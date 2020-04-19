@@ -87,7 +87,7 @@
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"Не удалось сохранить скриншот: недостаточно места."</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Не удалось сделать скриншот: нет разрешения от приложения или организации."</string>
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"Закрыть скриншот"</string>
-    <string name="screenshot_preview_description" msgid="669177537416980449">"Открыть скриншот"</string>
+    <string name="screenshot_preview_description" msgid="7606510140714080474">"Предварительный просмотр скриншота"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Создание скриншотов"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Текущее уведомление для записи видео с экрана"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Начать запись?"</string>
@@ -588,7 +588,7 @@
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"Настройки звука"</string>
     <string name="accessibility_volume_expand" msgid="7653070939304433603">"Развернуть"</string>
     <string name="accessibility_volume_collapse" msgid="2746845391013829996">"Свернуть"</string>
-    <string name="volume_odi_captions_tip" msgid="8825655463280990941">"Автоматические субтитры"</string>
+    <string name="volume_odi_captions_tip" msgid="8825655463280990941">"Автоматически добавлять субтитры"</string>
     <string name="accessibility_volume_close_odi_captions_tip" msgid="8924753283621160480">"Подсказка \"Закрыть субтитры\""</string>
     <string name="volume_odi_captions_content_description" msgid="4172765742046013630">"Наложение субтитров"</string>
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"включить"</string>
@@ -713,9 +713,9 @@
     <string name="notification_bubble_title" msgid="8330481035191903164">"Всплывающая подсказка"</string>
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"Уведомления приходят без звука и вибрации"</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"Уведомления приходят со звуком или вибрацией"</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="6298026344552480458">"Уведомления приходят со звуком или вибрацией. Разговоры из приложения \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" по умолчанию появляются в виде всплывающего чата."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Привлекает ваше внимание к контенту с помощью плавающего ярлыка"</string>
     <string name="notification_channel_summary_priority" msgid="7415770044553264622">"Появляется в верхней части списка разговоров и в виде всплывающего чата."</string>
-    <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"Все разговоры из сервиса \"<xliff:g id="APP_NAME_0">%1$s</xliff:g>\" по умолчанию появляются в виде всплывающих чатов. Изменить настройки можно в приложении \"<xliff:g id="APP_NAME_1">%2$s</xliff:g>\"."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Настройки"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Приоритет"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Нет недавних всплывающих чатов"</string>
@@ -972,7 +972,7 @@
     <string name="running_foreground_services_title" msgid="5137313173431186685">"Приложения, работающие в фоновом режиме"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"Нажмите, чтобы проверить энергопотребление и трафик"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"Отключить мобильный Интернет?"</string>
-    <string name="mobile_data_disable_message" msgid="8604966027899770415">"У вас не будет доступа к данным и Интернету через оператора \"<xliff:g id="CARRIER">%s</xliff:g>\". Вы сможете установить интернет-соединение только по сети Wi-Fi."</string>
+    <string name="mobile_data_disable_message" msgid="8604966027899770415">"Вы не сможете передавать данные или выходить в Интернет через оператора \"<xliff:g id="CARRIER">%s</xliff:g>\". Интернет будет доступен только по сети Wi-Fi."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"ваш оператор"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"Невозможно принять ваше согласие, поскольку запрос скрыт другим приложением."</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"Разрешить приложению \"<xliff:g id="APP_0">%1$s</xliff:g>\" показывать фрагменты приложения \"<xliff:g id="APP_2">%2$s</xliff:g>\"?"</string>
@@ -1012,6 +1012,16 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Параметры навигации в системе обновлены. Чтобы изменить их, перейдите в настройки."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Чтобы обновить параметры навигации в системе, перейдите в настройки."</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Переход в режим ожидания"</string>
+    <!-- no translation found for priority_onboarding_show_at_top_text (1678400241025513541) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_show_avatar_text (5756291381124091508) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_appear_as_bubble_text (4227039772250263122) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_ignores_dnd_text (2918952762719600529) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_done_button_title (4569550984286506007) -->
+    <skip />
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Наложение окна увеличения"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Окно увеличения"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Настройки окна увеличения"</string>
@@ -1028,10 +1038,8 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Элементы управления"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Выберите элементы управления, которые будут доступны в меню кнопки питания."</string>
-    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
-    <skip />
-    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
-    <skip />
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Чтобы изменить порядок элементов управления, перетащите их"</string>
+    <string name="controls_favorite_removed" msgid="5276978408529217272">"Все элементы управления удалены"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Не удалось загрузить список элементов управления."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Другое"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Добавьте элементы управления"</string>

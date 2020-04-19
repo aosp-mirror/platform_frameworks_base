@@ -87,7 +87,7 @@
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"Imeshindwa kuhifadhi picha ya skrini kwa sababu nafasi haitoshi"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Programu au shirika lako halikuruhusu kupiga picha za skrini"</string>
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"Ondoa picha ya skrini"</string>
-    <string name="screenshot_preview_description" msgid="669177537416980449">"Fungua picha ya skrini"</string>
+    <string name="screenshot_preview_description" msgid="7606510140714080474">"Onyesho la kukagua picha ya skrini"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Kinasa Skrini"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Arifa inayoendelea ya kipindi cha kurekodi skrini"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Ungependa kuanza kurekodi?"</string>
@@ -615,7 +615,7 @@
     <string name="stream_accessibility" msgid="3873610336741987152">"Zana za walio na matatizo ya kuona au kusikia"</string>
     <string name="ring_toggle_title" msgid="5973120187287633224">"Simu"</string>
     <string name="volume_ringer_status_normal" msgid="1339039682222461143">"Piga"</string>
-    <string name="volume_ringer_status_vibrate" msgid="6970078708957857825">"Tetema"</string>
+    <string name="volume_ringer_status_vibrate" msgid="6970078708957857825">"Kutetema"</string>
     <string name="volume_ringer_status_silent" msgid="3691324657849880883">"Zima sauti"</string>
     <string name="qs_status_phone_vibrate" msgid="7055409506885541979">"Umeweka mipangilio ya simu kutetema"</string>
     <string name="qs_status_phone_muted" msgid="3763664791309544103">"Umezima sauti ya simu"</string>
@@ -707,9 +707,9 @@
     <string name="notification_bubble_title" msgid="8330481035191903164">"Kiputo"</string>
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"Hukusaidia kuwa makini bila sauti au mtetemo."</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"Hupata umakinifu wako kwa sauti na mtetemo."</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="6298026344552480458">"Hupata umakinifu wako kwa sauti au mtetemo. Mazungumzo kutoka kiputo cha <xliff:g id="APP_NAME">%1$s</xliff:g> kwa chaguomsingi."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Huweka umakinifu wako kwenye maudhui haya kwa kutumia njia ya mkato ya kuelea."</string>
     <string name="notification_channel_summary_priority" msgid="7415770044553264622">"Huonyeshwa sehemu ya juu ya mazungumzo na huonekana kama kiputo."</string>
-    <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"Mazungumzo yote kwenye <xliff:g id="APP_NAME_0">%1$s</xliff:g> huwa na kiputo kwa chaguo msingi. Dhibiti katika <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Mipangilio"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Kipaumbele"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Hakuna viputo vya hivi majuzi"</string>
@@ -1002,6 +1002,16 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Umesasisha usogezaji kwenye mfumo. Ili ubadilishe, nenda kwenye Mipangilio."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Nenda kwenye mipangilio ili usasishe usogezaji kwenye mfumo"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Hali tuli"</string>
+    <!-- no translation found for priority_onboarding_show_at_top_text (1678400241025513541) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_show_avatar_text (5756291381124091508) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_appear_as_bubble_text (4227039772250263122) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_ignores_dnd_text (2918952762719600529) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_done_button_title (4569550984286506007) -->
+    <skip />
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Dirisha la Kuwekelea Linalokuza"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Dirisha la Ukuzaji"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Vidhibiti vya Dirisha la Ukuzaji"</string>

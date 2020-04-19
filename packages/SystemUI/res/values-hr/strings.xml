@@ -33,7 +33,7 @@
     <string name="invalid_charger_title" msgid="938685362320735167">"Punjenje putem USB-a nije moguće"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"Koristite punjač koji ste dobili s uređajem"</string>
     <string name="battery_low_why" msgid="2056750982959359863">"Postavke"</string>
-    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Želite li uključiti Štednju baterije?"</string>
+    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Uključiti Štednju baterije?"</string>
     <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"O Štednji baterije"</string>
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"Uključi"</string>
     <string name="battery_saver_start_action" msgid="4553256017945469937">"Uključite Štednju baterije"</string>
@@ -87,7 +87,7 @@
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"Zaslon nije snimljen zbog ograničenog prostora za pohranu"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Aplikacija ili vaša organizacija ne dopuštaju snimanje zaslona"</string>
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"Odbacivanje snimke zaslona"</string>
-    <string name="screenshot_preview_description" msgid="669177537416980449">"Otvaranje snimke zaslona"</string>
+    <string name="screenshot_preview_description" msgid="7606510140714080474">"Pregled snimke zaslona"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Snimač zaslona"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Tekuća obavijest za sesiju snimanja zaslona"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Želite li započeti snimanje?"</string>
@@ -398,7 +398,7 @@
     <string name="quick_settings_tethering_label" msgid="5257299852322475780">"Dijeljenje veze"</string>
     <string name="quick_settings_hotspot_label" msgid="1199196300038363424">"Žarišna točka"</string>
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"Uključivanje…"</string>
-    <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"Ušteda podat. uklj."</string>
+    <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"Štednja pod. prom. uklj."</string>
     <plurals name="quick_settings_hotspot_secondary_label_num_devices" formatted="false" msgid="3142308865165871976">
       <item quantity="one">%d uređaj</item>
       <item quantity="few">%d uređaja</item>
@@ -515,7 +515,7 @@
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Razgovori"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Izbriši sve bešumne obavijesti"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Značajka Ne uznemiravaj pauzirala je Obavijesti"</string>
-    <string name="media_projection_action_text" msgid="3634906766918186440">"Započni sad"</string>
+    <string name="media_projection_action_text" msgid="3634906766918186440">"Započni"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Nema obavijesti"</string>
     <string name="profile_owned_footer" msgid="2756770645766113964">"Profil se možda nadzire"</string>
     <string name="vpn_footer" msgid="3457155078010607471">"Mreža se možda nadzire"</string>
@@ -710,9 +710,9 @@
     <string name="notification_bubble_title" msgid="8330481035191903164">"Oblačić"</string>
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"Pomaže vam da se usredotočite bez zvučnih signala i vibracija."</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"Privlači vašu pažnju zvučnim signalima ili vibracijama."</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="6298026344552480458">"Privlači vašu pažnju zvučnim signalima ili vibracijama. Razgovori iz aplikacije <xliff:g id="APP_NAME">%1$s</xliff:g> prikazuju se u oblačiću prema zadanim postavkama."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Održava vam pozornost pomoću plutajućeg prečaca ovom sadržaju."</string>
     <string name="notification_channel_summary_priority" msgid="7415770044553264622">"Prikazuje se pri vrhu odjeljka razgovora kao oblačić."</string>
-    <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"Svi razgovori iz aplikacije <xliff:g id="APP_NAME_0">%1$s</xliff:g> prema zadanim se postavkama pojavljuju u oblačiću. Upravljajte u aplikaciji <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Postavke"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritet"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Nema nedavnih oblačića"</string>
@@ -966,7 +966,7 @@
     <string name="qs_dnd_replace" msgid="7712119051407052689">"Zamijeni"</string>
     <string name="running_foreground_services_title" msgid="5137313173431186685">"Izvođenje aplikacija u pozadini"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"Dodirnite da biste vidjeli pojedinosti o potrošnji baterije i podatkovnom prometu"</string>
-    <string name="mobile_data_disable_title" msgid="5366476131671617790">"Želite li isključiti mobilne podatke?"</string>
+    <string name="mobile_data_disable_title" msgid="5366476131671617790">"Isključiti mobilne podatke?"</string>
     <string name="mobile_data_disable_message" msgid="8604966027899770415">"Nećete imati pristup mobilnim podacima ili internetu putem operatera <xliff:g id="CARRIER">%s</xliff:g>. Internet će biti dostupan samo putem Wi-Fija."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"vaš mobilni operater"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"Budući da aplikacija prekriva zahtjev za dopuštenje, Postavke ne mogu potvrditi vaš odgovor."</string>
@@ -1007,6 +1007,16 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Ažurirana je navigacija sustavom. Možete je promijeniti u Postavkama."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Navigaciju sustavom možete ažurirati u Postavkama"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Stanje mirovanja"</string>
+    <!-- no translation found for priority_onboarding_show_at_top_text (1678400241025513541) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_show_avatar_text (5756291381124091508) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_appear_as_bubble_text (4227039772250263122) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_ignores_dnd_text (2918952762719600529) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_done_button_title (4569550984286506007) -->
+    <skip />
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Prozor preklapanja povećavanja"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Prozor za povećavanje"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Kontrole prozora za povećavanje"</string>
@@ -1022,10 +1032,8 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Kontrole"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Odaberite kontrole kojima želite pristupati iz izbornika napajanja"</string>
-    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
-    <skip />
-    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
-    <skip />
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Zadržite i povucite da biste promijenili raspored kontrola"</string>
+    <string name="controls_favorite_removed" msgid="5276978408529217272">"Sve su kontrole uklonjene"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Popis svih kontrola nije se učitao."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Drugo"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Dodavanje kontrolama uređaja"</string>

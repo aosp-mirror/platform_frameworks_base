@@ -33,7 +33,7 @@
     <string name="invalid_charger_title" msgid="938685362320735167">"Не може да се полни преку USB"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"Користете го полначот што дојде со вашиот уред"</string>
     <string name="battery_low_why" msgid="2056750982959359863">"Поставки"</string>
-    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Да се вклучи штедачот на батерија?"</string>
+    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Да се вклучи „Штедачот на батерија“?"</string>
     <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"За „Штедачот на батерија“"</string>
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"Вклучи"</string>
     <string name="battery_saver_start_action" msgid="4553256017945469937">"Да се вклучи штедачот на батерија?"</string>
@@ -87,7 +87,7 @@
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"Сликата од екранот не може да се зачува поради ограничена меморија"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Апликацијата или вашата организација не дозволува снимање слики од екранот"</string>
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"Отфрлете ја сликата од екранот"</string>
-    <string name="screenshot_preview_description" msgid="669177537416980449">"Отворете ја сликата од екранот"</string>
+    <string name="screenshot_preview_description" msgid="7606510140714080474">"Преглед на слика од екранот"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Снимач на екран"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Тековно известување за сесија за снимање на екранот"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Да се започне со снимање?"</string>
@@ -210,7 +210,7 @@
     <string name="accessibility_three_bars" msgid="819417766606501295">"Три цртички."</string>
     <string name="accessibility_signal_full" msgid="5920148525598637311">"Полн сигнал."</string>
     <string name="accessibility_desc_on" msgid="2899626845061427845">"Вклучена."</string>
-    <string name="accessibility_desc_off" msgid="8055389500285421408">"Исклучена."</string>
+    <string name="accessibility_desc_off" msgid="8055389500285421408">"Исклучено."</string>
     <string name="accessibility_desc_connected" msgid="3082590384032624233">"Поврзана."</string>
     <string name="accessibility_desc_connecting" msgid="8011433412112903614">"Се поврзува."</string>
     <string name="data_connection_gprs" msgid="2752584037409568435">"GPRS"</string>
@@ -231,7 +231,7 @@
     <string name="accessibility_cell_data_on" msgid="691666434519443162">"Мобилниот интернет е вклучен"</string>
     <string name="cell_data_off_content_description" msgid="9165555931499878044">"Мобилниот интернет е исклучен"</string>
     <string name="not_default_data_content_description" msgid="6757881730711522517">"Не е поставен да користи интернет"</string>
-    <string name="cell_data_off" msgid="4886198950247099526">"Исклучи"</string>
+    <string name="cell_data_off" msgid="4886198950247099526">"Исклучено"</string>
     <string name="accessibility_bluetooth_tether" msgid="6327291292208790599">"Се поврзува со Bluetooth."</string>
     <string name="accessibility_airplane_mode" msgid="1899529214045998505">"Авионски режим."</string>
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"VPN е вклучена."</string>
@@ -707,9 +707,9 @@
     <string name="notification_bubble_title" msgid="8330481035191903164">"Балонче"</string>
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"Ви помага да се концентрирате без звук или вибрации."</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"Ви го привлекува вниманието со звук или вибрации."</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="6298026344552480458">"Ви го привлекува вниманието со звук или вибрации. Стандардно, разговорите од <xliff:g id="APP_NAME">%1$s</xliff:g> се во балончиња."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Ви го задржува вниманието со лебдечка кратенка на содржинава."</string>
     <string name="notification_channel_summary_priority" msgid="7415770044553264622">"Се појавува на горниот дел од разговорот и изгледа како балонче."</string>
-    <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"Сите разговори од <xliff:g id="APP_NAME_0">%1$s</xliff:g> стандардно се во балончиња. Управувајте во <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Поставки"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Приоритет"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Нема неодамнешни балончиња"</string>
@@ -758,7 +758,7 @@
       <item quantity="one">%d минута</item>
       <item quantity="other">%d минути</item>
     </plurals>
-    <string name="battery_panel_title" msgid="5931157246673665963">"Користење батерија"</string>
+    <string name="battery_panel_title" msgid="5931157246673665963">"Искор. на батерија"</string>
     <string name="battery_detail_charging_summary" msgid="8821202155297559706">"Штедачот на батерија не е достапен при полнење"</string>
     <string name="battery_detail_switch_title" msgid="6940976502957380405">"Штедач на батерија"</string>
     <string name="battery_detail_switch_summary" msgid="3668748557848025990">"Ја намалува изведбата и податоците во заднина"</string>
@@ -961,7 +961,7 @@
     <string name="qs_dnd_replace" msgid="7712119051407052689">"Замени"</string>
     <string name="running_foreground_services_title" msgid="5137313173431186685">"Апликациите се извршуваат во заднина"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"Допрете за детали за батеријата и потрошениот сообраќај"</string>
-    <string name="mobile_data_disable_title" msgid="5366476131671617790">"Да се исклучи ли мобилниот интернет?"</string>
+    <string name="mobile_data_disable_title" msgid="5366476131671617790">"Да се исклучи мобилниот интернет?"</string>
     <string name="mobile_data_disable_message" msgid="8604966027899770415">"Нема да имате пристап до податоците или интернетот преку <xliff:g id="CARRIER">%s</xliff:g>. Интернетот ќе биде достапен само преку Wi-Fi."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"вашиот оператор"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"Бидејќи апликацијата го прикрива барањето за дозвола, „Поставките“ не може да го потврдат вашиот одговор."</string>
@@ -1002,6 +1002,16 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Навигацијата на системот е ажурирана. За да извршите промени, одете во „Поставки“."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Одете во „Поставки“ за да ја ажурирате навигацијата на системот"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Подготвеност"</string>
+    <!-- no translation found for priority_onboarding_show_at_top_text (1678400241025513541) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_show_avatar_text (5756291381124091508) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_appear_as_bubble_text (4227039772250263122) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_ignores_dnd_text (2918952762719600529) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_done_button_title (4569550984286506007) -->
+    <skip />
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Прозорец за преклопување на зголемувањето"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Прозорец за зголемување"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Контроли на прозорец за зголемување"</string>
@@ -1016,10 +1026,8 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Контроли"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Изберете ги контролите до кои ќе пристапувате од менито за вклучување"</string>
-    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
-    <skip />
-    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
-    <skip />
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Задржете и влечете за да ги преуредите контролите"</string>
+    <string name="controls_favorite_removed" msgid="5276978408529217272">"Сите контроли се отстранети"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Не можеше да се вчита списокот со сите контроли."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Друга"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Додајте во контроли за уредите"</string>

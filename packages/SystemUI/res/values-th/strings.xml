@@ -87,7 +87,7 @@
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"บันทึกภาพหน้าจอไม่ได้เนื่องจากพื้นที่เก็บข้อมูลมีจำกัด"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"แอปหรือองค์กรของคุณไม่อนุญาตให้จับภาพหน้าจอ"</string>
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"ปิดภาพหน้าจอ"</string>
-    <string name="screenshot_preview_description" msgid="669177537416980449">"เปิดภาพหน้าจอ"</string>
+    <string name="screenshot_preview_description" msgid="7606510140714080474">"ตัวอย่างภาพหน้าจอ"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"โปรแกรมอัดหน้าจอ"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"การแจ้งเตือนต่อเนื่องสำหรับเซสชันการบันทึกหน้าจอ"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"เริ่มบันทึกเลยไหม"</string>
@@ -352,7 +352,7 @@
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"เสียง"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"ชุดหูฟัง"</string>
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="3887552721233148132">"อินพุต"</string>
-    <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="3003338571871392293">"เครื่องช่วยการได้ยิน"</string>
+    <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="3003338571871392293">"เครื่องช่วยฟัง"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"กำลังเปิด..."</string>
     <string name="quick_settings_brightness_label" msgid="680259653088849563">"ความสว่าง"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"หมุนอัตโนมัติ"</string>
@@ -397,7 +397,7 @@
     <string name="quick_settings_tethering_label" msgid="5257299852322475780">"การปล่อยสัญญาณ"</string>
     <string name="quick_settings_hotspot_label" msgid="1199196300038363424">"ฮอตสปอต"</string>
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"กำลังเปิด..."</string>
-    <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"เปิดประหยัดเน็ตอยู่"</string>
+    <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"เปิดการประหยัดเน็ตอยู่"</string>
     <plurals name="quick_settings_hotspot_secondary_label_num_devices" formatted="false" msgid="3142308865165871976">
       <item quantity="other">อุปกรณ์ %d เครื่อง</item>
       <item quantity="one">อุปกรณ์ %d เครื่อง</item>
@@ -707,9 +707,9 @@
     <string name="notification_bubble_title" msgid="8330481035191903164">"บับเบิล"</string>
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"ช่วยรักษาสมาธิของคุณด้วยการไม่ส่งเสียงหรือสั่น"</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"ดึงความสนใจของคุณด้วยเสียงและการสั่น"</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="6298026344552480458">"ดึงความสนใจของคุณด้วยเสียงและการสั่น การสนทนาจาก <xliff:g id="APP_NAME">%1$s</xliff:g> จะแสดงเป็นบับเบิลโดยค่าเริ่มต้น"</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"ดึงดูดความสนใจของคุณไว้เสมอด้วยทางลัดแบบลอยที่มายังเนื้อหานี้"</string>
     <string name="notification_channel_summary_priority" msgid="7415770044553264622">"แสดงที่ด้านบนของส่วนการสนทนาและปรากฏเป็นบับเบิล"</string>
-    <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"การสนทนาทั้งหมดจากบับเบิล <xliff:g id="APP_NAME_0">%1$s</xliff:g> โดยค่าเริ่มต้น จัดการใน<xliff:g id="APP_NAME_1">%2$s</xliff:g>"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"การตั้งค่า"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"ลำดับความสำคัญ"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"ไม่มีบับเบิลเมื่อเร็วๆ นี้"</string>
@@ -847,8 +847,8 @@
     <string name="right_keycode" msgid="2480715509844798438">"Keycode ทางขวา"</string>
     <string name="left_icon" msgid="5036278531966897006">"ไอคอนทางซ้าย"</string>
     <string name="right_icon" msgid="1103955040645237425">"ไอคอนทางขวา"</string>
-    <string name="drag_to_add_tiles" msgid="8933270127508303672">"กดค้างแล้วลากเพื่อเพิ่มชิ้นส่วน"</string>
-    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"กดไทล์ค้างไว้แล้วลากเพื่อจัดเรียงใหม่"</string>
+    <string name="drag_to_add_tiles" msgid="8933270127508303672">"กดค้างแล้วลากเพื่อเพิ่มการ์ด"</string>
+    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"กดการ์ดค้างไว้แล้วลากเพื่อจัดเรียงใหม่"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"ลากมาที่นี่เพื่อนำออก"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"คุณต้องมีการ์ดอย่างน้อย <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> รายการ"</string>
     <string name="qs_edit" msgid="5583565172803472437">"แก้ไข"</string>
@@ -1002,6 +1002,16 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"อัปเดตการไปยังส่วนต่างๆ ของระบบแล้ว หากต้องการเปลี่ยนแปลง ให้ไปที่การตั้งค่า"</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"ไปที่การตั้งค่าเพื่ออัปเดตการไปยังส่วนต่างๆ ของระบบ"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"สแตนด์บาย"</string>
+    <!-- no translation found for priority_onboarding_show_at_top_text (1678400241025513541) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_show_avatar_text (5756291381124091508) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_appear_as_bubble_text (4227039772250263122) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_ignores_dnd_text (2918952762719600529) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_done_button_title (4569550984286506007) -->
+    <skip />
     <string name="magnification_overlay_title" msgid="6584179429612427958">"หน้าต่างการขยายที่วางซ้อน"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"หน้าต่างการขยาย"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"การควบคุมหน้าต่างการขยาย"</string>
@@ -1016,10 +1026,8 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"การควบคุม"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"เลือกตัวควบคุมที่ต้องการให้เข้าถึงได้จากเมนูเปิด/ปิด"</string>
-    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
-    <skip />
-    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
-    <skip />
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"กดตัวควบคุมค้างไว้แล้วลากเพื่อจัดเรียงใหม่"</string>
+    <string name="controls_favorite_removed" msgid="5276978408529217272">"นำตัวควบคุมทั้งหมดออกแล้ว"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"โหลดรายการตัวควบคุมทั้งหมดไม่ได้"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"อื่นๆ"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"เพิ่มไปยังการควบคุมอุปกรณ์"</string>

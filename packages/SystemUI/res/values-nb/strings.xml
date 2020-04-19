@@ -87,7 +87,7 @@
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"Kan ikke lagre skjermdumpen på grunn av begrenset lagringsplass"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Appen eller organisasjonen din tillater ikke at du tar skjermdumper"</string>
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"Avvis skjermdumpen"</string>
-    <string name="screenshot_preview_description" msgid="669177537416980449">"Åpne skjermdumpen"</string>
+    <string name="screenshot_preview_description" msgid="7606510140714080474">"Forhåndsvisning av skjermdump"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Skjermopptaker"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Vedvarende varsel for et skjermopptak"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Vil du starte opptaket?"</string>
@@ -582,7 +582,7 @@
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"Lydinnstillinger"</string>
     <string name="accessibility_volume_expand" msgid="7653070939304433603">"Utvid"</string>
     <string name="accessibility_volume_collapse" msgid="2746845391013829996">"Skjul"</string>
-    <string name="volume_odi_captions_tip" msgid="8825655463280990941">"Automatisk teksting av media"</string>
+    <string name="volume_odi_captions_tip" msgid="8825655463280990941">"Automatisk medieteksting"</string>
     <string name="accessibility_volume_close_odi_captions_tip" msgid="8924753283621160480">"Verktøytips for teksting"</string>
     <string name="volume_odi_captions_content_description" msgid="4172765742046013630">"Overlegg med teksting"</string>
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"slå på"</string>
@@ -707,9 +707,9 @@
     <string name="notification_bubble_title" msgid="8330481035191903164">"Boble"</string>
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"Hjelper deg med å fokusere uten lyd eller vibrering."</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"Får oppmerksomheten din med lyd eller vibrering."</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="6298026344552480458">"Får oppmerksomheten din med lyd eller vibrering. Samtaler fra <xliff:g id="APP_NAME">%1$s</xliff:g> lager bobler som standard."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Holder deg oppmerksom med en svevende snarvei til dette innholdet."</string>
     <string name="notification_channel_summary_priority" msgid="7415770044553264622">"Vises øverst i en samtaledel og vises som en boble."</string>
-    <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"Alle samtaler fra <xliff:g id="APP_NAME_0">%1$s</xliff:g> vises i bobler som standard. Administrer i <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Innstillinger"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritet"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Ingen nylige bobler"</string>
@@ -962,7 +962,7 @@
     <string name="running_foreground_services_title" msgid="5137313173431186685">"Apper kjører i bakgrunnen"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"Trykk for detaljer om batteri- og databruk"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"Vil du slå av mobildata?"</string>
-    <string name="mobile_data_disable_message" msgid="8604966027899770415">"Du får ikke tilgang til data eller Internett via <xliff:g id="CARRIER">%s</xliff:g>. Internett blir bare tilgjengelig via Wi-Fi."</string>
+    <string name="mobile_data_disable_message" msgid="8604966027899770415">"Du får ikke tilgang til data eller internett via <xliff:g id="CARRIER">%s</xliff:g>. Internett er bare tilgjengelig via Wi-Fi."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"operatøren din"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"Fordi en app skjuler tillatelsesforespørselen, kan ikke Innstillinger bekrefte svaret ditt."</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"Vil du tillate at <xliff:g id="APP_0">%1$s</xliff:g> viser <xliff:g id="APP_2">%2$s</xliff:g>-utsnitt?"</string>
@@ -1002,6 +1002,16 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Systemnavigeringen er oppdatert. For å gjøre endringer, gå til Innstillinger."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Gå til Innstillinger for å oppdatere systemnavigeringen"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Ventemodus"</string>
+    <!-- no translation found for priority_onboarding_show_at_top_text (1678400241025513541) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_show_avatar_text (5756291381124091508) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_appear_as_bubble_text (4227039772250263122) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_ignores_dnd_text (2918952762719600529) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_done_button_title (4569550984286506007) -->
+    <skip />
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Overleggsvindu for forstørring"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Forstørringsvindu"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Kontroller for forstørringsvindu"</string>
@@ -1016,10 +1026,8 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Kontroller"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Velg kontroller som er tilgjengelige fra av/på-menyen"</string>
-    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
-    <skip />
-    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
-    <skip />
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Hold og dra for å flytte kontroller"</string>
+    <string name="controls_favorite_removed" msgid="5276978408529217272">"Alle kontroller er fjernet"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Listen over alle kontroller kunne ikke lastes inn."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Annet"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Legg til i enhetskontroller"</string>

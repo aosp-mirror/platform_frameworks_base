@@ -87,7 +87,7 @@
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"Kan weens beperkte bergingspasie nie skermkiekie stoor nie"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Die program of jou organisasie laat nie toe dat skermkiekies geneem word nie"</string>
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"Maak skermkiekie toe"</string>
-    <string name="screenshot_preview_description" msgid="669177537416980449">"Maak skermkiekie oop"</string>
+    <string name="screenshot_preview_description" msgid="7606510140714080474">"Skermkiekievoorskou"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Skermopnemer"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Deurlopende kennisgewing vir \'n skermopnamesessie"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Begin opname?"</string>
@@ -418,7 +418,7 @@
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"Tot sonsopkoms"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"Aan om <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"Tot <xliff:g id="TIME">%s</xliff:g>"</string>
-    <string name="quick_settings_ui_mode_night_label" msgid="1398928270610780470">"Donker-tema"</string>
+    <string name="quick_settings_ui_mode_night_label" msgid="1398928270610780470">"Donkertema"</string>
     <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"Batterybespaarder"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at_sunset" msgid="6017379738102015710">"Aan met sonsondergang"</string>
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"Tot sonsopkoms"</string>
@@ -707,9 +707,9 @@
     <string name="notification_bubble_title" msgid="8330481035191903164">"Borrel"</string>
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"Help jou om te fokus sonder klank of vibrasie."</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"Kry jou aandag met klank of vibrasie."</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="6298026344552480458">"Trek jou aandag met klank of vibrasie. Gesprekke van <xliff:g id="APP_NAME">%1$s</xliff:g> af verskyn by verstek in \'n borrel."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Hou jou aandag met \'n swewende kortpad na hierdie inhoud toe."</string>
     <string name="notification_channel_summary_priority" msgid="7415770044553264622">"Verskyn boaan die gespreksafdeling en lyk soos \'n borrel."</string>
-    <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"Alle gesprekke van <xliff:g id="APP_NAME_0">%1$s</xliff:g> af sal by verstek borrels word. Bestuur in <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Instellings"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioriteit"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Geen onlangse borrels nie"</string>
@@ -1002,6 +1002,16 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Stelselnavigasie is opgedateer. Gaan na Instellings toe om veranderinge te maak."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Gaan na Instellings toe om stelselnavigasie op te dateer"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Bystandmodus"</string>
+    <!-- no translation found for priority_onboarding_show_at_top_text (1678400241025513541) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_show_avatar_text (5756291381124091508) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_appear_as_bubble_text (4227039772250263122) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_ignores_dnd_text (2918952762719600529) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_done_button_title (4569550984286506007) -->
+    <skip />
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Vergrotingoorleggervenster"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Vergrotingvenster"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Vergrotingvensterkontroles"</string>
@@ -1016,10 +1026,8 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Kontroles"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Kies kontroles om toegang vanaf die aan/af-kieslys te kry"</string>
-    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
-    <skip />
-    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
-    <skip />
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Hou en sleep om kontroles te herrangskik"</string>
+    <string name="controls_favorite_removed" msgid="5276978408529217272">"Alle kontroles is verwyder"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Die lys met alle kontroles kon nie gelaai word nie."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Ander"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Voeg by toestelkontroles"</string>

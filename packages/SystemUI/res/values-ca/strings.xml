@@ -87,7 +87,7 @@
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"La captura de pantalla no es pot desar perquè no hi ha prou espai d\'emmagatzematge"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"L\'aplicació o la teva organització no permeten fer captures de pantalla"</string>
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"Ignora la captura de pantalla"</string>
-    <string name="screenshot_preview_description" msgid="669177537416980449">"Obre la captura de pantalla"</string>
+    <string name="screenshot_preview_description" msgid="7606510140714080474">"Previsualització de la captura de pantalla"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Gravadora de pantalla"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Notificació en curs d\'una sessió de gravació de la pantalla"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Vols iniciar la gravació?"</string>
@@ -296,8 +296,8 @@
     <string name="accessibility_quick_settings_flashlight_on" msgid="3785616827729850766">"Llanterna encesa."</string>
     <string name="accessibility_quick_settings_flashlight_changed_off" msgid="3782375441381402599">"Llanterna apagada."</string>
     <string name="accessibility_quick_settings_flashlight_changed_on" msgid="4747870681508334200">"Llanterna encesa."</string>
-    <string name="accessibility_quick_settings_color_inversion_changed_off" msgid="7548045840282925393">"La inversió dels colors està desactivada."</string>
-    <string name="accessibility_quick_settings_color_inversion_changed_on" msgid="4711141858364404084">"La inversió dels colors està activada."</string>
+    <string name="accessibility_quick_settings_color_inversion_changed_off" msgid="7548045840282925393">"La inversió de colors està desactivada."</string>
+    <string name="accessibility_quick_settings_color_inversion_changed_on" msgid="4711141858364404084">"La inversió de colors està activada."</string>
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"El punt d\'accés mòbil està desactivat."</string>
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"El punt d\'accés mòbil està activat."</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"S\'ha aturat l\'emissió de la pantalla."</string>
@@ -427,7 +427,7 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"L\'NFC està desactivada"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"L\'NFC està activada"</string>
-    <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"Gravació de la pantalla"</string>
+    <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"Gravació de pantalla"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Inicia"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Atura"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Llisca cap amunt per canviar d\'aplicació"</string>
@@ -707,9 +707,9 @@
     <string name="notification_bubble_title" msgid="8330481035191903164">"Bombolla"</string>
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"T\'ajuda a concentrar-te sense so ni vibració."</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"Atrau la teva atenció amb so i vibració."</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="6298026344552480458">"Atrau la teva atenció amb so i vibració. Les converses de l\'aplicació <xliff:g id="APP_NAME">%1$s</xliff:g> es mostren com a bombolles de manera predeterminada."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Atrau la teva atenció amb una drecera flotant a aquest contingut."</string>
     <string name="notification_channel_summary_priority" msgid="7415770044553264622">"Es mostra com a bombolla a la part superior de la secció de converses."</string>
-    <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"Totes les converses de l\'aplicació <xliff:g id="APP_NAME_0">%1$s</xliff:g> es mostren com a bombolles de manera predeterminada. Gestiona-ho a <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Configuració"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritat"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"No hi ha bombolles recents"</string>
@@ -1002,6 +1002,16 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"S\'ha actualitzat el sistema de navegació. Per fer canvis, ves a Configuració."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Ves a Configuració per actualitzar el sistema de navegació"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"En espera"</string>
+    <!-- no translation found for priority_onboarding_show_at_top_text (1678400241025513541) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_show_avatar_text (5756291381124091508) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_appear_as_bubble_text (4227039772250263122) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_ignores_dnd_text (2918952762719600529) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_done_button_title (4569550984286506007) -->
+    <skip />
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Finestra superposada d\'ampliació"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Finestra d\'ampliació"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Finestra de controls d\'ampliació"</string>
@@ -1016,10 +1026,8 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Controls"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Selecciona els controls per accedir-hi des del menú d\'engegada"</string>
-    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
-    <skip />
-    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
-    <skip />
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Mantén premut i arrossega per reorganitzar els controls"</string>
+    <string name="controls_favorite_removed" msgid="5276978408529217272">"S\'han suprimit tots els controls"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"No s\'ha pogut carregar la llista completa de controls."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Altres"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Afegeix als controls del dispositiu"</string>

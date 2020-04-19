@@ -33,7 +33,7 @@
     <string name="invalid_charger_title" msgid="938685362320735167">"USB-р цэнэглэх боломжгүй байна"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"Төхөөрөмждөө дагалдаж ирсэн цэнэглэгчийг ашиглах"</string>
     <string name="battery_low_why" msgid="2056750982959359863">"Тохиргоо"</string>
-    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Тэжээл хэмнэгчийг асаах уу?"</string>
+    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Батарей хэмнэгчийг асаах уу?"</string>
     <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"Батарей хэмнэгчийн тухай"</string>
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"Асаах"</string>
     <string name="battery_saver_start_action" msgid="4553256017945469937">"Тэжээл хэмнэгчийг асаах"</string>
@@ -87,7 +87,7 @@
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"Сангийн багтаамж бага байгаа тул дэлгэцээс дарсан зургийг хадгалах боломжгүй байна"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Таны апп, байгууллагад дэлгэцийн зураг авахыг зөвшөөрдөггүй"</string>
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"Дэлгэцийн агшныг хаах"</string>
-    <string name="screenshot_preview_description" msgid="669177537416980449">"Дэлгэцийн агшныг нээх"</string>
+    <string name="screenshot_preview_description" msgid="7606510140714080474">"Дэлгэцийн агшныг урьдчилан үзэх"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Дэлгэцийн үйлдэл бичигч"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Дэлгэц бичих горимын үргэлжилж буй мэдэгдэл"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Бичлэгийг эхлүүлэх үү?"</string>
@@ -707,9 +707,9 @@
     <string name="notification_bubble_title" msgid="8330481035191903164">"Бөмбөлөг"</string>
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"Дуу эсвэл чичиргээгүйгээр танд төвлөрөхөд тусална."</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"Дуу эсвэл чичиргээгүйгээр таны анхаарлыг татна."</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="6298026344552480458">"Дуу эсвэл чичиргээгээр таны анхаарлыг татна. <xliff:g id="APP_NAME">%1$s</xliff:g>-н харилцан яриаг өгөгдмөл тохиргоогоор бөмбөлөг болгоно."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Энэ контентын хөвөн гарч ирэх товчлолтойгоор таны анхаарлыг татдаг."</string>
     <string name="notification_channel_summary_priority" msgid="7415770044553264622">"Харилцан ярианы хэсгийн дээд талд, бөмбөлөг хэлбэрээр харагдана."</string>
-    <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"<xliff:g id="APP_NAME_0">%1$s</xliff:g>-н бүх харилцан яриаг өгөгдмөл тохиргоогоор бөмбөлөг болгоно. <xliff:g id="APP_NAME_1">%2$s</xliff:g>-д удирдана уу."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Тохиргоо"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Ач холбогдол"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Саяхны бөмбөлөг алга байна"</string>
@@ -847,7 +847,7 @@
     <string name="right_keycode" msgid="2480715509844798438">"Баруун түлхүүрийн код"</string>
     <string name="left_icon" msgid="5036278531966897006">"Зүүн дүрс тэмдэг"</string>
     <string name="right_icon" msgid="1103955040645237425">"Баруун дүрс тэмдэг"</string>
-    <string name="drag_to_add_tiles" msgid="8933270127508303672">"Хавтанд нэмэхийн тулд дараад чирэх"</string>
+    <string name="drag_to_add_tiles" msgid="8933270127508303672">"Хавтан нэмэхийн тулд дараад чирэх"</string>
     <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Хавтангуудыг дахин засварлахын тулд дараад чирнэ үү"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"Устгахын тулд энд зөөнө үү"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"Танд хамгийн багадаа <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> хавтан шаардлагатай"</string>
@@ -1002,6 +1002,16 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Системийн навигацыг шинэчиллээ. Өөрчлөхийн тулд Тохиргоо руу очно уу."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Системийн навигацыг шинэчлэхийн тулд Тохиргоо руу очно уу"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Зогсолтын горим"</string>
+    <!-- no translation found for priority_onboarding_show_at_top_text (1678400241025513541) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_show_avatar_text (5756291381124091508) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_appear_as_bubble_text (4227039772250263122) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_ignores_dnd_text (2918952762719600529) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_done_button_title (4569550984286506007) -->
+    <skip />
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Томруулалтыг давхарласан цонх"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Томруулалтын цонх"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Томруулалтын цонхны хяналт"</string>
@@ -1016,10 +1026,8 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Хяналт"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Тэжээлийн цэсээс хандах хяналтуудыг сонгоно уу"</string>
-    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
-    <skip />
-    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
-    <skip />
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Хяналтуудыг дахин засварлахын тулд дараад чирнэ үү"</string>
+    <string name="controls_favorite_removed" msgid="5276978408529217272">"Бүх хяналтыг хассан"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Бүх хяналтын жагсаалтыг ачаалж чадсангүй."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Бусад"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Төхөөрөмжийн хяналт руу нэмэх"</string>

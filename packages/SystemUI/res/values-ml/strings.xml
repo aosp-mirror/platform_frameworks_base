@@ -87,7 +87,7 @@
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"സ്‌റ്റോറേജ് ഇടം പരിമിതമായതിനാൽ സ്‌ക്രീൻഷോട്ട് സംരക്ഷിക്കാനാകുന്നില്ല"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"സ്ക്രീൻഷോട്ടുകൾ എടുക്കുന്നത് ആപ്പോ നിങ്ങളുടെ സ്ഥാപനമോ അനുവദിക്കുന്നില്ല"</string>
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"സ്ക്രീൻഷോട്ട് ഡിസ്‌മിസ് ചെയ്യുക"</string>
-    <string name="screenshot_preview_description" msgid="669177537416980449">"സ്ക്രീൻഷോട്ട് തുറക്കുക"</string>
+    <string name="screenshot_preview_description" msgid="7606510140714080474">"സ്‌ക്രീൻഷോട്ട് പ്രിവ്യു"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"സ്ക്രീൻ റെക്കോർഡർ"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"ഒരു സ്ക്രീൻ റെക്കോർഡിംഗ് സെഷനായി നിലവിലുള്ള അറിയിപ്പ്"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"റെക്കോർഡിംഗ് ആരംഭിക്കണോ?"</string>
@@ -500,7 +500,7 @@
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"പ്രവർത്തനവും പശ്ചാത്തല ഡാറ്റയും കുറയ്‌ക്കുന്നു"</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"ബാറ്ററി ലാഭിക്കൽ ഓഫാക്കുക"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"റെക്കോർഡ് ചെയ്യുമ്പോഴോ കാസ്‌റ്റ് ചെയ്യുമ്പോഴോ നിങ്ങളുടെ ഉപകരണത്തിൽ നിന്ന് പ്ലേ ചെയ്യുന്നതോ നിങ്ങളുടെ സ്‌ക്രീനിൽ ദൃശ്യമാകുന്നതോ ആയ എല്ലാ വിവരങ്ങളിലേക്കും <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> എന്നതിന് ആക്‌സസ് ഉണ്ടായിരിക്കും. നിങ്ങൾ പ്ലേ ചെയ്യുന്ന ഒഡിയോ, സന്ദേശങ്ങൾ, ഫോട്ടോകൾ, പേയ്‌മെന്റ് വിശദാംശങ്ങൾ, പാസ്‌വേഡുകൾ എന്നിവ പോലുള്ള വിവരങ്ങൾ ഇതിൽ ഉൾപ്പെടുന്നു."</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"റെക്കോർഡ് ചെയ്യുമ്പോഴോ കാസ്‌റ്റ് ചെയ്യുമ്പോഴോ നിങ്ങളുടെ ഉപകരണത്തിൽ നിന്ന് പ്ലേ ചെയ്യുന്നതോ നിങ്ങളുടെ സ്‌ക്രീനിൽ ദൃശ്യമാകുന്നതോ ആയ എല്ലാ വിവരങ്ങളിലേക്കും ഈ ഫംഗ്‌ഷൻ ലഭ്യമാക്കുന്ന സേവനത്തിന് ആക്‌സസ് ഉണ്ടായിരിക്കും. നിങ്ങൾ പ്ലേ ചെയ്യുന്ന ഒഡിയോ, സന്ദേശങ്ങൾ, ഫോട്ടോകൾ, പേയ്‌മെന്റ് വിശദാംശങ്ങൾ, പാസ്‌വേഡുകൾ എന്നിവ പോലുള്ള വിവരങ്ങൾ ഇതിൽ ഉൾപ്പെടുന്നു."</string>
+    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"റെക്കോർഡ് ചെയ്യുമ്പോഴോ കാസ്‌റ്റ് ചെയ്യുമ്പോഴോ നിങ്ങളുടെ ഉപകരണത്തിൽ നിന്ന് പ്ലേ ചെയ്യുന്നതോ നിങ്ങളുടെ സ്‌ക്രീനിൽ ദൃശ്യമാകുന്നതോ ആയ എല്ലാ വിവരങ്ങളിലേക്കും ഈ ഫംഗ്‌ഷൻ ലഭ്യമാക്കുന്ന സേവനത്തിന് ആക്‌സസ് ഉണ്ടായിരിക്കും. നിങ്ങൾ പ്ലേ ചെയ്യുന്ന ഓഡിയോ, സന്ദേശങ്ങൾ, ഫോട്ടോകൾ, പേയ്‌മെന്റ് വിശദാംശങ്ങൾ, പാസ്‌വേഡുകൾ എന്നിവ പോലുള്ള വിവരങ്ങൾ ഇതിൽ ഉൾപ്പെടുന്നു."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"റെക്കോർഡ് ചെയ്യൽ അല്ലെങ്കിൽ കാസ്റ്റ് ചെയ്യൽ ആരംഭിക്കണോ?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ഉപയോഗിച്ച് റെക്കോർഡ് ചെയ്യൽ അല്ലെങ്കിൽ കാസ്‌റ്റ് ചെയ്യൽ ആരംഭിക്കണോ?"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"വീണ്ടും കാണിക്കരുത്"</string>
@@ -707,9 +707,10 @@
     <string name="notification_bubble_title" msgid="8330481035191903164">"ബബ്ൾ"</string>
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"ശബ്‌ദമോ വൈബ്രേഷനോ ഇല്ലാതെ ശ്രദ്ധ കേന്ദ്രീകരിക്കാൻ നിങ്ങളെ സഹായിക്കുന്നു."</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"ശബ്‌ദമോ വെെബ്രേഷനോ ഉപയോഗിച്ച് നിങ്ങളുടെ ശ്രദ്ധ ക്ഷണിക്കുന്നു."</string>
+    <!-- no translation found for notification_channel_summary_default_with_bubbles (6298026344552480458) -->
+    <skip />
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"ഈ ഉള്ളടക്കത്തിലേക്ക് ഒരു ഫ്ലോട്ടിംഗ് കുറുക്കുവഴി ഉപയോഗിച്ച് നിങ്ങളുടെ ശ്രദ്ധ നിലനിർത്തുന്നു."</string>
     <string name="notification_channel_summary_priority" msgid="7415770044553264622">"സംഭാഷണ വിഭാഗത്തിന് മുകളിൽ ബബിളായി ദൃശ്യമാവുന്നു."</string>
-    <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> എന്നതിൽ നിന്നുള്ള എല്ലാ സംഭാഷണങ്ങളും ഡിഫോൾട്ടായി ബബിളാവുന്നു. <xliff:g id="APP_NAME_1">%2$s</xliff:g> എന്നതിൽ മാനേജ് ചെയ്യുക."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"ക്രമീകരണം"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"മുൻഗണന"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"അടുത്തിടെയുള്ള ബബിളുകൾ ഒന്നുമില്ല"</string>
@@ -1002,6 +1003,16 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"സിസ്‌റ്റം നാവിഗേഷൻ അപ്‌ഡേറ്റ് ചെയ്‌തു. മാറ്റങ്ങൾ വരുത്താൻ ക്രമീകരണത്തിലേക്ക് പോവുക."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"സിസ്‌റ്റം നാവിഗേഷൻ അപ്‌ഡേറ്റ് ചെയ്യാൻ ക്രമീകരണത്തിലേക്ക് പോവുക"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"സ്‌റ്റാൻഡ്‌ബൈ"</string>
+    <!-- no translation found for priority_onboarding_show_at_top_text (1678400241025513541) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_show_avatar_text (5756291381124091508) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_appear_as_bubble_text (4227039772250263122) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_ignores_dnd_text (2918952762719600529) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_done_button_title (4569550984286506007) -->
+    <skip />
     <string name="magnification_overlay_title" msgid="6584179429612427958">"മാഗ്നിഫിക്കേഷൻ ഓവർലേ വിൻഡോ"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"മാഗ്നിഫിക്കേഷൻ വിൻഡോ"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"മാഗ്നിഫിക്കേഷൻ വിൻഡോ നിയന്ത്രണങ്ങൾ"</string>
@@ -1016,10 +1027,8 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"നിയന്ത്രണങ്ങൾ"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"പവർ മെനുവിൽ നിന്ന് ആക്സസ് ചെയ്യേണ്ട നിയന്ത്രണങ്ങൾ തിരഞ്ഞെടുക്കുക"</string>
-    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
-    <skip />
-    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
-    <skip />
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"നിയന്ത്രണങ്ങൾ പുനഃക്രമീകരിക്കാൻ പിടിച്ച് വലിച്ചിടുക"</string>
+    <string name="controls_favorite_removed" msgid="5276978408529217272">"എല്ലാ നിയന്ത്രണങ്ങളും നീക്കം ചെയ്തു"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"എല്ലാ നിയന്ത്രണങ്ങളുടെയും ലിസ്റ്റ് ലോഡ് ചെയ്യാനായില്ല."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"മറ്റുള്ളവ"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"ഉപകരണ നിയന്ത്രണങ്ങളിലേക്ക് ചേർക്കുക"</string>

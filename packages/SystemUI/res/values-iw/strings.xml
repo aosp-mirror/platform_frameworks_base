@@ -87,7 +87,8 @@
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"לא היה מספיק מקום לשמור את צילום המסך"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"האפליקציה או הארגון שלך אינם מתירים ליצור צילומי מסך"</string>
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"סגירת צילום מסך"</string>
-    <string name="screenshot_preview_description" msgid="669177537416980449">"פתיחת צילום מסך"</string>
+    <!-- no translation found for screenshot_preview_description (7606510140714080474) -->
+    <skip />
     <string name="screenrecord_name" msgid="2596401223859996572">"מקליט המסך"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"התראה מתמשכת לסשן הקלטת מסך"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"להתחיל את ההקלטה?"</string>
@@ -713,9 +714,10 @@
     <string name="notification_bubble_title" msgid="8330481035191903164">"בועה"</string>
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"עוזרת להתרכז ללא צלילים או רטט."</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"מעוררת תשומת לב באמצעות צלילים או רטט."</string>
+    <!-- no translation found for notification_channel_summary_default_with_bubbles (6298026344552480458) -->
+    <skip />
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"מעוררת תשומת לב באמצעות קיצור דרך צף לתוכן הזה."</string>
     <string name="notification_channel_summary_priority" msgid="7415770044553264622">"מוצגת בחלק העליון של קטע השיחה ומופיעה כבועה."</string>
-    <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"כל השיחות מהאפליקציה <xliff:g id="APP_NAME_0">%1$s</xliff:g> מופיעות בבועות כברירת מחדל. ניתן לנהל באפליקציה <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"הגדרות"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"עדיפות"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"אין בועות מהזמן האחרון"</string>
@@ -1012,6 +1014,16 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"הניווט במערכת עודכן. אפשר לערוך שינויים דרך ההגדרות."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"יש לעבור להגדרות כדי לעדכן את הניווט במערכת"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"המתנה"</string>
+    <!-- no translation found for priority_onboarding_show_at_top_text (1678400241025513541) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_show_avatar_text (5756291381124091508) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_appear_as_bubble_text (4227039772250263122) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_ignores_dnd_text (2918952762719600529) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_done_button_title (4569550984286506007) -->
+    <skip />
     <string name="magnification_overlay_title" msgid="6584179429612427958">"חלון ליצירת שכבת-על להגדלה"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"חלון הגדלה"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"בקרות של חלון ההגדלה"</string>
@@ -1028,10 +1040,8 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"פקדים"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"יש לבחור פקדים לגישה מתפריט ההפעלה"</string>
-    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
-    <skip />
-    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
-    <skip />
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"יש ללחוץ לחיצה ארוכה ולגרור כדי לארגן מחדש את הפקדים"</string>
+    <string name="controls_favorite_removed" msgid="5276978408529217272">"כל הפקדים הוסרו"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"לא ניתן היה לטעון את הרשימה של כל הפקדים."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"אחר"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"הוספה לפקדי המכשיר"</string>

@@ -87,7 +87,7 @@
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"मेमोरी कम होने की वजह से स्क्रीनशॉट सेव नहीं किया जा सका"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"ऐप्लिकेशन या आपका संगठन स्क्रीनशॉट लेने की अनुमति नहीं देता"</string>
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"स्क्रीनशॉट खारिज करें"</string>
-    <string name="screenshot_preview_description" msgid="669177537416980449">"स्क्रीनशॉट खोलें"</string>
+    <string name="screenshot_preview_description" msgid="7606510140714080474">"स्क्रीनशॉट की झलक"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"स्क्रीन रिकॉर्डर"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"स्क्रीन रिकॉर्ड सेशन के लिए जारी सूचना"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"रिकॉर्डिंग शुरू करना चाहते हैं?"</string>
@@ -514,7 +514,7 @@
     <string name="notification_section_header_conversations" msgid="821834744538345661">"बातचीत"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"बिना आवाज़ की सभी सूचनाएं हटाएं"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"\'परेशान न करें\' सुविधा के ज़रिए कुछ समय के लिए सूचनाएं दिखाना रोक दिया गया है"</string>
-    <string name="media_projection_action_text" msgid="3634906766918186440">"अब शुरू करें"</string>
+    <string name="media_projection_action_text" msgid="3634906766918186440">"अभी शुरू करें"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"कोई सूचना नहीं मिली"</string>
     <string name="profile_owned_footer" msgid="2756770645766113964">"प्रोफ़ाइल को मॉनीटर किया जा सकता है"</string>
     <string name="vpn_footer" msgid="3457155078010607471">"नेटवर्क को मॉनीटर किया जा सकता है"</string>
@@ -584,7 +584,7 @@
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"साउंड सेटिंग"</string>
     <string name="accessibility_volume_expand" msgid="7653070939304433603">"विस्तार करें"</string>
     <string name="accessibility_volume_collapse" msgid="2746845391013829996">"छोटा करें"</string>
-    <string name="volume_odi_captions_tip" msgid="8825655463280990941">"मीडिया में अपने आप कैप्शन जोड़ें"</string>
+    <string name="volume_odi_captions_tip" msgid="8825655463280990941">"ऑडियो-वीडियो पहचानकर अपने-आप कैप्शन बनना"</string>
     <string name="accessibility_volume_close_odi_captions_tip" msgid="8924753283621160480">"कैप्शन सलाह बंद करें"</string>
     <string name="volume_odi_captions_content_description" msgid="4172765742046013630">"कैप्शन ऊपर लगाएं"</string>
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"चालू करें"</string>
@@ -709,9 +709,9 @@
     <string name="notification_bubble_title" msgid="8330481035191903164">"बबल"</string>
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"आवाज़ या वाइब्रेशन न होने की वजह से आप काम में ध्यान लगा पाते हैं."</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"आवाज़ या वाइब्रेशन होने की वजह से आपका ध्यान सूचनाओं पर जाता है."</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="6298026344552480458">"आवाज़ या वाइब्रेशन होने की वजह से आपका ध्यान सूचनाओं पर जाता है. <xliff:g id="APP_NAME">%1$s</xliff:g> में होने वाली बातचीत डिफ़ॉल्ट रूप से बबल के तौर पर दिखती है."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"फ़्लोट करने वाले शॉर्टकट की मदद से इस सामग्री पर आपका ध्यान बना रहता है."</string>
     <string name="notification_channel_summary_priority" msgid="7415770044553264622">"यह बातचीत सेक्शन में सबसे ऊपर और एक बबल के तौर पर दिखती है."</string>
-    <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> में हुई सभी बातचीत डिफ़ॉल्ट रूप से बबल की जाती हैं. <xliff:g id="APP_NAME_1">%2$s</xliff:g> में प्रबंधित करें."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"सेटिंग"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"प्राथमिकता"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"हाल ही के बबल्स मौजूद नहीं हैं"</string>
@@ -964,7 +964,7 @@
     <string name="running_foreground_services_title" msgid="5137313173431186685">"बैकग्राउंड में चल रहे ऐप्लिकेशन"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"बैटरी और डेटा खर्च की जानकारी के लिए छूएं"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"मोबाइल डेटा बंद करना चाहते हैं?"</string>
-    <string name="mobile_data_disable_message" msgid="8604966027899770415">"आप <xliff:g id="CARRIER">%s</xliff:g> के ज़रिए डेटा या इंटरनेट इस्तेमाल नहीं कर पाएंगे. इंटरनेट सिर्फ़ वाई-फ़ाई का इस्तेमाल करके चलेगा."</string>
+    <string name="mobile_data_disable_message" msgid="8604966027899770415">"आप <xliff:g id="CARRIER">%s</xliff:g> से डेटा या इंटरनेट का इस्तेमाल नहीं कर पाएंगे. इंटरनेट सिर्फ़ वाई-फ़ाई से चलेगा."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"आपको मोबाइल और इंटरनेट सेवा देने वाली कंपनी"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"ऐप की वजह से मंज़ूरी के अनुरोध को समझने में दिक्कत हो रही है, इसलिए सेटिंग से आपके जवाब की पुष्टि नहीं हो पा रही है."</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"<xliff:g id="APP_0">%1$s</xliff:g> को <xliff:g id="APP_2">%2$s</xliff:g> के हिस्से (स्लाइस) दिखाने की मंज़ूरी दें?"</string>
@@ -1004,6 +1004,16 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"सिस्टम नेविगेशन अपडेट हो गया. बदलाव करने के लिए \'सेटिंग\' पर जाएं."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"सिस्टम नेविगेशन अपडेट करने के लिए \'सेटिंग\' में जाएं"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"स्टैंडबाई"</string>
+    <!-- no translation found for priority_onboarding_show_at_top_text (1678400241025513541) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_show_avatar_text (5756291381124091508) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_appear_as_bubble_text (4227039772250263122) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_ignores_dnd_text (2918952762719600529) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_done_button_title (4569550984286506007) -->
+    <skip />
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Magnification Overlay Window"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"स्क्रीन को बड़ा करके दिखाने वाली विंडो"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"स्क्रीन को बड़ा करके दिखाने वाली विंडो के नियंत्रण"</string>
@@ -1018,10 +1028,8 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"कंट्राेल"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"पावर मेन्यू से ऐक्सेस करने के लिए कंट्रोल चुनें"</string>
-    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
-    <skip />
-    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
-    <skip />
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"कंट्रोल का क्रम फिर से बदलने के लिए उन्हें दबाकर रखें और खींचें"</string>
+    <string name="controls_favorite_removed" msgid="5276978408529217272">"सभी कंट्रोल हटा दिए गए"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"सभी कंट्रोल की सूची लोड नहीं हो सकी."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"अन्य"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"डिवाइस के कंट्रोल में जोड़ें"</string>
