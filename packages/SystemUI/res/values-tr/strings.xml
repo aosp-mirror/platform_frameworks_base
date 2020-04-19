@@ -87,7 +87,7 @@
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"Depolama alanı sınırlı olduğundan ekran görüntüsü kaydedilemiyor"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Uygulama veya kuruluşunuz, ekran görüntüsü alınmasına izin vermiyor."</string>
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"Ekran görüntüsünü kapat"</string>
-    <string name="screenshot_preview_description" msgid="669177537416980449">"Ekran görüntüsünü aç"</string>
+    <string name="screenshot_preview_description" msgid="7606510140714080474">"Ekran görüntüsü önizlemesi"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Ekran Kaydedicisi"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Ekran kaydı oturumu için devam eden bildirim"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Kayıt Başlatılsın mı?"</string>
@@ -707,9 +707,10 @@
     <string name="notification_bubble_title" msgid="8330481035191903164">"Baloncuk"</string>
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"Ses veya titreşim olmadan odaklanmanıza yardımcı olur."</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"Ses veya titreşimle dikkatinizi çeker."</string>
+    <!-- no translation found for notification_channel_summary_default_with_bubbles (6298026344552480458) -->
+    <skip />
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Kayan kısayolla dikkatinizi bu içerik üzerinde tutar."</string>
     <string name="notification_channel_summary_priority" msgid="7415770044553264622">"Görüşme bölümünün üstünde baloncuk olarak gösterilir."</string>
-    <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> adlı uygulamadan tüm görüşmeler varsayılan olarak baloncukla gösterilir. <xliff:g id="APP_NAME_1">%2$s</xliff:g> uygulamasında yönet."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Ayarlar"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Öncelik"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Son kapatılan baloncuk yok"</string>
@@ -1002,6 +1003,16 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Sistemde gezinme yöntemi güncellendi. Değişiklik yapmak için Ayarlar\'a gidin."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Sistemde gezinme yöntemini güncellemek için Ayarlar\'a gidin"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Beklemeye alınıyor"</string>
+    <!-- no translation found for priority_onboarding_show_at_top_text (1678400241025513541) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_show_avatar_text (5756291381124091508) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_appear_as_bubble_text (4227039772250263122) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_ignores_dnd_text (2918952762719600529) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_done_button_title (4569550984286506007) -->
+    <skip />
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Yer Paylaşımlı Büyütme Penceresi"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Büyütme Penceresi"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Büyütme Penceresi Kontrolleri"</string>

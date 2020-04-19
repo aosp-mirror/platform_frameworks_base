@@ -251,8 +251,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Certifikace bezdrát. displeje"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Podrobné protokolování Wi‑Fi"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Přibrždění vyhledávání Wi‑Fi"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization (5437378364995776979) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Vylepšená randomizace adres MAC pro WiFi"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Mobilní data jsou vždy aktivní"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Hardwarová akcelerace tetheringu"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Zobrazovat zařízení Bluetooth bez názvů"</string>
@@ -285,8 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Zobrazit možnosti certifikace bezdrátového displeje"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Zvýšit úroveň protokolování Wi‑Fi zobrazenou v SSID a RSSI při výběru sítě Wi‑Fi."</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Snižuje vyčerpávání baterie a vylepšuje výkon sítě"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization_summary (7925425746373704991) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Tento přepínač má vliv pouze na chování randomizace adres MAC pro režim klienta.\nKdyž je tento režim aktivován, u sítí s povolenou randomizací adresa MAC mohou být během přidružování adresy MAC randomizovány znovu, podle toho, kdy se klient od sítě naposledy odpojil. Opětovná randomizace se neprovádí, pokud se zařízení připojí znovu do 4 hodin."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Měřená"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Neměřená"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Vyrovnávací paměť protokol. nástroje"</string>

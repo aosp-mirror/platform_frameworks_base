@@ -187,7 +187,7 @@
     <string name="work_profile_deleted" msgid="5891181538182009328">"ลบโปรไฟล์งานแล้ว"</string>
     <string name="work_profile_deleted_details" msgid="3773706828364418016">"แอปผู้ดูแลระบบโปรไฟล์งานไม่มีอยู่หรือเสียหาย ระบบจึงทำการลบโปรไฟล์งานและข้อมูลที่เกี่ยวข้องของคุณออก โปรดติดต่อผู้ดูแลระบบเพื่อรับความช่วยเหลือ"</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"โปรไฟล์งานของคุณไม่สามารถใช้ในอุปกรณ์นี้อีกต่อไป"</string>
-    <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"ลองป้อนรหัสผ่านหลายครั้งเกินไป"</string>
+    <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"พยายามป้อนรหัสผ่านหลายครั้งเกินไป"</string>
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"ผู้ดูแลระบบปล่อยอุปกรณ์ให้คุณใช้งานส่วนตัว"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"อุปกรณ์มีการจัดการ"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"องค์กรของคุณจัดการอุปกรณ์นี้และอาจตรวจสอบการจราจรของข้อมูลในเครือข่าย แตะเพื่อดูรายละเอียด"</string>
@@ -1457,6 +1457,12 @@
     <string name="gpsNotifMessage" msgid="7346649122793758032">"ร้องขอโดย <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
     <string name="gpsVerifYes" msgid="3719843080744112940">"ใช่"</string>
     <string name="gpsVerifNo" msgid="1671201856091564741">"ไม่"</string>
+    <!-- no translation found for gnss_nfw_notification_title (5004493772059563423) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_oem (3683958907027107969) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_carrier (815888995791562151) -->
+    <skip />
     <string name="sync_too_many_deletes" msgid="6999440774578705300">"เกินจำนวนการนำออกสูงสุด"</string>
     <string name="sync_too_many_deletes_desc" msgid="7409327940303504440">"มีรายการที่จะลบ <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> รายการสำหรับ <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g> ในบัญชี <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g> คุณต้องการทำสิ่งใด"</string>
     <string name="sync_really_delete" msgid="5657871730315579051">"ลบรายการ"</string>

@@ -538,14 +538,14 @@
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Z tego urządzenia możesz korzystać wraz z innymi osobami, dodając na nim konta użytkowników. Każdy użytkownik ma własne miejsce na swoje aplikacje, tapety i inne dane. Może też zmieniać ustawienia, które wpływają na wszystkich użytkowników urządzenia (np. Wi‑Fi).\n\nGdy dodasz nowego użytkownika, musi on skonfigurować swoje miejsce na dane.\n\nKażdy użytkownik może aktualizować aplikacje w imieniu wszystkich pozostałych użytkowników. Ułatwienia dostępu i usługi mogą nie zostać przeniesione na konto nowego użytkownika."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Gdy dodasz nowego użytkownika, musi on skonfigurować swoją przestrzeń.\n\nKażdy użytkownik może aktualizować aplikacje wszystkich innych użytkowników."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Skonfigurować ustawienia dla użytkownika?"</string>
-    <string name="user_setup_dialog_message" msgid="269931619868102841">"Upewnij się, że ta osoba jest w pobliżu i może skonfigurować swój profil."</string>
+    <string name="user_setup_dialog_message" msgid="269931619868102841">"Upewnij się, że ta osoba jest w pobliżu i może skonfigurować swój profil"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Skonfigurować teraz profil?"</string>
     <string name="user_setup_button_setup_now" msgid="1708269547187760639">"Skonfiguruj"</string>
     <string name="user_setup_button_setup_later" msgid="8712980133555493516">"Nie teraz"</string>
     <string name="user_add_user_type_title" msgid="551279664052914497">"Dodaj"</string>
     <string name="user_new_user_name" msgid="60979820612818840">"Nowy użytkownik"</string>
     <string name="user_new_profile_name" msgid="2405500423304678841">"Nowy profil"</string>
-    <string name="user_info_settings_title" msgid="6351390762733279907">"Użytkownik – informacje"</string>
+    <string name="user_info_settings_title" msgid="6351390762733279907">"Informacje o użytkowniku"</string>
     <string name="profile_info_settings_title" msgid="105699672534365099">"Informacje o profilu"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"Zanim utworzysz profil z ograniczeniami, musisz skonfigurować ekran blokady, by chronić aplikacje i osobiste dane."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"Ustaw blokadę"</string>

@@ -1457,6 +1457,12 @@
     <string name="gpsNotifMessage" msgid="7346649122793758032">"<xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>) এর দ্বারা অনুরোধকৃত"</string>
     <string name="gpsVerifYes" msgid="3719843080744112940">"হ্যাঁ"</string>
     <string name="gpsVerifNo" msgid="1671201856091564741">"না"</string>
+    <!-- no translation found for gnss_nfw_notification_title (5004493772059563423) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_oem (3683958907027107969) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_carrier (815888995791562151) -->
+    <skip />
     <string name="sync_too_many_deletes" msgid="6999440774578705300">"মুছে ফেলার সীমা ছাড়িয়ে গেছে"</string>
     <string name="sync_too_many_deletes_desc" msgid="7409327940303504440">"<xliff:g id="ACCOUNT_NAME">%3$s</xliff:g> অ্যাকাউন্টে <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g> এর জন্য <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g>টি মুছে ফেলা আইটেম রয়েছে৷ আপনি এগুলিকে নিয়ে কি করতে চান?"</string>
     <string name="sync_really_delete" msgid="5657871730315579051">"আইটেমগুলি মুছুন"</string>
@@ -1790,7 +1796,7 @@
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"আপনার প্রশাসক মুছে দিয়েছেন"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ঠিক আছে"</string>
     <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"ব্যাটারি আরও বেশিক্ষণ চালাতে, ব্যাটারি সেভার:\n·গাঢ় থিম চালু করে\n·ব্যাকগ্রাউন্ড অ্যাক্টিভিটি, কিছু ভিজ্যুয়াল এফেক্ট, এবং “হ্যালো Google”-এর মতো অন্যান্য ফিচার বন্ধ বা সীমাবদ্ধ করে\n\n"<annotation id="url">"আরও জানুন"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"ব্যাটারি আরও বেশিক্ষণ চালাতে, ব্যাটারি সেভার:\n·গাঢ় থিম চালু করে\n·ব্যাকগ্রাউন্ড অ্যাক্টিভিটি, কিছু ভিজ্যুয়াল এফেক্ট, এবং “হ্যালো Google”-এর মতো অন্যান্য ফিচার বন্ধ বা সীমাবদ্ধ করে"</string>
+    <string name="battery_saver_description" msgid="7618492104632328184">"ব্যাটারি আরও বেশিক্ষণ চালাতে, ব্যাটারি সেভার:\n·গাঢ় থিম চালু করে\n·ব্যাকগ্রাউন্ড অ্যাক্টিভিটি, কিছু ভিজ্যুয়াল এফেক্ট এবং “হ্যালো Google”-এর মতো অন্যান্য ফিচার বন্ধ বা সীমাবদ্ধ করে"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"ডেটার ব্যবহার কমাতে সহায়তা করার জন্য, ডেটা সেভার ব্যাকগ্রাউন্ডে কিছু অ্যাপ্লিকেশনকে ডেটা পাঠাতে বা গ্রহণ করতে বাধা দেয়৷ আপনি বর্তমানে এমন একটি অ্যাপ্লিকেশন ব্যবহার করছেন যেটি ডেটা অ্যাক্সেস করতে পারে, তবে সেটি কমই করে৷ এর ফলে যা হতে পারে, উদাহরণস্বরূপ, আপনি ছবির উপর ট্যাপ না করা পর্যন্ত সেগুলি দেখানো হবে না৷"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"ডেটা সেভার চালু করবেন?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"চালু করুন"</string>

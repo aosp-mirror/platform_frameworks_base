@@ -87,7 +87,7 @@
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"Não é possível salvar a captura de tela, porque não há espaço suficiente"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"O app ou a organização não permitem capturas de tela"</string>
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"Dispensar captura de tela"</string>
-    <string name="screenshot_preview_description" msgid="669177537416980449">"Abrir captura de tela"</string>
+    <string name="screenshot_preview_description" msgid="7606510140714080474">"Visualização de captura de tela"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Gravador de tela"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Notificação contínua para uma sessão de gravação de tela"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Iniciar gravação?"</string>
@@ -707,9 +707,9 @@
     <string name="notification_bubble_title" msgid="8330481035191903164">"Bolha"</string>
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"Ajuda você a manter o foco sem som ou vibração."</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"Chama sua atenção com som ou vibração."</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="6298026344552480458">"Chama sua atenção com som ou vibração. As conversas do app <xliff:g id="APP_NAME">%1$s</xliff:g> aparecem em balões por padrão."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Mantém sua atenção com um atalho flutuante para esse conteúdo."</string>
     <string name="notification_channel_summary_priority" msgid="7415770044553264622">"Aparece na parte superior de uma seção de conversa e em forma de balão."</string>
-    <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"Todas as conversas em <xliff:g id="APP_NAME_0">%1$s</xliff:g> aparecem em forma de balão por padrão. Gerencie isso no app <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Config."</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioridade"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Nenhum balão recente"</string>
@@ -962,7 +962,7 @@
     <string name="running_foreground_services_title" msgid="5137313173431186685">"Apps sendo executados em segundo plano"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"Tocar para ver detalhes sobre a bateria e o uso de dados"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"Desativar os dados móveis?"</string>
-    <string name="mobile_data_disable_message" msgid="8604966027899770415">"Você não terá acesso a dados ou à Internet por meio da operadora <xliff:g id="CARRIER">%s</xliff:g>. A Internet só estará disponível via Wi-Fi."</string>
+    <string name="mobile_data_disable_message" msgid="8604966027899770415">"Você não terá acesso a dados ou à Internet pela operadora <xliff:g id="CARRIER">%s</xliff:g>. A Internet só estará disponível via Wi-Fi."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"sua operadora"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"Como um app está ocultando uma solicitação de permissão, as configurações não podem verificar sua resposta."</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"Permitir que <xliff:g id="APP_0">%1$s</xliff:g> mostre partes do app <xliff:g id="APP_2">%2$s</xliff:g>?"</string>
@@ -1002,6 +1002,16 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Navegação no sistema atualizada. Se quiser alterá-la, acesse as configurações."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Acesse as configurações para atualizar a navegação no sistema"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Em espera"</string>
+    <!-- no translation found for priority_onboarding_show_at_top_text (1678400241025513541) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_show_avatar_text (5756291381124091508) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_appear_as_bubble_text (4227039772250263122) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_ignores_dnd_text (2918952762719600529) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_done_button_title (4569550984286506007) -->
+    <skip />
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Janela de sobreposição de ampliação"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Janela de ampliação"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Controles da janela de ampliação"</string>
@@ -1016,10 +1026,8 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Controles"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Escolha os controles para acessar pelo menu do botão liga/desliga"</string>
-    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
-    <skip />
-    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
-    <skip />
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Mantenha a tela pressionada e arraste para reorganizar os controles"</string>
+    <string name="controls_favorite_removed" msgid="5276978408529217272">"Todos os controles foram removidos"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Não foi possível carregar a lista de controles."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Outro"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Adicionar aos controles do dispositivo"</string>

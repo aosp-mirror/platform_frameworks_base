@@ -28,15 +28,15 @@
     <string name="battery_low_percent_format" msgid="4276661262843170964">"<xliff:g id="PERCENTAGE">%s</xliff:g> restants"</string>
     <string name="battery_low_percent_format_hybrid" msgid="3985614339605686167">"Il reste <xliff:g id="PERCENTAGE">%1$s</xliff:g>, environ <xliff:g id="TIME">%2$s</xliff:g> en fonction de votre usage"</string>
     <string name="battery_low_percent_format_hybrid_short" msgid="5917433188456218857">"Il reste <xliff:g id="PERCENTAGE">%1$s</xliff:g>, environ <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="battery_low_percent_format_saver_started" msgid="4968468824040940688">"<xliff:g id="PERCENTAGE">%s</xliff:g> restants. La fonction Économie d\'énergie est activée."</string>
+    <string name="battery_low_percent_format_saver_started" msgid="4968468824040940688">"<xliff:g id="PERCENTAGE">%s</xliff:g> restants. La fonction Économiseur de pile est activée."</string>
     <string name="invalid_charger" msgid="4370074072117767416">"Impossible de charger l\'appareil par USB. Servez-vous du chargeur fourni avec celui-ci."</string>
     <string name="invalid_charger_title" msgid="938685362320735167">"Impossible de charger l\'appareil par USB"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"Servez-vous du chargeur fourni avec votre appareil"</string>
     <string name="battery_low_why" msgid="2056750982959359863">"Paramètres"</string>
-    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Activer la fonction Économie d\'énergie?"</string>
+    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Activer l\'économiseur de pile?"</string>
     <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"À propos du mode Économiseur de pile"</string>
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"Activer"</string>
-    <string name="battery_saver_start_action" msgid="4553256017945469937">"Activer la fonction Économie d\'énergie"</string>
+    <string name="battery_saver_start_action" msgid="4553256017945469937">"Activer la fonction Économiseur de pile"</string>
     <string name="status_bar_settings_settings_button" msgid="534331565185171556">"Paramètres"</string>
     <string name="status_bar_settings_wifi_button" msgid="7243072479837270946">"Wi-Fi"</string>
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Rotation auto de l\'écran"</string>
@@ -87,7 +87,7 @@
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"Impossible d\'enregistrer la capture d\'écran, car l\'espace de stockage est limité"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"L\'application ou votre organisation n\'autorise pas les saisies d\'écran"</string>
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"Fermer la capture d\'écran"</string>
-    <string name="screenshot_preview_description" msgid="669177537416980449">"Ouvrir la capture d\'écran"</string>
+    <string name="screenshot_preview_description" msgid="7606510140714080474">"Aperçu de la capture d\'écran"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Enregistreur d\'écran"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Notification en cours pour une session d\'enregistrement d\'écran"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Commencer l\'enregistrement?"</string>
@@ -496,9 +496,9 @@
     <string name="user_remove_user_title" msgid="9124124694835811874">"Supprimer l\'utilisateur?"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"Toutes les applications et les données de cet utilisateur seront supprimées."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"Supprimer"</string>
-    <string name="battery_saver_notification_title" msgid="8419266546034372562">"La fonction Économie d\'énergie est activée"</string>
+    <string name="battery_saver_notification_title" msgid="8419266546034372562">"Économiseur de pile activé"</string>
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"Réduire les performances et de fond"</string>
-    <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"Désactiver la fonction Économie d\'énergie"</string>
+    <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"Désactiver la fonction Économiseur de pile"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> aura accès à toute l\'information visible sur votre écran ou qui joue sur votre appareil durant l\'enregistrement ou la diffusion. Cela comprend des renseignements comme les mots de passe, les détails du paiement, les photos, les messages et l\'audio que vous faites jouer."</string>
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Le service offrant cette fonction aura accès à toute l\'information qui est visible sur votre écran ou sur ce qui joue sur votre appareil durant l\'enregistrement ou la diffusion. Cela comprend des renseignements comme les mots de passe, les détails du paiement, les photos, les messages et le contenu audio que vous faites jouer."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Commencer à enregistrer ou à diffuser?"</string>
@@ -707,9 +707,9 @@
     <string name="notification_bubble_title" msgid="8330481035191903164">"Bulle"</string>
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"Vous aider à vous concentrer, sans son ni vibration."</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"Attire votre attention à l\'aide de sons et de vibrations."</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="6298026344552480458">"Attire votre attention à l\'aide de sons et de vibrations. Conversations des bulles de <xliff:g id="APP_NAME">%1$s</xliff:g> par défaut."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Garde votre attention à l\'aide d\'un raccourci flottant vers ce contenu."</string>
     <string name="notification_channel_summary_priority" msgid="7415770044553264622">"S\'affiche en haut de la section des conversations sous forme de bulle."</string>
-    <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"Par défaut, toutes les conversations <xliff:g id="APP_NAME_0">%1$s</xliff:g> s\'affichent sous forme de bulles. Vous pouvez gérer cela dans <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Paramètres"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Priorité"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Aucune bulle récente"</string>
@@ -759,8 +759,8 @@
       <item quantity="other">%d minutes</item>
     </plurals>
     <string name="battery_panel_title" msgid="5931157246673665963">"Utilisation de la pile"</string>
-    <string name="battery_detail_charging_summary" msgid="8821202155297559706">"Le mode Économie d\'énergie n\'est pas accessible pendant la charge"</string>
-    <string name="battery_detail_switch_title" msgid="6940976502957380405">"Économie d\'énergie"</string>
+    <string name="battery_detail_charging_summary" msgid="8821202155297559706">"Le mode Économiseur de pile n\'est pas accessible pendant la charge"</string>
+    <string name="battery_detail_switch_title" msgid="6940976502957380405">"Économiseur de pile"</string>
     <string name="battery_detail_switch_summary" msgid="3668748557848025990">"Réduit les performances et les données en arrière-plan"</string>
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"Bouton <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="3734400625170020657">"Accueil"</string>
@@ -971,11 +971,11 @@
     <string name="slice_permission_checkbox" msgid="4242888137592298523">"Autoriser <xliff:g id="APP">%1$s</xliff:g> à afficher des tranches de n\'importe quelle application"</string>
     <string name="slice_permission_allow" msgid="6340449521277951123">"Autoriser"</string>
     <string name="slice_permission_deny" msgid="6870256451658176895">"Refuser"</string>
-    <string name="auto_saver_title" msgid="6873691178754086596">"Toucher pour activer la fonction Économie d\'énergie"</string>
+    <string name="auto_saver_title" msgid="6873691178754086596">"Toucher pour activer la fonction Économiseur de pile"</string>
     <string name="auto_saver_text" msgid="3214960308353838764">"Activer si la pile est susceptible de s\'épuiser totalement"</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"Non merci"</string>
-    <string name="auto_saver_enabled_title" msgid="4294726198280286333">"La fonction Économie d\'énergie est activée"</string>
-    <string name="auto_saver_enabled_text" msgid="7889491183116752719">"La fonction Économie d\'énergie s\'activera automatiquement une fois que la pile sera en dessous de <xliff:g id="PERCENTAGE">%d</xliff:g> %%."</string>
+    <string name="auto_saver_enabled_title" msgid="4294726198280286333">"La fonction Économiseur de pile est activée"</string>
+    <string name="auto_saver_enabled_text" msgid="7889491183116752719">"La fonction Économiseur de pile s\'activera automatiquement une fois que la pile sera en dessous de <xliff:g id="PERCENTAGE">%d</xliff:g> %%."</string>
     <string name="open_saver_setting_action" msgid="2111461909782935190">"Paramètres"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"OK"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Copier mémoire SysUI"</string>
@@ -1002,6 +1002,16 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"La navigation système a été mise à jour. Pour apporter des modifications, accédez au menu Paramètres."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Accédez au menu Paramètres pour mettre à jour la navigation système"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Veille"</string>
+    <!-- no translation found for priority_onboarding_show_at_top_text (1678400241025513541) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_show_avatar_text (5756291381124091508) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_appear_as_bubble_text (4227039772250263122) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_ignores_dnd_text (2918952762719600529) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_done_button_title (4569550984286506007) -->
+    <skip />
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Fenêtre d\'agrandissement superposée"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Fenêtre d\'agrandissement"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Commandes pour la fenêtre d\'agrandissement"</string>

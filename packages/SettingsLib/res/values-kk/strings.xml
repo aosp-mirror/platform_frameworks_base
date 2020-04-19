@@ -251,8 +251,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Сымсыз дисплей сертификаты"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Wi‑Fi егжей-тегжейлі журналы"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Wi‑Fi іздеуін шектеу"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization (5437378364995776979) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Wi‑Fi жақсартылған MAC рандомизациясы"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Мобильдік интернет әрқашан қосулы"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Тетеринг режиміндегі аппараттық жеделдету"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Bluetooth құрылғыларын атаусыз көрсету"</string>
@@ -285,8 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Сымсыз дисплей сертификаты опцияларын көрсету"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Wi‑Fi тіркеу деңгейін арттыру, Wi‑Fi таңдағанда әр SSID RSSI бойынша көрсету"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Батарея зарядының шығынын азайтады және желі жұмысын жақсартады."</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization_summary (7925425746373704991) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Бұл қосқыш тек клиент режимі үшін MAC рандомизациясының әрекетіне әсер етеді.\nБұл режим қосылған кезде, MAC рандомизациясы қосулы кез келген желі MAC мекенжайларын қайта рандомизациялайды. Бұл үшін клиенттің желіден ең соңғы ажыратылған уақыты негізге алынады. Құрылғы желіге 4 сағат немесе одан аз уақыт ішінде қайта қосылса, қайта рандомизацияланбайды."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Трафик саналады"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Трафик саналмайды"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Журналға тіркеуші буферінің өлшемдері"</string>
@@ -476,7 +474,7 @@
     <string name="screen_zoom_summary_large" msgid="4706951482598978984">"Үлкен"</string>
     <string name="screen_zoom_summary_very_large" msgid="7317423942896999029">"Үлкенірек"</string>
     <string name="screen_zoom_summary_extremely_large" msgid="1438045624562358554">"Ең үлкен"</string>
-    <string name="screen_zoom_summary_custom" msgid="3468154096832912210">"Арнаулы (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
+    <string name="screen_zoom_summary_custom" msgid="3468154096832912210">"Басқа (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="content_description_menu_button" msgid="6254844309171779931">"Mәзір"</string>
     <string name="retail_demo_reset_message" msgid="5392824901108195463">"Демо режимде зауыттық мәндерге қайтару үшін құпия сөзді енгізу"</string>
     <string name="retail_demo_reset_next" msgid="3688129033843885362">"Келесі"</string>
@@ -538,7 +536,7 @@
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Қосымша профильдер жасай отырып, бұл құрылғыны басқалармен ортақ пайдалануға болады. Әр пайдаланушы қолданбаларды, тұсқағаздарды орнатып, профилін өз қалауынша реттей алады. Сондай-ақ барлығы ортақ қолданатын Wi‑Fi сияқты параметрлерді де реттеуге болады.\n\nЖаңа пайдаланушы енгізілгенде, ол өз профилін реттеуі керек болады.\n\nКез келген пайдаланушы барлық басқа пайдаланушылар үшін қолданбаларды жаңарта алады. Арнайы мүмкіндіктерге қатысты параметрлер мен қызметтер жаңа пайдаланушыға өтпейді."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Жаңа пайдаланушыны қосқанда сол адам өз кеңістігін реттеуі керек.\n\nКез келген пайдаланушы барлық басқа пайдаланушылар үшін қолданбаларды жаңарта алады."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Профиль құру керек пе?"</string>
-    <string name="user_setup_dialog_message" msgid="269931619868102841">"Пайдаланушы құрылығыны алып, өз профилін реттеуі керек."</string>
+    <string name="user_setup_dialog_message" msgid="269931619868102841">"Пайдаланушы құрылғыны алып, өз профилін реттеуі керек."</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Профайл қазір жасақталсын ба?"</string>
     <string name="user_setup_button_setup_now" msgid="1708269547187760639">"Қазір құру"</string>
     <string name="user_setup_button_setup_later" msgid="8712980133555493516">"Қазір емес"</string>

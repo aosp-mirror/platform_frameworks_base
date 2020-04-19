@@ -1457,6 +1457,12 @@
     <string name="gpsNotifMessage" msgid="7346649122793758032">"Begärt av <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
     <string name="gpsVerifYes" msgid="3719843080744112940">"Ja"</string>
     <string name="gpsVerifNo" msgid="1671201856091564741">"Nej"</string>
+    <!-- no translation found for gnss_nfw_notification_title (5004493772059563423) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_oem (3683958907027107969) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_carrier (815888995791562151) -->
+    <skip />
     <string name="sync_too_many_deletes" msgid="6999440774578705300">"Gränsen för borttagning har överskridits"</string>
     <string name="sync_too_many_deletes_desc" msgid="7409327940303504440">"Det finns <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> borttagna objekt för <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>, konto <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g>. Vad vill du göra?"</string>
     <string name="sync_really_delete" msgid="5657871730315579051">"Ta bort objekten"</string>
@@ -1789,10 +1795,10 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Administratören uppdaterade paketet"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Administratören raderade paketet"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"I syfte att förlänga batteritiden sker följande i batterisparläget:\n·mörkt tema aktiveras\n·aktivitet i bakgrunden, vissa visuella effekter och andra funktioner, som ”Hey Google”, inaktiveras eller begränsas\n\n"<annotation id="url">"Läs mer"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"I syfte att förlänga batteritiden sker följande i batterisparläget:\n·mörkt tema aktiveras\n·aktivitet i bakgrunden, vissa visuella effekter och andra funktioner, som ”Hey Google”, inaktiveras eller begränsas"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Batterisparläget förlänger batteritiden genom att:\n·aktivera mörkt tema\n·inaktivera eller begränsa aktivitet i bakgrunden, vissa visuella effekter och andra funktioner, som ”Hey Google”\n\n"<annotation id="url">"Läs mer"</annotation></string>
+    <string name="battery_saver_description" msgid="7618492104632328184">"Batterisparläget förlänger batteritiden genom att:\n·aktivera mörkt tema\n·inaktivera eller begränsa aktivitet i bakgrunden, vissa visuella effekter och andra funktioner, som ”Hey Google”"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Med databesparing kan du minska dataanvändningen genom att hindra en del appar från att skicka eller ta emot data i bakgrunden. Appar som du använder kan komma åt data, men det sker kanske inte lika ofta. Detta innebär t.ex. att bilder inte visas förrän du trycker på dem."</string>
-    <string name="data_saver_enable_title" msgid="7080620065745260137">"Aktivera Databesparing?"</string>
+    <string name="data_saver_enable_title" msgid="7080620065745260137">"Vill du aktivera Databesparing?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Aktivera"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
       <item quantity="other">I %1$d minuter (till kl. <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>

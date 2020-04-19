@@ -1457,6 +1457,12 @@
     <string name="gpsNotifMessage" msgid="7346649122793758032">"<xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>) દ્વારા વિનંતી કરાઈ"</string>
     <string name="gpsVerifYes" msgid="3719843080744112940">"હા"</string>
     <string name="gpsVerifNo" msgid="1671201856091564741">"નહીં"</string>
+    <!-- no translation found for gnss_nfw_notification_title (5004493772059563423) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_oem (3683958907027107969) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_carrier (815888995791562151) -->
+    <skip />
     <string name="sync_too_many_deletes" msgid="6999440774578705300">"કાઢી નાખવાની સીમા ઓળંગાઈ"</string>
     <string name="sync_too_many_deletes_desc" msgid="7409327940303504440">"<xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>, એકાઉન્ટ <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g> માટે <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> કાઢી નાખેલ આઇટમ્સ છે. તમે શું કરવા માગો છો?"</string>
     <string name="sync_really_delete" msgid="5657871730315579051">"આઇટમ્સ કાઢી નાખો"</string>
@@ -1558,8 +1564,8 @@
     <string name="wireless_display_route_description" msgid="8297563323032966831">"વાયરલેસ ડિસ્પ્લે"</string>
     <string name="media_route_button_content_description" msgid="2299223698196869956">"કાસ્ટ કરો"</string>
     <string name="media_route_chooser_title" msgid="6646594924991269208">"ઉપકરણ સાથે કનેક્ટ કરો"</string>
-    <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"ઉપકરણ પર સ્ક્રીન કાસ્ટ કરો"</string>
-    <string name="media_route_chooser_searching" msgid="6119673534251329535">"ઉપકરણો માટે શોધી રહ્યું છે…"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"ડિવાઇસ પર સ્ક્રીન કાસ્ટ કરો"</string>
+    <string name="media_route_chooser_searching" msgid="6119673534251329535">"ડિવાઇસ શોધી રહ્યું છે…"</string>
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"સેટિંગ"</string>
     <string name="media_route_controller_disconnect" msgid="7362617572732576959">"ડિસ્કનેક્ટ કરો"</string>
     <string name="media_route_status_scanning" msgid="8045156315309594482">"સ્કેન કરી રહ્યું છે..."</string>
@@ -1791,7 +1797,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ઓકે"</string>
     <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"બૅટરીની આવરદા વધારવા માટે, બૅટરી સેવર:\n·ઘેરી થીમ ચાલુ કરે છે\n·બૅકગ્રાઉન્ડ પ્રવૃત્તિ, અમુક વિઝ્યુઅલ ઇફેક્ટ અને “હેય Google” જેવી અન્ય સુવિધાઓ બંધ અથવા પ્રતિબંધિત કરે છે\n\n"<annotation id="url">"વધુ જાણો"</annotation></string>
     <string name="battery_saver_description" msgid="7618492104632328184">"બૅટરીની આવરદા વધારવા માટે, બૅટરી સેવર:\n·ઘેરી થીમ ચાલુ કરે છે\n·બૅકગ્રાઉન્ડ પ્રવૃત્તિ, અમુક વિઝ્યુઅલ ઇફેક્ટ અને “હેય Google” જેવી અન્ય સુવિધાઓ બંધ અથવા પ્રતિબંધિત કરે છે"</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"ડેટા વપરાશને ઘટાડવામાં સહાય માટે, ડેટા સેવર કેટલીક ઍપ્લિકેશનોને પૃષ્ઠભૂમિમાં ડેટા મોકલવા અથવા પ્રાપ્ત કરવાથી અટકાવે છે. તમે હાલમાં ઉપયોગ કરી રહ્યાં છો તે ઍપ્લિકેશન ડેટાને ઍક્સેસ કરી શકે છે, પરંતુ તે આ ક્યારેક જ કરી શકે છે. આનો અર્થ એ હોઈ શકે છે, ઉદાહરણ તરીકે, છબીઓ ત્યાં સુધી પ્રદર્શિત થશે નહીં જ્યાં સુધી તમે તેને ટૅપ નહીં કરો."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"ડેટા વપરાશને ઘટાડવામાં સહાય માટે, ડેટા સેવર કેટલીક ઍપને બૅકગ્રાઉન્ડમાં ડેટા મોકલવા અથવા પ્રાપ્ત કરવાથી અટકાવે છે. તમે હાલમાં ઉપયોગ કરી રહ્યાં છો તે ઍપ ડેટાને ઍક્સેસ કરી શકે છે, પરંતુ તે આ ક્યારેક જ કરી શકે છે. આનો અર્થ એ હોઈ શકે છે, ઉદાહરણ તરીકે, છબીઓ ત્યાં સુધી પ્રદર્શિત થશે નહીં જ્યાં સુધી તમે તેને ટૅપ નહીં કરો."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"ડેટા સેવર ચાલુ કરીએ?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"ચાલુ કરો"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
@@ -1909,7 +1915,7 @@
     <string name="conference_call" msgid="5731633152336490471">"કોન્ફરન્સ કૉલ"</string>
     <string name="tooltip_popup_title" msgid="7863719020269945722">"ટૂલટિપ"</string>
     <string name="app_category_game" msgid="4534216074910244790">"રમતો"</string>
-    <string name="app_category_audio" msgid="8296029904794676222">"સંગીત અને ઑડિઓ"</string>
+    <string name="app_category_audio" msgid="8296029904794676222">"સંગીત અને ઑડિયો"</string>
     <string name="app_category_video" msgid="2590183854839565814">"મૂવી અને વીડિઓ"</string>
     <string name="app_category_image" msgid="7307840291864213007">"ફોટો અને છબીઓ"</string>
     <string name="app_category_social" msgid="2278269325488344054">"સામાજિક અને સંચાર"</string>

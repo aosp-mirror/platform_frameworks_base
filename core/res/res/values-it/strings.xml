@@ -142,7 +142,7 @@
     <string name="wfcSpnFormat_wifi" msgid="1376356951297043426">"Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="7178561009225028264">"Chiamate Wi-Fi"</string>
     <string name="wfcSpnFormat_vowifi" msgid="8371335230890725606">"VoWifi"</string>
-    <string name="wifi_calling_off_summary" msgid="5626710010766902560">"OFF"</string>
+    <string name="wifi_calling_off_summary" msgid="5626710010766902560">"Off"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1035175836270943089">"Chiamata tramite Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="4958965609212575619">"Chiamata su rete mobile"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="104951993894678665">"Solo Wi-Fi"</string>
@@ -1457,6 +1457,12 @@
     <string name="gpsNotifMessage" msgid="7346649122793758032">"Richiesto da <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
     <string name="gpsVerifYes" msgid="3719843080744112940">"Sì"</string>
     <string name="gpsVerifNo" msgid="1671201856091564741">"No"</string>
+    <!-- no translation found for gnss_nfw_notification_title (5004493772059563423) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_oem (3683958907027107969) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_carrier (815888995791562151) -->
+    <skip />
     <string name="sync_too_many_deletes" msgid="6999440774578705300">"Limite di eliminazioni superato"</string>
     <string name="sync_too_many_deletes_desc" msgid="7409327940303504440">"Ci sono <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> elementi eliminati per <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>, account <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g> . Come vuoi procedere?"</string>
     <string name="sync_really_delete" msgid="5657871730315579051">"Elimina gli elementi"</string>
@@ -1790,7 +1796,7 @@
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Eliminato dall\'amministratore"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
     <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Per estendere la durata della batteria, il risparmio energetico:\n·Attiva il Tema scuro\n·Disattiva o limita le attività in background, alcuni effetti visivi e altre funzionalità come \"Ok Google\"\n\n"<annotation id="url">"Ulteriori informazioni"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"Per estendere la durata della batteria, il risparmio energetico:\n·Attiva il Tema scuro\n·Disattiva o limita le attività in background, alcuni effetti visivi e altre funzionalità come \"Ok Google\""</string>
+    <string name="battery_saver_description" msgid="7618492104632328184">"Per estendere la durata della batteria, Risparmio energetico:\n·Attiva il Tema scuro\n·Disattiva o limita le attività in background, alcuni effetti visivi e altre funzionalità come \"Ok Google\""</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Per contribuire a ridurre l\'utilizzo dei dati, la funzione Risparmio dati impedisce ad alcune app di inviare o ricevere dati in background. Un\'app in uso può accedere ai dati, ma potrebbe farlo con meno frequenza. Esempio: le immagini non vengono visualizzate finché non le tocchi."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Attivare Risparmio dati?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Attiva"</string>

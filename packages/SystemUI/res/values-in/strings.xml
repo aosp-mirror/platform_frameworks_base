@@ -87,7 +87,7 @@
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"Tidak dapat menyimpan screenshot karena ruang penyimpanan terbatas"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Mengambil screenshot tidak diizinkan oleh aplikasi atau organisasi"</string>
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"Menutup screenshot"</string>
-    <string name="screenshot_preview_description" msgid="669177537416980449">"Membuka screenshot"</string>
+    <string name="screenshot_preview_description" msgid="7606510140714080474">"Pratinjau screenshot"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Perekam Layar"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Notifikasi yang sedang berjalan untuk sesi rekaman layar"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Mulai Merekam?"</string>
@@ -305,8 +305,8 @@
     <string name="accessibility_quick_settings_work_mode_on" msgid="2779253456042059110">"Mode kerja aktif."</string>
     <string name="accessibility_quick_settings_work_mode_changed_off" msgid="6256690740556798683">"Mode kerja dinonaktifkan."</string>
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="1105258550138313384">"Mode kerja diaktifkan."</string>
-    <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"Penghemat Kuota nonaktif."</string>
-    <string name="accessibility_quick_settings_data_saver_changed_on" msgid="6370606590802623078">"Penghemat Kuota diaktifkan."</string>
+    <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"Penghemat Data nonaktif."</string>
+    <string name="accessibility_quick_settings_data_saver_changed_on" msgid="6370606590802623078">"Penghemat Data diaktifkan."</string>
     <string name="accessibility_quick_settings_sensor_privacy_changed_off" msgid="7608378211873807353">"Privasi Sensor dinonaktifkan."</string>
     <string name="accessibility_quick_settings_sensor_privacy_changed_on" msgid="4267393685085328801">"Privasi Sensor diaktifkan."</string>
     <string name="accessibility_brightness" msgid="5391187016177823721">"Kecerahan tampilan"</string>
@@ -397,7 +397,7 @@
     <string name="quick_settings_tethering_label" msgid="5257299852322475780">"Menambatkan"</string>
     <string name="quick_settings_hotspot_label" msgid="1199196300038363424">"Hotspot"</string>
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"Mengaktifkan…"</string>
-    <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"Penghemat Kuota aktif"</string>
+    <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"Penghemat Data aktif"</string>
     <plurals name="quick_settings_hotspot_secondary_label_num_devices" formatted="false" msgid="3142308865165871976">
       <item quantity="other">%d perangkat</item>
       <item quantity="one">%d perangkat</item>
@@ -707,9 +707,9 @@
     <string name="notification_bubble_title" msgid="8330481035191903164">"Balon"</string>
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"Membantu Anda tetap fokus tanpa suara atau getaran."</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"Menarik perhatian Anda dengan suara atau getaran."</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="6298026344552480458">"Menarik perhatian Anda dengan suara atau getaran. Percakapan dari balon <xliff:g id="APP_NAME">%1$s</xliff:g> secara default."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Menjaga perhatian dengan pintasan floating ke konten ini."</string>
     <string name="notification_channel_summary_priority" msgid="7415770044553264622">"Muncul di atas bagian percakapan dan ditampilkan sebagai balon."</string>
-    <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"Semua percakapan <xliff:g id="APP_NAME_0">%1$s</xliff:g> menggunakan balon secara default. Kelola di <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Setelan"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritas"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Tidak ada balon baru-baru ini"</string>
@@ -814,9 +814,9 @@
     <string name="accessibility_long_click_tile" msgid="210472753156768705">"Buka setelan"</string>
     <string name="accessibility_status_bar_headphones" msgid="1304082414912647414">"Headphone terhubung"</string>
     <string name="accessibility_status_bar_headset" msgid="2699275863720926104">"Headset terhubung"</string>
-    <string name="data_saver" msgid="3484013368530820763">"Penghemat Kuota"</string>
-    <string name="accessibility_data_saver_on" msgid="5394743820189757731">"Penghemat Kuota aktif"</string>
-    <string name="accessibility_data_saver_off" msgid="58339669022107171">"Penghemat Kuota nonaktif"</string>
+    <string name="data_saver" msgid="3484013368530820763">"Penghemat Data"</string>
+    <string name="accessibility_data_saver_on" msgid="5394743820189757731">"Penghemat Data aktif"</string>
+    <string name="accessibility_data_saver_off" msgid="58339669022107171">"Penghemat Data nonaktif"</string>
     <string name="switch_bar_on" msgid="1770868129120096114">"Aktif"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"Nonaktif"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"Tidak tersedia"</string>
@@ -961,7 +961,7 @@
     <string name="qs_dnd_replace" msgid="7712119051407052689">"Ganti"</string>
     <string name="running_foreground_services_title" msgid="5137313173431186685">"Aplikasi yang sedang berjalan di latar belakang"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"Ketuk untuk melihat detail penggunaan baterai dan data"</string>
-    <string name="mobile_data_disable_title" msgid="5366476131671617790">"Nonaktifkan kuota?"</string>
+    <string name="mobile_data_disable_title" msgid="5366476131671617790">"Nonaktifkan data seluler?"</string>
     <string name="mobile_data_disable_message" msgid="8604966027899770415">"Anda tidak akan dapat mengakses data atau internet melalui <xliff:g id="CARRIER">%s</xliff:g>. Internet hanya akan tersedia melalui Wi-Fi."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"Operator Seluler Anda"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"Karena sebuah aplikasi menghalangi permintaan izin, Setelan tidak dapat memverifikasi respons Anda."</string>
@@ -1002,6 +1002,16 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Navigasi sistem diupdate. Untuk melakukan perubahan, buka Setelan."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Buka Setelan untuk mengupdate navigasi sistem"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Siaga"</string>
+    <!-- no translation found for priority_onboarding_show_at_top_text (1678400241025513541) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_show_avatar_text (5756291381124091508) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_appear_as_bubble_text (4227039772250263122) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_ignores_dnd_text (2918952762719600529) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_done_button_title (4569550984286506007) -->
+    <skip />
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Jendela Overlay Pembesaran"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Jendela Pembesaran"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Kontrol Jendela Pembesaran"</string>
@@ -1016,10 +1026,8 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Kontrol"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Pilih kontrol yang akan diakses dari menu daya"</string>
-    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
-    <skip />
-    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
-    <skip />
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Tahan &amp; tarik untuk mengatur ulang kontrol"</string>
+    <string name="controls_favorite_removed" msgid="5276978408529217272">"Semua kontrol dihapus"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Daftar semua kontrol tidak dapat dimuat."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Lainnya"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Tambahkan ke kontrol perangkat"</string>

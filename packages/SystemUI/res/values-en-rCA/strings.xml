@@ -87,7 +87,7 @@
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"Can\'t save screenshot due to limited storage space"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Taking screenshots isn\'t allowed by the app or your organisation"</string>
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"Dismiss screenshot"</string>
-    <string name="screenshot_preview_description" msgid="669177537416980449">"Open screenshot"</string>
+    <string name="screenshot_preview_description" msgid="7606510140714080474">"Screenshot preview"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Screen Recorder"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Ongoing notification for a screen record session"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Start recording?"</string>
@@ -500,7 +500,7 @@
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"Reduces performance and background data"</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"Turn off Battery Saver"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> will have access to all of the information that is visible on your screen or played from your device while recording or casting. This includes information, such as passwords, payment details, photos, messages and audio that you play."</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"The service providing this function will have access to all of the information that is visible on your screen or played from your device while recording or casting. This includes information, such as passwords, payment details, photos, messages and audio that you play."</string>
+    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"The service providing this function will have access to all of the information that is visible on your screen or played from your device while recording or casting. This includes information such as passwords, payment details, photos, messages and audio that you play."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Start recording or casting?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"Start recording or casting with <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"Don\'t show again"</string>
@@ -707,9 +707,9 @@
     <string name="notification_bubble_title" msgid="8330481035191903164">"Bubble"</string>
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"Helps you focus without sound or vibration."</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"Gets your attention with sound or vibration."</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="6298026344552480458">"Gets your attention with sound or vibration. Conversations from <xliff:g id="APP_NAME">%1$s</xliff:g> bubble by default."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Keeps your attention with a floating shortcut to this content."</string>
     <string name="notification_channel_summary_priority" msgid="7415770044553264622">"Shows at top of conversation section and appears as a bubble."</string>
-    <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"All conversations from <xliff:g id="APP_NAME_0">%1$s</xliff:g> bubble by default. Manage in <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Settings"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Priority"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"No recent bubbles"</string>
@@ -1002,6 +1002,11 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"System navigation updated. To make changes, go to Settings."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Go to Settings to update system navigation"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Standby"</string>
+    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Show at top of conversation section"</string>
+    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Show profile picture on lock screen"</string>
+    <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Appear as a floating bubble on top of apps"</string>
+    <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Interrupt Do Not Disturb"</string>
+    <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"OK"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Magnification overlay window"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Magnification window"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Magnification window controls"</string>

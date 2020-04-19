@@ -1457,6 +1457,12 @@
     <string name="gpsNotifMessage" msgid="7346649122793758032">"მოთხოვნილია <xliff:g id="NAME">%1$s</xliff:g>-ის მიერ (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
     <string name="gpsVerifYes" msgid="3719843080744112940">"დიახ"</string>
     <string name="gpsVerifNo" msgid="1671201856091564741">"არა"</string>
+    <!-- no translation found for gnss_nfw_notification_title (5004493772059563423) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_oem (3683958907027107969) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_carrier (815888995791562151) -->
+    <skip />
     <string name="sync_too_many_deletes" msgid="6999440774578705300">"წაშლის შეზღუდვა გადაჭარბებულია"</string>
     <string name="sync_too_many_deletes_desc" msgid="7409327940303504440">"<xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> წაშლილი ერთეულია <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>-თვის, ანგარიში <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g>. რისი გაკეთება გსურთ?"</string>
     <string name="sync_really_delete" msgid="5657871730315579051">"ერთეულების წაშლა"</string>
@@ -1789,8 +1795,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"განახლებულია თქვენი ადმინისტრატორის მიერ"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"წაიშალა თქვენი ადმინისტრატორის მიერ"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"კარგი"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"ელემენტის მუშაობის განრძლივობის მიზნით, ელემენტის დამზოგველი:\n·ირთვება ბნელ თემაზე\n·თიშავს ან ზღუდავს ფონის აქტივობებს, გარკვეულ ვიზუალურ ეფექტებს და სახვა შესაძლებლობებს, როგორიც არის “Hey Google”\n\n"<annotation id="url">"შეიტყვეთ მეტი"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"ელემენტის მუშაობის განრძლივობის მიზნით, ელემენტის დამზოგველი:\n·ირთვება ბნელ თემაზე\n·თიშავს ან ზღუდავს ფონის აქტივობებს, გარკვეულ ვიზუალურ ეფექტებს და სახვა შესაძლებლობებს, როგორიც არის “Hey Google”"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"ბატარეის მუშაობის განრძლივობის მიზნით, ბატარეის დამზოგველი:\n·ირთვება ბნელ თემაზე\n·თიშავს ან ზღუდავს ფონის აქტივობებს, გარკვეულ ვიზუალურ ეფექტებს და სახვა შესაძლებლობებს, როგორიც არის “Hey Google”\n\n"<annotation id="url">"შეიტყვეთ მეტი"</annotation></string>
+    <string name="battery_saver_description" msgid="7618492104632328184">"ბატარეის მუშაობის გახანგრძლივების მიზნით, ბატარეის დამზოგველი:\n·ირთვება ბნელ თემაზე\n·თიშავს ან ზღუდავს ფონის აქტივობებს, გარკვეულ ვიზუალურ ეფექტებს და სახვა შესაძლებლობებს, როგორიც არის “Hey Google”"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"მობილური ინტერნეტის მოხმარების შემცირების მიზნით, მონაცემთა დამზოგველი ზოგიერთ აპს ფონურ რეჟიმში მონაცემთა გაგზავნასა და მიღებას შეუზღუდავს. თქვენ მიერ ამჟამად გამოყენებული აპი მაინც შეძლებს მობილურ ინტერნეტზე წვდომას, თუმცა ამას ნაკლები სიხშირით განახორციელებს. ეს ნიშნავს, რომ, მაგალითად, სურათები არ გამოჩნდება მანამ, სანამ მათ საგანგებოდ არ შეეხებით."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"ჩაირთოს მონაცემთა დამზოგველი?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"ჩართვა"</string>

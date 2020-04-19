@@ -212,8 +212,7 @@
     <string name="adb_wireless_settings" msgid="2295017847215680229">"ৱায়াৰলেচ ডি\'বাগিং"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"উপলব্ধ ডিভাইচসমূহ চাবলৈ আৰু ব্যৱহাৰ কৰিবলৈ, ৱায়াৰলেচ ডি\'বাগিং অন কৰক"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"কিউআৰ ক’ডৰ জৰিয়তে ডিভাইচ পেয়াৰ কৰক"</string>
-    <!-- no translation found for adb_pair_method_qrcode_summary (7130694277228970888) -->
-    <skip />
+    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"কিউআৰ ক’ড স্কেনাৰ ব্যৱহাৰ কৰি নতুন ডিভাইচসমূহ পেয়াৰ কৰক"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"পেয়াৰ কৰা ক’ডৰ জৰিয়তে ডিভাইচ পেয়াৰ কৰক"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"ছটা অংকৰ ক’ড ব্যৱহাৰ কৰি নতুন ডিভাইচসমূহ পেয়াৰ কৰক"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"পেয়াৰ কৰি থোৱা ডিভাইচসমূহ"</string>
@@ -232,8 +231,7 @@
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"ডিভাইচটো পেয়াৰ কৰিব পৰা নগ’ল। কিউআৰ ক’ডটো ভুল অথবা ডিভাইচটো একেটা নেটৱৰ্কৰ সৈতে সংযোগ কৰা হোৱা নাই।"</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"আইপি ঠিকনা &amp; প’ৰ্ট"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"কিউআৰ ক’ড স্কেন কৰক"</string>
-    <!-- no translation found for adb_wireless_qrcode_pairing_description (6014121407143607851) -->
-    <skip />
+    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"এটা কিউআৰ ক’ড স্কেন কৰি ৱাই-ফাইৰে ডিভাইচ পেয়াৰ কৰক"</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"অনুগ্ৰহ কৰি এটা ৱাই-ফাই নেটৱর্কলৈ সংযোগ কৰক"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, ডিবাগ, dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"বাগ ৰিপৰ্টৰ শ্ৱৰ্টকাট"</string>
@@ -253,8 +251,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"বেতাঁৰ ডিছপ্লে’ প্ৰমাণীকৰণ"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"ৱাই-ফাই ভাৰ্ব\'ছ লগিং সক্ষম কৰক"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"ৱাই-ফাই স্কেনৰ নিয়ন্ত্ৰণ"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization (5437378364995776979) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"ৱাই-ফাই বৰ্ধিত MAC যাদৃচ্ছিকীকৰণ"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"ম’বাইল ডেটা সদা-সক্ৰিয়"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"টেডাৰিং হাৰ্ডৱেৰ ত্বৰণ"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"নামবিহীন ব্লুটুথ ডিভাইচসমূহ দেখুৱাওক"</string>
@@ -287,8 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"বেতাঁৰ ডিছপ্লে’ প্ৰমাণপত্ৰৰ বাবে বিকল্পসমূহ দেখুৱাওক"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"ৱাই-ফাই লগিঙৰ মাত্ৰা বঢ়াওক, Wi‑Fi পিকাৰত প্ৰতি SSID RSSI দেখুৱাওক"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"বেটাৰীৰ খৰচ কমায় আৰু নেটৱৰ্কৰ কাৰ্যক্ষমতা বৃদ্ধি কৰে"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization_summary (7925425746373704991) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"এই ট\'গল কৰা কার্যই MAC যাদৃচ্ছিকীকৰণৰ আচৰণ কেৱল ক্লায়েণ্ট ম\'ডৰ বাবে প্ৰভাৱিত কৰে।\nএই ম\'ডটো সক্ৰিয় কৰাৰ সময়ত, ক্লায়েণ্টে শেষবাৰৰ বাবে নেটৱর্কটোৰ পৰা কেতিয়া সংযোগ বিচ্ছিন্ন কৰিছে তাৰ ভিত্তিত MAC যাদৃচ্ছিকীকৰণ সক্ষম কৰি থোৱা যিকোনো নেটৱর্কৰ সংযোজনৰ সময়ত MAC ঠিকনাসমূহৰ পুনৰ যাদৃচ্ছিকীকৰণ হ\'ব পাৰে। ডিভাইচটো ৪ ঘণ্টা অথবা তাতকৈ কম সময়ৰ ভিতৰত পুনৰ সংযুক্ত হ\'লে পুনৰ যাদৃচ্ছিকীকৰণ নহয়।"</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"নিৰিখ-নিৰ্দিষ্ট"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"নিৰিখ অনিৰ্দিষ্ট"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"লগাৰৰ বাফাৰৰ আকাৰ"</string>
@@ -377,10 +373,8 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"নেপথ্য এপসমূহৰ বাবে এপে সঁহাৰি দিয়া নাই ডায়ল\'গ প্ৰদৰ্শন কৰক"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"জাননী চ্চেনেলৰ সকীয়নিসমূহ দেখুৱাওক"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"কোনো এপে বৈধ চ্চেনেল নোহোৱাকৈ কোনো জাননী প\'ষ্ট কৰিলে স্ক্ৰীণত সকীয়নি প্ৰদৰ্শন হয়"</string>
-    <!-- no translation found for enforce_shortcuts_for_conversations (7040735163945040763) -->
-    <skip />
-    <!-- no translation found for enforce_shortcuts_for_conversations_summary (1860168037282467862) -->
-    <skip />
+    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"বার্তালাপৰ জাননীৰ বাবে শ্বৰ্টকাট কাৰ্যকৰী কৰক"</string>
+    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"বার্তালাপৰ শাখাত প্ৰদর্শিত হ\'বলৈ জাননী কোনো দীর্ঘস্থায়ী শ্বেয়াৰিং শ্বৰ্টকাটৰ সমৰ্থিত হ\'ব লাগে"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"বাহ্যিক সঞ্চয়াগাৰত এপক বলেৰে অনুমতি দিয়ক"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"মেনিফেষ্টৰ মান যিয়েই নহওক, বাহ্যিক সঞ্চয়াগাৰত লিখিবলৈ যিকোনো এপক উপযুক্ত কৰি তোলে"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"বলেৰে কাৰ্যকলাপসমূহৰ আকাৰ সলনি কৰিব পৰা কৰক"</string>

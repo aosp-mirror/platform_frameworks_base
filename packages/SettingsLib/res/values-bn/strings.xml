@@ -21,7 +21,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="wifi_fail_to_scan" msgid="2333336097603822490">"নেটওয়ার্কগুলির জন্য স্ক্যান করা যাবে না"</string>
-    <string name="wifi_security_none" msgid="7392696451280611452">"কোনো কিছুই নয়"</string>
+    <string name="wifi_security_none" msgid="7392696451280611452">"কোনও কিছুই নয়"</string>
     <string name="wifi_remembered" msgid="3266709779723179188">"সংরক্ষিত"</string>
     <string name="wifi_disconnected" msgid="7054450256284661757">"কানেকশন নেই"</string>
     <string name="wifi_disabled_generic" msgid="2651916945380294607">"অক্ষম হয়েছে"</string>
@@ -117,7 +117,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"বাতিল করুন"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"চেনানো থাকলে তা কানেক্ট থাকাকালীন অবস্থায় আপনার পরিচিতিগুলি এবং কলের ইতিহাসকে অ্যাক্সেস করতে অনুমোদিত করে৷"</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> এর সাথে চেনানো যায়নি।"</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"ভুল পিন বা কোড দেওয়ার কারণে <xliff:g id="DEVICE_NAME">%1$s</xliff:g> এর সঙ্গে চেনানো যায়নি।"</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"ভুল পিন বা কোড দেওয়ার কারণে <xliff:g id="DEVICE_NAME">%1$s</xliff:g>-এর সঙ্গে যুক্ত করা যায়নি।"</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> এর সঙ্গে যোগাযোগ করতে পারবেন না।"</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"চেনানো <xliff:g id="DEVICE_NAME">%1$s</xliff:g> প্রত্যাখ্যান করেছে।"</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"কম্পিউটার"</string>
@@ -212,8 +212,7 @@
     <string name="adb_wireless_settings" msgid="2295017847215680229">"ওয়্যারলেস ডিবাগিং"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"কোন কোন ডিভাইস উপলভ্য আছে তা দেখে নিয়ে ব্যবহার করার জন্য, ওয়্যারলেস ডিবাগিং চালু করুন"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"QR কোড ব্যবহার করে ডিভাইস যোগ করুন"</string>
-    <!-- no translation found for adb_pair_method_qrcode_summary (7130694277228970888) -->
-    <skip />
+    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"QR কোড স্ক্যানার ব্যবহার করে নতুন ডিভাইস যোগ করুন"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"যোগ করার কোড ব্যবহার করে ডিভাইস যোগ করুন"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"ছয় সংখ্যার কোড ব্যবহার করে নতুন ডিভাইস যোগ করুন"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"যোগ করা ডিভাইস"</string>
@@ -232,8 +231,7 @@
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"ডিভাইস যোগ করা যায়নি। এটি দুটি কারণে হয়ে থাকে - QR কোডটি সঠিক নয় বা ডিভাইসটি একই নেটওয়ার্কে কানেক্ট করা নেই।"</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP অ্যাড্রেস ও পোর্ট"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"QR কোড স্ক্যান করুন"</string>
-    <!-- no translation found for adb_wireless_qrcode_pairing_description (6014121407143607851) -->
-    <skip />
+    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"QR কোড স্ক্যান করে ওয়াই-ফাইয়ের সাহায্যে ডিভাইস যোগ করুন"</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"একটি ওয়াই-ফাই নেটওয়ার্কের সাথে কানেক্ট করুন"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, debug, dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"ত্রুটি প্রতিবেদনের শর্টকাট"</string>
@@ -253,8 +251,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"ওয়্যারলেস ডিসপ্লে সার্টিফিকেশন"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"ওয়াই-ফাই ভারবোস লগিং চালু করুন"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"ওয়াই-ফাই স্ক্যান থ্রোটলিং"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization (5437378364995776979) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"ওয়াই-ফাই উন্নত MAC র‍্যান্ডমাইজেশন"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"মোবাইল ডেটা সব সময় সক্রিয় থাক"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"টিথারিং হার্ডওয়্যার অ্যাক্সিলারেশন"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"নামহীন ব্লুটুথ ডিভাইসগুলি দেখুন"</string>
@@ -287,8 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"ওয়্যারলেস প্রদর্শন সার্টিফিকেশন জন্য বিকল্পগুলি দেখান"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"ওয়াই-ফাই লগিং স্তর বাড়ান, ওয়াই-ফাই চয়নকারীতে SSID RSSI অনুযায়ী দেখান"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"ব্যাটারির খরচ কমায় এবং নেটওয়ার্কের পারফর্ম্যান্স উন্নত করে"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization_summary (7925425746373704991) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"এই টগলটি কেবল ক্লায়েন্ট মোডের জন্য ম্যাক র‍্যান্ডমাইজেশন আচরণকে প্রভাবিত করে।\nযখন এই মোডটি চালু করা হয়, তখন ক্লায়েন্টটি কখন নেটওয়ার্ক থেকে ডিসকানেক্ট হয়েছিল তার উপর নির্ভর করে কানেকশনটি সর্বশেষ কানেক্ট হওয়ার পরে MAC র‍্যান্ডম দ্বারা চালু করা যেকোনও MAC অ্যাড্রেস যেকোনও নেটওয়ার্কে আবার র‍্যান্ডমাইজেশন করা যেতে পারে। যদি ডিভাইসটি ৪ ঘন্টা বা তারও কম সময়ে আবার কানেক্ট করা হয় তবে এটি আর র‍্যান্ডমাইজেশন হবে না।"</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"মিটার্ড"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"পরিমাপ করা নয়"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"লগার বাফারের আকারগুলি"</string>
@@ -377,10 +373,8 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"ব্যাকগ্রাউন্ডের অ্যাপগুলির জন্য \'অ্যাপ থেকে সাড়া পাওয়া যাচ্ছে না\' মেসেজ দেখান"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"বিজ্ঞপ্তির সতর্কতা দেখুন"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"অ্যাপ সঠিক চ্যানেল ছাড়া বিজ্ঞপ্তি দেখালে সতর্ক করে"</string>
-    <!-- no translation found for enforce_shortcuts_for_conversations (7040735163945040763) -->
-    <skip />
-    <!-- no translation found for enforce_shortcuts_for_conversations_summary (1860168037282467862) -->
-    <skip />
+    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"কথোপকথনের বিজ্ঞপ্তির জন্য শর্টকাট ব্যবহার করুন"</string>
+    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"কথোপকথন বিভাগে দেখানোর জন্য বিজ্ঞপ্তিতে অনেকটা সময় ধরে চলে এমন শেয়ারিং শর্টকাট যেন থাকে"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"বহিরাগততে বলপূর্বক মঞ্জুরি"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"ম্যানিফেস্ট মানগুলি নির্বিশেষে যেকোনো অ্যাপ্লিকেশানকে বাহ্যিক সঞ্চয়স্থানে লেখার উপযুক্ত বানায়"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"আকার পরিবর্তনযোগ্য করার জন্য ক্রিয়াকলাপগুলিকে জোর করুন"</string>
@@ -466,7 +460,7 @@
     <string name="disabled" msgid="8017887509554714950">"অক্ষম হয়েছে"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"অনুমোদিত"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"অনুমোদিত নয়"</string>
-    <string name="install_other_apps" msgid="3232595082023199454">"অজানা অ্যাপ ইনস্টল করুন"</string>
+    <string name="install_other_apps" msgid="3232595082023199454">"অজানা অ্যাপ ইনস্টল করা"</string>
     <string name="home" msgid="973834627243661438">"সেটিংস হোম"</string>
   <string-array name="battery_labels">
     <item msgid="7878690469765357158">"০%"</item>

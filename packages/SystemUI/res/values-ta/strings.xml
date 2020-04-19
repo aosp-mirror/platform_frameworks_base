@@ -87,7 +87,8 @@
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"போதுமான சேமிப்பிடம் இல்லாததால் ஸ்கிரீன்ஷாட்டைச் சேமிக்க முடியவில்லை"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"ஸ்கிரீன் ஷாட்டுகளை எடுப்பதை, ஆப்ஸ் அல்லது உங்கள் நிறுவனம் அனுமதிக்கவில்லை"</string>
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"ஸ்கிரீன்ஷாட்டை நிராகரி"</string>
-    <string name="screenshot_preview_description" msgid="669177537416980449">"ஸ்கிரீன்ஷாட்டைத் திற"</string>
+    <!-- no translation found for screenshot_preview_description (7606510140714080474) -->
+    <skip />
     <string name="screenrecord_name" msgid="2596401223859996572">"ஸ்கிரீன் ரெக்கார்டர்"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"திரை ரெக்கார்டிங் அமர்விற்கான தொடர் அறிவிப்பு"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"ரெக்கார்டிங்கைத் தொடங்கவா?"</string>
@@ -296,8 +297,8 @@
     <string name="accessibility_quick_settings_flashlight_on" msgid="3785616827729850766">"டார்ச் லைட் எரிகிறது"</string>
     <string name="accessibility_quick_settings_flashlight_changed_off" msgid="3782375441381402599">"ஃபிளாஷ்லைட் முடக்கப்பட்டது."</string>
     <string name="accessibility_quick_settings_flashlight_changed_on" msgid="4747870681508334200">"டார்ச் லைட் எரிகிறது"</string>
-    <string name="accessibility_quick_settings_color_inversion_changed_off" msgid="7548045840282925393">"வண்ண நேர்மாறு முறை முடக்கப்பட்டது."</string>
-    <string name="accessibility_quick_settings_color_inversion_changed_on" msgid="4711141858364404084">"வண்ண நேர்மாறு முறை இயக்கப்பட்டது."</string>
+    <string name="accessibility_quick_settings_color_inversion_changed_off" msgid="7548045840282925393">"கலர் இன்வெர்ஷன் முடக்கப்பட்டது."</string>
+    <string name="accessibility_quick_settings_color_inversion_changed_on" msgid="4711141858364404084">"கலர் இன்வெர்ஷன் இயக்கப்பட்டது."</string>
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"மொபைல் ஹாட்ஸ்பாட் முடக்கப்பட்டது."</string>
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"மொபைல் ஹாட்ஸ்பாட் இயக்கப்பட்டது."</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"திரையை அனுப்புதல் நிறுத்தப்பட்டது."</string>
@@ -707,9 +708,10 @@
     <string name="notification_bubble_title" msgid="8330481035191903164">"பபிள்"</string>
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"ஒலியோ அதிர்வோ இல்லாமல் முழு கவனம் செலுத்த உதவும்."</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"ஒலியோ அதிர்வோ ஏற்படுத்தி உங்கள் கவனத்தை ஈர்க்கும்."</string>
+    <!-- no translation found for notification_channel_summary_default_with_bubbles (6298026344552480458) -->
+    <skip />
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"இந்த உள்ளடக்கத்திற்கான மிதக்கும் ஷார்ட்கட் மூலம் உங்கள் கவனத்தைப் பெற்றிருக்கும்."</string>
     <string name="notification_channel_summary_priority" msgid="7415770044553264622">"உரையாடல் பிரிவின் மேற்பகுதியில் ஒரு குமிழாகக் காட்டப்படும்."</string>
-    <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> ஆப்ஸில் இருக்கும் அனைத்து உரையாடல்களும் இயல்பாகக் குமிழாகவே இருக்கும். <xliff:g id="APP_NAME_1">%2$s</xliff:g> ஆப்ஸில் நிர்வகிக்கலாம்."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"அமைப்புகள்"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"முன்னுரிமை"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"சமீபத்திய குமிழ்கள் இல்லை"</string>
@@ -1002,6 +1004,16 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"சிஸ்டம் நேவிகேஷன் மாற்றப்பட்டது. மாற்றங்களைச் செய்ய ‘அமைப்புகளுக்குச்’ செல்லவும்."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"சிஸ்டம் நேவிகேஷனை மாற்ற ’அமைப்புகளுக்குச்’ செல்லவும்"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"இயக்க நேரம்"</string>
+    <!-- no translation found for priority_onboarding_show_at_top_text (1678400241025513541) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_show_avatar_text (5756291381124091508) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_appear_as_bubble_text (4227039772250263122) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_ignores_dnd_text (2918952762719600529) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_done_button_title (4569550984286506007) -->
+    <skip />
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Magnification Overlay Window"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"பெரிதாக்கல் சாளரம்"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"பெரிதாக்கல் சாளரக் கட்டுப்பாடுகள்"</string>

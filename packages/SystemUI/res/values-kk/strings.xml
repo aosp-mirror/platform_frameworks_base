@@ -33,7 +33,7 @@
     <string name="invalid_charger_title" msgid="938685362320735167">"USB арқылы зарядтау мүмкін емес"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"Құрылғымен бірге берілген зарядтау құралын пайдаланыңыз"</string>
     <string name="battery_low_why" msgid="2056750982959359863">"Параметрлер"</string>
-    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Battery Saver функциясы қосылсын ба?"</string>
+    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Battery Saver функциясын қосу керек пе?"</string>
     <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"Battery Saver туралы ақпарат"</string>
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"Қосу"</string>
     <string name="battery_saver_start_action" msgid="4553256017945469937">"Battery saver функциясын қосу"</string>
@@ -87,7 +87,8 @@
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"Жадтағы шектеулі бос орынға байланысты скриншот сақталмайды"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Қолданба немесе ұйым скриншоттар түсіруге рұқсат етпейді"</string>
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"Скриншотты жабу"</string>
-    <string name="screenshot_preview_description" msgid="669177537416980449">"Скриншотты ашу"</string>
+    <!-- no translation found for screenshot_preview_description (7606510140714080474) -->
+    <skip />
     <string name="screenrecord_name" msgid="2596401223859996572">"Экран жазғыш"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Экранды бейнеге жазудың ағымдағы хабарландыруы"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Жазу басталсын ба?"</string>
@@ -707,9 +708,9 @@
     <string name="notification_bubble_title" msgid="8330481035191903164">"Көпіршік"</string>
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"Хабарландырулар келгенде, дыбыс шықпайды не дірілдемейді"</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"Хабарландырулар келгенде, дыбыс шығады не дірілдейді"</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="6298026344552480458">"Хабарландырулар келгенде, дыбыс шығады не дірілдейді <xliff:g id="APP_NAME">%1$s</xliff:g> чаттары әдепкісінше қалқымалы етіп көрсетіледі."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Осы мазмұнға бекітілген қалқымалы таңбашамен назарыңызды өзіне тартады."</string>
     <string name="notification_channel_summary_priority" msgid="7415770044553264622">"Сөйлесу бөлімінің жоғарғы жағында және қалқыма хабар түрінде көрсетіледі."</string>
-    <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"Барлық <xliff:g id="APP_NAME_0">%1$s</xliff:g> әңгімесінің қалқыма хабарлары әдепкісінше көрсетіледі. <xliff:g id="APP_NAME_1">%2$s</xliff:g> арқылы басқарыңыз."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Параметрлер"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Маңыздылығы"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Жақындағы қалқыма хабарлар жоқ"</string>
@@ -903,7 +904,7 @@
     <string name="pip_phone_expand" msgid="1424988917240616212">"Жаю"</string>
     <string name="pip_phone_minimize" msgid="9057117033655996059">"Кішірейту"</string>
     <string name="pip_phone_close" msgid="8801864042095341824">"Жабу"</string>
-    <string name="pip_phone_settings" msgid="5687538631925004341">"Реттеулер"</string>
+    <string name="pip_phone_settings" msgid="5687538631925004341">"Параметрлер"</string>
     <string name="pip_phone_dismiss_hint" msgid="5825740708095316710">"Жабу үшін төмен қарай сүйреңіз"</string>
     <string name="pip_menu_title" msgid="6365909306215631910">"Mәзір"</string>
     <string name="pip_notification_title" msgid="8661573026059630525">"<xliff:g id="NAME">%s</xliff:g> \"суреттегі сурет\" режимінде"</string>
@@ -1002,6 +1003,16 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Жүйе навигациясы жаңартылды. Өзгерту енгізу үшін \"Параметрлер\" бөліміне өтіңіз."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Жүйе навигациясын жаңарту үшін \"Параметрлер\" бөліміне өтіңіз."</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Күту режимі"</string>
+    <!-- no translation found for priority_onboarding_show_at_top_text (1678400241025513541) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_show_avatar_text (5756291381124091508) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_appear_as_bubble_text (4227039772250263122) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_ignores_dnd_text (2918952762719600529) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_done_button_title (4569550984286506007) -->
+    <skip />
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Ұлғайту терезесін қабаттастыру"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Ұлғайту терезесі"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Ұлғайту терезесінің басқару элементтері"</string>
@@ -1016,10 +1027,8 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Басқару элементтері"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"\"Қуат\" мәзірінен пайдалануға болатын басқару элементтерін таңдаңыз."</string>
-    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
-    <skip />
-    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
-    <skip />
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Басқару элементтерінің ретін өзгерту үшін оларды басып тұрып сүйреңіз."</string>
+    <string name="controls_favorite_removed" msgid="5276978408529217272">"Барлық басқару элементтері өшірілді."</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Барлық басқару элементі тізімі жүктелмеді."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Басқа"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Құрылғыны басқару элементтеріне қосу"</string>

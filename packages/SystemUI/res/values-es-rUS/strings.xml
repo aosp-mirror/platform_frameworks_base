@@ -33,7 +33,7 @@
     <string name="invalid_charger_title" msgid="938685362320735167">"No se puede cargar mediante USB"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"Usa el cargador que se incluyó con el dispositivo"</string>
     <string name="battery_low_why" msgid="2056750982959359863">"Configuración"</string>
-    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"¿Activar el Ahorro de batería?"</string>
+    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"¿Deseas activar Ahorro de batería?"</string>
     <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"Acerca del Ahorro de batería"</string>
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"Activar"</string>
     <string name="battery_saver_start_action" msgid="4553256017945469937">"Activar el Ahorro de batería"</string>
@@ -87,7 +87,7 @@
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"No se puede guardar la captura de pantalla debido a que no hay suficiente espacio de almacenamiento"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"La app o tu organización no permiten las capturas de pantalla"</string>
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"Descartar captura de pantalla"</string>
-    <string name="screenshot_preview_description" msgid="669177537416980449">"Abrir captura de pantalla"</string>
+    <string name="screenshot_preview_description" msgid="7606510140714080474">"Vista previa de la captura de pantalla"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Grabadora de pantalla"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Notificación constante para una sesión de grabación de pantalla"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"¿Comenzar grabación?"</string>
@@ -384,7 +384,7 @@
     <string name="quick_settings_cast_device_default_name" msgid="6988469571141331700">"Dispositivo sin nombre"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2580520859212250265">"Listo para transmitir"</string>
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"No hay dispositivos disponibles"</string>
-    <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"La red Wi-Fi no está conectada"</string>
+    <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Red Wi-Fi no conectada"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Brillo"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="2325362583903258677">"AUTOMÁTICO"</string>
     <string name="quick_settings_inversion_label" msgid="5078769633069667698">"Invertir colores"</string>
@@ -397,7 +397,7 @@
     <string name="quick_settings_tethering_label" msgid="5257299852322475780">"Compartir conexión"</string>
     <string name="quick_settings_hotspot_label" msgid="1199196300038363424">"Hotspot"</string>
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"Activando…"</string>
-    <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"Ahorro de datos sí"</string>
+    <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"Ahorro de datos act."</string>
     <plurals name="quick_settings_hotspot_secondary_label_num_devices" formatted="false" msgid="3142308865165871976">
       <item quantity="other">%d dispositivos</item>
       <item quantity="one">%d dispositivo</item>
@@ -707,9 +707,9 @@
     <string name="notification_bubble_title" msgid="8330481035191903164">"Cuadro"</string>
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"Te ayuda a concentrarte sin sonar ni vibrar."</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"Capta tu atención con sonido o vibración."</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="6298026344552480458">"Capta tu atención con sonido o vibración. Conversaciones de la burbuja de <xliff:g id="APP_NAME">%1$s</xliff:g> de forma predeterminada."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Retiene tu atención con un acceso directo flotante a este contenido."</string>
     <string name="notification_channel_summary_priority" msgid="7415770044553264622">"Aparece como una burbuja en la parte superior de la sección de la conversación."</string>
-    <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"Todas las conversaciones de <xliff:g id="APP_NAME_0">%1$s</xliff:g> se muestran como burbujas de forma predeterminada. Administra esta opción en <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Configuración"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioridad"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"No hay burbujas recientes"</string>
@@ -962,7 +962,7 @@
     <string name="running_foreground_services_title" msgid="5137313173431186685">"Apps que se ejecutan en segundo plano"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"Presiona para obtener información sobre el uso de datos y de la batería"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"¿Deseas desactivar los datos móviles?"</string>
-    <string name="mobile_data_disable_message" msgid="8604966027899770415">"No tendrás acceso a datos ni Internet de <xliff:g id="CARRIER">%s</xliff:g>. Internet solo estará disponible mediante Wi-Fi."</string>
+    <string name="mobile_data_disable_message" msgid="8604966027899770415">"No tendrás acceso a datos móviles ni a Internet a través de <xliff:g id="CARRIER">%s</xliff:g>. Solo podrás conectarte a Internet mediante Wi‑Fi."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"tu proveedor"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"Como una app está bloqueando una solicitud de permiso, Configuración no puede verificar tu respuesta."</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"¿Permitir que <xliff:g id="APP_0">%1$s</xliff:g> muestre fragmentos de <xliff:g id="APP_2">%2$s</xliff:g>?"</string>
@@ -1002,6 +1002,16 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Se actualizó el sistema de navegación. Para hacer cambios, ve a Configuración."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Ve a Configuración para actualizar la navegación del sistema"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"En espera"</string>
+    <!-- no translation found for priority_onboarding_show_at_top_text (1678400241025513541) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_show_avatar_text (5756291381124091508) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_appear_as_bubble_text (4227039772250263122) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_ignores_dnd_text (2918952762719600529) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_done_button_title (4569550984286506007) -->
+    <skip />
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Ventana superpuesta de ampliación"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Ventana de ampliación"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Controles de ampliación de la ventana"</string>
@@ -1016,10 +1026,8 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Controles"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Elige los controles a los que quieres acceder desde el menú de encendido"</string>
-    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
-    <skip />
-    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
-    <skip />
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Mantén presionado y arrastra para reorganizar los controles"</string>
+    <string name="controls_favorite_removed" msgid="5276978408529217272">"Se quitaron todos los controles"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"No se cargó la lista completa de controles."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Otros"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Agregar a controles del dispositivo"</string>

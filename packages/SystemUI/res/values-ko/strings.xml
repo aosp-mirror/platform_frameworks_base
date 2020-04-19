@@ -87,7 +87,7 @@
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"저장용량이 부족하여 스크린샷을 저장할 수 없습니다"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"앱이나 조직에서 스크린샷 촬영을 허용하지 않습니다."</string>
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"스크린샷 닫기"</string>
-    <string name="screenshot_preview_description" msgid="669177537416980449">"스크린샷 열기"</string>
+    <string name="screenshot_preview_description" msgid="7606510140714080474">"스크린샷 미리보기"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"화면 녹화"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"화면 녹화 세션에 관한 지속적인 알림"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"녹화를 시작하시겠습니까?"</string>
@@ -384,7 +384,7 @@
     <string name="quick_settings_cast_device_default_name" msgid="6988469571141331700">"이름이 없는 기기"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2580520859212250265">"전송 준비 완료"</string>
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"사용 가능한 기기가 없습니다."</string>
-    <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Wi-Fi가 연결되어 있지 않음"</string>
+    <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Wi-Fi가 연결되지 않음"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"밝기"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="2325362583903258677">"자동"</string>
     <string name="quick_settings_inversion_label" msgid="5078769633069667698">"색상 반전"</string>
@@ -417,12 +417,12 @@
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"일몰에"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"일출까지"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"<xliff:g id="TIME">%s</xliff:g>에"</string>
-    <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"<xliff:g id="TIME">%s</xliff:g>까지"</string>
+    <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"<xliff:g id="TIME">%s</xliff:g>에 꺼짐"</string>
     <string name="quick_settings_ui_mode_night_label" msgid="1398928270610780470">"어두운 테마"</string>
     <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"절전 모드"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at_sunset" msgid="6017379738102015710">"일몰에"</string>
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"일출까지"</string>
-    <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"<xliff:g id="TIME">%s</xliff:g>에"</string>
+    <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"<xliff:g id="TIME">%s</xliff:g>에 켜짐"</string>
     <string name="quick_settings_dark_mode_secondary_label_until" msgid="2289774641256492437">"<xliff:g id="TIME">%s</xliff:g>까지"</string>
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC 사용 중지됨"</string>
@@ -707,9 +707,9 @@
     <string name="notification_bubble_title" msgid="8330481035191903164">"버블"</string>
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"소리나 진동 없이 집중할 수 있도록 도와줍니다"</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"소리나 진동으로 알립니다."</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="6298026344552480458">"소리나 진동으로 알립니다. 기본적으로 <xliff:g id="APP_NAME">%1$s</xliff:g>의 대화는 대화창으로 표시됩니다."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"이 콘텐츠로 연결되는 플로팅 바로가기로 사용자의 주의를 끕니다."</string>
     <string name="notification_channel_summary_priority" msgid="7415770044553264622">"대화 섹션 상단에 대화창으로 표시"</string>
-    <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"기본적으로 <xliff:g id="APP_NAME_0">%1$s</xliff:g>의 모든 대화가 대화창으로 표시됩니다. <xliff:g id="APP_NAME_1">%2$s</xliff:g>에서 관리하세요."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"설정"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"우선순위"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"최근에 닫은 대화창 없음"</string>
@@ -1002,6 +1002,16 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"시스템 탐색이 업데이트되었습니다. 변경하려면 설정으로 이동하세요."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"설정으로 이동하여 시스템 탐색을 업데이트하세요."</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"대기"</string>
+    <!-- no translation found for priority_onboarding_show_at_top_text (1678400241025513541) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_show_avatar_text (5756291381124091508) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_appear_as_bubble_text (4227039772250263122) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_ignores_dnd_text (2918952762719600529) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_done_button_title (4569550984286506007) -->
+    <skip />
     <string name="magnification_overlay_title" msgid="6584179429612427958">"확대 오버레이 창"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"확대 창"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"확대 창 컨트롤"</string>
@@ -1016,10 +1026,8 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"제어"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"전원 메뉴에서 액세스할 컨트롤을 선택합니다."</string>
-    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
-    <skip />
-    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
-    <skip />
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"길게 누르고 드래그하여 컨트롤 재정렬"</string>
+    <string name="controls_favorite_removed" msgid="5276978408529217272">"모든 컨트롤 삭제됨"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"전체 컨트롤 목록을 로드할 수 없습니다."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"기타"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"기기 컨트롤에 추가"</string>

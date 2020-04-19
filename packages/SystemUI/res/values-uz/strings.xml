@@ -87,7 +87,7 @@
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"Xotirada joy kamligi uchun skrinshot saqlanmadi"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Ilova yoki tashkilotingiz skrinshot olishni taqiqlagan"</string>
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"Skrinshotni yopish"</string>
-    <string name="screenshot_preview_description" msgid="669177537416980449">"Skrinshotni ochish"</string>
+    <string name="screenshot_preview_description" msgid="7606510140714080474">"Skrinshotga razm solish"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Ekrandan yozib olish"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Ekrandan yozib olish seansi uchun joriy bildirishnoma"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Yozib olish boshlansinmi?"</string>
@@ -582,7 +582,7 @@
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"Tovush sozlamalari"</string>
     <string name="accessibility_volume_expand" msgid="7653070939304433603">"Yoyish"</string>
     <string name="accessibility_volume_collapse" msgid="2746845391013829996">"Yig‘ish"</string>
-    <string name="volume_odi_captions_tip" msgid="8825655463280990941">"Avtomatik taglavha mediasi"</string>
+    <string name="volume_odi_captions_tip" msgid="8825655463280990941">"Avtomatik taglavha yaratish"</string>
     <string name="accessibility_volume_close_odi_captions_tip" msgid="8924753283621160480">"Taglavhalar maslahatini yopish"</string>
     <string name="volume_odi_captions_content_description" msgid="4172765742046013630">"Taglavhalarni chiqarish"</string>
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"faollashtirish"</string>
@@ -707,9 +707,9 @@
     <string name="notification_bubble_title" msgid="8330481035191903164">"Pufaklar"</string>
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"Bildirishnomalar tovush va tebranishsiz keladi."</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"Bildirishnomalar tovush va tebranish bilan keladi."</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="6298026344552480458">"Bildirishnomalar tovush va tebranish bilan keladi. <xliff:g id="APP_NAME">%1$s</xliff:g> suhbatlari standart holatda pufaklar shaklida chiqadi."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Bu kontentni ochuvchi erkin yorliq diqqatingizda boʻladi."</string>
     <string name="notification_channel_summary_priority" msgid="7415770044553264622">"Suhbatlar boʻlimining yuqori qismida bulutcha shaklida chiqadi."</string>
-    <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"Barcha <xliff:g id="APP_NAME_0">%1$s</xliff:g> xabarlari bulutcha shaklida chiqadi. Sozlamalarni <xliff:g id="APP_NAME_1">%2$s</xliff:g> orqali oʻzgartirish mumkin."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Sozlamalar"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Muhimligi"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Avvalgi bulutchalar topilmadi"</string>
@@ -1002,6 +1002,16 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Tizim navigatsiyasi yangilandi. Buni Sozlamalar orqali oʻzgartirishingiz mumkin."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Tizim navigatsiyasini yangilash uchun Sozlamalarni oching"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Kutib turing"</string>
+    <!-- no translation found for priority_onboarding_show_at_top_text (1678400241025513541) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_show_avatar_text (5756291381124091508) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_appear_as_bubble_text (4227039772250263122) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_ignores_dnd_text (2918952762719600529) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_done_button_title (4569550984286506007) -->
+    <skip />
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Kattalashtirish oynasining ustidan ochilishi"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Kattalashtirish oynasi"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Kattalashtirish oynasi sozlamalari"</string>

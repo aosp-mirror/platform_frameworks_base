@@ -1327,7 +1327,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"JAA"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"HYLKÄÄ"</string>
     <string name="select_input_method" msgid="3971267998568587025">"Valitse syöttötapa"</string>
-    <string name="show_ime" msgid="6406112007347443383">"Pidä näytöllä, kun fyysinen näppäimistö on aktiivinen."</string>
+    <string name="show_ime" msgid="6406112007347443383">"Pidä näytöllä, kun fyysinen näppäimistö on aktiivinen"</string>
     <string name="hardware" msgid="1800597768237606953">"Näytä virtuaalinen näppäimistö"</string>
     <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"Määritä fyysinen näppäimistö"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Valitse kieli ja asettelu koskettamalla."</string>
@@ -1457,6 +1457,12 @@
     <string name="gpsNotifMessage" msgid="7346649122793758032">"Pyytänyt <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
     <string name="gpsVerifYes" msgid="3719843080744112940">"Kyllä"</string>
     <string name="gpsVerifNo" msgid="1671201856091564741">"Ei"</string>
+    <!-- no translation found for gnss_nfw_notification_title (5004493772059563423) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_oem (3683958907027107969) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_carrier (815888995791562151) -->
+    <skip />
     <string name="sync_too_many_deletes" msgid="6999440774578705300">"Poistoraja ylittynyt"</string>
     <string name="sync_too_many_deletes_desc" msgid="7409327940303504440">"Tilin <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g> synkronointityypissä <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g> on <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> poistettua kohdetta. Mitä tehdään?"</string>
     <string name="sync_really_delete" msgid="5657871730315579051">"Poista kohteet"</string>
@@ -1909,7 +1915,7 @@
     <string name="conference_call" msgid="5731633152336490471">"Puhelinneuvottelu"</string>
     <string name="tooltip_popup_title" msgid="7863719020269945722">"Työkaluvinkki"</string>
     <string name="app_category_game" msgid="4534216074910244790">"Pelit"</string>
-    <string name="app_category_audio" msgid="8296029904794676222">"Musiikki ja audio"</string>
+    <string name="app_category_audio" msgid="8296029904794676222">"Musiikki ja ääni"</string>
     <string name="app_category_video" msgid="2590183854839565814">"Elokuvat ja videot"</string>
     <string name="app_category_image" msgid="7307840291864213007">"Kuvat ja valokuvat"</string>
     <string name="app_category_social" msgid="2278269325488344054">"Some ja viestintä"</string>

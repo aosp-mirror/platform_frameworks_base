@@ -87,7 +87,7 @@
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"বেশি জায়গা নেই তাই স্ক্রিনশটটি সেভ করা যাবে না৷"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"এই অ্যাপ বা আপনার প্রতিষ্ঠান স্ক্রিনশট নেওয়ার অনুমতি দেয়নি"</string>
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"স্ক্রিনশট বাতিল করুন"</string>
-    <string name="screenshot_preview_description" msgid="669177537416980449">"স্ক্রিনশট খুলুন"</string>
+    <string name="screenshot_preview_description" msgid="7606510140714080474">"স্ক্রিনশটের প্রিভিউ"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"স্ক্রিন রেকর্ডার"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"স্ক্রিন রেকর্ডিং সেশন চলার বিজ্ঞপ্তি"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"রেকর্ডিং শুরু করবেন?"</string>
@@ -707,9 +707,10 @@
     <string name="notification_bubble_title" msgid="8330481035191903164">"বাবল"</string>
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"সাউন্ড বা ভাইব্রেশন ছাড়া ফোকাস করতে আপনাকে সাহায্য করে।"</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"সাউন্ড বা ভাইব্রেশনের সাহায্যে দৃষ্টি আকর্ষণ করে।"</string>
+    <!-- no translation found for notification_channel_summary_default_with_bubbles (6298026344552480458) -->
+    <skip />
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"ফ্লোটিং শর্টকাট ব্যবহার করে এই কন্টেন্টে আপনার দৃষ্টি আকর্ষণ করে রাখে।"</string>
     <string name="notification_channel_summary_priority" msgid="7415770044553264622">"কথোপকথন বিভাগের উপরে বাবল হিসেবে দেখা যায়।"</string>
-    <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"ডিফল্ট হিসেবে <xliff:g id="APP_NAME_0">%1$s</xliff:g>-এর সব কথোপকথন বাবলের মধ্যে দেখুন। <xliff:g id="APP_NAME_1">%2$s</xliff:g>-এ ম্যানেজ করুন।"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"সেটিংস"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"অগ্রাধিকার"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"কোনও সাম্প্রতিক বাবল নেই"</string>
@@ -1002,6 +1003,16 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"সিস্টেম নেভিগেশন আপডেট হয়েছে। পরিবর্তন করার জন্য সেটিংসে যান।"</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"সিস্টেম নেভিগেশন আপডেট করতে সেটিংসে যান"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"স্ট্যান্ডবাই"</string>
+    <!-- no translation found for priority_onboarding_show_at_top_text (1678400241025513541) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_show_avatar_text (5756291381124091508) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_appear_as_bubble_text (4227039772250263122) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_ignores_dnd_text (2918952762719600529) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_done_button_title (4569550984286506007) -->
+    <skip />
     <string name="magnification_overlay_title" msgid="6584179429612427958">"ওভারলে উইন্ডো বড় করে দেখা"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"উইন্ডো বড় করে দেখা"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"উইন্ডো কন্ট্রোল বড় করে দেখা"</string>
@@ -1016,10 +1027,8 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"নিয়ন্ত্রণ"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"যেসব কন্ট্রোল অ্যাক্সেস করতে চান সেগুলি পাওয়ার মেনু থেকে বেছে নিন"</string>
-    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
-    <skip />
-    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
-    <skip />
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"কন্ট্রোলগুলিকে আবার সাজানোর জন্য ধরে রেখে টেনে আনুন"</string>
+    <string name="controls_favorite_removed" msgid="5276978408529217272">"সমস্ত কন্ট্রোল সরানো হয়েছে"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"সব কন্ট্রোলের তালিকা লোড করা যায়নি।"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"অন্য"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"ডিভাইস কন্ট্রোলে যোগ করুন"</string>

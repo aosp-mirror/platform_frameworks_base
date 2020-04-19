@@ -538,7 +538,7 @@
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"صارف کو ابھی سیٹ اپ کریں؟"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"یقینی بنائیں کہ وہ شخص آلہ لینے اور اپنی جگہ کو سیٹ اپ کرنے کیلئے دستیاب ہے"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"پروفائل کو ابھی ترتیب دیں؟"</string>
-    <string name="user_setup_button_setup_now" msgid="1708269547187760639">"ابھی ترتیب دیں"</string>
+    <string name="user_setup_button_setup_now" msgid="1708269547187760639">"ابھی سیٹ اپ کریں"</string>
     <string name="user_setup_button_setup_later" msgid="8712980133555493516">"ابھی نہیں"</string>
     <string name="user_add_user_type_title" msgid="551279664052914497">"شامل کریں"</string>
     <string name="user_new_user_name" msgid="60979820612818840">"نیا صارف"</string>

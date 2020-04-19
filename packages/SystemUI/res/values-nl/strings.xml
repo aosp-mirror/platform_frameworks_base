@@ -33,7 +33,7 @@
     <string name="invalid_charger_title" msgid="938685362320735167">"Kan niet opladen via USB"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"Gebruik de oplader die bij je apparaat is geleverd"</string>
     <string name="battery_low_why" msgid="2056750982959359863">"Instellingen"</string>
-    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Batterijbesparing inschakelen?"</string>
+    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Batterijbesparing aanzetten?"</string>
     <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"Over Batterijbesparing"</string>
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"Inschakelen"</string>
     <string name="battery_saver_start_action" msgid="4553256017945469937">"Batterijbesparing inschakelen"</string>
@@ -87,7 +87,7 @@
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"Kan screenshot niet opslaan vanwege beperkte opslagruimte"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Het maken van screenshots wordt niet toegestaan door de app of je organisatie"</string>
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"Screenshot sluiten"</string>
-    <string name="screenshot_preview_description" msgid="669177537416980449">"Screenshot openen"</string>
+    <string name="screenshot_preview_description" msgid="7606510140714080474">"Voorbeeld van screenshot"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Schermopname"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Doorlopende melding voor een schermopname-sessie"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Opname starten?"</string>
@@ -707,9 +707,9 @@
     <string name="notification_bubble_title" msgid="8330481035191903164">"Bubbel"</string>
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"Helpt je focussen zonder geluid of trilling."</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"Trekt je aandacht met geluid of trillingen."</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="6298026344552480458">"Trekt je aandacht met geluid of trillingen. Gesprekken uit <xliff:g id="APP_NAME">%1$s</xliff:g> worden standaard als bubbels weergegeven."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Trekt de aandacht met een zwevende snelkoppeling naar deze content."</string>
     <string name="notification_channel_summary_priority" msgid="7415770044553264622">"Wordt bovenaan het gedeelte met gesprekken weergegeven en als een bubbel."</string>
-    <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"Alle gesprekken uit <xliff:g id="APP_NAME_0">%1$s</xliff:g> worden standaard als bubbels weergegeven. Beheer dit in <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Instellingen"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioriteit"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Geen recente bubbels"</string>
@@ -961,8 +961,8 @@
     <string name="qs_dnd_replace" msgid="7712119051407052689">"Vervangen"</string>
     <string name="running_foreground_services_title" msgid="5137313173431186685">"Apps uitgevoerd op achtergrond"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"Tik voor batterij- en datagebruik"</string>
-    <string name="mobile_data_disable_title" msgid="5366476131671617790">"Mobiele data uitschakelen?"</string>
-    <string name="mobile_data_disable_message" msgid="8604966027899770415">"Je hebt geen toegang tot data of internet via <xliff:g id="CARRIER">%s</xliff:g>. Internet is alleen beschikbaar via wifi."</string>
+    <string name="mobile_data_disable_title" msgid="5366476131671617790">"Mobiele data uitzetten?"</string>
+    <string name="mobile_data_disable_message" msgid="8604966027899770415">"Je hebt dan geen toegang meer tot data of internet via <xliff:g id="CARRIER">%s</xliff:g>. Internet is alleen nog beschikbaar via wifi."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"je provider"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"Aangezien een app een toestemmingsverzoek afdekt, kan Instellingen je reactie niet verifiëren."</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"<xliff:g id="APP_0">%1$s</xliff:g> toestaan om segmenten van <xliff:g id="APP_2">%2$s</xliff:g> weer te geven?"</string>
@@ -1002,6 +1002,16 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Systeemnavigatie geüpdatet. Als je wijzigingen wilt aanbrengen, ga je naar Instellingen."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Ga naar Instellingen om de systeemnavigatie te updaten"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Stand-by"</string>
+    <!-- no translation found for priority_onboarding_show_at_top_text (1678400241025513541) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_show_avatar_text (5756291381124091508) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_appear_as_bubble_text (4227039772250263122) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_ignores_dnd_text (2918952762719600529) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_done_button_title (4569550984286506007) -->
+    <skip />
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Overlay voor vergrotingsvenster"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Vergrotingsvenster"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Bediening van vergrotingsvenster"</string>
@@ -1016,10 +1026,8 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Bedieningselementen"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Kies bedieningselementen die je vanaf het menu Voeding wilt kunnen gebruiken"</string>
-    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
-    <skip />
-    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
-    <skip />
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Houd vast en sleep om de bedieningselementen opnieuw in te delen"</string>
+    <string name="controls_favorite_removed" msgid="5276978408529217272">"Alle bedieningselementen verwijderd"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Kan lijst met alle bedieningselementen niet laden."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Overig"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Toevoegen aan apparaatopties"</string>

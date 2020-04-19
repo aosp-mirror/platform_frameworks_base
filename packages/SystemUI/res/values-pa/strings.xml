@@ -39,7 +39,7 @@
     <string name="battery_saver_start_action" msgid="4553256017945469937">"ਬੈਟਰੀ ਸੇਵਰ ਚਾਲੂ ਕਰੋ"</string>
     <string name="status_bar_settings_settings_button" msgid="534331565185171556">"ਸੈਟਿੰਗਾਂ"</string>
     <string name="status_bar_settings_wifi_button" msgid="7243072479837270946">"ਵਾਈ-ਫਾਈ"</string>
-    <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"ਸਕ੍ਰੀਨ ਆਪਣੇ-ਆਪ ਘੁੰਮਾਓ"</string>
+    <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"ਸਕ੍ਰੀਨ ਸਵੈ-ਘੁਮਾਓ"</string>
     <string name="status_bar_settings_mute_label" msgid="914392730086057522">"ਮਿਊਟ ਕਰੋ"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="2151934479226017725">"ਆਟੋ"</string>
     <string name="status_bar_settings_notifications" msgid="5285316949980621438">"ਸੂਚਨਾਵਾਂ"</string>
@@ -87,7 +87,7 @@
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"ਸੀਮਿਤ ਸਟੋਰੇਜ ਹੋਣ ਕਾਰਨ ਸਕ੍ਰੀਨਸ਼ਾਟ ਰੱਖਿਅਤ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਦਾ"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"ਐਪ ਜਾਂ ਤੁਹਾਡੀ ਸੰਸਥਾ ਵੱਲੋਂ ਸਕ੍ਰੀਨਸ਼ਾਟ ਲੈਣ ਦੀ ਇਜਾਜ਼ਤ ਨਹੀਂ ਦਿੱਤੀ ਗਈ ਹੈ"</string>
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"ਸਕ੍ਰੀਨਸ਼ਾਟ ਖਾਰਜ ਕਰੋ"</string>
-    <string name="screenshot_preview_description" msgid="669177537416980449">"ਸਕ੍ਰੀਨਸ਼ਾਟ ਖੋਲ੍ਹੋ"</string>
+    <string name="screenshot_preview_description" msgid="7606510140714080474">"ਸਕ੍ਰੀਨਸ਼ਾਟ ਪੂਰਵ-ਝਲਕ"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"ਸਕ੍ਰੀਨ ਰਿਕਾਰਡਰ"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"ਕਿਸੇ ਸਕ੍ਰੀਨ ਰਿਕਾਰਡ ਸੈਸ਼ਨ ਲਈ ਚੱਲ ਰਹੀ ਸੂਚਨਾ"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"ਕੀ ਰਿਕਾਰਡਿੰਗ ਸ਼ੁਰੂ ਕਰਨੀ ਹੈ?"</string>
@@ -707,9 +707,10 @@
     <string name="notification_bubble_title" msgid="8330481035191903164">"ਬੁਲਬੁਲਾ"</string>
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"ਤੁਹਾਨੂੰ ਬਿਨਾਂ ਧੁਨੀ ਅਤੇ ਥਰਥਰਾਹਟ ਦੇ ਫੋਕਸ ਕਰਨ ਵਿੱਚ ਮਦਦ ਕਰਦਾ ਹੈ।"</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"ਧੁਨੀ ਅਤੇ ਥਰਥਰਾਹਟ ਨਾਲ ਤੁਹਾਡਾ ਧਿਆਨ ਖਿੱਚਦੀ ਹੈ।"</string>
+    <!-- no translation found for notification_channel_summary_default_with_bubbles (6298026344552480458) -->
+    <skip />
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"ਇਸ ਸਮੱਗਰੀ ਦੇ ਅਸਥਿਰ ਸ਼ਾਰਟਕੱਟ ਨਾਲ ਆਪਣਾ ਧਿਆਨ ਕੇਂਦਰਿਤ ਰੱਖੋ।"</string>
     <string name="notification_channel_summary_priority" msgid="7415770044553264622">"ਗੱਲਬਾਤ ਸੈਕਸ਼ਨ ਦੇ ਉੱਪਰ ਅਤੇ ਬਬਲ ਦੇ ਤੌਰ \'ਤੇ ਦਿਖਾਉਂਦਾ ਹੈ।"</string>
-    <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> ਵੱਲੋਂ ਸਾਰੀਆਂ ਗੱਲਾਂਬਾਤਾਂ \'ਤੇ ਪੂਰਵ-ਨਿਰਧਾਰਤ ਤੌਰ \'ਤੇ ਬਬਲ ਲਾਏ ਜਾਂਦੇ ਹਨ। <xliff:g id="APP_NAME_1">%2$s</xliff:g> ਵਿੱਚ ਪ੍ਰਬੰਧਨ ਕਰੋ।"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"ਸੈਟਿੰਗਾਂ"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"ਤਰਜੀਹ"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"ਕੋਈ ਹਾਲੀਆ ਬਬਲ ਨਹੀਂ"</string>
@@ -1002,6 +1003,16 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"ਸਿਸਟਮ ਨੈਵੀਗੇਸ਼ਨ ਅੱਪਡੇਟ ਹੋ ਗਿਆ। ਤਬਦੀਲੀਆਂ ਕਰਨ ਲਈ, ਸੈਟਿੰਗਾਂ \'ਤੇ ਜਾਓ।"</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"ਸਿਸਟਮ ਨੈਵੀਗੇਸ਼ਨ ਨੂੰ ਅੱਪਡੇਟ ਕਰਨ ਲਈ ਸੈਟਿੰਗਾਂ \'ਤੇ ਜਾਓ"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"ਸਟੈਂਡਬਾਈ"</string>
+    <!-- no translation found for priority_onboarding_show_at_top_text (1678400241025513541) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_show_avatar_text (5756291381124091508) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_appear_as_bubble_text (4227039772250263122) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_ignores_dnd_text (2918952762719600529) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_done_button_title (4569550984286506007) -->
+    <skip />
     <string name="magnification_overlay_title" msgid="6584179429612427958">"ਵੱਡਦਰਸ਼ੀਕਰਨ ਓਵਰਲੇ Window"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"ਵੱਡਦਰਸ਼ੀਕਰਨ Window"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"ਵੱਡਦਰਸ਼ੀਕਰਨ Window ਦੇ ਕੰਟਰੋਲ"</string>
@@ -1016,10 +1027,8 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"ਕੰਟਰੋਲ"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"ਪਹੁੰਚ ਕਰਨ ਲਈ ਪਾਵਰ ਮੀਨੂ ਤੋਂ ਕੰਟਰੋਲ ਚੁਣੋ"</string>
-    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
-    <skip />
-    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
-    <skip />
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"ਕੰਟਰੋਲਾਂ ਨੂੰ ਮੁੜ-ਵਿਵਸਥਿਤ ਕਰਨ ਲਈ ਫੜ੍ਹ ਕੇ ਘਸੀਟੋ"</string>
+    <string name="controls_favorite_removed" msgid="5276978408529217272">"ਸਾਰੇ ਕੰਟਰੋਲ ਹਟਾਏ ਗਏ"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"ਸਾਰੇ ਕੰਟਰੋਲਾਂ ਦੀ ਸੂਚੀ ਨੂੰ ਲੋਡ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਿਆ।"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"ਹੋਰ"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"ਡੀਵਾਈਸ ਕੰਟਰੋਲਾਂ ਵਿੱਚ ਸ਼ਾਮਲ ਕਰੋ"</string>

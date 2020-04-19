@@ -421,7 +421,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"紅色弱視 (紅綠)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"藍色弱視 (藍黃)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"色彩校正"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"你可以用色彩校正調整裝置顯示嘅顏色"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"色彩校正功能讓您調整裝置顯示的顏色"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"已由「<xliff:g id="TITLE">%1$s</xliff:g>」覆寫"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"還有大約 <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
@@ -533,17 +533,17 @@
     <string name="user_add_user_item_title" msgid="2394272381086965029">"使用者"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"限制存取的個人檔案"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"新增使用者？"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"您可以建立其他使用者，與他人共用這部裝置。每位使用者都有專屬的空間，並可使用應用程式、桌布等項目自訂個人空間。此外，使用者也可以調整會影響所有人的裝置設定，例如 Wi‑Fi 設定。\n\n新增的使用者需要自行設定個人空間。\n\n任何使用者都可以為所有其他使用者更新應用程式。無障礙功能設定和服務可能無法轉移至新的使用者。"</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"您可以建立其他使用者，與他人共用這部裝置。每位使用者都有屬於自己的空間，並可以自訂應用程式、桌布等等。此外，使用者也可以調整會影響所有人的裝置設定，例如 Wi‑Fi 設定。\n\n新加入的使用者需要自行設定個人空間。\n\n任何使用者都可以為所有其他使用者更新應用程式。無障礙功能設定和服務則未必適用於新的使用者。"</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"新增的使用者需要自行設定個人空間。\n\n任何使用者都可以為其他所有使用者更新應用程式。"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"立即設定使用者？"</string>
-    <string name="user_setup_dialog_message" msgid="269931619868102841">"請確定對方現在可以使用裝置設定自己的空間"</string>
+    <string name="user_setup_dialog_message" msgid="269931619868102841">"請確保對方現在可以在裝置上設定自己的空間"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"立即設定個人檔案？"</string>
     <string name="user_setup_button_setup_now" msgid="1708269547187760639">"立即設定"</string>
     <string name="user_setup_button_setup_later" msgid="8712980133555493516">"暫時不要"</string>
     <string name="user_add_user_type_title" msgid="551279664052914497">"新增"</string>
     <string name="user_new_user_name" msgid="60979820612818840">"新使用者"</string>
     <string name="user_new_profile_name" msgid="2405500423304678841">"新個人檔案"</string>
-    <string name="user_info_settings_title" msgid="6351390762733279907">"使用者資訊"</string>
+    <string name="user_info_settings_title" msgid="6351390762733279907">"使用者資料"</string>
     <string name="profile_info_settings_title" msgid="105699672534365099">"個人檔案資料"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"建立限制存取的個人檔案前，您必須先設定上鎖畫面來保護您的應用程式和個人資料。"</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"設定上鎖畫面"</string>

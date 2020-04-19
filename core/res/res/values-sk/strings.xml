@@ -242,11 +242,11 @@
     <string name="global_action_lock" msgid="6949357274257655383">"Zámka obrazovky"</string>
     <string name="global_action_power_off" msgid="4404936470711393203">"Vypnúť"</string>
     <string name="global_action_power_options" msgid="1185286119330160073">"Vypnutie"</string>
-    <string name="global_action_restart" msgid="4678451019561687074">"Reštart"</string>
-    <string name="global_action_emergency" msgid="1387617624177105088">"Tieseň"</string>
+    <string name="global_action_restart" msgid="4678451019561687074">"Reštartovať"</string>
+    <string name="global_action_emergency" msgid="1387617624177105088">"Tiesňový režim"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"Hlásenie o chybách"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"Ukončiť reláciu"</string>
-    <string name="global_action_screenshot" msgid="2610053466156478564">"Snímka"</string>
+    <string name="global_action_screenshot" msgid="2610053466156478564">"Snímka obrazovky"</string>
     <string name="bugreport_title" msgid="8549990811777373050">"Hlásenie chyby"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"Týmto zhromaždíte informácie o aktuálnom stave zariadenia. Informácie je potom možné odoslať e-mailom, chvíľu však potrvá, kým bude hlásenie chyby pripravené na odoslanie. Prosíme vás preto o trpezlivosť."</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"Interaktívne nahlásenie"</string>
@@ -1499,6 +1499,12 @@
     <string name="gpsNotifMessage" msgid="7346649122793758032">"Žiadosť od používateľa <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
     <string name="gpsVerifYes" msgid="3719843080744112940">"Áno"</string>
     <string name="gpsVerifNo" msgid="1671201856091564741">"Nie"</string>
+    <!-- no translation found for gnss_nfw_notification_title (5004493772059563423) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_oem (3683958907027107969) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_carrier (815888995791562151) -->
+    <skip />
     <string name="sync_too_many_deletes" msgid="6999440774578705300">"Bol prekročený limit odstraňovania"</string>
     <string name="sync_too_many_deletes_desc" msgid="7409327940303504440">"Počet odstránených položiek pre <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g> účet <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g> je: <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g>. Čo chcete robiť?"</string>
     <string name="sync_really_delete" msgid="5657871730315579051">"Odstrániť položky"</string>
@@ -1601,7 +1607,7 @@
     <string name="media_route_button_content_description" msgid="2299223698196869956">"Prenášať"</string>
     <string name="media_route_chooser_title" msgid="6646594924991269208">"Pripojenie k zariadeniu"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"Prenos obrazovky do zariadenia"</string>
-    <string name="media_route_chooser_searching" msgid="6119673534251329535">"Prebieha vyhľadávanie zariadení…"</string>
+    <string name="media_route_chooser_searching" msgid="6119673534251329535">"Vyhľadávajú sa zariadenia…"</string>
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"Nastavenia"</string>
     <string name="media_route_controller_disconnect" msgid="7362617572732576959">"Odpojiť"</string>
     <string name="media_route_status_scanning" msgid="8045156315309594482">"Prebieha vyhľadávanie..."</string>

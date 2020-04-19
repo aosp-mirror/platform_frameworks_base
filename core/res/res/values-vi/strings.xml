@@ -1216,7 +1216,7 @@
     <string name="dump_heap_ready_text" msgid="5849618132123045516">"Bạn hiện có thể chia sẻ tệp báo lỗi của quá trình <xliff:g id="PROC">%1$s</xliff:g>. Lưu ý: tệp báo lỗi này có thể chứa bất kỳ thông tin cá nhân nhạy cảm nào mà quá trình có quyền truy cập, có thể bao gồm cả thông tin bạn vừa nhập."</string>
     <string name="sendText" msgid="493003724401350724">"Chọn một tác vụ cho văn bản"</string>
     <string name="volume_ringtone" msgid="134784084629229029">"Âm lượng chuông"</string>
-    <string name="volume_music" msgid="7727274216734955095">"Âm lượng phương tiện"</string>
+    <string name="volume_music" msgid="7727274216734955095">"Âm lượng nội dung nghe nhìn"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="2614142915948898228">"Đang phát qua Bluetooth"</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="1514829655029062233">"Đã đặt nhạc chuông im lặng"</string>
     <string name="volume_call" msgid="7625321655265747433">"Âm lượng cuộc gọi"</string>
@@ -1227,7 +1227,7 @@
     <string name="volume_icon_description_bluetooth" msgid="7540388479345558400">"Âm lượng bluetooth"</string>
     <string name="volume_icon_description_ringer" msgid="2187800636867423459">"Âm lượng nhạc chuông"</string>
     <string name="volume_icon_description_incall" msgid="4491255105381227919">"Âm lượng cuộc gọi"</string>
-    <string name="volume_icon_description_media" msgid="4997633254078171233">"Âm lượng phương tiện"</string>
+    <string name="volume_icon_description_media" msgid="4997633254078171233">"Âm lượng nội dung nghe nhìn"</string>
     <string name="volume_icon_description_notification" msgid="579091344110747279">"Âm lượng thông báo"</string>
     <string name="ringtone_default" msgid="9118299121288174597">"Nhạc chuông mặc định"</string>
     <string name="ringtone_default_with_actual" msgid="2709686194556159773">"Mặc định (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
@@ -1457,6 +1457,12 @@
     <string name="gpsNotifMessage" msgid="7346649122793758032">"Được yêu cầu bởi <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
     <string name="gpsVerifYes" msgid="3719843080744112940">"Có"</string>
     <string name="gpsVerifNo" msgid="1671201856091564741">"Không"</string>
+    <!-- no translation found for gnss_nfw_notification_title (5004493772059563423) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_oem (3683958907027107969) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_carrier (815888995791562151) -->
+    <skip />
     <string name="sync_too_many_deletes" msgid="6999440774578705300">"Đã vượt quá giới hạn xóa"</string>
     <string name="sync_too_many_deletes_desc" msgid="7409327940303504440">"Có <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> mục đã xóa cho <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>, tài khoản <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g>. Bạn muốn thực hiện tác vụ nào?"</string>
     <string name="sync_really_delete" msgid="5657871730315579051">"Xóa mục"</string>
@@ -1646,7 +1652,7 @@
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Tắt phím tắt"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Sử dụng phím tắt"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Đảo màu"</string>
-    <string name="color_correction_feature_name" msgid="3655077237805422597">"Sửa màu"</string>
+    <string name="color_correction_feature_name" msgid="3655077237805422597">"Chỉnh màu"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Bạn đã giữ các phím âm lượng. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> đã bật."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Bạn đã giữ các phím âm lượng. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> đã tắt."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Nhấn và giữ đồng thời cả hai phím âm lượng trong 3 giây để sử dụng <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
@@ -1789,8 +1795,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Do quản trị viên của bạn cập nhật"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Do quản trị viên của bạn xóa"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Để tăng thời lượng pin, Trình tiết kiệm pin:\n·Bật Giao diện tối\n·Tắt hoặc hạn chế hoạt động chạy trong nền, một số hiệu ứng hình ảnh và các tính năng khác như lệnh “Ok Google”\n\n"<annotation id="url">"Tìm hiểu thêm"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"Để tăng thời lượng pin, Trình tiết kiệm pin:\n·Bật Giao diện tối\n·Tắt hoặc hạn chế hoạt động chạy trong nền, một số hiệu ứng hình ảnh và các tính năng khác như lệnh “Ok Google”"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Để tăng thời lượng pin, Trình tiết kiệm pin sẽ:\n·Bật Giao diện tối\n·Tắt hoặc hạn chế hoạt động chạy trong nền, một số hiệu ứng hình ảnh và các tính năng khác như lệnh “Ok Google”\n\n"<annotation id="url">"Tìm hiểu thêm"</annotation></string>
+    <string name="battery_saver_description" msgid="7618492104632328184">"Để tăng thời lượng pin, Trình tiết kiệm pin sẽ:\n·Bật giao diện tối\n·Tắt hoặc hạn chế hoạt động chạy trong nền, một số hiệu ứng hình ảnh và các tính năng khác như lệnh “Ok Google”"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Để giúp giảm mức sử dụng dữ liệu, Trình tiết kiệm dữ liệu sẽ chặn một số ứng dụng gửi hoặc nhận dữ liệu trong nền. Ứng dụng mà bạn hiện sử dụng có thể dùng dữ liệu nhưng tần suất sẽ giảm. Ví dụ: hình ảnh sẽ không hiển thị cho đến khi bạn nhấn vào hình ảnh đó."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Bật Trình tiết kiệm dữ liệu?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Bật"</string>

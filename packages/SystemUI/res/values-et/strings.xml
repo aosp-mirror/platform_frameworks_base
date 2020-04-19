@@ -87,7 +87,7 @@
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"Piiratud salvestusruumi tõttu ei saa ekraanipilti salvestada"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Rakendus või teie organisatsioon ei luba ekraanipilte jäädvustada"</string>
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"Sule ekraanipilt"</string>
-    <string name="screenshot_preview_description" msgid="669177537416980449">"Ava ekraanipilt"</string>
+    <string name="screenshot_preview_description" msgid="7606510140714080474">"Ekraanipildi eelvaade"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Ekraanisalvesti"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Pooleli märguanne ekraanikuva salvestamise seansi puhul"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Kas alustada salvestamist?"</string>
@@ -427,7 +427,7 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC on keelatud"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC on lubatud"</string>
-    <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"Ekraanikirje"</string>
+    <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"Ekraanisalvestus"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Alustage"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Peatage"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Rakenduste vahetamiseks pühkige üles"</string>
@@ -707,9 +707,9 @@
     <string name="notification_bubble_title" msgid="8330481035191903164">"Mull"</string>
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"Aitab teil keskenduda (heli või vibreerimine puudub)."</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"Haarab heli või vibreerimisega teie tähelepanu."</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="6298026344552480458">"Haarab heli või vibreerimisega teie tähelepanu. Rakenduse <xliff:g id="APP_NAME">%1$s</xliff:g> vestlused kuvatakse vaikimisi mullis."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Hoiab teie tähelepanu hõljuva otseteega selle sisu juurde."</string>
     <string name="notification_channel_summary_priority" msgid="7415770044553264622">"Kuvatakse vestluste jaotise ülaosas mullina."</string>
-    <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"Kõik rakenduse <xliff:g id="APP_NAME_0">%1$s</xliff:g> vestlused kuvatakse vaikimisi mullina. Halda rakenduses <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Seaded"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioriteet"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Hiljutisi mulle pole"</string>
@@ -1002,6 +1002,16 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Süsteemis navigeerimine on värskendatud. Muutmiseks avage jaotis Seaded."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Süsteemi navigeerimise värskendamiseks avage jaotis Seaded"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Ooterežiim"</string>
+    <!-- no translation found for priority_onboarding_show_at_top_text (1678400241025513541) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_show_avatar_text (5756291381124091508) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_appear_as_bubble_text (4227039772250263122) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_ignores_dnd_text (2918952762719600529) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_done_button_title (4569550984286506007) -->
+    <skip />
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Suurendamisakna ülekate"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Suurendamisaken"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Suurendamisakna juhtelemendid"</string>
@@ -1016,10 +1026,8 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Juhtnupud"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Valige toitemenüüs saadaolevad juhtelemendid"</string>
-    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
-    <skip />
-    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
-    <skip />
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Juhtnuppude ümberpaigutamiseks hoidke neid all ja lohistage"</string>
+    <string name="controls_favorite_removed" msgid="5276978408529217272">"Kõik juhtnupud eemaldati"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Kõikide juhtelementide loendit ei saanud laadida."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Muu"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Seadme juhtelementide hulka lisamine"</string>

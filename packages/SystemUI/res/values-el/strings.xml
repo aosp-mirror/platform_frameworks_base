@@ -45,7 +45,7 @@
     <string name="status_bar_settings_notifications" msgid="5285316949980621438">"Ειδοποιήσεις"</string>
     <string name="bluetooth_tethered" msgid="4171071193052799041">"Έγινε σύνδεση μέσω Bluetooth"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="2972273031043777851">"Ρύθμιση μεθόδων εισαγωγής"</string>
-    <string name="status_bar_use_physical_keyboard" msgid="4849251850931213371">"Φυσικό πληκτρολόγιο"</string>
+    <string name="status_bar_use_physical_keyboard" msgid="4849251850931213371">"Κανονικό πληκτρολόγιο"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"Να επιτρέπεται η πρόσβαση της εφαρμογής <xliff:g id="APPLICATION">%1$s</xliff:g> στη συσκευή <xliff:g id="USB_DEVICE">%2$s</xliff:g>;"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"Να επιτρέπεται στην εφαρμογή <xliff:g id="APPLICATION">%1$s</xliff:g> να έχει πρόσβαση στη συσκευή <xliff:g id="USB_DEVICE">%2$s</xliff:g>;\nΔεν έχει εκχωρηθεί άδεια εγγραφής σε αυτήν την εφαρμογή, αλλά μέσω αυτής της συσκευής USB θα μπορεί να εγγράφει ήχο."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"Να επιτρέπεται η πρόσβαση της εφαρμογής <xliff:g id="APPLICATION">%1$s</xliff:g> στο αξεσουάρ <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>;"</string>
@@ -87,7 +87,7 @@
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"Αδύνατη η αποθήκευση του στιγμιότυπου οθόνης λόγω περιορισμένου αποθηκευτικού χώρου"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Η λήψη στιγμιότυπων οθόνης δεν επιτρέπεται από την εφαρμογή ή τον οργανισμό σας"</string>
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"Παράβλεψη στιγμιότυπου οθόνης"</string>
-    <string name="screenshot_preview_description" msgid="669177537416980449">"Άνοιγμα στιγμιότυπου οθόνης"</string>
+    <string name="screenshot_preview_description" msgid="7606510140714080474">"Προεπισκόπηση στιγμιότυπου οθόνης"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Εγγραφή οθόνης"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Ειδοποίηση σε εξέλιξη για μια περίοδο λειτουργίας εγγραφής οθόνης"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Έναρξη εγγραφής;"</string>
@@ -707,9 +707,9 @@
     <string name="notification_bubble_title" msgid="8330481035191903164">"Φούσκα"</string>
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"Σας βοηθά να συγκεντρωθείτε χωρίς ήχο και δόνηση."</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"Τραβά την προσοχή σας με ήχο ή δόνηση."</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="6298026344552480458">"Τραβά την προσοχή σας με ήχο ή δόνηση. Οι συζητήσεις από την εφαρμογή <xliff:g id="APP_NAME">%1$s</xliff:g> εμφανίζονται σε συννεφάκι από προεπιλογή."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Κρατάει την προσοχή σας με μια κινούμενη συντόμευση προς αυτό το περιεχόμενο."</string>
     <string name="notification_channel_summary_priority" msgid="7415770044553264622">"Εμφανίζεται στο επάνω μέρος της ενότητας συζήτησης ως συννεφάκι."</string>
-    <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"Όλες οι συζητήσεις από την εφαρμογή <xliff:g id="APP_NAME_0">%1$s</xliff:g> εμφανίζονται από προεπιλογή ως συννεφάκια. Διαχείριση στην εφαρμογή <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Ρυθμίσεις"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Προτεραιότητα"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Δεν υπάρχουν πρόσφατα συννεφάκια"</string>
@@ -1002,6 +1002,16 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Η πλοήγηση συστήματος ενημερώθηκε. Για να κάνετε αλλαγές, μεταβείτε στις Ρυθμίσεις."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Μεταβείτε στις Ρυθμίσεις για να ενημερώσετε την πλοήγηση συστήματος"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Κατάσταση αναμονής"</string>
+    <!-- no translation found for priority_onboarding_show_at_top_text (1678400241025513541) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_show_avatar_text (5756291381124091508) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_appear_as_bubble_text (4227039772250263122) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_ignores_dnd_text (2918952762719600529) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_done_button_title (4569550984286506007) -->
+    <skip />
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Παράθυρο επικάλυψης μεγέθυνσης"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Παράθυρο μεγέθυνσης"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Στοιχεία ελέγχου παραθύρου μεγέθυνσης"</string>
@@ -1016,10 +1026,8 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Στοιχεία ελέγχου"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Επιλέξτε τα στοιχεία ελέγχου στα οποία θα έχετε πρόσβαση από το μενού λειτουργίας."</string>
-    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
-    <skip />
-    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
-    <skip />
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Κρατήστε και σύρετε για αναδιάταξη των στοιχείων ελέγχου"</string>
+    <string name="controls_favorite_removed" msgid="5276978408529217272">"Όλα τα στοιχεία ελέγχου καταργήθηκαν"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Ανεπιτυχής φόρτωση λίστας όλων των στοιχ. ελέγχου."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Άλλο"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Προσθήκη στα στοιχεία ελέγχου συσκευής"</string>

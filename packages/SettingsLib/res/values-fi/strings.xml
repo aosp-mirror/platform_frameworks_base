@@ -251,8 +251,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Langattoman näytön sertifiointi"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Käytä Wi-Fin laajennettua lokikirjausta"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Wi‑Fi-haun rajoitus"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization (5437378364995776979) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Wi-Fi-paranneltu MAC-satunnaistaminen"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Mobiilidata aina käytössä"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Laitteistokiihdytyksen yhteyden jakaminen"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Näytä nimettömät Bluetooth-laitteet"</string>
@@ -285,8 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Näytä langattoman näytön sertifiointiin liittyvät asetukset."</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Lisää Wi‑Fin lokikirjaustasoa, näytä SSID RSSI -kohtaisesti Wi‑Fi-valitsimessa."</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Vähentää virrankulutusta ja parantaa verkon toimintaa"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization_summary (7925425746373704991) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Tämä vaihto vaikuttaa MAC-satunnaistamistoimintaan vain asiakastilassa.\nTämän tilan ollessa aktivoituna niiden verkkojen, joissa MAC-satunnaistaminen on käytössä, MAC-osoitteet voidaan satunnaistaa uudelleen yhdistämisen aikana riippuen siitä, milloin asiakas katkaisi viimeksi yhteyden verkkoon. Uudelleensatunnaistamista ei tapahdu, jos laite yhdistetään uudelleen enintään neljän tunnin sisällä."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Maksullinen"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Maksuton"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Lokipuskurien koot"</string>
@@ -422,7 +420,7 @@
     <string name="daltonizer_mode_deuteranomaly" msgid="3507284319584683963">"Deuteranomalia (puna-vihersokeus)"</string>
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomalia (puna-vihersokeus)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomalia (sini-keltasokeus)"</string>
-    <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Värikorjaus"</string>
+    <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Värinkorjaus"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"Värinkorjauksella voit muuttaa värien näkymistä laitteellasi"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Tämän ohittaa <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> – <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>

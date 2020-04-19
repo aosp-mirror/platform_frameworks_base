@@ -87,7 +87,7 @@
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"由於儲存空間有限，因此無法儲存螢幕擷取畫面"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"應用程式或您的機構不允許擷取螢幕畫面"</string>
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"關閉螢幕截圖"</string>
-    <string name="screenshot_preview_description" msgid="669177537416980449">"開啟螢幕截圖"</string>
+    <string name="screenshot_preview_description" msgid="7606510140714080474">"螢幕截圖預覽"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"螢幕畫面錄影工具"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"持續顯示錄影畫面工作階段通知"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"要開始錄影嗎？"</string>
@@ -471,7 +471,7 @@
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="5759855008166759399">"切換使用者，目前使用者是<xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="383168614528618402">"目前的使用者是 <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"顯示個人檔案"</string>
-    <string name="user_add_user" msgid="4336657383006913022">"新增使用者"</string>
+    <string name="user_add_user" msgid="4336657383006913022">"加入使用者"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"新使用者"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"移除訪客？"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"這個工作階段中的所有應用程式和資料都會被刪除。"</string>
@@ -707,9 +707,9 @@
     <string name="notification_bubble_title" msgid="8330481035191903164">"氣泡"</string>
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"助您保持專注，不會發出聲音或震動。"</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"發出聲音或震動來吸引您的注意。"</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="6298026344552480458">"發出聲音或震動來吸引您的注意。「<xliff:g id="APP_NAME">%1$s</xliff:g>」的對話會預設以小視窗顯示。"</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"為此內容建立浮動捷徑以保持注意力。"</string>
     <string name="notification_channel_summary_priority" msgid="7415770044553264622">"在對話部分的頂部以小視窗顯示。"</string>
-    <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"根據預設，透過小視窗顯示所有「<xliff:g id="APP_NAME_0">%1$s</xliff:g>」的對話。在「<xliff:g id="APP_NAME_1">%2$s</xliff:g>」中管理。"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"設定"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"重要"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"沒有最近曾使用的小視窗"</string>
@@ -962,7 +962,7 @@
     <string name="running_foreground_services_title" msgid="5137313173431186685">"正在背景中執行的應用程式"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"輕按即可查看電池和數據用量詳情"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"要關閉流動數據嗎？"</string>
-    <string name="mobile_data_disable_message" msgid="8604966027899770415">"您將無法透過「<xliff:g id="CARRIER">%s</xliff:g>」存取流動數據或互聯網。必須連接 Wi-Fi 才能使用互聯網。"</string>
+    <string name="mobile_data_disable_message" msgid="8604966027899770415">"您將無法透過「<xliff:g id="CARRIER">%s</xliff:g>」使用流動數據或互聯網，只可透過 Wi-Fi 才能連接互聯網。"</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"您的流動網絡供應商"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"由於某個應用程式已阻擋權限要求畫面，因此「設定」應用程式無法驗證您的回應。"</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"要允許「<xliff:g id="APP_0">%1$s</xliff:g>」顯示「<xliff:g id="APP_2">%2$s</xliff:g>」的快訊嗎？"</string>
@@ -1002,12 +1002,22 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"系統導覽已更新。如需變更，請前往「設定」。"</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"前往「設定」更新系統導覽"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"待機"</string>
+    <!-- no translation found for priority_onboarding_show_at_top_text (1678400241025513541) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_show_avatar_text (5756291381124091508) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_appear_as_bubble_text (4227039772250263122) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_ignores_dnd_text (2918952762719600529) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_done_button_title (4569550984286506007) -->
+    <skip />
     <string name="magnification_overlay_title" msgid="6584179429612427958">"放大重疊視窗"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"放大視窗"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"放大視窗控制項"</string>
-    <string name="quick_controls_title" msgid="6839108006171302273">"裝置控制項"</string>
+    <string name="quick_controls_title" msgid="6839108006171302273">"裝置控制"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"為已連接的裝置新增控制項"</string>
-    <string name="quick_controls_setup_title" msgid="8901436655997849822">"設定裝置控制項"</string>
+    <string name="quick_controls_setup_title" msgid="8901436655997849822">"設定裝置控制"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"按住「開關」按鈕便可存取控制項"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"選擇應用程式以新增控制項"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
@@ -1016,13 +1026,11 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"控制項"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"從電源選單選擇要存取的控制項"</string>
-    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
-    <skip />
-    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
-    <skip />
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"按住並拖曳便可重新排列控制項"</string>
+    <string name="controls_favorite_removed" msgid="5276978408529217272">"已移除所有控制項"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"無法載入完整控制項清單。"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"其他"</string>
-    <string name="controls_dialog_title" msgid="2343565267424406202">"加到裝置控制項"</string>
+    <string name="controls_dialog_title" msgid="2343565267424406202">"加到裝置控制"</string>
     <string name="controls_dialog_ok" msgid="7011816381344485651">"加入至常用項目"</string>
     <string name="controls_dialog_message" msgid="6292099631702047540">"「<xliff:g id="APP">%s</xliff:g>」建議將此控制項加入至常用項目。"</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"已更新控制項"</string>

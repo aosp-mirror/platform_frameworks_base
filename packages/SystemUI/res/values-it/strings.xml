@@ -87,7 +87,7 @@
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"Impossibile salvare lo screenshot a causa dello spazio di archiviazione limitato"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"L\'acquisizione di screenshot non è consentita dall\'app o dall\'organizzazione"</string>
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"Ignora screenshot"</string>
-    <string name="screenshot_preview_description" msgid="669177537416980449">"Apri screenshot"</string>
+    <string name="screenshot_preview_description" msgid="7606510140714080474">"Anteprima screenshot"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Registrazione dello schermo"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Notifica costante per una sessione di registrazione dello schermo"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Avviare la registrazione?"</string>
@@ -210,7 +210,7 @@
     <string name="accessibility_three_bars" msgid="819417766606501295">"Tre barre."</string>
     <string name="accessibility_signal_full" msgid="5920148525598637311">"Massimo segnale."</string>
     <string name="accessibility_desc_on" msgid="2899626845061427845">"ON"</string>
-    <string name="accessibility_desc_off" msgid="8055389500285421408">"OFF"</string>
+    <string name="accessibility_desc_off" msgid="8055389500285421408">"Off"</string>
     <string name="accessibility_desc_connected" msgid="3082590384032624233">"Connesso."</string>
     <string name="accessibility_desc_connecting" msgid="8011433412112903614">"Connessione in corso."</string>
     <string name="data_connection_gprs" msgid="2752584037409568435">"GPRS"</string>
@@ -231,7 +231,7 @@
     <string name="accessibility_cell_data_on" msgid="691666434519443162">"Dati mobili attivati"</string>
     <string name="cell_data_off_content_description" msgid="9165555931499878044">"Dati mobili disattivati"</string>
     <string name="not_default_data_content_description" msgid="6757881730711522517">"Non impostato per l\'utilizzo dei dati"</string>
-    <string name="cell_data_off" msgid="4886198950247099526">"OFF"</string>
+    <string name="cell_data_off" msgid="4886198950247099526">"Off"</string>
     <string name="accessibility_bluetooth_tether" msgid="6327291292208790599">"Tethering Bluetooth."</string>
     <string name="accessibility_airplane_mode" msgid="1899529214045998505">"Modalità aereo."</string>
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"VPN attiva."</string>
@@ -427,7 +427,7 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC non attiva"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC attiva"</string>
-    <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"Registrazione dello schermo"</string>
+    <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"Registrazione schermo"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Inizia"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Interrompi"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Scorri verso l\'alto per passare ad altre app"</string>
@@ -680,7 +680,7 @@
     <string name="do_not_silence_block" msgid="4361847809775811849">"Non silenziare e non bloccare"</string>
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Controlli di gestione delle notifiche"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"On"</string>
-    <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"OFF"</string>
+    <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"Off"</string>
     <string name="power_notification_controls_description" msgid="1334963837572708952">"I controlli di gestione delle notifiche ti consentono di impostare un livello di importanza compreso tra 0 e 5 per le notifiche di un\'app. \n\n"<b>"Livello 5"</b>" \n- Mostra in cima all\'elenco di notifiche \n- Consenti l\'interruzione a schermo intero \n- Visualizza sempre \n\n"<b>"Livello 4"</b>" \n- Impedisci l\'interruzione a schermo intero \n- Visualizza sempre \n\n"<b>"Livello 3"</b>" \n- Impedisci l\'interruzione a schermo intero \n- Non visualizzare mai \n\n"<b>"Livello 2"</b>" \n- Impedisci l\'interruzione a schermo intero \n- Non visualizzare mai \n- Non emettere mai suoni e vibrazioni \n\n"<b>"Livello 1"</b>" \n- Impedisci l\'interruzione a schermo intero \n- Non visualizzare mai \n- Non emettere mai suoni e vibrazioni \n- Nascondi da schermata di blocco e barra di stato \n- Mostra in fondo all\'elenco di notifiche \n\n"<b>"Livello 0"</b>" \n- Blocca tutte le notifiche dell\'app"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"Notifiche"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"Non vedrai più queste notifiche"</string>
@@ -707,9 +707,9 @@
     <string name="notification_bubble_title" msgid="8330481035191903164">"Fumetto"</string>
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"Favorisce la tua concentrazione grazie all\'assenza di suono o vibrazione."</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"Richiama la tua attenzione con suono o vibrazione."</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="6298026344552480458">"Richiama la tua attenzione con suono o vibrazione. Conversazioni dalla bolla <xliff:g id="APP_NAME">%1$s</xliff:g> per impostazione predefinita."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Mantiene la tua attenzione con una scorciatoia mobile a questi contenuti."</string>
     <string name="notification_channel_summary_priority" msgid="7415770044553264622">"Appare in cima alla sezione delle conversazioni sotto forma di bolla."</string>
-    <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"Per impostazione predefinita, tutte le conversazioni di <xliff:g id="APP_NAME_0">%1$s</xliff:g> vengono mostrate come bolle. Gestisci in <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Impostazioni"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Priorità"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Nessuna bolla recente"</string>
@@ -818,7 +818,7 @@
     <string name="accessibility_data_saver_on" msgid="5394743820189757731">"Risparmio dati attivo"</string>
     <string name="accessibility_data_saver_off" msgid="58339669022107171">"Risparmio dati disattivato"</string>
     <string name="switch_bar_on" msgid="1770868129120096114">"On"</string>
-    <string name="switch_bar_off" msgid="5669805115416379556">"OFF"</string>
+    <string name="switch_bar_off" msgid="5669805115416379556">"Off"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"Non disponibile"</string>
     <string name="nav_bar" msgid="4642708685386136807">"Barra di navigazione"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"Layout"</string>
@@ -847,8 +847,8 @@
     <string name="right_keycode" msgid="2480715509844798438">"Keycode destra"</string>
     <string name="left_icon" msgid="5036278531966897006">"Icona sinistra"</string>
     <string name="right_icon" msgid="1103955040645237425">"Icona destra"</string>
-    <string name="drag_to_add_tiles" msgid="8933270127508303672">"Tieni premuto e trascina per aggiungere riquadri"</string>
-    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Tieni premuto e trascina per riordinare i riquadri"</string>
+    <string name="drag_to_add_tiles" msgid="8933270127508303672">"Tieni premuto e trascina per aggiungere icone"</string>
+    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Tieni premuto e trascina per riordinare le icone"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"Trascina qui per rimuovere"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"Occorrono almeno <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> schede"</string>
     <string name="qs_edit" msgid="5583565172803472437">"Modifica"</string>
@@ -1002,6 +1002,16 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Navigazione del sistema aggiornata. Per apportare modifiche, usa le Impostazioni."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Usa le Impostazioni per aggiornare la navigazione del sistema"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Standby"</string>
+    <!-- no translation found for priority_onboarding_show_at_top_text (1678400241025513541) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_show_avatar_text (5756291381124091508) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_appear_as_bubble_text (4227039772250263122) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_ignores_dnd_text (2918952762719600529) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_done_button_title (4569550984286506007) -->
+    <skip />
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Finestra overlay ingrandimento"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Finestra ingrandimento"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Finestra controlli di ingrandimento"</string>
@@ -1016,10 +1026,8 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Controlli"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Seleziona i controlli a cui accedere dal menu di accensione"</string>
-    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
-    <skip />
-    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
-    <skip />
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Tieni premuto e trascina per riordinare i controlli"</string>
+    <string name="controls_favorite_removed" msgid="5276978408529217272">"Tutti i controlli sono stati rimossi"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Impossibile caricare l\'elenco di tutti i controlli."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Altro"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Aggiungi ai controlli del dispositivo"</string>

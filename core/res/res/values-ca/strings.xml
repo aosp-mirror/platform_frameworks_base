@@ -1457,6 +1457,12 @@
     <string name="gpsNotifMessage" msgid="7346649122793758032">"Sol·licitat per <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
     <string name="gpsVerifYes" msgid="3719843080744112940">"Sí"</string>
     <string name="gpsVerifNo" msgid="1671201856091564741">"No"</string>
+    <!-- no translation found for gnss_nfw_notification_title (5004493772059563423) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_oem (3683958907027107969) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_carrier (815888995791562151) -->
+    <skip />
     <string name="sync_too_many_deletes" msgid="6999440774578705300">"S\'ha superat el límit de supressions"</string>
     <string name="sync_too_many_deletes_desc" msgid="7409327940303504440">"Hi ha <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> elements suprimits per a <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>, compte <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g>. Què vols fer?"</string>
     <string name="sync_really_delete" msgid="5657871730315579051">"Suprimeix els elements"</string>
@@ -1645,8 +1651,8 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Fet"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Desactiva la drecera"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Utilitza la drecera"</string>
-    <string name="color_inversion_feature_name" msgid="326050048927789012">"Inversió dels colors"</string>
-    <string name="color_correction_feature_name" msgid="3655077237805422597">"Correcció del color"</string>
+    <string name="color_inversion_feature_name" msgid="326050048927789012">"Inversió de colors"</string>
+    <string name="color_correction_feature_name" msgid="3655077237805422597">"Correcció de color"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"S\'han mantingut premudes les tecles de volum. S\'ha activat <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"S\'han mantingut premudes les tecles de volum. S\'ha desactivat <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Mantén premudes les dues tecles de volum durant 3 segons per fer servir <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
@@ -1789,8 +1795,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Actualitzat per l\'administrador"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Suprimit per l\'administrador"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"D\'acord"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Per allargar la durada de la bateria, el mode Estalvi de bateria fa el següent:\n Activa el tema fosc\n Desactiva o restringeix l\'activitat en segon pla, alguns efectes visuals i altres funcions com \"Ok Google\"\n\n"<annotation id="url">"Més informació"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"Per allargar la durada de la bateria, el mode Estalvi de bateria fa el següent:\n Activa el tema fosc\n Desactiva o restringeix l\'activitat en segon pla, alguns efectes visuals i altres funcions com \"Ok Google\""</string>
+    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Per allargar la durada de la bateria, el mode Estalvi de bateria:\n Activa el tema fosc\n Desactiva o restringeix l\'activitat en segon pla, alguns efectes visuals i altres funcions com \"Ok Google\"\n\n"<annotation id="url">"Més informació"</annotation></string>
+    <string name="battery_saver_description" msgid="7618492104632328184">"Per allargar la durada de la bateria, el mode Estalvi de bateria:\n Activa el tema fosc\n Desactiva o restringeix l\'activitat en segon pla, alguns efectes visuals i altres funcions com \"Ok Google\""</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Per reduir l\'ús de dades, la funció Economitzador de dades evita que determinades aplicacions enviïn o rebin dades en segon pla. L\'aplicació que estiguis fent servir podrà accedir a les dades, però menys sovint. Això vol dir, per exemple, que les imatges no es mostraran fins que no les toquis."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Activar Economitzador de dades?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Activa"</string>

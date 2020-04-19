@@ -1457,6 +1457,12 @@
     <string name="gpsNotifMessage" msgid="7346649122793758032">"Заявено от <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
     <string name="gpsVerifYes" msgid="3719843080744112940">"Да"</string>
     <string name="gpsVerifNo" msgid="1671201856091564741">"Не"</string>
+    <!-- no translation found for gnss_nfw_notification_title (5004493772059563423) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_oem (3683958907027107969) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_carrier (815888995791562151) -->
+    <skip />
     <string name="sync_too_many_deletes" msgid="6999440774578705300">"Лимитът за изтриване бе надхвърлен"</string>
     <string name="sync_too_many_deletes_desc" msgid="7409327940303504440">"Има <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> изтрити елемента за <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>, профил <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g>. Какво искате да направите?"</string>
     <string name="sync_really_delete" msgid="5657871730315579051">"Изтриване на елементите"</string>
@@ -1789,10 +1795,10 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Актуализирано от администратора ви"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Изтрито от администратора ви"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ОК"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"С цел удължаване на живота на батерията режимът за запазването й:\n·включва тъмната тема;\n·изключва или ограничава активността на заден план, някои визуални ефекти и други функции, като например „Ok Google“.\n\n"<annotation id="url">"Научете повече"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"С цел удължаване на живота на батерията режимът за запазването й:\n·включва тъмната тема;\n·изключва или ограничава активността на заден план, някои визуални ефекти и други функции, като например „Ok Google“."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"С цел удължаване на живота на батерията режимът за запазването ѝ:\n·включва тъмната тема;\n·изключва или ограничава активността на заден план, някои визуални ефекти и други функции, като например „Ok Google“.\n\n"<annotation id="url">"Научете повече"</annotation></string>
+    <string name="battery_saver_description" msgid="7618492104632328184">"С цел удължаване на живота на батерията режимът за запазването ѝ:\n·включва тъмната тема;\n·изключва или ограничава активността на заден план, някои визуални ефекти и други функции, като например „Ok Google“."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"С цел намаляване на преноса на данни функцията за икономия на данни не позволява на някои приложения да изпращат или получават данни на заден план. Понастоящем използвано от вас приложение може да използва данни, но по-рядко. Това например може да означава, че изображенията не се показват, докато не ги докоснете."</string>
-    <string name="data_saver_enable_title" msgid="7080620065745260137">"Ще вкл. ли Икономия на данни?"</string>
+    <string name="data_saver_enable_title" msgid="7080620065745260137">"Ще вкл. ли „Икономия на данни“?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Включване"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
       <item quantity="other">За %1$d минути (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>

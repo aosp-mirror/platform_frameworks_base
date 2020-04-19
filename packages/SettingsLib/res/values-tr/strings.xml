@@ -417,9 +417,9 @@
     <string name="picture_color_mode_desc" msgid="151780973768136200">"sRGB\'yi kullan"</string>
     <string name="daltonizer_mode_disabled" msgid="403424372812399228">"Devre dışı"</string>
     <string name="daltonizer_mode_monochromacy" msgid="362060873835885014">"Tam renk körlüğü"</string>
-    <string name="daltonizer_mode_deuteranomaly" msgid="3507284319584683963">"Yeşil renk körlüğü (kırmızı-yeşil)"</string>
-    <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Kırmızı renk körlüğü (kırmızı-yeşil)"</string>
-    <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Mavi renk körlüğü (mavi-sarı)"</string>
+    <string name="daltonizer_mode_deuteranomaly" msgid="3507284319584683963">"Döteranomali (kırmızı-yeşil)"</string>
+    <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomali (kırmızı-yeşil)"</string>
+    <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomali (mavi-sarı)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Renk düzeltme"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"Renk düzeltme, renklerin cihazınızda nasıl görüntüleneceğini düzenlemenize olanak sağlar."</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> tarafından geçersiz kılındı"</string>

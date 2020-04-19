@@ -87,7 +87,7 @@
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"Snímka obrazovky sa nedá uložiť z dôvodu nedostatku miesta v úložisku"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Vytváranie snímok obrazovky je zakázané aplikáciou alebo vašou organizáciou"</string>
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"Zavrieť snímku obrazovky"</string>
-    <string name="screenshot_preview_description" msgid="669177537416980449">"Otvoriť snímku obrazovky"</string>
+    <string name="screenshot_preview_description" msgid="7606510140714080474">"Ukážka snímky obrazovky"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Rekordér obrazovky"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Zobrazuje sa upozornenie týkajúce sa relácie záznamu obrazovky"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Chcete spustiť nahrávanie?"</string>
@@ -713,9 +713,9 @@
     <string name="notification_bubble_title" msgid="8330481035191903164">"Bublina"</string>
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"Pomáha vám sústrediť sa bez zvukov či vibrácií."</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"Upúta vás zvukom alebo vibráciami."</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="6298026344552480458">"Upúta vás zvukom alebo vibráciami. Predvolene sa zobrazia konverzácie z bubliny <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Upúta vás plávajúcim odkazom na tento obsah."</string>
     <string name="notification_channel_summary_priority" msgid="7415770044553264622">"Zobrazuje sa v hornej časti konverzácie ako bublina."</string>
-    <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"Predvolene zobrazovať všetky konverzácie z aplikácie <xliff:g id="APP_NAME_0">%1$s</xliff:g> ako bubliny. Spravujte v aplikácii <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Nastavenia"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Priorita"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Žiadne nedávne bubliny"</string>
@@ -1012,6 +1012,16 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Navigácia v systéme bola aktualizovaná. Ak chcete vykonať zmeny, prejdite do Nastavení."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Prejdite do Nastavení a aktualizujte navigáciu v systéme"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Pohotovostný režim"</string>
+    <!-- no translation found for priority_onboarding_show_at_top_text (1678400241025513541) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_show_avatar_text (5756291381124091508) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_appear_as_bubble_text (4227039772250263122) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_ignores_dnd_text (2918952762719600529) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_done_button_title (4569550984286506007) -->
+    <skip />
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Okno prekrytia priblíženia"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Okno priblíženia"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Ovládacie prvky okna priblíženia"</string>
@@ -1028,10 +1038,8 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Ovládacie prvky"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Vyberte si ovládacie prvky, ku ktorým chcete mať prístup v ponuke vypínača"</string>
-    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
-    <skip />
-    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
-    <skip />
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Ovládacie prvky môžete usporiadať pridržaním a presunutím"</string>
+    <string name="controls_favorite_removed" msgid="5276978408529217272">"Všetky ovládacie prvky boli odstránené"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Zoznam všetkých ovl. prvkov sa nepodarilo načítať."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Iné"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Pridanie do ovládacích prvkov zariadenia"</string>

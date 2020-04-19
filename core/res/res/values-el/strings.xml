@@ -268,7 +268,7 @@
     <string name="status_bar_notification_info_overflow" msgid="3330152558746563475">"999+"</string>
     <string name="notification_hidden_text" msgid="2835519769868187223">"Νέα ειδοποίηση"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6465975799223304567">"Εικονικό πληκτρολόγιο"</string>
-    <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"Φυσικό πληκτρολόγιο"</string>
+    <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"Κανονικό πληκτρολόγιο"</string>
     <string name="notification_channel_security" msgid="8516754650348238057">"Ασφάλεια"</string>
     <string name="notification_channel_car_mode" msgid="2123919247040988436">"Λειτουργία αυτοκινήτου"</string>
     <string name="notification_channel_account" msgid="6436294521740148173">"Κατάσταση λογαριασμού"</string>
@@ -1327,7 +1327,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"ΚΟΙΝΟΠΟΙΗΣΗ"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"ΑΠΟΡΡΙΨΗ"</string>
     <string name="select_input_method" msgid="3971267998568587025">"Επιλογή μεθόδου εισόδου"</string>
-    <string name="show_ime" msgid="6406112007347443383">"Να παραμένει στην οθόνη όταν είναι ενεργό το φυσικό πληκτρολόγιο"</string>
+    <string name="show_ime" msgid="6406112007347443383">"Να παραμένει στην οθόνη όταν είναι ενεργό το κανονικό πληκτρολόγιο"</string>
     <string name="hardware" msgid="1800597768237606953">"Εμφάνιση εικονικού πληκτρολ."</string>
     <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"Διαμόρφωση φυσικού πληκτρολογίου"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Πατήστε για να επιλέξετε γλώσσα και διάταξη"</string>
@@ -1457,6 +1457,12 @@
     <string name="gpsNotifMessage" msgid="7346649122793758032">"Ζητήθηκε από <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
     <string name="gpsVerifYes" msgid="3719843080744112940">"Ναι"</string>
     <string name="gpsVerifNo" msgid="1671201856091564741">"Όχι"</string>
+    <!-- no translation found for gnss_nfw_notification_title (5004493772059563423) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_oem (3683958907027107969) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_carrier (815888995791562151) -->
+    <skip />
     <string name="sync_too_many_deletes" msgid="6999440774578705300">"Έγινε υπέρβαση του ορίου διαγραφής"</string>
     <string name="sync_too_many_deletes_desc" msgid="7409327940303504440">"Υπάρχουν <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> διαγραμμένα στοιχεία για τον συγχρονισμό <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>, στον λογαριασμό <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g>. Τι θέλετε να κάνετε;"</string>
     <string name="sync_really_delete" msgid="5657871730315579051">"Διαγραφή των στοιχείων"</string>

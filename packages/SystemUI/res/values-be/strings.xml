@@ -87,7 +87,7 @@
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"Немагчыма захаваць здымак экрана, бо мала месца ў сховішчы"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Рабіць здымкі экрана не дазваляе праграма ці ваша арганізацыя"</string>
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"Адхіліць здымак экрана"</string>
-    <string name="screenshot_preview_description" msgid="669177537416980449">"Адкрыць здымак экрана"</string>
+    <string name="screenshot_preview_description" msgid="7606510140714080474">"Перадпрагляд здымка экрана"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Запіс экрана"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Бягучае апавяшчэнне для сеанса запісу экрана"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Пачаць запіс?"</string>
@@ -231,7 +231,7 @@
     <string name="accessibility_cell_data_on" msgid="691666434519443162">"Мабільная перадача даных уключана"</string>
     <string name="cell_data_off_content_description" msgid="9165555931499878044">"Мабільная перадача даных выключана"</string>
     <string name="not_default_data_content_description" msgid="6757881730711522517">"Не зададзена для выкарыстання даных"</string>
-    <string name="cell_data_off" msgid="4886198950247099526">"Выключаны"</string>
+    <string name="cell_data_off" msgid="4886198950247099526">"Выключана"</string>
     <string name="accessibility_bluetooth_tether" msgid="6327291292208790599">"Сувязь па Bluetooth."</string>
     <string name="accessibility_airplane_mode" msgid="1899529214045998505">"Рэжым палёту."</string>
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"VPN уключана."</string>
@@ -305,8 +305,8 @@
     <string name="accessibility_quick_settings_work_mode_on" msgid="2779253456042059110">"Рэжым працы ўкл."</string>
     <string name="accessibility_quick_settings_work_mode_changed_off" msgid="6256690740556798683">"Рэжым працы выключаны."</string>
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="1105258550138313384">"Рэжым працы ўключаны."</string>
-    <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"Эканомія трафіку адключана."</string>
-    <string name="accessibility_quick_settings_data_saver_changed_on" msgid="6370606590802623078">"Эканомія трафіку ўключана."</string>
+    <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"Эканомія трафіка адключана."</string>
+    <string name="accessibility_quick_settings_data_saver_changed_on" msgid="6370606590802623078">"Эканомія трафіка ўключана."</string>
     <string name="accessibility_quick_settings_sensor_privacy_changed_off" msgid="7608378211873807353">"Прыватнасць датчыкаў выключана."</string>
     <string name="accessibility_quick_settings_sensor_privacy_changed_on" msgid="4267393685085328801">"Прыватнасць датчыкаў уключана."</string>
     <string name="accessibility_brightness" msgid="5391187016177823721">"Яркасць дысплэя"</string>
@@ -713,9 +713,9 @@
     <string name="notification_bubble_title" msgid="8330481035191903164">"Усплывальнае апавяшчэнне"</string>
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"Не адцягвае ўвагу дзякуючы выключаным гуку і вібрацыі."</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"Прыцягвае ўвагу гукам і вібрацыяй."</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="6298026344552480458">"Прыцягвае ўвагу гукам і вібрацыяй. Размовы ў праграме \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" аўтаматычна паяўляюцца ў выглядзе ўсплывальных апавяшчэнняў."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Прыцягвае ўвагу да гэтага змесціва ўсплывальнай кнопкай."</string>
     <string name="notification_channel_summary_priority" msgid="7415770044553264622">"Паказваецца ўверсе раздзела размоў у выглядзе ўсплывальнага апавяшчэння."</string>
-    <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"Усе размовы з праграмы \"<xliff:g id="APP_NAME_0">%1$s</xliff:g>\" стандартна паказваюцца ў выглядзе ўсплывальных апавяшчэнняў. Кіраваць імі можна ў праграме \"<xliff:g id="APP_NAME_1">%2$s</xliff:g>\"."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Налады"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Прыярытэт"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Няма нядаўніх усплывальных апавяшчэнняў"</string>
@@ -824,9 +824,9 @@
     <string name="accessibility_long_click_tile" msgid="210472753156768705">"Адкрыць налады"</string>
     <string name="accessibility_status_bar_headphones" msgid="1304082414912647414">"Навушнікі падключаны"</string>
     <string name="accessibility_status_bar_headset" msgid="2699275863720926104">"Гарнітура падлучана"</string>
-    <string name="data_saver" msgid="3484013368530820763">"Эканомія трафіку"</string>
-    <string name="accessibility_data_saver_on" msgid="5394743820189757731">"Эканомія трафіку ўключана"</string>
-    <string name="accessibility_data_saver_off" msgid="58339669022107171">"Эканомія трафіку адключана"</string>
+    <string name="data_saver" msgid="3484013368530820763">"Эканомія трафіка"</string>
+    <string name="accessibility_data_saver_on" msgid="5394743820189757731">"Эканомія трафіка ўключана"</string>
+    <string name="accessibility_data_saver_off" msgid="58339669022107171">"Эканомія трафіка адключана"</string>
     <string name="switch_bar_on" msgid="1770868129120096114">"Уключана"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"Выключана"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"Недаступна"</string>
@@ -1012,6 +1012,16 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Навігацыя ў сістэме абноўлена. Каб унесці змяненні, перайдзіце ў Налады."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Перайдзіце ў Налады, каб абнавіць параметры навігацыі ў сістэме"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Рэжым чакання"</string>
+    <!-- no translation found for priority_onboarding_show_at_top_text (1678400241025513541) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_show_avatar_text (5756291381124091508) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_appear_as_bubble_text (4227039772250263122) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_ignores_dnd_text (2918952762719600529) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_done_button_title (4569550984286506007) -->
+    <skip />
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Акно-накладка з павелічэннем"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Акно павелічэння"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Налады акна павелічэння"</string>
@@ -1028,10 +1038,8 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Сродкі кіравання"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Выберыце элементы кіравання, да якіх вы хочаце мець доступ з меню сілкавання"</string>
-    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
-    <skip />
-    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
-    <skip />
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Каб змяніць парадак элементаў кіравання, утрымлівайце і перацягвайце іх"</string>
+    <string name="controls_favorite_removed" msgid="5276978408529217272">"Усе элементы кіравання выдалены"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Не ўдалося загрузіць спіс усіх сродкаў кіравання."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Іншае"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Дадаць у элементы кіравання прыладай"</string>

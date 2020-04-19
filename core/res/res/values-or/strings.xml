@@ -230,7 +230,7 @@
     <string name="shutdown_confirm_question" msgid="796151167261608447">"ଆପଣ ବନ୍ଦ କରିବାକୁ ଚାହାନ୍ତି?"</string>
     <string name="reboot_safemode_title" msgid="5853949122655346734">"ନିରାପଦ ମୋଡ୍‍ରେ ରିବୁଟ୍‍ କରନ୍ତୁ"</string>
     <string name="reboot_safemode_confirm" msgid="1658357874737219624">"ଆପଣ ନିରାପଦ ମୋଡ୍‍ରେ ରିବୁଟ୍‍ କରିବେ କି? ଆପଣ ଇନଷ୍ଟଲ୍‍ କରିଥିବା ସମସ୍ତ ତୃତୀୟ ପକ୍ଷ ଆପ୍ଲିକେଶନ୍‌, ଏହାଦ୍ୱାରା ଅକ୍ଷମ ହୋଇଯିବ। ଆପଣ ପୁଣି ରିବୁଟ୍‍ କରିବା ପରେ ସେଗୁଡ଼ିକ ରିଷ୍ଟୋର୍‍ ହେବ।"</string>
-    <string name="recent_tasks_title" msgid="8183172372995396653">"କିଛି ସମୟ ପୂର୍ବରୁ"</string>
+    <string name="recent_tasks_title" msgid="8183172372995396653">"ବର୍ତ୍ତମାନର"</string>
     <string name="no_recent_tasks" msgid="9063946524312275906">"କୌଣସି ସମ୍ପ୍ରତି ଆପ୍‌ ନାହିଁ।"</string>
     <string name="global_actions" product="tablet" msgid="4412132498517933867">"ଟାବଲେଟ ବିକଳ୍ପ"</string>
     <string name="global_actions" product="tv" msgid="3871763739487450369">"Android ଟିଭିର ବିକଳ୍ପଗୁଡ଼ିକ"</string>
@@ -678,14 +678,14 @@
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"ସ୍କ୍ରୀନ୍‍ ଅନଲକ୍‍ କରିବାବେଳେ ଟାଇପ୍‍ କରାଯାଇଥିବା ଭୁଲ ପାସ୍‌ୱର୍ଡର ସଂଖ୍ୟାକୁ ନୀରିକ୍ଷଣ କରେ ଏବଂ ଟାବଲେଟ୍‍କୁ ଲକ୍‍ କରିଦିଏ କିମ୍ବା ଯଦି ଅନେକ ଭୁଲ ପାସ୍‌ୱର୍ଡ ଟାଇପ୍‍ କରାଯାଇଥାଏ, ତେବେ ସମସ୍ତ ଡାଟା ଲିଭାଇଦିଏ।"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"ସ୍କ୍ରିନ୍ ଅନ୍‌ଲକ୍ କରିବା ସମୟରେ ଟାଇପ୍ କରାଯାଇଥିବା ଭୁଲ ପାସ୍‌ୱାର୍ଡଗୁଡ଼ିକର ସଂଖ୍ୟାକୁ ନିରୀକ୍ଷଣ କରେ ଏବଂ ଆପଣଙ୍କର Android ଟିଭି ଡିଭାଇସ୍‌କୁ ଲକ୍ କରିଦିଏ କିମ୍ବା ଯଦି ଅନେକ ଭୁଲ ପାସ୍‌ୱାର୍ଡ ଟାଇପ୍ କରାଯାଇଥାଏ, ତେବେ ସମସ୍ତ ଡାଟା ଲିଭାଇ ଦିଏ।"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"ସ୍କ୍ରୀନ୍‍ ଅନଲକ୍‍ କରିବାବେଳେ ଟାଇପ୍‍ କରାଯାଇଥିବା ଭୁଲ ପାସ୍‌ୱର୍ଡର ସଂଖ୍ୟାକୁ ନୀରିକ୍ଷଣ କରେ ଏବଂ ଫୋନ୍‍କୁ ଲକ୍‍ କରିଦିଏ କିମ୍ବା ଯଦି ଅନେକ ଭୁଲ ପାସ୍‌ୱର୍ଡ ଟାଇପ୍‍ କରାଯାଇଥାଏ, ତେବେ ସମସ୍ତ ଡାଟା ଲିଭାଇଦିଏ।"</string>
-    <string name="policylab_resetPassword" msgid="214556238645096520">"ସ୍କ୍ରୀନ୍‍ ଲକ୍‍ ବଦଳାଇବା"</string>
-    <string name="policydesc_resetPassword" msgid="4626419138439341851">"ସ୍କ୍ରୀନ୍‍ ଲକ୍‍ ବଦଳାଏ।"</string>
-    <string name="policylab_forceLock" msgid="7360335502968476434">"ସ୍କ୍ରୀନ୍‌କୁ ଲକ୍‌ କରିବା"</string>
-    <string name="policydesc_forceLock" msgid="1008844760853899693">"ସ୍କ୍ରୀନ୍‍ କିପରି ଓ କେତେବେଳେ ଲକ୍‍ କରାଯିବ, ତାହା ନିୟନ୍ତ୍ରଣ କରେ।"</string>
+    <string name="policylab_resetPassword" msgid="214556238645096520">"ସ୍କ୍ରିନ୍ ଲକ୍ ବଦଳାଏ"</string>
+    <string name="policydesc_resetPassword" msgid="4626419138439341851">"ସ୍କ୍ରିନ୍ ଲକ୍‍ ବଦଳାଏ।"</string>
+    <string name="policylab_forceLock" msgid="7360335502968476434">"ସ୍କ୍ରିନ୍ ଲକ୍‌ କରିବା"</string>
+    <string name="policydesc_forceLock" msgid="1008844760853899693">"ସ୍କ୍ରିନ୍ କିପରି ଓ କେତେବେଳେ ଲକ୍‍ କରାଯିବ, ତାହା ନିୟନ୍ତ୍ରଣ କରେ।"</string>
     <string name="policylab_wipeData" msgid="1359485247727537311">"ସମସ୍ତ ଡାଟା ଖାଲି କରିବା"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"ବିନା ଚେତାବନୀରେ ଫ୍ୟାକ୍ଟୋରୀ ସେଟିଙ୍ଗ କରାଇ ଟାବ୍‍ଲେଟ୍‍ର ଡାଟା ଲିଭାଇଥାଏ।"</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"ଏକ ଫ୍ୟାକ୍ଟୋରୀ ଡାଟା ରିସେଟ୍ କରି ବିନା ଆଲର୍ଟରେ ଆପଣଙ୍କର Android ଟିଭି ଡିଭାଇସ୍‌ର ଡାଟା ଲିଭାନ୍ତୁ।"</string>
-    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"ବିନା ଚେତାବନୀରେ ଫ୍ୟାକ୍ଟୋରୀ ସେଟିଙ୍ଗ କରାଇ ଫୋନ୍‍ର ଡାଟା ଲିଭାଇଥାଏ।"</string>
+    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"ବିନା ଚେତାବନୀରେ ଫ୍ୟାକ୍ଟୋରୀ ଡାଟା ରିସେଟ୍ କରି ଫୋନ୍‍ର ଡାଟା ଲିଭାଇଥାଏ।"</string>
     <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"ୟୁଜର୍‍ ଡାଟା ଲିଭାନ୍ତୁ"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"ବିନା ଚେତାବନୀରେ ଏହି ଟାବଲେଟରେ ଥିବା ଏହି ୟୁଜରଙ୍କ ଡାଟା ଲିଭାଇ ଦିଅନ୍ତୁ।"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"ବିନା ଚେତାବନୀରେ ଏହି Android ଟିଭି ଡିଭାଇସ୍‌ରେ ଏହି ଉପଯୋଗକର୍ତ୍ତାଙ୍କ ଡାଟା ଲିଭାଇ ଦିଅନ୍ତୁ।"</string>
@@ -698,8 +698,8 @@
     <string name="policydesc_encryptedStorage" msgid="1102516950740375617">"ଷ୍ଟୋର୍ କରାଯାଇଥିବା ଡାଟା ଏନ୍‍କ୍ରେପ୍ଟ କରିବା ଆବଶ୍ୟକ।"</string>
     <string name="policylab_disableCamera" msgid="5749486347810162018">"କ୍ୟାମେରାଗୁଡ଼ିକୁ ଅକ୍ଷମ କରନ୍ତୁ"</string>
     <string name="policydesc_disableCamera" msgid="3204405908799676104">"ସମସ୍ତ ଡିଭାଇସ୍‍ର କ୍ୟାମେରା ବ୍ୟବହାର କରିବା ପ୍ରତିରୋଧ କରନ୍ତୁ।"</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="5071855750149949741">"କିଛି ସ୍କ୍ରୀନ୍‍ ଲକ୍‍ ସୁବିଧାକୁ ଅକ୍ଷମ କରିବା"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="6641673177041195957">"କିଛି ସ୍କ୍ରୀନ୍‍ ଲକ୍‍ ସୁବିଧା ବ୍ୟବହାର କରିବାରେ ପ୍ରତିରୋଧ କରେ।"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="5071855750149949741">"କିଛି ସ୍କ୍ରିନ ଲକ୍‍ ଫିଚରକୁ ଅକ୍ଷମ କରିବା"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="6641673177041195957">"କିଛି ସ୍କ୍ରିନ ଲକ୍‍ ଫିଚର ବ୍ୟବହାର କରିବାକୁ ପ୍ରତିରୋଧ କରେ।"</string>
   <string-array name="phoneTypes">
     <item msgid="8996339953292723951">"ହୋମ୍"</item>
     <item msgid="7740243458912727194">"ମୋବାଇଲ୍‍"</item>
@@ -717,7 +717,7 @@
     <item msgid="3233938986670468328">"କଷ୍ଟମ୍‌"</item>
   </string-array>
   <string-array name="postalAddressTypes">
-    <item msgid="3861463339764243038">"ହୋମ୍"</item>
+    <item msgid="3861463339764243038">"ମୂଳପୃଷ୍ଠା"</item>
     <item msgid="5472578890164979109">"ୱାର୍କ"</item>
     <item msgid="5718921296646594739">"ଅନ୍ୟାନ୍ୟ"</item>
     <item msgid="5523122236731783179">"କଷ୍ଟମ୍‌"</item>
@@ -744,7 +744,7 @@
     <item msgid="8293711853624033835">"Jabber"</item>
   </string-array>
     <string name="phoneTypeCustom" msgid="5120365721260686814">"କଷ୍ଟମ୍‌"</string>
-    <string name="phoneTypeHome" msgid="3880132427643623588">"ହୋମ୍"</string>
+    <string name="phoneTypeHome" msgid="3880132427643623588">"ମୂଳପୃଷ୍ଠା"</string>
     <string name="phoneTypeMobile" msgid="1178852541462086735">"ମୋବାଇଲ୍‍"</string>
     <string name="phoneTypeWork" msgid="6604967163358864607">"ୱାର୍କ"</string>
     <string name="phoneTypeFaxWork" msgid="6757519896109439123">"ୱାର୍କ ଫାକ୍ସ"</string>
@@ -875,7 +875,7 @@
     <string name="lockscreen_glogin_too_many_attempts" msgid="3775904917743034195">"ଅତ୍ୟଧିକ ପାଟର୍ନ ଉଦ୍ୟମ"</string>
     <string name="lockscreen_glogin_instructions" msgid="4695162942525531700">"ଅନଲକ୍‌ କରିବା ପାଇଁ, ନିଜ Google ଆକାଉଣ୍ଟରେ ସାଇନ୍-ଇନ୍ କରନ୍ତୁ।"</string>
     <string name="lockscreen_glogin_username_hint" msgid="6916101478673157045">"ୟୁଜରନେମ୍‌ (ଇମେଲ୍)"</string>
-    <string name="lockscreen_glogin_password_hint" msgid="3031027901286812848">"ପାସ୍‌ୱର୍ଡ:"</string>
+    <string name="lockscreen_glogin_password_hint" msgid="3031027901286812848">"ପାସୱାର୍ଡ"</string>
     <string name="lockscreen_glogin_submit_button" msgid="3590556636347843733">"ସାଇନ୍‍-ଇନ୍"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="4369219936865697679">"ୟୁଜର୍‍ନେମ୍‌ କିମ୍ୱା ପାସ୍‌ୱର୍ଡ ଭୁଲ୍‍ ଅଛି।"</string>
     <string name="lockscreen_glogin_account_recovery_hint" msgid="1683405808525090649">"ଆପଣଙ୍କର ଯୁଜରନେମ୍‌ କିମ୍ୱା ପାସୱାର୍ଡ ଭୁଲି ଯାଇଛନ୍ତି କି?\n"<b>"google.com/accounts/recovery"</b>" ଭିଜିଟ୍‍ କରନ୍ତୁ।"</string>
@@ -1306,8 +1306,8 @@
     <string name="usb_power_notification_message" msgid="7284765627437897702">"ଯୋଡ଼ାଯାଇଥିବା ଡିଭାଇସ୍ ଚାର୍ଜ ହେଉଛି। ଅଧିକ ବିକଳ୍ପ ପାଇଁ ଟାପ୍ କରନ୍ତୁ।"</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"ଆନାଲଗ୍‍ ଅଡିଓ ଆକ୍ସେସରୀ ଚିହ୍ନଟ ହେଲା"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"ଏହି ଫୋନ୍‌ରେ କନେକ୍ଟ ଥିବା ଡିଭାଇସ୍‍ କମ୍ପାଟିବଲ୍‍ ନୁହେଁ। ଅଧିକ ଜାଣିବା ପାଇଁ ଟାପ୍‌ କରନ୍ତୁ।"</string>
-    <string name="adb_active_notification_title" msgid="408390247354560331">"USB ଡିବଗିଙ୍ଗ ସଂଯୁକ୍ତ ହୋଇଛି"</string>
-    <string name="adb_active_notification_message" msgid="5617264033476778211">"USBର ଡିବଗିଙ୍ଗ ସୁବିଧାକୁ ବନ୍ଦ କରିବା ପାଇଁ ଟାପ୍ କରନ୍ତୁ"</string>
+    <string name="adb_active_notification_title" msgid="408390247354560331">"USB ଡିବଗିଂ ସଂଯୁକ୍ତ ହୋଇଛି"</string>
+    <string name="adb_active_notification_message" msgid="5617264033476778211">"USB ଡିବଗିଂ ସୁବିଧାକୁ ବନ୍ଦ କରିବା ପାଇଁ ଟାପ୍ କରନ୍ତୁ"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"USB ଡିବଗିଙ୍ଗକୁ ଅକ୍ଷମ କରିବା ପାଇଁ ଚୟନ କରନ୍ତୁ।"</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"ୱାୟାରଲେସ୍ ଡିବଗିଂ ସଂଯୋଗ କରାଯାଇଛି"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"ୱାୟାରଲେସ୍ ଡିବଗିଂକୁ ବନ୍ଦ କରିବା ପାଇଁ ଟାପ୍ କରନ୍ତୁ"</string>
@@ -1457,14 +1457,20 @@
     <string name="gpsNotifMessage" msgid="7346649122793758032">"<xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)ଙ୍କ ଦ୍ୱାରା ଅନୁରୋଧ କରାଯାଇଛି"</string>
     <string name="gpsVerifYes" msgid="3719843080744112940">"ହଁ"</string>
     <string name="gpsVerifNo" msgid="1671201856091564741">"ନା"</string>
+    <!-- no translation found for gnss_nfw_notification_title (5004493772059563423) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_oem (3683958907027107969) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_carrier (815888995791562151) -->
+    <skip />
     <string name="sync_too_many_deletes" msgid="6999440774578705300">"ଡିଲିଟ୍‌ କରିବାର ସୀମା ଅତିକ୍ରମ ହୋଇଯାଇଛି"</string>
     <string name="sync_too_many_deletes_desc" msgid="7409327940303504440">"<xliff:g id="ACCOUNT_NAME">%3$s</xliff:g> ଆକାଉଣ୍ଟର <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g> ପାଇଁ <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> ଟି ଡିଲିଟ୍‍ କରାଯାଇଥିବା ଆଇଟମ୍‍ ରହିଛି। ଆପଣ କ’ଣ କରିବାକୁ ଚାହାଁନ୍ତି?"</string>
     <string name="sync_really_delete" msgid="5657871730315579051">"ଆଇଟମ୍‍ ଡିଲିଟ୍‍ କରନ୍ତୁ"</string>
     <string name="sync_undo_deletes" msgid="5786033331266418896">"ଡିଲିଟ୍‍ଗୁଡ଼ିକୁ ପୂର୍ବାବସ୍ଥାକୁ ଫେରାଇ ଆଣନ୍ତୁ"</string>
     <string name="sync_do_nothing" msgid="4528734662446469646">"ଏବେ କିଛି କରନ୍ତୁ ନାହିଁ"</string>
     <string name="choose_account_label" msgid="5557833752759831548">"ଗୋଟିଏ ଆକାଉଣ୍ଟର ଚୟନ କରନ୍ତୁ"</string>
-    <string name="add_account_label" msgid="4067610644298737417">"ଗୋଟିଏ ଆକାଉଣ୍ଟ ଯୋଡ଼ନ୍ତୁ"</string>
-    <string name="add_account_button_label" msgid="322390749416414097">"ଆକାଉଣ୍ଟ ଯୋଡ଼ନ୍ତୁ"</string>
+    <string name="add_account_label" msgid="4067610644298737417">"ଗୋଟିଏ ଆକାଉଣ୍ଟ ଯୋଗ କରନ୍ତୁ"</string>
+    <string name="add_account_button_label" msgid="322390749416414097">"ଆକାଉଣ୍ଟ ଯୋଗ କରନ୍ତୁ"</string>
     <string name="number_picker_increment_button" msgid="7621013714795186298">"ବଢ଼ାନ୍ତୁ"</string>
     <string name="number_picker_decrement_button" msgid="5116948444762708204">"କମ୍‍ କରନ୍ତୁ"</string>
     <string name="number_picker_increment_scroll_mode" msgid="8403893549806805985">"<xliff:g id="VALUE">%s</xliff:g> ସ୍ପର୍ଶ କରନ୍ତୁ ଏବଂ ଧରିରଖନ୍ତୁ"</string>
@@ -1561,7 +1567,7 @@
     <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"ଡିଭାଇସରେ ସ୍କ୍ରିନ୍‍ କାଷ୍ଟ କରନ୍ତୁ"</string>
     <string name="media_route_chooser_searching" msgid="6119673534251329535">"ଡିଭାଇସ୍‍ ଖୋଜାଯାଉଛି…"</string>
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"ସେଟିଙ୍ଗ"</string>
-    <string name="media_route_controller_disconnect" msgid="7362617572732576959">"ବିଛିନ୍ନ କରନ୍ତୁ"</string>
+    <string name="media_route_controller_disconnect" msgid="7362617572732576959">"ବିଚ୍ଛିନ୍ନ କରନ୍ତୁ"</string>
     <string name="media_route_status_scanning" msgid="8045156315309594482">"ସ୍କାନ୍‌ କରୁଛି…"</string>
     <string name="media_route_status_connecting" msgid="5845597961412010540">"ସଂଯୋଗ କରୁଛି..."</string>
     <string name="media_route_status_available" msgid="1477537663492007608">"ଉପଲବ୍ଧ"</string>
@@ -1596,7 +1602,7 @@
     <string name="kg_login_too_many_attempts" msgid="699292728290654121">"ଅନେକ ପାଟର୍ନ ପ୍ରୟାସ"</string>
     <string name="kg_login_instructions" msgid="3619844310339066827">"ଅନଲକ୍‌ କରିବା ପାଇଁ, ଆପଣଙ୍କ Google ଆକାଉଣ୍ଟ ସହ ସାଇନ୍-ଇନ୍ କରନ୍ତୁ।"</string>
     <string name="kg_login_username_hint" msgid="1765453775467133251">"ୟୁଜରନେମ୍‍ (ଇମେଲ୍)"</string>
-    <string name="kg_login_password_hint" msgid="3330530727273164402">"ପାସ୍‌ୱର୍ଡ"</string>
+    <string name="kg_login_password_hint" msgid="3330530727273164402">"ପାସୱାର୍ଡ"</string>
     <string name="kg_login_submit_button" msgid="893611277617096870">"ସାଇନ୍-ଇନ୍"</string>
     <string name="kg_login_invalid_input" msgid="8292367491901220210">"ଅମାନ୍ୟ ୟୁଜରନେମ୍‍ କିମ୍ୱା ପାସ୍‌ୱର୍ଡ।"</string>
     <string name="kg_login_account_recovery_hint" msgid="4892466171043541248">"ଆପଣଙ୍କର ୟୁଜରନେମ୍‍ କିମ୍ୱା ପାସ୍‌ୱର୍ଡ ଭୁଲି ଯାଇଛନ୍ତି କି?\n"<b>"google.com/accounts/recovery"</b>" ଭିଜିଟ୍‍ କରନ୍ତୁ।"</string>
@@ -1789,10 +1795,10 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"ଆପଣଙ୍କ ଆଡମିନ୍‌‌ ଅପଡେଟ୍‍ କରିଛନ୍ତି"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"ଆପଣଙ୍କ ଆଡମିନ୍‌‌ ଡିଲିଟ୍‍ କରିଛନ୍ତି"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ଠିକ୍ ଅଛି"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"ବ୍ୟାଟେରୀ ଜୀବନ ବଢ଼ାଇବାକୁ ବ୍ୟାଟେରୀ ସେଭର୍:\n·ଗାଢା ଥିମ୍‌ ଚାଲୁ କରେ\n·ପୃଷ୍ଟପଟ କାର୍ଯ୍ୟକଳାପକୁ, କିଛି ଭିଜୁଆଲ୍ ପ୍ରଭାବଗୁଡ଼ିକୁ ଏବଂ “ହେ Google” ପରି ଅନ୍ୟ ଫିଚର୍‌କୁ ବନ୍ଦ ରଖେ କିମ୍ବା ପ୍ରତିବନ୍ଧିତ କରିଥାଏ\n\n"<annotation id="url">"ଅଧିକ ଜାଣନ୍ତୁ"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"ବ୍ୟାଟେରୀ ଜୀବନ ବଢ଼ାଇବାକୁ ବ୍ୟାଟେରୀ ସେଭର୍:\n·ଗାଢା ଥିମ୍‌ ଚାଲୁ କରେ\n·ପୃଷ୍ଟପଟ କାର୍ଯ୍ୟକଳାପକୁ, କିଛି ଭିଜୁଆଲ୍ ପ୍ରଭାବଗୁଡ଼ିକୁ ଏବଂ “ହେ Google” ପରି ଅନ୍ୟ ଫିଚର୍‌କୁ ବନ୍ଦ ରଖେ କିମ୍ବା ପ୍ରତିବନ୍ଧିତ କରିଥାଏ"</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"ଡାଟା ବ୍ୟବହାର କମ୍‍ କରିବାରେ ସାହାଯ୍ୟ କରିବାକୁ, ଡାଟା ସେଭର୍‍ ବ୍ୟାକ୍‌ଗ୍ରାଉଣ୍ଡରେ ଡାଟା ପଠାଇବା କିମ୍ବା ପ୍ରାପ୍ତ କରିବାକୁ କିଛି ଆପ୍‍କୁ ବାରଣ କରେ। ଆପଣ ବର୍ତ୍ତମାନ ବ୍ୟବହାର କରୁଥିବା ଆପ୍‍, ଡାଟା ଆକ୍ସେସ୍‍ କରିପାରେ, କିନ୍ତୁ ଏହା କମ୍‍ ଥର କରିପାରେ। ଏହାର ଅର୍ଥ ହୋଇପାରେ, ଯେପରି, ଆପଣ ଟାପ୍‍ ନକରିବା ପର୍ଯ୍ୟନ୍ତ ଯେଉଁ ଇମେଜ୍‍ ଦେଖାଯାଏ ନାହିଁ।"</string>
-    <string name="data_saver_enable_title" msgid="7080620065745260137">"ଡାଟା ସେଭର୍‌ ଅନ୍ କରିବେ?"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"ବ୍ୟାଟେରୀ ଜୀବନ ବଢ଼ାଇବାକୁ ବ୍ୟାଟେରୀ ସେଭର୍:\n·ଗାଢା ଥିମ୍‌ ଚାଲୁ କରେ\n·ପୃଷ୍ଠପଟ କାର୍ଯ୍ୟକଳାପକୁ, କିଛି ଭିଜୁଆଲ୍ ପ୍ରଭାବଗୁଡ଼ିକୁ ଏବଂ “ହେ Google” ପରି ଅନ୍ୟ ଫିଚର୍‌କୁ ବନ୍ଦ ରଖେ କିମ୍ବା ପ୍ରତିବନ୍ଧିତ କରିଥାଏ\n\n"<annotation id="url">"ଅଧିକ ଜାଣନ୍ତୁ"</annotation></string>
+    <string name="battery_saver_description" msgid="7618492104632328184">"ବ୍ୟାଟେରୀ ଜୀବନ ବଢ଼ାଇବାକୁ ବ୍ୟାଟେରୀ ସେଭର୍:\n·ଗାଢା ଥିମ୍‌ ଚାଲୁ କରେ\n·ପୃଷ୍ଠପଟ କାର୍ଯ୍ୟକଳାପକୁ, କିଛି ଭିଜୁଆଲ୍ ପ୍ରଭାବଗୁଡ଼ିକୁ ଏବଂ “ହେ Google” ପରି ଅନ୍ୟ ଫିଚର୍‌କୁ ବନ୍ଦ ରଖେ କିମ୍ବା ପ୍ରତିବନ୍ଧିତ କରିଥାଏ"</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"ଡାଟା ବ୍ୟବହାର କମ୍‍ କରିବାରେ ସାହାଯ୍ୟ କରିବାକୁ, ଡାଟା ସେଭର୍‍ ବ୍ୟାକ୍‌ଗ୍ରାଉଣ୍ଡରେ ଡାଟା ପଠାଇବା କିମ୍ବା ପ୍ରାପ୍ତ କରିବାକୁ କିଛି ଆପ୍‍କୁ ବାରଣ କରେ। ଆପଣ ବର୍ତ୍ତମାନ ବ୍ୟବହାର କରୁଥିବା ଆପ୍‍, ଡାଟା ଆକ୍ସେସ୍‍ କରିପାରେ, କିନ୍ତୁ ଏହା କମ୍‍ ଥର କରିପାରେ। ଏହାର ଅର୍ଥ ହୋଇପାରେ ଯେମିତି ଆପଣ ଟାପ୍‍ ନକରିବା ପର୍ଯ୍ୟନ୍ତ ଇମେଜ୍‍ ଡିସପ୍ଲେ ହୁଏ ନାହିଁ।"</string>
+    <string name="data_saver_enable_title" msgid="7080620065745260137">"ଡାଟା ସେଭର୍‌ ଚାଲୁ କରିବେ?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"ଅନ୍ କରନ୍ତୁ"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
       <item quantity="other">%1$d ମିନିଟ୍‍ ପାଇଁ (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> ପର୍ଯ୍ୟନ୍ତ)</item>
@@ -1947,7 +1953,7 @@
     <string name="autofill_save_never" msgid="6821841919831402526">"କେବେ ବି ନୁହେଁ"</string>
     <string name="autofill_update_yes" msgid="4608662968996874445">"ଅପ୍‍ଡେଟ୍‌ କରନ୍ତୁ"</string>
     <string name="autofill_continue_yes" msgid="7914985605534510385">"ଜାରି ରଖନ୍ତୁ"</string>
-    <string name="autofill_save_type_password" msgid="5624528786144539944">"ପାସୱର୍ଡ୍"</string>
+    <string name="autofill_save_type_password" msgid="5624528786144539944">"ପାସୱାର୍ଡ"</string>
     <string name="autofill_save_type_address" msgid="3111006395818252885">"ଠିକଣା"</string>
     <string name="autofill_save_type_credit_card" msgid="3583795235862046693">"କ୍ରେଡିଟ୍ କାର୍ଡ"</string>
     <string name="autofill_save_type_debit_card" msgid="3169397504133097468">"ଡେବିଟ୍ କାର୍ଡ"</string>
