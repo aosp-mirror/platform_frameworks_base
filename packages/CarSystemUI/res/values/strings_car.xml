@@ -29,19 +29,4 @@
     <string name="user_add_user_message_setup">When you add a new user, that person needs to set up their space.</string>
     <!-- Message to inform user that the newly created user will have permissions to update apps for all other users. [CHAR LIMIT=100] -->
     <string name="user_add_user_message_update">Any user can update apps for all other users.</string>
-    <!-- Default messages displayed on the unlock dialog before unlock advertising started. [CHAR LIMIT=30]-->
-    <string name="unlock_dialog_message_default">Waiting\u2026</string>
-    <!-- Message to inform user that the IHU is looking for trusted device. [CHAR LIMIT=30] -->
-    <string name="unlock_dialog_message_start">Looking for trusted device\u2026</string>
-
-    <!-- Cancel Button text for user who has PIN as security lock. [CHAR LIMIT=30] -->
-    <string name="unlock_dialog_button_text_pin">Enter PIN instead</string>
-    <!-- Cancel Button text for user who has Pattern as security lock. [CHAR LIMIT=30] -->
-    <string name="unlock_dialog_button_text_pattern">Enter Pattern instead</string>
-    <!-- Cancel Button text for user who has Password as security lock. [CHAR LIMIT=30] -->
-    <string name="unlock_dialog_button_text_password">Enter Password instead</string>
-    <!-- Default user name shows on unlock dialog -->
-    <string name="unlock_dialog_default_user_name">Default Name</string>
-    <!-- Default title for unlock dialog -->
-    <string name="unlock_dialog_title">Unlock Dialogue</string>
 </resources>
