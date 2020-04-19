@@ -15,6 +15,7 @@
  */
 
 package com.android.internal.accessibility.util;
+
 import static com.android.internal.accessibility.common.ShortcutConstants.AccessibilityFragmentType;
 import static com.android.internal.accessibility.common.ShortcutConstants.SERVICES_SEPARATOR;
 
@@ -27,9 +28,11 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.ArraySet;
+import android.view.accessibility.AccessibilityManager;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -128,5 +131,28 @@ public final class AccessibilityUtils {
         return requestA11yButton
                 ? AccessibilityFragmentType.INVISIBLE_TOGGLE
                 : AccessibilityFragmentType.TOGGLE;
+    }
+
+    /**
+     * Returns if a {@code componentId} service is enabled.
+     *
+     * @param context The current context.
+     * @param componentId The component id that need to be checked.
+     * @return {@code true} if a {@code componentId} service is enabled.
+     */
+    public static boolean isAccessibilityServiceEnabled(Context context,
+            @NonNull String componentId) {
+        final AccessibilityManager am = context.getSystemService(AccessibilityManager.class);
+        final List<AccessibilityServiceInfo> enabledServices =
+                am.getEnabledAccessibilityServiceList(AccessibilityServiceInfo.FEEDBACK_ALL_MASK);
+
+        for (AccessibilityServiceInfo info : enabledServices) {
+            final String id = info.getComponentName().flattenToString();
+            if (id.equals(componentId)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

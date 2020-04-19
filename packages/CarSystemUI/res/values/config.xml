@@ -25,6 +25,7 @@
     <bool name="config_enableFullscreenUserSwitcher">true</bool>
 
     <!-- configure which system ui bars should be displayed -->
+    <bool name="config_enableTopNavigationBar">true</bool>
     <bool name="config_enableLeftNavigationBar">false</bool>
     <bool name="config_enableRightNavigationBar">false</bool>
     <bool name="config_enableBottomNavigationBar">true</bool>
@@ -76,6 +77,11 @@
         <item>com.android.systemui.car.userswitcher.FullscreenUserSwitcherViewMediator</item>
     </string-array>
 
+    <!-- List of package names that are allowed sources of app installation. -->
+    <string-array name="config_allowedAppInstallSources" translatable="false">
+        <item>com.android.vending</item>
+    </string-array>
+
     <!-- SystemUI Services: The classes of the stuff to start. -->
     <string-array name="config_systemUIServiceComponents" translatable="false">
         <item>com.android.systemui.util.NotificationChannels</item>
@@ -83,7 +89,7 @@
         <item>com.android.systemui.recents.Recents</item>
         <item>com.android.systemui.volume.VolumeUI</item>
         <item>com.android.systemui.stackdivider.Divider</item>
-        <item>com.android.systemui.statusbar.phone.StatusBar</item>
+<!--        <item>com.android.systemui.statusbar.phone.StatusBar</item>-->
         <item>com.android.systemui.usb.StorageNotification</item>
         <item>com.android.systemui.power.PowerUI</item>
         <item>com.android.systemui.media.RingtonePlayer</item>

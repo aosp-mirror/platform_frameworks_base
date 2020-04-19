@@ -16,26 +16,10 @@
 package android.hardware.biometrics;
 
 /**
- * Communication channel from
- *   1) BiometricDialogImpl (SysUI) back to BiometricService
- *   2) <Biometric>Service back to BiometricService
- * Receives messages from the above and does some handling before forwarding to BiometricPrompt
- * via IBiometricServiceReceiver.
+ * Communication channel from AuthController back to BiometricService.
  * @hide
  */
-oneway interface IBiometricServiceReceiverInternal {
-    // Notify BiometricService that authentication was successful. If user confirmation is required,
-    // the auth token must be submitted into KeyStore.
-    // TODO(b/151967372): Strength should be changed to authenticatorId
-    void onAuthenticationSucceeded(boolean requireConfirmation, in byte[] token,
-            boolean isStrongBiometric);
-    // Notify BiometricService authentication was rejected.
-    void onAuthenticationFailed();
-    // Notify BiometricService than an error has occured. Forward to the correct receiver depending
-    // on the cookie.
-    void onError(int cookie, int modality, int error, int vendorCode);
-    // Notifies that a biometric has been acquired.
-    void onAcquired(int acquiredInfo, String message);
+oneway interface IBiometricSysuiReceiver {
     // Notifies that the SystemUI dialog has been dismissed.
     void onDialogDismissed(int reason, in byte[] credentialAttestation);
     // Notifies that the user has pressed the "try again" button on SystemUI

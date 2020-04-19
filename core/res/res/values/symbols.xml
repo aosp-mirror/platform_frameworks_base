@@ -2424,6 +2424,7 @@
   <java-symbol type="string" name="biometric_not_recognized" />
   <java-symbol type="string" name="biometric_error_canceled" />
   <java-symbol type="string" name="biometric_error_device_not_secured" />
+  <java-symbol type="string" name="biometric_error_generic" />
 
   <!-- Fingerprint messages -->
   <java-symbol type="string" name="fingerprint_error_unable_to_process" />
@@ -3172,7 +3173,6 @@
   <java-symbol type="drawable" name="lockscreen_selected" />
 
   <java-symbol type="string" name="notification_header_divider_symbol_with_spaces" />
-  <java-symbol type="array" name="config_defaultCellBroadcastReceiverPkgs" />
 
   <java-symbol type="color" name="notification_primary_text_color_light" />
   <java-symbol type="color" name="notification_primary_text_color_dark" />

@@ -64,6 +64,7 @@ public class TunerResourceManager {
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     public static final int INVALID_RESOURCE_HANDLE = -1;
+    public static final int INVALID_OWNER_ID = -1;
     /**
      * Tuner resource type to help generate resource handle
      */
@@ -73,6 +74,7 @@ public class TunerResourceManager {
         TUNER_RESOURCE_TYPE_DESCRAMBLER,
         TUNER_RESOURCE_TYPE_LNB,
         TUNER_RESOURCE_TYPE_CAS_SESSION,
+        TUNER_RESOURCE_TYPE_MAX,
      })
     @Retention(RetentionPolicy.SOURCE)
     public @interface TunerResourceType {}
@@ -82,6 +84,7 @@ public class TunerResourceManager {
     public static final int TUNER_RESOURCE_TYPE_DESCRAMBLER = 2;
     public static final int TUNER_RESOURCE_TYPE_LNB = 3;
     public static final int TUNER_RESOURCE_TYPE_CAS_SESSION = 4;
+    public static final int TUNER_RESOURCE_TYPE_MAX = 5;
 
     private final ITunerResourceManager mService;
     private final int mUserId;
@@ -177,7 +180,8 @@ public class TunerResourceManager {
      * Updates the current TRM of the TunerHAL Frontend information.
      *
      * <p><strong>Note:</strong> This update must happen before the first
-     * {@link #requestFrontend(TunerFrontendRequest, int[])} and {@link #releaseFrontend(int)} call.
+     * {@link #requestFrontend(TunerFrontendRequest, int[])} and
+     * {@link #releaseFrontend(int, int)} call.
      *
      * @param infos an array of the available {@link TunerFrontendInfo} information.
      */
@@ -193,7 +197,7 @@ public class TunerResourceManager {
      * Updates the TRM of the current CAS information.
      *
      * <p><strong>Note:</strong> This update must happen before the first
-     * {@link #requestCasSession(CasSessionRequest, int[])} and {@link #releaseCasSession(int)}
+     * {@link #requestCasSession(CasSessionRequest, int[])} and {@link #releaseCasSession(int, int)}
      * call.
      *
      * @param casSystemId id of the updating CAS system.
@@ -211,7 +215,7 @@ public class TunerResourceManager {
      * Updates the TRM of the current Lnb information.
      *
      * <p><strong>Note:</strong> This update must happen before the first
-     * {@link #requestLnb(TunerLnbRequest, int[])} and {@link #releaseLnb(int)} call.
+     * {@link #requestLnb(TunerLnbRequest, int[])} and {@link #releaseLnb(int, int)} call.
      *
      * @param lnbIds ids of the updating lnbs.
      */
@@ -243,16 +247,16 @@ public class TunerResourceManager {
      * before this request.
      *
      * @param request {@link TunerFrontendRequest} information of the current request.
-     * @param frontendId a one-element array to return the granted frontendId. If
-     *                   no frontend granted, this will return {@link #INVALID_FRONTEND_ID}.
+     * @param frontendHandle a one-element array to return the granted frontendHandle. If
+     *                       no frontend granted, this will return {@link #INVALID_RESOURCE_HANDLE}.
      *
      * @return true if there is frontend granted.
      */
     public boolean requestFrontend(@NonNull TunerFrontendRequest request,
-                @Nullable int[] frontendId) {
+                @Nullable int[] frontendHandle) {
         boolean result = false;
         try {
-            result = mService.requestFrontend(request, frontendId);
+            result = mService.requestFrontend(request, frontendHandle);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -393,15 +397,15 @@ public class TunerResourceManager {
      * <p><strong>Note:</strong> {@link #setLnbInfoList(int[])} must be called before this request.
      *
      * @param request {@link TunerLnbRequest} information of the current request.
-     * @param lnbId a one-element array to return the granted Lnb id.
-     *              If no Lnb granted, this will return {@link #INVALID_LNB_ID}.
+     * @param lnbHandle a one-element array to return the granted Lnb handle.
+     *                  If no Lnb granted, this will return {@link #INVALID_RESOURCE_HANDLE}.
      *
      * @return true if there is Lnb granted.
      */
-    public boolean requestLnb(@NonNull TunerLnbRequest request, @NonNull int[] lnbId) {
+    public boolean requestLnb(@NonNull TunerLnbRequest request, @NonNull int[] lnbHandle) {
         boolean result = false;
         try {
-            result = mService.requestLnb(request, lnbId);
+            result = mService.requestLnb(request, lnbHandle);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -416,11 +420,12 @@ public class TunerResourceManager {
      * <p><strong>Note:</strong> {@link #setFrontendInfoList(TunerFrontendInfo[])} must be called
      * before this release.
      *
-     * @param frontendId the id of the released frontend.
+     * @param frontendHandle the handle of the released frontend.
+     * @param clientId the id of the client that is releasing the frontend.
      */
-    public void releaseFrontend(int frontendId) {
+    public void releaseFrontend(int frontendHandle, int clientId) {
         try {
-            mService.releaseFrontend(frontendId);
+            mService.releaseFrontend(frontendHandle, clientId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -432,10 +437,11 @@ public class TunerResourceManager {
      * <p>Client must call this whenever it releases an Demux.
      *
      * @param demuxHandle the handle of the released Tuner Demux.
+     * @param clientId the id of the client that is releasing the demux.
      */
-    public void releaseDemux(int demuxHandle) {
+    public void releaseDemux(int demuxHandle, int clientId) {
         try {
-            mService.releaseDemux(demuxHandle);
+            mService.releaseDemux(demuxHandle, clientId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -447,10 +453,11 @@ public class TunerResourceManager {
      * <p>Client must call this whenever it releases an Descrambler.
      *
      * @param descramblerHandle the handle of the released Tuner Descrambler.
+     * @param clientId the id of the client that is releasing the descrambler.
      */
-    public void releaseDescrambler(int descramblerHandle) {
+    public void releaseDescrambler(int descramblerHandle, int clientId) {
         try {
-            mService.releaseDescrambler(descramblerHandle);
+            mService.releaseDescrambler(descramblerHandle, clientId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -465,10 +472,11 @@ public class TunerResourceManager {
      * release.
      *
      * @param sessionResourceId the id of the released CAS session.
+     * @param clientId the id of the client that is releasing the cas session.
      */
-    public void releaseCasSession(int sessionResourceId) {
+    public void releaseCasSession(int sessionResourceId, int clientId) {
         try {
-            mService.releaseCasSession(sessionResourceId);
+            mService.releaseCasSession(sessionResourceId, clientId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -481,11 +489,12 @@ public class TunerResourceManager {
      *
      * <p><strong>Note:</strong> {@link #setLnbInfoList(int[])} must be called before this release.
      *
-     * @param lnbId the id of the released Tuner Lnb.
+     * @param lnbHandle the handle of the released Tuner Lnb.
+     * @param clientId the id of the client that is releasing the lnb.
      */
-    public void releaseLnb(int lnbId) {
+    public void releaseLnb(int lnbHandle, int clientId) {
         try {
-            mService.releaseLnb(lnbId);
+            mService.releaseLnb(lnbHandle, clientId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

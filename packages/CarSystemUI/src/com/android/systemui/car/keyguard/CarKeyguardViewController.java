@@ -92,7 +92,7 @@ public class CarKeyguardViewController extends OverlayViewController implements
                 }
             };
     private final CarUserManager.UserLifecycleListener mUserLifecycleListener = (e) -> {
-        if (e.getEventType() == CarUserManager.USER_LIFECYCLE_EVENT_TYPE_UNLOCKED) {
+        if (e.getEventType() == CarUserManager.USER_LIFECYCLE_EVENT_TYPE_SWITCHING) {
             revealKeyguardIfBouncerPrepared();
         }
     };

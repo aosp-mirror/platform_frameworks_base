@@ -112,13 +112,13 @@ message PendingEventProto {
   optional int32 flags = 4;
   optional int32 type = 5;
   optional .android.content.ConfigurationProto config = 6;
-  optional string shortcut_id = 7;
+  optional string shortcut_id = 7 [(.android.privacy).dest = DEST_EXPLICIT];
   optional int32 standby_bucket = 8;
-  optional string notification_channel_id = 9;
+  optional string notification_channel_id = 9 [(.android.privacy).dest = DEST_EXPLICIT];
   optional int32 instance_id = 10;
   optional string task_root_package = 11;
   optional string task_root_class = 12;
-  optional string locus_id = 13;
+  optional string locus_id = 13 [(.android.privacy).dest = DEST_EXPLICIT];
 }
 
 /**
@@ -128,7 +128,7 @@ message ObfuscatedPackagesProto {
   message PackagesMap {
     optional int32 package_token = 1;
     // The list of strings for each package where their indices are the token
-    repeated string strings = 2;
+    repeated string strings = 2 [(.android.privacy).dest = DEST_EXPLICIT];
   }
 
   optional int32 counter = 1;

@@ -28,7 +28,7 @@ import android.hardware.biometrics.IBiometricAuthenticator;
 interface IBiometricService {
     // Requests authentication. The service choose the appropriate biometric to use, and show
     // the corresponding BiometricDialog.
-    void authenticate(IBinder token, long sessionId, int userId,
+    void authenticate(IBinder token, long operationId, int userId,
             IBiometricServiceReceiver receiver, String opPackageName, in Bundle bundle,
             int callingUid, int callingPid, int callingUserId);
 
@@ -66,4 +66,6 @@ interface IBiometricService {
     // the requirements for integrating with Keystore. The AuthenticatorID are known in Keystore
     // land as SIDs, and are used during key generation.
     long[] getAuthenticatorIds();
+
+    int getCurrentStrength(int sensorId);
 }

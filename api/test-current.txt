@@ -107,12 +107,21 @@ package android.app {
   }
 
   public class ActivityOptions {
+    method @NonNull public static android.app.ActivityOptions makeCustomAnimation(@NonNull android.content.Context, int, int, @Nullable android.os.Handler, @Nullable android.app.ActivityOptions.OnAnimationStartedListener, @Nullable android.app.ActivityOptions.OnAnimationFinishedListener);
     method public static void setExitTransitionTimeout(long);
     method public void setLaunchActivityType(int);
     method public void setLaunchTaskId(int);
     method public void setLaunchWindowingMode(int);
     method public void setTaskAlwaysOnTop(boolean);
     method public void setTaskOverlay(boolean, boolean);
+  }
+
+  public static interface ActivityOptions.OnAnimationFinishedListener {
+    method public void onAnimationFinished();
+  }
+
+  public static interface ActivityOptions.OnAnimationStartedListener {
+    method public void onAnimationStarted();
   }
 
   public class ActivityTaskManager {
@@ -1311,6 +1320,34 @@ package android.hardware.lights {
 
 }
 
+package android.hardware.soundtrigger {
+
+  public class KeyphraseEnrollmentInfo {
+    ctor public KeyphraseEnrollmentInfo(@NonNull android.content.pm.PackageManager);
+    method @Nullable public android.hardware.soundtrigger.KeyphraseMetadata getKeyphraseMetadata(@NonNull String, @NonNull java.util.Locale);
+    method @Nullable public android.content.Intent getManageKeyphraseIntent(int, @NonNull String, @NonNull java.util.Locale);
+    method @NonNull public String getParseError();
+    method @NonNull public java.util.Collection<android.hardware.soundtrigger.KeyphraseMetadata> listKeyphraseMetadata();
+    field public static final int MANAGE_ACTION_ENROLL = 0; // 0x0
+    field public static final int MANAGE_ACTION_RE_ENROLL = 1; // 0x1
+    field public static final int MANAGE_ACTION_UN_ENROLL = 2; // 0x2
+  }
+
+  public final class KeyphraseMetadata implements android.os.Parcelable {
+    ctor public KeyphraseMetadata(int, @NonNull String, @NonNull java.util.Set<java.util.Locale>, int);
+    method public int describeContents();
+    method public int getId();
+    method @NonNull public String getKeyphrase();
+    method public int getRecognitionModeFlags();
+    method @NonNull public java.util.Set<java.util.Locale> getSupportedLocales();
+    method public boolean supportsLocale(@Nullable java.util.Locale);
+    method public boolean supportsPhrase(@Nullable String);
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.soundtrigger.KeyphraseMetadata> CREATOR;
+  }
+
+}
+
 package android.location {
 
   public final class GnssClock implements android.os.Parcelable {
@@ -2263,7 +2300,11 @@ package android.os {
 
   public class Environment {
     method public static java.io.File buildPath(java.io.File, java.lang.String...);
+    method @NonNull public static java.io.File getOdmDirectory();
+    method @NonNull public static java.io.File getOemDirectory();
     method @NonNull public static java.io.File getProductDirectory();
+    method @NonNull public static java.io.File getSystemExtDirectory();
+    method @NonNull public static java.io.File getVendorDirectory();
   }
 
   public final class FileUtils {

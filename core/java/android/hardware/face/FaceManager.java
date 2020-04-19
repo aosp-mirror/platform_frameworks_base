@@ -228,9 +228,9 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
                 useHandler(handler);
                 mAuthenticationCallback = callback;
                 mCryptoObject = crypto;
-                long sessionId = crypto != null ? crypto.getOpId() : 0;
+                final long operationId = crypto != null ? crypto.getOpId() : 0;
                 Trace.beginSection("FaceManager#authenticate");
-                mService.authenticate(mToken, sessionId, userId, mServiceReceiver,
+                mService.authenticate(mToken, operationId, userId, mServiceReceiver,
                         flags, mContext.getOpPackageName());
             } catch (RemoteException e) {
                 Log.w(TAG, "Remote exception while authenticating: ", e);

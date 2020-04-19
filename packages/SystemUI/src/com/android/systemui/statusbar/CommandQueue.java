@@ -34,7 +34,8 @@ import android.app.StatusBarManager.WindowType;
 import android.app.StatusBarManager.WindowVisibleState;
 import android.content.ComponentName;
 import android.content.Context;
-import android.hardware.biometrics.IBiometricServiceReceiverInternal;
+import android.hardware.biometrics.BiometricAuthenticator;
+import android.hardware.biometrics.IBiometricSysuiReceiver;
 import android.hardware.display.DisplayManager;
 import android.inputmethodservice.InputMethodService.BackDispositionMode;
 import android.os.Bundle;
@@ -262,7 +263,8 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
         default void onRotationProposal(int rotation, boolean isValid) { }
 
         default void showAuthenticationDialog(Bundle bundle,
-                IBiometricServiceReceiverInternal receiver, int biometricModality,
+                IBiometricSysuiReceiver receiver,
+                @BiometricAuthenticator.Modality int biometricModality,
                 boolean requireConfirmation, int userId, String opPackageName,
                 long operationId) { }
         default void onBiometricAuthenticated() { }
@@ -790,9 +792,9 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
     }
 
     @Override
-    public void showAuthenticationDialog(Bundle bundle, IBiometricServiceReceiverInternal receiver,
-            int biometricModality, boolean requireConfirmation, int userId, String opPackageName,
-            long operationId) {
+    public void showAuthenticationDialog(Bundle bundle, IBiometricSysuiReceiver receiver,
+            @BiometricAuthenticator.Modality int biometricModality, boolean requireConfirmation,
+            int userId, String opPackageName, long operationId) {
         synchronized (mLock) {
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = bundle;
@@ -1182,7 +1184,7 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
                     for (int i = 0; i < mCallbacks.size(); i++) {
                         mCallbacks.get(i).showAuthenticationDialog(
                                 (Bundle) someArgs.arg1,
-                                (IBiometricServiceReceiverInternal) someArgs.arg2,
+                                (IBiometricSysuiReceiver) someArgs.arg2,
                                 someArgs.argi1 /* biometricModality */,
                                 (boolean) someArgs.arg3 /* requireConfirmation */,
                                 someArgs.argi2 /* userId */,

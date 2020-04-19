@@ -424,6 +424,9 @@ message Atom {
         UserLifecycleJourneyReported user_lifecycle_journey_reported = 264 [(module) = "framework"];
         UserLifecycleEventOccurred user_lifecycle_event_occurred = 265 [(module) = "framework"];
         SdkExtensionStatus sdk_extension_status = 354;
+
+        // StatsdStats tracks platform atoms with ids upto 500.
+        // Update StatsdStats::kMaxPushedAtomId when atom ids here approach that value.
     }
 
     // Pulled events will start at field 10000.

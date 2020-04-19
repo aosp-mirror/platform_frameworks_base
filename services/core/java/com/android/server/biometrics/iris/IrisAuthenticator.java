@@ -17,10 +17,12 @@
 package com.android.server.biometrics.iris;
 
 import android.hardware.biometrics.IBiometricAuthenticator;
-import android.hardware.biometrics.IBiometricServiceReceiverInternal;
+import android.hardware.biometrics.IBiometricSensorReceiver;
 import android.hardware.iris.IIrisService;
 import android.os.IBinder;
 import android.os.RemoteException;
+
+import com.android.server.biometrics.SensorConfig;
 
 /**
  * TODO(b/141025588): Add JavaDoc.
@@ -28,13 +30,14 @@ import android.os.RemoteException;
 public final class IrisAuthenticator extends IBiometricAuthenticator.Stub {
     private final IIrisService mIrisService;
 
-    public IrisAuthenticator(IIrisService irisService) {
+    public IrisAuthenticator(IIrisService irisService, SensorConfig config) throws RemoteException {
         mIrisService = irisService;
+        mIrisService.initializeConfiguration(config.id);
     }
 
     @Override
     public void prepareForAuthentication(boolean requireConfirmation, IBinder token,
-            long sessionId, int userId, IBiometricServiceReceiverInternal wrapperReceiver,
+            long sessionId, int userId, IBiometricSensorReceiver sensorReceiver,
             String opPackageName, int cookie, int callingUid, int callingPid, int callingUserId)
             throws RemoteException {
     }

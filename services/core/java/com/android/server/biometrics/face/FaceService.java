@@ -34,8 +34,8 @@ import android.content.pm.UserInfo;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricsProtoEnums;
+import android.hardware.biometrics.IBiometricSensorReceiver;
 import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
-import android.hardware.biometrics.IBiometricServiceReceiverInternal;
 import android.hardware.biometrics.face.V1_0.IBiometricsFace;
 import android.hardware.biometrics.face.V1_0.IBiometricsFaceClientCallback;
 import android.hardware.biometrics.face.V1_0.OptionalBool;
@@ -240,6 +240,11 @@ public class FaceService extends BiometricServiceBase {
         @Override
         public boolean isStrongBiometric() {
             return FaceService.this.isStrongBiometric();
+        }
+
+        @Override
+        public int getSensorId() {
+            return FaceService.this.getSensorId();
         }
 
         @Override
@@ -449,7 +454,7 @@ public class FaceService extends BiometricServiceBase {
 
         @Override // Binder call
         public void prepareForAuthentication(boolean requireConfirmation, IBinder token, long opId,
-                int groupId, IBiometricServiceReceiverInternal wrapperReceiver,
+                int groupId, IBiometricSensorReceiver sensorReceiver,
                 String opPackageName, int cookie, int callingUid, int callingPid,
                 int callingUserId) {
             checkPermission(USE_BIOMETRIC_INTERNAL);
@@ -457,7 +462,7 @@ public class FaceService extends BiometricServiceBase {
             final boolean restricted = true; // BiometricPrompt is always restricted
             final AuthenticationClientImpl client = new FaceAuthClient(getContext(),
                     mDaemonWrapper, mHalDeviceId, token,
-                    new BiometricPromptServiceListenerImpl(wrapperReceiver),
+                    new BiometricPromptServiceListenerImpl(sensorReceiver),
                     mCurrentUserId, 0 /* groupId */, opId, restricted, opPackageName, cookie,
                     requireConfirmation, null /* surface */);
             authenticateInternal(client, opId, opPackageName, callingUid, callingPid,
@@ -734,19 +739,19 @@ public class FaceService extends BiometricServiceBase {
         }
 
         @Override // Binder call
-        public void initConfiguredStrength(int strength) {
+        public void initializeConfiguration(int sensorId) {
             checkPermission(USE_BIOMETRIC_INTERNAL);
-            initConfiguredStrengthInternal(strength);
+            initializeConfigurationInternal(sensorId);
         }
     }
 
     /**
-     * Receives callbacks from the ClientMonitor implementations. The results are forwarded to
-     * BiometricPrompt.
+     * Receives callbacks from the ClientMonitor implementations and forwards results to
+     * BiometricService.
      */
     private class BiometricPromptServiceListenerImpl extends BiometricServiceListener {
-        BiometricPromptServiceListenerImpl(IBiometricServiceReceiverInternal wrapperReceiver) {
-            super(wrapperReceiver);
+        BiometricPromptServiceListenerImpl(IBiometricSensorReceiver sensorReceiver) {
+            super(sensorReceiver);
         }
 
         @Override

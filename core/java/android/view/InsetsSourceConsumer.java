@@ -107,8 +107,8 @@ public class InsetsSourceConsumer {
         } else {
             // We are gaining control, and need to run an animation since previous state
             // didn't match
-            if (mRequestedVisible != mState.getSource(mType).isVisible()) {
-                if (mRequestedVisible) {
+            if (isRequestedVisibleAwaitingControl() != mState.getSource(mType).isVisible()) {
+                if (isRequestedVisibleAwaitingControl()) {
                     showTypes[0] |= toPublicType(getType());
                 } else {
                     hideTypes[0] |= toPublicType(getType());
@@ -136,6 +136,16 @@ public class InsetsSourceConsumer {
     @VisibleForTesting
     public InsetsSourceControl getControl() {
         return mSourceControl;
+    }
+
+    /**
+     * Determines if the consumer will be shown after control is available.
+     * Note: for system bars this method is same as {@link #isRequestedVisible()}.
+     *
+     * @return {@code true} if consumer has a pending show.
+     */
+    protected boolean isRequestedVisibleAwaitingControl() {
+        return isRequestedVisible();
     }
 
     int getType() {
@@ -263,7 +273,7 @@ public class InsetsSourceConsumer {
      * Sets requested visibility from the client, regardless of whether we are able to control it at
      * the moment.
      */
-    private void setRequestedVisible(boolean requestedVisible) {
+    protected void setRequestedVisible(boolean requestedVisible) {
         mRequestedVisible = requestedVisible;
         if (applyLocalVisibilityOverride()) {
             mController.notifyVisibilityChanged();

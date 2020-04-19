@@ -307,17 +307,20 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
             }
 
             ExpandableNotificationRow parent = (ExpandableNotificationRow) view;
-            List<ExpandableNotificationRow> children = parent.getNotificationChildren();
+            List<ExpandableNotificationRow> children = parent.getAttachedChildren();
             List<NotificationEntry> orderedChildren = mTmpChildOrderMap.get(parent.getEntry());
-
-            for (int childIndex = 0; orderedChildren != null && childIndex < orderedChildren.size();
-                    childIndex++) {
+            if (orderedChildren == null) {
+                // Not a group
+                continue;
+            }
+            parent.setUntruncatedChildCount(orderedChildren.size());
+            for (int childIndex = 0; childIndex < orderedChildren.size(); childIndex++) {
                 ExpandableNotificationRow childView = orderedChildren.get(childIndex).getRow();
                 if (children == null || !children.contains(childView)) {
                     if (childView.getParent() != null) {
-                        Log.wtf(TAG, "trying to add a notification child that already has " +
-                                "a parent. class:" + childView.getParent().getClass() +
-                                "\n child: " + childView);
+                        Log.wtf(TAG, "trying to add a notification child that already has "
+                                + "a parent. class:" + childView.getParent().getClass()
+                                + "\n child: " + childView);
                         // This shouldn't happen. We can recover by removing it though.
                         ((ViewGroup) childView.getParent()).removeView(childView);
                     }
@@ -349,7 +352,7 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
             }
 
             ExpandableNotificationRow parent = (ExpandableNotificationRow) view;
-            List<ExpandableNotificationRow> children = parent.getNotificationChildren();
+            List<ExpandableNotificationRow> children = parent.getAttachedChildren();
             List<NotificationEntry> orderedChildren = mTmpChildOrderMap.get(parent.getEntry());
 
             if (children != null) {
@@ -454,7 +457,7 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
             }
             if (row.isSummaryWithChildren()) {
                 List<ExpandableNotificationRow> notificationChildren =
-                        row.getNotificationChildren();
+                        row.getAttachedChildren();
                 int size = notificationChildren.size();
                 for (int i = size - 1; i >= 0; i--) {
                     stack.push(notificationChildren.get(i));

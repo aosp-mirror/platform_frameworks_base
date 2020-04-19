@@ -171,41 +171,46 @@ private:
     public:
         DataLoaderStub(IncrementalService& service, MountId id, DataLoaderParamsParcel&& params,
                        FileSystemControlParcel&& control,
-                       const DataLoaderStatusListener* externalListener)
-              : mService(service),
-                mId(id),
-                mParams(std::move(params)),
-                mControl(std::move(control)),
-                mListener(externalListener ? *externalListener : DataLoaderStatusListener()) {}
+                       const DataLoaderStatusListener* externalListener);
         ~DataLoaderStub();
+        // Cleans up the internal state and invalidates DataLoaderStub. Any subsequent calls will
+        // result in an error.
+        void cleanupResources();
 
-        bool create();
+        bool requestCreate();
         bool requestStart();
-        void destroy();
+        bool requestDestroy();
 
-        // accessors
+        void onDump(int fd);
+
         MountId id() const { return mId; }
         const DataLoaderParamsParcel& params() const { return mParams; }
-        int status() const { return mStatus; }
-        bool startRequested() const { return mStartRequested; }
 
     private:
         binder::Status onStatusChanged(MountId mount, int newStatus) final;
 
+        bool isValid() const { return mId != kInvalidStorageId; }
+
+        bool create();
         bool start();
-        bool waitForDestroy();
+        bool destroy();
+
+        bool setTargetStatus(int status);
+        bool waitForStatus(int status, Clock::duration duration);
+
+        bool fsmStep();
 
         IncrementalService& mService;
-        MountId const mId;
-        DataLoaderParamsParcel const mParams;
-        FileSystemControlParcel const mControl;
-        DataLoaderStatusListener const mListener;
+        MountId mId = kInvalidStorageId;
+        DataLoaderParamsParcel mParams;
+        FileSystemControlParcel mControl;
+        DataLoaderStatusListener mListener;
 
         std::mutex mStatusMutex;
         std::condition_variable mStatusCondition;
-        int mStatus = IDataLoaderStatusListener::DATA_LOADER_DESTROYED;
-        bool mStartRequested = false;
-        bool mDestroyRequested = true;
+        int mCurrentStatus = IDataLoaderStatusListener::DATA_LOADER_DESTROYED;
+        int mTargetStatus = IDataLoaderStatusListener::DATA_LOADER_DESTROYED;
+        TimePoint mTargetStatusTs = {};
     };
     using DataLoaderStubPtr = sp<DataLoaderStub>;
 

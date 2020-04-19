@@ -2003,7 +2003,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             if (self.isState(
                     ActivityStack.ActivityState.RESUMED, ActivityStack.ActivityState.PAUSING)) {
                 self.getDisplay().mDisplayContent.mAppTransition.overridePendingAppTransition(
-                        packageName, enterAnim, exitAnim, null);
+                        packageName, enterAnim, exitAnim, null, null);
             }
 
             Binder.restoreCallingIdentity(origId);
@@ -4065,7 +4065,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         return r != null
                 && r.getRootTask() != null
                 && r.inPinnedWindowingMode()
-                && r.getRootTask().isInStackLocked(r) != null;
+                && r.getRootTask().isInTask(r) != null;
     }
 
     @Override

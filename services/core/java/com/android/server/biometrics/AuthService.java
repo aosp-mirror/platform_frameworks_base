@@ -327,13 +327,13 @@ public class AuthService extends SystemService {
     }
 
     private void registerAuthenticator(SensorConfig config) throws RemoteException {
-        Slog.d(TAG, "Registering ID: " + config.mId
-                + " Modality: " + config.mModality
-                + " Strength: " + config.mStrength);
+        Slog.d(TAG, "Registering ID: " + config.id
+                + " Modality: " + config.modality
+                + " Strength: " + config.strength);
 
         final IBiometricAuthenticator.Stub authenticator;
 
-        switch (config.mModality) {
+        switch (config.modality) {
             case TYPE_FINGERPRINT:
                 final IFingerprintService fingerprintService = mInjector.getFingerprintService();
                 if (fingerprintService == null) {
@@ -342,8 +342,7 @@ public class AuthService extends SystemService {
                     return;
                 }
 
-                authenticator = new FingerprintAuthenticator(fingerprintService);
-                fingerprintService.initConfiguredStrength(config.mStrength);
+                authenticator = new FingerprintAuthenticator(fingerprintService, config);
                 break;
 
             case TYPE_FACE:
@@ -354,8 +353,7 @@ public class AuthService extends SystemService {
                     return;
                 }
 
-                authenticator = new FaceAuthenticator(faceService);
-                faceService.initConfiguredStrength(config.mStrength);
+                authenticator = new FaceAuthenticator(faceService, config);
                 break;
 
             case TYPE_IRIS:
@@ -366,16 +364,15 @@ public class AuthService extends SystemService {
                     return;
                 }
 
-                authenticator = new IrisAuthenticator(irisService);
-                irisService.initConfiguredStrength(config.mStrength);
+                authenticator = new IrisAuthenticator(irisService, config);
                 break;
 
             default:
-                Slog.e(TAG, "Unknown modality: " + config.mModality);
+                Slog.e(TAG, "Unknown modality: " + config.modality);
                 return;
         }
 
-        mBiometricService.registerAuthenticator(config.mId, config.mModality, config.mStrength,
+        mBiometricService.registerAuthenticator(config.id, config.modality, config.strength,
                 authenticator);
     }
 

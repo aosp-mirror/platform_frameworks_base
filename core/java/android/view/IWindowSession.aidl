@@ -225,13 +225,13 @@ interface IWindowSession {
      * For multi screen launcher type applications, xstep and ystep indicate
      * how big the increment is from one screen to another.
      */
-    void setWallpaperPosition(IBinder windowToken, float x, float y, float xstep, float ystep);
+    oneway void setWallpaperPosition(IBinder windowToken, float x, float y, float xstep, float ystep);
 
     /**
      * For wallpaper windows, sets the scale of the wallpaper based on
      * SystemUI behavior.
      */
-    void setWallpaperZoomOut(IBinder windowToken, float scale);
+    oneway void setWallpaperZoomOut(IBinder windowToken, float scale);
 
     /**
      * For wallpaper windows, sets whether the wallpaper should actually be
