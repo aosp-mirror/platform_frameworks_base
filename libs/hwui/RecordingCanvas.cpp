@@ -837,8 +837,8 @@ bool RecordingCanvas::onDoSaveBehind(const SkRect* subset) {
     return false;
 }
 
-void RecordingCanvas::didConcat44(const SkScalar colMajor[16]) {
-    fDL->concat(SkM44::ColMajor(colMajor));
+void RecordingCanvas::didConcat44(const SkM44& m) {
+    fDL->concat(m);
 }
 void RecordingCanvas::didConcat(const SkMatrix& matrix) {
     fDL->concat(matrix);

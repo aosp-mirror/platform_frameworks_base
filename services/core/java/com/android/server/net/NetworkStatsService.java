@@ -16,7 +16,6 @@
 
 package com.android.server.net;
 
-import static android.Manifest.permission.ACCESS_NETWORK_STATE;
 import static android.Manifest.permission.NETWORK_STATS_PROVIDER;
 import static android.Manifest.permission.READ_NETWORK_USAGE_HISTORY;
 import static android.Manifest.permission.UPDATE_DEVICE_STATS;
@@ -855,7 +854,8 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     @Override
     public NetworkStats getDataLayerSnapshotForUid(int uid) throws RemoteException {
         if (Binder.getCallingUid() != uid) {
-            mContext.enforceCallingOrSelfPermission(ACCESS_NETWORK_STATE, TAG);
+            Log.w(TAG, "Snapshots only available for calling UID");
+            return new NetworkStats(SystemClock.elapsedRealtime(), 0);
         }
 
         // TODO: switch to data layer stats once kernel exports

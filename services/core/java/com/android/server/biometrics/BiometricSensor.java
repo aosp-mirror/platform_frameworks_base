@@ -20,7 +20,7 @@ import android.annotation.IntDef;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.IBiometricAuthenticator;
-import android.hardware.biometrics.IBiometricServiceReceiverInternal;
+import android.hardware.biometrics.IBiometricSensorReceiver;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
@@ -89,12 +89,12 @@ public class BiometricSensor {
     }
 
     void goToStateWaitingForCookie(boolean requireConfirmation, IBinder token, long sessionId,
-            int userId, IBiometricServiceReceiverInternal internalReceiver, String opPackageName,
+            int userId, IBiometricSensorReceiver sensorReceiver, String opPackageName,
             int cookie, int callingUid, int callingPid, int callingUserId)
             throws RemoteException {
         mCookie = cookie;
         impl.prepareForAuthentication(requireConfirmation, token,
-                sessionId, userId, internalReceiver, opPackageName, mCookie,
+                sessionId, userId, sensorReceiver, opPackageName, mCookie,
                 callingUid, callingPid, callingUserId);
         mSensorState = STATE_WAITING_FOR_COOKIE;
     }
@@ -159,11 +159,12 @@ public class BiometricSensor {
     @Override
     public String toString() {
         return "ID(" + id + ")"
-                + " oemStrength: " + oemStrength
-                + " updatedStrength: " + mUpdatedStrength
-                + " modality " + modality
-                + " authenticator: " + impl
-                + " state: " + mSensorState
-                + " cookie: " + mCookie;
+                + "\n oemStrength: " + oemStrength
+                + "\n updatedStrength: " + mUpdatedStrength
+                + "\n modality " + modality
+                + "\n state: " + mSensorState
+                + "\n cookie: " + mCookie
+                + "\n authenticator: " + impl
+                + "\n";
     }
 }

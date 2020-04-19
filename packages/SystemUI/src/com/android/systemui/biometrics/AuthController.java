@@ -33,7 +33,7 @@ import android.content.res.Configuration;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricPrompt;
-import android.hardware.biometrics.IBiometricServiceReceiverInternal;
+import android.hardware.biometrics.IBiometricSysuiReceiver;
 import android.hardware.face.FaceManager;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.Bundle;
@@ -80,7 +80,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
     @VisibleForTesting
     BiometricTaskStackListener mTaskStackListener;
     @VisibleForTesting
-    IBiometricServiceReceiverInternal mReceiver;
+    IBiometricSysuiReceiver mReceiver;
 
     public class BiometricTaskStackListener extends TaskStackListener {
         @Override
@@ -275,7 +275,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
     }
 
     @Override
-    public void showAuthenticationDialog(Bundle bundle, IBiometricServiceReceiverInternal receiver,
+    public void showAuthenticationDialog(Bundle bundle, IBiometricSysuiReceiver receiver,
             @BiometricAuthenticator.Modality int biometricModality, boolean requireConfirmation,
             int userId, String opPackageName, long operationId) {
         final int authenticators = Utils.getAuthenticators(bundle);
@@ -415,7 +415,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
             mCurrentDialog.dismissWithoutCallback(false /* animate */);
         }
 
-        mReceiver = (IBiometricServiceReceiverInternal) args.arg2;
+        mReceiver = (IBiometricSysuiReceiver) args.arg2;
         mCurrentDialog = newDialog;
         mCurrentDialog.show(mWindowManager, savedState);
     }
