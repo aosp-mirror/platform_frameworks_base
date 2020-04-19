@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.systemui.voicerecognition.car;
+package com.android.systemui.car.voicerecognition;
 
-import static com.android.systemui.voicerecognition.car.ConnectedDeviceVoiceRecognitionNotifier.INVALID_VALUE;
-import static com.android.systemui.voicerecognition.car.ConnectedDeviceVoiceRecognitionNotifier.VOICE_RECOGNITION_STARTED;
+import static com.android.systemui.car.voicerecognition.ConnectedDeviceVoiceRecognitionNotifier.INVALID_VALUE;
+import static com.android.systemui.car.voicerecognition.ConnectedDeviceVoiceRecognitionNotifier.VOICE_RECOGNITION_STARTED;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;

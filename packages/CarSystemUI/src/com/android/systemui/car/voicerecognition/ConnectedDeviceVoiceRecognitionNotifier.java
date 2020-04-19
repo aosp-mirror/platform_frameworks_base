@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.voicerecognition.car;
+package com.android.systemui.car.voicerecognition;
 
 import android.bluetooth.BluetoothHeadsetClient;
 import android.content.BroadcastReceiver;
