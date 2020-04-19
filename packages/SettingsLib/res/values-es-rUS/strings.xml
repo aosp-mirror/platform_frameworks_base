@@ -251,8 +251,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Certificación de pantalla inalámbrica"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Habilitar registro detallado de Wi-Fi"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Limitación de búsqueda de Wi-Fi"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization (5437378364995776979) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Aleatorización de MAC de Wi-Fi Enhanced"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Datos móviles siempre activados"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Aceleración de hardware de conexión mediante dispositivo móvil"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Mostrar dispositivos Bluetooth sin nombre"</string>
@@ -285,8 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Mostrar opciones de certificación de pantalla inalámbrica"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Aumentar nivel de registro Wi-Fi; mostrar por SSID RSSI en el selector de Wi-Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Reduce el consumo de batería y mejora el rendimiento de la red"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization_summary (7925425746373704991) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Esta activación afecta el comportamiento de aleatorización de MAC para el modo de cliente solamente.\nCuando este modo está activado, todas las redes que tienen aleatorización de MAC habilitada pueden volver a establecer de manera aleatoria sus direcciones MAC durante la asociación, según cuándo el cliente se desconectó por última vez de la red. El proceso volver a establecer de manera aleatoria no se produce si el dispositivo se vuelve a conectar en 4 horas o menos."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Con uso medido"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Sin tarifa plana"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Tamaños de búfer de Logger"</string>
@@ -460,7 +458,7 @@
     <string name="battery_info_status_full" msgid="4443168946046847468">"Cargado"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Controlada por el administrador"</string>
     <string name="disabled" msgid="8017887509554714950">"Inhabilitada"</string>
-    <string name="external_source_trusted" msgid="1146522036773132905">"Permitida"</string>
+    <string name="external_source_trusted" msgid="1146522036773132905">"Con permiso"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"No permitida"</string>
     <string name="install_other_apps" msgid="3232595082023199454">"Instalar apps desconocidas"</string>
     <string name="home" msgid="973834627243661438">"Pantalla de configuración"</string>

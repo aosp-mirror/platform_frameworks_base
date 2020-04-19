@@ -212,8 +212,7 @@
     <string name="adb_wireless_settings" msgid="2295017847215680229">"வைஃபை பிழைதிருத்தம்"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"கிடைக்கும் சாதனங்களைப் பார்க்கவும் பயன்படுத்தவும் வைஃபை பிழைதிருத்தத்தை ஆன் செய்யவும்"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"QR குறியீட்டின் மூலம் சாதனத்தை இணைத்தல்"</string>
-    <!-- no translation found for adb_pair_method_qrcode_summary (7130694277228970888) -->
-    <skip />
+    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"QR குறியீடு ஸ்கேனரைப் பயன்படுத்தி புதிய சாதனங்களை இணைக்கலாம்"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"இணைத்தல் குறியீட்டின் மூலம் சாதனத்தை இணைத்தல்"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"ஆறு இலக்கக் குறியீட்டைப் பயன்படுத்தி புதிய சாதனங்களை இணைக்கலாம்"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"இணைக்கப்பட்ட சாதனங்கள்"</string>
@@ -232,8 +231,7 @@
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"சாதனத்துடன் இணைக்க முடியவில்லை. தவறான QR குறியீடாகவோ சாதனம் அதே நெர்வொர்க்குடன் இணைக்கப்படாமலோ இருக்கலாம்."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP முகவரி &amp; போர்ட்"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"QR குறியீட்டை ஸ்கேன் செய்தல்"</string>
-    <!-- no translation found for adb_wireless_qrcode_pairing_description (6014121407143607851) -->
-    <skip />
+    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"QR குறியீட்டை ஸ்கேன் செய்வதன் மூலம் சாதனத்தை வைஃபை மூலம் இணைக்கலாம்"</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"வைஃபை நெட்வொர்க்குடன் இணைக்கவும்"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, debug, dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"பிழைப் புகாருக்கான ஷார்ட்கட்"</string>
@@ -253,8 +251,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"வயர்லெஸ் காட்சிக்கான சான்றிதழ்"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"வைஃபை அதிவிவர நுழைவை இயக்கு"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"வைஃபை ஸ்கேனிங்கை வரம்பிடுதல்"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization (5437378364995776979) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"வைஃபை மேம்படுத்திய MAC ரேண்டம் ஆக்குதல்"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"மொபைல் டேட்டாவை எப்போதும் இயக்கத்திலேயே வை"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"வன்பொருள் விரைவுப்படுத்துதல் இணைப்பு முறை"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"பெயர்கள் இல்லாத புளூடூத் சாதனங்களைக் காட்டு"</string>
@@ -287,8 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"வயர்லெஸ் காட்சி சான்றுக்கான விருப்பங்களைக் காட்டு"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"வைஃபை நுழைவு அளவை அதிகரித்து, வைஃபை தேர்வுக் கருவியில் ஒவ்வொன்றிற்கும் SSID RSSI ஐ காட்டுக"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"பேட்டரி தீர்ந்துபோவதைக் குறைத்து நெட்வொர்க்கின் செயல்திறனை மேம்படுத்தும்"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization_summary (7925425746373704991) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"கிளையண்ட் பயன்முறைக்கான MAC ரேண்டம் ஆக்குதலை மட்டுமே இந்த நிலைமாற்றி பாதிக்கும்.\nஇந்தப் பயன்முறை இயக்கப்பட்டால் நெட்வொர்க்கிலிருந்து கிளையண்ட் கடைசியாக எப்போது துண்டிக்கப்பட்டது என்பதைப் பொறுத்து, MAC ரேண்டம் ஆக்குதல் இயக்கப்பட்டிருக்கும் நெட்வொர்க்குகள் இணைக்கப்படும்போது தங்கள் MAC முகவரிகளை மீண்டும் ரேண்டம் ஆக்கக்கூடும். சாதனம் 4 மணிநேரத்திலோ அதற்கு முன்னரோ மீண்டும் இணைக்கப்பட்டால் மீண்டும் ரேண்டம் ஆக்குதல் நிகழாது."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"கட்டண நெட்வொர்க்"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"கட்டணமில்லா நெட்வொர்க்"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"லாகர் பஃபர் அளவுகள்"</string>
@@ -377,10 +373,8 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"பின்புல ஆப்ஸுக்கு, ஆப்ஸ் பதிலளிக்கவில்லை என்ற செய்தியைக் காட்டும்"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"அறிவிப்புச் சேனல் எச்சரிக்கைகளைக் காட்டு"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"ஆப்ஸானது சரியான சேனல் இல்லாமல் அறிவிப்பை இடுகையிடும் போது, திரையில் எச்சரிக்கையைக் காட்டும்"</string>
-    <!-- no translation found for enforce_shortcuts_for_conversations (7040735163945040763) -->
-    <skip />
-    <!-- no translation found for enforce_shortcuts_for_conversations_summary (1860168037282467862) -->
-    <skip />
+    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"உரையாடல் அறிவிப்புகளுக்கான ஷார்ட்கட்களை செயல்படுத்து"</string>
+    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"அறிவிப்புகளானது உரையாடல் பிரிவில் தோன்ற வேண்டும் எனில் அவை நீண்ட காலம் செயல்பாட்டில் இருந்த பகிர்தலுக்கான ஷார்ட்கட் ஆதரவைக் கொண்டிருக்க வேண்டும்"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"ஆப்ஸை வெளிப்புறச் சேமிப்பிடத்தில் அனுமதி"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"மேனிஃபெஸ்ட் மதிப்புகளைப் பொருட்படுத்தாமல், எல்லா ஆப்ஸையும் வெளிப்புறச் சேமிப்பிடத்தில் எழுத அனுமதிக்கும்"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"செயல்பாடுகளை அளவுமாறக்கூடியதாக அமை"</string>

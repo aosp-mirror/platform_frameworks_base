@@ -144,10 +144,10 @@
     <string name="data_usage_uninstalled_apps_users" msgid="5533981546921913295">"Kendutako aplikazioak eta erabiltzaileak"</string>
     <string name="data_usage_ota" msgid="7984667793701597001">"Sistemaren eguneratzeak"</string>
     <string name="tether_settings_title_usb" msgid="3728686573430917722">"Konexioa partekatzea (USB)"</string>
-    <string name="tether_settings_title_wifi" msgid="4803402057533895526">"Sare publiko eramangarria"</string>
+    <string name="tether_settings_title_wifi" msgid="4803402057533895526">"Wifi-gune eramangarria"</string>
     <string name="tether_settings_title_bluetooth" msgid="916519902721399656">"Konexioa partekatzea (Bluetooth)"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="1727111807207577322">"Konexioa partekatzea"</string>
-    <string name="tether_settings_title_all" msgid="8910259483383010470">"Konexioa partekatzea eta sare publikoak"</string>
+    <string name="tether_settings_title_all" msgid="8910259483383010470">"Konexioa partekatzea eta wifi-gune eramangarriak"</string>
     <string name="managed_user_title" msgid="449081789742645723">"Laneko aplikazio guztiak"</string>
     <string name="user_guest" msgid="6939192779649870792">"Gonbidatua"</string>
     <string name="unknown" msgid="3544487229740637809">"Ezezaguna"</string>
@@ -251,8 +251,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Hari gabe bistaratzeko ziurtagiria"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Gaitu wifi-sareetan saioa hasteko modu xehatua"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Wifi-sareen bilaketaren muga"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization (5437378364995776979) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Wifi bidez hobetutako MAC helbideak ausaz aukeratzeko eginbidea"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Datu-konexioa beti aktibo"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Konexioa partekatzeko hardwarearen azelerazioa"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Erakutsi Bluetooth bidezko gailuak izenik gabe"</string>
@@ -285,8 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Erakutsi hari gabe bistaratzeko ziurtagiriaren aukerak"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Erakutsi datu gehiago wifi-sareetan saioa hastean. Erakutsi sarearen identifikatzailea eta seinalearen indarra wifi-sareen hautatzailean."</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Bateria gutxiago kontsumituko da, eta sarearen errendimendua hobetuko."</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization_summary (7925425746373704991) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Bezero modurako soilik MAC helbideak ausaz aukeratzeko eginbidearen portaerari eragiten dio etengailu honek.\nModu hau aktibatuta dagoenean, baliteke MAC helbideak ausaz aukeratzeko eginbidea aktibatuta daukaten sareen MAC helbideak berriro ausaz aukeratzea haiek lotu bitartean, bezeroa saretik deskonektatuta ematen duen denboraren arabera. Gailua lau ordu edo gutxiagoren buruan berriro konektatzen bada, ez da berriro MAC helbiderik ausaz aukeratuko."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Sare neurtua"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Neurtu gabeko sarea"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Erregistroen buffer-tamainak"</string>
@@ -462,7 +460,7 @@
     <string name="disabled" msgid="8017887509554714950">"Desgaituta"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Baimena dauka"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"Ez dauka baimenik"</string>
-    <string name="install_other_apps" msgid="3232595082023199454">"Aplikazio ezezagunak instalatzea"</string>
+    <string name="install_other_apps" msgid="3232595082023199454">"Instalatu aplikazio ezezagunak"</string>
     <string name="home" msgid="973834627243661438">"Ezarpenen hasierako pantaila"</string>
   <string-array name="battery_labels">
     <item msgid="7878690469765357158">"% 0"</item>

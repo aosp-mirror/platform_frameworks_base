@@ -543,7 +543,7 @@
     <string name="user_add_user_type_title" msgid="551279664052914497">"ထပ်ထည့်ရန်"</string>
     <string name="user_new_user_name" msgid="60979820612818840">"အသုံးပြုသူအသစ်"</string>
     <string name="user_new_profile_name" msgid="2405500423304678841">"ကိုယ်ရေးအချက်အလက်အသစ်"</string>
-    <string name="user_info_settings_title" msgid="6351390762733279907">"သုံးစွဲသူအကြောင်း"</string>
+    <string name="user_info_settings_title" msgid="6351390762733279907">"အသုံးပြုသူအကြောင်း"</string>
     <string name="profile_info_settings_title" msgid="105699672534365099">"ကိုယ်ရေးအချက်အလက်"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"ကန့်သတ်ကိုယ်ရေးအချက်အလက်တစ်ခုကို မပြုလုပ်မီ သင်၏ အပလီကေးရှင်းများနှင့် ကိုယ်ပိုင်အချက်အလက်များကို ကာကွယ်ရန် မျက်နှာပြင်သော့ချခြင်းကို စီမံရန် လိုအပ်လိမ့်မည်"</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"သော့ချရန် သတ်မှတ်ပါ"</string>

@@ -251,8 +251,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Зымсыз мониторлорду тастыктамалоо"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Wi‑Fi дайын-даректүү журналы"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Wi‑Fi тармактарын издөөнү жөнгө салуу"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization (5437378364995776979) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Wi‑Fi иштетилген MAC даректерин башаламан түзүү"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Мобилдик Интернет иштей берет"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Модем режиминде аппараттын иштешин тездетүү"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Аталышсыз Bluetooth түзмөктөрү көрсөтүлсүн"</string>
@@ -285,8 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Зымсыз мониторлорду тастыктамалоо параметрлери көрүнүп турат"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Wi-Fi тандалганда ар бир SSID үчүн RSSI көрүнүп турат"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Батареянын коротулушун чектеп, тармактын иштешин жакшыртат"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization_summary (7925425746373704991) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Бул жөндөөнүн өчүрүлүшү/күйгүзүлүшү MAC даректерин башаламан түзүү тартибине кардар режиминде гана таасирин тийгизет.\nБул режим иштетилсе, MAC даректерин башаламан түзүү иштетилген бардык тармактарда байланышуу учурунда, кардар тармактан акыркы жолу качан ажыратылганына жараша, алардын MAC даректери кайрадан башаламан түзүлүшү мүмкүн. Эгер түзмөк 4 саатка жетпеген убакытта кайра туташтырылса, даректерди башаламан түзүү аракети аткарылбайт."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Трафик ченелет"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Чектелбеген тармак"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Журнал буферинин өлчөмү"</string>
@@ -511,7 +509,7 @@
     <string name="zen_mode_duration_settings_title" msgid="1553451650289651489">"Узактыгы"</string>
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Ар дайым суралсын"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"Бул функция өчүрүлгөнгө чейин"</string>
-    <string name="time_unit_just_now" msgid="3006134267292728099">"Азыр эле"</string>
+    <string name="time_unit_just_now" msgid="3006134267292728099">"Жаңы эле"</string>
     <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Телефондун динамиги"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Туташууда маселе келип чыкты. Түзмөктү өчүрүп, кайра күйгүзүп көрүңүз"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Зымдуу аудио түзмөк"</string>
@@ -538,7 +536,7 @@
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Эгер түзмөгүңүздү дагы бир адам колдонуп жаткан болсо, кошумча профилдерди түзүп коюңуз. Профилдин ээси аны өзү каалагандай жөндөп, тушкагаздарды коюп, керектүү колдонмолорду орнотуп алат. Мындан тышкары, колдонуучулар түзмөктүн Wi‑Fi´ды өчүрүү/күйгүзүү сыяктуу жалпы жөндөөлөрүн өзгөртө алат.\n\nПрофиль түзүлгөндөн кийин, аны жөндөп алуу керек.\n\nЖалпы колдонмолорду баары жаңырта алат, бирок атайын мүмкүнчүлүктөр өз-өзүнчө жөндөлөт."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Жаңы колдонуучу кошулганда, ал өз мейкиндигин түзүп алышы керек.\n\nКолдонмолорду бир колдонуучу жаңыртканда, ал калган бардык колдонуучулар үчүн да жаңырат."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Профилди жөндөйсүзбү?"</string>
-    <string name="user_setup_dialog_message" msgid="269931619868102841">"Өз мейкиндигин жөндөп алышы үчүн түзмөктү колдонуучуга беришиңиз керек."</string>
+    <string name="user_setup_dialog_message" msgid="269931619868102841">"Өз мейкиндигин жөндөп алышы үчүн, түзмөктү колдонуучуга беришиңиз керек."</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Профайл азыр түзүлсүнбү?"</string>
     <string name="user_setup_button_setup_now" msgid="1708269547187760639">"Азыр түзүү"</string>
     <string name="user_setup_button_setup_later" msgid="8712980133555493516">"Азыр эмес"</string>

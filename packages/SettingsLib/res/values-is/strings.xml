@@ -251,8 +251,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Vottun þráðlausra skjáa"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Kveikja á ítarlegri skráningu Wi-Fi"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Hægja á Wi‑Fi leit"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization (5437378364995776979) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Slembival MAC-vistfanga með Wi-Fi styrk"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Alltaf kveikt á farsímagögnum"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Vélbúnaðarhröðun fyrir tjóðrun"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Sýna Bluetooth-tæki án heita"</string>
@@ -285,8 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Sýna valkosti fyrir vottun þráðlausra skjáa"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Auka skráningarstig Wi-Fi, sýna RSSI fyrir hvert SSID í Wi-Fi vali"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Dregur úr rafhlöðunotkun og eykur netafköst"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization_summary (7925425746373704991) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Þessi rofi hefur eingöngu áhrif á slembival MAC-vistfanga fyrir biðlarastillingu.\nÞegar þessi stilling er virk geta öll netkerfi sem eru með slembival MAC-vistfanga virkt látið slembiraða MAC-vistföngum aftur við tengingu, allt eftir því hvenær biðlarinn aftengdist netinu síðast. Endurslembiröðun á sér ekki stað ef tækið tengist aftur innan fjögurra klukkustunda."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Mæld notkun"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Notkun ekki mæld"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Annálsritastærðir biðminna"</string>
@@ -546,7 +544,7 @@
     <string name="user_new_user_name" msgid="60979820612818840">"Nýr notandi"</string>
     <string name="user_new_profile_name" msgid="2405500423304678841">"Nýtt snið"</string>
     <string name="user_info_settings_title" msgid="6351390762733279907">"Notandaupplýsingar"</string>
-    <string name="profile_info_settings_title" msgid="105699672534365099">"Upplýsingar um snið"</string>
+    <string name="profile_info_settings_title" msgid="105699672534365099">"Notandaupplýsingar"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"Áður en þú getur búið til takmarkað snið þarftu að setja upp skjálás til að vernda forritin þín og persónuleg gögn."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"Velja lás"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"Skipta yfir í <xliff:g id="USER_NAME">%s</xliff:g>"</string>

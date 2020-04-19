@@ -251,8 +251,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"ਵਾਇਰਲੈੱਸ ਡਿਸਪਲੇ ਪ੍ਰਮਾਣੀਕਰਨ"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"ਵਾਈ-ਫਾਈ ਵਰਬੋਸ ਲੌਗਿੰਗ ਚਾਲੂ ਕਰੋ"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"ਸੀਮਤ ਵਾਈ‑ਫਾਈ ਸਕੈਨ"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization (5437378364995776979) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"ਵਾਈ-ਫਾਈ ਵਿਸਤ੍ਰਿਤ MAC ਬੇਤਰਤੀਬਵਾਰ"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"ਮੋਬਾਈਲ ਡਾਟਾ ਹਮੇਸ਼ਾਂ ਕਿਰਿਆਸ਼ੀਲ"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"ਟੈਦਰਿੰਗ ਹਾਰਡਵੇਅਰ ਐਕਸੈੱਲਰੇਸ਼ਨ"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"ਅਨਾਮ ਬਲੂਟੁੱਥ ਡੀਵਾਈਸਾਂ ਦਿਖਾਓ"</string>
@@ -285,8 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"ਵਾਇਰਲੈੱਸ ਡਿਸਪਲੇ ਪ੍ਰਮਾਣੀਕਰਨ ਲਈ ਚੋਣਾਂ ਪ੍ਰਦਰਸ਼ਿਤ ਕਰੋ"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"ਵਾਈ‑ਫਾਈ ਲੌਗਿੰਗ ਪੱਧਰ ਵਧਾਓ, ਵਾਈ‑ਫਾਈ Picker ਵਿੱਚ ਪ੍ਰਤੀ SSID RSSI ਦਿਖਾਓ"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"ਬੈਟਰੀ ਦੀ ਵਰਤੋਂ ਘਟਾ ਕੇ ਨੈੱਟਵਰਕ ਕਾਰਗੁਜ਼ਾਰੀ ਨੂੰ ਬਿਹਤਰ ਬਣਾਉਂਦਾ ਹੈ"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization_summary (7925425746373704991) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"ਇਹ ਟੌਗਲ ਸਿਰਫ਼ ਕਲਾਇੰਟ ਮੋਡ ਲਈ MAC ਦੇ ਬੇਤਰਤੀਬਵਾਰ ਵਿਵਹਾਰ \'ਤੇ ਅਸਰ ਪਾਉਂਦਾ ਹੈ।\nਜਦੋਂ ਇਸ ਮੋਡ ਨੂੰ ਕਿਰਿਆਸ਼ੀਲ ਕੀਤਾ ਜਾਂਦਾ ਹੈ, ਤਾਂ ਜਿਹੜੇ ਵੀ ਨੈੱਟਵਰਕਾਂ ਵਿੱਚ MAC ਬੇਤਰਤੀਬਵਾਰ ਚਾਲੂ ਹੈ ਉਹਨਾਂ ਦੇ MAC ਪਤਿਆਂ ਦਾ ਸਾਂਝੇਦਾਰੀ ਦੌਰਾਨ ਮੁੜ-ਬੇਤਰਤੀਬੀਕਰਨ ਕੀਤਾ ਜਾ ਸਕਦਾ ਹੈ, ਜੋ ਕਲਾਇੰਟ ਦੇ ਪਿਛਲੀ ਵਾਰ ਨੈੱਟਵਰਕ ਤੋਂ ਡਿਸਕਨੈਕਟ ਹੋਣ \'ਤੇ ਨਿਰਭਰ ਕਰਦਾ ਹੈ। ਜੇ ਡੀਵਾਈਸ 4 ਘੰਟੇ ਜਾਂ ਘੱਟ ਸਮੇਂ ਵਿੱਚ ਮੁੜ-ਕਨੈਕਟ ਹੋ ਜਾਂਦਾ ਹੈ, ਤਾਂ ਮੁੜ-ਬੇਤਰਤੀਬਵਾਰ ਨਹੀਂ ਹੋਵੇਗਾ।"</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"ਮੀਟਰਬੱਧ ਕੀਤਾ ਗਿਆ"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"ਗੈਰ-ਮੀਟਰਬੱਧ ਕੀਤਾ ਗਿਆ"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"ਲੌਗਰ ਬਫ਼ਰ ਆਕਾਰ"</string>

@@ -487,7 +487,7 @@
     <string name="ims_reg_title" msgid="8197592958123671062">"Status pendaftaran IMS"</string>
     <string name="ims_reg_status_registered" msgid="884916398194885457">"Terdaftar"</string>
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"Tidak terdaftar"</string>
-    <string name="status_unavailable" msgid="5279036186589861608">"Tidak Tersedia"</string>
+    <string name="status_unavailable" msgid="5279036186589861608">"Tidak tersedia"</string>
     <string name="wifi_status_mac_randomized" msgid="466382542497832189">"MAC diacak"</string>
     <plurals name="wifi_tether_connected_summary" formatted="false" msgid="6317236306047306139">
       <item quantity="other">%1$d perangkat terhubung</item>
@@ -533,7 +533,7 @@
     <string name="user_add_user_item_title" msgid="2394272381086965029">"Pengguna"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Profil dibatasi"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Tambahkan pengguna baru?"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"Anda dapat berbagi penggunaan perangkat ini dengan orang lain dengan membuat pengguna tambahan. Setiap pengguna memiliki ruang sendiri, yang dapat disesuaikan dengan aplikasi, wallpaper, dan lainnya.\n\nSaat Anda menambahkan pengguna baru, pengguna tersebut perlu menyiapkan ruangnya.\n\nPengguna mana pun dapat mengupdate aplikasi untuk semua pengguna lainnya. Layanan dan setelan aksesibilitas mungkin tidak ditransfer ke pengguna baru."</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"Anda dapat menggunakan perangkat ini bersama orang lain dengan membuat pengguna tambahan. Setiap pengguna memiliki ruang sendiri, yang dapat disesuaikan dengan aplikasi, wallpaper, dan lainnya. Pengguna juga dapat menyesuaikan setelan perangkat seperti Wi-Fi yang dapat memengaruhi semua pengguna lain.\n\nSaat Anda menambahkan pengguna baru, pengguna tersebut perlu menyiapkan ruangnya.\n\nPengguna mana pun dapat mengupdate aplikasi untuk semua pengguna lainnya. Layanan dan setelan aksesibilitas mungkin tidak ditransfer ke pengguna baru."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Saat Anda menambahkan pengguna baru, orang tersebut perlu menyiapkan ruang mereka sendiri.\n\nPengguna mana pun dapat memperbarui aplikasi untuk semua pengguna lain."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Siapkan pengguna sekarang?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Pastikan orang tersebut ada untuk mengambil perangkat dan menyiapkan ruangnya"</string>

@@ -420,7 +420,7 @@
     <string name="daltonizer_mode_deuteranomaly" msgid="3507284319584683963">"녹색약(적녹)"</string>
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"적색약(적녹)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"청색약(청황)"</string>
-    <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"색보정"</string>
+    <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"색상 보정"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"색상 보정을 사용하면 기기에 표시되는 색상을 조절할 수 있습니다."</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> 우선 적용됨"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g>, <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
@@ -432,8 +432,8 @@
     <skip />
     <string name="power_discharge_by_enhanced" msgid="563438403581662942">"사용량(<xliff:g id="LEVEL">%2$s</xliff:g>)을 기준으로 약 <xliff:g id="TIME">%1$s</xliff:g>까지 사용 가능"</string>
     <string name="power_discharge_by_only_enhanced" msgid="3268796172652988877">"사용량을 기준으로 약 <xliff:g id="TIME">%1$s</xliff:g>까지 사용 가능"</string>
-    <string name="power_discharge_by" msgid="4113180890060388350">"약 <xliff:g id="TIME">%1$s</xliff:g>까지 사용 가능(<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_discharge_by_only" msgid="92545648425937000">"약 <xliff:g id="TIME">%1$s</xliff:g>까지 사용 가능"</string>
+    <string name="power_discharge_by" msgid="4113180890060388350">"대략 <xliff:g id="TIME">%1$s</xliff:g>까지 사용 가능(<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_discharge_by_only" msgid="92545648425937000">"대략 <xliff:g id="TIME">%1$s</xliff:g>까지 사용 가능"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"<xliff:g id="TIME">%1$s</xliff:g>까지"</string>
     <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"예상 배터리 종료 시간: <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"<xliff:g id="THRESHOLD">%1$s</xliff:g> 미만 남음"</string>
@@ -536,7 +536,7 @@
     <string name="user_add_user_message_long" msgid="1527434966294733380">"추가 사용자를 만들어 다른 사용자와 기기를 공유할 수 있습니다. 각 사용자는 앱, 배경화면 등으로 맞춤설정할 수 있는 자신만의 공간을 갖게 됩니다. 또한 모든 사용자에게 영향을 미치는 Wi‑Fi와 같은 기기 설정도 조정할 수 있습니다.\n\n추가된 신규 사용자는 자신의 공간을 설정해야 합니다.\n\n모든 사용자가 앱을 업데이트할 수 있으며, 업데이트는 다른 사용자에게도 적용됩니다. 접근성 설정 및 서비스는 신규 사용자에게 이전되지 않을 수도 있습니다."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"추가된 새로운 사용자는 자신의 공간을 설정해야 합니다.\n\n모든 사용자는 다른 사용자들을 위하여 앱을 업데이트할 수 있습니다."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"지금 사용자를 설정하시겠습니까?"</string>
-    <string name="user_setup_dialog_message" msgid="269931619868102841">"사용자가 기기에서 자신의 공간을 설정하도록 하세요."</string>
+    <string name="user_setup_dialog_message" msgid="269931619868102841">"사용자가 기기를 사용하여 자신의 공간을 설정할 수 있도록 하세요."</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"지금 프로필을 설정하시겠습니까?"</string>
     <string name="user_setup_button_setup_now" msgid="1708269547187760639">"지금 설정"</string>
     <string name="user_setup_button_setup_later" msgid="8712980133555493516">"나중에"</string>

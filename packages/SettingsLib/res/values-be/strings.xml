@@ -156,7 +156,7 @@
     <string name="launch_defaults_none" msgid="8049374306261262709">"Параметры па змаўчанні не ўсталяваныя"</string>
     <string name="tts_settings" msgid="8130616705989351312">"Налады Text-to-speech"</string>
     <string name="tts_settings_title" msgid="7602210956640483039">"Сінтэз маўлення"</string>
-    <string name="tts_default_rate_title" msgid="3964187817364304022">"Хуткасць гаворкі"</string>
+    <string name="tts_default_rate_title" msgid="3964187817364304022">"Хуткасць маўлення"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"Хуткасць, з якой кажуць тэкст"</string>
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"Тон"</string>
     <string name="tts_default_pitch_summary" msgid="9132719475281551884">"Уплывае на тон сінтэзаванага маўлення"</string>
@@ -251,8 +251,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Сертыфікацыя бесправаднога экрана"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Уключыць падрабязны журнал Wi‑Fi"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Рэгуляванне пошуку сетак Wi‑Fi"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization (5437378364995776979) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Палепшаная Wi‑Fi рандамізацыя MAC-адраса"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Мабільная перадача даных заўсёды актыўная"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Апаратнае паскарэнне ў рэжыме мадэма"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Паказваць прылады Bluetooth без назваў"</string>
@@ -285,8 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Паказаць опцыі сертыфікацыі бесправаднога экрана"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Пры выбары сеткі Wi-Fi указваць у журнале RSSI для кожнага SSID"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Зніжае расход зараду акумулятара і павышае прадукцыйнасць мабільных сетак"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization_summary (7925425746373704991) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Гэты пераключальнік уплывае на рандамізацыю MAC-адрасоў толькі ў кліенцкім рэжыме.\nКалі гэты рэжым актываваны, ва ўсіх сетках з уключанай рандамізацыяй MAC-адрасоў падчас прывязвання можа выконвацца паўторная рандамізацыя ў залежнасці ад таго, калі кліент адключаўся ад сеткі ў апошні раз. Паўторная рандамізацыя не выконваецца, калі прылада зноў падключаецца да сеткі менш чым праз 4 гадзіны."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Сетка з улікам трафіка"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Сетка без уліку трафіка"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Памеры буфера журнала"</string>
@@ -547,7 +545,7 @@
     <string name="user_add_user_type_title" msgid="551279664052914497">"Дадаць"</string>
     <string name="user_new_user_name" msgid="60979820612818840">"Новы карыстальнік"</string>
     <string name="user_new_profile_name" msgid="2405500423304678841">"Новы профiль"</string>
-    <string name="user_info_settings_title" msgid="6351390762733279907">"Інфармацыя карыстальніка"</string>
+    <string name="user_info_settings_title" msgid="6351390762733279907">"Звесткі карыстальніка"</string>
     <string name="profile_info_settings_title" msgid="105699672534365099">"Звесткi профiлю"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"Перш чым вы зможаце стварыць профіль з абмежаваннямi, вам трэба наладзіць блакiроўку экрана для абароны сваiх дадаткаў і асабістай інфармацыі."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"Усталёўка блакiроўкi"</string>

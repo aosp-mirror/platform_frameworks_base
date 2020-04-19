@@ -194,7 +194,7 @@
     <item msgid="581904787661470707">"ഏറ്റവും വേഗത്തിൽ"</item>
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"പ്രൊഫൈൽ തിരഞ്ഞെടുക്കുക"</string>
-    <string name="category_personal" msgid="6236798763159385225">"വ്യക്തിഗതം"</string>
+    <string name="category_personal" msgid="6236798763159385225">"വ്യക്തിപരം"</string>
     <string name="category_work" msgid="4014193632325996115">"ഔദ്യോഗികം"</string>
     <string name="development_settings_title" msgid="140296922921597393">"ഡെവലപ്പർ ഓ‌പ്ഷനുകൾ"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"ഡെവലപ്പർ ഓ‌പ്ഷനുകൾ പ്രവർത്തനക്ഷമമാക്കുക"</string>
@@ -212,8 +212,7 @@
     <string name="adb_wireless_settings" msgid="2295017847215680229">"വയർലെസ് ഡീബഗ്ഗിംഗ്"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"ലഭ്യമായ ഉപകരണങ്ങൾ കാണാനും ഉപയോഗിക്കാനും വയർലെസ് ഡീബഗ്ഗിംഗ് ഓണാക്കുക"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"QR കോഡ് ഉപയോഗിച്ച് ഉപകരണം ജോടിയാക്കുക"</string>
-    <!-- no translation found for adb_pair_method_qrcode_summary (7130694277228970888) -->
-    <skip />
+    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"QR കോഡ് സ്‌കാനർ ഉപയോഗിച്ച് പുതിയ ഉപകരണങ്ങൾ ജോടിയാക്കുക"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"ജോടിയാക്കൽ കോഡ് ഉപയോഗിച്ച് ഉപകരണം ജോടിയാക്കുക"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"ആറക്ക കോഡ് ഉപയോഗിച്ച് പുതിയ ഉപകരണങ്ങൾ ജോടിയാക്കുക"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"ജോടിയാക്കിയ ഉപകരണങ്ങൾ"</string>
@@ -232,8 +231,7 @@
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"ഉപകരണം ജോടിയാക്കാനായില്ല. ഒന്നുകിൽ QR കോഡ് തെറ്റായിരുന്നു അല്ലെങ്കിൽ ഉപകരണം ഒരേ നെറ്റ്‌വർക്കിൽ അല്ല കണക്റ്റ് ചെയ്‌തിട്ടുള്ളത്."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP വിലാസവും പോർട്ടും"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"QR കോഡ് സ്‌കാൻ ചെയ്യുക"</string>
-    <!-- no translation found for adb_wireless_qrcode_pairing_description (6014121407143607851) -->
-    <skip />
+    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"QR കോഡ് സ്‌കാൻ ചെയ്‌ത് വൈഫൈയിലൂടെ ഉപകരണം ജോടിയാക്കുക"</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"ഒരു വൈഫൈ നെറ്റ്‌വർക്കിലേക്ക് കണക്റ്റ് ചെയ്യുക"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, debug, dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"ബഗ് റിപ്പോർട്ട് കുറുക്കുവഴി"</string>
@@ -253,8 +251,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"വയർലെസ് ഡിസ്‌പ്ലേ സർട്ടിഫിക്കേഷൻ"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"വൈഫൈ വെർബോസ് ലോഗിംഗ് പ്രവർത്തനക്ഷമമാക്കുക"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"വൈഫൈ സ്‌കാൻ പ്രവർത്തനരഹിതമാക്കുന്നു"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization (5437378364995776979) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"വൈഫൈ മെച്ചപ്പെടുത്തിയ MAC ക്രമരഹിതമാക്കൽ"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"മൊബൈൽ ഡാറ്റ എല്ലായ്‌പ്പോഴും സജീവം"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"ടെതറിംഗ് ഹാർഡ്‌വെയർ ത്വരിതപ്പെടുത്തൽ"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"പേരില്ലാത്ത Bluetooth ഉപകരണങ്ങൾ കാണിക്കുക"</string>
@@ -281,14 +278,13 @@
     <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"സ്വകാര്യ DNS മോഡ് തിരഞ്ഞെടുക്കുക"</string>
     <string name="private_dns_mode_off" msgid="7065962499349997041">"ഓഫ്"</string>
     <string name="private_dns_mode_opportunistic" msgid="1947864819060442354">"സ്വയമേവ"</string>
-    <string name="private_dns_mode_provider" msgid="3619040641762557028">"സ്വകാര്യ DNS ദാതാവിന്‍റെ ഹോസ്റ്റുനാമം"</string>
-    <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"DNS ദാതാവിന്‍റെ ഹോസ്റ്റുനാമം നൽകുക"</string>
+    <string name="private_dns_mode_provider" msgid="3619040641762557028">"സ്വകാര്യ DNS ദാതാവിന്‍റെ ഹോസ്റ്റ് നാമം"</string>
+    <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"DNS ദാതാവിന്‍റെ ഹോസ്റ്റ് നാമം നൽകുക"</string>
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"കണക്റ്റ് ചെയ്യാനായില്ല"</string>
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"വയർലെസ് ഡിസ്‌പ്ലേ സർട്ടിഫിക്കേഷനായി ഓപ്‌ഷനുകൾ ദൃശ്യമാക്കുക"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"വൈഫൈ പിക്കറിൽ ഓരോ SSID RSSI പ്രകാരം കാണിക്കാൻ വൈഫൈ ലോഗിംഗ് നില വർദ്ധിപ്പിക്കുക"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"ബാറ്ററി ചാർജ് വേഗത്തിൽ തീരുന്ന അവസ്ഥ കുറച്ച് നെറ്റ്‌വർക്ക് പ്രകടനം മെച്ചപ്പെടുത്തുന്നു"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization_summary (7925425746373704991) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"ഈ മാറ്റം ക്ലയന്റ് മോഡിലെ MAC ക്രമരഹിതമാക്കൽ പ്രവർത്തനരീതിയെ മാത്രമേ ബാധിക്കുകയുള്ളൂ.\nഈ മോഡ് സജീവമാക്കിക്കഴിഞ്ഞാൽ, MAC ക്രമരഹിതമാക്കൽ പ്രവർത്തനക്ഷമമാക്കിയിരിക്കുന്ന എല്ലാ നെറ്റ്‌വർക്കുകളിലും അസോസിയേഷൻ സമയത്ത്, ക്ലയന്റ് അവസാനമായി നെറ്റ്‌വർക്കിൽ നിന്ന് വിച്‌ഛേദിച്ച സമയത്തിന്റെ അടിസ്ഥാനത്തിൽ അവരുടെ MAC വിലാസങ്ങൾ വീണ്ടും ക്രമരഹിതമാക്കപ്പെടും. നാല് മണിക്കൂറോ അതിൽ കുറവ് സമയത്തിനുള്ളിലോ ഉപകരണം വീണ്ടും കണക്‌റ്റ് ചെയ്യുന്നില്ലെങ്കിൽ വീണ്ടും ക്രമരഹിതമാക്കൽ സംഭവിക്കില്ല."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"മീറ്റർ ചെയ്തത്"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"മീറ്റർമാപകമല്ലാത്തത്"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"ലോഗർ ബഫർ വലുപ്പം"</string>
@@ -377,10 +373,8 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"പ‌ശ്ചാത്തല ആപ്പുകൾക്കായി \'ആപ്പ് പ്രതികരിക്കുന്നില്ല\' ഡയലോഗ് പ്രദര്‍ശിപ്പിക്കുക"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"ചാനൽ മുന്നറിയിപ്പ് കാണിക്കൂ"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"സാധുതയുള്ള ചാനലിൽ അല്ലാതെ ഒരു ആപ്പ്, അറിയിപ്പ് പോസ്റ്റ് ചെയ്യുമ്പോൾ ഓൺ-സ്‌ക്രീൻ മുന്നറിയിപ്പ് ‌പ്രദർശിപ്പിക്കുന്നു"</string>
-    <!-- no translation found for enforce_shortcuts_for_conversations (7040735163945040763) -->
-    <skip />
-    <!-- no translation found for enforce_shortcuts_for_conversations_summary (1860168037282467862) -->
-    <skip />
+    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"സംഭാഷണ അറിയിപ്പിലേക്ക് കുറുക്കുവഴികൾ നടപ്പിലാക്കൂ"</string>
+    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"സംഭാഷണ വിഭാഗത്തിൽ ദൃശ്യമാകാൻ അറിയിപ്പുകൾ ദീർഘകാലമായി പങ്കിടൽ കുറുക്കുവഴി പിന്തുടരണം"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"ബാഹ്യമായതിൽ നിർബന്ധിച്ച് അനുവദിക്കുക"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"മാനിഫെസ്റ്റ് മൂല്യങ്ങൾ പരിഗണിക്കാതെ, ബാഹ്യ സ്റ്റോറേജിലേക്ക് എഴുതപ്പെടുന്നതിന് ഏതൊരു ആപ്പിനെയും യോഗ്യമാക്കുന്നു"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"വലുപ്പം മാറ്റാൻ പ്രവർത്തനങ്ങളെ നിർബന്ധിക്കുക"</string>

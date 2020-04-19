@@ -284,7 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Optionen zur Zertifizierung für kabellose Übertragung anzeigen"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"WLAN-Protokollierungsebene erhöhen, pro SSID RSSI in WiFi Picker anzeigen"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Verringert den Akkuverbrauch und verbessert die Netzwerkleistung"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Hiermit wird das Verhalten der MAC-Adressrandomisierung ausschließlich für den Clientmodus umgeschaltet.\nWenn dieser Modus aktiviert ist, werden bei allen Netzwerken, bei denen die MAC-Randomisierung aktiviert ist, die MAC-Adressen während der Verknüpfung abhängig davon, wann der Client zuletzt vom Netzwerk getrennt wurde, wieder randomisiert. Die erneute Randomisierung findet nicht statt, wenn die Verbindung des Geräts innerhalb von maximal 4 Stunden wieder hergestellt wird."</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Hiermit wird das Verhalten der MAC-Adressrandomisierung ausschließlich für den Clientmodus umgeschaltet.\nWenn dieser Modus aktiviert ist, werden bei allen Netzwerken, bei denen die MAC-Randomisierung aktiviert ist, die MAC-Adressen während der Verknüpfung abhängig davon, wann der Client zuletzt vom Netzwerk getrennt wurde, wieder randomisiert. Die erneute Randomisierung findet nicht statt, wenn die Verbindung des Geräts innerhalb von maximal 4 Stunden wiederhergestellt wird."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Kostenpflichtig"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Kostenlos"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Logger-Puffergrößen"</string>
@@ -496,7 +496,7 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Mehr Zeit."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Weniger Zeit."</string>
     <string name="cancel" msgid="5665114069455378395">"Abbrechen"</string>
-    <string name="okay" msgid="949938843324579502">"Ok"</string>
+    <string name="okay" msgid="949938843324579502">"OK"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Aktivieren"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"\"Bitte nicht stören\" aktivieren"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"Nie"</string>

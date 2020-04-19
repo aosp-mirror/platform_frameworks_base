@@ -251,8 +251,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Утасгүй дэлгэцийн сертификат"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Wi‑Fi дэлгэрэнгүй лог-г идэвхжүүлэх"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Wi‑Fi скан бууруулалт"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization (5437378364995776979) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"MAC-г санамсаргүй байдлаар Wi‑Fi‑н сайжруулалттай эмхлэх"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Мобайл дата байнга идэвхтэй"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Модем болгох техник хангамжийн хурдасгуур"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Нэргүй Bluetooth төхөөрөмжийг харуулах"</string>
@@ -285,8 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Утасгүй дэлгэцийн сертификатын сонголтыг харуулах"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Wi‑Fi лог-н түвшинг нэмэгдүүлэх, Wi‑Fi Сонгогч дээрх SSID-д ногдох RSSI-г харуулах"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Батарей зарцуулалтыг бууруулж, сүлжээний гүйцэтгэлийг сайжруулдаг"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization_summary (7925425746373704991) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Унтраах эсвэл асаах нь зөвхөн клиент горимын MAC-г санамсаргүй байдлаар эмхлэх төлөвт нөлөөлнө.\nЭнэ горимыг идэвхжүүлсэн тохиолдолд клиентийг сүлжээнээс хамгийн сүүлд хэзээ салгаснаас хамаараад, холбоотой байх үеэр MAC-г санамсаргүй байдлаар эмхлэхийг идэвхжүүлсэн дурын сүлжээний MAC хаягуудыг санамсаргүй байдлаар дахин эмхэлж болзошгүй. Төхөөрөмж 4 цаг буюу түүнээс бага хугацаанд дахин холбогдвол санамсаргүй байдлаар дахин эмхлэх төлөв хэрэгжихгүй."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Хязгаартай"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Хязгааргүй"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Логгерын буферын хэмжээ"</string>
