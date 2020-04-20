@@ -19,6 +19,7 @@ package com.android.internal.policy;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import android.app.Activity;
 import android.app.EmptyActivity;
@@ -100,6 +101,16 @@ public final class DecorContextTest {
                     activity.getSystemService(WindowManager.class);
             // Verify that window manager is from activity not application context.
             assertEquals(expectedWm.mContext, actualWm.mContext);
+        });
+    }
+
+    @Test
+    public void testIsUiContextFromVisualDecorContext() throws Throwable {
+        mActivityRule.runOnUiThread(() -> {
+            Activity activity = mActivityRule.getActivity();
+            final DecorContext decorContext = new DecorContext(mContext.getApplicationContext(),
+                    (PhoneWindow) activity.getWindow());
+            assertTrue(decorContext.isUiContext());
         });
     }
 }
