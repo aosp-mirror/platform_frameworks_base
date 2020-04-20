@@ -27,6 +27,7 @@ import static org.junit.Assert.assertTrue;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManager.TaskDescription;
+import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
 import android.app.ActivityView;
 import android.app.IActivityManager;
@@ -43,6 +44,7 @@ import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 import android.support.test.uiautomator.UiDevice;
 import android.text.TextUtils;
+import android.view.Display;
 import android.view.ViewGroup;
 
 import androidx.test.filters.FlakyTest;
@@ -319,15 +321,91 @@ public class TaskStackChangedListenerTest {
         waitForCallback(singleTaskDisplayEmptyLatch);
     }
 
+    @Test
+    public void testTaskDisplayChanged() throws Exception {
+        final CountDownLatch activityViewReadyLatch = new CountDownLatch(1);
+        final ActivityViewTestActivity activity =
+                (ActivityViewTestActivity) startTestActivity(ActivityViewTestActivity.class);
+        final ActivityView activityView = activity.getActivityView();
+        activityView.setCallback(new ActivityView.StateCallback() {
+            @Override
+            public void onActivityViewReady(ActivityView view) {
+                activityViewReadyLatch.countDown();
+            }
+            @Override
+            public void onActivityViewDestroyed(ActivityView view) {}
+        });
+        waitForCallback(activityViewReadyLatch);
+
+        // Launch a Activity inside ActivityView.
+        final Object[] params1 = new Object[1];
+        final CountDownLatch displayChangedLatch1 = new CountDownLatch(1);
+        final int activityViewDisplayId = activityView.getVirtualDisplayId();
+        registerTaskStackChangedListener(
+                new TaskDisplayChangedListener(
+                        activityViewDisplayId, params1, displayChangedLatch1));
+        int taskId1;
+        ActivityOptions options1 = ActivityOptions.makeBasic()
+                .setLaunchDisplayId(activityView.getVirtualDisplayId());
+        synchronized (sLock) {
+            taskId1 = startTestActivity(ActivityInActivityView.class, options1).getTaskId();
+        }
+        waitForCallback(displayChangedLatch1);
+
+        assertEquals(taskId1, params1[0]);
+
+        // Launch the Activity in the default display, expects that reparenting happens.
+        final Object[] params2 = new Object[1];
+        final CountDownLatch displayChangedLatch2 = new CountDownLatch(1);
+        registerTaskStackChangedListener(
+                new TaskDisplayChangedListener(
+                        Display.DEFAULT_DISPLAY, params2, displayChangedLatch2));
+        int taskId2;
+        ActivityOptions options2 = ActivityOptions.makeBasic()
+                .setLaunchDisplayId(Display.DEFAULT_DISPLAY);
+        synchronized (sLock) {
+            taskId2 = startTestActivity(ActivityInActivityView.class, options2).getTaskId();
+        }
+        waitForCallback(displayChangedLatch2);
+
+        assertEquals(taskId2, params2[0]);
+        assertEquals(taskId1, taskId2);  // TaskId should be same since reparenting happens.
+    }
+
+    private static class TaskDisplayChangedListener extends TaskStackListener {
+        private int mDisplayId;
+        private final Object[] mParams;
+        private final CountDownLatch mDisplayChangedLatch;
+        TaskDisplayChangedListener(
+                int displayId, Object[] params, CountDownLatch displayChangedLatch) {
+            mDisplayId = displayId;
+            mParams = params;
+            mDisplayChangedLatch = displayChangedLatch;
+        }
+        @Override
+        public void onTaskDisplayChanged(int taskId, int displayId) throws RemoteException {
+            // Filter out the events for the uninterested displays.
+            // if (displayId != mDisplayId) return;
+            mParams[0] = taskId;
+            mDisplayChangedLatch.countDown();
+        }
+    };
+
     /**
      * Starts the provided activity and returns the started instance.
      */
     private TestActivity startTestActivity(Class<?> activityClass) throws InterruptedException {
+        return startTestActivity(activityClass, ActivityOptions.makeBasic());
+    }
+
+    private TestActivity startTestActivity(Class<?> activityClass, ActivityOptions options)
+            throws InterruptedException {
         final ActivityMonitor monitor = new ActivityMonitor(activityClass.getName(), null, false);
         getInstrumentation().addMonitor(monitor);
         final Context context = getInstrumentation().getContext();
         context.startActivity(
-                new Intent(context, activityClass).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+                new Intent(context, activityClass).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+                options.toBundle());
         final TestActivity activity = (TestActivity) monitor.waitForActivityWithTimeout(1000);
         if (activity == null) {
             throw new RuntimeException("Timed out waiting for Activity");
@@ -337,6 +415,9 @@ public class TaskStackChangedListenerTest {
     }
 
     private void registerTaskStackChangedListener(ITaskStackListener listener) throws Exception {
+        if (mTaskStackListener != null) {
+            ActivityTaskManager.getService().unregisterTaskStackListener(mTaskStackListener);
+        }
         mTaskStackListener = listener;
         ActivityTaskManager.getService().registerTaskStackListener(listener);
     }

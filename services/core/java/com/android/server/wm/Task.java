@@ -641,7 +641,7 @@ class Task extends WindowContainer<WindowContainer> {
             return;
         }
         removeImmediately();
-        if (!isRootTask) {
+        if (isLeafTask()) {
             mAtmService.getTaskChangeNotificationController().notifyTaskRemoved(mTaskId);
         }
     }
@@ -2777,7 +2777,7 @@ class Task extends WindowContainer<WindowContainer> {
         }
         final DisplayContent prevDc = mDisplayContent;
         super.onDisplayChanged(dc);
-        if (!isRootTask) {
+        if (isLeafTask()) {
             final int displayId = (dc != null) ? dc.getDisplayId() : INVALID_DISPLAY;
             mWmService.mAtmService.getTaskChangeNotificationController().notifyTaskDisplayChanged(
                     mTaskId, displayId);
