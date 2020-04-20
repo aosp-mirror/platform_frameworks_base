@@ -954,6 +954,7 @@ filegroup {
 
 aidl_interface {
     name: "libincremental_aidl",
+    unstable: true,
     srcs: [
         ":incremental_aidl",
     ],
@@ -972,6 +973,7 @@ aidl_interface {
 
 aidl_interface {
     name: "libdataloader_aidl",
+    unstable: true,
     srcs: [
         ":dataloader_aidl",
     ],
@@ -993,6 +995,7 @@ aidl_interface {
 
 aidl_interface {
     name: "libincremental_manager_aidl",
+    unstable: true,
     srcs: [
         ":incremental_manager_aidl",
     ],
