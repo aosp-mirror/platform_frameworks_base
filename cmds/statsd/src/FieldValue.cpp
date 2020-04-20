@@ -18,7 +18,6 @@
 #include "Log.h"
 #include "FieldValue.h"
 #include "HashableDimensionKey.h"
-#include "atoms_info.h"
 #include "math.h"
 
 namespace android {

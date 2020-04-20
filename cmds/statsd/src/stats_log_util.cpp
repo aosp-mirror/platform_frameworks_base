@@ -24,7 +24,6 @@
 
 #include "statscompanion_util.h"
 
-using android::util::AtomsInfo;
 using android::util::FIELD_COUNT_REPEATED;
 using android::util::FIELD_TYPE_BOOL;
 using android::util::FIELD_TYPE_FIXED64;
