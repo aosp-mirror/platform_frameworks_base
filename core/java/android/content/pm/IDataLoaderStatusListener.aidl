@@ -21,16 +21,29 @@ package android.content.pm;
  * @hide
  */
 oneway interface IDataLoaderStatusListener {
-    /** Data loader status */
+    /** When this status is returned from DataLoader, it means that the DataLoader
+    *   process is running, bound to and has handled onCreate(). */
     const int DATA_LOADER_CREATED = 0;
+    /** Listener will receive this status when the DataLoader process died,
+    *   binder disconnected or class destroyed. */
     const int DATA_LOADER_DESTROYED = 1;
 
+    /** DataLoader can receive missing pages and read pages notifications,
+     *  and ready to provide data. */
     const int DATA_LOADER_STARTED = 2;
+    /** DataLoader no longer ready to provide data and is not receiving
+    *   any notifications from IncFS. */
     const int DATA_LOADER_STOPPED = 3;
 
+    /** DataLoader streamed everything necessary to continue installation. */
     const int DATA_LOADER_IMAGE_READY = 4;
+    /** Installation can't continue as DataLoader failed to stream necessary data. */
     const int DATA_LOADER_IMAGE_NOT_READY = 5;
 
+    /** DataLoader reports that this instance is invalid and can never be restored.
+    *   Warning: this is a terminal status that data loader should use carefully and
+    *            the system should almost never use - e.g. only if all recovery attempts
+    *            fail and all retry limits are exceeded. */
     const int DATA_LOADER_UNRECOVERABLE = 6;
 
     /** Data loader status callback */
