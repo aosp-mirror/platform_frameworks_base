@@ -60,6 +60,7 @@ public class Nat464XlatTest {
     static final String STACKED_IFACE = "v4-test0";
     static final LinkAddress ADDR = new LinkAddress("192.0.2.5/29");
     static final String NAT64_PREFIX = "64:ff9b::/96";
+    static final String OTHER_NAT64_PREFIX = "2001:db8:0:64::/96";
     static final int NETID = 42;
 
     @Mock ConnectivityService mConnectivity;
@@ -139,7 +140,7 @@ public class Nat464XlatTest {
             for (NetworkInfo.DetailedState state : supportedDetailedStates) {
                 mNai.networkInfo.setDetailedState(state, "reason", "extraInfo");
 
-                mNai.linkProperties.setNat64Prefix(new IpPrefix("2001:db8:0:64::/96"));
+                mNai.linkProperties.setNat64Prefix(new IpPrefix(OTHER_NAT64_PREFIX));
                 assertRequiresClat(false, mNai);
                 assertShouldStartClat(false, mNai);
 
@@ -396,6 +397,47 @@ public class Nat464XlatTest {
         assertIdle(nat);
 
         verifyNoMoreInteractions(mNetd, mNms, mConnectivity);
+    }
+
+    @Test
+    public void testNat64PrefixPreference() throws Exception {
+        final IpPrefix prefixFromDns = new IpPrefix(NAT64_PREFIX);
+        final IpPrefix prefixFromRa = new IpPrefix(OTHER_NAT64_PREFIX);
+
+        Nat464Xlat nat = makeNat464Xlat();
+
+        final LinkProperties emptyLp = new LinkProperties();
+        LinkProperties fixedupLp;
+
+        fixedupLp = new LinkProperties();
+        nat.setNat64PrefixFromDns(prefixFromDns);
+        nat.fixupLinkProperties(emptyLp, fixedupLp);
+        assertEquals(prefixFromDns, fixedupLp.getNat64Prefix());
+
+        fixedupLp = new LinkProperties();
+        nat.setNat64PrefixFromRa(prefixFromRa);
+        nat.fixupLinkProperties(emptyLp, fixedupLp);
+        assertEquals(prefixFromRa, fixedupLp.getNat64Prefix());
+
+        fixedupLp = new LinkProperties();
+        nat.setNat64PrefixFromRa(null);
+        nat.fixupLinkProperties(emptyLp, fixedupLp);
+        assertEquals(prefixFromDns, fixedupLp.getNat64Prefix());
+
+        fixedupLp = new LinkProperties();
+        nat.setNat64PrefixFromRa(prefixFromRa);
+        nat.fixupLinkProperties(emptyLp, fixedupLp);
+        assertEquals(prefixFromRa, fixedupLp.getNat64Prefix());
+
+        fixedupLp = new LinkProperties();
+        nat.setNat64PrefixFromDns(null);
+        nat.fixupLinkProperties(emptyLp, fixedupLp);
+        assertEquals(prefixFromRa, fixedupLp.getNat64Prefix());
+
+        fixedupLp = new LinkProperties();
+        nat.setNat64PrefixFromRa(null);
+        nat.fixupLinkProperties(emptyLp, fixedupLp);
+        assertEquals(null, fixedupLp.getNat64Prefix());
     }
 
     static void assertIdle(Nat464Xlat nat) {
