@@ -454,7 +454,8 @@ public class MtpDatabase implements AutoCloseable {
     }
 
     @VisibleForNative
-    private int getNumObjects(int storageID, int format, int parent) {
+    @VisibleForTesting
+    public int getNumObjects(int storageID, int format, int parent) {
         List<MtpStorageManager.MtpObject> objs = mManager.getObjects(parent,
                 format, storageID);
         if (objs == null) {

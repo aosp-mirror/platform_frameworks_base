@@ -22,6 +22,7 @@ import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.FileUtils;
 import android.os.UserHandle;
+import android.os.storage.StorageManager;
 import android.os.storage.StorageVolume;
 import android.util.Log;
 
@@ -33,6 +34,7 @@ import com.android.internal.util.Preconditions;
 
 import org.junit.After;
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -58,7 +60,9 @@ public class MtpDatabaseTest {
     private static final String TEST_DIRNAME = "/TestIs";
 
     private static final int MAIN_STORAGE_ID = 0x10001;
+    private static final int SCND_STORAGE_ID = 0x20001;
     private static final String MAIN_STORAGE_ID_STR = Integer.toHexString(MAIN_STORAGE_ID);
+    private static final String SCND_STORAGE_ID_STR = Integer.toHexString(SCND_STORAGE_ID);
 
     private static final File mMainStorageDir = new File(MAIN_STORAGE_DIR);
 
@@ -280,5 +284,33 @@ public class MtpDatabaseTest {
         Log.d(TAG, "testMtpDatabaseThumbnail: Test bad PNG");
 
         testThumbnail(handlePngBad, pngFileBad, false);
+    }
+
+    @Test
+    @SmallTest
+    public void testMtpDatabaseExtStorage() throws IOException {
+        int numObj;
+        StorageVolume[] mVolumes;
+
+        logMethodName();
+
+        mVolumes = StorageManager.getVolumeList(UserHandle.myUserId(), 0);
+        // Currently it may need manual setup for 2nd storage on virtual device testing.
+        // Thus only run test when 2nd storage exists.
+        Assume.assumeTrue(
+                "Skip when 2nd storage not available, volume numbers = " + mVolumes.length,
+                mVolumes.length >= 2);
+
+        for (int ii = 0; ii < mVolumes.length; ii++) {
+            StorageVolume volume = mVolumes[ii];
+            // Skip Actual Main storage (Internal Storage),
+            // since we use manipulated path as testing Main storage
+            if (ii > 0)
+                mMtpDatabase.addStorage(volume);
+        }
+
+        numObj = mMtpDatabase.getNumObjects(SCND_STORAGE_ID, 0, 0xFFFFFFFF);
+        Assert.assertTrue(
+                "Fail to get objects in 2nd storage, object numbers = " + numObj, numObj >= 0);
     }
 }
