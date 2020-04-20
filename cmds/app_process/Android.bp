@@ -5,11 +5,13 @@ cc_binary {
 
     multilib: {
         lib32: {
-            version_script: ":art_sigchain_version_script32.txt",
+            // TODO(b/142944043): Remove version script when libsigchain is a DSO.
+            version_script: "version-script32.txt",
             suffix: "32",
         },
         lib64: {
-            version_script: ":art_sigchain_version_script64.txt",
+            // TODO(b/142944043): Remove version script when libsigchain is a DSO.
+            version_script: "version-script64.txt",
             suffix: "64",
         },
     },
