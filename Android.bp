@@ -855,6 +855,7 @@ filegroup {
 
 aidl_interface {
     name: "libincremental_aidl",
+    unstable: true,
     srcs: [
         ":incremental_aidl",
     ],
