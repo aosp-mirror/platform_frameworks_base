@@ -26,7 +26,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -37,6 +36,7 @@ import android.graphics.Color;
 import android.os.Handler;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
+import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
@@ -64,6 +64,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
+import org.mockito.stubbing.Answer;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -94,9 +95,11 @@ public class KeyguardBouncerTest extends SysuiTestCase {
     private Handler mHandler;
     @Mock
     private KeyguardSecurityModel mKeyguardSecurityModel;
+    @Mock
+    private ViewGroup mRootView;
     @Rule
     public MockitoRule mRule = MockitoJUnit.rule();
-    private ViewGroup mRootView;
+    private Integer mRootVisibility = View.INVISIBLE;
     private KeyguardBouncer mBouncer;
 
     @Before
@@ -105,6 +108,11 @@ public class KeyguardBouncerTest extends SysuiTestCase {
         mDependency.injectTestDependency(KeyguardUpdateMonitor.class, mKeyguardUpdateMonitor);
         mDependency.injectTestDependency(KeyguardSecurityModel.class, mKeyguardSecurityModel);
         mDependency.injectMockDependency(KeyguardStateController.class);
+        when(mRootView.getVisibility()).thenAnswer((Answer<Integer>) invocation -> mRootVisibility);
+        doAnswer(invocation -> {
+            mRootVisibility = invocation.getArgument(0);
+            return null;
+        }).when(mRootView).setVisibility(anyInt());
         when(mKeyguardSecurityModel.getSecurityMode(anyInt()))
                 .thenReturn(KeyguardSecurityModel.SecurityMode.None);
         DejankUtils.setImmediate(true);
@@ -117,10 +125,8 @@ public class KeyguardBouncerTest extends SysuiTestCase {
                 mKeyguardBypassController, mHandler) {
             @Override
             protected void inflateView() {
-                super.inflateView();
                 mKeyguardView = mKeyguardHostView;
-                mRoot = spy(mRoot);
-                mRootView = mRoot;
+                mRoot = mRootView;
             }
         };
     }
@@ -212,8 +218,10 @@ public class KeyguardBouncerTest extends SysuiTestCase {
         verify(mExpansionCallback).onFullyShown();
 
         verify(mExpansionCallback, never()).onStartingToHide();
+        verify(mKeyguardHostView, never()).onStartingToHide();
         mBouncer.setExpansion(0.9f);
         verify(mExpansionCallback).onStartingToHide();
+        verify(mKeyguardHostView).onStartingToHide();
     }
 
     @Test
