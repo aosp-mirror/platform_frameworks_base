@@ -15,6 +15,7 @@
  */
 package com.android.statsd.shelltools.testdrive;
 
+import com.android.internal.os.StatsdConfigProto;
 import com.android.internal.os.StatsdConfigProto.AtomMatcher;
 import com.android.internal.os.StatsdConfigProto.EventMetric;
 import com.android.internal.os.StatsdConfigProto.FieldFilter;
@@ -29,6 +30,7 @@ import com.android.os.StatsLog.ConfigMetricsReportList;
 import com.android.os.StatsLog.StatsLogReport;
 import com.android.statsd.shelltools.Utils;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.io.Files;
 
 import java.io.File;
@@ -39,6 +41,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -73,179 +76,269 @@ public class TestDrive {
     };
     private static final Logger LOGGER = Logger.getLogger(TestDrive.class.getName());
 
-    private String mAdditionalAllowedPackage;
-    private String mDeviceSerial;
-    private final Set<Long> mTrackedMetrics = new HashSet<>();
+    @VisibleForTesting
+    String mDeviceSerial = null;
 
     public static void main(String[] args) {
+        final Configuration configuration = new Configuration();
+
         TestDrive testDrive = new TestDrive();
-        Set<Integer> trackedAtoms = new HashSet<>();
         Utils.setUpLogger(LOGGER, false);
-        String remoteConfigPath = null;
 
+        if (!testDrive.processArgs(configuration, args,
+                Utils.getDeviceSerials(LOGGER), Utils.getDefaultDevice(LOGGER))) {
+            return;
+        }
+
+        final ConfigMetricsReportList reports = testDrive.testDriveAndGetReports(
+                configuration.createConfig(), configuration.hasPulledAtoms(),
+                configuration.hasPushedAtoms());
+        if (reports != null) {
+            configuration.dumpMetrics(reports);
+        }
+    }
+
+    boolean processArgs(Configuration configuration, String[] args, List<String> connectedDevices,
+            String defaultDevice) {
         if (args.length < 1) {
-            LOGGER.log(Level.SEVERE, "Usage: ./test_drive [-p additional_allowed_package] "
-                    + "[-s DEVICE_SERIAL_NUMBER]"
+            LOGGER.severe("Usage: ./test_drive [-one] "
+                    + "[-p additional_allowed_package] "
+                    + "[-s DEVICE_SERIAL_NUMBER] "
                     + "<atomId1> <atomId2> ... <atomIdN>");
-            return;
+            return false;
         }
 
-        List<String> connectedDevices = Utils.getDeviceSerials(LOGGER);
-        if (connectedDevices == null || connectedDevices.size() == 0) {
-            LOGGER.log(Level.SEVERE, "No device connected.");
-            return;
-        }
-
-        int arg_index = 0;
-        while (arg_index < args.length) {
-            String arg = args[arg_index];
-            if (arg.equals("-p")) {
-                testDrive.mAdditionalAllowedPackage = args[++arg_index];
-            } else if (arg.equals("-s")) {
-                testDrive.mDeviceSerial = args[++arg_index];
+        int first_arg = 0;
+        // Consume all flags, which must precede all atoms
+        for (; first_arg < args.length; ++first_arg) {
+            String arg = args[first_arg];
+            int remaining_args = args.length - first_arg;
+            if (remaining_args >= 2 && arg.equals("-one")) {
+                LOGGER.info("Creating one event metric to catch all pushed atoms.");
+                configuration.mOnePushedAtomEvent = true;
+            } else if (remaining_args >= 3 && arg.equals("-p")) {
+                configuration.mAdditionalAllowedPackage = args[++first_arg];
+            } else if (remaining_args >= 3 && arg.equals("-s")) {
+                mDeviceSerial = args[++first_arg];
             } else {
-                break;
+                break;  // Found the atom list
             }
-            arg_index++;
         }
 
-        if (connectedDevices.size() == 1 && testDrive.mDeviceSerial == null) {
-            testDrive.mDeviceSerial = connectedDevices.get(0);
+        mDeviceSerial = Utils.chooseDevice(mDeviceSerial, connectedDevices, defaultDevice, LOGGER);
+        if (mDeviceSerial == null) {
+            return false;
         }
 
-        if (testDrive.mDeviceSerial == null) {
-            LOGGER.log(Level.SEVERE, "More than one devices connected. Please specify"
-                    + " with -s DEVICE_SERIAL");
-            return;
-        }
-
-        for (int i = arg_index; i < args.length; i++) {
+        for ( ; first_arg < args.length; ++first_arg) {
+            String atom = args[first_arg];
             try {
-                int atomId = Integer.valueOf(args[i]);
-                if (Atom.getDescriptor().findFieldByNumber(atomId) == null) {
-                    LOGGER.log(Level.SEVERE, "No such atom found: " + args[i]);
-                    continue;
-                }
-                trackedAtoms.add(atomId);
+                configuration.addAtom(Integer.valueOf(atom));
             } catch (NumberFormatException e) {
-                LOGGER.log(Level.SEVERE, "Bad atom id provided: " + args[i]);
-                continue;
+                LOGGER.severe("Bad atom id provided: " + atom);
             }
         }
 
+        return configuration.hasPulledAtoms() || configuration.hasPushedAtoms();
+    }
+
+    private ConfigMetricsReportList testDriveAndGetReports(StatsdConfig config,
+            boolean hasPulledAtoms, boolean hasPushedAtoms) {
+        if (config == null) {
+            LOGGER.severe("Failed to create valid config.");
+            return null;
+        }
+
+        String remoteConfigPath = null;
         try {
-            StatsdConfig config = testDrive.createConfig(trackedAtoms);
-            if (config == null) {
-                LOGGER.log(Level.SEVERE, "Failed to create valid config.");
-                return;
-            }
-            remoteConfigPath = testDrive.pushConfig(config, testDrive.mDeviceSerial);
-            LOGGER.info("Pushed the following config to statsd:");
+            remoteConfigPath = pushConfig(config, mDeviceSerial);
+            LOGGER.info("Pushed the following config to statsd on device '" + mDeviceSerial
+                    + "':");
             LOGGER.info(config.toString());
-            if (!hasPulledAtom(trackedAtoms)) {
+            if (hasPushedAtoms) {
+                LOGGER.info("Now please play with the device to trigger the event.");
+            }
+            if (!hasPulledAtoms) {
                 LOGGER.info(
-                        "Now please play with the device to trigger the event. All events should "
-                                + "be dumped after 1 min ...");
+                        "All events should be dumped after 1 min ...");
                 Thread.sleep(60_000);
             } else {
-                LOGGER.info("Now wait for 1.5 minutes ...");
+                LOGGER.info("All events should be dumped after 1.5 minutes ...");
                 Thread.sleep(15_000);
-                Utils.logAppBreadcrumb(0, 0, LOGGER, testDrive.mDeviceSerial);
+                Utils.logAppBreadcrumb(0, 0, LOGGER, mDeviceSerial);
                 Thread.sleep(75_000);
             }
-            testDrive.dumpMetrics();
+            return Utils.getReportList(CONFIG_ID, true, false, LOGGER,
+                    mDeviceSerial);
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Failed to test drive: " + e.getMessage(), e);
         } finally {
-            testDrive.removeConfig(testDrive.mDeviceSerial);
+            removeConfig(mDeviceSerial);
             if (remoteConfigPath != null) {
                 try {
                     Utils.runCommand(null, LOGGER,
-                            "adb", "-s", testDrive.mDeviceSerial, "shell", "rm", remoteConfigPath);
+                            "adb", "-s", mDeviceSerial, "shell", "rm",
+                            remoteConfigPath);
                 } catch (Exception e) {
                     LOGGER.log(Level.WARNING,
                             "Unable to remove remote config file: " + remoteConfigPath, e);
                 }
             }
         }
+        return null;
     }
 
-    private void dumpMetrics() throws Exception {
-        ConfigMetricsReportList reportList = Utils.getReportList(CONFIG_ID, true, false, LOGGER,
-                mDeviceSerial);
-        // We may get multiple reports. Take the last one.
-        ConfigMetricsReport report = reportList.getReports(reportList.getReportsCount() - 1);
-        for (StatsLogReport statsLog : report.getMetricsList()) {
-            if (mTrackedMetrics.contains(statsLog.getMetricId())) {
-                LOGGER.info(statsLog.toString());
+    static class Configuration {
+        boolean mOnePushedAtomEvent = false;
+        @VisibleForTesting
+        Set<Integer> mPushedAtoms = new TreeSet<>();
+        @VisibleForTesting
+        Set<Integer> mPulledAtoms = new TreeSet<>();
+        @VisibleForTesting
+        String mAdditionalAllowedPackage = null;
+        private final Set<Long> mTrackedMetrics = new HashSet<>();
+
+        private void dumpMetrics(ConfigMetricsReportList reportList) {
+            // We may get multiple reports. Take the last one.
+            ConfigMetricsReport report = reportList.getReports(reportList.getReportsCount() - 1);
+            for (StatsLogReport statsLog : report.getMetricsList()) {
+                if (isTrackedMetric(statsLog.getMetricId())) {
+                    LOGGER.info(statsLog.toString());
+                }
             }
         }
-    }
 
-    private StatsdConfig createConfig(Set<Integer> atomIds) {
-        long metricId = METRIC_ID_BASE;
-        long atomMatcherId = ATOM_MATCHER_ID_BASE;
-
-        ArrayList<String> allowedSources = new ArrayList<>();
-        Collections.addAll(allowedSources, ALLOWED_LOG_SOURCES);
-        if (mAdditionalAllowedPackage != null) {
-            allowedSources.add(mAdditionalAllowedPackage);
+        boolean isTrackedMetric(long metricId) {
+            return mTrackedMetrics.contains(metricId);
         }
 
-        StatsdConfig.Builder builder = StatsdConfig.newBuilder();
-        builder
-            .addAllAllowedLogSource(allowedSources)
-            .addAllDefaultPullPackages(Arrays.asList(DEFAULT_PULL_SOURCES))
-            .addPullAtomPackages(PullAtomPackages.newBuilder()
-                    .setAtomId(Atom.GPU_STATS_GLOBAL_INFO_FIELD_NUMBER)
-                    .addPackages("AID_GPU_SERVICE"))
-            .addPullAtomPackages(PullAtomPackages.newBuilder()
-                    .setAtomId(Atom.GPU_STATS_APP_INFO_FIELD_NUMBER)
-                    .addPackages("AID_GPU_SERVICE"))
-            .addPullAtomPackages(PullAtomPackages.newBuilder()
-                    .setAtomId(Atom.TRAIN_INFO_FIELD_NUMBER)
-                    .addPackages("AID_STATSD"))
-            .setHashStringsInMetricReport(false);
-
-        if (hasPulledAtom(atomIds)) {
-            builder.addAtomMatcher(
-                    createAtomMatcher(
-                            Atom.APP_BREADCRUMB_REPORTED_FIELD_NUMBER, APP_BREADCRUMB_MATCHER_ID));
+        static boolean isPulledAtom(int atomId) {
+            return atomId >= PULL_ATOM_START && atomId <= MAX_PLATFORM_ATOM_TAG
+                    || atomId >= VENDOR_PULLED_ATOM_START_TAG;
         }
 
-        for (int atomId : atomIds) {
-            if (isPulledAtom(atomId)) {
+        void addAtom(Integer atom) {
+            if (Atom.getDescriptor().findFieldByNumber(atom) == null) {
+                LOGGER.severe("No such atom found: " + atom);
+                return;
+            }
+            if (isPulledAtom(atom)) {
+                mPulledAtoms.add(atom);
+            } else {
+                mPushedAtoms.add(atom);
+            }
+        }
+
+        private boolean hasPulledAtoms() {
+            return !mPulledAtoms.isEmpty();
+        }
+
+        private boolean hasPushedAtoms() {
+            return !mPushedAtoms.isEmpty();
+        }
+
+        StatsdConfig createConfig() {
+            long metricId = METRIC_ID_BASE;
+            long atomMatcherId = ATOM_MATCHER_ID_BASE;
+
+            StatsdConfig.Builder builder = baseBuilder();
+
+            if (hasPulledAtoms()) {
+                builder.addAtomMatcher(
+                        createAtomMatcher(
+                                Atom.APP_BREADCRUMB_REPORTED_FIELD_NUMBER,
+                                APP_BREADCRUMB_MATCHER_ID));
+            }
+
+            for (int atomId : mPulledAtoms) {
                 builder.addAtomMatcher(createAtomMatcher(atomId, atomMatcherId));
                 GaugeMetric.Builder gaugeMetricBuilder = GaugeMetric.newBuilder();
                 gaugeMetricBuilder
-                    .setId(metricId)
-                    .setWhat(atomMatcherId)
-                    .setTriggerEvent(APP_BREADCRUMB_MATCHER_ID)
-                    .setGaugeFieldsFilter(FieldFilter.newBuilder().setIncludeAll(true).build())
-                    .setBucket(TimeUnit.ONE_MINUTE)
-                    .setSamplingType(GaugeMetric.SamplingType.FIRST_N_SAMPLES)
-                    .setMaxNumGaugeAtomsPerBucket(100);
+                        .setId(metricId)
+                        .setWhat(atomMatcherId)
+                        .setTriggerEvent(APP_BREADCRUMB_MATCHER_ID)
+                        .setGaugeFieldsFilter(FieldFilter.newBuilder().setIncludeAll(true).build())
+                        .setBucket(TimeUnit.ONE_MINUTE)
+                        .setSamplingType(GaugeMetric.SamplingType.FIRST_N_SAMPLES)
+                        .setMaxNumGaugeAtomsPerBucket(100);
                 builder.addGaugeMetric(gaugeMetricBuilder.build());
-            } else {
-                EventMetric.Builder eventMetricBuilder = EventMetric.newBuilder();
-                eventMetricBuilder
-                    .setId(metricId)
-                    .setWhat(atomMatcherId);
-                builder.addEventMetric(eventMetricBuilder.build());
-                builder.addAtomMatcher(createAtomMatcher(atomId, atomMatcherId));
+                atomMatcherId++;
+                mTrackedMetrics.add(metricId++);
             }
-            atomMatcherId++;
-            mTrackedMetrics.add(metricId++);
-        }
-        return builder.build();
-    }
 
-    private static AtomMatcher createAtomMatcher(int atomId, long matcherId) {
-        AtomMatcher.Builder atomMatcherBuilder = AtomMatcher.newBuilder();
-        atomMatcherBuilder
-                .setId(matcherId)
-                .setSimpleAtomMatcher(SimpleAtomMatcher.newBuilder().setAtomId(atomId));
-        return atomMatcherBuilder.build();
+            // A simple atom matcher for each pushed atom.
+            List<AtomMatcher> simpleAtomMatchers = new ArrayList<>();
+            for (int atomId : mPushedAtoms) {
+                final AtomMatcher atomMatcher = createAtomMatcher(atomId, atomMatcherId++);
+                simpleAtomMatchers.add(atomMatcher);
+                builder.addAtomMatcher(atomMatcher);
+            }
+
+            if (mOnePushedAtomEvent) {
+                // Create a union event metric, using an matcher that matches all pulled atoms.
+                AtomMatcher unionAtomMatcher = createUnionMatcher(simpleAtomMatchers,
+                        atomMatcherId);
+                builder.addAtomMatcher(unionAtomMatcher);
+                EventMetric.Builder eventMetricBuilder = EventMetric.newBuilder();
+                eventMetricBuilder.setId(metricId).setWhat(unionAtomMatcher.getId());
+                builder.addEventMetric(eventMetricBuilder.build());
+                mTrackedMetrics.add(metricId++);
+            } else {
+                // Create multiple event metrics, one per pulled atom.
+                for (AtomMatcher atomMatcher : simpleAtomMatchers) {
+                    EventMetric.Builder eventMetricBuilder = EventMetric.newBuilder();
+                    eventMetricBuilder
+                            .setId(metricId)
+                            .setWhat(atomMatcher.getId());
+                    builder.addEventMetric(eventMetricBuilder.build());
+                    mTrackedMetrics.add(metricId++);
+                }
+            }
+
+            return builder.build();
+        }
+
+        private static AtomMatcher createAtomMatcher(int atomId, long matcherId) {
+            AtomMatcher.Builder atomMatcherBuilder = AtomMatcher.newBuilder();
+            atomMatcherBuilder
+                    .setId(matcherId)
+                    .setSimpleAtomMatcher(SimpleAtomMatcher.newBuilder().setAtomId(atomId));
+            return atomMatcherBuilder.build();
+        }
+
+        private AtomMatcher createUnionMatcher(List<AtomMatcher> simpleAtomMatchers,
+                long atomMatcherId) {
+            AtomMatcher.Combination.Builder combinationBuilder =
+                    AtomMatcher.Combination.newBuilder();
+            combinationBuilder.setOperation(StatsdConfigProto.LogicalOperation.OR);
+            for (AtomMatcher matcher : simpleAtomMatchers) {
+                combinationBuilder.addMatcher(matcher.getId());
+            }
+            AtomMatcher.Builder atomMatcherBuilder = AtomMatcher.newBuilder();
+            atomMatcherBuilder.setId(atomMatcherId).setCombination(combinationBuilder.build());
+            return atomMatcherBuilder.build();
+        }
+
+        private StatsdConfig.Builder baseBuilder() {
+            ArrayList<String> allowedSources = new ArrayList<>();
+            Collections.addAll(allowedSources, ALLOWED_LOG_SOURCES);
+            if (mAdditionalAllowedPackage != null) {
+                allowedSources.add(mAdditionalAllowedPackage);
+            }
+            return StatsdConfig.newBuilder()
+                    .addAllAllowedLogSource(allowedSources)
+                    .addAllDefaultPullPackages(Arrays.asList(DEFAULT_PULL_SOURCES))
+                    .addPullAtomPackages(PullAtomPackages.newBuilder()
+                            .setAtomId(Atom.GPU_STATS_GLOBAL_INFO_FIELD_NUMBER)
+                            .addPackages("AID_GPU_SERVICE"))
+                    .addPullAtomPackages(PullAtomPackages.newBuilder()
+                            .setAtomId(Atom.GPU_STATS_APP_INFO_FIELD_NUMBER)
+                            .addPackages("AID_GPU_SERVICE"))
+                    .addPullAtomPackages(PullAtomPackages.newBuilder()
+                            .setAtomId(Atom.TRAIN_INFO_FIELD_NUMBER)
+                            .addPackages("AID_STATSD"))
+                    .setHashStringsInMetricReport(false);
+        }
     }
 
     private static String pushConfig(StatsdConfig config, String deviceSerial)
@@ -267,21 +360,7 @@ public class TestDrive {
             Utils.runCommand(null, LOGGER, "adb", "-s", deviceSerial,
                     "shell", Utils.CMD_REMOVE_CONFIG, String.valueOf(CONFIG_ID));
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Failed to remove config: " + e.getMessage());
+            LOGGER.severe("Failed to remove config: " + e.getMessage());
         }
-    }
-
-    private static boolean isPulledAtom(int atomId) {
-        return atomId >= PULL_ATOM_START && atomId <= MAX_PLATFORM_ATOM_TAG
-                || atomId >= VENDOR_PULLED_ATOM_START_TAG;
-    }
-
-    private static boolean hasPulledAtom(Set<Integer> atoms) {
-        for (Integer i : atoms) {
-            if (isPulledAtom(i)) {
-                return true;
-            }
-        }
-        return false;
     }
 }

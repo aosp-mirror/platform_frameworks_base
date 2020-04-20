@@ -1,0 +1,8 @@
+{
+  "presubmit": [
+    {
+      "name": "statsd_testdrive_test",
+      "host": true
+    }
+  ]
+}
