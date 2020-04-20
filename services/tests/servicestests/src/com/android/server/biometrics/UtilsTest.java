@@ -261,4 +261,12 @@ public class UtilsTest {
         assertTrue(Utils.isConfirmationSupported(BiometricAuthenticator.TYPE_IRIS));
         assertFalse(Utils.isConfirmationSupported(BiometricAuthenticator.TYPE_FINGERPRINT));
     }
+
+    @Test
+    public void testRemoveBiometricBits() {
+        @Authenticators.Types int authenticators = Integer.MAX_VALUE;
+        authenticators = Utils.removeBiometricBits(authenticators);
+        // All biometric bits are removed
+        assertEquals(0, authenticators & Authenticators.BIOMETRIC_MIN_STRENGTH);
+    }
 }

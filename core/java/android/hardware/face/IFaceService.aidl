@@ -48,7 +48,7 @@ interface IFaceService {
 
     // Same as above, with extra arguments.
     void cancelAuthenticationFromService(IBinder token, String opPackageName,
-            int callingUid, int callingPid, int callingUserId, boolean fromClient);
+            int callingUid, int callingPid, int callingUserId);
 
     // Start face enrollment
     void enroll(int userId, IBinder token, in byte [] cryptoToken, IFaceServiceReceiver receiver,

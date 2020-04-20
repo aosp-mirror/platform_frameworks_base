@@ -171,6 +171,19 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
      */
     public static final int DISMISSED_REASON_CREDENTIAL_CONFIRMED = 7;
 
+    /**
+     * @hide
+     */
+    @IntDef({DISMISSED_REASON_BIOMETRIC_CONFIRMED,
+            DISMISSED_REASON_NEGATIVE,
+            DISMISSED_REASON_USER_CANCEL,
+            DISMISSED_REASON_BIOMETRIC_CONFIRM_NOT_REQUIRED,
+            DISMISSED_REASON_ERROR,
+            DISMISSED_REASON_SERVER_REQUESTED,
+            DISMISSED_REASON_CREDENTIAL_CONFIRMED})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface DismissedReason {}
+
     private static class ButtonInfo {
         Executor executor;
         DialogInterface.OnClickListener listener;

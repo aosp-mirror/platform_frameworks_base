@@ -53,7 +53,7 @@ interface IFingerprintService {
     // Same as above, except this is protected by the MANAGE_BIOMETRIC signature permission. Takes
     // an additional uid, pid, userid.
     void cancelAuthenticationFromService(IBinder token, String opPackageName,
-            int callingUid, int callingPid, int callingUserId, boolean fromClient);
+            int callingUid, int callingPid, int callingUserId);
 
     // Start fingerprint enrollment
     void enroll(IBinder token, in byte [] cryptoToken, int groupId, IFingerprintServiceReceiver receiver,

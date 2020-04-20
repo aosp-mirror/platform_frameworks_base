@@ -305,4 +305,8 @@ public class Utils {
                 return false;
         }
     }
+
+    static int removeBiometricBits(@Authenticators.Types int authenticators) {
+        return authenticators &= ~Authenticators.BIOMETRIC_MIN_STRENGTH;
+    }
 }

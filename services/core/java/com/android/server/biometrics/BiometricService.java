@@ -114,12 +114,9 @@ public class BiometricService extends SystemService {
 
     BiometricStrengthController mBiometricStrengthController;
 
-    // The current authentication session, null if idle/done. We need to track both the current
-    // and pending sessions since errors may be sent to either.
+    // The current authentication session, null if idle/done.
     @VisibleForTesting
     AuthSession mCurrentAuthSession;
-    @VisibleForTesting
-    AuthSession mPendingAuthSession;
 
     @VisibleForTesting
     final Handler mHandler = new Handler(Looper.getMainLooper()) {
@@ -430,7 +427,8 @@ public class BiometricService extends SystemService {
 
     final IBiometricSysuiReceiver mSysuiReceiver = new IBiometricSysuiReceiver.Stub() {
         @Override
-        public void onDialogDismissed(int reason, @Nullable byte[] credentialAttestation) {
+        public void onDialogDismissed(@BiometricPrompt.DismissedReason int reason,
+                @Nullable byte[] credentialAttestation) {
             mHandler.obtainMessage(MSG_ON_DISMISSED,
                     reason,
                     0 /* arg2 */,
@@ -934,179 +932,63 @@ public class BiometricService extends SystemService {
 
     private void handleAuthenticationSucceeded(int sensorId, boolean requireConfirmation,
             byte[] token) {
-        try {
-            // Should never happen, log this to catch bad HAL behavior (e.g. auth succeeded
-            // after user dismissed/canceled dialog).
-            if (mCurrentAuthSession == null) {
-                Slog.e(TAG, "handleAuthenticationSucceeded: Auth session is null");
-                return;
-            }
-
-            if (isStrongBiometric(sensorId)) {
-                // Store the auth token and submit it to keystore after the dialog is confirmed /
-                // animating away.
-                mCurrentAuthSession.mTokenEscrow = token;
-            } else {
-                if (token != null) {
-                    Slog.w(TAG, "Dropping authToken for non-strong biometric, id: " + sensorId);
-                }
-            }
-
-            if (!requireConfirmation) {
-                mCurrentAuthSession.mState = AuthSession.STATE_AUTHENTICATED_PENDING_SYSUI;
-            } else {
-                mCurrentAuthSession.mAuthenticatedTimeMs = System.currentTimeMillis();
-                mCurrentAuthSession.mState = AuthSession.STATE_AUTH_PENDING_CONFIRM;
-            }
-
-            // Notify SysUI that the biometric has been authenticated. SysUI already knows
-            // the implicit/explicit state and will react accordingly.
-            mStatusBarService.onBiometricAuthenticated();
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Remote exception", e);
+        Slog.v(TAG, "handleAuthenticationSucceeded(), sensorId: " + sensorId);
+        // Should never happen, log this to catch bad HAL behavior (e.g. auth succeeded
+        // after user dismissed/canceled dialog).
+        if (mCurrentAuthSession == null) {
+            Slog.e(TAG, "handleAuthenticationSucceeded: AuthSession is null");
+            return;
         }
+
+        mCurrentAuthSession.onAuthenticationSucceeded(sensorId, requireConfirmation,
+                isStrongBiometric(sensorId), token);
     }
 
     private void handleAuthenticationRejected() {
         Slog.v(TAG, "handleAuthenticationRejected()");
-        try {
-            // Should never happen, log this to catch bad HAL behavior (e.g. auth succeeded
-            // after user dismissed/canceled dialog).
-            if (mCurrentAuthSession == null) {
-                Slog.e(TAG, "handleAuthenticationRejected: Auth session is null");
-                return;
-            }
 
-            mStatusBarService.onBiometricError(TYPE_NONE,
-                    BiometricConstants.BIOMETRIC_PAUSED_REJECTED, 0 /* vendorCode */);
-
-            // TODO: This logic will need to be updated if BP is multi-modal
-            if (mCurrentAuthSession.hasPausableBiometric()) {
-                // Pause authentication. onBiometricAuthenticated(false) causes the
-                // dialog to show a "try again" button for passive modalities.
-                mCurrentAuthSession.mState = AuthSession.STATE_AUTH_PAUSED;
-            }
-
-            mCurrentAuthSession.mClientReceiver.onAuthenticationFailed();
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Remote exception", e);
+        // Should never happen, log this to catch bad HAL behavior (e.g. auth rejected
+        // after user dismissed/canceled dialog).
+        if (mCurrentAuthSession == null) {
+            Slog.e(TAG, "handleAuthenticationRejected: AuthSession is null");
+            return;
         }
+
+        mCurrentAuthSession.onAuthenticationRejected();
     }
 
     private void handleAuthenticationTimedOut(int modality, int error, int vendorCode) {
-        Slog.v(TAG, String.format("handleAuthenticationTimedOut(%d, %d, %d)", modality, error,
-                vendorCode));
-        try {
-            // Should never happen, log this to catch bad HAL behavior (e.g. auth succeeded
-            // after user dismissed/canceled dialog).
-            if (mCurrentAuthSession == null) {
-                Slog.e(TAG, "handleAuthenticationTimedOut: Auth session is null");
-                return;
-            }
-
-            mStatusBarService.onBiometricError(modality, error, vendorCode);
-            mCurrentAuthSession.mState = AuthSession.STATE_AUTH_PAUSED;
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Remote exception", e);
+        Slog.v(TAG, "handleAuthenticationTimedOut(), modality: " + modality
+                + ", error: " + error
+                + ", vendorCode: " + vendorCode);
+        // Should never happen, log this to catch bad HAL behavior (e.g. auth succeeded
+        // after user dismissed/canceled dialog).
+        if (mCurrentAuthSession == null) {
+            Slog.e(TAG, "handleAuthenticationTimedOut: AuthSession is null");
+            return;
         }
+
+        mCurrentAuthSession.onAuthenticationTimedOut(modality, error, vendorCode);
     }
 
     private void handleOnError(int cookie, @BiometricAuthenticator.Modality int modality,
             @BiometricConstants.Errors int error, int vendorCode) {
         Slog.d(TAG, "handleOnError: " + error + " cookie: " + cookie);
-        // Errors can either be from the current auth session or the pending auth session.
-        // The pending auth session may receive errors such as ERROR_LOCKOUT before
-        // it becomes the current auth session. Similarly, the current auth session may
-        // receive errors such as ERROR_CANCELED while the pending auth session is preparing
-        // to be started. Thus we must match error messages with their cookies to be sure
-        // of their intended receivers.
 
-        // Update state if cookie matches, that the sensor is now stopped.
-        // TODO: The sensor-specific state is not currently used, this would need to be updated if
-        // multiple authenticators are running.
-        if (mCurrentAuthSession != null) {
-            mCurrentAuthSession.onErrorReceived(cookie, error);
-        } else if (mPendingAuthSession != null) {
-            mPendingAuthSession.onErrorReceived(cookie, error);
+        if (mCurrentAuthSession == null) {
+            Slog.e(TAG, "handleOnError: AuthSession is null");
+            return;
         }
 
         try {
-            if (mCurrentAuthSession != null && mCurrentAuthSession.containsCookie(cookie)) {
-                mCurrentAuthSession.mErrorEscrow = error;
-                mCurrentAuthSession.mVendorCodeEscrow = vendorCode;
-
-                if (mCurrentAuthSession.mState == AuthSession.STATE_AUTH_STARTED) {
-                    final boolean errorLockout = error == BiometricConstants.BIOMETRIC_ERROR_LOCKOUT
-                            || error == BiometricConstants.BIOMETRIC_ERROR_LOCKOUT_PERMANENT;
-                    if (mCurrentAuthSession.isAllowDeviceCredential() && errorLockout) {
-                        // SystemUI handles transition from biometric to device credential.
-                        mCurrentAuthSession.mState = AuthSession.STATE_SHOWING_DEVICE_CREDENTIAL;
-                        mStatusBarService.onBiometricError(modality, error, vendorCode);
-                    } else if (error == BiometricConstants.BIOMETRIC_ERROR_CANCELED) {
-                        mStatusBarService.hideAuthenticationDialog();
-                        // TODO: If multiple authenticators are simultaneously running, this will
-                        // need to be modified. Send the error to the client here, instead of doing
-                        // a round trip to SystemUI.
-                        mCurrentAuthSession.mClientReceiver.onError(modality, error, vendorCode);
-                        mCurrentAuthSession = null;
-                    } else {
-                        mCurrentAuthSession.mState = AuthSession.STATE_ERROR_PENDING_SYSUI;
-                        mStatusBarService.onBiometricError(modality, error, vendorCode);
-                    }
-                } else if (mCurrentAuthSession.mState == AuthSession.STATE_AUTH_PAUSED) {
-                    // In the "try again" state, we should forward canceled errors to
-                    // the client and and clean up. The only error we should get here is
-                    // ERROR_CANCELED due to another client kicking us out.
-                    mCurrentAuthSession.mClientReceiver.onError(modality, error, vendorCode);
-                    mStatusBarService.hideAuthenticationDialog();
-                    mCurrentAuthSession = null;
-                } else if (mCurrentAuthSession.mState == AuthSession.STATE_SHOWING_DEVICE_CREDENTIAL) {
-                    Slog.d(TAG, "Biometric canceled, ignoring from state: "
-                            + mCurrentAuthSession.mState);
-                } else {
-                    Slog.e(TAG, "Impossible session error state: "
-                            + mCurrentAuthSession.mState);
-                }
-            } else if (mPendingAuthSession != null
-                    && mPendingAuthSession.containsCookie(cookie)) {
-                if (mPendingAuthSession.mState == AuthSession.STATE_AUTH_CALLED) {
-                    // If any error is received while preparing the auth session (lockout, etc),
-                    // and if device credential is allowed, just show the credential UI.
-                    if (mPendingAuthSession.isAllowDeviceCredential()) {
-                        @Authenticators.Types int authenticators =
-                                mPendingAuthSession.mBundle.getInt(
-                                        BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED, 0);
-                        // Disallow biometric and notify SystemUI to show the authentication prompt.
-                        authenticators &= ~Authenticators.BIOMETRIC_WEAK;
-                        mPendingAuthSession.mBundle.putInt(
-                                BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED,
-                                authenticators);
-
-                        mCurrentAuthSession = mPendingAuthSession;
-                        mCurrentAuthSession.mState = AuthSession.STATE_SHOWING_DEVICE_CREDENTIAL;
-                        mPendingAuthSession = null;
-
-                        mStatusBarService.showAuthenticationDialog(
-                                mCurrentAuthSession.mBundle,
-                                mSysuiReceiver,
-                                0 /* biometricModality */,
-                                false /* requireConfirmation */,
-                                mCurrentAuthSession.mUserId,
-                                mCurrentAuthSession.mOpPackageName,
-                                mCurrentAuthSession.mOperationId);
-                    } else {
-                        mPendingAuthSession.mClientReceiver.onError(modality, error, vendorCode);
-                        mPendingAuthSession = null;
-                    }
-                } else {
-                    Slog.e(TAG, "Impossible pending session error state: "
-                            + mPendingAuthSession.mState);
-                }
-            } else {
-                Slog.e(TAG, "Unknown cookie: " + cookie);
+            final boolean finished = mCurrentAuthSession
+                    .onErrorReceived(cookie, modality, error, vendorCode);
+            if (finished) {
+                Slog.d(TAG, "handleOnError: AuthSession finished");
+                mCurrentAuthSession = null;
             }
         } catch (RemoteException e) {
-            Slog.e(TAG, "Remote exception", e);
+            Slog.e(TAG, "RemoteException", e);
         }
     }
 
@@ -1114,88 +996,31 @@ public class BiometricService extends SystemService {
         // Should never happen, log this to catch bad HAL behavior (e.g. auth succeeded
         // after user dismissed/canceled dialog).
         if (mCurrentAuthSession == null) {
-            Slog.e(TAG, "onAcquired(): Auth session is null");
+            Slog.e(TAG, "onAcquired: AuthSession is null");
             return;
         }
 
-        if (message == null) {
-            Slog.w(TAG, "Ignoring null message: " + acquiredInfo);
-            return;
-        }
-        try {
-            mStatusBarService.onBiometricHelp(message);
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Remote exception", e);
-        }
+        mCurrentAuthSession.onAcquired(acquiredInfo, message);
     }
 
-    private void handleOnDismissed(int reason, @Nullable byte[] credentialAttestation) {
+    private void handleOnDismissed(@BiometricPrompt.DismissedReason int reason,
+            @Nullable byte[] credentialAttestation) {
         if (mCurrentAuthSession == null) {
-            Slog.e(TAG, "onDismissed: " + reason + ", auth session null");
+            Slog.e(TAG, "onDismissed: " + reason + ", AuthSession is null");
             return;
         }
 
         logDialogDismissed(reason);
-
-        try {
-            switch (reason) {
-                case BiometricPrompt.DISMISSED_REASON_CREDENTIAL_CONFIRMED:
-                    mKeyStore.addAuthToken(credentialAttestation);
-                case BiometricPrompt.DISMISSED_REASON_BIOMETRIC_CONFIRMED:
-                case BiometricPrompt.DISMISSED_REASON_BIOMETRIC_CONFIRM_NOT_REQUIRED:
-                    if (mCurrentAuthSession.mTokenEscrow != null) {
-                        mKeyStore.addAuthToken(mCurrentAuthSession.mTokenEscrow);
-                    }
-                    mCurrentAuthSession.mClientReceiver.onAuthenticationSucceeded(
-                            Utils.getAuthenticationTypeForResult(reason));
-                    break;
-
-                case BiometricPrompt.DISMISSED_REASON_NEGATIVE:
-                    mCurrentAuthSession.mClientReceiver.onDialogDismissed(reason);
-                    // Cancel authentication. Skip the token/package check since we are cancelling
-                    // from system server. The interface is permission protected so this is fine.
-                    cancelInternal(false /* fromClient */);
-                    break;
-
-                case BiometricPrompt.DISMISSED_REASON_USER_CANCEL:
-                    mCurrentAuthSession.mClientReceiver.onError(
-                            mCurrentAuthSession.getEligibleModalities(),
-                            BiometricConstants.BIOMETRIC_ERROR_USER_CANCELED,
-                            0 /* vendorCode */
-                    );
-                    // Cancel authentication. Skip the token/package check since we are cancelling
-                    // from system server. The interface is permission protected so this is fine.
-                    cancelInternal(false /* fromClient */);
-                    break;
-
-                case BiometricPrompt.DISMISSED_REASON_SERVER_REQUESTED:
-                case BiometricPrompt.DISMISSED_REASON_ERROR:
-                    mCurrentAuthSession.mClientReceiver.onError(
-                            mCurrentAuthSession.getEligibleModalities(),
-                            mCurrentAuthSession.mErrorEscrow,
-                            mCurrentAuthSession.mVendorCodeEscrow
-                    );
-                    break;
-
-                default:
-                    Slog.w(TAG, "Unhandled reason: " + reason);
-                    break;
-            }
-
-            // Dialog is gone, auth session is done.
-            mCurrentAuthSession = null;
-
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Remote exception", e);
-        }
+        mCurrentAuthSession.onDialogDismissed(reason, credentialAttestation);
+        mCurrentAuthSession = null;
     }
 
     private void handleOnTryAgainPressed() {
         Slog.d(TAG, "onTryAgainPressed");
         // No need to check permission, since it can only be invoked by SystemUI
         // (or system server itself).
-        mCurrentAuthSession.setSensorsToStateUnknown();
-        authenticateInternal(mCurrentAuthSession.mToken,
+        authenticateInternal(true /* continuing */,
+                mCurrentAuthSession.mToken,
                 mCurrentAuthSession.mOperationId,
                 mCurrentAuthSession.mUserId,
                 mCurrentAuthSession.mClientReceiver,
@@ -1210,15 +1035,11 @@ public class BiometricService extends SystemService {
     private void handleOnDeviceCredentialPressed() {
         Slog.d(TAG, "onDeviceCredentialPressed");
         if (mCurrentAuthSession == null) {
-            Slog.e(TAG, "Auth session null");
+            Slog.e(TAG, "handleOnDeviceCredentialPressed: AuthSession is null");
             return;
         }
 
-        // Cancel authentication. Skip the token/package check since we are cancelling
-        // from system server. The interface is permission protected so this is fine.
-        cancelInternal(false /* fromClient */);
-
-        mCurrentAuthSession.mState = AuthSession.STATE_SHOWING_DEVICE_CREDENTIAL;
+        mCurrentAuthSession.onDeviceCredentialPressed();
     }
 
     private void handleOnSystemEvent(int event) {
@@ -1227,7 +1048,7 @@ public class BiometricService extends SystemService {
         Slog.d(TAG, "onSystemEvent: " + event + ", shouldReceive: " + shouldReceive);
 
         if (mCurrentAuthSession == null) {
-            Slog.e(TAG, "Auth session null");
+            Slog.e(TAG, "handleOnSystemEvent: AuthSession is null");
             return;
         }
 
@@ -1248,42 +1069,16 @@ public class BiometricService extends SystemService {
      */
     private void handleOnReadyForAuthentication(int cookie, boolean requireConfirmation,
             int userId) {
-        if (mPendingAuthSession == null) {
+        if (mCurrentAuthSession == null) {
             // Only should happen if a biometric was locked out when authenticate() was invoked.
             // In that case, if device credentials are allowed, the UI is already showing. If not
             // allowed, the error has already been returned to the caller.
-            Slog.w(TAG, "Pending auth session null");
+            Slog.w(TAG, "handleOnReadyForAuthentication: AuthSession is null");
             return;
         }
 
-        mPendingAuthSession.onCookieReceived(cookie);
-
-        if (mPendingAuthSession.allCookiesReceived()) {
-            final boolean continuing = mCurrentAuthSession != null
-                    && mCurrentAuthSession.mState == AuthSession.STATE_AUTH_PAUSED;
-
-            mCurrentAuthSession = mPendingAuthSession;
-
-            // Time starts when lower layers are ready to start the client.
-            mCurrentAuthSession.mStartTimeMs = System.currentTimeMillis();
-            mPendingAuthSession = null;
-
-            mCurrentAuthSession.mState = AuthSession.STATE_AUTH_STARTED;
-            mCurrentAuthSession.startAllPreparedSensors();
-
-            if (!continuing) {
-                try {
-                    final @BiometricAuthenticator.Modality int modality =
-                            mCurrentAuthSession.getEligibleModalities();
-                    mStatusBarService.showAuthenticationDialog(mCurrentAuthSession.mBundle,
-                            mSysuiReceiver, modality, requireConfirmation, userId,
-                            mCurrentAuthSession.mOpPackageName,
-                            mCurrentAuthSession.mOperationId);
-                } catch (RemoteException e) {
-                    Slog.e(TAG, "Remote exception", e);
-                }
-            }
-        }
+        // TODO: RequireConfirmation does not need to exist in <Biometric>Services
+        mCurrentAuthSession.onCookieReceived(cookie, requireConfirmation);
     }
 
     private void handleAuthenticate(IBinder token, long operationId, int userId,
@@ -1314,8 +1109,9 @@ public class BiometricService extends SystemService {
                                 Authenticators.DEVICE_CREDENTIAL);
                     }
 
-                    authenticateInternal(token, operationId, userId, receiver, opPackageName,
-                            bundle, callingUid, callingPid, callingUserId, preAuthInfo);
+                    authenticateInternal(false /* continuing */, token, operationId, userId,
+                            receiver, opPackageName, bundle, callingUid, callingPid, callingUserId,
+                            preAuthInfo);
                 } else {
                     receiver.onError(preAuthStatus.first /* modality */,
                             preAuthStatus.second /* errorCode */,
@@ -1336,79 +1132,45 @@ public class BiometricService extends SystemService {
      * 2) Preparing <Biometric>Services for authentication when BiometricPrompt is already shown
      * and the user has pressed "try again"
      */
-    private void authenticateInternal(IBinder token, long operationId, int userId,
-            IBiometricServiceReceiver receiver, String opPackageName, Bundle bundle,
+    private void authenticateInternal(boolean continuing, IBinder token, long operationId,
+            int userId, IBiometricServiceReceiver receiver, String opPackageName, Bundle bundle,
             int callingUid, int callingPid, int callingUserId, PreAuthInfo preAuthInfo) {
-        Slog.d(TAG, "Creating authSession with authRequest: " + preAuthInfo);
+        Slog.d(TAG, "Creating authSession with authRequest: " + preAuthInfo
+                + ", continuing: " + continuing);
 
-        mPendingAuthSession = new AuthSession(mRandom, preAuthInfo, token, operationId, userId,
+        // No need to dismiss dialog / send error yet if we're continuing authentication, e.g.
+        // "Try again" is showing due to something like ERROR_TIMEOUT.
+        if (mCurrentAuthSession != null && !continuing) {
+            // Forcefully cancel authentication. Dismiss the UI, and immediately send
+            // ERROR_CANCELED to the client. Note that we should/will ignore HAL ERROR_CANCELED.
+            // Expect to see some harmless "unknown cookie" errors.
+            Slog.w(TAG, "Existing AuthSession: " + mCurrentAuthSession);
+            mCurrentAuthSession.onCancelAuthSession(true /* force */);
+            mCurrentAuthSession = null;
+        }
+
+        mCurrentAuthSession = new AuthSession(mStatusBarService, mSysuiReceiver, mKeyStore,
+                continuing, mRandom, preAuthInfo, token, operationId, userId,
                 mBiometricSensorReceiver, receiver, opPackageName, bundle, callingUid, callingPid,
                 callingUserId);
         try {
-            if (preAuthInfo.credentialRequested
-                    && preAuthInfo.eligibleSensors.isEmpty()) {
-                // Only device credential should be shown. In this case, we don't need to wait,
-                // since LockSettingsService/Gatekeeper is always ready to check for credential.
-                // SystemUI invokes that path.
-                mPendingAuthSession.mState = AuthSession.STATE_SHOWING_DEVICE_CREDENTIAL;
-                mCurrentAuthSession = mPendingAuthSession;
-                mPendingAuthSession = null;
-
-                mStatusBarService.showAuthenticationDialog(
-                        mCurrentAuthSession.mBundle,
-                        mSysuiReceiver,
-                        0 /* biometricModality */,
-                        false /* requireConfirmation */,
-                        mCurrentAuthSession.mUserId,
-                        mCurrentAuthSession.mOpPackageName,
-                        operationId);
-            } else if (!preAuthInfo.eligibleSensors.isEmpty()) {
-                // Some combination of biometric or biometric|credential is requested
-                mPendingAuthSession.mState = AuthSession.STATE_AUTH_CALLED;
-                mPendingAuthSession.prepareAllSensorsForAuthentication();
-            } else {
-                // No authenticators requested. This should never happen - an exception should have
-                // been thrown earlier in the pipeline.
-                throw new IllegalStateException("No authenticators requested");
-            }
+            mCurrentAuthSession.goToInitialState();
         } catch (RemoteException e) {
-            Slog.e(TAG, "Unable to start authentication", e);
+            Slog.e(TAG, "RemoteException", e);
         }
     }
 
     private void handleCancelAuthentication() {
-        if (mCurrentAuthSession != null
-                && mCurrentAuthSession.mState != AuthSession.STATE_AUTH_STARTED) {
-            // We need to check the current authenticators state. If we're pending confirm
-            // or idle, we need to dismiss the dialog and send an ERROR_CANCELED to the client,
-            // since we won't be getting an onError from the driver.
-            try {
-                // Send error to client
-                mCurrentAuthSession.mClientReceiver.onError(
-                        mCurrentAuthSession.getEligibleModalities(),
-                        BiometricConstants.BIOMETRIC_ERROR_CANCELED,
-                        0 /* vendorCode */
-                );
-                mCurrentAuthSession = null;
-                mStatusBarService.hideAuthenticationDialog();
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Remote exception", e);
-            }
-        } else {
-            cancelInternal(true /* fromClient */);
-        }
-    }
-
-    private void cancelInternal(boolean fromClient) {
         if (mCurrentAuthSession == null) {
-            Slog.w(TAG, "Skipping cancelInternal");
-            return;
-        } else if (mCurrentAuthSession.mState != AuthSession.STATE_AUTH_STARTED) {
-            Slog.w(TAG, "Skipping cancelInternal, state: " + mCurrentAuthSession.mState);
+            Slog.e(TAG, "handleCancelAuthentication: AuthSession is null");
             return;
         }
 
-        mCurrentAuthSession.cancelAllSensors(fromClient);
+        final boolean finished = mCurrentAuthSession.onCancelAuthSession(false /* force */);
+        if (finished) {
+            Slog.d(TAG, "handleCancelAuthentication: AuthSession finished");
+            mCurrentAuthSession = null;
+        }
     }
 
     private void dumpInternal(PrintWriter pw) {
@@ -1416,8 +1178,6 @@ public class BiometricService extends SystemService {
         for (BiometricSensor sensor : mSensors) {
             pw.println(" " + sensor);
         }
-
-        pw.println("PendingSession: " + mPendingAuthSession);
         pw.println("CurrentSession: " + mCurrentAuthSession);
     }
 }

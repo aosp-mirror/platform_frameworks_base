@@ -123,9 +123,9 @@ public abstract class BiometricSensor {
     }
 
     void goToStateCancelling(IBinder token, String opPackageName, int callingUid,
-            int callingPid, int callingUserId, boolean fromClient) throws RemoteException {
+            int callingPid, int callingUserId) throws RemoteException {
         impl.cancelAuthenticationFromService(token, opPackageName, callingUid, callingPid,
-                callingUserId, fromClient);
+                callingUserId);
         mSensorState = STATE_CANCELING;
     }
 

@@ -40,9 +40,9 @@ interface IBiometricAuthenticator {
     // Starts authentication with the previously prepared client.
     void startPreparedClient(int cookie);
 
-    // Same as above, with extra arguments.
+    // Cancels authentication.
     void cancelAuthenticationFromService(IBinder token, String opPackageName,
-            int callingUid, int callingPid, int callingUserId, boolean fromClient);
+            int callingUid, int callingPid, int callingUserId);
 
     // Determine if HAL is loaded and ready
     boolean isHardwareDetected(String opPackageName);

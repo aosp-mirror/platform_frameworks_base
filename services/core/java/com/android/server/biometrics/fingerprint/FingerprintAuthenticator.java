@@ -52,9 +52,9 @@ public final class FingerprintAuthenticator extends IBiometricAuthenticator.Stub
 
     @Override
     public void cancelAuthenticationFromService(IBinder token, String opPackageName, int callingUid,
-            int callingPid, int callingUserId, boolean fromClient) throws RemoteException {
+            int callingPid, int callingUserId) throws RemoteException {
         mFingerprintService.cancelAuthenticationFromService(token, opPackageName, callingUid,
-                callingPid, callingUserId, fromClient);
+                callingPid, callingUserId);
     }
 
     @Override

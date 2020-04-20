@@ -37,13 +37,17 @@ import android.hardware.biometrics.BiometricPrompt;
 import android.hardware.biometrics.IBiometricAuthenticator;
 import android.hardware.biometrics.IBiometricSensorReceiver;
 import android.hardware.biometrics.IBiometricServiceReceiver;
+import android.hardware.biometrics.IBiometricSysuiReceiver;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
+import android.security.KeyStore;
 
 import androidx.test.filters.SmallTest;
+
+import com.android.internal.statusbar.IStatusBarService;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -65,6 +69,9 @@ public class AuthSessionTest {
     @Mock private BiometricService.SettingObserver mSettingObserver;
     @Mock private IBiometricSensorReceiver mSensorReceiver;
     @Mock private IBiometricServiceReceiver mClientReceiver;
+    @Mock private IStatusBarService mStatusBarService;
+    @Mock private IBiometricSysuiReceiver mSysuiReceiver;
+    @Mock private KeyStore mKeyStore;
 
     private Random mRandom;
     private IBinder mToken;
@@ -85,7 +92,8 @@ public class AuthSessionTest {
         setupFingerprint(0 /* id */);
         setupFace(1 /* id */, false /* confirmationAlwaysRequired */);
 
-        final AuthSession session = createAuthSession(mSensors,
+        final AuthSession session = createAuthSession(false /* continuing */,
+                mSensors,
                 false /* checkDevicePolicyManager */,
                 Authenticators.BIOMETRIC_STRONG,
                 0 /* operationId */,
@@ -112,7 +120,8 @@ public class AuthSessionTest {
         final int callingPid = 1000;
         final int callingUserId = 10000;
 
-        final AuthSession session = createAuthSession(mSensors,
+        final AuthSession session = createAuthSession(false /* continuing */,
+                mSensors,
                 false /* checkDevicePolicyManager */,
                 Authenticators.BIOMETRIC_STRONG,
                 operationId,
@@ -127,7 +136,7 @@ public class AuthSessionTest {
             assertEquals(0, sensor.getCookie());
         }
 
-        session.prepareAllSensorsForAuthentication();
+        session.goToInitialState();
         for (BiometricSensor sensor : session.mPreAuthInfo.eligibleSensors) {
             assertEquals(BiometricSensor.STATE_WAITING_FOR_COOKIE, sensor.getSensorState());
             assertTrue("Cookie must be >0", sensor.getCookie() > 0);
@@ -145,7 +154,8 @@ public class AuthSessionTest {
         }
 
         final int cookie1 = session.mPreAuthInfo.eligibleSensors.get(0).getCookie();
-        session.onCookieReceived(cookie1);
+        // TODO: RequireConfirmation being removed from this interface soon. True for face.
+        session.onCookieReceived(cookie1, true /* requireConfirmation */);
         for (BiometricSensor sensor : session.mPreAuthInfo.eligibleSensors) {
             if (cookie1 == sensor.getCookie()) {
                 assertEquals(BiometricSensor.STATE_COOKIE_RETURNED, sensor.getSensorState());
@@ -156,13 +166,10 @@ public class AuthSessionTest {
         assertFalse(session.allCookiesReceived());
 
         final int cookie2 = session.mPreAuthInfo.eligibleSensors.get(1).getCookie();
-        session.onCookieReceived(cookie2);
-        for (BiometricSensor sensor : session.mPreAuthInfo.eligibleSensors) {
-            assertEquals(BiometricSensor.STATE_COOKIE_RETURNED, sensor.getSensorState());
-        }
+        // TODO: RequireConfirmation being removed from this interface soon. False for fingerprint.
+        session.onCookieReceived(cookie2, false /* requireConfirmation */);
         assertTrue(session.allCookiesReceived());
 
-        session.startAllPreparedSensors();
         for (BiometricSensor sensor : session.mPreAuthInfo.eligibleSensors) {
             verify(sensor.impl).startPreparedClient(eq(sensor.getCookie()));
             assertEquals(BiometricSensor.STATE_AUTHENTICATING, sensor.getSensorState());
@@ -181,7 +188,7 @@ public class AuthSessionTest {
                 checkDevicePolicyManager);
     }
 
-    private AuthSession createAuthSession(List<BiometricSensor> sensors,
+    private AuthSession createAuthSession(boolean continuing, List<BiometricSensor> sensors,
             boolean checkDevicePolicyManager, @Authenticators.Types int authenticators,
             long operationId, int userId,
             int callingUid, int callingPid, int callingUserId)
@@ -192,7 +199,8 @@ public class AuthSessionTest {
         final PreAuthInfo preAuthInfo = createPreAuthInfo(sensors, userId, bundle,
                 checkDevicePolicyManager);
 
-        return new AuthSession(mRandom, preAuthInfo, mToken, operationId, userId, mSensorReceiver,
+        return new AuthSession(mStatusBarService, mSysuiReceiver, mKeyStore, continuing,
+                mRandom, preAuthInfo, mToken, operationId, userId, mSensorReceiver,
                 mClientReceiver, TEST_PACKAGE, bundle, callingUid,
                 callingPid, callingUserId);
     }

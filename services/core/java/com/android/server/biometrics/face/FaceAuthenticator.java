@@ -52,9 +52,9 @@ public final class FaceAuthenticator extends IBiometricAuthenticator.Stub {
 
     @Override
     public void cancelAuthenticationFromService(IBinder token, String opPackageName, int callingUid,
-            int callingPid, int callingUserId, boolean fromClient) throws RemoteException {
+            int callingPid, int callingUserId) throws RemoteException {
         mFaceService.cancelAuthenticationFromService(token, opPackageName, callingUid, callingPid,
-                callingUserId, fromClient);
+                callingUserId);
     }
 
     @Override
