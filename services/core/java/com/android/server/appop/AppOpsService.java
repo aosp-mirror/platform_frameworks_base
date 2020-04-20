@@ -5308,6 +5308,12 @@ public class AppOpsService extends IAppOpsService.Stub {
                     pw.print("    pendingCapability=");
                     pw.println(uidState.pendingCapability);
                 }
+                pw.print("    appWidgetVisible=");
+                pw.println(uidState.appWidgetVisible);
+                if (uidState.appWidgetVisible != uidState.pendingAppWidgetVisible) {
+                    pw.print("    pendingAppWidgetVisible=");
+                    pw.println(uidState.pendingAppWidgetVisible);
+                }
                 if (uidState.pendingStateCommitTime != 0) {
                     pw.print("    pendingStateCommitTime=");
                     TimeUtils.formatDuration(uidState.pendingStateCommitTime, nowElapsed, pw);
