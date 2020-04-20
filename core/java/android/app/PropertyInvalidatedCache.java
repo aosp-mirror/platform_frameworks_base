@@ -17,6 +17,10 @@
 package android.app;
 
 import android.annotation.NonNull;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
+import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.util.Log;
 
@@ -492,6 +496,10 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
     public static void corkInvalidations(@NonNull String name) {
         synchronized (sCorkLock) {
             int numberCorks = sCorks.getOrDefault(name, 0);
+            if (DEBUG) {
+                Log.d(TAG, String.format("corking %s: numberCorks=%s", name, numberCorks));
+            }
+
             // If we're the first ones to cork this cache, set the cache to the unset state so
             // existing caches talk directly to their services while we've corked updates.
             // Make sure we don't clobber a disabled cache value.
@@ -523,6 +531,10 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
     public static void uncorkInvalidations(@NonNull String name) {
         synchronized (sCorkLock) {
             int numberCorks = sCorks.getOrDefault(name, 0);
+            if (DEBUG) {
+                Log.d(TAG, String.format("uncorking %s: numberCorks=%s", name, numberCorks));
+            }
+
             if (numberCorks < 1) {
                 throw new AssertionError("cork underflow: " + name);
             }
@@ -535,6 +547,106 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
             } else {
                 sCorks.put(name, numberCorks - 1);
             }
+        }
+    }
+
+    /**
+     * Time-based automatic corking helper. This class allows providers of cached data to
+     * amortize the cost of cache invalidations by corking the cache immediately after a
+     * modification (instructing clients to bypass the cache temporarily) and automatically
+     * uncork after some period of time has elapsed.
+     *
+     * It's better to use explicit cork and uncork pairs that tighly surround big batches of
+     * invalidations, but it's not always practical to tell where these invalidation batches
+     * might occur. AutoCorker's time-based corking is a decent alternative.
+     */
+    public static final class AutoCorker {
+        public static final int DEFAULT_AUTO_CORK_DELAY_MS = 2000;
+
+        private final String mPropertyName;
+        private final int mAutoCorkDelayMs;
+        private final Object mLock = new Object();
+        @GuardedBy("mLock")
+        private long mUncorkDeadlineMs = -1;  // SystemClock.uptimeMillis()
+        @GuardedBy("mLock")
+        private Handler mHandler;
+
+        public AutoCorker(@NonNull String propertyName) {
+            this(propertyName, DEFAULT_AUTO_CORK_DELAY_MS);
+        }
+
+        public AutoCorker(@NonNull String propertyName, int autoCorkDelayMs) {
+            mPropertyName = propertyName;
+            mAutoCorkDelayMs = autoCorkDelayMs;
+            // We can't initialize mHandler here: when we're created, the main loop might not
+            // be set up yet! Wait until we have a main loop to initialize our
+            // corking callback.
+        }
+
+        public void autoCork() {
+            if (Looper.getMainLooper() == null) {
+                // We're not ready to auto-cork yet, so just invalidate the cache immediately.
+                if (DEBUG) {
+                    Log.w(TAG, "invalidating instead of autocorking early in init: "
+                            + mPropertyName);
+                }
+                PropertyInvalidatedCache.invalidateCache(mPropertyName);
+                return;
+            }
+            synchronized (mLock) {
+                boolean alreadyQueued = mUncorkDeadlineMs >= 0;
+                if (DEBUG) {
+                    Log.w(TAG, String.format(
+                                    "autoCork mUncorkDeadlineMs=%s", mUncorkDeadlineMs));
+                }
+                mUncorkDeadlineMs = SystemClock.uptimeMillis() + mAutoCorkDelayMs;
+                if (!alreadyQueued) {
+                    getHandlerLocked().sendEmptyMessageAtTime(0, mUncorkDeadlineMs);
+                    PropertyInvalidatedCache.corkInvalidations(mPropertyName);
+                }
+            }
+        }
+
+        private void handleMessage(Message msg) {
+            synchronized (mLock) {
+                if (DEBUG) {
+                    Log.w(TAG, String.format(
+                                    "handleMsesage mUncorkDeadlineMs=%s", mUncorkDeadlineMs));
+                }
+
+                if (mUncorkDeadlineMs < 0) {
+                    return;  // ???
+                }
+                long nowMs = SystemClock.uptimeMillis();
+                if (mUncorkDeadlineMs > nowMs) {
+                    mUncorkDeadlineMs = nowMs + mAutoCorkDelayMs;
+                    if (DEBUG) {
+                        Log.w(TAG, String.format(
+                                        "scheduling uncork at %s",
+                                        mUncorkDeadlineMs));
+                    }
+                    getHandlerLocked().sendEmptyMessageAtTime(0, mUncorkDeadlineMs);
+                    return;
+                }
+                if (DEBUG) {
+                    Log.w(TAG, "automatic uncorking " + mPropertyName);
+                }
+                mUncorkDeadlineMs = -1;
+                PropertyInvalidatedCache.uncorkInvalidations(mPropertyName);
+            }
+        }
+
+        @GuardedBy("mLock")
+        private Handler getHandlerLocked() {
+            if (mHandler == null) {
+                mHandler = new Handler(Looper.getMainLooper()) {
+                        @Override
+                        public void handleMessage(Message msg) {
+                            AutoCorker.this.handleMessage(msg);
+                        }
+                    };
+            }
+            return mHandler;
         }
     }
 
