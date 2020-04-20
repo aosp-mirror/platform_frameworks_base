@@ -25,6 +25,4 @@
     <string name="upstream_roaming_notification_title">Hotspot or tethering is on</string>
     <!-- String for cellular roaming notification message [CHAR LIMIT=500] -->
     <string name="upstream_roaming_notification_message">Additional charges may apply while roaming</string>
-    <!-- String for cellular roaming notification continue button [CHAR LIMIT=200] -->
-    <string name="upstream_roaming_notification_continue_button">Continue</string>
 </resources>
