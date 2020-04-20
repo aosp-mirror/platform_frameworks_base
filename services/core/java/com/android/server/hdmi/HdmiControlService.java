@@ -768,9 +768,6 @@ public class HdmiControlService extends SystemService {
         // A container for [Device type, Local device info].
         ArrayList<HdmiCecLocalDevice> localDevices = new ArrayList<>();
         for (int type : mLocalDevices) {
-            if (type == HdmiDeviceInfo.DEVICE_PLAYBACK) {
-                continue;
-            }
             HdmiCecLocalDevice localDevice = mCecController.getLocalDevice(type);
             if (localDevice == null) {
                 localDevice = HdmiCecLocalDevice.create(this, type);
@@ -1185,9 +1182,6 @@ public class HdmiControlService extends SystemService {
             }
             ArrayList<HdmiCecLocalDevice> localDevices = new ArrayList<>();
             for (int type : mLocalDevices) {
-                if (type == HdmiDeviceInfo.DEVICE_PLAYBACK) {
-                    continue;
-                }
                 HdmiCecLocalDevice localDevice = mCecController.getLocalDevice(type);
                 if (localDevice == null) {
                     localDevice = HdmiCecLocalDevice.create(this, type);
