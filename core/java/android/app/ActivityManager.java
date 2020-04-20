@@ -2791,7 +2791,9 @@ public class ActivityManager {
         @UnsupportedAppUsage
         public boolean visible;
         // Index of the stack in the display's stack list, can be used for comparison of stack order
+        // TODO: Can be removed since no one is using it.
         @UnsupportedAppUsage
+        @Deprecated
         public int position;
         public WindowContainerToken stackToken;
         /**
