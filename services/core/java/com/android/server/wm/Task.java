@@ -1943,12 +1943,15 @@ class Task extends WindowContainer<WindowContainer> {
         final int prevWinMode = getWindowingMode();
         mTmpPrevBounds.set(getBounds());
         final boolean wasInMultiWindowMode = inMultiWindowMode();
+        final boolean wasInPictureInPicture = inPinnedWindowingMode();
         super.onConfigurationChanged(newParentConfig);
         // Only need to update surface size here since the super method will handle updating
         // surface position.
         updateSurfaceSize(getPendingTransaction());
 
-        if (wasInMultiWindowMode != inMultiWindowMode()) {
+        if (wasInPictureInPicture != inPinnedWindowingMode()) {
+            mStackSupervisor.scheduleUpdatePictureInPictureModeIfNeeded(this, getStack());
+        } else if (wasInMultiWindowMode != inMultiWindowMode()) {
             mStackSupervisor.scheduleUpdateMultiWindowMode(this);
         }
 
