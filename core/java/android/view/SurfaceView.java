@@ -1173,43 +1173,6 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                 TAG, "Layout: x=" + mScreenRect.left + " y=" + mScreenRect.top
                 + " w=" + mScreenRect.width() + " h=" + mScreenRect.height()
                 + ", frame=" + mSurfaceFrame);
-        } else {
-            // Calculate the window position in case RT loses the window
-            // and we need to fallback to a UI-thread driven position update
-            if (positionChanged || layoutSizeChanged) { // Only the position has changed
-                mWindowSpaceLeft = mLocation[0];
-                mWindowSpaceTop = mLocation[1];
-                // For our size changed check, we keep mScreenRect.width() and mScreenRect.height()
-                // in view local space.
-                mLocation[0] = getWidth();
-                mLocation[1] = getHeight();
-
-                mScreenRect.set(mWindowSpaceLeft, mWindowSpaceTop,
-                        mWindowSpaceLeft + mLocation[0], mWindowSpaceTop + mLocation[1]);
-
-                if (translator != null) {
-                    translator.translateRectInAppWindowToScreen(mScreenRect);
-                }
-
-                if (mSurfaceControl == null) {
-                    return;
-                }
-
-                if (!isHardwareAccelerated() || !mRtHandlingPositionUpdates) {
-                    try {
-                        if (DEBUG_POSITION) {
-                            Log.d(TAG, String.format("%d updateSurfacePosition UI, "
-                                            + "position = [%d, %d, %d, %d]",
-                                    System.identityHashCode(this),
-                                    mScreenRect.left, mScreenRect.top,
-                                    mScreenRect.right, mScreenRect.bottom));
-                        }
-                        setParentSpaceRectangle(mScreenRect, -1);
-                    } catch (Exception ex) {
-                        Log.e(TAG, "Exception configuring surface", ex);
-                    }
-                }
-            }
         }
     }
 
