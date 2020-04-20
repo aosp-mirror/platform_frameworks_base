@@ -83,4 +83,52 @@ public class TvRemoteProviderTest extends AndroidTestCase {
 
         assertTrue(tvProvider.verifyTokens());
     }
+
+    @SmallTest
+    public void testOpenGamepadRemoteInputBridge() throws Exception {
+        Binder tokenA = new Binder();
+        Binder tokenB = new Binder();
+        Binder tokenC = new Binder();
+
+        class LocalTvRemoteProvider extends TvRemoteProvider {
+            private final ArrayList<IBinder> mTokens = new ArrayList<IBinder>();
+
+            LocalTvRemoteProvider(Context context) {
+                super(context);
+            }
+
+            @Override
+            public void onInputBridgeConnected(IBinder token) {
+                mTokens.add(token);
+            }
+
+            public boolean verifyTokens() {
+                return mTokens.size() == 3 && mTokens.contains(tokenA) && mTokens.contains(tokenB)
+                        && mTokens.contains(tokenC);
+            }
+        }
+
+        LocalTvRemoteProvider tvProvider = new LocalTvRemoteProvider(getContext());
+        ITvRemoteProvider binder = (ITvRemoteProvider) tvProvider.getBinder();
+
+        ITvRemoteServiceInput tvServiceInput = mock(ITvRemoteServiceInput.class);
+        doAnswer((i) -> {
+            binder.onInputBridgeConnected(i.getArgument(0));
+            return null;
+        })
+                .when(tvServiceInput)
+                .openGamepadBridge(any(), any());
+
+        tvProvider.openGamepadBridge(tokenA, "A");
+        tvProvider.openGamepadBridge(tokenB, "B");
+        binder.setRemoteServiceInputSink(tvServiceInput);
+        tvProvider.openGamepadBridge(tokenC, "C");
+
+        verify(tvServiceInput).openGamepadBridge(tokenA, "A");
+        verify(tvServiceInput).openGamepadBridge(tokenB, "B");
+        verify(tvServiceInput).openGamepadBridge(tokenC, "C");
+        verifyNoMoreInteractions(tvServiceInput);
+
+        assertTrue(tvProvider.verifyTokens());
+    }
 }
