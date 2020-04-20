@@ -2523,16 +2523,10 @@ enum PageId {
     // OS: R
     PANEL_ADD_WIFI_NETWORKS = 1809;
 
-    // OPEN: Settings > Accessibility > Enable accessibility service > Show tutorial dialog
+    // OPEN: Settings > Accessibility > Enable the feature or shortcut > Show tutorial dialog
     // CATEGORY: SETTINGS
     // OS: R
-    DIALOG_TOGGLE_SCREEN_ACCESSIBILITY_BUTTON = 1810;
-
-    // OPEN: Settings > Accessibility > Enable accessibility service > Show tutorial dialog in
-    // gesture mode
-    // CATEGORY: SETTINGS
-    // OS: R
-    DIALOG_TOGGLE_SCREEN_GESTURE_NAVIGATION = 1811;
+    DIALOG_ACCESSIBILITY_TUTORIAL = 1810;
 
     // OPEN: Settings > Accessibility > Edit shortcut dialog
     // CATEGORY: SETTINGS
