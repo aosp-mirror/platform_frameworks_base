@@ -39,4 +39,10 @@ oneway interface ITvRemoteServiceInput {
     void sendPointerUp(IBinder token, int pointerId);
     @UnsupportedAppUsage
     void sendPointerSync(IBinder token);
+
+    // API specific to gamepads. Close gamepads with closeInputBridge
+    void openGamepadBridge(IBinder token, String name);
+    void sendGamepadKeyDown(IBinder token, int keyCode);
+    void sendGamepadKeyUp(IBinder token, int keyCode);
+    void sendGamepadAxisValue(IBinder token, int axis, float value);
 }

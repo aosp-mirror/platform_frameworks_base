@@ -16,6 +16,8 @@
 
 package com.android.media.tv.remoteprovider;
 
+import android.annotation.FloatRange;
+import android.annotation.NonNull;
 import android.content.Context;
 import android.media.tv.ITvRemoteProvider;
 import android.media.tv.ITvRemoteServiceInput;
@@ -24,6 +26,7 @@ import android.os.RemoteException;
 import android.util.Log;
 
 import java.util.LinkedList;
+import java.util.Objects;
 
 /**
  * Base class for emote providers implemented in unbundled service.
@@ -124,27 +127,75 @@ public abstract class TvRemoteProvider {
      * @param maxPointers Maximum supported pointers
      * @throws RuntimeException
      */
-    public void openRemoteInputBridge(IBinder token, String name, int width, int height,
-                                      int maxPointers) throws RuntimeException {
+    public void openRemoteInputBridge(
+            IBinder token, String name, int width, int height, int maxPointers)
+            throws RuntimeException {
+        final IBinder finalToken = Objects.requireNonNull(token);
+        final String finalName = Objects.requireNonNull(name);
+
         synchronized (mOpenBridgeRunnables) {
             if (mRemoteServiceInput == null) {
-                Log.d(TAG, "Delaying openRemoteInputBridge() for " + name);
+                Log.d(TAG, "Delaying openRemoteInputBridge() for " + finalName);
 
                 mOpenBridgeRunnables.add(() -> {
                     try {
                         mRemoteServiceInput.openInputBridge(
-                                token, name, width, height, maxPointers);
-                        Log.d(TAG, "Delayed openRemoteInputBridge() for " + name + ": success");
+                                finalToken, finalName, width, height, maxPointers);
+                        Log.d(TAG, "Delayed openRemoteInputBridge() for " + finalName
+                                + ": success");
                     } catch (RemoteException re) {
-                        Log.e(TAG, "Delayed openRemoteInputBridge() for " + name + ": failure", re);
+                        Log.e(TAG, "Delayed openRemoteInputBridge() for " + finalName
+                                + ": failure", re);
                     }
                 });
                 return;
             }
         }
         try {
-            mRemoteServiceInput.openInputBridge(token, name, width, height, maxPointers);
-            Log.d(TAG, "openRemoteInputBridge() for " + name + ": success");
+            mRemoteServiceInput.openInputBridge(finalToken, finalName, width, height, maxPointers);
+            Log.d(TAG, "openRemoteInputBridge() for " + finalName + ": success");
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Opens an input bridge as a gamepad device.
+     * Clients should pass in a token that can be used to match this request with a token that
+     * will be returned by {@link TvRemoteProvider#onInputBridgeConnected(IBinder token)}
+     * <p>
+     * The token should be used for subsequent calls.
+     * </p>
+     *
+     * @param token       Identifier for this connection
+     * @param name        Device name
+     * @throws RuntimeException
+     *
+     * @hide
+     */
+    public void openGamepadBridge(@NonNull IBinder token, @NonNull  String name)
+            throws RuntimeException {
+        final IBinder finalToken = Objects.requireNonNull(token);
+        final String finalName = Objects.requireNonNull(name);
+        synchronized (mOpenBridgeRunnables) {
+            if (mRemoteServiceInput == null) {
+                Log.d(TAG, "Delaying openGamepadBridge() for " + finalName);
+
+                mOpenBridgeRunnables.add(() -> {
+                    try {
+                        mRemoteServiceInput.openGamepadBridge(finalToken, finalName);
+                        Log.d(TAG, "Delayed openGamepadBridge() for " + finalName + ": success");
+                    } catch (RemoteException re) {
+                        Log.e(TAG, "Delayed openGamepadBridge() for " + finalName + ": failure",
+                                re);
+                    }
+                });
+                return;
+            }
+        }
+        try {
+            mRemoteServiceInput.openGamepadBridge(token, finalName);
+            Log.d(TAG, "openGamepadBridge() for " + finalName + ": success");
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -157,6 +208,7 @@ public abstract class TvRemoteProvider {
      * @throws RuntimeException
      */
     public void closeInputBridge(IBinder token) throws RuntimeException {
+        Objects.requireNonNull(token);
         try {
             mRemoteServiceInput.closeInputBridge(token);
         } catch (RemoteException re) {
@@ -173,6 +225,7 @@ public abstract class TvRemoteProvider {
      * @throws RuntimeException
      */
     public void clearInputBridge(IBinder token) throws RuntimeException {
+        Objects.requireNonNull(token);
         if (DEBUG_KEYS) Log.d(TAG, "clearInputBridge() token " + token);
         try {
             mRemoteServiceInput.clearInputBridge(token);
@@ -190,6 +243,7 @@ public abstract class TvRemoteProvider {
      * @throws RuntimeException
      */
     public void sendTimestamp(IBinder token, long timestamp) throws RuntimeException {
+        Objects.requireNonNull(token);
         if (DEBUG_KEYS) Log.d(TAG, "sendTimestamp() token: " + token +
                 ", timestamp: " + timestamp);
         try {
@@ -207,6 +261,7 @@ public abstract class TvRemoteProvider {
      * @throws RuntimeException
      */
     public void sendKeyUp(IBinder token, int keyCode) throws RuntimeException {
+        Objects.requireNonNull(token);
         if (DEBUG_KEYS) Log.d(TAG, "sendKeyUp() token: " + token + ", keyCode: " + keyCode);
         try {
             mRemoteServiceInput.sendKeyUp(token, keyCode);
@@ -223,6 +278,7 @@ public abstract class TvRemoteProvider {
      * @throws RuntimeException
      */
     public void sendKeyDown(IBinder token, int keyCode) throws RuntimeException {
+        Objects.requireNonNull(token);
         if (DEBUG_KEYS) Log.d(TAG, "sendKeyDown() token: " + token +
                 ", keyCode: " + keyCode);
         try {
@@ -241,6 +297,7 @@ public abstract class TvRemoteProvider {
      * @throws RuntimeException
      */
     public void sendPointerUp(IBinder token, int pointerId) throws RuntimeException {
+        Objects.requireNonNull(token);
         if (DEBUG_KEYS) Log.d(TAG, "sendPointerUp() token: " + token +
                 ", pointerId: " + pointerId);
         try {
@@ -262,6 +319,7 @@ public abstract class TvRemoteProvider {
      */
     public void sendPointerDown(IBinder token, int pointerId, int x, int y)
             throws RuntimeException {
+        Objects.requireNonNull(token);
         if (DEBUG_KEYS) Log.d(TAG, "sendPointerDown() token: " + token +
                 ", pointerId: " + pointerId);
         try {
@@ -278,9 +336,98 @@ public abstract class TvRemoteProvider {
      * @throws RuntimeException
      */
     public void sendPointerSync(IBinder token) throws RuntimeException {
+        Objects.requireNonNull(token);
         if (DEBUG_KEYS) Log.d(TAG, "sendPointerSync() token: " + token);
         try {
             mRemoteServiceInput.sendPointerSync(token);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Send a notification that a gamepad key was pressed.
+     *
+     * Supported buttons are:
+     * <ul>
+     *   <li> Right-side buttons: BUTTON_A, BUTTON_B, BUTTON_X, BUTTON_Y
+     *   <li> Digital Triggers and bumpers: BUTTON_L1, BUTTON_R1, BUTTON_L2, BUTTON_R2
+     *   <li> Thumb buttons: BUTTON_THUMBL, BUTTON_THUMBR
+     *   <li> DPad buttons: DPAD_UP, DPAD_DOWN, DPAD_LEFT, DPAD_RIGHT
+     *   <li> Gamepad buttons: BUTTON_SELECT, BUTTON_START, BUTTON_MODE
+     *   <li> Generic buttons: BUTTON_1, BUTTON_2, ...., BUTTON16
+     *   <li> Assistant: ASSIST, VOICE_ASSIST
+     * </ul>
+     *
+     * @param token   identifier for the device
+     * @param keyCode the gamepad key that was pressed (like BUTTON_A)
+     *
+     * @hide
+     */
+    public void sendGamepadKeyDown(@NonNull IBinder token, int keyCode) throws RuntimeException {
+        Objects.requireNonNull(token);
+        if (DEBUG_KEYS) {
+            Log.d(TAG, "sendGamepadKeyDown() token: " + token);
+        }
+
+        try {
+            mRemoteServiceInput.sendGamepadKeyDown(token, keyCode);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Send a notification that a gamepad key was released.
+     *
+     * @see sendGamepadKeyDown for supported key codes.
+     *
+     * @param token identifier for the device
+     * @param keyCode the gamepad key that was pressed
+     *
+     * @hide
+     */
+    public void sendGamepadKeyUp(@NonNull IBinder token, int keyCode) throws RuntimeException {
+        Objects.requireNonNull(token);
+        if (DEBUG_KEYS) {
+            Log.d(TAG, "sendGamepadKeyUp() token: " + token);
+        }
+
+        try {
+            mRemoteServiceInput.sendGamepadKeyUp(token, keyCode);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Send a gamepad axis value.
+     *
+     * Supported axes:
+     *  <li> Left Joystick: AXIS_X, AXIS_Y
+     *  <li> Right Joystick: AXIS_Z, AXIS_RZ
+     *  <li> Triggers: AXIS_LTRIGGER, AXIS_RTRIGGER
+     *  <li> DPad: AXIS_HAT_X, AXIS_HAT_Y
+     *
+     * For non-trigger axes, the range of acceptable values is [-1, 1]. The trigger axes support
+     * values [0, 1].
+     *
+     * @param token identifier for the device
+     * @param axis  MotionEvent axis
+     * @param value the value to send
+     *
+     * @hide
+     */
+    public void sendGamepadAxisValue(
+            @NonNull IBinder token, int axis, @FloatRange(from = -1.0f, to = 1.0f) float value)
+            throws RuntimeException {
+        Objects.requireNonNull(token);
+        if (DEBUG_KEYS) {
+            Log.d(TAG, "sendGamepadAxisValue() token: " + token);
+        }
+
+        try {
+            mRemoteServiceInput.sendGamepadAxisValue(token, axis, value);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
