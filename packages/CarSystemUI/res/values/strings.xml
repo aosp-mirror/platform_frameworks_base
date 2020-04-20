@@ -22,4 +22,16 @@
     <string name="hvac_max_text">Max</string>
     <!-- Text for voice recognition toast. [CHAR LIMIT=60] -->
     <string name="voice_recognition_toast">Voice recognition now handled by connected Bluetooth device</string>
+    <!-- Name of Guest Profile. [CHAR LIMIT=30] -->
+    <string name="car_guest">Guest</string>
+    <!-- Title for button that starts a guest session. [CHAR LIMIT=30] -->
+    <string name="start_guest_session">Guest</string>
+    <!-- Title for button that  adds a new user. [CHAR LIMIT=30] -->
+    <string name="car_add_user">Add User</string>
+    <!-- Default name of the new user created. [CHAR LIMIT=30] -->
+    <string name="car_new_user">New User</string>
+    <!-- Message to inform user that creation of new user requires that user to set up their space. [CHAR LIMIT=100] -->
+    <string name="user_add_user_message_setup">When you add a new user, that person needs to set up their space.</string>
+    <!-- Message to inform user that the newly created user will have permissions to update apps for all other users. [CHAR LIMIT=100] -->
+    <string name="user_add_user_message_update">Any user can update apps for all other users.</string>
 </resources>
