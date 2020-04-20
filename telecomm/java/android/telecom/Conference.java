@@ -74,6 +74,7 @@ public abstract class Conference extends Conferenceable {
         public void onConnectionEvent(Conference c, String event, Bundle extras) {}
         public void onCallerDisplayNameChanged(
                 Conference c, String callerDisplayName, int presentation) {}
+        public void onCallDirectionChanged(Conference c, int callDirection) {}
         public void onRingbackRequested(Conference c, boolean ringback) {}
     }
 
@@ -103,6 +104,7 @@ public abstract class Conference extends Conferenceable {
     private int mAddressPresentation;
     private String mCallerDisplayName;
     private int mCallerDisplayNamePresentation;
+    private int mCallDirection;
     private boolean mRingbackRequested = false;
 
     private final Connection.Listener mConnectionDeathListener = new Connection.Listener() {
@@ -1024,6 +1026,25 @@ public abstract class Conference extends Conferenceable {
     }
 
     /**
+     * Sets the call direction of this {@link Conference}. By default, all {@link Conference}s have
+     * a direction of {@link android.telecom.Call.Details.CallDirection#DIRECTION_UNKNOWN}. The
+     * direction of a {@link Conference} is only applicable to the case where
+     * {@link #setConferenceState(boolean)} has been set to {@code false}, otherwise the direction
+     * will be ignored.
+     * @param callDirection The direction of the conference.
+     * @hide
+     */
+    @RequiresPermission(MODIFY_PHONE_STATE)
+    public final void setCallDirection(@Call.Details.CallDirection int callDirection) {
+        Log.d(this, "setDirection %d", callDirection);
+        mCallDirection = callDirection;
+        for (Listener l : mListeners) {
+            l.onCallDirectionChanged(this, callDirection);
+        }
+    }
+
+
+    /**
      * Sets the address of this {@link Conference}.  Used when {@link #setConferenceState(boolean)}
      * is called to mark a conference temporarily as NOT a conference.
      * <p>
@@ -1099,6 +1120,15 @@ public abstract class Conference extends Conferenceable {
      */
     public final int getCallerDisplayNamePresentation() {
         return mCallerDisplayNamePresentation;
+    }
+
+    /**
+     * @return The call direction of this conference. Only applicable when
+     * {@link #setConferenceState(boolean)} is set to false.
+     * @hide
+     */
+    public final @Call.Details.CallDirection int getCallDirection() {
+        return mCallDirection;
     }
 
     /**
