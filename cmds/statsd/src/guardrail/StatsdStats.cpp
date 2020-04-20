@@ -119,7 +119,7 @@ const std::map<int, std::pair<size_t, size_t>> StatsdStats::kAtomDimensionKeySiz
 };
 
 StatsdStats::StatsdStats() {
-    mPushedAtomStats.resize(android::util::kMaxPushedAtomId + 1);
+    mPushedAtomStats.resize(kMaxPushedAtomId + 1);
     mStartTimeSec = getWallClockSec();
 }
 
@@ -448,7 +448,7 @@ void StatsdStats::notePullExceedMaxDelay(int pullAtomId) {
 void StatsdStats::noteAtomLogged(int atomId, int32_t timeSec) {
     lock_guard<std::mutex> lock(mLock);
 
-    if (atomId <= android::util::kMaxPushedAtomId) {
+    if (atomId <= kMaxPushedAtomId) {
         mPushedAtomStats[atomId]++;
     } else {
         if (mNonPlatformPushedAtomStats.size() < kMaxNonPlatformPushedAtoms) {
