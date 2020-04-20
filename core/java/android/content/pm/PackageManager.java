@@ -8071,13 +8071,16 @@ public abstract class PackageManager {
         sApplicationInfoCache.disableLocal();
     }
 
+    private static final PropertyInvalidatedCache.AutoCorker sCacheAutoCorker =
+            new PropertyInvalidatedCache.AutoCorker(PermissionManager.CACHE_KEY_PACKAGE_INFO);
+
     /**
      * Invalidate caches of package and permission information system-wide.
      *
      * @hide
      */
     public static void invalidatePackageInfoCache() {
-        PropertyInvalidatedCache.invalidateCache(PermissionManager.CACHE_KEY_PACKAGE_INFO);
+        sCacheAutoCorker.autoCork();
     }
 
     // Some of the flags don't affect the query result, but let's be conservative and cache
