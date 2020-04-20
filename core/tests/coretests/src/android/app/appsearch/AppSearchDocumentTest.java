@@ -20,11 +20,12 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.testng.Assert.assertThrows;
 
+import android.app.appsearch.proto.DocumentProto;
+import android.app.appsearch.proto.PropertyProto;
+import android.app.appsearch.protobuf.ByteString;
+
 import androidx.test.filters.SmallTest;
 
-import com.google.android.icing.proto.DocumentProto;
-import com.google.android.icing.proto.PropertyProto;
-import com.google.android.icing.protobuf.ByteString;
 
 import org.junit.Test;
 

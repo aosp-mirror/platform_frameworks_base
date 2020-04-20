@@ -36,6 +36,7 @@ java_library {
         "//frameworks/base",
         "//frameworks/base/apex/appsearch:__subpackages__",
     ],
+    jarjar_rules: "jarjar-rules.txt",
     permitted_packages: ["android.app.appsearch"],
     apex_available: ["com.android.appsearch"],
 }

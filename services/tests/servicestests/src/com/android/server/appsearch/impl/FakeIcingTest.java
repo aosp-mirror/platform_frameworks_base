@@ -19,10 +19,10 @@ import static com.google.common.truth.Truth.assertThat;
 
 import androidx.test.runner.AndroidJUnit4;
 
-import com.google.android.icing.proto.DocumentProto;
-import com.google.android.icing.proto.PropertyProto;
-import com.google.android.icing.proto.SearchResultProto;
-import com.google.android.icing.proto.StatusProto;
+import com.android.server.appsearch.proto.DocumentProto;
+import com.android.server.appsearch.proto.PropertyProto;
+import com.android.server.appsearch.proto.SearchResultProto;
+import com.android.server.appsearch.proto.StatusProto;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

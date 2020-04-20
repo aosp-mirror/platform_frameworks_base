@@ -18,13 +18,13 @@ package android.app.appsearch;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import androidx.test.filters.SmallTest;
+import android.app.appsearch.proto.DocumentProto;
+import android.app.appsearch.proto.PropertyProto;
+import android.app.appsearch.proto.SearchResultProto;
+import android.app.appsearch.proto.SnippetMatchProto;
+import android.app.appsearch.proto.SnippetProto;
 
-import com.google.android.icing.proto.DocumentProto;
-import com.google.android.icing.proto.PropertyProto;
-import com.google.android.icing.proto.SearchResultProto;
-import com.google.android.icing.proto.SnippetMatchProto;
-import com.google.android.icing.proto.SnippetProto;
+import androidx.test.filters.SmallTest;
 
 import org.junit.Test;
 
