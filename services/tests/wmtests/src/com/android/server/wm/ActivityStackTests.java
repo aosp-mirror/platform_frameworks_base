@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
@@ -44,6 +45,7 @@ import static com.android.server.wm.ActivityStack.STACK_VISIBILITY_VISIBLE;
 import static com.android.server.wm.ActivityStack.STACK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT;
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_FREE_RESIZE;
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_WINDOWING_MODE_RESIZE;
+import static com.android.server.wm.Task.FLAG_FORCE_HIDDEN_FOR_TASK_ORG;
 import static com.android.server.wm.Task.REPARENT_MOVE_STACK_TO_FRONT;
 import static com.android.server.wm.TaskDisplayArea.getStackAbove;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
@@ -486,6 +488,55 @@ public class ActivityStackTests extends ActivityTestsBase {
                 splitScreenSecondary.getVisibility(null /* starting */));
         assertEquals(STACK_VISIBILITY_VISIBLE,
                 splitScreenSecondary2.getVisibility(null /* starting */));
+    }
+
+    @Test
+    public void testGetVisibility_MultiLevel() {
+        final ActivityStack homeStack = createStackForShouldBeVisibleTest(
+                mDefaultTaskDisplayArea, WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_HOME,
+                true /* onTop */);
+        final ActivityStack splitPrimary = createStackForShouldBeVisibleTest(
+                mDefaultTaskDisplayArea, WINDOWING_MODE_SPLIT_SCREEN_PRIMARY,
+                ACTIVITY_TYPE_UNDEFINED, true /* onTop */);
+        final ActivityStack splitSecondary = createStackForShouldBeVisibleTest(
+                mDefaultTaskDisplayArea, WINDOWING_MODE_SPLIT_SCREEN_SECONDARY,
+                ACTIVITY_TYPE_UNDEFINED, true /* onTop */);
+
+        doReturn(false).when(homeStack).isTranslucent(any());
+        doReturn(false).when(splitPrimary).isTranslucent(any());
+        doReturn(false).when(splitSecondary).isTranslucent(any());
+
+
+        // Re-parent home to split secondary.
+        homeStack.reparent(splitSecondary, POSITION_TOP);
+        // Current tasks should be visible.
+        assertEquals(STACK_VISIBILITY_VISIBLE, splitPrimary.getVisibility(null /* starting */));
+        assertEquals(STACK_VISIBILITY_VISIBLE, splitSecondary.getVisibility(null /* starting */));
+        // Home task should still be visible even though it is a child of another visible task.
+        assertEquals(STACK_VISIBILITY_VISIBLE, homeStack.getVisibility(null /* starting */));
+
+
+        // Add fullscreen translucent task that partially occludes split tasks
+        final ActivityStack translucentStack = createStandardStackForVisibilityTest(
+                WINDOWING_MODE_FULLSCREEN, true /* translucent */);
+        // Fullscreen translucent task should be visible
+        assertEquals(STACK_VISIBILITY_VISIBLE, translucentStack.getVisibility(null /* starting */));
+        // Split tasks should be visible behind translucent
+        assertEquals(STACK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT,
+                splitPrimary.getVisibility(null /* starting */));
+        assertEquals(STACK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT,
+                splitSecondary.getVisibility(null /* starting */));
+        // Home task should be visible behind translucent since its parent is visible behind
+        // translucent.
+        assertEquals(STACK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT,
+                homeStack.getVisibility(null /* starting */));
+
+
+        // Hide split-secondary
+        splitSecondary.setForceHidden(FLAG_FORCE_HIDDEN_FOR_TASK_ORG, true /* set */);
+        // Home split secondary and home task should be invisible.
+        assertEquals(STACK_VISIBILITY_INVISIBLE, splitSecondary.getVisibility(null /* starting */));
+        assertEquals(STACK_VISIBILITY_INVISIBLE, homeStack.getVisibility(null /* starting */));
     }
 
     @Test
