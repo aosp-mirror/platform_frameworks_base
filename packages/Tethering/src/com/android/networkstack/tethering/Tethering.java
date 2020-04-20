@@ -1007,6 +1007,11 @@ public class Tethering {
     }
 
     @VisibleForTesting
+    boolean isTetheringActive() {
+        return mActiveTetheringRequests.size() > 0;
+    }
+
+    @VisibleForTesting
     protected static class UserRestrictionActionListener {
         private final UserManager mUserManager;
         private final Tethering mWrapper;
@@ -1043,13 +1048,14 @@ public class Tethering {
                 return;
             }
 
-            // Restricted notification is shown when tethering function is disallowed on
-            // user's device.
-            mNotificationUpdater.notifyTetheringDisabledByRestriction();
+            if (mWrapper.isTetheringActive()) {
+                // Restricted notification is shown when tethering function is disallowed on
+                // user's device.
+                mNotificationUpdater.notifyTetheringDisabledByRestriction();
 
-            // Untether from all downstreams since tethering is disallowed.
-            mWrapper.untetherAll();
-
+                // Untether from all downstreams since tethering is disallowed.
+                mWrapper.untetherAll();
+            }
             // TODO(b/148139325): send tetheringSupported on restriction change
         }
     }
