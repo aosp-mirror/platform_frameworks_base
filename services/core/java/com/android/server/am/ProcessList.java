@@ -2272,10 +2272,11 @@ public final class ProcessList {
             if (mVoldAppDataIsolationEnabled && UserHandle.isApp(app.uid)
                     && !storageManagerInternal.isExternalStorageService(uid)) {
                 bindMountAppStorageDirs = true;
-                if (!storageManagerInternal.prepareStorageDirs(userId, pkgDataInfoMap.keySet(),
+                if (pkgDataInfoMap == null ||
+                        !storageManagerInternal.prepareStorageDirs(userId, pkgDataInfoMap.keySet(),
                         app.processName)) {
-                    // Cannot prepare Android/app and Android/obb directory,
-                    // so we won't mount it in zygote.
+                    // Cannot prepare Android/app and Android/obb directory or inode == 0,
+                    // so we won't mount it in zygote, but resume the mount after unlocking device.
                     app.bindMountPending = true;
                     bindMountAppStorageDirs = false;
                 }
