@@ -45,8 +45,10 @@ public abstract class CellIdentity implements Parcelable {
      */
     public static final int MCC_LENGTH = 3;
 
-    private static final int MNC_MIN_LENGTH = 2;
-    private static final int MNC_MAX_LENGTH = 3;
+    /** @hide */
+    public static final int MNC_MIN_LENGTH = 2;
+    /** @hide */
+    public static final int MNC_MAX_LENGTH = 3;
 
     // Log tag
     /** @hide */
