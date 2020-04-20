@@ -143,27 +143,6 @@ static HalVersion connectPowerHalLocked() {
     return HalVersion::NONE;
 }
 
-// Retrieve a copy of PowerHAL HIDL V1_0
-sp<IPowerV1_0> getPowerHalHidlV1_0() {
-    std::lock_guard<std::mutex> lock(gPowerHalMutex);
-    HalVersion halVersion = connectPowerHalLocked();
-    if (halVersion == HalVersion::HIDL_1_0 || halVersion == HalVersion::HIDL_1_1) {
-        return gPowerHalHidlV1_0_;
-    }
-
-    return nullptr;
-}
-
-// Retrieve a copy of PowerHAL HIDL V1_1
-sp<IPowerV1_1> getPowerHalHidlV1_1() {
-    std::lock_guard<std::mutex> lock(gPowerHalMutex);
-    if (connectPowerHalLocked() == HalVersion::HIDL_1_1) {
-        return gPowerHalHidlV1_1_;
-    }
-
-    return nullptr;
-}
-
 // Check if a call to a power HAL function failed; if so, log the failure and invalidate the
 // current handle to the power HAL service.
 bool processPowerHalReturn(bool isOk, const char* functionName) {
