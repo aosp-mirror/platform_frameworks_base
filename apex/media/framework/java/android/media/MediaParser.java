@@ -718,8 +718,6 @@ public final class MediaParser {
     private static final String TS_MODE_SINGLE_PMT = "single_pmt";
     private static final String TS_MODE_MULTI_PMT = "multi_pmt";
     private static final String TS_MODE_HLS = "hls";
-    @Nullable
-    private static final Constructor<DrmInitData.SchemeInitData> SCHEME_INIT_DATA_CONSTRUCTOR;
 
     // Instance creation methods.
 
@@ -854,6 +852,7 @@ public final class MediaParser {
     private final InputReadingDataReader mExoDataReader;
     private final DataReaderAdapter mScratchDataReaderAdapter;
     private final ParsableByteArrayAdapter mScratchParsableByteArrayAdapter;
+    @Nullable private final Constructor<DrmInitData.SchemeInitData> mSchemeInitDataConstructor;
     private String mParserName;
     private Extractor mExtractor;
     private ExtractorInput mExtractorInput;
@@ -1055,6 +1054,7 @@ public final class MediaParser {
         removePendingSeek();
         mScratchDataReaderAdapter = new DataReaderAdapter();
         mScratchParsableByteArrayAdapter = new ParsableByteArrayAdapter();
+        mSchemeInitDataConstructor = getSchemeInitDataConstructor();
     }
 
     private boolean isPendingSeek() {
@@ -1196,7 +1196,7 @@ public final class MediaParser {
         }
     }
 
-    private static final class MediaParserDrmInitData extends DrmInitData {
+    private final class MediaParserDrmInitData extends DrmInitData {
 
         private final SchemeInitData[] mSchemeDatas;
 
@@ -1229,10 +1229,9 @@ public final class MediaParser {
             return mSchemeDatas.length;
         }
 
-        private static DrmInitData.SchemeInitData toFrameworkSchemeInitData(
-                SchemeData exoSchemeData)
+        private DrmInitData.SchemeInitData toFrameworkSchemeInitData(SchemeData exoSchemeData)
                 throws IllegalAccessException, InvocationTargetException, InstantiationException {
-            return SCHEME_INIT_DATA_CONSTRUCTOR.newInstance(
+            return mSchemeInitDataConstructor.newInstance(
                     exoSchemeData.uuid, exoSchemeData.mimeType, exoSchemeData.data);
         }
     }
@@ -1479,7 +1478,7 @@ public final class MediaParser {
     private DrmInitData toFrameworkDrmInitData(
             com.google.android.exoplayer2.drm.DrmInitData exoDrmInitData) {
         try {
-            return exoDrmInitData != null && SCHEME_INIT_DATA_CONSTRUCTOR != null
+            return exoDrmInitData != null && mSchemeInitDataConstructor != null
                     ? new MediaParserDrmInitData(exoDrmInitData)
                     : null;
         } catch (Throwable e) {
@@ -1512,6 +1511,19 @@ public final class MediaParser {
                                 + TextUtils.join(", ", EXTRACTOR_FACTORIES_BY_NAME.keySet())
                                 + ".");
             }
+        }
+    }
+
+    @Nullable
+    private static Constructor<DrmInitData.SchemeInitData> getSchemeInitDataConstructor() {
+        // TODO: Use constructor statically when available.
+        Constructor<DrmInitData.SchemeInitData> constructor;
+        try {
+            return DrmInitData.SchemeInitData.class.getConstructor(
+                    UUID.class, String.class, byte[].class);
+        } catch (Throwable e) {
+            Log.e(TAG, "Unable to get SchemeInitData constructor.");
+            return null;
         }
     }
 
@@ -1558,17 +1570,5 @@ public final class MediaParser {
         expectedTypeByParameterName.put(PARAMETER_TS_DETECT_ACCESS_UNITS, Boolean.class);
         expectedTypeByParameterName.put(PARAMETER_TS_ENABLE_HDMV_DTS_AUDIO_STREAMS, Boolean.class);
         EXPECTED_TYPE_BY_PARAMETER_NAME = Collections.unmodifiableMap(expectedTypeByParameterName);
-
-        // TODO: Use constructor statically when available.
-        Constructor<DrmInitData.SchemeInitData> constructor;
-        try {
-            constructor =
-                    DrmInitData.SchemeInitData.class.getConstructor(
-                            UUID.class, String.class, byte[].class);
-        } catch (Throwable e) {
-            Log.e(TAG, "Unable to get SchemeInitData constructor.");
-            constructor = null;
-        }
-        SCHEME_INIT_DATA_CONSTRUCTOR = constructor;
     }
 }
