@@ -195,6 +195,9 @@ public class Nat464Xlat extends BaseNetworkObserver {
         } catch (ClassCastException | IllegalArgumentException | NullPointerException e) {
             Slog.e(TAG, "Invalid IPv6 address " + addrStr);
         }
+        if (mPrefixDiscoveryRunning && !isPrefixDiscoveryNeeded()) {
+            stopPrefixDiscovery();
+        }
     }
 
     /**
@@ -221,12 +224,11 @@ public class Nat464Xlat extends BaseNetworkObserver {
         if (isPrefixDiscoveryNeeded()) {
             if (!mPrefixDiscoveryRunning) {
                 startPrefixDiscovery();
-            } else {
-                // Prefix discovery is already running. Nothing to do.
-                mState = State.DISCOVERING;
             }
+            mState = State.DISCOVERING;
         } else {
-            stopPrefixDiscovery();  // Enters IDLE state.
+            stopPrefixDiscovery();
+            mState = State.IDLE;
         }
     }
 
@@ -287,7 +289,6 @@ public class Nat464Xlat extends BaseNetworkObserver {
         } catch (RemoteException | ServiceSpecificException e) {
             Slog.e(TAG, "Error starting prefix discovery on netId " + getNetId() + ": " + e);
         }
-        mState = State.DISCOVERING;
         mPrefixDiscoveryRunning = true;
     }
 
@@ -297,7 +298,6 @@ public class Nat464Xlat extends BaseNetworkObserver {
         } catch (RemoteException | ServiceSpecificException e) {
             Slog.e(TAG, "Error stopping prefix discovery on netId " + getNetId() + ": " + e);
         }
-        mState = State.IDLE;
         mPrefixDiscoveryRunning = false;
     }
 
@@ -330,6 +330,7 @@ public class Nat464Xlat extends BaseNetworkObserver {
             case IDLE:
                 if (isPrefixDiscoveryNeeded()) {
                     startPrefixDiscovery();  // Enters DISCOVERING state.
+                    mState = State.DISCOVERING;
                 } else if (requiresClat(mNetwork)) {
                     start();  // Enters STARTING state.
                 }
@@ -344,6 +345,7 @@ public class Nat464Xlat extends BaseNetworkObserver {
                 if (!requiresClat(mNetwork)) {
                     // IPv4 address added. Go back to IDLE state.
                     stopPrefixDiscovery();
+                    mState = State.IDLE;
                     return;
                 }
                 break;
