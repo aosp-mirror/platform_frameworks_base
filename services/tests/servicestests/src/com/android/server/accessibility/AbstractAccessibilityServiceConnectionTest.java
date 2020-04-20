@@ -16,7 +16,10 @@
 
 package com.android.server.accessibility;
 
+import static android.accessibilityservice.AccessibilityService.ERROR_TAKE_SCREENSHOT_INVALID_DISPLAY;
+import static android.accessibilityservice.AccessibilityService.ERROR_TAKE_SCREENSHOT_NO_ACCESSIBILITY_ACCESS;
 import static android.accessibilityservice.AccessibilityService.GLOBAL_ACTION_HOME;
+import static android.accessibilityservice.AccessibilityService.KEY_ACCESSIBILITY_SCREENSHOT_STATUS;
 import static android.accessibilityservice.AccessibilityServiceInfo.CAPABILITY_CAN_CONTROL_MAGNIFICATION;
 import static android.accessibilityservice.AccessibilityServiceInfo.CAPABILITY_CAN_PERFORM_GESTURES;
 import static android.accessibilityservice.AccessibilityServiceInfo.CAPABILITY_CAN_REQUEST_FILTER_KEY_EVENTS;
@@ -69,6 +72,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.graphics.Region;
+import android.hardware.display.DisplayManager;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
@@ -93,6 +97,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 
@@ -162,6 +167,7 @@ public class AbstractAccessibilityServiceConnectionTest {
     @Mock private IAccessibilityInteractionConnectionCallback mMockCallback;
     @Mock private FingerprintGestureDispatcher mMockFingerprintGestureDispatcher;
     @Mock private MagnificationController mMockMagnificationController;
+    @Mock private RemoteCallback.OnResultListener mMockListener;
 
     @Before
     public void setup() {
@@ -703,6 +709,38 @@ public class AbstractAccessibilityServiceConnectionTest {
         when(mMockSecurityPolicy.canTakeScreenshotLocked(mServiceConnection)).thenReturn(false);
         mServiceConnection.takeScreenshot(Display.DEFAULT_DISPLAY, new RemoteCallback((result) -> {
         }));
+    }
+
+    @Test
+    public void takeScreenshot_NoA11yAccess_returnErrorCode() throws InterruptedException {
+        // no checkAccessibilityAccess, should return error code.
+        when(mMockSecurityPolicy.canTakeScreenshotLocked(mServiceConnection)).thenReturn(true);
+        when(mMockSecurityPolicy.checkAccessibilityAccess(mServiceConnection)).thenReturn(false);
+
+        mServiceConnection.takeScreenshot(Display.DEFAULT_DISPLAY,
+                new RemoteCallback(mMockListener));
+        mHandler.sendLastMessage();
+
+        verify(mMockListener).onResult(Mockito.argThat(
+                bundle -> ERROR_TAKE_SCREENSHOT_NO_ACCESSIBILITY_ACCESS
+                        == bundle.getInt(KEY_ACCESSIBILITY_SCREENSHOT_STATUS)));
+    }
+
+    @Test
+    public void takeScreenshot_invalidDisplay_returnErrorCode() throws InterruptedException {
+        when(mMockSecurityPolicy.canTakeScreenshotLocked(mServiceConnection)).thenReturn(true);
+        when(mMockSecurityPolicy.checkAccessibilityAccess(mServiceConnection)).thenReturn(true);
+
+        final DisplayManager displayManager = new DisplayManager(mMockContext);
+        when(mMockContext.getSystemService(Context.DISPLAY_SERVICE)).thenReturn(displayManager);
+
+        mServiceConnection.takeScreenshot(Display.DEFAULT_DISPLAY + 1,
+                new RemoteCallback(mMockListener));
+        mHandler.sendLastMessage();
+
+        verify(mMockListener).onResult(Mockito.argThat(
+                bundle -> ERROR_TAKE_SCREENSHOT_INVALID_DISPLAY
+                        == bundle.getInt(KEY_ACCESSIBILITY_SCREENSHOT_STATUS)));
     }
 
     private void updateServiceInfo(AccessibilityServiceInfo serviceInfo, int eventType,
