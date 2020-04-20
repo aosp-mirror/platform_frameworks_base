@@ -3152,6 +3152,8 @@ public class UserBackupManagerService {
      * to the backup agent during restore.
      */
     public void excludeKeysFromRestore(String packageName, List<String> keys) {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
+                "excludeKeysFromRestore");
         mBackupPreferences.addExcludedKeys(packageName, keys);
     }
 
