@@ -15,7 +15,7 @@
   ~ limitations under the License
   -->
 <!-- Extends LinearLayout -->
-<com.android.systemui.qs.car.CarStatusBarHeader
+<com.android.systemui.car.userswitcher.CarStatusBarHeader
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/header"
     android:layout_width="match_parent"
@@ -27,4 +27,4 @@
         android:layout_height="match_parent"
         android:layout_weight="1"
     />
-</com.android.systemui.qs.car.CarStatusBarHeader>
+</com.android.systemui.car.userswitcher.CarStatusBarHeader>
