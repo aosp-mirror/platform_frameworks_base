@@ -20,6 +20,7 @@ filegroup {
 
 aidl_interface {
     name: "statsd-aidl",
+    unstable: true,
     srcs: [
         "android/os/IPendingIntentRef.aidl",
         "android/os/IPullAtomCallback.aidl",
