@@ -380,11 +380,14 @@ bool MetricsManager::eventSanityCheck(const LogEvent& event) {
         // Uid is 3rd from last field and must match the caller's uid,
         // unless that caller is statsd itself (statsd is allowed to spoof uids).
         long appHookUid = event.GetLong(event.size()-2, &err);
-        if (err != NO_ERROR ) {
+        if (err != NO_ERROR) {
             VLOG("APP_BREADCRUMB_REPORTED had error when parsing the uid");
             return false;
         }
-        int32_t loggerUid = event.GetUid();
+
+        // Because the uid within the LogEvent may have been mapped from
+        // isolated to host, map the loggerUid similarly before comparing.
+        int32_t loggerUid = mUidMap->getHostUidOrSelf(event.GetUid());
         if (loggerUid != appHookUid && loggerUid != AID_STATSD) {
             VLOG("APP_BREADCRUMB_REPORTED has invalid uid: claimed %ld but caller is %d",
                  appHookUid, loggerUid);
@@ -393,7 +396,7 @@ bool MetricsManager::eventSanityCheck(const LogEvent& event) {
 
         // The state must be from 0,3. This part of code must be manually updated.
         long appHookState = event.GetLong(event.size(), &err);
-        if (err != NO_ERROR ) {
+        if (err != NO_ERROR) {
             VLOG("APP_BREADCRUMB_REPORTED had error when parsing the state field");
             return false;
         } else if (appHookState < 0 || appHookState > 3) {
@@ -407,7 +410,7 @@ bool MetricsManager::eventSanityCheck(const LogEvent& event) {
 
         // Uid is the first field provided.
         long jankUid = event.GetLong(1, &err);
-        if (err != NO_ERROR ) {
+        if (err != NO_ERROR) {
             VLOG("Davey occurred had error when parsing the uid");
             return false;
         }
@@ -419,7 +422,7 @@ bool MetricsManager::eventSanityCheck(const LogEvent& event) {
         }
 
         long duration = event.GetLong(event.size(), &err);
-        if (err != NO_ERROR ) {
+        if (err != NO_ERROR) {
             VLOG("Davey occurred had error when parsing the duration");
             return false;
         } else if (duration > 100000) {
