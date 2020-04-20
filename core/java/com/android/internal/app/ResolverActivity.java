@@ -1745,22 +1745,33 @@ public class ResolverActivity extends Activity implements
             return;
         }
         final ViewGroup buttonLayout = findViewById(R.id.button_bar);
-        if (buttonLayout != null) {
-            buttonLayout.setVisibility(View.VISIBLE);
-
-            if (!useLayoutWithDefault()) {
-                int inset = mSystemWindowInsets != null ? mSystemWindowInsets.bottom : 0;
-                buttonLayout.setPadding(buttonLayout.getPaddingLeft(), buttonLayout.getPaddingTop(),
-                        buttonLayout.getPaddingRight(), getResources().getDimensionPixelSize(
-                                R.dimen.resolver_button_bar_spacing) + inset);
-            }
-            mOnceButton = (Button) buttonLayout.findViewById(R.id.button_once);
-            mAlwaysButton = (Button) buttonLayout.findViewById(R.id.button_always);
-
-            resetAlwaysOrOnceButtonBar();
-        } else {
+        if (buttonLayout == null) {
             Log.e(TAG, "Layout unexpectedly does not have a button bar");
+            return;
         }
+        ResolverListAdapter activeListAdapter =
+                mMultiProfilePagerAdapter.getActiveListAdapter();
+        View buttonBarDivider = findViewById(R.id.resolver_button_bar_divider);
+        if (activeListAdapter.isTabLoaded()
+                && mMultiProfilePagerAdapter.shouldShowEmptyStateScreen(activeListAdapter)) {
+            buttonLayout.setVisibility(View.INVISIBLE);
+            buttonBarDivider.setVisibility(View.INVISIBLE);
+            return;
+        }
+
+        buttonBarDivider.setVisibility(View.VISIBLE);
+        buttonLayout.setVisibility(View.VISIBLE);
+
+        if (!useLayoutWithDefault()) {
+            int inset = mSystemWindowInsets != null ? mSystemWindowInsets.bottom : 0;
+            buttonLayout.setPadding(buttonLayout.getPaddingLeft(), buttonLayout.getPaddingTop(),
+                    buttonLayout.getPaddingRight(), getResources().getDimensionPixelSize(
+                            R.dimen.resolver_button_bar_spacing) + inset);
+        }
+        mOnceButton = (Button) buttonLayout.findViewById(R.id.button_once);
+        mAlwaysButton = (Button) buttonLayout.findViewById(R.id.button_always);
+
+        resetAlwaysOrOnceButtonBar();
     }
 
     private void resetAlwaysOrOnceButtonBar() {
