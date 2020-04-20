@@ -8071,13 +8071,16 @@ public abstract class PackageManager {
         sApplicationInfoCache.disableLocal();
     }
 
+    private static final PropertyInvalidatedCache.AutoCorker sCacheAutoCorker =
+            new PropertyInvalidatedCache.AutoCorker(PermissionManager.CACHE_KEY_PACKAGE_INFO);
+
     /**
      * Invalidate caches of package and permission information system-wide.
      *
      * @hide
      */
     public static void invalidatePackageInfoCache() {
-        PropertyInvalidatedCache.invalidateCache(PermissionManager.CACHE_KEY_PACKAGE_INFO);
+        sCacheAutoCorker.autoCork();
     }
 
     // Some of the flags don't affect the query result, but let's be conservative and cache
@@ -8167,4 +8170,19 @@ public abstract class PackageManager {
         sPackageInfoCache.disableLocal();
     }
 
+    /**
+     * Inhibit package info cache invalidations when correct.
+     *
+     * @hide */
+    public static void corkPackageInfoCache() {
+        PropertyInvalidatedCache.corkInvalidations(PermissionManager.CACHE_KEY_PACKAGE_INFO);
+    }
+
+    /**
+     * Enable package info cache invalidations.
+     *
+     * @hide */
+    public static void uncorkPackageInfoCache() {
+        PropertyInvalidatedCache.uncorkInvalidations(PermissionManager.CACHE_KEY_PACKAGE_INFO);
+    }
 }
