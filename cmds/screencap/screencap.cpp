@@ -87,7 +87,7 @@ static status_t notifyMediaScanner(const char* fileName) {
     char *cmd[] = {
         (char*) "am",
         (char*) "broadcast",
-        (char*) "am",
+        (char*) "-a",
         (char*) "android.intent.action.MEDIA_SCANNER_SCAN_FILE",
         (char*) "-d",
         &filePath[0],
