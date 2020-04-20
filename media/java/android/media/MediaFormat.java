@@ -1312,7 +1312,7 @@ public final class MediaFormat {
     }
 
     /**
-     * Returns the value of an long key, or the default value if the key is missing.
+     * Returns the value of a long key, or the default value if the key is missing.
      *
      * @return defaultValue if the key does not exist or the stored value for the key is null
      * @throws ClassCastException if the stored value for the key is int, float, ByteBuffer or
@@ -1340,19 +1340,15 @@ public final class MediaFormat {
     }
 
     /**
-     * Returns the value of an float key, or the default value if the key is missing.
+     * Returns the value of a float key, or the default value if the key is missing.
      *
      * @return defaultValue if the key does not exist or the stored value for the key is null
      * @throws ClassCastException if the stored value for the key is int, long, ByteBuffer or
      *         String
      */
     public final float getFloat(@NonNull String name, float defaultValue) {
-        try {
-            return getFloat(name);
-        } catch (NullPointerException  e) {
-            /* no such field or field is null */
-            return defaultValue;
-        }
+        Object value = mMap.get(name);
+        return value != null ? (float) value : defaultValue;
     }
 
     /**
@@ -1366,7 +1362,7 @@ public final class MediaFormat {
     }
 
     /**
-     * Returns the value of an string key, or the default value if the key is missing.
+     * Returns the value of a string key, or the default value if the key is missing.
      *
      * @return defaultValue if the key does not exist or the stored value for the key is null
      * @throws ClassCastException if the stored value for the key is int, long, float or ByteBuffer
