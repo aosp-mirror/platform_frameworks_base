@@ -5450,6 +5450,46 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         return mWmService.mDisplayManagerInternal.getDisplayPosition(getDisplayId());
     }
 
+    /**
+     * Locates the appropriate target window for scroll capture. The search progresses top to
+     * bottom.
+     * If {@code searchBehind} is non-null, the search will only consider windows behind this one.
+     * If a valid taskId is specified, the target window must belong to the given task.
+     *
+     * @param searchBehind a window used to filter the search to windows behind it, or null to begin
+     *                     the search at the top window of the display
+     * @param taskId       specifies the id of a task the result must belong to or
+     *                     {@link android.app.ActivityTaskManager#INVALID_TASK_ID INVALID_TASK_ID}
+     *                     to match any window
+     * @return the located window or null if none could be found matching criteria
+     */
+    @Nullable
+    WindowState findScrollCaptureTargetWindow(@Nullable WindowState searchBehind, int taskId) {
+        return getWindow(new Predicate<WindowState>() {
+            boolean behindTopWindow = (searchBehind == null); // optional filter
+            @Override
+            public boolean test(WindowState nextWindow) {
+                // Skip through all windows until we pass topWindow (if specified)
+                if (!behindTopWindow) {
+                    if (nextWindow == searchBehind) {
+                        behindTopWindow = true;
+                    }
+                    return false; /* continue */
+                }
+                if (taskId != INVALID_TASK_ID) {
+                    Task task = nextWindow.getTask();
+                    if (task == null || !task.isTaskId(taskId)) {
+                        return false; /* continue */
+                    }
+                }
+                if (!nextWindow.canReceiveKeys()) {
+                    return false; /* continue */
+                }
+                return true; /* stop */
+            }
+        });
+    }
+
     class RemoteInsetsControlTarget implements InsetsControlTarget {
         private final IDisplayWindowInsetsController mRemoteInsetsController;
 
