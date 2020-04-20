@@ -622,12 +622,17 @@ public final class UsageStatsManager {
      * app hasn't been used directly or indirectly for a period of time defined by the system. This
      * could be of the order of several hours or days. Apps are not considered inactive when the
      * device is charging.
+     * <p> The caller must have {@link android.Manifest.permission#PACKAGE_USAGE_STATS} to query the
+     * inactive state of other apps</p>
+     *
      * @param packageName The package name of the app to query
-     * @return whether the app is currently considered inactive
+     * @return whether the app is currently considered inactive or false if querying another app
+     * without {@link android.Manifest.permission#PACKAGE_USAGE_STATS}
      */
     public boolean isAppInactive(String packageName) {
         try {
-            return mService.isAppInactive(packageName, mContext.getUserId());
+            return mService.isAppInactive(packageName, mContext.getUserId(),
+                    mContext.getOpPackageName());
         } catch (RemoteException e) {
             // fall through and return default
         }
