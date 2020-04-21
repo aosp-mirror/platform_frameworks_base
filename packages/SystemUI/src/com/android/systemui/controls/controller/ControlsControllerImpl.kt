@@ -77,8 +77,6 @@ class ControlsControllerImpl @Inject constructor (
 
     private var userChanging: Boolean = true
 
-    private var loadCanceller: Runnable? = null
-
     private var seedingInProgress = false
     private val seedingCallbacks = mutableListOf<Consumer<Boolean>>()
 
@@ -276,28 +274,29 @@ class ControlsControllerImpl @Inject constructor (
 
     override fun loadForComponent(
         componentName: ComponentName,
-        dataCallback: Consumer<ControlsController.LoadData>
+        dataCallback: Consumer<ControlsController.LoadData>,
+        cancelWrapper: Consumer<Runnable>
     ) {
         if (!confirmAvailability()) {
             if (userChanging) {
                 // Try again later, userChanging should not last forever. If so, we have bigger
                 // problems. This will return a runnable that allows to cancel the delayed version,
                 // it will not be able to cancel the load if
-                loadCanceller = executor.executeDelayed(
-                        { loadForComponent(componentName, dataCallback) },
-                        USER_CHANGE_RETRY_DELAY,
-                        TimeUnit.MILLISECONDS
+                executor.executeDelayed(
+                    { loadForComponent(componentName, dataCallback, cancelWrapper) },
+                    USER_CHANGE_RETRY_DELAY,
+                    TimeUnit.MILLISECONDS
                 )
-            } else {
-                dataCallback.accept(createLoadDataObject(emptyList(), emptyList(), true))
             }
-            return
+
+            dataCallback.accept(createLoadDataObject(emptyList(), emptyList(), true))
         }
-        loadCanceller = bindingController.bindAndLoad(
+
+        cancelWrapper.accept(
+            bindingController.bindAndLoad(
                 componentName,
                 object : ControlsBindingController.LoadCallback {
                     override fun accept(controls: List<Control>) {
-                        loadCanceller = null
                         executor.execute {
                             val favoritesForComponentKeys = Favorites
                                 .getControlsForComponent(componentName).map { it.controlId }
@@ -333,7 +332,6 @@ class ControlsControllerImpl @Inject constructor (
                     }
 
                     override fun error(message: String) {
-                        loadCanceller = null
                         executor.execute {
                             val controls = Favorites.getStructuresForComponent(componentName)
                                     .flatMap { st ->
@@ -348,6 +346,7 @@ class ControlsControllerImpl @Inject constructor (
                         }
                     }
                 }
+            )
         )
     }
 
@@ -430,12 +429,6 @@ class ControlsControllerImpl @Inject constructor (
             it.accept(state)
         }
         seedingCallbacks.clear()
-    }
-
-    override fun cancelLoad() {
-        loadCanceller?.let {
-            executor.execute(it)
-        }
     }
 
     private fun createRemovedStatus(
