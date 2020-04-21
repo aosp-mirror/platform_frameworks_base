@@ -721,6 +721,98 @@ public final class AdbDebuggingManagerTest {
                 isKeyInFile(TEST_KEY_2, mAdbKeyFile));
     }
 
+    @Test
+    public void testIsValidMdnsServiceName() {
+        // Longer than 15 characters
+        assertFalse(isValidMdnsServiceName("abcd1234abcd1234"));
+
+        // Contains invalid characters
+        assertFalse(isValidMdnsServiceName("a*a"));
+        assertFalse(isValidMdnsServiceName("a_a"));
+        assertFalse(isValidMdnsServiceName("_a"));
+
+        // Does not begin or end with letter or digit
+        assertFalse(isValidMdnsServiceName(""));
+        assertFalse(isValidMdnsServiceName("-"));
+        assertFalse(isValidMdnsServiceName("-a"));
+        assertFalse(isValidMdnsServiceName("-1"));
+        assertFalse(isValidMdnsServiceName("a-"));
+        assertFalse(isValidMdnsServiceName("1-"));
+
+        // Contains consecutive hyphens
+        assertFalse(isValidMdnsServiceName("a--a"));
+
+        // Does not contain at least one letter
+        assertFalse(isValidMdnsServiceName("1"));
+        assertFalse(isValidMdnsServiceName("12"));
+        assertFalse(isValidMdnsServiceName("1-2"));
+
+        // letter not within [a-zA-Z]
+        assertFalse(isValidMdnsServiceName("aés"));
+
+        // Some valid names
+        assertTrue(isValidMdnsServiceName("a"));
+        assertTrue(isValidMdnsServiceName("a1"));
+        assertTrue(isValidMdnsServiceName("1A"));
+        assertTrue(isValidMdnsServiceName("aZ"));
+        assertTrue(isValidMdnsServiceName("a-Z"));
+        assertTrue(isValidMdnsServiceName("a-b-Z"));
+        assertTrue(isValidMdnsServiceName("abc-def-123-456"));
+    }
+
+    @Test
+    public void testPairingThread_MdnsServiceName_RFC6335() {
+        assertTrue(isValidMdnsServiceName(AdbDebuggingManager.PairingThread.SERVICE_PROTOCOL));
+    }
+
+    private boolean isValidMdnsServiceName(String name) {
+        // The rules for Service Names [RFC6335] state that they may be no more
+        // than fifteen characters long (not counting the mandatory underscore),
+        // consisting of only letters, digits, and hyphens, must begin and end
+        // with a letter or digit, must not contain consecutive hyphens, and
+        // must contain at least one letter.
+        // No more than 15 characters long
+        final int len = name.length();
+        if (name.isEmpty() || len > 15) {
+            return false;
+        }
+
+        boolean hasAtLeastOneLetter = false;
+        boolean sawHyphen = false;
+        for (int i = 0; i < len; ++i) {
+            // Must contain at least one letter
+            // Only contains letters, digits and hyphens
+            char c = name.charAt(i);
+            if (c == '-') {
+                // Cannot be at beginning or end
+                if (i == 0 || i == len - 1) {
+                    return false;
+                }
+                if (sawHyphen) {
+                    // Consecutive hyphen found
+                    return false;
+                }
+                sawHyphen = true;
+                continue;
+            }
+
+            sawHyphen = false;
+            if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) {
+                hasAtLeastOneLetter = true;
+                continue;
+            }
+
+            if (c >= '0' && c <= '9') {
+                continue;
+            }
+
+            // Invalid character
+            return false;
+        }
+
+        return hasAtLeastOneLetter;
+    }
+
     /**
      * Runs an adb test with the provided configuration.
      *
