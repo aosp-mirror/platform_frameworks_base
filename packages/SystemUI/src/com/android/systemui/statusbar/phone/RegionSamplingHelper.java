@@ -148,11 +148,6 @@ public class RegionSamplingHelper implements View.OnAttachStateChangeListener,
         updateSamplingRect();
     }
 
-    private void postUpdateSamplingListener() {
-        mHandler.removeCallbacks(mUpdateSamplingListener);
-        mHandler.post(mUpdateSamplingListener);
-    }
-
     private void updateSamplingListener() {
         boolean isSamplingEnabled = mSamplingEnabled
                 && !mSamplingRequestBounds.isEmpty()
