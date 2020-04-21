@@ -163,12 +163,10 @@ public:
         return mUidFieldIndex;
     }
 
-    // Returns the index of (the first) attribution chain within the atom
-    // definition. Note that the value is 1-indexed. If there is no attribution
-    // chain, returns -1.
-    inline int getAttributionChainIndex() {
-        return mAttributionChainIndex;
-    }
+    // Returns whether this LogEvent has an AttributionChain.
+    // If it does and indexRange is not a nullptr, populate indexRange with the start and end index
+    // of the AttributionChain within mValues.
+    bool hasAttributionChain(std::pair<int, int>* indexRange = nullptr) const;
 
     // Returns the index of the exclusive state field within the FieldValues vector if
     // an exclusive state exists. If there is no exclusive state field, returns -1.
@@ -310,7 +308,8 @@ private:
     // Annotations
     bool mTruncateTimestamp = false;
     int mUidFieldIndex = -1;
-    int mAttributionChainIndex = -1;
+    int mAttributionChainStartIndex = -1;
+    int mAttributionChainEndIndex = -1;
     int mExclusiveStateFieldIndex = -1;
 };
 

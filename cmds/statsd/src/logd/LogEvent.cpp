@@ -219,8 +219,8 @@ void LogEvent::parseKeyValuePairs(int32_t* pos, int32_t depth, bool* last, uint8
 
 void LogEvent::parseAttributionChain(int32_t* pos, int32_t depth, bool* last,
                                      uint8_t numAnnotations) {
-    int firstUidInChainIndex = mValues.size();
-    int32_t numNodes = readNextValue<uint8_t>();
+    const unsigned int firstUidInChainIndex = mValues.size();
+    const int32_t numNodes = readNextValue<uint8_t>();
     for (pos[1] = 1; pos[1] <= numNodes; pos[1]++) {
         last[1] = (pos[1] == numNodes);
 
@@ -232,6 +232,11 @@ void LogEvent::parseAttributionChain(int32_t* pos, int32_t depth, bool* last,
         pos[2] = 2;
         last[2] = true;
         parseString(pos, /*depth=*/2, last, /*numAnnotations=*/0);
+    }
+    // Check if at least one node was successfully parsed.
+    if (mValues.size() - 1 > firstUidInChainIndex) {
+        mAttributionChainStartIndex = firstUidInChainIndex;
+        mAttributionChainEndIndex = mValues.size() - 1;
     }
 
     parseAnnotations(numAnnotations, firstUidInChainIndex);
@@ -411,7 +416,6 @@ bool LogEvent::parseBuffer(uint8_t* buf, size_t len) {
                 break;
             case ATTRIBUTION_CHAIN_TYPE:
                 parseAttributionChain(pos, /*depth=*/0, last, getNumAnnotations(typeInfo));
-                if (mAttributionChainIndex == -1) mAttributionChainIndex = pos[0];
                 break;
             default:
                 mValid = false;
@@ -570,6 +574,19 @@ string LogEvent::ToString() const {
 
 void LogEvent::ToProto(ProtoOutputStream& protoOutput) const {
     writeFieldValueTreeToStream(mTagId, getValues(), &protoOutput);
+}
+
+bool LogEvent::hasAttributionChain(std::pair<int, int>* indexRange) const {
+    if (mAttributionChainStartIndex == -1 || mAttributionChainEndIndex == -1) {
+        return false;
+    }
+
+    if (nullptr != indexRange) {
+        indexRange->first = mAttributionChainStartIndex;
+        indexRange->second = mAttributionChainEndIndex;
+    }
+
+    return true;
 }
 
 void writeExperimentIdsToProto(const std::vector<int64_t>& experimentIds,

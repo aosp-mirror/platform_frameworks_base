@@ -95,6 +95,7 @@ TEST(LogEventTest, TestPrimitiveParsing) {
     EXPECT_EQ(100, logEvent.GetTagId());
     EXPECT_EQ(1000, logEvent.GetUid());
     EXPECT_EQ(1001, logEvent.GetPid());
+    EXPECT_FALSE(logEvent.hasAttributionChain());
 
     const vector<FieldValue>& values = logEvent.getValues();
     EXPECT_EQ(4, values.size());
@@ -143,6 +144,7 @@ TEST(LogEventTest, TestStringAndByteArrayParsing) {
     EXPECT_EQ(100, logEvent.GetTagId());
     EXPECT_EQ(1000, logEvent.GetUid());
     EXPECT_EQ(1001, logEvent.GetPid());
+    EXPECT_FALSE(logEvent.hasAttributionChain());
 
     const vector<FieldValue>& values = logEvent.getValues();
     EXPECT_EQ(2, values.size());
@@ -179,6 +181,7 @@ TEST(LogEventTest, TestEmptyString) {
     EXPECT_EQ(100, logEvent.GetTagId());
     EXPECT_EQ(1000, logEvent.GetUid());
     EXPECT_EQ(1001, logEvent.GetPid());
+    EXPECT_FALSE(logEvent.hasAttributionChain());
 
     const vector<FieldValue>& values = logEvent.getValues();
     EXPECT_EQ(1, values.size());
@@ -247,6 +250,11 @@ TEST(LogEventTest, TestAttributionChain) {
 
     const vector<FieldValue>& values = logEvent.getValues();
     EXPECT_EQ(4, values.size());  // 2 per attribution node
+
+    std::pair<int, int> attrIndexRange;
+    EXPECT_TRUE(logEvent.hasAttributionChain(&attrIndexRange));
+    EXPECT_EQ(0, attrIndexRange.first);
+    EXPECT_EQ(3, attrIndexRange.second);
 
     // Check first attribution node
     const FieldValue& uid1Item = values[0];

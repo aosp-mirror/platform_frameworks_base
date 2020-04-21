@@ -51,7 +51,8 @@ void mapAndMergeIsolatedUidsToHostUid(vector<shared_ptr<LogEvent>>& data, const 
                                       int tagId, const vector<int>& additiveFieldsVec) {
     // Check the first LogEvent for attribution chain or a uid field as either all atoms with this
     // tagId have them or none of them do.
-    const bool hasAttributionChain = data[0]->getAttributionChainIndex() != -1;
+    std::pair<int, int> attrIndexRange;
+    const bool hasAttributionChain = data[0]->hasAttributionChain(&attrIndexRange);
     bool hasUidField = (data[0]->getUidFieldIndex() != -1);
 
     if (!hasAttributionChain && !hasUidField) {
@@ -65,14 +66,13 @@ void mapAndMergeIsolatedUidsToHostUid(vector<shared_ptr<LogEvent>>& data, const 
             ALOGE("Wrong atom. Expecting %d, got %d", tagId, event->GetTagId());
             return;
         }
-        if (event->getAttributionChainIndex() != -1) {
-            for (auto& value : *(event->getMutableValues())) {
-                if (value.mField.getPosAtDepth(0) > kAttributionField) {
-                    break;
-                }
-                if (isAttributionUidField(value)) {
-                    const int hostUid = uidMap->getHostUidOrSelf(value.mValue.int_value);
-                    value.mValue.setInt(hostUid);
+        if (hasAttributionChain) {
+            vector<FieldValue>* const fieldValues = event->getMutableValues();
+            for (int i = attrIndexRange.first; i <= attrIndexRange.second; i++) {
+                FieldValue& fieldValue = fieldValues->at(i);
+                if (isAttributionUidField(fieldValue)) {
+                    const int hostUid = uidMap->getHostUidOrSelf(fieldValue.mValue.int_value);
+                    fieldValue.mValue.setInt(hostUid);
                 }
             }
         } else {
