@@ -748,7 +748,7 @@ public class TextUtils {
             int parcelableFlags) {
         if (cs instanceof Spanned) {
             p.writeInt(0);
-            p.writeString(cs.toString());
+            p.writeString8(cs.toString());
 
             Spanned sp = (Spanned) cs;
             Object[] os = sp.getSpans(0, cs.length(), Object.class);
@@ -785,9 +785,9 @@ public class TextUtils {
         } else {
             p.writeInt(1);
             if (cs != null) {
-                p.writeString(cs.toString());
+                p.writeString8(cs.toString());
             } else {
-                p.writeString(null);
+                p.writeString8(null);
             }
         }
     }
@@ -807,7 +807,7 @@ public class TextUtils {
         public CharSequence createFromParcel(Parcel p) {
             int kind = p.readInt();
 
-            String string = p.readString();
+            String string = p.readString8();
             if (string == null) {
                 return null;
             }

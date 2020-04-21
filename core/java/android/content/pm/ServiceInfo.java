@@ -244,7 +244,7 @@ public class ServiceInfo extends ComponentInfo
 
     public void writeToParcel(Parcel dest, int parcelableFlags) {
         super.writeToParcel(dest, parcelableFlags);
-        dest.writeString(permission);
+        dest.writeString8(permission);
         dest.writeInt(flags);
         dest.writeInt(mForegroundServiceType);
     }
@@ -261,7 +261,7 @@ public class ServiceInfo extends ComponentInfo
 
     private ServiceInfo(Parcel source) {
         super(source);
-        permission = source.readString();
+        permission = source.readString8();
         flags = source.readInt();
         mForegroundServiceType = source.readInt();
     }
