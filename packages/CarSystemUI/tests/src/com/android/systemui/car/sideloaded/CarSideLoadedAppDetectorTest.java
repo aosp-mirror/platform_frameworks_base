@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.sideloaded.car;
+package com.android.systemui.car.sideloaded;
 
 import static com.google.common.truth.Truth.assertThat;
 
