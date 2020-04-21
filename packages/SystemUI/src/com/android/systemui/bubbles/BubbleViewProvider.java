@@ -20,15 +20,17 @@ import android.graphics.Bitmap;
 import android.graphics.Path;
 import android.view.View;
 
+import androidx.annotation.Nullable;
+
 /**
  * Interface to represent actual Bubbles and UI elements that act like bubbles, like BubbleOverflow.
  */
 interface BubbleViewProvider {
-    BubbleExpandedView getExpandedView();
+    @Nullable BubbleExpandedView getExpandedView();
 
     void setContentVisibility(boolean visible);
 
-    View getIconView();
+    @Nullable View getIconView();
 
     void logUIEvent(int bubbleCount, int action, float normalX, float normalY, int index);
 
