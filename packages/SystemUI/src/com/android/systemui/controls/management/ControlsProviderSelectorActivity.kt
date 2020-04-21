@@ -84,8 +84,22 @@ class ControlsProviderSelectorActivity @Inject constructor(
         }
 
         recyclerView = requireViewById(R.id.list)
-        recyclerView.alpha = 0.0f
         recyclerView.layoutManager = LinearLayoutManager(applicationContext)
+
+        requireViewById<TextView>(R.id.title).apply {
+            text = resources.getText(R.string.controls_providers_title)
+        }
+
+        requireViewById<Button>(R.id.done).setOnClickListener {
+            this@ControlsProviderSelectorActivity.finishAffinity()
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        currentUserTracker.startTracking()
+
+        recyclerView.alpha = 0.0f
         recyclerView.adapter = AppAdapter(
                 backExecutor,
                 executor,
@@ -105,16 +119,11 @@ class ControlsProviderSelectorActivity @Inject constructor(
                 }
             })
         }
+    }
 
-        requireViewById<TextView>(R.id.title).apply {
-            text = resources.getText(R.string.controls_providers_title)
-        }
-
-        requireViewById<Button>(R.id.done).setOnClickListener {
-            this@ControlsProviderSelectorActivity.finishAffinity()
-        }
-
-        currentUserTracker.startTracking()
+    override fun onStop() {
+        super.onStop()
+        currentUserTracker.stopTracking()
     }
 
     /**

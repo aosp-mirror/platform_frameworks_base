@@ -2234,7 +2234,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
         private void dismissForControlsActivity() {
             dismissWithAnimation(() -> {
-                ViewGroup root = (ViewGroup) mGlobalActionsLayout.getRootView();
+                ViewGroup root = (ViewGroup) mGlobalActionsLayout.getParent();
                 ControlsAnimations.exitAnimation(root, this::completeDismiss).start();
             });
         }

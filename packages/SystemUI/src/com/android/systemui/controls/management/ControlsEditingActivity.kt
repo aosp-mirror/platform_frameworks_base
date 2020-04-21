@@ -32,6 +32,7 @@ import com.android.systemui.R
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.controls.controller.ControlsControllerImpl
 import com.android.systemui.controls.controller.StructureInfo
+import com.android.systemui.globalactions.GlobalActionsComponent
 import com.android.systemui.settings.CurrentUserTracker
 import com.android.systemui.util.LifecycleActivity
 import javax.inject.Inject
@@ -41,7 +42,8 @@ import javax.inject.Inject
  */
 class ControlsEditingActivity @Inject constructor(
     private val controller: ControlsControllerImpl,
-    broadcastDispatcher: BroadcastDispatcher
+    broadcastDispatcher: BroadcastDispatcher,
+    private val globalActionsComponent: GlobalActionsComponent
 ) : LifecycleActivity() {
 
     companion object {
@@ -86,10 +88,18 @@ class ControlsEditingActivity @Inject constructor(
         bindViews()
 
         bindButtons()
+    }
 
+    override fun onStart() {
+        super.onStart()
         setUpList()
 
         currentUserTracker.startTracking()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        currentUserTracker.stopTracking()
     }
 
     private fun bindViews() {
@@ -129,12 +139,21 @@ class ControlsEditingActivity @Inject constructor(
             }
         }
 
+        val rootView = requireViewById<ViewGroup>(R.id.controls_management_root)
         saveButton = requireViewById<Button>(R.id.done).apply {
             isEnabled = false
             setText(R.string.save)
             setOnClickListener {
                 saveFavorites()
-                finishAffinity()
+                ControlsAnimations.exitAnimation(
+                    rootView,
+                    object : Runnable {
+                        override fun run() {
+                            finish()
+                        }
+                    }
+                ).start()
+                globalActionsComponent.handleShowGlobalActionsMenu()
             }
         }
     }

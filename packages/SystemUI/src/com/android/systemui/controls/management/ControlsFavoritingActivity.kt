@@ -40,6 +40,7 @@ import com.android.systemui.controls.TooltipManager
 import com.android.systemui.controls.controller.ControlsControllerImpl
 import com.android.systemui.controls.controller.StructureInfo
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.globalactions.GlobalActionsComponent
 import com.android.systemui.settings.CurrentUserTracker
 import com.android.systemui.util.LifecycleActivity
 import java.text.Collator
@@ -51,7 +52,8 @@ class ControlsFavoritingActivity @Inject constructor(
     @Main private val executor: Executor,
     private val controller: ControlsControllerImpl,
     private val listingController: ControlsListingController,
-    broadcastDispatcher: BroadcastDispatcher
+    broadcastDispatcher: BroadcastDispatcher,
+    private val globalActionsComponent: GlobalActionsComponent
 ) : LifecycleActivity() {
 
     companion object {
@@ -82,6 +84,8 @@ class ControlsFavoritingActivity @Inject constructor(
     private var listOfStructures = emptyList<StructureContainer>()
 
     private lateinit var comparator: Comparator<StructureContainer>
+    private var cancelLoadRunnable: Runnable? = null
+    private var isPagerLoaded = false
 
     private val currentUserTracker = object : CurrentUserTracker(broadcastDispatcher) {
         private val startingUser = controller.currentUserId
@@ -124,14 +128,6 @@ class ControlsFavoritingActivity @Inject constructor(
         component = intent.getParcelableExtra<ComponentName>(Intent.EXTRA_COMPONENT_NAME)
 
         bindViews()
-
-        setUpPager()
-
-        loadControls()
-
-        listingController.addCallback(listingCallback)
-
-        currentUserTracker.startTracking()
     }
 
     private val controlsModelCallback = object : ControlsModel.ControlsModelCallback {
@@ -180,7 +176,7 @@ class ControlsFavoritingActivity @Inject constructor(
                     ControlsAnimations.enterAnimation(pageIndicator).start()
                     ControlsAnimations.enterAnimation(structurePager).start()
                 }
-            })
+            }, Consumer { runnable -> cancelLoadRunnable = runnable })
         }
     }
 
@@ -299,6 +295,7 @@ class ControlsFavoritingActivity @Inject constructor(
             }
         }
 
+        val rootView = requireViewById<ViewGroup>(R.id.controls_management_root)
         doneButton = requireViewById<Button>(R.id.done).apply {
             isEnabled = false
             setOnClickListener {
@@ -309,7 +306,16 @@ class ControlsFavoritingActivity @Inject constructor(
                         StructureInfo(component!!, it.structureName, favoritesForStorage)
                     )
                 }
-                finishAffinity()
+
+                ControlsAnimations.exitAnimation(
+                    rootView,
+                    object : Runnable {
+                        override fun run() {
+                            finish()
+                        }
+                    }
+                ).start()
+                globalActionsComponent.handleShowGlobalActionsMenu()
             }
         }
     }
@@ -319,15 +325,39 @@ class ControlsFavoritingActivity @Inject constructor(
         mTooltipManager?.hide(false)
     }
 
+    override fun onStart() {
+        super.onStart()
+
+        listingController.addCallback(listingCallback)
+        currentUserTracker.startTracking()
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        // only do once, to make sure that any user changes do not get replaces if resume is called
+        // more than once
+        if (!isPagerLoaded) {
+            setUpPager()
+            loadControls()
+            isPagerLoaded = true
+        }
+    }
+
+    override fun onStop() {
+        super.onStop()
+
+        listingController.removeCallback(listingCallback)
+        currentUserTracker.stopTracking()
+    }
+
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         mTooltipManager?.hide(false)
     }
 
     override fun onDestroy() {
-        currentUserTracker.stopTracking()
-        listingController.removeCallback(listingCallback)
-        controller.cancelLoad()
+        cancelLoadRunnable?.run()
         super.onDestroy()
     }
 
