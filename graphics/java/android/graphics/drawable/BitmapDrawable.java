@@ -696,18 +696,18 @@ public class BitmapDrawable extends Drawable {
     }
 
     /**
-     * @hide only needed by a hack within ProgressBar
+     * No longer needed by ProgressBar, but still here due to UnsupportedAppUsage.
      */
     @UnsupportedAppUsage
-    public ColorStateList getTint() {
+    private ColorStateList getTint() {
         return mBitmapState.mTint;
     }
 
     /**
-     * @hide only needed by a hack within ProgressBar
+     * No longer needed by ProgressBar, but still here due to UnsupportedAppUsage.
      */
     @UnsupportedAppUsage
-    public Mode getTintMode() {
+    private Mode getTintMode() {
         return BlendMode.blendModeToPorterDuffMode(mBitmapState.mBlendMode);
     }
 
