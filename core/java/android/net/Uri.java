@@ -500,7 +500,7 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
         }
 
         static Uri readFrom(Parcel parcel) {
-            return new StringUri(parcel.readString());
+            return new StringUri(parcel.readString8());
         }
 
         public int describeContents() {
@@ -509,7 +509,7 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
 
         public void writeToParcel(Parcel parcel, int flags) {
             parcel.writeInt(TYPE_ID);
-            parcel.writeString(uriString);
+            parcel.writeString8(uriString);
         }
 
         /** Cached scheme separator index. */
@@ -875,7 +875,7 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
 
         static Uri readFrom(Parcel parcel) {
             return new OpaqueUri(
-                parcel.readString(),
+                parcel.readString8(),
                 Part.readFrom(parcel),
                 Part.readFrom(parcel)
             );
@@ -887,7 +887,7 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
 
         public void writeToParcel(Parcel parcel, int flags) {
             parcel.writeInt(TYPE_ID);
-            parcel.writeString(scheme);
+            parcel.writeString8(scheme);
             ssp.writeTo(parcel);
             fragment.writeTo(parcel);
         }
@@ -1195,7 +1195,7 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
 
         static Uri readFrom(Parcel parcel) {
             return new HierarchicalUri(
-                parcel.readString(),
+                parcel.readString8(),
                 Part.readFrom(parcel),
                 PathPart.readFrom(parcel),
                 Part.readFrom(parcel),
@@ -1209,7 +1209,7 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
 
         public void writeToParcel(Parcel parcel, int flags) {
             parcel.writeInt(TYPE_ID);
-            parcel.writeString(scheme);
+            parcel.writeString8(scheme);
             authority.writeTo(parcel);
             path.writeTo(parcel);
             query.writeTo(parcel);
@@ -2028,7 +2028,7 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
                     + mCanonicalRepresentation + ")");
             }
             parcel.writeInt(mCanonicalRepresentation);
-            parcel.writeString(canonicalValue);
+            parcel.writeString8(canonicalValue);
         }
     }
 
@@ -2060,7 +2060,7 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
 
         static Part readFrom(Parcel parcel) {
             int representation = parcel.readInt();
-            String value = parcel.readString();
+            String value = parcel.readString8();
             switch (representation) {
                 case REPRESENTATION_ENCODED:
                     return fromEncoded(value);
@@ -2251,9 +2251,9 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
             int representation = parcel.readInt();
             switch (representation) {
                 case REPRESENTATION_ENCODED:
-                    return fromEncoded(parcel.readString());
+                    return fromEncoded(parcel.readString8());
                 case REPRESENTATION_DECODED:
-                    return fromDecoded(parcel.readString());
+                    return fromDecoded(parcel.readString8());
                 default:
                     throw new IllegalArgumentException("Unknown representation: " + representation);
             }

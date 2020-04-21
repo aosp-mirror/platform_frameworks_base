@@ -1206,7 +1206,7 @@ public class ClipData implements Parcelable {
             }
         } else {
             dest.writeInt(PARCEL_TYPE_STRING);
-            dest.writeString(text);
+            dest.writeString8(text);
         }
     }
 
@@ -1215,7 +1215,7 @@ public class ClipData implements Parcelable {
      */
     private static String readHtmlTextFromParcel(Parcel in) {
         if (in.readInt() == PARCEL_TYPE_STRING) {
-            return in.readString();
+            return in.readString8();
         }
         ParcelFileDescriptor pfd =
                 in.readParcelable(ParcelFileDescriptor.class.getClassLoader());
