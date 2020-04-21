@@ -603,8 +603,7 @@ class AlarmManagerService extends SystemService {
             }
 
             pw.print(KEY_APP_STANDBY_RESTRICTED_QUOTA); pw.print("=");
-            TimeUtils.formatDuration(APP_STANDBY_RESTRICTED_QUOTA, pw);
-            pw.println();
+            pw.println(APP_STANDBY_RESTRICTED_QUOTA);
 
             pw.print(KEY_APP_STANDBY_RESTRICTED_WINDOW); pw.print("=");
             TimeUtils.formatDuration(APP_STANDBY_RESTRICTED_WINDOW, pw);
