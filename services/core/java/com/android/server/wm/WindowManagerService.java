@@ -2446,17 +2446,15 @@ public class WindowManagerService extends IWindowManager.Stub
             if (controls != null) {
                 final int length = Math.min(controls.length, outControls.length);
                 for (int i = 0; i < length; i++) {
-                    final InsetsSourceControl control = controls[i];
-
-                    // Check if we are sending invalid leashes.
-                    final SurfaceControl leash = control != null ? control.getLeash() : null;
-                    if (leash != null && !leash.isValid()) {
-                        Slog.wtf(TAG, leash + " is not valid before sending to " + win,
-                                leash.getReleaseStack());
-                    }
-
-                    outControls[i] = win.isClientLocal() && control != null
-                            ? new InsetsSourceControl(control) : control;
+                    // We will leave the critical section before returning the leash to the client,
+                    // so we need to copy the leash to prevent others release the one that we are
+                    // about to return.
+                    // TODO: We will have an extra copy if the client is not local.
+                    //       For now, we rely on GC to release it.
+                    //       Maybe we can modify InsetsSourceControl.writeToParcel so it can release
+                    //       the extra leash as soon as possible.
+                    outControls[i] = controls[i] != null
+                            ? new InsetsSourceControl(controls[i]) : null;
                 }
             }
         }
