@@ -20,6 +20,7 @@ import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -194,6 +195,20 @@ public class TaskInfo {
     /** @hide */
     public boolean isResizable() {
         return resizeMode != RESIZE_MODE_UNRESIZEABLE;
+    }
+
+    /** @hide */
+    @NonNull
+    @TestApi
+    public WindowContainerToken getToken() {
+        return token;
+    }
+
+    /** @hide */
+    @NonNull
+    @TestApi
+    public Configuration getConfiguration() {
+        return configuration;
     }
 
     /**
