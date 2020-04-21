@@ -186,7 +186,7 @@ public class TaskStackTests extends WindowTestsBase {
         final ActivityStack stack = createTaskStackOnDisplay(mDisplayContent);
         final int stackOutset = 10;
         spyOn(stack);
-        doReturn(stackOutset).when(stack).getStackOutset();
+        doReturn(stackOutset).when(stack).getTaskOutset();
         doReturn(true).when(stack).inMultiWindowMode();
 
         // Mock the resolved override windowing mode to non-fullscreen
