@@ -6074,6 +6074,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         // Pretend the shortcut exists
         List<ShortcutInfo> shortcutInfos = new ArrayList<>();
         ShortcutInfo info = mock(ShortcutInfo.class);
+        when(info.getPackage()).thenReturn(PKG);
+        when(info.getId()).thenReturn("someshortcutId");
+        when(info.getUserId()).thenReturn(USER_SYSTEM);
         when(info.isLongLived()).thenReturn(true);
         when(info.isEnabled()).thenReturn(true);
         shortcutInfos.add(info);
@@ -6137,6 +6140,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         // Pretend the shortcut exists
         List<ShortcutInfo> shortcutInfos = new ArrayList<>();
         ShortcutInfo info = mock(ShortcutInfo.class);
+        when(info.getPackage()).thenReturn(PKG);
+        when(info.getId()).thenReturn("someshortcutId");
+        when(info.getUserId()).thenReturn(USER_SYSTEM);
         when(info.isLongLived()).thenReturn(true);
         when(info.isEnabled()).thenReturn(true);
         shortcutInfos.add(info);
@@ -6483,6 +6489,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         when(mPreferencesHelper.getConversations(anyString(), anyInt())).thenReturn(convos);
 
         ShortcutInfo si = mock(ShortcutInfo.class);
+        when(si.getPackage()).thenReturn(PKG_P);
+        when(si.getId()).thenReturn("convo");
+        when(si.getUserId()).thenReturn(USER_SYSTEM);
         when(si.getShortLabel()).thenReturn("Hello");
         when(si.isLongLived()).thenReturn(true);
         when(si.isEnabled()).thenReturn(true);
@@ -6514,6 +6523,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         when(mPreferencesHelper.getConversations(anyString(), anyInt())).thenReturn(convos);
 
         ShortcutInfo si = mock(ShortcutInfo.class);
+        when(si.getPackage()).thenReturn(PKG_P);
+        when(si.getId()).thenReturn("convo");
+        when(si.getUserId()).thenReturn(USER_SYSTEM);
         when(si.getShortLabel()).thenReturn("Hello");
         when(si.isLongLived()).thenReturn(false);
         when(mLauncherApps.getShortcuts(any(), any())).thenReturn(Arrays.asList(si));
