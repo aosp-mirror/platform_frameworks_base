@@ -35,6 +35,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import android.app.PropertyInvalidatedCache;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -98,6 +99,9 @@ public class UserSystemPackageInstallerTest {
         if (Looper.myLooper() == null) {
             Looper.prepare();
         }
+        // Disable binder caches in this process.
+        PropertyInvalidatedCache.disableForTestMode();
+
         LocalServices.removeServiceForTest(UserManagerInternal.class);
         UserManagerService ums = new UserManagerService(InstrumentationRegistry.getContext());
 
