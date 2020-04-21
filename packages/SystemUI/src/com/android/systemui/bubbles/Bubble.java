@@ -90,6 +90,7 @@ class Bubble implements BubbleViewProvider {
     }
 
     private FlyoutMessage mFlyoutMessage;
+    private Drawable mBadgedAppIcon;
     private Bitmap mBadgedImage;
     private int mDotColor;
     private Path mDotPath;
@@ -131,6 +132,10 @@ class Bubble implements BubbleViewProvider {
     @Override
     public Bitmap getBadgedImage() {
         return mBadgedImage;
+    }
+
+    public Drawable getBadgedAppIcon() {
+        return mBadgedAppIcon;
     }
 
     @Override
@@ -239,6 +244,7 @@ class Bubble implements BubbleViewProvider {
         mAppName = info.appName;
         mFlyoutMessage = info.flyoutMessage;
 
+        mBadgedAppIcon = info.badgedAppIcon;
         mBadgedImage = info.badgedBubbleImage;
         mDotColor = info.dotColor;
         mDotPath = info.dotPath;

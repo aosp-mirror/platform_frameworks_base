@@ -1201,6 +1201,7 @@
          snap to the dismiss target. -->
     <dimen name="bubble_dismiss_target_padding_x">40dp</dimen>
     <dimen name="bubble_dismiss_target_padding_y">20dp</dimen>
+    <dimen name="bubble_manage_menu_elevation">4dp</dimen>
 
     <dimen name="dismiss_circle_size">52dp</dimen>
     <dimen name="dismiss_target_x_size">24dp</dimen>
