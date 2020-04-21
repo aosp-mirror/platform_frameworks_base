@@ -1610,6 +1610,8 @@ binder::Status IncrementalService::DataLoaderStub::onStatusChanged(MountId mount
 
     fsmStep();
 
+    mStatusCondition.notify_all();
+
     return binder::Status::ok();
 }
 
