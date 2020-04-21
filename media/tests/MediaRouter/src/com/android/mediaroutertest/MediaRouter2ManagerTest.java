@@ -36,6 +36,7 @@ import static com.android.mediaroutertest.StubMediaRoute2ProviderService.VOLUME_
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import android.content.Context;
@@ -160,6 +161,7 @@ public class MediaRouter2ManagerTest {
         });
 
         MediaRoute2Info routeToRemove = routes.get(ROUTE_ID2);
+        assertNotNull(routeToRemove);
 
         StubMediaRoute2ProviderService sInstance =
                 StubMediaRoute2ProviderService.getInstance();
@@ -169,6 +171,52 @@ public class MediaRouter2ManagerTest {
 
         sInstance.addRoute(routeToRemove);
         assertTrue(addedLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
+    }
+
+    @Test
+    public void testGetRoutes_removedRoute_returnsCorrectRoutes() throws Exception {
+        CountDownLatch addedLatch = new CountDownLatch(1);
+        CountDownLatch removedLatch = new CountDownLatch(1);
+
+        RouteCallback routeCallback = new RouteCallback() {
+            // Used to ensure the removed route is added.
+            @Override
+            public void onRoutesAdded(List<MediaRoute2Info> routes) {
+                if (removedLatch.getCount() > 0) {
+                    return;
+                }
+                addedLatch.countDown();
+            }
+
+            @Override
+            public void onRoutesRemoved(List<MediaRoute2Info> routes) {
+                removedLatch.countDown();
+            }
+        };
+
+        mRouter2.registerRouteCallback(mExecutor, routeCallback,
+                new RouteDiscoveryPreference.Builder(FEATURES_ALL, true).build());
+        mRouteCallbacks.add(routeCallback);
+
+        Map<String, MediaRoute2Info> routes = waitAndGetRoutesWithManager(FEATURES_ALL);
+        MediaRoute2Info routeToRemove = routes.get(ROUTE_ID2);
+        assertNotNull(routeToRemove);
+
+        StubMediaRoute2ProviderService sInstance =
+                StubMediaRoute2ProviderService.getInstance();
+        assertNotNull(sInstance);
+        sInstance.removeRoute(ROUTE_ID2);
+
+        // Wait until the route is removed.
+        assertTrue(removedLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
+
+        Map<String, MediaRoute2Info> newRoutes = waitAndGetRoutesWithManager(FEATURES_ALL);
+        assertNull(newRoutes.get(ROUTE_ID2));
+
+        // Revert the removal.
+        sInstance.addRoute(routeToRemove);
+        assertTrue(addedLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
+        mRouter2.unregisterRouteCallback(routeCallback);
     }
 
     /**
@@ -475,8 +523,8 @@ public class MediaRouter2ManagerTest {
         MediaRouter2Manager.Callback managerCallback = new MediaRouter2Manager.Callback() {
             @Override
             public void onRoutesAdded(List<MediaRoute2Info> routes) {
-                for (int i = 0; i < routes.size(); i++) {
-                    if (!routes.get(i).isSystemRoute()) {
+                for (MediaRoute2Info route : routes) {
+                    if (!route.isSystemRoute()) {
                         addedLatch.countDown();
                         break;
                     }
