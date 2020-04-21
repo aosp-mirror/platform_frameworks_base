@@ -84,7 +84,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.FileUtils;
 import android.os.RemoteException;
-import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.ext.SdkExtensions;
 import android.text.TextUtils;
@@ -2348,7 +2347,7 @@ public class ParsingPackageUtils {
                     R.styleable.AndroidManifestResourceOverlay_requiredSystemPropertyName);
             String propValue = sa.getString(
                     R.styleable.AndroidManifestResourceOverlay_requiredSystemPropertyValue);
-            if (!checkOverlayRequiredSystemProperty(propName, propValue)) {
+            if (!PackageParser.checkRequiredSystemProperties(propName, propValue)) {
                 Slog.i(TAG, "Skipping target and overlay pair " + target + " and "
                         + pkg.getBaseCodePath()
                         + ": overlay ignored due to required system property: "
@@ -2520,24 +2519,6 @@ public class ParsingPackageUtils {
                 }
             }
         }
-    }
-
-    private static boolean checkOverlayRequiredSystemProperty(String propName, String propValue) {
-        if (TextUtils.isEmpty(propName) || TextUtils.isEmpty(propValue)) {
-            if (!TextUtils.isEmpty(propName) || !TextUtils.isEmpty(propValue)) {
-                // malformed condition - incomplete
-                Slog.w(TAG, "Disabling overlay - incomplete property :'" + propName
-                        + "=" + propValue + "' - require both requiredSystemPropertyName"
-                        + " AND requiredSystemPropertyValue to be specified.");
-                return false;
-            }
-            // no valid condition set - so no exclusion criteria, overlay will be included.
-            return true;
-        }
-
-        // check property value - make sure it is both set and equal to expected value
-        final String currValue = SystemProperties.get(propName);
-        return (currValue != null && currValue.equals(propValue));
     }
 
     /**
