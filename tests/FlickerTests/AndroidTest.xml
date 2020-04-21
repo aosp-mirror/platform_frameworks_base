@@ -13,12 +13,8 @@
         <option name="run-command" value="cmd window tracing level all" />
         <!-- inform WM to log all transactions -->
         <option name="run-command" value="cmd window tracing transaction" />
-    </target_preparer>
-    <target_preparer class="com.android.tradefed.targetprep.RunHostCommandTargetPreparer" >
-        <!-- Prevent TAPL error for Nexus Launcher (http://go/tapl) -->
-        <option name="host-setup-command" value="adb root" />
-        <option name="host-setup-command" value="adb shell setprop ro.test_harness 1" />
-        <option name="host-setup-command" value="adb shell am force-stop com.google.android.apps.nexuslauncher" />
+        <!-- restart launcher to activate TAPL -->
+        <option name="run-command" value="setprop ro.test_harness 1 ; am force-stop com.google.android.apps.nexuslauncher" />
     </target_preparer>
     <target_preparer class="com.android.tradefed.targetprep.DeviceCleaner">
         <!-- reboot the device to teardown any crashed tests -->
