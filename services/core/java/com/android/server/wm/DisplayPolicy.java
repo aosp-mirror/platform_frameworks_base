@@ -3783,13 +3783,14 @@ public class DisplayPolicy {
      * @param screenshotType The type of screenshot, for example either
      *                       {@link WindowManager#TAKE_SCREENSHOT_FULLSCREEN} or
      *                       {@link WindowManager#TAKE_SCREENSHOT_SELECTED_REGION}
+     * @param source Where the screenshot originated from (see WindowManager.ScreenshotSource)
      */
-    public void takeScreenshot(int screenshotType) {
+    public void takeScreenshot(int screenshotType, int source) {
         if (mScreenshotHelper != null) {
             mScreenshotHelper.takeScreenshot(screenshotType,
                     mStatusBar != null && mStatusBar.isVisibleLw(),
                     mNavigationBar != null && mNavigationBar.isVisibleLw(),
-                    mHandler, null /* completionConsumer */);
+                    source, mHandler, null /* completionConsumer */);
         }
     }
 
