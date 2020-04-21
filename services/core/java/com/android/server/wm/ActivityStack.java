@@ -847,7 +847,8 @@ class ActivityStack extends Task {
 
     /** Resume next focusable stack after reparenting to another display. */
     void postReparent() {
-        adjustFocusToNextFocusableStack("reparent", true /* allowFocusSelf */);
+        adjustFocusToNextFocusableTask("reparent", true /* allowFocusSelf */,
+                true /* moveParentsToTop */);
         mRootWindowContainer.resumeFocusedStacksTopActivities();
         // Update visibility of activities before notifying WM. This way it won't try to resize
         // windows that are no longer visible.
@@ -2069,7 +2070,7 @@ class ActivityStack extends Task {
         final String reason = "noMoreActivities";
 
         if (!isActivityTypeHome()) {
-            final ActivityStack nextFocusedStack = adjustFocusToNextFocusableStack(reason);
+            final ActivityStack nextFocusedStack = adjustFocusToNextFocusableTask(reason);
             if (nextFocusedStack != null) {
                 // Try to move focus to the next visible stack with a running activity if this
                 // stack is not covering the entire screen or is on a secondary display with no home
@@ -2275,48 +2276,6 @@ class ActivityStack extends Task {
         }
 
         return taskTop;
-    }
-
-    /**
-     * Find next proper focusable stack and make it focused.
-     * @return The stack that now got the focus, {@code null} if none found.
-     */
-    ActivityStack adjustFocusToNextFocusableStack(String reason) {
-        return adjustFocusToNextFocusableStack(reason, false /* allowFocusSelf */);
-    }
-
-    /**
-     * Find next proper focusable stack and make it focused.
-     * @param allowFocusSelf Is the focus allowed to remain on the same stack.
-     * @return The stack that now got the focus, {@code null} if none found.
-     */
-    private ActivityStack adjustFocusToNextFocusableStack(String reason, boolean allowFocusSelf) {
-        final ActivityStack stack =
-                mRootWindowContainer.getNextFocusableStack(this, !allowFocusSelf);
-        final String myReason = reason + " adjustFocusToNextFocusableStack";
-        if (stack == null) {
-            return null;
-        }
-
-        final ActivityRecord top = stack.topRunningActivity();
-
-        if (stack.isActivityTypeHome() && (top == null || !top.mVisibleRequested)) {
-            // If we will be focusing on the home stack next and its current top activity isn't
-            // visible, then use the move the home stack task to top to make the activity visible.
-            stack.getDisplayArea().moveHomeActivityToTop(reason);
-            return stack;
-        }
-
-        stack.moveToFront(myReason);
-        // Top display focused stack is changed, update top resumed activity if needed.
-        if (stack.mResumedActivity != null) {
-            mStackSupervisor.updateTopResumedActivityIfNeeded();
-            // Set focused app directly because if the next focused activity is already resumed
-            // (e.g. the next top activity is on a different display), there won't have activity
-            // state change to update it.
-            mAtmService.setResumedActivityUncheckLocked(stack.mResumedActivity, reason);
-        }
-        return stack;
     }
 
     /**
