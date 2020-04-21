@@ -1147,7 +1147,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     && registrationLimit >= 1
                     && numRecordsForPid >= registrationLimit) {
                 String errorMsg = "Pid " + callingPid + " has exceeded the number of permissible"
-                        + "registered listeners. Ignoring request to add.";
+                        + " registered listeners. Ignoring request to add.";
                 loge(errorMsg);
                 if (mConfigurationProvider
                         .isRegistrationLimitEnabledInPlatformCompat(callingUid)) {
@@ -1158,7 +1158,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 // Log the warning independently of the dynamically set limit -- apps shouldn't be
                 // doing this regardless of whether we're throwing them an exception for it.
                 Rlog.w(TAG, "Pid " + callingPid + " has exceeded half the number of permissible"
-                        + "registered listeners. Now at " + numRecordsForPid);
+                        + " registered listeners. Now at " + numRecordsForPid);
             }
 
             r = new Record();
