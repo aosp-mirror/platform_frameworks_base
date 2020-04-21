@@ -36,6 +36,7 @@ import android.media.IAudioRoutesObserver;
 import android.media.IAudioService;
 import android.media.MediaRoute2Info;
 import android.media.MediaRoute2ProviderInfo;
+import android.media.MediaRoute2ProviderService;
 import android.media.RouteDiscoveryPreference;
 import android.media.RoutingSessionInfo;
 import android.os.Bundle;
@@ -47,6 +48,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.internal.R;
+import com.android.internal.annotations.GuardedBy;
 
 import java.util.Objects;
 
@@ -79,6 +81,10 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
     MediaRoute2Info mDeviceRoute;
     RoutingSessionInfo mDefaultSessionInfo;
     final AudioRoutesInfo mCurAudioRoutesInfo = new AudioRoutesInfo();
+
+    private final Object mRequestLock = new Object();
+    @GuardedBy("mRequestLock")
+    private volatile SessionCreationRequest mPendingSessionCreationRequest;
 
     final IAudioRoutesObserver.Stub mAudioRoutesObserver = new IAudioRoutesObserver.Stub() {
         @Override
@@ -135,10 +141,27 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
     @Override
     public void requestCreateSession(long requestId, String packageName, String routeId,
             Bundle sessionHints) {
+        // Assume a router without MODIFY_AUDIO_ROUTING permission can't request with
+        // a route ID different from the default route ID. The service should've filtered.
+        if (TextUtils.equals(routeId, DEFAULT_ROUTE_ID)) {
+            mCallback.onSessionCreated(this, requestId, mDefaultSessionInfo);
+            return;
+        }
+        if (TextUtils.equals(routeId, mSelectedRouteId)) {
+            mCallback.onSessionCreated(this, requestId, mSessionInfos.get(0));
+            return;
+        }
+
+        synchronized (mRequestLock) {
+            // Handle the previous request as a failure if exists.
+            if (mPendingSessionCreationRequest != null) {
+                mCallback.onRequestFailed(this, mPendingSessionCreationRequest.mRequestId,
+                        MediaRoute2ProviderService.REASON_UNKNOWN_ERROR);
+            }
+            mPendingSessionCreationRequest = new SessionCreationRequest(requestId, routeId);
+        }
 
         transferToRoute(requestId, SYSTEM_SESSION_ID, routeId);
-        mCallback.onSessionCreated(this, requestId, mSessionInfos.get(0));
-        //TODO: We should call after the session info is changed.
     }
 
     @Override
@@ -280,6 +303,24 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
             }
 
             RoutingSessionInfo newSessionInfo = builder.setProviderId(mUniqueId).build();
+
+            if (mPendingSessionCreationRequest != null) {
+                SessionCreationRequest sessionCreationRequest;
+                synchronized (mRequestLock) {
+                    sessionCreationRequest = mPendingSessionCreationRequest;
+                    mPendingSessionCreationRequest = null;
+                }
+                if (sessionCreationRequest != null) {
+                    if (TextUtils.equals(mSelectedRouteId, sessionCreationRequest.mRouteId)) {
+                        mCallback.onSessionCreated(this,
+                                sessionCreationRequest.mRequestId, newSessionInfo);
+                    } else {
+                        mCallback.onRequestFailed(this, sessionCreationRequest.mRequestId,
+                                MediaRoute2ProviderService.REASON_UNKNOWN_ERROR);
+                    }
+                }
+            }
+
             if (Objects.equals(oldSessionInfo, newSessionInfo)) {
                 return false;
             } else {
@@ -308,6 +349,16 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
         }
 
         mCallback.onSessionUpdated(this, sessionInfo);
+    }
+
+    private static class SessionCreationRequest {
+        final long mRequestId;
+        final String mRouteId;
+
+        SessionCreationRequest(long requestId, String routeId) {
+            this.mRequestId = requestId;
+            this.mRouteId = routeId;
+        }
     }
 
     private class VolumeChangeReceiver extends BroadcastReceiver {
