@@ -16,9 +16,16 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="tethered_notification_title" msgid="6426563586025792944">"Ligação (à Internet) via telemóvel ou zona Wi-Fi ativos"</string>
+    <string name="tethered_notification_title" msgid="6426563586025792944">"Ligação (à Internet) via telemóvel ou zona Wi-Fi ativas"</string>
     <string name="tethered_notification_message" msgid="64800879503420696">"Toque para configurar."</string>
+    <!-- no translation found for tethered_notification_title_with_client_number (1786826735091081282) -->
     <string name="disable_tether_notification_title" msgid="3004509127903564191">"A ligação (à Internet) via telemóvel está desativada."</string>
     <string name="disable_tether_notification_message" msgid="6717523799293901476">"Contacte o administrador para obter detalhes."</string>
     <string name="notification_channel_tethering_status" msgid="2663463891530932727">"Estado da zona Wi-Fi e da ligação (à Internet) via telemóvel"</string>
+    <string name="no_upstream_notification_title" msgid="1204601824631788482"></string>
+    <string name="no_upstream_notification_message" msgid="8586582938243032621"></string>
+    <string name="no_upstream_notification_disable_button" msgid="8800919436924640822"></string>
+    <string name="upstream_roaming_notification_title" msgid="4772373823198997030"></string>
+    <string name="upstream_roaming_notification_message" msgid="3985577843181551650"></string>
+    <string name="upstream_roaming_notification_continue_button" msgid="9050110597328860509"></string>
 </resources>
