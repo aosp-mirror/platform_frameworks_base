@@ -43,6 +43,7 @@
             android:fontFamily="@string/config_headlineFontFamilyMedium"
             android:textColor="@color/resolver_empty_state_text"
             android:textSize="14sp"
+            android:gravity="center_horizontal"
             android:layout_centerHorizontal="true" />
         <TextView
             android:id="@+id/resolver_empty_state_subtitle"
