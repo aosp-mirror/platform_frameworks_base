@@ -76,7 +76,6 @@ public class LockscreenLockIconController {
     private boolean mKeyguardShowing;
     private boolean mKeyguardJustShown;
     private boolean mBlockUpdates;
-    private boolean mPulsing;
     private boolean mDozing;
     private boolean mSimLocked;
     private boolean mTransientBiometricsError;
@@ -376,14 +375,6 @@ public class LockscreenLockIconController {
     }
 
     /**
-     * Propagate {@link StatusBar} pulsing state.
-     */
-    public void setPulsing(boolean pulsing) {
-        mPulsing = pulsing;
-        update();
-    }
-
-    /**
      * We need to hide the lock whenever there's a fingerprint unlock, otherwise you'll see the
      * icon on top of the black front scrim.
      * @param wakeAndUnlock are we wake and unlocking
@@ -461,7 +452,7 @@ public class LockscreenLockIconController {
             shouldUpdate = false;
         }
         if (shouldUpdate && mLockIcon != null) {
-            mLockIcon.update(state, mPulsing, mDozing, mKeyguardJustShown);
+            mLockIcon.update(state, mDozing, mKeyguardJustShown);
         }
         mLastState = state;
         mKeyguardJustShown = false;
@@ -475,7 +466,7 @@ public class LockscreenLockIconController {
             return STATE_LOCK_OPEN;
         } else if (mTransientBiometricsError) {
             return STATE_BIOMETRICS_ERROR;
-        } else if (mKeyguardUpdateMonitor.isFaceDetectionRunning() && !mPulsing) {
+        } else if (mKeyguardUpdateMonitor.isFaceDetectionRunning()) {
             return STATE_SCANNING_FACE;
         } else {
             return STATE_LOCKED;
@@ -502,9 +493,8 @@ public class LockscreenLockIconController {
      * @return true if the visibility changed
      */
     private boolean updateIconVisibility() {
-        boolean onAodNotPulsingOrDocked = mDozing && (!mPulsing || mDocked);
-        boolean invisible = onAodNotPulsingOrDocked || mWakeAndUnlockRunning
-                || mShowingLaunchAffordance;
+        boolean onAodOrDocked = mDozing || mDocked;
+        boolean invisible = onAodOrDocked || mWakeAndUnlockRunning || mShowingLaunchAffordance;
         if (mKeyguardBypassController.getBypassEnabled() && !mBouncerShowingScrimmed) {
             if ((mHeadsUpManagerPhone.isHeadsUpGoingAway()
                     || mHeadsUpManagerPhone.hasPinnedHeadsUp()
