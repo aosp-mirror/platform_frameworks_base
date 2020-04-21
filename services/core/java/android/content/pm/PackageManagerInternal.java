@@ -480,6 +480,12 @@ public abstract class PackageManagerInternal {
     public abstract void pruneInstantApps();
 
     /**
+     * Prunes the cache of the APKs in the given APEXes.
+     * @param apexPackages The list of APEX packages that may contain APK-in-APEX.
+     */
+    public abstract void pruneCachedApksInApex(@NonNull List<PackageInfo> apexPackages);
+
+    /**
      * @return The SetupWizard package name.
      */
     public abstract String getSetupWizardPackageName();
