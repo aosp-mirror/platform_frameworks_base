@@ -92,7 +92,6 @@ public class BitmapDrawable extends Drawable {
     private BitmapState mBitmapState;
     private BlendModeColorFilter mBlendModeFilter;
 
-    @UnsupportedAppUsage
     private int mTargetDensity = DisplayMetrics.DENSITY_DEFAULT;
 
     private boolean mDstRectAndInsetsDirty = true;
