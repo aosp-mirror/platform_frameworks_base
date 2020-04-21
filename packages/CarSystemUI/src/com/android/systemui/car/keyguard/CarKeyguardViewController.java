@@ -205,6 +205,9 @@ public class CarKeyguardViewController extends OverlayViewController implements
 
     @Override
     public void onCancelClicked() {
+        getOverlayViewGlobalStateController().setWindowFocusable(/* focusable= */ false);
+        getOverlayViewGlobalStateController().setWindowNeedsInput(/* needsInput= */ false);
+
         mBouncer.hide(/* destroyView= */ true);
         mKeyguardCancelClickedListener.onCancelClicked();
     }
@@ -226,7 +229,8 @@ public class CarKeyguardViewController extends OverlayViewController implements
 
     @Override
     public void setNeedsInput(boolean needsInput) {
-        getLayout().setFocusable(needsInput);
+        getOverlayViewGlobalStateController().setWindowFocusable(needsInput);
+        getOverlayViewGlobalStateController().setWindowNeedsInput(needsInput);
     }
 
     /**
