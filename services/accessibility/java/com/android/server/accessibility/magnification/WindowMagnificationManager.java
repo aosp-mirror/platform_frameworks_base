@@ -281,6 +281,29 @@ public final class WindowMagnificationManager implements
     }
 
     /**
+     * Requests System UI show magnification mode button UI on the specified display.
+     *
+     * @param displayId The logical display id.
+     * @param magnificationMode the current magnification mode.
+     * @return {@code true} if the event was handled, {@code false} otherwise
+     */
+    public boolean showMagnificationButton(int displayId, int magnificationMode) {
+        return mConnectionWrapper != null && mConnectionWrapper.showMagnificationButton(
+                displayId, magnificationMode);
+    }
+
+    /**
+     * Requests System UI remove magnification mode button UI on the specified display.
+     *
+     * @param displayId The logical display id.
+     * @return {@code true} if the event was handled, {@code false} otherwise
+     */
+    public boolean removeMagnificationButton(int displayId) {
+        return mConnectionWrapper != null && mConnectionWrapper.removeMagnificationButton(
+                displayId);
+    }
+
+    /**
      * Creates the windowMagnifier based on the specified display and stores it.
      * @param displayId logical display id.
      */
@@ -296,22 +319,22 @@ public final class WindowMagnificationManager implements
         private boolean mExpiredDeathRecipient = false;
 
         @Override
-        public void onWindowMagnifierBoundsChanged(int display, Rect bounds) {
+        public void onWindowMagnifierBoundsChanged(int displayId, Rect bounds) {
             synchronized (mLock) {
-                WindowMagnifier magnifier = mWindowMagnifiers.get(display);
+                WindowMagnifier magnifier = mWindowMagnifiers.get(displayId);
                 if (magnifier == null) {
                     return;
                 }
                 if (DBG) {
                     Slog.i(TAG,
-                            "onWindowMagnifierBoundsChanged -" + display + " bounds = " + bounds);
+                            "onWindowMagnifierBoundsChanged -" + displayId + " bounds = " + bounds);
                 }
                 magnifier.setMagnifierLocation(bounds);
             }
         }
 
         @Override
-        public void onChangeMagnificationMode(int display, int magnificationMode)
+        public void onChangeMagnificationMode(int displayId, int magnificationMode)
                 throws RemoteException {
             //TODO: Uses this method to change the magnification mode on non-default display.
         }
