@@ -311,7 +311,7 @@ public class KeyguardIndicationController implements StateListener,
                     mTextView.switchIndication(mTransientIndication);
                 } else if (!TextUtils.isEmpty(mAlignmentIndication)) {
                     mTextView.switchIndication(mAlignmentIndication);
-                    mTextView.setTextColor(Utils.getColorError(mContext));
+                    mTextView.setTextColor(mContext.getColor(R.color.misalignment_text_color));
                 } else if (mPowerPluggedIn) {
                     String indication = computePowerIndication();
                     if (animate) {
