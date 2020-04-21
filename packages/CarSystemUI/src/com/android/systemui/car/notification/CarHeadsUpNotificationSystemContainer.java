@@ -30,7 +30,6 @@ import com.android.car.notification.R;
 import com.android.car.notification.headsup.CarHeadsUpNotificationContainer;
 import com.android.systemui.car.CarDeviceProvisionedController;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.statusbar.car.CarStatusBar;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -43,7 +42,7 @@ import dagger.Lazy;
 @Singleton
 public class CarHeadsUpNotificationSystemContainer implements CarHeadsUpNotificationContainer {
     private final CarDeviceProvisionedController mCarDeviceProvisionedController;
-    private final Lazy<CarStatusBar> mCarStatusBarLazy;
+    private final Lazy<NotificationPanelViewController> mNotificationPanelViewControllerLazy;
 
     private final ViewGroup mWindow;
     private final FrameLayout mHeadsUpContentFrame;
@@ -55,10 +54,9 @@ public class CarHeadsUpNotificationSystemContainer implements CarHeadsUpNotifica
             @Main Resources resources,
             CarDeviceProvisionedController deviceProvisionedController,
             WindowManager windowManager,
-            // TODO: Remove dependency on CarStatusBar
-            Lazy<CarStatusBar> carStatusBarLazy) {
+            Lazy<NotificationPanelViewController> notificationPanelViewControllerLazy) {
         mCarDeviceProvisionedController = deviceProvisionedController;
-        mCarStatusBarLazy = carStatusBarLazy;
+        mNotificationPanelViewControllerLazy = notificationPanelViewControllerLazy;
 
         boolean showOnBottom = resources.getBoolean(R.bool.config_showHeadsUpNotificationOnBottom);
 
@@ -87,7 +85,8 @@ public class CarHeadsUpNotificationSystemContainer implements CarHeadsUpNotifica
 
     private void animateShow() {
         if ((mEnableHeadsUpNotificationWhenNotificationShadeOpen
-                || !mCarStatusBarLazy.get().isPanelExpanded()) && isCurrentUserSetup()) {
+                || !mNotificationPanelViewControllerLazy.get().isPanelExpanded())
+                && mCarDeviceProvisionedController.isCurrentUserFullySetup()) {
             mWindow.setVisibility(View.VISIBLE);
         }
     }
@@ -113,10 +112,5 @@ public class CarHeadsUpNotificationSystemContainer implements CarHeadsUpNotifica
     @Override
     public boolean isVisible() {
         return mWindow.getVisibility() == View.VISIBLE;
-    }
-
-    private boolean isCurrentUserSetup() {
-        return mCarDeviceProvisionedController.isCurrentUserSetup()
-                && !mCarDeviceProvisionedController.isCurrentUserSetupInProgress();
     }
 }
