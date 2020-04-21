@@ -21,7 +21,101 @@
     <Transition
         app:constraintSetStart="@id/collapsed"
         app:constraintSetEnd="@id/expanded"
-        app:duration="1000" />
+        app:duration="1000" >
+        <KeyFrameSet >
+            <KeyPosition
+                app:motionTarget="@+id/action0"
+                app:keyPositionType="pathRelative"
+                app:framePosition="70"
+                app:sizePercent="0.9" />
+            <KeyPosition
+                app:motionTarget="@+id/action1"
+                app:keyPositionType="pathRelative"
+                app:framePosition="70"
+                app:sizePercent="0.9" />
+            <KeyPosition
+                app:motionTarget="@+id/action2"
+                app:keyPositionType="pathRelative"
+                app:framePosition="70"
+                app:sizePercent="0.9" />
+            <KeyPosition
+                app:motionTarget="@+id/action3"
+                app:keyPositionType="pathRelative"
+                app:framePosition="70"
+                app:sizePercent="0.9" />
+            <KeyPosition
+                app:motionTarget="@+id/action4"
+                app:keyPositionType="pathRelative"
+                app:framePosition="70"
+                app:sizePercent="0.9" />
+            <KeyPosition
+                app:motionTarget="@+id/media_progress_bar"
+                app:keyPositionType="pathRelative"
+                app:framePosition="70"
+                app:sizePercent="0.9" />
+            <KeyAttribute
+                app:motionTarget="@id/media_progress_bar"
+                app:framePosition="0"
+                android:alpha="0.0" />
+            <KeyAttribute
+                app:motionTarget="@+id/media_progress_bar"
+                app:framePosition="70"
+                android:alpha="0.0"/>
+            <KeyPosition
+                app:motionTarget="@+id/notification_media_progress_time"
+                app:keyPositionType="pathRelative"
+                app:framePosition="70"
+                app:sizePercent="0.9" />
+            <KeyAttribute
+                app:motionTarget="@id/notification_media_progress_time"
+                app:framePosition="0"
+                android:alpha="0.0" />
+            <KeyAttribute
+                app:motionTarget="@+id/notification_media_progress_time"
+                app:framePosition="70"
+                android:alpha="0.0"/>
+            <KeyAttribute
+                app:motionTarget="@id/action0"
+                app:framePosition="0"
+                android:alpha="0.0" />
+            <KeyAttribute
+                app:motionTarget="@+id/action0"
+                app:framePosition="70"
+                android:alpha="0.0"/>
+            <KeyAttribute
+                app:motionTarget="@id/action1"
+                app:framePosition="0"
+                android:alpha="0.0" />
+            <KeyAttribute
+                app:motionTarget="@+id/action1"
+                app:framePosition="70"
+                android:alpha="0.0"/>
+            <KeyAttribute
+                app:motionTarget="@id/action2"
+                app:framePosition="0"
+                android:alpha="0.0" />
+            <KeyAttribute
+                app:motionTarget="@+id/action2"
+                app:framePosition="70"
+                android:alpha="0.0"/>
+            <KeyAttribute
+                app:motionTarget="@id/action3"
+                app:framePosition="0"
+                android:alpha="0.0" />
+            <KeyAttribute
+                app:motionTarget="@+id/action3"
+                app:framePosition="70"
+                android:alpha="0.0"/>
+            <KeyAttribute
+                app:motionTarget="@id/action4"
+                app:framePosition="0"
+                android:alpha="0.0" />
+            <KeyAttribute
+                app:motionTarget="@+id/action4"
+                app:framePosition="70"
+                android:alpha="0.0"/>
+        </KeyFrameSet>
+    </Transition>
 
     <ConstraintSet android:id="@+id/expanded">
         <Constraint
@@ -36,7 +130,7 @@
 
         <Constraint
             android:id="@+id/app_name"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginEnd="10dp"
             android:layout_marginStart="10dp"
@@ -62,9 +156,9 @@
             android:id="@+id/album_art"
             android:layout_width="@dimen/qs_media_album_size"
             android:layout_height="@dimen/qs_media_album_size"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="14dp"
             android:layout_marginStart="@dimen/qs_media_panel_outer_padding"
-            app:layout_constraintTop_toBottomOf="@id/icon"
+            app:layout_constraintTop_toBottomOf="@+id/app_name"
             app:layout_constraintStart_toStartOf="parent"
             />
 
@@ -74,9 +168,9 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginEnd="@dimen/qs_media_panel_outer_padding"
-            android:layout_marginTop="3dp"
+            android:layout_marginTop="17dp"
             android:layout_marginStart="16dp"
-            app:layout_constraintTop_toTopOf="@id/album_art"
+            app:layout_constraintTop_toBottomOf="@+id/app_name"
             app:layout_constraintStart_toEndOf="@id/album_art"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0"/>
@@ -98,7 +192,8 @@
             android:id="@+id/media_progress_bar"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@id/album_art"
+            android:layout_marginTop="3dp"
+            app:layout_constraintTop_toBottomOf="@id/header_artist"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             />
@@ -107,10 +202,10 @@
             android:id="@+id/notification_media_progress_time"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="35dp"
+            android:layout_marginTop="38dp"
             android:layout_marginEnd="@dimen/qs_media_panel_outer_padding"
             android:layout_marginStart="@dimen/qs_media_panel_outer_padding"
-            app:layout_constraintTop_toBottomOf="@id/album_art"
+            app:layout_constraintTop_toBottomOf="@id/header_artist"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             />
@@ -120,48 +215,66 @@
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:layout_marginTop="5dp"
-            android:layout_marginStart="@dimen/qs_media_panel_outer_padding"
-            app:layout_constraintVertical_chainStyle="packed"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="4dp"
+            android:layout_marginBottom="@dimen/qs_media_panel_outer_padding"
+            app:layout_constraintHorizontal_chainStyle="packed"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toLeftOf="@id/action1"
-            app:layout_constraintTop_toBottomOf="@id/notification_media_progress_time" >
+            app:layout_constraintTop_toBottomOf="@id/notification_media_progress_time"
+            app:layout_constraintBottom_toBottomOf="parent">
         </Constraint>
 
         <Constraint
             android:id="@+id/action1"
             android:layout_width="48dp"
             android:layout_height="48dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="4dp"
+            android:layout_marginBottom="@dimen/qs_media_panel_outer_padding"
             app:layout_constraintLeft_toRightOf="@id/action0"
             app:layout_constraintRight_toLeftOf="@id/action2"
-            app:layout_constraintTop_toTopOf="@id/action0" >
+            app:layout_constraintTop_toTopOf="@id/action0"
+            app:layout_constraintBottom_toBottomOf="parent">
         </Constraint>
 
         <Constraint
             android:id="@+id/action2"
-            android:layout_width="52dp"
-            android:layout_height="52dp"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="4dp"
+            android:layout_marginBottom="@dimen/qs_media_panel_outer_padding"
             app:layout_constraintLeft_toRightOf="@id/action1"
             app:layout_constraintRight_toLeftOf="@id/action3"
-            app:layout_constraintTop_toTopOf="@id/action0" >
+            app:layout_constraintTop_toTopOf="@id/action0"
+            app:layout_constraintBottom_toBottomOf="parent">
         </Constraint>
 
         <Constraint
             android:id="@+id/action3"
             android:layout_width="48dp"
             android:layout_height="48dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="4dp"
             app:layout_constraintLeft_toRightOf="@id/action2"
             app:layout_constraintRight_toLeftOf="@id/action4"
-            app:layout_constraintTop_toTopOf="@id/action0" >
+            app:layout_constraintTop_toTopOf="@id/action0"
+            android:layout_marginBottom="@dimen/qs_media_panel_outer_padding"
+            app:layout_constraintBottom_toBottomOf="parent">
         </Constraint>
 
         <Constraint
             android:id="@+id/action4"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:layout_marginEnd="@dimen/qs_media_panel_outer_padding"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="4dp"
+            android:layout_marginBottom="@dimen/qs_media_panel_outer_padding"
             app:layout_constraintLeft_toRightOf="@id/action3"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="@id/action0" >
+            app:layout_constraintTop_toTopOf="@id/action0"
+            app:layout_constraintBottom_toBottomOf="parent">
         </Constraint>
     </ConstraintSet>
 
@@ -178,7 +291,7 @@
 
         <Constraint
             android:id="@+id/app_name"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginEnd="10dp"
             android:layout_marginStart="10dp"
@@ -206,8 +319,10 @@
             android:layout_height="@dimen/qs_media_album_size"
             android:layout_marginTop="16dp"
             android:layout_marginStart="@dimen/qs_media_panel_outer_padding"
+            android:layout_marginBottom="24dp"
             app:layout_constraintTop_toBottomOf="@id/icon"
             app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
             />
 
         <!-- Song name -->
@@ -215,9 +330,10 @@
             android:id="@+id/header_title"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="3dp"
+            android:layout_marginTop="17dp"
             android:layout_marginStart="16dp"
-            app:layout_constraintTop_toTopOf="@id/album_art"
+            app:layout_constraintTop_toBottomOf="@id/app_name"
+            app:layout_constraintBottom_toTopOf="@id/header_artist"
             app:layout_constraintStart_toEndOf="@id/album_art"
             app:layout_constraintEnd_toStartOf="@id/action0"
             app:layout_constraintHorizontal_bias="0"/>
@@ -228,9 +344,11 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="3dp"
+            android:layout_marginBottom="24dp"
             app:layout_constraintTop_toBottomOf="@id/header_title"
             app:layout_constraintStart_toStartOf="@id/header_title"
             app:layout_constraintEnd_toStartOf="@id/action0"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintHorizontal_bias="0"/>
 
         <!-- Seek Bar -->
@@ -261,52 +379,67 @@
             android:id="@+id/action0"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:layout_marginTop="5dp"
             android:layout_marginStart="4dp"
+            android:layout_marginTop="16dp"
             android:visibility="gone"
-            app:layout_constraintVertical_chainStyle="packed"
+            app:layout_constraintHorizontal_chainStyle="packed"
+            app:layout_constraintTop_toBottomOf="@id/app_name"
             app:layout_constraintLeft_toRightOf="@id/header_title"
             app:layout_constraintRight_toLeftOf="@id/action1"
-            app:layout_constraintTop_toTopOf="@id/album_art">
+            >
         </Constraint>
 
         <Constraint
             android:id="@+id/action1"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            app:layout_constraintVertical_chainStyle="packed"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="4dp"
+            android:layout_marginTop="18dp"
+            app:layout_constraintTop_toBottomOf="@id/app_name"
             app:layout_constraintLeft_toRightOf="@id/action0"
             app:layout_constraintRight_toLeftOf="@id/action2"
-            app:layout_constraintTop_toTopOf="@id/action0" >
+            >
         </Constraint>
 
         <Constraint
             android:id="@+id/action2"
-            android:layout_width="52dp"
-            android:layout_height="52dp"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="4dp"
+            android:layout_marginTop="18dp"
+            app:layout_constraintTop_toBottomOf="@id/app_name"
             app:layout_constraintLeft_toRightOf="@id/action1"
             app:layout_constraintRight_toLeftOf="@id/action3"
-            app:layout_constraintTop_toTopOf="@id/action0" >
+            >
         </Constraint>
 
         <Constraint
             android:id="@+id/action3"
             android:layout_width="48dp"
             android:layout_height="48dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="4dp"
+            android:layout_marginTop="18dp"
+            app:layout_constraintTop_toBottomOf="@id/app_name"
             app:layout_constraintLeft_toRightOf="@id/action2"
             app:layout_constraintRight_toLeftOf="@id/action4"
-            app:layout_constraintTop_toTopOf="@id/action0" >
+            >
         </Constraint>
 
         <Constraint
             android:id="@+id/action4"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:layout_marginRight="@dimen/qs_media_panel_outer_padding"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="4dp"
             android:visibility="gone"
+            android:layout_marginTop="18dp"
+            app:layout_constraintTop_toBottomOf="@id/app_name"
             app:layout_constraintLeft_toRightOf="@id/action3"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="@id/action0" >
+            >
         </Constraint>
     </ConstraintSet>
 </MotionScene>

@@ -83,11 +83,10 @@ public class QuickQSPanel extends QSPanel {
             BroadcastDispatcher broadcastDispatcher,
             QSLogger qsLogger,
             MediaHost mediaHost,
-            ActivityStarter activityStarter,
             UiEventLogger uiEventLogger
     ) {
-        super(context, attrs, dumpManager, broadcastDispatcher, qsLogger, mediaHost, 
-                activityStarter, uiEventLogger);
+        super(context, attrs, dumpManager, broadcastDispatcher, qsLogger, mediaHost,
+                uiEventLogger);
         if (mFooter != null) {
             removeView(mFooter.getView());
         }
@@ -193,7 +192,7 @@ public class QuickQSPanel extends QSPanel {
             return null;
         });
         mMediaHost.init(MediaHierarchyManager.LOCATION_QQS);
-        mMediaHost.setExpanded(false);
+        mMediaHost.setExpansion(0.0f);
         mMediaHost.setShowsOnlyActiveMedia(true);
         reAttachMediaHost();
     }

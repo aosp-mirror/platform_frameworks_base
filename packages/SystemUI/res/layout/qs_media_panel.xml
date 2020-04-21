@@ -21,10 +21,21 @@
     android:id="@+id/qs_media_controls"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/qs_media_background"
+    android:clipChildren="false"
+    android:clipToPadding="false"
     android:gravity="center_horizontal|fill_vertical"
-    android:paddingBottom="@dimen/qs_media_panel_outer_padding"
     app:layoutDescription="@xml/media_scene">
+
+    <View
+        android:id="@+id/media_background"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@drawable/qs_media_background"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        />
 
     <FrameLayout
         android:id="@+id/notification_media_progress_time"

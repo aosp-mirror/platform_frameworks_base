@@ -18,32 +18,23 @@ package com.android.systemui.media;
 
 import static com.android.systemui.util.SysuiLifecycle.viewAttachLifecycle;
 
-import android.annotation.LayoutRes;
 import android.app.PendingIntent;
 import android.content.ComponentName;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.ColorStateList;
-import android.graphics.Bitmap;
-import android.graphics.ImageDecoder;
-import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.RippleDrawable;
-import android.media.MediaDescription;
 import android.media.MediaMetadata;
-import android.media.ThumbnailUtils;
 import android.media.session.MediaController;
 import android.media.session.MediaController.PlaybackInfo;
 import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
-import android.net.Uri;
 import android.service.media.MediaBrowserService;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -56,10 +47,11 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
+import androidx.constraintlayout.motion.widget.Key;
+import androidx.constraintlayout.motion.widget.KeyAttributes;
+import androidx.constraintlayout.motion.widget.KeyFrames;
 import androidx.constraintlayout.motion.widget.MotionLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
-import androidx.core.graphics.drawable.RoundedBitmapDrawable;
-import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory;
 
 import com.android.settingslib.media.LocalMediaManager;
 import com.android.settingslib.media.MediaDevice;
@@ -73,7 +65,7 @@ import com.android.systemui.util.concurrency.DelayableExecutor;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executor;
 
@@ -100,7 +92,8 @@ public class MediaControlPanel {
     private final ActivityStarter mActivityStarter;
 
     private Context mContext;
-    protected MotionLayout mMediaNotifView;
+    private MotionLayout mMediaNotifView;
+    private final View mBackground;
     private View mSeamless;
     private MediaSession.Token mToken;
     private MediaController mController;
@@ -109,6 +102,7 @@ public class MediaControlPanel {
     private MediaDevice mDevice;
     protected ComponentName mServiceComponent;
     private boolean mIsRegistered = false;
+    private final List<KeyFrames> mKeyFrames;
     private String mKey;
 
     public static final String MEDIA_PREFERENCES = "media_control_prefs";
@@ -184,8 +178,6 @@ public class MediaControlPanel {
      * @param context
      * @param parent
      * @param routeManager Manager used to listen for device change events.
-     * @param layoutId layout resource to use for this control panel
-     * @param actionIds resource IDs for action buttons in the layout
      * @param foregroundExecutor foreground executor
      * @param backgroundExecutor background executor, used for processing artwork
      * @param activityStarter activity starter
@@ -196,6 +188,8 @@ public class MediaControlPanel {
         mContext = context;
         LayoutInflater inflater = LayoutInflater.from(mContext);
         mMediaNotifView = (MotionLayout) inflater.inflate(R.layout.qs_media_panel, parent, false);
+        mBackground = mMediaNotifView.findViewById(R.id.media_background);
+        mKeyFrames = mMediaNotifView.getDefinedTransitions().get(0).getKeyFrameList();
         // TODO(b/150854549): removeOnAttachStateChangeListener when this doesn't inflate views
         // mStateListener shouldn't need to be unregistered since this object shares the same
         // lifecycle with the inflated view. It would be better, however, if this controller used an
@@ -250,7 +244,7 @@ public class MediaControlPanel {
      * Bind this view based on the data given
      */
     public void bind(@NotNull MediaData data) {
-        mToken = data.getToken();
+        MediaSession.Token token = data.getToken();
         mForegroundColor = data.getForegroundColor();
         mBackgroundColor = data.getBackgroundColor();
         if (mToken == null || !mToken.equals(token)) {
@@ -265,7 +259,6 @@ public class MediaControlPanel {
         }
 
         mController = new MediaController(mContext, mToken);
-        mKey = key;
 
         // Try to find a browser service component for this app
         // TODO also check for a media button receiver intended for restarting (b/154127084)
@@ -291,9 +284,8 @@ public class MediaControlPanel {
 
         mController.registerCallback(mSessionCallback);
 
-        albumView.setImageDrawable(data.getArtwork());
-
-        mMediaNotifView.setBackgroundTintList(ColorStateList.valueOf(mBackgroundColor));
+        mMediaNotifView.requireViewById(R.id.media_background).setBackgroundTintList(
+                ColorStateList.valueOf(mBackgroundColor));
 
         // Click action
         PendingIntent clickIntent = data.getClickIntent();
@@ -303,6 +295,9 @@ public class MediaControlPanel {
             });
         }
 
+        ImageView albumView = mMediaNotifView.findViewById(R.id.album_art);
+        albumView.setImageDrawable(data.getArtwork());
+
         // App icon
         ImageView appIcon = mMediaNotifView.requireViewById(R.id.icon);
         // TODO: look at iconDrawable
@@ -310,14 +305,21 @@ public class MediaControlPanel {
         iconDrawable.setTint(mForegroundColor);
         appIcon.setImageDrawable(iconDrawable);
 
+        // Song name
         TextView titleText = mMediaNotifView.requireViewById(R.id.header_title);
         titleText.setText(data.getSong());
+        titleText.setTextColor(data.getForegroundColor());
+
+        // App title
         TextView appName = mMediaNotifView.requireViewById(R.id.app_name);
         appName.setText(data.getApp());
         appName.setTextColor(mForegroundColor);
+
+        // Artist name
         TextView artistText = mMediaNotifView.requireViewById(R.id.header_artist);
         artistText.setText(data.getArtist());
         artistText.setTextColor(mForegroundColor);
+
         // Transfer chip
         mSeamless = mMediaNotifView.findViewById(R.id.media_seamless);
         if (mSeamless != null) {
@@ -352,15 +354,16 @@ public class MediaControlPanel {
         int i = 0;
         List<MediaAction> actionIcons = data.getActions();
         for (; i < actionIcons.size() && i < ACTION_IDS.length; i++) {
-            final ImageButton button = mMediaNotifView.findViewById(ACTION_IDS[i]);
+            int actionId = ACTION_IDS[i];
+            final ImageButton button = mMediaNotifView.findViewById(actionId);
             MediaAction mediaAction = actionIcons.get(i);
             button.setImageDrawable(mediaAction.getDrawable());
             button.setContentDescription(mediaAction.getContentDescription());
             button.setImageTintList(ColorStateList.valueOf(mForegroundColor));
             PendingIntent actionIntent = mediaAction.getIntent();
 
-            if (mMediaNotifView.getBackground() instanceof IlluminationDrawable) {
-                ((IlluminationDrawable) mMediaNotifView.getBackground())
+            if (mBackground.getBackground() instanceof IlluminationDrawable) {
+                ((IlluminationDrawable) mBackground.getBackground())
                         .setupTouch(button, mMediaNotifView);
             }
 
@@ -374,9 +377,10 @@ public class MediaControlPanel {
                 }
             });
             boolean visibleInCompat = actionsWhenCollapsed.contains(i);
-            collapsedSet.setVisibility(ACTION_IDS[i],
+            updateKeyFrameVisibility(actionId, visibleInCompat);
+            collapsedSet.setVisibility(actionId,
                     visibleInCompat ? ConstraintSet.VISIBLE : ConstraintSet.GONE);
-            expandedSet.setVisibility(ACTION_IDS[i], ConstraintSet.VISIBLE);
+            expandedSet.setVisibility(actionId, ConstraintSet.VISIBLE);
         }
 
         // Hide any unused buttons
@@ -394,41 +398,26 @@ public class MediaControlPanel {
         // TODO: b/156036025 bring back media guts
 
         makeActive();
+    }
 
-        // App title (not in mini player)
-        TextView appName = mMediaNotifView.findViewById(R.id.app_name);
-        if (appName != null) {
-            appName.setText(appNameString);
-            appName.setTextColor(mForegroundColor);
-        }
-
-        // Can be null!
-        MediaMetadata mediaMetadata = mController.getMetadata();
-
-        ImageView albumView = mMediaNotifView.findViewById(R.id.album_art);
-        if (albumView != null) {
-            // Resize art in a background thread
-            mBackgroundExecutor.execute(() -> processAlbumArt(mediaMetadata, largeIcon, albumView));
-        }
-
-        // Song name
-        TextView titleText = mMediaNotifView.findViewById(R.id.header_title);
-        String songName = "";
-        if (mediaMetadata != null) {
-            songName = mediaMetadata.getString(MediaMetadata.METADATA_KEY_TITLE);
-        }
-        titleText.setText(songName);
-        titleText.setTextColor(mForegroundColor);
-
-        // Artist name (not in mini player)
-        TextView artistText = mMediaNotifView.findViewById(R.id.header_artist);
-        if (artistText != null) {
-            String artistName = "";
-            if (mediaMetadata != null) {
-                artistName = mediaMetadata.getString(MediaMetadata.METADATA_KEY_ARTIST);
+    /**
+     * Updates the keyframe visibility such that only views that are not visible actually go
+     * through a transition and fade in.
+     *
+     * @param actionId the id to change
+     * @param visible is the view visible
+     */
+    private void updateKeyFrameVisibility(int actionId, boolean visible) {
+        for (int i = 0; i < mKeyFrames.size(); i++) {
+            KeyFrames keyframe = mKeyFrames.get(i);
+            ArrayList<Key> viewKeyFrames = keyframe.getKeyFramesForView(actionId);
+            for (int j = 0; j < viewKeyFrames.size(); j++) {
+                Key key = viewKeyFrames.get(j);
+                if (key instanceof KeyAttributes) {
+                    KeyAttributes attributes = (KeyAttributes) key;
+                    attributes.setValue("alpha", visible ? 1.0f : 0.0f);
+                }
             }
-            artistText.setText(artistName);
-            artistText.setTextColor(mForegroundColor);
         }
     }
 
@@ -499,120 +488,6 @@ public class MediaControlPanel {
         }
 
         return (state.getState() == PlaybackState.STATE_PLAYING);
-    }
-
-    /**
-     * Process album art for layout
-     * @param description media description
-     * @param albumView view to hold the album art
-     */
-    protected void processAlbumArt(MediaDescription description, ImageView albumView) {
-        Bitmap albumArt = null;
-
-        // First try loading from URI
-        albumArt = loadBitmapFromUri(description.getIconUri());
-
-        // Then check bitmap
-        if (albumArt == null) {
-            albumArt = description.getIconBitmap();
-        }
-
-        processAlbumArtInternal(albumArt, albumView);
-    }
-
-    /**
-     * Process album art for layout
-     * @param metadata media metadata
-     * @param largeIcon from notification, checked as a fallback if metadata does not have art
-     * @param albumView view to hold the album art
-     */
-    private void processAlbumArt(MediaMetadata metadata, Icon largeIcon, ImageView albumView) {
-        Bitmap albumArt = null;
-
-        if (metadata != null) {
-            // First look in URI fields
-            for (String field : ART_URIS) {
-                String uriString = metadata.getString(field);
-                if (!TextUtils.isEmpty(uriString)) {
-                    albumArt = loadBitmapFromUri(Uri.parse(uriString));
-                    if (albumArt != null) {
-                        Log.d(TAG, "loaded art from " + field);
-                        break;
-                    }
-                }
-            }
-
-            // Then check bitmap field
-            if (albumArt == null) {
-                albumArt = metadata.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART);
-            }
-        }
-
-        // Finally try the notification's largeIcon
-        if (albumArt == null && largeIcon != null) {
-            albumArt = largeIcon.getBitmap();
-        }
-
-        processAlbumArtInternal(albumArt, albumView);
-    }
-
-    /**
-     * Load a bitmap from a URI
-     * @param uri
-     * @return bitmap, or null if couldn't be loaded
-     */
-    private Bitmap loadBitmapFromUri(Uri uri) {
-        // ImageDecoder requires a scheme of the following types
-        if (uri.getScheme() == null) {
-            return null;
-        }
-
-        if (!uri.getScheme().equals(ContentResolver.SCHEME_CONTENT)
-                && !uri.getScheme().equals(ContentResolver.SCHEME_ANDROID_RESOURCE)
-                && !uri.getScheme().equals(ContentResolver.SCHEME_FILE)) {
-            return null;
-        }
-
-        ImageDecoder.Source source = ImageDecoder.createSource(mContext.getContentResolver(), uri);
-        try {
-            return ImageDecoder.decodeBitmap(source);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    /**
-     * Resize and crop the image if provided and update the control view
-     * @param albumArt Bitmap of art to display, or null to hide view
-     * @param albumView View that will hold the art
-     */
-    private void processAlbumArtInternal(@Nullable Bitmap albumArt, ImageView albumView) {
-        // Resize
-        RoundedBitmapDrawable roundedDrawable = null;
-        if (albumArt != null) {
-            float radius = mContext.getResources().getDimension(R.dimen.qs_media_corner_radius);
-            Bitmap original = albumArt.copy(Bitmap.Config.ARGB_8888, true);
-            int albumSize = (int) mContext.getResources().getDimension(
-                    R.dimen.qs_media_album_size);
-            Bitmap scaled = ThumbnailUtils.extractThumbnail(original, albumSize, albumSize);
-            roundedDrawable = RoundedBitmapDrawableFactory.create(mContext.getResources(), scaled);
-            roundedDrawable.setCornerRadius(radius);
-        } else {
-            Log.e(TAG, "No album art available");
-        }
-
-        // Now that it's resized, update the UI
-        final RoundedBitmapDrawable result = roundedDrawable;
-        mForegroundExecutor.execute(() -> {
-            if (result != null) {
-                albumView.setImageDrawable(result);
-                albumView.setVisibility(View.VISIBLE);
-            } else {
-                albumView.setImageDrawable(null);
-                albumView.setVisibility(View.GONE);
-            }
-        });
     }
 
     /**

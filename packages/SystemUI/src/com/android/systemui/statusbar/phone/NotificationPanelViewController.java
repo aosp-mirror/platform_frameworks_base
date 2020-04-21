@@ -3518,7 +3518,11 @@ public class NotificationPanelViewController extends PanelViewController {
             // Calculate quick setting heights.
             int oldMaxHeight = mQsMaxExpansionHeight;
             if (mQs != null) {
+                float previousMin = mQsMinExpansionHeight;
                 mQsMinExpansionHeight = mKeyguardShowing ? 0 : mQs.getQsMinExpansionHeight();
+                if (mQsExpansionHeight == previousMin) {
+                    mQsExpansionHeight = mQsMinExpansionHeight;
+                }
                 mQsMaxExpansionHeight = mQs.getDesiredHeight();
                 mNotificationStackScroller.setMaxTopPadding(
                         mQsMaxExpansionHeight + mQsNotificationTopPadding);

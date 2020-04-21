@@ -220,6 +220,10 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         mNextAlarmTextView.setSelected(true);
     }
 
+    public QuickQSPanel getHeaderQsPanel() {
+        return mHeaderQsPanel;
+    }
+
     private List<String> getIgnoredIconSlots() {
         ArrayList<String> ignored = new ArrayList<>();
         ignored.add(mContext.getResources().getString(

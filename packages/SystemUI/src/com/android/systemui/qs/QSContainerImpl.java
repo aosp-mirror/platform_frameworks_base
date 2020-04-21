@@ -167,7 +167,7 @@ public class QSContainerImpl extends FrameLayout {
         int height = calculateContainerHeight();
         setBottom(getTop() + height);
         mQSDetail.setBottom(getTop() + height);
-        // Pin QS Footer to the bottom of the panel.
+        // Pin the drag handle to the bottom of the panel.
         mDragHandle.setTranslationY(height - mDragHandle.getHeight());
         mBackground.setTop(mQSPanel.getTop());
         mBackground.setBottom(height);

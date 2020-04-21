@@ -60,4 +60,9 @@ public class MediaHeaderView extends ActivatableNotificationView {
         layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT;
         layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT;
     }
+
+    @Override
+    public boolean wantsAddAndRemoveAnimations() {
+        return false;
+    }
 }

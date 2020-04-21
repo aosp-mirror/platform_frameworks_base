@@ -39,7 +39,7 @@ class KeyguardMediaController @Inject constructor(
     fun attach(mediaView: MediaHeaderView) {
         view = mediaView
         mediaHost.visibleChangedListener = ::updateVisibility
-        mediaHost.isExpanded = false
+        mediaHost.expansion = 0.0f
         mediaHost.showsOnlyActiveMedia = true
         mediaHost.init(MediaHierarchyManager.LOCATION_LOCKSCREEN)
         mediaView.setMediaHost(mediaHost.hostView)

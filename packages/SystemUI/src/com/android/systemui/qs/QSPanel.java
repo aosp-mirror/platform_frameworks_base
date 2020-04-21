@@ -104,7 +104,6 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
     private final MetricsLogger mMetricsLogger = Dependency.get(MetricsLogger.class);
     private final QSTileRevealController mQsTileRevealController;
 
-    private ActivityStarter mActivityStarter;
     protected boolean mExpanded;
     protected boolean mListening;
 
@@ -148,7 +147,6 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
             BroadcastDispatcher broadcastDispatcher,
             QSLogger qsLogger,
             MediaHost mediaHost,
-            ActivityStarter activityStarter,
             UiEventLogger uiEventLogger
     ) {
         super(context, attrs);
@@ -157,7 +155,6 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         mQSLogger = qsLogger;
         mDumpManager = dumpManager;
         mBroadcastDispatcher = broadcastDispatcher;
-        mActivityStarter = activityStarter;
         mUiEventLogger = uiEventLogger;
 
         setOrientation(VERTICAL);
@@ -186,7 +183,6 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
                 findViewById(R.id.brightness_slider), mBroadcastDispatcher);
     }
 
-
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
@@ -198,7 +194,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
 
     protected void addMediaHostView() {
         mMediaHost.init(MediaHierarchyManager.LOCATION_QS);
-        mMediaHost.setExpanded(true);
+        mMediaHost.setExpansion(1.0f);
         mMediaHost.setShowsOnlyActiveMedia(false);
         ViewGroup hostView = mMediaHost.getHostView();
         addView(hostView);
@@ -219,7 +215,8 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         @Override
         public void addTrack(MediaDescription desc, ComponentName component,
                 QSMediaBrowser browser) {
-            if (component == null) {
+            // TODO: Fix Resumption b/156104922
+/*            if (component == null) {
                 Log.e(TAG, "Component cannot be null");
                 return;
             }
@@ -255,7 +252,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
             int iconColor = Color.DKGRAY;
             int bgColor = Color.LTGRAY;
             player.setMediaSession(token, desc, iconColor, bgColor, browser.getAppIntent(),
-                    pkgName);
+                    pkgName);*/
         }
     };
 
@@ -854,6 +851,10 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
                 lp.rightMargin = sideMargins;
             }
         }
+    }
+
+    public MediaHost getMediaHost() {
+        return mMediaHost;
     }
 
     private class H extends Handler {
