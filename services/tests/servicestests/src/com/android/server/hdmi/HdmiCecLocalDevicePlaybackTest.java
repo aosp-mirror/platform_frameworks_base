@@ -20,7 +20,12 @@ import static com.android.server.hdmi.HdmiControlService.INITIATED_BY_ENABLE_CEC
 
 import static com.google.common.truth.Truth.assertThat;
 
+import android.content.Context;
+import android.os.Handler;
+import android.os.IPowerManager;
+import android.os.IThermalService;
 import android.os.Looper;
+import android.os.PowerManager;
 import android.os.test.TestLooper;
 import android.platform.test.annotations.Presubmit;
 import android.view.KeyEvent;
@@ -33,6 +38,8 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 
@@ -52,8 +59,17 @@ public class HdmiCecLocalDevicePlaybackTest {
     private int mPlaybackPhysicalAddress;
     private boolean mWokenUp;
 
+    @Mock private IPowerManager mIPowerManagerMock;
+    @Mock private IThermalService mIThermalServiceMock;
+
     @Before
     public void setUp() {
+        MockitoAnnotations.initMocks(this);
+
+        Context context = InstrumentationRegistry.getTargetContext();
+        mMyLooper = mTestLooper.getLooper();
+        PowerManager powerManager = new PowerManager(context, mIPowerManagerMock,
+                mIThermalServiceMock, new Handler(mMyLooper));
         mHdmiControlService =
             new HdmiControlService(InstrumentationRegistry.getTargetContext()) {
                 @Override
@@ -70,9 +86,13 @@ public class HdmiCecLocalDevicePlaybackTest {
                 void writeStringSystemProperty(String key, String value) {
                     // do nothing
                 }
+
+                @Override
+                PowerManager getPowerManager() {
+                    return powerManager;
+                }
             };
 
-        mMyLooper = mTestLooper.getLooper();
         mHdmiCecLocalDevicePlayback = new HdmiCecLocalDevicePlayback(mHdmiControlService);
         mHdmiCecLocalDevicePlayback.init();
         mHdmiControlService.setIoLooper(mMyLooper);
@@ -142,7 +162,6 @@ public class HdmiCecLocalDevicePlaybackTest {
     }
 
     @Test
-    @Ignore("b/151147315")
     public void doNotWakeUpOnHotPlug_PlugIn() {
         mWokenUp = false;
         mHdmiCecLocalDevicePlayback.onHotplug(0, true);
@@ -150,7 +169,6 @@ public class HdmiCecLocalDevicePlaybackTest {
     }
 
     @Test
-    @Ignore("b/151147315")
     public void doNotWakeUpOnHotPlug_PlugOut() {
         mWokenUp = false;
         mHdmiCecLocalDevicePlayback.onHotplug(0, false);
@@ -158,7 +176,6 @@ public class HdmiCecLocalDevicePlaybackTest {
     }
 
     @Test
-    @Ignore("b/151147315")
     public void sendVolumeKeyEvent_up_volumeEnabled() {
         mHdmiControlService.setHdmiCecVolumeControlEnabled(true);
         mHdmiCecLocalDevicePlayback.sendVolumeKeyEvent(KeyEvent.KEYCODE_VOLUME_UP, true);
@@ -168,7 +185,6 @@ public class HdmiCecLocalDevicePlaybackTest {
     }
 
     @Test
-    @Ignore("b/151147315")
     public void sendVolumeKeyEvent_down_volumeEnabled() {
         mHdmiControlService.setHdmiCecVolumeControlEnabled(true);
         mHdmiCecLocalDevicePlayback.sendVolumeKeyEvent(KeyEvent.KEYCODE_VOLUME_DOWN, true);
@@ -178,7 +194,6 @@ public class HdmiCecLocalDevicePlaybackTest {
     }
 
     @Test
-    @Ignore("b/151147315")
     public void sendVolumeKeyEvent_mute_volumeEnabled() {
         mHdmiControlService.setHdmiCecVolumeControlEnabled(true);
         mHdmiCecLocalDevicePlayback.sendVolumeKeyEvent(KeyEvent.KEYCODE_VOLUME_MUTE, true);
@@ -188,7 +203,6 @@ public class HdmiCecLocalDevicePlaybackTest {
     }
 
     @Test
-    @Ignore("b/151147315")
     public void sendVolumeKeyEvent_up_volumeDisabled() {
         mHdmiControlService.setHdmiCecVolumeControlEnabled(false);
         mHdmiCecLocalDevicePlayback.sendVolumeKeyEvent(KeyEvent.KEYCODE_VOLUME_UP, true);
@@ -198,7 +212,6 @@ public class HdmiCecLocalDevicePlaybackTest {
     }
 
     @Test
-    @Ignore("b/151147315")
     public void sendVolumeKeyEvent_down_volumeDisabled() {
         mHdmiControlService.setHdmiCecVolumeControlEnabled(false);
         mHdmiCecLocalDevicePlayback.sendVolumeKeyEvent(KeyEvent.KEYCODE_VOLUME_DOWN, true);
@@ -208,7 +221,6 @@ public class HdmiCecLocalDevicePlaybackTest {
     }
 
     @Test
-    @Ignore("b/151147315")
     public void sendVolumeKeyEvent_mute_volumeDisabled() {
         mHdmiControlService.setHdmiCecVolumeControlEnabled(false);
         mHdmiCecLocalDevicePlayback.sendVolumeKeyEvent(KeyEvent.KEYCODE_VOLUME_MUTE, true);
