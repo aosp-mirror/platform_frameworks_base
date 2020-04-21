@@ -237,9 +237,9 @@ public final class MediaRouter2 {
                 } catch (RemoteException ex) {
                     Log.e(TAG, "Unable to unregister media router.", ex);
                 }
+                mStub = null;
             }
             mShouldUpdateRoutes = true;
-            mStub = null;
         }
     }
 
