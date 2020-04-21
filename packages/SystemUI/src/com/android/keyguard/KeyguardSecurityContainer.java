@@ -227,6 +227,13 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
     }
 
     @Override
+    public void onStartingToHide() {
+        if (mCurrentSecuritySelection != SecurityMode.None) {
+            getSecurityView(mCurrentSecuritySelection).onStartingToHide();
+        }
+    }
+
+    @Override
     public boolean shouldDelayChildPressedState() {
         return true;
     }

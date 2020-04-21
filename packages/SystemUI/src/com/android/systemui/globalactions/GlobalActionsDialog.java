@@ -78,6 +78,7 @@ import android.widget.BaseAdapter;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
+import android.widget.LinearLayout;
 import android.widget.ListPopupWindow;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -2053,8 +2054,17 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             if (overflowButton != null) {
                 if (mOverflowAdapter.getCount() > 0) {
                     overflowButton.setOnClickListener((view) -> showPowerOverflowMenu());
+                    LinearLayout.LayoutParams params =
+                            (LinearLayout.LayoutParams) mGlobalActionsLayout.getLayoutParams();
+                    params.setMarginEnd(0);
+                    mGlobalActionsLayout.setLayoutParams(params);
                 } else {
                     overflowButton.setVisibility(View.GONE);
+                    LinearLayout.LayoutParams params =
+                            (LinearLayout.LayoutParams) mGlobalActionsLayout.getLayoutParams();
+                    params.setMarginEnd(mContext.getResources().getDimensionPixelSize(
+                            com.android.systemui.R.dimen.global_actions_side_margin));
+                    mGlobalActionsLayout.setLayoutParams(params);
                 }
             }
 

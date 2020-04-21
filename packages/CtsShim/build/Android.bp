@@ -69,6 +69,14 @@ android_app {
     // Explicitly uncompress native libs rather than letting the build system doing it and destroy the
     // v2/v3 signature.
     use_embedded_native_libs: true,
+    apex_available: [
+        "com.android.apex.cts.shim.v1",
+        "com.android.apex.cts.shim.v2",
+        "com.android.apex.cts.shim.v2_no_hashtree",
+        "com.android.apex.cts.shim.v2_legacy",
+        "com.android.apex.cts.shim.v2_sdk_target_p",
+        "com.android.apex.cts.shim.v3",
+    ],
 }
 
 //##########################################################
@@ -110,7 +118,10 @@ android_app {
     dex_preopt: {
         enabled: false,
     },
-    manifest: "shim/AndroidManifestTargetPSdk.xml"
+    manifest: "shim/AndroidManifestTargetPSdk.xml",
+    apex_available: [
+        "com.android.apex.cts.shim.v2_apk_in_apex_sdk_target_p",
+    ],
 }
 
 //##########################################################
@@ -128,4 +139,12 @@ android_app {
     },
 
     manifest: "shim/AndroidManifest.xml",
+    apex_available: [
+        "com.android.apex.cts.shim.v1",
+        "com.android.apex.cts.shim.v2",
+        "com.android.apex.cts.shim.v2_no_hashtree",
+        "com.android.apex.cts.shim.v2_legacy",
+        "com.android.apex.cts.shim.v2_sdk_target_p",
+        "com.android.apex.cts.shim.v3",
+    ],
 }

@@ -90,11 +90,23 @@ public class ActivityView extends ViewGroup implements android.window.TaskEmbedd
 
     public ActivityView(Context context, AttributeSet attrs, int defStyle,
             boolean singleTaskInstance) {
+        this(context, attrs, defStyle, singleTaskInstance, false /* usePublicVirtualDisplay */);
+    }
+
+    /**
+     * This constructor let's the caller explicitly request a public virtual display as the backing
+     * display. Using a public display is not recommended as it exposes it to other applications,
+     * but it might be needed for backwards compatibility.
+     */
+    public ActivityView(
+            @NonNull Context context, @NonNull AttributeSet attrs, int defStyle,
+            boolean singleTaskInstance, boolean usePublicVirtualDisplay) {
         super(context, attrs, defStyle);
         if (useTaskOrganizer()) {
             mTaskEmbedder = new TaskOrganizerTaskEmbedder(context, this);
         } else {
-            mTaskEmbedder = new VirtualDisplayTaskEmbedder(context, this, singleTaskInstance);
+            mTaskEmbedder = new VirtualDisplayTaskEmbedder(context, this, singleTaskInstance,
+                    usePublicVirtualDisplay);
         }
         mSurfaceView = new SurfaceView(context);
         // Since ActivityView#getAlpha has been overridden, we should use parent class's alpha

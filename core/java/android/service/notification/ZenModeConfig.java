@@ -102,8 +102,8 @@ public class ZenModeConfig implements Parcelable {
     private static final boolean DEFAULT_ALLOW_REMINDERS = false;
     private static final boolean DEFAULT_ALLOW_EVENTS = false;
     private static final boolean DEFAULT_ALLOW_REPEAT_CALLERS = true;
-    private static final boolean DEFAULT_ALLOW_CONV = true;
-    private static final int DEFAULT_ALLOW_CONV_FROM = ZenPolicy.CONVERSATION_SENDERS_IMPORTANT;
+    private static final boolean DEFAULT_ALLOW_CONV = false;
+    private static final int DEFAULT_ALLOW_CONV_FROM = ZenPolicy.CONVERSATION_SENDERS_NONE;
     private static final boolean DEFAULT_CHANNELS_BYPASSING_DND = false;
     private static final int DEFAULT_SUPPRESSED_VISUAL_EFFECTS = 0;
 
@@ -125,8 +125,8 @@ public class ZenModeConfig implements Parcelable {
     private static final String ALLOW_ATT_EVENTS = "events";
     private static final String ALLOW_ATT_SCREEN_OFF = "visualScreenOff";
     private static final String ALLOW_ATT_SCREEN_ON = "visualScreenOn";
-    private static final String ALLOW_ATT_CONV = "conv";
-    private static final String ALLOW_ATT_CONV_FROM = "convFrom";
+    private static final String ALLOW_ATT_CONV = "convos";
+    private static final String ALLOW_ATT_CONV_FROM = "convosFrom";
     private static final String DISALLOW_TAG = "disallow";
     private static final String DISALLOW_ATT_VISUAL_EFFECTS = "visualEffects";
     private static final String STATE_TAG = "state";
