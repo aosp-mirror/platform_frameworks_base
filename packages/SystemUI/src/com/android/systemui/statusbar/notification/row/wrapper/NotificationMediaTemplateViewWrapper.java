@@ -22,6 +22,7 @@ import android.annotation.Nullable;
 import android.app.Notification;
 import android.content.Context;
 import android.content.res.ColorStateList;
+import android.graphics.drawable.Drawable;
 import android.media.MediaMetadata;
 import android.media.session.MediaController;
 import android.media.session.MediaSession;
@@ -187,8 +188,9 @@ public class NotificationMediaTemplateViewWrapper extends NotificationTemplateVi
                     com.android.systemui.R.id.quick_qs_panel);
             StatusBarNotification sbn = mRow.getEntry().getSbn();
             Notification notif = sbn.getNotification();
+            Drawable iconDrawable = notif.getSmallIcon().loadDrawable(mContext);
             panel.getMediaPlayer().setMediaSession(token,
-                    notif.getSmallIcon(),
+                    iconDrawable,
                     tintColor,
                     mBackgroundColor,
                     mActions,
@@ -198,7 +200,7 @@ public class NotificationMediaTemplateViewWrapper extends NotificationTemplateVi
             QSPanel bigPanel = ctrl.getNotificationShadeView().findViewById(
                     com.android.systemui.R.id.quick_settings_panel);
             bigPanel.addMediaSession(token,
-                    notif.getSmallIcon(),
+                    iconDrawable,
                     tintColor,
                     mBackgroundColor,
                     mActions,
