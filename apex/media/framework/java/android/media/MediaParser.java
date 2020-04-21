@@ -1412,14 +1412,12 @@ public final class MediaParser {
         setOptionalMediaFormatInt(result, MediaFormat.KEY_HEIGHT, format.height);
 
         List<byte[]> initData = format.initializationData;
-        if (initData != null) {
-            for (int i = 0; i < initData.size(); i++) {
-                result.setByteBuffer("csd-" + i, ByteBuffer.wrap(initData.get(i)));
-            }
+        for (int i = 0; i < initData.size(); i++) {
+            result.setByteBuffer("csd-" + i, ByteBuffer.wrap(initData.get(i)));
         }
+        setPcmEncoding(format, result);
         setOptionalMediaFormatString(result, MediaFormat.KEY_LANGUAGE, format.language);
         setOptionalMediaFormatInt(result, MediaFormat.KEY_MAX_INPUT_SIZE, format.maxInputSize);
-        setOptionalMediaFormatInt(result, MediaFormat.KEY_PCM_ENCODING, format.pcmEncoding);
         setOptionalMediaFormatInt(result, MediaFormat.KEY_ROTATION, format.rotationDegrees);
         setOptionalMediaFormatInt(result, MediaFormat.KEY_SAMPLE_RATE, format.sampleRate);
         setOptionalMediaFormatInt(
@@ -1460,6 +1458,27 @@ public final class MediaParser {
         //    format.metadata;
         //    format.stereoMode;
         return result;
+    }
+
+    private static void setPcmEncoding(Format format, MediaFormat result) {
+        int exoPcmEncoding = format.pcmEncoding;
+        setOptionalMediaFormatInt(result, "exo-pcm-encoding", format.pcmEncoding);
+        int mediaFormatPcmEncoding;
+        switch (exoPcmEncoding) {
+            case C.ENCODING_PCM_8BIT:
+                mediaFormatPcmEncoding = AudioFormat.ENCODING_PCM_8BIT;
+                break;
+            case C.ENCODING_PCM_16BIT:
+                mediaFormatPcmEncoding = AudioFormat.ENCODING_PCM_16BIT;
+                break;
+            case C.ENCODING_PCM_FLOAT:
+                mediaFormatPcmEncoding = AudioFormat.ENCODING_PCM_FLOAT;
+                break;
+            default:
+                // No matching value. Do nothing.
+                return;
+        }
+        result.setInteger(MediaFormat.KEY_PCM_ENCODING, mediaFormatPcmEncoding);
     }
 
     private static void setOptionalMediaFormatInt(MediaFormat mediaFormat, String key, int value) {
