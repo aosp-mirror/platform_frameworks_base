@@ -59,6 +59,8 @@ interface IMediaRouterService {
 
     void requestCreateSessionWithRouter2(IMediaRouter2 router, int requestId,
             in MediaRoute2Info route, in @nullable Bundle sessionHints);
+    void notifySessionHintsForCreatingSession(IMediaRouter2 router, long uniqueRequestId,
+                in MediaRoute2Info route, in @nullable Bundle sessionHints);
     void selectRouteWithRouter2(IMediaRouter2 router, String sessionId, in MediaRoute2Info route);
     void deselectRouteWithRouter2(IMediaRouter2 router, String sessionId, in MediaRoute2Info route);
     void transferToRouteWithRouter2(IMediaRouter2 router, String sessionId,
