@@ -2,12 +2,14 @@ package com.android.systemui.statusbar.policy;
 
 import static junit.framework.Assert.assertEquals;
 
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.content.Intent;
+import android.net.ConnectivityManager;
 import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiInfo;
@@ -169,6 +171,32 @@ public class NetworkControllerWifiTest extends NetworkControllerBaseTest {
         setWifiLevel(testLevel);
         setConnectivityViaCallback(NetworkCapabilities.TRANSPORT_WIFI, true, true);
         verifyLastWifiIcon(true, WifiIcons.WIFI_SIGNAL_STRENGTH[1][testLevel]);
+    }
+
+    @Test
+    public void testFetchInitialData() {
+        mNetworkController.mWifiSignalController.fetchInitialState();
+        Mockito.verify(mMockWm).getWifiState();
+        Mockito.verify(mMockCm).getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+    }
+
+    @Test
+    public void testFetchInitialData_correctValues() {
+        String testSsid = "TEST";
+
+        when(mMockWm.getWifiState()).thenReturn(WifiManager.WIFI_STATE_ENABLED);
+        NetworkInfo networkInfo = mock(NetworkInfo.class);
+        when(networkInfo.isConnected()).thenReturn(true);
+        when(mMockCm.getNetworkInfo(ConnectivityManager.TYPE_WIFI)).thenReturn(networkInfo);
+        WifiInfo wifiInfo = mock(WifiInfo.class);
+        when(wifiInfo.getSSID()).thenReturn(testSsid);
+        when(mMockWm.getConnectionInfo()).thenReturn(wifiInfo);
+
+        mNetworkController.mWifiSignalController.fetchInitialState();
+
+        assertTrue(mNetworkController.mWifiSignalController.mCurrentState.enabled);
+        assertTrue(mNetworkController.mWifiSignalController.mCurrentState.connected);
+        assertEquals(testSsid, mNetworkController.mWifiSignalController.mCurrentState.ssid);
     }
 
     protected void setWifiActivity(int activity) {
