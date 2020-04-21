@@ -21,7 +21,6 @@ import static android.content.pm.LauncherApps.ShortcutQuery.FLAG_MATCH_DYNAMIC;
 import static android.content.pm.LauncherApps.ShortcutQuery.FLAG_MATCH_PINNED;
 
 import android.annotation.NonNull;
-import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.LauncherApps;
 import android.content.pm.ShortcutInfo;
@@ -41,8 +40,17 @@ import java.util.List;
 /**
  * Helper for querying shortcuts.
  */
-class ShortcutHelper {
+public class ShortcutHelper {
     private static final String TAG = "ShortcutHelper";
+
+    private static final IntentFilter SHARING_FILTER = new IntentFilter();
+    static {
+        try {
+            SHARING_FILTER.addDataType("*/*");
+        } catch (IntentFilter.MalformedMimeTypeException e) {
+            Slog.e(TAG, "Bad mime type", e);
+        }
+    }
 
     /**
      * Listener to call when a shortcut we're tracking has been removed.
@@ -54,7 +62,6 @@ class ShortcutHelper {
     private LauncherApps mLauncherAppsService;
     private ShortcutListener mShortcutListener;
     private ShortcutServiceInternal mShortcutServiceInternal;
-    private IntentFilter mSharingFilter;
 
     // Key: packageName Value: <shortcutId, notifId>
     private HashMap<String, HashMap<String, String>> mActiveShortcutBubbles = new HashMap<>();
@@ -122,12 +129,6 @@ class ShortcutHelper {
             ShortcutServiceInternal shortcutServiceInternal) {
         mLauncherAppsService = launcherApps;
         mShortcutListener = listener;
-        mSharingFilter = new IntentFilter();
-        try {
-            mSharingFilter.addDataType("*/*");
-        } catch (IntentFilter.MalformedMimeTypeException e) {
-            Slog.e(TAG, "Bad mime type", e);
-        }
         mShortcutServiceInternal = shortcutServiceInternal;
     }
 
@@ -142,7 +143,21 @@ class ShortcutHelper {
     }
 
     /**
-     * Only returns shortcut info if it's found and if it's {@link ShortcutInfo#isLongLived()}.
+     * Returns whether the given shortcut info is a conversation shortcut.
+     */
+    public static boolean isConversationShortcut(
+            ShortcutInfo shortcutInfo, ShortcutServiceInternal mShortcutServiceInternal,
+            int callingUserId) {
+        if (shortcutInfo == null || !shortcutInfo.isLongLived() || !shortcutInfo.isEnabled()) {
+            return false;
+        }
+        return mShortcutServiceInternal.isSharingShortcut(callingUserId, "android",
+                shortcutInfo.getPackage(), shortcutInfo.getId(), shortcutInfo.getUserId(),
+                SHARING_FILTER);
+    }
+
+    /**
+     * Only returns shortcut info if it's found and if it's a conversation shortcut.
      */
     ShortcutInfo getValidShortcutInfo(String shortcutId, String packageName, UserHandle user) {
         if (mLauncherAppsService == null) {
@@ -161,11 +176,7 @@ class ShortcutHelper {
             ShortcutInfo info = shortcuts != null && shortcuts.size() > 0
                     ? shortcuts.get(0)
                     : null;
-            if (info == null || !info.isLongLived() || !info.isEnabled()) {
-                return null;
-            }
-            if (mShortcutServiceInternal.isSharingShortcut(user.getIdentifier(),
-                    "android", packageName, shortcutId, user.getIdentifier(), mSharingFilter)) {
+            if (isConversationShortcut(info, mShortcutServiceInternal, user.getIdentifier())) {
                 return info;
             }
             return null;
