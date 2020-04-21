@@ -42,21 +42,27 @@ public final class UinputBridge {
     /** Opens a gamepad - will support gamepad key and axis sending */
     private static native long nativeGamepadOpen(String name, String uniqueId);
 
-    /** Marks the specified key up/down for a gamepad */
-    private static native void nativeSendGamepadKey(long ptr, int keyIndex, boolean down);
+    /**
+     * Marks the specified key up/down for a gamepad.
+     *
+     *  @param keyCode - a code like BUTTON_MODE, BUTTON_A, BUTTON_B, ...
+     */
+    private static native void nativeSendGamepadKey(long ptr, int keyCode, boolean down);
 
     /**
-     * Gamepads pre-define the following axes:
-     *   - Left joystick X, axis == ABS_X == 0, range [0, 254]
-     *   - Left joystick Y, axis == ABS_Y == 1, range [0, 254]
-     *   - Right joystick X, axis == ABS_RX == 3, range [0, 254]
-     *   - Right joystick Y, axis == ABS_RY == 4, range [0, 254]
-     *   - Left trigger, axis == ABS_Z == 2, range [0, 254]
-     *   - Right trigger, axis == ABS_RZ == 5, range [0, 254]
-     *   - DPad X, axis == ABS_HAT0X == 0x10, range [-1, 1]
-     *   - DPad Y, axis == ABS_HAT0Y == 0x11, range [-1, 1]
+     * Send an axis value.
+     *
+     * Available axes are:
+     *  <li> Left joystick: AXIS_X, AXIS_Y
+     *  <li> Right joystick: AXIS_Z, AXIS_RZ
+     *  <li> Analog triggers: AXIS_LTRIGGER, AXIS_RTRIGGER
+     *  <li> DPad: AXIS_HAT_X, AXIS_HAT_Y
+     *
+     * @param axis is a MotionEvent.AXIS_* value.
+     * @param value is a value between -1 and 1 (inclusive)
+     *
      */
-    private static native void nativeSendGamepadAxisValue(long ptr, int axis, int value);
+    private static native void nativeSendGamepadAxisValue(long ptr, int axis, float value);
 
     public UinputBridge(IBinder token, String name, int width, int height, int maxPointers)
                         throws IOException {
@@ -163,26 +169,19 @@ public final class UinputBridge {
      *  @param keyIndex - the index of the w3-spec key
      *  @param down - is the key pressed ?
      */
-    public void sendGamepadKey(IBinder token, int keyIndex, boolean down) {
+    public void sendGamepadKey(IBinder token, int keyCode, boolean down) {
         if (isTokenValid(token)) {
-            nativeSendGamepadKey(mPtr, keyIndex, down);
+            nativeSendGamepadKey(mPtr, keyCode, down);
         }
     }
 
-    /** Send a gamepad axis value.
-     *   - Left joystick X, axis == ABS_X == 0, range [0, 254]
-     *   - Left joystick Y, axis == ABS_Y == 1, range [0, 254]
-     *   - Right joystick X, axis == ABS_RX == 3, range [0, 254]
-     *   - Right joystick Y, axis == ABS_RY == 4, range [0, 254]
-     *   - Left trigger, axis == ABS_Z == 2, range [0, 254]
-     *   - Right trigger, axis == ABS_RZ == 5, range [0, 254]
-     *   - DPad X, axis == ABS_HAT0X == 0x10, range [-1, 1]
-     *   - DPad Y, axis == ABS_HAT0Y == 0x11, range [-1, 1]
+    /**
+     * Send a gamepad axis value.
      *
-     * @param axis is the axis index
-     * @param value is the value to set for that axis
+     * @param axis is the axis code (MotionEvent.AXIS_*)
+     * @param value is the value to set for that axis in [-1, 1]
      */
-    public void sendGamepadAxisValue(IBinder token, int axis, int value) {
+    public void sendGamepadAxisValue(IBinder token, int axis, float value) {
         if (isTokenValid(token)) {
             nativeSendGamepadAxisValue(mPtr, axis, value);
         }
