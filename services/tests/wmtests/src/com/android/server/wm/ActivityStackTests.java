@@ -1196,7 +1196,7 @@ public class ActivityStackTests extends ActivityTestsBase {
         mDefaultTaskDisplayArea.registerStackOrderChangedListener(listener);
         try {
             mStack.mReparenting = true;
-            mDefaultTaskDisplayArea.addStack(mStack, 0);
+            mDefaultTaskDisplayArea.addChild(mStack, 0);
         } finally {
             mDefaultTaskDisplayArea.unregisterStackOrderChangedListener(listener);
         }
