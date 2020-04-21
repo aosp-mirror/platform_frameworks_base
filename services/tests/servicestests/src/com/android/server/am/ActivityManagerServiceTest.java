@@ -45,6 +45,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -54,9 +56,11 @@ import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.app.IApplicationThread;
 import android.app.IUidObserver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -70,6 +74,7 @@ import androidx.test.filters.FlakyTest;
 import androidx.test.filters.MediumTest;
 import androidx.test.filters.SmallTest;
 
+import com.android.server.LocalServices;
 import com.android.server.am.ProcessList.IsolatedUidRange;
 import com.android.server.am.ProcessList.IsolatedUidRangeAllocator;
 import com.android.server.appop.AppOpsService;
@@ -77,6 +82,7 @@ import com.android.server.wm.ActivityTaskManagerService;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -114,6 +120,18 @@ public class ActivityManagerServiceTest {
         UidRecord.CHANGE_IDLE,
         UidRecord.CHANGE_ACTIVE
     };
+
+    private static PackageManagerInternal sPackageManagerInternal;
+
+    @BeforeClass
+    public static void setUpOnce() {
+        sPackageManagerInternal = mock(PackageManagerInternal.class);
+        doReturn(new ComponentName("", "")).when(sPackageManagerInternal)
+                .getSystemUiServiceComponent();
+        // Remove stale instance of PackageManagerInternal if there is any
+        LocalServices.removeServiceForTest(PackageManagerInternal.class);
+        LocalServices.addService(PackageManagerInternal.class, sPackageManagerInternal);
+    }
 
     @Rule public ServiceThreadRule mServiceThreadRule = new ServiceThreadRule();
 
@@ -258,8 +276,11 @@ public class ActivityManagerServiceTest {
         uidRec.hasInternetPermission = true;
         mAms.mProcessList.mActiveUids.put(uid, uidRec);
 
-        final ProcessRecord appRec = new ProcessRecord(mAms, new ApplicationInfo(), TAG, uid);
-        appRec.thread = Mockito.mock(IApplicationThread.class);
+        ApplicationInfo info = new ApplicationInfo();
+        info.packageName = "";
+
+        final ProcessRecord appRec = new ProcessRecord(mAms, info, TAG, uid);
+        appRec.thread = mock(IApplicationThread.class);
         mAms.mProcessList.mLruProcesses.add(appRec);
 
         return uidRec;
@@ -497,7 +518,7 @@ public class ActivityManagerServiceTest {
         };
         final IUidObserver[] observers = new IUidObserver.Stub[changesToObserve.length];
         for (int i = 0; i < observers.length; ++i) {
-            observers[i] = Mockito.mock(IUidObserver.Stub.class);
+            observers[i] = mock(IUidObserver.Stub.class);
             when(observers[i].asBinder()).thenReturn((IBinder) observers[i]);
             mAms.registerUidObserver(observers[i], changesToObserve[i] /* which */,
                     ActivityManager.PROCESS_STATE_UNKNOWN /* cutpoint */, null /* caller */);
@@ -610,7 +631,7 @@ public class ActivityManagerServiceTest {
      */
     @Test
     public void testDispatchUidChanges_procStateCutpoint() throws RemoteException {
-        final IUidObserver observer = Mockito.mock(IUidObserver.Stub.class);
+        final IUidObserver observer = mock(IUidObserver.Stub.class);
 
         when(observer.asBinder()).thenReturn((IBinder) observer);
         mAms.registerUidObserver(observer, ActivityManager.UID_OBSERVER_PROCSTATE /* which */,
@@ -704,7 +725,7 @@ public class ActivityManagerServiceTest {
         assertEquals("No observers registered, so validateUids should be empty",
                 0, mAms.mValidateUids.size());
 
-        final IUidObserver observer = Mockito.mock(IUidObserver.Stub.class);
+        final IUidObserver observer = mock(IUidObserver.Stub.class);
         when(observer.asBinder()).thenReturn((IBinder) observer);
         mAms.registerUidObserver(observer, 0, 0, null);
         // Verify that when observers are registered, then validateUids is correctly updated.
