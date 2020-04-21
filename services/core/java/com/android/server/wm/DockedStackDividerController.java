@@ -45,6 +45,11 @@ public class DockedStackDividerController {
 
     void setTouchRegion(Rect touchRegion) {
         mTouchRegion.set(touchRegion);
+        // We need to report touchable region changes to accessibility.
+        if (mDisplayContent.mWmService.mAccessibilityController != null) {
+            mDisplayContent.mWmService.mAccessibilityController.onSomeWindowResizedOrMovedLocked(
+                    mDisplayContent.getDisplayId());
+        }
     }
 
     void getTouchRegion(Rect outRegion) {
