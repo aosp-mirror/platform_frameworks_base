@@ -61,6 +61,18 @@ public class LogModule {
         return buffer;
     }
 
+    /** Provides a logging buffer for all logs related to the data layer of notifications. */
+    @Provides
+    @Singleton
+    @NotifInteractionLog
+    public static LogBuffer provideNotifInteractionLogBuffer(
+            LogcatEchoTracker echoTracker,
+            DumpManager dumpManager) {
+        LogBuffer buffer = new LogBuffer("NotifInteractionLog", 50, 10, echoTracker);
+        buffer.attach(dumpManager);
+        return buffer;
+    }
+
     /** Provides a logging buffer for all logs related to Quick Settings. */
     @Provides
     @Singleton
