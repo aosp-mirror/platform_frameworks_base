@@ -45,7 +45,7 @@
           systemui:intent="intent:#Intent;action=android.car.intent.action.TOGGLE_HVAC_CONTROLS;end"
           />
 
-      <com.android.systemui.statusbar.hvac.AnimatedTemperatureView
+      <com.android.systemui.car.hvac.AnimatedTemperatureView
           android:id="@+id/lefttext"
           android:layout_width="wrap_content"
           android:layout_height="match_parent"
@@ -123,7 +123,7 @@
           systemui:intent="intent:#Intent;action=android.car.intent.action.TOGGLE_HVAC_CONTROLS;end"
           />
 
-      <com.android.systemui.statusbar.hvac.AnimatedTemperatureView
+      <com.android.systemui.car.hvac.AnimatedTemperatureView
           android:id="@+id/righttext"
           android:layout_width="wrap_content"
           android:layout_height="match_parent"
