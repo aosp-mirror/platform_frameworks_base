@@ -2301,11 +2301,11 @@ public class Notification implements Parcelable
 
         priority = parcel.readInt();
 
-        category = parcel.readString();
+        category = parcel.readString8();
 
-        mGroupKey = parcel.readString();
+        mGroupKey = parcel.readString8();
 
-        mSortKey = parcel.readString();
+        mSortKey = parcel.readString8();
 
         extras = Bundle.setDefusable(parcel.readBundle(), true); // may be null
         fixDuplicateExtras();
@@ -2329,12 +2329,12 @@ public class Notification implements Parcelable
         color = parcel.readInt();
 
         if (parcel.readInt() != 0) {
-            mChannelId = parcel.readString();
+            mChannelId = parcel.readString8();
         }
         mTimeout = parcel.readLong();
 
         if (parcel.readInt() != 0) {
-            mShortcutId = parcel.readString();
+            mShortcutId = parcel.readString8();
         }
 
         if (parcel.readInt() != 0) {
@@ -2766,11 +2766,11 @@ public class Notification implements Parcelable
 
         parcel.writeInt(priority);
 
-        parcel.writeString(category);
+        parcel.writeString8(category);
 
-        parcel.writeString(mGroupKey);
+        parcel.writeString8(mGroupKey);
 
-        parcel.writeString(mSortKey);
+        parcel.writeString8(mSortKey);
 
         parcel.writeBundle(extras); // null ok
 
@@ -2803,7 +2803,7 @@ public class Notification implements Parcelable
 
         if (mChannelId != null) {
             parcel.writeInt(1);
-            parcel.writeString(mChannelId);
+            parcel.writeString8(mChannelId);
         } else {
             parcel.writeInt(0);
         }
@@ -2811,7 +2811,7 @@ public class Notification implements Parcelable
 
         if (mShortcutId != null) {
             parcel.writeInt(1);
-            parcel.writeString(mShortcutId);
+            parcel.writeString8(mShortcutId);
         } else {
             parcel.writeInt(0);
         }
@@ -8873,7 +8873,7 @@ public class Notification implements Parcelable
             }
             mDesiredHeightResId = in.readInt();
             if (in.readInt() != 0) {
-                mShortcutId = in.readString();
+                mShortcutId = in.readString8();
             }
         }
 
@@ -9029,7 +9029,7 @@ public class Notification implements Parcelable
             out.writeInt(mDesiredHeightResId);
             out.writeInt(TextUtils.isEmpty(mShortcutId) ? 0 : 1);
             if (!TextUtils.isEmpty(mShortcutId)) {
-                out.writeString(mShortcutId);
+                out.writeString8(mShortcutId);
             }
         }
 
