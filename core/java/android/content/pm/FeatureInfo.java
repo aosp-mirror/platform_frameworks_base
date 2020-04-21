@@ -108,7 +108,7 @@ public class FeatureInfo implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int parcelableFlags) {
-        dest.writeString(name);
+        dest.writeString8(name);
         dest.writeInt(version);
         dest.writeInt(reqGlEsVersion);
         dest.writeInt(flags);
@@ -138,7 +138,7 @@ public class FeatureInfo implements Parcelable {
     };
 
     private FeatureInfo(Parcel source) {
-        name = source.readString();
+        name = source.readString8();
         version = source.readInt();
         reqGlEsVersion = source.readInt();
         flags = source.readInt();
