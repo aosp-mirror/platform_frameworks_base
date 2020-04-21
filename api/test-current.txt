@@ -575,6 +575,7 @@ package android.app.admin {
     method public java.util.List<java.lang.String> getOwnerInstalledCaCerts(@NonNull android.os.UserHandle);
     method public boolean isCurrentInputMethodSetByOwner();
     method public boolean isDeviceManaged();
+    method public boolean isFactoryResetProtectionPolicySupported();
     field public static final String ACCOUNT_FEATURE_DEVICE_OR_PROFILE_OWNER_ALLOWED = "android.account.DEVICE_OR_PROFILE_OWNER_ALLOWED";
     field public static final String ACCOUNT_FEATURE_DEVICE_OR_PROFILE_OWNER_DISALLOWED = "android.account.DEVICE_OR_PROFILE_OWNER_DISALLOWED";
     field public static final String ACTION_DATA_SHARING_RESTRICTION_APPLIED = "android.app.action.DATA_SHARING_RESTRICTION_APPLIED";

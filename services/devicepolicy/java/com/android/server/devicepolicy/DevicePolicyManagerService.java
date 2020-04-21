@@ -7252,13 +7252,23 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         return admin != null ? admin.mFactoryResetProtectionPolicy : null;
     }
 
-    private int getFrpManagementAgentUidOrThrow() {
+    private int getFrpManagementAgentUid() {
         PersistentDataBlockManagerInternal pdb = mInjector.getPersistentDataBlockManagerInternal();
-        if ((pdb == null) || (pdb.getAllowedUid() == -1)) {
+        return pdb != null ? pdb.getAllowedUid() : -1;
+    }
+
+    private int getFrpManagementAgentUidOrThrow() {
+        int uid = getFrpManagementAgentUid();
+        if (uid == -1) {
             throw new UnsupportedOperationException(
                     "The persistent data block service is not supported on this device");
         }
-        return pdb.getAllowedUid();
+        return uid;
+    }
+
+    @Override
+    public boolean isFactoryResetProtectionPolicySupported() {
+        return getFrpManagementAgentUid() != -1;
     }
 
     @Override

@@ -10953,6 +10953,22 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Returns whether factory reset protection policy is supported on the device.
+     *
+     * @return {@code true} if the device support factory reset protection policy.
+     *
+     * @hide
+     */
+    @TestApi
+    public boolean isFactoryResetProtectionPolicySupported() {
+        try {
+            return mService.isFactoryResetProtectionPolicySupported();
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Called by the device owner or profile owner to clear application user data of a given
      * package. The behaviour of this is equivalent to the target application calling
      * {@link android.app.ActivityManager#clearApplicationUserData()}.

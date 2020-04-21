@@ -108,6 +108,7 @@ interface IDevicePolicyManager {
 
     void setFactoryResetProtectionPolicy(in ComponentName who, in FactoryResetProtectionPolicy policy);
     FactoryResetProtectionPolicy getFactoryResetProtectionPolicy(in ComponentName who);
+    boolean isFactoryResetProtectionPolicySupported();
 
     ComponentName setGlobalProxy(in ComponentName admin, String proxySpec, String exclusionList);
     ComponentName getGlobalProxyAdmin(int userHandle);
