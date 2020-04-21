@@ -5889,6 +5889,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     private void processLinkPropertiesFromAgent(NetworkAgentInfo nai, LinkProperties lp) {
         lp.ensureDirectlyConnectedRoutes();
+        nai.clatd.setNat64PrefixFromRa(lp.getNat64Prefix());
     }
 
     private void updateLinkProperties(NetworkAgentInfo networkAgent, LinkProperties newLp,
