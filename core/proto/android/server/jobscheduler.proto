@@ -308,8 +308,10 @@ message ConstantsProto {
         // Treat two distinct {@link TimingSession}s as the same if they start and end within this
         // amount of time of each other.
         optional int64 timing_session_coalescing_duration_ms = 18;
+        // The minimum amount of time between quota check alarms.
+        optional int64 min_quota_check_delay_ms = 23;
 
-        // Next tag: 23
+        // Next tag: 24
     }
     optional QuotaController quota_controller = 24;
 
