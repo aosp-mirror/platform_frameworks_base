@@ -67,7 +67,7 @@ public class BrightnessUtils {
 
     /**
      * Version of {@link #convertGammaToLinear} that takes and returns float values.
-     * TODO: brightnessfloat Merge with above method later.
+     * TODO(flc): refactor Android Auto to use float version
      *
      * @param val The slider value.
      * @param min The minimum acceptable value for the setting.
@@ -83,9 +83,13 @@ public class BrightnessUtils {
             ret = MathUtils.exp((normalizedVal - C) / A) + B;
         }
 
-        // HLG is normalized to the range [0, 12], so we need to re-normalize to the range [0, 1]
+        // HLG is normalized to the range [0, 12], ensure that value is within that range,
+        // it shouldn't be out of bounds.
+        final float normalizedRet = MathUtils.constrain(ret, 0, 12);
+
+        // Re-normalize to the range [0, 1]
         // in order to derive the correct setting value.
-        return MathUtils.lerp(min, max, ret / 12);
+        return MathUtils.lerp(min, max, normalizedRet / 12);
     }
 
     /**
@@ -111,16 +115,7 @@ public class BrightnessUtils {
      * @return The corresponding slider value
      */
     public static final int convertLinearToGamma(int val, int min, int max) {
-        // For some reason, HLG normalizes to the range [0, 12] rather than [0, 1]
-        final float normalizedVal = MathUtils.norm(min, max, val) * 12;
-        final float ret;
-        if (normalizedVal <= 1f) {
-            ret = MathUtils.sqrt(normalizedVal) * R;
-        } else {
-            ret = A * MathUtils.log(normalizedVal - B) + C;
-        }
-
-        return Math.round(MathUtils.lerp(GAMMA_SPACE_MIN, GAMMA_SPACE_MAX, ret));
+        return convertLinearToGammaFloat((float) val, (float) min, (float) max);
     }
 
     /**
