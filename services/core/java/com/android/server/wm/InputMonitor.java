@@ -487,7 +487,8 @@ final class InputMonitor {
                     || w.cantReceiveTouchInput()) {
                 if (w.mWinAnimator.hasSurface()) {
                     mInputTransaction.setInputWindowInfo(
-                            w.mWinAnimator.mSurfaceController.mSurfaceControl, mInvalidInputWindow);
+                        w.mWinAnimator.mSurfaceController.getClientViewRootSurface(),
+                        mInvalidInputWindow);
                 }
                 // Skip this window because it cannot possibly receive input.
                 return;
@@ -560,7 +561,8 @@ final class InputMonitor {
 
             if (w.mWinAnimator.hasSurface()) {
                 mInputTransaction.setInputWindowInfo(
-                        w.mWinAnimator.mSurfaceController.mSurfaceControl, inputWindowHandle);
+                    w.mWinAnimator.mSurfaceController.getClientViewRootSurface(),
+                    inputWindowHandle);
             }
         }
     }
