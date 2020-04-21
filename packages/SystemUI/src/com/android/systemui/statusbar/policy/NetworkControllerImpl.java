@@ -357,7 +357,18 @@ public class NetworkControllerImpl extends BroadcastReceiver
         mBroadcastDispatcher.registerReceiverWithHandler(this, filter, mReceiverHandler);
         mListening = true;
 
+        // Initial setup of connectivity. Handled as if we had received a sticky broadcast of
+        // ConnectivityManager.CONNECTIVITY_ACTION or ConnectivityManager.INET_CONDITION_ACTION.
+        mReceiverHandler.post(this::updateConnectivity);
+
+        // Initial setup of WifiSignalController. Handled as if we had received a sticky broadcast
+        // of WifiManager.WIFI_STATE_CHANGED_ACTION or WifiManager.NETWORK_STATE_CHANGED_ACTION
+        mReceiverHandler.post(mWifiSignalController::fetchInitialState);
         updateMobileControllers();
+
+        // Initial setup of emergency information. Handled as if we had received a sticky broadcast
+        // of TelephonyManager.ACTION_DEFAULT_VOICE_SUBSCRIPTION_CHANGED.
+        mReceiverHandler.post(this::recalculateEmergency);
     }
 
     private void unregisterListeners() {
