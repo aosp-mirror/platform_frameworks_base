@@ -307,7 +307,9 @@ public final class Parcel {
     @FastNative
     private static native void nativeWriteDouble(long nativePtr, double val);
     @FastNative
-    static native void nativeWriteString(long nativePtr, String val);
+    private static native void nativeWriteString8(long nativePtr, String val);
+    @FastNative
+    private static native void nativeWriteString16(long nativePtr, String val);
     @FastNative
     private static native void nativeWriteStrongBinder(long nativePtr, IBinder val);
     @FastNative
@@ -325,7 +327,9 @@ public final class Parcel {
     @CriticalNative
     private static native double nativeReadDouble(long nativePtr);
     @FastNative
-    static native String nativeReadString(long nativePtr);
+    private static native String nativeReadString8(long nativePtr);
+    @FastNative
+    private static native String nativeReadString16(long nativePtr);
     @FastNative
     private static native IBinder nativeReadStrongBinder(long nativePtr);
     @FastNative
@@ -386,8 +390,12 @@ public final class Parcel {
          * must use {@link #writeStringNoHelper(String)} to avoid
          * infinity recursive calls.
          */
-        public void writeString(Parcel p, String s) {
-            nativeWriteString(p.mNativePtr, s);
+        public void writeString8(Parcel p, String s) {
+            p.writeString8NoHelper(s);
+        }
+
+        public void writeString16(Parcel p, String s) {
+            p.writeString16NoHelper(s);
         }
 
         /**
@@ -395,8 +403,12 @@ public final class Parcel {
          * must use {@link #readStringNoHelper()} to avoid
          * infinity recursive calls.
          */
-        public String readString(Parcel p) {
-            return nativeReadString(p.mNativePtr);
+        public String readString8(Parcel p) {
+            return p.readString8NoHelper();
+        }
+
+        public String readString16(Parcel p) {
+            return p.readString16NoHelper();
         }
     }
 
@@ -759,7 +771,17 @@ public final class Parcel {
      * growing dataCapacity() if needed.
      */
     public final void writeString(@Nullable String val) {
-        mReadWriteHelper.writeString(this, val);
+        writeString16(val);
+    }
+
+    /** {@hide} */
+    public final void writeString8(@Nullable String val) {
+        mReadWriteHelper.writeString8(this, val);
+    }
+
+    /** {@hide} */
+    public final void writeString16(@Nullable String val) {
+        mReadWriteHelper.writeString16(this, val);
     }
 
     /**
@@ -770,7 +792,17 @@ public final class Parcel {
      * @hide
      */
     public void writeStringNoHelper(@Nullable String val) {
-        nativeWriteString(mNativePtr, val);
+        writeString16NoHelper(val);
+    }
+
+    /** {@hide} */
+    public void writeString8NoHelper(@Nullable String val) {
+        nativeWriteString8(mNativePtr, val);
+    }
+
+    /** {@hide} */
+    public void writeString16NoHelper(@Nullable String val) {
+        nativeWriteString16(mNativePtr, val);
     }
 
     /**
@@ -2337,7 +2369,17 @@ public final class Parcel {
      */
     @Nullable
     public final String readString() {
-        return mReadWriteHelper.readString(this);
+        return readString16();
+    }
+
+    /** {@hide} */
+    public final @Nullable String readString8() {
+        return mReadWriteHelper.readString8(this);
+    }
+
+    /** {@hide} */
+    public final @Nullable String readString16() {
+        return mReadWriteHelper.readString16(this);
     }
 
     /**
@@ -2347,9 +2389,18 @@ public final class Parcel {
      *
      * @hide
      */
-    @Nullable
-    public String readStringNoHelper() {
-        return nativeReadString(mNativePtr);
+    public @Nullable String readStringNoHelper() {
+        return readString16NoHelper();
+    }
+
+    /** {@hide} */
+    public @Nullable String readString8NoHelper() {
+        return nativeReadString8(mNativePtr);
+    }
+
+    /** {@hide} */
+    public @Nullable String readString16NoHelper() {
+        return nativeReadString16(mNativePtr);
     }
 
     /**
