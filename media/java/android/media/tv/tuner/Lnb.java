@@ -143,9 +143,12 @@ public class Lnb implements AutoCloseable {
      */
     public static final int EVENT_TYPE_LNB_OVERLOAD = Constants.LnbEventType.LNB_OVERLOAD;
 
+    private static final String TAG = "Lnb";
+
     int mId;
     LnbCallback mCallback;
     Executor mExecutor;
+    Tuner mTuner;
 
 
     private native int nativeSetVoltage(int voltage);
@@ -156,13 +159,17 @@ public class Lnb implements AutoCloseable {
 
     private long mNativeContext;
 
+    private Boolean mIsClosed = false;
+    private final Object mLock = new Object();
+
     private Lnb(int id) {
         mId = id;
     }
 
-    void setCallback(Executor executor, @Nullable LnbCallback callback) {
+    void setCallback(Executor executor, @Nullable LnbCallback callback, Tuner tuner) {
         mCallback = callback;
         mExecutor = executor;
+        mTuner = tuner;
     }
 
     private void onEvent(int eventType) {
@@ -177,6 +184,12 @@ public class Lnb implements AutoCloseable {
         }
     }
 
+    /* package */ boolean isClosed() {
+        synchronized (mLock) {
+            return mIsClosed;
+        }
+    }
+
     /**
      * Sets the LNB's power voltage.
      *
@@ -185,7 +198,10 @@ public class Lnb implements AutoCloseable {
      */
     @Result
     public int setVoltage(@Voltage int voltage) {
-        return nativeSetVoltage(voltage);
+        synchronized (mLock) {
+            TunerUtils.checkResourceState(TAG, mIsClosed);
+            return nativeSetVoltage(voltage);
+        }
     }
 
     /**
@@ -196,7 +212,10 @@ public class Lnb implements AutoCloseable {
      */
     @Result
     public int setTone(@Tone int tone) {
-        return nativeSetTone(tone);
+        synchronized (mLock) {
+            TunerUtils.checkResourceState(TAG, mIsClosed);
+            return nativeSetTone(tone);
+        }
     }
 
     /**
@@ -207,7 +226,10 @@ public class Lnb implements AutoCloseable {
      */
     @Result
     public int setSatellitePosition(@Position int position) {
-        return nativeSetSatellitePosition(position);
+        synchronized (mLock) {
+            TunerUtils.checkResourceState(TAG, mIsClosed);
+            return nativeSetSatellitePosition(position);
+        }
     }
 
     /**
@@ -222,16 +244,27 @@ public class Lnb implements AutoCloseable {
      */
     @Result
     public int sendDiseqcMessage(@NonNull byte[] message) {
-        return nativeSendDiseqcMessage(message);
+        synchronized (mLock) {
+            TunerUtils.checkResourceState(TAG, mIsClosed);
+            return nativeSendDiseqcMessage(message);
+        }
     }
 
     /**
      * Releases the LNB instance.
      */
     public void close() {
-        int res = nativeClose();
-        if (res != Tuner.RESULT_SUCCESS) {
-            TunerUtils.throwExceptionForResult(res, "Failed to close LNB");
+        synchronized (mLock) {
+            if (mIsClosed) {
+                return;
+            }
+            int res = nativeClose();
+            if (res != Tuner.RESULT_SUCCESS) {
+                TunerUtils.throwExceptionForResult(res, "Failed to close LNB");
+            } else {
+                mIsClosed = true;
+                mTuner.releaseLnb();
+            }
         }
     }
 }

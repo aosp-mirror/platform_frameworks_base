@@ -254,8 +254,8 @@ TEST(StatsdStatsTest, TestAtomLog) {
 TEST(StatsdStatsTest, TestNonPlatformAtomLog) {
     StatsdStats stats;
     time_t now = time(nullptr);
-    int newAtom1 = android::util::kMaxPushedAtomId + 1;
-    int newAtom2 = android::util::kMaxPushedAtomId + 2;
+    int newAtom1 = StatsdStats::kMaxPushedAtomId + 1;
+    int newAtom2 = StatsdStats::kMaxPushedAtomId + 2;
 
     stats.noteAtomLogged(newAtom1, now + 1);
     stats.noteAtomLogged(newAtom1, now + 2);

@@ -2220,7 +2220,6 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                     })
                     .start();
             dismissPanel();
-            dismissOverflow();
             resetOrientation();
         }
 
@@ -2228,7 +2227,6 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             mShowing = false;
             if (mControlsUiController != null) mControlsUiController.hide();
             dismissPanel();
-            dismissOverflow();
             resetOrientation();
             completeDismiss();
         }
@@ -2242,12 +2240,6 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         private void dismissPanel() {
             if (mPanelController != null) {
                 mPanelController.onDismissed();
-            }
-        }
-
-        private void dismissOverflow() {
-            if (mOverflowPopup != null) {
-                mOverflowPopup.dismiss();
             }
         }
 

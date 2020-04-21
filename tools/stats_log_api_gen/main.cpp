@@ -229,7 +229,7 @@ static int run(int argc, char const* const* argv) {
             fprintf(stderr, "Unable to open file for write: %s\n", atomsInfoHeaderFilename.c_str());
             return 1;
         }
-        errorCount = android::stats_log_api_gen::write_atoms_info_header(out, atoms, cppNamespace);
+        errorCount = android::stats_log_api_gen::write_atoms_info_header(out, cppNamespace);
         fclose(out);
     }
 

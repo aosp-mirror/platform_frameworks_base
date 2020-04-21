@@ -3908,11 +3908,16 @@ public class PermissionManagerService extends IPermissionManager.Stub {
      */
     private void updateAllPermissions(@Nullable String volumeUuid, boolean sdkUpdated,
             @NonNull PermissionCallback callback) {
-        final int flags = UPDATE_PERMISSIONS_ALL |
-                (sdkUpdated
-                        ? UPDATE_PERMISSIONS_REPLACE_PKG | UPDATE_PERMISSIONS_REPLACE_ALL
-                        : 0);
-        updatePermissions(null, null, volumeUuid, flags, callback);
+        PackageManager.corkPackageInfoCache();  // Prevent invalidation storm
+        try {
+            final int flags = UPDATE_PERMISSIONS_ALL |
+                    (sdkUpdated
+                            ? UPDATE_PERMISSIONS_REPLACE_PKG | UPDATE_PERMISSIONS_REPLACE_ALL
+                            : 0);
+            updatePermissions(null, null, volumeUuid, flags, callback);
+        } finally {
+            PackageManager.uncorkPackageInfoCache();
+        }
     }
 
     /**
