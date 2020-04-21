@@ -44,6 +44,7 @@ import com.android.systemui.statusbar.phone.BarTransitions.TransitionMode;
 import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.phone.NavigationBarFragment;
 import com.android.systemui.statusbar.phone.NavigationBarView;
+import com.android.systemui.statusbar.phone.NavigationModeController;
 import com.android.systemui.statusbar.policy.BatteryController;
 
 import javax.inject.Inject;
@@ -139,7 +140,8 @@ public class NavigationBarController implements Callbacks {
                     ? Dependency.get(LightBarController.class)
                     : new LightBarController(context,
                             Dependency.get(DarkIconDispatcher.class),
-                            Dependency.get(BatteryController.class));
+                            Dependency.get(BatteryController.class),
+                            Dependency.get(NavigationModeController.class));
             navBar.setLightBarController(lightBarController);
 
             // TODO(b/118592525): to support multi-display, we start to add something which is
