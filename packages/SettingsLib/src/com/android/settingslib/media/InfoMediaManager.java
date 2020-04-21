@@ -17,11 +17,16 @@ package com.android.settingslib.media;
 
 import static android.media.MediaRoute2Info.TYPE_BLUETOOTH_A2DP;
 import static android.media.MediaRoute2Info.TYPE_BUILTIN_SPEAKER;
+import static android.media.MediaRoute2Info.TYPE_DOCK;
 import static android.media.MediaRoute2Info.TYPE_GROUP;
+import static android.media.MediaRoute2Info.TYPE_HDMI;
 import static android.media.MediaRoute2Info.TYPE_HEARING_AID;
 import static android.media.MediaRoute2Info.TYPE_REMOTE_SPEAKER;
 import static android.media.MediaRoute2Info.TYPE_REMOTE_TV;
 import static android.media.MediaRoute2Info.TYPE_UNKNOWN;
+import static android.media.MediaRoute2Info.TYPE_USB_ACCESSORY;
+import static android.media.MediaRoute2Info.TYPE_USB_DEVICE;
+import static android.media.MediaRoute2Info.TYPE_USB_HEADSET;
 import static android.media.MediaRoute2Info.TYPE_WIRED_HEADPHONES;
 import static android.media.MediaRoute2Info.TYPE_WIRED_HEADSET;
 import static android.media.MediaRoute2ProviderService.REASON_UNKNOWN_ERROR;
@@ -339,7 +344,7 @@ public class InfoMediaManager extends MediaManager {
         for (MediaRoute2Info route : mRouterManager.getAllRoutes()) {
             if (DEBUG) {
                 Log.d(TAG, "buildAllRoutes() route : " + route.getName() + ", volume : "
-                        + route.getVolume());
+                        + route.getVolume() + ", type : " + route.getType());
             }
             if (route.isSystemRoute()) {
                 addMediaDevice(route);
@@ -350,13 +355,15 @@ public class InfoMediaManager extends MediaManager {
     private void buildAvailableRoutes() {
         for (MediaRoute2Info route : mRouterManager.getAvailableRoutes(mPackageName)) {
             if (DEBUG) {
-                Log.d(TAG, "buildAvailableRoutes() route : " + route.getName());
+                Log.d(TAG, "buildAvailableRoutes() route : " + route.getName()
+                        + ", type : " + route.getType());
             }
             addMediaDevice(route);
         }
     }
 
-    private void addMediaDevice(MediaRoute2Info route) {
+    @VisibleForTesting
+    void addMediaDevice(MediaRoute2Info route) {
         final int deviceType = route.getType();
         MediaDevice mediaDevice = null;
         switch (deviceType) {
@@ -374,6 +381,11 @@ public class InfoMediaManager extends MediaManager {
                 }
                 break;
             case TYPE_BUILTIN_SPEAKER:
+            case TYPE_USB_DEVICE:
+            case TYPE_USB_HEADSET:
+            case TYPE_USB_ACCESSORY:
+            case TYPE_DOCK:
+            case TYPE_HDMI:
             case TYPE_WIRED_HEADSET:
             case TYPE_WIRED_HEADPHONES:
                 mediaDevice =

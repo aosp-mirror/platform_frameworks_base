@@ -17,11 +17,16 @@ package com.android.settingslib.media;
 
 import static android.media.MediaRoute2Info.TYPE_BLUETOOTH_A2DP;
 import static android.media.MediaRoute2Info.TYPE_BUILTIN_SPEAKER;
+import static android.media.MediaRoute2Info.TYPE_DOCK;
 import static android.media.MediaRoute2Info.TYPE_GROUP;
+import static android.media.MediaRoute2Info.TYPE_HDMI;
 import static android.media.MediaRoute2Info.TYPE_HEARING_AID;
 import static android.media.MediaRoute2Info.TYPE_REMOTE_SPEAKER;
 import static android.media.MediaRoute2Info.TYPE_REMOTE_TV;
 import static android.media.MediaRoute2Info.TYPE_UNKNOWN;
+import static android.media.MediaRoute2Info.TYPE_USB_ACCESSORY;
+import static android.media.MediaRoute2Info.TYPE_USB_DEVICE;
+import static android.media.MediaRoute2Info.TYPE_USB_HEADSET;
 import static android.media.MediaRoute2Info.TYPE_WIRED_HEADPHONES;
 import static android.media.MediaRoute2Info.TYPE_WIRED_HEADSET;
 
@@ -101,6 +106,13 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
             case TYPE_WIRED_HEADSET:
             case TYPE_WIRED_HEADPHONES:
                 mType = MediaDeviceType.TYPE_3POINT5_MM_AUDIO_DEVICE;
+                break;
+            case TYPE_USB_DEVICE:
+            case TYPE_USB_HEADSET:
+            case TYPE_USB_ACCESSORY:
+            case TYPE_DOCK:
+            case TYPE_HDMI:
+                mType = MediaDeviceType.TYPE_USB_C_AUDIO_DEVICE;
                 break;
             case TYPE_HEARING_AID:
             case TYPE_BLUETOOTH_A2DP:

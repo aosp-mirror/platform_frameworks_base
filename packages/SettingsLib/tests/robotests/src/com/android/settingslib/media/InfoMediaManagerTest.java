@@ -16,20 +16,29 @@
 
 package com.android.settingslib.media;
 
+import static android.media.MediaRoute2Info.TYPE_BLUETOOTH_A2DP;
+import static android.media.MediaRoute2Info.TYPE_BUILTIN_SPEAKER;
+import static android.media.MediaRoute2Info.TYPE_REMOTE_SPEAKER;
+import static android.media.MediaRoute2Info.TYPE_USB_DEVICE;
+import static android.media.MediaRoute2Info.TYPE_WIRED_HEADSET;
 import static android.media.MediaRoute2ProviderService.REASON_NETWORK_ERROR;
 import static android.media.MediaRoute2ProviderService.REASON_UNKNOWN_ERROR;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.media.MediaRoute2Info;
 import android.media.MediaRouter2Manager;
 import android.media.RoutingSessionInfo;
 
+import com.android.settingslib.bluetooth.CachedBluetoothDevice;
+import com.android.settingslib.bluetooth.CachedBluetoothDeviceManager;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.settingslib.testutils.shadow.ShadowRouter2Manager;
 
@@ -600,5 +609,42 @@ public class InfoMediaManagerTest {
         assertThat(infoDevice.getId()).isEqualTo(TEST_ID);
         assertThat(mInfoMediaManager.mMediaDevices).hasSize(routes.size());
         verify(mCallback).onConnectedDeviceChanged(null);
+    }
+
+    @Test
+    public void addMediaDevice_verifyDeviceTypeCanCorrespondToMediaDevice() {
+        final MediaRoute2Info route2Info = mock(MediaRoute2Info.class);
+        final CachedBluetoothDeviceManager cachedBluetoothDeviceManager =
+                mock(CachedBluetoothDeviceManager.class);
+        final CachedBluetoothDevice cachedDevice = mock(CachedBluetoothDevice.class);
+
+        when(route2Info.getType()).thenReturn(TYPE_REMOTE_SPEAKER);
+        mInfoMediaManager.addMediaDevice(route2Info);
+        assertThat(mInfoMediaManager.mMediaDevices.get(0) instanceof InfoMediaDevice).isTrue();
+
+        when(route2Info.getType()).thenReturn(TYPE_USB_DEVICE);
+        mInfoMediaManager.mMediaDevices.clear();
+        mInfoMediaManager.addMediaDevice(route2Info);
+        assertThat(mInfoMediaManager.mMediaDevices.get(0) instanceof PhoneMediaDevice).isTrue();
+
+        when(route2Info.getType()).thenReturn(TYPE_WIRED_HEADSET);
+        mInfoMediaManager.mMediaDevices.clear();
+        mInfoMediaManager.addMediaDevice(route2Info);
+        assertThat(mInfoMediaManager.mMediaDevices.get(0) instanceof PhoneMediaDevice).isTrue();
+
+        when(route2Info.getType()).thenReturn(TYPE_BLUETOOTH_A2DP);
+        when(route2Info.getOriginalId()).thenReturn("00:00:00:00:00:00");
+        when(mLocalBluetoothManager.getCachedDeviceManager())
+                .thenReturn(cachedBluetoothDeviceManager);
+        when(cachedBluetoothDeviceManager.findDevice(any(BluetoothDevice.class)))
+                .thenReturn(cachedDevice);
+        mInfoMediaManager.mMediaDevices.clear();
+        mInfoMediaManager.addMediaDevice(route2Info);
+        assertThat(mInfoMediaManager.mMediaDevices.get(0) instanceof BluetoothMediaDevice).isTrue();
+
+        when(route2Info.getType()).thenReturn(TYPE_BUILTIN_SPEAKER);
+        mInfoMediaManager.mMediaDevices.clear();
+        mInfoMediaManager.addMediaDevice(route2Info);
+        assertThat(mInfoMediaManager.mMediaDevices.get(0) instanceof PhoneMediaDevice).isTrue();
     }
 }
