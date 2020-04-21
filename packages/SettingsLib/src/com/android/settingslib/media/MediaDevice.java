@@ -15,6 +15,16 @@
  */
 package com.android.settingslib.media;
 
+import static android.media.MediaRoute2Info.TYPE_BLUETOOTH_A2DP;
+import static android.media.MediaRoute2Info.TYPE_BUILTIN_SPEAKER;
+import static android.media.MediaRoute2Info.TYPE_GROUP;
+import static android.media.MediaRoute2Info.TYPE_HEARING_AID;
+import static android.media.MediaRoute2Info.TYPE_REMOTE_SPEAKER;
+import static android.media.MediaRoute2Info.TYPE_REMOTE_TV;
+import static android.media.MediaRoute2Info.TYPE_UNKNOWN;
+import static android.media.MediaRoute2Info.TYPE_WIRED_HEADPHONES;
+import static android.media.MediaRoute2Info.TYPE_WIRED_HEADSET;
+
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
@@ -38,13 +48,21 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
     private static final String TAG = "MediaDevice";
 
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({MediaDeviceType.TYPE_CAST_DEVICE,
+    @IntDef({MediaDeviceType.TYPE_USB_C_AUDIO_DEVICE,
+            MediaDeviceType.TYPE_3POINT5_MM_AUDIO_DEVICE,
+            MediaDeviceType.TYPE_FAST_PAIR_BLUETOOTH_DEVICE,
             MediaDeviceType.TYPE_BLUETOOTH_DEVICE,
+            MediaDeviceType.TYPE_CAST_DEVICE,
+            MediaDeviceType.TYPE_CAST_GROUP_DEVICE,
             MediaDeviceType.TYPE_PHONE_DEVICE})
     public @interface MediaDeviceType {
-        int TYPE_PHONE_DEVICE = 1;
-        int TYPE_CAST_DEVICE = 2;
-        int TYPE_BLUETOOTH_DEVICE = 3;
+        int TYPE_USB_C_AUDIO_DEVICE = 1;
+        int TYPE_3POINT5_MM_AUDIO_DEVICE = 2;
+        int TYPE_FAST_PAIR_BLUETOOTH_DEVICE = 3;
+        int TYPE_BLUETOOTH_DEVICE = 4;
+        int TYPE_CAST_DEVICE = 5;
+        int TYPE_CAST_GROUP_DEVICE = 6;
+        int TYPE_PHONE_DEVICE = 7;
     }
 
     @VisibleForTesting
@@ -58,13 +76,43 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
     protected final MediaRouter2Manager mRouterManager;
     protected final String mPackageName;
 
-    MediaDevice(Context context, @MediaDeviceType int type, MediaRouter2Manager routerManager,
-            MediaRoute2Info info, String packageName) {
-        mType = type;
+    MediaDevice(Context context, MediaRouter2Manager routerManager, MediaRoute2Info info,
+            String packageName) {
         mContext = context;
         mRouteInfo = info;
         mRouterManager = routerManager;
         mPackageName = packageName;
+        setType(info);
+    }
+
+    private void setType(MediaRoute2Info info) {
+        if (info == null) {
+            mType = MediaDeviceType.TYPE_BLUETOOTH_DEVICE;
+            return;
+        }
+
+        switch (info.getType()) {
+            case TYPE_GROUP:
+                mType = MediaDeviceType.TYPE_CAST_GROUP_DEVICE;
+                break;
+            case TYPE_BUILTIN_SPEAKER:
+                mType = MediaDeviceType.TYPE_PHONE_DEVICE;
+                break;
+            case TYPE_WIRED_HEADSET:
+            case TYPE_WIRED_HEADPHONES:
+                mType = MediaDeviceType.TYPE_3POINT5_MM_AUDIO_DEVICE;
+                break;
+            case TYPE_HEARING_AID:
+            case TYPE_BLUETOOTH_A2DP:
+                mType = MediaDeviceType.TYPE_BLUETOOTH_DEVICE;
+                break;
+            case TYPE_UNKNOWN:
+            case TYPE_REMOTE_TV:
+            case TYPE_REMOTE_SPEAKER:
+            default:
+                mType = MediaDeviceType.TYPE_CAST_DEVICE;
+                break;
+        }
     }
 
     void initDeviceRecord() {
