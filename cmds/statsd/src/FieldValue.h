@@ -382,10 +382,6 @@ public:
 
     inline void setUidField(bool isUid) { setBitmaskAtPos(UID_POS, isUid); }
 
-    inline void setResetState(int32_t resetState) {
-        mResetState = resetState;
-    }
-
     // Default value = false
     inline bool isNested() const { return getValueFromBitmask(NESTED_POS); }
 
@@ -397,12 +393,6 @@ public:
 
     // Default value = false
     inline bool isUidField() const { return getValueFromBitmask(UID_POS); }
-
-    // If a reset state is not sent in the StatsEvent, returns -1. Note that a
-    // reset satate is only sent if and only if a reset should be triggered.
-    inline int32_t getResetState() const {
-        return mResetState;
-    }
 
 private:
     inline void setBitmaskAtPos(int pos, bool value) {
@@ -417,8 +407,6 @@ private:
     // This is a bitmask over all annotations stored in boolean form. Because
     // there are only 4 booleans, just one byte is required.
     uint8_t mBooleanBitmask = 0;
-
-    int32_t mResetState = -1;
 };
 
 /**
