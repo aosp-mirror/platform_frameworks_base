@@ -218,11 +218,11 @@ interface ITunerResourceManager {
      * <p><strong>Note:</strong> {@link #updateCasInfo(int, int)} must be called before this request.
      *
      * @param request {@link CasSessionRequest} information of the current request.
-     * @param sessionResourceId a one-element array to return the granted cas session id.
+     * @param casSessionHandle a one-element array to return the granted cas session handle.
      *
      * @return true if there is CAS session granted.
      */
-    boolean requestCasSession(in CasSessionRequest request, out int[] sessionResourceId);
+    boolean requestCasSession(in CasSessionRequest request, out int[] casSessionHandle);
 
     /*
      * This API is used by the Tuner framework to request an available Lnb from the TunerHAL.
@@ -276,7 +276,7 @@ interface ITunerResourceManager {
      *
      * <p>Client must call this whenever it releases a descrambler.
      *
-     * @param demuxHandle the handle of the released Tuner Descrambler.
+     * @param descramblerHandle the handle of the released Tuner Descrambler.
      * @param clientId the id of the client that is releasing the descrambler.
      */
     void releaseDescrambler(in int descramblerHandle, int clientId);
@@ -288,10 +288,10 @@ interface ITunerResourceManager {
      *
      * <p><strong>Note:</strong> {@link #updateCasInfo(int, int)} must be called before this release.
      *
-     * @param sessionResourceId the id of the released CAS session.
+     * @param casSessionHandle the handle of the released CAS session.
      * @param clientId the id of the client that is releasing the cas session.
      */
-    void releaseCasSession(in int sessionResourceId, int clientId);
+    void releaseCasSession(in int casSessionHandle, int clientId);
 
     /*
      * Notifies the TRM that the Lnb with the given handle was released.
