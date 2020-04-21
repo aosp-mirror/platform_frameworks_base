@@ -3577,17 +3577,22 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         drawnWindowTypes.put(TYPE_NOTIFICATION_SHADE, true);
 
         final WindowState visibleNotDrawnWindow = getWindow(w -> {
-            if (w.mViewVisibility == View.VISIBLE && !w.mObscured && !w.isDrawnLw()) {
+            boolean isVisible = w.mViewVisibility == View.VISIBLE && !w.mObscured;
+            boolean hasDrawn = w.isDrawnLw() && w.hasDrawnLw();
+            if (isVisible && !hasDrawn) {
                 return true;
             }
-            if (w.isDrawnLw()) {
-                final int type = w.mAttrs.type;
-                if (type == TYPE_BOOT_PROGRESS || type == TYPE_BASE_APPLICATION
-                        || type == TYPE_WALLPAPER) {
-                    drawnWindowTypes.put(type, true);
-                } else if (type == TYPE_NOTIFICATION_SHADE) {
-                    drawnWindowTypes.put(TYPE_NOTIFICATION_SHADE,
-                            mWmService.mPolicy.isKeyguardDrawnLw());
+            if (hasDrawn) {
+                switch (w.mAttrs.type) {
+                    case TYPE_BOOT_PROGRESS:
+                    case TYPE_BASE_APPLICATION:
+                    case TYPE_WALLPAPER:
+                        drawnWindowTypes.put(w.mAttrs.type, true);
+                        break;
+                    case TYPE_NOTIFICATION_SHADE:
+                        drawnWindowTypes.put(TYPE_NOTIFICATION_SHADE,
+                                mWmService.mPolicy.isKeyguardDrawnLw());
+                        break;
                 }
             }
             return false;
