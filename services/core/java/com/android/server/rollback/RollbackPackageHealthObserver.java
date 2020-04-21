@@ -25,6 +25,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.VersionedPackage;
 import android.content.rollback.PackageRollbackInfo;
 import android.content.rollback.RollbackInfo;
@@ -41,10 +42,13 @@ import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.FrameworkStatsLog;
+import com.android.server.LocalServices;
 import com.android.server.PackageWatchdog;
 import com.android.server.PackageWatchdog.FailureReasons;
 import com.android.server.PackageWatchdog.PackageHealthObserver;
 import com.android.server.PackageWatchdog.PackageHealthObserverImpact;
+import com.android.server.pm.ApexManager;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -71,6 +75,7 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
 
     private final Context mContext;
     private final Handler mHandler;
+    private final ApexManager mApexManager;
     private final File mLastStagedRollbackIdsFile;
     // Staged rollback ids that have been committed but their session is not yet ready
     @GuardedBy("mPendingStagedRollbackIds")
@@ -85,6 +90,7 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
         dataDir.mkdirs();
         mLastStagedRollbackIdsFile = new File(dataDir, "last-staged-rollback-ids");
         PackageWatchdog.getInstance(mContext).registerHealthObserver(this);
+        mApexManager = ApexManager.getInstance();
     }
 
     @Override
@@ -302,6 +308,18 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
      * Returns true if the package name is the name of a module.
      */
     private boolean isModule(String packageName) {
+        // Check if the package is an APK inside an APEX. If it is, use the parent APEX package when
+        // querying PackageManager.
+        PackageManagerInternal pmi = LocalServices.getService(PackageManagerInternal.class);
+        AndroidPackage apkPackage = pmi.getPackage(packageName);
+        if (apkPackage != null) {
+            String apexPackageName = mApexManager.getActiveApexPackageNameContainingPackage(
+                    apkPackage);
+            if (apexPackageName != null) {
+                packageName = apexPackageName;
+            }
+        }
+
         PackageManager pm = mContext.getPackageManager();
         try {
             return pm.getModuleInfo(packageName, 0) != null;
