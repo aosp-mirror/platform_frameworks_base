@@ -70,7 +70,7 @@ public:
     explicit LogEvent(int64_t wallClockTimestampNs, int64_t elapsedTimestampNs,
                       const InstallTrainInfo& installTrainInfo);
 
-    ~LogEvent();
+    ~LogEvent() {}
 
     /**
      * Get the timestamp associated with this event.
@@ -184,6 +184,12 @@ public:
         return mExclusiveStateFieldIndex;
     }
 
+    // If a reset state is not sent in the StatsEvent, returns -1. Note that a
+    // reset state is sent if and only if a reset should be triggered.
+    inline int getResetState() const {
+        return mResetState;
+    }
+
     inline LogEvent makeCopy() {
         return LogEvent(*this);
     }
@@ -287,11 +293,6 @@ private:
     // matching.
     std::vector<FieldValue> mValues;
 
-    // This field is used when statsD wants to create log event object and write fields to it. After
-    // calling init() function, this object would be destroyed to save memory usage.
-    // When the log event is created from log msg, this field is never initiated.
-    android_log_context mContext = NULL;
-
     // The timestamp set by the logd.
     int64_t mLogdTimestampNs;
 
@@ -312,6 +313,7 @@ private:
     int mUidFieldIndex = -1;
     int mAttributionChainIndex = -1;
     int mExclusiveStateFieldIndex = -1;
+    int mResetState = -1;
 };
 
 void writeExperimentIdsToProto(const std::vector<int64_t>& experimentIds, std::vector<uint8_t>* protoOut);
