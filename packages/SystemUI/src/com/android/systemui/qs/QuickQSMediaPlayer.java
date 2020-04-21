@@ -19,6 +19,7 @@ package com.android.systemui.qs;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.Icon;
 import android.media.session.MediaController;
 import android.media.session.MediaSession;
 import android.view.View;
@@ -58,6 +59,7 @@ public class QuickQSMediaPlayer extends MediaControlPanel {
      * Update media panel view for the given media session
      * @param token token for this media session
      * @param icon app notification icon
+     * @param largeIcon notification's largeIcon, used as a fallback for album art
      * @param iconColor foreground color (for text, icons)
      * @param bgColor background color
      * @param actionsContainer a LinearLayout containing the media action buttons
@@ -66,8 +68,9 @@ public class QuickQSMediaPlayer extends MediaControlPanel {
      * @param contentIntent Intent to send when user taps on the view
      * @param key original notification's key
      */
-    public void setMediaSession(MediaSession.Token token, Drawable icon, int iconColor, int bgColor,
-            View actionsContainer, int[] actionsToShow, PendingIntent contentIntent, String key) {
+    public void setMediaSession(MediaSession.Token token, Drawable icon, Icon largeIcon,
+            int iconColor, int bgColor, View actionsContainer, int[] actionsToShow,
+            PendingIntent contentIntent, String key) {
         // Only update if this is a different session and currently playing
         String oldPackage = "";
         if (getController() != null) {
@@ -82,7 +85,7 @@ public class QuickQSMediaPlayer extends MediaControlPanel {
             return;
         }
 
-        super.setMediaSession(token, icon, iconColor, bgColor, contentIntent, null, key);
+        super.setMediaSession(token, icon, largeIcon, iconColor, bgColor, contentIntent, null, key);
 
         LinearLayout parentActionsLayout = (LinearLayout) actionsContainer;
         int i = 0;
