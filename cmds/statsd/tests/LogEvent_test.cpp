@@ -352,7 +352,7 @@ TEST(LogEventTest, TestResetStateAnnotation) {
 
     const vector<FieldValue>& values = event.getValues();
     EXPECT_EQ(values.size(), 1);
-    EXPECT_EQ(values[0].mAnnotations.getResetState(), resetState);
+    EXPECT_EQ(event.getResetState(), resetState);
 }
 
 }  // namespace statsd

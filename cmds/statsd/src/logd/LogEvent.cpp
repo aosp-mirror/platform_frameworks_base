@@ -114,14 +114,6 @@ LogEvent::LogEvent(int64_t wallClockTimestampNs, int64_t elapsedTimestampNs,
     mValues.push_back(FieldValue(Field(mTagId, getSimpleField(4)), Value(trainInfo.status)));
 }
 
-LogEvent::~LogEvent() {
-    if (mContext) {
-        // This is for the case when LogEvent is created using the test interface
-        // but init() isn't called.
-        android_log_destroy(&mContext);
-    }
-}
-
 void LogEvent::parseInt32(int32_t* pos, int32_t depth, bool* last, uint8_t numAnnotations) {
     int32_t value = readNextValue<int32_t>();
     addToValues(pos, depth, value, last);
@@ -303,8 +295,7 @@ void LogEvent::parseTriggerStateResetAnnotation(uint8_t annotationType) {
         return;
     }
 
-    int32_t resetState = readNextValue<int32_t>();
-    mValues[mValues.size() - 1].mAnnotations.setResetState(resetState);
+    mResetState = readNextValue<int32_t>();
 }
 
 void LogEvent::parseStateNestedAnnotation(uint8_t annotationType) {
