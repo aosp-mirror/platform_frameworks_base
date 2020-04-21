@@ -234,6 +234,20 @@ public class CarVolumeDialogImpl implements VolumeDialog {
         cleanupAudioManager();
     }
 
+    /**
+     * Reveals volume dialog.
+     */
+    public void show(int reason) {
+        mHandler.obtainMessage(H.SHOW, reason).sendToTarget();
+    }
+
+    /**
+     * Hides volume dialog.
+     */
+    public void dismiss(int reason) {
+        mHandler.obtainMessage(H.DISMISS, reason).sendToTarget();
+    }
+
     private void initDialog() {
         loadAudioUsageItems();
         mCarVolumeLineItems.clear();
