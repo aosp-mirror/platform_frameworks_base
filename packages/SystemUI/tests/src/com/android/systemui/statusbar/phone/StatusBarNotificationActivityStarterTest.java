@@ -176,25 +176,43 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
         when(mStatusBarStateController.getState()).thenReturn(StatusBarState.SHADE);
         when(mFeatureFlags.isNewNotifPipelineRenderingEnabled()).thenReturn(false);
 
-        mNotificationActivityStarter = (new StatusBarNotificationActivityStarter.Builder(
-                getContext(), mock(CommandQueue.class), () -> mAssistManager,
-                mEntryManager, mock(HeadsUpManagerPhone.class),
-                mActivityStarter, mStatusBarService,
-                mock(StatusBarStateController.class), mStatusBarKeyguardViewManager,
-                mock(KeyguardManager.class),
-                mock(IDreamManager.class), mRemoteInputManager,
-                mock(StatusBarRemoteInputCallback.class), mock(NotificationGroupManager.class),
-                mock(NotificationLockscreenUserManager.class),
-                mKeyguardStateController,
-                mock(NotificationInterruptStateProvider.class), mock(MetricsLogger.class),
-                mock(LockPatternUtils.class), mHandler, mHandler, mUiBgExecutor,
-                mActivityIntentHelper, mBubbleController, mShadeController, mFeatureFlags,
-                mNotifPipeline, mNotifCollection)
+        mNotificationActivityStarter =
+                new StatusBarNotificationActivityStarter.Builder(
+                        getContext(),
+                        mock(CommandQueue.class),
+                        mHandler,
+                        mHandler,
+                        mUiBgExecutor,
+                        mEntryManager,
+                        mNotifPipeline,
+                        mNotifCollection,
+                        mock(HeadsUpManagerPhone.class),
+                        mActivityStarter,
+                        mStatusBarService,
+                        mock(StatusBarStateController.class),
+                        mStatusBarKeyguardViewManager,
+                        mock(KeyguardManager.class),
+                        mock(IDreamManager.class),
+                        mBubbleController,
+                        () -> mAssistManager,
+                        mRemoteInputManager,
+                        mock(NotificationGroupManager.class),
+                        mock(NotificationLockscreenUserManager.class),
+                        mShadeController,
+                        mKeyguardStateController,
+                        mock(NotificationInterruptStateProvider.class),
+                        mock(LockPatternUtils.class),
+                        mock(StatusBarRemoteInputCallback.class),
+                        mActivityIntentHelper,
+
+                        mFeatureFlags,
+                        mock(MetricsLogger.class),
+                        mock(StatusBarNotificationActivityStarterLogger.class))
                 .setStatusBar(mStatusBar)
-                .setNotificationPanelViewController(mock(NotificationPanelViewController.class))
                 .setNotificationPresenter(mock(NotificationPresenter.class))
-                .setActivityLaunchAnimator(mock(ActivityLaunchAnimator.class)))
-        .build();
+                .setNotificationPanelViewController(mock(NotificationPanelViewController.class))
+                .setActivityLaunchAnimator(mock(ActivityLaunchAnimator.class))
+                .build();
 
         // set up dismissKeyguardThenExecute to synchronously invoke the OnDismissAction arg
         doAnswer(mCallOnDismiss).when(mActivityStarter).dismissKeyguardThenExecute(
