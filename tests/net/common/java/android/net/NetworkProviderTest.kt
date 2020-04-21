@@ -105,14 +105,43 @@ class NetworkProviderTest {
                 .build()
         val cb = ConnectivityManager.NetworkCallback()
         mCm.requestNetwork(nr, cb)
-        provider.expectCallback<OnNetworkRequested>() {
-            callback -> callback.request.getNetworkSpecifier() == specifier &&
+        provider.expectCallback<OnNetworkRequested>() { callback ->
+            callback.request.getNetworkSpecifier() == specifier &&
             callback.request.hasTransport(TRANSPORT_TEST)
         }
 
+        val initialScore = 40
+        val updatedScore = 60
+        val nc = NetworkCapabilities().apply {
+                addTransportType(NetworkCapabilities.TRANSPORT_TEST)
+                removeCapability(NetworkCapabilities.NET_CAPABILITY_TRUSTED)
+                removeCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+                addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_SUSPENDED)
+                addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING)
+                addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VPN)
+                setNetworkSpecifier(specifier)
+        }
+        val lp = LinkProperties()
+        val config = NetworkAgentConfig.Builder().build()
+        val agent = object : NetworkAgent(context, mHandlerThread.looper, "TestAgent", nc, lp,
+                initialScore, config, provider) {}
+
+        provider.expectCallback<OnNetworkRequested>() { callback ->
+            callback.request.getNetworkSpecifier() == specifier &&
+            callback.score == initialScore &&
+            callback.id == agent.providerId
+        }
+
+        agent.sendNetworkScore(updatedScore)
+        provider.expectCallback<OnNetworkRequested>() { callback ->
+            callback.request.getNetworkSpecifier() == specifier &&
+            callback.score == updatedScore &&
+            callback.id == agent.providerId
+        }
+
         mCm.unregisterNetworkCallback(cb)
-        provider.expectCallback<OnNetworkRequestWithdrawn>() {
-            callback -> callback.request.getNetworkSpecifier() == specifier &&
+        provider.expectCallback<OnNetworkRequestWithdrawn>() { callback ->
+            callback.request.getNetworkSpecifier() == specifier &&
             callback.request.hasTransport(TRANSPORT_TEST)
         }
         mCm.unregisterNetworkProvider(provider)
