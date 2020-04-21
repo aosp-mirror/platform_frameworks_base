@@ -22,15 +22,16 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
-import android.content.pm.PackageParser;
 import android.content.res.Resources;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.Pair;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.LocalServices;
 import com.android.server.SystemConfig;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
@@ -38,7 +39,9 @@ import com.android.server.pm.parsing.pkg.AndroidPackage;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -263,37 +266,85 @@ class UserSystemPackageInstaller {
         if (!isLogMode(mode) && !isEnforceMode(mode)) {
             return;
         }
-        Slog.v(TAG,  "Checking that all system packages are whitelisted.");
-        final Set<String> allWhitelistedPackages = getWhitelistedSystemPackages();
-        PackageManagerInternal pmInt = LocalServices.getService(PackageManagerInternal.class);
-
-        // Check whether all whitelisted packages are indeed on the system.
-        for (String pkgName : allWhitelistedPackages) {
-            AndroidPackage pkg = pmInt.getPackage(pkgName);
-            if (pkg == null) {
-                Slog.w(TAG, pkgName + " is whitelisted but not present.");
-            } else if (!pkg.isSystem()) {
-                Slog.w(TAG, pkgName + " is whitelisted and present but not a system package.");
-            }
-        }
-
-        // Check whether all system packages are indeed whitelisted.
-        if (isImplicitWhitelistMode(mode) && !isLogMode(mode)) {
+        final List<Pair<Boolean, String>> warnings = checkSystemPackagesWhitelistWarnings(mode);
+        final int size = warnings.size();
+        if (size == 0) {
+            Slog.v(TAG, "checkWhitelistedSystemPackages(mode=" + mode + "): no warnings");
             return;
         }
-        final boolean doWtf = isEnforceMode(mode);
-        pmInt.forEachPackage(pkg -> {
-            if (pkg.isSystem() && !allWhitelistedPackages.contains(pkg.getManifestPackageName())) {
-                final String msg = "System package " + pkg.getManifestPackageName()
-                        + " is not whitelisted using 'install-in-user-type' in SystemConfig "
-                        + "for any user types!";
+
+        if (isImplicitWhitelistMode(mode) && !isLogMode(mode)) {
+            // Only shows whether all whitelisted packages are indeed on the system.
+            for (int i = 0; i < size; i++) {
+                final Pair<Boolean, String> pair = warnings.get(i);
+                final boolean isSevere = pair.first;
+                if (!isSevere) {
+                    final String msg = pair.second;
+                    Slog.w(TAG, msg);
+                }
+            }
+            return;
+        }
+
+        Slog.v(TAG, "checkWhitelistedSystemPackages(mode=" + mode + "): " + size + " warnings");
+        boolean doWtf = !isImplicitWhitelistMode(mode);
+        for (int i = 0; i < size; i++) {
+            final Pair<Boolean, String> pair = warnings.get(i);
+            final boolean isSevere = pair.first;
+            final String msg = pair.second;
+            if (isSevere) {
                 if (doWtf) {
                     Slog.wtf(TAG, msg);
                 } else {
                     Slog.e(TAG, msg);
                 }
+            } else {
+                Slog.w(TAG, msg);
+            }
+        }
+    }
+
+    // TODO: method below was created to refactor the one-time logging logic so it can be used on
+    // dump / cmd as well. It could to be further refactored (for example, creating a new
+    // structure for the warnings so it doesn't need a Pair).
+    /**
+     * Gets warnings for system user whitelisting.
+     *
+     * @return list of warnings, where {@code Pair.first} is the severity ({@code true} for WTF,
+     * {@code false} for WARN) and {@code Pair.second} the message.
+     */
+    @NonNull
+    private List<Pair<Boolean, String>> checkSystemPackagesWhitelistWarnings(
+            @PackageWhitelistMode int mode) {
+        final Set<String> allWhitelistedPackages = getWhitelistedSystemPackages();
+        final List<Pair<Boolean, String>> warnings = new ArrayList<>();
+        final PackageManagerInternal pmInt = LocalServices.getService(PackageManagerInternal.class);
+
+        // Check whether all whitelisted packages are indeed on the system.
+        final String notPresentFmt = "%s is whitelisted but not present.";
+        final String notSystemFmt = "%s is whitelisted and present but not a system package.";
+        for (String pkgName : allWhitelistedPackages) {
+            final AndroidPackage pkg = pmInt.getPackage(pkgName);
+            if (pkg == null) {
+                warnings.add(new Pair<>(false, String.format(notPresentFmt, pkgName)));
+            } else if (!pkg.isSystem()) {
+                warnings.add(new Pair<>(false, String.format(notSystemFmt, pkgName)));
+            }
+        }
+
+        // Check whether all system packages are indeed whitelisted.
+        final String logMessageFmt = "System package %s is not whitelisted using "
+                + "'install-in-user-type' in SystemConfig for any user types!";
+        final boolean isSevere = isEnforceMode(mode);
+        pmInt.forEachPackage(pkg -> {
+            if (!pkg.isSystem()) return;
+            final String pkgName = pkg.getManifestPackageName();
+            if (!allWhitelistedPackages.contains(pkgName)) {
+                warnings.add(new Pair<>(isSevere, String.format(logMessageFmt, pkgName)));
             }
         });
+
+        return warnings;
     }
 
     /** Whether to only install system packages in new users for which they are whitelisted. */
@@ -602,32 +653,45 @@ class UserSystemPackageInstaller {
     }
 
     void dump(PrintWriter pw) {
-        final String prefix = "    ";
-        final String prefix2 = prefix + prefix;
+        try (IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "    ")) {
+            dumpIndented(ipw);
+        }
+    }
+
+    private void dumpIndented(IndentingPrintWriter pw) {
         final int mode = getWhitelistMode();
         pw.println("Whitelisted packages per user type");
-        pw.print(prefix); pw.print("Mode: ");
+
+        pw.increaseIndent();
+        pw.print("Mode: ");
         pw.print(mode);
         pw.print(isEnforceMode(mode) ? " (enforced)" : "");
         pw.print(isLogMode(mode) ? " (logged)" : "");
         pw.print(isImplicitWhitelistMode(mode) ? " (implicit)" : "");
         pw.print(isIgnoreOtaMode(mode) ? " (ignore OTAs)" : "");
         pw.println();
+        pw.decreaseIndent();
 
-        pw.print(prefix); pw.println("Legend");
+        pw.increaseIndent();
+        pw.println("Legend");
+        pw.increaseIndent();
         for (int idx = 0; idx < mUserTypes.length; idx++) {
-            pw.print(prefix2); pw.println(idx + " -> " + mUserTypes[idx]);
+            pw.println(idx + " -> " + mUserTypes[idx]);
         }
+        pw.decreaseIndent(); pw.decreaseIndent();
 
+        pw.increaseIndent();
         final int size = mWhitelistedPackagesForUserTypes.size();
         if (size == 0) {
-            pw.print(prefix); pw.println("No packages");
+            pw.println("No packages");
+            pw.decreaseIndent();
             return;
         }
-        pw.print(prefix); pw.print(size); pw.println(" packages:");
+        pw.print(size); pw.println(" packages:");
+        pw.increaseIndent();
         for (int pkgIdx = 0; pkgIdx < size; pkgIdx++) {
             final String pkgName = mWhitelistedPackagesForUserTypes.keyAt(pkgIdx);
-            pw.print(prefix2); pw.print(pkgName); pw.print(": ");
+            pw.print(pkgName); pw.print(": ");
             final long userTypesBitSet = mWhitelistedPackagesForUserTypes.valueAt(pkgIdx);
             for (int idx = 0; idx < mUserTypes.length; idx++) {
                 if ((userTypesBitSet & (1 << idx)) != 0) {
@@ -635,6 +699,41 @@ class UserSystemPackageInstaller {
                 }
             }
             pw.println();
+        }
+        pw.decreaseIndent(); pw.decreaseIndent();
+
+        pw.increaseIndent();
+        dumpMissingSystemPackages(pw, /* force= */ true, /* verbose= */ true);
+        pw.decreaseIndent();
+    }
+
+    void dumpMissingSystemPackages(IndentingPrintWriter pw, boolean force, boolean verbose) {
+        final int mode = getWhitelistMode();
+        final boolean show = force || (isEnforceMode(mode) && !isImplicitWhitelistMode(mode));
+        if (!show) return;
+
+        final List<Pair<Boolean, String>> warnings = checkSystemPackagesWhitelistWarnings(mode);
+        final int size = warnings.size();
+
+        if (size == 0) {
+            if (verbose) {
+                pw.println("All system packages are accounted for");
+            }
+            return;
+        }
+
+        if (verbose) {
+            pw.print(size); pw.println(" warnings for system user:");
+            pw.increaseIndent();
+        }
+        for (int i = 0; i < size; i++) {
+            final Pair<Boolean, String> pair = warnings.get(i);
+            final String lvl = pair.first ? "WTF" : "WARN";
+            final String msg = pair.second;
+            pw.print(lvl); pw.print(": "); pw.println(msg);
+        }
+        if (verbose) {
+            pw.decreaseIndent();
         }
     }
 }
