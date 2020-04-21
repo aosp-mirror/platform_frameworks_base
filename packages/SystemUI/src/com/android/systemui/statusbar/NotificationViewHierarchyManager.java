@@ -123,7 +123,6 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
                 res.getBoolean(R.bool.config_alwaysExpandNonGroupedNotifications);
         mBubbleController = bubbleController;
         mDynamicPrivacyController = privacyController;
-        privacyController.addListener(this);
         mDynamicChildBindController = dynamicChildBindController;
     }
 
@@ -131,6 +130,7 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
             NotificationListContainer listContainer) {
         mPresenter = presenter;
         mListContainer = listContainer;
+        mDynamicPrivacyController.addListener(this);
     }
 
     /**

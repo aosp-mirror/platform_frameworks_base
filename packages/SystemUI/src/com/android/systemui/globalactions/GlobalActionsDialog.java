@@ -78,6 +78,7 @@ import android.widget.BaseAdapter;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
+import android.widget.LinearLayout;
 import android.widget.ListPopupWindow;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -2053,8 +2054,17 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             if (overflowButton != null) {
                 if (mOverflowAdapter.getCount() > 0) {
                     overflowButton.setOnClickListener((view) -> showPowerOverflowMenu());
+                    LinearLayout.LayoutParams params =
+                            (LinearLayout.LayoutParams) mGlobalActionsLayout.getLayoutParams();
+                    params.setMarginEnd(0);
+                    mGlobalActionsLayout.setLayoutParams(params);
                 } else {
                     overflowButton.setVisibility(View.GONE);
+                    LinearLayout.LayoutParams params =
+                            (LinearLayout.LayoutParams) mGlobalActionsLayout.getLayoutParams();
+                    params.setMarginEnd(mContext.getResources().getDimensionPixelSize(
+                            com.android.systemui.R.dimen.global_actions_side_margin));
+                    mGlobalActionsLayout.setLayoutParams(params);
                 }
             }
 
@@ -2220,7 +2230,6 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                     })
                     .start();
             dismissPanel();
-            dismissOverflow();
             resetOrientation();
         }
 
@@ -2228,7 +2237,6 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             mShowing = false;
             if (mControlsUiController != null) mControlsUiController.hide();
             dismissPanel();
-            dismissOverflow();
             resetOrientation();
             completeDismiss();
         }
@@ -2242,12 +2250,6 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         private void dismissPanel() {
             if (mPanelController != null) {
                 mPanelController.onDismissed();
-            }
-        }
-
-        private void dismissOverflow() {
-            if (mOverflowPopup != null) {
-                mOverflowPopup.dismiss();
             }
         }
 

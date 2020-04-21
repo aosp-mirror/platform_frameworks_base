@@ -85,6 +85,7 @@ import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -517,6 +518,23 @@ public class UserBackupManagerServiceTest {
         UserBackupManagerService backupManagerService = createUserBackupManagerServiceAndRunTasks();
 
         expectThrows(SecurityException.class, backupManagerService::getCurrentTransportComponent);
+    }
+
+    /**
+     * Test verifying that {@link UserBackupManagerService#excludeKeysFromRestore(String, List)}
+     * throws a {@link SecurityException} if the caller does not have backup permission.
+     */
+    @Test
+    public void testExcludeKeysFromRestore_withoutPermission() throws Exception {
+        mShadowContext.denyPermissions(android.Manifest.permission.BACKUP);
+        UserBackupManagerService backupManagerService = createUserBackupManagerServiceAndRunTasks();
+
+        expectThrows(
+                SecurityException.class,
+                () ->
+                        backupManagerService.excludeKeysFromRestore(
+                                PACKAGE_1,
+                                new ArrayList<String>(){}));
     }
 
     /* Tests for updating transport attributes */

@@ -107,6 +107,7 @@ cc_defaults {
         "libmtp",
         "libnativehelper",
         "libnativewindow",
+        "libpowermanager",
         "libutils",
         "libui",
         "libinput",
