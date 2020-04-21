@@ -83,6 +83,7 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.statusbar.phone.StatusBar;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
@@ -163,6 +164,9 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
     private static final long SCREENSHOT_TO_CORNER_X_DURATION_MS = 234;
     private static final long SCREENSHOT_TO_CORNER_Y_DURATION_MS = 500;
     private static final long SCREENSHOT_TO_CORNER_SCALE_DURATION_MS = 234;
+    private static final long SCREENSHOT_ACTIONS_EXPANSION_DURATION_MS = 400;
+    private static final long SCREENSHOT_ACTIONS_ALPHA_DURATION_MS = 100;
+    private static final float SCREENSHOT_ACTIONS_START_SCALE_X = .7f;
     private static final float ROUNDED_CORNER_RADIUS = .05f;
     private static final long SCREENSHOT_CORNER_TIMEOUT_MILLIS = 6000;
     private static final int MESSAGE_CORNER_TIMEOUT = 2;
@@ -262,6 +266,7 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
         mScreenshotSelectorView.setFocusableInTouchMode(true);
         mScreenshotView.setPivotX(0);
         mScreenshotView.setPivotY(0);
+        mActionsContainer.setPivotX(0);
 
         // Setup the window that we are going to use
         mWindowLayoutParams = new WindowManager.LayoutParams(
@@ -651,6 +656,8 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
         } catch (RemoteException e) {
         }
 
+        ArrayList<ScreenshotActionChip> chips = new ArrayList<>();
+
         for (Notification.Action smartAction : imageData.smartActions) {
             ScreenshotActionChip actionChip = (ScreenshotActionChip) inflater.inflate(
                     R.layout.global_screenshot_action_chip, mActionsView, false);
@@ -662,6 +669,7 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
                         clearScreenshot("chip tapped");
                     });
             mActionsView.addView(actionChip);
+            chips.add(actionChip);
         }
 
         ScreenshotActionChip shareChip = (ScreenshotActionChip) inflater.inflate(
@@ -673,6 +681,7 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
             clearScreenshot("chip tapped");
         });
         mActionsView.addView(shareChip);
+        chips.add(shareChip);
 
         ScreenshotActionChip editChip = (ScreenshotActionChip) inflater.inflate(
                 R.layout.global_screenshot_action_chip, mActionsView, false);
@@ -683,6 +692,7 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
             clearScreenshot("chip tapped");
         });
         mActionsView.addView(editChip);
+        chips.add(editChip);
 
         mScreenshotView.setOnClickListener(v -> {
             try {
@@ -694,7 +704,6 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
             }
         });
         mScreenshotView.setContentDescription(imageData.editAction.title);
-
 
         if (DeviceConfig.getBoolean(NAMESPACE_SYSTEMUI, SCREENSHOT_SCROLLING_ENABLED, false)) {
             ScreenshotActionChip scrollChip = (ScreenshotActionChip) inflater.inflate(
@@ -709,18 +718,27 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
                 scrollNotImplemented.show();
             });
             mActionsView.addView(scrollChip);
+            chips.add(scrollChip);
         }
 
         ValueAnimator animator = ValueAnimator.ofFloat(0, 1);
-        mActionsContainer.setY(mDisplayMetrics.heightPixels);
+        animator.setDuration(SCREENSHOT_ACTIONS_EXPANSION_DURATION_MS);
+        float alphaFraction = (float) SCREENSHOT_ACTIONS_ALPHA_DURATION_MS
+                / SCREENSHOT_ACTIONS_EXPANSION_DURATION_MS;
         mActionsContainer.setVisibility(VISIBLE);
-        mActionsContainer.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
-        float actionsViewHeight = mActionsContainer.getMeasuredHeight() + mScreenshotHeightPx;
+        mActionsContainer.setAlpha(0);
 
         animator.addUpdateListener(animation -> {
             float t = animation.getAnimatedFraction();
             mBackgroundProtection.setAlpha(t);
-            mActionsContainer.setY(mDisplayMetrics.heightPixels - actionsViewHeight * t);
+            mActionsContainer.setAlpha(t < alphaFraction ? t / alphaFraction : 1);
+            float containerScale = SCREENSHOT_ACTIONS_START_SCALE_X
+                    + (t * (1 - SCREENSHOT_ACTIONS_START_SCALE_X));
+            mActionsContainer.setScaleX(containerScale);
+            for (ScreenshotActionChip chip : chips) {
+                chip.setAlpha(t);
+                chip.setScaleX(1 / containerScale); // invert to keep size of children constant
+            }
         });
         return animator;
     }
