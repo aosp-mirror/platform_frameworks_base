@@ -228,19 +228,26 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
         } catch (SQLiteCantOpenDatabaseException e) {
             String message = String.format("Cannot open database '%s'", file);
 
-            final Path path = FileSystems.getDefault().getPath(file);
-            final Path dir = path.getParent();
+            try {
+                // Try to diagnose for common reasons. If something fails in here, that's fine;
+                // just swallow the exception.
 
-            if (!Files.isDirectory(dir)) {
-                message += ": Directory " + dir + " doesn't exist";
-            } else if (!Files.exists(path)) {
-                message += ": File " + path + " doesn't exist";
-            } else if (!Files.isReadable(path)) {
-                message += ": File " + path + " is not readable";
-            } else if (Files.isDirectory(path)) {
-                message += ": Path " + path + " is a directory";
-            } else {
-                message += ": Unknown reason";
+                final Path path = FileSystems.getDefault().getPath(file);
+                final Path dir = path.getParent();
+
+                if (!Files.isDirectory(dir)) {
+                    message += ": Directory " + dir + " doesn't exist";
+                } else if (!Files.exists(path)) {
+                    message += ": File " + path + " doesn't exist";
+                } else if (!Files.isReadable(path)) {
+                    message += ": File " + path + " is not readable";
+                } else if (Files.isDirectory(path)) {
+                    message += ": Path " + path + " is a directory";
+                } else {
+                    message += ": Unknown reason";
+                }
+            } catch (Throwable th) {
+                message += ": Unknown reason; cannot examine filesystem: " + th.getMessage();
             }
             throw new SQLiteCantOpenDatabaseException(message, e);
         } finally {
