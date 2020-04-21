@@ -487,6 +487,14 @@ public final class MediaRouterService extends IMediaRouterService.Stub
 
     // Binder call
     @Override
+    public void notifySessionHintsForCreatingSession(IMediaRouter2 router,
+            long uniqueRequestId, MediaRoute2Info route, Bundle sessionHints) {
+        mService2.notifySessionHintsForCreatingSession(router,
+                uniqueRequestId, route, sessionHints);
+    }
+
+    // Binder call
+    @Override
     public void selectRouteWithRouter2(IMediaRouter2 router, String sessionId,
             MediaRoute2Info route) {
         mService2.selectRouteWithRouter2(router, sessionId, route);
