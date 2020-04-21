@@ -536,7 +536,7 @@ class ControlsUiControllerImpl @Inject constructor (
     override fun hide() {
         Log.d(ControlsUiController.TAG, "hide()")
         hidden = true
-        popup?.dismiss()
+        popup?.dismissImmediate()
         activeDialog?.dismiss()
         ControlActionCoordinator.closeDialog()
 
