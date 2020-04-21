@@ -197,8 +197,8 @@ public class ComponentInfo extends PackageItemInfo {
     public void writeToParcel(Parcel dest, int parcelableFlags) {
         super.writeToParcel(dest, parcelableFlags);
         applicationInfo.writeToParcel(dest, parcelableFlags);
-        dest.writeString(processName);
-        dest.writeString(splitName);
+        dest.writeString8(processName);
+        dest.writeString8(splitName);
         dest.writeInt(descriptionRes);
         dest.writeInt(enabled ? 1 : 0);
         dest.writeInt(exported ? 1 : 0);
@@ -208,8 +208,8 @@ public class ComponentInfo extends PackageItemInfo {
     protected ComponentInfo(Parcel source) {
         super(source);
         applicationInfo = ApplicationInfo.CREATOR.createFromParcel(source);
-        processName = source.readString();
-        splitName = source.readString();
+        processName = source.readString8();
+        splitName = source.readString8();
         descriptionRes = source.readInt();
         enabled = (source.readInt() != 0);
         exported = (source.readInt() != 0);

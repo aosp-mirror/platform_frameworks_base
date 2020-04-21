@@ -1206,17 +1206,17 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
         dest.writeInt(theme);
         dest.writeInt(launchMode);
         dest.writeInt(documentLaunchMode);
-        dest.writeString(permission);
-        dest.writeString(taskAffinity);
-        dest.writeString(targetActivity);
-        dest.writeString(launchToken);
+        dest.writeString8(permission);
+        dest.writeString8(taskAffinity);
+        dest.writeString8(targetActivity);
+        dest.writeString8(launchToken);
         dest.writeInt(flags);
         dest.writeInt(privateFlags);
         dest.writeInt(screenOrientation);
         dest.writeInt(configChanges);
         dest.writeInt(softInputMode);
         dest.writeInt(uiOptions);
-        dest.writeString(parentActivityName);
+        dest.writeString8(parentActivityName);
         dest.writeInt(persistableMode);
         dest.writeInt(maxRecents);
         dest.writeInt(lockTaskLaunchMode);
@@ -1227,7 +1227,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
             dest.writeInt(0);
         }
         dest.writeInt(resizeMode);
-        dest.writeString(requestedVrComponent);
+        dest.writeString8(requestedVrComponent);
         dest.writeInt(rotationAnimation);
         dest.writeInt(colorMode);
         dest.writeFloat(maxAspectRatio);
@@ -1327,17 +1327,17 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
         theme = source.readInt();
         launchMode = source.readInt();
         documentLaunchMode = source.readInt();
-        permission = source.readString();
-        taskAffinity = source.readString();
-        targetActivity = source.readString();
-        launchToken = source.readString();
+        permission = source.readString8();
+        taskAffinity = source.readString8();
+        targetActivity = source.readString8();
+        launchToken = source.readString8();
         flags = source.readInt();
         privateFlags = source.readInt();
         screenOrientation = source.readInt();
         configChanges = source.readInt();
         softInputMode = source.readInt();
         uiOptions = source.readInt();
-        parentActivityName = source.readString();
+        parentActivityName = source.readString8();
         persistableMode = source.readInt();
         maxRecents = source.readInt();
         lockTaskLaunchMode = source.readInt();
@@ -1345,7 +1345,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
             windowLayout = new WindowLayout(source);
         }
         resizeMode = source.readInt();
-        requestedVrComponent = source.readString();
+        requestedVrComponent = source.readString8();
         rotationAnimation = source.readInt();
         colorMode = source.readInt();
         maxAspectRatio = source.readFloat();
@@ -1386,7 +1386,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
             gravity = source.readInt();
             minWidth = source.readInt();
             minHeight = source.readInt();
-            windowLayoutAffinity = source.readString();
+            windowLayoutAffinity = source.readString8();
         }
 
         /**
@@ -1476,7 +1476,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
             dest.writeInt(gravity);
             dest.writeInt(minWidth);
             dest.writeInt(minHeight);
-            dest.writeString(windowLayoutAffinity);
+            dest.writeString8(windowLayoutAffinity);
         }
     }
 }
