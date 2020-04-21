@@ -366,7 +366,8 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
             final ExpandableNotificationRow row,
             NotificationConversationInfo notificationInfoView) throws Exception {
         NotificationGuts guts = row.getGuts();
-        StatusBarNotification sbn = row.getEntry().getSbn();
+        NotificationEntry entry = row.getEntry();
+        StatusBarNotification sbn = entry.getSbn();
         String packageName = sbn.getPackageName();
         // Settings link is only valid for notifications that specify a non-system user
         NotificationConversationInfo.OnSettingsClickListener onSettingsClick = null;
@@ -407,8 +408,9 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
                 mNotificationManager,
                 mVisualStabilityManager,
                 packageName,
-                row.getEntry().getChannel(),
-                row.getEntry(),
+                entry.getChannel(),
+                entry,
+                entry.getBubbleMetadata(),
                 onSettingsClick,
                 onSnoozeClickListener,
                 iconFactoryLoader,
