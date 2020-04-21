@@ -120,6 +120,7 @@ android_app {
     },
     manifest: "shim/AndroidManifestTargetPSdk.xml",
     apex_available: [
+        "//apex_available:platform",
         "com.android.apex.cts.shim.v2_apk_in_apex_sdk_target_p",
     ],
 }
