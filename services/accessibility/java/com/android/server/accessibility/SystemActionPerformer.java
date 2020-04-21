@@ -305,6 +305,7 @@ public class SystemActionPerformer {
                     sendDownAndUpKeyEvents(KeyEvent.KEYCODE_HEADSETHOOK);
                     return true;
                 default:
+                    Slog.e(TAG, "Invalid action id: " + actionId);
                     return false;
             }
         } finally {
