@@ -479,7 +479,8 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
      */
     @VisibleForTesting
     protected int getMaxShownPowerItems() {
-        if (shouldUseControlsLayout()) {
+        // TODO: Overflow disabled on keyguard while we solve for touch blocking issues.
+        if (shouldUseControlsLayout() && !mKeyguardShowing) {
             return mResources.getInteger(com.android.systemui.R.integer.power_menu_max_columns);
         } else {
             return Integer.MAX_VALUE;
