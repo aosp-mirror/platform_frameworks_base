@@ -514,33 +514,24 @@ public interface WindowManager extends ViewManager {
     int TAKE_SCREENSHOT_PROVIDED_IMAGE = 3;
 
     /**
-     * Parcel key for the screen shot bitmap sent with messages of type
-     * {@link #TAKE_SCREENSHOT_PROVIDED_IMAGE}, type {@link android.graphics.Bitmap}
+     * Enum listing the possible sources from which a screenshot was originated. Used for logging.
+     *
      * @hide
      */
-    String PARCEL_KEY_SCREENSHOT_BITMAP = "screenshot_screen_bitmap";
-
-    /**
-     * Parcel key for the screen bounds of the image sent with messages of type
-     * [@link {@link #TAKE_SCREENSHOT_PROVIDED_IMAGE}], type {@link Rect} in screen coordinates.
-     * @hide
-     */
-    String PARCEL_KEY_SCREENSHOT_BOUNDS = "screenshot_screen_bounds";
-
-    /**
-     * Parcel key for the task id of the task that the screen shot was taken of, sent with messages
-     * of type [@link {@link #TAKE_SCREENSHOT_PROVIDED_IMAGE}], type int.
-     * @hide
-     */
-    String PARCEL_KEY_SCREENSHOT_TASK_ID = "screenshot_task_id";
-
-    /**
-     * Parcel key for the visible insets of the image sent with messages of type
-     * [@link {@link #TAKE_SCREENSHOT_PROVIDED_IMAGE}], type {@link android.graphics.Insets} in
-     * screen coordinates.
-     * @hide
-     */
-    String PARCEL_KEY_SCREENSHOT_INSETS = "screenshot_insets";
+    @IntDef({ScreenshotSource.SCREENSHOT_GLOBAL_ACTIONS,
+            ScreenshotSource.SCREENSHOT_KEY_CHORD,
+            ScreenshotSource.SCREENSHOT_KEY_OTHER,
+            ScreenshotSource.SCREENSHOT_OVERVIEW,
+            ScreenshotSource.SCREENSHOT_ACCESSIBILITY_ACTIONS,
+            ScreenshotSource.SCREENSHOT_OTHER})
+    @interface ScreenshotSource {
+        int SCREENSHOT_GLOBAL_ACTIONS = 0;
+        int SCREENSHOT_KEY_CHORD = 1;
+        int SCREENSHOT_KEY_OTHER = 2;
+        int SCREENSHOT_OVERVIEW = 3;
+        int SCREENSHOT_ACCESSIBILITY_ACTIONS = 4;
+        int SCREENSHOT_OTHER = 5;
+    }
 
     /**
      * @hide
