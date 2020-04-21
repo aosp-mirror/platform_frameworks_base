@@ -734,6 +734,31 @@ public abstract class Connection extends Conferenceable {
             "android.telecom.extra.ORIGINAL_CONNECTION_ID";
 
     /**
+     * Extra key set on a {@link Connection} when it was created via a remote connection service.
+     * For example, if a connection manager requests a remote connection service to create a call
+     * using one of the remote connection service's phone account handle, this extra will be set so
+     * that Telecom knows that the wrapped remote connection originated in a remote connection
+     * service.  We stash this in the extras since connection managers will typically copy the
+     * extras from a {@link RemoteConnection} to a {@link Connection} (there is ultimately not
+     * other way to relate a {@link RemoteConnection} to a {@link Connection}.
+     * @hide
+     */
+    public static final String EXTRA_REMOTE_PHONE_ACCOUNT_HANDLE =
+            "android.telecom.extra.REMOTE_PHONE_ACCOUNT_HANDLE";
+
+    /**
+     * Extra key set from a {@link ConnectionService} when using the remote connection APIs
+     * (e.g. {@link RemoteConnectionService#createRemoteConnection(PhoneAccountHandle,
+     * ConnectionRequest, boolean)}) to create a remote connection.  Provides the receiving
+     * {@link ConnectionService} with a means to know the package name of the requesting
+     * {@link ConnectionService} so that {@link #EXTRA_REMOTE_PHONE_ACCOUNT_HANDLE} can be set for
+     * better visibility in Telecom of where a connection ultimately originated.
+     * @hide
+     */
+    public static final String EXTRA_REMOTE_CONNECTION_ORIGINATING_PACKAGE_NAME =
+            "android.telecom.extra.REMOTE_CONNECTION_ORIGINATING_PACKAGE_NAME";
+
+    /**
      * Boolean connection extra key set on the extras passed to
      * {@link Connection#sendConnectionEvent} which indicates that audio is present
      * on the RTT call when the extra value is true.
