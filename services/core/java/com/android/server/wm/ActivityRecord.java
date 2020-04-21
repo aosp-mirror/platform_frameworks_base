@@ -4718,7 +4718,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      */
     private boolean shouldBeResumed(ActivityRecord activeActivity) {
         return shouldMakeActive(activeActivity) && isFocusable()
-                && getRootTask().getVisibility(activeActivity) == STACK_VISIBILITY_VISIBLE
+                && getTask().getVisibility(activeActivity) == STACK_VISIBILITY_VISIBLE
                 && canResumeByCompat();
     }
 
