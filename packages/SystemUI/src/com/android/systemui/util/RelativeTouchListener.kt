@@ -115,7 +115,9 @@ abstract class RelativeTouchListener : View.OnTouchListener {
 
                 performedLongClick = false
                 handler.postDelayed({
-                    performedLongClick = v.performLongClick()
+                    if (v.isLongClickable) {
+                        performedLongClick = v.performLongClick()
+                    }
                 }, ViewConfiguration.getLongPressTimeout().toLong())
             }
 
