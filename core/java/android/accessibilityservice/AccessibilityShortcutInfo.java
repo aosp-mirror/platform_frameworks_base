@@ -153,7 +153,7 @@ public final class AccessibilityShortcutInfo {
                     com.android.internal.R.styleable.AccessibilityShortcutTarget_settingsActivity);
             asAttributes.recycle();
 
-            if (mDescriptionResId == 0 || mSummaryResId == 0) {
+            if ((mDescriptionResId == 0 && mHtmlDescriptionRes == 0) || mSummaryResId == 0) {
                 throw new XmlPullParserException("No description or summary in meta-data");
             }
         } catch (PackageManager.NameNotFoundException e) {
