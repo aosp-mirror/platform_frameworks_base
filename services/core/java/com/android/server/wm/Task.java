@@ -2225,14 +2225,16 @@ class Task extends WindowContainer<WindowContainer> {
         }
         density *= DisplayMetrics.DENSITY_DEFAULT_SCALE;
 
+        // If bounds have been overridden at this level, restrict config resources to these bounds
+        // rather than the parent because the overridden bounds can be larger than the parent.
+        boolean hasOverrideBounds = false;
+
         final Rect resolvedBounds = inOutConfig.windowConfiguration.getBounds();
-        if (resolvedBounds == null) {
-            mTmpFullBounds.setEmpty();
+        if (resolvedBounds == null || resolvedBounds.isEmpty()) {
+            mTmpFullBounds.set(parentConfig.windowConfiguration.getBounds());
         } else {
             mTmpFullBounds.set(resolvedBounds);
-        }
-        if (mTmpFullBounds.isEmpty()) {
-            mTmpFullBounds.set(parentConfig.windowConfiguration.getBounds());
+            hasOverrideBounds = true;
         }
 
         Rect outAppBounds = inOutConfig.windowConfiguration.getAppBounds();
@@ -2244,7 +2246,16 @@ class Task extends WindowContainer<WindowContainer> {
         // the out bounds doesn't need to be restricted by the parent.
         final boolean insideParentBounds = compatInsets == null;
         if (insideParentBounds && windowingMode != WINDOWING_MODE_FREEFORM) {
-            final Rect parentAppBounds = parentConfig.windowConfiguration.getAppBounds();
+            Rect parentAppBounds;
+            if (hasOverrideBounds) {
+                // Since we overrode the bounds, restrict appBounds to display non-decor rather
+                // than parent. Otherwise, it won't match the overridden bounds.
+                final TaskDisplayArea displayArea = getDisplayArea();
+                parentAppBounds = displayArea != null
+                        ? displayArea.getConfiguration().windowConfiguration.getAppBounds() : null;
+            } else {
+                parentAppBounds = parentConfig.windowConfiguration.getAppBounds();
+            }
             if (parentAppBounds != null && !parentAppBounds.isEmpty()) {
                 outAppBounds.intersect(parentAppBounds);
             }
@@ -2291,13 +2302,13 @@ class Task extends WindowContainer<WindowContainer> {
 
             if (inOutConfig.screenWidthDp == Configuration.SCREEN_WIDTH_DP_UNDEFINED) {
                 final int overrideScreenWidthDp = (int) (mTmpStableBounds.width() / density);
-                inOutConfig.screenWidthDp = insideParentBounds
+                inOutConfig.screenWidthDp = (insideParentBounds && !hasOverrideBounds)
                         ? Math.min(overrideScreenWidthDp, parentConfig.screenWidthDp)
                         : overrideScreenWidthDp;
             }
             if (inOutConfig.screenHeightDp == Configuration.SCREEN_HEIGHT_DP_UNDEFINED) {
                 final int overrideScreenHeightDp = (int) (mTmpStableBounds.height() / density);
-                inOutConfig.screenHeightDp = insideParentBounds
+                inOutConfig.screenHeightDp = (insideParentBounds && !hasOverrideBounds)
                         ? Math.min(overrideScreenHeightDp, parentConfig.screenHeightDp)
                         : overrideScreenHeightDp;
             }
@@ -2344,27 +2355,27 @@ class Task extends WindowContainer<WindowContainer> {
         mTmpBounds.set(getResolvedOverrideConfiguration().windowConfiguration.getBounds());
         super.resolveOverrideConfiguration(newParentConfig);
 
-        // Resolve override windowing mode to fullscreen for home task (even on freeform
-        // display), or split-screen-secondary if in split-screen mode.
         int windowingMode =
                 getResolvedOverrideConfiguration().windowConfiguration.getWindowingMode();
+
+        // Resolve override windowing mode to fullscreen for home task (even on freeform
+        // display), or split-screen if in split-screen mode.
         if (getActivityType() == ACTIVITY_TYPE_HOME && windowingMode == WINDOWING_MODE_UNDEFINED) {
             final int parentWindowingMode = newParentConfig.windowConfiguration.getWindowingMode();
-            windowingMode = parentWindowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY
-                    ? WINDOWING_MODE_SPLIT_SCREEN_SECONDARY
-                    : WINDOWING_MODE_FULLSCREEN;
+            windowingMode = WindowConfiguration.isSplitScreenWindowingMode(parentWindowingMode)
+                    ? parentWindowingMode : WINDOWING_MODE_FULLSCREEN;
             getResolvedOverrideConfiguration().windowConfiguration.setWindowingMode(windowingMode);
         }
 
-        if (!isLeafTask()) {
-            // Compute configuration overrides for tasks that created by organizer, so that
-            // organizer can get the correct configuration from those tasks.
-            if (mCreatedByOrganizer) {
-                computeConfigResourceOverrides(getResolvedOverrideConfiguration(), newParentConfig);
-            }
-            return;
+        if (isLeafTask()) {
+            resolveLeafOnlyOverrideConfigs(newParentConfig);
         }
+        computeConfigResourceOverrides(getResolvedOverrideConfiguration(), newParentConfig);
+    }
 
+    void resolveLeafOnlyOverrideConfigs(Configuration newParentConfig) {
+        int windowingMode =
+                getResolvedOverrideConfiguration().windowConfiguration.getWindowingMode();
         if (windowingMode == WINDOWING_MODE_UNDEFINED) {
             windowingMode = newParentConfig.windowConfiguration.getWindowingMode();
         }
@@ -2404,7 +2415,6 @@ class Task extends WindowContainer<WindowContainer> {
                 outOverrideBounds.offset(0, offsetTop);
             }
         }
-        computeConfigResourceOverrides(getResolvedOverrideConfiguration(), newParentConfig);
     }
 
     /**
