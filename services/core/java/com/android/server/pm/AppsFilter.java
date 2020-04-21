@@ -612,7 +612,7 @@ public class AppsFilter {
                     }
                     final int insert = ~loc;
                     System.arraycopy(appIds, insert, buffer, 0, whitelistSize - insert);
-                    appIds[insert] = existingUid;
+                    appIds[insert] = existingAppId;
                     System.arraycopy(buffer, 0, appIds, insert + 1, whitelistSize - insert);
                     whitelistSize++;
                 }
