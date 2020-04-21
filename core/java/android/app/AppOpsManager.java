@@ -233,12 +233,9 @@ public class AppOpsManager {
                 }
 
                 private void reportStackTraceIfNeeded(@NonNull SyncNotedAppOp op) {
-                    if (sConfig.getSampledOpCode() == OP_NONE
-                            && sConfig.getExpirationTimeSinceBootMillis()
-                            >= SystemClock.elapsedRealtime()) {
+                    if (!isCollectingStackTraces()) {
                         return;
                     }
-
                     MessageSamplingConfig config = sConfig;
                     if (leftCircularDistance(strOpToOp(op.getOp()), config.getSampledOpCode(),
                             _NUM_OP) <= config.getAcceptableLeftDistance()
@@ -8181,7 +8178,22 @@ public class AppOpsManager {
      * @hide
      */
     public static boolean isListeningForOpNoted() {
-        return sOnOpNotedCallback != null;
+        return sOnOpNotedCallback != null || isCollectingStackTraces();
+    }
+
+    /**
+     * @return {@code true} iff the process is currently sampled for stacktrace collection.
+     *
+     * @see #setOnOpNotedCallback
+     *
+     * @hide
+     */
+    private static boolean isCollectingStackTraces() {
+        if (sConfig.getSampledOpCode() == OP_NONE &&
+                sConfig.getExpirationTimeSinceBootMillis() >= SystemClock.elapsedRealtime()) {
+            return false;
+        }
+        return true;
     }
 
     /**

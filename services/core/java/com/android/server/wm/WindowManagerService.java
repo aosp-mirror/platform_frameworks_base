@@ -219,6 +219,7 @@ import android.view.IOnKeyguardExitResult;
 import android.view.IPinnedStackListener;
 import android.view.IRecentsAnimationRunner;
 import android.view.IRotationWatcher;
+import android.view.IScrollCaptureController;
 import android.view.ISystemGestureExclusionListener;
 import android.view.IWallpaperVisibilityListener;
 import android.view.IWindow;
@@ -6834,6 +6835,58 @@ public class WindowManagerService extends IWindowManager.Stub
                 return;
             }
             callingWin.updateTapExcludeRegion(region);
+        }
+    }
+
+    /**
+     * Forwards a scroll capture request to the appropriate window, if available.
+     *
+     * @param displayId the display for the request
+     * @param behindClient token for a window, used to filter the search to windows behind it
+     * @param taskId specifies the id of a task the result must belong to or -1 to ignore task ids
+     * @param controller the controller to receive results; a call to either
+     *      {@link IScrollCaptureController#onClientConnected} or
+     *      {@link IScrollCaptureController#onClientUnavailable}.
+     */
+    public void requestScrollCapture(int displayId, @Nullable IBinder behindClient, int taskId,
+            IScrollCaptureController controller) {
+        if (!checkCallingPermission(READ_FRAME_BUFFER, "requestScrollCapture()")) {
+            throw new SecurityException("Requires READ_FRAME_BUFFER permission");
+        }
+        final long token = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                DisplayContent dc = mRoot.getDisplayContent(displayId);
+                if (dc == null) {
+                    ProtoLog.e(WM_ERROR,
+                            "Invalid displayId for requestScrollCapture: %d", displayId);
+                    controller.onClientUnavailable();
+                    return;
+                }
+                WindowState topWindow = null;
+                if (behindClient != null) {
+                    topWindow = windowForClientLocked(null, behindClient, /* throwOnError*/ true);
+                }
+                WindowState targetWindow = dc.findScrollCaptureTargetWindow(topWindow, taskId);
+                if (targetWindow == null) {
+                    controller.onClientUnavailable();
+                    return;
+                }
+                // Forward to the window for handling.
+                try {
+                    targetWindow.mClient.requestScrollCapture(controller);
+                } catch (RemoteException e) {
+                    ProtoLog.w(WM_ERROR,
+                            "requestScrollCapture: caught exception dispatching to window."
+                                    + "token=%s", targetWindow.mClient.asBinder());
+                    controller.onClientUnavailable();
+                }
+            }
+        } catch (RemoteException e) {
+            ProtoLog.w(WM_ERROR,
+                    "requestScrollCapture: caught exception dispatching callback: %s", e);
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
     }
 

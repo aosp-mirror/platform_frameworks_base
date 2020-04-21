@@ -2544,23 +2544,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
             pauseKeyDispatchingLocked();
 
-            // We are finishing the top focused activity and its stack has nothing to be focused so
-            // the next focusable stack should be focused.
-            if (mayAdjustTop
-                    && (stack.topRunningActivity() == null || !stack.isTopActivityFocusable())) {
-                if (shouldAdjustGlobalFocus) {
-                    // Move the entire hierarchy to top with updating global top resumed activity
-                    // and focused application if needed.
-                    stack.adjustFocusToNextFocusableStack("finish-top");
-                } else {
-                    // Only move the next stack to top in its task container.
-                    final TaskDisplayArea taskDisplayArea = stack.getDisplayArea();
-                    next = taskDisplayArea.topRunningActivity();
-                    if (next != null) {
-                        taskDisplayArea.positionStackAtTop(next.getRootTask(),
-                                false /* includingParents */, "finish-display-top");
-                    }
-                }
+            // We are finishing the top focused activity and its task has nothing to be focused so
+            // the next focusable task should be focused.
+            if (mayAdjustTop && ((ActivityStack) task).topRunningActivity(true /* focusableOnly */)
+                    == null) {
+                task.adjustFocusToNextFocusableTask("finish-top", false /* allowFocusSelf */,
+                        shouldAdjustGlobalFocus);
             }
 
             finishActivityResults(resultCode, resultData);

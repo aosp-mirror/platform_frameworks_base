@@ -523,8 +523,12 @@ public class StagingManager {
                 // TODO(b/146343545): Persist failure reason across checkpoint reboot
                 Slog.d(TAG, "Reverting back to safe state. Marking " + session.sessionId
                         + " as failed.");
-                session.setStagedSessionFailed(SessionInfo.STAGED_SESSION_UNKNOWN,
-                        "Reverting back to safe state");
+                String errorMsg = "Reverting back to safe state";
+                if (!TextUtils.isEmpty(mNativeFailureReason)) {
+                    errorMsg = "Entered fs-rollback mode and reverted session due to crashing "
+                            + "native process: " + mNativeFailureReason;
+                }
+                session.setStagedSessionFailed(SessionInfo.STAGED_SESSION_UNKNOWN, errorMsg);
                 return;
             }
         } catch (RemoteException e) {
@@ -553,6 +557,10 @@ public class StagingManager {
             if (isApexSessionFailed(apexSessionInfo)) {
                 String errorMsg = "APEX activation failed. Check logcat messages from apexd for "
                         + "more information.";
+                if (!TextUtils.isEmpty(mNativeFailureReason)) {
+                    errorMsg = "Session reverted due to crashing native process: "
+                            + mNativeFailureReason;
+                }
                 session.setStagedSessionFailed(SessionInfo.STAGED_SESSION_ACTIVATION_FAILED,
                         errorMsg);
                 abortCheckpoint(errorMsg);

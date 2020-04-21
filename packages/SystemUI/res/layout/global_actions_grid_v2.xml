@@ -15,8 +15,7 @@
       android:clipChildren="false"
       android:clipToPadding="false"
       android:layout_marginTop="@dimen/global_actions_top_margin"
-      android:layout_marginLeft="@dimen/global_actions_side_margin"
-      android:layout_marginRight="@dimen/global_actions_side_margin"
+      android:layout_marginStart="@dimen/global_actions_side_margin"
   >
     <LinearLayout
         android:id="@android:id/list"

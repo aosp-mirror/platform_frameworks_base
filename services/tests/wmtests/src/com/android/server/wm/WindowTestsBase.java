@@ -247,7 +247,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
     WindowState createAppWindow(Task task, int type, String name) {
         synchronized (mWm.mGlobalLock) {
             final ActivityRecord activity =
-                    WindowTestUtils.createTestActivityRecord(mDisplayContent);
+                    WindowTestUtils.createTestActivityRecord(task.getDisplayContent());
             task.addChild(activity, 0);
             return createWindow(null, type, activity, name);
         }
