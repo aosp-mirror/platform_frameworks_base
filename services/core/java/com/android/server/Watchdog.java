@@ -131,6 +131,8 @@ public class Watchdog extends Thread {
 
     private static Watchdog sWatchdog;
 
+    private final Object mLock = new Object();
+
     /* This handler will be used to post message back onto the main thread */
     private final ArrayList<HandlerChecker> mHandlerCheckers = new ArrayList<>();
     private final HandlerChecker mMonitorChecker;
@@ -240,13 +242,13 @@ public class Watchdog extends Thread {
             // point we have completed execution of this method.
             final int size = mMonitors.size();
             for (int i = 0 ; i < size ; i++) {
-                synchronized (Watchdog.this) {
+                synchronized (mLock) {
                     mCurrentMonitor = mMonitors.get(i);
                 }
                 mCurrentMonitor.monitor();
             }
 
-            synchronized (Watchdog.this) {
+            synchronized (mLock) {
                 mCompleted = true;
                 mCurrentMonitor = null;
             }
@@ -377,7 +379,7 @@ public class Watchdog extends Thread {
     public void processStarted(String processName, int pid) {
         if (isInterestingJavaProcess(processName)) {
             Slog.i(TAG, "Interesting Java process " + processName + " started. Pid " + pid);
-            synchronized (this) {
+            synchronized (mLock) {
                 mInterestingJavaPids.add(pid);
             }
         }
@@ -389,26 +391,26 @@ public class Watchdog extends Thread {
     public void processDied(String processName, int pid) {
         if (isInterestingJavaProcess(processName)) {
             Slog.i(TAG, "Interesting Java process " + processName + " died. Pid " + pid);
-            synchronized (this) {
+            synchronized (mLock) {
                 mInterestingJavaPids.remove(Integer.valueOf(pid));
             }
         }
     }
 
     public void setActivityController(IActivityController controller) {
-        synchronized (this) {
+        synchronized (mLock) {
             mController = controller;
         }
     }
 
     public void setAllowRestart(boolean allowRestart) {
-        synchronized (this) {
+        synchronized (mLock) {
             mAllowRestart = allowRestart;
         }
     }
 
     public void addMonitor(Monitor monitor) {
-        synchronized (this) {
+        synchronized (mLock) {
             mMonitorChecker.addMonitorLocked(monitor);
         }
     }
@@ -418,7 +420,7 @@ public class Watchdog extends Thread {
     }
 
     public void addThread(Handler thread, long timeoutMillis) {
-        synchronized (this) {
+        synchronized (mLock) {
             final String name = thread.getLooper().getThread().getName();
             mHandlerCheckers.add(new HandlerChecker(thread, name, timeoutMillis));
         }
@@ -438,7 +440,7 @@ public class Watchdog extends Thread {
      * pauses have been resumed.
      */
     public void pauseWatchingCurrentThread(String reason) {
-        synchronized (this) {
+        synchronized (mLock) {
             for (HandlerChecker hc : mHandlerCheckers) {
                 if (Thread.currentThread().equals(hc.getThread())) {
                     hc.pauseLocked(reason);
@@ -460,7 +462,7 @@ public class Watchdog extends Thread {
      * as many times as the calls to pause.
      */
     public void resumeWatchingCurrentThread(String reason) {
-        synchronized (this) {
+        synchronized (mLock) {
             for (HandlerChecker hc : mHandlerCheckers) {
                 if (Thread.currentThread().equals(hc.getThread())) {
                     hc.resumeLocked(reason);
@@ -557,7 +559,7 @@ public class Watchdog extends Thread {
             final String subject;
             final boolean allowRestart;
             int debuggerWasConnected = 0;
-            synchronized (this) {
+            synchronized (mLock) {
                 long timeout = CHECK_INTERVAL;
                 // Make sure we (re)spin the checkers that have become idle within
                 // this wait-and-check interval
@@ -580,7 +582,7 @@ public class Watchdog extends Thread {
                         debuggerWasConnected = 2;
                     }
                     try {
-                        wait(timeout);
+                        mLock.wait(timeout);
                         // Note: mHandlerCheckers and mMonitorChecker may have changed after waiting
                     } catch (InterruptedException e) {
                         Log.wtf(TAG, e);
@@ -678,7 +680,7 @@ public class Watchdog extends Thread {
             } catch (InterruptedException ignored) {}
 
             IActivityController controller;
-            synchronized (this) {
+            synchronized (mLock) {
                 controller = mController;
             }
             if (controller != null) {
