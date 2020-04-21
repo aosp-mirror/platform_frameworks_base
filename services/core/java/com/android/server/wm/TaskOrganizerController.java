@@ -218,18 +218,24 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         }
 
         void dispose() {
-            releaseTasks();
+            // Move organizer from managing specific windowing modes
             for (int i = mTaskOrganizersForWindowingMode.size() - 1; i >= 0; --i) {
                 mTaskOrganizersForWindowingMode.valueAt(i).remove(mOrganizer.getBinder());
             }
-        }
 
-        private void releaseTasks() {
-            for (int i = mOrganizedTasks.size() - 1; i >= 0; i--) {
-                final Task t = mOrganizedTasks.get(i);
-                removeTask(t);
-                t.taskOrganizerUnregistered();
+            // Update tasks currently managed by this organizer to the next one available if
+            // possible.
+            while (!mOrganizedTasks.isEmpty()) {
+                final Task t = mOrganizedTasks.get(0);
+                t.updateTaskOrganizerState(true /* forceUpdate */);
+                if (mOrganizedTasks.contains(t)) {
+                    removeTask(t);
+                }
             }
+
+            // Remove organizer state after removing tasks so we get a chance to send
+            // onTaskVanished.
+            mTaskOrganizerStates.remove(asBinder());
         }
 
         void unlinkDeath() {
@@ -313,16 +319,11 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                             new TaskOrganizerState(organizer, uid));
                 }
 
-                if (orgs.size() == 1) {
-                    // Only in the case where this is the root task organizer for the given
-                    // windowing mode, we add report all existing tasks in that mode to the new
-                    // task organizer.
-                    mService.mRootWindowContainer.forAllTasks((task) -> {
-                        if (task.getWindowingMode() == windowingMode) {
-                            task.updateTaskOrganizerState(true /* forceUpdate */);
-                        }
-                    });
-                }
+                mService.mRootWindowContainer.forAllTasks((task) -> {
+                    if (task.getWindowingMode() == windowingMode) {
+                        task.updateTaskOrganizerState(true /* forceUpdate */);
+                    }
+                });
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -335,7 +336,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
-                final TaskOrganizerState state = mTaskOrganizerStates.remove(organizer.asBinder());
+                final TaskOrganizerState state = mTaskOrganizerStates.get(organizer.asBinder());
                 if (state == null) {
                     return;
                 }
@@ -367,7 +368,9 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
 
     void onTaskVanished(ITaskOrganizer organizer, Task task) {
         final TaskOrganizerState state = mTaskOrganizerStates.get(organizer.asBinder());
-        state.removeTask(task);
+        if (state != null) {
+            state.removeTask(task);
+        }
     }
 
     @Override
