@@ -38,6 +38,8 @@ import android.util.SparseArray;
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.SystemService;
 
+import libcore.io.IoUtils;
+
 import java.util.List;
 
 /**
@@ -64,31 +66,52 @@ public class DataLoaderManagerService extends SystemService {
         publishBinderService(Context.DATA_LOADER_MANAGER_SERVICE, mBinderService);
     }
 
+    private static void closeQuietly(FileSystemControlParcel control) {
+        if (control == null || control.incremental == null) {
+            return;
+        }
+        IoUtils.closeQuietly(control.incremental.cmd);
+        IoUtils.closeQuietly(control.incremental.pendingReads);
+        IoUtils.closeQuietly(control.incremental.log);
+    }
+
     final class DataLoaderManagerBinderService extends IDataLoaderManager.Stub {
         @Override
         public boolean initializeDataLoader(int dataLoaderId, DataLoaderParamsParcel params,
                 FileSystemControlParcel control, IDataLoaderStatusListener listener) {
-            synchronized (mLock) {
-                if (mServiceConnections.get(dataLoaderId) != null) {
-                    Slog.e(TAG, "Data loader of ID=" + dataLoaderId + " already exists.");
+            DataLoaderServiceConnection connection = null;
+            try {
+                synchronized (mLock) {
+                    if (mServiceConnections.get(dataLoaderId) != null) {
+                        Slog.e(TAG, "Data loader of ID=" + dataLoaderId + " already exists.");
+                        return false;
+                    }
+                }
+                ComponentName componentName =
+                        new ComponentName(params.packageName, params.className);
+                ComponentName dataLoaderComponent = resolveDataLoaderComponentName(componentName);
+                if (dataLoaderComponent == null) {
                     return false;
                 }
-            }
-            ComponentName componentName = new ComponentName(params.packageName, params.className);
-            ComponentName dataLoaderComponent = resolveDataLoaderComponentName(componentName);
-            if (dataLoaderComponent == null) {
-                return false;
-            }
-            // Binds to the specific data loader service
-            DataLoaderServiceConnection connection =
-                    new DataLoaderServiceConnection(dataLoaderId, params, control, listener);
-            Intent intent = new Intent();
-            intent.setComponent(dataLoaderComponent);
-            if (!mContext.bindServiceAsUser(intent, connection, Context.BIND_AUTO_CREATE,
-                    UserHandle.of(UserHandle.getCallingUserId()))) {
-                Slog.e(TAG, "Failed to bind to data loader binder service.");
-                mContext.unbindService(connection);
-                return false;
+                // Binds to the specific data loader service
+                connection =
+                        new DataLoaderServiceConnection(dataLoaderId, params,
+                                                        control, listener);
+                control = null; // now connection manages it
+                Intent intent = new Intent();
+                intent.setComponent(dataLoaderComponent);
+                if (!mContext.bindServiceAsUser(intent, connection, Context.BIND_AUTO_CREATE,
+                        UserHandle.of(UserHandle.getCallingUserId()))) {
+                    Slog.e(TAG, "Failed to bind to data loader binder service.");
+                    mContext.unbindService(connection);
+                    return false;
+                }
+                connection = null;
+            } finally {
+                DataLoaderManagerService.closeQuietly(control);
+                if (connection != null) {
+                    connection.close();
+                }
             }
             return true;
         }
@@ -173,7 +196,7 @@ public class DataLoaderManagerService extends SystemService {
         }
     }
 
-    class DataLoaderServiceConnection implements ServiceConnection {
+    class DataLoaderServiceConnection implements ServiceConnection, AutoCloseable {
         final int mId;
         final DataLoaderParamsParcel mParams;
         final FileSystemControlParcel mControl;
@@ -204,13 +227,32 @@ public class DataLoaderManagerService extends SystemService {
 
         @Override
         public void onServiceDisconnected(ComponentName arg0) {
-            if (mListener != null) {
-                try {
-                    mListener.onStatusChanged(mId, IDataLoaderStatusListener.DATA_LOADER_DESTROYED);
-                } catch (RemoteException ignored) {
-                }
-            }
+            Slog.i(TAG, "DataLoader " + mId + " disconnected, but will try to recover");
+            callListener(IDataLoaderStatusListener.DATA_LOADER_DESTROYED);
             remove();
+        }
+
+        @Override
+        public void onBindingDied(ComponentName name) {
+            Slog.i(TAG, "DataLoader " + mId + " died");
+            callListener(IDataLoaderStatusListener.DATA_LOADER_DESTROYED);
+            mContext.unbindService(this);
+            close();
+            remove();
+        }
+
+        @Override
+        public void onNullBinding(ComponentName name) {
+            Slog.i(TAG, "DataLoader " + mId + " failed to start");
+            callListener(IDataLoaderStatusListener.DATA_LOADER_DESTROYED);
+            mContext.unbindService(this);
+            close();
+            remove();
+        }
+
+        @Override
+        public void close() {
+            DataLoaderManagerService.closeQuietly(mControl);
         }
 
         IDataLoader getDataLoader() {
@@ -223,11 +265,22 @@ public class DataLoaderManagerService extends SystemService {
             } catch (RemoteException ignored) {
             }
             mContext.unbindService(this);
+            close();
+            remove();
         }
 
         private void remove() {
             synchronized (mLock) {
                 mServiceConnections.remove(mId);
+            }
+        }
+
+        private void callListener(int status) {
+            if (mListener != null) {
+                try {
+                    mListener.onStatusChanged(mId, status);
+                } catch (RemoteException ignored) {
+                }
             }
         }
     }
