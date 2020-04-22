@@ -32,8 +32,12 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 
 /**
  * Provides operations to open or create an IncrementalStorage, using IIncrementalService
@@ -176,25 +180,6 @@ public final class IncrementalManager {
     }
 
     /**
-     * Iterates through path parents to find the base dir of an Incremental Storage.
-     *
-     * @param file Target file to search storage for.
-     * @return Absolute path which is a bind-mount point of Incremental File System.
-     */
-    @Nullable
-    private Path getStoragePathForFile(File file) {
-        File currentPath = new File(file.getParent());
-        while (currentPath.getParent() != null) {
-            IncrementalStorage storage = openStorage(currentPath.getAbsolutePath());
-            if (storage != null) {
-                return currentPath.toPath();
-            }
-            currentPath = new File(currentPath.getParent());
-        }
-        return null;
-    }
-
-    /**
      * Set up an app's code path. The expected outcome of this method is:
      * 1) The actual apk directory under /data/incremental is bind-mounted to the parent directory
      * of {@code afterCodeFile}.
@@ -212,29 +197,27 @@ public final class IncrementalManager {
      */
     public void renameCodePath(File beforeCodeFile, File afterCodeFile)
             throws IllegalArgumentException, IOException {
-        final String beforeCodePath = beforeCodeFile.getAbsolutePath();
-        final String afterCodePathParent = afterCodeFile.getParentFile().getAbsolutePath();
-        if (!isIncrementalPath(beforeCodePath)) {
-            throw new IllegalArgumentException("Not an Incremental path: " + beforeCodePath);
-        }
-        final String afterCodePathName = afterCodeFile.getName();
-        final Path apkStoragePath = Paths.get(beforeCodePath);
-        if (apkStoragePath == null || apkStoragePath.toAbsolutePath() == null) {
-            throw new IOException("Invalid source storage path for: " + beforeCodePath);
-        }
-        final IncrementalStorage apkStorage =
-                openStorage(apkStoragePath.toAbsolutePath().toString());
+        final File beforeCodeAbsolute = beforeCodeFile.getAbsoluteFile();
+        final IncrementalStorage apkStorage = openStorage(beforeCodeAbsolute.toString());
         if (apkStorage == null) {
-            throw new IOException("Failed to retrieve storage from Incremental Service.");
+            throw new IllegalArgumentException("Not an Incremental path: " + beforeCodeAbsolute);
         }
-        final IncrementalStorage linkedApkStorage = createStorage(afterCodePathParent, apkStorage,
-                IncrementalManager.CREATE_MODE_CREATE
-                        | IncrementalManager.CREATE_MODE_PERMANENT_BIND);
+        final String targetStorageDir = afterCodeFile.getAbsoluteFile().getParent();
+        final IncrementalStorage linkedApkStorage =
+                createStorage(targetStorageDir, apkStorage,
+                        IncrementalManager.CREATE_MODE_CREATE
+                                | IncrementalManager.CREATE_MODE_PERMANENT_BIND);
         if (linkedApkStorage == null) {
-            throw new IOException("Failed to create linked storage at dir: " + afterCodePathParent);
+            throw new IOException("Failed to create linked storage at dir: " + targetStorageDir);
         }
-        linkFiles(apkStorage, beforeCodeFile, "", linkedApkStorage, afterCodePathName);
-        apkStorage.unBind(beforeCodePath);
+        try {
+            final String afterCodePathName = afterCodeFile.getName();
+            linkFiles(apkStorage, beforeCodeAbsolute, "", linkedApkStorage, afterCodePathName);
+            apkStorage.unBind(beforeCodeAbsolute.toString());
+        } catch (Exception e) {
+            linkedApkStorage.unBind(targetStorageDir);
+            throw e;
+        }
     }
 
     /**
@@ -252,22 +235,27 @@ public final class IncrementalManager {
     private void linkFiles(IncrementalStorage sourceStorage, File sourceAbsolutePath,
             String sourceRelativePath, IncrementalStorage targetStorage,
             String targetRelativePath) throws IOException {
-        targetStorage.makeDirectory(targetRelativePath);
-        final File[] entryList = sourceAbsolutePath.listFiles();
-        for (int i = 0; i < entryList.length; i++) {
-            final File entry = entryList[i];
-            final String entryName = entryList[i].getName();
-            final String sourceEntryRelativePath =
-                    sourceRelativePath.isEmpty() ? entryName : sourceRelativePath + "/" + entryName;
-            final String targetEntryRelativePath = targetRelativePath + "/" + entryName;
-            if (entry.isFile()) {
-                sourceStorage.makeLink(
-                        sourceEntryRelativePath, targetStorage, targetEntryRelativePath);
-            } else if (entry.isDirectory()) {
-                linkFiles(sourceStorage, entry, sourceEntryRelativePath, targetStorage,
-                        targetEntryRelativePath);
+        final Path sourceBase = sourceAbsolutePath.toPath().resolve(sourceRelativePath);
+        final Path targetRelative = Paths.get(targetRelativePath);
+        Files.walkFileTree(sourceAbsolutePath.toPath(), new SimpleFileVisitor<Path>() {
+            @Override
+            public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs)
+                    throws IOException {
+                final Path relativeDir = sourceBase.relativize(dir);
+                targetStorage.makeDirectory(targetRelative.resolve(relativeDir).toString());
+                return FileVisitResult.CONTINUE;
             }
-        }
+
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
+                    throws IOException {
+                final Path relativeFile = sourceBase.relativize(file);
+                sourceStorage.makeLink(
+                        file.toAbsolutePath().toString(), targetStorage,
+                        targetRelative.resolve(relativeFile).toString());
+                return FileVisitResult.CONTINUE;
+            }
+        });
     }
 
     /**
