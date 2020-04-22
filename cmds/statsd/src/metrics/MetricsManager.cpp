@@ -189,7 +189,7 @@ MetricsManager::~MetricsManager() {
             StateManager::getInstance().unregisterListener(atomId, it);
         }
     }
-    mPullerManager->UnregisterPullUidProvider(mConfigKey);
+    mPullerManager->UnregisterPullUidProvider(mConfigKey, this);
 
     VLOG("~MetricsManager()");
 }
