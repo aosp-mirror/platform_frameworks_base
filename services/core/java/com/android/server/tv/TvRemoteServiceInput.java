@@ -88,6 +88,47 @@ final class TvRemoteServiceInput extends ITvRemoteServiceInput.Stub {
     }
 
     @Override
+    public void openGamepadBridge(IBinder token, String name) throws RemoteException {
+        if (DEBUG) {
+            Slog.d(TAG, String.format("openGamepadBridge(), token: %s, name: %s", token, name));
+        }
+
+        synchronized (mLock) {
+            if (mBridgeMap.containsKey(token)) {
+                if (DEBUG) {
+                    Slog.d(TAG, "InputBridge already exists");
+                }
+            } else {
+                final long idToken = Binder.clearCallingIdentity();
+                try {
+                    mBridgeMap.put(token, UinputBridge.openGamepad(token, name));
+                    token.linkToDeath(new IBinder.DeathRecipient() {
+                        @Override
+                        public void binderDied() {
+                            closeInputBridge(token);
+                        }
+                    }, 0);
+                } catch (IOException e) {
+                    Slog.e(TAG, "Cannot create device for " + name);
+                    return;
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Token is already dead");
+                    closeInputBridge(token);
+                    return;
+                } finally {
+                    Binder.restoreCallingIdentity(idToken);
+                }
+            }
+        }
+
+        try {
+            mProvider.onInputBridgeConnected(token);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Failed remote call to onInputBridgeConnected");
+        }
+    }
+
+    @Override
     public void closeInputBridge(IBinder token) {
         if (DEBUG) {
             Slog.d(TAG, "closeInputBridge(), token: " + token);
@@ -96,6 +137,7 @@ final class TvRemoteServiceInput extends ITvRemoteServiceInput.Stub {
         synchronized (mLock) {
             UinputBridge inputBridge = mBridgeMap.remove(token);
             if (inputBridge == null) {
+                Slog.w(TAG, String.format("Input bridge not found for token: %s", token));
                 return;
             }
 
@@ -117,6 +159,7 @@ final class TvRemoteServiceInput extends ITvRemoteServiceInput.Stub {
         synchronized (mLock) {
             UinputBridge inputBridge = mBridgeMap.get(token);
             if (inputBridge == null) {
+                Slog.w(TAG, String.format("Input bridge not found for token: %s", token));
                 return;
             }
 
@@ -145,6 +188,7 @@ final class TvRemoteServiceInput extends ITvRemoteServiceInput.Stub {
         synchronized (mLock) {
             UinputBridge inputBridge = mBridgeMap.get(token);
             if (inputBridge == null) {
+                Slog.w(TAG, String.format("Input bridge not found for token: %s", token));
                 return;
             }
 
@@ -166,6 +210,7 @@ final class TvRemoteServiceInput extends ITvRemoteServiceInput.Stub {
         synchronized (mLock) {
             UinputBridge inputBridge = mBridgeMap.get(token);
             if (inputBridge == null) {
+                Slog.w(TAG, String.format("Input bridge not found for token: %s", token));
                 return;
             }
 
@@ -188,6 +233,7 @@ final class TvRemoteServiceInput extends ITvRemoteServiceInput.Stub {
         synchronized (mLock) {
             UinputBridge inputBridge = mBridgeMap.get(token);
             if (inputBridge == null) {
+                Slog.w(TAG, String.format("Input bridge not found for token: %s", token));
                 return;
             }
 
@@ -209,6 +255,7 @@ final class TvRemoteServiceInput extends ITvRemoteServiceInput.Stub {
         synchronized (mLock) {
             UinputBridge inputBridge = mBridgeMap.get(token);
             if (inputBridge == null) {
+                Slog.w(TAG, String.format("Input bridge not found for token: %s", token));
                 return;
             }
 
@@ -230,12 +277,76 @@ final class TvRemoteServiceInput extends ITvRemoteServiceInput.Stub {
         synchronized (mLock) {
             UinputBridge inputBridge = mBridgeMap.get(token);
             if (inputBridge == null) {
+                Slog.w(TAG, String.format("Input bridge not found for token: %s", token));
                 return;
             }
 
             final long idToken = Binder.clearCallingIdentity();
             try {
                 inputBridge.sendPointerSync(token);
+            } finally {
+                Binder.restoreCallingIdentity(idToken);
+            }
+        }
+    }
+
+    @Override
+    public void sendGamepadKeyUp(IBinder token, int keyIndex) {
+        if (DEBUG_KEYS) {
+            Slog.d(TAG, String.format("sendGamepadKeyUp(), token: %s", token));
+        }
+        synchronized (mLock) {
+            UinputBridge inputBridge = mBridgeMap.get(token);
+            if (inputBridge == null) {
+                Slog.w(TAG, String.format("Input bridge not found for token: %s", token));
+                return;
+            }
+
+            final long idToken = Binder.clearCallingIdentity();
+            try {
+                inputBridge.sendGamepadKey(token, keyIndex, false);
+            } finally {
+                Binder.restoreCallingIdentity(idToken);
+            }
+        }
+    }
+
+    @Override
+    public void sendGamepadKeyDown(IBinder token, int keyCode) {
+        if (DEBUG_KEYS) {
+            Slog.d(TAG, String.format("sendGamepadKeyDown(), token: %s", token));
+        }
+        synchronized (mLock) {
+            UinputBridge inputBridge = mBridgeMap.get(token);
+            if (inputBridge == null) {
+                Slog.w(TAG, String.format("Input bridge not found for token: %s", token));
+                return;
+            }
+
+            final long idToken = Binder.clearCallingIdentity();
+            try {
+                inputBridge.sendGamepadKey(token, keyCode, true);
+            } finally {
+                Binder.restoreCallingIdentity(idToken);
+            }
+        }
+    }
+
+    @Override
+    public void sendGamepadAxisValue(IBinder token, int axis, float value) {
+        if (DEBUG_KEYS) {
+            Slog.d(TAG, String.format("sendGamepadAxisValue(), token: %s", token));
+        }
+        synchronized (mLock) {
+            UinputBridge inputBridge = mBridgeMap.get(token);
+            if (inputBridge == null) {
+                Slog.w(TAG, String.format("Input bridge not found for token: %s", token));
+                return;
+            }
+
+            final long idToken = Binder.clearCallingIdentity();
+            try {
+                inputBridge.sendGamepadAxisValue(token, axis, value);
             } finally {
                 Binder.restoreCallingIdentity(idToken);
             }

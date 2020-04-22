@@ -16,7 +16,6 @@
 
 package com.android.keyguard;
 
-import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.res.ColorStateList;
@@ -30,6 +29,8 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.widget.FrameLayout;
+
+import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardSecurityContainer.SecurityCallback;
@@ -101,7 +102,8 @@ public class KeyguardHostView extends FrameLayout implements SecurityCallback {
     public static final boolean DEBUG = KeyguardConstants.DEBUG;
     private static final String TAG = "KeyguardViewBase";
 
-    private KeyguardSecurityContainer mSecurityContainer;
+    @VisibleForTesting
+    protected KeyguardSecurityContainer mSecurityContainer;
 
     public KeyguardHostView(Context context) {
         this(context, null);
@@ -445,5 +447,12 @@ public class KeyguardHostView extends FrameLayout implements SecurityCallback {
 
     public SecurityMode getCurrentSecurityMode() {
         return mSecurityContainer.getCurrentSecurityMode();
+    }
+
+    /**
+     * When bouncer was visible and is starting to become hidden.
+     */
+    public void onStartingToHide() {
+        mSecurityContainer.onStartingToHide();
     }
 }

@@ -97,9 +97,7 @@ public final class RemoteInlineSuggestionRenderService extends
      * Gets the inline suggestions renderer info as a {@link Bundle}.
      */
     public void getInlineSuggestionsRendererInfo(@NonNull RemoteCallback callback) {
-        scheduleAsyncRequest((s) -> s.getInlineSuggestionsRendererInfo(new RemoteCallback(
-                (bundle) -> callback.sendResult(bundle)
-        )));
+        scheduleAsyncRequest((s) -> s.getInlineSuggestionsRendererInfo(callback));
     }
 
     @Nullable

@@ -258,6 +258,9 @@ final class RemoteConnectionService {
             // See comments on Connection.EXTRA_ORIGINAL_CONNECTION_ID for more information.
             Bundle newExtras = new Bundle();
             newExtras.putString(Connection.EXTRA_ORIGINAL_CONNECTION_ID, callId);
+            // Track the fact this request was relayed through the remote connection service.
+            newExtras.putParcelable(Connection.EXTRA_REMOTE_PHONE_ACCOUNT_HANDLE,
+                    parcel.getPhoneAccount());
             conference.putExtras(newExtras);
 
             conference.registerCallback(new RemoteConference.Callback() {
@@ -383,6 +386,11 @@ final class RemoteConnectionService {
             RemoteConnection remoteConnection = new RemoteConnection(callId,
                     mOutgoingConnectionServiceRpc, connection, callingPackage,
                     callingTargetSdkVersion);
+            // Track that it is via a remote connection.
+            Bundle newExtras = new Bundle();
+            newExtras.putParcelable(Connection.EXTRA_REMOTE_PHONE_ACCOUNT_HANDLE,
+                    connection.getPhoneAccount());
+            remoteConnection.putExtras(newExtras);
             mConnectionById.put(callId, remoteConnection);
             remoteConnection.registerCallback(new RemoteConnection.Callback() {
                 @Override
@@ -535,10 +543,20 @@ final class RemoteConnectionService {
             ConnectionRequest request,
             boolean isIncoming) {
         final String id = UUID.randomUUID().toString();
+        Bundle extras = new Bundle();
+        if (request.getExtras() != null) {
+            extras.putAll(request.getExtras());
+        }
+        // We will set the package name for the originator of the remote request; this lets the
+        // receiving ConnectionService know that the request originated from a remote connection
+        // service so that it can provide tracking information for Telecom.
+        extras.putString(Connection.EXTRA_REMOTE_CONNECTION_ORIGINATING_PACKAGE_NAME,
+                mOurConnectionServiceImpl.getApplicationContext().getOpPackageName());
+
         final ConnectionRequest newRequest = new ConnectionRequest.Builder()
                 .setAccountHandle(request.getAccountHandle())
                 .setAddress(request.getAddress())
-                .setExtras(request.getExtras())
+                .setExtras(extras)
                 .setVideoState(request.getVideoState())
                 .setRttPipeFromInCall(request.getRttPipeFromInCall())
                 .setRttPipeToInCall(request.getRttPipeToInCall())

@@ -163,7 +163,7 @@ public class IntentForwarderActivity extends Activity  {
             return;
         }
         sanitizeIntent(innerIntent);
-        startActivity(intentReceived);
+        startActivityAsCaller(intentReceived, null, null, false, getUserId());
         finish();
     }
 
@@ -234,23 +234,7 @@ public class IntentForwarderActivity extends Activity  {
 
         Intent intentToCheck = forwardIntent;
         if (Intent.ACTION_CHOOSER.equals(forwardIntent.getAction())) {
-            // The EXTRA_INITIAL_INTENTS may not be allowed to be forwarded.
-            if (forwardIntent.hasExtra(Intent.EXTRA_INITIAL_INTENTS)) {
-                Slog.wtf(TAG, "An chooser intent with extra initial intents cannot be forwarded to"
-                        + " a different user");
-                return null;
-            }
-            if (forwardIntent.hasExtra(Intent.EXTRA_REPLACEMENT_EXTRAS)) {
-                Slog.wtf(TAG, "A chooser intent with replacement extras cannot be forwarded to a"
-                        + " different user");
-                return null;
-            }
-            intentToCheck = forwardIntent.getParcelableExtra(Intent.EXTRA_INTENT);
-            if (intentToCheck == null) {
-                Slog.wtf(TAG, "Cannot forward a chooser intent with no extra "
-                        + Intent.EXTRA_INTENT);
-                return null;
-            }
+            return null;
         }
         if (forwardIntent.getSelector() != null) {
             intentToCheck = forwardIntent.getSelector();

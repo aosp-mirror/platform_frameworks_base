@@ -153,7 +153,7 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
 
     @Override
     protected boolean isRequestedVisibleAwaitingControl() {
-        return mIsRequestedVisibleAwaitingControl || isRequestedVisible();
+        return mIsRequestedVisibleAwaitingControl;
     }
 
     private boolean isDummyOrEmptyEditor(EditorInfo info) {

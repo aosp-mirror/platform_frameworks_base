@@ -64,6 +64,7 @@ public class VirtualDisplayTaskEmbedder extends TaskEmbedder {
     // For Virtual Displays
     private int mDisplayDensityDpi;
     private final boolean mSingleTaskInstance;
+    private final boolean mUsePublicVirtualDisplay;
     private VirtualDisplay mVirtualDisplay;
     private Insets mForwardedInsets;
     private DisplayMetrics mTmpDisplayMetrics;
@@ -78,9 +79,10 @@ public class VirtualDisplayTaskEmbedder extends TaskEmbedder {
      *                           only applicable if virtual displays are used
      */
     public VirtualDisplayTaskEmbedder(Context context, VirtualDisplayTaskEmbedder.Host host,
-            boolean singleTaskInstance) {
+            boolean singleTaskInstance, boolean usePublicVirtualDisplay) {
         super(context, host);
         mSingleTaskInstance = singleTaskInstance;
+        mUsePublicVirtualDisplay = usePublicVirtualDisplay;
     }
 
     /**
@@ -97,11 +99,16 @@ public class VirtualDisplayTaskEmbedder extends TaskEmbedder {
     public boolean onInitialize() {
         final DisplayManager displayManager = mContext.getSystemService(DisplayManager.class);
         mDisplayDensityDpi = getBaseDisplayDensity();
+
+        int virtualDisplayFlags = VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY
+                | VIRTUAL_DISPLAY_FLAG_DESTROY_CONTENT_ON_REMOVAL;
+        if (mUsePublicVirtualDisplay) {
+            virtualDisplayFlags |= VIRTUAL_DISPLAY_FLAG_PUBLIC;
+        }
+
         mVirtualDisplay = displayManager.createVirtualDisplay(
                 DISPLAY_NAME + "@" + System.identityHashCode(this), mHost.getWidth(),
-                mHost.getHeight(), mDisplayDensityDpi, null,
-                VIRTUAL_DISPLAY_FLAG_PUBLIC | VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY
-                        | VIRTUAL_DISPLAY_FLAG_DESTROY_CONTENT_ON_REMOVAL);
+                mHost.getHeight(), mDisplayDensityDpi, null, virtualDisplayFlags);
 
         if (mVirtualDisplay == null) {
             Log.e(TAG, "Failed to initialize TaskEmbedder");

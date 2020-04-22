@@ -2504,7 +2504,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
 
         IUsageStatsManager usm = IUsageStatsManager.Stub.asInterface(ServiceManager.getService(
                 Context.USAGE_STATS_SERVICE));
-        boolean isIdle = usm.isAppInactive(packageName, userId);
+        boolean isIdle = usm.isAppInactive(packageName, userId, SHELL_PACKAGE_NAME);
         pw.println("Idle=" + isIdle);
         return 0;
     }

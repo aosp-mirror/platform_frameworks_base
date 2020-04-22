@@ -22,15 +22,10 @@
 
     <dimen name="status_bar_icon_drawing_size_dark">36dp</dimen>
     <dimen name="status_bar_icon_drawing_size">36dp</dimen>
-    <dimen name="car_qs_header_system_icons_area_height">96dp</dimen>
     <!-- The amount by which to scale up the status bar icons. -->
     <item name="status_bar_icon_scale_factor" format="float" type="dimen">1.75</item>
 
     <dimen name="car_primary_icon_size">@*android:dimen/car_primary_icon_size</dimen>
-
-    <!-- dimensions for the car user switcher -->
-    <dimen name="car_user_switcher_name_text_size">@dimen/car_body1_size</dimen>
-    <dimen name="car_user_switcher_vertical_spacing_between_users">124dp</dimen>
 
     <!--These values represent MIN and MAX for hvac-->
     <item name="hvac_min_value" format="float" type="dimen">0</item>
@@ -90,9 +85,6 @@
     <!-- The width of panel holding the notification card. -->
     <dimen name="notification_panel_width">522dp</dimen>
 
-    <!-- The width of the quick settings panel. -1 for match_parent. -->
-    <dimen name="qs_panel_width">-1px</dimen>
-
     <!-- Height of a small notification in the status bar-->
     <dimen name="notification_min_height">192dp</dimen>
 
@@ -149,7 +141,19 @@
          child closer so there is less wasted space. -->
     <dimen name="notification_children_container_margin_top">68dp</dimen>
 
-    <!-- The height of the quick settings footer that holds the user switcher, settings icon,
-         etc. in the car setting.-->
-    <dimen name="qs_footer_height">74dp</dimen>
+    <!-- dimensions for the car user switcher -->
+    <dimen name="car_user_switcher_name_text_size">@*android:dimen/car_body1_size</dimen>
+    <dimen name="car_user_switcher_image_avatar_size">@*android:dimen/car_large_avatar_size</dimen>
+    <dimen name="car_user_switcher_vertical_spacing_between_users">@*android:dimen/car_padding_5</dimen>
+    <dimen name="car_user_switcher_vertical_spacing_between_name_and_avatar">@*android:dimen/car_padding_4</dimen>
+    <dimen name="car_user_switcher_margin_top">@*android:dimen/car_padding_4</dimen>
+
+    <dimen name="car_navigation_button_width">64dp</dimen>
+    <dimen name="car_navigation_bar_width">760dp</dimen>
+    <dimen name="car_left_navigation_bar_width">96dp</dimen>
+    <dimen name="car_right_navigation_bar_width">96dp</dimen>
+
+    <dimen name="car_user_switcher_container_height">420dp</dimen>
+    <!-- This must be the negative of car_user_switcher_container_height for the animation. -->
+    <dimen name="car_user_switcher_container_anim_height">-420dp</dimen>
 </resources>

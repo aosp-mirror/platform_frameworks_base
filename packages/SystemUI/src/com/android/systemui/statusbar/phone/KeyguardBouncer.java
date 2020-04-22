@@ -400,6 +400,9 @@ public class KeyguardBouncer {
             mExpansionCallback.onFullyHidden();
         } else if (fraction != EXPANSION_VISIBLE && oldExpansion == EXPANSION_VISIBLE) {
             mExpansionCallback.onStartingToHide();
+            if (mKeyguardView != null) {
+                mKeyguardView.onStartingToHide();
+            }
         }
     }
 

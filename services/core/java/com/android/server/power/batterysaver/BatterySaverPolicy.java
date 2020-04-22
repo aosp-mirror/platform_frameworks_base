@@ -214,7 +214,7 @@ public class BatterySaverPolicy extends ContentObserver {
      * required adjustments.
      */
     @GuardedBy("mLock")
-    private Policy mEffectivePolicy = OFF_POLICY;
+    private Policy mEffectivePolicyRaw = OFF_POLICY;
 
     @IntDef(prefix = {"POLICY_LEVEL_"}, value = {
             POLICY_LEVEL_OFF,
@@ -228,12 +228,8 @@ public class BatterySaverPolicy extends ContentObserver {
     static final int POLICY_LEVEL_ADAPTIVE = 1;
     static final int POLICY_LEVEL_FULL = 2;
 
-    /**
-     * Do not access directly; always use {@link #setPolicyLevel}
-     * and {@link #getPolicyLevelLocked}
-     */
     @GuardedBy("mLock")
-    private int mPolicyLevelRaw = POLICY_LEVEL_OFF;
+    private int mPolicyLevel = POLICY_LEVEL_OFF;
 
     private final Context mContext;
     private final ContentResolver mContentResolver;
@@ -338,7 +334,7 @@ public class BatterySaverPolicy extends ContentObserver {
     private void maybeNotifyListenersOfPolicyChange() {
         final BatterySaverPolicyListener[] listeners;
         synchronized (mLock) {
-            if (getPolicyLevelLocked() == POLICY_LEVEL_OFF) {
+            if (mPolicyLevel == POLICY_LEVEL_OFF) {
                 // Current policy is OFF, so there's no change to notify listeners of.
                 return;
             }
@@ -428,14 +424,14 @@ public class BatterySaverPolicy extends ContentObserver {
         boolean changed = false;
         Policy newFullPolicy = Policy.fromSettings(setting, deviceSpecificSetting,
                 DEFAULT_FULL_POLICY);
-        if (getPolicyLevelLocked() == POLICY_LEVEL_FULL && !mFullPolicy.equals(newFullPolicy)) {
+        if (mPolicyLevel == POLICY_LEVEL_FULL && !mFullPolicy.equals(newFullPolicy)) {
             changed = true;
         }
         mFullPolicy = newFullPolicy;
 
         mDefaultAdaptivePolicy = Policy.fromSettings(adaptiveSetting, adaptiveDeviceSpecificSetting,
                 DEFAULT_ADAPTIVE_POLICY);
-        if (getPolicyLevelLocked() == POLICY_LEVEL_ADAPTIVE
+        if (mPolicyLevel == POLICY_LEVEL_ADAPTIVE
                 && !mAdaptivePolicy.equals(mDefaultAdaptivePolicy)) {
             changed = true;
         }
@@ -451,8 +447,9 @@ public class BatterySaverPolicy extends ContentObserver {
     @GuardedBy("mLock")
     private void updatePolicyDependenciesLocked() {
         final Policy rawPolicy = getCurrentRawPolicyLocked();
-
         final int locationMode;
+
+        invalidatePowerSaveModeCaches();
         if (mCarModeEnabled
                 && rawPolicy.locationMode != PowerManager.LOCATION_MODE_NO_CHANGE
                 && rawPolicy.locationMode != PowerManager.LOCATION_MODE_FOREGROUND_ONLY) {
@@ -461,7 +458,8 @@ public class BatterySaverPolicy extends ContentObserver {
         } else {
             locationMode = rawPolicy.locationMode;
         }
-        mEffectivePolicy = new Policy(
+
+        mEffectivePolicyRaw = new Policy(
                 rawPolicy.adjustBrightnessFactor,
                 rawPolicy.advertiseIsEnabled,
                 rawPolicy.deferFullBackup,
@@ -489,24 +487,24 @@ public class BatterySaverPolicy extends ContentObserver {
 
         final StringBuilder sb = new StringBuilder();
 
-        if (mEffectivePolicy.forceAllAppsStandby) sb.append("A");
-        if (mEffectivePolicy.forceBackgroundCheck) sb.append("B");
+        if (mEffectivePolicyRaw.forceAllAppsStandby) sb.append("A");
+        if (mEffectivePolicyRaw.forceBackgroundCheck) sb.append("B");
 
-        if (mEffectivePolicy.disableVibration) sb.append("v");
-        if (mEffectivePolicy.disableAnimation) sb.append("a");
-        if (mEffectivePolicy.disableSoundTrigger) sb.append("s");
-        if (mEffectivePolicy.deferFullBackup) sb.append("F");
-        if (mEffectivePolicy.deferKeyValueBackup) sb.append("K");
-        if (mEffectivePolicy.enableFirewall) sb.append("f");
-        if (mEffectivePolicy.enableDataSaver) sb.append("d");
-        if (mEffectivePolicy.enableAdjustBrightness) sb.append("b");
+        if (mEffectivePolicyRaw.disableVibration) sb.append("v");
+        if (mEffectivePolicyRaw.disableAnimation) sb.append("a");
+        if (mEffectivePolicyRaw.disableSoundTrigger) sb.append("s");
+        if (mEffectivePolicyRaw.deferFullBackup) sb.append("F");
+        if (mEffectivePolicyRaw.deferKeyValueBackup) sb.append("K");
+        if (mEffectivePolicyRaw.enableFirewall) sb.append("f");
+        if (mEffectivePolicyRaw.enableDataSaver) sb.append("d");
+        if (mEffectivePolicyRaw.enableAdjustBrightness) sb.append("b");
 
-        if (mEffectivePolicy.disableLaunchBoost) sb.append("l");
-        if (mEffectivePolicy.disableOptionalSensors) sb.append("S");
-        if (mEffectivePolicy.disableAod) sb.append("o");
-        if (mEffectivePolicy.enableQuickDoze) sb.append("q");
+        if (mEffectivePolicyRaw.disableLaunchBoost) sb.append("l");
+        if (mEffectivePolicyRaw.disableOptionalSensors) sb.append("S");
+        if (mEffectivePolicyRaw.disableAod) sb.append("o");
+        if (mEffectivePolicyRaw.enableQuickDoze) sb.append("q");
 
-        sb.append(mEffectivePolicy.locationMode);
+        sb.append(mEffectivePolicyRaw.locationMode);
 
         mEventLogKeys = sb.toString();
     }
@@ -969,14 +967,14 @@ public class BatterySaverPolicy extends ContentObserver {
      */
     boolean setPolicyLevel(@PolicyLevel int level) {
         synchronized (mLock) {
-            if (getPolicyLevelLocked() == level) {
+            if (mPolicyLevel == level) {
                 return false;
             }
             switch (level) {
                 case POLICY_LEVEL_FULL:
                 case POLICY_LEVEL_ADAPTIVE:
                 case POLICY_LEVEL_OFF:
-                    setPolicyLevelLocked(level);
+                    mPolicyLevel = level;
                     break;
                 default:
                     Slog.wtf(TAG, "setPolicyLevel invalid level given: " + level);
@@ -998,7 +996,7 @@ public class BatterySaverPolicy extends ContentObserver {
         }
 
         mAdaptivePolicy = p;
-        if (getPolicyLevelLocked() == POLICY_LEVEL_ADAPTIVE) {
+        if (mPolicyLevel == POLICY_LEVEL_ADAPTIVE) {
             updatePolicyDependenciesLocked();
             return true;
         }
@@ -1011,11 +1009,11 @@ public class BatterySaverPolicy extends ContentObserver {
     }
 
     private Policy getCurrentPolicyLocked() {
-        return mEffectivePolicy;
+        return mEffectivePolicyRaw;
     }
 
     private Policy getCurrentRawPolicyLocked() {
-        switch (getPolicyLevelLocked()) {
+        switch (mPolicyLevel) {
             case POLICY_LEVEL_FULL:
                 return mFullPolicy;
             case POLICY_LEVEL_ADAPTIVE:
@@ -1077,12 +1075,12 @@ public class BatterySaverPolicy extends ContentObserver {
 
             pw.println("  mAccessibilityEnabled=" + mAccessibilityEnabled);
             pw.println("  mCarModeEnabled=" + mCarModeEnabled);
-            pw.println("  mPolicyLevel=" + getPolicyLevelLocked());
+            pw.println("  mPolicyLevel=" + mPolicyLevel);
 
             dumpPolicyLocked(pw, "  ", "full", mFullPolicy);
             dumpPolicyLocked(pw, "  ", "default adaptive", mDefaultAdaptivePolicy);
             dumpPolicyLocked(pw, "  ", "current adaptive", mAdaptivePolicy);
-            dumpPolicyLocked(pw, "  ", "effective", mEffectivePolicy);
+            dumpPolicyLocked(pw, "  ", "effective", mEffectivePolicyRaw);
         }
     }
 
@@ -1169,21 +1167,5 @@ public class BatterySaverPolicy extends ContentObserver {
                 maybeNotifyListenersOfPolicyChange();
             }
         }
-    }
-
-    /** Non-blocking getter exists as a reminder not to modify cached fields directly */
-    @GuardedBy("mLock")
-    private int getPolicyLevelLocked() {
-        return mPolicyLevelRaw;
-    }
-
-    @GuardedBy("mLock")
-    private void setPolicyLevelLocked(int level) {
-        if (mPolicyLevelRaw == level) {
-            return;
-        }
-        // Under lock, invalidate before set ensures caches won't return stale values.
-        invalidatePowerSaveModeCaches();
-        mPolicyLevelRaw = level;
     }
 }

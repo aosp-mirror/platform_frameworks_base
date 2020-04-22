@@ -1577,15 +1577,27 @@ public class UsageStatsService extends SystemService implements
         }
 
         @Override
-        public boolean isAppInactive(String packageName, int userId) {
+        public boolean isAppInactive(String packageName, int userId, String callingPackage) {
+            final int callingUid = Binder.getCallingUid();
             try {
                 userId = ActivityManager.getService().handleIncomingUser(Binder.getCallingPid(),
-                        Binder.getCallingUid(), userId, false, false, "isAppInactive", null);
+                        callingUid, userId, false, false, "isAppInactive", null);
             } catch (RemoteException re) {
                 throw re.rethrowFromSystemServer();
             }
+
+            // If the calling app is asking about itself, continue, else check for permission.
+            if (packageName.equals(callingPackage)) {
+                final int actualCallingUid = mPackageManagerInternal.getPackageUidInternal(
+                        callingPackage, 0, userId);
+                if (actualCallingUid != callingUid) {
+                    return false;
+                }
+            } else if (!hasPermission(callingPackage)) {
+                return false;
+            }
             final boolean obfuscateInstantApps = shouldObfuscateInstantAppsForCaller(
-                    Binder.getCallingUid(), userId);
+                    callingUid, userId);
             final long token = Binder.clearCallingIdentity();
             try {
                 return mAppStandby.isAppIdleFiltered(

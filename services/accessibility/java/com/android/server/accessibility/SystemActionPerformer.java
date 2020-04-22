@@ -301,7 +301,11 @@ public class SystemActionPerformer {
                     return lockScreen();
                 case AccessibilityService.GLOBAL_ACTION_TAKE_SCREENSHOT:
                     return takeScreenshot();
+                case AccessibilityService.GLOBAL_ACTION_KEYCODE_HEADSETHOOK :
+                    sendDownAndUpKeyEvents(KeyEvent.KEYCODE_HEADSETHOOK);
+                    return true;
                 default:
+                    Slog.e(TAG, "Invalid action id: " + actionId);
                     return false;
             }
         } finally {

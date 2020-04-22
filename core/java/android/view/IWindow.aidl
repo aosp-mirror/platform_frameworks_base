@@ -21,15 +21,16 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
+import android.util.MergedConfiguration;
+import android.view.DisplayCutout;
 import android.view.DragEvent;
+import android.view.InsetsSourceControl;
+import android.view.InsetsState;
+import android.view.IScrollCaptureController;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
-import android.view.DisplayCutout;
-import android.view.InsetsState;
-import android.view.InsetsSourceControl;
 
 import com.android.internal.os.IResultReceiver;
-import android.util.MergedConfiguration;
 
 /**
  * API back to a client window that the Window Manager uses to inform it of
@@ -139,4 +140,11 @@ oneway interface IWindow {
      * Tell the window that it is either gaining or losing pointer capture.
      */
     void dispatchPointerCaptureChanged(boolean hasCapture);
+
+    /**
+     * Called when Scroll Capture support is requested for a window.
+     *
+     * @param controller the controller to receive responses
+     */
+    void requestScrollCapture(in IScrollCaptureController controller);
 }

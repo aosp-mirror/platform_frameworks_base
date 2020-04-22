@@ -25,6 +25,7 @@ import android.os.SystemProperties;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -159,6 +160,13 @@ import java.util.concurrent.atomic.AtomicLong;
  * this local case, there's no IPC, so use of the cache is (depending on exact
  * circumstance) unnecessary.
  *
+ * For security, there is a whitelist of processes that are allowed to invalidate a cache.
+ * The whitelist includes normal runtime processes but does not include test processes.
+ * Test processes must call {@code PropertyInvalidatedCache.disableForTestMode()} to disable
+ * all cache activity in that process.
+ *
+ * Caching can be disabled completely by initializing {@code sEnabled} to false and rebuilding.
+ *
  * @param <Query> The class used to index cache entries: must be hashable and comparable
  * @param <Result> The class holding cache entries; use a boxed primitive if possible
  *
@@ -170,8 +178,13 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
 
     private static final String TAG = "PropertyInvalidatedCache";
     private static final boolean DEBUG = false;
-    private static final boolean ENABLE = true;
     private static final boolean VERIFY = false;
+
+    /**
+     * If sEnabled is false then all cache operations are stubbed out.  Set
+     * it to false inside test processes.
+     */
+    private static boolean sEnabled = true;
 
     private static final Object sCorkLock = new Object();
 
@@ -300,7 +313,7 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
      * Return whether the cache is disabled in this process.
      */
     public final boolean isDisabledLocal() {
-        return mDisabled;
+        return mDisabled || !sEnabled;
     }
 
     /**
@@ -308,7 +321,7 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
      */
     public Result query(Query query) {
         // Let access to mDisabled race: it's atomic anyway.
-        long currentNonce = (ENABLE && !mDisabled) ? getCurrentNonce() : NONCE_DISABLED;
+        long currentNonce = (!isDisabledLocal()) ? getCurrentNonce() : NONCE_DISABLED;
         for (;;) {
             if (currentNonce == NONCE_DISABLED || currentNonce == NONCE_UNSET) {
                 if (DEBUG) {
@@ -419,6 +432,9 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
      * @param name Name of the cache-key property to invalidate
      */
     public static void disableSystemWide(@NonNull String name) {
+        if (!sEnabled) {
+            return;
+        }
         SystemProperties.set(name, Long.toString(NONCE_DISABLED));
     }
 
@@ -437,6 +453,14 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
      * @param name Name of the cache-key property to invalidate
      */
     public static void invalidateCache(@NonNull String name) {
+        if (!sEnabled) {
+            if (DEBUG) {
+                Log.w(TAG, String.format(
+                    "cache invalidate %s suppressed", name));
+            }
+            return;
+        }
+
         // Take the cork lock so invalidateCache() racing against corkInvalidations() doesn't
         // clobber a cork-written NONCE_UNSET with a cache key we compute before the cork.
         // The property service is single-threaded anyway, so we don't lose any concurrency by
@@ -675,5 +699,15 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
      */
     public String queryToString(Query query) {
         return Objects.toString(query);
+    }
+
+    /**
+     * Disable all caches in the local process.  Once disabled it is not
+     * possible to re-enable caching in the current process.
+     */
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    public static void disableForTestMode() {
+        Log.d(TAG, "disabling all caches in the process");
+        sEnabled = false;
     }
 }

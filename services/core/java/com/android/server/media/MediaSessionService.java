@@ -165,6 +165,10 @@ public class MediaSessionService extends SystemService implements Monitor {
         mAudioPlayerStateMonitor = AudioPlayerStateMonitor.getInstance(mContext);
         mAudioPlayerStateMonitor.registerListener(
                 (config, isRemoved) -> {
+                    if (DEBUG) {
+                        Log.d(TAG, "Audio playback is changed, config=" + config
+                                + ", removed=" + isRemoved);
+                    }
                     if (config.getPlayerType()
                             == AudioPlaybackConfiguration.PLAYER_TYPE_JAM_SOUNDPOOL) {
                         return;
@@ -1993,7 +1997,7 @@ public class MediaSessionService extends SystemService implements Monitor {
                     FullUserRecord user = getFullUserRecordLocked(record.getUserId());
                     if (record != null && user != null) {
                         record.setSessionPolicies(policies);
-                        user.mPriorityStack.updateMediaButtonSessionIfNeeded();
+                        user.mPriorityStack.updateMediaButtonSessionBySessionPolicyChange(record);
                     }
                 }
             } finally {

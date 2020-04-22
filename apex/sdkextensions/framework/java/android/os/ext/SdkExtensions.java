@@ -62,7 +62,11 @@ public class SdkExtensions {
         if (sdk < VERSION_CODES.R) {
             throw new IllegalArgumentException(String.valueOf(sdk) + " does not have extensions");
         }
-        return R_EXTENSION_INT;
+
+        if (sdk == VERSION_CODES.R) {
+            return R_EXTENSION_INT;
+        }
+        return 0;
     }
 
 }

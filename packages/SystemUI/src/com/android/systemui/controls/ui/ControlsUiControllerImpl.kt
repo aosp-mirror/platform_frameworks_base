@@ -85,7 +85,7 @@ class ControlsUiControllerImpl @Inject constructor (
         private const val PREF_STRUCTURE = "controls_structure"
 
         private const val USE_PANELS = "systemui.controls_use_panel"
-        private const val FADE_IN_MILLIS = 225L
+        private const val FADE_IN_MILLIS = 200L
 
         private val EMPTY_COMPONENT = ComponentName("", "")
         private val EMPTY_STRUCTURE = StructureInfo(
@@ -104,6 +104,7 @@ class ControlsUiControllerImpl @Inject constructor (
     private var popup: ListPopupWindow? = null
     private var activeDialog: Dialog? = null
     private var hidden = true
+    private lateinit var dismissGlobalActions: Runnable
 
     override val available: Boolean
         get() = controlsController.get().available
@@ -134,9 +135,10 @@ class ControlsUiControllerImpl @Inject constructor (
         }
     }
 
-    override fun show(parent: ViewGroup) {
+    override fun show(parent: ViewGroup, dismissGlobalActions: Runnable) {
         Log.d(ControlsUiController.TAG, "show()")
         this.parent = parent
+        this.dismissGlobalActions = dismissGlobalActions
         hidden = false
 
         allStructures = controlsController.get().getFavorites()
@@ -169,7 +171,7 @@ class ControlsUiControllerImpl @Inject constructor (
         fadeAnim.setDuration(FADE_IN_MILLIS)
         fadeAnim.addListener(object : AnimatorListenerAdapter() {
             override fun onAnimationEnd(animation: Animator) {
-                show(parent)
+                show(parent, dismissGlobalActions)
                 val showAnim = ObjectAnimator.ofFloat(parent, "alpha", 0.0f, 1.0f)
                 showAnim.setInterpolator(DecelerateInterpolator(1.0f))
                 showAnim.setDuration(FADE_IN_MILLIS)
@@ -256,9 +258,10 @@ class ControlsUiControllerImpl @Inject constructor (
     }
 
     private fun startActivity(context: Context, intent: Intent) {
-        val closeDialog = Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)
-        context.sendBroadcast(closeDialog)
+        // Force animations when transitioning from a dialog to an activity
+        intent.putExtra(ControlsUiController.EXTRA_ANIMATE, true)
         context.startActivity(intent)
+        dismissGlobalActions.run()
     }
 
     private fun showControlsView(items: List<SelectionItem>) {

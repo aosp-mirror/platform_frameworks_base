@@ -54,7 +54,6 @@ import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.PluginDependencyProvider;
 import com.android.systemui.plugins.qs.QS;
-import com.android.systemui.qs.car.CarQSFragment;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.ScreenPinningRequest;
 import com.android.systemui.shared.plugins.PluginManager;
@@ -407,7 +406,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
 
     @Override
     protected QS createDefaultQSFragment() {
-        return new CarQSFragment();
+        return null;
     }
 
     private BatteryController createBatteryController() {

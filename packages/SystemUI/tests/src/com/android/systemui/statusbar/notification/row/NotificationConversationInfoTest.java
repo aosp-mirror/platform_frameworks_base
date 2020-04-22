@@ -48,9 +48,9 @@ import android.app.INotificationManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationChannelGroup;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Person;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.LauncherApps;
@@ -91,6 +91,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.mockito.stubbing.Answer;
@@ -147,14 +148,15 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
     private ShadeController mShadeController;
     @Mock
     private ConversationIconFactory mIconFactory;
-    @Mock
-    private Context mUserContext;
     @Mock(answer = Answers.RETURNS_SELF)
     private PriorityOnboardingDialogController.Builder mBuilder;
     private Provider<PriorityOnboardingDialogController.Builder> mBuilderProvider = () -> mBuilder;
+    @Mock
+    private Notification.BubbleMetadata mBubbleMetadata;
 
     @Before
     public void setUp() throws Exception {
+        MockitoAnnotations.initMocks(this);
         mTestableLooper = TestableLooper.get(this);
 
         mDependency.injectTestDependency(Dependency.BG_LOOPER, mTestableLooper.getLooper());
@@ -228,6 +230,11 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
         when(mMockINotificationManager.getConversationNotificationChannel(anyString(), anyInt(),
                 anyString(), eq(TEST_CHANNEL), eq(false), eq(CONVERSATION_ID)))
                 .thenReturn(mConversationChannel);
+
+        when(mMockINotificationManager.getConsolidatedNotificationPolicy())
+                .thenReturn(mock(NotificationManager.Policy.class));
+
+        when(mBuilder.build()).thenReturn(mock(PriorityOnboardingDialogController.class));
     }
 
     @Test
@@ -240,10 +247,11 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
                 mEntry,
+                mBubbleMetadata,
                 null,
                 null,
                 mIconFactory,
-                mUserContext,
+                mContext,
                 mBuilderProvider,
                 true);
         final ImageView view = mNotificationInfo.findViewById(R.id.conversation_icon);
@@ -261,10 +269,11 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
                 mEntry,
+                mBubbleMetadata,
                 null,
                 null,
                 mIconFactory,
-                mUserContext,
+                mContext,
                 mBuilderProvider,
                 true);
         final TextView textView = mNotificationInfo.findViewById(R.id.pkg_name);
@@ -283,7 +292,8 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
                 mEntry,
-                null,
+    mBubbleMetadata,
+    null,
                 null,
                 null,
                 true);
@@ -308,10 +318,11 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
                 mEntry,
+                mBubbleMetadata,
                 null,
                 null,
                 mIconFactory,
-                mUserContext,
+                mContext,
                 mBuilderProvider,
                 true);
         final TextView textView = mNotificationInfo.findViewById(R.id.group_name);
@@ -331,10 +342,11 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
                 mEntry,
+                mBubbleMetadata,
                 null,
                 null,
                 mIconFactory,
-                mUserContext,
+                mContext,
                 mBuilderProvider,
                 true);
         final TextView textView = mNotificationInfo.findViewById(R.id.group_name);
@@ -353,10 +365,11 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
                 mEntry,
+                mBubbleMetadata,
                 null,
                 null,
                 mIconFactory,
-                mUserContext,
+                mContext,
                 mBuilderProvider,
                 true);
         final TextView nameView = mNotificationInfo.findViewById(R.id.delegate_name);
@@ -382,10 +395,11 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
                 entry,
+                mBubbleMetadata,
                 null,
                 null,
                 mIconFactory,
-                mUserContext,
+                mContext,
                 mBuilderProvider,
                 true);
         final TextView nameView = mNotificationInfo.findViewById(R.id.delegate_name);
@@ -404,13 +418,14 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
                 mEntry,
+                mBubbleMetadata,
                 (View v, NotificationChannel c, int appUid) -> {
                     assertEquals(mConversationChannel, c);
                     latch.countDown();
                 },
                 null,
                 mIconFactory,
-                mUserContext,
+                mContext,
                 mBuilderProvider,
                 true);
 
@@ -430,10 +445,11 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
                 mEntry,
+                mBubbleMetadata,
                 null,
                 null,
                 mIconFactory,
-                mUserContext,
+                mContext,
                 mBuilderProvider,
                 true);
         final View settingsButton = mNotificationInfo.findViewById(R.id.info);
@@ -451,13 +467,14 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
                 mEntry,
+                mBubbleMetadata,
                 (View v, NotificationChannel c, int appUid) -> {
                     assertEquals(mNotificationChannel, c);
                     latch.countDown();
                 },
                 null,
                 mIconFactory,
-                mUserContext,
+                mContext,
                 mBuilderProvider,
                 false);
         final View settingsButton = mNotificationInfo.findViewById(R.id.info);
@@ -476,10 +493,11 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
                 mEntry,
+                mBubbleMetadata,
                 null,
                 null,
                 mIconFactory,
-                mUserContext,
+                mContext,
                 mBuilderProvider,
                 true);
         View view = mNotificationInfo.findViewById(R.id.silence);
@@ -501,10 +519,11 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
                 mEntry,
+                mBubbleMetadata,
                 null,
                 null,
                 mIconFactory,
-                mUserContext,
+                mContext,
                 mBuilderProvider,
                 true);
         View view = mNotificationInfo.findViewById(R.id.default_behavior);
@@ -529,10 +548,11 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
                 mEntry,
+                mBubbleMetadata,
                 null,
                 null,
                 mIconFactory,
-                mUserContext,
+                mContext,
                 mBuilderProvider,
                 true);
         View view = mNotificationInfo.findViewById(R.id.default_behavior);
@@ -556,10 +576,11 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
                 mEntry,
+                mBubbleMetadata,
                 null,
                 null,
                 mIconFactory,
-                mUserContext,
+                mContext,
                 mBuilderProvider,
                 true);
 
@@ -596,10 +617,11 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
                 mEntry,
+                mBubbleMetadata,
                 null,
                 null,
                 mIconFactory,
-                mUserContext,
+                mContext,
                 mBuilderProvider,
                 true);
 
@@ -635,10 +657,11 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
                 mEntry,
+                mBubbleMetadata,
                 null,
                 null,
                 mIconFactory,
-                mUserContext,
+                mContext,
                 mBuilderProvider,
                 true);
 
@@ -675,10 +698,11 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
                 mEntry,
+                mBubbleMetadata,
                 null,
                 null,
                 mIconFactory,
-                mUserContext,
+                mContext,
                 mBuilderProvider,
                 true);
 
@@ -709,10 +733,11 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
                 mEntry,
+                mBubbleMetadata,
                 null,
                 null,
                 mIconFactory,
-                mUserContext,
+                mContext,
                 mBuilderProvider,
                 true);
 
@@ -741,10 +766,11 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
                 mEntry,
+                mBubbleMetadata,
                 null,
                 null,
                 mIconFactory,
-                mUserContext,
+                mContext,
                 mBuilderProvider,
                 true);
 
@@ -774,10 +800,11 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
                 mEntry,
+                mBubbleMetadata,
                 null,
                 null,
                 mIconFactory,
-                mUserContext,
+                mContext,
                 mBuilderProvider,
                 true);
 
@@ -807,10 +834,11 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
                 mEntry,
+                mBubbleMetadata,
                 null,
                 null,
                 mIconFactory,
-                mUserContext,
+                mContext,
                 mBuilderProvider,
                 true);
 
@@ -839,10 +867,11 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
                 mEntry,
+                mBubbleMetadata,
                 null,
                 null,
                 mIconFactory,
-                mUserContext,
+                mContext,
                 mBuilderProvider,
                 true);
 
@@ -870,10 +899,11 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
                 mEntry,
+                mBubbleMetadata,
                 null,
                 null,
                 mIconFactory,
-                mUserContext,
+                mContext,
                 mBuilderProvider,
                 true);
 
@@ -892,10 +922,11 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
                 mEntry,
+                mBubbleMetadata,
                 null,
                 null,
                 mIconFactory,
-                mUserContext,
+                mContext,
                 mBuilderProvider,
                 true);
 
@@ -910,13 +941,12 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
 
         // GIVEN the priority onboarding screen is present
         PriorityOnboardingDialogController.Builder b =
-                new PriorityOnboardingDialogController.Builder();
+                mock(PriorityOnboardingDialogController.Builder.class, Answers.RETURNS_SELF);
         PriorityOnboardingDialogController controller =
                 mock(PriorityOnboardingDialogController.class);
         when(b.build()).thenReturn(controller);
 
         // GIVEN the user is changing conversation settings
-        when(mBuilderProvider.get()).thenReturn(b);
         mNotificationInfo.bindNotification(
                 mShortcutManager,
                 mMockPackageManager,
@@ -925,11 +955,12 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
                 mEntry,
+                mBubbleMetadata,
                 null,
                 null,
                 mIconFactory,
-                mUserContext,
-                mBuilderProvider,
+                mContext,
+                () -> b,
                 true);
 
         // WHEN user clicks "priority"
@@ -945,12 +976,11 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
         Prefs.putBoolean(mContext, Prefs.Key.HAS_SEEN_PRIORITY_ONBOARDING, true);
 
         PriorityOnboardingDialogController.Builder b =
-                new PriorityOnboardingDialogController.Builder();
+                mock(PriorityOnboardingDialogController.Builder.class, Answers.RETURNS_SELF);
         PriorityOnboardingDialogController controller =
                 mock(PriorityOnboardingDialogController.class);
         when(b.build()).thenReturn(controller);
 
-        when(mBuilderProvider.get()).thenReturn(b);
         mNotificationInfo.bindNotification(
                 mShortcutManager,
                 mMockPackageManager,
@@ -959,11 +989,12 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
                 mEntry,
+                mBubbleMetadata,
                 null,
                 null,
                 mIconFactory,
-                mUserContext,
-                mBuilderProvider,
+                mContext,
+                () -> b,
                 true);
 
         // WHEN user clicks "priority"

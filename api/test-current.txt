@@ -151,6 +151,7 @@ package android.app {
     ctor public ActivityView(android.content.Context, android.util.AttributeSet);
     ctor public ActivityView(android.content.Context, android.util.AttributeSet, int);
     ctor public ActivityView(android.content.Context, android.util.AttributeSet, int, boolean);
+    ctor public ActivityView(@NonNull android.content.Context, @NonNull android.util.AttributeSet, int, boolean, boolean);
     method public int getVirtualDisplayId();
     method public void onLayout(boolean, int, int, int, int);
     method public void onLocationChanged();

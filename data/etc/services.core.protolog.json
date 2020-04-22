@@ -283,6 +283,12 @@
       "group": "WM_DEBUG_APP_TRANSITIONS",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
+    "-1517908912": {
+      "message": "requestScrollCapture: caught exception dispatching to window.token=%s",
+      "level": "WARN",
+      "group": "WM_ERROR",
+      "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
     "-1515151503": {
       "message": ">>> OPEN TRANSACTION removeReplacedWindows",
       "level": "INFO",
@@ -1441,6 +1447,12 @@
       "group": "WM_DEBUG_RECENTS_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RecentsAnimation.java"
     },
+    "646981048": {
+      "message": "Invalid displayId for requestScrollCapture: %d",
+      "level": "ERROR",
+      "group": "WM_ERROR",
+      "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
     "662572728": {
       "message": "Attempted to add a toast window with bad token %s.  Aborting.",
       "level": "WARN",
@@ -1593,6 +1605,12 @@
     },
     "1001904964": {
       "message": "***** BOOT TIMEOUT: forcing display enabled",
+      "level": "WARN",
+      "group": "WM_ERROR",
+      "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
+    "1046922686": {
+      "message": "requestScrollCapture: caught exception dispatching callback: %s",
       "level": "WARN",
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"

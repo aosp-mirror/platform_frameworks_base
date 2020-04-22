@@ -80,7 +80,8 @@ public class AudioVolumeGroupChangeHandler {
                                         (AudioManager.VolumeGroupCallback) msg.obj);
                             }
                         } else {
-                            listeners = mListeners;
+                            listeners = (ArrayList<AudioManager.VolumeGroupCallback>)
+                                    mListeners.clone();
                         }
                     }
                     if (listeners.isEmpty()) {

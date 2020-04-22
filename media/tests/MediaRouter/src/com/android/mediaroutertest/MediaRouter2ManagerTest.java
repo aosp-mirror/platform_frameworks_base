@@ -36,6 +36,7 @@ import static com.android.mediaroutertest.StubMediaRoute2ProviderService.VOLUME_
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import android.content.Context;
@@ -47,6 +48,7 @@ import android.media.MediaRouter2Manager;
 import android.media.MediaRouter2Utils;
 import android.media.RouteDiscoveryPreference;
 import android.media.RoutingSessionInfo;
+import android.os.Bundle;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
@@ -73,6 +75,8 @@ public class MediaRouter2ManagerTest {
     private static final String TAG = "MediaRouter2ManagerTest";
     private static final int WAIT_TIME_MS = 2000;
     private static final int TIMEOUT_MS = 5000;
+    private static final String TEST_KEY = "test_key";
+    private static final String TEST_VALUE = "test_value";
 
     private Context mContext;
     private MediaRouter2Manager mManager;
@@ -160,6 +164,7 @@ public class MediaRouter2ManagerTest {
         });
 
         MediaRoute2Info routeToRemove = routes.get(ROUTE_ID2);
+        assertNotNull(routeToRemove);
 
         StubMediaRoute2ProviderService sInstance =
                 StubMediaRoute2ProviderService.getInstance();
@@ -169,6 +174,52 @@ public class MediaRouter2ManagerTest {
 
         sInstance.addRoute(routeToRemove);
         assertTrue(addedLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
+    }
+
+    @Test
+    public void testGetRoutes_removedRoute_returnsCorrectRoutes() throws Exception {
+        CountDownLatch addedLatch = new CountDownLatch(1);
+        CountDownLatch removedLatch = new CountDownLatch(1);
+
+        RouteCallback routeCallback = new RouteCallback() {
+            // Used to ensure the removed route is added.
+            @Override
+            public void onRoutesAdded(List<MediaRoute2Info> routes) {
+                if (removedLatch.getCount() > 0) {
+                    return;
+                }
+                addedLatch.countDown();
+            }
+
+            @Override
+            public void onRoutesRemoved(List<MediaRoute2Info> routes) {
+                removedLatch.countDown();
+            }
+        };
+
+        mRouter2.registerRouteCallback(mExecutor, routeCallback,
+                new RouteDiscoveryPreference.Builder(FEATURES_ALL, true).build());
+        mRouteCallbacks.add(routeCallback);
+
+        Map<String, MediaRoute2Info> routes = waitAndGetRoutesWithManager(FEATURES_ALL);
+        MediaRoute2Info routeToRemove = routes.get(ROUTE_ID2);
+        assertNotNull(routeToRemove);
+
+        StubMediaRoute2ProviderService sInstance =
+                StubMediaRoute2ProviderService.getInstance();
+        assertNotNull(sInstance);
+        sInstance.removeRoute(ROUTE_ID2);
+
+        // Wait until the route is removed.
+        assertTrue(removedLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
+
+        Map<String, MediaRoute2Info> newRoutes = waitAndGetRoutesWithManager(FEATURES_ALL);
+        assertNull(newRoutes.get(ROUTE_ID2));
+
+        // Revert the removal.
+        sInstance.addRoute(routeToRemove);
+        assertTrue(addedLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
+        mRouter2.unregisterRouteCallback(routeCallback);
     }
 
     /**
@@ -465,6 +516,56 @@ public class MediaRouter2ManagerTest {
         assertEquals(VOLUME_MAX, variableVolumeRoute.getVolumeMax());
     }
 
+    @Test
+    public void testRouter2SetOnGetControllerHintsListener() throws Exception {
+        Map<String, MediaRoute2Info> routes = waitAndGetRoutesWithManager(FEATURES_ALL);
+        addRouterCallback(new RouteCallback() {});
+
+        MediaRoute2Info route = routes.get(ROUTE_ID1);
+        assertNotNull(route);
+
+        final Bundle controllerHints = new Bundle();
+        controllerHints.putString(TEST_KEY, TEST_VALUE);
+        final CountDownLatch hintLatch = new CountDownLatch(1);
+        final MediaRouter2.OnGetControllerHintsListener listener =
+                route1 -> {
+                    hintLatch.countDown();
+                    return controllerHints;
+                };
+
+        final CountDownLatch successLatch = new CountDownLatch(1);
+        final CountDownLatch failureLatch = new CountDownLatch(1);
+
+        addManagerCallback(new MediaRouter2Manager.Callback() {
+            @Override
+            public void onTransferred(RoutingSessionInfo oldSession,
+                    RoutingSessionInfo newSession) {
+                assertTrue(newSession.getSelectedRoutes().contains(route.getId()));
+                // The StubMediaRoute2ProviderService is supposed to set control hints
+                // with the given controllerHints.
+                Bundle controlHints = newSession.getControlHints();
+                assertNotNull(controlHints);
+                assertTrue(controlHints.containsKey(TEST_KEY));
+                assertEquals(TEST_VALUE, controlHints.getString(TEST_KEY));
+
+                successLatch.countDown();
+            }
+
+            @Override
+            public void onTransferFailed(RoutingSessionInfo session,
+                    MediaRoute2Info requestedRoute) {
+                failureLatch.countDown();
+            }
+        });
+
+        mRouter2.setOnGetControllerHintsListener(listener);
+        mManager.selectRoute(mPackageName, route);
+        assertTrue(hintLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
+        assertTrue(successLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
+
+        assertFalse(failureLatch.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS));
+    }
+
     Map<String, MediaRoute2Info> waitAndGetRoutesWithManager(List<String> routeFeatures)
             throws Exception {
         CountDownLatch addedLatch = new CountDownLatch(1);
@@ -475,8 +576,8 @@ public class MediaRouter2ManagerTest {
         MediaRouter2Manager.Callback managerCallback = new MediaRouter2Manager.Callback() {
             @Override
             public void onRoutesAdded(List<MediaRoute2Info> routes) {
-                for (int i = 0; i < routes.size(); i++) {
-                    if (!routes.get(i).isSystemRoute()) {
+                for (MediaRoute2Info route : routes) {
+                    if (!route.isSystemRoute()) {
                         addedLatch.countDown();
                         break;
                     }

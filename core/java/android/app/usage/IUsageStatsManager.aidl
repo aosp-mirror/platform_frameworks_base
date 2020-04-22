@@ -43,7 +43,7 @@ interface IUsageStatsManager {
     @UnsupportedAppUsage
     void setAppInactive(String packageName, boolean inactive, int userId);
     @UnsupportedAppUsage
-    boolean isAppInactive(String packageName, int userId);
+    boolean isAppInactive(String packageName, int userId, String callingPackage);
     void onCarrierPrivilegedAppsChanged();
     void reportChooserSelection(String packageName, int userId, String contentType,
             in String[] annotations, String action);

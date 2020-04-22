@@ -40,6 +40,7 @@ import android.graphics.Color;
 import android.graphics.Insets;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
@@ -75,6 +76,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.function.Predicate;
 
 /**
@@ -188,7 +190,16 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     private PointF mLocalPoint;
 
     // Lazily-created holder for point computations.
-    private float[] mTempPoint;
+    private float[] mTempPosition;
+
+    // Lazily-created holder for point computations.
+    private Point mTempPoint;
+
+    // Lazily created Rect for dispatch to children
+    private Rect mTempRect;
+
+    // Lazily created int[2] for dispatch to children
+    private int[] mTempLocation;
 
     // Layout animation
     private LayoutAnimationController mLayoutAnimationController;
@@ -1860,7 +1871,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         final float tx = mCurrentDragStartEvent.mX;
         final float ty = mCurrentDragStartEvent.mY;
 
-        final float[] point = getTempPoint();
+        final float[] point = getTempLocationF();
         point[0] = tx;
         point[1] = ty;
         transformPointToViewLocal(point, child);
@@ -2932,9 +2943,23 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
     }
 
-    private float[] getTempPoint() {
+    private Rect getTempRect() {
+        if (mTempRect == null) {
+            mTempRect = new Rect();
+        }
+        return mTempRect;
+    }
+
+    private float[] getTempLocationF() {
+        if (mTempPosition == null) {
+            mTempPosition = new float[2];
+        }
+        return mTempPosition;
+    }
+
+    private Point getTempPoint() {
         if (mTempPoint == null) {
-            mTempPoint = new float[2];
+            mTempPoint = new Point();
         }
         return mTempPoint;
     }
@@ -2948,7 +2973,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     @UnsupportedAppUsage
     protected boolean isTransformedTouchPointInView(float x, float y, View child,
             PointF outLocalPoint) {
-        final float[] point = getTempPoint();
+        final float[] point = getTempLocationF();
         point[0] = x;
         point[1] = y;
         transformPointToViewLocal(point, child);
@@ -4568,7 +4593,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             final boolean nonActionable = !child.isClickable() && !child.isLongClickable();
             final boolean duplicatesState = (child.mViewFlags & DUPLICATE_PARENT_STATE) != 0;
             if (nonActionable || duplicatesState) {
-                final float[] point = getTempPoint();
+                final float[] point = getTempLocationF();
                 point[0] = x;
                 point[1] = y;
                 transformPointToViewLocal(point, child);
@@ -7350,6 +7375,97 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         final int count = getChildCount();
         for (int i = 0; i < count; i++) {
             getChildAt(i).dispatchWindowInsetsAnimationEnd(animation);
+        }
+    }
+
+    /**
+     * Offsets the given rectangle in parent's local coordinates into child's coordinate space
+     * and clips the result to the child View's bounds, padding and clipRect if appropriate. If the
+     * resulting rectangle is not empty, the request is forwarded to the child.
+     * <p>
+     * Note: This method does not account for any static View transformations which may be
+     * applied to the child view.
+     *
+     * @param child            the child to dispatch to
+     * @param localVisibleRect the visible (clipped) area of this ViewGroup, in local coordinates
+     * @param windowOffset     the offset of localVisibleRect within the window
+     * @param targets          a queue to collect located targets
+     */
+    private void dispatchTransformedScrollCaptureSearch(View child, Rect localVisibleRect,
+            Point windowOffset, Queue<ScrollCaptureTarget> targets) {
+
+        // copy local visible rect for modification and dispatch
+        final Rect childVisibleRect = getTempRect();
+        childVisibleRect.set(localVisibleRect);
+
+        // transform to child coords
+        final Point childWindowOffset = getTempPoint();
+        childWindowOffset.set(windowOffset.x, windowOffset.y);
+
+        final int dx = child.mLeft - mScrollX;
+        final int dy = child.mTop - mScrollY;
+
+        childVisibleRect.offset(-dx, -dy);
+        childWindowOffset.offset(dx, dy);
+
+        boolean rectIsVisible = true;
+        final int width = mRight - mLeft;
+        final int height = mBottom - mTop;
+
+        // Clip to child bounds
+        if (getClipChildren()) {
+            rectIsVisible = childVisibleRect.intersect(0, 0, child.getWidth(), child.getHeight());
+        }
+
+        // Clip to child padding.
+        if (rectIsVisible && (child instanceof ViewGroup)
+                && ((ViewGroup) child).getClipToPadding()) {
+            rectIsVisible = childVisibleRect.intersect(
+                    child.mPaddingLeft, child.mPaddingTop,
+                    child.getWidth() - child.mPaddingRight,
+                    child.getHeight() - child.mPaddingBottom);
+        }
+        // Clip to child clipBounds.
+        if (rectIsVisible && child.mClipBounds != null) {
+            rectIsVisible = childVisibleRect.intersect(child.mClipBounds);
+        }
+        if (rectIsVisible) {
+            child.dispatchScrollCaptureSearch(childVisibleRect, childWindowOffset, targets);
+        }
+    }
+
+    /**
+     * Handle the scroll capture search request by checking this view if applicable, then to each
+     * child view.
+     *
+     * @param localVisibleRect the visible area of this ViewGroup in local coordinates, according to
+     *                         the parent
+     * @param windowOffset     the offset of this view within the window
+     * @param targets          the collected list of scroll capture targets
+     *
+     * @hide
+     */
+    @Override
+    public void dispatchScrollCaptureSearch(
+            @NonNull Rect localVisibleRect, @NonNull Point windowOffset,
+            @NonNull Queue<ScrollCaptureTarget> targets) {
+
+        // Dispatch to self first.
+        super.dispatchScrollCaptureSearch(localVisibleRect, windowOffset, targets);
+
+        // Then dispatch to children, if not excluding descendants.
+        if ((getScrollCaptureHint() & SCROLL_CAPTURE_HINT_EXCLUDE_DESCENDANTS) == 0) {
+            final int childCount = getChildCount();
+            for (int i = 0; i < childCount; i++) {
+                View child = getChildAt(i);
+                // Only visible views can be captured.
+                if (child.getVisibility() != View.VISIBLE) {
+                    continue;
+                }
+                // Transform to child coords and dispatch
+                dispatchTransformedScrollCaptureSearch(child, localVisibleRect, windowOffset,
+                        targets);
+            }
         }
     }
 

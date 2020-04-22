@@ -173,12 +173,13 @@ private:
                        FileSystemControlParcel&& control,
                        const DataLoaderStatusListener* externalListener);
         ~DataLoaderStub();
+        // Cleans up the internal state and invalidates DataLoaderStub. Any subsequent calls will
+        // result in an error.
+        void cleanupResources();
 
         bool requestCreate();
         bool requestStart();
         bool requestDestroy();
-
-        bool waitForDestroy(Clock::duration duration = std::chrono::seconds(60));
 
         void onDump(int fd);
 
@@ -187,6 +188,8 @@ private:
 
     private:
         binder::Status onStatusChanged(MountId mount, int newStatus) final;
+
+        bool isValid() const { return mId != kInvalidStorageId; }
 
         bool create();
         bool start();
@@ -198,10 +201,10 @@ private:
         bool fsmStep();
 
         IncrementalService& mService;
-        MountId const mId;
-        DataLoaderParamsParcel const mParams;
-        FileSystemControlParcel const mControl;
-        DataLoaderStatusListener const mListener;
+        MountId mId = kInvalidStorageId;
+        DataLoaderParamsParcel mParams;
+        FileSystemControlParcel mControl;
+        DataLoaderStatusListener mListener;
 
         std::mutex mStatusMutex;
         std::condition_variable mStatusCondition;

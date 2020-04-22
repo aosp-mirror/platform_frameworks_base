@@ -1014,6 +1014,9 @@
     <!-- Margins at the left and right of the power menu and home controls widgets. -->
     <dimen name="global_actions_side_margin">16dp</dimen>
 
+    <!-- Amount to shift the layout when exiting/entering for controls activities -->
+    <dimen name="global_actions_controls_y_translation">20dp</dimen>
+
     <!-- The maximum offset in either direction that elements are moved horizontally to prevent
          burn-in on AOD. -->
     <dimen name="burn_in_prevention_offset_x">8dp</dimen>

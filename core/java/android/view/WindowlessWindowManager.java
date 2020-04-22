@@ -24,7 +24,6 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 import android.util.MergedConfiguration;
-import android.view.IWindowSession;
 
 import java.util.HashMap;
 

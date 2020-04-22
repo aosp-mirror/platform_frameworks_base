@@ -2535,6 +2535,33 @@ public abstract class Window {
         return Collections.emptyList();
     }
 
+    /**
+     * System request to begin scroll capture.
+     *
+     * @param controller the controller to receive responses
+     * @hide
+     */
+    public void requestScrollCapture(IScrollCaptureController controller) {
+    }
+
+    /**
+     * Registers a {@link ScrollCaptureCallback} with the root of this window.
+     *
+     * @param callback the callback to add
+     * @hide
+     */
+    public void addScrollCaptureCallback(@NonNull ScrollCaptureCallback callback) {
+    }
+
+    /**
+     * Unregisters a {@link ScrollCaptureCallback} previously registered with this window.
+     *
+     * @param callback the callback to remove
+     * @hide
+     */
+    public void removeScrollCaptureCallback(@NonNull ScrollCaptureCallback callback) {
+    }
+
     /** @hide */
     public void setTheme(int resId) {
     }

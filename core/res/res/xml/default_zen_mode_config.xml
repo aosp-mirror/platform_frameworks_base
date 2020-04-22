@@ -20,8 +20,8 @@
 <!-- Default configuration for zen mode.  See android.service.notification.ZenModeConfig. -->
 <zen version="9">
     <allow alarms="true" media="true" system="false" calls="true" callsFrom="2" messages="false"
-            reminders="false" events="false" repeatCallers="true" conversations="true"
-            conversationsFrom="2"/>
+            reminders="false" events="false" repeatCallers="true" convos="false"
+            convosFrom="3"/>
     <automatic ruleId="EVENTS_DEFAULT_RULE" enabled="false" snoozing="false" name="Event" zen="1"
                component="android/com.android.server.notification.EventConditionProvider"
                conditionId="condition://android/event?userId=-10000&amp;calendar=&amp;reply=1"/>

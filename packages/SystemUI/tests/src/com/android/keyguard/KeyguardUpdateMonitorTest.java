@@ -61,6 +61,7 @@ import android.os.UserManager;
 import android.telephony.ServiceState;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
+import android.telephony.TelephonyManager;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableContext;
@@ -133,20 +134,23 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     @Mock
     private BroadcastDispatcher mBroadcastDispatcher;
     @Mock
-    private Executor mBackgroundExecutor;
-    @Mock
     private RingerModeTracker mRingerModeTracker;
     @Mock
     private LiveData<Integer> mRingerModeLiveData;
+    @Mock
+    private TelephonyManager mTelephonyManager;
+    // Direct executor
+    private Executor mBackgroundExecutor = Runnable::run;
     private TestableLooper mTestableLooper;
     private TestableKeyguardUpdateMonitor mKeyguardUpdateMonitor;
+    private TestableContext mSpiedContext;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        TestableContext context = spy(mContext);
+        mSpiedContext = spy(mContext);
         when(mPackageManager.hasSystemFeature(anyString())).thenReturn(true);
-        when(context.getPackageManager()).thenReturn(mPackageManager);
+        when(mSpiedContext.getPackageManager()).thenReturn(mPackageManager);
         doAnswer(invocation -> {
             IBiometricEnabledOnKeyguardCallback callback = invocation.getArgument(0);
             callback.onChanged(BiometricSourceType.FACE, true /* enabled */,
@@ -161,19 +165,20 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         when(mStrongAuthTracker
                 .isUnlockingWithBiometricAllowed(anyBoolean() /* isStrongBiometric */))
                 .thenReturn(true);
-        context.addMockSystemService(TrustManager.class, mTrustManager);
-        context.addMockSystemService(FingerprintManager.class, mFingerprintManager);
-        context.addMockSystemService(BiometricManager.class, mBiometricManager);
-        context.addMockSystemService(FaceManager.class, mFaceManager);
-        context.addMockSystemService(UserManager.class, mUserManager);
-        context.addMockSystemService(DevicePolicyManager.class, mDevicePolicyManager);
-        context.addMockSystemService(SubscriptionManager.class, mSubscriptionManager);
+        mSpiedContext.addMockSystemService(TrustManager.class, mTrustManager);
+        mSpiedContext.addMockSystemService(FingerprintManager.class, mFingerprintManager);
+        mSpiedContext.addMockSystemService(BiometricManager.class, mBiometricManager);
+        mSpiedContext.addMockSystemService(FaceManager.class, mFaceManager);
+        mSpiedContext.addMockSystemService(UserManager.class, mUserManager);
+        mSpiedContext.addMockSystemService(DevicePolicyManager.class, mDevicePolicyManager);
+        mSpiedContext.addMockSystemService(SubscriptionManager.class, mSubscriptionManager);
+        mSpiedContext.addMockSystemService(TelephonyManager.class, mTelephonyManager);
 
         when(mRingerModeTracker.getRingerMode()).thenReturn(mRingerModeLiveData);
 
         mTestableLooper = TestableLooper.get(this);
         allowTestableLooperAsMainThread();
-        mKeyguardUpdateMonitor = new TestableKeyguardUpdateMonitor(context);
+        mKeyguardUpdateMonitor = new TestableKeyguardUpdateMonitor(mSpiedContext);
     }
 
     @After
@@ -189,6 +194,22 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         verify(mBroadcastDispatcher, atLeastOnce()).registerReceiverWithHandler(
                 eq(mKeyguardUpdateMonitor.mBroadcastAllReceiver),
                 any(IntentFilter.class), any(Handler.class), eq(UserHandle.ALL));
+    }
+
+    @Test
+    public void testSimStateInitialized() {
+        final int subId = 3;
+        final int state = TelephonyManager.SIM_STATE_ABSENT;
+
+        when(mTelephonyManager.getActiveModemCount()).thenReturn(1);
+        when(mTelephonyManager.getSimState(anyInt())).thenReturn(state);
+        when(mSubscriptionManager.getSubscriptionIds(anyInt())).thenReturn(new int[] { subId });
+
+        KeyguardUpdateMonitor testKUM = new TestableKeyguardUpdateMonitor(mSpiedContext);
+
+        mTestableLooper.processAllMessages();
+
+        assertThat(testKUM.getSimState(subId)).isEqualTo(state);
     }
 
     @Test

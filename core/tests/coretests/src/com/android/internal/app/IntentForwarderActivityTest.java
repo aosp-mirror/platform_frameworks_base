@@ -648,12 +648,6 @@ public class IntentForwarderActivityTest {
         }
 
         @Override
-        public void startActivity(Intent intent) {
-            mStartActivityIntent = intent;
-            mUserIdActivityLaunchedIn = getUserId();
-        }
-
-        @Override
         protected MetricsLogger getMetricsLogger() {
             return mMetricsLogger;
         }

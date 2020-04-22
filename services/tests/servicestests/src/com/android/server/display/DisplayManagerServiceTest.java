@@ -26,6 +26,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.PropertyInvalidatedCache;
 import android.content.Context;
 import android.hardware.display.BrightnessConfiguration;
 import android.hardware.display.Curve;
@@ -120,6 +121,9 @@ public class DisplayManagerServiceTest {
         LocalServices.addService(LightsManager.class, mMockLightsManager);
 
         mContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
+
+        // Disable binder caches in this process.
+        PropertyInvalidatedCache.disableForTestMode();
     }
 
     @Test

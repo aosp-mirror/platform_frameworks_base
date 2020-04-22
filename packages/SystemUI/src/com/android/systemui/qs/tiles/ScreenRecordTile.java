@@ -18,7 +18,9 @@ package com.android.systemui.qs.tiles;
 
 import android.content.Intent;
 import android.service.quicksettings.Tile;
+import android.text.TextUtils;
 import android.util.Log;
+import android.widget.Switch;
 
 import com.android.systemui.R;
 import com.android.systemui.plugins.qs.QSTile;
@@ -88,6 +90,10 @@ public class ScreenRecordTile extends QSTileImpl<QSTile.BooleanState>
             state.icon = ResourceIcon.get(R.drawable.ic_qs_screenrecord);
             state.secondaryLabel = mContext.getString(R.string.quick_settings_screen_record_start);
         }
+        state.contentDescription = TextUtils.isEmpty(state.secondaryLabel)
+                ? state.label
+                : TextUtils.concat(state.label, ", ", state.secondaryLabel);
+        state.expandedAccessibilityClassName = Switch.class.getName();
     }
 
     @Override

@@ -494,6 +494,13 @@ public abstract class AccessibilityService extends Service {
      */
     public static final int GLOBAL_ACTION_TAKE_SCREENSHOT = 9;
 
+    /**
+     * Action to send the KEYCODE_HEADSETHOOK KeyEvent, which is used to answer/hang up calls and
+     * play/stop media
+     * @hide
+     */
+    public static final int GLOBAL_ACTION_KEYCODE_HEADSETHOOK = 10;
+
     private static final String LOG_TAG = "AccessibilityService";
 
     /**

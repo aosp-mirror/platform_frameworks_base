@@ -2527,6 +2527,21 @@
             <flag name="noExcludeDescendants" value="0x8" />
         </attr>
 
+        <!-- Hints the Android System whether the this View should be considered a scroll capture target. -->
+        <attr name="scrollCaptureHint">
+            <!-- Let the Android System  determine if the view can be a scroll capture target. -->
+            <flag name="auto" value="0" />
+            <!-- Hint the Android System that this view is a likely target. If capable, it will
+                 be ranked above other views without this flag. -->
+            <flag name="include" value="0x1" />
+            <!-- Hint the Android System that this view should never be considered a scroll capture
+                 target. -->
+            <flag name="exclude" value="0x2" />
+            <!-- Hint the Android System that this view's children should not be examined and should
+                 be excluded as a scroll capture target. -->
+            <flag name="excludeDescendants" value="0x4" />
+        </attr>
+
         <!-- Boolean that controls whether a view can take focus while in touch mode.
              If this is true for a view, that view can gain focus when clicked on, and can keep
              focus if another view is clicked on that doesn't have this attribute set to true. -->
