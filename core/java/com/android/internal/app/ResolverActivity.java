@@ -146,6 +146,7 @@ public class ResolverActivity extends Activity implements
 
     private static final String TAG = "ResolverActivity";
     private static final boolean DEBUG = false;
+    private static final String LAST_SHOWN_TAB_KEY = "last_shown_tab_key";
 
     private boolean mRegistered;
 
@@ -844,9 +845,19 @@ public class ResolverActivity extends Activity implements
     }
 
     @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        ViewPager viewPager = findViewById(R.id.profile_pager);
+        outState.putInt(LAST_SHOWN_TAB_KEY, viewPager.getCurrentItem());
+    }
+
+    @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         resetButtonBar();
+        ViewPager viewPager = findViewById(R.id.profile_pager);
+        viewPager.setCurrentItem(savedInstanceState.getInt(LAST_SHOWN_TAB_KEY));
+        mMultiProfilePagerAdapter.clearInactiveProfileCache();
     }
 
     private boolean isHttpSchemeAndViewAction(Intent intent) {
@@ -1585,6 +1596,7 @@ public class ResolverActivity extends Activity implements
         TabHost tabHost = findViewById(R.id.profile_tabhost);
         tabHost.setup();
         ViewPager viewPager = findViewById(R.id.profile_pager);
+        viewPager.setSaveEnabled(false);
         TabHost.TabSpec tabSpec = tabHost.newTabSpec(TAB_TAG_PERSONAL)
                 .setContent(R.id.profile_pager)
                 .setIndicator(getString(R.string.resolver_personal_tab));
