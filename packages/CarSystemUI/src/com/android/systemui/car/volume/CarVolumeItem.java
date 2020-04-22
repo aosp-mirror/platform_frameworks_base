@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.volume;
+package com.android.systemui.car.volume;
 
 import android.graphics.drawable.Drawable;
 import android.view.View;
@@ -38,12 +38,12 @@ public class CarVolumeItem {
     private int mMax;
     private int mProgress;
     private SeekBar.OnSeekBarChangeListener mOnSeekBarChangeListener;
-    
+
     /**
      * Called when {@link CarVolumeItem} is bound to its ViewHolder.
      */
     void bind(CarVolumeItemViewHolder viewHolder) {
-            viewHolder.bind(/* carVolumeItem= */ this);
+        viewHolder.bind(/* carVolumeItem= */ this);
     }
 
     /** Sets progress of seekbar. */
