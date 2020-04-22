@@ -69,7 +69,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.Objects;
 
 /**
  * This class provides access to a centralized registry of the user's
@@ -3469,7 +3468,7 @@ public class AccountManager {
     public void disableLocalAccountCaches() {
         mAccountsForUserCache.disableLocal();
     }
-    
+
     /**
      * @hide
      * Calling this will invalidate Local Account User Data Cache which
