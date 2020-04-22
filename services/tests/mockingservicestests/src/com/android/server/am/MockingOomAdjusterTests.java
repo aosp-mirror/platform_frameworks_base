@@ -541,7 +541,7 @@ public class MockingOomAdjusterTests {
         doReturn(new ArrayMap<IBinder, ArrayList<ConnectionRecord>>()).when(s).getConnections();
         s.startRequested = true;
         s.lastActivity = SystemClock.uptimeMillis();
-        app.services.add(s);
+        app.startService(s);
         sService.mWakefulness = PowerManagerInternal.WAKEFULNESS_AWAKE;
         sService.mOomAdjuster.updateOomAdjLocked(app, false, OomAdjuster.OOM_ADJ_REASON_NONE);
 
@@ -585,7 +585,7 @@ public class MockingOomAdjusterTests {
         doReturn(new ArrayMap<IBinder, ArrayList<ConnectionRecord>>()).when(s).getConnections();
         s.startRequested = true;
         s.lastActivity = SystemClock.uptimeMillis();
-        app.services.add(s);
+        app.startService(s);
         sService.mWakefulness = PowerManagerInternal.WAKEFULNESS_AWAKE;
         sService.mOomAdjuster.updateOomAdjLocked(app, false, OomAdjuster.OOM_ADJ_REASON_NONE);
 
@@ -1593,7 +1593,7 @@ public class MockingOomAdjusterTests {
         s.app = app3;
         setFieldValue(ServiceRecord.class, s, "connections",
                 new ArrayMap<IBinder, ArrayList<ConnectionRecord>>());
-        app3.services.add(s);
+        app3.startService(s);
         doCallRealMethod().when(s).getConnections();
         s.startRequested = true;
         s.lastActivity = now;
@@ -1698,7 +1698,7 @@ public class MockingOomAdjusterTests {
             record.app = service;
             setFieldValue(ServiceRecord.class, record, "connections",
                     new ArrayMap<IBinder, ArrayList<ConnectionRecord>>());
-            service.services.add(record);
+            service.startService(record);
             doCallRealMethod().when(record).getConnections();
         }
         AppBindRecord binding = new AppBindRecord(record, null, client);
