@@ -16,10 +16,9 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="no_upstream_notification_title" msgid="5026912695053828030">"Hotspotun internetə girişi yoxdur"</string>
-    <string name="no_upstream_notification_message" msgid="6810713595219684058">"Cihazlar internetə qoşula bilmir"</string>
-    <string name="no_upstream_notification_disable_button" msgid="3388523729003352854">"Hotspot\'u deaktiv edin"</string>
-    <string name="upstream_roaming_notification_title" msgid="2242169951273396377">"Hotspot aktivdir"</string>
+    <string name="no_upstream_notification_title" msgid="611650570559011140">"Modemin internetə girişi yoxdur"</string>
+    <string name="no_upstream_notification_message" msgid="6508394877641864863">"Cihazları qoşmaq mümkün deyil"</string>
+    <string name="no_upstream_notification_disable_button" msgid="7609346639290990508">"Modemi deaktiv edin"</string>
+    <string name="upstream_roaming_notification_title" msgid="6032901176124830787">"Hotspot və ya modem aktivdir"</string>
     <string name="upstream_roaming_notification_message" msgid="7599056263326217523">"Rouminq zamanı əlavə ödənişlər tətbiq edilə bilər"</string>
-    <string name="upstream_roaming_notification_continue_button" msgid="693106687178152486">"Davam edin"</string>
 </resources>

@@ -16,10 +16,9 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="no_upstream_notification_title" msgid="5026912695053828030">"හොට්ස්පොට් හට අන්තර්ජාලය නැත"</string>
-    <string name="no_upstream_notification_message" msgid="6810713595219684058">"උපාංගවලට අන්තර්ජාලයට සම්බන්ධ විය නොහැකිය"</string>
-    <string name="no_upstream_notification_disable_button" msgid="3388523729003352854">"හොට්ස්පොට් ක්‍රියාවිරහිත කරන්න"</string>
-    <string name="upstream_roaming_notification_title" msgid="2242169951273396377">"හොට්ස්පොට් ක්‍රියාත්මකයි"</string>
+    <string name="no_upstream_notification_title" msgid="611650570559011140">"ටෙදරින් හට අන්තර්ජාලය නැත"</string>
+    <string name="no_upstream_notification_message" msgid="6508394877641864863">"උපාංගවලට සම්බන්ධ විය නොහැකිය"</string>
+    <string name="no_upstream_notification_disable_button" msgid="7609346639290990508">"ටෙදරින් ක්‍රියාවිරහිත කරන්න"</string>
+    <string name="upstream_roaming_notification_title" msgid="6032901176124830787">"හොට්ස්පොට් හෝ ටෙදරින් ක්‍රියාත්මකයි"</string>
     <string name="upstream_roaming_notification_message" msgid="7599056263326217523">"රෝමිං අතරතුර අමතර ගාස්තු අදාළ විය හැකිය"</string>
-    <string name="upstream_roaming_notification_continue_button" msgid="693106687178152486">"ඉදිරියට යන්න"</string>
 </resources>

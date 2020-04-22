@@ -16,10 +16,9 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="no_upstream_notification_title" msgid="221932678126754542">"O ponto de acesso não tem conexão com a Internet"</string>
-    <string name="no_upstream_notification_message" msgid="4145932079850792642">"Não foi possível conectar os dispositivos à Internet"</string>
-    <string name="no_upstream_notification_disable_button" msgid="2164668551525869970">"Desativar ponto de acesso"</string>
-    <string name="upstream_roaming_notification_title" msgid="8448552978815624701">"O ponto de acesso está ativado"</string>
+    <string name="no_upstream_notification_title" msgid="5030042590486713460">"O tethering não tem Internet"</string>
+    <string name="no_upstream_notification_message" msgid="3843613362272973447">"Não é possível conectar os dispositivos"</string>
+    <string name="no_upstream_notification_disable_button" msgid="6385491461813507624">"Desativar o tethering"</string>
+    <string name="upstream_roaming_notification_title" msgid="3015912166812283303">"Ponto de acesso ou tethering ativado"</string>
     <string name="upstream_roaming_notification_message" msgid="6724434706748439902">"Pode haver cobranças extras durante o roaming"</string>
-    <string name="upstream_roaming_notification_continue_button" msgid="8390621437856451758">"Continuar"</string>
 </resources>
