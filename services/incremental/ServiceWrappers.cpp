@@ -36,7 +36,7 @@ static constexpr auto kDataLoaderManagerName = "dataloader_manager"sv;
 
 class RealVoldService : public VoldServiceWrapper {
 public:
-    RealVoldService(const sp<os::IVold> vold) : mInterface(std::move(vold)) {}
+    RealVoldService(sp<os::IVold> vold) : mInterface(std::move(vold)) {}
     ~RealVoldService() = default;
     binder::Status mountIncFs(
             const std::string& backingPath, const std::string& targetDir, int32_t flags,
