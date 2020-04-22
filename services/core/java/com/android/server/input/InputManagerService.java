@@ -1069,7 +1069,7 @@ public class InputManagerService extends IInputManager.Stub
                     | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED
                     | Intent.FLAG_ACTIVITY_CLEAR_TOP);
             final PendingIntent keyboardLayoutIntent = PendingIntent.getActivityAsUser(mContext, 0,
-                    intent, 0, null, UserHandle.CURRENT);
+                    intent, PendingIntent.FLAG_IMMUTABLE, null, UserHandle.CURRENT);
 
             Resources r = mContext.getResources();
             Notification notification =
