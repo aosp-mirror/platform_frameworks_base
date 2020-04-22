@@ -166,7 +166,7 @@ public abstract class DynamicDrawableSpan extends ReplacementSpan {
         if (mVerticalAlignment == ALIGN_BASELINE) {
             transY -= paint.getFontMetricsInt().descent;
         } else if (mVerticalAlignment == ALIGN_CENTER) {
-            transY = (bottom - top) / 2 - b.getBounds().height() / 2;
+            transY = top + (bottom - top) / 2 - b.getBounds().height() / 2;
         }
 
         canvas.translate(x, transY);
