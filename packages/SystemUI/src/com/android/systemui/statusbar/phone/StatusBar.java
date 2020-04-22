@@ -73,6 +73,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.database.ContentObserver;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
@@ -619,9 +620,9 @@ public class StatusBar extends SystemUI implements DemoMode,
     private ShadeController mShadeController;
 
 
-    private StatusBarSettingsObserver mStatusBarSettingsObserver = new StatusBarSettingsObserver(mHandler);
-    private class StatusBarSettingsObserver extends ContentObserver {
-        StatusBarSettingsObserver(Handler handler) {
+    private StatusBarObserver mStatusBarObserver = new StatusBarObserver(mHandler);
+    private class StatusBarObserver extends ContentObserver {
+        StatusBarObserver(Handler handler) {
             super(handler);
         }
 
