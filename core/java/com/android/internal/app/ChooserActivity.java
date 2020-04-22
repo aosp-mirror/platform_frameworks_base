@@ -2885,6 +2885,13 @@ public class ChooserActivity extends ResolverActivity implements
         return METRICS_CATEGORY_CHOOSER;
     }
 
+    @Override
+    protected void onProfileTabSelected() {
+        ChooserGridAdapter currentRootAdapter =
+                mChooserMultiProfilePagerAdapter.getCurrentRootAdapter();
+        currentRootAdapter.updateDirectShareExpansion();
+    }
+
     /**
      * Adapter for all types of items and targets in ShareSheet.
      * Note that ranked sections like Direct Share - while appearing grid-like - are handled on the
@@ -3357,20 +3364,24 @@ public class ChooserActivity extends ResolverActivity implements
         }
 
         public void handleScroll(View v, int y, int oldy) {
-            // Only expand direct share area if there is a minimum number of shortcuts,
-            // which will help reduce the amount of visible shuffling due to older-style
-            // direct share targets.
-            int orientation = getResources().getConfiguration().orientation;
-            boolean canExpandDirectShare =
-                    mChooserListAdapter.getNumShortcutResults() > getMaxTargetsPerRow()
-                    && orientation == Configuration.ORIENTATION_PORTRAIT
-                    && !isInMultiWindowMode();
-
+            boolean canExpandDirectShare = canExpandDirectShare();
             if (mDirectShareViewHolder != null && canExpandDirectShare) {
                 mDirectShareViewHolder.handleScroll(
                         mChooserMultiProfilePagerAdapter.getActiveAdapterView(), y, oldy,
                         getMaxTargetsPerRow());
             }
+        }
+
+        /**
+         * Only expand direct share area if there is a minimum number of shortcuts,
+         * which will help reduce the amount of visible shuffling due to older-style
+         * direct share targets.
+         */
+        private boolean canExpandDirectShare() {
+            int orientation = getResources().getConfiguration().orientation;
+            return mChooserListAdapter.getNumShortcutResults() > getMaxTargetsPerRow()
+                    && orientation == Configuration.ORIENTATION_PORTRAIT
+                    && !isInMultiWindowMode();
         }
 
         public ChooserListAdapter getListAdapter() {
@@ -3379,6 +3390,19 @@ public class ChooserActivity extends ResolverActivity implements
 
         boolean shouldCellSpan(int position) {
             return getItemViewType(position) == VIEW_TYPE_NORMAL;
+        }
+
+        void updateDirectShareExpansion() {
+            if (mDirectShareViewHolder == null || !canExpandDirectShare()) {
+                return;
+            }
+            RecyclerView activeAdapterView =
+                    mChooserMultiProfilePagerAdapter.getActiveAdapterView();
+            if (mResolverDrawerLayout.isCollapsed()) {
+                mDirectShareViewHolder.collapse(activeAdapterView);
+            } else {
+                mDirectShareViewHolder.expand(activeAdapterView);
+            }
         }
     }
 
@@ -3577,6 +3601,20 @@ public class ChooserActivity extends ResolverActivity implements
             newHeight = Math.max(newHeight, mDirectShareMinHeight);
             yDiff = newHeight - prevHeight;
 
+            updateDirectShareRowHeight(view, yDiff, newHeight);
+        }
+
+        void expand(RecyclerView view) {
+            updateDirectShareRowHeight(view, mDirectShareMaxHeight - mDirectShareCurrHeight,
+                    mDirectShareMaxHeight);
+        }
+
+        void collapse(RecyclerView view) {
+            updateDirectShareRowHeight(view, mDirectShareMinHeight - mDirectShareCurrHeight,
+                    mDirectShareMinHeight);
+        }
+
+        private void updateDirectShareRowHeight(RecyclerView view, int yDiff, int newHeight) {
             if (view == null || view.getChildCount() == 0 || yDiff == 0) {
                 return;
             }
