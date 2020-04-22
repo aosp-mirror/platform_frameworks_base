@@ -632,8 +632,10 @@ public class MediaControlPanel {
                     public void onError() {
                         Log.d(TAG, "Cannot resume with " + componentName);
                         mServiceComponent = null;
-                        clearControls();
-                        // remove
+                        if (!hasMediaSession()) {
+                            // If it's not active and we can't resume, remove
+                            removePlayer();
+                        }
                     }
                 },
                 componentName);
