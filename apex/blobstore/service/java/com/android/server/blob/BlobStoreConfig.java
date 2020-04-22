@@ -131,6 +131,10 @@ class BlobStoreConfig {
                         LEASE_ACQUISITION_WAIT_DURATION_MS = properties.getLong(key,
                                 DEFAULT_LEASE_ACQUISITION_WAIT_DURATION_MS);
                         break;
+                    case KEY_COMMIT_COOL_OFF_DURATION_MS:
+                        COMMIT_COOL_OFF_DURATION_MS = properties.getLong(key,
+                                DEFAULT_COMMIT_COOL_OFF_DURATION_MS);
+                        break;
                     default:
                         Slog.wtf(TAG, "Unknown key in device config properties: " + key);
                 }
@@ -149,6 +153,9 @@ class BlobStoreConfig {
             fout.println(String.format(dumpFormat, KEY_LEASE_ACQUISITION_WAIT_DURATION_MS,
                     TimeUtils.formatDuration(LEASE_ACQUISITION_WAIT_DURATION_MS),
                     TimeUtils.formatDuration(DEFAULT_LEASE_ACQUISITION_WAIT_DURATION_MS)));
+            fout.println(String.format(dumpFormat, KEY_COMMIT_COOL_OFF_DURATION_MS,
+                    TimeUtils.formatDuration(COMMIT_COOL_OFF_DURATION_MS),
+                    TimeUtils.formatDuration(DEFAULT_COMMIT_COOL_OFF_DURATION_MS)));
         }
     }
 
