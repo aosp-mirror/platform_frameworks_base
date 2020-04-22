@@ -124,6 +124,9 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
         // Key is a pair of uri and userId
         private final Map<Pair<Uri, Integer>, ContentObserver> mContentObservers = new ArrayMap<>();
 
+        // Used as an override when set to nonzero.
+        private long mCurrentTimeMillis = 0;
+
         public MockInjector(MockSystemServices services, DpmMockContext context) {
             super(context);
             this.services = services;
@@ -470,5 +473,19 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
 
         @Override
         public void runCryptoSelfTest() {}
+
+        @Override
+        public String[] getPersonalAppsForSuspension(int userId) {
+            return new String[]{};
+        }
+
+        public void setSystemCurrentTimeMillis(long value) {
+            mCurrentTimeMillis = value;
+        }
+
+        @Override
+        public long systemCurrentTimeMillis() {
+            return mCurrentTimeMillis != 0 ? mCurrentTimeMillis : System.currentTimeMillis();
+        }
     }
 }
