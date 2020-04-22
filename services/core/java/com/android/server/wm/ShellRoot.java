@@ -43,6 +43,8 @@ public class ShellRoot {
     private WindowToken mToken;
     private final IBinder.DeathRecipient mDeathRecipient;
     private SurfaceControl mSurfaceControl = null;
+    private IWindow mAccessibilityWindow;
+    private IBinder.DeathRecipient mAccessibilityWindowDeath;
 
     ShellRoot(@NonNull IWindow client, @NonNull DisplayContent dc, final int windowType) {
         mDisplayContent = dc;
@@ -112,11 +114,14 @@ public class ShellRoot {
         if (!mDisplayContent.getDefaultTaskDisplayArea().isSplitScreenModeActivated()) {
             return null;
         }
+        if (mAccessibilityWindow == null) {
+            return null;
+        }
         WindowInfo windowInfo = WindowInfo.obtain();
         windowInfo.displayId = mToken.getDisplayArea().getDisplayContent().mDisplayId;
         windowInfo.type = mToken.windowType;
         windowInfo.layer = mToken.getWindowLayerFromType();
-        windowInfo.token = mClient.asBinder();
+        windowInfo.token = mAccessibilityWindow.asBinder();
         windowInfo.title = "Splitscreen Divider";
         windowInfo.focused = false;
         windowInfo.inPictureInPicture = false;
@@ -125,6 +130,30 @@ public class ShellRoot {
         mDisplayContent.getDockedDividerController().getTouchRegion(regionRect);
         windowInfo.regionInScreen.set(regionRect);
         return windowInfo;
+    }
+
+    void setAccessibilityWindow(IWindow window) {
+        if (mAccessibilityWindow != null) {
+            mAccessibilityWindow.asBinder().unlinkToDeath(mAccessibilityWindowDeath, 0);
+        }
+        mAccessibilityWindow = window;
+        if (mAccessibilityWindow != null) {
+            try {
+                mAccessibilityWindowDeath = () -> {
+                    synchronized (mDisplayContent.mWmService.mGlobalLock) {
+                        mAccessibilityWindow = null;
+                        setAccessibilityWindow(null);
+                    }
+                };
+                mAccessibilityWindow.asBinder().linkToDeath(mAccessibilityWindowDeath, 0);
+            } catch (RemoteException e) {
+                mAccessibilityWindow = null;
+            }
+        }
+        if (mDisplayContent.mWmService.mAccessibilityController != null) {
+            mDisplayContent.mWmService.mAccessibilityController.onSomeWindowResizedOrMovedLocked(
+                    mDisplayContent.getDisplayId());
+        }
     }
 }
 

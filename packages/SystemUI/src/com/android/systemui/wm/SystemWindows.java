@@ -201,6 +201,14 @@ public class SystemWindows {
             attrs.flags |= FLAG_HARDWARE_ACCELERATED;
             viewRoot.setView(view, attrs);
             mViewRoots.put(view, viewRoot);
+
+            try {
+                mWmService.setShellRootAccessibilityWindow(mDisplayId, windowType,
+                        viewRoot.getWindowToken());
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Error setting accessibility window for " + mDisplayId + ":"
+                        + windowType, e);
+            }
         }
 
         SysUiWindowManager addRoot(int windowType) {

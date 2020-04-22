@@ -161,6 +161,14 @@ interface IWindowManager
     SurfaceControl addShellRoot(int displayId, IWindow client, int windowType);
 
     /**
+     * Sets the window token sent to accessibility for a particular shell root. The
+     * displayId and windowType identify which shell-root to update.
+     *
+     * @param target The IWindow that accessibility service interfaces with.
+     */
+    void setShellRootAccessibilityWindow(int displayId, int windowType, IWindow target);
+
+    /**
      * Like overridePendingAppTransitionMultiThumb, but uses a future to supply the specs. This is
      * used for recents, where generating the thumbnails of the specs takes a non-trivial amount of
      * time, so we want to move that off the critical path for starting the new activity.
