@@ -125,6 +125,7 @@ public final class DefaultPermissionGrantPolicy {
 
 
     static {
+        PHONE_PERMISSIONS.add(Manifest.permission.READ_PHONE_STATE);
         PHONE_PERMISSIONS.add(Manifest.permission.CALL_PHONE);
         PHONE_PERMISSIONS.add(Manifest.permission.READ_CALL_LOG);
         PHONE_PERMISSIONS.add(Manifest.permission.WRITE_CALL_LOG);
