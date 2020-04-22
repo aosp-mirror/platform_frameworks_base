@@ -128,15 +128,29 @@ public class ExpandedAnimationController
      */
     private boolean mBubbleDraggedOutEnough = false;
 
+    /** End action to run when the lead bubble's expansion animation completes. */
+    @Nullable private Runnable mLeadBubbleEndAction;
+
+    /**
+     * Animates expanding the bubbles into a row along the top of the screen, optionally running an
+     * end action when the entire animation completes, and an end action when the lead bubble's
+     * animation ends.
+     */
+    public void expandFromStack(
+            @Nullable Runnable after, @Nullable Runnable leadBubbleEndAction) {
+        mAnimatingCollapse = false;
+        mAnimatingExpand = true;
+        mAfterExpand = after;
+        mLeadBubbleEndAction = leadBubbleEndAction;
+
+        startOrUpdatePathAnimation(true /* expanding */);
+    }
+
     /**
      * Animates expanding the bubbles into a row along the top of the screen.
      */
     public void expandFromStack(@Nullable Runnable after) {
-        mAnimatingCollapse = false;
-        mAnimatingExpand = true;
-        mAfterExpand = after;
-
-        startOrUpdatePathAnimation(true /* expanding */);
+        expandFromStack(after, null /* leadBubbleEndAction */);
     }
 
     /** Animate collapsing the bubbles back to their stacked position. */
@@ -237,11 +251,17 @@ public class ExpandedAnimationController
                     ? (index * 10)
                     : ((mLayout.getChildCount() - index) * 10);
 
+            final boolean isLeadBubble =
+                    (firstBubbleLeads && index == 0)
+                            || (!firstBubbleLeads && index == mLayout.getChildCount() - 1);
+
             animation
                     .followAnimatedTargetAlongPath(
                             path,
                             EXPAND_COLLAPSE_TARGET_ANIM_DURATION /* targetAnimDuration */,
-                            Interpolators.LINEAR /* targetAnimInterpolator */)
+                            Interpolators.LINEAR /* targetAnimInterpolator */,
+                            isLeadBubble ? mLeadBubbleEndAction : null /* endAction */,
+                            () -> mLeadBubbleEndAction = null /* endAction */)
                     .withStartDelay(startDelay)
                     .withStiffness(EXPAND_COLLAPSE_ANIM_STIFFNESS);
         }).startAll(after);
