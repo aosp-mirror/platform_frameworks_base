@@ -17,9 +17,6 @@
 package com.android.networkstack.tethering;
 
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING;
-import static android.net.TetheringManager.TETHERING_BLUETOOTH;
-import static android.net.TetheringManager.TETHERING_USB;
-import static android.net.TetheringManager.TETHERING_WIFI;
 import static android.text.TextUtils.isEmpty;
 
 import android.app.Notification;
@@ -39,10 +36,8 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
-import android.util.Log;
 import android.util.SparseArray;
 
-import androidx.annotation.ArrayRes;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.IntDef;
 import androidx.annotation.IntRange;
@@ -77,9 +72,6 @@ public class TetheringNotificationUpdater {
     private static final boolean NO_NOTIFY = false;
     @VisibleForTesting
     static final int EVENT_SHOW_NO_UPSTREAM = 1;
-    // Id to update and cancel enable notification. Must be unique within the tethering app.
-    @VisibleForTesting
-    static final int ENABLE_NOTIFICATION_ID = 1000;
     // Id to update and cancel restricted notification. Must be unique within the tethering app.
     @VisibleForTesting
     static final int RESTRICTED_NOTIFICATION_ID = 1001;
@@ -120,7 +112,6 @@ public class TetheringNotificationUpdater {
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(value = {
-            ENABLE_NOTIFICATION_ID,
             RESTRICTED_NOTIFICATION_ID,
             NO_UPSTREAM_NOTIFICATION_ID,
             ROAMING_NOTIFICATION_ID
@@ -223,7 +214,6 @@ public class TetheringNotificationUpdater {
         final boolean tetheringActiveChanged =
                 (downstreamTypes == DOWNSTREAM_NONE) != (mDownstreamTypesMask == DOWNSTREAM_NONE);
         final boolean subIdChanged = subId != mActiveDataSubId;
-        final boolean downstreamChanged = downstreamTypes != mDownstreamTypesMask;
         final boolean upstreamChanged = noUpstream != mNoUpstream;
         final boolean roamingChanged = isRoaming != mRoaming;
         final boolean updateAll = tetheringActiveChanged || subIdChanged;
@@ -232,17 +222,8 @@ public class TetheringNotificationUpdater {
         mNoUpstream = noUpstream;
         mRoaming = isRoaming;
 
-        if (updateAll || downstreamChanged) updateEnableNotification();
         if (updateAll || upstreamChanged) updateNoUpstreamNotification();
         if (updateAll || roamingChanged) updateRoamingNotification();
-    }
-
-    private void updateEnableNotification() {
-        final boolean tetheringInactive = mDownstreamTypesMask == DOWNSTREAM_NONE;
-
-        if (tetheringInactive || setupNotification() == NO_NOTIFY) {
-            clearNotification(ENABLE_NOTIFICATION_ID);
-        }
     }
 
     private void updateNoUpstreamNotification() {
@@ -310,64 +291,6 @@ public class TetheringNotificationUpdater {
                 NO_UPSTREAM_NOTIFICATION_ID, null /* pendingIntent */, action);
     }
 
-    /**
-     * Returns the downstream types mask which convert from given string.
-     *
-     * @param types This string has to be made by "WIFI", "USB", "BT", and OR'd with the others.
-     *
-     * @return downstream types mask value.
-     */
-    @VisibleForTesting
-    @IntRange(from = 0, to = 7)
-    int getDownstreamTypesMask(@NonNull final String types) {
-        int downstreamTypesMask = DOWNSTREAM_NONE;
-        final String[] downstreams = types.split("\\|");
-        for (String downstream : downstreams) {
-            if (USB_DOWNSTREAM.equals(downstream.trim())) {
-                downstreamTypesMask |= (1 << TETHERING_USB);
-            } else if (WIFI_DOWNSTREAM.equals(downstream.trim())) {
-                downstreamTypesMask |= (1 << TETHERING_WIFI);
-            } else if (BLUETOOTH_DOWNSTREAM.equals(downstream.trim())) {
-                downstreamTypesMask |= (1 << TETHERING_BLUETOOTH);
-            }
-        }
-        return downstreamTypesMask;
-    }
-
-    /**
-     * Returns the icons {@link android.util.SparseArray} which get from given string-array resource
-     * id.
-     *
-     * @param id String-array resource id
-     *
-     * @return {@link android.util.SparseArray} with downstream types and icon id info.
-     */
-    @NonNull
-    @VisibleForTesting
-    SparseArray<Integer> getIcons(@ArrayRes int id, @NonNull Resources res) {
-        final String[] array = res.getStringArray(id);
-        final SparseArray<Integer> icons = new SparseArray<>();
-        for (String config : array) {
-            if (isEmpty(config)) continue;
-
-            final String[] elements = config.split(";");
-            if (elements.length != 2) {
-                Log.wtf(TAG,
-                        "Unexpected format in Tethering notification configuration : " + config);
-                continue;
-            }
-
-            final String[] types = elements[0].split(",");
-            for (String type : types) {
-                int mask = getDownstreamTypesMask(type);
-                if (mask == DOWNSTREAM_NONE) continue;
-                icons.put(mask, res.getIdentifier(
-                        elements[1].trim(), null /* defType */, null /* defPackage */));
-            }
-        }
-        return icons;
-    }
-
     private boolean setupRoamingNotification() {
         final Resources res = getResourcesForSubId(mContext, mActiveDataSubId);
         final boolean upstreamRoamingNotification =
@@ -400,29 +323,6 @@ public class TetheringNotificationUpdater {
 
         mHandler.sendMessageDelayed(mHandler.obtainMessage(EVENT_SHOW_NO_UPSTREAM),
                 delayToShowUpstreamNotification);
-        return NOTIFY_DONE;
-    }
-
-    private boolean setupNotification() {
-        final Resources res = getResourcesForSubId(mContext, mActiveDataSubId);
-        final SparseArray<Integer> downstreamIcons =
-                getIcons(R.array.tethering_notification_icons, res);
-
-        final int iconId = downstreamIcons.get(mDownstreamTypesMask, NO_ICON_ID);
-        if (iconId == NO_ICON_ID) return NO_NOTIFY;
-
-        final String title = res.getString(R.string.tethering_notification_title);
-        final String message = res.getString(R.string.tethering_notification_message);
-        if (isEmpty(title) || isEmpty(message)) return NO_NOTIFY;
-
-        final PendingIntent pi = PendingIntent.getActivity(
-                mContext.createContextAsUser(UserHandle.CURRENT, 0 /* flags */),
-                0 /* requestCode */,
-                new Intent(Settings.ACTION_TETHER_SETTINGS),
-                Intent.FLAG_ACTIVITY_NEW_TASK,
-                null /* options */);
-
-        showNotification(iconId, title, message, ENABLE_NOTIFICATION_ID, pi, new Action[0]);
         return NOTIFY_DONE;
     }
 
