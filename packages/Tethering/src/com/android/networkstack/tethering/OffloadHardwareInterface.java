@@ -142,7 +142,7 @@ public class OffloadHardwareInterface {
     public boolean initOffloadConfig() {
         IOffloadConfig offloadConfig;
         try {
-            offloadConfig = IOffloadConfig.getService();
+            offloadConfig = IOffloadConfig.getService(true /*retry*/);
         } catch (RemoteException e) {
             mLog.e("getIOffloadConfig error " + e);
             return false;
