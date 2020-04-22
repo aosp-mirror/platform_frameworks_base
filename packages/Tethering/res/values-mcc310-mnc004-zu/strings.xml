@@ -16,10 +16,9 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="no_upstream_notification_title" msgid="221932678126754542">"I-Hotspot ayina-inthanethi"</string>
-    <string name="no_upstream_notification_message" msgid="4145932079850792642">"Amadivayisi awakwazi ukuxhuma ku-inthanethi"</string>
-    <string name="no_upstream_notification_disable_button" msgid="2164668551525869970">"Vala i-hotspot"</string>
-    <string name="upstream_roaming_notification_title" msgid="8448552978815624701">"I-Hotspot ivuliwe"</string>
+    <string name="no_upstream_notification_title" msgid="5030042590486713460">"Ukusebenzisa ifoni njengemodemu akunayo i-inthanethi"</string>
+    <string name="no_upstream_notification_message" msgid="3843613362272973447">"Amadivayisi awakwazi ukuxhumeka"</string>
+    <string name="no_upstream_notification_disable_button" msgid="6385491461813507624">"Vala ukusebenzisa ifoni njengemodemu"</string>
+    <string name="upstream_roaming_notification_title" msgid="3015912166812283303">"I-hotspot noma ukusebenzisa ifoni njengemodemu kuvuliwe"</string>
     <string name="upstream_roaming_notification_message" msgid="6724434706748439902">"Kungaba nezinkokhelo ezengeziwe uma uzula"</string>
-    <string name="upstream_roaming_notification_continue_button" msgid="8390621437856451758">"Qhubeka"</string>
 </resources>

@@ -16,10 +16,9 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="no_upstream_notification_title" msgid="5026912695053828030">"Zona e qasjes për internet nuk ka internet"</string>
-    <string name="no_upstream_notification_message" msgid="6810713595219684058">"Pajisjet nuk mund të lidhen me internetin"</string>
-    <string name="no_upstream_notification_disable_button" msgid="3388523729003352854">"Çaktivizo zonën e qasjes për internet"</string>
-    <string name="upstream_roaming_notification_title" msgid="2242169951273396377">"Zona e qasjes për internet është aktive"</string>
+    <string name="no_upstream_notification_title" msgid="611650570559011140">"Ndarja e internetit nuk ka internet"</string>
+    <string name="no_upstream_notification_message" msgid="6508394877641864863">"Pajisjet nuk mund të lidhen"</string>
+    <string name="no_upstream_notification_disable_button" msgid="7609346639290990508">"Çaktivizo ndarjen e internetit"</string>
+    <string name="upstream_roaming_notification_title" msgid="6032901176124830787">"Zona e qasjes për internet ose ndarja e internetit është aktive"</string>
     <string name="upstream_roaming_notification_message" msgid="7599056263326217523">"Mund të zbatohen tarifime shtesë kur je në roaming"</string>
-    <string name="upstream_roaming_notification_continue_button" msgid="693106687178152486">"Vazhdo"</string>
 </resources>
