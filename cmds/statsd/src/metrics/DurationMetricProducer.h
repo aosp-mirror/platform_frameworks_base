@@ -154,12 +154,14 @@ private:
     FRIEND_TEST(DurationMetricTrackerTest, TestNoCondition);
     FRIEND_TEST(DurationMetricTrackerTest, TestNonSlicedCondition);
     FRIEND_TEST(DurationMetricTrackerTest, TestNonSlicedConditionUnknownState);
-    FRIEND_TEST(DurationMetricTrackerTest, TestSumDurationWithUpgrade);
-    FRIEND_TEST(DurationMetricTrackerTest, TestSumDurationWithUpgradeInFollowingBucket);
-    FRIEND_TEST(DurationMetricTrackerTest, TestMaxDurationWithUpgrade);
-    FRIEND_TEST(DurationMetricTrackerTest, TestMaxDurationWithUpgradeInNextBucket);
     FRIEND_TEST(WakelockDurationE2eTest, TestAggregatedPredicates);
     FRIEND_TEST(DurationMetricTrackerTest, TestFirstBucket);
+
+    FRIEND_TEST(DurationMetricProducerTest_PartialBucket, TestSumDuration);
+    FRIEND_TEST(DurationMetricProducerTest_PartialBucket,
+                TestSumDurationWithSplitInFollowingBucket);
+    FRIEND_TEST(DurationMetricProducerTest_PartialBucket, TestMaxDuration);
+    FRIEND_TEST(DurationMetricProducerTest_PartialBucket, TestMaxDurationWithSplitInNextBucket);
 };
 
 }  // namespace statsd
