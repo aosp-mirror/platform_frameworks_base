@@ -358,49 +358,45 @@ public class EnableZenModeDialog {
             }
         });
 
-        // minus button
-        final ImageView button1 = (ImageView) row.findViewById(android.R.id.button1);
-        button1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onClickTimeButton(row, tag, false /*down*/, rowId);
-                tag.lines.setAccessibilityLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);
-            }
-        });
-
-        // plus button
-        final ImageView button2 = (ImageView) row.findViewById(android.R.id.button2);
-        button2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onClickTimeButton(row, tag, true /*up*/, rowId);
-                tag.lines.setAccessibilityLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);
-            }
-        });
-
         final long time = ZenModeConfig.tryParseCountdownConditionId(conditionId);
+        final ImageView minusButton = (ImageView) row.findViewById(android.R.id.button1);
+        final ImageView plusButton = (ImageView) row.findViewById(android.R.id.button2);
         if (rowId == COUNTDOWN_CONDITION_INDEX && time > 0) {
-            button1.setVisibility(View.VISIBLE);
-            button2.setVisibility(View.VISIBLE);
+            minusButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    onClickTimeButton(row, tag, false /*down*/, rowId);
+                    tag.lines.setAccessibilityLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);
+                }
+            });
+
+            plusButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    onClickTimeButton(row, tag, true /*up*/, rowId);
+                    tag.lines.setAccessibilityLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);
+                }
+            });
             if (mBucketIndex > -1) {
-                button1.setEnabled(mBucketIndex > 0);
-                button2.setEnabled(mBucketIndex < MINUTE_BUCKETS.length - 1);
+                minusButton.setEnabled(mBucketIndex > 0);
+                plusButton.setEnabled(mBucketIndex < MINUTE_BUCKETS.length - 1);
             } else {
                 final long span = time - System.currentTimeMillis();
-                button1.setEnabled(span > MIN_BUCKET_MINUTES * MINUTES_MS);
+                minusButton.setEnabled(span > MIN_BUCKET_MINUTES * MINUTES_MS);
                 final Condition maxCondition = ZenModeConfig.toTimeCondition(mContext,
                         MAX_BUCKET_MINUTES, ActivityManager.getCurrentUser());
-                button2.setEnabled(!Objects.equals(condition.summary, maxCondition.summary));
+                plusButton.setEnabled(!Objects.equals(condition.summary, maxCondition.summary));
             }
 
-            button1.setAlpha(button1.isEnabled() ? 1f : .5f);
-            button2.setAlpha(button2.isEnabled() ? 1f : .5f);
+            minusButton.setAlpha(minusButton.isEnabled() ? 1f : .5f);
+            plusButton.setAlpha(plusButton.isEnabled() ? 1f : .5f);
         } else {
-            if (button1 != null) {
-                ((ViewGroup) row).removeView(button1);
+            if (minusButton != null) {
+                ((ViewGroup) row).removeView(minusButton);
             }
-            if (button2 != null) {
-                ((ViewGroup) row).removeView(button2);
+
+            if (plusButton != null) {
+                ((ViewGroup) row).removeView(plusButton);
             }
         }
     }
