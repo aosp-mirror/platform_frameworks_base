@@ -384,7 +384,8 @@ public final class WifiNetworkSpecifier extends NetworkSpecifier implements Parc
          *
          * For example:
          * To connect to an open network with a SSID prefix of "test" and a BSSID OUI of "10:03:23":
-         * {@code
+         *
+         * <pre>{@code
          * final NetworkSpecifier specifier =
          *      new Builder()
          *      .setSsidPattern(new PatternMatcher("test", PatterMatcher.PATTERN_PREFIX))
@@ -406,7 +407,7 @@ public final class WifiNetworkSpecifier extends NetworkSpecifier implements Parc
          *      // etc.
          * };
          * connectivityManager.requestNetwork(request, networkCallback);
-         * }
+         * }</pre>
          *
          * @return Instance of {@link NetworkSpecifier}.
          * @throws IllegalStateException on invalid params set.
