@@ -3331,6 +3331,16 @@ class Task extends WindowContainer<WindowContainer> {
         });
     }
 
+    boolean isTopActivityFocusable() {
+        final ActivityRecord r = topRunningActivity();
+        return r != null ? r.isFocusable()
+                : (isFocusable() && getWindowConfiguration().canReceiveKeys());
+    }
+
+    boolean isFocusableAndVisible() {
+        return isTopActivityFocusable() && shouldBeVisible(null /* starting */);
+    }
+
     void positionChildAtTop(ActivityRecord child) {
         positionChildAt(child, POSITION_TOP);
     }
@@ -4626,7 +4636,14 @@ class Task extends WindowContainer<WindowContainer> {
         if (mForceHiddenFlags == newFlags) {
             return false;
         }
+        final boolean wasHidden = isForceHidden();
         mForceHiddenFlags = newFlags;
+        if (wasHidden && isFocusableAndVisible()) {
+            // The change in force-hidden state will change visibility without triggering a stack
+            // order change, so we should reset the preferred top focusable stack to ensure it's not
+            // used if a new activity is started from this task.
+            getDisplayArea().resetPreferredTopFocusableStackIfBelow(this);
+        }
         return true;
     }
 
