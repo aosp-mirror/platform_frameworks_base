@@ -137,9 +137,9 @@ public class PowerUtilTest {
                 true /* basedOnUsage */);
 
         // shortened string should not have percentage
-        assertThat(info).isEqualTo("Less than 15 min remaining");
+        assertThat(info).isEqualTo("Less than 15 min left");
         // Add percentage to string when provided
-        assertThat(info2).isEqualTo("Less than 15 min remaining (10%)");
+        assertThat(info2).isEqualTo("Less than 15 min left (10%)");
     }
 
     @Test
@@ -171,9 +171,9 @@ public class PowerUtilTest {
                 true /* basedOnUsage */);
 
         // shortened string should not have percentage
-        assertThat(info).isEqualTo("More than 2 days remaining");
+        assertThat(info).isEqualTo("More than 2 days left");
         // Add percentage to string when provided
-        assertThat(info2).isEqualTo("More than 2 days remaining (10%)");
+        assertThat(info2).isEqualTo("More than 2 days left (10%)");
     }
 
     @Test
@@ -181,7 +181,7 @@ public class PowerUtilTest {
         String info = PowerUtil.getBatteryTipStringFormatted(mContext,
                 THREE_DAYS_MILLIS);
 
-        assertThat(info).isEqualTo("More than 3 days remaining");
+        assertThat(info).isEqualTo("More than 3 days left");
     }
 
     @Test
