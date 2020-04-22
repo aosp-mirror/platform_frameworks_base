@@ -252,9 +252,13 @@ void StatsPullerManager::RegisterPullUidProvider(const ConfigKey& configKey,
     mPullUidProviders[configKey] = provider;
 }
 
-void StatsPullerManager::UnregisterPullUidProvider(const ConfigKey& configKey) {
+void StatsPullerManager::UnregisterPullUidProvider(const ConfigKey& configKey,
+                                                   wp<PullUidProvider> provider) {
     std::lock_guard<std::mutex> _l(mLock);
-    mPullUidProviders.erase(configKey);
+    const auto& it = mPullUidProviders.find(configKey);
+    if (it != mPullUidProviders.end() && it->second == provider) {
+        mPullUidProviders.erase(it);
+    }
 }
 
 void StatsPullerManager::OnAlarmFired(int64_t elapsedTimeNs) {

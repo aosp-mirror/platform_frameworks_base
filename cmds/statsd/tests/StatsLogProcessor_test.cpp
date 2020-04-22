@@ -301,6 +301,29 @@ TEST(StatsLogProcessorTest, TestOnDumpReportEraseData) {
     EXPECT_TRUE(noData);
 }
 
+TEST(StatsLogProcessorTest, TestPullUidProviderSetOnConfigUpdate) {
+    // Setup simple config key corresponding to empty config.
+    sp<UidMap> m = new UidMap();
+    sp<StatsPullerManager> pullerManager = new StatsPullerManager();
+    sp<AlarmMonitor> anomalyAlarmMonitor;
+    sp<AlarmMonitor> subscriberAlarmMonitor;
+    StatsLogProcessor p(
+            m, pullerManager, anomalyAlarmMonitor, subscriberAlarmMonitor, 0,
+            [](const ConfigKey& key) { return true; },
+            [](const int&, const vector<int64_t>&) { return true; });
+    ConfigKey key(3, 4);
+    StatsdConfig config = MakeConfig(false);
+    p.OnConfigUpdated(0, key, config);
+    EXPECT_NE(pullerManager->mPullUidProviders.find(key), pullerManager->mPullUidProviders.end());
+
+    config.add_default_pull_packages("AID_STATSD");
+    p.OnConfigUpdated(5, key, config);
+    EXPECT_NE(pullerManager->mPullUidProviders.find(key), pullerManager->mPullUidProviders.end());
+
+    p.OnConfigRemoved(key);
+    EXPECT_EQ(pullerManager->mPullUidProviders.find(key), pullerManager->mPullUidProviders.end());
+}
+
 TEST(StatsLogProcessorTest, TestActiveConfigMetricDiskWriteRead) {
     int uid = 1111;
 
