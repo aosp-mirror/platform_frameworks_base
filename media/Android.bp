@@ -28,6 +28,7 @@ java_library {
 
     // Make sure that the implementaion only relies on SDK or system APIs.
     sdk_version: "core_platform",
+    min_sdk_version: "29",
     libs: [
         // The order matters. android_system_* library should come later.
         "framework_media_annotation",
