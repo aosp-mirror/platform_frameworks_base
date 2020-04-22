@@ -1622,6 +1622,7 @@ public class ResolverActivity extends Activity implements
             }
             setupViewVisibilities();
             maybeLogProfileChange();
+            onProfileTabSelected();
             DevicePolicyEventLogger
                     .createEvent(DevicePolicyEnums.RESOLVER_SWITCH_TABS)
                     .setInt(viewPager.getCurrentItem())
@@ -1639,6 +1640,12 @@ public class ResolverActivity extends Activity implements
                 });
         findViewById(R.id.resolver_tab_divider).setVisibility(View.VISIBLE);
     }
+
+    /**
+     * Callback called when user changes the profile tab.
+     * <p>This method is intended to be overridden by subclasses.
+     */
+    protected void onProfileTabSelected() { }
 
     private void resetCheckedItem() {
         if (!isIntentPicker()) {
