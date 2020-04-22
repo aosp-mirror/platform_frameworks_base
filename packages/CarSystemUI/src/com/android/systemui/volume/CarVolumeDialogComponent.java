@@ -45,6 +45,7 @@ public class CarVolumeDialogComponent extends VolumeDialogComponent {
     @Override
     protected VolumeDialog createDefault() {
         mCarVolumeDialog = new CarVolumeDialogImpl(mContext);
+        mCarVolumeDialog.show(Events.SHOW_REASON_VOLUME_CHANGED);
         return mCarVolumeDialog;
     }
 }
