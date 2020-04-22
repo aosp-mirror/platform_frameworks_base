@@ -77,7 +77,8 @@ interface IConnectivityManager
     NetworkQuotaInfo getActiveNetworkQuotaInfo();
     boolean isActiveNetworkMetered();
 
-    boolean requestRouteToHostAddress(int networkType, in byte[] hostAddress);
+    boolean requestRouteToHostAddress(int networkType, in byte[] hostAddress,
+            String callingPackageName, String callingAttributionTag);
 
     @UnsupportedAppUsage(maxTargetSdk = 29,
             publicAlternatives = "Use {@code TetheringManager#getLastTetherError} as alternative")
@@ -168,10 +169,10 @@ interface IConnectivityManager
 
     NetworkRequest requestNetwork(in NetworkCapabilities networkCapabilities,
             in Messenger messenger, int timeoutSec, in IBinder binder, int legacy,
-            String callingPackageName);
+            String callingPackageName, String callingAttributionTag);
 
     NetworkRequest pendingRequestForNetwork(in NetworkCapabilities networkCapabilities,
-            in PendingIntent operation, String callingPackageName);
+            in PendingIntent operation, String callingPackageName, String callingAttributionTag);
 
     void releasePendingNetworkRequest(in PendingIntent operation);
 
