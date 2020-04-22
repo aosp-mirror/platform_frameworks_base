@@ -42,6 +42,8 @@ namespace android {
 namespace os {
 namespace statsd {
 
+namespace {
+
 const ConfigKey kConfigKey(0, 12345);
 const int tagId = 1;
 const int64_t metricId = 123;
@@ -52,9 +54,8 @@ const int64_t bucketSizeNs = TimeUnitToBucketSizeInMillis(ONE_MINUTE) * 1000000L
 const int64_t bucket2StartTimeNs = bucketStartTimeNs + bucketSizeNs;
 const int64_t bucket3StartTimeNs = bucketStartTimeNs + 2 * bucketSizeNs;
 const int64_t bucket4StartTimeNs = bucketStartTimeNs + 3 * bucketSizeNs;
-const int64_t eventUpgradeTimeNs = bucketStartTimeNs + 15 * NS_PER_SEC;
+const int64_t partialBucketSplitTimeNs = bucketStartTimeNs + 15 * NS_PER_SEC;
 
-namespace {
 shared_ptr<LogEvent> makeLogEvent(int32_t atomId, int64_t timestampNs, int32_t value1, string str1,
                                   int32_t value2) {
     AStatsEvent* statsEvent = AStatsEvent_obtain();
@@ -70,6 +71,13 @@ shared_ptr<LogEvent> makeLogEvent(int32_t atomId, int64_t timestampNs, int32_t v
     return logEvent;
 }
 }  // anonymous namespace
+
+// Setup for parameterized tests.
+class GaugeMetricProducerTest_PartialBucket : public TestWithParam<BucketSplitEvent> {};
+
+INSTANTIATE_TEST_SUITE_P(GaugeMetricProducerTest_PartialBucket,
+                         GaugeMetricProducerTest_PartialBucket,
+                         testing::Values(APP_UPGRADE, BOOT_COMPLETE));
 
 /*
  * Tests that the first bucket works correctly
@@ -194,7 +202,7 @@ TEST(GaugeMetricProducerTest, TestPulledEventsNoCondition) {
     EXPECT_EQ(25L, it->mValue.int_value);
 }
 
-TEST(GaugeMetricProducerTest, TestPushedEventsWithUpgrade) {
+TEST_P(GaugeMetricProducerTest_PartialBucket, TestPushedEvents) {
     sp<AlarmMonitor> alarmMonitor;
     GaugeMetric metric;
     metric.set_id(metricId);
@@ -230,11 +238,22 @@ TEST(GaugeMetricProducerTest, TestPushedEventsWithUpgrade) {
     gaugeProducer.onMatchedLogEvent(1 /*log matcher index*/, event1);
     EXPECT_EQ(1UL, (*gaugeProducer.mCurrentSlicedBucket).count(DEFAULT_METRIC_DIMENSION_KEY));
 
-    gaugeProducer.notifyAppUpgrade(eventUpgradeTimeNs, "ANY.APP", 1, 1);
+    switch (GetParam()) {
+        case APP_UPGRADE:
+            gaugeProducer.notifyAppUpgrade(partialBucketSplitTimeNs);
+            break;
+        case BOOT_COMPLETE:
+            gaugeProducer.onStatsdInitCompleted(partialBucketSplitTimeNs);
+            break;
+    }
     EXPECT_EQ(0UL, (*gaugeProducer.mCurrentSlicedBucket).count(DEFAULT_METRIC_DIMENSION_KEY));
     EXPECT_EQ(1UL, gaugeProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY].size());
+    EXPECT_EQ(bucketStartTimeNs,
+              gaugeProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY][0].mBucketStartNs);
+    EXPECT_EQ(partialBucketSplitTimeNs,
+              gaugeProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY][0].mBucketEndNs);
     EXPECT_EQ(0L, gaugeProducer.mCurrentBucketNum);
-    EXPECT_EQ(eventUpgradeTimeNs, gaugeProducer.mCurrentBucketStartTimeNs);
+    EXPECT_EQ(partialBucketSplitTimeNs, gaugeProducer.mCurrentBucketStartTimeNs);
     // Partial buckets are not sent to anomaly tracker.
     EXPECT_EQ(0, anomalyTracker->getSumOverPastBuckets(DEFAULT_METRIC_DIMENSION_KEY));
 
@@ -244,7 +263,11 @@ TEST(GaugeMetricProducerTest, TestPushedEventsWithUpgrade) {
     gaugeProducer.onMatchedLogEvent(1 /*log matcher index*/, event2);
     EXPECT_EQ(0L, gaugeProducer.mCurrentBucketNum);
     EXPECT_EQ(1UL, gaugeProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY].size());
-    EXPECT_EQ((int64_t)eventUpgradeTimeNs, gaugeProducer.mCurrentBucketStartTimeNs);
+    EXPECT_EQ(bucketStartTimeNs,
+              gaugeProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY][0].mBucketStartNs);
+    EXPECT_EQ(partialBucketSplitTimeNs,
+              gaugeProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY][0].mBucketEndNs);
+    EXPECT_EQ((int64_t)partialBucketSplitTimeNs, gaugeProducer.mCurrentBucketStartTimeNs);
     // Partial buckets are not sent to anomaly tracker.
     EXPECT_EQ(0, anomalyTracker->getSumOverPastBuckets(DEFAULT_METRIC_DIMENSION_KEY));
 
@@ -267,7 +290,7 @@ TEST(GaugeMetricProducerTest, TestPushedEventsWithUpgrade) {
     EXPECT_EQ(2, anomalyTracker->getSumOverPastBuckets(DEFAULT_METRIC_DIMENSION_KEY));
 }
 
-TEST(GaugeMetricProducerTest, TestPulledWithUpgrade) {
+TEST_P(GaugeMetricProducerTest_PartialBucket, TestPulled) {
     GaugeMetric metric;
     metric.set_id(metricId);
     metric.set_bucket(ONE_MINUTE);
@@ -293,7 +316,8 @@ TEST(GaugeMetricProducerTest, TestPulledWithUpgrade) {
             .WillOnce(Invoke(
                     [](int tagId, const ConfigKey&, vector<std::shared_ptr<LogEvent>>* data, bool) {
                         data->clear();
-                        data->push_back(CreateRepeatedValueLogEvent(tagId, eventUpgradeTimeNs, 2));
+                        data->push_back(
+                                CreateRepeatedValueLogEvent(tagId, partialBucketSplitTimeNs, 2));
                         return true;
                     }));
 
@@ -311,10 +335,21 @@ TEST(GaugeMetricProducerTest, TestPulledWithUpgrade) {
                          .mFields->begin()
                          ->mValue.int_value);
 
-    gaugeProducer.notifyAppUpgrade(eventUpgradeTimeNs, "ANY.APP", 1, 1);
+    switch (GetParam()) {
+        case APP_UPGRADE:
+            gaugeProducer.notifyAppUpgrade(partialBucketSplitTimeNs);
+            break;
+        case BOOT_COMPLETE:
+            gaugeProducer.onStatsdInitCompleted(partialBucketSplitTimeNs);
+            break;
+    }
     EXPECT_EQ(1UL, gaugeProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY].size());
+    EXPECT_EQ(bucketStartTimeNs,
+              gaugeProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY][0].mBucketStartNs);
+    EXPECT_EQ(partialBucketSplitTimeNs,
+              gaugeProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY][0].mBucketEndNs);
     EXPECT_EQ(0L, gaugeProducer.mCurrentBucketNum);
-    EXPECT_EQ((int64_t)eventUpgradeTimeNs, gaugeProducer.mCurrentBucketStartTimeNs);
+    EXPECT_EQ(partialBucketSplitTimeNs, gaugeProducer.mCurrentBucketStartTimeNs);
     EXPECT_EQ(1UL, gaugeProducer.mCurrentSlicedBucket->size());
     EXPECT_EQ(2, gaugeProducer.mCurrentSlicedBucket->begin()
                          ->second.front()
@@ -370,7 +405,7 @@ TEST(GaugeMetricProducerTest, TestPulledWithAppUpgradeDisabled) {
                          .mFields->begin()
                          ->mValue.int_value);
 
-    gaugeProducer.notifyAppUpgrade(eventUpgradeTimeNs, "ANY.APP", 1, 1);
+    gaugeProducer.notifyAppUpgrade(partialBucketSplitTimeNs);
     EXPECT_EQ(0UL, gaugeProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY].size());
     EXPECT_EQ(0L, gaugeProducer.mCurrentBucketNum);
     EXPECT_EQ(bucketStartTimeNs, gaugeProducer.mCurrentBucketStartTimeNs);
