@@ -214,6 +214,175 @@ public class AudioSystem
         }
     }
 
+    /**
+     * @hide
+     * Convert a native audio format integer constant to a string.
+     */
+    public static String audioFormatToString(int audioFormat) {
+        switch (audioFormat) {
+            case /* AUDIO_FORMAT_INVALID         */ 0xFFFFFFFF:
+                return "AUDIO_FORMAT_INVALID";
+            case /* AUDIO_FORMAT_DEFAULT         */ 0:
+                return "AUDIO_FORMAT_DEFAULT";
+            case /* AUDIO_FORMAT_MP3             */ 0x01000000:
+                return "AUDIO_FORMAT_MP3";
+            case /* AUDIO_FORMAT_AMR_NB          */ 0x02000000:
+                return "AUDIO_FORMAT_AMR_NB";
+            case /* AUDIO_FORMAT_AMR_WB          */ 0x03000000:
+                return "AUDIO_FORMAT_AMR_WB";
+            case /* AUDIO_FORMAT_AAC             */ 0x04000000:
+                return "AUDIO_FORMAT_AAC";
+            case /* AUDIO_FORMAT_HE_AAC_V1       */ 0x05000000:
+                return "AUDIO_FORMAT_HE_AAC_V1";
+            case /* AUDIO_FORMAT_HE_AAC_V2       */ 0x06000000:
+                return "AUDIO_FORMAT_HE_AAC_V2";
+            case /* AUDIO_FORMAT_VORBIS          */ 0x07000000:
+                return "AUDIO_FORMAT_VORBIS";
+            case /* AUDIO_FORMAT_OPUS            */ 0x08000000:
+                return "AUDIO_FORMAT_OPUS";
+            case /* AUDIO_FORMAT_AC3             */ 0x09000000:
+                return "AUDIO_FORMAT_AC3";
+            case /* AUDIO_FORMAT_E_AC3           */ 0x0A000000:
+                return "AUDIO_FORMAT_E_AC3";
+            case /* AUDIO_FORMAT_DTS             */ 0x0B000000:
+                return "AUDIO_FORMAT_DTS";
+            case /* AUDIO_FORMAT_DTS_HD          */ 0x0C000000:
+                return "AUDIO_FORMAT_DTS_HD";
+            case /* AUDIO_FORMAT_IEC61937        */ 0x0D000000:
+                return "AUDIO_FORMAT_IEC61937";
+            case /* AUDIO_FORMAT_DOLBY_TRUEHD    */ 0x0E000000:
+                return "AUDIO_FORMAT_DOLBY_TRUEHD";
+            case /* AUDIO_FORMAT_EVRC            */ 0x10000000:
+                return "AUDIO_FORMAT_EVRC";
+            case /* AUDIO_FORMAT_EVRCB           */ 0x11000000:
+                return "AUDIO_FORMAT_EVRCB";
+            case /* AUDIO_FORMAT_EVRCWB          */ 0x12000000:
+                return "AUDIO_FORMAT_EVRCWB";
+            case /* AUDIO_FORMAT_EVRCNW          */ 0x13000000:
+                return "AUDIO_FORMAT_EVRCNW";
+            case /* AUDIO_FORMAT_AAC_ADIF        */ 0x14000000:
+                return "AUDIO_FORMAT_AAC_ADIF";
+            case /* AUDIO_FORMAT_WMA             */ 0x15000000:
+                return "AUDIO_FORMAT_WMA";
+            case /* AUDIO_FORMAT_WMA_PRO         */ 0x16000000:
+                return "AUDIO_FORMAT_WMA_PRO";
+            case /* AUDIO_FORMAT_AMR_WB_PLUS     */ 0x17000000:
+                return "AUDIO_FORMAT_AMR_WB_PLUS";
+            case /* AUDIO_FORMAT_MP2             */ 0x18000000:
+                return "AUDIO_FORMAT_MP2";
+            case /* AUDIO_FORMAT_QCELP           */ 0x19000000:
+                return "AUDIO_FORMAT_QCELP";
+            case /* AUDIO_FORMAT_DSD             */ 0x1A000000:
+                return "AUDIO_FORMAT_DSD";
+            case /* AUDIO_FORMAT_FLAC            */ 0x1B000000:
+                return "AUDIO_FORMAT_FLAC";
+            case /* AUDIO_FORMAT_ALAC            */ 0x1C000000:
+                return "AUDIO_FORMAT_ALAC";
+            case /* AUDIO_FORMAT_APE             */ 0x1D000000:
+                return "AUDIO_FORMAT_APE";
+            case /* AUDIO_FORMAT_AAC_ADTS        */ 0x1E000000:
+                return "AUDIO_FORMAT_AAC_ADTS";
+            case /* AUDIO_FORMAT_SBC             */ 0x1F000000:
+                return "AUDIO_FORMAT_SBC";
+            case /* AUDIO_FORMAT_APTX            */ 0x20000000:
+                return "AUDIO_FORMAT_APTX";
+            case /* AUDIO_FORMAT_APTX_HD         */ 0x21000000:
+                return "AUDIO_FORMAT_APTX_HD";
+            case /* AUDIO_FORMAT_AC4             */ 0x22000000:
+                return "AUDIO_FORMAT_AC4";
+            case /* AUDIO_FORMAT_LDAC            */ 0x23000000:
+                return "AUDIO_FORMAT_LDAC";
+            case /* AUDIO_FORMAT_MAT             */ 0x24000000:
+                return "AUDIO_FORMAT_MAT";
+            case /* AUDIO_FORMAT_AAC_LATM        */ 0x25000000:
+                return "AUDIO_FORMAT_AAC_LATM";
+            case /* AUDIO_FORMAT_CELT            */ 0x26000000:
+                return "AUDIO_FORMAT_CELT";
+            case /* AUDIO_FORMAT_APTX_ADAPTIVE   */ 0x27000000:
+                return "AUDIO_FORMAT_APTX_ADAPTIVE";
+            case /* AUDIO_FORMAT_LHDC            */ 0x28000000:
+                return "AUDIO_FORMAT_LHDC";
+            case /* AUDIO_FORMAT_LHDC_LL         */ 0x29000000:
+                return "AUDIO_FORMAT_LHDC_LL";
+            case /* AUDIO_FORMAT_APTX_TWSP       */ 0x2A000000:
+                return "AUDIO_FORMAT_APTX_TWSP";
+
+            /* Aliases */
+            case /* AUDIO_FORMAT_PCM_16_BIT        */ 0x1:
+                return "AUDIO_FORMAT_PCM_16_BIT";        // (PCM | PCM_SUB_16_BIT)
+            case /* AUDIO_FORMAT_PCM_8_BIT         */ 0x2:
+                return "AUDIO_FORMAT_PCM_8_BIT";        // (PCM | PCM_SUB_8_BIT)
+            case /* AUDIO_FORMAT_PCM_32_BIT        */ 0x3:
+                return "AUDIO_FORMAT_PCM_32_BIT";        // (PCM | PCM_SUB_32_BIT)
+            case /* AUDIO_FORMAT_PCM_8_24_BIT      */ 0x4:
+                return "AUDIO_FORMAT_PCM_8_24_BIT";        // (PCM | PCM_SUB_8_24_BIT)
+            case /* AUDIO_FORMAT_PCM_FLOAT         */ 0x5:
+                return "AUDIO_FORMAT_PCM_FLOAT";        // (PCM | PCM_SUB_FLOAT)
+            case /* AUDIO_FORMAT_PCM_24_BIT_PACKED */ 0x6:
+                return "AUDIO_FORMAT_PCM_24_BIT_PACKED";        // (PCM | PCM_SUB_24_BIT_PACKED)
+            case /* AUDIO_FORMAT_AAC_MAIN          */ 0x4000001:
+                return "AUDIO_FORMAT_AAC_MAIN";  // (AAC | AAC_SUB_MAIN)
+            case /* AUDIO_FORMAT_AAC_LC            */ 0x4000002:
+                return "AUDIO_FORMAT_AAC_LC";  // (AAC | AAC_SUB_LC)
+            case /* AUDIO_FORMAT_AAC_SSR           */ 0x4000004:
+                return "AUDIO_FORMAT_AAC_SSR";  // (AAC | AAC_SUB_SSR)
+            case /* AUDIO_FORMAT_AAC_LTP           */ 0x4000008:
+                return "AUDIO_FORMAT_AAC_LTP";  // (AAC | AAC_SUB_LTP)
+            case /* AUDIO_FORMAT_AAC_HE_V1         */ 0x4000010:
+                return "AUDIO_FORMAT_AAC_HE_V1";  // (AAC | AAC_SUB_HE_V1)
+            case /* AUDIO_FORMAT_AAC_SCALABLE      */ 0x4000020:
+                return "AUDIO_FORMAT_AAC_SCALABLE";  // (AAC | AAC_SUB_SCALABLE)
+            case /* AUDIO_FORMAT_AAC_ERLC          */ 0x4000040:
+                return "AUDIO_FORMAT_AAC_ERLC";  // (AAC | AAC_SUB_ERLC)
+            case /* AUDIO_FORMAT_AAC_LD            */ 0x4000080:
+                return "AUDIO_FORMAT_AAC_LD";  // (AAC | AAC_SUB_LD)
+            case /* AUDIO_FORMAT_AAC_HE_V2         */ 0x4000100:
+                return "AUDIO_FORMAT_AAC_HE_V2";  // (AAC | AAC_SUB_HE_V2)
+            case /* AUDIO_FORMAT_AAC_ELD           */ 0x4000200:
+                return "AUDIO_FORMAT_AAC_ELD";  // (AAC | AAC_SUB_ELD)
+            case /* AUDIO_FORMAT_AAC_XHE           */ 0x4000300:
+                return "AUDIO_FORMAT_AAC_XHE";  // (AAC | AAC_SUB_XHE)
+            case /* AUDIO_FORMAT_AAC_ADTS_MAIN     */ 0x1e000001:
+                return "AUDIO_FORMAT_AAC_ADTS_MAIN"; // (AAC_ADTS | AAC_SUB_MAIN)
+            case /* AUDIO_FORMAT_AAC_ADTS_LC       */ 0x1e000002:
+                return "AUDIO_FORMAT_AAC_ADTS_LC"; // (AAC_ADTS | AAC_SUB_LC)
+            case /* AUDIO_FORMAT_AAC_ADTS_SSR      */ 0x1e000004:
+                return "AUDIO_FORMAT_AAC_ADTS_SSR"; // (AAC_ADTS | AAC_SUB_SSR)
+            case /* AUDIO_FORMAT_AAC_ADTS_LTP      */ 0x1e000008:
+                return "AUDIO_FORMAT_AAC_ADTS_LTP"; // (AAC_ADTS | AAC_SUB_LTP)
+            case /* AUDIO_FORMAT_AAC_ADTS_HE_V1    */ 0x1e000010:
+                return "AUDIO_FORMAT_AAC_ADTS_HE_V1"; // (AAC_ADTS | AAC_SUB_HE_V1)
+            case /* AUDIO_FORMAT_AAC_ADTS_SCALABLE */ 0x1e000020:
+                return "AUDIO_FORMAT_AAC_ADTS_SCALABLE"; // (AAC_ADTS | AAC_SUB_SCALABLE)
+            case /* AUDIO_FORMAT_AAC_ADTS_ERLC     */ 0x1e000040:
+                return "AUDIO_FORMAT_AAC_ADTS_ERLC"; // (AAC_ADTS | AAC_SUB_ERLC)
+            case /* AUDIO_FORMAT_AAC_ADTS_LD       */ 0x1e000080:
+                return "AUDIO_FORMAT_AAC_ADTS_LD"; // (AAC_ADTS | AAC_SUB_LD)
+            case /* AUDIO_FORMAT_AAC_ADTS_HE_V2    */ 0x1e000100:
+                return "AUDIO_FORMAT_AAC_ADTS_HE_V2"; // (AAC_ADTS | AAC_SUB_HE_V2)
+            case /* AUDIO_FORMAT_AAC_ADTS_ELD      */ 0x1e000200:
+                return "AUDIO_FORMAT_AAC_ADTS_ELD"; // (AAC_ADTS | AAC_SUB_ELD)
+            case /* AUDIO_FORMAT_AAC_ADTS_XHE      */ 0x1e000300:
+                return "AUDIO_FORMAT_AAC_ADTS_XHE"; // (AAC_ADTS | AAC_SUB_XHE)
+            case /* AUDIO_FORMAT_AAC_LATM_LC       */ 0x25000002:
+                return "AUDIO_FORMAT_AAC_LATM_LC"; // (AAC_LATM | AAC_SUB_LC)
+            case /* AUDIO_FORMAT_AAC_LATM_HE_V1    */ 0x25000010:
+                return "AUDIO_FORMAT_AAC_LATM_HE_V1"; // (AAC_LATM | AAC_SUB_HE_V1)
+            case /* AUDIO_FORMAT_AAC_LATM_HE_V2    */ 0x25000100:
+                return "AUDIO_FORMAT_AAC_LATM_HE_V2"; // (AAC_LATM | AAC_SUB_HE_V2)
+            case /* AUDIO_FORMAT_E_AC3_JOC         */ 0xA000001:
+                return "AUDIO_FORMAT_E_AC3_JOC";  // (E_AC3 | E_AC3_SUB_JOC)
+            case /* AUDIO_FORMAT_MAT_1_0           */ 0x24000001:
+                return "AUDIO_FORMAT_MAT_1_0"; // (MAT | MAT_SUB_1_0)
+            case /* AUDIO_FORMAT_MAT_2_0           */ 0x24000002:
+                return "AUDIO_FORMAT_MAT_2_0"; // (MAT | MAT_SUB_2_0)
+            case /* AUDIO_FORMAT_MAT_2_1           */ 0x24000003:
+                return "AUDIO_FORMAT_MAT_2_1"; // (MAT | MAT_SUB_2_1)
+            default:
+                return "AUDIO_FORMAT_(" + audioFormat + ")";
+        }
+    }
+
     /* Routing bits for the former setRouting/getRouting API */
     /** @hide @deprecated */
     @Deprecated public static final int ROUTE_EARPIECE          = (1 << 0);
