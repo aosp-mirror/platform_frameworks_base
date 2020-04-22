@@ -17,6 +17,8 @@
 android_test {
     name: "FlickerTests",
     srcs: ["src/**/*.java"],
+    manifest: "AndroidManifest.xml",
+    test_config: "AndroidTest.xml",
     platform_apis: true,
     certificate: "platform",
     test_suites: ["device-tests"],
