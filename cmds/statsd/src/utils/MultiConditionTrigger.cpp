@@ -15,7 +15,9 @@
  */
 #define DEBUG false  // STOPSHIP if true
 
-#include "NamedLatch.h"
+#include "MultiConditionTrigger.h"
+
+#include <thread>
 
 using namespace std;
 
@@ -23,26 +25,33 @@ namespace android {
 namespace os {
 namespace statsd {
 
-NamedLatch::NamedLatch(const set<string>& eventNames) : mRemainingEventNames(eventNames) {
+MultiConditionTrigger::MultiConditionTrigger(const set<string>& conditionNames,
+                                             function<void()> trigger)
+    : mRemainingConditionNames(conditionNames),
+      mTrigger(trigger),
+      mCompleted(mRemainingConditionNames.empty()) {
+    if (mCompleted) {
+        thread executorThread([this] { mTrigger(); });
+        executorThread.detach();
+    }
 }
 
-void NamedLatch::countDown(const string& eventName) {
-    bool notify = false;
+void MultiConditionTrigger::markComplete(const string& conditionName) {
+    bool doTrigger = false;
     {
         lock_guard<mutex> lg(mMutex);
-        mRemainingEventNames.erase(eventName);
-        notify = mRemainingEventNames.empty();
+        if (mCompleted) {
+            return;
+        }
+        mRemainingConditionNames.erase(conditionName);
+        mCompleted = mRemainingConditionNames.empty();
+        doTrigger = mCompleted;
     }
-    if (notify) {
-        mConditionVariable.notify_all();
+    if (doTrigger) {
+        std::thread executorThread([this] { mTrigger(); });
+        executorThread.detach();
     }
 }
-
-void NamedLatch::wait() const {
-    unique_lock<mutex> unique_lk(mMutex);
-    mConditionVariable.wait(unique_lk, [this] { return mRemainingEventNames.empty(); });
-}
-
 }  // namespace statsd
 }  // namespace os
 }  // namespace android

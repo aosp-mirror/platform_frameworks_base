@@ -89,6 +89,7 @@ StatsdConfig MakeValueMetricConfig(int64_t minTime) {
     valueMetric->set_bucket(FIVE_MINUTES);
     valueMetric->set_min_bucket_size_nanos(minTime);
     valueMetric->set_use_absolute_value_on_reset(true);
+    valueMetric->set_skip_zero_diff_output(false);
     return config;
 }
 
@@ -217,6 +218,35 @@ TEST(PartialBucketE2eTest, TestCountMetricSplitOnRemoval) {
     EXPECT_EQ(1, report.metrics(0).count_metrics().data(0).bucket_info(0).count());
 }
 
+TEST(PartialBucketE2eTest, TestCountMetricSplitOnBoot) {
+    shared_ptr<StatsService> service = SharedRefBase::make<StatsService>(nullptr, nullptr);
+    SendConfig(service, MakeConfig());
+    int64_t start = getElapsedRealtimeNs();  // This is the start-time the metrics producers are
+                                             // initialized with.
+
+    // Goes into the first bucket
+    service->mProcessor->OnLogEvent(CreateAppCrashEvent(start + NS_PER_SEC, 100).get());
+    int64_t bootCompleteTimeNs = start + 2 * NS_PER_SEC;
+    service->mProcessor->onStatsdInitCompleted(bootCompleteTimeNs);
+    // Goes into the second bucket.
+    service->mProcessor->OnLogEvent(CreateAppCrashEvent(start + 3 * NS_PER_SEC, 100).get());
+
+    ConfigMetricsReport report = GetReports(service->mProcessor, start + 4 * NS_PER_SEC);
+    backfillStartEndTimestamp(&report);
+
+    ASSERT_EQ(1, report.metrics_size());
+    ASSERT_EQ(1, report.metrics(0).count_metrics().data_size());
+    ASSERT_EQ(1, report.metrics(0).count_metrics().data(0).bucket_info_size());
+    EXPECT_TRUE(report.metrics(0)
+                        .count_metrics()
+                        .data(0)
+                        .bucket_info(0)
+                        .has_start_bucket_elapsed_nanos());
+    EXPECT_EQ(MillisToNano(NanoToMillis(bootCompleteTimeNs)),
+              report.metrics(0).count_metrics().data(0).bucket_info(0).end_bucket_elapsed_nanos());
+    EXPECT_EQ(1, report.metrics(0).count_metrics().data(0).bucket_info(0).count());
+}
+
 TEST(PartialBucketE2eTest, TestValueMetricWithoutMinPartialBucket) {
     shared_ptr<StatsService> service = SharedRefBase::make<StatsService>(nullptr, nullptr);
     service->mPullerManager->RegisterPullAtomCallback(
@@ -229,13 +259,22 @@ TEST(PartialBucketE2eTest, TestValueMetricWithoutMinPartialBucket) {
                                              // initialized with.
 
     service->mProcessor->informPullAlarmFired(5 * 60 * NS_PER_SEC + start);
-    service->mUidMap->updateApp(5 * 60 * NS_PER_SEC + start + 2, String16(kApp1.c_str()), 1, 2,
-                                String16("v2"), String16(""));
+    int64_t appUpgradeTimeNs = 5 * 60 * NS_PER_SEC + start + 2 * NS_PER_SEC;
+    service->mUidMap->updateApp(appUpgradeTimeNs, String16(kApp1.c_str()), 1, 2, String16("v2"),
+                                String16(""));
 
     ConfigMetricsReport report =
-            GetReports(service->mProcessor, 5 * 60 * NS_PER_SEC + start + 100, true);
+            GetReports(service->mProcessor, 5 * 60 * NS_PER_SEC + start + 100 * NS_PER_SEC);
+    backfillStartEndTimestamp(&report);
+
     EXPECT_EQ(1, report.metrics_size());
     EXPECT_EQ(0, report.metrics(0).value_metrics().skipped_size());
+
+    // The fake subsystem state sleep puller returns two atoms.
+    ASSERT_EQ(2, report.metrics(0).value_metrics().data_size());
+    ASSERT_EQ(2, report.metrics(0).value_metrics().data(0).bucket_info_size());
+    EXPECT_EQ(MillisToNano(NanoToMillis(appUpgradeTimeNs)),
+              report.metrics(0).value_metrics().data(0).bucket_info(1).end_bucket_elapsed_nanos());
 }
 
 TEST(PartialBucketE2eTest, TestValueMetricWithMinPartialBucket) {
@@ -249,13 +288,13 @@ TEST(PartialBucketE2eTest, TestValueMetricWithMinPartialBucket) {
     int64_t start = getElapsedRealtimeNs();  // This is the start-time the metrics producers are
                                              // initialized with.
 
-    const int64_t endSkipped = 5 * 60 * NS_PER_SEC + start + 2;
+    const int64_t endSkipped = 5 * 60 * NS_PER_SEC + start + 2 * NS_PER_SEC;
     service->mProcessor->informPullAlarmFired(5 * 60 * NS_PER_SEC + start);
     service->mUidMap->updateApp(endSkipped, String16(kApp1.c_str()), 1, 2, String16("v2"),
                                String16(""));
 
     ConfigMetricsReport report =
-            GetReports(service->mProcessor, 5 * 60 * NS_PER_SEC + start + 100 * NS_PER_SEC, true);
+            GetReports(service->mProcessor, 5 * 60 * NS_PER_SEC + start + 100 * NS_PER_SEC);
     backfillStartEndTimestamp(&report);
 
     ASSERT_EQ(1, report.metrics_size());
@@ -264,10 +303,49 @@ TEST(PartialBucketE2eTest, TestValueMetricWithMinPartialBucket) {
     // Can't test the start time since it will be based on the actual time when the pulling occurs.
     EXPECT_EQ(MillisToNano(NanoToMillis(endSkipped)),
               report.metrics(0).value_metrics().skipped(0).end_bucket_elapsed_nanos());
+
+    ASSERT_EQ(2, report.metrics(0).value_metrics().data_size());
+    EXPECT_EQ(1, report.metrics(0).value_metrics().data(0).bucket_info_size());
+}
+
+TEST(PartialBucketE2eTest, TestValueMetricOnBootWithoutMinPartialBucket) {
+    shared_ptr<StatsService> service = SharedRefBase::make<StatsService>(nullptr, nullptr);
+    // Initial pull will fail since puller is not registered.
+    SendConfig(service, MakeValueMetricConfig(0));
+    int64_t start = getElapsedRealtimeNs();  // This is the start-time the metrics producers are
+                                             // initialized with.
+
+    service->mPullerManager->RegisterPullAtomCallback(
+            /*uid=*/0, util::SUBSYSTEM_SLEEP_STATE, NS_PER_SEC, NS_PER_SEC * 10, {},
+            SharedRefBase::make<FakeSubsystemSleepCallback>());
+
+    int64_t bootCompleteTimeNs = start + NS_PER_SEC;
+    service->mProcessor->onStatsdInitCompleted(bootCompleteTimeNs);
+
+    service->mProcessor->informPullAlarmFired(5 * 60 * NS_PER_SEC + start);
+
+    ConfigMetricsReport report = GetReports(service->mProcessor, 5 * 60 * NS_PER_SEC + start + 100);
+    backfillStartEndTimestamp(&report);
+
+    // First bucket is dropped due to the initial pull failing
+    ASSERT_EQ(1, report.metrics_size());
+    EXPECT_EQ(1, report.metrics(0).value_metrics().skipped_size());
+    EXPECT_EQ(MillisToNano(NanoToMillis(bootCompleteTimeNs)),
+              report.metrics(0).value_metrics().skipped(0).end_bucket_elapsed_nanos());
+
+    // The fake subsystem state sleep puller returns two atoms.
+    ASSERT_EQ(2, report.metrics(0).value_metrics().data_size());
+    ASSERT_EQ(1, report.metrics(0).value_metrics().data(0).bucket_info_size());
+    EXPECT_EQ(
+            MillisToNano(NanoToMillis(bootCompleteTimeNs)),
+            report.metrics(0).value_metrics().data(0).bucket_info(0).start_bucket_elapsed_nanos());
 }
 
 TEST(PartialBucketE2eTest, TestGaugeMetricWithoutMinPartialBucket) {
     shared_ptr<StatsService> service = SharedRefBase::make<StatsService>(nullptr, nullptr);
+    service->mPullerManager->RegisterPullAtomCallback(
+            /*uid=*/0, util::SUBSYSTEM_SLEEP_STATE, NS_PER_SEC, NS_PER_SEC * 10, {},
+            SharedRefBase::make<FakeSubsystemSleepCallback>());
     // Partial buckets don't occur when app is first installed.
     service->mUidMap->updateApp(1, String16(kApp1.c_str()), 1, 1, String16("v1"), String16(""));
     SendConfig(service, MakeGaugeMetricConfig(0));
@@ -278,16 +356,22 @@ TEST(PartialBucketE2eTest, TestGaugeMetricWithoutMinPartialBucket) {
     service->mUidMap->updateApp(5 * 60 * NS_PER_SEC + start + 2, String16(kApp1.c_str()), 1, 2,
                                String16("v2"), String16(""));
 
-    ConfigMetricsReport report =
-            GetReports(service->mProcessor, 5 * 60 * NS_PER_SEC + start + 100, true);
-    EXPECT_EQ(1, report.metrics_size());
+    ConfigMetricsReport report = GetReports(service->mProcessor, 5 * 60 * NS_PER_SEC + start + 100);
+    backfillStartEndTimestamp(&report);
+    ASSERT_EQ(1, report.metrics_size());
     EXPECT_EQ(0, report.metrics(0).gauge_metrics().skipped_size());
+    // The fake subsystem state sleep puller returns two atoms.
+    ASSERT_EQ(2, report.metrics(0).gauge_metrics().data_size());
+    EXPECT_EQ(2, report.metrics(0).gauge_metrics().data(0).bucket_info_size());
 }
 
 TEST(PartialBucketE2eTest, TestGaugeMetricWithMinPartialBucket) {
     shared_ptr<StatsService> service = SharedRefBase::make<StatsService>(nullptr, nullptr);
     // Partial buckets don't occur when app is first installed.
     service->mUidMap->updateApp(1, String16(kApp1.c_str()), 1, 1, String16("v1"), String16(""));
+    service->mPullerManager->RegisterPullAtomCallback(
+            /*uid=*/0, util::SUBSYSTEM_SLEEP_STATE, NS_PER_SEC, NS_PER_SEC * 10, {},
+            SharedRefBase::make<FakeSubsystemSleepCallback>());
     SendConfig(service, MakeGaugeMetricConfig(60 * NS_PER_SEC /* One minute */));
     int64_t start = getElapsedRealtimeNs();  // This is the start-time the metrics producers are
                                              // initialized with.
@@ -298,7 +382,7 @@ TEST(PartialBucketE2eTest, TestGaugeMetricWithMinPartialBucket) {
                                 String16(""));
 
     ConfigMetricsReport report =
-            GetReports(service->mProcessor, 5 * 60 * NS_PER_SEC + start + 100 * NS_PER_SEC, true);
+            GetReports(service->mProcessor, 5 * 60 * NS_PER_SEC + start + 100 * NS_PER_SEC);
     backfillStartEndTimestamp(&report);
     ASSERT_EQ(1, report.metrics_size());
     ASSERT_EQ(1, report.metrics(0).gauge_metrics().skipped_size());
@@ -306,6 +390,38 @@ TEST(PartialBucketE2eTest, TestGaugeMetricWithMinPartialBucket) {
     EXPECT_TRUE(report.metrics(0).gauge_metrics().skipped(0).has_start_bucket_elapsed_nanos());
     EXPECT_EQ(MillisToNano(NanoToMillis(endSkipped)),
               report.metrics(0).gauge_metrics().skipped(0).end_bucket_elapsed_nanos());
+    ASSERT_EQ(2, report.metrics(0).gauge_metrics().data_size());
+    EXPECT_EQ(1, report.metrics(0).gauge_metrics().data(0).bucket_info_size());
+}
+
+TEST(PartialBucketE2eTest, TestGaugeMetricOnBootWithoutMinPartialBucket) {
+    shared_ptr<StatsService> service = SharedRefBase::make<StatsService>(nullptr, nullptr);
+    // Initial pull will fail since puller hasn't been registered.
+    SendConfig(service, MakeGaugeMetricConfig(0));
+    int64_t start = getElapsedRealtimeNs();  // This is the start-time the metrics producers are
+                                             // initialized with.
+
+    service->mPullerManager->RegisterPullAtomCallback(
+            /*uid=*/0, util::SUBSYSTEM_SLEEP_STATE, NS_PER_SEC, NS_PER_SEC * 10, {},
+            SharedRefBase::make<FakeSubsystemSleepCallback>());
+
+    int64_t bootCompleteTimeNs = start + NS_PER_SEC;
+    service->mProcessor->onStatsdInitCompleted(bootCompleteTimeNs);
+
+    service->mProcessor->informPullAlarmFired(5 * 60 * NS_PER_SEC + start);
+
+    ConfigMetricsReport report = GetReports(service->mProcessor, 5 * 60 * NS_PER_SEC + start + 100);
+    backfillStartEndTimestamp(&report);
+
+    ASSERT_EQ(1, report.metrics_size());
+    EXPECT_EQ(0, report.metrics(0).gauge_metrics().skipped_size());
+    // The fake subsystem state sleep puller returns two atoms.
+    ASSERT_EQ(2, report.metrics(0).gauge_metrics().data_size());
+    // No data in the first bucket, so nothing is reported
+    ASSERT_EQ(1, report.metrics(0).gauge_metrics().data(0).bucket_info_size());
+    EXPECT_EQ(
+            MillisToNano(NanoToMillis(bootCompleteTimeNs)),
+            report.metrics(0).gauge_metrics().data(0).bucket_info(0).start_bucket_elapsed_nanos());
 }
 
 #else
