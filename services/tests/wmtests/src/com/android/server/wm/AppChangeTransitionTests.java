@@ -37,7 +37,6 @@ import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationDefinition;
 import android.view.RemoteAnimationTarget;
 
-import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
 import org.junit.Test;
@@ -97,7 +96,6 @@ public class AppChangeTransitionTests extends WindowTestsBase {
     }
 
     @Test
-    @FlakyTest(bugId = 131005232)
     public void testModeChangeRemoteAnimatorNoSnapshot() {
         // setup currently defaults to no snapshot.
         setUpOnDisplay(mDisplayContent);
@@ -115,7 +113,6 @@ public class AppChangeTransitionTests extends WindowTestsBase {
     }
 
     @Test
-    @FlakyTest(bugId = 131005232)
     public void testCancelPendingChangeOnRemove() {
         // setup currently defaults to no snapshot.
         setUpOnDisplay(mDisplayContent);
@@ -135,8 +132,7 @@ public class AppChangeTransitionTests extends WindowTestsBase {
     }
 
     @Test
-    @FlakyTest(bugId = 131005232)
-    public void testNoChangeWhenMoveDisplay() {
+    public void testNoChangeOnOldDisplayWhenMoveDisplay() {
         mDisplayContent.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
         final DisplayContent dc1 = createNewDisplay(Display.STATE_ON);
         dc1.setWindowingMode(WINDOWING_MODE_FREEFORM);
@@ -151,9 +147,8 @@ public class AppChangeTransitionTests extends WindowTestsBase {
 
         assertEquals(WINDOWING_MODE_FULLSCREEN, mTask.getWindowingMode());
 
-        // Make sure we're not waiting for a change animation (no leash)
-        assertFalse(mTask.isInChangeTransition());
-        assertNull(mActivity.mSurfaceFreezer.mSnapshot);
+        // Make sure the change transition is not the old display
+        assertFalse(dc1.mChangingContainers.contains(mTask));
 
         waitUntilHandlersIdle();
         mActivity.removeImmediately();
