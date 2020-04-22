@@ -16,10 +16,9 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="no_upstream_notification_title" msgid="5026912695053828030">"Wi-Fi-sonen har ikke internettilgang"</string>
-    <string name="no_upstream_notification_message" msgid="6810713595219684058">"Enheter kan ikke koble til internett"</string>
-    <string name="no_upstream_notification_disable_button" msgid="3388523729003352854">"Slå av Wi-Fi-sonen"</string>
-    <string name="upstream_roaming_notification_title" msgid="2242169951273396377">"Wi-Fi-sonen er på"</string>
+    <string name="no_upstream_notification_title" msgid="611650570559011140">"Internettdeling har ikke internettilgang"</string>
+    <string name="no_upstream_notification_message" msgid="6508394877641864863">"Enhetene kan ikke koble til"</string>
+    <string name="no_upstream_notification_disable_button" msgid="7609346639290990508">"Slå av internettdeling"</string>
+    <string name="upstream_roaming_notification_title" msgid="6032901176124830787">"Wi-Fi-sone eller internettdeling er på"</string>
     <string name="upstream_roaming_notification_message" msgid="7599056263326217523">"Ytterligere kostnader kan påløpe under roaming"</string>
-    <string name="upstream_roaming_notification_continue_button" msgid="693106687178152486">"Fortsett"</string>
 </resources>
