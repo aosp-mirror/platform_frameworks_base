@@ -36,6 +36,7 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Insets;
@@ -184,9 +185,11 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
     private final LinearLayout mActionsView;
     private final ImageView mBackgroundProtection;
     private final FrameLayout mDismissButton;
+    private final ImageView mDismissImage;
 
     private Bitmap mScreenBitmap;
     private Animator mScreenshotAnimation;
+    private boolean mInDarkMode = false;
 
     private float mScreenshotOffsetXPx;
     private float mScreenshotOffsetYPx;
@@ -250,6 +253,7 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
             mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_EXPLICIT_DISMISSAL);
             clearScreenshot("dismiss_button");
         });
+        mDismissImage = mDismissButton.findViewById(R.id.global_screenshot_dismiss_image);
 
         mScreenshotFlash = mScreenshotLayout.findViewById(R.id.global_screenshot_flash);
         mScreenshotSelectorView = mScreenshotLayout.findViewById(R.id.global_screenshot_selector);
@@ -356,6 +360,8 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
         mScreenBitmap.setHasAlpha(false);
         mScreenBitmap.prepareToDraw();
 
+        updateDarkTheme();
+
         mWindowManager.addView(mScreenshotLayout, mWindowLayoutParams);
         mScreenshotLayout.getViewTreeObserver().addOnComputeInternalInsetsListener(this);
 
@@ -451,6 +457,41 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
         mScreenshotView.setLayerType(View.LAYER_TYPE_NONE, null);
         mScreenshotView.setContentDescription(
                 mContext.getResources().getString(R.string.screenshot_preview_description));
+    }
+
+    /**
+     * Update assets (called when the dark theme status changes). We only need to update the dismiss
+     * button and the actions container background, since the buttons are re-inflated on demand.
+     */
+    private void reloadAssets() {
+        mDismissImage.setImageDrawable(mContext.getDrawable(R.drawable.screenshot_cancel));
+        mActionsContainer.setBackground(
+                mContext.getDrawable(R.drawable.action_chip_container_background));
+
+    }
+
+    /**
+     * Checks the current dark theme status and updates if it has changed.
+     */
+    private void updateDarkTheme() {
+        int currentNightMode = mContext.getResources().getConfiguration().uiMode
+                & Configuration.UI_MODE_NIGHT_MASK;
+        switch (currentNightMode) {
+            case Configuration.UI_MODE_NIGHT_NO:
+                // Night mode is not active, we're using the light theme
+                if (mInDarkMode) {
+                    mInDarkMode = false;
+                    reloadAssets();
+                }
+                break;
+            case Configuration.UI_MODE_NIGHT_YES:
+                // Night mode is active, we're using dark theme
+                if (!mInDarkMode) {
+                    mInDarkMode = true;
+                    reloadAssets();
+                }
+                break;
+        }
     }
 
     /**
