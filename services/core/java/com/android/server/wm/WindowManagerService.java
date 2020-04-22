@@ -7650,15 +7650,8 @@ public class WindowManagerService extends IWindowManager.Stub
                     Slog.w(TAG, "Cannot find window which accessibility connection is added to");
                     return;
                 }
-                try (SurfaceControl.Transaction t = new SurfaceControl.Transaction()) {
-                    t.setMetadata(
-                            state.mSurfaceControl,
-                            SurfaceControl.METADATA_ACCESSIBILITY_ID,
-                            accessibilityWindowId);
-                    t.apply();
-                } finally {
-                    SurfaceControl.closeTransaction();
-                }
+                mTransaction.setMetadata(state.mSurfaceControl,
+                        SurfaceControl.METADATA_ACCESSIBILITY_ID, accessibilityWindowId).apply();
             }
         }
 
