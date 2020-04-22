@@ -20826,8 +20826,11 @@ public class PackageManagerService extends IPackageManager.Stub
         final int[] instantUserIds = isInstantApp ? new int[] { userId } : EMPTY_INT_ARRAY;
         final SparseArray<int[]> broadcastWhitelist;
         synchronized (mLock) {
-            broadcastWhitelist = isInstantApp ? null : mAppsFilter.getVisibilityWhitelist(
-                    getPackageSettingInternal(packageName, Process.SYSTEM_UID),
+            PackageSetting setting = getPackageSettingInternal(packageName, Process.SYSTEM_UID);
+            if (setting == null) {
+                return;
+            }
+            broadcastWhitelist = isInstantApp ? null : mAppsFilter.getVisibilityWhitelist(setting,
                     userIds, mSettings.mPackages);
         }
         sendPackageBroadcast(Intent.ACTION_PACKAGE_CHANGED,  packageName, extras, flags, null, null,
