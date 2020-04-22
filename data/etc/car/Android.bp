@@ -101,13 +101,6 @@ prebuilt_etc {
 }
 
 prebuilt_etc {
-    name: "privapp_whitelist_com.android.car.trust",
-    sub_dir: "permissions",
-    src: "com.android.car.trust.xml",
-    filename_from_src: true,
-}
-
-prebuilt_etc {
     name: "privapp_whitelist_com.android.car",
     sub_dir: "permissions",
     src: "com.android.car.xml",

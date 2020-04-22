@@ -20,6 +20,7 @@ package com.android.server.accessibility.magnification;
 import static org.mockito.Mockito.verify;
 
 import android.os.RemoteException;
+import android.provider.Settings;
 import android.view.Display;
 import android.view.accessibility.IWindowMagnificationConnection;
 import android.view.accessibility.IWindowMagnificationConnectionCallback;
@@ -70,8 +71,22 @@ public class WindowMagnificationConnectionWrapperTest {
 
     @Test
     public void moveWindowMagnifier() throws RemoteException {
-        mConnectionWrapper.moveWindowMagnifier(0, 100, 150);
-        verify(mConnection).moveWindowMagnifier(0, 100, 150);
+        mConnectionWrapper.moveWindowMagnifier(TEST_DISPLAY, 100, 150);
+        verify(mConnection).moveWindowMagnifier(TEST_DISPLAY, 100, 150);
+    }
+
+    @Test
+    public void showMagnificationButton() throws RemoteException {
+        mConnectionWrapper.showMagnificationButton(TEST_DISPLAY,
+                Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
+        verify(mConnection).showMagnificationButton(TEST_DISPLAY,
+                Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
+    }
+
+    @Test
+    public void removeMagnificationButton() throws RemoteException {
+        mConnectionWrapper.removeMagnificationButton(TEST_DISPLAY);
+        verify(mConnection).removeMagnificationButton(TEST_DISPLAY);
     }
 
     @Test

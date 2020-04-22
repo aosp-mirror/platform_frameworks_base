@@ -33,12 +33,14 @@ import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
+import android.graphics.Outline;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.PointF;
@@ -47,6 +49,7 @@ import android.graphics.RectF;
 import android.graphics.Region;
 import android.os.Bundle;
 import android.os.Vibrator;
+import android.service.notification.StatusBarNotification;
 import android.util.Log;
 import android.view.Choreographer;
 import android.view.DisplayCutout;
@@ -55,6 +58,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewOutlineProvider;
 import android.view.ViewTreeObserver;
 import android.view.WindowInsets;
 import android.view.WindowManager;
@@ -62,6 +66,7 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.MainThread;
@@ -83,6 +88,7 @@ import com.android.systemui.bubbles.animation.StackAnimationController;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.shared.system.SysUiStatsLog;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowController;
 import com.android.systemui.util.DismissCircleView;
 import com.android.systemui.util.FloatingContentCoordinator;
@@ -97,6 +103,7 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * Renders bubbles in a stack and handles animating expanded and collapsed states.
@@ -224,7 +231,7 @@ public class BubbleStackView extends FrameLayout {
     private int mPointerHeight;
     private int mStatusBarHeight;
     private int mImeOffset;
-    private BubbleViewProvider mExpandedBubble;
+    @Nullable private BubbleViewProvider mExpandedBubble;
     private boolean mIsExpanded;
 
     /** Whether the stack is currently on the left side of the screen, or animating there. */
@@ -244,6 +251,10 @@ public class BubbleStackView extends FrameLayout {
     }
 
     private BubbleController.BubbleExpandListener mExpandListener;
+
+    /** Callback to run when we want to unbubble the given notification's conversation. */
+    private Consumer<NotificationEntry> mUnbubbleConversationCallback;
+
     private SysUiState mSysUiState;
 
     private boolean mViewUpdatedRequested = false;
@@ -255,9 +266,7 @@ public class BubbleStackView extends FrameLayout {
 
     private LayoutInflater mInflater;
 
-    // Used for determining view / touch intersection
-    int[] mTempLoc = new int[2];
-    RectF mTempRect = new RectF();
+    private Rect mTempRect = new Rect();
 
     private final List<Rect> mSystemGestureExclusionRects = Collections.singletonList(new Rect());
 
@@ -471,6 +480,11 @@ public class BubbleStackView extends FrameLayout {
                 return true;
             }
 
+            // If the manage menu is visible, just hide it.
+            if (mShowingManage) {
+                showManageMenu(false /* show */);
+            }
+
             if (mBubbleData.isExpanded()) {
                 maybeShowManageEducation(false /* show */);
 
@@ -627,6 +641,13 @@ public class BubbleStackView extends FrameLayout {
     private BubbleManageEducationView mManageEducationView;
     private boolean mAnimatingManageEducationAway;
 
+    private ViewGroup mManageMenu;
+    private ImageView mManageSettingsIcon;
+    private TextView mManageSettingsText;
+    private boolean mShowingManage = false;
+    private PhysicsAnimator.SpringConfig mManageSpringConfig = new PhysicsAnimator.SpringConfig(
+            SpringForce.STIFFNESS_MEDIUM, SpringForce.DAMPING_RATIO_LOW_BOUNCY);
+
     @SuppressLint("ClickableViewAccessibility")
     public BubbleStackView(Context context, BubbleData data,
             @Nullable SurfaceSynchronizer synchronizer,
@@ -688,6 +709,8 @@ public class BubbleStackView extends FrameLayout {
                 mExpandedViewPadding, mExpandedViewPadding);
         mExpandedViewContainer.setClipChildren(false);
         addView(mExpandedViewContainer);
+
+        setUpManageMenu();
 
         setUpFlyout();
         mFlyoutTransitionSpring.setSpring(new SpringForce()
@@ -838,13 +861,75 @@ public class BubbleStackView extends FrameLayout {
         // ActivityViews, etc.) were touched. Collapse the stack if it's expanded.
         setOnTouchListener((view, ev) -> {
             if (ev.getAction() == MotionEvent.ACTION_DOWN) {
-                if (mBubbleData.isExpanded()) {
+                if (mShowingManage) {
+                    showManageMenu(false /* show */);
+                } else if (mBubbleData.isExpanded()) {
                     mBubbleData.setExpanded(false);
                 }
             }
 
             return false;
         });
+    }
+
+    private void setUpManageMenu() {
+        if (mManageMenu != null) {
+            removeView(mManageMenu);
+        }
+
+        mManageMenu = (ViewGroup) LayoutInflater.from(getContext()).inflate(
+                R.layout.bubble_manage_menu, this, false);
+        mManageMenu.setVisibility(View.INVISIBLE);
+
+        PhysicsAnimator.getInstance(mManageMenu).setDefaultSpringConfig(mManageSpringConfig);
+
+        final TypedArray ta = mContext.obtainStyledAttributes(
+                new int[] {android.R.attr.dialogCornerRadius});
+        final int menuCornerRadius = ta.getDimensionPixelSize(0, 0);
+        ta.recycle();
+
+        mManageMenu.setOutlineProvider(new ViewOutlineProvider() {
+            @Override
+            public void getOutline(View view, Outline outline) {
+                outline.setRoundRect(0, 0, view.getWidth(), view.getHeight(), menuCornerRadius);
+            }
+        });
+        mManageMenu.setClipToOutline(true);
+
+        mManageMenu.findViewById(R.id.bubble_manage_menu_dismiss_container).setOnClickListener(
+                view -> {
+                    showManageMenu(false /* show */);
+                    dismissBubbleIfExists(mBubbleData.getSelectedBubble());
+                });
+
+        mManageMenu.findViewById(R.id.bubble_manage_menu_dont_bubble_container).setOnClickListener(
+                view -> {
+                    showManageMenu(false /* show */);
+                    final Bubble bubble = mBubbleData.getSelectedBubble();
+                    if (bubble != null && mBubbleData.hasBubbleWithKey(bubble.getKey())) {
+                        mUnbubbleConversationCallback.accept(bubble.getEntry());
+                    }
+                });
+
+        mManageMenu.findViewById(R.id.bubble_manage_menu_settings_container).setOnClickListener(
+                view -> {
+                    showManageMenu(false /* show */);
+                    final Bubble bubble = mBubbleData.getSelectedBubble();
+                    if (bubble != null && mBubbleData.hasBubbleWithKey(bubble.getKey())) {
+                        final Intent intent = bubble.getSettingsIntent();
+                        collapseStack(() -> {
+                            mContext.startActivityAsUser(
+                                    intent, bubble.getEntry().getSbn().getUser());
+                            logBubbleClickEvent(
+                                    bubble,
+                                    SysUiStatsLog.BUBBLE_UICHANGED__ACTION__HEADER_GO_TO_SETTINGS);
+                        });
+                    }
+                });
+
+        mManageSettingsIcon = mManageMenu.findViewById(R.id.bubble_manage_menu_settings_icon);
+        mManageSettingsText = mManageMenu.findViewById(R.id.bubble_manage_menu_settings_name);
+        addView(mManageMenu);
     }
 
     private void setUpUserEducation() {
@@ -934,6 +1019,7 @@ public class BubbleStackView extends FrameLayout {
         setUpFlyout();
         setUpOverflow();
         setUpUserEducation();
+        setUpManageMenu();
     }
 
     /** Respond to the phone being rotated by repositioning the stack and hiding any flyouts. */
@@ -960,6 +1046,9 @@ public class BubbleStackView extends FrameLayout {
                 Math.max(0f, Math.min(1f, mVerticalPosPercentBeforeRotation));
         addOnLayoutChangeListener(mOrientationChangedListener);
         hideFlyoutImmediate();
+
+        mManageMenu.setVisibility(View.INVISIBLE);
+        mShowingManage = false;
     }
 
     @Override
@@ -1098,6 +1187,12 @@ public class BubbleStackView extends FrameLayout {
      */
     public void setExpandListener(BubbleController.BubbleExpandListener listener) {
         mExpandListener = listener;
+    }
+
+    /** Sets the function to call to un-bubble the given conversation. */
+    public void setUnbubbleConversationCallback(
+            Consumer<NotificationEntry> unbubbleConversationCallback) {
+        mUnbubbleConversationCallback = unbubbleConversationCallback;
     }
 
     /**
@@ -1361,15 +1456,14 @@ public class BubbleStackView extends FrameLayout {
             mManageEducationView.setAlpha(0);
             mManageEducationView.setVisibility(VISIBLE);
             mManageEducationView.post(() -> {
-                final Rect position =
-                        mExpandedBubble.getExpandedView().getManageButtonLocationOnScreen();
+                mExpandedBubble.getExpandedView().getManageButtonBoundsOnScreen(mTempRect);
                 final int viewHeight = mManageEducationView.getManageViewHeight();
                 final int inset = getResources().getDimensionPixelSize(
                         R.dimen.bubbles_manage_education_top_inset);
                 mManageEducationView.bringToFront();
-                mManageEducationView.setManageViewPosition(position.left,
-                        position.top - viewHeight + inset);
-                mManageEducationView.setPointerPosition(position.centerX() - position.left);
+                mManageEducationView.setManageViewPosition(mTempRect.left,
+                        mTempRect.top - viewHeight + inset);
+                mManageEducationView.setPointerPosition(mTempRect.centerX() - mTempRect.left);
                 mManageEducationView.animate()
                         .setDuration(ANIMATE_STACK_USER_EDUCATION_DURATION)
                         .setInterpolator(FAST_OUT_SLOW_IN).alpha(1);
@@ -1443,6 +1537,9 @@ public class BubbleStackView extends FrameLayout {
     }
 
     private void animateCollapse() {
+        // Hide the menu if it's visible.
+        showManageMenu(false);
+
         mIsExpanded = false;
         final BubbleViewProvider previouslySelected = mExpandedBubble;
         beforeExpandedViewAnimation();
@@ -1570,9 +1667,9 @@ public class BubbleStackView extends FrameLayout {
      */
     @Override
     public void subtractObscuredTouchableRegion(Region touchableRegion, View view) {
-        // If the notification shade is expanded, we shouldn't let the ActivityView steal any touch
-        // events from any location.
-        if (mNotificationShadeWindowController.getPanelExpanded()) {
+        // If the notification shade is expanded, or the manage menu is open, we shouldn't let the
+        // ActivityView steal any touch events from any location.
+        if (mNotificationShadeWindowController.getPanelExpanded() || mShowingManage) {
             touchableRegion.setEmpty();
         }
     }
@@ -1658,14 +1755,17 @@ public class BubbleStackView extends FrameLayout {
     private void dismissMagnetizedObject() {
         if (mIsExpanded) {
             final View draggedOutBubbleView = (View) mMagnetizedObject.getUnderlyingObject();
-            final Bubble draggedOutBubble = mBubbleData.getBubbleWithView(draggedOutBubbleView);
+            dismissBubbleIfExists(mBubbleData.getBubbleWithView(draggedOutBubbleView));
 
-            if (mBubbleData.hasBubbleWithKey(draggedOutBubble.getKey())) {
-                mBubbleData.notificationEntryRemoved(
-                        draggedOutBubble.getEntry(), BubbleController.DISMISS_USER_GESTURE);
-            }
         } else {
             mBubbleData.dismissAll(BubbleController.DISMISS_USER_GESTURE);
+        }
+    }
+
+    private void dismissBubbleIfExists(@Nullable Bubble bubble) {
+        if (bubble != null && mBubbleData.hasBubbleWithKey(bubble.getKey())) {
+            mBubbleData.notificationEntryRemoved(
+                    bubble.getEntry(), BubbleController.DISMISS_USER_GESTURE);
         }
     }
 
@@ -1912,6 +2012,63 @@ public class BubbleStackView extends FrameLayout {
         invalidate();
     }
 
+    private void showManageMenu(boolean show) {
+        mShowingManage = show;
+
+        // This should not happen, since the manage menu is only visible when there's an expanded
+        // bubble. If we end up in this state, just hide the menu immediately.
+        if (mExpandedBubble == null || mExpandedBubble.getExpandedView() == null) {
+            mManageMenu.setVisibility(View.INVISIBLE);
+            return;
+        }
+
+        // If available, update the manage menu's settings option with the expanded bubble's app
+        // name and icon.
+        if (show && mBubbleData.hasBubbleWithKey(mExpandedBubble.getKey())) {
+            final Bubble bubble = mBubbleData.getBubbleWithKey(mExpandedBubble.getKey());
+            mManageSettingsIcon.setImageDrawable(bubble.getBadgedAppIcon());
+            mManageSettingsText.setText(getResources().getString(
+                    R.string.bubbles_app_settings, bubble.getAppName()));
+        }
+
+        mExpandedBubble.getExpandedView().getManageButtonBoundsOnScreen(mTempRect);
+
+        // When the menu is open, it should be at these coordinates. This will make the menu's
+        // bottom left corner match up with the button's bottom left corner.
+        final float targetX = mTempRect.left;
+        final float targetY = mTempRect.bottom - mManageMenu.getHeight();
+
+        if (show) {
+            mManageMenu.setScaleX(0.5f);
+            mManageMenu.setScaleY(0.5f);
+            mManageMenu.setTranslationX(targetX - mManageMenu.getWidth() / 4);
+            mManageMenu.setTranslationY(targetY + mManageMenu.getHeight() / 4);
+            mManageMenu.setAlpha(0f);
+
+            PhysicsAnimator.getInstance(mManageMenu)
+                    .spring(DynamicAnimation.ALPHA, 1f)
+                    .spring(DynamicAnimation.SCALE_X, 1f)
+                    .spring(DynamicAnimation.SCALE_Y, 1f)
+                    .spring(DynamicAnimation.TRANSLATION_X, targetX)
+                    .spring(DynamicAnimation.TRANSLATION_Y, targetY)
+                    .start();
+
+            mManageMenu.setVisibility(View.VISIBLE);
+        } else {
+            PhysicsAnimator.getInstance(mManageMenu)
+                    .spring(DynamicAnimation.ALPHA, 0f)
+                    .spring(DynamicAnimation.SCALE_X, 0.5f)
+                    .spring(DynamicAnimation.SCALE_Y, 0.5f)
+                    .spring(DynamicAnimation.TRANSLATION_X, targetX - mManageMenu.getWidth() / 4)
+                    .spring(DynamicAnimation.TRANSLATION_Y, targetY + mManageMenu.getHeight() / 4)
+                    .withEndActions(() -> mManageMenu.setVisibility(View.INVISIBLE))
+                    .start();
+        }
+
+        // Update the AV's obscured touchable region for the new menu visibility state.
+        mExpandedBubble.getExpandedView().updateObscuredTouchableRegion();
+    }
+
     private void updateExpandedBubble() {
         if (DEBUG_BUBBLE_STACK_VIEW) {
             Log.d(TAG, "updateExpandedBubble()");
@@ -1921,6 +2078,7 @@ public class BubbleStackView extends FrameLayout {
                 && mExpandedBubble.getExpandedView() != null) {
             BubbleExpandedView bev = mExpandedBubble.getExpandedView();
             mExpandedViewContainer.addView(bev);
+            bev.setManageClickListener((view) -> showManageMenu(!mShowingManage));
             bev.populateExpandedView();
             mExpandedViewContainer.setVisibility(VISIBLE);
             mExpandedViewContainer.setAlpha(1.0f);
@@ -2088,5 +2246,27 @@ public class BubbleStackView extends FrameLayout {
             }
         }
         return bubbles;
+    }
+
+    /**
+     * Logs bubble UI click event.
+     *
+     * @param bubble the bubble notification entry that user is interacting with.
+     * @param action the user interaction enum.
+     */
+    private void logBubbleClickEvent(Bubble bubble, int action) {
+        StatusBarNotification notification = bubble.getEntry().getSbn();
+        SysUiStatsLog.write(SysUiStatsLog.BUBBLE_UI_CHANGED,
+                notification.getPackageName(),
+                notification.getNotification().getChannelId(),
+                notification.getId(),
+                getBubbleIndex(getExpandedBubble()),
+                getBubbleCount(),
+                action,
+                getNormalizedXPosition(),
+                getNormalizedYPosition(),
+                bubble.showInShade(),
+                bubble.isOngoing(),
+                false /* isAppForeground (unused) */);
     }
 }

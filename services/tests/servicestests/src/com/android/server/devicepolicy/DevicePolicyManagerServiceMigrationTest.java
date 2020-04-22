@@ -62,6 +62,10 @@ public class DevicePolicyManagerServiceMigrationTest extends DpmTestBase {
 
         mContext = getContext();
 
+        // Make createContextAsUser to work.
+        mContext.packageName = "com.android.frameworks.servicestests";
+        getServices().addPackageContext(UserHandle.of(0), mContext);
+
         when(getServices().packageManager.hasSystemFeature(eq(PackageManager.FEATURE_DEVICE_ADMIN)))
                 .thenReturn(true);
     }

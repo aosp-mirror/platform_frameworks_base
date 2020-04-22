@@ -164,7 +164,9 @@ public class PasswordTextView extends View {
                 currentDrawPosition = getPaddingLeft();
             }
         } else {
-            currentDrawPosition = getWidth() / 2 - totalDrawingWidth / 2;
+            float maxRight = getWidth() - getPaddingRight() - totalDrawingWidth;
+            float center = getWidth() / 2f - totalDrawingWidth / 2f;
+            currentDrawPosition = center > 0 ? center : maxRight;
         }
         int length = mTextChars.size();
         Rect bounds = getCharBounds();

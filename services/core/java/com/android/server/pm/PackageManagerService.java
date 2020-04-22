@@ -351,6 +351,7 @@ import com.android.server.pm.dex.DexManager;
 import com.android.server.pm.dex.DexoptOptions;
 import com.android.server.pm.dex.PackageDexUsage;
 import com.android.server.pm.dex.ViewCompiler;
+import com.android.server.pm.parsing.PackageCacher;
 import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.parsing.PackageParser2;
 import com.android.server.pm.parsing.library.PackageBackwardCompatibility;
@@ -24241,6 +24242,25 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         @Override
+        public void pruneCachedApksInApex(@NonNull List<PackageInfo> apexPackages) {
+            if (mCacheDir == null) {
+                return;
+            }
+
+            final PackageCacher cacher = new PackageCacher(mCacheDir);
+            synchronized (mLock) {
+                for (int i = 0, size = apexPackages.size(); i < size; i++) {
+                    final List<String> apkNames =
+                            mApexManager.getApksInApex(apexPackages.get(i).packageName);
+                    for (int j = 0, apksInApex = apkNames.size(); j < apksInApex; j++) {
+                        final AndroidPackage pkg = getPackage(apkNames.get(j));
+                        cacher.cleanCachedResult(new File(pkg.getCodePath()));
+                    }
+                }
+            }
+        }
+
+        @Override
         public String getSetupWizardPackageName() {
             return mSetupWizardPackage;
         }
@@ -24709,6 +24729,14 @@ public class PackageManagerService extends IPackageManager.Stub
         public boolean isSystemPackage(@NonNull String packageName) {
             return packageName.equals(
                     PackageManagerService.this.ensureSystemPackageName(packageName));
+        }
+
+        @Override
+        public void clearBlockUninstallForUser(@UserIdInt int userId) {
+            synchronized (mLock) {
+                mSettings.clearBlockUninstallLPw(userId);
+                mSettings.writePackageRestrictionsLPr(userId);
+            }
         }
     }
 

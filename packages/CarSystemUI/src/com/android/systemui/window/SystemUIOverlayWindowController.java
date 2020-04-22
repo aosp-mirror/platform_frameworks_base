@@ -90,7 +90,7 @@ public class SystemUIOverlayWindowController implements
         mLp = new WindowManager.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT,
-                WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL,
+                WindowManager.LayoutParams.TYPE_NOTIFICATION_SHADE,
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                         | WindowManager.LayoutParams.FLAG_TOUCHABLE_WHEN_WAKING
                         | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH
@@ -128,6 +128,16 @@ public class SystemUIOverlayWindowController implements
             mLpChanged.flags &= ~WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
         } else {
             mLpChanged.flags |= WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+        }
+        updateWindow();
+    }
+
+    /** Sets the window to enable IME. */
+    public void setWindowNeedsInput(boolean needsInput) {
+        if (needsInput) {
+            mLpChanged.flags &= ~WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
+        } else {
+            mLpChanged.flags |= WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
         }
         updateWindow();
     }

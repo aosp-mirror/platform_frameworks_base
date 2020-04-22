@@ -33,6 +33,7 @@ import android.util.Log;
 import android.util.Slog;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -395,8 +396,12 @@ public class EnableZenModeDialog {
             button1.setAlpha(button1.isEnabled() ? 1f : .5f);
             button2.setAlpha(button2.isEnabled() ? 1f : .5f);
         } else {
-            button1.setVisibility(View.GONE);
-            button2.setVisibility(View.GONE);
+            if (button1 != null) {
+                ((ViewGroup) row).removeView(button1);
+            }
+            if (button2 != null) {
+                ((ViewGroup) row).removeView(button2);
+            }
         }
     }
 

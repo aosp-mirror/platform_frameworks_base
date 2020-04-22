@@ -67,6 +67,7 @@ import com.android.internal.os.BackgroundThread;
 import com.android.internal.telephony.SmsApplication;
 import com.android.server.LocalServices;
 import com.android.server.notification.NotificationManagerInternal;
+import com.android.server.notification.ShortcutHelper;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -497,10 +498,6 @@ public class DataManager {
                 EventStore.CATEGORY_SHORTCUT_BASED, shortcutId);
     }
 
-    private boolean isPersonShortcut(@NonNull ShortcutInfo shortcutInfo) {
-        return shortcutInfo.getPersons() != null && shortcutInfo.getPersons().length != 0;
-    }
-
     @VisibleForTesting
     @WorkerThread
     void addOrUpdateConversationInfo(@NonNull ShortcutInfo shortcutInfo) {
@@ -712,7 +709,8 @@ public class DataManager {
                 @NonNull List<ShortcutInfo> shortcuts, @NonNull UserHandle user) {
             mInjector.getBackgroundExecutor().execute(() -> {
                 for (ShortcutInfo shortcut : shortcuts) {
-                    if (isPersonShortcut(shortcut)) {
+                    if (ShortcutHelper.isConversationShortcut(
+                            shortcut, mShortcutServiceInternal, user.getIdentifier())) {
                         addOrUpdateConversationInfo(shortcut);
                     }
                 }

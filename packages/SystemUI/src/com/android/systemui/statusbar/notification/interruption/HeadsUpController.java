@@ -175,7 +175,7 @@ public class HeadsUpController {
     private OnHeadsUpChangedListener mOnHeadsUpChangedListener  = new OnHeadsUpChangedListener() {
         @Override
         public void onHeadsUpStateChanged(@NonNull NotificationEntry entry, boolean isHeadsUp) {
-            if (!isHeadsUp) {
+            if (!isHeadsUp && !entry.getRow().isRemoved()) {
                 mHeadsUpViewBinder.unbindHeadsUpView(entry);
             }
         }

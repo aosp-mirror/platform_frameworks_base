@@ -851,6 +851,7 @@ public class Activity extends ContextThemeWrapper
 
     static final class NonConfigurationInstances {
         Object activity;
+        ArrayMap<Class<?>, Object> activityMap;
         HashMap<String, Object> children;
         FragmentManagerNonConfig fragments;
         ArrayMap<String, LoaderManager> loaders;
@@ -858,6 +859,9 @@ public class Activity extends ContextThemeWrapper
     }
     @UnsupportedAppUsage
     /* package */ NonConfigurationInstances mLastNonConfigurationInstances;
+
+    // Stored separately since NonConfigurationInstances are set to null in onResume.
+    private ArrayMap<Class<?>, Object> mNonConfigurationInstanceMap;
 
     @UnsupportedAppUsage
     private Window mWindow;
@@ -3012,8 +3016,12 @@ public class Activity extends ContextThemeWrapper
      * available on older platforms through the Android support libraries.
      *
      * @return the object previously returned by {@link #onRetainNonConfigurationInstance()}
+     *
+     * @deprecated Use {@link #getNonConfigurationInstance} which supports map-like behavior for
+     * fetching and retaining multiple objects without requiring a subclass.
      */
     @Nullable
+    @Deprecated
     public Object getLastNonConfigurationInstance() {
         return mLastNonConfigurationInstances != null
                 ? mLastNonConfigurationInstances.activity : null;
@@ -3070,7 +3078,11 @@ public class Activity extends ContextThemeWrapper
      *
      * @return any Object holding the desired state to propagate to the
      *         next activity instance
+     * @deprecated Use {@link #getNonConfigurationInstance} which supports map-like behavior for
+     * fetching and retaining multiple objects without requiring a subclass.
      */
+    @Nullable
+    @Deprecated
     public Object onRetainNonConfigurationInstance() {
         return null;
     }
@@ -3110,8 +3122,91 @@ public class Activity extends ContextThemeWrapper
         return null;
     }
 
+    /**
+     * Retrieve a non-configuration instance for {@code cls} that was previously associated via a
+     * call to {@link #putNonConfigurationInstance}. This method can be called at any time after
+     * the initial {@link #onCreate} call, allowing you to extract any useful dynamic state from
+     * the previous instance of this activity.
+     * <p>
+     * Note that the data you retrieve here should <em>only</em> be used as an optimization for
+     * handling configuration changes. You should always be able to handle getting a null
+     * reference back, and an activity must still be able to restore itself to its previous state
+     * (through the normal {@link #onSaveInstanceState(Bundle)} mechanism) even if this method
+     * returns null.
+     * <p>
+     * This functionality is not supported for child activities in an {@link ActivityGroup}.
+     */
+    @Nullable
+    public final <T> T getNonConfigurationInstance(@NonNull Class<T> cls) {
+        if (cls == null) {
+            throw new NullPointerException("cls == null");
+        }
+        return cls.cast(mNonConfigurationInstanceMap.get(cls));
+    }
+
+    /**
+     * Retain {@code instance} across configuration changes when it is known that a new instance of
+     * this activity will immediately be created for the new configuration. You can pass any object
+     * you like here, which can later be retrieved by calling {@link #getNonConfigurationInstance}
+     * in the new activity instance using the same {@code cls}.
+     * <p>
+     * Instances supplied to this function are used purely as an optimization, and you must not
+     * rely on them being available in the new instance. This method can be called at any time
+     * during {@link #onCreate} through (and including) {@link #onDestroy}.
+     * <p>
+     * Each instance is associated with and retrieved by its corresponding {@link Class}. Only one
+     * instance can be associated with a class in an activity. If an existing instance is mapped to
+     * the supplied class it will be replaced and the old instance returned. Passing null for
+     * {@code instance} will remove any stored instance. A return value of null means there was no
+     * previous mapping.
+     * <p>
+     * If you need to dynamically retain instances where a unique class is not available, create a
+     * unique class and instance which contains a list, map, or whatever structure facilitates your
+     * dynamic setup.
+     * <code><pre>
+     *   class MyLibraryState {
+     *     Map&lt;String, State> keyToState = new ArrayMap&lt;>();
+     *   }
+     * </pre></code>
+     * Similarly, if you need to store something generic like {@code List<String>} you should wrap
+     * it in a unique class with no generic parameters.
+     * <code><pre>
+     *   class MyLibraryState {
+     *     List&lt;String> states = new ArrayList&lt;>();
+     *   }
+     * </pre></code>
+     * <p>
+     * This API can be used to propagate extensive state from the old to new activity instance, from
+     * loaded bitmaps, to network connections, to even actively running threads. Note that you
+     * should <em>not</em> propagate any data that may change based on the configuration, including
+     * any data loaded from resources such as strings, layouts, or drawables.
+     * <p>
+     * This functionality is not supported for child activities in an {@link ActivityGroup}.
+     *
+     * @param cls The class to which {@code instance} will be associated. This will be used to
+     * retrieve the instance after configuration change.
+     *
+     * @param instance The instance associated with {@code cls}.
+     *
+     * @return The previous instance stored for {@code cls}. This may have come from a previous
+     * activity instance or simply a previous call to this method. A return value of null indicates
+     * no instance was associated with the specified class.
+     */
+    @Nullable
+    public final <T> T putNonConfigurationInstance(@NonNull Class<T> cls, @Nullable T instance) {
+        if (cls == null) {
+            throw new NullPointerException("cls == null");
+        }
+        ArrayMap<Class<?>, Object> map = mNonConfigurationInstanceMap;
+        Object removed = instance == null
+                ? map.remove(cls)
+                : map.put(cls, cls.cast(instance));
+        return cls.cast(removed);
+    }
+
     NonConfigurationInstances retainNonConfigurationInstances() {
         Object activity = onRetainNonConfigurationInstance();
+        ArrayMap<Class<?>, Object> activityMap = mNonConfigurationInstanceMap;
         HashMap<String, Object> children = onRetainNonConfigurationChildInstances();
         FragmentManagerNonConfig fragments = mFragments.retainNestedNonConfig();
 
@@ -3123,13 +3218,9 @@ public class Activity extends ContextThemeWrapper
         mFragments.doLoaderStop(true);
         ArrayMap<String, LoaderManager> loaders = mFragments.retainLoaderNonConfig();
 
-        if (activity == null && children == null && fragments == null && loaders == null
-                && mVoiceInteractor == null) {
-            return null;
-        }
-
         NonConfigurationInstances nci = new NonConfigurationInstances();
         nci.activity = activity;
+        nci.activityMap = activityMap;
         nci.children = children;
         nci.fragments = fragments;
         nci.loaders = loaders;
@@ -7922,6 +8013,14 @@ public class Activity extends ContextThemeWrapper
         mParent = parent;
         mEmbeddedID = id;
         mLastNonConfigurationInstances = lastNonConfigurationInstances;
+        if (lastNonConfigurationInstances != null) {
+            mNonConfigurationInstanceMap = lastNonConfigurationInstances.activityMap;
+        } else {
+            // This map is eagerly instantiated because we want people to be able to insert items
+            // in onDestroy which is *after* the non-config instances are collected. Being a mutable
+            // map, these otherwise-late puts are thus able to still be retained.
+            mNonConfigurationInstanceMap = new ArrayMap<>(0);
+        }
         if (voiceInteractor != null) {
             if (lastNonConfigurationInstances != null) {
                 mVoiceInteractor = lastNonConfigurationInstances.voiceInteractor;

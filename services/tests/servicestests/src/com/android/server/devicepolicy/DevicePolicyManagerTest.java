@@ -196,6 +196,11 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                         anyInt(),
                         any(UserHandle.class));
 
+        // Make createContextAsUser to work.
+        mContext.packageName = "com.android.frameworks.servicestests";
+        getServices().addPackageContext(UserHandle.of(0), mContext);
+        getServices().addPackageContext(UserHandle.of(DpmMockContext.CALLER_USER_HANDLE), mContext);
+
         // By default, pretend all users are running and unlocked.
         when(getServices().userManager.isUserUnlocked(anyInt())).thenReturn(true);
 

@@ -65,9 +65,9 @@ public class StubMediaRoute2ProviderService extends MediaRoute2ProviderService {
     public static final String ROUTE_NAME_VARIABLE_VOLUME = "Variable Volume Route";
 
     public static final String FEATURE_SAMPLE =
-            "com.android.mediarouteprovider.FEATURE_SAMPLE";
+            "com.android.mediaroutertest.FEATURE_SAMPLE";
     public static final String FEATURE_SPECIAL =
-            "com.android.mediarouteprovider.FEATURE_SPECIAL";
+            "com.android.mediaroutertest..FEATURE_SPECIAL";
 
     Map<String, MediaRoute2Info> mRoutes = new HashMap<>();
     Map<String, String> mRouteIdToSessionId = new HashMap<>();

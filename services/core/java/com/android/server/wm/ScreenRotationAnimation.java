@@ -597,8 +597,8 @@ class ScreenRotationAnimation {
             return startAnimation(initializeBuilder()
                             .setSurfaceControl(mScreenshotLayer)
                             .setAnimationLeashParent(mDisplayContent.getOverlayLayer())
-                            .setWidth(mWidth)
-                            .setHeight(mHeight)
+                            .setWidth(mDisplayContent.getSurfaceWidth())
+                            .setHeight(mDisplayContent.getSurfaceHeight())
                             .build(),
                     createWindowAnimationSpec(mRotateAlphaAnimation),
                     this::onAnimationEnd);

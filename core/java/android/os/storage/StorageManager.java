@@ -2447,7 +2447,12 @@ public class StorageManager {
         final String filePath = path.getCanonicalPath();
         final StorageVolume volume = getStorageVolume(path);
         if (volume == null) {
-            throw new IllegalStateException("Failed to update quota type for " + filePath);
+            Log.w(TAG, "Failed to update quota type for " + filePath);
+            return;
+        }
+        if (!volume.isEmulated()) {
+            // We only support quota tracking on emulated filesystems
+            return;
         }
 
         final int userId = volume.getOwner().getIdentifier();

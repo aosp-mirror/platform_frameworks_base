@@ -159,4 +159,9 @@ public interface KeyguardSecurityView {
     default boolean disallowInterceptTouch(MotionEvent event) {
         return false;
     }
+
+    /**
+     * When bouncer was visible but is being dragged down or dismissed.
+     */
+    default void onStartingToHide() {};
 }

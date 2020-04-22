@@ -76,6 +76,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
@@ -104,7 +105,6 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
      */
     static class SaveImageInBackgroundData {
         public Bitmap image;
-        public Uri imageUri;
         public Consumer<Uri> finisher;
         public GlobalScreenshot.ActionsReadyListener mActionsReadyListener;
         public int errorMsgResId;
@@ -112,13 +112,33 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
 
         void clearImage() {
             image = null;
-            imageUri = null;
+        }
+    }
+
+    /**
+     * Structure returned by the SaveImageInBackgroundTask
+     */
+    static class SavedImageData {
+        public Uri uri;
+        public Notification.Action shareAction;
+        public Notification.Action editAction;
+        public Notification.Action deleteAction;
+        public List<Notification.Action> smartActions;
+
+        /**
+         * Used to reset the return data on error
+         */
+        public void reset() {
+            uri = null;
+            shareAction = null;
+            editAction = null;
+            deleteAction = null;
+            smartActions = null;
         }
     }
 
     abstract static class ActionsReadyListener {
-        abstract void onActionsReady(Uri imageUri, List<Notification.Action> smartActions,
-                List<Notification.Action> actions);
+        abstract void onActionsReady(SavedImageData imageData);
     }
 
     // These strings are used for communicating the action invoked to
@@ -147,6 +167,7 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
     private static final int MESSAGE_CORNER_TIMEOUT = 2;
 
     private final ScreenshotNotificationsController mNotificationsController;
+    private final UiEventLogger mUiEventLogger;
 
     private final Context mContext;
     private final WindowManager mWindowManager;
@@ -185,6 +206,7 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case MESSAGE_CORNER_TIMEOUT:
+                    mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_INTERACTION_TIMEOUT);
                     GlobalScreenshot.this.clearScreenshot("timeout");
                     break;
                 default:
@@ -199,9 +221,11 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
     @Inject
     public GlobalScreenshot(
             Context context, @Main Resources resources, LayoutInflater layoutInflater,
-            ScreenshotNotificationsController screenshotNotificationsController) {
+            ScreenshotNotificationsController screenshotNotificationsController,
+            UiEventLogger uiEventLogger) {
         mContext = context;
         mNotificationsController = screenshotNotificationsController;
+        mUiEventLogger = uiEventLogger;
 
         // Inflate the screenshot layout
         mScreenshotLayout = layoutInflater.inflate(R.layout.global_screenshot, null);
@@ -222,7 +246,10 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
         mBackgroundProtection = mScreenshotLayout.findViewById(
                 R.id.global_screenshot_actions_background);
         mDismissButton = mScreenshotLayout.findViewById(R.id.global_screenshot_dismiss_button);
-        mDismissButton.setOnClickListener(view -> clearScreenshot("dismiss_button"));
+        mDismissButton.setOnClickListener(view -> {
+            mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_EXPLICIT_DISMISSAL);
+            clearScreenshot("dismiss_button");
+        });
 
         mScreenshotFlash = mScreenshotLayout.findViewById(R.id.global_screenshot_flash);
         mScreenshotSelectorView = mScreenshotLayout.findViewById(R.id.global_screenshot_selector);
@@ -445,12 +472,14 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
 
         saveScreenshotInWorkerThread(finisher, new ActionsReadyListener() {
             @Override
-            void onActionsReady(Uri uri, List<Notification.Action> smartActions,
-                    List<Notification.Action> actions) {
-                if (uri == null) {
+            void onActionsReady(SavedImageData imageData) {
+                finisher.accept(imageData.uri);
+                if (imageData.uri == null) {
+                    mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_NOT_SAVED);
                     mNotificationsController.notifyScreenshotError(
                             R.string.screenshot_failed_to_capture_text);
                 } else {
+                    mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_SAVED);
                     mScreenshotHandler.post(() -> {
                         if (mScreenshotAnimation != null && mScreenshotAnimation.isRunning()) {
                             mScreenshotAnimation.addListener(
@@ -458,13 +487,12 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
                                         @Override
                                         public void onAnimationEnd(Animator animation) {
                                             super.onAnimationEnd(animation);
-                                            createScreenshotActionsShadeAnimation(
-                                                    smartActions, actions).start();
+                                            createScreenshotActionsShadeAnimation(imageData)
+                                                    .start();
                                         }
                                     });
                         } else {
-                            createScreenshotActionsShadeAnimation(smartActions,
-                                    actions).start();
+                            createScreenshotActionsShadeAnimation(imageData).start();
                         }
                     });
                 }
@@ -567,8 +595,7 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
         return dropInAnimation;
     }
 
-    private ValueAnimator createScreenshotActionsShadeAnimation(
-            List<Notification.Action> smartActions, List<Notification.Action> actions) {
+    private ValueAnimator createScreenshotActionsShadeAnimation(SavedImageData imageData) {
         LayoutInflater inflater = LayoutInflater.from(mContext);
         mActionsView.removeAllViews();
         mActionsContainer.setScrollX(0);
@@ -583,45 +610,63 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
         } catch (RemoteException e) {
         }
 
-        for (Notification.Action smartAction : smartActions) {
+        for (Notification.Action smartAction : imageData.smartActions) {
             ScreenshotActionChip actionChip = (ScreenshotActionChip) inflater.inflate(
                     R.layout.global_screenshot_action_chip, mActionsView, false);
             actionChip.setText(smartAction.title);
             actionChip.setIcon(smartAction.getIcon(), false);
             actionChip.setPendingIntent(smartAction.actionIntent,
-                    () -> clearScreenshot("chip tapped"));
+                    () -> {
+                        mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_SMART_ACTION_TAPPED);
+                        clearScreenshot("chip tapped");
+                    });
             mActionsView.addView(actionChip);
         }
 
-        for (Notification.Action action : actions) {
-            ScreenshotActionChip actionChip = (ScreenshotActionChip) inflater.inflate(
-                    R.layout.global_screenshot_action_chip, mActionsView, false);
-            actionChip.setText(action.title);
-            actionChip.setIcon(action.getIcon(), true);
-            actionChip.setPendingIntent(action.actionIntent, () -> clearScreenshot("chip tapped"));
-            if (action.actionIntent.getIntent().getAction().equals(Intent.ACTION_EDIT)) {
-                mScreenshotView.setOnClickListener(v -> {
-                    try {
-                        action.actionIntent.send();
-                        clearScreenshot("screenshot preview tapped");
-                    } catch (PendingIntent.CanceledException e) {
-                        Log.e(TAG, "Intent cancelled", e);
-                    }
-                });
-                mScreenshotView.setContentDescription(action.title);
+        ScreenshotActionChip shareChip = (ScreenshotActionChip) inflater.inflate(
+                R.layout.global_screenshot_action_chip, mActionsView, false);
+        shareChip.setText(imageData.shareAction.title);
+        shareChip.setIcon(imageData.shareAction.getIcon(), true);
+        shareChip.setPendingIntent(imageData.shareAction.actionIntent, () -> {
+            mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_SHARE_TAPPED);
+            clearScreenshot("chip tapped");
+        });
+        mActionsView.addView(shareChip);
+
+        ScreenshotActionChip editChip = (ScreenshotActionChip) inflater.inflate(
+                R.layout.global_screenshot_action_chip, mActionsView, false);
+        editChip.setText(imageData.editAction.title);
+        editChip.setIcon(imageData.editAction.getIcon(), true);
+        editChip.setPendingIntent(imageData.editAction.actionIntent, () -> {
+            mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_EDIT_TAPPED);
+            clearScreenshot("chip tapped");
+        });
+        mActionsView.addView(editChip);
+
+        mScreenshotView.setOnClickListener(v -> {
+            try {
+                imageData.editAction.actionIntent.send();
+                mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_PREVIEW_TAPPED);
+                clearScreenshot("screenshot preview tapped");
+            } catch (PendingIntent.CanceledException e) {
+                Log.e(TAG, "Intent cancelled", e);
             }
-            mActionsView.addView(actionChip);
-        }
+        });
+        mScreenshotView.setContentDescription(imageData.editAction.title);
+
 
         if (DeviceConfig.getBoolean(NAMESPACE_SYSTEMUI, SCREENSHOT_SCROLLING_ENABLED, false)) {
             ScreenshotActionChip scrollChip = (ScreenshotActionChip) inflater.inflate(
                     R.layout.global_screenshot_action_chip, mActionsView, false);
             Toast scrollNotImplemented = Toast.makeText(
                     mContext, "Not implemented", Toast.LENGTH_SHORT);
-            scrollChip.setText("Extend"); // TODO (mkephart): add resource and translate
+            scrollChip.setText("Extend"); // TODO : add resource and translate
             scrollChip.setIcon(
                     Icon.createWithResource(mContext, R.drawable.ic_arrow_downward), true);
-            scrollChip.setOnClickListener(v -> scrollNotImplemented.show());
+            scrollChip.setOnClickListener(v -> {
+                mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_SCROLL_TAPPED);
+                scrollNotImplemented.show();
+            });
             mActionsView.addView(scrollChip);
         }
 

@@ -215,7 +215,6 @@ class BluetoothRouteProvider {
                 .setConnectionState(MediaRoute2Info.CONNECTION_STATE_DISCONNECTED)
                 .setDescription(mContext.getResources().getText(
                         R.string.bluetooth_a2dp_audio_route_name).toString())
-                //TODO: Set type correctly (BLUETOOTH_A2DP or HEARING_AID)
                 .setType(MediaRoute2Info.TYPE_BLUETOOTH_A2DP)
                 .setVolumeHandling(MediaRoute2Info.PLAYBACK_VOLUME_VARIABLE)
                 .build();
@@ -236,6 +235,8 @@ class BluetoothRouteProvider {
         // Update volume when the connection state is changed.
         MediaRoute2Info.Builder builder = new MediaRoute2Info.Builder(btRoute.route)
                 .setConnectionState(state);
+        builder.setType(btRoute.connectedProfiles.get(BluetoothProfile.HEARING_AID, false)
+                ? MediaRoute2Info.TYPE_HEARING_AID : MediaRoute2Info.TYPE_BLUETOOTH_A2DP);
 
         if (state == MediaRoute2Info.CONNECTION_STATE_CONNECTED) {
             int maxVolume = mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);

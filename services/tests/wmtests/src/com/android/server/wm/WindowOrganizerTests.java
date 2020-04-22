@@ -44,7 +44,6 @@ import static com.android.server.wm.WindowContainer.POSITION_TOP;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -407,22 +406,20 @@ public class WindowOrganizerTests extends WindowTestsBase {
                 .setWindowingMode(WINDOWING_MODE_FREEFORM).build();
         final Task task = stack.getTopMostTask();
         WindowContainerTransaction t = new WindowContainerTransaction();
-        t.setBounds(task.mRemoteToken.toWindowContainerToken(), new Rect(10, 10, 100, 100));
         mWm.mAtmService.mWindowOrganizerController.applyTransaction(t);
         final int origScreenWDp = task.getConfiguration().screenHeightDp;
         final int origScreenHDp = task.getConfiguration().screenHeightDp;
         t = new WindowContainerTransaction();
         // verify that setting config overrides on parent restricts children.
         t.setScreenSizeDp(stack.mRemoteToken
-                .toWindowContainerToken(), origScreenWDp, origScreenHDp);
-        t.setBounds(task.mRemoteToken.toWindowContainerToken(), new Rect(10, 10, 150, 200));
+                .toWindowContainerToken(), origScreenWDp, origScreenHDp / 2);
         mWm.mAtmService.mWindowOrganizerController.applyTransaction(t);
-        assertEquals(origScreenHDp, task.getConfiguration().screenHeightDp);
+        assertEquals(origScreenHDp / 2, task.getConfiguration().screenHeightDp);
         t = new WindowContainerTransaction();
         t.setScreenSizeDp(stack.mRemoteToken.toWindowContainerToken(), SCREEN_WIDTH_DP_UNDEFINED,
                 SCREEN_HEIGHT_DP_UNDEFINED);
         mWm.mAtmService.mWindowOrganizerController.applyTransaction(t);
-        assertNotEquals(origScreenHDp, task.getConfiguration().screenHeightDp);
+        assertEquals(origScreenHDp, task.getConfiguration().screenHeightDp);
     }
 
     @Test
