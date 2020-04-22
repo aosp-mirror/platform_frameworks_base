@@ -156,51 +156,6 @@
     <!-- ComponentName of the service used to run no ui tether provisioning. -->
     <string translatable="false" name="config_wifi_tether_enable">com.android.settings/.wifi.tether.TetherService</string>
 
-    <!-- Enable tethering notification -->
-    <!-- Icons for showing tether enable notification.
-         Each item should have two elements and be separated with ";".
-
-         The first element is downstream types which is one of tethering. This element has to be
-         made by WIFI, USB, BT, and OR'd with the others. Use "|" to combine multiple downstream
-         types and use "," to separate each combinations. Such as
-
-             USB|BT,WIFI|USB|BT
-
-         The second element is icon for the item. This element has to be composed by
-         <package name>:drawable/<resource name>. Such as
-
-             1. com.android.networkstack.tethering:drawable/stat_sys_tether_general
-             2. android:drawable/xxx
-
-         So the entire string of each item would be
-
-             USB|BT,WIFI|USB|BT;com.android.networkstack.tethering:drawable/stat_sys_tether_general
-
-         NOTE: One config can be separated into two or more for readability. Such as
-
-               WIFI|USB,WIFI|BT,USB|BT,WIFI|USB|BT;android:drawable/xxx
-
-               can be separated into
-
-               WIFI|USB;android:drawable/xxx
-               WIFI|BT;android:drawable/xxx
-               USB|BT;android:drawable/xxx
-               WIFI|USB|BT;android:drawable/xxx
-
-         Notification will not show if the downstream type isn't listed in array.
-         Empty array means disable notifications. -->
-    <!-- In AOSP, hotspot is configured to no notification by default. Because status bar has showed
-         an icon on the right side already -->
-    <string-array translatable="false" name="tethering_notification_icons">
-        <item>USB;com.android.networkstack.tethering:drawable/stat_sys_tether_usb</item>
-        <item>BT;com.android.networkstack.tethering:drawable/stat_sys_tether_bluetooth</item>
-        <item>WIFI|USB,WIFI|BT,USB|BT,WIFI|USB|BT;com.android.networkstack.tethering:drawable/stat_sys_tether_general</item>
-    </string-array>
-    <!-- String for tether enable notification title. -->
-    <string name="tethering_notification_title">@string/tethered_notification_title</string>
-    <!-- String for tether enable notification message. -->
-    <string name="tethering_notification_message">@string/tethered_notification_message</string>
-
     <!-- No upstream notification is shown when there is a downstream but no upstream that is able
          to do the tethering. -->
     <!-- Delay(millisecond) to show no upstream notification after there's no Backhaul. Set delay to
