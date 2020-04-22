@@ -20,7 +20,6 @@ import android.app.ActivityOptions
 import android.content.ComponentName
 import android.content.Intent
 import android.content.res.Configuration
-import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.text.TextUtils
 import android.view.Gravity
@@ -29,7 +28,6 @@ import android.view.ViewGroup
 import android.view.ViewStub
 import android.widget.Button
 import android.widget.FrameLayout
-import android.widget.ImageView
 import android.widget.TextView
 import androidx.viewpager2.widget.ViewPager2
 import com.android.systemui.Prefs
@@ -76,11 +74,10 @@ class ControlsFavoritingActivity @Inject constructor(
     private lateinit var structurePager: ViewPager2
     private lateinit var statusText: TextView
     private lateinit var titleView: TextView
-    private lateinit var iconView: ImageView
-    private lateinit var iconFrame: View
     private lateinit var pageIndicator: ManagementPageIndicator
     private var mTooltipManager: TooltipManager? = null
     private lateinit var doneButton: View
+    private lateinit var otherAppsButton: View
     private var listOfStructures = emptyList<StructureContainer>()
 
     private lateinit var comparator: Comparator<StructureContainer>
@@ -99,17 +96,10 @@ class ControlsFavoritingActivity @Inject constructor(
     }
 
     private val listingCallback = object : ControlsListingController.ControlsListingCallback {
-        private var icon: Drawable? = null
 
         override fun onServicesUpdated(serviceInfos: List<ControlsServiceInfo>) {
-            val newIcon = serviceInfos.firstOrNull { it.componentName == component }?.loadIcon()
-            if (icon == newIcon) return
-            icon = newIcon
-            executor.execute {
-                if (icon != null) {
-                    iconView.setImageDrawable(icon)
-                }
-                iconFrame.visibility = if (icon != null) View.VISIBLE else View.GONE
+            if (serviceInfos.size > 1) {
+                otherAppsButton.visibility = View.VISIBLE
             }
         }
     }
@@ -271,8 +261,6 @@ class ControlsFavoritingActivity @Inject constructor(
         }
         requireViewById<TextView>(R.id.subtitle).text =
                 resources.getText(R.string.controls_favorite_subtitle)
-        iconView = requireViewById(com.android.internal.R.id.icon)
-        iconFrame = requireViewById(R.id.icon_frame)
         structurePager = requireViewById<ViewPager2>(R.id.structure_pager)
         structurePager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
@@ -284,8 +272,7 @@ class ControlsFavoritingActivity @Inject constructor(
     }
 
     private fun bindButtons() {
-        requireViewById<Button>(R.id.other_apps).apply {
-            visibility = View.VISIBLE
+        otherAppsButton = requireViewById<Button>(R.id.other_apps).apply {
             setOnClickListener {
                 val i = Intent()
                 i.setComponent(
