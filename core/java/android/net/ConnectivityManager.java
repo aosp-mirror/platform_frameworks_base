@@ -2044,10 +2044,19 @@ public class ConnectivityManager {
     public boolean requestRouteToHostAddress(int networkType, InetAddress hostAddress) {
         checkLegacyRoutingApiAccess();
         try {
-            return mService.requestRouteToHostAddress(networkType, hostAddress.getAddress());
+            return mService.requestRouteToHostAddress(networkType, hostAddress.getAddress(),
+                    mContext.getOpPackageName(), getAttributionTag());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * @return the context's attribution tag
+     */
+    // TODO: Remove method and replace with direct call once R code is pushed to AOSP
+    private @Nullable String getAttributionTag() {
+        return null;
     }
 
     /**
@@ -2240,14 +2249,30 @@ public class ConnectivityManager {
      * services.jar, possibly in com.android.server.net. */
 
     /** {@hide} */
-    public static final void enforceChangePermission(Context context) {
+    public static final void enforceChangePermission(Context context,
+            String callingPkg, String callingAttributionTag) {
         int uid = Binder.getCallingUid();
-        Settings.checkAndNoteChangeNetworkStateOperation(context, uid, Settings
-                .getPackageNameForUid(context, uid), true /* throwException */);
+        checkAndNoteChangeNetworkStateOperation(context, uid, callingPkg,
+                callingAttributionTag, true /* throwException */);
+    }
+
+    /**
+     * Check if the package is a allowed to change the network state. This also accounts that such
+     * an access happened.
+     *
+     * @return {@code true} iff the package is allowed to change the network state.
+     */
+    // TODO: Remove method and replace with direct call once R code is pushed to AOSP
+    private static boolean checkAndNoteChangeNetworkStateOperation(@NonNull Context context,
+            int uid, @NonNull String callingPackage, @Nullable String callingAttributionTag,
+            boolean throwException) {
+        return Settings.checkAndNoteChangeNetworkStateOperation(context, uid, callingPackage,
+                throwException);
     }
 
     /** {@hide} */
-    public static final void enforceTetherChangePermission(Context context, String callingPkg) {
+    public static final void enforceTetherChangePermission(Context context, String callingPkg,
+            String callingAttributionTag) {
         Preconditions.checkNotNull(context, "Context cannot be null");
         Preconditions.checkNotNull(callingPkg, "callingPkg cannot be null");
 
@@ -2261,9 +2286,23 @@ public class ConnectivityManager {
             int uid = Binder.getCallingUid();
             // If callingPkg's uid is not same as Binder.getCallingUid(),
             // AppOpsService throws SecurityException.
-            Settings.checkAndNoteWriteSettingsOperation(context, uid, callingPkg,
-                    true /* throwException */);
+            checkAndNoteWriteSettingsOperation(context, uid, callingPkg,
+                    callingAttributionTag, true /* throwException */);
         }
+    }
+
+    /**
+     * Check if the package is a allowed to write settings. This also accounts that such an access
+     * happened.
+     *
+     * @return {@code true} iff the package is allowed to write settings.
+     */
+    // TODO: Remove method and replace with direct call once R code is pushed to AOSP
+    private static boolean checkAndNoteWriteSettingsOperation(@NonNull Context context, int uid,
+            @NonNull String callingPackage, @Nullable String callingAttributionTag,
+            boolean throwException) {
+        return Settings.checkAndNoteWriteSettingsOperation(context, uid, callingPackage,
+                throwException);
     }
 
     /**
@@ -3706,7 +3745,8 @@ public class ConnectivityManager {
                             need, messenger, binder, callingPackageName);
                 } else {
                     request = mService.requestNetwork(
-                            need, messenger, timeoutMs, binder, legacyType, callingPackageName);
+                            need, messenger, timeoutMs, binder, legacyType, callingPackageName,
+                            getAttributionTag());
                 }
                 if (request != null) {
                     sCallbacks.put(request, callback);
@@ -3982,7 +4022,8 @@ public class ConnectivityManager {
         checkPendingIntentNotNull(operation);
         try {
             mService.pendingRequestForNetwork(
-                    request.networkCapabilities, operation, mContext.getOpPackageName());
+                    request.networkCapabilities, operation, mContext.getOpPackageName(),
+                    getAttributionTag());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (ServiceSpecificException e) {
