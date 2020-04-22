@@ -86,28 +86,34 @@ void runShellTest(ShellSubscription config, sp<MockUidMap> uidMap,
     // wait for the data to be written.
     std::this_thread::sleep_for(100ms);
 
-    int expected_data_size = expectedData.ByteSize();
+    // Because we might receive heartbeats from statsd, consisting of data sizes
+    // of 0, encapsulate reads within a while loop.
+    bool readAtom = false;
+    while (!readAtom) {
+        // Read the atom size.
+        size_t dataSize = 0;
+        read(fds_data[0], &dataSize, sizeof(dataSize));
+        if (dataSize == 0) continue;
+        EXPECT_EQ(expectedData.ByteSize(), int(dataSize));
 
-    // now read from the pipe. firstly read the atom size.
-    size_t dataSize = 0;
-    EXPECT_EQ((int)sizeof(dataSize), read(fds_data[0], &dataSize, sizeof(dataSize)));
+        // Read that much data in proto binary format.
+        vector<uint8_t> dataBuffer(dataSize);
+        EXPECT_EQ((int)dataSize, read(fds_data[0], dataBuffer.data(), dataSize));
 
-    EXPECT_EQ(expected_data_size, (int)dataSize);
+        // Make sure the received bytes can be parsed to an atom.
+        ShellData receivedAtom;
+        EXPECT_TRUE(receivedAtom.ParseFromArray(dataBuffer.data(), dataSize) != 0);
 
-    // then read that much data which is the atom in proto binary format
-    vector<uint8_t> dataBuffer(dataSize);
-    EXPECT_EQ((int)dataSize, read(fds_data[0], dataBuffer.data(), dataSize));
+        // Serialize the expected atom to byte array and compare to make sure
+        // they are the same.
+        vector<uint8_t> expectedAtomBuffer(expectedData.ByteSize());
+        expectedData.SerializeToArray(expectedAtomBuffer.data(), expectedData.ByteSize());
+        EXPECT_EQ(expectedAtomBuffer, dataBuffer);
 
-    // make sure the received bytes can be parsed to an atom
-    ShellData receivedAtom;
-    EXPECT_TRUE(receivedAtom.ParseFromArray(dataBuffer.data(), dataSize) != 0);
+        readAtom = true;
+    }
 
-    // serialze the expected atom to bytes. and compare. to make sure they are the same.
-    vector<uint8_t> atomBuffer(expected_data_size);
-    expectedData.SerializeToArray(&atomBuffer[0], expected_data_size);
-    EXPECT_EQ(atomBuffer, dataBuffer);
     close(fds_data[0]);
-
     if (reader.joinable()) {
         reader.join();
     }
