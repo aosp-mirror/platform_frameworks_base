@@ -69,12 +69,20 @@ public:
                       bool pullSuccess, int64_t originalPullTimeNs) override;
 
     // ValueMetric needs special logic if it's a pulled atom.
-    void notifyAppUpgrade(const int64_t& eventTimeNs, const string& apk, const int uid,
-                          const int64_t version) override {
+    void notifyAppUpgrade(const int64_t& eventTimeNs) override {
         std::lock_guard<std::mutex> lock(mMutex);
         if (!mSplitBucketForAppUpgrade) {
             return;
         }
+        if (mIsPulled && mCondition) {
+            pullAndMatchEventsLocked(eventTimeNs);
+        }
+        flushCurrentBucketLocked(eventTimeNs, eventTimeNs);
+    };
+
+    // ValueMetric needs special logic if it's a pulled atom.
+    void onStatsdInitCompleted(const int64_t& eventTimeNs) override {
+        std::lock_guard<std::mutex> lock(mMutex);
         if (mIsPulled && mCondition) {
             pullAndMatchEventsLocked(eventTimeNs);
         }
@@ -256,7 +264,6 @@ private:
 
     FRIEND_TEST(ValueMetricProducerTest, TestAnomalyDetection);
     FRIEND_TEST(ValueMetricProducerTest, TestBaseSetOnConditionChange);
-    FRIEND_TEST(ValueMetricProducerTest, TestBucketBoundariesOnAppUpgrade);
     FRIEND_TEST(ValueMetricProducerTest, TestBucketBoundariesOnConditionChange);
     FRIEND_TEST(ValueMetricProducerTest, TestBucketBoundaryNoCondition);
     FRIEND_TEST(ValueMetricProducerTest, TestBucketBoundaryWithCondition);
@@ -269,10 +276,8 @@ private:
     FRIEND_TEST(ValueMetricProducerTest, TestEmptyDataResetsBase_onDataPulled);
     FRIEND_TEST(ValueMetricProducerTest, TestEventsWithNonSlicedCondition);
     FRIEND_TEST(ValueMetricProducerTest, TestFirstBucket);
-    FRIEND_TEST(ValueMetricProducerTest, TestFullBucketResetWhenLastBucketInvalid);
     FRIEND_TEST(ValueMetricProducerTest, TestLateOnDataPulledWithDiff);
     FRIEND_TEST(ValueMetricProducerTest, TestLateOnDataPulledWithoutDiff);
-    FRIEND_TEST(ValueMetricProducerTest, TestPartialBucketCreated);
     FRIEND_TEST(ValueMetricProducerTest, TestPartialResetOnBucketBoundaries);
     FRIEND_TEST(ValueMetricProducerTest, TestPulledData_noDiff_bucketBoundaryFalse);
     FRIEND_TEST(ValueMetricProducerTest, TestPulledData_noDiff_bucketBoundaryTrue);
@@ -283,15 +288,12 @@ private:
     FRIEND_TEST(ValueMetricProducerTest, TestPulledEventsTakeAbsoluteValueOnReset);
     FRIEND_TEST(ValueMetricProducerTest, TestPulledEventsTakeZeroOnReset);
     FRIEND_TEST(ValueMetricProducerTest, TestPulledEventsWithFiltering);
-    FRIEND_TEST(ValueMetricProducerTest, TestPulledValueWithUpgrade);
-    FRIEND_TEST(ValueMetricProducerTest, TestPulledValueWithUpgradeWhileConditionFalse);
     FRIEND_TEST(ValueMetricProducerTest, TestPulledWithAppUpgradeDisabled);
     FRIEND_TEST(ValueMetricProducerTest, TestPushedAggregateAvg);
     FRIEND_TEST(ValueMetricProducerTest, TestPushedAggregateMax);
     FRIEND_TEST(ValueMetricProducerTest, TestPushedAggregateMin);
     FRIEND_TEST(ValueMetricProducerTest, TestPushedAggregateSum);
     FRIEND_TEST(ValueMetricProducerTest, TestPushedEventsWithCondition);
-    FRIEND_TEST(ValueMetricProducerTest, TestPushedEventsWithUpgrade);
     FRIEND_TEST(ValueMetricProducerTest, TestPushedEventsWithoutCondition);
     FRIEND_TEST(ValueMetricProducerTest, TestResetBaseOnPullDelayExceeded);
     FRIEND_TEST(ValueMetricProducerTest, TestResetBaseOnPullFailAfterConditionChange);
@@ -313,6 +315,14 @@ private:
     FRIEND_TEST(ValueMetricProducerTest_BucketDrop, TestInvalidBucketWhenGuardRailHit);
     FRIEND_TEST(ValueMetricProducerTest_BucketDrop,
                 TestInvalidBucketWhenAccumulateEventWrongBucket);
+
+    FRIEND_TEST(ValueMetricProducerTest_PartialBucket, TestBucketBoundariesOnPartialBucket);
+    FRIEND_TEST(ValueMetricProducerTest_PartialBucket, TestFullBucketResetWhenLastBucketInvalid);
+    FRIEND_TEST(ValueMetricProducerTest_PartialBucket, TestPartialBucketCreated);
+    FRIEND_TEST(ValueMetricProducerTest_PartialBucket, TestPushedEvents);
+    FRIEND_TEST(ValueMetricProducerTest_PartialBucket, TestPulledValue);
+    FRIEND_TEST(ValueMetricProducerTest_PartialBucket, TestPulledValueWhileConditionFalse);
+
     friend class ValueMetricProducerTestHelper;
 };
 

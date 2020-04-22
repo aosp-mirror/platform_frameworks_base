@@ -70,6 +70,8 @@ public:
 
     void onUidMapReceived(const int64_t& eventTimeNs);
 
+    void onStatsdInitCompleted(const int64_t& elapsedTimeNs);
+
     void init();
 
     vector<int32_t> getPullAtomUids(int32_t atomId) override;
