@@ -1023,8 +1023,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         try {
             mMainHandler.post(PooledLambda.obtainRunnable((nonArg) -> {
                 final ScreenshotGraphicBuffer screenshotBuffer = LocalServices
-                        .getService(DisplayManagerInternal.class)
-                        .screenshotWithoutSecureLayer(displayId);
+                        .getService(DisplayManagerInternal.class).userScreenshot(displayId);
                 if (screenshotBuffer != null) {
                     sendScreenshotSuccess(screenshotBuffer, callback);
                 } else {
