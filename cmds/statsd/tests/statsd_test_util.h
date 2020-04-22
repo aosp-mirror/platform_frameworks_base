@@ -42,6 +42,8 @@ using Status = ::ndk::ScopedAStatus;
 const int SCREEN_STATE_ATOM_ID = util::SCREEN_STATE_CHANGED;
 const int UID_PROCESS_STATE_ATOM_ID = util::UID_PROCESS_STATE_CHANGED;
 
+enum BucketSplitEvent { APP_UPGRADE, BOOT_COMPLETE };
+
 // Converts a ProtoOutputStream to a StatsLogReport proto.
 StatsLogReport outputStreamToProto(ProtoOutputStream* proto);
 

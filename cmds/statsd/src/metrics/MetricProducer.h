@@ -141,30 +141,25 @@ public:
     }
 
     /**
-     * Forces this metric to split into a partial bucket right now. If we're past a full bucket, we
-     * first call the standard flushing code to flush up to the latest full bucket. Then we call
-     * the flush again when the end timestamp is forced to be now, and then after flushing, update
-     * the start timestamp to be now.
+     * Force a partial bucket split on app upgrade
      */
-    virtual void notifyAppUpgrade(const int64_t& eventTimeNs, const string& apk, const int uid,
-                          const int64_t version) {
+    virtual void notifyAppUpgrade(const int64_t& eventTimeNs) {
         std::lock_guard<std::mutex> lock(mMutex);
-
-        if (eventTimeNs > getCurrentBucketEndTimeNs()) {
-            // Flush full buckets on the normal path up to the latest bucket boundary.
-            flushIfNeededLocked(eventTimeNs);
-        }
-        // Now flush a partial bucket.
-        flushCurrentBucketLocked(eventTimeNs, eventTimeNs);
-        // Don't update the current bucket number so that the anomaly tracker knows this bucket
-        // is a partial bucket and can merge it with the previous bucket.
+        flushLocked(eventTimeNs);
     };
 
-    void notifyAppRemoved(const int64_t& eventTimeNs, const string& apk, const int uid) {
+    void notifyAppRemoved(const int64_t& eventTimeNs) {
         // Force buckets to split on removal also.
-        notifyAppUpgrade(eventTimeNs, apk, uid, 0);
+        notifyAppUpgrade(eventTimeNs);
     };
 
+    /**
+     * Force a partial bucket split on boot complete.
+     */
+    virtual void onStatsdInitCompleted(const int64_t& eventTimeNs) {
+        std::lock_guard<std::mutex> lock(mMutex);
+        flushLocked(eventTimeNs);
+    }
     // Consume the parsed stats log entry that already matched the "what" of the metric.
     void onMatchedLogEvent(const size_t matcherIndex, const LogEvent& event) {
         std::lock_guard<std::mutex> lock(mMutex);
@@ -292,8 +287,7 @@ public:
     // End: getters/setters
 protected:
     /**
-     * Flushes the current bucket if the eventTime is after the current bucket's end time. This will
-       also flush the current partial bucket in memory.
+     * Flushes the current bucket if the eventTime is after the current bucket's end time.
      */
     virtual void flushIfNeededLocked(const int64_t& eventTime){};
 
