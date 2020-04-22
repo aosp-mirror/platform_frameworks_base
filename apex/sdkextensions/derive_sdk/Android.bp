@@ -22,11 +22,11 @@ cc_defaults {
         type: "lite",
         static: true,
     },
-    min_sdk_version: "current",
+    sdk_version: "current",
     stl: "c++_static",
-    shared_libs: [
-        "libbase",
-        "liblog",
+    shared_libs: [ "liblog" ],
+    static_libs: [
+        "libbase_ndk",
     ],
 }
 
