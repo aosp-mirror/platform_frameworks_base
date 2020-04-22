@@ -582,7 +582,6 @@ public class NinePatchDrawable extends Drawable {
         return super.isStateful() || (s.mTint != null && s.mTint.isStateful());
     }
 
-    /** @hide */
     @Override
     public boolean hasFocusStateSpecified() {
         return mNinePatchState.mTint != null && mNinePatchState.mTint.hasFocusStateSpecified();

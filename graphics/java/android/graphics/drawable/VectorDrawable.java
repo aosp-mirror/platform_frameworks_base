@@ -502,7 +502,6 @@ public class VectorDrawable extends Drawable {
         return super.isStateful() || (mVectorState != null && mVectorState.isStateful());
     }
 
-    /** @hide */
     @Override
     public boolean hasFocusStateSpecified() {
         return mVectorState != null && mVectorState.hasFocusStateSpecified();

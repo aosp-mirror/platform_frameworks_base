@@ -760,7 +760,6 @@ public class BitmapDrawable extends Drawable {
                 || super.isStateful();
     }
 
-    /** @hide */
     @Override
     public boolean hasFocusStateSpecified() {
         return mBitmapState.mTint != null && mBitmapState.mTint.hasFocusStateSpecified();
