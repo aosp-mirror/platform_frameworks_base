@@ -57,6 +57,7 @@ import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.PinnedStackListenerForwarder.PinnedStackListener;
 import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.shared.system.WindowManagerWrapper;
+import com.android.systemui.stackdivider.Divider;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -232,7 +233,8 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
     @Inject
     public PipManager(Context context, BroadcastDispatcher broadcastDispatcher,
             PipBoundsHandler pipBoundsHandler,
-            PipSurfaceTransactionHelper surfaceTransactionHelper) {
+            PipSurfaceTransactionHelper surfaceTransactionHelper,
+            Divider divider) {
         if (mInitialized) {
             return;
         }
@@ -249,7 +251,7 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
         mResizeAnimationDuration = context.getResources()
                 .getInteger(R.integer.config_pipResizeAnimationDuration);
         mPipTaskOrganizer = new PipTaskOrganizer(mContext, mPipBoundsHandler,
-                surfaceTransactionHelper);
+                surfaceTransactionHelper, divider);
         mPipTaskOrganizer.registerPipTransitionCallback(this);
         mActivityTaskManager = ActivityTaskManager.getService();
         ActivityManagerWrapper.getInstance().registerTaskStackListener(mTaskStackListener);
