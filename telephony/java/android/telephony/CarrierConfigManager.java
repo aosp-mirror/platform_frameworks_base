@@ -1207,6 +1207,25 @@ public class CarrierConfigManager {
             "support_ims_conference_call_bool";
 
     /**
+     * Determines whether the device will locally disconnect an IMS conference when the participant
+     * count drops to zero.  When {@code true}, it is assumed the carrier does NOT disconnect a
+     * conference when the participant count drops to zero and that the device must do this by
+     * disconnecting the conference locally.  When {@code false}, it is assumed that the carrier
+     * is responsible for disconnecting the conference when there are no longer any participants
+     * present.
+     * <p>
+     * Note: both {@link #KEY_SUPPORT_IMS_CONFERENCE_CALL_BOOL} and
+     * {@link #KEY_SUPPORT_IMS_CONFERENCE_EVENT_PACKAGE_BOOL} must be true for this configuration to
+     * have any effect.
+     * <p>
+     * Defaults to {@code false}, meaning the carrier network is responsible for disconnecting an
+     * empty IMS conference.
+     * @hide
+     */
+    public static final String KEY_LOCAL_DISCONNECT_EMPTY_IMS_CONFERENCE_BOOL =
+            "local_disconnect_empty_ims_conference_bool";
+
+    /**
      * Determines whether video conference calls are supported by a carrier.  When {@code true},
      * video calls can be merged into conference calls, {@code false} otherwiwse.
      * <p>
@@ -3755,6 +3774,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_SUPPORT_ADD_CONFERENCE_PARTICIPANTS_BOOL, false);
         sDefaults.putBoolean(KEY_SUPPORT_CONFERENCE_CALL_BOOL, true);
         sDefaults.putBoolean(KEY_SUPPORT_IMS_CONFERENCE_CALL_BOOL, true);
+        sDefaults.putBoolean(KEY_LOCAL_DISCONNECT_EMPTY_IMS_CONFERENCE_BOOL, false);
         sDefaults.putBoolean(KEY_SUPPORT_MANAGE_IMS_CONFERENCE_CALL_BOOL, true);
         sDefaults.putBoolean(KEY_SUPPORT_IMS_CONFERENCE_EVENT_PACKAGE_BOOL, true);
         sDefaults.putBoolean(KEY_SUPPORT_IMS_CONFERENCE_EVENT_PACKAGE_ON_PEER_BOOL, true);
