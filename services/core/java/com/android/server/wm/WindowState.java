@@ -5387,7 +5387,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
     }
 
-    private void transformFrameToSurfacePosition(int left, int top, Point outPoint) {
+    void transformFrameToSurfacePosition(int left, int top, Point outPoint) {
         outPoint.set(left, top);
 
         // If changed, also adjust getTransformationMatrix

@@ -1037,8 +1037,8 @@ public class DisplayPolicy {
                 mStatusBarController.setWindow(win);
                 final TriConsumer<DisplayFrames, WindowState, Rect> frameProvider =
                         (displayFrames, windowState, rect) -> {
-                            rect.top = 0;
-                            rect.bottom = getStatusBarHeight(displayFrames);
+                            rect.set(windowState.getFrameLw());
+                            rect.bottom = rect.top + getStatusBarHeight(displayFrames);
                         };
                 mDisplayContent.setInsetProvider(ITYPE_STATUS_BAR, win, frameProvider);
                 mDisplayContent.setInsetProvider(ITYPE_TOP_GESTURES, win, frameProvider);
@@ -1058,8 +1058,7 @@ public class DisplayPolicy {
                                     displayFrames.mDisplayHeight,
                                     displayFrames.mRotation) == NAV_BAR_BOTTOM
                                     && !mNavButtonForcedVisible) {
-
-                                sTmpRect.set(displayFrames.mUnrestricted);
+                                sTmpRect.set(windowState.getFrameLw());
                                 sTmpRect.intersectUnchecked(displayFrames.mDisplayCutoutSafe);
                                 inOutFrame.top = sTmpRect.bottom
                                         - getNavigationBarHeight(displayFrames.mRotation,
@@ -1687,12 +1686,11 @@ public class DisplayPolicy {
             if (isSimulatedLayout) {
                 w.setSimulatedWindowFrames(simulatedFrames);
             }
+            Rect bounds = w.getBounds();
             final WindowFrames windowFrames = w.getLayoutingWindowFrames();
-            windowFrames.setFrames(displayFrames.mUnrestricted /* parentFrame */,
-                    displayFrames.mUnrestricted /* displayFrame */,
-                    displayFrames.mUnrestricted /* contentFrame */,
-                    displayFrames.mUnrestricted /* visibleFrame */, sTmpRect /* decorFrame */,
-                    displayFrames.mUnrestricted /* stableFrame */);
+            windowFrames.setFrames(bounds /* parentFrame */, bounds /* displayFrame */,
+                    bounds /* contentFrame */, bounds /* visibleFrame */, sTmpRect /* decorFrame */,
+                    bounds /* stableFrame */);
             try {
                 w.computeFrame(displayFrames);
             } finally {
@@ -1749,14 +1747,13 @@ public class DisplayPolicy {
         if (mStatusBar == null) {
             return false;
         }
-        // apply any navigation bar insets
+        // apply any status bar insets
+        Rect bounds = mStatusBar.getBounds();
         sTmpRect.setEmpty();
         final WindowFrames windowFrames = mStatusBar.getLayoutingWindowFrames();
-        windowFrames.setFrames(displayFrames.mUnrestricted /* parentFrame */,
-                displayFrames.mUnrestricted /* displayFrame */,
-                displayFrames.mStable /* contentFrame */,
-                displayFrames.mStable /* visibleFrame */, sTmpRect /* decorFrame */,
-                displayFrames.mStable /* stableFrame */);
+        windowFrames.setFrames(bounds /* parentFrame */, bounds /* displayFrame */,
+                bounds /* contentFrame */, bounds /* visibleFrame */, sTmpRect /* decorFrame */,
+                bounds /* stableFrame */);
         // Let the status bar determine its size.
         mStatusBar.computeFrame(displayFrames);
 
@@ -1827,18 +1824,20 @@ public class DisplayPolicy {
         final Rect dockFrame = displayFrames.mDock;
         final int navBarPosition = navigationBarPosition(displayWidth, displayHeight, rotation);
 
+        navigationFrame.set(mNavigationBar.getBounds());
+
         final Rect cutoutSafeUnrestricted = sTmpRect;
         cutoutSafeUnrestricted.set(displayFrames.mUnrestricted);
         cutoutSafeUnrestricted.intersectUnchecked(displayFrames.mDisplayCutoutSafe);
 
         if (navBarPosition == NAV_BAR_BOTTOM) {
             // It's a system nav bar or a portrait screen; nav bar goes on bottom.
-            final int topNavBar = cutoutSafeUnrestricted.bottom
+            final int topNavBar = Math.min(cutoutSafeUnrestricted.bottom, navigationFrame.bottom)
                     - getNavigationBarFrameHeight(rotation, uiMode);
-            final int top = mNavButtonForcedVisible
-                    ? topNavBar
-                    : cutoutSafeUnrestricted.bottom - getNavigationBarHeight(rotation, uiMode);
-            navigationFrame.set(0, topNavBar, displayWidth, displayFrames.mUnrestricted.bottom);
+            final int top = mNavButtonForcedVisible ? topNavBar :
+                    Math.min(cutoutSafeUnrestricted.bottom, navigationFrame.bottom)
+                            - getNavigationBarHeight(rotation, uiMode);
+            navigationFrame.top = topNavBar;
             displayFrames.mStable.bottom = displayFrames.mStableFullscreen.bottom = top;
             if (transientNavBarShowing) {
                 mNavigationBarController.setBarShowingLw(true);
@@ -1858,9 +1857,9 @@ public class DisplayPolicy {
             }
         } else if (navBarPosition == NAV_BAR_RIGHT) {
             // Landscape screen; nav bar goes to the right.
-            final int left = cutoutSafeUnrestricted.right
+            final int left = Math.min(cutoutSafeUnrestricted.right, navigationFrame.right)
                     - getNavigationBarWidth(rotation, uiMode);
-            navigationFrame.set(left, 0, displayFrames.mUnrestricted.right, displayHeight);
+            navigationFrame.left = left;
             displayFrames.mStable.right = displayFrames.mStableFullscreen.right = left;
             if (transientNavBarShowing) {
                 mNavigationBarController.setBarShowingLw(true);
@@ -1880,9 +1879,9 @@ public class DisplayPolicy {
             }
         } else if (navBarPosition == NAV_BAR_LEFT) {
             // Seascape screen; nav bar goes to the left.
-            final int right = cutoutSafeUnrestricted.left
+            final int right = Math.max(cutoutSafeUnrestricted.left, navigationFrame.left)
                     + getNavigationBarWidth(rotation, uiMode);
-            navigationFrame.set(displayFrames.mUnrestricted.left, 0, right, displayHeight);
+            navigationFrame.right = right;
             displayFrames.mStable.left = displayFrames.mStableFullscreen.left = right;
             if (transientNavBarShowing) {
                 mNavigationBarController.setBarShowingLw(true);
@@ -2065,7 +2064,7 @@ public class DisplayPolicy {
             final @InsetsType int typesToFit = attrs.getFitInsetsTypes();
             final @InsetsSide int sidesToFit = attrs.getFitInsetsSides();
             final ArraySet<Integer> types = InsetsState.toInternalType(typesToFit);
-            final Rect dfu = displayFrames.mUnrestricted;
+            final Rect dfu = win.getBounds();
             Insets insets = Insets.of(0, 0, 0, 0);
             for (int i = types.size() - 1; i >= 0; i--) {
                 final InsetsSource source = mDisplayContent.getInsetsPolicy()
