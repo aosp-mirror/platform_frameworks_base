@@ -231,8 +231,8 @@ bool MetricsManager::isConfigValid() const {
 void MetricsManager::notifyAppUpgrade(const int64_t& eventTimeNs, const string& apk, const int uid,
                                       const int64_t version) {
     // Inform all metric producers.
-    for (auto it : mAllMetricProducers) {
-        it->notifyAppUpgrade(eventTimeNs, apk, uid, version);
+    for (const auto& it : mAllMetricProducers) {
+        it->notifyAppUpgrade(eventTimeNs);
     }
     // check if we care this package
     if (std::find(mAllowedPkg.begin(), mAllowedPkg.end(), apk) != mAllowedPkg.end()) {
@@ -252,8 +252,8 @@ void MetricsManager::notifyAppUpgrade(const int64_t& eventTimeNs, const string& 
 void MetricsManager::notifyAppRemoved(const int64_t& eventTimeNs, const string& apk,
                                       const int uid) {
     // Inform all metric producers.
-    for (auto it : mAllMetricProducers) {
-        it->notifyAppRemoved(eventTimeNs, apk, uid);
+    for (const auto& it : mAllMetricProducers) {
+        it->notifyAppRemoved(eventTimeNs);
     }
     // check if we care this package
     if (std::find(mAllowedPkg.begin(), mAllowedPkg.end(), apk) != mAllowedPkg.end()) {
@@ -280,6 +280,13 @@ void MetricsManager::onUidMapReceived(const int64_t& eventTimeNs) {
         return;
     }
     initLogSourceWhiteList();
+}
+
+void MetricsManager::onStatsdInitCompleted(const int64_t& eventTimeNs) {
+    // Inform all metric producers.
+    for (const auto& it : mAllMetricProducers) {
+        it->onStatsdInitCompleted(eventTimeNs);
+    }
 }
 
 void MetricsManager::init() {

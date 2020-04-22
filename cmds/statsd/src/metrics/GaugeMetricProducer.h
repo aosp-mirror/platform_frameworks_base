@@ -73,18 +73,23 @@ public:
                       bool pullSuccess, int64_t originalPullTimeNs) override;
 
     // GaugeMetric needs to immediately trigger another pull when we create the partial bucket.
-    void notifyAppUpgrade(const int64_t& eventTimeNs, const string& apk, const int uid,
-                          const int64_t version) override {
+    void notifyAppUpgrade(const int64_t& eventTimeNs) override {
         std::lock_guard<std::mutex> lock(mMutex);
 
         if (!mSplitBucketForAppUpgrade) {
             return;
         }
-        if (eventTimeNs > getCurrentBucketEndTimeNs()) {
-            // Flush full buckets on the normal path up to the latest bucket boundary.
-            flushIfNeededLocked(eventTimeNs);
+        flushLocked(eventTimeNs);
+        if (mIsPulled && mSamplingType == GaugeMetric::RANDOM_ONE_SAMPLE) {
+            pullAndMatchEventsLocked(eventTimeNs);
         }
-        flushCurrentBucketLocked(eventTimeNs, eventTimeNs);
+    };
+
+    // GaugeMetric needs to immediately trigger another pull when we create the partial bucket.
+    void onStatsdInitCompleted(const int64_t& eventTimeNs) override {
+        std::lock_guard<std::mutex> lock(mMutex);
+
+        flushLocked(eventTimeNs);
         if (mIsPulled && mSamplingType == GaugeMetric::RANDOM_ONE_SAMPLE) {
             pullAndMatchEventsLocked(eventTimeNs);
         }
@@ -190,13 +195,14 @@ private:
     FRIEND_TEST(GaugeMetricProducerTest, TestPulledEventsWithCondition);
     FRIEND_TEST(GaugeMetricProducerTest, TestPulledEventsWithSlicedCondition);
     FRIEND_TEST(GaugeMetricProducerTest, TestPulledEventsNoCondition);
-    FRIEND_TEST(GaugeMetricProducerTest, TestPushedEventsWithUpgrade);
-    FRIEND_TEST(GaugeMetricProducerTest, TestPulledWithUpgrade);
     FRIEND_TEST(GaugeMetricProducerTest, TestPulledWithAppUpgradeDisabled);
     FRIEND_TEST(GaugeMetricProducerTest, TestPulledEventsAnomalyDetection);
     FRIEND_TEST(GaugeMetricProducerTest, TestFirstBucket);
     FRIEND_TEST(GaugeMetricProducerTest, TestPullOnTrigger);
     FRIEND_TEST(GaugeMetricProducerTest, TestRemoveDimensionInOutput);
+
+    FRIEND_TEST(GaugeMetricProducerTest_PartialBucket, TestPushedEvents);
+    FRIEND_TEST(GaugeMetricProducerTest_PartialBucket, TestPulled);
 };
 
 }  // namespace statsd

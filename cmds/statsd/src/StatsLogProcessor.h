@@ -120,6 +120,11 @@ public:
     /* Notify all MetricsManagers of uid map snapshots received */
     void onUidMapReceived(const int64_t& eventTimeNs) override;
 
+    /* Notify all metrics managers of boot completed
+     * This will force a bucket split when the boot is finished.
+     */
+    void onStatsdInitCompleted(const int64_t& elapsedTimeNs);
+
     // Reset all configs.
     void resetConfigs();
 
