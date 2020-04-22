@@ -109,10 +109,11 @@ private:
     FRIEND_TEST(CountMetricProducerTest, TestEventsWithNonSlicedCondition);
     FRIEND_TEST(CountMetricProducerTest, TestEventsWithSlicedCondition);
     FRIEND_TEST(CountMetricProducerTest, TestAnomalyDetectionUnSliced);
-    FRIEND_TEST(CountMetricProducerTest, TestEventWithAppUpgrade);
-    FRIEND_TEST(CountMetricProducerTest, TestEventWithAppUpgradeInNextBucket);
     FRIEND_TEST(CountMetricProducerTest, TestFirstBucket);
     FRIEND_TEST(CountMetricProducerTest, TestOneWeekTimeUnit);
+
+    FRIEND_TEST(CountMetricProducerTest_PartialBucket, TestSplitInCurrentBucket);
+    FRIEND_TEST(CountMetricProducerTest_PartialBucket, TestSplitInNextBucket);
 };
 
 }  // namespace statsd

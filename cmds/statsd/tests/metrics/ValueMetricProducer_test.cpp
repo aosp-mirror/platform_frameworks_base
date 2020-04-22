@@ -41,6 +41,8 @@ namespace android {
 namespace os {
 namespace statsd {
 
+namespace {
+
 const ConfigKey kConfigKey(0, 12345);
 const int tagId = 1;
 const int64_t metricId = 123;
@@ -58,10 +60,18 @@ double epsilon = 0.001;
 static void assertPastBucketValuesSingleKey(
         const std::unordered_map<MetricDimensionKey, std::vector<ValueBucket>>& mPastBuckets,
         const std::initializer_list<int>& expectedValuesList,
-        const std::initializer_list<int64_t>& expectedDurationNsList) {
-    std::vector<int> expectedValues(expectedValuesList);
-    std::vector<int64_t> expectedDurationNs(expectedDurationNsList);
+        const std::initializer_list<int64_t>& expectedDurationNsList,
+        const std::initializer_list<int64_t>& expectedStartTimeNsList,
+        const std::initializer_list<int64_t>& expectedEndTimeNsList) {
+    vector<int> expectedValues(expectedValuesList);
+    vector<int64_t> expectedDurationNs(expectedDurationNsList);
+    vector<int64_t> expectedStartTimeNs(expectedStartTimeNsList);
+    vector<int64_t> expectedEndTimeNs(expectedEndTimeNsList);
+
     ASSERT_EQ(expectedValues.size(), expectedDurationNs.size());
+    ASSERT_EQ(expectedValues.size(), expectedStartTimeNs.size());
+    ASSERT_EQ(expectedValues.size(), expectedEndTimeNs.size());
+
     if (expectedValues.size() == 0) {
         ASSERT_EQ(0, mPastBuckets.size());
         return;
@@ -70,14 +80,20 @@ static void assertPastBucketValuesSingleKey(
     ASSERT_EQ(1, mPastBuckets.size());
     ASSERT_EQ(expectedValues.size(), mPastBuckets.begin()->second.size());
 
-    auto buckets = mPastBuckets.begin()->second;
+    const vector<ValueBucket>& buckets = mPastBuckets.begin()->second;
     for (int i = 0; i < expectedValues.size(); i++) {
         EXPECT_EQ(expectedValues[i], buckets[i].values[0].long_value)
                 << "Values differ at index " << i;
         EXPECT_EQ(expectedDurationNs[i], buckets[i].mConditionTrueNs)
                 << "Condition duration value differ at index " << i;
+        EXPECT_EQ(expectedStartTimeNs[i], buckets[i].mBucketStartNs)
+                << "Start time differs at index " << i;
+        EXPECT_EQ(expectedEndTimeNs[i], buckets[i].mBucketEndNs)
+                << "End time differs at index " << i;
     }
 }
+
+}  // anonymous namespace
 
 class ValueMetricProducerTestHelper {
 public:
@@ -190,6 +206,13 @@ public:
         return metric;
     }
 };
+
+// Setup for parameterized tests.
+class ValueMetricProducerTest_PartialBucket : public TestWithParam<BucketSplitEvent> {};
+
+INSTANTIATE_TEST_SUITE_P(ValueMetricProducerTest_PartialBucket,
+                         ValueMetricProducerTest_PartialBucket,
+                         testing::Values(APP_UPGRADE, BOOT_COMPLETE));
 
 /*
  * Tests that the first bucket works correctly
@@ -325,9 +348,10 @@ TEST(ValueMetricProducerTest, TestPulledEventsNoCondition) {
     EXPECT_EQ(bucketSizeNs, valueProducer->mPastBuckets.begin()->second[2].mConditionTrueNs);
 }
 
-TEST(ValueMetricProducerTest, TestPartialBucketCreated) {
+TEST_P(ValueMetricProducerTest_PartialBucket, TestPartialBucketCreated) {
     ValueMetric metric = ValueMetricProducerTestHelper::createMetric();
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
+    int64_t partialBucketSplitTimeNs = bucket2StartTimeNs + 2;
     EXPECT_CALL(*pullerManager, Pull(tagId, kConfigKey, _, _))
             // Initialize bucket.
             .WillOnce(Invoke([](int tagId, const ConfigKey&,
@@ -337,10 +361,12 @@ TEST(ValueMetricProducerTest, TestPartialBucketCreated) {
                 return true;
             }))
             // Partial bucket.
-            .WillOnce(Invoke([](int tagId, const ConfigKey&,
-                                vector<std::shared_ptr<LogEvent>>* data, bool) {
+            .WillOnce(Invoke([partialBucketSplitTimeNs](int tagId, const ConfigKey&,
+                                                        vector<std::shared_ptr<LogEvent>>* data,
+                                                        bool) {
                 data->clear();
-                data->push_back(CreateRepeatedValueLogEvent(tagId, bucket2StartTimeNs + 10, 5));
+                data->push_back(
+                        CreateRepeatedValueLogEvent(tagId, partialBucketSplitTimeNs + 8, 5));
                 return true;
             }));
 
@@ -354,19 +380,21 @@ TEST(ValueMetricProducerTest, TestPartialBucketCreated) {
     valueProducer->onDataPulled(allData, /** success */ true, bucket2StartTimeNs);
 
     // Partial buckets created in 2nd bucket.
-    valueProducer->notifyAppUpgrade(bucket2StartTimeNs + 2, "com.foo", 10000, 1);
+    switch (GetParam()) {
+        case APP_UPGRADE:
+            valueProducer->notifyAppUpgrade(partialBucketSplitTimeNs);
+            break;
+        case BOOT_COMPLETE:
+            valueProducer->onStatsdInitCompleted(partialBucketSplitTimeNs);
+            break;
+    }
+    EXPECT_EQ(partialBucketSplitTimeNs, valueProducer->mCurrentBucketStartTimeNs);
+    EXPECT_EQ(1, valueProducer->getCurrentBucketNum());
 
-    // One full bucket and one partial bucket.
-    EXPECT_EQ(1UL, valueProducer->mPastBuckets.size());
-    vector<ValueBucket> buckets = valueProducer->mPastBuckets.begin()->second;
-    EXPECT_EQ(2UL, buckets.size());
-    // Full bucket (2 - 1)
-    EXPECT_EQ(1, buckets[0].values[0].long_value);
-    EXPECT_EQ(bucketSizeNs, buckets[0].mConditionTrueNs);
-    // Full bucket (5 - 3)
-    EXPECT_EQ(3, buckets[1].values[0].long_value);
-    // partial bucket [bucket2StartTimeNs, bucket2StartTimeNs + 2]
-    EXPECT_EQ(2, buckets[1].mConditionTrueNs);
+    assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {1, 3},
+                                    {bucketSizeNs, partialBucketSplitTimeNs - bucket2StartTimeNs},
+                                    {bucketStartTimeNs, bucket2StartTimeNs},
+                                    {bucket2StartTimeNs, partialBucketSplitTimeNs});
 }
 
 /*
@@ -613,7 +641,8 @@ TEST(ValueMetricProducerTest, TestEventsWithNonSlicedCondition) {
     allData.clear();
     allData.push_back(CreateRepeatedValueLogEvent(tagId, bucket2StartTimeNs + 1, 110));
     valueProducer->onDataPulled(allData, /** succeed */ true, bucket2StartTimeNs);
-    assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {10}, {bucketSizeNs - 8});
+    assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {10}, {bucketSizeNs - 8},
+                                    {bucketStartTimeNs}, {bucket2StartTimeNs});
 
     // has one slice
     EXPECT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
@@ -625,7 +654,8 @@ TEST(ValueMetricProducerTest, TestEventsWithNonSlicedCondition) {
     EXPECT_EQ(10, curInterval.value.long_value);
 
     valueProducer->onConditionChanged(false, bucket2StartTimeNs + 1);
-    assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {10}, {bucketSizeNs - 8});
+    assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {10}, {bucketSizeNs - 8},
+                                    {bucketStartTimeNs}, {bucket2StartTimeNs});
 
     // has one slice
     EXPECT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
@@ -636,10 +666,12 @@ TEST(ValueMetricProducerTest, TestEventsWithNonSlicedCondition) {
     EXPECT_EQ(false, curBaseInfo.hasBase);
 
     valueProducer->onConditionChanged(true, bucket3StartTimeNs + 1);
-    assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {10, 20}, {bucketSizeNs - 8, 1});
+    assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {10, 20}, {bucketSizeNs - 8, 1},
+                                    {bucketStartTimeNs, bucket2StartTimeNs},
+                                    {bucket2StartTimeNs, bucket3StartTimeNs});
 }
 
-TEST(ValueMetricProducerTest, TestPushedEventsWithUpgrade) {
+TEST_P(ValueMetricProducerTest_PartialBucket, TestPushedEvents) {
     ValueMetric metric = ValueMetricProducerTestHelper::createMetric();
 
     UidMap uidMap;
@@ -660,25 +692,46 @@ TEST(ValueMetricProducerTest, TestPushedEventsWithUpgrade) {
     valueProducer.onMatchedLogEvent(1 /*log matcher index*/, event1);
     EXPECT_EQ(1UL, valueProducer.mCurrentSlicedBucket.size());
 
-    valueProducer.notifyAppUpgrade(bucketStartTimeNs + 150, "ANY.APP", 1, 1);
-    EXPECT_EQ(1UL, valueProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY].size());
-    EXPECT_EQ(bucketStartTimeNs + 150, valueProducer.mCurrentBucketStartTimeNs);
+    int64_t partialBucketSplitTimeNs = bucketStartTimeNs + 150;
+    switch (GetParam()) {
+        case APP_UPGRADE:
+            valueProducer.notifyAppUpgrade(partialBucketSplitTimeNs);
+            break;
+        case BOOT_COMPLETE:
+            valueProducer.onStatsdInitCompleted(partialBucketSplitTimeNs);
+            break;
+    }
+    assertPastBucketValuesSingleKey(valueProducer.mPastBuckets, {10},
+                                    {partialBucketSplitTimeNs - bucketStartTimeNs},
+                                    {bucketStartTimeNs}, {partialBucketSplitTimeNs});
+    EXPECT_EQ(partialBucketSplitTimeNs, valueProducer.mCurrentBucketStartTimeNs);
+    EXPECT_EQ(0, valueProducer.getCurrentBucketNum());
 
+    // Event arrives after the bucket split.
     LogEvent event2(/*uid=*/0, /*pid=*/0);
-    CreateRepeatedValueLogEvent(&event2, tagId, bucketStartTimeNs + 59 * NS_PER_SEC, 10);
+    CreateRepeatedValueLogEvent(&event2, tagId, bucketStartTimeNs + 59 * NS_PER_SEC, 20);
     valueProducer.onMatchedLogEvent(1 /*log matcher index*/, event2);
-    EXPECT_EQ(1UL, valueProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY].size());
-    EXPECT_EQ(bucketStartTimeNs + 150, valueProducer.mCurrentBucketStartTimeNs);
+
+    assertPastBucketValuesSingleKey(valueProducer.mPastBuckets, {10},
+                                    {partialBucketSplitTimeNs - bucketStartTimeNs},
+                                    {bucketStartTimeNs}, {partialBucketSplitTimeNs});
+    EXPECT_EQ(partialBucketSplitTimeNs, valueProducer.mCurrentBucketStartTimeNs);
+    EXPECT_EQ(0, valueProducer.getCurrentBucketNum());
 
     // Next value should create a new bucket.
     LogEvent event3(/*uid=*/0, /*pid=*/0);
-    CreateRepeatedValueLogEvent(&event3, tagId, bucketStartTimeNs + 65 * NS_PER_SEC, 10);
+    CreateRepeatedValueLogEvent(&event3, tagId, bucket2StartTimeNs + 5 * NS_PER_SEC, 10);
     valueProducer.onMatchedLogEvent(1 /*log matcher index*/, event3);
-    EXPECT_EQ(2UL, valueProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY].size());
+    assertPastBucketValuesSingleKey(valueProducer.mPastBuckets, {10, 20},
+                                    {partialBucketSplitTimeNs - bucketStartTimeNs,
+                                     bucket2StartTimeNs - partialBucketSplitTimeNs},
+                                    {bucketStartTimeNs, partialBucketSplitTimeNs},
+                                    {partialBucketSplitTimeNs, bucket2StartTimeNs});
     EXPECT_EQ(bucketStartTimeNs + bucketSizeNs, valueProducer.mCurrentBucketStartTimeNs);
+    EXPECT_EQ(1, valueProducer.getCurrentBucketNum());
 }
 
-TEST(ValueMetricProducerTest, TestPulledValueWithUpgrade) {
+TEST_P(ValueMetricProducerTest_PartialBucket, TestPulledValue) {
     ValueMetric metric = ValueMetricProducerTestHelper::createMetric();
 
     UidMap uidMap;
@@ -689,14 +742,16 @@ TEST(ValueMetricProducerTest, TestPulledValueWithUpgrade) {
                     atomMatcherId, logEventMatcherIndex, atomMatcher, uidMap)});
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
+    int64_t partialBucketSplitTimeNs = bucket2StartTimeNs + 150;
     EXPECT_CALL(*pullerManager, RegisterReceiver(tagId, kConfigKey, _, _, _)).WillOnce(Return());
     EXPECT_CALL(*pullerManager, UnRegisterReceiver(tagId, kConfigKey, _)).WillOnce(Return());
     EXPECT_CALL(*pullerManager, Pull(tagId, kConfigKey, _, _))
             .WillOnce(Return(true))
-            .WillOnce(Invoke([](int tagId, const ConfigKey&,
-                                vector<std::shared_ptr<LogEvent>>* data, bool) {
+            .WillOnce(Invoke([partialBucketSplitTimeNs](int tagId, const ConfigKey&,
+                                                        vector<std::shared_ptr<LogEvent>>* data,
+                                                        bool) {
                 data->clear();
-                data->push_back(CreateRepeatedValueLogEvent(tagId, bucket2StartTimeNs + 149, 120));
+                data->push_back(CreateRepeatedValueLogEvent(tagId, partialBucketSplitTimeNs, 120));
                 return true;
             }));
     ValueMetricProducer valueProducer(kConfigKey, metric, -1, wizard, logEventMatcherIndex,
@@ -711,20 +766,27 @@ TEST(ValueMetricProducerTest, TestPulledValueWithUpgrade) {
     valueProducer.onDataPulled(allData, /** succeed */ true, bucket2StartTimeNs);
     EXPECT_EQ(1UL, valueProducer.mCurrentSlicedBucket.size());
 
-    valueProducer.notifyAppUpgrade(bucket2StartTimeNs + 150, "ANY.APP", 1, 1);
-    EXPECT_EQ(1UL, valueProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY].size());
-    EXPECT_EQ(bucket2StartTimeNs + 150, valueProducer.mCurrentBucketStartTimeNs);
-    assertPastBucketValuesSingleKey(valueProducer.mPastBuckets, {20}, {150});
+    switch (GetParam()) {
+        case APP_UPGRADE:
+            valueProducer.notifyAppUpgrade(partialBucketSplitTimeNs);
+            break;
+        case BOOT_COMPLETE:
+            valueProducer.onStatsdInitCompleted(partialBucketSplitTimeNs);
+            break;
+    }
+    EXPECT_EQ(partialBucketSplitTimeNs, valueProducer.mCurrentBucketStartTimeNs);
+    EXPECT_EQ(1, valueProducer.getCurrentBucketNum());
+    assertPastBucketValuesSingleKey(valueProducer.mPastBuckets, {20}, {150}, {bucket2StartTimeNs},
+                                    {partialBucketSplitTimeNs});
 
     allData.clear();
     allData.push_back(CreateRepeatedValueLogEvent(tagId, bucket3StartTimeNs + 1, 150));
     valueProducer.onDataPulled(allData, /** succeed */ true, bucket3StartTimeNs);
-    EXPECT_EQ(2UL, valueProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY].size());
     EXPECT_EQ(bucket3StartTimeNs, valueProducer.mCurrentBucketStartTimeNs);
-    EXPECT_EQ(20L,
-              valueProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY][0].values[0].long_value);
-    assertPastBucketValuesSingleKey(valueProducer.mPastBuckets, {20, 30},
-                                    {150, bucketSizeNs - 150});
+    EXPECT_EQ(2, valueProducer.getCurrentBucketNum());
+    assertPastBucketValuesSingleKey(valueProducer.mPastBuckets, {20, 30}, {150, bucketSizeNs - 150},
+                                    {bucket2StartTimeNs, partialBucketSplitTimeNs},
+                                    {partialBucketSplitTimeNs, bucket3StartTimeNs});
 }
 
 TEST(ValueMetricProducerTest, TestPulledWithAppUpgradeDisabled) {
@@ -754,12 +816,12 @@ TEST(ValueMetricProducerTest, TestPulledWithAppUpgradeDisabled) {
     valueProducer.onDataPulled(allData, /** succeed */ true, bucket2StartTimeNs);
     EXPECT_EQ(1UL, valueProducer.mCurrentSlicedBucket.size());
 
-    valueProducer.notifyAppUpgrade(bucket2StartTimeNs + 150, "ANY.APP", 1, 1);
+    valueProducer.notifyAppUpgrade(bucket2StartTimeNs + 150);
     EXPECT_EQ(0UL, valueProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY].size());
     EXPECT_EQ(bucket2StartTimeNs, valueProducer.mCurrentBucketStartTimeNs);
 }
 
-TEST(ValueMetricProducerTest, TestPulledValueWithUpgradeWhileConditionFalse) {
+TEST_P(ValueMetricProducerTest_PartialBucket, TestPulledValueWhileConditionFalse) {
     ValueMetric metric = ValueMetricProducerTestHelper::createMetricWithCondition();
 
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
@@ -784,14 +846,21 @@ TEST(ValueMetricProducerTest, TestPulledValueWithUpgradeWhileConditionFalse) {
     valueProducer->onConditionChanged(false, bucket2StartTimeNs - 100);
     EXPECT_FALSE(valueProducer->mCondition);
 
-    valueProducer->notifyAppUpgrade(bucket2StartTimeNs - 50, "ANY.APP", 1, 1);
+    int64_t partialBucketSplitTimeNs = bucket2StartTimeNs - 50;
+    switch (GetParam()) {
+        case APP_UPGRADE:
+            valueProducer->notifyAppUpgrade(partialBucketSplitTimeNs);
+            break;
+        case BOOT_COMPLETE:
+            valueProducer->onStatsdInitCompleted(partialBucketSplitTimeNs);
+            break;
+    }
     // Expect one full buckets already done and starting a partial bucket.
-    EXPECT_EQ(bucket2StartTimeNs - 50, valueProducer->mCurrentBucketStartTimeNs);
-    EXPECT_EQ(1UL, valueProducer->mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY].size());
-    EXPECT_EQ(bucketStartTimeNs,
-              valueProducer->mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY][0].mBucketStartNs);
+    EXPECT_EQ(partialBucketSplitTimeNs, valueProducer->mCurrentBucketStartTimeNs);
+    EXPECT_EQ(0, valueProducer->getCurrentBucketNum());
     assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {20},
-                                    {(bucket2StartTimeNs - 100) - (bucketStartTimeNs + 1)});
+                                    {(bucket2StartTimeNs - 100) - (bucketStartTimeNs + 1)},
+                                    {bucketStartTimeNs}, {partialBucketSplitTimeNs});
     EXPECT_FALSE(valueProducer->mCondition);
 }
 TEST(ValueMetricProducerTest, TestPushedEventsWithoutCondition) {
@@ -834,7 +903,8 @@ TEST(ValueMetricProducerTest, TestPushedEventsWithoutCondition) {
     EXPECT_EQ(30, curInterval.value.long_value);
 
     valueProducer.flushIfNeededLocked(bucket2StartTimeNs);
-    assertPastBucketValuesSingleKey(valueProducer.mPastBuckets, {30}, {bucketSizeNs});
+    assertPastBucketValuesSingleKey(valueProducer.mPastBuckets, {30}, {bucketSizeNs},
+                                    {bucketStartTimeNs}, {bucket2StartTimeNs});
 }
 
 TEST(ValueMetricProducerTest, TestPushedEventsWithCondition) {
@@ -895,7 +965,8 @@ TEST(ValueMetricProducerTest, TestPushedEventsWithCondition) {
     EXPECT_EQ(50, curInterval.value.long_value);
 
     valueProducer.flushIfNeededLocked(bucket2StartTimeNs);
-    assertPastBucketValuesSingleKey(valueProducer.mPastBuckets, {50}, {20});
+    assertPastBucketValuesSingleKey(valueProducer.mPastBuckets, {50}, {20}, {bucketStartTimeNs},
+                                    {bucket2StartTimeNs});
 }
 
 TEST(ValueMetricProducerTest, TestAnomalyDetection) {
@@ -1012,7 +1083,8 @@ TEST(ValueMetricProducerTest, TestBucketBoundaryNoCondition) {
     EXPECT_EQ(true, curBaseInfo.hasBase);
     EXPECT_EQ(23, curBaseInfo.base.long_value);
     EXPECT_EQ(false, curInterval.hasValue);
-    assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {12}, {bucketSizeNs});
+    assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {12}, {bucketSizeNs},
+                                    {bucket2StartTimeNs}, {bucket3StartTimeNs});
 
     // pull 3 come late.
     // The previous bucket gets closed with error. (Has start value 23, no ending)
@@ -1028,7 +1100,15 @@ TEST(ValueMetricProducerTest, TestBucketBoundaryNoCondition) {
     EXPECT_EQ(true, curBaseInfo.hasBase);
     EXPECT_EQ(36, curBaseInfo.base.long_value);
     EXPECT_EQ(false, curInterval.hasValue);
-    assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {12}, {bucketSizeNs});
+    assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {12}, {bucketSizeNs},
+                                    {bucket2StartTimeNs}, {bucket3StartTimeNs});
+    // The 3rd bucket is dropped due to multiple buckets being skipped.
+    ASSERT_EQ(1, valueProducer->mSkippedBuckets.size());
+    EXPECT_EQ(bucket3StartTimeNs, valueProducer->mSkippedBuckets[0].bucketStartTimeNs);
+    EXPECT_EQ(bucket4StartTimeNs, valueProducer->mSkippedBuckets[0].bucketEndTimeNs);
+    ASSERT_EQ(1, valueProducer->mSkippedBuckets[0].dropEvents.size());
+    EXPECT_EQ(MULTIPLE_BUCKETS_SKIPPED, valueProducer->mSkippedBuckets[0].dropEvents[0].reason);
+    EXPECT_EQ(bucket6StartTimeNs, valueProducer->mSkippedBuckets[0].dropEvents[0].dropTimeNs);
 }
 
 /*
@@ -1073,7 +1153,8 @@ TEST(ValueMetricProducerTest, TestBucketBoundaryWithCondition) {
     valueProducer->onConditionChanged(false, bucket2StartTimeNs + 1);
     curInterval = valueProducer->mCurrentSlicedBucket.begin()->second[0];
     curBaseInfo = valueProducer->mCurrentBaseInfo.begin()->second[0];
-    assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {20}, {bucketSizeNs - 8});
+    assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {20}, {bucketSizeNs - 8},
+                                    {bucketStartTimeNs}, {bucket2StartTimeNs});
     EXPECT_EQ(false, curBaseInfo.hasBase);
 
     // Now the alarm is delivered.
@@ -1082,7 +1163,8 @@ TEST(ValueMetricProducerTest, TestBucketBoundaryWithCondition) {
     allData.push_back(CreateRepeatedValueLogEvent(tagId, bucket2StartTimeNs + 30, 110));
     valueProducer->onDataPulled(allData, /** succeed */ true, bucket2StartTimeNs);
 
-    assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {20}, {bucketSizeNs - 8});
+    assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {20}, {bucketSizeNs - 8},
+                                    {bucketStartTimeNs}, {bucket2StartTimeNs});
     curInterval = valueProducer->mCurrentSlicedBucket.begin()->second[0];
     curBaseInfo = valueProducer->mCurrentBaseInfo.begin()->second[0];
     EXPECT_EQ(false, curBaseInfo.hasBase);
@@ -1090,10 +1172,9 @@ TEST(ValueMetricProducerTest, TestBucketBoundaryWithCondition) {
 }
 
 /*
-* Test pulled event with non sliced condition. The pull on boundary come late, after the
-condition
-* change to false, and then true again. This is due to alarm delivered late.
-*/
+ * Test pulled event with non sliced condition. The pull on boundary come late, after the condition
+ * change to false, and then true again. This is due to alarm delivered late.
+ */
 TEST(ValueMetricProducerTest, TestBucketBoundaryWithCondition2) {
     ValueMetric metric = ValueMetricProducerTestHelper::createMetricWithCondition();
 
@@ -1139,7 +1220,8 @@ TEST(ValueMetricProducerTest, TestBucketBoundaryWithCondition2) {
 
     // pull on bucket boundary come late, condition change happens before it
     valueProducer->onConditionChanged(false, bucket2StartTimeNs + 1);
-    assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {20}, {bucketSizeNs - 8});
+    assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {20}, {bucketSizeNs - 8},
+                                    {bucketStartTimeNs}, {bucket2StartTimeNs});
     EXPECT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
     curInterval = valueProducer->mCurrentSlicedBucket.begin()->second[0];
     curBaseInfo = valueProducer->mCurrentBaseInfo.begin()->second[0];
@@ -1148,7 +1230,8 @@ TEST(ValueMetricProducerTest, TestBucketBoundaryWithCondition2) {
 
     // condition changed to true again, before the pull alarm is delivered
     valueProducer->onConditionChanged(true, bucket2StartTimeNs + 25);
-    assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {20}, {bucketSizeNs - 8});
+    assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {20}, {bucketSizeNs - 8},
+                                    {bucketStartTimeNs}, {bucket2StartTimeNs});
     curInterval = valueProducer->mCurrentSlicedBucket.begin()->second[0];
     curBaseInfo = valueProducer->mCurrentBaseInfo.begin()->second[0];
     EXPECT_EQ(true, curBaseInfo.hasBase);
@@ -1167,13 +1250,15 @@ TEST(ValueMetricProducerTest, TestBucketBoundaryWithCondition2) {
     EXPECT_EQ(140, curBaseInfo.base.long_value);
     EXPECT_EQ(true, curInterval.hasValue);
     EXPECT_EQ(10, curInterval.value.long_value);
-    assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {20}, {bucketSizeNs - 8});
+    assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {20}, {bucketSizeNs - 8},
+                                    {bucketStartTimeNs}, {bucket2StartTimeNs});
 
     allData.clear();
     allData.push_back(CreateRepeatedValueLogEvent(tagId, bucket3StartTimeNs, 160));
     valueProducer->onDataPulled(allData, /** succeed */ true, bucket3StartTimeNs);
-    assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {20, 30},
-                                    {bucketSizeNs - 8, bucketSizeNs - 24});
+    assertPastBucketValuesSingleKey(
+            valueProducer->mPastBuckets, {20, 30}, {bucketSizeNs - 8, bucketSizeNs - 24},
+            {bucketStartTimeNs, bucket2StartTimeNs}, {bucket2StartTimeNs, bucket3StartTimeNs});
 }
 
 TEST(ValueMetricProducerTest, TestPushedAggregateMin) {
@@ -1216,7 +1301,8 @@ TEST(ValueMetricProducerTest, TestPushedAggregateMin) {
     EXPECT_EQ(10, curInterval.value.long_value);
 
     valueProducer.flushIfNeededLocked(bucket2StartTimeNs);
-    assertPastBucketValuesSingleKey(valueProducer.mPastBuckets, {10}, {bucketSizeNs});
+    assertPastBucketValuesSingleKey(valueProducer.mPastBuckets, {10}, {bucketSizeNs},
+                                    {bucketStartTimeNs}, {bucket2StartTimeNs});
 }
 
 TEST(ValueMetricProducerTest, TestPushedAggregateMax) {
@@ -1239,9 +1325,6 @@ TEST(ValueMetricProducerTest, TestPushedAggregateMax) {
 
     LogEvent event1(/*uid=*/0, /*pid=*/0);
     CreateRepeatedValueLogEvent(&event1, tagId, bucketStartTimeNs + 10, 10);
-
-    LogEvent event2(/*uid=*/0, /*pid=*/0);
-    CreateRepeatedValueLogEvent(&event2, tagId, bucketStartTimeNs + 20, 20);
     valueProducer.onMatchedLogEvent(1 /*log matcher index*/, event1);
 
     // has one slice
@@ -1251,6 +1334,8 @@ TEST(ValueMetricProducerTest, TestPushedAggregateMax) {
     EXPECT_EQ(10, curInterval.value.long_value);
     EXPECT_EQ(true, curInterval.hasValue);
 
+    LogEvent event2(/*uid=*/0, /*pid=*/0);
+    CreateRepeatedValueLogEvent(&event2, tagId, bucketStartTimeNs + 20, 20);
     valueProducer.onMatchedLogEvent(1 /*log matcher index*/, event2);
 
     // has one slice
@@ -1258,10 +1343,9 @@ TEST(ValueMetricProducerTest, TestPushedAggregateMax) {
     curInterval = valueProducer.mCurrentSlicedBucket.begin()->second[0];
     EXPECT_EQ(20, curInterval.value.long_value);
 
-    valueProducer.flushIfNeededLocked(bucket3StartTimeNs);
-    /* EXPECT_EQ(1UL, valueProducer.mPastBuckets.size()); */
-    /* EXPECT_EQ(1UL, valueProducer.mPastBuckets.begin()->second.size()); */
-    /* EXPECT_EQ(20, valueProducer.mPastBuckets.begin()->second.back().values[0].long_value); */
+    valueProducer.flushIfNeededLocked(bucket2StartTimeNs);
+    assertPastBucketValuesSingleKey(valueProducer.mPastBuckets, {20}, {bucketSizeNs},
+                                    {bucketStartTimeNs}, {bucket2StartTimeNs});
 }
 
 TEST(ValueMetricProducerTest, TestPushedAggregateAvg) {
@@ -1351,7 +1435,8 @@ TEST(ValueMetricProducerTest, TestPushedAggregateSum) {
     EXPECT_EQ(25, curInterval.value.long_value);
 
     valueProducer.flushIfNeededLocked(bucket2StartTimeNs);
-    assertPastBucketValuesSingleKey(valueProducer.mPastBuckets, {25}, {bucketSizeNs});
+    assertPastBucketValuesSingleKey(valueProducer.mPastBuckets, {25}, {bucketSizeNs},
+                                    {bucketStartTimeNs}, {bucket2StartTimeNs});
 }
 
 TEST(ValueMetricProducerTest, TestSkipZeroDiffOutput) {
@@ -1375,10 +1460,8 @@ TEST(ValueMetricProducerTest, TestSkipZeroDiffOutput) {
 
     LogEvent event1(/*uid=*/0, /*pid=*/0);
     CreateRepeatedValueLogEvent(&event1, tagId, bucketStartTimeNs + 10, 10);
-
-    LogEvent event2(/*uid=*/0, /*pid=*/0);
-    CreateRepeatedValueLogEvent(&event2, tagId, bucketStartTimeNs + 15, 15);
     valueProducer.onMatchedLogEvent(1 /*log matcher index*/, event1);
+
     // has one slice
     EXPECT_EQ(1UL, valueProducer.mCurrentSlicedBucket.size());
     ValueMetricProducer::Interval curInterval =
@@ -1388,6 +1471,8 @@ TEST(ValueMetricProducerTest, TestSkipZeroDiffOutput) {
     EXPECT_EQ(10, curBaseInfo.base.long_value);
     EXPECT_EQ(false, curInterval.hasValue);
 
+    LogEvent event2(/*uid=*/0, /*pid=*/0);
+    CreateRepeatedValueLogEvent(&event2, tagId, bucketStartTimeNs + 15, 15);
     valueProducer.onMatchedLogEvent(1 /*log matcher index*/, event2);
 
     // has one slice
@@ -1400,12 +1485,14 @@ TEST(ValueMetricProducerTest, TestSkipZeroDiffOutput) {
     LogEvent event3(/*uid=*/0, /*pid=*/0);
     CreateRepeatedValueLogEvent(&event3, tagId, bucket2StartTimeNs + 10, 15);
     valueProducer.onMatchedLogEvent(1 /*log matcher index*/, event3);
+
     EXPECT_EQ(1UL, valueProducer.mCurrentSlicedBucket.size());
     curInterval = valueProducer.mCurrentSlicedBucket.begin()->second[0];
     curBaseInfo = valueProducer.mCurrentBaseInfo.begin()->second[0];
     EXPECT_EQ(true, curBaseInfo.hasBase);
     EXPECT_EQ(15, curBaseInfo.base.long_value);
     EXPECT_EQ(true, curInterval.hasValue);
+    EXPECT_EQ(0, curInterval.value.long_value);
 
     LogEvent event4(/*uid=*/0, /*pid=*/0);
     CreateRepeatedValueLogEvent(&event4, tagId, bucket2StartTimeNs + 15, 15);
@@ -1416,11 +1503,11 @@ TEST(ValueMetricProducerTest, TestSkipZeroDiffOutput) {
     EXPECT_EQ(true, curBaseInfo.hasBase);
     EXPECT_EQ(15, curBaseInfo.base.long_value);
     EXPECT_EQ(true, curInterval.hasValue);
+    EXPECT_EQ(0, curInterval.value.long_value);
 
     valueProducer.flushIfNeededLocked(bucket3StartTimeNs);
-    EXPECT_EQ(1UL, valueProducer.mPastBuckets.size());
-    EXPECT_EQ(1UL, valueProducer.mPastBuckets.begin()->second.size());
-    assertPastBucketValuesSingleKey(valueProducer.mPastBuckets, {5}, {bucketSizeNs});
+    assertPastBucketValuesSingleKey(valueProducer.mPastBuckets, {5}, {bucketSizeNs},
+                                    {bucketStartTimeNs}, {bucket2StartTimeNs});
 }
 
 TEST(ValueMetricProducerTest, TestSkipZeroDiffOutputMultiValue) {
@@ -1740,8 +1827,8 @@ TEST(ValueMetricProducerTest, TestTrimUnusedDimensionKey) {
     EXPECT_EQ(3, baseInfo1.base.long_value);
     EXPECT_EQ(false, interval1.hasValue);
     EXPECT_EQ(0UL, valueProducer->mPastBuckets.size());
-    vector<shared_ptr<LogEvent>> allData;
 
+    vector<shared_ptr<LogEvent>> allData;
     allData.clear();
     allData.push_back(CreateTwoValueLogEvent(tagId, bucket2StartTimeNs + 1, 2, 4));
     allData.push_back(CreateTwoValueLogEvent(tagId, bucket2StartTimeNs + 1, 1, 11));
@@ -1753,7 +1840,8 @@ TEST(ValueMetricProducerTest, TestTrimUnusedDimensionKey) {
     EXPECT_EQ(false, interval1.hasValue);
     EXPECT_EQ(8, interval1.value.long_value);
     EXPECT_FALSE(interval1.seenNewData);
-    assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {8}, {bucketSizeNs});
+    assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {8}, {bucketSizeNs},
+                                    {bucketStartTimeNs}, {bucket2StartTimeNs});
 
     auto it = valueProducer->mCurrentSlicedBucket.begin();
     for (; it != valueProducer->mCurrentSlicedBucket.end(); it++) {
@@ -1769,14 +1857,13 @@ TEST(ValueMetricProducerTest, TestTrimUnusedDimensionKey) {
     }
     EXPECT_TRUE(it != iter);
     EXPECT_TRUE(itBase != iterBase);
-    auto& interval2 = it->second[0];
-    auto& baseInfo2 = itBase->second[0];
+    auto interval2 = it->second[0];
+    auto baseInfo2 = itBase->second[0];
     EXPECT_EQ(2, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
     EXPECT_EQ(true, baseInfo2.hasBase);
     EXPECT_EQ(4, baseInfo2.base.long_value);
     EXPECT_EQ(false, interval2.hasValue);
     EXPECT_FALSE(interval2.seenNewData);
-    assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {8}, {bucketSizeNs});
 
     // next pull somehow did not happen, skip to end of bucket 3
     allData.clear();
@@ -1791,7 +1878,8 @@ TEST(ValueMetricProducerTest, TestTrimUnusedDimensionKey) {
     EXPECT_EQ(5, baseInfo2.base.long_value);
     EXPECT_EQ(false, interval2.hasValue);
     EXPECT_FALSE(interval2.seenNewData);
-    assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {8}, {bucketSizeNs});
+    assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {8}, {bucketSizeNs},
+                                    {bucketStartTimeNs}, {bucket2StartTimeNs});
 
     allData.clear();
     allData.push_back(CreateTwoValueLogEvent(tagId, bucket5StartTimeNs + 1, 2, 14));
@@ -1805,9 +1893,13 @@ TEST(ValueMetricProducerTest, TestTrimUnusedDimensionKey) {
     EXPECT_FALSE(interval2.seenNewData);
     ASSERT_EQ(2UL, valueProducer->mPastBuckets.size());
     auto iterator = valueProducer->mPastBuckets.begin();
+    EXPECT_EQ(bucket4StartTimeNs, iterator->second[0].mBucketStartNs);
+    EXPECT_EQ(bucket5StartTimeNs, iterator->second[0].mBucketEndNs);
     EXPECT_EQ(9, iterator->second[0].values[0].long_value);
     EXPECT_EQ(bucketSizeNs, iterator->second[0].mConditionTrueNs);
     iterator++;
+    EXPECT_EQ(bucketStartTimeNs, iterator->second[0].mBucketStartNs);
+    EXPECT_EQ(bucket2StartTimeNs, iterator->second[0].mBucketEndNs);
     EXPECT_EQ(8, iterator->second[0].values[0].long_value);
     EXPECT_EQ(bucketSizeNs, iterator->second[0].mConditionTrueNs);
 }
@@ -2414,7 +2506,8 @@ TEST(ValueMetricProducerTest, TestEmptyDataResetsBase_onBucketBoundary) {
     EXPECT_EQ(true, valueProducer->mHasGlobalBase);
 
     EXPECT_EQ(1UL, valueProducer->mPastBuckets.size());
-    assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {1}, {bucketSizeNs - 12 + 1});
+    assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {1}, {bucketSizeNs - 12 + 1},
+                                    {bucketStartTimeNs}, {bucket2StartTimeNs});
 }
 
 TEST(ValueMetricProducerTest, TestPartialResetOnBucketBoundaries) {
@@ -2461,10 +2554,11 @@ TEST(ValueMetricProducerTest, TestPartialResetOnBucketBoundaries) {
     EXPECT_EQ(true, valueProducer->mHasGlobalBase);
 }
 
-TEST(ValueMetricProducerTest, TestFullBucketResetWhenLastBucketInvalid) {
+TEST_P(ValueMetricProducerTest_PartialBucket, TestFullBucketResetWhenLastBucketInvalid) {
     ValueMetric metric = ValueMetricProducerTestHelper::createMetric();
 
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
+    int64_t partialBucketSplitTimeNs = bucketStartTimeNs + bucketSizeNs / 2;
     EXPECT_CALL(*pullerManager, Pull(tagId, kConfigKey, _, _))
             // Initialization.
             .WillOnce(Invoke(
@@ -2474,23 +2568,41 @@ TEST(ValueMetricProducerTest, TestFullBucketResetWhenLastBucketInvalid) {
                         return true;
                     }))
             // notifyAppUpgrade.
-            .WillOnce(Invoke([](int tagId, const ConfigKey&,
-                                vector<std::shared_ptr<LogEvent>>* data, bool) {
+            .WillOnce(Invoke([partialBucketSplitTimeNs](int tagId, const ConfigKey&,
+                                                        vector<std::shared_ptr<LogEvent>>* data,
+                                                        bool) {
                 data->clear();
-                data->push_back(CreateRepeatedValueLogEvent(
-                        tagId, bucketStartTimeNs + bucketSizeNs / 2, 10));
+                data->push_back(CreateRepeatedValueLogEvent(tagId, partialBucketSplitTimeNs, 10));
                 return true;
             }));
     sp<ValueMetricProducer> valueProducer =
             ValueMetricProducerTestHelper::createValueProducerNoConditions(pullerManager, metric);
     ASSERT_EQ(0UL, valueProducer->mCurrentFullBucket.size());
 
-    valueProducer->notifyAppUpgrade(bucketStartTimeNs + bucketSizeNs / 2, "com.foo", 10000, 1);
+    switch (GetParam()) {
+        case APP_UPGRADE:
+            valueProducer->notifyAppUpgrade(partialBucketSplitTimeNs);
+            break;
+        case BOOT_COMPLETE:
+            valueProducer->onStatsdInitCompleted(partialBucketSplitTimeNs);
+            break;
+    }
+    EXPECT_EQ(partialBucketSplitTimeNs, valueProducer->mCurrentBucketStartTimeNs);
+    EXPECT_EQ(0, valueProducer->getCurrentBucketNum());
+    assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {9},
+                                    {partialBucketSplitTimeNs - bucketStartTimeNs},
+                                    {bucketStartTimeNs}, {partialBucketSplitTimeNs});
     ASSERT_EQ(1UL, valueProducer->mCurrentFullBucket.size());
 
     vector<shared_ptr<LogEvent>> allData;
     allData.push_back(CreateRepeatedValueLogEvent(tagId, bucket3StartTimeNs + 1, 4));
     valueProducer->onDataPulled(allData, /** fails */ false, bucket3StartTimeNs + 1);
+    assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {9},
+                                    {partialBucketSplitTimeNs - bucketStartTimeNs},
+                                    {bucketStartTimeNs}, {partialBucketSplitTimeNs});
+    ASSERT_EQ(1, valueProducer->mSkippedBuckets.size());
+    EXPECT_EQ(partialBucketSplitTimeNs, valueProducer->mSkippedBuckets[0].bucketStartTimeNs);
+    EXPECT_EQ(bucket2StartTimeNs, valueProducer->mSkippedBuckets[0].bucketEndTimeNs);
     ASSERT_EQ(0UL, valueProducer->mCurrentFullBucket.size());
 }
 
@@ -2537,7 +2649,8 @@ TEST(ValueMetricProducerTest, TestBucketBoundariesOnConditionChange) {
     valueProducer->onConditionChanged(false, bucket3StartTimeNs + 10);
 
     // Bucket should have been completed.
-    assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {2}, {bucketSizeNs - 10});
+    assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {2}, {bucketSizeNs - 10},
+                                    {bucket2StartTimeNs}, {bucket3StartTimeNs});
 }
 
 TEST(ValueMetricProducerTest, TestLateOnDataPulledWithoutDiff) {
@@ -2557,7 +2670,8 @@ TEST(ValueMetricProducerTest, TestLateOnDataPulledWithoutDiff) {
     valueProducer->onDataPulled(allData, /** succeed */ true, bucket2StartTimeNs);
 
     // Bucket should have been completed.
-    assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {30}, {bucketSizeNs});
+    assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {30}, {bucketSizeNs},
+                                    {bucketStartTimeNs}, {bucket2StartTimeNs});
 }
 
 TEST(ValueMetricProducerTest, TestLateOnDataPulledWithDiff) {
@@ -2585,12 +2699,14 @@ TEST(ValueMetricProducerTest, TestLateOnDataPulledWithDiff) {
     valueProducer->onDataPulled(allData, /** succeed */ true, bucket2StartTimeNs);
 
     // Bucket should have been completed.
-    assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {19}, {bucketSizeNs});
+    assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {19}, {bucketSizeNs},
+                                    {bucketStartTimeNs}, {bucket2StartTimeNs});
 }
 
-TEST(ValueMetricProducerTest, TestBucketBoundariesOnAppUpgrade) {
+TEST_P(ValueMetricProducerTest_PartialBucket, TestBucketBoundariesOnPartialBucket) {
     ValueMetric metric = ValueMetricProducerTestHelper::createMetric();
 
+    int64_t partialBucketSplitTimeNs = bucket2StartTimeNs + 2;
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
     EXPECT_CALL(*pullerManager, Pull(tagId, kConfigKey, _, _))
             // Initialization.
@@ -2601,20 +2717,29 @@ TEST(ValueMetricProducerTest, TestBucketBoundariesOnAppUpgrade) {
                         return true;
                     }))
             // notifyAppUpgrade.
-            .WillOnce(Invoke([](int tagId, const ConfigKey&,
-                                vector<std::shared_ptr<LogEvent>>* data, bool) {
+            .WillOnce(Invoke([partialBucketSplitTimeNs](int tagId, const ConfigKey&,
+                                                        vector<std::shared_ptr<LogEvent>>* data,
+                                                        bool) {
                 data->clear();
-                data->push_back(CreateRepeatedValueLogEvent(tagId, bucket2StartTimeNs + 2, 10));
+                data->push_back(CreateRepeatedValueLogEvent(tagId, partialBucketSplitTimeNs, 10));
                 return true;
             }));
 
     sp<ValueMetricProducer> valueProducer =
             ValueMetricProducerTestHelper::createValueProducerNoConditions(pullerManager, metric);
 
-    valueProducer->notifyAppUpgrade(bucket2StartTimeNs + 2, "com.foo", 10000, 1);
+    switch (GetParam()) {
+        case APP_UPGRADE:
+            valueProducer->notifyAppUpgrade(partialBucketSplitTimeNs);
+            break;
+        case BOOT_COMPLETE:
+            valueProducer->onStatsdInitCompleted(partialBucketSplitTimeNs);
+            break;
+    }
 
     // Bucket should have been completed.
-    assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {9}, {bucketSizeNs});
+    assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {9}, {bucketSizeNs},
+                                    {bucketStartTimeNs}, {bucket2StartTimeNs});
 }
 
 TEST(ValueMetricProducerTest, TestDataIsNotUpdatedWhenNoConditionChanged) {
@@ -2642,7 +2767,7 @@ TEST(ValueMetricProducerTest, TestDataIsNotUpdatedWhenNoConditionChanged) {
 
     valueProducer->onConditionChanged(true, bucketStartTimeNs + 8);
     valueProducer->onConditionChanged(false, bucketStartTimeNs + 10);
-    valueProducer->onConditionChanged(false, bucketStartTimeNs + 10);
+    valueProducer->onConditionChanged(false, bucketStartTimeNs + 12);
 
     EXPECT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
     auto curInterval = valueProducer->mCurrentSlicedBucket.begin()->second[0];
@@ -2654,7 +2779,8 @@ TEST(ValueMetricProducerTest, TestDataIsNotUpdatedWhenNoConditionChanged) {
     allData.push_back(CreateRepeatedValueLogEvent(tagId, bucket2StartTimeNs + 1, 10));
     valueProducer->onDataPulled(allData, /** succeed */ true, bucket2StartTimeNs + 1);
 
-    assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {2}, {2});
+    assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {2}, {2}, {bucketStartTimeNs},
+                                    {bucket2StartTimeNs});
 }
 
 // TODO: b/145705635 fix or delete this test
@@ -2705,7 +2831,7 @@ TEST(ValueMetricProducerTest, TestBucketInvalidIfGlobalBaseIsNotSet) {
     valueProducer->onDataPulled(allData, /** succeed */ true, bucket2StartTimeNs);
 
     // There was not global base available so all buckets are invalid.
-    assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {}, {});
+    assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {}, {}, {}, {});
 }
 
 TEST(ValueMetricProducerTest, TestPullNeededFastDump) {
@@ -2849,7 +2975,8 @@ TEST(ValueMetricProducerTest, TestPulledData_noDiff_withoutCondition) {
     valueProducer->onDataPulled(allData, /** succeed */ true, bucket2StartTimeNs + 30);
 
     // Bucket should have been completed.
-    assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {10}, {bucketSizeNs});
+    assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {10}, {bucketSizeNs},
+                                    {bucketStartTimeNs}, {bucket2StartTimeNs});
 }
 
 TEST(ValueMetricProducerTest, TestPulledData_noDiff_withMultipleConditionChanges) {
@@ -2892,7 +3019,8 @@ TEST(ValueMetricProducerTest, TestPulledData_noDiff_withMultipleConditionChanges
     allData.push_back(CreateRepeatedValueLogEvent(tagId, bucket2StartTimeNs + 30, 110));
     valueProducer->onDataPulled(allData, /** succeed */ true, bucket2StartTimeNs);
 
-    assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {20}, {50 - 8});
+    assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {20}, {50 - 8},
+                                    {bucketStartTimeNs}, {bucket2StartTimeNs});
     curInterval = valueProducer->mCurrentSlicedBucket.begin()->second[0];
     curBaseInfo = valueProducer->mCurrentBaseInfo.begin()->second[0];
     EXPECT_EQ(false, curBaseInfo.hasBase);
@@ -2923,7 +3051,8 @@ TEST(ValueMetricProducerTest, TestPulledData_noDiff_bucketBoundaryTrue) {
     allData.push_back(CreateRepeatedValueLogEvent(tagId, bucket2StartTimeNs + 30, 30));
     valueProducer->onDataPulled(allData, /** succeed */ true, bucket2StartTimeNs);
 
-    assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {30}, {bucketSizeNs - 8});
+    assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {30}, {bucketSizeNs - 8},
+                                    {bucketStartTimeNs}, {bucket2StartTimeNs});
     ValueMetricProducer::Interval curInterval =
             valueProducer->mCurrentSlicedBucket.begin()->second[0];
     ValueMetricProducer::BaseInfo curBaseInfo = valueProducer->mCurrentBaseInfo.begin()->second[0];
@@ -2946,7 +3075,7 @@ TEST(ValueMetricProducerTest, TestPulledData_noDiff_bucketBoundaryFalse) {
     valueProducer->onDataPulled(allData, /** succeed */ true, bucket2StartTimeNs);
 
     // Condition was always false.
-    assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {}, {});
+    assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {}, {}, {}, {});
 }
 
 TEST(ValueMetricProducerTest, TestPulledData_noDiff_withFailure) {
@@ -2976,7 +3105,7 @@ TEST(ValueMetricProducerTest, TestPulledData_noDiff_withFailure) {
     valueProducer->onDataPulled(allData, /** succeed */ true, bucket2StartTimeNs);
 
     // No buckets, we had a failure.
-    assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {}, {});
+    assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {}, {}, {}, {});
 }
 
 /*
