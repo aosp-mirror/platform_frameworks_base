@@ -2221,20 +2221,6 @@ public final class Bitmap implements Parcelable {
     }
 
     /**
-     * @return {@link GraphicBuffer} which is internally used by hardware bitmap
-     *
-     * Note: the GraphicBuffer does *not* have an associated {@link ColorSpace}.
-     * To render this object the same as its rendered with this Bitmap, you
-     * should also call {@link getColorSpace}.
-     *
-     * @hide
-     */
-    @UnsupportedAppUsage
-    public GraphicBuffer createGraphicBufferHandle() {
-        return GraphicBuffer.createFromHardwareBuffer(getHardwareBuffer());
-    }
-
-    /**
      * @return {@link HardwareBuffer} which is internally used by hardware bitmap
      *
      * Note: the HardwareBuffer does *not* have an associated {@link ColorSpace}.
