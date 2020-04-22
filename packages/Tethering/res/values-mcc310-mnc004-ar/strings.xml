@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--  Copyright (C) 2020 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="no_upstream_notification_title" msgid="5030042590486713460">"ما مِن اتصال بالإنترنت خلال التوصيل"</string>
+    <string name="no_upstream_notification_message" msgid="3843613362272973447">"تعذّر اتصال الأجهزة"</string>
+    <string name="no_upstream_notification_disable_button" msgid="6385491461813507624">"إيقاف التوصيل"</string>
+    <string name="upstream_roaming_notification_title" msgid="3015912166812283303">"نقطة الاتصال أو التوصيل مفعّلان"</string>
+    <string name="upstream_roaming_notification_message" msgid="6724434706748439902">"قد يتم تطبيق رسوم إضافية أثناء التجوال."</string>
+</resources>
