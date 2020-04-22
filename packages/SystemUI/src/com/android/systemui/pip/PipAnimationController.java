@@ -53,15 +53,22 @@ public class PipAnimationController {
     public static final int TRANSITION_DIRECTION_SAME = 1;
     public static final int TRANSITION_DIRECTION_TO_PIP = 2;
     public static final int TRANSITION_DIRECTION_TO_FULLSCREEN = 3;
+    public static final int TRANSITION_DIRECTION_TO_SPLIT_SCREEN = 4;
 
     @IntDef(prefix = { "TRANSITION_DIRECTION_" }, value = {
             TRANSITION_DIRECTION_NONE,
             TRANSITION_DIRECTION_SAME,
             TRANSITION_DIRECTION_TO_PIP,
-            TRANSITION_DIRECTION_TO_FULLSCREEN
+            TRANSITION_DIRECTION_TO_FULLSCREEN,
+            TRANSITION_DIRECTION_TO_SPLIT_SCREEN
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface TransitionDirection {}
+
+    public static boolean isOutPipDirection(@TransitionDirection int direction) {
+        return direction == TRANSITION_DIRECTION_TO_FULLSCREEN
+                || direction == TRANSITION_DIRECTION_TO_SPLIT_SCREEN;
+    }
 
     private final Interpolator mFastOutSlowInInterpolator;
     private final PipSurfaceTransactionHelper mSurfaceTransactionHelper;
@@ -253,14 +260,13 @@ public class PipAnimationController {
         }
 
         boolean shouldApplyCornerRadius() {
-            return mTransitionDirection != TRANSITION_DIRECTION_TO_FULLSCREEN;
+            return !isOutPipDirection(mTransitionDirection);
         }
 
         boolean inScaleTransition() {
             if (mAnimationType != ANIM_TYPE_BOUNDS) return false;
             final int direction = getTransitionDirection();
-            return direction != TRANSITION_DIRECTION_TO_FULLSCREEN
-                    && direction != TRANSITION_DIRECTION_TO_PIP;
+            return !isOutPipDirection(direction) && direction != TRANSITION_DIRECTION_TO_PIP;
         }
 
         /**
