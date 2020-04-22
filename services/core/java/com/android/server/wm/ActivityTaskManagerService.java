@@ -66,6 +66,10 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.TRANSIT_NONE;
 
+import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_CONFIGURATION;
+import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_FOCUS;
+import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_IMMERSIVE;
+import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_LOCKTASK;
 import static com.android.server.am.ActivityManagerService.ANR_TRACE_DIR;
 import static com.android.server.am.ActivityManagerService.MY_PID;
 import static com.android.server.am.ActivityManagerService.STOCK_PM_FLAGS;
@@ -92,10 +96,6 @@ import static com.android.server.wm.ActivityStackSupervisor.ON_TOP;
 import static com.android.server.wm.ActivityStackSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.wm.ActivityStackSupervisor.REMOVE_FROM_RECENTS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_ALL;
-import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_CONFIGURATION;
-import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_FOCUS;
-import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_IMMERSIVE;
-import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_LOCKTASK;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_STACK;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_SWITCH;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_TASKS;
@@ -242,6 +242,7 @@ import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.os.TransferPipe;
 import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.KeyguardDismissCallback;
+import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.FrameworkStatsLog;
@@ -813,7 +814,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             // in-place.
             updateConfigurationLocked(configuration, null, true);
             final Configuration globalConfig = getGlobalConfiguration();
-            if (DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION, "Initial config: " + globalConfig);
+            ProtoLog.v(WM_DEBUG_CONFIGURATION, "Initial config: %s", globalConfig);
 
             // Load resources only after the current configuration has been set.
             final Resources res = mContext.getResources();
@@ -1960,7 +1961,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
             // update associated state if we're frontmost
             if (r.isFocusedActivityOnDisplay()) {
-                if (DEBUG_IMMERSIVE) Slog.d(TAG_IMMERSIVE, "Frontmost changed immersion: "+ r);
+                ProtoLog.d(WM_DEBUG_IMMERSIVE, "Frontmost changed immersion: %s", r);
                 applyUpdateLockStateLocked(r);
             }
         }
@@ -1974,8 +1975,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         final boolean nextState = r != null && r.immersive;
         mH.post(() -> {
             if (mUpdateLock.isHeld() != nextState) {
-                if (DEBUG_IMMERSIVE) Slog.d(TAG_IMMERSIVE,
-                        "Applying new update lock state '" + nextState + "' for " + r);
+                ProtoLog.d(WM_DEBUG_IMMERSIVE, "Applying new update lock state '%s' for %s",
+                        nextState, r);
                 if (nextState) {
                     mUpdateLock.acquire();
                 } else {
@@ -2176,7 +2177,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     @Override
     public void setFocusedStack(int stackId) {
         mAmInternal.enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "setFocusedStack()");
-        if (DEBUG_FOCUS) Slog.d(TAG_FOCUS, "setFocusedStack: stackId=" + stackId);
+        ProtoLog.d(WM_DEBUG_FOCUS, "setFocusedStack: stackId=%d", stackId);
         final long callingId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
@@ -2198,7 +2199,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     @Override
     public void setFocusedTask(int taskId) {
         mAmInternal.enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "setFocusedTask()");
-        if (DEBUG_FOCUS) Slog.d(TAG_FOCUS, "setFocusedTask: taskId=" + taskId);
+        ProtoLog.d(WM_DEBUG_FOCUS, "setFocusedTask: taskId=%d", taskId);
         final long callingId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
@@ -3013,7 +3014,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     private void startLockTaskModeLocked(@Nullable Task task, boolean isSystemCaller) {
-        if (DEBUG_LOCKTASK) Slog.w(TAG_LOCKTASK, "startLockTaskModeLocked: " + task);
+        ProtoLog.w(WM_DEBUG_LOCKTASK, "startLockTaskModeLocked: %s", task);
         if (task == null || task.mLockTaskAuth == LOCK_TASK_AUTH_DONT_LOCK) {
             return;
         }
@@ -3075,8 +3076,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     "updateLockTaskPackages()");
         }
         synchronized (mGlobalLock) {
-            if (DEBUG_LOCKTASK) Slog.w(TAG_LOCKTASK, "Allowlisting " + userId + ":"
-                    + Arrays.toString(packages));
+            ProtoLog.w(WM_DEBUG_LOCKTASK, "Allowlisting %d:%s", userId, Arrays.toString(packages));
             getLockTaskController().updateLockTaskPackages(userId, packages);
         }
     }
@@ -4001,9 +4001,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     @Override
     public void reportSizeConfigurations(IBinder token, int[] horizontalSizeConfiguration,
             int[] verticalSizeConfigurations, int[] smallestSizeConfigurations) {
-        if (DEBUG_CONFIGURATION) Slog.v(TAG, "Report configuration: " + token + " "
-                + Arrays.toString(horizontalSizeConfiguration) + " "
-                + Arrays.toString(verticalSizeConfigurations));
+        ProtoLog.v(WM_DEBUG_CONFIGURATION, "Report configuration: %s %s %s",
+                token, Arrays.toString(horizontalSizeConfiguration),
+                Arrays.toString(verticalSizeConfigurations));
         synchronized (mGlobalLock) {
             ActivityRecord record = ActivityRecord.isInStackLocked(token);
             if (record == null) {
@@ -4497,8 +4497,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     "updateLockTaskFeatures()");
         }
         synchronized (mGlobalLock) {
-            if (DEBUG_LOCKTASK) Slog.w(TAG_LOCKTASK, "Allowing features " + userId + ":0x" +
-                    Integer.toHexString(flags));
+            ProtoLog.w(WM_DEBUG_LOCKTASK, "Allowing features %d:0x%s",
+                    userId, Integer.toHexString(flags));
             getLockTaskController().updateLockTaskFeatures(userId, flags);
         }
     }
@@ -5183,8 +5183,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             return 0;
         }
 
-        if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.i(TAG_CONFIGURATION,
-                "Updating global configuration to: " + values);
+        ProtoLog.i(WM_DEBUG_CONFIGURATION, "Updating global configuration "
+                + "to: %s", values);
         writeConfigurationChanged(changes);
         FrameworkStatsLog.write(FrameworkStatsLog.RESOURCE_CONFIGURATION_CHANGED,
                 values.colorMode,
@@ -5262,10 +5262,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         for (int i = pidMap.size() - 1; i >= 0; i--) {
             final int pid = pidMap.keyAt(i);
             final WindowProcessController app = pidMap.get(pid);
-            if (DEBUG_CONFIGURATION) {
-                Slog.v(TAG_CONFIGURATION, "Update process config of "
-                        + app.mName + " to new config " + configCopy);
-            }
+            ProtoLog.v(WM_DEBUG_CONFIGURATION, "Update process config of %s to new "
+                    + "config %s", app.mName, configCopy);
             app.onConfigurationChanged(configCopy);
         }
 
@@ -6563,10 +6561,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             if (InputMethodSystemProperty.MULTI_CLIENT_IME_ENABLED) return;
 
             if (pid == MY_PID || pid < 0) {
-                if (DEBUG_CONFIGURATION) {
-                    Slog.w(TAG,
+                ProtoLog.w(WM_DEBUG_CONFIGURATION,
                             "Trying to update display configuration for system/invalid process.");
-                }
                 return;
             }
             synchronized (mGlobalLock) {
@@ -6574,18 +6570,14 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                         mRootWindowContainer.getDisplayContent(displayId);
                 if (displayContent == null) {
                     // Call might come when display is not yet added or has been removed.
-                    if (DEBUG_CONFIGURATION) {
-                        Slog.w(TAG, "Trying to update display configuration for non-existing "
-                                + "displayId=" + displayId);
-                    }
+                    ProtoLog.w(WM_DEBUG_CONFIGURATION, "Trying to update display "
+                            + "configuration for non-existing displayId=%d", displayId);
                     return;
                 }
                 final WindowProcessController process = mProcessMap.getProcess(pid);
                 if (process == null) {
-                    if (DEBUG_CONFIGURATION) {
-                        Slog.w(TAG, "Trying to update display configuration for invalid "
-                                + "process, pid=" + pid);
-                    }
+                    ProtoLog.w(WM_DEBUG_CONFIGURATION, "Trying to update display "
+                            + "configuration for invalid process, pid=%d", pid);
                     return;
                 }
                 process.registerDisplayConfigurationListener(displayContent);
