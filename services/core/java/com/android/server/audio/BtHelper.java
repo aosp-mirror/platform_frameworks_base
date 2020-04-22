@@ -113,6 +113,24 @@ public class BtHelper {
 
     private static final int BT_HEARING_AID_GAIN_MIN = -128;
 
+    /**
+     * Returns a string representation of the scoAudioMode.
+     */
+    public static String scoAudioModeToString(int scoAudioMode) {
+        switch (scoAudioMode) {
+            case SCO_MODE_UNDEFINED:
+                return "SCO_MODE_UNDEFINED";
+            case SCO_MODE_VIRTUAL_CALL:
+                return "SCO_MODE_VIRTUAL_CALL";
+            case SCO_MODE_RAW:
+                return "SCO_MODE_RAW";
+            case SCO_MODE_VR:
+                return "SCO_MODE_VR";
+            default:
+                return "SCO_MODE_(" + scoAudioMode + ")";
+        }
+    }
+
     //----------------------------------------------------------------------
     /*package*/ static class BluetoothA2dpDeviceInfo {
         private final @NonNull BluetoothDevice mBtDevice;
@@ -963,6 +981,29 @@ public class BtHelper {
                 return AudioSystem.AUDIO_FORMAT_LDAC;
             default:
                 return AudioSystem.AUDIO_FORMAT_DEFAULT;
+        }
+    }
+
+    /**
+     * Returns the String equivalent of the btCodecType.
+     *
+     * This uses an "ENCODING_" prefix for consistency with Audio;
+     * we could alternately use the "SOURCE_CODEC_TYPE_" prefix from Bluetooth.
+     */
+    public static String bluetoothCodecToEncodingString(int btCodecType) {
+        switch (btCodecType) {
+            case BluetoothCodecConfig.SOURCE_CODEC_TYPE_SBC:
+                return "ENCODING_SBC";
+            case BluetoothCodecConfig.SOURCE_CODEC_TYPE_AAC:
+                return "ENCODING_AAC";
+            case BluetoothCodecConfig.SOURCE_CODEC_TYPE_APTX:
+                return "ENCODING_APTX";
+            case BluetoothCodecConfig.SOURCE_CODEC_TYPE_APTX_HD:
+                return "ENCODING_APTX_HD";
+            case BluetoothCodecConfig.SOURCE_CODEC_TYPE_LDAC:
+                return "ENCODING_LDAC";
+            default:
+                return "ENCODING_BT_CODEC_TYPE(" + btCodecType + ")";
         }
     }
 }

@@ -109,11 +109,6 @@ public class AudioServiceEvents {
         final String mGroupName;
         final AudioAttributes mAudioAttributes;
 
-        /**
-         * Audio Analytics unique Id.
-         */
-        private static final String mAnalyticsIdRoot = "audio.volumeEvent.";
-
         /** used for VOL_ADJUST_VOL_UID,
          *           VOL_ADJUST_SUGG_VOL,
          *           VOL_ADJUST_STREAM_VOL,
@@ -126,13 +121,7 @@ public class AudioServiceEvents {
             mCaller = caller;
             mGroupName = null;
             mAudioAttributes = null;
-
-            new MediaMetrics.Item(mAnalyticsIdRoot + mStream)
-                    .putInt("op", mOp)
-                    .putInt("dir", mVal1)
-                    .putInt("flags", mVal2)
-                    .putString("from", mCaller)
-                    .record();
+            logMetricEvent();
         }
 
         /** used for VOL_SET_HEARING_AID_VOL*/
@@ -145,12 +134,7 @@ public class AudioServiceEvents {
             mCaller = null;
             mGroupName = null;
             mAudioAttributes = null;
-
-            new MediaMetrics.Item(mAnalyticsIdRoot + "HA")
-                    .putInt("op", mOp)
-                    .putInt("index", mVal1)
-                    .putInt("gainDb", mVal2)
-                    .record();
+            logMetricEvent();
         }
 
         /** used for VOL_SET_AVRCP_VOL */
@@ -163,11 +147,7 @@ public class AudioServiceEvents {
             mCaller = null;
             mGroupName = null;
             mAudioAttributes = null;
-
-            new MediaMetrics.Item(mAnalyticsIdRoot + "AVRCP")
-                    .putInt("op", mOp)
-                    .putInt("index", mVal1)
-                    .record();
+            logMetricEvent();
         }
 
         /** used for VOL_VOICE_ACTIVITY_HEARING_AID */
@@ -180,12 +160,7 @@ public class AudioServiceEvents {
             mCaller = null;
             mGroupName = null;
             mAudioAttributes = null;
-
-            new MediaMetrics.Item(mAnalyticsIdRoot + mStream)
-                    .putInt("op", mOp)
-                    .putInt("index", mVal1)
-                    .putInt("voiceActive", mVal2)
-                    .record();
+            logMetricEvent();
         }
 
         /** used for VOL_MODE_CHANGE_HEARING_AID */
@@ -198,6 +173,7 @@ public class AudioServiceEvents {
             mCaller = null;
             mGroupName = null;
             mAudioAttributes = null;
+            logMetricEvent();
         }
 
         /** used for VOL_SET_GROUP_VOL */
@@ -209,12 +185,102 @@ public class AudioServiceEvents {
             mCaller = caller;
             mGroupName = group;
             mAudioAttributes = aa;
+            logMetricEvent();
+        }
 
-            new MediaMetrics.Item(mAnalyticsIdRoot + mStream)
-                    .putInt("op", mOp)
-                    .putInt("index", mVal1)
-                    .putInt("mode", mVal2)
-                    .record();
+
+        /**
+         * Audio Analytics unique Id.
+         */
+        private static final String mMetricsId = MediaMetrics.Name.AUDIO_VOLUME_EVENT;
+
+        /**
+         * Log mediametrics event
+         */
+        private void logMetricEvent() {
+            switch (mOp) {
+                case VOL_ADJUST_SUGG_VOL:
+                case VOL_ADJUST_VOL_UID:
+                case VOL_ADJUST_STREAM_VOL: {
+                    String eventName;
+                    switch (mOp) {
+                        case VOL_ADJUST_SUGG_VOL:
+                            eventName = "adjustSuggestedStreamVolume";
+                            break;
+                        case VOL_ADJUST_STREAM_VOL:
+                            eventName = "adjustStreamVolume";
+                            break;
+                        case VOL_ADJUST_VOL_UID:
+                            eventName = "adjustStreamVolumeForUid";
+                            break;
+                        default:
+                            return; // not possible, just return here
+                    }
+                    new MediaMetrics.Item(mMetricsId)
+                            .set(MediaMetrics.Property.CALLING_PACKAGE, mCaller)
+                            .set(MediaMetrics.Property.DIRECTION, mVal1 > 0 ? "up" : "down")
+                            .set(MediaMetrics.Property.EVENT, eventName)
+                            .set(MediaMetrics.Property.FLAGS, mVal2)
+                            .set(MediaMetrics.Property.STREAM_TYPE,
+                                    AudioSystem.streamToString(mStream))
+                            .record();
+                    return;
+                }
+                case VOL_SET_STREAM_VOL:
+                    new MediaMetrics.Item(mMetricsId)
+                            .set(MediaMetrics.Property.CALLING_PACKAGE, mCaller)
+                            .set(MediaMetrics.Property.EVENT, "setStreamVolume")
+                            .set(MediaMetrics.Property.FLAGS, mVal2)
+                            .set(MediaMetrics.Property.INDEX, mVal1)
+                            .set(MediaMetrics.Property.STREAM_TYPE,
+                                    AudioSystem.streamToString(mStream))
+                            .record();
+                    return;
+                case VOL_SET_HEARING_AID_VOL:
+                    new MediaMetrics.Item(mMetricsId)
+                            .set(MediaMetrics.Property.EVENT, "setHearingAidVolume")
+                            .set(MediaMetrics.Property.GAIN_DB, (double) mVal2)
+                            .set(MediaMetrics.Property.INDEX, mVal1)
+                            .record();
+                    return;
+                case VOL_SET_AVRCP_VOL:
+                    new MediaMetrics.Item(mMetricsId)
+                            .set(MediaMetrics.Property.EVENT, "setAvrcpVolume")
+                            .set(MediaMetrics.Property.INDEX, mVal1)
+                            .record();
+                    return;
+                case VOL_VOICE_ACTIVITY_HEARING_AID:
+                    new MediaMetrics.Item(mMetricsId)
+                            .set(MediaMetrics.Property.EVENT, "voiceActivityHearingAid")
+                            .set(MediaMetrics.Property.INDEX, mVal1)
+                            .set(MediaMetrics.Property.STATE,
+                                    mVal2 == 1 ? "active" : "inactive")
+                            .set(MediaMetrics.Property.STREAM_TYPE,
+                                    AudioSystem.streamToString(mStream))
+                            .record();
+                    return;
+                case VOL_MODE_CHANGE_HEARING_AID:
+                    new MediaMetrics.Item(mMetricsId)
+                            .set(MediaMetrics.Property.EVENT, "modeChangeHearingAid")
+                            .set(MediaMetrics.Property.INDEX, mVal1)
+                            .set(MediaMetrics.Property.MODE, AudioSystem.modeToString(mVal2))
+                            .set(MediaMetrics.Property.STREAM_TYPE,
+                                    AudioSystem.streamToString(mStream))
+                            .record();
+                    return;
+                case VOL_SET_GROUP_VOL:
+                    new MediaMetrics.Item(mMetricsId)
+                            .set(MediaMetrics.Property.ATTRIBUTES, mAudioAttributes.toString())
+                            .set(MediaMetrics.Property.CALLING_PACKAGE, mCaller)
+                            .set(MediaMetrics.Property.EVENT, "setVolumeIndexForAttributes")
+                            .set(MediaMetrics.Property.FLAGS, mVal2)
+                            .set(MediaMetrics.Property.GROUP, mGroupName)
+                            .set(MediaMetrics.Property.INDEX, mVal1)
+                            .record();
+                    return;
+                default:
+                    return;
+            }
         }
 
         @Override
