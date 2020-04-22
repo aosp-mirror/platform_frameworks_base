@@ -16,10 +16,9 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="no_upstream_notification_title" msgid="5026912695053828030">"መገናኛ ነጥቡ በይነመረብ የለውም"</string>
-    <string name="no_upstream_notification_message" msgid="6810713595219684058">"መሣሪያዎች ከበይነመረብ ጋር መገናኘት አይችሉም"</string>
-    <string name="no_upstream_notification_disable_button" msgid="3388523729003352854">"መገናኛ ነጥብ ያጥፉ"</string>
-    <string name="upstream_roaming_notification_title" msgid="2242169951273396377">"የመገናኛ ነጥብ በርቷል"</string>
+    <string name="no_upstream_notification_title" msgid="611650570559011140">"ማስተሳሰር ምንም በይነመረብ የለውም"</string>
+    <string name="no_upstream_notification_message" msgid="6508394877641864863">"መሣሪያዎችን ማገናኘት አይቻልም"</string>
+    <string name="no_upstream_notification_disable_button" msgid="7609346639290990508">"ማስተሳሰርን አጥፋ"</string>
+    <string name="upstream_roaming_notification_title" msgid="6032901176124830787">"መገናኛ ነጥብ ወይም ማስተሳሰር በርቷል"</string>
     <string name="upstream_roaming_notification_message" msgid="7599056263326217523">"በሚያንዣብብበት ጊዜ ተጨማሪ ክፍያዎች ተፈጻሚ ሊሆኑ ይችላሉ"</string>
-    <string name="upstream_roaming_notification_continue_button" msgid="693106687178152486">"ቀጥል"</string>
 </resources>

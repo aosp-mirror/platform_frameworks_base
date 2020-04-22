@@ -16,10 +16,9 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="no_upstream_notification_title" msgid="221932678126754542">"Hotspot nemá připojení k internetu"</string>
-    <string name="no_upstream_notification_message" msgid="4145932079850792642">"Zařízení se nemohou připojit k internetu"</string>
-    <string name="no_upstream_notification_disable_button" msgid="2164668551525869970">"Vypnout hotspot"</string>
-    <string name="upstream_roaming_notification_title" msgid="8448552978815624701">"Hotspot je aktivní"</string>
+    <string name="no_upstream_notification_title" msgid="5030042590486713460">"Tethering nemá připojení k internetu"</string>
+    <string name="no_upstream_notification_message" msgid="3843613362272973447">"Zařízení se nemůžou připojit"</string>
+    <string name="no_upstream_notification_disable_button" msgid="6385491461813507624">"Vypnout tethering"</string>
+    <string name="upstream_roaming_notification_title" msgid="3015912166812283303">"Je zapnutý hotspot nebo tethering"</string>
     <string name="upstream_roaming_notification_message" msgid="6724434706748439902">"Při roamingu mohou být účtovány dodatečné poplatky"</string>
-    <string name="upstream_roaming_notification_continue_button" msgid="8390621437856451758">"Pokračovat"</string>
 </resources>

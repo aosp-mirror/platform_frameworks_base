@@ -16,10 +16,9 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="no_upstream_notification_title" msgid="221932678126754542">"Mtandao pepe hauna intaneti"</string>
-    <string name="no_upstream_notification_message" msgid="4145932079850792642">"Vifaa vimeshindwa kuunganisha kwenye intaneti"</string>
-    <string name="no_upstream_notification_disable_button" msgid="2164668551525869970">"Zima mtandao pepe"</string>
-    <string name="upstream_roaming_notification_title" msgid="8448552978815624701">"Mtandaopepe umewashwa"</string>
+    <string name="no_upstream_notification_title" msgid="5030042590486713460">"Kipengele cha kusambaza mtandao hakina intaneti"</string>
+    <string name="no_upstream_notification_message" msgid="3843613362272973447">"Imeshindwa kuunganisha vifaa"</string>
+    <string name="no_upstream_notification_disable_button" msgid="6385491461813507624">"Zima kipengele cha kusambaza mtandao"</string>
+    <string name="upstream_roaming_notification_title" msgid="3015912166812283303">"Umewasha kipengele cha kusambaza mtandao au mtandao pepe"</string>
     <string name="upstream_roaming_notification_message" msgid="6724434706748439902">"Huenda ukatozwa gharama za ziada ukitumia mitandao ya ng\'ambo"</string>
-    <string name="upstream_roaming_notification_continue_button" msgid="8390621437856451758">"Endelea"</string>
 </resources>

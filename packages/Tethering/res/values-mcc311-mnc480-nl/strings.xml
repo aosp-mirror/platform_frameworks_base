@@ -16,10 +16,9 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="no_upstream_notification_title" msgid="5026912695053828030">"Hotspot heeft geen internet"</string>
-    <string name="no_upstream_notification_message" msgid="6810713595219684058">"Apparaten kunnen geen verbinding maken met internet"</string>
-    <string name="no_upstream_notification_disable_button" msgid="3388523729003352854">"Hotspot uitschakelen"</string>
-    <string name="upstream_roaming_notification_title" msgid="2242169951273396377">"Hotspot is ingeschakeld"</string>
+    <string name="no_upstream_notification_title" msgid="611650570559011140">"Tethering heeft geen internet"</string>
+    <string name="no_upstream_notification_message" msgid="6508394877641864863">"Apparaten kunnen niet worden verbonden"</string>
+    <string name="no_upstream_notification_disable_button" msgid="7609346639290990508">"Tethering uitschakelen"</string>
+    <string name="upstream_roaming_notification_title" msgid="6032901176124830787">"Hotspot of tethering is ingeschakeld"</string>
     <string name="upstream_roaming_notification_message" msgid="7599056263326217523">"Er kunnen extra kosten voor roaming in rekening worden gebracht."</string>
-    <string name="upstream_roaming_notification_continue_button" msgid="693106687178152486">"Doorgaan"</string>
 </resources>
