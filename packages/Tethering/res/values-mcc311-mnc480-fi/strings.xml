@@ -16,10 +16,9 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="no_upstream_notification_title" msgid="5026912695053828030">"Hotspotilla ei ole internetyhteyttä"</string>
-    <string name="no_upstream_notification_message" msgid="6810713595219684058">"Laitteet eivät voi yhdistää internetiin"</string>
-    <string name="no_upstream_notification_disable_button" msgid="3388523729003352854">"Laita hotspot pois päältä"</string>
-    <string name="upstream_roaming_notification_title" msgid="2242169951273396377">"Hotspot on päällä"</string>
+    <string name="no_upstream_notification_title" msgid="611650570559011140">"Ei jaettavaa internetyhteyttä"</string>
+    <string name="no_upstream_notification_message" msgid="6508394877641864863">"Laitteet eivät voi muodostaa yhteyttä"</string>
+    <string name="no_upstream_notification_disable_button" msgid="7609346639290990508">"Laita yhteyden jakaminen pois päältä"</string>
+    <string name="upstream_roaming_notification_title" msgid="6032901176124830787">"Hotspot tai yhteyden jakaminen on päällä"</string>
     <string name="upstream_roaming_notification_message" msgid="7599056263326217523">"Roaming voi aiheuttaa lisämaksuja"</string>
-    <string name="upstream_roaming_notification_continue_button" msgid="693106687178152486">"Jatka"</string>
 </resources>

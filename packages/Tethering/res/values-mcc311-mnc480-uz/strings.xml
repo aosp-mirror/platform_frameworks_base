@@ -16,15 +16,9 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <!-- no translation found for no_upstream_notification_title (5026912695053828030) -->
-    <skip />
-    <!-- no translation found for no_upstream_notification_message (6810713595219684058) -->
-    <skip />
-    <!-- no translation found for no_upstream_notification_disable_button (3388523729003352854) -->
-    <skip />
-    <!-- no translation found for upstream_roaming_notification_title (2242169951273396377) -->
-    <skip />
-    <!-- no translation found for upstream_roaming_notification_message (7599056263326217523) -->
-    <skip />
-    <string name="upstream_roaming_notification_continue_button" msgid="693106687178152486">"Davom etish"</string>
+    <string name="no_upstream_notification_title" msgid="611650570559011140">"Modem internetga ulanmagan"</string>
+    <string name="no_upstream_notification_message" msgid="6508394877641864863">"Qurilmalar ulanmadi"</string>
+    <string name="no_upstream_notification_disable_button" msgid="7609346639290990508">"Modem rejimini faolsizlantirish"</string>
+    <string name="upstream_roaming_notification_title" msgid="6032901176124830787">"Hotspot yoki modem rejimi yoniq"</string>
+    <string name="upstream_roaming_notification_message" msgid="7599056263326217523">"Rouming vaqtida qoʻshimcha haq olinishi mumkin"</string>
 </resources>

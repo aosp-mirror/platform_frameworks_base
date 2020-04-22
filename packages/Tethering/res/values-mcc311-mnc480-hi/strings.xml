@@ -16,10 +16,9 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="no_upstream_notification_title" msgid="5026912695053828030">"हॉटस्पॉट से इंटरनेट नहीं चल रहा"</string>
-    <string name="no_upstream_notification_message" msgid="6810713595219684058">"डिवाइस इंटरनेट से कनेक्ट नहीं हो पा रहे"</string>
-    <string name="no_upstream_notification_disable_button" msgid="3388523729003352854">"हॉटस्पॉट बंद करें"</string>
-    <string name="upstream_roaming_notification_title" msgid="2242169951273396377">"हॉटस्पॉट चालू है"</string>
+    <string name="no_upstream_notification_title" msgid="611650570559011140">"टेदरिंग से इंटरनेट नहीं चल रहा"</string>
+    <string name="no_upstream_notification_message" msgid="6508394877641864863">"डिवाइस कनेक्ट नहीं हो पा रहे"</string>
+    <string name="no_upstream_notification_disable_button" msgid="7609346639290990508">"टेदरिंग बंद करें"</string>
+    <string name="upstream_roaming_notification_title" msgid="6032901176124830787">"हॉटस्पॉट या टेदरिंग चालू है"</string>
     <string name="upstream_roaming_notification_message" msgid="7599056263326217523">"रोमिंग के दौरान अतिरिक्त शुल्क लग सकता है"</string>
-    <string name="upstream_roaming_notification_continue_button" msgid="693106687178152486">"जारी रखें"</string>
 </resources>

@@ -16,10 +16,9 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="no_upstream_notification_title" msgid="5026912695053828030">"L\'hotspot non ha accesso a Internet"</string>
-    <string name="no_upstream_notification_message" msgid="6810713595219684058">"I dispositivi non possono connettersi a Internet"</string>
-    <string name="no_upstream_notification_disable_button" msgid="3388523729003352854">"Disattiva l\'hotspot"</string>
-    <string name="upstream_roaming_notification_title" msgid="2242169951273396377">"Hotspot attivo"</string>
-    <string name="upstream_roaming_notification_message" msgid="7599056263326217523">"Potrebbero essere addebitati costi aggiuntivi durante il roaming"</string>
-    <string name="upstream_roaming_notification_continue_button" msgid="693106687178152486">"Continua"</string>
+    <string name="no_upstream_notification_title" msgid="611650570559011140">"Nessuna connessione a Internet per il tethering"</string>
+    <string name="no_upstream_notification_message" msgid="6508394877641864863">"Impossibile connettere i dispositivi"</string>
+    <string name="no_upstream_notification_disable_button" msgid="7609346639290990508">"Disattiva il tethering"</string>
+    <string name="upstream_roaming_notification_title" msgid="6032901176124830787">"Hotspot o tethering attivi"</string>
+    <string name="upstream_roaming_notification_message" msgid="7599056263326217523">"Potrebbero essere applicati costi aggiuntivi durante il roaming"</string>
 </resources>
