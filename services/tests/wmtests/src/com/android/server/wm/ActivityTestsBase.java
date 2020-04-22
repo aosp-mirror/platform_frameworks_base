@@ -108,6 +108,7 @@ class ActivityTestsBase extends SystemServiceTestsBase {
         private String mTargetActivity;
         private Task mTask;
         private String mProcessName = "name";
+        private String mAffinity;
         private int mUid = 12345;
         private boolean mCreateTask;
         private ActivityStack mStack;
@@ -222,6 +223,11 @@ class ActivityTestsBase extends SystemServiceTestsBase {
             return this;
         }
 
+        ActivityBuilder setAffinity(String affinity) {
+            mAffinity = affinity;
+            return this;
+        }
+
         ActivityRecord build() {
             try {
                 mService.deferWindowLayout();
@@ -270,6 +276,7 @@ class ActivityTestsBase extends SystemServiceTestsBase {
             aInfo.maxAspectRatio = mMaxAspectRatio;
             aInfo.screenOrientation = mScreenOrientation;
             aInfo.configChanges |= mConfigChanges;
+            aInfo.taskAffinity = mAffinity;
 
             ActivityOptions options = null;
             if (mLaunchTaskBehind) {
