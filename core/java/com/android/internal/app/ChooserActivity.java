@@ -2721,11 +2721,12 @@ public class ChooserActivity extends ResolverActivity implements
     }
 
     private void setupScrollListener() {
-        if (mResolverDrawerLayout == null || shouldShowTabs()) {
+        if (mResolverDrawerLayout == null) {
             return;
         }
-        final View chooserHeader = mResolverDrawerLayout.findViewById(R.id.chooser_header);
-        final float defaultElevation = chooserHeader.getElevation();
+        int elevatedViewResId = shouldShowTabs() ? R.id.resolver_tab_divider : R.id.chooser_header;
+        final View elevatedView = mResolverDrawerLayout.findViewById(elevatedViewResId);
+        final float defaultElevation = elevatedView.getElevation();
         final float chooserHeaderScrollElevation =
                 getResources().getDimensionPixelSize(R.dimen.chooser_header_scroll_elevation);
 
@@ -2738,12 +2739,12 @@ public class ChooserActivity extends ResolverActivity implements
                         if (view.getChildCount() > 0) {
                             View child = view.getLayoutManager().findViewByPosition(0);
                             if (child == null || child.getTop() < 0) {
-                                chooserHeader.setElevation(chooserHeaderScrollElevation);
+                                elevatedView.setElevation(chooserHeaderScrollElevation);
                                 return;
                             }
                         }
 
-                        chooserHeader.setElevation(defaultElevation);
+                        elevatedView.setElevation(defaultElevation);
                     }
                 });
     }
