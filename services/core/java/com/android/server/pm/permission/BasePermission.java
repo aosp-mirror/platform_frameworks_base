@@ -31,7 +31,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.PermissionInfo;
-import android.content.pm.Signature;
 import android.content.pm.parsing.component.ParsedPermission;
 import android.os.UserHandle;
 import android.util.Log;
@@ -86,9 +85,6 @@ public final class BasePermission {
 
     String sourcePackageName;
 
-    // TODO: Can we get rid of this? Seems we only use some signature info from the setting
-    PackageSettingBase sourcePackageSetting;
-
     int protectionLevel;
 
     ParsedPermission perm;
@@ -130,12 +126,6 @@ public final class BasePermission {
     public String getSourcePackageName() {
         return sourcePackageName;
     }
-    public PackageSettingBase getSourcePackageSetting() {
-        return sourcePackageSetting;
-    }
-    public Signature[] getSourceSignatures() {
-        return sourcePackageSetting.getSignatures();
-    }
     public int getType() {
         return type;
     }
@@ -148,9 +138,6 @@ public final class BasePermission {
     }
     public void setPermission(@Nullable ParsedPermission perm) {
         this.perm = perm;
-    }
-    public void setSourcePackageSetting(PackageSettingBase sourcePackageSetting) {
-        this.sourcePackageSetting = sourcePackageSetting;
     }
 
     public int[] computeGids(int userId) {
@@ -290,7 +277,6 @@ public final class BasePermission {
             return;
         }
         sourcePackageName = newPackageName;
-        sourcePackageSetting = null;
         perm = null;
         if (pendingPermissionInfo != null) {
             pendingPermissionInfo.packageName = newPackageName;
@@ -319,10 +305,9 @@ public final class BasePermission {
         if (PackageManagerService.DEBUG_SETTINGS) Log.v(TAG, "Dynamic permission: name="
                 + getName() + " pkg=" + getSourcePackageName()
                 + " info=" + pendingPermissionInfo);
-        if (sourcePackageSetting == null && pendingPermissionInfo != null) {
+        if (pendingPermissionInfo != null) {
             final BasePermission tree = findPermissionTree(permissionTrees, name);
             if (tree != null && tree.perm != null) {
-                sourcePackageSetting = tree.sourcePackageSetting;
                 perm = new ParsedPermission(tree.perm, pendingPermissionInfo,
                         tree.perm.getPackageName(), name);
                 uid = tree.uid;
@@ -355,7 +340,6 @@ public final class BasePermission {
                 if (bp.type == BasePermission.TYPE_BUILTIN && bp.perm == null) {
                     // It's a built-in permission and no owner, take ownership now
                     p.setFlags(p.getFlags() | PermissionInfo.FLAG_INSTALLED);
-                    bp.sourcePackageSetting = pkgSetting;
                     bp.perm = p;
                     bp.uid = pkg.getUid();
                     bp.sourcePackageName = p.getPackageName();
@@ -378,7 +362,6 @@ public final class BasePermission {
                 if (tree == null
                         || tree.sourcePackageName.equals(p.getPackageName())) {
                     p.setFlags(p.getFlags() | PermissionInfo.FLAG_INSTALLED);
-                    bp.sourcePackageSetting = pkgSetting;
                     bp.perm = p;
                     bp.uid = pkg.getUid();
                     bp.sourcePackageName = p.getPackageName();
@@ -638,9 +621,6 @@ public final class BasePermission {
                     || (perm.getFlags() & PermissionInfo.FLAG_REMOVED) != 0) {
                 pw.print("    flags=0x"); pw.println(Integer.toHexString(perm.getFlags()));
             }
-        }
-        if (sourcePackageSetting != null) {
-            pw.print("    packageSetting="); pw.println(sourcePackageSetting);
         }
         if (READ_EXTERNAL_STORAGE.equals(name)) {
             pw.print("    enforced=");

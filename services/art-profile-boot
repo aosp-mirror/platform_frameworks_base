@@ -171,7 +171,6 @@ Lcom/android/server/pm/PackageUsage;->readToken(Ljava/io/InputStream;Ljava/lang/
 Lcom/android/server/pm/PackageUsage;->readVersion1LP(Ljava/util/Map;Ljava/io/InputStream;Ljava/lang/StringBuffer;)V
 Lcom/android/server/pm/PackageUsage;->parseAsLong(Ljava/lang/String;)J
 Lcom/android/server/pm/CompilerStats;->read(Ljava/io/Reader;)Z
-Lcom/android/server/pm/permission/BasePermission;->getSourcePackageSetting()Lcom/android/server/pm/PackageSettingBase;
 Lcom/android/server/pm/permission/PermissionManagerService;->updatePermissionSourcePackage(Ljava/lang/String;Landroid/content/pm/PackageParser$Package;)Z
 Lcom/android/server/pm/permission/BasePermission;->isDynamic()Z
 Lcom/android/server/pm/permission/PermissionManagerService;->cacheBackgroundToForegoundPermissionMapping()V

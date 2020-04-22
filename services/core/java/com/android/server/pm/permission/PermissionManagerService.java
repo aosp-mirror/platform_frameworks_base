@@ -2526,7 +2526,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                             + " checking " + permName + ": " + bp);
                 }
 
-                if (bp == null || bp.getSourcePackageSetting() == null) {
+                if (bp == null || getSourcePackageSetting(bp) == null) {
                     if (packageOfInterest == null || packageOfInterest.equals(
                             pkg.getPackageName())) {
                         if (DEBUG_PERMISSIONS) {
@@ -3403,10 +3403,11 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         //     - or its signing certificate is a previous signing certificate of the defining
         //       package, and the defining package still trusts the old certificate for permissions
         //     - or it shares the above relationships with the system package
+        final PackageParser.SigningDetails sourceSigningDetails =
+                getSourcePackageSigningDetails(bp);
         boolean allowed =
-                pkg.getSigningDetails().hasAncestorOrSelf(
-                        bp.getSourcePackageSetting().getSigningDetails())
-                || bp.getSourcePackageSetting().getSigningDetails().checkCapability(
+                pkg.getSigningDetails().hasAncestorOrSelf(sourceSigningDetails)
+                || sourceSigningDetails.checkCapability(
                         pkg.getSigningDetails(),
                         PackageParser.SigningDetails.CertCapabilities.PERMISSION)
                 || pkg.getSigningDetails().hasAncestorOrSelf(systemPackage.getSigningDetails())
@@ -3574,6 +3575,22 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             }
         }
         return allowed;
+    }
+
+    @NonNull
+    private PackageParser.SigningDetails getSourcePackageSigningDetails(
+            @NonNull BasePermission bp) {
+        final PackageSetting ps = getSourcePackageSetting(bp);
+        if (ps == null) {
+            return PackageParser.SigningDetails.UNKNOWN;
+        }
+        return ps.getSigningDetails();
+    }
+
+    @Nullable
+    private PackageSetting getSourcePackageSetting(@NonNull BasePermission bp) {
+        final String sourcePackageName = bp.getSourcePackageName();
+        return mPackageManagerInt.getPackageSetting(sourcePackageName);
     }
 
     private static boolean isProfileOwner(int uid) {
@@ -4084,8 +4101,10 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 if (bp.isDynamic()) {
                     bp.updateDynamicPermission(mSettings.mPermissionTrees.values());
                 }
-                if (bp.getSourcePackageSetting() == null
-                        || !packageName.equals(bp.getSourcePackageName())) {
+                if (!packageName.equals(bp.getSourcePackageName())) {
+                    // Not checking sourcePackageSetting because it can be null when
+                    // the permission source package is the target package and the target package is
+                    // being uninstalled,
                     continue;
                 }
                 // The target package is the source of the current permission
@@ -4123,9 +4142,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                                 bp.getSourcePackageName());
                 synchronized (mLock) {
                     if (sourcePkg != null && sourcePs != null) {
-                        if (bp.getSourcePackageSetting() == null) {
-                            bp.setSourcePackageSetting(sourcePs);
-                        }
                         continue;
                     }
                     Slog.w(TAG, "Removing dangling permission: " + bp.getName()
@@ -4200,8 +4216,10 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             final Iterator<BasePermission> it = mSettings.mPermissionTrees.values().iterator();
             while (it.hasNext()) {
                 final BasePermission bp = it.next();
-                if (bp.getSourcePackageSetting() == null
-                        || !packageName.equals(bp.getSourcePackageName())) {
+                if (!packageName.equals(bp.getSourcePackageName())) {
+                    // Not checking sourcePackageSetting because it can be null when
+                    // the permission source package is the target package and the target package is
+                    // being uninstalled,
                     continue;
                 }
                 // The target package is the source of the current permission tree
@@ -4227,9 +4245,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                                 bp.getSourcePackageName());
                 synchronized (mLock) {
                     if (sourcePkg != null && sourcePs != null) {
-                        if (bp.getSourcePackageSetting() == null) {
-                            bp.setSourcePackageSetting(sourcePs);
-                        }
                         continue;
                     }
                     Slog.w(TAG, "Removing dangling permission tree: " + bp.getName()

@@ -17122,7 +17122,12 @@ public class PackageManagerService extends IPackageManager.Stub
                     // "updating same package" could also involve key-rotation.
                     final boolean sigsOk;
                     final String sourcePackageName = bp.getSourcePackageName();
-                    final PackageSettingBase sourcePackageSetting = bp.getSourcePackageSetting();
+                    final PackageSetting sourcePackageSetting;
+                    synchronized (mLock) {
+                        sourcePackageSetting = mSettings.getPackageLPr(sourcePackageName);
+                    }
+                    final SigningDetails sourceSigningDetails = (sourcePackageSetting == null
+                            ? SigningDetails.UNKNOWN : sourcePackageSetting.getSigningDetails());
                     final KeySetManagerService ksms = mSettings.mKeySetManagerService;
                     if (sourcePackageName.equals(parsedPackage.getPackageName())
                             && (ksms.shouldCheckUpgradeKeySetLocked(
@@ -17133,18 +17138,19 @@ public class PackageManagerService extends IPackageManager.Stub
                         // in the event of signing certificate rotation, we need to see if the
                         // package's certificate has rotated from the current one, or if it is an
                         // older certificate with which the current is ok with sharing permissions
-                        if (sourcePackageSetting.signatures.mSigningDetails.checkCapability(
+                        if (sourceSigningDetails.checkCapability(
                                 parsedPackage.getSigningDetails(),
                                 PackageParser.SigningDetails.CertCapabilities.PERMISSION)) {
                             sigsOk = true;
                         } else if (parsedPackage.getSigningDetails().checkCapability(
-                                sourcePackageSetting.signatures.mSigningDetails,
+                                sourceSigningDetails,
                                 PackageParser.SigningDetails.CertCapabilities.PERMISSION)) {
-
                             // the scanned package checks out, has signing certificate rotation
                             // history, and is newer; bring it over
-                            sourcePackageSetting.signatures.mSigningDetails =
-                                    parsedPackage.getSigningDetails();
+                            synchronized (mLock) {
+                                sourcePackageSetting.signatures.mSigningDetails =
+                                        parsedPackage.getSigningDetails();
+                            }
                             sigsOk = true;
                         } else {
                             sigsOk = false;
