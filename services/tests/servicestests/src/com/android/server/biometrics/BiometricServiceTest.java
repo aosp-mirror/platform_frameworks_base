@@ -324,17 +324,14 @@ public class BiometricServiceTest {
                 null /* authenticators */);
         waitForIdle();
         verify(mReceiver1, never()).onError(anyInt(), anyInt(), anyInt());
-        verify(mBiometricService.mSensors.get(0).impl).prepareForAuthentication(
-                eq(true) /* requireConfirmation */,
-                any(IBinder.class),
-                anyLong() /* sessionId */,
-                anyInt() /* userId */,
-                any(IBiometricSensorReceiver.class),
-                anyString() /* opPackageName */,
-                anyInt() /* cookie */,
-                anyInt() /* callingUid */,
-                anyInt() /* callingPid */,
-                anyInt() /* callingUserId */);
+        final byte[] HAT = generateRandomHAT();
+        mBiometricService.mBiometricSensorReceiver.onAuthenticationSucceeded(
+                1 /* sensorId */,
+                HAT);
+        waitForIdle();
+        // Confirmation is required
+        assertEquals(AuthSession.STATE_AUTH_PENDING_CONFIRM,
+                mBiometricService.mCurrentAuthSession.getState());
 
         // Enrolled, not disabled in settings, user doesn't require confirmation in settings
         resetReceiver();
@@ -344,17 +341,14 @@ public class BiometricServiceTest {
         invokeAuthenticate(mBiometricService.mImpl, mReceiver1, false /* requireConfirmation */,
                 null /* authenticators */);
         waitForIdle();
-        verify(mBiometricService.mSensors.get(0).impl).prepareForAuthentication(
-                eq(false) /* requireConfirmation */,
-                any(IBinder.class),
-                anyLong() /* sessionId */,
-                anyInt() /* userId */,
-                any(IBiometricSensorReceiver.class),
-                anyString() /* opPackageName */,
-                anyInt() /* cookie */,
-                anyInt() /* callingUid */,
-                anyInt() /* callingPid */,
-                anyInt() /* callingUserId */);
+        mBiometricService.mBiometricSensorReceiver.onAuthenticationSucceeded(
+                1 /* sensorId */,
+                HAT);
+        waitForIdle();
+        // Confirmation not required, waiting for dialog to dismiss
+        assertEquals(AuthSession.STATE_AUTHENTICATED_PENDING_SYSUI,
+                mBiometricService.mCurrentAuthSession.getState());
+
     }
 
     @Test
@@ -384,7 +378,7 @@ public class BiometricServiceTest {
         ArgumentCaptor<Integer> cookieCaptor = ArgumentCaptor.forClass(Integer.class);
         verify(mReceiver1, never()).onError(anyInt(), anyInt(), anyInt());
         verify(mBiometricService.mSensors.get(0).impl).prepareForAuthentication(
-                anyBoolean() /* requireConfirmation */,
+                eq(false) /* requireConfirmation */,
                 any(IBinder.class),
                 anyLong() /* sessionId */,
                 anyInt() /* userId */,
@@ -396,8 +390,7 @@ public class BiometricServiceTest {
                 anyInt() /* callingUserId */);
 
         // onReadyForAuthentication, mCurrentAuthSession state OK
-        mBiometricService.mImpl.onReadyForAuthentication(cookieCaptor.getValue(),
-                mBiometricService.mCurrentAuthSession.mPreAuthInfo.confirmationRequested);
+        mBiometricService.mImpl.onReadyForAuthentication(cookieCaptor.getValue());
         waitForIdle();
         assertEquals(AuthSession.STATE_AUTH_STARTED,
                 mBiometricService.mCurrentAuthSession.getState());
@@ -420,7 +413,6 @@ public class BiometricServiceTest {
         final byte[] HAT = generateRandomHAT();
         mBiometricService.mBiometricSensorReceiver.onAuthenticationSucceeded(
                 0 /* sensorId */,
-                false /* requireConfirmation */,
                 HAT);
         waitForIdle();
         // Waiting for SystemUI to send dismissed callback
@@ -495,7 +487,6 @@ public class BiometricServiceTest {
         // TODO: Do not hardcode ID (currently face is always 1)
         mBiometricService.mBiometricSensorReceiver.onAuthenticationSucceeded(
                 1 /* sensorId */,
-                true /* requireConfirmation */,
                 HAT);
         waitForIdle();
         // Waiting for SystemUI to send confirmation callback
@@ -971,7 +962,6 @@ public class BiometricServiceTest {
 
         mBiometricService.mBiometricSensorReceiver.onAuthenticationSucceeded(
                 0 /* sensorId */,
-                true /* requireConfirmation */,
                 new byte[69] /* HAT */);
         mBiometricService.mSysuiReceiver.onDialogDismissed(
                 BiometricPrompt.DISMISSED_REASON_USER_CANCEL, null /* credentialAttestation */);
@@ -1509,8 +1499,7 @@ public class BiometricServiceTest {
         final int cookie = preAuthInfo.eligibleSensors.get(0).getCookie();
         assertNotEquals(cookie, 0);
 
-        service.mImpl.onReadyForAuthentication(cookie,
-                preAuthInfo.confirmationRequested /* requireConfirmation */);
+        service.mImpl.onReadyForAuthentication(cookie);
     }
 
     private static void invokeAuthenticate(IBiometricService.Stub service,

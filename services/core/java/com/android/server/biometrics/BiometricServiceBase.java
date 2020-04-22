@@ -434,8 +434,8 @@ public abstract class BiometricServiceBase extends SystemService
             throw new UnsupportedOperationException("Stub!");
         }
 
-        default void onAuthenticationSucceededInternal(int sensorId, boolean requireConfirmation,
-                byte[] token) throws RemoteException {
+        default void onAuthenticationSucceededInternal(int sensorId, byte[] token)
+                throws RemoteException {
             throw new UnsupportedOperationException("Stub!");
         }
 
@@ -472,11 +472,10 @@ public abstract class BiometricServiceBase extends SystemService
         }
 
         @Override
-        public void onAuthenticationSucceededInternal(int sensorId, boolean requireConfirmation,
-                byte[] token) throws RemoteException {
+        public void onAuthenticationSucceededInternal(int sensorId, byte[] token)
+                throws RemoteException {
             if (getWrapperReceiver() != null) {
-                getWrapperReceiver().onAuthenticationSucceeded(sensorId, requireConfirmation,
-                        token);
+                getWrapperReceiver().onAuthenticationSucceeded(sensorId, token);
             }
         }
 
@@ -1125,8 +1124,7 @@ public abstract class BiometricServiceBase extends SystemService
                                 ServiceManager.getService(Context.BIOMETRIC_SERVICE));
                     }
                     try {
-                        mBiometricService.onReadyForAuthentication(client.getCookie(),
-                                client.getRequireConfirmation());
+                        mBiometricService.onReadyForAuthentication(client.getCookie());
                     } catch (RemoteException e) {
                         Slog.e(getTag(), "Remote exception", e);
                     }

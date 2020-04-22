@@ -184,9 +184,7 @@ final class AuthSession {
     private void setSensorsToStateWaitingForCookie() throws RemoteException {
         for (BiometricSensor sensor : mPreAuthInfo.eligibleSensors) {
             final int cookie = mRandom.nextInt(Integer.MAX_VALUE - 1) + 1;
-            final boolean requireConfirmation = sensor.confirmationSupported()
-                    && (sensor.confirmationAlwaysRequired(mUserId)
-                    || mPreAuthInfo.confirmationRequested);
+            final boolean requireConfirmation = isConfirmationRequired(sensor);
             sensor.goToStateWaitingForCookie(requireConfirmation, mToken, mOperationId,
                     mUserId, mSensorReceiver, mOpPackageName, cookie, mCallingUid, mCallingPid,
                     mCallingUserId);
@@ -219,7 +217,7 @@ final class AuthSession {
         }
     }
 
-    void onCookieReceived(int cookie, boolean requireConfirmation) {
+    void onCookieReceived(int cookie) {
         for (BiometricSensor sensor : mPreAuthInfo.eligibleSensors) {
             sensor.goToStateCookieReturnedIfCookieMatches(cookie);
         }
@@ -228,9 +226,11 @@ final class AuthSession {
             mStartTimeMs = System.currentTimeMillis();
             startAllPreparedSensors();
 
-            // No need to request the UI if we're coming from the paused state
+            // No need to request the UI if we're coming from the paused state.
             if (mState != STATE_AUTH_PAUSED_RESUMING) {
                 try {
+                    // If any sensor requires confirmation, request it to be shown.
+                    final boolean requireConfirmation = isConfirmationRequiredByAnyEligibleSensor();
                     final @BiometricAuthenticator.Modality int modality =
                             getEligibleModalities();
                     mStatusBarService.showAuthenticationDialog(mBundle,
@@ -246,6 +246,21 @@ final class AuthSession {
             }
             mState = STATE_AUTH_STARTED;
         }
+    }
+
+    private boolean isConfirmationRequired(BiometricSensor sensor) {
+        return sensor.confirmationSupported()
+                && (sensor.confirmationAlwaysRequired(mUserId)
+                || mPreAuthInfo.confirmationRequested);
+    }
+
+    private boolean isConfirmationRequiredByAnyEligibleSensor() {
+        for (BiometricSensor sensor : mPreAuthInfo.eligibleSensors) {
+            if (isConfirmationRequired(sensor)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void startAllPreparedSensors() {
@@ -406,7 +421,7 @@ final class AuthSession {
         }
     }
 
-    void onAuthenticationSucceeded(int sensorId, boolean requireConfirmation, boolean strong,
+    void onAuthenticationSucceeded(int sensorId, boolean strong,
             byte[] token) {
         if (strong) {
             mTokenEscrow = token;
@@ -420,6 +435,8 @@ final class AuthSession {
             // Notify SysUI that the biometric has been authenticated. SysUI already knows
             // the implicit/explicit state and will react accordingly.
             mStatusBarService.onBiometricAuthenticated();
+
+            final boolean requireConfirmation = isConfirmationRequiredByAnyEligibleSensor();
 
             if (!requireConfirmation) {
                 mState = STATE_AUTHENTICATED_PENDING_SYSUI;

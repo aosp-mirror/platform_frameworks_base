@@ -152,8 +152,7 @@ public class AuthSessionTest {
         }
 
         final int cookie1 = session.mPreAuthInfo.eligibleSensors.get(0).getCookie();
-        // TODO: RequireConfirmation being removed from this interface soon. True for face.
-        session.onCookieReceived(cookie1, true /* requireConfirmation */);
+        session.onCookieReceived(cookie1);
         for (BiometricSensor sensor : session.mPreAuthInfo.eligibleSensors) {
             if (cookie1 == sensor.getCookie()) {
                 assertEquals(BiometricSensor.STATE_COOKIE_RETURNED, sensor.getSensorState());
@@ -164,8 +163,7 @@ public class AuthSessionTest {
         assertFalse(session.allCookiesReceived());
 
         final int cookie2 = session.mPreAuthInfo.eligibleSensors.get(1).getCookie();
-        // TODO: RequireConfirmation being removed from this interface soon. False for fingerprint.
-        session.onCookieReceived(cookie2, false /* requireConfirmation */);
+        session.onCookieReceived(cookie2);
         assertTrue(session.allCookiesReceived());
 
         for (BiometricSensor sensor : session.mPreAuthInfo.eligibleSensors) {

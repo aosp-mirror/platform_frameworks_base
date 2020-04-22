@@ -17,7 +17,6 @@
 package com.android.server.biometrics;
 
 import static android.Manifest.permission.USE_BIOMETRIC_INTERNAL;
-import static android.hardware.biometrics.BiometricAuthenticator.TYPE_NONE;
 import static android.hardware.biometrics.BiometricManager.Authenticators;
 
 import android.annotation.Nullable;
@@ -127,8 +126,7 @@ public class BiometricService extends SystemService {
                     SomeArgs args = (SomeArgs) msg.obj;
                     handleAuthenticationSucceeded(
                             args.argi1 /* sensorId */,
-                            (boolean) args.arg1 /* requireConfirmation */,
-                            (byte[]) args.arg2 /* token */);
+                            (byte[]) args.arg1 /* token */);
                     args.recycle();
                     break;
                 }
@@ -171,8 +169,7 @@ public class BiometricService extends SystemService {
                 case MSG_ON_READY_FOR_AUTHENTICATION: {
                     SomeArgs args = (SomeArgs) msg.obj;
                     handleOnReadyForAuthentication(
-                            args.argi1 /* cookie */,
-                            (boolean) args.arg1 /* requireConfirmation */);
+                            args.argi1 /* cookie */);
                     args.recycle();
                     break;
                 }
@@ -378,12 +375,11 @@ public class BiometricService extends SystemService {
     @VisibleForTesting
     final IBiometricSensorReceiver mBiometricSensorReceiver = new IBiometricSensorReceiver.Stub() {
         @Override
-        public void onAuthenticationSucceeded(int sensorId, boolean requireConfirmation,
+        public void onAuthenticationSucceeded(int sensorId,
                 byte[] token) {
             SomeArgs args = SomeArgs.obtain();
             args.argi1 = sensorId;
-            args.arg1 = requireConfirmation;
-            args.arg2 = token;
+            args.arg1 = token;
             mHandler.obtainMessage(MSG_ON_AUTHENTICATION_SUCCEEDED, args).sendToTarget();
         }
 
@@ -458,12 +454,11 @@ public class BiometricService extends SystemService {
      */
     private final class BiometricServiceWrapper extends IBiometricService.Stub {
         @Override // Binder call
-        public void onReadyForAuthentication(int cookie, boolean requireConfirmation) {
+        public void onReadyForAuthentication(int cookie) {
             checkInternalPermission();
 
             SomeArgs args = SomeArgs.obtain();
             args.argi1 = cookie;
-            args.arg1 = requireConfirmation;
             mHandler.obtainMessage(MSG_ON_READY_FOR_AUTHENTICATION, args).sendToTarget();
         }
 
@@ -928,8 +923,7 @@ public class BiometricService extends SystemService {
         return modality;
     }
 
-    private void handleAuthenticationSucceeded(int sensorId, boolean requireConfirmation,
-            byte[] token) {
+    private void handleAuthenticationSucceeded(int sensorId, byte[] token) {
         Slog.v(TAG, "handleAuthenticationSucceeded(), sensorId: " + sensorId);
         // Should never happen, log this to catch bad HAL behavior (e.g. auth succeeded
         // after user dismissed/canceled dialog).
@@ -938,8 +932,7 @@ public class BiometricService extends SystemService {
             return;
         }
 
-        mCurrentAuthSession.onAuthenticationSucceeded(sensorId, requireConfirmation,
-                isStrongBiometric(sensorId), token);
+        mCurrentAuthSession.onAuthenticationSucceeded(sensorId, isStrongBiometric(sensorId), token);
     }
 
     private void handleAuthenticationRejected() {
@@ -1050,7 +1043,7 @@ public class BiometricService extends SystemService {
      * Invoked when each service has notified that its client is ready to be started. When
      * all biometrics are ready, this invokes the SystemUI dialog through StatusBar.
      */
-    private void handleOnReadyForAuthentication(int cookie, boolean requireConfirmation) {
+    private void handleOnReadyForAuthentication(int cookie) {
         if (mCurrentAuthSession == null) {
             // Only should happen if a biometric was locked out when authenticate() was invoked.
             // In that case, if device credentials are allowed, the UI is already showing. If not
@@ -1059,8 +1052,7 @@ public class BiometricService extends SystemService {
             return;
         }
 
-        // TODO: RequireConfirmation does not need to exist in <Biometric>Services
-        mCurrentAuthSession.onCookieReceived(cookie, requireConfirmation);
+        mCurrentAuthSession.onCookieReceived(cookie);
     }
 
     private void handleAuthenticate(IBinder token, long operationId, int userId,
