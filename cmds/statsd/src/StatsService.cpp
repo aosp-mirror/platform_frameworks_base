@@ -1212,15 +1212,6 @@ Status StatsService::unsetBroadcastSubscriber(int64_t configId,
     return Status::ok();
 }
 
-Status StatsService::sendAppBreadcrumbAtom(int32_t label, int32_t state) {
-    // Permission check not necessary as it's meant for applications to write to
-    // statsd.
-    android::os::statsd::util::stats_write(android::os::statsd::util::APP_BREADCRUMB_REPORTED,
-                               (int32_t) AIBinder_getCallingUid(), label,
-                               state);
-    return Status::ok();
-}
-
 Status StatsService::allPullersFromBootRegistered() {
     ENFORCE_UID(AID_SYSTEM);
 
