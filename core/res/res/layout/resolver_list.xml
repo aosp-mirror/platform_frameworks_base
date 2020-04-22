@@ -112,59 +112,61 @@
             </FrameLayout>
         </LinearLayout>
     </TabHost>
-
-    <View
-        android:layout_alwaysShow="true"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="?attr/colorBackgroundFloating"
-        android:foreground="?attr/dividerVertical" />
-
     <LinearLayout
-        android:id="@+id/button_bar"
-        android:visibility="gone"
-        style="?attr/buttonBarStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_ignoreOffset="true"
         android:layout_alwaysShow="true"
-        android:layout_hasNestedScrollIndicator="true"
-        android:gravity="end|center_vertical"
-        android:orientation="horizontal"
-        android:layoutDirection="locale"
-        android:measureWithLargestChild="true"
-        android:background="?attr/colorBackgroundFloating"
-        android:paddingTop="@dimen/resolver_button_bar_spacing"
-        android:paddingBottom="@dimen/resolver_button_bar_spacing"
-        android:paddingStart="@dimen/resolver_edge_margin"
-        android:paddingEnd="@dimen/resolver_small_margin"
-        android:elevation="@dimen/resolver_elevation">
-
-        <Button
-            android:id="@+id/button_once"
-            android:layout_width="wrap_content"
-            android:layout_gravity="start"
-            android:maxLines="2"
-            style="?attr/buttonBarButtonStyle"
-            android:fontFamily="@android:string/config_headlineFontFamilyMedium"
+        android:orientation="vertical"
+        android:background="?attr/colorBackgroundFloating">
+        <View
+            android:id="@+id/resolver_button_bar_divider"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="?attr/colorBackgroundFloating"
+            android:foreground="?attr/dividerVertical" />
+        <LinearLayout
+            android:id="@+id/button_bar"
+            android:visibility="gone"
+            style="?attr/buttonBarStyle"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textAllCaps="false"
-            android:enabled="false"
-            android:text="@string/activity_resolver_use_once"
-            android:onClick="onButtonClick" />
+            android:layout_ignoreOffset="true"
+            android:layout_hasNestedScrollIndicator="true"
+            android:gravity="end|center_vertical"
+            android:orientation="horizontal"
+            android:layoutDirection="locale"
+            android:measureWithLargestChild="true"
+            android:paddingTop="@dimen/resolver_button_bar_spacing"
+            android:paddingBottom="@dimen/resolver_button_bar_spacing"
+            android:paddingStart="@dimen/resolver_edge_margin"
+            android:paddingEnd="@dimen/resolver_small_margin"
+            android:elevation="@dimen/resolver_elevation">
 
-        <Button
-            android:id="@+id/button_always"
-            android:layout_width="wrap_content"
-            android:layout_gravity="end"
-            android:maxLines="2"
-            style="?attr/buttonBarButtonStyle"
-            android:fontFamily="@android:string/config_headlineFontFamilyMedium"
-            android:textAllCaps="false"
-            android:layout_height="wrap_content"
-            android:enabled="false"
-            android:text="@string/activity_resolver_use_always"
-            android:onClick="onButtonClick" />
+            <Button
+                android:id="@+id/button_once"
+                android:layout_width="wrap_content"
+                android:layout_gravity="start"
+                android:maxLines="2"
+                style="?attr/buttonBarButtonStyle"
+                android:fontFamily="@android:string/config_headlineFontFamilyMedium"
+                android:layout_height="wrap_content"
+                android:textAllCaps="false"
+                android:enabled="false"
+                android:text="@string/activity_resolver_use_once"
+                android:onClick="onButtonClick" />
+
+            <Button
+                android:id="@+id/button_always"
+                android:layout_width="wrap_content"
+                android:layout_gravity="end"
+                android:maxLines="2"
+                style="?attr/buttonBarButtonStyle"
+                android:fontFamily="@android:string/config_headlineFontFamilyMedium"
+                android:textAllCaps="false"
+                android:layout_height="wrap_content"
+                android:enabled="false"
+                android:text="@string/activity_resolver_use_always"
+                android:onClick="onButtonClick" />
+        </LinearLayout>
     </LinearLayout>
-
 </com.android.internal.widget.ResolverDrawerLayout>
