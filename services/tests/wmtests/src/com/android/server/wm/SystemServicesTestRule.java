@@ -429,6 +429,31 @@ public class SystemServicesTestRule implements TestRule {
         }
     }
 
+    void waitUntilWindowAnimatorIdle() {
+        final WindowManagerService wm = getWindowManagerService();
+        if (wm == null) {
+            return;
+        }
+        synchronized (mCurrentMessagesProcessed) {
+            // Add a message to the handler queue and make sure it is fully processed before we move
+            // on. This makes sure all previous messages in the handler are fully processed vs. just
+            // popping them from the message queue.
+            mCurrentMessagesProcessed.set(false);
+            wm.mAnimator.getChoreographer().postFrameCallback(time -> {
+                synchronized (mCurrentMessagesProcessed) {
+                    mCurrentMessagesProcessed.set(true);
+                    mCurrentMessagesProcessed.notifyAll();
+                }
+            });
+            while (!mCurrentMessagesProcessed.get()) {
+                try {
+                    mCurrentMessagesProcessed.wait();
+                } catch (InterruptedException e) {
+                }
+            }
+        }
+    }
+
     /**
      * Throws if caller doesn't hold the given lock.
      * @param lock the lock
