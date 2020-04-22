@@ -16945,8 +16945,16 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public void updatePersistentConfiguration(Configuration values) {
+        updatePersistentConfigurationWithAttribution(values,
+                Settings.getPackageNameForUid(mContext, Binder.getCallingUid()), null);
+    }
+
+    @Override
+    public void updatePersistentConfigurationWithAttribution(Configuration values,
+            String callingPackage, String callingAttributionTag) {
         enforceCallingPermission(CHANGE_CONFIGURATION, "updatePersistentConfiguration()");
-        enforceWriteSettingsPermission("updatePersistentConfiguration()");
+        enforceWriteSettingsPermission("updatePersistentConfiguration()", callingPackage,
+                callingAttributionTag);
         if (values == null) {
             throw new NullPointerException("Configuration must not be null");
         }
@@ -16956,14 +16964,15 @@ public class ActivityManagerService extends IActivityManager.Stub
         mActivityTaskManager.updatePersistentConfiguration(values, userId);
     }
 
-    private void enforceWriteSettingsPermission(String func) {
+    private void enforceWriteSettingsPermission(String func, String callingPackage,
+            String callingAttributionTag) {
         int uid = Binder.getCallingUid();
         if (uid == ROOT_UID) {
             return;
         }
 
         if (Settings.checkAndNoteWriteSettingsOperation(mContext, uid,
-                Settings.getPackageNameForUid(mContext, uid), false)) {
+                callingPackage, callingAttributionTag, false)) {
             return;
         }
 

@@ -400,7 +400,8 @@ public class SettingsHelper {
             // indicate this isn't some passing default - the user wants this remembered
             config.userSetLocale = true;
 
-            am.updatePersistentConfiguration(config);
+            am.updatePersistentConfigurationWithAttribution(config, mContext.getOpPackageName(),
+                    mContext.getAttributionTag());
         } catch (RemoteException e) {
             // Intentionally left blank
         }
