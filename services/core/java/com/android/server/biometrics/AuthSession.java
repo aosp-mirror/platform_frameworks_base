@@ -93,7 +93,7 @@ final class AuthSession {
     final IBinder mToken;
     final long mOperationId;
     final int mUserId;
-    final IBiometricSensorReceiver mSensorReceiver;
+    private final IBiometricSensorReceiver mSensorReceiver;
     // Original receiver from BiometricPrompt.
     final IBiometricServiceReceiver mClientReceiver;
     final String mOpPackageName;
@@ -102,8 +102,6 @@ final class AuthSession {
     final int mCallingUid;
     final int mCallingPid;
     final int mCallingUserId;
-
-    final boolean mRequireConfirmation;
 
     // The current state, which can be either idle, called, or started
     @SessionState int mState = STATE_AUTH_IDLE;
@@ -122,8 +120,7 @@ final class AuthSession {
     AuthSession(Random random, PreAuthInfo preAuthInfo, IBinder token, long operationId,
             int userId, IBiometricSensorReceiver sensorReceiver,
             IBiometricServiceReceiver clientReceiver, String opPackageName,
-            Bundle bundle, int callingUid, int callingPid, int callingUserId,
-            boolean requireConfirmation) {
+            Bundle bundle, int callingUid, int callingPid, int callingUserId) {
         mRandom = random;
         mPreAuthInfo = preAuthInfo;
         mToken = token;
@@ -136,7 +133,6 @@ final class AuthSession {
         mCallingUid = callingUid;
         mCallingPid = callingPid;
         mCallingUserId = callingUserId;
-        mRequireConfirmation = requireConfirmation;
 
         setSensorsToStateUnknown();
     }
@@ -162,7 +158,10 @@ final class AuthSession {
     void prepareAllSensorsForAuthentication() throws RemoteException {
         for (BiometricSensor sensor : mPreAuthInfo.eligibleSensors) {
             final int cookie = mRandom.nextInt(Integer.MAX_VALUE - 1) + 1;
-            sensor.goToStateWaitingForCookie(mRequireConfirmation, mToken, mOperationId, mUserId,
+            final boolean requireConfirmation = sensor.confirmationSupported()
+                    && (sensor.confirmationAlwaysRequired(mUserId)
+                    || mPreAuthInfo.confirmationRequested);
+            sensor.goToStateWaitingForCookie(requireConfirmation, mToken, mOperationId, mUserId,
                     mSensorReceiver, mOpPackageName, cookie, mCallingUid, mCallingPid,
                     mCallingUserId);
         }

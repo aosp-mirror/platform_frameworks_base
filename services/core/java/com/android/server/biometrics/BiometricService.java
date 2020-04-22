@@ -17,7 +17,6 @@
 package com.android.server.biometrics;
 
 import static android.Manifest.permission.USE_BIOMETRIC_INTERNAL;
-import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FACE;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_NONE;
 import static android.hardware.biometrics.BiometricManager.Authenticators;
 
@@ -322,14 +321,23 @@ public class BiometricService extends SystemService {
             return mFaceEnabledForApps.getOrDefault(userId, DEFAULT_APP_ENABLED);
         }
 
-        public boolean getFaceAlwaysRequireConfirmation(int userId) {
-            if (!mFaceAlwaysRequireConfirmation.containsKey(userId)) {
-                onChange(true /* selfChange */, FACE_UNLOCK_ALWAYS_REQUIRE_CONFIRMATION, userId);
+        public boolean getConfirmationAlwaysRequired(@BiometricAuthenticator.Modality int modality,
+                int userId) {
+            switch (modality) {
+                case BiometricAuthenticator.TYPE_FACE:
+                    if (!mFaceAlwaysRequireConfirmation.containsKey(userId)) {
+                        onChange(true /* selfChange */,
+                                FACE_UNLOCK_ALWAYS_REQUIRE_CONFIRMATION,
+                                userId);
+                    }
+                    return mFaceAlwaysRequireConfirmation.get(userId);
+
+                default:
+                    return false;
             }
-            return mFaceAlwaysRequireConfirmation.get(userId);
         }
 
-        public void notifyEnabledOnKeyguardCallbacks(int userId) {
+        void notifyEnabledOnKeyguardCallbacks(int userId) {
             List<EnabledOnKeyguardCallback> callbacks = mCallbacks;
             for (int i = 0; i < callbacks.size(); i++) {
                 callbacks.get(i).notify(BiometricSourceType.FACE,
@@ -600,7 +608,17 @@ public class BiometricService extends SystemService {
                 throw new IllegalStateException("Cannot register unknown id");
             }
 
-            mSensors.add(new BiometricSensor(id, modality, strength, authenticator));
+            mSensors.add(new BiometricSensor(id, modality, strength, authenticator) {
+                @Override
+                boolean confirmationAlwaysRequired(int userId) {
+                    return mSettingObserver.getConfirmationAlwaysRequired(modality, userId);
+                }
+
+                @Override
+                boolean confirmationSupported() {
+                    return Utils.isConfirmationSupported(modality);
+                }
+            });
 
             mBiometricStrengthController.updateStrengths();
         }
@@ -833,15 +851,6 @@ public class BiometricService extends SystemService {
         return false;
     }
 
-    private int biometricIdToModality(int id) {
-        for (BiometricSensor sensor : mSensors) {
-            if (sensor.id == id) {
-                return sensor.modality;
-            }
-        }
-        return TYPE_NONE;
-    }
-
     private void logDialogDismissed(int reason) {
         if (reason == BiometricPrompt.DISMISSED_REASON_BIOMETRIC_CONFIRMED) {
             // Explicit auth, authentication confirmed.
@@ -856,7 +865,7 @@ public class BiometricService extends SystemService {
                         + ", IsCrypto: " + mCurrentAuthSession.isCrypto()
                         + ", Client: " + BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT
                         + ", RequireConfirmation: "
-                        + mCurrentAuthSession.mRequireConfirmation
+                        + mCurrentAuthSession.mPreAuthInfo.confirmationRequested
                         + ", State: " + FrameworkStatsLog.BIOMETRIC_AUTHENTICATED__STATE__CONFIRMED
                         + ", Latency: " + latency);
             }
@@ -866,7 +875,7 @@ public class BiometricService extends SystemService {
                     mCurrentAuthSession.mUserId,
                     mCurrentAuthSession.isCrypto(),
                     BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT,
-                    mCurrentAuthSession.mRequireConfirmation,
+                    mCurrentAuthSession.mPreAuthInfo.confirmationRequested,
                     FrameworkStatsLog.BIOMETRIC_AUTHENTICATED__STATE__CONFIRMED,
                     latency,
                     mInjector.isDebugEnabled(getContext(), mCurrentAuthSession.mUserId));
@@ -1330,24 +1339,11 @@ public class BiometricService extends SystemService {
     private void authenticateInternal(IBinder token, long operationId, int userId,
             IBiometricServiceReceiver receiver, String opPackageName, Bundle bundle,
             int callingUid, int callingPid, int callingUserId, PreAuthInfo preAuthInfo) {
-        boolean requireConfirmation = bundle.getBoolean(
-                BiometricPrompt.KEY_REQUIRE_CONFIRMATION, true /* default */);
-        // Assume at this point that if a sensor is contained in the eligible list, it will be
-        // used for authentication and presented to the user.
-        for (BiometricSensor sensor : preAuthInfo.eligibleSensors) {
-            if (biometricIdToModality(sensor.id) == TYPE_FACE) {
-                // Check if the user has forced confirmation to be required in Settings.
-                requireConfirmation = requireConfirmation
-                        || mSettingObserver.getFaceAlwaysRequireConfirmation(userId);
-            }
-        }
-
         Slog.d(TAG, "Creating authSession with authRequest: " + preAuthInfo);
 
         mPendingAuthSession = new AuthSession(mRandom, preAuthInfo, token, operationId, userId,
                 mBiometricSensorReceiver, receiver, opPackageName, bundle, callingUid, callingPid,
-                callingUserId, requireConfirmation);
-
+                callingUserId);
         try {
             if (preAuthInfo.credentialRequested
                     && preAuthInfo.eligibleSensors.isEmpty()) {

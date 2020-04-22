@@ -315,7 +315,8 @@ public class BiometricServiceTest {
         // Enrolled, not disabled in settings, user requires confirmation in settings
         resetReceiver();
         when(mBiometricService.mSettingObserver.getFaceEnabledForApps(anyInt())).thenReturn(true);
-        when(mBiometricService.mSettingObserver.getFaceAlwaysRequireConfirmation(anyInt()))
+        when(mBiometricService.mSettingObserver.getConfirmationAlwaysRequired(
+                anyInt() /* modality */, anyInt() /* userId */))
                 .thenReturn(true);
         invokeAuthenticate(mBiometricService.mImpl, mReceiver1, false /* requireConfirmation */,
                 null /* authenticators */);
@@ -335,7 +336,8 @@ public class BiometricServiceTest {
 
         // Enrolled, not disabled in settings, user doesn't require confirmation in settings
         resetReceiver();
-        when(mBiometricService.mSettingObserver.getFaceAlwaysRequireConfirmation(anyInt()))
+        when(mBiometricService.mSettingObserver.getConfirmationAlwaysRequired(
+                anyInt() /* modality */, anyInt() /* userId */))
                 .thenReturn(false);
         invokeAuthenticate(mBiometricService.mImpl, mReceiver1, false /* requireConfirmation */,
                 null /* authenticators */);
@@ -1139,7 +1141,17 @@ public class BiometricServiceTest {
                     new BiometricSensor(0 /* id */,
                             BiometricAuthenticator.TYPE_FINGERPRINT,
                             testCases[i][0],
-                            null /* impl */);
+                            null /* impl */) {
+                        @Override
+                        boolean confirmationAlwaysRequired(int userId) {
+                            return false;
+                        }
+
+                        @Override
+                        boolean confirmationSupported() {
+                            return false;
+                        }
+                    };
             sensor.updateStrength(testCases[i][1]);
             assertEquals(testCases[i][2], sensor.getCurrentStrength());
         }
