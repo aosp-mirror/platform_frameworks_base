@@ -30,7 +30,6 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.graphics.drawable.Drawable;
-import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Xml;
 
@@ -153,7 +152,7 @@ public final class AccessibilityShortcutInfo {
                     com.android.internal.R.styleable.AccessibilityShortcutTarget_settingsActivity);
             asAttributes.recycle();
 
-            if (mDescriptionResId == 0 || mSummaryResId == 0) {
+            if ((mDescriptionResId == 0 && mHtmlDescriptionRes == 0) || mSummaryResId == 0) {
                 throw new XmlPullParserException("No description or summary in meta-data");
             }
         } catch (PackageManager.NameNotFoundException e) {
@@ -243,7 +242,10 @@ public final class AccessibilityShortcutInfo {
     public String loadHtmlDescription(@NonNull PackageManager packageManager) {
         final String htmlDescription = loadResourceString(packageManager, mActivityInfo,
                 mHtmlDescriptionRes);
-        return TextUtils.isEmpty(htmlDescription) ? null : getFilteredHtmlText(htmlDescription);
+        if (htmlDescription != null) {
+            return getFilteredHtmlText(htmlDescription);
+        }
+        return null;
     }
 
     /**

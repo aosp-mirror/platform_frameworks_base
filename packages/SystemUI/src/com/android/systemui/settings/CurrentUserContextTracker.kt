@@ -18,8 +18,10 @@ package com.android.systemui.settings
 
 import android.content.Context
 import android.os.UserHandle
+import androidx.annotation.VisibleForTesting
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.util.Assert
+import java.lang.IllegalStateException
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -32,7 +34,16 @@ class CurrentUserContextTracker @Inject constructor(
     broadcastDispatcher: BroadcastDispatcher
 ) {
     private val userTracker: CurrentUserTracker
-    var currentUserContext: Context
+    private var initialized = false
+
+    private var _curUserContext: Context? = null
+    val currentUserContext: Context
+        get() {
+            if (!initialized) {
+                throw IllegalStateException("Must initialize before getting context")
+            }
+            return _curUserContext!!
+        }
 
     init {
         userTracker = object : CurrentUserTracker(broadcastDispatcher) {
@@ -40,21 +51,21 @@ class CurrentUserContextTracker @Inject constructor(
                 handleUserSwitched(newUserId)
             }
         }
-
-        currentUserContext = makeUserContext(userTracker.currentUserId)
     }
 
     fun initialize() {
+        initialized = true
+        _curUserContext = makeUserContext(userTracker.currentUserId)
         userTracker.startTracking()
     }
 
-    private fun handleUserSwitched(newUserId: Int) {
-        currentUserContext = makeUserContext(newUserId)
+    @VisibleForTesting
+    fun handleUserSwitched(newUserId: Int) {
+        _curUserContext = makeUserContext(newUserId)
     }
 
     private fun makeUserContext(uid: Int): Context {
         Assert.isMainThread()
-        return sysuiContext.createContextAsUser(
-                UserHandle.getUserHandleForUid(userTracker.currentUserId), 0)
+        return sysuiContext.createContextAsUser(UserHandle.of(uid), 0)
     }
 }

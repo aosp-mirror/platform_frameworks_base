@@ -3779,7 +3779,9 @@ public final class ViewRootImpl implements ViewParent,
                 mNextReportConsumeBLAST = true;
                 mNextDrawUseBLASTSyncTransaction = false;
 
-                mBlastBufferQueue.setNextTransaction(mRtBLASTSyncTransaction);
+                if (mBlastBufferQueue != null) {
+                    mBlastBufferQueue.setNextTransaction(mRtBLASTSyncTransaction);
+                }
             }
             boolean canUseAsync = draw(fullRedrawNeeded);
             if (usingAsyncReport && !canUseAsync) {

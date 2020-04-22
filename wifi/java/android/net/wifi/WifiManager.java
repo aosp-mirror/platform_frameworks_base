@@ -758,6 +758,13 @@ public class WifiManager {
     @SystemApi
     public static final int SAP_CLIENT_BLOCK_REASON_CODE_NO_MORE_STAS = 1;
 
+    /**
+     * Client disconnected for unspecified reason. This could for example be because the AP is being
+     * shut down.
+     * @hide
+     */
+    public static final int SAP_CLIENT_DISCONNECT_REASON_CODE_UNSPECIFIED = 2;
+
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = {"IFACE_IP_MODE_"}, value = {

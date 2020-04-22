@@ -31,7 +31,6 @@ import androidx.test.filters.SmallTest;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.car.CarDeviceProvisionedController;
-import com.android.systemui.statusbar.car.CarStatusBar;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -48,7 +47,7 @@ public class CarHeadsUpNotificationSystemContainerTest extends SysuiTestCase {
     @Mock
     private CarDeviceProvisionedController mCarDeviceProvisionedController;
     @Mock
-    private CarStatusBar mCarStatusBar;
+    private NotificationPanelViewController mNotificationPanelViewController;
     @Mock
     private WindowManager mWindowManager;
 
@@ -61,7 +60,7 @@ public class CarHeadsUpNotificationSystemContainerTest extends SysuiTestCase {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
-        when(mCarStatusBar.isPanelExpanded()).thenReturn(false);
+        when(mNotificationPanelViewController.isPanelExpanded()).thenReturn(false);
         when(mCarDeviceProvisionedController.isCurrentUserSetup()).thenReturn(true);
         when(mCarDeviceProvisionedController.isCurrentUserSetupInProgress()).thenReturn(false);
 
@@ -72,14 +71,14 @@ public class CarHeadsUpNotificationSystemContainerTest extends SysuiTestCase {
 
         mDefaultController = new CarHeadsUpNotificationSystemContainer(mContext,
                 testableResources.getResources(), mCarDeviceProvisionedController, mWindowManager,
-                () -> mCarStatusBar);
+                () -> mNotificationPanelViewController);
 
         testableResources.addOverride(
                 R.bool.config_enableHeadsUpNotificationWhenNotificationShadeOpen, true);
 
         mOverrideEnabledController = new CarHeadsUpNotificationSystemContainer(mContext,
                 testableResources.getResources(), mCarDeviceProvisionedController, mWindowManager,
-                () -> mCarStatusBar);
+                () -> mNotificationPanelViewController);
     }
 
     @Test
@@ -120,14 +119,14 @@ public class CarHeadsUpNotificationSystemContainerTest extends SysuiTestCase {
 
     @Test
     public void testDisplayNotification_notificationPanelExpanded_isInvisible() {
-        when(mCarStatusBar.isPanelExpanded()).thenReturn(true);
+        when(mNotificationPanelViewController.isPanelExpanded()).thenReturn(true);
         mDefaultController.displayNotification(mNotificationView);
         assertThat(mDefaultController.isVisible()).isFalse();
     }
 
     @Test
     public void testDisplayNotification_notificationPanelExpandedEnabledHUNWhenOpen_isVisible() {
-        when(mCarStatusBar.isPanelExpanded()).thenReturn(true);
+        when(mNotificationPanelViewController.isPanelExpanded()).thenReturn(true);
         mOverrideEnabledController.displayNotification(mNotificationView);
         assertThat(mOverrideEnabledController.isVisible()).isTrue();
     }

@@ -102,6 +102,20 @@ public class WifiSignalController extends
     }
 
     /**
+     * Fetches wifi initial state replacing the initial sticky broadcast.
+     */
+    public void fetchInitialState() {
+        mWifiTracker.fetchInitialState();
+        mCurrentState.enabled = mWifiTracker.enabled;
+        mCurrentState.connected = mWifiTracker.connected;
+        mCurrentState.ssid = mWifiTracker.ssid;
+        mCurrentState.rssi = mWifiTracker.rssi;
+        mCurrentState.level = mWifiTracker.level;
+        mCurrentState.statusLabel = mWifiTracker.statusLabel;
+        notifyListenersIfNecessary();
+    }
+
+    /**
      * Extract wifi state directly from broadcasts about changes in wifi state.
      */
     public void handleBroadcast(Intent intent) {

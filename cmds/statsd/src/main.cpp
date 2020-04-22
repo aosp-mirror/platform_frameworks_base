@@ -37,6 +37,7 @@ using std::shared_ptr;
 using std::make_shared;
 
 shared_ptr<StatsService> gStatsService = nullptr;
+sp<StatsSocketListener> gSocketListener = nullptr;
 
 void signalHandler(int sig) {
     if (sig == SIGPIPE) {
@@ -47,6 +48,7 @@ void signalHandler(int sig) {
         return;
     }
 
+    if (gSocketListener != nullptr) gSocketListener->stopListener();
     if (gStatsService != nullptr) gStatsService->Terminate();
     ALOGW("statsd terminated on receiving signal %d.", sig);
     exit(1);
@@ -92,11 +94,11 @@ int main(int /*argc*/, char** /*argv*/) {
 
     gStatsService->Startup();
 
-    sp<StatsSocketListener> socketListener = new StatsSocketListener(eventQueue);
+    gSocketListener = new StatsSocketListener(eventQueue);
 
     ALOGI("Statsd starts to listen to socket.");
     // Backlog and /proc/sys/net/unix/max_dgram_qlen set to large value
-    if (socketListener->startListener(600)) {
+    if (gSocketListener->startListener(600)) {
         exit(1);
     }
 

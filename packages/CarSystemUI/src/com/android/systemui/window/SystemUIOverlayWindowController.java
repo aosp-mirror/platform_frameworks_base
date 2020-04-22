@@ -132,6 +132,16 @@ public class SystemUIOverlayWindowController implements
         updateWindow();
     }
 
+    /** Sets the window to enable IME. */
+    public void setWindowNeedsInput(boolean needsInput) {
+        if (needsInput) {
+            mLpChanged.flags &= ~WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
+        } else {
+            mLpChanged.flags |= WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
+        }
+        updateWindow();
+    }
+
     /** Returns {@code true} if the window is visible */
     public boolean isWindowVisible() {
         return mVisible;

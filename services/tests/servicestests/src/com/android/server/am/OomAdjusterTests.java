@@ -22,12 +22,15 @@ import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentat
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 
 import android.app.ActivityManager;
 import android.app.usage.UsageStatsManagerInternal;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.PackageManagerInternal;
 
 import com.android.server.LocalServices;
 import com.android.server.wm.ActivityTaskManagerService;
@@ -45,6 +48,7 @@ import org.junit.Test;
 public class OomAdjusterTests {
     private static Context sContext;
     private static ActivityManagerService sService;
+    private static PackageManagerInternal sPackageManagerInternal;
 
     private ProcessRecord mProcessRecord;
 
@@ -55,6 +59,13 @@ public class OomAdjusterTests {
     @BeforeClass
     public static void setUpOnce() {
         sContext = getInstrumentation().getTargetContext();
+
+        sPackageManagerInternal = mock(PackageManagerInternal.class);
+        doReturn(new ComponentName("", "")).when(sPackageManagerInternal)
+                .getSystemUiServiceComponent();
+        // Remove stale instance of PackageManagerInternal if there is any
+        LocalServices.removeServiceForTest(PackageManagerInternal.class);
+        LocalServices.addService(PackageManagerInternal.class, sPackageManagerInternal);
 
         // We need to run with dexmaker share class loader to make use of
         // ActivityTaskManagerService from wm package.

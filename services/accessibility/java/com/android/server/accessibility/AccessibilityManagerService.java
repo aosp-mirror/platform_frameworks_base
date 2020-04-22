@@ -2732,7 +2732,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     public void onShellCommand(FileDescriptor in, FileDescriptor out,
             FileDescriptor err, String[] args, ShellCallback callback,
             ResultReceiver resultReceiver) {
-        new AccessibilityShellCommand(this).exec(this, in, out, err, args,
+        new AccessibilityShellCommand(this, mSystemActionPerformer).exec(this, in, out, err, args,
                 callback, resultReceiver);
     }
 

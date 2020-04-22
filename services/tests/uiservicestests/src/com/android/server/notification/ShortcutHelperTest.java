@@ -170,6 +170,9 @@ public class ShortcutHelperTest extends UiServiceTestCase {
     @Test
     public void testGetValidShortcutInfo_notLongLived() {
         ShortcutInfo si = mock(ShortcutInfo.class);
+        when(si.getPackage()).thenReturn(PKG);
+        when(si.getId()).thenReturn(SHORTCUT_ID);
+        when(si.getUserId()).thenReturn(UserHandle.USER_SYSTEM);
         when(si.isLongLived()).thenReturn(false);
         when(si.isEnabled()).thenReturn(true);
         ArrayList<ShortcutInfo> shortcuts = new ArrayList<>();
@@ -184,6 +187,9 @@ public class ShortcutHelperTest extends UiServiceTestCase {
     @Test
     public void testGetValidShortcutInfo_notSharingShortcut() {
         ShortcutInfo si = mock(ShortcutInfo.class);
+        when(si.getPackage()).thenReturn(PKG);
+        when(si.getId()).thenReturn(SHORTCUT_ID);
+        when(si.getUserId()).thenReturn(UserHandle.USER_SYSTEM);
         when(si.isLongLived()).thenReturn(true);
         when(si.isEnabled()).thenReturn(true);
         ArrayList<ShortcutInfo> shortcuts = new ArrayList<>();
@@ -198,6 +204,9 @@ public class ShortcutHelperTest extends UiServiceTestCase {
     @Test
     public void testGetValidShortcutInfo_notEnabled() {
         ShortcutInfo si = mock(ShortcutInfo.class);
+        when(si.getPackage()).thenReturn(PKG);
+        when(si.getId()).thenReturn(SHORTCUT_ID);
+        when(si.getUserId()).thenReturn(UserHandle.USER_SYSTEM);
         when(si.isLongLived()).thenReturn(true);
         when(si.isEnabled()).thenReturn(false);
         ArrayList<ShortcutInfo> shortcuts = new ArrayList<>();
@@ -212,6 +221,9 @@ public class ShortcutHelperTest extends UiServiceTestCase {
     @Test
     public void testGetValidShortcutInfo_isValid() {
         ShortcutInfo si = mock(ShortcutInfo.class);
+        when(si.getPackage()).thenReturn(PKG);
+        when(si.getId()).thenReturn(SHORTCUT_ID);
+        when(si.getUserId()).thenReturn(UserHandle.USER_SYSTEM);
         when(si.isLongLived()).thenReturn(true);
         when(si.isEnabled()).thenReturn(true);
         ArrayList<ShortcutInfo> shortcuts = new ArrayList<>();

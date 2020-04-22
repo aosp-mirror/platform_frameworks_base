@@ -1245,6 +1245,16 @@ final class AccessibilityController {
                     }
                 }
 
+                for (int i = dc.mShellRoots.size() - 1; i >= 0; --i) {
+                    final WindowInfo info = dc.mShellRoots.valueAt(i).getWindowInfo();
+                    if (info == null) {
+                        continue;
+                    }
+                    info.layer = addedWindows.size();
+                    windows.add(info);
+                    addedWindows.add(info.token);
+                }
+
                 // Remove child/parent references to windows that were not added.
                 final int windowCount = windows.size();
                 for (int i = 0; i < windowCount; i++) {

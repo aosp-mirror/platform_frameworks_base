@@ -16,7 +16,7 @@
 
 package com.android.systemui.controls.management
 
-import android.app.Activity
+import android.app.ActivityOptions
 import android.content.ComponentName
 import android.content.Intent
 import android.content.res.Configuration
@@ -41,6 +41,7 @@ import com.android.systemui.controls.controller.ControlsControllerImpl
 import com.android.systemui.controls.controller.StructureInfo
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.settings.CurrentUserTracker
+import com.android.systemui.util.LifecycleActivity
 import java.text.Collator
 import java.util.concurrent.Executor
 import java.util.function.Consumer
@@ -51,7 +52,7 @@ class ControlsFavoritingActivity @Inject constructor(
     private val controller: ControlsControllerImpl,
     private val listingController: ControlsListingController,
     broadcastDispatcher: BroadcastDispatcher
-) : Activity() {
+) : LifecycleActivity() {
 
     companion object {
         private const val TAG = "ControlsFavoritingActivity"
@@ -115,6 +116,7 @@ class ControlsFavoritingActivity @Inject constructor(
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         val collator = Collator.getInstance(resources.configuration.locales[0])
         comparator = compareBy(collator) { it.structureName }
         appName = intent.getCharSequenceExtra(EXTRA_APP)
@@ -174,12 +176,17 @@ class ControlsFavoritingActivity @Inject constructor(
                     pageIndicator.setLocation(0f)
                     pageIndicator.visibility =
                         if (listOfStructures.size > 1) View.VISIBLE else View.GONE
+
+                    ControlsAnimations.enterAnimation(pageIndicator).start()
+                    ControlsAnimations.enterAnimation(structurePager).start()
                 }
             })
         }
     }
 
     private fun setUpPager() {
+        structurePager.alpha = 0.0f
+        pageIndicator.alpha = 0.0f
         structurePager.apply {
             adapter = StructureAdapter(emptyList())
             registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
@@ -203,6 +210,15 @@ class ControlsFavoritingActivity @Inject constructor(
 
     private fun bindViews() {
         setContentView(R.layout.controls_management)
+
+        getLifecycle().addObserver(
+            ControlsAnimations.observerForAnimations(
+                requireViewById<ViewGroup>(R.id.controls_management_root),
+                window,
+                intent
+            )
+        )
+
         requireViewById<ViewStub>(R.id.stub).apply {
             layoutResource = R.layout.controls_management_favorites
             inflate()
@@ -278,7 +294,8 @@ class ControlsFavoritingActivity @Inject constructor(
                 val i = Intent()
                 i.setComponent(
                     ComponentName(context, ControlsProviderSelectorActivity::class.java))
-                context.startActivity(i)
+                startActivity(i, ActivityOptions
+                    .makeSceneTransitionAnimation(this@ControlsFavoritingActivity).toBundle())
             }
         }
 

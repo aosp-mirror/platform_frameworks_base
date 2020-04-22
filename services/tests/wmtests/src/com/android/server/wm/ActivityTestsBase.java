@@ -329,6 +329,7 @@ class ActivityTestsBase extends SystemServiceTestsBase {
         private boolean mCreateStack = true;
 
         private ActivityStack mStack;
+        private TaskDisplayArea mTaskDisplayArea;
 
         TaskBuilder(ActivityStackSupervisor supervisor) {
             mSupervisor = supervisor;
@@ -378,9 +379,16 @@ class ActivityTestsBase extends SystemServiceTestsBase {
             return this;
         }
 
+        TaskBuilder setDisplay(DisplayContent display) {
+            mTaskDisplayArea = display.getDefaultTaskDisplayArea();
+            return this;
+        }
+
         Task build() {
             if (mStack == null && mCreateStack) {
-                mStack = mSupervisor.mRootWindowContainer.getDefaultTaskDisplayArea().createStack(
+                TaskDisplayArea displayArea = mTaskDisplayArea != null ? mTaskDisplayArea
+                        : mSupervisor.mRootWindowContainer.getDefaultTaskDisplayArea();
+                mStack = displayArea.createStack(
                         WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
                 spyOn(mStack);
             }

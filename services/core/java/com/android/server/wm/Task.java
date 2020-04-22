@@ -120,6 +120,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Debug;
 import android.os.IBinder;
@@ -213,7 +214,6 @@ class Task extends WindowContainer<WindowContainer> {
 
     static final int INVALID_MIN_SIZE = -1;
     private float mShadowRadius = 0;
-    private final Rect mLastSurfaceCrop = new Rect();
 
     /**
      * The modes to control how the stack is moved to the front when calling {@link Task#reparent}.
@@ -397,6 +397,7 @@ class Task extends WindowContainer<WindowContainer> {
 
     private Dimmer mDimmer = new Dimmer(this);
     private final Rect mTmpDimBoundsRect = new Rect();
+    private final Point mLastSurfaceSize = new Point();
 
     /** @see #setCanAffectSystemUiFlags */
     private boolean mCanAffectSystemUiFlags = true;
@@ -1943,6 +1944,10 @@ class Task extends WindowContainer<WindowContainer> {
         mTmpPrevBounds.set(getBounds());
         final boolean wasInMultiWindowMode = inMultiWindowMode();
         super.onConfigurationChanged(newParentConfig);
+        // Only need to update surface size here since the super method will handle updating
+        // surface position.
+        updateSurfaceSize(getPendingTransaction());
+
         if (wasInMultiWindowMode != inMultiWindowMode()) {
             mStackSupervisor.scheduleUpdateMultiWindowMode(this);
         }
@@ -1993,6 +1998,57 @@ class Task extends WindowContainer<WindowContainer> {
         // Only do an animation into and out-of freeform mode for now. Other mode
         // transition animations are currently handled by system-ui.
         return (prevWinMode == WINDOWING_MODE_FREEFORM) != (newWinMode == WINDOWING_MODE_FREEFORM);
+    }
+
+    void updateSurfaceSize(SurfaceControl.Transaction transaction) {
+        if (mSurfaceControl == null || mCreatedByOrganizer) {
+            return;
+        }
+
+        // Apply crop to root tasks only and clear the crops of the descendant tasks.
+        int width = 0;
+        int height = 0;
+        if (isRootTask()) {
+            final Rect taskBounds = getBounds();
+            width = taskBounds.width();
+            height = taskBounds.height();
+
+            final int outset = getTaskOutset();
+            width += 2 * outset;
+            height += 2 * outset;
+        }
+        if (width == mLastSurfaceSize.x && height == mLastSurfaceSize.y) {
+            return;
+        }
+        transaction.setWindowCrop(mSurfaceControl, width, height);
+        mLastSurfaceSize.set(width, height);
+    }
+
+    /**
+     * Calculate an amount by which to expand the task bounds in each direction.
+     * Used to make room for shadows in the pinned windowing mode.
+     */
+    int getTaskOutset() {
+        // If we are drawing shadows on the task then don't outset the stack.
+        if (mWmService.mRenderShadowsInCompositor) {
+            return 0;
+        }
+        DisplayContent displayContent = getDisplayContent();
+        if (inPinnedWindowingMode() && displayContent != null) {
+            final DisplayMetrics displayMetrics = displayContent.getDisplayMetrics();
+
+            // We multiply by two to match the client logic for converting view elevation
+            // to insets, as in {@link WindowManager.LayoutParams#setSurfaceInsets}
+            return (int) Math.ceil(
+                    mWmService.dipToPixel(PINNED_WINDOWING_MODE_ELEVATION_IN_DIP, displayMetrics)
+                            * 2);
+        }
+        return 0;
+    }
+
+    @VisibleForTesting
+    Point getLastSurfaceSize() {
+        return mLastSurfaceSize;
     }
 
     @VisibleForTesting
@@ -2225,14 +2281,16 @@ class Task extends WindowContainer<WindowContainer> {
         }
         density *= DisplayMetrics.DENSITY_DEFAULT_SCALE;
 
+        // If bounds have been overridden at this level, restrict config resources to these bounds
+        // rather than the parent because the overridden bounds can be larger than the parent.
+        boolean hasOverrideBounds = false;
+
         final Rect resolvedBounds = inOutConfig.windowConfiguration.getBounds();
-        if (resolvedBounds == null) {
-            mTmpFullBounds.setEmpty();
+        if (resolvedBounds == null || resolvedBounds.isEmpty()) {
+            mTmpFullBounds.set(parentConfig.windowConfiguration.getBounds());
         } else {
             mTmpFullBounds.set(resolvedBounds);
-        }
-        if (mTmpFullBounds.isEmpty()) {
-            mTmpFullBounds.set(parentConfig.windowConfiguration.getBounds());
+            hasOverrideBounds = true;
         }
 
         Rect outAppBounds = inOutConfig.windowConfiguration.getAppBounds();
@@ -2244,7 +2302,16 @@ class Task extends WindowContainer<WindowContainer> {
         // the out bounds doesn't need to be restricted by the parent.
         final boolean insideParentBounds = compatInsets == null;
         if (insideParentBounds && windowingMode != WINDOWING_MODE_FREEFORM) {
-            final Rect parentAppBounds = parentConfig.windowConfiguration.getAppBounds();
+            Rect parentAppBounds;
+            if (hasOverrideBounds) {
+                // Since we overrode the bounds, restrict appBounds to display non-decor rather
+                // than parent. Otherwise, it won't match the overridden bounds.
+                final TaskDisplayArea displayArea = getDisplayArea();
+                parentAppBounds = displayArea != null
+                        ? displayArea.getConfiguration().windowConfiguration.getAppBounds() : null;
+            } else {
+                parentAppBounds = parentConfig.windowConfiguration.getAppBounds();
+            }
             if (parentAppBounds != null && !parentAppBounds.isEmpty()) {
                 outAppBounds.intersect(parentAppBounds);
             }
@@ -2291,13 +2358,13 @@ class Task extends WindowContainer<WindowContainer> {
 
             if (inOutConfig.screenWidthDp == Configuration.SCREEN_WIDTH_DP_UNDEFINED) {
                 final int overrideScreenWidthDp = (int) (mTmpStableBounds.width() / density);
-                inOutConfig.screenWidthDp = insideParentBounds
+                inOutConfig.screenWidthDp = (insideParentBounds && !hasOverrideBounds)
                         ? Math.min(overrideScreenWidthDp, parentConfig.screenWidthDp)
                         : overrideScreenWidthDp;
             }
             if (inOutConfig.screenHeightDp == Configuration.SCREEN_HEIGHT_DP_UNDEFINED) {
                 final int overrideScreenHeightDp = (int) (mTmpStableBounds.height() / density);
-                inOutConfig.screenHeightDp = insideParentBounds
+                inOutConfig.screenHeightDp = (insideParentBounds && !hasOverrideBounds)
                         ? Math.min(overrideScreenHeightDp, parentConfig.screenHeightDp)
                         : overrideScreenHeightDp;
             }
@@ -2344,27 +2411,27 @@ class Task extends WindowContainer<WindowContainer> {
         mTmpBounds.set(getResolvedOverrideConfiguration().windowConfiguration.getBounds());
         super.resolveOverrideConfiguration(newParentConfig);
 
-        // Resolve override windowing mode to fullscreen for home task (even on freeform
-        // display), or split-screen-secondary if in split-screen mode.
         int windowingMode =
                 getResolvedOverrideConfiguration().windowConfiguration.getWindowingMode();
+
+        // Resolve override windowing mode to fullscreen for home task (even on freeform
+        // display), or split-screen if in split-screen mode.
         if (getActivityType() == ACTIVITY_TYPE_HOME && windowingMode == WINDOWING_MODE_UNDEFINED) {
             final int parentWindowingMode = newParentConfig.windowConfiguration.getWindowingMode();
-            windowingMode = parentWindowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY
-                    ? WINDOWING_MODE_SPLIT_SCREEN_SECONDARY
-                    : WINDOWING_MODE_FULLSCREEN;
+            windowingMode = WindowConfiguration.isSplitScreenWindowingMode(parentWindowingMode)
+                    ? parentWindowingMode : WINDOWING_MODE_FULLSCREEN;
             getResolvedOverrideConfiguration().windowConfiguration.setWindowingMode(windowingMode);
         }
 
-        if (!isLeafTask()) {
-            // Compute configuration overrides for tasks that created by organizer, so that
-            // organizer can get the correct configuration from those tasks.
-            if (mCreatedByOrganizer) {
-                computeConfigResourceOverrides(getResolvedOverrideConfiguration(), newParentConfig);
-            }
-            return;
+        if (isLeafTask()) {
+            resolveLeafOnlyOverrideConfigs(newParentConfig);
         }
+        computeConfigResourceOverrides(getResolvedOverrideConfiguration(), newParentConfig);
+    }
 
+    void resolveLeafOnlyOverrideConfigs(Configuration newParentConfig) {
+        int windowingMode =
+                getResolvedOverrideConfiguration().windowConfiguration.getWindowingMode();
         if (windowingMode == WINDOWING_MODE_UNDEFINED) {
             windowingMode = newParentConfig.windowConfiguration.getWindowingMode();
         }
@@ -2404,7 +2471,6 @@ class Task extends WindowContainer<WindowContainer> {
                 outOverrideBounds.offset(0, offsetTop);
             }
         }
-        computeConfigResourceOverrides(getResolvedOverrideConfiguration(), newParentConfig);
     }
 
     /**
@@ -2801,28 +2867,6 @@ class Task extends WindowContainer<WindowContainer> {
         mRotation = rotation;
         updateSurfacePosition();
         return boundsChange;
-    }
-
-    private void updateSurfaceCrop() {
-        // Only update the crop if we are drawing shadows on the task.
-        if (mSurfaceControl == null || !mWmService.mRenderShadowsInCompositor || !isRootTask()) {
-            return;
-        }
-
-        if (inSplitScreenWindowingMode()) {
-            // inherit crop from parent
-            mTmpRect.setEmpty();
-        } else {
-            getBounds(mTmpRect);
-        }
-
-        mTmpRect.offsetTo(0, 0);
-        if (mLastSurfaceCrop.equals(mTmpRect)) {
-            return;
-        }
-
-        getPendingTransaction().setWindowCrop(mSurfaceControl, mTmpRect);
-        mLastSurfaceCrop.set(mTmpRect);
     }
 
     @Override
@@ -3453,7 +3497,6 @@ class Task extends WindowContainer<WindowContainer> {
             mTmpDimBoundsRect.offsetTo(0, 0);
         }
 
-        updateSurfaceCrop();
         updateShadowsRadius(isFocused(), getPendingTransaction());
 
         if (mDimmer.updateDims(getPendingTransaction(), mTmpDimBoundsRect)) {
@@ -4392,19 +4435,20 @@ class Task extends WindowContainer<WindowContainer> {
         // Let the old organizer know it has lost control.
         sendTaskVanished();
         mTaskOrganizer = organizer;
-        sendTaskAppeared();
-        onTaskOrganizerChanged();
-        return true;
-    }
 
-    void taskOrganizerUnregistered() {
-        mTaskOrganizer = null;
-        mTaskAppearedSent = false;
-        mLastTaskOrganizerWindowingMode = -1;
-        onTaskOrganizerChanged();
-        if (mCreatedByOrganizer) {
-            removeImmediately();
+        if (mTaskOrganizer != null) {
+            sendTaskAppeared();
+        } else {
+            // No longer managed by any organizer.
+            mTaskAppearedSent = false;
+            mLastTaskOrganizerWindowingMode = -1;
+            setForceHidden(FLAG_FORCE_HIDDEN_FOR_TASK_ORG, false /* set */);
+            if (mCreatedByOrganizer) {
+                removeImmediately();
+            }
         }
+
+        return true;
     }
 
     /**
@@ -4439,14 +4483,6 @@ class Task extends WindowContainer<WindowContainer> {
         final boolean result = setTaskOrganizer(org);
         mLastTaskOrganizerWindowingMode = windowingMode;
         return result;
-    }
-
-    private void onTaskOrganizerChanged() {
-        if (mTaskOrganizer == null) {
-            // If this task is no longer controlled by a task organizer, then reset the force hidden
-            // state
-            setForceHidden(FLAG_FORCE_HIDDEN_FOR_TASK_ORG, false /* set */);
-        }
     }
 
     @Override

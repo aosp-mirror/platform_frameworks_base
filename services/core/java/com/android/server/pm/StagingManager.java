@@ -1226,8 +1226,9 @@ public class StagingManager {
             // APEX checks. For single-package sessions, check if they contain an APEX. For
             // multi-package sessions, find all the child sessions that contain an APEX.
             if (hasApex) {
+                final List<PackageInfo> apexPackages;
                 try {
-                    final List<PackageInfo> apexPackages = submitSessionToApexService(session);
+                    apexPackages = submitSessionToApexService(session);
                     for (int i = 0, size = apexPackages.size(); i < size; i++) {
                         validateApexSignature(apexPackages.get(i));
                     }
@@ -1235,6 +1236,10 @@ public class StagingManager {
                     session.setStagedSessionFailed(e.error, e.getMessage());
                     return;
                 }
+
+                final PackageManagerInternal packageManagerInternal =
+                        LocalServices.getService(PackageManagerInternal.class);
+                packageManagerInternal.pruneCachedApksInApex(apexPackages);
             }
 
             notifyPreRebootVerification_Apex_Complete(session.sessionId);

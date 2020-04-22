@@ -1014,6 +1014,9 @@
     <!-- Margins at the left and right of the power menu and home controls widgets. -->
     <dimen name="global_actions_side_margin">16dp</dimen>
 
+    <!-- Amount to shift the layout when exiting/entering for controls activities -->
+    <dimen name="global_actions_controls_y_translation">20dp</dimen>
+
     <!-- The maximum offset in either direction that elements are moved horizontally to prevent
          burn-in on AOD. -->
     <dimen name="burn_in_prevention_offset_x">8dp</dimen>
@@ -1197,6 +1200,7 @@
          snap to the dismiss target. -->
     <dimen name="bubble_dismiss_target_padding_x">40dp</dimen>
     <dimen name="bubble_dismiss_target_padding_y">20dp</dimen>
+    <dimen name="bubble_manage_menu_elevation">4dp</dimen>
 
     <dimen name="dismiss_circle_size">52dp</dimen>
     <dimen name="dismiss_target_x_size">24dp</dimen>

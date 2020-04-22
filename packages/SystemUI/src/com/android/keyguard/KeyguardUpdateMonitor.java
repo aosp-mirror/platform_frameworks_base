@@ -1301,6 +1301,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private FingerprintManager mFpm;
     private FaceManager mFaceManager;
     private boolean mFingerprintLockedOut;
+    private TelephonyManager mTelephonyManager;
 
     /**
      * When we receive a
@@ -1728,10 +1729,22 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         }
         updateAirplaneModeState();
 
-        TelephonyManager telephony =
+        mTelephonyManager =
                 (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
-        if (telephony != null) {
-            telephony.listen(mPhoneStateListener, LISTEN_ACTIVE_DATA_SUBSCRIPTION_ID_CHANGE);
+        if (mTelephonyManager != null) {
+            mTelephonyManager.listen(mPhoneStateListener,
+                    LISTEN_ACTIVE_DATA_SUBSCRIPTION_ID_CHANGE);
+            // Set initial sim states values.
+            for (int slot = 0; slot < mTelephonyManager.getActiveModemCount(); slot++) {
+                int state = mTelephonyManager.getSimState(slot);
+                int[] subIds = mSubscriptionManager.getSubscriptionIds(slot);
+                if (subIds != null) {
+                    for (int subId : subIds) {
+                        mHandler.obtainMessage(MSG_SIM_STATE_CHANGE, subId, slot, state)
+                                .sendToTarget();
+                    }
+                }
+            }
         }
     }
 
