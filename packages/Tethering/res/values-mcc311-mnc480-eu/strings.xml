@@ -16,10 +16,9 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="no_upstream_notification_title" msgid="5026912695053828030">"Sare publikoak ez du Interneteko konexiorik"</string>
-    <string name="no_upstream_notification_message" msgid="6810713595219684058">"Gailuak ezin dira konektatu Internetera"</string>
-    <string name="no_upstream_notification_disable_button" msgid="3388523729003352854">"Desaktibatu sare publikoa"</string>
-    <string name="upstream_roaming_notification_title" msgid="2242169951273396377">"Sare publikoa aktibatuta dago"</string>
+    <string name="no_upstream_notification_title" msgid="611650570559011140">"Konexioa partekatzeko aukerak ez du Interneteko konexiorik"</string>
+    <string name="no_upstream_notification_message" msgid="6508394877641864863">"Ezin dira konektatu gailuak"</string>
+    <string name="no_upstream_notification_disable_button" msgid="7609346639290990508">"Desaktibatu konexioa partekatzeko aukera"</string>
+    <string name="upstream_roaming_notification_title" msgid="6032901176124830787">"Wifi-gunea edo konexioa partekatzeko aukera aktibatuta dago"</string>
     <string name="upstream_roaming_notification_message" msgid="7599056263326217523">"Baliteke kostu gehigarriak ordaindu behar izatea ibiltaritzan"</string>
-    <string name="upstream_roaming_notification_continue_button" msgid="693106687178152486">"Egin aurrera"</string>
 </resources>

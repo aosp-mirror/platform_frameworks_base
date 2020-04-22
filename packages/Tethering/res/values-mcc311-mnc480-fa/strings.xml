@@ -16,10 +16,9 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="no_upstream_notification_title" msgid="5026912695053828030">"نقطه اتصال به اینترنت دسترسی ندارد"</string>
-    <string name="no_upstream_notification_message" msgid="6810713595219684058">"دستگاه‌ها به اینترنت متصل نشدند"</string>
-    <string name="no_upstream_notification_disable_button" msgid="3388523729003352854">"نقطه اتصال را خاموش کنید"</string>
-    <string name="upstream_roaming_notification_title" msgid="2242169951273396377">"نقطه اتصال روشن است"</string>
+    <string name="no_upstream_notification_title" msgid="611650570559011140">"«اشتراک‌گذاری اینترنت» به اینترنت دسترسی ندارد"</string>
+    <string name="no_upstream_notification_message" msgid="6508394877641864863">"دستگاه‌ها متصل نمی‌شوند"</string>
+    <string name="no_upstream_notification_disable_button" msgid="7609346639290990508">"خاموش کردن «اشتراک‌گذاری اینترنت»"</string>
+    <string name="upstream_roaming_notification_title" msgid="6032901176124830787">"«نقطه اتصال» یا «اشتراک‌گذاری اینترنت» روشن است"</string>
     <string name="upstream_roaming_notification_message" msgid="7599056263326217523">"ممکن است درحین فراگردی تغییرات دیگر اعمال شود"</string>
-    <string name="upstream_roaming_notification_continue_button" msgid="693106687178152486">"ادامه"</string>
 </resources>

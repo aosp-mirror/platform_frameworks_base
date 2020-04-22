@@ -16,10 +16,9 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="no_upstream_notification_title" msgid="5026912695053828030">"হটস্পটৰ কোনো ইণ্টাৰনেট নাই"</string>
-    <string name="no_upstream_notification_message" msgid="6810713595219684058">"ডিভাইচসমূহ ইণ্টাৰনেটৰ সৈতে সংযোগ কৰিব নোৱাৰি"</string>
-    <string name="no_upstream_notification_disable_button" msgid="3388523729003352854">"হটস্পট অফ কৰক"</string>
-    <string name="upstream_roaming_notification_title" msgid="2242169951273396377">"হটস্পট অন হৈ আছে"</string>
+    <string name="no_upstream_notification_title" msgid="611650570559011140">"টে\'ডাৰিঙৰ ইণ্টাৰনেট নাই"</string>
+    <string name="no_upstream_notification_message" msgid="6508394877641864863">"ডিভাইচসমূহ সংযোগ কৰিব নোৱাৰি"</string>
+    <string name="no_upstream_notification_disable_button" msgid="7609346639290990508">"টে\'ডাৰিং অফ কৰক"</string>
+    <string name="upstream_roaming_notification_title" msgid="6032901176124830787">"হটস্পট অথবা টে\'ডাৰিং অন আছে"</string>
     <string name="upstream_roaming_notification_message" msgid="7599056263326217523">"ৰ\'মিঙত থাকিলে অতিৰিক্ত মাচুল প্ৰযোজ্য হ’ব পাৰে"</string>
-    <string name="upstream_roaming_notification_continue_button" msgid="693106687178152486">"অব্যাহত ৰাখক"</string>
 </resources>

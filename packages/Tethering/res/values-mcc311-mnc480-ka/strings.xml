@@ -16,10 +16,9 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="no_upstream_notification_title" msgid="5026912695053828030">"უსადენო ქსელს არ აქვს ინტერნეტზე წვდომა"</string>
-    <string name="no_upstream_notification_message" msgid="6810713595219684058">"მოწყობილობები ვერ უკავშირდება ინტერნეტს"</string>
-    <string name="no_upstream_notification_disable_button" msgid="3388523729003352854">"გამორთეთ უსადენო ქსელი"</string>
-    <string name="upstream_roaming_notification_title" msgid="2242169951273396377">"უსადენო ქსელი ჩართულია"</string>
+    <string name="no_upstream_notification_title" msgid="611650570559011140">"ტეტერინგს არ აქვს ინტერნეტზე წვდომა"</string>
+    <string name="no_upstream_notification_message" msgid="6508394877641864863">"მოწყობილობები ვერ ახერხებენ დაკავშირებას"</string>
+    <string name="no_upstream_notification_disable_button" msgid="7609346639290990508">"ტეტერინგის გამორთვა"</string>
+    <string name="upstream_roaming_notification_title" msgid="6032901176124830787">"ჩართულია უსადენო ქსელი ან ტეტერინგი"</string>
     <string name="upstream_roaming_notification_message" msgid="7599056263326217523">"როუმინგის გამოყენებისას შეიძლება ჩამოგეჭრათ დამატებითი საფასური"</string>
-    <string name="upstream_roaming_notification_continue_button" msgid="693106687178152486">"გაგრძელება"</string>
 </resources>

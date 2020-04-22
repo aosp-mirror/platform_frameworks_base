@@ -16,10 +16,9 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="no_upstream_notification_title" msgid="221932678126754542">"Kuumkohal puudub Interneti-ühendus"</string>
-    <string name="no_upstream_notification_message" msgid="4145932079850792642">"Seadmed ei saa Internetiga ühendust luua"</string>
-    <string name="no_upstream_notification_disable_button" msgid="2164668551525869970">"Lülita kuumkoht välja"</string>
-    <string name="upstream_roaming_notification_title" msgid="8448552978815624701">"Kuumkoht on sees"</string>
+    <string name="no_upstream_notification_title" msgid="5030042590486713460">"Jagamisel puudub internetiühendus"</string>
+    <string name="no_upstream_notification_message" msgid="3843613362272973447">"Seadmed ei saa ühendust luua"</string>
+    <string name="no_upstream_notification_disable_button" msgid="6385491461813507624">"Lülita jagamine välja"</string>
+    <string name="upstream_roaming_notification_title" msgid="3015912166812283303">"Kuumkoht või jagamine on sisse lülitatud"</string>
     <string name="upstream_roaming_notification_message" msgid="6724434706748439902">"Rändluse kasutamisega võivad kaasneda lisatasud"</string>
-    <string name="upstream_roaming_notification_continue_button" msgid="8390621437856451758">"Jätka"</string>
 </resources>
