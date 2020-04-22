@@ -758,20 +758,33 @@ public class PhysicsAnimationLayout extends FrameLayout {
          * or {@link #position}, ultimately animating the view's position to the final point on the
          * given path.
          *
-         * Any provided end listeners will be called when the physics-based animations kicked off by
-         * the moving target have completed - not when the target animation completes.
+         * @param pathAnimEndActions End actions to run after the animator that moves the target
+         *                           along the path ends. The views following the target may still
+         *                           be moving.
          */
         public PhysicsPropertyAnimator followAnimatedTargetAlongPath(
                 Path path,
                 int targetAnimDuration,
                 TimeInterpolator targetAnimInterpolator,
-                Runnable... endActions) {
+                Runnable... pathAnimEndActions) {
             mPathAnimator = ObjectAnimator.ofFloat(
                     this, mCurrentPointOnPathXProperty, mCurrentPointOnPathYProperty, path);
+
+            if (pathAnimEndActions != null) {
+                mPathAnimator.addListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        for (Runnable action : pathAnimEndActions) {
+                            if (action != null) {
+                                action.run();
+                            }
+                        }
+                    }
+                });
+            }
+
             mPathAnimator.setDuration(targetAnimDuration);
             mPathAnimator.setInterpolator(targetAnimInterpolator);
-
-            mPositionEndActions = endActions;
 
             // Remove translation related values since we're going to ignore them and follow the
             // path instead.
