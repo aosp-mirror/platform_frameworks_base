@@ -213,6 +213,12 @@ public class ResolverMultiProfilePagerAdapter extends AbstractMultiProfilePagerA
                 /* subtitleRes */ 0);
     }
 
+    @Override
+    protected void setupContainerPadding(View container) {
+        container.setPadding(container.getPaddingLeft(), container.getPaddingTop(),
+                container.getPaddingRight(), /* bottom */ 0);
+    }
+
     class ResolverProfileDescriptor extends ProfileDescriptor {
         private ResolverListAdapter resolverListAdapter;
         final ListView listView;
