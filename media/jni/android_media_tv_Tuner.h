@@ -191,6 +191,8 @@ struct JTuner : public RefBase {
     jobject getFrontendStatus(jintArray types);
     Result openDemux();
     jint close();
+    jint closeFrontend();
+    jint closeDemux();
 
 protected:
     virtual ~JTuner();
