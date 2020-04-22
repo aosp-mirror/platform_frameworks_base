@@ -452,10 +452,6 @@
         -->
     </string-array>
 
-    <!-- Package name for the default CellBroadcastService module [DO NOT TRANSLATE] -->
-    <string name="cellbroadcast_default_package" translatable="false">com.android.cellbroadcastservice
-    </string>
-
     <!-- If the mobile hotspot feature requires provisioning, a package name and class name
         can be provided to launch a supported application that provisions the devices.
 
