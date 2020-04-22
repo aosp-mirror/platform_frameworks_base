@@ -3296,7 +3296,7 @@ public class AccountManager {
      *         status of the account
      *         </ul>
      *         If no activity was specified and additional information is needed
-     *         from user, the returned Bundle may contains only
+     *         from user, the returned Bundle may only contain
      *         {@link #KEY_INTENT} with the {@link Intent} needed to launch the
      *         actual account creation process. If an error occurred,
      *         {@link AccountManagerFuture#getResult()} throws:
