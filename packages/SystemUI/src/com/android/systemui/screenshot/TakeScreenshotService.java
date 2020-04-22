@@ -132,7 +132,7 @@ public class TakeScreenshotService extends Service {
     @Override
     public boolean onUnbind(Intent intent) {
         if (mScreenshot != null) mScreenshot.stopScreenshot();
-        // TODO (mkephart) remove once notifications flow is fully deprecated
+        // TODO remove once notifications flow is fully deprecated
         if (mScreenshotLegacy != null) mScreenshotLegacy.stopScreenshot();
         return true;
     }
