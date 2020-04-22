@@ -118,7 +118,8 @@ StatsService::StatsService(const sp<Looper>& handlerLooper, shared_ptr<LogEventQ
                   }
               })),
       mEventQueue(queue),
-      mBootCompleteLatch({kBootCompleteTag, kUidMapReceivedTag, kAllPullersRegisteredTag}),
+      mBootCompleteTrigger({kBootCompleteTag, kUidMapReceivedTag, kAllPullersRegisteredTag},
+                           [this]() { mProcessor->onStatsdInitCompleted(getElapsedRealtimeNs()); }),
       mStatsCompanionServiceDeathRecipient(
               AIBinder_DeathRecipient_new(StatsService::statsCompanionServiceDied)) {
     mUidMap = UidMap::getInstance();
@@ -165,12 +166,6 @@ StatsService::StatsService(const sp<Looper>& handlerLooper, shared_ptr<LogEventQ
         std::thread pushedEventThread([this] { readLogs(); });
         pushedEventThread.detach();
     }
-
-    std::thread bootCompletedThread([this] {
-        mBootCompleteLatch.wait();
-        VLOG("In the boot completed thread");
-    });
-    bootCompletedThread.detach();
 }
 
 StatsService::~StatsService() {
@@ -946,7 +941,7 @@ Status StatsService::informAllUidData(const ScopedFileDescriptor& fd) {
                        packageNames,
                        installers);
 
-    mBootCompleteLatch.countDown(kUidMapReceivedTag);
+    mBootCompleteTrigger.markComplete(kUidMapReceivedTag);
     VLOG("StatsService::informAllUidData UidData proto parsed successfully.");
     return Status::ok();
 }
@@ -1066,7 +1061,7 @@ Status StatsService::bootCompleted() {
     ENFORCE_UID(AID_SYSTEM);
 
     VLOG("StatsService::bootCompleted was called");
-    mBootCompleteLatch.countDown(kBootCompleteTag);
+    mBootCompleteTrigger.markComplete(kBootCompleteTag);
     return Status::ok();
 }
 
@@ -1226,7 +1221,7 @@ Status StatsService::allPullersFromBootRegistered() {
     ENFORCE_UID(AID_SYSTEM);
 
     VLOG("StatsService::allPullersFromBootRegistered was called");
-    mBootCompleteLatch.countDown(kAllPullersRegisteredTag);
+    mBootCompleteTrigger.markComplete(kAllPullersRegisteredTag);
     return Status::ok();
 }
 
