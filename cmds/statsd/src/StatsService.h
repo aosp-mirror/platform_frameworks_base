@@ -162,11 +162,6 @@ public:
     virtual void sayHiToStatsCompanion();
 
     /**
-     * Binder call to get AppBreadcrumbReported atom.
-     */
-    virtual Status sendAppBreadcrumbAtom(int32_t label, int32_t state) override;
-
-    /**
      * Binder call to notify statsd that all pullers from boot have been registered.
      */
     virtual Status allPullersFromBootRegistered();
