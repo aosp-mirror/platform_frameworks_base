@@ -1318,7 +1318,10 @@
     <dimen name="screenrecord_dialog_padding">18dp</dimen>
     <dimen name="screenrecord_logo_size">24dp</dimen>
     <dimen name="screenrecord_status_text_size">14sp</dimen>
-    <dimen name="screenrecord_status_icon_radius">5dp</dimen>
+    <dimen name="screenrecord_status_icon_radius">7dp</dimen>
+    <dimen name="screenrecord_status_icon_width">21dp</dimen>
+    <dimen name="screenrecord_status_icon_height">17.5dp</dimen>
+    <dimen name="screenrecord_status_icon_bg_radius">8dp</dimen>
 
     <dimen name="kg_user_switcher_text_size">16sp</dimen>
 
