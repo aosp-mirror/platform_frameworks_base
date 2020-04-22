@@ -19,7 +19,7 @@ package com.android.systemui.pip.phone;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 
-import static com.android.systemui.pip.PipAnimationController.TRANSITION_DIRECTION_TO_FULLSCREEN;
+import static com.android.systemui.pip.PipAnimationController.isOutPipDirection;
 
 import android.annotation.Nullable;
 import android.app.ActivityManager;
@@ -53,6 +53,7 @@ import com.android.systemui.shared.system.InputConsumerController;
 import com.android.systemui.shared.system.PinnedStackListenerForwarder.PinnedStackListener;
 import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.shared.system.WindowManagerWrapper;
+import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.util.DeviceConfigProxy;
 import com.android.systemui.util.FloatingContentCoordinator;
 import com.android.systemui.wm.DisplayChangeController;
@@ -199,7 +200,8 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
             DeviceConfigProxy deviceConfig,
             PipBoundsHandler pipBoundsHandler,
             PipSnapAlgorithm pipSnapAlgorithm,
-            PipSurfaceTransactionHelper surfaceTransactionHelper) {
+            PipSurfaceTransactionHelper surfaceTransactionHelper,
+            Divider divider) {
         mContext = context;
         mActivityManager = ActivityManager.getService();
 
@@ -214,7 +216,7 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
         final IActivityTaskManager activityTaskManager = ActivityTaskManager.getService();
         mPipBoundsHandler = pipBoundsHandler;
         mPipTaskOrganizer = new PipTaskOrganizer(context, pipBoundsHandler,
-                surfaceTransactionHelper);
+                surfaceTransactionHelper, divider);
         mPipTaskOrganizer.registerPipTransitionCallback(this);
         mInputConsumerController = InputConsumerController.getPipInputConsumer();
         mMediaController = new PipMediaController(context, mActivityManager, broadcastDispatcher);
@@ -312,7 +314,7 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
 
     @Override
     public void onPipTransitionStarted(ComponentName activity, int direction) {
-        if (direction == TRANSITION_DIRECTION_TO_FULLSCREEN) {
+        if (isOutPipDirection(direction)) {
             // On phones, the expansion animation that happens on pip tap before restoring
             // to fullscreen makes it so that the bounds received here are the expanded
             // bounds. We want to restore to the unexpanded bounds when re-entering pip,
