@@ -24,9 +24,9 @@ import android.provider.Settings
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowInsets
+import android.view.WindowInsets.Type
 import android.view.WindowManager
 import android.widget.ImageView
-import android.widget.TextView
 
 import com.android.systemui.R
 
@@ -45,7 +45,7 @@ class DetailDialog(
         private const val PANEL_TOP_OFFSET = "systemui.controls_panel_top_offset"
     }
 
-    lateinit var activityView: ActivityView
+    var activityView = ActivityView(context, null, 0, false)
 
     val stateCallback: ActivityView.StateCallback = object : ActivityView.StateCallback() {
         override fun onActivityViewReady(view: ActivityView) {
@@ -67,24 +67,14 @@ class DetailDialog(
 
     init {
         window.setType(WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY)
-
         setContentView(R.layout.controls_detail_dialog)
 
-        activityView = ActivityView(context, null, 0, false)
         requireViewById<ViewGroup>(R.id.controls_activity_view).apply {
             addView(activityView)
         }
 
         requireViewById<ImageView>(R.id.control_detail_close).apply {
             setOnClickListener { _: View -> dismiss() }
-        }
-
-        requireViewById<TextView>(R.id.title).apply {
-            setText(cvh.title.text)
-        }
-
-        requireViewById<TextView>(R.id.subtitle).apply {
-            setText(cvh.subtitle.text)
         }
 
         requireViewById<ImageView>(R.id.control_detail_open_in_app).apply {
@@ -97,15 +87,15 @@ class DetailDialog(
 
         // consume all insets to achieve slide under effect
         window.getDecorView().setOnApplyWindowInsetsListener {
-            v: View, insets: WindowInsets ->
+            _: View, insets: WindowInsets ->
                 activityView.apply {
                     val l = getPaddingLeft()
                     val t = getPaddingTop()
                     val r = getPaddingRight()
-                    setPadding(l, t, r, insets.getSystemWindowInsets().bottom)
+                    setPadding(l, t, r, insets.getInsets(Type.systemBars()).bottom)
                 }
 
-                insets.consumeSystemWindowInsets()
+                WindowInsets.CONSUMED
         }
 
         requireViewById<ViewGroup>(R.id.control_detail_root).apply {
@@ -118,6 +108,9 @@ class DetailDialog(
             val lp = getLayoutParams() as ViewGroup.MarginLayoutParams
             lp.topMargin = offsetInPx
             setLayoutParams(lp)
+
+            setOnClickListener { dismiss() }
+            (getParent() as View).setOnClickListener { dismiss() }
         }
     }
 
