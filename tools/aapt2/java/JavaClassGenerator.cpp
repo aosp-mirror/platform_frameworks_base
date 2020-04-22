@@ -218,13 +218,10 @@ struct StyleableAttr {
 static bool operator<(const StyleableAttr& lhs, const StyleableAttr& rhs) {
   const ResourceId lhs_id = lhs.attr_ref->id.value_or_default(ResourceId(0));
   const ResourceId rhs_id = rhs.attr_ref->id.value_or_default(ResourceId(0));
-  if (lhs_id < rhs_id) {
-    return true;
-  } else if (lhs_id > rhs_id) {
-    return false;
-  } else {
+  if (lhs_id == rhs_id) {
     return lhs.attr_ref->name.value() < rhs.attr_ref->name.value();
   }
+  return cmp_ids_dynamic_after_framework(lhs_id, rhs_id);
 }
 
 void JavaClassGenerator::ProcessStyleable(const ResourceNameRef& name, const ResourceId& id,

@@ -551,4 +551,39 @@ TEST(JavaClassGeneratorTest, OnlyGenerateRText) {
   ASSERT_TRUE(generator.Generate("android", nullptr));
 }
 
+TEST(JavaClassGeneratorTest, SortsDynamicAttributesAfterFrameworkAttributes) {
+  std::unique_ptr<ResourceTable> table =
+      test::ResourceTableBuilder()
+          .SetPackageId("android", 0x01)
+          .SetPackageId("lib", 0x00)
+          .AddValue("android:attr/framework_attr", ResourceId(0x01010000),
+                    test::AttributeBuilder().Build())
+          .AddValue("lib:attr/dynamic_attr", ResourceId(0x00010000),
+                    test::AttributeBuilder().Build())
+          .AddValue("lib:styleable/MyStyleable", ResourceId(0x00030000),
+                    test::StyleableBuilder()
+                        .AddItem("android:attr/framework_attr", ResourceId(0x01010000))
+                        .AddItem("lib:attr/dynamic_attr", ResourceId(0x00010000))
+                        .Build())
+          .Build();
+
+  std::unique_ptr<IAaptContext> context =
+      test::ContextBuilder()
+          .AddSymbolSource(util::make_unique<ResourceTableSymbolSource>(table.get()))
+          .SetNameManglerPolicy(NameManglerPolicy{"custom"})
+          .SetCompilationPackage("custom")
+          .Build();
+  JavaClassGenerator generator(context.get(), table.get(), {});
+
+  std::string output;
+  StringOutputStream out(&output);
+  EXPECT_TRUE(generator.Generate("lib", &out));
+  out.Flush();
+
+  EXPECT_THAT(output, HasSubstr("public static final int[] MyStyleable={"));
+  EXPECT_THAT(output, HasSubstr("0x01010000, 0x00010000"));
+  EXPECT_THAT(output, HasSubstr("public static final int MyStyleable_android_framework_attr=0;"));
+  EXPECT_THAT(output, HasSubstr("public static final int MyStyleable_dynamic_attr=1;"));
+}
+
 }  // namespace aapt

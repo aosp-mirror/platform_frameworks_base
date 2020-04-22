@@ -279,6 +279,19 @@ inline std::string to_string(const ResourceId& id) {
   return id.to_string();
 }
 
+// Helper to compare resource IDs, moving dynamic IDs after framework IDs.
+inline bool cmp_ids_dynamic_after_framework(const ResourceId& a, const ResourceId& b) {
+  // If one of a and b is from the framework package (package ID 0x01), and the
+  // other is a dynamic ID (package ID 0x00), then put the dynamic ID after the
+  // framework ID. This ensures that when AssetManager resolves the dynamic IDs,
+  // they will be in sorted order as expected by AssetManager.
+  if ((a.package_id() == kFrameworkPackageId && b.package_id() == 0x00) ||
+      (a.package_id() == 0x00 && b.package_id() == kFrameworkPackageId)) {
+    return b < a;
+  }
+  return a < b;
+}
+
 //
 // ResourceType implementation.
 //

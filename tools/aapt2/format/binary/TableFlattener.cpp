@@ -59,22 +59,10 @@ static void strcpy16_htod(uint16_t* dst, size_t len, const StringPiece16& src) {
   dst[i] = 0;
 }
 
-static bool cmp_style_ids(ResourceId a, ResourceId b) {
-  // If one of a and b is from the framework package (package ID 0x01), and the
-  // other is a dynamic ID (package ID 0x00), then put the dynamic ID after the
-  // framework ID. This ensures that when AssetManager resolves the dynamic IDs,
-  // they will be in sorted order as expected by AssetManager.
-  if ((a.package_id() == kFrameworkPackageId && b.package_id() == 0x00) ||
-      (a.package_id() == 0x00 && b.package_id() == kFrameworkPackageId)) {
-    return b < a;
-  }
-  return a < b;
-}
-
 static bool cmp_style_entries(const Style::Entry& a, const Style::Entry& b) {
   if (a.key.id) {
     if (b.key.id) {
-      return cmp_style_ids(a.key.id.value(), b.key.id.value());
+      return cmp_ids_dynamic_after_framework(a.key.id.value(), b.key.id.value());
     }
     return true;
   } else if (!b.key.id) {
