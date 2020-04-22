@@ -3137,7 +3137,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         commitVisibility(false /* visible */, true /* performLayout */);
 
         getDisplayContent().mOpeningApps.remove(this);
-        getDisplayContent().mChangingContainers.remove(this);
         getDisplayContent().mUnknownAppVisibilityController.appRemovedOrHidden(this);
         mWmService.mTaskSnapshotController.onAppRemoved(this);
         mStackSupervisor.getActivityMetricsLogger().notifyActivityRemoved(this);
@@ -6130,19 +6129,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     @Override
     void cancelAnimation() {
-        cancelAnimationOnly();
-        clearThumbnail();
-        mSurfaceFreezer.unfreeze(getPendingTransaction());
-    }
-
-    /**
-     * This only cancels the animation. It doesn't do other teardown like cleaning-up thumbnail
-     * or interim leashes.
-     * <p>
-     * Used when canceling in preparation for starting a new animation.
-     */
-    void cancelAnimationOnly() {
         super.cancelAnimation();
+        clearThumbnail();
     }
 
     @VisibleForTesting
