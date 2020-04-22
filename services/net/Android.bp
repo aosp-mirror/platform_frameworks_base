@@ -41,6 +41,7 @@ java_library {
     sdk_version: "module_current",
     libs: [
         "unsupportedappusage",
+        "framework-wifi-util-lib",
     ],
     static_libs: [
         "dnsresolver_aidl_interface-V2-java",
