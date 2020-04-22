@@ -13,14 +13,7 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.android.theme.icon.vessel"
-          android:versionCode="1"
-          android:versionName="1.0">
-    <overlay
-        android:targetPackage="android"
-        android:category="android.theme.customization.adaptive_icon_shape"
-        android:priority="1"/>
-
-    <application android:label="@string/icon_shape_vessel_overlay" android:hasCode="false"/>
-</manifest>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- Headline / Body font Noto Serif / Source Sans Pro overlay -->
+    <string name="font_overlay" translatable="false">Lustria</string>
+</resources>

@@ -23,5 +23,7 @@
     <dimen name="config_dialogCornerRadius">0dp</dimen>
     <!-- Corner radius for bottom sheet system dialogs -->
     <dimen name="config_bottomDialogCornerRadius">0dp</dimen>
+    <!-- Tile stroke width -->
+    <dimen name="config_qsTileStrokeWidthInactive">10dp</dimen>
 
 </resources>

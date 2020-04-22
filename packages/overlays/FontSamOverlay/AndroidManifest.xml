@@ -14,13 +14,16 @@
   ~ limitations under the License.
   -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.android.theme.icon.vessel"
-          android:versionCode="1"
-          android:versionName="1.0">
-    <overlay
-        android:targetPackage="android"
-        android:category="android.theme.customization.adaptive_icon_shape"
+    package="com.android.theme.font.sam"
+    android:versionCode="1"
+    android:versionName="1.0">
+    <overlay android:targetPackage="android"
+        android:category="android.theme.customization.font"
         android:priority="1"/>
 
-    <application android:label="@string/icon_shape_vessel_overlay" android:hasCode="false"/>
+    <application android:label="@string/font_overlay" android:hasCode="false">
+        <meta-data
+            android:name="android.theme.customization.REQUIRED_SYSTEM_FONTS"
+            android:value="fraunces,fraunces-semi-bold,karla,karla-bold" />
+    </application>
 </manifest>
