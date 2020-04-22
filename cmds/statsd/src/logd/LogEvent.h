@@ -70,7 +70,7 @@ public:
     explicit LogEvent(int64_t wallClockTimestampNs, int64_t elapsedTimestampNs,
                       const InstallTrainInfo& installTrainInfo);
 
-    ~LogEvent();
+    ~LogEvent() {}
 
     /**
      * Get the timestamp associated with this event.
@@ -184,6 +184,12 @@ public:
         return mExclusiveStateFieldIndex;
     }
 
+    // If a reset state is not sent in the StatsEvent, returns -1. Note that a
+    // reset state is sent if and only if a reset should be triggered.
+    inline int getResetState() const {
+        return mResetState;
+    }
+
     inline LogEvent makeCopy() {
         return LogEvent(*this);
     }
@@ -202,6 +208,14 @@ public:
             }
         }
         return BAD_INDEX;
+    }
+
+    bool isValid() const {
+        return mValid;
+    }
+
+    int32_t getErrorBitmask() const {
+        return mErrorBitmask;
     }
 
 private:
@@ -230,12 +244,13 @@ private:
     bool checkPreviousValueType(Type expected);
 
     /**
-     * The below three variables are only valid during the execution of
+     * The below two variables are only valid during the execution of
      * parseBuffer. There are no guarantees about the state of these variables
      * before/after.
      */
     uint8_t* mBuf;
     uint32_t mRemainingLen; // number of valid bytes left in the buffer being parsed
+
     bool mValid = true; // stores whether the event we received from the socket is valid
 
     /**
@@ -287,19 +302,15 @@ private:
     // matching.
     std::vector<FieldValue> mValues;
 
-    // This field is used when statsD wants to create log event object and write fields to it. After
-    // calling init() function, this object would be destroyed to save memory usage.
-    // When the log event is created from log msg, this field is never initiated.
-    android_log_context mContext = NULL;
-
     // The timestamp set by the logd.
     int64_t mLogdTimestampNs;
 
     // The elapsed timestamp set by statsd log writer.
     int64_t mElapsedTimestampNs;
 
-    // The atom tag of the event.
-    int mTagId;
+    // The atom tag of the event (defaults to 0 if client does not
+    // appropriately set the atom id).
+    int mTagId = 0;
 
     // The uid of the logging client (defaults to -1).
     int32_t mLogUid = -1;
@@ -307,11 +318,15 @@ private:
     // The pid of the logging client (defaults to -1).
     int32_t mLogPid = -1;
 
+    // Bitmask of errors sent by StatsEvent/AStatsEvent.
+    int32_t mErrorBitmask = 0;
+
     // Annotations
     bool mTruncateTimestamp = false;
     int mUidFieldIndex = -1;
     int mAttributionChainIndex = -1;
     int mExclusiveStateFieldIndex = -1;
+    int mResetState = -1;
 };
 
 void writeExperimentIdsToProto(const std::vector<int64_t>& experimentIds, std::vector<uint8_t>* protoOut);

@@ -114,14 +114,6 @@ LogEvent::LogEvent(int64_t wallClockTimestampNs, int64_t elapsedTimestampNs,
     mValues.push_back(FieldValue(Field(mTagId, getSimpleField(4)), Value(trainInfo.status)));
 }
 
-LogEvent::~LogEvent() {
-    if (mContext) {
-        // This is for the case when LogEvent is created using the test interface
-        // but init() isn't called.
-        android_log_destroy(&mContext);
-    }
-}
-
 void LogEvent::parseInt32(int32_t* pos, int32_t depth, bool* last, uint8_t numAnnotations) {
     int32_t value = readNextValue<int32_t>();
     addToValues(pos, depth, value, last);
@@ -303,8 +295,7 @@ void LogEvent::parseTriggerStateResetAnnotation(uint8_t annotationType) {
         return;
     }
 
-    int32_t resetState = readNextValue<int32_t>();
-    mValues[mValues.size() - 1].mAnnotations.setResetState(resetState);
+    mResetState = readNextValue<int32_t>();
 }
 
 void LogEvent::parseStateNestedAnnotation(uint8_t annotationType) {
@@ -386,7 +377,6 @@ bool LogEvent::parseBuffer(uint8_t* buf, size_t len) {
         typeInfo = readNextValue<uint8_t>();
         uint8_t typeId = getTypeId(typeInfo);
 
-        // TODO(b/144373276): handle errors passed to the socket
         switch (typeId) {
             case BOOL_TYPE:
                 parseBool(pos, /*depth=*/0, last, getNumAnnotations(typeInfo));
@@ -413,8 +403,13 @@ bool LogEvent::parseBuffer(uint8_t* buf, size_t len) {
                 parseAttributionChain(pos, /*depth=*/0, last, getNumAnnotations(typeInfo));
                 if (mAttributionChainIndex == -1) mAttributionChainIndex = pos[0];
                 break;
+            case ERROR_TYPE:
+                mErrorBitmask = readNextValue<int32_t>();
+                mValid = false;
+                break;
             default:
                 mValid = false;
+                break;
         }
     }
 

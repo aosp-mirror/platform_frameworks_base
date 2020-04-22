@@ -6093,7 +6093,8 @@ public class BatteryStatsImpl extends BatteryStats {
         return array;
     }
 
-    public void noteNetworkInterfaceTypeLocked(String iface, int networkType) {
+    /** @hide */
+    public void noteNetworkInterfaceType(String iface, int networkType) {
         if (TextUtils.isEmpty(iface)) return;
 
         synchronized (mModemNetworkLock) {

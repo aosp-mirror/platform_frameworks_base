@@ -422,8 +422,8 @@ public class PackageItemInfo {
     }
 
     public void writeToParcel(Parcel dest, int parcelableFlags) {
-        dest.writeString(name);
-        dest.writeString(packageName);
+        dest.writeString8(name);
+        dest.writeString8(packageName);
         dest.writeInt(labelRes);
         TextUtils.writeToParcel(nonLocalizedLabel, dest, parcelableFlags);
         dest.writeInt(icon);
@@ -452,8 +452,8 @@ public class PackageItemInfo {
     }
 
     protected PackageItemInfo(Parcel source) {
-        name = source.readString();
-        packageName = source.readString();
+        name = source.readString8();
+        packageName = source.readString8();
         labelRes = source.readInt();
         nonLocalizedLabel
                 = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);

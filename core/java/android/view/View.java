@@ -144,6 +144,7 @@ import android.widget.ScrollBarDrawable;
 
 import com.android.internal.R;
 import com.android.internal.util.FrameworkStatsLog;
+import com.android.internal.view.ScrollCaptureInternal;
 import com.android.internal.view.TooltipPopup;
 import com.android.internal.view.menu.MenuBuilder;
 import com.android.internal.widget.ScrollBarUtils;
@@ -167,6 +168,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Queue;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
@@ -1311,7 +1313,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public static final int AUTOFILL_TYPE_LIST = 3;
 
-
     /**
      * Autofill type for a field that contains a date, which is represented by a long representing
      * the number of milliseconds since the standard base time known as "the epoch", namely
@@ -1441,6 +1442,58 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public static final int IMPORTANT_FOR_CONTENT_CAPTURE_NO_EXCLUDE_DESCENDANTS = 0x8;
 
+    /** {@hide} */
+    @IntDef(flag = true, prefix = {"SCROLL_CAPTURE_HINT_"},
+            value = {
+                    SCROLL_CAPTURE_HINT_AUTO,
+                    SCROLL_CAPTURE_HINT_EXCLUDE,
+                    SCROLL_CAPTURE_HINT_INCLUDE,
+                    SCROLL_CAPTURE_HINT_EXCLUDE_DESCENDANTS
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ScrollCaptureHint {}
+
+    /**
+     * The content of this view will be considered for scroll capture if scrolling is possible.
+     *
+     * @see #getScrollCaptureHint()
+     * @see #setScrollCaptureHint(int)
+     * @hide
+     */
+    public static final int SCROLL_CAPTURE_HINT_AUTO = 0;
+
+    /**
+     * Explicitly exclcude this view as a potential scroll capture target. The system will not
+     * consider it. Mutually exclusive with {@link #SCROLL_CAPTURE_HINT_INCLUDE}, which this flag
+     * takes precedence over.
+     *
+     * @see #getScrollCaptureHint()
+     * @see #setScrollCaptureHint(int)
+     * @hide
+     */
+    public static final int SCROLL_CAPTURE_HINT_EXCLUDE = 0x1;
+
+    /**
+     * Explicitly include this view as a potential scroll capture target. When locating a scroll
+     * capture target, this view will be prioritized before others without this flag. Mutually
+     * exclusive with {@link #SCROLL_CAPTURE_HINT_EXCLUDE}, which takes precedence.
+     *
+     * @see #getScrollCaptureHint()
+     * @see #setScrollCaptureHint(int)
+     * @hide
+     */
+    public static final int SCROLL_CAPTURE_HINT_INCLUDE = 0x2;
+
+    /**
+     * Explicitly exclude all children of this view as potential scroll capture targets. This view
+     * is unaffected. Note: Excluded children are not considered, regardless of {@link
+     * #SCROLL_CAPTURE_HINT_INCLUDE}.
+     *
+     * @see #getScrollCaptureHint()
+     * @see #setScrollCaptureHint(int)
+     * @hide
+     */
+    public static final int SCROLL_CAPTURE_HINT_EXCLUDE_DESCENDANTS = 0x4;
 
     /**
      * This view is enabled. Interpretation varies by subclass.
@@ -3430,6 +3483,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *                         11       PFLAG4_CONTENT_CAPTURE_IMPORTANCE_MASK
      *                        1         PFLAG4_FRAMEWORK_OPTIONAL_FITS_SYSTEM_WINDOWS
      *                       1          PFLAG4_AUTOFILL_HIDE_HIGHLIGHT
+     *                     11           PFLAG4_SCROLL_CAPTURE_HINT_MASK
      * |-------|-------|-------|-------|
      */
 
@@ -3476,6 +3530,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Flag indicating the field should not have yellow highlight when autofilled.
      */
     private static final int PFLAG4_AUTOFILL_HIDE_HIGHLIGHT = 0x200;
+
+    /**
+     * Shift for the bits in {@link #mPrivateFlags4} related to scroll capture.
+     */
+    static final int PFLAG4_SCROLL_CAPTURE_HINT_SHIFT = 10;
+
+    static final int PFLAG4_SCROLL_CAPTURE_HINT_MASK = (SCROLL_CAPTURE_HINT_INCLUDE
+            | SCROLL_CAPTURE_HINT_EXCLUDE | SCROLL_CAPTURE_HINT_EXCLUDE_DESCENDANTS)
+            << PFLAG4_SCROLL_CAPTURE_HINT_SHIFT;
 
     /* End of masks for mPrivateFlags4 */
 
@@ -4690,6 +4753,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          * Used to track {@link #mSystemGestureExclusionRects}
          */
         public RenderNode.PositionUpdateListener mPositionUpdateListener;
+
+        /**
+         * Allows the application to implement custom scroll capture support.
+         */
+        ScrollCaptureCallback mScrollCaptureCallback;
     }
 
     @UnsupportedAppUsage
@@ -5940,6 +6008,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     break;
                 case R.styleable.View_forceDarkAllowed:
                     mRenderNode.setForceDarkAllowed(a.getBoolean(attr, true));
+                    break;
+                case R.styleable.View_scrollCaptureHint:
+                    setScrollCaptureHint((a.getInt(attr, SCROLL_CAPTURE_HINT_AUTO)));
                     break;
             }
         }
@@ -29091,6 +29162,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         int mLeashedParentAccessibilityViewId;
 
         /**
+         *
+         */
+        ScrollCaptureInternal mScrollCaptureInternal;
+
+        /**
          * Creates a new set of attachment information with the specified
          * events handler and thread.
          *
@@ -29149,6 +29225,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
 
             return events;
+        }
+
+        @Nullable
+        ScrollCaptureInternal getScrollCaptureInternal() {
+            if (mScrollCaptureInternal != null) {
+                mScrollCaptureInternal = new ScrollCaptureInternal();
+            }
+            return mScrollCaptureInternal;
         }
     }
 
@@ -29680,6 +29764,104 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         @Override
         public boolean test(View view) {
             return (view.mLabelForId == mLabeledId);
+        }
+    }
+
+
+    /**
+     * Returns the current scroll capture hint for this view.
+     *
+     * @return the current scroll capture hint
+     *
+     * @hide
+     */
+    @ScrollCaptureHint
+    public int getScrollCaptureHint() {
+        return (mPrivateFlags4 & PFLAG4_SCROLL_CAPTURE_HINT_MASK)
+                >> PFLAG4_SCROLL_CAPTURE_HINT_SHIFT;
+    }
+
+    /**
+     * Sets the scroll capture hint for this View. These flags affect the search for a potential
+     * scroll capture targets.
+     *
+     * @param hint the scrollCaptureHint flags value to set
+     *
+     * @hide
+     */
+    public void setScrollCaptureHint(@ScrollCaptureHint int hint) {
+        mPrivateFlags4 &= ~PFLAG4_SCROLL_CAPTURE_HINT_MASK;
+        mPrivateFlags4 |= ((hint << PFLAG4_SCROLL_CAPTURE_HINT_SHIFT)
+                & PFLAG4_SCROLL_CAPTURE_HINT_MASK);
+    }
+
+    /**
+     * Sets the callback to receive scroll capture requests. This component is the adapter between
+     * the scroll capture API and application UI code. If no callback is set, the system may provide
+     * an implementation. Any value provided here will take precedence over a system version.
+     * <p>
+     * This view will be ignored when {@link #SCROLL_CAPTURE_HINT_EXCLUDE} is set in its {@link
+     * #setScrollCaptureHint(int) scrollCaptureHint}, regardless whether a callback has been set.
+     * <p>
+     * It is recommended to set the scroll capture hint {@link #SCROLL_CAPTURE_HINT_INCLUDE} when
+     * setting a custom callback to help ensure it is selected as the target.
+     *
+     * @param callback the new callback to assign
+     *
+     * @hide
+     */
+    public void setScrollCaptureCallback(@Nullable ScrollCaptureCallback callback) {
+        getListenerInfo().mScrollCaptureCallback = callback;
+    }
+
+    /** {@hide} */
+    @Nullable
+    public ScrollCaptureCallback createScrollCaptureCallbackInternal(@NonNull Rect localVisibleRect,
+            @NonNull Point windowOffset) {
+        if (mAttachInfo == null) {
+            return null;
+        }
+        if (mAttachInfo.mScrollCaptureInternal == null) {
+            mAttachInfo.mScrollCaptureInternal = new ScrollCaptureInternal();
+        }
+        return mAttachInfo.mScrollCaptureInternal.requestCallback(this, localVisibleRect,
+                windowOffset);
+    }
+
+    /**
+     * Called when scroll capture is requested, to search for appropriate content to scroll. If
+     * applicable, this view adds itself to the provided list for consideration, subject to the
+     * flags set by {@link #setScrollCaptureHint}.
+     *
+     * @param localVisibleRect the local visible rect of this view
+     * @param windowOffset     the offset of localVisibleRect within the window
+     * @param targets          a queue which collects potential targets
+     *
+     * @throws IllegalStateException if this view is not attached to a window
+     * @hide
+     */
+    public void dispatchScrollCaptureSearch(@NonNull Rect localVisibleRect,
+            @NonNull Point windowOffset, @NonNull Queue<ScrollCaptureTarget> targets) {
+        int hint = getScrollCaptureHint();
+        if ((hint & SCROLL_CAPTURE_HINT_EXCLUDE) != 0) {
+            return;
+        }
+
+        // Get a callback provided by the framework, library or application.
+        ScrollCaptureCallback callback =
+                (mListenerInfo == null) ? null : mListenerInfo.mScrollCaptureCallback;
+
+        // Try internal support for standard scrolling containers.
+        if (callback == null) {
+            callback = createScrollCaptureCallbackInternal(localVisibleRect, windowOffset);
+        }
+
+        // If found, then add it to the list.
+        if (callback != null) {
+            // Add to the list for consideration
+            Point offset = new Point(windowOffset.x, windowOffset.y);
+            Rect rect = new Rect(localVisibleRect);
+            targets.add(new ScrollCaptureTarget(this, rect, offset, callback));
         }
     }
 

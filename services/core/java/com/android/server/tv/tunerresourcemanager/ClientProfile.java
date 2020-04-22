@@ -27,6 +27,7 @@ import java.util.Set;
 public final class ClientProfile {
 
     public static final int INVALID_GROUP_ID = -1;
+    public static final int INVALID_RESOURCE_ID = -1;
 
     /**
      * Client id sent to the client when registering with
@@ -56,7 +57,6 @@ public final class ClientProfile {
      * also lose their resources.
      */
     private int mGroupId = INVALID_GROUP_ID;
-
     /**
      * Optional nice value for TRM to reduce client’s priority.
      */
@@ -71,6 +71,11 @@ public final class ClientProfile {
      * List of the Lnb ids that are used by the current client.
      */
     private Set<Integer> mUsingLnbIds = new HashSet<>();
+
+    /**
+     * List of the Cas system ids that are used by the current client.
+     */
+    private int mUsingCasSystemId = INVALID_RESOURCE_ID;
 
     /**
      * Optional arbitrary priority value given by the client.
@@ -172,11 +177,32 @@ public final class ClientProfile {
     }
 
     /**
+     * Set when the client starts to use a Cas system.
+     *
+     * @param casSystemId cas being used.
+     */
+    public void useCas(int casSystemId) {
+        mUsingCasSystemId = casSystemId;
+    }
+
+    public int getInUseCasSystemId() {
+        return mUsingCasSystemId;
+    }
+
+    /**
+     * Called when the client released a Cas System.
+     */
+    public void releaseCas() {
+        mUsingCasSystemId = INVALID_RESOURCE_ID;
+    }
+
+    /**
      * Called to reclaim all the resources being used by the current client.
      */
     public void reclaimAllResources() {
         mUsingFrontendIds.clear();
         mUsingLnbIds.clear();
+        mUsingCasSystemId = INVALID_RESOURCE_ID;
     }
 
     @Override

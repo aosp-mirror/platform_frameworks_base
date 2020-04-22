@@ -41,6 +41,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_NOTIFICATION_SHADE;
+import static android.view.WindowManager.LayoutParams.TYPE_SCREENSHOT;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_VOICE_INTERACTION;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
@@ -74,6 +75,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 
 import android.annotation.SuppressLint;
+import android.app.ActivityTaskManager;
 import android.app.WindowConfiguration;
 import android.content.res.Configuration;
 import android.graphics.Rect;
@@ -1205,6 +1207,31 @@ public class DisplayContentTests extends WindowTestsBase {
 
         assertNull(taskDisplayArea.getRootHomeTask());
         assertNull(taskDisplayArea.getOrCreateRootHomeTask());
+    }
+
+    @Test
+    public void testFindScrollCaptureTargetWindow_behindWindow() {
+        DisplayContent display = createNewDisplay();
+        ActivityStack stack = createTaskStackOnDisplay(display);
+        Task task = createTaskInStack(stack, 0 /* userId */);
+        WindowState activityWindow = createAppWindow(task, TYPE_APPLICATION, "App Window");
+        WindowState behindWindow = createWindow(null, TYPE_SCREENSHOT, display, "Screenshot");
+
+        WindowState result = display.findScrollCaptureTargetWindow(behindWindow,
+                ActivityTaskManager.INVALID_TASK_ID);
+        assertEquals(activityWindow, result);
+    }
+
+    @Test
+    public void testFindScrollCaptureTargetWindow_taskId() {
+        DisplayContent display = createNewDisplay();
+        ActivityStack stack = createTaskStackOnDisplay(display);
+        Task task = createTaskInStack(stack, 0 /* userId */);
+        WindowState window = createAppWindow(task, TYPE_APPLICATION, "App Window");
+        WindowState behindWindow = createWindow(null, TYPE_SCREENSHOT, display, "Screenshot");
+
+        WindowState result = display.findScrollCaptureTargetWindow(null, task.mTaskId);
+        assertEquals(window, result);
     }
 
     private boolean isOptionsPanelAtRight(int displayId) {

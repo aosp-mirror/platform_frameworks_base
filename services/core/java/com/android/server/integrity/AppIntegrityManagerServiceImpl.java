@@ -27,6 +27,7 @@ import static android.content.integrity.InstallerAllowedByManifestFormula.INSTAL
 import static android.content.integrity.IntegrityUtils.getHexDigest;
 import static android.content.pm.PackageManager.EXTRA_VERIFICATION_ID;
 
+import android.annotation.BinderThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.BroadcastReceiver;
@@ -50,7 +51,6 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Slog;
@@ -89,9 +89,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import java.util.function.Supplier;
 
 /** Implementation of {@link AppIntegrityManagerService}. */
 public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
@@ -184,9 +184,10 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
     }
 
     @Override
+    @BinderThread
     public void updateRuleSet(
             String version, ParceledListSlice<Rule> rules, IntentSender statusReceiver) {
-        String ruleProvider = getCallerPackageNameOrThrow();
+        String ruleProvider = getCallerPackageNameOrThrow(Binder.getCallingUid());
 
         mHandler.post(
                 () -> {
@@ -220,8 +221,9 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
     }
 
     @Override
+    @BinderThread
     public String getCurrentRuleSetVersion() {
-        getCallerPackageNameOrThrow();
+        getCallerPackageNameOrThrow(Binder.getCallingUid());
 
         RuleMetadata ruleMetadata = mIntegrityFileManager.readMetadata();
         return (ruleMetadata != null && ruleMetadata.getVersion() != null)
@@ -230,8 +232,9 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
     }
 
     @Override
+    @BinderThread
     public String getCurrentRuleSetProvider() {
-        getCallerPackageNameOrThrow();
+        getCallerPackageNameOrThrow(Binder.getCallingUid());
 
         RuleMetadata ruleMetadata = mIntegrityFileManager.readMetadata();
         return (ruleMetadata != null && ruleMetadata.getRuleProvider() != null)
@@ -251,8 +254,8 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
     }
 
     @Override
-    public List<String> getWhitelistedRuleProviders() throws RemoteException {
-        return getAllowedRuleProviders();
+    public List<String> getWhitelistedRuleProviders() {
+        return getAllowedRuleProviderSystemApps();
     }
 
     private void handleIntegrityVerification(Intent intent) {
@@ -367,23 +370,9 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
             return UNKNOWN_INSTALLER;
         }
 
-        try {
-            int actualInstallerUid =
-                    mContext.getPackageManager().getPackageUid(installer, /* flags= */ 0);
-            if (actualInstallerUid != installerUid) {
-                // Installer package name can be faked but the installerUid cannot.
-                Slog.e(
-                        TAG,
-                        "Installer "
-                                + installer
-                                + " has UID "
-                                + actualInstallerUid
-                                + " which doesn't match alleged installer UID "
-                                + installerUid);
-                return UNKNOWN_INSTALLER;
-            }
-        } catch (PackageManager.NameNotFoundException e) {
-            Slog.e(TAG, "Installer package " + installer + " not found.");
+        // Verify that the installer UID actually contains the package. Note that comparing UIDs
+        // is not safe since context's uid can change in different settings; e.g. Android Auto.
+        if (!getPackageListForUid(installerUid).contains(installer)) {
             return UNKNOWN_INSTALLER;
         }
 
@@ -398,14 +387,13 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
                 Slog.e(TAG, "Installer is package installer but originating UID not found.");
                 return UNKNOWN_INSTALLER;
             }
-            String[] installerPackages =
-                    mContext.getPackageManager().getPackagesForUid(originatingUid);
-            if (installerPackages == null || installerPackages.length == 0) {
+            List<String> installerPackages = getPackageListForUid(originatingUid);
+            if (installerPackages.isEmpty()) {
                 Slog.e(TAG, "No package found associated with originating UID " + originatingUid);
                 return UNKNOWN_INSTALLER;
             }
             // In the case of multiple package sharing a UID, we just return the first one.
-            return installerPackages[0];
+            return installerPackages.get(0);
         }
 
         return installer;
@@ -652,35 +640,55 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
         return installationPath;
     }
 
-    private String getCallerPackageNameOrThrow() {
-        String callerPackageName = getCallerPackageName();
+    private String getCallerPackageNameOrThrow(int callingUid) {
+        String callerPackageName = getCallingRulePusherPackageName(callingUid);
         if (callerPackageName == null) {
             throw new SecurityException(
-                    "Only system packages specified in config_integrityRuleProviderPackages are"
-                            + " allowed to call this method.");
+                    "Only system packages specified in config_integrityRuleProviderPackages are "
+                            + "allowed to call this method.");
         }
         return callerPackageName;
     }
 
-    private String getCallerPackageName() {
-        final List<String> allowedRuleProviders = getAllowedRuleProviders();
-        for (String packageName : allowedRuleProviders) {
-            try {
-                // At least in tests, getPackageUid gives "NameNotFound" but getPackagesFromUid
-                // give the correct package name.
-                int uid = mContext.getPackageManager().getPackageUid(packageName, 0);
-                if (uid == Binder.getCallingUid()) {
-                    // Caller is allowed in the config.
-                    if (isSystemApp(packageName)) {
-                        return packageName;
-                    }
-                }
-            } catch (PackageManager.NameNotFoundException e) {
-                // Ignore the exception. We don't expect the app to be necessarily installed.
-                Slog.i(TAG, "Rule provider package " + packageName + " not installed.");
-            }
-        }
-        return null;
+    private String getCallingRulePusherPackageName(int callingUid) {
+        // Obtain the system apps that are whitelisted in config_integrityRuleProviderPackages.
+        List<String> allowedRuleProviders = getAllowedRuleProviderSystemApps();
+        Slog.i(TAG, String.format(
+                "Rule provider system app list contains: %s", allowedRuleProviders));
+
+        // Identify the package names in the caller list.
+        List<String> callingPackageNames = getPackageListForUid(callingUid);
+        Slog.i(TAG, String.format("Calling packages are: ", callingPackageNames));
+
+        // Find the intersection between the allowed and calling packages. Ideally, we will have
+        // at most one package name here. But if we have more, it is fine.
+        List<String> allowedCallingPackages =
+                callingPackageNames
+                        .stream()
+                        .filter(packageName -> allowedRuleProviders.contains(packageName))
+                        .collect(Collectors.toList());
+        Slog.i(TAG, String.format("Calling rule pusher packages are: ", allowedCallingPackages));
+
+        return allowedCallingPackages.isEmpty() ? null : allowedCallingPackages.get(0);
+    }
+
+    private boolean isRuleProvider(String installerPackageName) {
+        return getAllowedRuleProviderSystemApps().stream()
+                .anyMatch(ruleProvider -> ruleProvider.equals(installerPackageName));
+    }
+
+    private List<String> getAllowedRuleProviderSystemApps() {
+        List<String> integrityRuleProviders =
+                Arrays.asList(
+                        mContext.getResources()
+                                .getStringArray(R.array.config_integrityRuleProviderPackages));
+
+        Slog.i(TAG, String.format("Rule provider list contains: %s", integrityRuleProviders));
+
+        // Filter out the rule provider packages that are not system apps.
+        return integrityRuleProviders.stream()
+                .filter(this::isSystemApp)
+                .collect(Collectors.toList());
     }
 
     private boolean isSystemApp(String packageName) {
@@ -694,22 +702,20 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
         }
     }
 
-    private List<String> getAllowedRuleProviders() {
-        return Arrays.asList(
-                mContext.getResources()
-                        .getStringArray(R.array.config_integrityRuleProviderPackages));
-    }
-
-    private boolean isRuleProvider(String installerPackageName) {
-        return getAllowedRuleProviders().stream()
-                .anyMatch(ruleProvider -> ruleProvider.equals(installerPackageName));
-    }
-
     private boolean integrityCheckIncludesRuleProvider() {
         return Settings.Global.getInt(
                         mContext.getContentResolver(),
                         Settings.Global.INTEGRITY_CHECK_INCLUDES_RULE_PROVIDER,
                         0)
                 == 1;
+    }
+
+    private List<String> getPackageListForUid(int uid) {
+        try {
+            return Arrays.asList(mContext.getPackageManager().getPackagesForUid(uid));
+        } catch (NullPointerException e) {
+            Slog.w(TAG, String.format("No packages were found for uid: %d", uid));
+            return List.of();
+        }
     }
 }

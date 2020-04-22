@@ -397,6 +397,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -9988,6 +9989,30 @@ public class ActivityManagerService extends IActivityManager.Stub
         addErrorToDropBox("wtf", r, processName, null, null, null, tag, null, null, crashInfo);
 
         return r;
+    }
+
+    /**
+     * Schedule to handle any pending system_server WTFs.
+     */
+    public void schedulePendingSystemServerWtfs(
+            final LinkedList<Pair<String, ApplicationErrorReport.CrashInfo>> list) {
+        mHandler.post(() -> handlePendingSystemServerWtfs(list));
+    }
+
+    /**
+     * Handle any pending system_server WTFs, add into the dropbox
+     */
+    private void handlePendingSystemServerWtfs(
+            final LinkedList<Pair<String, ApplicationErrorReport.CrashInfo>> list) {
+        ProcessRecord proc;
+        synchronized (mPidsSelfLocked) {
+            proc = mPidsSelfLocked.get(MY_PID);
+        }
+        for (Pair<String, ApplicationErrorReport.CrashInfo> p = list.poll();
+                p != null; p = list.poll()) {
+            addErrorToDropBox("wtf", proc, "system_server", null, null, null, p.first, null, null,
+                    p.second);
+        }
     }
 
     /**

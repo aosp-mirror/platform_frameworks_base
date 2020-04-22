@@ -24,6 +24,7 @@ import android.os.RemoteException;
 import android.util.MergedConfiguration;
 import android.view.DisplayCutout;
 import android.view.DragEvent;
+import android.view.IScrollCaptureController;
 import android.view.IWindow;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
@@ -110,6 +111,10 @@ public class TestIWindow extends IWindow.Stub {
 
     @Override
     public void dispatchPointerCaptureChanged(boolean hasCapture) {
+    }
+
+    @Override
+    public void requestScrollCapture(IScrollCaptureController controller) throws RemoteException {
     }
 
     @Override

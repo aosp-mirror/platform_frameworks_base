@@ -19,6 +19,11 @@ package com.android.server.media;
 import static android.media.MediaRoute2Info.FEATURE_LIVE_AUDIO;
 import static android.media.MediaRoute2Info.FEATURE_LIVE_VIDEO;
 import static android.media.MediaRoute2Info.TYPE_BUILTIN_SPEAKER;
+import static android.media.MediaRoute2Info.TYPE_DOCK;
+import static android.media.MediaRoute2Info.TYPE_HDMI;
+import static android.media.MediaRoute2Info.TYPE_USB_DEVICE;
+import static android.media.MediaRoute2Info.TYPE_WIRED_HEADPHONES;
+import static android.media.MediaRoute2Info.TYPE_WIRED_HEADSET;
 
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -194,19 +199,27 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
 
     private void updateDeviceRoute(AudioRoutesInfo newRoutes) {
         int name = R.string.default_audio_route_name;
+        int type = TYPE_BUILTIN_SPEAKER;
         if (newRoutes != null) {
             mCurAudioRoutesInfo.mainType = newRoutes.mainType;
-            if ((newRoutes.mainType & AudioRoutesInfo.MAIN_HEADPHONES) != 0
-                    || (newRoutes.mainType & AudioRoutesInfo.MAIN_HEADSET) != 0) {
+            if ((newRoutes.mainType & AudioRoutesInfo.MAIN_HEADPHONES) != 0) {
+                type = TYPE_WIRED_HEADPHONES;
+                name = com.android.internal.R.string.default_audio_route_name_headphones;
+            } else if ((newRoutes.mainType & AudioRoutesInfo.MAIN_HEADSET) != 0) {
+                type = TYPE_WIRED_HEADSET;
                 name = com.android.internal.R.string.default_audio_route_name_headphones;
             } else if ((newRoutes.mainType & AudioRoutesInfo.MAIN_DOCK_SPEAKERS) != 0) {
+                type = TYPE_DOCK;
                 name = com.android.internal.R.string.default_audio_route_name_dock_speakers;
             } else if ((newRoutes.mainType & AudioRoutesInfo.MAIN_HDMI) != 0) {
+                type = TYPE_HDMI;
                 name = com.android.internal.R.string.default_audio_route_name_hdmi;
             } else if ((newRoutes.mainType & AudioRoutesInfo.MAIN_USB) != 0) {
+                type = TYPE_USB_DEVICE;
                 name = com.android.internal.R.string.default_audio_route_name_usb;
             }
         }
+
         mDeviceRoute = new MediaRoute2Info.Builder(
                 DEVICE_ROUTE_ID, mContext.getResources().getText(name).toString())
                 .setVolumeHandling(mAudioManager.isVolumeFixed()
@@ -214,8 +227,7 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
                         : MediaRoute2Info.PLAYBACK_VOLUME_VARIABLE)
                 .setVolumeMax(mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC))
                 .setVolume(mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC))
-                //TODO: Guess the exact type using AudioDevice
-                .setType(TYPE_BUILTIN_SPEAKER)
+                .setType(type)
                 .addFeature(FEATURE_LIVE_AUDIO)
                 .addFeature(FEATURE_LIVE_VIDEO)
                 .setConnectionState(MediaRoute2Info.CONNECTION_STATE_CONNECTED)

@@ -50,6 +50,9 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * This is used in conjunction with
@@ -74,11 +77,13 @@ public class IntentForwarderActivity extends Activity  {
     private Injector mInjector;
 
     private MetricsLogger mMetricsLogger;
+    protected ExecutorService mExecutorService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mInjector = createInjector();
+        mExecutorService = Executors.newSingleThreadExecutor();
 
         Intent intentReceived = getIntent();
         String className = intentReceived.getComponent().getClassName();
@@ -118,35 +123,52 @@ public class IntentForwarderActivity extends Activity  {
                 mInjector.getIPackageManager(), getContentResolver());
         if (newIntent != null) {
             newIntent.prepareToLeaveUser(callingUserId);
-
-            final ResolveInfo ri = mInjector.resolveActivityAsUser(newIntent, MATCH_DEFAULT_ONLY,
-                    targetUserId);
-            try {
-                startActivityAsCaller(newIntent, null, null, false, targetUserId);
-            } catch (RuntimeException e) {
-                int launchedFromUid = -1;
-                String launchedFromPackage = "?";
-                try {
-                    launchedFromUid = ActivityTaskManager.getService().getLaunchedFromUid(
-                            getActivityToken());
-                    launchedFromPackage = ActivityTaskManager.getService().getLaunchedFromPackage(
-                            getActivityToken());
-                } catch (RemoteException ignored) {
-                }
-
-                Slog.wtf(TAG, "Unable to launch as UID " + launchedFromUid + " package "
-                        + launchedFromPackage + ", while running in "
-                        + ActivityThread.currentProcessName(), e);
-            }
-
-            if (shouldShowDisclosure(ri, intentReceived)) {
-                mInjector.showToast(userMessageId, Toast.LENGTH_LONG);
-            }
+            maybeShowDisclosureAsync(intentReceived, newIntent, targetUserId, userMessageId);
+            CompletableFuture.runAsync(() -> startActivityAsCaller(
+                    newIntent, targetUserId), mExecutorService);
         } else {
             Slog.wtf(TAG, "the intent: " + intentReceived + " cannot be forwarded from user "
                     + callingUserId + " to user " + targetUserId);
         }
         finish();
+    }
+
+    private void maybeShowDisclosureAsync(
+            Intent intentReceived, Intent newIntent, int userId, int messageId) {
+        final CompletableFuture<ResolveInfo> resolveInfoFuture =
+                mInjector.resolveActivityAsUser(newIntent, MATCH_DEFAULT_ONLY, userId);
+        resolveInfoFuture.thenAcceptAsync(ri -> {
+            if (shouldShowDisclosure(ri, intentReceived)) {
+                mInjector.showToast(messageId, Toast.LENGTH_LONG);
+            }
+        }, getApplicationContext().getMainExecutor());
+    }
+
+    private void startActivityAsCaller(Intent newIntent, int userId) {
+        try {
+            startActivityAsCaller(
+                    newIntent,
+                    /* options= */ null,
+                    /* permissionToken= */ null,
+                    /* ignoreTargetSecurity= */ false,
+                    userId);
+        } catch (RuntimeException e) {
+            int launchedFromUid = -1;
+            String launchedFromPackage = "?";
+            try {
+                launchedFromUid = ActivityTaskManager.getService().getLaunchedFromUid(
+                        getActivityToken());
+                launchedFromPackage = ActivityTaskManager.getService()
+                        .getLaunchedFromPackage(getActivityToken());
+            } catch (RemoteException ignored) {
+            }
+
+            Slog.wtf(TAG, "Unable to launch as UID " + launchedFromUid + " package "
+                    + launchedFromPackage + ", while running in "
+                    + ActivityThread.currentProcessName(), e);
+        } finally {
+            mExecutorService.shutdown();
+        }
     }
 
     private void launchChooserActivityWithCorrectTab(Intent intentReceived, String className) {
@@ -163,7 +185,7 @@ public class IntentForwarderActivity extends Activity  {
             return;
         }
         sanitizeIntent(innerIntent);
-        startActivity(intentReceived);
+        startActivityAsCaller(intentReceived, null, null, false, getUserId());
         finish();
     }
 
@@ -234,23 +256,7 @@ public class IntentForwarderActivity extends Activity  {
 
         Intent intentToCheck = forwardIntent;
         if (Intent.ACTION_CHOOSER.equals(forwardIntent.getAction())) {
-            // The EXTRA_INITIAL_INTENTS may not be allowed to be forwarded.
-            if (forwardIntent.hasExtra(Intent.EXTRA_INITIAL_INTENTS)) {
-                Slog.wtf(TAG, "An chooser intent with extra initial intents cannot be forwarded to"
-                        + " a different user");
-                return null;
-            }
-            if (forwardIntent.hasExtra(Intent.EXTRA_REPLACEMENT_EXTRAS)) {
-                Slog.wtf(TAG, "A chooser intent with replacement extras cannot be forwarded to a"
-                        + " different user");
-                return null;
-            }
-            intentToCheck = forwardIntent.getParcelableExtra(Intent.EXTRA_INTENT);
-            if (intentToCheck == null) {
-                Slog.wtf(TAG, "Cannot forward a chooser intent with no extra "
-                        + Intent.EXTRA_INTENT);
-                return null;
-            }
+            return null;
         }
         if (forwardIntent.getSelector() != null) {
             intentToCheck = forwardIntent.getSelector();
@@ -338,8 +344,11 @@ public class IntentForwarderActivity extends Activity  {
         }
 
         @Override
-        public ResolveInfo resolveActivityAsUser(Intent intent, int flags, int userId) {
-            return getPackageManager().resolveActivityAsUser(intent, flags, userId);
+        @Nullable
+        public CompletableFuture<ResolveInfo> resolveActivityAsUser(
+                Intent intent, int flags, int userId) {
+            return CompletableFuture.supplyAsync(
+                    () -> getPackageManager().resolveActivityAsUser(intent, flags, userId));
         }
 
         @Override
@@ -355,7 +364,7 @@ public class IntentForwarderActivity extends Activity  {
 
         PackageManager getPackageManager();
 
-        ResolveInfo resolveActivityAsUser(Intent intent, int flags, int userId);
+        CompletableFuture<ResolveInfo> resolveActivityAsUser(Intent intent, int flags, int userId);
 
         void showToast(@StringRes int messageId, int duration);
     }

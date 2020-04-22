@@ -68,6 +68,8 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 @RunWith(AndroidJUnit4.class)
 public class IntentForwarderActivityTest {
@@ -633,6 +635,11 @@ public class IntentForwarderActivityTest {
         public void onCreate(@Nullable Bundle savedInstanceState) {
             getIntent().setComponent(sComponentName);
             super.onCreate(savedInstanceState);
+            try {
+                mExecutorService.awaitTermination(/* timeout= */ 30, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
 
         @Override
@@ -645,12 +652,6 @@ public class IntentForwarderActivityTest {
                 IBinder permissionToken, boolean ignoreTargetSecurity, int userId) {
             mStartActivityIntent = intent;
             mUserIdActivityLaunchedIn = userId;
-        }
-
-        @Override
-        public void startActivity(Intent intent) {
-            mStartActivityIntent = intent;
-            mUserIdActivityLaunchedIn = getUserId();
         }
 
         @Override
@@ -677,7 +678,8 @@ public class IntentForwarderActivityTest {
         }
 
         @Override
-        public ResolveInfo resolveActivityAsUser(Intent intent, int flags, int userId) {
+        public CompletableFuture<ResolveInfo> resolveActivityAsUser(
+                Intent intent, int flags, int userId) {
             ActivityInfo activityInfo = new ActivityInfo();
             activityInfo.packageName = sPackageName;
             activityInfo.name = sActivityName;
@@ -686,7 +688,7 @@ public class IntentForwarderActivityTest {
             ResolveInfo resolveInfo = new ResolveInfo();
             resolveInfo.activityInfo = activityInfo;
 
-            return resolveInfo;
+            return CompletableFuture.completedFuture(resolveInfo);
         }
 
         @Override

@@ -212,7 +212,7 @@ class ScreenRotationAnimation {
             final Surface surface = mService.mSurfaceFactory.get();
             surface.copyFrom(mScreenshotLayer);
             SurfaceControl.ScreenshotGraphicBuffer gb =
-                    mService.mDisplayManagerInternal.screenshot(displayId);
+                    mService.mDisplayManagerInternal.systemScreenshot(displayId);
             if (gb != null) {
                 Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER,
                         "ScreenRotationAnimation#getMedianBorderLuma");
@@ -597,8 +597,8 @@ class ScreenRotationAnimation {
             return startAnimation(initializeBuilder()
                             .setSurfaceControl(mScreenshotLayer)
                             .setAnimationLeashParent(mDisplayContent.getOverlayLayer())
-                            .setWidth(mWidth)
-                            .setHeight(mHeight)
+                            .setWidth(mDisplayContent.getSurfaceWidth())
+                            .setHeight(mDisplayContent.getSurfaceHeight())
                             .build(),
                     createWindowAnimationSpec(mRotateAlphaAnimation),
                     this::onAnimationEnd);

@@ -44,7 +44,6 @@ import static com.android.server.wm.WindowContainer.POSITION_TOP;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -82,7 +81,7 @@ import java.util.List;
  * Test class for {@link ITaskOrganizer} and {@link android.window.ITaskOrganizerController}.
  *
  * Build/Install/Run:
- *  atest WmTests:TaskOrganizerTests
+ *  atest WmTests:WindowOrganizerTests
  */
 @SmallTest
 @Presubmit
@@ -265,15 +264,22 @@ public class WindowOrganizerTests extends WindowTestsBase {
         // newly entering the windowing mode.
         final ITaskOrganizer organizer2 = registerMockOrganizer(WINDOWING_MODE_MULTI_WINDOW);
         stack2.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
-        verify(organizer2).onTaskAppeared(any());
+        // One each for task and task2
+        verify(organizer2, times(2)).onTaskAppeared(any());
+        verify(organizer2, times(0)).onTaskVanished(any());
+        // One for task
+        verify(organizer).onTaskVanished(any());
         assertTrue(stack2.isOrganized());
 
         // Now we unregister the second one, the first one should automatically be reregistered
         // so we verify that it's now seeing changes.
         mWm.mAtmService.mTaskOrganizerController.unregisterTaskOrganizer(organizer2);
+        verify(organizer, times(3)).onTaskAppeared(any());
+        verify(organizer2, times(2)).onTaskVanished(any());
 
         stack3.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
-        verify(organizer, times(2)).onTaskAppeared(any());
+        verify(organizer, times(4)).onTaskAppeared(any());
+        verify(organizer2, times(2)).onTaskVanished(any());
         assertTrue(stack3.isOrganized());
     }
 
@@ -407,22 +413,20 @@ public class WindowOrganizerTests extends WindowTestsBase {
                 .setWindowingMode(WINDOWING_MODE_FREEFORM).build();
         final Task task = stack.getTopMostTask();
         WindowContainerTransaction t = new WindowContainerTransaction();
-        t.setBounds(task.mRemoteToken.toWindowContainerToken(), new Rect(10, 10, 100, 100));
         mWm.mAtmService.mWindowOrganizerController.applyTransaction(t);
         final int origScreenWDp = task.getConfiguration().screenHeightDp;
         final int origScreenHDp = task.getConfiguration().screenHeightDp;
         t = new WindowContainerTransaction();
         // verify that setting config overrides on parent restricts children.
         t.setScreenSizeDp(stack.mRemoteToken
-                .toWindowContainerToken(), origScreenWDp, origScreenHDp);
-        t.setBounds(task.mRemoteToken.toWindowContainerToken(), new Rect(10, 10, 150, 200));
+                .toWindowContainerToken(), origScreenWDp, origScreenHDp / 2);
         mWm.mAtmService.mWindowOrganizerController.applyTransaction(t);
-        assertEquals(origScreenHDp, task.getConfiguration().screenHeightDp);
+        assertEquals(origScreenHDp / 2, task.getConfiguration().screenHeightDp);
         t = new WindowContainerTransaction();
         t.setScreenSizeDp(stack.mRemoteToken.toWindowContainerToken(), SCREEN_WIDTH_DP_UNDEFINED,
                 SCREEN_HEIGHT_DP_UNDEFINED);
         mWm.mAtmService.mWindowOrganizerController.applyTransaction(t);
-        assertNotEquals(origScreenHDp, task.getConfiguration().screenHeightDp);
+        assertEquals(origScreenHDp, task.getConfiguration().screenHeightDp);
     }
 
     @Test
@@ -905,12 +909,13 @@ public class WindowOrganizerTests extends WindowTestsBase {
         task.setHasBeenVisible(true);
         verify(organizer, times(1)).onTaskAppeared(any());
 
-        task.taskOrganizerUnregistered();
+        task.setTaskOrganizer(null);
+        verify(organizer, times(1)).onTaskVanished(any());
         task.setTaskOrganizer(organizer);
         verify(organizer, times(2)).onTaskAppeared(any());
 
         task.removeImmediately();
-        verify(organizer).onTaskVanished(any());
+        verify(organizer, times(2)).onTaskVanished(any());
     }
 
     @Test

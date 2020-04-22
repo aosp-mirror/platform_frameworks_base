@@ -19,8 +19,10 @@ package com.android.systemui.dagger;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
+import android.app.ActivityTaskManager;
 import android.app.AlarmManager;
 import android.app.IActivityManager;
+import android.app.IActivityTaskManager;
 import android.app.IWallpaperManager;
 import android.app.KeyguardManager;
 import android.app.NotificationManager;
@@ -126,6 +128,12 @@ public class SystemServicesModule {
     @Provides
     static IActivityManager provideIActivityManager() {
         return ActivityManager.getService();
+    }
+
+    @Singleton
+    @Provides
+    static IActivityTaskManager provideIActivityTaskManager() {
+        return ActivityTaskManager.getService();
     }
 
     @Provides

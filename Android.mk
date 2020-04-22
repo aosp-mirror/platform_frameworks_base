@@ -36,10 +36,6 @@ include $(CLEAR_VARS)
 # always included.
 INTERNAL_SDK_SOURCE_DIRS := $(addprefix $(LOCAL_PATH)/,$(dirs_to_document))
 
-$(call dist-for-goals,sdk,$(INTERNAL_PLATFORM_API_FILE))
-$(call dist-for-goals,sdk,$(INTERNAL_PLATFORM_SYSTEM_API_FILE))
-$(call dist-for-goals,sdk,$(INTERNAL_PLATFORM_TEST_API_FILE))
-
 # sdk.atree needs to copy the whole dir: $(OUT_DOCS)/offline-sdk to the final zip.
 # So keep offline-sdk-timestamp target here, and unzip offline-sdk-docs.zip to
 # $(OUT_DOCS)/offline-sdk.

@@ -752,6 +752,31 @@ public class ActivityRecordTests extends ActivityTestsBase {
     }
 
     /**
+     * Verify that when finishing the top focused activity while root task was created by organizer,
+     * the stack order will be changed by adjusting focus.
+     */
+    @Test
+    public void testFinishActivityIfPossible_adjustStackOrderOrganizedRoot() {
+        // Make mStack be a the root task that created by task organizer
+        mStack.mCreatedByOrganizer = true;
+
+        // Have two tasks (topRootableTask and mTask) as the children of mStack.
+        ActivityRecord topActivity = new ActivityBuilder(mActivity.mAtmService)
+                .setCreateTask(true)
+                .setStack(mStack)
+                .build();
+        ActivityStack topRootableTask = (ActivityStack) topActivity.getTask();
+        topRootableTask.moveToFront("test");
+        assertTrue(mStack.isTopStackInDisplayArea());
+
+        // Finish top activity and verify the next focusable rootable task has adjusted to top.
+        topActivity.setState(RESUMED, "test");
+        topActivity.finishIfPossible(0 /* resultCode */, null /* resultData */, "test",
+                false /* oomAdj */);
+        assertEquals(mTask, mStack.getTopMostTask());
+    }
+
+    /**
      * Verify that resumed activity is paused due to finish request.
      */
     @Test

@@ -16,6 +16,7 @@
 // AIDL interfaces between the core system and the tethering mainline module.
 aidl_interface {
     name: "tethering-aidl-interfaces",
+    unstable: true,
     local_include_dir: "src",
     include_dirs: ["frameworks/base/core/java"], // For framework parcelables.
     srcs: [

@@ -261,6 +261,7 @@ filegroup {
 
 aidl_interface {
     name: "overlayable_policy_aidl",
+    unstable: true,
     srcs: [":overlayable_policy_aidl_files"],
 }
 

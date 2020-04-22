@@ -486,6 +486,41 @@ TEST(StatsdStatsTest, TestActivationBroadcastGuardrailHit) {
     EXPECT_TRUE(uid2Good);
 }
 
+TEST(StatsdStatsTest, TestAtomErrorStats) {
+    StatsdStats stats;
+
+    int pushAtomTag = 100;
+    int pullAtomTag = 1000;
+    int numErrors = 10;
+
+    for (int i = 0; i < numErrors; i++) {
+        // We must call noteAtomLogged as well because only those pushed atoms
+        // that have been logged will have stats printed about them in the
+        // proto.
+        stats.noteAtomLogged(pushAtomTag, /*timeSec=*/0);
+        stats.noteAtomError(pushAtomTag, /*pull=*/false);
+
+        stats.noteAtomError(pullAtomTag, /*pull=*/true);
+    }
+
+    vector<uint8_t> output;
+    stats.dumpStats(&output, false);
+    StatsdStatsReport report;
+    EXPECT_TRUE(report.ParseFromArray(&output[0], output.size()));
+
+    // Check error count = numErrors for push atom
+    EXPECT_EQ(1, report.atom_stats_size());
+    const auto& pushedAtomStats = report.atom_stats(0);
+    EXPECT_EQ(pushAtomTag, pushedAtomStats.tag());
+    EXPECT_EQ(numErrors, pushedAtomStats.error_count());
+
+    // Check error count = numErrors for pull atom
+    EXPECT_EQ(1, report.pulled_atom_stats_size());
+    const auto& pulledAtomStats = report.pulled_atom_stats(0);
+    EXPECT_EQ(pullAtomTag, pulledAtomStats.atom_id());
+    EXPECT_EQ(numErrors, pulledAtomStats.atom_error_count());
+}
+
 }  // namespace statsd
 }  // namespace os
 }  // namespace android

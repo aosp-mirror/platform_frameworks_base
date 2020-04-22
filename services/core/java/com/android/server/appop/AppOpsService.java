@@ -5750,7 +5750,7 @@ public class AppOpsService extends IAppOpsService.Stub {
      */
     private void switchPackageIfBootTimeOrRarelyUsedLocked(@NonNull String packageName) {
         if (mSampledPackage == null) {
-            if (ThreadLocalRandom.current().nextFloat() < 0.1f) {
+            if (ThreadLocalRandom.current().nextFloat() < 0.5f) {
                 mSamplingStrategy = SAMPLING_STRATEGY_BOOT_TIME_SAMPLING;
                 resampleAppOpForPackageLocked(packageName);
             }

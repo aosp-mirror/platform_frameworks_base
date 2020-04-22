@@ -17,30 +17,50 @@
 package com.android.keyguard;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
+import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
 public class KeyguardHostViewTest extends SysuiTestCase {
 
+    @Mock
+    private KeyguardSecurityContainer mSecurityContainer;
+    @Mock
+    private LockPatternUtils mLockPatternUtils;
+    @Rule
+    public MockitoRule mMockitoRule = MockitoJUnit.rule();
+
     private KeyguardHostView mKeyguardHostView;
 
     @Before
     public void setup() {
         mDependency.injectMockDependency(KeyguardUpdateMonitor.class);
-        mKeyguardHostView = new KeyguardHostView(getContext());
+        mKeyguardHostView = new KeyguardHostView(getContext()) {
+            @Override
+            protected void onFinishInflate() {
+                mSecurityContainer = KeyguardHostViewTest.this.mSecurityContainer;
+                mLockPatternUtils = KeyguardHostViewTest.this.mLockPatternUtils;
+            }
+        };
+        mKeyguardHostView.onFinishInflate();
     }
 
     @Test
@@ -49,5 +69,11 @@ public class KeyguardHostViewTest extends SysuiTestCase {
         mKeyguardHostView.setOnDismissAction(mock(OnDismissAction.class),
                 null /* cancelAction */);
         Assert.assertTrue("Action should exist", mKeyguardHostView.hasDismissActions());
+    }
+
+    @Test
+    public void testOnStartingToHide() {
+        mKeyguardHostView.onStartingToHide();
+        verify(mSecurityContainer).onStartingToHide();
     }
 }

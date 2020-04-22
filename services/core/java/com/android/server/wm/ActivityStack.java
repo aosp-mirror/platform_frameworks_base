@@ -18,11 +18,8 @@ package com.android.server.wm;
 
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.ITaskStackListener.FORCED_RESIZEABLE_REASON_SPLIT_SCREEN;
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
-import static android.app.WindowConfiguration.PINNED_WINDOWING_MODE_ELEVATION_IN_DIP;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
@@ -142,13 +139,11 @@ import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.service.voice.IVoiceInteractionSession;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.view.Display;
 import android.view.DisplayInfo;
-import android.view.SurfaceControl;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -157,7 +152,6 @@ import com.android.internal.os.logging.MetricsLoggerWrapper;
 import com.android.internal.util.function.pooled.PooledConsumer;
 import com.android.internal.util.function.pooled.PooledFunction;
 import com.android.internal.util.function.pooled.PooledLambda;
-import com.android.internal.util.function.pooled.PooledPredicate;
 import com.android.server.Watchdog;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.am.ActivityManagerService.ItemMatcher;
@@ -275,11 +269,6 @@ class ActivityStack extends Task {
     private Rect mBoundsAnimationSourceHintBounds = new Rect();
 
     Rect mPreAnimationBounds = new Rect();
-
-    /**
-     * For {@link #prepareSurfaces}.
-     */
-    private final Point mLastSurfaceSize = new Point();
 
     private final AnimatingActivityRegistry mAnimatingActivityRegistry =
             new AnimatingActivityRegistry();
@@ -606,10 +595,6 @@ class ActivityStack extends Task {
 
         super.onConfigurationChanged(newParentConfig);
 
-        // Only need to update surface size here since the super method will handle updating
-        // surface position.
-        updateSurfaceSize(getPendingTransaction());
-
         final TaskDisplayArea taskDisplayArea = getDisplayArea();
         if (taskDisplayArea == null) {
             return;
@@ -847,7 +832,8 @@ class ActivityStack extends Task {
 
     /** Resume next focusable stack after reparenting to another display. */
     void postReparent() {
-        adjustFocusToNextFocusableStack("reparent", true /* allowFocusSelf */);
+        adjustFocusToNextFocusableTask("reparent", true /* allowFocusSelf */,
+                true /* moveParentsToTop */);
         mRootWindowContainer.resumeFocusedStacksTopActivities();
         // Update visibility of activities before notifying WM. This way it won't try to resize
         // windows that are no longer visible.
@@ -2069,7 +2055,7 @@ class ActivityStack extends Task {
         final String reason = "noMoreActivities";
 
         if (!isActivityTypeHome()) {
-            final ActivityStack nextFocusedStack = adjustFocusToNextFocusableStack(reason);
+            final ActivityStack nextFocusedStack = adjustFocusToNextFocusableTask(reason);
             if (nextFocusedStack != null) {
                 // Try to move focus to the next visible stack with a running activity if this
                 // stack is not covering the entire screen or is on a secondary display with no home
@@ -2275,48 +2261,6 @@ class ActivityStack extends Task {
         }
 
         return taskTop;
-    }
-
-    /**
-     * Find next proper focusable stack and make it focused.
-     * @return The stack that now got the focus, {@code null} if none found.
-     */
-    ActivityStack adjustFocusToNextFocusableStack(String reason) {
-        return adjustFocusToNextFocusableStack(reason, false /* allowFocusSelf */);
-    }
-
-    /**
-     * Find next proper focusable stack and make it focused.
-     * @param allowFocusSelf Is the focus allowed to remain on the same stack.
-     * @return The stack that now got the focus, {@code null} if none found.
-     */
-    private ActivityStack adjustFocusToNextFocusableStack(String reason, boolean allowFocusSelf) {
-        final ActivityStack stack =
-                mRootWindowContainer.getNextFocusableStack(this, !allowFocusSelf);
-        final String myReason = reason + " adjustFocusToNextFocusableStack";
-        if (stack == null) {
-            return null;
-        }
-
-        final ActivityRecord top = stack.topRunningActivity();
-
-        if (stack.isActivityTypeHome() && (top == null || !top.mVisibleRequested)) {
-            // If we will be focusing on the home stack next and its current top activity isn't
-            // visible, then use the move the home stack task to top to make the activity visible.
-            stack.getDisplayArea().moveHomeActivityToTop(reason);
-            return stack;
-        }
-
-        stack.moveToFront(myReason);
-        // Top display focused stack is changed, update top resumed activity if needed.
-        if (stack.mResumedActivity != null) {
-            mStackSupervisor.updateTopResumedActivityIfNeeded();
-            // Set focused app directly because if the next focused activity is already resumed
-            // (e.g. the next top activity is on a different display), there won't have activity
-            // state change to update it.
-            mAtmService.setResumedActivityUncheckLocked(stack.mResumedActivity, reason);
-        }
-        return stack;
     }
 
     /**
@@ -3303,59 +3247,12 @@ class ActivityStack extends Task {
         scheduleAnimation();
     }
 
-    /**
-     * Calculate an amount by which to expand the stack bounds in each direction.
-     * Used to make room for shadows in the pinned windowing mode.
-     */
-    int getStackOutset() {
-        // If we are drawing shadows on the task then don't outset the stack.
-        if (mWmService.mRenderShadowsInCompositor) {
-            return 0;
-        }
-        DisplayContent displayContent = getDisplayContent();
-        if (inPinnedWindowingMode() && displayContent != null) {
-            final DisplayMetrics displayMetrics = displayContent.getDisplayMetrics();
-
-            // We multiply by two to match the client logic for converting view elevation
-            // to insets, as in {@link WindowManager.LayoutParams#setSurfaceInsets}
-            return (int) Math.ceil(
-                    mWmService.dipToPixel(PINNED_WINDOWING_MODE_ELEVATION_IN_DIP, displayMetrics)
-                            * 2);
-        }
-        return 0;
-    }
-
     @Override
     void getRelativePosition(Point outPos) {
         super.getRelativePosition(outPos);
-        final int outset = getStackOutset();
+        final int outset = getTaskOutset();
         outPos.x -= outset;
         outPos.y -= outset;
-    }
-
-    private void updateSurfaceSize(SurfaceControl.Transaction transaction) {
-        if (mSurfaceControl == null) {
-            return;
-        }
-
-        final Rect stackBounds = getBounds();
-        int width = stackBounds.width();
-        int height = stackBounds.height();
-
-        final int outset = getStackOutset();
-        width += 2 * outset;
-        height += 2 * outset;
-
-        if (width == mLastSurfaceSize.x && height == mLastSurfaceSize.y) {
-            return;
-        }
-        transaction.setWindowCrop(mSurfaceControl, width, height);
-        mLastSurfaceSize.set(width, height);
-    }
-
-    @VisibleForTesting
-    Point getLastSurfaceSize() {
-        return mLastSurfaceSize;
     }
 
     @Override

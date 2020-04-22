@@ -31,6 +31,7 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.INotificationManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -98,7 +99,7 @@ public class NotificationConversationInfo extends LinearLayout implements
     private ShortcutInfo mShortcutInfo;
     private String mConversationId;
     private StatusBarNotification mSbn;
-    private Notification.BubbleMetadata mBubbleMetadata;
+    @Nullable private Notification.BubbleMetadata mBubbleMetadata;
     private Context mUserContext;
     private Provider<PriorityOnboardingDialogController.Builder> mBuilderProvider;
     private boolean mIsDeviceProvisioned;
@@ -203,6 +204,7 @@ public class NotificationConversationInfo extends LinearLayout implements
             String pkg,
             NotificationChannel notificationChannel,
             NotificationEntry entry,
+            Notification.BubbleMetadata bubbleMetadata,
             OnSettingsClickListener onSettingsClick,
             OnSnoozeClickListener onSnoozeClickListener,
             ConversationIconFactory conversationIconFactory,
@@ -224,7 +226,7 @@ public class NotificationConversationInfo extends LinearLayout implements
         mOnSnoozeClickListener = onSnoozeClickListener;
         mIconFactory = conversationIconFactory;
         mUserContext = userContext;
-        mBubbleMetadata = entry.getBubbleMetadata();
+        mBubbleMetadata = bubbleMetadata;
         mBuilderProvider = builderProvider;
 
         mShortcutManager = shortcutManager;
@@ -538,7 +540,8 @@ public class NotificationConversationInfo extends LinearLayout implements
             Log.e(TAG, "Could not check conversation senders", e);
         }
 
-        boolean showAsBubble = mBubbleMetadata.getAutoExpandBubble()
+        boolean showAsBubble = mBubbleMetadata != null
+                && mBubbleMetadata.getAutoExpandBubble()
                 && Settings.Global.getInt(mContext.getContentResolver(),
                         NOTIFICATION_BUBBLES, 0) == 1;
 

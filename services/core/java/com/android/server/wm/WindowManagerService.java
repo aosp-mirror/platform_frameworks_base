@@ -219,6 +219,7 @@ import android.view.IOnKeyguardExitResult;
 import android.view.IPinnedStackListener;
 import android.view.IRecentsAnimationRunner;
 import android.view.IRotationWatcher;
+import android.view.IScrollCaptureController;
 import android.view.ISystemGestureExclusionListener;
 import android.view.IWallpaperVisibilityListener;
 import android.view.IWindow;
@@ -2445,17 +2446,15 @@ public class WindowManagerService extends IWindowManager.Stub
             if (controls != null) {
                 final int length = Math.min(controls.length, outControls.length);
                 for (int i = 0; i < length; i++) {
-                    final InsetsSourceControl control = controls[i];
-
-                    // Check if we are sending invalid leashes.
-                    final SurfaceControl leash = control != null ? control.getLeash() : null;
-                    if (leash != null && !leash.isValid()) {
-                        Slog.wtf(TAG, leash + " is not valid before sending to " + win,
-                                leash.getReleaseStack());
-                    }
-
-                    outControls[i] = win.isClientLocal() && control != null
-                            ? new InsetsSourceControl(control) : control;
+                    // We will leave the critical section before returning the leash to the client,
+                    // so we need to copy the leash to prevent others release the one that we are
+                    // about to return.
+                    // TODO: We will have an extra copy if the client is not local.
+                    //       For now, we rely on GC to release it.
+                    //       Maybe we can modify InsetsSourceControl.writeToParcel so it can release
+                    //       the extra leash as soon as possible.
+                    outControls[i] = controls[i] != null
+                            ? new InsetsSourceControl(controls[i]) : null;
                 }
             }
         }
@@ -6112,15 +6111,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 pw.print("  mInputMethodInputTarget in display# "); pw.print(displayId);
                 pw.print(' '); pw.println(inputMethodInputTarget);
             }
-            if (mAccessibilityController != null) {
-                final Region magnificationRegion = new Region();
-                mAccessibilityController.getMagnificationRegionLocked(displayId,
-                        magnificationRegion);
-                pw.print("  mMagnificationRegion in display# ");
-                pw.print(displayId);
-                pw.print(' ');
-                pw.println(magnificationRegion);
-            }
         });
         pw.print("  mInTouchMode="); pw.println(mInTouchMode);
         pw.print("  mLastDisplayFreezeDuration=");
@@ -6136,6 +6126,9 @@ public class WindowManagerService extends IWindowManager.Stub
 
         mInputManagerCallback.dump(pw, "  ");
         mTaskSnapshotController.dump(pw, "  ");
+        if (mAccessibilityController != null) {
+            mAccessibilityController.dump(pw, "  ");
+        }
 
         if (dumpAll) {
             final WindowState imeWindow = mRoot.getCurrentInputMethodWindow();
@@ -6834,6 +6827,58 @@ public class WindowManagerService extends IWindowManager.Stub
                 return;
             }
             callingWin.updateTapExcludeRegion(region);
+        }
+    }
+
+    /**
+     * Forwards a scroll capture request to the appropriate window, if available.
+     *
+     * @param displayId the display for the request
+     * @param behindClient token for a window, used to filter the search to windows behind it
+     * @param taskId specifies the id of a task the result must belong to or -1 to ignore task ids
+     * @param controller the controller to receive results; a call to either
+     *      {@link IScrollCaptureController#onClientConnected} or
+     *      {@link IScrollCaptureController#onClientUnavailable}.
+     */
+    public void requestScrollCapture(int displayId, @Nullable IBinder behindClient, int taskId,
+            IScrollCaptureController controller) {
+        if (!checkCallingPermission(READ_FRAME_BUFFER, "requestScrollCapture()")) {
+            throw new SecurityException("Requires READ_FRAME_BUFFER permission");
+        }
+        final long token = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                DisplayContent dc = mRoot.getDisplayContent(displayId);
+                if (dc == null) {
+                    ProtoLog.e(WM_ERROR,
+                            "Invalid displayId for requestScrollCapture: %d", displayId);
+                    controller.onClientUnavailable();
+                    return;
+                }
+                WindowState topWindow = null;
+                if (behindClient != null) {
+                    topWindow = windowForClientLocked(null, behindClient, /* throwOnError*/ true);
+                }
+                WindowState targetWindow = dc.findScrollCaptureTargetWindow(topWindow, taskId);
+                if (targetWindow == null) {
+                    controller.onClientUnavailable();
+                    return;
+                }
+                // Forward to the window for handling.
+                try {
+                    targetWindow.mClient.requestScrollCapture(controller);
+                } catch (RemoteException e) {
+                    ProtoLog.w(WM_ERROR,
+                            "requestScrollCapture: caught exception dispatching to window."
+                                    + "token=%s", targetWindow.mClient.asBinder());
+                    controller.onClientUnavailable();
+                }
+            }
+        } catch (RemoteException e) {
+            ProtoLog.w(WM_ERROR,
+                    "requestScrollCapture: caught exception dispatching callback: %s", e);
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
     }
 

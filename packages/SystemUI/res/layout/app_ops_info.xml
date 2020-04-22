@@ -62,30 +62,35 @@
         style="@style/TextAppearance.NotificationInfo.Secondary" />
 
     <!-- Settings and Done buttons -->
-    <LinearLayout
+    <RelativeLayout
+        android:id="@+id/bottom_buttons"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/notification_guts_button_spacing"
-        android:layout_marginBottom="@dimen/notification_guts_button_spacing"
-        android:gravity="end"
-        android:orientation="horizontal">
-
+        android:gravity="center_vertical"
+        android:paddingStart="4dp"
+        android:paddingEnd="4dp">
         <TextView
             android:id="@+id/settings"
             android:text="@string/notification_appops_settings"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_toStartOf="@+id/ok"
+            android:gravity="center_vertical"
             android:background="@drawable/ripple_drawable"
+            android:layout_marginEnd="8dp"
+            android:minWidth="@dimen/min_clickable_item_size"
+            android:minHeight="@dimen/min_clickable_item_size"
             style="@style/TextAppearance.NotificationInfo.Button"/>
         <TextView
             android:id="@+id/ok"
             android:text="@string/notification_appops_ok"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:gravity="end|center_vertical"
             android:background="@drawable/ripple_drawable"
-            android:minWidth="48dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="-8dp"
+            android:minWidth="@dimen/min_clickable_item_size"
+            android:minHeight="@dimen/min_clickable_item_size"
             style="@style/TextAppearance.NotificationInfo.Button"/>
-    </LinearLayout>
+    </RelativeLayout>
 </com.android.systemui.statusbar.notification.row.AppOpsInfo>

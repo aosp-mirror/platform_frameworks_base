@@ -180,12 +180,17 @@ public class WindowManagerProxy {
             if (isHomeOrRecentTask(rootTask)) {
                 tiles.mHomeAndRecentsSurfaces.add(rootTask.token.getLeash());
             }
+            // Only move resizeable task to split secondary. WM will just ignore this anyways...
+            if (!rootTask.isResizable()) continue;
+            // Only move fullscreen tasks to split secondary.
             if (rootTask.configuration.windowConfiguration.getWindowingMode()
                     != WINDOWING_MODE_FULLSCREEN) {
                 continue;
             }
             wct.reparent(rootTask.token, tiles.mSecondary.token, true /* onTop */);
         }
+        // Move the secondary split-forward.
+        wct.reorder(tiles.mSecondary.token, true /* onTop */);
         boolean isHomeResizable = applyHomeTasksMinimized(layout, null /* parent */, wct);
         WindowOrganizer.applyTransaction(wct);
         return isHomeResizable;

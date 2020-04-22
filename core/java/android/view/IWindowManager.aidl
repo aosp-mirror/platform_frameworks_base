@@ -42,6 +42,7 @@ import android.view.IDisplayFoldListener;
 import android.view.IDisplayWindowRotationController;
 import android.view.IOnKeyguardExitResult;
 import android.view.IPinnedStackListener;
+import android.view.IScrollCaptureController;
 import android.view.RemoteAnimationAdapter;
 import android.view.IRotationWatcher;
 import android.view.ISystemGestureExclusionListener;
@@ -749,4 +750,18 @@ interface IWindowManager
      * @param flags see definition in SurfaceTracing.cpp
      */
     void setLayerTracingFlags(int flags);
+
+    /**
+     * Forwards a scroll capture request to the appropriate window, if available.
+     *
+     * @param displayId the id of the display to target
+     * @param behindClient token for a window, used to filter the search to windows behind it, or
+     *                     {@code null} to accept a window at any zOrder
+     * @param taskId specifies the id of a task the result must belong to, or -1 to ignore task ids
+     * @param controller the controller to receive results, a call to either
+     *      {@link IScrollCaptureController#onClientConnected} or
+     *      {@link IScrollCaptureController#onClientUnavailable}.
+     */
+    void requestScrollCapture(int displayId, IBinder behindClient, int taskId,
+            IScrollCaptureController controller);
 }

@@ -662,9 +662,11 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                 //       position that takes into account the removed child (if the index of the
                 //       child < position, then the position should be adjusted). We should consider
                 //       doing this adjustment here and remove any adjustments in the callers.
-                mChildren.remove(child);
-                mChildren.add(position, child);
-                onChildPositionChanged(child);
+                if (mChildren.indexOf(child) != position) {
+                    mChildren.remove(child);
+                    mChildren.add(position, child);
+                    onChildPositionChanged(child);
+                }
         }
     }
 

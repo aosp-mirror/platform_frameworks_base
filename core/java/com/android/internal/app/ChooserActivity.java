@@ -2611,11 +2611,12 @@ public class ChooserActivity extends ResolverActivity implements
      * does not match either the personal or work user handle.
      **/
     private int getProfileForUser(UserHandle currentUserHandle) {
-        if (currentUserHandle == getPersonalProfileUserHandle()) {
+        if (currentUserHandle.equals(getPersonalProfileUserHandle())) {
             return PROFILE_PERSONAL;
-        } else if (currentUserHandle == getWorkProfileUserHandle()) {
+        } else if (currentUserHandle.equals(getWorkProfileUserHandle())) {
             return PROFILE_WORK;
         }
+        Log.e(TAG, "User " + currentUserHandle + " does not belong to a personal or work profile.");
         return -1;
     }
 

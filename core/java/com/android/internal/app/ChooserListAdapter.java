@@ -207,6 +207,9 @@ public class ChooserListAdapter extends ResolverListAdapter {
         if (mListViewDataChanged) {
             if (mAppendDirectShareEnabled) {
                 appendServiceTargetsWithQuota();
+                if (mPendingChooserTargetService.isEmpty()) {
+                    fillAllServiceTargets();
+                }
             }
             super.notifyDataSetChanged();
         }
@@ -488,13 +491,14 @@ public class ChooserListAdapter extends ResolverListAdapter {
             Map<ChooserTarget, ShortcutInfo> directShareToShortcutInfos,
             List<ChooserActivity.ChooserTargetServiceConnection>
                     pendingChooserTargetServiceConnections) {
-        ComponentName origComponentName = origTarget.getResolvedComponentName();
+        ComponentName origComponentName = origTarget != null ? origTarget.getResolvedComponentName()
+                : !targets.isEmpty() ? targets.get(0).getComponentName() : null;
         mPendingChooserTargetService = pendingChooserTargetServiceConnections.stream()
                 .map(ChooserActivity.ChooserTargetServiceConnection::getComponentName)
                 .filter(componentName -> !componentName.equals(origComponentName))
                 .collect(Collectors.toSet());
         // Park targets in memory
-        if (!targets.isEmpty() && !mParkingDirectShareTargets.containsKey(origComponentName)) {
+        if (!targets.isEmpty()) {
             final boolean isShortcutResult =
                     (targetType == TARGET_TYPE_SHORTCUTS_FROM_SHORTCUT_MANAGER
                             || targetType == TARGET_TYPE_SHORTCUTS_FROM_PREDICTION_SERVICE);
@@ -509,8 +513,11 @@ public class ChooserListAdapter extends ResolverListAdapter {
                                             : null))
                     )
                     .collect(Collectors.toList());
-            mParkingDirectShareTargets.put(origComponentName,
-                    new Pair<>(parkingTargetInfos, 0));
+            Pair<List<ChooserTargetInfo>, Integer> parkingTargetInfoPair =
+                    mParkingDirectShareTargets.getOrDefault(origComponentName,
+                            new Pair<>(new ArrayList<>(), 0));
+            parkingTargetInfoPair.first.addAll(parkingTargetInfos);
+            mParkingDirectShareTargets.put(origComponentName, parkingTargetInfoPair);
             if (isShortcutResult) {
                 mShortcutComponents.add(origComponentName);
             }
@@ -558,6 +565,9 @@ public class ChooserListAdapter extends ResolverListAdapter {
      * Append all remaining targets (parking in memory) into direct share row as per their ranking.
      */
     private void fillAllServiceTargets() {
+        if (mParkingDirectShareTargets.isEmpty()) {
+            return;
+        }
         int maxRankedTargets = mChooserListCommunicator.getMaxRankedTargets();
         List<ComponentName> topComponentNames = getTopComponentNames(maxRankedTargets);
         // Append all remaining targets of top recommended components into direct share row.
@@ -576,16 +586,18 @@ public class ChooserListAdapter extends ResolverListAdapter {
             mParkingDirectShareTargets.remove(component);
         }
         // Append all remaining shortcuts targets into direct share row.
-        List<ChooserTargetInfo> remainingTargets = new ArrayList<>();
         mParkingDirectShareTargets.entrySet().stream()
                 .filter(entry -> mShortcutComponents.contains(entry.getKey()))
                 .map(entry -> entry.getValue())
                 .map(pair -> pair.first)
-                .forEach(remainingTargets::addAll);
-        remainingTargets.sort(
-                (t1, t2) -> -Float.compare(t1.getModifiedScore(), t2.getModifiedScore()));
-        mServiceTargets.addAll(remainingTargets);
-        mNumShortcutResults += remainingTargets.size();
+                .forEach(targets -> {
+                    for (ChooserTargetInfo target : targets) {
+                        if (!checkDuplicateTarget(target)) {
+                            mServiceTargets.add(target);
+                            mNumShortcutResults++;
+                        }
+                    }
+                });
         mParkingDirectShareTargets.clear();
     }
 

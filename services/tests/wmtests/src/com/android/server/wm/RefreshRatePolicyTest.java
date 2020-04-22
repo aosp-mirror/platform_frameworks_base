@@ -33,6 +33,7 @@ import androidx.test.filters.SmallTest;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
  * Build/Install/Run:
@@ -40,6 +41,7 @@ import org.junit.Test;
  */
 @SmallTest
 @Presubmit
+@RunWith(WindowTestRunner.class)
 @FlakyTest
 public class RefreshRatePolicyTest extends WindowTestsBase {
 

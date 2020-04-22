@@ -163,6 +163,9 @@ class AppPredictionServiceResolverComparator extends AbstractResolverComparator 
 
     @Override
     List<ComponentName> getTopComponentNames(int topK) {
+        if (mResolverRankerService != null) {
+            return mResolverRankerService.getTopComponentNames(topK);
+        }
         return mTargetRanks.entrySet().stream()
                 .sorted(Entry.comparingByValue())
                 .limit(topK)

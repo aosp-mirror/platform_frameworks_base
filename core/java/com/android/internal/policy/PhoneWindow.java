@@ -79,6 +79,7 @@ import android.util.TypedValue;
 import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.IRotationWatcher.Stub;
+import android.view.IScrollCaptureController;
 import android.view.IWindowManager;
 import android.view.InputDevice;
 import android.view.InputEvent;
@@ -89,6 +90,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
+import android.view.ScrollCaptureCallback;
 import android.view.SearchEvent;
 import android.view.SurfaceHolder.Callback2;
 import android.view.View;
@@ -3915,5 +3917,36 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                     ? sDefaultContentInsetsApplier
                     : null);
         }
+    }
+
+    /**
+     * System request to begin scroll capture.
+     *
+     * @param controller the controller to receive responses
+     * @hide
+     */
+    @Override
+    public void requestScrollCapture(IScrollCaptureController controller) {
+        getViewRootImpl().dispatchScrollCaptureRequest(controller);
+    }
+
+    /**
+     * Registers a handler providing scrolling capture support for window content.
+     *
+     * @param callback the callback to add
+     */
+    @Override
+    public void addScrollCaptureCallback(@NonNull ScrollCaptureCallback callback) {
+        getViewRootImpl().addScrollCaptureCallback(callback);
+    }
+
+    /**
+     * Unregisters the given {@link ScrollCaptureCallback}.
+     *
+     * @param callback the callback to remove
+     */
+    @Override
+    public void removeScrollCaptureCallback(@NonNull ScrollCaptureCallback callback) {
+        getViewRootImpl().removeScrollCaptureCallback(callback);
     }
 }

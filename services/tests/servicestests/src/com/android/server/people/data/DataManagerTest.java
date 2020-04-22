@@ -215,6 +215,8 @@ public final class DataManagerTest {
         mDataManager = new DataManager(mContext, mInjector);
         mDataManager.initialize();
 
+        when(mShortcutServiceInternal.isSharingShortcut(anyInt(), anyString(), anyString(),
+                anyString(), anyInt(), any())).thenReturn(true);
         verify(mShortcutServiceInternal).addShortcutChangeCallback(
                 mShortcutChangeCallbackCaptor.capture());
         mShortcutChangeCallback = mShortcutChangeCallbackCaptor.getValue();

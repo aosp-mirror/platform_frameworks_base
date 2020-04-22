@@ -133,4 +133,12 @@ public class ScreenRecordTileTest extends SysuiTestCase {
 
         verify(mController, times(1)).stopRecording();
     }
+
+    @Test
+    public void testContentDescriptionHasTileName() {
+        mTile.refreshState();
+        mTestableLooper.processAllMessages();
+
+        assertTrue(mTile.getState().contentDescription.toString().contains(mTile.getState().label));
+    }
 }

@@ -1111,7 +1111,6 @@ public class ResourcesManager {
         }
         int displayId = key.mDisplayId;
         final boolean hasOverrideConfiguration = key.hasOverrideConfiguration();
-        tmpConfig.setTo(config);
 
         // Get new DisplayMetrics based on the DisplayAdjustments given to the ResourcesImpl. Update
         // a copy if the CompatibilityInfo changed, because the ResourcesImpl object will handle the
@@ -1121,17 +1120,15 @@ public class ResourcesManager {
             daj = new DisplayAdjustments(daj);
             daj.setCompatibilityInfo(compat);
         }
-        if (displayId == Display.DEFAULT_DISPLAY) {
-            daj.setConfiguration(config);
-        }
-        DisplayMetrics dm = getDisplayMetrics(displayId, daj);
-        if (displayId != Display.DEFAULT_DISPLAY) {
-            applyNonDefaultDisplayMetricsToConfiguration(dm, tmpConfig);
-        }
-
+        tmpConfig.setTo(config);
         if (hasOverrideConfiguration) {
             tmpConfig.updateFrom(key.mOverrideConfiguration);
         }
+        // Only apply for default display
+        if (displayId == Display.DEFAULT_DISPLAY) {
+            daj.setConfiguration(tmpConfig);
+        }
+        DisplayMetrics dm = getDisplayMetrics(displayId, daj);
         resourcesImpl.updateConfiguration(tmpConfig, dm, compat);
     }
 

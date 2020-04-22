@@ -109,9 +109,7 @@ public abstract class DataLoaderService extends Service {
                 @NonNull IDataLoaderStatusListener listener)
                 throws RuntimeException {
             try {
-                if (!nativeCreateDataLoader(id, control, params, listener)) {
-                    Slog.e(TAG, "Failed to create native loader for " + id);
-                }
+                nativeCreateDataLoader(id, control, params, listener);
             } catch (Exception ex) {
                 Slog.e(TAG, "Failed to create native loader for " + id, ex);
                 destroy(id);

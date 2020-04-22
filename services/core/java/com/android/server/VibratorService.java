@@ -1034,6 +1034,9 @@ public class VibratorService extends IVibratorService.Stub
             VibrationEffect.Waveform waveform = (VibrationEffect.Waveform) vib.effect;
             waveform = waveform.resolve(mDefaultVibrationAmplitude);
             scaledEffect = waveform.scale(scale.gamma, scale.maxAmplitude);
+        } else if (vib.effect instanceof VibrationEffect.Composed) {
+            VibrationEffect.Composed composed = (VibrationEffect.Composed) vib.effect;
+            scaledEffect = composed.scale(scale.gamma, scale.maxAmplitude);
         } else {
             Slog.w(TAG, "Unable to apply intensity scaling, unknown VibrationEffect type");
         }

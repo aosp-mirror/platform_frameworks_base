@@ -61,14 +61,17 @@ internal val animators = WeakHashMap<Any, PhysicsAnimator<*>>()
 
 /**
  * Default spring configuration to use for animations where stiffness and/or damping ratio
- * were not provided.
+ * were not provided, and a default spring was not set via [PhysicsAnimator.setDefaultSpringConfig].
  */
-private val defaultSpring = PhysicsAnimator.SpringConfig(
+private val globalDefaultSpring = PhysicsAnimator.SpringConfig(
         SpringForce.STIFFNESS_MEDIUM,
         SpringForce.DAMPING_RATIO_MEDIUM_BOUNCY)
 
-/** Default fling configuration to use for animations where friction was not provided. */
-private val defaultFling = PhysicsAnimator.FlingConfig(
+/**
+ * Default fling configuration to use for animations where friction was not provided, and a default
+ * fling config was not set via [PhysicsAnimator.setDefaultFlingConfig].
+ */
+private val globalDefaultFling = PhysicsAnimator.FlingConfig(
         friction = 1f, min = -Float.MAX_VALUE, max = Float.MAX_VALUE)
 
 /** Whether to log helpful debug information about animations. */
@@ -110,6 +113,12 @@ class PhysicsAnimator<T> private constructor (val target: T) {
 
     /** End actions to run when all animations have completed.  */
     private val endActions = ArrayList<EndAction>()
+
+    /** SpringConfig to use by default for properties whose springs were not provided. */
+    private var defaultSpring: SpringConfig = globalDefaultSpring
+
+    /** FlingConfig to use by default for properties whose fling configs were not provided. */
+    private var defaultFling: FlingConfig = globalDefaultFling
 
     /**
      * Internal listeners that respond to DynamicAnimations updating and ending, and dispatch to
@@ -201,6 +210,19 @@ class PhysicsAnimator<T> private constructor (val target: T) {
         config: SpringConfig = defaultSpring
     ): PhysicsAnimator<T> {
         return spring(property, toPosition, 0f, config)
+    }
+
+    /**
+     * Springs a property to a given value using the provided configuration options, and a start
+     * velocity of 0f.
+     *
+     * @see spring
+     */
+    fun spring(
+        property: FloatPropertyCompat<in T>,
+        toPosition: Float
+    ): PhysicsAnimator<T> {
+        return spring(property, toPosition, 0f)
     }
 
     /**
@@ -390,6 +412,14 @@ class PhysicsAnimator<T> private constructor (val target: T) {
     fun withEndActions(vararg endActions: Runnable?): PhysicsAnimator<T> {
         this.endActions.addAll(endActions.filterNotNull().map { it::run })
         return this
+    }
+
+    fun setDefaultSpringConfig(defaultSpring: SpringConfig) {
+        this.defaultSpring = defaultSpring
+    }
+
+    fun setDefaultFlingConfig(defaultFling: FlingConfig) {
+        this.defaultFling = defaultFling
     }
 
     /** Starts the animations! */
@@ -752,7 +782,7 @@ class PhysicsAnimator<T> private constructor (val target: T) {
     ) {
 
         constructor() :
-                this(defaultSpring.stiffness, defaultSpring.dampingRatio)
+                this(globalDefaultSpring.stiffness, globalDefaultSpring.dampingRatio)
 
         constructor(stiffness: Float, dampingRatio: Float) :
                 this(stiffness = stiffness, dampingRatio = dampingRatio, startVelocity = 0f)
@@ -782,10 +812,10 @@ class PhysicsAnimator<T> private constructor (val target: T) {
         internal var startVelocity: Float
     ) {
 
-        constructor() : this(defaultFling.friction)
+        constructor() : this(globalDefaultFling.friction)
 
         constructor(friction: Float) :
-                this(friction, defaultFling.min, defaultFling.max)
+                this(friction, globalDefaultFling.min, globalDefaultFling.max)
 
         constructor(friction: Float, min: Float, max: Float) :
                 this(friction, min, max, startVelocity = 0f)

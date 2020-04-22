@@ -19,6 +19,7 @@ package com.android.internal.os;
 import android.app.ActivityManager;
 import android.app.ActivityThread;
 import android.app.ApplicationErrorReport;
+import android.app.IActivityManager;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.type.DefaultMimeMapFactory;
 import android.os.Build;
@@ -63,6 +64,8 @@ public class RuntimeInit {
     private static IBinder mApplicationObject;
 
     private static volatile boolean mCrashing = false;
+
+    private static volatile ApplicationWtfHandler sDefaultApplicationWtfHandler;
 
     private static final native void nativeFinishInit();
     private static final native void nativeSetExitWithoutCleanup(boolean exitWithoutCleanup);
@@ -438,10 +441,27 @@ public class RuntimeInit {
      */
     public static void wtf(String tag, Throwable t, boolean system) {
         try {
-            if (ActivityManager.getService().handleApplicationWtf(
-                    mApplicationObject, tag, system,
-                    new ApplicationErrorReport.ParcelableCrashInfo(t),
-                    Process.myPid())) {
+            boolean exit = false;
+            final IActivityManager am = ActivityManager.getService();
+            if (am != null) {
+                exit = am.handleApplicationWtf(
+                        mApplicationObject, tag, system,
+                        new ApplicationErrorReport.ParcelableCrashInfo(t),
+                        Process.myPid());
+            } else {
+                // Unlikely but possible in early system boot
+                final ApplicationWtfHandler handler = sDefaultApplicationWtfHandler;
+                if (handler != null) {
+                    exit = handler.handleApplicationWtf(
+                            mApplicationObject, tag, system,
+                            new ApplicationErrorReport.ParcelableCrashInfo(t),
+                            Process.myPid());
+                } else {
+                    // Simply log the error
+                    Slog.e(TAG, "Original WTF:", t);
+                }
+            }
+            if (exit) {
                 // The Activity Manager has already written us off -- now exit.
                 Process.killProcess(Process.myPid());
                 System.exit(10);
@@ -454,6 +474,29 @@ public class RuntimeInit {
                 Slog.e(TAG, "Original WTF:", t);
             }
         }
+    }
+
+    /**
+     * Set the default {@link ApplicationWtfHandler}, in case the ActivityManager is not ready yet.
+     */
+    public static void setDefaultApplicationWtfHandler(final ApplicationWtfHandler handler) {
+        sDefaultApplicationWtfHandler = handler;
+    }
+
+    /**
+     * The handler to deal with the serious application errors.
+     */
+    public interface ApplicationWtfHandler {
+        /**
+         * @param app object of the crashing app, null for the system server
+         * @param tag reported by the caller
+         * @param system whether this wtf is coming from the system
+         * @param crashInfo describing the context of the error
+         * @param immediateCallerPid the caller Pid
+         * @return true if the process should exit immediately (WTF is fatal)
+         */
+        boolean handleApplicationWtf(IBinder app, String tag, boolean system,
+                ApplicationErrorReport.ParcelableCrashInfo crashInfo, int immediateCallerPid);
     }
 
     /**
