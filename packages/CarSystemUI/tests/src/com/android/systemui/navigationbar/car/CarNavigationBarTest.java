@@ -37,7 +37,6 @@ import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.car.CarDeviceProvisionedController;
 import com.android.systemui.statusbar.CommandQueue;
-import com.android.systemui.statusbar.NavigationBarController;
 import com.android.systemui.statusbar.phone.AutoHideController;
 import com.android.systemui.statusbar.phone.PhoneStatusBarPolicy;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
@@ -72,8 +71,6 @@ public class CarNavigationBarTest extends SysuiTestCase {
     @Mock
     private KeyguardStateController mKeyguardStateController;
     @Mock
-    private NavigationBarController mNavigationBarController;
-    @Mock
     private ButtonSelectionStateController mButtonSelectionStateController;
     @Mock
     private PhoneStatusBarPolicy mIconPolicy;
@@ -88,8 +85,8 @@ public class CarNavigationBarTest extends SysuiTestCase {
         mCarNavigationBar = new CarNavigationBar(mContext, mTestableResources.getResources(),
                 mCarNavigationBarController, mWindowManager, mDeviceProvisionedController,
                 new CommandQueue(mContext), mAutoHideController, mButtonSelectionStateListener,
-                mHandler, () -> mKeyguardStateController, () -> mNavigationBarController,
-                mButtonSelectionStateController, mIconPolicy, mIconController);
+                mHandler, () -> mKeyguardStateController, mButtonSelectionStateController,
+                mIconPolicy, mIconController);
     }
 
     @Test
