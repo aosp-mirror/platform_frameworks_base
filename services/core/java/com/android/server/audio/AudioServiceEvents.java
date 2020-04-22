@@ -19,6 +19,7 @@ package com.android.server.audio;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.AudioSystem;
+import android.media.MediaMetrics;
 
 import com.android.server.audio.AudioDeviceInventory.WiredDeviceConnectionState;
 
@@ -108,6 +109,11 @@ public class AudioServiceEvents {
         final String mGroupName;
         final AudioAttributes mAudioAttributes;
 
+        /**
+         * Audio Analytics unique Id.
+         */
+        private static final String mAnalyticsIdRoot = "audio.volumeEvent.";
+
         /** used for VOL_ADJUST_VOL_UID,
          *           VOL_ADJUST_SUGG_VOL,
          *           VOL_ADJUST_STREAM_VOL,
@@ -120,6 +126,13 @@ public class AudioServiceEvents {
             mCaller = caller;
             mGroupName = null;
             mAudioAttributes = null;
+
+            new MediaMetrics.Item(mAnalyticsIdRoot + mStream)
+                    .putInt("op", mOp)
+                    .putInt("dir", mVal1)
+                    .putInt("flags", mVal2)
+                    .putString("from", mCaller)
+                    .record();
         }
 
         /** used for VOL_SET_HEARING_AID_VOL*/
@@ -132,6 +145,12 @@ public class AudioServiceEvents {
             mCaller = null;
             mGroupName = null;
             mAudioAttributes = null;
+
+            new MediaMetrics.Item(mAnalyticsIdRoot + "HA")
+                    .putInt("op", mOp)
+                    .putInt("index", mVal1)
+                    .putInt("gainDb", mVal2)
+                    .record();
         }
 
         /** used for VOL_SET_AVRCP_VOL */
@@ -144,6 +163,11 @@ public class AudioServiceEvents {
             mCaller = null;
             mGroupName = null;
             mAudioAttributes = null;
+
+            new MediaMetrics.Item(mAnalyticsIdRoot + "AVRCP")
+                    .putInt("op", mOp)
+                    .putInt("index", mVal1)
+                    .record();
         }
 
         /** used for VOL_VOICE_ACTIVITY_HEARING_AID */
@@ -156,6 +180,12 @@ public class AudioServiceEvents {
             mCaller = null;
             mGroupName = null;
             mAudioAttributes = null;
+
+            new MediaMetrics.Item(mAnalyticsIdRoot + mStream)
+                    .putInt("op", mOp)
+                    .putInt("index", mVal1)
+                    .putInt("voiceActive", mVal2)
+                    .record();
         }
 
         /** used for VOL_MODE_CHANGE_HEARING_AID */
@@ -179,6 +209,12 @@ public class AudioServiceEvents {
             mCaller = caller;
             mGroupName = group;
             mAudioAttributes = aa;
+
+            new MediaMetrics.Item(mAnalyticsIdRoot + mStream)
+                    .putInt("op", mOp)
+                    .putInt("index", mVal1)
+                    .putInt("mode", mVal2)
+                    .record();
         }
 
         @Override
