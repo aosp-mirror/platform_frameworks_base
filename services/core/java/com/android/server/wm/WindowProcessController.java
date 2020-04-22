@@ -40,6 +40,7 @@ import static com.android.server.wm.ActivityTaskManagerService.INSTRUMENTATION_K
 import static com.android.server.wm.ActivityTaskManagerService.KEY_DISPATCHING_TIMEOUT_MS;
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_NONE;
 
+import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityThread;
@@ -50,6 +51,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.ServiceInfo;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Message;
@@ -165,7 +167,8 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     // Thread currently set for VR scheduling
     int mVrThreadTid;
 
-    boolean mIsImeProcess;
+    // Whether this process has ever started a service with the BIND_INPUT_METHOD permission.
+    private volatile boolean mHasImeService;
 
     // all activities running in the process
     private final ArrayList<ActivityRecord> mActivities = new ArrayList<>();
@@ -187,6 +190,8 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     // Registered display id as a listener to override config change
     private int mDisplayId;
     private ActivityRecord mConfigActivityRecord;
+    // Whether the activity config override is allowed for this process.
+    private volatile boolean mIsActivityConfigOverrideAllowed = true;
     /**
      * Activities that hosts some UI drawn by the current process. The activities live
      * in another process. This is used to check if the process is currently showing anything
@@ -201,9 +206,6 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     /** Whether our process is currently running a {@link IRemoteAnimationRunner} */
     private boolean mRunningRemoteAnimation;
 
-    /** Whether this process is owned by the System UI package. */
-    final boolean mIsSysUiPackage;
-
     public WindowProcessController(@NonNull ActivityTaskManagerService atm, ApplicationInfo info,
             String name, int uid, int userId, Object owner, WindowProcessListener listener) {
         mInfo = info;
@@ -215,8 +217,13 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         mAtm = atm;
         mDisplayId = INVALID_DISPLAY;
 
-        mIsSysUiPackage = info.packageName.equals(
+        boolean isSysUiPackage = info.packageName.equals(
                 mAtm.getSysUiServiceComponentLocked().getPackageName());
+        if (isSysUiPackage || mUid == Process.SYSTEM_UID) {
+            // This is a system owned process and should not use an activity config.
+            // TODO(b/151161907): Remove after support for display-independent (raw) SysUi configs.
+            mIsActivityConfigOverrideAllowed = false;
+        }
 
         onConfigurationChanged(atm.getGlobalConfiguration());
     }
@@ -1095,9 +1102,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
      * always track the configuration of the non-finishing activity last added to the process.
      */
     private void updateActivityConfigurationListener() {
-        if (mIsSysUiPackage || mUid == Process.SYSTEM_UID) {
-            // This is a system owned process and should not use an activity config.
-            // TODO(b/151161907): Remove after support for display-independent (raw) SysUi configs.
+        if (!mIsActivityConfigOverrideAllowed) {
             return;
         }
 
@@ -1132,7 +1137,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         final Configuration config = getConfiguration();
         if (mLastReportedConfiguration.diff(config) == 0) {
             // Nothing changed.
-            if (Build.IS_DEBUGGABLE && mIsImeProcess) {
+            if (Build.IS_DEBUGGABLE && mHasImeService) {
                 // TODO (b/135719017): Temporary log for debugging IME service.
                 Slog.w(TAG_CONFIGURATION, "Current config: " + config
                         + " unchanged for IME proc " + mName);
@@ -1156,7 +1161,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
 
     private void dispatchConfigurationChange(Configuration config) {
         if (mThread == null) {
-            if (Build.IS_DEBUGGABLE && mIsImeProcess) {
+            if (Build.IS_DEBUGGABLE && mHasImeService) {
                 // TODO (b/135719017): Temporary log for debugging IME service.
                 Slog.w(TAG_CONFIGURATION, "Unable to send config for IME proc " + mName
                         + ": no app thread");
@@ -1166,7 +1171,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         if (DEBUG_CONFIGURATION) {
             Slog.v(TAG_CONFIGURATION, "Sending to proc " + mName + " new config " + config);
         }
-        if (Build.IS_DEBUGGABLE && mIsImeProcess) {
+        if (Build.IS_DEBUGGABLE && mHasImeService) {
             // TODO (b/135719017): Temporary log for debugging IME service.
             Slog.v(TAG_CONFIGURATION, "Sending to IME proc " + mName + " new config " + config);
         }
@@ -1283,6 +1288,35 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
                 mPendingConfiguration = null;
                 dispatchConfigurationChange(config);
             }
+        }
+    }
+
+    /**
+     * Called to notify {@link WindowProcessController} of a started service.
+     *
+     * @param serviceInfo information describing the started service.
+     */
+    public void onServiceStarted(ServiceInfo serviceInfo) {
+        String permission = serviceInfo.permission;
+        if (permission == null) {
+            return;
+        }
+
+        // TODO: Audit remaining services for disabling activity override (Wallpaper, Dream, etc).
+        switch (permission) {
+            case Manifest.permission.BIND_INPUT_METHOD:
+                mHasImeService = true;
+                // Fall-through
+            case Manifest.permission.BIND_ACCESSIBILITY_SERVICE:
+            case Manifest.permission.BIND_VOICE_INTERACTION:
+                // We want to avoid overriding the config of these services with that of the
+                // activity as it could lead to incorrect display metrics. For ex, IME services
+                // expect their config to match the config of the display with the IME window
+                // showing.
+                mIsActivityConfigOverrideAllowed = false;
+                break;
+            default:
+                break;
         }
     }
 
