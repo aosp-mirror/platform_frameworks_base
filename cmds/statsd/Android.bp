@@ -295,7 +295,12 @@ cc_test {
 
     //TODO(b/153588990): Remove when the build system properly separates
     //32bit and 64bit architectures.
-    compile_multilib: "prefer32",
+    compile_multilib: "both",
+    multilib: {
+        lib64: {
+            suffix: "64",
+        }
+    },
 
     cflags: [
         "-Wall",
