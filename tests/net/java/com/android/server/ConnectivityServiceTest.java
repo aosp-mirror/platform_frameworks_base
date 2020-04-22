@@ -3049,6 +3049,13 @@ public class ConnectivityServiceTest {
         assertNoCallbacks(cEmpty1, cEmpty2, cEmpty3, cEmpty4, cFoo, cBar);
     }
 
+    /**
+     * @return the context's attribution tag
+     */
+    private String getAttributionTag() {
+        return null;
+    }
+
     @Test
     public void testInvalidNetworkSpecifier() {
         assertThrows(IllegalArgumentException.class, () -> {
@@ -3061,7 +3068,8 @@ public class ConnectivityServiceTest {
             networkCapabilities.addTransportType(TRANSPORT_WIFI)
                     .setNetworkSpecifier(new MatchAllNetworkSpecifier());
             mService.requestNetwork(networkCapabilities, null, 0, null,
-                    ConnectivityManager.TYPE_WIFI, mContext.getPackageName());
+                    ConnectivityManager.TYPE_WIFI, mContext.getPackageName(),
+                    getAttributionTag());
         });
 
         class NonParcelableSpecifier extends NetworkSpecifier {
