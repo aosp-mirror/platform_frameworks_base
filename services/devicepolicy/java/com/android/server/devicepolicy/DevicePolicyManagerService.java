@@ -403,11 +403,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     private static final long EXPIRATION_GRACE_PERIOD_MS = 5 * MS_PER_DAY; // 5 days, in ms
     private static final long MANAGED_PROFILE_MAXIMUM_TIME_OFF_THRESHOLD = 3 * MS_PER_DAY;
+    /** When to warn the user about the approaching work profile off deadline: 1 day before */
+    private static final long MANAGED_PROFILE_OFF_WARNING_PERIOD = 1 * MS_PER_DAY;
 
     private static final String ACTION_EXPIRED_PASSWORD_NOTIFICATION =
             "com.android.server.ACTION_EXPIRED_PASSWORD_NOTIFICATION";
 
-    private static final String ACTION_PROFILE_OFF_DEADLINE =
+    @VisibleForTesting
+    static final String ACTION_PROFILE_OFF_DEADLINE =
             "com.android.server.ACTION_PROFILE_OFF_DEADLINE";
 
     private static final String ATTR_PERMISSION_PROVIDER = "permission-provider";
@@ -648,6 +651,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     private DevicePolicyConstants mConstants;
 
     private static final boolean ENABLE_LOCK_GUARD = true;
+
+    /** Profile off deadline is not set or more than MANAGED_PROFILE_OFF_WARNING_PERIOD away. */
+    private static final int PROFILE_OFF_DEADLINE_DEFAULT = 0;
+    /** Profile off deadline is closer than MANAGED_PROFILE_OFF_WARNING_PERIOD. */
+    private static final int PROFILE_OFF_DEADLINE_WARNING = 1;
+    /** Profile off deadline reached, notify the user that personal apps blocked. */
+    private static final int PROFILE_OFF_DEADLINE_REACHED = 2;
 
     interface Stats {
         int LOCK_GUARD_GUARD = 0;
@@ -926,11 +936,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     mUserData.remove(userHandle);
                 }
                 handlePackagesChanged(null /* check all admins */, userHandle);
+                updatePersonalAppsSuspensionOnUserStart(userHandle);
             } else if (Intent.ACTION_USER_STOPPED.equals(action)) {
                 sendDeviceOwnerUserCommand(DeviceAdminReceiver.ACTION_USER_STOPPED, userHandle);
                 if (isManagedProfile(userHandle)) {
                     Slog.d(LOG_TAG, "Managed profile was stopped");
-                    updatePersonalAppSuspension(userHandle, false /* profileIsOn */);
+                    updatePersonalAppsSuspension(userHandle, false /* unlocked */);
                 }
             } else if (Intent.ACTION_USER_SWITCHED.equals(action)) {
                 sendDeviceOwnerUserCommand(DeviceAdminReceiver.ACTION_USER_SWITCHED, userHandle);
@@ -940,7 +951,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 }
                 if (isManagedProfile(userHandle)) {
                     Slog.d(LOG_TAG, "Managed profile became unlocked");
-                    updatePersonalAppSuspension(userHandle, true /* profileIsOn */);
+                    updatePersonalAppsSuspension(userHandle, true /* unlocked */);
                 }
             } else if (Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE.equals(action)) {
                 handlePackagesChanged(null /* check all admins */, userHandle);
@@ -967,7 +978,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 Slog.i(LOG_TAG, "Profile off deadline alarm was triggered");
                 final int userId = getManagedUserId(UserHandle.USER_SYSTEM);
                 if (userId >= 0) {
-                    updatePersonalAppSuspension(userId, mUserManager.isUserUnlocked(userId));
+                    updatePersonalAppsSuspension(userId, mUserManager.isUserUnlocked(userId));
                 } else {
                     Slog.wtf(LOG_TAG, "Got deadline alarm for nonexistent profile");
                 }
@@ -2485,6 +2496,16 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         public void runCryptoSelfTest() {
             CryptoTestHelper.runAndLogSelfTest();
+        }
+
+        public String[] getPersonalAppsForSuspension(int userId) {
+            return new PersonalAppsSuspensionHelper(
+                    mContext.createContextAsUser(UserHandle.of(userId), 0 /* flags */))
+                    .getPersonalAppsForSuspension();
+        }
+
+        public long systemCurrentTimeMillis() {
+            return System.currentTimeMillis();
         }
     }
 
@@ -4045,14 +4066,20 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     applyManagedProfileRestrictionIfDeviceOwnerLocked();
                 }
                 maybeStartSecurityLogMonitorOnActivityManagerReady();
-                final int userId = getManagedUserId(UserHandle.USER_SYSTEM);
-                if (userId >= 0) {
-                    updatePersonalAppSuspension(userId, false /* running */);
-                }
                 break;
             case SystemService.PHASE_BOOT_COMPLETED:
                 ensureDeviceOwnerUserStarted(); // TODO Consider better place to do this.
                 break;
+        }
+    }
+
+    private void updatePersonalAppsSuspensionOnUserStart(int userHandle) {
+        final int profileUserHandle = getManagedUserId(userHandle);
+        if (profileUserHandle >= 0) {
+            // Given that the parent user has just started, profile should be locked.
+            updatePersonalAppsSuspension(profileUserHandle, false /* unlocked */);
+        } else {
+            suspendPersonalAppsInternal(userHandle, false);
         }
     }
 
@@ -15893,11 +15920,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
         }
 
-        final int suspendedState = suspended
-                ? PERSONAL_APPS_SUSPENDED_EXPLICITLY
-                : PERSONAL_APPS_NOT_SUSPENDED;
-        mInjector.binderWithCleanCallingIdentity(
-                () -> applyPersonalAppsSuspension(callingUserId, suspendedState));
+        mInjector.binderWithCleanCallingIdentity(() -> updatePersonalAppsSuspension(
+                callingUserId, mUserManager.isUserUnlocked(callingUserId)));
 
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.SET_PERSONAL_APPS_SUSPENDED)
@@ -15907,44 +15931,54 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     /**
-     * Checks whether there is a policy that requires personal apps to be suspended and if so,
-     * applies it.
-     * @param running whether the profile is currently considered running.
+     * Checks whether personal apps should be suspended according to the policy and applies the
+     * change if needed.
+     *
+     * @param unlocked whether the profile is currently running unlocked.
      */
-    private void updatePersonalAppSuspension(int profileUserId, boolean running) {
-        final int suspensionState;
+    private void updatePersonalAppsSuspension(int profileUserId, boolean unlocked) {
+        final boolean suspended;
         synchronized (getLockObject()) {
             final ActiveAdmin profileOwner = getProfileOwnerAdminLocked(profileUserId);
             if (profileOwner != null) {
-                final boolean deadlineReached =
-                        updateProfileOffDeadlineLocked(profileUserId, profileOwner, running);
-                suspensionState = makeSuspensionReasons(
-                        profileOwner.mSuspendPersonalApps, deadlineReached);
-                Slog.d(LOG_TAG,
-                        String.format("New personal apps suspension state: %d", suspensionState));
+                final int deadlineState =
+                        updateProfileOffDeadlineLocked(profileUserId, profileOwner, unlocked);
+                suspended = profileOwner.mSuspendPersonalApps
+                        || deadlineState == PROFILE_OFF_DEADLINE_REACHED;
+                Slog.d(LOG_TAG, String.format("Personal apps suspended: %b, deadline state: %d",
+                            suspended, deadlineState));
+                updateProfileOffDeadlineNotificationLocked(profileUserId, profileOwner,
+                        unlocked ? PROFILE_OFF_DEADLINE_DEFAULT : deadlineState);
             } else {
-                suspensionState = PERSONAL_APPS_NOT_SUSPENDED;
+                suspended = false;
             }
         }
 
-        applyPersonalAppsSuspension(profileUserId, suspensionState);
+        final int parentUserId = getProfileParentId(profileUserId);
+        suspendPersonalAppsInternal(parentUserId, suspended);
     }
 
     /**
      * Checks work profile time off policy, scheduling personal apps suspension via alarm if
      * necessary.
-     * @return whether the apps should be suspended based on maximum time off policy.
+     * @return profile deadline state
      */
-    private boolean updateProfileOffDeadlineLocked(
+    private int updateProfileOffDeadlineLocked(
             int profileUserId, ActiveAdmin profileOwner, boolean unlocked) {
-        final long now = System.currentTimeMillis();
+        final long now = mInjector.systemCurrentTimeMillis();
         if (profileOwner.mProfileOffDeadline != 0 && now > profileOwner.mProfileOffDeadline) {
             // Profile off deadline is already reached.
             Slog.i(LOG_TAG, "Profile off deadline has been reached.");
-            return true;
+            return PROFILE_OFF_DEADLINE_REACHED;
         }
         boolean shouldSaveSettings = false;
-        if (profileOwner.mProfileOffDeadline != 0
+        if (profileOwner.mSuspendPersonalApps) {
+            // When explicit suspension is active, deadline shouldn't be set.
+            if (profileOwner.mProfileOffDeadline != 0) {
+                profileOwner.mProfileOffDeadline = 0;
+                shouldSaveSettings = true;
+            }
+        } else if (profileOwner.mProfileOffDeadline != 0
                 && (profileOwner.mProfileMaximumTimeOffMillis == 0 || unlocked)) {
             // There is a deadline but either there is no policy or the profile is unlocked -> clear
             // the deadline.
@@ -15960,52 +15994,51 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             shouldSaveSettings = true;
         }
 
-        updateProfileOffAlarm(profileOwner.mProfileOffDeadline);
-
         if (shouldSaveSettings) {
             saveSettingsLocked(profileUserId);
         }
-        return false;
-    }
 
-    private void updateProfileOffAlarm(long profileOffDeadline) {
+        final long alarmTime;
+        final int deadlineState;
+        if (profileOwner.mProfileOffDeadline == 0) {
+            alarmTime = 0;
+            deadlineState = PROFILE_OFF_DEADLINE_DEFAULT;
+        } else if (profileOwner.mProfileOffDeadline - now < MANAGED_PROFILE_OFF_WARNING_PERIOD) {
+            // The deadline is close, upon the alarm personal apps should be suspended.
+            alarmTime = profileOwner.mProfileOffDeadline;
+            deadlineState = PROFILE_OFF_DEADLINE_WARNING;
+        } else {
+            // The deadline is quite far, upon the alarm we should warn the user first, so the
+            // alarm is scheduled earlier than the actual deadline.
+            alarmTime = profileOwner.mProfileOffDeadline - MANAGED_PROFILE_OFF_WARNING_PERIOD;
+            deadlineState = PROFILE_OFF_DEADLINE_DEFAULT;
+        }
+
         final AlarmManager am = mInjector.getAlarmManager();
         final PendingIntent pi = mInjector.pendingIntentGetBroadcast(
                 mContext, REQUEST_PROFILE_OFF_DEADLINE, new Intent(ACTION_PROFILE_OFF_DEADLINE),
                 PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_UPDATE_CURRENT);
-        am.cancel(pi);
-        if (profileOffDeadline != 0) {
-            Slog.i(LOG_TAG, "Profile off deadline alarm is set.");
-            am.set(AlarmManager.RTC, profileOffDeadline, pi);
-        } else {
+
+        if (alarmTime == 0) {
             Slog.i(LOG_TAG, "Profile off deadline alarm is removed.");
-        }
-    }
-
-    private void applyPersonalAppsSuspension(
-            int profileUserId, @PersonalAppsSuspensionReason int suspensionState) {
-        final boolean suspended = getUserData(UserHandle.USER_SYSTEM).mAppsSuspended;
-        final boolean shouldSuspend = suspensionState != PERSONAL_APPS_NOT_SUSPENDED;
-        if (suspended != shouldSuspend) {
-            suspendPersonalAppsInternal(shouldSuspend, UserHandle.USER_SYSTEM);
-        }
-
-        if (suspensionState == PERSONAL_APPS_SUSPENDED_PROFILE_TIMEOUT) {
-            sendPersonalAppsSuspendedNotification(profileUserId);
+            am.cancel(pi);
         } else {
-            clearPersonalAppsSuspendedNotification();
+            Slog.i(LOG_TAG, "Profile off deadline alarm is set.");
+            am.set(AlarmManager.RTC, alarmTime, pi);
         }
+
+        return deadlineState;
     }
 
-    private void suspendPersonalAppsInternal(boolean suspended, int userId) {
+    private void suspendPersonalAppsInternal(int userId, boolean suspended) {
+        if (getUserData(userId).mAppsSuspended == suspended) {
+            return;
+        }
         Slog.i(LOG_TAG, String.format("%s personal apps for user %d",
                 suspended ? "Suspending" : "Unsuspending", userId));
         mInjector.binderWithCleanCallingIdentity(() -> {
             try {
-                final String[] appsToSuspend =
-                        new PersonalAppsSuspensionHelper(
-                                mContext.createContextAsUser(UserHandle.of(userId), 0 /* flags */))
-                                .getPersonalAppsForSuspension();
+                final String[] appsToSuspend = mInjector.getPersonalAppsForSuspension(userId);
                 final String[] failedPackages = mIPackageManager.setPackagesSuspendedAsUser(
                         appsToSuspend, suspended, null, null, null, PLATFORM_PACKAGE_NAME, userId);
                 if (!ArrayUtils.isEmpty(failedPackages)) {
@@ -16024,37 +16057,38 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
-    private void clearPersonalAppsSuspendedNotification() {
-        mInjector.binderWithCleanCallingIdentity(() ->
-                mInjector.getNotificationManager().cancel(
-                        SystemMessage.NOTE_PERSONAL_APPS_SUSPENDED));
-    }
+    private void updateProfileOffDeadlineNotificationLocked(int profileUserId,
+            @Nullable ActiveAdmin profileOwner, int notificationState) {
 
-    private void sendPersonalAppsSuspendedNotification(int userId) {
-        final String profileOwnerPackageName;
-        final long maxTimeOffDays;
-        synchronized (getLockObject()) {
-            profileOwnerPackageName = mOwners.getProfileOwnerComponent(userId).getPackageName();
-            final ActiveAdmin poAdmin = getProfileOwnerAdminLocked(userId);
-            maxTimeOffDays = TimeUnit.MILLISECONDS.toDays(poAdmin.mProfileMaximumTimeOffMillis);
+        if (notificationState == PROFILE_OFF_DEADLINE_DEFAULT) {
+            mInjector.getNotificationManager().cancel(SystemMessage.NOTE_PERSONAL_APPS_SUSPENDED);
+            return;
         }
+
+        final String profileOwnerPackageName = profileOwner.info.getPackageName();
+        final long maxTimeOffDays =
+                TimeUnit.MILLISECONDS.toDays(profileOwner.mProfileMaximumTimeOffMillis);
 
         final Intent intent = new Intent(DevicePolicyManager.ACTION_CHECK_POLICY_COMPLIANCE);
         intent.setPackage(profileOwnerPackageName);
 
         final PendingIntent pendingIntent = mInjector.pendingIntentGetActivityAsUser(mContext,
-                0 /* requestCode */, intent, PendingIntent.FLAG_UPDATE_CURRENT, null /* options */,
-                UserHandle.of(userId));
+                0 /* requestCode */, intent, PendingIntent.FLAG_UPDATE_CURRENT,
+                null /* options */, UserHandle.of(profileUserId));
+
+        // TODO(b/149075510): Only the first of the notifications should be dismissible.
+        final String title = mContext.getString(
+                notificationState == PROFILE_OFF_DEADLINE_WARNING
+                ? R.string.personal_apps_suspended_tomorrow_title
+                : R.string.personal_apps_suspended_title);
 
         final Notification notification =
                 new Notification.Builder(mContext, SystemNotificationChannels.DEVICE_ADMIN)
                         .setSmallIcon(android.R.drawable.stat_sys_warning)
                         .setOngoing(true)
-                        .setContentTitle(
-                                mContext.getString(
-                                        R.string.personal_apps_suspended_title))
+                        .setContentTitle(title)
                         .setContentText(mContext.getString(
-                                R.string.personal_apps_suspended_text, maxTimeOffDays))
+                            R.string.personal_apps_suspended_text, maxTimeOffDays))
                         .setColor(mContext.getColor(R.color.system_notification_accent_color))
                         .setContentIntent(pendingIntent)
                         .build();
@@ -16086,7 +16120,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
 
         mInjector.binderWithCleanCallingIdentity(
-                () -> updatePersonalAppSuspension(userId, mUserManager.isUserUnlocked()));
+                () -> updatePersonalAppsSuspension(userId, mUserManager.isUserUnlocked()));
 
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.SET_MANAGED_PROFILE_MAXIMUM_TIME_OFF)
