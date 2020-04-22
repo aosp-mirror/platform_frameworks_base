@@ -440,7 +440,7 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
      * Clears current screenshot
      */
     private void clearScreenshot(String reason) {
-        Log.e(TAG, "clearing screenshot: " + reason);
+        Log.v(TAG, "clearing screenshot: " + reason);
         if (mScreenshotLayout.isAttachedToWindow()) {
             mWindowManager.removeView(mScreenshotLayout);
         }
@@ -701,7 +701,7 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
                     R.layout.global_screenshot_action_chip, mActionsView, false);
             Toast scrollNotImplemented = Toast.makeText(
                     mContext, "Not implemented", Toast.LENGTH_SHORT);
-            scrollChip.setText("Extend"); // TODO : add resource and translate
+            scrollChip.setText("Extend"); // TODO: add resource and translate
             scrollChip.setIcon(
                     Icon.createWithResource(mContext, R.drawable.ic_arrow_downward), true);
             scrollChip.setOnClickListener(v -> {
