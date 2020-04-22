@@ -25,6 +25,7 @@ import android.media.AudioFocusInfo;
 import android.media.AudioManager;
 import android.media.AudioSystem;
 import android.media.IAudioFocusDispatcher;
+import android.media.MediaMetrics;
 import android.media.audiopolicy.IAudioPolicyCallback;
 import android.os.Binder;
 import android.os.Build;
@@ -143,6 +144,8 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
 
     private static final AudioEventLogger mEventLogger = new AudioEventLogger(50,
             "focus commands as seen by MediaFocusControl");
+
+    private static final String mMetricsId = MediaMetrics.Name.AUDIO_FOCUS;
 
     /*package*/ void noFocusForSuspendedApp(@NonNull String packageName, int uid) {
         synchronized (mAudioFocusLock) {
@@ -818,6 +821,17 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
     protected int requestAudioFocus(@NonNull AudioAttributes aa, int focusChangeHint, IBinder cb,
             IAudioFocusDispatcher fd, @NonNull String clientId, @NonNull String callingPackageName,
             int flags, int sdk, boolean forceDuck) {
+        new MediaMetrics.Item(mMetricsId)
+                .setUid(Binder.getCallingUid())
+                .set(MediaMetrics.Property.CALLING_PACKAGE, callingPackageName)
+                .set(MediaMetrics.Property.CLIENT_NAME, clientId)
+                .set(MediaMetrics.Property.EVENT, "requestAudioFocus")
+                .set(MediaMetrics.Property.FLAGS, flags)
+                .set(MediaMetrics.Property.FOCUS_CHANGE_HINT,
+                        AudioManager.audioFocusToString(focusChangeHint))
+                //.set(MediaMetrics.Property.SDK, sdk)
+                .record();
+
         mEventLogger.log((new AudioEventLogger.StringEvent(
                 "requestAudioFocus() from uid/pid " + Binder.getCallingUid()
                     + "/" + Binder.getCallingPid()
@@ -982,6 +996,13 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
      * */
     protected int abandonAudioFocus(IAudioFocusDispatcher fl, String clientId, AudioAttributes aa,
             String callingPackageName) {
+        new MediaMetrics.Item(mMetricsId)
+                .setUid(Binder.getCallingUid())
+                .set(MediaMetrics.Property.CALLING_PACKAGE, callingPackageName)
+                .set(MediaMetrics.Property.CLIENT_NAME, clientId)
+                .set(MediaMetrics.Property.EVENT, "abandonAudioFocus")
+                .record();
+
         // AudioAttributes are currently ignored, to be used for zones / a11y
         mEventLogger.log((new AudioEventLogger.StringEvent(
                 "abandonAudioFocus() from uid/pid " + Binder.getCallingUid()
