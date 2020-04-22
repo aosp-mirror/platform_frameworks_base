@@ -407,6 +407,10 @@ class InsetsStateController {
             return;
         }
         mDisplayContent.mWmService.mAnimator.addAfterPrepareSurfacesRunnable(() -> {
+            for (int i = mProviders.size() - 1; i >= 0; i--) {
+                final InsetsSourceProvider provider = mProviders.valueAt(i);
+                provider.onSurfaceTransactionApplied();
+            }
             for (int i = mPendingControlChanged.size() - 1; i >= 0; i--) {
                 final InsetsControlTarget controlTarget = mPendingControlChanged.valueAt(i);
                 controlTarget.notifyInsetsControlChanged();

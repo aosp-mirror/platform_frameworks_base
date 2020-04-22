@@ -50,6 +50,7 @@ import android.view.test.InsetsModeSession;
 import androidx.test.filters.SmallTest;
 
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -70,6 +71,11 @@ public class InsetsPolicyTest extends WindowTestsBase {
     @AfterClass
     public static void tearDownOnce() {
         sInsetsModeSession.close();
+    }
+
+    @Before
+    public void setup() {
+        mWm.mAnimator.ready();
     }
 
     @Test
@@ -194,6 +200,7 @@ public class InsetsPolicyTest extends WindowTestsBase {
         policy.updateBarControlTarget(mAppWindow);
         policy.showTransient(
                 IntArray.wrap(new int[]{ITYPE_STATUS_BAR, ITYPE_NAVIGATION_BAR}));
+        waitUntilWindowAnimatorIdle();
         final InsetsSourceControl[] controls =
                 mDisplayContent.getInsetsStateController().getControlsForDispatch(mAppWindow);
 
@@ -221,6 +228,7 @@ public class InsetsPolicyTest extends WindowTestsBase {
         policy.updateBarControlTarget(mAppWindow);
         policy.showTransient(
                 IntArray.wrap(new int[]{ITYPE_STATUS_BAR, ITYPE_NAVIGATION_BAR}));
+        waitUntilWindowAnimatorIdle();
         final InsetsSourceControl[] controls =
                 mDisplayContent.getInsetsStateController().getControlsForDispatch(mAppWindow);
 
@@ -249,6 +257,7 @@ public class InsetsPolicyTest extends WindowTestsBase {
         policy.updateBarControlTarget(mAppWindow);
         policy.showTransient(
                 IntArray.wrap(new int[]{ITYPE_STATUS_BAR, ITYPE_NAVIGATION_BAR}));
+        waitUntilWindowAnimatorIdle();
         InsetsSourceControl[] controls =
                 mDisplayContent.getInsetsStateController().getControlsForDispatch(mAppWindow);
 
@@ -262,6 +271,7 @@ public class InsetsPolicyTest extends WindowTestsBase {
         state.setSourceVisible(ITYPE_STATUS_BAR, true);
         state.setSourceVisible(ITYPE_NAVIGATION_BAR, true);
         policy.onInsetsModified(mAppWindow, state);
+        waitUntilWindowAnimatorIdle();
 
         controls = mDisplayContent.getInsetsStateController().getControlsForDispatch(mAppWindow);
 
