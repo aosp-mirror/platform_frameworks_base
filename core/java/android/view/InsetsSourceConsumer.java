@@ -69,6 +69,13 @@ public class InsetsSourceConsumer {
     private Rect mPendingFrame;
     private Rect mPendingVisibleFrame;
 
+    /**
+     * Indicates if we have the pending animation. When we have the control, we need to play the
+     * animation if the requested visibility is different from the current state. But if we haven't
+     * had a leash yet, we will set this flag, and play the animation once we get the leash.
+     */
+    private boolean mIsAnimationPending;
+
     public InsetsSourceConsumer(@InternalInsetsType int type, InsetsState state,
             Supplier<Transaction> transactionSupplier, InsetsController controller) {
         mType = type;
@@ -107,13 +114,21 @@ public class InsetsSourceConsumer {
         } else {
             // We are gaining control, and need to run an animation since previous state
             // didn't match
-            if (isRequestedVisibleAwaitingControl() != mState.getSource(mType).isVisible()) {
-                if (isRequestedVisibleAwaitingControl()) {
+            final boolean requestedVisible = isRequestedVisibleAwaitingControl();
+            final boolean needAnimation = requestedVisible != mState.getSource(mType).isVisible();
+            if (control.getLeash() != null && (needAnimation || mIsAnimationPending)) {
+                if (requestedVisible) {
                     showTypes[0] |= toPublicType(getType());
                 } else {
                     hideTypes[0] |= toPublicType(getType());
                 }
+                mIsAnimationPending = false;
             } else {
+                if (needAnimation) {
+                    // We need animation but we haven't had a leash yet. Set this flag that when we
+                    // get the leash we can play the deferred animation.
+                    mIsAnimationPending = true;
+                }
                 // We are gaining control, but don't need to run an animation.
                 // However make sure that the leash visibility is still up to date.
                 if (applyLocalVisibilityOverride()) {
@@ -274,7 +289,10 @@ public class InsetsSourceConsumer {
      * the moment.
      */
     protected void setRequestedVisible(boolean requestedVisible) {
-        mRequestedVisible = requestedVisible;
+        if (mRequestedVisible != requestedVisible) {
+            mRequestedVisible = requestedVisible;
+            mIsAnimationPending = false;
+        }
         if (applyLocalVisibilityOverride()) {
             mController.notifyVisibilityChanged();
         }
