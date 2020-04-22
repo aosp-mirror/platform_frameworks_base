@@ -18,6 +18,7 @@
 
 #include <android-base/logging.h>
 #include <android-base/no_destructor.h>
+#include <android/os/IVold.h>
 #include <binder/IResultReceiver.h>
 #include <binder/PermissionCache.h>
 #include <incfs.h>
@@ -117,11 +118,12 @@ binder::Status BinderIncrementalService::openStorage(const std::string& path,
 }
 
 binder::Status BinderIncrementalService::createStorage(
-        const std::string& path, const DataLoaderParamsParcel& params,
+        const std::string& path, const content::pm::DataLoaderParamsParcel& params,
         const ::android::sp<::android::content::pm::IDataLoaderStatusListener>& listener,
         int32_t createMode, int32_t* _aidl_return) {
     *_aidl_return =
-            mImpl.createStorage(path, const_cast<DataLoaderParamsParcel&&>(params), listener,
+            mImpl.createStorage(path, const_cast<content::pm::DataLoaderParamsParcel&&>(params),
+                                listener,
                                 android::incremental::IncrementalService::CreateOptions(
                                         createMode));
     return ok();
@@ -238,11 +240,8 @@ binder::Status BinderIncrementalService::isFileRangeLoaded(int32_t storageId,
 binder::Status BinderIncrementalService::getMetadataByPath(int32_t storageId,
                                                            const std::string& path,
                                                            std::vector<uint8_t>* _aidl_return) {
-    auto fid = mImpl.nodeFor(storageId, path);
-    if (fid != kIncFsInvalidFileId) {
-        auto metadata = mImpl.getMetadata(storageId, fid);
-        _aidl_return->assign(metadata.begin(), metadata.end());
-    }
+    auto metadata = mImpl.getMetadata(storageId, path);
+    _aidl_return->assign(metadata.begin(), metadata.end());
     return ok();
 }
 
