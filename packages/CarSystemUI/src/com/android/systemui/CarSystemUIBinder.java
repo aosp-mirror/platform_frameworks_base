@@ -20,6 +20,7 @@ import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.bubbles.dagger.BubbleModule;
 import com.android.systemui.car.notification.CarNotificationModule;
 import com.android.systemui.car.voicerecognition.ConnectedDeviceVoiceRecognitionNotifier;
+import com.android.systemui.car.volume.VolumeUI;
 import com.android.systemui.globalactions.GlobalActionsComponent;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.dagger.KeyguardModule;
@@ -39,7 +40,6 @@ import com.android.systemui.statusbar.tv.TvStatusBar;
 import com.android.systemui.theme.ThemeOverlayController;
 import com.android.systemui.toast.ToastUI;
 import com.android.systemui.util.leak.GarbageMonitor;
-import com.android.systemui.volume.VolumeUI;
 import com.android.systemui.window.OverlayWindowModule;
 import com.android.systemui.window.SystemUIOverlayWindowManager;
 
@@ -65,7 +65,7 @@ public abstract class CarSystemUIBinder {
     @ClassKey(Divider.class)
     public abstract SystemUI bindDivider(Divider sysui);
 
-    /** */
+    /** Inject Car Navigation Bar. */
     @Binds
     @IntoMap
     @ClassKey(CarNavigationBar.class)
