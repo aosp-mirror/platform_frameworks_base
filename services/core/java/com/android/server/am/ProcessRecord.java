@@ -261,9 +261,9 @@ class ProcessRecord implements WindowProcessListener {
     // Controller for error dialogs
     private final ErrorDialogController mDialogController = new ErrorDialogController();
     // Controller for driving the process state on the window manager side.
-    final private WindowProcessController mWindowProcessController;
+    private final WindowProcessController mWindowProcessController;
     // all ServiceRecord running in this process
-    final ArraySet<ServiceRecord> services = new ArraySet<>();
+    private final ArraySet<ServiceRecord> mServices = new ArraySet<>();
     // services that are currently executing code (need to remain foreground).
     final ArraySet<ServiceRecord> executingServices = new ArraySet<>();
     // All ConnectionRecord this process holds
@@ -577,10 +577,10 @@ class ProcessRecord implements WindowProcessListener {
             pw.println(Arrays.toString(isolatedEntryPointArgs));
         }
         mWindowProcessController.dump(pw, prefix);
-        if (services.size() > 0) {
+        if (mServices.size() > 0) {
             pw.print(prefix); pw.println("Services:");
-            for (int i=0; i<services.size(); i++) {
-                pw.print(prefix); pw.print("  - "); pw.println(services.valueAt(i));
+            for (int i = 0; i < mServices.size(); i++) {
+                pw.print(prefix); pw.print("  - "); pw.println(mServices.valueAt(i));
             }
         }
         if (executingServices.size() > 0) {
@@ -735,6 +735,60 @@ class ProcessRecord implements WindowProcessListener {
         }
     }
 
+    /**
+     * Records a service as running in the process. Note that this method does not actually start
+     * the service, but records the service as started for bookkeeping.
+     *
+     * @return true if the service was added, false otherwise.
+     */
+    boolean startService(ServiceRecord record) {
+        if (record == null) {
+            return false;
+        }
+        boolean added = mServices.add(record);
+        if (added && record.serviceInfo != null) {
+            mWindowProcessController.onServiceStarted(record.serviceInfo);
+        }
+        return added;
+    }
+
+    /**
+     * Records a service as stopped. Note that like {@link #startService(ServiceRecord)} this method
+     * does not actually stop the service, but records the service as stopped for bookkeeping.
+     *
+     * @return true if the service was removed, false otherwise.
+     */
+    boolean stopService(ServiceRecord record) {
+        return mServices.remove(record);
+    }
+
+    /**
+     * The same as calling {@link #stopService(ServiceRecord)} on all current running services.
+     */
+    void stopAllServices() {
+        mServices.clear();
+    }
+
+    /**
+     * Returns the number of services added with {@link #startService(ServiceRecord)} and not yet
+     * removed by a call to {@link #stopService(ServiceRecord)} or {@link #stopAllServices()}.
+     *
+     * @see #startService(ServiceRecord)
+     * @see #stopService(ServiceRecord)
+     */
+    int numberOfRunningServices() {
+        return mServices.size();
+    }
+
+    /**
+     * Returns the service at the specified {@code index}.
+     *
+     * @see #numberOfRunningServices()
+     */
+    ServiceRecord getRunningServiceAt(int index) {
+        return mServices.valueAt(index);
+    }
+
     void setCached(boolean cached) {
         if (mCached != cached) {
             mCached = cached;
@@ -768,9 +822,9 @@ class ProcessRecord implements WindowProcessListener {
             return true;
         }
 
-        final int servicesSize = services.size();
+        final int servicesSize = mServices.size();
         for (int i = 0; i < servicesSize; i++) {
-            ServiceRecord r = services.valueAt(i);
+            ServiceRecord r = mServices.valueAt(i);
             if (r.isForeground) {
                 return true;
             }
@@ -1289,16 +1343,16 @@ class ProcessRecord implements WindowProcessListener {
     }
 
     void updateBoundClientUids() {
-        if (services.isEmpty()) {
+        if (mServices.isEmpty()) {
             clearBoundClientUids();
             return;
         }
         // grab a set of clientUids of all connections of all services
         ArraySet<Integer> boundClientUids = new ArraySet<>();
-        final int K = services.size();
-        for (int j = 0; j < K; j++) {
+        final int serviceCount = mServices.size();
+        for (int j = 0; j < serviceCount; j++) {
             ArrayMap<IBinder, ArrayList<ConnectionRecord>> conns =
-                    services.valueAt(j).getConnections();
+                    mServices.valueAt(j).getConnections();
             final int N = conns.size();
             for (int conni = 0; conni < N; conni++) {
                 ArrayList<ConnectionRecord> c = conns.valueAt(conni);
