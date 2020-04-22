@@ -2181,7 +2181,8 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                         getSurfaceAnimationRunner());
 
                 resultAdapters = new Pair<>(adapter, null);
-                mNeedsZBoost = a.getZAdjustment() == Animation.ZORDER_TOP;
+                mNeedsZBoost = a.getZAdjustment() == Animation.ZORDER_TOP
+                        || AppTransition.isClosingTransit(transit);
                 mTransit = transit;
                 mTransitFlags = getDisplayContent().mAppTransition.getTransitFlags();
             } else {
