@@ -65,21 +65,23 @@ public abstract class DisplayManagerInternal {
     public abstract boolean isProximitySensorAvailable();
 
     /**
-     * Take a screenshot of the specified display and return a buffer.
+     * Screenshot for internal system-only use such as rotation, etc.  This method includes
+     * secure layers and the result should never be exposed to non-system applications.
+     * This method does not apply any rotation and provides the output in natural orientation.
      *
      * @param displayId The display id to take the screenshot of.
      * @return The buffer or null if we have failed.
      */
-    public abstract SurfaceControl.ScreenshotHardwareBuffer screenshot(int displayId);
+    public abstract SurfaceControl.ScreenshotHardwareBuffer systemScreenshot(int displayId);
 
     /**
-     * Take a screenshot without secure layer of the specified display and return a buffer.
+     * General screenshot functionality that excludes secure layers and applies appropriate
+     * rotation that the device is currently in.
      *
      * @param displayId The display id to take the screenshot of.
      * @return The buffer or null if we have failed.
      */
-    public abstract SurfaceControl.ScreenshotHardwareBuffer screenshotWithoutSecureLayers(
-            int displayId);
+    public abstract SurfaceControl.ScreenshotHardwareBuffer userScreenshot(int displayId);
 
     /**
      * Returns information about the specified logical display.
