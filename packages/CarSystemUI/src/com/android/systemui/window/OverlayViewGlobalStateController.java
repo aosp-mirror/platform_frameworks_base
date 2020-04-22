@@ -123,6 +123,12 @@ public class OverlayViewGlobalStateController {
         mSystemUIOverlayWindowController.setWindowFocusable(focusable);
     }
 
+    /** Sets the {@link android.view.WindowManager.LayoutParams#FLAG_ALT_FOCUSABLE_IM} flag of the
+     * sysui overlay window */
+    public void setWindowNeedsInput(boolean needsInput) {
+        mSystemUIOverlayWindowController.setWindowNeedsInput(needsInput);
+    }
+
     /** Returns {@code true} if the window is focusable. */
     public boolean isWindowFocusable() {
         return mSystemUIOverlayWindowController.isWindowFocusable();

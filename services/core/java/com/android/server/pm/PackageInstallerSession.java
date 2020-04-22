@@ -150,7 +150,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -2101,11 +2100,13 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                             continue;
                         }
 
-                        mResolvedInstructionSets.add(archSubDir.getName());
-                        List<File> oatFiles = Arrays.asList(archSubDir.listFiles());
-                        if (!oatFiles.isEmpty()) {
-                            mResolvedInheritedFiles.addAll(oatFiles);
+                        File[] files = archSubDir.listFiles();
+                        if (files == null || files.length == 0) {
+                            continue;
                         }
+
+                        mResolvedInstructionSets.add(archSubDir.getName());
+                        mResolvedInheritedFiles.addAll(Arrays.asList(files));
                     }
                 }
             }
@@ -2119,7 +2120,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     if (!libDir.exists() || !libDir.isDirectory()) {
                         continue;
                     }
-                    final List<File> libDirsToInherit = new LinkedList<>();
+                    final List<String> libDirsToInherit = new ArrayList<>();
+                    final List<File> libFilesToInherit = new ArrayList<>();
                     for (File archSubDir : libDir.listFiles()) {
                         if (!archSubDir.isDirectory()) {
                             continue;
@@ -2131,14 +2133,24 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                             Slog.e(TAG, "Skipping linking of native library directory!", e);
                             // shouldn't be possible, but let's avoid inheriting these to be safe
                             libDirsToInherit.clear();
+                            libFilesToInherit.clear();
                             break;
                         }
-                        if (!mResolvedNativeLibPaths.contains(relLibPath)) {
-                            mResolvedNativeLibPaths.add(relLibPath);
+
+                        File[] files = archSubDir.listFiles();
+                        if (files == null || files.length == 0) {
+                            continue;
                         }
-                        libDirsToInherit.addAll(Arrays.asList(archSubDir.listFiles()));
+
+                        libDirsToInherit.add(relLibPath);
+                        libFilesToInherit.addAll(Arrays.asList(files));
                     }
-                    mResolvedInheritedFiles.addAll(libDirsToInherit);
+                    for (String subDir : libDirsToInherit) {
+                        if (!mResolvedNativeLibPaths.contains(subDir)) {
+                            mResolvedNativeLibPaths.add(subDir);
+                        }
+                    }
+                    mResolvedInheritedFiles.addAll(libFilesToInherit);
                 }
             }
         }

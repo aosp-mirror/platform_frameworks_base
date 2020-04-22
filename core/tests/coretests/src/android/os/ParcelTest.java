@@ -87,4 +87,27 @@ public class ParcelTest {
 
         p.recycle();
     }
+
+    /**
+     * Verify that writing/reading UTF-8 and UTF-16 strings works well.
+     */
+    @Test
+    public void testStrings() {
+        final String[] strings = {
+                null, "", "abc\0def", "com.example.typical_package_name",
+                "從不喜歡孤單一個 - 蘇永康／吳雨霏", "example"
+        };
+
+        final Parcel p = Parcel.obtain();
+        for (String string : strings) {
+            p.writeString8(string);
+            p.writeString16(string);
+        }
+
+        p.setDataPosition(0);
+        for (String string : strings) {
+            assertEquals(string, p.readString8());
+            assertEquals(string, p.readString16());
+        }
+    }
 }

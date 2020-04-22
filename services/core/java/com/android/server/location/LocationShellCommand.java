@@ -81,5 +81,12 @@ class LocationShellCommand extends BasicShellCommandHandler {
         pw.println("    Sets the master location switch enabled state.");
         pw.println("  send-extra-command <PROVIDER> <COMMAND>");
         pw.println("    Sends the given extra command to the given provider.");
+        pw.println();
+        pw.println("    Common commands that may be supported by the gps provider, depending on");
+        pw.println("    hardware and software configurations:");
+        pw.println("      delete_aiding_data - requests deletion of any predictive aiding data");
+        pw.println("      force_time_injection - requests NTP time injection to chipset");
+        pw.println("      force_psds_injection - "
+                + "requests predictive aiding data injection to chipset");
     }
 }

@@ -137,6 +137,36 @@ public abstract class ConcurrencyModule {
     }
 
     /**
+     * Provide a Background-Thread Executor by default.
+     */
+    @Provides
+    @Singleton
+    public static RepeatableExecutor provideRepeatableExecutor(@Background DelayableExecutor exec) {
+        return new RepeatableExecutorImpl(exec);
+    }
+
+    /**
+     * Provide a Background-Thread Executor.
+     */
+    @Provides
+    @Singleton
+    @Background
+    public static RepeatableExecutor provideBackgroundRepeatableExecutor(
+            @Background DelayableExecutor exec) {
+        return new RepeatableExecutorImpl(exec);
+    }
+
+    /**
+     * Provide a Main-Thread Executor.
+     */
+    @Provides
+    @Singleton
+    @Main
+    public static RepeatableExecutor provideMainRepeatableExecutor(@Main DelayableExecutor exec) {
+        return new RepeatableExecutorImpl(exec);
+    }
+
+    /**
      * Provide an Executor specifically for running UI operations on a separate thread.
      *
      * Keep submitted runnables short and to the point, just as with any other UI code.

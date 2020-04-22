@@ -70,6 +70,7 @@ android_app {
     // v2/v3 signature.
     use_embedded_native_libs: true,
     apex_available: [
+        "//apex_available:platform",
         "com.android.apex.cts.shim.v1",
         "com.android.apex.cts.shim.v2",
         "com.android.apex.cts.shim.v2_no_hashtree",
@@ -120,6 +121,7 @@ android_app {
     },
     manifest: "shim/AndroidManifestTargetPSdk.xml",
     apex_available: [
+        "//apex_available:platform",
         "com.android.apex.cts.shim.v2_apk_in_apex_sdk_target_p",
     ],
 }
@@ -140,6 +142,7 @@ android_app {
 
     manifest: "shim/AndroidManifest.xml",
     apex_available: [
+        "//apex_available:platform",
         "com.android.apex.cts.shim.v1",
         "com.android.apex.cts.shim.v2",
         "com.android.apex.cts.shim.v2_no_hashtree",

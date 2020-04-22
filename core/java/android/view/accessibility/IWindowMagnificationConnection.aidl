@@ -66,8 +66,22 @@ oneway interface IWindowMagnificationConnection {
     void moveWindowMagnifier(int displayId, float offsetX, float offsetY);
 
     /**
-     * Sets {@link IWindowMagnificationConnectionCallback} to receive the request or the callback.
+     * Requests System UI show magnification mode button UI on the specified display.
      *
+     * @param displayId The logical display id.
+     * @param magnificationMode the current magnification mode.
+     */
+    void showMagnificationButton(int displayId, int magnificationMode);
+
+    /**
+     * Requests System UI remove magnification mode button UI on the specified display.
+     *
+     * @param displayId The logical display id.
+     */
+    void removeMagnificationButton(int displayId);
+
+    /**
+     * Sets {@link IWindowMagnificationConnectionCallback} to receive the request or the callback.
      *
      * @param callback the interface to be called.
      */

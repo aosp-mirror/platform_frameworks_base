@@ -32,6 +32,7 @@ import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.Instrumentation;
@@ -222,7 +223,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
 
         ArgumentCaptor<ConnectivityManager.NetworkCallback> callbackArg =
             ArgumentCaptor.forClass(ConnectivityManager.NetworkCallback.class);
-        Mockito.verify(mMockCm, atLeastOnce())
+        verify(mMockCm, atLeastOnce())
             .registerDefaultNetworkCallback(callbackArg.capture(), isA(Handler.class));
         mNetworkCallback = callbackArg.getValue();
         assertNotNull(mNetworkCallback);
@@ -384,7 +385,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
     }
 
     protected void verifyHasNoSims(boolean hasNoSimsVisible) {
-        Mockito.verify(mCallbackHandler, Mockito.atLeastOnce()).setNoSims(
+        verify(mCallbackHandler, Mockito.atLeastOnce()).setNoSims(
                 eq(hasNoSimsVisible), eq(false));
     }
 
@@ -395,7 +396,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
         ArgumentCaptor<Boolean> dataInArg = ArgumentCaptor.forClass(Boolean.class);
         ArgumentCaptor<Boolean> dataOutArg = ArgumentCaptor.forClass(Boolean.class);
 
-        Mockito.verify(mCallbackHandler, Mockito.atLeastOnce()).setMobileDataIndicators(
+        verify(mCallbackHandler, Mockito.atLeastOnce()).setMobileDataIndicators(
                     any(),
                     iconArg.capture(),
                     anyInt(),
@@ -429,7 +430,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
         ArgumentCaptor<Integer> typeIconArg = ArgumentCaptor.forClass(Integer.class);
 
         // TODO: Verify all fields.
-        Mockito.verify(mCallbackHandler, Mockito.atLeastOnce()).setMobileDataIndicators(
+        verify(mCallbackHandler, Mockito.atLeastOnce()).setMobileDataIndicators(
                 iconArg.capture(),
                 any(),
                 typeIconArg.capture(),
@@ -475,7 +476,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
         ArgumentCaptor<CharSequence> typeContentDescriptionHtmlArg =
                 ArgumentCaptor.forClass(CharSequence.class);
 
-        Mockito.verify(mCallbackHandler, Mockito.atLeastOnce()).setMobileDataIndicators(
+        verify(mCallbackHandler, Mockito.atLeastOnce()).setMobileDataIndicators(
                 iconArg.capture(),
                 qsIconArg.capture(),
                 typeIconArg.capture(),

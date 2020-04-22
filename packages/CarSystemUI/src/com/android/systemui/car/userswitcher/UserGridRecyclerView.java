@@ -368,7 +368,7 @@ public class UserGridRecyclerView extends RecyclerView {
 
         private void applyCarSysUIDialogFlags(AlertDialog dialog) {
             final Window window = dialog.getWindow();
-            window.setType(WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL);
+            window.setType(WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
             window.addFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
                     | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
             window.getAttributes().setFitInsetsTypes(

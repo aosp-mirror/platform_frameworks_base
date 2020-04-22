@@ -26,9 +26,10 @@ interface ControlsUiController {
 
     companion object {
         public const val TAG = "ControlsUiController"
+        public const val EXTRA_ANIMATE = "extra_animate"
     }
 
-    fun show(parent: ViewGroup)
+    fun show(parent: ViewGroup, dismissGlobalActions: Runnable)
     fun hide()
     fun onRefreshState(componentName: ComponentName, controls: List<Control>)
     fun onActionResponse(

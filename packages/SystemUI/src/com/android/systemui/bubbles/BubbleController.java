@@ -605,6 +605,9 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
             if (mExpandListener != null) {
                 mStackView.setExpandListener(mExpandListener);
             }
+
+            mStackView.setUnbubbleConversationCallback(notificationEntry ->
+                    onUserChangedBubble(notificationEntry, false /* shouldBubble */));
         }
     }
 

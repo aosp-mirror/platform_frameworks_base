@@ -31,6 +31,7 @@ import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.util.concurrency.DelayableExecutor
 import dagger.Lazy
+import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -284,13 +285,19 @@ open class ControlsBindingControllerImpl @Inject constructor(
         val requestLimit: Long
     ) : IControlsSubscriber.Stub() {
         val loadedControls = ArrayList<Control>()
-        private var isTerminated = false
+        private var isTerminated = AtomicBoolean(false)
         private var _loadCancelInternal: (() -> Unit)? = null
         private lateinit var subscription: IControlsSubscription
 
+        /**
+         * Potentially cancel a subscriber. The subscriber may also have terminated, in which case
+         * the request is ignored.
+         */
         fun loadCancel() = Runnable {
-            Log.d(TAG, "Cancel load requested")
-            _loadCancelInternal?.invoke()
+            _loadCancelInternal?.let {
+                Log.d(TAG, "Canceling loadSubscribtion")
+                it.invoke()
+            }
         }
 
         override fun onSubscribe(token: IBinder, subs: IControlsSubscription) {
@@ -301,7 +308,7 @@ open class ControlsBindingControllerImpl @Inject constructor(
 
         override fun onNext(token: IBinder, c: Control) {
             backgroundExecutor.execute {
-                if (isTerminated) return@execute
+                if (isTerminated.get()) return@execute
 
                 loadedControls.add(c)
 
@@ -325,13 +332,15 @@ open class ControlsBindingControllerImpl @Inject constructor(
         }
 
         private fun maybeTerminateAndRun(postTerminateFn: Runnable) {
-            if (isTerminated) return
+            if (isTerminated.get()) return
 
-            isTerminated = true
             _loadCancelInternal = {}
             currentProvider?.cancelLoadTimeout()
 
-            backgroundExecutor.execute(postTerminateFn)
+            backgroundExecutor.execute {
+                isTerminated.compareAndSet(false, true)
+                postTerminateFn.run()
+            }
         }
     }
 }

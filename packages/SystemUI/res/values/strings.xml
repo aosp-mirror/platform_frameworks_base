@@ -2629,6 +2629,8 @@
     <string name="bubbles_user_education_manage">Tap Manage to turn off bubbles from this app</string>
     <!-- Button text for dismissing the bubble "manage" button tool tip  [CHAR LIMIT=20]-->
     <string name="bubbles_user_education_got_it">Got it</string>
+    <!-- Label for the button that takes the user to the notification settings for the given app. -->
+    <string name="bubbles_app_settings"><xliff:g id="notification_title" example="Android Messages">%1$s</xliff:g> settings</string>
 
     <!-- Notification content text when the system navigation mode changes as a result of changing the default launcher [CHAR LIMIT=NONE] -->
     <string name="notification_content_system_nav_changed">System navigation updated. To make changes, go to Settings.</string>

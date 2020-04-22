@@ -52,7 +52,7 @@ class WindowMagnificationConnectionWrapper {
             mConnection.enableWindowMagnification(displayId, scale, centerX, centerY);
         } catch (RemoteException e) {
             if (DBG) {
-                Slog.e(TAG, "Error calling enableWindowMagnification()");
+                Slog.e(TAG, "Error calling enableWindowMagnification()", e);
             }
             return false;
         }
@@ -64,7 +64,7 @@ class WindowMagnificationConnectionWrapper {
             mConnection.setScale(displayId, scale);
         } catch (RemoteException e) {
             if (DBG) {
-                Slog.e(TAG, "Error calling setScale()");
+                Slog.e(TAG, "Error calling setScale()", e);
             }
             return false;
         }
@@ -76,7 +76,7 @@ class WindowMagnificationConnectionWrapper {
             mConnection.disableWindowMagnification(displayId);
         } catch (RemoteException e) {
             if (DBG) {
-                Slog.e(TAG, "Error calling disableWindowMagnification()");
+                Slog.e(TAG, "Error calling disableWindowMagnification()", e);
             }
             return false;
         }
@@ -88,7 +88,31 @@ class WindowMagnificationConnectionWrapper {
             mConnection.moveWindowMagnifier(displayId, offsetX, offsetY);
         } catch (RemoteException e) {
             if (DBG) {
-                Slog.e(TAG, "Error calling moveWindowMagnifier()");
+                Slog.e(TAG, "Error calling moveWindowMagnifier()", e);
+            }
+            return false;
+        }
+        return true;
+    }
+
+    boolean showMagnificationButton(int displayId, int magnificationMode) {
+        try {
+            mConnection.showMagnificationButton(displayId, magnificationMode);
+        } catch (RemoteException e) {
+            if (DBG) {
+                Slog.e(TAG, "Error calling showMagnificationButton()", e);
+            }
+            return false;
+        }
+        return true;
+    }
+
+    boolean removeMagnificationButton(int displayId) {
+        try {
+            mConnection.removeMagnificationButton(displayId);
+        } catch (RemoteException e) {
+            if (DBG) {
+                Slog.e(TAG, "Error calling removeMagnificationButton()", e);
             }
             return false;
         }
@@ -100,7 +124,7 @@ class WindowMagnificationConnectionWrapper {
             mConnection.setConnectionCallback(connectionCallback);
         } catch (RemoteException e) {
             if (DBG) {
-                Slog.e(TAG, "Error calling setConnectionCallback()");
+                Slog.e(TAG, "Error calling setConnectionCallback()", e);
             }
             return false;
         }

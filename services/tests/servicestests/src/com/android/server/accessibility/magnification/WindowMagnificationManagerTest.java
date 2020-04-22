@@ -66,7 +66,7 @@ public class WindowMagnificationManagerTest {
     private WindowMagnificationManager mWindowMagnificationManager;
 
     @Before
-    public void setUp() throws  RemoteException {
+    public void setUp() throws RemoteException {
         MockitoAnnotations.initMocks(this);
         mResolver = new MockContentResolver();
         mMockConnection = new MockWindowMagnificationConnection();
@@ -151,7 +151,7 @@ public class WindowMagnificationManagerTest {
     }
 
     @Test
-    public void disable_testDisplay_disableWindowMagnification()  throws RemoteException {
+    public void disable_testDisplay_disableWindowMagnification() throws RemoteException {
         mWindowMagnificationManager.setConnection(mMockConnection.getConnection());
         mWindowMagnificationManager.enableWindowMagnifier(TEST_DISPLAY, 3f, NaN, NaN);
 
@@ -219,6 +219,19 @@ public class WindowMagnificationManagerTest {
 
         mWindowMagnificationManager.moveWindowMagnifier(TEST_DISPLAY, 200, 300);
         verify(mMockConnection.getConnection()).moveWindowMagnifier(TEST_DISPLAY, 200, 300);
+    }
+
+    @Test
+    public void showMagnificationButton() throws RemoteException {
+        mWindowMagnificationManager.setConnection(mMockConnection.getConnection());
+
+        mWindowMagnificationManager.showMagnificationButton(TEST_DISPLAY,
+                Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
+        verify(mMockConnection.getConnection()).showMagnificationButton(TEST_DISPLAY,
+                Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
+
+        mWindowMagnificationManager.removeMagnificationButton(TEST_DISPLAY);
+        verify(mMockConnection.getConnection()).removeMagnificationButton(TEST_DISPLAY);
     }
 
     @Test

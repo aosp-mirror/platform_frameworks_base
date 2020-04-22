@@ -38,7 +38,7 @@ public class InfoMediaDevice extends MediaDevice {
 
     InfoMediaDevice(Context context, MediaRouter2Manager routerManager, MediaRoute2Info info,
             String packageName) {
-        super(context, MediaDeviceType.TYPE_CAST_DEVICE, routerManager, info, packageName);
+        super(context, routerManager, info, packageName);
         initDeviceRecord();
     }
 

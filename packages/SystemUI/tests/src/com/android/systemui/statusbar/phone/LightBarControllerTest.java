@@ -56,7 +56,7 @@ public class LightBarControllerTest extends SysuiTestCase {
         when(mStatusBarIconController.getTransitionsController()).thenReturn(
                 mLightBarTransitionsController);
         mLightBarController = new LightBarController(mContext, mStatusBarIconController,
-                mock(BatteryController.class));
+                mock(BatteryController.class), mock(NavigationModeController.class));
     }
 
     @Test

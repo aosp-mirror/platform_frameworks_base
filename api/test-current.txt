@@ -126,6 +126,7 @@ package android.app {
 
   public class ActivityTaskManager {
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public void clearLaunchParamsForPackages(java.util.List<java.lang.String>);
+    method public static boolean currentUiModeSupportsErrorDialogs(@NonNull android.content.Context);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public String listAllStacks();
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public void moveTaskToStack(int, int, boolean);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public boolean moveTopActivityToPinnedStack(int, android.graphics.Rect);
@@ -502,6 +503,11 @@ package android.app {
     method public boolean isRecentsDisabled();
     method public boolean isSearchDisabled();
     method public boolean isStatusBarExpansionDisabled();
+  }
+
+  public class TaskInfo {
+    method @NonNull public android.content.res.Configuration getConfiguration();
+    method @NonNull public android.window.WindowContainerToken getToken();
   }
 
   public class TimePickerDialog extends android.app.AlertDialog implements android.content.DialogInterface.OnClickListener android.widget.TimePicker.OnTimeChangedListener {

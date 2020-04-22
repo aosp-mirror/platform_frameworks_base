@@ -16,11 +16,12 @@
 
 package com.android.systemui.controls.management
 
-import android.app.Activity
+import android.app.ActivityOptions
 import android.content.ComponentName
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import android.view.ViewGroup
 import android.view.ViewStub
 import android.widget.Button
 import android.widget.TextView
@@ -31,7 +32,9 @@ import com.android.systemui.R
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.controls.controller.ControlsControllerImpl
 import com.android.systemui.controls.controller.StructureInfo
+import com.android.systemui.globalactions.GlobalActionsComponent
 import com.android.systemui.settings.CurrentUserTracker
+import com.android.systemui.util.LifecycleActivity
 import javax.inject.Inject
 
 /**
@@ -39,8 +42,9 @@ import javax.inject.Inject
  */
 class ControlsEditingActivity @Inject constructor(
     private val controller: ControlsControllerImpl,
-    broadcastDispatcher: BroadcastDispatcher
-) : Activity() {
+    broadcastDispatcher: BroadcastDispatcher,
+    private val globalActionsComponent: GlobalActionsComponent
+) : LifecycleActivity() {
 
     companion object {
         private const val TAG = "ControlsEditingActivity"
@@ -84,14 +88,31 @@ class ControlsEditingActivity @Inject constructor(
         bindViews()
 
         bindButtons()
+    }
 
+    override fun onStart() {
+        super.onStart()
         setUpList()
 
         currentUserTracker.startTracking()
     }
 
+    override fun onStop() {
+        super.onStop()
+        currentUserTracker.stopTracking()
+    }
+
     private fun bindViews() {
         setContentView(R.layout.controls_management)
+
+        getLifecycle().addObserver(
+            ControlsAnimations.observerForAnimations(
+                requireViewById<ViewGroup>(R.id.controls_management_root),
+                window,
+                intent
+            )
+        )
+
         requireViewById<ViewStub>(R.id.stub).apply {
             layoutResource = R.layout.controls_management_editing
             inflate()
@@ -113,17 +134,26 @@ class ControlsEditingActivity @Inject constructor(
                     putExtras(this@ControlsEditingActivity.intent)
                     putExtra(ControlsFavoritingActivity.EXTRA_SINGLE_STRUCTURE, true)
                 }
-                startActivity(intent)
-                finish()
+                startActivity(intent, ActivityOptions
+                    .makeSceneTransitionAnimation(this@ControlsEditingActivity).toBundle())
             }
         }
 
+        val rootView = requireViewById<ViewGroup>(R.id.controls_management_root)
         saveButton = requireViewById<Button>(R.id.done).apply {
             isEnabled = false
             setText(R.string.save)
             setOnClickListener {
                 saveFavorites()
-                finishAffinity()
+                ControlsAnimations.exitAnimation(
+                    rootView,
+                    object : Runnable {
+                        override fun run() {
+                            finish()
+                        }
+                    }
+                ).start()
+                globalActionsComponent.handleShowGlobalActionsMenu()
             }
         }
     }
@@ -151,22 +181,34 @@ class ControlsEditingActivity @Inject constructor(
         val controls = controller.getFavoritesForStructure(component, structure)
         model = FavoritesModel(component, controls, favoritesModelCallback)
         val elevation = resources.getFloat(R.dimen.control_card_elevation)
-        val adapter = ControlAdapter(elevation)
-        val recycler = requireViewById<RecyclerView>(R.id.list)
+        val recyclerView = requireViewById<RecyclerView>(R.id.list)
+        recyclerView.alpha = 0.0f
+        val adapter = ControlAdapter(elevation).apply {
+            registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
+                var hasAnimated = false
+                override fun onChanged() {
+                    if (!hasAnimated) {
+                        hasAnimated = true
+                        ControlsAnimations.enterAnimation(recyclerView).start()
+                    }
+                }
+            })
+        }
+
         val margin = resources
                 .getDimensionPixelSize(R.dimen.controls_card_margin)
         val itemDecorator = MarginItemDecorator(margin, margin)
 
-        recycler.apply {
+        recyclerView.apply {
             this.adapter = adapter
-            layoutManager = GridLayoutManager(recycler.context, 2).apply {
+            layoutManager = GridLayoutManager(recyclerView.context, 2).apply {
                 spanSizeLookup = adapter.spanSizeLookup
             }
             addItemDecoration(itemDecorator)
         }
         adapter.changeModel(model)
         model.attachAdapter(adapter)
-        ItemTouchHelper(model.itemTouchHelperCallback).attachToRecyclerView(recycler)
+        ItemTouchHelper(model.itemTouchHelperCallback).attachToRecyclerView(recyclerView)
     }
 
     override fun onDestroy() {

@@ -33,6 +33,7 @@ import com.android.internal.view.AppearanceRegion;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.plugins.DarkIconDispatcher;
+import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.policy.BatteryController;
 
 import java.io.FileDescriptor;
@@ -58,6 +59,7 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
     private AppearanceRegion[] mAppearanceRegions = new AppearanceRegion[0];
     private int mStatusBarMode;
     private int mNavigationBarMode;
+    private int mNavigationMode;
     private final Color mDarkModeColor;
 
     /**
@@ -84,11 +86,14 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
 
     @Inject
     public LightBarController(Context ctx, DarkIconDispatcher darkIconDispatcher,
-            BatteryController batteryController) {
+            BatteryController batteryController, NavigationModeController navModeController) {
         mDarkModeColor = Color.valueOf(ctx.getColor(R.color.dark_mode_icon_color_single_tone));
         mStatusBarIconController = (SysuiDarkIconDispatcher) darkIconDispatcher;
         mBatteryController = batteryController;
         mBatteryController.addCallback(this);
+        mNavigationMode = navModeController.addListener((mode) -> {
+            mNavigationMode = mode;
+        });
     }
 
     public void setNavigationBar(LightBarTransitionsController navigationBar) {
@@ -234,7 +239,8 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
     }
 
     private void updateNavigation() {
-        if (mNavigationBarController != null) {
+        if (mNavigationBarController != null
+                && !QuickStepContract.isGesturalMode(mNavigationMode)) {
             mNavigationBarController.setIconsDark(mNavigationLight, animateChange());
         }
     }

@@ -51,7 +51,7 @@ void StateTracker::onLogEvent(const LogEvent& event) {
         return;
     }
 
-    const int32_t resetState = stateValue.mAnnotations.getResetState();
+    const int32_t resetState = event.getResetState();
     if (resetState != -1) {
         VLOG("StateTracker new reset state: %d", resetState);
         handleReset(eventTimeNs, resetState);

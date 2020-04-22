@@ -193,6 +193,18 @@ public class WindowMagnification extends SystemUI implements WindowMagnifierCall
         }
 
         @Override
+        public void showMagnificationButton(int displayId, int magnificationMode) {
+            // TODO(b/145780606): show magnification button UI when the magnification capability
+            //  or scale changed.
+        }
+
+        @Override
+        public void removeMagnificationButton(int displayId) {
+            // TODO(b/145780606): remove magnification button UI when the magnification
+            //  capability changed.
+        }
+
+        @Override
         public void setConnectionCallback(IWindowMagnificationConnectionCallback callback) {
             mConnectionCallback = callback;
         }

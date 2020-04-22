@@ -362,17 +362,16 @@ public class TunerResourceManager {
      * request.
      *
      * @param request {@link CasSessionRequest} information of the current request.
-     * @param sessionResourceId a one-element array to return the granted cas session id.
-     *                          If no CAS granted, this will return
-     *                          {@link #INVALID_CAS_SESSION_RESOURCE_ID}.
+     * @param casSessionHandle a one-element array to return the granted cas session handel.
+     *                         If no CAS granted, this will return {@link #INVALID_RESOURCE_HANDLE}.
      *
      * @return true if there is CAS session granted.
      */
     public boolean requestCasSession(@NonNull CasSessionRequest request,
-                @NonNull int[] sessionResourceId) {
+                @NonNull int[] casSessionHandle) {
         boolean result = false;
         try {
-            result = mService.requestCasSession(request, sessionResourceId);
+            result = mService.requestCasSession(request, casSessionHandle);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -471,12 +470,12 @@ public class TunerResourceManager {
      * <p><strong>Note:</strong> {@link #updateCasInfo(int, int)} must be called before this
      * release.
      *
-     * @param sessionResourceId the id of the released CAS session.
+     * @param casSessionHandle the handle of the released CAS session.
      * @param clientId the id of the client that is releasing the cas session.
      */
-    public void releaseCasSession(int sessionResourceId, int clientId) {
+    public void releaseCasSession(int casSessionHandle, int clientId) {
         try {
-            mService.releaseCasSession(sessionResourceId, clientId);
+            mService.releaseCasSession(casSessionHandle, clientId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
