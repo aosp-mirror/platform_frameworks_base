@@ -38,16 +38,10 @@ import android.content.pm.DataLoaderParams;
 import android.content.pm.IDataLoaderStatusListener;
 import android.content.pm.InstallationFileParcel;
 import android.text.TextUtils;
-import android.util.Slog;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
-import java.util.Objects;
-import java.util.Random;
 
 /**
  * This class manages storage instances used during a package installation session.
@@ -56,13 +50,9 @@ import java.util.Random;
 public final class IncrementalFileStorages {
     private static final String TAG = "IncrementalFileStorages";
 
-    private static final String TMP_DIR_ROOT = "/data/incremental/tmp";
-    private static final Random TMP_DIR_RANDOM = new Random();
-
+    private @NonNull final IncrementalManager mIncrementalManager;
+    private @NonNull final File mStageDir;
     private @Nullable IncrementalStorage mDefaultStorage;
-    private @Nullable String mDefaultDir;
-    private @NonNull IncrementalManager mIncrementalManager;
-    private @NonNull File mStageDir;
 
     /**
      * Set up files and directories used in an installation session. Only used by Incremental.
@@ -85,72 +75,63 @@ public final class IncrementalFileStorages {
             throw new IOException("Failed to obtain incrementalManager.");
         }
 
-        IncrementalFileStorages result = null;
-        try {
-            result = new IncrementalFileStorages(stageDir, incrementalManager, dataLoaderParams,
-                    dataLoaderStatusListener);
-
-            if (!addedFiles.isEmpty()) {
-                result.mDefaultStorage.bind(stageDir.getAbsolutePath());
-            }
-
-            for (InstallationFileParcel file : addedFiles) {
-                if (file.location == LOCATION_DATA_APP) {
-                    try {
-                        result.addApkFile(file);
-                    } catch (IOException e) {
-                        // TODO(b/146080380): add incremental-specific error code
-                        throw new IOException(
-                                "Failed to add file to IncFS: " + file.name + ", reason: ", e);
-                    }
-                } else {
-                    throw new IOException("Unknown file location: " + file.location);
+        final IncrementalFileStorages result =
+                new IncrementalFileStorages(stageDir, incrementalManager, dataLoaderParams,
+                                            dataLoaderStatusListener);
+        for (InstallationFileParcel file : addedFiles) {
+            if (file.location == LOCATION_DATA_APP) {
+                try {
+                    result.addApkFile(file);
+                } catch (IOException e) {
+                    // TODO(b/146080380): add incremental-specific error code
+                    throw new IOException(
+                            "Failed to add file to IncFS: " + file.name + ", reason: ", e);
                 }
+            } else {
+                throw new IOException("Unknown file location: " + file.location);
             }
-
-            // TODO(b/146080380): remove 5 secs wait in startLoading
-            if (!result.mDefaultStorage.startLoading()) {
-                // TODO(b/146080380): add incremental-specific error code
-                throw new IOException("Failed to start loading data for Incremental installation.");
-            }
-
-            return result;
-        } catch (IOException e) {
-            Slog.e(TAG, "Failed to initialize Incremental file storages. Cleaning up...", e);
-            if (result != null) {
-                result.cleanUp();
-            }
-            throw e;
         }
+
+        if (!result.mDefaultStorage.startLoading()) {
+            // TODO(b/146080380): add incremental-specific error code
+            throw new IOException("Failed to start loading data for Incremental installation.");
+        }
+
+        return result;
     }
 
     private IncrementalFileStorages(@NonNull File stageDir,
             @NonNull IncrementalManager incrementalManager,
             @NonNull DataLoaderParams dataLoaderParams,
             @Nullable IDataLoaderStatusListener dataLoaderStatusListener) throws IOException {
-        mStageDir = stageDir;
-        mIncrementalManager = incrementalManager;
-        if (dataLoaderParams.getComponentName().getPackageName().equals("local")) {
-            final String incrementalPath = dataLoaderParams.getArguments();
-            mDefaultDir = incrementalPath;
-            if (TextUtils.isEmpty(mDefaultDir)) {
-                throw new IOException("Failed to create storage: incrementalPath is empty");
+        try {
+            mStageDir = stageDir;
+            mIncrementalManager = incrementalManager;
+            if (dataLoaderParams.getComponentName().getPackageName().equals("local")) {
+                final String incrementalPath = dataLoaderParams.getArguments();
+                if (TextUtils.isEmpty(incrementalPath)) {
+                    throw new IOException("Failed to create storage: incrementalPath is empty");
+                }
+                mDefaultStorage = mIncrementalManager.openStorage(incrementalPath);
+                if (mDefaultStorage == null) {
+                    throw new IOException(
+                            "Couldn't open incremental storage at " + incrementalPath);
+                }
+                mDefaultStorage.bind(stageDir.getAbsolutePath());
+            } else {
+                mDefaultStorage = mIncrementalManager.createStorage(stageDir.getAbsolutePath(),
+                        dataLoaderParams,
+                        dataLoaderStatusListener,
+                        IncrementalManager.CREATE_MODE_CREATE
+                                | IncrementalManager.CREATE_MODE_TEMPORARY_BIND, false);
+                if (mDefaultStorage == null) {
+                    throw new IOException(
+                            "Couldn't create incremental storage at " + stageDir);
+                }
             }
-            mDefaultStorage = mIncrementalManager.openStorage(incrementalPath);
-        } else {
-            mDefaultDir = getTempDir();
-            if (mDefaultDir == null) {
-                throw new IOException("Failed to create storage: tempDir is empty");
-            }
-            mDefaultStorage = mIncrementalManager.createStorage(mDefaultDir,
-                    dataLoaderParams,
-                    dataLoaderStatusListener,
-                    IncrementalManager.CREATE_MODE_CREATE
-                            | IncrementalManager.CREATE_MODE_TEMPORARY_BIND, false);
-        }
-
-        if (mDefaultStorage == null) {
-            throw new IOException("Failed to create storage");
+        } catch (IOException e) {
+            cleanUp();
+            throw e;
         }
     }
 
@@ -167,27 +148,14 @@ public final class IncrementalFileStorages {
      * TODO(b/136132412): make sure unnecessary binds are removed but useful storages are kept
      */
     public void cleanUp() {
-        Objects.requireNonNull(mDefaultStorage);
+        if (mDefaultStorage == null) {
+            return;
+        }
 
         try {
-            mDefaultStorage.unBind(mDefaultDir);
             mDefaultStorage.unBind(mStageDir.getAbsolutePath());
         } catch (IOException ignored) {
         }
-
-        mDefaultDir = null;
         mDefaultStorage = null;
-    }
-
-    private static String getTempDir() {
-        final Path tmpDir = Paths.get(TMP_DIR_ROOT,
-                String.valueOf(TMP_DIR_RANDOM.nextInt(Integer.MAX_VALUE - 1)));
-        try {
-            Files.createDirectories(tmpDir);
-        } catch (Exception ex) {
-            Slog.e(TAG, "Failed to create dir", ex);
-            return null;
-        }
-        return tmpDir.toAbsolutePath().toString();
     }
 }
