@@ -367,7 +367,7 @@ public final class BluetoothPan implements BluetoothProfile {
         final IBluetoothPan service = getService();
         if (service != null && isEnabled()) {
             try {
-                service.setBluetoothTethering(value, pkgName);
+                service.setBluetoothTethering(value, pkgName, null);
             } catch (RemoteException e) {
                 Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
             }

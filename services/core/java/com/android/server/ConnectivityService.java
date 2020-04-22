@@ -1819,11 +1819,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
      * @return {@code true} on success, {@code false} on failure
      */
     @Override
-    public boolean requestRouteToHostAddress(int networkType, byte[] hostAddress) {
+    public boolean requestRouteToHostAddress(int networkType, byte[] hostAddress,
+            String callingPackageName, String callingAttributionTag) {
         if (disallowedBecauseSystemCaller()) {
             return false;
         }
-        enforceChangePermission();
+        enforceChangePermission(callingPackageName, callingAttributionTag);
         if (mProtectedNetworks.contains(networkType)) {
             enforceConnectivityRestrictedNetworksPermission();
         }
@@ -2077,8 +2078,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 "ConnectivityService");
     }
 
-    private void enforceChangePermission() {
-        ConnectivityManager.enforceChangePermission(mContext);
+    private void enforceChangePermission(String callingPkg, String callingAttributionTag) {
+        ConnectivityManager.enforceChangePermission(mContext, callingPkg, callingAttributionTag);
     }
 
     private void enforceSettingsPermission() {
@@ -5430,7 +5431,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     @Override
     public NetworkRequest requestNetwork(NetworkCapabilities networkCapabilities,
             Messenger messenger, int timeoutMs, IBinder binder, int legacyType,
-            @NonNull String callingPackageName) {
+            @NonNull String callingPackageName, @Nullable String callingAttributionTag) {
         if (legacyType != TYPE_NONE && !checkNetworkStackPermission()) {
             if (checkUnsupportedStartingFrom(Build.VERSION_CODES.M, callingPackageName)) {
                 throw new SecurityException("Insufficient permissions to specify legacy type");
@@ -5448,7 +5449,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
             enforceAccessPermission();
         } else {
             networkCapabilities = new NetworkCapabilities(networkCapabilities);
-            enforceNetworkRequestPermissions(networkCapabilities);
+            enforceNetworkRequestPermissions(networkCapabilities, callingPackageName,
+                    callingAttributionTag);
             // TODO: this is incorrect. We mark the request as metered or not depending on the state
             // of the app when the request is filed, but we never change the request if the app
             // changes network state. http://b/29964605
@@ -5483,11 +5485,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
         return networkRequest;
     }
 
-    private void enforceNetworkRequestPermissions(NetworkCapabilities networkCapabilities) {
+    private void enforceNetworkRequestPermissions(NetworkCapabilities networkCapabilities,
+            String callingPackageName, String callingAttributionTag) {
         if (networkCapabilities.hasCapability(NET_CAPABILITY_NOT_RESTRICTED) == false) {
             enforceConnectivityRestrictedNetworksPermission();
         } else {
-            enforceChangePermission();
+            enforceChangePermission(callingPackageName, callingAttributionTag);
         }
     }
 
@@ -5538,11 +5541,13 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     @Override
     public NetworkRequest pendingRequestForNetwork(NetworkCapabilities networkCapabilities,
-            PendingIntent operation, @NonNull String callingPackageName) {
+            PendingIntent operation, @NonNull String callingPackageName,
+            @Nullable String callingAttributionTag) {
         Objects.requireNonNull(operation, "PendingIntent cannot be null.");
         final int callingUid = Binder.getCallingUid();
         networkCapabilities = new NetworkCapabilities(networkCapabilities);
-        enforceNetworkRequestPermissions(networkCapabilities);
+        enforceNetworkRequestPermissions(networkCapabilities, callingPackageName,
+                callingAttributionTag);
         enforceMeteredApnPolicy(networkCapabilities);
         ensureRequestableCapabilities(networkCapabilities);
         ensureSufficientPermissionsForRequest(networkCapabilities,
