@@ -115,8 +115,8 @@ class WindowSurfaceController {
                 .setMetadata(METADATA_WINDOW_TYPE, windowType)
                 .setMetadata(METADATA_OWNER_UID, ownerUid);
 
-        final boolean useBLAST = (win.getAttrs().privateFlags &
-                WindowManager.LayoutParams.PRIVATE_FLAG_USE_BLAST) != 0;
+        final boolean useBLAST = mService.mUseBLAST && ((win.getAttrs().privateFlags &
+                WindowManager.LayoutParams.PRIVATE_FLAG_USE_BLAST) != 0);
         if (useBLAST) {
             b.setContainerLayer();
         }
