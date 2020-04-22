@@ -107,9 +107,10 @@ public class AutomaticBrightnessControllerTest {
                 eq(INITIAL_LIGHT_SENSOR_RATE * 1000), any(Handler.class));
         SensorEventListener listener = listenerCaptor.getValue();
 
-        // Set up system to return 5 as a brightness value
+        // Set up system to return 0.02f as a brightness value
         float lux1 = 100.0f;
-        float normalizedBrightness1 = 0.0158f; //float equivalent of 5 out of 255
+        // Brightness as float (from 0.0f to 1.0f)
+        float normalizedBrightness1 = 0.02f;
         when(mAmbientBrightnessThresholds.getBrighteningThreshold(lux1))
                 .thenReturn(lux1);
         when(mAmbientBrightnessThresholds.getDarkeningThreshold(lux1))
@@ -120,14 +121,14 @@ public class AutomaticBrightnessControllerTest {
         // This is the important bit: When the new brightness is set, make sure the new
         // brightening threshold is beyond the maximum brightness value...so that we can test that
         // our threshold clamping works.
-        when(mScreenBrightnessThresholds.getBrighteningThreshold(5)).thenReturn(1.0f);
+        when(mScreenBrightnessThresholds.getBrighteningThreshold(normalizedBrightness1))
+                .thenReturn(1.0f);
 
         // Send new sensor value and verify
         listener.onSensorChanged(TestUtils.createSensorEvent(lightSensor, (int) lux1));
-        assertEquals(5, controller.getAutomaticScreenBrightness());
+        assertEquals(normalizedBrightness1, controller.getAutomaticScreenBrightness(), 0.001f);
 
-
-        // Set up system to return 255 as a brightness value
+        // Set up system to return 0.0f (minimum possible brightness) as a brightness value
         float lux2 = 10.0f;
         float normalizedBrightness2 = 0.0f;
         when(mAmbientBrightnessThresholds.getBrighteningThreshold(lux2))
@@ -139,7 +140,7 @@ public class AutomaticBrightnessControllerTest {
 
         // Send new sensor value and verify
         listener.onSensorChanged(TestUtils.createSensorEvent(lightSensor, (int) lux2));
-        assertEquals(1, controller.getAutomaticScreenBrightness());
+        assertEquals(normalizedBrightness2, controller.getAutomaticScreenBrightness(), 0.001f);
     }
 
     @Test
@@ -153,9 +154,9 @@ public class AutomaticBrightnessControllerTest {
                 eq(INITIAL_LIGHT_SENSOR_RATE * 1000), any(Handler.class));
         SensorEventListener listener = listenerCaptor.getValue();
 
-        // Set up system to return 250 as a brightness value
+        // Set up system to return 0.98f as a brightness value
         float lux1 = 100.0f;
-        float normalizedBrightness1 = 0.981f; //float equivalent of 250 out of 255
+        float normalizedBrightness1 = 0.98f;
         when(mAmbientBrightnessThresholds.getBrighteningThreshold(lux1))
                 .thenReturn(lux1);
         when(mAmbientBrightnessThresholds.getDarkeningThreshold(lux1))
@@ -166,14 +167,15 @@ public class AutomaticBrightnessControllerTest {
         // This is the important bit: When the new brightness is set, make sure the new
         // brightening threshold is beyond the maximum brightness value...so that we can test that
         // our threshold clamping works.
-        when(mScreenBrightnessThresholds.getBrighteningThreshold(250)).thenReturn(260.0f);
+        when(mScreenBrightnessThresholds.getBrighteningThreshold(normalizedBrightness1))
+                .thenReturn(1.1f);
 
         // Send new sensor value and verify
         listener.onSensorChanged(TestUtils.createSensorEvent(lightSensor, (int) lux1));
-        assertEquals(250, controller.getAutomaticScreenBrightness());
+        assertEquals(normalizedBrightness1, controller.getAutomaticScreenBrightness(), 0.001f);
 
 
-        // Set up system to return 255 as a brightness value
+        // Set up system to return 1.0f as a brightness value (brightness_max)
         float lux2 = 110.0f;
         float normalizedBrightness2 = 1.0f;
         when(mAmbientBrightnessThresholds.getBrighteningThreshold(lux2))
@@ -185,7 +187,7 @@ public class AutomaticBrightnessControllerTest {
 
         // Send new sensor value and verify
         listener.onSensorChanged(TestUtils.createSensorEvent(lightSensor, (int) lux2));
-        assertEquals(255, controller.getAutomaticScreenBrightness());
+        assertEquals(normalizedBrightness2, controller.getAutomaticScreenBrightness(), 0.001f);
     }
 
     @Test
@@ -204,10 +206,10 @@ public class AutomaticBrightnessControllerTest {
 
         // User sets brightness to 100
         controller.configure(true /* enable */, null /* configuration */,
-                100 /* brightness */, true /* userChangedBrightness */, 0 /* adjustment */,
+                0.5f /* brightness */, true /* userChangedBrightness */, 0 /* adjustment */,
                 false /* userChanged */, DisplayPowerRequest.POLICY_BRIGHT);
 
         // There should be a user data point added to the mapper.
-        verify(mBrightnessMappingStrategy).addUserDataPoint(1000f, 100);
+        verify(mBrightnessMappingStrategy).addUserDataPoint(1000f, 0.5f);
     }
 }
