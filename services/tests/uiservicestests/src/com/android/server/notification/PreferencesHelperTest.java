@@ -454,6 +454,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         mHelper.createNotificationChannel(PKG_O, UID_O, getChannel(), true, false);
 
         mHelper.setShowBadge(PKG_N_MR1, UID_N_MR1, true);
+        mHelper.setMessageSent(PKG_P, UID_P);
 
         mHelper.setImportance(PKG_O, UID_O, IMPORTANCE_NONE);
 
@@ -469,6 +470,8 @@ public class PreferencesHelperTest extends UiServiceTestCase {
 
         assertEquals(IMPORTANCE_NONE, mHelper.getImportance(PKG_O, UID_O));
         assertTrue(mHelper.canShowBadge(PKG_N_MR1, UID_N_MR1));
+        assertTrue(mHelper.hasSentMessage(PKG_P, UID_P));
+        assertFalse(mHelper.hasSentMessage(PKG_N_MR1, UID_N_MR1));
         assertEquals(channel1,
                 mHelper.getNotificationChannel(PKG_N_MR1, UID_N_MR1, channel1.getId(), false));
         compareChannels(channel2,
@@ -3389,5 +3392,18 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                 NotificationChannelLogger.NotificationChannelEvent
                         .NOTIFICATION_CHANNEL_CONVERSATION_DELETED,
                 mLogger.get(6).event);  // Delete Channel channel2 - Conversation A person calls
+    }
+
+    @Test
+    public void testMessageSent() {
+        // create package preferences
+        mHelper.canShowBadge(PKG_P, UID_P);
+
+        // check default value
+        assertFalse(mHelper.hasSentMessage(PKG_P, UID_P));
+
+        // change it
+        mHelper.setMessageSent(PKG_P, UID_P);
+        assertTrue(mHelper.hasSentMessage(PKG_P, UID_P));
     }
 }
