@@ -38,15 +38,15 @@ import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.car.CarServiceProvider;
+import com.android.systemui.car.navigationbar.CarNavigationBarController;
+import com.android.systemui.car.window.OverlayViewGlobalStateController;
+import com.android.systemui.car.window.SystemUIOverlayWindowController;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
-import com.android.systemui.navigationbar.car.CarNavigationBarController;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.statusbar.phone.BiometricUnlockController;
 import com.android.systemui.statusbar.phone.KeyguardBouncer;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
-import com.android.systemui.window.OverlayViewGlobalStateController;
-import com.android.systemui.window.SystemUIOverlayWindowController;
 
 import org.junit.Before;
 import org.junit.Test;
