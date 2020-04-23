@@ -23,6 +23,7 @@ import android.util.Log;
 import android.widget.Switch;
 
 import com.android.systemui.R;
+import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
@@ -37,14 +38,17 @@ public class ScreenRecordTile extends QSTileImpl<QSTile.BooleanState>
         implements RecordingController.RecordingStateChangeCallback {
     private static final String TAG = "ScreenRecordTile";
     private RecordingController mController;
+    private ActivityStarter mActivityStarter;
     private long mMillisUntilFinished = 0;
     private Callback mCallback = new Callback();
 
     @Inject
-    public ScreenRecordTile(QSHost host, RecordingController controller) {
+    public ScreenRecordTile(QSHost host, RecordingController controller,
+            ActivityStarter activityStarter) {
         super(host);
         mController = controller;
         mController.observe(this, mCallback);
+        mActivityStarter = activityStarter;
     }
 
     @Override
@@ -115,7 +119,8 @@ public class ScreenRecordTile extends QSTileImpl<QSTile.BooleanState>
         Log.d(TAG, "Starting countdown");
         // Close QS, otherwise the permission dialog appears beneath it
         getHost().collapsePanels();
-        mController.launchRecordPrompt();
+        Intent intent = mController.getPromptIntent();
+        mActivityStarter.postStartActivityDismissingKeyguard(intent, 0);
     }
 
     private void cancelCountdown() {
