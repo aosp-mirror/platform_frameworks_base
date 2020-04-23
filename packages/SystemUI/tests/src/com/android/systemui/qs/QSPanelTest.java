@@ -39,6 +39,7 @@ import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.QSTileView;
 import com.android.systemui.qs.customize.QSCustomizer;
 import com.android.systemui.qs.logging.QSLogger;
@@ -88,6 +89,8 @@ public class QSPanelTest extends SysuiTestCase {
     private DelayableExecutor mBackgroundExecutor;
     @Mock
     private LocalBluetoothManager mLocalBluetoothManager;
+    @Mock
+    private ActivityStarter mActivityStarter;
 
     @Before
     public void setup() throws Exception {
@@ -98,7 +101,7 @@ public class QSPanelTest extends SysuiTestCase {
             mMetricsLogger = mDependency.injectMockDependency(MetricsLogger.class);
             mQsPanel = new QSPanel(mContext, null, mDumpManager, mBroadcastDispatcher,
                     mQSLogger, mForegroundExecutor, mBackgroundExecutor,
-                    mLocalBluetoothManager);
+                    mLocalBluetoothManager, mActivityStarter);
             // Provides a parent with non-zero size for QSPanel
             mParentView = new FrameLayout(mContext);
             mParentView.addView(mQsPanel);
