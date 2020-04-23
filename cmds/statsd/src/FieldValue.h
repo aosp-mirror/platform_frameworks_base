@@ -27,7 +27,6 @@ struct Matcher;
 struct Field;
 struct FieldValue;
 
-const int32_t kAttributionField = 1;
 const int32_t kMaxLogDepth = 2;
 const int32_t kLastBitMask = 0x80;
 const int32_t kClearLastBitDeco = 0x7f;
