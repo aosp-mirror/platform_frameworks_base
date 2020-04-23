@@ -16,6 +16,8 @@ package com.android.systemui.globalactions;
 
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
+import static android.view.WindowManager.ScreenshotSource.SCREENSHOT_GLOBAL_ACTIONS;
+import static android.view.WindowManager.TAKE_SCREENSHOT_FULLSCREEN;
 
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_USER_REQUEST;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_NOT_REQUIRED;
@@ -127,7 +129,6 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.EmergencyDialerConstants;
 import com.android.systemui.util.RingerModeTracker;
 import com.android.systemui.util.leak.RotationUtils;
-import com.android.systemui.volume.SystemUIInterpolators.LogAccelerateInterpolator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -480,7 +481,8 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
      */
     @VisibleForTesting
     protected int getMaxShownPowerItems() {
-        if (shouldUseControlsLayout()) {
+        // TODO: Overflow disabled on keyguard while we solve for touch blocking issues.
+        if (shouldUseControlsLayout() && !mKeyguardShowing) {
             return mResources.getInteger(com.android.systemui.R.integer.power_menu_max_columns);
         } else {
             return Integer.MAX_VALUE;
@@ -830,7 +832,8 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             mHandler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    mScreenshotHelper.takeScreenshot(1, true, true, mHandler, null);
+                    mScreenshotHelper.takeScreenshot(TAKE_SCREENSHOT_FULLSCREEN, true, true,
+                            SCREENSHOT_GLOBAL_ACTIONS, mHandler, null);
                     mMetricsLogger.action(MetricsEvent.ACTION_SCREENSHOT_POWER_MENU);
                     mUiEventLogger.log(GlobalActionsEvent.GA_SCREENSHOT_PRESS);
                 }
@@ -1895,6 +1898,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
         private ControlsUiController mControlsUiController;
         private ViewGroup mControlsView;
+        private ViewGroup mContainer;
 
         ActionsDialog(Context context, MyAdapter adapter, MyOverflowAdapter overflowAdapter,
                 GlobalActionsPanelPlugin.PanelViewController plugin,
@@ -2047,6 +2051,11 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             });
             mGlobalActionsLayout.setRotationListener(this::onRotate);
             mGlobalActionsLayout.setAdapter(mAdapter);
+            mContainer = findViewById(com.android.systemui.R.id.global_actions_container);
+            // Some legacy dialog layouts don't have the outer container
+            if (mContainer == null) {
+                mContainer = mGlobalActionsLayout;
+            }
 
             mOverflowPopup = createPowerOverflowPopup();
 
@@ -2173,10 +2182,10 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             mHadTopUi = mNotificationShadeWindowController.getForceHasTopUi();
             mNotificationShadeWindowController.setForceHasTopUi(true);
             mBackgroundDrawable.setAlpha(0);
-            mGlobalActionsLayout.setTranslationX(mGlobalActionsLayout.getAnimationOffsetX());
-            mGlobalActionsLayout.setTranslationY(mGlobalActionsLayout.getAnimationOffsetY());
-            mGlobalActionsLayout.setAlpha(0);
-            mGlobalActionsLayout.animate()
+            mContainer.setTranslationX(mGlobalActionsLayout.getAnimationOffsetX());
+            mContainer.setTranslationY(mGlobalActionsLayout.getAnimationOffsetY());
+            mContainer.setAlpha(0);
+            mContainer.animate()
                     .alpha(1)
                     .translationX(0)
                     .translationY(0)
@@ -2208,16 +2217,16 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         @Override
         public void dismiss() {
             dismissWithAnimation(() -> {
-                mGlobalActionsLayout.setTranslationX(0);
-                mGlobalActionsLayout.setTranslationY(0);
-                mGlobalActionsLayout.setAlpha(1);
-                mGlobalActionsLayout.animate()
+                mContainer.setTranslationX(0);
+                mContainer.setTranslationY(0);
+                mContainer.setAlpha(1);
+                mContainer.animate()
                         .alpha(0)
                         .translationX(mGlobalActionsLayout.getAnimationOffsetX())
                         .translationY(mGlobalActionsLayout.getAnimationOffsetY())
-                        .setDuration(550)
+                        .setDuration(450)
                         .withEndAction(this::completeDismiss)
-                        .setInterpolator(new LogAccelerateInterpolator())
+                        .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
                         .setUpdateListener(animation -> {
                             float animatedValue = 1f - animation.getAnimatedFraction();
                             int alpha = (int) (animatedValue * mScrimAlpha * 255);
@@ -2231,7 +2240,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
         private void dismissForControlsActivity() {
             dismissWithAnimation(() -> {
-                ViewGroup root = (ViewGroup) mGlobalActionsLayout.getRootView();
+                ViewGroup root = (ViewGroup) mGlobalActionsLayout.getParent();
                 ControlsAnimations.exitAnimation(root, this::completeDismiss).start();
             });
         }

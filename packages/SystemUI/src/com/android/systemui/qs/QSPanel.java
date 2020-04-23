@@ -32,6 +32,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.Icon;
 import android.media.MediaDescription;
 import android.media.session.MediaSession;
 import android.metrics.LogMaker;
@@ -225,14 +226,16 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
      * Add or update a player for the associated media session
      * @param token
      * @param icon
+     * @param largeIcon
      * @param iconColor
      * @param bgColor
      * @param actionsContainer
      * @param notif
      * @param key
      */
-    public void addMediaSession(MediaSession.Token token, Drawable icon, int iconColor, int bgColor,
-            View actionsContainer, StatusBarNotification notif, String key) {
+    public void addMediaSession(MediaSession.Token token, Drawable icon, Icon largeIcon,
+            int iconColor, int bgColor, View actionsContainer, StatusBarNotification notif,
+            String key) {
         if (!useQsMediaPlayer(mContext)) {
             // Shouldn't happen, but just in case
             Log.e(TAG, "Tried to add media session without player!");
@@ -296,7 +299,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         Log.d(TAG, "setting player session");
         String appName = Notification.Builder.recoverBuilder(getContext(), notif.getNotification())
                 .loadHeaderAppName();
-        player.setMediaSession(token, icon, iconColor, bgColor, actionsContainer,
+        player.setMediaSession(token, icon, largeIcon, iconColor, bgColor, actionsContainer,
                 notif.getNotification().contentIntent, appName, key);
 
         if (mMediaPlayers.size() > 0) {

@@ -145,9 +145,9 @@ public final class ProviderInfo extends ComponentInfo
 
     @Override public void writeToParcel(Parcel out, int parcelableFlags) {
         super.writeToParcel(out, parcelableFlags);
-        out.writeString(authority);
-        out.writeString(readPermission);
-        out.writeString(writePermission);
+        out.writeString8(authority);
+        out.writeString8(readPermission);
+        out.writeString8(writePermission);
         out.writeInt(grantUriPermissions ? 1 : 0);
         out.writeInt(forceUriPermissions ? 1 : 0);
         out.writeTypedArray(uriPermissionPatterns, parcelableFlags);
@@ -175,9 +175,9 @@ public final class ProviderInfo extends ComponentInfo
 
     private ProviderInfo(Parcel in) {
         super(in);
-        authority = in.readString();
-        readPermission = in.readString();
-        writePermission = in.readString();
+        authority = in.readString8();
+        readPermission = in.readString8();
+        writePermission = in.readString8();
         grantUriPermissions = in.readInt() != 0;
         forceUriPermissions = in.readInt() != 0;
         uriPermissionPatterns = in.createTypedArray(PatternMatcher.CREATOR);

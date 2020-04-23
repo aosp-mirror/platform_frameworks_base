@@ -3085,7 +3085,7 @@
   <java-symbol type="string" name="global_action_emergency" />
   <java-symbol type="string" name="config_emergency_call_number" />
   <java-symbol type="string" name="config_emergency_dialer_package" />
-  <java-symbol type="array" name="config_emergency_mcc_codes" />
+  <java-symbol type="array" name="config_emergency_iso_country_codes" />
 
   <java-symbol type="string" name="config_dozeDoubleTapSensorType" />
   <java-symbol type="string" name="config_dozeTapSensorType" />
@@ -3921,6 +3921,8 @@
   <java-symbol type="id" name="resolver_empty_state_button" />
   <java-symbol type="id" name="resolver_empty_state_progress" />
   <java-symbol type="id" name="resolver_tab_divider" />
+  <java-symbol type="id" name="resolver_button_bar_divider" />
+  <java-symbol type="id" name="resolver_empty_state_container" />
   <java-symbol type="string" name="resolver_cant_share_with_work_apps" />
   <java-symbol type="string" name="resolver_cant_share_with_work_apps_explanation" />
   <java-symbol type="string" name="resolver_cant_share_with_personal_apps" />

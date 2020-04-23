@@ -104,7 +104,7 @@ cc_defaults {
         "src/subscriber/IncidentdReporter.cpp",
         "src/subscriber/SubscriberReporter.cpp",
         "src/uid_data.proto",
-        "src/utils/NamedLatch.cpp",
+        "src/utils/MultiConditionTrigger.cpp",
     ],
 
     local_include_dirs: [
@@ -295,7 +295,12 @@ cc_test {
 
     //TODO(b/153588990): Remove when the build system properly separates
     //32bit and 64bit architectures.
-    compile_multilib: "prefer32",
+    compile_multilib: "both",
+    multilib: {
+        lib64: {
+            suffix: "64",
+        }
+    },
 
     cflags: [
         "-Wall",
@@ -366,7 +371,7 @@ cc_test {
         "tests/StatsService_test.cpp",
         "tests/storage/StorageManager_test.cpp",
         "tests/UidMap_test.cpp",
-        "tests/utils/NamedLatch_test.cpp",
+        "tests/utils/MultiConditionTrigger_test.cpp",
     ],
 
     static_libs: [

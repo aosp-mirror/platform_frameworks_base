@@ -24,7 +24,6 @@ import android.animation.AnimatorSet;
 import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.annotation.Nullable;
-import android.app.Notification;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -53,7 +52,6 @@ import android.widget.Toast;
 import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Main;
 
-import java.util.List;
 import java.util.function.Consumer;
 
 import javax.inject.Inject;
@@ -347,14 +345,13 @@ public class GlobalScreenshotLegacy {
                 // Save the screenshot once we have a bit of time now
                 saveScreenshotInWorkerThread(finisher, new GlobalScreenshot.ActionsReadyListener() {
                     @Override
-                    void onActionsReady(Uri uri, List<Notification.Action> smartActions,
-                            List<Notification.Action> actions) {
-                        if (uri == null) {
+                    void onActionsReady(GlobalScreenshot.SavedImageData actionData) {
+                        if (actionData.uri == null) {
                             mNotificationsController.notifyScreenshotError(
                                     R.string.screenshot_failed_to_capture_text);
                         } else {
                             mNotificationsController
-                                    .showScreenshotActionsNotification(uri, smartActions, actions);
+                                    .showScreenshotActionsNotification(actionData);
                         }
                     }
                 });

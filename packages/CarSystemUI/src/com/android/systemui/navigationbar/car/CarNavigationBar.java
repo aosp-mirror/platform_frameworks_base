@@ -51,8 +51,6 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.statusbar.AutoHideUiElement;
 import com.android.systemui.statusbar.CommandQueue;
-import com.android.systemui.statusbar.NavigationBarController;
-import com.android.systemui.statusbar.SuperStatusBarViewFactory;
 import com.android.systemui.statusbar.phone.AutoHideController;
 import com.android.systemui.statusbar.phone.BarTransitions;
 import com.android.systemui.statusbar.phone.PhoneStatusBarPolicy;
@@ -79,8 +77,6 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
     private final ButtonSelectionStateListener mButtonSelectionStateListener;
     private final Handler mMainHandler;
     private final Lazy<KeyguardStateController> mKeyguardStateControllerLazy;
-    private final Lazy<NavigationBarController> mNavigationBarControllerLazy;
-    private final SuperStatusBarViewFactory mSuperStatusBarViewFactory;
     private final ButtonSelectionStateController mButtonSelectionStateController;
     private final PhoneStatusBarPolicy mIconPolicy;
     private final StatusBarIconController mIconController;
@@ -126,8 +122,6 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
             ButtonSelectionStateListener buttonSelectionStateListener,
             @Main Handler mainHandler,
             Lazy<KeyguardStateController> keyguardStateControllerLazy,
-            Lazy<NavigationBarController> navigationBarControllerLazy,
-            SuperStatusBarViewFactory superStatusBarViewFactory,
             ButtonSelectionStateController buttonSelectionStateController,
             PhoneStatusBarPolicy iconPolicy,
             StatusBarIconController iconController
@@ -142,8 +136,6 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
         mButtonSelectionStateListener = buttonSelectionStateListener;
         mMainHandler = mainHandler;
         mKeyguardStateControllerLazy = keyguardStateControllerLazy;
-        mNavigationBarControllerLazy = navigationBarControllerLazy;
-        mSuperStatusBarViewFactory = superStatusBarViewFactory;
         mButtonSelectionStateController = buttonSelectionStateController;
         mIconPolicy = iconPolicy;
         mIconController = iconController;
@@ -319,11 +311,6 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
                     result.mImeWindowVis, result.mImeBackDisposition,
                     result.mShowImeSwitcher);
         }
-
-        // There has been a car customized nav bar on the default display, so just create nav bars
-        // on external displays.
-        mNavigationBarControllerLazy.get().createNavigationBars(/* includeDefaultDisplay= */ false,
-                result);
     }
 
     private void buildNavBarWindows() {

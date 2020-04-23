@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.Icon;
 import android.media.MediaDescription;
 import android.media.session.MediaController;
 import android.media.session.MediaSession;
@@ -115,8 +116,8 @@ public class QSMediaPlayer extends MediaControlPanel {
         }
 
         // Set what we can normally
-        super.setMediaSession(token, icon, iconColor, bgColor, contentIntent, appName.toString(),
-                null);
+        super.setMediaSession(token, icon, null, iconColor, bgColor, contentIntent,
+                appName.toString(), null);
 
         // Then add info from MediaDescription
         ImageView albumView = mMediaNotifView.findViewById(R.id.album_art);
@@ -149,6 +150,7 @@ public class QSMediaPlayer extends MediaControlPanel {
      * Update media panel view for the given media session
      * @param token token for this media session
      * @param icon app notification icon
+     * @param largeIcon notification's largeIcon, used as a fallback for album art
      * @param iconColor foreground color (for text, icons)
      * @param bgColor background color
      * @param actionsContainer a LinearLayout containing the media action buttons
@@ -156,11 +158,12 @@ public class QSMediaPlayer extends MediaControlPanel {
      * @param appName Application title
      * @param key original notification's key
      */
-    public void setMediaSession(MediaSession.Token token, Drawable icon, int iconColor,
-            int bgColor, View actionsContainer, PendingIntent contentIntent, String appName,
-            String key) {
+    public void setMediaSession(MediaSession.Token token, Drawable icon, Icon largeIcon,
+            int iconColor, int bgColor, View actionsContainer, PendingIntent contentIntent,
+            String appName, String key) {
 
-        super.setMediaSession(token, icon, iconColor, bgColor, contentIntent, appName, key);
+        super.setMediaSession(token, icon, largeIcon, iconColor, bgColor, contentIntent, appName,
+                key);
 
         // Media controls
         if (actionsContainer != null) {

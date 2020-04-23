@@ -17,9 +17,6 @@
 package com.android.systemui.statusbar.phone;
 
 import static android.content.Intent.ACTION_OVERLAY_CHANGED;
-import static android.content.Intent.ACTION_PREFERRED_ACTIVITY_CHANGED;
-import static android.os.UserHandle.USER_CURRENT;
-import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY;
 
@@ -38,17 +35,14 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.provider.Settings.Secure;
 import android.util.Log;
-import android.util.SparseBooleanArray;
 
 import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
-import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
@@ -70,104 +64,34 @@ public class NavigationModeController implements Dumpable {
     private final Context mContext;
     private Context mCurrentUserContext;
     private final IOverlayManager mOverlayManager;
-    private final DeviceProvisionedController mDeviceProvisionedController;
     private final Executor mUiBgExecutor;
-
-    private SparseBooleanArray mRestoreGesturalNavBarMode = new SparseBooleanArray();
 
     private ArrayList<ModeChangedListener> mListeners = new ArrayList<>();
 
     private BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            switch (intent.getAction()) {
-                case ACTION_OVERLAY_CHANGED:
                     if (DEBUG) {
                         Log.d(TAG, "ACTION_OVERLAY_CHANGED");
                     }
                     updateCurrentInteractionMode(true /* notify */);
-                    break;
-            }
         }
     };
 
-    private final DeviceProvisionedController.DeviceProvisionedListener mDeviceProvisionedCallback =
-            new DeviceProvisionedController.DeviceProvisionedListener() {
-                @Override
-                public void onDeviceProvisionedChanged() {
-                    if (DEBUG) {
-                        Log.d(TAG, "onDeviceProvisionedChanged: "
-                                + mDeviceProvisionedController.isDeviceProvisioned());
-                    }
-                    // Once the device has been provisioned, check if we can restore gestural nav
-                    restoreGesturalNavOverlayIfNecessary();
-                }
-
-                @Override
-                public void onUserSetupChanged() {
-                    if (DEBUG) {
-                        Log.d(TAG, "onUserSetupChanged: "
-                                + mDeviceProvisionedController.isCurrentUserSetup());
-                    }
-                    // Once the user has been setup, check if we can restore gestural nav
-                    restoreGesturalNavOverlayIfNecessary();
-                }
-
-                @Override
-                public void onUserSwitched() {
-                    if (DEBUG) {
-                        Log.d(TAG, "onUserSwitched: "
-                                + ActivityManagerWrapper.getInstance().getCurrentUserId());
-                    }
-
-                    // Update the nav mode for the current user
-                    updateCurrentInteractionMode(true /* notify */);
-
-                    // When switching users, defer enabling the gestural nav overlay until the user
-                    // is all set up
-                    deferGesturalNavOverlayIfNecessary();
-                }
-            };
-
     @Inject
-    public NavigationModeController(Context context,
-            DeviceProvisionedController deviceProvisionedController,
-            @UiBackground Executor uiBgExecutor) {
+    public NavigationModeController(Context context, @UiBackground Executor uiBgExecutor) {
         mContext = context;
         mCurrentUserContext = context;
         mOverlayManager = IOverlayManager.Stub.asInterface(
                 ServiceManager.getService(Context.OVERLAY_SERVICE));
         mUiBgExecutor = uiBgExecutor;
-        mDeviceProvisionedController = deviceProvisionedController;
-        mDeviceProvisionedController.addCallback(mDeviceProvisionedCallback);
 
         IntentFilter overlayFilter = new IntentFilter(ACTION_OVERLAY_CHANGED);
         overlayFilter.addDataScheme("package");
         overlayFilter.addDataSchemeSpecificPart("android", PatternMatcher.PATTERN_LITERAL);
         mContext.registerReceiverAsUser(mReceiver, UserHandle.ALL, overlayFilter, null, null);
 
-        IntentFilter preferredActivityFilter = new IntentFilter(ACTION_PREFERRED_ACTIVITY_CHANGED);
-        mContext.registerReceiverAsUser(mReceiver, UserHandle.ALL, preferredActivityFilter, null,
-                null);
-
         updateCurrentInteractionMode(false /* notify */);
-
-        // Check if we need to defer enabling gestural nav
-        deferGesturalNavOverlayIfNecessary();
-    }
-
-    private boolean setGestureModeOverlayForMainLauncher() {
-        if (getCurrentInteractionMode(mCurrentUserContext) == NAV_BAR_MODE_GESTURAL) {
-            // Already in gesture mode
-            return true;
-        }
-
-        Log.d(TAG, "Switching system navigation to full-gesture mode:"
-                + " contextUser="
-                + mCurrentUserContext.getUserId());
-
-        setModeOverlay(NAV_BAR_MODE_GESTURAL_OVERLAY, USER_CURRENT);
-        return true;
     }
 
     public void updateCurrentInteractionMode(boolean notify) {
@@ -176,10 +100,9 @@ public class NavigationModeController implements Dumpable {
         if (mode == NAV_BAR_MODE_GESTURAL) {
             switchToDefaultGestureNavOverlayIfNecessary();
         }
-        mUiBgExecutor.execute(() -> {
+        mUiBgExecutor.execute(() ->
             Settings.Secure.putString(mCurrentUserContext.getContentResolver(),
-                    Secure.NAVIGATION_MODE, String.valueOf(mode));
-        });
+                    Secure.NAVIGATION_MODE, String.valueOf(mode)));
         if (DEBUG) {
             Log.e(TAG, "updateCurrentInteractionMode: mode=" + mode);
             dumpAssetPaths(mCurrentUserContext);
@@ -230,61 +153,11 @@ public class NavigationModeController implements Dumpable {
         }
     }
 
-    private void deferGesturalNavOverlayIfNecessary() {
-        final int userId = mDeviceProvisionedController.getCurrentUser();
-        mRestoreGesturalNavBarMode.put(userId, false);
-        if (mDeviceProvisionedController.isDeviceProvisioned()
-                && mDeviceProvisionedController.isCurrentUserSetup()) {
-            // User is already setup and device is provisioned, nothing to do
-            if (DEBUG) {
-                Log.d(TAG, "deferGesturalNavOverlayIfNecessary: device is provisioned and user is "
-                        + "setup");
-            }
-            return;
-        }
-
-        ArrayList<String> defaultOverlays = new ArrayList<>();
-        try {
-            defaultOverlays.addAll(Arrays.asList(mOverlayManager.getDefaultOverlayPackages()));
-        } catch (RemoteException e) {
-            Log.e(TAG, "deferGesturalNavOverlayIfNecessary: failed to fetch default overlays");
-        }
-        if (!defaultOverlays.contains(NAV_BAR_MODE_GESTURAL_OVERLAY)) {
-            // No default gesture nav overlay
-            if (DEBUG) {
-                Log.d(TAG, "deferGesturalNavOverlayIfNecessary: no default gestural overlay, "
-                        + "default=" + defaultOverlays);
-            }
-            return;
-        }
-
-        // If the default is gestural, force-enable three button mode until the device is
-        // provisioned
-        setModeOverlay(NAV_BAR_MODE_3BUTTON_OVERLAY, USER_CURRENT);
-        mRestoreGesturalNavBarMode.put(userId, true);
-
-        if (DEBUG) {
-            Log.d(TAG, "deferGesturalNavOverlayIfNecessary: setting to 3 button mode");
-        }
-    }
-
-    private void restoreGesturalNavOverlayIfNecessary() {
-        if (DEBUG) {
-            Log.d(TAG, "restoreGesturalNavOverlayIfNecessary: needs restore="
-                    + mRestoreGesturalNavBarMode);
-        }
-        final int userId = mDeviceProvisionedController.getCurrentUser();
-        if (mRestoreGesturalNavBarMode.get(userId)) {
-            // Restore the gestural state if necessary
-            setGestureModeOverlayForMainLauncher();
-            mRestoreGesturalNavBarMode.put(userId, false);
-        }
-    }
-
     private void switchToDefaultGestureNavOverlayIfNecessary() {
         final int userId = mCurrentUserContext.getUserId();
         try {
-            final IOverlayManager om = mOverlayManager;
+            final IOverlayManager om = IOverlayManager.Stub.asInterface(
+                    ServiceManager.getService(Context.OVERLAY_SERVICE));
             final OverlayInfo info = om.getOverlayInfo(NAV_BAR_MODE_GESTURAL_OVERLAY, userId);
             if (info != null && !info.isEnabled()) {
                 // Enable the default gesture nav overlay, and move the back gesture inset scale to
@@ -309,20 +182,6 @@ public class NavigationModeController implements Dumpable {
         }
     }
 
-    public void setModeOverlay(String overlayPkg, int userId) {
-        mUiBgExecutor.execute(() -> {
-            try {
-                mOverlayManager.setEnabledExclusiveInCategory(overlayPkg, userId);
-                if (DEBUG) {
-                    Log.d(TAG, "setModeOverlay: overlayPackage=" + overlayPkg
-                            + " userId=" + userId);
-                }
-            } catch (SecurityException | IllegalStateException | RemoteException e) {
-                Log.e(TAG, "Failed to enable overlay " + overlayPkg + " for user " + userId);
-            }
-        });
-    }
-
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println("NavigationModeController:");
@@ -334,11 +193,6 @@ public class NavigationModeController implements Dumpable {
             defaultOverlays = "failed_to_fetch";
         }
         pw.println("  defaultOverlays=" + defaultOverlays);
-        pw.println("  restoreGesturalNavMode:");
-        for (int i = 0; i < mRestoreGesturalNavBarMode.size(); i++) {
-            pw.println("    userId=" + mRestoreGesturalNavBarMode.keyAt(i)
-                    + " shouldRestore=" + mRestoreGesturalNavBarMode.valueAt(i));
-        }
         dumpAssetPaths(mCurrentUserContext);
     }
 

@@ -36,6 +36,7 @@ import android.graphics.Insets;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.os.Looper;
+import android.view.WindowManager;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -91,7 +92,8 @@ public final class ScreenshotHelperTest {
     public void testProvidedImageScreenshot() {
         mScreenshotHelper.provideScreenshot(
                 Bitmap.createBitmap(10, 10, Bitmap.Config.ARGB_8888), new Rect(),
-                Insets.of(0, 0, 0, 0), 1, mHandler, null);
+                Insets.of(0, 0, 0, 0), 1,
+                WindowManager.ScreenshotSource.SCREENSHOT_OTHER, mHandler, null);
     }
 
     @Test

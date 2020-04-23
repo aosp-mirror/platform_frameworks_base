@@ -26,14 +26,18 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
+import android.graphics.ImageDecoder;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.Icon;
 import android.graphics.drawable.RippleDrawable;
 import android.media.MediaDescription;
 import android.media.MediaMetadata;
+import android.media.ThumbnailUtils;
 import android.media.session.MediaController;
 import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
+import android.net.Uri;
 import android.service.media.MediaBrowserService;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -59,6 +63,7 @@ import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.qs.QSMediaBrowser;
 import com.android.systemui.util.Assert;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.Executor;
 
@@ -97,6 +102,13 @@ public class MediaControlPanel {
             com.android.internal.R.id.action2,
             com.android.internal.R.id.action3,
             com.android.internal.R.id.action4
+    };
+
+    // URI fields to try loading album art from
+    private static final String[] ART_URIS = {
+            MediaMetadata.METADATA_KEY_ALBUM_ART_URI,
+            MediaMetadata.METADATA_KEY_ART_URI,
+            MediaMetadata.METADATA_KEY_DISPLAY_ICON_URI
     };
 
     private final MediaController.Callback mSessionCallback = new MediaController.Callback() {
@@ -205,14 +217,16 @@ public class MediaControlPanel {
      * Update the media panel view for the given media session
      * @param token
      * @param iconDrawable
+     * @param largeIcon
      * @param iconColor
      * @param bgColor
      * @param contentIntent
      * @param appNameString
      * @param key
      */
-    public void setMediaSession(MediaSession.Token token, Drawable iconDrawable, int iconColor,
-            int bgColor, PendingIntent contentIntent, String appNameString, String key) {
+    public void setMediaSession(MediaSession.Token token, Drawable iconDrawable, Icon largeIcon,
+            int iconColor, int bgColor, PendingIntent contentIntent, String appNameString,
+            String key) {
         // Ensure that component names are updated if token has changed
         if (mToken == null || !mToken.equals(token)) {
             mToken = token;
@@ -303,7 +317,7 @@ public class MediaControlPanel {
         ImageView albumView = mMediaNotifView.findViewById(R.id.album_art);
         if (albumView != null) {
             // Resize art in a background thread
-            mBackgroundExecutor.execute(() -> processAlbumArt(mediaMetadata, albumView));
+            mBackgroundExecutor.execute(() -> processAlbumArt(mediaMetadata, largeIcon, albumView));
         }
 
         // Song name
@@ -396,30 +410,82 @@ public class MediaControlPanel {
      * @param albumView view to hold the album art
      */
     protected void processAlbumArt(MediaDescription description, ImageView albumView) {
-        Bitmap albumArt = description.getIconBitmap();
-        //TODO check other fields (b/151054111, b/152067055)
+        Bitmap albumArt = null;
+
+        // First try loading from URI
+        albumArt = loadBitmapFromUri(description.getIconUri());
+
+        // Then check bitmap
+        if (albumArt == null) {
+            albumArt = description.getIconBitmap();
+        }
+
         processAlbumArtInternal(albumArt, albumView);
     }
 
     /**
      * Process album art for layout
      * @param metadata media metadata
+     * @param largeIcon from notification, checked as a fallback if metadata does not have art
      * @param albumView view to hold the album art
      */
-    private void processAlbumArt(MediaMetadata metadata, ImageView albumView) {
-        Bitmap albumArt = metadata.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART);
-        //TODO check other fields (b/151054111, b/152067055)
+    private void processAlbumArt(MediaMetadata metadata, Icon largeIcon, ImageView albumView) {
+        Bitmap albumArt = null;
+
+        // First look in URI fields
+        for (String field : ART_URIS) {
+            String uriString = metadata.getString(field);
+            if (uriString != null) {
+                albumArt = loadBitmapFromUri(Uri.parse(uriString));
+                if (albumArt != null) {
+                    Log.d(TAG, "loaded art from " + field);
+                    break;
+                }
+            }
+        }
+
+        // Then check bitmap field
+        if (albumArt == null) {
+            albumArt = metadata.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART);
+        }
+
+        // Finally try the notification's largeIcon
+        if (albumArt == null && largeIcon != null) {
+            albumArt = largeIcon.getBitmap();
+        }
+
         processAlbumArtInternal(albumArt, albumView);
     }
 
-    private void processAlbumArtInternal(Bitmap albumArt, ImageView albumView) {
-        float radius = mContext.getResources().getDimension(R.dimen.qs_media_corner_radius);
+    /**
+     * Load a bitmap from a URI
+     * @param uri
+     * @return bitmap, or null if couldn't be loaded
+     */
+    private Bitmap loadBitmapFromUri(Uri uri) {
+        ImageDecoder.Source source = ImageDecoder.createSource(mContext.getContentResolver(), uri);
+        try {
+            return ImageDecoder.decodeBitmap(source);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * Resize and crop the image if provided and update the control view
+     * @param albumArt Bitmap of art to display, or null to hide view
+     * @param albumView View that will hold the art
+     */
+    private void processAlbumArtInternal(@Nullable Bitmap albumArt, ImageView albumView) {
+        // Resize
         RoundedBitmapDrawable roundedDrawable = null;
         if (albumArt != null) {
+            float radius = mContext.getResources().getDimension(R.dimen.qs_media_corner_radius);
             Bitmap original = albumArt.copy(Bitmap.Config.ARGB_8888, true);
             int albumSize = (int) mContext.getResources().getDimension(
                     R.dimen.qs_media_album_size);
-            Bitmap scaled = Bitmap.createScaledBitmap(original, albumSize, albumSize, false);
+            Bitmap scaled = ThumbnailUtils.extractThumbnail(original, albumSize, albumSize);
             roundedDrawable = RoundedBitmapDrawableFactory.create(mContext.getResources(), scaled);
             roundedDrawable.setCornerRadius(radius);
         } else {

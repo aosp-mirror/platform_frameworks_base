@@ -1213,7 +1213,7 @@ public class RemoteViews implements Parcelable, Filter {
 
         BitmapReflectionAction(Parcel in) {
             viewId = in.readInt();
-            methodName = in.readString();
+            methodName = in.readString8();
             bitmapId = in.readInt();
             bitmap = mBitmapCache.getBitmapForId(bitmapId);
         }
@@ -1221,7 +1221,7 @@ public class RemoteViews implements Parcelable, Filter {
         @Override
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeInt(viewId);
-            dest.writeString(methodName);
+            dest.writeString8(methodName);
             dest.writeInt(bitmapId);
         }
 
@@ -1282,7 +1282,7 @@ public class RemoteViews implements Parcelable, Filter {
 
         ReflectionAction(Parcel in) {
             this.viewId = in.readInt();
-            this.methodName = in.readString();
+            this.methodName = in.readString8();
             this.type = in.readInt();
             //noinspection ConstantIfStatement
             if (false) {
@@ -1318,7 +1318,7 @@ public class RemoteViews implements Parcelable, Filter {
                     this.value = (char)in.readInt();
                     break;
                 case STRING:
-                    this.value = in.readString();
+                    this.value = in.readString8();
                     break;
                 case CHAR_SEQUENCE:
                     this.value = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
@@ -1347,7 +1347,7 @@ public class RemoteViews implements Parcelable, Filter {
 
         public void writeToParcel(Parcel out, int flags) {
             out.writeInt(this.viewId);
-            out.writeString(this.methodName);
+            out.writeString8(this.methodName);
             out.writeInt(this.type);
             //noinspection ConstantIfStatement
             if (false) {
@@ -1383,7 +1383,7 @@ public class RemoteViews implements Parcelable, Filter {
                     out.writeInt((int)((Character)this.value).charValue());
                     break;
                 case STRING:
-                    out.writeString((String)this.value);
+                    out.writeString8((String)this.value);
                     break;
                 case CHAR_SEQUENCE:
                     TextUtils.writeToParcel((CharSequence)this.value, out, flags);

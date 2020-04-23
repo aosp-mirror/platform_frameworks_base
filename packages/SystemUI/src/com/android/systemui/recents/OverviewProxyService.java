@@ -20,6 +20,7 @@ import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
 import static android.view.MotionEvent.ACTION_CANCEL;
 import static android.view.MotionEvent.ACTION_DOWN;
 import static android.view.MotionEvent.ACTION_UP;
+import static android.view.WindowManager.ScreenshotSource.SCREENSHOT_OVERVIEW;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON;
 
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_INPUT_MONITOR;
@@ -380,7 +381,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         public void handleImageAsScreenshot(Bitmap screenImage, Rect locationInScreen,
                 Insets visibleInsets, int taskId) {
             mScreenshotHelper.provideScreenshot(screenImage, locationInScreen, visibleInsets,
-                    taskId, mHandler, null);
+                    taskId, SCREENSHOT_OVERVIEW, mHandler, null);
         }
 
         @Override

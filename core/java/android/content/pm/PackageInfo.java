@@ -441,14 +441,14 @@ public class PackageInfo implements Parcelable {
     public void writeToParcel(Parcel dest, int parcelableFlags) {
         // Allow ApplicationInfo to be squashed.
         final boolean prevAllowSquashing = dest.allowSquashing();
-        dest.writeString(packageName);
+        dest.writeString8(packageName);
         dest.writeStringArray(splitNames);
         dest.writeInt(versionCode);
         dest.writeInt(versionCodeMajor);
-        dest.writeString(versionName);
+        dest.writeString8(versionName);
         dest.writeInt(baseRevisionCode);
         dest.writeIntArray(splitRevisionCodes);
-        dest.writeString(sharedUserId);
+        dest.writeString8(sharedUserId);
         dest.writeInt(sharedUserLabel);
         if (applicationInfo != null) {
             dest.writeInt(1);
@@ -475,14 +475,14 @@ public class PackageInfo implements Parcelable {
         dest.writeInt(isStub ? 1 : 0);
         dest.writeInt(coreApp ? 1 : 0);
         dest.writeInt(requiredForAllUsers ? 1 : 0);
-        dest.writeString(restrictedAccountType);
-        dest.writeString(requiredAccountType);
-        dest.writeString(overlayTarget);
-        dest.writeString(overlayCategory);
+        dest.writeString8(restrictedAccountType);
+        dest.writeString8(requiredAccountType);
+        dest.writeString8(overlayTarget);
+        dest.writeString8(overlayCategory);
         dest.writeInt(overlayPriority);
         dest.writeBoolean(mOverlayIsStatic);
         dest.writeInt(compileSdkVersion);
-        dest.writeString(compileSdkVersionCodename);
+        dest.writeString8(compileSdkVersionCodename);
         if (signingInfo != null) {
             dest.writeInt(1);
             signingInfo.writeToParcel(dest, parcelableFlags);
@@ -508,14 +508,14 @@ public class PackageInfo implements Parcelable {
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private PackageInfo(Parcel source) {
-        packageName = source.readString();
+        packageName = source.readString8();
         splitNames = source.createStringArray();
         versionCode = source.readInt();
         versionCodeMajor = source.readInt();
-        versionName = source.readString();
+        versionName = source.readString8();
         baseRevisionCode = source.readInt();
         splitRevisionCodes = source.createIntArray();
-        sharedUserId = source.readString();
+        sharedUserId = source.readString8();
         sharedUserLabel = source.readInt();
         int hasApp = source.readInt();
         if (hasApp != 0) {
@@ -540,14 +540,14 @@ public class PackageInfo implements Parcelable {
         isStub = source.readInt() != 0;
         coreApp = source.readInt() != 0;
         requiredForAllUsers = source.readInt() != 0;
-        restrictedAccountType = source.readString();
-        requiredAccountType = source.readString();
-        overlayTarget = source.readString();
-        overlayCategory = source.readString();
+        restrictedAccountType = source.readString8();
+        requiredAccountType = source.readString8();
+        overlayTarget = source.readString8();
+        overlayCategory = source.readString8();
         overlayPriority = source.readInt();
         mOverlayIsStatic = source.readBoolean();
         compileSdkVersion = source.readInt();
-        compileSdkVersionCodename = source.readString();
+        compileSdkVersionCodename = source.readString8();
         int hasSigningInfo = source.readInt();
         if (hasSigningInfo != 0) {
             signingInfo = SigningInfo.CREATOR.createFromParcel(source);

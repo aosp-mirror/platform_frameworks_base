@@ -46,6 +46,7 @@ import android.view.Display;
 import android.view.WindowManager;
 
 import com.android.internal.annotations.VisibleForNative;
+import com.android.internal.annotations.VisibleForTesting;
 
 import dalvik.system.CloseGuard;
 
@@ -408,7 +409,8 @@ public class MtpDatabase implements AutoCloseable {
     }
 
     @VisibleForNative
-    private int beginSendObject(String path, int format, int parent, int storageId) {
+    @VisibleForTesting
+    public int beginSendObject(String path, int format, int parent, int storageId) {
         MtpStorageManager.MtpObject parentObj =
                 parent == 0 ? mManager.getStorageRoot(storageId) : mManager.getObject(parent);
         if (parentObj == null) {
@@ -452,7 +454,8 @@ public class MtpDatabase implements AutoCloseable {
     }
 
     @VisibleForNative
-    private int getNumObjects(int storageID, int format, int parent) {
+    @VisibleForTesting
+    public int getNumObjects(int storageID, int format, int parent) {
         List<MtpStorageManager.MtpObject> objs = mManager.getObjects(parent,
                 format, storageID);
         if (objs == null) {
@@ -830,7 +833,8 @@ public class MtpDatabase implements AutoCloseable {
     }
 
     @VisibleForNative
-    private boolean getThumbnailInfo(int handle, long[] outLongs) {
+    @VisibleForTesting
+    public boolean getThumbnailInfo(int handle, long[] outLongs) {
         MtpStorageManager.MtpObject obj = mManager.getObject(handle);
         if (obj == null) {
             return false;
@@ -866,7 +870,8 @@ public class MtpDatabase implements AutoCloseable {
     }
 
     @VisibleForNative
-    private byte[] getThumbnailData(int handle) {
+    @VisibleForTesting
+    public byte[] getThumbnailData(int handle) {
         MtpStorageManager.MtpObject obj = mManager.getObject(handle);
         if (obj == null) {
             return null;

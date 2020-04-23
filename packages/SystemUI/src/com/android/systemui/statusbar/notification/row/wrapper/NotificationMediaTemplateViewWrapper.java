@@ -191,6 +191,7 @@ public class NotificationMediaTemplateViewWrapper extends NotificationTemplateVi
             Drawable iconDrawable = notif.getSmallIcon().loadDrawable(mContext);
             panel.getMediaPlayer().setMediaSession(token,
                     iconDrawable,
+                    notif.getLargeIcon(),
                     tintColor,
                     mBackgroundColor,
                     mActions,
@@ -201,6 +202,7 @@ public class NotificationMediaTemplateViewWrapper extends NotificationTemplateVi
                     com.android.systemui.R.id.quick_settings_panel);
             bigPanel.addMediaSession(token,
                     iconDrawable,
+                    notif.getLargeIcon(),
                     tintColor,
                     mBackgroundColor,
                     mActions,
