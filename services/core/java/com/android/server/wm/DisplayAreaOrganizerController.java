@@ -94,7 +94,7 @@ public class DisplayAreaOrganizerController extends IDisplayAreaOrganizerControl
 
     void onDisplayAreaAppeared(IDisplayAreaOrganizer organizer, DisplayArea da) {
         try {
-            organizer.onDisplayAreaAppeared(da.mRemoteToken.toWindowContainerToken());
+            organizer.onDisplayAreaAppeared(da.getDisplayAreaInfo());
         } catch (RemoteException e) {
             // Oh well...
         }
@@ -102,7 +102,7 @@ public class DisplayAreaOrganizerController extends IDisplayAreaOrganizerControl
 
     void onDisplayAreaVanished(IDisplayAreaOrganizer organizer, DisplayArea da) {
         try {
-            organizer.onDisplayAreaVanished(da.mRemoteToken.toWindowContainerToken());
+            organizer.onDisplayAreaVanished(da.getDisplayAreaInfo());
         } catch (RemoteException e) {
             // Oh well...
         }
