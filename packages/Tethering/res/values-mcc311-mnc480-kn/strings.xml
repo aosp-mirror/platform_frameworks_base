@@ -16,10 +16,9 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="no_upstream_notification_title" msgid="5026912695053828030">"ಹಾಟ್‌ಸ್ಪಾಟ್ ಯಾವುದೇ ಇಂಟರ್ನೆಟ್ ಸಂಪರ್ಕವನ್ನು ಹೊಂದಿಲ್ಲ"</string>
-    <string name="no_upstream_notification_message" msgid="6810713595219684058">"ಇಂಟರ್ನೆಟ್‌ಗೆ ಸಂಪರ್ಕಗೊಳ್ಳಲು ಸಾಧನಗಳಿಗೆ ಸಾಧ್ಯವಾಗುತ್ತಿಲ್ಲ"</string>
-    <string name="no_upstream_notification_disable_button" msgid="3388523729003352854">"ಹಾಟ್‌ಸ್ಪಾಟ್ ಆಫ್‌ ಮಾಡಿ"</string>
-    <string name="upstream_roaming_notification_title" msgid="2242169951273396377">"ಹಾಟ್‌ಸ್ಪಾಟ್ ಆನ್ ಆಗಿದೆ"</string>
+    <string name="no_upstream_notification_title" msgid="611650570559011140">"ಟೆಥರಿಂಗ್‌ ಯಾವುದೇ ಇಂಟರ್ನೆಟ್ ಕನೆಕ್ಷನ್ ಹೊಂದಿಲ್ಲ"</string>
+    <string name="no_upstream_notification_message" msgid="6508394877641864863">"ಸಾಧನಗಳನ್ನು ಕನೆಕ್ಟ್ ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
+    <string name="no_upstream_notification_disable_button" msgid="7609346639290990508">"ಟೆಥರಿಂಗ್‌ ಆಫ್ ಮಾಡಿ"</string>
+    <string name="upstream_roaming_notification_title" msgid="6032901176124830787">"ಹಾಟ್‌ಸ್ಪಾಟ್ ಅಥವಾ ಟೆಥರಿಂಗ್‌ ಆನ್ ಆಗಿದೆ"</string>
     <string name="upstream_roaming_notification_message" msgid="7599056263326217523">"ರೋಮಿಂಗ್‌ನಲ್ಲಿರುವಾಗ ಹೆಚ್ಚುವರಿ ಶುಲ್ಕಗಳು ಅನ್ವಯವಾಗಬಹುದು"</string>
-    <string name="upstream_roaming_notification_continue_button" msgid="693106687178152486">"ಮುಂದುವರಿಸಿ"</string>
 </resources>

@@ -40,6 +40,11 @@ class SystemServiceTestsBase {
         mLockRule.waitForLocked(mSystemServicesTestRule::waitUntilWindowManagerHandlersIdle);
     }
 
+    /** Waits until the choreographer of WindowAnimator has processed all callbacks. */
+    void waitUntilWindowAnimatorIdle() {
+        mLockRule.waitForLocked(mSystemServicesTestRule::waitUntilWindowAnimatorIdle);
+    }
+
     void cleanupWindowManagerHandlers() {
         mLockRule.waitForLocked(mSystemServicesTestRule::cleanupWindowManagerHandlers);
     }

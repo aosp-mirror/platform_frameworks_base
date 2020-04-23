@@ -16,10 +16,9 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="no_upstream_notification_title" msgid="5026912695053828030">"Dostopna točka nima internetne povezave"</string>
-    <string name="no_upstream_notification_message" msgid="6810713595219684058">"Naprave ne morejo vzpostaviti internetne povezave"</string>
-    <string name="no_upstream_notification_disable_button" msgid="3388523729003352854">"Izklopi dostopno točko"</string>
-    <string name="upstream_roaming_notification_title" msgid="2242169951273396377">"Dostopna točka je vklopljena"</string>
+    <string name="no_upstream_notification_title" msgid="611650570559011140">"Internetna povezava prek mobilnega telefona ni vzpostavljena"</string>
+    <string name="no_upstream_notification_message" msgid="6508394877641864863">"Napravi se ne moreta povezati"</string>
+    <string name="no_upstream_notification_disable_button" msgid="7609346639290990508">"Izklopi internetno povezavo prek mobilnega telefona"</string>
+    <string name="upstream_roaming_notification_title" msgid="6032901176124830787">"Dostopna točka ali internetna povezava prek mobilnega telefona je vklopljena"</string>
     <string name="upstream_roaming_notification_message" msgid="7599056263326217523">"Med gostovanjem lahko nastanejo dodatni stroški"</string>
-    <string name="upstream_roaming_notification_continue_button" msgid="693106687178152486">"Naprej"</string>
 </resources>

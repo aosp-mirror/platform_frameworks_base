@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <!-- Copyright (C) 2020 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,10 +12,18 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <!-- String for tethered notification title with client number info. -->
-    <plurals name="tethered_notification_title_with_client_number">
-        <item quantity="one"><xliff:g>%1$d</xliff:g> device connected.</item>
-        <item quantity="other"><xliff:g>%1$d</xliff:g> devices connected.</item>
-    </plurals>
-</resources>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+  <path
+      android:fillColor="#FF000000"
+      android:pathData="M17.59,1H6.41L5,2.41v19.17L6.41,23h11.17L19,21.59V2.41L17.59,1zM17.5,2.5v1.75h-11V2.5H17.5zM17.5,5.75v12.5h-11V5.75H17.5zM6.5,21.5v-1.75h11v1.75H6.5z"/>
+  <path
+      android:fillColor="#FF000000"
+      android:pathData="M9.5,11l0,-2.5l2.5,0l0,-1.5l-4,0l0,4z"/>
+  <path
+      android:fillColor="#FF000000"
+      android:pathData="M12,17l4,0l0,-4l-1.5,0l0,2.5l-2.5,0z"/>
+</vector>

@@ -117,6 +117,8 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
     private static final String ALLOWED_INSTALLER_DELIMITER = ",";
     private static final String INSTALLER_PACKAGE_CERT_DELIMITER = "\\|";
 
+    public static final boolean DEBUG_INTEGRITY_COMPONENT = false;
+
     private static final Set<String> PACKAGE_INSTALLER =
             new HashSet<>(
                     Arrays.asList(
@@ -262,14 +264,18 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
         int verificationId = intent.getIntExtra(EXTRA_VERIFICATION_ID, -1);
 
         try {
-            Slog.i(TAG, "Received integrity verification intent " + intent.toString());
-            Slog.i(TAG, "Extras " + intent.getExtras());
+            if (DEBUG_INTEGRITY_COMPONENT) {
+                Slog.d(TAG, "Received integrity verification intent " + intent.toString());
+                Slog.d(TAG, "Extras " + intent.getExtras());
+            }
 
             String installerPackageName = getInstallerPackageName(intent);
 
             // Skip integrity verification if the verifier is doing the install.
             if (!integrityCheckIncludesRuleProvider() && isRuleProvider(installerPackageName)) {
-                Slog.i(TAG, "Verifier doing the install. Skipping integrity check.");
+                if (DEBUG_INTEGRITY_COMPONENT) {
+                    Slog.i(TAG, "Verifier doing the install. Skipping integrity check.");
+                }
                 mPackageManagerInternal.setIntegrityVerificationResult(
                         verificationId, PackageManagerInternal.INTEGRITY_VERIFICATION_ALLOW);
                 return;
@@ -303,19 +309,23 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
 
             AppInstallMetadata appInstallMetadata = builder.build();
 
-            Slog.i(
-                    TAG,
-                    "To be verified: "
-                            + appInstallMetadata
-                            + " installers "
-                            + getAllowedInstallers(packageInfo));
+            if (DEBUG_INTEGRITY_COMPONENT) {
+                Slog.i(
+                        TAG,
+                        "To be verified: "
+                                + appInstallMetadata
+                                + " installers "
+                                + getAllowedInstallers(packageInfo));
+            }
             IntegrityCheckResult result = mEvaluationEngine.evaluate(appInstallMetadata);
-            Slog.i(
-                    TAG,
-                    "Integrity check result: "
-                            + result.getEffect()
-                            + " due to "
-                            + result.getMatchedRules());
+            if (DEBUG_INTEGRITY_COMPONENT) {
+                Slog.i(
+                        TAG,
+                        "Integrity check result: "
+                                + result.getEffect()
+                                + " due to "
+                                + result.getMatchedRules());
+            }
 
             FrameworkStatsLog.write(
                     FrameworkStatsLog.INTEGRITY_CHECK_RESULT_REPORTED,
@@ -424,7 +434,7 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
                             .getPackageInfo(installer, PackageManager.GET_SIGNING_CERTIFICATES);
             return getCertificateFingerprint(installerInfo);
         } catch (PackageManager.NameNotFoundException e) {
-            Slog.i(TAG, "Installer package " + installer + " not found.");
+            Slog.w(TAG, "Installer package " + installer + " not found.");
             return Collections.emptyList();
         }
     }
@@ -653,28 +663,39 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
     private String getCallingRulePusherPackageName(int callingUid) {
         // Obtain the system apps that are whitelisted in config_integrityRuleProviderPackages.
         List<String> allowedRuleProviders = getAllowedRuleProviderSystemApps();
-        Slog.i(TAG, String.format(
-                "Rule provider system app list contains: %s", allowedRuleProviders));
+        if (DEBUG_INTEGRITY_COMPONENT) {
+            Slog.i(TAG, String.format(
+                    "Rule provider system app list contains: %s", allowedRuleProviders));
+        }
 
         // Identify the package names in the caller list.
         List<String> callingPackageNames = getPackageListForUid(callingUid);
-        Slog.i(TAG, String.format("Calling packages are: ", callingPackageNames));
+        if (DEBUG_INTEGRITY_COMPONENT) {
+            Slog.i(TAG, String.format("Calling packages are: ", callingPackageNames));
+        }
 
         // Find the intersection between the allowed and calling packages. Ideally, we will have
         // at most one package name here. But if we have more, it is fine.
-        List<String> allowedCallingPackages =
-                callingPackageNames
-                        .stream()
-                        .filter(packageName -> allowedRuleProviders.contains(packageName))
-                        .collect(Collectors.toList());
-        Slog.i(TAG, String.format("Calling rule pusher packages are: ", allowedCallingPackages));
-
+        List<String> allowedCallingPackages = new ArrayList<>();
+        for (String packageName : callingPackageNames) {
+            if (allowedRuleProviders.contains(packageName)) {
+                allowedCallingPackages.add(packageName);
+            }
+        }
+        if (DEBUG_INTEGRITY_COMPONENT) {
+            Slog.i(TAG,
+                    String.format("Calling rule pusher packages are: ", allowedCallingPackages));
+        }
         return allowedCallingPackages.isEmpty() ? null : allowedCallingPackages.get(0);
     }
 
     private boolean isRuleProvider(String installerPackageName) {
-        return getAllowedRuleProviderSystemApps().stream()
-                .anyMatch(ruleProvider -> ruleProvider.equals(installerPackageName));
+        for (String ruleProvider : getAllowedRuleProviderSystemApps()) {
+            if (ruleProvider.matches(installerPackageName)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private List<String> getAllowedRuleProviderSystemApps() {
@@ -682,13 +703,18 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
                 Arrays.asList(
                         mContext.getResources()
                                 .getStringArray(R.array.config_integrityRuleProviderPackages));
-
-        Slog.i(TAG, String.format("Rule provider list contains: %s", integrityRuleProviders));
+        if (DEBUG_INTEGRITY_COMPONENT) {
+            Slog.i(TAG, String.format("Rule provider list contains: %s", integrityRuleProviders));
+        }
 
         // Filter out the rule provider packages that are not system apps.
-        return integrityRuleProviders.stream()
-                .filter(this::isSystemApp)
-                .collect(Collectors.toList());
+        List<String> systemAppRuleProviders = new ArrayList<>();
+        for (String ruleProvider: integrityRuleProviders) {
+            if (isSystemApp(ruleProvider)) {
+                systemAppRuleProviders.add(ruleProvider);
+            }
+        }
+        return systemAppRuleProviders;
     }
 
     private boolean isSystemApp(String packageName) {

@@ -44,7 +44,7 @@ bool PathLess::operator()(std::string_view l, std::string_view r) const {
                                         PathCharsLess());
 }
 
-static void preparePathComponent(std::string_view path, bool trimFront) {
+static void preparePathComponent(std::string_view& path, bool trimFront) {
     if (trimFront) {
         while (!path.empty() && path.front() == '/') {
             path.remove_prefix(1);

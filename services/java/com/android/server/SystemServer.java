@@ -2179,12 +2179,6 @@ public final class SystemServer {
         mPackageManagerService.systemReady();
         t.traceEnd();
 
-        if (mIncrementalServiceHandle != 0) {
-            t.traceBegin("MakeIncrementalServiceReady");
-            setIncrementalServiceSystemReady(mIncrementalServiceHandle);
-            t.traceEnd();
-        }
-
         t.traceBegin("MakeDisplayManagerServiceReady");
         try {
             // TODO: use boot phase and communicate these flags some other way
@@ -2458,6 +2452,12 @@ public final class SystemServer {
                 reportWtf("Notifying incident daemon running", e);
             }
             t.traceEnd();
+
+            if (mIncrementalServiceHandle != 0) {
+                t.traceBegin("MakeIncrementalServiceReady");
+                setIncrementalServiceSystemReady(mIncrementalServiceHandle);
+                t.traceEnd();
+            }
         }, t);
 
         t.traceEnd(); // startOtherServices

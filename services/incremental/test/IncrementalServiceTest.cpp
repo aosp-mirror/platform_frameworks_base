@@ -25,6 +25,7 @@
 #include <future>
 
 #include "IncrementalService.h"
+#include "IncrementalServiceValidation.h"
 #include "Metadata.pb.h"
 #include "ServiceWrappers.h"
 
@@ -262,6 +263,8 @@ private:
 
 class MockIncFs : public IncFsWrapper {
 public:
+    MOCK_CONST_METHOD1(listExistingMounts, void(const ExistingMountCallback& cb));
+    MOCK_CONST_METHOD1(openMount, Control(std::string_view path));
     MOCK_CONST_METHOD3(createControl, Control(IncFsFd cmd, IncFsFd pendingReads, IncFsFd logs));
     MOCK_CONST_METHOD5(makeFile,
                        ErrorCode(const Control& control, std::string_view path, int mode, FileId id,
@@ -274,10 +277,13 @@ public:
                        ErrorCode(const Control& control, std::string_view from, std::string_view to));
     MOCK_CONST_METHOD2(unlink, ErrorCode(const Control& control, std::string_view path));
     MOCK_CONST_METHOD2(openForSpecialOps, base::unique_fd(const Control& control, FileId id));
-    MOCK_CONST_METHOD1(writeBlocks, ErrorCode(Span<const DataBlock> blocks));
+    MOCK_CONST_METHOD1(writeBlocks, ErrorCode(std::span<const DataBlock> blocks));
+
+    MockIncFs() { ON_CALL(*this, listExistingMounts(_)).WillByDefault(Return()); }
 
     void makeFileFails() { ON_CALL(*this, makeFile(_, _, _, _, _)).WillByDefault(Return(-1)); }
     void makeFileSuccess() { ON_CALL(*this, makeFile(_, _, _, _, _)).WillByDefault(Return(0)); }
+
     RawMetadata getMountInfoMetadata(const Control& control, std::string_view path) {
         metadata::Mount m;
         m.mutable_storage()->set_id(100);
@@ -692,14 +698,14 @@ TEST_F(IncrementalServiceTest, testMakeDirectory) {
                                                IncrementalService::CreateOptions::CreateNew);
     std::string dir_path("test");
 
-    std::string tempPath(tempDir.path);
-    std::replace(tempPath.begin(), tempPath.end(), '/', '_');
-    std::string mount_dir = std::string(mRootDir.path) + "/MT_" + tempPath.substr(1);
-    std::string normalized_dir_path = mount_dir + "/mount/st_1_0/" + dir_path;
-
     // Expecting incfs to call makeDir on a path like:
-    // /data/local/tmp/TemporaryDir-06yixG/data_local_tmp_TemporaryDir-xwdFhT/mount/st_1_0/test
-    EXPECT_CALL(*mIncFs, makeDir(_, std::string_view(normalized_dir_path), _));
+    // <root>/*/mount/<storage>/test
+    EXPECT_CALL(*mIncFs,
+                makeDir(_, Truly([&](std::string_view arg) {
+                            return arg.starts_with(mRootDir.path) &&
+                                    arg.ends_with("/mount/st_1_0/" + dir_path);
+                        }),
+                        _));
     auto res = mIncrementalService->makeDir(storageId, dir_path, 0555);
     ASSERT_EQ(res, 0);
 }
@@ -717,29 +723,32 @@ TEST_F(IncrementalServiceTest, testMakeDirectories) {
     auto first = "first"sv;
     auto second = "second"sv;
     auto third = "third"sv;
-
-    std::string tempPath(tempDir.path);
-    std::replace(tempPath.begin(), tempPath.end(), '/', '_');
-    std::string mount_dir = std::string(mRootDir.path) + "/MT_" + tempPath.substr(1);
-
-    InSequence seq;
     auto parent_path = std::string(first) + "/" + std::string(second);
     auto dir_path = parent_path + "/" + std::string(third);
 
-    std::string normalized_first_path = mount_dir + "/mount/st_1_0/" + std::string(first);
-    std::string normalized_parent_path = mount_dir + "/mount/st_1_0/" + parent_path;
-    std::string normalized_dir_path = mount_dir + "/mount/st_1_0/" + dir_path;
+    auto checkArgFor = [&](std::string_view expected, std::string_view arg) {
+        return arg.starts_with(mRootDir.path) && arg.ends_with("/mount/st_1_0/"s += expected);
+    };
 
-    EXPECT_CALL(*mIncFs, makeDir(_, std::string_view(normalized_dir_path), _))
-            .WillOnce(Return(-ENOENT));
-    EXPECT_CALL(*mIncFs, makeDir(_, std::string_view(normalized_parent_path), _))
-            .WillOnce(Return(-ENOENT));
-    EXPECT_CALL(*mIncFs, makeDir(_, std::string_view(normalized_first_path), _))
-            .WillOnce(Return(0));
-    EXPECT_CALL(*mIncFs, makeDir(_, std::string_view(normalized_parent_path), _))
-            .WillOnce(Return(0));
-    EXPECT_CALL(*mIncFs, makeDir(_, std::string_view(normalized_dir_path), _)).WillOnce(Return(0));
-    auto res = mIncrementalService->makeDirs(storageId, normalized_dir_path, 0555);
+    {
+        InSequence seq;
+        EXPECT_CALL(*mIncFs,
+                    makeDir(_, Truly([&](auto arg) { return checkArgFor(dir_path, arg); }), _))
+                .WillOnce(Return(-ENOENT));
+        EXPECT_CALL(*mIncFs,
+                    makeDir(_, Truly([&](auto arg) { return checkArgFor(parent_path, arg); }), _))
+                .WillOnce(Return(-ENOENT));
+        EXPECT_CALL(*mIncFs,
+                    makeDir(_, Truly([&](auto arg) { return checkArgFor(first, arg); }), _))
+                .WillOnce(Return(0));
+        EXPECT_CALL(*mIncFs,
+                    makeDir(_, Truly([&](auto arg) { return checkArgFor(parent_path, arg); }), _))
+                .WillOnce(Return(0));
+        EXPECT_CALL(*mIncFs,
+                    makeDir(_, Truly([&](auto arg) { return checkArgFor(dir_path, arg); }), _))
+                .WillOnce(Return(0));
+    }
+    auto res = mIncrementalService->makeDirs(storageId, dir_path, 0555);
     ASSERT_EQ(res, 0);
 }
 } // namespace android::os::incremental

@@ -66,6 +66,7 @@ class InsetsSourceProvider {
     private TriConsumer<DisplayFrames, WindowState, Rect> mFrameProvider;
     private TriConsumer<DisplayFrames, WindowState, Rect> mImeFrameProvider;
     private final Rect mImeOverrideFrame = new Rect();
+    private boolean mIsLeashReadyForDispatching;
 
     /** The visibility override from the current controlling window. */
     private boolean mClientVisible;
@@ -266,9 +267,14 @@ class InsetsSourceProvider {
         if (getSource().getType() == ITYPE_IME) {
             setClientVisible(InsetsState.getDefaultVisibility(mSource.getType()));
         }
-        final Transaction t = mDisplayContent.mWmService.mTransactionFactory.get();
+        final Transaction t = mDisplayContent.getPendingTransaction();
         mWin.startAnimation(t, mAdapter, !mClientVisible /* hidden */,
                 ANIMATION_TYPE_INSETS_CONTROL, null /* animationFinishedCallback */);
+
+        // The leash was just created. We cannot dispatch it until its surface transaction is
+        // applied. Otherwise, the client's operation to the leash might be overwritten by us.
+        mIsLeashReadyForDispatching = false;
+
         final SurfaceControl leash = mAdapter.mCapturedLeash;
         final long frameNumber = mFinishSeamlessRotateFrameNumber;
         mFinishSeamlessRotateFrameNumber = -1;
@@ -281,9 +287,6 @@ class InsetsSourceProvider {
             t.deferTransactionUntil(mWin.getSurfaceControl(), barrier, frameNumber);
             t.deferTransactionUntil(leash, barrier, frameNumber);
         }
-        // Applying the transaction here can prevent the client from applying its transaction sooner
-        // than us which makes us overwrite the client's operation to the leash.
-        t.apply();
         mControlTarget = target;
         mControl = new InsetsSourceControl(mSource.getType(), leash,
                 new Point(mWin.getWindowFrames().mFrame.left, mWin.getWindowFrames().mFrame.top));
@@ -313,6 +316,10 @@ class InsetsSourceProvider {
         return true;
     }
 
+    void onSurfaceTransactionApplied() {
+        mIsLeashReadyForDispatching = true;
+    }
+
     private void setClientVisible(boolean clientVisible) {
         if (mClientVisible == clientVisible) {
             return;
@@ -334,6 +341,13 @@ class InsetsSourceProvider {
 
     InsetsSourceControl getControl(InsetsControlTarget target) {
         if (target == mControlTarget) {
+            if (!mIsLeashReadyForDispatching && mControl != null) {
+                // The surface transaction of preparing leash is not applied yet. We don't send it
+                // to the client in case that the client applies its transaction sooner than ours
+                // that we could unexpectedly overwrite the surface state.
+                return new InsetsSourceControl(mControl.getType(), null /* leash */,
+                        mControl.getSurfacePosition());
+            }
             return mControl;
         }
         if (target == mFakeControlTarget) {

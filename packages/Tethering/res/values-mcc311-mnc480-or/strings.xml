@@ -16,10 +16,13 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="no_upstream_notification_title" msgid="5026912695053828030">"ହଟସ୍ପଟରେ କୌଣସି ଇଣ୍ଟର୍ନେଟ୍ ସଂଯୋଗ ନାହିଁ"</string>
-    <string name="no_upstream_notification_message" msgid="6810713595219684058">"ଡିଭାଇସଗୁଡ଼ିକ ଇଣ୍ଟର୍ନେଟ୍ ସହ ସଂଯୋଗ କରାଯାଇପାରିବ ନାହିଁ"</string>
-    <string name="no_upstream_notification_disable_button" msgid="3388523729003352854">"ହଟସ୍ପଟ ବନ୍ଦ କରନ୍ତୁ"</string>
-    <string name="upstream_roaming_notification_title" msgid="2242169951273396377">"ହଟସ୍ପଟ ଚାଲୁ ଅଛି"</string>
+    <!-- no translation found for no_upstream_notification_title (611650570559011140) -->
+    <skip />
+    <!-- no translation found for no_upstream_notification_message (6508394877641864863) -->
+    <skip />
+    <!-- no translation found for no_upstream_notification_disable_button (7609346639290990508) -->
+    <skip />
+    <!-- no translation found for upstream_roaming_notification_title (6032901176124830787) -->
+    <skip />
     <string name="upstream_roaming_notification_message" msgid="7599056263326217523">"ରୋମିଂରେ ଥିବା ସମୟରେ ଅତିରିକ୍ତ ଶୁଳ୍କ ଲାଗୁ ହୋଇପାରେ"</string>
-    <string name="upstream_roaming_notification_continue_button" msgid="693106687178152486">"ଜାରି ରଖନ୍ତୁ"</string>
 </resources>

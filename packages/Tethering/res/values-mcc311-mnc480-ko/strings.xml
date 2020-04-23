@@ -16,10 +16,9 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="no_upstream_notification_title" msgid="5026912695053828030">"핫스팟이 인터넷에 연결되지 않음"</string>
-    <string name="no_upstream_notification_message" msgid="6810713595219684058">"기기를 인터넷에 연결할 수 없음"</string>
-    <string name="no_upstream_notification_disable_button" msgid="3388523729003352854">"핫스팟 사용 중지"</string>
-    <string name="upstream_roaming_notification_title" msgid="2242169951273396377">"핫스팟 사용 중"</string>
+    <string name="no_upstream_notification_title" msgid="611650570559011140">"테더링으로 인터넷을 사용할 수 없음"</string>
+    <string name="no_upstream_notification_message" msgid="6508394877641864863">"기기에서 연결할 수 없음"</string>
+    <string name="no_upstream_notification_disable_button" msgid="7609346639290990508">"테더링 사용 중지"</string>
+    <string name="upstream_roaming_notification_title" msgid="6032901176124830787">"핫스팟 또는 테더링 켜짐"</string>
     <string name="upstream_roaming_notification_message" msgid="7599056263326217523">"로밍 중에는 추가 요금이 발생할 수 있습니다."</string>
-    <string name="upstream_roaming_notification_continue_button" msgid="693106687178152486">"계속"</string>
 </resources>

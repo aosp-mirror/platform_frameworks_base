@@ -28,9 +28,11 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
+import android.Manifest;
 import android.app.IApplicationThread;
 import android.content.ComponentName;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.ServiceInfo;
 import android.content.res.Configuration;
 import android.platform.test.annotations.Presubmit;
 
@@ -198,6 +200,57 @@ public class WindowProcessControllerTests extends ActivityTestsBase {
         wpc.addActivityIfNeeded(activity);
         // System UI owned processes should not be registered for activity config changes.
         assertFalse(wpc.registeredForActivityConfigChanges());
+    }
+
+    @Test
+    public void testActivityNotOverridingImeProcessConfig() {
+        ServiceInfo serviceInfo = new ServiceInfo();
+        serviceInfo.permission = Manifest.permission.BIND_INPUT_METHOD;
+        // Notify WPC that this process has started an IME service.
+        mWpc.onServiceStarted(serviceInfo);
+
+        final ActivityRecord activity = new ActivityBuilder(mService)
+                .setCreateTask(true)
+                .setUseProcess(mWpc)
+                .build();
+
+        mWpc.addActivityIfNeeded(activity);
+        // IME processes should not be registered for activity config changes.
+        assertFalse(mWpc.registeredForActivityConfigChanges());
+    }
+
+    @Test
+    public void testActivityNotOverridingAllyProcessConfig() {
+        ServiceInfo serviceInfo = new ServiceInfo();
+        serviceInfo.permission = Manifest.permission.BIND_ACCESSIBILITY_SERVICE;
+        // Notify WPC that this process has started an ally service.
+        mWpc.onServiceStarted(serviceInfo);
+
+        final ActivityRecord activity = new ActivityBuilder(mService)
+                .setCreateTask(true)
+                .setUseProcess(mWpc)
+                .build();
+
+        mWpc.addActivityIfNeeded(activity);
+        // Ally processes should not be registered for activity config changes.
+        assertFalse(mWpc.registeredForActivityConfigChanges());
+    }
+
+    @Test
+    public void testActivityNotOverridingVoiceInteractionProcessConfig() {
+        ServiceInfo serviceInfo = new ServiceInfo();
+        serviceInfo.permission = Manifest.permission.BIND_VOICE_INTERACTION;
+        // Notify WPC that this process has started an voice interaction service.
+        mWpc.onServiceStarted(serviceInfo);
+
+        final ActivityRecord activity = new ActivityBuilder(mService)
+                .setCreateTask(true)
+                .setUseProcess(mWpc)
+                .build();
+
+        mWpc.addActivityIfNeeded(activity);
+        // Voice interaction service processes should not be registered for activity config changes.
+        assertFalse(mWpc.registeredForActivityConfigChanges());
     }
 
     private TestDisplayContent createTestDisplayContentInContainer() {

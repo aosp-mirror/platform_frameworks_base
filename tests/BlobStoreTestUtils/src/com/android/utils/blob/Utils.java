@@ -34,6 +34,9 @@ import java.io.OutputStream;
 public class Utils {
     public static final int BUFFER_SIZE_BYTES = 16 * 1024;
 
+    public static final long KB_IN_BYTES = 1000;
+    public static final long MB_IN_BYTES = KB_IN_BYTES * 1000;
+
     public static void copy(InputStream in, OutputStream out, long lengthBytes)
             throws IOException {
         final byte[] buffer = new byte[BUFFER_SIZE_BYTES];

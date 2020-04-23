@@ -16,10 +16,9 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="no_upstream_notification_title" msgid="5026912695053828030">"Điểm phát sóng không có kết nối Internet"</string>
-    <string name="no_upstream_notification_message" msgid="6810713595219684058">"Các thiết bị không thể kết nối Internet"</string>
-    <string name="no_upstream_notification_disable_button" msgid="3388523729003352854">"Tắt điểm phát sóng"</string>
-    <string name="upstream_roaming_notification_title" msgid="2242169951273396377">"Điểm phát sóng đang bật"</string>
+    <string name="no_upstream_notification_title" msgid="611650570559011140">"Không có Internet để chia sẻ kết Internet"</string>
+    <string name="no_upstream_notification_message" msgid="6508394877641864863">"Các thiết bị không thể kết nối"</string>
+    <string name="no_upstream_notification_disable_button" msgid="7609346639290990508">"Tắt tính năng chia sẻ Internet"</string>
+    <string name="upstream_roaming_notification_title" msgid="6032901176124830787">"Điểm phát sóng hoặc tính năng chia sẻ Internet đang bật"</string>
     <string name="upstream_roaming_notification_message" msgid="7599056263326217523">"Bạn có thể mất thêm phí dữ liệu khi chuyển vùng"</string>
-    <string name="upstream_roaming_notification_continue_button" msgid="693106687178152486">"Tiếp tục"</string>
 </resources>

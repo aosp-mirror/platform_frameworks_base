@@ -33,10 +33,8 @@ import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.window.TaskOrganizer;
 
-import java.util.ArrayList;
-
 class SplitScreenTaskOrganizer extends TaskOrganizer {
-    private static final String TAG = "SplitScreenTaskOrganizer";
+    private static final String TAG = "SplitScreenTaskOrg";
     private static final boolean DEBUG = Divider.DEBUG;
 
     RunningTaskInfo mPrimary;
@@ -45,7 +43,6 @@ class SplitScreenTaskOrganizer extends TaskOrganizer {
     SurfaceControl mSecondarySurface;
     SurfaceControl mPrimaryDim;
     SurfaceControl mSecondaryDim;
-    ArrayList<SurfaceControl> mHomeAndRecentsSurfaces = new ArrayList<>();
     Rect mHomeBounds = new Rect();
     final Divider mDivider;
     private boolean mSplitScreenSupported = false;
@@ -110,6 +107,15 @@ class SplitScreenTaskOrganizer extends TaskOrganizer {
      * presentations based on the contents of the split regions.
      */
     private void handleTaskInfoChanged(RunningTaskInfo info) {
+        if (!mSplitScreenSupported) {
+            // This shouldn't happen; but apparently there is a chance that SysUI crashes without
+            // system server receiving binder-death (or maybe it receives binder-death too late?).
+            // In this situation, when sys-ui restarts, the split root-tasks will still exist so
+            // there is a small window of time during init() where WM might send messages here
+            // before init() fails. So, avoid a cycle of crashes by returning early.
+            Log.e(TAG, "Got handleTaskInfoChanged when not initialized: " + info);
+            return;
+        }
         final boolean secondaryWasHomeOrRecents = mSecondary.topActivityType == ACTIVITY_TYPE_HOME
                 || mSecondary.topActivityType == ACTIVITY_TYPE_RECENTS;
         final boolean primaryWasEmpty = mPrimary.topActivityType == ACTIVITY_TYPE_UNDEFINED;
