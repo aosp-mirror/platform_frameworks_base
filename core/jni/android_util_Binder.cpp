@@ -1036,31 +1036,6 @@ static void android_os_Binder_blockUntilThreadAvailable(JNIEnv* env, jobject cla
     return IPCThreadState::self()->blockUntilThreadAvailable();
 }
 
-static jobject android_os_Binder_waitForService(
-        JNIEnv *env,
-        jclass /* clazzObj */,
-        jstring serviceNameObj) {
-
-    const jchar* serviceName = env->GetStringCritical(serviceNameObj, nullptr);
-    if (!serviceName) {
-        signalExceptionForError(env, nullptr, BAD_VALUE, true /*canThrowRemoteException*/);
-        return nullptr;
-    }
-    String16 nameCopy = String16(reinterpret_cast<const char16_t *>(serviceName),
-            env->GetStringLength(serviceNameObj));
-    env->ReleaseStringCritical(serviceNameObj, serviceName);
-
-    auto sm = android::defaultServiceManager();
-    sp<IBinder> service = sm->waitForService(nameCopy);
-
-    if (!service) {
-        signalExceptionForError(env, nullptr, NAME_NOT_FOUND, true /*canThrowRemoteException*/);
-        return nullptr;
-    }
-
-    return javaObjectForIBinder(env, service);
-}
-
 static jobject android_os_Binder_getExtension(JNIEnv* env, jobject obj) {
     JavaBBinderHolder* jbh = (JavaBBinderHolder*) env->GetLongField(obj, gBinderOffsets.mObject);
     return javaObjectForIBinder(env, jbh->getExtension());
@@ -1101,7 +1076,6 @@ static const JNINativeMethod gBinderMethods[] = {
     { "getNativeBBinderHolder", "()J", (void*)android_os_Binder_getNativeBBinderHolder },
     { "getNativeFinalizer", "()J", (void*)android_os_Binder_getNativeFinalizer },
     { "blockUntilThreadAvailable", "()V", (void*)android_os_Binder_blockUntilThreadAvailable },
-    { "waitForService", "(Ljava/lang/String;)Landroid/os/IBinder;", (void*)android_os_Binder_waitForService },
     { "getExtension", "()Landroid/os/IBinder;", (void*)android_os_Binder_getExtension },
     { "setExtension", "(Landroid/os/IBinder;)V", (void*)android_os_Binder_setExtension },
 };
