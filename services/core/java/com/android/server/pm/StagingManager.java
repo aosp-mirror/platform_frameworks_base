@@ -137,6 +137,9 @@ public class StagingManager {
         synchronized (mStagedSessions) {
             for (int i = 0; i < mStagedSessions.size(); i++) {
                 final PackageInstallerSession stagedSession = mStagedSessions.valueAt(i);
+                if (stagedSession.isDestroyed()) {
+                    continue;
+                }
                 result.add(stagedSession.generateInfoForCaller(false /*icon*/, callingUid));
             }
         }
