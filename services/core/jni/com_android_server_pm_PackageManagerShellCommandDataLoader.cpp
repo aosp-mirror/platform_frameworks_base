@@ -69,13 +69,8 @@ static constexpr auto PollTimeoutMs = 5000;
 struct JniIds {
     jclass packageManagerShellCommandDataLoader;
     jmethodID pmscdLookupShellCommand;
-    jmethodID pmscdGetStdInPFD;
+    jmethodID pmscdGetStdIn;
     jmethodID pmscdGetLocalFile;
-
-    jmethodID parcelFileDescriptorGetFileDescriptor;
-
-    jclass ioUtils;
-    jmethodID ioUtilsCloseQuietly;
 
     JniIds(JNIEnv* env) {
         packageManagerShellCommandDataLoader = (jclass)env->NewGlobalRef(
@@ -84,23 +79,11 @@ struct JniIds {
                 GetStaticMethodIDOrDie(env, packageManagerShellCommandDataLoader,
                                        "lookupShellCommand",
                                        "(Ljava/lang/String;)Landroid/os/ShellCommand;");
-        pmscdGetStdInPFD =
-                GetStaticMethodIDOrDie(env, packageManagerShellCommandDataLoader, "getStdInPFD",
-                                       "(Landroid/os/ShellCommand;)Landroid/os/"
-                                       "ParcelFileDescriptor;");
+        pmscdGetStdIn = GetStaticMethodIDOrDie(env, packageManagerShellCommandDataLoader,
+                                               "getStdIn", "(Landroid/os/ShellCommand;)I");
         pmscdGetLocalFile =
                 GetStaticMethodIDOrDie(env, packageManagerShellCommandDataLoader, "getLocalFile",
-                                       "(Landroid/os/ShellCommand;Ljava/lang/String;)Landroid/os/"
-                                       "ParcelFileDescriptor;");
-
-        auto parcelFileDescriptor = FindClassOrDie(env, "android/os/ParcelFileDescriptor");
-        parcelFileDescriptorGetFileDescriptor =
-                GetMethodIDOrDie(env, parcelFileDescriptor, "getFileDescriptor",
-                                 "()Ljava/io/FileDescriptor;");
-
-        ioUtils = (jclass)env->NewGlobalRef(FindClassOrDie(env, "libcore/io/IoUtils"));
-        ioUtilsCloseQuietly = GetStaticMethodIDOrDie(env, ioUtils, "closeQuietly",
-                                                     "(Ljava/lang/AutoCloseable;)V");
+                                       "(Landroid/os/ShellCommand;Ljava/lang/String;)I");
     }
 };
 
@@ -211,22 +194,6 @@ static inline IncFsSize verityTreeSizeForFile(IncFsSize fileSize) {
     return total_tree_block_count * INCFS_DATA_FILE_BLOCK_SIZE;
 }
 
-static inline unique_fd convertPfdToFdAndDup(JNIEnv* env, const JniIds& jni, jobject pfd) {
-    if (!pfd) {
-        ALOGE("Missing In ParcelFileDescriptor.");
-        return {};
-    }
-    auto managedFd = env->CallObjectMethod(pfd, jni.parcelFileDescriptorGetFileDescriptor);
-    if (!pfd) {
-        ALOGE("Missing In FileDescriptor.");
-        return {};
-    }
-    unique_fd result{dup(jniGetFDFromFileDescriptor(env, managedFd))};
-    // Can be closed after dup.
-    env->CallStaticVoidMethod(jni.ioUtils, jni.ioUtilsCloseQuietly, pfd);
-    return result;
-}
-
 enum MetadataMode : int8_t {
     STDIN = 0,
     LOCAL_FILE = 1,
@@ -263,11 +230,9 @@ static inline InputDescs openLocalFile(JNIEnv* env, const JniIds& jni, jobject s
 
     const std::string idsigPath = filePath + ".idsig";
 
-    auto idsigFd = convertPfdToFdAndDup(
-            env, jni,
-            env->CallStaticObjectMethod(jni.packageManagerShellCommandDataLoader,
-                                        jni.pmscdGetLocalFile, shellCommand,
-                                        env->NewStringUTF(idsigPath.c_str())));
+    unique_fd idsigFd{env->CallStaticIntMethod(jni.packageManagerShellCommandDataLoader,
+                                               jni.pmscdGetLocalFile, shellCommand,
+                                               env->NewStringUTF(idsigPath.c_str()))};
     if (idsigFd.ok()) {
         auto treeSize = verityTreeSizeForFile(size);
         auto actualTreeSize = skipIdSigHeaders(idsigFd);
@@ -283,11 +248,9 @@ static inline InputDescs openLocalFile(JNIEnv* env, const JniIds& jni, jobject s
         });
     }
 
-    auto fileFd = convertPfdToFdAndDup(
-            env, jni,
-            env->CallStaticObjectMethod(jni.packageManagerShellCommandDataLoader,
-                                        jni.pmscdGetLocalFile, shellCommand,
-                                        env->NewStringUTF(filePath.c_str())));
+    unique_fd fileFd{env->CallStaticIntMethod(jni.packageManagerShellCommandDataLoader,
+                                              jni.pmscdGetLocalFile, shellCommand,
+                                              env->NewStringUTF(filePath.c_str()))};
     if (fileFd.ok()) {
         result.push_back(InputDesc{
                 .fd = std::move(fileFd),
@@ -307,10 +270,8 @@ static inline InputDescs openInputs(JNIEnv* env, const JniIds& jni, jobject shel
                              std::string(metadata.data, metadata.size));
     }
 
-    auto fd = convertPfdToFdAndDup(
-            env, jni,
-            env->CallStaticObjectMethod(jni.packageManagerShellCommandDataLoader,
-                                        jni.pmscdGetStdInPFD, shellCommand));
+    unique_fd fd{env->CallStaticIntMethod(jni.packageManagerShellCommandDataLoader,
+                                          jni.pmscdGetStdIn, shellCommand)};
     if (!fd.ok()) {
         return {};
     }
