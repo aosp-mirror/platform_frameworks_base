@@ -528,7 +528,7 @@ TEST(MetricsManagerTest, TestLogSources) {
             }));
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
     EXPECT_CALL(*pullerManager, RegisterPullUidProvider(kConfigKey, _)).Times(1);
-    EXPECT_CALL(*pullerManager, UnregisterPullUidProvider(kConfigKey)).Times(1);
+    EXPECT_CALL(*pullerManager, UnregisterPullUidProvider(kConfigKey, _)).Times(1);
 
     sp<AlarmMonitor> anomalyAlarmMonitor;
     sp<AlarmMonitor> periodicAlarmMonitor;

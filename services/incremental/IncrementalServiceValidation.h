@@ -16,61 +16,17 @@
 
 #pragma once
 
-#include <android-base/stringprintf.h>
-#include <binder/IPCThreadState.h>
-#include <binder/PermissionCache.h>
-#include <binder/PermissionController.h>
 #include <binder/Status.h>
+#include <stdint.h>
+
+#include <string>
 
 namespace android::incremental {
 
-inline binder::Status Ok() {
-    return binder::Status::ok();
-}
-
-inline binder::Status Exception(uint32_t code, const std::string& msg) {
-    return binder::Status::fromExceptionCode(code, String8(msg.c_str()));
-}
-
-inline int fromBinderStatus(const binder::Status& status) {
-    return status.exceptionCode() == binder::Status::EX_SERVICE_SPECIFIC
-            ? status.serviceSpecificErrorCode() > 0 ? -status.serviceSpecificErrorCode()
-                                                    : status.serviceSpecificErrorCode() == 0
-                            ? -EFAULT
-                            : status.serviceSpecificErrorCode()
-            : -EIO;
-}
-
-inline binder::Status CheckPermissionForDataDelivery(const char* permission, const char* operation,
-                                                     const char* package) {
-    using android::base::StringPrintf;
-
-    int32_t pid;
-    int32_t uid;
-
-    if (!PermissionCache::checkCallingPermission(String16(permission), &pid, &uid)) {
-        return Exception(binder::Status::EX_SECURITY,
-                         StringPrintf("UID %d / PID %d lacks permission %s", uid, pid, permission));
-    }
-
-    String16 packageName{package};
-
-    // Caller must also have op granted.
-    PermissionController pc;
-    if (auto packageUid = pc.getPackageUid(packageName, 0); packageUid != uid) {
-        return Exception(binder::Status::EX_SECURITY,
-                         StringPrintf("UID %d / PID %d does not own package %s", uid, pid,
-                                      package));
-    }
-    switch (auto result = pc.noteOp(String16(operation), uid, packageName); result) {
-        case PermissionController::MODE_ALLOWED:
-        case PermissionController::MODE_DEFAULT:
-            return binder::Status::ok();
-        default:
-            return Exception(binder::Status::EX_SECURITY,
-                             StringPrintf("UID %d / PID %d / package %s lacks app-op %s, error %d",
-                                          uid, pid, package, operation, result));
-    }
-}
+binder::Status Ok();
+binder::Status Exception(uint32_t code, const std::string& msg);
+int fromBinderStatus(const binder::Status& status);
+binder::Status CheckPermissionForDataDelivery(const char* permission, const char* operation,
+                                              const char* package);
 
 } // namespace android::incremental

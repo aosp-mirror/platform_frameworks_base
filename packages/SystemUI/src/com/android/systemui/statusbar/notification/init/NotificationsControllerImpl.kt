@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar.notification.init
 
 import android.service.notification.StatusBarNotification
-import com.android.systemui.bubbles.BubbleController
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper.SnoozeOption
 import com.android.systemui.statusbar.FeatureFlags
 import com.android.systemui.statusbar.NotificationListener
@@ -62,12 +61,12 @@ class NotificationsControllerImpl @Inject constructor(
     private val deviceProvisionedController: DeviceProvisionedController,
     private val notificationRowBinder: NotificationRowBinderImpl,
     private val remoteInputUriController: RemoteInputUriController,
-    private val bubbleController: BubbleController,
     private val groupManager: NotificationGroupManager,
     private val groupAlertTransferHelper: NotificationGroupAlertTransferHelper,
     private val headsUpManager: HeadsUpManager,
     private val headsUpController: HeadsUpController,
-    private val headsUpViewBinder: HeadsUpViewBinder
+    private val headsUpViewBinder: HeadsUpViewBinder,
+    private val clickerBuilder: NotificationClicker.Builder
 ) : NotificationsController {
 
     override fun initialize(
@@ -87,10 +86,7 @@ class NotificationsControllerImpl @Inject constructor(
         listController.bind()
 
         notificationRowBinder.setNotificationClicker(
-                NotificationClicker(
-                        Optional.of(statusBar),
-                        bubbleController,
-                        notificationActivityStarter))
+                clickerBuilder.build(Optional.of(statusBar), notificationActivityStarter))
         notificationRowBinder.setUpWithPresenter(
                 presenter,
                 listContainer,

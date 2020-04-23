@@ -146,6 +146,7 @@ public class ResolverActivity extends Activity implements
 
     private static final String TAG = "ResolverActivity";
     private static final boolean DEBUG = false;
+    private static final String LAST_SHOWN_TAB_KEY = "last_shown_tab_key";
 
     private boolean mRegistered;
 
@@ -844,9 +845,19 @@ public class ResolverActivity extends Activity implements
     }
 
     @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        ViewPager viewPager = findViewById(R.id.profile_pager);
+        outState.putInt(LAST_SHOWN_TAB_KEY, viewPager.getCurrentItem());
+    }
+
+    @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         resetButtonBar();
+        ViewPager viewPager = findViewById(R.id.profile_pager);
+        viewPager.setCurrentItem(savedInstanceState.getInt(LAST_SHOWN_TAB_KEY));
+        mMultiProfilePagerAdapter.clearInactiveProfileCache();
     }
 
     private boolean isHttpSchemeAndViewAction(Intent intent) {
@@ -1585,6 +1596,7 @@ public class ResolverActivity extends Activity implements
         TabHost tabHost = findViewById(R.id.profile_tabhost);
         tabHost.setup();
         ViewPager viewPager = findViewById(R.id.profile_pager);
+        viewPager.setSaveEnabled(false);
         TabHost.TabSpec tabSpec = tabHost.newTabSpec(TAB_TAG_PERSONAL)
                 .setContent(R.id.profile_pager)
                 .setIndicator(getString(R.string.resolver_personal_tab));
@@ -1610,6 +1622,7 @@ public class ResolverActivity extends Activity implements
             }
             setupViewVisibilities();
             maybeLogProfileChange();
+            onProfileTabSelected();
             DevicePolicyEventLogger
                     .createEvent(DevicePolicyEnums.RESOLVER_SWITCH_TABS)
                     .setInt(viewPager.getCurrentItem())
@@ -1627,6 +1640,12 @@ public class ResolverActivity extends Activity implements
                 });
         findViewById(R.id.resolver_tab_divider).setVisibility(View.VISIBLE);
     }
+
+    /**
+     * Callback called when user changes the profile tab.
+     * <p>This method is intended to be overridden by subclasses.
+     */
+    protected void onProfileTabSelected() { }
 
     private void resetCheckedItem() {
         if (!isIntentPicker()) {
@@ -1745,22 +1764,33 @@ public class ResolverActivity extends Activity implements
             return;
         }
         final ViewGroup buttonLayout = findViewById(R.id.button_bar);
-        if (buttonLayout != null) {
-            buttonLayout.setVisibility(View.VISIBLE);
-
-            if (!useLayoutWithDefault()) {
-                int inset = mSystemWindowInsets != null ? mSystemWindowInsets.bottom : 0;
-                buttonLayout.setPadding(buttonLayout.getPaddingLeft(), buttonLayout.getPaddingTop(),
-                        buttonLayout.getPaddingRight(), getResources().getDimensionPixelSize(
-                                R.dimen.resolver_button_bar_spacing) + inset);
-            }
-            mOnceButton = (Button) buttonLayout.findViewById(R.id.button_once);
-            mAlwaysButton = (Button) buttonLayout.findViewById(R.id.button_always);
-
-            resetAlwaysOrOnceButtonBar();
-        } else {
+        if (buttonLayout == null) {
             Log.e(TAG, "Layout unexpectedly does not have a button bar");
+            return;
         }
+        ResolverListAdapter activeListAdapter =
+                mMultiProfilePagerAdapter.getActiveListAdapter();
+        View buttonBarDivider = findViewById(R.id.resolver_button_bar_divider);
+        if (activeListAdapter.isTabLoaded()
+                && mMultiProfilePagerAdapter.shouldShowEmptyStateScreen(activeListAdapter)) {
+            buttonLayout.setVisibility(View.INVISIBLE);
+            buttonBarDivider.setVisibility(View.INVISIBLE);
+            return;
+        }
+
+        buttonBarDivider.setVisibility(View.VISIBLE);
+        buttonLayout.setVisibility(View.VISIBLE);
+
+        if (!useLayoutWithDefault()) {
+            int inset = mSystemWindowInsets != null ? mSystemWindowInsets.bottom : 0;
+            buttonLayout.setPadding(buttonLayout.getPaddingLeft(), buttonLayout.getPaddingTop(),
+                    buttonLayout.getPaddingRight(), getResources().getDimensionPixelSize(
+                            R.dimen.resolver_button_bar_spacing) + inset);
+        }
+        mOnceButton = (Button) buttonLayout.findViewById(R.id.button_once);
+        mAlwaysButton = (Button) buttonLayout.findViewById(R.id.button_always);
+
+        resetAlwaysOrOnceButtonBar();
     }
 
     private void resetAlwaysOrOnceButtonBar() {

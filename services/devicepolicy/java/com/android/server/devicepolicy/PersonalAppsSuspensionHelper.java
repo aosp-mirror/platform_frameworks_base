@@ -51,6 +51,10 @@ import java.util.Set;
 public class PersonalAppsSuspensionHelper {
     private static final String LOG_TAG = DevicePolicyManagerService.LOG_TAG;
 
+    // Flags to get all packages even if the user is still locked.
+    private static final int PACKAGE_QUERY_FLAGS =
+            PackageManager.MATCH_DIRECT_BOOT_AWARE | PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
+
     private final Context mContext;
     private final PackageManager mPackageManager;
 
@@ -67,7 +71,7 @@ public class PersonalAppsSuspensionHelper {
      */
     String[] getPersonalAppsForSuspension() {
         final List<PackageInfo> installedPackageInfos =
-                mPackageManager.getInstalledPackages(0 /* flags */);
+                mPackageManager.getInstalledPackages(PACKAGE_QUERY_FLAGS);
         final Set<String> result = new ArraySet<>();
         for (final PackageInfo packageInfo : installedPackageInfos) {
             final ApplicationInfo info = packageInfo.applicationInfo;
@@ -97,7 +101,7 @@ public class PersonalAppsSuspensionHelper {
         final Intent intent = new Intent(Intent.ACTION_MAIN);
         intent.addCategory(Intent.CATEGORY_HOME);
         final List<ResolveInfo> matchingActivities =
-                mPackageManager.queryIntentActivities(intent, 0);
+                mPackageManager.queryIntentActivities(intent, PACKAGE_QUERY_FLAGS);
         for (final ResolveInfo resolveInfo : matchingActivities) {
             if (resolveInfo.activityInfo == null
                     || TextUtils.isEmpty(resolveInfo.activityInfo.packageName)) {
@@ -107,7 +111,7 @@ public class PersonalAppsSuspensionHelper {
             final String packageName = resolveInfo.activityInfo.packageName;
             try {
                 final ApplicationInfo applicationInfo =
-                        mPackageManager.getApplicationInfo(packageName, 0);
+                        mPackageManager.getApplicationInfo(packageName, PACKAGE_QUERY_FLAGS);
                 if (applicationInfo.isSystemApp() || applicationInfo.isUpdatedSystemApp()) {
                     result.add(packageName);
                 }
@@ -147,7 +151,8 @@ public class PersonalAppsSuspensionHelper {
     private String getSettingsPackageName() {
         final Intent intent = new Intent(Settings.ACTION_SETTINGS);
         intent.addCategory(Intent.CATEGORY_DEFAULT);
-        final ResolveInfo resolveInfo = mPackageManager.resolveActivity(intent, /* flags= */ 0);
+        final ResolveInfo resolveInfo =
+                mPackageManager.resolveActivity(intent, PACKAGE_QUERY_FLAGS);
         if (resolveInfo != null) {
             return resolveInfo.activityInfo.packageName;
         }
@@ -164,7 +169,7 @@ public class PersonalAppsSuspensionHelper {
         intentToResolve.addCategory(Intent.CATEGORY_LAUNCHER);
         intentToResolve.setPackage(packageName);
         final List<ResolveInfo> resolveInfos =
-                mPackageManager.queryIntentActivities(intentToResolve, /* flags= */ 0);
+                mPackageManager.queryIntentActivities(intentToResolve, PACKAGE_QUERY_FLAGS);
         return resolveInfos != null && !resolveInfos.isEmpty();
     }
 

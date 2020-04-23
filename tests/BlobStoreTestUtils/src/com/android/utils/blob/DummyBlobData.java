@@ -77,7 +77,7 @@ public class DummyBlobData {
             return mRandomSeed;
         }
 
-        public Builder setFileSize(int fileSize) {
+        public Builder setFileSize(long fileSize) {
             mFileSize = fileSize;
             return this;
         }

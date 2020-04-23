@@ -44,7 +44,8 @@ public:
                             vector<std::shared_ptr<LogEvent>>* data, bool useUids));
     MOCK_METHOD2(RegisterPullUidProvider,
                  void(const ConfigKey& configKey, wp<PullUidProvider> provider));
-    MOCK_METHOD1(UnregisterPullUidProvider, void(const ConfigKey& configKey));
+    MOCK_METHOD2(UnregisterPullUidProvider,
+                 void(const ConfigKey& configKey, wp<PullUidProvider> provider));
 };
 
 class MockUidMap : public UidMap {

@@ -38,6 +38,117 @@ import java.util.Objects;
 public class MediaMetrics {
     public static final String TAG = "MediaMetrics";
 
+    public static final String SEPARATOR = ".";
+
+    /**
+     * A list of established MediaMetrics names that can be used for Items.
+     */
+    public static class Name {
+        public static final String AUDIO = "audio";
+        public static final String AUDIO_BLUETOOTH = AUDIO + SEPARATOR + "bluetooth";
+        public static final String AUDIO_DEVICE = AUDIO + SEPARATOR + "device";
+        public static final String AUDIO_FOCUS = AUDIO + SEPARATOR + "focus";
+        public static final String AUDIO_FORCE_USE = AUDIO + SEPARATOR + "forceUse";
+        public static final String AUDIO_MIC = AUDIO + SEPARATOR + "mic";
+        public static final String AUDIO_SERVICE = AUDIO + SEPARATOR + "service";
+        public static final String AUDIO_VOLUME = AUDIO + SEPARATOR + "volume";
+        public static final String AUDIO_VOLUME_EVENT = AUDIO_VOLUME + SEPARATOR + "event";
+    }
+
+    /**
+     * A list of established string values.
+     */
+    public static class Value {
+        public static final String CONNECT = "connect";
+        public static final String CONNECTED = "connected";
+        public static final String DISCONNECT = "disconnect";
+        public static final String DISCONNECTED = "disconnected";
+        public static final String DOWN = "down";
+        public static final String MUTE = "mute";
+        public static final String NO = "no";
+        public static final String OFF = "off";
+        public static final String ON = "on";
+        public static final String UNMUTE = "unmute";
+        public static final String UP = "up";
+        public static final String YES = "yes";
+    }
+
+    /**
+     * A list of standard property keys for consistent use and type.
+     */
+    public static class Property {
+        // A use for Bluetooth or USB device addresses
+        public static final Key<String> ADDRESS = createKey("address", String.class);
+        // A string representing the Audio Attributes
+        public static final Key<String> ATTRIBUTES = createKey("attributes", String.class);
+
+        // The calling package responsible for the state change
+        public static final Key<String> CALLING_PACKAGE =
+                createKey("callingPackage", String.class);
+
+        // The client name
+        public static final Key<String> CLIENT_NAME = createKey("clientName", String.class);
+
+        // The device type
+        public static final Key<Integer> DELAY_MS = createKey("delayMs", Integer.class);
+
+        // The device type
+        public static final Key<String> DEVICE = createKey("device", String.class);
+
+        // For volume changes, up or down
+        public static final Key<String> DIRECTION = createKey("direction", String.class);
+
+        // A reason for early return or error
+        public static final Key<String> EARLY_RETURN =
+                createKey("earlyReturn", String.class);
+        // ENCODING_ ... string to match AudioFormat encoding
+        public static final Key<String> ENCODING = createKey("encoding", String.class);
+
+        public static final Key<String> EVENT = createKey("event#", String.class);
+
+        // event generated is external (yes, no)
+        public static final Key<String> EXTERNAL = createKey("external", String.class);
+
+        public static final Key<Integer> FLAGS = createKey("flags", Integer.class);
+        public static final Key<String> FOCUS_CHANGE_HINT =
+                createKey("focusChangeHint", String.class);
+        public static final Key<String> FORCE_USE_DUE_TO =
+                createKey("forceUseDueTo", String.class);
+        public static final Key<String> FORCE_USE_MODE =
+                createKey("forceUseMode", String.class);
+        public static final Key<Double> GAIN_DB =
+                createKey("gainDb", Double.class);
+        public static final Key<String> GROUP =
+                createKey("group", String.class);
+        // For volume
+        public static final Key<Integer> INDEX = createKey("index", Integer.class);
+        public static final Key<Integer> MAX_INDEX = createKey("maxIndex", Integer.class);
+        public static final Key<Integer> MIN_INDEX = createKey("minIndex", Integer.class);
+        public static final Key<String> MODE =
+                createKey("mode", String.class); // audio_mode
+        public static final Key<String> MUTE =
+                createKey("mute", String.class); // microphone, on or off.
+
+        // Bluetooth or Usb device name
+        public static final Key<String> NAME =
+                createKey("name", String.class);
+
+        // Number of observers
+        public static final Key<Integer> OBSERVERS =
+                createKey("observers", Integer.class);
+
+        public static final Key<String> REQUEST =
+                createKey("request", String.class);
+
+        // For Bluetooth
+        public static final Key<String> SCO_AUDIO_MODE =
+                createKey("scoAudioMode", String.class);
+        public static final Key<Integer> SDK = createKey("sdk", Integer.class);
+        public static final Key<String> STATE = createKey("state", String.class);
+        public static final Key<Integer> STATUS = createKey("status", Integer.class);
+        public static final Key<String> STREAM_TYPE = createKey("streamType", String.class);
+    }
+
     /**
      * The TYPE constants below should match those in native MediaMetricsItem.h
      */

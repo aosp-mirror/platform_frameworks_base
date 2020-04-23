@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYERS;
@@ -45,6 +46,7 @@ class WallpaperWindowToken extends WindowToken {
             DisplayContent dc, boolean ownerCanManageAppTokens) {
         super(service, token, TYPE_WALLPAPER, explicit, dc, ownerCanManageAppTokens);
         dc.mWallpaperController.addWallpaperToken(this);
+        setWindowingMode(WINDOWING_MODE_FULLSCREEN);
     }
 
     @Override

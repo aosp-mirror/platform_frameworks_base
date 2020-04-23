@@ -1476,6 +1476,7 @@ class WindowStateAnimator {
         if (dumpAll) {
             pw.print(prefix); pw.print("mDrawState="); pw.print(drawStateToString());
             pw.print(prefix); pw.print(" mLastHidden="); pw.println(mLastHidden);
+            pw.print(prefix); pw.print("mEnterAnimationPending=" + mEnterAnimationPending);
             pw.print(prefix); pw.print("mSystemDecorRect="); mSystemDecorRect.printShortString(pw);
             pw.print(" mLastClipRect="); mLastClipRect.printShortString(pw);
 

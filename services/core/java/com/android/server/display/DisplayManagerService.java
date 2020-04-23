@@ -28,6 +28,8 @@ import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_SHOUL
 import static android.hardware.display.DisplayViewport.VIEWPORT_EXTERNAL;
 import static android.hardware.display.DisplayViewport.VIEWPORT_INTERNAL;
 import static android.hardware.display.DisplayViewport.VIEWPORT_VIRTUAL;
+import static android.view.Surface.ROTATION_270;
+import static android.view.Surface.ROTATION_90;
 
 import android.Manifest;
 import android.annotation.NonNull;
@@ -1363,8 +1365,7 @@ public final class DisplayManagerService extends SystemService {
         return null;
     }
 
-    private SurfaceControl.ScreenshotGraphicBuffer screenshotInternal(int displayId,
-            boolean captureSecureLayer) {
+    private SurfaceControl.ScreenshotGraphicBuffer systemScreenshotInternal(int displayId) {
         synchronized (mSyncRoot) {
             final IBinder token = getDisplayToken(displayId);
             if (token == null) {
@@ -1376,15 +1377,42 @@ public final class DisplayManagerService extends SystemService {
             }
 
             final DisplayInfo displayInfo = logicalDisplay.getDisplayInfoLocked();
-            if (captureSecureLayer) {
-                return SurfaceControl.screenshotToBufferWithSecureLayersUnsafe(token, new Rect(),
-                        displayInfo.getNaturalWidth(), displayInfo.getNaturalHeight(),
-                        false /* useIdentityTransform */, 0 /* rotation */);
-            } else {
-                return SurfaceControl.screenshotToBuffer(token, new Rect(),
-                        displayInfo.getNaturalWidth(), displayInfo.getNaturalHeight(),
-                        false /* useIdentityTransform */, 0 /* rotation */);
+            return SurfaceControl.screenshotToBufferWithSecureLayersUnsafe(token, new Rect(),
+                    displayInfo.getNaturalWidth(), displayInfo.getNaturalHeight(),
+                    false /* useIdentityTransform */, 0 /* rotation */);
+        }
+    }
+
+    private SurfaceControl.ScreenshotGraphicBuffer userScreenshotInternal(int displayId) {
+        synchronized (mSyncRoot) {
+            final IBinder token = getDisplayToken(displayId);
+            if (token == null) {
+                return null;
             }
+            final LogicalDisplay logicalDisplay = mLogicalDisplays.get(displayId);
+            if (logicalDisplay == null) {
+                return null;
+            }
+
+            final DisplayInfo displayInfo = logicalDisplay.getDisplayInfoLocked();
+            // Takes screenshot based on current device orientation.
+            final Display display = DisplayManagerGlobal.getInstance()
+                    .getRealDisplay(displayId);
+            if (display == null) {
+                return null;
+            }
+            final Point displaySize = new Point();
+            display.getRealSize(displaySize);
+
+            int rotation = displayInfo.rotation;
+            // TODO (b/153382624) : This workaround solution would be removed after
+            // SurfaceFlinger fixes the inconsistency with rotation direction issue.
+            if (rotation == ROTATION_90 || rotation == ROTATION_270) {
+                rotation = (rotation == ROTATION_90) ? ROTATION_270 : ROTATION_90;
+            }
+
+            return SurfaceControl.screenshotToBuffer(token, new Rect(), displaySize.x,
+                    displaySize.y, false /* useIdentityTransform */, rotation /* rotation */);
         }
     }
 
@@ -2502,13 +2530,13 @@ public final class DisplayManagerService extends SystemService {
         }
 
         @Override
-        public SurfaceControl.ScreenshotGraphicBuffer screenshot(int displayId) {
-            return screenshotInternal(displayId, true);
+        public SurfaceControl.ScreenshotGraphicBuffer systemScreenshot(int displayId) {
+            return systemScreenshotInternal(displayId);
         }
 
         @Override
-        public SurfaceControl.ScreenshotGraphicBuffer screenshotWithoutSecureLayer(int displayId) {
-            return screenshotInternal(displayId, false);
+        public SurfaceControl.ScreenshotGraphicBuffer userScreenshot(int displayId) {
+            return userScreenshotInternal(displayId);
         }
 
         @Override

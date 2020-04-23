@@ -87,7 +87,7 @@
         <item>com.android.systemui.util.NotificationChannels</item>
         <item>com.android.systemui.keyguard.KeyguardViewMediator</item>
 <!--        <item>com.android.systemui.recents.Recents</item>-->
-        <item>com.android.systemui.volume.VolumeUI</item>
+<!--        <item>com.android.systemui.volume.VolumeUI</item>-->
 <!--        <item>com.android.systemui.stackdivider.Divider</item>-->
 <!--        <item>com.android.systemui.statusbar.phone.StatusBar</item>-->
         <item>com.android.systemui.usb.StorageNotification</item>
@@ -108,7 +108,8 @@
         <item>com.android.systemui.theme.ThemeOverlayController</item>
         <item>com.android.systemui.navigationbar.car.CarNavigationBar</item>
         <item>com.android.systemui.toast.ToastUI</item>
-        <item>com.android.systemui.voicerecognition.car.ConnectedDeviceVoiceRecognitionNotifier</item>
+        <item>com.android.systemui.car.voicerecognition.ConnectedDeviceVoiceRecognitionNotifier</item>
         <item>com.android.systemui.window.SystemUIOverlayWindowManager</item>
+        <item>com.android.systemui.car.volume.VolumeUI</item>
     </string-array>
 </resources>
