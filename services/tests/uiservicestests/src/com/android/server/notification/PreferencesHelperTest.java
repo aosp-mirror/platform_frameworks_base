@@ -3142,6 +3142,44 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testGetConversations_notDemoted() {
+        String convoId = "convo";
+        NotificationChannel messages =
+                new NotificationChannel("messages", "Messages", IMPORTANCE_DEFAULT);
+        mHelper.createNotificationChannel(PKG_O, UID_O, messages, true, false);
+        NotificationChannel calls =
+                new NotificationChannel("calls", "Calls", IMPORTANCE_DEFAULT);
+        mHelper.createNotificationChannel(PKG_O, UID_O, calls, true, false);
+        NotificationChannel p =
+                new NotificationChannel("p calls", "Calls", IMPORTANCE_DEFAULT);
+        mHelper.createNotificationChannel(PKG_P, UID_P, p, true, false);
+
+        NotificationChannel channel =
+                new NotificationChannel("A person msgs", "messages from A", IMPORTANCE_DEFAULT);
+        channel.setConversationId(messages.getId(), convoId);
+        mHelper.createNotificationChannel(PKG_O, UID_O, channel, true, false);
+
+        NotificationChannel diffConvo =
+                new NotificationChannel("B person msgs", "messages from B", IMPORTANCE_DEFAULT);
+        diffConvo.setConversationId(p.getId(), "different convo");
+        diffConvo.setDemoted(true);
+        mHelper.createNotificationChannel(PKG_P, UID_P, diffConvo, true, false);
+
+        NotificationChannel channel2 =
+                new NotificationChannel("A person calls", "calls from A", IMPORTANCE_DEFAULT);
+        channel2.setConversationId(calls.getId(), convoId);
+        channel2.setImportantConversation(true);
+        mHelper.createNotificationChannel(PKG_O, UID_O, channel2, true, false);
+
+        List<ConversationChannelWrapper> convos = mHelper.getConversations(false);
+
+        assertEquals(2, convos.size());
+        assertTrue(conversationWrapperContainsChannel(convos, channel));
+        assertFalse(conversationWrapperContainsChannel(convos, diffConvo));
+        assertTrue(conversationWrapperContainsChannel(convos, channel2));
+    }
+
+    @Test
     public void testGetConversations_onlyImportant() {
         String convoId = "convo";
         NotificationChannel messages =
