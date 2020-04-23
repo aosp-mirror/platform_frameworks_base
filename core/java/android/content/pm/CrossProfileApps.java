@@ -279,12 +279,8 @@ public class CrossProfileApps {
      * <ul>
      * <li>{@code UserManager#getEnabledProfileIds(int)} ()} returns at least one other profile for
      * the calling user.</li>
-     * <li>The calling app has requested</li>
-     * {@code android.Manifest.permission.INTERACT_ACROSS_PROFILES} in its manifest.
-     * <li>The calling package has either been whitelisted by default by the OEM or has been
-     * explicitly whitelisted by the admin via
-     * {@link android.app.admin.DevicePolicyManager#setCrossProfilePackages(ComponentName, Set)}.
-     * </li>
+     * <li>The calling app has requested
+     * {@code android.Manifest.permission.INTERACT_ACROSS_PROFILES} in its manifest.</li>
      * </ul>
      *
      * <p>Note that in order for the user to be able to grant the consent, the requesting package
