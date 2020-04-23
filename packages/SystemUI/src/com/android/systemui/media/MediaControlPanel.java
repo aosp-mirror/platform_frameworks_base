@@ -57,7 +57,6 @@ import com.android.settingslib.media.LocalMediaManager;
 import com.android.settingslib.media.MediaDevice;
 import com.android.settingslib.media.MediaOutputSliceConstants;
 import com.android.settingslib.widget.AdaptiveIcon;
-import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.qs.QSMediaBrowser;
@@ -75,6 +74,7 @@ public class MediaControlPanel {
     @Nullable private final LocalMediaManager mLocalMediaManager;
     private final Executor mForegroundExecutor;
     protected final Executor mBackgroundExecutor;
+    private final ActivityStarter mActivityStarter;
 
     private Context mContext;
     protected LinearLayout mMediaNotifView;
@@ -178,10 +178,12 @@ public class MediaControlPanel {
      * @param actionIds resource IDs for action buttons in the layout
      * @param foregroundExecutor foreground executor
      * @param backgroundExecutor background executor, used for processing artwork
+     * @param activityStarter activity starter
      */
     public MediaControlPanel(Context context, ViewGroup parent,
             @Nullable LocalMediaManager routeManager, @LayoutRes int layoutId, int[] actionIds,
-            Executor foregroundExecutor, Executor backgroundExecutor) {
+            Executor foregroundExecutor, Executor backgroundExecutor,
+            ActivityStarter activityStarter) {
         mContext = context;
         LayoutInflater inflater = LayoutInflater.from(mContext);
         mMediaNotifView = (LinearLayout) inflater.inflate(layoutId, parent, false);
@@ -195,6 +197,7 @@ public class MediaControlPanel {
         mActionIds = actionIds;
         mForegroundExecutor = foregroundExecutor;
         mBackgroundExecutor = backgroundExecutor;
+        mActivityStarter = activityStarter;
     }
 
     /**
@@ -267,13 +270,7 @@ public class MediaControlPanel {
         // Click action
         if (contentIntent != null) {
             mMediaNotifView.setOnClickListener(v -> {
-                try {
-                    contentIntent.send();
-                    // Also close shade
-                    mContext.sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
-                } catch (PendingIntent.CanceledException e) {
-                    Log.e(TAG, "Pending intent was canceled", e);
-                }
+                mActivityStarter.postStartActivityDismissingKeyguard(contentIntent);
             });
         }
 
@@ -287,7 +284,6 @@ public class MediaControlPanel {
         if (mSeamless != null && mLocalMediaManager != null) {
             mSeamless.setVisibility(View.VISIBLE);
             updateDevice(mLocalMediaManager.getCurrentConnectedDevice());
-            ActivityStarter mActivityStarter = Dependency.get(ActivityStarter.class);
             mSeamless.setOnClickListener(v -> {
                 final Intent intent = new Intent()
                         .setAction(MediaOutputSliceConstants.ACTION_MEDIA_OUTPUT)
