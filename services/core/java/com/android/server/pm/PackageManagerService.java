@@ -15908,20 +15908,26 @@ public class PackageManagerService extends IPackageManager.Stub
 
             // Verify: if target already has an installer package, it must
             // be signed with the same cert as the caller.
-            if (targetPackageSetting.installerPackageName != null) {
-                PackageSetting setting = mSettings.mPackages.get(
-                        targetPackageSetting.installerPackageName);
-                // If the currently set package isn't valid, then it's always
-                // okay to change it.
-                if (setting != null) {
-                    if (compareSignatures(callerSignature,
-                            setting.signatures.mSignatures)
-                            != PackageManager.SIGNATURE_MATCH) {
-                        throw new SecurityException(
-                                "Caller does not have same cert as old installer package "
-                                + targetPackageSetting.installerPackageName);
-                    }
+            String targetInstallerPackageName =
+                    targetPackageSetting.installerPackageName;
+            PackageSetting targetInstallerPkgSetting = targetInstallerPackageName == null ? null :
+                    mSettings.mPackages.get(targetInstallerPackageName);
+
+            if (targetInstallerPkgSetting != null) {
+                if (compareSignatures(callerSignature,
+                        targetInstallerPkgSetting.signatures.mSignatures)
+                        != PackageManager.SIGNATURE_MATCH) {
+                    throw new SecurityException(
+                            "Caller does not have same cert as old installer package "
+                                    + targetInstallerPackageName);
                 }
+            } else if (mContext.checkCallingOrSelfPermission(Manifest.permission.INSTALL_PACKAGES)
+                    != PackageManager.PERMISSION_GRANTED) {
+                // This is probably an attempt to exploit vulnerability b/150857253 of taking
+                // privileged installer permissions when the installer has been uninstalled or
+                // was never set.
+                EventLog.writeEvent(0x534e4554, "150857253", callingUid, "");
+                return;
             }
 
             // Okay!
