@@ -1170,6 +1170,8 @@ public final class ActivityThread extends ClientTransactionHandler {
             } catch (IOException e) {
                 Slog.e(TAG, "Failed to duplicate heap dump file descriptor", e);
                 return;
+            } finally {
+                IoUtils.closeQuietly(fd);
             }
             dhd.finishCallback = finishCallback;
             sendMessage(H.DUMP_HEAP, dhd, 0, 0, true /*async*/);
