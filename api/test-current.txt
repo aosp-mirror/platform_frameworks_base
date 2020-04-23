@@ -5260,10 +5260,20 @@ package android.widget {
 
 package android.window {
 
+  public final class DisplayAreaInfo implements android.os.Parcelable {
+    ctor public DisplayAreaInfo(@NonNull android.window.WindowContainerToken, int);
+    method public int describeContents();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.window.DisplayAreaInfo> CREATOR;
+    field @NonNull public final android.content.res.Configuration configuration;
+    field public final int displayId;
+    field @NonNull public final android.window.WindowContainerToken token;
+  }
+
   public class DisplayAreaOrganizer extends android.window.WindowOrganizer {
     ctor public DisplayAreaOrganizer();
-    method public void onDisplayAreaAppeared(@NonNull android.window.WindowContainerToken);
-    method public void onDisplayAreaVanished(@NonNull android.window.WindowContainerToken);
+    method public void onDisplayAreaAppeared(@NonNull android.window.DisplayAreaInfo);
+    method public void onDisplayAreaVanished(@NonNull android.window.DisplayAreaInfo);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public void registerOrganizer(int);
     field public static final int FEATURE_DEFAULT_TASK_CONTAINER = 1; // 0x1
     field public static final int FEATURE_ROOT = 0; // 0x0

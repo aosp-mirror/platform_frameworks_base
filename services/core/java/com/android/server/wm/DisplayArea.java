@@ -33,6 +33,7 @@ import static com.android.server.wm.WindowContainerChildProto.DISPLAY_AREA;
 
 import android.graphics.Rect;
 import android.util.proto.ProtoOutputStream;
+import android.window.DisplayAreaInfo;
 import android.window.IDisplayAreaOrganizer;
 
 import com.android.server.policy.WindowManagerPolicy;
@@ -156,6 +157,14 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
     @Override
     boolean isOrganized() {
         return mOrganizer != null;
+    }
+
+
+    DisplayAreaInfo getDisplayAreaInfo() {
+        DisplayAreaInfo info = new DisplayAreaInfo(mRemoteToken.toWindowContainerToken(),
+                getDisplayContent().getDisplayId());
+        info.configuration.setTo(getConfiguration());
+        return info;
     }
 
     /**

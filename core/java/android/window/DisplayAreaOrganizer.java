@@ -52,21 +52,20 @@ public class DisplayAreaOrganizer extends WindowOrganizer {
         }
     }
 
-    public void onDisplayAreaAppeared(@NonNull WindowContainerToken displayArea) {}
+    public void onDisplayAreaAppeared(@NonNull DisplayAreaInfo displayAreaInfo) {}
 
-    public void onDisplayAreaVanished(@NonNull WindowContainerToken displayArea) {}
-
+    public void onDisplayAreaVanished(@NonNull DisplayAreaInfo displayAreaInfo) {}
 
     private final IDisplayAreaOrganizer mInterface = new IDisplayAreaOrganizer.Stub() {
 
         @Override
-        public void onDisplayAreaAppeared(@NonNull WindowContainerToken displayArea) {
-            DisplayAreaOrganizer.this.onDisplayAreaAppeared(displayArea);
+        public void onDisplayAreaAppeared(@NonNull DisplayAreaInfo displayAreaInfo) {
+            DisplayAreaOrganizer.this.onDisplayAreaAppeared(displayAreaInfo);
         }
 
         @Override
-        public void onDisplayAreaVanished(@NonNull WindowContainerToken displayArea) {
-            DisplayAreaOrganizer.this.onDisplayAreaVanished(displayArea);
+        public void onDisplayAreaVanished(@NonNull DisplayAreaInfo displayAreaInfo) {
+            DisplayAreaOrganizer.this.onDisplayAreaVanished(displayAreaInfo);
         }
     };
 
