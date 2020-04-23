@@ -1288,6 +1288,7 @@ public final class AccessibilityManager {
      * @hide
      */
     @SystemApi
+    @TestApi
     @RequiresPermission(Manifest.permission.MANAGE_ACCESSIBILITY)
     public void registerSystemAction(@NonNull RemoteAction action, int actionId) {
         final IAccessibilityManager service;
@@ -1315,6 +1316,7 @@ public final class AccessibilityManager {
      * @hide
      */
     @SystemApi
+    @TestApi
     @RequiresPermission(Manifest.permission.MANAGE_ACCESSIBILITY)
     public void unregisterSystemAction(int actionId) {
         final IAccessibilityManager service;

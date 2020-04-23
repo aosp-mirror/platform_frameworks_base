@@ -4969,7 +4969,9 @@ package android.view.accessibility {
     method public void addAccessibilityServicesStateChangeListener(@NonNull android.view.accessibility.AccessibilityManager.AccessibilityServicesStateChangeListener, @Nullable android.os.Handler);
     method @NonNull @RequiresPermission("android.permission.MANAGE_ACCESSIBILITY") public java.util.List<java.lang.String> getAccessibilityShortcutTargets(int);
     method @RequiresPermission("android.permission.MANAGE_ACCESSIBILITY") public void performAccessibilityShortcut();
+    method @RequiresPermission("android.permission.MANAGE_ACCESSIBILITY") public void registerSystemAction(@NonNull android.app.RemoteAction, int);
     method public void removeAccessibilityServicesStateChangeListener(@NonNull android.view.accessibility.AccessibilityManager.AccessibilityServicesStateChangeListener);
+    method @RequiresPermission("android.permission.MANAGE_ACCESSIBILITY") public void unregisterSystemAction(int);
   }
 
   public static interface AccessibilityManager.AccessibilityServicesStateChangeListener {
