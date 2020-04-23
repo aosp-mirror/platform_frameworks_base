@@ -116,6 +116,7 @@ public class PreferencesHelper implements RankingConfig {
     private static final String ATT_ENABLED = "enabled";
     private static final String ATT_USER_ALLOWED = "allowed";
     private static final String ATT_HIDE_SILENT = "hide_gentle";
+    private static final String ATT_SENT_MESSAGE = "sent_msg";
 
     private static final int DEFAULT_PRIORITY = Notification.PRIORITY_DEFAULT;
     private static final int DEFAULT_VISIBILITY = NotificationManager.VISIBILITY_NO_OVERRIDE;
@@ -269,6 +270,8 @@ public class PreferencesHelper implements RankingConfig {
                                     parser, ATT_SHOW_BADGE, DEFAULT_SHOW_BADGE);
                             r.lockedAppFields = XmlUtils.readIntAttribute(parser,
                                     ATT_APP_USER_LOCKED_FIELDS, DEFAULT_LOCKED_APP_FIELDS);
+                            r.hasSentMessage = XmlUtils.readBooleanAttribute(
+                                    parser, ATT_SENT_MESSAGE, false);
 
                             final int innerDepth = parser.getDepth();
                             while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
@@ -510,7 +513,8 @@ public class PreferencesHelper implements RankingConfig {
                                 || r.channels.size() > 0
                                 || r.groups.size() > 0
                                 || r.delegate != null
-                                || r.bubblePreference != DEFAULT_BUBBLE_PREFERENCE;
+                                || r.bubblePreference != DEFAULT_BUBBLE_PREFERENCE
+                                || r.hasSentMessage;
                 if (hasNonDefaultSettings) {
                     out.startTag(null, TAG_PACKAGE);
                     out.attribute(null, ATT_NAME, r.pkg);
@@ -529,6 +533,7 @@ public class PreferencesHelper implements RankingConfig {
                     out.attribute(null, ATT_SHOW_BADGE, Boolean.toString(r.showBadge));
                     out.attribute(null, ATT_APP_USER_LOCKED_FIELDS,
                             Integer.toString(r.lockedAppFields));
+                    out.attribute(null, ATT_SENT_MESSAGE, Boolean.toString(r.hasSentMessage));
 
                     if (!forBackup) {
                         out.attribute(null, ATT_UID, Integer.toString(r.uid));
@@ -645,6 +650,18 @@ public class PreferencesHelper implements RankingConfig {
             getOrCreatePackagePreferencesLocked(packageName, uid).showBadge = showBadge;
         }
         updateConfig();
+    }
+
+    public boolean hasSentMessage(String packageName, int uid) {
+        synchronized (mPackagePreferences) {
+            return getOrCreatePackagePreferencesLocked(packageName, uid).hasSentMessage;
+        }
+    }
+
+    public void setMessageSent(String packageName, int uid) {
+        synchronized (mPackagePreferences) {
+            getOrCreatePackagePreferencesLocked(packageName, uid).hasSentMessage = true;
+        }
     }
 
     @Override
@@ -2271,6 +2288,7 @@ public class PreferencesHelper implements RankingConfig {
         boolean oemLockedImportance = DEFAULT_OEM_LOCKED_IMPORTANCE;
         List<String> oemLockedChannels = new ArrayList<>();
         boolean defaultAppLockedImportance = DEFAULT_APP_LOCKED_IMPORTANCE;
+        boolean hasSentMessage = false;
 
         Delegate delegate = null;
         ArrayMap<String, NotificationChannel> channels = new ArrayMap<>();
