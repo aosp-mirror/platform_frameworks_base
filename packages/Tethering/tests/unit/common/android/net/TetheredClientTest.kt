@@ -33,7 +33,9 @@ private val TEST_MACADDR = MacAddress.fromBytes(byteArrayOf(12, 23, 34, 45, 56, 
 private val TEST_OTHER_MACADDR = MacAddress.fromBytes(byteArrayOf(23, 34, 45, 56, 67, 78))
 private val TEST_ADDR1 = makeLinkAddress("192.168.113.3", prefixLength = 24, expTime = 123L)
 private val TEST_ADDR2 = makeLinkAddress("fe80::1:2:3", prefixLength = 64, expTime = 456L)
-private val TEST_ADDRINFO1 = AddressInfo(TEST_ADDR1, "test_hostname")
+private val TEST_HOSTNAME = "test_hostname"
+private val TEST_OTHER_HOSTNAME = "test_other_hostname"
+private val TEST_ADDRINFO1 = AddressInfo(TEST_ADDR1, TEST_HOSTNAME)
 private val TEST_ADDRINFO2 = AddressInfo(TEST_ADDR2, null)
 
 private fun makeLinkAddress(addr: String, prefixLength: Int, expTime: Long) = LinkAddress(
@@ -49,6 +51,7 @@ private fun makeLinkAddress(addr: String, prefixLength: Int, expTime: Long) = Li
 class TetheredClientTest {
     @Test
     fun testParceling() {
+        assertParcelSane(TEST_ADDRINFO1, fieldCount = 2)
         assertParcelSane(makeTestClient(), fieldCount = 3)
     }
 
@@ -65,7 +68,7 @@ class TetheredClientTest {
         // Different hostname
         assertNotEquals(makeTestClient(), TetheredClient(
                 TEST_MACADDR,
-                listOf(AddressInfo(TEST_ADDR1, "test_other_hostname"), TEST_ADDRINFO2),
+                listOf(AddressInfo(TEST_ADDR1, TEST_OTHER_HOSTNAME), TEST_ADDRINFO2),
                 TETHERING_BLUETOOTH))
 
         // Null hostname
@@ -95,6 +98,21 @@ class TetheredClientTest {
                 TEST_MACADDR,
                 listOf(TEST_ADDRINFO1, TEST_ADDRINFO2),
                 TETHERING_USB), client1.addAddresses(client2))
+    }
+
+    @Test
+    fun testGetters() {
+        assertEquals(TEST_MACADDR, makeTestClient().macAddress)
+        assertEquals(listOf(TEST_ADDRINFO1, TEST_ADDRINFO2), makeTestClient().addresses)
+        assertEquals(TETHERING_BLUETOOTH, makeTestClient().tetheringType)
+    }
+
+    @Test
+    fun testAddressInfo_Getters() {
+        assertEquals(TEST_ADDR1, TEST_ADDRINFO1.address)
+        assertEquals(TEST_ADDR2, TEST_ADDRINFO2.address)
+        assertEquals(TEST_HOSTNAME, TEST_ADDRINFO1.hostname)
+        assertEquals(null, TEST_ADDRINFO2.hostname)
     }
 
     private fun makeTestClient() = TetheredClient(
