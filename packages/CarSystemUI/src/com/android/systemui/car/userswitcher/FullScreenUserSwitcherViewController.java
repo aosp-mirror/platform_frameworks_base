@@ -25,9 +25,9 @@ import android.view.View;
 import androidx.recyclerview.widget.GridLayoutManager;
 
 import com.android.systemui.R;
+import com.android.systemui.car.window.OverlayViewController;
+import com.android.systemui.car.window.OverlayViewGlobalStateController;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.window.OverlayViewController;
-import com.android.systemui.window.OverlayViewGlobalStateController;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
