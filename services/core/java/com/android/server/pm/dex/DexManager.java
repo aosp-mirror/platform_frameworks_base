@@ -548,6 +548,16 @@ public class DexManager {
                 continue;
             }
 
+            if (dexUseInfo.isUnsupportedClassLoaderContext()
+                    || dexUseInfo.isVariableClassLoaderContext()) {
+                String debugMsg = dexUseInfo.isUnsupportedClassLoaderContext()
+                        ? "unsupported"
+                        : "variable";
+                Slog.w(TAG, "Skipping dexopt for system server path loaded with " + debugMsg
+                        + " class loader context: " + dexPath);
+                continue;
+            }
+
             int newResult = pdo.dexoptSystemServerPath(dexPath, dexUseInfo, overriddenOptions);
 
             // The end result is:
