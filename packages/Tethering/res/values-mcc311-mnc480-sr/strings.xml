@@ -16,10 +16,9 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="no_upstream_notification_title" msgid="5026912695053828030">"Хотспот нема приступ интернету"</string>
-    <string name="no_upstream_notification_message" msgid="6810713595219684058">"Уређаји не могу да се повежу на интернет"</string>
-    <string name="no_upstream_notification_disable_button" msgid="3388523729003352854">"Искључи хотспот"</string>
-    <string name="upstream_roaming_notification_title" msgid="2242169951273396377">"Хотспот је укључен"</string>
+    <string name="no_upstream_notification_title" msgid="611650570559011140">"Привезивање нема приступ интернету"</string>
+    <string name="no_upstream_notification_message" msgid="6508394877641864863">"Повезивање уређаја није успело"</string>
+    <string name="no_upstream_notification_disable_button" msgid="7609346639290990508">"Искључи привезивање"</string>
+    <string name="upstream_roaming_notification_title" msgid="6032901176124830787">"Укључен је хотспот или привезивање"</string>
     <string name="upstream_roaming_notification_message" msgid="7599056263326217523">"Можда важе додатни трошкови у ромингу"</string>
-    <string name="upstream_roaming_notification_continue_button" msgid="693106687178152486">"Настави"</string>
 </resources>

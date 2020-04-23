@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
-package com.android.systemui.volume;
+package com.android.systemui.car.volume;
 
 import android.content.Context;
 
 import com.android.systemui.car.CarServiceProvider;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.plugins.VolumeDialog;
+import com.android.systemui.volume.Events;
+import com.android.systemui.volume.VolumeDialogComponent;
+import com.android.systemui.volume.VolumeDialogControllerImpl;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -45,6 +48,7 @@ public class CarVolumeDialogComponent extends VolumeDialogComponent {
     @Override
     protected VolumeDialog createDefault() {
         mCarVolumeDialog = new CarVolumeDialogImpl(mContext);
+        mCarVolumeDialog.show(Events.SHOW_REASON_VOLUME_CHANGED);
         return mCarVolumeDialog;
     }
 }

@@ -5863,6 +5863,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         case KeyEvent.KEYCODE_DPAD_RIGHT:
         case KeyEvent.KEYCODE_DPAD_CENTER:
         case KeyEvent.KEYCODE_ENTER:
+        case KeyEvent.KEYCODE_NUMPAD_ENTER:
             okToSend = false;
             break;
         case KeyEvent.KEYCODE_BACK:

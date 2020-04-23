@@ -16,10 +16,9 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="no_upstream_notification_title" msgid="5026912695053828030">"Tīklājam nav interneta savienojuma"</string>
-    <string name="no_upstream_notification_message" msgid="6810713595219684058">"Ierīces nevar izveidot savienojumu ar internetu"</string>
-    <string name="no_upstream_notification_disable_button" msgid="3388523729003352854">"Izslēgt tīklāju"</string>
-    <string name="upstream_roaming_notification_title" msgid="2242169951273396377">"Tīklājs ir ieslēgts"</string>
+    <string name="no_upstream_notification_title" msgid="611650570559011140">"Piesaistei nav interneta savienojuma"</string>
+    <string name="no_upstream_notification_message" msgid="6508394877641864863">"Nevar savienot ierīces"</string>
+    <string name="no_upstream_notification_disable_button" msgid="7609346639290990508">"Izslēgt piesaisti"</string>
+    <string name="upstream_roaming_notification_title" msgid="6032901176124830787">"Ir ieslēgts tīklājs vai piesaiste"</string>
     <string name="upstream_roaming_notification_message" msgid="7599056263326217523">"Viesabonēšanas laikā var tikt piemērota papildu samaksa"</string>
-    <string name="upstream_roaming_notification_continue_button" msgid="693106687178152486">"Tālāk"</string>
 </resources>

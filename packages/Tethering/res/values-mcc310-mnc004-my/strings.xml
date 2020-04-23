@@ -16,10 +16,9 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="no_upstream_notification_title" msgid="221932678126754542">"ဟော့စပေါ့တွင် အင်တာနက်မရှိပါ"</string>
-    <string name="no_upstream_notification_message" msgid="4145932079850792642">"စက်များက အင်တာနက်ချိတ်ဆက်၍ မရပါ"</string>
-    <string name="no_upstream_notification_disable_button" msgid="2164668551525869970">"ဟော့စပေါ့ ပိတ်ရန်"</string>
-    <string name="upstream_roaming_notification_title" msgid="8448552978815624701">"ဟော့စပေါ့ ဖွင့်ထားသည်"</string>
+    <string name="no_upstream_notification_title" msgid="5030042590486713460">"မိုဘိုင်းဖုန်းသုံး ချိတ်ဆက်မျှဝေခြင်းတွင် အင်တာနက် မရှိပါ"</string>
+    <string name="no_upstream_notification_message" msgid="3843613362272973447">"စက်များ ချိတ်ဆက်၍ မရပါ"</string>
+    <string name="no_upstream_notification_disable_button" msgid="6385491461813507624">"မိုဘိုင်းဖုန်းသုံး ချိတ်ဆက်မျှဝေခြင်း ပိတ်ရန်"</string>
+    <string name="upstream_roaming_notification_title" msgid="3015912166812283303">"ဟော့စပေါ့ (သို့) မိုဘိုင်းဖုန်းသုံး ချိတ်ဆက်မျှဝေခြင်း ဖွင့်ထားသည်"</string>
     <string name="upstream_roaming_notification_message" msgid="6724434706748439902">"ပြင်ပကွန်ရက်နှင့် ချိတ်ဆက်သည့်အခါ နောက်ထပ်ကျသင့်မှုများ ရှိနိုင်သည်"</string>
-    <string name="upstream_roaming_notification_continue_button" msgid="8390621437856451758">"ရှေ့ဆက်ရန်"</string>
 </resources>

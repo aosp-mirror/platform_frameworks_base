@@ -702,10 +702,10 @@ class AppErrors {
         }
 
         // Bump up the crash count of any services currently running in the proc.
-        for (int i = app.services.size() - 1; i >= 0; i--) {
+        for (int i = app.numberOfRunningServices() - 1; i >= 0; i--) {
             // Any services running in the application need to be placed
             // back in the pending list.
-            ServiceRecord sr = app.services.valueAt(i);
+            ServiceRecord sr = app.getRunningServiceAt(i);
             // If the service was restarted a while ago, then reset crash count, else increment it.
             if (now > sr.restartTime + ProcessList.MIN_CRASH_INTERVAL) {
                 sr.crashCount = 1;

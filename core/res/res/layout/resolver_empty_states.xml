@@ -24,6 +24,7 @@
     android:paddingStart="24dp"
     android:paddingEnd="24dp">
     <RelativeLayout
+        android:id="@+id/resolver_empty_state_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingTop="48dp"

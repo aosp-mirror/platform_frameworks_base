@@ -22,14 +22,13 @@ import androidx.annotation.VisibleForTesting
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.util.Assert
 import java.lang.IllegalStateException
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * Tracks a reference to the context for the current user
+ *
+ * Constructor is injected at SettingsModule
  */
-@Singleton
-class CurrentUserContextTracker @Inject constructor(
+class CurrentUserContextTracker internal constructor(
     private val sysuiContext: Context,
     broadcastDispatcher: BroadcastDispatcher
 ) {

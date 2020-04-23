@@ -78,11 +78,12 @@ public:
                                     wp<PullDataReceiver> receiver);
 
     // Registers a pull uid provider for the config key. When pulling atoms, it will be used to
-    // determine which atoms to pull from.
+    // determine which uids to pull from.
     virtual void RegisterPullUidProvider(const ConfigKey& configKey, wp<PullUidProvider> provider);
 
     // Unregister a pull uid provider.
-    virtual void UnregisterPullUidProvider(const ConfigKey& configKey);
+    virtual void UnregisterPullUidProvider(const ConfigKey& configKey,
+                                           wp<PullUidProvider> provider);
 
     // Verify if we know how to pull for this matcher
     bool PullerForMatcherExists(int tagId) const;
@@ -180,6 +181,8 @@ private:
     FRIEND_TEST(ValueMetricE2eTest, TestPulledEvents);
     FRIEND_TEST(ValueMetricE2eTest, TestPulledEvents_LateAlarm);
     FRIEND_TEST(ValueMetricE2eTest, TestPulledEvents_WithActivation);
+
+    FRIEND_TEST(StatsLogProcessorTest, TestPullUidProviderSetOnConfigUpdate);
 };
 
 }  // namespace statsd

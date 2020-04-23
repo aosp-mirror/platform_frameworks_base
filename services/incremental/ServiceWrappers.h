@@ -16,29 +16,23 @@
 
 #pragma once
 
-#include "IncrementalServiceValidation.h"
-
-#include <android-base/strings.h>
 #include <android-base/unique_fd.h>
 #include <android/content/pm/DataLoaderParamsParcel.h>
 #include <android/content/pm/FileSystemControlParcel.h>
 #include <android/content/pm/IDataLoader.h>
-#include <android/content/pm/IDataLoaderManager.h>
 #include <android/content/pm/IDataLoaderStatusListener.h>
-#include <android/os/IVold.h>
-#include <binder/AppOpsManager.h>
+#include <binder/IAppOpsCallback.h>
 #include <binder/IServiceManager.h>
+#include <binder/Status.h>
 #include <incfs.h>
 #include <jni.h>
 
 #include <memory>
+#include <span>
 #include <string>
 #include <string_view>
 
-using namespace android::incfs;
-using namespace android::content::pm;
-
-namespace android::os::incremental {
+namespace android::incremental {
 
 // --- Wrapper interfaces ---
 
@@ -47,42 +41,55 @@ using MountId = int32_t;
 class VoldServiceWrapper {
 public:
     virtual ~VoldServiceWrapper() = default;
-    virtual binder::Status mountIncFs(const std::string& backingPath, const std::string& targetDir,
-                                      int32_t flags,
-                                      IncrementalFileSystemControlParcel* _aidl_return) const = 0;
+    virtual binder::Status mountIncFs(
+            const std::string& backingPath, const std::string& targetDir, int32_t flags,
+            os::incremental::IncrementalFileSystemControlParcel* result) const = 0;
     virtual binder::Status unmountIncFs(const std::string& dir) const = 0;
     virtual binder::Status bindMount(const std::string& sourceDir,
                                      const std::string& targetDir) const = 0;
-    virtual binder::Status setIncFsMountOptions(const ::android::os::incremental::IncrementalFileSystemControlParcel& control, bool enableReadLogs) const = 0;
+    virtual binder::Status setIncFsMountOptions(
+            const os::incremental::IncrementalFileSystemControlParcel& control,
+            bool enableReadLogs) const = 0;
 };
 
 class DataLoaderManagerWrapper {
 public:
     virtual ~DataLoaderManagerWrapper() = default;
-    virtual binder::Status initializeDataLoader(MountId mountId,
-                                                const DataLoaderParamsParcel& params,
-                                                const FileSystemControlParcel& control,
-                                                const sp<IDataLoaderStatusListener>& listener,
-                                                bool* _aidl_return) const = 0;
-    virtual binder::Status getDataLoader(MountId mountId, sp<IDataLoader>* _aidl_return) const = 0;
+    virtual binder::Status initializeDataLoader(
+            MountId mountId, const content::pm::DataLoaderParamsParcel& params,
+            const content::pm::FileSystemControlParcel& control,
+            const sp<content::pm::IDataLoaderStatusListener>& listener, bool* result) const = 0;
+    virtual binder::Status getDataLoader(MountId mountId,
+                                         sp<content::pm::IDataLoader>* result) const = 0;
     virtual binder::Status destroyDataLoader(MountId mountId) const = 0;
 };
 
 class IncFsWrapper {
 public:
+    using Control = incfs::Control;
+    using FileId = incfs::FileId;
+    using ErrorCode = incfs::ErrorCode;
+
+    using ExistingMountCallback =
+            std::function<void(std::string_view root, std::string_view backingDir,
+                               std::span<std::pair<std::string_view, std::string_view>> binds)>;
+
     virtual ~IncFsWrapper() = default;
+    virtual void listExistingMounts(const ExistingMountCallback& cb) const = 0;
+    virtual Control openMount(std::string_view path) const = 0;
     virtual Control createControl(IncFsFd cmd, IncFsFd pendingReads, IncFsFd logs) const = 0;
     virtual ErrorCode makeFile(const Control& control, std::string_view path, int mode, FileId id,
-                               NewFileParams params) const = 0;
+                               incfs::NewFileParams params) const = 0;
     virtual ErrorCode makeDir(const Control& control, std::string_view path, int mode) const = 0;
-    virtual RawMetadata getMetadata(const Control& control, FileId fileid) const = 0;
-    virtual RawMetadata getMetadata(const Control& control, std::string_view path) const = 0;
+    virtual ErrorCode makeDirs(const Control& control, std::string_view path, int mode) const = 0;
+    virtual incfs::RawMetadata getMetadata(const Control& control, FileId fileid) const = 0;
+    virtual incfs::RawMetadata getMetadata(const Control& control, std::string_view path) const = 0;
     virtual FileId getFileId(const Control& control, std::string_view path) const = 0;
     virtual ErrorCode link(const Control& control, std::string_view from,
                            std::string_view to) const = 0;
     virtual ErrorCode unlink(const Control& control, std::string_view path) const = 0;
     virtual base::unique_fd openForSpecialOps(const Control& control, FileId id) const = 0;
-    virtual ErrorCode writeBlocks(Span<const DataBlock> blocks) const = 0;
+    virtual ErrorCode writeBlocks(std::span<const incfs::DataBlock> blocks) const = 0;
 };
 
 class AppOpsManagerWrapper {
@@ -129,4 +136,4 @@ private:
     JavaVM* const mJvm;
 };
 
-} // namespace android::os::incremental
+} // namespace android::incremental

@@ -35,6 +35,7 @@ import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.collection.inflation.LowPriorityInflationHelper;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.stack.ForegroundServiceSectionController;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
@@ -71,6 +72,7 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
     protected final VisualStabilityManager mVisualStabilityManager;
     private final SysuiStatusBarStateController mStatusBarStateController;
     private final NotificationEntryManager mEntryManager;
+    private final LowPriorityInflationHelper mLowPriorityInflationHelper;
 
     /**
      * {@code true} if notifications not part of a group should by default be rendered in their
@@ -108,7 +110,8 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
             BubbleController bubbleController,
             DynamicPrivacyController privacyController,
             ForegroundServiceSectionController fgsSectionController,
-            DynamicChildBindController dynamicChildBindController) {
+            DynamicChildBindController dynamicChildBindController,
+            LowPriorityInflationHelper lowPriorityInflationHelper) {
         mContext = context;
         mHandler = mainHandler;
         mLockscreenUserManager = notificationLockscreenUserManager;
@@ -124,6 +127,7 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
         mBubbleController = bubbleController;
         mDynamicPrivacyController = privacyController;
         mDynamicChildBindController = dynamicChildBindController;
+        mLowPriorityInflationHelper = lowPriorityInflationHelper;
     }
 
     public void setUpWithPresenter(NotificationPresenter presenter,
@@ -177,6 +181,7 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
                     currentUserId);
             ent.setSensitive(sensitive, deviceSensitive);
             ent.getRow().setNeedsRedaction(needsRedaction);
+            mLowPriorityInflationHelper.recheckLowPriorityViewAndInflate(ent, ent.getRow());
             boolean isChildInGroup = mGroupManager.isChildInGroupWithSummary(ent.getSbn());
 
             boolean groupChangesAllowed = mVisualStabilityManager.areGroupChangesAllowed()

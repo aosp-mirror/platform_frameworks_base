@@ -23,6 +23,7 @@ import static android.Manifest.permission.MANAGE_APP_TOKENS;
 import static android.Manifest.permission.READ_FRAME_BUFFER;
 import static android.Manifest.permission.REGISTER_WINDOW_MANAGER_LISTENERS;
 import static android.Manifest.permission.RESTRICTED_VR_ACCESS;
+import static android.Manifest.permission.STATUS_BAR_SERVICE;
 import static android.Manifest.permission.WRITE_SECURE_SETTINGS;
 import static android.app.ActivityManagerInternal.ALLOW_FULL_ONLY;
 import static android.app.ActivityManagerInternal.ALLOW_NON_FULL;
@@ -74,6 +75,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_VOICE_INTERACTION;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static android.view.WindowManager.REMOVE_CONTENT_MODE_UNDEFINED;
 import static android.view.WindowManagerGlobal.ADD_OKAY;
+import static android.view.WindowManagerGlobal.ADD_TOO_MANY_TOKENS;
 import static android.view.WindowManagerGlobal.RELAYOUT_DEFER_SURFACE_DESTROY;
 import static android.view.WindowManagerGlobal.RELAYOUT_RES_BLAST_SYNC;
 import static android.view.WindowManagerGlobal.RELAYOUT_RES_SURFACE_CHANGED;
@@ -412,6 +414,12 @@ public class WindowManagerService extends IWindowManager.Stub
     private static final int ANIMATION_DURATION_SCALE = 2;
 
     private static final int ANIMATION_COMPLETED_TIMEOUT_MS = 5000;
+
+    /** The maximum count of window tokens without surface that an app can register. */
+    private static final int MAXIMUM_WINDOW_TOKEN_COUNT_WITHOUT_SURFACE = 5;
+
+    /** System UI can create more window context... */
+    private static final int SYSTEM_UI_MULTIPLIER = 2;
 
     // TODO(b/143053092): Remove the settings if it becomes stable.
     private static final String FIXED_ROTATION_TRANSFORM_SETTING_NAME = "fixed_rotation_transform";
@@ -2594,8 +2602,28 @@ public class WindowManagerService extends IWindowManager.Stub
     @Override
     public int addWindowTokenWithOptions(IBinder binder, int type, int displayId, Bundle options,
             String packageName) {
+        if (tokenCountExceed()) {
+            return ADD_TOO_MANY_TOKENS;
+        }
         return addWindowTokenWithOptions(binder, type, displayId, options, packageName,
                 true /* fromClientToken */);
+    }
+
+    private boolean tokenCountExceed() {
+        final int callingUid = Binder.getCallingUid();
+        // Don't check if caller is from system server.
+        if (callingUid == myPid()) {
+            return false;
+        }
+        final int limit =
+                (checkCallingPermission(STATUS_BAR_SERVICE, "addWindowTokenWithOptions"))
+                        ?  MAXIMUM_WINDOW_TOKEN_COUNT_WITHOUT_SURFACE * SYSTEM_UI_MULTIPLIER
+                        : MAXIMUM_WINDOW_TOKEN_COUNT_WITHOUT_SURFACE;
+        synchronized (mGlobalLock) {
+            int[] count = new int[1];
+            mRoot.forAllDisplays(d -> count[0] += d.getWindowTokensWithoutSurfaceCount(callingUid));
+            return count[0] >= limit;
+        }
     }
 
     private int addWindowTokenWithOptions(IBinder binder, int type, int displayId, Bundle options,
@@ -7650,15 +7678,8 @@ public class WindowManagerService extends IWindowManager.Stub
                     Slog.w(TAG, "Cannot find window which accessibility connection is added to");
                     return;
                 }
-                try (SurfaceControl.Transaction t = new SurfaceControl.Transaction()) {
-                    t.setMetadata(
-                            state.mSurfaceControl,
-                            SurfaceControl.METADATA_ACCESSIBILITY_ID,
-                            accessibilityWindowId);
-                    t.apply();
-                } finally {
-                    SurfaceControl.closeTransaction();
-                }
+                mTransaction.setMetadata(state.mSurfaceControl,
+                        SurfaceControl.METADATA_ACCESSIBILITY_ID, accessibilityWindowId).apply();
             }
         }
 

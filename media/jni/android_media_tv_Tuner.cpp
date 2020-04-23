@@ -1130,7 +1130,7 @@ jintArray JTuner::getLnbIds() {
         lnbIds = ids;
         res = r;
     });
-    if (res != Result::SUCCESS || mLnbIds.size() == 0) {
+    if (res != Result::SUCCESS || lnbIds.size() == 0) {
         ALOGW("Lnb isn't available");
         return NULL;
     }
@@ -1795,6 +1795,22 @@ jobject JTuner::getFrontendStatus(jintArray types) {
     }
 
     return statusObj;
+}
+
+jint JTuner::closeFrontend() {
+    Result r = Result::SUCCESS;
+    if (mFe != NULL) {
+        r = mFe->close();
+    }
+    return (jint) r;
+}
+
+jint JTuner::closeDemux() {
+    Result r = Result::SUCCESS;
+    if (mDemux != NULL) {
+        r = mDemux->close();
+    }
+    return (jint) r;
 }
 
 }  // namespace android
@@ -3199,6 +3215,16 @@ static jint android_media_tv_Tuner_close_tuner(JNIEnv* env, jobject thiz) {
     return (jint) tuner->close();
 }
 
+static jint android_media_tv_Tuner_close_demux(JNIEnv* env, jobject thiz, jint /* handle */) {
+    sp<JTuner> tuner = getTuner(env, thiz);
+    return tuner->closeDemux();
+}
+
+static jint android_media_tv_Tuner_close_frontend(JNIEnv* env, jobject thiz, jint /* handle */) {
+    sp<JTuner> tuner = getTuner(env, thiz);
+    return tuner->closeFrontend();
+}
+
 static jint android_media_tv_Tuner_attach_filter(JNIEnv *env, jobject dvr, jobject filter) {
     sp<Dvr> dvrSp = getDvr(env, dvr);
     if (dvrSp == NULL) {
@@ -3526,7 +3552,9 @@ static const JNINativeMethod gTunerMethods[] = {
     { "nativeGetDemuxCapabilities", "()Landroid/media/tv/tuner/DemuxCapabilities;",
             (void *)android_media_tv_Tuner_get_demux_caps },
     { "nativeOpenDemuxByhandle", "(I)I", (void *)android_media_tv_Tuner_open_demux },
-    {"nativeClose", "()I", (void *)android_media_tv_Tuner_close_tuner },
+    { "nativeClose", "()I", (void *)android_media_tv_Tuner_close_tuner },
+    { "nativeCloseFrontend", "(I)I", (void *)android_media_tv_Tuner_close_frontend },
+    { "nativeCloseDemux", "(I)I", (void *)android_media_tv_Tuner_close_demux },
 };
 
 static const JNINativeMethod gFilterMethods[] = {

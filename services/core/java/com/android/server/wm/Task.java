@@ -1943,12 +1943,15 @@ class Task extends WindowContainer<WindowContainer> {
         final int prevWinMode = getWindowingMode();
         mTmpPrevBounds.set(getBounds());
         final boolean wasInMultiWindowMode = inMultiWindowMode();
+        final boolean wasInPictureInPicture = inPinnedWindowingMode();
         super.onConfigurationChanged(newParentConfig);
         // Only need to update surface size here since the super method will handle updating
         // surface position.
         updateSurfaceSize(getPendingTransaction());
 
-        if (wasInMultiWindowMode != inMultiWindowMode()) {
+        if (wasInPictureInPicture != inPinnedWindowingMode()) {
+            mStackSupervisor.scheduleUpdatePictureInPictureModeIfNeeded(this, getStack());
+        } else if (wasInMultiWindowMode != inMultiWindowMode()) {
             mStackSupervisor.scheduleUpdateMultiWindowMode(this);
         }
 
@@ -1992,7 +1995,8 @@ class Task extends WindowContainer<WindowContainer> {
         if (mWmService.mDisableTransitionAnimation
                 || !isVisible()
                 || getDisplayContent().mAppTransition.isTransitionSet()
-                || getSurfaceControl() == null) {
+                || getSurfaceControl() == null
+                || !isLeafTask()) {
             return false;
         }
         // Only do an animation into and out-of freeform mode for now. Other mode
@@ -2897,21 +2901,11 @@ class Task extends WindowContainer<WindowContainer> {
         if (!isRootTask) {
             adjustBoundsForDisplayChangeIfNeeded(dc);
         }
-        final DisplayContent prevDc = mDisplayContent;
         super.onDisplayChanged(dc);
         if (!isRootTask) {
             final int displayId = (dc != null) ? dc.getDisplayId() : INVALID_DISPLAY;
             mWmService.mAtmService.getTaskChangeNotificationController().notifyTaskDisplayChanged(
                     mTaskId, displayId);
-        }
-        if (prevDc != null && prevDc.mChangingContainers.remove(this)) {
-            // This gets called *after* this has been reparented to the new display.
-            // That reparenting resulted in this window changing modes (eg. FREEFORM -> FULLSCREEN),
-            // so this token is now "frozen" while waiting for the animation to start on prevDc
-            // (which will be cancelled since the window is no-longer a child). However, since this
-            // is no longer a child of prevDc, this won't be notified of the cancelled animation,
-            // so we need to cancel the change transition here.
-            mSurfaceFreezer.unfreeze(getPendingTransaction());
         }
     }
 
