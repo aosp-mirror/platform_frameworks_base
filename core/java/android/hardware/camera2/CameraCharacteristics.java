@@ -488,11 +488,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * The respective value of such request key can be obtained by calling
      * {@link CaptureRequest.Builder#getPhysicalCameraKey }. Capture requests that contain
      * individual physical device requests must be built via
-     * {@link android.hardware.camera2.CameraDevice#createCaptureRequest(int, Set)}.
-     * Such extended capture requests can be passed only to
-     * {@link CameraCaptureSession#capture } or {@link CameraCaptureSession#captureBurst } and
-     * not to {@link CameraCaptureSession#setRepeatingRequest } or
-     * {@link CameraCaptureSession#setRepeatingBurst }.</p>
+     * {@link android.hardware.camera2.CameraDevice#createCaptureRequest(int, Set)}.</p>
      *
      * <p>The list returned is not modifiable, so any attempts to modify it will throw
      * a {@code UnsupportedOperationException}.</p>
