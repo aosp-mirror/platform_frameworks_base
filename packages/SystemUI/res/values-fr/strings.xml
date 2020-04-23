@@ -87,11 +87,11 @@
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"Impossible d\'enregistrer la capture d\'écran, car l\'espace de stockage est limité"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Les captures d\'écran ne sont pas autorisées par l\'application ni par votre organisation"</string>
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"Fermer la capture d\'écran"</string>
-    <string name="screenshot_preview_description" msgid="669177537416980449">"Ouvrir la capture d\'écran"</string>
+    <string name="screenshot_preview_description" msgid="7606510140714080474">"Aperçu de la capture d\'écran"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Enregistreur d\'écran"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Notification en cours pour une session d\'enregistrement de l\'écran"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Démarrer l\'enregistrement ?"</string>
-    <string name="screenrecord_description" msgid="1123231719680353736">"Pendant l\'enregistrement, le système Android peut capturer des informations sensibles affichées à l\'écran ou lues depuis votre appareil. Ceci inclut les mots de passe, les informations de paiement, les photos, les messages et les contenus audio."</string>
+    <string name="screenrecord_description" msgid="1123231719680353736">"Pendant l\'enregistrement, le système Android peut capturer toute information sensible affichée à l\'écran ou lue sur votre appareil. Ceci inclut les mots de passe, les informations de paiement, les photos, les messages et les contenus audio."</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Enregistrer les contenus audio"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Appareil"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Sons provenant de l\'appareil, tels que la musique, les appels et les sonneries"</string>
@@ -100,7 +100,7 @@
     <string name="screenrecord_start" msgid="330991441575775004">"Démarrer"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"Enregistrement de l\'écran"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"Enregistrement de l\'écran et des contenus audio"</string>
-    <string name="screenrecord_taps_label" msgid="1595690528298857649">"Afficher les éléments touchés à l\'écran"</string>
+    <string name="screenrecord_taps_label" msgid="1595690528298857649">"Afficher les points de l\'écran touchés"</string>
     <string name="screenrecord_stop_text" msgid="6549288689506057686">"Appuyez ici pour arrêter"</string>
     <string name="screenrecord_stop_label" msgid="72699670052087989">"Arrêter"</string>
     <string name="screenrecord_pause_label" msgid="6004054907104549857">"Pause"</string>
@@ -508,7 +508,7 @@
     <string name="manage_notifications_text" msgid="6885645344647733116">"Gérer"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Historique"</string>
     <string name="notification_section_header_gentle" msgid="3044910806569985386">"Notifications silencieuses"</string>
-    <string name="notification_section_header_alerting" msgid="3168140660646863240">"Notifications sonores"</string>
+    <string name="notification_section_header_alerting" msgid="3168140660646863240">"Notifications d\'alerte"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Conversations"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Effacer toutes les notifications silencieuses"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Notifications suspendues par le mode Ne pas déranger"</string>
@@ -707,9 +707,9 @@
     <string name="notification_bubble_title" msgid="8330481035191903164">"Bulle"</string>
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"Sans sons ni vibrations, vous aide à vous concentrer."</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"Attire votre attention à l\'aide de sons ou de vibrations."</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="6298026344552480458">"Attire votre attention à l\'aide de sons ou de vibrations. Les conversations provenant de <xliff:g id="APP_NAME">%1$s</xliff:g> s\'affichent sous forme de bulles par défaut."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Attire votre attention à l\'aide d\'un raccourci flottant vers ce contenu."</string>
     <string name="notification_channel_summary_priority" msgid="7415770044553264622">"S\'affiche en haut de la section des conversations et apparaît sous forme de bulle."</string>
-    <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"Par défaut, toutes les conversations <xliff:g id="APP_NAME_0">%1$s</xliff:g> s\'affichent sous forme de bulles. Vous pouvez gérer cela dans <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Paramètres"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritaire"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Aucune bulle récente"</string>
@@ -978,7 +978,7 @@
     <string name="auto_saver_enabled_text" msgid="7889491183116752719">"L\'économiseur de batterie s\'active automatiquement lorsque l\'autonomie de la batterie est inférieure à <xliff:g id="PERCENTAGE">%d</xliff:g> %%."</string>
     <string name="open_saver_setting_action" msgid="2111461909782935190">"Paramètres"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"OK"</string>
-    <string name="heap_dump_tile_name" msgid="2464189856478823046">"Copier le tas SysUI"</string>
+    <string name="heap_dump_tile_name" msgid="2464189856478823046">"Copier mémoire SysUI"</string>
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"Capteurs désactivés"</string>
     <string name="device_services" msgid="1549944177856658705">"Services pour l\'appareil"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Sans titre"</string>
@@ -999,15 +999,22 @@
     <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Contrôler les paramètres des bulles"</string>
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Appuyez sur \"Gérer\" pour désactiver les bulles de cette application"</string>
     <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"OK"</string>
+    <!-- no translation found for bubbles_app_settings (5779443644062348657) -->
+    <skip />
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Navigation système mise à jour. Pour apporter des modifications, accédez aux paramètres."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Accédez aux paramètres pour mettre à jour la navigation système"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Mode Veille imminent"</string>
+    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"En haut de la liste des conversations"</string>
+    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Photo de profil sur l\'écran de verrouillage"</string>
+    <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Sous forme d\'info-bulle au-dessus des applications"</string>
+    <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Interrompre Ne pas déranger"</string>
+    <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"OK"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Fenêtre de superposition de l\'agrandissement"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Fenêtre d\'agrandissement"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Fenêtre des commandes d\'agrandissement"</string>
-    <string name="quick_controls_title" msgid="6839108006171302273">"Commandes de l\'appareil"</string>
+    <string name="quick_controls_title" msgid="6839108006171302273">"Commandes de contrôle des appareils"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Ajouter des commandes pour vos appareils connectés"</string>
-    <string name="quick_controls_setup_title" msgid="8901436655997849822">"Configurer les commandes de l\'appareil"</string>
+    <string name="quick_controls_setup_title" msgid="8901436655997849822">"Configurer les commandes de contrôle des appareils"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Appuyez de manière prolongée sur le bouton Marche/Arrêt pour accéder aux commandes"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Sélectionnez l\'appli pour laquelle ajouter des commandes"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
@@ -1016,13 +1023,11 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Commandes"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Sélectionnez les commandes auxquelles vous souhaitez accéder depuis le menu de démarrage"</string>
-    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
-    <skip />
-    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
-    <skip />
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Appuyer et faire glisser pour réorganiser les commandes"</string>
+    <string name="controls_favorite_removed" msgid="5276978408529217272">"Toutes les commandes ont été supprimées"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Impossible de charger toutes les commandes."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Autre"</string>
-    <string name="controls_dialog_title" msgid="2343565267424406202">"Ajouter aux commandes de l\'appareil"</string>
+    <string name="controls_dialog_title" msgid="2343565267424406202">"Ajouter aux commandes de contrôle des appareils"</string>
     <string name="controls_dialog_ok" msgid="7011816381344485651">"Ajouter aux favoris"</string>
     <string name="controls_dialog_message" msgid="6292099631702047540">"<xliff:g id="APP">%s</xliff:g> a suggéré d\'ajouter cette commande aux favoris."</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"Commandes mises à jour"</string>
