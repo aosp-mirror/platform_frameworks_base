@@ -2234,7 +2234,9 @@ public final class ActivityThread extends ClientTransactionHandler {
             LoadedApk packageInfo = ref != null ? ref.get() : null;
             if (ai != null && packageInfo != null) {
                 if (!isLoadedApkResourceDirsUpToDate(packageInfo, ai)) {
-                    packageInfo.updateApplicationInfo(ai, null);
+                    List<String> oldPaths = new ArrayList<>();
+                    LoadedApk.makePaths(this, ai, oldPaths);
+                    packageInfo.updateApplicationInfo(ai, oldPaths);
                 }
 
                 if (packageInfo.isSecurityViolation()
@@ -2322,7 +2324,9 @@ public final class ActivityThread extends ClientTransactionHandler {
 
             if (packageInfo != null) {
                 if (!isLoadedApkResourceDirsUpToDate(packageInfo, aInfo)) {
-                    packageInfo.updateApplicationInfo(aInfo, null);
+                    List<String> oldPaths = new ArrayList<>();
+                    LoadedApk.makePaths(this, aInfo, oldPaths);
+                    packageInfo.updateApplicationInfo(aInfo, oldPaths);
                 }
 
                 return packageInfo;
