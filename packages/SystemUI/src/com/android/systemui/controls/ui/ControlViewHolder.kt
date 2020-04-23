@@ -186,22 +186,36 @@ class ControlViewHolder(
         val fg = context.resources.getColorStateList(ri.foreground, context.theme)
         val bg = context.resources.getColor(R.color.control_default_background, context.theme)
         val dimAlpha = if (dimmed) dimmedAlpha else 1f
-        var (clip, newAlpha) = if (enabled) {
-            listOf(ri.enabledBackground, ALPHA_ENABLED)
+        var (newClipColor, newAlpha) = if (enabled) {
+            // allow color overrides for the enabled state only
+            val color = cws.control?.getCustomColor()?.let {
+                val state = intArrayOf(android.R.attr.state_enabled)
+                it.getColorForState(state, it.getDefaultColor())
+            } ?: context.resources.getColor(ri.enabledBackground, context.theme)
+            listOf(color, ALPHA_ENABLED)
         } else {
-            listOf(R.color.control_default_background, ALPHA_DISABLED)
+            listOf(
+                context.resources.getColor(R.color.control_default_background, context.theme),
+                ALPHA_DISABLED
+            )
         }
 
         status.setTextColor(fg)
-        icon.setImageDrawable(ri.icon)
 
-        // do not color app icons
-        if (deviceType != DeviceTypes.TYPE_ROUTINE) {
-            icon.imageTintList = fg
+        cws.control?.getCustomIcon()?.let {
+            // do not tint custom icons, assume the intended icon color is correct
+            icon.imageTintList = null
+            icon.setImageIcon(it)
+        } ?: run {
+            icon.setImageDrawable(ri.icon)
+
+            // do not color app icons
+            if (deviceType != DeviceTypes.TYPE_ROUTINE) {
+                icon.imageTintList = fg
+            }
         }
 
         (clipLayer.getDrawable() as GradientDrawable).apply {
-            val newClipColor = context.resources.getColor(clip, context.theme)
             val newBaseColor = if (behavior is ToggleRangeBehavior) {
                 ColorUtils.blendARGB(bg, newClipColor, toggleBackgroundIntensity)
             } else {
