@@ -27,7 +27,6 @@ import com.android.systemui.statusbar.notification.row.NotificationRowContentBin
  */
 public final class RowContentBindParams {
     private boolean mUseLowPriority;
-    private boolean mUseChildInGroup;
     private boolean mUseIncreasedHeight;
     private boolean mUseIncreasedHeadsUpHeight;
     private boolean mViewsNeedReinflation;
@@ -53,20 +52,6 @@ public final class RowContentBindParams {
 
     public boolean useLowPriority() {
         return mUseLowPriority;
-    }
-
-    /**
-     * Set whether content should use group child version of its content views.
-     */
-    public void setUseChildInGroup(boolean useChildInGroup) {
-        if (mUseChildInGroup != useChildInGroup) {
-            mDirtyContentViews |= (FLAG_CONTENT_VIEW_CONTRACTED | FLAG_CONTENT_VIEW_EXPANDED);
-        }
-        mUseChildInGroup = useChildInGroup;
-    }
-
-    public boolean useChildInGroup() {
-        return mUseChildInGroup;
     }
 
     /**
@@ -163,10 +148,10 @@ public final class RowContentBindParams {
     @Override
     public String toString() {
         return String.format("RowContentBindParams[mContentViews=%x mDirtyContentViews=%x "
-                + "mUseLowPriority=%b mUseChildInGroup=%b mUseIncreasedHeight=%b "
+                + "mUseLowPriority=%b mUseIncreasedHeight=%b "
                 + "mUseIncreasedHeadsUpHeight=%b mViewsNeedReinflation=%b]",
-                mContentViews, mDirtyContentViews, mUseLowPriority, mUseChildInGroup,
-                mUseIncreasedHeight, mUseIncreasedHeadsUpHeight, mViewsNeedReinflation);
+                mContentViews, mDirtyContentViews, mUseLowPriority, mUseIncreasedHeight,
+                mUseIncreasedHeadsUpHeight, mViewsNeedReinflation);
     }
 
     /**

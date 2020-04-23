@@ -64,6 +64,7 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
     private final ExpandableNotificationRowComponent.Builder
             mExpandableNotificationRowComponentBuilder;
     private final IconManager mIconManager;
+    private final LowPriorityInflationHelper mLowPriorityInflationHelper;
 
     private NotificationPresenter mPresenter;
     private NotificationListContainer mListContainer;
@@ -81,7 +82,8 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
             NotificationInterruptStateProvider notificationInterruptionStateProvider,
             Provider<RowInflaterTask> rowInflaterTaskProvider,
             ExpandableNotificationRowComponent.Builder expandableNotificationRowComponentBuilder,
-            IconManager iconManager) {
+            IconManager iconManager,
+            LowPriorityInflationHelper lowPriorityInflationHelper) {
         mContext = context;
         mNotifBindPipeline = notifBindPipeline;
         mRowContentBindStage = rowContentBindStage;
@@ -92,6 +94,7 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
         mRowInflaterTaskProvider = rowInflaterTaskProvider;
         mExpandableNotificationRowComponentBuilder = expandableNotificationRowComponentBuilder;
         mIconManager = iconManager;
+        mLowPriorityInflationHelper = lowPriorityInflationHelper;
     }
 
     /**
@@ -225,11 +228,15 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
             @Nullable NotificationRowContentBinder.InflationCallback inflationCallback) {
         final boolean useIncreasedCollapsedHeight =
                 mMessagingUtil.isImportantMessaging(entry.getSbn(), entry.getImportance());
-        final boolean isLowPriority = entry.isAmbient();
+        // If this is our first time inflating, we don't actually know the groupings for real
+        // yet, so we might actually inflate a low priority content view incorrectly here and have
+        // to correct it later in the pipeline. On subsequent inflations (i.e. updates), this
+        // should inflate the correct view.
+        final boolean isLowPriority = mLowPriorityInflationHelper.shouldUseLowPriorityView(entry);
 
         RowContentBindParams params = mRowContentBindStage.getStageParams(entry);
         params.setUseIncreasedCollapsedHeight(useIncreasedCollapsedHeight);
-        params.setUseLowPriority(entry.isAmbient());
+        params.setUseLowPriority(isLowPriority);
 
         // TODO: Replace this API with RowContentBindParams directly. Also move to a separate
         // redaction controller.
