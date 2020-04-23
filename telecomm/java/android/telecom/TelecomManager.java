@@ -2218,15 +2218,23 @@ public class TelecomManager {
     @NonNull
     public Intent createLaunchEmergencyDialerIntent(@Nullable String number) {
         ITelecomService service = getTelecomService();
-        Intent result = null;
         if (service != null) {
             try {
-                result = service.createLaunchEmergencyDialerIntent(number);
+                return service.createLaunchEmergencyDialerIntent(number);
             } catch (RemoteException e) {
                 Log.e(TAG, "Error createLaunchEmergencyDialerIntent", e);
             }
+        } else {
+            Log.w(TAG, "createLaunchEmergencyDialerIntent - Telecom service not available.");
         }
-        return result;
+
+        // Telecom service knows the package name of the expected emergency dialer package; if it
+        // is not available, then fallback to not targeting a specific package.
+        Intent intent = new Intent(Intent.ACTION_DIAL_EMERGENCY);
+        if (!TextUtils.isEmpty(number) && TextUtils.isDigitsOnly(number)) {
+            intent.setData(Uri.fromParts(PhoneAccount.SCHEME_TEL, number, null));
+        }
+        return intent;
     }
 
     /**
