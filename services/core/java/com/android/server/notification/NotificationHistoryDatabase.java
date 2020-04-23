@@ -108,7 +108,9 @@ public class NotificationHistoryDatabase {
     public void init() {
         synchronized (mLock) {
             try {
-                mHistoryDir.mkdir();
+                if (!mHistoryDir.mkdir()) {
+                    throw new IllegalStateException("could not create history directory");
+                }
                 mVersionFile.createNewFile();
             } catch (Exception e) {
                 Slog.e(TAG, "could not create needed files", e);
