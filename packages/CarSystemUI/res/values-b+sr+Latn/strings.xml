@@ -20,4 +20,10 @@
     <string name="hvac_min_text" msgid="8167124789068494624">"Min."</string>
     <string name="hvac_max_text" msgid="3669693372074755551">"Maks."</string>
     <string name="voice_recognition_toast" msgid="1149934534584052842">"Prepoznavanjem glasa sada upravlja povezani Bluetooth uređaj"</string>
+    <string name="car_guest" msgid="318393171202663722">"Gost"</string>
+    <string name="start_guest_session" msgid="497784785761754874">"Gost"</string>
+    <string name="car_add_user" msgid="4067337059622483269">"Dodaj korisnika"</string>
+    <string name="car_new_user" msgid="6637442369728092473">"Novi korisnik"</string>
+    <string name="user_add_user_message_setup" msgid="1035578846007352323">"Kada dodate novog korisnika, ta osoba treba da podesi svoj prostor."</string>
+    <string name="user_add_user_message_update" msgid="7061671307004867811">"Svaki korisnik može da ažurira aplikacije za sve ostale korisnike."</string>
 </resources>
