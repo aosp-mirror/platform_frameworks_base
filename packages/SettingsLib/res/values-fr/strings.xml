@@ -143,7 +143,7 @@
     <string name="data_usage_uninstalled_apps" msgid="1933665711856171491">"Applications supprimées"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="5533981546921913295">"Applications et utilisateurs supprimés"</string>
     <string name="data_usage_ota" msgid="7984667793701597001">"Mises à jour du système"</string>
-    <string name="tether_settings_title_usb" msgid="3728686573430917722">"Partage connexion Bluetooth par USB"</string>
+    <string name="tether_settings_title_usb" msgid="3728686573430917722">"Partage de connexion via USB"</string>
     <string name="tether_settings_title_wifi" msgid="4803402057533895526">"Point d\'accès Wi-Fi mobile"</string>
     <string name="tether_settings_title_bluetooth" msgid="916519902721399656">"Partage connexion Bluetooth"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="1727111807207577322">"Partage de connexion"</string>
@@ -436,10 +436,14 @@
     <string name="power_discharge_by_only" msgid="92545648425937000">"Devrait durer jusqu\'à environ <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"Jusqu\'à <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"La batterie risque d\'être épuisée à <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"Il reste moins de <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
-    <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"Il reste moins de <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"Il reste plus de <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_only_more_than_subtext" msgid="3274496164769110480">"Il reste plus de <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
+    <!-- no translation found for power_remaining_less_than_duration_only (8956656616031395152) -->
+    <skip />
+    <!-- no translation found for power_remaining_less_than_duration (318215464914990578) -->
+    <skip />
+    <!-- no translation found for power_remaining_more_than_subtext (446388082266121894) -->
+    <skip />
+    <!-- no translation found for power_remaining_only_more_than_subtext (4873750633368888062) -->
+    <skip />
     <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"Le téléphone va bientôt s\'éteindre"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"La tablette va bientôt s\'éteindre"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"L\'appareil va bientôt s\'éteindre"</string>
