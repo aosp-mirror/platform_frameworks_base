@@ -35,7 +35,6 @@ import android.util.Log;
 import com.android.internal.annotations.GuardedBy;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -379,11 +378,7 @@ public final class MediaRouter2 {
      */
     public void transferTo(@NonNull MediaRoute2Info route) {
         Objects.requireNonNull(route, "route must not be null");
-
-        List<RoutingController> controllers = getControllers();
-        RoutingController controller = controllers.get(controllers.size() - 1);
-
-        transfer(controller, route);
+        transfer(getCurrentController(), route);
     }
 
     /**
@@ -391,10 +386,7 @@ public final class MediaRouter2 {
      * controls the media routing, this method is a no-op.
      */
     public void stop() {
-        List<RoutingController> controllers = getControllers();
-        RoutingController controller = controllers.get(controllers.size() - 1);
-
-        controller.release();
+        getCurrentController().release();
     }
 
     /**
@@ -417,12 +409,9 @@ public final class MediaRouter2 {
             return;
         }
 
-        controller.release();
-
         final int requestId = mControllerCreationRequestCnt.getAndIncrement();
 
-        ControllerCreationRequest request =
-                new ControllerCreationRequest(requestId, controller, route);
+        ControllerCreationRequest request = new ControllerCreationRequest(requestId, route);
         mControllerCreationRequests.add(request);
 
         OnGetControllerHintsListener listener = mOnGetControllerHintsListener;
@@ -450,6 +439,12 @@ public final class MediaRouter2 {
         }
     }
 
+    @NonNull
+    private RoutingController getCurrentController() {
+        List<RoutingController> controllers = getControllers();
+        return controllers.get(controllers.size() - 1);
+    }
+
     /**
      * Gets a {@link RoutingController} which can control the routes provided by system.
      * e.g. Phone speaker, wired headset, Bluetooth, etc.
@@ -474,13 +469,8 @@ public final class MediaRouter2 {
     public List<RoutingController> getControllers() {
         List<RoutingController> result = new ArrayList<>();
         result.add(0, mSystemController);
-
-        Collection<RoutingController> controllers;
         synchronized (sRouterLock) {
-            controllers = mRoutingControllers.values();
-            if (controllers != null) {
-                result.addAll(controllers);
-            }
+            result.addAll(mRoutingControllers.values());
         }
         return result;
     }
@@ -608,19 +598,33 @@ public final class MediaRouter2 {
             }
         }
 
-        if (sessionInfo != null) {
-            RoutingController newController;
-            if (sessionInfo.isSystemSession()) {
-                newController = getSystemController();
-            } else {
-                newController = new RoutingController(sessionInfo);
-                synchronized (sRouterLock) {
-                    mRoutingControllers.put(newController.getId(), newController);
-                }
+        if (sessionInfo == null) {
+            return;
+        }
+
+        RoutingController oldController = getCurrentController();
+        if (!oldController.releaseInternal(
+                /* shouldReleaseSession= */ true, /* shouldNotifyStop= */ false)) {
+            // Could not release the controller since it was just released by other thread.
+            oldController = getSystemController();
+        }
+
+        RoutingController newController;
+        if (sessionInfo.isSystemSession()) {
+            newController = getSystemController();
+            newController.setRoutingSessionInfo(sessionInfo);
+        } else {
+            newController = new RoutingController(sessionInfo);
+            synchronized (sRouterLock) {
+                mRoutingControllers.put(newController.getId(), newController);
             }
-            //TODO: Determine oldController properly when transfer is launched by Output Switcher.
-            notifyTransfer(matchingRequest != null ? matchingRequest.mController :
-                    getSystemController(), newController);
+        }
+
+        // Two controller can be same if stop() is called before the result of Cast -> Phone comes.
+        if (oldController != newController) {
+            notifyTransfer(oldController, newController);
+        } else if (matchingRequest != null) {
+            notifyTransferFailure(matchingRequest.mRoute);
         }
     }
 
@@ -687,7 +691,8 @@ public final class MediaRouter2 {
             return;
         }
 
-        matchingController.releaseInternal(/* shouldReleaseSession= */ false);
+        matchingController.releaseInternal(
+                /* shouldReleaseSession= */ false, /* shouldNotifyStop= */ true);
     }
 
     void onGetControllerHintsForCreatingSessionOnHandler(long uniqueRequestId,
@@ -814,8 +819,9 @@ public final class MediaRouter2 {
     public abstract static class TransferCallback {
         /**
          * Called when a media is transferred between two different routing controllers.
-         * This can happen by calling {@link #transferTo(MediaRoute2Info)} or
-         * {@link RoutingController#release()}.
+         * This can happen by calling {@link #transferTo(MediaRoute2Info)}.
+         * The {@code oldController} is released before this method is called, except for the
+         * {@link #getSystemController() system controller}.
          *
          * @param oldController the previous controller that controlled routing
          * @param newController the new controller to control routing
@@ -833,6 +839,9 @@ public final class MediaRouter2 {
 
         /**
          * Called when a media routing stops. It can be stopped by a user or a provider.
+         * App should not continue playing media locally when this method is called.
+         * The {@code oldController} is released before this method is called, except for the
+         * {@link #getSystemController() system controller}.
          *
          * @param controller the controller that controlled the stopped media routing.
          */
@@ -1206,14 +1215,18 @@ public final class MediaRouter2 {
          */
         // TODO: Add tests using {@link MediaRouter2Manager#getActiveSessions()}.
         public void release() {
-            releaseInternal(/* shouldReleaseSession= */ true);
+            releaseInternal(/* shouldReleaseSession= */ true, /* shouldNotifyStop= */ true);
         }
 
-        void releaseInternal(boolean shouldReleaseSession) {
+        /**
+         * Returns {@code true} when succeeded to release, {@code false} if the controller is
+         * already released.
+         */
+        boolean releaseInternal(boolean shouldReleaseSession, boolean shouldNotifyStop) {
             synchronized (mControllerLock) {
                 if (mIsReleased) {
                     Log.w(TAG, "releaseInternal() called on released controller. Ignoring.");
-                    return;
+                    return false;
                 }
                 mIsReleased = true;
             }
@@ -1232,12 +1245,11 @@ public final class MediaRouter2 {
                 }
             }
 
-            if (Thread.currentThread() == mHandler.getLooper().getThread()) {
-                notifyStop(this);
-            } else {
+            if (shouldNotifyStop) {
                 mHandler.sendMessage(obtainMessage(MediaRouter2::notifyStop, MediaRouter2.this,
                         RoutingController.this));
             }
+            return true;
         }
 
         @Override
@@ -1294,13 +1306,14 @@ public final class MediaRouter2 {
         }
 
         @Override
-        public void release() {
-            // Do nothing. SystemRoutingController will never be released
+        public boolean isReleased() {
+            // SystemRoutingController will never be released
+            return false;
         }
 
         @Override
-        public boolean isReleased() {
-            // SystemRoutingController will never be released
+        boolean releaseInternal(boolean shouldReleaseSession, boolean shouldNotifyStop) {
+            // Do nothing. SystemRoutingController will never be released
             return false;
         }
     }
@@ -1391,13 +1404,10 @@ public final class MediaRouter2 {
 
     static final class ControllerCreationRequest {
         public final int mRequestId;
-        public final RoutingController mController;
         public final MediaRoute2Info mRoute;
 
-        ControllerCreationRequest(int requestId, @NonNull RoutingController controller,
-                @NonNull MediaRoute2Info route) {
+        ControllerCreationRequest(int requestId, @NonNull MediaRoute2Info route) {
             mRequestId = requestId;
-            mController = controller;
             mRoute = route;
         }
     }
