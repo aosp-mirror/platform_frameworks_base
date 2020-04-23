@@ -26,6 +26,7 @@ import android.content.Context;
 import android.content.pm.UserInfo;
 import android.database.ContentObserver;
 import android.net.Uri;
+import android.os.Binder;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.UserHandle;
@@ -37,6 +38,7 @@ import android.util.SparseBooleanArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.FunctionalUtils;
 import com.android.server.IoThread;
 
 import java.io.File;
@@ -198,16 +200,18 @@ public class NotificationHistoryManager {
     }
 
     public void addNotification(@NonNull final HistoricalNotification notification) {
-        synchronized (mLock) {
-            final NotificationHistoryDatabase userHistory =
-                    getUserHistoryAndInitializeIfNeededLocked(notification.getUserId());
-            if (userHistory == null) {
-                Slog.w(TAG, "Attempted to add notif for locked/gone/disabled user "
-                        + notification.getUserId());
-                return;
+        Binder.withCleanCallingIdentity(() -> {
+            synchronized (mLock) {
+                final NotificationHistoryDatabase userHistory =
+                        getUserHistoryAndInitializeIfNeededLocked(notification.getUserId());
+                if (userHistory == null) {
+                    Slog.w(TAG, "Attempted to add notif for locked/gone/disabled user "
+                            + notification.getUserId());
+                    return;
+                }
+                userHistory.addNotification(notification);
             }
-            userHistory.addNotification(notification);
-        }
+        });
     }
 
     public @NonNull NotificationHistory readNotificationHistory(@UserIdInt int[] userIds) {
