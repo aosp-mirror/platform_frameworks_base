@@ -1877,8 +1877,10 @@ class UserController implements Handler.Callback {
                     builder.append("; this requires ");
                     builder.append(INTERACT_ACROSS_USERS_FULL);
                     if (allowMode != ALLOW_FULL_ONLY) {
-                        builder.append(" or ");
-                        builder.append(INTERACT_ACROSS_USERS);
+                        if (allowMode == ALLOW_NON_FULL || isSameProfileGroup) {
+                            builder.append(" or ");
+                            builder.append(INTERACT_ACROSS_USERS);
+                        }
                         if (isSameProfileGroup
                                 && allowMode == ALLOW_ALL_PROFILE_PERMISSIONS_IN_PROFILE) {
                             builder.append(" or ");
