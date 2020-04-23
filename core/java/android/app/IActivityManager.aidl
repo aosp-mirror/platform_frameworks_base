@@ -345,6 +345,8 @@ interface IActivityManager {
     boolean isIntentSenderTargetedToPackage(in IIntentSender sender);
     @UnsupportedAppUsage
     void updatePersistentConfiguration(in Configuration values);
+    void updatePersistentConfigurationWithAttribution(in Configuration values,
+            String callingPackageName, String callingAttributionTag);
     @UnsupportedAppUsage
     long[] getProcessPss(in int[] pids);
     void showBootMessage(in CharSequence msg, boolean always);

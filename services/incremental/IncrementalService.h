@@ -16,13 +16,13 @@
 
 #pragma once
 
-#include <android-base/strings.h>
-#include <android-base/unique_fd.h>
+#include <android/content/pm/BnDataLoaderStatusListener.h>
 #include <android/content/pm/DataLoaderParamsParcel.h>
-#include <binder/IServiceManager.h>
+#include <android/content/pm/IDataLoaderStatusListener.h>
+#include <android/os/incremental/BnIncrementalServiceConnector.h>
+#include <binder/IAppOpsCallback.h>
 #include <utils/String16.h>
 #include <utils/StrongPointer.h>
-#include <utils/Vector.h>
 #include <ziparchive/zip_archive.h>
 
 #include <atomic>
@@ -37,20 +37,13 @@
 #include <string_view>
 #include <thread>
 #include <unordered_map>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
 #include "ServiceWrappers.h"
-#include "android/content/pm/BnDataLoaderStatusListener.h"
-#include "android/os/incremental/BnIncrementalServiceConnector.h"
 #include "incfs.h"
 #include "path.h"
-
-using namespace android::os::incremental;
-
-namespace android::os {
-class IVold;
-}
 
 namespace android::incremental {
 
@@ -101,16 +94,13 @@ public:
 
     void onSystemReady();
 
-    StorageId createStorage(std::string_view mountPoint, DataLoaderParamsParcel&& dataLoaderParams,
+    StorageId createStorage(std::string_view mountPoint,
+                            content::pm::DataLoaderParamsParcel&& dataLoaderParams,
                             const DataLoaderStatusListener& dataLoaderStatusListener,
                             CreateOptions options = CreateOptions::Default);
     StorageId createLinkedStorage(std::string_view mountPoint, StorageId linkedStorage,
                                   CreateOptions options = CreateOptions::Default);
     StorageId openStorage(std::string_view path);
-
-    FileId nodeFor(StorageId storage, std::string_view path) const;
-    std::pair<FileId, std::string_view> parentAndNameFor(StorageId storage,
-                                                         std::string_view path) const;
 
     int bind(StorageId storage, std::string_view source, std::string_view target, BindKind kind);
     int unbind(StorageId storage, std::string_view target);
@@ -131,9 +121,9 @@ public:
         return false;
     }
 
+    RawMetadata getMetadata(StorageId storage, std::string_view path) const;
     RawMetadata getMetadata(StorageId storage, FileId node) const;
 
-    std::vector<std::string> listFiles(StorageId storage) const;
     bool startLoading(StorageId storage) const;
 
     bool configureNativeBinaries(StorageId storage, std::string_view apkFullPath,
@@ -151,7 +141,7 @@ public:
         const std::string packageName;
     };
 
-    class IncrementalServiceConnector : public BnIncrementalServiceConnector {
+    class IncrementalServiceConnector : public os::incremental::BnIncrementalServiceConnector {
     public:
         IncrementalServiceConnector(IncrementalService& incrementalService, int32_t storage)
               : incrementalService(incrementalService), storage(storage) {}
@@ -163,14 +153,13 @@ public:
     };
 
 private:
-    static const bool sEnablePerfLogging;
-
     struct IncFsMount;
 
-    class DataLoaderStub : public android::content::pm::BnDataLoaderStatusListener {
+    class DataLoaderStub : public content::pm::BnDataLoaderStatusListener {
     public:
-        DataLoaderStub(IncrementalService& service, MountId id, DataLoaderParamsParcel&& params,
-                       FileSystemControlParcel&& control,
+        DataLoaderStub(IncrementalService& service, MountId id,
+                       content::pm::DataLoaderParamsParcel&& params,
+                       content::pm::FileSystemControlParcel&& control,
                        const DataLoaderStatusListener* externalListener);
         ~DataLoaderStub();
         // Cleans up the internal state and invalidates DataLoaderStub. Any subsequent calls will
@@ -184,7 +173,7 @@ private:
         void onDump(int fd);
 
         MountId id() const { return mId; }
-        const DataLoaderParamsParcel& params() const { return mParams; }
+        const content::pm::DataLoaderParamsParcel& params() const { return mParams; }
 
     private:
         binder::Status onStatusChanged(MountId mount, int newStatus) final;
@@ -202,14 +191,14 @@ private:
 
         IncrementalService& mService;
         MountId mId = kInvalidStorageId;
-        DataLoaderParamsParcel mParams;
-        FileSystemControlParcel mControl;
+        content::pm::DataLoaderParamsParcel mParams;
+        content::pm::FileSystemControlParcel mControl;
         DataLoaderStatusListener mListener;
 
         std::mutex mStatusMutex;
         std::condition_variable mStatusCondition;
-        int mCurrentStatus = IDataLoaderStatusListener::DATA_LOADER_DESTROYED;
-        int mTargetStatus = IDataLoaderStatusListener::DATA_LOADER_DESTROYED;
+        int mCurrentStatus = content::pm::IDataLoaderStatusListener::DATA_LOADER_DESTROYED;
+        int mTargetStatus = content::pm::IDataLoaderStatusListener::DATA_LOADER_DESTROYED;
         TimePoint mTargetStatusTs = {};
     };
     using DataLoaderStubPtr = sp<DataLoaderStub>;
@@ -228,7 +217,7 @@ private:
 
         using Control = incfs::UniqueControl;
 
-        using BindMap = std::map<std::string, Bind>;
+        using BindMap = std::map<std::string, Bind, path::PathLess>;
         using StorageMap = std::unordered_map<StorageId, Storage>;
 
         mutable std::mutex lock;
@@ -260,7 +249,10 @@ private:
     using MountMap = std::unordered_map<MountId, IfsMountPtr>;
     using BindPathMap = std::map<std::string, IncFsMount::BindMap::iterator, path::PathLess>;
 
-    void mountExistingImages();
+    static bool perfLoggingEnabled();
+
+    std::unordered_set<std::string_view> adoptMountedInstances();
+    void mountExistingImages(const std::unordered_set<std::string_view>& mountedRootNames);
     bool mountExistingImage(std::string_view root);
 
     IfsMountPtr getIfs(StorageId storage) const;
@@ -273,8 +265,14 @@ private:
                            std::string&& source, std::string&& target, BindKind kind,
                            std::unique_lock<std::mutex>& mainLock);
 
-    DataLoaderStubPtr prepareDataLoader(IncFsMount& ifs, DataLoaderParamsParcel&& params,
+    void addBindMountRecordLocked(IncFsMount& ifs, StorageId storage, std::string&& metadataName,
+                                  std::string&& source, std::string&& target, BindKind kind);
+
+    DataLoaderStubPtr prepareDataLoader(IncFsMount& ifs,
+                                        content::pm::DataLoaderParamsParcel&& params,
                                         const DataLoaderStatusListener* externalListener = nullptr);
+    void prepareDataLoaderLocked(IncFsMount& ifs, content::pm::DataLoaderParamsParcel&& params,
+                                 const DataLoaderStatusListener* externalListener = nullptr);
 
     BindPathMap::const_iterator findStorageLocked(std::string_view path) const;
     StorageId findStorageId(std::string_view path) const;
@@ -282,11 +280,12 @@ private:
     void deleteStorage(IncFsMount& ifs);
     void deleteStorageLocked(IncFsMount& ifs, std::unique_lock<std::mutex>&& ifsLock);
     MountMap::iterator getStorageSlotLocked();
-    std::string normalizePathToStorage(const IfsMountPtr& incfs, StorageId storage,
-                                       std::string_view path);
-    std::string normalizePathToStorageLocked(IncFsMount::StorageMap::iterator storageIt,
-                                             std::string_view path);
-
+    std::string normalizePathToStorage(const IncFsMount& incfs, StorageId storage,
+                                       std::string_view path) const;
+    std::string normalizePathToStorageLocked(const IncFsMount& incfs,
+                                             IncFsMount::StorageMap::const_iterator storageIt,
+                                             std::string_view path) const;
+    int makeDirs(const IncFsMount& ifs, StorageId storageId, std::string_view path, int mode);
     binder::Status applyStorageParams(IncFsMount& ifs, bool enableReadLogs);
 
     void registerAppOpsCallback(const std::string& packageName);

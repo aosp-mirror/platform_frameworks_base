@@ -273,7 +273,28 @@ static void android_os_Parcel_writeDouble(JNIEnv* env, jclass clazz, jlong nativ
     }
 }
 
-static void android_os_Parcel_writeString(JNIEnv* env, jclass clazz, jlong nativePtr, jstring val)
+static void android_os_Parcel_writeString8(JNIEnv* env, jclass clazz, jlong nativePtr, jstring val)
+{
+    Parcel* parcel = reinterpret_cast<Parcel*>(nativePtr);
+    if (parcel != NULL) {
+        status_t err = NO_MEMORY;
+        if (val) {
+            const size_t len = env->GetStringUTFLength(val);
+            const char* str = env->GetStringUTFChars(val, 0);
+            if (str) {
+                err = parcel->writeString8(str, len);
+                env->ReleaseStringUTFChars(val, str);
+            }
+        } else {
+            err = parcel->writeString8(NULL, 0);
+        }
+        if (err != NO_ERROR) {
+            signalExceptionForError(env, clazz, err);
+        }
+    }
+}
+
+static void android_os_Parcel_writeString16(JNIEnv* env, jclass clazz, jlong nativePtr, jstring val)
 {
     Parcel* parcel = reinterpret_cast<Parcel*>(nativePtr);
     if (parcel != NULL) {
@@ -444,7 +465,21 @@ static jdouble android_os_Parcel_readDouble(jlong nativePtr)
     return 0;
 }
 
-static jstring android_os_Parcel_readString(JNIEnv* env, jclass clazz, jlong nativePtr)
+static jstring android_os_Parcel_readString8(JNIEnv* env, jclass clazz, jlong nativePtr)
+{
+    Parcel* parcel = reinterpret_cast<Parcel*>(nativePtr);
+    if (parcel != NULL) {
+        size_t len;
+        const char* str = parcel->readString8Inplace(&len);
+        if (str) {
+            return env->NewStringUTF(str);
+        }
+        return NULL;
+    }
+    return NULL;
+}
+
+static jstring android_os_Parcel_readString16(JNIEnv* env, jclass clazz, jlong nativePtr)
 {
     Parcel* parcel = reinterpret_cast<Parcel*>(nativePtr);
     if (parcel != NULL) {
@@ -722,7 +757,9 @@ static const JNINativeMethod gParcelMethods[] = {
     // @FastNative
     {"nativeWriteDouble",         "(JD)V", (void*)android_os_Parcel_writeDouble},
     // @FastNative
-    {"nativeWriteString",         "(JLjava/lang/String;)V", (void*)android_os_Parcel_writeString},
+    {"nativeWriteString8",        "(JLjava/lang/String;)V", (void*)android_os_Parcel_writeString8},
+    // @FastNative
+    {"nativeWriteString16",       "(JLjava/lang/String;)V", (void*)android_os_Parcel_writeString16},
     // @FastNative
     {"nativeWriteStrongBinder",   "(JLandroid/os/IBinder;)V", (void*)android_os_Parcel_writeStrongBinder},
     // @FastNative
@@ -740,7 +777,9 @@ static const JNINativeMethod gParcelMethods[] = {
     // @CriticalNative
     {"nativeReadDouble",          "(J)D", (void*)android_os_Parcel_readDouble},
     // @FastNative
-    {"nativeReadString",          "(J)Ljava/lang/String;", (void*)android_os_Parcel_readString},
+    {"nativeReadString8",         "(J)Ljava/lang/String;", (void*)android_os_Parcel_readString8},
+    // @FastNative
+    {"nativeReadString16",        "(J)Ljava/lang/String;", (void*)android_os_Parcel_readString16},
     // @FastNative
     {"nativeReadStrongBinder",    "(J)Landroid/os/IBinder;", (void*)android_os_Parcel_readStrongBinder},
     // @FastNative

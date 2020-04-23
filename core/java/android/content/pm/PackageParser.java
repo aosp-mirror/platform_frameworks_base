@@ -6873,9 +6873,9 @@ public class PackageParser {
 
         /** @hide */
         public boolean canHaveOatDir() {
-            // The following app types CANNOT have oat directory
-            // - non-updated system apps
-            return !isSystem() || isUpdatedSystemApp();
+            // Nobody should be calling this method ever, but we can't rely on this.
+            // Thus no logic here and a reasonable return value.
+            return true;
         }
 
         public boolean isMatch(int flags) {

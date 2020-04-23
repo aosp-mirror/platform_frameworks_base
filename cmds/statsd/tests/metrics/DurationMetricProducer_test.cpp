@@ -41,10 +41,10 @@ namespace android {
 namespace os {
 namespace statsd {
 
-const ConfigKey kConfigKey(0, 12345);
 
 namespace {
 
+const ConfigKey kConfigKey(0, 12345);
 void makeLogEvent(LogEvent* logEvent, int64_t timestampNs, int atomId) {
     AStatsEvent* statsEvent = AStatsEvent_obtain();
     AStatsEvent_setAtomId(statsEvent, atomId);
@@ -54,6 +54,13 @@ void makeLogEvent(LogEvent* logEvent, int64_t timestampNs, int atomId) {
 }
 
 }  // namespace
+
+// Setup for parameterized tests.
+class DurationMetricProducerTest_PartialBucket : public TestWithParam<BucketSplitEvent> {};
+
+INSTANTIATE_TEST_SUITE_P(DurationMetricProducerTest_PartialBucket,
+                         DurationMetricProducerTest_PartialBucket,
+                         testing::Values(APP_UPGRADE, BOOT_COMPLETE));
 
 TEST(DurationMetricTrackerTest, TestFirstBucket) {
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
@@ -205,7 +212,7 @@ TEST(DurationMetricTrackerTest, TestNonSlicedConditionUnknownState) {
     EXPECT_EQ(1LL, buckets2[0].mDuration);
 }
 
-TEST(DurationMetricTrackerTest, TestSumDurationWithUpgrade) {
+TEST_P(DurationMetricProducerTest_PartialBucket, TestSumDuration) {
     /**
      * The duration starts from the first bucket, through the two partial buckets (10-70sec),
      * another bucket, and ends at the beginning of the next full bucket.
@@ -217,15 +224,7 @@ TEST(DurationMetricTrackerTest, TestSumDurationWithUpgrade) {
      */
     int64_t bucketStartTimeNs = 10000000000;
     int64_t bucketSizeNs = TimeUnitToBucketSizeInMillis(ONE_MINUTE) * 1000000LL;
-    int64_t eventUpgradeTimeNs = bucketStartTimeNs + 15 * NS_PER_SEC;
-    int64_t startTimeNs = bucketStartTimeNs + 1 * NS_PER_SEC;
-    int64_t endTimeNs = startTimeNs + 125 * NS_PER_SEC;
-
     int tagId = 1;
-    LogEvent event1(/*uid=*/0, /*pid=*/0);
-    makeLogEvent(&event1, startTimeNs, tagId);
-    LogEvent event2(/*uid=*/0, /*pid=*/0);
-    makeLogEvent(&event2, endTimeNs, tagId);
 
     DurationMetric metric;
     metric.set_id(1);
@@ -238,32 +237,47 @@ TEST(DurationMetricTrackerTest, TestSumDurationWithUpgrade) {
                                             3 /* stop_all index */, false /*nesting*/, wizard,
                                             dimensions, bucketStartTimeNs, bucketStartTimeNs);
 
+    int64_t startTimeNs = bucketStartTimeNs + 1 * NS_PER_SEC;
+    LogEvent event1(/*uid=*/0, /*pid=*/0);
+    makeLogEvent(&event1, startTimeNs, tagId);
     durationProducer.onMatchedLogEvent(1 /* start index*/, event1);
     EXPECT_EQ(0UL, durationProducer.mPastBuckets.size());
     EXPECT_EQ(bucketStartTimeNs, durationProducer.mCurrentBucketStartTimeNs);
 
-    durationProducer.notifyAppUpgrade(eventUpgradeTimeNs, "ANY.APP", 1, 1);
+    int64_t partialBucketSplitTimeNs = bucketStartTimeNs + 15 * NS_PER_SEC;
+    switch (GetParam()) {
+        case APP_UPGRADE:
+            durationProducer.notifyAppUpgrade(partialBucketSplitTimeNs);
+            break;
+        case BOOT_COMPLETE:
+            durationProducer.onStatsdInitCompleted(partialBucketSplitTimeNs);
+            break;
+    }
     EXPECT_EQ(1UL, durationProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY].size());
     std::vector<DurationBucket> buckets =
             durationProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY];
     EXPECT_EQ(bucketStartTimeNs, buckets[0].mBucketStartNs);
-    EXPECT_EQ(eventUpgradeTimeNs, buckets[0].mBucketEndNs);
-    EXPECT_EQ(eventUpgradeTimeNs - startTimeNs, buckets[0].mDuration);
-    EXPECT_EQ(eventUpgradeTimeNs, durationProducer.mCurrentBucketStartTimeNs);
+    EXPECT_EQ(partialBucketSplitTimeNs, buckets[0].mBucketEndNs);
+    EXPECT_EQ(partialBucketSplitTimeNs - startTimeNs, buckets[0].mDuration);
+    EXPECT_EQ(partialBucketSplitTimeNs, durationProducer.mCurrentBucketStartTimeNs);
+    EXPECT_EQ(0, durationProducer.getCurrentBucketNum());
 
     // We skip ahead one bucket, so we fill in the first two partial buckets and one full bucket.
+    int64_t endTimeNs = startTimeNs + 125 * NS_PER_SEC;
+    LogEvent event2(/*uid=*/0, /*pid=*/0);
+    makeLogEvent(&event2, endTimeNs, tagId);
     durationProducer.onMatchedLogEvent(2 /* stop index*/, event2);
     buckets = durationProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY];
     EXPECT_EQ(3UL, buckets.size());
-    EXPECT_EQ(eventUpgradeTimeNs, buckets[1].mBucketStartNs);
+    EXPECT_EQ(partialBucketSplitTimeNs, buckets[1].mBucketStartNs);
     EXPECT_EQ(bucketStartTimeNs + bucketSizeNs, buckets[1].mBucketEndNs);
-    EXPECT_EQ(bucketStartTimeNs + bucketSizeNs - eventUpgradeTimeNs, buckets[1].mDuration);
+    EXPECT_EQ(bucketStartTimeNs + bucketSizeNs - partialBucketSplitTimeNs, buckets[1].mDuration);
     EXPECT_EQ(bucketStartTimeNs + bucketSizeNs, buckets[2].mBucketStartNs);
     EXPECT_EQ(bucketStartTimeNs + 2 * bucketSizeNs, buckets[2].mBucketEndNs);
     EXPECT_EQ(bucketSizeNs, buckets[2].mDuration);
 }
 
-TEST(DurationMetricTrackerTest, TestSumDurationWithUpgradeInFollowingBucket) {
+TEST_P(DurationMetricProducerTest_PartialBucket, TestSumDurationWithSplitInFollowingBucket) {
     /**
      * Expected buckets (start at 11s, upgrade at 75s, end at 135s):
      *  - [10,70]: 59 secs
@@ -272,15 +286,7 @@ TEST(DurationMetricTrackerTest, TestSumDurationWithUpgradeInFollowingBucket) {
      */
     int64_t bucketStartTimeNs = 10000000000;
     int64_t bucketSizeNs = TimeUnitToBucketSizeInMillis(ONE_MINUTE) * 1000000LL;
-    int64_t eventUpgradeTimeNs = bucketStartTimeNs + 65 * NS_PER_SEC;
-    int64_t startTimeNs = bucketStartTimeNs + 1 * NS_PER_SEC;
-    int64_t endTimeNs = startTimeNs + 125 * NS_PER_SEC;
-
     int tagId = 1;
-    LogEvent event1(/*uid=*/0, /*pid=*/0);
-    makeLogEvent(&event1, startTimeNs, tagId);
-    LogEvent event2(/*uid=*/0, /*pid=*/0);
-    makeLogEvent(&event2, endTimeNs, tagId);
 
     DurationMetric metric;
     metric.set_id(1);
@@ -293,11 +299,22 @@ TEST(DurationMetricTrackerTest, TestSumDurationWithUpgradeInFollowingBucket) {
                                             3 /* stop_all index */, false /*nesting*/, wizard,
                                             dimensions, bucketStartTimeNs, bucketStartTimeNs);
 
+    int64_t startTimeNs = bucketStartTimeNs + 1 * NS_PER_SEC;
+    LogEvent event1(/*uid=*/0, /*pid=*/0);
+    makeLogEvent(&event1, startTimeNs, tagId);
     durationProducer.onMatchedLogEvent(1 /* start index*/, event1);
     EXPECT_EQ(0UL, durationProducer.mPastBuckets.size());
     EXPECT_EQ(bucketStartTimeNs, durationProducer.mCurrentBucketStartTimeNs);
 
-    durationProducer.notifyAppUpgrade(eventUpgradeTimeNs, "ANY.APP", 1, 1);
+    int64_t partialBucketSplitTimeNs = bucketStartTimeNs + 65 * NS_PER_SEC;
+    switch (GetParam()) {
+        case APP_UPGRADE:
+            durationProducer.notifyAppUpgrade(partialBucketSplitTimeNs);
+            break;
+        case BOOT_COMPLETE:
+            durationProducer.onStatsdInitCompleted(partialBucketSplitTimeNs);
+            break;
+    }
     EXPECT_EQ(2UL, durationProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY].size());
     std::vector<DurationBucket> buckets =
             durationProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY];
@@ -305,32 +322,29 @@ TEST(DurationMetricTrackerTest, TestSumDurationWithUpgradeInFollowingBucket) {
     EXPECT_EQ(bucketStartTimeNs + bucketSizeNs, buckets[0].mBucketEndNs);
     EXPECT_EQ(bucketStartTimeNs + bucketSizeNs - startTimeNs, buckets[0].mDuration);
     EXPECT_EQ(bucketStartTimeNs + bucketSizeNs, buckets[1].mBucketStartNs);
-    EXPECT_EQ(eventUpgradeTimeNs, buckets[1].mBucketEndNs);
-    EXPECT_EQ(eventUpgradeTimeNs - (bucketStartTimeNs + bucketSizeNs), buckets[1].mDuration);
-    EXPECT_EQ(eventUpgradeTimeNs, durationProducer.mCurrentBucketStartTimeNs);
+    EXPECT_EQ(partialBucketSplitTimeNs, buckets[1].mBucketEndNs);
+    EXPECT_EQ(partialBucketSplitTimeNs - (bucketStartTimeNs + bucketSizeNs), buckets[1].mDuration);
+    EXPECT_EQ(partialBucketSplitTimeNs, durationProducer.mCurrentBucketStartTimeNs);
+    EXPECT_EQ(1, durationProducer.getCurrentBucketNum());
 
     // We skip ahead one bucket, so we fill in the first two partial buckets and one full bucket.
+    int64_t endTimeNs = startTimeNs + 125 * NS_PER_SEC;
+    LogEvent event2(/*uid=*/0, /*pid=*/0);
+    makeLogEvent(&event2, endTimeNs, tagId);
     durationProducer.onMatchedLogEvent(2 /* stop index*/, event2);
     buckets = durationProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY];
     EXPECT_EQ(3UL, buckets.size());
-    EXPECT_EQ(eventUpgradeTimeNs, buckets[2].mBucketStartNs);
+    EXPECT_EQ(partialBucketSplitTimeNs, buckets[2].mBucketStartNs);
     EXPECT_EQ(bucketStartTimeNs + 2 * bucketSizeNs, buckets[2].mBucketEndNs);
-    EXPECT_EQ(bucketStartTimeNs + 2 * bucketSizeNs - eventUpgradeTimeNs, buckets[2].mDuration);
+    EXPECT_EQ(bucketStartTimeNs + 2 * bucketSizeNs - partialBucketSplitTimeNs,
+              buckets[2].mDuration);
 }
 
-TEST(DurationMetricTrackerTest, TestSumDurationAnomalyWithUpgrade) {
+TEST_P(DurationMetricProducerTest_PartialBucket, TestSumDurationAnomaly) {
     sp<AlarmMonitor> alarmMonitor;
     int64_t bucketStartTimeNs = 10000000000;
     int64_t bucketSizeNs = TimeUnitToBucketSizeInMillis(ONE_MINUTE) * 1000000LL;
-    int64_t eventUpgradeTimeNs = bucketStartTimeNs + 15 * NS_PER_SEC;
-    int64_t startTimeNs = bucketStartTimeNs + 1;
-    int64_t endTimeNs = startTimeNs + 65 * NS_PER_SEC;
-
     int tagId = 1;
-    LogEvent event1(/*uid=*/0, /*pid=*/0);
-    makeLogEvent(&event1, startTimeNs, tagId);
-    LogEvent event2(/*uid=*/0, /*pid=*/0);
-    makeLogEvent(&event2, endTimeNs, tagId);
 
     // Setup metric with alert.
     DurationMetric metric;
@@ -351,27 +365,35 @@ TEST(DurationMetricTrackerTest, TestSumDurationAnomalyWithUpgrade) {
     sp<AnomalyTracker> anomalyTracker = durationProducer.addAnomalyTracker(alert, alarmMonitor);
     EXPECT_TRUE(anomalyTracker != nullptr);
 
+    int64_t startTimeNs = bucketStartTimeNs + 1;
+    LogEvent event1(/*uid=*/0, /*pid=*/0);
+    makeLogEvent(&event1, startTimeNs, tagId);
     durationProducer.onMatchedLogEvent(1 /* start index*/, event1);
-    durationProducer.notifyAppUpgrade(eventUpgradeTimeNs, "ANY.APP", 1, 1);
+
+    int64_t partialBucketSplitTimeNs = bucketStartTimeNs + 15 * NS_PER_SEC;
+    switch (GetParam()) {
+        case APP_UPGRADE:
+            durationProducer.notifyAppUpgrade(partialBucketSplitTimeNs);
+            break;
+        case BOOT_COMPLETE:
+            durationProducer.onStatsdInitCompleted(partialBucketSplitTimeNs);
+            break;
+    }
 
     // We skip ahead one bucket, so we fill in the first two partial buckets and one full bucket.
+    int64_t endTimeNs = startTimeNs + 65 * NS_PER_SEC;
+    LogEvent event2(/*uid=*/0, /*pid=*/0);
+    makeLogEvent(&event2, endTimeNs, tagId);
     durationProducer.onMatchedLogEvent(2 /* stop index*/, event2);
+
     EXPECT_EQ(bucketStartTimeNs + bucketSizeNs - startTimeNs,
               anomalyTracker->getSumOverPastBuckets(DEFAULT_METRIC_DIMENSION_KEY));
 }
 
-TEST(DurationMetricTrackerTest, TestMaxDurationWithUpgrade) {
+TEST_P(DurationMetricProducerTest_PartialBucket, TestMaxDuration) {
     int64_t bucketStartTimeNs = 10000000000;
     int64_t bucketSizeNs = TimeUnitToBucketSizeInMillis(ONE_MINUTE) * 1000000LL;
-    int64_t eventUpgradeTimeNs = bucketStartTimeNs + 15 * NS_PER_SEC;
-    int64_t startTimeNs = bucketStartTimeNs + 1;
-    int64_t endTimeNs = startTimeNs + 125 * NS_PER_SEC;
-
     int tagId = 1;
-    LogEvent event1(/*uid=*/0, /*pid=*/0);
-    makeLogEvent(&event1, startTimeNs, tagId);
-    LogEvent event2(/*uid=*/0, /*pid=*/0);
-    makeLogEvent(&event2, endTimeNs, tagId);
 
     DurationMetric metric;
     metric.set_id(1);
@@ -385,15 +407,30 @@ TEST(DurationMetricTrackerTest, TestMaxDurationWithUpgrade) {
                                             3 /* stop_all index */, false /*nesting*/, wizard,
                                             dimensions, bucketStartTimeNs, bucketStartTimeNs);
 
+    int64_t startTimeNs = bucketStartTimeNs + 1;
+    LogEvent event1(/*uid=*/0, /*pid=*/0);
+    makeLogEvent(&event1, startTimeNs, tagId);
     durationProducer.onMatchedLogEvent(1 /* start index*/, event1);
     EXPECT_EQ(0UL, durationProducer.mPastBuckets.size());
     EXPECT_EQ(bucketStartTimeNs, durationProducer.mCurrentBucketStartTimeNs);
 
-    durationProducer.notifyAppUpgrade(eventUpgradeTimeNs, "ANY.APP", 1, 1);
+    int64_t partialBucketSplitTimeNs = bucketStartTimeNs + 15 * NS_PER_SEC;
+    switch (GetParam()) {
+        case APP_UPGRADE:
+            durationProducer.notifyAppUpgrade(partialBucketSplitTimeNs);
+            break;
+        case BOOT_COMPLETE:
+            durationProducer.onStatsdInitCompleted(partialBucketSplitTimeNs);
+            break;
+    }
     EXPECT_EQ(0UL, durationProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY].size());
-    EXPECT_EQ(eventUpgradeTimeNs, durationProducer.mCurrentBucketStartTimeNs);
+    EXPECT_EQ(partialBucketSplitTimeNs, durationProducer.mCurrentBucketStartTimeNs);
+    EXPECT_EQ(0, durationProducer.getCurrentBucketNum());
 
     // We skip ahead one bucket, so we fill in the first two partial buckets and one full bucket.
+    int64_t endTimeNs = startTimeNs + 125 * NS_PER_SEC;
+    LogEvent event2(/*uid=*/0, /*pid=*/0);
+    makeLogEvent(&event2, endTimeNs, tagId);
     durationProducer.onMatchedLogEvent(2 /* stop index*/, event2);
     EXPECT_EQ(0UL, durationProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY].size());
 
@@ -406,18 +443,10 @@ TEST(DurationMetricTrackerTest, TestMaxDurationWithUpgrade) {
     EXPECT_EQ(endTimeNs - startTimeNs, buckets[0].mDuration);
 }
 
-TEST(DurationMetricTrackerTest, TestMaxDurationWithUpgradeInNextBucket) {
+TEST_P(DurationMetricProducerTest_PartialBucket, TestMaxDurationWithSplitInNextBucket) {
     int64_t bucketStartTimeNs = 10000000000;
     int64_t bucketSizeNs = TimeUnitToBucketSizeInMillis(ONE_MINUTE) * 1000000LL;
-    int64_t eventUpgradeTimeNs = bucketStartTimeNs + 65 * NS_PER_SEC;
-    int64_t startTimeNs = bucketStartTimeNs + 1;
-    int64_t endTimeNs = startTimeNs + 115 * NS_PER_SEC;
-
     int tagId = 1;
-    LogEvent event1(/*uid=*/0, /*pid=*/0);
-    makeLogEvent(&event1, startTimeNs, tagId);
-    LogEvent event2(/*uid=*/0, /*pid=*/0);
-    makeLogEvent(&event2, endTimeNs, tagId);
 
     DurationMetric metric;
     metric.set_id(1);
@@ -431,24 +460,39 @@ TEST(DurationMetricTrackerTest, TestMaxDurationWithUpgradeInNextBucket) {
                                             3 /* stop_all index */, false /*nesting*/, wizard,
                                             dimensions, bucketStartTimeNs, bucketStartTimeNs);
 
+    int64_t startTimeNs = bucketStartTimeNs + 1;
+    LogEvent event1(/*uid=*/0, /*pid=*/0);
+    makeLogEvent(&event1, startTimeNs, tagId);
     durationProducer.onMatchedLogEvent(1 /* start index*/, event1);
     EXPECT_EQ(0UL, durationProducer.mPastBuckets.size());
     EXPECT_EQ(bucketStartTimeNs, durationProducer.mCurrentBucketStartTimeNs);
 
-    durationProducer.notifyAppUpgrade(eventUpgradeTimeNs, "ANY.APP", 1, 1);
+    int64_t partialBucketSplitTimeNs = bucketStartTimeNs + 65 * NS_PER_SEC;
+    switch (GetParam()) {
+        case APP_UPGRADE:
+            durationProducer.notifyAppUpgrade(partialBucketSplitTimeNs);
+            break;
+        case BOOT_COMPLETE:
+            durationProducer.onStatsdInitCompleted(partialBucketSplitTimeNs);
+            break;
+    }
     EXPECT_EQ(0UL, durationProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY].size());
-    EXPECT_EQ(eventUpgradeTimeNs, durationProducer.mCurrentBucketStartTimeNs);
+    EXPECT_EQ(partialBucketSplitTimeNs, durationProducer.mCurrentBucketStartTimeNs);
+    EXPECT_EQ(1, durationProducer.getCurrentBucketNum());
 
     // Stop occurs in the same partial bucket as created for the app upgrade.
+    int64_t endTimeNs = startTimeNs + 115 * NS_PER_SEC;
+    LogEvent event2(/*uid=*/0, /*pid=*/0);
+    makeLogEvent(&event2, endTimeNs, tagId);
     durationProducer.onMatchedLogEvent(2 /* stop index*/, event2);
     EXPECT_EQ(0UL, durationProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY].size());
-    EXPECT_EQ(eventUpgradeTimeNs, durationProducer.mCurrentBucketStartTimeNs);
+    EXPECT_EQ(partialBucketSplitTimeNs, durationProducer.mCurrentBucketStartTimeNs);
 
     durationProducer.flushIfNeededLocked(bucketStartTimeNs + 2 * bucketSizeNs + 1);
     std::vector<DurationBucket> buckets =
             durationProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY];
     EXPECT_EQ(1UL, buckets.size());
-    EXPECT_EQ(eventUpgradeTimeNs, buckets[0].mBucketStartNs);
+    EXPECT_EQ(partialBucketSplitTimeNs, buckets[0].mBucketStartNs);
     EXPECT_EQ(bucketStartTimeNs + 2 * bucketSizeNs, buckets[0].mBucketEndNs);
     EXPECT_EQ(endTimeNs - startTimeNs, buckets[0].mDuration);
 }

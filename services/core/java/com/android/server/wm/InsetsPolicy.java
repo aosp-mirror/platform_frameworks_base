@@ -126,13 +126,22 @@ class InsetsPolicy {
             mPolicy.getStatusBarManagerInternal().showTransient(mDisplayContent.getDisplayId(),
                     mShowingTransientTypes.toArray());
             updateBarControlTarget(mFocusedWin);
-            InsetsState state = new InsetsState(mStateController.getRawInsetsState());
-            startAnimation(true /* show */, () -> {
+
+            // The leashes can be created while updating bar control target. The surface transaction
+            // of the new leashes might not be applied yet. The callback posted here ensures we can
+            // get the valid leashes because the surface transaction will be applied in the next
+            // animation frame which will be triggered if a new leash is created.
+            mDisplayContent.mWmService.mAnimator.getChoreographer().postFrameCallback(time -> {
                 synchronized (mDisplayContent.mWmService.mGlobalLock) {
-                    mStateController.notifyInsetsChanged();
+                    final InsetsState state = new InsetsState(mStateController.getRawInsetsState());
+                    startAnimation(true /* show */, () -> {
+                        synchronized (mDisplayContent.mWmService.mGlobalLock) {
+                            mStateController.notifyInsetsChanged();
+                        }
+                    }, state);
+                    mStateController.onInsetsModified(mDummyControlTarget, state);
                 }
-            }, state);
-            mStateController.onInsetsModified(mDummyControlTarget, state);
+            });
         }
     }
 

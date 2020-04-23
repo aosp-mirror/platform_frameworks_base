@@ -45,6 +45,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.util.ArraySet;
+import android.util.IntArray;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TypedValue;
@@ -66,6 +67,7 @@ import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.wm.WindowManagerInternal.MagnificationCallbacks;
 import com.android.server.wm.WindowManagerInternal.WindowsForAccessibilityCallback;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -127,14 +129,13 @@ final class AccessibilityController {
      */
     public boolean setWindowsForAccessibilityCallbackLocked(int displayId,
             WindowsForAccessibilityCallback callback) {
-        if (callback != null) {
-            final DisplayContent dc = mService.mRoot.getDisplayContentOrCreate(displayId);
-            if (dc == null) {
-                return false;
-            }
+        final DisplayContent dc = mService.mRoot.getDisplayContentOrCreate(displayId);
+        if (dc == null) {
+            return false;
+        }
 
-            final Display display = dc.getDisplay();
-            if (display.getType() == Display.TYPE_VIRTUAL && dc.getParentWindow() != null) {
+        if (callback != null) {
+            if (isEmbeddedDisplay(dc)) {
                 // If this display is an embedded one, its window observer should have been set from
                 // window manager after setting its parent window. But if its window observer is
                 // empty, that means this mapping didn't be set, and needs to do this again.
@@ -151,13 +152,22 @@ final class AccessibilityController {
             mWindowsForAccessibilityObserver.put(displayId,
                     new WindowsForAccessibilityObserver(mService, displayId, callback));
         } else {
+            if (isEmbeddedDisplay(dc)) {
+                // If this display is an embedded one, its window observer should be removed along
+                // with the window observer of its parent display removed because the window
+                // observer of the embedded display and its parent display is the same, and would
+                // be removed together when stopping the window tracking of its parent display. So
+                // here don't need to do removing window observer of the embedded display again.
+                return true;
+            }
             final WindowsForAccessibilityObserver windowsForA11yObserver =
                     mWindowsForAccessibilityObserver.get(displayId);
-            if  (windowsForA11yObserver == null) {
+            if (windowsForA11yObserver == null) {
                 throw new IllegalStateException(
                         "Windows for accessibility callback of display " + displayId
                                 + " already cleared!");
             }
+            removeObserverOfEmbeddedDisplay(windowsForA11yObserver);
             mWindowsForAccessibilityObserver.remove(displayId);
         }
         return true;
@@ -331,6 +341,7 @@ final class AccessibilityController {
                 mWindowsForAccessibilityObserver.get(parentDisplayId);
 
         if (windowsForA11yObserver != null) {
+            windowsForA11yObserver.addEmbeddedDisplay(embeddedDisplayId);
             // Replaces the observer of embedded display to the one of parent display
             mWindowsForAccessibilityObserver.put(embeddedDisplayId, windowsForA11yObserver);
         }
@@ -339,6 +350,33 @@ final class AccessibilityController {
     private static void populateTransformationMatrixLocked(WindowState windowState,
             Matrix outMatrix) {
         windowState.getTransformationMatrix(sTempFloats, outMatrix);
+    }
+
+    void dump(PrintWriter pw, String prefix) {
+        for (int i = 0; i < mDisplayMagnifiers.size(); i++) {
+            final DisplayMagnifier displayMagnifier = mDisplayMagnifiers.valueAt(i);
+            if (displayMagnifier != null) {
+                displayMagnifier.dump(pw, prefix
+                        + "Magnification display# " + mDisplayMagnifiers.keyAt(i));
+            }
+        }
+    }
+
+    private void removeObserverOfEmbeddedDisplay(WindowsForAccessibilityObserver
+            observerOfParentDisplay) {
+        final IntArray embeddedDisplayIdList =
+                observerOfParentDisplay.getAndClearEmbeddedDisplayIdList();
+
+        for (int index = 0; index < embeddedDisplayIdList.size(); index++) {
+            final int embeddedDisplayId = embeddedDisplayIdList.get(index);
+            mWindowsForAccessibilityObserver.remove(embeddedDisplayId);
+        }
+    }
+
+    private static boolean isEmbeddedDisplay(DisplayContent dc) {
+        final Display display = dc.getDisplay();
+
+        return display.getType() == Display.TYPE_VIRTUAL && dc.getParentWindow() != null;
     }
 
     /**
@@ -549,6 +587,10 @@ final class AccessibilityController {
 
         public void drawMagnifiedRegionBorderIfNeededLocked(SurfaceControl.Transaction t) {
             mMagnifedViewport.drawWindowIfNeededLocked(t);
+        }
+
+        void dump(PrintWriter pw, String prefix) {
+            mMagnifedViewport.dump(pw, prefix);
         }
 
         private final class MagnifiedViewport {
@@ -820,6 +862,10 @@ final class AccessibilityController {
                 }, false /* traverseTopToBottom */ );
             }
 
+            void dump(PrintWriter pw, String prefix) {
+                mWindow.dump(pw, prefix);
+            }
+
             private final class ViewportWindow {
                 private static final String SURFACE_TITLE = "Magnification Overlay";
 
@@ -983,6 +1029,14 @@ final class AccessibilityController {
                 public void releaseSurface() {
                     mService.mTransactionFactory.get().remove(mSurfaceControl).apply();
                     mSurface.release();
+                }
+
+                void dump(PrintWriter pw, String prefix) {
+                    pw.println(prefix
+                            + " mBounds= " + mBounds
+                            + " mDirtyRect= " + mDirtyRect
+                            + " mWidth= " + mSurfaceControl.getWidth()
+                            + " mHeight= " + mSurfaceControl.getHeight());
                 }
 
                 private final class AnimationController extends Handler {
@@ -1152,6 +1206,8 @@ final class AccessibilityController {
 
         private final long mRecurringAccessibilityEventsIntervalMillis;
 
+        private final IntArray mEmbeddedDisplayIdList = new IntArray(0);
+
         public WindowsForAccessibilityObserver(WindowManagerService windowManagerService,
                 int displayId,
                 WindowsForAccessibilityCallback callback) {
@@ -1174,6 +1230,21 @@ final class AccessibilityController {
                 mHandler.sendEmptyMessageDelayed(MyHandler.MESSAGE_COMPUTE_CHANGED_WINDOWS,
                         mRecurringAccessibilityEventsIntervalMillis);
             }
+        }
+
+        IntArray getAndClearEmbeddedDisplayIdList() {
+            final IntArray returnedArray = new IntArray(mEmbeddedDisplayIdList.size());
+            returnedArray.addAll(mEmbeddedDisplayIdList);
+            mEmbeddedDisplayIdList.clear();
+
+            return returnedArray;
+        }
+
+        void addEmbeddedDisplay(int displayId) {
+            if (displayId == mDisplayId) {
+                return;
+            }
+            mEmbeddedDisplayIdList.add(displayId);
         }
 
         /**

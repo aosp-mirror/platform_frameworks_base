@@ -819,7 +819,9 @@ public class PreferencesHelper implements RankingConfig {
             }
             if (fromTargetApp) {
                 channel.setLockscreenVisibility(r.visibility);
-                channel.setAllowBubbles(existing != null && existing.canBubble());
+                channel.setAllowBubbles(existing != null
+                        ? existing.getAllowBubbles()
+                        : NotificationChannel.DEFAULT_ALLOW_BUBBLE);
             }
             clearLockedFieldsLocked(channel);
             channel.setImportanceLockedByOEM(r.oemLockedImportance);
@@ -1704,7 +1706,7 @@ public class PreferencesHelper implements RankingConfig {
         if (original.canShowBadge() != update.canShowBadge()) {
             update.lockFields(NotificationChannel.USER_LOCKED_SHOW_BADGE);
         }
-        if (original.canBubble() != update.canBubble()) {
+        if (original.getAllowBubbles() != update.getAllowBubbles()) {
             update.lockFields(NotificationChannel.USER_LOCKED_ALLOW_BUBBLE);
         }
     }

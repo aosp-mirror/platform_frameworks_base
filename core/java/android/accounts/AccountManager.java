@@ -69,7 +69,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.Objects;
 
 /**
  * This class provides access to a centralized registry of the user's
@@ -681,7 +680,7 @@ public class AccountManager {
     /**
      * Lists all accounts visible to the caller regardless of type. Equivalent to
      * getAccountsByType(null). These accounts may be visible because the user granted access to the
-     * account, or the AbstractAcccountAuthenticator managing the account did so or because the
+     * account, or the AbstractAccountAuthenticator managing the account did so or because the
      * client shares a signature with the managing AbstractAccountAuthenticator.
      *
      * <div class="caution"><p><b>Caution: </b>This method returns personal and sensitive user data.
@@ -770,7 +769,7 @@ public class AccountManager {
 
     /**
      * Lists all accounts of particular type visible to the caller. These accounts may be visible
-     * because the user granted access to the account, or the AbstractAcccountAuthenticator managing
+     * because the user granted access to the account, or the AbstractAccountAuthenticator managing
      * the account did so or because the client shares a signature with the managing
      * AbstractAccountAuthenticator.
      *
@@ -803,7 +802,7 @@ public class AccountManager {
      * Caller targeting API level {@link android.os.Build.VERSION_CODES#O} and above, will get list
      * of accounts made visible to it by user
      * (see {@link #newChooseAccountIntent(Account, List, String[], String,
-     * String, String[], Bundle)}) or AbstractAcccountAuthenticator
+     * String, String[], Bundle)}) or AbstractAccountAuthenticator
      * using {@link #setAccountVisibility}.
      * {@link android.Manifest.permission#GET_ACCOUNTS} permission is not used.
      *
@@ -951,7 +950,7 @@ public class AccountManager {
      * Caller targeting API level {@link android.os.Build.VERSION_CODES#O} and above, will get list
      * of accounts made visible to it by user
      * (see {@link #newChooseAccountIntent(Account, List, String[], String,
-     * String, String[], Bundle)}) or AbstractAcccountAuthenticator
+     * String, String[], Bundle)}) or AbstractAccountAuthenticator
      * using {@link #setAccountVisibility}.
      * {@link android.Manifest.permission#GET_ACCOUNTS} permission is not used.
      *
@@ -2977,7 +2976,7 @@ public class AccountManager {
 
     /**
      * Adds an {@link OnAccountsUpdateListener} to this instance of the {@link AccountManager}. This
-     * listener will be notified whenever user or AbstractAcccountAuthenticator made changes to
+     * listener will be notified whenever user or AbstractAccountAuthenticator made changes to
      * accounts of any type related to the caller. This method is equivalent to
      * addOnAccountsUpdatedListener(listener, handler, updateImmediately, null)
      *
@@ -2991,7 +2990,7 @@ public class AccountManager {
 
     /**
      * Adds an {@link OnAccountsUpdateListener} to this instance of the {@link AccountManager}. This
-     * listener will be notified whenever user or AbstractAcccountAuthenticator made changes to
+     * listener will be notified whenever user or AbstractAccountAuthenticator made changes to
      * accounts of given types related to the caller -
      * either list of accounts returned by {@link #getAccounts()}
      * was changed, or new account was added for which user can grant access to the caller.
@@ -3297,7 +3296,7 @@ public class AccountManager {
      *         status of the account
      *         </ul>
      *         If no activity was specified and additional information is needed
-     *         from user, the returned Bundle may contains only
+     *         from user, the returned Bundle may only contain
      *         {@link #KEY_INTENT} with the {@link Intent} needed to launch the
      *         actual account creation process. If an error occurred,
      *         {@link AccountManagerFuture#getResult()} throws:
@@ -3469,7 +3468,7 @@ public class AccountManager {
     public void disableLocalAccountCaches() {
         mAccountsForUserCache.disableLocal();
     }
-    
+
     /**
      * @hide
      * Calling this will invalidate Local Account User Data Cache which

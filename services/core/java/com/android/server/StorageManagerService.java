@@ -1259,7 +1259,8 @@ class StorageManagerService extends IStorageManager.Stub
         Configuration config = new Configuration();
         config.setLocale(locale);
         try {
-            ActivityManager.getService().updatePersistentConfiguration(config);
+            ActivityManager.getService().updatePersistentConfigurationWithAttribution(config,
+                    mContext.getOpPackageName(), mContext.getAttributionTag());
         } catch (RemoteException e) {
             Slog.e(TAG, "Error setting system locale from mount service", e);
         }

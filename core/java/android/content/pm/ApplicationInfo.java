@@ -1704,10 +1704,10 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
             return;
         }
         super.writeToParcel(dest, parcelableFlags);
-        dest.writeString(taskAffinity);
-        dest.writeString(permission);
-        dest.writeString(processName);
-        dest.writeString(className);
+        dest.writeString8(taskAffinity);
+        dest.writeString8(permission);
+        dest.writeString8(processName);
+        dest.writeString8(className);
         dest.writeInt(theme);
         dest.writeInt(flags);
         dest.writeInt(privateFlags);
@@ -1721,28 +1721,28 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         } else {
             dest.writeInt(0);
         }
-        dest.writeString(scanSourceDir);
-        dest.writeString(scanPublicSourceDir);
-        dest.writeString(sourceDir);
-        dest.writeString(publicSourceDir);
+        dest.writeString8(scanSourceDir);
+        dest.writeString8(scanPublicSourceDir);
+        dest.writeString8(sourceDir);
+        dest.writeString8(publicSourceDir);
         dest.writeStringArray(splitNames);
         dest.writeStringArray(splitSourceDirs);
         dest.writeStringArray(splitPublicSourceDirs);
         dest.writeSparseArray((SparseArray) splitDependencies);
-        dest.writeString(nativeLibraryDir);
-        dest.writeString(secondaryNativeLibraryDir);
-        dest.writeString(nativeLibraryRootDir);
+        dest.writeString8(nativeLibraryDir);
+        dest.writeString8(secondaryNativeLibraryDir);
+        dest.writeString8(nativeLibraryRootDir);
         dest.writeInt(nativeLibraryRootRequiresIsa ? 1 : 0);
-        dest.writeString(primaryCpuAbi);
-        dest.writeString(secondaryCpuAbi);
+        dest.writeString8(primaryCpuAbi);
+        dest.writeString8(secondaryCpuAbi);
         dest.writeStringArray(resourceDirs);
-        dest.writeString(seInfo);
-        dest.writeString(seInfoUser);
+        dest.writeString8(seInfo);
+        dest.writeString8(seInfoUser);
         dest.writeStringArray(sharedLibraryFiles);
         dest.writeTypedList(sharedLibraryInfos);
-        dest.writeString(dataDir);
-        dest.writeString(deviceProtectedDataDir);
-        dest.writeString(credentialProtectedDataDir);
+        dest.writeString8(dataDir);
+        dest.writeString8(deviceProtectedDataDir);
+        dest.writeString8(credentialProtectedDataDir);
         dest.writeInt(uid);
         dest.writeInt(minSdkVersion);
         dest.writeInt(targetSdkVersion);
@@ -1750,8 +1750,8 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         dest.writeInt(enabled ? 1 : 0);
         dest.writeInt(enabledSetting);
         dest.writeInt(installLocation);
-        dest.writeString(manageSpaceActivityName);
-        dest.writeString(backupAgentName);
+        dest.writeString8(manageSpaceActivityName);
+        dest.writeString8(backupAgentName);
         dest.writeInt(descriptionRes);
         dest.writeInt(uiOptions);
         dest.writeInt(fullBackupContent);
@@ -1759,16 +1759,16 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         dest.writeInt(networkSecurityConfigRes);
         dest.writeInt(category);
         dest.writeInt(targetSandboxVersion);
-        dest.writeString(classLoaderName);
+        dest.writeString8(classLoaderName);
         dest.writeStringArray(splitClassLoaderNames);
         dest.writeInt(compileSdkVersion);
-        dest.writeString(compileSdkVersionCodename);
-        dest.writeString(appComponentFactory);
+        dest.writeString8(compileSdkVersionCodename);
+        dest.writeString8(appComponentFactory);
         dest.writeInt(iconRes);
         dest.writeInt(roundIconRes);
         dest.writeInt(mHiddenApiPolicy);
         dest.writeInt(hiddenUntilInstalled ? 1 : 0);
-        dest.writeString(zygotePreloadName);
+        dest.writeString8(zygotePreloadName);
         dest.writeInt(gwpAsanMode);
     }
 
@@ -1788,10 +1788,10 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     @SuppressWarnings("unchecked")
     private ApplicationInfo(Parcel source) {
         super(source);
-        taskAffinity = source.readString();
-        permission = source.readString();
-        processName = source.readString();
-        className = source.readString();
+        taskAffinity = source.readString8();
+        permission = source.readString8();
+        processName = source.readString8();
+        className = source.readString8();
         theme = source.readInt();
         flags = source.readInt();
         privateFlags = source.readInt();
@@ -1802,28 +1802,28 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
             storageUuid = new UUID(source.readLong(), source.readLong());
             volumeUuid = StorageManager.convert(storageUuid);
         }
-        scanSourceDir = source.readString();
-        scanPublicSourceDir = source.readString();
-        sourceDir = source.readString();
-        publicSourceDir = source.readString();
+        scanSourceDir = source.readString8();
+        scanPublicSourceDir = source.readString8();
+        sourceDir = source.readString8();
+        publicSourceDir = source.readString8();
         splitNames = source.readStringArray();
         splitSourceDirs = source.readStringArray();
         splitPublicSourceDirs = source.readStringArray();
         splitDependencies = source.readSparseArray(null);
-        nativeLibraryDir = source.readString();
-        secondaryNativeLibraryDir = source.readString();
-        nativeLibraryRootDir = source.readString();
+        nativeLibraryDir = source.readString8();
+        secondaryNativeLibraryDir = source.readString8();
+        nativeLibraryRootDir = source.readString8();
         nativeLibraryRootRequiresIsa = source.readInt() != 0;
-        primaryCpuAbi = source.readString();
-        secondaryCpuAbi = source.readString();
+        primaryCpuAbi = source.readString8();
+        secondaryCpuAbi = source.readString8();
         resourceDirs = source.readStringArray();
-        seInfo = source.readString();
-        seInfoUser = source.readString();
+        seInfo = source.readString8();
+        seInfoUser = source.readString8();
         sharedLibraryFiles = source.readStringArray();
         sharedLibraryInfos = source.createTypedArrayList(SharedLibraryInfo.CREATOR);
-        dataDir = source.readString();
-        deviceProtectedDataDir = source.readString();
-        credentialProtectedDataDir = source.readString();
+        dataDir = source.readString8();
+        deviceProtectedDataDir = source.readString8();
+        credentialProtectedDataDir = source.readString8();
         uid = source.readInt();
         minSdkVersion = source.readInt();
         targetSdkVersion = source.readInt();
@@ -1831,8 +1831,8 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         enabled = source.readInt() != 0;
         enabledSetting = source.readInt();
         installLocation = source.readInt();
-        manageSpaceActivityName = source.readString();
-        backupAgentName = source.readString();
+        manageSpaceActivityName = source.readString8();
+        backupAgentName = source.readString8();
         descriptionRes = source.readInt();
         uiOptions = source.readInt();
         fullBackupContent = source.readInt();
@@ -1840,16 +1840,16 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         networkSecurityConfigRes = source.readInt();
         category = source.readInt();
         targetSandboxVersion = source.readInt();
-        classLoaderName = source.readString();
+        classLoaderName = source.readString8();
         splitClassLoaderNames = source.readStringArray();
         compileSdkVersion = source.readInt();
-        compileSdkVersionCodename = source.readString();
-        appComponentFactory = source.readString();
+        compileSdkVersionCodename = source.readString8();
+        appComponentFactory = source.readString8();
         iconRes = source.readInt();
         roundIconRes = source.readInt();
         mHiddenApiPolicy = source.readInt();
         hiddenUntilInstalled = source.readInt() != 0;
-        zygotePreloadName = source.readString();
+        zygotePreloadName = source.readString8();
         gwpAsanMode = source.readInt();
     }
 

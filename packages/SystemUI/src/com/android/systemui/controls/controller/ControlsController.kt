@@ -52,17 +52,15 @@ interface ControlsController : UserAwareController {
      * Load all available [Control] for a given service.
      *
      * @param componentName the [ComponentName] of the [ControlsProviderService] to load from
-     * @param dataCallback a callback in which to retrieve the result.
+     * @param dataCallback a callback in which to retrieve the result
+     * @param cancelWrapper a callback to receive a [Runnable] that can be run to cancel the
+     *                      request
      */
     fun loadForComponent(
         componentName: ComponentName,
-        dataCallback: Consumer<LoadData>
+        dataCallback: Consumer<LoadData>,
+        cancelWrapper: Consumer<Runnable>
     )
-
-    /**
-     * Cancels a pending load call
-     */
-    fun cancelLoad()
 
     /**
      * Request to subscribe for favorited controls per structure

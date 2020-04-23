@@ -16,6 +16,9 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
@@ -251,6 +254,22 @@ public class WallpaperControllerTests extends WindowTestsBase {
         assertEquals(otherWindowInitialZoom, wallpaperWindow.mWallpaperZoomOut, .01f);
     }
 
+    /**
+     * Tests that the windowing mode of the wallpaper window must always be fullscreen.
+     */
+    @Test
+    public void testWallpaperTokenWindowingMode() {
+        final DisplayContent dc = mWm.mRoot.getDefaultDisplay();
+        final WallpaperWindowToken token = new WallpaperWindowToken(mWm, mock(IBinder.class),
+                true, dc, true /* ownerCanManageAppTokens */);
+
+        // The wallpaper should have requested override fullscreen windowing mode, so the
+        // configuration (windowing mode) propagation from display won't change it.
+        dc.setWindowingMode(WINDOWING_MODE_FREEFORM);
+        assertEquals(WINDOWING_MODE_FULLSCREEN, token.getWindowingMode());
+        dc.setWindowingMode(WINDOWING_MODE_UNDEFINED);
+        assertEquals(WINDOWING_MODE_FULLSCREEN, token.getWindowingMode());
+    }
 
     private WindowState createWallpaperTargetWindow(DisplayContent dc) {
         final ActivityRecord homeActivity = new ActivityTestsBase.ActivityBuilder(mWm.mAtmService)

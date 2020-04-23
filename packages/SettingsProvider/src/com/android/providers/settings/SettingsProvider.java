@@ -1724,7 +1724,8 @@ public class SettingsProvider extends ContentProvider {
             // If the caller doesn't hold WRITE_SECURE_SETTINGS, we verify whether this
             // operation is allowed for the calling package through appops.
             if (!Settings.checkAndNoteWriteSettingsOperation(getContext(),
-                    Binder.getCallingUid(), getCallingPackage(), true)) {
+                    Binder.getCallingUid(), getCallingPackage(), getCallingAttributionTag(),
+                    true)) {
                 return false;
             }
         }
