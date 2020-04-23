@@ -979,6 +979,9 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
 
     @Override
     public void bypassNextStagedInstallerCheck(boolean value) {
+        if (!isCalledBySystemOrShell(Binder.getCallingUid())) {
+            throw new SecurityException("Caller not allowed to bypass staged installer check");
+        }
         mBypassNextStagedInstallerCheck = value;
     }
 
