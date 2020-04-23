@@ -884,8 +884,8 @@ class WindowStateAnimator {
             clipRect = mTmpClipRect;
         }
 
-        if (mSurfaceResized && (mAttrType == TYPE_BASE_APPLICATION) &&
-            (task != null) && (task.getMainWindowSizeChangeTransaction() != null)) {
+        if (w.mInRelayout && (mAttrType == TYPE_BASE_APPLICATION) && (task != null)
+                && (task.getMainWindowSizeChangeTransaction() != null)) {
             mSurfaceController.deferTransactionUntil(mWin.getClientViewRootSurface(),
                     mWin.getFrameNumber());
             SurfaceControl.mergeToGlobalTransaction(task.getMainWindowSizeChangeTransaction());
