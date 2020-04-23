@@ -742,7 +742,7 @@
     <string name="notification_conversation_unmute" msgid="2692255619510896710">"發出提醒"</string>
     <string name="notification_conversation_bubble" msgid="2242180995373949022">"以小視窗顯示"</string>
     <string name="notification_conversation_unbubble" msgid="6908427185031099868">"移除小視窗"</string>
-    <string name="notification_conversation_home_screen" msgid="8347136037958438935">"加入主畫面"</string>
+    <string name="notification_conversation_home_screen" msgid="8347136037958438935">"加到主畫面"</string>
     <string name="notification_menu_accessibility" msgid="8984166825879886773">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="6429668976593634862">"通知控制項"</string>
     <string name="notification_menu_snooze_description" msgid="4740133348901973244">"通知延後選項"</string>
@@ -999,19 +999,16 @@
     <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"隨時控制小視窗設定"</string>
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"輕按「管理」即可關閉此應用程式的小視窗"</string>
     <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"知道了"</string>
+    <!-- no translation found for bubbles_app_settings (5779443644062348657) -->
+    <skip />
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"系統導覽已更新。如需變更，請前往「設定」。"</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"前往「設定」更新系統導覽"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"待機"</string>
-    <!-- no translation found for priority_onboarding_show_at_top_text (1678400241025513541) -->
-    <skip />
-    <!-- no translation found for priority_onboarding_show_avatar_text (5756291381124091508) -->
-    <skip />
-    <!-- no translation found for priority_onboarding_appear_as_bubble_text (4227039772250263122) -->
-    <skip />
-    <!-- no translation found for priority_onboarding_ignores_dnd_text (2918952762719600529) -->
-    <skip />
-    <!-- no translation found for priority_onboarding_done_button_title (4569550984286506007) -->
-    <skip />
+    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"在對話部分的頂部顯示"</string>
+    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"在上鎖畫面顯示個人檔案相片"</string>
+    <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"在應用程式上以浮動小視窗顯示"</string>
+    <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"中斷「請勿騷擾」"</string>
+    <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"知道了"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"放大重疊視窗"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"放大視窗"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"放大視窗控制項"</string>
