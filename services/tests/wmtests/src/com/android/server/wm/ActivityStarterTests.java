@@ -808,6 +808,41 @@ public class ActivityStarterTests extends ActivityTestsBase {
         verify(secondaryTaskContainer, times(2)).createStack(anyInt(), anyInt(), anyBoolean());
     }
 
+    @Test
+    public void testWasVisibleInRestartAttempt() {
+        final ActivityStarter starter = prepareStarter(
+                FLAG_ACTIVITY_RESET_TASK_IF_NEEDED | FLAG_ACTIVITY_SINGLE_TOP, false);
+        final ActivityRecord reusableActivity =
+                new ActivityBuilder(mService).setCreateTask(true).build();
+        final ActivityRecord topActivity =
+                new ActivityBuilder(mService).setCreateTask(true).build();
+
+        // Make sure topActivity is on top
+        topActivity.getRootTask().moveToFront("testWasVisibleInRestartAttempt");
+        reusableActivity.setVisible(false);
+
+        final TaskChangeNotificationController taskChangeNotifier =
+                mService.getTaskChangeNotificationController();
+        spyOn(taskChangeNotifier);
+
+        Task task = topActivity.getTask();
+        starter.postStartActivityProcessing(
+                task.getTopNonFinishingActivity(), START_DELIVERED_TO_TOP, task.getStack());
+
+        verify(taskChangeNotifier).notifyActivityRestartAttempt(
+                any(), anyBoolean(), anyBoolean(), anyBoolean());
+        verify(taskChangeNotifier).notifyActivityRestartAttempt(
+                any(), anyBoolean(), anyBoolean(), eq(true));
+
+        Task task2 = reusableActivity.getTask();
+        starter.postStartActivityProcessing(
+                task2.getTopNonFinishingActivity(), START_TASK_TO_FRONT, task.getStack());
+        verify(taskChangeNotifier, times(2)).notifyActivityRestartAttempt(
+                any(), anyBoolean(), anyBoolean(), anyBoolean());
+        verify(taskChangeNotifier).notifyActivityRestartAttempt(
+                any(), anyBoolean(), anyBoolean(), eq(false));
+    }
+
     private ActivityRecord createSingleTaskActivityOn(ActivityStack stack) {
         final ComponentName componentName = ComponentName.createRelative(
                 DEFAULT_COMPONENT_PACKAGE_NAME,
