@@ -353,13 +353,16 @@ public class Tuner implements AutoCloseable  {
     @Override
     public void close() {
         if (mFrontendHandle != null) {
-            nativeCloseFrontendByHandle(mFrontendHandle);
+            int res = nativeCloseFrontend(mFrontendHandle);
+            if (res != Tuner.RESULT_SUCCESS) {
+                TunerUtils.throwExceptionForResult(res, "failed to close frontend");
+            }
             mTunerResourceManager.releaseFrontend(mFrontendHandle, mClientId);
             mFrontendHandle = null;
             mFrontend = null;
         }
         if (mLnb != null) {
-            releaseLnb();
+            mLnb.close();
         }
         if (!mDescramblers.isEmpty()) {
             for (Map.Entry<Integer, Descrambler> d : mDescramblers.entrySet()) {
@@ -373,6 +376,14 @@ public class Tuner implements AutoCloseable  {
                 f.close();
             }
             mFilters.clear();
+        }
+        if (mDemuxHandle != null) {
+            int res = nativeCloseDemux(mDemuxHandle);
+            if (res != Tuner.RESULT_SUCCESS) {
+                TunerUtils.throwExceptionForResult(res, "failed to close demux");
+            }
+            mTunerResourceManager.releaseDemux(mDemuxHandle, mClientId);
+            mFrontendHandle = null;
         }
         TunerUtils.throwExceptionForResult(nativeClose(), "failed to close tuner");
     }
@@ -425,6 +436,8 @@ public class Tuner implements AutoCloseable  {
 
     private static native DemuxCapabilities nativeGetDemuxCapabilities();
 
+    private native int nativeCloseDemux(int handle);
+    private native int nativeCloseFrontend(int handle);
     private native int nativeClose();
 
 
@@ -545,10 +558,11 @@ public class Tuner implements AutoCloseable  {
     @Result
     public int tune(@NonNull FrontendSettings settings) {
         mFrontendType = settings.getType();
-        checkResource(TunerResourceManager.TUNER_RESOURCE_TYPE_FRONTEND);
-
-        mFrontendInfo = null;
-        return nativeTune(settings.getType(), settings);
+        if (checkResource(TunerResourceManager.TUNER_RESOURCE_TYPE_FRONTEND)) {
+            mFrontendInfo = null;
+            return nativeTune(settings.getType(), settings);
+        }
+        return RESULT_UNAVAILABLE;
     }
 
     /**
@@ -584,11 +598,13 @@ public class Tuner implements AutoCloseable  {
                             + "started.");
         }
         mFrontendType = settings.getType();
-        checkResource(TunerResourceManager.TUNER_RESOURCE_TYPE_FRONTEND);
-        mScanCallback = scanCallback;
-        mScanCallbackExecutor = executor;
-        mFrontendInfo = null;
-        return nativeScan(settings.getType(), settings, scanType);
+        if (checkResource(TunerResourceManager.TUNER_RESOURCE_TYPE_FRONTEND)) {
+            mScanCallback = scanCallback;
+            mScanCallbackExecutor = executor;
+            mFrontendInfo = null;
+            return nativeScan(settings.getType(), settings, scanType);
+        }
+        return RESULT_UNAVAILABLE;
     }
 
     /**
@@ -671,7 +687,9 @@ public class Tuner implements AutoCloseable  {
      * @return the id of hardware A/V sync.
      */
     public int getAvSyncHwId(@NonNull Filter filter) {
-        checkResource(TunerResourceManager.TUNER_RESOURCE_TYPE_DEMUX);
+        if (!checkResource(TunerResourceManager.TUNER_RESOURCE_TYPE_DEMUX)) {
+            return INVALID_AV_SYNC_ID;
+        }
         Integer id = nativeGetAvSyncHwId(filter);
         return id == null ? INVALID_AV_SYNC_ID : id;
     }
@@ -686,7 +704,9 @@ public class Tuner implements AutoCloseable  {
      * @return the current timestamp of hardware A/V sync.
      */
     public long getAvSyncTime(int avSyncHwId) {
-        checkResource(TunerResourceManager.TUNER_RESOURCE_TYPE_DEMUX);
+        if (!checkResource(TunerResourceManager.TUNER_RESOURCE_TYPE_DEMUX)) {
+            return INVALID_TIMESTAMP;
+        }
         Long time = nativeGetAvSyncTime(avSyncHwId);
         return time == null ? INVALID_TIMESTAMP : time;
     }
@@ -702,8 +722,10 @@ public class Tuner implements AutoCloseable  {
      */
     @Result
     public int connectCiCam(int ciCamId) {
-        checkResource(TunerResourceManager.TUNER_RESOURCE_TYPE_DEMUX);
-        return nativeConnectCiCam(ciCamId);
+        if (checkResource(TunerResourceManager.TUNER_RESOURCE_TYPE_DEMUX)) {
+            return nativeConnectCiCam(ciCamId);
+        }
+        return RESULT_UNAVAILABLE;
     }
 
     /**
@@ -715,8 +737,10 @@ public class Tuner implements AutoCloseable  {
      */
     @Result
     public int disconnectCiCam() {
-        checkResource(TunerResourceManager.TUNER_RESOURCE_TYPE_DEMUX);
-        return nativeDisconnectCiCam();
+        if (checkResource(TunerResourceManager.TUNER_RESOURCE_TYPE_DEMUX)) {
+            return nativeDisconnectCiCam();
+        }
+        return RESULT_UNAVAILABLE;
     }
 
     /**
@@ -726,7 +750,9 @@ public class Tuner implements AutoCloseable  {
      */
     @Nullable
     public FrontendInfo getFrontendInfo() {
-        checkResource(TunerResourceManager.TUNER_RESOURCE_TYPE_FRONTEND);
+        if (!checkResource(TunerResourceManager.TUNER_RESOURCE_TYPE_FRONTEND)) {
+            return null;
+        }
         if (mFrontend == null) {
             throw new IllegalStateException("frontend is not initialized");
         }
@@ -861,7 +887,9 @@ public class Tuner implements AutoCloseable  {
     public Filter openFilter(@Type int mainType, @Subtype int subType,
             @BytesLong long bufferSize, @CallbackExecutor @Nullable Executor executor,
             @Nullable FilterCallback cb) {
-        checkResource(TunerResourceManager.TUNER_RESOURCE_TYPE_DEMUX);
+        if (!checkResource(TunerResourceManager.TUNER_RESOURCE_TYPE_DEMUX)) {
+            return null;
+        }
         Filter filter = nativeOpenFilter(
                 mainType, TunerUtils.getFilterSubtype(mainType, subType), bufferSize);
         if (filter != null) {
@@ -891,12 +919,15 @@ public class Tuner implements AutoCloseable  {
         Objects.requireNonNull(executor, "executor must not be null");
         Objects.requireNonNull(cb, "LnbCallback must not be null");
         if (mLnb != null) {
+            mLnb.setCallback(executor, cb, this);
             return mLnb;
         }
         if (checkResource(TunerResourceManager.TUNER_RESOURCE_TYPE_LNB) && mLnb != null) {
             mLnb.setCallback(executor, cb, this);
+            setLnb(mLnb);
+            return mLnb;
         }
-        return mLnb;
+        return null;
     }
 
     /**
@@ -922,6 +953,7 @@ public class Tuner implements AutoCloseable  {
             }
             mLnb = newLnb;
             mLnb.setCallback(executor, cb, this);
+            setLnb(mLnb);
         }
         return mLnb;
     }
@@ -944,7 +976,9 @@ public class Tuner implements AutoCloseable  {
      */
     @Nullable
     public TimeFilter openTimeFilter() {
-        checkResource(TunerResourceManager.TUNER_RESOURCE_TYPE_DEMUX);
+        if (!checkResource(TunerResourceManager.TUNER_RESOURCE_TYPE_DEMUX)) {
+            return null;
+        }
         return nativeOpenTimeFilter();
     }
 
@@ -956,6 +990,9 @@ public class Tuner implements AutoCloseable  {
     @RequiresPermission(android.Manifest.permission.ACCESS_TV_DESCRAMBLER)
     @Nullable
     public Descrambler openDescrambler() {
+        if (!checkResource(TunerResourceManager.TUNER_RESOURCE_TYPE_DEMUX)) {
+            return null;
+        }
         return requestDescrambler();
     }
 
@@ -976,7 +1013,9 @@ public class Tuner implements AutoCloseable  {
             @NonNull OnRecordStatusChangedListener l) {
         Objects.requireNonNull(executor, "executor must not be null");
         Objects.requireNonNull(l, "OnRecordStatusChangedListener must not be null");
-        checkResource(TunerResourceManager.TUNER_RESOURCE_TYPE_DEMUX);
+        if (!checkResource(TunerResourceManager.TUNER_RESOURCE_TYPE_DEMUX)) {
+            return null;
+        }
         DvrRecorder dvr = nativeOpenDvrRecorder(bufferSize);
         dvr.setListener(executor, l);
         return dvr;
@@ -999,7 +1038,9 @@ public class Tuner implements AutoCloseable  {
             @NonNull OnPlaybackStatusChangedListener l) {
         Objects.requireNonNull(executor, "executor must not be null");
         Objects.requireNonNull(l, "OnPlaybackStatusChangedListener must not be null");
-        checkResource(TunerResourceManager.TUNER_RESOURCE_TYPE_DEMUX);
+        if (!checkResource(TunerResourceManager.TUNER_RESOURCE_TYPE_DEMUX)) {
+            return null;
+        }
         DvrPlayback dvr = nativeOpenDvrPlayback(bufferSize);
         dvr.setListener(executor, l);
         return dvr;
