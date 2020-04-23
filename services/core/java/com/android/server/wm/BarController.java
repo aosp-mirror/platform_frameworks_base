@@ -168,7 +168,7 @@ public class BarController {
     }
 
     boolean isTransparentAllowed(WindowState win) {
-        return win == null || !win.isLetterboxedOverlappingWith(mContentFrame);
+        return win == null || win.letterboxNotIntersectsOrFullyContains(mContentFrame);
     }
 
     boolean setBarShowingLw(final boolean show) {
