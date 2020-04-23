@@ -16,6 +16,8 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_DREAM;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
@@ -270,6 +272,28 @@ public class ActivityDisplayTests extends ActivityTestsBase {
         anotherAlwaysOnTopStack.setWindowingMode(WINDOWING_MODE_FREEFORM);
         assertTrue(anotherAlwaysOnTopStack.isAlwaysOnTop());
         assertEquals(anotherAlwaysOnTopStack, taskDisplayArea.getStackAt(topPosition - 1));
+
+        final ActivityStack dreamStack = taskDisplayArea.createStack(
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_DREAM, true /* onTop */);
+        assertEquals(taskDisplayArea, dreamStack.getDisplayArea());
+        assertTrue(dreamStack.isAlwaysOnTop());
+        topPosition = taskDisplayArea.getStackCount() - 1;
+        // Ensure dream shows above all activities, including PiP
+        assertEquals(dreamStack, taskDisplayArea.getTopStack());
+        assertEquals(pinnedStack, taskDisplayArea.getStackAt(topPosition - 1));
+
+        final ActivityStack assistStack = taskDisplayArea.createStack(
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_ASSISTANT, true /* onTop */);
+        assertEquals(taskDisplayArea, assistStack.getDisplayArea());
+        assertFalse(assistStack.isAlwaysOnTop());
+        topPosition = taskDisplayArea.getStackCount() - 1;
+
+        // Ensure Assistant shows as a non-always-on-top activity when config_assistantOnTopOfDream
+        // is false and on top of everything when true.
+        final boolean isAssistantOnTop = mContext.getResources()
+                .getBoolean(com.android.internal.R.bool.config_assistantOnTopOfDream);
+        assertEquals(assistStack, taskDisplayArea.getStackAt(
+                    isAssistantOnTop ? topPosition : topPosition - 4));
     }
 
     @Test
