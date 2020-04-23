@@ -6573,4 +6573,16 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
             fail(e.getMessage());
         }
     }
+
+    @Test
+    public void testRecordMessages() throws RemoteException {
+        NotificationRecord nr =
+                generateMessageBubbleNotifRecord(mTestNotificationChannel,
+                        "testRecordMessages");
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, nr.getSbn().getTag(),
+                nr.getSbn().getId(), nr.getSbn().getNotification(), nr.getSbn().getUserId());
+        waitForIdle();
+
+        assertTrue(mBinderService.hasSentMessage(PKG, mUid));
+    }
 }
