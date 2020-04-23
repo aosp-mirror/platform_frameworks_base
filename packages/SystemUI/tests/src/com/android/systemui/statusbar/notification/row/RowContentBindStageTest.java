@@ -147,30 +147,6 @@ public class RowContentBindStageTest extends SysuiTestCase {
     }
 
     @Test
-    public void testSetUseGroupInChild() {
-        // GIVEN a view with all content bound.
-        RowContentBindParams params = mRowContentBindStage.getStageParams(mEntry);
-        params.requireContentViews(FLAG_CONTENT_VIEW_ALL);
-        params.clearDirtyContentViews();
-
-        // WHEN use group is set and stage executed.
-        params.setUseChildInGroup(true);
-        mRowContentBindStage.executeStage(mEntry, mRow, (en) -> { });
-
-        // THEN binder is called with use group view and contracted/expanded are called to bind.
-        ArgumentCaptor<BindParams> bindParamsCaptor = ArgumentCaptor.forClass(BindParams.class);
-        verify(mBinder).bindContent(
-                eq(mEntry),
-                any(),
-                eq(FLAG_CONTENT_VIEW_CONTRACTED | FLAG_CONTENT_VIEW_EXPANDED),
-                bindParamsCaptor.capture(),
-                anyBoolean(),
-                any());
-        BindParams usedParams = bindParamsCaptor.getValue();
-        assertTrue(usedParams.isChildInGroup);
-    }
-
-    @Test
     public void testSetUseIncreasedHeight() {
         // GIVEN a view with all content bound.
         RowContentBindParams params = mRowContentBindStage.getStageParams(mEntry);
