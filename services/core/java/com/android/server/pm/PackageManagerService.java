@@ -11210,8 +11210,16 @@ public class PackageManagerService extends IPackageManager.Stub
         boolean needToDeriveAbi = (scanFlags & SCAN_FIRST_BOOT_OR_UPGRADE) != 0;
         if (!needToDeriveAbi) {
             if (pkgSetting != null) {
-                primaryCpuAbiFromSettings = pkgSetting.primaryCpuAbiString;
-                secondaryCpuAbiFromSettings = pkgSetting.secondaryCpuAbiString;
+                // TODO(b/154610922): if it is not first boot or upgrade, we should directly use
+                // API info from existing package setting. However, stub packages currently do not
+                // preserve ABI info, thus the special condition check here. Remove the special
+                // check after we fix the stub generation.
+                if (pkgSetting.pkg != null && pkgSetting.pkg.isStub()) {
+                    needToDeriveAbi = true;
+                } else {
+                    primaryCpuAbiFromSettings = pkgSetting.primaryCpuAbiString;
+                    secondaryCpuAbiFromSettings = pkgSetting.secondaryCpuAbiString;
+                }
             } else {
                 // Re-scanning a system package after uninstalling updates; need to derive ABI
                 needToDeriveAbi = true;
