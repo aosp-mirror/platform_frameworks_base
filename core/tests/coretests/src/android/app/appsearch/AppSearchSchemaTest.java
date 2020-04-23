@@ -22,13 +22,12 @@ import static org.testng.Assert.assertThrows;
 import static org.testng.Assert.expectThrows;
 
 import android.app.appsearch.AppSearchSchema.PropertyConfig;
+import android.app.appsearch.proto.IndexingConfig;
+import android.app.appsearch.proto.PropertyConfigProto;
+import android.app.appsearch.proto.SchemaTypeConfigProto;
+import android.app.appsearch.proto.TermMatchType;
 
 import androidx.test.filters.SmallTest;
-
-import com.google.android.icing.proto.IndexingConfig.TokenizerType;
-import com.google.android.icing.proto.PropertyConfigProto;
-import com.google.android.icing.proto.SchemaTypeConfigProto;
-import com.google.android.icing.proto.TermMatchType;
 
 import org.junit.Test;
 
@@ -58,8 +57,8 @@ public class AppSearchSchemaTest {
                         .setDataType(PropertyConfigProto.DataType.Code.STRING)
                         .setCardinality(PropertyConfigProto.Cardinality.Code.OPTIONAL)
                         .setIndexingConfig(
-                                com.google.android.icing.proto.IndexingConfig.newBuilder()
-                                        .setTokenizerType(TokenizerType.Code.PLAIN)
+                                android.app.appsearch.proto.IndexingConfig.newBuilder()
+                                        .setTokenizerType(IndexingConfig.TokenizerType.Code.PLAIN)
                                         .setTermMatchType(TermMatchType.Code.PREFIX)
                         )
                 ).addProperties(PropertyConfigProto.newBuilder()
@@ -67,8 +66,10 @@ public class AppSearchSchemaTest {
                         .setDataType(PropertyConfigProto.DataType.Code.STRING)
                         .setCardinality(PropertyConfigProto.Cardinality.Code.OPTIONAL)
                         .setIndexingConfig(
-                                com.google.android.icing.proto.IndexingConfig.newBuilder()
-                                        .setTokenizerType(TokenizerType.Code.PLAIN)
+                                android.app.appsearch.proto.IndexingConfig.newBuilder()
+                                        .setTokenizerType(
+                                                android.app.appsearch.proto.IndexingConfig
+                                                        .TokenizerType.Code.PLAIN)
                                         .setTermMatchType(TermMatchType.Code.PREFIX)
                         )
                 ).build();
@@ -100,8 +101,10 @@ public class AppSearchSchemaTest {
                         .setDataType(PropertyConfigProto.DataType.Code.STRING)
                         .setCardinality(PropertyConfigProto.Cardinality.Code.REPEATED)
                         .setIndexingConfig(
-                                com.google.android.icing.proto.IndexingConfig.newBuilder()
-                                        .setTokenizerType(TokenizerType.Code.PLAIN)
+                                android.app.appsearch.proto.IndexingConfig.newBuilder()
+                                        .setTokenizerType(
+                                                android.app.appsearch.proto.IndexingConfig
+                                                        .TokenizerType.Code.PLAIN)
                                         .setTermMatchType(TermMatchType.Code.PREFIX)
                         )
                 ).addProperties(PropertyConfigProto.newBuilder()
@@ -109,8 +112,10 @@ public class AppSearchSchemaTest {
                         .setDataType(PropertyConfigProto.DataType.Code.INT64)
                         .setCardinality(PropertyConfigProto.Cardinality.Code.OPTIONAL)
                         .setIndexingConfig(
-                                com.google.android.icing.proto.IndexingConfig.newBuilder()
-                                        .setTokenizerType(TokenizerType.Code.NONE)
+                                android.app.appsearch.proto.IndexingConfig.newBuilder()
+                                        .setTokenizerType(
+                                                android.app.appsearch.proto.IndexingConfig
+                                                        .TokenizerType.Code.NONE)
                                         .setTermMatchType(TermMatchType.Code.UNKNOWN)
                         )
                 ).build();

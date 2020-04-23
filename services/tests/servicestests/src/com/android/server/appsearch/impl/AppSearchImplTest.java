@@ -26,11 +26,11 @@ import android.os.UserHandle;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
-import com.google.android.icing.proto.IndexingConfig;
-import com.google.android.icing.proto.PropertyConfigProto;
-import com.google.android.icing.proto.SchemaProto;
-import com.google.android.icing.proto.SchemaTypeConfigProto;
-import com.google.android.icing.proto.TermMatchType;
+import com.android.server.appsearch.proto.IndexingConfig;
+import com.android.server.appsearch.proto.PropertyConfigProto;
+import com.android.server.appsearch.proto.SchemaProto;
+import com.android.server.appsearch.proto.SchemaTypeConfigProto;
+import com.android.server.appsearch.proto.TermMatchType;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
