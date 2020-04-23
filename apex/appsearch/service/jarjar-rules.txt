@@ -1,0 +1,2 @@
+rule com.google.protobuf.** com.android.server.appsearch.protobuf.@1
+rule com.google.android.icing.proto.** com.android.server.appsearch.proto.@1
