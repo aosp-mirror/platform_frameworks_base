@@ -1395,7 +1395,7 @@ bool IncrementalService::configureNativeBinaries(StorageId storage, std::string_
         auto startFileTs = Clock::now();
 
         const auto libName = path::basename(fileName);
-        const auto targetLibPath = path::join(libDirRelativePath, libName);
+        auto targetLibPath = path::join(libDirRelativePath, libName);
         const auto targetLibPathAbsolute = normalizePathToStorage(*ifs, storage, targetLibPath);
         // If the extract file already exists, skip
         if (access(targetLibPathAbsolute.c_str(), F_OK) == 0) {
