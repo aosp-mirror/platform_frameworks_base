@@ -1255,6 +1255,7 @@ public class PreferencesHelper implements RankingConfig {
                 for (int i = 0; i < N; i++) {
                     final NotificationChannel nc = p.channels.valueAt(i);
                     if (!TextUtils.isEmpty(nc.getConversationId()) && !nc.isDeleted()
+                            && !nc.isDemoted()
                             && (nc.isImportantConversation() || !onlyImportant)) {
                         ConversationChannelWrapper conversation = new ConversationChannelWrapper();
                         conversation.setPkg(p.pkg);
