@@ -63,6 +63,7 @@ import com.android.systemui.statusbar.notification.NotificationFilter;
 import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationRankingManager;
+import com.android.systemui.statusbar.notification.collection.inflation.LowPriorityInflationHelper;
 import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinderImpl;
 import com.android.systemui.statusbar.notification.collection.provider.HighPriorityProvider;
 import com.android.systemui.statusbar.notification.icon.IconBuilder;
@@ -264,7 +265,8 @@ public class NotificationEntryManagerInflationTest extends SysuiTestCase {
                 new IconManager(
                         mEntryManager,
                         mock(LauncherApps.class),
-                        new IconBuilder(mContext)));
+                        new IconBuilder(mContext)),
+                mock(LowPriorityInflationHelper.class));
 
         mEntryManager.setUpWithPresenter(mPresenter);
         mEntryManager.addNotificationEntryListener(mEntryListener);
