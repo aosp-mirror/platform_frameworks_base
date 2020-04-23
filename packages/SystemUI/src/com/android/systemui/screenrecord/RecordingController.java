@@ -59,15 +59,15 @@ public class RecordingController
     }
 
     /**
-     * Show dialog of screen recording options to user.
+     * Get an intent to show screen recording options to the user.
      */
-    public void launchRecordPrompt() {
+    public Intent getPromptIntent() {
         final ComponentName launcherComponent = new ComponentName(SYSUI_PACKAGE,
                 SYSUI_SCREENRECORD_LAUNCHER);
         final Intent intent = new Intent();
         intent.setComponent(launcherComponent);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        mContext.startActivity(intent);
+        return intent;
     }
 
     /**
