@@ -31,6 +31,7 @@ import static com.android.server.wm.DisplayAreaProto.WINDOW_CONTAINER;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_ORIENTATION;
 import static com.android.server.wm.WindowContainerChildProto.DISPLAY_AREA;
 
+import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.util.proto.ProtoOutputStream;
 import android.window.DisplayAreaInfo;
@@ -152,6 +153,14 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
     void sendDisplayAreaVanished() {
         if (mOrganizer == null) return;
         mOrganizerController.onDisplayAreaVanished(mOrganizer, this);
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newParentConfig) {
+        super.onConfigurationChanged(newParentConfig);
+        if (mOrganizer != null) {
+            mOrganizerController.onDisplayAreaInfoChanged(mOrganizer, this);
+        }
     }
 
     @Override
