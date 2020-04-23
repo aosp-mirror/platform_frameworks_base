@@ -16,6 +16,7 @@
 package android.app;
 
 import static android.view.WindowManagerGlobal.ADD_OKAY;
+import static android.view.WindowManagerGlobal.ADD_TOO_MANY_TOKENS;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -80,6 +81,11 @@ public class WindowContext extends ContextWrapper {
         }  catch (RemoteException e) {
             mOwnsToken = false;
             throw e.rethrowFromSystemServer();
+        }
+        if (result == ADD_TOO_MANY_TOKENS) {
+            throw new UnsupportedOperationException("createWindowContext failed! Too many unused "
+                    + "window contexts. Please see Context#createWindowContext documentation for "
+                    + "detail.");
         }
         mOwnsToken = result == ADD_OKAY;
         Reference.reachabilityFence(this);
