@@ -2278,6 +2278,12 @@ class SettingsProtoDumpUtil {
                 SecureSettingsProto.ParentalControl.REDIRECT_URL);
         p.end(parentalControlToken);
 
+        final long powerMenuPrivacyToken = p.start(SecureSettingsProto.POWER_MENU_PRIVACY);
+        dumpSetting(s, p,
+                Settings.Secure.POWER_MENU_LOCKED_SHOW_CONTENT,
+                SecureSettingsProto.PowerMenuPrivacy.SHOW);
+        p.end(powerMenuPrivacyToken);
+
         final long printServiceToken = p.start(SecureSettingsProto.PRINT_SERVICE);
         dumpSetting(s, p,
                 Settings.Secure.PRINT_SERVICE_SEARCH_URI,

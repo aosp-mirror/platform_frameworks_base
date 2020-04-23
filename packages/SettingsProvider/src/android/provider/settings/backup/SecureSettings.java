@@ -97,6 +97,7 @@ public class SecureSettings {
         Settings.Secure.SYSTEM_NAVIGATION_KEYS_ENABLED,
         Settings.Secure.QS_TILES,
         Settings.Secure.CONTROLS_ENABLED,
+        Settings.Secure.POWER_MENU_LOCKED_SHOW_CONTENT,
         Settings.Secure.DOZE_ENABLED,
         Settings.Secure.DOZE_ALWAYS_ON,
         Settings.Secure.DOZE_PICK_UP_GESTURE,
