@@ -170,8 +170,13 @@ class InsetsStateController {
         }
 
         if (aboveIme) {
-            state = new InsetsState(state);
-            state.setSourceVisible(ITYPE_IME, false);
+            InsetsSource imeSource = state.peekSource(ITYPE_IME);
+            if (imeSource != null && imeSource.isVisible()) {
+                imeSource = new InsetsSource(imeSource);
+                imeSource.setVisible(false);
+                state = new InsetsState(state);
+                state.addSource(imeSource);
+            }
         }
 
         return state;
