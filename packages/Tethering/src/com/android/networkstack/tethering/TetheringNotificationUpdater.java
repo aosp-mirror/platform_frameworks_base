@@ -267,7 +267,7 @@ public class TetheringNotificationUpdater {
                 null /* options */);
 
         showNotification(R.drawable.stat_sys_tether_general, title, message,
-                RESTRICTED_NOTIFICATION_ID, pi, new Action[0]);
+                RESTRICTED_NOTIFICATION_ID, false /* ongoing */, pi, new Action[0]);
     }
 
     private void notifyTetheringNoUpstream() {
@@ -288,7 +288,7 @@ public class TetheringNotificationUpdater {
         final Action action = new Action.Builder(NO_ICON_ID, disableButton, pi).build();
 
         showNotification(R.drawable.stat_sys_tether_general, title, message,
-                NO_UPSTREAM_NOTIFICATION_ID, null /* pendingIntent */, action);
+                NO_UPSTREAM_NOTIFICATION_ID, true /* ongoing */, null /* pendingIntent */, action);
     }
 
     private boolean setupRoamingNotification() {
@@ -310,7 +310,7 @@ public class TetheringNotificationUpdater {
                 null /* options */);
 
         showNotification(R.drawable.stat_sys_tether_general, title, message,
-                ROAMING_NOTIFICATION_ID, pi, new Action[0]);
+                ROAMING_NOTIFICATION_ID, true /* ongoing */, pi, new Action[0]);
         return NOTIFY_DONE;
     }
 
@@ -327,14 +327,14 @@ public class TetheringNotificationUpdater {
     }
 
     private void showNotification(@DrawableRes final int iconId, @NonNull final String title,
-            @NonNull final String message, @NotificationId final int id, @Nullable PendingIntent pi,
-            @NonNull final Action... actions) {
+            @NonNull final String message, @NotificationId final int id, final boolean ongoing,
+            @Nullable PendingIntent pi, @NonNull final Action... actions) {
         final Notification notification =
                 new Notification.Builder(mContext, mChannel.getId())
                         .setSmallIcon(iconId)
                         .setContentTitle(title)
                         .setContentText(message)
-                        .setOngoing(true)
+                        .setOngoing(ongoing)
                         .setColor(mContext.getColor(
                                 android.R.color.system_notification_accent_color))
                         .setVisibility(Notification.VISIBILITY_PUBLIC)
