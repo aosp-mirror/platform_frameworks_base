@@ -72,7 +72,7 @@ public class ActivatableNotificationViewController {
             } else {
                 mView.makeInactive(true /* animate */);
             }
-        }, mView::superPerformClick, mView::handleSlideBack,
+        }, mView::performClick, mView::handleSlideBack,
                 mFalsingManager::onNotificationDoubleTap);
         mView.setOnTouchListener(mTouchHandler);
         mView.setTouchHandler(mTouchHandler);
