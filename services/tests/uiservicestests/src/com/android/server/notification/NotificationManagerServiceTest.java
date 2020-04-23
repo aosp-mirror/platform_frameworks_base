@@ -6053,6 +6053,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testNotificationBubbles_flagRemoved_whenShortcutRemoved()
             throws RemoteException {
+        final String shortcutId = "someshortcutId";
         setUpPrefsForBubbles(PKG, mUid,
                 true /* global */,
                 BUBBLE_PREFERENCE_ALL /* app */,
@@ -6063,9 +6064,10 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         // Messaging notification with shortcut info
         Notification.BubbleMetadata metadata =
-                new Notification.BubbleMetadata.Builder("someshortcutId").build();
+                new Notification.BubbleMetadata.Builder(shortcutId).build();
         Notification.Builder nb = getMessageStyleNotifBuilder(false /* addDefaultMetadata */,
                 null /* groupKey */, false /* isSummary */);
+        nb.setShortcutId(shortcutId);
         nb.setBubbleMetadata(metadata);
         StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, 1,
                 "tag", mUid, 0, nb.build(), new UserHandle(mUid), null, 0);
@@ -6075,7 +6077,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         List<ShortcutInfo> shortcutInfos = new ArrayList<>();
         ShortcutInfo info = mock(ShortcutInfo.class);
         when(info.getPackage()).thenReturn(PKG);
-        when(info.getId()).thenReturn("someshortcutId");
+        when(info.getId()).thenReturn(shortcutId);
         when(info.getUserId()).thenReturn(USER_SYSTEM);
         when(info.isLongLived()).thenReturn(true);
         when(info.isEnabled()).thenReturn(true);
@@ -6097,6 +6099,11 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         // yes allowed, yes messaging w/shortcut, yes bubble
         Notification notif = mService.getNotificationRecord(nr.getSbn().getKey()).getNotification();
         assertTrue(notif.isBubbleNotification());
+
+        // Make sure the shortcut is cached.
+        verify(mShortcutServiceInternal).cacheShortcuts(
+                anyInt(), any(), eq(PKG), eq(Collections.singletonList(shortcutId)),
+                eq(USER_SYSTEM));
 
         // Test: Remove the shortcut
         when(mLauncherApps.getShortcuts(any(), any())).thenReturn(null);
@@ -6119,6 +6126,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testNotificationBubbles_shortcut_stopListeningWhenNotifRemoved()
             throws RemoteException {
+        final String shortcutId = "someshortcutId";
         setUpPrefsForBubbles(PKG, mUid,
                 true /* global */,
                 BUBBLE_PREFERENCE_ALL /* app */,
@@ -6129,9 +6137,10 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         // Messaging notification with shortcut info
         Notification.BubbleMetadata metadata = new Notification.BubbleMetadata.Builder(
-                "someshortcutId").build();
+                shortcutId).build();
         Notification.Builder nb = getMessageStyleNotifBuilder(false /* addDefaultMetadata */,
                 null /* groupKey */, false /* isSummary */);
+        nb.setShortcutId(shortcutId);
         nb.setBubbleMetadata(metadata);
         StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, 1,
                 "tag", mUid, 0, nb.build(), new UserHandle(mUid), null, 0);
@@ -6141,7 +6150,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         List<ShortcutInfo> shortcutInfos = new ArrayList<>();
         ShortcutInfo info = mock(ShortcutInfo.class);
         when(info.getPackage()).thenReturn(PKG);
-        when(info.getId()).thenReturn("someshortcutId");
+        when(info.getId()).thenReturn(shortcutId);
         when(info.getUserId()).thenReturn(USER_SYSTEM);
         when(info.isLongLived()).thenReturn(true);
         when(info.isEnabled()).thenReturn(true);
@@ -6163,6 +6172,11 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         // yes allowed, yes messaging w/shortcut, yes bubble
         Notification notif = mService.getNotificationRecord(nr.getSbn().getKey()).getNotification();
         assertTrue(notif.isBubbleNotification());
+
+        // Make sure the shortcut is cached.
+        verify(mShortcutServiceInternal).cacheShortcuts(
+                anyInt(), any(), eq(PKG), eq(Collections.singletonList(shortcutId)),
+                eq(USER_SYSTEM));
 
         // Test: Remove the notification
         mBinderService.cancelNotificationWithTag(PKG, PKG, nr.getSbn().getTag(),
