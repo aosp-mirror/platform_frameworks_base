@@ -29,6 +29,7 @@ import android.widget.LinearLayout;
 
 import com.android.systemui.R;
 import com.android.systemui.media.MediaControlPanel;
+import com.android.systemui.plugins.ActivityStarter;
 
 import java.util.concurrent.Executor;
 
@@ -48,11 +49,12 @@ public class QuickQSMediaPlayer extends MediaControlPanel {
      * @param parent
      * @param foregroundExecutor
      * @param backgroundExecutor
+     * @param activityStarter
      */
     public QuickQSMediaPlayer(Context context, ViewGroup parent, Executor foregroundExecutor,
-            Executor backgroundExecutor) {
+            Executor backgroundExecutor, ActivityStarter activityStarter) {
         super(context, parent, null, R.layout.qqs_media_panel, QQS_ACTION_IDS,
-                foregroundExecutor, backgroundExecutor);
+                foregroundExecutor, backgroundExecutor, activityStarter);
     }
 
     /**
