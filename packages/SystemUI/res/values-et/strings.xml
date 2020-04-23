@@ -87,7 +87,7 @@
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"Piiratud salvestusruumi tõttu ei saa ekraanipilti salvestada"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Rakendus või teie organisatsioon ei luba ekraanipilte jäädvustada"</string>
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"Sule ekraanipilt"</string>
-    <string name="screenshot_preview_description" msgid="669177537416980449">"Ava ekraanipilt"</string>
+    <string name="screenshot_preview_description" msgid="7606510140714080474">"Ekraanipildi eelvaade"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Ekraanisalvesti"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Pooleli märguanne ekraanikuva salvestamise seansi puhul"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Kas alustada salvestamist?"</string>
@@ -100,7 +100,7 @@
     <string name="screenrecord_start" msgid="330991441575775004">"Alusta"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"Ekraanikuva salvestamine"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"Ekraanikuva ja heli salvestamine"</string>
-    <string name="screenrecord_taps_label" msgid="1595690528298857649">"Kuva ekraanikuva puudutused"</string>
+    <string name="screenrecord_taps_label" msgid="1595690528298857649">"Kuva ekraanipuudutused"</string>
     <string name="screenrecord_stop_text" msgid="6549288689506057686">"Puudutage peatamiseks"</string>
     <string name="screenrecord_stop_label" msgid="72699670052087989">"Peata"</string>
     <string name="screenrecord_pause_label" msgid="6004054907104549857">"Peata"</string>
@@ -427,7 +427,7 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC on keelatud"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC on lubatud"</string>
-    <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"Ekraanikirje"</string>
+    <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"Ekraanisalvestus"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Alustage"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Peatage"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Rakenduste vahetamiseks pühkige üles"</string>
@@ -707,9 +707,9 @@
     <string name="notification_bubble_title" msgid="8330481035191903164">"Mull"</string>
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"Aitab teil keskenduda (heli või vibreerimine puudub)."</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"Haarab heli või vibreerimisega teie tähelepanu."</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="6298026344552480458">"Haarab heli või vibreerimisega teie tähelepanu. Rakenduse <xliff:g id="APP_NAME">%1$s</xliff:g> vestlused kuvatakse vaikimisi mullis."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Hoiab teie tähelepanu hõljuva otseteega selle sisu juurde."</string>
     <string name="notification_channel_summary_priority" msgid="7415770044553264622">"Kuvatakse vestluste jaotise ülaosas mullina."</string>
-    <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"Kõik rakenduse <xliff:g id="APP_NAME_0">%1$s</xliff:g> vestlused kuvatakse vaikimisi mullina. Halda rakenduses <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Seaded"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioriteet"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Hiljutisi mulle pole"</string>
@@ -945,7 +945,7 @@
     <string name="instant_apps_title" msgid="8942706782103036910">"Rakendus <xliff:g id="APP">%1$s</xliff:g> töötab"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"Rakendus avati installimata."</string>
     <string name="instant_apps_message_with_help" msgid="1816952263531203932">"Rakendus avati installimata. Lisateabe saamiseks puudutage."</string>
-    <string name="app_info" msgid="5153758994129963243">"Rakenduse teave"</string>
+    <string name="app_info" msgid="5153758994129963243">"Rakenduste teave"</string>
     <string name="go_to_web" msgid="636673528981366511">"Ava brauser"</string>
     <string name="mobile_data" msgid="4564407557775397216">"Mobiilne andmeside"</string>
     <string name="mobile_data_text_format" msgid="6806501540022589786">"<xliff:g id="ID_1">%1$s</xliff:g> – <xliff:g id="ID_2">%2$s</xliff:g>"</string>
@@ -962,7 +962,7 @@
     <string name="running_foreground_services_title" msgid="5137313173431186685">"Rakendusi käitatakse taustal"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"Aku ja andmekasutuse üksikasjade nägemiseks puudutage"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"Kas lülitada mobiilne andmeside välja?"</string>
-    <string name="mobile_data_disable_message" msgid="8604966027899770415">"Teil ei ole operaatori <xliff:g id="CARRIER">%s</xliff:g> kaudu juurdepääsu andmesidele ega Internetile. Internet on saadaval ainult WiFi kaudu."</string>
+    <string name="mobile_data_disable_message" msgid="8604966027899770415">"Pärast seda pole teil operaatori <xliff:g id="CARRIER">%s</xliff:g> kaudu juurdepääsu andmesidele ega internetile. Internet on saadaval ainult WiFi kaudu."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"teie operaator"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"Seaded ei saa teie vastust kinnitada, sest rakendus varjab loataotlust."</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"Kas lubada rakendusel <xliff:g id="APP_0">%1$s</xliff:g> näidata rakenduse <xliff:g id="APP_2">%2$s</xliff:g> lõike?"</string>
@@ -999,15 +999,22 @@
     <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Juhtige mulle igal ajal"</string>
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Selle rakenduse puhul mullide väljalülitamiseks puudutage valikut Haldamine"</string>
     <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"Selge"</string>
+    <!-- no translation found for bubbles_app_settings (5779443644062348657) -->
+    <skip />
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Süsteemis navigeerimine on värskendatud. Muutmiseks avage jaotis Seaded."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Süsteemi navigeerimise värskendamiseks avage jaotis Seaded"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Ooterežiim"</string>
+    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Kuvatakse vestluste jaotise kohal"</string>
+    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Lukustuskuval kuvatakse profiilipilt"</string>
+    <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Kuvatakse rakenduste kohal hõljuva mullina"</string>
+    <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Funktsiooni Mitte segada katkestamine"</string>
+    <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"Selge"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Suurendamisakna ülekate"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Suurendamisaken"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Suurendamisakna juhtelemendid"</string>
-    <string name="quick_controls_title" msgid="6839108006171302273">"Seadme juhtelemendid"</string>
+    <string name="quick_controls_title" msgid="6839108006171302273">"Seadmete juhtimisvidinad"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Lisage juhtelemendid ühendatud seadmete jaoks"</string>
-    <string name="quick_controls_setup_title" msgid="8901436655997849822">"Seadme juhtelementide seadistamine"</string>
+    <string name="quick_controls_setup_title" msgid="8901436655997849822">"Seadmete juhtimisvidinate seadistamine"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Juhtelementidele juurdepääsemiseks hoidke all toitenuppu"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Valige juhtelementide lisamiseks rakendus"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
@@ -1016,13 +1023,11 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Juhtnupud"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Valige toitemenüüs saadaolevad juhtelemendid"</string>
-    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
-    <skip />
-    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
-    <skip />
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Juhtnuppude ümberpaigutamiseks hoidke neid all ja lohistage"</string>
+    <string name="controls_favorite_removed" msgid="5276978408529217272">"Kõik juhtnupud eemaldati"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Kõikide juhtelementide loendit ei saanud laadida."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Muu"</string>
-    <string name="controls_dialog_title" msgid="2343565267424406202">"Seadme juhtelementide hulka lisamine"</string>
+    <string name="controls_dialog_title" msgid="2343565267424406202">"Seadmete juhtimisvidinate hulka lisamine"</string>
     <string name="controls_dialog_ok" msgid="7011816381344485651">"Lisa lemmikutesse"</string>
     <string name="controls_dialog_message" msgid="6292099631702047540">"<xliff:g id="APP">%s</xliff:g> soovitas selle juhtnupu teie lemmikutesse lisada."</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"Juhtelemente värskendati"</string>
