@@ -372,7 +372,9 @@ public class TaskRecordTests extends ActivityTestsBase {
         final int longSide = 1200;
         final int shortSide = 600;
         final Rect parentBounds = new Rect(0, 0, 250, 500);
+        final Rect parentAppBounds = new Rect(0, 0, 250, 480);
         parentConfig.windowConfiguration.setBounds(parentBounds);
+        parentConfig.windowConfiguration.setAppBounds(parentAppBounds);
         parentConfig.densityDpi = 400;
         parentConfig.screenHeightDp = (parentBounds.bottom * 160) / parentConfig.densityDpi; // 200
         parentConfig.screenWidthDp = (parentBounds.right * 160) / parentConfig.densityDpi; // 100
@@ -383,21 +385,25 @@ public class TaskRecordTests extends ActivityTestsBase {
 
         assertEquals(parentConfig.screenHeightDp, inOutConfig.screenHeightDp);
         assertEquals(parentConfig.screenWidthDp, inOutConfig.screenWidthDp);
+        assertEquals(parentAppBounds, inOutConfig.windowConfiguration.getAppBounds());
         assertEquals(Configuration.ORIENTATION_PORTRAIT, inOutConfig.orientation);
 
         // If bounds are overridden, config properties should be made to match. Surface hierarchy
         // will crop for policy.
         inOutConfig.setToDefaults();
-        inOutConfig.windowConfiguration.getBounds().set(0, 0, shortSide, longSide);
-        // By default, the parent bounds should limit the existing input bounds.
+        final Rect largerPortraitBounds = new Rect(0, 0, shortSide, longSide);
+        inOutConfig.windowConfiguration.setBounds(largerPortraitBounds);
         task.computeConfigResourceOverrides(inOutConfig, parentConfig);
-
+        // The override bounds are beyond the parent, the out appBounds should not be intersected
+        // by parent appBounds.
+        assertEquals(largerPortraitBounds, inOutConfig.windowConfiguration.getAppBounds());
         assertEquals(longSide, inOutConfig.screenHeightDp * parentConfig.densityDpi / 160);
         assertEquals(shortSide, inOutConfig.screenWidthDp * parentConfig.densityDpi / 160);
 
         inOutConfig.setToDefaults();
         // Landscape bounds.
-        inOutConfig.windowConfiguration.getBounds().set(0, 0, longSide, shortSide);
+        final Rect largerLandscapeBounds = new Rect(0, 0, longSide, shortSide);
+        inOutConfig.windowConfiguration.setBounds(largerLandscapeBounds);
 
         // Setup the display with a top stable inset. The later assertion will ensure the inset is
         // excluded from screenHeightDp.
@@ -415,6 +421,7 @@ public class TaskRecordTests extends ActivityTestsBase {
                 new ActivityRecord.CompatDisplayInsets(display, task);
         task.computeConfigResourceOverrides(inOutConfig, parentConfig, compatIntsets);
 
+        assertEquals(largerLandscapeBounds, inOutConfig.windowConfiguration.getAppBounds());
         assertEquals((shortSide - statusBarHeight) * DENSITY_DEFAULT / parentConfig.densityDpi,
                 inOutConfig.screenHeightDp);
         assertEquals(longSide * DENSITY_DEFAULT / parentConfig.densityDpi,
