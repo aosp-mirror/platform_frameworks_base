@@ -798,7 +798,7 @@
     <string name="relationTypeAssistant" msgid="4057605157116589315">"助理"</string>
     <string name="relationTypeBrother" msgid="7141662427379247820">"兄弟"</string>
     <string name="relationTypeChild" msgid="9076258911292693601">"子女"</string>
-    <string name="relationTypeDomesticPartner" msgid="7825306887697559238">"同居人"</string>
+    <string name="relationTypeDomesticPartner" msgid="7825306887697559238">"同居伴侶"</string>
     <string name="relationTypeFather" msgid="3856225062864790596">"父親"</string>
     <string name="relationTypeFriend" msgid="3192092625893980574">"好友"</string>
     <string name="relationTypeManager" msgid="2272860813153171857">"經理"</string>
@@ -1457,12 +1457,9 @@
     <string name="gpsNotifMessage" msgid="7346649122793758032">"要求者：<xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
     <string name="gpsVerifYes" msgid="3719843080744112940">"是"</string>
     <string name="gpsVerifNo" msgid="1671201856091564741">"否"</string>
-    <!-- no translation found for gnss_nfw_notification_title (5004493772059563423) -->
-    <skip />
-    <!-- no translation found for gnss_nfw_notification_message_oem (3683958907027107969) -->
-    <skip />
-    <!-- no translation found for gnss_nfw_notification_message_carrier (815888995791562151) -->
-    <skip />
+    <string name="gnss_nfw_notification_title" msgid="5004493772059563423">"外部實體存取了你的緊急位置資訊"</string>
+    <string name="gnss_nfw_notification_message_oem" msgid="3683958907027107969">"你的裝置製造商在最近的緊急工作階段期間存取了你的位置資訊"</string>
+    <string name="gnss_nfw_notification_message_carrier" msgid="815888995791562151">"你的電信業者在最近的緊急工作階段期間存取了你的位置資訊"</string>
     <string name="sync_too_many_deletes" msgid="6999440774578705300">"已超過刪除上限"</string>
     <string name="sync_too_many_deletes_desc" msgid="7409327940303504440">"帳戶 <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g> 的<xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>會刪除 <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> 個項目。你要如何處理？"</string>
     <string name="sync_really_delete" msgid="5657871730315579051">"刪除這些項目"</string>

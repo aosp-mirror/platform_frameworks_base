@@ -239,7 +239,7 @@
     <string name="global_action_power_off" msgid="4404936470711393203">"പവർ ഓഫാക്കുക"</string>
     <string name="global_action_power_options" msgid="1185286119330160073">"പവർ"</string>
     <string name="global_action_restart" msgid="4678451019561687074">"റീസ്റ്റാർട്ട് ചെയ്യുക"</string>
-    <string name="global_action_emergency" msgid="1387617624177105088">"അടിയന്തിരാവശ്യം"</string>
+    <string name="global_action_emergency" msgid="1387617624177105088">"അടിയന്തരാവശ്യം"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"ബഗ് റിപ്പോർട്ട്"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"സെഷൻ അവസാനിപ്പിക്കുക"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"സ്‌ക്രീൻഷോട്ട്"</string>
@@ -1652,7 +1652,7 @@
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"കുറുക്കുവഴി ‌ഓഫാക്കുക"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"കുറുക്കുവഴി ഉപയോഗിക്കുക"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"വർണ്ണ വിപര്യയം"</string>
-    <string name="color_correction_feature_name" msgid="3655077237805422597">"വർണ്ണം ക്രമീകരിക്കൽ"</string>
+    <string name="color_correction_feature_name" msgid="3655077237805422597">"നിറം ക്രമീകരിക്കൽ"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"വോളിയം കീകൾ പിടിച്ചു. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ഓണാക്കി."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"വോളിയം കീകൾ പിടിച്ചു. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ഓഫാക്കി."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> ഉപയോഗിക്കാൻ, രണ്ട് വോളിയം കീകളും മൂന്ന് സെക്കൻഡ് അമർത്തിപ്പിടിക്കുക"</string>
