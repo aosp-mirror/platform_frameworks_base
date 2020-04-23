@@ -252,4 +252,7 @@
     <color name="control_enabled_thermo_heat_background">@color/GM2_red_200</color>
     <color name="control_enabled_thermo_cool_background">@color/GM2_blue_200</color>
     <color name="control_enabled_default_background">@color/GM2_blue_200</color>
+
+    <!-- Docked misalignment message -->
+    <color name="misalignment_text_color">#F28B82</color>
 </resources>
