@@ -34,6 +34,7 @@ import android.os.RemoteException;
 import android.security.KeyStore;
 import android.util.Slog;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.IStatusBarService;
 
 import java.lang.annotation.Retention;
@@ -70,6 +71,11 @@ final class AuthSession {
      */
     static final int STATE_AUTH_PAUSED = 3;
     /**
+     * Paused, but "try again" was pressed. Sensors have new cookies and we're now waiting for all
+     * cookies to be returned.
+     */
+    static final int STATE_AUTH_PAUSED_RESUMING = 4;
+    /**
      * Authentication is successful, but we're waiting for the user to press "confirm" button.
      */
     static final int STATE_AUTH_PENDING_CONFIRM = 5;
@@ -90,6 +96,7 @@ final class AuthSession {
             STATE_AUTH_CALLED,
             STATE_AUTH_STARTED,
             STATE_AUTH_PAUSED,
+            STATE_AUTH_PAUSED_RESUMING,
             STATE_AUTH_PENDING_CONFIRM,
             STATE_AUTHENTICATED_PENDING_SYSUI,
             STATE_ERROR_PENDING_SYSUI,
@@ -105,23 +112,18 @@ final class AuthSession {
 
     // The following variables are passed to authenticateInternal, which initiates the
     // appropriate <Biometric>Services.
-    final IBinder mToken;
-    final long mOperationId;
-    final int mUserId;
+    @VisibleForTesting final IBinder mToken;
+    // Info to be shown on BiometricDialog when all cookies are returned.
+    @VisibleForTesting final Bundle mBundle;
+    private final long mOperationId;
+    private final int mUserId;
     private final IBiometricSensorReceiver mSensorReceiver;
     // Original receiver from BiometricPrompt.
-    final IBiometricServiceReceiver mClientReceiver;
-    final String mOpPackageName;
-    // Info to be shown on BiometricDialog when all cookies are returned.
-    final Bundle mBundle;
-    final int mCallingUid;
-    final int mCallingPid;
-    final int mCallingUserId;
-
-    // True if this authentication session is still part of the same BiometricPrompt call. For
-    // example, authentication can be in the paused state, in which a new AuthSession is created
-    // even though the caller is still the same BiometricPrompt invocation.
-    private final boolean mContinuing;
+    private final IBiometricServiceReceiver mClientReceiver;
+    private final String mOpPackageName;
+    private final int mCallingUid;
+    private final int mCallingPid;
+    private final int mCallingUserId;
 
     // The current state, which can be either idle, called, or started
     private @SessionState int mState = STATE_AUTH_IDLE;
@@ -138,14 +140,13 @@ final class AuthSession {
     long mAuthenticatedTimeMs;
 
     AuthSession(IStatusBarService statusBarService, IBiometricSysuiReceiver sysuiReceiver,
-            KeyStore keystore, boolean continuing, Random random, PreAuthInfo preAuthInfo,
+            KeyStore keystore, Random random, PreAuthInfo preAuthInfo,
             IBinder token, long operationId, int userId, IBiometricSensorReceiver sensorReceiver,
             IBiometricServiceReceiver clientReceiver, String opPackageName, Bundle bundle,
             int callingUid, int callingPid, int callingUserId) {
         mStatusBarService = statusBarService;
         mSysuiReceiver = sysuiReceiver;
         mKeyStore = keystore;
-        mContinuing = continuing;
         mRandom = random;
         mPreAuthInfo = preAuthInfo;
         mToken = token;
@@ -180,6 +181,18 @@ final class AuthSession {
         }
     }
 
+    private void setSensorsToStateWaitingForCookie() throws RemoteException {
+        for (BiometricSensor sensor : mPreAuthInfo.eligibleSensors) {
+            final int cookie = mRandom.nextInt(Integer.MAX_VALUE - 1) + 1;
+            final boolean requireConfirmation = sensor.confirmationSupported()
+                    && (sensor.confirmationAlwaysRequired(mUserId)
+                    || mPreAuthInfo.confirmationRequested);
+            sensor.goToStateWaitingForCookie(requireConfirmation, mToken, mOperationId,
+                    mUserId, mSensorReceiver, mOpPackageName, cookie, mCallingUid, mCallingPid,
+                    mCallingUserId);
+        }
+    }
+
     void goToInitialState() throws RemoteException {
         if (mPreAuthInfo.credentialAvailable && mPreAuthInfo.eligibleSensors.isEmpty()) {
             // Only device credential should be shown. In this case, we don't need to wait,
@@ -197,16 +210,8 @@ final class AuthSession {
                     mOperationId);
         } else if (!mPreAuthInfo.eligibleSensors.isEmpty()) {
             // Some combination of biometric or biometric|credential is requested
+            setSensorsToStateWaitingForCookie();
             mState = AuthSession.STATE_AUTH_CALLED;
-            for (BiometricSensor sensor : mPreAuthInfo.eligibleSensors) {
-                final int cookie = mRandom.nextInt(Integer.MAX_VALUE - 1) + 1;
-                final boolean requireConfirmation = sensor.confirmationSupported()
-                        && (sensor.confirmationAlwaysRequired(mUserId)
-                        || mPreAuthInfo.confirmationRequested);
-                sensor.goToStateWaitingForCookie(requireConfirmation, mToken, mOperationId,
-                        mUserId, mSensorReceiver, mOpPackageName, cookie, mCallingUid, mCallingPid,
-                        mCallingUserId);
-            }
         } else {
             // No authenticators requested. This should never happen - an exception should have
             // been thrown earlier in the pipeline.
@@ -221,10 +226,10 @@ final class AuthSession {
 
         if (allCookiesReceived()) {
             mStartTimeMs = System.currentTimeMillis();
-            mState = STATE_AUTH_STARTED;
             startAllPreparedSensors();
 
-            if (!mContinuing) {
+            // No need to request the UI if we're coming from the paused state
+            if (mState != STATE_AUTH_PAUSED_RESUMING) {
                 try {
                     final @BiometricAuthenticator.Modality int modality =
                             getEligibleModalities();
@@ -239,6 +244,7 @@ final class AuthSession {
                     Slog.e(TAG, "Remote exception", e);
                 }
             }
+            mState = STATE_AUTH_STARTED;
         }
     }
 
@@ -370,6 +376,33 @@ final class AuthSession {
             mStatusBarService.onBiometricHelp(message);
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception", e);
+        }
+    }
+
+    void onSystemEvent(int event) {
+        final boolean shouldReceive = mBundle
+                .getBoolean(BiometricPrompt.KEY_RECEIVE_SYSTEM_EVENTS, false);
+        if (!shouldReceive) {
+            return;
+        }
+
+        try {
+            mClientReceiver.onSystemEvent(event);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "RemoteException", e);
+        }
+    }
+
+    void onTryAgainPressed() {
+        if (mState != STATE_AUTH_PAUSED) {
+            Slog.w(TAG, "onTryAgainPressed, state: " + mState);
+        }
+
+        try {
+            setSensorsToStateWaitingForCookie();
+            mState = STATE_AUTH_PAUSED_RESUMING;
+        } catch (RemoteException e) {
+            Slog.e(TAG, "RemoteException: " + e);
         }
     }
 
@@ -557,6 +590,10 @@ final class AuthSession {
 
     @SessionState int getState() {
         return mState;
+    }
+
+    int getUserId() {
+        return mUserId;
     }
 
     @Override

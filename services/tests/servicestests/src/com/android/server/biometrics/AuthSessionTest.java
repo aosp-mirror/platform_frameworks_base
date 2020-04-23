@@ -92,8 +92,7 @@ public class AuthSessionTest {
         setupFingerprint(0 /* id */);
         setupFace(1 /* id */, false /* confirmationAlwaysRequired */);
 
-        final AuthSession session = createAuthSession(false /* continuing */,
-                mSensors,
+        final AuthSession session = createAuthSession(mSensors,
                 false /* checkDevicePolicyManager */,
                 Authenticators.BIOMETRIC_STRONG,
                 0 /* operationId */,
@@ -120,8 +119,7 @@ public class AuthSessionTest {
         final int callingPid = 1000;
         final int callingUserId = 10000;
 
-        final AuthSession session = createAuthSession(false /* continuing */,
-                mSensors,
+        final AuthSession session = createAuthSession(mSensors,
                 false /* checkDevicePolicyManager */,
                 Authenticators.BIOMETRIC_STRONG,
                 operationId,
@@ -188,7 +186,7 @@ public class AuthSessionTest {
                 checkDevicePolicyManager);
     }
 
-    private AuthSession createAuthSession(boolean continuing, List<BiometricSensor> sensors,
+    private AuthSession createAuthSession(List<BiometricSensor> sensors,
             boolean checkDevicePolicyManager, @Authenticators.Types int authenticators,
             long operationId, int userId,
             int callingUid, int callingPid, int callingUserId)
@@ -199,7 +197,7 @@ public class AuthSessionTest {
         final PreAuthInfo preAuthInfo = createPreAuthInfo(sensors, userId, bundle,
                 checkDevicePolicyManager);
 
-        return new AuthSession(mStatusBarService, mSysuiReceiver, mKeyStore, continuing,
+        return new AuthSession(mStatusBarService, mSysuiReceiver, mKeyStore,
                 mRandom, preAuthInfo, mToken, operationId, userId, mSensorReceiver,
                 mClientReceiver, TEST_PACKAGE, bundle, callingUid,
                 callingPid, callingUserId);

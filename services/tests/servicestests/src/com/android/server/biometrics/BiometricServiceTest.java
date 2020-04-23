@@ -616,13 +616,13 @@ public class BiometricServiceTest {
         assertEquals(AuthSession.STATE_AUTH_PAUSED,
                 mBiometricService.mCurrentAuthSession.getState());
 
-        // Pressing "Try again" on SystemUI starts a new auth session.
+        // Pressing "Try again" on SystemUI
         mBiometricService.mSysuiReceiver.onTryAgainPressed();
         waitForIdle();
         verify(mReceiver1, never()).onError(anyInt(), anyInt(), anyInt());
 
-        // New one has been created
-        assertEquals(AuthSession.STATE_AUTH_CALLED,
+        // AuthSession is now resuming
+        assertEquals(AuthSession.STATE_AUTH_PAUSED_RESUMING,
                 mBiometricService.mCurrentAuthSession.getState());
 
         // Test resuming when hardware becomes ready. SystemUI should not be requested to

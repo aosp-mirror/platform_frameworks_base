@@ -859,7 +859,7 @@ public class BiometricService extends SystemService {
 
             if (LoggableMonitor.DEBUG) {
                 Slog.v(LoggableMonitor.TAG, "Confirmed! Modality: " + statsModality()
-                        + ", User: " + mCurrentAuthSession.mUserId
+                        + ", User: " + mCurrentAuthSession.getUserId()
                         + ", IsCrypto: " + mCurrentAuthSession.isCrypto()
                         + ", Client: " + BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT
                         + ", RequireConfirmation: "
@@ -870,13 +870,13 @@ public class BiometricService extends SystemService {
 
             FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_AUTHENTICATED,
                     statsModality(),
-                    mCurrentAuthSession.mUserId,
+                    mCurrentAuthSession.getUserId(),
                     mCurrentAuthSession.isCrypto(),
                     BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT,
                     mCurrentAuthSession.mPreAuthInfo.confirmationRequested,
                     FrameworkStatsLog.BIOMETRIC_AUTHENTICATED__STATE__CONFIRMED,
                     latency,
-                    mInjector.isDebugEnabled(getContext(), mCurrentAuthSession.mUserId));
+                    mInjector.isDebugEnabled(getContext(), mCurrentAuthSession.getUserId()));
         } else {
             final long latency = System.currentTimeMillis() - mCurrentAuthSession.mStartTimeMs;
 
@@ -887,7 +887,7 @@ public class BiometricService extends SystemService {
                             : 0;
             if (LoggableMonitor.DEBUG) {
                 Slog.v(LoggableMonitor.TAG, "Dismissed! Modality: " + statsModality()
-                        + ", User: " + mCurrentAuthSession.mUserId
+                        + ", User: " + mCurrentAuthSession.getUserId()
                         + ", IsCrypto: " + mCurrentAuthSession.isCrypto()
                         + ", Action: " + BiometricsProtoEnums.ACTION_AUTHENTICATE
                         + ", Client: " + BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT
@@ -897,13 +897,13 @@ public class BiometricService extends SystemService {
             // Auth canceled
             FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_ERROR_OCCURRED,
                     statsModality(),
-                    mCurrentAuthSession.mUserId,
+                    mCurrentAuthSession.getUserId(),
                     mCurrentAuthSession.isCrypto(),
                     BiometricsProtoEnums.ACTION_AUTHENTICATE,
                     BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT,
                     error,
                     0 /* vendorCode */,
-                    mInjector.isDebugEnabled(getContext(), mCurrentAuthSession.mUserId),
+                    mInjector.isDebugEnabled(getContext(), mCurrentAuthSession.getUserId()),
                     latency);
         }
     }
@@ -1019,17 +1019,12 @@ public class BiometricService extends SystemService {
         Slog.d(TAG, "onTryAgainPressed");
         // No need to check permission, since it can only be invoked by SystemUI
         // (or system server itself).
-        authenticateInternal(true /* continuing */,
-                mCurrentAuthSession.mToken,
-                mCurrentAuthSession.mOperationId,
-                mCurrentAuthSession.mUserId,
-                mCurrentAuthSession.mClientReceiver,
-                mCurrentAuthSession.mOpPackageName,
-                mCurrentAuthSession.mBundle,
-                mCurrentAuthSession.mCallingUid,
-                mCurrentAuthSession.mCallingPid,
-                mCurrentAuthSession.mCallingUserId,
-                mCurrentAuthSession.mPreAuthInfo);
+        if (mCurrentAuthSession == null) {
+            Slog.e(TAG, "handleOnTryAgainPressed: AuthSession is null");
+            return;
+        }
+
+        mCurrentAuthSession.onTryAgainPressed();
     }
 
     private void handleOnDeviceCredentialPressed() {
@@ -1043,24 +1038,14 @@ public class BiometricService extends SystemService {
     }
 
     private void handleOnSystemEvent(int event) {
-        final boolean shouldReceive = mCurrentAuthSession.mBundle
-                .getBoolean(BiometricPrompt.KEY_RECEIVE_SYSTEM_EVENTS, false);
-        Slog.d(TAG, "onSystemEvent: " + event + ", shouldReceive: " + shouldReceive);
+        Slog.d(TAG, "onSystemEvent: " + event);
 
         if (mCurrentAuthSession == null) {
             Slog.e(TAG, "handleOnSystemEvent: AuthSession is null");
             return;
         }
 
-        if (!shouldReceive) {
-            return;
-        }
-
-        try {
-            mCurrentAuthSession.mClientReceiver.onSystemEvent(event);
-        } catch (RemoteException e) {
-            Slog.e(TAG, "RemoteException", e);
-        }
+        mCurrentAuthSession.onSystemEvent(event);
     }
 
     /**
@@ -1109,7 +1094,7 @@ public class BiometricService extends SystemService {
                                 Authenticators.DEVICE_CREDENTIAL);
                     }
 
-                    authenticateInternal(false /* continuing */, token, operationId, userId,
+                    authenticateInternal(token, operationId, userId,
                             receiver, opPackageName, bundle, callingUid, callingPid, callingUserId,
                             preAuthInfo);
                 } else {
@@ -1132,15 +1117,14 @@ public class BiometricService extends SystemService {
      * 2) Preparing <Biometric>Services for authentication when BiometricPrompt is already shown
      * and the user has pressed "try again"
      */
-    private void authenticateInternal(boolean continuing, IBinder token, long operationId,
+    private void authenticateInternal(IBinder token, long operationId,
             int userId, IBiometricServiceReceiver receiver, String opPackageName, Bundle bundle,
             int callingUid, int callingPid, int callingUserId, PreAuthInfo preAuthInfo) {
-        Slog.d(TAG, "Creating authSession with authRequest: " + preAuthInfo
-                + ", continuing: " + continuing);
+        Slog.d(TAG, "Creating authSession with authRequest: " + preAuthInfo);
 
         // No need to dismiss dialog / send error yet if we're continuing authentication, e.g.
         // "Try again" is showing due to something like ERROR_TIMEOUT.
-        if (mCurrentAuthSession != null && !continuing) {
+        if (mCurrentAuthSession != null) {
             // Forcefully cancel authentication. Dismiss the UI, and immediately send
             // ERROR_CANCELED to the client. Note that we should/will ignore HAL ERROR_CANCELED.
             // Expect to see some harmless "unknown cookie" errors.
@@ -1149,10 +1133,9 @@ public class BiometricService extends SystemService {
             mCurrentAuthSession = null;
         }
 
-        mCurrentAuthSession = new AuthSession(mStatusBarService, mSysuiReceiver, mKeyStore,
-                continuing, mRandom, preAuthInfo, token, operationId, userId,
-                mBiometricSensorReceiver, receiver, opPackageName, bundle, callingUid, callingPid,
-                callingUserId);
+        mCurrentAuthSession = new AuthSession(mStatusBarService, mSysuiReceiver, mKeyStore, mRandom,
+                preAuthInfo, token, operationId, userId, mBiometricSensorReceiver, receiver,
+                opPackageName, bundle, callingUid, callingPid, callingUserId);
         try {
             mCurrentAuthSession.goToInitialState();
         } catch (RemoteException e) {
