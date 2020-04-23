@@ -2601,8 +2601,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     "Failed to find data loader manager service");
         }
 
+        final DataLoaderParams params = this.params.dataLoaderParams;
         final boolean manualStartAndDestroy = !isIncrementalInstallation();
-        IDataLoaderStatusListener listener = new IDataLoaderStatusListener.Stub() {
+        final IDataLoaderStatusListener listener = new IDataLoaderStatusListener.Stub() {
             @Override
             public void onStatusChanged(int dataLoaderId, int status) {
                 switch (status) {
@@ -2629,6 +2630,15 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     }
 
                     switch (status) {
+                        case IDataLoaderStatusListener.DATA_LOADER_BOUND: {
+                            if (manualStartAndDestroy) {
+                                FileSystemControlParcel control = new FileSystemControlParcel();
+                                control.callback = new FileSystemConnector(addedFiles);
+                                dataLoader.create(dataLoaderId, params.getData(), control, this);
+                            }
+
+                            break;
+                        }
                         case IDataLoaderStatusListener.DATA_LOADER_CREATED: {
                             if (manualStartAndDestroy) {
                                 // IncrementalFileStorages will call start after all files are
@@ -2680,8 +2690,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
         if (!manualStartAndDestroy) {
             try {
-                mIncrementalFileStorages = IncrementalFileStorages.initialize(mContext,
-                        stageDir, params.dataLoaderParams, listener, addedFiles);
+                mIncrementalFileStorages = IncrementalFileStorages.initialize(mContext, stageDir,
+                        params, listener, addedFiles);
                 return false;
             } catch (IOException e) {
                 throw new PackageManagerException(INSTALL_FAILED_MEDIA_UNAVAILABLE, e.getMessage(),
@@ -2689,13 +2699,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
         }
 
-        final FileSystemConnector connector = new FileSystemConnector(addedFiles);
-        final FileSystemControlParcel control = new FileSystemControlParcel();
-        control.callback = connector;
-
-        final DataLoaderParams params = this.params.dataLoaderParams;
-        if (!dataLoaderManager.initializeDataLoader(
-                sessionId, params.getData(), control, listener)) {
+        if (!dataLoaderManager.bindToDataLoader(
+                sessionId, params.getData(), listener)) {
             throw new PackageManagerException(INSTALL_FAILED_MEDIA_UNAVAILABLE,
                     "Failed to initialize data loader");
         }

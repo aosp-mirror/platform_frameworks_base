@@ -180,6 +180,7 @@ private:
 
         bool isValid() const { return mId != kInvalidStorageId; }
 
+        bool bind();
         bool create();
         bool start();
         bool destroy();
