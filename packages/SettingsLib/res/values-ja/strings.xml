@@ -436,10 +436,14 @@
     <string name="power_discharge_by_only" msgid="92545648425937000">"電池が切れる推定時刻: <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"<xliff:g id="TIME">%1$s</xliff:g> まで"</string>
     <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"<xliff:g id="TIME">%1$s</xliff:g> 頃に電池がなくなります"</string>
-    <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"残り時間: <xliff:g id="THRESHOLD">%1$s</xliff:g>未満"</string>
-    <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"残り時間: <xliff:g id="THRESHOLD">%1$s</xliff:g>未満（<xliff:g id="LEVEL">%2$s</xliff:g>）"</string>
-    <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"残り時間: <xliff:g id="TIME_REMAINING">%1$s</xliff:g>以上（<xliff:g id="LEVEL">%2$s</xliff:g>）"</string>
-    <string name="power_remaining_only_more_than_subtext" msgid="3274496164769110480">"残り時間: <xliff:g id="TIME_REMAINING">%1$s</xliff:g>以上"</string>
+    <!-- no translation found for power_remaining_less_than_duration_only (8956656616031395152) -->
+    <skip />
+    <!-- no translation found for power_remaining_less_than_duration (318215464914990578) -->
+    <skip />
+    <!-- no translation found for power_remaining_more_than_subtext (446388082266121894) -->
+    <skip />
+    <!-- no translation found for power_remaining_only_more_than_subtext (4873750633368888062) -->
+    <skip />
     <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"スマートフォンの電源がもうすぐ切れます"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"タブレットの電源がもうすぐ切れます"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"デバイスの電源がもうすぐ切れます"</string>
@@ -506,7 +510,7 @@
     <string name="zen_alarm_warning" msgid="245729928048586280">"次回のアラーム（<xliff:g id="WHEN">%1$s</xliff:g>）は鳴りません"</string>
     <string name="alarm_template" msgid="3346777418136233330">"<xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="6382760514842998629">"<xliff:g id="WHEN">%1$s</xliff:g>"</string>
-    <string name="zen_mode_duration_settings_title" msgid="1553451650289651489">"期間"</string>
+    <string name="zen_mode_duration_settings_title" msgid="1553451650289651489">"時間"</string>
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"毎回確認"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"OFF にするまで"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"たった今"</string>

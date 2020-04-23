@@ -436,10 +436,14 @@
     <string name="power_discharge_by_only" msgid="92545648425937000">"น่าจะใช้งานได้ถึงเวลาประมาณ <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"จนถึง <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"แบตเตอรี่อาจหมดภายใน <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"เหลืออีกไม่ถึง <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
-    <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"เหลือเวลาอีกไม่ถึง <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"เหลือเวลามากกว่า <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_only_more_than_subtext" msgid="3274496164769110480">"เหลือเวลามากกว่า <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
+    <!-- no translation found for power_remaining_less_than_duration_only (8956656616031395152) -->
+    <skip />
+    <!-- no translation found for power_remaining_less_than_duration (318215464914990578) -->
+    <skip />
+    <!-- no translation found for power_remaining_more_than_subtext (446388082266121894) -->
+    <skip />
+    <!-- no translation found for power_remaining_only_more_than_subtext (4873750633368888062) -->
+    <skip />
     <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"โทรศัพท์อาจปิดเครื่องในไม่ช้า"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"แท็บเล็ตอาจปิดเครื่องในไม่ช้า"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"อุปกรณ์อาจปิดเครื่องในไม่ช้า"</string>
@@ -487,7 +491,7 @@
     <string name="ims_reg_title" msgid="8197592958123671062">"สถานะการลงทะเบียน IMS"</string>
     <string name="ims_reg_status_registered" msgid="884916398194885457">"ลงทะเบียนแล้ว"</string>
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"ไม่ได้ลงทะเบียน"</string>
-    <string name="status_unavailable" msgid="5279036186589861608">"ไม่ว่าง"</string>
+    <string name="status_unavailable" msgid="5279036186589861608">"ไม่มี"</string>
     <string name="wifi_status_mac_randomized" msgid="466382542497832189">"MAC เป็นแบบสุ่ม"</string>
     <plurals name="wifi_tether_connected_summary" formatted="false" msgid="6317236306047306139">
       <item quantity="other">มีอุปกรณ์ที่เชื่อมต่อ %1$d เครื่อง</item>
