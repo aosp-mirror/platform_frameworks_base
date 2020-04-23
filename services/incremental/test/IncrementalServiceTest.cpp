@@ -270,6 +270,8 @@ public:
                        ErrorCode(const Control& control, std::string_view path, int mode, FileId id,
                                  NewFileParams params));
     MOCK_CONST_METHOD3(makeDir, ErrorCode(const Control& control, std::string_view path, int mode));
+    MOCK_CONST_METHOD3(makeDirs,
+                       ErrorCode(const Control& control, std::string_view path, int mode));
     MOCK_CONST_METHOD2(getMetadata, RawMetadata(const Control& control, FileId fileid));
     MOCK_CONST_METHOD2(getMetadata, RawMetadata(const Control& control, std::string_view path));
     MOCK_CONST_METHOD2(getFileId, FileId(const Control& control, std::string_view path));
@@ -723,31 +725,14 @@ TEST_F(IncrementalServiceTest, testMakeDirectories) {
     auto first = "first"sv;
     auto second = "second"sv;
     auto third = "third"sv;
-    auto parent_path = std::string(first) + "/" + std::string(second);
-    auto dir_path = parent_path + "/" + std::string(third);
+    auto dir_path = std::string(first) + "/" + std::string(second) + "/" + std::string(third);
 
-    auto checkArgFor = [&](std::string_view expected, std::string_view arg) {
-        return arg.starts_with(mRootDir.path) && arg.ends_with("/mount/st_1_0/"s += expected);
-    };
-
-    {
-        InSequence seq;
-        EXPECT_CALL(*mIncFs,
-                    makeDir(_, Truly([&](auto arg) { return checkArgFor(dir_path, arg); }), _))
-                .WillOnce(Return(-ENOENT));
-        EXPECT_CALL(*mIncFs,
-                    makeDir(_, Truly([&](auto arg) { return checkArgFor(parent_path, arg); }), _))
-                .WillOnce(Return(-ENOENT));
-        EXPECT_CALL(*mIncFs,
-                    makeDir(_, Truly([&](auto arg) { return checkArgFor(first, arg); }), _))
-                .WillOnce(Return(0));
-        EXPECT_CALL(*mIncFs,
-                    makeDir(_, Truly([&](auto arg) { return checkArgFor(parent_path, arg); }), _))
-                .WillOnce(Return(0));
-        EXPECT_CALL(*mIncFs,
-                    makeDir(_, Truly([&](auto arg) { return checkArgFor(dir_path, arg); }), _))
-                .WillOnce(Return(0));
-    }
+    EXPECT_CALL(*mIncFs,
+                makeDirs(_, Truly([&](std::string_view arg) {
+                             return arg.starts_with(mRootDir.path) &&
+                                     arg.ends_with("/mount/st_1_0/" + dir_path);
+                         }),
+                         _));
     auto res = mIncrementalService->makeDirs(storageId, dir_path, 0555);
     ASSERT_EQ(res, 0);
 }
