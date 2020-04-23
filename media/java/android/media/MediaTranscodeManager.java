@@ -397,7 +397,7 @@ public final class MediaTranscodeManager {
     }
 
     static {
-        System.loadLibrary("media_jni");
+        System.loadLibrary("mediatranscodemanager_jni");
         native_init();
     }
 }
