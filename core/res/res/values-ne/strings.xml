@@ -428,7 +428,7 @@
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"पृष्ठभूमिमा स्थानसम्बन्धी पहुँच"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"यो अनुप्रयोगले जुनसुकै बेला (अनुप्रयोग नचलाएका बेलामा पनि) स्थानमाथि पहुँच राख्न सक्छ।"</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"तपाईँका अडियो सेटिङहरू परिवर्तन गर्नुहोस्"</string>
-    <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"अनुप्रयोगलाई ग्लोबल अडियो सेटिङहरू परिमार्जन गर्न अनुमति दिन्छ, जस्तै आवाजको मात्रा र आउटपुटको लागि कुन स्पिकर प्रयोग गर्ने।"</string>
+    <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"अनुप्रयोगलाई ग्लोबल अडियो सेटिङहरू परिमार्जन गर्न अनुमति दिन्छ, जस्तै भोल्युम र आउटपुटको लागि कुन स्पिकर प्रयोग गर्ने।"</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"अडियो रेकर्ड गर्नुहोस्"</string>
     <string name="permdesc_recordAudio" msgid="3976213377904701093">"यस अनुप्रयोगले जुनसुकै समय माइक्रोफोनको प्रयोग गरी अडियो रेकर्ड गर्न सक्छ।"</string>
     <string name="permlab_sim_communication" msgid="176788115994050692">"SIM मा आदेशहरू पठाउन दिनुहोस्"</string>
@@ -683,9 +683,9 @@
     <string name="policylab_forceLock" msgid="7360335502968476434">"स्क्रिन लक गर्ने"</string>
     <string name="policydesc_forceLock" msgid="1008844760853899693">"कसरी र कहिले स्क्रिन लक गर्ने नियन्त्रण गर्नुहोस्।"</string>
     <string name="policylab_wipeData" msgid="1359485247727537311">"सबै डेटा मेट्नुहोस्"</string>
-    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"एउटा फ्याक्ट्रि डेटा पुनःसेट गरेर चेतावनी नआउँदै ट्याबल्टको डेटा मेट्नुहोस्।"</string>
+    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"एउटा फ्याक्ट्रि डेटा रिसेट गरेर चेतावनी नआउँदै ट्याबल्टको डेटा मेट्नुहोस्।"</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"फ्याक्ट्री डेटा रिसेट गरेर चेतावनी नदिइकन आफ्नो Android TV यन्त्रको डेटा मेटाउनुहोस्।"</string>
-    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"एउटा फ्याक्ट्रि डेटा पुनःसेट गरेर चेतावनी नदिइकन फोनको डेटा मेट्न।"</string>
+    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"एउटा फ्याक्ट्रि डेटा रिसेट गरेर चेतावनी नदिइकन फोनको डेटा मेट्न।"</string>
     <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"प्रयोगकर्ता डेटा मेट्नुहोस्"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"चेतावनी बिना यो ट्याब्लेटमा यस प्रयोगकर्ताको डेटा मेट्नुहोस्।"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"यो Android TV यन्त्रमा भएको यस प्रयोगकर्ताको डेटा चेतावनी नदिइकन मेटाउनुहोस्।"</string>
@@ -863,12 +863,12 @@
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="3069635524964070596">"तपाईँले तपाईँको अनलक ढाँचा गलत तरिकाले <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक खिच्नु भएको छ। पछि <xliff:g id="NUMBER_1">%2$d</xliff:g> थप असफल कोसिसहरू, तपाईँको Google साइन इन प्रयोग गरी तपाईँको ट्याब्लेट अनलक गर्न भनिने छ।\n\n  <xliff:g id="NUMBER_2">%3$d</xliff:g> सेकेन्डमा फरि प्रयास गर्नुहोस्।"</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="6399092175942158529">"तपाईंले आफ्नो अनलक शैली <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक गलत तरिकाले कोर्नुभएको छ। थप <xliff:g id="NUMBER_1">%2$d</xliff:g> प्रयासहरू असफल भएपछि तपाईंलाई आफ्नो Google खाता मार्फत साइन इन गरेर आफ्नो Android TV यन्त्र अनलक गर्न अनुरोध गरिनेछ।\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> सेकेन्डपछि फेरि प्रयास गर्नुहोस्।"</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="5691623136957148335">"तपाईँले <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक गलत तरिकाले तपाईँको अनलक ढाँचालाई कोर्नु भएको छ। पछि <xliff:g id="NUMBER_1">%2$d</xliff:g> अरू धेरै असफल कोसिसहरूपछि, तपाईँलाई तपाईँको फोन Google साइन इन प्रयोग गरेर अनलक गर्नको लागि सोधिने छ। \n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> सेकेन्डमा पुनः प्रयास गर्नुहोस्।"</string>
-    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="7914445759242151426">"तपाईँले <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक ट्याब्लेटलाई अनलक गर्नको लागि गलत तरिकाले कोशिस गर्नुभएको छ। <xliff:g id="NUMBER_1">%2$d</xliff:g> अरू धेरै असफल कोसिसहरूपछि, ट्याब्लेट फ्याट्रि पूर्वनिर्धारितमा पुनःसेट हुने छ र सबै प्रयोगकर्ता डेटा हराउने छन्।"</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="7914445759242151426">"तपाईँले <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक ट्याब्लेटलाई अनलक गर्नको लागि गलत तरिकाले कोशिस गर्नुभएको छ। <xliff:g id="NUMBER_1">%2$d</xliff:g> अरू धेरै असफल कोसिसहरूपछि, ट्याब्लेट फ्याट्रि पूर्वनिर्धारितमा रिसेट हुने छ र सबै प्रयोगकर्ता डेटा हराउने छन्।"</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="4275591249631864248">"तपाईंले आफ्नो Android TV यन्त्र <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक गलत तरिकाले अनलक गर्ने प्रयास गर्नुभएको छ। थप <xliff:g id="NUMBER_1">%2$d</xliff:g> प्रयासहरू असफल भएपछि तपाईंको Android TV यन्त्रलाई रिसेट गरेर पूर्वनिर्धारित फ्याक्ट्री सेटिङ लागू गरिने छ र प्रयोगकर्ताको सम्पूर्ण डेटा गुम्ने छ।"</string>
-    <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="1166532464798446579">"तपाईंले गलत तरिकाले <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक फोन अनलक गर्ने प्रयत्न गर्नुभयो। <xliff:g id="NUMBER_1">%2$d</xliff:g> बढी असफल प्रयत्नहरू पछि, फोन फ्याक्ट्रि पूर्वनिर्धारितमा पुनःसेट हुने छ र सबै प्रयोगकर्ता डेटा हराउने छन्।"</string>
-    <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="8682445539263683414">"तपाईँले ट्यब्लेटलाई अनलक गर्न गलत तरिकाले <xliff:g id="NUMBER">%d</xliff:g> पटक प्रयास गर्नु भएको छ। अब ट्याब्लेटलाई पूर्वनिर्धारित कार्यशालामा पुनःसेट गरिने छ।"</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="1166532464798446579">"तपाईंले गलत तरिकाले <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक फोन अनलक गर्ने प्रयत्न गर्नुभयो। <xliff:g id="NUMBER_1">%2$d</xliff:g> बढी असफल प्रयत्नहरू पछि, फोन फ्याक्ट्रि पूर्वनिर्धारितमा रिसेट हुने छ र सबै प्रयोगकर्ता डेटा हराउने छन्।"</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="8682445539263683414">"तपाईँले ट्यब्लेटलाई अनलक गर्न गलत तरिकाले <xliff:g id="NUMBER">%d</xliff:g> पटक प्रयास गर्नु भएको छ। अब ट्याब्लेटलाई पूर्वनिर्धारित कार्यशालामा रिसेट गरिने छ।"</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="2205435033340091883">"तपाईंले आफ्नो Android TV यन्त्र <xliff:g id="NUMBER">%d</xliff:g> पटक गलत तरिकाले अनलक गर्ने प्रयास गर्नुभएको छ। अब तपाईंको Android TV यन्त्रलाई रिसेट गरेर पूर्वनिर्धारित फ्याक्ट्री सेटिङ लागू गरिनेछ।"</string>
-    <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="2203704707679895487">"तपाईंले गलत तरिकाले फोन <xliff:g id="NUMBER">%d</xliff:g> पटक अनलक गर्ने प्रयत्न गर्नुभयो। अब फोन फ्याक्ट्रि पूर्वनिर्धारितमा पुनःसेट हुने छ।"</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="2203704707679895487">"तपाईंले गलत तरिकाले फोन <xliff:g id="NUMBER">%d</xliff:g> पटक अनलक गर्ने प्रयत्न गर्नुभयो। अब फोन फ्याक्ट्रि पूर्वनिर्धारितमा रिसेट हुने छ।"</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6807200118164539589">"<xliff:g id="NUMBER">%d</xliff:g> सेकेन्डमा फेरि प्रयास गर्नुहोस्।"</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="8362442730606839031">"ढाँचा बिर्सनु भयो?"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="9218940117797602518">"खाता अनलक"</string>
@@ -1127,7 +1127,7 @@
     <!-- no translation found for whichApplicationNamed (6969946041713975681) -->
     <skip />
     <string name="whichApplicationLabel" msgid="7852182961472531728">"पूर्ण कारबाही"</string>
-    <string name="whichViewApplication" msgid="5733194231473132945">"निम्नमार्फत खोल्नुहोस्"</string>
+    <string name="whichViewApplication" msgid="5733194231473132945">"निम्नबाट खोल्नुहोस्"</string>
     <!-- String.format failed for translation -->
     <!-- no translation found for whichViewApplicationNamed (415164730629690105) -->
     <skip />
@@ -1222,18 +1222,18 @@
     <string name="dump_heap_ready_text" msgid="5849618132123045516">"तपाईंसँग आदान प्रदान गर्नका लागि <xliff:g id="PROC">%1$s</xliff:g> को प्रक्रियासम्बन्धी हिप डम्प उपलब्ध छ। सावधान हुनुहोस्: यस हिप डम्पमा उक्त प्रक्रियाको पहुँच भएको जुनसुकै संवेदनशील व्यक्तिगत जानकारी समावेश हुन सक्छ जसमा तपाईंले टाइप गर्नुभएका कुराहरू पर्न सक्छन्।"</string>
     <string name="sendText" msgid="493003724401350724">"पाठको लागि एउटा प्रकार्य छान्नुहोस्"</string>
     <string name="volume_ringtone" msgid="134784084629229029">"बजाउने मात्रा"</string>
-    <string name="volume_music" msgid="7727274216734955095">"मिडियाको आवाजको मात्रा"</string>
+    <string name="volume_music" msgid="7727274216734955095">"मिडियाको भोल्युम"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="2614142915948898228">"ब्लुटुथको माध्यमद्वारा बजाइदै छ।"</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="1514829655029062233">"शान्त रिङ्गटोन सेट"</string>
     <string name="volume_call" msgid="7625321655265747433">"इन-कल भोल्युम"</string>
     <string name="volume_bluetooth_call" msgid="2930204618610115061">"ब्लुटुथ भित्री-कल मात्रा"</string>
-    <string name="volume_alarm" msgid="4486241060751798448">"आलर्मको आवाजको मात्रा"</string>
+    <string name="volume_alarm" msgid="4486241060751798448">"आलर्मको भोल्युम"</string>
     <string name="volume_notification" msgid="6864412249031660057">"सूचना मात्रा"</string>
     <string name="volume_unknown" msgid="4041914008166576293">"मात्रा"</string>
     <string name="volume_icon_description_bluetooth" msgid="7540388479345558400">"ब्लुटुथ भोल्युम"</string>
     <string name="volume_icon_description_ringer" msgid="2187800636867423459">"घन्टिको आवाज मात्रा"</string>
     <string name="volume_icon_description_incall" msgid="4491255105381227919">"कला मात्रा"</string>
-    <string name="volume_icon_description_media" msgid="4997633254078171233">"मिडियाको आवाजको मात्रा"</string>
+    <string name="volume_icon_description_media" msgid="4997633254078171233">"मिडियाको भोल्युम"</string>
     <string name="volume_icon_description_notification" msgid="579091344110747279">"सूचना भोल्युम"</string>
     <string name="ringtone_default" msgid="9118299121288174597">"पूर्वनिर्धारित रिङटोन"</string>
     <string name="ringtone_default_with_actual" msgid="2709686194556159773">"पूर्वनिर्धारित (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
@@ -1463,6 +1463,12 @@
     <string name="gpsNotifMessage" msgid="7346649122793758032">"<xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>) द्वारा अनुरोध गरिएको"</string>
     <string name="gpsVerifYes" msgid="3719843080744112940">"हो"</string>
     <string name="gpsVerifNo" msgid="1671201856091564741">"होइन"</string>
+    <!-- no translation found for gnss_nfw_notification_title (5004493772059563423) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_oem (3683958907027107969) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_carrier (815888995791562151) -->
+    <skip />
     <string name="sync_too_many_deletes" msgid="6999440774578705300">"सीमा नाघेकाहरू मेट्नुहोस्"</string>
     <string name="sync_too_many_deletes_desc" msgid="7409327940303504440">"त्यहाँ <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> मेटाइएका आइटमहरू छन् <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>को लागि, खाता <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g>। तपाईं के गर्न चाहनु हुन्छ?"</string>
     <string name="sync_really_delete" msgid="5657871730315579051">"वस्तुहरू मेट्नुहोस्"</string>
@@ -1564,7 +1570,7 @@
     <string name="wireless_display_route_description" msgid="8297563323032966831">"ताररहित प्रदर्शन"</string>
     <string name="media_route_button_content_description" msgid="2299223698196869956">"कास्ट"</string>
     <string name="media_route_chooser_title" msgid="6646594924991269208">"उपकरणमा जडान गर्नुहोस्"</string>
-    <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"उपकरणलाई स्क्रिनमा कास्ट गर्नुहोस्"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"स्क्रिन उपकरणमा कास्ट गर्नुहोस्"</string>
     <string name="media_route_chooser_searching" msgid="6119673534251329535">"उपकरणको खोजी गरिँदै..."</string>
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"सेटिंङहरू"</string>
     <string name="media_route_controller_disconnect" msgid="7362617572732576959">"विच्छेदन गर्नुहोस्"</string>
@@ -1610,12 +1616,12 @@
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="23741434207544038">"तपाईँले गलत तरिकाले तपाईँको PIN <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक टाइप गर्नु भएको छ। \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> सेकेन्डमा फेरि प्रयास गर्नुहोस्।"</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="3328686432962224215">"तपाईँले तपाईँक पासवर्ड <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक गलत टाइप गर्नुभएको छ। \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> सेकेन्डमा फेरि प्रयास गर्नुहोस्।"</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="7357404233979139075">"तपाईँले तपाईँको अनलक ढाँचा गलत तरिकाले <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक खिच्नु भएको छ। \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> सेकेन्डमा फेरि कोसिस गर्नुहोस्।"</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="3479940221343361587">"तपाईँले ट्याब्लेटलाई अनलक गर्न गलत तरिकाले <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक कोसिस गर्नु भएको छ। <xliff:g id="NUMBER_1">%2$d</xliff:g> पछि थप असफल प्रयासहरू, ट्याब्लेट पूर्वनिर्धारित कार्यशालामा पुनःसेट गरिने छ र सबै प्रयोग डेटा हराउने छ।"</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="3479940221343361587">"तपाईँले ट्याब्लेटलाई अनलक गर्न गलत तरिकाले <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक कोसिस गर्नु भएको छ। <xliff:g id="NUMBER_1">%2$d</xliff:g> पछि थप असफल प्रयासहरू, ट्याब्लेट पूर्वनिर्धारित कार्यशालामा रिसेट गरिने छ र सबै प्रयोग डेटा हराउने छ।"</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="9064457748587850217">"तपाईंले आफ्नो Android TV यन्त्र <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक गलत तरिकाले अनलक गर्ने प्रयास गर्नुभएको छ। थप <xliff:g id="NUMBER_1">%2$d</xliff:g> प्रयासहरू असफल भएपछि तपाईंको Android TV यन्त्रलाई रिसेट गरेर पूर्वनिर्धारित फ्याक्ट्री सेटिङ लागू गरिने छ र प्रयोगकर्ताको सम्पूर्ण डेटा गुम्ने छ।"</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="5955398963754432548">"तपाईँले गलतसँग फोनलाई अनलक गर्न <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक कोसिस गर्नु भयो। <xliff:g id="NUMBER_1">%2$d</xliff:g> पछि थप असफल कोसिसहरू, फोनलाई पूर्वनिर्धारित कार्यशालामा पुनःसेट गरिने छ र सबै प्रयोग डेटा हराउने छ।"</string>
-    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2299099385175083308">"तपाईँले ट्यब्लेटलाई अनलक गर्न गलत तरिकाले <xliff:g id="NUMBER">%d</xliff:g> पटक प्रयास गर्नु भएको छ। अब ट्याब्लेटलाई पूर्वनिर्धारित कार्यशालामा पुनःसेट गरिने छ।"</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="5955398963754432548">"तपाईँले गलतसँग फोनलाई अनलक गर्न <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक कोसिस गर्नु भयो। <xliff:g id="NUMBER_1">%2$d</xliff:g> पछि थप असफल कोसिसहरू, फोनलाई पूर्वनिर्धारित कार्यशालामा रिसेट गरिने छ र सबै प्रयोग डेटा हराउने छ।"</string>
+    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2299099385175083308">"तपाईँले ट्यब्लेटलाई अनलक गर्न गलत तरिकाले <xliff:g id="NUMBER">%d</xliff:g> पटक प्रयास गर्नु भएको छ। अब ट्याब्लेटलाई पूर्वनिर्धारित कार्यशालामा रिसेट गरिने छ।"</string>
     <string name="kg_failed_attempts_now_wiping" product="tv" msgid="5045460916106267585">"तपाईंले आफ्नो Android TV यन्त्र <xliff:g id="NUMBER">%d</xliff:g> पटक गलत तरिकाले अनलक गर्ने प्रयास गर्नुभएको छ। अब तपाईंको Android TV यन्त्रलाई रिसेट गरेर पूर्वनिर्धारित फ्याक्ट्री सेटिङ लागू गरिनेछ।"</string>
-    <string name="kg_failed_attempts_now_wiping" product="default" msgid="5043730590446071189">"तपाईंले गलत तरिकाले फोन <xliff:g id="NUMBER">%d</xliff:g> पटक अनलक गर्ने प्रयत्न गर्नुभयो। अब फोन फ्याक्ट्रि पूर्वनिर्धारितमा पुनःसेट हुने छ।"</string>
+    <string name="kg_failed_attempts_now_wiping" product="default" msgid="5043730590446071189">"तपाईंले गलत तरिकाले फोन <xliff:g id="NUMBER">%d</xliff:g> पटक अनलक गर्ने प्रयत्न गर्नुभयो। अब फोन फ्याक्ट्रि पूर्वनिर्धारितमा रिसेट हुने छ।"</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="7086799295109717623">"तपाईंले गलत तरिकाले आफ्नो अनलक ढाँचा <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक कोर्नुभयो। <xliff:g id="NUMBER_1">%2$d</xliff:g> विफल प्रयत्नहरू पछि, तपाईंलाई आफ्नो ट्याब्लेट इमेल खाता प्रयोग गरेर अनलक गर्न सोधिने छ।\n\n फेरि प्रयास गर्नुहोस् <xliff:g id="NUMBER_2">%3$d</xliff:g> सेकेन्डहरूमा।"</string>
     <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4670840383567106114">"तपाईंले आफ्नो अनलक शैली <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक गलत तरिकाले कोर्नुभएको छ। थप <xliff:g id="NUMBER_1">%2$d</xliff:g> प्रयासहरू असफल भएपछि तपाईंलाई आफ्नो इमेल खाता प्रयोग गरेर आफ्नो Android TV यन्त्र अनलक गर्न अनुरोध गरिनेछ।\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> सेकेन्डपछि फेरि प्रयास गर्नुहोस्।"</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"तपाईँले आफ्नो अनलक ढाँचा गलत रूपमा <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक तान्नु भएको छ। <xliff:g id="NUMBER_1">%2$d</xliff:g> धेरै असफल प्रयासहरूपछि, तपाईँलाई एउटा इमेल खाताको प्रयोग गरेर तपाईँको फोन अनलक गर्न सोधिने छ।\n\n फेरि <xliff:g id="NUMBER_2">%3$d</xliff:g> सेकेन्डमा प्रयास गर्नुहोस्।"</string>
@@ -1652,7 +1658,7 @@
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"सर्टकटलाई निष्क्रिय पार्नुहोस्"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"सर्टकट प्रयोग गर्नुहोस्"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"रङ्ग उल्टाउने सुविधा"</string>
-    <string name="color_correction_feature_name" msgid="3655077237805422597">"रङ सच्याउने सुविधा"</string>
+    <string name="color_correction_feature_name" msgid="3655077237805422597">"रङ्ग सच्याउने सुविधा"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"तपाईंले भोल्युम बटनहरू थिचिराख्नुभयो। <xliff:g id="SERVICE_NAME">%1$s</xliff:g> सक्रिय पारियो।"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"तपाईंले भोल्युम बटनहरू थिचिराख्नुभयो। <xliff:g id="SERVICE_NAME">%1$s</xliff:g> निष्क्रिय पारियो।"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> प्रयोग गर्न दुवै भोल्युम कुञ्जीहरूलाई तीन सेकेन्डसम्म थिचिराख्नुहोस्"</string>
@@ -1795,10 +1801,10 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"तपाईंका प्रशासकले अद्यावधिक गर्नुभएको"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"तपाईंका प्रशासकले मेट्नुभएको"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ठिक छ"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"ब्याट्रीको आयु लामो बनाउन ब्याट्री सेभरले:\n·अँध्यारो विषयवस्तु सक्रिय गर्छ\n·पृष्ठभूमिका गतिविधि, कतिपय भिजुअल प्रभाव तथा “Hey Google” जस्ता अन्य सुविधाहरू निष्क्रिय वा सीमित पार्छ।\n\n"<annotation id="url">"थप जान्नुहोस्"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"ब्याट्रीको आयु लामो बनाउन ब्याट्री सेभरले:\n·अँध्यारो विषयवस्तु सक्रिय गर्छ\n·पृष्ठभूमिका गतिविधि, कतिपय भिजुअल प्रभाव तथा “Hey Google” जस्ता अन्य सुविधाहरू निष्क्रिय वा सीमित पार्छ।"</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"डेटाको प्रयोगलाई कम गर्नमा मद्दतका लागि डेटा सर्भरले केही अनुप्रयोगहरूलाई पृष्ठभूमिमा डेटा पठाउन वा प्राप्त गर्नबाट रोक्दछ। तपाईँले हाल प्रयोग गरिरहनुभएको अनु्प्रयोगले डेटामाथि पहुँच राख्न सक्छ, तर त्यसले यो काम थोरै पटक गर्न सक्छ। उदाहरणका लागि यसको मतलब यो हुन सक्छ: तपाईँले छविहरूलाई ट्याप नगरेसम्म ती प्रदर्शन हुँदैनन्।"</string>
-    <string name="data_saver_enable_title" msgid="7080620065745260137">"डेटा सेभरलाई सक्रिय गर्ने हो?"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"ब्याट्रीको आयु लामो बनाउन ब्याट्री सेभरले:\n·अँध्यारो थिम सक्रिय गर्छ\n·पृष्ठभूमिका गतिविधि, कतिपय भिजुअल प्रभाव तथा “Hey Google” जस्ता अन्य सुविधाहरू निष्क्रिय वा सीमित पार्छ।\n\n"<annotation id="url">"थप जान्नुहोस्"</annotation></string>
+    <string name="battery_saver_description" msgid="7618492104632328184">"ब्याट्रीको आयु बढाउन ब्याट्री सेभरले:\n·अँध्यारो थिम सक्रिय गर्छ\n·पृष्ठभूमिका गतिविधि, कतिपय भिजुअल प्रभाव तथा “Hey Google” जस्ता अन्य सुविधाहरू निष्क्रिय वा सीमित पार्छ।"</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"डेटाको प्रयोगलाई कम गर्न डेटा सर्भरले केही अनुप्रयोगलाई पृष्ठभूमिमा डेटा पठाउन वा प्राप्त गर्न दिँदैन। तपाईंले हाल प्रयोग गरिरहनुभएको अनु्प्रयोगले डेटा चलाउन सक्छ, तर पहिला भन्दा कम अन्तरालमा मात्र। उदाहरणका लागि, तपाईले छविहरूमा ट्याप नगरेसम्म ती छविहरू देखिँदैनन्।"</string>
+    <string name="data_saver_enable_title" msgid="7080620065745260137">"डेटा सेभर सक्रिय गर्ने हो?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"सक्रिय गर्नुहोस्"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
       <item quantity="other"> %1$d मिनेटको लागि (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> सम्म)</item>

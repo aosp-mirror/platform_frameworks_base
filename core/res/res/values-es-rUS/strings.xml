@@ -1457,6 +1457,9 @@
     <string name="gpsNotifMessage" msgid="7346649122793758032">"Solicitado por <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
     <string name="gpsVerifYes" msgid="3719843080744112940">"Sí"</string>
     <string name="gpsVerifNo" msgid="1671201856091564741">"No"</string>
+    <string name="gnss_nfw_notification_title" msgid="5004493772059563423">"Se accedió a la ubicación en emergencia"</string>
+    <string name="gnss_nfw_notification_message_oem" msgid="3683958907027107969">"El fabricante del dispositivo accedió a tu ubicación durante una sesión de emergencia reciente"</string>
+    <string name="gnss_nfw_notification_message_carrier" msgid="815888995791562151">"El proveedor accedió a tu ubicación durante una sesión de emergencia reciente"</string>
     <string name="sync_too_many_deletes" msgid="6999440774578705300">"Eliminar el límite excedido"</string>
     <string name="sync_too_many_deletes_desc" msgid="7409327940303504440">"Hay <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> elementos eliminados para <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g> en la cuenta <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g>. ¿Qué quieres hacer?"</string>
     <string name="sync_really_delete" msgid="5657871730315579051">"Eliminar elementos"</string>
@@ -1790,9 +1793,9 @@
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Tu administrador borró este paquete"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Aceptar"</string>
     <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Para extender la duración de batería, el Ahorro de batería hace lo siguiente:\n·Activa el Tema oscuro.\n·Desactiva o restringe la actividad en segundo plano, algunos efectos visuales y otras funciones, como \"Ok Google\".\n\n"<annotation id="url">"Más información"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"Para extender la duración de batería, el Ahorro de batería hace lo siguiente:\n·Activa el Tema oscuro.\n·Desactiva o restringe la actividad en segundo plano, algunos efectos visuales y otras funciones, como \"Ok Google\"."</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"Para reducir el uso de datos, Ahorro de datos evita que algunas apps envíen y reciban datos en segundo plano. La app que estés usando podrá acceder a los datos, pero con menor frecuencia. De esta forma, por ejemplo, las imágenes no se mostrarán hasta que las presiones."</string>
-    <string name="data_saver_enable_title" msgid="7080620065745260137">"¿Activar Ahorro de datos?"</string>
+    <string name="battery_saver_description" msgid="7618492104632328184">"Para extender la duración de batería, el modo Ahorro de batería hace lo siguiente:\n·Activa el Tema oscuro.\n·Desactiva o restringe la actividad en segundo plano, algunos efectos visuales y otras funciones como \"Ok Google\"."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"Para reducir el uso de datos, el modo Ahorro de datos evita que algunas apps envíen y reciban datos en segundo plano. La app que estés usando podrá acceder a los datos, pero con menor frecuencia. De esta forma, por ejemplo, las imágenes no se mostrarán hasta que las presiones."</string>
+    <string name="data_saver_enable_title" msgid="7080620065745260137">"¿Deseas activar Ahorro de datos?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Activar"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
       <item quantity="other">Durante %1$d minutos hasta la(s) <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g></item>
@@ -2026,7 +2029,7 @@
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> y <xliff:g id="COUNT_3">%d</xliff:g> archivos más</item>
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> y <xliff:g id="COUNT_1">%d</xliff:g> archivo más</item>
     </plurals>
-    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"No hay personas recomendadas con las que compartir"</string>
+    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"No hay personas recomendadas con quienes compartir"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"Lista de apps"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Aunque no se le otorgó permiso de grabación a esta app, puede capturar audio con este dispositivo USB."</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"Página principal"</string>

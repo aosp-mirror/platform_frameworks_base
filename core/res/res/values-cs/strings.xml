@@ -1499,6 +1499,9 @@
     <string name="gpsNotifMessage" msgid="7346649122793758032">"Požadavek od uživatele <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
     <string name="gpsVerifYes" msgid="3719843080744112940">"Ano"</string>
     <string name="gpsVerifNo" msgid="1671201856091564741">"Ne"</string>
+    <string name="gnss_nfw_notification_title" msgid="5004493772059563423">"Byl využit údaj o poloze v nouzi"</string>
+    <string name="gnss_nfw_notification_message_oem" msgid="3683958907027107969">"Výrobce vašeho zařízení při nedávném tísňovém volání získal přístup k vaší poloze"</string>
+    <string name="gnss_nfw_notification_message_carrier" msgid="815888995791562151">"Váš operátor při nedávném tísňovém volání získal přístup k vaší poloze"</string>
     <string name="sync_too_many_deletes" msgid="6999440774578705300">"Byl překročen limit mazání."</string>
     <string name="sync_too_many_deletes_desc" msgid="7409327940303504440">"Počet smazaných položek pro <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g> (účet <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g>): <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g>. Co chcete dělat?"</string>
     <string name="sync_really_delete" msgid="5657871730315579051">"Smazat položky."</string>
