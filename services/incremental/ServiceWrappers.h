@@ -55,13 +55,12 @@ public:
 class DataLoaderManagerWrapper {
 public:
     virtual ~DataLoaderManagerWrapper() = default;
-    virtual binder::Status initializeDataLoader(
+    virtual binder::Status bindToDataLoader(
             MountId mountId, const content::pm::DataLoaderParamsParcel& params,
-            const content::pm::FileSystemControlParcel& control,
             const sp<content::pm::IDataLoaderStatusListener>& listener, bool* result) const = 0;
     virtual binder::Status getDataLoader(MountId mountId,
                                          sp<content::pm::IDataLoader>* result) const = 0;
-    virtual binder::Status destroyDataLoader(MountId mountId) const = 0;
+    virtual binder::Status unbindFromDataLoader(MountId mountId) const = 0;
 };
 
 class IncFsWrapper {
