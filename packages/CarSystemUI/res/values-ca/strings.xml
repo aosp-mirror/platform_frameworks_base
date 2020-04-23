@@ -20,4 +20,10 @@
     <string name="hvac_min_text" msgid="8167124789068494624">"Mín."</string>
     <string name="hvac_max_text" msgid="3669693372074755551">"Màx."</string>
     <string name="voice_recognition_toast" msgid="1149934534584052842">"Reconeixement de veu gestionat per disp. Bluetooth connectat"</string>
+    <string name="car_guest" msgid="318393171202663722">"Convidat"</string>
+    <string name="start_guest_session" msgid="497784785761754874">"Convidat"</string>
+    <string name="car_add_user" msgid="4067337059622483269">"Afegeix un usuari"</string>
+    <string name="car_new_user" msgid="6637442369728092473">"Usuari nou"</string>
+    <string name="user_add_user_message_setup" msgid="1035578846007352323">"Quan s\'afegeix un usuari nou, aquest usuari ha de configurar el seu espai."</string>
+    <string name="user_add_user_message_update" msgid="7061671307004867811">"Qualsevol usuari pot actualitzar les aplicacions de la resta d\'usuaris."</string>
 </resources>

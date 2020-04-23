@@ -20,4 +20,10 @@
     <string name="hvac_min_text" msgid="8167124789068494624">"ਨਿਊਨਤਮ"</string>
     <string name="hvac_max_text" msgid="3669693372074755551">"ਅਧਿਕਤਮ"</string>
     <string name="voice_recognition_toast" msgid="1149934534584052842">"ਅਵਾਜ਼ ਦੀ ਪਛਾਣ ਨੂੰ ਹੁਣ ਕਨੈਕਟ ਕੀਤਾ ਬਲੂਟੁੱਥ ਡੀਵਾਈਸ ਸੰਭਾਲਦਾ ਹੈ"</string>
+    <string name="car_guest" msgid="318393171202663722">"ਮਹਿਮਾਨ"</string>
+    <string name="start_guest_session" msgid="497784785761754874">"ਮਹਿਮਾਨ"</string>
+    <string name="car_add_user" msgid="4067337059622483269">"ਵਰਤੋਂਕਾਰ ਸ਼ਾਮਲ ਕਰੋ"</string>
+    <string name="car_new_user" msgid="6637442369728092473">"ਨਵਾਂ ਵਰਤੋਂਕਾਰ"</string>
+    <string name="user_add_user_message_setup" msgid="1035578846007352323">"ਜਦੋਂ ਤੁਸੀਂ ਕੋਈ ਨਵਾਂ ਵਰਤੋਂਕਾਰ ਸ਼ਾਮਲ ਕਰਦੇ ਹੋ, ਤਾਂ ਉਸ ਵਿਅਕਤੀ ਨੂੰ ਆਪਣੀ ਜਗ੍ਹਾ ਸੈੱਟਅੱਪ ਕਰਨ ਦੀ ਲੋੜ ਹੁੰਦੀ ਹੈ।"</string>
+    <string name="user_add_user_message_update" msgid="7061671307004867811">"ਕੋਈ ਵੀ ਵਰਤੋਂਕਾਰ ਹੋਰ ਸਾਰੇ ਵਰਤੋਂਕਾਰਾਂ ਦੀਆਂ ਐਪਾਂ ਨੂੰ ਅੱਪਡੇਟ ਕਰ ਸਕਦਾ ਹੈ।"</string>
 </resources>
