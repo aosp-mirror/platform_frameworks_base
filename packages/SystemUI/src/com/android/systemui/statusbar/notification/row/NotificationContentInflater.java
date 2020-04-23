@@ -132,7 +132,6 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                 mConversationProcessor,
                 row,
                 bindParams.isLowPriority,
-                bindParams.isChildInGroup,
                 bindParams.usesIncreasedHeight,
                 bindParams.usesIncreasedHeadsUpHeight,
                 callback,
@@ -156,7 +155,6 @@ public class NotificationContentInflater implements NotificationRowContentBinder
         InflationProgress result = createRemoteViews(reInflateFlags,
                 builder,
                 bindParams.isLowPriority,
-                bindParams.isChildInGroup,
                 bindParams.usesIncreasedHeight,
                 bindParams.usesIncreasedHeadsUpHeight,
                 packageContext);
@@ -285,11 +283,9 @@ public class NotificationContentInflater implements NotificationRowContentBinder
     }
 
     private static InflationProgress createRemoteViews(@InflationFlag int reInflateFlags,
-            Notification.Builder builder, boolean isLowPriority, boolean isChildInGroup,
-            boolean usesIncreasedHeight, boolean usesIncreasedHeadsUpHeight,
-            Context packageContext) {
+            Notification.Builder builder, boolean isLowPriority, boolean usesIncreasedHeight,
+            boolean usesIncreasedHeadsUpHeight, Context packageContext) {
         InflationProgress result = new InflationProgress();
-        isLowPriority = isLowPriority && !isChildInGroup;
 
         if ((reInflateFlags & FLAG_CONTENT_VIEW_CONTRACTED) != 0) {
             result.newContentView = createContentView(builder, isLowPriority, usesIncreasedHeight);
@@ -702,7 +698,6 @@ public class NotificationContentInflater implements NotificationRowContentBinder
         private final Context mContext;
         private final boolean mInflateSynchronously;
         private final boolean mIsLowPriority;
-        private final boolean mIsChildInGroup;
         private final boolean mUsesIncreasedHeight;
         private final InflationCallback mCallback;
         private final boolean mUsesIncreasedHeadsUpHeight;
@@ -728,7 +723,6 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                 ConversationNotificationProcessor conversationProcessor,
                 ExpandableNotificationRow row,
                 boolean isLowPriority,
-                boolean isChildInGroup,
                 boolean usesIncreasedHeight,
                 boolean usesIncreasedHeadsUpHeight,
                 InflationCallback callback,
@@ -743,7 +737,6 @@ public class NotificationContentInflater implements NotificationRowContentBinder
             mRemoteViewCache = cache;
             mContext = mRow.getContext();
             mIsLowPriority = isLowPriority;
-            mIsChildInGroup = isChildInGroup;
             mUsesIncreasedHeight = usesIncreasedHeight;
             mUsesIncreasedHeadsUpHeight = usesIncreasedHeadsUpHeight;
             mRemoteViewClickHandler = remoteViewClickHandler;
@@ -781,7 +774,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                     mConversationProcessor.processNotification(mEntry, recoveredBuilder);
                 }
                 InflationProgress inflationProgress = createRemoteViews(mReInflateFlags,
-                        recoveredBuilder, mIsLowPriority, mIsChildInGroup, mUsesIncreasedHeight,
+                        recoveredBuilder, mIsLowPriority, mUsesIncreasedHeight,
                         mUsesIncreasedHeadsUpHeight, packageContext);
                 return inflateSmartReplyViews(inflationProgress, mReInflateFlags, mEntry,
                         mRow.getContext(), packageContext, mRow.getHeadsUpManager(),
