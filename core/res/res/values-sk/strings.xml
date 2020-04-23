@@ -242,11 +242,11 @@
     <string name="global_action_lock" msgid="6949357274257655383">"Zámka obrazovky"</string>
     <string name="global_action_power_off" msgid="4404936470711393203">"Vypnúť"</string>
     <string name="global_action_power_options" msgid="1185286119330160073">"Vypnutie"</string>
-    <string name="global_action_restart" msgid="4678451019561687074">"Reštart"</string>
-    <string name="global_action_emergency" msgid="1387617624177105088">"Tieseň"</string>
+    <string name="global_action_restart" msgid="4678451019561687074">"Reštartovať"</string>
+    <string name="global_action_emergency" msgid="1387617624177105088">"Tiesňový režim"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"Hlásenie o chybách"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"Ukončiť reláciu"</string>
-    <string name="global_action_screenshot" msgid="2610053466156478564">"Snímka"</string>
+    <string name="global_action_screenshot" msgid="2610053466156478564">"Snímka obrazovky"</string>
     <string name="bugreport_title" msgid="8549990811777373050">"Hlásenie chyby"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"Týmto zhromaždíte informácie o aktuálnom stave zariadenia. Informácie je potom možné odoslať e-mailom, chvíľu však potrvá, kým bude hlásenie chyby pripravené na odoslanie. Prosíme vás preto o trpezlivosť."</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"Interaktívne nahlásenie"</string>
@@ -1499,6 +1499,9 @@
     <string name="gpsNotifMessage" msgid="7346649122793758032">"Žiadosť od používateľa <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
     <string name="gpsVerifYes" msgid="3719843080744112940">"Áno"</string>
     <string name="gpsVerifNo" msgid="1671201856091564741">"Nie"</string>
+    <string name="gnss_nfw_notification_title" msgid="5004493772059563423">"Bola použitá poloha v tiesni"</string>
+    <string name="gnss_nfw_notification_message_oem" msgid="3683958907027107969">"Výrobca vášho zariadenia použil vašu polohu počas nedávnej relácie v tiesňovej situácii"</string>
+    <string name="gnss_nfw_notification_message_carrier" msgid="815888995791562151">"Váš operátor použil vašu polohu počas nedávnej relácie v tiesňovej situácii"</string>
     <string name="sync_too_many_deletes" msgid="6999440774578705300">"Bol prekročený limit odstraňovania"</string>
     <string name="sync_too_many_deletes_desc" msgid="7409327940303504440">"Počet odstránených položiek pre <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g> účet <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g> je: <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g>. Čo chcete robiť?"</string>
     <string name="sync_really_delete" msgid="5657871730315579051">"Odstrániť položky"</string>
@@ -1601,7 +1604,7 @@
     <string name="media_route_button_content_description" msgid="2299223698196869956">"Prenášať"</string>
     <string name="media_route_chooser_title" msgid="6646594924991269208">"Pripojenie k zariadeniu"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"Prenos obrazovky do zariadenia"</string>
-    <string name="media_route_chooser_searching" msgid="6119673534251329535">"Prebieha vyhľadávanie zariadení…"</string>
+    <string name="media_route_chooser_searching" msgid="6119673534251329535">"Vyhľadávajú sa zariadenia…"</string>
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"Nastavenia"</string>
     <string name="media_route_controller_disconnect" msgid="7362617572732576959">"Odpojiť"</string>
     <string name="media_route_status_scanning" msgid="8045156315309594482">"Prebieha vyhľadávanie..."</string>
@@ -1835,8 +1838,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Aktualizoval správca"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Odstránil správca"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Šetrič batérie predlžuje výdrž batérie:\n·zapnutím tmavého motívu;\n·vypnutím alebo obmedzením aktivity na pozadí, niektorých vizuálnych efektov a ďalších funkcií, ako napríklad „Hej Google“.\n\n"<annotation id="url">"Ďalšie informácie"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"Šetrič batérie predlžuje výdrž batérie:\n·zapnutím tmavého motívu;\n·vypnutím alebo obmedzením aktivity na pozadí, niektorých vizuálnych efektov a ďalších funkcií, ako napríklad „Hej Google“."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Šetrič batérie predlžuje výdrž batérie:\n·zapnutím tmavého motívu;\n·vypnutím alebo obmedzením aktivity na pozadí, niektorých vizuálnych efektov a ďalších funkcií, ako napríklad „Hey Google“.\n\n"<annotation id="url">"Ďalšie informácie"</annotation></string>
+    <string name="battery_saver_description" msgid="7618492104632328184">"Šetrič batérie predlžuje výdrž batérie:\n·zapnutím tmavého motívu;\n·vypnutím alebo obmedzením aktivity na pozadí, niektorých vizuálnych efektov a ďalších funkcií, ako napríklad „Hey Google“."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"S cieľom znížiť spotrebu dát bráni šetrič dát niektorým aplikáciám odosielať alebo prijímať dáta na pozadí. Aplikácia, ktorú práve používate, môže využívať dáta, ale možno to bude robiť menej často. Znamená to napríklad, že sa nezobrazia obrázky, kým na ne neklepnete."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Chcete zapnúť šetrič dát?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Zapnúť"</string>

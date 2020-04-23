@@ -1457,6 +1457,12 @@
     <string name="gpsNotifMessage" msgid="7346649122793758032">"درخواست کردہ بذریعہ <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
     <string name="gpsVerifYes" msgid="3719843080744112940">"ہاں"</string>
     <string name="gpsVerifNo" msgid="1671201856091564741">"نہیں"</string>
+    <!-- no translation found for gnss_nfw_notification_title (5004493772059563423) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_oem (3683958907027107969) -->
+    <skip />
+    <!-- no translation found for gnss_nfw_notification_message_carrier (815888995791562151) -->
+    <skip />
     <string name="sync_too_many_deletes" msgid="6999440774578705300">"حذف کرنے کی حد سے متجاوز ہو گیا"</string>
     <string name="sync_too_many_deletes_desc" msgid="7409327940303504440">"<xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>، اکاؤنٹ <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g> کیلئے <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> حذف کردہ آئٹمز ہیں۔ آپ کیا کرنا چاہتے ہیں؟"</string>
     <string name="sync_really_delete" msgid="5657871730315579051">"آئٹمز حذف کریں"</string>
@@ -1791,7 +1797,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ٹھیک ہے"</string>
     <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"‏بیٹری لائف کو بڑھانے کے لیے، بیٹری سیور:\n گہری تھیم کو آن کرتی ہے\n پس منظر کی سرگرمی، کچھ بصری اثرات اور دیگر خصوصیات جیسے کہ \"Ok Google\" کو آف یا محدود کرتی ہے\n\n"<annotation id="url">"مزید جانیں"</annotation></string>
     <string name="battery_saver_description" msgid="7618492104632328184">"‏بیٹری لائف کو بڑھانے کے لیے، بیٹری سیور:\n گہری تھیم کو آن کرتی ہے\n پس منظر کی سرگرمی، کچھ بصری اثرات اور دیگر خصوصیات جیسے کہ \"Ok Google\" کو آف یا محدود کرتی ہے"</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"ڈیٹا کے استعمال کو کم کرنے میں مدد کیلئے، ڈیٹا سیور پس منظر میں کچھ ایپس کو ڈیٹا بھیجنے یا موصول کرنے سے روکتا ہے۔ آپ جو ایپ فی الحال استعمال کر رہے ہیں وہ ڈیٹا پر رسائی کر سکتی ہے مگر ہو سکتا ہے ایسا زیادہ نہ ہو۔ اس کا مطلب مثال کے طور پر یہ ہو سکتا ہے کہ تصاویر تھپتھپانے تک ظاہر نہ ہوں۔"</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"ڈیٹا کے استعمال کو کم کرنے میں مدد کیلئے، ڈیٹا سیور پس منظر میں کچھ ایپس کو ڈیٹا بھیجنے یا موصول کرنے سے روکتی ہے۔ آپ جو ایپ فی الحال استعمال کر رہے ہیں وہ ڈیٹا تک رسائی کر سکتی ہے مگر ہو سکتا ہے ایسا اکثر نہ ہو۔ اس کا مطلب مثال کے طور پر یہ ہو سکتا ہے کہ تصاویر تھپتھپانے تک ظاہر نہ ہوں۔"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"ڈیٹا سیور آن کریں؟"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"آن کریں"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">

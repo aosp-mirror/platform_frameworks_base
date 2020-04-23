@@ -798,7 +798,7 @@
     <string name="relationTypeAssistant" msgid="4057605157116589315">"助理"</string>
     <string name="relationTypeBrother" msgid="7141662427379247820">"兄弟"</string>
     <string name="relationTypeChild" msgid="9076258911292693601">"子女"</string>
-    <string name="relationTypeDomesticPartner" msgid="7825306887697559238">"同居人"</string>
+    <string name="relationTypeDomesticPartner" msgid="7825306887697559238">"同居伴侶"</string>
     <string name="relationTypeFather" msgid="3856225062864790596">"父親"</string>
     <string name="relationTypeFriend" msgid="3192092625893980574">"好友"</string>
     <string name="relationTypeManager" msgid="2272860813153171857">"經理"</string>
@@ -1142,7 +1142,7 @@
     <string name="whichSendToApplication" msgid="77101541959464018">"透過以下應用程式傳送："</string>
     <string name="whichSendToApplicationNamed" msgid="3385686512014670003">"透過「%1$s」傳送"</string>
     <string name="whichSendToApplicationLabel" msgid="3543240188816513303">"傳送"</string>
-    <string name="whichHomeApplication" msgid="8276350727038396616">"選取主螢幕應用程式"</string>
+    <string name="whichHomeApplication" msgid="8276350727038396616">"選取主畫面應用程式"</string>
     <string name="whichHomeApplicationNamed" msgid="5855990024847433794">"使用「%1$s」做為主螢幕"</string>
     <string name="whichHomeApplicationLabel" msgid="8907334282202933959">"擷取圖片"</string>
     <string name="whichImageCaptureApplication" msgid="2737413019463215284">"使用以下應用程式擷取圖片："</string>
@@ -1457,6 +1457,9 @@
     <string name="gpsNotifMessage" msgid="7346649122793758032">"要求者：<xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
     <string name="gpsVerifYes" msgid="3719843080744112940">"是"</string>
     <string name="gpsVerifNo" msgid="1671201856091564741">"否"</string>
+    <string name="gnss_nfw_notification_title" msgid="5004493772059563423">"外部實體存取了你的緊急位置資訊"</string>
+    <string name="gnss_nfw_notification_message_oem" msgid="3683958907027107969">"你的裝置製造商在最近的緊急工作階段期間存取了你的位置資訊"</string>
+    <string name="gnss_nfw_notification_message_carrier" msgid="815888995791562151">"你的電信業者在最近的緊急工作階段期間存取了你的位置資訊"</string>
     <string name="sync_too_many_deletes" msgid="6999440774578705300">"已超過刪除上限"</string>
     <string name="sync_too_many_deletes_desc" msgid="7409327940303504440">"帳戶 <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g> 的<xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>會刪除 <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> 個項目。你要如何處理？"</string>
     <string name="sync_really_delete" msgid="5657871730315579051">"刪除這些項目"</string>
@@ -1789,9 +1792,9 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"已由你的管理員更新"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"已由你的管理員刪除"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"確定"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"為了延長電池續航力，節約耗電量功能會執行以下動作：\n開啟深色主題\n關閉或限制背景活動、部分視覺效果和其他功能，例如「Hey Google」\n\n"<annotation id="url">"瞭解詳情"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"為了延長電池續航力，節約耗電量功能會執行以下動作：\n開啟深色主題\n關閉或限制背景活動、部分視覺效果和其他功能，例如「Hey Google」"</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"「數據節省模式」可防止部分應用程式在背景收發資料，以節省數據用量。你目前使用的某個應用程式可以存取資料，但存取頻率可能不如平時高。舉例來說，圖片可能不會自動顯示，在你輕觸後才會顯示。"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"為了延長電池續航力，節約耗電量功能會執行以下動作：\n開啟深色主題\n關閉或限制背景活動、部分視覺效果和其他功能，例如「Hey Google」啟動字詞\n\n"<annotation id="url">"瞭解詳情"</annotation></string>
+    <string name="battery_saver_description" msgid="7618492104632328184">"為了延長電池續航力，節約耗電量功能會執行以下動作：\n· 開啟深色主題\n· 關閉或限制背景活動、部分視覺效果和其他功能，例如「Hey Google」啟動字詞"</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"「數據節省模式」可防止部分應用程式在背景收發資料，以節省數據用量。你目前使用的應用程式可以存取資料，但存取頻率可能不如平時高。舉例來說，圖片可能不會自動顯示，在你輕觸後才會顯示。"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"要開啟數據節省模式嗎？"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"開啟"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
