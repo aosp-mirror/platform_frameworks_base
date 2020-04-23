@@ -20045,8 +20045,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (uid == mTargetUid && isTargetOp(code)) {
                 final long identity = Binder.clearCallingIdentity();
                 try {
-                    return mAppOpsService.noteProxyOperation(code, Process.SHELL_UID,
-                            "com.android.shell", null, uid, packageName, featureId,
+                    return superImpl.apply(code, Process.SHELL_UID, "com.android.shell", featureId,
                             shouldCollectAsyncNotedOp, message);
                 } finally {
                     Binder.restoreCallingIdentity(identity);
