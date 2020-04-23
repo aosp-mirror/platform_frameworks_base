@@ -3660,9 +3660,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return mActivityRecord.getBounds().equals(mTmpRect);
     }
 
-    @Override
-    public boolean isLetterboxedOverlappingWith(Rect rect) {
-        return mActivityRecord != null && mActivityRecord.isLetterboxOverlappingWith(rect);
+    /**
+     * @see Letterbox#notIntersectsOrFullyContains(Rect)
+     */
+    boolean letterboxNotIntersectsOrFullyContains(Rect rect) {
+        return mActivityRecord == null
+                || mActivityRecord.letterboxNotIntersectsOrFullyContains(rect);
     }
 
     boolean isDragResizeChanged() {
