@@ -23,4 +23,9 @@ interface IDisplayAreaOrganizerController {
 
     /** Register a DisplayAreaOrganizer to manage display areas for a given feature. */
     void registerOrganizer(in IDisplayAreaOrganizer organizer, int displayAreaFeature);
+
+    /**
+     * Unregisters a previously registered display area organizer.
+     */
+    void unregisterOrganizer(in IDisplayAreaOrganizer organizer);
 }
