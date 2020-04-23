@@ -8607,6 +8607,16 @@ public final class Settings {
         public static final String CONTROLS_ENABLED = "controls_enabled";
 
         /**
+         * Whether power menu content (cards, passes, controls) will be shown when device is locked.
+         *
+         * 0 indicates hide and 1 indicates show. A non existent value will be treated as hide.
+         * @hide
+         */
+        @TestApi
+        public static final String POWER_MENU_LOCKED_SHOW_CONTENT =
+                "power_menu_locked_show_content";
+
+        /**
          * Specifies whether the web action API is enabled.
          *
          * @hide
