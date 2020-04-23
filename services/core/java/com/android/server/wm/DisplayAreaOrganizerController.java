@@ -92,6 +92,25 @@ public class DisplayAreaOrganizerController extends IDisplayAreaOrganizerControl
         }
     }
 
+    @Override
+    public void unregisterOrganizer(IDisplayAreaOrganizer organizer) {
+        enforceStackPermission("unregisterTaskOrganizer()");
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                mOrganizersByFeatureIds.entrySet().removeIf(
+                        entry -> entry.getValue().asBinder() == organizer.asBinder());
+
+                mService.mRootWindowContainer.forAllDisplayAreas((da) -> {
+                    if (da.mOrganizer != organizer) return;
+                    da.setOrganizer(null);
+                });
+            }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
+    }
+
     void onDisplayAreaAppeared(IDisplayAreaOrganizer organizer, DisplayArea da) {
         try {
             organizer.onDisplayAreaAppeared(da.getDisplayAreaInfo());
@@ -103,6 +122,14 @@ public class DisplayAreaOrganizerController extends IDisplayAreaOrganizerControl
     void onDisplayAreaVanished(IDisplayAreaOrganizer organizer, DisplayArea da) {
         try {
             organizer.onDisplayAreaVanished(da.getDisplayAreaInfo());
+        } catch (RemoteException e) {
+            // Oh well...
+        }
+    }
+
+    void onDisplayAreaInfoChanged(IDisplayAreaOrganizer organizer, DisplayArea da) {
+        try {
+            organizer.onDisplayAreaInfoChanged(da.getDisplayAreaInfo());
         } catch (RemoteException e) {
             // Oh well...
         }

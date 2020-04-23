@@ -25,4 +25,5 @@ import android.window.DisplayAreaInfo;
 oneway interface IDisplayAreaOrganizer {
     void onDisplayAreaAppeared(in DisplayAreaInfo displayAreaInfo);
     void onDisplayAreaVanished(in DisplayAreaInfo displayAreaInfo);
+    void onDisplayAreaInfoChanged(in DisplayAreaInfo displayAreaInfo);
 }
