@@ -81,6 +81,7 @@ public:
     virtual ErrorCode makeFile(const Control& control, std::string_view path, int mode, FileId id,
                                incfs::NewFileParams params) const = 0;
     virtual ErrorCode makeDir(const Control& control, std::string_view path, int mode) const = 0;
+    virtual ErrorCode makeDirs(const Control& control, std::string_view path, int mode) const = 0;
     virtual incfs::RawMetadata getMetadata(const Control& control, FileId fileid) const = 0;
     virtual incfs::RawMetadata getMetadata(const Control& control, std::string_view path) const = 0;
     virtual FileId getFileId(const Control& control, std::string_view path) const = 0;
