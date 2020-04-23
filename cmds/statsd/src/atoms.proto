@@ -46,6 +46,7 @@ import "frameworks/base/core/proto/android/stats/dnsresolver/dns_resolver.proto"
 import "frameworks/base/core/proto/android/stats/devicepolicy/device_policy.proto";
 import "frameworks/base/core/proto/android/stats/devicepolicy/device_policy_enums.proto";
 import "frameworks/base/core/proto/android/stats/docsui/docsui_enums.proto";
+import "frameworks/base/core/proto/android/stats/accessibility/accessibility_enums.proto";
 import "frameworks/base/core/proto/android/stats/enums.proto";
 import "frameworks/base/core/proto/android/stats/intelligence/enums.proto";
 import "frameworks/base/core/proto/android/stats/launcher/launcher.proto";
@@ -423,6 +424,9 @@ message Atom {
         PackageInstallerV2Reported package_installer_v2_reported = 263 [(module) = "framework"];
         UserLifecycleJourneyReported user_lifecycle_journey_reported = 264 [(module) = "framework"];
         UserLifecycleEventOccurred user_lifecycle_event_occurred = 265 [(module) = "framework"];
+        AccessibilityShortcutReported accessibility_shortcut_reported =
+            266 [(module) = "framework"];
+        AccessibilityServiceReported accessibility_service_reported = 267 [(module) = "framework"];
         SdkExtensionStatus sdk_extension_status = 354;
 
         // StatsdStats tracks platform atoms with ids upto 500.
@@ -9440,4 +9444,39 @@ message UserLifecycleEventOccurred {
         FINISH = 2;
     }
     optional State state = 4; // Represents the state of an event (beginning/ending)
+}
+
+/**
+ * Logs when accessibility shortcut clicked.
+ *
+ * Logged from:
+ *   frameworks/base/services/accessibility/java/com/android/server/accessibility/AccessibilityManagerService.java
+ */
+message AccessibilityShortcutReported {
+    // The accessibility feature(including installed a11y service, framework a11y feature,
+    // and installed a11y activity) package name that is assigned to the accessibility shortcut.
+    optional string package_name = 1;
+
+    // The definition of the accessibility shortcut.
+    // From frameworks/base/core/proto/android/stats/accessibility/accessibility_enums.proto.
+    optional android.stats.accessibility.ShortcutType shortcut_type = 2;
+
+    // The definition of the service status.
+    // From frameworks/base/core/proto/android/stats/accessibility/accessibility_enums.proto.
+    optional android.stats.accessibility.ServiceStatus service_status = 3;
+}
+
+/**
+ * Logs when accessibility service status changed.
+ *
+ * Logged from:
+ *   frameworks/base/services/accessibility/java/com/android/server/accessibility/AccessibilityManagerService.java
+ */
+message AccessibilityServiceReported {
+    // The accessibility service package name.
+    optional string package_name = 1;
+
+    // The definition of the service status.
+    // From frameworks/base/core/proto/android/stats/accessibility/accessibility_enums.proto.
+    optional android.stats.accessibility.ServiceStatus service_status = 2;
 }
