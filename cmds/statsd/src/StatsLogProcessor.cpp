@@ -25,7 +25,6 @@
 #include <frameworks/base/cmds/statsd/src/experiment_ids.pb.h>
 
 #include "android-base/stringprintf.h"
-#include "atoms_info.h"
 #include "external/StatsPullerManager.h"
 #include "guardrail/StatsdStats.h"
 #include "logd/LogEvent.h"
