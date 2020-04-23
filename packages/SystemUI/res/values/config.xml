@@ -205,6 +205,14 @@
          far break points. A sensor value less than this is considered "near". -->
     <item name="proximity_sensor_threshold" translatable="false" format="float" type="dimen"></item>
 
+    <!-- Override value to use for proximity sensor as confirmation for proximity_sensor_type. -->
+    <string name="proximity_sensor_secondary_type" translatable="false"></string>
+
+    <!-- If using proximity_sensor_confirmation_type, specifies a threshold value to distinguish
+         near and far break points. A sensor value less than this is considered "near". -->
+    <item name="proximity_sensor_secondary_threshold" translatable="false" format="float"
+          type="dimen"></item>
+
     <!-- Doze: pulse parameter - how long does it take to fade in? -->
     <integer name="doze_pulse_duration_in">130</integer>
 
