@@ -14,7 +14,6 @@
       android:theme="@style/qs_theme"
       android:clipChildren="false"
       android:clipToPadding="false"
-      android:layout_marginTop="@dimen/global_actions_top_margin"
       android:layout_marginStart="@dimen/global_actions_side_margin"
   >
     <LinearLayout
@@ -51,6 +50,7 @@
       android:paddingBottom="@dimen/global_actions_grid_container_shadow_offset"
       android:layout_marginBottom="@dimen/global_actions_grid_container_negative_shadow_offset"
       android:orientation="vertical"
+      android:scrollbars="none"
   >
     <LinearLayout
         android:id="@+id/global_actions_grid_root"
