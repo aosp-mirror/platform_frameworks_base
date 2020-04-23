@@ -118,7 +118,7 @@ public final class DreamManagerService extends SystemService {
                 public void onReceive(Context context, Intent intent) {
                     writePulseGestureEnabled();
                     synchronized (mLock) {
-                        stopDreamLocked(false /*immediate*/);
+                        stopDreamLocked(false /*immediate*/, "user switched");
                     }
                 }
             }, new IntentFilter(Intent.ACTION_USER_SWITCHED), null, mHandler);
@@ -177,7 +177,7 @@ public final class DreamManagerService extends SystemService {
         // for example when being undocked.
         long time = SystemClock.uptimeMillis();
         mPowerManager.userActivity(time, false /*noChangeLights*/);
-        stopDreamInternal(false /*immediate*/);
+        stopDreamInternal(false /*immediate*/, "request awaken");
     }
 
     private void finishSelfInternal(IBinder token, boolean immediate) {
@@ -194,7 +194,7 @@ public final class DreamManagerService extends SystemService {
         // device may simply go to sleep.
         synchronized (mLock) {
             if (mCurrentDreamToken == token) {
-                stopDreamLocked(immediate);
+                stopDreamLocked(immediate, "finished self");
             }
         }
     }
@@ -215,9 +215,9 @@ public final class DreamManagerService extends SystemService {
         }
     }
 
-    private void stopDreamInternal(boolean immediate) {
+    private void stopDreamInternal(boolean immediate, String reason) {
         synchronized (mLock) {
-            stopDreamLocked(immediate);
+            stopDreamLocked(immediate, reason);
         }
     }
 
@@ -370,7 +370,7 @@ public final class DreamManagerService extends SystemService {
             return;
         }
 
-        stopDreamLocked(true /*immediate*/);
+        stopDreamLocked(true /*immediate*/, "starting new dream");
 
         Slog.i(TAG, "Entering dreamland.");
 
@@ -387,7 +387,7 @@ public final class DreamManagerService extends SystemService {
                 () -> mController.startDream(newToken, name, isTest, canDoze, userId, wakeLock)));
     }
 
-    private void stopDreamLocked(final boolean immediate) {
+    private void stopDreamLocked(final boolean immediate, String reason) {
         if (mCurrentDreamToken != null) {
             if (immediate) {
                 Slog.i(TAG, "Leaving dreamland.");
@@ -403,7 +403,7 @@ public final class DreamManagerService extends SystemService {
                 @Override
                 public void run() {
                     Slog.i(TAG, "Performing gentle wake from dream.");
-                    mController.stopDream(immediate);
+                    mController.stopDream(immediate, reason);
                 }
             });
         }
@@ -690,7 +690,7 @@ public final class DreamManagerService extends SystemService {
 
         @Override
         public void stopDream(boolean immediate) {
-            stopDreamInternal(immediate);
+            stopDreamInternal(immediate, "requested stopDream");
         }
 
         @Override
