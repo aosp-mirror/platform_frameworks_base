@@ -135,6 +135,9 @@ public:
     ErrorCode makeDir(const Control& control, std::string_view path, int mode) const final {
         return incfs::makeDir(control, path, mode);
     }
+    ErrorCode makeDirs(const Control& control, std::string_view path, int mode) const final {
+        return incfs::makeDirs(control, path, mode);
+    }
     incfs::RawMetadata getMetadata(const Control& control, FileId fileid) const final {
         return incfs::getMetadata(control, fileid);
     }
