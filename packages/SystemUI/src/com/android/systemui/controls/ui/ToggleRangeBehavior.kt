@@ -181,9 +181,13 @@ class ToggleRangeBehavior : Behavior {
     fun updateRange(level: Int, checked: Boolean, isDragging: Boolean) {
         val newLevel = if (checked) Math.max(MIN_LEVEL, Math.min(MAX_LEVEL, level)) else MIN_LEVEL
 
+        if (newLevel == clipLayer.level) return
+
         rangeAnimator?.cancel()
         if (isDragging) {
             clipLayer.level = newLevel
+            val isEdge = newLevel == MIN_LEVEL || newLevel == MAX_LEVEL
+            ControlActionCoordinator.drag(isEdge)
         } else {
             rangeAnimator = ValueAnimator.ofInt(cvh.clipLayer.level, newLevel).apply {
                 addUpdateListener {
