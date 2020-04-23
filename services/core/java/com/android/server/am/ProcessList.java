@@ -2213,6 +2213,17 @@ public final class ProcessList {
         return result;
     }
 
+    private boolean needsStorageDataIsolation(StorageManagerInternal storageManagerInternal,
+            ProcessRecord app) {
+        return mVoldAppDataIsolationEnabled && UserHandle.isApp(app.uid)
+                && !storageManagerInternal.isExternalStorageService(app.uid)
+                // Special mounting mode doesn't need to have data isolation as they won't
+                // access /mnt/user anyway.
+                && app.mountMode != Zygote.MOUNT_EXTERNAL_ANDROID_WRITABLE
+                && app.mountMode != Zygote.MOUNT_EXTERNAL_PASS_THROUGH
+                && app.mountMode != Zygote.MOUNT_EXTERNAL_INSTALLER;
+    }
+
     private Process.ProcessStartResult startProcess(HostingRecord hostingRecord, String entryPoint,
             ProcessRecord app, int uid, int[] gids, int runtimeFlags, int zygotePolicyFlags,
             int mountExternal, String seInfo, String requiredAbi, String instructionSet,
@@ -2269,8 +2280,7 @@ public final class ProcessList {
             int userId = UserHandle.getUserId(uid);
             StorageManagerInternal storageManagerInternal = LocalServices.getService(
                     StorageManagerInternal.class);
-            if (mVoldAppDataIsolationEnabled && UserHandle.isApp(app.uid)
-                    && !storageManagerInternal.isExternalStorageService(uid)) {
+            if (needsStorageDataIsolation(storageManagerInternal, app)) {
                 bindMountAppStorageDirs = true;
                 if (pkgDataInfoMap == null ||
                         !storageManagerInternal.prepareStorageDirs(userId, pkgDataInfoMap.keySet(),
