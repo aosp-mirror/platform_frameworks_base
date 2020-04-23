@@ -2721,6 +2721,16 @@ public class NotificationManagerService extends SystemService {
         }
         return text == null ? null : String.valueOf(text);
     }
+    
+    protected void maybeRegisterMessageSent(NotificationRecord r) {
+        Context appContext = r.getSbn().getPackageContext(getContext());
+        Notification.Builder nb = 
+                Notification.Builder.recoverBuilder(appContext, r.getNotification());
+        if (nb.getStyle() instanceof Notification.MessagingStyle) {
+            mPreferencesHelper.setMessageSent(r.getSbn().getPackageName(), r.getUid());
+            handleSavePolicyFile();
+        }
+    }
 
     /**
      * Report to usage stats that the user interacted with the notification.
@@ -3146,6 +3156,12 @@ public class NotificationManagerService extends SystemService {
             checkCallerIsSystem();
             mPreferencesHelper.setShowBadge(pkg, uid, showBadge);
             handleSavePolicyFile();
+        }
+
+        @Override
+        public boolean hasSentMessage(String pkg, int uid) {
+            checkCallerIsSystem();
+            return mPreferencesHelper.hasSentMessage(pkg, uid);
         }
 
         @Override
@@ -6462,6 +6478,7 @@ public class NotificationManagerService extends SystemService {
                     }
 
                     maybeRecordInterruptionLocked(r);
+                    maybeRegisterMessageSent(r);
 
                     // Log event to statsd
                     mNotificationRecordLogger.maybeLogNotificationPosted(r, old, position,
