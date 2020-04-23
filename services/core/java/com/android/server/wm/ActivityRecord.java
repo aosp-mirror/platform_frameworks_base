@@ -2677,7 +2677,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (isState(PAUSED)
                 && mStackSupervisor.getKeyguardController().isKeyguardLocked()
                 && getStack().topActivityOccludesKeyguard()) {
-            getStack().ensureActivitiesVisible(null /* starting */, 0 /* configChanges */,
+            getDisplay().ensureActivitiesVisible(null /* starting */, 0 /* configChanges */,
                     false /* preserveWindows */, false /* notifyClients */);
         }
 
