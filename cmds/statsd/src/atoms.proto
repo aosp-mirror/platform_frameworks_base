@@ -9000,7 +9000,7 @@ message AppFreezeChanged {
  * Each pull creates multiple atoms, one for each call. The sequence is randomized when pulled.
  *
  * Pulled from:
- *   frameworks/opt/telephony/src/java/com/android/internal/telephony/metrics/PersistPullers.java
+ *   frameworks/opt/telephony/src/java/com/android/internal/telephony/metrics/MetricsCollector.java
  */
 message VoiceCallSession {
     // Bearer (IMS or CS) when the call started.
@@ -9064,9 +9064,7 @@ message VoiceCallSession {
     // See https://source.android.com/devices/tech/config/carrierid.
     optional int32 carrier_id = 18;
 
-    // Whether an SRVCC has been completed successfully.
-    // SRVCC (CS fallback) should be recorded in the IMS call since there will be no more SRVCC
-    // events once the call is switched to CS.
+    // Whether an SRVCC has been completed successfully for this call.
     optional bool srvcc_completed = 19;
 
     // Number of SRVCC failures.
@@ -9075,7 +9073,8 @@ message VoiceCallSession {
     // Number of SRVCC cancellations.
     optional int64 srvcc_cancellation_count = 21;
 
-    // Whether the Real-Time Text (RTT) was ever used in the call.
+    // Whether the Real-Time Text (RTT) was ever used in the call (rather than whether RTT was
+    // enabled in the dialer's settings).
     optional bool rtt_enabled = 22;
 
     // Whether this was an emergency call.
@@ -9092,7 +9091,7 @@ message VoiceCallSession {
  * time. The atom will be skipped if not enough data is available.
  *
  * Pulled from:
- *   frameworks/opt/telephony/src/java/com/android/internal/telephony/metrics/PersistPullers.java
+ *   frameworks/opt/telephony/src/java/com/android/internal/telephony/metrics/MetricsCollector.java
  */
 message VoiceCallRatUsage {
     // Carrier ID (https://source.android.com/devices/tech/config/carrierid).
@@ -9113,7 +9112,7 @@ message VoiceCallRatUsage {
  * Pulls the number of active SIM slots and SIMs/eSIM profiles.
  *
  * Pulled from:
- *   frameworks/opt/telephony/src/java/com/android/internal/telephony/metrics/NonPersistPullers.java
+ *   frameworks/opt/telephony/src/java/com/android/internal/telephony/metrics/MetricsCollector.java
  */
 message SimSlotState {
     // Number of active SIM slots (both physical and eSIM profiles) in the device.
@@ -9134,7 +9133,7 @@ message SimSlotState {
  * This atom reports the capabilities of the device, rather than the network it has access to.
  *
  * Pulled from:
- *   frameworks/opt/telephony/src/java/com/android/internal/telephony/metrics/NonPersistPullers.java
+ *   frameworks/opt/telephony/src/java/com/android/internal/telephony/metrics/MetricsCollector.java
  */
 message SupportedRadioAccessFamily {
     // A bitmask of supported radio technologies.
