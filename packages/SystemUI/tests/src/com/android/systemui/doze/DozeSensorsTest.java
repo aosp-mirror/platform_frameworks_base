@@ -46,6 +46,7 @@ import com.android.systemui.doze.DozeSensors.TriggerSensor;
 import com.android.systemui.plugins.SensorManagerPlugin;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.util.sensors.AsyncSensorManager;
+import com.android.systemui.util.sensors.ProximitySensor;
 import com.android.systemui.util.wakelock.WakeLock;
 
 import org.junit.Before;
@@ -83,6 +84,9 @@ public class DozeSensorsTest extends SysuiTestCase {
     private DozeLog mDozeLog;
     @Mock
     private Sensor mProximitySensor;
+    @Mock
+    private ProximitySensor mMockProxSensor;
+
     private SensorManagerPlugin.SensorEventListener mWakeLockScreenListener;
     private TestableLooper mTestableLooper;
     private DozeSensors mDozeSensors;
@@ -104,9 +108,9 @@ public class DozeSensorsTest extends SysuiTestCase {
     @Test
     public void testRegisterProx() {
         // We should not register with the sensor manager initially.
-        verify(mSensorManager, never()).registerListener(any(), any(Sensor.class), anyInt());
+        verify(mMockProxSensor).pause();
         mDozeSensors.setProxListening(true);
-        verify(mSensorManager).registerListener(any(), any(Sensor.class), anyInt());
+        verify(mMockProxSensor).resume();
     }
 
     @Test
@@ -162,7 +166,8 @@ public class DozeSensorsTest extends SysuiTestCase {
 
         TestableDozeSensors() {
             super(getContext(), mAlarmManager, mSensorManager, mDozeParameters,
-                    mAmbientDisplayConfiguration, mWakeLock, mCallback, mProxCallback, mDozeLog);
+                    mAmbientDisplayConfiguration, mWakeLock, mCallback, mProxCallback, mDozeLog,
+                    mMockProxSensor);
             for (TriggerSensor sensor : mSensors) {
                 if (sensor instanceof PluginSensor
                         && ((PluginSensor) sensor).mPluginSensor.getType()
