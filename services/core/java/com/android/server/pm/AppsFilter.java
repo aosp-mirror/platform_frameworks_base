@@ -27,12 +27,11 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageParser;
-import android.content.pm.parsing.component.ParsedActivity;
 import android.content.pm.parsing.component.ParsedComponent;
 import android.content.pm.parsing.component.ParsedInstrumentation;
 import android.content.pm.parsing.component.ParsedIntentInfo;
+import android.content.pm.parsing.component.ParsedMainComponent;
 import android.content.pm.parsing.component.ParsedProvider;
-import android.content.pm.parsing.component.ParsedService;
 import android.os.Binder;
 import android.os.Process;
 import android.os.Trace;
@@ -302,7 +301,7 @@ public class AppsFilter {
             AndroidPackage potentialTarget, Set<String> protectedBroadcasts) {
         if (!querying.getQueriesIntents().isEmpty()) {
             for (Intent intent : querying.getQueriesIntents()) {
-                if (matchesIntentFilters(intent, potentialTarget, protectedBroadcasts)) {
+                if (matchesPackage(intent, potentialTarget, protectedBroadcasts)) {
                     return true;
                 }
             }
@@ -354,33 +353,35 @@ public class AppsFilter {
         return false;
     }
 
-    private static boolean matchesIntentFilters(Intent intent, AndroidPackage potentialTarget,
+    private static boolean matchesPackage(Intent intent, AndroidPackage potentialTarget,
             Set<String> protectedBroadcasts) {
-        for (int s = ArrayUtils.size(potentialTarget.getServices()) - 1; s >= 0; s--) {
-            ParsedService service = potentialTarget.getServices().get(s);
-            if (!service.isExported()) {
-                continue;
-            }
-            if (matchesAnyFilter(intent, service, null /*protectedBroadcasts*/)) {
-                return true;
-            }
+        if (matchesAnyComponents(
+                intent, potentialTarget.getServices(), null /*protectedBroadcasts*/)) {
+            return true;
         }
-        for (int a = ArrayUtils.size(potentialTarget.getActivities()) - 1; a >= 0; a--) {
-            ParsedActivity activity = potentialTarget.getActivities().get(a);
-            if (!activity.isExported()) {
-                continue;
-            }
+        if (matchesAnyComponents(
+                intent, potentialTarget.getActivities(), null /*protectedBroadcasts*/)) {
+            return true;
+        }
+        if (matchesAnyComponents(intent, potentialTarget.getReceivers(), protectedBroadcasts)) {
+            return true;
+        }
+        if (matchesAnyComponents(
+                intent, potentialTarget.getProviders(), null /*protectedBroadcasts*/)) {
+            return true;
+        }
+        return false;
+    }
 
-            if (matchesAnyFilter(intent, activity, null /*protectedBroadcasts*/)) {
-                return true;
-            }
-        }
-        for (int r = ArrayUtils.size(potentialTarget.getReceivers()) - 1; r >= 0; r--) {
-            ParsedActivity receiver = potentialTarget.getReceivers().get(r);
-            if (!receiver.isExported()) {
+    private static boolean matchesAnyComponents(Intent intent,
+            List<? extends ParsedMainComponent> components,
+            Set<String> protectedBroadcasts) {
+        for (int i = ArrayUtils.size(components) - 1; i >= 0; i--) {
+            ParsedMainComponent component = components.get(i);
+            if (!component.isExported()) {
                 continue;
             }
-            if (matchesAnyFilter(intent, receiver, protectedBroadcasts)) {
+            if (matchesAnyFilter(intent, component, protectedBroadcasts)) {
                 return true;
             }
         }
