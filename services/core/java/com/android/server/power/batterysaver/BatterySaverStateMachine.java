@@ -838,7 +838,8 @@ public class BatterySaverStateMachine {
         Intent intent = new Intent(intentAction);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         PendingIntent batterySaverIntent = PendingIntent.getActivity(
-                mContext, 0 /* requestCode */, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                mContext, 0 /* requestCode */, intent,
+                PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
         final String title = res.getString(titleId);
         final String summary = res.getString(summaryId);
 
