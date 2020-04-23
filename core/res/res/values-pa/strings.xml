@@ -1564,7 +1564,7 @@
     <string name="wireless_display_route_description" msgid="8297563323032966831">"ਵਾਇਰਲੈੱਸ ਡਿਸਪਲੇ"</string>
     <string name="media_route_button_content_description" msgid="2299223698196869956">"ਪ੍ਰਸਾਰਿਤ ਕਰੋ"</string>
     <string name="media_route_chooser_title" msgid="6646594924991269208">"ਡੀਵਾਈਸ ਨਾਲ ਕਨੈਕਟ ਕਰੋ"</string>
-    <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"ਡੀਵਾਈਸ ਨਾਲ ਸਕ੍ਰੀਨ ਕਾਸਟ ਕਰੋ"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"ਡੀਵਾਈਸ \'ਤੇ ਸਕ੍ਰੀਨ ਕਾਸਟ ਕਰੋ"</string>
     <string name="media_route_chooser_searching" msgid="6119673534251329535">"ਡੀਵਾਈਸਾਂ ਦੀ ਖੋਜ ਹੋ ਰਹੀ ਹੈ…"</string>
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"ਸੈਟਿੰਗਾਂ"</string>
     <string name="media_route_controller_disconnect" msgid="7362617572732576959">"ਡਿਸਕਨੈਕਟ ਕਰੋ"</string>

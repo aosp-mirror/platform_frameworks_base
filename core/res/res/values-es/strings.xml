@@ -192,7 +192,7 @@
     <string name="network_logging_notification_title" msgid="554983187553845004">"El dispositivo está administrado"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Tu organización administra este dispositivo y puede supervisar el tráfico de red. Toca la notificación para obtener más información."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"Las aplicaciones pueden acceder a tu ubicación"</string>
-    <string name="location_changed_notification_text" msgid="7158423339982706912">"Para obtener más información, ponte en contacto con tu administrador de TI"</string>
+    <string name="location_changed_notification_text" msgid="7158423339982706912">"Contacta con tu admin. de TI para más información"</string>
     <string name="country_detector" msgid="7023275114706088854">"Detector de país"</string>
     <string name="location_service" msgid="2439187616018455546">"Servicio de ubicación"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"Servicio de notificación de sensor"</string>
@@ -1457,12 +1457,9 @@
     <string name="gpsNotifMessage" msgid="7346649122793758032">"Solicitud enviada por <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
     <string name="gpsVerifYes" msgid="3719843080744112940">"Sí"</string>
     <string name="gpsVerifNo" msgid="1671201856091564741">"No"</string>
-    <!-- no translation found for gnss_nfw_notification_title (5004493772059563423) -->
-    <skip />
-    <!-- no translation found for gnss_nfw_notification_message_oem (3683958907027107969) -->
-    <skip />
-    <!-- no translation found for gnss_nfw_notification_message_carrier (815888995791562151) -->
-    <skip />
+    <string name="gnss_nfw_notification_title" msgid="5004493772059563423">"Ubicación consultada durante emergencia"</string>
+    <string name="gnss_nfw_notification_message_oem" msgid="3683958907027107969">"El fabricante de tu dispositivo ha consultado tu ubicación durante una sesión de emergencia reciente"</string>
+    <string name="gnss_nfw_notification_message_carrier" msgid="815888995791562151">"Tu operador ha consultado tu ubicación durante una sesión de emergencia reciente"</string>
     <string name="sync_too_many_deletes" msgid="6999440774578705300">"Se ha superado el límite de eliminaciones."</string>
     <string name="sync_too_many_deletes_desc" msgid="7409327940303504440">"Hay <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> elementos eliminados para <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g> (cuenta <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g>). ¿Qué quieres hacer?"</string>
     <string name="sync_really_delete" msgid="5657871730315579051">"Eliminar elementos"</string>
@@ -2001,7 +1998,7 @@
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"Micrófono"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"se muestra sobre otras aplicaciones que haya en la pantalla"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notificación sobre el modo rutina"</string>
-    <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Es posible que te quedes sin batería antes de lo habitual"</string>
+    <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Puede que se agote la batería antes de lo habitual"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Se ha activado el modo Ahorro de batería para aumentar la duración de la batería"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Ahorro de batería"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Ahorro de batería desactivado"</string>
@@ -2032,7 +2029,7 @@
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> y <xliff:g id="COUNT_3">%d</xliff:g> archivos</item>
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> y <xliff:g id="COUNT_1">%d</xliff:g> archivo</item>
     </plurals>
-    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"No hay personas recomendadas con las que compartir"</string>
+    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"No hay sugerencias de personas con las que compartir"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"Lista de aplicaciones"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Esta aplicación no tiene permiso para grabar, pero podría registrar audio con este dispositivo USB."</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"Inicio"</string>

@@ -1457,12 +1457,9 @@
     <string name="gpsNotifMessage" msgid="7346649122793758032">"Sol·licitat per <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
     <string name="gpsVerifYes" msgid="3719843080744112940">"Sí"</string>
     <string name="gpsVerifNo" msgid="1671201856091564741">"No"</string>
-    <!-- no translation found for gnss_nfw_notification_title (5004493772059563423) -->
-    <skip />
-    <!-- no translation found for gnss_nfw_notification_message_oem (3683958907027107969) -->
-    <skip />
-    <!-- no translation found for gnss_nfw_notification_message_carrier (815888995791562151) -->
-    <skip />
+    <string name="gnss_nfw_notification_title" msgid="5004493772059563423">"S\'ha accedit a la ubicació per emergència"</string>
+    <string name="gnss_nfw_notification_message_oem" msgid="3683958907027107969">"El fabricant del teu dispositiu ha accedit a la teva ubicació durant una sessió d\'emergència recent"</string>
+    <string name="gnss_nfw_notification_message_carrier" msgid="815888995791562151">"El teu operador ha accedit a la teva ubicació durant una sessió d\'emergència recent"</string>
     <string name="sync_too_many_deletes" msgid="6999440774578705300">"S\'ha superat el límit de supressions"</string>
     <string name="sync_too_many_deletes_desc" msgid="7409327940303504440">"Hi ha <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> elements suprimits per a <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>, compte <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g>. Què vols fer?"</string>
     <string name="sync_really_delete" msgid="5657871730315579051">"Suprimeix els elements"</string>
@@ -1834,7 +1831,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="2250286190237669079">"Fins a les <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"Fins a les <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (propera alarma)"</string>
-    <string name="zen_mode_forever" msgid="740585666364912448">"Fins que no ho desactivi"</string>
+    <string name="zen_mode_forever" msgid="740585666364912448">"Fins que no el desactivis"</string>
     <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"Fins que desactivis el mode No molestis"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"Replega"</string>
