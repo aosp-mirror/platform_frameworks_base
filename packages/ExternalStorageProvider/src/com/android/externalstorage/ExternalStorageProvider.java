@@ -433,7 +433,7 @@ public class ExternalStorageProvider extends FileSystemProvider {
         final int splitIndex = docId.indexOf(':', 1);
         final String path = docId.substring(splitIndex + 1);
 
-        File target = visible ? root.visiblePath : root.path;
+        File target = root.visiblePath != null ? root.visiblePath : root.path;
         if (target == null) {
             return null;
         }
