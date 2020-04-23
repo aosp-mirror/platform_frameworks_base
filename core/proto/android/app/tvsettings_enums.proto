@@ -298,6 +298,12 @@ enum ItemId {
     // TvSettings > Apps > See all apps > [An app entry] > Permissions
     APPS_ALL_APPS_APP_ENTRY_PERMISSIONS = 0x1611A000;
 
+    // TvSettings > Apps > See all apps > [An app entry] > Enable
+    APPS_ALL_APPS_APP_ENTRY_ENABLE = 0x1611B000;
+
+    // TvSettings > Apps > See all apps > [An app entry] > Open source licenses
+    APPS_ALL_APPS_APP_ENTRY_LICENSES = 0x1611C000;
+
     // TvSettings > Apps > See all apps > Show system apps
     APPS_ALL_APPS_SHOW_SYSTEM_APPS = 0x16120000;
 
