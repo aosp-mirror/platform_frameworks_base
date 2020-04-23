@@ -471,23 +471,39 @@ public class ActivityStackTests extends ActivityTestsBase {
         assertEquals(STACK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT,
                 splitScreenSecondary2.getVisibility(null /* starting */));
 
-        // Assistant stack shouldn't be visible behind translucent split-screen stack
+        // Assistant stack shouldn't be visible behind translucent split-screen stack,
+        // unless it is configured to show on top of everything.
         doReturn(false).when(assistantStack).isTranslucent(any());
         doReturn(true).when(splitScreenPrimary).isTranslucent(any());
         doReturn(true).when(splitScreenSecondary2).isTranslucent(any());
         splitScreenSecondary2.moveToFront("testShouldBeVisible_SplitScreen");
         splitScreenPrimary.moveToFront("testShouldBeVisible_SplitScreen");
-        assertFalse(assistantStack.shouldBeVisible(null /* starting */));
-        assertTrue(splitScreenPrimary.shouldBeVisible(null /* starting */));
-        assertTrue(splitScreenSecondary2.shouldBeVisible(null /* starting */));
-        assertEquals(STACK_VISIBILITY_INVISIBLE,
-                assistantStack.getVisibility(null /* starting */));
-        assertEquals(STACK_VISIBILITY_VISIBLE,
-                splitScreenPrimary.getVisibility(null /* starting */));
-        assertEquals(STACK_VISIBILITY_INVISIBLE,
-                splitScreenSecondary.getVisibility(null /* starting */));
-        assertEquals(STACK_VISIBILITY_VISIBLE,
-                splitScreenSecondary2.getVisibility(null /* starting */));
+
+        if (isAssistantOnTop()) {
+            assertTrue(assistantStack.shouldBeVisible(null /* starting */));
+            assertFalse(splitScreenPrimary.shouldBeVisible(null /* starting */));
+            assertFalse(splitScreenSecondary2.shouldBeVisible(null /* starting */));
+            assertEquals(STACK_VISIBILITY_VISIBLE,
+                    assistantStack.getVisibility(null /* starting */));
+            assertEquals(STACK_VISIBILITY_INVISIBLE,
+                    splitScreenPrimary.getVisibility(null /* starting */));
+            assertEquals(STACK_VISIBILITY_INVISIBLE,
+                    splitScreenSecondary.getVisibility(null /* starting */));
+            assertEquals(STACK_VISIBILITY_INVISIBLE,
+                    splitScreenSecondary2.getVisibility(null /* starting */));
+        } else {
+            assertFalse(assistantStack.shouldBeVisible(null /* starting */));
+            assertTrue(splitScreenPrimary.shouldBeVisible(null /* starting */));
+            assertTrue(splitScreenSecondary2.shouldBeVisible(null /* starting */));
+            assertEquals(STACK_VISIBILITY_INVISIBLE,
+                    assistantStack.getVisibility(null /* starting */));
+            assertEquals(STACK_VISIBILITY_VISIBLE,
+                    splitScreenPrimary.getVisibility(null /* starting */));
+            assertEquals(STACK_VISIBILITY_INVISIBLE,
+                    splitScreenSecondary.getVisibility(null /* starting */));
+            assertEquals(STACK_VISIBILITY_VISIBLE,
+                    splitScreenSecondary2.getVisibility(null /* starting */));
+        }
     }
 
     @Test
@@ -927,9 +943,15 @@ public class ActivityStackTests extends ActivityTestsBase {
 
         splitScreenSecondary.moveToFront("testSplitScreenMoveToFront");
 
-        assertTrue(splitScreenPrimary.shouldBeVisible(null /* starting */));
-        assertTrue(splitScreenSecondary.shouldBeVisible(null /* starting */));
-        assertFalse(assistantStack.shouldBeVisible(null /* starting */));
+        if (isAssistantOnTop()) {
+            assertFalse(splitScreenPrimary.shouldBeVisible(null /* starting */));
+            assertFalse(splitScreenSecondary.shouldBeVisible(null /* starting */));
+            assertTrue(assistantStack.shouldBeVisible(null /* starting */));
+        } else {
+            assertTrue(splitScreenPrimary.shouldBeVisible(null /* starting */));
+            assertTrue(splitScreenSecondary.shouldBeVisible(null /* starting */));
+            assertFalse(assistantStack.shouldBeVisible(null /* starting */));
+        }
     }
 
     private ActivityStack createStandardStackForVisibilityTest(int windowingMode,
@@ -1342,6 +1364,11 @@ public class ActivityStackTests extends ActivityTestsBase {
                 false /* preserveWindows */);
         verify(mSupervisor).startSpecificActivity(any(), eq(false) /* andResume */,
                 anyBoolean());
+    }
+
+    private boolean isAssistantOnTop() {
+        return mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_assistantOnTopOfDream);
     }
 
     private void verifyShouldSleepActivities(boolean focusedStack,
