@@ -50,41 +50,15 @@
         android:padding="12dp" />
   </LinearLayout>
 
-  <LinearLayout
+  <FrameLayout
+      android:id="@+id/controls_activity_view"
       android:layout_width="match_parent"
-      android:layout_height="wrap_content"
+      android:layout_height="0dp"
+      android:layout_weight="1"
       android:paddingTop="@dimen/controls_activity_view_top_padding"
       android:paddingLeft="@dimen/controls_activity_view_side_padding"
       android:paddingRight="@dimen/controls_activity_view_side_padding"
       android:background="@drawable/rounded_bg_top"
-      android:orientation="vertical">
-    <TextView
-        android:id="@+id/title"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textAppearance="@style/TextAppearance.ControlDialog"
-        android:clickable="false"
-        android:focusable="false"
-        android:maxLines="1"
-        android:ellipsize="end" />
-    <TextView
-        android:id="@+id/subtitle"
-        android:layout_marginTop="6dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textAppearance="@style/TextAppearance.ControlDialog"
-        android:clickable="false"
-        android:focusable="false"
-        android:maxLines="1"
-        android:ellipsize="end" />
-
-    <FrameLayout
-        android:id="@+id/controls_activity_view"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_marginTop="10dp"
-        android:layout_weight="1" />
-
-  </LinearLayout>
+      android:orientation="vertical" />
 </LinearLayout>
 
