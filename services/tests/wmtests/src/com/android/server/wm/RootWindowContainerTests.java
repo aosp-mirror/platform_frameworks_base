@@ -16,11 +16,22 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_NOTIFICATION_SHADE;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
+
+import static com.android.server.wm.ActivityStack.ActivityState.FINISHING;
+import static com.android.server.wm.ActivityStack.ActivityState.PAUSED;
+import static com.android.server.wm.ActivityStack.ActivityState.PAUSING;
+import static com.android.server.wm.ActivityStack.ActivityState.STOPPED;
+import static com.android.server.wm.ActivityStack.ActivityState.STOPPING;
+
+import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -132,6 +143,31 @@ public class RootWindowContainerTests extends WindowTestsBase {
 
         assertEquals(activity, mWm.mRoot.findActivity(activity.intent, activity.info,
                 false /* compareIntentFilters */));
+    }
+
+    @Test
+    public void testAllPausedActivitiesComplete() {
+        DisplayContent displayContent = mWm.mRoot.getDisplayContent(DEFAULT_DISPLAY);
+        TaskDisplayArea taskDisplayArea = displayContent.getTaskDisplayAreaAt(0);
+        ActivityStack stack = taskDisplayArea.getStackAt(0);
+        ActivityRecord activity = createActivityRecord(displayContent,
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
+        stack.mPausingActivity = activity;
+
+        activity.setState(PAUSING, "test PAUSING");
+        assertThat(mWm.mRoot.allPausedActivitiesComplete()).isFalse();
+
+        activity.setState(PAUSED, "test PAUSED");
+        assertThat(mWm.mRoot.allPausedActivitiesComplete()).isTrue();
+
+        activity.setState(STOPPED, "test STOPPED");
+        assertThat(mWm.mRoot.allPausedActivitiesComplete()).isTrue();
+
+        activity.setState(STOPPING, "test STOPPING");
+        assertThat(mWm.mRoot.allPausedActivitiesComplete()).isTrue();
+
+        activity.setState(FINISHING, "test FINISHING");
+        assertThat(mWm.mRoot.allPausedActivitiesComplete()).isTrue();
     }
 }
 
