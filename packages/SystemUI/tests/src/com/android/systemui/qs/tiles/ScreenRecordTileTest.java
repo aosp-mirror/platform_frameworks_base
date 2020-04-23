@@ -32,6 +32,7 @@ import androidx.test.filters.SmallTest;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.screenrecord.RecordingController;
 
@@ -49,6 +50,8 @@ public class ScreenRecordTileTest extends SysuiTestCase {
     @Mock
     private RecordingController mController;
     @Mock
+    private ActivityStarter mActivityStarter;
+    @Mock
     private QSTileHost mHost;
 
     private TestableLooper mTestableLooper;
@@ -61,10 +64,11 @@ public class ScreenRecordTileTest extends SysuiTestCase {
         mTestableLooper = TestableLooper.get(this);
         mDependency.injectTestDependency(Dependency.BG_LOOPER, mTestableLooper.getLooper());
         mController = mDependency.injectMockDependency(RecordingController.class);
+        mActivityStarter = mDependency.injectMockDependency(ActivityStarter.class);
 
         when(mHost.getContext()).thenReturn(mContext);
 
-        mTile = new ScreenRecordTile(mHost, mController);
+        mTile = new ScreenRecordTile(mHost, mController, mActivityStarter);
     }
 
     // Test that the tile is inactive and labeled correctly when the controller is neither starting
@@ -82,7 +86,7 @@ public class ScreenRecordTileTest extends SysuiTestCase {
                 mContext.getString(R.string.quick_settings_screen_record_start)));
 
         mTile.handleClick();
-        verify(mController, times(1)).launchRecordPrompt();
+        verify(mController, times(1)).getPromptIntent();
     }
 
     // Test that the tile is active and labeled correctly when the controller is starting
