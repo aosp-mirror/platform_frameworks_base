@@ -17,7 +17,7 @@
 package com.android.systemui.car.keyguard;
 
 import com.android.systemui.car.userswitcher.FullScreenUserSwitcherViewController;
-import com.android.systemui.window.OverlayViewMediator;
+import com.android.systemui.car.window.OverlayViewMediator;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;

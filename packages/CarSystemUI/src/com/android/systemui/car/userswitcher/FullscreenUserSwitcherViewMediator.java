@@ -17,9 +17,9 @@
 package com.android.systemui.car.userswitcher;
 
 import com.android.systemui.car.keyguard.CarKeyguardViewController;
+import com.android.systemui.car.window.OverlayViewMediator;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.StatusBarState;
-import com.android.systemui.window.OverlayViewMediator;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
