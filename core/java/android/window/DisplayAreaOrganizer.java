@@ -52,9 +52,26 @@ public class DisplayAreaOrganizer extends WindowOrganizer {
         }
     }
 
+    /**
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
+    public void unregisterOrganizer() {
+        try {
+            getController().unregisterOrganizer(mInterface);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     public void onDisplayAreaAppeared(@NonNull DisplayAreaInfo displayAreaInfo) {}
 
     public void onDisplayAreaVanished(@NonNull DisplayAreaInfo displayAreaInfo) {}
+
+    /**
+     * @hide
+     */
+    public void onDisplayAreaInfoChanged(@NonNull DisplayAreaInfo displayAreaInfo) {}
 
     private final IDisplayAreaOrganizer mInterface = new IDisplayAreaOrganizer.Stub() {
 
@@ -66,6 +83,11 @@ public class DisplayAreaOrganizer extends WindowOrganizer {
         @Override
         public void onDisplayAreaVanished(@NonNull DisplayAreaInfo displayAreaInfo) {
             DisplayAreaOrganizer.this.onDisplayAreaVanished(displayAreaInfo);
+        }
+
+        @Override
+        public void onDisplayAreaInfoChanged(@NonNull DisplayAreaInfo displayAreaInfo) {
+            DisplayAreaOrganizer.this.onDisplayAreaInfoChanged(displayAreaInfo);
         }
     };
 
