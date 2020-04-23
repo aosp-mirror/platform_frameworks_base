@@ -1126,7 +1126,7 @@ public abstract class BiometricServiceBase extends SystemService
                     }
                     try {
                         mBiometricService.onReadyForAuthentication(client.getCookie(),
-                                client.getRequireConfirmation(), client.getTargetUserId());
+                                client.getRequireConfirmation());
                     } catch (RemoteException e) {
                         Slog.e(getTag(), "Remote exception", e);
                     }

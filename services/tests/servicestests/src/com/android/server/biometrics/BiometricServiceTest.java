@@ -397,7 +397,7 @@ public class BiometricServiceTest {
 
         // onReadyForAuthentication, mCurrentAuthSession state OK
         mBiometricService.mImpl.onReadyForAuthentication(cookieCaptor.getValue(),
-                anyBoolean() /* requireConfirmation */, anyInt() /* userId */);
+                mBiometricService.mCurrentAuthSession.mPreAuthInfo.confirmationRequested);
         waitForIdle();
         assertEquals(AuthSession.STATE_AUTH_STARTED,
                 mBiometricService.mCurrentAuthSession.getState());
@@ -1510,7 +1510,7 @@ public class BiometricServiceTest {
         assertNotEquals(cookie, 0);
 
         service.mImpl.onReadyForAuthentication(cookie,
-                anyBoolean() /* requireConfirmation */, anyInt() /* userId */);
+                preAuthInfo.confirmationRequested /* requireConfirmation */);
     }
 
     private static void invokeAuthenticate(IBiometricService.Stub service,

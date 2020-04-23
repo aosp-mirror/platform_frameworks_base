@@ -172,8 +172,7 @@ public class BiometricService extends SystemService {
                     SomeArgs args = (SomeArgs) msg.obj;
                     handleOnReadyForAuthentication(
                             args.argi1 /* cookie */,
-                            (boolean) args.arg1 /* requireConfirmation */,
-                            args.argi2 /* userId */);
+                            (boolean) args.arg1 /* requireConfirmation */);
                     args.recycle();
                     break;
                 }
@@ -459,13 +458,12 @@ public class BiometricService extends SystemService {
      */
     private final class BiometricServiceWrapper extends IBiometricService.Stub {
         @Override // Binder call
-        public void onReadyForAuthentication(int cookie, boolean requireConfirmation, int userId) {
+        public void onReadyForAuthentication(int cookie, boolean requireConfirmation) {
             checkInternalPermission();
 
             SomeArgs args = SomeArgs.obtain();
             args.argi1 = cookie;
             args.arg1 = requireConfirmation;
-            args.argi2 = userId;
             mHandler.obtainMessage(MSG_ON_READY_FOR_AUTHENTICATION, args).sendToTarget();
         }
 
@@ -1052,8 +1050,7 @@ public class BiometricService extends SystemService {
      * Invoked when each service has notified that its client is ready to be started. When
      * all biometrics are ready, this invokes the SystemUI dialog through StatusBar.
      */
-    private void handleOnReadyForAuthentication(int cookie, boolean requireConfirmation,
-            int userId) {
+    private void handleOnReadyForAuthentication(int cookie, boolean requireConfirmation) {
         if (mCurrentAuthSession == null) {
             // Only should happen if a biometric was locked out when authenticate() was invoked.
             // In that case, if device credentials are allowed, the UI is already showing. If not
