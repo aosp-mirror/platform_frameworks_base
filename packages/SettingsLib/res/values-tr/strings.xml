@@ -417,9 +417,9 @@
     <string name="picture_color_mode_desc" msgid="151780973768136200">"sRGB\'yi kullan"</string>
     <string name="daltonizer_mode_disabled" msgid="403424372812399228">"Devre dışı"</string>
     <string name="daltonizer_mode_monochromacy" msgid="362060873835885014">"Tam renk körlüğü"</string>
-    <string name="daltonizer_mode_deuteranomaly" msgid="3507284319584683963">"Yeşil renk körlüğü (kırmızı-yeşil)"</string>
-    <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Kırmızı renk körlüğü (kırmızı-yeşil)"</string>
-    <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Mavi renk körlüğü (mavi-sarı)"</string>
+    <string name="daltonizer_mode_deuteranomaly" msgid="3507284319584683963">"Döteranomali (kırmızı-yeşil)"</string>
+    <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomali (kırmızı-yeşil)"</string>
+    <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomali (mavi-sarı)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Renk düzeltme"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"Renk düzeltme, renklerin cihazınızda nasıl görüntüleneceğini düzenlemenize olanak sağlar."</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> tarafından geçersiz kılındı"</string>
@@ -436,10 +436,14 @@
     <string name="power_discharge_by_only" msgid="92545648425937000">"Saat yaklaşık <xliff:g id="TIME">%1$s</xliff:g> olana kadar kullanılabilmelidir"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"Şu saate kadar: <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Pilin tahmini bitiş zamanı: <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"En fazla <xliff:g id="THRESHOLD">%1$s</xliff:g> kaldı"</string>
-    <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"En çok <xliff:g id="THRESHOLD">%1$s</xliff:g> kaldı (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"En az <xliff:g id="TIME_REMAINING">%1$s</xliff:g> kaldı (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_only_more_than_subtext" msgid="3274496164769110480">"En az <xliff:g id="TIME_REMAINING">%1$s</xliff:g> kaldı"</string>
+    <!-- no translation found for power_remaining_less_than_duration_only (8956656616031395152) -->
+    <skip />
+    <!-- no translation found for power_remaining_less_than_duration (318215464914990578) -->
+    <skip />
+    <!-- no translation found for power_remaining_more_than_subtext (446388082266121894) -->
+    <skip />
+    <!-- no translation found for power_remaining_only_more_than_subtext (4873750633368888062) -->
+    <skip />
     <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"Telefon kısa süre içinde kapanabilir"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"Tablet kısa süre içinde kapanabilir"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"Cihaz kısa süre içinde kapanabilir"</string>

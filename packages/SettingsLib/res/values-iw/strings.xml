@@ -251,8 +251,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"‏אישור של תצוגת WiFi"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"‏הפעלת רישום מפורט של Wi‑Fi ביומן"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"‏ויסות סריקה לנקודות Wi-Fi"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization (5437378364995776979) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"‏רנדומיזציה משופרת של כתובות MAC ב-Wi‑Fi"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"חבילת הגלישה פעילה תמיד"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"שיפור מהירות באמצעות חומרה לצורך שיתוף אינטרנט בין ניידים"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"‏הצגת מכשירי Bluetooth ללא שמות"</string>
@@ -285,8 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"‏הצג אפשרויות עבור אישור של תצוגת WiFi"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"‏העלה את רמת הרישום של Wi‑Fi ביומן, הצג לכל SSID RSSI ב-Wi‑Fi Picker"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"מפחית את קצב התרוקנות הסוללה ומשפר את ביצועי הרשת"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization_summary (7925425746373704991) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"‏לחצן החלפת המצב משפיע על התנהגות הרנדומיזציה של כתובות MAC במצב לקוח בלבד.\nכשמצב זה מופעל, ברשת שבה מופעלת רנדומיזציה של כתובות MAC, ייתכן שתתבצע רנדומיזציה מחדש של כתובות ה-MAC במהלך השיוך, בהתאם למועד הניתוק האחרון של הלקוח מהרשת. לא תתבצע רנדומיזציה מחדש אם המכשיר מתחבר מחדש תוך ארבע שעות או פחות."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"נמדדת"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"לא נמדדת"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"גדלי מאגר של יומן רישום"</string>
@@ -423,7 +421,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"פרוטנומליה (אדום-ירוק)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"טריטנומליה (כחול-צהוב)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"תיקון צבע"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"תיקון צבעים מאפשר לשנות את האופן שבו צבעים מוצגים במכשיר שלך"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"תיקון צבע מאפשר לשנות את האופן שבו צבעים מוצגים במכשיר שלך"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"נעקף על ידי <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"הזמן הנותר: בערך <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
@@ -438,10 +436,14 @@
     <string name="power_discharge_by_only" msgid="92545648425937000">"אמורה להחזיק מעמד בערך עד <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"עד <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"ייתכן שהסוללה תתרוקן עד <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"נותרו פחות מ-<xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
-    <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"נותרו פחות מ-<xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"נותרו יותר מ-<xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_only_more_than_subtext" msgid="3274496164769110480">"הזמן שנותר: יותר מ-<xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
+    <!-- no translation found for power_remaining_less_than_duration_only (8956656616031395152) -->
+    <skip />
+    <!-- no translation found for power_remaining_less_than_duration (318215464914990578) -->
+    <skip />
+    <!-- no translation found for power_remaining_more_than_subtext (446388082266121894) -->
+    <skip />
+    <!-- no translation found for power_remaining_only_more_than_subtext (4873750633368888062) -->
+    <skip />
     <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"הטלפון עלול להיכבות בקרוב"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"הטאבלט עלול להיכבות בקרוב"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"המכשיר עלול להיכבות בקרוב"</string>

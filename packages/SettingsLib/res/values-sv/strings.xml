@@ -251,8 +251,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Certifiering för Wi-Fi-skärmdelning"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Aktivera utförlig loggning för Wi-Fi"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Begränsning av Wi-Fi-sökning"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization (5437378364995776979) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Wi‑Fi‑förstärkt MAC-slumpgenerering"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Mobildata alltid aktiverad"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Maskinvaruacceleration för internetdelning"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Visa namnlösa Bluetooth-enheter"</string>
@@ -285,8 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Visa certifieringsalternativ för Wi-Fi-skärmdelning"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Öka loggningsnivån för Wi-Fi, visa per SSID RSSI i Wi‑Fi Picker"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Sänker batteriförbrukningen och förbättrar nätverksprestandan"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization_summary (7925425746373704991) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Detta läge påverkar endast MAC-slumpgenereringens beteende för klientläget.\nNär läget aktiveras kan alla nätverk som har MAC-slumpgenerering aktiverat få sina adresser slumpgenererade på nytt under kopplingen, beroende på när klienten senast kopplade från nätverket. Det sker ingen ny slumpgenerering om enheten återansluter inom fyra timmar."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Med datapriser"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Utan datapriser"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Buffertstorlekar för logg"</string>
@@ -438,10 +436,14 @@
     <string name="power_discharge_by_only" msgid="92545648425937000">"Bör räcka ungefär till klockan <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"Till kl. <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Batteriet kan ta slut klockan <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"Mindre än <xliff:g id="THRESHOLD">%1$s</xliff:g> återstår"</string>
-    <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"Mindre än <xliff:g id="THRESHOLD">%1$s</xliff:g> återstår (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"Mer än <xliff:g id="TIME_REMAINING">%1$s</xliff:g> återstår (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_only_more_than_subtext" msgid="3274496164769110480">"Mer än <xliff:g id="TIME_REMAINING">%1$s</xliff:g> återstår"</string>
+    <!-- no translation found for power_remaining_less_than_duration_only (8956656616031395152) -->
+    <skip />
+    <!-- no translation found for power_remaining_less_than_duration (318215464914990578) -->
+    <skip />
+    <!-- no translation found for power_remaining_more_than_subtext (446388082266121894) -->
+    <skip />
+    <!-- no translation found for power_remaining_only_more_than_subtext (4873750633368888062) -->
+    <skip />
     <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"Telefonen kanske stängs av snart"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"Surfplattan kanske stängs av snart"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"Enheten kanske stängs av snart"</string>
@@ -482,7 +484,7 @@
     <string name="retail_demo_reset_next" msgid="3688129033843885362">"Nästa"</string>
     <string name="retail_demo_reset_title" msgid="1866911701095959800">"Lösenord krävs"</string>
     <string name="active_input_method_subtypes" msgid="4232680535471633046">"Aktiva inmatningsmetoder"</string>
-    <string name="use_system_language_to_select_input_method_subtypes" msgid="4865195835541387040">"Använda systemspråk"</string>
+    <string name="use_system_language_to_select_input_method_subtypes" msgid="4865195835541387040">"Använd systemspråk"</string>
     <string name="failed_to_open_app_settings_toast" msgid="764897252657692092">"Det gick inte att öppna inställningarna för <xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g>"</string>
     <string name="ime_security_warning" msgid="6547562217880551450">"Den här inmatningsmetoden kan samla all text som du skriver, inklusive personliga uppgifter som lösenord och kreditkortsnummer. Den kommer från appen <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g>. Vill du använda inmatningsmetoden?"</string>
     <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"Obs! När du har startat om enheten måste du låsa upp mobilen innan du kan starta den här appen"</string>
@@ -545,8 +547,8 @@
     <string name="user_add_user_type_title" msgid="551279664052914497">"Lägg till"</string>
     <string name="user_new_user_name" msgid="60979820612818840">"Ny användare"</string>
     <string name="user_new_profile_name" msgid="2405500423304678841">"Ny profil"</string>
-    <string name="user_info_settings_title" msgid="6351390762733279907">"Användarinfo"</string>
-    <string name="profile_info_settings_title" msgid="105699672534365099">"Profilinfo"</string>
+    <string name="user_info_settings_title" msgid="6351390762733279907">"Användarinformation"</string>
+    <string name="profile_info_settings_title" msgid="105699672534365099">"Profilinformation"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"Innan du skapar en begränsad profil måste du konfigurera ett skärmlås för att skydda dina appar och personliga data."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"Konfigurera lås"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"Byt till <xliff:g id="USER_NAME">%s</xliff:g>"</string>

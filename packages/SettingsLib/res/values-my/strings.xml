@@ -116,7 +116,7 @@
     <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"ချိတ်တွဲရန်"</string>
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"မလုပ်တော့"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"ချိတ်တွဲမှုက ချိတ်ဆက်ထားလျှင် သင်၏ အဆက်အသွယ်များ နှင့် ခေါ်ဆိုမှု မှတ်တမ်းကို ရယူခွင့် ပြုသည်။"</string>
-    <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>နှင့် တွဲချိတ်မရပါ"</string>
+    <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> နှင့် တွဲချိတ်မရပါ"</string>
     <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"ပင်နံပါတ် သို့မဟုတ် ဖြတ်သန်းခွင့်ကီးမမှန်ကန်သောကြောင့်<xliff:g id="DEVICE_NAME">%1$s</xliff:g>နှင့် တွဲချိတ်မရပါ။"</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>နှင့်ဆက်သွယ်မရပါ"</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>နှင့်တွဲချိတ်ရန် ပယ်ချခံရသည်"</string>
@@ -217,7 +217,7 @@
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"ဂဏန်းခြောက်လုံးကုဒ်ဖြင့် စက်ပစ္စည်းသစ်များကို အတူတွဲပါ"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"တွဲချိတ်ပြီး စက်ပစ္စည်းများ"</string>
     <string name="adb_wireless_device_connected_summary" msgid="3039660790249148713">"လက်ရှိ ချိတ်ဆက်ထားသည်"</string>
-    <string name="adb_wireless_device_details_title" msgid="7129369670526565786">"စက်ပစ္စည်း အသေးစိတ်"</string>
+    <string name="adb_wireless_device_details_title" msgid="7129369670526565786">"စက်အသေးစိတ်များ"</string>
     <string name="adb_device_forget" msgid="193072400783068417">"မေ့ပစ်ရန်"</string>
     <string name="adb_device_fingerprint_title_format" msgid="291504822917843701">"စက်ပစ္စည်း လက်ဗွေ- <xliff:g id="FINGERPRINT_PARAM">%1$s</xliff:g>"</string>
     <string name="adb_wireless_connection_failed_title" msgid="664211177427438438">"ချိတ်ဆက်ခြင်း မအောင်မြင်ပါ"</string>
@@ -251,8 +251,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"ကြိုးမဲ့ပြသမှု အသိအမှတ်ပြုလက်မှတ်"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Wi‑Fi Verbose မှတ်တမ်းတင်ခြင်းအား ဖွင့်မည်"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Wi‑Fi ရှာဖွေခြင်း ထိန်းချုပ်မှု"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization (5437378364995776979) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Wi‑Fi တိုးမြှင့် MAC ကျပန်းပြုလုပ်ခြင်း"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"မိုဘိုင်းဒေတာကို အမြဲဖွင့်ထားရန်"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"ဖုန်းကို မိုဒမ်အဖြစ်အသုံးပြုမှု စက်ပစ္စည်းဖြင့် အရှိန်မြှင့်တင်ခြင်း"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"အမည်မရှိသော ဘလူးတုသ်စက်ပစ္စည်းများကို ပြသရန်"</string>
@@ -285,8 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"ကြိုးမဲ့ အခင်းအကျင်း အသိအမှတ်ပြုလက်မှတ်အတွက် ရွေးချယ်စရာများပြရန်"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Wi‑Fi မှတ်တမ်းတင်ခြင်း နှုန်းအားမြင့်ကာ၊ Wi‑Fi ရွေးရာတွင် SSID RSSI ဖြင့်ပြပါ"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"ဘက်ထရီ အသုံးပြုမှုကို လျှော့ကျစေပြီး ကွန်ရက်စွမ်းဆောင်ရည်ကို ပိုမိုကောင်းမွန်စေသည်"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization_summary (7925425746373704991) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"ဤဖွင့်ပိတ်ခလုတ်က ကလိုင်းယင့်မုဒ် အတွက်သာ MAC ကျပန်းပြုလုပ်ခြင်း အပြုအမူကို သက်ရောက်စေသည်။\nဤမုဒ်အသုံးပြုသည့်အခါ MAC ကျပန်းပြုလုပ်ခြင်း ဖွင့်ထားသော ကွန်ရက်များသည် ကွန်ရက်မှ ကလိုင်းယင့် ချိတ်ဆက်မှုဖြုတ်သည့် နောက်ဆုံးအချိန်ပေါ် မူတည်၍ ချိတ်ဆက်နေစဉ်အတွင်း ၎င်းတို့၏ MAC လိပ်စာများကို ပြန်လည်ကျပန်းပြုလုပ်နိုင်သည်။ စက်သည် ၄ နာရီအတွင်း ပြန်ချိန်ဆက်ထားပါက ပြန်လည်ကျပန်းပြုလုပ်မည် မဟုတ်ပါ။"</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"အခမဲ့ မဟုတ်ပါ"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"အခမဲ့"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"မှတ်တမ်းကြားခံနယ် အရွယ်အစားများ"</string>
@@ -438,10 +436,14 @@
     <string name="power_discharge_by_only" msgid="92545648425937000">"<xliff:g id="TIME">%1$s</xliff:g> ခန့်အထိ သုံးနိုင်သည်"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"<xliff:g id="TIME">%1$s</xliff:g> အထိ"</string>
     <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"<xliff:g id="TIME">%1$s</xliff:g> တွင် ဘက်ထရီကုန်သွားနိုင်သည်"</string>
-    <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"<xliff:g id="THRESHOLD">%1$s</xliff:g> ခန့်သာ ကျန်တော့သည်"</string>
-    <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"<xliff:g id="THRESHOLD">%1$s</xliff:g> အောက်သာ ကျန်သည် (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> ကျော် ကျန်သည် (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_only_more_than_subtext" msgid="3274496164769110480">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> ကျော် ကျန်သေးသည်"</string>
+    <!-- no translation found for power_remaining_less_than_duration_only (8956656616031395152) -->
+    <skip />
+    <!-- no translation found for power_remaining_less_than_duration (318215464914990578) -->
+    <skip />
+    <!-- no translation found for power_remaining_more_than_subtext (446388082266121894) -->
+    <skip />
+    <!-- no translation found for power_remaining_only_more_than_subtext (4873750633368888062) -->
+    <skip />
     <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"မကြာမီ ဖုန်းပိတ်သွားနိုင်သည်"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"မကြာမီ တက်ဘလက် ပိတ်သွားနိုင်သည်"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"မကြာမီ စက်ပိတ်သွားနိုင်သည်"</string>
@@ -470,7 +472,7 @@
     <item msgid="7529124349186240216">"၁၀၀%"</item>
   </string-array>
     <string name="charge_length_format" msgid="6941645744588690932">"ပြီးခဲ့သည့် <xliff:g id="ID_1">%1$s</xliff:g> က"</string>
-    <string name="remaining_length_format" msgid="4310625772926171089">"<xliff:g id="ID_1">%1$s</xliff:g> ကျန်ပါသည်"</string>
+    <string name="remaining_length_format" msgid="4310625772926171089">"<xliff:g id="ID_1">%1$s</xliff:g> ကျန်"</string>
     <string name="screen_zoom_summary_small" msgid="6050633151263074260">"သေး"</string>
     <string name="screen_zoom_summary_default" msgid="1888865694033865408">"မူရင်း"</string>
     <string name="screen_zoom_summary_large" msgid="4706951482598978984">"ကြီး"</string>
@@ -545,7 +547,7 @@
     <string name="user_add_user_type_title" msgid="551279664052914497">"ထပ်ထည့်ရန်"</string>
     <string name="user_new_user_name" msgid="60979820612818840">"အသုံးပြုသူအသစ်"</string>
     <string name="user_new_profile_name" msgid="2405500423304678841">"ကိုယ်ရေးအချက်အလက်အသစ်"</string>
-    <string name="user_info_settings_title" msgid="6351390762733279907">"သုံးစွဲသူအကြောင်း"</string>
+    <string name="user_info_settings_title" msgid="6351390762733279907">"အသုံးပြုသူအကြောင်း"</string>
     <string name="profile_info_settings_title" msgid="105699672534365099">"ကိုယ်ရေးအချက်အလက်"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"ကန့်သတ်ကိုယ်ရေးအချက်အလက်တစ်ခုကို မပြုလုပ်မီ သင်၏ အပလီကေးရှင်းများနှင့် ကိုယ်ပိုင်အချက်အလက်များကို ကာကွယ်ရန် မျက်နှာပြင်သော့ချခြင်းကို စီမံရန် လိုအပ်လိမ့်မည်"</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"သော့ချရန် သတ်မှတ်ပါ"</string>

@@ -251,8 +251,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Πιστοποίηση ασύρματης οθόνης"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Ενεργοποίηση λεπτομερ. καταγραφής Wi-Fi"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Περιορισμός σάρωσης Wi-Fi"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization (5437378364995776979) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Ρύθμ. τυχαίας σειράς MAC με βελτ. Wi‑Fi"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Πάντα ενεργά δεδομένα κινητής τηλεφωνίας"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Σύνδεση επιτάχυνσης υλικού"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Εμφάνιση συσκευών Bluetooth χωρίς ονόματα"</string>
@@ -285,8 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Εμφάνιση επιλογών για πιστοποίηση ασύρματης οθόνης"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Αύξηση επιπέδου καταγ. Wi-Fi, εμφάνιση ανά SSID RSSI στο εργαλείο επιλογής Wi-Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Περιορίζει την κατανάλωση της μπαταρίας και βελτιώνει την απόδοση του δικτύου"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization_summary (7925425746373704991) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Αυτός ο διακόπτης επηρεάζει τη συμπεριφορά της ρύθμισης τυχαίας σειράς διευθύνσεων MAC μόνο για τη λειτουργία εφαρμογής πελάτη.\nΌταν αυτή η λειτουργία είναι ενεργοποιημένη, σε όλα τα δίκτυα που είναι ενεργή η ρύθμιση τυχαίας σειράς διευθύνσεων MAC ενδέχεται να αλλάξει ξανά η τυχαία σειρά των διευθύνσεων MAC κατά τη συσχέτιση, ανάλογα με το πότε έγινε η τελευταία αποσύνδεση της εφαρμογής πελάτη από το δίκτυο. Αν η συσκευή επανασυνδεθεί μέσα σε 4 ώρες ή λιγότερες, τότε δεν θα αλλάξει η τυχαία σειρά."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Μέτρηση με βάση τη χρήση"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Χωρίς μέτρηση με βάση τη χρήση"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Μέγεθος προσωρινής μνήμης για τη λειτουργία καταγραφής"</string>
@@ -438,10 +436,14 @@
     <string name="power_discharge_by_only" msgid="92545648425937000">"Θα διαρκέσει μέχρι τις <xliff:g id="TIME">%1$s</xliff:g> περίπου"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"Έως τις <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Η μπαταρία μπορεί να εξαντληθεί έως τις <xliff:g id="TIME">%1$s</xliff:g>."</string>
-    <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"Απομένει/ουν λιγότερo/α από <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
-    <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"Απομένει/ουν λιγότερo/α από <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"Απομένουν περισσότερα/ες από <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_only_more_than_subtext" msgid="3274496164769110480">"Απομένουν περισσότερα/ες από <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
+    <!-- no translation found for power_remaining_less_than_duration_only (8956656616031395152) -->
+    <skip />
+    <!-- no translation found for power_remaining_less_than_duration (318215464914990578) -->
+    <skip />
+    <!-- no translation found for power_remaining_more_than_subtext (446388082266121894) -->
+    <skip />
+    <!-- no translation found for power_remaining_only_more_than_subtext (4873750633368888062) -->
+    <skip />
     <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"Το τηλέφωνο μπορεί να απενεργοποιηθεί σύντομα"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"Το tablet μπορεί να απενεργοποιηθεί σύντομα"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"Η συσκευή μπορεί να απενεργοποιηθεί σύντομα"</string>
@@ -535,7 +537,7 @@
     <string name="user_add_user_item_title" msgid="2394272381086965029">"Χρήστης"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Προφίλ περιορ. πρόσβασης"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Προσθήκη νέου χρήστη;"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"Μπορείτε να μοιραστείτε αυτήν τη συσκευή με άλλα άτομα, δημιουργώντας επιπλέον χρήστες. Κάθε χρήστης θα έχει το δικό του χώρο, τον οποίο μπορεί να προσαρμόσει με τις δικές του εφαρμογές, ταπετσαρία κ.λπ. Οι χρήστες μπορούν επίσης να προσαρμόσουν ρυθμίσεις της συσκευής, όπως το Wi‑Fi, που επηρεάζουν τους πάντες.\n\nΚατά την προσθήκη ενός νέου χρήστη, αυτός θα πρέπει να ρυθμίσει τον χώρο του.\n\nΟποιοσδήποτε χρήστης μπορεί να ενημερώσει τις εφαρμογές για όλους τους άλλους χρήστες. Οι ρυθμίσεις και οι υπηρεσίες προσβασιμότητας ενδέχεται να μην μεταφερθούν στον νέο χρήστη"</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"Μπορείτε να μοιραστείτε αυτήν τη συσκευή με άλλα άτομα, δημιουργώντας επιπλέον χρήστες. Κάθε χρήστης θα έχει το δικό του χώρο, τον οποίο μπορεί να προσαρμόσει με τις δικές του εφαρμογές, ταπετσαρία κ.λπ. Οι χρήστες μπορούν επίσης να προσαρμόσουν ρυθμίσεις της συσκευής, όπως το Wi‑Fi, που επηρεάζουν τους πάντες.\n\nΚατά την προσθήκη ενός νέου χρήστη, αυτός θα πρέπει να ρυθμίσει τον χώρο του.\n\nΟποιοσδήποτε χρήστης μπορεί να ενημερώσει τις εφαρμογές για όλους τους άλλους χρήστες. Οι ρυθμίσεις και οι υπηρεσίες προσβασιμότητας ενδέχεται να μην μεταφερθούν στον νέο χρήστη."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Κατά την προσθήκη ενός νέου χρήστη, αυτός θα πρέπει να ρυθμίσει το χώρο του.\n\nΟποιοσδήποτε χρήστης μπορεί να ενημερώσει τις εφαρμογές για όλους τους άλλους χρήστες."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Να γίνει ρύθμιση χρήστη τώρα;"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Βεβαιωθείτε ότι ο χρήστης μπορεί να πάρει τη συσκευή και ρυθμίστε το χώρο του"</string>

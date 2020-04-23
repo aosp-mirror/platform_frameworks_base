@@ -251,8 +251,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Wyświetlacz bezprzewodowy"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Szczegółowy dziennik Wi-Fi"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Ograniczanie skanowania Wi-Fi"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization (5437378364995776979) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Randomizacja MAC ulepszona w zakresie Wi‑Fi"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Mobilna transmisja danych zawsze aktywna"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Akceleracja sprzętowa tetheringu"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Pokaż urządzenia Bluetooth bez nazw"</string>
@@ -285,8 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Pokaż opcje certyfikacji wyświetlacza bezprzewodowego"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Zwiększ poziom rejestrowania Wi‑Fi, pokazuj według RSSI SSID w selektorze Wi‑Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Zmniejsza zużycie baterii i zwiększa wydajność sieci"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization_summary (7925425746373704991) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Ten przełącznik wpływa na zachowanie randomizacji MAC tylko w przypadku trybu klienta.\nKiedy ten tryb jest aktywny, adresy MAC dowolnej sieci, która ma włączoną randomizację MAC, podczas powiązywania mogą zostać poddane ponownej randomizacji, w zależności od tego, kiedy klient ostatni raz rozłączył się z siecią. Ponowna randomizacja nie zachodzi, jeśli urządzenie połączy się ponownie w ciągu 4 lub mniejszej liczby godzin."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Użycie danych jest mierzone"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Użycie danych nie jest mierzone"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Rozmiary bufora rejestratora"</string>
@@ -438,10 +436,14 @@
     <string name="power_discharge_by_only" msgid="92545648425937000">"Powinno wystarczyć do <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"Do <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Bateria może się wyczerpać do <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"Pozostało mniej niż <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
-    <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"Pozostało mniej niż <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"Pozostało ponad: <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_only_more_than_subtext" msgid="3274496164769110480">"Pozostało ponad: <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
+    <!-- no translation found for power_remaining_less_than_duration_only (8956656616031395152) -->
+    <skip />
+    <!-- no translation found for power_remaining_less_than_duration (318215464914990578) -->
+    <skip />
+    <!-- no translation found for power_remaining_more_than_subtext (446388082266121894) -->
+    <skip />
+    <!-- no translation found for power_remaining_only_more_than_subtext (4873750633368888062) -->
+    <skip />
     <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"Wkrótce telefon może się wyłączyć"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"Tablet może się wkrótce wyłączyć"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"Urządzenie może się wkrótce wyłączyć"</string>
@@ -540,14 +542,14 @@
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Z tego urządzenia możesz korzystać wraz z innymi osobami, dodając na nim konta użytkowników. Każdy użytkownik ma własne miejsce na swoje aplikacje, tapety i inne dane. Może też zmieniać ustawienia, które wpływają na wszystkich użytkowników urządzenia (np. Wi‑Fi).\n\nGdy dodasz nowego użytkownika, musi on skonfigurować swoje miejsce na dane.\n\nKażdy użytkownik może aktualizować aplikacje w imieniu wszystkich pozostałych użytkowników. Ułatwienia dostępu i usługi mogą nie zostać przeniesione na konto nowego użytkownika."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Gdy dodasz nowego użytkownika, musi on skonfigurować swoją przestrzeń.\n\nKażdy użytkownik może aktualizować aplikacje wszystkich innych użytkowników."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Skonfigurować ustawienia dla użytkownika?"</string>
-    <string name="user_setup_dialog_message" msgid="269931619868102841">"Upewnij się, że ta osoba jest w pobliżu i może skonfigurować swój profil."</string>
+    <string name="user_setup_dialog_message" msgid="269931619868102841">"Upewnij się, że ta osoba jest w pobliżu i może skonfigurować swój profil"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Skonfigurować teraz profil?"</string>
     <string name="user_setup_button_setup_now" msgid="1708269547187760639">"Skonfiguruj"</string>
     <string name="user_setup_button_setup_later" msgid="8712980133555493516">"Nie teraz"</string>
     <string name="user_add_user_type_title" msgid="551279664052914497">"Dodaj"</string>
     <string name="user_new_user_name" msgid="60979820612818840">"Nowy użytkownik"</string>
     <string name="user_new_profile_name" msgid="2405500423304678841">"Nowy profil"</string>
-    <string name="user_info_settings_title" msgid="6351390762733279907">"Użytkownik – informacje"</string>
+    <string name="user_info_settings_title" msgid="6351390762733279907">"Informacje o użytkowniku"</string>
     <string name="profile_info_settings_title" msgid="105699672534365099">"Informacje o profilu"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"Zanim utworzysz profil z ograniczeniami, musisz skonfigurować ekran blokady, by chronić aplikacje i osobiste dane."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"Ustaw blokadę"</string>
