@@ -251,8 +251,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Juhtmeta ekraaniühenduse sertifitseerimine"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Luba WiFi sõnaline logimine"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"WiFi-skannimise ahendamine"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization (5437378364995776979) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"WiFi-põhine MAC-i juhuslikustamine"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Hoia mobiilne andmeside alati aktiivne"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Ühenduse jagamise riistvaraline kiirendus"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Kuva ilma nimedeta Bluetoothi seadmed"</string>
@@ -285,8 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Juhtmeta ekraaniühenduse sertifitseerimisvalikute kuvamine"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Suurenda WiFi logimistaset, kuva WiFi valijas SSID RSSI järgi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Aeglustab aku tühjenemist ja parandab võrgu toimivust"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization_summary (7925425746373704991) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"See lüliti mõjutab MAC-aadressi juhuslikustamise käitumist ainult kliendirežiimis.\nSelle režiimi aktiveerimisel võidakse seostamise ajal MAC-aadressid uuesti juhuslikustada kõigi võrkude jaoks, millel on MAC-aadressi juhuslikustamine lubatud, olenevalt sellest, millal klient viimati ühenduse võrguga katkestas. Uuesti juhuslikustamist ei toimu juhul, kui seade loob uuesti ühenduse kuni 4 tunni jooksul."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Mahupõhine"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Mittemahupõhine"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Logija puhvri suurused"</string>
@@ -423,7 +421,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomaalia (punane-roheline)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomaalia (sinine-kollane)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Värvide korrigeerimine"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"Värviparandus võimaldab kohandada seadmes kuvatavaid värve"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"Värvikorrigeerimine võimaldab kohandada seadmes kuvatavaid värve"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Alistas <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> – <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Ligikaudu <xliff:g id="TIME_REMAINING">%1$s</xliff:g> jäänud"</string>
@@ -438,10 +436,14 @@
     <string name="power_discharge_by_only" msgid="92545648425937000">"Peaks kestma kuni <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"Kuni <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Aku võib tühjaks saada kell <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"Jäänud on alla <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
-    <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"Jäänud on alla <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"Jäänud on üle <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_only_more_than_subtext" msgid="3274496164769110480">"Jäänud on üle <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
+    <!-- no translation found for power_remaining_less_than_duration_only (8956656616031395152) -->
+    <skip />
+    <!-- no translation found for power_remaining_less_than_duration (318215464914990578) -->
+    <skip />
+    <!-- no translation found for power_remaining_more_than_subtext (446388082266121894) -->
+    <skip />
+    <!-- no translation found for power_remaining_only_more_than_subtext (4873750633368888062) -->
+    <skip />
     <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"Telefon võib peagi välja lülituda"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"Tahvelarvuti võib peagi välja lülituda"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"Seade võib peagi välja lülituda"</string>

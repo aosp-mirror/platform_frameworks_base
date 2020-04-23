@@ -251,8 +251,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Certificazione display wireless"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Attiva logging dettagliato Wi-Fi"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Limita ricerca di reti Wi‑Fi"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization (5437378364995776979) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Randomizzazione MAC con Wi‑Fi migliorato"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Dati mobili sempre attivi"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Tethering accelerazione hardware"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Mostra dispositivi Bluetooth senza nome"</string>
@@ -277,7 +276,7 @@
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="2040810756832027227">"Streaming: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="7887550926056143018">"DNS privato"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"Seleziona modalità DNS privato"</string>
-    <string name="private_dns_mode_off" msgid="7065962499349997041">"OFF"</string>
+    <string name="private_dns_mode_off" msgid="7065962499349997041">"Off"</string>
     <string name="private_dns_mode_opportunistic" msgid="1947864819060442354">"Automatico"</string>
     <string name="private_dns_mode_provider" msgid="3619040641762557028">"Nome host del provider DNS privato"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"Inserisci il nome host del provider DNS"</string>
@@ -285,8 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Mostra opzioni per la certificazione display wireless"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Aumenta livello di logging Wi-Fi, mostra SSID RSSI nel selettore Wi-Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Riduce il consumo della batteria e migliora le prestazioni della rete"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization_summary (7925425746373704991) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Questa opzione influenza il comportamento della randomizzazione MAC solo nella modalità client.\nQuando questa modalità è attiva, durante l\'associazione gli indirizzi MAC di tutte le reti con randomizzazione MAC abilitata potrebbero essere nuovamente sottoposti a randomizzazione, a seconda di quando il client è stato disconnesso l\'ultima volta dalla rete. La randomizzazione non viene eseguita nuovamente se il dispositivo si riconnette entro quattro ore."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"A consumo"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Non a consumo"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Dimensioni buffer logger"</string>
@@ -438,10 +436,14 @@
     <string name="power_discharge_by_only" msgid="92545648425937000">"Ora stimata esaurimento batteria: <xliff:g id="TIME">%1$s</xliff:g> circa"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"Fino alle ore <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"La batteria potrebbe esaurirsi entro <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"Tempo rimanente: meno di <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
-    <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"Tempo rimanente: meno di <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"Tempo rimanente: più di <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_only_more_than_subtext" msgid="3274496164769110480">"Tempo rimanente: più di <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
+    <!-- no translation found for power_remaining_less_than_duration_only (8956656616031395152) -->
+    <skip />
+    <!-- no translation found for power_remaining_less_than_duration (318215464914990578) -->
+    <skip />
+    <!-- no translation found for power_remaining_more_than_subtext (446388082266121894) -->
+    <skip />
+    <!-- no translation found for power_remaining_only_more_than_subtext (4873750633368888062) -->
+    <skip />
     <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"Il telefono potrebbe spegnersi a breve"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"Il tablet potrebbe spegnersi a breve"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"Il dispositivo potrebbe spegnersi a breve"</string>
@@ -460,7 +462,7 @@
     <string name="battery_info_status_full" msgid="4443168946046847468">"Carica"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Gestita dall\'amministratore"</string>
     <string name="disabled" msgid="8017887509554714950">"Disattivato"</string>
-    <string name="external_source_trusted" msgid="1146522036773132905">"Consentite"</string>
+    <string name="external_source_trusted" msgid="1146522036773132905">"Autorizzate"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"Non consentite"</string>
     <string name="install_other_apps" msgid="3232595082023199454">"Installa app sconosciute"</string>
     <string name="home" msgid="973834627243661438">"Home page Impostazioni"</string>
@@ -545,7 +547,7 @@
     <string name="user_add_user_type_title" msgid="551279664052914497">"Aggiungi"</string>
     <string name="user_new_user_name" msgid="60979820612818840">"Nuovo utente"</string>
     <string name="user_new_profile_name" msgid="2405500423304678841">"Nuovo profilo"</string>
-    <string name="user_info_settings_title" msgid="6351390762733279907">"Dati utente"</string>
+    <string name="user_info_settings_title" msgid="6351390762733279907">"Informazioni utente"</string>
     <string name="profile_info_settings_title" msgid="105699672534365099">"Informazioni profilo"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"Prima di poter creare un profilo con limitazioni, devi impostare un blocco schermo per proteggere le tue app e i tuoi dati personali."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"Imposta blocco"</string>

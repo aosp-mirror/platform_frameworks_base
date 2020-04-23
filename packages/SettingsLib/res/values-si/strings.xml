@@ -251,8 +251,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"නොරැහැන් සංදර්ශක සහතිකය"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"විස්තරාත්මක Wi‑Fi ලොග් කිරීම සබල කරන්න"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Wi‑Fi ස්කෑන් අවකරණය"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization (5437378364995776979) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Wi-Fi‑වැඩිදියුණු කළ MAC සසම්භාවීකරණය"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"ජංගම දත්ත සැමවිට ක්‍රියාකාරීය"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"ටෙදරින් දෘඪාංග ත්වරණය"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"නම් නොමැති බ්ලූටූත් උපාංග පෙන්වන්න"</string>
@@ -285,8 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"නොරැහැන් සංදර්ශක සහතිකය සඳහා විකල්ප පෙන්වන්න"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Wi‑Fi ලොග් මට්ටම වැඩි කරන්න, Wi‑Fi තෝරනයෙහි SSID RSSI අනුව පෙන්වන්න"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"බැටරි බැසීම අඩු කරන අතර ජාල කාර්ය සාධනය වැඩි දියුණු කරයි"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization_summary (7925425746373704991) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"මෙම ටොගලය සේවාලාභී ප්‍රකාරය සඳහා පමණක් MAC සසම්භාවීකරණ හැසිරීමට බලපායි.\nමෙම ප්‍රකාරය සක්‍රිය කර ඇති විට, MAC සසම්භාවීකරණය සබල කර ඇති ඕනෑම ජාලයකට, සේවාලාභියා අවසන් වරට ජාලයෙන් විසන්ධි වූයේ කවදාද යන්න මත පදනම්ව සම්බන්ධය අතරතුර ඔවුන්ගේ MAC ලිපින යළි සසම්භාවිකරණය කර තිබිය හැකිය. උපාංගය පැය 4කින් හෝ ඊට අඩු කාලයකදී නැවත සම්බන්ධ වන්නේ නම් යළි සසම්භාවිකරණය සිදු නොවේ."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"මනිනු ලැබේ"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"මනින්නේ නැත"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"ලෝගයේ අන්තරාවක ප්‍රමාණය"</string>
@@ -438,10 +436,14 @@
     <string name="power_discharge_by_only" msgid="92545648425937000">"<xliff:g id="TIME">%1$s</xliff:g> පමණ වන තෙක් තිබිය යුතුය"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"<xliff:g id="TIME">%1$s</xliff:g> දක්වා"</string>
     <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"බැටරි බලය <xliff:g id="TIME">%1$s</xliff:g> වන විට අවසන් විය හැකිය"</string>
-    <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"<xliff:g id="THRESHOLD">%1$s</xliff:g>ට වඩා අඩුවෙන් ඉතිරිව ඇත"</string>
-    <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"<xliff:g id="THRESHOLD">%1$s</xliff:g>ට වඩා අඩුවෙන් ඉතිරිය (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g>ට වඩා වැඩියෙන් ඉතිරිය (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_only_more_than_subtext" msgid="3274496164769110480">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g>කට වඩා වැඩියෙන් ඉතිරිය"</string>
+    <!-- no translation found for power_remaining_less_than_duration_only (8956656616031395152) -->
+    <skip />
+    <!-- no translation found for power_remaining_less_than_duration (318215464914990578) -->
+    <skip />
+    <!-- no translation found for power_remaining_more_than_subtext (446388082266121894) -->
+    <skip />
+    <!-- no translation found for power_remaining_only_more_than_subtext (4873750633368888062) -->
+    <skip />
     <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"දුරකථනය ඉක්මනින් වැසිය හැකිය"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"ටැබ්ලට් පරිගණකය ඉක්මනින් වැසිය හැකිය"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"උපාංගය ඉක්මනින් වැසිය හැකිය"</string>

@@ -231,7 +231,7 @@
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"ਡੀਵਾਈਸ ਨੂੰ ਜੋੜਾਬੱਧ ਕਰਨਾ ਅਸਫਲ ਰਿਹਾ। ਜਾਂ ਤਾਂ QR ਕੋਡ ਗਲਤ ਸੀ, ਜਾਂ ਡੀਵਾਈਸ ਉਸੇ ਨੈੱਟਵਰਕ ਨਾਲ ਕਨੈਕਟ ਨਹੀਂ ਹੈ।"</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP ਪਤਾ &amp; ਪੋਰਟ"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"QR ਕੋਡ ਸਕੈਨ ਕਰੋ"</string>
-    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"QR ਕੋਡ ਸਕੈਨ ਕਰਕੇ Wi-Fi \'ਤੇ ਡੀਵਾਈਸ ਜੋੜਾਬੱਧ ਕਰੋ"</string>
+    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"QR ਕੋਡ ਸਕੈਨ ਕਰਕੇ ਵਾਈ-ਫਾਈ \'ਤੇ ਡੀਵਾਈਸ ਜੋੜਾਬੱਧ ਕਰੋ"</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"ਕਿਰਪਾ ਕਰਕੇ ਕਿਸੇ ਵਾਈ-ਫਾਈ ਨੈੱਟਵਰਕ ਨਾਲ ਕਨੈਕਟ ਕਰੋ"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, ਡੀਬੱਗ, dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"ਬੱਗ ਰਿਪੋਰਟ ਸ਼ਾਰਟਕੱਟ"</string>
@@ -251,8 +251,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"ਵਾਇਰਲੈੱਸ ਡਿਸਪਲੇ ਪ੍ਰਮਾਣੀਕਰਨ"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"ਵਾਈ-ਫਾਈ ਵਰਬੋਸ ਲੌਗਿੰਗ ਚਾਲੂ ਕਰੋ"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"ਸੀਮਤ ਵਾਈ‑ਫਾਈ ਸਕੈਨ"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization (5437378364995776979) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"ਵਾਈ-ਫਾਈ ਵਿਸਤ੍ਰਿਤ MAC ਬੇਤਰਤੀਬਵਾਰ"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"ਮੋਬਾਈਲ ਡਾਟਾ ਹਮੇਸ਼ਾਂ ਕਿਰਿਆਸ਼ੀਲ"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"ਟੈਦਰਿੰਗ ਹਾਰਡਵੇਅਰ ਐਕਸੈੱਲਰੇਸ਼ਨ"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"ਅਨਾਮ ਬਲੂਟੁੱਥ ਡੀਵਾਈਸਾਂ ਦਿਖਾਓ"</string>
@@ -285,8 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"ਵਾਇਰਲੈੱਸ ਡਿਸਪਲੇ ਪ੍ਰਮਾਣੀਕਰਨ ਲਈ ਚੋਣਾਂ ਪ੍ਰਦਰਸ਼ਿਤ ਕਰੋ"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"ਵਾਈ‑ਫਾਈ ਲੌਗਿੰਗ ਪੱਧਰ ਵਧਾਓ, ਵਾਈ‑ਫਾਈ Picker ਵਿੱਚ ਪ੍ਰਤੀ SSID RSSI ਦਿਖਾਓ"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"ਬੈਟਰੀ ਦੀ ਵਰਤੋਂ ਘਟਾ ਕੇ ਨੈੱਟਵਰਕ ਕਾਰਗੁਜ਼ਾਰੀ ਨੂੰ ਬਿਹਤਰ ਬਣਾਉਂਦਾ ਹੈ"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization_summary (7925425746373704991) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"ਇਹ ਟੌਗਲ ਸਿਰਫ਼ ਕਲਾਇੰਟ ਮੋਡ ਲਈ MAC ਦੇ ਬੇਤਰਤੀਬਵਾਰ ਵਿਵਹਾਰ \'ਤੇ ਅਸਰ ਪਾਉਂਦਾ ਹੈ।\nਜਦੋਂ ਇਸ ਮੋਡ ਨੂੰ ਕਿਰਿਆਸ਼ੀਲ ਕੀਤਾ ਜਾਂਦਾ ਹੈ, ਤਾਂ ਜਿਹੜੇ ਵੀ ਨੈੱਟਵਰਕਾਂ ਵਿੱਚ MAC ਬੇਤਰਤੀਬਵਾਰ ਚਾਲੂ ਹੈ ਉਹਨਾਂ ਦੇ MAC ਪਤਿਆਂ ਦਾ ਸਾਂਝੇਦਾਰੀ ਦੌਰਾਨ ਮੁੜ-ਬੇਤਰਤੀਬੀਕਰਨ ਕੀਤਾ ਜਾ ਸਕਦਾ ਹੈ, ਜੋ ਕਲਾਇੰਟ ਦੇ ਪਿਛਲੀ ਵਾਰ ਨੈੱਟਵਰਕ ਤੋਂ ਡਿਸਕਨੈਕਟ ਹੋਣ \'ਤੇ ਨਿਰਭਰ ਕਰਦਾ ਹੈ। ਜੇ ਡੀਵਾਈਸ 4 ਘੰਟੇ ਜਾਂ ਘੱਟ ਸਮੇਂ ਵਿੱਚ ਮੁੜ-ਕਨੈਕਟ ਹੋ ਜਾਂਦਾ ਹੈ, ਤਾਂ ਮੁੜ-ਬੇਤਰਤੀਬਵਾਰ ਨਹੀਂ ਹੋਵੇਗਾ।"</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"ਮੀਟਰਬੱਧ ਕੀਤਾ ਗਿਆ"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"ਗੈਰ-ਮੀਟਰਬੱਧ ਕੀਤਾ ਗਿਆ"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"ਲੌਗਰ ਬਫ਼ਰ ਆਕਾਰ"</string>
@@ -438,10 +436,14 @@
     <string name="power_discharge_by_only" msgid="92545648425937000">"ਲਗਭਗ <xliff:g id="TIME">%1$s</xliff:g> ਤੱਕ ਚੱਲੇਗੀ"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"<xliff:g id="TIME">%1$s</xliff:g> ਤੱਕ"</string>
     <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"ਬੈਟਰੀ <xliff:g id="TIME">%1$s</xliff:g> ਤੱਕ ਖਤਮ ਹੋ ਸਕਦੀ ਹੈ"</string>
-    <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"<xliff:g id="THRESHOLD">%1$s</xliff:g> ਤੋਂ ਘੱਟ ਸਮਾਂ ਬਾਕੀ"</string>
-    <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"<xliff:g id="THRESHOLD">%1$s</xliff:g> ਤੋਂ ਘੱਟ ਸਮਾਂ ਬਾਕੀ (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> ਤੋਂ ਵੱਧ ਸਮਾਂ ਬਾਕੀ (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_only_more_than_subtext" msgid="3274496164769110480">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> ਤੋਂ ਵੱਧ ਸਮਾਂ ਬਾਕੀ"</string>
+    <!-- no translation found for power_remaining_less_than_duration_only (8956656616031395152) -->
+    <skip />
+    <!-- no translation found for power_remaining_less_than_duration (318215464914990578) -->
+    <skip />
+    <!-- no translation found for power_remaining_more_than_subtext (446388082266121894) -->
+    <skip />
+    <!-- no translation found for power_remaining_only_more_than_subtext (4873750633368888062) -->
+    <skip />
     <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"ਫ਼ੋਨ ਛੇਤੀ ਹੀ ਬੰਦ ਹੋ ਸਕਦਾ ਹੈ"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"ਟੈਬਲੈੱਟ ਛੇਤੀ ਹੀ ਬੰਦ ਹੋ ਸਕਦਾ ਹੈ"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"ਡੀਵਾਈਸ ਛੇਤੀ ਹੀ ਬੰਦ ਹੋ ਸਕਦਾ ਹੈ"</string>
@@ -545,7 +547,7 @@
     <string name="user_add_user_type_title" msgid="551279664052914497">"ਸ਼ਾਮਲ ਕਰੋ"</string>
     <string name="user_new_user_name" msgid="60979820612818840">"ਨਵਾਂ ਵਰਤੋਂਕਾਰ"</string>
     <string name="user_new_profile_name" msgid="2405500423304678841">"ਨਵੀਂ ਪ੍ਰੋਫਾਈਲ"</string>
-    <string name="user_info_settings_title" msgid="6351390762733279907">"ਉਪਭੋਗਤਾ ਜਾਣਕਾਰੀ"</string>
+    <string name="user_info_settings_title" msgid="6351390762733279907">"ਵਰਤੋਂਕਾਰ ਜਾਣਕਾਰੀ"</string>
     <string name="profile_info_settings_title" msgid="105699672534365099">"ਪ੍ਰੋਫਾਈਲ ਜਾਣਕਾਰੀ"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"ਇਸਤੋਂ ਪਹਿਲਾਂ ਕਿ ਤੁਸੀਂ ਇੱਕ ਪ੍ਰਤਿਬੰਧਿਤ ਪ੍ਰੋਫਾਈਲ ਬਣਾ ਸਕੋ, ਤੁਹਾਨੂੰ ਆਪਣੀਆਂ ਐਪਾਂ ਅਤੇ ਨਿੱਜੀ ਡਾਟਾ ਸੁਰੱਖਿਅਤ ਕਰਨ ਲਈ ਇੱਕ ਸਕ੍ਰੀਨ  ਲਾਕ  ਸੈੱਟ ਅੱਪ ਕਰਨ ਦੀ ਲੋੜ ਹੈ।"</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">" ਲਾਕ  ਸੈੱਟ ਕਰੋ"</string>

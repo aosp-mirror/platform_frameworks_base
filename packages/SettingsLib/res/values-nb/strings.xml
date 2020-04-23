@@ -112,7 +112,7 @@
     <string name="bluetooth_opp_profile_summary_use_for" msgid="461981154387015457">"Bruk til filoverføring"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"Bruk for inndata"</string>
     <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="7689393730163320483">"Bruk for høreapparater"</string>
-    <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"Sammenkoble"</string>
+    <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"Koble til"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"KOBLE TIL"</string>
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Avbryt"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Med sammenkobling får den andre enheten tilgang til kontaktene og anropsloggen din når den er tilkoblet."</string>
@@ -251,8 +251,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Trådløs skjermsertifisering"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Slå på detaljert Wi-Fi-loggføring"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Begrensning av Wi‑Fi-skanning"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization (5437378364995776979) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Wi‑Fi‑forbedret MAC-tilfeldiggjøring"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Mobildata er alltid aktiv"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Maskinvareakselerasjon for internettdeling"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Vis Bluetooth-enheter uten navn"</string>
@@ -285,8 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Vis alternativer for sertifisering av trådløs skjerm"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Øk Wi-Fi-loggenivå – vis per SSID RSSI i Wi-Fi-velgeren"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Reduserer batteriforbruket og forbedrer nettverksytelsen"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization_summary (7925425746373704991) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Denne av/på-bryteren påvirker bare atferden til MAC-tilfeldiggjøring for klientmodus.\nNår denne modusen er aktivert, kan nettverk som har tilfeldig valgt MAC, få MAC-adressen tilfeldig valgt på nytt under tilknytning, avhengig av når klienten sist ble koblet fra nettverket. Ny tilfeldiggjøring oppstår ikke hvis enheten kobler seg til igjen innen fire timer."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Med datamåling"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Uten datamåling"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Bufferstørrelser for logg"</string>
@@ -438,10 +436,14 @@
     <string name="power_discharge_by_only" msgid="92545648425937000">"Skal vare til omtrent <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"Til <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Batteriet kan gå tomt <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"Mindre enn <xliff:g id="THRESHOLD">%1$s</xliff:g> gjenstår"</string>
-    <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"Mindre enn <xliff:g id="THRESHOLD">%1$s</xliff:g> gjenstår (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"Mer enn <xliff:g id="TIME_REMAINING">%1$s</xliff:g> gjenstår (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_only_more_than_subtext" msgid="3274496164769110480">"Mer enn <xliff:g id="TIME_REMAINING">%1$s</xliff:g> gjenstår"</string>
+    <!-- no translation found for power_remaining_less_than_duration_only (8956656616031395152) -->
+    <skip />
+    <!-- no translation found for power_remaining_less_than_duration (318215464914990578) -->
+    <skip />
+    <!-- no translation found for power_remaining_more_than_subtext (446388082266121894) -->
+    <skip />
+    <!-- no translation found for power_remaining_only_more_than_subtext (4873750633368888062) -->
+    <skip />
     <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"Telefonen slås kanskje av snart"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"Nettbrettet slås kanskje av snart"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"Enheten slås kanskje av snart"</string>
