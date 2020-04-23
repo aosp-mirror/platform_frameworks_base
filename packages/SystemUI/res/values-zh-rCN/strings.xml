@@ -100,7 +100,7 @@
     <string name="screenrecord_start" msgid="330991441575775004">"开始"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"正在录制屏幕"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"正在录制屏幕和音频"</string>
-    <string name="screenrecord_taps_label" msgid="1595690528298857649">"在屏幕上显示轻触位置"</string>
+    <string name="screenrecord_taps_label" msgid="1595690528298857649">"显示触屏位置"</string>
     <string name="screenrecord_stop_text" msgid="6549288689506057686">"点按即可停止"</string>
     <string name="screenrecord_stop_label" msgid="72699670052087989">"停止"</string>
     <string name="screenrecord_pause_label" msgid="6004054907104549857">"暂停"</string>
@@ -348,7 +348,7 @@
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="6595808498429809855">"蓝牙（<xliff:g id="NUMBER">%d</xliff:g> 台设备）"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="6375098046500790870">"蓝牙：关闭"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"没有可用的配对设备"</string>
-    <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"电池电量：<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
+    <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> 的电量"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"音频"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"耳机"</string>
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="3887552721233148132">"输入"</string>
@@ -999,25 +999,22 @@
     <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"随时控制对话泡"</string>
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"点按“管理”按钮，可关闭来自此应用的对话泡"</string>
     <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"知道了"</string>
+    <!-- no translation found for bubbles_app_settings (5779443644062348657) -->
+    <skip />
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"系统导航已更新。要进行更改，请转到“设置”。"</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"转到“设置”即可更新系统导航"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"待机"</string>
-    <!-- no translation found for priority_onboarding_show_at_top_text (1678400241025513541) -->
-    <skip />
-    <!-- no translation found for priority_onboarding_show_avatar_text (5756291381124091508) -->
-    <skip />
-    <!-- no translation found for priority_onboarding_appear_as_bubble_text (4227039772250263122) -->
-    <skip />
-    <!-- no translation found for priority_onboarding_ignores_dnd_text (2918952762719600529) -->
-    <skip />
-    <!-- no translation found for priority_onboarding_done_button_title (4569550984286506007) -->
-    <skip />
+    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"显示在对话部分顶部"</string>
+    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"在锁定屏幕上显示个人资料照片"</string>
+    <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"以悬浮对话泡的形式显示在应用之上"</string>
+    <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"中断“勿扰”模式"</string>
+    <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"知道了"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"放大叠加窗口"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"放大窗口"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"放大窗口控件"</string>
-    <string name="quick_controls_title" msgid="6839108006171302273">"设备控件"</string>
+    <string name="quick_controls_title" msgid="6839108006171302273">"设备控制器"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"为您所连接的设备添加控件"</string>
-    <string name="quick_controls_setup_title" msgid="8901436655997849822">"设置设备控件"</string>
+    <string name="quick_controls_setup_title" msgid="8901436655997849822">"设置设备控制器"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"按住电源按钮即可访问您的控件"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"选择应用以添加控件"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
@@ -1030,7 +1027,7 @@
     <string name="controls_favorite_removed" msgid="5276978408529217272">"已移除所有控件"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"无法加载所有控件的列表。"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"其他"</string>
-    <string name="controls_dialog_title" msgid="2343565267424406202">"添加到设备控件"</string>
+    <string name="controls_dialog_title" msgid="2343565267424406202">"添加到设备控制器"</string>
     <string name="controls_dialog_ok" msgid="7011816381344485651">"添加到收藏夹"</string>
     <string name="controls_dialog_message" msgid="6292099631702047540">"<xliff:g id="APP">%s</xliff:g>建议将此控件添加到您的收藏夹。"</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"控件已更新"</string>

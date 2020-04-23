@@ -1001,25 +1001,22 @@
     <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"जब चाहें, बबल्स को कंट्रोल करें"</string>
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"इस ऐप्लिकेशन पर बबल्स को बंद करने के लिए \'प्रबंधित करें\' पर टैप करें"</string>
     <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"ठीक है"</string>
+    <!-- no translation found for bubbles_app_settings (5779443644062348657) -->
+    <skip />
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"सिस्टम नेविगेशन अपडेट हो गया. बदलाव करने के लिए \'सेटिंग\' पर जाएं."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"सिस्टम नेविगेशन अपडेट करने के लिए \'सेटिंग\' में जाएं"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"स्टैंडबाई"</string>
-    <!-- no translation found for priority_onboarding_show_at_top_text (1678400241025513541) -->
-    <skip />
-    <!-- no translation found for priority_onboarding_show_avatar_text (5756291381124091508) -->
-    <skip />
-    <!-- no translation found for priority_onboarding_appear_as_bubble_text (4227039772250263122) -->
-    <skip />
-    <!-- no translation found for priority_onboarding_ignores_dnd_text (2918952762719600529) -->
-    <skip />
-    <!-- no translation found for priority_onboarding_done_button_title (4569550984286506007) -->
-    <skip />
+    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"बातचीत सेक्शन में सबसे ऊपर दिखाएं"</string>
+    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"लॉक स्क्रीन पर प्रोफ़ाइल फ़ोटो दिखाएं"</string>
+    <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"खास बातचीत फ़्लोटिंग बबल की तरह ऐप्लिकेशन के ऊपर दिखेंगी"</string>
+    <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"\'परेशान न करें\' मोड में रुकावट"</string>
+    <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"ठीक है"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Magnification Overlay Window"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"स्क्रीन को बड़ा करके दिखाने वाली विंडो"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"स्क्रीन को बड़ा करके दिखाने वाली विंडो के नियंत्रण"</string>
-    <string name="quick_controls_title" msgid="6839108006171302273">"डिवाइस के कंट्रोल"</string>
+    <string name="quick_controls_title" msgid="6839108006171302273">"डिवाइस कंट्रोल"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"कनेक्ट किए गए डिवाइस के लिए कंट्रोल जोड़ें"</string>
-    <string name="quick_controls_setup_title" msgid="8901436655997849822">"डिवाइस के कंट्रोल सेट अप करें"</string>
+    <string name="quick_controls_setup_title" msgid="8901436655997849822">"डिवाइस कंट्रोल सेट अप करें"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"कंट्रोल ऐक्सेस करने के लिए पावर बटन को दबाकर रखें"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"कंट्रोल जोड़ने के लिए ऐप्लिकेशन चुनें"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
@@ -1032,7 +1029,7 @@
     <string name="controls_favorite_removed" msgid="5276978408529217272">"सभी कंट्रोल हटा दिए गए"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"सभी कंट्रोल की सूची लोड नहीं हो सकी."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"अन्य"</string>
-    <string name="controls_dialog_title" msgid="2343565267424406202">"डिवाइस के कंट्रोल में जोड़ें"</string>
+    <string name="controls_dialog_title" msgid="2343565267424406202">"डिवाइस कंट्रोल में जोड़ें"</string>
     <string name="controls_dialog_ok" msgid="7011816381344485651">"पसंदीदा में जोड़ें"</string>
     <string name="controls_dialog_message" msgid="6292099631702047540">"<xliff:g id="APP">%s</xliff:g> आपको इस कंट्रोल को अपनी पसंदीदा में जोड़ने का सुझाव देता है."</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"कंट्रोल अपडेट किए गए"</string>

@@ -710,7 +710,7 @@
     <string name="notification_channel_summary_default_with_bubbles" msgid="6298026344552480458">"Chama sua atenção com som ou vibração. As conversas do app <xliff:g id="APP_NAME">%1$s</xliff:g> aparecem em balões por padrão."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Mantém sua atenção com um atalho flutuante para esse conteúdo."</string>
     <string name="notification_channel_summary_priority" msgid="7415770044553264622">"Aparece na parte superior de uma seção de conversa e em forma de balão."</string>
-    <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Config."</string>
+    <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Configurações"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioridade"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Nenhum balão recente"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Os balões recentes e dispensados aparecerão aqui"</string>
@@ -999,19 +999,15 @@
     <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Controle os balões a qualquer momento"</string>
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Toque em \"Gerenciar\" para desativar os balões desse app"</string>
     <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"Ok"</string>
+    <string name="bubbles_app_settings" msgid="5779443644062348657">"Configurações de <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Navegação no sistema atualizada. Se quiser alterá-la, acesse as configurações."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Acesse as configurações para atualizar a navegação no sistema"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Em espera"</string>
-    <!-- no translation found for priority_onboarding_show_at_top_text (1678400241025513541) -->
-    <skip />
-    <!-- no translation found for priority_onboarding_show_avatar_text (5756291381124091508) -->
-    <skip />
-    <!-- no translation found for priority_onboarding_appear_as_bubble_text (4227039772250263122) -->
-    <skip />
-    <!-- no translation found for priority_onboarding_ignores_dnd_text (2918952762719600529) -->
-    <skip />
-    <!-- no translation found for priority_onboarding_done_button_title (4569550984286506007) -->
-    <skip />
+    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Aparecer na parte superior da seção de conversa"</string>
+    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Mostrar foto do perfil na tela de bloqueio"</string>
+    <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Aparecer como balões flutuantes sobre outros apps"</string>
+    <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Interromper o \"Não perturbe\""</string>
+    <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"Ok"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Janela de sobreposição de ampliação"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Janela de ampliação"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Controles da janela de ampliação"</string>

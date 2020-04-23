@@ -945,7 +945,7 @@
     <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> işləyir"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"Quraşdırılmadan açılan tətbiq."</string>
     <string name="instant_apps_message_with_help" msgid="1816952263531203932">"Quraşdırılmadan açılan tətbiq. Ətraflı məlumat üçün klikləyin."</string>
-    <string name="app_info" msgid="5153758994129963243">"Tətbiq haqqında"</string>
+    <string name="app_info" msgid="5153758994129963243">"Tətbiq infosu"</string>
     <string name="go_to_web" msgid="636673528981366511">"Brauzerə daxil edin"</string>
     <string name="mobile_data" msgid="4564407557775397216">"Mobil data"</string>
     <string name="mobile_data_text_format" msgid="6806501540022589786">"<xliff:g id="ID_1">%1$s</xliff:g> — <xliff:g id="ID_2">%2$s</xliff:g>"</string>
@@ -999,25 +999,22 @@
     <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Yumrucuqları istənilən vaxt idarə edin"</string>
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Bu tətbiqdə yumrucuqları deaktiv etmək üçün \"İdarə edin\" seçiminə toxunun"</string>
     <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"Anladım"</string>
+    <!-- no translation found for bubbles_app_settings (5779443644062348657) -->
+    <skip />
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Sistem naviqasiyası yeniləndi. Dəyişiklik etmək üçün Ayarlara daxil olun."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Sistem naviqasiyasını yeniləmək üçün Ayarlara keçin"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Gözləmə rejimi"</string>
-    <!-- no translation found for priority_onboarding_show_at_top_text (1678400241025513541) -->
-    <skip />
-    <!-- no translation found for priority_onboarding_show_avatar_text (5756291381124091508) -->
-    <skip />
-    <!-- no translation found for priority_onboarding_appear_as_bubble_text (4227039772250263122) -->
-    <skip />
-    <!-- no translation found for priority_onboarding_ignores_dnd_text (2918952762719600529) -->
-    <skip />
-    <!-- no translation found for priority_onboarding_done_button_title (4569550984286506007) -->
-    <skip />
+    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Söhbət bölməsinin yuxarısında göstərilir"</string>
+    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Kilid ekranında profil şəkli göstərilir"</string>
+    <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Tətbiqlərin üzərində üzən qabarcıq kimi görünəcək"</string>
+    <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Narahat Etməyin rejimi bölünsün"</string>
+    <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"Anladım"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Böyütmə Üst-üstə Düşən Pəncərəsi"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Böyütmə Pəncərəsi"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Böyütmə Pəncərəsi Kontrolları"</string>
-    <string name="quick_controls_title" msgid="6839108006171302273">"Cihaz nizamlayıcıları"</string>
+    <string name="quick_controls_title" msgid="6839108006171302273">"Cihaz idarəetmələri"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Qoşulmuş cihazlarınız üçün nizamlayıcılar əlavə edin"</string>
-    <string name="quick_controls_setup_title" msgid="8901436655997849822">"Cihaz nizamlayıcılarını ayarlayın"</string>
+    <string name="quick_controls_setup_title" msgid="8901436655997849822">"Cihaz idarəetmələrini ayarlayın"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Nizamlayıcılara giriş üçün Yandırıb-söndürmə düyməsini basıb saxlayın"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Nizamlayıcıları əlavə etmək üçün tətbiq seçin"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
@@ -1030,7 +1027,7 @@
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Bütün nizamlayıcılar silindi"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Bütün nizamlayıcıların siyahısı yüklənmədi."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Digər"</string>
-    <string name="controls_dialog_title" msgid="2343565267424406202">"Cihaz nizamlayıcılarına əlavə edin"</string>
+    <string name="controls_dialog_title" msgid="2343565267424406202">"Cihaz idarəetmələrinə əlavə edin"</string>
     <string name="controls_dialog_ok" msgid="7011816381344485651">"Sevimlilərə əlavə edin"</string>
     <string name="controls_dialog_message" msgid="6292099631702047540">"<xliff:g id="APP">%s</xliff:g> sevimlilərə əlavə etmək üçün bu nizamlayıcını təklif edib."</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"Nizamlayıcılar güncəlləndi"</string>
