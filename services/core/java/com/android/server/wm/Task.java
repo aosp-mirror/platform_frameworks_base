@@ -2285,16 +2285,18 @@ class Task extends WindowContainer<WindowContainer> {
         }
         density *= DisplayMetrics.DENSITY_DEFAULT_SCALE;
 
-        // If bounds have been overridden at this level, restrict config resources to these bounds
-        // rather than the parent because the overridden bounds can be larger than the parent.
-        boolean hasOverrideBounds = false;
+        // The bounds may have been overridden at this level. If the parent cannot cover these
+        // bounds, the configuration is still computed according to the override bounds.
+        final boolean insideParentBounds;
 
+        final Rect parentBounds = parentConfig.windowConfiguration.getBounds();
         final Rect resolvedBounds = inOutConfig.windowConfiguration.getBounds();
         if (resolvedBounds == null || resolvedBounds.isEmpty()) {
-            mTmpFullBounds.set(parentConfig.windowConfiguration.getBounds());
+            mTmpFullBounds.set(parentBounds);
+            insideParentBounds = true;
         } else {
             mTmpFullBounds.set(resolvedBounds);
-            hasOverrideBounds = true;
+            insideParentBounds = parentBounds.contains(resolvedBounds);
         }
 
         Rect outAppBounds = inOutConfig.windowConfiguration.getAppBounds();
@@ -2303,30 +2305,30 @@ class Task extends WindowContainer<WindowContainer> {
             outAppBounds = inOutConfig.windowConfiguration.getAppBounds();
         }
         // Non-null compatibility insets means the activity prefers to keep its original size, so
-        // the out bounds doesn't need to be restricted by the parent.
-        final boolean insideParentBounds = compatInsets == null;
-        if (insideParentBounds && windowingMode != WINDOWING_MODE_FREEFORM) {
-            Rect parentAppBounds;
-            if (hasOverrideBounds) {
-                // Since we overrode the bounds, restrict appBounds to display non-decor rather
-                // than parent. Otherwise, it won't match the overridden bounds.
-                final TaskDisplayArea displayArea = getDisplayArea();
-                parentAppBounds = displayArea != null
-                        ? displayArea.getConfiguration().windowConfiguration.getAppBounds() : null;
+        // the out bounds doesn't need to be restricted by the parent or current display.
+        final boolean customContainerPolicy = compatInsets != null;
+        if (!customContainerPolicy && windowingMode != WINDOWING_MODE_FREEFORM) {
+            final Rect containingAppBounds;
+            if (insideParentBounds) {
+                containingAppBounds = parentConfig.windowConfiguration.getAppBounds();
             } else {
-                parentAppBounds = parentConfig.windowConfiguration.getAppBounds();
+                // Restrict appBounds to display non-decor rather than parent because the override
+                // bounds are beyond the parent. Otherwise, it won't match the overridden bounds.
+                final TaskDisplayArea displayArea = getDisplayArea();
+                containingAppBounds = displayArea != null
+                        ? displayArea.getWindowConfiguration().getAppBounds() : null;
             }
-            if (parentAppBounds != null && !parentAppBounds.isEmpty()) {
-                outAppBounds.intersect(parentAppBounds);
+            if (containingAppBounds != null && !containingAppBounds.isEmpty()) {
+                outAppBounds.intersect(containingAppBounds);
             }
         }
 
         if (inOutConfig.screenWidthDp == Configuration.SCREEN_WIDTH_DP_UNDEFINED
                 || inOutConfig.screenHeightDp == Configuration.SCREEN_HEIGHT_DP_UNDEFINED) {
-            if (insideParentBounds && WindowConfiguration.isFloating(windowingMode)) {
+            if (!customContainerPolicy && WindowConfiguration.isFloating(windowingMode)) {
                 mTmpNonDecorBounds.set(mTmpFullBounds);
                 mTmpStableBounds.set(mTmpFullBounds);
-            } else if (insideParentBounds
+            } else if (!customContainerPolicy
                     && (overrideDisplayInfo != null || getDisplayContent() != null)) {
                 final DisplayInfo di = overrideDisplayInfo != null
                         ? overrideDisplayInfo
@@ -2344,7 +2346,7 @@ class Task extends WindowContainer<WindowContainer> {
                 if (rotation == ROTATION_UNDEFINED) {
                     rotation = parentConfig.windowConfiguration.getRotation();
                 }
-                if (rotation != ROTATION_UNDEFINED && compatInsets != null) {
+                if (rotation != ROTATION_UNDEFINED && customContainerPolicy) {
                     mTmpNonDecorBounds.set(mTmpFullBounds);
                     mTmpStableBounds.set(mTmpFullBounds);
                     compatInsets.getBoundsByRotation(mTmpBounds, rotation);
@@ -2362,13 +2364,13 @@ class Task extends WindowContainer<WindowContainer> {
 
             if (inOutConfig.screenWidthDp == Configuration.SCREEN_WIDTH_DP_UNDEFINED) {
                 final int overrideScreenWidthDp = (int) (mTmpStableBounds.width() / density);
-                inOutConfig.screenWidthDp = (insideParentBounds && !hasOverrideBounds)
+                inOutConfig.screenWidthDp = (insideParentBounds && !customContainerPolicy)
                         ? Math.min(overrideScreenWidthDp, parentConfig.screenWidthDp)
                         : overrideScreenWidthDp;
             }
             if (inOutConfig.screenHeightDp == Configuration.SCREEN_HEIGHT_DP_UNDEFINED) {
                 final int overrideScreenHeightDp = (int) (mTmpStableBounds.height() / density);
-                inOutConfig.screenHeightDp = (insideParentBounds && !hasOverrideBounds)
+                inOutConfig.screenHeightDp = (insideParentBounds && !customContainerPolicy)
                         ? Math.min(overrideScreenHeightDp, parentConfig.screenHeightDp)
                         : overrideScreenHeightDp;
             }
