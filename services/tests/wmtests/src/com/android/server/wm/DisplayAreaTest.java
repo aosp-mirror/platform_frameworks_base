@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_PRESENTATION;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
@@ -40,8 +41,10 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 
+import android.graphics.Rect;
 import android.os.Binder;
 import android.platform.test.annotations.Presubmit;
+import android.view.SurfaceControl;
 
 import com.google.android.collect.Lists;
 
@@ -63,7 +66,6 @@ import java.util.function.Function;
  */
 @Presubmit
 public class DisplayAreaTest {
-
     @Rule
     public SystemServicesTestRule mWmsRule = new SystemServicesTestRule();
 
@@ -377,6 +379,42 @@ public class DisplayAreaTest {
         }, false /* traverseTopToBottom */);
 
         assertThat(result).isEqualTo(tda1);
+    }
+
+    @Test
+    public void testSetMaxBounds() {
+        final Rect parentBounds = new Rect(0, 0, 100, 100);
+        final Rect childBounds1 = new Rect(parentBounds.left, parentBounds.top,
+                parentBounds.right / 2, parentBounds.bottom);
+        final Rect childBounds2 = new Rect(parentBounds.right / 2, parentBounds.top,
+                parentBounds.right, parentBounds.bottom);
+        TestDisplayArea parentDa = new TestDisplayArea(mWms, parentBounds);
+        TestDisplayArea childDa1 = new TestDisplayArea(mWms, childBounds1);
+        TestDisplayArea childDa2 = new TestDisplayArea(mWms, childBounds2);
+        parentDa.addChild(childDa1, 0);
+        parentDa.addChild(childDa2, 1);
+
+        assertEquals(parentBounds, parentDa.getMaxBounds());
+        assertEquals(childBounds1, childDa1.getMaxBounds());
+        assertEquals(childBounds2, childDa2.getMaxBounds());
+
+        final WindowToken windowToken = createWindowToken(TYPE_APPLICATION);
+        childDa1.addChild(windowToken, 0);
+
+        assertEquals("DisplayArea's children must have the same max bounds as itself",
+                childBounds1, windowToken.getMaxBounds());
+    }
+
+    private static class TestDisplayArea<T extends WindowContainer> extends DisplayArea<T> {
+        private TestDisplayArea(WindowManagerService wms, Rect bounds) {
+            super(wms, ANY, "half display area");
+            setBounds(bounds);
+        }
+
+        @Override
+        SurfaceControl.Builder makeChildSurface(WindowContainer child) {
+            return new MockSurfaceControlBuilder();
+        }
     }
 
     private WindowToken createWindowToken(int type) {

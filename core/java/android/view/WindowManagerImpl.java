@@ -29,7 +29,6 @@ import android.app.ResourcesManager;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.graphics.Insets;
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Bundle;
@@ -233,17 +232,16 @@ public final class WindowManagerImpl implements WindowManager {
 
     @Override
     public WindowMetrics getMaximumWindowMetrics() {
-        final Rect maxBounds = getMaximumBounds();
+        final Context context = mParentWindow != null ? mParentWindow.getContext() : mContext;
+        final Rect maxBounds = getMaximumBounds(context);
+
         return new WindowMetrics(maxBounds, computeWindowInsets(maxBounds));
     }
 
-    private Rect getMaximumBounds() {
-        // TODO(b/128338354): Current maximum bound is display size, but it should be displayArea
-        //  bound after displayArea feature is finished.
-        final Display display = mContext.getDisplayNoVerify();
-        final Point displaySize = new Point();
-        display.getRealSize(displaySize);
-        return new Rect(0, 0, displaySize.x, displaySize.y);
+    private static Rect getMaximumBounds(Context context) {
+        synchronized (ResourcesManager.getInstance()) {
+            return context.getResources().getConfiguration().windowConfiguration.getMaxBounds();
+        }
     }
 
     // TODO(b/150095967): Set window type to LayoutParams

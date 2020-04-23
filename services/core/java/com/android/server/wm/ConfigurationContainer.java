@@ -93,9 +93,17 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
     private final Rect mTmpRect = new Rect();
 
     static final int BOUNDS_CHANGE_NONE = 0;
-    // Return value from {@link setBounds} indicating the position of the override bounds changed.
+
+    /**
+     * Return value from {@link #setBounds(Rect)} indicating the position of the override bounds
+     * changed.
+     */
     static final int BOUNDS_CHANGE_POSITION = 1;
-    // Return value from {@link setBounds} indicating the size of the override bounds changed.
+
+    /**
+     * Return value from {@link #setBounds(Rect)} indicating the size of the override bounds
+     * changed.
+     */
     static final int BOUNDS_CHANGE_SIZE = 1 << 1;
 
     /**
@@ -226,6 +234,11 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
         return equivalentBounds(getRequestedOverrideBounds(),  bounds);
     }
 
+    /** Similar to {@link #equivalentRequestedOverrideBounds(Rect)}, but compares max bounds. */
+    public boolean equivalentRequestedOverrideMaxBounds(Rect bounds) {
+        return equivalentBounds(getRequestedOverrideMaxBounds(),  bounds);
+    }
+
     /**
      * Returns whether the two bounds are equal to each other or are a combination of null or empty.
      */
@@ -238,7 +251,6 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
     /**
      * Returns the effective bounds of this container, inheriting the first non-empty bounds set in
      * its ancestral hierarchy, including itself.
-     * @return
      */
     public Rect getBounds() {
         mReturnBounds.set(getConfiguration().windowConfiguration.getBounds());
@@ -247,6 +259,12 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
 
     public void getBounds(Rect outBounds) {
         outBounds.set(getBounds());
+    }
+
+    /** Similar to {@link #getBounds()}, but reports the max bounds. */
+    public Rect getMaxBounds() {
+        mReturnBounds.set(getConfiguration().windowConfiguration.getMaxBounds());
+        return mReturnBounds;
     }
 
     /**
@@ -273,6 +291,13 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
         return mReturnBounds;
     }
 
+    /** Similar to {@link #getRequestedOverrideBounds()}, but returns the max bounds. */
+    public Rect getRequestedOverrideMaxBounds() {
+        mReturnBounds.set(getRequestedOverrideConfiguration().windowConfiguration.getMaxBounds());
+
+        return mReturnBounds;
+    }
+
     /**
      * Returns {@code true} if the {@link WindowConfiguration} in the requested override
      * {@link Configuration} specifies bounds.
@@ -283,7 +308,7 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
 
     /**
      * Sets the passed in {@link Rect} to the current bounds.
-     * @see {@link #getRequestedOverrideBounds()}.
+     * @see #getRequestedOverrideBounds()
      */
     public void getRequestedOverrideBounds(Rect outBounds) {
         outBounds.set(getRequestedOverrideBounds());
@@ -295,19 +320,25 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
      * {@link #getRequestedOverrideBounds()}. If
      * an empty {@link Rect} or null is specified, this container will be considered to match its
      * parent bounds {@see #matchParentBounds} and will inherit bounds from its parent.
+     *
      * @param bounds The bounds defining the container size.
+     *
      * @return a bitmask representing the types of changes made to the bounds.
      */
     public int setBounds(Rect bounds) {
         int boundsChange = diffRequestedOverrideBounds(bounds);
+        final boolean overrideMaxBounds = providesMaxBounds()
+                && diffRequestedOverrideMaxBounds(bounds) != BOUNDS_CHANGE_NONE;
 
-        if (boundsChange == BOUNDS_CHANGE_NONE) {
+        if (boundsChange == BOUNDS_CHANGE_NONE && !overrideMaxBounds) {
             return boundsChange;
         }
 
-
         mRequestsTmpConfig.setTo(getRequestedOverrideConfiguration());
         mRequestsTmpConfig.windowConfiguration.setBounds(bounds);
+        if (overrideMaxBounds) {
+            mRequestsTmpConfig.windowConfiguration.setMaxBounds(bounds);
+        }
         onRequestedOverrideConfigurationChanged(mRequestsTmpConfig);
 
         return boundsChange;
@@ -316,6 +347,40 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
     public int setBounds(int left, int top, int right, int bottom) {
         mTmpRect.set(left, top, right, bottom);
         return setBounds(mTmpRect);
+    }
+
+    /**
+     * Returns {@code true} if this {@link ConfigurationContainer} provides the maximum bounds to
+     * its child {@link ConfigurationContainer}s. Returns {@code false}, otherwise.
+     * <p>
+     * The maximum bounds is how large a window can be expanded. Currently only
+     * {@link DisplayContent} and {@link DisplayArea} effect this property.
+     * </p>
+     */
+    protected boolean providesMaxBounds() {
+        return false;
+    }
+
+    int diffRequestedOverrideMaxBounds(Rect bounds) {
+        if (equivalentRequestedOverrideMaxBounds(bounds)) {
+            return BOUNDS_CHANGE_NONE;
+        }
+
+        int boundsChange = BOUNDS_CHANGE_NONE;
+
+        final Rect existingBounds = getRequestedOverrideMaxBounds();
+
+        if (bounds == null || existingBounds.left != bounds.left
+                || existingBounds.top != bounds.top) {
+            boundsChange |= BOUNDS_CHANGE_POSITION;
+        }
+
+        if (bounds == null || existingBounds.width() != bounds.width()
+                || existingBounds.height() != bounds.height()) {
+            boundsChange |= BOUNDS_CHANGE_SIZE;
+        }
+
+        return boundsChange;
     }
 
     int diffRequestedOverrideBounds(Rect bounds) {
@@ -338,10 +403,6 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
         }
 
         return boundsChange;
-    }
-
-    boolean hasOverrideConfiguration() {
-        return mHasOverrideConfiguration;
     }
 
     public WindowConfiguration getWindowConfiguration() {

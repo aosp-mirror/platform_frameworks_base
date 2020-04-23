@@ -37,7 +37,6 @@ import android.platform.test.annotations.Presubmit;
 import android.util.DisplayMetrics;
 import android.util.Log;
 
-import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
 import org.junit.After;

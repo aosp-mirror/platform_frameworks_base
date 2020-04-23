@@ -26,6 +26,7 @@ import android.annotation.SuppressLint;
 import android.annotation.TestApi;
 import android.app.KeyguardManager;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.Context;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -1157,9 +1158,19 @@ public final class Display {
      * </p><p>
      * The real size may be smaller than the physical size of the screen when the
      * window manager is emulating a smaller display (using adb shell wm size).
-     * </p>
+     * </p><p>
+     * In general, {@link #getRealSize(Point)} and {@link WindowManager#getMaximumWindowMetrics()}
+     * report the same bounds except that certain areas of the display may not be available to
+     * windows created in the {@link WindowManager}'s {@link Context}.
+     *
+     * For example, imagine a device which has a multi-task mode that limits windows to half of the
+     * screen. In this case, {@link WindowManager#getMaximumWindowMetrics()} reports the
+     * bounds of the screen half where the window is located, while {@link #getRealSize(Point)}
+     * still reports the bounds of the whole display.
      *
      * @param outSize Set to the real size of the display.
+     *
+     * @see WindowManager#getMaximumWindowMetrics()
      */
     public void getRealSize(Point outSize) {
         synchronized (this) {

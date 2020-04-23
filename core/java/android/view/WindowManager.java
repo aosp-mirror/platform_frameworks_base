@@ -72,6 +72,7 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.graphics.PixelFormat;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.IBinder;
@@ -473,9 +474,18 @@ public interface WindowManager extends ViewManager {
      *
      * Note that this might still be smaller than the size of the physical display if certain areas
      * of the display are not available to windows created in this {@link Context}.
+     * <p>
+     * For example, given that there's a device which have a multi-task mode to limit activities
+     * to a half screen. In this case, {@link #getMaximumWindowMetrics()} reports the bounds of
+     * the half screen which the activity is located, while {@link Display#getRealSize(Point)} still
+     * reports the bounds of the whole physical display.
      *
-     * @see #getMaximumWindowMetrics()
+     * Despite this, {@link #getMaximumWindowMetrics()} and {@link Display#getRealSize(Point)}
+     * reports the same bounds in general.
+     *
+     * @see #getCurrentWindowMetrics()
      * @see WindowMetrics
+     * @see Display#getRealSize(Point)
      */
     default @NonNull WindowMetrics getMaximumWindowMetrics() {
         throw new UnsupportedOperationException();
