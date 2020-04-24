@@ -30,6 +30,7 @@ import org.junit.Before;
 public abstract class OneHandedTestCase extends SysuiTestCase {
     static boolean sOrigEnabled;
     static int sOrigTimeout;
+
     @Before
     public void setupSettings() {
         sOrigEnabled = OneHandedSettingsUtil.getSettingsOneHandedModeEnabled(
@@ -41,6 +42,7 @@ public abstract class OneHandedTestCase extends SysuiTestCase {
         Settings.Secure.putInt(getContext().getContentResolver(),
                 Settings.Secure.ONE_HANDED_MODE_TIMEOUT, ONE_HANDED_TIMEOUT_MEDIUM_IN_SECONDS);
     }
+
     @After
     public void restoreSettings() {
         Settings.Secure.putInt(getContext().getContentResolver(),

@@ -55,6 +55,8 @@ public class OneHandedManagerImplTest extends OneHandedTestCase {
     @Mock
     OneHandedSurfaceTransactionHelper mMockSurfaceTransactionHelper;
     @Mock
+    OneHandedTouchHandler mMockTouchHandler;
+    @Mock
     SysUiState mMockSysUiState;
 
     @Before
@@ -63,6 +65,7 @@ public class OneHandedManagerImplTest extends OneHandedTestCase {
         mOneHandedManagerImpl = new OneHandedManagerImpl(getContext(),
                 mMockDisplayController,
                 mMockDisplayAreaOrganizer,
+                mMockTouchHandler,
                 mMockSysUiState);
         mTimeoutHandler = Mockito.spy(OneHandedTimeoutHandler.get());
 
@@ -115,5 +118,12 @@ public class OneHandedManagerImplTest extends OneHandedTestCase {
         verify(mTimeoutHandler, times(1)).removeTimer();
     }
 
+    @Test
+    public void testUpdateIsEnabled() {
+        final boolean enabled = true;
+        mOneHandedManagerImpl.setOneHandedEnabled(enabled);
+
+        verify(mMockTouchHandler, atLeastOnce()).onOneHandedEnabled(enabled);
+    }
 
 }

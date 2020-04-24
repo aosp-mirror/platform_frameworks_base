@@ -49,6 +49,8 @@ public class OneHandedManagerImpl implements OneHandedManager, Dumpable {
     private DisplayController mDisplayController;
     private OneHandedDisplayAreaOrganizer mDisplayAreaOrganizer;
     private OneHandedTimeoutHandler mTimeoutHandler;
+    private OneHandedTouchHandler mTouchHandler;
+    private OneHandedTouchHandler.OneHandedTouchEventCallback mTouchEventCallback;
     private OneHandedTransitionCallback mTransitionCallback;
     private SysUiState mSysUiFlagContainer;
 
@@ -59,6 +61,7 @@ public class OneHandedManagerImpl implements OneHandedManager, Dumpable {
     public OneHandedManagerImpl(Context context,
             DisplayController displayController,
             OneHandedDisplayAreaOrganizer displayAreaOrganizer,
+            OneHandedTouchHandler touchHandler,
             SysUiState sysUiState) {
 
         mDisplayAreaOrganizer = displayAreaOrganizer;
@@ -69,6 +72,7 @@ public class OneHandedManagerImpl implements OneHandedManager, Dumpable {
         mIsOneHandedEnabled = OneHandedSettingsUtil.getSettingsOneHandedModeEnabled(
                 context.getContentResolver());
         mTimeoutHandler = OneHandedTimeoutHandler.get();
+        mTouchHandler = touchHandler;
         updateOneHandedEnabled();
         setupGestures();
     }
@@ -105,6 +109,29 @@ public class OneHandedManagerImpl implements OneHandedManager, Dumpable {
     }
 
     private void setupGestures() {
+        mTouchEventCallback = new OneHandedTouchHandler.OneHandedTouchEventCallback() {
+            @Override
+            public boolean onStart() {
+                boolean result = false;
+                if (!mDisplayAreaOrganizer.isInOneHanded()) {
+                    startOneHanded();
+                    result = true;
+                }
+                return result;
+            }
+
+            @Override
+            public boolean onStop() {
+                boolean result = false;
+                if (mDisplayAreaOrganizer.isInOneHanded()) {
+                    stopOneHanded();
+                    result = true;
+                }
+                return result;
+            }
+        };
+        mTouchHandler.registerTouchEventListener(mTouchEventCallback);
+
         mTransitionCallback = new OneHandedTransitionCallback() {
             @Override
             public void onStartFinished(Rect bounds) {
@@ -119,6 +146,7 @@ public class OneHandedManagerImpl implements OneHandedManager, Dumpable {
             }
         };
         mDisplayAreaOrganizer.registerTransitionCallback(mTransitionCallback);
+        mDisplayAreaOrganizer.registerTransitionCallback(mTouchHandler);
     }
 
     /**
