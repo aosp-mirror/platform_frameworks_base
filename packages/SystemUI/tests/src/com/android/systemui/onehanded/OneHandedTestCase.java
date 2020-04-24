@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.android.systemui.onehanded;
 
 import static com.android.systemui.onehanded.OneHandedSettingsUtil.ONE_HANDED_TIMEOUT_MEDIUM_IN_SECONDS;
@@ -51,3 +52,4 @@ public abstract class OneHandedTestCase extends SysuiTestCase {
                 Settings.Secure.ONE_HANDED_MODE_TIMEOUT, sOrigTimeout);
     }
 }
+

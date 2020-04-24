@@ -26,10 +26,13 @@ import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.statusbar.CommandQueue;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -40,7 +43,9 @@ import org.mockito.MockitoAnnotations;
 @TestableLooper.RunWithLooper
 public class OneHandedUITest extends OneHandedTestCase {
     CommandQueue mCommandQueue;
+    KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     OneHandedUI mOneHandedUI;
+    ScreenLifecycle mScreenLifecycle;
     @Mock
     OneHandedManagerImpl mMockOneHandedManagerImpl;
     @Mock
@@ -54,12 +59,15 @@ public class OneHandedUITest extends OneHandedTestCase {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         mCommandQueue = new CommandQueue(mContext);
+        mScreenLifecycle = new ScreenLifecycle();
         mOneHandedUI = new OneHandedUI(mContext,
                 mCommandQueue,
                 mMockOneHandedManagerImpl,
                 mMockDumpManager,
-                mMockSettingsUtil);
+                mMockSettingsUtil,
+                mScreenLifecycle);
         mOneHandedUI.start();
+        mKeyguardUpdateMonitor = mDependency.injectMockDependency(KeyguardUpdateMonitor.class);
     }
 
     @Test
@@ -113,6 +121,21 @@ public class OneHandedUITest extends OneHandedTestCase {
 
         verify(mMockTimeoutHandler).setTimeout(
                 OneHandedSettingsUtil.ONE_HANDED_TIMEOUT_MEDIUM_IN_SECONDS);
+    }
+
+    @Ignore("Clarifying do not receive callback")
+    @Test
+    public void testKeyguardBouncerShowing_shouldStopOneHanded() {
+        mKeyguardUpdateMonitor.sendKeyguardBouncerChanged(true);
+
+        verify(mMockOneHandedManagerImpl, times(1)).stopOneHanded();
+    }
+
+    @Test
+    public void testScreenTurningOff_shouldStopOneHanded() {
+        mScreenLifecycle.dispatchScreenTurningOff();
+
+        verify(mMockOneHandedManagerImpl, times(1)).stopOneHanded();
     }
 
 }

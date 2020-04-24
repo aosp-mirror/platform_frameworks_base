@@ -20,6 +20,7 @@ import static android.view.Display.DEFAULT_DISPLAY;
 
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_ONE_HANDED_ACTIVE;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -29,6 +30,8 @@ import androidx.annotation.NonNull;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.model.SysUiState;
+import com.android.systemui.shared.system.ActivityManagerWrapper;
+import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.wm.DisplayController;
 
 import java.io.FileDescriptor;
@@ -45,6 +48,7 @@ public class OneHandedManagerImpl implements OneHandedManager, Dumpable {
     private static final String TAG = "OneHandedManager";
 
     private boolean mIsOneHandedEnabled;
+    private boolean mTaskChangeToExit;
     private float mOffSetFraction;
     private DisplayController mDisplayController;
     private OneHandedDisplayAreaOrganizer mDisplayAreaOrganizer;
@@ -53,6 +57,27 @@ public class OneHandedManagerImpl implements OneHandedManager, Dumpable {
     private OneHandedTouchHandler.OneHandedTouchEventCallback mTouchEventCallback;
     private OneHandedTransitionCallback mTransitionCallback;
     private SysUiState mSysUiFlagContainer;
+
+    /**
+     * Handler for system task stack changes, exit when user lunch new task or bring task to front
+     */
+    private final TaskStackChangeListener mTaskStackListener = new TaskStackChangeListener() {
+        @Override
+        public void onTaskCreated(int taskId, ComponentName componentName) {
+            if (!mIsOneHandedEnabled || !mDisplayAreaOrganizer.isInOneHanded()) {
+                return;
+            }
+            stopOneHanded();
+        }
+
+        @Override
+        public void onTaskMovedToFront(int taskId) {
+            if (!mIsOneHandedEnabled || !mDisplayAreaOrganizer.isInOneHanded()) {
+                return;
+            }
+            stopOneHanded();
+        }
+    };
 
     /**
      * Constructor of OneHandedManager
@@ -82,6 +107,17 @@ public class OneHandedManagerImpl implements OneHandedManager, Dumpable {
      */
     public void setOneHandedEnabled(boolean enabled) {
         mIsOneHandedEnabled = enabled;
+        updateOneHandedEnabled();
+    }
+
+    /**
+     * Set one handed enabled or disabled by OneHanded UI when user update settings
+     */
+    public void setTaskChangeToExit(boolean enabled) {
+        if (mTaskChangeToExit == enabled) {
+            return;
+        }
+        mTaskChangeToExit = enabled;
         updateOneHandedEnabled();
     }
 
@@ -172,6 +208,11 @@ public class OneHandedManagerImpl implements OneHandedManager, Dumpable {
             mDisplayAreaOrganizer.registerOrganizer(
                     OneHandedDisplayAreaOrganizer.FEATURE_ONE_HANDED);
         }
+        ActivityManagerWrapper.getInstance().unregisterTaskStackListener(mTaskStackListener);
+        if (mTaskChangeToExit) {
+            ActivityManagerWrapper.getInstance().registerTaskStackListener(mTaskStackListener);
+        }
+        mTouchHandler.onOneHandedEnabled(mIsOneHandedEnabled);
     }
 
     @Override

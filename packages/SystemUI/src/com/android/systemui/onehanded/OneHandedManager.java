@@ -27,6 +27,11 @@ public interface OneHandedManager {
     default void setOneHandedEnabled(boolean enabled) {}
 
     /**
+     * Set task stack changed to exit
+     */
+    default void setTaskChangeToExit(boolean enabled) {}
+
+    /**
      * Exit one handed mode
      */
     default void stopOneHanded() {}
