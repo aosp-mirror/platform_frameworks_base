@@ -57,7 +57,6 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import androidx.core.view.inputmethod.EditorInfoCompat;
 import androidx.core.view.inputmethod.InputConnectionCompat;
 import androidx.core.view.inputmethod.InputContentInfoCompat;
 
@@ -656,9 +655,10 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
 
         @Override
         public InputConnection onCreateInputConnection(EditorInfo outAttrs) {
-            String[] allowedDataTypes = mRemoteInputView.mRemoteInput.getAllowedDataTypes()
-                    .toArray(new String[0]);
-            EditorInfoCompat.setContentMimeTypes(outAttrs, allowedDataTypes);
+            // TODO: Pass RemoteInput data types to allow image insertion.
+            // String[] allowedDataTypes = mRemoteInputView.mRemoteInput.getAllowedDataTypes()
+            //     .toArray(new String[0]);
+            // EditorInfoCompat.setContentMimeTypes(outAttrs, allowedDataTypes);
             final InputConnection inputConnection = super.onCreateInputConnection(outAttrs);
 
             final InputConnectionCompat.OnCommitContentListener callback =
