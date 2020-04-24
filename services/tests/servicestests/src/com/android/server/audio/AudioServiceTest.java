@@ -57,8 +57,8 @@ public class AudioServiceTest {
             sLooperPrepared = true;
         }
         mContext = InstrumentationRegistry.getTargetContext();
-        mAudioSystem = AudioSystemAdapter.getConfigurableAdapter();
-        mSpySystemServer = spy(SystemServerAdapter.getNoOpAdapter());
+        mAudioSystem = new NoOpAudioSystemAdapter();
+        mSpySystemServer = spy(new NoOpSystemServerAdapter());
         mAudioService = new AudioService(mContext, mAudioSystem, mSpySystemServer);
     }
 
@@ -70,8 +70,7 @@ public class AudioServiceTest {
     public void testMuteMicrophone() throws Exception {
         Log.i(TAG, "running testMuteMicrophone");
         Assert.assertNotNull(mAudioService);
-        final AudioSystemAdapter.AudioSystemConfigurableAdapter testAudioSystem =
-                (AudioSystemAdapter.AudioSystemConfigurableAdapter) mAudioSystem;
+        final NoOpAudioSystemAdapter testAudioSystem = (NoOpAudioSystemAdapter) mAudioSystem;
         testAudioSystem.configureMuteMicrophoneToFail(false);
         for (boolean muted : new boolean[] { true, false}) {
             testAudioSystem.configureIsMicrophoneMuted(!muted);
@@ -96,8 +95,7 @@ public class AudioServiceTest {
     public void testMuteMicrophoneWhenFail() throws Exception {
         Log.i(TAG, "running testMuteMicrophoneWhenFail");
         Assert.assertNotNull(mAudioService);
-        final AudioSystemAdapter.AudioSystemConfigurableAdapter testAudioSystem =
-                (AudioSystemAdapter.AudioSystemConfigurableAdapter) mAudioSystem;
+        final NoOpAudioSystemAdapter testAudioSystem = (NoOpAudioSystemAdapter) mAudioSystem;
         testAudioSystem.configureMuteMicrophoneToFail(true);
         for (boolean muted : new boolean[] { true, false}) {
             testAudioSystem.configureIsMicrophoneMuted(!muted);
