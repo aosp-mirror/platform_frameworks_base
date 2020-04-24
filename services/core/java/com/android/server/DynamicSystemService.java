@@ -25,6 +25,7 @@ import android.gsi.IGsiServiceCallback;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.image.IDynamicSystemService;
@@ -55,7 +56,7 @@ public class DynamicSystemService extends IDynamicSystemService.Stub {
         if (mGsiService != null) {
             return mGsiService;
         }
-        return IGsiService.Stub.asInterface(waitForService("gsiservice"));
+        return IGsiService.Stub.asInterface(ServiceManager.waitForService("gsiservice"));
     }
 
     private void checkPermission() {
