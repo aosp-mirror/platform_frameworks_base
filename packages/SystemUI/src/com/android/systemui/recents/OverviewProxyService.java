@@ -495,8 +495,9 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             }
             dispatchNavButtonBounds();
 
-            // Update the systemui state flags
+            // Force-update the systemui state flags
             updateSystemUiStateFlags();
+            notifySystemUiStateFlags(mSysUiState.getFlags());
 
             notifyConnectionChanged();
         }
