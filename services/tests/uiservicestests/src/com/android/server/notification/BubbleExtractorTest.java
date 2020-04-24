@@ -257,6 +257,7 @@ public class BubbleExtractorTest extends UiServiceTestCase {
                 BUBBLE_PREFERENCE_ALL /* app */,
                 true /* channel */);
         when(mActivityManager.isLowRamDevice()).thenReturn(false);
+        setUpShortcutBubble(true /* isValid */);
 
         NotificationRecord r = getNotificationRecord(true /* bubble */);
         r.setFlagBubbleRemoved(true);
