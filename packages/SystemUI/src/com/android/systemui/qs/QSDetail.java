@@ -39,6 +39,7 @@ import android.widget.Switch;
 import android.widget.TextView;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.Dependency;
 import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
@@ -53,6 +54,7 @@ public class QSDetail extends LinearLayout {
     private static final long FADE_DURATION = 300;
 
     private final SparseArray<View> mDetailViews = new SparseArray<>();
+    private final UiEventLogger mUiEventLogger = QSEvents.INSTANCE.getQsUiEventsLogger();
 
     private ViewGroup mDetailContent;
     protected TextView mDetailSettingsButton;
@@ -205,6 +207,7 @@ public class QSDetail extends LinearLayout {
             mDetailContent.addView(detailView);
             mDetailViews.put(viewCacheIndex, detailView);
             Dependency.get(MetricsLogger.class).visible(adapter.getMetricsCategory());
+            mUiEventLogger.log(adapter.openDetailEvent());
             announceForAccessibility(mContext.getString(
                     R.string.accessibility_quick_settings_detail,
                     adapter.getTitle()));
@@ -214,6 +217,7 @@ public class QSDetail extends LinearLayout {
         } else {
             if (mDetailAdapter != null) {
                 Dependency.get(MetricsLogger.class).hidden(mDetailAdapter.getMetricsCategory());
+                mUiEventLogger.log(mDetailAdapter.closeDetailEvent());
             }
             mClosingDetail = true;
             mDetailAdapter = null;
@@ -249,6 +253,7 @@ public class QSDetail extends LinearLayout {
         mDetailSettingsButton.setOnClickListener(v -> {
             Dependency.get(MetricsLogger.class).action(ACTION_QS_MORE_SETTINGS,
                     adapter.getMetricsCategory());
+            mUiEventLogger.log(adapter.moreSettingsEvent());
             Dependency.get(ActivityStarter.class)
                     .postStartActivityDismissingKeyguard(settingsIntent, 0);
         });

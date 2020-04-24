@@ -44,6 +44,7 @@ import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.qs.QSDetailClipper;
+import com.android.systemui.qs.QSEditEvent;
 import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.phone.NotificationsQuickSettingsContainer;
@@ -93,7 +94,8 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
             LightBarController lightBarController,
             KeyguardStateController keyguardStateController,
             ScreenLifecycle screenLifecycle,
-            TileQueryHelper tileQueryHelper) {
+            TileQueryHelper tileQueryHelper,
+            UiEventLogger uiEventLogger) {
         super(new ContextThemeWrapper(context, R.style.edit_theme), attrs);
 
         LayoutInflater.from(getContext()).inflate(R.layout.qs_customize_panel_content, this);
@@ -115,7 +117,7 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
         mToolbar.setTitle(R.string.qs_edit);
         mRecyclerView = findViewById(android.R.id.list);
         mTransparentView = findViewById(R.id.customizer_transparent_view);
-        mTileAdapter = new TileAdapter(getContext());
+        mTileAdapter = new TileAdapter(getContext(), uiEventLogger);
         mTileQueryHelper = tileQueryHelper;
         mTileQueryHelper.setListener(mTileAdapter);
         mRecyclerView.setAdapter(mTileAdapter);

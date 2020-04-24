@@ -33,6 +33,8 @@ import android.view.LayoutInflater;
 import android.view.WindowManager;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.UiEventLogger;
+import com.android.internal.logging.UiEventLoggerImpl;
 import com.android.internal.util.NotificationMessagingUtil;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.ViewMediatorCallback;
@@ -217,5 +219,12 @@ public class DependencyProvider {
     @Provides
     public Choreographer providesChoreographer() {
         return Choreographer.getInstance();
+    }
+
+    /** Provides an instance of {@link com.android.internal.logging.UiEventLogger} */
+    @Singleton
+    @Provides
+    static UiEventLogger provideUiEventLogger() {
+        return new UiEventLoggerImpl();
     }
 }

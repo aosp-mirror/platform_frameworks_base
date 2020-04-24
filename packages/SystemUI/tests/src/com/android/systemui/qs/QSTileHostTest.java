@@ -41,6 +41,7 @@ import android.testing.TestableLooper.RunWithLooper;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.logging.UiEventLogger;
 import com.android.internal.util.CollectionUtils;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
@@ -50,7 +51,6 @@ import com.android.systemui.plugins.qs.QSFactory;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.qs.logging.QSLogger;
-import com.android.systemui.qs.tileimpl.QSFactoryImpl;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.phone.AutoTileManager;
@@ -105,6 +105,8 @@ public class QSTileHostTest extends SysuiTestCase {
     private QSLogger mQSLogger;
     @Mock
     private CustomTile mCustomTile;
+    @Mock
+    private UiEventLogger mUiEventLogger;
 
     private Handler mHandler;
     private TestableLooper mLooper;
@@ -117,7 +119,7 @@ public class QSTileHostTest extends SysuiTestCase {
         mHandler = new Handler(mLooper.getLooper());
         mQSTileHost = new TestQSTileHost(mContext, mIconController, mDefaultFactory, mHandler,
                 mLooper.getLooper(), mPluginManager, mTunerService, mAutoTiles, mDumpManager,
-                mBroadcastDispatcher, mStatusBar, mQSLogger);
+                mBroadcastDispatcher, mStatusBar, mQSLogger, mUiEventLogger);
         setUpTileFactory();
 
         // Override this config so there are no unexpected tiles
@@ -298,10 +300,11 @@ public class QSTileHostTest extends SysuiTestCase {
                 QSFactory defaultFactory, Handler mainHandler, Looper bgLooper,
                 PluginManager pluginManager, TunerService tunerService,
                 Provider<AutoTileManager> autoTiles, DumpManager dumpManager,
-                BroadcastDispatcher broadcastDispatcher, StatusBar statusBar, QSLogger qsLogger) {
+                BroadcastDispatcher broadcastDispatcher, StatusBar statusBar, QSLogger qsLogger,
+                UiEventLogger uiEventLogger) {
             super(context, iconController, defaultFactory, mainHandler, bgLooper, pluginManager,
                     tunerService, autoTiles, dumpManager, broadcastDispatcher,
-                    Optional.of(statusBar), qsLogger);
+                    Optional.of(statusBar), qsLogger, uiEventLogger);
         }
 
         @Override

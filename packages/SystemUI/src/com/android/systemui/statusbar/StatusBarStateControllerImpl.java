@@ -24,6 +24,7 @@ import android.util.Log;
 import android.view.animation.Interpolator;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.Dumpable;
 import com.android.systemui.Interpolators;
@@ -69,6 +70,7 @@ public class StatusBarStateControllerImpl implements SysuiStatusBarStateControll
             };
 
     private final ArrayList<RankedListener> mListeners = new ArrayList<>();
+    private final UiEventLogger mUiEventLogger;
     private int mState;
     private int mLastState;
     private boolean mLeaveOpenOnKeyguardHide;
@@ -119,7 +121,8 @@ public class StatusBarStateControllerImpl implements SysuiStatusBarStateControll
     private Interpolator mDozeInterpolator = Interpolators.FAST_OUT_SLOW_IN;
 
     @Inject
-    public StatusBarStateControllerImpl() {
+    public StatusBarStateControllerImpl(UiEventLogger uiEventLogger) {
+        mUiEventLogger = uiEventLogger;
         for (int i = 0; i < HISTORY_SIZE; i++) {
             mHistoricalRecords[i] = new HistoricalState();
         }
@@ -155,6 +158,7 @@ public class StatusBarStateControllerImpl implements SysuiStatusBarStateControll
             }
             mLastState = mState;
             mState = state;
+            mUiEventLogger.log(StatusBarStateEvent.fromState(mState));
             for (RankedListener rl : new ArrayList<>(mListeners)) {
                 rl.mListener.onStateChanged(mState);
             }

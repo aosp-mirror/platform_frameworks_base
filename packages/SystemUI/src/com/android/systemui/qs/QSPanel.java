@@ -52,6 +52,7 @@ import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.settingslib.Utils;
@@ -129,6 +130,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
     private BrightnessController mBrightnessController;
     private final DumpManager mDumpManager;
     private final QSLogger mQSLogger;
+    protected final UiEventLogger mUiEventLogger;
     protected QSTileHost mHost;
 
     protected QSSecurityFooter mFooter;
@@ -176,7 +178,8 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
             @Background DelayableExecutor backgroundExecutor,
             @Nullable LocalBluetoothManager localBluetoothManager,
             ActivityStarter activityStarter,
-            NotificationEntryManager entryManager
+            NotificationEntryManager entryManager,
+            UiEventLogger uiEventLogger
     ) {
         super(context, attrs);
         mContext = context;
@@ -188,6 +191,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         mBroadcastDispatcher = broadcastDispatcher;
         mActivityStarter = activityStarter;
         mNotificationEntryManager = entryManager;
+        mUiEventLogger = uiEventLogger;
 
         setOrientation(VERTICAL);
 
@@ -678,8 +682,10 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         }
         mMetricsLogger.visibility(MetricsEvent.QS_PANEL, mExpanded);
         if (!mExpanded) {
+            mUiEventLogger.log(closePanelEvent());
             closeDetail();
         } else {
+            mUiEventLogger.log(openPanelEvent());
             logTiles();
         }
     }
@@ -784,6 +790,18 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
 
     protected QSTileView createTileView(QSTile tile, boolean collapsedView) {
         return mHost.createTileView(tile, collapsedView);
+    }
+
+    protected QSEvent openPanelEvent() {
+        return QSEvent.QS_PANEL_EXPANDED;
+    }
+
+    protected QSEvent closePanelEvent() {
+        return QSEvent.QS_PANEL_COLLAPSED;
+    }
+
+    protected QSEvent tileVisibleEvent() {
+        return QSEvent.QS_TILE_VISIBLE;
     }
 
     protected boolean shouldShowDetail() {

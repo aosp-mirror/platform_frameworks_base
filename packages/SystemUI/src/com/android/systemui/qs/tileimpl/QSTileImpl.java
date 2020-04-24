@@ -48,7 +48,9 @@ import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.LifecycleRegistry;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.logging.InstanceId;
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.UiEventLogger;
 import com.android.settingslib.RestrictedLockUtils;
 import com.android.settingslib.RestrictedLockUtilsInternal;
 import com.android.settingslib.Utils;
@@ -62,6 +64,7 @@ import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTile.State;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.PagedTileLayout.TilePage;
+import com.android.systemui.qs.QSEvent;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.QuickStatusBarHeader;
 import com.android.systemui.qs.logging.QSLogger;
@@ -97,12 +100,14 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
     private final MetricsLogger mMetricsLogger = Dependency.get(MetricsLogger.class);
     private final StatusBarStateController
             mStatusBarStateController = Dependency.get(StatusBarStateController.class);
+    private final UiEventLogger mUiEventLogger;
     private final QSLogger mQSLogger;
 
     private final ArrayList<Callback> mCallbacks = new ArrayList<>();
     private final Object mStaleListener = new Object();
     protected TState mState;
     private TState mTmpState;
+    private final InstanceId mInstanceId;
     private boolean mAnnounceNextStateChange;
 
     private String mTileSpec;
@@ -156,10 +161,12 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
     protected QSTileImpl(QSHost host) {
         mHost = host;
         mContext = host.getContext();
+        mInstanceId = host.getNewInstanceId();
         mState = newTileState();
         mTmpState = newTileState();
         mQSSettingsPanelOption = QSSettingsControllerKt.getQSSettingsPanelOption();
         mQSLogger = host.getQSLogger();
+        mUiEventLogger = host.getUiEventLogger();
     }
 
     protected final void resetStates() {
@@ -171,6 +178,11 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
     @Override
     public Lifecycle getLifecycle() {
         return mLifecycle;
+    }
+
+    @Override
+    public InstanceId getInstanceId() {
+        return mInstanceId;
     }
 
     /**
@@ -247,6 +259,8 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
         mMetricsLogger.write(populate(new LogMaker(ACTION_QS_CLICK).setType(TYPE_ACTION)
                 .addTaggedData(FIELD_STATUS_BAR_STATE,
                         mStatusBarStateController.getState())));
+        mUiEventLogger.logWithInstanceId(QSEvent.QS_ACTION_CLICK, 0, getMetricsSpec(),
+                getInstanceId());
         mQSLogger.logTileClick(mTileSpec, mStatusBarStateController.getState(), mState.state);
         mHandler.sendEmptyMessage(H.CLICK);
     }
@@ -255,6 +269,8 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
         mMetricsLogger.write(populate(new LogMaker(ACTION_QS_SECONDARY_CLICK).setType(TYPE_ACTION)
                 .addTaggedData(FIELD_STATUS_BAR_STATE,
                         mStatusBarStateController.getState())));
+        mUiEventLogger.logWithInstanceId(QSEvent.QS_ACTION_SECONDARY_CLICK, 0, getMetricsSpec(),
+                getInstanceId());
         mQSLogger.logTileSecondaryClick(mTileSpec, mStatusBarStateController.getState(),
                 mState.state);
         mHandler.sendEmptyMessage(H.SECONDARY_CLICK);
@@ -264,6 +280,8 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
         mMetricsLogger.write(populate(new LogMaker(ACTION_QS_LONG_PRESS).setType(TYPE_ACTION)
                 .addTaggedData(FIELD_STATUS_BAR_STATE,
                         mStatusBarStateController.getState())));
+        mUiEventLogger.logWithInstanceId(QSEvent.QS_ACTION_LONG_PRESS, 0, getMetricsSpec(),
+                getInstanceId());
         mQSLogger.logTileLongClick(mTileSpec, mStatusBarStateController.getState(), mState.state);
         mHandler.sendEmptyMessage(H.LONG_CLICK);
 
@@ -481,6 +499,11 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
             state.disabledByPolicy = false;
             mEnforcedAdmin = null;
         }
+    }
+
+    @Override
+    public String getMetricsSpec() {
+        return mTileSpec;
     }
 
     /**

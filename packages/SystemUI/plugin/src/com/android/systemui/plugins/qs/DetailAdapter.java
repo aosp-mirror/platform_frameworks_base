@@ -19,6 +19,7 @@ import android.content.Intent;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.plugins.annotations.ProvidesInterface;
 
 @ProvidesInterface(version = DetailAdapter.VERSION)
@@ -44,4 +45,18 @@ public interface DetailAdapter {
     default boolean hasHeader() {
         return true;
     }
+
+    default UiEventLogger.UiEventEnum openDetailEvent() {
+        return INVALID;
+    }
+
+    default UiEventLogger.UiEventEnum closeDetailEvent() {
+        return INVALID;
+    }
+
+    default UiEventLogger.UiEventEnum moreSettingsEvent() {
+        return INVALID;
+    }
+
+    UiEventLogger.UiEventEnum INVALID = () -> 0;
 }
