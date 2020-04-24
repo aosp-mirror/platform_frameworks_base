@@ -60,6 +60,7 @@ public final class Prefs {
             Key.HAS_SEEN_ODI_CAPTIONS_TOOLTIP,
             Key.HAS_SEEN_BUBBLES_EDUCATION,
             Key.HAS_SEEN_BUBBLES_MANAGE_EDUCATION,
+            Key.HAS_SEEN_REVERSE_BOTTOM_SHEET,
             Key.CONTROLS_STRUCTURE_SWIPE_TOOLTIP_COUNT
     })
     public @interface Key {
@@ -108,6 +109,7 @@ public final class Prefs {
         String HAS_SEEN_ODI_CAPTIONS_TOOLTIP = "HasSeenODICaptionsTooltip";
         String HAS_SEEN_BUBBLES_EDUCATION = "HasSeenBubblesOnboarding";
         String HAS_SEEN_BUBBLES_MANAGE_EDUCATION = "HasSeenBubblesManageOnboarding";
+        String HAS_SEEN_REVERSE_BOTTOM_SHEET = "HasSeenReverseBottomSheet";
         String CONTROLS_STRUCTURE_SWIPE_TOOLTIP_COUNT = "ControlsStructureSwipeTooltipCount";
     }
 
