@@ -1271,6 +1271,12 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         if (configUpdated) {
             return;
         }
+
+        // The display configuration doesn't change. If there is a launching transformed app, that
+        // means its request to change display configuration has been discarded, then it should
+        // respect to the current configuration of display.
+        clearFixedRotationLaunchingApp();
+
         // Something changed (E.g. device rotation), but no configuration update is needed.
         // E.g. changing device rotation by 180 degrees. Go ahead and perform surface placement to
         // unfreeze the display since we froze it when the rotation was updated in
@@ -1496,8 +1502,20 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             sendNewConfiguration();
             return;
         }
-        // The display won't rotate (e.g. the orientation from sensor has updated again before
-        // applying rotation to display), so clear it to stop using seamless rotation.
+        // The orientation of display is not changed.
+        clearFixedRotationLaunchingApp();
+    }
+
+    /**
+     * Clears the {@link mFixedRotationLaunchingApp} without applying rotation to display. It is
+     * used when the display won't rotate (e.g. the orientation from sensor has updated again before
+     * applying rotation to display) but the launching app has been transformed. So the record need
+     * to be cleared and restored to stop using seamless rotation and rotated configuration.
+     */
+    private void clearFixedRotationLaunchingApp() {
+        if (mFixedRotationLaunchingApp == null) {
+            return;
+        }
         mFixedRotationLaunchingApp.finishFixedRotationTransform();
         mFixedRotationLaunchingApp = null;
     }
@@ -2868,6 +2886,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         if (mLastStatusBarVisibility != 0) {
             pw.print("  mLastStatusBarVisibility=0x");
             pw.println(Integer.toHexString(mLastStatusBarVisibility));
+        }
+        if (mFixedRotationLaunchingApp != null) {
+            pw.println("  mFixedRotationLaunchingApp=" + mFixedRotationLaunchingApp);
         }
 
         pw.println();
