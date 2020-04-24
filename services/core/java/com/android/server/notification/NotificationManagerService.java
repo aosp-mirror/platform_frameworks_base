@@ -5702,6 +5702,14 @@ public class NotificationManagerService extends SystemService {
             return;
         }
 
+        if (info != null) {
+            // Cache the shortcut synchronously after the associated notification is posted in case
+            // the app unpublishes this shortcut immediately after posting the notification. If the
+            // user does not modify the notification settings on this conversation, the shortcut
+            // will be uncached by People Service when all the associated notifications are removed.
+            mShortcutHelper.cacheShortcut(info, user);
+        }
+
         // Whitelist pending intents.
         if (notification.allPendingIntents != null) {
             final int intentCount = notification.allPendingIntents.size();
