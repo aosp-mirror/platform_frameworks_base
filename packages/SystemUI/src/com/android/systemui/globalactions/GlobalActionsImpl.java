@@ -88,7 +88,7 @@ public class GlobalActionsImpl implements GlobalActions, CommandQueue.Callbacks 
     public void showGlobalActions(GlobalActionsManager manager) {
         if (mDisabled) return;
         mGlobalActionsDialog = mGlobalActionsDialogLazy.get();
-        mGlobalActionsDialog.showDialog(mKeyguardStateController.isShowing(),
+        mGlobalActionsDialog.showOrHideDialog(mKeyguardStateController.isShowing(),
                 mDeviceProvisionedController.isDeviceProvisioned(),
                 mPanelExtension.get());
         Dependency.get(KeyguardUpdateMonitor.class).requestFaceAuth();
