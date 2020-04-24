@@ -214,9 +214,12 @@ public class ResolverMultiProfilePagerAdapter extends AbstractMultiProfilePagerA
     }
 
     @Override
-    protected void setupContainerPadding(View container) {
-        container.setPadding(container.getPaddingLeft(), container.getPaddingTop(),
-                container.getPaddingRight(), /* bottom */ 0);
+    protected void onButtonLayoutHidden() {
+        View emptyStateContainer = getItem(getCurrentPage()).getEmptyStateView()
+                .findViewById(R.id.resolver_empty_state_container);
+        emptyStateContainer.setPadding(emptyStateContainer.getPaddingLeft(),
+                emptyStateContainer.getPaddingTop(), emptyStateContainer.getPaddingRight(),
+                /* bottom */ 0);
     }
 
     class ResolverProfileDescriptor extends ProfileDescriptor {
