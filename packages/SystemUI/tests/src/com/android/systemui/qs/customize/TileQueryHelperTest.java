@@ -23,6 +23,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
@@ -49,6 +50,10 @@ import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.qs.QSTileHost;
+import com.android.systemui.qs.logging.QSLogger;
+import com.android.systemui.qs.tiles.HotspotTile;
+import com.android.systemui.statusbar.policy.DataSaverController;
+import com.android.systemui.statusbar.policy.HotspotController;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
 
@@ -94,6 +99,8 @@ public class TileQueryHelperTest extends SysuiTestCase {
     private QSTileHost mQSTileHost;
     @Mock
     private PackageManager mPackageManager;
+    @Mock
+    private QSLogger mQSLogger;
     @Captor
     private ArgumentCaptor<List<TileQueryHelper.TileInfo>> mCaptor;
 
@@ -106,6 +113,7 @@ public class TileQueryHelperTest extends SysuiTestCase {
     public void setup() {
         MockitoAnnotations.initMocks(this);
         mContext.setMockPackageManager(mPackageManager);
+        when(mQSTileHost.getQSLogger()).thenReturn(mQSLogger);
 
         mState = new QSTile.State();
         doAnswer(invocation -> {
@@ -268,5 +276,22 @@ public class TileQueryHelperTest extends SysuiTestCase {
         mContext.getOrCreateTestableResources().addOverride(R.string.quick_settings_tiles_stock,
                 STOCK_TILES);
         mTileQueryHelper.queryTiles(mQSTileHost);
+    }
+
+    @Test
+    public void testQueryTiles_notAvailableDestroyed_isNotNullSpec() {
+        HotspotController mockHC = mock(HotspotController.class);
+        DataSaverController mockDSC = mock(DataSaverController.class);
+        when(mockHC.isHotspotSupported()).thenReturn(false);
+        HotspotTile t = new HotspotTile(mQSTileHost, mockHC, mockDSC);
+        when(mQSTileHost.createTile("hotspot")).thenReturn(t);
+
+        mContext.getOrCreateTestableResources().addOverride(R.string.quick_settings_tiles_stock,
+                "hotspot");
+
+        mTileQueryHelper.queryTiles(mQSTileHost);
+
+        FakeExecutor.exhaustExecutors(mMainExecutor, mBgExecutor);
+        verify(mQSLogger).logTileDestroyed(eq("hotspot"), anyString());
     }
 }
