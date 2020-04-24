@@ -149,10 +149,10 @@ public class AccessibilityShortcutChooserActivity extends Activity {
 
     private void updateDialogListeners() {
         final boolean isEditMenuMode =
-                (mTargetAdapter.getShortcutMenuMode() == ShortcutMenuMode.EDIT);
+                mTargetAdapter.getShortcutMenuMode() == ShortcutMenuMode.EDIT;
         final int selectDialogTitleId = R.string.accessibility_select_shortcut_menu_title;
         final int editDialogTitleId =
-                (mShortcutType == ACCESSIBILITY_BUTTON)
+                mShortcutType == ACCESSIBILITY_BUTTON
                         ? R.string.accessibility_edit_shortcut_menu_button_title
                         : R.string.accessibility_edit_shortcut_menu_volume_title;
 
