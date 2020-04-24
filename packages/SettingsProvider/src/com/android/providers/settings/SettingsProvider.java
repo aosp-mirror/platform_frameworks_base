@@ -4692,23 +4692,15 @@ public class SettingsProvider extends ContentProvider {
 
                 if (currentVersion == 185) {
                     // Deprecate ACCESSIBILITY_DISPLAY_MAGNIFICATION_NAVBAR_ENABLED, and migrate it
-                    // to ACCESSIBILITY_BUTTON_TARGET_COMPONENT.
+                    // to ACCESSIBILITY_BUTTON_TARGETS.
                     final SettingsState secureSettings = getSecureSettingsLocked(userId);
                     final Setting magnifyNavbarEnabled = secureSettings.getSettingLocked(
                             Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_NAVBAR_ENABLED);
                     if ("1".equals(magnifyNavbarEnabled.getValue())) {
                         secureSettings.insertSettingLocked(
-                                Secure.ACCESSIBILITY_BUTTON_TARGET_COMPONENT,
+                                Secure.ACCESSIBILITY_BUTTON_TARGETS,
                                 ACCESSIBILITY_SHORTCUT_TARGET_MAGNIFICATION_CONTROLLER,
                                 null /* tag */, false /* makeDefault */,
-                                SettingsState.SYSTEM_PACKAGE_NAME);
-                    } else {
-                        // Clear a11y button targets list setting. A11yManagerService will end up
-                        // adding all legacy enabled services that want the button to the list, so
-                        // there's no need to keep tracking them.
-                        secureSettings.insertSettingLocked(
-                                Secure.ACCESSIBILITY_BUTTON_TARGET_COMPONENT,
-                                null, null /* tag */, false /* makeDefault */,
                                 SettingsState.SYSTEM_PACKAGE_NAME);
                     }
                     secureSettings.deleteSettingLocked(
