@@ -590,7 +590,7 @@ public final class ProcessStatsService extends IProcessStats.Stub {
                             }
                             if (doAggregate) {
                                 mergedStats.add(stats);
-                            } else {
+                            } else if (committedStats != null) {
                                 committedStats.add(protoToParcelFileDescriptor(stats, section));
                             }
                             if (stats.mReadError != null) {
@@ -604,7 +604,7 @@ public final class ProcessStatsService extends IProcessStats.Stub {
                         Slog.w(TAG, "Failure to read and parse commit file " + fileName, e);
                     }
                 }
-                if (doAggregate) {
+                if (doAggregate && committedStats != null) {
                     committedStats.add(protoToParcelFileDescriptor(mergedStats, section));
                 }
                 return newHighWaterMark;
@@ -789,11 +789,16 @@ public final class ProcessStatsService extends IProcessStats.Stub {
 
         long ident = Binder.clearCallingIdentity();
         try {
-            if (args.length > 0 && "--proto".equals(args[0])) {
-                dumpProto(fd);
-            } else {
-                dumpInner(pw, args);
+            if (args.length > 0) {
+                if ("--proto".equals(args[0])) {
+                    dumpProto(fd);
+                    return;
+                } else if ("--statsd".equals(args[0])) {
+                    dumpProtoForStatsd(fd);
+                    return;
+                }
             }
+            dumpInner(pw, args);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
@@ -1248,6 +1253,19 @@ public final class ProcessStatsService extends IProcessStats.Stub {
 
         // aggregated over last 24 hours procstats
         dumpAggregatedStats(proto, ProcessStatsServiceDumpProto.PROCSTATS_OVER_24HRS, 24, now);
+
+        proto.flush();
+    }
+
+    /**
+     * Dump proto for the statsd, mainly for testing.
+     */
+    private void dumpProtoForStatsd(FileDescriptor fd) {
+        final ProtoOutputStream proto = new ProtoOutputStream(fd);
+
+        ProcessStats procStats = new ProcessStats(false);
+        getCommittedStatsMerged(0, 0, true, null, procStats);
+        procStats.dumpAggregatedProtoForStatsd(proto);
 
         proto.flush();
     }
