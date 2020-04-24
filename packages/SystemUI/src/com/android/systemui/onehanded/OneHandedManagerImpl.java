@@ -82,14 +82,25 @@ public class OneHandedManagerImpl implements OneHandedManager, Dumpable {
     }
 
     private void updateOneHandedEnabled() {
+        if (mDisplayAreaOrganizer.isInOneHanded()) {
+            stopOneHanded();
+        }
+        // TODO Be aware to unregisterOrganizer() after animation finished
+        mDisplayAreaOrganizer.unregisterOrganizer();
+        if (mIsOneHandedEnabled) {
+            mDisplayAreaOrganizer.registerOrganizer(
+                    OneHandedDisplayAreaOrganizer.FEATURE_ONE_HANDED);
+        }
     }
 
     @Override
     public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
         final String innerPrefix = "  ";
         pw.println(TAG + "states: ");
-        pw.print(innerPrefix + "mIsOneHandedEnabled=");
-        pw.println(mIsOneHandedEnabled);
+        pw.print(innerPrefix + "mSysUiFlagContainer=");
+        pw.println(mSysUiFlagContainer.getFlags());
+        pw.print(innerPrefix + "mOffSetFraction=");
+        pw.println(mOffSetFraction);
 
         if (mDisplayAreaOrganizer != null) {
             mDisplayAreaOrganizer.dump(fd, pw, args);

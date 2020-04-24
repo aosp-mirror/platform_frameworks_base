@@ -16,12 +16,13 @@
 
 package com.android.systemui.onehanded;
 
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
-import android.view.SurfaceControl;
-import android.window.WindowContainerToken;
 
 import androidx.test.filters.SmallTest;
 
@@ -40,11 +41,7 @@ public class OneHandedManagerImplTest extends OneHandedTestCase {
 
     OneHandedManagerImpl mOneHandedManagerImpl;
     @Mock
-    SurfaceControl mMockLeash;
-    @Mock
     OneHandedDisplayAreaOrganizer mMockDisplayAreaOrganizer;
-    @Mock
-    WindowContainerToken mMockToken;
     @Mock
     SysUiState mMockSysUiState;
 
@@ -55,7 +52,12 @@ public class OneHandedManagerImplTest extends OneHandedTestCase {
                 mMockDisplayAreaOrganizer,
                 mMockSysUiState);
 
-        when(mMockToken.getLeash()).thenReturn(mMockLeash);
+        when(mMockDisplayAreaOrganizer.isInOneHanded()).thenReturn(false);
+    }
+
+    @Test
+    public void testRegisterOrganizer() {
+        verify(mMockDisplayAreaOrganizer, times(1)).registerOrganizer(anyInt());
     }
 
     @Test

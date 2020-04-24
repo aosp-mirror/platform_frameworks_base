@@ -490,9 +490,6 @@
     <!-- On debuggable builds, alert the user if SystemUI PSS goes over this number (in kb) -->
     <integer name="watch_heap_limit">256000</integer>
 
-    <!-- One handed mode default offset % of display size -->
-    <fraction name="config_one_handed_offset">50%</fraction>
-
     <!-- Animation duration for resizing of PIP when entering/exiting. -->
     <integer name="config_pipResizeAnimationDuration">425</integer>
 
@@ -573,5 +570,8 @@
     <integer name="controls_max_columns_adjust_below_width_dp">320</integer>
     <!-- If the config font scale is >= this value, potentially adjust the number of columns-->
     <item name="controls_max_columns_adjust_above_font_scale" translatable="false" format="float" type="dimen">1.25</item>
+
+    <!-- One handed mode default offset % of display size -->
+    <fraction name="config_one_handed_offset">50%</fraction>
 
 </resources>

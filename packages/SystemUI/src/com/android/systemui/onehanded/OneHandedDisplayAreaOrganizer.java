@@ -18,6 +18,9 @@ package com.android.systemui.onehanded;
 
 import android.content.Context;
 import android.os.Handler;
+import android.util.Log;
+import android.view.SurfaceControl;
+import android.window.DisplayAreaInfo;
 import android.window.DisplayAreaOrganizer;
 import android.window.WindowContainerTransaction;
 
@@ -28,6 +31,7 @@ import com.android.systemui.Dumpable;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.Objects;
 
 import javax.inject.Inject;
 
@@ -46,9 +50,13 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer implemen
 
     private final Handler mUpdateHandler;
 
+    private boolean mIsInOneHanded;
+    @VisibleForTesting
+    DisplayAreaInfo mDisplayAreaInfo;
+    private SurfaceControl mLeash;
+
     @SuppressWarnings("unchecked")
     private final Handler.Callback mUpdateCallback = (msg) -> true;
-
 
     /**
      * Constructor of OneHandedDisplayAreaOrganizer
@@ -58,14 +66,57 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer implemen
         mUpdateHandler = new Handler(OneHandedThread.get().getLooper(), mUpdateCallback);
     }
 
+    @Override
+    public void onDisplayAreaAppeared(@NonNull DisplayAreaInfo displayAreaInfo,
+            @NonNull SurfaceControl leash) {
+        Objects.requireNonNull(displayAreaInfo, "displayAreaInfo must not be null");
+        Objects.requireNonNull(leash, "leash must not be null");
+        mDisplayAreaInfo = displayAreaInfo;
+        mLeash = leash;
+    }
+
+    @Override
+    public void onDisplayAreaInfoChanged(@NonNull DisplayAreaInfo displayAreaInfo) {
+        Objects.requireNonNull(displayAreaInfo, "displayArea must not be null");
+        mDisplayAreaInfo = displayAreaInfo;
+    }
+
+    @Override
+    public void onDisplayAreaVanished(@NonNull DisplayAreaInfo displayAreaInfo) {
+        Objects.requireNonNull(displayAreaInfo,
+                "Requires valid displayArea, and displayArea must not be null");
+        if (displayAreaInfo.token.asBinder() != mDisplayAreaInfo.token.asBinder()) {
+            Log.w(TAG, "Unrecognized token: " + displayAreaInfo.token);
+            return;
+        }
+        mDisplayAreaInfo = displayAreaInfo;
+
+        // Stop one handed immediately
+    }
+
     @VisibleForTesting
     Handler getUpdateHandler() {
         return mUpdateHandler;
+    }
+
+    /**
+     * The latest state of one handed mode
+     *
+     * @return true Currently is in one handed mode, otherwise is not in one handed mode
+     */
+    public boolean isInOneHanded() {
+        return mIsInOneHanded;
     }
 
     @Override
     public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
         final String innerPrefix = "  ";
         pw.println(TAG + "states: ");
+        pw.print(innerPrefix + "mIsInOneHanded=");
+        pw.println(mIsInOneHanded);
+        pw.print(innerPrefix + "mDisplayAreaInfo=");
+        pw.println(mDisplayAreaInfo);
+        pw.print(innerPrefix + "mLeash=");
+        pw.println(mLeash);
     }
 }
