@@ -20,6 +20,7 @@ import android.annotation.IntDef
 import android.service.notification.NotificationListenerService.Ranking
 import android.service.notification.StatusBarNotification
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier.Companion.PeopleNotificationType
+import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier.Companion.TYPE_FULL_PERSON
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier.Companion.TYPE_IMPORTANT_PERSON
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier.Companion.TYPE_NON_PERSON
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier.Companion.TYPE_PERSON
@@ -33,21 +34,28 @@ interface PeopleNotificationIdentifier {
     /**
      * Identifies if the given notification can be classified as a "People" notification.
      *
-     * @return [TYPE_NON_PERSON] if not a people notification, [TYPE_PERSON] if a standard people
-     *  notification, and [TYPE_IMPORTANT_PERSON] if an "important" people notification.
+     * @return [TYPE_NON_PERSON] if not a people notification, [TYPE_PERSON] if it is a people
+     *  notification that doesn't use shortcuts, [TYPE_FULL_PERSON] if it is a person notification
+     *  that users shortcuts, and [TYPE_IMPORTANT_PERSON] if an "important" people notification
+     *  that users shortcuts.
      */
     @PeopleNotificationType
     fun getPeopleNotificationType(sbn: StatusBarNotification, ranking: Ranking): Int
 
+    fun compareTo(@PeopleNotificationType a: Int,
+                  @PeopleNotificationType b: Int): Int
+
     companion object {
 
         @Retention(AnnotationRetention.SOURCE)
-        @IntDef(prefix = ["TYPE_"], value = [TYPE_NON_PERSON, TYPE_PERSON, TYPE_IMPORTANT_PERSON])
+        @IntDef(prefix = ["TYPE_"], value = [TYPE_NON_PERSON, TYPE_PERSON, TYPE_FULL_PERSON,
+            TYPE_IMPORTANT_PERSON])
         annotation class PeopleNotificationType
 
         const val TYPE_NON_PERSON = 0
         const val TYPE_PERSON = 1
-        const val TYPE_IMPORTANT_PERSON = 2
+        const val TYPE_FULL_PERSON = 2
+        const val TYPE_IMPORTANT_PERSON = 3
     }
 }
 
@@ -69,6 +77,11 @@ class PeopleNotificationIdentifierImpl @Inject constructor(
                 }
             }
 
+    override fun compareTo(@PeopleNotificationType a: Int,
+                  @PeopleNotificationType b: Int): Int {
+        return b.compareTo(a);
+    }
+
     /**
      * Given two [PeopleNotificationType]s, determine the upper bound. Used to constrain a
      * notification to a type given multiple signals, i.e. notification groups, where each child
@@ -84,8 +97,9 @@ class PeopleNotificationIdentifierImpl @Inject constructor(
     private val Ranking.personTypeInfo
         get() = when {
             !isConversation -> TYPE_NON_PERSON
+            shortcutInfo == null -> TYPE_PERSON
             channel?.isImportantConversation == true -> TYPE_IMPORTANT_PERSON
-            else -> TYPE_PERSON
+            else -> TYPE_FULL_PERSON
         }
 
     private fun extractPersonTypeInfo(sbn: StatusBarNotification) =

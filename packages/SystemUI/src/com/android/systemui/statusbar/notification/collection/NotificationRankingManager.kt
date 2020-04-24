@@ -34,12 +34,13 @@ import com.android.systemui.statusbar.notification.stack.NotificationSectionsMan
 import com.android.systemui.statusbar.notification.stack.NotificationSectionsManager.BUCKET_HEADS_UP
 import com.android.systemui.statusbar.notification.stack.NotificationSectionsManager.BUCKET_PEOPLE
 import com.android.systemui.statusbar.notification.stack.NotificationSectionsManager.BUCKET_SILENT
+
 import com.android.systemui.statusbar.phone.NotificationGroupManager
 import com.android.systemui.statusbar.policy.HeadsUpManager
 import dagger.Lazy
-import java.util.Comparator
-import java.util.Objects
+import java.util.Objects;
 import javax.inject.Inject
+import kotlin.Comparator
 
 private const val TAG = "NotifRankingManager"
 
@@ -90,19 +91,13 @@ open class NotificationRankingManager @Inject constructor(
 
         val aIsHighPriority = a.isHighPriority()
         val bIsHighPriority = b.isHighPriority()
-
         when {
             aHeadsUp != bHeadsUp -> if (aHeadsUp) -1 else 1
             // Provide consistent ranking with headsUpManager
             aHeadsUp -> headsUpManager.compare(a, b)
-            usePeopleFiltering && aPersonType != bPersonType -> when (aPersonType) {
-                TYPE_IMPORTANT_PERSON -> -1
-                TYPE_PERSON -> when (bPersonType) {
-                    TYPE_IMPORTANT_PERSON -> 1
-                    else -> -1
-                }
-                else -> 1
-            }
+
+            usePeopleFiltering && aPersonType != bPersonType ->
+                peopleNotificationIdentifier.compareTo(aPersonType, bPersonType)
             // Upsort current media notification.
             aMedia != bMedia -> if (aMedia) -1 else 1
             // Upsort PRIORITY_MAX system notifications
