@@ -16,7 +16,12 @@
 
 package com.android.systemui.onehanded;
 
+import static com.google.common.truth.Truth.assertThat;
+
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -27,6 +32,7 @@ import android.testing.TestableLooper;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.model.SysUiState;
+import com.android.systemui.wm.DisplayController;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -41,7 +47,11 @@ public class OneHandedManagerImplTest extends OneHandedTestCase {
 
     OneHandedManagerImpl mOneHandedManagerImpl;
     @Mock
+    DisplayController mMockDisplayController;
+    @Mock
     OneHandedDisplayAreaOrganizer mMockDisplayAreaOrganizer;
+    @Mock
+    OneHandedSurfaceTransactionHelper mMockSurfaceTransactionHelper;
     @Mock
     SysUiState mMockSysUiState;
 
@@ -49,10 +59,25 @@ public class OneHandedManagerImplTest extends OneHandedTestCase {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         mOneHandedManagerImpl = new OneHandedManagerImpl(getContext(),
+                mMockDisplayController,
                 mMockDisplayAreaOrganizer,
                 mMockSysUiState);
 
         when(mMockDisplayAreaOrganizer.isInOneHanded()).thenReturn(false);
+    }
+
+
+    @Test
+    public void testDefaultShouldNotInOneHanded() {
+        final OneHandedSurfaceTransactionHelper transactionHelper =
+                new OneHandedSurfaceTransactionHelper(mContext);
+        final OneHandedAnimationController animationController = new OneHandedAnimationController(
+                mContext, transactionHelper);
+        OneHandedDisplayAreaOrganizer displayAreaOrganizer = new OneHandedDisplayAreaOrganizer(
+                mContext, mMockDisplayController, animationController,
+                mMockSurfaceTransactionHelper);
+
+        assertThat(displayAreaOrganizer.isInOneHanded()).isFalse();
     }
 
     @Test
@@ -63,11 +88,21 @@ public class OneHandedManagerImplTest extends OneHandedTestCase {
     @Test
     public void testStartOneHanded() {
         mOneHandedManagerImpl.startOneHanded();
+
+        verify(mMockDisplayAreaOrganizer, times(1)).scheduleOffset(anyInt(), anyInt());
     }
 
     @Test
     public void testStopOneHanded() {
+        when(mMockDisplayAreaOrganizer.isInOneHanded()).thenReturn(false);
         mOneHandedManagerImpl.stopOneHanded();
+
+        verify(mMockDisplayAreaOrganizer, never()).scheduleOffset(anyInt(), anyInt());
+    }
+
+    @Test
+    public void testRegisterTransitionCallback() {
+        verify(mMockDisplayAreaOrganizer, atLeastOnce()).registerTransitionCallback(any());
     }
 
 }

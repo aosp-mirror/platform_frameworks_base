@@ -16,13 +16,20 @@
 
 package com.android.systemui.onehanded;
 
+import static android.view.Display.DEFAULT_DISPLAY;
+
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_ONE_HANDED_ACTIVE;
+
 import android.content.Context;
+import android.graphics.Point;
+import android.graphics.Rect;
 
 import androidx.annotation.NonNull;
 
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.model.SysUiState;
+import com.android.systemui.wm.DisplayController;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -39,7 +46,9 @@ public class OneHandedManagerImpl implements OneHandedManager, Dumpable {
 
     private boolean mIsOneHandedEnabled;
     private float mOffSetFraction;
+    private DisplayController mDisplayController;
     private OneHandedDisplayAreaOrganizer mDisplayAreaOrganizer;
+    private OneHandedTransitionCallback mTransitionCallback;
     private SysUiState mSysUiFlagContainer;
 
     /**
@@ -47,16 +56,19 @@ public class OneHandedManagerImpl implements OneHandedManager, Dumpable {
      */
     @Inject
     public OneHandedManagerImpl(Context context,
+            DisplayController displayController,
             OneHandedDisplayAreaOrganizer displayAreaOrganizer,
             SysUiState sysUiState) {
 
         mDisplayAreaOrganizer = displayAreaOrganizer;
+        mDisplayController = displayController;
         mSysUiFlagContainer = sysUiState;
         mOffSetFraction =
                 context.getResources().getFraction(R.fraction.config_one_handed_offset, 1, 1);
         mIsOneHandedEnabled = OneHandedSettingsUtil.getSettingsOneHandedModeEnabled(
                 context.getContentResolver());
         updateOneHandedEnabled();
+        setupGestures();
     }
 
     /**
@@ -72,6 +84,10 @@ public class OneHandedManagerImpl implements OneHandedManager, Dumpable {
      */
     @Override
     public void startOneHanded() {
+        if (!mDisplayAreaOrganizer.isInOneHanded() && mIsOneHandedEnabled) {
+            final int yOffSet = Math.round(getDisplaySize().y * mOffSetFraction);
+            mDisplayAreaOrganizer.scheduleOffset(0, yOffSet);
+        }
     }
 
     /**
@@ -79,6 +95,39 @@ public class OneHandedManagerImpl implements OneHandedManager, Dumpable {
      */
     @Override
     public void stopOneHanded() {
+        if (mDisplayAreaOrganizer.isInOneHanded()) {
+            mDisplayAreaOrganizer.scheduleOffset(0, 0);
+        }
+    }
+
+    private void setupGestures() {
+        mTransitionCallback = new OneHandedTransitionCallback() {
+            @Override
+            public void onStartFinished(Rect bounds) {
+                mSysUiFlagContainer.setFlag(SYSUI_STATE_ONE_HANDED_ACTIVE,
+                        true).commitUpdate(DEFAULT_DISPLAY);
+            }
+
+            @Override
+            public void onStopFinished(Rect bounds) {
+                mSysUiFlagContainer.setFlag(SYSUI_STATE_ONE_HANDED_ACTIVE,
+                        false).commitUpdate(DEFAULT_DISPLAY);
+            }
+        };
+        mDisplayAreaOrganizer.registerTransitionCallback(mTransitionCallback);
+    }
+
+    /**
+     * Query the current display real size from {@link DisplayController}
+     *
+     * @return {@link DisplayController#getDisplay(int)#getDisplaySize()}
+     */
+    private Point getDisplaySize() {
+        Point displaySize = new Point();
+        if (mDisplayController != null && mDisplayController.getDisplay(DEFAULT_DISPLAY) != null) {
+            mDisplayController.getDisplay(DEFAULT_DISPLAY).getRealSize(displaySize);
+        }
+        return displaySize;
     }
 
     private void updateOneHandedEnabled() {

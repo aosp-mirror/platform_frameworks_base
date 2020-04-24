@@ -21,9 +21,14 @@ import static android.window.DisplayAreaOrganizer.FEATURE_ONE_HANDED;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.graphics.Rect;
 import android.os.Handler;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -55,9 +60,16 @@ public class OneHandedDisplayAreaOrganizerTest extends OneHandedTestCase {
     DisplayInfo mDisplayInfo;
     Handler mUpdateHandler;
     OneHandedDisplayAreaOrganizer mDisplayAreaOrganizer;
+    OneHandedAnimationController.OneHandedTransitionAnimator mFakeAnimator;
     WindowContainerToken mToken;
     @Mock
     IWindowContainerToken mMockRealToken;
+    @Mock
+    OneHandedAnimationController mMockAnimationController;
+    @Mock
+    OneHandedAnimationController.OneHandedTransitionAnimator mMockAnimator;
+    @Mock
+    OneHandedSurfaceTransactionHelper mMockSurfaceTransactionHelper;
     @Mock
     DisplayController mMockDisplayController;
     @Mock
@@ -66,7 +78,10 @@ public class OneHandedDisplayAreaOrganizerTest extends OneHandedTestCase {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        mDisplayAreaOrganizer = new OneHandedDisplayAreaOrganizer(mContext);
+        mDisplayAreaOrganizer = new OneHandedDisplayAreaOrganizer(mContext,
+                mMockDisplayController,
+                mMockAnimationController,
+                mMockSurfaceTransactionHelper);
         mUpdateHandler = Mockito.spy(mDisplayAreaOrganizer.getUpdateHandler());
         mToken = new WindowContainerToken(mMockRealToken);
         mDisplayAreaInfo = new DisplayAreaInfo(mToken, DEFAULT_DISPLAY, FEATURE_ONE_HANDED);
@@ -74,9 +89,21 @@ public class OneHandedDisplayAreaOrganizerTest extends OneHandedTestCase {
         mDisplayInfo.logicalWidth = DISPLAY_WIDTH;
         mDisplayInfo.logicalHeight = DISPLAY_HEIGHT;
 
+        when(mMockAnimationController.getAnimator(any(), any(), any())).thenReturn(null);
+        when(mMockSurfaceTransactionHelper.translate(any(), any(), anyFloat())).thenReturn(
+                mMockSurfaceTransactionHelper);
+        when(mMockSurfaceTransactionHelper.crop(any(), any(), any())).thenReturn(
+                mMockSurfaceTransactionHelper);
+        when(mMockSurfaceTransactionHelper.round(any(), any())).thenReturn(
+                mMockSurfaceTransactionHelper);
+        when(mMockAnimator.isRunning()).thenReturn(true);
+        when(mMockAnimator.setDuration(anyInt())).thenReturn(mFakeAnimator);
+        when(mMockAnimator.setOneHandedAnimationCallback(any())).thenReturn(mFakeAnimator);
+        when(mMockAnimator.setTransitionDirection(anyInt())).thenReturn(mFakeAnimator);
         when(mMockLeash.getWidth()).thenReturn(DISPLAY_WIDTH);
         when(mMockLeash.getHeight()).thenReturn(DISPLAY_HEIGHT);
         when(mMockDisplayController.getDisplay(anyInt())).thenReturn(null);
+
     }
 
     @Test
@@ -87,6 +114,8 @@ public class OneHandedDisplayAreaOrganizerTest extends OneHandedTestCase {
     @Test
     public void testOnDisplayAreaAppeared() {
         mDisplayAreaOrganizer.onDisplayAreaAppeared(mDisplayAreaInfo, mMockLeash);
+
+        verify(mMockAnimationController, never()).getAnimator(any(), any(), any());
     }
 
     @Test
@@ -105,5 +134,39 @@ public class OneHandedDisplayAreaOrganizerTest extends OneHandedTestCase {
         assertThat(mDisplayAreaOrganizer.mDisplayAreaInfo).isEqualTo(newDisplayAreaInfo);
     }
 
+    @Test
+    public void testScheduleOffset() {
+        final int xOffSet = 0;
+        final int yOffSet = 100;
+
+        mDisplayAreaOrganizer.onDisplayAreaAppeared(mDisplayAreaInfo, mMockLeash);
+        mDisplayAreaOrganizer.scheduleOffset(xOffSet, yOffSet);
+
+        assertThat(mUpdateHandler.hasMessages(
+                OneHandedDisplayAreaOrganizer.MSG_OFFSET_ANIMATE)).isNotNull();
+    }
+
+    @Test
+    public void testOffsetImmediately() {
+        final int xOffSet = 0;
+        final int yOffSet = 0;
+
+        mDisplayAreaOrganizer.onDisplayAreaAppeared(mDisplayAreaInfo, mMockLeash);
+        mDisplayAreaOrganizer.offsetImmediately(xOffSet, yOffSet);
+
+        assertThat(mUpdateHandler.hasMessages(
+                OneHandedDisplayAreaOrganizer.MSG_OFFSET_IMMEDIATE)).isNotNull();
+    }
+
+    @Test
+    public void testResizeImmediately() {
+        final Rect newBounds = new Rect(0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT);
+
+        mDisplayAreaOrganizer.onDisplayAreaAppeared(mDisplayAreaInfo, mMockLeash);
+        mDisplayAreaOrganizer.resizeImmediately(newBounds);
+
+        assertThat(mUpdateHandler.hasMessages(
+                OneHandedDisplayAreaOrganizer.MSG_RESIZE_IMMEDIATE)).isNotNull();
+    }
 
 }
