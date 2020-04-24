@@ -19,7 +19,6 @@ package com.android.server.audio;
 import android.annotation.NonNull;
 import android.media.AudioDeviceAttributes;
 import android.media.AudioSystem;
-import android.util.Log;
 
 /**
  * Provides an adapter to access functionality of the android.media.AudioSystem class for device
@@ -36,15 +35,6 @@ public class AudioSystemAdapter {
      */
     static final @NonNull AudioSystemAdapter getDefaultAdapter() {
         return new AudioSystemAdapter();
-    }
-
-    /**
-     * Create an adapter for AudioSystem that always succeeds, and does nothing.
-     * Overridden methods can be configured
-     * @return a no-op AudioSystem adapter with configurable adapter
-     */
-    static final @NonNull AudioSystemAdapter getConfigurableAdapter() {
-        return new AudioSystemConfigurableAdapter();
     }
 
     /**
@@ -143,75 +133,10 @@ public class AudioSystemAdapter {
         return AudioSystem.setCurrentImeUid(uid);
     }
 
-    //--------------------------------------------------------------------
-    protected static class AudioSystemConfigurableAdapter extends AudioSystemAdapter {
-        private static final String TAG = "ASA";
-        private boolean mIsMicMuted = false;
-        private boolean mMuteMicrophoneFails = false;
-
-        public void configureIsMicrophoneMuted(boolean muted) {
-            mIsMicMuted = muted;
-        }
-
-        public void configureMuteMicrophoneToFail(boolean fail) {
-            mMuteMicrophoneFails = fail;
-        }
-
-        //-----------------------------------------------------------------
-        // Overrides of AudioSystemAdapter
-        @Override
-        public int setDeviceConnectionState(int device, int state, String deviceAddress,
-                                            String deviceName, int codecFormat) {
-            Log.i(TAG, String.format("setDeviceConnectionState(0x%s, %s, %s, 0x%s",
-                    Integer.toHexString(device), state, deviceAddress, deviceName,
-                    Integer.toHexString(codecFormat)));
-            return AudioSystem.AUDIO_STATUS_OK;
-        }
-
-        @Override
-        public int getDeviceConnectionState(int device, String deviceAddress) {
-            return AudioSystem.AUDIO_STATUS_OK;
-        }
-
-        @Override
-        public int handleDeviceConfigChange(int device, String deviceAddress,
-                                                   String deviceName, int codecFormat) {
-            return AudioSystem.AUDIO_STATUS_OK;
-        }
-
-        @Override
-        public int setPreferredDeviceForStrategy(int strategy,
-                                                 @NonNull AudioDeviceAttributes device) {
-            return AudioSystem.AUDIO_STATUS_OK;
-        }
-
-        @Override
-        public int removePreferredDeviceForStrategy(int strategy) {
-            return AudioSystem.AUDIO_STATUS_OK;
-        }
-
-        @Override
-        public int setParameters(String keyValuePairs) {
-            return AudioSystem.AUDIO_STATUS_OK;
-        }
-
-        @Override
-        public boolean isMicrophoneMuted() {
-            return mIsMicMuted;
-        }
-
-        @Override
-        public int muteMicrophone(boolean on) {
-            if (mMuteMicrophoneFails) {
-                return AudioSystem.AUDIO_STATUS_ERROR;
-            }
-            mIsMicMuted = on;
-            return AudioSystem.AUDIO_STATUS_OK;
-        }
-
-        @Override
-        public int setCurrentImeUid(int uid) {
-            return AudioSystem.AUDIO_STATUS_OK;
-        }
+    /**
+     * Same as {@link AudioSystem#isStreamActive(int, int)}
+     */
+    public boolean isStreamActive(int stream, int inPastMs) {
+        return AudioSystem.isStreamActive(stream, inPastMs);
     }
 }
