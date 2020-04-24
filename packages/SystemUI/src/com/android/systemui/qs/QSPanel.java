@@ -65,6 +65,7 @@ import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.media.MediaControlPanel;
+import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.DetailAdapter;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTileView;
@@ -114,6 +115,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
     private final Executor mForegroundExecutor;
     private final DelayableExecutor mBackgroundExecutor;
     private boolean mUpdateCarousel = false;
+    private ActivityStarter mActivityStarter;
 
     protected boolean mExpanded;
     protected boolean mListening;
@@ -158,7 +160,8 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
             QSLogger qsLogger,
             @Main Executor foregroundExecutor,
             @Background DelayableExecutor backgroundExecutor,
-            @Nullable LocalBluetoothManager localBluetoothManager
+            @Nullable LocalBluetoothManager localBluetoothManager,
+            ActivityStarter activityStarter
     ) {
         super(context, attrs);
         mContext = context;
@@ -168,6 +171,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         mBackgroundExecutor = backgroundExecutor;
         mLocalBluetoothManager = localBluetoothManager;
         mBroadcastDispatcher = broadcastDispatcher;
+        mActivityStarter = activityStarter;
 
         setOrientation(VERTICAL);
 
@@ -284,7 +288,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
                     imm, notif.getPackageName());
 
             player = new QSMediaPlayer(mContext, this, routeManager, mForegroundExecutor,
-                    mBackgroundExecutor);
+                    mBackgroundExecutor, mActivityStarter);
             player.setListening(mListening);
             if (player.isPlaying()) {
                 mMediaCarousel.addView(player.getView(), 0, lp); // add in front
@@ -341,7 +345,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
 
             Log.d(TAG, "adding track from browser: " + desc + ", " + component);
             QSMediaPlayer player = new QSMediaPlayer(mContext, QSPanel.this,
-                    null, mForegroundExecutor, mBackgroundExecutor);
+                    null, mForegroundExecutor, mBackgroundExecutor, mActivityStarter);
 
             String pkgName = component.getPackageName();
 
