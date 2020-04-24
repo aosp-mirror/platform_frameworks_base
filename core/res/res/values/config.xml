@@ -3578,10 +3578,9 @@
 
     <!-- Do not translate. Mcc codes whose existence trigger the presence of emergency
          affordances-->
-    <integer-array name="config_emergency_mcc_codes" translatable="false">
-        <item>404</item>
-        <item>405</item>
-    </integer-array>
+    <string-array name="config_emergency_iso_country_codes" translatable="false">
+        <item>in</item>
+    </string-array>
 
     <!-- Package name for the device provisioning package. -->
     <string name="config_deviceProvisioningPackage"></string>
