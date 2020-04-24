@@ -270,6 +270,8 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
             }
         }
 
+        mAcceptSet = backupManagerService.filterUserFacingPackages(mAcceptSet);
+
         if (MORE_DEBUG) {
             Slog.v(TAG, "Restore; accept set size is " + mAcceptSet.size());
             for (PackageInfo info : mAcceptSet) {

@@ -61,6 +61,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -131,7 +132,7 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
     private UserBackupManagerService mUserBackupManagerService;
     private final Object mCancelLock = new Object();
 
-    ArrayList<PackageInfo> mPackages;
+    List<PackageInfo> mPackages;
     PackageInfo mCurrentPackage;
     boolean mUpdateSchedule;
     CountDownLatch mLatch;
@@ -249,6 +250,8 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
                         null);
             }
         }
+
+        mPackages = backupManagerService.filterUserFacingPackages(mPackages);
     }
 
     private void registerTask() {

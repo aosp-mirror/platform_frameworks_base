@@ -318,6 +318,9 @@ public class UserBackupManagerService {
 
     private static final String SERIAL_ID_FILE = "serial_id";
 
+    private static final String SKIP_USER_FACING_DATA = "backup_skip_user_facing_data";
+    private static final String WALLPAPER_PACKAGE = "com.android.wallpaperbackup";
+
     private final @UserIdInt int mUserId;
     private final BackupAgentTimeoutParameters mAgentTimeoutParameters;
     private final TransportManager mTransportManager;
@@ -3551,6 +3554,40 @@ public class UserBackupManagerService {
         } finally {
             Binder.restoreCallingIdentity(oldId);
         }
+    }
+
+    /**
+     * We want to skip backup/restore of certain packages if 'backup_skip_user_facing_data' is
+     * set to true in secure settings. See b/153940088 for details.
+     *
+     * TODO(b/154822946): Remove this logic in the next release.
+     */
+    public List<PackageInfo> filterUserFacingPackages(List<PackageInfo> packages) {
+        if (!shouldSkipUserFacingData()) {
+            return packages;
+        }
+
+        List<PackageInfo> filteredPackages = new ArrayList<>(packages.size());
+        for (PackageInfo packageInfo : packages)  {
+            if (!shouldSkipPackage(packageInfo.packageName)) {
+                filteredPackages.add(packageInfo);
+            } else {
+                Slog.i(TAG, "Will skip backup/restore for " + packageInfo.packageName);
+            }
+        }
+
+        return filteredPackages;
+    }
+
+    @VisibleForTesting
+    public boolean shouldSkipUserFacingData() {
+        return Settings.Secure.getInt(mContext.getContentResolver(), SKIP_USER_FACING_DATA,
+                /* def */ 0) != 0;
+    }
+
+    @VisibleForTesting
+    public boolean shouldSkipPackage(String packageName) {
+        return WALLPAPER_PACKAGE.equals(packageName);
     }
 
     private void updateStateForTransport(String newTransportName) {
