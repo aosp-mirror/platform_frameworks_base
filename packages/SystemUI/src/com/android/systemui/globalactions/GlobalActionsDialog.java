@@ -2039,7 +2039,6 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             fixNavBarClipping();
             mControlsView = findViewById(com.android.systemui.R.id.global_actions_controls);
             mGlobalActionsLayout = findViewById(com.android.systemui.R.id.global_actions_view);
-            mGlobalActionsLayout.setOutsideTouchListener(view -> dismiss());
             mGlobalActionsLayout.setListViewAccessibilityDelegate(new View.AccessibilityDelegate() {
                 @Override
                 public boolean dispatchPopulateAccessibilityEvent(
@@ -2076,15 +2075,6 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                             com.android.systemui.R.dimen.global_actions_side_margin));
                     mGlobalActionsLayout.setLayoutParams(params);
                 }
-            }
-
-            View globalActionsParent = (View) mGlobalActionsLayout.getParent();
-            globalActionsParent.setOnClickListener(v -> dismiss());
-
-            // add fall-through dismiss handling to root view
-            View rootView = findViewById(com.android.systemui.R.id.global_actions_grid_root);
-            if (rootView != null) {
-                rootView.setOnClickListener(v -> dismiss());
             }
 
             if (shouldUsePanel()) {
