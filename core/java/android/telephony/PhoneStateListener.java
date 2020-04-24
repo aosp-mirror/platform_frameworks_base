@@ -764,7 +764,8 @@ public class PhoneStateListener {
      *
      */
     @RequiresPermission((android.Manifest.permission.READ_PRECISE_PHONE_STATE))
-    public void onCallDisconnectCauseChanged(int disconnectCause, int preciseDisconnectCause) {
+    public void onCallDisconnectCauseChanged(@Annotation.DisconnectCauses int disconnectCause,
+            int preciseDisconnectCause) {
         // default implementation empty
     }
 
