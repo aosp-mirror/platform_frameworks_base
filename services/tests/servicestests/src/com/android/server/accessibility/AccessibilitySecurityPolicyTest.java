@@ -28,10 +28,12 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.Manifest;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.app.AppOpsManager;
 import android.appwidget.AppWidgetManagerInternal;
@@ -71,6 +73,8 @@ public class AccessibilitySecurityPolicyTest {
     private static final int WINDOWID = 0x000a;
     private static final int WINDOWID2 = 0x000b;
     private static final int APP_UID = 10400;
+    private static final int APP_PID = 2000;
+    private static final int SYSTEM_PID = 558;
 
     private static final String PERMISSION = "test-permission";
     private static final String FUNCTION = "test-function-name";
@@ -196,13 +200,13 @@ public class AccessibilitySecurityPolicyTest {
     @Test
     public void resolveValidReportedPackage_nullPkgName_returnNull() {
         assertNull(mA11ySecurityPolicy.resolveValidReportedPackageLocked(
-                null, Process.SYSTEM_UID, UserHandle.USER_SYSTEM));
+                null, Process.SYSTEM_UID, UserHandle.USER_SYSTEM, SYSTEM_PID));
     }
 
     @Test
     public void resolveValidReportedPackage_uidIsSystem_returnPkgName() {
         assertEquals(mA11ySecurityPolicy.resolveValidReportedPackageLocked(
-                PACKAGE_NAME, Process.SYSTEM_UID, UserHandle.USER_SYSTEM),
+                PACKAGE_NAME, Process.SYSTEM_UID, UserHandle.USER_SYSTEM, SYSTEM_PID),
                 PACKAGE_NAME);
     }
 
@@ -213,7 +217,7 @@ public class AccessibilitySecurityPolicyTest {
                 .thenReturn(APP_UID);
 
         assertEquals(mA11ySecurityPolicy.resolveValidReportedPackageLocked(
-                PACKAGE_NAME, APP_UID, UserHandle.USER_SYSTEM),
+                PACKAGE_NAME, APP_UID, UserHandle.USER_SYSTEM, APP_PID),
                 PACKAGE_NAME);
     }
 
@@ -221,6 +225,7 @@ public class AccessibilitySecurityPolicyTest {
     public void resolveValidReportedPackage_uidIsWidgetHost_pkgNameIsAppWidget_returnPkgName()
             throws PackageManager.NameNotFoundException {
         final int widgetHostUid = APP_UID;
+        final int widgetHostPid = APP_PID;
         final String hostPackageName = PACKAGE_NAME;
         final String widgetPackageName = PACKAGE_NAME2;
         final ArraySet<String> widgetPackages = new ArraySet<>();
@@ -232,7 +237,7 @@ public class AccessibilitySecurityPolicyTest {
                 .thenReturn(widgetHostUid);
 
         assertEquals(mA11ySecurityPolicy.resolveValidReportedPackageLocked(
-                widgetPackageName, widgetHostUid, UserHandle.USER_SYSTEM),
+                widgetPackageName, widgetHostUid, UserHandle.USER_SYSTEM, widgetHostPid),
                 widgetPackageName);
     }
 
@@ -247,10 +252,52 @@ public class AccessibilitySecurityPolicyTest {
                 .thenThrow(PackageManager.NameNotFoundException.class);
         when(mMockAppWidgetManager.getHostedWidgetPackages(APP_UID))
                 .thenReturn(new ArraySet<>());
+        when(mMockContext.checkPermission(
+                eq(Manifest.permission.ACT_AS_PACKAGE_FOR_ACCESSIBILITY), anyInt(), eq(APP_UID)))
+                .thenReturn(PackageManager.PERMISSION_DENIED);
 
-        assertEquals(mA11ySecurityPolicy.resolveValidReportedPackageLocked(
-                invalidPackageName, APP_UID, UserHandle.USER_SYSTEM),
-                PACKAGE_NAME);
+        assertEquals(PACKAGE_NAME, mA11ySecurityPolicy.resolveValidReportedPackageLocked(
+                invalidPackageName, APP_UID, UserHandle.USER_SYSTEM, APP_PID));
+    }
+
+    @Test
+    public void resolveValidReportedPackage_anotherPkgNameWithActAsPkgPermission_returnPkg()
+            throws PackageManager.NameNotFoundException {
+        final String wantedPackageName = PACKAGE_NAME2;
+        final int wantedUid = APP_UID + 1;
+        final String[] uidPackages = {PACKAGE_NAME};
+        when(mMockPackageManager.getPackagesForUid(APP_UID))
+                .thenReturn(uidPackages);
+        when(mMockPackageManager.getPackageUidAsUser(wantedPackageName, UserHandle.USER_SYSTEM))
+                .thenReturn(wantedUid);
+        when(mMockAppWidgetManager.getHostedWidgetPackages(APP_UID))
+                .thenReturn(new ArraySet<>());
+        when(mMockContext.checkPermission(
+                eq(Manifest.permission.ACT_AS_PACKAGE_FOR_ACCESSIBILITY), anyInt(), eq(APP_UID)))
+                .thenReturn(PackageManager.PERMISSION_GRANTED);
+
+        assertEquals(wantedPackageName, mA11ySecurityPolicy.resolveValidReportedPackageLocked(
+                wantedPackageName, APP_UID, UserHandle.USER_SYSTEM, APP_PID));
+    }
+
+    @Test
+    public void resolveValidReportedPackage_anotherPkgNameWithoutActAsPkgPermission_returnUidPkg()
+            throws PackageManager.NameNotFoundException {
+        final String wantedPackageName = PACKAGE_NAME2;
+        final int wantedUid = APP_UID + 1;
+        final String[] uidPackages = {PACKAGE_NAME};
+        when(mMockPackageManager.getPackagesForUid(APP_UID))
+                .thenReturn(uidPackages);
+        when(mMockPackageManager.getPackageUidAsUser(wantedPackageName, UserHandle.USER_SYSTEM))
+                .thenReturn(wantedUid);
+        when(mMockAppWidgetManager.getHostedWidgetPackages(APP_UID))
+                .thenReturn(new ArraySet<>());
+        when(mMockContext.checkPermission(
+                eq(Manifest.permission.ACT_AS_PACKAGE_FOR_ACCESSIBILITY), anyInt(), eq(APP_UID)))
+                .thenReturn(PackageManager.PERMISSION_DENIED);
+
+        assertEquals(PACKAGE_NAME, mA11ySecurityPolicy.resolveValidReportedPackageLocked(
+                wantedPackageName, APP_UID, UserHandle.USER_SYSTEM, APP_PID));
     }
 
     @Test
@@ -432,21 +479,59 @@ public class AccessibilitySecurityPolicyTest {
                 UserHandle.USER_CURRENT_OR_SELF);
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void resolveCallingUserId_callingParentNotCurrentUser_userIdIsInvalid_shouldException() {
+    @Test
+    public void resolveCallingUserId_anotherUserIdWithCrossUserPermission_returnUserId() {
         final AccessibilitySecurityPolicy spySecurityPolicy = Mockito.spy(mA11ySecurityPolicy);
         final int callingUserId = UserHandle.getUserId(Process.myUid());
         final int callingParentId = 20;
         final int currentUserId = 30;
-        final int invalidUserId = 40;
+        final int wantedUserId = 40;
         when(mMockA11yUserManager.getCurrentUserIdLocked())
                 .thenReturn(currentUserId);
         doReturn(callingParentId).when(spySecurityPolicy).resolveProfileParentLocked(
                 callingUserId);
-        when(mMockContext.checkCallingPermission(any()))
+        when(mMockContext.checkCallingPermission(Manifest.permission.INTERACT_ACROSS_USERS))
                 .thenReturn(PackageManager.PERMISSION_GRANTED);
 
-        spySecurityPolicy.resolveCallingUserIdEnforcingPermissionsLocked(invalidUserId);
+        assertEquals(wantedUserId,
+                spySecurityPolicy.resolveCallingUserIdEnforcingPermissionsLocked(wantedUserId));
+    }
+
+    @Test
+    public void resolveCallingUserId_anotherUserIdWithCrossUserFullPermission_returnUserId() {
+        final AccessibilitySecurityPolicy spySecurityPolicy = Mockito.spy(mA11ySecurityPolicy);
+        final int callingUserId = UserHandle.getUserId(Process.myUid());
+        final int callingParentId = 20;
+        final int currentUserId = 30;
+        final int wantedUserId = 40;
+        when(mMockA11yUserManager.getCurrentUserIdLocked())
+                .thenReturn(currentUserId);
+        doReturn(callingParentId).when(spySecurityPolicy).resolveProfileParentLocked(
+                callingUserId);
+        when(mMockContext.checkCallingPermission(Manifest.permission.INTERACT_ACROSS_USERS_FULL))
+                .thenReturn(PackageManager.PERMISSION_GRANTED);
+
+        assertEquals(wantedUserId,
+                spySecurityPolicy.resolveCallingUserIdEnforcingPermissionsLocked(wantedUserId));
+    }
+
+    @Test(expected = SecurityException.class)
+    public void resolveCallingUserId_anotherUserIdWithoutCrossUserPermission_shouldException() {
+        final AccessibilitySecurityPolicy spySecurityPolicy = Mockito.spy(mA11ySecurityPolicy);
+        final int callingUserId = UserHandle.getUserId(Process.myUid());
+        final int callingParentId = 20;
+        final int currentUserId = 30;
+        final int wantedUserId = 40;
+        when(mMockA11yUserManager.getCurrentUserIdLocked())
+                .thenReturn(currentUserId);
+        doReturn(callingParentId).when(spySecurityPolicy).resolveProfileParentLocked(
+                callingUserId);
+        when(mMockContext.checkCallingPermission(Manifest.permission.INTERACT_ACROSS_USERS))
+                .thenReturn(PackageManager.PERMISSION_DENIED);
+        when(mMockContext.checkCallingPermission(Manifest.permission.INTERACT_ACROSS_USERS_FULL))
+                .thenReturn(PackageManager.PERMISSION_DENIED);
+
+        spySecurityPolicy.resolveCallingUserIdEnforcingPermissionsLocked(wantedUserId);
     }
 
     @Test
