@@ -454,6 +454,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         mHelper.createNotificationChannel(PKG_O, UID_O, getChannel(), true, false);
 
         mHelper.setShowBadge(PKG_N_MR1, UID_N_MR1, true);
+        mHelper.setMessageSent(PKG_P, UID_P);
 
         mHelper.setImportance(PKG_O, UID_O, IMPORTANCE_NONE);
 
@@ -469,6 +470,8 @@ public class PreferencesHelperTest extends UiServiceTestCase {
 
         assertEquals(IMPORTANCE_NONE, mHelper.getImportance(PKG_O, UID_O));
         assertTrue(mHelper.canShowBadge(PKG_N_MR1, UID_N_MR1));
+        assertTrue(mHelper.hasSentMessage(PKG_P, UID_P));
+        assertFalse(mHelper.hasSentMessage(PKG_N_MR1, UID_N_MR1));
         assertEquals(channel1,
                 mHelper.getNotificationChannel(PKG_N_MR1, UID_N_MR1, channel1.getId(), false));
         compareChannels(channel2,
@@ -3142,6 +3145,44 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testGetConversations_notDemoted() {
+        String convoId = "convo";
+        NotificationChannel messages =
+                new NotificationChannel("messages", "Messages", IMPORTANCE_DEFAULT);
+        mHelper.createNotificationChannel(PKG_O, UID_O, messages, true, false);
+        NotificationChannel calls =
+                new NotificationChannel("calls", "Calls", IMPORTANCE_DEFAULT);
+        mHelper.createNotificationChannel(PKG_O, UID_O, calls, true, false);
+        NotificationChannel p =
+                new NotificationChannel("p calls", "Calls", IMPORTANCE_DEFAULT);
+        mHelper.createNotificationChannel(PKG_P, UID_P, p, true, false);
+
+        NotificationChannel channel =
+                new NotificationChannel("A person msgs", "messages from A", IMPORTANCE_DEFAULT);
+        channel.setConversationId(messages.getId(), convoId);
+        mHelper.createNotificationChannel(PKG_O, UID_O, channel, true, false);
+
+        NotificationChannel diffConvo =
+                new NotificationChannel("B person msgs", "messages from B", IMPORTANCE_DEFAULT);
+        diffConvo.setConversationId(p.getId(), "different convo");
+        diffConvo.setDemoted(true);
+        mHelper.createNotificationChannel(PKG_P, UID_P, diffConvo, true, false);
+
+        NotificationChannel channel2 =
+                new NotificationChannel("A person calls", "calls from A", IMPORTANCE_DEFAULT);
+        channel2.setConversationId(calls.getId(), convoId);
+        channel2.setImportantConversation(true);
+        mHelper.createNotificationChannel(PKG_O, UID_O, channel2, true, false);
+
+        List<ConversationChannelWrapper> convos = mHelper.getConversations(false);
+
+        assertEquals(2, convos.size());
+        assertTrue(conversationWrapperContainsChannel(convos, channel));
+        assertFalse(conversationWrapperContainsChannel(convos, diffConvo));
+        assertTrue(conversationWrapperContainsChannel(convos, channel2));
+    }
+
+    @Test
     public void testGetConversations_onlyImportant() {
         String convoId = "convo";
         NotificationChannel messages =
@@ -3351,5 +3392,18 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                 NotificationChannelLogger.NotificationChannelEvent
                         .NOTIFICATION_CHANNEL_CONVERSATION_DELETED,
                 mLogger.get(6).event);  // Delete Channel channel2 - Conversation A person calls
+    }
+
+    @Test
+    public void testMessageSent() {
+        // create package preferences
+        mHelper.canShowBadge(PKG_P, UID_P);
+
+        // check default value
+        assertFalse(mHelper.hasSentMessage(PKG_P, UID_P));
+
+        // change it
+        mHelper.setMessageSent(PKG_P, UID_P);
+        assertTrue(mHelper.hasSentMessage(PKG_P, UID_P));
     }
 }

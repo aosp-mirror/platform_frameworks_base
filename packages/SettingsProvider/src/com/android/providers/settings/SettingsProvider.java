@@ -3437,7 +3437,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 189;
+            private static final int SETTINGS_VERSION = 190;
 
             private final int mUserId;
 
@@ -4692,23 +4692,15 @@ public class SettingsProvider extends ContentProvider {
 
                 if (currentVersion == 185) {
                     // Deprecate ACCESSIBILITY_DISPLAY_MAGNIFICATION_NAVBAR_ENABLED, and migrate it
-                    // to ACCESSIBILITY_BUTTON_TARGET_COMPONENT.
+                    // to ACCESSIBILITY_BUTTON_TARGETS.
                     final SettingsState secureSettings = getSecureSettingsLocked(userId);
                     final Setting magnifyNavbarEnabled = secureSettings.getSettingLocked(
                             Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_NAVBAR_ENABLED);
                     if ("1".equals(magnifyNavbarEnabled.getValue())) {
                         secureSettings.insertSettingLocked(
-                                Secure.ACCESSIBILITY_BUTTON_TARGET_COMPONENT,
+                                Secure.ACCESSIBILITY_BUTTON_TARGETS,
                                 ACCESSIBILITY_SHORTCUT_TARGET_MAGNIFICATION_CONTROLLER,
                                 null /* tag */, false /* makeDefault */,
-                                SettingsState.SYSTEM_PACKAGE_NAME);
-                    } else {
-                        // Clear a11y button targets list setting. A11yManagerService will end up
-                        // adding all legacy enabled services that want the button to the list, so
-                        // there's no need to keep tracking them.
-                        secureSettings.insertSettingLocked(
-                                Secure.ACCESSIBILITY_BUTTON_TARGET_COMPONENT,
-                                null, null /* tag */, false /* makeDefault */,
                                 SettingsState.SYSTEM_PACKAGE_NAME);
                     }
                     secureSettings.deleteSettingLocked(
@@ -4775,6 +4767,28 @@ public class SettingsProvider extends ContentProvider {
                     }
                     secureSettings.deleteSettingLocked("accessibility_shortcut_enabled");
                     currentVersion = 189;
+                }
+
+                if (currentVersion == 189) {
+                    final SettingsState secureSettings = getSecureSettingsLocked(userId);
+                    final Setting showNotifications = secureSettings.getSettingLocked(
+                            Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS);
+                    final Setting allowPrivateNotifications = secureSettings.getSettingLocked(
+                            Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS);
+                    if ("1".equals(showNotifications.getValue())
+                            && "1".equals(allowPrivateNotifications.getValue())) {
+                        secureSettings.insertSettingLocked(
+                                Secure.POWER_MENU_LOCKED_SHOW_CONTENT,
+                                "1", null /* tag */, false /* makeDefault */,
+                                SettingsState.SYSTEM_PACKAGE_NAME);
+                    } else if ("0".equals(showNotifications.getValue())
+                            || "0".equals(allowPrivateNotifications.getValue())) {
+                        secureSettings.insertSettingLocked(
+                                Secure.POWER_MENU_LOCKED_SHOW_CONTENT,
+                                "0", null /* tag */, false /* makeDefault */,
+                                SettingsState.SYSTEM_PACKAGE_NAME);
+                    }
+                    currentVersion = 190;
                 }
 
                 // vXXX: Add new settings above this point.

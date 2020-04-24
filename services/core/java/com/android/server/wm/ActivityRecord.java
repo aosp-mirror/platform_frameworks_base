@@ -1419,11 +1419,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     /**
-     * @return {@code true} if there is a letterbox and any part of that letterbox overlaps with
-     * the given {@code rect}.
+     * @see Letterbox#notIntersectsOrFullyContains(Rect)
      */
-    boolean isLetterboxOverlappingWith(Rect rect) {
-        return mLetterbox != null && mLetterbox.isOverlappingWith(rect);
+    boolean letterboxNotIntersectsOrFullyContains(Rect rect) {
+        return mLetterbox == null || mLetterbox.notIntersectsOrFullyContains(rect);
     }
 
     static class Token extends IApplicationToken.Stub {
@@ -2677,7 +2676,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (isState(PAUSED)
                 && mStackSupervisor.getKeyguardController().isKeyguardLocked()
                 && getStack().topActivityOccludesKeyguard()) {
-            getStack().ensureActivitiesVisible(null /* starting */, 0 /* configChanges */,
+            getDisplay().ensureActivitiesVisible(null /* starting */, 0 /* configChanges */,
                     false /* preserveWindows */, false /* notifyClients */);
         }
 

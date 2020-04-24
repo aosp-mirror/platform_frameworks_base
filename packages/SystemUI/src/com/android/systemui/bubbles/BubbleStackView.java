@@ -906,7 +906,7 @@ public class BubbleStackView extends FrameLayout {
                 view -> {
                     showManageMenu(false /* show */);
                     final Bubble bubble = mBubbleData.getSelectedBubble();
-                    if (bubble != null && mBubbleData.hasBubbleWithKey(bubble.getKey())) {
+                    if (bubble != null && mBubbleData.hasBubbleInStackWithKey(bubble.getKey())) {
                         mUnbubbleConversationCallback.accept(bubble.getEntry());
                     }
                 });
@@ -915,7 +915,7 @@ public class BubbleStackView extends FrameLayout {
                 view -> {
                     showManageMenu(false /* show */);
                     final Bubble bubble = mBubbleData.getSelectedBubble();
-                    if (bubble != null && mBubbleData.hasBubbleWithKey(bubble.getKey())) {
+                    if (bubble != null && mBubbleData.hasBubbleInStackWithKey(bubble.getKey())) {
                         final Intent intent = bubble.getSettingsIntent();
                         collapseStack(() -> {
                             mContext.startActivityAsUser(
@@ -1756,14 +1756,13 @@ public class BubbleStackView extends FrameLayout {
         if (mIsExpanded) {
             final View draggedOutBubbleView = (View) mMagnetizedObject.getUnderlyingObject();
             dismissBubbleIfExists(mBubbleData.getBubbleWithView(draggedOutBubbleView));
-
         } else {
             mBubbleData.dismissAll(BubbleController.DISMISS_USER_GESTURE);
         }
     }
 
     private void dismissBubbleIfExists(@Nullable Bubble bubble) {
-        if (bubble != null && mBubbleData.hasBubbleWithKey(bubble.getKey())) {
+        if (bubble != null && mBubbleData.hasBubbleInStackWithKey(bubble.getKey())) {
             mBubbleData.notificationEntryRemoved(
                     bubble.getEntry(), BubbleController.DISMISS_USER_GESTURE);
         }
@@ -2024,8 +2023,8 @@ public class BubbleStackView extends FrameLayout {
 
         // If available, update the manage menu's settings option with the expanded bubble's app
         // name and icon.
-        if (show && mBubbleData.hasBubbleWithKey(mExpandedBubble.getKey())) {
-            final Bubble bubble = mBubbleData.getBubbleWithKey(mExpandedBubble.getKey());
+        if (show && mBubbleData.hasBubbleInStackWithKey(mExpandedBubble.getKey())) {
+            final Bubble bubble = mBubbleData.getBubbleInStackWithKey(mExpandedBubble.getKey());
             mManageSettingsIcon.setImageDrawable(bubble.getBadgedAppIcon());
             mManageSettingsText.setText(getResources().getString(
                     R.string.bubbles_app_settings, bubble.getAppName()));
@@ -2241,7 +2240,7 @@ public class BubbleStackView extends FrameLayout {
             View child = mBubbleContainer.getChildAt(i);
             if (child instanceof BadgedImageView) {
                 String key = ((BadgedImageView) child).getKey();
-                Bubble bubble = mBubbleData.getBubbleWithKey(key);
+                Bubble bubble = mBubbleData.getBubbleInStackWithKey(key);
                 bubbles.add(bubble);
             }
         }

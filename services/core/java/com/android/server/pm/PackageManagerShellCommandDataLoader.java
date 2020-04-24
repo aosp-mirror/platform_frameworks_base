@@ -217,7 +217,7 @@ public class PackageManagerShellCommandDataLoader extends DataLoaderService {
                         case Metadata.LOCAL_FILE: {
                             ParcelFileDescriptor incomingFd = null;
                             try {
-                                incomingFd = getLocalFile(shellCommand, metadata.getData());
+                                incomingFd = getLocalFilePFD(shellCommand, metadata.getData());
                                 mConnector.writeData(file.getName(), 0, incomingFd.getStatSize(),
                                         incomingFd);
                             } finally {
@@ -263,8 +263,18 @@ public class PackageManagerShellCommandDataLoader extends DataLoaderService {
         }
     }
 
-    static ParcelFileDescriptor getLocalFile(ShellCommand shellCommand, String filePath) {
+    static ParcelFileDescriptor getLocalFilePFD(ShellCommand shellCommand, String filePath) {
         return shellCommand.openFileForSystem(filePath, "r");
+    }
+
+    static int getStdIn(ShellCommand shellCommand) {
+        ParcelFileDescriptor pfd = getStdInPFD(shellCommand);
+        return pfd == null ? -1 : pfd.detachFd();
+    }
+
+    static int getLocalFile(ShellCommand shellCommand, String filePath) {
+        ParcelFileDescriptor pfd = getLocalFilePFD(shellCommand, filePath);
+        return pfd == null ? -1 : pfd.detachFd();
     }
 
     @Override

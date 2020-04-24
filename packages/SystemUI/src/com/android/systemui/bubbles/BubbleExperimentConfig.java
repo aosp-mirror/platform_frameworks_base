@@ -71,7 +71,7 @@ public class BubbleExperimentConfig {
     private static final String WHITELISTED_AUTO_BUBBLE_APPS = "whitelisted_auto_bubble_apps";
 
     private static final String ALLOW_BUBBLE_OVERFLOW = "allow_bubble_overflow";
-    private static final boolean ALLOW_BUBBLE_OVERFLOW_DEFAULT = false;
+    private static final boolean ALLOW_BUBBLE_OVERFLOW_DEFAULT = true;
 
     /**
      * When true, if a notification has the information necessary to bubble (i.e. valid
