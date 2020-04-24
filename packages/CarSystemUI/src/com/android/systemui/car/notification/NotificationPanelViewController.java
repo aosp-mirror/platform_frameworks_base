@@ -45,13 +45,13 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.R;
 import com.android.systemui.car.CarDeviceProvisionedController;
 import com.android.systemui.car.CarServiceProvider;
+import com.android.systemui.car.window.OverlayPanelViewController;
+import com.android.systemui.car.window.OverlayViewGlobalStateController;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.FlingAnimationUtils;
 import com.android.systemui.statusbar.StatusBarState;
-import com.android.systemui.window.OverlayPanelViewController;
-import com.android.systemui.window.OverlayViewGlobalStateController;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;

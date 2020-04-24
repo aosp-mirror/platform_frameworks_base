@@ -5812,6 +5812,12 @@ public abstract class Context {
      * display.</b> If there is a need to add different window types, or non-associated windows,
      * separate Contexts should be used.
      * </p>
+     * <p>
+     * Creating a window context is an expensive operation. Misuse of this API may lead to a huge
+     * performance drop. The best practice is to use the same window context when possible.
+     * An approach is to create one window context with specific window type and display and
+     * use it everywhere it's needed..
+     * </p>
      *
      * @param type Window type in {@link WindowManager.LayoutParams}
      * @param options Bundle used to pass window-related options.
@@ -5824,7 +5830,9 @@ public abstract class Context {
      * @see #WINDOW_SERVICE
      * @see #LAYOUT_INFLATER_SERVICE
      * @see #WALLPAPER_SERVICE
-     * @throws IllegalArgumentException if token is invalid
+     * @throws UnsupportedOperationException if this {@link Context} does not attach to a display or
+     * the current number of window contexts without adding any view by
+     * {@link WindowManager#addView} <b>exceeds five</b>.
      */
     public @NonNull Context createWindowContext(@WindowType int type, @Nullable Bundle options)  {
         throw new RuntimeException("Not implemented. Must override in a subclass.");

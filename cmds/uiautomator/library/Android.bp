@@ -28,9 +28,6 @@ droiddoc {
     installable: false,
     args: "-stubpackages com.android.uiautomator.core:" +
           "com.android.uiautomator.testrunner",
-    api_tag_name: "UIAUTOMATOR",
-    api_filename: "uiautomator_api.txt",
-    removed_api_filename: "uiautomator_removed_api.txt",
 
     check_api: {
         current: {

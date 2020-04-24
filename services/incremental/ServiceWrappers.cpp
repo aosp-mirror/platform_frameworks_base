@@ -36,7 +36,7 @@ static constexpr auto kDataLoaderManagerName = "dataloader_manager"sv;
 
 class RealVoldService : public VoldServiceWrapper {
 public:
-    RealVoldService(const sp<os::IVold> vold) : mInterface(std::move(vold)) {}
+    RealVoldService(sp<os::IVold> vold) : mInterface(std::move(vold)) {}
     ~RealVoldService() = default;
     binder::Status mountIncFs(
             const std::string& backingPath, const std::string& targetDir, int32_t flags,
@@ -65,19 +65,18 @@ public:
     RealDataLoaderManager(sp<content::pm::IDataLoaderManager> manager)
           : mInterface(std::move(manager)) {}
     ~RealDataLoaderManager() = default;
-    binder::Status initializeDataLoader(MountId mountId,
-                                        const content::pm::DataLoaderParamsParcel& params,
-                                        const content::pm::FileSystemControlParcel& control,
-                                        const sp<content::pm::IDataLoaderStatusListener>& listener,
-                                        bool* _aidl_return) const final {
-        return mInterface->initializeDataLoader(mountId, params, control, listener, _aidl_return);
+    binder::Status bindToDataLoader(MountId mountId,
+                                    const content::pm::DataLoaderParamsParcel& params,
+                                    const sp<content::pm::IDataLoaderStatusListener>& listener,
+                                    bool* _aidl_return) const final {
+        return mInterface->bindToDataLoader(mountId, params, listener, _aidl_return);
     }
     binder::Status getDataLoader(MountId mountId,
                                  sp<content::pm::IDataLoader>* _aidl_return) const final {
         return mInterface->getDataLoader(mountId, _aidl_return);
     }
-    binder::Status destroyDataLoader(MountId mountId) const final {
-        return mInterface->destroyDataLoader(mountId);
+    binder::Status unbindFromDataLoader(MountId mountId) const final {
+        return mInterface->unbindFromDataLoader(mountId);
     }
 
 private:
@@ -134,6 +133,9 @@ public:
     }
     ErrorCode makeDir(const Control& control, std::string_view path, int mode) const final {
         return incfs::makeDir(control, path, mode);
+    }
+    ErrorCode makeDirs(const Control& control, std::string_view path, int mode) const final {
+        return incfs::makeDirs(control, path, mode);
     }
     incfs::RawMetadata getMetadata(const Control& control, FileId fileid) const final {
         return incfs::getMetadata(control, fileid);
