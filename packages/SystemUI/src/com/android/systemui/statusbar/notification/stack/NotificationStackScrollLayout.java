@@ -5722,6 +5722,14 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         EmptyShadeView view = (EmptyShadeView) LayoutInflater.from(mContext).inflate(
                 R.layout.status_bar_no_notifications, this, false);
         view.setText(R.string.empty_shade_text);
+        view.setOnClickListener(v -> {
+            final boolean showHistory = Settings.Secure.getInt(mContext.getContentResolver(),
+                    Settings.Secure.NOTIFICATION_HISTORY_ENABLED, 0) == 1;
+            Intent intent = showHistory ? new Intent(
+                    Settings.ACTION_NOTIFICATION_HISTORY) : new Intent(
+                    Settings.ACTION_NOTIFICATION_SETTINGS);
+            mStatusBar.startActivity(intent, true, true, Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        });
         setEmptyShadeView(view);
     }
 

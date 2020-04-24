@@ -21,7 +21,6 @@ import android.content.Context;
 import com.android.systemui.car.CarServiceProvider;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.plugins.VolumeDialog;
-import com.android.systemui.volume.Events;
 import com.android.systemui.volume.VolumeDialogComponent;
 import com.android.systemui.volume.VolumeDialogControllerImpl;
 
@@ -48,7 +47,6 @@ public class CarVolumeDialogComponent extends VolumeDialogComponent {
     @Override
     protected VolumeDialog createDefault() {
         mCarVolumeDialog = new CarVolumeDialogImpl(mContext);
-        mCarVolumeDialog.show(Events.SHOW_REASON_VOLUME_CHANGED);
         return mCarVolumeDialog;
     }
 }

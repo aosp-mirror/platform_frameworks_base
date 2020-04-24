@@ -331,19 +331,6 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
                 .setDuration(ACTIVATE_ANIMATION_LENGTH);
     }
 
-    @Override
-    public boolean performClick() {
-        if (!mNeedsDimming || (mAccessibilityManager != null
-                && mAccessibilityManager.isTouchExplorationEnabled())) {
-            return super.performClick();
-        }
-        return false;
-    }
-
-    boolean superPerformClick() {
-        return super.performClick();
-    }
-
     /**
      * Cancels the hotspot and makes the notification inactive.
      */

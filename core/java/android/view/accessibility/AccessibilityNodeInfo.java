@@ -3437,6 +3437,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @hide
      */
     @UnsupportedAppUsage
+    @TestApi
     public long getSourceNodeId() {
         return mSourceNodeId;
     }

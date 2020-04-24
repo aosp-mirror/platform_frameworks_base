@@ -25,6 +25,8 @@ import com.android.keyguard.KeyguardViewController;
 import com.android.systemui.car.CarDeviceProvisionedController;
 import com.android.systemui.car.CarDeviceProvisionedControllerImpl;
 import com.android.systemui.car.keyguard.CarKeyguardViewController;
+import com.android.systemui.car.statusbar.CarStatusBar;
+import com.android.systemui.car.statusbar.CarStatusBarKeyguardViewManager;
 import com.android.systemui.car.volume.CarVolumeDialogComponent;
 import com.android.systemui.dagger.SystemUIRootComponent;
 import com.android.systemui.dock.DockManager;
@@ -40,8 +42,6 @@ import com.android.systemui.stackdivider.DividerModule;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationLockscreenUserManagerImpl;
-import com.android.systemui.statusbar.car.CarStatusBar;
-import com.android.systemui.statusbar.car.CarStatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
@@ -87,15 +87,22 @@ public abstract class CarSystemUIModule {
                 groupManager, configurationController);
     }
 
-    @Binds
-    abstract HeadsUpManager bindHeadsUpManagerPhone(HeadsUpManagerPhone headsUpManagerPhone);
-
     @Singleton
     @Provides
     @Named(LEAK_REPORT_EMAIL_NAME)
     static String provideLeakReportEmail() {
         return "buganizer-system+181579@google.com";
     }
+
+    @Provides
+    @Singleton
+    static Recents provideRecents(Context context, RecentsImplementation recentsImplementation,
+            CommandQueue commandQueue) {
+        return new Recents(context, recentsImplementation, commandQueue);
+    }
+
+    @Binds
+    abstract HeadsUpManager bindHeadsUpManagerPhone(HeadsUpManagerPhone headsUpManagerPhone);
 
     @Binds
     abstract EnhancedEstimates bindEnhancedEstimates(EnhancedEstimatesImpl enhancedEstimates);
@@ -121,13 +128,6 @@ public abstract class CarSystemUIModule {
 
     @Binds
     abstract ShadeController provideShadeController(ShadeControllerImpl shadeController);
-
-    @Provides
-    @Singleton
-    static Recents provideRecents(Context context, RecentsImplementation recentsImplementation,
-            CommandQueue commandQueue) {
-        return new Recents(context, recentsImplementation, commandQueue);
-    }
 
     @Binds
     abstract SystemUIRootComponent bindSystemUIRootComponent(

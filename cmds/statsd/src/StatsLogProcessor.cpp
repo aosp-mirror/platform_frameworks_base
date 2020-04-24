@@ -25,7 +25,6 @@
 #include <frameworks/base/cmds/statsd/src/experiment_ids.pb.h>
 
 #include "android-base/stringprintf.h"
-#include "atoms_info.h"
 #include "external/StatsPullerManager.h"
 #include "guardrail/StatsdStats.h"
 #include "logd/LogEvent.h"
@@ -139,14 +138,13 @@ void StatsLogProcessor::onPeriodicAlarmFired(
 }
 
 void StatsLogProcessor::mapIsolatedUidToHostUidIfNecessaryLocked(LogEvent* event) const {
-    if (event->getAttributionChainIndex() != -1) {
-        for (auto& value : *(event->getMutableValues())) {
-            if (value.mField.getPosAtDepth(0) > kAttributionField) {
-                break;
-            }
-            if (isAttributionUidField(value)) {
-                const int hostUid = mUidMap->getHostUidOrSelf(value.mValue.int_value);
-                value.mValue.setInt(hostUid);
+    if (std::pair<int, int> indexRange; event->hasAttributionChain(&indexRange)) {
+        vector<FieldValue>* const fieldValues = event->getMutableValues();
+        for (int i = indexRange.first; i <= indexRange.second; i++) {
+            FieldValue& fieldValue = fieldValues->at(i);
+            if (isAttributionUidField(fieldValue)) {
+                const int hostUid = mUidMap->getHostUidOrSelf(fieldValue.mValue.int_value);
+                fieldValue.mValue.setInt(hostUid);
             }
         }
     } else {

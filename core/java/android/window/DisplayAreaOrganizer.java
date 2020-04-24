@@ -52,21 +52,42 @@ public class DisplayAreaOrganizer extends WindowOrganizer {
         }
     }
 
-    public void onDisplayAreaAppeared(@NonNull WindowContainerToken displayArea) {}
+    /**
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
+    public void unregisterOrganizer() {
+        try {
+            getController().unregisterOrganizer(mInterface);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
 
-    public void onDisplayAreaVanished(@NonNull WindowContainerToken displayArea) {}
+    public void onDisplayAreaAppeared(@NonNull DisplayAreaInfo displayAreaInfo) {}
 
+    public void onDisplayAreaVanished(@NonNull DisplayAreaInfo displayAreaInfo) {}
+
+    /**
+     * @hide
+     */
+    public void onDisplayAreaInfoChanged(@NonNull DisplayAreaInfo displayAreaInfo) {}
 
     private final IDisplayAreaOrganizer mInterface = new IDisplayAreaOrganizer.Stub() {
 
         @Override
-        public void onDisplayAreaAppeared(@NonNull WindowContainerToken displayArea) {
-            DisplayAreaOrganizer.this.onDisplayAreaAppeared(displayArea);
+        public void onDisplayAreaAppeared(@NonNull DisplayAreaInfo displayAreaInfo) {
+            DisplayAreaOrganizer.this.onDisplayAreaAppeared(displayAreaInfo);
         }
 
         @Override
-        public void onDisplayAreaVanished(@NonNull WindowContainerToken displayArea) {
-            DisplayAreaOrganizer.this.onDisplayAreaVanished(displayArea);
+        public void onDisplayAreaVanished(@NonNull DisplayAreaInfo displayAreaInfo) {
+            DisplayAreaOrganizer.this.onDisplayAreaVanished(displayAreaInfo);
+        }
+
+        @Override
+        public void onDisplayAreaInfoChanged(@NonNull DisplayAreaInfo displayAreaInfo) {
+            DisplayAreaOrganizer.this.onDisplayAreaInfoChanged(displayAreaInfo);
         }
     };
 
