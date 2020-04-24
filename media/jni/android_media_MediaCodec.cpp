@@ -37,6 +37,7 @@
 #include <C2AllocatorGralloc.h>
 #include <C2BlockInternal.h>
 #include <C2Buffer.h>
+#include <C2PlatformSupport.h>
 
 #include <android/hardware/cas/native/1.0/IDescrambler.h>
 
@@ -1862,7 +1863,7 @@ static void android_media_MediaCodec_queueSecureInputBuffer(
             env, err, ACTION_CODE_FATAL, errorDetailMsg.empty() ? NULL : errorDetailMsg.c_str());
 }
 
-static jobject android_media_MediaCodec_mapHardwareBuffer(JNIEnv *env, jobject bufferObj) {
+static jobject android_media_MediaCodec_mapHardwareBuffer(JNIEnv *env, jclass, jobject bufferObj) {
     ALOGV("android_media_MediaCodec_mapHardwareBuffer");
     AHardwareBuffer *hardwareBuffer = android_hardware_HardwareBuffer_getNativeHardwareBuffer(
             env, bufferObj);
@@ -1878,9 +1879,9 @@ static jobject android_media_MediaCodec_mapHardwareBuffer(JNIEnv *env, jobject b
     }
     bool readOnly = ((desc.usage & AHARDWAREBUFFER_USAGE_CPU_WRITE_MASK) == 0);
 
-    uint64_t cpuUsage = desc.usage;
-    cpuUsage = (cpuUsage & AHARDWAREBUFFER_USAGE_CPU_READ_MASK);
-    cpuUsage = (cpuUsage & AHARDWAREBUFFER_USAGE_CPU_WRITE_MASK);
+    uint64_t cpuUsage = 0;
+    cpuUsage |= (desc.usage & AHARDWAREBUFFER_USAGE_CPU_READ_MASK);
+    cpuUsage |= (desc.usage & AHARDWAREBUFFER_USAGE_CPU_WRITE_MASK);
 
     AHardwareBuffer_Planes planes;
     int err = AHardwareBuffer_lockPlanes(
@@ -1895,42 +1896,56 @@ static jobject android_media_MediaCodec_mapHardwareBuffer(JNIEnv *env, jobject b
         return nullptr;
     }
 
-    ScopedLocalRef<jclass> planeClazz(
-            env, env->FindClass("android/media/MediaCodec$MediaImage$MediaPlane"));
-    ScopedLocalRef<jobjectArray> planeArray{
-            env, env->NewObjectArray(3, planeClazz.get(), NULL)};
-    CHECK(planeClazz.get() != NULL);
-    jmethodID planeConstructID = env->GetMethodID(planeClazz.get(), "<init>",
-            "([Ljava/nio/ByteBuffer;IIIII)V");
+    ScopedLocalRef<jobjectArray> buffersArray{
+            env, env->NewObjectArray(3, gByteBufferInfo.clazz, NULL)};
+    ScopedLocalRef<jintArray> rowStridesArray{env, env->NewIntArray(3)};
+    ScopedLocalRef<jintArray> pixelStridesArray{env, env->NewIntArray(3)};
 
+    jboolean isCopy = JNI_FALSE;
+    jint *rowStrides = env->GetIntArrayElements(rowStridesArray.get(), &isCopy);
+    jint *pixelStrides = env->GetIntArrayElements(rowStridesArray.get(), &isCopy);
+
+    // For Y plane
+    int rowSampling = 1;
+    int colSampling = 1;
     // plane indices are Y-U-V.
     for (uint32_t i = 0; i < 3; ++i) {
         const AHardwareBuffer_Plane &plane = planes.planes[i];
+        int maxRowOffset = plane.rowStride * (desc.height / rowSampling - 1);
+        int maxColOffset = plane.pixelStride * (desc.width / colSampling - 1);
+        int maxOffset = maxRowOffset + maxColOffset;
         ScopedLocalRef<jobject> byteBuffer{env, CreateByteBuffer(
                 env,
                 plane.data,
-                plane.rowStride * (desc.height - 1) + plane.pixelStride * (desc.width - 1) + 1,
+                maxOffset + 1,
                 0,
-                plane.rowStride * (desc.height - 1) + plane.pixelStride * (desc.width - 1) + 1,
+                maxOffset + 1,
                 readOnly,
                 true)};
 
-        ScopedLocalRef<jobject> planeObj{env, env->NewObject(
-                planeClazz.get(), planeConstructID,
-                byteBuffer.get(), plane.rowStride, plane.pixelStride)};
-
-        env->SetObjectArrayElement(planeArray.get(), i, planeObj.get());
+        env->SetObjectArrayElement(buffersArray.get(), i, byteBuffer.get());
+        rowStrides[i] = plane.rowStride;
+        pixelStrides[i] = plane.pixelStride;
+        // For U-V planes
+        rowSampling = 2;
+        colSampling = 2;
     }
+
+    env->ReleaseIntArrayElements(rowStridesArray.get(), rowStrides, 0);
+    env->ReleaseIntArrayElements(pixelStridesArray.get(), pixelStrides, 0);
+    rowStrides = pixelStrides = nullptr;
 
     ScopedLocalRef<jclass> imageClazz(
             env, env->FindClass("android/media/MediaCodec$MediaImage"));
     CHECK(imageClazz.get() != NULL);
 
     jmethodID imageConstructID = env->GetMethodID(imageClazz.get(), "<init>",
-            "([Landroid/media/Image$Plane;IIIZJIILandroid/graphics/Rect;J)V");
+            "([Ljava/nio/ByteBuffer;[I[IIIIZJIILandroid/graphics/Rect;J)V");
 
     jobject img = env->NewObject(imageClazz.get(), imageConstructID,
-            planeArray.get(),
+            buffersArray.get(),
+            rowStridesArray.get(),
+            pixelStridesArray.get(),
             desc.width,
             desc.height,
             desc.format, // ???
@@ -1951,17 +1966,15 @@ static jobject android_media_MediaCodec_mapHardwareBuffer(JNIEnv *env, jobject b
     return img;
 }
 
-static void android_media_MediaCodec_closeMediaImage(JNIEnv *, jlong context) {
+static void android_media_MediaCodec_closeMediaImage(JNIEnv *, jclass, jlong context) {
+    ALOGV("android_media_MediaCodec_closeMediaImage");
     if (context == 0) {
         return;
     }
     AHardwareBuffer *hardwareBuffer = (AHardwareBuffer *)context;
 
-    int32_t fenceFd = -1;
-    int err = AHardwareBuffer_unlock(hardwareBuffer, &fenceFd);
-    if (err == 0) {
-        sp<Fence> fence{new Fence(fenceFd)};
-    } else {
+    int err = AHardwareBuffer_unlock(hardwareBuffer, nullptr);
+    if (err != 0) {
         ALOGI("closeMediaImage: failed to unlock (err=%d)", err);
         // Continue to release the hardwareBuffer
     }
@@ -2171,19 +2184,30 @@ static void android_media_MediaCodec_native_queueHardwareBuffer(
             env, bufferObj);
     sp<GraphicBuffer> graphicBuffer{AHardwareBuffer_to_GraphicBuffer(hardwareBuffer)};
     C2Handle *handle = WrapNativeCodec2GrallocHandle(
-            graphicBuffer->handle, graphicBuffer->format,
-            graphicBuffer->width, graphicBuffer->height,
-            graphicBuffer->usage, graphicBuffer->stride);
-    std::shared_ptr<C2GraphicBlock> block = _C2BlockFactory::CreateGraphicBlock(handle);
-
-    if (!block) {
+            graphicBuffer->handle, graphicBuffer->width, graphicBuffer->height,
+            graphicBuffer->format, graphicBuffer->usage, graphicBuffer->stride);
+    static std::shared_ptr<C2Allocator> sGrallocAlloc = []() -> std::shared_ptr<C2Allocator> {
+        std::shared_ptr<C2Allocator> alloc;
+        c2_status_t err = GetCodec2PlatformAllocatorStore()->fetchAllocator(
+                C2PlatformAllocatorStore::GRALLOC, &alloc);
+        if (err == C2_OK) {
+            return alloc;
+        }
+        return nullptr;
+    }();
+    std::shared_ptr<C2GraphicAllocation> alloc;
+    c2_status_t c2err = sGrallocAlloc->priorGraphicAllocation(handle, &alloc);
+    if (c2err != C2_OK) {
+        ALOGW("Failed to wrap AHardwareBuffer into C2GraphicAllocation");
         throwExceptionAsNecessary(env, BAD_VALUE);
         return;
     }
+    std::shared_ptr<C2GraphicBlock> block = _C2BlockFactory::CreateGraphicBlock(alloc);
     std::shared_ptr<C2Buffer> buffer = C2Buffer::CreateGraphicBuffer(block->share(
             block->crop(), C2Fence{}));
     AString errorDetailMsg;
-    err = codec->queueBuffer(index, buffer, presentationTimeUs, flags, tunings, &errorDetailMsg);
+    err = codec->queueBuffer(
+            index, buffer, presentationTimeUs, flags, tunings, &errorDetailMsg);
     throwExceptionAsNecessary(env, err, ACTION_CODE_FATAL, errorDetailMsg.c_str());
 }
 
