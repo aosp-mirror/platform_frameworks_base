@@ -16,14 +16,17 @@
 
 package com.android.server.policy;
 
+import static android.Manifest.permission.READ_PHONE_STATE;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.MODE_FOREGROUND;
 import static android.app.AppOpsManager.MODE_IGNORED;
 import static android.app.AppOpsManager.OP_NONE;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_APPLY_RESTRICTION;
+import static android.content.pm.PackageManager.FLAG_PERMISSION_AUTO_REVOKED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_REVOKED_COMPAT;
 import static android.content.pm.PackageManager.GET_PERMISSIONS;
+import static android.content.pm.PackageManager.MATCH_ALL;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -42,6 +45,7 @@ import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageManagerInternal.PackageListObserver;
 import android.content.pm.PermissionInfo;
 import android.os.Build;
+import android.os.Handler;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -53,6 +57,7 @@ import android.provider.Telephony;
 import android.telecom.TelecomManager;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.Log;
 import android.util.LongSparseLongArray;
 import android.util.Pair;
 import android.util.Slog;
@@ -318,9 +323,49 @@ public final class PermissionPolicyService extends SystemService {
         // Force synchronization as permissions might have changed
         synchronizePermissionsAndAppOpsForUser(userId);
 
+        restoreReadPhoneStatePermissions();
+
         // Tell observers we are initialized for this user.
         if (callback != null) {
             callback.onInitialized(userId);
+        }
+    }
+
+    /**
+     * Ensure READ_PHONE_STATE user sensitive flags are assigned properly
+     * TODO ntmyren: Remove once propagated, and state is repaired
+     */
+    private void restoreReadPhoneStatePermissions() {
+        PermissionControllerManager manager = new PermissionControllerManager(this.getContext(),
+                Handler.getMain());
+        PackageManager pm = getContext().getPackageManager();
+        List<PackageInfo> packageInfos = pm.getInstalledPackages(MATCH_ALL | GET_PERMISSIONS);
+        for (int i = packageInfos.size() - 1; i >= 0; i--) {
+            PackageInfo pI = packageInfos.get(i);
+            if (pI.requestedPermissions == null) {
+                continue;
+            }
+
+            boolean hasReadPhoneState = false;
+            for (int j = pI.requestedPermissions.length - 1; j >= 0; j--) {
+                if (pI.requestedPermissions[j].equals(READ_PHONE_STATE)) {
+                    hasReadPhoneState = true;
+                }
+            }
+            if (!hasReadPhoneState) {
+                continue;
+            }
+
+            Log.i(LOG_TAG, "Updating read phone state for " + pI.packageName + " "
+                    + pI.applicationInfo.uid);
+            manager.updateUserSensitiveForApp(pI.applicationInfo.uid);
+
+            UserHandle user = UserHandle.getUserHandleForUid(pI.applicationInfo.uid);
+            int permFlags = pm.getPermissionFlags(READ_PHONE_STATE, pI.packageName, user);
+            if ((permFlags & FLAG_PERMISSION_AUTO_REVOKED) != 0) {
+                pm.updatePermissionFlags(READ_PHONE_STATE, pI.packageName,
+                        FLAG_PERMISSION_AUTO_REVOKED, 0, user);
+            }
         }
     }
 
