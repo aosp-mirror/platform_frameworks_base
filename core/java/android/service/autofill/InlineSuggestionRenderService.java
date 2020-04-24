@@ -26,6 +26,7 @@ import android.app.slice.Slice;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.graphics.PixelFormat;
+import android.os.BaseBundle;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -146,6 +147,7 @@ public abstract class InlineSuggestionRenderService extends Service {
     @Override
     @Nullable
     public final IBinder onBind(@NonNull Intent intent) {
+        BaseBundle.setShouldDefuse(true);
         if (SERVICE_INTERFACE.equals(intent.getAction())) {
             return new IInlineSuggestionRenderService.Stub() {
                 @Override
