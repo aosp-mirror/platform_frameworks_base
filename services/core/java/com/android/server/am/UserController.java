@@ -163,9 +163,6 @@ class UserController implements Handler.Callback {
     // when it never calls back.
     private static final int USER_SWITCH_CALLBACKS_TIMEOUT_MS = 5 * 1000;
 
-    // TODO(b/149604218): STOPSHIP remove  this constant and the logcat
-    private static final boolean TESTS_NEED_LOGCAT = true;
-
     // Used for statsd logging with UserLifecycleJourneyReported + UserLifecycleEventOccurred atoms
     private static final long INVALID_SESSION_ID = 0;
 
@@ -1740,9 +1737,6 @@ class UserController implements Handler.Callback {
     }
 
     void continueUserSwitch(UserState uss, int oldUserId, int newUserId) {
-        if (TESTS_NEED_LOGCAT) {
-            Slog.d(TAG, "Continue user switch oldUser #" + oldUserId + ", newUser #" + newUserId);
-        }
         EventLog.writeEvent(EventLogTags.UC_CONTINUE_USER_SWITCH, oldUserId, newUserId);
 
         if (isUserSwitchUiEnabled()) {
@@ -1896,8 +1890,10 @@ class UserController implements Handler.Callback {
                     builder.append("; this requires ");
                     builder.append(INTERACT_ACROSS_USERS_FULL);
                     if (allowMode != ALLOW_FULL_ONLY) {
-                        builder.append(" or ");
-                        builder.append(INTERACT_ACROSS_USERS);
+                        if (allowMode == ALLOW_NON_FULL || isSameProfileGroup) {
+                            builder.append(" or ");
+                            builder.append(INTERACT_ACROSS_USERS);
+                        }
                         if (isSameProfileGroup
                                 && allowMode == ALLOW_ALL_PROFILE_PERMISSIONS_IN_PROFILE) {
                             builder.append(" or ");

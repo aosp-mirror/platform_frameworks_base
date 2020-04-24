@@ -29,6 +29,9 @@
     <uses-permission android:name="android.permission.DUMP" />
     <!-- Run layers trace -->
     <uses-permission android:name="android.permission.HARDWARE_TEST"/>
+    <!-- Workaround grant runtime permission exception from b/152733071 -->
+    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS"/>
+    <uses-permission android:name="android.permission.READ_LOGS"/>
     <application>
         <uses-library android:name="android.test.runner"/>
     </application>

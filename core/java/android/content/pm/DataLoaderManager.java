@@ -41,17 +41,16 @@ public class DataLoaderManager {
      * @param dataLoaderId ID for the new data loader binder service.
      * @param params       DataLoaderParamsParcel object that contains data loader params, including
      *                     its package name, class name, and additional parameters.
-     * @param control      FileSystemControlParcel that contains filesystem control handlers.
      * @param listener     Callback for the data loader service to report status back to the
      *                     caller.
      * @return false if 1) target ID collides with a data loader that is already bound to data
      * loader manager; 2) package name is not specified; 3) fails to find data loader package;
      * or 4) fails to bind to the specified data loader service, otherwise return true.
      */
-    public boolean initializeDataLoader(int dataLoaderId, @NonNull DataLoaderParamsParcel params,
-            @NonNull FileSystemControlParcel control, @NonNull IDataLoaderStatusListener listener) {
+    public boolean bindToDataLoader(int dataLoaderId, @NonNull DataLoaderParamsParcel params,
+            @NonNull IDataLoaderStatusListener listener) {
         try {
-            return mService.initializeDataLoader(dataLoaderId, params, control, listener);
+            return mService.bindToDataLoader(dataLoaderId, params, listener);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -70,12 +69,13 @@ public class DataLoaderManager {
     }
 
     /**
-     * Destroys the data loader binder service and removes it from data loader manager service.
+     * Unbinds from a data loader binder service, specified by its ID.
+     * DataLoader will receive destroy notification.
      */
     @Nullable
-    public void destroyDataLoader(int dataLoaderId) {
+    public void unbindFromDataLoader(int dataLoaderId) {
         try {
-            mService.destroyDataLoader(dataLoaderId);
+            mService.unbindFromDataLoader(dataLoaderId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

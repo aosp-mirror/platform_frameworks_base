@@ -23,7 +23,7 @@
 #include "core_jni_helpers.h"
 
 #include <android/graphics/canvas.h>
-#include <android_runtime/android_graphics_GraphicBuffer.h>
+#include <android_runtime/android_hardware_HardwareBuffer.h>
 #include <android_runtime/android_graphics_SurfaceTexture.h>
 #include <android_runtime/android_view_Surface.h>
 #include <android_runtime/Log.h>
@@ -389,11 +389,12 @@ static jint nativeForceScopedDisconnect(JNIEnv *env, jclass clazz, jlong nativeO
     return surface->disconnect(-1, IGraphicBufferProducer::DisconnectMode::AllLocal);
 }
 
-static jint nativeAttachAndQueueBufferWithColorSpace(JNIEnv *env, jclass clazz, jlong nativeObject,
-        jobject graphicBuffer, jint colorSpaceId) {
+static jint nativeAttachAndQueueBufferWithColorSpace(JNIEnv* env, jclass clazz, jlong nativeObject,
+                                                     jobject hardwareBuffer, jint colorSpaceId) {
     Surface* surface = reinterpret_cast<Surface*>(nativeObject);
-    sp<GraphicBuffer> gb(android_graphics_GraphicBuffer_getNativeGraphicsBuffer(env,
-                                                                                graphicBuffer));
+    AHardwareBuffer* ahb =
+            android_hardware_HardwareBuffer_getNativeHardwareBuffer(env, hardwareBuffer);
+    GraphicBuffer* gb = AHardwareBuffer_to_GraphicBuffer(ahb);
     int err = Surface::attachAndQueueBufferWithDataspace(surface, gb,
             fromNamedColorSpaceValueToDataspace(colorSpaceId));
     return err;
@@ -454,7 +455,7 @@ static const JNINativeMethod gSurfaceMethods[] = {
     {"nativeGetNextFrameNumber", "(J)J", (void*)nativeGetNextFrameNumber },
     {"nativeSetScalingMode", "(JI)I", (void*)nativeSetScalingMode },
     {"nativeForceScopedDisconnect", "(J)I", (void*)nativeForceScopedDisconnect},
-    {"nativeAttachAndQueueBufferWithColorSpace", "(JLandroid/graphics/GraphicBuffer;I)I",
+    {"nativeAttachAndQueueBufferWithColorSpace", "(JLandroid/hardware/HardwareBuffer;I)I",
             (void*)nativeAttachAndQueueBufferWithColorSpace},
     {"nativeSetSharedBufferModeEnabled", "(JZ)I", (void*)nativeSetSharedBufferModeEnabled},
     {"nativeSetAutoRefreshEnabled", "(JZ)I", (void*)nativeSetAutoRefreshEnabled},

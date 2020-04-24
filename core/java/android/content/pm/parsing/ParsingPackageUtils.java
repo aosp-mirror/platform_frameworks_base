@@ -1530,8 +1530,8 @@ public class ParsingPackageUtils {
             } else if (parser.getName().equals("package")) {
                 final TypedArray sa = res.obtainAttributes(parser,
                         R.styleable.AndroidManifestQueriesPackage);
-                final String packageName = sa.getString(
-                        R.styleable.AndroidManifestQueriesPackage_name);
+                final String packageName = sa.getNonConfigurationString(
+                        R.styleable.AndroidManifestQueriesPackage_name, 0);
                 if (TextUtils.isEmpty(packageName)) {
                     return input.error("Package name is missing from package tag.");
                 }
@@ -1540,8 +1540,8 @@ public class ParsingPackageUtils {
                 final TypedArray sa = res.obtainAttributes(parser,
                         R.styleable.AndroidManifestQueriesProvider);
                 try {
-                    final String authorities =
-                            sa.getString(R.styleable.AndroidManifestQueriesProvider_authorities);
+                    final String authorities = sa.getNonConfigurationString(
+                            R.styleable.AndroidManifestQueriesProvider_authorities, 0);
                     if (TextUtils.isEmpty(authorities)) {
                         return input.error(
                                 PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED,

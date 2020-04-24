@@ -180,6 +180,7 @@ private:
 
         bool isValid() const { return mId != kInvalidStorageId; }
 
+        bool bind();
         bool create();
         bool start();
         bool destroy();
@@ -280,12 +281,12 @@ private:
     void deleteStorage(IncFsMount& ifs);
     void deleteStorageLocked(IncFsMount& ifs, std::unique_lock<std::mutex>&& ifsLock);
     MountMap::iterator getStorageSlotLocked();
-    std::string normalizePathToStorage(const IfsMountPtr& incfs, StorageId storage,
+    std::string normalizePathToStorage(const IncFsMount& incfs, StorageId storage,
                                        std::string_view path) const;
-    std::string normalizePathToStorageLocked(const IfsMountPtr& incfs,
-                                             IncFsMount::StorageMap::iterator storageIt,
+    std::string normalizePathToStorageLocked(const IncFsMount& incfs,
+                                             IncFsMount::StorageMap::const_iterator storageIt,
                                              std::string_view path) const;
-
+    int makeDirs(const IncFsMount& ifs, StorageId storageId, std::string_view path, int mode);
     binder::Status applyStorageParams(IncFsMount& ifs, bool enableReadLogs);
 
     void registerAppOpsCallback(const std::string& packageName);

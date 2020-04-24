@@ -30,7 +30,7 @@ import com.android.internal.util.Preconditions;
 
 import com.google.android.icing.proto.DocumentProto;
 import com.google.android.icing.proto.PropertyProto;
-import com.google.android.icing.protobuf.ByteString;
+import com.google.protobuf.ByteString;
 
 import java.util.ArrayList;
 import java.util.Collections;

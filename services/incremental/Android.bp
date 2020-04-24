@@ -19,6 +19,21 @@ cc_defaults {
     proto: {
         type: "lite",
     },
+    tidy: true,
+    tidy_checks: [
+        "android-*",
+        "cert-*",
+        "clang-analyzer-security*",
+        "-cert-err34-c",
+        "clang-analyzer-security*",
+        // Disabling due to many unavoidable warnings from POSIX API usage.
+        "-google-runtime-int",
+        "-google-explicit-constructor",
+        // do not define variadic C function - JNI headers
+        "-cert-dcl50-cpp",
+        // operator=() does not handle self-assignment properly - all protobuf-generated classes
+        "-cert-oop54-cpp",
+    ],
 }
 
 cc_defaults {

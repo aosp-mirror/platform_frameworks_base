@@ -20,10 +20,10 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.testng.Assert.assertThrows;
 
-import androidx.test.filters.SmallTest;
+import android.app.appsearch.proto.DocumentProto;
+import android.app.appsearch.proto.SearchResultProto;
 
-import com.google.android.icing.proto.DocumentProto;
-import com.google.android.icing.proto.SearchResultProto;
+import androidx.test.filters.SmallTest;
 
 import org.junit.Test;
 
