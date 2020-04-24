@@ -17,6 +17,10 @@
 package com.android.systemui.onehanded;
 
 import android.content.Context;
+import android.database.ContentObserver;
+import android.os.Handler;
+import android.os.Looper;
+import android.provider.Settings;
 
 import com.android.systemui.Dumpable;
 import com.android.systemui.SystemUI;
@@ -36,14 +40,46 @@ import javax.inject.Singleton;
 public class OneHandedUI extends SystemUI implements CommandQueue.Callbacks, Dumpable {
     private static final String TAG = "OneHandedUI";
 
-    private final OneHandedManager mOneHandedManager;
+    private final OneHandedManagerImpl mOneHandedManager;
     private final CommandQueue mCommandQueue;
+    private final Handler mMainHandler = new Handler(Looper.getMainLooper());
+    private final OneHandedSettingsUtil mSettingUtil;
+
+    private final ContentObserver mEnabledObserver = new ContentObserver(mMainHandler) {
+        @Override
+        public void onChange(boolean selfChange) {
+            // TODO (b/149366439) UIEvent metrics add here, user config timeout in settings
+            if (mOneHandedManager != null) {
+                final boolean enabled = OneHandedSettingsUtil.getSettingsOneHandedModeEnabled(
+                        mContext.getContentResolver());
+                mOneHandedManager.setOneHandedEnabled(enabled);
+            }
+        }
+    };
+
+    private final ContentObserver mTimeoutObserver = new ContentObserver(mMainHandler) {
+        @Override
+        public void onChange(boolean selfChange) {
+            // TODO (b/149366439) UIEvent metrics add here, user config timeout in settings
+            final boolean enabled = OneHandedSettingsUtil.getSettingsOneHandedModeEnabled(
+                    mContext.getContentResolver());
+            mOneHandedManager.setOneHandedEnabled(enabled);
+        }
+    };
+
+    private final ContentObserver mTaskChangeExitObserver = new ContentObserver(mMainHandler) {
+        @Override
+        public void onChange(boolean selfChange) {
+            // TODO (b/149366439) UIEvent metrics add here, user config tap app exit in settings
+        }
+    };
 
     @Inject
     public OneHandedUI(Context context,
             CommandQueue commandQueue,
-            OneHandedManager oneHandedManager,
-            DumpManager dumpManager) {
+            OneHandedManagerImpl oneHandedManager,
+            DumpManager dumpManager,
+            OneHandedSettingsUtil settingsUtil) {
         super(context);
 
         mCommandQueue = commandQueue;
@@ -51,6 +87,7 @@ public class OneHandedUI extends SystemUI implements CommandQueue.Callbacks, Dum
             boolean supportOneHanded = SystemProperties.getBoolean("support_one_handed_mode");
             if (!supportOneHanded) return; */
         mOneHandedManager = oneHandedManager;
+        mSettingUtil =  settingsUtil;
     }
 
     @Override
@@ -59,6 +96,22 @@ public class OneHandedUI extends SystemUI implements CommandQueue.Callbacks, Dum
             boolean supportOneHanded = SystemProperties.getBoolean("support_one_handed_mode");
             if (!supportOneHanded) return; */
         mCommandQueue.addCallback(this);
+        setupSettingObservers();
+        updateSettings();
+    }
+
+    private void setupSettingObservers() {
+        mSettingUtil.registerSettingsKeyObserver(Settings.Secure.ONE_HANDED_MODE_ENABLED,
+                mContext.getContentResolver(), mEnabledObserver);
+        mSettingUtil.registerSettingsKeyObserver(Settings.Secure.ONE_HANDED_MODE_TIMEOUT,
+                mContext.getContentResolver(), mTimeoutObserver);
+        mSettingUtil.registerSettingsKeyObserver(Settings.Secure.TAPS_APP_TO_EXIT,
+                mContext.getContentResolver(), mTaskChangeExitObserver);
+    }
+
+    private void updateSettings() {
+        mOneHandedManager.setOneHandedEnabled(
+                mSettingUtil.getSettingsOneHandedModeEnabled(mContext.getContentResolver()));
     }
 
     /**
@@ -86,6 +139,10 @@ public class OneHandedUI extends SystemUI implements CommandQueue.Callbacks, Dum
 
         if (mOneHandedManager != null) {
             ((OneHandedManagerImpl) mOneHandedManager).dump(fd, pw, args);
+        }
+
+        if (mSettingUtil != null) {
+            mSettingUtil.dump(pw, innerPrefix, mContext.getContentResolver());
         }
     }
 }

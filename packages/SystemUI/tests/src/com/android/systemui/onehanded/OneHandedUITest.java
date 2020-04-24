@@ -16,9 +16,11 @@
 
 package com.android.systemui.onehanded;
 
+import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
@@ -28,6 +30,7 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.statusbar.CommandQueue;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -43,6 +46,8 @@ public class OneHandedUITest extends OneHandedTestCase {
     OneHandedManagerImpl mMockOneHandedManagerImpl;
     @Mock
     DumpManager mMockDumpManager;
+    @Mock
+    OneHandedSettingsUtil mMockSettingsUtil;
 
     @Before
     public void setUp() throws Exception {
@@ -51,7 +56,8 @@ public class OneHandedUITest extends OneHandedTestCase {
         mOneHandedUI = new OneHandedUI(mContext,
                 mCommandQueue,
                 mMockOneHandedManagerImpl,
-                mMockDumpManager);
+                mMockDumpManager,
+                mMockSettingsUtil);
     }
 
     @Test
@@ -66,6 +72,36 @@ public class OneHandedUITest extends OneHandedTestCase {
         mOneHandedUI.stopOneHanded();
 
         verify(mMockOneHandedManagerImpl, times(1)).stopOneHanded();
+    }
+
+    @Test
+    public void testRegisterSettingsObserver_forEnabled() {
+        final String key = Settings.Secure.ONE_HANDED_MODE_ENABLED;
+
+        verify(mMockSettingsUtil, times(1)).registerSettingsKeyObserver(key, any(), any());
+    }
+
+    @Test
+    public void testRegisterSettingsObserver_forTimeout() {
+        final String key = Settings.Secure.ONE_HANDED_MODE_TIMEOUT;
+
+        verify(mMockSettingsUtil, times(1)).registerSettingsKeyObserver(key, any(), any());
+    }
+
+    @Test
+    public void testRegisterSettingsObserver_forTapAppExit() {
+        final String key = Settings.Secure.TAPS_APP_TO_EXIT;
+
+        verify(mMockSettingsUtil, times(1)).registerSettingsKeyObserver(key, any(), any());
+    }
+
+    @Ignore("Need to clarifying")
+    @Test
+    public void tesSettingsObserver_updateEnabled() {
+        Settings.Secure.putInt(mContext.getContentResolver(),
+                Settings.Secure.ONE_HANDED_MODE_ENABLED, 1);
+
+        verify(mMockOneHandedManagerImpl, times(1)).setOneHandedEnabled(true);
     }
 
 }

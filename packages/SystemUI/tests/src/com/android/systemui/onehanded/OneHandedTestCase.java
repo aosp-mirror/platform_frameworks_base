@@ -13,8 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.android.systemui.onehanded;
+
+import static com.android.systemui.onehanded.OneHandedSettingsUtil.ONE_HANDED_TIMEOUT_MEDIUM_IN_SECONDS;
+
+import android.provider.Settings;
 
 import com.android.systemui.SysuiTestCase;
 
@@ -25,13 +28,24 @@ import org.junit.Before;
  * Base class that does One Handed specific setup.
  */
 public abstract class OneHandedTestCase extends SysuiTestCase {
-
+    static boolean sOrigEnabled;
+    static int sOrigTimeout;
     @Before
     public void setupSettings() {
+        sOrigEnabled = OneHandedSettingsUtil.getSettingsOneHandedModeEnabled(
+                getContext().getContentResolver());
+        sOrigTimeout = OneHandedSettingsUtil.getSettingsOneHandedModeTimeout(
+                getContext().getContentResolver());
+        Settings.Secure.putInt(getContext().getContentResolver(),
+                Settings.Secure.ONE_HANDED_MODE_ENABLED, 1);
+        Settings.Secure.putInt(getContext().getContentResolver(),
+                Settings.Secure.ONE_HANDED_MODE_TIMEOUT, ONE_HANDED_TIMEOUT_MEDIUM_IN_SECONDS);
     }
-
     @After
     public void restoreSettings() {
+        Settings.Secure.putInt(getContext().getContentResolver(),
+                Settings.Secure.ONE_HANDED_MODE_ENABLED, sOrigEnabled ? 1 : 0);
+        Settings.Secure.putInt(mContext.getContentResolver(),
+                Settings.Secure.ONE_HANDED_MODE_TIMEOUT, sOrigTimeout);
     }
 }
-

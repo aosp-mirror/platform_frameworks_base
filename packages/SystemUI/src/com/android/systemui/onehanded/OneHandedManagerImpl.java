@@ -21,6 +21,7 @@ import android.content.Context;
 import androidx.annotation.NonNull;
 
 import com.android.systemui.Dumpable;
+import com.android.systemui.R;
 import com.android.systemui.model.SysUiState;
 
 import java.io.FileDescriptor;
@@ -36,6 +37,8 @@ import javax.inject.Singleton;
 public class OneHandedManagerImpl implements OneHandedManager, Dumpable {
     private static final String TAG = "OneHandedManager";
 
+    private boolean mIsOneHandedEnabled;
+    private float mOffSetFraction;
     private OneHandedDisplayAreaOrganizer mDisplayAreaOrganizer;
     private SysUiState mSysUiFlagContainer;
 
@@ -49,6 +52,19 @@ public class OneHandedManagerImpl implements OneHandedManager, Dumpable {
 
         mDisplayAreaOrganizer = displayAreaOrganizer;
         mSysUiFlagContainer = sysUiState;
+        mOffSetFraction =
+                context.getResources().getFraction(R.fraction.config_one_handed_offset, 1, 1);
+        mIsOneHandedEnabled = OneHandedSettingsUtil.getSettingsOneHandedModeEnabled(
+                context.getContentResolver());
+        updateOneHandedEnabled();
+    }
+
+    /**
+     * Set one handed enabled or disabled by OneHanded UI when user update settings
+     */
+    public void setOneHandedEnabled(boolean enabled) {
+        mIsOneHandedEnabled = enabled;
+        updateOneHandedEnabled();
     }
 
     /**
@@ -65,10 +81,15 @@ public class OneHandedManagerImpl implements OneHandedManager, Dumpable {
     public void stopOneHanded() {
     }
 
+    private void updateOneHandedEnabled() {
+    }
+
     @Override
     public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
         final String innerPrefix = "  ";
         pw.println(TAG + "states: ");
+        pw.print(innerPrefix + "mIsOneHandedEnabled=");
+        pw.println(mIsOneHandedEnabled);
 
         if (mDisplayAreaOrganizer != null) {
             mDisplayAreaOrganizer.dump(fd, pw, args);

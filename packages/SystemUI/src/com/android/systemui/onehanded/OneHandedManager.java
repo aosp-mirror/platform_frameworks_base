@@ -22,6 +22,11 @@ package com.android.systemui.onehanded;
 public interface OneHandedManager {
 
     /**
+     * Set one handed enabled or disabled
+     */
+    default void setOneHandedEnabled(boolean enabled) {}
+
+    /**
      * Exit one handed mode
      */
     default void stopOneHanded() {}
