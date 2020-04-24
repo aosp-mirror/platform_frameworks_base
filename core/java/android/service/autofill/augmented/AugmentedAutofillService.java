@@ -30,6 +30,7 @@ import android.app.Service;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.graphics.Rect;
+import android.os.BaseBundle;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CancellationSignal;
@@ -132,6 +133,7 @@ public abstract class AugmentedAutofillService extends Service {
     public void onCreate() {
         super.onCreate();
         mHandler = new Handler(Looper.getMainLooper(), null, true);
+        BaseBundle.setShouldDefuse(true);
     }
 
     /** @hide */
