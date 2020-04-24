@@ -1027,13 +1027,18 @@ public class ResolverActivity extends Activity implements
 
     @Override // ResolverListCommunicator
     public final void onPostListReady(ResolverListAdapter listAdapter, boolean doPostProcessing) {
-        if (isAutolaunching() || maybeAutolaunchActivity()) {
+        if (isAutolaunching()) {
             return;
         }
         if (mMultiProfilePagerAdapter.shouldShowEmptyStateScreen(listAdapter)) {
             mMultiProfilePagerAdapter.showEmptyResolverListEmptyState(listAdapter);
         } else {
             mMultiProfilePagerAdapter.showListView(listAdapter);
+        }
+        // showEmptyResolverListEmptyState can mark the tab as loaded,
+        // which is a precondition for auto launching
+        if (maybeAutolaunchActivity()) {
+            return;
         }
         if (doPostProcessing) {
             maybeCreateHeader(listAdapter);
