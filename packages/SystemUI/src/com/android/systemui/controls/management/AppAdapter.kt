@@ -102,7 +102,9 @@ class AppAdapter(
         fun bindData(data: ControlsServiceInfo) {
             icon.setImageDrawable(data.loadIcon())
             title.text = data.loadLabel()
-            favorites.text = favRenderer.renderFavoritesForComponent(data.componentName)
+            val text = favRenderer.renderFavoritesForComponent(data.componentName)
+            favorites.text = text
+            favorites.visibility = if (text == null) View.GONE else View.VISIBLE
         }
     }
 }
@@ -112,12 +114,12 @@ class FavoritesRenderer(
     private val favoriteFunction: (ComponentName) -> Int
 ) {
 
-    fun renderFavoritesForComponent(component: ComponentName): String {
+    fun renderFavoritesForComponent(component: ComponentName): String? {
         val qty = favoriteFunction(component)
         if (qty != 0) {
             return resources.getQuantityString(R.plurals.controls_number_of_favorites, qty, qty)
         } else {
-            return ""
+            return null
         }
     }
 }
