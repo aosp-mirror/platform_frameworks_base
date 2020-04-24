@@ -34,6 +34,7 @@ import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.app.PendingIntent;
+import android.app.PropertyInvalidatedCache;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.Intent;
@@ -130,6 +131,33 @@ public class SubscriptionManager {
     @UnsupportedAppUsage
     public static final Uri CONTENT_URI = SimInfo.CONTENT_URI;
 
+    /** @hide */
+    public static final String CACHE_KEY_DEFAULT_SUB_ID_PROPERTY =
+            "cache_key.telephony.get_default_sub_id";
+
+    private static final int DEFAULT_SUB_ID_CACHE_SIZE = 1;
+
+    private static PropertyInvalidatedCache<Void, Integer> sDefaultSubIdCache =
+            new PropertyInvalidatedCache<Void, Integer>(
+                    DEFAULT_SUB_ID_CACHE_SIZE,
+                    CACHE_KEY_DEFAULT_SUB_ID_PROPERTY) {
+                @Override
+                protected Integer recompute(Void query) {
+                    int subId = INVALID_SUBSCRIPTION_ID;
+
+                    try {
+                        ISub iSub = TelephonyManager.getSubscriptionService();
+                        if (iSub != null) {
+                            subId = iSub.getDefaultSubId();
+                        }
+                    } catch (RemoteException ex) {
+                        // ignore it
+                    }
+
+                    if (VDBG) logd("getDefaultSubId=" + subId);
+                    return subId;
+                }
+            };
     /**
      * Generates a content {@link Uri} used to receive updates on simInfo change
      * on the given subscriptionId
@@ -1840,19 +1868,7 @@ public class SubscriptionManager {
      * @return the "system" default subscription id.
      */
     public static int getDefaultSubscriptionId() {
-        int subId = INVALID_SUBSCRIPTION_ID;
-
-        try {
-            ISub iSub = TelephonyManager.getSubscriptionService();
-            if (iSub != null) {
-                subId = iSub.getDefaultSubId();
-            }
-        } catch (RemoteException ex) {
-            // ignore it
-        }
-
-        if (VDBG) logd("getDefaultSubId=" + subId);
-        return subId;
+        return sDefaultSubIdCache.query(null);
     }
 
     /**
@@ -3273,5 +3289,19 @@ public class SubscriptionManager {
     public static void putSubscriptionIdExtra(Intent intent, int subId) {
         intent.putExtra(SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX, subId);
         intent.putExtra(PhoneConstants.SUBSCRIPTION_KEY, subId);
+    }
+
+    /** @hide */
+    public static void invalidateDefaultSubIdCaches() {
+        PropertyInvalidatedCache.invalidateCache(CACHE_KEY_DEFAULT_SUB_ID_PROPERTY);
+    }
+
+    /**
+     * Clears all process-local binder caches.
+     *
+     * @hide
+     */
+    public static void clearCaches() {
+        sDefaultSubIdCache.clear();
     }
 }
