@@ -1689,7 +1689,7 @@ public class TetheringTest {
         final DhcpServingParamsParcel params = dhcpParamsCaptor.getValue();
         assertEquals(serverAddr, intToInet4AddressHTH(params.serverAddr).getHostAddress());
         assertEquals(24, params.serverAddrPrefixLength);
-        assertEquals(clientAddrParceled, params.clientAddr);
+        assertEquals(clientAddrParceled, params.singleClientAddr);
     }
 
     @Test
