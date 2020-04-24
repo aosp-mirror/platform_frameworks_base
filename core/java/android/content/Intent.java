@@ -1885,8 +1885,9 @@ public class Intent implements Parcelable, Cloneable {
     /**
      * Activity action: Launch UI to manage auto-revoke state.
      * <p>
-     * Input: {@link #EXTRA_PACKAGE_NAME} specifies the package whose
-     * auto-revoke state will be reviewed (mandatory).
+     * Input: {@link Intent#setData data} should be a {@code package}-scheme {@link Uri} with
+     * a package name, whose auto-revoke state will be reviewed (mandatory).
+     * E.g. {@code Uri.fromParts("package", packageName, null) }
      * </p>
      * <p>
      * Output: Nothing.
