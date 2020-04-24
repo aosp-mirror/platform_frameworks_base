@@ -3085,6 +3085,11 @@ public final class ActivityThread extends ClientTransactionHandler {
         return mActivities.get(token);
     }
 
+    @VisibleForTesting(visibility = PACKAGE)
+    public Configuration getConfiguration() {
+        return mConfiguration;
+    }
+
     @Override
     public void updatePendingConfiguration(Configuration config) {
         synchronized (mResourcesManager) {
