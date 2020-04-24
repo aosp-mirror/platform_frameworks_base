@@ -47,14 +47,14 @@ import org.mockito.MockitoAnnotations;
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
 @SmallTest
-public class CarSideLoadedAppDetectorTest extends SysuiTestCase {
+public class SideLoadedAppDetectorTest extends SysuiTestCase {
 
     private static final String SAFE_VENDOR = "com.safe.vendor";
     private static final String UNSAFE_VENDOR = "com.unsafe.vendor";
     private static final String APP_PACKAGE_NAME = "com.test";
     private static final String APP_CLASS_NAME = ".TestClass";
 
-    private CarSideLoadedAppDetector mSideLoadedAppDetector;
+    private SideLoadedAppDetector mSideLoadedAppDetector;
 
     @Mock
     private PackageManager mPackageManager;
@@ -70,7 +70,7 @@ public class CarSideLoadedAppDetectorTest extends SysuiTestCase {
         testableResources.addOverride(R.array.config_allowedAppInstallSources,
                 allowedAppInstallSources);
 
-        mSideLoadedAppDetector = new CarSideLoadedAppDetector(testableResources.getResources(),
+        mSideLoadedAppDetector = new SideLoadedAppDetector(testableResources.getResources(),
                 mPackageManager,
                 mCarDeviceProvisionedController);
     }
