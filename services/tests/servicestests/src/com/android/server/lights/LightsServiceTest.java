@@ -16,9 +16,9 @@
 
 package com.android.server.lights;
 
-import static android.graphics.Color.BLACK;
 import static android.graphics.Color.BLUE;
 import static android.graphics.Color.GREEN;
+import static android.graphics.Color.TRANSPARENT;
 import static android.graphics.Color.WHITE;
 import static android.hardware.lights.LightsRequest.Builder;
 
@@ -128,7 +128,7 @@ public class LightsServiceTest {
         Light micLight = manager.getLights().get(0);
 
         // The light should begin by being off.
-        assertThat(manager.getLightState(micLight).getColor()).isEqualTo(BLACK);
+        assertThat(manager.getLightState(micLight).getColor()).isEqualTo(TRANSPARENT);
 
         // When a session commits changes:
         LightsManager.LightsSession session = manager.openSession();
@@ -139,7 +139,7 @@ public class LightsServiceTest {
         // When the session goes away:
         session.close();
         // Then the light should turn off.
-        assertThat(manager.getLightState(micLight).getColor()).isEqualTo(BLACK);
+        assertThat(manager.getLightState(micLight).getColor()).isEqualTo(TRANSPARENT);
     }
 
     @Test
