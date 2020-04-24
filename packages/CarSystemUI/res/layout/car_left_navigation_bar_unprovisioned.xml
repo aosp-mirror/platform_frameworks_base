@@ -33,7 +33,6 @@
         android:gravity="top"
         android:paddingTop="30dp"
         android:layout_weight="1"
-        android:background="@drawable/system_bar_background"
         android:animateLayoutChanges="true">
 
         <com.android.systemui.car.navigationbar.CarNavigationButton

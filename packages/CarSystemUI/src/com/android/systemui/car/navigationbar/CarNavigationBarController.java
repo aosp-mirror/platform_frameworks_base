@@ -20,7 +20,6 @@ import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.systemui.R;
@@ -160,8 +159,12 @@ public class CarNavigationBarController {
     }
 
     /** Gets the top navigation bar with the appropriate listeners set. */
-    @NonNull
+    @Nullable
     public CarNavigationBarView getTopBar(boolean isSetUp) {
+        if (!mShowTop) {
+            return null;
+        }
+
         mTopView = mNavigationBarViewFactory.getTopBar(isSetUp);
         setupBar(mTopView, mTopBarTouchListener, mNotificationsShadeController);
         return mTopView;
