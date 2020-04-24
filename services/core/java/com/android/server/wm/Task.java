@@ -2694,20 +2694,20 @@ class Task extends WindowContainer<WindowContainer> {
             return null;
         }
 
-        final String myReason = reason + " adjustFocusToNextFocusableStack";
-        final ActivityRecord top = focusableTask.topRunningActivity();
         final ActivityStack rootTask = (ActivityStack) focusableTask.getRootTask();
-        if (focusableTask.isActivityTypeHome() && (top == null || !top.mVisibleRequested)) {
-            // If we will be focusing on the home stack next and its current top activity isn't
-            // visible, then use the move the home stack task to top to make the activity visible.
-            focusableTask.getDisplayArea().moveHomeActivityToTop(myReason);
-            return rootTask;
-        }
-
         if (!moveParentsToTop) {
             // Only move the next stack to top in its task container.
             WindowContainer parent = focusableTask.getParent();
             parent.positionChildAt(POSITION_TOP, focusableTask, false /* includingParents */);
+            return rootTask;
+        }
+
+        final String myReason = reason + " adjustFocusToNextFocusableStack";
+        final ActivityRecord top = focusableTask.topRunningActivity();
+        if (focusableTask.isActivityTypeHome() && (top == null || !top.mVisibleRequested)) {
+            // If we will be focusing on the home stack next and its current top activity isn't
+            // visible, then use the move the home stack task to top to make the activity visible.
+            focusableTask.getDisplayArea().moveHomeActivityToTop(myReason);
             return rootTask;
         }
 
