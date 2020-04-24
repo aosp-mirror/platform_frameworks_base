@@ -4,7 +4,7 @@
       "name": "CtsSdkExtensionsTestCases"
     },
     {
-      "name": "apiextensions_e2e_tests"
+      "name": "sdkextensions_e2e_tests"
     }
   ]
 }
