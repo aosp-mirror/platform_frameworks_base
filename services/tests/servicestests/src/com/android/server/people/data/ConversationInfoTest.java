@@ -54,6 +54,7 @@ public final class ConversationInfoTest {
                 .setPersonImportant(true)
                 .setPersonBot(true)
                 .setContactStarred(true)
+                .setNotificationSettingChanged(true)
                 .build();
 
         assertEquals(SHORTCUT_ID, conversationInfo.getShortcutId());
@@ -70,6 +71,7 @@ public final class ConversationInfoTest {
         assertTrue(conversationInfo.isPersonImportant());
         assertTrue(conversationInfo.isPersonBot());
         assertTrue(conversationInfo.isContactStarred());
+        assertTrue(conversationInfo.isNotificationSettingChanged());
     }
 
     @Test
@@ -92,6 +94,7 @@ public final class ConversationInfoTest {
         assertFalse(conversationInfo.isPersonImportant());
         assertFalse(conversationInfo.isPersonBot());
         assertFalse(conversationInfo.isContactStarred());
+        assertFalse(conversationInfo.isNotificationSettingChanged());
     }
 
     @Test
@@ -109,6 +112,7 @@ public final class ConversationInfoTest {
                 .setPersonImportant(true)
                 .setPersonBot(true)
                 .setContactStarred(true)
+                .setNotificationSettingChanged(true)
                 .build();
 
         ConversationInfo destination = new ConversationInfo.Builder(source)
@@ -128,5 +132,6 @@ public final class ConversationInfoTest {
         assertTrue(destination.isPersonImportant());
         assertTrue(destination.isPersonBot());
         assertFalse(destination.isContactStarred());
+        assertTrue(destination.isNotificationSettingChanged());
     }
 }
