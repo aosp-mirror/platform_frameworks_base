@@ -32,6 +32,7 @@ import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.hdmi.Constants.LocalActivePort;
 import com.android.server.hdmi.HdmiAnnotations.ServiceThreadOnly;
@@ -144,7 +145,8 @@ abstract class HdmiCecLocalDevice {
 
     // A collection of FeatureAction.
     // Note that access to this collection should happen in service thread.
-    private final ArrayList<HdmiCecFeatureAction> mActions = new ArrayList<>();
+    @VisibleForTesting
+    final ArrayList<HdmiCecFeatureAction> mActions = new ArrayList<>();
 
     private final Handler mHandler =
             new Handler() {
@@ -544,6 +546,8 @@ abstract class HdmiCecLocalDevice {
         } else if (mService.isPowerStandbyOrTransient() && isPowerOnOrToggleCommand(message)) {
             mService.wakeUp();
             return true;
+        } else if (!mService.isHdmiCecVolumeControlEnabled() && isVolumeOrMuteCommand(message)) {
+            return false;
         }
 
         final long downTime = SystemClock.uptimeMillis();
@@ -616,6 +620,16 @@ abstract class HdmiCecLocalDevice {
         return message.getOpcode() == Constants.MESSAGE_USER_CONTROL_PRESSED
                 && (params[0] == HdmiCecKeycode.CEC_KEYCODE_POWER_OFF_FUNCTION
                         || params[0] == HdmiCecKeycode.CEC_KEYCODE_POWER_TOGGLE_FUNCTION);
+    }
+
+    static boolean isVolumeOrMuteCommand(HdmiCecMessage message) {
+        byte[] params = message.getParams();
+        return message.getOpcode() == Constants.MESSAGE_USER_CONTROL_PRESSED
+                && (params[0] == HdmiCecKeycode.CEC_KEYCODE_VOLUME_DOWN
+                    || params[0] == HdmiCecKeycode.CEC_KEYCODE_VOLUME_UP
+                    || params[0] == HdmiCecKeycode.CEC_KEYCODE_MUTE
+                    || params[0] == HdmiCecKeycode.CEC_KEYCODE_MUTE_FUNCTION
+                    || params[0] == HdmiCecKeycode.CEC_KEYCODE_RESTORE_VOLUME_FUNCTION);
     }
 
     protected boolean handleTextViewOn(HdmiCecMessage message) {
@@ -1038,6 +1052,9 @@ abstract class HdmiCecLocalDevice {
     @ServiceThreadOnly
     protected void sendVolumeKeyEvent(int keyCode, boolean isPressed) {
         assertRunOnServiceThread();
+        if (!mService.isHdmiCecVolumeControlEnabled()) {
+            return;
+        }
         if (!HdmiCecKeycode.isVolumeKeycode(keyCode)) {
             Slog.w(TAG, "Not a volume key: " + keyCode);
             return;
