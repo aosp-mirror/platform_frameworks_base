@@ -20,6 +20,8 @@ import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.content.Intent.ACTION_USER_SWITCHED;
 import static android.provider.Settings.Secure.NOTIFICATION_NEW_INTERRUPTION_MODEL;
 
+import static com.android.systemui.statusbar.notification.stack.NotificationSectionsManager.BUCKET_MEDIA_CONTROLS;
+import static com.android.systemui.statusbar.notification.stack.NotificationSectionsManager.BUCKET_PEOPLE;
 import static com.android.systemui.statusbar.notification.stack.NotificationSectionsManager.BUCKET_SILENT;
 
 import static junit.framework.Assert.assertFalse;
@@ -231,6 +233,45 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
                 .build();
         entry.setBucket(BUCKET_SILENT);
         assertFalse(mLockscreenUserManager.shouldShowOnKeyguard(entry));
+    }
+
+    @Test
+    public void testShowSilentNotificationsPeopleBucket_settingSaysHide() {
+        Settings.Secure.putInt(mContext.getContentResolver(),
+                Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS, 1);
+        Settings.Secure.putInt(mContext.getContentResolver(),
+                NOTIFICATION_NEW_INTERRUPTION_MODEL, 1);
+        Settings.Secure.putInt(mContext.getContentResolver(),
+                Settings.Secure.LOCK_SCREEN_SHOW_SILENT_NOTIFICATIONS, 0);
+
+        final Notification notification = mock(Notification.class);
+        when(notification.isForegroundService()).thenReturn(true);
+        NotificationEntry entry = new NotificationEntryBuilder()
+                .setImportance(IMPORTANCE_LOW)
+                .setNotification(notification)
+                .build();
+        entry.setBucket(BUCKET_PEOPLE);
+        assertFalse(mLockscreenUserManager.shouldShowOnKeyguard(entry));
+    }
+
+    @Test
+    public void testShowSilentNotificationsMediaBucket_settingSaysHide() {
+        Settings.Secure.putInt(mContext.getContentResolver(),
+                Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS, 1);
+        Settings.Secure.putInt(mContext.getContentResolver(),
+                NOTIFICATION_NEW_INTERRUPTION_MODEL, 1);
+        Settings.Secure.putInt(mContext.getContentResolver(),
+                Settings.Secure.LOCK_SCREEN_SHOW_SILENT_NOTIFICATIONS, 0);
+
+        final Notification notification = mock(Notification.class);
+        when(notification.isForegroundService()).thenReturn(true);
+        NotificationEntry entry = new NotificationEntryBuilder()
+                .setImportance(IMPORTANCE_LOW)
+                .setNotification(notification)
+                .build();
+        entry.setBucket(BUCKET_MEDIA_CONTROLS);
+        // always show media controls, even if they're silent
+        assertTrue(mLockscreenUserManager.shouldShowOnKeyguard(entry));
     }
 
     private class TestNotificationLockscreenUserManager
