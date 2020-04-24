@@ -17,7 +17,6 @@
 #define DEBUG false  // STOPSHIP if true
 #include "Log.h"
 
-#include "atoms_info.h"
 #include "puller_util.h"
 
 namespace android {

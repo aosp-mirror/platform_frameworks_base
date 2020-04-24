@@ -1005,6 +1005,7 @@ public class ListPopupWindow implements ShowableListMenu {
                         case KeyEvent.KEYCODE_DPAD_CENTER:
                         case KeyEvent.KEYCODE_DPAD_DOWN:
                         case KeyEvent.KEYCODE_DPAD_UP:
+                        case KeyEvent.KEYCODE_NUMPAD_ENTER:
                             return true;
                     }
                 } else {

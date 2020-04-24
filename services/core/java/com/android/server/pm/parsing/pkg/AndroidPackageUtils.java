@@ -31,6 +31,7 @@ import android.content.pm.parsing.component.ParsedActivity;
 import android.content.pm.parsing.component.ParsedInstrumentation;
 import android.content.pm.parsing.component.ParsedProvider;
 import android.content.pm.parsing.component.ParsedService;
+import android.os.incremental.IncrementalManager;
 import android.text.TextUtils;
 
 import com.android.internal.content.NativeLibraryHelper;
@@ -141,8 +142,15 @@ public class AndroidPackageUtils {
 
     public static boolean canHaveOatDir(AndroidPackage pkg, boolean isUpdatedSystemApp) {
         // The following app types CANNOT have oat directory
-        // - non-updated system apps
-        return !pkg.isSystem() || isUpdatedSystemApp;
+        // - non-updated system apps,
+        // - incrementally installed apps.
+        if (pkg.isSystem() && !isUpdatedSystemApp) {
+            return false;
+        }
+        if (IncrementalManager.isIncrementalPath(pkg.getCodePath())) {
+            return false;
+        }
+        return true;
     }
 
     public static boolean hasComponentClassName(AndroidPackage pkg, String className) {

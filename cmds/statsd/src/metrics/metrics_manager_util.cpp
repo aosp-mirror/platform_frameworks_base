@@ -21,7 +21,6 @@
 
 #include <inttypes.h>
 
-#include "atoms_info.h"
 #include "FieldValue.h"
 #include "MetricProducer.h"
 #include "condition/CombinationConditionTracker.h"

@@ -21,6 +21,7 @@ import android.content.ComponentName
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import android.view.ViewStub
 import android.widget.Button
@@ -90,9 +91,14 @@ class ControlsProviderSelectorActivity @Inject constructor(
             text = resources.getText(R.string.controls_providers_title)
         }
 
-        requireViewById<Button>(R.id.done).setOnClickListener {
-            this@ControlsProviderSelectorActivity.finishAffinity()
+        requireViewById<Button>(R.id.other_apps).apply {
+            visibility = View.VISIBLE
+            setText(com.android.internal.R.string.cancel)
+            setOnClickListener {
+                this@ControlsProviderSelectorActivity.finishAffinity()
+            }
         }
+        requireViewById<View>(R.id.done).visibility = View.GONE
     }
 
     override fun onStart() {

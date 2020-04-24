@@ -88,6 +88,7 @@ import android.media.IStrategyPreferredDeviceDispatcher;
 import android.media.IVolumeController;
 import android.media.MediaExtractor;
 import android.media.MediaFormat;
+import android.media.MediaMetrics;
 import android.media.PlayerBase;
 import android.media.VolumePolicy;
 import android.media.audiofx.AudioEffect;
@@ -1880,6 +1881,16 @@ public class AudioService extends IAudioService.Stub
         synchronized (mExtVolumeControllerLock) {
             extVolCtlr = mExtVolumeController;
         }
+        new MediaMetrics.Item(mMetricsId + "adjustSuggestedStreamVolume")
+                .setUid(Binder.getCallingUid())
+                .set(MediaMetrics.Property.CALLING_PACKAGE, callingPackage)
+                .set(MediaMetrics.Property.CLIENT_NAME, caller)
+                .set(MediaMetrics.Property.DIRECTION, direction > 0
+                        ? MediaMetrics.Value.UP : MediaMetrics.Value.DOWN)
+                .set(MediaMetrics.Property.EXTERNAL, extVolCtlr != null
+                        ? MediaMetrics.Value.YES : MediaMetrics.Value.NO)
+                .set(MediaMetrics.Property.FLAGS, flags)
+                .record();
         if (extVolCtlr != null) {
             sendMsg(mAudioHandler, MSG_NOTIFY_VOL_EVENT, SENDMSG_QUEUE,
                     direction, 0 /*ignored*/,
@@ -3141,21 +3152,32 @@ public class AudioService extends IAudioService.Stub
         if (uid == android.os.Process.SYSTEM_UID) {
             uid = UserHandle.getUid(userId, UserHandle.getAppId(uid));
         }
+        MediaMetrics.Item mmi = new MediaMetrics.Item(MediaMetrics.Name.AUDIO_MIC)
+                .setUid(uid)
+                .set(MediaMetrics.Property.CALLING_PACKAGE, callingPackage)
+                .set(MediaMetrics.Property.EVENT, "setMicrophoneMute")
+                .set(MediaMetrics.Property.REQUEST, on
+                        ? MediaMetrics.Value.MUTE : MediaMetrics.Value.UNMUTE);
+
         // If OP_MUTE_MICROPHONE is set, disallow unmuting.
         if (!on && mAppOps.noteOp(AppOpsManager.OP_MUTE_MICROPHONE, uid, callingPackage)
                 != AppOpsManager.MODE_ALLOWED) {
+            mmi.set(MediaMetrics.Property.EARLY_RETURN, "disallow unmuting").record();
             return;
         }
         if (!checkAudioSettingsPermission("setMicrophoneMute()")) {
+            mmi.set(MediaMetrics.Property.EARLY_RETURN, "!checkAudioSettingsPermission").record();
             return;
         }
         if (userId != UserHandle.getCallingUserId() &&
                 mContext.checkCallingOrSelfPermission(
                 android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
                 != PackageManager.PERMISSION_GRANTED) {
+            mmi.set(MediaMetrics.Property.EARLY_RETURN, "permission").record();
             return;
         }
         mMicMuteFromApi = on;
+        mmi.record(); // record now, the no caller check will set the mute state.
         setMicrophoneMuteNoCallerCheck(userId);
     }
 
@@ -3167,6 +3189,12 @@ public class AudioService extends IAudioService.Stub
             return;
         }
         mMicMuteFromSwitch = on;
+        new MediaMetrics.Item(MediaMetrics.Name.AUDIO_MIC)
+                .setUid(userId)
+                .set(MediaMetrics.Property.EVENT, "setMicrophoneMuteFromSwitch")
+                .set(MediaMetrics.Property.REQUEST, on
+                        ? MediaMetrics.Value.MUTE : MediaMetrics.Value.UNMUTE)
+                .record();
         setMicrophoneMuteNoCallerCheck(userId);
     }
 
@@ -3207,6 +3235,17 @@ public class AudioService extends IAudioService.Stub
                 Log.e(TAG, "Error changing mic mute state to " + muted + " current:"
                         + mMicMuteFromSystemCached);
             }
+
+            new MediaMetrics.Item(MediaMetrics.Name.AUDIO_MIC)
+                    .setUid(userId)
+                    .set(MediaMetrics.Property.EVENT, "setMicrophoneMuteNoCallerCheck")
+                    .set(MediaMetrics.Property.MUTE, mMicMuteFromSystemCached
+                            ? MediaMetrics.Value.ON : MediaMetrics.Value.OFF)
+                    .set(MediaMetrics.Property.REQUEST, muted
+                            ? MediaMetrics.Value.MUTE : MediaMetrics.Value.UNMUTE)
+                    .set(MediaMetrics.Property.STATUS, ret)
+                    .record();
+
             try {
                 // send the intent even if there was a failure to change the actual mute state:
                 // the AudioManager.setMicrophoneMute API doesn't have a return value to
@@ -3941,10 +3980,20 @@ public class AudioService extends IAudioService.Stub
         }
 
         // for logging only
+        final int uid = Binder.getCallingUid();
+        final int pid = Binder.getCallingPid();
         final String eventSource = new StringBuilder("setSpeakerphoneOn(").append(on)
-                .append(") from u/pid:").append(Binder.getCallingUid()).append("/")
-                .append(Binder.getCallingPid()).toString();
+                .append(") from u/pid:").append(uid).append("/")
+                .append(pid).toString();
         final boolean stateChanged = mDeviceBroker.setSpeakerphoneOn(on, eventSource);
+        new MediaMetrics.Item(MediaMetrics.Name.AUDIO_DEVICE
+                + MediaMetrics.SEPARATOR + "setSpeakerphoneOn")
+                .setUid(uid)
+                .setPid(pid)
+                .set(MediaMetrics.Property.STATE, on
+                        ? MediaMetrics.Value.ON : MediaMetrics.Value.OFF)
+                .record();
+
         if (stateChanged) {
             final long ident = Binder.clearCallingIdentity();
             try {
@@ -3975,9 +4024,19 @@ public class AudioService extends IAudioService.Stub
         }
 
         // for logging only
+        final int uid = Binder.getCallingUid();
+        final int pid = Binder.getCallingPid();
         final String eventSource = new StringBuilder("setBluetoothScoOn(").append(on)
-                .append(") from u/pid:").append(Binder.getCallingUid()).append("/")
-                .append(Binder.getCallingPid()).toString();
+                .append(") from u/pid:").append(uid).append("/").append(pid).toString();
+
+        //bt sco
+        new MediaMetrics.Item(MediaMetrics.Name.AUDIO_DEVICE
+                + MediaMetrics.SEPARATOR + "setBluetoothScoOn")
+                .setUid(uid)
+                .setPid(pid)
+                .set(MediaMetrics.Property.STATE, on
+                        ? MediaMetrics.Value.ON : MediaMetrics.Value.OFF)
+                .record();
 
         mDeviceBroker.setBluetoothScoOn(on, eventSource);
     }
@@ -3993,9 +4052,20 @@ public class AudioService extends IAudioService.Stub
     /** @see AudioManager#setBluetoothA2dpOn(boolean) */
     public void setBluetoothA2dpOn(boolean on) {
         // for logging only
+        final int uid = Binder.getCallingUid();
+        final int pid = Binder.getCallingPid();
         final String eventSource = new StringBuilder("setBluetoothA2dpOn(").append(on)
-                .append(") from u/pid:").append(Binder.getCallingUid()).append("/")
-                .append(Binder.getCallingPid()).toString();
+                .append(") from u/pid:").append(uid).append("/")
+                .append(pid).toString();
+
+        new MediaMetrics.Item(MediaMetrics.Name.AUDIO_DEVICE
+                + MediaMetrics.SEPARATOR + "setBluetoothA2dpOn")
+                .setUid(uid)
+                .setPid(pid)
+                .set(MediaMetrics.Property.STATE, on
+                        ? MediaMetrics.Value.ON : MediaMetrics.Value.OFF)
+                .record();
+
         mDeviceBroker.setBluetoothA2dpOn_Async(on, eventSource);
     }
 
@@ -4006,31 +4076,59 @@ public class AudioService extends IAudioService.Stub
 
     /** @see AudioManager#startBluetoothSco() */
     public void startBluetoothSco(IBinder cb, int targetSdkVersion) {
+        final int uid = Binder.getCallingUid();
+        final int pid = Binder.getCallingPid();
         final int scoAudioMode =
                 (targetSdkVersion < Build.VERSION_CODES.JELLY_BEAN_MR2) ?
                         BtHelper.SCO_MODE_VIRTUAL_CALL : BtHelper.SCO_MODE_UNDEFINED;
         final String eventSource = new StringBuilder("startBluetoothSco()")
-                .append(") from u/pid:").append(Binder.getCallingUid()).append("/")
-                .append(Binder.getCallingPid()).toString();
+                .append(") from u/pid:").append(uid).append("/")
+                .append(pid).toString();
+
+        new MediaMetrics.Item(MediaMetrics.Name.AUDIO_BLUETOOTH)
+                .setUid(uid)
+                .setPid(pid)
+                .set(MediaMetrics.Property.EVENT, "startBluetoothSco")
+                .set(MediaMetrics.Property.SCO_AUDIO_MODE,
+                        BtHelper.scoAudioModeToString(scoAudioMode))
+                .record();
         startBluetoothScoInt(cb, scoAudioMode, eventSource);
+
     }
 
     /** @see AudioManager#startBluetoothScoVirtualCall() */
     public void startBluetoothScoVirtualCall(IBinder cb) {
+        final int uid = Binder.getCallingUid();
+        final int pid = Binder.getCallingPid();
         final String eventSource = new StringBuilder("startBluetoothScoVirtualCall()")
-                .append(") from u/pid:").append(Binder.getCallingUid()).append("/")
-                .append(Binder.getCallingPid()).toString();
+                .append(") from u/pid:").append(uid).append("/")
+                .append(pid).toString();
+
+        new MediaMetrics.Item(MediaMetrics.Name.AUDIO_BLUETOOTH)
+                .setUid(uid)
+                .setPid(pid)
+                .set(MediaMetrics.Property.EVENT, "startBluetoothScoVirtualCall")
+                .set(MediaMetrics.Property.SCO_AUDIO_MODE,
+                        BtHelper.scoAudioModeToString(BtHelper.SCO_MODE_VIRTUAL_CALL))
+                .record();
         startBluetoothScoInt(cb, BtHelper.SCO_MODE_VIRTUAL_CALL, eventSource);
     }
 
     void startBluetoothScoInt(IBinder cb, int scoAudioMode, @NonNull String eventSource) {
+        MediaMetrics.Item mmi = new MediaMetrics.Item(MediaMetrics.Name.AUDIO_BLUETOOTH)
+                .set(MediaMetrics.Property.EVENT, "startBluetoothScoInt")
+                .set(MediaMetrics.Property.SCO_AUDIO_MODE,
+                        BtHelper.scoAudioModeToString(scoAudioMode));
+
         if (!checkAudioSettingsPermission("startBluetoothSco()") ||
                 !mSystemReady) {
+            mmi.set(MediaMetrics.Property.EARLY_RETURN, "permission or systemReady").record();
             return;
         }
         synchronized (mDeviceBroker.mSetModeLock) {
             mDeviceBroker.startBluetoothScoForClient_Sync(cb, scoAudioMode, eventSource);
         }
+        mmi.record();
     }
 
     /** @see AudioManager#stopBluetoothSco() */
@@ -4039,12 +4137,21 @@ public class AudioService extends IAudioService.Stub
                 !mSystemReady) {
             return;
         }
+        final int uid = Binder.getCallingUid();
+        final int pid = Binder.getCallingPid();
         final String eventSource =  new StringBuilder("stopBluetoothSco()")
-                .append(") from u/pid:").append(Binder.getCallingUid()).append("/")
-                .append(Binder.getCallingPid()).toString();
+                .append(") from u/pid:").append(uid).append("/")
+                .append(pid).toString();
         synchronized (mDeviceBroker.mSetModeLock) {
             mDeviceBroker.stopBluetoothScoForClient_Sync(cb, eventSource);
         }
+        new MediaMetrics.Item(MediaMetrics.Name.AUDIO_BLUETOOTH)
+                .setUid(uid)
+                .setPid(pid)
+                .set(MediaMetrics.Property.EVENT, "stopBluetoothSco")
+                .set(MediaMetrics.Property.SCO_AUDIO_MODE,
+                        BtHelper.scoAudioModeToString(BtHelper.SCO_MODE_UNDEFINED))
+                .record();
     }
 
 
@@ -4806,6 +4913,14 @@ public class AudioService extends IAudioService.Stub
                 && state != CONNECTION_STATE_DISCONNECTED) {
             throw new IllegalArgumentException("Invalid state " + state);
         }
+        new MediaMetrics.Item(mMetricsId + "setWiredDeviceConnectionState")
+                .set(MediaMetrics.Property.ADDRESS, address)
+                .set(MediaMetrics.Property.CLIENT_NAME, caller)
+                .set(MediaMetrics.Property.DEVICE, AudioSystem.getDeviceName(type))
+                .set(MediaMetrics.Property.NAME, name)
+                .set(MediaMetrics.Property.STATE,
+                        state == CONNECTION_STATE_CONNECTED ? "connected" : "disconnected")
+                .record();
         mDeviceBroker.setWiredDeviceConnectionState(type, state, address, name, caller);
     }
 
@@ -5266,7 +5381,32 @@ public class AudioService extends IAudioService.Stub
         private String mVolumeIndexSettingName;
         private int mObservedDevices;
 
-        private final SparseIntArray mIndexMap = new SparseIntArray(8);
+        private final SparseIntArray mIndexMap = new SparseIntArray(8) {
+            @Override
+            public void put(int key, int value) {
+                super.put(key, value);
+                record("put", key, value);
+            }
+            @Override
+            public void setValueAt(int index, int value) {
+                super.setValueAt(index, value);
+                record("setValueAt", keyAt(index), value);
+            }
+
+            // Record all changes in the VolumeStreamState
+            private void record(String event, int key, int value) {
+                final String device = key == AudioSystem.DEVICE_OUT_DEFAULT ? "default"
+                        : AudioSystem.getOutputDeviceName(key);
+                new MediaMetrics.Item(MediaMetrics.Name.AUDIO_VOLUME + MediaMetrics.SEPARATOR
+                        + AudioSystem.streamToString(mStreamType)
+                        + "." + device)
+                        .set(MediaMetrics.Property.EVENT, event)
+                        .set(MediaMetrics.Property.INDEX, value)
+                        .set(MediaMetrics.Property.MIN_INDEX, mIndexMin)
+                        .set(MediaMetrics.Property.MAX_INDEX, mIndexMax)
+                        .record();
+            }
+        };
         private final Intent mVolumeChanged;
         private final Intent mStreamDevicesChanged;
 
@@ -5949,6 +6089,13 @@ public class AudioService extends IAudioService.Stub
                                 + eventSource);
                         break;
                     }
+                    new MediaMetrics.Item(MediaMetrics.Name.AUDIO_FORCE_USE
+                            + MediaMetrics.SEPARATOR + AudioSystem.forceUseUsageToString(useCase))
+                            .set(MediaMetrics.Property.EVENT, "setForceUse")
+                            .set(MediaMetrics.Property.FORCE_USE_DUE_TO, eventSource)
+                            .set(MediaMetrics.Property.FORCE_USE_MODE,
+                                    AudioSystem.forceUseConfigToString(config))
+                            .record();
                     sForceUseLogger.log(
                             new AudioServiceEvents.ForceUseEvent(useCase, config, eventSource));
                     AudioSystem.setForceUse(useCase, config);
@@ -6450,23 +6597,42 @@ public class AudioService extends IAudioService.Stub
     public int requestAudioFocus(AudioAttributes aa, int durationHint, IBinder cb,
             IAudioFocusDispatcher fd, String clientId, String callingPackageName, int flags,
             IAudioPolicyCallback pcb, int sdk) {
+        final int uid = Binder.getCallingUid();
+        MediaMetrics.Item mmi = new MediaMetrics.Item(mMetricsId + "focus")
+                .setUid(uid)
+                //.putInt("durationHint", durationHint)
+                .set(MediaMetrics.Property.CALLING_PACKAGE, callingPackageName)
+                .set(MediaMetrics.Property.CLIENT_NAME, clientId)
+                .set(MediaMetrics.Property.EVENT, "requestAudioFocus")
+                .set(MediaMetrics.Property.FLAGS, flags);
+
         // permission checks
         if (aa != null && !isValidAudioAttributesUsage(aa)) {
-            Log.w(TAG, "Request using unsupported usage.");
+            final String reason = "Request using unsupported usage";
+            Log.w(TAG, reason);
+            mmi.set(MediaMetrics.Property.EARLY_RETURN, reason)
+                    .record();
             return AudioManager.AUDIOFOCUS_REQUEST_FAILED;
         }
         if ((flags & AudioManager.AUDIOFOCUS_FLAG_LOCK) == AudioManager.AUDIOFOCUS_FLAG_LOCK) {
             if (AudioSystem.IN_VOICE_COMM_FOCUS_ID.equals(clientId)) {
                 if (PackageManager.PERMISSION_GRANTED != mContext.checkCallingOrSelfPermission(
                             android.Manifest.permission.MODIFY_PHONE_STATE)) {
-                    Log.e(TAG, "Invalid permission to (un)lock audio focus", new Exception());
+                    final String reason = "Invalid permission to (un)lock audio focus";
+                    Log.e(TAG, reason, new Exception());
+                    mmi.set(MediaMetrics.Property.EARLY_RETURN, reason)
+                            .record();
                     return AudioManager.AUDIOFOCUS_REQUEST_FAILED;
                 }
             } else {
                 // only a registered audio policy can be used to lock focus
                 synchronized (mAudioPolicies) {
                     if (!mAudioPolicies.containsKey(pcb.asBinder())) {
-                        Log.e(TAG, "Invalid unregistered AudioPolicy to (un)lock audio focus");
+                        final String reason =
+                                "Invalid unregistered AudioPolicy to (un)lock audio focus";
+                        Log.e(TAG, reason);
+                        mmi.set(MediaMetrics.Property.EARLY_RETURN, reason)
+                                .record();
                         return AudioManager.AUDIOFOCUS_REQUEST_FAILED;
                     }
                 }
@@ -6474,25 +6640,40 @@ public class AudioService extends IAudioService.Stub
         }
 
         if (callingPackageName == null || clientId == null || aa == null) {
-            Log.e(TAG, "Invalid null parameter to request audio focus");
+            final String reason = "Invalid null parameter to request audio focus";
+            Log.e(TAG, reason);
+            mmi.set(MediaMetrics.Property.EARLY_RETURN, reason)
+                    .record();
             return AudioManager.AUDIOFOCUS_REQUEST_FAILED;
         }
-
+        mmi.record();
         return mMediaFocusControl.requestAudioFocus(aa, durationHint, cb, fd,
                 clientId, callingPackageName, flags, sdk,
-                forceFocusDuckingForAccessibility(aa, durationHint, Binder.getCallingUid()));
+                forceFocusDuckingForAccessibility(aa, durationHint, uid));
     }
 
     public int abandonAudioFocus(IAudioFocusDispatcher fd, String clientId, AudioAttributes aa,
             String callingPackageName) {
+        MediaMetrics.Item mmi = new MediaMetrics.Item(mMetricsId + "focus")
+                .set(MediaMetrics.Property.CALLING_PACKAGE, callingPackageName)
+                .set(MediaMetrics.Property.CLIENT_NAME, clientId)
+                .set(MediaMetrics.Property.EVENT, "abandonAudioFocus");
+
         if (aa != null && !isValidAudioAttributesUsage(aa)) {
             Log.w(TAG, "Request using unsupported usage.");
+            mmi.set(MediaMetrics.Property.EARLY_RETURN, "unsupported usage").record();
+
             return AudioManager.AUDIOFOCUS_REQUEST_FAILED;
         }
+        mmi.record();
         return mMediaFocusControl.abandonAudioFocus(fd, clientId, aa, callingPackageName);
     }
 
     public void unregisterAudioFocusClient(String clientId) {
+        new MediaMetrics.Item(mMetricsId + "focus")
+                .set(MediaMetrics.Property.CLIENT_NAME, clientId)
+                .set(MediaMetrics.Property.EVENT, "unregisterAudioFocusClient")
+                .record();
         mMediaFocusControl.unregisterAudioFocusClient(clientId);
     }
 
@@ -7065,6 +7246,12 @@ public class AudioService extends IAudioService.Stub
             }
         }
     }
+
+    /**
+     * Audio Analytics ids.
+     */
+    private static final String mMetricsId = MediaMetrics.Name.AUDIO_SERVICE
+            + MediaMetrics.SEPARATOR;
 
     private static String safeMediaVolumeStateToString(int state) {
         switch(state) {
