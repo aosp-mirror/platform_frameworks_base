@@ -22,16 +22,23 @@ import static android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK;
 import static android.net.NetworkStack.checkNetworkStackPermission;
 import static android.net.NetworkStack.checkNetworkStackPermissionOr;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
+import android.os.Build;
+import android.os.IBinder;
 
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.testutils.DevSdkIgnoreRule;
+import com.android.testutils.DevSdkIgnoreRule.IgnoreUpTo;
+
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -41,7 +48,11 @@ import org.mockito.MockitoAnnotations;
 public class NetworkStackTest {
     private static final String [] OTHER_PERMISSION = {"otherpermission1", "otherpermission2"};
 
+    @Rule
+    public DevSdkIgnoreRule mDevSdkIgnoreRule = new DevSdkIgnoreRule();
+
     @Mock Context mCtx;
+    @Mock private IBinder mConnectorBinder;
 
     @Before public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
@@ -71,5 +82,11 @@ public class NetworkStackTest {
         }
 
         fail("Expect fail but permission granted.");
+    }
+
+    @Test @IgnoreUpTo(Build.VERSION_CODES.Q)
+    public void testGetService() {
+        NetworkStack.setServiceForTest(mConnectorBinder);
+        assertEquals(NetworkStack.getService(), mConnectorBinder);
     }
 }
