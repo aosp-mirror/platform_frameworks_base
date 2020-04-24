@@ -346,6 +346,13 @@ public class CarKeyguardViewController extends OverlayViewController implements
     private void revealKeyguardIfBouncerPrepared() {
         int reattemptDelayMillis = 50;
         Runnable revealKeyguard = () -> {
+            if (mBouncer == null) {
+                if (DEBUG) {
+                    Log.d(TAG, "revealKeyguardIfBouncerPrepared: revealKeyguard request is ignored "
+                                    + "since the Bouncer has not been initialized yet.");
+                }
+                return;
+            }
             if (!mBouncer.inTransit() || !mBouncer.isSecure()) {
                 getLayout().setVisibility(View.VISIBLE);
             } else {
