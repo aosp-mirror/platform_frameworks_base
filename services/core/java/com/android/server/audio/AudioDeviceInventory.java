@@ -1118,7 +1118,7 @@ public class AudioDeviceInventory {
                 && AudioSystem.isSingleAudioDeviceType(devices, device)
                 && !mDeviceBroker.hasMediaDynamicPolicy()
                 && (musicDevice != AudioSystem.DEVICE_OUT_REMOTE_SUBMIX)) {
-            if (!AudioSystem.isStreamActive(AudioSystem.STREAM_MUSIC, 0 /*not looking in past*/)
+            if (!mAudioSystem.isStreamActive(AudioSystem.STREAM_MUSIC, 0 /*not looking in past*/)
                     && !mDeviceBroker.hasAudioFocusUsers()) {
                 // no media playback, not a "becoming noisy" situation, otherwise it could cause
                 // the pausing of some apps that are playing remotely
