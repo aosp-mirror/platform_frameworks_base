@@ -25,6 +25,8 @@ import static android.view.accessibility.AccessibilityManager.STATE_FLAG_ACCESSI
 import static android.view.accessibility.AccessibilityManager.STATE_FLAG_HIGH_TEXT_CONTRAST_ENABLED;
 import static android.view.accessibility.AccessibilityManager.STATE_FLAG_TOUCH_EXPLORATION_ENABLED;
 
+import static com.android.server.accessibility.AccessibilityUserState.doesShortcutTargetsStringContain;
+
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNull;
@@ -41,6 +43,7 @@ import android.content.Context;
 import android.provider.Settings;
 import android.test.mock.MockContentResolver;
 import android.testing.DexmakerShareClassLoaderRule;
+import android.util.ArraySet;
 
 import com.android.internal.util.test.FakeSettingsProvider;
 
@@ -56,6 +59,12 @@ public class AccessibilityUserStateTest {
 
     private static final ComponentName COMPONENT_NAME =
             new ComponentName("com.android.server.accessibility", "AccessibilityUserStateTest");
+    private static final ComponentName COMPONENT_NAME1 =
+            new ComponentName("com.android.server.accessibility",
+                    "com.android.server.accessibility.AccessibilityUserStateTest1");
+    private static final ComponentName COMPONENT_NAME2 =
+            new ComponentName("com.android.server.accessibility",
+                    "com.android.server.accessibility.AccessibilityUserStateTest2");
 
     // Values of setting key SHOW_IME_WITH_HARD_KEYBOARD
     private static final int STATE_HIDE_IME = 0;
@@ -111,6 +120,7 @@ public class AccessibilityUserStateTest {
         mUserState.mTouchExplorationGrantedServices.add(COMPONENT_NAME);
         mUserState.mAccessibilityShortcutKeyTargets.add(COMPONENT_NAME.flattenToString());
         mUserState.mAccessibilityButtonTargets.add(COMPONENT_NAME.flattenToString());
+        mUserState.setTargetAssignedToAccessibilityButton(COMPONENT_NAME.flattenToString());
         mUserState.setTouchExplorationEnabledLocked(true);
         mUserState.setDisplayMagnificationEnabledLocked(true);
         mUserState.setAutoclickEnabledLocked(true);
@@ -129,6 +139,7 @@ public class AccessibilityUserStateTest {
         assertTrue(mUserState.mTouchExplorationGrantedServices.isEmpty());
         assertTrue(mUserState.mAccessibilityShortcutKeyTargets.isEmpty());
         assertTrue(mUserState.mAccessibilityButtonTargets.isEmpty());
+        assertNull(mUserState.getTargetAssignedToAccessibilityButton());
         assertFalse(mUserState.isTouchExplorationEnabledLocked());
         assertFalse(mUserState.isDisplayMagnificationEnabledLocked());
         assertFalse(mUserState.isAutoclickEnabledLocked());
@@ -283,6 +294,31 @@ public class AccessibilityUserStateTest {
         assertTrue(mUserState.setSoftKeyboardModeLocked(SHOW_MODE_HIDDEN, COMPONENT_NAME));
 
         verify(mMockConnection).notifySoftKeyboardShowModeChangedLocked(eq(SHOW_MODE_HIDDEN));
+    }
+
+    @Test
+    public void doesShortcutTargetsStringContain_returnFalse() {
+        assertFalse(doesShortcutTargetsStringContain(null, null));
+        assertFalse(doesShortcutTargetsStringContain(null,
+                COMPONENT_NAME.flattenToShortString()));
+        assertFalse(doesShortcutTargetsStringContain(new ArraySet<>(), null));
+
+        final ArraySet<String> shortcutTargets = new ArraySet<>();
+        shortcutTargets.add(COMPONENT_NAME.flattenToString());
+        assertFalse(doesShortcutTargetsStringContain(shortcutTargets,
+                COMPONENT_NAME1.flattenToString()));
+    }
+
+    @Test
+    public void isAssignedToShortcutLocked_withDifferentTypeComponentString_returnTrue() {
+        final ArraySet<String> shortcutTargets = new ArraySet<>();
+        shortcutTargets.add(COMPONENT_NAME1.flattenToShortString());
+        shortcutTargets.add(COMPONENT_NAME2.flattenToString());
+
+        assertTrue(doesShortcutTargetsStringContain(shortcutTargets,
+                COMPONENT_NAME1.flattenToString()));
+        assertTrue(doesShortcutTargetsStringContain(shortcutTargets,
+                COMPONENT_NAME2.flattenToShortString()));
     }
 
     @Test
