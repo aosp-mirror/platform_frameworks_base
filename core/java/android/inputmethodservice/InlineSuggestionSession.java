@@ -169,6 +169,7 @@ class InlineSuggestionSession {
                 mCallback.onInlineSuggestionsUnsupported();
             } else {
                 request.setHostInputToken(mHostInputTokenSupplier.get());
+                request.filterContentTypes();
                 mResponseCallback = new InlineSuggestionsResponseCallbackImpl(this);
                 mCallback.onInlineSuggestionsRequest(request, mResponseCallback);
             }
