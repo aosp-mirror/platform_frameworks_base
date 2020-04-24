@@ -23,7 +23,6 @@ import static com.android.internal.accessibility.common.ShortcutConstants.Shortc
 import static com.android.internal.accessibility.dialog.AccessibilityTargetHelper.createEnableDialogContentView;
 import static com.android.internal.accessibility.dialog.AccessibilityTargetHelper.getInstalledTargets;
 import static com.android.internal.accessibility.dialog.AccessibilityTargetHelper.getTargets;
-import static com.android.internal.util.Preconditions.checkArgument;
 
 import android.annotation.Nullable;
 import android.app.Activity;
@@ -33,7 +32,6 @@ import android.content.res.TypedArray;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
-import android.view.accessibility.AccessibilityManager;
 import android.widget.AdapterView;
 
 import com.android.internal.R;
@@ -47,7 +45,7 @@ import java.util.List;
  */
 public class AccessibilityShortcutChooserActivity extends Activity {
     @ShortcutType
-    private int mShortcutType;
+    private final int mShortcutType = ACCESSIBILITY_SHORTCUT_KEY;
     private final List<AccessibilityTarget> mTargets = new ArrayList<>();
     private AlertDialog mMenuDialog;
     private AlertDialog mPermissionDialog;
@@ -61,12 +59,6 @@ public class AccessibilityShortcutChooserActivity extends Activity {
         if (!theme.getBoolean(android.R.styleable.Theme_windowNoTitle, /* defValue= */ false)) {
             requestWindowFeature(Window.FEATURE_NO_TITLE);
         }
-
-        mShortcutType = getIntent().getIntExtra(AccessibilityManager.EXTRA_SHORTCUT_TYPE,
-                /* unexpectedShortcutType */ -1);
-        final boolean existInShortcutType = (mShortcutType == ACCESSIBILITY_BUTTON)
-                || (mShortcutType == ACCESSIBILITY_SHORTCUT_KEY);
-        checkArgument(existInShortcutType, "Unexpected shortcut type: " + mShortcutType);
 
         mTargets.addAll(getTargets(this, mShortcutType));
 
