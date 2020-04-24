@@ -725,6 +725,9 @@ public class PackageDexOptimizer {
         } catch (IOException ioe) {
             Slog.w(TAG, "IOException reading apk: " + path, ioe);
             return DEX_OPT_FAILED;
+        } catch (Exception e) {
+            Slog.wtf(TAG, "Unexpected exception when calling dexoptNeeded on " + path, e);
+            return DEX_OPT_FAILED;
         }
         return adjustDexoptNeeded(dexoptNeeded);
     }
