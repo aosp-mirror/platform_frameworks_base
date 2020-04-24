@@ -494,6 +494,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * The launching activity which is using fixed rotation transformation.
      *
      * @see #handleTopActivityLaunchingInDifferentOrientation
+     * @see #setFixedRotationLaunchingApp
      * @see DisplayRotation#shouldRotateSeamlessly
      */
     ActivityRecord mFixedRotationLaunchingApp;
@@ -1451,6 +1452,15 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             return false;
         }
 
+        setFixedRotationLaunchingApp(r, rotation);
+        return true;
+    }
+
+    /**
+     * Sets the provided record to {@link mFixedRotationLaunchingApp} if possible to apply fixed
+     * rotation transform to it and indicate that the display may be rotated after it is launched.
+     */
+    void setFixedRotationLaunchingApp(@NonNull ActivityRecord r, @Surface.Rotation int rotation) {
         final WindowToken prevRotatedLaunchingApp = mFixedRotationLaunchingApp;
         if (prevRotatedLaunchingApp != null
                 && prevRotatedLaunchingApp.getWindowConfiguration().getRotation() == rotation
@@ -1461,15 +1471,16 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             // the heavy operations. This also benefits that the states of multiple activities
             // are handled together.
             r.linkFixedRotationTransform(prevRotatedLaunchingApp);
-            return true;
+            return;
         }
 
-        startFixedRotationTransform(r, rotation);
+        if (!r.hasFixedRotationTransform()) {
+            startFixedRotationTransform(r, rotation);
+        }
         mFixedRotationLaunchingApp = r;
         if (prevRotatedLaunchingApp != null) {
             prevRotatedLaunchingApp.finishFixedRotationTransform();
         }
-        return true;
     }
 
     /**
@@ -5497,10 +5508,51 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     /** The entry for proceeding to handle {@link #mFixedRotationLaunchingApp}. */
     class FixedRotationTransitionListener extends WindowManagerInternal.AppTransitionListener {
 
+        /**
+         * The animating activity which shows the recents task list. It is set between
+         * {@link RecentsAnimationController#initialize} and
+         * {@link RecentsAnimationController#cancelAnimation}.
+         */
+        private ActivityRecord mAnimatingRecents;
+
+        /**
+         * If the recents activity has a fixed orientation which is different from the current top
+         * activity, it will be rotated before being shown so we avoid a screen rotation animation
+         * when showing the Recents view.
+         */
+        void onStartRecentsAnimation(@NonNull ActivityRecord r) {
+            mAnimatingRecents = r;
+            rotateInDifferentOrientationIfNeeded(r);
+            if (r.hasFixedRotationTransform()) {
+                // Set the record so we can recognize it to continue to update display orientation
+                // if the recents activity becomes the top later.
+                setFixedRotationLaunchingApp(r, r.getWindowConfiguration().getRotation());
+            }
+        }
+
+        /**
+         * If {@link #mAnimatingRecents} still has fixed rotation, it should be moved to top so we
+         * don't clear {@link #mFixedRotationLaunchingApp} that will be handled by transition.
+         */
+        void onFinishRecentsAnimation() {
+            final ActivityRecord animatingRecents = mAnimatingRecents;
+            mAnimatingRecents = null;
+            if (animatingRecents != null && animatingRecents == mFixedRotationLaunchingApp
+                    && !animatingRecents.hasFixedRotationTransform()) {
+                // The recents activity won't be the top, such as giving up the swipe up gesture
+                // and return to the original top.
+                mFixedRotationLaunchingApp = null;
+            }
+        }
+
         @Override
         public void onAppTransitionFinishedLocked(IBinder token) {
             final ActivityRecord r = getActivityRecord(token);
-            if (r == null) {
+            // Ignore the animating recents so the fixed rotation transform won't be switched twice
+            // by finishing the recents animation and moving it to top. That also avoids flickering
+            // due to wait for previous activity to be paused if it supports PiP that ignores the
+            // effect of resume-while-pausing.
+            if (r == null || r == mAnimatingRecents) {
                 return;
             }
             if (mFixedRotationLaunchingApp != null
