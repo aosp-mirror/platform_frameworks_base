@@ -18,10 +18,8 @@ package com.android.internal.accessibility.dialog;
 
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL;
 import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_BUTTON;
-import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_SHORTCUT_KEY;
 
 import static com.android.internal.accessibility.dialog.AccessibilityTargetHelper.getTargets;
-import static com.android.internal.util.Preconditions.checkArgument;
 
 import android.annotation.Nullable;
 import android.app.Activity;
@@ -49,12 +47,6 @@ public class AccessibilityButtonChooserActivity extends Activity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.accessibility_button_chooser);
-
-        final int shortcutType = getIntent().getIntExtra(AccessibilityManager.EXTRA_SHORTCUT_TYPE,
-                /* unexpectedShortcutType */ -1);
-        final boolean existInShortcutType = (shortcutType == ACCESSIBILITY_BUTTON)
-                || (shortcutType == ACCESSIBILITY_SHORTCUT_KEY);
-        checkArgument(existInShortcutType, "Unexpected shortcut type: " + shortcutType);
 
         final ResolverDrawerLayout rdl = findViewById(R.id.contentPanel);
         if (rdl != null) {
@@ -89,7 +81,7 @@ public class AccessibilityButtonChooserActivity extends Activity {
             prompt.setVisibility(View.VISIBLE);
         }
 
-        mTargets.addAll(getTargets(this, shortcutType));
+        mTargets.addAll(getTargets(this, ACCESSIBILITY_BUTTON));
 
         final GridView gridview = findViewById(R.id.accessibility_button_chooser_grid);
         gridview.setAdapter(new ButtonTargetAdapter(mTargets));
