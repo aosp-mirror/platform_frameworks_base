@@ -42,10 +42,13 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.statusbar.phone.DozeParameters;
+import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.sensors.AsyncSensorManager;
 import com.android.systemui.util.sensors.FakeProximitySensor;
 import com.android.systemui.util.sensors.FakeSensorManager;
+import com.android.systemui.util.sensors.FakeThresholdSensor;
 import com.android.systemui.util.sensors.ProximitySensor;
+import com.android.systemui.util.time.FakeSystemClock;
 import com.android.systemui.util.wakelock.WakeLock;
 import com.android.systemui.util.wakelock.WakeLockFake;
 
@@ -71,10 +74,12 @@ public class DozeTriggersTest extends SysuiTestCase {
     private BroadcastDispatcher mBroadcastDispatcher;
     @Mock
     private DockManager mDockManager;
+
     private DozeTriggers mTriggers;
     private FakeSensorManager mSensors;
     private Sensor mTapSensor;
     private FakeProximitySensor mProximitySensor;
+    private FakeExecutor mExecutor = new FakeExecutor(new FakeSystemClock());
 
     @Before
     public void setUp() throws Exception {
@@ -86,7 +91,10 @@ public class DozeTriggersTest extends SysuiTestCase {
         WakeLock wakeLock = new WakeLockFake();
         AsyncSensorManager asyncSensorManager =
                 new AsyncSensorManager(mSensors, null, new Handler());
-        mProximitySensor = new FakeProximitySensor(getContext().getResources(), asyncSensorManager);
+
+        FakeThresholdSensor thresholdSensor = new FakeThresholdSensor();
+        thresholdSensor.setLoaded(true);
+        mProximitySensor = new FakeProximitySensor(thresholdSensor,  null, mExecutor);
 
         mTriggers = new DozeTriggers(mContext, mMachine, mHost, mAlarmManager, config, parameters,
                 asyncSensorManager, Handler.createAsync(Looper.myLooper()), wakeLock, true,
@@ -104,17 +112,17 @@ public class DozeTriggersTest extends SysuiTestCase {
         mTriggers.transitionTo(DozeMachine.State.INITIALIZED, DozeMachine.State.DOZE);
         clearInvocations(mMachine);
 
-        mProximitySensor.setLastEvent(new ProximitySensor.ProximityEvent(true, 1));
+        mProximitySensor.setLastEvent(new ProximitySensor.ThresholdSensorEvent(true, 1));
         captor.getValue().onNotificationAlerted(null /* pulseSuppressedListener */);
         mProximitySensor.alertListeners();
 
         verify(mMachine, never()).requestState(any());
         verify(mMachine, never()).requestPulse(anyInt());
 
-        captor.getValue().onNotificationAlerted(null /* pulseSuppressedListener */);
-        waitForSensorManager();
-        mProximitySensor.setLastEvent(new ProximitySensor.ProximityEvent(false, 2));
+        mProximitySensor.setLastEvent(new ProximitySensor.ThresholdSensorEvent(false, 2));
         mProximitySensor.alertListeners();
+        waitForSensorManager();
+        captor.getValue().onNotificationAlerted(null /* pulseSuppressedListener */);
 
         verify(mMachine).requestPulse(anyInt());
     }

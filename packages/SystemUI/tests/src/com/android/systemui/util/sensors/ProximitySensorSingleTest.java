@@ -21,33 +21,40 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import android.os.Handler;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.util.concurrency.FakeExecutor;
+import com.android.systemui.util.time.FakeSystemClock;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.MockitoAnnotations;
 
+/**
+ * Tests for ProximitySensor that rely on a single hardware sensor.
+ */
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
-public class ProximitySensorTest extends SysuiTestCase {
-
+public class ProximitySensorSingleTest extends SysuiTestCase {
     private ProximitySensor mProximitySensor;
-    private FakeSensorManager.FakeProximitySensor mFakeProximitySensor;
+    private FakeExecutor mFakeExecutor = new FakeExecutor(new FakeSystemClock());
+    private FakeThresholdSensor mThresholdSensor;
 
     @Before
     public void setUp() throws Exception {
-        FakeSensorManager sensorManager = new FakeSensorManager(getContext());
-        AsyncSensorManager asyncSensorManager = new AsyncSensorManager(
-                sensorManager, null, new Handler());
-        mFakeProximitySensor = sensorManager.getFakeProximitySensor();
-        mProximitySensor = new ProximitySensor(getContext().getResources(), asyncSensorManager);
+        MockitoAnnotations.initMocks(this);
+        allowTestableLooperAsMainThread();
+        mThresholdSensor = new FakeThresholdSensor();
+        mThresholdSensor.setLoaded(true);
+
+        mProximitySensor = new ProximitySensor(
+                mThresholdSensor, new FakeThresholdSensor(), mFakeExecutor);
     }
 
     @Test
@@ -56,19 +63,17 @@ public class ProximitySensorTest extends SysuiTestCase {
 
         assertFalse(mProximitySensor.isRegistered());
         mProximitySensor.register(listener);
-        waitForSensorManager();
         assertTrue(mProximitySensor.isRegistered());
         assertNull(listener.mLastEvent);
 
-        mFakeProximitySensor.sendProximityResult(true);
-        assertFalse(listener.mLastEvent.getNear());
-        assertEquals(listener.mCallCount, 1);
-        mFakeProximitySensor.sendProximityResult(false);
-        assertTrue(listener.mLastEvent.getNear());
-        assertEquals(listener.mCallCount, 2);
+        mThresholdSensor.triggerEvent(false, 0);
+        assertFalse(listener.mLastEvent.getBelow());
+        assertEquals(1, listener.mCallCount);
+        mThresholdSensor.triggerEvent(true, 0);
+        assertTrue(listener.mLastEvent.getBelow());
+        assertEquals(2, listener.mCallCount);
 
         mProximitySensor.unregister(listener);
-        waitForSensorManager();
     }
 
     @Test
@@ -79,28 +84,25 @@ public class ProximitySensorTest extends SysuiTestCase {
         assertFalse(mProximitySensor.isRegistered());
 
         mProximitySensor.register(listenerA);
-        waitForSensorManager();
         assertTrue(mProximitySensor.isRegistered());
         mProximitySensor.register(listenerB);
-        waitForSensorManager();
         assertTrue(mProximitySensor.isRegistered());
         assertNull(listenerA.mLastEvent);
         assertNull(listenerB.mLastEvent);
 
-        mFakeProximitySensor.sendProximityResult(true);
-        assertFalse(listenerA.mLastEvent.getNear());
-        assertFalse(listenerB.mLastEvent.getNear());
-        assertEquals(listenerA.mCallCount, 1);
-        assertEquals(listenerB.mCallCount, 1);
-        mFakeProximitySensor.sendProximityResult(false);
-        assertTrue(listenerA.mLastEvent.getNear());
-        assertTrue(listenerB.mLastEvent.getNear());
-        assertEquals(listenerA.mCallCount, 2);
-        assertEquals(listenerB.mCallCount, 2);
+        mThresholdSensor.triggerEvent(false, 0);
+        assertFalse(listenerA.mLastEvent.getBelow());
+        assertFalse(listenerB.mLastEvent.getBelow());
+        assertEquals(1, listenerA.mCallCount);
+        assertEquals(1, listenerB.mCallCount);
+        mThresholdSensor.triggerEvent(true, 1);
+        assertTrue(listenerA.mLastEvent.getBelow());
+        assertTrue(listenerB.mLastEvent.getBelow());
+        assertEquals(2, listenerA.mCallCount);
+        assertEquals(2, listenerB.mCallCount);
 
         mProximitySensor.unregister(listenerA);
         mProximitySensor.unregister(listenerB);
-        waitForSensorManager();
     }
 
     @Test
@@ -110,22 +112,19 @@ public class ProximitySensorTest extends SysuiTestCase {
         assertFalse(mProximitySensor.isRegistered());
 
         mProximitySensor.register(listenerA);
-        waitForSensorManager();
         assertTrue(mProximitySensor.isRegistered());
         mProximitySensor.register(listenerA);
-        waitForSensorManager();
         assertTrue(mProximitySensor.isRegistered());
         assertNull(listenerA.mLastEvent);
 
-        mFakeProximitySensor.sendProximityResult(true);
-        assertFalse(listenerA.mLastEvent.getNear());
-        assertEquals(listenerA.mCallCount, 1);
-        mFakeProximitySensor.sendProximityResult(false);
-        assertTrue(listenerA.mLastEvent.getNear());
-        assertEquals(listenerA.mCallCount, 2);
+        mThresholdSensor.triggerEvent(false, 0);
+        assertFalse(listenerA.mLastEvent.getBelow());
+        assertEquals(1, listenerA.mCallCount);
+        mThresholdSensor.triggerEvent(true, 1);
+        assertTrue(listenerA.mLastEvent.getBelow());
+        assertEquals(2, listenerA.mCallCount);
 
         mProximitySensor.unregister(listenerA);
-        waitForSensorManager();
     }
     @Test
     public void testUnregister() {
@@ -133,16 +132,14 @@ public class ProximitySensorTest extends SysuiTestCase {
 
         assertFalse(mProximitySensor.isRegistered());
         mProximitySensor.register(listener);
-        waitForSensorManager();
         assertTrue(mProximitySensor.isRegistered());
         assertNull(listener.mLastEvent);
 
-        mFakeProximitySensor.sendProximityResult(true);
-        assertFalse(listener.mLastEvent.getNear());
-        assertEquals(listener.mCallCount, 1);
+        mThresholdSensor.triggerEvent(false, 0);
+        assertFalse(listener.mLastEvent.getBelow());
+        assertEquals(1, listener.mCallCount);
 
         mProximitySensor.unregister(listener);
-        waitForSensorManager();
         assertFalse(mProximitySensor.isRegistered());
     }
 
@@ -152,39 +149,35 @@ public class ProximitySensorTest extends SysuiTestCase {
 
         assertFalse(mProximitySensor.isRegistered());
         mProximitySensor.register(listener);
-        waitForSensorManager();
         assertTrue(mProximitySensor.isRegistered());
         assertNull(listener.mLastEvent);
 
-        mFakeProximitySensor.sendProximityResult(true);
-        assertFalse(listener.mLastEvent.getNear());
-        assertEquals(listener.mCallCount, 1);
+        mThresholdSensor.triggerEvent(false, 0);
+        assertFalse(listener.mLastEvent.getBelow());
+        assertEquals(1, listener.mCallCount);
 
         mProximitySensor.pause();
-        waitForSensorManager();
         assertFalse(mProximitySensor.isRegistered());
 
         // More events do nothing when paused.
-        mFakeProximitySensor.sendProximityResult(true);
-        assertFalse(listener.mLastEvent.getNear());
-        assertEquals(listener.mCallCount, 1);
-        mFakeProximitySensor.sendProximityResult(false);
-        assertFalse(listener.mLastEvent.getNear());
-        assertEquals(listener.mCallCount, 1);
+        mThresholdSensor.triggerEvent(false, 1);
+        assertFalse(listener.mLastEvent.getBelow());
+        assertEquals(1, listener.mCallCount);
+        mThresholdSensor.triggerEvent(true, 2);
+        assertFalse(listener.mLastEvent.getBelow());
+        assertEquals(1, listener.mCallCount);
 
         mProximitySensor.resume();
-        waitForSensorManager();
         assertTrue(mProximitySensor.isRegistered());
         // Still matches our previous call
-        assertFalse(listener.mLastEvent.getNear());
-        assertEquals(listener.mCallCount, 1);
+        assertFalse(listener.mLastEvent.getBelow());
+        assertEquals(1, listener.mCallCount);
 
-        mFakeProximitySensor.sendProximityResult(true);
-        assertFalse(listener.mLastEvent.getNear());
-        assertEquals(listener.mCallCount, 2);
+        mThresholdSensor.triggerEvent(true, 3);
+        assertTrue(listener.mLastEvent.getBelow());
+        assertEquals(2, listener.mCallCount);
 
         mProximitySensor.unregister(listener);
-        waitForSensorManager();
         assertFalse(mProximitySensor.isRegistered());
     }
 
@@ -197,46 +190,35 @@ public class ProximitySensorTest extends SysuiTestCase {
 
         mProximitySensor.register(listenerA);
         mProximitySensor.register(listenerB);
-        waitForSensorManager();
         assertTrue(mProximitySensor.isRegistered());
         assertNull(listenerA.mLastEvent);
         assertNull(listenerB.mLastEvent);
 
         mProximitySensor.alertListeners();
         assertNull(listenerA.mLastEvent);
-        assertEquals(listenerA.mCallCount, 1);
+        assertEquals(0, listenerA.mCallCount);
         assertNull(listenerB.mLastEvent);
-        assertEquals(listenerB.mCallCount, 1);
+        assertEquals(0, listenerB.mCallCount);
 
-        mFakeProximitySensor.sendProximityResult(false);
-        assertTrue(listenerA.mLastEvent.getNear());
-        assertEquals(listenerA.mCallCount, 2);
-        assertTrue(listenerB.mLastEvent.getNear());
-        assertEquals(listenerB.mCallCount, 2);
+        mThresholdSensor.triggerEvent(true, 0);
+        assertTrue(listenerA.mLastEvent.getBelow());
+        assertEquals(1, listenerA.mCallCount);
+        assertTrue(listenerB.mLastEvent.getBelow());
+        assertEquals(1,  listenerB.mCallCount);
 
         mProximitySensor.unregister(listenerA);
         mProximitySensor.unregister(listenerB);
-        waitForSensorManager();
     }
 
-    class TestableListener implements ProximitySensor.ProximitySensorListener {
-        ProximitySensor.ProximityEvent mLastEvent;
+    private static class TestableListener implements ThresholdSensor.Listener {
+        ThresholdSensor.ThresholdSensorEvent mLastEvent;
         int mCallCount = 0;
 
         @Override
-        public void onSensorEvent(ProximitySensor.ProximityEvent proximityEvent) {
+        public void onThresholdCrossed(ThresholdSensor.ThresholdSensorEvent proximityEvent) {
             mLastEvent = proximityEvent;
             mCallCount++;
         }
-
-        void reset() {
-            mLastEvent = null;
-            mCallCount = 0;
-        }
     };
-
-    private void waitForSensorManager() {
-        TestableLooper.get(this).processAllMessages();
-    }
 
 }
