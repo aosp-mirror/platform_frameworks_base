@@ -20,6 +20,7 @@ import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.bubbles.dagger.BubbleModule;
 import com.android.systemui.car.navigationbar.CarNavigationBar;
 import com.android.systemui.car.notification.CarNotificationModule;
+import com.android.systemui.car.sideloaded.SideLoadedAppController;
 import com.android.systemui.car.statusbar.CarStatusBar;
 import com.android.systemui.car.statusbar.CarStatusBarModule;
 import com.android.systemui.car.voicerecognition.ConnectedDeviceVoiceRecognitionNotifier;
@@ -192,4 +193,10 @@ public abstract class CarSystemUIBinder {
     @IntoMap
     @ClassKey(SystemUIOverlayWindowManager.class)
     public abstract SystemUI bindSystemUIPrimaryWindowManager(SystemUIOverlayWindowManager sysui);
+
+    /** Inject into SideLoadedAppController. */
+    @Binds
+    @IntoMap
+    @ClassKey(SideLoadedAppController.class)
+    public abstract SystemUI bindSideLoadedAppController(SideLoadedAppController sysui);
 }
