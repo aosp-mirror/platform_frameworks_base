@@ -397,8 +397,10 @@ public class InfoMediaManager extends MediaManager {
                         BluetoothAdapter.getDefaultAdapter().getRemoteDevice(route.getOriginalId());
                 final CachedBluetoothDevice cachedDevice =
                         mBluetoothManager.getCachedDeviceManager().findDevice(device);
-                mediaDevice = new BluetoothMediaDevice(mContext, cachedDevice, mRouterManager,
-                        route, mPackageName);
+                if (cachedDevice != null) {
+                    mediaDevice = new BluetoothMediaDevice(mContext, cachedDevice, mRouterManager,
+                            route, mPackageName);
+                }
                 break;
             default:
                 Log.w(TAG, "addMediaDevice() unknown device type : " + deviceType);
