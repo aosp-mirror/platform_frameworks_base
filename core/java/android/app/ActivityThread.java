@@ -6403,6 +6403,9 @@ public final class ActivityThread extends ClientTransactionHandler {
         HardwareRenderer.setDebuggingEnabled(isAppDebuggable || Build.IS_DEBUGGABLE);
         HardwareRenderer.setPackageName(data.appInfo.packageName);
 
+        // Pass the current context to HardwareRenderer
+        HardwareRenderer.setContextForInit(getSystemContext());
+
         /**
          * Initialize the default http proxy in this process for the reasons we set the time zone.
          */
