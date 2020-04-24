@@ -167,11 +167,12 @@ public class AccessibilitySecurityPolicy {
      * @param packageName The package name the app wants to expose
      * @param appId The app's id
      * @param userId The app's user id
+     * @param pid The app's process pid that requested this
      * @return A package name that is valid to report
      */
     @Nullable
     public String resolveValidReportedPackageLocked(
-            @Nullable CharSequence packageName, int appId, int userId) {
+            @Nullable CharSequence packageName, int appId, int userId, int pid) {
         // Okay to pass no package
         if (packageName == null) {
             return null;
@@ -189,6 +190,11 @@ public class AccessibilitySecurityPolicy {
         // Appwidget hosts get to pass packages for widgets they host
         if (mAppWidgetService != null && ArrayUtils.contains(mAppWidgetService
                 .getHostedWidgetPackages(resolvedUid), packageNameStr)) {
+            return packageName.toString();
+        }
+        // If app has the targeted permission to act as another package
+        if (mContext.checkPermission(Manifest.permission.ACT_AS_PACKAGE_FOR_ACCESSIBILITY,
+                pid, resolvedUid) == PackageManager.PERMISSION_GRANTED) {
             return packageName.toString();
         }
         // Otherwise, set the package to the first one in the UID
@@ -403,8 +409,7 @@ public class AccessibilitySecurityPolicy {
                 || userId == UserHandle.USER_CURRENT_OR_SELF) {
             return currentUserId;
         }
-        throw new IllegalArgumentException("Calling user can be changed to only "
-                + "UserHandle.USER_CURRENT or UserHandle.USER_CURRENT_OR_SELF.");
+        return resolveProfileParentLocked(userId);
     }
 
     /**

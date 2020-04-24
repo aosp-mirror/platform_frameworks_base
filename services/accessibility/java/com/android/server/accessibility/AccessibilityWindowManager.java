@@ -955,7 +955,8 @@ public class AccessibilityWindowManager {
 
             // Makes sure the reported package is one the caller has access to.
             packageName = mSecurityPolicy.resolveValidReportedPackageLocked(
-                    packageName, UserHandle.getCallingAppId(), resolvedUserId);
+                    packageName, UserHandle.getCallingAppId(), resolvedUserId,
+                    Binder.getCallingPid());
 
             windowId = sNextWindowId++;
             // If the window is from a process that runs across users such as
