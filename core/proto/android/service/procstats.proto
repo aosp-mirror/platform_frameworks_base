@@ -104,7 +104,7 @@ message ProcessStatsAvailablePagesProto {
     repeated int32 pages_per_order = 4;
 }
 
-// Next Tag: 10
+// Next Tag: 13
 message ProcessStatsStateProto {
     option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
@@ -114,13 +114,20 @@ message ProcessStatsStateProto {
 
     // this enum list is from frameworks/base/core/java/com/android/internal/app/procstats/ProcessStats.java
     // and not frameworks/base/core/java/android/app/ActivityManager.java
-    optional ProcessState process_state = 3;
+    optional ProcessState process_state = 3 [deprecated = true];
+
+    // the AggregatedProcessState needs to keep sync with ProcessStateAggregated
+    optional AggregatedProcessState process_state_aggregated = 10;
 
     // Millisecond uptime duration spent in this state
-    optional int64 duration_ms = 4;
+    optional int64 duration_ms = 4 [deprecated = true];
+    // Same as above, but with minute resolution so it fits into an int32.
+    optional int32 duration_minutes = 11;
 
     // Millisecond elapsed realtime duration spent in this state
-    optional int64 realtime_duration_ms = 9;
+    optional int64 realtime_duration_ms = 9 [deprecated = true];
+    // Same as above, but with minute resolution so it fits into an int32.
+    optional int32 realtime_duration_minutes = 12;
 
     // # of samples taken
     optional int32 sample_size = 5;
