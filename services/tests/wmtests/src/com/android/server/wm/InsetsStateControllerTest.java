@@ -153,6 +153,21 @@ public class InsetsStateControllerTest extends WindowTestsBase {
     }
 
     @Test
+    public void testStripForDispatch_independentSources() {
+        getController().getSourceProvider(ITYPE_IME).setWindow(mImeWindow, null, null);
+
+        final WindowState app1 = createWindow(null, TYPE_APPLICATION, "app1");
+        app1.mBehindIme = true;
+
+        final WindowState app2 = createWindow(null, TYPE_APPLICATION, "app2");
+        app2.mBehindIme = false;
+
+        getController().getRawInsetsState().setSourceVisible(ITYPE_IME, true);
+        assertFalse(getController().getInsetsForDispatch(app2).getSource(ITYPE_IME).isVisible());
+        assertTrue(getController().getInsetsForDispatch(app1).getSource(ITYPE_IME).isVisible());
+    }
+
+    @Test
     public void testStripForDispatch_belowIme() {
         getController().getSourceProvider(ITYPE_IME).setWindow(mImeWindow, null, null);
 
