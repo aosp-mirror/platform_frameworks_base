@@ -38,6 +38,7 @@ import android.content.pm.ShortcutManager;
 import android.content.res.Resources;
 import android.hardware.SensorManager;
 import android.hardware.SensorPrivacyManager;
+import android.hardware.display.DisplayManager;
 import android.media.AudioManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkScoreManager;
@@ -114,6 +115,12 @@ public class SystemServicesModule {
     }
 
     @Provides
+    @Singleton
+    static DevicePolicyManager provideDevicePolicyManager(Context context) {
+        return context.getSystemService(DevicePolicyManager.class);
+    }
+
+    @Provides
     @DisplayId
     static int provideDisplayId(Context context) {
         return context.getDisplayId();
@@ -121,8 +128,8 @@ public class SystemServicesModule {
 
     @Provides
     @Singleton
-    static DevicePolicyManager provideDevicePolicyManager(Context context) {
-        return context.getSystemService(DevicePolicyManager.class);
+    static DisplayManager provideDisplayManager(Context context) {
+        return context.getSystemService(DisplayManager.class);
     }
 
     @Singleton
