@@ -179,6 +179,7 @@ private:
         binder::Status onStatusChanged(MountId mount, int newStatus) final;
 
         bool isValid() const { return mId != kInvalidStorageId; }
+        sp<content::pm::IDataLoader> getDataLoader();
 
         bool bind();
         bool create();
