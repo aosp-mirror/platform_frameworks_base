@@ -415,16 +415,19 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
      *
      * @param keyguardShowing True if keyguard is showing
      */
-    public void showDialog(boolean keyguardShowing, boolean isDeviceProvisioned,
+    public void showOrHideDialog(boolean keyguardShowing, boolean isDeviceProvisioned,
             GlobalActionsPanelPlugin panelPlugin) {
         mKeyguardShowing = keyguardShowing;
         mDeviceProvisioned = isDeviceProvisioned;
         mPanelPlugin = panelPlugin;
-        if (mDialog != null) {
+        if (mDialog != null && mDialog.isShowing()) {
+            // In order to force global actions to hide on the same affordance press, we must
+            // register a call to onGlobalActionsShown() first to prevent the default actions
+            // menu from showing. This will be followed by a subsequent call to
+            // onGlobalActionsHidden() on dismiss()
+            mWindowManagerFuncs.onGlobalActionsShown();
             mDialog.dismiss();
             mDialog = null;
-            // Show delayed, so that the dismiss of the previous dialog completes
-            mHandler.sendEmptyMessage(MESSAGE_SHOW);
         } else {
             handleShow();
         }
@@ -1805,7 +1808,6 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
     private static final int MESSAGE_DISMISS = 0;
     private static final int MESSAGE_REFRESH = 1;
-    private static final int MESSAGE_SHOW = 2;
     private static final int DIALOG_DISMISS_DELAY = 300; // ms
     private static final int DIALOG_PRESS_DELAY = 850; // ms
 
@@ -1829,9 +1831,6 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                 case MESSAGE_REFRESH:
                     refreshSilentMode();
                     mAdapter.notifyDataSetChanged();
-                    break;
-                case MESSAGE_SHOW:
-                    handleShow();
                     break;
             }
         }
