@@ -88,8 +88,8 @@ public class NotificationConversationInfo extends LinearLayout implements
     private INotificationManager mINotificationManager;
     ShortcutManager mShortcutManager;
     private PackageManager mPm;
-    private VisualStabilityManager mVisualStabilityManager;
     private ConversationIconFactory mIconFactory;
+    private VisualStabilityManager mVisualStabilityManager;
 
     private String mPackageName;
     private String mAppName;
@@ -108,7 +108,9 @@ public class NotificationConversationInfo extends LinearLayout implements
     private TextView mPriorityDescriptionView;
     private TextView mDefaultDescriptionView;
     private TextView mSilentDescriptionView;
+
     private @Action int mSelectedAction = -1;
+    private boolean mPressedApply;
 
     private OnSnoozeClickListener mOnSnoozeClickListener;
     private OnSettingsClickListener mOnSettingsClickListener;
@@ -160,6 +162,7 @@ public class NotificationConversationInfo extends LinearLayout implements
     };
 
     private OnClickListener mOnDone = v -> {
+        mPressedApply = true;
         closeControls(v, true);
     };
 
@@ -521,6 +524,7 @@ public class NotificationConversationInfo extends LinearLayout implements
         bgHandler.post(
                 new UpdateChannelRunnable(mINotificationManager, mPackageName,
                         mAppUid, mSelectedAction, mNotificationChannel));
+        mVisualStabilityManager.temporarilyAllowReordering();
     }
 
     private boolean shouldShowPriorityOnboarding() {
@@ -587,7 +591,7 @@ public class NotificationConversationInfo extends LinearLayout implements
 
     @Override
     public boolean shouldBeSaved() {
-        return mSelectedAction == ACTION_FAVORITE || mSelectedAction == ACTION_MUTE;
+        return mPressedApply;
     }
 
     @Override
