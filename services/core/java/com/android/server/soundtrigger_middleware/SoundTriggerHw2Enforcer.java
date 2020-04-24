@@ -23,6 +23,7 @@ import android.hardware.soundtrigger.V2_3.Properties;
 import android.hardware.soundtrigger.V2_3.RecognitionConfig;
 import android.os.IHwBinder;
 import android.os.RemoteException;
+import android.os.SystemProperties;
 import android.util.Log;
 
 import java.util.HashMap;
@@ -48,83 +49,130 @@ public class SoundTriggerHw2Enforcer implements ISoundTriggerHw2 {
 
     @Override
     public Properties getProperties() {
-        return mUnderlying.getProperties();
+        try {
+            return mUnderlying.getProperties();
+        } catch (RuntimeException e) {
+            throw handleException(e);
+        }
     }
 
     @Override
     public int loadSoundModel(ISoundTriggerHw.SoundModel soundModel, Callback callback,
             int cookie) {
-        int handle = mUnderlying.loadSoundModel(soundModel, new CallbackEnforcer(callback), cookie);
-        synchronized (mModelStates) {
-            mModelStates.put(handle, false);
+        try {
+            int handle = mUnderlying.loadSoundModel(soundModel, new CallbackEnforcer(callback),
+                    cookie);
+            synchronized (mModelStates) {
+                mModelStates.put(handle, false);
+            }
+            return handle;
+        } catch (RuntimeException e) {
+            throw handleException(e);
         }
-        return handle;
     }
 
     @Override
     public int loadPhraseSoundModel(ISoundTriggerHw.PhraseSoundModel soundModel, Callback callback,
             int cookie) {
-        int handle = mUnderlying.loadPhraseSoundModel(soundModel, new CallbackEnforcer(callback),
-                cookie);
-        synchronized (mModelStates) {
-            mModelStates.put(handle, false);
+        try {
+            int handle = mUnderlying.loadPhraseSoundModel(soundModel,
+                    new CallbackEnforcer(callback),
+                    cookie);
+            synchronized (mModelStates) {
+                mModelStates.put(handle, false);
+            }
+            return handle;
+        } catch (RuntimeException e) {
+            throw handleException(e);
         }
-        return handle;
     }
 
     @Override
     public void unloadSoundModel(int modelHandle) {
-        mUnderlying.unloadSoundModel(modelHandle);
-        synchronized (mModelStates) {
-            mModelStates.remove(modelHandle);
+        try {
+            mUnderlying.unloadSoundModel(modelHandle);
+            synchronized (mModelStates) {
+                mModelStates.remove(modelHandle);
+            }
+        } catch (RuntimeException e) {
+            throw handleException(e);
         }
     }
 
     @Override
     public void stopRecognition(int modelHandle) {
-        mUnderlying.stopRecognition(modelHandle);
-        synchronized (mModelStates) {
-            mModelStates.replace(modelHandle, false);
+        try {
+            mUnderlying.stopRecognition(modelHandle);
+            synchronized (mModelStates) {
+                mModelStates.replace(modelHandle, false);
+            }
+        } catch (RuntimeException e) {
+            throw handleException(e);
         }
     }
 
     @Override
     public void stopAllRecognitions() {
-        mUnderlying.stopAllRecognitions();
-        synchronized (mModelStates) {
-            for (Map.Entry<Integer, Boolean> entry : mModelStates.entrySet()) {
-                entry.setValue(false);
+        try {
+            mUnderlying.stopAllRecognitions();
+            synchronized (mModelStates) {
+                for (Map.Entry<Integer, Boolean> entry : mModelStates.entrySet()) {
+                    entry.setValue(false);
+                }
             }
+        } catch (RuntimeException e) {
+            throw handleException(e);
         }
     }
 
     @Override
     public void startRecognition(int modelHandle, RecognitionConfig config, Callback callback,
             int cookie) {
-        mUnderlying.startRecognition(modelHandle, config, new CallbackEnforcer(callback), cookie);
-        synchronized (mModelStates) {
-            mModelStates.replace(modelHandle, true);
+        try {
+            mUnderlying.startRecognition(modelHandle, config, new CallbackEnforcer(callback),
+                    cookie);
+            synchronized (mModelStates) {
+                mModelStates.replace(modelHandle, true);
+            }
+        } catch (RuntimeException e) {
+            throw handleException(e);
         }
     }
 
     @Override
     public void getModelState(int modelHandle) {
-        mUnderlying.getModelState(modelHandle);
+        try {
+            mUnderlying.getModelState(modelHandle);
+        } catch (RuntimeException e) {
+            throw handleException(e);
+        }
     }
 
     @Override
     public int getModelParameter(int modelHandle, int param) {
-        return mUnderlying.getModelParameter(modelHandle, param);
+        try {
+            return mUnderlying.getModelParameter(modelHandle, param);
+        } catch (RuntimeException e) {
+            throw handleException(e);
+        }
     }
 
     @Override
     public void setModelParameter(int modelHandle, int param, int value) {
-        mUnderlying.setModelParameter(modelHandle, param, value);
+        try {
+            mUnderlying.setModelParameter(modelHandle, param, value);
+        } catch (RuntimeException e) {
+            throw handleException(e);
+        }
     }
 
     @Override
     public ModelParameterRange queryParameter(int modelHandle, int param) {
-        return mUnderlying.queryParameter(modelHandle, param);
+        try {
+            return mUnderlying.queryParameter(modelHandle, param);
+        } catch (RuntimeException e) {
+            throw handleException(e);
+        }
     }
 
     @Override
@@ -142,6 +190,17 @@ public class SoundTriggerHw2Enforcer implements ISoundTriggerHw2 {
         return mUnderlying.interfaceDescriptor();
     }
 
+    private static RuntimeException handleException(RuntimeException e) {
+        Log.e(TAG, "Exception caught from HAL, rebooting HAL");
+        rebootHal();
+        throw e;
+    }
+
+    private static void rebootHal() {
+        // This property needs to be defined in an init.rc script and trigger a HAL reboot.
+        SystemProperties.set("sys.audio.restart.hal", "1");
+    }
+
     private class CallbackEnforcer implements Callback {
         private final Callback mUnderlying;
 
@@ -157,6 +216,8 @@ public class SoundTriggerHw2Enforcer implements ISoundTriggerHw2 {
             synchronized (mModelStates) {
                 if (!mModelStates.getOrDefault(model, false)) {
                     Log.wtfStack(TAG, "Unexpected recognition event for model: " + model);
+                    rebootHal();
+                    return;
                 }
                 if (event.header.status
                         != android.media.soundtrigger_middleware.RecognitionStatus.FORCED) {
@@ -173,6 +234,8 @@ public class SoundTriggerHw2Enforcer implements ISoundTriggerHw2 {
             synchronized (mModelStates) {
                 if (!mModelStates.getOrDefault(model, false)) {
                     Log.wtfStack(TAG, "Unexpected recognition event for model: " + model);
+                    rebootHal();
+                    return;
                 }
                 if (event.common.header.status
                         != android.media.soundtrigger_middleware.RecognitionStatus.FORCED) {
