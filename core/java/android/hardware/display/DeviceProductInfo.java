@@ -139,7 +139,7 @@ public final class DeviceProductInfo implements Parcelable {
     @Override
     public int hashCode() {
         return Objects.hash(mName, mManufacturerPnpId, mProductId, mModelYear, mManufactureDate,
-            mRelativeAddress);
+            Arrays.hashCode(mRelativeAddress));
     }
 
     public static final Creator<DeviceProductInfo> CREATOR =
