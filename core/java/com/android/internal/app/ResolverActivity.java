@@ -180,7 +180,7 @@ public class ResolverActivity extends Activity implements
     public static final String EXTRA_IS_AUDIO_CAPTURE_DEVICE = "is_audio_capture_device";
 
     private BroadcastReceiver mWorkProfileStateReceiver;
-    private boolean mIsHeaderCreated;
+    private UserHandle mHeaderCreatorUser;
 
     /**
      * Get the string resource to be used as a label for the link to the resolver activity for an
@@ -1730,11 +1730,10 @@ public class ResolverActivity extends Activity implements
 
     /**
      * Configure the area above the app selection list (title, content preview, etc).
-     * <p>The header is created once when first launching the activity and whenever a package is
-     * installed or uninstalled.
      */
     private void maybeCreateHeader(ResolverListAdapter listAdapter) {
-        if (mIsHeaderCreated) {
+        if (mHeaderCreatorUser != null
+                && !listAdapter.getUserHandle().equals(mHeaderCreatorUser)) {
             return;
         }
         if (!shouldShowTabs()
@@ -1761,7 +1760,7 @@ public class ResolverActivity extends Activity implements
         if (iconView != null) {
             listAdapter.loadFilteredItemIconTaskAsync(iconView);
         }
-        mIsHeaderCreated = true;
+        mHeaderCreatorUser = listAdapter.getUserHandle();
     }
 
     protected void resetButtonBar() {
@@ -1777,13 +1776,18 @@ public class ResolverActivity extends Activity implements
                 mMultiProfilePagerAdapter.getActiveListAdapter();
         View buttonBarDivider = findViewById(R.id.resolver_button_bar_divider);
         if (activeListAdapter.isTabLoaded()
-                && mMultiProfilePagerAdapter.shouldShowEmptyStateScreen(activeListAdapter)) {
+                && mMultiProfilePagerAdapter.shouldShowEmptyStateScreen(activeListAdapter)
+                && !useLayoutWithDefault()) {
             buttonLayout.setVisibility(View.INVISIBLE);
-            buttonBarDivider.setVisibility(View.INVISIBLE);
+            if (buttonBarDivider != null) {
+                buttonBarDivider.setVisibility(View.INVISIBLE);
+            }
+            mMultiProfilePagerAdapter.onButtonLayoutHidden();
             return;
         }
-
-        buttonBarDivider.setVisibility(View.VISIBLE);
+        if (buttonBarDivider != null) {
+            buttonBarDivider.setVisibility(View.VISIBLE);
+        }
         buttonLayout.setVisibility(View.VISIBLE);
 
         if (!useLayoutWithDefault()) {
@@ -1872,7 +1876,6 @@ public class ResolverActivity extends Activity implements
                 // turning on.
                 return;
             }
-            mIsHeaderCreated = false;
             boolean listRebuilt = mMultiProfilePagerAdapter.rebuildActiveTab(true);
             if (listRebuilt) {
                 ResolverListAdapter activeListAdapter =
