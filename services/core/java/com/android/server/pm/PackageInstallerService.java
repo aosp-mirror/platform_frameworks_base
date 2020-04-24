@@ -1248,7 +1248,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         public void onStagedSessionChanged(PackageInstallerSession session) {
             session.markUpdated();
             writeSessionsAsync();
-            if (mOkToSendBroadcasts) {
+            if (mOkToSendBroadcasts && !session.isDestroyed()) {
                 // we don't scrub the data here as this is sent only to the installer several
                 // privileged system packages
                 mPm.sendSessionUpdatedBroadcast(
