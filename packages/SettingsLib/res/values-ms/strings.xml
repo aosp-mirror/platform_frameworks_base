@@ -435,7 +435,7 @@
     <string name="power_discharge_by" msgid="4113180890060388350">"Seharusnya boleh digunakan hingga kira-kira <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"Seharusnya boleh digunakan hingga kira-kira <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"Hingga <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Bateri mungkin kehabisan selewat-lewatnya <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Bateri mungkin habis menjelang <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <!-- no translation found for power_remaining_less_than_duration_only (8956656616031395152) -->
     <skip />
     <!-- no translation found for power_remaining_less_than_duration (318215464914990578) -->
