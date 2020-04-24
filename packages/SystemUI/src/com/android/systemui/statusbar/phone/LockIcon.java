@@ -52,7 +52,6 @@ public class LockIcon extends KeyguardAffordanceView {
     private int mIconColor;
     private int mOldState;
     private int mState;
-    private boolean mPulsing;
     private boolean mDozing;
     private boolean mKeyguardJustShown;
     private boolean mPredrawRegistered;
@@ -134,9 +133,8 @@ public class LockIcon extends KeyguardAffordanceView {
         return false;
     }
 
-    void update(int newState, boolean pulsing, boolean dozing, boolean keyguardJustShown) {
+    void update(int newState, boolean dozing, boolean keyguardJustShown) {
         mState = newState;
-        mPulsing = pulsing;
         mDozing = dozing;
         mKeyguardJustShown = keyguardJustShown;
 
@@ -164,8 +162,7 @@ public class LockIcon extends KeyguardAffordanceView {
 
     private Drawable getIcon(int newState) {
         @LockAnimIndex final int lockAnimIndex =
-                getAnimationIndexForTransition(mOldState, newState, mPulsing, mDozing,
-                        mKeyguardJustShown);
+                getAnimationIndexForTransition(mOldState, newState, mDozing, mKeyguardJustShown);
 
         boolean isAnim = lockAnimIndex != -1;
         int iconRes = isAnim ? getThemedAnimationResId(lockAnimIndex) : getIconForState(newState);
@@ -198,11 +195,11 @@ public class LockIcon extends KeyguardAffordanceView {
         return iconRes;
     }
 
-    private static int getAnimationIndexForTransition(int oldState, int newState, boolean pulsing,
-            boolean dozing, boolean keyguardJustShown) {
+    private static int getAnimationIndexForTransition(int oldState, int newState, boolean dozing,
+            boolean keyguardJustShown) {
 
         // Never animate when screen is off
-        if (dozing && !pulsing) {
+        if (dozing) {
             return -1;
         }
 
