@@ -48,7 +48,6 @@ import android.graphics.Region;
 import android.graphics.drawable.Icon;
 import android.media.MediaActionSound;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -188,7 +187,9 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
     private final ImageView mDismissImage;
 
     private Bitmap mScreenBitmap;
+    private SaveImageInBackgroundTask mSaveInBgTask;
     private Animator mScreenshotAnimation;
+    private Runnable mOnCompleteRunnable;
     private boolean mInDarkMode = false;
 
     private float mScreenshotOffsetXPx;
@@ -196,8 +197,6 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
     private float mScreenshotHeightPx;
     private float mDismissButtonSize;
     private float mCornerSizeX;
-
-    private AsyncTask<Void, Void, Void> mSaveInBgTask;
 
     private MediaActionSound mCameraSound;
 
@@ -211,6 +210,7 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
                 case MESSAGE_CORNER_TIMEOUT:
                     mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_INTERACTION_TIMEOUT);
                     GlobalScreenshot.this.clearScreenshot("timeout");
+                    mOnCompleteRunnable.run();
                     break;
                 default:
                     break;
@@ -252,6 +252,7 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
         mDismissButton.setOnClickListener(view -> {
             mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_EXPLICIT_DISMISSAL);
             clearScreenshot("dismiss_button");
+            mOnCompleteRunnable.run();
         });
         mDismissImage = mDismissButton.findViewById(R.id.global_screenshot_dismiss_image);
 
@@ -325,19 +326,19 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
         data.finisher = finisher;
         data.mActionsReadyListener = actionsReadyListener;
         data.createDeleteAction = false;
+
         if (mSaveInBgTask != null) {
-            mSaveInBgTask.cancel(false);
+            mSaveInBgTask.ignoreResult();
         }
 
-        mSaveInBgTask = new SaveImageInBackgroundTask(mContext, data).execute();
+        mSaveInBgTask = new SaveImageInBackgroundTask(mContext, data);
+        mSaveInBgTask.execute();
     }
 
     /**
      * Takes a screenshot of the current display and shows an animation.
      */
     private void takeScreenshot(Consumer<Uri> finisher, Rect crop) {
-        clearScreenshot("new screenshot requested");
-
         int rot = mDisplay.getRotation();
         int width = crop.width();
         int height = crop.height();
@@ -349,10 +350,12 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
 
     private void takeScreenshot(Bitmap screenshot, Consumer<Uri> finisher, Rect screenRect) {
         mScreenBitmap = screenshot;
+
         if (mScreenBitmap == null) {
             mNotificationsController.notifyScreenshotError(
                     R.string.screenshot_failed_to_capture_text);
             finisher.accept(null);
+            mOnCompleteRunnable.run();
             return;
         }
 
@@ -366,11 +369,13 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
         mScreenshotLayout.getViewTreeObserver().addOnComputeInternalInsetsListener(this);
 
         // Start the post-screenshot animation
-        startAnimation(finisher, screenRect.width(), screenRect.height(),
-                screenRect);
+        startAnimation(finisher, screenRect.width(), screenRect.height(), screenRect);
     }
 
-    void takeScreenshot(Consumer<Uri> finisher) {
+    void takeScreenshot(Consumer<Uri> finisher, Runnable onComplete) {
+        clearScreenshot("new screenshot requested");
+        mOnCompleteRunnable = onComplete;
+
         mDisplay.getRealMetrics(mDisplayMetrics);
         takeScreenshot(
                 finisher,
@@ -378,9 +383,11 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
     }
 
     void handleImageAsScreenshot(Bitmap screenshot, Rect screenshotScreenBounds,
-            Insets visibleInsets, int taskId, Consumer<Uri> finisher) {
+            Insets visibleInsets, int taskId, Consumer<Uri> finisher, Runnable onComplete) {
         // TODO use taskId and visibleInsets
         clearScreenshot("new screenshot requested");
+        mOnCompleteRunnable = onComplete;
+
         takeScreenshot(screenshot, finisher, screenshotScreenBounds);
     }
 
@@ -388,7 +395,10 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
      * Displays a screenshot selector
      */
     @SuppressLint("ClickableViewAccessibility")
-    void takeScreenshotPartial(final Consumer<Uri> finisher) {
+    void takeScreenshotPartial(final Consumer<Uri> finisher, Runnable onComplete) {
+        clearScreenshot("new screenshot requested");
+        mOnCompleteRunnable = onComplete;
+
         mWindowManager.addView(mScreenshotLayout, mWindowLayoutParams);
         mScreenshotSelectorView.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -660,6 +670,7 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
                     () -> {
                         mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_SMART_ACTION_TAPPED);
                         clearScreenshot("chip tapped");
+                        mOnCompleteRunnable.run();
                     });
             mActionsView.addView(actionChip);
         }
@@ -671,6 +682,7 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
         shareChip.setPendingIntent(imageData.shareAction.actionIntent, () -> {
             mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_SHARE_TAPPED);
             clearScreenshot("chip tapped");
+            mOnCompleteRunnable.run();
         });
         mActionsView.addView(shareChip);
 
@@ -681,6 +693,7 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
         editChip.setPendingIntent(imageData.editAction.actionIntent, () -> {
             mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_EDIT_TAPPED);
             clearScreenshot("chip tapped");
+            mOnCompleteRunnable.run();
         });
         mActionsView.addView(editChip);
 
@@ -689,6 +702,7 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
                 imageData.editAction.actionIntent.send();
                 mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_PREVIEW_TAPPED);
                 clearScreenshot("screenshot preview tapped");
+                mOnCompleteRunnable.run();
             } catch (PendingIntent.CanceledException e) {
                 Log.e(TAG, "Intent cancelled", e);
             }

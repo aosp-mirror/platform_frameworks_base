@@ -230,6 +230,19 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
         return null;
     }
 
+    /**
+     * If we get a new screenshot request while this one is saving, we want to continue saving in
+     * the background but not return anything.
+     */
+    void ignoreResult() {
+        mParams.mActionsReadyListener = new GlobalScreenshot.ActionsReadyListener() {
+            @Override
+            void onActionsReady(GlobalScreenshot.SavedImageData imageData) {
+                // do nothing
+            }
+        };
+    }
+
     @Override
     protected void onCancelled(Void params) {
         // If we are cancelled while the task is running in the background, we may get null

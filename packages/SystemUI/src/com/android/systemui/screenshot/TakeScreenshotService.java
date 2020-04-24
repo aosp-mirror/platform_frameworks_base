@@ -16,6 +16,9 @@
 
 package com.android.systemui.screenshot;
 
+import static com.android.internal.util.ScreenshotHelper.SCREENSHOT_MSG_PROCESS_COMPLETE;
+import static com.android.internal.util.ScreenshotHelper.SCREENSHOT_MSG_URI;
+
 import android.app.Service;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -51,8 +54,15 @@ public class TakeScreenshotService extends Service {
         @Override
         public void handleMessage(Message msg) {
             final Messenger callback = msg.replyTo;
-            Consumer<Uri> finisher = uri -> {
-                Message reply = Message.obtain(null, 1, uri);
+            Consumer<Uri> uriConsumer = uri -> {
+                Message reply = Message.obtain(null, SCREENSHOT_MSG_URI, uri);
+                try {
+                    callback.send(reply);
+                } catch (RemoteException e) {
+                }
+            };
+            Runnable onComplete = () -> {
+                Message reply = Message.obtain(null, SCREENSHOT_MSG_PROCESS_COMPLETE);
                 try {
                     callback.send(reply);
                 } catch (RemoteException e) {
@@ -64,7 +74,8 @@ public class TakeScreenshotService extends Service {
             // animation and error notification.
             if (!mUserManager.isUserUnlocked()) {
                 Log.w(TAG, "Skipping screenshot because storage is locked!");
-                post(() -> finisher.accept(null));
+                post(() -> uriConsumer.accept(null));
+                post(onComplete);
                 return;
             }
 
@@ -79,19 +90,19 @@ public class TakeScreenshotService extends Service {
             switch (msg.what) {
                 case WindowManager.TAKE_SCREENSHOT_FULLSCREEN:
                     if (useCornerFlow) {
-                        mScreenshot.takeScreenshot(finisher);
+                        mScreenshot.takeScreenshot(uriConsumer, onComplete);
                     } else {
                         mScreenshotLegacy.takeScreenshot(
-                                finisher, screenshotRequest.getHasStatusBar(),
+                                uriConsumer, screenshotRequest.getHasStatusBar(),
                                 screenshotRequest.getHasNavBar());
                     }
                     break;
                 case WindowManager.TAKE_SCREENSHOT_SELECTED_REGION:
                     if (useCornerFlow) {
-                        mScreenshot.takeScreenshotPartial(finisher);
+                        mScreenshot.takeScreenshotPartial(uriConsumer, onComplete);
                     } else {
                         mScreenshotLegacy.takeScreenshotPartial(
-                                finisher, screenshotRequest.getHasStatusBar(),
+                                uriConsumer, screenshotRequest.getHasStatusBar(),
                                 screenshotRequest.getHasNavBar());
                     }
                     break;
@@ -102,10 +113,10 @@ public class TakeScreenshotService extends Service {
                     int taskId = screenshotRequest.getTaskId();
                     if (useCornerFlow) {
                         mScreenshot.handleImageAsScreenshot(
-                                screenshot, screenBounds, insets, taskId, finisher);
+                                screenshot, screenBounds, insets, taskId, uriConsumer, onComplete);
                     } else {
                         mScreenshotLegacy.handleImageAsScreenshot(
-                                screenshot, screenBounds, insets, taskId, finisher);
+                                screenshot, screenBounds, insets, taskId, uriConsumer);
                     }
                     break;
                 default:
