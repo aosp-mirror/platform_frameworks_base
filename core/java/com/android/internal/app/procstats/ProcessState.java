@@ -1459,16 +1459,16 @@ public final class ProcessState {
         for (int i = 0; i < mPssTable.getKeyCount(); i++) {
             final int key = mPssTable.getKeyAt(i);
             final int type = SparseMappingTable.getIdFromKey(key);
-            if (durationByState.indexOfKey(type) < 0) {
+            final int aggregatedType = DumpUtils.aggregateCurrentProcessState(type);
+            if (durationByState.indexOfKey(aggregatedType) < 0) {
                 // state without duration should not have stats!
                 continue;
             }
-            final int aggregatedType = DumpUtils.aggregateCurrentProcessState(type);
 
             long[] rssMeanAndMax = mPssTable.getRssMeanAndMax(key);
 
             // compute mean * duration, then store sum of that in meanRssByState
-            long meanTimesDuration = rssMeanAndMax[0] * mDurations.getValue(key);
+            long meanTimesDuration = rssMeanAndMax[0] * mDurations.getValueForId((byte) type);
             if (meanRssByState.indexOfKey(aggregatedType) >= 0) {
                 meanRssByState.put(aggregatedType,
                         meanTimesDuration + meanRssByState.get(aggregatedType));
@@ -1492,8 +1492,10 @@ public final class ProcessState {
                 // these data structures should be consistent
                 continue;
             }
+            final long duration = durationByState.get(aggregatedKey);
             meanRssByState.put(aggregatedKey,
-                    meanRssByState.get(aggregatedKey) / durationByState.get(aggregatedKey));
+                    duration > 0 ? (meanRssByState.get(aggregatedKey) / duration)
+                            : meanRssByState.get(aggregatedKey));
         }
 
         // build the output
@@ -1508,14 +1510,16 @@ public final class ProcessState {
 
             DumpUtils.printAggregatedProcStateTagProto(proto,
                     ProcessStatsStateProto.SCREEN_STATE,
-                    ProcessStatsStateProto.PROCESS_STATE,
+                    ProcessStatsStateProto.PROCESS_STATE_AGGREGATED,
                     aggregatedKey);
             proto.write(ProcessStatsStateProto.DURATION_MS, durationByState.get(aggregatedKey));
 
             ProtoUtils.toAggStatsProto(proto, ProcessStatsStateProto.RSS,
                     0, /* do not output a minimum value */
-                    meanRssByState.get(aggregatedKey),
-                    maxRssByState.get(aggregatedKey));
+                    0, /* do not output an average value */
+                    0, /* do not output a max value */
+                    (int) meanRssByState.get(aggregatedKey),
+                    (int) maxRssByState.get(aggregatedKey));
 
             proto.end(stateToken);
         }
