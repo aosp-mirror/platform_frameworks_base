@@ -219,6 +219,7 @@
     <!-- accessibility -->
     <uses-permission android:name="android.permission.MODIFY_ACCESSIBILITY_DATA" />
     <uses-permission android:name="android.permission.MANAGE_ACCESSIBILITY" />
+    <uses-permission android:name="android.permission.ACT_AS_PACKAGE_FOR_ACCESSIBILITY" />
 
     <!-- to control accessibility volume -->
     <uses-permission android:name="android.permission.CHANGE_ACCESSIBILITY_VOLUME" />
