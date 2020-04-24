@@ -21,7 +21,10 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.content.Intent;
 import android.media.AudioManager;
+import android.os.Binder;
 import android.os.UserHandle;
+
+import java.util.Objects;
 
 /**
  * Provides an adapter to access functionality reserved to components running in system_server
@@ -32,7 +35,7 @@ public class SystemServerAdapter {
 
     protected final Context mContext;
 
-    private SystemServerAdapter(@Nullable Context context) {
+    protected SystemServerAdapter(@Nullable Context context) {
         mContext = context;
     }
     /**
@@ -40,16 +43,8 @@ public class SystemServerAdapter {
      * @return the adapter
      */
     static final @NonNull SystemServerAdapter getDefaultAdapter(Context context) {
+        Objects.requireNonNull(context);
         return new SystemServerAdapter(context);
-    }
-
-    /**
-     * Create an adapter that does nothing.
-     * Use for running non-privileged tests, such as unit tests
-     * @return a no-op adapter
-     */
-    static final @NonNull SystemServerAdapter getNoOpAdapter() {
-        return new NoOpSystemServerAdapter();
     }
 
     /**
@@ -70,21 +65,21 @@ public class SystemServerAdapter {
                 UserHandle.ALL);
     }
 
-    //--------------------------------------------------------------------
-    protected static class NoOpSystemServerAdapter extends SystemServerAdapter {
-
-        NoOpSystemServerAdapter() {
-            super(null);
+    /**
+     * Broadcast ACTION_AUDIO_BECOMING_NOISY
+     */
+    public void sendDeviceBecomingNoisyIntent() {
+        if (mContext == null) {
+            return;
         }
-
-        @Override
-        public boolean isPrivileged() {
-            return false;
-        }
-
-        @Override
-        public void sendMicrophoneMuteChangedIntent() {
-            // no-op
+        final Intent intent = new Intent(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
+        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+        intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
         }
     }
 }
