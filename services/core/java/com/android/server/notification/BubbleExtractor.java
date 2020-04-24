@@ -94,7 +94,9 @@ public class BubbleExtractor implements NotificationSignalExtractor {
                 && record.isConversation()
                 && !mActivityManager.isLowRamDevice()
                 && (record.getNotification().flags & FLAG_FOREGROUND_SERVICE) == 0;
-        final boolean applyFlag = fulfillsPolicy && canPresentAsBubble(record);
+        final boolean applyFlag = fulfillsPolicy
+                && canPresentAsBubble(record)
+                && !record.isFlagBubbleRemoved();
         if (applyFlag) {
             record.getNotification().flags |= FLAG_BUBBLE;
         } else {
