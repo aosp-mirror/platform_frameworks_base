@@ -332,7 +332,14 @@ public final class DisplayCutout {
     }
 
     /**
-     * Return the waterfall insets.
+     * Returns the insets representing the curved areas of a waterfall display.
+     *
+     * A waterfall display has curved areas along the edges of the screen. Apps should be careful
+     * when showing UI and handling touch input in those insets because the curve may impair
+     * legibility and can frequently lead to unintended touch inputs.
+     *
+     * @return the insets for the curved areas of a waterfall display in pixels or {@code
+     * Insets.NONE} if there are no curved areas or they don't overlap with the window.
      */
     public @NonNull Insets getWaterfallInsets() {
         return mWaterfallInsets;
