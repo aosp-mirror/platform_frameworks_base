@@ -124,7 +124,7 @@ public final class AccessibilityManager {
      * Activity action: Launch UI to manage which accessibility service or feature is assigned
      * to the navigation bar Accessibility button.
      * <p>
-     * Input: {@link #EXTRA_SHORTCUT_TYPE} is the shortcut type.
+     * Input: Nothing.
      * </p>
      * <p>
      * Output: Nothing.
@@ -137,16 +137,7 @@ public final class AccessibilityManager {
             "com.android.internal.intent.action.CHOOSE_ACCESSIBILITY_BUTTON";
 
     /**
-     * Used as an int extra field in {@link #ACTION_CHOOSE_ACCESSIBILITY_BUTTON} intent to specify
-     * the shortcut type.
-     *
-     * @hide
-     */
-    public static final String EXTRA_SHORTCUT_TYPE =
-            "com.android.internal.intent.extra.SHORTCUT_TYPE";
-
-    /**
-     * Used as an int value for {@link #EXTRA_SHORTCUT_TYPE} to represent the accessibility button
+     * Used as an int value for accessibility chooser activity to represent the accessibility button
      * shortcut type.
      *
      * @hide
@@ -154,7 +145,7 @@ public final class AccessibilityManager {
     public static final int ACCESSIBILITY_BUTTON = 0;
 
     /**
-     * Used as an int value for {@link #EXTRA_SHORTCUT_TYPE} to represent hardware key shortcut,
+     * Used as an int value for accessibility chooser activity to represent hardware key shortcut,
      * such as volume key button.
      *
      * @hide
