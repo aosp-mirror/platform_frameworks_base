@@ -20,8 +20,11 @@ import static com.android.systemui.statusbar.NotificationEntryHelper.modifyRanki
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
@@ -285,6 +288,25 @@ public class BubbleDataTest extends SysuiTestCase {
         assertOverflowChangedTo(ImmutableList.of(mBubbleA2));
     }
 
+    @Test
+    public void testOverflowBubble_maxReached_bubbleRemoved() {
+        // Setup
+        sendUpdatedEntryAtTime(mEntryA1, 1000);
+        sendUpdatedEntryAtTime(mEntryA2, 2000);
+        sendUpdatedEntryAtTime(mEntryA3, 3000);
+        mBubbleData.setListener(mListener);
+
+        mBubbleData.setMaxOverflowBubbles(1);
+        mBubbleData.notificationEntryRemoved(mEntryA1, BubbleController.DISMISS_USER_GESTURE);
+        verifyUpdateReceived();
+        assertOverflowChangedTo(ImmutableList.of(mBubbleA1));
+
+        // Overflow max of 1 is reached; A1 is oldest, so it gets removed
+        mBubbleData.notificationEntryRemoved(mEntryA2, BubbleController.DISMISS_USER_GESTURE);
+        verifyUpdateReceived();
+        assertOverflowChangedTo(ImmutableList.of(mBubbleA2));
+    }
+
     /**
      * Verifies that new bubbles insert to the left when collapsed, carrying along grouped bubbles.
      * <p>
@@ -470,6 +492,32 @@ public class BubbleDataTest extends SysuiTestCase {
         mBubbleData.notificationEntryRemoved(mEntryA1, BubbleController.DISMISS_NOTIF_CANCEL);
         verifyUpdateReceived();
         assertOrderChangedTo(mBubbleB2, mBubbleB1, mBubbleA2);
+    }
+
+    /**
+     * Verifies that overflow bubbles are canceled on notif entry removal.
+     */
+    @Test
+    public void test_removeOverflowBubble_forCanceledNotif() {
+        // Setup
+        sendUpdatedEntryAtTime(mEntryA1, 1000);
+        sendUpdatedEntryAtTime(mEntryA2, 2000);
+        sendUpdatedEntryAtTime(mEntryA3, 3000);
+        sendUpdatedEntryAtTime(mEntryB1, 4000);
+        sendUpdatedEntryAtTime(mEntryB2, 5000);
+        sendUpdatedEntryAtTime(mEntryB3, 6000); // [A2, A3, B1, B2, B3], overflow: [A1]
+        sendUpdatedEntryAtTime(mEntryC1, 7000); // [A3, B1, B2, B3, C1], overflow: [A2, A1]
+        mBubbleData.setListener(mListener);
+
+        // Test
+        mBubbleData.notificationEntryRemoved(mEntryA1, BubbleController.DISMISS_NOTIF_CANCEL);
+        verifyUpdateReceived();
+        assertOverflowChangedTo(ImmutableList.of(mBubbleA2));
+
+        // Test
+        mBubbleData.notificationEntryRemoved(mEntryA2, BubbleController.DISMISS_GROUP_CANCELLED);
+        verifyUpdateReceived();
+        assertOverflowChangedTo(ImmutableList.of());
     }
 
     /**
