@@ -2376,7 +2376,7 @@ public class PackageManagerService extends IPackageManager.Stub
         for (String packageName : packages) {
             PackageSetting setting = mSettings.mPackages.get(packageName);
             if (setting != null
-                    && shouldFilterApplicationLocked(setting, callingUid, callingUserId)) {
+                    && !shouldFilterApplicationLocked(setting, callingUid, callingUserId)) {
                 notifyInstallObserver(packageName);
             }
         }
@@ -21016,11 +21016,15 @@ public class PackageManagerService extends IPackageManager.Stub
                 false /* requireFullPermission */, false /* checkShell */, "get enabled");
         // reader
         synchronized (mLock) {
-            if (shouldFilterApplicationLocked(
-                    mSettings.getPackageLPr(packageName), callingUid, userId)) {
-                return COMPONENT_ENABLED_STATE_DISABLED;
+            try {
+                if (shouldFilterApplicationLocked(
+                        mSettings.getPackageLPr(packageName), callingUid, userId)) {
+                    throw new PackageManager.NameNotFoundException(packageName);
+                }
+                return mSettings.getApplicationEnabledSettingLPr(packageName, userId);
+            } catch (PackageManager.NameNotFoundException e) {
+                throw new IllegalArgumentException("Unknown package: " + packageName);
             }
-            return mSettings.getApplicationEnabledSettingLPr(packageName, userId);
         }
     }
 
@@ -21032,12 +21036,16 @@ public class PackageManagerService extends IPackageManager.Stub
         mPermissionManager.enforceCrossUserPermission(callingUid, userId,
                 false /*requireFullPermission*/, false /*checkShell*/, "getComponentEnabled");
         synchronized (mLock) {
-            if (shouldFilterApplicationLocked(
-                    mSettings.getPackageLPr(component.getPackageName()), callingUid,
-                    component, TYPE_UNKNOWN, userId)) {
-                return COMPONENT_ENABLED_STATE_DISABLED;
+            try {
+                if (shouldFilterApplicationLocked(
+                        mSettings.getPackageLPr(component.getPackageName()), callingUid,
+                        component, TYPE_UNKNOWN, userId)) {
+                    throw new PackageManager.NameNotFoundException(component.getPackageName());
+                }
+                return mSettings.getComponentEnabledSettingLPr(component, userId);
+            } catch (PackageManager.NameNotFoundException e) {
+                throw new IllegalArgumentException("Unknown component: " + component);
             }
-            return mSettings.getComponentEnabledSettingLPr(component, userId);
         }
     }
 
