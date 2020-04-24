@@ -140,6 +140,7 @@ import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.charging.WirelessChargingAnimation;
 import com.android.systemui.classifier.FalsingLog;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.fragments.ExtensionFragmentListener;
 import com.android.systemui.fragments.FragmentHostManager;
@@ -467,6 +468,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private final ScrimController mScrimController;
     protected DozeScrimController mDozeScrimController;
     private final Executor mUiBgExecutor;
+    private final Executor mMainExecutor;
 
     protected boolean mDozing;
 
@@ -625,6 +627,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             DisplayMetrics displayMetrics,
             MetricsLogger metricsLogger,
             @UiBackground Executor uiBgExecutor,
+            @Main Executor mainExecutor,
             NotificationMediaManager notificationMediaManager,
             NotificationLockscreenUserManager lockScreenUserManager,
             NotificationRemoteInputManager remoteInputManager,
@@ -705,6 +708,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mDisplayMetrics = displayMetrics;
         mMetricsLogger = metricsLogger;
         mUiBgExecutor = uiBgExecutor;
+        mMainExecutor = mainExecutor;
         mMediaManager = notificationMediaManager;
         mLockscreenUserManager = lockScreenUserManager;
         mRemoteInputManager = remoteInputManager;
@@ -1232,7 +1236,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         mActivityLaunchAnimator = new ActivityLaunchAnimator(
                 mNotificationShadeWindowViewController, this, mNotificationPanelViewController,
                 mNotificationShadeDepthControllerLazy.get(),
-                (NotificationListContainer) mStackScroller);
+                (NotificationListContainer) mStackScroller,
+                mMainExecutor);
 
         // TODO: inject this.
         mPresenter = new StatusBarNotificationPresenter(mContext, mNotificationPanelViewController,
