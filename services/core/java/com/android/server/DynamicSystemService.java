@@ -51,7 +51,7 @@ public class DynamicSystemService extends IDynamicSystemService.Stub {
         mContext = context;
     }
 
-    private IGsiService getGsiService() throws RemoteException {
+    private IGsiService getGsiService() {
         checkPermission();
         if (mGsiService != null) {
             return mGsiService;
@@ -60,8 +60,7 @@ public class DynamicSystemService extends IDynamicSystemService.Stub {
     }
 
     private void checkPermission() {
-        if (mContext.checkCallingOrSelfPermission(
-                        android.Manifest.permission.MANAGE_DYNAMIC_SYSTEM)
+        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.MANAGE_DYNAMIC_SYSTEM)
                 != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Requires MANAGE_DYNAMIC_SYSTEM permission");
         }
@@ -147,12 +146,12 @@ public class DynamicSystemService extends IDynamicSystemService.Stub {
     }
 
     @Override
-    public boolean isInUse() throws RemoteException {
+    public boolean isInUse() {
         return SystemProperties.getBoolean("ro.gsid.image_running", false);
     }
 
     @Override
-    public boolean isInstalled() throws RemoteException {
+    public boolean isInstalled() {
         boolean installed = SystemProperties.getBoolean("gsid.image_installed", false);
         Slog.i(TAG, "isInstalled(): " + installed);
         return installed;
