@@ -44,6 +44,7 @@ public class OneHandedUI extends SystemUI implements CommandQueue.Callbacks, Dum
     private final CommandQueue mCommandQueue;
     private final Handler mMainHandler = new Handler(Looper.getMainLooper());
     private final OneHandedSettingsUtil mSettingUtil;
+    private final OneHandedTimeoutHandler mTimeoutHandler;
 
     private final ContentObserver mEnabledObserver = new ContentObserver(mMainHandler) {
         @Override
@@ -61,9 +62,11 @@ public class OneHandedUI extends SystemUI implements CommandQueue.Callbacks, Dum
         @Override
         public void onChange(boolean selfChange) {
             // TODO (b/149366439) UIEvent metrics add here, user config timeout in settings
-            final boolean enabled = OneHandedSettingsUtil.getSettingsOneHandedModeEnabled(
-                    mContext.getContentResolver());
-            mOneHandedManager.setOneHandedEnabled(enabled);
+            if (mTimeoutHandler != null) {
+                final int newTimeout = OneHandedSettingsUtil.getSettingsOneHandedModeTimeout(
+                        mContext.getContentResolver());
+                mTimeoutHandler.setTimeout(newTimeout);
+            }
         }
     };
 
@@ -88,6 +91,7 @@ public class OneHandedUI extends SystemUI implements CommandQueue.Callbacks, Dum
             if (!supportOneHanded) return; */
         mOneHandedManager = oneHandedManager;
         mSettingUtil =  settingsUtil;
+        mTimeoutHandler = OneHandedTimeoutHandler.get();
     }
 
     @Override
@@ -97,7 +101,12 @@ public class OneHandedUI extends SystemUI implements CommandQueue.Callbacks, Dum
             if (!supportOneHanded) return; */
         mCommandQueue.addCallback(this);
         setupSettingObservers();
+        setupTimeoutListener();
         updateSettings();
+    }
+
+    private void setupTimeoutListener() {
+        mTimeoutHandler.registerTimeoutListener(timeoutTime -> stopOneHanded());
     }
 
     private void setupSettingObservers() {
@@ -112,6 +121,8 @@ public class OneHandedUI extends SystemUI implements CommandQueue.Callbacks, Dum
     private void updateSettings() {
         mOneHandedManager.setOneHandedEnabled(
                 mSettingUtil.getSettingsOneHandedModeEnabled(mContext.getContentResolver()));
+        mTimeoutHandler.setTimeout(
+                mSettingUtil.getSettingsOneHandedModeTimeout(mContext.getContentResolver()));
     }
 
     /**
@@ -139,6 +150,10 @@ public class OneHandedUI extends SystemUI implements CommandQueue.Callbacks, Dum
 
         if (mOneHandedManager != null) {
             ((OneHandedManagerImpl) mOneHandedManager).dump(fd, pw, args);
+        }
+
+        if (mTimeoutHandler != null) {
+            mTimeoutHandler.dump(fd, pw, args);
         }
 
         if (mSettingUtil != null) {

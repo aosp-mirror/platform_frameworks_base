@@ -30,7 +30,6 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.statusbar.CommandQueue;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -48,6 +47,8 @@ public class OneHandedUITest extends OneHandedTestCase {
     DumpManager mMockDumpManager;
     @Mock
     OneHandedSettingsUtil mMockSettingsUtil;
+    @Mock
+    OneHandedTimeoutHandler mMockTimeoutHandler;
 
     @Before
     public void setUp() throws Exception {
@@ -58,6 +59,7 @@ public class OneHandedUITest extends OneHandedTestCase {
                 mMockOneHandedManagerImpl,
                 mMockDumpManager,
                 mMockSettingsUtil);
+        mOneHandedUI.start();
     }
 
     @Test
@@ -95,13 +97,22 @@ public class OneHandedUITest extends OneHandedTestCase {
         verify(mMockSettingsUtil, times(1)).registerSettingsKeyObserver(key, any(), any());
     }
 
-    @Ignore("Need to clarifying")
     @Test
     public void tesSettingsObserver_updateEnabled() {
         Settings.Secure.putInt(mContext.getContentResolver(),
                 Settings.Secure.ONE_HANDED_MODE_ENABLED, 1);
 
         verify(mMockOneHandedManagerImpl, times(1)).setOneHandedEnabled(true);
+    }
+
+    @Test
+    public void tesSettingsObserver_updateTimeout() {
+        Settings.Secure.putInt(mContext.getContentResolver(),
+                Settings.Secure.ONE_HANDED_MODE_TIMEOUT,
+                OneHandedSettingsUtil.ONE_HANDED_TIMEOUT_MEDIUM_IN_SECONDS);
+
+        verify(mMockTimeoutHandler).setTimeout(
+                OneHandedSettingsUtil.ONE_HANDED_TIMEOUT_MEDIUM_IN_SECONDS);
     }
 
 }

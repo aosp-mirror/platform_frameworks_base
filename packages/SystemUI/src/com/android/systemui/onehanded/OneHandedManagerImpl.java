@@ -48,6 +48,7 @@ public class OneHandedManagerImpl implements OneHandedManager, Dumpable {
     private float mOffSetFraction;
     private DisplayController mDisplayController;
     private OneHandedDisplayAreaOrganizer mDisplayAreaOrganizer;
+    private OneHandedTimeoutHandler mTimeoutHandler;
     private OneHandedTransitionCallback mTransitionCallback;
     private SysUiState mSysUiFlagContainer;
 
@@ -67,6 +68,7 @@ public class OneHandedManagerImpl implements OneHandedManager, Dumpable {
                 context.getResources().getFraction(R.fraction.config_one_handed_offset, 1, 1);
         mIsOneHandedEnabled = OneHandedSettingsUtil.getSettingsOneHandedModeEnabled(
                 context.getContentResolver());
+        mTimeoutHandler = OneHandedTimeoutHandler.get();
         updateOneHandedEnabled();
         setupGestures();
     }
@@ -87,6 +89,7 @@ public class OneHandedManagerImpl implements OneHandedManager, Dumpable {
         if (!mDisplayAreaOrganizer.isInOneHanded() && mIsOneHandedEnabled) {
             final int yOffSet = Math.round(getDisplaySize().y * mOffSetFraction);
             mDisplayAreaOrganizer.scheduleOffset(0, yOffSet);
+            mTimeoutHandler.resetTimer();
         }
     }
 
@@ -97,6 +100,7 @@ public class OneHandedManagerImpl implements OneHandedManager, Dumpable {
     public void stopOneHanded() {
         if (mDisplayAreaOrganizer.isInOneHanded()) {
             mDisplayAreaOrganizer.scheduleOffset(0, 0);
+            mTimeoutHandler.removeTimer();
         }
     }
 

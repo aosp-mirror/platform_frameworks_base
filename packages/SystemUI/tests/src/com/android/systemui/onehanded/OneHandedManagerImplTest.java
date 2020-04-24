@@ -38,14 +38,16 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
 public class OneHandedManagerImplTest extends OneHandedTestCase {
-
     OneHandedManagerImpl mOneHandedManagerImpl;
+    OneHandedTimeoutHandler mTimeoutHandler;
+
     @Mock
     DisplayController mMockDisplayController;
     @Mock
@@ -62,6 +64,7 @@ public class OneHandedManagerImplTest extends OneHandedTestCase {
                 mMockDisplayController,
                 mMockDisplayAreaOrganizer,
                 mMockSysUiState);
+        mTimeoutHandler = Mockito.spy(OneHandedTimeoutHandler.get());
 
         when(mMockDisplayAreaOrganizer.isInOneHanded()).thenReturn(false);
     }
@@ -104,5 +107,13 @@ public class OneHandedManagerImplTest extends OneHandedTestCase {
     public void testRegisterTransitionCallback() {
         verify(mMockDisplayAreaOrganizer, atLeastOnce()).registerTransitionCallback(any());
     }
+
+    @Test
+    public void testStopOneHanded_shouldRemoveTimer() {
+        mOneHandedManagerImpl.stopOneHanded();
+
+        verify(mTimeoutHandler, times(1)).removeTimer();
+    }
+
 
 }
