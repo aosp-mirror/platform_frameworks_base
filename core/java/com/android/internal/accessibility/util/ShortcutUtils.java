@@ -151,7 +151,7 @@ public final class ShortcutUtils {
     public static String convertToKey(@UserShortcutType int type) {
         switch (type) {
             case UserShortcutType.SOFTWARE:
-                return Settings.Secure.ACCESSIBILITY_BUTTON_TARGET_COMPONENT;
+                return Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS;
             case UserShortcutType.HARDWARE:
                 return Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE;
             case UserShortcutType.TRIPLETAP:
