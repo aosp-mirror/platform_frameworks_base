@@ -360,7 +360,7 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
      * Verify the UID and return the installer package name.
      *
      * @return the package name of the installer, or null if it cannot be determined or it is
-     *     installed via adb.
+     * installed via adb.
      */
     @Nullable
     private String getInstallerPackageName(Intent intent) {
@@ -568,7 +568,10 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
         try (PackageParser2 parser = mParserSupplier.get()) {
             ParsedPackage pkg = parser.parsePackage(installationPath, 0, false);
             int flags = PackageManager.GET_SIGNING_CERTIFICATES | PackageManager.GET_META_DATA;
-            pkg.setSigningDetails(ParsingPackageUtils.collectCertificates(pkg, false));
+            // APK signatures is already verified elsewhere in PackageManager. We do not need to
+            // verify it again since it could cause a timeout for large APKs.
+            pkg.setSigningDetails(
+                    ParsingPackageUtils.collectCertificates(pkg, /* skipVerify= */ true));
             return PackageInfoUtils.generate(
                     pkg,
                     null,
@@ -709,7 +712,7 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
 
         // Filter out the rule provider packages that are not system apps.
         List<String> systemAppRuleProviders = new ArrayList<>();
-        for (String ruleProvider: integrityRuleProviders) {
+        for (String ruleProvider : integrityRuleProviders) {
             if (isSystemApp(ruleProvider)) {
                 systemAppRuleProviders.add(ruleProvider);
             }
