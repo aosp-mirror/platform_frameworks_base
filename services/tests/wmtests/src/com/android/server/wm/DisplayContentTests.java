@@ -97,9 +97,7 @@ import android.view.InsetsState;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.SurfaceControl.Transaction;
-import android.view.ViewRootImpl;
 import android.view.WindowManager;
-import android.view.test.InsetsModeSession;
 
 import androidx.test.filters.SmallTest;
 
@@ -448,7 +446,7 @@ public class DisplayContentTests extends WindowTestsBase {
         assertTrue(defaultDisplay.shouldWaitForSystemDecorWindowsOnBoot());
 
         // Verify not waiting for drawn windows.
-        makeWindowsDrawn(windows);
+        makeWindowsDrawnState(windows, WindowStateAnimator.HAS_DRAWN);
         assertFalse(defaultDisplay.shouldWaitForSystemDecorWindowsOnBoot());
     }
 
@@ -469,8 +467,24 @@ public class DisplayContentTests extends WindowTestsBase {
         assertTrue(secondaryDisplay.shouldWaitForSystemDecorWindowsOnBoot());
 
         // Verify not waiting for drawn windows on display with system decorations.
-        makeWindowsDrawn(windows);
+        makeWindowsDrawnState(windows, WindowStateAnimator.HAS_DRAWN);
         assertFalse(secondaryDisplay.shouldWaitForSystemDecorWindowsOnBoot());
+    }
+
+    @Test
+    public void testShouldWaitForSystemDecorWindowsOnBoot_OnWindowReadyToShowAndDrawn() {
+        mWm.mSystemBooted = true;
+        final DisplayContent defaultDisplay = mWm.getDefaultDisplayContentLocked();
+        final WindowState[] windows = createNotDrawnWindowsOn(defaultDisplay,
+                TYPE_WALLPAPER, TYPE_APPLICATION);
+
+        // Verify waiting for windows to be drawn.
+        makeWindowsDrawnState(windows, WindowStateAnimator.READY_TO_SHOW);
+        assertTrue(defaultDisplay.shouldWaitForSystemDecorWindowsOnBoot());
+
+        // Verify not waiting for drawn windows.
+        makeWindowsDrawnState(windows, WindowStateAnimator.HAS_DRAWN);
+        assertFalse(defaultDisplay.shouldWaitForSystemDecorWindowsOnBoot());
     }
 
     private WindowState[] createNotDrawnWindowsOn(DisplayContent displayContent, int... types) {
@@ -483,10 +497,10 @@ public class DisplayContentTests extends WindowTestsBase {
         return windows;
     }
 
-    private static void makeWindowsDrawn(WindowState[] windows) {
+    private static void makeWindowsDrawnState(WindowState[] windows, int state) {
         for (WindowState window : windows) {
             window.mHasSurface = true;
-            window.mWinAnimator.mDrawState = WindowStateAnimator.HAS_DRAWN;
+            window.mWinAnimator.mDrawState = state;
         }
     }
 
