@@ -424,8 +424,7 @@ class RemoteAnimationController implements DeathRecipient {
                 @AnimationType int type, OnAnimationFinishedCallback finishCallback) {
             ProtoLog.d(WM_DEBUG_REMOTE_ANIMATIONS, "startAnimation");
 
-            // Restore z-layering, position and stack crop until client has a chance to modify it.
-            t.setLayer(animationLeash, mRecord.mWindowContainer.getPrefixOrderIndex());
+            // Restore position and stack crop until client has a chance to modify it.
             if (mRecord.mStartBounds != null) {
                 t.setPosition(animationLeash, mRecord.mStartBounds.left, mRecord.mStartBounds.top);
                 t.setWindowCrop(animationLeash, mRecord.mStartBounds.width(),
