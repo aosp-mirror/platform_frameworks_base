@@ -261,7 +261,6 @@ public final class DozeServiceHost implements DozeHost {
                 mKeyguardViewMediator.setPulsing(pulsing);
                 mNotificationPanel.setPulsing(pulsing);
                 mVisualStabilityManager.setPulsing(pulsing);
-                mLockscreenLockIconController.setPulsing(pulsing);
                 mIgnoreTouchWhilePulsing = false;
                 if (mKeyguardUpdateMonitor != null && passiveAuthInterrupt) {
                     mKeyguardUpdateMonitor.onAuthInterruptDetected(pulsing /* active */);
