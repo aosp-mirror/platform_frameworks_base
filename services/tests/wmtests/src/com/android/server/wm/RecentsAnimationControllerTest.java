@@ -401,10 +401,6 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         assertEquals(Configuration.ORIENTATION_PORTRAIT,
                 wallpapers.get(0).getConfiguration().orientation);
 
-        // Wallpaper's transform state is controlled by home, so the invocation should be no-op.
-        wallpaperWindowToken.finishFixedRotationTransform();
-        assertTrue(wallpaperWindowToken.hasFixedRotationTransform());
-
         // Wallpaper's transform state should be cleared with home.
         homeActivity.finishFixedRotationTransform();
         assertFalse(wallpaperWindowToken.hasFixedRotationTransform());
