@@ -683,5 +683,32 @@ public class ImsCallSessionListener {
             e.rethrowFromSystemServer();
         }
     }
+
+    /**
+     * Notifies the result of transfer request.
+     * @hide
+     */
+    public void callSessionTransferred() {
+        try {
+            mListener.callSessionTransferred();
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Notifies the result of transfer request.
+     *
+     * @param reasonInfo {@link ImsReasonInfo} containing a reason for the
+     * session transfer failure
+     * @hide
+     */
+    public void callSessionTransferFailed(ImsReasonInfo reasonInfo) {
+        try {
+            mListener.callSessionTransferFailed(reasonInfo);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
 }
 
