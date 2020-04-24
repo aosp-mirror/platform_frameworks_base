@@ -52,15 +52,21 @@ public class NetworkStagedRollbackTest {
     private static final String PROPERTY_WATCHDOG_REQUEST_TIMEOUT_MILLIS =
             "watchdog_request_timeout_millis";
 
+    private static final String[] NETWORK_STACK_APK_NAMES = {
+            "NetworkStack", "NetworkStackGoogle", "NetworkStackNext", "NetworkStackNextGoogle"
+    };
+
     private static final TestApp NETWORK_STACK = new TestApp("NetworkStack",
             getNetworkStackPackageName(), -1, false, findNetworkStackApk());
 
     private static File findNetworkStackApk() {
-        final File apk = new File("/system/priv-app/NetworkStack/NetworkStack.apk");
-        if (apk.isFile()) {
-            return apk;
+        for (String name : NETWORK_STACK_APK_NAMES) {
+            final File apk = new File("/system/priv-app/" + name + "/" + name + ".apk");
+            if (apk.isFile()) {
+                return apk;
+            }
         }
-        return new File("/system/priv-app/NetworkStackNext/NetworkStackNext.apk");
+        throw new RuntimeException("Can't find NetworkStackApk");
     }
 
     /**
