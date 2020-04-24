@@ -35,6 +35,7 @@ import android.content.pm.parsing.PackageInfoWithoutStateUtils;
 import android.os.Binder;
 import android.os.Environment;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.Trace;
 import android.sysprop.ApexProperties;
 import android.util.ArrayMap;
@@ -398,13 +399,9 @@ public abstract class ApexManager {
          */
         @VisibleForTesting
         protected IApexService waitForApexService() {
-            try {
-                // Since apexd is a trusted platform component, synchronized calls are allowable
-                return IApexService.Stub.asInterface(
-                        Binder.allowBlocking(Binder.waitForService("apexservice")));
-            } catch (RemoteException e) {
-                throw new IllegalStateException("Required service apexservice not available");
-            }
+            // Since apexd is a trusted platform component, synchronized calls are allowable
+            return IApexService.Stub.asInterface(
+                    Binder.allowBlocking(ServiceManager.waitForService("apexservice")));
         }
 
         @Override
