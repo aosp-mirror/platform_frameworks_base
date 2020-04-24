@@ -761,7 +761,10 @@ int IncrementalService::unbind(StorageId storage, std::string_view target) {
     std::unique_lock l2(ifs->lock);
     if (ifs->bindPoints.size() <= 1) {
         ifs->bindPoints.clear();
-        deleteStorageLocked(*ifs, std::move(l2));
+        std::thread([this, ifs, l2 = std::move(l2)]() mutable {
+            mJni->initializeForCurrentThread();
+            deleteStorageLocked(*ifs, std::move(l2));
+        }).detach();
     } else {
         const std::string savedFile = std::move(bindIt->second.savedFilename);
         ifs->bindPoints.erase(bindIt);
@@ -770,6 +773,7 @@ int IncrementalService::unbind(StorageId storage, std::string_view target) {
             mIncFs->unlink(ifs->control, path::join(ifs->root, constants().mount, savedFile));
         }
     }
+
     return 0;
 }
 
@@ -1676,6 +1680,20 @@ void IncrementalService::DataLoaderStub::cleanupResources() {
     mId = kInvalidStorageId;
 }
 
+sp<content::pm::IDataLoader> IncrementalService::DataLoaderStub::getDataLoader() {
+    sp<IDataLoader> dataloader;
+    auto status = mService.mDataLoaderManager->getDataLoader(mId, &dataloader);
+    if (!status.isOk()) {
+        LOG(ERROR) << "Failed to get dataloader: " << status.toString8();
+        return {};
+    }
+    if (!dataloader) {
+        LOG(ERROR) << "DataLoader is null: " << status.toString8();
+        return {};
+    }
+    return dataloader;
+}
+
 bool IncrementalService::DataLoaderStub::requestCreate() {
     return setTargetStatus(IDataLoaderStatusListener::DATA_LOADER_CREATED);
 }
@@ -1720,17 +1738,11 @@ bool IncrementalService::DataLoaderStub::bind() {
 }
 
 bool IncrementalService::DataLoaderStub::create() {
-    sp<IDataLoader> dataloader;
-    auto status = mService.mDataLoaderManager->getDataLoader(mId, &dataloader);
-    if (!status.isOk()) {
-        LOG(ERROR) << "Failed to get dataloader: " << status.toString8();
-        return false;
-    }
+    auto dataloader = getDataLoader();
     if (!dataloader) {
-        LOG(ERROR) << "DataLoader is null: " << status.toString8();
         return false;
     }
-    status = dataloader->create(mId, mParams, mControl, this);
+    auto status = dataloader->create(mId, mParams, mControl, this);
     if (!status.isOk()) {
         LOG(ERROR) << "Failed to start DataLoader: " << status.toString8();
         return false;
@@ -1739,17 +1751,11 @@ bool IncrementalService::DataLoaderStub::create() {
 }
 
 bool IncrementalService::DataLoaderStub::start() {
-    sp<IDataLoader> dataloader;
-    auto status = mService.mDataLoaderManager->getDataLoader(mId, &dataloader);
-    if (!status.isOk()) {
-        LOG(ERROR) << "Failed to get dataloader: " << status.toString8();
-        return false;
-    }
+    auto dataloader = getDataLoader();
     if (!dataloader) {
-        LOG(ERROR) << "DataLoader is null: " << status.toString8();
         return false;
     }
-    status = dataloader->start(mId);
+    auto status = dataloader->start(mId);
     if (!status.isOk()) {
         LOG(ERROR) << "Failed to start DataLoader: " << status.toString8();
         return false;
@@ -1758,8 +1764,7 @@ bool IncrementalService::DataLoaderStub::start() {
 }
 
 bool IncrementalService::DataLoaderStub::destroy() {
-    mService.mDataLoaderManager->unbindFromDataLoader(mId);
-    return true;
+    return mService.mDataLoaderManager->unbindFromDataLoader(mId).isOk();
 }
 
 bool IncrementalService::DataLoaderStub::fsmStep() {
@@ -1823,8 +1828,8 @@ binder::Status IncrementalService::DataLoaderStub::onStatusChanged(MountId mount
         if (mCurrentStatus == newStatus) {
             return binder::Status::ok();
         }
-        mCurrentStatus = newStatus;
         oldStatus = mCurrentStatus;
+        mCurrentStatus = newStatus;
         targetStatus = mTargetStatus;
     }
 
