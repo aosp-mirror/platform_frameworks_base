@@ -856,6 +856,7 @@ public final class MediaParser {
     private String mParserName;
     private Extractor mExtractor;
     private ExtractorInput mExtractorInput;
+    private boolean mPendingExtractorInit;
     private long mPendingSeekPosition;
     private long mPendingSeekTimeMicros;
     private boolean mLoggedSchemeInitDataCreationException;
@@ -972,7 +973,7 @@ public final class MediaParser {
                         if (extractor.sniff(mExtractorInput)) {
                             mParserName = parserName;
                             mExtractor = extractor;
-                            mExtractor.init(new ExtractorOutputAdapter());
+                            mPendingExtractorInit = true;
                             break;
                         }
                     } catch (EOFException e) {
@@ -988,13 +989,17 @@ public final class MediaParser {
             }
         }
 
+        if (mPendingExtractorInit) {
+            mExtractor.init(new ExtractorOutputAdapter());
+            mPendingExtractorInit = false;
+        }
         if (isPendingSeek()) {
             mExtractor.seek(mPendingSeekPosition, mPendingSeekTimeMicros);
             removePendingSeek();
         }
 
         mPositionHolder.position = seekableInputReader.getPosition();
-        int result = 0;
+        int result;
         try {
             result = mExtractor.read(mExtractorInput, mPositionHolder);
         } catch (ParserException e) {
