@@ -60,6 +60,11 @@ public class SysUiState implements Dumpable {
         mCallbacks.remove(callback);
     }
 
+    /** Returns the current sysui state flags. */
+    public int getFlags() {
+        return mFlags;
+    }
+
     /** Methods to this call can be chained together before calling {@link #commitUpdate(int)}. */
     public SysUiState setFlag(int flag, boolean enabled) {
         if (enabled) {
