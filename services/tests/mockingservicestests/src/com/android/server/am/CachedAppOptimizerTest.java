@@ -16,14 +16,23 @@
 
 package com.android.server.am;
 
+import static android.app.ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
+
 import static com.android.server.am.ActivityManagerService.Injector;
 import static com.android.server.am.CachedAppOptimizer.compactActionIntToString;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
+
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManagerInternal;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.MessageQueue;
 import android.os.Process;
 import android.platform.test.annotations.Presubmit;
 import android.provider.DeviceConfig;
@@ -31,9 +40,11 @@ import android.text.TextUtils;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
 import com.android.server.appop.AppOpsService;
 import com.android.server.testables.TestableDeviceConfig;
+import com.android.server.wm.ActivityTaskManagerService;
 
 import org.junit.After;
 import org.junit.Assume;
@@ -45,6 +56,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
@@ -68,25 +80,36 @@ public final class CachedAppOptimizerTest {
     private HandlerThread mHandlerThread;
     private Handler mHandler;
     private CountDownLatch mCountDown;
+    private ActivityManagerService mAms;
+    private Context mContext;
+    private TestInjector mInjector;
+    private TestProcessDependencies mProcessDependencies;
+
+    @Mock
+    private PackageManagerInternal mPackageManagerInt;
 
     @Rule
-    public TestableDeviceConfig.TestableDeviceConfigRule
+    public final TestableDeviceConfig.TestableDeviceConfigRule
             mDeviceConfigRule = new TestableDeviceConfig.TestableDeviceConfigRule();
+    @Rule
+    public final ApplicationExitInfoTest.ServiceThreadRule
+            mServiceThreadRule = new ApplicationExitInfoTest.ServiceThreadRule();
 
     @Before
     public void setUp() {
         mHandlerThread = new HandlerThread("");
         mHandlerThread.start();
         mHandler = new Handler(mHandlerThread.getLooper());
-
         mThread = new ServiceThread("TestServiceThread", Process.THREAD_PRIORITY_DEFAULT,
                 true /* allowIo */);
         mThread.start();
-
-        ActivityManagerService ams = new ActivityManagerService(
-                new TestInjector(InstrumentationRegistry.getInstrumentation().getContext()),
-                mThread);
-        mCachedAppOptimizerUnderTest = new CachedAppOptimizer(ams,
+        mContext = InstrumentationRegistry.getInstrumentation().getContext();
+        mInjector = new TestInjector(mContext);
+        mAms = new ActivityManagerService(
+                new TestInjector(mContext), mServiceThreadRule.getThread());
+        doReturn(new ComponentName("", "")).when(mPackageManagerInt).getSystemUiServiceComponent();
+        mProcessDependencies = new TestProcessDependencies();
+        mCachedAppOptimizerUnderTest = new CachedAppOptimizer(mAms,
                 new CachedAppOptimizer.PropertyChangedCallbackForTest() {
                     @Override
                     public void onPropertyChanged() {
@@ -94,7 +117,9 @@ public final class CachedAppOptimizerTest {
                             mCountDown.countDown();
                         }
                     }
-                });
+                }, mProcessDependencies);
+        LocalServices.removeServiceForTest(PackageManagerInternal.class);
+        LocalServices.addService(PackageManagerInternal.class, mPackageManagerInt);
     }
 
     @After
@@ -102,6 +127,19 @@ public final class CachedAppOptimizerTest {
         mHandlerThread.quit();
         mThread.quit();
         mCountDown = null;
+    }
+
+    private ProcessRecord makeProcessRecord(int pid, int uid, int packageUid, String processName,
+            String packageName) {
+        ApplicationInfo ai = new ApplicationInfo();
+        ai.packageName = packageName;
+        ProcessRecord app = new ProcessRecord(mAms, ai, processName, uid);
+        app.pid = pid;
+        app.info.uid = packageUid;
+        // Exact value does not mater, it can be any state for which compaction is allowed.
+        app.setProcState = PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
+        app.setAdj = 905;
+        return app;
     }
 
     @Test
@@ -197,7 +235,7 @@ public final class CachedAppOptimizerTest {
                 CachedAppOptimizer.DEFAULT_USE_FREEZER);
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                 CachedAppOptimizer.KEY_USE_FREEZER, CachedAppOptimizer.DEFAULT_USE_FREEZER
-                ?  "false" : "true" , false);
+                        ? "false" : "true", false);
 
         // Then calling init will read and set that flag.
         mCachedAppOptimizerUnderTest.init();
@@ -790,6 +828,174 @@ public final class CachedAppOptimizerTest {
                 .containsExactlyElementsIn(expected);
     }
 
+    @Test
+    public void processWithDeltaRSSTooSmall_notFullCompacted() throws Exception {
+        // Initialize CachedAppOptimizer and set flags to (1) enable compaction, (2) set RSS
+        // throttle to 12000.
+        mCachedAppOptimizerUnderTest.init();
+        setFlag(CachedAppOptimizer.KEY_USE_COMPACTION, "true", true);
+        setFlag(CachedAppOptimizer.KEY_COMPACT_FULL_DELTA_RSS_THROTTLE_KB, "12000", false);
+        initActivityManagerService();
+
+        // Simulate RSS anon memory larger than throttle.
+        long[] rssBefore1 =
+                new long[]{/*totalRSS*/ 10000, /*fileRSS*/ 10000, /*anonRSS*/ 12000, /*swap*/
+                        10000};
+        long[] rssAfter1 =
+                new long[]{/*totalRSS*/ 9000, /*fileRSS*/ 9000, /*anonRSS*/ 11000, /*swap*/9000};
+        // Delta between rssAfter1 and rssBefore2 is below threshold (500).
+        long[] rssBefore2 =
+                new long[]{/*totalRSS*/ 9500, /*fileRSS*/ 9500, /*anonRSS*/ 11500, /*swap*/9500};
+        long[] rssAfter2 =
+                new long[]{/*totalRSS*/ 8000, /*fileRSS*/ 8000, /*anonRSS*/ 9000, /*swap*/8000};
+        // Delta between rssAfter1 and rssBefore3 is above threshold (13000).
+        long[] rssBefore3 =
+                new long[]{/*totalRSS*/ 10000, /*fileRSS*/ 18000, /*anonRSS*/ 13000, /*swap*/ 7000};
+        long[] rssAfter3 =
+                new long[]{/*totalRSS*/ 10000, /*fileRSS*/ 11000, /*anonRSS*/ 10000, /*swap*/ 6000};
+        long[] valuesAfter = {};
+        // Process that passes properties.
+        int pid = 1;
+        ProcessRecord processRecord = makeProcessRecord(pid, 2, 3, "p1", "app1");
+
+        // GIVEN we simulate RSS memory before above thresholds and it is the first time 'p1' is
+        // compacted.
+        mProcessDependencies.setRss(rssBefore1);
+        mProcessDependencies.setRssAfterCompaction(rssAfter1); //
+        // WHEN we try to run compaction
+        mCachedAppOptimizerUnderTest.compactAppFull(processRecord);
+        waitForHandler();
+        // THEN process IS compacted.
+        assertThat(mCachedAppOptimizerUnderTest.mLastCompactionStats.get(pid)).isNotNull();
+        valuesAfter = mCachedAppOptimizerUnderTest.mLastCompactionStats.get(
+                pid).getRssAfterCompaction();
+        assertThat(valuesAfter).isEqualTo(rssAfter1);
+
+        // WHEN delta is below threshold (500).
+        mProcessDependencies.setRss(rssBefore2);
+        mProcessDependencies.setRssAfterCompaction(rssAfter2);
+        // This is to avoid throttle of compacting too soon.
+        processRecord.lastCompactTime = processRecord.lastCompactTime - 10_000;
+        // WHEN we try to run compaction.
+        mCachedAppOptimizerUnderTest.compactAppFull(processRecord);
+        waitForHandler();
+        // THEN process IS NOT compacted - values after compaction for process 1 should remain the
+        // same as from the last compaction.
+        assertThat(mCachedAppOptimizerUnderTest.mLastCompactionStats.get(pid)).isNotNull();
+        valuesAfter = mCachedAppOptimizerUnderTest.mLastCompactionStats.get(
+                pid).getRssAfterCompaction();
+        assertThat(valuesAfter).isEqualTo(rssAfter1);
+
+        // WHEN delta is above threshold (13000).
+        mProcessDependencies.setRss(rssBefore3);
+        mProcessDependencies.setRssAfterCompaction(rssAfter3);
+        // This is to avoid throttle of compacting too soon.
+        processRecord.lastCompactTime = processRecord.lastCompactTime - 10_000;
+        // WHEN we try to run compaction
+        mCachedAppOptimizerUnderTest.compactAppFull(processRecord);
+        waitForHandler();
+        // THEN process IS compacted - values after compaction for process 1 should be updated.
+        assertThat(mCachedAppOptimizerUnderTest.mLastCompactionStats.get(pid)).isNotNull();
+        valuesAfter = mCachedAppOptimizerUnderTest.mLastCompactionStats.get(
+                pid).getRssAfterCompaction();
+        assertThat(valuesAfter).isEqualTo(rssAfter3);
+
+    }
+
+    @Test
+    public void processWithAnonRSSTooSmall_notFullCompacted() throws Exception {
+        // Initialize CachedAppOptimizer and set flags to (1) enable compaction, (2) set RSS
+        // throttle to 8000.
+        mCachedAppOptimizerUnderTest.init();
+        setFlag(CachedAppOptimizer.KEY_USE_COMPACTION, "true", true);
+        setFlag(CachedAppOptimizer.KEY_COMPACT_FULL_RSS_THROTTLE_KB, "8000", false);
+        initActivityManagerService();
+
+        // Simulate RSS anon memory larger than throttle.
+        long[] rssBelowThreshold =
+                new long[]{/*Total RSS*/ 10000, /*File RSS*/ 10000, /*Anon RSS*/ 7000, /*Swap*/
+                        10000};
+        long[] rssBelowThresholdAfter =
+                new long[]{/*Total RSS*/ 9000, /*File RSS*/ 7000, /*Anon RSS*/ 4000, /*Swap*/
+                        8000};
+        long[] rssAboveThreshold =
+                new long[]{/*Total RSS*/ 10000, /*File RSS*/ 10000, /*Anon RSS*/ 9000, /*Swap*/
+                        10000};
+        long[] rssAboveThresholdAfter =
+                new long[]{/*Total RSS*/ 8000, /*File RSS*/ 9000, /*Anon RSS*/ 6000, /*Swap*/5000};
+        // Process that passes properties.
+        int pid = 1;
+        ProcessRecord processRecord =
+                makeProcessRecord(pid, 2, 3, "p1",
+                        "app1");
+
+        // GIVEN we simulate RSS memory before below threshold.
+        mProcessDependencies.setRss(rssBelowThreshold);
+        mProcessDependencies.setRssAfterCompaction(rssBelowThresholdAfter);
+        // WHEN we try to run compaction
+        mCachedAppOptimizerUnderTest.compactAppFull(processRecord);
+        waitForHandler();
+        // THEN process IS NOT compacted.
+        assertThat(mCachedAppOptimizerUnderTest.mLastCompactionStats.get(pid)).isNull();
+
+        // GIVEN we simulate RSS memory before above threshold.
+        mProcessDependencies.setRss(rssAboveThreshold);
+        mProcessDependencies.setRssAfterCompaction(rssAboveThresholdAfter);
+        // WHEN we try to run compaction
+        mCachedAppOptimizerUnderTest.compactAppFull(processRecord);
+        waitForHandler();
+        // THEN process IS compacted.
+        assertThat(mCachedAppOptimizerUnderTest.mLastCompactionStats.get(pid)).isNotNull();
+        long[] valuesAfter = mCachedAppOptimizerUnderTest.mLastCompactionStats.get(
+                pid).getRssAfterCompaction();
+        assertThat(valuesAfter).isEqualTo(rssAboveThresholdAfter);
+    }
+
+
+    private void setFlag(String key, String value, boolean defaultValue) throws Exception {
+        mCountDown = new CountDownLatch(1);
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER, key, value, defaultValue);
+        assertThat(mCountDown.await(5, TimeUnit.SECONDS)).isTrue();
+    }
+
+    private void waitForHandler() {
+        Idle idle = new Idle();
+        mCachedAppOptimizerUnderTest.mCompactionHandler.getLooper().getQueue().addIdleHandler(idle);
+        mCachedAppOptimizerUnderTest.mCompactionHandler.post(() -> { });
+        idle.waitForIdle();
+    }
+
+    private void initActivityManagerService() {
+        mAms = new ActivityManagerService(mInjector, mServiceThreadRule.getThread());
+        mAms.mActivityTaskManager = new ActivityTaskManagerService(mContext);
+        mAms.mActivityTaskManager.initialize(null, null, mContext.getMainLooper());
+        mAms.mAtmInternal = spy(mAms.mActivityTaskManager.getAtmInternal());
+        mAms.mPackageManagerInt = mPackageManagerInt;
+    }
+
+    private static final class Idle implements MessageQueue.IdleHandler {
+        private boolean mIdle;
+
+        @Override
+        public boolean queueIdle() {
+            synchronized (this) {
+                mIdle = true;
+                notifyAll();
+            }
+            return false;
+        }
+
+        public synchronized void waitForIdle() {
+            while (!mIdle) {
+                try {
+                    // Wait with a timeout of 10s.
+                    wait(10000);
+                } catch (InterruptedException e) {
+                }
+            }
+        }
+    }
+
     private class TestInjector extends Injector {
 
         TestInjector(Context context) {
@@ -804,6 +1010,31 @@ public final class CachedAppOptimizerTest {
         @Override
         public Handler getUiHandler(ActivityManagerService service) {
             return mHandler;
+        }
+    }
+
+    // Test implementation for ProcessDependencies.
+    private static final class TestProcessDependencies
+            implements CachedAppOptimizer.ProcessDependencies {
+        private long[] mRss;
+        private long[] mRssAfterCompaction;
+
+        @Override
+        public long[] getRss(int pid) {
+            return mRss;
+        }
+
+        @Override
+        public void performCompaction(String action, int pid) throws IOException {
+            mRss = mRssAfterCompaction;
+        }
+
+        public void setRss(long[] newValues) {
+            mRss = newValues;
+        }
+
+        public void setRssAfterCompaction(long[] newValues) {
+            mRssAfterCompaction = newValues;
         }
     }
 }
