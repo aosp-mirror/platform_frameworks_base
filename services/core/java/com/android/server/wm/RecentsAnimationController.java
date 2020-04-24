@@ -936,8 +936,7 @@ public class RecentsAnimationController implements DeathRecipient {
         @Override
         public void startAnimation(SurfaceControl animationLeash, Transaction t,
                 @AnimationType int type, OnAnimationFinishedCallback finishCallback) {
-            // Restore z-layering, position and stack crop until client has a chance to modify it.
-            t.setLayer(animationLeash, mTask.getPrefixOrderIndex());
+            // Restore position and stack crop until client has a chance to modify it.
             t.setPosition(animationLeash, mLocalBounds.left, mLocalBounds.top);
             mTmpRect.set(mLocalBounds);
             mTmpRect.offsetTo(0, 0);
