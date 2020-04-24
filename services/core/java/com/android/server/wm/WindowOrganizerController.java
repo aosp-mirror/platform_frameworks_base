@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static android.Manifest.permission.MANAGE_ACTIVITY_STACKS;
 
 import static com.android.server.wm.ActivityStackSupervisor.PRESERVE_WINDOWS;
+import static com.android.server.wm.ActivityTaskManagerService.LAYOUT_REASON_CONFIG_CHANGED;
 import static com.android.server.wm.Task.FLAG_FORCE_HIDDEN_FOR_TASK_ORG;
 import static com.android.server.wm.WindowContainer.POSITION_BOTTOM;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
@@ -172,6 +173,10 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                         } finally {
                             f.recycle();
                         }
+                    }
+
+                    if ((effects & TRANSACT_EFFECTS_CLIENT_CONFIG) == 0) {
+                        mService.addWindowLayoutReasons(LAYOUT_REASON_CONFIG_CHANGED);
                     }
                 } finally {
                     mService.continueWindowLayout();
