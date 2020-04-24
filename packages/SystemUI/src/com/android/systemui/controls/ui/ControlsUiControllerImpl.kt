@@ -30,6 +30,7 @@ import android.content.res.Configuration
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.LayerDrawable
 import android.os.Process
+import android.os.Vibrator
 import android.service.controls.Control
 import android.service.controls.actions.ControlAction
 import android.util.Log
@@ -108,6 +109,11 @@ class ControlsUiControllerImpl @Inject constructor (
         get() = controlsController.get().available
 
     private lateinit var listingCallback: ControlsListingController.ControlsListingCallback
+
+    init {
+        val vibratorService = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+        ControlActionCoordinator.initialize(vibratorService, bgExecutor)
+    }
 
     private fun createCallback(
         onResult: (List<SelectionItem>) -> Unit
