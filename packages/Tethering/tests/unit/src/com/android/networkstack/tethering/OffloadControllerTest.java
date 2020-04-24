@@ -26,6 +26,7 @@ import static android.net.NetworkStats.UID_TETHERING;
 import static android.net.RouteInfo.RTN_UNICAST;
 import static android.provider.Settings.Global.TETHER_OFFLOAD_DISABLED;
 
+import static com.android.networkstack.tethering.OffloadController.DEFAULT_PERFORM_POLL_INTERVAL_MS;
 import static com.android.networkstack.tethering.OffloadController.StatsType.STATS_PER_IFACE;
 import static com.android.networkstack.tethering.OffloadController.StatsType.STATS_PER_UID;
 import static com.android.networkstack.tethering.OffloadHardwareInterface.ForwardedStats;
@@ -45,6 +46,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -61,6 +63,7 @@ import android.net.LinkProperties;
 import android.net.NetworkStats;
 import android.net.NetworkStats.Entry;
 import android.net.RouteInfo;
+import android.net.netstats.provider.NetworkStatsProvider;
 import android.net.util.SharedLog;
 import android.os.Handler;
 import android.os.test.TestLooper;
@@ -118,7 +121,7 @@ public class OffloadControllerTest {
     private OffloadController.Dependencies mDeps = new OffloadController.Dependencies() {
         @Override
         int getPerformPollInterval() {
-            return 0;
+            return -1; // Disabled.
         }
     };
 
@@ -147,6 +150,15 @@ public class OffloadControllerTest {
 
     private void enableOffload() {
         Settings.Global.putInt(mContentResolver, TETHER_OFFLOAD_DISABLED, 0);
+    }
+
+    private void setOffloadPollInterval(int interval) {
+        mDeps = new OffloadController.Dependencies() {
+            @Override
+            int getPerformPollInterval() {
+                return interval;
+            }
+        };
     }
 
     private void waitForIdle() {
@@ -769,4 +781,50 @@ public class OffloadControllerTest {
         verifyNoMoreInteractions(mHardware);
     }
 
+    @Test
+    public void testOnSetAlert() throws Exception {
+        setupFunctioningHardwareInterface();
+        enableOffload();
+        setOffloadPollInterval(DEFAULT_PERFORM_POLL_INTERVAL_MS);
+        final OffloadController offload = makeOffloadController();
+        offload.start();
+
+        // Initialize with fake eth upstream.
+        final String ethernetIface = "eth1";
+        InOrder inOrder = inOrder(mHardware);
+        final LinkProperties lp = new LinkProperties();
+        lp.setInterfaceName(ethernetIface);
+        offload.setUpstreamLinkProperties(lp);
+        // Previous upstream was null, so no stats are fetched.
+        inOrder.verify(mHardware, never()).getForwardedStats(any());
+
+        // Verify that set quota to 0 will immediately triggers an callback.
+        mTetherStatsProvider.onSetAlert(0);
+        waitForIdle();
+        mTetherStatsProviderCb.expectNotifyAlertReached();
+
+        // Verify that notifyAlertReached never fired if quota is not yet reached.
+        when(mHardware.getForwardedStats(eq(ethernetIface))).thenReturn(
+                new ForwardedStats(0, 0));
+        mTetherStatsProvider.onSetAlert(100);
+        mTestLooper.moveTimeForward(DEFAULT_PERFORM_POLL_INTERVAL_MS);
+        waitForIdle();
+        mTetherStatsProviderCb.assertNoCallback();
+
+        // Verify that notifyAlertReached fired when quota is reached.
+        when(mHardware.getForwardedStats(eq(ethernetIface))).thenReturn(
+                new ForwardedStats(50, 50));
+        mTestLooper.moveTimeForward(DEFAULT_PERFORM_POLL_INTERVAL_MS);
+        waitForIdle();
+        mTetherStatsProviderCb.expectNotifyAlertReached();
+
+        // Verify that set quota with UNLIMITED won't trigger any callback, and won't fetch
+        // any stats since the polling is stopped.
+        reset(mHardware);
+        mTetherStatsProvider.onSetAlert(NetworkStatsProvider.QUOTA_UNLIMITED);
+        mTestLooper.moveTimeForward(DEFAULT_PERFORM_POLL_INTERVAL_MS);
+        waitForIdle();
+        mTetherStatsProviderCb.assertNoCallback();
+        verify(mHardware, never()).getForwardedStats(any());
+    }
 }
