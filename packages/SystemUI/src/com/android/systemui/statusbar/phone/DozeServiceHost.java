@@ -77,7 +77,6 @@ public final class DozeServiceHost implements DozeHost {
     private final BatteryController mBatteryController;
     private final ScrimController mScrimController;
     private final Lazy<BiometricUnlockController> mBiometricUnlockControllerLazy;
-    private BiometricUnlockController mBiometricUnlockController;
     private final KeyguardViewMediator mKeyguardViewMediator;
     private final Lazy<AssistManager> mAssistManagerLazy;
     private final DozeScrimController mDozeScrimController;
@@ -148,8 +147,8 @@ public final class DozeServiceHost implements DozeHost {
         mNotificationPanel = notificationPanel;
         mNotificationShadeWindowViewController = notificationShadeWindowViewController;
         mAmbientIndicationContainer = ambientIndicationContainer;
-        mBiometricUnlockController = mBiometricUnlockControllerLazy.get();
     }
+
 
     @Override
     public String toString() {
@@ -206,11 +205,11 @@ public final class DozeServiceHost implements DozeHost {
         boolean
                 dozing =
                 mDozingRequested && mStatusBarStateController.getState() == StatusBarState.KEYGUARD
-                        || mBiometricUnlockController.getMode()
+                        || mBiometricUnlockControllerLazy.get().getMode()
                         == BiometricUnlockController.MODE_WAKE_AND_UNLOCK_PULSING;
         // When in wake-and-unlock we may not have received a change to StatusBarState
         // but we still should not be dozing, manually set to false.
-        if (mBiometricUnlockController.getMode()
+        if (mBiometricUnlockControllerLazy.get().getMode()
                 == BiometricUnlockController.MODE_WAKE_AND_UNLOCK) {
             dozing = false;
         }
@@ -311,7 +310,7 @@ public final class DozeServiceHost implements DozeHost {
 
     @Override
     public boolean isPulsingBlocked() {
-        return mBiometricUnlockController.getMode()
+        return mBiometricUnlockControllerLazy.get().getMode()
                 == BiometricUnlockController.MODE_WAKE_AND_UNLOCK;
     }
 
@@ -323,7 +322,7 @@ public final class DozeServiceHost implements DozeHost {
 
     @Override
     public boolean isBlockingDoze() {
-        if (mBiometricUnlockController.hasPendingAuthentication()) {
+        if (mBiometricUnlockControllerLazy.get().hasPendingAuthentication()) {
             Log.i(StatusBar.TAG, "Blocking AOD because fingerprint has authenticated");
             return true;
         }
