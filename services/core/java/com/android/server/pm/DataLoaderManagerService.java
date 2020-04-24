@@ -190,13 +190,10 @@ public class DataLoaderManagerService extends SystemService {
                 onNullBinding(className);
                 return;
             }
-            synchronized (mServiceConnections) {
-                if (mServiceConnections.get(mId) != null) {
-                    // Another connection already bound for this ID.
-                    mContext.unbindService(this);
-                    return;
-                }
-                mServiceConnections.append(mId, this);
+            if (!append()) {
+                // Another connection already bound for this ID.
+                mContext.unbindService(this);
+                return;
             }
             callListener(IDataLoaderStatusListener.DATA_LOADER_BOUND);
         }
@@ -234,13 +231,33 @@ public class DataLoaderManagerService extends SystemService {
                 }
                 mDataLoader = null;
             }
-            mContext.unbindService(this);
+            try {
+                mContext.unbindService(this);
+            } catch (Exception ignored) {
+            }
             remove();
+        }
+
+        private boolean append() {
+            synchronized (mServiceConnections) {
+                DataLoaderServiceConnection bound = mServiceConnections.get(mId);
+                if (bound == this) {
+                    return true;
+                }
+                if (bound != null) {
+                    // Another connection already bound for this ID.
+                    return false;
+                }
+                mServiceConnections.append(mId, this);
+                return true;
+            }
         }
 
         private void remove() {
             synchronized (mServiceConnections) {
-                mServiceConnections.remove(mId);
+                if (mServiceConnections.get(mId) == this) {
+                    mServiceConnections.remove(mId);
+                }
             }
         }
 
