@@ -52,8 +52,7 @@ class ControlViewHolder(
     val layout: ViewGroup,
     val controlsController: ControlsController,
     val uiExecutor: DelayableExecutor,
-    val bgExecutor: DelayableExecutor,
-    val usePanels: Boolean
+    val bgExecutor: DelayableExecutor
 ) {
 
     companion object {
@@ -159,8 +158,7 @@ class ControlViewHolder(
         controlsController.action(cws.componentName, cws.ci, action)
     }
 
-    fun usePanel(): Boolean =
-        usePanels && deviceType in ControlViewHolder.FORCE_PANEL_DEVICES
+    fun usePanel(): Boolean = deviceType in ControlViewHolder.FORCE_PANEL_DEVICES
 
     private fun findBehavior(
         status: Int,
