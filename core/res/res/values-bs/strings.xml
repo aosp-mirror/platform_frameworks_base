@@ -1470,7 +1470,7 @@
     </plurals>
     <string name="action_mode_done" msgid="2536182504764803222">"Gotovo"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"Brisanje dijeljene pohrane…"</string>
-    <string name="share" msgid="4157615043345227321">"Podijelite"</string>
+    <string name="share" msgid="4157615043345227321">"Dijeli"</string>
     <string name="find" msgid="5015737188624767706">"Pronađi"</string>
     <string name="websearch" msgid="5624340204512793290">"Internet pretraživanje"</string>
     <string name="find_next" msgid="5341217051549648153">"Nađi sljedeći"</string>
@@ -2066,7 +2066,7 @@
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> fajlova</item>
     </plurals>
     <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Nijedna osoba nije preporučena za dijeljenje"</string>
-    <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"Spisak aplikacija"</string>
+    <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"Lista aplikacija"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Ovoj aplikaciji nije dato odobrenje za snimanje, ali može snimati zvuk putem ovog USB uređaja."</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"Početna stranica"</string>
     <string name="accessibility_system_action_back_label" msgid="4205361367345537608">"Nazad"</string>

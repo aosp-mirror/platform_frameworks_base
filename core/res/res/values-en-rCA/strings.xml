@@ -311,7 +311,7 @@
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"take pictures and record video"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"Call logs"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"read and write phone call logs"</string>
-    <string name="permgrouplab_phone" msgid="570318944091926620">"Telephone"</string>
+    <string name="permgrouplab_phone" msgid="570318944091926620">"Phone"</string>
     <string name="permgroupdesc_phone" msgid="270048070781478204">"make and manage phone calls"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Body sensors"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"access sensor data about your vital signs"</string>

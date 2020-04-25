@@ -1314,7 +1314,7 @@
     <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"Hautatu hau hari gabeko arazketa desgaitzeko"</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"Proba-materialeko modua gaitu da"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"Proba-materialaren modua desgaitzeko, berrezarri jatorrizko datuak."</string>
-    <string name="console_running_notification_title" msgid="6087888939261635904">"Serie-kontsola gaituta dago"</string>
+    <string name="console_running_notification_title" msgid="6087888939261635904">"Serie-kontsola gaituta"</string>
     <string name="console_running_notification_message" msgid="7892751888125174039">"Funtzionamenduari eragiten dio. Desgaitzeko, joan abiarazlera."</string>
     <string name="usb_contaminant_detected_title" msgid="4359048603069159678">"Likidoa edo zikinkeriak daude USB atakan"</string>
     <string name="usb_contaminant_detected_message" msgid="7346100585390795743">"USB ataka automatikoki desgaitu da. Informazio gehiago lortzeko, sakatu hau."</string>
