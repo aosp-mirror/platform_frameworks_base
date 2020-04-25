@@ -87,7 +87,8 @@
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"भण्डारण ठाउँ सीमित भएका कारण स्क्रिनसट सुरक्षित गर्न सकिएन"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"उक्त अनुप्रयोग वा तपाईंको संगठनले स्क्रिनसटहरू लिन दिँदैन"</string>
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"स्क्रिनसट हटाउनुहोस्"</string>
-    <string name="screenshot_preview_description" msgid="669177537416980449">"स्क्रिनसट खोल्नुहोस्"</string>
+    <!-- no translation found for screenshot_preview_description (7606510140714080474) -->
+    <skip />
     <string name="screenrecord_name" msgid="2596401223859996572">"स्क्रिन रेकर्डर"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"कुनै स्क्रिन रेकर्ड गर्ने सत्रका लागि चलिरहेको सूचना"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"रेकर्ड गर्न थाल्ने हो?"</string>
@@ -296,8 +297,8 @@
     <string name="accessibility_quick_settings_flashlight_on" msgid="3785616827729850766">"टर्च खुला छ।"</string>
     <string name="accessibility_quick_settings_flashlight_changed_off" msgid="3782375441381402599">"टर्च बन्द गरियो।"</string>
     <string name="accessibility_quick_settings_flashlight_changed_on" msgid="4747870681508334200">"टर्च खुला गरियो।"</string>
-    <string name="accessibility_quick_settings_color_inversion_changed_off" msgid="7548045840282925393">"रङ उल्टाउने बन्द गरियो।"</string>
-    <string name="accessibility_quick_settings_color_inversion_changed_on" msgid="4711141858364404084">"रङ उल्टाउने खुला गरियो।"</string>
+    <string name="accessibility_quick_settings_color_inversion_changed_off" msgid="7548045840282925393">"रङ्ग उल्टाउने बन्द गरियो।"</string>
+    <string name="accessibility_quick_settings_color_inversion_changed_on" msgid="4711141858364404084">"रङ्ग उल्टाउने खुला गरियो।"</string>
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"मोबाइल हटस्पट बन्द गरियो।"</string>
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"मोबाइल हटस्पट खुला गरियो।"</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"स्क्रिन कास्टिङ रोकियो।"</string>
@@ -418,7 +419,7 @@
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"सूर्योदयसम्म"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"<xliff:g id="TIME">%s</xliff:g> मा सक्रिय"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"<xliff:g id="TIME">%s</xliff:g> सम्म"</string>
-    <string name="quick_settings_ui_mode_night_label" msgid="1398928270610780470">"अँध्यारो विषयवस्तु"</string>
+    <string name="quick_settings_ui_mode_night_label" msgid="1398928270610780470">"अँध्यारो थिम"</string>
     <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"ब्याट्री सेभर"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at_sunset" msgid="6017379738102015710">"सूर्यास्तमा सक्रिय"</string>
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"सूर्योदयसम्म"</string>
@@ -582,7 +583,7 @@
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"ध्वनिसम्बन्धी सेटिङहरू"</string>
     <string name="accessibility_volume_expand" msgid="7653070939304433603">"विस्तार गर्नुहोस्"</string>
     <string name="accessibility_volume_collapse" msgid="2746845391013829996">"संक्षिप्त पार्नुहोस्"</string>
-    <string name="volume_odi_captions_tip" msgid="8825655463280990941">"स्वचालित क्याप्सनहरूसम्बन्धी मिडिया"</string>
+    <string name="volume_odi_captions_tip" msgid="8825655463280990941">"मिडियाको स्वत: क्याप्सन बनाउनुहोस्"</string>
     <string name="accessibility_volume_close_odi_captions_tip" msgid="8924753283621160480">"उपशीर्षकहरूसम्बन्धी सुझाव"</string>
     <string name="volume_odi_captions_content_description" msgid="4172765742046013630">"क्याप्सनको ओभरले"</string>
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"सक्षम पार्नुहोस्"</string>
@@ -707,9 +708,9 @@
     <string name="notification_bubble_title" msgid="8330481035191903164">"बबल"</string>
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"तपाईंलाई आवाज वा कम्पनविना ध्यान केन्द्रित गर्न मद्दत गर्छ।"</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"ध्वनि वा कम्पनमार्फत तपाईंको ध्यान आकर्षित गर्छ।"</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="6298026344552480458">"ध्वनि वा कम्पनमार्फत तपाईंको ध्यान आकर्षित गर्छ। <xliff:g id="APP_NAME">%1$s</xliff:g> का वार्तालापहरू पूर्वनिर्धारित रूपमा बबलमा देखाइन्छन्।"</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"फ्लोटिङ सर्टकटमार्फत यो सामग्रीतर्फ तपाईंको ध्यान आकर्षित गर्दछ।"</string>
     <string name="notification_channel_summary_priority" msgid="7415770044553264622">"वार्तालाप खण्डको सिरानमा बबलका रूपमा देखा पर्छ।"</string>
-    <string name="notification_conversation_channel_all_bubble" msgid="5389290797101635297">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> मार्फत भएका सबै वार्तालापहरू पूर्वनिर्धारित रूपमा बबलमा देखिन्छन्। <xliff:g id="APP_NAME_1">%2$s</xliff:g> मा गई व्यवस्थापन गर्नुहोस्।"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"सेटिङ"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"प्राथमिकता"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"हालैका बबलहरू छैनन्"</string>
@@ -866,16 +867,16 @@
     <string name="tuner_low_priority" msgid="8412666814123009820">"कम प्राथमिकताका सूचना आइकनहरू देखाउनुहोस्"</string>
     <string name="other" msgid="429768510980739978">"अन्य"</string>
     <string name="accessibility_divider" msgid="2830785970889237307">"विभाजित-स्क्रिन छुट्याउने"</string>
-    <string name="accessibility_action_divider_left_full" msgid="7598733539422375847">"बायाँ भाग पूर्ण स्क्रिन"</string>
+    <string name="accessibility_action_divider_left_full" msgid="7598733539422375847">"बायाँ भाग फुल स्क्रिन"</string>
     <string name="accessibility_action_divider_left_70" msgid="4919312892541727761">"बायाँ भाग ७०%"</string>
     <string name="accessibility_action_divider_left_50" msgid="3664701169564893826">"बायाँ भाग ५०%"</string>
     <string name="accessibility_action_divider_left_30" msgid="4358145268046362088">"बायाँ भाग ३०%"</string>
-    <string name="accessibility_action_divider_right_full" msgid="8576057422864896305">"दायाँ भाग पूर्ण स्क्रिन"</string>
-    <string name="accessibility_action_divider_top_full" msgid="4243901660795169777">"माथिल्लो भाग पूर्ण स्क्रिन"</string>
+    <string name="accessibility_action_divider_right_full" msgid="8576057422864896305">"दायाँ भाग फुल स्क्रिन"</string>
+    <string name="accessibility_action_divider_top_full" msgid="4243901660795169777">"माथिल्लो भाग फुल स्क्रिन"</string>
     <string name="accessibility_action_divider_top_70" msgid="6941226213260515072">"माथिल्लो भाग ७०%"</string>
     <string name="accessibility_action_divider_top_50" msgid="6275211443706497621">"माथिल्लो भाग ५०%"</string>
     <string name="accessibility_action_divider_top_30" msgid="5780597635887574916">"माथिल्लो भाग ३०%"</string>
-    <string name="accessibility_action_divider_bottom_full" msgid="7352434720610115395">"तल्लो भाग पूर्ण स्क्रिन"</string>
+    <string name="accessibility_action_divider_bottom_full" msgid="7352434720610115395">"तल्लो भाग फुल स्क्रिन"</string>
     <string name="accessibility_qs_edit_tile_label" msgid="9079791448815232967">"स्थिति <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>। सम्पादन गर्नाका लागि डबल ट्याप गर्नुहोस्।"</string>
     <string name="accessibility_qs_edit_add_tile_label" msgid="8292218072049068613">"<xliff:g id="TILE_NAME">%1$s</xliff:g>। थप्नका लागि डबल ट्याप गर्नुहोस्।"</string>
     <string name="accessibility_qs_edit_move_tile" msgid="6027997446473163426">"<xliff:g id="TILE_NAME">%1$s</xliff:g> लाई सार्नुहोस्"</string>
@@ -962,7 +963,7 @@
     <string name="running_foreground_services_title" msgid="5137313173431186685">"पृष्ठभूमिमा चल्ने अनुप्रयोगहरू"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"ब्याट्री र डेटाका प्रयोग सम्बन्धी विवरणहरूका लागि ट्याप गर्नुहोस्"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"मोबाइल डेटा निष्क्रिय पार्ने हो?"</string>
-    <string name="mobile_data_disable_message" msgid="8604966027899770415">"तपाईंको <xliff:g id="CARRIER">%s</xliff:g> मार्फत डेटा वा इन्टरनेटमाथि पहुँच हुने छैन। Wi-Fi मार्फत मात्र इन्टरनेट उपलब्ध हुने छ।"</string>
+    <string name="mobile_data_disable_message" msgid="8604966027899770415">"तपाईं <xliff:g id="CARRIER">%s</xliff:g> मार्फत डेटा वा इन्टरनेट प्रयोग गर्न सक्नुहुने छैन। Wi-Fi मार्फत मात्र इन्टरनेट उपलब्ध हुने छ।"</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"तपाईंको सेवा प्रदायक"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"कुनै अनुप्रयोगको कारणले अनुमतिसम्बन्धी अनुरोध बुझ्न गाह्रो भइरहेकोले सेटिङहरूले तपाईंको प्रतिक्रिया प्रमाणित गर्न सक्दैनन्।"</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"<xliff:g id="APP_0">%1$s</xliff:g> लाई <xliff:g id="APP_2">%2$s</xliff:g> का स्लाइसहरू देखाउन अनुमति दिने हो?"</string>
@@ -982,7 +983,7 @@
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"सेन्सरहरू निष्क्रिय छन्"</string>
     <string name="device_services" msgid="1549944177856658705">"यन्त्रका सेवाहरू"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"शीर्षक छैन"</string>
-    <string name="restart_button_description" msgid="6916116576177456480">"यो अनुप्रयोग पुनः सुरु गर्न ट्याप गर्नुहोस् र पूर्ण स्क्रिन मोडमा जानुहोस्।"</string>
+    <string name="restart_button_description" msgid="6916116576177456480">"यो अनुप्रयोग पुनः सुरु गर्न ट्याप गर्नुहोस् र फुल स्क्रिन मोडमा जानुहोस्।"</string>
     <string name="bubbles_settings_button_description" msgid="7324245408859877545">"<xliff:g id="APP_NAME">%1$s</xliff:g> का बबलसम्बन्धी सेटिङहरू"</string>
     <string name="manage_bubbles_text" msgid="6856830436329494850">"व्यवस्थापन गर्नुहोस्"</string>
     <string name="bubble_content_description_single" msgid="5175160674436546329">"<xliff:g id="APP_NAME">%2$s</xliff:g> को <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
@@ -999,15 +1000,27 @@
     <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"जुनसुकै बेला बबलहरू नियन्त्रण गर्नुहोस्"</string>
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"यो अनुप्रयोगबाट आएका बबलहरू निष्क्रिय पार्न व्यवस्थापन गर्नुहोस् नामक बटनमा ट्याप गर्नुहोस्"</string>
     <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"बुझेँ"</string>
+    <!-- no translation found for bubbles_app_settings (5779443644062348657) -->
+    <skip />
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"प्रणालीको नेभिगेसन अद्यावधिक गरियो। परिवर्तन गर्न सेटिङमा जानुहोस्।"</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"प्रणालीको नेभिगेसन अद्यावधिक गर्न सेटिङमा जानुहोस्"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"स्ट्यान्डबाई"</string>
+    <!-- no translation found for priority_onboarding_show_at_top_text (1678400241025513541) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_show_avatar_text (5756291381124091508) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_appear_as_bubble_text (4227039772250263122) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_ignores_dnd_text (2918952762719600529) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_done_button_title (4569550984286506007) -->
+    <skip />
     <string name="magnification_overlay_title" msgid="6584179429612427958">"म्याग्निफिकेसन ओभरले विन्डो"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"म्याग्निफिकेसन विन्डो"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"म्याग्निफिकेसन विन्डोका नियन्त्रणहरू"</string>
-    <string name="quick_controls_title" msgid="6839108006171302273">"यन्त्रले नियन्त्रण गर्न सक्ने कुराहरू"</string>
+    <string name="quick_controls_title" msgid="6839108006171302273">"यन्त्र नियन्त्रण गर्ने विजेटहरू"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"आफ्ना जोडिएका यन्त्रहरूका लागि नियन्त्रण सुविधाहरू थप्नुहोस्"</string>
-    <string name="quick_controls_setup_title" msgid="8901436655997849822">"यन्त्रले नियन्त्रण गर्न सक्ने कुराहरू सेटअप गर्नुहोस्"</string>
+    <string name="quick_controls_setup_title" msgid="8901436655997849822">"यन्त्र नियन्त्रण गर्ने विजेटहरू सेटअप गर्नुहोस्"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"आफ्ना नियन्त्रणहरूमाथि पहुँच राख्न पावर बटन थिचिराख्नुहोस्"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"नियन्त्रणहरू थप्न अनुप्रयोग छनौट गर्नुहोस्"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
@@ -1016,13 +1029,11 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"नियन्त्रणहरू"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"पावर मेनुबाट प्रयोग गर्न चाहेका नियन्त्रण सुविधाहरू छान्नुहोस्"</string>
-    <!-- no translation found for controls_favorite_rearrange (5616952398043063519) -->
-    <skip />
-    <!-- no translation found for controls_favorite_removed (5276978408529217272) -->
-    <skip />
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"नियन्त्रणहरूको क्रम मिलाउन तिनलाई थिचेर ड्र्याग गर्नुहोस्"</string>
+    <string name="controls_favorite_removed" msgid="5276978408529217272">"सबै नियन्त्रणहरू हटाइए"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"सबै नियन्त्रणहरूको सूची लोड गर्न सकिएन।"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"अन्य"</string>
-    <string name="controls_dialog_title" msgid="2343565267424406202">"यन्त्रले नियन्त्रण गर्न सक्ने कुराहरूको सूचीमा थप्नुहोस्"</string>
+    <string name="controls_dialog_title" msgid="2343565267424406202">"यन्त्र नियन्त्रण गर्ने विजेटहरूको सूचीमा थप्नुहोस्"</string>
     <string name="controls_dialog_ok" msgid="7011816381344485651">"मन पर्ने कुराहरूमा थप्नुहोस्"</string>
     <string name="controls_dialog_message" msgid="6292099631702047540">"<xliff:g id="APP">%s</xliff:g> ले यो नियन्त्रण तपाईंका मन पर्ने कुराहरूमा थप्न सुझाव सिफारिस गरेको छ।"</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"नियन्त्रण सुविधाहरू अद्यावधिक गरिए"</string>

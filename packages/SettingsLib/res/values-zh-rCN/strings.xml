@@ -78,7 +78,7 @@
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="8477440576953067242">"已连接（无手机或媒体信号），电量为 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_active_battery_level" msgid="3450745316700494425">"使用中，电池电量：<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_active_battery_level_untethered" msgid="2706188607604205362">"已启用，左：目前电量为 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>；右：目前电量为 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
-    <string name="bluetooth_battery_level" msgid="2893696778200201555">"电池电量：<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level" msgid="2893696778200201555">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> 的电量"</string>
     <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"左：目前电量为 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>；右：目前电量为 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"使用中"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"媒体音频"</string>
@@ -251,8 +251,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"无线显示认证"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"启用 WLAN 详细日志记录功能"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"WLAN 扫描调节"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization (5437378364995776979) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"WLAN 增强型随机分配 MAC 地址功能"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"始终开启移动数据网络"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"网络共享硬件加速"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"显示没有名称的蓝牙设备"</string>
@@ -285,8 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"显示无线显示认证选项"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"提升 WLAN 日志记录级别（在 WLAN 选择器中显示每个 SSID 的 RSSI）"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"降低耗电量以及改善网络性能"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization_summary (7925425746373704991) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"此切换开关仅会影响客户端模式的 MAC 地址随机分配行为。\n此模式开启后，系统可能会为已启用随机分配 MAC 地址功能的所有网络在关联期间重新随机分配 MAC 地址，具体取决于客户端上次断开网络连接的时间。如果设备在 4 小时或更短时间内重新连接到网络，系统便不会执行重新随机分配操作。"</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"按流量计费"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"不按流量计费"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"日志记录器缓冲区大小"</string>
@@ -438,10 +436,14 @@
     <string name="power_discharge_by_only" msgid="92545648425937000">"估计能用到<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"直到<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"电池电量可能在<xliff:g id="TIME">%1$s</xliff:g> 前耗尽"</string>
-    <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"剩余电池续航时间不到 <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
-    <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"电量剩余使用时间不到 <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"电量剩余使用时间超过 <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_only_more_than_subtext" msgid="3274496164769110480">"电量剩余使用时间超过 <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
+    <!-- no translation found for power_remaining_less_than_duration_only (8956656616031395152) -->
+    <skip />
+    <!-- no translation found for power_remaining_less_than_duration (318215464914990578) -->
+    <skip />
+    <!-- no translation found for power_remaining_more_than_subtext (446388082266121894) -->
+    <skip />
+    <!-- no translation found for power_remaining_only_more_than_subtext (4873750633368888062) -->
+    <skip />
     <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"手机可能即将关机"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"平板电脑可能即将关机"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"设备可能即将关机"</string>
@@ -500,7 +502,7 @@
     <string name="cancel" msgid="5665114069455378395">"取消"</string>
     <string name="okay" msgid="949938843324579502">"确定"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"开启"</string>
-    <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"开启“勿扰”模式"</string>
+    <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"开启勿扰模式"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"永不"</string>
     <string name="zen_interruption_level_priority" msgid="5392140786447823299">"仅限优先事项"</string>
     <string name="zen_mode_and_condition" msgid="8877086090066332516">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>。<xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>

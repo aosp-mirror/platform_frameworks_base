@@ -251,8 +251,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Сертифікація бездрот. екрана"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Докладний запис у журнал Wi-Fi"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Зменшити радіус пошуку мереж Wi‑Fi"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization (5437378364995776979) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Довільний вибір MAC-адрес із Wi‑Fi"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Не вимикати мобільне передавання даних"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Апаратне прискорення під час використання телефона в режимі модема"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Показувати пристрої Bluetooth без назв"</string>
@@ -275,18 +274,17 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3233402355917446304">"Кодек для аудіо Bluetooth LDAC: якість відтворення"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7274396574659784285">"Активувати LDAC для аудіо Bluetooth\nВибір кодека: якість відтворення"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="2040810756832027227">"Трансляція: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
-    <string name="select_private_dns_configuration_title" msgid="7887550926056143018">"Приватна DNS"</string>
-    <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"Режим приватної системи DNS"</string>
+    <string name="select_private_dns_configuration_title" msgid="7887550926056143018">"Приватний DNS-сервер"</string>
+    <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"Режим приватного DNS-сервера"</string>
     <string name="private_dns_mode_off" msgid="7065962499349997041">"Вимкнено"</string>
     <string name="private_dns_mode_opportunistic" msgid="1947864819060442354">"Автоматично"</string>
-    <string name="private_dns_mode_provider" msgid="3619040641762557028">"Ім’я хосту приватного постачальника послуг DNS"</string>
+    <string name="private_dns_mode_provider" msgid="3619040641762557028">"Ім’я хосту постачальника приватного DNS-сервера"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"Введіть ім’я хосту постачальника послуг DNS"</string>
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"Не вдалося під’єднатися"</string>
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Показати параметри сертифікації бездротового екрана"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Показувати в журналі RSSI для кожного SSID під час вибору Wi-Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Зменшує споживання заряду акумулятора й підвищує ефективність роботи мережі"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization_summary (7925425746373704991) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Цей перемикач впливає на поведінку довільного вибору MAC-адрес лише для клієнтського режиму.\nКоли цей режим активовано, MAC-адреси мереж із довільним вибором цих адрес переназначаються під час зв\'язування залежно від часу останнього відключення клієнта від мережі. Повторний довільний вибір адрес не відбувається, якщо пристрій знову підключається протягом 4 годин."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"З тарифікацією трафіку"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Без тарифікації трафіку"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Розміри буфера журналу"</string>
@@ -438,10 +436,14 @@
     <string name="power_discharge_by_only" msgid="92545648425937000">"Вистачить приблизно до <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"До <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Акумулятор може розрядитися до <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"Залишилося менше ніж <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
-    <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"Залишилося менше ніж <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"Залишилося понад <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_only_more_than_subtext" msgid="3274496164769110480">"Залишилося понад <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
+    <!-- no translation found for power_remaining_less_than_duration_only (8956656616031395152) -->
+    <skip />
+    <!-- no translation found for power_remaining_less_than_duration (318215464914990578) -->
+    <skip />
+    <!-- no translation found for power_remaining_more_than_subtext (446388082266121894) -->
+    <skip />
+    <!-- no translation found for power_remaining_only_more_than_subtext (4873750633368888062) -->
+    <skip />
     <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"Телефон може невдовзі вимкнутися"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"Планшет може невдовзі вимкнутися"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"Пристрій може невдовзі вимкнутися"</string>

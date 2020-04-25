@@ -34,6 +34,7 @@ import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -182,6 +183,17 @@ public class ShortcutHelper {
             return null;
         } finally {
             Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    /**
+     * Caches the given shortcut in Shortcut Service.
+     */
+    void cacheShortcut(ShortcutInfo shortcutInfo, UserHandle user) {
+        if (shortcutInfo.isLongLived() && !shortcutInfo.isCached()) {
+            mShortcutServiceInternal.cacheShortcuts(user.getIdentifier(), "android",
+                    shortcutInfo.getPackage(), Collections.singletonList(shortcutInfo.getId()),
+                    shortcutInfo.getUserId());
         }
     }
 

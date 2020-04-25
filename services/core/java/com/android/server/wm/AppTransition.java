@@ -2279,6 +2279,15 @@ public class AppTransition implements Dump {
         return transit == TRANSIT_TASK_CHANGE_WINDOWING_MODE;
     }
 
+    static boolean isClosingTransit(int transit) {
+        return transit == TRANSIT_ACTIVITY_CLOSE
+                || transit == TRANSIT_TASK_CLOSE
+                || transit == TRANSIT_WALLPAPER_CLOSE
+                || transit == TRANSIT_WALLPAPER_INTRA_CLOSE
+                || transit == TRANSIT_TRANSLUCENT_ACTIVITY_CLOSE
+                || transit == TRANSIT_CRASHING_ACTIVITY_CLOSE;
+    }
+
     /**
      * @return whether the transition should show the thumbnail being scaled down.
      */
