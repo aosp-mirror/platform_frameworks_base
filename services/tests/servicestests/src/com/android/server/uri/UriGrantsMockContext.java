@@ -62,6 +62,8 @@ public class UriGrantsMockContext extends ContextWrapper {
     static final String PKG_PRIVATE = "com.example.private";
     /** Completely public app/provider that needs no grants */
     static final String PKG_PUBLIC = "com.example.public";
+    /** Completely public app/provider that forces grants */
+    static final String PKG_FORCE = "com.example.force";
     /** Complex provider that offers nested grants */
     static final String PKG_COMPLEX = "com.example.complex";
 
@@ -69,24 +71,28 @@ public class UriGrantsMockContext extends ContextWrapper {
     private static final int UID_CAMERA = android.os.Process.LAST_APPLICATION_UID - 2;
     private static final int UID_PRIVATE = android.os.Process.LAST_APPLICATION_UID - 3;
     private static final int UID_PUBLIC = android.os.Process.LAST_APPLICATION_UID - 4;
-    private static final int UID_COMPLEX = android.os.Process.LAST_APPLICATION_UID - 5;
+    private static final int UID_FORCE = android.os.Process.LAST_APPLICATION_UID - 5;
+    private static final int UID_COMPLEX = android.os.Process.LAST_APPLICATION_UID - 6;
 
     static final int UID_PRIMARY_SOCIAL = UserHandle.getUid(USER_PRIMARY, UID_SOCIAL);
     static final int UID_PRIMARY_CAMERA = UserHandle.getUid(USER_PRIMARY, UID_CAMERA);
     static final int UID_PRIMARY_PRIVATE = UserHandle.getUid(USER_PRIMARY, UID_PRIVATE);
     static final int UID_PRIMARY_PUBLIC = UserHandle.getUid(USER_PRIMARY, UID_PUBLIC);
+    static final int UID_PRIMARY_FORCE = UserHandle.getUid(USER_PRIMARY, UID_FORCE);
     static final int UID_PRIMARY_COMPLEX = UserHandle.getUid(USER_PRIMARY, UID_COMPLEX);
 
     static final int UID_SECONDARY_SOCIAL = UserHandle.getUid(USER_SECONDARY, UID_SOCIAL);
     static final int UID_SECONDARY_CAMERA = UserHandle.getUid(USER_SECONDARY, UID_CAMERA);
     static final int UID_SECONDARY_PRIVATE = UserHandle.getUid(USER_SECONDARY, UID_PRIVATE);
     static final int UID_SECONDARY_PUBLIC = UserHandle.getUid(USER_SECONDARY, UID_PUBLIC);
-    static final int UID_SECONDARY_COMPLEX = UserHandle.getUid(USER_PRIMARY, UID_COMPLEX);
+    static final int UID_SECONDARY_FORCE = UserHandle.getUid(USER_SECONDARY, UID_FORCE);
+    static final int UID_SECONDARY_COMPLEX = UserHandle.getUid(USER_SECONDARY, UID_COMPLEX);
 
     static final Uri URI_PHOTO_1 = Uri.parse("content://" + PKG_CAMERA + "/1");
     static final Uri URI_PHOTO_2 = Uri.parse("content://" + PKG_CAMERA + "/2");
     static final Uri URI_PRIVATE = Uri.parse("content://" + PKG_PRIVATE + "/42");
     static final Uri URI_PUBLIC = Uri.parse("content://" + PKG_PUBLIC + "/42");
+    static final Uri URI_FORCE = Uri.parse("content://" + PKG_FORCE + "/42");
 
     private final File mDir;
 
@@ -122,6 +128,8 @@ public class UriGrantsMockContext extends ContextWrapper {
                     .thenReturn(UserHandle.getUid(userId, UID_PRIVATE));
             when(mPmInternal.getPackageUidInternal(eq(PKG_PUBLIC), anyInt(), eq(userId)))
                     .thenReturn(UserHandle.getUid(userId, UID_PUBLIC));
+            when(mPmInternal.getPackageUidInternal(eq(PKG_FORCE), anyInt(), eq(userId)))
+                    .thenReturn(UserHandle.getUid(userId, UID_FORCE));
             when(mPmInternal.getPackageUidInternal(eq(PKG_COMPLEX), anyInt(), eq(userId)))
                     .thenReturn(UserHandle.getUid(userId, UID_COMPLEX));
 
@@ -131,6 +139,8 @@ public class UriGrantsMockContext extends ContextWrapper {
                     .thenReturn(buildPrivateProvider(userId));
             when(mPmInternal.resolveContentProvider(eq(PKG_PUBLIC), anyInt(), eq(userId)))
                     .thenReturn(buildPublicProvider(userId));
+            when(mPmInternal.resolveContentProvider(eq(PKG_FORCE), anyInt(), eq(userId)))
+                    .thenReturn(buildForceProvider(userId));
             when(mPmInternal.resolveContentProvider(eq(PKG_COMPLEX), anyInt(), eq(userId)))
                     .thenReturn(buildComplexProvider(userId));
         }
@@ -167,6 +177,18 @@ public class UriGrantsMockContext extends ContextWrapper {
         pi.grantUriPermissions = false;
         pi.applicationInfo = new ApplicationInfo();
         pi.applicationInfo.uid = UserHandle.getUid(userId, UID_PUBLIC);
+        return pi;
+    }
+
+    private static ProviderInfo buildForceProvider(int userId) {
+        final ProviderInfo pi = new ProviderInfo();
+        pi.packageName = PKG_FORCE;
+        pi.authority = PKG_FORCE;
+        pi.exported = true;
+        pi.grantUriPermissions = true;
+        pi.forceUriPermissions = true;
+        pi.applicationInfo = new ApplicationInfo();
+        pi.applicationInfo.uid = UserHandle.getUid(userId, UID_FORCE);
         return pi;
     }
 
