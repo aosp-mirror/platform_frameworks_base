@@ -301,6 +301,7 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
         editIntent.setData(uri);
         editIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         editIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+        editIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
 
         // Create a edit action
         PendingIntent editAction = PendingIntent.getBroadcastAsUser(context, requestCode,
