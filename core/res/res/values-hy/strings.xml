@@ -543,6 +543,7 @@
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Չհաջողվեց ճանաչել"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"Նույնականացումը չեղարկվեց"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"Ավելացրեք PIN կոդ, նախշ կամ գաղտնաբառ։"</string>
+    <string name="biometric_error_generic" msgid="6784371929985434439">"Չհաջողվեց նույնականացնել"</string>
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"Մատնահետքն ամբողջությամբ չի սկանավորվել: Փորձեք նորից:"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Չհաջողվեց մշակել մատնահետքը: Նորից փորձեք:"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"Մատնահետքերի սենսորն աղտոտված է: Մաքրեք այն և փորձեք նորից:"</string>
@@ -1559,7 +1560,7 @@
     <string name="wireless_display_route_description" msgid="8297563323032966831">"Անլար էկրան"</string>
     <string name="media_route_button_content_description" msgid="2299223698196869956">"Հեռարձակում"</string>
     <string name="media_route_chooser_title" msgid="6646594924991269208">"Միանալ սարքին"</string>
-    <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"Հեռարձակել էկրանը սարքի վրա"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"Էկրանը հեռարձակել սարքին"</string>
     <string name="media_route_chooser_searching" msgid="6119673534251329535">"Որոնվում են սարքեր..."</string>
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"Կարգավորումներ"</string>
     <string name="media_route_controller_disconnect" msgid="7362617572732576959">"Անջատել"</string>
@@ -1790,9 +1791,9 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Թարմացվել է ձեր ադմինիստրատորի կողմից"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Ջնջվել է ձեր ադմինիստրատորի կողմից"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Եղավ"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Մարտկոցի աշխատաժամանակը երկարացնելու համար «Մարտկոցի տնտեսում» գործառույթը՝\n·միացնում է մուգ թեման,\n·անջատում կամ սահմանափակում է աշխատանքը ֆոնային ռեժիմում, որոշ տեսողական էֆեկտներ և այլ գործառույթներ, օրինակ «OK Google» հրահանգը:\n\n"<annotation id="url">"Իմանալ ավելին"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"Մարտկոցի աշխատաժամանակը երկարացնելու համար «Մարտկոցի տնտեսում» գործառույթը՝\n·միացնում է մուգ թեման,\n·անջատում կամ սահմանափակում է աշխատանքը ֆոնային ռեժիմում, որոշ տեսողական էֆեկտներ և այլ գործառույթներ, օրինակ «OK Google» հրահանգը:"</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"Թրաֆիկի տնտեսման ռեժիմում որոշ հավելվածների համար ֆոնային փոխանցումն անջատված է։ Հավելվածը, որն օգտագործում եք, կարող է տվյալներ փոխանցել և ստանալ, սակայն ոչ այնքան հաճախ: Օրինակ՝ պատկերները կցուցադրվեն միայն դրանց վրա սեղմելուց հետո։"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Մարտկոցի աշխատաժամանակը երկարացնելու համար «Մարտկոցի տնտեսում» գործառույթը\n·միացնում է մուգ թեման,\n·անջատում կամ սահմանափակում է աշխատանքը ֆոնային ռեժիմում, որոշ վիզուալ էֆեկտներ և այլ գործառույթներ, օրինակ «OK Google» հրահանգը:\n\n"<annotation id="url">"Իմանալ ավելին"</annotation></string>
+    <string name="battery_saver_description" msgid="7618492104632328184">"Մարտկոցի աշխատաժամանակը երկարացնելու համար «Մարտկոցի տնտեսում» գործառույթը\n·միացնում է մուգ թեման,\n·անջատում կամ սահմանափակում է աշխատանքը ֆոնային ռեժիմում, որոշ վիզուալ էֆեկտներ և այլ գործառույթներ, օրինակ «OK Google» հրահանգը:"</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"Թրաֆիկի տնտեսման ռեժիմում որոշ հավելվածների համար տվյալների ֆոնային փոխանցումն անջատված է։ Հավելվածը, որն օգտագործում եք, կարող է տվյալներ փոխանցել և ստանալ, սակայն ոչ այնքան հաճախ: Օրինակ՝ պատկերները կցուցադրվեն միայն դրանց վրա սեղմելուց հետո։"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Միացնե՞լ թրաֆիկի խնայումը:"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Միացնել"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
@@ -2027,7 +2028,7 @@
       <item quantity="one"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> ֆայլ</item>
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> ֆայլ</item>
     </plurals>
-    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Առաջարկվող օգտատերեր չկան, որոնց հետ կարող եք կիսվել"</string>
+    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Չկան օգտատերեր, որոնց հետ կարող եք կիսվել"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"Հավելվածների ցանկ"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Հավելվածը ձայնագրելու թույլտվություն չունի, սակայն կկարողանա գրանցել ձայնն այս USB սարքի միջոցով։"</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"Սկիզբ"</string>

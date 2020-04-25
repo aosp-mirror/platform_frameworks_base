@@ -543,6 +543,7 @@
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Nicht erkannt"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"Authentifizierung abgebrochen"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"Keine PIN, kein Muster und kein Passwort festgelegt"</string>
+    <string name="biometric_error_generic" msgid="6784371929985434439">"Fehler bei der Authentifizierung"</string>
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"Fingerabdruck nur teilweise erkannt. Bitte versuche es noch einmal."</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Fingerabdruck konnte nicht verarbeitet werden. Bitte versuche es noch einmal."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"Fingerabdrucksensor ist verschmutzt. Reinige ihn und versuche es noch einmal."</string>
@@ -1016,8 +1017,8 @@
     <string name="years" msgid="5797714729103773425">"Jahre"</string>
     <string name="now_string_shortest" msgid="3684914126941650330">"Jetzt"</string>
     <plurals name="duration_minutes_shortest" formatted="false" msgid="7519574894537185135">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> min</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> min</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> Min.</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> Min.</item>
     </plurals>
     <plurals name="duration_hours_shortest" formatted="false" msgid="2838655994500499651">
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> h</item>
@@ -1032,8 +1033,8 @@
       <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> J.</item>
     </plurals>
     <plurals name="duration_minutes_shortest_future" formatted="false" msgid="849196137176399440">
-      <item quantity="other">in <xliff:g id="COUNT_1">%d</xliff:g> min</item>
-      <item quantity="one">in <xliff:g id="COUNT_0">%d</xliff:g> min</item>
+      <item quantity="other">in <xliff:g id="COUNT_1">%d</xliff:g> Min.</item>
+      <item quantity="one">in <xliff:g id="COUNT_0">%d</xliff:g> Min.</item>
     </plurals>
     <plurals name="duration_hours_shortest_future" formatted="false" msgid="5386373597343170388">
       <item quantity="other">in <xliff:g id="COUNT_1">%d</xliff:g> h</item>
@@ -1789,10 +1790,10 @@
     <string name="package_installed_device_owner" msgid="7035926868974878525">"Von deinem Administrator installiert"</string>
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Von deinem Administrator aktualisiert"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Von deinem Administrator gelöscht"</string>
-    <string name="confirm_battery_saver" msgid="5247976246208245754">"Ok"</string>
+    <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
     <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Der Energiesparmodus sorgt für eine längere Akkulaufzeit:\n·Das dunkle Design wird aktiviert\n·Hintergrundaktivitäten, einige optische Effekte und weitere Funktionen wie \"Ok Google\" werden abgeschaltet oder eingeschränkt\n\n"<annotation id="url">"Weitere Informationen"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"Der Energiesparmodus sorgt für eine längere Akkulaufzeit:\n Das dunkle Design wird aktiviert\n·Hintergrundaktivitäten, einige optische Effekte und weitere Funktionen wie \"Ok Google\" werden abgeschaltet oder eingeschränkt"</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"Der Datensparmodus verhindert zum einen, dass Apps im Hintergrund Daten senden oder empfangen, sodass weniger Daten verbraucht werden. Zum anderen werden die Datenzugriffe der gerade aktiven App eingeschränkt, was z. B. dazu führen kann, dass Bilder erst angetippt werden müssen, bevor sie sichtbar werden."</string>
+    <string name="battery_saver_description" msgid="7618492104632328184">"Der Energiesparmodus sorgt für eine längere Akkulaufzeit:\n·Das dunkle Design wird aktiviert\n·Hintergrundaktivitäten, einige optische Effekte und weitere Funktionen wie \"Ok Google\" werden abgeschaltet oder eingeschränkt"</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"Der Datensparmodus verhindert zum einen, dass manche Apps im Hintergrund Daten senden oder empfangen, sodass weniger Daten verbraucht werden. Zum anderen werden die Datenzugriffe der gerade aktiven App eingeschränkt, was z. B. dazu führen kann, dass Bilder erst angetippt werden müssen, bevor sie sichtbar werden."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Datensparmodus aktivieren?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Aktivieren"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
@@ -1800,8 +1801,8 @@
       <item quantity="one">1 Minute (bis <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
     </plurals>
     <plurals name="zen_mode_duration_minutes_summary_short" formatted="false" msgid="4230730310318858312">
-      <item quantity="other">Für %1$d min (bis <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="one">Für 1 min (bis <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
+      <item quantity="other">Für %1$d Min. (bis <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="one">Für 1 Min. (bis <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
     </plurals>
     <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="7725354244196466758">
       <item quantity="other">%1$d Stunden (bis <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
@@ -1816,8 +1817,8 @@
       <item quantity="one">Für 1 Minute</item>
     </plurals>
     <plurals name="zen_mode_duration_minutes_short" formatted="false" msgid="2742377799995454859">
-      <item quantity="other">Für %d min</item>
-      <item quantity="one">Für 1 min</item>
+      <item quantity="other">Für %d Min.</item>
+      <item quantity="one">Für 1 Min.</item>
     </plurals>
     <plurals name="zen_mode_duration_hours" formatted="false" msgid="525401855645490022">
       <item quantity="other">%d Stunden</item>
@@ -2027,7 +2028,7 @@
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> und <xliff:g id="COUNT_3">%d</xliff:g> Dateien</item>
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> und <xliff:g id="COUNT_1">%d</xliff:g> Datei</item>
     </plurals>
-    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Keine Personen zum Teilen empfohlen"</string>
+    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Keine empfohlenen Empfänger"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"Liste der Apps"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Diese App hat noch keine Berechtigung zum Aufnehmen erhalten, könnte aber Audioaufnahmen über dieses USB-Gerät machen."</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"Startseite"</string>

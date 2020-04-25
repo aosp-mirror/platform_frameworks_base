@@ -543,6 +543,7 @@
     <string name="biometric_not_recognized" msgid="5106687642694635888">"স্বীকৃত নয়"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"যাচাইকরণ বাতিল হয়েছে"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"পিন, প্যাটার্ন অথবা পাসওয়ার্ড সেট করা নেই"</string>
+    <string name="biometric_error_generic" msgid="6784371929985434439">"যাচাইকরণে সমস্যা হয়েছে"</string>
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"আঙ্গুলের ছাপ আংশিক শনাক্ত করা হয়েছে৷ অনুগ্রহ করে আবার চেষ্টা করুন৷"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"আঙ্গুলের ছাপ প্রক্রিয়া করা যায়নি৷ অনুগ্রহ করে আবার চেষ্টা করুন৷"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"আঙ্গুলের ছাপ নেওয়ার সেন্সরটি অপরিস্কার৷ অনুগ্রহ করে পরিষ্কার করে আবার চেষ্টা করুন৷"</string>
@@ -1791,7 +1792,7 @@
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"আপনার প্রশাসক মুছে দিয়েছেন"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ঠিক আছে"</string>
     <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"ব্যাটারি আরও বেশিক্ষণ চালাতে, ব্যাটারি সেভার:\n·গাঢ় থিম চালু করে\n·ব্যাকগ্রাউন্ড অ্যাক্টিভিটি, কিছু ভিজ্যুয়াল এফেক্ট, এবং “হ্যালো Google”-এর মতো অন্যান্য ফিচার বন্ধ বা সীমাবদ্ধ করে\n\n"<annotation id="url">"আরও জানুন"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"ব্যাটারি আরও বেশিক্ষণ চালাতে, ব্যাটারি সেভার:\n·গাঢ় থিম চালু করে\n·ব্যাকগ্রাউন্ড অ্যাক্টিভিটি, কিছু ভিজ্যুয়াল এফেক্ট, এবং “হ্যালো Google”-এর মতো অন্যান্য ফিচার বন্ধ বা সীমাবদ্ধ করে"</string>
+    <string name="battery_saver_description" msgid="7618492104632328184">"ব্যাটারি আরও বেশিক্ষণ চালাতে, ব্যাটারি সেভার:\n·গাঢ় থিম চালু করে\n·ব্যাকগ্রাউন্ড অ্যাক্টিভিটি, কিছু ভিজ্যুয়াল এফেক্ট এবং “হ্যালো Google”-এর মতো অন্যান্য ফিচার বন্ধ বা সীমাবদ্ধ করে"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"ডেটার ব্যবহার কমাতে সহায়তা করার জন্য, ডেটা সেভার ব্যাকগ্রাউন্ডে কিছু অ্যাপ্লিকেশনকে ডেটা পাঠাতে বা গ্রহণ করতে বাধা দেয়৷ আপনি বর্তমানে এমন একটি অ্যাপ্লিকেশন ব্যবহার করছেন যেটি ডেটা অ্যাক্সেস করতে পারে, তবে সেটি কমই করে৷ এর ফলে যা হতে পারে, উদাহরণস্বরূপ, আপনি ছবির উপর ট্যাপ না করা পর্যন্ত সেগুলি দেখানো হবে না৷"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"ডেটা সেভার চালু করবেন?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"চালু করুন"</string>

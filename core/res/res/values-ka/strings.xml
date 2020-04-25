@@ -543,6 +543,7 @@
     <string name="biometric_not_recognized" msgid="5106687642694635888">"არ არის ამოცნობილი"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"ავტორიზაცია გაუქმდა"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"PIN-კოდი, ნიმუში ან პაროლი დაყენებული არ არის"</string>
+    <string name="biometric_error_generic" msgid="6784371929985434439">"შეცდომა ავთენტიკაციისას"</string>
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"აღმოჩენილია თითის ნაწილობრივი ანაბეჭდი. გთხოვთ, სცადოთ ხელახლა."</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"თითის ანაბეჭდის დამუშავება ვერ მოხერხდა. გთხოვთ, ცადოთ ხელახლა."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"თითის ანაბეჭდის სენსორი დაბინძურებულია. გთხოვთ, გაასუფთაოთ და სცადოთ ხელახლა."</string>
@@ -1308,7 +1309,7 @@
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"აღმოჩენილია ანალოგური აუდიო აქსესუარი"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"მიერთებული მოწყობილობა არაა თავსებადი ამ ტელეფონთან. მეტის გასაგებად, შეეხეთ."</string>
     <string name="adb_active_notification_title" msgid="408390247354560331">"USB გამართვა შეერთებულია"</string>
-    <string name="adb_active_notification_message" msgid="5617264033476778211">"შეეხეთ, რათა გამორთოთ USB შეცდომების გამართვა"</string>
+    <string name="adb_active_notification_message" msgid="5617264033476778211">"შეეხეთ და გამორთეთ USB შეცდ. გამართვა"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"მონიშნეთ რათა შეწყვიტოთ USB-ის გამართვა"</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"შეცდომების უსადენო გამართვა დაკავშირებულია"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"შეეხეთ შეცდომების უსადენო გამართვის გამოსართავად"</string>
@@ -1790,8 +1791,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"განახლებულია თქვენი ადმინისტრატორის მიერ"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"წაიშალა თქვენი ადმინისტრატორის მიერ"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"კარგი"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"ელემენტის მუშაობის განრძლივობის მიზნით, ელემენტის დამზოგველი:\n·ირთვება ბნელ თემაზე\n·თიშავს ან ზღუდავს ფონის აქტივობებს, გარკვეულ ვიზუალურ ეფექტებს და სახვა შესაძლებლობებს, როგორიც არის “Hey Google”\n\n"<annotation id="url">"შეიტყვეთ მეტი"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"ელემენტის მუშაობის განრძლივობის მიზნით, ელემენტის დამზოგველი:\n·ირთვება ბნელ თემაზე\n·თიშავს ან ზღუდავს ფონის აქტივობებს, გარკვეულ ვიზუალურ ეფექტებს და სახვა შესაძლებლობებს, როგორიც არის “Hey Google”"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"ბატარეის მუშაობის განრძლივობის მიზნით, ბატარეის დამზოგველი:\n·ირთვება ბნელ თემაზე\n·თიშავს ან ზღუდავს ფონის აქტივობებს, გარკვეულ ვიზუალურ ეფექტებს და სახვა შესაძლებლობებს, როგორიც არის “Hey Google”\n\n"<annotation id="url">"შეიტყვეთ მეტი"</annotation></string>
+    <string name="battery_saver_description" msgid="7618492104632328184">"ბატარეის მუშაობის გახანგრძლივების მიზნით, ბატარეის დამზოგველი:\n·ირთვება ბნელ თემაზე\n·თიშავს ან ზღუდავს ფონის აქტივობებს, გარკვეულ ვიზუალურ ეფექტებს და სახვა შესაძლებლობებს, როგორიც არის “Hey Google”"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"მობილური ინტერნეტის მოხმარების შემცირების მიზნით, მონაცემთა დამზოგველი ზოგიერთ აპს ფონურ რეჟიმში მონაცემთა გაგზავნასა და მიღებას შეუზღუდავს. თქვენ მიერ ამჟამად გამოყენებული აპი მაინც შეძლებს მობილურ ინტერნეტზე წვდომას, თუმცა ამას ნაკლები სიხშირით განახორციელებს. ეს ნიშნავს, რომ, მაგალითად, სურათები არ გამოჩნდება მანამ, სანამ მათ საგანგებოდ არ შეეხებით."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"ჩაირთოს მონაცემთა დამზოგველი?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"ჩართვა"</string>

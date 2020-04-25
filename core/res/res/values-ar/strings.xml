@@ -555,6 +555,7 @@
     <string name="biometric_not_recognized" msgid="5106687642694635888">"لم يتم التعرف عليها."</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"تم إلغاء المصادقة."</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"لم يتم ضبط رقم تعريف شخصي أو نقش أو كلمة مرور."</string>
+    <string name="biometric_error_generic" msgid="6784371929985434439">"خطأ في المصادقة"</string>
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"تم اكتشاف جزء من بصمة الإصبع فقط؛ يرجى إعادة المحاولة."</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"تعذرت معالجة بصمة الإصبع. يُرجى إعادة المحاولة."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"زر استشعار بصمات الأصابع متّسخ. يُرجى تنظيفه وإعادة المحاولة."</string>
@@ -816,9 +817,9 @@
     <string name="relationTypeFriend" msgid="3192092625893980574">"صديق"</string>
     <string name="relationTypeManager" msgid="2272860813153171857">"مدير"</string>
     <string name="relationTypeMother" msgid="2331762740982699460">"أم"</string>
-    <string name="relationTypeParent" msgid="4177920938333039882">"الوالدان"</string>
+    <string name="relationTypeParent" msgid="4177920938333039882">"ولي أمر"</string>
     <string name="relationTypePartner" msgid="4018017075116766194">"شريك"</string>
-    <string name="relationTypeReferredBy" msgid="5285082289602849400">"جهة الإحالة"</string>
+    <string name="relationTypeReferredBy" msgid="5285082289602849400">"جهة إحالة"</string>
     <string name="relationTypeRelative" msgid="3396498519818009134">"قريب"</string>
     <string name="relationTypeSister" msgid="3721676005094140671">"أخت"</string>
     <string name="relationTypeSpouse" msgid="6916682664436031703">"زوج/زوجة"</string>
@@ -1734,7 +1735,7 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"تم"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"إيقاف الاختصار"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"استخدام الاختصار"</string>
-    <string name="color_inversion_feature_name" msgid="326050048927789012">"عكس الألوان"</string>
+    <string name="color_inversion_feature_name" msgid="326050048927789012">"قلب الألوان"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"تصحيح الألوان"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"تم الضغط مع الاستمرار على مفتاحَي التحكّم في مستوى الصوت. تم تفعيل <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"تم الضغط مع الاستمرار على مفتاحَي التحكّم في مستوى الصوت. تم إيقاف <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
@@ -1882,9 +1883,9 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"تم التحديث بواسطة المشرف"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"تم الحذف بواسطة المشرف"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"حسنًا"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"‏لإطالة عمر البطارية، \"توفير شحن البطارية\":\n·تفعيل \"التصميم الداكن\"\n إيقاف النشاط في الخلفية أو تقييده وأيضًا بعض التأثيرات المرئية والميزات الأخرى، مثلاً \"Ok Google\"\n\n"<annotation id="url">"مزيد من المعلومات"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"‏لإطالة عمر البطارية، \"توفير شحن البطارية\":\n·تفعيل \"التصميم الداكن\"\n إيقاف النشاط في الخلفية أو تقييده وأيضًا بعض التأثيرات المرئية والميزات الأخرى، مثلاً \"Ok Google\"."</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"للمساعدة في خفض استخدام البيانات، تمنع ميزة \"توفير البيانات\" بعض التطبيقات من إرسال البيانات وتلقّيها في الخلفية. يمكن للتطبيق الذي تستخدمه الآن الوصول إلى البيانات، ولكن لا يمكنه تنفيذ ذلك كثيرًا. وهذا يعني أن الصور مثلاً لا تظهر حتى تنقر عليها."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"‏لإطالة عمر البطارية، \"توفير شحن البطارية\":\n·تفعيل \"المظهر الداكن\"\n إيقاف النشاط في الخلفية وأيضًا بعض التأثيرات المرئية والميزات الأخرى، مثلاً \"Ok Google\" أو فرض قيود عليها\n\n"<annotation id="url">"مزيد من المعلومات"</annotation></string>
+    <string name="battery_saver_description" msgid="7618492104632328184">"‏لإطالة عمر البطارية، \"توفير شحن البطارية\":\n·تفعيل \"المظهر الداكن\"\n إيقاف النشاط في الخلفية وأيضًا بعض التأثيرات المرئية والميزات الأخرى، مثلاً \"Ok Google\" أو فرض قيود عليها."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"للمساعدة في خفض استخدام البيانات، تمنع ميزة \"توفير البيانات\" بعض التطبيقات من إرسال البيانات وتلقّيها في الخلفية. يمكن للتطبيقات المتاحة لديك الآن استخدام البيانات، ولكن لا يمكنها الإكثار من ذلك. وهذا يعني أن الصور مثلاً لا تظهر حتى تنقر عليها."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"هل تريد تفعيل توفير البيانات؟"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"تفعيل"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
@@ -1953,7 +1954,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="2250286190237669079">"حتى <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"حتى <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (التنبيه التالي)"</string>
-    <string name="zen_mode_forever" msgid="740585666364912448">"لحين الإيقاف"</string>
+    <string name="zen_mode_forever" msgid="740585666364912448">"إلى أن يتم إيقاف الوضع"</string>
     <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"حتى يتم إيقاف \"عدم الإزعاج\""</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"تصغير"</string>
@@ -1988,12 +1989,12 @@
     <string name="close_button_text" msgid="10603510034455258">"إغلاق"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <plurals name="selected_count" formatted="false" msgid="3946212171128200491">
-      <item quantity="zero">تم تحديد <xliff:g id="COUNT_1">%1$d</xliff:g> من العناصر</item>
-      <item quantity="two">تم تحديد عنصرين (<xliff:g id="COUNT_1">%1$d</xliff:g>)</item>
-      <item quantity="few">تم تحديد <xliff:g id="COUNT_1">%1$d</xliff:g> عناصر</item>
-      <item quantity="many">تم تحديد <xliff:g id="COUNT_1">%1$d</xliff:g> عنصرًا</item>
-      <item quantity="other">تم تحديد <xliff:g id="COUNT_1">%1$d</xliff:g> من العناصر</item>
-      <item quantity="one">تم تحديد عنصر واحد (<xliff:g id="COUNT_0">%1$d</xliff:g>)</item>
+      <item quantity="zero">تم اختيار <xliff:g id="COUNT_1">%1$d</xliff:g> عنصر</item>
+      <item quantity="two">تم اختيار عنصرين (<xliff:g id="COUNT_1">%1$d</xliff:g>)</item>
+      <item quantity="few">تم اختيار <xliff:g id="COUNT_1">%1$d</xliff:g> عناصر</item>
+      <item quantity="many">تم اختيار <xliff:g id="COUNT_1">%1$d</xliff:g> عنصرًا</item>
+      <item quantity="other">تم اختيار <xliff:g id="COUNT_1">%1$d</xliff:g> عنصر</item>
+      <item quantity="one">تم اختيار عنصر واحد (<xliff:g id="COUNT_0">%1$d</xliff:g>)</item>
     </plurals>
     <string name="default_notification_channel_label" msgid="3697928973567217330">"غير مصنفة"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"لقد عيَّنت أهمية هذه الإشعارات."</string>

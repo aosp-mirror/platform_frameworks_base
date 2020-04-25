@@ -192,7 +192,7 @@
     <string name="network_logging_notification_title" msgid="554983187553845004">"设备为受管理设备"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"贵单位会管理该设备，且可能会监控网络流量。点按即可了解详情。"</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"应用可以访问您的位置信息"</string>
-    <string name="location_changed_notification_text" msgid="7158423339982706912">"与您的 IT 管理员联系即可了解详情"</string>
+    <string name="location_changed_notification_text" msgid="7158423339982706912">"详情请与您的 IT 管理员联系"</string>
     <string name="country_detector" msgid="7023275114706088854">"国家/地区检测器"</string>
     <string name="location_service" msgid="2439187616018455546">"位置信息服务"</string>
     <string name="gnss_service" msgid="8907781262179951385">"GNSS 服务"</string>
@@ -543,6 +543,7 @@
     <string name="biometric_not_recognized" msgid="5106687642694635888">"无法识别"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"身份验证已取消"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"未设置任何 PIN 码、图案和密码"</string>
+    <string name="biometric_error_generic" msgid="6784371929985434439">"进行身份验证时出错"</string>
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"仅检测到部分指纹，请重试。"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"无法处理指纹，请重试。"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"指纹传感器有脏污。请擦拭干净，然后重试。"</string>
@@ -845,7 +846,7 @@
     <string name="lockscreen_missing_sim_instructions_long" msgid="3664999892038416334">"SIM卡缺失或无法读取。请插入SIM卡。"</string>
     <string name="lockscreen_permanent_disabled_sim_message_short" msgid="3812893366715730539">"SIM卡无法使用。"</string>
     <string name="lockscreen_permanent_disabled_sim_instructions" msgid="4358929052509450807">"您的SIM卡已永久停用。\n请与您的无线服务提供商联系，以便重新获取一张SIM卡。"</string>
-    <string name="lockscreen_transport_prev_description" msgid="2879469521751181478">"上一曲"</string>
+    <string name="lockscreen_transport_prev_description" msgid="2879469521751181478">"上一首"</string>
     <string name="lockscreen_transport_next_description" msgid="2931509904881099919">"下一曲"</string>
     <string name="lockscreen_transport_pause_description" msgid="6705284702135372494">"暂停"</string>
     <string name="lockscreen_transport_play_description" msgid="106868788691652733">"播放"</string>

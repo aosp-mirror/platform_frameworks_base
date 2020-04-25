@@ -195,8 +195,8 @@
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"Администратор освободил устройство для личного использования"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"Это управляемое устройство"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Ваша организация управляет этим устройством и может отслеживать сетевой трафик. Подробнее…"</string>
-    <string name="location_changed_notification_title" msgid="3620158742816699316">"У приложений появился доступ к данным о вашем местоположении"</string>
-    <string name="location_changed_notification_text" msgid="7158423339982706912">"За подробной информацией обращайтесь к системному администратору."</string>
+    <string name="location_changed_notification_title" msgid="3620158742816699316">"У приложений есть доступ к вашим геоданным"</string>
+    <string name="location_changed_notification_text" msgid="7158423339982706912">"Узнайте подробности у системного администратора."</string>
     <string name="country_detector" msgid="7023275114706088854">"Определение страны"</string>
     <string name="location_service" msgid="2439187616018455546">"Геолокация"</string>
     <string name="gnss_service" msgid="8907781262179951385">"Служба GNSS"</string>
@@ -549,6 +549,7 @@
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Не распознано"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"Аутентификация отменена"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"Укажите PIN-код, пароль или графический ключ"</string>
+    <string name="biometric_error_generic" msgid="6784371929985434439">"Ошибка аутентификации."</string>
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"Отсканирована только часть отпечатка. Повторите попытку."</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Не удалось распознать отпечаток. Повторите попытку."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"Очистите сканер и повторите попытку."</string>
@@ -1838,7 +1839,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ОК"</string>
     <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Чтобы продлить время работы от батареи, в режиме энергосбережения:\nвключается тёмная тема;\nотключаются или ограничиваются фоновые процессы, некоторые визуальные эффекты и другие функции (например, распознавание команды \"Окей, Google\").\n\n"<annotation id="url">"Подробнее…"</annotation></string>
     <string name="battery_saver_description" msgid="7618492104632328184">"Чтобы продлить время работы от батареи, в режиме энергосбережения:\nвключается тёмная тема;\nотключаются или ограничиваются фоновые процессы, некоторые визуальные эффекты и другие функции (например, распознавание команды \"Окей, Google\")."</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"В режиме экономии трафика фоновая передача для некоторых приложений отключена. Приложение, которым вы пользуетесь, может получать и отправлять данные, но реже, чем обычно. Например, изображения могут не загружаться, пока вы не нажмете на них."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"В режиме экономии трафика фоновая передача данных для некоторых приложений отключена. Приложение, которым вы пользуетесь, может получать и отправлять данные, но реже, чем обычно. Например, изображения могут не загружаться, пока вы не нажмете на них."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Включить экономию трафика?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Включить"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
@@ -2095,7 +2096,7 @@
       <item quantity="many">\"<xliff:g id="FILE_NAME_2">%s</xliff:g>\" и ещё <xliff:g id="COUNT_3">%d</xliff:g> файлов</item>
       <item quantity="other">\"<xliff:g id="FILE_NAME_2">%s</xliff:g>\" и ещё <xliff:g id="COUNT_3">%d</xliff:g> файла</item>
     </plurals>
-    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Рекомендованных пользователей нет."</string>
+    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Рекомендованных получателей нет."</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"Список приложений"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Приложению не разрешено записывать звук, однако оно может делать это с помощью этого USB-устройства."</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"Главный экран"</string>
@@ -2114,8 +2115,8 @@
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"Чат"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"Групповой чат"</string>
     <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>
-    <string name="resolver_personal_tab" msgid="2051260504014442073">"Личный"</string>
-    <string name="resolver_work_tab" msgid="2690019516263167035">"Рабочий"</string>
+    <string name="resolver_personal_tab" msgid="2051260504014442073">"Личное"</string>
+    <string name="resolver_work_tab" msgid="2690019516263167035">"Рабочее"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Просмотр личных данных"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Просмотр рабочих данных"</string>
     <string name="resolver_cant_share_with_work_apps" msgid="637686613606502219">"Этим контентом нельзя делиться с рабочими приложениями"</string>

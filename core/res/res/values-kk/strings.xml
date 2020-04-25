@@ -543,6 +543,7 @@
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Танылмады"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"Аутентификациядан бас тартылды."</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"Ешқандай PIN коды, өрнек немесе құпия сөз орнатылмаған."</string>
+    <string name="biometric_error_generic" msgid="6784371929985434439">"Аутентификациялауда қате шықты."</string>
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"Саусақ ізі толық анықталмады. Әрекетті қайталаңыз."</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Саусақ ізін өңдеу мүмкін емес. Әрекетті қайталаңыз."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"Саусақ ізі сенсоры лас. Тазалап, әрекетті қайталаңыз."</string>
@@ -1560,7 +1561,7 @@
     <string name="media_route_button_content_description" msgid="2299223698196869956">"Трансляциялау"</string>
     <string name="media_route_chooser_title" msgid="6646594924991269208">"Құрылғыға жалғау"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"Экран трансляциясы"</string>
-    <string name="media_route_chooser_searching" msgid="6119673534251329535">"Құрылғыларды іздеуде…"</string>
+    <string name="media_route_chooser_searching" msgid="6119673534251329535">"Құрылғылар ізделуде…"</string>
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"Параметрлер"</string>
     <string name="media_route_controller_disconnect" msgid="7362617572732576959">"Ажырату"</string>
     <string name="media_route_status_scanning" msgid="8045156315309594482">"Тексеруде..."</string>
@@ -1791,7 +1792,7 @@
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Әкімші жойған"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Жарайды"</string>
     <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Батарея жұмысының ұзақтығын арттыру үшін Battery Saver:\n·Қараңғы тақырыпты іске қосады\n·фондық әрекеттерді, кейбір көрнекі әсерлерді және \"Ok Google\" сияқты басқа да функцияларды өшіреді немесе шектейді.\n\n"<annotation id="url">"Толығырақ"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"Батарея жұмысының ұзақтығын арттыру үшін Battery Saver:\n·Қараңғы тақырыпты іске қосады\n·фондық әрекеттерді, кейбір көрнекі әсерлерді және \"Ok Google\" сияқты басқа да функцияларды өшіреді немесе шектейді."</string>
+    <string name="battery_saver_description" msgid="7618492104632328184">"Батарея жұмысының ұзақтығын арттыру үшін Battery Saver:\n·Қараңғы тақырыпты іске қосады;\n·фондық әрекеттерді, кейбір көрнекі әсерлерді және \"Ok Google\" сияқты басқа да функцияларды өшіреді немесе шектейді."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Дерек шығынын азайту үшін Data Saver функциясы кейбір қолданбаларға деректерді фондық режимде жіберуге және алуға жол бермейді. Ашық тұрған қолданба деректерді пайдаланады, бірақ шектеулі шамада (мысалы, кескіндер оларды түрткенге дейін көрсетілмейді)."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Data Saver функциясын қосу керек пе?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Қосу"</string>
