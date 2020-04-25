@@ -306,11 +306,9 @@ public abstract class ActivityTaskManagerInternal {
     public abstract void setAllowAppSwitches(@NonNull String type, int uid, int userId);
 
     /**
-     * Called when a user has been deleted. This can happen during normal device usage
-     * or just at startup, when partially removed users are purged. Any state persisted by the
-     * ActivityManager should be purged now.
+     * Called when a user has been stopped.
      *
-     * @param userId The user being cleaned up.
+     * @param userId The user being stopped.
      */
     public abstract void onUserStopped(int userId);
     public abstract boolean isGetTasksAllowed(String caller, int callingPid, int callingUid);
