@@ -35,6 +35,7 @@ import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.util.DeviceConfigProxy;
 import com.android.systemui.util.DeviceConfigProxyFake;
 import com.android.systemui.util.sensors.ProximitySensor;
+import com.android.systemui.util.sensors.ThresholdSensor;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -77,7 +78,7 @@ public class BrightLineFalsingManagerTest extends SysuiTestCase {
     @Test
     public void testRegisterSensor() {
         mFalsingManager.onScreenTurningOn();
-        verify(mProximitySensor).register(any(ProximitySensor.ProximitySensorListener.class));
+        verify(mProximitySensor).register(any(ThresholdSensor.Listener.class));
     }
 
     @Test
@@ -85,7 +86,7 @@ public class BrightLineFalsingManagerTest extends SysuiTestCase {
         mFalsingManager.onScreenTurningOn();
         reset(mProximitySensor);
         mFalsingManager.onScreenOff();
-        verify(mProximitySensor).unregister(any(ProximitySensor.ProximitySensorListener.class));
+        verify(mProximitySensor).unregister(any(ThresholdSensor.Listener.class));
     }
 
     @Test
@@ -93,9 +94,9 @@ public class BrightLineFalsingManagerTest extends SysuiTestCase {
         mFalsingManager.onScreenTurningOn();
         reset(mProximitySensor);
         mFalsingManager.setQsExpanded(true);
-        verify(mProximitySensor).unregister(any(ProximitySensor.ProximitySensorListener.class));
+        verify(mProximitySensor).unregister(any(ThresholdSensor.Listener.class));
         mFalsingManager.setQsExpanded(false);
-        verify(mProximitySensor).register(any(ProximitySensor.ProximitySensorListener.class));
+        verify(mProximitySensor).register(any(ThresholdSensor.Listener.class));
     }
 
     @Test
@@ -103,9 +104,9 @@ public class BrightLineFalsingManagerTest extends SysuiTestCase {
         mFalsingManager.onScreenTurningOn();
         reset(mProximitySensor);
         mFalsingManager.onBouncerShown();
-        verify(mProximitySensor).unregister(any(ProximitySensor.ProximitySensorListener.class));
+        verify(mProximitySensor).unregister(any(ThresholdSensor.Listener.class));
         mFalsingManager.onBouncerHidden();
-        verify(mProximitySensor).register(any(ProximitySensor.ProximitySensorListener.class));
+        verify(mProximitySensor).register(any(ThresholdSensor.Listener.class));
     }
 
     @Test
@@ -113,6 +114,6 @@ public class BrightLineFalsingManagerTest extends SysuiTestCase {
         mFalsingManager.onScreenTurningOn();
         reset(mProximitySensor);
         mStatusBarStateController.setState(StatusBarState.SHADE);
-        verify(mProximitySensor).unregister(any(ProximitySensor.ProximitySensorListener.class));
+        verify(mProximitySensor).unregister(any(ThresholdSensor.Listener.class));
     }
 }

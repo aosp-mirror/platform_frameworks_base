@@ -50,6 +50,7 @@ import com.android.internal.accessibility.AccessibilityShortcutController;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -96,6 +97,8 @@ class AccessibilityUserState {
     private final ServiceInfoChangeListener mServiceInfoChangeListener;
 
     private ComponentName mServiceChangingSoftKeyboardMode;
+
+    private String mTargetAssignedToAccessibilityButton;
 
     private boolean mBindInstantServiceAllowed;
     private boolean mIsAutoclickEnabled;
@@ -155,6 +158,7 @@ class AccessibilityUserState {
         mTouchExplorationGrantedServices.clear();
         mAccessibilityShortcutKeyTargets.clear();
         mAccessibilityButtonTargets.clear();
+        mTargetAssignedToAccessibilityButton = null;
         mIsTouchExplorationEnabled = false;
         mServiceHandlesDoubleTap = false;
         mRequestMultiFingerGestures = false;
@@ -473,6 +477,8 @@ class AccessibilityUserState {
             }
         }
         pw.println("}");
+        pw.append("     button target:{").append(mTargetAssignedToAccessibilityButton);
+        pw.println("}");
         pw.append("     Bound services:{");
         final int serviceCount = mBoundServices.size();
         for (int j = 0; j < serviceCount; j++) {
@@ -738,5 +744,57 @@ class AccessibilityUserState {
 
     public void setUserNonInteractiveUiTimeoutLocked(int timeout) {
         mUserNonInteractiveUiTimeout = timeout;
+    }
+
+    /**
+     * Gets a shortcut target which is assigned to the accessibility button by the chooser
+     * activity.
+     *
+     * @return The flattened component name or the system class name of the shortcut target.
+     */
+    public String getTargetAssignedToAccessibilityButton() {
+        return mTargetAssignedToAccessibilityButton;
+    }
+
+    /**
+     * Sets a shortcut target which is assigned to the accessibility button by the chooser
+     * activity.
+     *
+     * @param target The flattened component name or the system class name of the shortcut target.
+     */
+    public void setTargetAssignedToAccessibilityButton(String target) {
+        mTargetAssignedToAccessibilityButton = target;
+    }
+
+    /**
+     * Whether or not the given target name is contained in the shortcut collection. Since the
+     * component name string format could be short or long, this function un-flatten the component
+     * name from the string in {@code shortcutTargets} and compared with the given target name.
+     *
+     * @param shortcutTargets The shortcut type.
+     * @param targetName The target name.
+     * @return {@code true} if the target is in the shortcut collection.
+     */
+    public static boolean doesShortcutTargetsStringContain(Collection<String> shortcutTargets,
+            String targetName) {
+        if (shortcutTargets == null || targetName == null) {
+            return false;
+        }
+        // Some system features, such as magnification, don't have component name. Using string
+        // compare first.
+        if (shortcutTargets.contains(targetName)) {
+            return true;
+        }
+        final ComponentName targetComponentName = ComponentName.unflattenFromString(targetName);
+        if (targetComponentName == null) {
+            return false;
+        }
+        for (String stringName : shortcutTargets) {
+            if (!TextUtils.isEmpty(stringName)
+                    && targetComponentName.equals(ComponentName.unflattenFromString(stringName))) {
+                return true;
+            }
+        }
+        return false;
     }
 }

@@ -3200,6 +3200,11 @@
     <permission android:name="android.permission.MODIFY_ACCESSIBILITY_DATA"
                 android:protectionLevel="signature" />
 
+    <!-- @hide Allows an application to perform accessibility operations (e.g. send events) on
+         behalf of another package. -->
+    <permission android:name="android.permission.ACT_AS_PACKAGE_FOR_ACCESSIBILITY"
+                android:protectionLevel="signature" />
+
     <!-- @hide Allows an application to change the accessibility volume. -->
     <permission android:name="android.permission.CHANGE_ACCESSIBILITY_VOLUME"
                 android:protectionLevel="signature" />
@@ -5067,6 +5072,21 @@
         <activity android:name="com.android.internal.accessibility.dialog.AccessibilityShortcutChooserActivity"
                   android:exported="false"
                   android:theme="@style/Theme.DeviceDefault.Dialog.Alert.DayNight"
+                  android:finishOnCloseSystemDialogs="true"
+                  android:excludeFromRecents="true"
+                  android:documentLaunchMode="never"
+                  android:relinquishTaskIdentity="true"
+                  android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboard|keyboardHidden"
+                  android:process=":ui"
+                  android:visibleToInstantApps="true">
+            <intent-filter>
+                <action android:name="com.android.internal.intent.action.CHOOSE_ACCESSIBILITY_BUTTON" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity android:name="com.android.internal.accessibility.dialog.AccessibilityButtonChooserActivity"
+                  android:exported="false"
+                  android:theme="@style/Theme.DeviceDefault.Resolver"
                   android:finishOnCloseSystemDialogs="true"
                   android:excludeFromRecents="true"
                   android:documentLaunchMode="never"

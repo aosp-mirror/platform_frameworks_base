@@ -134,7 +134,7 @@ public class AccessibilityWindowManagerTest {
         when(mMockA11ySecurityPolicy.resolveCallingUserIdEnforcingPermissionsLocked(
                 USER_SYSTEM_ID)).thenReturn(USER_SYSTEM_ID);
         when(mMockA11ySecurityPolicy.resolveValidReportedPackageLocked(
-                anyString(), anyInt(), anyInt())).thenReturn(PACKAGE_NAME);
+                anyString(), anyInt(), anyInt(), anyInt())).thenReturn(PACKAGE_NAME);
 
         mA11yWindowManager = new AccessibilityWindowManager(new Object(), mHandler,
                 mMockWindowManagerInternal,

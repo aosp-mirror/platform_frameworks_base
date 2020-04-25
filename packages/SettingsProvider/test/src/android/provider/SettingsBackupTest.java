@@ -296,6 +296,7 @@ public class SettingsBackupTest {
                     Settings.Global.HDMI_CONTROL_AUTO_DEVICE_OFF_ENABLED,
                     Settings.Global.HDMI_CONTROL_AUTO_WAKEUP_ENABLED,
                     Settings.Global.HDMI_CONTROL_ENABLED,
+                    Settings.Global.HDMI_CONTROL_VOLUME_CONTROL_ENABLED,
                     Settings.Global.HDMI_SYSTEM_AUDIO_CONTROL_ENABLED,
                     Settings.Global.HEADS_UP_NOTIFICATIONS_ENABLED,
                     Settings.Global.HIDDEN_API_POLICY,

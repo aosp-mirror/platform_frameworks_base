@@ -4369,19 +4369,21 @@ public final class Settings {
         return pkg.installSource.isOrphaned;
     }
 
-    int getApplicationEnabledSettingLPr(String packageName, int userId) {
+    int getApplicationEnabledSettingLPr(String packageName, int userId)
+            throws PackageManager.NameNotFoundException {
         final PackageSetting pkg = mPackages.get(packageName);
         if (pkg == null) {
-            throw new IllegalArgumentException("Unknown package: " + packageName);
+            throw new PackageManager.NameNotFoundException(packageName);
         }
         return pkg.getEnabled(userId);
     }
 
-    int getComponentEnabledSettingLPr(ComponentName componentName, int userId) {
+    int getComponentEnabledSettingLPr(ComponentName componentName, int userId)
+            throws PackageManager.NameNotFoundException {
         final String packageName = componentName.getPackageName();
         final PackageSetting pkg = mPackages.get(packageName);
         if (pkg == null) {
-            throw new IllegalArgumentException("Unknown component: " + componentName);
+            throw new PackageManager.NameNotFoundException(componentName.getPackageName());
         }
         final String classNameStr = componentName.getClassName();
         return pkg.getCurrentEnabledStateLPr(classNameStr, userId);

@@ -42,6 +42,7 @@ import com.android.systemui.statusbar.phone.dagger.StatusBarComponent;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.util.concurrency.ConcurrencyModule;
 import com.android.systemui.util.sensors.AsyncSensorManager;
+import com.android.systemui.util.sensors.SensorModule;
 import com.android.systemui.util.time.SystemClock;
 import com.android.systemui.util.time.SystemClockImpl;
 
@@ -61,6 +62,7 @@ import dagger.Provides;
             ConcurrencyModule.class,
             LogModule.class,
             PeopleHubModule.class,
+            SensorModule.class,
         },
         subcomponents = {StatusBarComponent.class,
                 NotificationRowComponent.class,

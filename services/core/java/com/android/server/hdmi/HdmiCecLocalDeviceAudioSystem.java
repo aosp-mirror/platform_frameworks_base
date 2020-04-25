@@ -575,7 +575,7 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
     @ServiceThreadOnly
     protected boolean handleGiveAudioStatus(HdmiCecMessage message) {
         assertRunOnServiceThread();
-        if (isSystemAudioControlFeatureEnabled()) {
+        if (isSystemAudioControlFeatureEnabled() && mService.isHdmiCecVolumeControlEnabled()) {
             reportAudioStatus(message.getSource());
         } else {
             mService.maySendFeatureAbortCommand(message, Constants.ABORT_REFUSED);
@@ -930,6 +930,9 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
 
     void reportAudioStatus(int source) {
         assertRunOnServiceThread();
+        if (!mService.isHdmiCecVolumeControlEnabled()) {
+            return;
+        }
 
         int volume = mService.getAudioManager().getStreamVolume(AudioManager.STREAM_MUSIC);
         boolean mute = mService.getAudioManager().isStreamMute(AudioManager.STREAM_MUSIC);

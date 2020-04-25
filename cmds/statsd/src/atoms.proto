@@ -668,7 +668,8 @@ message ActivityManagerSleepStateChanged {
         ASLEEP = 1;
         AWAKE = 2;
     }
-    optional State state = 1 [(state_field_option).exclusive_state = true];
+    optional State state = 1
+            [(state_field_option).exclusive_state = true, (state_field_option).nested = false];
 }
 
 /**
@@ -1185,7 +1186,8 @@ message BatterySaverModeStateChanged {
         OFF = 0;
         ON = 1;
     }
-    optional State state = 1;
+    optional State state = 1
+            [(state_field_option).exclusive_state = true, (state_field_option).nested = false];
 }
 
 /**
@@ -1195,7 +1197,8 @@ message BatterySaverModeStateChanged {
  *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
  */
 message DeviceIdleModeStateChanged {
-    optional android.server.DeviceIdleModeEnum state = 1;
+    optional android.server.DeviceIdleModeEnum state = 1
+            [(state_field_option).exclusive_state = true, (state_field_option).nested = false];
 }
 
 
@@ -1206,7 +1209,8 @@ message DeviceIdleModeStateChanged {
  *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
  */
 message DeviceIdlingModeStateChanged {
-    optional android.server.DeviceIdleModeEnum state = 1;
+    optional android.server.DeviceIdleModeEnum state = 1
+            [(state_field_option).exclusive_state = true, (state_field_option).nested = false];
 }
 
 /**
@@ -1250,7 +1254,8 @@ message ChargingStateChanged {
  */
 message PluggedStateChanged {
     // Whether the device is plugged in, from frameworks/base/core/proto/android/os/enums.proto.
-    optional android.os.BatteryPluggedStateEnum state = 1;
+    optional android.os.BatteryPluggedStateEnum state = 1
+            [(state_field_option).exclusive_state = true, (state_field_option).nested = false];
 }
 
 /**
@@ -2714,8 +2719,9 @@ message UsbConnectorStateChanged {
         STATE_DISCONNECTED = 0;
         STATE_CONNECTED = 1;
     }
-    optional State state = 1;
-    optional string id = 2;
+    optional State state = 1
+            [(state_field_option).exclusive_state = true, (state_field_option).nested = false];
+    optional string id = 2 [(state_field_option).primary_field = true];
     // Last active session in ms.
     // 0 when the port is in connected state.
     optional int64 last_connect_duration_millis = 3;
@@ -3598,11 +3604,8 @@ message OverlayStateChanged {
         ENTERED = 1;
         EXITED = 2;
     }
-    optional State state = 4 [
-        (state_field_option).exclusive_state = true,
-        (state_field_option).nested = false,
-        (state_field_option).default_state_value = 2
-    ];
+    optional State state = 4
+            [(state_field_option).exclusive_state = true, (state_field_option).nested = false];
 }
 
 /**

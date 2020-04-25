@@ -30,7 +30,7 @@ import android.content.res.Configuration
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.LayerDrawable
 import android.os.Process
-import android.provider.Settings
+import android.os.Vibrator
 import android.service.controls.Control
 import android.service.controls.actions.ControlAction
 import android.util.Log
@@ -84,7 +84,6 @@ class ControlsUiControllerImpl @Inject constructor (
         private const val PREF_COMPONENT = "controls_component"
         private const val PREF_STRUCTURE = "controls_structure"
 
-        private const val USE_PANELS = "systemui.controls_use_panel"
         private const val FADE_IN_MILLIS = 200L
 
         private val EMPTY_COMPONENT = ComponentName("", "")
@@ -110,6 +109,11 @@ class ControlsUiControllerImpl @Inject constructor (
         get() = controlsController.get().available
 
     private lateinit var listingCallback: ControlsListingController.ControlsListingCallback
+
+    init {
+        val vibratorService = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+        ControlActionCoordinator.initialize(vibratorService, bgExecutor)
+    }
 
     private fun createCallback(
         onResult: (List<SelectionItem>) -> Unit
@@ -441,9 +445,6 @@ class ControlsUiControllerImpl @Inject constructor (
 
         val maxColumns = findMaxColumns()
 
-        // use flag only temporarily for testing
-        val usePanels = Settings.Secure.getInt(context.contentResolver, USE_PANELS, 0) == 1
-
         val listView = parent.requireViewById(R.id.global_actions_controls_list) as ViewGroup
         var lastRow: ViewGroup = createRow(inflater, listView)
         selectedStructure.controls.forEach {
@@ -457,8 +458,7 @@ class ControlsUiControllerImpl @Inject constructor (
                 baseLayout,
                 controlsController.get(),
                 uiExecutor,
-                bgExecutor,
-                usePanels
+                bgExecutor
             )
             val key = ControlKey(selectedStructure.componentName, it.controlId)
             cvh.bindData(controlsById.getValue(key))

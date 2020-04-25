@@ -23,6 +23,7 @@ import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.app.Service;
 import android.content.Intent;
+import android.os.BaseBundle;
 import android.os.CancellationSignal;
 import android.os.Handler;
 import android.os.IBinder;
@@ -611,6 +612,7 @@ public abstract class AutofillService extends Service {
     public void onCreate() {
         super.onCreate();
         mHandler = new Handler(Looper.getMainLooper(), null, true);
+        BaseBundle.setShouldDefuse(true);
     }
 
     @Override

@@ -543,6 +543,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 .isEqualTo(GONE);
 
         // no changes until hit done
+        assertFalse(mNotificationInfo.shouldBeSaved());
         verify(mMockINotificationManager, never()).updateNotificationChannelForPackage(
                 anyString(), anyInt(), any());
         assertFalse(mConversationChannel.isImportantConversation());
@@ -580,6 +581,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 .isEqualTo(GONE);
 
         // no changes until hit done
+        assertFalse(mNotificationInfo.shouldBeSaved());
         verify(mMockINotificationManager, never()).updateNotificationChannelForPackage(
                 anyString(), anyInt(), any());
         assertFalse(mConversationChannel.isImportantConversation());
@@ -619,6 +621,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 .isEqualTo(VISIBLE);
 
         // no changes until save
+        assertFalse(mNotificationInfo.shouldBeSaved());
         verify(mMockINotificationManager, never()).updateNotificationChannelForPackage(
                 anyString(), anyInt(), any());
         assertEquals(IMPORTANCE_DEFAULT, mConversationChannel.getImportance());
