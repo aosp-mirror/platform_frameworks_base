@@ -242,7 +242,7 @@
     <string name="global_action_emergency" msgid="1387617624177105088">"Urgences"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"Rapport de bug"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"Fermer la session"</string>
-    <string name="global_action_screenshot" msgid="2610053466156478564">"Capture"</string>
+    <string name="global_action_screenshot" msgid="2610053466156478564">"Capture d\'écran"</string>
     <string name="bugreport_title" msgid="8549990811777373050">"Rapport de bug"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"Cela permet de recueillir des informations concernant l\'état actuel de votre appareil. Ces informations sont ensuite envoyées sous forme d\'e-mail. Merci de patienter pendant la préparation du rapport de bug. Cette opération peut prendre quelques instants."</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"Rapport interactif"</string>
@@ -800,15 +800,15 @@
     <string name="relationTypeChild" msgid="9076258911292693601">"Enfant"</string>
     <string name="relationTypeDomesticPartner" msgid="7825306887697559238">"Concubin"</string>
     <string name="relationTypeFather" msgid="3856225062864790596">"Père"</string>
-    <string name="relationTypeFriend" msgid="3192092625893980574">"Ami"</string>
+    <string name="relationTypeFriend" msgid="3192092625893980574">"Ami(e)"</string>
     <string name="relationTypeManager" msgid="2272860813153171857">"Responsable"</string>
     <string name="relationTypeMother" msgid="2331762740982699460">"Mère"</string>
-    <string name="relationTypeParent" msgid="4177920938333039882">"Parent"</string>
-    <string name="relationTypePartner" msgid="4018017075116766194">"Partenaire"</string>
-    <string name="relationTypeReferredBy" msgid="5285082289602849400">"Recommandé par"</string>
+    <string name="relationTypeParent" msgid="4177920938333039882">"Parent(e)"</string>
+    <string name="relationTypePartner" msgid="4018017075116766194">"Conjoint(e)"</string>
+    <string name="relationTypeReferredBy" msgid="5285082289602849400">"Parrain(ne)"</string>
     <string name="relationTypeRelative" msgid="3396498519818009134">"Proche"</string>
     <string name="relationTypeSister" msgid="3721676005094140671">"Sœur"</string>
-    <string name="relationTypeSpouse" msgid="6916682664436031703">"Conjoint"</string>
+    <string name="relationTypeSpouse" msgid="6916682664436031703">"Époux(se)"</string>
     <string name="sipAddressTypeCustom" msgid="6283889809842649336">"Personnalisée"</string>
     <string name="sipAddressTypeHome" msgid="5918441930656878367">"Domicile"</string>
     <string name="sipAddressTypeWork" msgid="7873967986701216770">"Professionnelle"</string>
@@ -1457,6 +1457,9 @@
     <string name="gpsNotifMessage" msgid="7346649122793758032">"Demande de <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
     <string name="gpsVerifYes" msgid="3719843080744112940">"Oui"</string>
     <string name="gpsVerifNo" msgid="1671201856091564741">"Non"</string>
+    <string name="gnss_nfw_notification_title" msgid="5004493772059563423">"Accès à la localisation d\'urgence"</string>
+    <string name="gnss_nfw_notification_message_oem" msgid="3683958907027107969">"Le fabricant de votre appareil a accédé à votre position récemment lors d\'une situation d\'urgence"</string>
+    <string name="gnss_nfw_notification_message_carrier" msgid="815888995791562151">"Votre opérateur a accédé à votre position récemment lors d\'une situation d\'urgence"</string>
     <string name="sync_too_many_deletes" msgid="6999440774578705300">"Le nombre maximal de suppressions a été atteint."</string>
     <string name="sync_too_many_deletes_desc" msgid="7409327940303504440">"<xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> éléments vont être supprimés lors de la synchronisation <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g> pour le compte <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g>. Que voulez-vous faire ?"</string>
     <string name="sync_really_delete" msgid="5657871730315579051">"Supprimer les éléments"</string>
@@ -1789,8 +1792,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Mis à jour par votre administrateur"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Supprimé par votre administrateur"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Pour prolonger l\'autonomie de la batterie, l\'économiseur de batterie :\n· active le thème sombre ;\n· désactive ou restreint les activités en arrière-plan, certains effet visuels et d\'autres fonctionnalités, comme \"Ok Google\".\n\n"<annotation id="url">"En savoir plus"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"Pour prolonger l\'autonomie de la batterie, l\'économiseur de batterie :\n· active le thème sombre ;\n· désactive ou restreint les activités en arrière-plan, certains effet visuels et d\'autres fonctionnalités, comme \"Ok Google\"."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Pour prolonger l\'autonomie de la batterie, l\'économiseur de batterie :\n· active le thème sombre ;\n· désactive ou restreint les activités en arrière-plan, certains effets visuels et d\'autres fonctionnalités, comme \"Ok Google\".\n\n"<annotation id="url">"En savoir plus"</annotation></string>
+    <string name="battery_saver_description" msgid="7618492104632328184">"Pour prolonger l\'autonomie de la batterie, l\'économiseur de batterie :\n· active le thème sombre ;\n· désactive ou restreint les activités en arrière-plan, certains effets visuels et d\'autres fonctionnalités, comme \"Ok Google\"."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Pour réduire la consommation de données, l\'économiseur de données empêche certaines applications d\'envoyer ou de recevoir des données en arrière-plan. Ainsi, les applications que vous utilisez peuvent toujours accéder aux données, mais pas en permanence. Par exemple, il se peut que les images ne s\'affichent pas tant que vous n\'appuyez pas dessus."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Activer l\'économiseur de données ?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Activer"</string>
@@ -2026,7 +2029,7 @@
       <item quantity="one"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> fichier</item>
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> fichiers</item>
     </plurals>
-    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Aucune personne trouvée pour le partage direct"</string>
+    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Aucune recommandation de personnes avec lesquelles effectuer un partage"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"Liste des applications"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Cette application n\'a pas reçu l\'autorisation d\'enregistrer des contenus audio, mais peut le faire via ce périphérique USB."</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"Accueil"</string>

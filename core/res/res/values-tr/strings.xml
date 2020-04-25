@@ -192,7 +192,7 @@
     <string name="network_logging_notification_title" msgid="554983187553845004">"Cihaz yönetiliyor"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Kuruluşunuz bu cihazı yönetmekte olup ağ trafiğini izleyebilir. Ayrıntılar için dokunun."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"Uygulamalar konumunuza erişebilir"</string>
-    <string name="location_changed_notification_text" msgid="7158423339982706912">"Daha fazla bilgi edinmek için BT yöneticinizle iletişim kurun"</string>
+    <string name="location_changed_notification_text" msgid="7158423339982706912">"BT yöneticinizden daha fazla bilgi alabilirsiniz."</string>
     <string name="country_detector" msgid="7023275114706088854">"Ülke Algılayıcı"</string>
     <string name="location_service" msgid="2439187616018455546">"Konum Hizmeti"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"Sensör Bildirim Hizmeti"</string>
@@ -1457,6 +1457,9 @@
     <string name="gpsNotifMessage" msgid="7346649122793758032">"<xliff:g id="NAME">%1$s</xliff:g> tarafından istendi (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
     <string name="gpsVerifYes" msgid="3719843080744112940">"Evet"</string>
     <string name="gpsVerifNo" msgid="1671201856091564741">"Hayır"</string>
+    <string name="gnss_nfw_notification_title" msgid="5004493772059563423">"Acil durum sırasında konuma erişildi"</string>
+    <string name="gnss_nfw_notification_message_oem" msgid="3683958907027107969">"Yakın zamanda yaşanan bir acil durum sırasında cihaz üreticiniz konumunuza erişti"</string>
+    <string name="gnss_nfw_notification_message_carrier" msgid="815888995791562151">"Yakın zamanda yaşanan bir acil durum sırasında operatörünüz konumunuza erişti"</string>
     <string name="sync_too_many_deletes" msgid="6999440774578705300">"Silme sınırı aşıldı"</string>
     <string name="sync_too_many_deletes_desc" msgid="7409327940303504440">"<xliff:g id="ACCOUNT_NAME">%3$s</xliff:g> hesabında <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g> için <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> adet silinmiş öğe var. Ne yapmak istiyorsunuz?"</string>
     <string name="sync_really_delete" msgid="5657871730315579051">"Öğeleri sil"</string>

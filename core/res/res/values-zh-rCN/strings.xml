@@ -192,7 +192,7 @@
     <string name="network_logging_notification_title" msgid="554983187553845004">"设备为受管理设备"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"贵单位会管理该设备，且可能会监控网络流量。点按即可了解详情。"</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"应用可以访问您的位置信息"</string>
-    <string name="location_changed_notification_text" msgid="7158423339982706912">"与您的 IT 管理员联系即可了解详情"</string>
+    <string name="location_changed_notification_text" msgid="7158423339982706912">"详情请与您的 IT 管理员联系"</string>
     <string name="country_detector" msgid="7023275114706088854">"国家/地区检测器"</string>
     <string name="location_service" msgid="2439187616018455546">"位置信息服务"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"传感器通知服务"</string>
@@ -844,7 +844,7 @@
     <string name="lockscreen_missing_sim_instructions_long" msgid="3664999892038416334">"SIM卡缺失或无法读取。请插入SIM卡。"</string>
     <string name="lockscreen_permanent_disabled_sim_message_short" msgid="3812893366715730539">"SIM卡无法使用。"</string>
     <string name="lockscreen_permanent_disabled_sim_instructions" msgid="4358929052509450807">"您的SIM卡已永久停用。\n请与您的无线服务提供商联系，以便重新获取一张SIM卡。"</string>
-    <string name="lockscreen_transport_prev_description" msgid="2879469521751181478">"上一曲"</string>
+    <string name="lockscreen_transport_prev_description" msgid="2879469521751181478">"上一首"</string>
     <string name="lockscreen_transport_next_description" msgid="2931509904881099919">"下一曲"</string>
     <string name="lockscreen_transport_pause_description" msgid="6705284702135372494">"暂停"</string>
     <string name="lockscreen_transport_play_description" msgid="106868788691652733">"播放"</string>
@@ -1457,6 +1457,9 @@
     <string name="gpsNotifMessage" msgid="7346649122793758032">"请求人：<xliff:g id="NAME">%1$s</xliff:g>（<xliff:g id="SERVICE">%2$s</xliff:g>）"</string>
     <string name="gpsVerifYes" msgid="3719843080744112940">"是"</string>
     <string name="gpsVerifNo" msgid="1671201856091564741">"否"</string>
+    <string name="gnss_nfw_notification_title" msgid="5004493772059563423">"外部实体获取了您的紧急位置信息"</string>
+    <string name="gnss_nfw_notification_message_oem" msgid="3683958907027107969">"最近发生紧急情况时，您的设备制造商获取了您的位置信息"</string>
+    <string name="gnss_nfw_notification_message_carrier" msgid="815888995791562151">"最近发生紧急情况时，您的运营商获取了您的位置信息"</string>
     <string name="sync_too_many_deletes" msgid="6999440774578705300">"超出删除限制"</string>
     <string name="sync_too_many_deletes_desc" msgid="7409327940303504440">"帐号 <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g> 在进行“<xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>”同步时删除了 <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> 项内容。您要如何处理这些删除的内容？"</string>
     <string name="sync_really_delete" msgid="5657871730315579051">"删除这些内容"</string>
