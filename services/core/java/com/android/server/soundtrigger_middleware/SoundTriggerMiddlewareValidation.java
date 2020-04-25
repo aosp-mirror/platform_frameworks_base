@@ -96,12 +96,12 @@ import java.util.Set;
  * {@link NullPointerException} or {@link
  * IllegalStateException}, respectively. All those exceptions are treated specially by Binder and
  * will get sent back to the client.<br>
- * Once this is done, any subsequent fault is considered a server fault. Only {@link
- * RecoverableException}s thrown by the implementation are special-cased: they would get sent back
- * to the caller as a {@link ServiceSpecificException}, which is the behavior of Binder. Any other
- * exception gets wrapped with a {@link InternalServerError}, which is specifically chosen as a type
- * that <b>does NOT</b> get forwarded by binder. Those exceptions would be handled by a high-level
- * exception handler on the server side, typically resulting in rebooting the server.
+ * Once this is done, any subsequent fault is considered either a recoverable (expected) or
+ * unexpected server fault. Those will be delivered to the client as a
+ * {@link ServiceSpecificException}. {@link RecoverableException}s thrown by the implementation are
+ * considered recoverable and will include a specific error code to indicate the problem. Any other
+ * exceptions will use the INTERNAL_ERROR code. They may also cause the module to become invalid
+ * asynchronously, and the client would be notified via the moduleDied() callback.
  *
  * {@hide}
  */
@@ -159,7 +159,7 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
         }
 
         Log.wtf(TAG, "Unexpected exception", e);
-        throw new InternalServerError(e);
+        throw new ServiceSpecificException(Status.INTERNAL_ERROR, e.getMessage());
     }
 
     @Override
@@ -273,8 +273,7 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
                 throw new ServiceSpecificException(Status.TEMPORARY_PERMISSION_DENIED,
                         String.format("Caller must have the %s permission.", permission));
             default:
-                throw new InternalServerError(
-                        new RuntimeException("Unexpected perimission check result."));
+                throw new RuntimeException("Unexpected perimission check result.");
         }
     }
 
