@@ -21,14 +21,17 @@ import static com.android.server.uri.UriGrantsMockContext.FLAG_PREFIX;
 import static com.android.server.uri.UriGrantsMockContext.FLAG_READ;
 import static com.android.server.uri.UriGrantsMockContext.PKG_CAMERA;
 import static com.android.server.uri.UriGrantsMockContext.PKG_COMPLEX;
+import static com.android.server.uri.UriGrantsMockContext.PKG_FORCE;
 import static com.android.server.uri.UriGrantsMockContext.PKG_SOCIAL;
 import static com.android.server.uri.UriGrantsMockContext.UID_PRIMARY_CAMERA;
 import static com.android.server.uri.UriGrantsMockContext.UID_PRIMARY_COMPLEX;
+import static com.android.server.uri.UriGrantsMockContext.UID_PRIMARY_FORCE;
 import static com.android.server.uri.UriGrantsMockContext.UID_PRIMARY_PRIVATE;
 import static com.android.server.uri.UriGrantsMockContext.UID_PRIMARY_PUBLIC;
 import static com.android.server.uri.UriGrantsMockContext.UID_PRIMARY_SOCIAL;
 import static com.android.server.uri.UriGrantsMockContext.UID_SECONDARY_CAMERA;
 import static com.android.server.uri.UriGrantsMockContext.UID_SECONDARY_SOCIAL;
+import static com.android.server.uri.UriGrantsMockContext.URI_FORCE;
 import static com.android.server.uri.UriGrantsMockContext.URI_PHOTO_1;
 import static com.android.server.uri.UriGrantsMockContext.URI_PRIVATE;
 import static com.android.server.uri.UriGrantsMockContext.URI_PUBLIC;
@@ -122,6 +125,19 @@ public class UriGrantsManagerServiceTest {
             fail();
         } catch (SecurityException expected) {
         }
+    }
+
+    /**
+     * Verify that {@link ProviderInfo#forceUriPermissions} forces permission
+     * grants, even when receiver already holds permission.
+     */
+    @Test
+    public void testNeeded_force() {
+        final Intent intent = new Intent(Intent.ACTION_VIEW, URI_FORCE)
+                .addFlags(FLAG_READ);
+        final NeededUriGrants needed = mService.checkGrantUriPermissionFromIntent(
+                UID_PRIMARY_FORCE, PKG_FORCE, intent, intent.getFlags(), null, USER_PRIMARY);
+        assertEquals(asSet(new GrantUri(USER_PRIMARY, URI_FORCE, 0)), needed.uris);
     }
 
     /**

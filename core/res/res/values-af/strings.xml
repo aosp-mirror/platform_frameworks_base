@@ -543,6 +543,7 @@
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Nie herken nie"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"Stawing is gekanselleer"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"Geen PIN, patroon of wagwoord is gestel nie"</string>
+    <string name="biometric_error_generic" msgid="6784371929985434439">"Kon nie staaf nie"</string>
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"Gedeeltelike vingerafdruk is bespeur. Probeer asseblief weer."</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Kon nie vingerafdruk verwerk nie. Probeer asseblief weer."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"Vingerafdruksensor is vuil. Maak dit skoon en probeer weer."</string>
@@ -1790,8 +1791,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Opgedateer deur jou administrateur"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Uitgevee deur jou administrateur"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Batterybespaarder doen die volgende om die batterylewe te verleng:\n·Skakel Donker-tema aan\n·Skakel agtergrondaktiwiteit, sommige visuele effekte en ander kenmerke, soos \"Hey Google\", af of beperk hulle\n\n"<annotation id="url">"Kom meer te wete"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"Batterybespaarder doen die volgende om die batterylewe te verleng:\n·Skakel Donker-tema aan\n·Skakel agtergrondaktiwiteit, sommige visuele effekte en ander kenmerke, soos \"Hey Google\", af of beperk hulle"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Batterybespaarder doen die volgende om die batterylewe te verleng:\n·Skakel Donkertema aan\n·Skakel agtergrondaktiwiteit, sommige visuele effekte en ander kenmerke, soos \"Hey Google\", af of beperk hulle\n\n"<annotation id="url">"Kom meer te wete"</annotation></string>
+    <string name="battery_saver_description" msgid="7618492104632328184">"Batterybespaarder doen die volgende om die batterylewe te verleng:\n·Skakel Donkertema aan\n·Skakel agtergrondaktiwiteit, sommige visuele effekte en ander kenmerke, soos \"Hey Google\", af of beperk hulle"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Databespaarder verhoed sommige programme om data in die agtergrond te stuur of te aanvaar om datagebruik te help verminder. \'n Program wat jy tans gebruik kan by data ingaan, maar sal dit dalk minder gereeld doen. Dit kan byvoorbeeld beteken dat prente nie wys totdat jy op hulle tik nie."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Skakel Databespaarder aan?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Skakel aan"</string>

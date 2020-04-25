@@ -294,7 +294,7 @@
     <string name="android_system_label" msgid="5974767339591067210">"Android 시스템"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"개인 프로필로 전환"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"직장 프로필로 전환"</string>
-    <string name="permgrouplab_contacts" msgid="4254143639307316920">"주소록"</string>
+    <string name="permgrouplab_contacts" msgid="4254143639307316920">"연락처"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"주소록에 액세스"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"위치"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"이 기기의 위치정보에 액세스"</string>
@@ -543,6 +543,7 @@
     <string name="biometric_not_recognized" msgid="5106687642694635888">"인식할 수 없음"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"인증이 취소되었습니다."</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"PIN, 패턴, 비밀번호가 설정되지 않음"</string>
+    <string name="biometric_error_generic" msgid="6784371929985434439">"인증 오류"</string>
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"지문이 일부만 인식되었습니다. 다시 시도해 주세요."</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"지문을 인식할 수 없습니다. 다시 시도해 주세요."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"지문 센서를 깨끗이 닦고 다시 시도하세요."</string>
@@ -804,7 +805,7 @@
     <string name="relationTypeFriend" msgid="3192092625893980574">"친구"</string>
     <string name="relationTypeManager" msgid="2272860813153171857">"상사"</string>
     <string name="relationTypeMother" msgid="2331762740982699460">"어머니"</string>
-    <string name="relationTypeParent" msgid="4177920938333039882">"부모"</string>
+    <string name="relationTypeParent" msgid="4177920938333039882">"부모님"</string>
     <string name="relationTypePartner" msgid="4018017075116766194">"파트너"</string>
     <string name="relationTypeReferredBy" msgid="5285082289602849400">"추천인"</string>
     <string name="relationTypeRelative" msgid="3396498519818009134">"친척"</string>
@@ -1793,7 +1794,7 @@
     <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"배터리 수명을 늘리기 위해 절전 모드가 다음과 같이 작동합니다.\n·어두운 테마를 사용 설정합니다.\n·백그라운드 활동, 일부 시각 효과 및 \'Hey Google\'과 같은 기타 기능을 사용 중지하거나 제한합니다.\n\n"<annotation id="url">"자세히 알아보기"</annotation></string>
     <string name="battery_saver_description" msgid="7618492104632328184">"배터리 수명을 늘리기 위해 절전 모드가 다음과 같이 작동합니다.\n·어두운 테마를 사용 설정합니다.\n·백그라운드 활동, 일부 시각 효과 및 \'Hey Google\'과 같은 기타 기능을 사용 중지하거나 제한합니다."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"데이터 사용량을 줄이기 위해 데이터 절약 모드는 일부 앱이 백그라운드에서 데이터를 전송하거나 수신하지 못하도록 합니다. 현재 사용 중인 앱에서 데이터에 액세스할 수 있지만 빈도가 줄어듭니다. 예를 들면, 이미지를 탭하기 전에는 이미지가 표시되지 않습니다."</string>
-    <string name="data_saver_enable_title" msgid="7080620065745260137">"데이터 절약 모드를 사용할까요?"</string>
+    <string name="data_saver_enable_title" msgid="7080620065745260137">"데이터 절약 모드를 사용 설정하시겠습니까?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"사용 설정"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
       <item quantity="other">%1$d분 동안(<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>까지)</item>

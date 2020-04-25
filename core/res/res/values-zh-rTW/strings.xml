@@ -543,6 +543,7 @@
     <string name="biometric_not_recognized" msgid="5106687642694635888">"無法辨識"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"已取消驗證"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"未設定 PIN 碼、解鎖圖案或密碼"</string>
+    <string name="biometric_error_generic" msgid="6784371929985434439">"驗證時發生錯誤"</string>
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"僅偵測到部分指紋，請再試一次。"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"無法處理指紋，請再試一次。"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"指紋感應器有髒汙。請清潔感應器，然後再試一次。"</string>
@@ -799,7 +800,7 @@
     <string name="relationTypeAssistant" msgid="4057605157116589315">"助理"</string>
     <string name="relationTypeBrother" msgid="7141662427379247820">"兄弟"</string>
     <string name="relationTypeChild" msgid="9076258911292693601">"子女"</string>
-    <string name="relationTypeDomesticPartner" msgid="7825306887697559238">"同居人"</string>
+    <string name="relationTypeDomesticPartner" msgid="7825306887697559238">"同居伴侶"</string>
     <string name="relationTypeFather" msgid="3856225062864790596">"父親"</string>
     <string name="relationTypeFriend" msgid="3192092625893980574">"好友"</string>
     <string name="relationTypeManager" msgid="2272860813153171857">"經理"</string>
@@ -1143,7 +1144,7 @@
     <string name="whichSendToApplication" msgid="77101541959464018">"透過以下應用程式傳送："</string>
     <string name="whichSendToApplicationNamed" msgid="3385686512014670003">"透過「%1$s」傳送"</string>
     <string name="whichSendToApplicationLabel" msgid="3543240188816513303">"傳送"</string>
-    <string name="whichHomeApplication" msgid="8276350727038396616">"選取主螢幕應用程式"</string>
+    <string name="whichHomeApplication" msgid="8276350727038396616">"選取主畫面應用程式"</string>
     <string name="whichHomeApplicationNamed" msgid="5855990024847433794">"使用「%1$s」做為主螢幕"</string>
     <string name="whichHomeApplicationLabel" msgid="8907334282202933959">"擷取圖片"</string>
     <string name="whichImageCaptureApplication" msgid="2737413019463215284">"使用以下應用程式擷取圖片："</string>
@@ -1790,9 +1791,9 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"已由你的管理員更新"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"已由你的管理員刪除"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"確定"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"為了延長電池續航力，節約耗電量功能會執行以下動作：\n開啟深色主題\n關閉或限制背景活動、部分視覺效果和其他功能，例如「Hey Google」\n\n"<annotation id="url">"瞭解詳情"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"為了延長電池續航力，節約耗電量功能會執行以下動作：\n開啟深色主題\n關閉或限制背景活動、部分視覺效果和其他功能，例如「Hey Google」"</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"「數據節省模式」可防止部分應用程式在背景收發資料，以節省數據用量。你目前使用的某個應用程式可以存取資料，但存取頻率可能不如平時高。舉例來說，圖片可能不會自動顯示，在你輕觸後才會顯示。"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"為了延長電池續航力，節約耗電量功能會執行以下動作：\n開啟深色主題\n關閉或限制背景活動、部分視覺效果和其他功能，例如「Hey Google」啟動字詞\n\n"<annotation id="url">"瞭解詳情"</annotation></string>
+    <string name="battery_saver_description" msgid="7618492104632328184">"為了延長電池續航力，節約耗電量功能會執行以下動作：\n· 開啟深色主題\n· 關閉或限制背景活動、部分視覺效果和其他功能，例如「Hey Google」啟動字詞"</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"「數據節省模式」可防止部分應用程式在背景收發資料，以節省數據用量。你目前使用的應用程式可以存取資料，但存取頻率可能不如平時高。舉例來說，圖片可能不會自動顯示，在你輕觸後才會顯示。"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"要開啟數據節省模式嗎？"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"開啟"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">

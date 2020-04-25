@@ -1880,6 +1880,8 @@ public class SoundTrigger {
                     return STATUS_PERMISSION_DENIED;
                 case Status.DEAD_OBJECT:
                     return STATUS_DEAD_OBJECT;
+                case Status.INTERNAL_ERROR:
+                    return STATUS_ERROR;
             }
             return STATUS_ERROR;
         }

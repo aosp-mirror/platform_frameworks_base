@@ -296,7 +296,7 @@
     <string name="managed_profile_label" msgid="7316778766973512382">"కార్యాలయ ప్రొఫైల్‌కి మార్చు"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"కాంటాక్ట్‌లు"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"మీ పరిచయాలను యాక్సెస్ చేయడానికి"</string>
-    <string name="permgrouplab_location" msgid="1858277002233964394">"స్థానం"</string>
+    <string name="permgrouplab_location" msgid="1858277002233964394">"లొకేషన్"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"ఈ పరికర స్థానాన్ని యాక్సెస్ చేయడానికి"</string>
     <string name="permgrouplab_calendar" msgid="6426860926123033230">"Calendar"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"మీ క్యాలెండర్‌ను యాక్సెస్ చేయడానికి"</string>
@@ -543,6 +543,7 @@
     <string name="biometric_not_recognized" msgid="5106687642694635888">"గుర్తించలేదు"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"ప్రమాణీకరణ రద్దు చేయబడింది"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"పిన్, ఆకృతి లేదా పాస్‌వర్డ్‌ సెట్ చేయబడలేదు"</string>
+    <string name="biometric_error_generic" msgid="6784371929985434439">"ప్రామాణీకరిస్తున్నప్పుడు ఎర్రర్ ఏర్పడింది"</string>
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"పాక్షిక వేలిముద్ర గుర్తించబడింది. దయచేసి మళ్లీ ప్రయత్నించండి."</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"వేలిముద్రను ప్రాసెస్ చేయడం సాధ్యపడలేదు. దయచేసి మళ్లీ ప్రయత్నించండి."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"వేలిముద్ర సెన్సార్ మురికిగా ఉంది. దయచేసి శుభ్రపరిచి, మళ్లీ ప్రయత్నించండి."</string>
@@ -1560,7 +1561,7 @@
     <string name="media_route_button_content_description" msgid="2299223698196869956">"ప్రసారం చేయండి"</string>
     <string name="media_route_chooser_title" msgid="6646594924991269208">"పరికరానికి కనెక్ట్ చేయండి"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"స్క్రీన్‌ను పరికరానికి ప్రసారం చేయండి"</string>
-    <string name="media_route_chooser_searching" msgid="6119673534251329535">"పరికరాల కోసం వెతుకుతోంది…"</string>
+    <string name="media_route_chooser_searching" msgid="6119673534251329535">"డివైజ్‌ల కోసం వెతుకుతోంది…"</string>
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"సెట్టింగ్‌లు"</string>
     <string name="media_route_controller_disconnect" msgid="7362617572732576959">"డిస్‌కనెక్ట్ చేయి"</string>
     <string name="media_route_status_scanning" msgid="8045156315309594482">"స్కాన్ చేస్తోంది..."</string>
@@ -1790,9 +1791,9 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"మీ నిర్వాహకులు నవీకరించారు"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"మీ నిర్వాహకులు తొలగించారు"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"సరే"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"బ్యాటరీ జీవితకాలాన్ని పెంచడానికి, బ్యాటరీ సేవర్:\n ముదురు రంగు·థీమ్‌ను ఆన్ చేస్తుంది\n·నేపథ్య కార్యకలాపం, కొన్ని విజువల్ ఎఫెక్ట్స్ మరియు “Hey Google” వంటి ఇతర ఫీచర్‌లను ఆపివేస్తుంది లేదా పరిమితం చేస్తుంది\n\n"<annotation id="url">"మరింత తెలుసుకోండి"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"బ్యాటరీ జీవితకాలాన్ని పెంచడానికి, బ్యాటరీ సేవర్:\n ముదురు రంగు·థీమ్‌ను ఆన్ చేస్తుంది\n·నేపథ్య కార్యకలాపం, కొన్ని విజువల్ ఎఫెక్ట్స్ మరియు “Hey Google” వంటి ఇతర ఫీచర్‌లను ఆపివేస్తుంది లేదా పరిమితం చేస్తుంది"</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"డేటా వినియోగాన్ని తగ్గించడంలో డేటా సేవర్ సహాయకరంగా ఉంటుంది. బ్యాక్‌గ్రౌండ్‌లో కొన్ని యాప్‌లు డేటాను పంపకుండా లేదా స్వీకరించకుండా నిరోధిస్తుంది. మీరు ప్రస్తుతం ఉపయోగిస్తోన్న యాప్‌ డేటాను యాక్సెస్ చేయగలదు. కానీ అలా అరుదుగా చేయవచ్చు. ఉదాహరణకు, మీరు చిత్రాలను నొక్కే వరకు అవి ప్రదర్శించబడవు."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"బ్యాటరీ జీవితకాలాన్ని పెంచడానికి, బ్యాటరీ సేవర్ వీటిని చేస్తుంది:\n·ముదురు రంగు థీమ్‌ను ఆన్ చేస్తుంది\n·బ్యాక్‌గ్రౌండ్ కార్యకలాపం, కొన్ని విజువల్ ఎఫెక్ట్స్‌లతో పాటు “Ok Google” వంటి ఇతర ఫీచర్‌లను ఆపివేస్తుంది లేదా పరిమితం చేస్తుంది\n\n"<annotation id="url">"మరింత తెలుసుకోండి"</annotation></string>
+    <string name="battery_saver_description" msgid="7618492104632328184">"బ్యాటరీ జీవితకాలాన్ని పెంచడానికి, బ్యాటరీ సేవర్ వీటిని చేస్తుంది:\n·ముదురు రంగు థీమ్‌ను ఆన్ చేస్తుంది\n·బ్యాక్‌గ్రౌండ్ కార్యకలాపం, కొన్ని విజువల్ ఎఫెక్ట్స్‌లతో పాటు “Ok Google” వంటి ఇతర ఫీచర్‌లను ఆపివేస్తుంది లేదా పరిమితం చేస్తుంది"</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"డేటా వినియోగాన్ని తగ్గించడంలో డేటా సేవర్ సహాయకరంగా ఉంటుంది. బ్యాక్‌గ్రౌండ్‌లో కొన్ని యాప్‌లు డేటాను పంపకుండా లేదా స్వీకరించకుండా నిరోధిస్తుంది. మీరు ప్రస్తుతం ఉపయోగిస్తోన్న యాప్‌, డేటాను యాక్సెస్ చేయగలదు. కానీ త‌క్కువ సార్లు మాత్ర‌మే అలా చేయవచ్చు. ఉదాహరణకు, మీరు నొక్కే వరకు ఫోటోలు ప్రదర్శించబడవు."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"డేటా సేవర్‌ను ఆన్ చేయాలా?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"ఆన్ చేయి"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
@@ -2027,7 +2028,7 @@
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> ఫైల్‌లు</item>
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g> ఫైల్</item>
     </plurals>
-    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"షేర్ చేయకూడని వ్యక్తులు"</string>
+    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"షేర్ చేయడానికి సిఫార్సు చేయబడని వ్యక్తులు"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"యాప్‌ల జాబితా"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"ఈ యాప్‌కు రికార్డ్ చేసే అనుమతి మంజూరు కాలేదు, అయినా ఈ USB పరికరం ద్వారా ఆడియోను క్యాప్చర్ చేయగలదు."</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"హోమ్"</string>

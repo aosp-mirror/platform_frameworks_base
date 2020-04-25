@@ -546,6 +546,7 @@
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Nije prepoznato"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"Potvrda identiteta je otkazana"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"Niste podesili ni PIN, ni šablon, ni lozinku"</string>
+    <string name="biometric_error_generic" msgid="6784371929985434439">"Greška pri potvrdi identiteta"</string>
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"Otkriven je delimični otisak prsta. Probajte ponovo."</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Nije uspela obrada otiska prsta. Probajte ponovo."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"Senzor za otiske prstiju je prljav. Očistite ga i pokušajte ponovo."</string>
@@ -1816,7 +1817,7 @@
     <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Radi dužeg trajanja baterije, ušteda baterije:\n·uključuje tamnu temu\n·isključuje ili ograničava aktivnosti u pozadini, neke vizuelne efekte i druge funkcije, na primer, „Ok Google“\n\n"<annotation id="url">"Saznajte više"</annotation></string>
     <string name="battery_saver_description" msgid="7618492104632328184">"Radi dužeg trajanja baterije, ušteda baterije:\n·uključuje tamnu temu\n·isključuje ili ograničava aktivnosti u pozadini, neke vizuelne efekte i druge funkcije, na primer, „Ok Google“"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Da bi se smanjila potrošnja podataka, Ušteda podataka sprečava neke aplikacije da šalju ili primaju podatke u pozadini. Aplikacija koju trenutno koristite može da pristupa podacima, ali će to činiti ređe. Na primer, slike se neće prikazivati dok ih ne dodirnete."</string>
-    <string name="data_saver_enable_title" msgid="7080620065745260137">"Uključiti Uštedu podataka?"</string>
+    <string name="data_saver_enable_title" msgid="7080620065745260137">"Želite da uključite Uštedu podataka?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Uključi"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
       <item quantity="one">%1$d minut (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
@@ -2080,7 +2081,7 @@
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"Konverzacija"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"Grupna konverzacija"</string>
     <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>
-    <string name="resolver_personal_tab" msgid="2051260504014442073">"Lični"</string>
+    <string name="resolver_personal_tab" msgid="2051260504014442073">"Lično"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Poslovni"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Lični prikaz"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Prikaz za posao"</string>

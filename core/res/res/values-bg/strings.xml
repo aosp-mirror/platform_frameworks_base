@@ -543,6 +543,7 @@
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Не е разпознато"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"Удостоверяването бе анулирано"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"Няма зададен ПИН код, фигура или парола"</string>
+    <string name="biometric_error_generic" msgid="6784371929985434439">"Грешка при удостоверяването"</string>
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"Открит е частичен отпечатък. Моля, опитайте отново."</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Отпечатъкът не бе обработен. Моля, опитайте отново."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"Сензорът за отпечатъци е мръсен. Моля, почистете го и опитайте отново."</string>
@@ -1790,10 +1791,10 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Актуализирано от администратора ви"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Изтрито от администратора ви"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ОК"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"С цел удължаване на живота на батерията режимът за запазването й:\n·включва тъмната тема;\n·изключва или ограничава активността на заден план, някои визуални ефекти и други функции, като например „Ok Google“.\n\n"<annotation id="url">"Научете повече"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"С цел удължаване на живота на батерията режимът за запазването й:\n·включва тъмната тема;\n·изключва или ограничава активността на заден план, някои визуални ефекти и други функции, като например „Ok Google“."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"С цел удължаване на живота на батерията режимът за запазването ѝ:\n·включва тъмната тема;\n·изключва или ограничава активността на заден план, някои визуални ефекти и други функции, като например „Ok Google“.\n\n"<annotation id="url">"Научете повече"</annotation></string>
+    <string name="battery_saver_description" msgid="7618492104632328184">"С цел удължаване на живота на батерията режимът за запазването ѝ:\n·включва тъмната тема;\n·изключва или ограничава активността на заден план, някои визуални ефекти и други функции, като например „Ok Google“."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"С цел намаляване на преноса на данни функцията за икономия на данни не позволява на някои приложения да изпращат или получават данни на заден план. Понастоящем използвано от вас приложение може да използва данни, но по-рядко. Това например може да означава, че изображенията не се показват, докато не ги докоснете."</string>
-    <string name="data_saver_enable_title" msgid="7080620065745260137">"Ще вкл. ли Икономия на данни?"</string>
+    <string name="data_saver_enable_title" msgid="7080620065745260137">"Ще вкл. ли „Икономия на данни“?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Включване"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
       <item quantity="other">За %1$d минути (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>

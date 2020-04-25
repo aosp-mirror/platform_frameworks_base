@@ -549,6 +549,7 @@
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Nie rozpoznano"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"Anulowano uwierzytelnianie"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"Nie ustawiono kodu PIN, wzoru ani hasła"</string>
+    <string name="biometric_error_generic" msgid="6784371929985434439">"Podczas uwierzytelniania wystąpił błąd"</string>
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"Odcisk palca został odczytany tylko częściowo. Spróbuj ponownie."</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Nie udało się przetworzyć odcisku palca. Spróbuj ponownie."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"Czytnik linii papilarnych jest zabrudzony. Wyczyść go i spróbuj ponownie."</string>
@@ -1837,7 +1838,7 @@
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Usunięty przez administratora"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
     <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Aby wydłużyć czas pracy na baterii, Oszczędzanie baterii:\n włącza tryb ciemny, \nwyłącza lub ogranicza aktywność w tle, niektóre efekty wizualne oraz inne funkcje, np. „OK Google”.\n\n"<annotation id="url">"Więcej informacji"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"Aby wydłużyć czas pracy na baterii, Oszczędzanie baterii:\n włącza tryb ciemny,\n wyłącza lub ogranicza aktywność w tle, niektóre efekty wizualne oraz inne funkcje, np. „OK Google”."</string>
+    <string name="battery_saver_description" msgid="7618492104632328184">"Aby wydłużyć czas pracy na baterii, Oszczędzanie baterii:\n· włącza tryb ciemny,\n· wyłącza lub ogranicza aktywność w tle, niektóre efekty wizualne oraz inne funkcje, np. „OK Google”."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Oszczędzanie danych uniemożliwia niektórym aplikacjom wysyłanie i odbieranie danych w tle, zmniejszając w ten sposób ich użycie. Aplikacja, z której w tej chwili korzystasz, może uzyskiwać dostęp do danych, ale rzadziej. Może to powodować, że obrazy będą się wyświetlać dopiero po kliknięciu."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Włączyć Oszczędzanie danych?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Włącz"</string>

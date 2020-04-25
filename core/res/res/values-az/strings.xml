@@ -543,6 +543,7 @@
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Tanınmır"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"Doğrulama ləğv edildi"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"Pin, nümunə və ya parol ayarlanmayıb"</string>
+    <string name="biometric_error_generic" msgid="6784371929985434439">"Doğrulama zamanı xəta baş verdi"</string>
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"Barmaq izi yarımçıq müəyyən olundu. Lütfən, yenidən cəhd edin."</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Barmaq izi tanınmadı. Lütfən, yenidən cəhd edin."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"Barmaq izi sensoru çirklidir. Lütfən, təmizləyin və yenidən cəhd edin."</string>
@@ -1316,7 +1317,7 @@
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"Test Rejimi aktivdir"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"Test Rejimini deaktiv etmək üçün fabrika ayarlarına sıfırlayın."</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"Ardıcıl konsol aktiv edildi"</string>
-    <string name="console_running_notification_message" msgid="7892751888125174039">"Performansa təsir edir. Deaktiv etmək üçün yükləyicini yoxlayın."</string>
+    <string name="console_running_notification_message" msgid="7892751888125174039">"Performans təsirlənir. Söndürməkçün yükləyicini yoxlayın."</string>
     <string name="usb_contaminant_detected_title" msgid="4359048603069159678">"USB portuna maye sızıb və ya qırılıb"</string>
     <string name="usb_contaminant_detected_message" msgid="7346100585390795743">"USB portu avtomatik deaktiv edildi. Ətraflı məlumat üçün klikləyin."</string>
     <string name="usb_contaminant_not_detected_title" msgid="2651167729563264053">"USB portundan istifadə etmək üçün OK"</string>
@@ -1792,7 +1793,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
     <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Batareyanın ömrünü artırmaq üçün Enerjiyə Qənaət xüsusiyyəti:\n·Qaranlıq temanı aktiv edir\n·Arxa fondakı fəaliyyəti, bəzi vizual effektləri və “Hey Google” kimi digər xüsusiyyətləri deaktiv edir və ya məhdudlaşdırır\n\n"<annotation id="url">"Ətraflı məlumat"</annotation></string>
     <string name="battery_saver_description" msgid="7618492104632328184">"Batareyanın ömrünü artırmaq üçün Enerjiyə Qənaət xüsusiyyəti:\n·Qaranlıq temanı aktiv edir\n·Arxa fondakı fəaliyyəti, bəzi vizual effektləri və “Hey Google” kimi digər xüsusiyyətləri deaktiv edir və ya məhdudlaşdırır"</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"Data istifadəsini azalatmaq üçün, Data Qanaəti bəzi tətbiqlərin arxafonda data göndərməsini və qəbulunun qarşısını alır. Hazırda istifadə etdiyiniz tətbiq dataya daxil ola bilər, lakin bunu tez-tez edə bilməz. Bu o deməkdir ki, məsələn, Siz üzərinə tıklamadıqca o şəkillər göstərilməyəcək."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"Data istifadəsini azalatmaq üçün, Data Qanaəti bəzi tətbiqlərin arxafonda data göndərməsinin və qəbulunun qarşısını alır. Hazırda işlətdiyiniz tətbiq dataya daxil ola bilər, ancaq bunu tez-tez edə bilməz. Bu o deməkdir ki, məsələn, Siz üzərinə tıklamadıqca o şəkillər göstərilməyəcək."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Data Qənaəti aktiv edilsin?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Aktivləşdirin"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
@@ -1902,7 +1903,7 @@
     <string name="pin_specific_target" msgid="7824671240625957415">"İşarələyin: <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="unpin_target" msgid="3963318576590204447">"Çıxarın"</string>
     <string name="unpin_specific_target" msgid="3859828252160908146">"İşarələməyin: <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="app_info" msgid="6113278084877079851">"Tətbiq məlumatı"</string>
+    <string name="app_info" msgid="6113278084877079851">"Tətbiq infosu"</string>
     <string name="negative_duration" msgid="1938335096972945232">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="6577581216125805905">"Demo başlayır…"</string>
     <string name="demo_restarting_message" msgid="1160053183701746766">"Cihaz sıfırlanır…"</string>
@@ -2027,7 +2028,7 @@
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> fayl</item>
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g> fayl</item>
     </plurals>
-    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Paylaşmaq üçün tövsiyə edilən biri yoxdur"</string>
+    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Paylaşmaq üçün tövsiyə edilən bir kimsə yoxdur"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"Tətbiq siyahısı"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Bu tətbiqə yazmaq icazəsi verilməyib, lakin, bu USB vasitəsilə səs yaza bilər."</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"Əsas səhifə"</string>

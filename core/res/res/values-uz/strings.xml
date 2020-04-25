@@ -543,6 +543,7 @@
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Aniqlanmadi"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"Autentifikatsiya bekor qilindi"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"PIN kod, grafik kalit yoki parol sozlanmagan"</string>
+    <string name="biometric_error_generic" msgid="6784371929985434439">"Autentifikatsiya amalga oshmadi"</string>
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"Barmoq izi qisman aniqlandi. Qayta urinib ko‘ring."</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Barmoq izi aniqlanmadi. Qaytadan urining."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"Barmoq izi skanerini tozalab, keyin qaytadan urining."</string>
@@ -1248,7 +1249,7 @@
     <string name="private_dns_broken_detailed" msgid="3709388271074611847">"Xususiy DNS server ishlamayapti"</string>
     <string name="network_partial_connectivity" msgid="4791024923851432291">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> nomli tarmoqda aloqa cheklangan"</string>
     <string name="network_partial_connectivity_detailed" msgid="5741329444564575840">"Baribir ulash uchun bosing"</string>
-    <string name="network_switch_metered" msgid="1531869544142283384">"<xliff:g id="NETWORK_TYPE">%1$s</xliff:g> tarmog‘iga ulanildi"</string>
+    <string name="network_switch_metered" msgid="1531869544142283384">"Yangi ulanish: <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="1358296010128405906">"Agar <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> tarmoqda internet uzilsa, qurilma <xliff:g id="NEW_NETWORK">%1$s</xliff:g>ga ulanadi. Sarflangan trafik uchun haq olinishi mumkin."</string>
     <string name="network_switch_metered_toast" msgid="501662047275723743">"<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> tarmog‘idan <xliff:g id="NEW_NETWORK">%2$s</xliff:g> tarmog‘iga o‘tildi"</string>
   <string-array name="network_switch_type_name">
@@ -1465,7 +1466,7 @@
     <string name="sync_do_nothing" msgid="4528734662446469646">"Hozir hech nima qilinmasin"</string>
     <string name="choose_account_label" msgid="5557833752759831548">"Hisobni tanlang"</string>
     <string name="add_account_label" msgid="4067610644298737417">"Hisob kiritish"</string>
-    <string name="add_account_button_label" msgid="322390749416414097">"Hisob qo‘shish"</string>
+    <string name="add_account_button_label" msgid="322390749416414097">"Hisob kiritish"</string>
     <string name="number_picker_increment_button" msgid="7621013714795186298">"Ko‘paytirish"</string>
     <string name="number_picker_decrement_button" msgid="5116948444762708204">"Kamaytirish"</string>
     <string name="number_picker_increment_scroll_mode" msgid="8403893549806805985">"<xliff:g id="VALUE">%s</xliff:g> raqamini bosib turing."</string>
@@ -1655,8 +1656,8 @@
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Maxsus imkoniyatlar ishorasi bilan ishga tushadigan funksiyani tanlang (ikkita barmoq bilan ekranning pastidan tepaga surib tortilganda):"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"Maxsus imkoniyatlar ishorasi bilan ishga tushadigan funksiyani tanlang (uchta barmoq bilan ekranning pastidan tepaga surib tortilganda):"</string>
     <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"Funksiyalarni almashtirish uchun maxsus imkoniyatlar tugmasini bosib turing."</string>
-    <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"Funksiyalarni almashtirish uchun ikkita barmoq bilan tepaga suring va bosib turing."</string>
-    <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"Funksiyalarni almashtirish uchun uchta barmoq bilan tepaga suring va bosib turing."</string>
+    <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"Funksiyalarni almashtirish uchun ikkita barmoq bilan tepaga suring va ushlab turing."</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"Funksiyalarni almashtirish uchun uchta barmoq bilan tepaga suring va ushlab turing."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Kattalashtirish"</string>
     <string name="user_switched" msgid="7249833311585228097">"Joriy foydalanuvchi <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"Quyidagi foydalanuvchiga o‘tilmoqda: <xliff:g id="NAME">%1$s</xliff:g>…"</string>

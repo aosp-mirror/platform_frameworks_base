@@ -243,16 +243,16 @@
     <string name="global_action_emergency" msgid="1387617624177105088">"اضطراری"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"گزارش اشکال"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"پایان جلسه"</string>
-    <string name="global_action_screenshot" msgid="2610053466156478564">"عکس صفحه‌نمایش"</string>
+    <string name="global_action_screenshot" msgid="2610053466156478564">"نماگرفت"</string>
     <string name="bugreport_title" msgid="8549990811777373050">"گزارش اشکال"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"این گزارش اطلاعات مربوط به وضعیت دستگاه کنونی شما را جمع‌آوری می‌کند تا به‌صورت پیام ایمیل ارسال شود. از زمان شروع گزارش اشکال تا آماده شدن برای ارسال اندکی زمان می‌برد؛ لطفاً کمی صبر کنید."</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"گزارش تعاملی"</string>
     <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"در بیشتر شرایط از این گزینه استفاده کنید. به شما امکان ردیابی پیشرفت گزارش و وارد کردن جزئیات بیشتری درباره مشکل را می‌دهد. ممکن است برخی از بخش‌هایی را که کمتر استفاده شده و باعث افزایش طول زمان گزارش می‌شود حذف کند."</string>
     <string name="bugreport_option_full_title" msgid="7681035745950045690">"گزارش کامل"</string>
-    <string name="bugreport_option_full_summary" msgid="1975130009258435885">"از این گزینه برای به‌حداقل رساندن تداخل سیستم هنگام پاسخ‌گو نبودن یا کند بودن دستگاه یا هنگام نیازداشتن به همه بخش‌های گزارش استفاده کنید. عکس صفحه‌نمایش دیگری نمی‌گیرد یا امکان وارد کردن جزئیات بیشتری به شما نمی‌دهد."</string>
+    <string name="bugreport_option_full_summary" msgid="1975130009258435885">"از این گزینه برای به‌حداقل رساندن تداخل سیستم هنگام پاسخ‌گو نبودن یا کند بودن دستگاه یا هنگام نیازداشتن به همه بخش‌های گزارش استفاده کنید. نماگرفت دیگری نمی‌گیرد یا امکان وارد کردن جزئیات بیشتری به شما نمی‌دهد."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="3906120379260059206">
-      <item quantity="one">تا <xliff:g id="NUMBER_1">%d</xliff:g> ثانیه دیگر عکس صفحه‌نمایش برای گزارش اشکال گرفته می‌شود.</item>
-      <item quantity="other">تا <xliff:g id="NUMBER_1">%d</xliff:g> ثانیه دیگر عکس صفحه‌نمایش برای گزارش اشکال گرفته می‌شود.</item>
+      <item quantity="one">تا <xliff:g id="NUMBER_1">%d</xliff:g> ثانیه دیگر نماگرفت برای گزارش اشکال گرفته می‌شود.</item>
+      <item quantity="other">تا <xliff:g id="NUMBER_1">%d</xliff:g> ثانیه دیگر نماگرفت برای گزارش اشکال گرفته می‌شود.</item>
     </plurals>
     <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"نماگرفت با گزارش اشکال گرفته شد"</string>
     <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"نماگرفت با گزارش اشکال گرفته نشد"</string>
@@ -543,6 +543,7 @@
     <string name="biometric_not_recognized" msgid="5106687642694635888">"شناسایی نشد"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"احراز هویت لغو شد"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"پین، الگو یا گذرواژه‌ای تنظیم نشده است"</string>
+    <string name="biometric_error_generic" msgid="6784371929985434439">"خطا هنگام احراز هویت"</string>
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"بخشی از اثر انگشت شناسایی شد. لطفاً دوباره امتحان کنید."</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"اثرانگشت پردازش نشد. لطفاً دوباره امتحان کنید."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"حسگر اثر انگشت کثیف است. لطفاً آن را تمیز کنید و دوباره امتحان نمایید."</string>
@@ -1557,10 +1558,10 @@
     <string name="default_audio_route_category_name" msgid="5241740395748134483">"سیستم"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="4214648773120426288">"بلوتوث‌های صوتی"</string>
     <string name="wireless_display_route_description" msgid="8297563323032966831">"صفحه نمایش بی‌سیم"</string>
-    <string name="media_route_button_content_description" msgid="2299223698196869956">"فرستادن"</string>
+    <string name="media_route_button_content_description" msgid="2299223698196869956">"ارسال محتوا"</string>
     <string name="media_route_chooser_title" msgid="6646594924991269208">"برقراری ارتباط با دستگاه"</string>
-    <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"فرستادن صفحه نمایش به دستگاه"</string>
-    <string name="media_route_chooser_searching" msgid="6119673534251329535">"در حال جستجو برای دستگاه‌ها..."</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"فرستادن محتوای صفحه به دستگاه"</string>
+    <string name="media_route_chooser_searching" msgid="6119673534251329535">"درحال جستجوی دستگاه‌ها…"</string>
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"تنظیمات"</string>
     <string name="media_route_controller_disconnect" msgid="7362617572732576959">"قطع ارتباط"</string>
     <string name="media_route_status_scanning" msgid="8045156315309594482">"در حال اسکن کردن…"</string>
@@ -1792,8 +1793,8 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"تأیید"</string>
     <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"‏برای افزایش عمر باتری، «بهینه‌سازی باتری»:\n «طرح زمینه تیره» را روشن می‌کند\n فعالیت پس‌زمینه، برخی جلوه‌های بصری، و دیگر ویژگی‌ها مانند «Ok Google» را خاموش یا محدود می‌کند\n\n"<annotation id="url">"بیشتر بدانید"</annotation></string>
     <string name="battery_saver_description" msgid="7618492104632328184">"‏برای افزایش عمر باتری، «بهینه‌سازی باتری»:\n «طرح زمینه تیره» را روشن می‌کند\n فعالیت پس‌زمینه، برخی جلوه‌های بصری، و دیگر ویژگی‌ها مانند «Ok Google» را خاموش یا محدود می‌کند"</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"برای کمک به کاهش مصرف داده، «صرفه‌جویی داده» از ارسال و دریافت داده در پس‌زمینه ازطرف بعضی برنامه‌ها جلوگیری می‌کند. برنامه‌ای که درحال‌حاضر استفاده می‌کنید می‌تواند به داده‌ها دسترسی داشته باشد اما دفعات دسترسی آن محدود است.این یعنی، برای مثال، تصاویر تا زمانی که روی آن‌ها ضربه نزنید نشان داده نمی‌شوند."</string>
-    <string name="data_saver_enable_title" msgid="7080620065745260137">"صرفه‌جویی داده روشن شود؟"</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"«صرفه‌جویی داده»، برای کمک به کاهش مصرف داده، از ارسال و دریافت داده در پس‌زمینه ازطرف بعضی برنامه‌ها جلوگیری می‌کند. برنامه‌ای که درحال‌حاضر استفاده می‌کنید می‌تواند به داده‌ها دسترسی داشته باشد اما دفعات دسترسی آن محدود است.این یعنی، برای مثال، تصاویر تازمانی‌که روی آن‌ها ضربه نزنید نشان داده نمی‌شوند."</string>
+    <string name="data_saver_enable_title" msgid="7080620065745260137">"«صرفه‌جویی داده» روشن شود؟"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"روشن کردن"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
       <item quantity="one">‏به مدت %1$d دقیقه (تا <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
@@ -2038,7 +2039,7 @@
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"کادر گفتگوی روشن/خاموش"</string>
     <string name="accessibility_system_action_toggle_split_screen_label" msgid="6626177163849387748">"تغییر وضعیت صفحهٔ دونیمه"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"صفحه قفل"</string>
-    <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"عکس صفحه‌نمایش"</string>
+    <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"نماگرفت"</string>
     <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"منوی دسترس‌پذیری"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"نوار شرح <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> در سطل «محدودشده» قرار گرفت"</string>

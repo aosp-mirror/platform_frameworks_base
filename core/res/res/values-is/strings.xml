@@ -543,6 +543,7 @@
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Þekktist ekki"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"Hætt við auðkenningu"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"Ekkert PIN-númer, mynstur eða aðgangsorð stillt"</string>
+    <string name="biometric_error_generic" msgid="6784371929985434439">"Villa við auðkenningu"</string>
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"Hluti fingrafars greindist. Reyndu aftur."</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Ekki var hægt að vinna úr fingrafarinu. Reyndu aftur."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"Fingrafaraskynjarinn er óhreinn. Hreinsaðu hann og reyndu aftur."</string>
@@ -1328,7 +1329,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"DEILA"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"HAFNA"</string>
     <string name="select_input_method" msgid="3971267998568587025">"Veldu innsláttaraðferð"</string>
-    <string name="show_ime" msgid="6406112007347443383">"Haltu því á skjánum meðan vélbúnaðarlyklaborðið er virkt"</string>
+    <string name="show_ime" msgid="6406112007347443383">"Halda því á skjánum meðan vélbúnaðarlyklaborðið er virkt"</string>
     <string name="hardware" msgid="1800597768237606953">"Sýna sýndarlyklaborð"</string>
     <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"Stilla vélbúnaðarlyklaborð"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Ýttu til að velja tungumál og útlit"</string>
@@ -1792,7 +1793,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Í lagi"</string>
     <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Til að auka rafhlöðuendingu gerir rafhlöðusparnaður eftirfarandi:\n·Kveikir á dökku þema\n·Slekkur á eða takmarkar bakgrunnsvirkni, tilteknar myndbrellur og aðra eiginleika eins og „Ok Google“.\n\n"<annotation id="url">"Frekari upplýsingar"</annotation></string>
     <string name="battery_saver_description" msgid="7618492104632328184">"Til að auka rafhlöðuendingu gerir rafhlöðusparnaður eftirfarandi:\n·Kveikir á dökku þema\n·Slekkur á eða takmarkar bakgrunnsvirkni, tilteknar myndbrellur og aðra eiginleika eins og „Ok Google“."</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"Gagnasparnaður getur hjálpað til við að draga úr gagnanotkun með því að hindra forrit í að senda eða sækja gögn í bakgrunni. Forrit sem er í notkun getur náð í gögn, en gerir það kannski sjaldnar. Niðurstaðan gæti verið, svo dæmi sé tekið, að myndir séu ekki birtar fyrr en þú ýtir á þær."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"Gagnasparnaður getur hjálpað til við að draga úr gagnanotkun með því að hindra forrit í að senda eða sækja gögn í bakgrunni. Forrit sem er í notkun getur náð í gögn, en gerir það kannski sjaldnar. Niðurstaðan getur verið, svo dæmi sé tekið, að myndir eru ekki birtar fyrr en þú ýtir á þær."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Kveikja á gagnasparnaði?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Kveikja"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">

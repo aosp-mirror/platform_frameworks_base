@@ -20,4 +20,10 @@
     <string name="hvac_min_text" msgid="8167124789068494624">"អប្បបរមា"</string>
     <string name="hvac_max_text" msgid="3669693372074755551">"អតិបរិមា"</string>
     <string name="voice_recognition_toast" msgid="1149934534584052842">"ឥឡូវនេះ ការសម្គាល់សំឡេងត្រូវបានចាត់ចែងដោយឧបករណ៍ដែលបានភ្ជាប់ប៊្លូធូស"</string>
+    <string name="car_guest" msgid="318393171202663722">"ភ្ញៀវ"</string>
+    <string name="start_guest_session" msgid="497784785761754874">"ភ្ញៀវ"</string>
+    <string name="car_add_user" msgid="4067337059622483269">"បញ្ចូល​អ្នក​ប្រើប្រាស់"</string>
+    <string name="car_new_user" msgid="6637442369728092473">"អ្នក​ប្រើប្រាស់​ថ្មី"</string>
+    <string name="user_add_user_message_setup" msgid="1035578846007352323">"នៅពេលដែល​អ្នក​បញ្ចូល​អ្នក​ប្រើប្រាស់​ថ្មី បុគ្គល​នោះ​ត្រូវតែ​រៀបចំ​ទំហំ​ផ្ទុក​របស់គេ។"</string>
+    <string name="user_add_user_message_update" msgid="7061671307004867811">"អ្នកប្រើប្រាស់​ណាក៏​អាច​ដំឡើងកំណែ​កម្មវិធី​សម្រាប់​អ្នកប្រើប្រាស់ទាំងអស់​ផ្សេងទៀត​បានដែរ។"</string>
 </resources>

@@ -81,6 +81,15 @@ public abstract class ActivityManagerInternal {
             String processName, String abiOverride, int uid, Runnable crashHandler);
 
     /**
+     * Called when a user has been deleted. This can happen during normal device usage
+     * or just at startup, when partially removed users are purged. Any state persisted by the
+     * ActivityManager should be purged now.
+     *
+     * @param userId The user being cleaned up.
+     */
+    public abstract void onUserRemoved(@UserIdInt int userId);
+
+    /**
      * Kill foreground apps from the specified user.
      */
     public abstract void killForegroundAppsForUser(@UserIdInt int userId);

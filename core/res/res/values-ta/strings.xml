@@ -543,6 +543,7 @@
     <string name="biometric_not_recognized" msgid="5106687642694635888">"அடையாளங்காணபடவில்லை"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"அங்கீகரிப்பு ரத்தானது"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"பின்னோ, பேட்டர்னோ, கடவுச்சொல்லோ அமைக்கப்படவில்லை"</string>
+    <string name="biometric_error_generic" msgid="6784371929985434439">"அங்கீகரிப்பதில் பிழை"</string>
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"கைரேகையை ஓரளவுதான் கண்டறிய முடிந்தது. மீண்டும் முயலவும்."</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"கைரேகையைச் செயலாக்க முடியவில்லை. மீண்டும் முயலவும்."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"கைரேகை சென்சாரில் தூசி உள்ளது. சுத்தம் செய்து, முயலவும்."</string>
@@ -1646,7 +1647,7 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"முடிந்தது"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"ஷார்ட்கட்டை முடக்கு"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"ஷார்ட்கட்டைப் பயன்படுத்து"</string>
-    <string name="color_inversion_feature_name" msgid="326050048927789012">"வண்ணத்தை நேர் எதிராக மாற்றுதல்"</string>
+    <string name="color_inversion_feature_name" msgid="326050048927789012">"கலர் இன்வெர்ஷன்"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"வண்ணத் திருத்தம்"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"ஒலியளவுக்கான விசைகளைப் பிடித்திருந்தீர்கள். <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ஆன் செய்யப்பட்டது."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"ஒலியளவுக்கான விசைகளைப் பிடித்திருந்தீர்கள். <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ஆஃப் செய்யப்பட்டது."</string>
@@ -2045,8 +2046,7 @@
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"உரையாடல்"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"குழு உரையாடல்"</string>
-    <!-- no translation found for unread_convo_overflow (920517615597353833) -->
-    <skip />
+    <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"தனிப்பட்ட சுயவிவரம்"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"பணிச் சுயவிவரம்"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"தனிப்பட்ட காட்சி"</string>

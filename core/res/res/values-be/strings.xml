@@ -20,9 +20,9 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="byteShort" msgid="202579285008794431">"б"</string>
+    <string name="byteShort" msgid="202579285008794431">"Б"</string>
     <string name="kilobyteShort" msgid="2214285521564195803">"КБ"</string>
-    <string name="megabyteShort" msgid="6649361267635823443">"Мб"</string>
+    <string name="megabyteShort" msgid="6649361267635823443">"МБ"</string>
     <string name="gigabyteShort" msgid="7515809460261287991">"ГБ"</string>
     <string name="terabyteShort" msgid="1822367128583886496">"Тб"</string>
     <string name="petabyteShort" msgid="5651571254228534832">"Пб"</string>
@@ -549,6 +549,7 @@
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Не распазнана"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"Аўтэнтыфікацыя скасавана"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"Не заданы PIN-код, узор разблакіроўкі або пароль"</string>
+    <string name="biometric_error_generic" msgid="6784371929985434439">"Памылка аўтэнтыфікацыі"</string>
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"Не ўвесь адбітак пальца адсканіраваны. Паспрабуйце яшчэ раз."</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Не атрымалася апрацаваць адбітак пальца. Паспрабуйце яшчэ раз."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"Датчык адбіткаў пальцаў брудны. Ачысціце яго і паспрабуйце яшчэ раз."</string>
@@ -1604,7 +1605,7 @@
     <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"Трансліраваць экран на прыладу"</string>
     <string name="media_route_chooser_searching" msgid="6119673534251329535">"Пошук прылад..."</string>
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"Налады"</string>
-    <string name="media_route_controller_disconnect" msgid="7362617572732576959">"Адлучыць"</string>
+    <string name="media_route_controller_disconnect" msgid="7362617572732576959">"Адключыць"</string>
     <string name="media_route_status_scanning" msgid="8045156315309594482">"Сканiраванне..."</string>
     <string name="media_route_status_connecting" msgid="5845597961412010540">"Падключэнне..."</string>
     <string name="media_route_status_available" msgid="1477537663492007608">"Даступна"</string>
@@ -1838,7 +1839,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ОК"</string>
     <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Каб павялічыць тэрмін службы акумулятара, рэжым эканоміі зараду:\n·уключае цёмную тэму;\n·выключае ці абмяжоўвае дзеянні ў фонавым рэжыме, некаторыя візуальныя эфекты і іншыя функцыі, напрыклад \"Ok Google\"\n\n"<annotation id="url">"Даведацца больш"</annotation></string>
     <string name="battery_saver_description" msgid="7618492104632328184">"Каб павялічыць тэрмін службы акумулятара, рэжым эканоміі зараду:\n·уключае цёмную тэму;\n·выключае ці абмяжоўвае дзеянні ў фонавым рэжыме, некаторыя візуальныя эфекты і іншыя функцыі, напрыклад \"Ok Google\""</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"У рэжыме Эканомія трафіка фонавая перадача для некаторых праграмам адключана. Праграма, якую вы зараз выкарыстоўваеце, можа атрымліваць доступ да даных, але радзей, чым звычайна. Напрыклад, відарысы могуць не загружацца, пакуль вы не націсніце на іх."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"У рэжыме \"Эканомія трафіка\" фонавая перадача для некаторых праграмам адключана. Праграма, якую вы зараз выкарыстоўваеце, можа атрымліваць доступ да даных, але радзей, чым звычайна. Напрыклад, відарысы могуць не загружацца, пакуль вы не націсніце на іх."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Уключыць Эканомію трафіка?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Уключыць"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
