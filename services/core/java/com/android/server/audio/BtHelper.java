@@ -135,7 +135,7 @@ public class BtHelper {
     /*package*/ static class BluetoothA2dpDeviceInfo {
         private final @NonNull BluetoothDevice mBtDevice;
         private final int mVolume;
-        private final int mCodec;
+        private final @AudioSystem.AudioFormatNativeEnumForBtCodec int mCodec;
 
         BluetoothA2dpDeviceInfo(@NonNull BluetoothDevice btDevice) {
             this(btDevice, -1, AudioSystem.AUDIO_FORMAT_DEFAULT);
@@ -155,15 +155,26 @@ public class BtHelper {
             return mVolume;
         }
 
-        public int getCodec() {
+        public @AudioSystem.AudioFormatNativeEnumForBtCodec int getCodec() {
             return mCodec;
         }
 
         // redefine equality op so we can match messages intended for this device
         @Override
         public boolean equals(Object o) {
-            return mBtDevice.equals(o);
+            if (o == null) {
+                return false;
+            }
+            if (this == o) {
+                return true;
+            }
+            if (o instanceof BluetoothA2dpDeviceInfo) {
+                return mBtDevice.equals(((BluetoothA2dpDeviceInfo) o).getBtDevice());
+            }
+            return false;
         }
+
+
     }
 
     // A2DP device events
@@ -249,7 +260,8 @@ public class BtHelper {
         mA2dp.setAvrcpAbsoluteVolume(index);
     }
 
-    /*package*/ synchronized int getA2dpCodec(@NonNull BluetoothDevice device) {
+    /*package*/ synchronized @AudioSystem.AudioFormatNativeEnumForBtCodec int getA2dpCodec(
+            @NonNull BluetoothDevice device) {
         if (mA2dp == null) {
             return AudioSystem.AUDIO_FORMAT_DEFAULT;
         }
@@ -261,7 +273,7 @@ public class BtHelper {
         if (btCodecConfig == null) {
             return AudioSystem.AUDIO_FORMAT_DEFAULT;
         }
-        return mapBluetoothCodecToAudioFormat(btCodecConfig.getCodecType());
+        return AudioSystem.bluetoothCodecToAudioFormat(btCodecConfig.getCodecType());
     }
 
     // @GuardedBy("AudioDeviceBroker.mSetModeLock")
@@ -965,23 +977,6 @@ public class BtHelper {
         mDeviceBroker.handleFailureToConnectToBtHeadsetService(
                 result ? AudioDeviceBroker.BT_HEADSET_CNCT_TIMEOUT_MS : 0);
         return result;
-    }
-
-    private int mapBluetoothCodecToAudioFormat(int btCodecType) {
-        switch (btCodecType) {
-            case BluetoothCodecConfig.SOURCE_CODEC_TYPE_SBC:
-                return AudioSystem.AUDIO_FORMAT_SBC;
-            case BluetoothCodecConfig.SOURCE_CODEC_TYPE_AAC:
-                return AudioSystem.AUDIO_FORMAT_AAC;
-            case BluetoothCodecConfig.SOURCE_CODEC_TYPE_APTX:
-                return AudioSystem.AUDIO_FORMAT_APTX;
-            case BluetoothCodecConfig.SOURCE_CODEC_TYPE_APTX_HD:
-                return AudioSystem.AUDIO_FORMAT_APTX_HD;
-            case BluetoothCodecConfig.SOURCE_CODEC_TYPE_LDAC:
-                return AudioSystem.AUDIO_FORMAT_LDAC;
-            default:
-                return AudioSystem.AUDIO_FORMAT_DEFAULT;
-        }
     }
 
     /**

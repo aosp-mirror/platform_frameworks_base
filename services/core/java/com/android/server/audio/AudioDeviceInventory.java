@@ -289,11 +289,11 @@ public class AudioDeviceInventory {
             address = "";
         }
 
-        final int a2dpCodec = btInfo.getCodec();
+        final @AudioSystem.AudioFormatNativeEnumForBtCodec int a2dpCodec = btInfo.getCodec();
 
         AudioService.sDeviceLogger.log(new AudioEventLogger.StringEvent(
                 "A2DP sink connected: device addr=" + address + " state=" + state
-                        + " codec=" + a2dpCodec
+                        + " codec=" + AudioSystem.audioFormatToString(a2dpCodec)
                         + " vol=" + a2dpVolume));
 
         new MediaMetrics.Item(mMetricsId + "a2dp")
@@ -422,7 +422,7 @@ public class AudioDeviceInventory {
             Log.d(TAG, "onBluetoothA2dpActiveDeviceChange btDevice=" + btDevice);
         }
         int a2dpVolume = btInfo.getVolume();
-        final int a2dpCodec = btInfo.getCodec();
+        @AudioSystem.AudioFormatNativeEnumForBtCodec final int a2dpCodec = btInfo.getCodec();
 
         String address = btDevice.getAddress();
         if (!BluetoothAdapter.checkBluetoothAddress(address)) {
@@ -435,7 +435,8 @@ public class AudioDeviceInventory {
         synchronized (mDevicesLock) {
             if (mDeviceBroker.hasScheduledA2dpSinkConnectionState(btDevice)) {
                 AudioService.sDeviceLogger.log(new AudioEventLogger.StringEvent(
-                        "A2dp config change ignored (scheduled connection change)"));
+                        "A2dp config change ignored (scheduled connection change)")
+                        .printLog(TAG));
                 mmi.set(MediaMetrics.Property.EARLY_RETURN, "A2dp config change ignored")
                         .record();
                 return;
@@ -476,8 +477,9 @@ public class AudioDeviceInventory {
 
             if (res != AudioSystem.AUDIO_STATUS_OK) {
                 AudioService.sDeviceLogger.log(new AudioEventLogger.StringEvent(
-                        "APM handleDeviceConfigChange failed for A2DP device addr="
-                        + address + " codec=" + a2dpCodec).printLog(TAG));
+                        "APM handleDeviceConfigChange failed for A2DP device addr=" + address
+                                + " codec=" + AudioSystem.audioFormatToString(a2dpCodec))
+                        .printLog(TAG));
 
                 int musicDevice = mDeviceBroker.getDeviceForStream(AudioSystem.STREAM_MUSIC);
                 // force A2DP device disconnection in case of error so that AudioService state is
@@ -488,8 +490,9 @@ public class AudioDeviceInventory {
                         -1 /* a2dpVolume */);
             } else {
                 AudioService.sDeviceLogger.log(new AudioEventLogger.StringEvent(
-                        "APM handleDeviceConfigChange success for A2DP device addr="
-                                + address + " codec=" + a2dpCodec).printLog(TAG));
+                        "APM handleDeviceConfigChange success for A2DP device addr=" + address
+                                + " codec=" + AudioSystem.audioFormatToString(a2dpCodec))
+                        .printLog(TAG));
             }
         }
         mmi.record();
@@ -816,20 +819,17 @@ public class AudioDeviceInventory {
 
             if (AudioService.DEBUG_DEVICES) {
                 Log.i(TAG, "setBluetoothA2dpDeviceConnectionState device: " + device
-                        + " state: " + state + " delay(ms): " + delay + "codec:" + a2dpCodec
+                        + " state: " + state + " delay(ms): " + delay
+                        + " codec:" + Integer.toHexString(a2dpCodec)
                         + " suppressNoisyIntent: " + suppressNoisyIntent);
             }
 
             final BtHelper.BluetoothA2dpDeviceInfo a2dpDeviceInfo =
                     new BtHelper.BluetoothA2dpDeviceInfo(device, a2dpVolume, a2dpCodec);
             if (profile == BluetoothProfile.A2DP) {
-                if (delay == 0) {
-                    onSetA2dpSinkConnectionState(a2dpDeviceInfo, state);
-                } else {
-                    mDeviceBroker.postA2dpSinkConnection(state,
+                mDeviceBroker.postA2dpSinkConnection(state,
                             a2dpDeviceInfo,
                             delay);
-                }
             } else { //profile == BluetoothProfile.A2DP_SINK
                 mDeviceBroker.postA2dpSourceConnection(state,
                         a2dpDeviceInfo,
