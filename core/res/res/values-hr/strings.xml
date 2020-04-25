@@ -194,7 +194,7 @@
     <string name="network_logging_notification_title" msgid="554983187553845004">"Uređaj je upravljan"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Vaša organizacija upravlja ovim uređajem i može nadzirati mrežni promet. Dodirnite za pojedinosti."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"Aplikacije mogu pristupiti vašoj lokaciji"</string>
-    <string name="location_changed_notification_text" msgid="7158423339982706912">"Obratite se svojem IT administratoru da biste saznali više"</string>
+    <string name="location_changed_notification_text" msgid="7158423339982706912">"Obratite se IT administratoru da biste saznali više"</string>
     <string name="country_detector" msgid="7023275114706088854">"Detektor zemlje"</string>
     <string name="location_service" msgid="2439187616018455546">"Usluga lokacije"</string>
     <string name="gnss_service" msgid="8907781262179951385">"Usluga GNSS-a"</string>
@@ -546,6 +546,7 @@
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Nije prepoznato"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"Autentifikacija otkazana"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"Nisu postavljeni PIN, uzorak ni zaporka"</string>
+    <string name="biometric_error_generic" msgid="6784371929985434439">"Pogreška prilikom autentifikacije"</string>
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"Otkriven je djelomični otisak prsta. Pokušajte ponovo."</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Obrada otiska prsta nije uspjela. Pokušajte ponovo."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"Senzor otiska prsta nije čist. Očistite ga i pokušajte ponovo."</string>
@@ -1814,9 +1815,9 @@
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Izbrisao administrator"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"U redu"</string>
     <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Da bi se produljilo trajanje baterije, Štednja baterije:\n·Uključuje Tamnu temu.\n·Isključuje ili ograničava aktivnosti u pozadini, neke vizualne efekte i druge značajke kao što je \"Hey Google\".\n\n"<annotation id="url">"Saznajte više"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"Da bi se produljilo trajanje baterije, Štednja baterije:\n·Uključuje Tamnu temu.\n·Isključuje ili ograničava aktivnosti u pozadini, neke vizualne efekte i druge značajke kao što je \"Hey Google\"."</string>
+    <string name="battery_saver_description" msgid="7618492104632328184">"Da bi se produljilo trajanje baterije, Štednja baterije:\n·uključuje Tamnu temu\n·isključuje ili ograničava aktivnosti u pozadini, neke vizualne efekte i druge značajke kao što je \"Hey Google\"."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Da bi se smanjio podatkovni promet, značajka Štednja podatkovnog prometa onemogućuje nekim aplikacijama slanje ili primanje podataka u pozadini. Aplikacija koju trenutačno upotrebljavate može pristupiti podacima, no možda će to činiti rjeđe. To može značiti da se, na primjer, slike neće prikazivati dok ih ne dodirnete."</string>
-    <string name="data_saver_enable_title" msgid="7080620065745260137">"Uključiti Uštedu podataka?"</string>
+    <string name="data_saver_enable_title" msgid="7080620065745260137">"Uključiti Štednju podatkovnog prometa?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Uključi"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
       <item quantity="one">%1$d minutu (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
@@ -2061,7 +2062,7 @@
       <item quantity="few"><xliff:g id="FILE_NAME_2">%s</xliff:g> i još <xliff:g id="COUNT_3">%d</xliff:g> datoteke</item>
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> i još <xliff:g id="COUNT_3">%d</xliff:g> datoteka</item>
     </plurals>
-    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Nema preporučenih ljudi za dijeljenje"</string>
+    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Nema preporučenih osoba za dijeljenje"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"Popis aplikacija"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Ta aplikacija nema dopuštenje za snimanje, no mogla bi primati zvuk putem ovog USB uređaja."</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"Početni zaslon"</string>

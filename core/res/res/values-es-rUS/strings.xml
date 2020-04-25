@@ -192,7 +192,7 @@
     <string name="network_logging_notification_title" msgid="554983187553845004">"Dispositivo administrado"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Tu organización administra este dispositivo y es posible que controle el tráfico de red. Presiona para obtener más información."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"Las apps pueden acceder a tu ubicación"</string>
-    <string name="location_changed_notification_text" msgid="7158423339982706912">"Para obtener más información, comunícate con tu administrador de TI"</string>
+    <string name="location_changed_notification_text" msgid="7158423339982706912">"Comunícate con el administrador por más información"</string>
     <string name="country_detector" msgid="7023275114706088854">"Detector de país"</string>
     <string name="location_service" msgid="2439187616018455546">"Servicio de ubicación"</string>
     <string name="gnss_service" msgid="8907781262179951385">"Servicio de Sistemas Globales de Navegación por Satélites (GNSS)"</string>
@@ -231,7 +231,7 @@
     <string name="shutdown_confirm_question" msgid="796151167261608447">"¿Deseas apagarlo?"</string>
     <string name="reboot_safemode_title" msgid="5853949122655346734">"Reiniciar en modo seguro"</string>
     <string name="reboot_safemode_confirm" msgid="1658357874737219624">"¿Deseas reiniciar el dispositivo en modo seguro? Las aplicaciones de terceros que instalaste se desactivarán y se restablecerán cuando vuelvas a reiniciar el dispositivo."</string>
-    <string name="recent_tasks_title" msgid="8183172372995396653">"Reciente"</string>
+    <string name="recent_tasks_title" msgid="8183172372995396653">"Recientes"</string>
     <string name="no_recent_tasks" msgid="9063946524312275906">"No hay aplicaciones recientes."</string>
     <string name="global_actions" product="tablet" msgid="4412132498517933867">"Opciones de tablet"</string>
     <string name="global_actions" product="tv" msgid="3871763739487450369">"Opciones de Android TV"</string>
@@ -543,6 +543,7 @@
     <string name="biometric_not_recognized" msgid="5106687642694635888">"No se reconoció"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"Se canceló la autenticación"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"No se estableció ningún PIN, patrón ni contraseña"</string>
+    <string name="biometric_error_generic" msgid="6784371929985434439">"Error de autenticación"</string>
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"Se detectó parcialmente la huella digital. Vuelve a intentarlo."</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"No se pudo procesar la huella digital. Vuelve a intentarlo."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"El sensor de huellas digitales está sucio. Limpia el sensor y vuelve a intentarlo."</string>
@@ -1316,7 +1317,7 @@
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"Se habilitó el modo de agente de prueba"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"Restablece la configuración de fábrica para inhabilitar el modo de agente de prueba."</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"Se habilitó la consola en serie"</string>
-    <string name="console_running_notification_message" msgid="7892751888125174039">"Afecta el rendimiento. Para inhabilitarla, verifica bootloader."</string>
+    <string name="console_running_notification_message" msgid="7892751888125174039">"Afecta el rendimiento. Para inhabilitarla, verifica el bootloader."</string>
     <string name="usb_contaminant_detected_title" msgid="4359048603069159678">"Hay líquido o suciedad en el puerto USB"</string>
     <string name="usb_contaminant_detected_message" msgid="7346100585390795743">"El puerto USB se inhabilitó automáticamente. Presiona para obtener más información."</string>
     <string name="usb_contaminant_not_detected_title" msgid="2651167729563264053">"Se puede usar el puerto USB"</string>
@@ -1791,9 +1792,9 @@
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Tu administrador borró este paquete"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Aceptar"</string>
     <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Para extender la duración de batería, el Ahorro de batería hace lo siguiente:\n·Activa el Tema oscuro.\n·Desactiva o restringe la actividad en segundo plano, algunos efectos visuales y otras funciones, como \"Ok Google\".\n\n"<annotation id="url">"Más información"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"Para extender la duración de batería, el Ahorro de batería hace lo siguiente:\n·Activa el Tema oscuro.\n·Desactiva o restringe la actividad en segundo plano, algunos efectos visuales y otras funciones, como \"Ok Google\"."</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"Para reducir el uso de datos, Ahorro de datos evita que algunas apps envíen y reciban datos en segundo plano. La app que estés usando podrá acceder a los datos, pero con menor frecuencia. De esta forma, por ejemplo, las imágenes no se mostrarán hasta que las presiones."</string>
-    <string name="data_saver_enable_title" msgid="7080620065745260137">"¿Activar Ahorro de datos?"</string>
+    <string name="battery_saver_description" msgid="7618492104632328184">"Para extender la duración de batería, el modo Ahorro de batería hace lo siguiente:\n·Activa el Tema oscuro.\n·Desactiva o restringe la actividad en segundo plano, algunos efectos visuales y otras funciones como \"Ok Google\"."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"Para reducir el uso de datos, el modo Ahorro de datos evita que algunas apps envíen y reciban datos en segundo plano. La app que estés usando podrá acceder a los datos, pero con menor frecuencia. De esta forma, por ejemplo, las imágenes no se mostrarán hasta que las presiones."</string>
+    <string name="data_saver_enable_title" msgid="7080620065745260137">"¿Deseas activar Ahorro de datos?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Activar"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
       <item quantity="other">Durante %1$d minutos hasta la(s) <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g></item>
@@ -2027,7 +2028,7 @@
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> y <xliff:g id="COUNT_3">%d</xliff:g> archivos más</item>
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> y <xliff:g id="COUNT_1">%d</xliff:g> archivo más</item>
     </plurals>
-    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"No hay personas recomendadas con las que compartir"</string>
+    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"No hay personas recomendadas con quienes compartir"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"Lista de apps"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Aunque no se le otorgó permiso de grabación a esta app, puede capturar audio con este dispositivo USB."</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"Página principal"</string>

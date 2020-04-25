@@ -549,6 +549,7 @@
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Nerozpoznáno"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"Ověření bylo zrušeno"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"Není nastaven žádný PIN, gesto ani heslo"</string>
+    <string name="biometric_error_generic" msgid="6784371929985434439">"Při ověřování došlo k chybě"</string>
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"Byla zjištěna jen část otisku prstu. Zkuste to znovu."</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Zpracování otisku prstu se nezdařilo. Zkuste to znovu."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"Senzor otisků prstů je znečištěn. Vyčistěte jej a zkuste to znovu."</string>
@@ -2095,7 +2096,7 @@
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> souborů</item>
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g> soubor</item>
     </plurals>
-    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Žádní doporučení lidé ke sdílení"</string>
+    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Žádní doporučení lidé, s nimiž můžete sdílet"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"Seznam aplikací"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Tato aplikace nemá oprávnění k nahrávání, ale může zaznamenávat zvuk prostřednictvím tohoto zařízení USB."</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"Plocha"</string>

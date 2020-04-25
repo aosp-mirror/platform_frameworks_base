@@ -543,6 +543,7 @@
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Niet herkend"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"Verificatie geannuleerd"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"Geen pincode, patroon of wachtwoord ingesteld"</string>
+    <string name="biometric_error_generic" msgid="6784371929985434439">"Fout bij verificatie"</string>
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"Gedeeltelijke vingerafdruk gedetecteerd. Probeer het opnieuw."</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Kan vingerafdruk niet verwerken. Probeer het opnieuw."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"De vingerafdruksensor moet worden schoongemaakt. Probeer het daarna opnieuw."</string>
@@ -1791,9 +1792,9 @@
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Verwijderd door je beheerder"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
     <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Batterijbesparing doet het volgende om de batterijduur te verlengen:\n·Het donkere thema inschakelen\n·Achtergrondactiviteit, bepaalde visuele effecten en andere functies (zoals \'Hey Google\') uitschakelen of beperken\n\n"<annotation id="url">"Meer informatie"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"Batterijbesparing doet het volgende om de batterijduur te verlengen:\n Het donkere thema inschakelen\n·Achtergrondactiviteit, bepaalde visuele effecten en andere functies (zoals \'Hey Google\') uitschakelen of beperken"</string>
+    <string name="battery_saver_description" msgid="7618492104632328184">"Batterijbesparing doet het volgende om de batterijduur te verlengen:\n Het donkere thema aanzetten\n·Achtergrondactiviteit, bepaalde visuele effecten en andere functies (zoals \'Hey Google\') uitzetten of beperken"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Databesparing beperkt het datagebruik door te voorkomen dat sommige apps gegevens verzenden of ontvangen op de achtergrond. De apps die je open hebt, kunnen nog steeds data verbruiken, maar doen dit minder vaak. Afbeeldingen worden dan bijvoorbeeld niet weergegeven totdat je erop tikt."</string>
-    <string name="data_saver_enable_title" msgid="7080620065745260137">"Databesparing inschakelen?"</string>
+    <string name="data_saver_enable_title" msgid="7080620065745260137">"Databesparing aanzetten?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Inschakelen"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
       <item quantity="other">%1$d minuten (tot <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>

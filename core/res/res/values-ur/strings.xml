@@ -191,7 +191,7 @@
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"منتظم نے ذاتی استعمال کے لیے آلہ کو دستبردار کیا ہے"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"آلہ زیر انتظام ہے"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"آپ کی تنظیم اس آلے کا نظم کرتی ہے اور وہ نیٹ ورک ٹریفک کی نگرانی کر سکتی ہے۔ تفاصیل کیلئے تھپتھپائیں۔"</string>
-    <string name="location_changed_notification_title" msgid="3620158742816699316">"ایپس آپ کے مقام تک رسائی حاصل کر سکتی ہے"</string>
+    <string name="location_changed_notification_title" msgid="3620158742816699316">"ایپس آپ کے مقام تک رسائی حاصل کر سکتی ہیں"</string>
     <string name="location_changed_notification_text" msgid="7158423339982706912">"‏مزید جاننے کے لیے اپنے IT منتظم سے رابطہ کریں"</string>
     <string name="country_detector" msgid="7023275114706088854">"ملک کا ڈیٹیکٹر"</string>
     <string name="location_service" msgid="2439187616018455546">"مقام کی سروس"</string>
@@ -543,6 +543,7 @@
     <string name="biometric_not_recognized" msgid="5106687642694635888">"تسلیم شدہ نہیں ہے"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"تصدیق کا عمل منسوخ ہو گیا"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"کوئی پن، پیٹرن، یا پاس ورڈ سیٹ نہیں ہے"</string>
+    <string name="biometric_error_generic" msgid="6784371929985434439">"خرابی کی توثیق ہو رہی ہے"</string>
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"جزوی فنگر پرنٹ کی شناخت ہوئی۔ براہ کرم دوبارہ کوشش کریں۔"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"فنگر پرنٹ پر کارروائی نہیں کی جا سکی۔ براہ کرم دوبارہ کوشش کریں۔"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"فنگر پرنٹ سینسر گندا ہے۔ براہ کرم صاف کریں اور دوبارہ کوشش کریں۔"</string>
@@ -1792,7 +1793,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ٹھیک ہے"</string>
     <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"‏بیٹری لائف کو بڑھانے کے لیے، بیٹری سیور:\n گہری تھیم کو آن کرتی ہے\n پس منظر کی سرگرمی، کچھ بصری اثرات اور دیگر خصوصیات جیسے کہ \"Ok Google\" کو آف یا محدود کرتی ہے\n\n"<annotation id="url">"مزید جانیں"</annotation></string>
     <string name="battery_saver_description" msgid="7618492104632328184">"‏بیٹری لائف کو بڑھانے کے لیے، بیٹری سیور:\n گہری تھیم کو آن کرتی ہے\n پس منظر کی سرگرمی، کچھ بصری اثرات اور دیگر خصوصیات جیسے کہ \"Ok Google\" کو آف یا محدود کرتی ہے"</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"ڈیٹا کے استعمال کو کم کرنے میں مدد کیلئے، ڈیٹا سیور پس منظر میں کچھ ایپس کو ڈیٹا بھیجنے یا موصول کرنے سے روکتا ہے۔ آپ جو ایپ فی الحال استعمال کر رہے ہیں وہ ڈیٹا پر رسائی کر سکتی ہے مگر ہو سکتا ہے ایسا زیادہ نہ ہو۔ اس کا مطلب مثال کے طور پر یہ ہو سکتا ہے کہ تصاویر تھپتھپانے تک ظاہر نہ ہوں۔"</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"ڈیٹا کے استعمال کو کم کرنے میں مدد کیلئے، ڈیٹا سیور پس منظر میں کچھ ایپس کو ڈیٹا بھیجنے یا موصول کرنے سے روکتی ہے۔ آپ جو ایپ فی الحال استعمال کر رہے ہیں وہ ڈیٹا تک رسائی کر سکتی ہے مگر ہو سکتا ہے ایسا اکثر نہ ہو۔ اس کا مطلب مثال کے طور پر یہ ہو سکتا ہے کہ تصاویر تھپتھپانے تک ظاہر نہ ہوں۔"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"ڈیٹا سیور آن کریں؟"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"آن کریں"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">

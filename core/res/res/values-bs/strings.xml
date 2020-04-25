@@ -294,7 +294,7 @@
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Dodirnite za detalje o potrošnji baterije i prijenosa podataka"</string>
     <string name="foreground_service_multiple_separator" msgid="5002287361849863168">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="8974401416068943888">"Siguran način rada"</string>
-    <string name="android_system_label" msgid="5974767339591067210">"Android sistem"</string>
+    <string name="android_system_label" msgid="5974767339591067210">"Sistem Android"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Pređite na lični profil"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Pređite na radni profil"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Kontakti"</string>
@@ -546,6 +546,7 @@
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Nije prepoznato"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"Autentifikacija je otkazana"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"Nije postavljen PIN, uzorak niti lozinka"</string>
+    <string name="biometric_error_generic" msgid="6784371929985434439">"Greška pri autentifikaciji"</string>
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"Otkriven je djelomični otisak prsta. Pokušajte ponovo."</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Obrada otiska prsta nije uspjela. Pokušajte ponovo."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"Senzor za otisak prsta je prljav. Očistite ga i pokušajte ponovo."</string>
@@ -1471,7 +1472,7 @@
     </plurals>
     <string name="action_mode_done" msgid="2536182504764803222">"Gotovo"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"Brisanje dijeljene pohrane…"</string>
-    <string name="share" msgid="4157615043345227321">"Podijelite"</string>
+    <string name="share" msgid="4157615043345227321">"Dijeli"</string>
     <string name="find" msgid="5015737188624767706">"Pronađi"</string>
     <string name="websearch" msgid="5624340204512793290">"Internet pretraživanje"</string>
     <string name="find_next" msgid="5341217051549648153">"Nađi sljedeći"</string>
@@ -1816,8 +1817,8 @@
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Izbrisao je vaš administrator"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Uredu"</string>
     <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Radi produženja vijeka trajanja baterije, Ušteda baterije:\n·Uključuje Tamnu temu\n·Isključuje ili ograničava aktivnosti u pozadini, određene vizuelne efekte i druge funkcije kao što je \"Hej Google\"\n\n"<annotation id="url">"Saznajte više"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"Radi produženja vijeka trajanja baterije, Ušteda baterije:\n·Uključuje Tamnu temu\n·Isključuje ili ograničava aktivnosti u pozadini, određene vizuelne efekte i druge funkcije kao što je \"Hej Google\""</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"Da bi se smanjio prijenos podataka, Ušteda podataka sprečava da neke aplikacije šalju ili primaju podatke u pozadini. Aplikacija koju trenutno koristite može pristupiti podacima, ali će to činiti rjeđe. To može značiti, naprimjer, da se slike ne prikazuju sve dok ih ne dodirnete."</string>
+    <string name="battery_saver_description" msgid="7618492104632328184">"Radi produženja vijeka trajanja baterije, Ušteda baterije:\n·Uključuje Tamnu temu\n·Isključuje ili ograničava aktivnosti u pozadini, određene vizuelne efekte i druge funkcije kao što je \"Ok Google\""</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"Radi smanjenja prijenosa podataka, Ušteda podataka sprečava da neke aplikacije šalju ili primaju podatke u pozadini. Aplikacija koju trenutno koristite može pristupiti podacima, ali će to činiti rjeđe. Naprimjer, to može značiti da se slike ne prikazuju dok ih ne dodirnete."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Uključiti Uštedu podataka?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Uključi"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
@@ -2064,7 +2065,7 @@
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> fajlova</item>
     </plurals>
     <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Nijedna osoba nije preporučena za dijeljenje"</string>
-    <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"Spisak aplikacija"</string>
+    <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"Lista aplikacija"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Ovoj aplikaciji nije dato odobrenje za snimanje, ali može snimati zvuk putem ovog USB uređaja."</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"Početna stranica"</string>
     <string name="accessibility_system_action_back_label" msgid="4205361367345537608">"Nazad"</string>

@@ -22,8 +22,8 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"B"</string>
     <string name="kilobyteShort" msgid="2214285521564195803">"kB"</string>
-    <string name="megabyteShort" msgid="6649361267635823443">"មេកាបៃ"</string>
-    <string name="gigabyteShort" msgid="7515809460261287991">"ជីកាបៃ"</string>
+    <string name="megabyteShort" msgid="6649361267635823443">"MB"</string>
+    <string name="gigabyteShort" msgid="7515809460261287991">"GB"</string>
     <string name="terabyteShort" msgid="1822367128583886496">"តេរ៉ាបៃ"</string>
     <string name="petabyteShort" msgid="5651571254228534832">"PB"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
@@ -192,7 +192,7 @@
     <string name="network_logging_notification_title" msgid="554983187553845004">"ឧបករណ៍ស្ថិតក្រោមការគ្រប់គ្រង"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"ស្ថាប័នរបស់អ្នកគ្រប់គ្រងឧបករណ៍នេះ ហើយអាចនឹងតាមដានចរាចរណ៍បណ្តាញ។ ចុចដើម្បីទទួលបានព័ត៌មានលម្អិត។"</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"កម្មវិធី​អាច​ចូលប្រើ​ទីតាំង​របស់អ្នក​បាន"</string>
-    <string name="location_changed_notification_text" msgid="7158423339982706912">"សូម​ទាក់ទង​អ្នក​គ្រប់គ្រងផ្នែក​ព័ត៌មានវិទ្យា​របស់អ្នក ដើម្បីស្វែងយល់​បន្ថែម"</string>
+    <string name="location_changed_notification_text" msgid="7158423339982706912">"ទាក់ទង​អ្នក​គ្រប់គ្រងផ្នែកព័ត៌មានវិទ្យា​របស់អ្នក​ដើម្បីស្វែងយល់​បន្ថែម"</string>
     <string name="country_detector" msgid="7023275114706088854">"ឧបករណ៍​សម្គាល់​ប្រទេស"</string>
     <string name="location_service" msgid="2439187616018455546">"សេវាកម្ម​ទីតាំង"</string>
     <string name="gnss_service" msgid="8907781262179951385">"សេវាកម្ម GNSS"</string>
@@ -543,6 +543,7 @@
     <string name="biometric_not_recognized" msgid="5106687642694635888">"មិនអាចសម្គាល់បានទេ"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"បាន​បោះបង់​ការ​ផ្ទៀងផ្ទាត់"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"គ្មាន​ការកំណត់​កូដ pin លំនាំ ឬពាក្យសម្ងាត់​ទេ"</string>
+    <string name="biometric_error_generic" msgid="6784371929985434439">"មានបញ្ហាក្នុង​ការផ្ទៀងផ្ទាត់"</string>
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"បានផ្តិតយកស្នាមម្រាមដៃមិនពេញលក្ខណៈ។ សូមព្យាយាមម្តងទៀត។"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"មិនអាចដំណើរការស្នាមម្រាមដៃបានទេ។ សូមព្យាយាមម្តងទៀត។"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"ឧបករណ៍ចាប់ស្នាមម្រាមដៃគឺប្រឡាក់។ សូមសម្អាត រួចព្យាយាមម្តងទៀត។"</string>
@@ -1795,7 +1796,7 @@
     <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"ដើម្បី​បង្កើនកម្រិត​ថាមពលថ្ម កម្មវិធី​សន្សំ​ថ្ម៖\n·បើករចនាប័ទ្មងងឹត​\n·បិទ ឬដាក់កំហិតលើ​សកម្មភាពផ្ទៃខាងក្រោយ ឥទ្ធិពល​ជារូបភាពមួយចំនួន និងមុខងារផ្សេងទៀត​ដូចជា “Hey Google” ជាដើម\n\n"<annotation id="url">"ស្វែងយល់បន្ថែម"</annotation></string>
     <string name="battery_saver_description" msgid="7618492104632328184">"ដើម្បី​បង្កើនកម្រិត​ថាមពលថ្ម កម្មវិធី​សន្សំ​ថ្ម៖\n·បើករចនាប័ទ្មងងឹត​\n·បិទ ឬដាក់កំហិតលើ​សកម្មភាពផ្ទៃខាងក្រោយ ឥទ្ធិពល​ជារូបភាពមួយចំនួន និងមុខងារផ្សេងទៀត​ដូចជា “Hey Google” ជាដើម"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"ដើម្បីជួយកាត់បន្ថយការប្រើប្រាស់ទិន្នន័យ កម្មវិធីសន្សំសំចៃទិន្នន័យរារាំងកម្មវិធីមួយចំនួនមិនឲ្យបញ្ជូន ឬទទួលទិន្នន័យនៅផ្ទៃខាងក្រោយទេ។ កម្មវិធីដែលអ្នកកំពុងប្រើនាពេលបច្ចុប្បន្នអាចចូលប្រើប្រាស់​ទិន្នន័យបាន ប៉ុន្តែអាចនឹងមិនញឹកញាប់ដូចមុនទេ។ ឧទាហរណ៍ រូបភាពមិនបង្ហាញទេ លុះត្រាតែអ្នកប៉ះរូបភាពទាំងនោះ។"</string>
-    <string name="data_saver_enable_title" msgid="7080620065745260137">"បើកកម្មវិធីសន្សំសំចៃទិន្នន័យឬ?"</string>
+    <string name="data_saver_enable_title" msgid="7080620065745260137">"បើកកម្មវិធីសន្សំសំចៃទិន្នន័យ?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"បើក"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
       <item quantity="other">រយៈពេល %1$d នាទី (រហូតដល់ <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>

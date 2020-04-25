@@ -543,6 +543,7 @@
     <string name="biometric_not_recognized" msgid="5106687642694635888">"No s\'ha reconegut"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"S\'ha cancel·lat l\'autenticació"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"No s\'ha establert cap PIN, patró o contrasenya"</string>
+    <string name="biometric_error_generic" msgid="6784371929985434439">"Error en l\'autenticació"</string>
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"S\'ha detectat una empremta digital parcial. Torna-ho a provar."</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"No s\'ha pogut processar l\'empremta digital. Torna-ho a provar."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"El sensor d\'empremtes dactilars està brut. Neteja\'l i torna-ho a provar."</string>
@@ -1316,7 +1317,7 @@
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"S\'ha activat el mode Agent de prova"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"Si vols desactivar el mode Agent de prova, restableix les dades de fàbrica."</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"S\'ha activat la consola de sèrie"</string>
-    <string name="console_running_notification_message" msgid="7892751888125174039">"El rendiment s\'ha vist afectat. Per desactivar-la, comprova el bootloader."</string>
+    <string name="console_running_notification_message" msgid="7892751888125174039">"Afecta el rendiment. Per desactivar-la, comprova el bootloader."</string>
     <string name="usb_contaminant_detected_title" msgid="4359048603069159678">"Hi ha líquid o pols al port USB"</string>
     <string name="usb_contaminant_detected_message" msgid="7346100585390795743">"El port USB es desactiva automàticament. Toca per obtenir més informació."</string>
     <string name="usb_contaminant_not_detected_title" msgid="2651167729563264053">"Ja pots utilitzar el port USB"</string>
@@ -1646,8 +1647,8 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Fet"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Desactiva la drecera"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Utilitza la drecera"</string>
-    <string name="color_inversion_feature_name" msgid="326050048927789012">"Inversió dels colors"</string>
-    <string name="color_correction_feature_name" msgid="3655077237805422597">"Correcció del color"</string>
+    <string name="color_inversion_feature_name" msgid="326050048927789012">"Inversió de colors"</string>
+    <string name="color_correction_feature_name" msgid="3655077237805422597">"Correcció de color"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"S\'han mantingut premudes les tecles de volum. S\'ha activat <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"S\'han mantingut premudes les tecles de volum. S\'ha desactivat <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Mantén premudes les dues tecles de volum durant 3 segons per fer servir <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
@@ -1790,8 +1791,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Actualitzat per l\'administrador"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Suprimit per l\'administrador"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"D\'acord"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Per allargar la durada de la bateria, el mode Estalvi de bateria fa el següent:\n Activa el tema fosc\n Desactiva o restringeix l\'activitat en segon pla, alguns efectes visuals i altres funcions com \"Ok Google\"\n\n"<annotation id="url">"Més informació"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"Per allargar la durada de la bateria, el mode Estalvi de bateria fa el següent:\n Activa el tema fosc\n Desactiva o restringeix l\'activitat en segon pla, alguns efectes visuals i altres funcions com \"Ok Google\""</string>
+    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Per allargar la durada de la bateria, el mode Estalvi de bateria:\n Activa el tema fosc\n Desactiva o restringeix l\'activitat en segon pla, alguns efectes visuals i altres funcions com \"Ok Google\"\n\n"<annotation id="url">"Més informació"</annotation></string>
+    <string name="battery_saver_description" msgid="7618492104632328184">"Per allargar la durada de la bateria, el mode Estalvi de bateria:\n Activa el tema fosc\n Desactiva o restringeix l\'activitat en segon pla, alguns efectes visuals i altres funcions com \"Ok Google\""</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Per reduir l\'ús de dades, la funció Economitzador de dades evita que determinades aplicacions enviïn o rebin dades en segon pla. L\'aplicació que estiguis fent servir podrà accedir a les dades, però menys sovint. Això vol dir, per exemple, que les imatges no es mostraran fins que no les toquis."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Activar Economitzador de dades?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Activa"</string>
@@ -1829,7 +1830,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="2250286190237669079">"Fins a les <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"Fins a les <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (propera alarma)"</string>
-    <string name="zen_mode_forever" msgid="740585666364912448">"Fins que no ho desactivi"</string>
+    <string name="zen_mode_forever" msgid="740585666364912448">"Fins que no el desactivis"</string>
     <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"Fins que desactivis el mode No molestis"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"Replega"</string>
