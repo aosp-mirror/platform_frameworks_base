@@ -17,11 +17,13 @@
 package android.window;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.TestApi;
 import android.app.ActivityTaskManager;
 import android.os.RemoteException;
 import android.util.Singleton;
+import android.view.SurfaceControl;
 
 /**
  * Base class for organizing specific types of windows like Tasks and DisplayAreas
@@ -58,6 +60,28 @@ public class WindowOrganizer {
             @NonNull WindowContainerTransactionCallback callback) {
         try {
             return getWindowOrganizerController().applySyncTransaction(t, callback.mInterface);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Take a screenshot for a specified Window
+     * @param token The token for the WindowContainer that should get a screenshot taken.
+     * @return A SurfaceControl where the screenshot will be attached, or null if failed.
+     *
+     * @hide
+     */
+    @Nullable
+    @RequiresPermission(android.Manifest.permission.READ_FRAME_BUFFER)
+    public static SurfaceControl takeScreenshot(@NonNull WindowContainerToken token) {
+        try {
+            SurfaceControl surfaceControl = new SurfaceControl();
+            if (getWindowOrganizerController().takeScreenshot(token, surfaceControl)) {
+                return surfaceControl;
+            } else {
+                return null;
+            }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
