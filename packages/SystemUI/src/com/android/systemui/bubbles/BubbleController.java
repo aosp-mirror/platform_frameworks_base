@@ -171,7 +171,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     private INotificationManager mINotificationManager;
 
     // Callback that updates BubbleOverflowActivity on data change.
-    @Nullable private Runnable mOverflowCallback = null;
+    @Nullable private BubbleData.Listener mOverflowListener = null;
 
     private final NotificationInterruptStateProvider mNotificationInterruptStateProvider;
     private IStatusBarService mBarService;
@@ -581,8 +581,8 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         mInflateSynchronously = inflateSynchronously;
     }
 
-    void setOverflowCallback(Runnable updateOverflow) {
-        mOverflowCallback = updateOverflow;
+    void setOverflowListener(BubbleData.Listener listener) {
+        mOverflowListener = listener;
     }
 
     /**
@@ -959,8 +959,8 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         @Override
         public void applyUpdate(BubbleData.Update update) {
             // Update bubbles in overflow.
-            if (mOverflowCallback != null) {
-                mOverflowCallback.run();
+            if (mOverflowListener != null) {
+                mOverflowListener.applyUpdate(update);
             }
 
             // Collapsing? Do this first before remaining steps.
@@ -984,7 +984,8 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                     if (!mBubbleData.hasOverflowBubbleWithKey(bubble.getKey())
                         && (!bubble.showInShade()
                             || reason == DISMISS_NOTIF_CANCEL
-                            || reason == DISMISS_GROUP_CANCELLED)) {
+                            || reason == DISMISS_GROUP_CANCELLED
+                            || reason == DISMISS_OVERFLOW_MAX_REACHED)) {
                         // The bubble is now gone & the notification is hidden from the shade, so
                         // time to actually remove it
                         for (NotifCallback cb : mCallbacks) {
@@ -1051,9 +1052,6 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                     Log.d(TAG, BubbleDebugConfig.formatBubblesString(mStackView.getBubblesOnScreen(),
                             mStackView.getExpandedBubble()));
                 }
-                Log.d(TAG, "\n[BubbleData] overflow:");
-                Log.d(TAG, BubbleDebugConfig.formatBubblesString(mBubbleData.getOverflowBubbles(),
-                        null) + "\n");
             }
         }
     };
