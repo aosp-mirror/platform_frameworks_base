@@ -199,18 +199,61 @@ public class AudioSystem
     /** @hide */
     public static final int AUDIO_FORMAT_LDAC           = 0x23000000;
 
+    /** @hide */
+    @IntDef(flag = false, prefix = "AUDIO_FORMAT_", value = {
+            AUDIO_FORMAT_INVALID,
+            AUDIO_FORMAT_DEFAULT,
+            AUDIO_FORMAT_AAC,
+            AUDIO_FORMAT_SBC,
+            AUDIO_FORMAT_APTX,
+            AUDIO_FORMAT_APTX_HD,
+            AUDIO_FORMAT_LDAC }
+    )
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface AudioFormatNativeEnumForBtCodec {}
+
     /**
      * @hide
      * Convert audio format enum values to Bluetooth codec values
      */
-    public static int audioFormatToBluetoothSourceCodec(int audioFormat) {
+    public static int audioFormatToBluetoothSourceCodec(
+            @AudioFormatNativeEnumForBtCodec int audioFormat) {
         switch (audioFormat) {
             case AUDIO_FORMAT_AAC: return BluetoothCodecConfig.SOURCE_CODEC_TYPE_AAC;
             case AUDIO_FORMAT_SBC: return BluetoothCodecConfig.SOURCE_CODEC_TYPE_SBC;
             case AUDIO_FORMAT_APTX: return BluetoothCodecConfig.SOURCE_CODEC_TYPE_APTX;
             case AUDIO_FORMAT_APTX_HD: return BluetoothCodecConfig.SOURCE_CODEC_TYPE_APTX_HD;
             case AUDIO_FORMAT_LDAC: return BluetoothCodecConfig.SOURCE_CODEC_TYPE_LDAC;
-            default: return BluetoothCodecConfig.SOURCE_CODEC_TYPE_INVALID;
+            default:
+                Log.e(TAG, "Unknown audio format 0x" + Integer.toHexString(audioFormat)
+                        + " for conversion to BT codec");
+                return BluetoothCodecConfig.SOURCE_CODEC_TYPE_INVALID;
+        }
+    }
+
+    /**
+     * @hide
+     * Convert a Bluetooth codec to an audio format enum
+     * @param btCodec the codec to convert.
+     * @return the audio format, or {@link #AUDIO_FORMAT_DEFAULT} if unknown
+     */
+    public static @AudioFormatNativeEnumForBtCodec int bluetoothCodecToAudioFormat(int btCodec) {
+        switch (btCodec) {
+            case BluetoothCodecConfig.SOURCE_CODEC_TYPE_SBC:
+                return AudioSystem.AUDIO_FORMAT_SBC;
+            case BluetoothCodecConfig.SOURCE_CODEC_TYPE_AAC:
+                return AudioSystem.AUDIO_FORMAT_AAC;
+            case BluetoothCodecConfig.SOURCE_CODEC_TYPE_APTX:
+                return AudioSystem.AUDIO_FORMAT_APTX;
+            case BluetoothCodecConfig.SOURCE_CODEC_TYPE_APTX_HD:
+                return AudioSystem.AUDIO_FORMAT_APTX_HD;
+            case BluetoothCodecConfig.SOURCE_CODEC_TYPE_LDAC:
+                return AudioSystem.AUDIO_FORMAT_LDAC;
+            default:
+                Log.e(TAG, "Unknown BT codec 0x" + Integer.toHexString(btCodec)
+                        + " for conversion to audio format");
+                // TODO returning DEFAULT is the current behavior, should this return INVALID?
+                return AudioSystem.AUDIO_FORMAT_DEFAULT;
         }
     }
 
