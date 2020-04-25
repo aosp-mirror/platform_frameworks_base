@@ -72,10 +72,20 @@
 
     <!-- Car System UI's OverlayViewsMediator-->
     <string-array name="config_carSystemUIOverlayViewsMediators" translatable="false">
-        <item>com.android.systemui.car.notification.NotificationPanelViewMediator</item>
+        <item>@string/config_notificationPanelViewMediator</item>
         <item>com.android.systemui.car.keyguard.CarKeyguardViewMediator</item>
         <item>com.android.systemui.car.userswitcher.FullscreenUserSwitcherViewMediator</item>
     </string-array>
+
+    <!--
+        Car SystemUI's notification mediator. Replace with other notification mediators to have
+        the notification panel show from another system bar. The system bar should be enabled to
+        use the mediator with that system bar.
+        Example: config_enableBottomNavigationBar=true
+                 config_notificationPanelViewMediator=
+                    com.android.systemui.car.notification.BottomNotificationPanelViewMediator -->
+    <string name="config_notificationPanelViewMediator" translatable="false">
+        com.android.systemui.car.notification.TopNotificationPanelViewMediator</string>
 
     <!-- List of package names that are allowed sources of app installation. -->
     <string-array name="config_allowedAppInstallSources" translatable="false">

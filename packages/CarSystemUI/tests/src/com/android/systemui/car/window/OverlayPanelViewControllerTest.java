@@ -18,13 +18,16 @@ package com.android.systemui.car.window;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.animation.Animator;
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Rect;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.LayoutInflater;
@@ -42,6 +45,7 @@ import com.android.systemui.tests.R;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -173,6 +177,51 @@ public class OverlayPanelViewControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void animateCollapsePanel_withOverlayFromTopBar_collapsesTowardsTopBar() {
+        mOverlayPanelViewController.inflate(mBaseLayout);
+        // Mock a panel that has layout size 50 and where the panel is opened.
+        int size = 50;
+        mockPanelWithSize(size);
+        mOverlayPanelViewController.getLayout().setClipBounds(
+                new Rect(0, 0, size, size));
+        mOverlayPanelViewController.setShouldAnimateCollapsePanel(true);
+        mOverlayPanelViewController.setPanelExpanded(true);
+        mOverlayPanelViewController.setPanelVisible(true);
+        mOverlayPanelViewController.setOverlayDirection(
+                OverlayPanelViewController.OVERLAY_FROM_TOP_BAR);
+
+        mOverlayPanelViewController.animateCollapsePanel();
+
+        ArgumentCaptor<Float> endValueCaptor = ArgumentCaptor.forClass(Float.class);
+        verify(mFlingAnimationUtils).apply(
+                any(Animator.class), anyFloat(), endValueCaptor.capture(), anyFloat());
+        assertThat(endValueCaptor.getValue().intValue()).isEqualTo(0);
+    }
+
+    @Test
+    public void animateCollapsePanel_withOverlayFromBottomBar_collapsesTowardsBottomBar() {
+        mOverlayPanelViewController.inflate(mBaseLayout);
+        // Mock a panel that has layout size 50 and where the panel is opened.
+        int size = 50;
+        mockPanelWithSize(size);
+        mOverlayPanelViewController.getLayout().setClipBounds(
+                new Rect(0, 0, size, size));
+        mOverlayPanelViewController.setShouldAnimateCollapsePanel(true);
+        mOverlayPanelViewController.setPanelExpanded(true);
+        mOverlayPanelViewController.setPanelVisible(true);
+        mOverlayPanelViewController.setOverlayDirection(
+                OverlayPanelViewController.OVERLAY_FROM_BOTTOM_BAR);
+
+        mOverlayPanelViewController.animateCollapsePanel();
+
+        ArgumentCaptor<Float> endValueCaptor = ArgumentCaptor.forClass(Float.class);
+        verify(mFlingAnimationUtils).apply(
+                any(Animator.class), anyFloat(), endValueCaptor.capture(), anyFloat());
+        assertThat(endValueCaptor.getValue().intValue()).isEqualTo(
+                mOverlayPanelViewController.getLayout().getHeight());
+    }
+
+    @Test
     public void animateCollapsePanel_removesWindowFocus() {
         mOverlayPanelViewController.inflate(mBaseLayout);
         mOverlayPanelViewController.setShouldAnimateCollapsePanel(true);
@@ -216,6 +265,49 @@ public class OverlayPanelViewControllerTest extends SysuiTestCase {
         mOverlayPanelViewController.animateExpandPanel();
 
         assertThat(mOverlayPanelViewController.mOnAnimateExpandPanelCalled).isTrue();
+    }
+
+    @Test
+    public void animateExpandPanel_withOverlayFromTopBar_expandsToBottom() {
+        mOverlayPanelViewController.inflate(mBaseLayout);
+        // Mock a panel that has layout size 50 and where the panel is not opened.
+        int size = 50;
+        mockPanelWithSize(size);
+        mOverlayPanelViewController.getLayout().setClipBounds(
+                new Rect(0, 0, size, 0));
+        mOverlayPanelViewController.setShouldAnimateExpandPanel(true);
+        when(mCarDeviceProvisionedController.isCurrentUserFullySetup()).thenReturn(true);
+        mOverlayPanelViewController.setOverlayDirection(
+                OverlayPanelViewController.OVERLAY_FROM_TOP_BAR);
+
+        mOverlayPanelViewController.animateExpandPanel();
+
+        ArgumentCaptor<Float> endValueCaptor = ArgumentCaptor.forClass(Float.class);
+        verify(mFlingAnimationUtils).apply(
+                any(Animator.class), anyFloat(), endValueCaptor.capture(), anyFloat());
+        assertThat(endValueCaptor.getValue().intValue()).isEqualTo(
+                mOverlayPanelViewController.getLayout().getHeight());
+    }
+
+    @Test
+    public void animateExpandPanel_withOverlayFromBottomBar_expandsToTop() {
+        mOverlayPanelViewController.inflate(mBaseLayout);
+        // Mock a panel that has layout size 50 and where the panel is not opened.
+        int size = 50;
+        mockPanelWithSize(size);
+        mOverlayPanelViewController.getLayout().setClipBounds(
+                new Rect(0, size, size, size));
+        mOverlayPanelViewController.setShouldAnimateExpandPanel(true);
+        when(mCarDeviceProvisionedController.isCurrentUserFullySetup()).thenReturn(true);
+        mOverlayPanelViewController.setOverlayDirection(
+                OverlayPanelViewController.OVERLAY_FROM_BOTTOM_BAR);
+
+        mOverlayPanelViewController.animateExpandPanel();
+
+        ArgumentCaptor<Float> endValueCaptor = ArgumentCaptor.forClass(Float.class);
+        verify(mFlingAnimationUtils).apply(
+                any(Animator.class), anyFloat(), endValueCaptor.capture(), anyFloat());
+        assertThat(endValueCaptor.getValue().intValue()).isEqualTo(0);
     }
 
     @Test
@@ -328,6 +420,10 @@ public class OverlayPanelViewControllerTest extends SysuiTestCase {
                         MotionEvent.ACTION_MOVE, /* x= */ 0, /* y= */ 0, /* metaState= */ 0));
 
         verify(mOverlayViewGlobalStateController).inflateView(mOverlayPanelViewController);
+    }
+
+    private void mockPanelWithSize(int size) {
+        mOverlayPanelViewController.getLayout().setLeftTopRightBottom(0, 0, size, size);
     }
 
     private static class TestOverlayPanelViewController extends OverlayPanelViewController {
