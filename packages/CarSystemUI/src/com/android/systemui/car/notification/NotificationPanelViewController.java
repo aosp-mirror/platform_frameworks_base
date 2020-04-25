@@ -83,9 +83,9 @@ public class NotificationPanelViewController extends OverlayPanelViewController 
     private NotificationViewController mNotificationViewController;
 
     private boolean mIsTracking;
-    private boolean mNotificationListAtBottom;
+    private boolean mNotificationListAtEnd;
     private float mFirstTouchDownOnGlassPane;
-    private boolean mNotificationListAtBottomAtTimeOfTouch;
+    private boolean mNotificationListAtEndAtTimeOfTouch;
     private boolean mIsSwipingVerticallyToClose;
     private boolean mIsNotificationCardSwiping;
 
@@ -233,11 +233,11 @@ public class NotificationPanelViewController extends OverlayPanelViewController 
         // This allows us to initialize gesture listeners and detect when to close the notifications
         glassPane.setOnTouchListener((v, event) -> {
             if (event.getActionMasked() == MotionEvent.ACTION_UP) {
-                mNotificationListAtBottomAtTimeOfTouch = false;
+                mNotificationListAtEndAtTimeOfTouch = false;
             }
             if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
                 mFirstTouchDownOnGlassPane = event.getRawX();
-                mNotificationListAtBottomAtTimeOfTouch = mNotificationListAtBottom;
+                mNotificationListAtEndAtTimeOfTouch = mNotificationListAtEnd;
                 // Reset the tracker when there is a touch down on the glass pane.
                 mIsTracking = false;
                 // Pass the down event to gesture detector so that it knows where the touch event
@@ -251,34 +251,34 @@ public class NotificationPanelViewController extends OverlayPanelViewController 
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
-                // Check if we can scroll vertically downwards.
-                if (!mNotificationList.canScrollVertically(/* direction= */ 1)) {
-                    mNotificationListAtBottom = true;
+                // Check if we can scroll vertically in the animation direction.
+                if (!mNotificationList.canScrollVertically(mAnimateDirection)) {
+                    mNotificationListAtEnd = true;
                     return;
                 }
-                mNotificationListAtBottom = false;
+                mNotificationListAtEnd = false;
                 mIsSwipingVerticallyToClose = false;
-                mNotificationListAtBottomAtTimeOfTouch = false;
+                mNotificationListAtEndAtTimeOfTouch = false;
             }
         });
 
         mNotificationList.setOnTouchListener((v, event) -> {
             mIsNotificationCardSwiping = Math.abs(mFirstTouchDownOnGlassPane - event.getRawX())
                     > SWIPE_MAX_OFF_PATH;
-            if (mNotificationListAtBottomAtTimeOfTouch && mNotificationListAtBottom) {
+            if (mNotificationListAtEndAtTimeOfTouch && mNotificationListAtEnd) {
                 // We need to save the state here as if notification card is swiping we will
-                // change the mNotificationListAtBottomAtTimeOfTouch. This is to protect
+                // change the mNotificationListAtEndAtTimeOfTouch. This is to protect
                 // closing the notification shade while the notification card is being swiped.
                 mIsSwipingVerticallyToClose = true;
             }
 
             // If the card is swiping we should not allow the notification shade to close.
-            // Hence setting mNotificationListAtBottomAtTimeOfTouch to false will stop that
+            // Hence setting mNotificationListAtEndAtTimeOfTouch to false will stop that
             // for us. We are also checking for mIsTracking because while swiping the
             // notification shade to close if the user goes a bit horizontal while swiping
             // upwards then also this should close.
             if (mIsNotificationCardSwiping && !mIsTracking) {
-                mNotificationListAtBottomAtTimeOfTouch = false;
+                mNotificationListAtEndAtTimeOfTouch = false;
             }
 
             boolean handled = closeGestureDetector.onTouchEvent(event);
@@ -290,7 +290,7 @@ public class NotificationPanelViewController extends OverlayPanelViewController 
             }
             if (!handled && event.getActionMasked() == MotionEvent.ACTION_UP
                     && mIsSwipingVerticallyToClose) {
-                if (getSettleClosePercentage() < getPercentageFromBottom() && isTracking) {
+                if (getSettleClosePercentage() < getPercentageFromEndingEdge() && isTracking) {
                     animatePanel(DEFAULT_FLING_VELOCITY, false);
                 } else if (clippedHeight != getLayout().getHeight() && isTracking) {
                     // this can be caused when user is at the end of the list and trying to
@@ -299,11 +299,11 @@ public class NotificationPanelViewController extends OverlayPanelViewController 
                 }
             }
 
-            // Updating the mNotificationListAtBottomAtTimeOfTouch state has to be done after
+            // Updating the mNotificationListAtEndAtTimeOfTouch state has to be done after
             // the event has been passed to the closeGestureDetector above, such that the
             // closeGestureDetector sees the up event before the state has changed.
             if (event.getActionMasked() == MotionEvent.ACTION_UP) {
-                mNotificationListAtBottomAtTimeOfTouch = false;
+                mNotificationListAtEndAtTimeOfTouch = false;
             }
             return handled || isTracking;
         });
@@ -377,25 +377,31 @@ public class NotificationPanelViewController extends OverlayPanelViewController 
     }
 
     @Override
-    protected void onScroll(int height) {
+    protected void onScroll(int y) {
         if (mHandleBar != null) {
             ViewGroup.MarginLayoutParams lp =
                     (ViewGroup.MarginLayoutParams) mHandleBar.getLayoutParams();
-            mHandleBar.setTranslationY(height - mHandleBar.getHeight() - lp.bottomMargin);
+            // Adjust handlebar to new pointer position, and a little more depending on the
+            // animate direction so the bar can be seen fully.
+            if (mAnimateDirection > 0) {
+                mHandleBar.setTranslationY(y - mHandleBar.getHeight() - lp.bottomMargin);
+            } else {
+                mHandleBar.setTranslationY(y + mHandleBar.getHeight() + lp.topMargin);
+            }
         }
 
         if (mNotificationView.getHeight() > 0) {
             Drawable background = mNotificationView.getBackground().mutate();
-            background.setAlpha((int) (getBackgroundAlpha(height) * 255));
+            background.setAlpha((int) (getBackgroundAlpha(y) * 255));
             mNotificationView.setBackground(background);
         }
     }
 
     @Override
     protected boolean shouldAllowClosingScroll() {
-        // Unless the notification list is at the bottom, the panel shouldn't be allowed to
+        // Unless the notification list is at the end, the panel shouldn't be allowed to
         // collapse on scroll.
-        return mNotificationListAtBottomAtTimeOfTouch;
+        return mNotificationListAtEndAtTimeOfTouch;
     }
 
     /**
@@ -403,9 +409,11 @@ public class NotificationPanelViewController extends OverlayPanelViewController 
      * shade is visible to the user. When the notification shade is completely open then
      * alpha value will be 1.
      */
-    private float getBackgroundAlpha(int height) {
-        return mInitialBackgroundAlpha
-                + ((float) height / mNotificationView.getHeight() * mBackgroundAlphaDiff);
+    private float getBackgroundAlpha(int y) {
+        float fractionCovered =
+                ((float) (mAnimateDirection > 0 ? y : mNotificationView.getHeight() - y))
+                        / mNotificationView.getHeight();
+        return mInitialBackgroundAlpha + fractionCovered * mBackgroundAlphaDiff;
     }
 
     /** Sets the unseen count listener. */
@@ -431,13 +439,18 @@ public class NotificationPanelViewController extends OverlayPanelViewController 
         @Override
         public boolean onScroll(MotionEvent event1, MotionEvent event2, float distanceX,
                 float distanceY) {
-            calculatePercentageFromBottom(event2.getRawY());
-            // To prevent the jump in the clip bounds while closing the notification shade using
+            calculatePercentageFromEndingEdge(event2.getRawY());
+            // To prevent the jump in the clip bounds while closing the notification panel using
             // the handle bar we should calculate the height using the diff of event1 and event2.
             // This will help the notification shade to clip smoothly as the event2 value changes
             // as event1 value will be fixed.
-            int clipHeight = getLayout().getHeight() - (int) (event1.getRawY() - event2.getRawY());
-            setViewClipBounds(clipHeight);
+            float diff = mAnimateDirection * (event1.getRawY() - event2.getRawY());
+            float y = mAnimateDirection > 0
+                    ? getLayout().getHeight() - diff
+                    : diff;
+            // Ensure the position is within the overlay panel.
+            y = Math.max(0, Math.min(y, getLayout().getHeight()));
+            setViewClipBounds((int) y);
             return true;
         }
     }

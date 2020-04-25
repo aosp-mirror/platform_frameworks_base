@@ -1315,7 +1315,7 @@
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"S\'ha activat el mode Agent de prova"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"Si vols desactivar el mode Agent de prova, restableix les dades de fàbrica."</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"S\'ha activat la consola de sèrie"</string>
-    <string name="console_running_notification_message" msgid="7892751888125174039">"El rendiment s\'ha vist afectat. Per desactivar-la, comprova el bootloader."</string>
+    <string name="console_running_notification_message" msgid="7892751888125174039">"Afecta el rendiment. Per desactivar-la, comprova el bootloader."</string>
     <string name="usb_contaminant_detected_title" msgid="4359048603069159678">"Hi ha líquid o pols al port USB"</string>
     <string name="usb_contaminant_detected_message" msgid="7346100585390795743">"El port USB es desactiva automàticament. Toca per obtenir més informació."</string>
     <string name="usb_contaminant_not_detected_title" msgid="2651167729563264053">"Ja pots utilitzar el port USB"</string>

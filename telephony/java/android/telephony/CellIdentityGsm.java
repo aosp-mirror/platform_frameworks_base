@@ -323,6 +323,7 @@ public final class CellIdentityGsm extends CellIdentity {
         mBsic = in.readInt();
         mAdditionalPlmns = (ArraySet<String>) in.readArraySet(null);
 
+        updateGlobalCellId();
         if (DBG) log(toString());
     }
 

@@ -195,8 +195,8 @@
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"Администратор освободил устройство для личного использования"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"Это управляемое устройство"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Ваша организация управляет этим устройством и может отслеживать сетевой трафик. Подробнее…"</string>
-    <string name="location_changed_notification_title" msgid="3620158742816699316">"У приложений появился доступ к данным о вашем местоположении"</string>
-    <string name="location_changed_notification_text" msgid="7158423339982706912">"За подробной информацией обращайтесь к системному администратору."</string>
+    <string name="location_changed_notification_title" msgid="3620158742816699316">"У приложений есть доступ к вашим геоданным"</string>
+    <string name="location_changed_notification_text" msgid="7158423339982706912">"Узнайте подробности у системного администратора."</string>
     <string name="country_detector" msgid="7023275114706088854">"Определение страны"</string>
     <string name="location_service" msgid="2439187616018455546">"Геолокация"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"Сервис для обработки уведомлений от датчиков"</string>
@@ -2116,8 +2116,8 @@
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"Чат"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"Групповой чат"</string>
     <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>
-    <string name="resolver_personal_tab" msgid="2051260504014442073">"Личный"</string>
-    <string name="resolver_work_tab" msgid="2690019516263167035">"Рабочий"</string>
+    <string name="resolver_personal_tab" msgid="2051260504014442073">"Личное"</string>
+    <string name="resolver_work_tab" msgid="2690019516263167035">"Рабочее"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Просмотр личных данных"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Просмотр рабочих данных"</string>
     <string name="resolver_cant_share_with_work_apps" msgid="637686613606502219">"Этим контентом нельзя делиться с рабочими приложениями"</string>
