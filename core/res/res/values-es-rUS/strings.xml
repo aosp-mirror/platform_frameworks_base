@@ -192,7 +192,7 @@
     <string name="network_logging_notification_title" msgid="554983187553845004">"Dispositivo administrado"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Tu organización administra este dispositivo y es posible que controle el tráfico de red. Presiona para obtener más información."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"Las apps pueden acceder a tu ubicación"</string>
-    <string name="location_changed_notification_text" msgid="7158423339982706912">"Para obtener más información, comunícate con tu administrador de TI"</string>
+    <string name="location_changed_notification_text" msgid="7158423339982706912">"Comunícate con el administrador por más información"</string>
     <string name="country_detector" msgid="7023275114706088854">"Detector de país"</string>
     <string name="location_service" msgid="2439187616018455546">"Servicio de ubicación"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"Servicio de notificaciones del sensor"</string>
@@ -230,7 +230,7 @@
     <string name="shutdown_confirm_question" msgid="796151167261608447">"¿Deseas apagarlo?"</string>
     <string name="reboot_safemode_title" msgid="5853949122655346734">"Reiniciar en modo seguro"</string>
     <string name="reboot_safemode_confirm" msgid="1658357874737219624">"¿Deseas reiniciar el dispositivo en modo seguro? Las aplicaciones de terceros que instalaste se desactivarán y se restablecerán cuando vuelvas a reiniciar el dispositivo."</string>
-    <string name="recent_tasks_title" msgid="8183172372995396653">"Reciente"</string>
+    <string name="recent_tasks_title" msgid="8183172372995396653">"Recientes"</string>
     <string name="no_recent_tasks" msgid="9063946524312275906">"No hay aplicaciones recientes."</string>
     <string name="global_actions" product="tablet" msgid="4412132498517933867">"Opciones de tablet"</string>
     <string name="global_actions" product="tv" msgid="3871763739487450369">"Opciones de Android TV"</string>
@@ -1315,7 +1315,7 @@
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"Se habilitó el modo de agente de prueba"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"Restablece la configuración de fábrica para inhabilitar el modo de agente de prueba."</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"Se habilitó la consola en serie"</string>
-    <string name="console_running_notification_message" msgid="7892751888125174039">"Afecta el rendimiento. Para inhabilitarla, verifica bootloader."</string>
+    <string name="console_running_notification_message" msgid="7892751888125174039">"Afecta el rendimiento. Para inhabilitarla, verifica el bootloader."</string>
     <string name="usb_contaminant_detected_title" msgid="4359048603069159678">"Hay líquido o suciedad en el puerto USB"</string>
     <string name="usb_contaminant_detected_message" msgid="7346100585390795743">"El puerto USB se inhabilitó automáticamente. Presiona para obtener más información."</string>
     <string name="usb_contaminant_not_detected_title" msgid="2651167729563264053">"Se puede usar el puerto USB"</string>

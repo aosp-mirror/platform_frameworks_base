@@ -2029,7 +2029,7 @@
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> und <xliff:g id="COUNT_3">%d</xliff:g> Dateien</item>
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> und <xliff:g id="COUNT_1">%d</xliff:g> Datei</item>
     </plurals>
-    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Keine Personen zum Teilen empfohlen"</string>
+    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Keine empfohlenen Empfänger"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"Liste der Apps"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Diese App hat noch keine Berechtigung zum Aufnehmen erhalten, könnte aber Audioaufnahmen über dieses USB-Gerät machen."</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"Startseite"</string>
