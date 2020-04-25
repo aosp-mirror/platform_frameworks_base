@@ -1120,7 +1120,11 @@ public final class OverlayManagerService extends SystemService {
 
         @Override
         public List<PackageInfo> getOverlayPackages(final int userId) {
-            return mPackageManagerInternal.getOverlayPackages(userId);
+            final List<PackageInfo> overlays = mPackageManagerInternal.getOverlayPackages(userId);
+            for (final PackageInfo info : overlays) {
+                cachePackageInfo(info.packageName, userId, info);
+            }
+            return overlays;
         }
 
         @Nullable
