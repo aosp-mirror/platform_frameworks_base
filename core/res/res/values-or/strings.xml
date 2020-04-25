@@ -261,7 +261,7 @@
     <string name="global_actions_toggle_airplane_mode" msgid="6911684460146916206">"ଏରୋପ୍ଲେନ୍‍ ମୋଡ୍"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="5508025516695361936">"ଏରୋପ୍ଲେନ୍‍ ମୋଡ୍ ଅନ୍ ଅଛି"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="8522219771500505475">"ଏରୋପ୍ଲେନ୍‍ ମୋଡ୍ ଅଫ୍ ଅଛି"</string>
-    <string name="global_action_settings" msgid="4671878836947494217">"ସେଟିଙ୍ଗ"</string>
+    <string name="global_action_settings" msgid="4671878836947494217">"ସେଟିଂସ୍"</string>
     <string name="global_action_assist" msgid="2517047220311505805">"ସହାୟକ"</string>
     <string name="global_action_voice_assist" msgid="6655788068555086695">"ଭଏସ୍‌ ସହାୟକ"</string>
     <string name="global_action_lockdown" msgid="2475471405907902963">"ଲକ୍ କରନ୍ତୁ"</string>
@@ -1091,13 +1091,13 @@
     <string name="elapsed_time_short_format_h_mm_ss" msgid="2302144714803345056">"<xliff:g id="HOURS">%1$d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="SECONDS">%3$02d</xliff:g>"</string>
     <string name="selectAll" msgid="1532369154488982046">"ସବୁ ଚୟନ କରନ୍ତୁ"</string>
     <string name="cut" msgid="2561199725874745819">"କଟ୍‌"</string>
-    <string name="copy" msgid="5472512047143665218">"କପୀ"</string>
-    <string name="failed_to_copy_to_clipboard" msgid="725919885138539875">"କ୍ଲିପ୍‌ବୋର୍ଡକୁ କପୀ କରିହେଲା ନାହିଁ"</string>
+    <string name="copy" msgid="5472512047143665218">"କପି କରନ୍ତୁ"</string>
+    <string name="failed_to_copy_to_clipboard" msgid="725919885138539875">"କ୍ଲିପ୍‌ବୋର୍ଡକୁ କପି କରିହେଲା ନାହିଁ"</string>
     <string name="paste" msgid="461843306215520225">"ପେଷ୍ଟ କରନ୍ତୁ"</string>
     <string name="paste_as_plain_text" msgid="7664800665823182587">"ସାଦା ଟେକ୍ସଟ୍‍ ଭାବରେ ପେଷ୍ଟ କରନ୍ତୁ"</string>
     <string name="replace" msgid="7842675434546657444">"ବଦଳାନ୍ତୁ…"</string>
     <string name="delete" msgid="1514113991712129054">"ଡିଲିଟ୍‍ କରନ୍ତୁ"</string>
-    <string name="copyUrl" msgid="6229645005987260230">"URL କପୀ କରନ୍ତୁ"</string>
+    <string name="copyUrl" msgid="6229645005987260230">"URL କପି କରନ୍ତୁ"</string>
     <string name="selectTextMode" msgid="3225108910999318778">"ଟେକ୍ସଟ୍‍ ଚୟନ କରନ୍ତୁ"</string>
     <string name="undo" msgid="3175318090002654673">"ପୂର୍ବ ପରି କରନ୍ତୁ"</string>
     <string name="redo" msgid="7231448494008532233">"ପୁଣି କରନ୍ତୁ"</string>
@@ -1457,12 +1457,9 @@
     <string name="gpsNotifMessage" msgid="7346649122793758032">"<xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)ଙ୍କ ଦ୍ୱାରା ଅନୁରୋଧ କରାଯାଇଛି"</string>
     <string name="gpsVerifYes" msgid="3719843080744112940">"ହଁ"</string>
     <string name="gpsVerifNo" msgid="1671201856091564741">"ନା"</string>
-    <!-- no translation found for gnss_nfw_notification_title (5004493772059563423) -->
-    <skip />
-    <!-- no translation found for gnss_nfw_notification_message_oem (3683958907027107969) -->
-    <skip />
-    <!-- no translation found for gnss_nfw_notification_message_carrier (815888995791562151) -->
-    <skip />
+    <string name="gnss_nfw_notification_title" msgid="5004493772059563423">"ଜରୁରୀକାଳୀନ ଲୋକେସନ୍ ଆକ୍ସେସ୍ କରାଯାଇଛି"</string>
+    <string name="gnss_nfw_notification_message_oem" msgid="3683958907027107969">"ବର୍ତ୍ତମାନର ଏକ ଜରୁରୀକାଳୀନ ଅବଧି ସମୟରେ ଆପଣଙ୍କ ଡିଭାଇସ୍ ନିର୍ମାତା ଆପଣଙ୍କ ଲୋକେସନ୍ ଆକ୍ସେସ୍ କରିଛନ୍ତି"</string>
+    <string name="gnss_nfw_notification_message_carrier" msgid="815888995791562151">"ବର୍ତ୍ତମାନର ଏକ ଜରୁରୀକାଳୀନ ଅବଧି ସମୟରେ ଆପଣଙ୍କ ମୋବାଇଲ୍ କମ୍ପାନୀ ଆପଣଙ୍କ ଲୋକେସନ୍ ଆକ୍ସେସ୍ କରିଛି"</string>
     <string name="sync_too_many_deletes" msgid="6999440774578705300">"ଡିଲିଟ୍‌ କରିବାର ସୀମା ଅତିକ୍ରମ ହୋଇଯାଇଛି"</string>
     <string name="sync_too_many_deletes_desc" msgid="7409327940303504440">"<xliff:g id="ACCOUNT_NAME">%3$s</xliff:g> ଆକାଉଣ୍ଟର <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g> ପାଇଁ <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> ଟି ଡିଲିଟ୍‍ କରାଯାଇଥିବା ଆଇଟମ୍‍ ରହିଛି। ଆପଣ କ’ଣ କରିବାକୁ ଚାହାଁନ୍ତି?"</string>
     <string name="sync_really_delete" msgid="5657871730315579051">"ଆଇଟମ୍‍ ଡିଲିଟ୍‍ କରନ୍ତୁ"</string>
@@ -1566,7 +1563,7 @@
     <string name="media_route_chooser_title" msgid="6646594924991269208">"ଡିଭାଇସ୍‍ ସଂଯୋଗ କରନ୍ତୁ"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"ଡିଭାଇସରେ ସ୍କ୍ରିନ୍‍ କାଷ୍ଟ କରନ୍ତୁ"</string>
     <string name="media_route_chooser_searching" msgid="6119673534251329535">"ଡିଭାଇସ୍‍ ଖୋଜାଯାଉଛି…"</string>
-    <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"ସେଟିଙ୍ଗ"</string>
+    <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"ସେଟିଂସ୍"</string>
     <string name="media_route_controller_disconnect" msgid="7362617572732576959">"ବିଚ୍ଛିନ୍ନ କରନ୍ତୁ"</string>
     <string name="media_route_status_scanning" msgid="8045156315309594482">"ସ୍କାନ୍‌ କରୁଛି…"</string>
     <string name="media_route_status_connecting" msgid="5845597961412010540">"ସଂଯୋଗ କରୁଛି..."</string>
@@ -1996,7 +1993,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"’ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ’ ବଦଳିଯାଇଛି"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"କ’ଣ ଅବରୋଧ ହୋଇଛି ଯାଞ୍ଚ କରିବା ପାଇଁ ଟାପ୍ କରନ୍ତୁ।"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"ସିଷ୍ଟମ୍‌"</string>
-    <string name="notification_app_name_settings" msgid="9088548800899952531">"ସେଟିଙ୍ଗ"</string>
+    <string name="notification_app_name_settings" msgid="9088548800899952531">"ସେଟିଂସ୍"</string>
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"କ୍ୟାମେରା"</string>
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"ମାଇକ୍ରୋଫୋନ୍"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"ଆପଣଙ୍କ ସ୍କ୍ରୀନ୍ ଉପରେ ଥିବା ଅନ୍ୟ ଆପ୍‌ ଉପରେ ଦେଖାଦେବ"</string>

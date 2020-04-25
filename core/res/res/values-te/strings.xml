@@ -1457,12 +1457,9 @@
     <string name="gpsNotifMessage" msgid="7346649122793758032">"<xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>) ద్వారా అభ్యర్థించబడింది"</string>
     <string name="gpsVerifYes" msgid="3719843080744112940">"అవును"</string>
     <string name="gpsVerifNo" msgid="1671201856091564741">"కాదు"</string>
-    <!-- no translation found for gnss_nfw_notification_title (5004493772059563423) -->
-    <skip />
-    <!-- no translation found for gnss_nfw_notification_message_oem (3683958907027107969) -->
-    <skip />
-    <!-- no translation found for gnss_nfw_notification_message_carrier (815888995791562151) -->
-    <skip />
+    <string name="gnss_nfw_notification_title" msgid="5004493772059563423">"ఎమర్జెన్సీ లొకేషన్ యాక్సెస్ చేయబడింది"</string>
+    <string name="gnss_nfw_notification_message_oem" msgid="3683958907027107969">"ఇటీవలి ఎమర్జెన్సీ సెషన్‌లో మీ పరికర తయారీదారు మీ లొకేషన్‌ను యాక్సెస్ చేశారు"</string>
+    <string name="gnss_nfw_notification_message_carrier" msgid="815888995791562151">"ఇటీవలి ఎమర్జెన్సీ సెషన్‌లో మీ లొకేషన్‌ను మీ క్యారియర్ యాక్సెస్ చేసింది"</string>
     <string name="sync_too_many_deletes" msgid="6999440774578705300">"తొలగింపు పరిమితి మించిపోయింది"</string>
     <string name="sync_too_many_deletes_desc" msgid="7409327940303504440">"<xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>, ఖాతా <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g>కి సంబంధించి <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> తొలగించబడే అంశాలు ఉన్నాయి. మీరు ఏమి చేయాలనుకుంటున్నారు?"</string>
     <string name="sync_really_delete" msgid="5657871730315579051">"అంశాలను తొలగించు"</string>
@@ -2032,7 +2029,7 @@
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> ఫైల్‌లు</item>
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g> ఫైల్</item>
     </plurals>
-    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"షేర్ చేయకూడని వ్యక్తులు"</string>
+    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"షేర్ చేయడానికి సిఫార్సు చేయబడని వ్యక్తులు"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"యాప్‌ల జాబితా"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"ఈ యాప్‌కు రికార్డ్ చేసే అనుమతి మంజూరు కాలేదు, అయినా ఈ USB పరికరం ద్వారా ఆడియోను క్యాప్చర్ చేయగలదు."</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"హోమ్"</string>
