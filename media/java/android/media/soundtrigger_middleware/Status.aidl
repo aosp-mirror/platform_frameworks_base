@@ -30,4 +30,9 @@ enum Status {
     TEMPORARY_PERMISSION_DENIED = 3,
     /** The object on which this method is called is dead and all of its state is lost. */
     DEAD_OBJECT = 4,
+    /**
+     * Unexpected internal error has occurred. Usually this will result in the service rebooting
+     * shortly after. The client should treat the state of the server as undefined.
+     */
+    INTERNAL_ERROR = 5,
 }
