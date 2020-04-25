@@ -436,10 +436,14 @@
     <string name="power_discharge_by_only" msgid="92545648425937000">"Ordu honetara arte iraungo du, gutxi gorabehera: <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"<xliff:g id="TIME">%1$s</xliff:g> arte"</string>
     <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Baliteke bateria ordu honetan agortzea: <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"<xliff:g id="THRESHOLD">%1$s</xliff:g> baino gutxiago gelditzen dira"</string>
-    <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"<xliff:g id="THRESHOLD">%1$s</xliff:g> baino gutxiago gelditzen da (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> baino gehiago gelditzen da (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_only_more_than_subtext" msgid="3274496164769110480">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> baino gehiago gelditzen da"</string>
+    <!-- no translation found for power_remaining_less_than_duration_only (8956656616031395152) -->
+    <skip />
+    <!-- no translation found for power_remaining_less_than_duration (318215464914990578) -->
+    <skip />
+    <!-- no translation found for power_remaining_more_than_subtext (446388082266121894) -->
+    <skip />
+    <!-- no translation found for power_remaining_only_more_than_subtext (4873750633368888062) -->
+    <skip />
     <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"Baliteke telefonoa laster itzaltzea"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"Baliteke tableta laster itzaltzea"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"Baliteke gailua laster itzaltzea"</string>

@@ -25,7 +25,6 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.media.AudioDeviceAttributes;
-import android.media.AudioManager;
 import android.media.AudioRoutesInfo;
 import android.media.AudioSystem;
 import android.media.IAudioRoutesObserver;
@@ -38,7 +37,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.SystemClock;
-import android.os.UserHandle;
 import android.util.Log;
 import android.util.PrintWriterPrinter;
 
@@ -71,6 +69,8 @@ import java.io.PrintWriter;
     private final AudioDeviceInventory mDeviceInventory;
     // Manages notifications to BT service
     private final BtHelper mBtHelper;
+    // Adapter for system_server-reserved operations
+    private final SystemServerAdapter mSystemServer;
 
 
     //-------------------------------------------------------------------
@@ -97,17 +97,21 @@ import java.io.PrintWriter;
         mAudioService = service;
         mBtHelper = new BtHelper(this);
         mDeviceInventory = new AudioDeviceInventory(this);
+        mSystemServer = SystemServerAdapter.getDefaultAdapter(mContext);
 
         init();
     }
 
-    /** for test purposes only, inject AudioDeviceInventory */
+    /** for test purposes only, inject AudioDeviceInventory and adapter for operations running
+     *  in system_server */
     AudioDeviceBroker(@NonNull Context context, @NonNull AudioService service,
-                      @NonNull AudioDeviceInventory mockDeviceInventory) {
+                      @NonNull AudioDeviceInventory mockDeviceInventory,
+                      @NonNull SystemServerAdapter mockSystemServer) {
         mContext = context;
         mAudioService = service;
         mBtHelper = new BtHelper(this);
         mDeviceInventory = mockDeviceInventory;
+        mSystemServer = mockSystemServer;
 
         init();
     }
@@ -682,7 +686,7 @@ import java.io.PrintWriter;
     private void onSendBecomingNoisyIntent() {
         AudioService.sDeviceLogger.log((new AudioEventLogger.StringEvent(
                 "broadcast ACTION_AUDIO_BECOMING_NOISY")).printLog(TAG));
-        sendBroadcastToAll(new Intent(AudioManager.ACTION_AUDIO_BECOMING_NOISY));
+        mSystemServer.sendDeviceBecomingNoisyIntent();
     }
 
     //---------------------------------------------------------------------
@@ -1098,19 +1102,6 @@ import java.io.PrintWriter;
 
             mBrokerHandler.sendMessageAtTime(mBrokerHandler.obtainMessage(msg, arg1, arg2, obj),
                     time);
-        }
-    }
-
-    //-------------------------------------------------------------
-    // internal utilities
-    private void sendBroadcastToAll(Intent intent) {
-        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
-        intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
-        final long ident = Binder.clearCallingIdentity();
-        try {
-            mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
-        } finally {
-            Binder.restoreCallingIdentity(ident);
         }
     }
 }

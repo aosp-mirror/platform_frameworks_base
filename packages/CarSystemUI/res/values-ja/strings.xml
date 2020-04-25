@@ -20,4 +20,10 @@
     <string name="hvac_min_text" msgid="8167124789068494624">"最小"</string>
     <string name="hvac_max_text" msgid="3669693372074755551">"最大"</string>
     <string name="voice_recognition_toast" msgid="1149934534584052842">"Bluetooth 接続デバイスで音声認識が処理されるようになりました"</string>
+    <string name="car_guest" msgid="318393171202663722">"ゲスト"</string>
+    <string name="start_guest_session" msgid="497784785761754874">"ゲスト"</string>
+    <string name="car_add_user" msgid="4067337059622483269">"ユーザーを追加"</string>
+    <string name="car_new_user" msgid="6637442369728092473">"新しいユーザー"</string>
+    <string name="user_add_user_message_setup" msgid="1035578846007352323">"新しいユーザーを追加したら、そのユーザーは自分のスペースをセットアップする必要があります。"</string>
+    <string name="user_add_user_message_update" msgid="7061671307004867811">"どのユーザーも他のすべてのユーザーに代わってアプリを更新できます。"</string>
 </resources>

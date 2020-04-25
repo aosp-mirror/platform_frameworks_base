@@ -122,6 +122,9 @@
   "imports": [
     {
       "path": "frameworks/base/core/java/android/content/pm"
+    },
+    {
+      "path": "vendor/xts/gts-tests/hostsidetests/stagedinstall"
     }
   ]
 }

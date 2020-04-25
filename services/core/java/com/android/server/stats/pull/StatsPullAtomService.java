@@ -206,6 +206,8 @@ public class StatsPullAtomService extends SystemService {
     private static final int OP_FLAGS_PULLED = OP_FLAG_SELF | OP_FLAG_TRUSTED_PROXY;
     private static final String COMMON_PERMISSION_PREFIX = "android.permission.";
     private static final String APP_OPS_TARGET_COLLECTION_SIZE = "app_ops_target_collection_size";
+    private static final String DANGEROUS_PERMISSION_STATE_SAMPLE_RATE =
+            "dangerous_permission_state_sample_rate";
 
     private final Object mNetworkStatsLock = new Object();
     @GuardedBy("mNetworkStatsLock")
@@ -2583,6 +2585,8 @@ public class StatsPullAtomService extends SystemService {
 
     int pullDangerousPermissionState(int atomTag, List<StatsEvent> pulledData) {
         final long token = Binder.clearCallingIdentity();
+        float samplingRate = DeviceConfig.getFloat(DeviceConfig.NAMESPACE_PERMISSIONS,
+                DANGEROUS_PERMISSION_STATE_SAMPLE_RATE, 0.02f);
         Set<Integer> reportedUids = new HashSet<>();
         try {
             PackageManager pm = mContext.getPackageManager();
@@ -2611,7 +2615,7 @@ public class StatsPullAtomService extends SystemService {
                     reportedUids.add(pkg.applicationInfo.uid);
 
                     if (atomTag == FrameworkStatsLog.DANGEROUS_PERMISSION_STATE_SAMPLED
-                            && ThreadLocalRandom.current().nextFloat() > 0.01f) {
+                            && ThreadLocalRandom.current().nextFloat() > samplingRate) {
                         continue;
                     }
 

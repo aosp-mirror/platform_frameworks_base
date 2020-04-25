@@ -1478,12 +1478,9 @@
     <string name="gpsNotifMessage" msgid="7346649122793758032">"Zahteva <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
     <string name="gpsVerifYes" msgid="3719843080744112940">"Da"</string>
     <string name="gpsVerifNo" msgid="1671201856091564741">"Ne"</string>
-    <!-- no translation found for gnss_nfw_notification_title (5004493772059563423) -->
-    <skip />
-    <!-- no translation found for gnss_nfw_notification_message_oem (3683958907027107969) -->
-    <skip />
-    <!-- no translation found for gnss_nfw_notification_message_carrier (815888995791562151) -->
-    <skip />
+    <string name="gnss_nfw_notification_title" msgid="5004493772059563423">"Pristupljeno lokaciji za hitne slučajeve"</string>
+    <string name="gnss_nfw_notification_message_oem" msgid="3683958907027107969">"Proizvođač uređaja je pristupio vašoj lokaciji tokom nedavne hitne sesije"</string>
+    <string name="gnss_nfw_notification_message_carrier" msgid="815888995791562151">"Mobilni operater je pristupio vašoj lokaciji tokom nedavne hitne sesije"</string>
     <string name="sync_too_many_deletes" msgid="6999440774578705300">"Premašeno je ograničenje za brisanje"</string>
     <string name="sync_too_many_deletes_desc" msgid="7409327940303504440">"Postoje izbrisane stavke (<xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g>) za <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>, nalog <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g>. Šta želite da uradite?"</string>
     <string name="sync_really_delete" msgid="5657871730315579051">"Izbriši stavke"</string>

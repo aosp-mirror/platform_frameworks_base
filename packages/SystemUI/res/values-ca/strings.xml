@@ -88,7 +88,7 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"L\'aplicació o la teva organització no permeten fer captures de pantalla"</string>
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"Ignora la captura de pantalla"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Previsualització de la captura de pantalla"</string>
-    <string name="screenrecord_name" msgid="2596401223859996572">"Gravadora de pantalla"</string>
+    <string name="screenrecord_name" msgid="2596401223859996572">"Gravació de pantalla"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Notificació en curs d\'una sessió de gravació de la pantalla"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Vols iniciar la gravació?"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"Quan graves contingut, el sistema Android pot capturar qualsevol informació sensible que es mostri a la pantalla o que es reprodueixi al dispositiu. Això inclou les contrasenyes, la informació de pagament, les fotos, els missatges i l\'àudio."</string>
@@ -999,25 +999,22 @@
     <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Controla les bombolles en qualsevol moment"</string>
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Toca Gestiona per desactivar les bombolles d\'aquesta aplicació"</string>
     <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"Entesos"</string>
+    <!-- no translation found for bubbles_app_settings (5779443644062348657) -->
+    <skip />
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"S\'ha actualitzat el sistema de navegació. Per fer canvis, ves a Configuració."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Ves a Configuració per actualitzar el sistema de navegació"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"En espera"</string>
-    <!-- no translation found for priority_onboarding_show_at_top_text (1678400241025513541) -->
-    <skip />
-    <!-- no translation found for priority_onboarding_show_avatar_text (5756291381124091508) -->
-    <skip />
-    <!-- no translation found for priority_onboarding_appear_as_bubble_text (4227039772250263122) -->
-    <skip />
-    <!-- no translation found for priority_onboarding_ignores_dnd_text (2918952762719600529) -->
-    <skip />
-    <!-- no translation found for priority_onboarding_done_button_title (4569550984286506007) -->
-    <skip />
+    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Mostra a la part superior de la secció de converses"</string>
+    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Mostra la foto de perfil a la pantalla de bloqueig"</string>
+    <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Es mostra com a bombolla flotant en primer pla"</string>
+    <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Interromp el mode No molestis"</string>
+    <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"Entesos"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Finestra superposada d\'ampliació"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Finestra d\'ampliació"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Finestra de controls d\'ampliació"</string>
-    <string name="quick_controls_title" msgid="6839108006171302273">"Controls del dispositiu"</string>
+    <string name="quick_controls_title" msgid="6839108006171302273">"Controls de dispositius"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Afegeix controls per als teus dispositius connectats"</string>
-    <string name="quick_controls_setup_title" msgid="8901436655997849822">"Configura els controls del dispositiu"</string>
+    <string name="quick_controls_setup_title" msgid="8901436655997849822">"Configura els controls de dispositius"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Mantén el botó d\'engegada premut per accedir als teus controls"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Selecciona l\'aplicació per afegir controls"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
@@ -1030,7 +1027,7 @@
     <string name="controls_favorite_removed" msgid="5276978408529217272">"S\'han suprimit tots els controls"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"No s\'ha pogut carregar la llista completa de controls."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Altres"</string>
-    <string name="controls_dialog_title" msgid="2343565267424406202">"Afegeix als controls del dispositiu"</string>
+    <string name="controls_dialog_title" msgid="2343565267424406202">"Afegeix als controls de dispositius"</string>
     <string name="controls_dialog_ok" msgid="7011816381344485651">"Afegeix als preferits"</string>
     <string name="controls_dialog_message" msgid="6292099631702047540">"<xliff:g id="APP">%s</xliff:g> ha suggerit aquest control perquè l\'afegeixis als preferits."</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"S\'han actualitzat els controls"</string>

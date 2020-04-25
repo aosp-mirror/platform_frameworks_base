@@ -1081,6 +1081,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
             pw.append(", eventTypes="
                     + AccessibilityEvent.eventTypeToString(mEventTypes));
             pw.append(", notificationTimeout=" + mNotificationTimeout);
+            pw.append(", requestA11yBtn=" + mRequestAccessibilityButton);
             pw.append("]");
         }
     }

@@ -999,19 +999,16 @@
     <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Buborékok vezérlése bármikor"</string>
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"A Kezelés gombra koppintva kapcsolhatja ki az alkalmazásból származó buborékokat"</string>
     <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"Értem"</string>
+    <!-- no translation found for bubbles_app_settings (5779443644062348657) -->
+    <skip />
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"A rendszer-navigáció módja megváltozott. Módosításához nyissa meg a Beállításokat."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"A rendszer-navigációs lehetőségeket a Beállításokban módosíthatja"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Készenléti mód"</string>
-    <!-- no translation found for priority_onboarding_show_at_top_text (1678400241025513541) -->
-    <skip />
-    <!-- no translation found for priority_onboarding_show_avatar_text (5756291381124091508) -->
-    <skip />
-    <!-- no translation found for priority_onboarding_appear_as_bubble_text (4227039772250263122) -->
-    <skip />
-    <!-- no translation found for priority_onboarding_ignores_dnd_text (2918952762719600529) -->
-    <skip />
-    <!-- no translation found for priority_onboarding_done_button_title (4569550984286506007) -->
-    <skip />
+    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"A beszélgetések szakaszának tetején jelennek meg"</string>
+    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Megjelenítik a profilképet a lezárási képernyőn"</string>
+    <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Buborékként jelennek meg az alkalmazások felett"</string>
+    <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Megszakítják a Ne zavarjanak módot"</string>
+    <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"Értem"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Nagyítási fedvény ablaka"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Nagyítás ablaka"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Nagyítási vezérlők ablaka"</string>

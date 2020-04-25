@@ -87,8 +87,7 @@
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"ບໍ່ສາມາດຖ່າຍຮູບໜ້າຈໍໄດ້ເນື່ອງຈາກພື້ນທີ່ຈັດເກັບຂໍ້ມູນມີຈຳກັດ"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"ແອັບ ຫຼື ອົງກອນຂອງທ່ານບໍ່ອະນຸຍາດໃຫ້ຖ່າຍຮູບໜ້າຈໍ"</string>
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"ປິດຮູບໜ້າຈໍ"</string>
-    <!-- no translation found for screenshot_preview_description (7606510140714080474) -->
-    <skip />
+    <string name="screenshot_preview_description" msgid="7606510140714080474">"ຕົວຢ່າງຮູບໜ້າຈໍ"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"ໂປຣແກຣມບັນທຶກໜ້າຈໍ"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"ການແຈ້ງເຕືອນສຳລັບເຊດຊັນການບັນທຶກໜ້າຈໍໃດໜຶ່ງ"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"ເລີ່ມການບັນທຶກບໍ?"</string>
@@ -1000,19 +999,15 @@
     <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"ຄວບຄຸມຟອງຕອນໃດກໍໄດ້"</string>
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"ແຕະຈັດການ ເພື່ອປິດຟອງຈາກແອັບນີ້"</string>
     <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"ເຂົ້າໃຈແລ້ວ"</string>
+    <string name="bubbles_app_settings" msgid="5779443644062348657">"ການຕັ້ງຄ່າ <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"ອັບເດດການນຳທາງລະບົບແລ້ວ. ເພື່ອປ່ຽນແປງ, ກະລຸນາໄປທີ່ການຕັ້ງຄ່າ."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"ໄປທີ່ການຕັ້ງຄ່າເພື່ອອັບເດດການນຳທາງລະບົບ"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"ສະແຕນບາຍ"</string>
-    <!-- no translation found for priority_onboarding_show_at_top_text (1678400241025513541) -->
-    <skip />
-    <!-- no translation found for priority_onboarding_show_avatar_text (5756291381124091508) -->
-    <skip />
-    <!-- no translation found for priority_onboarding_appear_as_bubble_text (4227039772250263122) -->
-    <skip />
-    <!-- no translation found for priority_onboarding_ignores_dnd_text (2918952762719600529) -->
-    <skip />
-    <!-- no translation found for priority_onboarding_done_button_title (4569550984286506007) -->
-    <skip />
+    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"ສະແດງຢູ່ເທິງສຸດຂອງພາກສ່ວນການສົນທະນາ"</string>
+    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"ສະແດງຮູບໂປຣໄຟລ໌ຢູ່ໜ້າຈໍລັອກ"</string>
+    <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"ປາກົດເປັນ bubble ລອຍຢູ່ເໜືອແອັບ"</string>
+    <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"ລົບກວນໂໝດຫ້າມລົບກວນ"</string>
+    <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"ເຂົ້າໃຈແລ້ວ"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"ໜ້າຈໍວາງທັບການຂະຫຍາຍ"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"ໜ້າຈໍການຂະຫຍາຍ"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"ການຄວບຄຸມໜ້າຈໍການຂະຫຍາຍ"</string>

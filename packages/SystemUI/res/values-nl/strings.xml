@@ -999,25 +999,21 @@
     <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Beheer bubbels wanneer je wilt"</string>
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Tik op Beheren om bubbels van deze app uit te schakelen"</string>
     <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"OK"</string>
+    <string name="bubbles_app_settings" msgid="5779443644062348657">"Instellingen voor <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Systeemnavigatie geüpdatet. Als je wijzigingen wilt aanbrengen, ga je naar Instellingen."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Ga naar Instellingen om de systeemnavigatie te updaten"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Stand-by"</string>
-    <!-- no translation found for priority_onboarding_show_at_top_text (1678400241025513541) -->
-    <skip />
-    <!-- no translation found for priority_onboarding_show_avatar_text (5756291381124091508) -->
-    <skip />
-    <!-- no translation found for priority_onboarding_appear_as_bubble_text (4227039772250263122) -->
-    <skip />
-    <!-- no translation found for priority_onboarding_ignores_dnd_text (2918952762719600529) -->
-    <skip />
-    <!-- no translation found for priority_onboarding_done_button_title (4569550984286506007) -->
-    <skip />
+    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Worden bovenaan het gespreksgedeelte weergegeven"</string>
+    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Tonen profielafbeelding op vergrendelingsscherm"</string>
+    <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Worden als zwevende ballon weergegeven vóór apps"</string>
+    <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Onderbreken \'Niet storen\'"</string>
+    <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"OK"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Overlay voor vergrotingsvenster"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Vergrotingsvenster"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Bediening van vergrotingsvenster"</string>
-    <string name="quick_controls_title" msgid="6839108006171302273">"Apparaatopties"</string>
+    <string name="quick_controls_title" msgid="6839108006171302273">"Apparaatbediening"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Bedieningselementen voor je gekoppelde apparaten toevoegen"</string>
-    <string name="quick_controls_setup_title" msgid="8901436655997849822">"Apparaatopties instellen"</string>
+    <string name="quick_controls_setup_title" msgid="8901436655997849822">"Apparaatbediening instellen"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Houd de aan/uit-knop ingedrukt voor toegang tot de bedieningselementen"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Kies de app waaraan je bedieningselementen wilt toevoegen"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
@@ -1025,12 +1021,12 @@
       <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> bedieningselement toegevoegd.</item>
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Bedieningselementen"</string>
-    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Kies bedieningselementen die je vanaf het menu Voeding wilt kunnen gebruiken"</string>
+    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Kies bedieningselementen die je vanaf het aan/uit-menu wilt kunnen gebruiken"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Houd vast en sleep om de bedieningselementen opnieuw in te delen"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Alle bedieningselementen verwijderd"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Kan lijst met alle bedieningselementen niet laden."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Overig"</string>
-    <string name="controls_dialog_title" msgid="2343565267424406202">"Toevoegen aan apparaatopties"</string>
+    <string name="controls_dialog_title" msgid="2343565267424406202">"Toevoegen aan apparaatbediening"</string>
     <string name="controls_dialog_ok" msgid="7011816381344485651">"Toevoegen aan favorieten"</string>
     <string name="controls_dialog_message" msgid="6292099631702047540">"<xliff:g id="APP">%s</xliff:g> heeft voorgesteld dit bedieningselement toe te voegen aan je favorieten."</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"Bedieningselementen geüpdated"</string>

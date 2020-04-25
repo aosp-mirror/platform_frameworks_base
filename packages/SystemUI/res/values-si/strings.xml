@@ -999,19 +999,16 @@
     <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"ඕනෑම වේලාවක බුබුලු පාලනය කරන්න"</string>
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"මෙම යෙදුමෙන් බුබුලු ක්‍රියාවිරහිත කිරීමට කළමනාකරණය කරන්න තට්ටු කරන්න"</string>
     <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"තේරුණා"</string>
+    <!-- no translation found for bubbles_app_settings (5779443644062348657) -->
+    <skip />
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"පද්ධති සංචලනය යාවත්කාලීන කළා. වෙනස්කම් සිදු කිරීමට, සැකසීම් වෙත යන්න."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"පද්ධති සංචලනය යාවත්කාලීන කිරීමට සැකසීම් වෙත යන්න"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"පොරොත්තු"</string>
-    <!-- no translation found for priority_onboarding_show_at_top_text (1678400241025513541) -->
-    <skip />
-    <!-- no translation found for priority_onboarding_show_avatar_text (5756291381124091508) -->
-    <skip />
-    <!-- no translation found for priority_onboarding_appear_as_bubble_text (4227039772250263122) -->
-    <skip />
-    <!-- no translation found for priority_onboarding_ignores_dnd_text (2918952762719600529) -->
-    <skip />
-    <!-- no translation found for priority_onboarding_done_button_title (4569550984286506007) -->
-    <skip />
+    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"සංවාද කොටසේ ඉහළ දී පෙන්වන්න"</string>
+    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"පැතිකඩ පින්තූරය අගුලු තිරය මත පෙන්වන්න"</string>
+    <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"යෙදුම්වල ඉහළම පාවෙන බුබුලක් ලෙස දිස් වේ"</string>
+    <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"බාධා නොකරන්න හට බාධා කරන්න"</string>
+    <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"තේරුණා"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"විශාලන උඩැතිරි කවුළුව"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"විශාලන කවුළුව"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"විශාලනය කිරීමේ කවුළු පාලන"</string>

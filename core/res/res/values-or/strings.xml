@@ -1327,7 +1327,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"ସେୟାର୍‌ କରନ୍ତୁ"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"ପ୍ରତ୍ୟାଖ୍ୟାନ କରନ୍ତୁ"</string>
     <string name="select_input_method" msgid="3971267998568587025">"ଇନପୁଟ୍ ପଦ୍ଧତି ବାଛନ୍ତୁ"</string>
-    <string name="show_ime" msgid="6406112007347443383">"ଫିଜିକାଲ୍‌ କୀ’ବୋର୍ଡ ସକ୍ରିୟ ଥିବାବେଳେ ଏହାକୁ ସ୍କ୍ରୀନ୍‌ ଉପରେ ରଖନ୍ତୁ"</string>
+    <string name="show_ime" msgid="6406112007347443383">"ଫିଜିକାଲ୍‌ କୀବୋର୍ଡ ସକ୍ରିୟ ଥିବାବେଳେ ଏହାକୁ ସ୍କ୍ରିନ୍‌ ଉପରେ ରଖନ୍ତୁ"</string>
     <string name="hardware" msgid="1800597768237606953">"ଭର୍ଚୁଆଲ୍ କୀ’ବୋର୍ଡ ଦେଖାନ୍ତୁ"</string>
     <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"ଫିଜିକଲ୍ କୀ\'ବୋର୍ଡ କନଫିଗର୍‍ କରନ୍ତୁ"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"ଭାଷା ଓ ଲେଆଉଟ୍‍ ଚୟନ କରିବା ପାଇଁ ଟାପ୍‍ କରନ୍ତୁ"</string>
@@ -1878,7 +1878,7 @@
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"କଷ୍ଟମ୍ ଆପ୍ ବିଜ୍ଞପ୍ତି"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"<xliff:g id="APP">%1$s</xliff:g>ରେ ଏକ ନୂଆ ଉପଯୋଗକର୍ତ୍ତା ତିଆରି କରିବା ପାଇଁ <xliff:g id="ACCOUNT">%2$s</xliff:g>କୁ (ପୂର୍ବରୁ ଏହି ଆକାଉଣ୍ଟ ଉପଯୋଗକର୍ତ୍ତାଙ୍କ ନାମରେ ଅଛି) ଅନୁମତି ଦେବେ?"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"<xliff:g id="APP">%1$s</xliff:g>ରେ ଏକ ନୂଆ ଉପଯୋଗକର୍ତ୍ତା ତିଆରି କରିବା ପାଇଁ <xliff:g id="ACCOUNT">%2$s</xliff:g>କୁ ଅନୁମତି ଦେବେ?"</string>
-    <string name="language_selection_title" msgid="52674936078683285">"ଏକ ଭାଷା ଯୋଡ଼ନ୍ତୁ"</string>
+    <string name="language_selection_title" msgid="52674936078683285">"ଏକ ଭାଷା ଯୋଗ କରନ୍ତୁ"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"ପସନ୍ଦର ଅଞ୍ଚଳ"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"ଭାଷାର ନାମ ଟାଇପ୍‍ କରନ୍ତୁ"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"ପ୍ରସ୍ତାବିତ"</string>

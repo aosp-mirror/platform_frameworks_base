@@ -550,7 +550,7 @@ public final class DumpUtils {
         // screen state is in lowest 0xf bits, process state is in next 0xf bits up
 
         try {
-            proto.write(stateId, STATE_PROTO_ENUMS[state >> 0xf]);
+            proto.write(stateId, state >> 0xf);
         } catch (IndexOutOfBoundsException e) {
             proto.write(stateId, ProcessStatsEnums.PROCESS_STATE_UNKNOWN);
         }

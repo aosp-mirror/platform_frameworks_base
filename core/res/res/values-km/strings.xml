@@ -1459,12 +1459,9 @@
     <string name="gpsNotifMessage" msgid="7346649122793758032">"បាន​ស្នើ​ដោយ <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
     <string name="gpsVerifYes" msgid="3719843080744112940">"បាទ/ចាស"</string>
     <string name="gpsVerifNo" msgid="1671201856091564741">"ទេ"</string>
-    <!-- no translation found for gnss_nfw_notification_title (5004493772059563423) -->
-    <skip />
-    <!-- no translation found for gnss_nfw_notification_message_oem (3683958907027107969) -->
-    <skip />
-    <!-- no translation found for gnss_nfw_notification_message_carrier (815888995791562151) -->
-    <skip />
+    <string name="gnss_nfw_notification_title" msgid="5004493772059563423">"បានចូលប្រើ​ទីតាំងពេលមាន​អាសន្ន"</string>
+    <string name="gnss_nfw_notification_message_oem" msgid="3683958907027107969">"ក្រុមហ៊ុន​ផលិតឧបករណ៍​របស់អ្នកបាន​ចូលប្រើទីតាំង​របស់អ្នក អំឡុងវគ្គពេលមាន​អាសន្នថ្មីៗ"</string>
+    <string name="gnss_nfw_notification_message_carrier" msgid="815888995791562151">"ក្រុមហ៊ុនសេវាទូរសព្ទ​របស់អ្នកបាន​ចូលប្រើទីតាំង​របស់អ្នក អំឡុងវគ្គពេលមាន​អាសន្នថ្មីៗ"</string>
     <string name="sync_too_many_deletes" msgid="6999440774578705300">"លុប​​លើស​ដែន​កំណត់"</string>
     <string name="sync_too_many_deletes_desc" msgid="7409327940303504440">"មាន​ធាតុ​បាន​លុប <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> សម្រាប់ <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g> គណនី <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g> ។ តើ​អ្នក​ចង់​ធ្វើ​អ្វី​ខ្លះ​?"</string>
     <string name="sync_really_delete" msgid="5657871730315579051">"លុប​ធាតុ"</string>

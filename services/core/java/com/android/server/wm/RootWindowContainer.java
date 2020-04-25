@@ -42,6 +42,7 @@ import static android.view.WindowManager.TRANSIT_SHOW_SINGLE_TASK_DISPLAY;
 
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
+import static com.android.server.wm.ActivityStack.ActivityState.FINISHING;
 import static com.android.server.wm.ActivityStack.ActivityState.PAUSED;
 import static com.android.server.wm.ActivityStack.ActivityState.RESUMED;
 import static com.android.server.wm.ActivityStack.ActivityState.STOPPED;
@@ -3324,7 +3325,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 for (int sNdx = taskDisplayArea.getStackCount() - 1; sNdx >= 0; --sNdx) {
                     final ActivityStack stack = taskDisplayArea.getStackAt(sNdx);
                     final ActivityRecord r = stack.mPausingActivity;
-                    if (r != null && !r.isState(PAUSED, STOPPED, STOPPING)) {
+                    if (r != null && !r.isState(PAUSED, STOPPED, STOPPING, FINISHING)) {
                         if (DEBUG_STATES) {
                             Slog.d(TAG_STATES, "allPausedActivitiesComplete: r=" + r
                                     + " state=" + r.getState());

@@ -999,25 +999,22 @@
     <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Controlar as burbullas en calquera momento"</string>
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Para desactivar as burbullas nesta aplicación, toca Xestionar"</string>
     <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"Entendido"</string>
+    <!-- no translation found for bubbles_app_settings (5779443644062348657) -->
+    <skip />
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Actualizouse a navegación do sistema. Para facer cambios, vai a Configuración."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Para actualizar a navegación do sistema, vai a Configuración"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Modo de espera"</string>
-    <!-- no translation found for priority_onboarding_show_at_top_text (1678400241025513541) -->
-    <skip />
-    <!-- no translation found for priority_onboarding_show_avatar_text (5756291381124091508) -->
-    <skip />
-    <!-- no translation found for priority_onboarding_appear_as_bubble_text (4227039772250263122) -->
-    <skip />
-    <!-- no translation found for priority_onboarding_ignores_dnd_text (2918952762719600529) -->
-    <skip />
-    <!-- no translation found for priority_onboarding_done_button_title (4569550984286506007) -->
-    <skip />
+    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Mostrar na parte superior da sección de conversas"</string>
+    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Mostrar imaxe do perfil na pantalla de bloqueo"</string>
+    <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Mostrar como burbulla flotante sobre outras apps"</string>
+    <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Interromper modo Non molestar"</string>
+    <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"Listo"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Ampliación da ventá de superposición"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Ventá de superposición"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Controis de ampliación da ventá"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"Control de dispositivos"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Engade controis para os dispositivos conectados"</string>
-    <string name="quick_controls_setup_title" msgid="8901436655997849822">"Configurar control de dispositivos"</string>
+    <string name="quick_controls_setup_title" msgid="8901436655997849822">"Configurar o control de dispositivos"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Mantén premido o botón de acendido para acceder aos controis"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Escolle unha aplicación para engadir controis"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
