@@ -2299,27 +2299,31 @@ class Task extends WindowContainer<WindowContainer> {
             insideParentBounds = parentBounds.contains(resolvedBounds);
         }
 
+        // Non-null compatibility insets means the activity prefers to keep its original size, so
+        // out bounds doesn't need to be restricted by the parent or current display
+        final boolean customContainerPolicy = compatInsets != null;
+
         Rect outAppBounds = inOutConfig.windowConfiguration.getAppBounds();
         if (outAppBounds == null || outAppBounds.isEmpty()) {
+            // App-bounds hasn't been overridden, so calculate a value for it.
             inOutConfig.windowConfiguration.setAppBounds(mTmpFullBounds);
             outAppBounds = inOutConfig.windowConfiguration.getAppBounds();
-        }
-        // Non-null compatibility insets means the activity prefers to keep its original size, so
-        // the out bounds doesn't need to be restricted by the parent or current display.
-        final boolean customContainerPolicy = compatInsets != null;
-        if (!customContainerPolicy && windowingMode != WINDOWING_MODE_FREEFORM) {
-            final Rect containingAppBounds;
-            if (insideParentBounds) {
-                containingAppBounds = parentConfig.windowConfiguration.getAppBounds();
-            } else {
-                // Restrict appBounds to display non-decor rather than parent because the override
-                // bounds are beyond the parent. Otherwise, it won't match the overridden bounds.
-                final TaskDisplayArea displayArea = getDisplayArea();
-                containingAppBounds = displayArea != null
-                        ? displayArea.getWindowConfiguration().getAppBounds() : null;
-            }
-            if (containingAppBounds != null && !containingAppBounds.isEmpty()) {
-                outAppBounds.intersect(containingAppBounds);
+
+            if (!customContainerPolicy && windowingMode != WINDOWING_MODE_FREEFORM) {
+                final Rect containingAppBounds;
+                if (insideParentBounds) {
+                    containingAppBounds = parentConfig.windowConfiguration.getAppBounds();
+                } else {
+                    // Restrict appBounds to display non-decor rather than parent because the
+                    // override bounds are beyond the parent. Otherwise, it won't match the
+                    // overridden bounds.
+                    final TaskDisplayArea displayArea = getDisplayArea();
+                    containingAppBounds = displayArea != null
+                            ? displayArea.getWindowConfiguration().getAppBounds() : null;
+                }
+                if (containingAppBounds != null && !containingAppBounds.isEmpty()) {
+                    outAppBounds.intersect(containingAppBounds);
+                }
             }
         }
 
