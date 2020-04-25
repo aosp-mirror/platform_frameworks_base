@@ -1457,12 +1457,9 @@
     <string name="gpsNotifMessage" msgid="7346649122793758032">"<xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)এ অনুৰোধ কৰিছে"</string>
     <string name="gpsVerifYes" msgid="3719843080744112940">"হয়"</string>
     <string name="gpsVerifNo" msgid="1671201856091564741">"নহয়"</string>
-    <!-- no translation found for gnss_nfw_notification_title (5004493772059563423) -->
-    <skip />
-    <!-- no translation found for gnss_nfw_notification_message_oem (3683958907027107969) -->
-    <skip />
-    <!-- no translation found for gnss_nfw_notification_message_carrier (815888995791562151) -->
-    <skip />
+    <string name="gnss_nfw_notification_title" msgid="5004493772059563423">"জৰুৰীকালীন অৱস্থান এক্সেছ কৰা হৈছে"</string>
+    <string name="gnss_nfw_notification_message_oem" msgid="3683958907027107969">"এটা শেহতীয়া জৰুৰীকালীন ছেশ্বনৰ সময়ত আপোনাৰ ডিভাইচ নিৰ্মাতাই আপোনাৰ অৱস্থান এক্সেছ কৰিছিল"</string>
+    <string name="gnss_nfw_notification_message_carrier" msgid="815888995791562151">"এটা শেহতীয়া জৰুৰীকালীন ছেশ্বনৰ সময়ত আপোনাৰ বাহকে আপোনাৰ অৱস্থান এক্সেছ কৰিছিল"</string>
     <string name="sync_too_many_deletes" msgid="6999440774578705300">"মচি পেলোৱাৰ সীমা পাৰ হ’ল"</string>
     <string name="sync_too_many_deletes_desc" msgid="7409327940303504440">"এই <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g> ৰ মচি থোৱা <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> টা <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g> বস্তু আছে। আপুনি কি কৰিব বিচাৰে?"</string>
     <string name="sync_really_delete" msgid="5657871730315579051">"বস্তুবোৰ মচক"</string>

@@ -2029,7 +2029,7 @@
       <item quantity="other">Faili <xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g></item>
       <item quantity="one">Faili <xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g></item>
     </plurals>
-    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Hujapendekeza watu wa kushiriki nao"</string>
+    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Hujapendekezewa watu wa kushiriki nao"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"Orodha ya programu"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Programu hii haijapewa ruhusa ya kurekodi lakini inaweza kurekodi sauti kupitia kifaa hiki cha USB."</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"Mwanzo"</string>

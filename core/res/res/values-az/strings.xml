@@ -1315,7 +1315,7 @@
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"Test Rejimi aktivdir"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"Test Rejimini deaktiv etmək üçün fabrika ayarlarına sıfırlayın."</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"Ardıcıl konsol aktiv edildi"</string>
-    <string name="console_running_notification_message" msgid="7892751888125174039">"Performansa təsir edir. Deaktiv etmək üçün yükləyicini yoxlayın."</string>
+    <string name="console_running_notification_message" msgid="7892751888125174039">"Performans təsirlənir. Söndürməkçün yükləyicini yoxlayın."</string>
     <string name="usb_contaminant_detected_title" msgid="4359048603069159678">"USB portuna maye sızıb və ya qırılıb"</string>
     <string name="usb_contaminant_detected_message" msgid="7346100585390795743">"USB portu avtomatik deaktiv edildi. Ətraflı məlumat üçün klikləyin."</string>
     <string name="usb_contaminant_not_detected_title" msgid="2651167729563264053">"USB portundan istifadə etmək üçün OK"</string>
@@ -2029,7 +2029,7 @@
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> fayl</item>
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g> fayl</item>
     </plurals>
-    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Paylaşmaq üçün tövsiyə edilən biri yoxdur"</string>
+    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Paylaşmaq üçün tövsiyə edilən bir kimsə yoxdur"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"Tətbiq siyahısı"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Bu tətbiqə yazmaq icazəsi verilməyib, lakin, bu USB vasitəsilə səs yaza bilər."</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"Əsas səhifə"</string>

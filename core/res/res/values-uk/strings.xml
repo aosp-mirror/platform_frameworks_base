@@ -1701,8 +1701,8 @@
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Виберіть функцію для жесту спеціальних можливостей (проведення двома пальцями знизу вгору):"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"Виберіть функцію для жесту спеціальних можливостей (проведення трьома пальцями знизу вгору):"</string>
     <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"Щоб переключитися між функціями, натисніть і утримуйте кнопку спеціальних можливостей."</string>
-    <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"Щоб переключитися між функціями, проведіть двома пальцями вгору й утримуйте екран."</string>
-    <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"Щоб переключитися між функціями, проведіть трьома пальцями вгору й утримуйте екран."</string>
+    <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"Щоб переключитися між функціями, проведіть по екрану знизу вгору двома пальцями й утримуйте їх."</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"Щоб переключитися між функціями, проведіть по екрану знизу вгору трьома пальцями й утримуйте їх."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Збільшення"</string>
     <string name="user_switched" msgid="7249833311585228097">"Поточний користувач: <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"Перехід в обліковий запис \"<xliff:g id="NAME">%1$s</xliff:g>\"…"</string>
