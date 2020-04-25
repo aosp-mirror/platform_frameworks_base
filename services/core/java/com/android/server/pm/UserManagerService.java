@@ -3890,9 +3890,8 @@ public class UserManagerService extends IUserManager.Stub {
                             new Thread() {
                                 @Override
                                 public void run() {
-                                    // Clean up any ActivityTaskManager state
-                                    LocalServices.getService(ActivityTaskManagerInternal.class)
-                                            .onUserStopped(userId);
+                                    LocalServices.getService(ActivityManagerInternal.class)
+                                            .onUserRemoved(userId);
                                     removeUserState(userId);
                                 }
                             }.start();
