@@ -19,6 +19,7 @@ package com.android.systemui.car.window;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
+import android.annotation.IntDef;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Rect;
@@ -35,13 +36,36 @@ import com.android.systemui.car.CarDeviceProvisionedController;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.statusbar.FlingAnimationUtils;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 /**
  * The {@link OverlayPanelViewController} provides additional dragging animation capabilities to
  * {@link OverlayViewController}.
  */
 public abstract class OverlayPanelViewController extends OverlayViewController {
 
-    private static final boolean DEBUG = true;
+    /** @hide */
+    @IntDef(flag = true, prefix = { "OVERLAY_" }, value = {
+            OVERLAY_FROM_TOP_BAR,
+            OVERLAY_FROM_BOTTOM_BAR
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface OverlayDirection {}
+
+    /**
+     * Indicates that the overlay panel should be opened from the top bar and expanded by dragging
+     * towards the bottom bar.
+     */
+    public static final int OVERLAY_FROM_TOP_BAR = 0;
+
+    /**
+     * Indicates that the overlay panel should be opened from the bottom bar and expanded by
+     * dragging towards the top bar.
+     */
+    public static final int OVERLAY_FROM_BOTTOM_BAR = 1;
+
+    private static final boolean DEBUG = false;
     private static final String TAG = "OverlayPanelViewController";
 
     // used to calculate how fast to open or close the window
@@ -54,14 +78,18 @@ public abstract class OverlayPanelViewController extends OverlayViewController {
     protected static final int SWIPE_DOWN_MIN_DISTANCE = 25;
     protected static final int SWIPE_MAX_OFF_PATH = 75;
     protected static final int SWIPE_THRESHOLD_VELOCITY = 200;
+    private static final int POSITIVE_DIRECTION = 1;
+    private static final int NEGATIVE_DIRECTION = -1;
 
     private final FlingAnimationUtils mFlingAnimationUtils;
     private final CarDeviceProvisionedController mCarDeviceProvisionedController;
     private final View.OnTouchListener mDragOpenTouchListener;
     private final View.OnTouchListener mDragCloseTouchListener;
 
+    protected int mAnimateDirection = POSITIVE_DIRECTION;
+
     private final int mSettleClosePercentage;
-    private int mPercentageFromBottom;
+    private int mPercentageFromEndingEdge;
 
     private boolean mPanelVisible;
     private boolean mPanelExpanded;
@@ -91,8 +119,7 @@ public abstract class OverlayPanelViewController extends OverlayViewController {
         mSettleClosePercentage = resources.getInteger(
                 R.integer.notification_settle_close_percentage);
 
-        // Attached to the top navigation bar (i.e. status bar) to detect pull down of the
-        // notification shade.
+        // Attached to a navigation bar to open the overlay panel
         GestureDetector openGestureDetector = new GestureDetector(context,
                 new OpenGestureListener() {
                     @Override
@@ -101,8 +128,8 @@ public abstract class OverlayPanelViewController extends OverlayViewController {
                     }
                 });
 
-        // Attached to the NavBars to close the notification shade
-        GestureDetector navBarCloseNotificationGestureDetector = new GestureDetector(context,
+        // Attached to the other navigation bars to close the overlay panel
+        GestureDetector closeGestureDetector = new GestureDetector(context,
                 new SystemBarCloseGestureListener() {
                     @Override
                     protected void close() {
@@ -132,13 +159,24 @@ public abstract class OverlayPanelViewController extends OverlayViewController {
             if (!isInflated()) {
                 return true;
             }
-            boolean consumed = navBarCloseNotificationGestureDetector.onTouchEvent(event);
+            boolean consumed = closeGestureDetector.onTouchEvent(event);
             if (consumed) {
                 return true;
             }
             maybeCompleteAnimation(event);
             return true;
         };
+    }
+
+    /** Sets the overlay panel animation direction along the x or y axis. */
+    public void setOverlayDirection(@OverlayDirection int direction) {
+        if (direction == OVERLAY_FROM_TOP_BAR) {
+            mAnimateDirection = POSITIVE_DIRECTION;
+        } else if (direction == OVERLAY_FROM_BOTTOM_BAR) {
+            mAnimateDirection = NEGATIVE_DIRECTION;
+        } else {
+            throw new IllegalArgumentException("Direction not supported");
+        }
     }
 
     /** Toggles the visibility of the panel. */
@@ -207,7 +245,7 @@ public abstract class OverlayPanelViewController extends OverlayViewController {
     protected void maybeCompleteAnimation(MotionEvent event) {
         if (event.getActionMasked() == MotionEvent.ACTION_UP
                 && isPanelVisible()) {
-            if (mSettleClosePercentage < mPercentageFromBottom) {
+            if (mSettleClosePercentage < mPercentageFromEndingEdge) {
                 animatePanel(DEFAULT_FLING_VELOCITY, false);
             } else {
                 animatePanel(DEFAULT_FLING_VELOCITY, true);
@@ -221,16 +259,15 @@ public abstract class OverlayPanelViewController extends OverlayViewController {
      * panel this method also makes the view invisible after animation ends.
      */
     protected void animatePanel(float velocity, boolean isClosing) {
-        float to = 0;
-        if (!isClosing) {
-            to = getLayout().getHeight();
-        }
+        float to = getEndPosition(isClosing);
 
         Rect rect = getLayout().getClipBounds();
-        if (rect != null && rect.bottom != to) {
-            float from = rect.bottom;
-            animate(from, to, velocity, isClosing);
-            return;
+        if (rect != null) {
+            float from = getCurrentStartPosition(rect);
+            if (from != to) {
+                animate(from, to, velocity, isClosing);
+                return;
+            }
         }
 
         // We will only be here if the shade is being opened programmatically or via button when
@@ -242,10 +279,30 @@ public abstract class OverlayPanelViewController extends OverlayViewController {
                     public void onGlobalLayout() {
                         ViewTreeObserver obs = getLayout().getViewTreeObserver();
                         obs.removeOnGlobalLayoutListener(this);
-                        float to = getLayout().getHeight();
-                        animate(/* from= */ 0, to, velocity, isClosing);
+                        animate(
+                                getDefaultStartPosition(),
+                                getEndPosition(/* isClosing= */ false),
+                                velocity,
+                                isClosing
+                        );
                     }
                 });
+    }
+
+    /* Returns the start position if the user has not started swiping. */
+    private int getDefaultStartPosition() {
+        return mAnimateDirection > 0 ? 0 : getLayout().getHeight();
+    }
+
+    /** Returns the start position if we are in the middle of swiping. */
+    private int getCurrentStartPosition(Rect clipBounds) {
+        return mAnimateDirection > 0 ? clipBounds.bottom : clipBounds.top;
+    }
+
+    private int getEndPosition(boolean isClosing) {
+        return (mAnimateDirection > 0 && !isClosing) || (mAnimateDirection == -1 && isClosing)
+                ? getLayout().getHeight()
+                : 0;
     }
 
     private void animate(float from, float to, float velocity, boolean isClosing) {
@@ -356,25 +413,44 @@ public abstract class OverlayPanelViewController extends OverlayViewController {
      * Misc
      * ***************************************************************************************** */
 
-    protected void calculatePercentageFromBottom(float height) {
+    /**
+     * Given the position of the pointer dragging the panel, return the percentage of its closeness
+     * to the ending edge.
+     */
+    protected void calculatePercentageFromEndingEdge(float y) {
         if (getLayout().getHeight() > 0) {
-            mPercentageFromBottom = (int) Math.abs(
-                    height / getLayout().getHeight() * 100);
+            float height = getVisiblePanelHeight(y);
+            mPercentageFromEndingEdge = (int) Math.abs(height / getLayout().getHeight() * 100);
         }
     }
 
-    protected void setViewClipBounds(int height) {
-        if (height > getLayout().getHeight()) {
-            height = getLayout().getHeight();
-        }
+    private float getVisiblePanelHeight(float y) {
+        return mAnimateDirection > 0 ? y : getLayout().getHeight() - y;
+    }
+
+    /** Sets the boundaries of the overlay panel that can be seen based on pointer position. */
+    protected void setViewClipBounds(int y) {
+        // Bound the pointer position to be within the overlay panel.
+        y = Math.max(0, Math.min(y, getLayout().getHeight()));
         Rect clipBounds = new Rect();
-        clipBounds.set(0, 0, getLayout().getWidth(), height);
+        int top, bottom;
+        if (mAnimateDirection > 0) {
+            top = 0;
+            bottom = y;
+        } else {
+            top = y;
+            bottom = getLayout().getHeight();
+        }
+        clipBounds.set(0, top, getLayout().getWidth(), bottom);
         getLayout().setClipBounds(clipBounds);
-        onScroll(height);
+        onScroll(y);
     }
 
-    /** Called while scrolling. */
-    protected abstract void onScroll(int height);
+    /**
+     * Called while scrolling, this passes the position of the clip boundary that is currently
+     * changing.
+     */
+    protected abstract void onScroll(int y);
 
     /* ***************************************************************************************** *
      * Getters
@@ -406,8 +482,8 @@ public abstract class OverlayPanelViewController extends OverlayViewController {
     }
 
     /** Returns the percentage of the panel that is open from the bottom. */
-    protected final int getPercentageFromBottom() {
-        return mPercentageFromBottom;
+    protected final int getPercentageFromEndingEdge() {
+        return mPercentageFromEndingEdge;
     }
 
     /** Returns the percentage at which we've determined whether to open or close the panel. */
@@ -443,7 +519,7 @@ public abstract class OverlayPanelViewController extends OverlayViewController {
 
             // Initially the scroll starts with height being zero. This checks protects from divide
             // by zero error.
-            calculatePercentageFromBottom(event2.getRawY());
+            calculatePercentageFromEndingEdge(event2.getRawY());
 
             mIsTracking = true;
             return true;
@@ -453,7 +529,7 @@ public abstract class OverlayPanelViewController extends OverlayViewController {
         @Override
         public boolean onFling(MotionEvent event1, MotionEvent event2,
                 float velocityX, float velocityY) {
-            if (velocityY > SWIPE_THRESHOLD_VELOCITY) {
+            if (mAnimateDirection * velocityY > SWIPE_THRESHOLD_VELOCITY) {
                 mOpeningVelocity = velocityY;
                 open();
                 return true;
@@ -483,19 +559,14 @@ public abstract class OverlayPanelViewController extends OverlayViewController {
         @Override
         public boolean onScroll(MotionEvent event1, MotionEvent event2, float distanceX,
                 float distanceY) {
-            // should not clip while scroll to the bottom of the list.
             if (!shouldAllowClosingScroll()) {
                 return false;
             }
-            float actualNotificationHeight =
-                    getLayout().getHeight() - (event1.getRawY() - event2.getRawY());
-            if (actualNotificationHeight > getLayout().getHeight()) {
-                actualNotificationHeight = getLayout().getHeight();
-            }
+            float y = getYPositionOfPanelEndingEdge(event1, event2);
             if (getLayout().getHeight() > 0) {
-                mPercentageFromBottom = (int) Math.abs(
-                        actualNotificationHeight / getLayout().getHeight() * 100);
-                boolean isUp = distanceY > 0;
+                mPercentageFromEndingEdge = (int) Math.abs(
+                        y / getLayout().getHeight() * 100);
+                boolean isInClosingDirection = mAnimateDirection * distanceY > 0;
 
                 // This check is to figure out if onScroll was called while swiping the card at
                 // bottom of the list. At that time we should not allow notification shade to
@@ -503,23 +574,37 @@ public abstract class OverlayPanelViewController extends OverlayViewController {
                 // possible if a user is closing the notification shade and while swiping starts
                 // to open again but does not fling. At that time we should allow the
                 // notification shade to close fully or else it would stuck in between.
-                if (Math.abs(getLayout().getHeight() - actualNotificationHeight)
-                        > SWIPE_DOWN_MIN_DISTANCE && isUp) {
-                    setViewClipBounds((int) actualNotificationHeight);
+                if (Math.abs(getLayout().getHeight() - y)
+                        > SWIPE_DOWN_MIN_DISTANCE && isInClosingDirection) {
+                    setViewClipBounds((int) y);
                     mIsTracking = true;
-                } else if (!isUp) {
-                    setViewClipBounds((int) actualNotificationHeight);
+                } else if (!isInClosingDirection) {
+                    setViewClipBounds((int) y);
                 }
             }
             // if we return true the items in RV won't be scrollable.
             return false;
         }
 
+        /**
+         * To prevent the jump in the clip bounds while closing the panel we should calculate the y
+         * position using the diff of event1 and event2. This will help the panel clip smoothly as
+         * the event2 value changes while event1 value will be fixed.
+         * @param event1 MotionEvent that contains the position of where the event2 started.
+         * @param event2 MotionEvent that contains the position of where the user has scrolled to
+         *               on the screen.
+         */
+        private float getYPositionOfPanelEndingEdge(MotionEvent event1, MotionEvent event2) {
+            float diff = mAnimateDirection * (event1.getRawY() - event2.getRawY());
+            float y = mAnimateDirection > 0 ? getLayout().getHeight() - diff : diff;
+            y = Math.max(0, Math.min(y, getLayout().getHeight()));
+            return y;
+        }
 
         @Override
         public boolean onFling(MotionEvent event1, MotionEvent event2,
                 float velocityX, float velocityY) {
-            // should not fling if the touch does not start when view is at the bottom of the list.
+            // should not fling if the touch does not start when view is at the end of the list.
             if (!shouldAllowClosingScroll()) {
                 return false;
             }
@@ -528,8 +613,8 @@ public abstract class OverlayPanelViewController extends OverlayViewController {
                 // swipe was not vertical or was not fast enough
                 return false;
             }
-            boolean isUp = velocityY < 0;
-            if (isUp) {
+            boolean isInClosingDirection = mAnimateDirection * velocityY < 0;
+            if (isInClosingDirection) {
                 close();
                 return true;
             } else {
@@ -555,7 +640,7 @@ public abstract class OverlayPanelViewController extends OverlayViewController {
         @Override
         public boolean onScroll(MotionEvent event1, MotionEvent event2, float distanceX,
                 float distanceY) {
-            calculatePercentageFromBottom(event2.getRawY());
+            calculatePercentageFromEndingEdge(event2.getRawY());
             setViewClipBounds((int) event2.getRawY());
             return true;
         }
