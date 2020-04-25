@@ -1126,15 +1126,16 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
                     }
                 }
             }
-            if (pi.forceUriPermissions) {
-                // When provider requires dynamic permission checks, the only
-                // way to be safe is to issue permission grants for each item by
-                // assuming no generic access
-                allowed = false;
-            }
             if (allowed) {
                 targetHoldsPermission = true;
             }
+        }
+
+        if (pi.forceUriPermissions) {
+            // When provider requires dynamic permission checks, the only
+            // way to be safe is to issue permission grants for each item by
+            // assuming no generic access
+            targetHoldsPermission = false;
         }
 
         final boolean basicGrant = (modeFlags & ~(FLAG_GRANT_READ_URI_PERMISSION
