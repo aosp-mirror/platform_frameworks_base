@@ -18788,6 +18788,15 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
+        public void onUserRemoved(@UserIdInt int userId) {
+            // Clean up any ActivityTaskManager state (by telling it the user is stopped)
+            mAtmInternal.onUserStopped(userId);
+            // Clean up various services by removing the user
+            mBatteryStatsService.onUserRemoved(userId);
+            mUserController.onUserRemoved(userId);
+        }
+
+        @Override
         public void killForegroundAppsForUser(@UserIdInt int userId) {
             synchronized (ActivityManagerService.this) {
                 final ArrayList<ProcessRecord> procs = new ArrayList<>();
