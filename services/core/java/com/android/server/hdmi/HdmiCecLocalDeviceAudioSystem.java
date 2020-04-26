@@ -35,6 +35,7 @@ import android.media.tv.TvInputInfo;
 import android.media.tv.TvInputManager.TvInputCallback;
 import android.os.SystemProperties;
 import android.provider.Settings.Global;
+import android.sysprop.HdmiProperties;
 import android.util.Slog;
 import android.util.SparseArray;
 
@@ -70,8 +71,7 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
 
     private static final String TAG = "HdmiCecLocalDeviceAudioSystem";
 
-    private static final boolean WAKE_ON_HOTPLUG =
-            SystemProperties.getBoolean(Constants.PROPERTY_WAKE_ON_HOTPLUG, false);
+    private static final boolean WAKE_ON_HOTPLUG = false;
 
     // Whether the System Audio Control feature is enabled or not. True by default.
     @GuardedBy("mLock")
@@ -93,8 +93,7 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
 
     // If the current device uses TvInput for ARC. We assume all other inputs also use TvInput
     // when ARC is using TvInput.
-    private boolean mArcIntentUsed = SystemProperties
-            .get(Constants.PROPERTY_SYSTEM_AUDIO_DEVICE_ARC_PORT, "0").contains("tvinput");
+    private boolean mArcIntentUsed = HdmiProperties.arc_port().orElse("0").contains("tvinput");
 
     // Keeps the mapping (HDMI port ID to TV input URI) to keep track of the TV inputs ready to
     // accept input switching request from HDMI devices.
@@ -918,7 +917,7 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
     private void enableAudioReturnChannel(boolean enabled) {
         assertRunOnServiceThread();
         mService.enableAudioReturnChannel(
-                SystemProperties.getInt(Constants.PROPERTY_SYSTEM_AUDIO_DEVICE_ARC_PORT, 0),
+                Integer.parseInt(HdmiProperties.arc_port().orElse("0")),
                 enabled);
     }
 
@@ -993,9 +992,7 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
         boolean currentMuteStatus =
                 mService.getAudioManager().isStreamMute(AudioManager.STREAM_MUSIC);
         if (currentMuteStatus == newSystemAudioMode) {
-            if (mService.readBooleanSystemProperty(
-                    Constants.PROPERTY_SYSTEM_AUDIO_MODE_MUTING_ENABLE, true)
-                            || newSystemAudioMode) {
+            if (HdmiProperties.system_audio_mode_muting().orElse(true) || newSystemAudioMode) {
                 mService.getAudioManager()
                         .adjustStreamVolume(
                                 AudioManager.STREAM_MUSIC,
@@ -1019,10 +1016,9 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
         // Audio Mode is off even without terminating the ARC. This can stop the current
         // audio device from playing audio when system audio mode is off.
         if (mArcIntentUsed
-            && !mService.readBooleanSystemProperty(
-                    Constants.PROPERTY_SYSTEM_AUDIO_MODE_MUTING_ENABLE, true)
-            && !newSystemAudioMode
-            && getLocalActivePort() == Constants.CEC_SWITCH_ARC) {
+                && !HdmiProperties.system_audio_mode_muting().orElse(true)
+                && !newSystemAudioMode
+                && getLocalActivePort() == Constants.CEC_SWITCH_ARC) {
             routeToInputFromPortId(getRoutingPort());
         }
         // Init arc whenever System Audio Mode is on
@@ -1253,7 +1249,7 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
         if (portId == Constants.CEC_SWITCH_HOME && mService.isPlaybackDevice()) {
             switchToHomeTvInput();
         } else if (portId == Constants.CEC_SWITCH_ARC) {
-            switchToTvInput(SystemProperties.get(Constants.PROPERTY_SYSTEM_AUDIO_DEVICE_ARC_PORT));
+            switchToTvInput(HdmiProperties.arc_port().orElse("0"));
             setLocalActivePort(portId);
             return;
         } else {
