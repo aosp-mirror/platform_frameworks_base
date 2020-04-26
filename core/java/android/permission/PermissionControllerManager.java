@@ -161,6 +161,7 @@ public final class PermissionControllerManager {
      *
      * @hide
      */
+    @TestApi
     public interface OnCountPermissionAppsResultCallback {
         /**
          * The result for {@link #countPermissionApps(List, int,
@@ -514,6 +515,7 @@ public final class PermissionControllerManager {
      *
      * @hide
      */
+    @TestApi
     @RequiresPermission(Manifest.permission.REVOKE_RUNTIME_PERMISSIONS)
     public void revokeRuntimePermission(@NonNull String packageName,
             @NonNull String permissionName) {
@@ -534,6 +536,7 @@ public final class PermissionControllerManager {
      *
      * @hide
      */
+    @TestApi
     @RequiresPermission(Manifest.permission.GET_RUNTIME_PERMISSIONS)
     public void countPermissionApps(@NonNull List<String> permissionNames,
             @CountPermissionAppsFlag int flags,
