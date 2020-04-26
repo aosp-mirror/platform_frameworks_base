@@ -1004,16 +1004,11 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"ਸਿਸਟਮ ਨੈਵੀਗੇਸ਼ਨ ਅੱਪਡੇਟ ਹੋ ਗਿਆ। ਤਬਦੀਲੀਆਂ ਕਰਨ ਲਈ, ਸੈਟਿੰਗਾਂ \'ਤੇ ਜਾਓ।"</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"ਸਿਸਟਮ ਨੈਵੀਗੇਸ਼ਨ ਨੂੰ ਅੱਪਡੇਟ ਕਰਨ ਲਈ ਸੈਟਿੰਗਾਂ \'ਤੇ ਜਾਓ"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"ਸਟੈਂਡਬਾਈ"</string>
-    <!-- no translation found for priority_onboarding_show_at_top_text (1678400241025513541) -->
-    <skip />
-    <!-- no translation found for priority_onboarding_show_avatar_text (5756291381124091508) -->
-    <skip />
-    <!-- no translation found for priority_onboarding_appear_as_bubble_text (4227039772250263122) -->
-    <skip />
-    <!-- no translation found for priority_onboarding_ignores_dnd_text (2918952762719600529) -->
-    <skip />
-    <!-- no translation found for priority_onboarding_done_button_title (4569550984286506007) -->
-    <skip />
+    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"ਗੱਲਬਾਤ ਸੈਕਸ਼ਨ ਦੇ ਸਿਖਰ \'ਤੇ ਦਿਖਾਓ"</string>
+    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"ਲਾਕ ਸਕ੍ਰੀਨ \'ਤੇ ਪ੍ਰੋਫਾਈਲ ਤਸਵੀਰ ਦਿਖਾਓ"</string>
+    <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"ਐਪਾਂ ਦੇ ਸਿਖਰ \'ਤੇ ਫਲੋਟਿੰਗ ਬਬਲ ਵਜੋਂ ਦਿਸਦੀਆਂ ਹਨ"</string>
+    <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"\'ਪਰੇਸ਼ਾਨ ਨਾ ਕਰੋ\' ਸੈਟਿੰਗਾਂ ਵਿੱਚ ਵਿਘਨ ਪੈ ਸਕਦਾ ਹੈ"</string>
+    <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"ਸਮਝ ਲਿਆ"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"ਵੱਡਦਰਸ਼ੀਕਰਨ ਓਵਰਲੇ Window"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"ਵੱਡਦਰਸ਼ੀਕਰਨ Window"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"ਵੱਡਦਰਸ਼ੀਕਰਨ Window ਦੇ ਕੰਟਰੋਲ"</string>

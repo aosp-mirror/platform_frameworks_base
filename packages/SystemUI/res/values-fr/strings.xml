@@ -999,8 +999,7 @@
     <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Contrôler les paramètres des bulles"</string>
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Appuyez sur \"Gérer\" pour désactiver les bulles de cette application"</string>
     <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"OK"</string>
-    <!-- no translation found for bubbles_app_settings (5779443644062348657) -->
-    <skip />
+    <string name="bubbles_app_settings" msgid="5779443644062348657">"Paramètres <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Navigation système mise à jour. Pour apporter des modifications, accédez aux paramètres."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Accédez aux paramètres pour mettre à jour la navigation système"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Mode Veille imminent"</string>

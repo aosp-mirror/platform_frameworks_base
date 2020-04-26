@@ -36,7 +36,7 @@
     <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Activer l\'économiseur de pile?"</string>
     <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"À propos du mode Économiseur de pile"</string>
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"Activer"</string>
-    <string name="battery_saver_start_action" msgid="4553256017945469937">"Activer la fonction Économiseur de pile"</string>
+    <string name="battery_saver_start_action" msgid="4553256017945469937">"Activer l\'économiseur de pile"</string>
     <string name="status_bar_settings_settings_button" msgid="534331565185171556">"Paramètres"</string>
     <string name="status_bar_settings_wifi_button" msgid="7243072479837270946">"Wi-Fi"</string>
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Rotation auto de l\'écran"</string>
@@ -101,7 +101,7 @@
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"Enregistrement de l\'écran"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"Enregistrement de l\'écran et de l\'audio"</string>
     <string name="screenrecord_taps_label" msgid="1595690528298857649">"Afficher les endroits touchés à l\'écran"</string>
-    <string name="screenrecord_stop_text" msgid="6549288689506057686">"Toucher pour arrêter"</string>
+    <string name="screenrecord_stop_text" msgid="6549288689506057686">"Touchez ici pour arrêter"</string>
     <string name="screenrecord_stop_label" msgid="72699670052087989">"Arrêter"</string>
     <string name="screenrecord_pause_label" msgid="6004054907104549857">"Pause"</string>
     <string name="screenrecord_resume_label" msgid="4972223043729555575">"Reprendre"</string>

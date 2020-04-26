@@ -999,8 +999,7 @@
     <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"언제든지 대화창을 제어하세요"</string>
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"이 앱에서 대화창을 사용 중지하려면 관리를 탭하세요."</string>
     <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"확인"</string>
-    <!-- no translation found for bubbles_app_settings (5779443644062348657) -->
-    <skip />
+    <string name="bubbles_app_settings" msgid="5779443644062348657">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> 설정"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"시스템 탐색이 업데이트되었습니다. 변경하려면 설정으로 이동하세요."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"설정으로 이동하여 시스템 탐색을 업데이트하세요."</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"대기"</string>
