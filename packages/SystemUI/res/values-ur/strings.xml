@@ -1004,16 +1004,11 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"سسٹم نیویگیشن اپ ڈیٹ کیا گیا۔ تبدیلیاں کرنے کے لیے، ترتیبات پر جائیں۔"</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"سسٹم نیویگیشن اپ ڈیٹ کرنے کے لیے ترتیبات پر جائیں"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"اسٹینڈ بائی"</string>
-    <!-- no translation found for priority_onboarding_show_at_top_text (1678400241025513541) -->
-    <skip />
-    <!-- no translation found for priority_onboarding_show_avatar_text (5756291381124091508) -->
-    <skip />
-    <!-- no translation found for priority_onboarding_appear_as_bubble_text (4227039772250263122) -->
-    <skip />
-    <!-- no translation found for priority_onboarding_ignores_dnd_text (2918952762719600529) -->
-    <skip />
-    <!-- no translation found for priority_onboarding_done_button_title (4569550984286506007) -->
-    <skip />
+    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"گفتگو کے سیکشن میں سب سے اوپر دکھائیں"</string>
+    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"مقفل سکرین پر پروفائل کی تصویر دکھائیں"</string>
+    <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"ایپس کے سب سے اوپر فلوٹنگ بلبلہ کے طور پر ظاہر ہوں"</string>
+    <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"مداخلت کریں ڈسٹرب نہ کریں"</string>
+    <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"سمجھ آ گئی"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"میگنیفیکیشن اوورلے ونڈو"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"میگنیفکیشن ونڈو"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"میگنیفکیشن ونڈو کنٹرولز"</string>

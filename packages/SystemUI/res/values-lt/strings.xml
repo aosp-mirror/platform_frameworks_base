@@ -1009,8 +1009,7 @@
     <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Bet kada valdyti burbulus"</string>
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Palieskite „Tvarkyti“, kad išjungtumėte burbulus šioje programoje"</string>
     <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"Supratau"</string>
-    <!-- no translation found for bubbles_app_settings (5779443644062348657) -->
-    <skip />
+    <string name="bubbles_app_settings" msgid="5779443644062348657">"„<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>“ nustatymai"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Sistemos naršymo funkcijos atnaujintos. Jei norite pakeisti, eikite į skiltį „Nustatymai“."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Eikite į skiltį „Nustatymai“, kad atnaujintumėte sistemos naršymo funkcijas"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Budėjimo laikas"</string>

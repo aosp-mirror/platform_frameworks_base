@@ -999,8 +999,7 @@
     <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Kontrollér bobler når som helst"</string>
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Trykk på Administrer for å slå av bobler for denne appen"</string>
     <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"Greit"</string>
-    <!-- no translation found for bubbles_app_settings (5779443644062348657) -->
-    <skip />
+    <string name="bubbles_app_settings" msgid="5779443644062348657">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>-innstillinger"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Systemnavigeringen er oppdatert. For å gjøre endringer, gå til Innstillinger."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Gå til Innstillinger for å oppdatere systemnavigeringen"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Ventemodus"</string>

@@ -90,7 +90,7 @@
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Pamja paraprake e imazhit"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Regjistruesi i ekranit"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Njoftim i vazhdueshëm për një seancë regjistrimi të ekranit"</string>
-    <string name="screenrecord_start_label" msgid="1750350278888217473">"Të niset regjistrimi?"</string>
+    <string name="screenrecord_start_label" msgid="1750350278888217473">"Të nis regjistrimi?"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"Gjatë regjistrimit, sistemi Android mund të regjistrojë çdo informacion delikat që është i dukshëm në ekranin tënd ose që luhet në pajisje. Kjo përfshin fjalëkalimet, informacionin e pagesave, fotografitë, mesazhet dhe audion."</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Regjistro audio"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Audioja e pajisjes"</string>
@@ -999,8 +999,7 @@
     <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Kontrollo flluskat në çdo moment"</string>
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Trokit \"Menaxho\" për të çaktivizuar flluskat nga ky aplikacion"</string>
     <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"E kuptova"</string>
-    <!-- no translation found for bubbles_app_settings (5779443644062348657) -->
-    <skip />
+    <string name="bubbles_app_settings" msgid="5779443644062348657">"Cilësimet e <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Navigimi i sistemit u përditësua. Për të bërë ndryshime, shko te \"Cilësimet\"."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Shko te \"Cilësimet\" për të përditësuar navigimin e sistemit"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Në gatishmëri"</string>

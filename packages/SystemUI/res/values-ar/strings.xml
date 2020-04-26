@@ -1019,15 +1019,14 @@
     <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"التحكّم في فقاعات المحادثات في أي وقت"</string>
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"انقر على \"إدارة\" لإيقاف فقاعات المحادثات من هذا التطبيق."</string>
     <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"حسنًا"</string>
-    <!-- no translation found for bubbles_app_settings (5779443644062348657) -->
-    <skip />
+    <string name="bubbles_app_settings" msgid="5779443644062348657">"إعدادات <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"تم تحديث التنقل داخل النظام. لإجراء التغييرات، يُرجى الانتقال إلى \"الإعدادات\"."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"الانتقال إلى \"الإعدادات\" لتعديل التنقل داخل النظام"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"وضع الاستعداد"</string>
     <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"تظهر في أعلى قسم المحادثات"</string>
-    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"إظهار صورة الملف الشخصي على شاشة القفل"</string>
+    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"تظهر صورة الملف الشخصي على شاشة القفل"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"تظهر كفقاعة عائمة فوق التطبيقات"</string>
-    <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"مقاطعة ميزة \"عدم الإزعاج\""</string>
+    <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"لا تتقيّد بميزة \"عدم الإزعاج\""</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"حسنًا"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"نافذة تراكب التكبير"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"نافذة التكبير"</string>
