@@ -25,6 +25,7 @@ import android.hardware.light.ILights;
 import android.hardware.lights.ILightsManager;
 import android.hardware.lights.Light;
 import android.hardware.lights.LightState;
+import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -37,16 +38,17 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.view.SurfaceControl;
 
+import com.android.internal.BrightnessSynchronizer;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
-import com.android.internal.BrightnessSynchronizer;
 import com.android.server.SystemService;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 public class LightsService extends SystemService {
     static final String TAG = "LightsService";
@@ -55,7 +57,8 @@ public class LightsService extends SystemService {
     private final LightImpl[] mLightsByType = new LightImpl[LightsManager.LIGHT_ID_COUNT];
     private final SparseArray<LightImpl> mLightsById = new SparseArray<>();
 
-    private ILights mVintfLights = null;
+    @Nullable
+    private final Supplier<ILights> mVintfLights;
 
     @VisibleForTesting
     final LightsManagerBinderService mManagerService;
@@ -391,7 +394,7 @@ public class LightsService extends SystemService {
                     lightState.flashOnMs = onMS;
                     lightState.flashOffMs = offMS;
                     lightState.brightnessMode = (byte) brightnessMode;
-                    mVintfLights.setLightState(mHwLight.id, lightState);
+                    mVintfLights.get().setLightState(mHwLight.id, lightState);
                 } else {
                     setLight_native(mHwLight.id, color, mode, onMS, offMS, brightnessMode);
                 }
@@ -435,19 +438,17 @@ public class LightsService extends SystemService {
     }
 
     public LightsService(Context context) {
-        this(context,
-                ILights.Stub.asInterface(
-                        ServiceManager.getService("android.hardware.light.ILights/default")),
-                Looper.myLooper());
+        this(context, new VintfHalCache(), Looper.myLooper());
     }
 
     @VisibleForTesting
-    LightsService(Context context, ILights service, Looper looper) {
+    LightsService(Context context, Supplier<ILights> service, Looper looper) {
         super(context);
         mH = new Handler(looper);
-        mVintfLights = service;
-        mManagerService = new LightsManagerBinderService();
+        mVintfLights = service.get() != null ? service : null;
+
         populateAvailableLights(context);
+        mManagerService = new LightsManagerBinderService();
     }
 
     private void populateAvailableLights(Context context) {
@@ -467,7 +468,7 @@ public class LightsService extends SystemService {
 
     private void populateAvailableLightsFromAidl(Context context) {
         try {
-            for (HwLight hwLight : mVintfLights.getLights()) {
+            for (HwLight hwLight : mVintfLights.get().getLights()) {
                 mLightsById.put(hwLight.id, new LightImpl(context, hwLight));
             }
         } catch (RemoteException ex) {
@@ -513,6 +514,33 @@ public class LightsService extends SystemService {
             }
         }
     };
+
+    private static class VintfHalCache implements Supplier<ILights>, IBinder.DeathRecipient {
+        @GuardedBy("this")
+        private ILights mInstance = null;
+
+        @Override
+        public synchronized ILights get() {
+            if (mInstance == null) {
+                IBinder binder = Binder.allowBlocking(ServiceManager.waitForDeclaredService(
+                        "android.hardware.light.ILights/default"));
+                if (binder != null) {
+                    mInstance = ILights.Stub.asInterface(binder);
+                    try {
+                        binder.linkToDeath(this, 0);
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "Unable to register DeathRecipient for " + mInstance);
+                    }
+                }
+            }
+            return mInstance;
+        }
+
+        @Override
+        public synchronized void binderDied() {
+            mInstance = null;
+        }
+    }
 
     static native void setLight_native(int light, int color, int mode,
             int onMS, int offMS, int brightnessMode);

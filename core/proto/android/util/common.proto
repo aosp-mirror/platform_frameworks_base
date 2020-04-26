@@ -27,11 +27,16 @@ option java_multiple_files = true;
 message AggStats {
     option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
-    optional int64 min = 1;
+    optional int64 min = 1 [deprecated = true];
 
-    optional int64 average = 2;
+    optional int64 average = 2 [deprecated = true];
 
-    optional int64 max = 3;
+    optional int64 max = 3 [deprecated = true];
+
+    // These are all in kilobyte resolution. Can fit in int32, so smaller on the wire than the above
+    // int64 fields.
+    optional int32 mean_kb = 4;
+    optional int32 max_kb = 5;
 }
 
 /**

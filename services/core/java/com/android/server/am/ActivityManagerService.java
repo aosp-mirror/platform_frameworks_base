@@ -18779,6 +18779,15 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
+        public void onUserRemoved(@UserIdInt int userId) {
+            // Clean up any ActivityTaskManager state (by telling it the user is stopped)
+            mAtmInternal.onUserStopped(userId);
+            // Clean up various services by removing the user
+            mBatteryStatsService.onUserRemoved(userId);
+            mUserController.onUserRemoved(userId);
+        }
+
+        @Override
         public void killForegroundAppsForUser(@UserIdInt int userId) {
             synchronized (ActivityManagerService.this) {
                 final ArrayList<ProcessRecord> procs = new ArrayList<>();
@@ -20045,7 +20054,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (uid == mTargetUid && isTargetOp(code)) {
                 final long identity = Binder.clearCallingIdentity();
                 try {
-                    return superImpl.apply(code, Process.SHELL_UID, "com.android.shell", featureId,
+                    return mAppOpsService.noteProxyOperation(code, Process.SHELL_UID,
+                            "com.android.shell", null, uid, packageName, featureId,
                             shouldCollectAsyncNotedOp, message);
                 } finally {
                     Binder.restoreCallingIdentity(identity);

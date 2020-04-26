@@ -42,15 +42,15 @@ import javax.inject.Singleton;
  * An app is considered safe if is a system app or installed through whitelisted sources.
  */
 @Singleton
-public class CarSideLoadedAppDetector {
-    private static final String TAG = "CarSideLoadedDetector";
+public class SideLoadedAppDetector {
+    private static final String TAG = SideLoadedAppDetector.class.getSimpleName();
 
     private final PackageManager mPackageManager;
     private final CarDeviceProvisionedController mCarDeviceProvisionedController;
     private final List<String> mAllowedAppInstallSources;
 
     @Inject
-    public CarSideLoadedAppDetector(@Main Resources resources, PackageManager packageManager,
+    public SideLoadedAppDetector(@Main Resources resources, PackageManager packageManager,
             CarDeviceProvisionedController deviceProvisionedController) {
         mAllowedAppInstallSources = Arrays.asList(
                 resources.getStringArray(R.array.config_allowedAppInstallSources));
