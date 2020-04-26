@@ -17,8 +17,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="ringtone_default" msgid="798836092118824500">"ଡିଫଲ୍ଟ ରିଙ୍ଗଟୋନ୍‌"</string>
-    <!-- no translation found for notification_sound_default (8133121186242636840) -->
-    <skip />
+    <string name="notification_sound_default" msgid="8133121186242636840">"ଡିଫଲ୍ଟ ବିଜ୍ଞପ୍ତି ସାଉଣ୍ଡ"</string>
     <string name="alarm_sound_default" msgid="4787646764557462649">"ଡିଫଲ୍ଟ ଆଲାର୍ମ ଶବ୍ଦ"</string>
     <string name="add_ringtone_text" msgid="6642389991738337529">"ରିଙ୍ଗଟୋନ୍‍ ଯୋଡ଼ନ୍ତୁ"</string>
     <string name="add_alarm_text" msgid="3545497316166999225">"ଆଲାର୍ମ ଯୋଗ କରନ୍ତୁ"</string>

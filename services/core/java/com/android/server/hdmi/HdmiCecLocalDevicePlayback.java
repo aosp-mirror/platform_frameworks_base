@@ -44,11 +44,10 @@ import java.util.Locale;
 public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
     private static final String TAG = "HdmiCecLocalDevicePlayback";
 
-    private static final boolean WAKE_ON_HOTPLUG =
-            SystemProperties.getBoolean(Constants.PROPERTY_WAKE_ON_HOTPLUG, false);
+    private static final boolean WAKE_ON_HOTPLUG = false;
 
     private static final boolean SET_MENU_LANGUAGE =
-            HdmiProperties.set_menu_language().orElse(false);
+            HdmiProperties.set_menu_language_enabled().orElse(false);
 
     // Used to keep the device awake while it is the active source. For devices that
     // cannot wake up via CEC commands, this address the inconvenience of having to
