@@ -345,7 +345,7 @@
     <string name="quick_settings_dnd_alarms_label" msgid="1241780970469630835">"ફક્ત એલાર્મ્સ"</string>
     <string name="quick_settings_dnd_none_label" msgid="8420869988472836354">"સાવ શાંતિ"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"બ્લૂટૂથ"</string>
-    <string name="quick_settings_bluetooth_multiple_devices_label" msgid="6595808498429809855">"બ્લૂટૂથ (<xliff:g id="NUMBER">%d</xliff:g> ઉપકરણો)"</string>
+    <string name="quick_settings_bluetooth_multiple_devices_label" msgid="6595808498429809855">"બ્લૂટૂથ (<xliff:g id="NUMBER">%d</xliff:g> ડિવાઇસ)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="6375098046500790870">"બ્લૂટૂથ બંધ"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"કોઈ જોડી કરેલ ઉપકરણો ઉપલબ્ધ નથી"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> બૅટરી"</string>
@@ -999,8 +999,7 @@
     <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"બબલને કોઈપણ સમયે નિયંત્રિત કરો"</string>
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"આ ઍપમાંથી બબલને બંધ કરવા માટે મેનેજ કરો પર ટૅપ કરો"</string>
     <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"સમજાઈ ગયું"</string>
-    <!-- no translation found for bubbles_app_settings (5779443644062348657) -->
-    <skip />
+    <string name="bubbles_app_settings" msgid="5779443644062348657">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> સેટિંગ"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"સિસ્ટમ નૅવિગેશન અપડેટ કર્યું. ફેરફારો કરવા માટે, સેટિંગ પર જાઓ."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"સિસ્ટમ નૅવિગેશનને અપડેટ કરવા માટે સેટિંગ પર જાઓ"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"સ્ટૅન્ડબાય"</string>

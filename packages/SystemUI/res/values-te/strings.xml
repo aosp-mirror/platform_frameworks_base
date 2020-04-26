@@ -1004,16 +1004,11 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"సిస్టమ్ నావిగేషన్ అప్‌డేట్ చేయబడింది. మార్పులు చేయడానికి, సెట్టింగ్‌లకు వెళ్లండి."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"సిస్టమ్ నావిగేషన్‌ను అప్‌డేట్ చేయడానికి సెట్టింగ్‌లకు వెళ్లండి"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"స్టాండ్‌బై"</string>
-    <!-- no translation found for priority_onboarding_show_at_top_text (1678400241025513541) -->
-    <skip />
-    <!-- no translation found for priority_onboarding_show_avatar_text (5756291381124091508) -->
-    <skip />
-    <!-- no translation found for priority_onboarding_appear_as_bubble_text (4227039772250263122) -->
-    <skip />
-    <!-- no translation found for priority_onboarding_ignores_dnd_text (2918952762719600529) -->
-    <skip />
-    <!-- no translation found for priority_onboarding_done_button_title (4569550984286506007) -->
-    <skip />
+    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"సంభాషణ విభాగంలో ఎగువున చూపబడుతుంది"</string>
+    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"లాక్ స్క్రీన్ మీద ప్రొఫైల్ ఫోటో చూపబడుతుంది"</string>
+    <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"యాప్‌ల పైన తేలియాడే బబుల్‌లాగా కనిపిస్తాయి"</string>
+    <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"\'అంతరాయం కలిగించవద్దు\' మోడ్‌కు అంతరాయం"</string>
+    <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"అర్థమైంది"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"మాగ్నిఫికేషన్ ఓవర్‌లే విండో"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"మాగ్నిఫికేషన్ విండో"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"మాగ్నిఫికేషన్ నియంత్రణల విండో"</string>
