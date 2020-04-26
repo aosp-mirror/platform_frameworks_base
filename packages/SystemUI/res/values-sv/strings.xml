@@ -91,7 +91,7 @@
     <string name="screenrecord_name" msgid="2596401223859996572">"Skärminspelare"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Avisering om att skärminspelning pågår"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Vill du starta inspelningen?"</string>
-    <string name="screenrecord_description" msgid="1123231719680353736">"När du spelar kan Android-systemet registrera alla känsliga uppgifter som visas på skärmen eller spelas upp på enheten. Detta omfattar lösenord, betalningsuppgifter, foton, meddelanden och ljud."</string>
+    <string name="screenrecord_description" msgid="1123231719680353736">"När du spelar in kan Android-systemet registrera alla känsliga uppgifter som visas på skärmen eller spelas upp på enheten. Detta omfattar lösenord, betalningsuppgifter, foton, meddelanden och ljud."</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Spela in ljud"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Ljud på enheten"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Ljud från enheten, till exempel musik, samtal och ringsignaler"</string>
@@ -999,8 +999,7 @@
     <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Styr bubblor när som helst"</string>
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Tryck på Hantera för att stänga av bubblor från den här appen"</string>
     <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"OK"</string>
-    <!-- no translation found for bubbles_app_settings (5779443644062348657) -->
-    <skip />
+    <string name="bubbles_app_settings" msgid="5779443644062348657">"Inställningar för <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Systemnavigeringen har uppdaterats. Öppna inställningarna om du vill ändra något."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Öppna inställningarna och uppdatera systemnavigeringen"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Viloläge"</string>

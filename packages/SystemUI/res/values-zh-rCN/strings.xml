@@ -999,8 +999,7 @@
     <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"随时控制对话泡"</string>
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"点按“管理”按钮，可关闭来自此应用的对话泡"</string>
     <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"知道了"</string>
-    <!-- no translation found for bubbles_app_settings (5779443644062348657) -->
-    <skip />
+    <string name="bubbles_app_settings" msgid="5779443644062348657">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>设置"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"系统导航已更新。要进行更改，请转到“设置”。"</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"转到“设置”即可更新系统导航"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"待机"</string>

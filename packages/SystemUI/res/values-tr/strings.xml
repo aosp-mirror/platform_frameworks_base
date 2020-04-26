@@ -999,8 +999,7 @@
     <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Baloncukları istediğiniz zaman kontrol edin"</string>
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Bu uygulamanın baloncuklarını kapatmak için Yönet\'e dokunun"</string>
     <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"Anladım"</string>
-    <!-- no translation found for bubbles_app_settings (5779443644062348657) -->
-    <skip />
+    <string name="bubbles_app_settings" msgid="5779443644062348657">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> ayarları"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Sistemde gezinme yöntemi güncellendi. Değişiklik yapmak için Ayarlar\'a gidin."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Sistemde gezinme yöntemini güncellemek için Ayarlar\'a gidin"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Beklemeye alınıyor"</string>
