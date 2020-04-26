@@ -374,7 +374,7 @@
     <string name="quick_settings_user_title" msgid="8673045967216204537">"Utilizator"</string>
     <string name="quick_settings_user_new_user" msgid="3347905871336069666">"Utilizator nou"</string>
     <string name="quick_settings_wifi_label" msgid="2879507532983487244">"Wi-Fi"</string>
-    <string name="quick_settings_wifi_not_connected" msgid="4071097522427039160">"Neconectat"</string>
+    <string name="quick_settings_wifi_not_connected" msgid="4071097522427039160">"Neconectată"</string>
     <string name="quick_settings_wifi_no_network" msgid="6003178398713839313">"Nicio rețea"</string>
     <string name="quick_settings_wifi_off_label" msgid="4003379736176547594">"Wi-Fi deconectat"</string>
     <string name="quick_settings_wifi_on_label" msgid="2489928193654318511">"Wi-Fi activat"</string>
@@ -1004,8 +1004,7 @@
     <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Controlați oricând baloanele"</string>
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Atingeți Gestionați pentru a dezactiva baloanele din această aplicație"</string>
     <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"OK"</string>
-    <!-- no translation found for bubbles_app_settings (5779443644062348657) -->
-    <skip />
+    <string name="bubbles_app_settings" msgid="5779443644062348657">"Setări <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Navigarea în sistem a fost actualizată. Pentru a face modificări, accesați Setările."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Accesați Setările pentru a actualiza navigarea în sistem"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Standby"</string>
