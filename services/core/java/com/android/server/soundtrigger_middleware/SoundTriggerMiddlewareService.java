@@ -27,9 +27,7 @@ import android.media.soundtrigger_middleware.PhraseSoundModel;
 import android.media.soundtrigger_middleware.RecognitionConfig;
 import android.media.soundtrigger_middleware.SoundModel;
 import android.media.soundtrigger_middleware.SoundTriggerModuleDescriptor;
-import android.os.Parcel;
 import android.os.RemoteException;
-import android.os.SystemProperties;
 import android.util.Log;
 
 import com.android.server.SystemService;
@@ -101,28 +99,6 @@ public class SoundTriggerMiddlewareService extends ISoundTriggerMiddlewareServic
         }
     }
 
-    @Override
-    public boolean onTransact(int code, Parcel data, Parcel reply, int flags)
-            throws RemoteException {
-        try {
-            return super.onTransact(code, data, reply, flags);
-        } catch (InternalServerError e) {
-            if (e.getCause() instanceof HalException) {
-                // We recover from any sort of HAL failure by rebooting the HAL process.
-                // This will likely reboot more than just the sound trigger HAL.
-                // The rest of the system should be able to tolerate that.
-                rebootHal();
-            }
-            throw e;
-        }
-    }
-
-    private static void rebootHal() {
-        Log.i(TAG, "Rebooting the sound trigger HAL");
-        // This property needs to be defined in an init.rc script and trigger a HAL reboot.
-        SystemProperties.set("sys.audio.restart.hal", "1");
-    }
-
     private final static class ModuleService extends ISoundTriggerModule.Stub {
         private final ISoundTriggerModule mDelegate;
 
@@ -181,22 +157,6 @@ public class SoundTriggerMiddlewareService extends ISoundTriggerMiddlewareServic
         @Override
         public void detach() throws RemoteException {
             mDelegate.detach();
-        }
-
-        @Override
-        public boolean onTransact(int code, Parcel data, Parcel reply, int flags)
-                throws RemoteException {
-            try {
-                return super.onTransact(code, data, reply, flags);
-            } catch (InternalServerError e) {
-                if (e.getCause() instanceof HalException) {
-                    // We recover from any sort of HAL failure by rebooting the HAL process.
-                    // This will likely reboot more than just the sound trigger HAL.
-                    // The rest of the system should be able to tolerate that.
-                    rebootHal();
-                }
-                throw e;
-            }
         }
     }
 

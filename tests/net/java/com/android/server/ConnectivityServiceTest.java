@@ -144,6 +144,7 @@ import android.net.ConnectivityManager.PacketKeepalive;
 import android.net.ConnectivityManager.PacketKeepaliveCallback;
 import android.net.ConnectivityManager.TooManyRequestsException;
 import android.net.ConnectivityThread;
+import android.net.DataStallReportParcelable;
 import android.net.IConnectivityDiagnosticsCallback;
 import android.net.IDnsResolver;
 import android.net.IIpConnectivityMetrics;
@@ -170,6 +171,7 @@ import android.net.NetworkSpecifier;
 import android.net.NetworkStack;
 import android.net.NetworkStackClient;
 import android.net.NetworkState;
+import android.net.NetworkTestResultParcelable;
 import android.net.NetworkUtils;
 import android.net.ProxyInfo;
 import android.net.ResolverParamsParcel;
@@ -196,7 +198,6 @@ import android.os.Looper;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
-import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -580,14 +581,6 @@ public class ConnectivityServiceTest {
     }
 
     private class TestNetworkAgentWrapper extends NetworkAgentWrapper {
-        private static final int VALIDATION_RESULT_BASE = NETWORK_VALIDATION_PROBE_DNS
-                | NETWORK_VALIDATION_PROBE_HTTP
-                | NETWORK_VALIDATION_PROBE_HTTPS;
-        private static final int VALIDATION_RESULT_VALID = VALIDATION_RESULT_BASE
-                | NETWORK_VALIDATION_RESULT_VALID;
-        private static final int VALIDATION_RESULT_PARTIAL = VALIDATION_RESULT_BASE
-                | NETWORK_VALIDATION_PROBE_FALLBACK
-                | NETWORK_VALIDATION_RESULT_PARTIAL;
         private static final int VALIDATION_RESULT_INVALID = 0;
 
         private static final long DATA_STALL_TIMESTAMP = 10L;
@@ -595,12 +588,10 @@ public class ConnectivityServiceTest {
 
         private INetworkMonitor mNetworkMonitor;
         private INetworkMonitorCallbacks mNmCallbacks;
-        private int mNmValidationResult = VALIDATION_RESULT_BASE;
+        private int mNmValidationResult = VALIDATION_RESULT_INVALID;
         private int mProbesCompleted;
         private int mProbesSucceeded;
         private String mNmValidationRedirectUrl = null;
-        private PersistableBundle mValidationExtras = PersistableBundle.EMPTY;
-        private PersistableBundle mDataStallExtras = PersistableBundle.EMPTY;
         private boolean mNmProvNotificationRequested = false;
 
         private final ConditionVariable mNetworkStatusReceived = new ConditionVariable();
@@ -668,8 +659,13 @@ public class ConnectivityServiceTest {
             }
 
             mNmCallbacks.notifyProbeStatusChanged(mProbesCompleted, mProbesSucceeded);
-            mNmCallbacks.notifyNetworkTestedWithExtras(
-                    mNmValidationResult, mNmValidationRedirectUrl, TIMESTAMP, mValidationExtras);
+            final NetworkTestResultParcelable p = new NetworkTestResultParcelable();
+            p.result = mNmValidationResult;
+            p.probesAttempted = mProbesCompleted;
+            p.probesSucceeded = mProbesSucceeded;
+            p.redirectUrl = mNmValidationRedirectUrl;
+            p.timestampMillis = TIMESTAMP;
+            mNmCallbacks.notifyNetworkTestedWithExtras(p);
 
             if (mNmValidationRedirectUrl != null) {
                 mNmCallbacks.showProvisioningNotification(
@@ -751,9 +747,9 @@ public class ConnectivityServiceTest {
         }
 
         void setNetworkValid(boolean isStrictMode) {
-            mNmValidationResult = VALIDATION_RESULT_VALID;
+            mNmValidationResult = NETWORK_VALIDATION_RESULT_VALID;
             mNmValidationRedirectUrl = null;
-            int probesSucceeded = VALIDATION_RESULT_BASE & ~NETWORK_VALIDATION_PROBE_HTTP;
+            int probesSucceeded = NETWORK_VALIDATION_PROBE_DNS | NETWORK_VALIDATION_PROBE_HTTPS;
             if (isStrictMode) {
                 probesSucceeded |= NETWORK_VALIDATION_PROBE_PRIVDNS;
             }
@@ -765,8 +761,9 @@ public class ConnectivityServiceTest {
         void setNetworkInvalid(boolean isStrictMode) {
             mNmValidationResult = VALIDATION_RESULT_INVALID;
             mNmValidationRedirectUrl = null;
-            int probesCompleted = VALIDATION_RESULT_BASE;
-            int probesSucceeded = VALIDATION_RESULT_INVALID;
+            int probesCompleted = NETWORK_VALIDATION_PROBE_DNS | NETWORK_VALIDATION_PROBE_HTTPS
+                    | NETWORK_VALIDATION_PROBE_HTTP;
+            int probesSucceeded = 0;
             // If the isStrictMode is true, it means the network is invalid when NetworkMonitor
             // tried to validate the private DNS but failed.
             if (isStrictMode) {
@@ -782,7 +779,7 @@ public class ConnectivityServiceTest {
             mNmValidationRedirectUrl = redirectUrl;
             // Suppose the portal is found when NetworkMonitor probes NETWORK_VALIDATION_PROBE_HTTP
             // in the beginning, so the NETWORK_VALIDATION_PROBE_HTTPS hasn't probed yet.
-            int probesCompleted = VALIDATION_RESULT_BASE & ~NETWORK_VALIDATION_PROBE_HTTPS;
+            int probesCompleted = NETWORK_VALIDATION_PROBE_DNS | NETWORK_VALIDATION_PROBE_HTTP;
             int probesSucceeded = VALIDATION_RESULT_INVALID;
             if (isStrictMode) {
                 probesCompleted |= NETWORK_VALIDATION_PROBE_PRIVDNS;
@@ -791,18 +788,20 @@ public class ConnectivityServiceTest {
         }
 
         void setNetworkPartial() {
-            mNmValidationResult = VALIDATION_RESULT_PARTIAL;
+            mNmValidationResult = NETWORK_VALIDATION_RESULT_PARTIAL;
             mNmValidationRedirectUrl = null;
-            int probesCompleted = VALIDATION_RESULT_BASE;
-            int probesSucceeded = VALIDATION_RESULT_BASE & ~NETWORK_VALIDATION_PROBE_HTTPS;
+            int probesCompleted = NETWORK_VALIDATION_PROBE_DNS | NETWORK_VALIDATION_PROBE_HTTPS
+                    | NETWORK_VALIDATION_PROBE_FALLBACK;
+            int probesSucceeded = NETWORK_VALIDATION_PROBE_DNS | NETWORK_VALIDATION_PROBE_FALLBACK;
             setProbesStatus(probesCompleted, probesSucceeded);
         }
 
         void setNetworkPartialValid(boolean isStrictMode) {
             setNetworkPartial();
-            mNmValidationResult |= VALIDATION_RESULT_VALID;
-            int probesCompleted = VALIDATION_RESULT_BASE;
-            int probesSucceeded = VALIDATION_RESULT_BASE & ~NETWORK_VALIDATION_PROBE_HTTPS;
+            mNmValidationResult |= NETWORK_VALIDATION_RESULT_VALID;
+            int probesCompleted = NETWORK_VALIDATION_PROBE_DNS | NETWORK_VALIDATION_PROBE_HTTPS
+                    | NETWORK_VALIDATION_PROBE_HTTP;
+            int probesSucceeded = NETWORK_VALIDATION_PROBE_DNS | NETWORK_VALIDATION_PROBE_HTTP;
             // Suppose the partial network cannot pass the private DNS validation as well, so only
             // add NETWORK_VALIDATION_PROBE_DNS in probesCompleted but not probesSucceeded.
             if (isStrictMode) {
@@ -838,8 +837,10 @@ public class ConnectivityServiceTest {
         }
 
         void notifyDataStallSuspected() throws Exception {
-            mNmCallbacks.notifyDataStallSuspected(
-                    DATA_STALL_TIMESTAMP, DATA_STALL_DETECTION_METHOD, mDataStallExtras);
+            final DataStallReportParcelable p = new DataStallReportParcelable();
+            p.detectionMethod = DATA_STALL_DETECTION_METHOD;
+            p.timestampMillis = DATA_STALL_TIMESTAMP;
+            mNmCallbacks.notifyDataStallSuspected(p);
         }
     }
 

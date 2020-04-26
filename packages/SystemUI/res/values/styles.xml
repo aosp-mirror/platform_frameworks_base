@@ -731,11 +731,6 @@
         <item name="android:textSize">@dimen/control_text_size</item>
         <item name="android:textColor">@color/control_secondary_text</item>
     </style>
-    <style name="TextAppearance.ControlDialog">
-        <item name="android:fontFamily">@*android:string/config_headlineFontFamilyMedium</item>
-        <item name="android:textSize">@dimen/controls_activity_view_text_size</item>
-        <item name="android:textColor">@color/control_primary_text</item>
-    </style>
     <style name="Control.ListPopupWindow" parent="@*android:style/Widget.DeviceDefault.ListPopupWindow">
         <item name="android:overlapAnchor">true</item>
 

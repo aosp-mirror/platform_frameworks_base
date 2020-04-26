@@ -16,6 +16,8 @@
 
 package com.android.server.people.data;
 
+import static android.app.NotificationChannel.USER_LOCKED_ALLOW_BUBBLE;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -56,6 +58,7 @@ import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.telecom.TelecomManager;
 import android.text.format.DateUtils;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -482,7 +485,8 @@ public class DataManager {
     }
 
     @Nullable
-    private EventHistoryImpl getEventHistoryIfEligible(StatusBarNotification sbn) {
+    private PackageData getPackageIfConversationExists(StatusBarNotification sbn,
+            Consumer<ConversationInfo> conversationConsumer) {
         Notification notification = sbn.getNotification();
         String shortcutId = notification.getShortcutId();
         if (shortcutId == null) {
@@ -490,12 +494,16 @@ public class DataManager {
         }
         PackageData packageData = getPackage(sbn.getPackageName(),
                 sbn.getUser().getIdentifier());
-        if (packageData == null
-                || packageData.getConversationStore().getConversation(shortcutId) == null) {
+        if (packageData == null) {
             return null;
         }
-        return packageData.getEventStore().getOrCreateEventHistory(
-                EventStore.CATEGORY_SHORTCUT_BASED, shortcutId);
+        ConversationInfo conversationInfo =
+                packageData.getConversationStore().getConversation(shortcutId);
+        if (conversationInfo == null) {
+            return null;
+        }
+        conversationConsumer.accept(conversationInfo);
+        return packageData;
     }
 
     @VisibleForTesting
@@ -745,10 +753,19 @@ public class DataManager {
     /** Listener for the notifications and their settings changes. */
     private class NotificationListener extends NotificationListenerService {
 
+        // Conversation shortcut ID -> Number of active notifications
+        private final Map<String, Integer> mActiveNotifCounts = new ArrayMap<>();
+
         @Override
         public void onNotificationPosted(StatusBarNotification sbn) {
-            EventHistoryImpl eventHistory = getEventHistoryIfEligible(sbn);
-            if (eventHistory != null) {
+            String shortcutId = sbn.getNotification().getShortcutId();
+            PackageData packageData = getPackageIfConversationExists(sbn, conversationInfo -> {
+                mActiveNotifCounts.merge(shortcutId, 1, Integer::sum);
+            });
+
+            if (packageData != null) {
+                EventHistoryImpl eventHistory = packageData.getEventStore().getOrCreateEventHistory(
+                        EventStore.CATEGORY_SHORTCUT_BASED, shortcutId);
                 eventHistory.addEvent(new Event(sbn.getPostTime(), Event.TYPE_NOTIFICATION_POSTED));
             }
         }
@@ -756,13 +773,32 @@ public class DataManager {
         @Override
         public void onNotificationRemoved(StatusBarNotification sbn, RankingMap rankingMap,
                 int reason) {
-            if (reason != REASON_CLICK) {
+            String shortcutId = sbn.getNotification().getShortcutId();
+            PackageData packageData = getPackageIfConversationExists(sbn, conversationInfo -> {
+                int count = mActiveNotifCounts.getOrDefault(shortcutId, 0) - 1;
+                if (count <= 0) {
+                    mActiveNotifCounts.remove(sbn.getNotification().getShortcutId());
+                    // The shortcut was cached by Notification Manager synchronously when the
+                    // associated notification was posted. Uncache it here when all the associated
+                    // notifications are removed.
+                    if (conversationInfo.isShortcutCached()
+                            && !conversationInfo.isNotificationSettingChanged()) {
+                        int userId = sbn.getUser().getIdentifier();
+                        mShortcutServiceInternal.uncacheShortcuts(userId,
+                                mContext.getPackageName(), sbn.getPackageName(),
+                                Collections.singletonList(conversationInfo.getShortcutId()),
+                                userId);
+                    }
+                } else {
+                    mActiveNotifCounts.put(shortcutId, count);
+                }
+            });
+
+            if (reason != REASON_CLICK || packageData == null) {
                 return;
             }
-            EventHistoryImpl eventHistory = getEventHistoryIfEligible(sbn);
-            if (eventHistory == null) {
-                return;
-            }
+            EventHistoryImpl eventHistory = packageData.getEventStore().getOrCreateEventHistory(
+                    EventStore.CATEGORY_SHORTCUT_BASED, shortcutId);
             long currentTime = System.currentTimeMillis();
             eventHistory.addEvent(new Event(currentTime, Event.TYPE_NOTIFICATION_OPENED));
         }
@@ -780,7 +816,16 @@ public class DataManager {
             if (conversationInfo == null) {
                 return;
             }
+            boolean isNotificationSettingChanged =
+                    conversationInfo.isImportant() != channel.isImportantConversation()
+                            || conversationInfo.isDemoted() != channel.isDemoted()
+                            || channel.hasUserSetImportance()
+                            || (channel.getUserLockedFields() & USER_LOCKED_ALLOW_BUBBLE) != 0;
             ConversationInfo.Builder builder = new ConversationInfo.Builder(conversationInfo);
+            if (modificationType == NOTIFICATION_CHANNEL_OR_GROUP_UPDATED
+                    && isNotificationSettingChanged) {
+                builder.setNotificationSettingChanged(true);
+            }
             switch (modificationType) {
                 case NOTIFICATION_CHANNEL_OR_GROUP_ADDED:
                 case NOTIFICATION_CHANNEL_OR_GROUP_UPDATED:
@@ -802,15 +847,6 @@ public class DataManager {
                     break;
             }
             conversationStore.addOrUpdate(builder.build());
-
-            if (modificationType == NOTIFICATION_CHANNEL_OR_GROUP_UPDATED
-                    && conversationInfo.isShortcutLongLived()
-                    && !conversationInfo.isShortcutCached()) {
-                mShortcutServiceInternal.cacheShortcuts(user.getIdentifier(),
-                        mContext.getPackageName(), pkg,
-                        Collections.singletonList(conversationInfo.getShortcutId()),
-                        user.getIdentifier());
-            }
         }
     }
 

@@ -17,32 +17,47 @@
 package com.android.systemui.controls.ui
 
 import android.app.Dialog
-import android.app.PendingIntent
 import android.content.Intent
+import android.os.Vibrator
+import android.os.VibrationEffect
 import android.service.controls.Control
 import android.service.controls.actions.BooleanAction
 import android.service.controls.actions.CommandAction
-import android.util.Log
 import android.view.HapticFeedbackConstants
-import com.android.systemui.R
 import com.android.systemui.controls.controller.ControlsController
+import com.android.systemui.util.concurrency.DelayableExecutor
 
 object ControlActionCoordinator {
     const val MIN_LEVEL = 0
     const val MAX_LEVEL = 10000
 
     private var dialog: Dialog? = null
+    private var vibrator: Vibrator? = null
+
+    lateinit var bgExecutor: DelayableExecutor
 
     fun closeDialog() {
         dialog?.dismiss()
         dialog = null
     }
 
+    /**
+     * Create custom vibrations, all intended to create very subtle feedback while interacting
+     * with the controls.
+     */
+    fun initialize(vibrator: Vibrator, bgExecutor: DelayableExecutor) {
+        this.vibrator = vibrator
+        this.bgExecutor = bgExecutor
+    }
+
     fun toggle(cvh: ControlViewHolder, templateId: String, isChecked: Boolean) {
+        val effect = if (isChecked) Vibrations.toggleOnEffect else Vibrations.toggleOffEffect
+        vibrate(effect)
         cvh.action(BooleanAction(templateId, !isChecked))
     }
 
     fun touch(cvh: ControlViewHolder, templateId: String, control: Control) {
+        vibrate(Vibrations.toggleOnEffect)
         if (cvh.usePanel()) {
             showDialog(cvh, control.getAppIntent().getIntent())
         } else {
@@ -50,24 +65,29 @@ object ControlActionCoordinator {
         }
     }
 
+    fun drag(isEdge: Boolean) {
+        if (isEdge) {
+            vibrate(Vibrations.rangeEdgeEffect)
+        } else {
+            vibrate(Vibrations.rangeMiddleEffect)
+        }
+    }
+
     /**
-     * Allow apps to specify whether they would like to appear in a detail panel or within
-     * the full activity by setting the {@link Control#EXTRA_USE_PANEL} flag. In order for
-     * activities to determine how they are being launched, they should inspect the
-     * {@link Control#EXTRA_USE_PANEL} flag for a value of true.
+     * All long presses will be shown in a 3/4 height bottomsheet panel, in order for the user to
+     * retain context with their favorited controls in the power menu.
      */
     fun longPress(cvh: ControlViewHolder) {
         // Long press snould only be called when there is valid control state, otherwise ignore
         cvh.cws.control?.let {
-            try {
-                it.getAppIntent().send()
-                cvh.layout.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
-                cvh.context.sendBroadcast(Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS))
-            } catch (e: PendingIntent.CanceledException) {
-                Log.e(ControlsUiController.TAG, "Error sending pending intent", e)
-                cvh.setTransientStatus(
-                    cvh.context.resources.getString(R.string.controls_error_failed))
-            }
+            cvh.layout.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+            showDialog(cvh, it.getAppIntent().getIntent())
+        }
+    }
+
+    private fun vibrate(effect: VibrationEffect) {
+        vibrator?.let {
+            bgExecutor.execute { it.vibrate(effect) }
         }
     }
 

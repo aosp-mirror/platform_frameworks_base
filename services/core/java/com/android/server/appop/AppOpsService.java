@@ -5201,8 +5201,9 @@ public class AppOpsService extends IAppOpsService.Stub {
             if (mNotedWatchers.size() > 0 && dumpMode < 0) {
                 needSep = true;
                 boolean printedHeader = false;
-                for (int i = 0; i < mNotedWatchers.size(); i++) {
-                    final SparseArray<NotedCallback> notedWatchers = mNotedWatchers.valueAt(i);
+                for (int watcherNum = 0; watcherNum < mNotedWatchers.size(); watcherNum++) {
+                    final SparseArray<NotedCallback> notedWatchers =
+                            mNotedWatchers.valueAt(watcherNum);
                     if (notedWatchers.size() <= 0) {
                         continue;
                     }
@@ -5220,16 +5221,16 @@ public class AppOpsService extends IAppOpsService.Stub {
                     }
                     pw.print("    ");
                     pw.print(Integer.toHexString(System.identityHashCode(
-                            mNotedWatchers.keyAt(i))));
+                            mNotedWatchers.keyAt(watcherNum))));
                     pw.println(" ->");
                     pw.print("        [");
                     final int opCount = notedWatchers.size();
-                    for (i = 0; i < opCount; i++) {
-                        if (i > 0) {
+                    for (int opNum = 0; opNum < opCount; opNum++) {
+                        if (opNum > 0) {
                             pw.print(' ');
                         }
-                        pw.print(AppOpsManager.opToName(notedWatchers.keyAt(i)));
-                        if (i < opCount - 1) {
+                        pw.print(AppOpsManager.opToName(notedWatchers.keyAt(opNum)));
+                        if (opNum < opCount - 1) {
                             pw.print(',');
                         }
                     }

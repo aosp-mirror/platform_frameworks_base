@@ -2115,6 +2115,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     void removeIfPossible() {
         super.removeIfPossible();
         removeIfPossible(false /*keepVisibleDeadWindow*/);
+        finishDrawing(null);
     }
 
     private void removeIfPossible(boolean keepVisibleDeadWindow) {
@@ -3456,7 +3457,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         final Rect visibleInsets = mWindowFrames.mLastVisibleInsets;
         final Rect stableInsets = mWindowFrames.mLastStableInsets;
         final MergedConfiguration mergedConfiguration = mLastReportedConfiguration;
-        final boolean reportDraw = mWinAnimator.mDrawState == DRAW_PENDING;
+        final boolean reportDraw = mWinAnimator.mDrawState == DRAW_PENDING || useBLASTSync();
         final boolean forceRelayout = reportOrientation || isDragResizeChanged();
         final int displayId = getDisplayId();
         final DisplayCutout displayCutout = getWmDisplayCutout().getDisplayCutout();

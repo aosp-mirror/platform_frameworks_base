@@ -1863,6 +1863,9 @@ public final class QuotaController extends StateController {
         /** The next time the alarm is set to go off, in the elapsed realtime timebase. */
         @GuardedBy("mLock")
         private long mTriggerTimeElapsed = 0;
+        /** The minimum amount of time between quota check alarms. */
+        @GuardedBy("mLock")
+        private long mMinQuotaCheckDelayMs = QcConstants.DEFAULT_MIN_QUOTA_CHECK_DELAY_MS;
 
         @GuardedBy("mLock")
         void addAlarmLocked(int userId, @NonNull String pkgName, long inQuotaTimeElapsed) {
@@ -1870,6 +1873,11 @@ public final class QuotaController extends StateController {
             mAlarmQueue.remove(pkg);
             mAlarmQueue.offer(new Pair<>(pkg, inQuotaTimeElapsed));
             setNextAlarmLocked();
+        }
+
+        @GuardedBy("mLock")
+        void setMinQuotaCheckDelayMs(long minDelayMs) {
+            mMinQuotaCheckDelayMs = minDelayMs;
         }
 
         @GuardedBy("mLock")
@@ -1902,8 +1910,14 @@ public final class QuotaController extends StateController {
 
         @GuardedBy("mLock")
         private void setNextAlarmLocked() {
+            setNextAlarmLocked(sElapsedRealtimeClock.millis());
+        }
+
+        @GuardedBy("mLock")
+        private void setNextAlarmLocked(long earliestTriggerElapsed) {
             if (mAlarmQueue.size() > 0) {
-                final long nextTriggerTimeElapsed = mAlarmQueue.peek().second;
+                final long nextTriggerTimeElapsed = Math.max(earliestTriggerElapsed,
+                        mAlarmQueue.peek().second);
                 // Only schedule the alarm if one of the following is true:
                 // 1. There isn't one currently scheduled
                 // 2. The new alarm is significantly earlier than the previous alarm. If it's
@@ -1939,7 +1953,7 @@ public final class QuotaController extends StateController {
                         break;
                     }
                 }
-                setNextAlarmLocked();
+                setNextAlarmLocked(sElapsedRealtimeClock.millis() + mMinQuotaCheckDelayMs);
             }
         }
 
@@ -2022,6 +2036,7 @@ public final class QuotaController extends StateController {
                 "max_session_count_per_rate_limiting_window";
         private static final String KEY_TIMING_SESSION_COALESCING_DURATION_MS =
                 "timing_session_coalescing_duration_ms";
+        private static final String KEY_MIN_QUOTA_CHECK_DELAY_MS = "min_quota_check_delay_ms";
 
         private static final long DEFAULT_ALLOWED_TIME_PER_PERIOD_MS =
                 10 * 60 * 1000L; // 10 minutes
@@ -2062,6 +2077,7 @@ public final class QuotaController extends StateController {
         private static final int DEFAULT_MAX_SESSION_COUNT_RESTRICTED = 1; // 1/day
         private static final int DEFAULT_MAX_SESSION_COUNT_PER_RATE_LIMITING_WINDOW = 20;
         private static final long DEFAULT_TIMING_SESSION_COALESCING_DURATION_MS = 5000; // 5 seconds
+        private static final long DEFAULT_MIN_QUOTA_CHECK_DELAY_MS = MINUTE_IN_MILLIS;
 
         /** How much time each app will have to run jobs within their standby bucket window. */
         public long ALLOWED_TIME_PER_PERIOD_MS = DEFAULT_ALLOWED_TIME_PER_PERIOD_MS;
@@ -2195,6 +2211,9 @@ public final class QuotaController extends StateController {
         public long TIMING_SESSION_COALESCING_DURATION_MS =
                 DEFAULT_TIMING_SESSION_COALESCING_DURATION_MS;
 
+        /** The minimum amount of time between quota check alarms. */
+        public long MIN_QUOTA_CHECK_DELAY_MS = DEFAULT_MIN_QUOTA_CHECK_DELAY_MS;
+
         // Safeguards
 
         /** The minimum number of jobs that any bucket will be allowed to run within its window. */
@@ -2288,6 +2307,8 @@ public final class QuotaController extends StateController {
             TIMING_SESSION_COALESCING_DURATION_MS = mParser.getLong(
                     KEY_TIMING_SESSION_COALESCING_DURATION_MS,
                     DEFAULT_TIMING_SESSION_COALESCING_DURATION_MS);
+            MIN_QUOTA_CHECK_DELAY_MS = mParser.getDurationMillis(KEY_MIN_QUOTA_CHECK_DELAY_MS,
+                    DEFAULT_MIN_QUOTA_CHECK_DELAY_MS);
 
             updateConstants();
         }
@@ -2433,6 +2454,11 @@ public final class QuotaController extends StateController {
                     mTimingSessionCoalescingDurationMs = newSessionCoalescingDurationMs;
                     changed = true;
                 }
+                // Don't set changed to true for this one since we don't need to re-evaluate
+                // execution stats or constraint status. Limit the delay to the range [0, 15]
+                // minutes.
+                mInQuotaAlarmListener.setMinQuotaCheckDelayMs(
+                        Math.min(15 * MINUTE_IN_MILLIS, Math.max(0, MIN_QUOTA_CHECK_DELAY_MS)));
 
                 if (changed) {
                     // Update job bookkeeping out of band.
@@ -2475,6 +2501,7 @@ public final class QuotaController extends StateController {
                     MAX_SESSION_COUNT_PER_RATE_LIMITING_WINDOW).println();
             pw.printPair(KEY_TIMING_SESSION_COALESCING_DURATION_MS,
                     TIMING_SESSION_COALESCING_DURATION_MS).println();
+            pw.printPair(KEY_MIN_QUOTA_CHECK_DELAY_MS, MIN_QUOTA_CHECK_DELAY_MS).println();
             pw.decreaseIndent();
         }
 
@@ -2520,6 +2547,8 @@ public final class QuotaController extends StateController {
                     MAX_SESSION_COUNT_PER_RATE_LIMITING_WINDOW);
             proto.write(ConstantsProto.QuotaController.TIMING_SESSION_COALESCING_DURATION_MS,
                     TIMING_SESSION_COALESCING_DURATION_MS);
+            proto.write(ConstantsProto.QuotaController.MIN_QUOTA_CHECK_DELAY_MS,
+                    MIN_QUOTA_CHECK_DELAY_MS);
             proto.end(qcToken);
         }
     }

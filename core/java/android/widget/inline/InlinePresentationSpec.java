@@ -57,6 +57,14 @@ public final class InlinePresentationSpec implements Parcelable {
         return InlinePresentationStyleUtils.bundleEquals(mStyle, style);
     }
 
+    /**
+     * Removes the remote objects from the {@code mStyle}.
+     * @hide
+     */
+    public void filterContentTypes() {
+        InlinePresentationStyleUtils.filterContentTypes(mStyle);
+    }
+
     /** @hide */
     @DataClass.Suppress({"setMaxSize", "setMinSize"})
     abstract static class BaseBuilder {
@@ -285,10 +293,10 @@ public final class InlinePresentationSpec implements Parcelable {
     }
 
     @DataClass.Generated(
-            time = 1585768046898L,
+            time = 1586935491105L,
             codegenVersion = "1.0.15",
             sourceFile = "frameworks/base/core/java/android/widget/inline/InlinePresentationSpec.java",
-            inputSignatures = "private final @android.annotation.NonNull android.util.Size mMinSize\nprivate final @android.annotation.NonNull android.util.Size mMaxSize\nprivate final @android.annotation.NonNull android.os.Bundle mStyle\nprivate static @android.annotation.NonNull android.os.Bundle defaultStyle()\nprivate  boolean styleEquals(android.os.Bundle)\nclass InlinePresentationSpec extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genEqualsHashCode=true, genToString=true, genBuilder=true)\nclass BaseBuilder extends java.lang.Object implements []")
+            inputSignatures = "private final @android.annotation.NonNull android.util.Size mMinSize\nprivate final @android.annotation.NonNull android.util.Size mMaxSize\nprivate final @android.annotation.NonNull android.os.Bundle mStyle\nprivate static @android.annotation.NonNull android.os.Bundle defaultStyle()\nprivate  boolean styleEquals(android.os.Bundle)\npublic  void filterContentTypes()\nclass InlinePresentationSpec extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genEqualsHashCode=true, genToString=true, genBuilder=true)\nclass BaseBuilder extends java.lang.Object implements []")
     @Deprecated
     private void __metadata() {}
 

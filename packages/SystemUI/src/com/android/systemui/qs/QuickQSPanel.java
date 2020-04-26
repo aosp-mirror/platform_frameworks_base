@@ -34,6 +34,7 @@ import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTile.SignalState;
 import com.android.systemui.plugins.qs.QSTile.State;
@@ -84,10 +85,11 @@ public class QuickQSPanel extends QSPanel {
             QSLogger qsLogger,
             @Main Executor foregroundExecutor,
             @Background DelayableExecutor backgroundExecutor,
-            @Nullable LocalBluetoothManager localBluetoothManager
+            @Nullable LocalBluetoothManager localBluetoothManager,
+            ActivityStarter activityStarter
     ) {
         super(context, attrs, dumpManager, broadcastDispatcher, qsLogger,
-                foregroundExecutor, backgroundExecutor, localBluetoothManager);
+                foregroundExecutor, backgroundExecutor, localBluetoothManager, activityStarter);
         if (mFooter != null) {
             removeView(mFooter.getView());
         }
@@ -107,7 +109,7 @@ public class QuickQSPanel extends QSPanel {
 
             int marginSize = (int) mContext.getResources().getDimension(R.dimen.qqs_media_spacing);
             mMediaPlayer = new QuickQSMediaPlayer(mContext, mHorizontalLinearLayout,
-                    foregroundExecutor, backgroundExecutor);
+                    foregroundExecutor, backgroundExecutor, activityStarter);
             LayoutParams lp2 = new LayoutParams(0, LayoutParams.MATCH_PARENT, 1);
             lp2.setMarginEnd(marginSize);
             lp2.setMarginStart(0);

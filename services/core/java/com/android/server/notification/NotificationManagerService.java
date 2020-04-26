@@ -5695,11 +5695,22 @@ public class NotificationManagerService extends SystemService {
         ShortcutInfo info = mShortcutHelper != null
                 ? mShortcutHelper.getValidShortcutInfo(notification.getShortcutId(), pkg, user)
                 : null;
+        if (notification.getShortcutId() != null && info == null) {
+            Slog.w(TAG, "notification " + r.getKey() + " added an invalid shortcut");
+        }
         r.setShortcutInfo(info);
 
         if (!checkDisqualifyingFeatures(userId, notificationUid, id, tag, r,
                 r.getSbn().getOverrideGroupKey() != null)) {
             return;
+        }
+
+        if (info != null) {
+            // Cache the shortcut synchronously after the associated notification is posted in case
+            // the app unpublishes this shortcut immediately after posting the notification. If the
+            // user does not modify the notification settings on this conversation, the shortcut
+            // will be uncached by People Service when all the associated notifications are removed.
+            mShortcutHelper.cacheShortcut(info, user);
         }
 
         // Whitelist pending intents.

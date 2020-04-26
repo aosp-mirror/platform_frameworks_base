@@ -123,6 +123,7 @@ cc_library_shared {
                 "android_os_MessageQueue.cpp",
                 "android_os_Parcel.cpp",
                 "android_os_SELinux.cpp",
+                "android_os_ServiceManager.cpp",
                 "android_os_SharedMemory.cpp",
                 "android_os_storage_StorageManager.cpp",
                 "android_os_UEventObserver.cpp",

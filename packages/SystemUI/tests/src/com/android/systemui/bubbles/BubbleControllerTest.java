@@ -158,6 +158,7 @@ public class BubbleControllerTest extends SysuiTestCase {
     private NotificationTestHelper mNotificationTestHelper;
     private ExpandableNotificationRow mRow;
     private ExpandableNotificationRow mRow2;
+    private ExpandableNotificationRow mRow3;
     private ExpandableNotificationRow mNonBubbleNotifRow;
 
     @Mock
@@ -232,6 +233,7 @@ public class BubbleControllerTest extends SysuiTestCase {
                 TestableLooper.get(this));
         mRow = mNotificationTestHelper.createBubble(mDeleteIntent);
         mRow2 = mNotificationTestHelper.createBubble(mDeleteIntent);
+        mRow3 = mNotificationTestHelper.createBubble(mDeleteIntent);
         mNonBubbleNotifRow = mNotificationTestHelper.createRow();
 
         // Return non-null notification data from the NEM
@@ -311,7 +313,7 @@ public class BubbleControllerTest extends SysuiTestCase {
     @Test
     public void testRemoveBubble() {
         mBubbleController.updateBubble(mRow.getEntry());
-        assertNotNull(mBubbleData.getBubbleWithKey(mRow.getEntry().getKey()));
+        assertNotNull(mBubbleData.getBubbleInStackWithKey(mRow.getEntry().getKey()));
         assertTrue(mBubbleController.hasBubbles());
         verify(mNotificationEntryManager).updateNotifications(any());
         verify(mBubbleStateChangeListener).onHasBubblesChanged(true);
@@ -319,7 +321,7 @@ public class BubbleControllerTest extends SysuiTestCase {
         mBubbleController.removeBubble(
                 mRow.getEntry(), BubbleController.DISMISS_USER_GESTURE);
         assertFalse(mNotificationShadeWindowController.getBubblesShowing());
-        assertNull(mBubbleData.getBubbleWithKey(mRow.getEntry().getKey()));
+        assertNull(mBubbleData.getBubbleInStackWithKey(mRow.getEntry().getKey()));
         verify(mNotificationEntryManager, times(2)).updateNotifications(anyString());
         verify(mBubbleStateChangeListener).onHasBubblesChanged(false);
 
@@ -335,8 +337,11 @@ public class BubbleControllerTest extends SysuiTestCase {
 
         Bubble b = mBubbleData.getOverflowBubbleWithKey(mRow.getEntry().getKey());
         assertThat(mBubbleData.getOverflowBubbles()).isEqualTo(ImmutableList.of(b));
+        verify(mNotificationEntryManager, never()).performRemoveNotification(
+                eq(mRow.getEntry().getSbn()), anyInt());
+        assertFalse(mRow.getEntry().isBubble());
 
-        Bubble b2 = mBubbleData.getBubbleWithKey(mRow2.getEntry().getKey());
+        Bubble b2 = mBubbleData.getBubbleInStackWithKey(mRow2.getEntry().getKey());
         assertThat(mBubbleData.getSelectedBubble()).isEqualTo(b2);
 
         mBubbleController.promoteBubbleFromOverflow(b);
@@ -344,45 +349,49 @@ public class BubbleControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testRemoveBubble_withDismissedNotif() {
-        mEntryListener.onPendingEntryAdded(mRow.getEntry());
-        mBubbleController.updateBubble(mRow.getEntry());
-
-        assertTrue(mBubbleController.hasBubbles());
-        assertFalse(mBubbleController.isBubbleNotificationSuppressedFromShade(
-                mRow.getEntry()));
-
-        // Make it look like dismissed notif
-        mBubbleData.getBubbleWithKey(mRow.getEntry().getKey()).setSuppressNotification(true);
-
-        // Now remove the bubble
+    public void testCancelOverflowBubble() {
+        mBubbleController.updateBubble(mRow2.getEntry());
+        mBubbleController.updateBubble(mRow.getEntry(), /* suppressFlyout */
+                false, /* showInShade */ true);
         mBubbleController.removeBubble(
                 mRow.getEntry(), BubbleController.DISMISS_USER_GESTURE);
 
-        // Since the notif is dismissed, once the bubble is removed, performRemoveNotification gets
-        // called to really remove the notif
+        mBubbleController.removeBubble(mRow.getEntry(), BubbleController.DISMISS_NOTIF_CANCEL);
         verify(mNotificationEntryManager, times(1)).performRemoveNotification(
                 eq(mRow.getEntry().getSbn()), anyInt());
-        assertFalse(mBubbleController.hasBubbles());
+        assertThat(mBubbleData.getOverflowBubbles()).isEmpty();
+        assertFalse(mRow.getEntry().isBubble());
+    }
 
+    @Test
+    public void testUserChange_doesNotRemoveNotif() {
+        mBubbleController.updateBubble(mRow.getEntry());
+        assertTrue(mBubbleController.hasBubbles());
+
+        mBubbleController.removeBubble(
+                mRow.getEntry(), BubbleController.DISMISS_USER_CHANGED);
+        verify(mNotificationEntryManager, never()).performRemoveNotification(
+                eq(mRow.getEntry().getSbn()), anyInt());
+        assertFalse(mBubbleController.hasBubbles());
         assertFalse(mSysUiStateBubblesExpanded);
+        assertTrue(mRow.getEntry().isBubble());
     }
 
     @Test
     public void testDismissStack() {
         mBubbleController.updateBubble(mRow.getEntry());
         verify(mNotificationEntryManager, times(1)).updateNotifications(any());
-        assertNotNull(mBubbleData.getBubbleWithKey(mRow.getEntry().getKey()));
+        assertNotNull(mBubbleData.getBubbleInStackWithKey(mRow.getEntry().getKey()));
         mBubbleController.updateBubble(mRow2.getEntry());
         verify(mNotificationEntryManager, times(2)).updateNotifications(any());
-        assertNotNull(mBubbleData.getBubbleWithKey(mRow2.getEntry().getKey()));
+        assertNotNull(mBubbleData.getBubbleInStackWithKey(mRow2.getEntry().getKey()));
         assertTrue(mBubbleController.hasBubbles());
 
         mBubbleData.dismissAll(BubbleController.DISMISS_USER_GESTURE);
         assertFalse(mNotificationShadeWindowController.getBubblesShowing());
         verify(mNotificationEntryManager, times(3)).updateNotifications(any());
-        assertNull(mBubbleData.getBubbleWithKey(mRow.getEntry().getKey()));
-        assertNull(mBubbleData.getBubbleWithKey(mRow2.getEntry().getKey()));
+        assertNull(mBubbleData.getBubbleInStackWithKey(mRow.getEntry().getKey()));
+        assertNull(mBubbleData.getBubbleInStackWithKey(mRow2.getEntry().getKey()));
 
         assertFalse(mSysUiStateBubblesExpanded);
     }
@@ -452,10 +461,10 @@ public class BubbleControllerTest extends SysuiTestCase {
                 mRow2.getEntry()));
 
         // Switch which bubble is expanded
-        mBubbleData.setSelectedBubble(mBubbleData.getBubbleWithKey(mRow.getEntry().getKey()));
+        mBubbleData.setSelectedBubble(mBubbleData.getBubbleInStackWithKey(mRow.getEntry().getKey()));
         mBubbleData.setExpanded(true);
         assertEquals(mRow.getEntry(),
-                mBubbleData.getBubbleWithKey(stackView.getExpandedBubble().getKey()).getEntry());
+                mBubbleData.getBubbleInStackWithKey(stackView.getExpandedBubble().getKey()).getEntry());
         assertTrue(mBubbleController.isBubbleNotificationSuppressedFromShade(
                 mRow.getEntry()));
 
@@ -483,7 +492,7 @@ public class BubbleControllerTest extends SysuiTestCase {
                 mRow.getEntry()));
 
         mTestableLooper.processAllMessages();
-        assertTrue(mBubbleData.getBubbleWithKey(mRow.getEntry().getKey()).showDot());
+        assertTrue(mBubbleData.getBubbleInStackWithKey(mRow.getEntry().getKey()).showDot());
 
         // Expand
         mBubbleData.setExpanded(true);
@@ -496,7 +505,7 @@ public class BubbleControllerTest extends SysuiTestCase {
         assertTrue(mBubbleController.isBubbleNotificationSuppressedFromShade(
                 mRow.getEntry()));
         // Notif shouldn't show dot after expansion
-        assertFalse(mBubbleData.getBubbleWithKey(mRow.getEntry().getKey()).showDot());
+        assertFalse(mBubbleData.getBubbleInStackWithKey(mRow.getEntry().getKey()).showDot());
     }
 
     @Test
@@ -511,7 +520,7 @@ public class BubbleControllerTest extends SysuiTestCase {
                 mRow.getEntry()));
 
         mTestableLooper.processAllMessages();
-        assertTrue(mBubbleData.getBubbleWithKey(mRow.getEntry().getKey()).showDot());
+        assertTrue(mBubbleData.getBubbleInStackWithKey(mRow.getEntry().getKey()).showDot());
 
         // Expand
         mBubbleData.setExpanded(true);
@@ -524,7 +533,7 @@ public class BubbleControllerTest extends SysuiTestCase {
         assertTrue(mBubbleController.isBubbleNotificationSuppressedFromShade(
                 mRow.getEntry()));
         // Notif shouldn't show dot after expansion
-        assertFalse(mBubbleData.getBubbleWithKey(mRow.getEntry().getKey()).showDot());
+        assertFalse(mBubbleData.getBubbleInStackWithKey(mRow.getEntry().getKey()).showDot());
 
         // Send update
         mEntryListener.onPreEntryUpdated(mRow.getEntry());
@@ -534,7 +543,7 @@ public class BubbleControllerTest extends SysuiTestCase {
         assertTrue(mBubbleController.isBubbleNotificationSuppressedFromShade(
                 mRow.getEntry()));
         // Notif shouldn't show dot after expansion
-        assertFalse(mBubbleData.getBubbleWithKey(mRow.getEntry().getKey()).showDot());
+        assertFalse(mBubbleData.getBubbleInStackWithKey(mRow.getEntry().getKey()).showDot());
     }
 
     @Test
@@ -557,24 +566,24 @@ public class BubbleControllerTest extends SysuiTestCase {
 
         // Last added is the one that is expanded
         assertEquals(mRow2.getEntry(),
-                mBubbleData.getBubbleWithKey(stackView.getExpandedBubble().getKey()).getEntry());
+                mBubbleData.getBubbleInStackWithKey(stackView.getExpandedBubble().getKey()).getEntry());
         assertTrue(mBubbleController.isBubbleNotificationSuppressedFromShade(
                 mRow2.getEntry()));
 
         // Dismiss currently expanded
         mBubbleController.removeBubble(
-                mBubbleData.getBubbleWithKey(stackView.getExpandedBubble().getKey()).getEntry(),
+                mBubbleData.getBubbleInStackWithKey(stackView.getExpandedBubble().getKey()).getEntry(),
                 BubbleController.DISMISS_USER_GESTURE);
         verify(mBubbleExpandListener).onBubbleExpandChanged(false, mRow2.getEntry().getKey());
 
         // Make sure first bubble is selected
         assertEquals(mRow.getEntry(),
-                mBubbleData.getBubbleWithKey(stackView.getExpandedBubble().getKey()).getEntry());
+                mBubbleData.getBubbleInStackWithKey(stackView.getExpandedBubble().getKey()).getEntry());
         verify(mBubbleExpandListener).onBubbleExpandChanged(true, mRow.getEntry().getKey());
 
         // Dismiss that one
         mBubbleController.removeBubble(
-                mBubbleData.getBubbleWithKey(stackView.getExpandedBubble().getKey()).getEntry(),
+                mBubbleData.getBubbleInStackWithKey(stackView.getExpandedBubble().getKey()).getEntry(),
                 BubbleController.DISMISS_USER_GESTURE);
 
         // Make sure state changes and collapse happens
@@ -639,8 +648,8 @@ public class BubbleControllerTest extends SysuiTestCase {
         assertTrue(mBubbleController.isBubbleNotificationSuppressedFromShade(
                 mRow.getEntry()));
         // Dot + flyout is hidden because notif is suppressed
-        assertFalse(mBubbleData.getBubbleWithKey(mRow.getEntry().getKey()).showDot());
-        assertFalse(mBubbleData.getBubbleWithKey(mRow.getEntry().getKey()).showFlyout());
+        assertFalse(mBubbleData.getBubbleInStackWithKey(mRow.getEntry().getKey()).showDot());
+        assertFalse(mBubbleData.getBubbleInStackWithKey(mRow.getEntry().getKey()).showFlyout());
 
         // # of bubbles should change
         verify(mBubbleStateChangeListener).onHasBubblesChanged(true /* hasBubbles */);
@@ -656,7 +665,7 @@ public class BubbleControllerTest extends SysuiTestCase {
         assertFalse(mBubbleController.isBubbleNotificationSuppressedFromShade(
                 mRow.getEntry()));
         // Should show dot
-        assertTrue(mBubbleData.getBubbleWithKey(mRow.getEntry().getKey()).showDot());
+        assertTrue(mBubbleData.getBubbleInStackWithKey(mRow.getEntry().getKey()).showDot());
 
         // Update to suppress notif
         setMetadataFlags(mRow.getEntry(),
@@ -667,8 +676,8 @@ public class BubbleControllerTest extends SysuiTestCase {
         assertTrue(mBubbleController.isBubbleNotificationSuppressedFromShade(
                 mRow.getEntry()));
         // Dot + flyout is hidden because notif is suppressed
-        assertFalse(mBubbleData.getBubbleWithKey(mRow.getEntry().getKey()).showDot());
-        assertFalse(mBubbleData.getBubbleWithKey(mRow.getEntry().getKey()).showFlyout());
+        assertFalse(mBubbleData.getBubbleInStackWithKey(mRow.getEntry().getKey()).showDot());
+        assertFalse(mBubbleData.getBubbleInStackWithKey(mRow.getEntry().getKey()).showFlyout());
 
         // # of bubbles should change
         verify(mBubbleStateChangeListener).onHasBubblesChanged(true /* hasBubbles */);
@@ -699,7 +708,7 @@ public class BubbleControllerTest extends SysuiTestCase {
                 mRow.getEntry()));
 
         mTestableLooper.processAllMessages();
-        assertTrue(mBubbleData.getBubbleWithKey(mRow.getEntry().getKey()).showDot());
+        assertTrue(mBubbleData.getBubbleInStackWithKey(mRow.getEntry().getKey()).showDot());
     }
 
     @Test
@@ -812,7 +821,29 @@ public class BubbleControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void removeBubble_succeeds_userDismissBubble_userDimissNotif() {
+    public void removeNotif_inOverflow_intercepted() {
+        // Get bubble with notif in shade.
+        mEntryListener.onPendingEntryAdded(mRow.getEntry());
+        mBubbleController.updateBubble(mRow.getEntry());
+        assertTrue(mBubbleController.hasBubbles());
+        assertFalse(mBubbleController.isBubbleNotificationSuppressedFromShade(
+                mRow.getEntry()));
+
+        // Dismiss the bubble into overflow.
+        mBubbleController.removeBubble(
+                mRow.getEntry(), BubbleController.DISMISS_USER_GESTURE);
+        assertFalse(mBubbleController.hasBubbles());
+
+        boolean intercepted = mRemoveInterceptor.onNotificationRemoveRequested(
+                mRow.getEntry().getKey(), mRow.getEntry(), REASON_CANCEL);
+
+        // Notif is no longer a bubble, but still in overflow, so we intercept removal.
+        assertTrue(intercepted);
+    }
+
+    @Test
+    public void removeNotif_notInOverflow_notIntercepted() {
+        // Get bubble with notif in shade.
         mEntryListener.onPendingEntryAdded(mRow.getEntry());
         mBubbleController.updateBubble(mRow.getEntry());
 
@@ -820,17 +851,40 @@ public class BubbleControllerTest extends SysuiTestCase {
         assertFalse(mBubbleController.isBubbleNotificationSuppressedFromShade(
                 mRow.getEntry()));
 
-        // Dismiss the bubble
         mBubbleController.removeBubble(
-                mRow.getEntry(), BubbleController.DISMISS_USER_GESTURE);
+                mRow.getEntry(), BubbleController.DISMISS_NO_LONGER_BUBBLE);
         assertFalse(mBubbleController.hasBubbles());
 
-        // Dismiss the notification
         boolean intercepted = mRemoveInterceptor.onNotificationRemoveRequested(
                 mRow.getEntry().getKey(), mRow.getEntry(), REASON_CANCEL);
 
-        // It's no longer a bubble so we shouldn't intercept
+        // Notif is no longer a bubble, so we should not intercept removal.
         assertFalse(intercepted);
+    }
+
+    @Test
+    public void testOverflowBubble_maxReached_notInShade_bubbleRemoved() {
+        mBubbleController.updateBubble(
+                mRow.getEntry(), /* suppressFlyout */ false, /* showInShade */ false);
+        mBubbleController.updateBubble(
+                mRow2.getEntry(), /* suppressFlyout */ false, /* showInShade */ false);
+        mBubbleController.updateBubble(
+                mRow3.getEntry(), /* suppressFlyout */ false, /* showInShade */ false);
+        assertEquals(mBubbleData.getBubbles().size(), 3);
+
+        mBubbleData.setMaxOverflowBubbles(1);
+        mBubbleController.removeBubble(
+                mRow.getEntry(), BubbleController.DISMISS_USER_GESTURE);
+        assertEquals(mBubbleData.getBubbles().size(), 2);
+        assertEquals(mBubbleData.getOverflowBubbles().size(), 1);
+
+        mBubbleController.removeBubble(
+                mRow2.getEntry(), BubbleController.DISMISS_USER_GESTURE);
+        // Overflow max of 1 is reached; mRow is oldest, so it gets removed
+        verify(mNotificationEntryManager, times(1)).performRemoveNotification(
+                mRow.getEntry().getSbn(), REASON_CANCEL);
+        assertEquals(mBubbleData.getBubbles().size(), 1);
+        assertEquals(mBubbleData.getOverflowBubbles().size(), 1);
     }
 
     @Test
@@ -854,7 +908,7 @@ public class BubbleControllerTest extends SysuiTestCase {
 
         // Should notify delegate that shade state changed
         verify(listener).onBubbleNotificationSuppressionChange(
-                mBubbleData.getBubbleWithKey(mRow.getEntry().getKey()));
+                mBubbleData.getBubbleInStackWithKey(mRow.getEntry().getKey()));
     }
 
     @Test
@@ -877,7 +931,7 @@ public class BubbleControllerTest extends SysuiTestCase {
 
         // Should notify delegate that shade state changed
         verify(listener).onBubbleNotificationSuppressionChange(
-                mBubbleData.getBubbleWithKey(mRow.getEntry().getKey()));
+                mBubbleData.getBubbleInStackWithKey(mRow.getEntry().getKey()));
     }
 
     @Test
@@ -887,7 +941,7 @@ public class BubbleControllerTest extends SysuiTestCase {
         ExpandableNotificationRow groupedBubble = mNotificationTestHelper.createBubbleInGroup();
         mEntryListener.onPendingEntryAdded(groupedBubble.getEntry());
         groupSummary.addChildNotification(groupedBubble);
-        assertTrue(mBubbleData.hasBubbleWithKey(groupedBubble.getEntry().getKey()));
+        assertTrue(mBubbleData.hasBubbleInStackWithKey(groupedBubble.getEntry().getKey()));
 
         // WHEN the summary is dismissed
         mBubbleController.handleDismissalInterception(groupSummary.getEntry());
@@ -905,7 +959,7 @@ public class BubbleControllerTest extends SysuiTestCase {
         ExpandableNotificationRow groupedBubble = mNotificationTestHelper.createBubbleInGroup();
         mEntryListener.onPendingEntryAdded(groupedBubble.getEntry());
         groupSummary.addChildNotification(groupedBubble);
-        assertTrue(mBubbleData.hasBubbleWithKey(groupedBubble.getEntry().getKey()));
+        assertTrue(mBubbleData.hasBubbleInStackWithKey(groupedBubble.getEntry().getKey()));
 
         // GIVEN the summary is dismissed
         mBubbleController.handleDismissalInterception(groupSummary.getEntry());
@@ -914,7 +968,7 @@ public class BubbleControllerTest extends SysuiTestCase {
         mEntryListener.onEntryRemoved(groupSummary.getEntry(), null, false, REASON_APP_CANCEL);
 
         // THEN the summary and its children are removed from bubble data
-        assertFalse(mBubbleData.hasBubbleWithKey(groupedBubble.getEntry().getKey()));
+        assertFalse(mBubbleData.hasBubbleInStackWithKey(groupedBubble.getEntry().getKey()));
         assertFalse(mBubbleData.isSummarySuppressed(
                 groupSummary.getEntry().getSbn().getGroupKey()));
     }
