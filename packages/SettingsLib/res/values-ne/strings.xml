@@ -251,8 +251,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"ताररहित प्रदर्शन प्रमाणीकरण"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Wi-Fi वर्बोज लग सक्षम पार्नुहोस्"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Wi‑Fi स्क्यान थ्रोटलिङ"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization (5437378364995776979) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Wi‑Fi द्वारा परिष्कृत MAC ठेगाना बदल्ने सुविधा"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"मोबाइल डेटा सधैँ सक्रिय राख्नुहोस्"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"टेदरिङको लागि हार्डवेयरको प्रवेग"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"नामकरण नगरिएका ब्लुटुथ यन्त्रहरू देखाउनुहोस्"</string>
@@ -285,8 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"ताररहित प्रदर्शन प्रमाणीकरणका लागि विकल्पहरू देखाउनुहोस्"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Wi-Fi लग स्तर बढाउनुहोस्, Wi-Fi चयनकर्तामा प्रति SSID RSSI देखाइन्छ"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"ब्याट्रीको खपत कम गरी नेटवर्कको कार्यसम्पादनमा सुधार गर्दछ"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization_summary (7925425746373704991) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"यो टगलले क्लाइन्ट मोडमा मात्र MAC ठेगाना बदल्ने सुविधामा असर पार्न सक्छ।\nयो मोड सक्रिय हुँदा MAC बदल्ने सुविधा सक्षम पारेको कुनै पनि नेटवर्कको MAC ठेगाना पुनः बदल्न सकिन्छ। यसका लागि नेटवर्क कनेक्ट भएको हुनु पर्छ। यो कुरा क्लाइन्टले उक्त नेटवर्क पछिल्लो पटक कहिले डिस्कनेक्ट गरेको थियो भन्ने कुरामा पनि भर पर्छ। यन्त्र ४ घन्टा वा सोभन्दा कम समयमा फेरि कनेक्ट हुन्छ भने MAC ठेगाना पुनः बदलिँदैन।"</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"सशुल्क वाइफाइ"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"मिटर नगरिएको"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"लगर बफर आकारहरू"</string>
