@@ -3662,7 +3662,8 @@ public class UserManager {
     }
 
     /**
-     * Returns the badge color for the given user (generally to color a profile's icon's badge).
+     * Returns the light theme badge color for the given user (generally to color a profile's
+     * icon's badge).
      *
      * <p>To check whether a badge color is expected for the user, first call {@link #hasBadge}.
      *
@@ -3675,6 +3676,27 @@ public class UserManager {
     public @ColorInt int getUserBadgeColor(@UserIdInt int userId) {
         try {
             final int resourceId = mService.getUserBadgeColorResId(userId);
+            return Resources.getSystem().getColor(resourceId, null);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the dark theme badge color for the given user (generally to color a profile's icon's
+     * badge).
+     *
+     * <p>To check whether a badge color is expected for the user, first call {@link #hasBadge}.
+     *
+     * @return the color (not the resource ID) to be used for the user's badge
+     * @throws Resources.NotFoundException if no valid badge color exists for this user
+     *
+     * @see #getBadgedIconForUser more information about badging in general
+     * @hide
+     */
+    public @ColorInt int getUserBadgeDarkColor(@UserIdInt int userId) {
+        try {
+            final int resourceId = mService.getUserBadgeDarkColorResId(userId);
             return Resources.getSystem().getColor(resourceId, null);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
