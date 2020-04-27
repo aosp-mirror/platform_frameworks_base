@@ -80,6 +80,8 @@ interface IHdmiControlService {
     void sendMhlVendorCommand(int portId, int offset, int length, in byte[] data);
     void addHdmiMhlVendorCommandListener(IHdmiMhlVendorCommandListener listener);
     void setStandbyMode(boolean isStandbyModeOn);
+    void setHdmiCecVolumeControlEnabled(boolean isHdmiCecVolumeControlEnabled);
+    boolean isHdmiCecVolumeControlEnabled();
     void reportAudioStatus(int deviceType, int volume, int maxVolume, boolean isMute);
     void setSystemAudioModeOnForAudioOnlySource();
 }
