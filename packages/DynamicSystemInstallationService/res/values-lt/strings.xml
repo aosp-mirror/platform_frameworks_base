@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_name" msgid="1329763481012806">"Dinaminiai sistemos atnaujinimai"</string>
-    <string name="notification_channel_name" msgid="4236645997978509780">"Dinaminiai sistemos atnaujinimai"</string>
-    <string name="keyguard_title" msgid="1804887096112528661">"Dinaminiai sistemos atnaujinimai"</string>
     <string name="keyguard_description" msgid="8582605799129954556">"Įveskite slaptažodį ir eikite į Dinaminių sistemos atnaujinimų funkciją"</string>
     <string name="notification_install_completed" msgid="6252047868415172643">"Dinaminė sistema paruošta. Jei norite pradėti ją naudoti, paleiskite įrenginį iš naujo."</string>
     <string name="notification_install_inprogress" msgid="7383334330065065017">"Diegiama"</string>

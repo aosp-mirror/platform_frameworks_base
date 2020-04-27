@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_name" msgid="1329763481012806">"Breytilegar kerfisuppfærslur"</string>
-    <string name="notification_channel_name" msgid="4236645997978509780">"Breytilegar kerfisuppfærslur"</string>
-    <string name="keyguard_title" msgid="1804887096112528661">"Breytilegar kerfisuppfærslur"</string>
     <string name="keyguard_description" msgid="8582605799129954556">"Sláðu inn aðgangsorð og haltu áfram í „Breytilegar kerfisuppfærslur“"</string>
     <string name="notification_install_completed" msgid="6252047868415172643">"Breytilegt kerfi er tilbúið. Endurræstu tækið til að byrja að nota það."</string>
     <string name="notification_install_inprogress" msgid="7383334330065065017">"Uppsetning stendur yfir"</string>

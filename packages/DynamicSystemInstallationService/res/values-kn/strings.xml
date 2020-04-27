@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_name" msgid="1329763481012806">"ಡೈನಾಮಿಕ್ ಸಿಸ್ಟಂ ಅಪ್‌ಡೇಟ್‌ಗಳು"</string>
-    <string name="notification_channel_name" msgid="4236645997978509780">"ಡೈನಾಮಿಕ್ ಸಿಸ್ಟಂ ಅಪ್‌ಡೇಟ್‌ಗಳು"</string>
-    <string name="keyguard_title" msgid="1804887096112528661">"ಡೈನಾಮಿಕ್ ಸಿಸ್ಟಂ ಅಪ್‌ಡೇಟ್‌ಗಳು"</string>
     <string name="keyguard_description" msgid="8582605799129954556">"ನಿಮ್ಮ ಪಾಸ್‌ವರ್ಡ್ ನಮೂದಿಸಿ ನಂತರ ಡೈನಾಮಿಕ್ ಸಿಸ್ಟಂ ಅಪ್‌ಡೇಟ್‌ಗಳಿಗೆ ಮುಂದುವರಿಯಿರಿ"</string>
     <string name="notification_install_completed" msgid="6252047868415172643">"ಡೈನಾಮಿಕ್ ಸಿಸ್ಟಂ ಸಿದ್ದವಾಗಿದೆ. ಇದನ್ನು ಬಳಸಲು, ನಿಮ್ಮ ಸಾಧನವನ್ನು ಮರುಪ್ರಾರಂಭಿಸಿ."</string>
     <string name="notification_install_inprogress" msgid="7383334330065065017">"ಇನ್‌ಸ್ಟಾಲ್ ಆಗುತ್ತಿದೆ"</string>

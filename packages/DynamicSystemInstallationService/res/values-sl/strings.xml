@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_name" msgid="1329763481012806">"Dinamične posodobitve sistema"</string>
-    <string name="notification_channel_name" msgid="4236645997978509780">"Dinamične posodobitve sistema"</string>
-    <string name="keyguard_title" msgid="1804887096112528661">"Dinamične posodobitve sistema"</string>
     <string name="keyguard_description" msgid="8582605799129954556">"Vnesite geslo in nadaljujte na dinamične posodobitve sistema"</string>
     <string name="notification_install_completed" msgid="6252047868415172643">"Dinamični sistem je pripravljen. Znova zaženite napravo, da ga boste lahko začeli uporabljati."</string>
     <string name="notification_install_inprogress" msgid="7383334330065065017">"Namestitev poteka"</string>

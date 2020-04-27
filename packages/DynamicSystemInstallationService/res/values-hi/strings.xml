@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_name" msgid="1329763481012806">"डाइनैमिक सिस्टम अपडेट"</string>
-    <string name="notification_channel_name" msgid="4236645997978509780">"डाइनैमिक सिस्टम अपडेट"</string>
-    <string name="keyguard_title" msgid="1804887096112528661">"डाइनैमिक सिस्टम अपडेट"</string>
     <string name="keyguard_description" msgid="8582605799129954556">"डाइनैमिक सिस्टम अपडेट की सुविधा जारी रखने के लिए कृपया अपना पासवर्ड डालें"</string>
     <string name="notification_install_completed" msgid="6252047868415172643">"डाइनैमिक सिस्टम तैयार है. इसका इस्तेमाल करने के लिए, अपना डिवाइस रीस्टार्ट करें."</string>
     <string name="notification_install_inprogress" msgid="7383334330065065017">"इंस्टॉल हो रहा है"</string>

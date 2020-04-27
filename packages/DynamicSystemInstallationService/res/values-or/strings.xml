@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_name" msgid="1329763481012806">"ଡାଇନାମିକ୍ ସିଷ୍ଟମ୍ ଅପଡେଟ୍"</string>
-    <string name="notification_channel_name" msgid="4236645997978509780">"ଡାଇନାମିକ୍ ସିଷ୍ଟମ୍ ଅପଡେଟ୍"</string>
-    <string name="keyguard_title" msgid="1804887096112528661">"ଡାଇନାମିକ୍ ସିଷ୍ଟମ୍ ଅପଡେଟ୍"</string>
     <string name="keyguard_description" msgid="8582605799129954556">"ଦୟାକରି ଆପଣଙ୍କ ପାସୱାର୍ଡ ଲେଖନ୍ତୁ ଏବଂ ଡାଇନାମିକ୍ ସିଷ୍ଟମ୍ ଅପଡେଟ୍ ଜାରି ରଖନ୍ତୁ"</string>
     <string name="notification_install_completed" msgid="6252047868415172643">"ଡାଇନାମିକ୍ ସିଷ୍ଟମ୍ ପ୍ରସ୍ତୁତ ଅଛି। ଏହାକୁ ବ୍ୟବହାର କରିବା ଆରମ୍ଭ କରିବାକୁ, ଆପଣଙ୍କ ଡିଭାଇସକୁ ରିଷ୍ଟାର୍ଟ କରନ୍ତୁ।"</string>
     <string name="notification_install_inprogress" msgid="7383334330065065017">"ଇନଷ୍ଟଲ୍ ହେଉଛି"</string>
