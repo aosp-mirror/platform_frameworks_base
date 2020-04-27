@@ -16,6 +16,8 @@
 
 package com.android.systemui.controls.management
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
 import android.app.ActivityOptions
 import android.content.ComponentName
 import android.content.Intent
@@ -163,7 +165,23 @@ class ControlsFavoritingActivity @Inject constructor(
                     pageIndicator.visibility =
                         if (listOfStructures.size > 1) View.VISIBLE else View.GONE
 
-                    ControlsAnimations.enterAnimation(pageIndicator).start()
+                    ControlsAnimations.enterAnimation(pageIndicator).apply {
+                        addListener(object : AnimatorListenerAdapter() {
+                            override fun onAnimationEnd(animation: Animator?) {
+                                // Position the tooltip if necessary after animations are complete
+                                // so we can get the position on screen. The tooltip is not
+                                // rooted in the layout root.
+                                if (pageIndicator.visibility == View.VISIBLE &&
+                                        mTooltipManager != null) {
+                                    val p = IntArray(2)
+                                    pageIndicator.getLocationOnScreen(p)
+                                    val x = p[0] + pageIndicator.width / 2
+                                    val y = p[1] + pageIndicator.height
+                                    mTooltipManager?.show(R.string.controls_structure_tooltip, x, y)
+                                }
+                            }
+                        })
+                    }.start()
                     ControlsAnimations.enterAnimation(structurePager).start()
                 }
             }, Consumer { runnable -> cancelLoadRunnable = runnable })
@@ -225,27 +243,6 @@ class ControlsFavoritingActivity @Inject constructor(
         }
         pageIndicator = requireViewById<ManagementPageIndicator>(
             R.id.structure_page_indicator).apply {
-            addOnLayoutChangeListener(object : View.OnLayoutChangeListener {
-                override fun onLayoutChange(
-                    v: View,
-                    left: Int,
-                    top: Int,
-                    right: Int,
-                    bottom: Int,
-                    oldLeft: Int,
-                    oldTop: Int,
-                    oldRight: Int,
-                    oldBottom: Int
-                ) {
-                    if (v.visibility == View.VISIBLE && mTooltipManager != null) {
-                        val p = IntArray(2)
-                        v.getLocationOnScreen(p)
-                        val x = p[0] + (right - left) / 2
-                        val y = p[1] + bottom - top
-                        mTooltipManager?.show(R.string.controls_structure_tooltip, x, y)
-                    }
-                }
-            })
             visibilityListener = {
                 if (it != View.VISIBLE) {
                     mTooltipManager?.hide(true)
