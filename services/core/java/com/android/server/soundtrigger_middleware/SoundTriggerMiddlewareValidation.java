@@ -47,6 +47,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * This is a decorator of an {@link ISoundTriggerMiddlewareService}, which enforces permissions and
@@ -123,7 +124,7 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
         }
     }
 
-    private Boolean mCaptureState;
+    private AtomicReference<Boolean> mCaptureState = new AtomicReference<>();
 
     private final @NonNull ISoundTriggerMiddlewareInternal mDelegate;
     private final @NonNull Context mContext;
@@ -230,10 +231,7 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
         } catch (Exception e) {
             throw handleException(e);
         } finally {
-            // It is safe to lock here - local operation.
-            synchronized (this) {
-                mCaptureState = active;
-            }
+            mCaptureState.set(active);
         }
     }
 
@@ -286,8 +284,9 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
     @Override
     public void dump(PrintWriter pw) {
         synchronized (this) {
-            pw.printf("Capture state is %s\n\n", mCaptureState == null ? "uninitialized"
-                    : (mCaptureState ? "active" : "inactive"));
+            Boolean captureState = mCaptureState.get();
+            pw.printf("Capture state is %s\n\n", captureState == null ? "uninitialized"
+                    : (captureState ? "active" : "inactive"));
             if (mModules != null) {
                 for (int handle : mModules.keySet()) {
                     final ModuleState module = mModules.get(handle);
