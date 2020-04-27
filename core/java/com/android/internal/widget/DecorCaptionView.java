@@ -30,6 +30,7 @@ import android.view.ViewOutlineProvider;
 import android.view.Window;
 
 import com.android.internal.R;
+import com.android.internal.policy.DecorView;
 import com.android.internal.policy.PhoneWindow;
 
 import java.util.ArrayList;
@@ -304,6 +305,8 @@ public class DecorCaptionView extends ViewGroup implements View.OnTouchListener,
                         captionHeight + mContent.getMeasuredHeight());
             }
         }
+
+        ((DecorView) mOwner.getDecorView()).notifyCaptionHeightChanged();
 
         // This assumes that the caption bar is at the top.
         mOwner.notifyRestrictedCaptionAreaCallback(mMaximize.getLeft(), mMaximize.getTop(),
