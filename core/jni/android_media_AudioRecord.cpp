@@ -307,6 +307,9 @@ android_media_AudioRecord_setup(JNIEnv *env, jobject thiz, jobject weak_this,
                     status);
             goto native_init_failure;
         }
+        // Set caller name so it can be logged in destructor.
+        // MediaMetricsConstants.h: AMEDIAMETRICS_PROP_CALLERNAME_VALUE_JAVA
+        lpRecorder->setCallerName("java");
     } else { // end if nativeRecordInJavaObj == 0)
         lpRecorder = (AudioRecord*)nativeRecordInJavaObj;
         // TODO: We need to find out which members of the Java AudioRecord might need to be
