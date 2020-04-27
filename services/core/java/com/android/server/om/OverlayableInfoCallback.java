@@ -22,7 +22,6 @@ import android.annotation.Nullable;
 import android.content.om.OverlayableInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.os.RemoteException;
 
 import com.android.server.pm.PackageManagerServiceUtils;
 
@@ -68,8 +67,7 @@ public interface OverlayableInfoCallback {
     /**
      * @return true if the target package has declared an overlayable
      */
-    boolean doesTargetDefineOverlayable(String targetPackageName, int userId)
-            throws RemoteException, IOException;
+    boolean doesTargetDefineOverlayable(String targetPackageName, int userId) throws IOException;
 
     /**
      * @throws SecurityException containing message if the caller doesn't have the given
