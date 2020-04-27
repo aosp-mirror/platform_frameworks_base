@@ -53,7 +53,7 @@ public class TopNotificationPanelViewMediator extends NotificationPanelViewMedia
     @Override
     public void registerListeners() {
         super.registerListeners();
-        getCarNavigationBarController().registerBottomBarTouchListener(
+        getCarNavigationBarController().registerTopBarTouchListener(
                 getNotificationPanelViewController().getDragOpenTouchListener());
     }
 }
