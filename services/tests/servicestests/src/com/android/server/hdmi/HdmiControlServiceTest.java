@@ -252,4 +252,13 @@ public class HdmiControlServiceTest {
         assertThat(mHdmiControlService.getPowerStatus()).isEqualTo(
                 HdmiControlManager.POWER_STATUS_STANDBY);
     }
+
+    @Test
+    public void setAndGetCecVolumeControlEnabled_isApi() {
+        mHdmiControlService.setHdmiCecVolumeControlEnabled(false);
+        assertThat(mHdmiControlService.isHdmiCecVolumeControlEnabled()).isFalse();
+
+        mHdmiControlService.setHdmiCecVolumeControlEnabled(true);
+        assertThat(mHdmiControlService.isHdmiCecVolumeControlEnabled()).isTrue();
+    }
 }

@@ -9614,6 +9614,43 @@ public final class Settings {
         */
        public static final String HDMI_CONTROL_ENABLED = "hdmi_control_enabled";
 
+        /**
+         * Controls whether volume control commands via HDMI CEC are enabled. (0 = false, 1 =
+         * true).
+         *
+         * <p>Effects on different device types:
+         * <table>
+         *     <tr><th>HDMI CEC device type</th><th>0: disabled</th><th>1: enabled</th></tr>
+         *     <tr>
+         *         <td>TV (type: 0)</td>
+         *         <td>Per CEC specification.</td>
+         *         <td>TV changes system volume. TV no longer reacts to incoming volume changes
+         *         via {@code <User Control Pressed>}. TV no longer handles {@code <Report Audio
+         *         Status>}.</td>
+         *     </tr>
+         *     <tr>
+         *         <td>Playback device (type: 4)</td>
+         *         <td>Device sends volume commands to TV/Audio system via {@code <User Control
+         *         Pressed>}</td>
+         *         <td>Device does not send volume commands via {@code <User Control Pressed>}.</td>
+         *     </tr>
+         *     <tr>
+         *         <td>Audio device (type: 5)</td>
+         *         <td>Full "System Audio Control" capabilities.</td>
+         *         <td>Audio device no longer reacts to incoming {@code <User Control Pressed>}
+         *         volume commands. Audio device no longer reports volume changes via {@code
+         *         <Report Audio Status>}.</td>
+         *     </tr>
+         * </table>
+         *
+         * <p> Due to the resulting behavior, usage on TV and Audio devices is discouraged.
+         *
+         * @hide
+         * @see android.hardware.hdmi.HdmiControlManager#setHdmiCecVolumeControlEnabled(boolean)
+         */
+        public static final String HDMI_CONTROL_VOLUME_CONTROL_ENABLED =
+                "hdmi_control_volume_control_enabled";
+
        /**
         * Whether HDMI System Audio Control feature is enabled. If enabled, TV will try to turn on
         * system audio mode if there's a connected CEC-enabled AV Receiver. Then audio stream will
