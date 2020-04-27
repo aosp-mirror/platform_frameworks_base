@@ -470,8 +470,10 @@ public class LockscreenLockIconController {
     }
 
     private int getState() {
-        if ((mKeyguardStateController.canDismissLockScreen() || !mKeyguardShowing
-                || mKeyguardStateController.isKeyguardGoingAway()) && !mSimLocked) {
+        if ((mKeyguardStateController.canDismissLockScreen()
+                || !mKeyguardStateController.isShowing()
+                || mKeyguardStateController.isKeyguardGoingAway()
+                || mKeyguardStateController.isKeyguardFadingAway()) && !mSimLocked) {
             return STATE_LOCK_OPEN;
         } else if (mTransientBiometricsError) {
             return STATE_BIOMETRICS_ERROR;
