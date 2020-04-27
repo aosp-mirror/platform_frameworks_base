@@ -19,7 +19,6 @@ package android.graphics;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.util.Pools.SynchronizedPool;
-import android.view.DisplayListCanvas;
 import android.view.TextureLayer;
 
 import dalvik.annotation.optimization.CriticalNative;
@@ -35,7 +34,7 @@ import dalvik.annotation.optimization.FastNative;
  * {@link RenderNode#endRecording()} is called. It must not be retained beyond that as it is
  * internally reused.
  */
-public final class RecordingCanvas extends DisplayListCanvas {
+public final class RecordingCanvas extends BaseRecordingCanvas {
     // The recording canvas pool should be large enough to handle a deeply nested
     // view hierarchy because display lists are generated recursively.
     private static final int POOL_LIMIT = 25;
@@ -90,8 +89,7 @@ public final class RecordingCanvas extends DisplayListCanvas {
     // Constructors
     ///////////////////////////////////////////////////////////////////////////
 
-    /** @hide */
-    protected RecordingCanvas(@NonNull RenderNode node, int width, int height) {
+    private RecordingCanvas(@NonNull RenderNode node, int width, int height) {
         super(nCreateDisplayListCanvas(node.mNativeRenderNode, width, height));
         mDensity = 0; // disable bitmap density scaling
     }
