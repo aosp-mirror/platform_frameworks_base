@@ -724,7 +724,7 @@
   </string-array>
   <string-array name="emailAddressTypes">
     <item msgid="7786349763648997741">"المنزل"</item>
-    <item msgid="435564470865989199">"عمل"</item>
+    <item msgid="435564470865989199">"العمل"</item>
     <item msgid="4199433197875490373">"آخر"</item>
     <item msgid="3233938986670468328">"مخصص"</item>
   </string-array>
@@ -778,7 +778,7 @@
     <string name="phoneTypeMms" msgid="1799747455131365989">"رسالة وسائط متعددة"</string>
     <string name="eventTypeCustom" msgid="3257367158986466481">"مخصص"</string>
     <string name="eventTypeBirthday" msgid="7770026752793912283">"عيد ميلاد"</string>
-    <string name="eventTypeAnniversary" msgid="4684702412407916888">"الذكرى السنوية"</string>
+    <string name="eventTypeAnniversary" msgid="4684702412407916888">"ذكرى سنوية"</string>
     <string name="eventTypeOther" msgid="530671238533887997">"غير ذلك"</string>
     <string name="emailTypeCustom" msgid="1809435350482181786">"مخصص"</string>
     <string name="emailTypeHome" msgid="1597116303154775999">"المنزل"</string>
