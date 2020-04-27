@@ -17,6 +17,7 @@
 package com.android.settingslib.media;
 
 import static android.media.MediaRoute2Info.TYPE_BUILTIN_SPEAKER;
+import static android.media.MediaRoute2Info.TYPE_USB_DEVICE;
 import static android.media.MediaRoute2Info.TYPE_WIRED_HEADPHONES;
 import static android.media.MediaRoute2Info.TYPE_WIRED_HEADSET;
 
@@ -95,9 +96,9 @@ public class PhoneMediaDeviceTest {
         when(mInfo.getName()).thenReturn(deviceName);
 
         assertThat(mPhoneMediaDevice.getName())
-                .isEqualTo(deviceName);
+                .isEqualTo(mContext.getString(R.string.media_transfer_wired_device_name));
 
-        when(mInfo.getType()).thenReturn(TYPE_WIRED_HEADSET);
+        when(mInfo.getType()).thenReturn(TYPE_USB_DEVICE);
 
         assertThat(mPhoneMediaDevice.getName())
                 .isEqualTo(deviceName);
