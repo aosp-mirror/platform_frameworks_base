@@ -158,6 +158,13 @@ public class DozeSensorsTest extends SysuiTestCase {
         verify(mTriggerSensor).setListening(eq(false));
     }
 
+    @Test
+    public void testDestroy() {
+        mDozeSensors.destroy();
+
+        verify(mTriggerSensor).setListening(false);
+    }
+
     private class TestableDozeSensors extends DozeSensors {
 
         TestableDozeSensors() {
