@@ -715,8 +715,8 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
 
         @Override
         public void onActivityRestartAttempt(RunningTaskInfo task, boolean homeTaskVisible,
-                boolean clearedTask) {
-            if (task.configuration.windowConfiguration.getWindowingMode()
+                boolean clearedTask, boolean wasVisible) {
+            if (!wasVisible || task.configuration.windowConfiguration.getWindowingMode()
                     != WINDOWING_MODE_PINNED) {
                 return;
             }
