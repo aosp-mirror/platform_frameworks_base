@@ -72,7 +72,7 @@
 ?application/x-x509-server-cert crt
 ?application/x-x509-user-cert crt
 
-?audio/3gpp 3gpp 3ga
+?audio/3gpp 3ga 3gpp
 ?audio/aac-adts aac
 ?audio/ac3 ac3 a52
 ?audio/amr amr
