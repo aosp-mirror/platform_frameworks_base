@@ -177,6 +177,10 @@ public class HdmiControlService extends SystemService {
     @GuardedBy("mLock")
     protected final ActiveSource mActiveSource = new ActiveSource();
 
+    // Whether HDMI CEC volume control is enabled or not.
+    @GuardedBy("mLock")
+    private boolean mHdmiCecVolumeControlEnabled;
+
     // Whether System Audio Mode is activated or not.
     @GuardedBy("mLock")
     private boolean mSystemAudioActivated = false;
@@ -493,6 +497,8 @@ public class HdmiControlService extends SystemService {
         mPowerStatus = getInitialPowerStatus();
         mProhibitMode = false;
         mHdmiControlEnabled = readBooleanSetting(Global.HDMI_CONTROL_ENABLED, true);
+        mHdmiCecVolumeControlEnabled = readBooleanSetting(
+                Global.HDMI_CONTROL_VOLUME_CONTROL_ENABLED, true);
         mMhlInputChangeEnabled = readBooleanSetting(Global.MHL_INPUT_SWITCHING_ENABLED, true);
 
         if (mCecController == null) {
@@ -642,6 +648,7 @@ public class HdmiControlService extends SystemService {
         ContentResolver resolver = getContext().getContentResolver();
         String[] settings = new String[] {
                 Global.HDMI_CONTROL_ENABLED,
+                Global.HDMI_CONTROL_VOLUME_CONTROL_ENABLED,
                 Global.HDMI_CONTROL_AUTO_WAKEUP_ENABLED,
                 Global.HDMI_CONTROL_AUTO_DEVICE_OFF_ENABLED,
                 Global.HDMI_SYSTEM_AUDIO_CONTROL_ENABLED,
@@ -669,6 +676,9 @@ public class HdmiControlService extends SystemService {
             switch (option) {
                 case Global.HDMI_CONTROL_ENABLED:
                     setControlEnabled(enabled);
+                    break;
+                case Global.HDMI_CONTROL_VOLUME_CONTROL_ENABLED:
+                    setHdmiCecVolumeControlEnabled(enabled);
                     break;
                 case Global.HDMI_CONTROL_AUTO_WAKEUP_ENABLED:
                     if (isTvDeviceEnabled()) {
@@ -1261,7 +1271,9 @@ public class HdmiControlService extends SystemService {
     }
 
     void setAudioStatus(boolean mute, int volume) {
-        if (!isTvDeviceEnabled() || !tv().isSystemAudioActivated()) {
+        if (!isTvDeviceEnabled()
+                || !tv().isSystemAudioActivated()
+                || !isHdmiCecVolumeControlEnabled()) {
             return;
         }
         AudioManager audioManager = getAudioManager();
@@ -2175,6 +2187,24 @@ public class HdmiControlService extends SystemService {
         }
 
         @Override
+        public boolean isHdmiCecVolumeControlEnabled() {
+            enforceAccessPermission();
+            return HdmiControlService.this.isHdmiCecVolumeControlEnabled();
+        }
+
+        @Override
+        public void setHdmiCecVolumeControlEnabled(final boolean isHdmiCecVolumeControlEnabled) {
+            enforceAccessPermission();
+            runOnServiceThread(new Runnable() {
+                @Override
+                public void run() {
+                    HdmiControlService.this.setHdmiCecVolumeControlEnabled(
+                            isHdmiCecVolumeControlEnabled);
+                }
+            });
+        }
+
+        @Override
         public void reportAudioStatus(final int deviceType, final int volume, final int maxVolume,
                 final boolean isMute) {
             enforceAccessPermission();
@@ -2238,6 +2268,7 @@ public class HdmiControlService extends SystemService {
             pw.println("mHdmiControlEnabled: " + mHdmiControlEnabled);
             pw.println("mMhlInputChangeEnabled: " + mMhlInputChangeEnabled);
             pw.println("mSystemAudioActivated: " + isSystemAudioActivated());
+            pw.println("mHdmiCecVolumeControlEnabled " + mHdmiCecVolumeControlEnabled);
             pw.decreaseIndent();
 
             pw.println("mMhlController: ");
@@ -2970,6 +3001,29 @@ public class HdmiControlService extends SystemService {
         }
     }
 
+    void setHdmiCecVolumeControlEnabled(boolean isHdmiCecVolumeControlEnabled) {
+        assertRunOnServiceThread();
+        synchronized (mLock) {
+            mHdmiCecVolumeControlEnabled = isHdmiCecVolumeControlEnabled;
+
+            boolean storedValue = readBooleanSetting(Global.HDMI_CONTROL_VOLUME_CONTROL_ENABLED,
+                    true);
+            if (storedValue != isHdmiCecVolumeControlEnabled) {
+                HdmiLogger.debug("Changing HDMI CEC volume control feature state: %s",
+                        isHdmiCecVolumeControlEnabled);
+                writeBooleanSetting(Global.HDMI_CONTROL_VOLUME_CONTROL_ENABLED,
+                        isHdmiCecVolumeControlEnabled);
+            }
+        }
+    }
+
+    boolean isHdmiCecVolumeControlEnabled() {
+        assertRunOnServiceThread();
+        synchronized (mLock) {
+            return mHdmiCecVolumeControlEnabled;
+        }
+    }
+
     boolean isProhibitMode() {
         synchronized (mLock) {
             return mProhibitMode;
@@ -3010,8 +3064,12 @@ public class HdmiControlService extends SystemService {
 
         if (enabled) {
             enableHdmiControlService();
+            setHdmiCecVolumeControlEnabled(
+                    readBooleanSetting(Global.HDMI_CONTROL_VOLUME_CONTROL_ENABLED, true));
             return;
         }
+
+        setHdmiCecVolumeControlEnabled(false);
         // Call the vendor handler before the service is disabled.
         invokeVendorCommandListenersOnControlStateChanged(false,
                 HdmiControlManager.CONTROL_STATE_CHANGED_REASON_SETTING);

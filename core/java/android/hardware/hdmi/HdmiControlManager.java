@@ -650,6 +650,68 @@ public final class HdmiControlManager {
     }
 
     /**
+     * Controls whether volume control commands via HDMI CEC are enabled.
+     *
+     * <p>When disabled:
+     * <ul>
+     *     <li>the device will not send any HDMI CEC audio messages
+     *     <li>received HDMI CEC audio messages are responded to with {@code <Feature Abort>}
+     * </ul>
+     *
+     * <p>Effects on different device types:
+     * <table>
+     *     <tr><th>HDMI CEC device type</th><th>enabled</th><th>disabled</th></tr>
+     *     <tr>
+     *         <td>TV (type: 0)</td>
+     *         <td>Per CEC specification.</td>
+     *         <td>TV changes system volume. TV no longer reacts to incoming volume changes via
+     *         {@code <User Control Pressed>}. TV no longer handles {@code <Report Audio Status>}
+     *         .</td>
+     *     </tr>
+     *     <tr>
+     *         <td>Playback device (type: 4)</td>
+     *         <td>Device sends volume commands to TV/Audio system via {@code <User Control
+     *         Pressed>}</td><td>Device does not send volume commands via {@code <User Control
+     *         Pressed>}.</td>
+     *     </tr>
+     *     <tr>
+     *         <td>Audio device (type: 5)</td>
+     *         <td>Full "System Audio Control" capabilities.</td>
+     *         <td>Audio device no longer reacts to incoming {@code <User Control Pressed>}
+     *         volume commands. Audio device no longer reports volume changes via {@code <Report
+     *         Audio Status>}.</td>
+     *     </tr>
+     * </table>
+     *
+     * <p> Due to the resulting behavior, usage on TV and Audio devices is discouraged.
+     *
+     * @param isHdmiCecVolumeControlEnabled target state of HDMI CEC volume control.
+     * @see Settings.Global.HDMI_CONTROL_VOLUME_CONTROL_ENABLED
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.HDMI_CEC)
+    public void setHdmiCecVolumeControlEnabled(boolean isHdmiCecVolumeControlEnabled) {
+        try {
+            mService.setHdmiCecVolumeControlEnabled(isHdmiCecVolumeControlEnabled);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns whether volume changes via HDMI CEC are enabled.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.HDMI_CEC)
+    public boolean isHdmiCecVolumeControlEnabled() {
+        try {
+            return mService.isHdmiCecVolumeControlEnabled();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Gets whether the system is in system audio mode.
      *
      * @hide
