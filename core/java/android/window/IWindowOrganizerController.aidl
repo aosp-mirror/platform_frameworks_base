@@ -16,9 +16,12 @@
 
 package android.window;
 
+import android.view.SurfaceControl;
+
 import android.window.IDisplayAreaOrganizerController;
 import android.window.ITaskOrganizerController;
 import android.window.IWindowContainerTransactionCallback;
+import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
 /** @hide */
@@ -47,4 +50,15 @@ interface IWindowOrganizerController {
 
     /** @return An interface enabling the management of display area organizers. */
     IDisplayAreaOrganizerController getDisplayAreaOrganizerController();
+
+    /**
+     * Take a screenshot of the requested Window token and place the content of the screenshot into
+     * outSurfaceControl. The SurfaceControl will be a child of the token's parent, so it will be
+     * a sibling of the token's window
+     * @param token The token for the WindowContainer that should get a screenshot taken.
+     * @param outSurfaceControl The SurfaceControl where the screenshot will be attached.
+     *
+     * @return true if the screenshot was successful, false otherwise.
+     */
+    boolean takeScreenshot(in WindowContainerToken token, out SurfaceControl outSurfaceControl);
 }
