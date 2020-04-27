@@ -30,6 +30,7 @@
     >
       <RelativeLayout
           android:id="@+id/global_actions_overflow_button"
+          android:contentDescription="@string/accessibility_menu"
           android:layout_width="48dp"
           android:layout_height="48dp"
       >
