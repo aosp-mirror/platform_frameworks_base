@@ -6549,8 +6549,12 @@ public class Activity extends ContextThemeWrapper
      * {@link #RESULT_CANCELED} if the activity explicitly returned that,
      * didn't return any result, or crashed during its operation.
      *
-     * <p>You will receive this call immediately before onResume() when your
-     * activity is re-starting.
+     * <p>An activity can never receive a result in the resumed state. You can count on
+     * {@link #onResume} being called after this method, though not necessarily immediately after.
+     * If the activity was resumed, it will be paused and the result will be delivered, followed
+     * by {@link #onResume}.  If the activity wasn't in the resumed state, then the result will
+     * be delivered, with {@link #onResume} called sometime later when the activity becomes active
+     * again.
      *
      * <p>This method is never invoked if your activity sets
      * {@link android.R.styleable#AndroidManifestActivity_noHistory noHistory} to
