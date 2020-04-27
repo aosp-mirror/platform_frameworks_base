@@ -32,6 +32,7 @@ import com.android.systemui.statusbar.notification.NotificationFilter
 import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager
 import com.android.systemui.statusbar.notification.collection.provider.HighPriorityProvider
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier
+import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier.Companion.TYPE_FULL_PERSON
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier.Companion.TYPE_IMPORTANT_PERSON
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier.Companion.TYPE_PERSON
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
@@ -227,6 +228,56 @@ class NotificationRankingManagerTest : SysuiTestCase() {
                 .build()
         whenever(personNotificationIdentifier.getPeopleNotificationType(b.sbn, b.ranking))
                 .thenReturn(TYPE_IMPORTANT_PERSON)
+
+        whenever(personNotificationIdentifier.compareTo(TYPE_PERSON, TYPE_IMPORTANT_PERSON))
+                .thenReturn(TYPE_IMPORTANT_PERSON.compareTo(TYPE_PERSON))
+        whenever(personNotificationIdentifier.compareTo(TYPE_IMPORTANT_PERSON, TYPE_PERSON))
+                .thenReturn(TYPE_PERSON.compareTo(TYPE_IMPORTANT_PERSON))
+
+        assertEquals(
+                listOf(b, a),
+                rankingManager.updateRanking(null, listOf(a, b), "test"))
+    }
+
+    @Test
+    fun testSort_fullPeople() {
+        whenever(sectionsManager.isFilteringEnabled()).thenReturn(true)
+        val aN = Notification.Builder(mContext, "test")
+                .setStyle(Notification.MessagingStyle(""))
+                .build()
+        val a = NotificationEntryBuilder()
+                .setImportance(IMPORTANCE_HIGH)
+                .setPkg("pkg")
+                .setOpPkg("pkg")
+                .setTag("tag")
+                .setNotification(aN)
+                .setChannel(NotificationChannel("test", "", IMPORTANCE_DEFAULT))
+                .setUser(mContext.user)
+                .setOverrideGroupKey("")
+                .build()
+        whenever(personNotificationIdentifier.getPeopleNotificationType(a.sbn, a.ranking))
+                .thenReturn(TYPE_PERSON)
+
+        val bN = Notification.Builder(mContext, "test")
+                .setStyle(Notification.MessagingStyle(""))
+                .build()
+        val b = NotificationEntryBuilder()
+                .setImportance(IMPORTANCE_HIGH)
+                .setPkg("pkg2")
+                .setOpPkg("pkg2")
+                .setTag("tag")
+                .setNotification(bN)
+                .setChannel(NotificationChannel("test", "", IMPORTANCE_DEFAULT))
+                .setUser(mContext.user)
+                .setOverrideGroupKey("")
+                .build()
+        whenever(personNotificationIdentifier.getPeopleNotificationType(b.sbn, b.ranking))
+                .thenReturn(TYPE_FULL_PERSON)
+
+        whenever(personNotificationIdentifier.compareTo(TYPE_PERSON, TYPE_FULL_PERSON))
+                .thenReturn(TYPE_FULL_PERSON.compareTo(TYPE_PERSON))
+        whenever(personNotificationIdentifier.compareTo(TYPE_FULL_PERSON, TYPE_PERSON))
+                .thenReturn(TYPE_PERSON.compareTo(TYPE_FULL_PERSON))
 
         assertEquals(
                 listOf(b, a),
