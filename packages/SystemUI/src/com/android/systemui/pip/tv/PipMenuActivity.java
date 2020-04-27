@@ -137,8 +137,8 @@ public class PipMenuActivity extends Activity implements PipManager.Listener {
     }
 
     @Override
-    public void onPipEntered() {
-        if (DEBUG) Log.d(TAG, "onPipEntered()");
+    public void onPipEntered(String packageName) {
+        if (DEBUG) Log.d(TAG, "onPipEntered(), packageName=" + packageName);
     }
 
     @Override
