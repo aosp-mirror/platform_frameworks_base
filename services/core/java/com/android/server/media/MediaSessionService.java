@@ -18,6 +18,12 @@ package com.android.server.media;
 
 import static android.os.UserHandle.USER_ALL;
 
+import static com.android.server.media.MediaKeyDispatcher.KEY_EVENT_LONG_PRESS;
+import static com.android.server.media.MediaKeyDispatcher.isDoubleTapOverridden;
+import static com.android.server.media.MediaKeyDispatcher.isLongPressOverridden;
+import static com.android.server.media.MediaKeyDispatcher.isSingleTapOverridden;
+import static com.android.server.media.MediaKeyDispatcher.isTripleTapOverridden;
+
 import android.app.ActivityManager;
 import android.app.INotificationManager;
 import android.app.KeyguardManager;
@@ -105,7 +111,7 @@ public class MediaSessionService extends SystemService implements Monitor {
     private static final int SESSION_CREATION_LIMIT_PER_UID = 100;
     private static final int LONG_PRESS_TIMEOUT = ViewConfiguration.getLongPressTimeout()
             + /* Buffer for delayed delivery of key event */ 50;
-    private static final int MULTI_PRESS_TIMEOUT = ViewConfiguration.getMultiPressTimeout();
+    private static final int MULTI_TAP_TIMEOUT = ViewConfiguration.getMultiPressTimeout();
 
     private final Context mContext;
     private final SessionManagerImpl mSessionManagerImpl;
@@ -1101,9 +1107,12 @@ public class MediaSessionService extends SystemService implements Monitor {
                 "android.media.AudioService.WAKELOCK_ACQUIRED";
         private static final int WAKELOCK_RELEASE_ON_FINISHED = 1980; // magic number
 
-        private KeyEvent mPendingFirstDownKeyEvent = null;
+        private KeyEvent mTrackingFirstDownKeyEvent = null;
         private boolean mIsLongPressing = false;
         private Runnable mLongPressTimeoutRunnable = null;
+        private int mMultiTapCount = 0;
+        private int mMultiTapKeyCode = 0;
+        private Runnable mMultiTapTimeoutRunnable = null;
 
         @Override
         public void onShellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
@@ -2117,10 +2126,12 @@ public class MediaSessionService extends SystemService implements Monitor {
         }
 
         // A long press is determined by:
-        // 1) A KeyEvent with KeyEvent.ACTION_DOWN and repeat count of 0, followed by
-        // 2) A KeyEvent with KeyEvent.ACTION_DOWN and repeat count of 1 and FLAG_LONG_PRESS within
-        //    ViewConfiguration.getLongPressTimeout().
-        // TODO: Add description about what a click is determined by.
+        // 1) A KeyEvent.ACTION_DOWN KeyEvent and repeat count of 0, followed by
+        // 2) A KeyEvent.ACTION_DOWN KeyEvent with the same key code, a repeat count of 1, and
+        //    FLAG_LONG_PRESS received within ViewConfiguration.getLongPressTimeout().
+        // A tap is determined by:
+        // 1) A KeyEvent.ACTION_DOWN KeyEvent followed by
+        // 2) A KeyEvent.ACTION_UP KeyEvent with the same key code.
         private void handleKeyEventLocked(String packageName, int pid, int uid,
                 boolean asSystemService, KeyEvent keyEvent, boolean needWakeLock) {
             if (keyEvent.isCanceled()) {
@@ -2129,61 +2140,121 @@ public class MediaSessionService extends SystemService implements Monitor {
 
             int overriddenKeyEvents = (mCustomMediaKeyDispatcher == null) ? 0
                     : mCustomMediaKeyDispatcher.getOverriddenKeyEvents().get(keyEvent.getKeyCode());
-            cancelPendingIfNeeded(keyEvent);
-            if (!needPending(keyEvent, overriddenKeyEvents)) {
+            cancelTrackingIfNeeded(packageName, pid, uid, asSystemService, keyEvent, needWakeLock,
+                    overriddenKeyEvents);
+            if (!needTracking(keyEvent, overriddenKeyEvents)) {
                 dispatchMediaKeyEventLocked(packageName, pid, uid, asSystemService, keyEvent,
                         needWakeLock);
                 return;
             }
 
             if (isFirstDownKeyEvent(keyEvent)) {
-                mPendingFirstDownKeyEvent = keyEvent;
+                mTrackingFirstDownKeyEvent = keyEvent;
                 mIsLongPressing = false;
                 return;
             }
 
+            // Long press is always overridden here, otherwise the key event would have been already
+            // handled
             if (isFirstLongPressKeyEvent(keyEvent)) {
                 mIsLongPressing = true;
             }
             if (mIsLongPressing) {
                 handleLongPressLocked(keyEvent, needWakeLock, overriddenKeyEvents);
-            } else if (keyEvent.getAction() == KeyEvent.ACTION_UP) {
-                mPendingFirstDownKeyEvent = null;
-                // TODO: Replace this with code to determine whether
-                // single/double/triple click and run custom implementations,
-                // if they exist.
-                dispatchDownAndUpKeyEventsLocked(packageName, pid, uid, asSystemService,
-                        keyEvent, needWakeLock);
+                return;
+            }
+
+            if (keyEvent.getAction() == KeyEvent.ACTION_UP) {
+                mTrackingFirstDownKeyEvent = null;
+                if (shouldTrackForMultipleTapsLocked(overriddenKeyEvents)) {
+                    if (mMultiTapCount == 0) {
+                        mMultiTapTimeoutRunnable = createSingleTapRunnable(packageName, pid, uid,
+                                asSystemService, keyEvent, needWakeLock,
+                                isSingleTapOverridden(overriddenKeyEvents));
+                        if (isSingleTapOverridden(overriddenKeyEvents)
+                                && !isDoubleTapOverridden(overriddenKeyEvents)
+                                && !isTripleTapOverridden(overriddenKeyEvents)) {
+                            mMultiTapTimeoutRunnable.run();
+                        } else {
+                            mHandler.postDelayed(mMultiTapTimeoutRunnable,
+                                    MULTI_TAP_TIMEOUT);
+                            mMultiTapCount = 1;
+                            mMultiTapKeyCode = keyEvent.getKeyCode();
+                        }
+                    } else if (mMultiTapCount == 1) {
+                        mHandler.removeCallbacks(mMultiTapTimeoutRunnable);
+                        mMultiTapTimeoutRunnable = createDoubleTapRunnable(packageName, pid, uid,
+                                asSystemService, keyEvent, needWakeLock,
+                                isSingleTapOverridden(overriddenKeyEvents),
+                                isDoubleTapOverridden(overriddenKeyEvents));
+                        if (isTripleTapOverridden(overriddenKeyEvents)) {
+                            mHandler.postDelayed(mMultiTapTimeoutRunnable, MULTI_TAP_TIMEOUT);
+                            mMultiTapCount = 2;
+                        } else {
+                            mMultiTapTimeoutRunnable.run();
+                        }
+                    } else if (mMultiTapCount == 2) {
+                        mHandler.removeCallbacks(mMultiTapTimeoutRunnable);
+                        onTripleTap(keyEvent);
+                    }
+                } else {
+                    dispatchDownAndUpKeyEventsLocked(packageName, pid, uid, asSystemService,
+                            keyEvent, needWakeLock);
+                }
             }
         }
 
-        private void cancelPendingIfNeeded(KeyEvent keyEvent) {
-            if (mPendingFirstDownKeyEvent == null) {
+        private boolean shouldTrackForMultipleTapsLocked(int overriddenKeyEvents) {
+            return isSingleTapOverridden(overriddenKeyEvents)
+                    || isDoubleTapOverridden(overriddenKeyEvents)
+                    || isTripleTapOverridden(overriddenKeyEvents);
+        }
+
+        private void cancelTrackingIfNeeded(String packageName, int pid, int uid,
+                boolean asSystemService, KeyEvent keyEvent, boolean needWakeLock,
+                int overriddenKeyEvents) {
+            if (mTrackingFirstDownKeyEvent == null && mMultiTapTimeoutRunnable == null) {
                 return;
             }
+
             if (isFirstDownKeyEvent(keyEvent)) {
                 if (mLongPressTimeoutRunnable != null) {
                     mHandler.removeCallbacks(mLongPressTimeoutRunnable);
                     mLongPressTimeoutRunnable.run();
-                } else {
-                    resetLongPressTracking();
                 }
+                if (mMultiTapTimeoutRunnable != null && keyEvent.getKeyCode() != mMultiTapKeyCode) {
+                    runExistingMultiTapRunnableLocked();
+                }
+                resetLongPressTracking();
                 return;
             }
-            if (mPendingFirstDownKeyEvent.getDownTime() == keyEvent.getDownTime()
-                    && mPendingFirstDownKeyEvent.getKeyCode() == keyEvent.getKeyCode()
-                    && keyEvent.getAction() == KeyEvent.ACTION_DOWN
-                    && keyEvent.getRepeatCount() > 1 && !mIsLongPressing) {
-                resetLongPressTracking();
+
+            if (mTrackingFirstDownKeyEvent != null
+                    && mTrackingFirstDownKeyEvent.getDownTime() == keyEvent.getDownTime()
+                    && mTrackingFirstDownKeyEvent.getKeyCode() == keyEvent.getKeyCode()
+                    && keyEvent.getAction() == KeyEvent.ACTION_DOWN) {
+                if (isFirstLongPressKeyEvent(keyEvent)) {
+                    if (mMultiTapTimeoutRunnable != null) {
+                        runExistingMultiTapRunnableLocked();
+                    }
+                    if ((overriddenKeyEvents & KEY_EVENT_LONG_PRESS) == 0
+                            && !isVoiceKey(keyEvent.getKeyCode())) {
+                        dispatchMediaKeyEventLocked(packageName, pid, uid, asSystemService,
+                                mTrackingFirstDownKeyEvent, needWakeLock);
+                        mTrackingFirstDownKeyEvent = null;
+                    }
+                } else if (keyEvent.getRepeatCount() > 1 && !mIsLongPressing) {
+                    resetLongPressTracking();
+                }
             }
         }
 
-        private boolean needPending(KeyEvent keyEvent, int overriddenKeyEvents) {
+        private boolean needTracking(KeyEvent keyEvent, int overriddenKeyEvents) {
             if (!isFirstDownKeyEvent(keyEvent)) {
-                if (mPendingFirstDownKeyEvent == null) {
+                if (mTrackingFirstDownKeyEvent == null) {
                     return false;
-                } else if (mPendingFirstDownKeyEvent.getDownTime() != keyEvent.getDownTime()
-                        || mPendingFirstDownKeyEvent.getKeyCode() != keyEvent.getKeyCode()) {
+                } else if (mTrackingFirstDownKeyEvent.getDownTime() != keyEvent.getDownTime()
+                        || mTrackingFirstDownKeyEvent.getKeyCode() != keyEvent.getKeyCode()) {
                     return false;
                 }
             }
@@ -2193,10 +2264,21 @@ public class MediaSessionService extends SystemService implements Monitor {
             return true;
         }
 
+        private void runExistingMultiTapRunnableLocked() {
+            mHandler.removeCallbacks(mMultiTapTimeoutRunnable);
+            mMultiTapTimeoutRunnable.run();
+        }
+
+        private void resetMultiTapTrackingLocked() {
+            mMultiTapCount = 0;
+            mMultiTapTimeoutRunnable = null;
+            mMultiTapKeyCode = 0;
+        }
+
         private void handleLongPressLocked(KeyEvent keyEvent, boolean needWakeLock,
                 int overriddenKeyEvents) {
             if (mCustomMediaKeyDispatcher != null
-                    && mCustomMediaKeyDispatcher.isLongPressOverridden(overriddenKeyEvents)) {
+                    && isLongPressOverridden(overriddenKeyEvents)) {
                 mCustomMediaKeyDispatcher.onLongPress(keyEvent);
 
                 if (mLongPressTimeoutRunnable != null) {
@@ -2230,7 +2312,7 @@ public class MediaSessionService extends SystemService implements Monitor {
         }
 
         private void resetLongPressTracking() {
-            mPendingFirstDownKeyEvent = null;
+            mTrackingFirstDownKeyEvent = null;
             mIsLongPressing = false;
             mLongPressTimeoutRunnable = null;
         }
@@ -2257,6 +2339,50 @@ public class MediaSessionService extends SystemService implements Monitor {
                     downEvent, needWakeLock);
             dispatchMediaKeyEventLocked(packageName, pid, uid, asSystemService,
                     keyEvent, needWakeLock);
+        }
+
+        Runnable createSingleTapRunnable(String packageName, int pid, int uid,
+                boolean asSystemService, KeyEvent keyEvent, boolean needWakeLock,
+                boolean overridden) {
+            return new Runnable() {
+                @Override
+                public void run() {
+                    resetMultiTapTrackingLocked();
+                    if (overridden) {
+                        mCustomMediaKeyDispatcher.onSingleTap(keyEvent);
+                    } else {
+                        dispatchDownAndUpKeyEventsLocked(packageName, pid, uid, asSystemService,
+                                keyEvent, needWakeLock);
+                    }
+                }
+            };
+        };
+
+        Runnable createDoubleTapRunnable(String packageName, int pid, int uid,
+                boolean asSystemService, KeyEvent keyEvent, boolean needWakeLock,
+                boolean singleTapOverridden, boolean doubleTapOverridden) {
+            return new Runnable() {
+                @Override
+                public void run() {
+                    resetMultiTapTrackingLocked();
+                    if (doubleTapOverridden) {
+                        mCustomMediaKeyDispatcher.onDoubleTap(keyEvent);
+                    } else if (singleTapOverridden) {
+                        mCustomMediaKeyDispatcher.onSingleTap(keyEvent);
+                        mCustomMediaKeyDispatcher.onSingleTap(keyEvent);
+                    } else {
+                        dispatchDownAndUpKeyEventsLocked(packageName, pid, uid, asSystemService,
+                                keyEvent, needWakeLock);
+                        dispatchDownAndUpKeyEventsLocked(packageName, pid, uid, asSystemService,
+                                keyEvent, needWakeLock);
+                    }
+                }
+            };
+        };
+
+        private void onTripleTap(KeyEvent keyEvent) {
+            resetMultiTapTrackingLocked();
+            mCustomMediaKeyDispatcher.onTripleTap(keyEvent);
         }
 
         private void dispatchMediaKeyEventLocked(String packageName, int pid, int uid,
