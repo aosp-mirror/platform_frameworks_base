@@ -23,13 +23,16 @@ import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+
 import android.content.Context;
 import android.graphics.Insets;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.platform.test.annotations.Presubmit;
-import android.view.SurfaceControl.Transaction;
 import android.view.WindowManager.BadTokenException;
 import android.view.WindowManager.LayoutParams;
 import android.view.inputmethod.EditorInfo;
@@ -42,6 +45,8 @@ import androidx.test.platform.app.InstrumentationRegistry;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
+import org.mockito.Spy;
 
 import java.util.ArrayList;
 
@@ -58,7 +63,7 @@ public class ImeInsetsSourceConsumerTest {
 
     Context mContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
     ImeInsetsSourceConsumer mImeConsumer;
-    InsetsController mController;
+    @Spy InsetsController mController;
     SurfaceControl mLeash;
 
     @Before
@@ -73,7 +78,7 @@ public class ImeInsetsSourceConsumerTest {
             } catch (BadTokenException e) {
                 // activity isn't running, we will ignore BadTokenException.
             }
-            mController = new InsetsController(viewRootImpl);
+            mController = Mockito.spy(new InsetsController(viewRootImpl));
             final Rect rect = new Rect(5, 5, 5, 5);
             mController.calculateInsets(
                     false,
@@ -81,8 +86,7 @@ public class ImeInsetsSourceConsumerTest {
                     new DisplayCutout(
                             Insets.of(10, 10, 10, 10), rect, rect, rect, rect),
                     SOFT_INPUT_ADJUST_RESIZE, 0);
-            mImeConsumer = new ImeInsetsSourceConsumer(
-                    new InsetsState(), Transaction::new, mController);
+            mImeConsumer = (ImeInsetsSourceConsumer) mController.getSourceConsumer(ITYPE_IME);
         });
     }
 
@@ -102,6 +106,27 @@ public class ImeInsetsSourceConsumerTest {
             mImeConsumer.applyImeVisibility(false);
             mController.cancelExistingAnimation();
             assertFalse(mController.getSourceConsumer(ime.getType()).isRequestedVisible());
+        });
+    }
+
+    @Test
+    public void testImeRequestedVisibleAwaitingControl() {
+        // Set null control and then request show.
+        mController.onControlsChanged(new InsetsSourceControl[] { null });
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            // Request IME visible before control is available.
+            mImeConsumer.onWindowFocusGained();
+            mImeConsumer.applyImeVisibility(true /* setVisible */);
+
+            // set control and verify visibility is applied.
+            InsetsSourceControl control = new InsetsSourceControl(ITYPE_IME, mLeash, new Point());
+            mController.onControlsChanged(new InsetsSourceControl[] { control });
+            // IME show animation should be triggered when control becomes available.
+            verify(mController).applyAnimation(
+                    eq(WindowInsets.Type.ime()), eq(true) /* show */, eq(true) /* fromIme */);
+            verify(mController, never()).applyAnimation(
+                    eq(WindowInsets.Type.ime()), eq(false) /* show */, eq(true) /* fromIme */);
         });
     }
 
