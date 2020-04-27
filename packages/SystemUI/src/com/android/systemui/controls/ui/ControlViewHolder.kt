@@ -58,7 +58,7 @@ class ControlViewHolder(
     companion object {
         const val STATE_ANIMATION_DURATION = 700L
         private const val UPDATE_DELAY_IN_MILLIS = 3000L
-        private const val ALPHA_ENABLED = (255.0 * 0.2).toInt()
+        private const val ALPHA_ENABLED = 255
         private const val ALPHA_DISABLED = 0
         private val FORCE_PANEL_DEVICES = setOf(
             DeviceTypes.TYPE_THERMOSTAT,
