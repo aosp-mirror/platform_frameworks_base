@@ -425,6 +425,9 @@ static jint android_media_AudioTrack_setup(JNIEnv *env, jobject thiz, jobject we
             ALOGE("Error %d initializing AudioTrack", status);
             goto native_init_failure;
         }
+        // Set caller name so it can be logged in destructor.
+        // MediaMetricsConstants.h: AMEDIAMETRICS_PROP_CALLERNAME_VALUE_JAVA
+        lpTrack->setCallerName("java");
     } else {  // end if (nativeAudioTrack == 0)
         lpTrack = (AudioTrack*)nativeAudioTrack;
         // TODO: We need to find out which members of the Java AudioTrack might
