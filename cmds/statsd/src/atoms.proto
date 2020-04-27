@@ -41,6 +41,7 @@ import "frameworks/base/core/proto/android/server/location/enums.proto";
 import "frameworks/base/core/proto/android/service/procstats_enum.proto";
 import "frameworks/base/core/proto/android/service/usb.proto";
 import "frameworks/base/core/proto/android/stats/connectivity/network_stack.proto";
+import "frameworks/base/core/proto/android/stats/connectivity/tethering.proto";
 import "frameworks/base/core/proto/android/stats/dnsresolver/dns_resolver.proto";
 import "frameworks/base/core/proto/android/stats/devicepolicy/device_policy.proto";
 import "frameworks/base/core/proto/android/stats/devicepolicy/device_policy_enums.proto";
@@ -364,6 +365,7 @@ message Atom {
         NetworkDhcpRenewReported network_dhcp_renew_reported = 291 [(log_from_module) = "network_stack"];
         NetworkValidationReported network_validation_reported = 292 [(log_from_module) = "network_stack"];
         NetworkStackQuirkReported network_stack_quirk_reported = 293 [(log_from_module) = "network_stack"];
+        NetworkTetheringReported  network_tethering_reported = 303 [(log_from_module) =  "network_tethering"];
     }
 
     // Pulled events will start at field 10000.
@@ -5850,6 +5852,24 @@ message AppCompacted {
 
   // Free ZRAM in kilobytes after compaction.
   optional int64 after_zram_free_kilobytes = 18;
+}
+
+/**
+ * Logs when a Tethering event occurs.
+ *
+ */
+message NetworkTetheringReported {
+  // tethering error code
+  optional android.stats.connectivity.ErrorCode error_code = 1;
+
+  // tethering downstream type
+  optional android.stats.connectivity.DownstreamType downstream_type = 2;
+
+  // transport type of upstream network
+  optional android.stats.connectivity.UpstreamType upstream_type = 3;
+
+  // The user type of Tethering
+  optional android.stats.connectivity.UserType user_type= 4;
 }
 
 /**
