@@ -1630,6 +1630,10 @@
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Ses tuşlarının ikisini birden birkaç saniyeliğine basılı tutmak <xliff:g id="SERVICE">%1$s</xliff:g> erişilebilirlik özelliğini etkinleştirir. Bu, cihazınızın çalışma şeklini değiştirebilir.\n\nBu kısayolu, Ayarlar &gt; Erişilebilirlik\'te başka bir özellikle değiştirebilirsiniz."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Etkinleştir"</string>
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"Etkinleştirme"</string>
+    <!-- no translation found for accessibility_shortcut_menu_item_status_on (6608392117189732543) -->
+    <skip />
+    <!-- no translation found for accessibility_shortcut_menu_item_status_off (5531598275559472393) -->
+    <skip />
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g> hizmetinin cihazınızı tamamen kontrol etmesine izin veriyor musunuz?"</string>
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"<xliff:g id="SERVICE">%1$s</xliff:g> hizmetini açarsanız cihazınız veri şifrelemeyi geliştirmek için ekran kilidinizi kullanmaz."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Erişebilirlik ihtiyaçlarınıza yardımcı olan uygulamalara tam kontrol verilmesi uygundur ancak diğer pek çok uygulama için uygun değildir."</string>

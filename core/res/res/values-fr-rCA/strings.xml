@@ -1630,6 +1630,10 @@
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Si vous maintenez enfoncées les deux touches de volume pendant quelques secondes, vous activez la fonctionnalité d\'accessibilité <xliff:g id="SERVICE">%1$s</xliff:g>. Cela peut modifier le fonctionnement de votre appareil.\n\nPour attribuer ce raccourci à une autre fonctionnalité, sélectionnez Paramètres &gt; Accessibilité."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Activer"</string>
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"Ne pas activer"</string>
+    <!-- no translation found for accessibility_shortcut_menu_item_status_on (6608392117189732543) -->
+    <skip />
+    <!-- no translation found for accessibility_shortcut_menu_item_status_off (5531598275559472393) -->
+    <skip />
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Permettre à <xliff:g id="SERVICE">%1$s</xliff:g> de commander complètement votre appareil?"</string>
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Si vous activez <xliff:g id="SERVICE">%1$s</xliff:g>, votre appareil n\'utilisera pas le verrouillage de l\'écran pour améliorer le chiffrement des données."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Le contrôle total convient aux applications qui répondent à vos besoins d\'accessibilité. Il ne convient pas à la plupart des applications."</string>
