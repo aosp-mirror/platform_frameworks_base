@@ -1002,7 +1002,8 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         }
     }
 
-    private void applyAnimation(@InsetsType final int types, boolean show, boolean fromIme) {
+    @VisibleForTesting
+    public void applyAnimation(@InsetsType final int types, boolean show, boolean fromIme) {
         if (types == 0) {
             // nothing to animate.
             return;
