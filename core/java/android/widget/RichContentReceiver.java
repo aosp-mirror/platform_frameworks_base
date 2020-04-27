@@ -203,4 +203,32 @@ public interface RichContentReceiver<T extends View> {
         }
         return false;
     }
+
+    /**
+     * Returns the symbolic name of the given source.
+     *
+     * @hide
+     */
+    static String sourceToString(@Source int source) {
+        switch (source) {
+            case SOURCE_CLIPBOARD: return "SOURCE_CLIPBOARD";
+            case SOURCE_INPUT_METHOD: return "SOURCE_INPUT_METHOD";
+            case SOURCE_DRAG_AND_DROP: return "SOURCE_DRAG_AND_DROP";
+            case SOURCE_AUTOFILL: return "SOURCE_AUTOFILL";
+            case SOURCE_PROCESS_TEXT: return "SOURCE_PROCESS_TEXT";
+        }
+        return String.valueOf(source);
+    }
+
+    /**
+     * Returns the symbolic names of the set flags or {@code "0"} if no flags are set.
+     *
+     * @hide
+     */
+    static String flagsToString(@Flags int flags) {
+        if ((flags & FLAG_CONVERT_TO_PLAIN_TEXT) != 0) {
+            return "FLAG_CONVERT_TO_PLAIN_TEXT";
+        }
+        return String.valueOf(flags);
+    }
 }
