@@ -1806,7 +1806,7 @@
       <item quantity="other">%1$d मिनट के लिए (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> तक)</item>
     </plurals>
     <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="7725354244196466758">
-      <item quantity="one">%1$d घंटों के लिए (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> तक)</item>
+      <item quantity="one">%1$d घंटे के लिए (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> तक)</item>
       <item quantity="other">%1$d घंटों के लिए (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> तक)</item>
     </plurals>
     <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="588719069121765642">
@@ -1822,7 +1822,7 @@
       <item quantity="other">%d मिनट के लिए</item>
     </plurals>
     <plurals name="zen_mode_duration_hours" formatted="false" msgid="525401855645490022">
-      <item quantity="one">%d घंटों के लिए</item>
+      <item quantity="one">%d घंटे के लिए</item>
       <item quantity="other">%d घंटों के लिए</item>
     </plurals>
     <plurals name="zen_mode_duration_hours_short" formatted="false" msgid="7644653189680911640">
