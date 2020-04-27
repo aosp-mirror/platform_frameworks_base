@@ -21,6 +21,7 @@ import static android.Manifest.permission.MANAGE_ACTIVITY_STACKS;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.view.SurfaceControl;
 import android.window.IDisplayAreaOrganizer;
 import android.window.IDisplayAreaOrganizerController;
 
@@ -113,7 +114,8 @@ public class DisplayAreaOrganizerController extends IDisplayAreaOrganizerControl
 
     void onDisplayAreaAppeared(IDisplayAreaOrganizer organizer, DisplayArea da) {
         try {
-            organizer.onDisplayAreaAppeared(da.getDisplayAreaInfo());
+            SurfaceControl outSurfaceControl = new SurfaceControl(da.getSurfaceControl());
+            organizer.onDisplayAreaAppeared(da.getDisplayAreaInfo(), outSurfaceControl);
         } catch (RemoteException e) {
             // Oh well...
         }
