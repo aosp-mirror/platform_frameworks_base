@@ -16,6 +16,7 @@
 
 package com.android.settingslib.media;
 
+import static android.bluetooth.BluetoothClass.Device.AUDIO_VIDEO_HEADPHONES;
 import static android.media.MediaRoute2ProviderService.REASON_UNKNOWN_ERROR;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -28,6 +29,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.media.MediaRoute2Info;
@@ -659,6 +661,7 @@ public class LocalMediaManagerTest {
         final BluetoothDevice bluetoothDevice4 = mock(BluetoothDevice.class);
         final BluetoothDevice bluetoothDevice5 = mock(BluetoothDevice.class);
         final BluetoothDevice bluetoothDevice6 = mock(BluetoothDevice.class);
+        final BluetoothClass bluetoothClass = mock(BluetoothClass.class);
         final CachedBluetoothDevice cachedDevice = mock(CachedBluetoothDevice.class);
         final CachedBluetoothDeviceManager cachedManager = mock(CachedBluetoothDeviceManager.class);
         bluetoothDevices.add(bluetoothDevice);
@@ -678,6 +681,9 @@ public class LocalMediaManagerTest {
         when(cachedManager.findDevice(bluetoothDevice6)).thenReturn(cachedDevice);
         when(cachedDevice.getBondState()).thenReturn(BluetoothDevice.BOND_BONDED);
         when(cachedDevice.isConnected()).thenReturn(false);
+        when(cachedDevice.getDevice()).thenReturn(bluetoothDevice);
+        when(bluetoothDevice.getBluetoothClass()).thenReturn(bluetoothClass);
+        when(bluetoothClass.getDeviceClass()).thenReturn(AUDIO_VIDEO_HEADPHONES);
 
         when(device1.getId()).thenReturn(TEST_DEVICE_ID_1);
         when(device2.getId()).thenReturn(TEST_DEVICE_ID_2);

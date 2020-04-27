@@ -18,6 +18,7 @@ package com.android.settingslib.media;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.bluetooth.BluetoothDevice;
@@ -68,5 +69,31 @@ public class BluetoothMediaDeviceTest {
         when(mDevice.isConnected()).thenReturn(false);
 
         assertThat(mBluetoothMediaDevice.isConnected()).isFalse();
+    }
+
+    @Test
+    public void isFastPairDevice_isUntetheredHeadset_returnTrue() {
+        final BluetoothDevice bluetoothDevice = mock(BluetoothDevice.class);
+        when(mDevice.getDevice()).thenReturn(bluetoothDevice);
+
+        final String value = "True";
+        final byte[] bytes = value.getBytes();
+        when(bluetoothDevice.getMetadata(BluetoothDevice.METADATA_IS_UNTETHERED_HEADSET))
+                .thenReturn(bytes);
+
+        assertThat(mBluetoothMediaDevice.isFastPairDevice()).isTrue();
+    }
+
+    @Test
+    public void isFastPairDevice_isNotUntetheredHeadset_returnFalse() {
+        final BluetoothDevice bluetoothDevice = mock(BluetoothDevice.class);
+        when(mDevice.getDevice()).thenReturn(bluetoothDevice);
+
+        final String value = "asjdaioshfaio";
+        final byte[] bytes = value.getBytes();
+        when(bluetoothDevice.getMetadata(BluetoothDevice.METADATA_IS_UNTETHERED_HEADSET))
+                .thenReturn(bytes);
+
+        assertThat(mBluetoothMediaDevice.isFastPairDevice()).isFalse();
     }
 }
