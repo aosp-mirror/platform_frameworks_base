@@ -669,6 +669,7 @@
         <item name="android:colorBackground">@android:color/black</item>
         <item name="android:windowAnimationStyle">@null</item>
         <item name="android:statusBarColor">@*android:color/transparent</item>
+        <item name="wallpaperTextColor">@*android:color/primary_text_material_dark</item>
     </style>
 
     <style name="TextAppearance.Control">
