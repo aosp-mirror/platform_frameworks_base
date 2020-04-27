@@ -89,6 +89,13 @@ public class BluetoothMediaDevice extends MediaDevice {
     }
 
     @Override
+    public boolean isFastPairDevice() {
+        return mCachedDevice != null
+                && BluetoothUtils.getBooleanMetaData(
+                mCachedDevice.getDevice(), BluetoothDevice.METADATA_IS_UNTETHERED_HEADSET);
+    }
+
+    @Override
     public boolean isConnected() {
         return mCachedDevice.getBondState() == BluetoothDevice.BOND_BONDED
                 && mCachedDevice.isConnected();
