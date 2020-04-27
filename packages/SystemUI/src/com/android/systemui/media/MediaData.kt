@@ -18,6 +18,7 @@ package com.android.systemui.media
 
 import android.app.PendingIntent
 import android.graphics.drawable.Drawable
+import android.graphics.drawable.Icon
 import android.media.session.MediaSession
 
 /** State of a media view. */
@@ -27,9 +28,9 @@ data class MediaData(
     val backgroundColor: Int,
     val app: String?,
     val appIcon: Drawable?,
-    val artist: String?,
-    val song: String?,
-    val artwork: Drawable?,
+    val artist: CharSequence?,
+    val song: CharSequence?,
+    val artwork: Icon?,
     val actions: List<MediaAction>,
     val actionsToShowInCompact: List<Int>,
     val packageName: String?,

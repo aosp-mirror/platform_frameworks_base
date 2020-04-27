@@ -26,10 +26,13 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.ColorStateList;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.Icon;
 import android.graphics.drawable.RippleDrawable;
-import android.media.MediaMetadata;
 import android.media.session.MediaController;
 import android.media.session.MediaController.PlaybackInfo;
 import android.media.session.MediaSession;
@@ -52,7 +55,10 @@ import androidx.constraintlayout.motion.widget.KeyAttributes;
 import androidx.constraintlayout.motion.widget.KeyFrames;
 import androidx.constraintlayout.motion.widget.MotionLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
+import androidx.core.graphics.drawable.RoundedBitmapDrawable;
+import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory;
 
+import com.android.settingslib.Utils;
 import com.android.settingslib.media.LocalMediaManager;
 import com.android.settingslib.media.MediaDevice;
 import com.android.settingslib.media.MediaOutputSliceConstants;
@@ -104,6 +110,8 @@ public class MediaControlPanel {
     private boolean mIsRegistered = false;
     private final List<KeyFrames> mKeyFrames;
     private String mKey;
+    private int mAlbumArtSize;
+    private int mAlbumArtRadius;
 
     public static final String MEDIA_PREFERENCES = "media_control_prefs";
     public static final String MEDIA_PREFERENCE_KEY = "browser_components";
@@ -111,13 +119,6 @@ public class MediaControlPanel {
     private boolean mCheckedForResumption = false;
     private boolean mIsRemotePlayback;
     private QSMediaBrowser mQSMediaBrowser;
-
-    // URI fields to try loading album art from
-    private static final String[] ART_URIS = {
-            MediaMetadata.METADATA_KEY_ALBUM_ART_URI,
-            MediaMetadata.METADATA_KEY_ART_URI,
-            MediaMetadata.METADATA_KEY_DISPLAY_ICON_URI
-    };
 
     private final MediaController.Callback mSessionCallback = new MediaController.Callback() {
         @Override
@@ -210,6 +211,13 @@ public class MediaControlPanel {
         SeekBar bar = getView().findViewById(R.id.media_progress_bar);
         bar.setOnSeekBarChangeListener(mSeekBarViewModel.getSeekBarListener());
         bar.setOnTouchListener(mSeekBarViewModel.getSeekBarTouchListener());
+        loadDimens();
+    }
+
+    private void loadDimens() {
+        mAlbumArtRadius = mContext.getResources().getDimensionPixelSize(
+                Utils.getThemeAttr(mContext, android.R.attr.dialogCornerRadius));
+        mAlbumArtSize = mContext.getResources().getDimensionPixelSize(R.dimen.qs_media_album_size);
     }
 
     /**
@@ -296,7 +304,10 @@ public class MediaControlPanel {
         }
 
         ImageView albumView = mMediaNotifView.findViewById(R.id.album_art);
-        albumView.setImageDrawable(data.getArtwork());
+        // TODO: migrate this to a view with rounded corners instead of baking the rounding
+        // into the bitmap
+        Drawable artwork = createRoundedBitmap(data.getArtwork());
+        albumView.setImageDrawable(artwork);
 
         // App icon
         ImageView appIcon = mMediaNotifView.requireViewById(R.id.icon);
@@ -398,6 +409,37 @@ public class MediaControlPanel {
         // TODO: b/156036025 bring back media guts
 
         makeActive();
+    }
+
+    private Drawable createRoundedBitmap(Icon icon) {
+        if (icon == null) {
+            return null;
+        }
+        // Let's scale down the View, such that the content always nicely fills the view.
+        // ThumbnailUtils actually scales it down such that it may not be filled for odd aspect
+        // ratios
+        Drawable drawable = icon.loadDrawable(mContext);
+        float aspectRatio = drawable.getIntrinsicHeight() / (float) drawable.getIntrinsicWidth();
+        Rect bounds;
+        if (aspectRatio > 1.0f) {
+            bounds = new Rect(0, 0, mAlbumArtSize, (int) (mAlbumArtSize * aspectRatio));
+        } else {
+            bounds = new Rect(0, 0, (int) (mAlbumArtSize / aspectRatio), mAlbumArtSize);
+        }
+        if (bounds.width() > mAlbumArtSize || bounds.height() > mAlbumArtSize) {
+            float offsetX = (bounds.width() - mAlbumArtSize) / 2.0f;
+            float offsetY = (bounds.height() - mAlbumArtSize) / 2.0f;
+            bounds.offset((int) -offsetX,(int) -offsetY);
+        }
+        drawable.setBounds(bounds);
+        Bitmap scaled = Bitmap.createBitmap(mAlbumArtSize, mAlbumArtSize,
+                Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(scaled);
+        drawable.draw(canvas);
+        RoundedBitmapDrawable artwork = RoundedBitmapDrawableFactory.create(
+                mContext.getResources(), scaled);
+        artwork.setCornerRadius(mAlbumArtRadius);
+        return artwork;
     }
 
     /**

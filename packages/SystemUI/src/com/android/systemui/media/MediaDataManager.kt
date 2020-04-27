@@ -17,28 +17,44 @@
 package com.android.systemui.media
 
 import android.app.Notification
+import android.content.ContentResolver
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.ImageDecoder
+import android.graphics.Rect
 import android.graphics.drawable.Drawable
+import android.graphics.drawable.Icon
 import android.media.MediaMetadata
 import android.media.session.MediaSession
-import android.media.session.PlaybackState
+import android.net.Uri
 import android.provider.Settings
 import android.service.notification.StatusBarNotification
-import androidx.core.graphics.drawable.RoundedBitmapDrawable
-import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory
+import android.text.TextUtils
+import android.util.Log
 import com.android.internal.util.ContrastColorUtil
-import com.android.settingslib.Utils
-import com.android.systemui.R
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.statusbar.NotificationMediaManager
 import com.android.systemui.statusbar.notification.MediaNotificationProcessor
+import com.android.systemui.statusbar.notification.row.HybridGroupManager
+import java.io.IOException
 import java.util.*
 import java.util.concurrent.Executor
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.collections.LinkedHashMap
+
+// URI fields to try loading album art from
+private val ART_URIS = arrayOf(
+        MediaMetadata.METADATA_KEY_ALBUM_ART_URI,
+        MediaMetadata.METADATA_KEY_ART_URI,
+        MediaMetadata.METADATA_KEY_DISPLAY_ICON_URI
+)
+
+private const val TAG = "MediaDataManager"
+
+private val LOADING = MediaData(false, 0, 0, null, null, null, null, null,
+        emptyList(), emptyList(), null, null, null)
 
 /**
  * A class that facilitates management and loading of Media Data, ready for binding.
@@ -52,19 +68,7 @@ class MediaDataManager @Inject constructor(
 ) {
 
     private val listeners: MutableSet<Listener> = mutableSetOf()
-    private var albumArtSize: Int = 0
-    private var albumArtRadius: Int = 0
     private val mediaEntries: LinkedHashMap<String, MediaData> = LinkedHashMap()
-
-    init {
-        loadDimens()
-    }
-
-    private fun loadDimens() {
-        albumArtRadius = context.resources.getDimensionPixelSize(
-                Utils.getThemeAttr(context, android.R.attr.dialogCornerRadius))
-        albumArtSize = context.resources.getDimensionPixelSize(R.dimen.qs_media_album_size)
-    }
 
     fun onNotificationAdded(key: String, sbn: StatusBarNotification) {
         if (isMediaNotification(sbn)) {
@@ -111,9 +115,31 @@ class MediaDataManager @Inject constructor(
         if (artworkBitmap == null) {
             artworkBitmap = metadata.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART)
         }
-        // TODO: load media data from uri
-        if (artworkBitmap != null) {
+        if (artworkBitmap == null) {
+            artworkBitmap = loadBitmapFromUri(metadata)
+        }
+        val artWorkIcon = if (artworkBitmap == null) {
+            notif.getLargeIcon()
+        } else {
+            Icon.createWithBitmap(artworkBitmap)
+        }
+        if (artWorkIcon != null) {
             // If we have art, get colors from that
+            if (artworkBitmap == null) {
+                if (artWorkIcon.type == Icon.TYPE_BITMAP
+                        || artWorkIcon.type == Icon.TYPE_ADAPTIVE_BITMAP) {
+                    artworkBitmap = artWorkIcon.bitmap
+                } else {
+                    val drawable: Drawable = artWorkIcon.loadDrawable(context)
+                    artworkBitmap = Bitmap.createBitmap(
+                            drawable.intrinsicWidth,
+                            drawable.intrinsicHeight,
+                            Bitmap.Config.ARGB_8888)
+                    val canvas = Canvas(artworkBitmap)
+                    drawable.setBounds(0, 0, drawable.intrinsicWidth, drawable.intrinsicHeight)
+                    drawable.draw(canvas)
+                }
+            }
             val p = MediaNotificationProcessor.generateArtworkPaletteBuilder(artworkBitmap)
                     .generate()
             val swatch = MediaNotificationProcessor.findBackgroundSwatch(p)
@@ -126,16 +152,6 @@ class MediaDataManager @Inject constructor(
                 isDark)
         fgColor = ContrastColorUtil.ensureTextContrast(fgColor, bgColor, isDark)
 
-        // Album art
-        var artwork: RoundedBitmapDrawable? = null
-        if (artworkBitmap != null) {
-            val original = artworkBitmap.copy(Bitmap.Config.ARGB_8888, true)
-            val scaled = Bitmap.createScaledBitmap(original, albumArtSize, albumArtSize,
-                    false)
-            artwork = RoundedBitmapDrawableFactory.create(context.resources, scaled)
-            artwork.cornerRadius = albumArtRadius.toFloat()
-        }
-
         // App name
         val builder = Notification.Builder.recoverBuilder(context, notif)
         val app = builder.loadHeaderAppName()
@@ -144,10 +160,19 @@ class MediaDataManager @Inject constructor(
         val smallIconDrawable: Drawable = sbn.notification.smallIcon.loadDrawable(context)
 
         // Song name
-        val song: String = metadata.getString(MediaMetadata.METADATA_KEY_TITLE)
+        var song: CharSequence? = metadata.getString(MediaMetadata.METADATA_KEY_DISPLAY_TITLE)
+        if (song == null) {
+            song = metadata.getString(MediaMetadata.METADATA_KEY_TITLE)
+        }
+        if (song == null) {
+            song = HybridGroupManager.resolveTitle(notif)
+        }
 
         // Artist name
-        val artist: String = metadata.getString(MediaMetadata.METADATA_KEY_ARTIST)
+        var artist: CharSequence? = metadata.getString(MediaMetadata.METADATA_KEY_ARTIST)
+        if (artist == null) {
+            artist = HybridGroupManager.resolveText(notif)
+        }
 
         // Control buttons
         val actionIcons: MutableList<MediaAction> = ArrayList()
@@ -167,10 +192,53 @@ class MediaDataManager @Inject constructor(
 
         foregroundExcecutor.execute {
             onMediaDataLoaded(key, MediaData(true, fgColor, bgColor, app, smallIconDrawable, artist,
-                    song, artwork, actionIcons, actionsToShowCollapsed, sbn.packageName, token,
+                    song, artWorkIcon, actionIcons, actionsToShowCollapsed, sbn.packageName, token,
                     notif.contentIntent))
         }
 
+    }
+
+    /**
+     * Load a bitmap from the various Art metadata URIs
+     */
+    private fun loadBitmapFromUri(metadata: MediaMetadata): Bitmap? {
+        for (uri in ART_URIS) {
+            val uriString = metadata.getString(uri)
+            if (!TextUtils.isEmpty(uriString)) {
+                val albumArt = loadBitmapFromUri(Uri.parse(uriString))
+                if (albumArt != null) {
+                    Log.d(TAG, "loaded art from $uri")
+                    break
+                }
+            }
+        }
+        return null
+    }
+
+    /**
+     * Load a bitmap from a URI
+     * @param uri the uri to load
+     * @return bitmap, or null if couldn't be loaded
+     */
+    private fun loadBitmapFromUri(uri: Uri): Bitmap? {
+        // ImageDecoder requires a scheme of the following types
+        if (uri.getScheme() == null) {
+            return null;
+        }
+
+        if (!uri.getScheme().equals(ContentResolver.SCHEME_CONTENT)
+                && !uri.getScheme().equals(ContentResolver.SCHEME_ANDROID_RESOURCE)
+                && !uri.getScheme().equals(ContentResolver.SCHEME_FILE)) {
+            return null;
+        }
+
+        val source = ImageDecoder.createSource(context.getContentResolver(), uri)
+        return try {
+            ImageDecoder.decodeBitmap(source)
+        } catch (e: IOException) {
+            e.printStackTrace()
+            null
+        }
     }
 
     fun onMediaDataLoaded(key: String, data: MediaData) {
@@ -236,6 +304,3 @@ class MediaDataManager @Inject constructor(
         fun onMediaDataRemoved(key: String) {}
     }
 }
-
-private val LOADING = MediaData(false, 0, 0, null, null, null, null, null,
-        emptyList(), emptyList(), null, null, null)
