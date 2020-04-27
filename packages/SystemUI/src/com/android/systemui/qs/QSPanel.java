@@ -343,6 +343,11 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
                 return;
             }
 
+            if (desc == null || desc.getTitle() == null) {
+                Log.e(TAG, "Description incomplete");
+                return;
+            }
+
             Log.d(TAG, "adding track from browser: " + desc + ", " + component);
             QSMediaPlayer player = new QSMediaPlayer(mContext, QSPanel.this,
                     null, mForegroundExecutor, mBackgroundExecutor, mActivityStarter);
