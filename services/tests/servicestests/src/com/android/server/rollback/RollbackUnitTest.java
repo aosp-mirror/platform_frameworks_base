@@ -29,6 +29,7 @@ import static org.mockito.Mockito.when;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.VersionedPackage;
 import android.content.rollback.PackageRollbackInfo;
+import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.util.SparseLongArray;
 
@@ -430,6 +431,26 @@ public class RollbackUnitTest {
             result.put(pair[0], pair[1]);
         }
         return result;
+    }
+
+    @Test
+    public void readAndWriteStagedRollbackIdsFile() throws Exception {
+        File testFile = File.createTempFile("test", ".txt");
+        RollbackPackageHealthObserver.writeStagedRollbackId(testFile, 2468, null);
+        RollbackPackageHealthObserver.writeStagedRollbackId(testFile, 12345,
+                new VersionedPackage("com.test.package", 1));
+        RollbackPackageHealthObserver.writeStagedRollbackId(testFile, 13579,
+                new VersionedPackage("com.test.package2", 2));
+        SparseArray<String> readInfo =
+                RollbackPackageHealthObserver.readStagedRollbackIds(testFile);
+        assertThat(readInfo.size()).isEqualTo(3);
+
+        assertThat(readInfo.keyAt(0)).isEqualTo(2468);
+        assertThat(readInfo.valueAt(0)).isEqualTo("");
+        assertThat(readInfo.keyAt(1)).isEqualTo(12345);
+        assertThat(readInfo.valueAt(1)).isEqualTo("com.test.package");
+        assertThat(readInfo.keyAt(2)).isEqualTo(13579);
+        assertThat(readInfo.valueAt(2)).isEqualTo("com.test.package2");
     }
 
     private static PackageRollbackInfo newPkgInfoFor(
