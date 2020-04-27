@@ -8,7 +8,10 @@ android_test {
     // We only want this apk build for tests.
 
     // Include all test java files.
-    srcs: ["src/**/*.java"] + ["src/android/util/IRemoteMemoryIntArray.aidl"],
+    srcs: [
+        "src/**/*.java",
+        "src/android/util/IRemoteMemoryIntArray.aidl",
+    ],
 
     jni_libs: [
         "libmemoryintarraytest",
