@@ -46,13 +46,13 @@ class NotificationConversationTemplateViewWrapper constructor(
     )
     private val conversationLayout: ConversationLayout = view as ConversationLayout
 
-    private lateinit var conversationIcon: CachingIconView
+    private lateinit var conversationIconView: CachingIconView
     private lateinit var conversationBadgeBg: View
     private lateinit var expandButton: View
     private lateinit var expandButtonContainer: View
     private lateinit var imageMessageContainer: ViewGroup
     private lateinit var messagingLinearLayout: MessagingLinearLayout
-    private lateinit var conversationTitle: View
+    private lateinit var conversationTitleView: View
     private lateinit var importanceRing: View
     private lateinit var appName: View
     private var facePileBottomBg: View? = null
@@ -63,7 +63,7 @@ class NotificationConversationTemplateViewWrapper constructor(
         messagingLinearLayout = conversationLayout.messagingLinearLayout
         imageMessageContainer = conversationLayout.imageMessageContainer
         with(conversationLayout) {
-            conversationIcon = requireViewById(com.android.internal.R.id.conversation_icon)
+            conversationIconView = requireViewById(com.android.internal.R.id.conversation_icon)
             conversationBadgeBg =
                     requireViewById(com.android.internal.R.id.conversation_icon_badge_bg)
             expandButton = requireViewById(com.android.internal.R.id.expand_button)
@@ -71,7 +71,7 @@ class NotificationConversationTemplateViewWrapper constructor(
                     requireViewById(com.android.internal.R.id.expand_button_container)
             importanceRing = requireViewById(com.android.internal.R.id.conversation_icon_badge_ring)
             appName = requireViewById(com.android.internal.R.id.app_name_text)
-            conversationTitle = requireViewById(com.android.internal.R.id.conversation_text)
+            conversationTitleView = requireViewById(com.android.internal.R.id.conversation_text)
             facePileTop = findViewById(com.android.internal.R.id.conversation_face_pile_top)
             facePileBottom = findViewById(com.android.internal.R.id.conversation_face_pile_bottom)
             facePileBottomBg =
@@ -93,7 +93,7 @@ class NotificationConversationTemplateViewWrapper constructor(
         addTransformedViews(
                 messagingLinearLayout,
                 appName,
-                conversationTitle)
+                conversationTitleView)
 
         // Let's ignore the image message container since that is transforming as part of the
         // messages already
@@ -124,7 +124,7 @@ class NotificationConversationTemplateViewWrapper constructor(
         )
 
         addViewsTransformingToSimilar(
-                conversationIcon,
+                conversationIconView,
                 conversationBadgeBg,
                 expandButton,
                 importanceRing,
@@ -136,29 +136,27 @@ class NotificationConversationTemplateViewWrapper constructor(
 
     override fun setShelfIconVisible(visible: Boolean) {
         if (conversationLayout.isImportantConversation) {
-            if (conversationIcon.visibility != GONE) {
-                conversationIcon.setForceHidden(visible);
+            if (conversationIconView.visibility != GONE) {
+                conversationIconView.isForceHidden = visible
                 // We don't want the small icon to be hidden by the extended wrapper, as force
                 // hiding the conversationIcon will already do that via its listener.
-                return;
+                return
             }
         }
         super.setShelfIconVisible(visible)
     }
 
-    override fun getShelfTransformationTarget(): View? {
-        if (conversationLayout.isImportantConversation) {
-            if (conversationIcon.visibility != GONE) {
-                return conversationIcon
-            } else {
-                // A notification with a fallback icon was set to important. Currently
-                // the transformation doesn't work for these and needs to be fixed. In the meantime
-                // those are using the icon.
-                return super.getShelfTransformationTarget();
-            }
-        }
-        return super.getShelfTransformationTarget()
-    }
+    override fun getShelfTransformationTarget(): View? =
+            if (conversationLayout.isImportantConversation)
+                if (conversationIconView.visibility != GONE)
+                    conversationIconView
+                else
+                    // A notification with a fallback icon was set to important. Currently
+                    // the transformation doesn't work for these and needs to be fixed.
+                    // In the meantime those are using the icon.
+                    super.getShelfTransformationTarget()
+            else
+                super.getShelfTransformationTarget()
 
     override fun setRemoteInputVisible(visible: Boolean) =
             conversationLayout.showHistoricMessages(visible)
