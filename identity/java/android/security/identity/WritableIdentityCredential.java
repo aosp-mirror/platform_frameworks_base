@@ -41,15 +41,16 @@ public abstract class WritableIdentityCredential {
      * <a href="https://source.android.com/security/keystore/attestation">Android Keystore</a>
      * attestation extension which describes the key and the security hardware in which it lives.
      *
-     * <p>Additionally, the attestation extension will contain the tag TODO_IC_KEY which indicates
-     * it is an Identity Credential key (which can only sign/MAC very specific messages) and not
-     * an Android Keystore key (which can be used to sign/MAC anything).
+     * <p>Additionally, the attestation extension will contain the tag Tag::IDENTITY_CREDENTIAL_KEY
+     * which indicates it is an Identity Credential key (which can only sign/MAC very specific
+     * messages) and not an Android Keystore key (which can be used to sign/MAC anything).
      *
      * <p>The issuer <b>MUST</b> carefully examine this certificate chain including (but not
-     * limited to) checking that the root certificate is well-known, the tag TODO_IC_KEY is
-     * present, the passed in challenge is present, the device has verified boot enabled, that each
-     * certificate in the chain is signed by its successor, that none of the certificates have been
-     * revoked and so on.
+     * limited to) checking that the root certificate is well-known, the tag
+     * Tag::IDENTITY_CREDENTIAL_KEY present, the passed in challenge is present, the tag
+     * Tag::ATTESTATION_APPLICATION_ID is set to the expected Android application, the device
+     * has verified boot enabled, each certificate in the chain is signed by its successor,
+     * none of the certificates have been revoked, and so on.
      *
      * <p>It is not strictly necessary to use this method to provision a credential if the issuing
      * authority doesn't care about the nature of the security hardware. If called, however, this

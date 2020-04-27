@@ -21,4 +21,9 @@
     <string name="disable_tether_notification_title" msgid="3004509127903564191">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‎‎‏‏‎‏‏‎‎‏‎‎‎‏‎‏‎‎‏‎‎‏‎‎‎‏‎‎‎‎‏‏‏‎‏‎‎‎‏‏‏‎‎‎‏‎‏‎‎‎‏‏‎‎‏‏‏‏‏‎Tethering is disabled‎‏‎‎‏‎"</string>
     <string name="disable_tether_notification_message" msgid="6717523799293901476">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‏‎‏‎‎‏‏‏‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‏‎‏‏‏‏‏‎‎‏‏‎‎‏‎‎‏‎‏‎‎‏‏‏‎‏‎‏‎‏‎‎‏‎‎‎Contact your admin for details‎‏‎‎‏‎"</string>
     <string name="notification_channel_tethering_status" msgid="2663463891530932727">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‏‎‎‏‏‏‏‎‏‏‎‏‎‎‎‎‏‏‎‎‏‎‎‏‏‎‎‎‎‏‏‎‏‏‎‏‏‎‎‎‏‏‏‏‏‏‎‎‎‎‏‏‏‏‏‎‏‏‏‎Hotspot &amp; tethering status‎‏‎‎‏‎"</string>
+    <string name="no_upstream_notification_title" msgid="1204601824631788482"></string>
+    <string name="no_upstream_notification_message" msgid="8586582938243032621"></string>
+    <string name="no_upstream_notification_disable_button" msgid="8800919436924640822"></string>
+    <string name="upstream_roaming_notification_title" msgid="4772373823198997030"></string>
+    <string name="upstream_roaming_notification_message" msgid="3985577843181551650"></string>
 </resources>

@@ -34,23 +34,23 @@ public abstract class ResultData {
     /** Value was successfully retrieved. */
     public static final int STATUS_OK = 0;
 
-    /** Requested entry does not exist. */
+    /** The entry does not exist. */
     public static final int STATUS_NO_SUCH_ENTRY = 1;
 
-    /** Requested entry was not requested. */
+    /** The entry was not requested. */
     public static final int STATUS_NOT_REQUESTED = 2;
 
-    /** Requested entry wasn't in the request message. */
+    /** The entry wasn't in the request message. */
     public static final int STATUS_NOT_IN_REQUEST_MESSAGE = 3;
 
-    /** The requested entry was not retrieved because user authentication wasn't performed. */
+    /** The entry was not retrieved because user authentication failed. */
     public static final int STATUS_USER_AUTHENTICATION_FAILED = 4;
 
-    /** The requested entry was not retrieved because reader authentication wasn't performed. */
+    /** The entry was not retrieved because reader authentication failed. */
     public static final int STATUS_READER_AUTHENTICATION_FAILED = 5;
 
     /**
-     * The requested entry was not retrieved because it was configured without any access
+     * The entry was not retrieved because it was configured without any access
      * control profile.
      */
     public static final int STATUS_NO_ACCESS_CONTROL_PROFILES = 6;
@@ -88,11 +88,10 @@ public abstract class ResultData {
      *
      *   DeviceEngagementBytes = #6.24(bstr .cbor DeviceEngagement)
      *   EReaderKeyBytes = #6.24(bstr .cbor EReaderKey.Pub)
-     *
      *   DeviceNameSpacesBytes = #6.24(bstr .cbor DeviceNameSpaces)
      * </pre>
      *
-     * where
+     * <p>where
      *
      * <pre>
      *   DeviceNameSpaces = {
@@ -116,15 +115,16 @@ public abstract class ResultData {
     public abstract @NonNull byte[] getAuthenticatedData();
 
     /**
-     * Returns a message authentication code over the data returned by
-     * {@link #getAuthenticatedData}, to prove to the reader that the data is from a trusted
-     * credential.
+     * Returns a message authentication code over the {@code DeviceAuthentication} CBOR
+     * specified in {@link #getAuthenticatedData()}, to prove to the reader that the data
+     * is from a trusted credential.
      *
      * <p>The MAC proves to the reader that the data is from a trusted credential. This code is
      * produced by using the key agreement and key derivation function from the ciphersuite
      * with the authentication private key and the reader ephemeral public key to compute a
      * shared message authentication code (MAC) key, then using the MAC function from the
-     * ciphersuite to compute a MAC of the authenticated data.
+     * ciphersuite to compute a MAC of the authenticated data. See section 9.2.3.5 of
+     * ISO/IEC 18013-5 for details of this operation.
      *
      * <p>If the {@code sessionTranscript} parameter passed to
      * {@link IdentityCredential#getEntries(byte[], Map, byte[], byte[])} was {@code null}
@@ -157,7 +157,7 @@ public abstract class ResultData {
     /**
      * Get the names of all entries.
      *
-     * This includes the name of entries that wasn't successfully retrieved.
+     * <p>This includes the name of entries that wasn't successfully retrieved.
      *
      * @param namespaceName the namespace name to get entries for.
      * @return A collection of names or {@code null} if there are no entries for the given
@@ -168,7 +168,7 @@ public abstract class ResultData {
     /**
      * Get the names of all entries that was successfully retrieved.
      *
-     * This only return entries for which {@link #getStatus(String, String)} will return
+     * <p>This only return entries for which {@link #getStatus(String, String)} will return
      * {@link #STATUS_OK}.
      *
      * @param namespaceName the namespace name to get entries for.
@@ -181,16 +181,15 @@ public abstract class ResultData {
     /**
      * Gets the status of an entry.
      *
-     * This returns {@link #STATUS_OK} if the value was retrieved, {@link #STATUS_NO_SUCH_ENTRY}
+     * <p>This returns {@link #STATUS_OK} if the value was retrieved, {@link #STATUS_NO_SUCH_ENTRY}
      * if the given entry wasn't retrieved, {@link #STATUS_NOT_REQUESTED} if it wasn't requested,
      * {@link #STATUS_NOT_IN_REQUEST_MESSAGE} if the request message was set but the entry wasn't
-     * present in the request message,
-     * {@link #STATUS_USER_AUTHENTICATION_FAILED} if the value
+     * present in the request message, {@link #STATUS_USER_AUTHENTICATION_FAILED} if the value
      * wasn't retrieved because the necessary user authentication wasn't performed,
-     * {@link #STATUS_READER_AUTHENTICATION_FAILED} if the supplied reader certificate chain
-     * didn't match the set of certificates the entry was provisioned with, or
-     * {@link #STATUS_NO_ACCESS_CONTROL_PROFILES} if the entry was configured without any
-     * access control profiles.
+     * {@link #STATUS_READER_AUTHENTICATION_FAILED} if the supplied reader certificate chain didn't
+     * match the set of certificates the entry was provisioned with, or
+     * {@link #STATUS_NO_ACCESS_CONTROL_PROFILES} if the entry was configured without any access
+     * control profiles.
      *
      * @param namespaceName the namespace name of the entry.
      * @param name the name of the entry to get the value for.
@@ -201,7 +200,7 @@ public abstract class ResultData {
     /**
      * Gets the raw CBOR data for the value of an entry.
      *
-     * This should only be called on an entry for which the {@link #getStatus(String, String)}
+     * <p>This should only be called on an entry for which the {@link #getStatus(String, String)}
      * method returns {@link #STATUS_OK}.
      *
      * @param namespaceName the namespace name of the entry.

@@ -28,6 +28,7 @@ apex {
 apex_defaults {
     name: "com.android.sdkext-defaults",
     updatable: true,
+    min_sdk_version: "R",
     java_libs: [ "framework-sdkextensions" ],
     prebuilts: [
         "derive_sdk.rc",

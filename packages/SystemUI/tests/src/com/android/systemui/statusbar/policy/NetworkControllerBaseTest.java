@@ -42,13 +42,13 @@ import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.provider.Settings;
 import android.provider.Settings.Global;
-import android.telephony.DisplayInfo;
 import android.telephony.NetworkRegistrationInfo;
 import android.telephony.PhoneStateListener;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
+import android.telephony.TelephonyDisplayInfo;
 import android.telephony.TelephonyManager;
 import android.testing.TestableLooper;
 import android.testing.TestableResources;
@@ -94,7 +94,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
     protected PhoneStateListener mPhoneStateListener;
     protected SignalStrength mSignalStrength;
     protected ServiceState mServiceState;
-    protected DisplayInfo mDisplayInfo;
+    protected TelephonyDisplayInfo mTelephonyDisplayInfo;
     protected ConnectivityManager mMockCm;
     protected WifiManager mMockWm;
     protected SubscriptionManager mMockSm;
@@ -145,7 +145,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
 
         mSignalStrength = mock(SignalStrength.class);
         mServiceState = mock(ServiceState.class);
-        mDisplayInfo = mock(DisplayInfo.class);
+        mTelephonyDisplayInfo = mock(TelephonyDisplayInfo.class);
 
         mConfig = new Config();
         mConfig.hspaDataDistinguishable = true;
@@ -319,7 +319,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
     protected void updateServiceState() {
         Log.d(TAG, "Sending Service State: " + mServiceState);
         mPhoneStateListener.onServiceStateChanged(mServiceState);
-        mPhoneStateListener.onDisplayInfoChanged(mDisplayInfo);
+        mPhoneStateListener.onDisplayInfoChanged(mTelephonyDisplayInfo);
     }
 
     public void updateCallState(int state) {
@@ -335,7 +335,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
                 .build();
         when(mServiceState.getNetworkRegistrationInfo(DOMAIN_PS, TRANSPORT_TYPE_WWAN))
                 .thenReturn(fakeRegInfo);
-        when(mDisplayInfo.getNetworkType()).thenReturn(dataNetType);
+        when(mTelephonyDisplayInfo.getNetworkType()).thenReturn(dataNetType);
         mPhoneStateListener.onDataConnectionStateChanged(dataState, dataNetType);
     }
 

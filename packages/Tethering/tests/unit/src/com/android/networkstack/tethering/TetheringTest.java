@@ -1079,12 +1079,12 @@ public class TetheringTest {
     }
 
     private void runUserRestrictionsChange(
-            boolean currentDisallow, boolean nextDisallow, String[] activeTetheringIfacesList,
+            boolean currentDisallow, boolean nextDisallow, boolean isTetheringActive,
             int expectedInteractionsWithShowNotification) throws  Exception {
         final Bundle newRestrictions = new Bundle();
         newRestrictions.putBoolean(UserManager.DISALLOW_CONFIG_TETHERING, nextDisallow);
         final Tethering mockTethering = mock(Tethering.class);
-        when(mockTethering.getTetheredIfaces()).thenReturn(activeTetheringIfacesList);
+        when(mockTethering.isTetheringActive()).thenReturn(isTetheringActive);
         when(mUserManager.getUserRestrictions()).thenReturn(newRestrictions);
 
         final Tethering.UserRestrictionActionListener ural =
@@ -1100,63 +1100,63 @@ public class TetheringTest {
     }
 
     @Test
-    public void testDisallowTetheringWhenNoTetheringInterfaceIsActive() throws Exception {
-        final String[] emptyActiveIfacesList = new String[]{};
+    public void testDisallowTetheringWhenTetheringIsNotActive() throws Exception {
+        final boolean isTetheringActive = false;
+        final boolean currDisallow = false;
+        final boolean nextDisallow = true;
+        final int expectedInteractionsWithShowNotification = 0;
+
+        runUserRestrictionsChange(currDisallow, nextDisallow, isTetheringActive,
+                expectedInteractionsWithShowNotification);
+    }
+
+    @Test
+    public void testDisallowTetheringWhenTetheringIsActive() throws Exception {
+        final boolean isTetheringActive = true;
         final boolean currDisallow = false;
         final boolean nextDisallow = true;
         final int expectedInteractionsWithShowNotification = 1;
 
-        runUserRestrictionsChange(currDisallow, nextDisallow, emptyActiveIfacesList,
+        runUserRestrictionsChange(currDisallow, nextDisallow, isTetheringActive,
                 expectedInteractionsWithShowNotification);
     }
 
     @Test
-    public void testDisallowTetheringWhenAtLeastOneTetheringInterfaceIsActive() throws Exception {
-        final String[] nonEmptyActiveIfacesList = new String[]{TEST_WLAN_IFNAME};
-        final boolean currDisallow = false;
-        final boolean nextDisallow = true;
-        final int expectedInteractionsWithShowNotification = 1;
-
-        runUserRestrictionsChange(currDisallow, nextDisallow, nonEmptyActiveIfacesList,
-                expectedInteractionsWithShowNotification);
-    }
-
-    @Test
-    public void testAllowTetheringWhenNoTetheringInterfaceIsActive() throws Exception {
-        final String[] nonEmptyActiveIfacesList = new String[]{};
+    public void testAllowTetheringWhenTetheringIsNotActive() throws Exception {
+        final boolean isTetheringActive = false;
         final boolean currDisallow = true;
         final boolean nextDisallow = false;
         final int expectedInteractionsWithShowNotification = 0;
 
-        runUserRestrictionsChange(currDisallow, nextDisallow, nonEmptyActiveIfacesList,
+        runUserRestrictionsChange(currDisallow, nextDisallow, isTetheringActive,
                 expectedInteractionsWithShowNotification);
     }
 
     @Test
-    public void testAllowTetheringWhenAtLeastOneTetheringInterfaceIsActive() throws Exception {
-        final String[] nonEmptyActiveIfacesList = new String[]{TEST_WLAN_IFNAME};
+    public void testAllowTetheringWhenTetheringIsActive() throws Exception {
+        final boolean isTetheringActive = true;
         final boolean currDisallow = true;
         final boolean nextDisallow = false;
         final int expectedInteractionsWithShowNotification = 0;
 
-        runUserRestrictionsChange(currDisallow, nextDisallow, nonEmptyActiveIfacesList,
+        runUserRestrictionsChange(currDisallow, nextDisallow, isTetheringActive,
                 expectedInteractionsWithShowNotification);
     }
 
     @Test
     public void testDisallowTetheringUnchanged() throws Exception {
-        final String[] nonEmptyActiveIfacesList = new String[]{TEST_WLAN_IFNAME};
+        final boolean isTetheringActive = true;
         final int expectedInteractionsWithShowNotification = 0;
         boolean currDisallow = true;
         boolean nextDisallow = true;
 
-        runUserRestrictionsChange(currDisallow, nextDisallow, nonEmptyActiveIfacesList,
+        runUserRestrictionsChange(currDisallow, nextDisallow, isTetheringActive,
                 expectedInteractionsWithShowNotification);
 
         currDisallow = false;
         nextDisallow = false;
 
-        runUserRestrictionsChange(currDisallow, nextDisallow, nonEmptyActiveIfacesList,
+        runUserRestrictionsChange(currDisallow, nextDisallow, isTetheringActive,
                 expectedInteractionsWithShowNotification);
     }
 
@@ -1689,7 +1689,7 @@ public class TetheringTest {
         final DhcpServingParamsParcel params = dhcpParamsCaptor.getValue();
         assertEquals(serverAddr, intToInet4AddressHTH(params.serverAddr).getHostAddress());
         assertEquals(24, params.serverAddrPrefixLength);
-        assertEquals(clientAddrParceled, params.clientAddr);
+        assertEquals(clientAddrParceled, params.singleClientAddr);
     }
 
     @Test

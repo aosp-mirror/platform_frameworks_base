@@ -17,6 +17,7 @@
 apex {
     name: "com.android.tethering",
     updatable: true,
+    min_sdk_version: "R",
     java_libs: ["framework-tethering"],
     apps: ["Tethering"],
     manifest: "manifest.json",

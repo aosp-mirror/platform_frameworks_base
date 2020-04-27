@@ -17,16 +17,12 @@
 package android.telephony;
 
 import android.annotation.NonNull;
-import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
 
 /**
  * Describes the cause of a disconnected call. Those disconnect causes can be converted into a more
  * generic {@link android.telecom.DisconnectCause} object.
- *
- * @hide
  */
-@SystemApi
 public final class DisconnectCause {
 
     /** The disconnect cause is not valid (Not received a disconnect cause) */
