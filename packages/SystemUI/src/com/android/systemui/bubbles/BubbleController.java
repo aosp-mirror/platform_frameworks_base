@@ -669,8 +669,11 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
             mStackView.onThemeChanged();
         }
         mBubbleIconFactory = new BubbleIconFactory(mContext);
+        // Reload each bubble
         for (Bubble b: mBubbleData.getBubbles()) {
-            // Reload each bubble
+            b.inflate(null /* callback */, mContext, mStackView, mBubbleIconFactory);
+        }
+        for (Bubble b: mBubbleData.getOverflowBubbles()) {
             b.inflate(null /* callback */, mContext, mStackView, mBubbleIconFactory);
         }
     }
