@@ -23,7 +23,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.net.Uri;
 import android.os.Process;
-import android.os.RemoteException;
 import android.text.TextUtils;
 import android.util.Pair;
 
@@ -140,7 +139,7 @@ public class OverlayActorEnforcer {
                         return ActorState.MISSING_LEGACY_PERMISSION;
                     }
                 }
-            } catch (RemoteException | IOException e) {
+            } catch (IOException e) {
                 return ActorState.ERROR_READING_OVERLAYABLE;
             }
         }
