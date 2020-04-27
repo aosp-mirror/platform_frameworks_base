@@ -19,6 +19,7 @@ package com.android.systemui.screenshot;
 import android.app.Notification;
 import android.content.ComponentName;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.util.Log;
 
 import java.util.Collections;
@@ -67,7 +68,7 @@ public class ScreenshotNotificationSmartActionsProvider {
      */
     public CompletableFuture<List<Notification.Action>> getActions(
             String screenshotId,
-            String screenshotFileName,
+            Uri screenshotUri,
             Bitmap bitmap,
             ComponentName componentName,
             boolean isManagedProfile) {
