@@ -36,6 +36,7 @@ public class ResolverMultiProfilePagerAdapter extends AbstractMultiProfilePagerA
 
     private final ResolverProfileDescriptor[] mItems;
     private final boolean mShouldShowNoCrossProfileIntentsEmptyState;
+    private boolean mUseLayoutWithDefault;
 
     ResolverMultiProfilePagerAdapter(Context context,
             ResolverListAdapter adapter,
@@ -213,13 +214,15 @@ public class ResolverMultiProfilePagerAdapter extends AbstractMultiProfilePagerA
                 /* subtitleRes */ 0);
     }
 
+    void setUseLayoutWithDefault(boolean useLayoutWithDefault) {
+        mUseLayoutWithDefault = useLayoutWithDefault;
+    }
+
     @Override
-    protected void onButtonLayoutHidden() {
-        View emptyStateContainer = getItem(getCurrentPage()).getEmptyStateView()
-                .findViewById(R.id.resolver_empty_state_container);
-        emptyStateContainer.setPadding(emptyStateContainer.getPaddingLeft(),
-                emptyStateContainer.getPaddingTop(), emptyStateContainer.getPaddingRight(),
-                /* bottom */ 0);
+    protected void setupContainerPadding(View container) {
+        int bottom = mUseLayoutWithDefault ? container.getPaddingBottom() : 0;
+        container.setPadding(container.getPaddingLeft(), container.getPaddingTop(),
+                container.getPaddingRight(), bottom);
     }
 
     class ResolverProfileDescriptor extends ProfileDescriptor {
