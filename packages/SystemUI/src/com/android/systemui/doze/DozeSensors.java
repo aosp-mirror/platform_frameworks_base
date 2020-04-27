@@ -164,6 +164,17 @@ public class DozeSensors {
     }
 
     /**
+     *  Unregister any sensors.
+     */
+    public void destroy() {
+        // Unregisters everything, which is enough to allow gc.
+        for (TriggerSensor triggerSensor : mSensors) {
+            triggerSensor.setListening(false);
+        }
+        mProximitySensor.pause();
+    }
+
+    /**
      * Temporarily disable some sensors to avoid turning on the device while the user is
      * turning it off.
      */
