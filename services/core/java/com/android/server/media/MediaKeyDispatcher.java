@@ -33,29 +33,28 @@ import java.util.Map;
 /**
  * Provides a way to customize behavior for media key events.
  * <p>
- * In order to override the implementation of the single/double/triple click or long press,
+ * In order to override the implementation of the single/double/triple tap or long press,
  * {@link #setOverriddenKeyEvents(int, int)} should be called for each key code with the
  * overridden {@link KeyEventType} bit value set, and the corresponding method,
- * {@link #onSingleClick(KeyEvent)}, {@link #onDoubleClick(KeyEvent)},
- * {@link #onTripleClick(KeyEvent)}, {@link #onLongPress(KeyEvent)} should be implemented.
+ * {@link #onSingleTap(KeyEvent)}, {@link #onDoubleTap(KeyEvent)},
+ * {@link #onTripleTap(KeyEvent)}, {@link #onLongPress(KeyEvent)} should be implemented.
  * <p>
  * Note: When instantiating this class, {@link MediaSessionService} will only use the constructor
  * without any parameters.
  */
-// TODO: Change API names from using "click" to "tap"
 // TODO: Move this class to apex/media/
 public abstract class MediaKeyDispatcher {
     @IntDef(flag = true, value = {
-            KEY_EVENT_SINGLE_CLICK,
-            KEY_EVENT_DOUBLE_CLICK,
-            KEY_EVENT_TRIPLE_CLICK,
+            KEY_EVENT_SINGLE_TAP,
+            KEY_EVENT_DOUBLE_TAP,
+            KEY_EVENT_TRIPLE_TAP,
             KEY_EVENT_LONG_PRESS
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface KeyEventType {}
-    static final int KEY_EVENT_SINGLE_CLICK = 1 << 0;
-    static final int KEY_EVENT_DOUBLE_CLICK = 1 << 1;
-    static final int KEY_EVENT_TRIPLE_CLICK = 1 << 2;
+    static final int KEY_EVENT_SINGLE_TAP = 1 << 0;
+    static final int KEY_EVENT_DOUBLE_TAP = 1 << 1;
+    static final int KEY_EVENT_TRIPLE_TAP = 1 << 2;
     static final int KEY_EVENT_LONG_PRESS = 1 << 3;
 
     private Map<Integer, Integer> mOverriddenKeyEvents;
@@ -110,16 +109,16 @@ public abstract class MediaKeyDispatcher {
         return mOverriddenKeyEvents;
     }
 
-    static boolean isSingleClickOverridden(@KeyEventType int overriddenKeyEvents) {
-        return (overriddenKeyEvents & MediaKeyDispatcher.KEY_EVENT_SINGLE_CLICK) != 0;
+    static boolean isSingleTapOverridden(@KeyEventType int overriddenKeyEvents) {
+        return (overriddenKeyEvents & MediaKeyDispatcher.KEY_EVENT_SINGLE_TAP) != 0;
     }
 
-    static boolean isDoubleClickOverridden(@KeyEventType int overriddenKeyEvents) {
-        return (overriddenKeyEvents & MediaKeyDispatcher.KEY_EVENT_DOUBLE_CLICK) != 0;
+    static boolean isDoubleTapOverridden(@KeyEventType int overriddenKeyEvents) {
+        return (overriddenKeyEvents & MediaKeyDispatcher.KEY_EVENT_DOUBLE_TAP) != 0;
     }
 
-    static boolean isTripleClickOverridden(@KeyEventType int overriddenKeyEvents) {
-        return (overriddenKeyEvents & MediaKeyDispatcher.KEY_EVENT_TRIPLE_CLICK) != 0;
+    static boolean isTripleTapOverridden(@KeyEventType int overriddenKeyEvents) {
+        return (overriddenKeyEvents & MediaKeyDispatcher.KEY_EVENT_TRIPLE_TAP) != 0;
     }
 
     static boolean isLongPressOverridden(@KeyEventType int overriddenKeyEvents) {
@@ -150,11 +149,11 @@ public abstract class MediaKeyDispatcher {
     }
 
     /**
-     * Customized implementation for single click event. Will be run if
-     * {@link #KEY_EVENT_SINGLE_CLICK} flag is on for the corresponding key code from
+     * Customized implementation for single tap event. Will be run if
+     * {@link #KEY_EVENT_SINGLE_TAP} flag is on for the corresponding key code from
      * {@link #getOverriddenKeyEvents()}.
      *
-     * It is considered a single click if only one {@link KeyEvent} with the same
+     * It is considered a single tap if only one {@link KeyEvent} with the same
      * {@link KeyEvent#getKeyCode()} is dispatched within
      * {@link ViewConfiguration#getMultiPressTimeout()} milliseconds. Change the
      * {@link android.provider.Settings.Secure#MULTI_PRESS_TIMEOUT} value to adjust the interval.
@@ -163,15 +162,15 @@ public abstract class MediaKeyDispatcher {
      *
      * @param keyEvent
      */
-    void onSingleClick(KeyEvent keyEvent) {
+    void onSingleTap(KeyEvent keyEvent) {
     }
 
     /**
-     * Customized implementation for double click event. Will be run if
-     * {@link #KEY_EVENT_DOUBLE_CLICK} flag is on for the corresponding key code from
+     * Customized implementation for double tap event. Will be run if
+     * {@link #KEY_EVENT_DOUBLE_TAP} flag is on for the corresponding key code from
      * {@link #getOverriddenKeyEvents()}.
      *
-     * It is considered a double click if two {@link KeyEvent}s with the same
+     * It is considered a double tap if two {@link KeyEvent}s with the same
      * {@link KeyEvent#getKeyCode()} are dispatched within
      * {@link ViewConfiguration#getMultiPressTimeout()} milliseconds of each other. Change the
      * {@link android.provider.Settings.Secure#MULTI_PRESS_TIMEOUT} value to adjust the interval.
@@ -180,15 +179,15 @@ public abstract class MediaKeyDispatcher {
      *
      * @param keyEvent
      */
-    void onDoubleClick(KeyEvent keyEvent) {
+    void onDoubleTap(KeyEvent keyEvent) {
     }
 
     /**
-     * Customized implementation for triple click event. Will be run if
-     * {@link #KEY_EVENT_TRIPLE_CLICK} flag is on for the corresponding key code from
+     * Customized implementation for triple tap event. Will be run if
+     * {@link #KEY_EVENT_TRIPLE_TAP} flag is on for the corresponding key code from
      * {@link #getOverriddenKeyEvents()}.
      *
-     * It is considered a triple click if three {@link KeyEvent}s with the same
+     * It is considered a triple tap if three {@link KeyEvent}s with the same
      * {@link KeyEvent#getKeyCode()} are dispatched within
      * {@link ViewConfiguration#getMultiPressTimeout()} milliseconds of each other. Change the
      * {@link android.provider.Settings.Secure#MULTI_PRESS_TIMEOUT} value to adjust the interval.
@@ -197,7 +196,7 @@ public abstract class MediaKeyDispatcher {
      *
      * @param keyEvent
      */
-    void onTripleClick(KeyEvent keyEvent) {
+    void onTripleTap(KeyEvent keyEvent) {
     }
 
     /**
