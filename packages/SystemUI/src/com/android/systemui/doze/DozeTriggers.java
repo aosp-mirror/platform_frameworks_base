@@ -111,6 +111,11 @@ public class DozeTriggers implements DozeMachine.Part {
         mBroadcastDispatcher = broadcastDispatcher;
     }
 
+    @Override
+    public void destroy() {
+        mDozeSensors.destroy();
+    }
+
     private void onNotification(Runnable onPulseSuppressedListener) {
         if (DozeMachine.DEBUG) {
             Log.d(TAG, "requestNotificationPulse");
