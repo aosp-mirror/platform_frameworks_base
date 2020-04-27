@@ -53,6 +53,14 @@ public class CarrierConfigManager {
     public static final String EXTRA_SLOT_INDEX = "android.telephony.extra.SLOT_INDEX";
 
     /**
+     * Extra included in {@link #ACTION_CARRIER_CONFIG_CHANGED} to indicate whether this is a
+     * rebroadcast on unlock. Defaults to {@code false} if not specified.
+     * @hide
+     */
+    public static final String EXTRA_REBROADCAST_ON_UNLOCK =
+            "android.telephony.extra.REBROADCAST_ON_UNLOCK";
+
+    /**
      * Optional extra included in {@link #ACTION_CARRIER_CONFIG_CHANGED} to indicate the
      * subscription index that the broadcast is for, if a valid one is available.
      */
@@ -1168,6 +1176,21 @@ public class CarrierConfigManager {
             "support_ims_conference_event_package_bool";
 
     /**
+     * Determines whether processing of conference event package data received on a device other
+     * than the conference host is supported.
+     * <p>
+     * When a device A merges calls B and C into a conference it is considered the conference host
+     * and B and C are considered the conference peers.
+     * <p>
+     * When {@code true}, the conference peer will display the conference state if it receives
+     * conference event package data from the network.  When {@code false}, the conference peer will
+     * ignore conference event package data received from the network.
+     * @hide
+     */
+    public static final String KEY_SUPPORT_IMS_CONFERENCE_EVENT_PACKAGE_ON_PEER_BOOL =
+            "support_ims_conference_event_package_on_peer_bool";
+
+    /**
      * Determines whether High Definition audio property is displayed in the dialer UI.
      * If {@code false}, remove the HD audio property from the connection so that HD audio related
      * UI is not displayed. If {@code true}, keep HD audio property as it is configured.
@@ -1182,6 +1205,25 @@ public class CarrierConfigManager {
      */
     public static final String KEY_SUPPORT_IMS_CONFERENCE_CALL_BOOL =
             "support_ims_conference_call_bool";
+
+    /**
+     * Determines whether the device will locally disconnect an IMS conference when the participant
+     * count drops to zero.  When {@code true}, it is assumed the carrier does NOT disconnect a
+     * conference when the participant count drops to zero and that the device must do this by
+     * disconnecting the conference locally.  When {@code false}, it is assumed that the carrier
+     * is responsible for disconnecting the conference when there are no longer any participants
+     * present.
+     * <p>
+     * Note: both {@link #KEY_SUPPORT_IMS_CONFERENCE_CALL_BOOL} and
+     * {@link #KEY_SUPPORT_IMS_CONFERENCE_EVENT_PACKAGE_BOOL} must be true for this configuration to
+     * have any effect.
+     * <p>
+     * Defaults to {@code false}, meaning the carrier network is responsible for disconnecting an
+     * empty IMS conference.
+     * @hide
+     */
+    public static final String KEY_LOCAL_DISCONNECT_EMPTY_IMS_CONFERENCE_BOOL =
+            "local_disconnect_empty_ims_conference_bool";
 
     /**
      * Determines whether video conference calls are supported by a carrier.  When {@code true},
@@ -3732,8 +3774,10 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_SUPPORT_ADD_CONFERENCE_PARTICIPANTS_BOOL, false);
         sDefaults.putBoolean(KEY_SUPPORT_CONFERENCE_CALL_BOOL, true);
         sDefaults.putBoolean(KEY_SUPPORT_IMS_CONFERENCE_CALL_BOOL, true);
+        sDefaults.putBoolean(KEY_LOCAL_DISCONNECT_EMPTY_IMS_CONFERENCE_BOOL, false);
         sDefaults.putBoolean(KEY_SUPPORT_MANAGE_IMS_CONFERENCE_CALL_BOOL, true);
         sDefaults.putBoolean(KEY_SUPPORT_IMS_CONFERENCE_EVENT_PACKAGE_BOOL, true);
+        sDefaults.putBoolean(KEY_SUPPORT_IMS_CONFERENCE_EVENT_PACKAGE_ON_PEER_BOOL, true);
         sDefaults.putBoolean(KEY_SUPPORT_VIDEO_CONFERENCE_CALL_BOOL, false);
         sDefaults.putBoolean(KEY_IS_IMS_CONFERENCE_SIZE_ENFORCED_BOOL, false);
         sDefaults.putInt(KEY_IMS_CONFERENCE_SIZE_LIMIT_INT, 5);

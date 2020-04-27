@@ -69,6 +69,7 @@ android_test {
     test_config: "AndroidTest_Coverage.xml",
     defaults: ["libnetworkstackutilsjni_deps"],
     static_libs: [
+        "NetworkStaticLibTestsLib",
         "NetworkStackTestsLib",
         "TetheringTestsLib",
         "TetheringIntegrationTestsLib",

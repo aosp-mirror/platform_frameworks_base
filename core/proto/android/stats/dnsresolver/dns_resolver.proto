@@ -211,7 +211,7 @@ enum CacheStatus{
 // 1. bionic/libc/kernel/uapi/asm-generic/errno-base.h
 // 2. bionic/libc/kernel/uapi/asm-generic/errno.h
 enum LinuxErrno {
-    SYS_UNKNOWN = 0;
+    SYS_NO_ERROR = 0;
     SYS_EPERM = 1;              // Not super-user
     SYS_ENOENT = 2;             // No such file or directory
     SYS_ESRCH = 3;              // No such process

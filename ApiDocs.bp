@@ -320,7 +320,7 @@ droiddoc {
         ":framework-doc-stubs",
     ],
     args: "-noJdkLink -links https://kotlinlang.org/api/latest/jvm/stdlib/^external/dokka/package-list " +
-    "-noStdlibLink",
+        "-noStdlibLink",
     proofread_file: "ds-dokka-proofread.txt",
     dokka_enabled: true,
 }
@@ -340,7 +340,7 @@ java_genrule {
         targets: ["docs"],
     },
     cmd: "$(location zip2zip) -i $(location :ds-docs-kt{.docs.zip}) -o $(genDir)/ds-docs-kt-moved.zip **/*:en/reference/kotlin && " +
-         "$(location merge_zips) $(out) $(location :ds-docs-java{.docs.zip}) $(genDir)/ds-docs-kt-moved.zip",
+        "$(location merge_zips) $(out) $(location :ds-docs-java{.docs.zip}) $(genDir)/ds-docs-kt-moved.zip",
 }
 
 java_genrule {
@@ -358,10 +358,10 @@ java_genrule {
         targets: ["docs"],
     },
     cmd: "unzip -q $(location :ds-docs-java{.docs.zip}) -d $(genDir) && " +
-         "unzip -q $(location :ds-docs-kt{.docs.zip}) -d $(genDir)/en/reference/kotlin && " +
-         "SWITCHER=$$(cd $$(dirname $(location switcher4)) && pwd)/$$(basename $(location switcher4)) && " +
-         "(cd $(genDir)/en/reference && $$SWITCHER --work platform) > /dev/null && " +
-         "$(location soong_zip) -o $(out) -C $(genDir) -D $(genDir)",
+        "unzip -q $(location :ds-docs-kt{.docs.zip}) -d $(genDir)/en/reference/kotlin && " +
+        "SWITCHER=$$(cd $$(dirname $(location switcher4)) && pwd)/$$(basename $(location switcher4)) && " +
+        "(cd $(genDir)/en/reference && $$SWITCHER --work platform) > /dev/null && " +
+        "$(location soong_zip) -o $(out) -C $(genDir) -D $(genDir)",
 }
 
 droiddoc {
@@ -373,7 +373,6 @@ droiddoc {
     hdf: [
         "android.whichdoc online",
     ],
-    proofread_file: "ds-static-docs-proofrerad.txt",
     args: framework_docs_only_args +
         " -staticonly " +
         " -toroot / " +
@@ -390,7 +389,6 @@ droiddoc {
     hdf: [
         "android.whichdoc online",
     ],
-    proofread_file: "ds-ref-navtree-docs-proofrerad.txt",
     args: framework_docs_only_args +
         " -toroot / " +
         " -atLinksNavtree " +
@@ -437,4 +435,3 @@ droiddoc {
         " -referenceonly " +
         " -title \"Android SDK - Including hidden APIs.\"",
 }
-

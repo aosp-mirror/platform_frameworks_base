@@ -693,4 +693,20 @@ final class ConnectionServiceAdapter implements DeathRecipient {
             }
         }
     }
+
+    /**
+     * Sets the direction of a call. Setting a new direction of an existing call is usually only
+     * applicable during single caller emulation during conferencing, see
+     * {@link Conference#setConferenceState(boolean)} for more information.
+     * @param callId The identifier of the call.
+     * @param direction The new direction of the call.
+     */
+    void setCallDirection(String callId, @Call.Details.CallDirection int direction) {
+        for (IConnectionServiceAdapter a : mAdapters) {
+            try {
+                a.setCallDirection(callId, direction, Log.getExternalSession());
+            } catch (RemoteException e) {
+            }
+        }
+    }
 }

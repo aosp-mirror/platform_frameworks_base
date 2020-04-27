@@ -3168,7 +3168,7 @@
   <java-symbol type="string" name="global_action_emergency" />
   <java-symbol type="string" name="config_emergency_call_number" />
   <java-symbol type="string" name="config_emergency_dialer_package" />
-  <java-symbol type="array" name="config_emergency_mcc_codes" />
+  <java-symbol type="array" name="config_emergency_iso_country_codes" />
 
   <java-symbol type="string" name="config_dozeDoubleTapSensorType" />
   <java-symbol type="string" name="config_dozeTapSensorType" />

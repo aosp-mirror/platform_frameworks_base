@@ -647,15 +647,32 @@ filegroup {
     ],
 }
 
+// utility classes statically linked into framework-wifi and dynamically linked
+// into wifi-service
+java_library {
+    name: "framework-wifi-util-lib",
+    sdk_version: "module_current",
+    srcs: [
+        "core/java/android/net/shared/Inet4AddressUtils.java",
+        "core/java/com/android/internal/util/Preconditions.java",
+    ],
+    libs: [
+        "framework-annotations-lib",
+        "unsupportedappusage",
+    ],
+    visibility: [
+        "//frameworks/base/wifi",
+        "//frameworks/base/services/net",
+    ],
+}
+
 filegroup {
     name: "framework-services-net-module-wifi-shared-srcs",
     srcs: [
         "core/java/android/net/DhcpResults.java",
-        "core/java/android/net/shared/Inet4AddressUtils.java",
         "core/java/android/net/shared/InetAddressUtils.java",
         "core/java/android/net/util/IpUtils.java",
         "core/java/android/util/LocalLog.java",
-        "core/java/com/android/internal/util/Preconditions.java",
     ],
 }
 
@@ -667,7 +684,6 @@ filegroup {
         "core/java/com/android/internal/util/IndentingPrintWriter.java",
         "core/java/com/android/internal/util/IState.java",
         "core/java/com/android/internal/util/MessageUtils.java",
-        "core/java/com/android/internal/util/Preconditions.java",
         "core/java/com/android/internal/util/State.java",
         "core/java/com/android/internal/util/StateMachine.java",
         "core/java/com/android/internal/util/TrafficStatsConstants.java",
@@ -855,6 +871,7 @@ filegroup {
 
 aidl_interface {
     name: "libincremental_aidl",
+    unstable: true,
     srcs: [
         ":incremental_aidl",
     ],
