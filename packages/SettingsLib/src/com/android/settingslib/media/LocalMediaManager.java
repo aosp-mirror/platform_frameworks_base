@@ -35,6 +35,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -185,7 +186,7 @@ public class LocalMediaManager implements BluetoothCallback {
     }
 
     void dispatchDeviceListUpdate() {
-        //TODO(b/149260820): Use new rule to rank device once device type api is ready.
+        Collections.sort(mMediaDevices, COMPARATOR);
         for (DeviceCallback callback : getCallbacks()) {
             callback.onDeviceListUpdate(new ArrayList<>(mMediaDevices));
         }
