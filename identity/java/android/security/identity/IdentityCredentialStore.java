@@ -46,7 +46,7 @@ import java.lang.annotation.RetentionPolicy;
  * access control profile IDs.  Names are strings and values are typed and can be any
  * value supported by <a href="http://cbor.io/">CBOR</a>.</li>
  *
- * <li>A set of access control profiles, each with a profile ID and a specification
+ * <li>A set of access control profiles (up to 32), each with a profile ID and a specification
  * of the conditions which satisfy the profile's requirements.</li>
  *
  * <li>An asymmetric key pair which is used to authenticate the credential to the Issuing
