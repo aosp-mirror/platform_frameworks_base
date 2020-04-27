@@ -4401,6 +4401,12 @@
     shortcut enabled. [CHAR LIMIT=none] -->
     <string name="accessibility_shortcut_off">Don’t turn on</string>
 
+    <!-- Text for a feature status that is enabled. [CHAR LIMIT=10] -->
+    <string name="accessibility_shortcut_menu_item_status_on">ON</string>
+
+    <!-- Text for a feature status that is disabled. [CHAR LIMIT=10] -->
+    <string name="accessibility_shortcut_menu_item_status_off">OFF</string>
+
     <!-- Title for a warning about security implications of enabling an accessibility
     service. [CHAR LIMIT=NONE] -->
     <string name="accessibility_enable_service_title">Allow
