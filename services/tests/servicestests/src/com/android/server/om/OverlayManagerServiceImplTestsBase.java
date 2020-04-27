@@ -377,8 +377,7 @@ class OverlayManagerServiceImplTestsBase {
                 return false;
             }
             final String key = createKey(overlayPackage.packageName, userId);
-            mIdmapFiles.add(key);
-            return true;
+            return mIdmapFiles.add(key);
         }
 
         @Override
