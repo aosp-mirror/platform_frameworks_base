@@ -761,10 +761,7 @@ int IncrementalService::unbind(StorageId storage, std::string_view target) {
     std::unique_lock l2(ifs->lock);
     if (ifs->bindPoints.size() <= 1) {
         ifs->bindPoints.clear();
-        std::thread([this, ifs, l2 = std::move(l2)]() mutable {
-            mJni->initializeForCurrentThread();
-            deleteStorageLocked(*ifs, std::move(l2));
-        }).detach();
+        deleteStorageLocked(*ifs, std::move(l2));
     } else {
         const std::string savedFile = std::move(bindIt->second.savedFilename);
         ifs->bindPoints.erase(bindIt);
