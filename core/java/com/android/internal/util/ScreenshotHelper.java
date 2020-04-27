@@ -27,6 +27,9 @@ import java.util.function.Consumer;
 
 public class ScreenshotHelper {
 
+    public static final int SCREENSHOT_MSG_URI = 1;
+    public static final int SCREENSHOT_MSG_PROCESS_COMPLETE = 2;
+
     /**
      * Describes a screenshot request (to make it easier to pass data through to the handler).
      */
@@ -135,6 +138,7 @@ public class ScreenshotHelper {
     private final int SCREENSHOT_TIMEOUT_MS = 10000;
 
     private final Object mScreenshotLock = new Object();
+    private IBinder mScreenshotService = null;
     private ServiceConnection mScreenshotConnection = null;
     private final Context mContext;
 
@@ -251,85 +255,104 @@ public class ScreenshotHelper {
     private void takeScreenshot(final int screenshotType, long timeoutMs, @NonNull Handler handler,
             ScreenshotRequest screenshotRequest, @Nullable Consumer<Uri> completionConsumer) {
         synchronized (mScreenshotLock) {
-            if (mScreenshotConnection != null) {
-                return;
-            }
-            final ComponentName serviceComponent = ComponentName.unflattenFromString(
-                    mContext.getResources().getString(
-                            com.android.internal.R.string.config_screenshotServiceComponent));
-            final Intent serviceIntent = new Intent();
 
-            final Runnable mScreenshotTimeout = new Runnable() {
+            final Runnable mScreenshotTimeout = () -> {
+                synchronized (mScreenshotLock) {
+                    if (mScreenshotConnection != null) {
+                        mContext.unbindService(mScreenshotConnection);
+                        mScreenshotConnection = null;
+                        mScreenshotService = null;
+                        notifyScreenshotError();
+                    }
+                }
+                if (completionConsumer != null) {
+                    completionConsumer.accept(null);
+                }
+            };
+
+            Message msg = Message.obtain(null, screenshotType, screenshotRequest);
+            final ServiceConnection myConn = mScreenshotConnection;
+            Handler h = new Handler(handler.getLooper()) {
                 @Override
-                public void run() {
-                    synchronized (mScreenshotLock) {
-                        if (mScreenshotConnection != null) {
-                            mContext.unbindService(mScreenshotConnection);
-                            mScreenshotConnection = null;
-                            notifyScreenshotError();
+                public void handleMessage(Message msg) {
+                    switch (msg.what) {
+                        case SCREENSHOT_MSG_URI:
+                            if (completionConsumer != null) {
+                                completionConsumer.accept((Uri) msg.obj);
+                            }
+                            handler.removeCallbacks(mScreenshotTimeout);
+                            break;
+                        case SCREENSHOT_MSG_PROCESS_COMPLETE:
+                            synchronized (mScreenshotLock) {
+                                if (mScreenshotConnection == myConn) {
+                                    mContext.unbindService(mScreenshotConnection);
+                                    mScreenshotConnection = null;
+                                    mScreenshotService = null;
+                                }
+                            }
+                            break;
+                    }
+                }
+            };
+            msg.replyTo = new Messenger(h);
+
+            if (mScreenshotConnection == null) {
+                final ComponentName serviceComponent = ComponentName.unflattenFromString(
+                        mContext.getResources().getString(
+                                com.android.internal.R.string.config_screenshotServiceComponent));
+                final Intent serviceIntent = new Intent();
+
+                serviceIntent.setComponent(serviceComponent);
+                ServiceConnection conn = new ServiceConnection() {
+                    @Override
+                    public void onServiceConnected(ComponentName name, IBinder service) {
+                        synchronized (mScreenshotLock) {
+                            if (mScreenshotConnection != this) {
+                                return;
+                            }
+                            mScreenshotService = service;
+                            Messenger messenger = new Messenger(mScreenshotService);
+
+                            try {
+                                messenger.send(msg);
+                            } catch (RemoteException e) {
+                                Log.e(TAG, "Couldn't take screenshot: " + e);
+                                if (completionConsumer != null) {
+                                    completionConsumer.accept(null);
+                                }
+                            }
                         }
                     }
+
+                    @Override
+                    public void onServiceDisconnected(ComponentName name) {
+                        synchronized (mScreenshotLock) {
+                            if (mScreenshotConnection != null) {
+                                mContext.unbindService(mScreenshotConnection);
+                                mScreenshotConnection = null;
+                                mScreenshotService = null;
+                                handler.removeCallbacks(mScreenshotTimeout);
+                                notifyScreenshotError();
+                            }
+                        }
+                    }
+                };
+                if (mContext.bindServiceAsUser(serviceIntent, conn,
+                        Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE,
+                        UserHandle.CURRENT)) {
+                    mScreenshotConnection = conn;
+                    handler.postDelayed(mScreenshotTimeout, timeoutMs);
+                }
+            } else {
+                Messenger messenger = new Messenger(mScreenshotService);
+                try {
+                    messenger.send(msg);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Couldn't take screenshot: " + e);
                     if (completionConsumer != null) {
                         completionConsumer.accept(null);
                     }
                 }
-            };
-
-            serviceIntent.setComponent(serviceComponent);
-            ServiceConnection conn = new ServiceConnection() {
-                @Override
-                public void onServiceConnected(ComponentName name, IBinder service) {
-                    synchronized (mScreenshotLock) {
-                        if (mScreenshotConnection != this) {
-                            return;
-                        }
-                        Messenger messenger = new Messenger(service);
-                        Message msg = Message.obtain(null, screenshotType, screenshotRequest);
-                        final ServiceConnection myConn = this;
-                        Handler h = new Handler(handler.getLooper()) {
-                            @Override
-                            public void handleMessage(Message msg) {
-                                synchronized (mScreenshotLock) {
-                                    if (mScreenshotConnection == myConn) {
-                                        mContext.unbindService(mScreenshotConnection);
-                                        mScreenshotConnection = null;
-                                        handler.removeCallbacks(mScreenshotTimeout);
-                                    }
-                                }
-                                if (completionConsumer != null) {
-                                    completionConsumer.accept((Uri) msg.obj);
-                                }
-                            }
-                        };
-                        msg.replyTo = new Messenger(h);
-
-                        try {
-                            messenger.send(msg);
-                        } catch (RemoteException e) {
-                            Log.e(TAG, "Couldn't take screenshot: " + e);
-                            if (completionConsumer != null) {
-                                completionConsumer.accept(null);
-                            }
-                        }
-                    }
-                }
-
-                @Override
-                public void onServiceDisconnected(ComponentName name) {
-                    synchronized (mScreenshotLock) {
-                        if (mScreenshotConnection != null) {
-                            mContext.unbindService(mScreenshotConnection);
-                            mScreenshotConnection = null;
-                            handler.removeCallbacks(mScreenshotTimeout);
-                            notifyScreenshotError();
-                        }
-                    }
-                }
-            };
-            if (mContext.bindServiceAsUser(serviceIntent, conn,
-                    Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE_WHILE_AWAKE,
-                    UserHandle.CURRENT)) {
-                mScreenshotConnection = conn;
                 handler.postDelayed(mScreenshotTimeout, timeoutMs);
             }
         }
