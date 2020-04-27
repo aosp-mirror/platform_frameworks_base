@@ -159,6 +159,15 @@ public class DozeMachine {
         mDozeHost = dozeHost;
     }
 
+    /**
+     * Clean ourselves up.
+     */
+    public void destroy() {
+        for (Part part : mParts) {
+            part.destroy();
+        }
+    }
+
     /** Initializes the set of {@link Part}s. Must be called exactly once after construction. */
     public void setParts(Part[] parts) {
         Preconditions.checkState(mParts == null);
@@ -411,6 +420,9 @@ public class DozeMachine {
 
         /** Dump current state. For debugging only. */
         default void dump(PrintWriter pw) {}
+
+        /** Give the Part a chance to clean itself up. */
+        default void destroy() {}
     }
 
     /** A wrapper interface for {@link android.service.dreams.DreamService} */
