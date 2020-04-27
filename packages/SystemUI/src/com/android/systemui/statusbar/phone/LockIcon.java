@@ -64,7 +64,6 @@ public class LockIcon extends KeyguardAffordanceView {
             mPredrawRegistered = false;
 
             int newState = mState;
-            mOldState = mState;
             Drawable icon = getIcon(newState);
             setImageDrawable(icon, false);
 
@@ -134,6 +133,7 @@ public class LockIcon extends KeyguardAffordanceView {
     }
 
     void update(int newState, boolean dozing, boolean keyguardJustShown) {
+        mOldState = mState;
         mState = newState;
         mDozing = dozing;
         mKeyguardJustShown = keyguardJustShown;
