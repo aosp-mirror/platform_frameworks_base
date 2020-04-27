@@ -211,14 +211,16 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
             mTargetShown = imeShouldShow;
             if (mLastAdjustTop < 0) {
                 mLastAdjustTop = imeShouldShow ? hiddenTop : shownTop;
-            } else {
-                // Check for an "interruption" of an existing animation. In this case, we need to
-                // fake-flip the last-known state direction so that the animation completes in the
-                // other direction.
+            } else if (mLastAdjustTop != (imeShouldShow ? mShownTop : mHiddenTop)) {
                 if (mTargetAdjusted != targetAdjusted && targetAdjusted == mAdjusted) {
-                    if (mLastAdjustTop != (imeShouldShow ? mShownTop : mHiddenTop)) {
-                        mAdjusted = mTargetAdjusted;
-                    }
+                    // Check for an "interruption" of an existing animation. In this case, we
+                    // need to fake-flip the last-known state direction so that the animation
+                    // completes in the other direction.
+                    mAdjusted = mTargetAdjusted;
+                } else if (targetAdjusted && mTargetAdjusted && mAdjusted) {
+                    // Already fully adjusted for IME, but IME height has changed; so, force-start
+                    // an async animation to the new IME height.
+                    mAdjusted = false;
                 }
             }
             if (mPaused) {
