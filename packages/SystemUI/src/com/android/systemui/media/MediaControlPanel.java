@@ -19,6 +19,7 @@ package com.android.systemui.media;
 import android.annotation.LayoutRes;
 import android.app.PendingIntent;
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -39,6 +40,7 @@ import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
 import android.net.Uri;
 import android.service.media.MediaBrowserService;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -431,7 +433,7 @@ public class MediaControlPanel {
         // First look in URI fields
         for (String field : ART_URIS) {
             String uriString = metadata.getString(field);
-            if (uriString != null) {
+            if (!TextUtils.isEmpty(uriString)) {
                 albumArt = loadBitmapFromUri(Uri.parse(uriString));
                 if (albumArt != null) {
                     Log.d(TAG, "loaded art from " + field);
@@ -459,6 +461,17 @@ public class MediaControlPanel {
      * @return bitmap, or null if couldn't be loaded
      */
     private Bitmap loadBitmapFromUri(Uri uri) {
+        // ImageDecoder requires a scheme of the following types
+        if (uri.getScheme() == null) {
+            return null;
+        }
+
+        if (!uri.getScheme().equals(ContentResolver.SCHEME_CONTENT)
+                && !uri.getScheme().equals(ContentResolver.SCHEME_ANDROID_RESOURCE)
+                && !uri.getScheme().equals(ContentResolver.SCHEME_FILE)) {
+            return null;
+        }
+
         ImageDecoder.Source source = ImageDecoder.createSource(mContext.getContentResolver(), uri);
         try {
             return ImageDecoder.decodeBitmap(source);
