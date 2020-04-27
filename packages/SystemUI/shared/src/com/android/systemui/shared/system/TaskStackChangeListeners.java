@@ -122,11 +122,12 @@ public class TaskStackChangeListeners extends TaskStackListener {
 
     @Override
     public void onActivityRestartAttempt(RunningTaskInfo task, boolean homeTaskVisible,
-            boolean clearedTask) throws RemoteException {
+            boolean clearedTask, boolean wasVisible) throws RemoteException {
         final SomeArgs args = SomeArgs.obtain();
         args.arg1 = task;
         args.argi1 = homeTaskVisible ? 1 : 0;
         args.argi2 = clearedTask ? 1 : 0;
+        args.argi3 = wasVisible ? 1 : 0;
         mHandler.removeMessages(H.ON_ACTIVITY_RESTART_ATTEMPT);
         mHandler.obtainMessage(H.ON_ACTIVITY_RESTART_ATTEMPT, args).sendToTarget();
     }
@@ -305,9 +306,10 @@ public class TaskStackChangeListeners extends TaskStackListener {
                         final RunningTaskInfo task = (RunningTaskInfo) args.arg1;
                         final boolean homeTaskVisible = args.argi1 != 0;
                         final boolean clearedTask = args.argi2 != 0;
+                        final boolean wasVisible = args.argi3 != 0;
                         for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
                             mTaskStackListeners.get(i).onActivityRestartAttempt(task,
-                                    homeTaskVisible, clearedTask);
+                                    homeTaskVisible, clearedTask, wasVisible);
                         }
                         break;
                     }
