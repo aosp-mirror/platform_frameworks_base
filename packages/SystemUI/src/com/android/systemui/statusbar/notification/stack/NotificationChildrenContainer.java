@@ -40,6 +40,7 @@ import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.HybridGroupManager;
 import com.android.systemui.statusbar.notification.row.HybridNotificationView;
+import com.android.systemui.statusbar.notification.row.wrapper.NotificationHeaderViewWrapper;
 import com.android.systemui.statusbar.notification.row.wrapper.NotificationViewWrapper;
 
 import java.util.ArrayList;
@@ -99,6 +100,7 @@ public class NotificationChildrenContainer extends ViewGroup {
     private boolean mIsLowPriority;
     private OnClickListener mHeaderClickListener;
     private ViewGroup mCurrentHeader;
+    private boolean mIsConversation;
 
     private boolean mShowDividersWhenExpanded;
     private boolean mHideDividersDuringExpand;
@@ -122,7 +124,7 @@ public class NotificationChildrenContainer extends ViewGroup {
     public NotificationChildrenContainer(Context context, AttributeSet attrs, int defStyleAttr,
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        mHybridGroupManager = new HybridGroupManager(getContext(), this);
+        mHybridGroupManager = new HybridGroupManager(getContext());
         initDimens();
         setClipChildren(false);
     }
@@ -308,8 +310,9 @@ public class NotificationChildrenContainer extends ViewGroup {
         return mAttachedChildren.size();
     }
 
-    public void recreateNotificationHeader(OnClickListener listener) {
+    public void recreateNotificationHeader(OnClickListener listener, boolean isConversation) {
         mHeaderClickListener = listener;
+        mIsConversation = isConversation;
         StatusBarNotification notification = mContainingNotification.getEntry().getSbn();
         final Notification.Builder builder = Notification.Builder.recoverBuilder(getContext(),
                 notification.getNotification());
@@ -328,7 +331,16 @@ public class NotificationChildrenContainer extends ViewGroup {
             header.reapply(getContext(), mNotificationHeader);
         }
         mNotificationHeaderWrapper.onContentUpdated(mContainingNotification);
-        recreateLowPriorityHeader(builder);
+        if (mNotificationHeaderWrapper instanceof NotificationHeaderViewWrapper) {
+            NotificationHeaderViewWrapper headerWrapper =
+                    (NotificationHeaderViewWrapper) mNotificationHeaderWrapper;
+            if (isConversation) {
+                headerWrapper.applyConversationSkin();
+            } else {
+                headerWrapper.clearConversationSkin();
+            }
+        }
+        recreateLowPriorityHeader(builder, isConversation);
         updateHeaderVisibility(false /* animate */);
         updateChildrenHeaderAppearance();
     }
@@ -338,7 +350,7 @@ public class NotificationChildrenContainer extends ViewGroup {
      *
      * @param builder a builder to reuse. Otherwise the builder will be recovered.
      */
-    private void recreateLowPriorityHeader(Notification.Builder builder) {
+    private void recreateLowPriorityHeader(Notification.Builder builder, boolean isConversation) {
         RemoteViews header;
         StatusBarNotification notification = mContainingNotification.getEntry().getSbn();
         if (mIsLowPriority) {
@@ -362,6 +374,15 @@ public class NotificationChildrenContainer extends ViewGroup {
                 header.reapply(getContext(), mNotificationHeaderLowPriority);
             }
             mNotificationHeaderWrapperLowPriority.onContentUpdated(mContainingNotification);
+            if (mNotificationHeaderWrapper instanceof NotificationHeaderViewWrapper) {
+                NotificationHeaderViewWrapper headerWrapper =
+                        (NotificationHeaderViewWrapper) mNotificationHeaderWrapper;
+                if (isConversation) {
+                    headerWrapper.applyConversationSkin();
+                } else {
+                    headerWrapper.clearConversationSkin();
+                }
+            }
             resetHeaderVisibilityIfNeeded(mNotificationHeaderLowPriority, calculateDesiredHeader());
         } else {
             removeView(mNotificationHeaderLowPriority);
@@ -378,7 +399,7 @@ public class NotificationChildrenContainer extends ViewGroup {
         int maxAllowedVisibleChildren = getMaxAllowedVisibleChildren(true /* likeCollapsed */);
         if (mUntruncatedChildCount > maxAllowedVisibleChildren) {
             int number = mUntruncatedChildCount - maxAllowedVisibleChildren;
-            mOverflowNumber = mHybridGroupManager.bindOverflowNumber(mOverflowNumber, number);
+            mOverflowNumber = mHybridGroupManager.bindOverflowNumber(mOverflowNumber, number, this);
             if (mGroupOverFlowState == null) {
                 mGroupOverFlowState = new ViewState();
                 mNeverAppliedGroupState = true;
@@ -1141,7 +1162,7 @@ public class NotificationChildrenContainer extends ViewGroup {
             removeView(mNotificationHeaderLowPriority);
             mNotificationHeaderLowPriority = null;
         }
-        recreateNotificationHeader(listener);
+        recreateNotificationHeader(listener, mIsConversation);
         initDimens();
         for (int i = 0; i < mDividers.size(); i++) {
             View prevDivider = mDividers.get(i);
@@ -1225,7 +1246,7 @@ public class NotificationChildrenContainer extends ViewGroup {
     public void setIsLowPriority(boolean isLowPriority) {
         mIsLowPriority = isLowPriority;
         if (mContainingNotification != null) { /* we're not yet set up yet otherwise */
-            recreateLowPriorityHeader(null /* existingBuilder */);
+            recreateLowPriorityHeader(null /* existingBuilder */, mIsConversation);
             updateHeaderVisibility(false /* animate */);
         }
         if (mUserLocked) {

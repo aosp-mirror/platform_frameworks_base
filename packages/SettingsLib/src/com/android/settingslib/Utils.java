@@ -279,8 +279,12 @@ public class Utils {
     }
 
     public static int getThemeAttr(Context context, int attr) {
+        return getThemeAttr(context, attr, 0);
+    }
+
+    public static int getThemeAttr(Context context, int attr, int defaultValue) {
         TypedArray ta = context.obtainStyledAttributes(new int[]{attr});
-        int theme = ta.getResourceId(0, 0);
+        int theme = ta.getResourceId(0, defaultValue);
         ta.recycle();
         return theme;
     }
