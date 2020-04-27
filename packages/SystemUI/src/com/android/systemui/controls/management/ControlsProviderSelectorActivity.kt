@@ -34,6 +34,7 @@ import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.controls.controller.ControlsController
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.globalactions.GlobalActionsComponent
 import com.android.systemui.settings.CurrentUserTracker
 import com.android.systemui.util.LifecycleActivity
 import java.util.concurrent.Executor
@@ -47,6 +48,7 @@ class ControlsProviderSelectorActivity @Inject constructor(
     @Background private val backExecutor: Executor,
     private val listingController: ControlsListingController,
     private val controlsController: ControlsController,
+    private val globalActionsComponent: GlobalActionsComponent,
     broadcastDispatcher: BroadcastDispatcher
 ) : LifecycleActivity() {
 
@@ -95,10 +97,15 @@ class ControlsProviderSelectorActivity @Inject constructor(
             visibility = View.VISIBLE
             setText(com.android.internal.R.string.cancel)
             setOnClickListener {
-                this@ControlsProviderSelectorActivity.finishAffinity()
+                onBackPressed()
             }
         }
         requireViewById<View>(R.id.done).visibility = View.GONE
+    }
+
+    override fun onBackPressed() {
+        globalActionsComponent.handleShowGlobalActionsMenu()
+        animateExitAndFinish()
     }
 
     override fun onStart() {
@@ -144,7 +151,7 @@ class ControlsProviderSelectorActivity @Inject constructor(
                     putExtra(ControlsFavoritingActivity.EXTRA_APP,
                             listingController.getAppLabel(it))
                     putExtra(Intent.EXTRA_COMPONENT_NAME, it)
-                    flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+                    putExtra(ControlsFavoritingActivity.EXTRA_FROM_PROVIDER_SELECTOR, true)
                 }
                 startActivity(intent, ActivityOptions.makeSceneTransitionAnimation(this).toBundle())
             }
@@ -154,5 +161,17 @@ class ControlsProviderSelectorActivity @Inject constructor(
     override fun onDestroy() {
         currentUserTracker.stopTracking()
         super.onDestroy()
+    }
+
+    private fun animateExitAndFinish() {
+        val rootView = requireViewById<ViewGroup>(R.id.controls_management_root)
+        ControlsAnimations.exitAnimation(
+                rootView,
+                object : Runnable {
+                    override fun run() {
+                        finish()
+                    }
+                }
+        ).start()
     }
 }
