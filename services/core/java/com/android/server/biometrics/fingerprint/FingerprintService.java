@@ -476,11 +476,12 @@ public class FingerprintService extends BiometricServiceBase {
         }
 
         @Override
-        public void onAcquired(int acquiredInfo, int vendorCode)
+        public void onAcquired(int sensorId, int acquiredInfo, int vendorCode)
                 throws RemoteException {
             if (getWrapperReceiver() != null) {
-                getWrapperReceiver().onAcquired(acquiredInfo, FingerprintManager.getAcquiredString(
-                            getContext(), acquiredInfo, vendorCode));
+                getWrapperReceiver().onAcquired(sensorId, acquiredInfo,
+                        FingerprintManager.getAcquiredString(getContext(), acquiredInfo,
+                                vendorCode));
             }
         }
 
@@ -514,7 +515,7 @@ public class FingerprintService extends BiometricServiceBase {
         }
 
         @Override
-        public void onAcquired(int acquiredInfo, int vendorCode)
+        public void onAcquired(int sensorId, int acquiredInfo, int vendorCode)
                 throws RemoteException {
             if (mFingerprintServiceReceiver != null) {
                 mFingerprintServiceReceiver.onAcquired(acquiredInfo, vendorCode);
@@ -596,7 +597,7 @@ public class FingerprintService extends BiometricServiceBase {
         @Override
         public void onAcquired_2_2(long deviceId, int acquiredInfo, int vendorCode) {
             mHandler.post(() -> {
-                FingerprintService.super.handleAcquired(deviceId, acquiredInfo, vendorCode);
+                FingerprintService.super.handleAcquired(getSensorId(), acquiredInfo, vendorCode);
             });
         }
 

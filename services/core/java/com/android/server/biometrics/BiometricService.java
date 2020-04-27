@@ -137,8 +137,8 @@ public class BiometricService extends SystemService {
                 case MSG_ON_ERROR: {
                     SomeArgs args = (SomeArgs) msg.obj;
                     handleOnError(
-                            args.argi1 /* cookie */,
-                            args.argi2 /* modality */,
+                            args.argi1 /* sensorId */,
+                            args.argi2 /* cookie */,
                             args.argi3 /* error */,
                             args.argi4 /* vendorCode */);
                     args.recycle();
@@ -148,7 +148,8 @@ public class BiometricService extends SystemService {
                 case MSG_ON_ACQUIRED: {
                     SomeArgs args = (SomeArgs) msg.obj;
                     handleOnAcquired(
-                            args.argi1 /* acquiredInfo */,
+                            args.argi1 /* sensorId */,
+                            args.argi2 /* acquiredInfo */,
                             (String) args.arg1 /* message */);
                     args.recycle();
                     break;
@@ -196,9 +197,10 @@ public class BiometricService extends SystemService {
                 case MSG_ON_AUTHENTICATION_TIMED_OUT: {
                     SomeArgs args = (SomeArgs) msg.obj;
                     handleAuthenticationTimedOut(
-                            args.argi1 /* modality */,
-                            args.argi2 /* error */,
-                            args.argi3 /* vendorCode */);
+                            args.argi1 /* sensorId */,
+                            args.argi2 /* cookie */,
+                            args.argi3 /* error */,
+                            args.argi4 /* vendorCode */);
                     args.recycle();
                     break;
                 }
@@ -373,8 +375,7 @@ public class BiometricService extends SystemService {
     @VisibleForTesting
     final IBiometricSensorReceiver mBiometricSensorReceiver = new IBiometricSensorReceiver.Stub() {
         @Override
-        public void onAuthenticationSucceeded(int sensorId,
-                byte[] token) {
+        public void onAuthenticationSucceeded(int sensorId, byte[] token) {
             SomeArgs args = SomeArgs.obtain();
             args.argi1 = sensorId;
             args.arg1 = token;
@@ -382,27 +383,28 @@ public class BiometricService extends SystemService {
         }
 
         @Override
-        public void onAuthenticationFailed() {
+        public void onAuthenticationFailed(int sensorId) {
             Slog.v(TAG, "onAuthenticationFailed");
             mHandler.obtainMessage(MSG_ON_AUTHENTICATION_REJECTED).sendToTarget();
         }
 
         @Override
-        public void onError(int cookie, @BiometricAuthenticator.Modality int modality,
-                @BiometricConstants.Errors int error, int vendorCode) {
+        public void onError(int sensorId, int cookie, @BiometricConstants.Errors int error,
+                int vendorCode) {
             // Determine if error is hard or soft error. Certain errors (such as TIMEOUT) are
             // soft errors and we should allow the user to try authenticating again instead of
             // dismissing BiometricPrompt.
             if (error == BiometricConstants.BIOMETRIC_ERROR_TIMEOUT) {
                 SomeArgs args = SomeArgs.obtain();
-                args.argi1 = modality;
-                args.argi2 = error;
-                args.argi3 = vendorCode;
+                args.argi1 = sensorId;
+                args.argi2 = cookie;
+                args.argi3 = error;
+                args.argi4 = vendorCode;
                 mHandler.obtainMessage(MSG_ON_AUTHENTICATION_TIMED_OUT, args).sendToTarget();
             } else {
                 SomeArgs args = SomeArgs.obtain();
-                args.argi1 = cookie;
-                args.argi2 = modality;
+                args.argi1 = sensorId;
+                args.argi2 = cookie;
                 args.argi3 = error;
                 args.argi4 = vendorCode;
                 mHandler.obtainMessage(MSG_ON_ERROR, args).sendToTarget();
@@ -410,9 +412,10 @@ public class BiometricService extends SystemService {
         }
 
         @Override
-        public void onAcquired(int acquiredInfo, String message) {
+        public void onAcquired(int sensorId, int acquiredInfo, String message) {
             SomeArgs args = SomeArgs.obtain();
-            args.argi1 = acquiredInfo;
+            args.argi1 = sensorId;
+            args.argi2 = acquiredInfo;
             args.arg1 = message;
             mHandler.obtainMessage(MSG_ON_ACQUIRED, args).sendToTarget();
         }
@@ -865,8 +868,9 @@ public class BiometricService extends SystemService {
         mCurrentAuthSession.onAuthenticationRejected();
     }
 
-    private void handleAuthenticationTimedOut(int modality, int error, int vendorCode) {
-        Slog.v(TAG, "handleAuthenticationTimedOut(), modality: " + modality
+    private void handleAuthenticationTimedOut(int sensorId, int cookie, int error, int vendorCode) {
+        Slog.v(TAG, "handleAuthenticationTimedOut(), sensorId: " + sensorId
+                + ", cookie: " + cookie
                 + ", error: " + error
                 + ", vendorCode: " + vendorCode);
         // Should never happen, log this to catch bad HAL behavior (e.g. auth succeeded
@@ -876,12 +880,15 @@ public class BiometricService extends SystemService {
             return;
         }
 
-        mCurrentAuthSession.onAuthenticationTimedOut(modality, error, vendorCode);
+        mCurrentAuthSession.onAuthenticationTimedOut(sensorId, cookie, error, vendorCode);
     }
 
-    private void handleOnError(int cookie, @BiometricAuthenticator.Modality int modality,
-            @BiometricConstants.Errors int error, int vendorCode) {
-        Slog.d(TAG, "handleOnError: " + error + " cookie: " + cookie);
+    private void handleOnError(int sensorId, int cookie, @BiometricConstants.Errors int error,
+            int vendorCode) {
+        Slog.d(TAG, "handleOnError() sensorId: " + sensorId
+                + ", cookie: " + cookie
+                + ", error: " + error
+                + ", vendorCode: " + vendorCode);
 
         if (mCurrentAuthSession == null) {
             Slog.e(TAG, "handleOnError: AuthSession is null");
@@ -890,7 +897,7 @@ public class BiometricService extends SystemService {
 
         try {
             final boolean finished = mCurrentAuthSession
-                    .onErrorReceived(cookie, modality, error, vendorCode);
+                    .onErrorReceived(sensorId, cookie, error, vendorCode);
             if (finished) {
                 Slog.d(TAG, "handleOnError: AuthSession finished");
                 mCurrentAuthSession = null;
@@ -900,7 +907,7 @@ public class BiometricService extends SystemService {
         }
     }
 
-    private void handleOnAcquired(int acquiredInfo, String message) {
+    private void handleOnAcquired(int sensorId, int acquiredInfo, String message) {
         // Should never happen, log this to catch bad HAL behavior (e.g. auth succeeded
         // after user dismissed/canceled dialog).
         if (mCurrentAuthSession == null) {
@@ -908,7 +915,7 @@ public class BiometricService extends SystemService {
             return;
         }
 
-        mCurrentAuthSession.onAcquired(acquiredInfo, message);
+        mCurrentAuthSession.onAcquired(sensorId, acquiredInfo, message);
     }
 
     private void handleOnDismissed(@BiometricPrompt.DismissedReason int reason,

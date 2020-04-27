@@ -296,8 +296,8 @@ final class AuthSession {
     /**
      * @return true if this AuthSession is finished, e.g. should be set to null.
      */
-    boolean onErrorReceived(int cookie, @BiometricAuthenticator.Modality int modality,
-            int error, int vendorCode) throws RemoteException {
+    boolean onErrorReceived(int sensorId, int cookie, @BiometricConstants.Errors int error,
+            int vendorCode) throws RemoteException {
 
         if (!containsCookie(cookie)) {
             Slog.e(TAG, "Unknown/expired cookie: " + cookie);
@@ -314,6 +314,8 @@ final class AuthSession {
 
         mErrorEscrow = error;
         mVendorCodeEscrow = vendorCode;
+
+        final @BiometricAuthenticator.Modality int modality = sensorIdToModality(sensorId);
 
         switch (mState) {
             case STATE_AUTH_CALLED: {
@@ -386,7 +388,7 @@ final class AuthSession {
         return false;
     }
 
-    void onAcquired(int acquiredInfo, String message) {
+    void onAcquired(int sensorId, int acquiredInfo, String message) {
         if (message == null) {
             Slog.w(TAG, "Ignoring null message: " + acquiredInfo);
             return;
@@ -471,10 +473,9 @@ final class AuthSession {
         }
     }
 
-    void onAuthenticationTimedOut(@BiometricAuthenticator.Modality int modality, int error,
-            int vendorCode) {
+    void onAuthenticationTimedOut(int sensorId, int cookie, int error, int vendorCode) {
         try {
-            mStatusBarService.onBiometricError(modality, error, vendorCode);
+            mStatusBarService.onBiometricError(sensorIdToModality(sensorId), error, vendorCode);
             mState = STATE_AUTH_PAUSED;
         } catch (RemoteException e) {
             Slog.e(TAG, "RemoteException", e);
@@ -693,6 +694,16 @@ final class AuthSession {
         }
 
         return modality;
+    }
+
+    private @BiometricAuthenticator.Modality int sensorIdToModality(int sensorId) {
+        for (BiometricSensor sensor : mPreAuthInfo.eligibleSensors) {
+            if (sensorId == sensor.id) {
+                return sensor.modality;
+            }
+        }
+        Slog.e(TAG, "Unknown sensor: " + sensorId);
+        return TYPE_NONE;
     }
 
     @Override

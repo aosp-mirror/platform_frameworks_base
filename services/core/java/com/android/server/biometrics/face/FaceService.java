@@ -303,7 +303,7 @@ public class FaceService extends BiometricServiceBase {
         }
 
         @Override
-        public boolean onAcquired(int acquireInfo, int vendorCode) {
+        public boolean onAcquired(int sensorId, int acquireInfo, int vendorCode) {
 
             mLastAcquire = acquireInfo;
 
@@ -344,7 +344,7 @@ public class FaceService extends BiometricServiceBase {
                         UserHandle.CURRENT);
             }
 
-            return super.onAcquired(acquireInfo, vendorCode);
+            return super.onAcquired(sensorId, acquireInfo, vendorCode);
         }
     }
 
@@ -756,13 +756,13 @@ public class FaceService extends BiometricServiceBase {
         }
 
         @Override
-        public void onAcquired(int acquiredInfo, int vendorCode)
+        public void onAcquired(int sensorId, int acquiredInfo, int vendorCode)
                 throws RemoteException {
             /**
              * Map the acquired codes onto existing {@link BiometricConstants} acquired codes.
              */
             if (getWrapperReceiver() != null) {
-                getWrapperReceiver().onAcquired(
+                getWrapperReceiver().onAcquired(sensorId,
                         FaceManager.getMappedAcquiredInfo(acquiredInfo, vendorCode),
                         FaceManager.getAcquiredString(getContext(), acquiredInfo, vendorCode));
             }
@@ -797,7 +797,7 @@ public class FaceService extends BiometricServiceBase {
         }
 
         @Override
-        public void onAcquired(int acquiredInfo, int vendorCode)
+        public void onAcquired(int sensorId, int acquiredInfo, int vendorCode)
                 throws RemoteException {
             if (mFaceServiceReceiver != null) {
                 mFaceServiceReceiver.onAcquired(acquiredInfo, vendorCode);
@@ -887,11 +887,10 @@ public class FaceService extends BiometricServiceBase {
         }
 
         @Override
-        public void onAcquired(final long deviceId, final int userId,
-                final int acquiredInfo,
+        public void onAcquired(final long deviceId, final int userId, final int acquiredInfo,
                 final int vendorCode) {
             mHandler.post(() -> {
-                FaceService.super.handleAcquired(deviceId, acquiredInfo, vendorCode);
+                FaceService.super.handleAcquired(getSensorId(), acquiredInfo, vendorCode);
             });
         }
 

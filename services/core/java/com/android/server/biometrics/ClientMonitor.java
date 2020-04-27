@@ -175,15 +175,16 @@ public abstract class ClientMonitor extends LoggableMonitor implements IBinder.D
     /**
      * Called when we get notification from the biometric's HAL that an image has been acquired.
      * Common to authenticate and enroll.
+     * @param sensorId as configured by the framework
      * @param acquiredInfo info about the current image acquisition
      * @return true if client should be removed
      */
-    public boolean onAcquired(int acquiredInfo, int vendorCode) {
+    public boolean onAcquired(int sensorId, int acquiredInfo, int vendorCode) {
         super.logOnAcquired(mContext, acquiredInfo, vendorCode, getTargetUserId());
         if (DEBUG) Slog.v(getLogTag(), "Acquired: " + acquiredInfo + " " + vendorCode);
         try {
             if (mListener != null && !blacklistContains(acquiredInfo, vendorCode)) {
-                mListener.onAcquired(acquiredInfo, vendorCode);
+                mListener.onAcquired(sensorId, acquiredInfo, vendorCode);
             }
             return false; // acquisition continues...
         } catch (RemoteException e) {

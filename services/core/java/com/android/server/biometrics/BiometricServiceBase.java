@@ -421,7 +421,7 @@ public abstract class BiometricServiceBase extends SystemService
         default void onEnrollResult(BiometricAuthenticator.Identifier identifier,
                 int remaining) throws RemoteException {};
 
-        void onAcquired(int acquiredInfo, int vendorCode) throws RemoteException;
+        void onAcquired(int sensorId, int acquiredInfo, int vendorCode) throws RemoteException;
 
         default void onAuthenticationSucceeded(BiometricAuthenticator.Identifier biometric,
                 int userId) throws RemoteException {
@@ -437,7 +437,7 @@ public abstract class BiometricServiceBase extends SystemService
             throw new UnsupportedOperationException("Stub!");
         }
 
-        default void onAuthenticationFailedInternal()
+        default void onAuthenticationFailedInternal(int sensorId)
                 throws RemoteException {
             throw new UnsupportedOperationException("Stub!");
         }
@@ -474,10 +474,10 @@ public abstract class BiometricServiceBase extends SystemService
         }
 
         @Override
-        public void onAuthenticationFailedInternal()
+        public void onAuthenticationFailedInternal(int sensorId)
                 throws RemoteException {
             if (getWrapperReceiver() != null) {
-                getWrapperReceiver().onAuthenticationFailed();
+                getWrapperReceiver().onAuthenticationFailed(sensorId);
             }
         }
     }
@@ -715,9 +715,9 @@ public abstract class BiometricServiceBase extends SystemService
      * Callback handlers from the daemon. The caller must put this on a handler.
      */
 
-    protected void handleAcquired(long deviceId, int acquiredInfo, int vendorCode) {
+    protected void handleAcquired(int sensorId, int acquiredInfo, int vendorCode) {
         ClientMonitor client = mCurrentClient;
-        if (client != null && client.onAcquired(acquiredInfo, vendorCode)) {
+        if (client != null && client.onAcquired(sensorId, acquiredInfo, vendorCode)) {
             removeClient(client);
         }
         if (mPerformanceStats != null && getLockoutMode() == AuthenticationClient.LOCKOUT_NONE
