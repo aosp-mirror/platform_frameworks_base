@@ -32,7 +32,6 @@ import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.View;
@@ -47,6 +46,7 @@ import com.android.systemui.R;
 import com.android.systemui.SystemUI;
 import com.android.systemui.car.CarDeviceProvisionedController;
 import com.android.systemui.car.CarDeviceProvisionedListener;
+import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.statusbar.AutoHideUiElement;
@@ -76,6 +76,8 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
     private final AutoHideController mAutoHideController;
     private final ButtonSelectionStateListener mButtonSelectionStateListener;
     private final Handler mMainHandler;
+    private final Handler mBgHandler;
+    private final IStatusBarService mBarService;
     private final Lazy<KeyguardStateController> mKeyguardStateControllerLazy;
     private final ButtonSelectionStateController mButtonSelectionStateController;
     private final PhoneStatusBarPolicy mIconPolicy;
@@ -84,7 +86,6 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
     private final int mDisplayId;
 
     private StatusBarSignalPolicy mSignalPolicy;
-    private IStatusBarService mBarService;
     private ActivityManagerWrapper mActivityManagerWrapper;
 
     // If the nav bar should be hidden when the soft keyboard is visible.
@@ -121,6 +122,8 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
             AutoHideController autoHideController,
             ButtonSelectionStateListener buttonSelectionStateListener,
             @Main Handler mainHandler,
+            @Background Handler bgHandler,
+            IStatusBarService barService,
             Lazy<KeyguardStateController> keyguardStateControllerLazy,
             ButtonSelectionStateController buttonSelectionStateController,
             PhoneStatusBarPolicy iconPolicy,
@@ -135,6 +138,8 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
         mAutoHideController = autoHideController;
         mButtonSelectionStateListener = buttonSelectionStateListener;
         mMainHandler = mainHandler;
+        mBgHandler = bgHandler;
+        mBarService = barService;
         mKeyguardStateControllerLazy = keyguardStateControllerLazy;
         mButtonSelectionStateController = buttonSelectionStateController;
         mIconPolicy = iconPolicy;
@@ -149,10 +154,6 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
         mHideNavBarForKeyboard = mResources.getBoolean(
                 com.android.internal.R.bool.config_automotiveHideNavBarForKeyboard);
         mBottomNavBarVisible = false;
-
-        // Get bar service.
-        mBarService = IStatusBarService.Stub.asInterface(
-                ServiceManager.getService(Context.STATUS_BAR_SERVICE));
 
         // Connect into the status bar manager service
         mCommandQueue.addCallback(this);
@@ -233,11 +234,15 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
         mActivityManagerWrapper = ActivityManagerWrapper.getInstance();
         mActivityManagerWrapper.registerTaskStackListener(mButtonSelectionStateListener);
 
-        mCarNavigationBarController.connectToHvac();
+        mBgHandler.post(() -> mCarNavigationBarController.connectToHvac());
 
         // Lastly, call to the icon policy to install/update all the icons.
-        mIconPolicy.init();
-        mSignalPolicy = new StatusBarSignalPolicy(mContext, mIconController);
+        // Must be called on the main thread due to the use of observeForever() in
+        // mIconPolicy.init().
+        mMainHandler.post(() -> {
+            mIconPolicy.init();
+            mSignalPolicy = new StatusBarSignalPolicy(mContext, mIconController);
+        });
     }
 
     private void restartNavBarsIfNecessary() {
