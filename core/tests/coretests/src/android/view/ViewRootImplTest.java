@@ -40,9 +40,9 @@ import android.platform.test.annotations.Presubmit;
 import android.view.WindowInsets.Side;
 import android.view.WindowInsets.Type;
 
-import androidx.test.InstrumentationRegistry;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
+import androidx.test.platform.app.InstrumentationRegistry;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -51,6 +51,12 @@ import org.junit.runner.RunWith;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
+/**
+ * Tests for {@link ViewRootImpl}
+ *
+ * Build/Install/Run:
+ *  atest FrameworksCoreTests:ViewRootImplTest
+ */
 @Presubmit
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -61,7 +67,7 @@ public class ViewRootImplTest {
 
     @Before
     public void setUp() throws Exception {
-        mContext = InstrumentationRegistry.getContext();
+        mContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
 
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
             mViewRootImpl = new ViewRootImplAccessor(
