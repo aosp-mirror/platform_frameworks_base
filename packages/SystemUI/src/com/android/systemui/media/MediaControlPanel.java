@@ -36,6 +36,7 @@ import android.media.MediaDescription;
 import android.media.MediaMetadata;
 import android.media.ThumbnailUtils;
 import android.media.session.MediaController;
+import android.media.session.MediaController.PlaybackInfo;
 import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
 import android.net.Uri;
@@ -96,6 +97,7 @@ public class MediaControlPanel {
     public static final String MEDIA_PREFERENCE_KEY = "browser_components";
     private SharedPreferences mSharedPrefs;
     private boolean mCheckedForResumption = false;
+    private boolean mIsRemotePlayback;
 
     // Button IDs used in notifications
     protected static final int[] NOTIF_ACTION_IDS = {
@@ -299,6 +301,13 @@ public class MediaControlPanel {
             } else {
                 Log.d(TAG, "LocalMediaManager is null. Not binding output chip for pkg=" + pkgName);
             }
+        }
+        PlaybackInfo playbackInfo = mController.getPlaybackInfo();
+        if (playbackInfo != null) {
+            mIsRemotePlayback = playbackInfo.getPlaybackType() == PlaybackInfo.PLAYBACK_TYPE_REMOTE;
+        } else {
+            Log.d(TAG, "PlaybackInfo was null. Defaulting to local playback.");
+            mIsRemotePlayback = false;
         }
 
         makeActive();
@@ -545,7 +554,16 @@ public class MediaControlPanel {
         TextView deviceName = mSeamless.findViewById(R.id.media_seamless_text);
         deviceName.setTextColor(fgTintList);
 
-        if (device != null) {
+        if (mIsRemotePlayback) {
+            mSeamless.setEnabled(false);
+            mSeamless.setAlpha(0.38f);
+            iconView.setImageResource(R.drawable.ic_hardware_speaker);
+            iconView.setVisibility(View.VISIBLE);
+            iconView.setImageTintList(fgTintList);
+            deviceName.setText(R.string.media_seamless_remote_device);
+        } else if (device != null) {
+            mSeamless.setEnabled(true);
+            mSeamless.setAlpha(1f);
             Drawable icon = device.getIcon();
             iconView.setVisibility(View.VISIBLE);
             iconView.setImageTintList(fgTintList);
@@ -561,6 +579,8 @@ public class MediaControlPanel {
         } else {
             // Reset to default
             Log.d(TAG, "device is null. Not binding output chip.");
+            mSeamless.setEnabled(true);
+            mSeamless.setAlpha(1f);
             iconView.setVisibility(View.GONE);
             deviceName.setText(com.android.internal.R.string.ext_media_seamless_action);
         }
