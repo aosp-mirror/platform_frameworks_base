@@ -41,6 +41,7 @@ import java.io.IOException;
 import java.net.SocketAddress;
 import java.net.SocketException;
 import java.util.ArrayList;
+import java.util.NoSuchElementException;
 
 
 /**
@@ -143,7 +144,7 @@ public class OffloadHardwareInterface {
         IOffloadConfig offloadConfig;
         try {
             offloadConfig = IOffloadConfig.getService(true /*retry*/);
-        } catch (RemoteException e) {
+        } catch (RemoteException | NoSuchElementException e) {
             mLog.e("getIOffloadConfig error " + e);
             return false;
         }
@@ -239,8 +240,8 @@ public class OffloadHardwareInterface {
 
         if (mOffloadControl == null) {
             try {
-                mOffloadControl = IOffloadControl.getService();
-            } catch (RemoteException e) {
+                mOffloadControl = IOffloadControl.getService(true /*retry*/);
+            } catch (RemoteException | NoSuchElementException e) {
                 mLog.e("tethering offload control not supported: " + e);
                 return false;
             }
