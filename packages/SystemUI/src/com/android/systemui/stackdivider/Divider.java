@@ -21,23 +21,25 @@ import static android.content.res.Configuration.SCREEN_HEIGHT_DP_UNDEFINED;
 import static android.content.res.Configuration.SCREEN_WIDTH_DP_UNDEFINED;
 import static android.view.Display.DEFAULT_DISPLAY;
 
+import static com.android.systemui.shared.system.WindowManagerWrapper.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
+import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Handler;
-import android.os.RemoteException;
 import android.provider.Settings;
 import android.util.Slog;
-import android.window.TaskOrganizer;
-import android.window.WindowContainerToken;
 import android.view.LayoutInflater;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.view.View;
+import android.window.TaskOrganizer;
+import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 import android.window.WindowOrganizer;
 
@@ -48,6 +50,8 @@ import com.android.systemui.R;
 import com.android.systemui.SystemUI;
 import com.android.systemui.TransactionPool;
 import com.android.systemui.recents.Recents;
+import com.android.systemui.shared.system.ActivityManagerWrapper;
+import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.wm.DisplayChangeController;
 import com.android.systemui.wm.DisplayController;
@@ -415,6 +419,21 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
     }
     private final DividerImeController mImePositionProcessor = new DividerImeController();
 
+    private TaskStackChangeListener mActivityRestartListener = new TaskStackChangeListener() {
+        @Override
+        public void onActivityRestartAttempt(ActivityManager.RunningTaskInfo task,
+                boolean homeTaskVisible, boolean clearedTask, boolean wasVisible) {
+            if (!wasVisible || task.configuration.windowConfiguration.getWindowingMode()
+                    != WINDOWING_MODE_SPLIT_SCREEN_PRIMARY || !mSplits.isSplitScreenSupported()) {
+                return;
+            }
+
+            if (isMinimized()) {
+                onUndockingTask();
+            }
+        }
+    };
+
     public Divider(Context context, Optional<Lazy<Recents>> recentsOptionalLazy,
             DisplayController displayController, SystemWindows systemWindows,
             DisplayImeController imeController, Handler handler,
@@ -485,6 +504,7 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
             removeDivider();
             return;
         }
+        ActivityManagerWrapper.getInstance().registerTaskStackListener(mActivityRestartListener);
         update(mDisplayController.getDisplayContext(displayId).getResources().getConfiguration());
     }
 
