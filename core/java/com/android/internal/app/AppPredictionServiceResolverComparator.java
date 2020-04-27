@@ -53,6 +53,7 @@ class AppPredictionServiceResolverComparator extends AbstractResolverComparator 
     private final AppPredictor mAppPredictor;
     private final Context mContext;
     private final Map<ComponentName, Integer> mTargetRanks = new HashMap<>();
+    private final Map<ComponentName, Integer> mTargetScores = new HashMap<>();
     private final UserHandle mUser;
     private final Intent mIntent;
     private final String mReferrerPackage;
@@ -138,6 +139,11 @@ class AppPredictionServiceResolverComparator extends AbstractResolverComparator 
         // Null value is okay if we have defaulted to the ResolverRankerService.
         if (msg.what == RANKER_SERVICE_RESULT && msg.obj != null) {
             final List<AppTarget> sortedAppTargets = (List<AppTarget>) msg.obj;
+            if (checkAppTargetRankValid(sortedAppTargets)) {
+                sortedAppTargets.forEach(target -> mTargetScores.put(
+                        new ComponentName(target.getPackageName(), target.getClassName()),
+                        target.getRank()));
+            }
             for (int i = 0; i < sortedAppTargets.size(); i++) {
                 mTargetRanks.put(new ComponentName(sortedAppTargets.get(i).getPackageName(),
                         sortedAppTargets.get(i).getClassName()), i);
@@ -147,10 +153,22 @@ class AppPredictionServiceResolverComparator extends AbstractResolverComparator 
         }
     }
 
+    private boolean checkAppTargetRankValid(List<AppTarget> sortedAppTargets) {
+        for (AppTarget target : sortedAppTargets) {
+            if (target.getRank() != 0) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     @Override
     float getScore(ComponentName name) {
         if (mResolverRankerService != null) {
             return mResolverRankerService.getScore(name);
+        }
+        if (!mTargetScores.isEmpty()) {
+            return mTargetScores.get(name);
         }
         Integer rank = mTargetRanks.get(name);
         if (rank == null) {

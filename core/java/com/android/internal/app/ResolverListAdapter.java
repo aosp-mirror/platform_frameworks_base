@@ -154,6 +154,13 @@ public class ResolverListAdapter extends BaseAdapter {
     }
 
     /**
+     * Returns the app share score of the given {@code componentName}.
+     */
+    public float getScore(ComponentName componentName) {
+        return mResolverListController.getScore(componentName);
+    }
+
+    /**
      * Returns the list of top K component names which have highest
      * {@link #getScore(DisplayResolveInfo)}
      */
