@@ -1236,7 +1236,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
 
         @Override
         public void onActivityRestartAttempt(RunningTaskInfo task, boolean homeTaskVisible,
-                boolean clearedTask) {
+                boolean clearedTask, boolean wasVisible) {
             for (Bubble b : mBubbleData.getBubbles()) {
                 if (b.getDisplayId() == task.displayId) {
                     expandStackAndSelectBubble(b.getKey());
