@@ -1151,9 +1151,8 @@ public final class OverlayManagerService extends SystemService {
 
         @Override
         public boolean doesTargetDefineOverlayable(String targetPackageName, int userId)
-                throws RemoteException, IOException {
-            PackageInfo packageInfo = mPackageManager.getPackageInfo(targetPackageName, 0,
-                    userId);
+                throws IOException {
+            PackageInfo packageInfo = getPackageInfo(targetPackageName, userId);
             if (packageInfo == null) {
                 throw new IOException("Unable to get target package");
             }
