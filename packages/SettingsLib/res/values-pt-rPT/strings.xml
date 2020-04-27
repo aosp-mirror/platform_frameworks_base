@@ -61,7 +61,7 @@
     <string name="speed_label_medium" msgid="9078405312828606976">"Média"</string>
     <string name="speed_label_fast" msgid="2677719134596044051">"Rápida"</string>
     <string name="speed_label_very_fast" msgid="8215718029533182439">"Muito rápida"</string>
-    <string name="wifi_passpoint_expired" msgid="6540867261754427561">"Expirado"</string>
+    <string name="wifi_passpoint_expired" msgid="6540867261754427561">"Expirada"</string>
     <string name="preference_summary_default_combination" msgid="2644094566845577901">"<xliff:g id="STATE">%1$s</xliff:g>/<xliff:g id="DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="bluetooth_disconnected" msgid="7739366554710388701">"Desligado"</string>
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"A desligar..."</string>
@@ -508,7 +508,7 @@
     <string name="alarm_template_far" msgid="6382760514842998629">"no(a) <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="zen_mode_duration_settings_title" msgid="1553451650289651489">"Duração"</string>
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Perguntar sempre"</string>
-    <string name="zen_mode_forever" msgid="3339224497605461291">"Até ser desativado"</string>
+    <string name="zen_mode_forever" msgid="3339224497605461291">"Até desativar"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Agora mesmo"</string>
     <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Altifalante do telemóvel"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Problema ao ligar. Desligue e volte a ligar o dispositivo."</string>
