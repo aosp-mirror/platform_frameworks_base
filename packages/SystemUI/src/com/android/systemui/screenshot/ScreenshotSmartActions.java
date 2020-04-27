@@ -23,6 +23,7 @@ import android.app.Notification;
 import android.content.ComponentName;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.util.Slog;
@@ -45,7 +46,7 @@ public class ScreenshotSmartActions {
 
     @VisibleForTesting
     static CompletableFuture<List<Notification.Action>> getSmartActionsFuture(
-            String screenshotId, String screenshotFileName, Bitmap image,
+            String screenshotId, Uri screenshotUri, Bitmap image,
             ScreenshotNotificationSmartActionsProvider smartActionsProvider,
             boolean smartActionsEnabled, boolean isManagedProfile) {
         if (!smartActionsEnabled) {
@@ -70,7 +71,7 @@ public class ScreenshotSmartActions {
                             ? runningTask.topActivity
                             : new ComponentName("", "");
             smartActionsFuture = smartActionsProvider.getActions(
-                    screenshotId, screenshotFileName, image, componentName, isManagedProfile);
+                    screenshotId, screenshotUri, image, componentName, isManagedProfile);
         } catch (Throwable e) {
             long waitTimeMs = SystemClock.uptimeMillis() - startTimeMs;
             smartActionsFuture = CompletableFuture.completedFuture(Collections.emptyList());
@@ -84,7 +85,7 @@ public class ScreenshotSmartActions {
     }
 
     @VisibleForTesting
-    static List<Notification.Action> getSmartActions(String screenshotId, String screenshotFileName,
+    static List<Notification.Action> getSmartActions(String screenshotId,
             CompletableFuture<List<Notification.Action>> smartActionsFuture, int timeoutMs,
             ScreenshotNotificationSmartActionsProvider smartActionsProvider) {
         long startTimeMs = SystemClock.uptimeMillis();
