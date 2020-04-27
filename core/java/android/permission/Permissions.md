@@ -728,7 +728,7 @@ platforms manifest using the `appop` protection level
 Almost always the protection level is app-op | something else, like
 [signature](#signature-permissions) (in the case above) or [privileged](#privileged-permissions).
 
-#### Checking a app-op permission
+#### Checking an app-op permission
 
 The `PermissionChecker` utility can check app-op permissions with the [same syntax as runtime
 permissions](#checking-a-runtime-permission).
@@ -764,7 +764,7 @@ class PermissionChecker {
 }
 ```
 
-#### Granting a app-op permission
+#### Granting an app-op permission
 
 The permission's grant state is only considered if the app-op's mode is `MODE_DEFAULT`. This
 allows to have default grants while still being overridden by the app-op.
