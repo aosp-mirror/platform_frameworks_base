@@ -21,6 +21,7 @@ import static com.android.systemui.bubbles.BubbleDebugConfig.TAG_BUBBLES;
 import static com.android.systemui.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -60,6 +61,16 @@ public class BubbleOverflowActivity extends Activity {
     private RecyclerView mRecyclerView;
     private List<Bubble> mOverflowBubbles = new ArrayList<>();
 
+    private class NoScrollGridLayoutManager extends GridLayoutManager {
+        NoScrollGridLayoutManager(Context context, int columns) {
+            super(context, columns);
+        }
+        @Override
+        public boolean canScrollVertically() {
+            return false;
+        }
+    }
+
     @Inject
     public BubbleOverflowActivity(BubbleController controller) {
         mBubbleController = controller;
@@ -78,7 +89,7 @@ public class BubbleOverflowActivity extends Activity {
         Resources res = getResources();
         final int columns = res.getInteger(R.integer.bubbles_overflow_columns);
         mRecyclerView.setLayoutManager(
-                new GridLayoutManager(getApplicationContext(), columns));
+                new NoScrollGridLayoutManager(getApplicationContext(), columns));
 
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
