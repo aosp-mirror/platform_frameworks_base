@@ -29,9 +29,10 @@
 
 namespace android {
 
-static jlong nativeCreate(JNIEnv* env, jclass clazz, jlong surfaceControl, jlong width, jlong height) {
+static jlong nativeCreate(JNIEnv* env, jclass clazz, jlong surfaceControl, jlong width, jlong height,
+                          jboolean enableTripleBuffering) {
     sp<BLASTBufferQueue> queue = new BLASTBufferQueue(
-            reinterpret_cast<SurfaceControl*>(surfaceControl), width, height);
+            reinterpret_cast<SurfaceControl*>(surfaceControl), width, height, enableTripleBuffering);
     queue->incStrong((void*)nativeCreate);
     return reinterpret_cast<jlong>(queue.get());
 }
@@ -59,7 +60,7 @@ static void nativeUpdate(JNIEnv*env, jclass clazz, jlong ptr, jlong surfaceContr
 
 static const JNINativeMethod gMethods[] = {
     /* name, signature, funcPtr */
-    { "nativeCreate", "(JJJ)J",
+    { "nativeCreate", "(JJJZ)J",
             (void*)nativeCreate },
     {  "nativeGetSurface", "(J)Landroid/view/Surface;",
        (void*)nativeGetSurface },
