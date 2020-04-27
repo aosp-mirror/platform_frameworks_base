@@ -60,8 +60,8 @@ import android.view.animation.LinearInterpolator;
 import android.view.test.InsetsModeSession;
 import android.widget.TextView;
 
-import androidx.test.InstrumentationRegistry;
-import androidx.test.runner.AndroidJUnit4;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.server.testutils.OffsettableClock;
 import com.android.server.testutils.TestHandler;
@@ -113,7 +113,7 @@ public class InsetsControllerTest {
                 .setName("testSurface")
                 .build();
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
-            Context context = InstrumentationRegistry.getTargetContext();
+            Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
             // cannot mock ViewRootImpl since it's final.
             mViewRoot = new ViewRootImpl(context, context.getDisplayNoVerify());
             try {
