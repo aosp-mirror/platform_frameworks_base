@@ -437,6 +437,9 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
         resetViewVisibilitiesForWorkProfileEmptyState(emptyStateView);
         emptyStateView.setVisibility(View.VISIBLE);
 
+        View container = emptyStateView.findViewById(R.id.resolver_empty_state_container);
+        setupContainerPadding(container);
+
         TextView title = emptyStateView.findViewById(R.id.resolver_empty_state_title);
         title.setText(titleRes);
 
@@ -462,6 +465,12 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
 
         activeListAdapter.markTabLoaded();
     }
+
+    /**
+     * Sets up the padding of the view containing the empty state screens.
+     * <p>This method is meant to be overridden so that subclasses can customize the padding.
+     */
+    protected void setupContainerPadding(View container) {}
 
     private void showConsumerUserNoAppsAvailableEmptyState(ResolverListAdapter activeListAdapter) {
         ProfileDescriptor descriptor = getItem(
@@ -554,12 +563,6 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
             return mEmptyStateView;
         }
     }
-
-    /**
-     * Callback called when the button layout has been hidden.
-     * <p>This method is meant to be overridden by subclasses.
-     */
-    protected void onButtonLayoutHidden() { }
 
     public interface OnProfileSelectedListener {
         /**
