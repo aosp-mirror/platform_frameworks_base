@@ -3011,10 +3011,13 @@ public class ConnectivityService extends IConnectivityManager.Stub
             // Legacy version of notifyNetworkTestedWithExtras.
             // Would only be called if the system has a NetworkStack module older than the
             // framework, which does not happen in practice.
+            Slog.wtf(TAG, "Deprecated notifyNetworkTested called: no action taken");
         }
 
         @Override
         public void notifyNetworkTestedWithExtras(NetworkTestResultParcelable p) {
+            // Notify mTrackerHandler and mConnectivityDiagnosticsHandler of the event. Both use
+            // the same looper so messages will be processed in sequence.
             final Message msg = mTrackerHandler.obtainMessage(
                     EVENT_NETWORK_TESTED,
                     new NetworkTestedResults(
