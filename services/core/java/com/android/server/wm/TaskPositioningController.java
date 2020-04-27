@@ -55,6 +55,8 @@ class TaskPositioningController {
         return mTaskPositioner != null;
     }
 
+    final SurfaceControl.Transaction mTransaction;
+
     InputWindowHandle getDragWindowHandleLocked() {
         return mTaskPositioner != null ? mTaskPositioner.mDragWindowHandle : null;
     }
@@ -65,16 +67,18 @@ class TaskPositioningController {
         mInputManager = inputManager;
         mActivityManager = activityManager;
         mHandler = new Handler(looper);
+        mTransaction = service.mTransactionFactory.get();
     }
 
-    void hideInputSurface(SurfaceControl.Transaction t, int displayId) {
+    void hideInputSurface(int displayId) {
         if (mPositioningDisplay != null && mPositioningDisplay.getDisplayId() == displayId
                 && mInputSurface != null) {
-            t.hide(mInputSurface);
+            mTransaction.hide(mInputSurface);
+            mTransaction.syncInputWindows().apply();
         }
     }
 
-    void showInputSurface(SurfaceControl.Transaction t, int displayId) {
+    void showInputSurface(int displayId) {
         if (mPositioningDisplay == null || mPositioningDisplay.getDisplayId() != displayId) {
             return;
         }
@@ -92,16 +96,17 @@ class TaskPositioningController {
             return;
         }
 
-        t.show(mInputSurface);
-        t.setInputWindowInfo(mInputSurface, h);
-        t.setLayer(mInputSurface, Integer.MAX_VALUE);
+        mTransaction.show(mInputSurface);
+        mTransaction.setInputWindowInfo(mInputSurface, h);
+        mTransaction.setLayer(mInputSurface, Integer.MAX_VALUE);
 
         final Display display = dc.getDisplay();
         final Point p = new Point();
         display.getRealSize(p);
 
         mTmpClipRect.set(0, 0, p.x, p.y);
-        t.setWindowCrop(mInputSurface, mTmpClipRect);
+        mTransaction.setWindowCrop(mInputSurface, mTmpClipRect);
+        mTransaction.syncInputWindows().apply();
     }
 
     boolean startMovingTask(IWindow window, float startX, float startY) {
