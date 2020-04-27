@@ -18,6 +18,7 @@ package com.android.systemui;
 
 import android.annotation.NonNull;
 import android.content.Context;
+import android.content.res.Resources;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
@@ -118,6 +119,16 @@ public class SystemUIFactory {
 
     public SystemUIRootComponent getRootComponent() {
         return mRootComponent;
+    }
+
+    /** Returns the list of system UI components that should be started. */
+    public String[] getSystemUIServiceComponents(Resources resources) {
+        return resources.getStringArray(R.array.config_systemUIServiceComponents);
+    }
+
+    /** Returns the list of system UI components that should be started per user. */
+    public String[] getSystemUIServiceComponentsPerUser(Resources resources) {
+        return resources.getStringArray(R.array.config_systemUIServiceComponentsPerUser);
     }
 
     /**
