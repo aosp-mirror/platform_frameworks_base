@@ -502,6 +502,18 @@ public abstract class AccessibilityService extends Service {
      */
     public static final int GLOBAL_ACTION_KEYCODE_HEADSETHOOK = 10;
 
+    /**
+     * Action to trigger the Accessibility Button
+     * @hide
+     */
+    public static final int GLOBAL_ACTION_ACCESSIBILITY_BUTTON = 11;
+
+    /**
+     * Action to bring up the Accessibility Button's chooser menu
+     * @hide
+     */
+    public static final int GLOBAL_ACTION_ACCESSIBILITY_BUTTON_CHOOSER = 12;
+
     private static final String LOG_TAG = "AccessibilityService";
 
     /**
