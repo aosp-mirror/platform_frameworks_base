@@ -25,6 +25,7 @@ import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.BiometricPrompt;
+import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.IBiometricSensorReceiver;
 import android.hardware.biometrics.IBiometricServiceReceiver;
 import android.hardware.biometrics.IBiometricSysuiReceiver;
@@ -36,6 +37,7 @@ import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.IStatusBarService;
+import com.android.internal.util.FrameworkStatsLog;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -124,6 +126,7 @@ final class AuthSession {
     private final int mCallingUid;
     private final int mCallingPid;
     private final int mCallingUserId;
+    private final boolean mDebugEnabled;
 
     // The current state, which can be either idle, called, or started
     private @SessionState int mState = STATE_AUTH_IDLE;
@@ -135,15 +138,15 @@ final class AuthSession {
     private int mVendorCodeEscrow;
 
     // Timestamp when authentication started
-    long mStartTimeMs;
+    private long mStartTimeMs;
     // Timestamp when hardware authentication occurred
-    long mAuthenticatedTimeMs;
+    private long mAuthenticatedTimeMs;
 
     AuthSession(IStatusBarService statusBarService, IBiometricSysuiReceiver sysuiReceiver,
             KeyStore keystore, Random random, PreAuthInfo preAuthInfo,
             IBinder token, long operationId, int userId, IBiometricSensorReceiver sensorReceiver,
             IBiometricServiceReceiver clientReceiver, String opPackageName, Bundle bundle,
-            int callingUid, int callingPid, int callingUserId) {
+            int callingUid, int callingPid, int callingUserId, boolean debugEnabled) {
         mStatusBarService = statusBarService;
         mSysuiReceiver = sysuiReceiver;
         mKeyStore = keystore;
@@ -159,6 +162,7 @@ final class AuthSession {
         mCallingUid = callingUid;
         mCallingPid = callingPid;
         mCallingUserId = callingUserId;
+        mDebugEnabled = debugEnabled;
 
         setSensorsToStateUnknown();
     }
@@ -484,8 +488,66 @@ final class AuthSession {
         mState = STATE_SHOWING_DEVICE_CREDENTIAL;
     }
 
+    private void logOnDialogDismissed(@BiometricPrompt.DismissedReason int reason) {
+        if (reason == BiometricPrompt.DISMISSED_REASON_BIOMETRIC_CONFIRMED) {
+            // Explicit auth, authentication confirmed.
+            // Latency in this case is authenticated -> confirmed. <Biometric>Service
+            // should have the first half (first acquired -> authenticated).
+            final long latency = System.currentTimeMillis() - mAuthenticatedTimeMs;
+
+            if (LoggableMonitor.DEBUG) {
+                Slog.v(LoggableMonitor.TAG, "Confirmed! Modality: " + statsModality()
+                        + ", User: " + mUserId
+                        + ", IsCrypto: " + isCrypto()
+                        + ", Client: " + BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT
+                        + ", RequireConfirmation: " + mPreAuthInfo.confirmationRequested
+                        + ", State: " + FrameworkStatsLog.BIOMETRIC_AUTHENTICATED__STATE__CONFIRMED
+                        + ", Latency: " + latency);
+            }
+
+            FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_AUTHENTICATED,
+                    statsModality(),
+                    mUserId,
+                    isCrypto(),
+                    BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT,
+                    mPreAuthInfo.confirmationRequested,
+                    FrameworkStatsLog.BIOMETRIC_AUTHENTICATED__STATE__CONFIRMED,
+                    latency,
+                    mDebugEnabled);
+        } else {
+            final long latency = System.currentTimeMillis() - mStartTimeMs;
+
+            int error = reason == BiometricPrompt.DISMISSED_REASON_NEGATIVE
+                    ? BiometricConstants.BIOMETRIC_ERROR_NEGATIVE_BUTTON
+                    : reason == BiometricPrompt.DISMISSED_REASON_USER_CANCEL
+                            ? BiometricConstants.BIOMETRIC_ERROR_USER_CANCELED
+                            : 0;
+            if (LoggableMonitor.DEBUG) {
+                Slog.v(LoggableMonitor.TAG, "Dismissed! Modality: " + statsModality()
+                        + ", User: " + mUserId
+                        + ", IsCrypto: " + isCrypto()
+                        + ", Action: " + BiometricsProtoEnums.ACTION_AUTHENTICATE
+                        + ", Client: " + BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT
+                        + ", Error: " + error
+                        + ", Latency: " + latency);
+            }
+            // Auth canceled
+            FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_ERROR_OCCURRED,
+                    statsModality(),
+                    mUserId,
+                    isCrypto(),
+                    BiometricsProtoEnums.ACTION_AUTHENTICATE,
+                    BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT,
+                    error,
+                    0 /* vendorCode */,
+                    mDebugEnabled,
+                    latency);
+        }
+    }
+
     void onDialogDismissed(@BiometricPrompt.DismissedReason int reason,
             @Nullable byte[] credentialAttestation) {
+        logOnDialogDismissed(reason);
         try {
             switch (reason) {
                 case BiometricPrompt.DISMISSED_REASON_CREDENTIAL_CONFIRMED:
@@ -609,8 +671,22 @@ final class AuthSession {
         return mState;
     }
 
-    int getUserId() {
-        return mUserId;
+    private int statsModality() {
+        int modality = 0;
+
+        for (BiometricSensor sensor : mPreAuthInfo.eligibleSensors) {
+            if ((sensor.modality & BiometricAuthenticator.TYPE_FINGERPRINT) != 0) {
+                modality |= BiometricsProtoEnums.MODALITY_FINGERPRINT;
+            }
+            if ((sensor.modality & BiometricAuthenticator.TYPE_IRIS) != 0) {
+                modality |= BiometricsProtoEnums.MODALITY_IRIS;
+            }
+            if ((sensor.modality & BiometricAuthenticator.TYPE_FACE) != 0) {
+                modality |= BiometricsProtoEnums.MODALITY_FACE;
+            }
+        }
+
+        return modality;
     }
 
     @Override

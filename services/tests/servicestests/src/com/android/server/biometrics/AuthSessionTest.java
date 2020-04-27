@@ -198,7 +198,7 @@ public class AuthSessionTest {
         return new AuthSession(mStatusBarService, mSysuiReceiver, mKeyStore,
                 mRandom, preAuthInfo, mToken, operationId, userId, mSensorReceiver,
                 mClientReceiver, TEST_PACKAGE, bundle, callingUid,
-                callingPid, callingUserId);
+                callingPid, callingUserId, false /* debugEnabled */);
     }
 
     private Bundle createBiometricPromptBundle(@Authenticators.Types int authenticators) {

@@ -32,7 +32,6 @@ import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricPrompt;
 import android.hardware.biometrics.BiometricSourceType;
-import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.IBiometricAuthenticator;
 import android.hardware.biometrics.IBiometricEnabledOnKeyguardCallback;
 import android.hardware.biometrics.IBiometricSensorReceiver;
@@ -61,7 +60,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.DumpUtils;
-import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.SystemService;
 
 import java.io.FileDescriptor;
@@ -842,87 +840,6 @@ public class BiometricService extends SystemService {
         return false;
     }
 
-    private void logDialogDismissed(int reason) {
-        if (reason == BiometricPrompt.DISMISSED_REASON_BIOMETRIC_CONFIRMED) {
-            // Explicit auth, authentication confirmed.
-            // Latency in this case is authenticated -> confirmed. <Biometric>Service
-            // should have the first half (first acquired -> authenticated).
-            final long latency = System.currentTimeMillis()
-                    - mCurrentAuthSession.mAuthenticatedTimeMs;
-
-            if (LoggableMonitor.DEBUG) {
-                Slog.v(LoggableMonitor.TAG, "Confirmed! Modality: " + statsModality()
-                        + ", User: " + mCurrentAuthSession.getUserId()
-                        + ", IsCrypto: " + mCurrentAuthSession.isCrypto()
-                        + ", Client: " + BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT
-                        + ", RequireConfirmation: "
-                        + mCurrentAuthSession.mPreAuthInfo.confirmationRequested
-                        + ", State: " + FrameworkStatsLog.BIOMETRIC_AUTHENTICATED__STATE__CONFIRMED
-                        + ", Latency: " + latency);
-            }
-
-            FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_AUTHENTICATED,
-                    statsModality(),
-                    mCurrentAuthSession.getUserId(),
-                    mCurrentAuthSession.isCrypto(),
-                    BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT,
-                    mCurrentAuthSession.mPreAuthInfo.confirmationRequested,
-                    FrameworkStatsLog.BIOMETRIC_AUTHENTICATED__STATE__CONFIRMED,
-                    latency,
-                    mInjector.isDebugEnabled(getContext(), mCurrentAuthSession.getUserId()));
-        } else {
-            final long latency = System.currentTimeMillis() - mCurrentAuthSession.mStartTimeMs;
-
-            int error = reason == BiometricPrompt.DISMISSED_REASON_NEGATIVE
-                    ? BiometricConstants.BIOMETRIC_ERROR_NEGATIVE_BUTTON
-                    : reason == BiometricPrompt.DISMISSED_REASON_USER_CANCEL
-                            ? BiometricConstants.BIOMETRIC_ERROR_USER_CANCELED
-                            : 0;
-            if (LoggableMonitor.DEBUG) {
-                Slog.v(LoggableMonitor.TAG, "Dismissed! Modality: " + statsModality()
-                        + ", User: " + mCurrentAuthSession.getUserId()
-                        + ", IsCrypto: " + mCurrentAuthSession.isCrypto()
-                        + ", Action: " + BiometricsProtoEnums.ACTION_AUTHENTICATE
-                        + ", Client: " + BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT
-                        + ", Error: " + error
-                        + ", Latency: " + latency);
-            }
-            // Auth canceled
-            FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_ERROR_OCCURRED,
-                    statsModality(),
-                    mCurrentAuthSession.getUserId(),
-                    mCurrentAuthSession.isCrypto(),
-                    BiometricsProtoEnums.ACTION_AUTHENTICATE,
-                    BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT,
-                    error,
-                    0 /* vendorCode */,
-                    mInjector.isDebugEnabled(getContext(), mCurrentAuthSession.getUserId()),
-                    latency);
-        }
-    }
-
-    private int statsModality() {
-        int modality = 0;
-        if (mCurrentAuthSession == null) {
-            return BiometricsProtoEnums.MODALITY_UNKNOWN;
-        }
-
-        for (BiometricSensor sensor :
-                mCurrentAuthSession.mPreAuthInfo.eligibleSensors) {
-            if ((sensor.modality & BiometricAuthenticator.TYPE_FINGERPRINT) != 0) {
-                modality |= BiometricsProtoEnums.MODALITY_FINGERPRINT;
-            }
-            if ((sensor.modality & BiometricAuthenticator.TYPE_IRIS) != 0) {
-                modality |= BiometricsProtoEnums.MODALITY_IRIS;
-            }
-            if ((sensor.modality & BiometricAuthenticator.TYPE_FACE) != 0) {
-                modality |= BiometricsProtoEnums.MODALITY_FACE;
-            }
-        }
-
-        return modality;
-    }
-
     private void handleAuthenticationSucceeded(int sensorId, byte[] token) {
         Slog.v(TAG, "handleAuthenticationSucceeded(), sensorId: " + sensorId);
         // Should never happen, log this to catch bad HAL behavior (e.g. auth succeeded
@@ -1001,7 +918,6 @@ public class BiometricService extends SystemService {
             return;
         }
 
-        logDialogDismissed(reason);
         mCurrentAuthSession.onDialogDismissed(reason, credentialAttestation);
         mCurrentAuthSession = null;
     }
@@ -1122,9 +1038,10 @@ public class BiometricService extends SystemService {
             mCurrentAuthSession = null;
         }
 
+        final boolean debugEnabled = mInjector.isDebugEnabled(getContext(), userId);
         mCurrentAuthSession = new AuthSession(mStatusBarService, mSysuiReceiver, mKeyStore, mRandom,
                 preAuthInfo, token, operationId, userId, mBiometricSensorReceiver, receiver,
-                opPackageName, bundle, callingUid, callingPid, callingUserId);
+                opPackageName, bundle, callingUid, callingPid, callingUserId, debugEnabled);
         try {
             mCurrentAuthSession.goToInitialState();
         } catch (RemoteException e) {
