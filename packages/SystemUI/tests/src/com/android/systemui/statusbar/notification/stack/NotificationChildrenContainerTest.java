@@ -146,7 +146,7 @@ public class NotificationChildrenContainerTest extends SysuiTestCase {
 
     @Test
     public void testRecreateNotificationHeader_hasHeader() {
-        mChildrenContainer.recreateNotificationHeader(null);
+        mChildrenContainer.recreateNotificationHeader(null, false);
         Assert.assertNotNull("Children container must have a header after recreation",
                 mChildrenContainer.getCurrentHeaderView());
     }
