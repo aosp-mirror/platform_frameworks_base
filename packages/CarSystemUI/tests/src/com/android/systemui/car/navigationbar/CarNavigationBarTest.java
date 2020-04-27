@@ -33,6 +33,7 @@ import android.view.WindowManager;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.car.CarDeviceProvisionedController;
@@ -57,6 +58,7 @@ public class CarNavigationBarTest extends SysuiTestCase {
     private CarNavigationBar mCarNavigationBar;
     private TestableResources mTestableResources;
     private Handler mHandler;
+    private Handler mBackgroundHandler;
 
     @Mock
     private CarNavigationBarController mCarNavigationBarController;
@@ -68,6 +70,8 @@ public class CarNavigationBarTest extends SysuiTestCase {
     private AutoHideController mAutoHideController;
     @Mock
     private ButtonSelectionStateListener mButtonSelectionStateListener;
+    @Mock
+    private IStatusBarService mBarService;
     @Mock
     private KeyguardStateController mKeyguardStateController;
     @Mock
@@ -82,11 +86,12 @@ public class CarNavigationBarTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         mTestableResources = mContext.getOrCreateTestableResources();
         mHandler = Handler.getMain();
+        mBackgroundHandler = Handler.createAsync(TestableLooper.get(this).getLooper());
         mCarNavigationBar = new CarNavigationBar(mContext, mTestableResources.getResources(),
                 mCarNavigationBarController, mWindowManager, mDeviceProvisionedController,
                 new CommandQueue(mContext), mAutoHideController, mButtonSelectionStateListener,
-                mHandler, () -> mKeyguardStateController, mButtonSelectionStateController,
-                mIconPolicy, mIconController);
+                mHandler, mBackgroundHandler, mBarService, () -> mKeyguardStateController,
+                mButtonSelectionStateController, mIconPolicy, mIconController);
     }
 
     @Test
@@ -103,7 +108,7 @@ public class CarNavigationBarTest extends SysuiTestCase {
         verify(mDeviceProvisionedController).addCallback(deviceProvisionedCallbackCaptor.capture());
 
         deviceProvisionedCallbackCaptor.getValue().onUserSwitched();
-        waitForIdleSync(mHandler);
+        waitForIdleSync(mBackgroundHandler);
 
         verify(mButtonSelectionStateListener).onTaskStackChanged();
     }
@@ -123,7 +128,7 @@ public class CarNavigationBarTest extends SysuiTestCase {
         verify(mDeviceProvisionedController).addCallback(deviceProvisionedCallbackCaptor.capture());
 
         deviceProvisionedCallbackCaptor.getValue().onUserSwitched();
-        waitForIdleSync(mHandler);
+        waitForIdleSync(mBackgroundHandler);
 
         verify(mCarNavigationBarController).showAllKeyguardButtons(false);
     }
@@ -142,12 +147,12 @@ public class CarNavigationBarTest extends SysuiTestCase {
         when(mDeviceProvisionedController.isCurrentUserSetup()).thenReturn(false);
         verify(mDeviceProvisionedController).addCallback(deviceProvisionedCallbackCaptor.capture());
         deviceProvisionedCallbackCaptor.getValue().onUserSwitched();
-        waitForIdleSync(mHandler);
+        waitForIdleSync(mBackgroundHandler);
         when(mDeviceProvisionedController.isCurrentUserSetup()).thenReturn(true);
         when(mKeyguardStateController.isShowing()).thenReturn(false);
 
         deviceProvisionedCallbackCaptor.getValue().onUserSetupChanged();
-        waitForIdleSync(mHandler);
+        waitForIdleSync(mBackgroundHandler);
 
         verify(mCarNavigationBarController).hideAllKeyguardButtons(true);
     }
