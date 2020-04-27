@@ -5606,7 +5606,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         @Override
         public void apply(Transaction t, SurfaceControl leash, long currentPlayTime) {
-            final float fraction = (float) currentPlayTime / getDuration();
+            final float fraction = getFraction(currentPlayTime);
             final float v = mInterpolator.getInterpolation(fraction);
             t.setPosition(leash, mFrom.x + (mTo.x - mFrom.x) * v,
                     mFrom.y + (mTo.y - mFrom.y) * v);
