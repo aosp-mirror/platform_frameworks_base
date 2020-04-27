@@ -19,11 +19,13 @@ import static android.app.Notification.VISIBILITY_SECRET;
 import static android.app.admin.DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED;
 
 import static com.android.systemui.DejankUtils.whitelistIpcs;
+import static com.android.systemui.statusbar.notification.stack.NotificationSectionsManager.BUCKET_MEDIA_CONTROLS;
 import static com.android.systemui.statusbar.notification.stack.NotificationSectionsManager.BUCKET_SILENT;
 
 import android.app.ActivityManager;
 import android.app.KeyguardManager;
 import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -351,7 +353,10 @@ public class NotificationLockscreenUserManagerImpl implements
         boolean exceedsPriorityThreshold;
         if (NotificationUtils.useNewInterruptionModel(mContext)
                 && hideSilentNotificationsOnLockscreen()) {
-            exceedsPriorityThreshold = entry.getBucket() != BUCKET_SILENT;
+            exceedsPriorityThreshold =
+                    entry.getBucket() == BUCKET_MEDIA_CONTROLS
+                            || (entry.getBucket() != BUCKET_SILENT
+                            && entry.getImportance() >= NotificationManager.IMPORTANCE_DEFAULT);
         } else {
             exceedsPriorityThreshold = !entry.getRanking().isAmbient();
         }
