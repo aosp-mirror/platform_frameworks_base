@@ -184,7 +184,7 @@ public class NotificationLockscreenUserManagerImpl implements
     protected final Context mContext;
     private final Handler mMainHandler;
     protected final SparseArray<UserInfo> mCurrentProfiles = new SparseArray<>();
-    protected final ArrayList<UserInfo> mCurrentManagedProfiles = new ArrayList<>();
+    protected final SparseArray<UserInfo> mCurrentManagedProfiles = new SparseArray<>();
 
     protected int mCurrentUserId = 0;
     protected NotificationPresenter mPresenter;
@@ -430,8 +430,9 @@ public class NotificationLockscreenUserManagerImpl implements
      */
     public boolean allowsManagedPrivateNotificationsInPublic() {
         synchronized (mLock) {
-            for (UserInfo profile : mCurrentManagedProfiles) {
-                if (!userAllowsPrivateNotificationsInPublic(profile.id)) {
+            for (int i = mCurrentManagedProfiles.size() - 1; i >= 0; i--) {
+                if (!userAllowsPrivateNotificationsInPublic(
+                        mCurrentManagedProfiles.valueAt(i).id)) {
                     return false;
                 }
             }
@@ -495,15 +496,22 @@ public class NotificationLockscreenUserManagerImpl implements
     public boolean needsRedaction(NotificationEntry ent) {
         int userId = ent.getSbn().getUserId();
 
-        boolean currentUserWantsRedaction = !userAllowsPrivateNotificationsInPublic(mCurrentUserId);
-        boolean notiUserWantsRedaction = !userAllowsPrivateNotificationsInPublic(userId);
-        boolean redactedLockscreen = currentUserWantsRedaction || notiUserWantsRedaction;
+        boolean isCurrentUserRedactingNotifs =
+                !userAllowsPrivateNotificationsInPublic(mCurrentUserId);
+        boolean isNotifForManagedProfile = mCurrentManagedProfiles.contains(userId);
+        boolean isNotifUserRedacted = !userAllowsPrivateNotificationsInPublic(userId);
+
+        // redact notifications if the current user is redacting notifications; however if the
+        // notification is associated with a managed profile, we rely on the managed profile
+        // setting to determine whether to redact it
+        boolean isNotifRedacted = (!isNotifForManagedProfile && isCurrentUserRedactingNotifs)
+                || isNotifUserRedacted;
 
         boolean notificationRequestsRedaction =
                 ent.getSbn().getNotification().visibility == Notification.VISIBILITY_PRIVATE;
         boolean userForcesRedaction = packageHasVisibilityOverride(ent.getSbn().getKey());
 
-        return userForcesRedaction || notificationRequestsRedaction && redactedLockscreen;
+        return userForcesRedaction || notificationRequestsRedaction && isNotifRedacted;
     }
 
     private boolean packageHasVisibilityOverride(String key) {
@@ -524,7 +532,7 @@ public class NotificationLockscreenUserManagerImpl implements
                 for (UserInfo user : mUserManager.getProfiles(mCurrentUserId)) {
                     mCurrentProfiles.put(user.id, user);
                     if (UserManager.USER_TYPE_PROFILE_MANAGED.equals(user.userType)) {
-                        mCurrentManagedProfiles.add(user);
+                        mCurrentManagedProfiles.put(user.id, user);
                     }
                 }
             }
@@ -556,7 +564,7 @@ public class NotificationLockscreenUserManagerImpl implements
     public boolean isAnyManagedProfilePublicMode() {
         synchronized (mLock) {
             for (int i = mCurrentManagedProfiles.size() - 1; i >= 0; i--) {
-                if (isLockscreenPublicMode(mCurrentManagedProfiles.get(i).id)) {
+                if (isLockscreenPublicMode(mCurrentManagedProfiles.valueAt(i).id)) {
                     return true;
                 }
             }
@@ -673,8 +681,8 @@ public class NotificationLockscreenUserManagerImpl implements
         }
         pw.print("  mCurrentManagedProfiles=");
         synchronized (mLock) {
-            for (UserInfo userInfo : mCurrentManagedProfiles) {
-                pw.print("" + userInfo.id + " ");
+            for (int i = mCurrentManagedProfiles.size() - 1; i >= 0; i--) {
+                pw.print("" + mCurrentManagedProfiles.valueAt(i).id + " ");
             }
         }
         pw.println();
