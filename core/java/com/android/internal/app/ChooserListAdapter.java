@@ -88,7 +88,7 @@ public class ChooserListAdapter extends ResolverListAdapter {
     private final int mMaxShortcutTargetsPerApp;
     private final ChooserListCommunicator mChooserListCommunicator;
     private final SelectableTargetInfo.SelectableTargetInfoCommunicator
-            mSelectableTargetInfoComunicator;
+            mSelectableTargetInfoCommunicator;
 
     private int mNumShortcutResults = 0;
 
@@ -117,7 +117,8 @@ public class ChooserListAdapter extends ResolverListAdapter {
             boolean filterLastUsed, ResolverListController resolverListController,
             boolean useLayoutForBrowsables,
             ChooserListCommunicator chooserListCommunicator,
-            SelectableTargetInfo.SelectableTargetInfoCommunicator selectableTargetInfoComunicator) {
+            SelectableTargetInfo.SelectableTargetInfoCommunicator selectableTargetInfoCommunicator,
+            PackageManager packageManager) {
         // Don't send the initial intents through the shared ResolverActivity path,
         // we want to separate them into a different section.
         super(context, payloadIntents, null, rList, filterLastUsed,
@@ -128,10 +129,9 @@ public class ChooserListAdapter extends ResolverListAdapter {
         mMaxShortcutTargetsPerApp =
                 context.getResources().getInteger(R.integer.config_maxShortcutTargetsPerApp);
         mChooserListCommunicator = chooserListCommunicator;
-        mSelectableTargetInfoComunicator = selectableTargetInfoComunicator;
+        mSelectableTargetInfoCommunicator = selectableTargetInfoCommunicator;
 
         if (initialIntents != null) {
-            final PackageManager pm = context.getPackageManager();
             for (int i = 0; i < initialIntents.length; i++) {
                 final Intent ii = initialIntents[i];
                 if (ii == null) {
@@ -147,7 +147,7 @@ public class ChooserListAdapter extends ResolverListAdapter {
                 final ComponentName cn = ii.getComponent();
                 if (cn != null) {
                     try {
-                        ai = pm.getActivityInfo(ii.getComponent(), 0);
+                        ai = packageManager.getActivityInfo(ii.getComponent(), 0);
                         ri = new ResolveInfo();
                         ri.activityInfo = ai;
                     } catch (PackageManager.NameNotFoundException ignored) {
@@ -155,7 +155,7 @@ public class ChooserListAdapter extends ResolverListAdapter {
                     }
                 }
                 if (ai == null) {
-                    ri = pm.resolveActivity(ii, PackageManager.MATCH_DEFAULT_ONLY);
+                    ri = packageManager.resolveActivity(ii, PackageManager.MATCH_DEFAULT_ONLY);
                     ai = ri != null ? ri.activityInfo : null;
                 }
                 if (ai == null) {
@@ -458,7 +458,7 @@ public class ChooserListAdapter extends ResolverListAdapter {
             UserHandle userHandle = getUserHandle();
             Context contextAsUser = mContext.createContextAsUser(userHandle, 0 /* flags */);
             boolean isInserted = insertServiceTarget(new SelectableTargetInfo(contextAsUser,
-                    origTarget, target, targetScore, mSelectableTargetInfoComunicator,
+                    origTarget, target, targetScore, mSelectableTargetInfoCommunicator,
                     (isShortcutResult ? directShareToShortcutInfos.get(target) : null)));
 
             if (isInserted && isShortcutResult) {
@@ -508,7 +508,7 @@ public class ChooserListAdapter extends ResolverListAdapter {
                     .map(target ->
                             new SelectableTargetInfo(
                                     contextAsUser, origTarget, target, target.getScore(),
-                                    mSelectableTargetInfoComunicator,
+                                    mSelectableTargetInfoCommunicator,
                                     (isShortcutResult ? directShareToShortcutInfos.get(target)
                                             : null))
                     )
