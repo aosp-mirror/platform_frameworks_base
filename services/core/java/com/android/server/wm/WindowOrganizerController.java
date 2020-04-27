@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import static android.Manifest.permission.MANAGE_ACTIVITY_STACKS;
+import static android.Manifest.permission.READ_FRAME_BUFFER;
 
 import static com.android.server.wm.ActivityStackSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.wm.ActivityTaskManagerService.LAYOUT_REASON_CONFIG_CHANGED;
@@ -27,17 +28,20 @@ import static com.android.server.wm.WindowContainer.POSITION_TOP;
 import android.app.WindowConfiguration;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.ArraySet;
 import android.util.Slog;
+import android.view.Surface;
 import android.view.SurfaceControl;
 import android.window.IDisplayAreaOrganizerController;
 import android.window.ITaskOrganizerController;
 import android.window.IWindowContainerTransactionCallback;
 import android.window.IWindowOrganizerController;
+import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
 import com.android.internal.util.function.pooled.PooledConsumer;
@@ -375,6 +379,40 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         }
 
         mTransactionCallbacksByPendingSyncId.remove(mSyncId);
+    }
+
+    @Override
+    public boolean takeScreenshot(WindowContainerToken token, SurfaceControl outSurfaceControl) {
+        mService.mAmInternal.enforceCallingPermission(READ_FRAME_BUFFER, "takeScreenshot()");
+        final WindowContainer wc = WindowContainer.fromBinder(token.asBinder());
+        if (wc == null) {
+            throw new RuntimeException("Invalid token in screenshot transaction");
+        }
+
+        final Rect bounds = new Rect();
+        wc.getBounds(bounds);
+        bounds.offsetTo(0, 0);
+        SurfaceControl.ScreenshotGraphicBuffer buffer = SurfaceControl.captureLayers(
+                wc.getSurfaceControl(), bounds, 1);
+
+        if (buffer == null || buffer.getGraphicBuffer() == null) {
+            return false;
+        }
+
+        SurfaceControl screenshot = mService.mWindowManager.mSurfaceControlFactory.apply(null)
+                .setName(wc.getName() + " - Organizer Screenshot")
+                .setBufferSize(bounds.width(), bounds.height())
+                .setFormat(PixelFormat.TRANSLUCENT)
+                .setParent(wc.getParentSurfaceControl())
+                .build();
+
+        Surface surface = new Surface();
+        surface.copyFrom(screenshot);
+        surface.attachAndQueueBufferWithColorSpace(buffer.getGraphicBuffer(), null);
+        surface.release();
+
+        outSurfaceControl.copyFrom(screenshot);
+        return true;
     }
 
     private void enforceStackPermission(String func) {
