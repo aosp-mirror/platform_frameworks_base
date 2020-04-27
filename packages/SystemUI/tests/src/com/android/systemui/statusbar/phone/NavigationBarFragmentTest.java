@@ -62,6 +62,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.Dependency;
 import com.android.systemui.SysuiBaseFragmentTest;
 import com.android.systemui.SysuiTestableContext;
+import com.android.systemui.accessibility.SystemActions;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.model.SysUiState;
@@ -102,6 +103,8 @@ public class NavigationBarFragmentTest extends SysuiBaseFragmentTest {
     private Divider mDivider;
     @Mock
     private Recents mRecents;
+    @Mock
+    private SystemActions mSystemActions;
 
     private AccessibilityManagerWrapper mAccessibilityWrapper =
             new AccessibilityManagerWrapper(mContext) {
@@ -257,6 +260,7 @@ public class NavigationBarFragmentTest extends SysuiBaseFragmentTest {
                 () -> mock(StatusBar.class),
                 mock(ShadeController.class),
                 mock(NotificationRemoteInputManager.class),
+                mock(SystemActions.class),
                 mHandler);
     }
 

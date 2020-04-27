@@ -98,6 +98,7 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.LatencyTracker;
 import com.android.internal.view.AppearanceRegion;
 import com.android.systemui.R;
+import com.android.systemui.accessibility.SystemActions;
 import com.android.systemui.assist.AssistHandleViewController;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.broadcast.BroadcastDispatcher;
@@ -185,6 +186,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
     private WindowManager mWindowManager;
     private final CommandQueue mCommandQueue;
     private long mLastLockToAppLongPress;
+    private final SystemActions mSystemActions;
 
     private Locale mLocale;
     private int mLayoutDirection;
@@ -373,6 +375,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
             Optional<Recents> recentsOptional, Lazy<StatusBar> statusBarLazy,
             ShadeController shadeController,
             NotificationRemoteInputManager notificationRemoteInputManager,
+            SystemActions systemActions,
             @Main Handler mainHandler) {
         mAccessibilityManagerWrapper = accessibilityManagerWrapper;
         mDeviceProvisionedController = deviceProvisionedController;
@@ -391,6 +394,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         mCommandQueue = commandQueue;
         mDivider = divider;
         mRecentsOptional = recentsOptional;
+        mSystemActions = systemActions;
         mHandler = mainHandler;
     }
 
@@ -1168,6 +1172,16 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
                 .setFlag(SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE, longClickable)
                 .setFlag(SYSUI_STATE_NAV_BAR_HIDDEN, !isNavBarWindowVisible())
                 .commitUpdate(mDisplayId);
+        registerAction(clickable, SystemActions.SYSTEM_ACTION_ID_ACCESSIBILITY_BUTTON);
+        registerAction(longClickable, SystemActions.SYSTEM_ACTION_ID_ACCESSIBILITY_BUTTON_CHOOSER);
+    }
+
+    private void registerAction(boolean register, int actionId) {
+        if (register) {
+            mSystemActions.register(actionId);
+        } else {
+            mSystemActions.unregister(actionId);
+        }
     }
 
     /**
