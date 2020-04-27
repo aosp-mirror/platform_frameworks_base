@@ -167,7 +167,7 @@ public class AndroidKeyStoreSecretKeyFactorySpi extends SecretKeyFactorySpi {
         boolean userAuthenticationRequired =
                 !keyCharacteristics.getBoolean(KeymasterDefs.KM_TAG_NO_AUTH_REQUIRED);
         long userAuthenticationValidityDurationSeconds =
-                keyCharacteristics.getUnsignedInt(KeymasterDefs.KM_TAG_AUTH_TIMEOUT, -1);
+                keyCharacteristics.getUnsignedInt(KeymasterDefs.KM_TAG_AUTH_TIMEOUT, 0);
         if (userAuthenticationValidityDurationSeconds > Integer.MAX_VALUE) {
             throw new ProviderException("User authentication timeout validity too long: "
                     + userAuthenticationValidityDurationSeconds + " seconds");
