@@ -49,6 +49,7 @@ import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.settings.CurrentUserContextTracker;
 import com.android.systemui.statusbar.NotificationLifetimeExtender;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationPresenter;
@@ -66,6 +67,8 @@ import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+
+import javax.inject.Provider;
 
 import dagger.Lazy;
 
@@ -111,6 +114,8 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
     private final INotificationManager mNotificationManager;
     private final LauncherApps mLauncherApps;
     private final ShortcutManager mShortcutManager;
+    private final CurrentUserContextTracker mContextTracker;
+    private final Provider<PriorityOnboardingDialogController.Builder> mBuilderProvider;
 
     /**
      * Injected constructor. See {@link NotificationsModule}.
@@ -121,7 +126,9 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
             HighPriorityProvider highPriorityProvider,
             INotificationManager notificationManager,
             LauncherApps launcherApps,
-            ShortcutManager shortcutManager) {
+            ShortcutManager shortcutManager,
+            CurrentUserContextTracker contextTracker,
+            Provider<PriorityOnboardingDialogController.Builder> builderProvider) {
         mContext = context;
         mVisualStabilityManager = visualStabilityManager;
         mStatusBarLazy = statusBarLazy;
@@ -131,6 +138,8 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
         mNotificationManager = notificationManager;
         mLauncherApps = launcherApps;
         mShortcutManager = shortcutManager;
+        mContextTracker = contextTracker;
+        mBuilderProvider = builderProvider;
     }
 
     public void setUpWithPresenter(NotificationPresenter presenter,
@@ -400,7 +409,8 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
             final ExpandableNotificationRow row,
             NotificationConversationInfo notificationInfoView) throws Exception {
         NotificationGuts guts = row.getGuts();
-        StatusBarNotification sbn = row.getEntry().getSbn();
+        NotificationEntry entry = row.getEntry();
+        StatusBarNotification sbn = entry.getSbn();
         String packageName = sbn.getPackageName();
         // Settings link is only valid for notifications that specify a non-system user
         NotificationConversationInfo.OnSettingsClickListener onSettingsClick = null;
@@ -441,11 +451,14 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
                 mNotificationManager,
                 mVisualStabilityManager,
                 packageName,
-                row.getEntry().getChannel(),
-                row.getEntry(),
+                entry.getChannel(),
+                entry,
+                entry.getBubbleMetadata(),
                 onSettingsClick,
                 onSnoozeClickListener,
                 iconFactoryLoader,
+                mContextTracker.getCurrentUserContext(),
+                mBuilderProvider,
                 mDeviceProvisionedController.isDeviceProvisioned());
     }
 
