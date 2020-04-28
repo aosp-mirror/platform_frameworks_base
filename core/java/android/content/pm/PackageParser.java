@@ -473,6 +473,7 @@ public class PackageParser {
         public final String targetPackageName;
         public final boolean overlayIsStatic;
         public final int overlayPriority;
+        public final int rollbackDataPolicy;
 
         public ApkLite(String codePath, String packageName, String splitName,
                 boolean isFeatureSplit,
@@ -483,7 +484,7 @@ public class PackageParser {
                 boolean debuggable, boolean multiArch, boolean use32bitAbi,
                 boolean useEmbeddedDex, boolean extractNativeLibs, boolean isolatedSplits,
                 String targetPackageName, boolean overlayIsStatic, int overlayPriority,
-                int minSdkVersion, int targetSdkVersion) {
+                int minSdkVersion, int targetSdkVersion, int rollbackDataPolicy) {
             this.codePath = codePath;
             this.packageName = packageName;
             this.splitName = splitName;
@@ -509,6 +510,7 @@ public class PackageParser {
             this.overlayPriority = overlayPriority;
             this.minSdkVersion = minSdkVersion;
             this.targetSdkVersion = targetSdkVersion;
+            this.rollbackDataPolicy = rollbackDataPolicy;
         }
 
         public long getLongVersionCode() {
@@ -1586,6 +1588,7 @@ public class PackageParser {
         String targetPackage = null;
         boolean overlayIsStatic = false;
         int overlayPriority = 0;
+        int rollbackDataPolicy = 0;
 
         String requiredSystemPropertyName = null;
         String requiredSystemPropertyValue = null;
@@ -1652,6 +1655,9 @@ public class PackageParser {
                     if ("useEmbeddedDex".equals(attr)) {
                         useEmbeddedDex = attrs.getAttributeBooleanValue(i, false);
                     }
+                    if (attr.equals("rollbackDataPolicy")) {
+                        rollbackDataPolicy = attrs.getAttributeIntValue(i, 0);
+                    }
                 }
             } else if (PackageParser.TAG_OVERLAY.equals(parser.getName())) {
                 for (int i = 0; i < attrs.getAttributeCount(); ++i) {
@@ -1709,7 +1715,8 @@ public class PackageParser {
                 configForSplit, usesSplitName, isSplitRequired, versionCode, versionCodeMajor,
                 revisionCode, installLocation, verifiers, signingDetails, coreApp, debuggable,
                 multiArch, use32bitAbi, useEmbeddedDex, extractNativeLibs, isolatedSplits,
-                targetPackage, overlayIsStatic, overlayPriority, minSdkVersion, targetSdkVersion);
+                targetPackage, overlayIsStatic, overlayPriority, minSdkVersion, targetSdkVersion,
+                rollbackDataPolicy);
     }
 
     /**
