@@ -999,8 +999,7 @@
     <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"బబుల్స్‌ను ఎప్పుడైనా నియంత్రించండి"</string>
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"ఈ యాప్ నుండి వచ్చే బబుల్స్‌ను ఆఫ్ చేయడానికి మేనేజ్ బటన్‌ను ట్యాప్ చేయండి"</string>
     <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"అర్థమైంది"</string>
-    <!-- no translation found for bubbles_app_settings (5779443644062348657) -->
-    <skip />
+    <string name="bubbles_app_settings" msgid="5779443644062348657">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> సెట్టింగ్‌లు"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"సిస్టమ్ నావిగేషన్ అప్‌డేట్ చేయబడింది. మార్పులు చేయడానికి, సెట్టింగ్‌లకు వెళ్లండి."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"సిస్టమ్ నావిగేషన్‌ను అప్‌డేట్ చేయడానికి సెట్టింగ్‌లకు వెళ్లండి"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"స్టాండ్‌బై"</string>

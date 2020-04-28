@@ -999,8 +999,7 @@
     <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"ਬਬਲ ਨੂੰ ਕਿਸੇ ਵੇਲੇ ਵੀ ਕੰਟਰੋਲ ਕਰੋ"</string>
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"ਇਸ ਐਪ \'ਤੇ ਬਬਲ ਬੰਦ ਕਰਨ ਲਈ \'ਪ੍ਰਬੰਧਨ ਕਰੋ\' \'ਤੇ ਟੈਪ ਕਰੋ"</string>
     <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"ਸਮਝ ਲਿਆ"</string>
-    <!-- no translation found for bubbles_app_settings (5779443644062348657) -->
-    <skip />
+    <string name="bubbles_app_settings" msgid="5779443644062348657">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> ਸੈਟਿੰਗਾਂ"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"ਸਿਸਟਮ ਨੈਵੀਗੇਸ਼ਨ ਅੱਪਡੇਟ ਹੋ ਗਿਆ। ਤਬਦੀਲੀਆਂ ਕਰਨ ਲਈ, ਸੈਟਿੰਗਾਂ \'ਤੇ ਜਾਓ।"</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"ਸਿਸਟਮ ਨੈਵੀਗੇਸ਼ਨ ਨੂੰ ਅੱਪਡੇਟ ਕਰਨ ਲਈ ਸੈਟਿੰਗਾਂ \'ਤੇ ਜਾਓ"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"ਸਟੈਂਡਬਾਈ"</string>
