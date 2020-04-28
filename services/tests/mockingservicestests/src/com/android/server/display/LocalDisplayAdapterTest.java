@@ -161,7 +161,7 @@ public class LocalDisplayAdapterTest {
             DisplayDeviceInfo info, int expectedPort, boolean shouldBePrivate) {
         final DisplayAddress.Physical address = (DisplayAddress.Physical) info.address;
         assertNotNull(address);
-        assertEquals((byte) expectedPort, address.getPort());
+        assertEquals(expectedPort, address.getPort());
         assertEquals(DISPLAY_MODEL, address.getModel());
         assertEquals(shouldBePrivate, (info.flags & DisplayDeviceInfo.FLAG_PRIVATE) != 0);
     }
@@ -254,7 +254,7 @@ public class LocalDisplayAdapterTest {
                                   int expectedDensityDpi) {
         final DisplayAddress.Physical physical = (DisplayAddress.Physical) info.address;
         assertNotNull(physical);
-        assertEquals((byte) expectedPort, physical.getPort());
+        assertEquals(expectedPort, physical.getPort());
         assertEquals(expectedXdpi, info.xDpi, 0.01);
         assertEquals(expectedYDpi, info.yDpi, 0.01);
         assertEquals(expectedDensityDpi, info.densityDpi);
@@ -323,7 +323,7 @@ public class LocalDisplayAdapterTest {
     }
 
     private static DisplayAddress.Physical createDisplayAddress(int port) {
-        return DisplayAddress.fromPortAndModel((byte) port, DISPLAY_MODEL);
+        return DisplayAddress.fromPortAndModel(port, DISPLAY_MODEL);
     }
 
     private static SurfaceControl.DisplayInfo createFakeDisplayInfo() {
