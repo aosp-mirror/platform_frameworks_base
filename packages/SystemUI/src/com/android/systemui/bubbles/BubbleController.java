@@ -54,7 +54,6 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Rect;
-import android.os.Handler;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.service.notification.NotificationListenerService;
@@ -176,9 +175,6 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     private final NotificationInterruptStateProvider mNotificationInterruptStateProvider;
     private IStatusBarService mBarService;
     private SysUiState mSysUiState;
-
-    // Used to post to main UI thread
-    private Handler mHandler = new Handler();
 
     // Used for determining view rect for touch interaction
     private Rect mTempRect = new Rect();
@@ -812,17 +808,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         Bubble bubble = mBubbleData.getOrCreateBubble(notif);
         bubble.setInflateSynchronously(mInflateSynchronously);
         bubble.inflate(
-                b -> {
-                    mBubbleData.notificationEntryUpdated(b, suppressFlyout, showInShade);
-                    if (bubble.getBubbleIntent() == null) {
-                        return;
-                    }
-                    bubble.getBubbleIntent().registerCancelListener(pendingIntent -> {
-                        mHandler.post(
-                                () -> removeBubble(bubble.getEntry(),
-                                        BubbleController.DISMISS_INVALID_INTENT));
-                    });
-                },
+                b -> mBubbleData.notificationEntryUpdated(b, suppressFlyout, showInShade),
                 mContext, mStackView, mBubbleIconFactory);
     }
 
