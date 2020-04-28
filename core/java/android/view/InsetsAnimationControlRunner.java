@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.util.proto.ProtoOutputStream;
 import android.view.InsetsController.AnimationType;
 import android.view.InsetsState.InternalInsetsType;
 import android.view.WindowInsets.Type.InsetsType;
@@ -53,4 +54,14 @@ public interface InsetsAnimationControlRunner {
      * @return The animation type this runner is running.
      */
     @AnimationType int getAnimationType();
+
+    /**
+     *
+     * Export the state of classes that implement this interface into a protocol buffer
+     * output stream.
+     *
+     * @param proto Stream to write the state to
+     * @param fieldId FieldId of the implementation class
+     */
+    void dumpDebug(ProtoOutputStream proto, long fieldId);
 }

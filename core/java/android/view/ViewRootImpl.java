@@ -33,6 +33,23 @@ import static android.view.View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
 import static android.view.View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
 import static android.view.View.SYSTEM_UI_FLAG_LOW_PROFILE;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
+import static android.view.ViewRootImplProto.ADDED;
+import static android.view.ViewRootImplProto.APP_VISIBLE;
+import static android.view.ViewRootImplProto.CUR_SCROLL_Y;
+import static android.view.ViewRootImplProto.DISPLAY_ID;
+import static android.view.ViewRootImplProto.HEIGHT;
+import static android.view.ViewRootImplProto.IS_ANIMATING;
+import static android.view.ViewRootImplProto.IS_DRAWING;
+import static android.view.ViewRootImplProto.LAST_WINDOW_INSETS;
+import static android.view.ViewRootImplProto.PENDING_DISPLAY_CUTOUT;
+import static android.view.ViewRootImplProto.REMOVED;
+import static android.view.ViewRootImplProto.SCROLL_Y;
+import static android.view.ViewRootImplProto.SOFT_INPUT_MODE;
+import static android.view.ViewRootImplProto.VIEW;
+import static android.view.ViewRootImplProto.VISIBLE_RECT;
+import static android.view.ViewRootImplProto.WIDTH;
+import static android.view.ViewRootImplProto.WINDOW_ATTRIBUTES;
+import static android.view.ViewRootImplProto.WIN_FRAME;
 import static android.view.WindowCallbacks.RESIZE_MODE_DOCKED_DIVIDER;
 import static android.view.WindowCallbacks.RESIZE_MODE_FREEFORM;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
@@ -61,6 +78,8 @@ import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_ADDITIONAL
 import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 import static android.view.WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY;
+import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodEditorProto.ClientSideProto.IME_FOCUS_CONTROLLER;
+import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodEditorProto.ClientSideProto.INSETS_CONTROLLER;
 
 import android.Manifest;
 import android.animation.LayoutTransition;
@@ -127,6 +146,8 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TimeUtils;
 import android.util.TypedValue;
+import android.util.imetracing.ImeTracing;
+import android.util.proto.ProtoOutputStream;
 import android.view.InputDevice.InputSourceClass;
 import android.view.InsetsState.InternalInsetsType;
 import android.view.Surface.OutOfResourcesException;
@@ -164,6 +185,7 @@ import android.window.ClientWindowFrames;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.inputmethod.InputMethodDebug;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.policy.DecorView;
@@ -182,6 +204,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Queue;
 import java.util.concurrent.CountDownLatch;
 
@@ -7520,6 +7543,38 @@ public final class ViewRootImpl implements ViewParent,
         mView.debug();
     }
 
+    /**
+     * Export the state of {@link ViewRootImpl} and other relevant classes into a protocol buffer
+     * output stream.
+     *
+     * @param proto Stream to write the state to
+     * @param fieldId FieldId of ViewRootImpl as defined in the parent message
+     */
+    @GuardedBy("this")
+    public void dumpDebug(ProtoOutputStream proto, long fieldId) {
+        final long token = proto.start(fieldId);
+        proto.write(VIEW, Objects.toString(mView));
+        proto.write(DISPLAY_ID, mDisplay.getDisplayId());
+        proto.write(APP_VISIBLE, mAppVisible);
+        proto.write(HEIGHT, mHeight);
+        proto.write(WIDTH, mWidth);
+        proto.write(IS_ANIMATING, mIsAnimating);
+        mVisRect.dumpDebug(proto, VISIBLE_RECT);
+        proto.write(IS_DRAWING, mIsDrawing);
+        proto.write(ADDED, mAdded);
+        mWinFrame.dumpDebug(proto, WIN_FRAME);
+        mPendingDisplayCutout.get().dumpDebug(proto, PENDING_DISPLAY_CUTOUT);
+        proto.write(LAST_WINDOW_INSETS, Objects.toString(mLastWindowInsets));
+        proto.write(SOFT_INPUT_MODE, InputMethodDebug.softInputModeToString(mSoftInputMode));
+        proto.write(SCROLL_Y, mScrollY);
+        proto.write(CUR_SCROLL_Y, mCurScrollY);
+        proto.write(REMOVED, mRemoved);
+        mWindowAttributes.dumpDebug(proto, WINDOW_ATTRIBUTES);
+        proto.end(token);
+        mInsetsController.dumpDebug(proto, INSETS_CONTROLLER);
+        mImeFocusController.dumpDebug(proto, IME_FOCUS_CONTROLLER);
+    }
+
     public void dump(String prefix, FileDescriptor fd, PrintWriter writer, String[] args) {
         String innerPrefix = prefix + "  ";
         writer.println(prefix + "ViewRoot:");
@@ -9094,6 +9149,9 @@ public final class ViewRootImpl implements ViewParent,
 
         @Override
         public void showInsets(@InsetsType int types, boolean fromIme) {
+            if (fromIme) {
+                ImeTracing.getInstance().triggerDump();
+            }
             final ViewRootImpl viewAncestor = mViewAncestor.get();
             if (viewAncestor != null) {
                 viewAncestor.showInsets(types, fromIme);
@@ -9102,6 +9160,9 @@ public final class ViewRootImpl implements ViewParent,
 
         @Override
         public void hideInsets(@InsetsType int types, boolean fromIme) {
+            if (fromIme) {
+                ImeTracing.getInstance().triggerDump();
+            }
             final ViewRootImpl viewAncestor = mViewAncestor.get();
             if (viewAncestor != null) {
                 viewAncestor.hideInsets(types, fromIme);
