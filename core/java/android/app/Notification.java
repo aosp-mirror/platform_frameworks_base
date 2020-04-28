@@ -3071,8 +3071,8 @@ public class Notification implements Parcelable
         StringBuilder sb = new StringBuilder();
         sb.append("Notification(channel=");
         sb.append(getChannelId());
-        sb.append(" pri=");
-        sb.append(priority);
+        sb.append(" shortcut=");
+        sb.append(getShortcutId());
         sb.append(" contentView=");
         if (contentView != null) {
             sb.append(contentView.getPackage());
