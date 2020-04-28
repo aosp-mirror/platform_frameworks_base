@@ -20,7 +20,6 @@ import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.ObjectAnimator
 import android.app.AlertDialog
-import android.app.Dialog
 import android.content.ComponentName
 import android.content.Context
 import android.content.DialogInterface
@@ -32,7 +31,6 @@ import android.graphics.drawable.LayerDrawable
 import android.os.Process
 import android.os.Vibrator
 import android.service.controls.Control
-import android.service.controls.actions.ControlAction
 import android.util.Log
 import android.util.TypedValue
 import android.view.ContextThemeWrapper
@@ -101,7 +99,6 @@ class ControlsUiControllerImpl @Inject constructor (
     private lateinit var parent: ViewGroup
     private lateinit var lastItems: List<SelectionItem>
     private var popup: ListPopupWindow? = null
-    private var activeDialog: Dialog? = null
     private var hidden = true
     private lateinit var dismissGlobalActions: Runnable
 
@@ -537,7 +534,11 @@ class ControlsUiControllerImpl @Inject constructor (
         Log.d(ControlsUiController.TAG, "hide()")
         hidden = true
         popup?.dismissImmediate()
-        activeDialog?.dismiss()
+
+        controlViewsById.forEach {
+            it.value.dismiss()
+        }
+
         ControlActionCoordinator.closeDialog()
 
         controlsController.get().unsubscribe()
@@ -551,7 +552,6 @@ class ControlsUiControllerImpl @Inject constructor (
     }
 
     override fun onRefreshState(componentName: ComponentName, controls: List<Control>) {
-        Log.d(ControlsUiController.TAG, "onRefreshState()")
         controls.forEach { c ->
             controlsById.get(ControlKey(componentName, c.getControlId()))?.let {
                 Log.d(ControlsUiController.TAG, "onRefreshState() for id: " + c.getControlId())
@@ -569,23 +569,7 @@ class ControlsUiControllerImpl @Inject constructor (
     override fun onActionResponse(componentName: ComponentName, controlId: String, response: Int) {
         val key = ControlKey(componentName, controlId)
         uiExecutor.execute {
-            controlViewsById.get(key)?.let { cvh ->
-                when (response) {
-                    ControlAction.RESPONSE_CHALLENGE_PIN -> {
-                        activeDialog = ChallengeDialogs.createPinDialog(cvh, false)
-                        activeDialog?.show()
-                    }
-                    ControlAction.RESPONSE_CHALLENGE_PASSPHRASE -> {
-                        activeDialog = ChallengeDialogs.createPinDialog(cvh, true)
-                        activeDialog?.show()
-                    }
-                    ControlAction.RESPONSE_CHALLENGE_ACK -> {
-                        activeDialog = ChallengeDialogs.createConfirmationDialog(cvh)
-                        activeDialog?.show()
-                    }
-                    else -> cvh.actionResponse(response)
-                }
-            }
+            controlViewsById.get(key)?.actionResponse(response)
         }
     }
 
