@@ -312,6 +312,10 @@
         <item>com.android.systemui.toast.ToastUI</item>
     </string-array>
 
+    <!-- QS tile shape store width. negative implies fill configuration instead of stroke-->
+    <dimen name="config_qsTileStrokeWidthActive">-1dp</dimen>
+    <dimen name="config_qsTileStrokeWidthInactive">-1dp</dimen>
+
     <!-- SystemUI vender service, used in config_systemUIServiceComponents. -->
     <string name="config_systemUIVendorServiceComponent" translatable="false">com.android.systemui.VendorServices</string>
 
