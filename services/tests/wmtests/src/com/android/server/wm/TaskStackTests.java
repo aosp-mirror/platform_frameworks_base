@@ -72,6 +72,13 @@ public class TaskStackTests extends WindowTestsBase {
         stack.positionChildAt(WindowContainer.POSITION_TOP, task2, false /* includingParents */);
         assertEquals(stack.mChildren.get(0), task2);
         assertEquals(stack.mChildren.get(1), task1);
+
+        // Non-leaf task should be moved to top regardless of the user id.
+        createTaskInStack((ActivityStack) task2, 0 /* userId */);
+        createTaskInStack((ActivityStack) task2, 1 /* userId */);
+        stack.positionChildAt(WindowContainer.POSITION_TOP, task2, false /* includingParents */);
+        assertEquals(stack.mChildren.get(0), task1);
+        assertEquals(stack.mChildren.get(1), task2);
     }
 
     @Test
