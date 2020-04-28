@@ -2404,15 +2404,24 @@ public class ChooserActivity extends ResolverActivity implements
     public ChooserGridAdapter createChooserGridAdapter(Context context,
             List<Intent> payloadIntents, Intent[] initialIntents, List<ResolveInfo> rList,
             boolean filterLastUsed, boolean useLayoutForBrowsables, UserHandle userHandle) {
-        ChooserListAdapter chooserListAdapter = new ChooserListAdapter(context, payloadIntents,
-                initialIntents, rList,
-                filterLastUsed, createListController(userHandle), useLayoutForBrowsables,
-                this, this);
+        ChooserListAdapter chooserListAdapter = createChooserListAdapter(context, payloadIntents,
+                initialIntents, rList, filterLastUsed,
+                useLayoutForBrowsables, createListController(userHandle));
         AppPredictor.Callback appPredictorCallback = createAppPredictorCallback(chooserListAdapter);
         AppPredictor appPredictor = setupAppPredictorForUser(userHandle, appPredictorCallback);
         chooserListAdapter.setAppPredictor(appPredictor);
         chooserListAdapter.setAppPredictorCallback(appPredictorCallback);
         return new ChooserGridAdapter(chooserListAdapter);
+    }
+
+    @VisibleForTesting
+    public ChooserListAdapter createChooserListAdapter(Context context,
+            List<Intent> payloadIntents, Intent[] initialIntents, List<ResolveInfo> rList,
+            boolean filterLastUsed, boolean useLayoutForBrowsables,
+            ResolverListController resolverListController) {
+        return new ChooserListAdapter(context, payloadIntents, initialIntents, rList,
+                filterLastUsed, resolverListController, useLayoutForBrowsables,
+                this, this, context.getPackageManager());
     }
 
     @VisibleForTesting
