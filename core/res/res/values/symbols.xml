@@ -2824,6 +2824,7 @@
 
   <java-symbol type="string" name="notification_hidden_text" />
   <java-symbol type="id" name="app_name_text" />
+  <java-symbol type="id" name="app_name_divider" />
   <java-symbol type="id" name="header_text" />
   <java-symbol type="id" name="header_text_secondary" />
   <java-symbol type="id" name="expand_button" />
@@ -3911,12 +3912,11 @@
   <java-symbol type="dimen" name="conversation_badge_side_margin_group_expanded" />
   <java-symbol type="dimen" name="conversation_badge_side_margin_group_expanded_face_pile" />
   <java-symbol type="dimen" name="conversation_content_start" />
-  <java-symbol type="dimen" name="expanded_group_conversation_message_padding_without_app_name" />
+  <java-symbol type="dimen" name="expanded_group_conversation_message_padding" />
   <java-symbol type="dimen" name="messaging_layout_margin_end" />
   <java-symbol type="dimen" name="conversation_header_expanded_padding_end" />
   <java-symbol type="dimen" name="conversation_icon_container_top_padding" />
   <java-symbol type="dimen" name="conversation_icon_container_top_padding_small_avatar" />
-  <java-symbol type="dimen" name="conversation_icon_container_top_padding_no_app_name" />
   <java-symbol type="layout" name="notification_template_material_conversation" />
   <java-symbol type="dimen" name="button_padding_horizontal_material" />
   <java-symbol type="dimen" name="button_inset_horizontal_material" />
