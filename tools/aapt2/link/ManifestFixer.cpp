@@ -236,6 +236,16 @@ bool ManifestFixer::BuildRules(xml::XmlActionExecutor* executor,
     }
   }
 
+  if (options_.rename_overlay_target_package) {
+    if (!util::IsJavaPackageName(options_.rename_overlay_target_package.value())) {
+      diag->Error(DiagMessage()
+                  << "invalid overlay target package override '"
+                  << options_.rename_overlay_target_package.value()
+                  << "'");
+      return false;
+    }
+  }
+
   // Common <intent-filter> actions.
   xml::XmlNodeAction intent_filter_action;
   intent_filter_action["action"].Action(RequiredNameIsNotEmpty);
@@ -337,7 +347,17 @@ bool ManifestFixer::BuildRules(xml::XmlActionExecutor* executor,
   manifest_action["instrumentation"]["meta-data"] = meta_data_action;
 
   manifest_action["original-package"];
-  manifest_action["overlay"];
+  manifest_action["overlay"].Action([&](xml::Element* el) -> bool {
+    if (!options_.rename_overlay_target_package) {
+      return true;
+    }
+
+    if (xml::Attribute* attr =
+            el->FindAttribute(xml::kSchemaAndroid, "targetPackage")) {
+      attr->value = options_.rename_overlay_target_package.value();
+    }
+    return true;
+  });
   manifest_action["protected-broadcast"];
   manifest_action["adopt-permissions"];
   manifest_action["uses-permission"];

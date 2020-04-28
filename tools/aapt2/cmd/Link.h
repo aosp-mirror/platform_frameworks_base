@@ -248,6 +248,10 @@ class LinkCommand : public Command {
         "Changes the name of the target package for instrumentation. Most useful\n"
             "when used in conjunction with --rename-manifest-package.",
         &options_.manifest_fixer_options.rename_instrumentation_target_package);
+    AddOptionalFlag("--rename-overlay-target-package",
+        "Changes the name of the target package for overlay. Most useful\n"
+            "when used in conjunction with --rename-manifest-package.",
+        &options_.manifest_fixer_options.rename_overlay_target_package);
     AddOptionalFlagList("-0", "File extensions not to compress.",
         &options_.extensions_to_not_compress);
     AddOptionalSwitch("--no-compress", "Do not compress any resources.",
