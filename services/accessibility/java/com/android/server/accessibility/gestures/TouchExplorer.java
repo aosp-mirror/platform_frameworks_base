@@ -589,6 +589,7 @@ public class TouchExplorer extends BaseEventStreamTransformation
                     // a given distance perform a drag.
                     mState.startDragging();
                     mDraggingPointerId = pointerId;
+                    adjustEventLocationForDrag(event);
                     event.setEdgeFlags(mReceivedPointerTracker.getLastReceivedDownEdgeFlags());
                     mDispatcher.sendMotionEvent(
                             event, ACTION_DOWN, rawEvent, pointerIdBits, policyFlags);
