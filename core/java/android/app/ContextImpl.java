@@ -250,6 +250,10 @@ class ContextImpl extends Context {
 
     private final Object mSync = new Object();
 
+    /**
+     * Whether this is created from {@link #createSystemContext(ActivityThread)} or
+     * {@link #createSystemUiContext(ContextImpl, int)} or any {@link Context} that system UI uses.
+     */
     private boolean mIsSystemOrSystemUiContext;
     private boolean mIsUiContext;
     private boolean mIsAssociatedWithDisplay;
@@ -1922,16 +1926,18 @@ class ContextImpl extends Context {
     /** @hide */
     @Override
     public boolean isUiContext() {
-        return mIsSystemOrSystemUiContext || mIsUiContext || isSystemOrSystemUI();
+        return mIsSystemOrSystemUiContext || mIsUiContext;
     }
 
     /**
      * Temporary workaround to permit incorrect usages of Context by SystemUI.
-     * TODO(b/149790106): Fix usages and remove.
+     * TODO(b/147647877): Fix usages and remove.
      */
-    private boolean isSystemOrSystemUI() {
-        return ActivityThread.isSystem() || checkPermission("android.permission.STATUS_BAR_SERVICE",
-                Binder.getCallingPid(), Binder.getCallingUid()) == PERMISSION_GRANTED;
+    private static boolean isSystemOrSystemUI(Context context) {
+        return ActivityThread.isSystem() || context.checkPermission(
+                "android.permission.STATUS_BAR_SERVICE",
+                Binder.getCallingPid(),
+                Binder.getCallingUid()) == PERMISSION_GRANTED;
     }
 
     private static boolean isUiComponent(String name) {
@@ -2467,7 +2473,7 @@ class ContextImpl extends Context {
 
     @Override
     public Display getDisplay() {
-        if (!mIsSystemOrSystemUiContext && !mIsAssociatedWithDisplay && !isSystemOrSystemUI()) {
+        if (!mIsSystemOrSystemUiContext && !mIsAssociatedWithDisplay) {
             throw new UnsupportedOperationException("Tried to obtain display from a Context not "
                     + "associated with  one. Only visual Contexts (such as Activity or one created "
                     + "with Context#createWindowContext) or ones created with "
@@ -2643,6 +2649,7 @@ class ContextImpl extends Context {
         ContextImpl context = new ContextImpl(null, mainThread, packageInfo, null, null, null, null,
                 0, null, opPackageName);
         context.setResources(packageInfo.getResources());
+        context.mIsSystemOrSystemUiContext = isSystemOrSystemUI(context);
         return context;
     }
 
@@ -2672,6 +2679,7 @@ class ContextImpl extends Context {
                 activityInfo.splitName, activityToken, null, 0, classLoader, null);
         context.mIsUiContext = true;
         context.mIsAssociatedWithDisplay = true;
+        context.mIsSystemOrSystemUiContext = isSystemOrSystemUI(context);
 
         // Clamp display ID to DEFAULT_DISPLAY if it is INVALID_DISPLAY.
         displayId = (displayId != Display.INVALID_DISPLAY) ? displayId : Display.DEFAULT_DISPLAY;
