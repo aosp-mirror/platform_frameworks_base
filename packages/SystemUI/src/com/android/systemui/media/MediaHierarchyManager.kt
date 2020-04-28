@@ -133,6 +133,7 @@ class MediaHierarchyManager @Inject constructor(
                 val removed = mediaPlayers.remove(key)
                 removed?.apply {
                     mediaContent.removeView(removed.view)
+                    removed.onDestroy()
                 }
             }
         })

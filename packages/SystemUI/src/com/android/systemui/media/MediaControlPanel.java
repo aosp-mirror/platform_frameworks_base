@@ -16,8 +16,6 @@
 
 package com.android.systemui.media;
 
-import static com.android.systemui.util.SysuiLifecycle.viewAttachLifecycle;
-
 import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
@@ -41,7 +39,6 @@ import android.service.media.MediaBrowserService;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnAttachStateChangeListener;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -139,17 +136,6 @@ public class MediaControlPanel {
         }
     };
 
-    private final OnAttachStateChangeListener mStateListener = new OnAttachStateChangeListener() {
-        @Override
-        public void onViewAttachedToWindow(View unused) {
-            makeActive();
-        }
-        @Override
-        public void onViewDetachedFromWindow(View unused) {
-            makeInactive();
-        }
-    };
-
     private final LocalMediaManager.DeviceCallback mDeviceCallback =
             new LocalMediaManager.DeviceCallback() {
         @Override
@@ -191,27 +177,23 @@ public class MediaControlPanel {
         mMediaNotifView = (MotionLayout) inflater.inflate(R.layout.qs_media_panel, parent, false);
         mBackground = mMediaNotifView.findViewById(R.id.media_background);
         mKeyFrames = mMediaNotifView.getDefinedTransitions().get(0).getKeyFrameList();
-        // TODO(b/150854549): removeOnAttachStateChangeListener when this doesn't inflate views
-        // mStateListener shouldn't need to be unregistered since this object shares the same
-        // lifecycle with the inflated view. It would be better, however, if this controller used an
-        // attach/detach of views instead of inflating them in the constructor, which would allow
-        // mStateListener to be unregistered in detach.
-        mMediaNotifView.addOnAttachStateChangeListener(mStateListener);
         mLocalMediaManager = routeManager;
         mForegroundExecutor = foregroundExecutor;
         mBackgroundExecutor = backgroundExecutor;
         mActivityStarter = activityStarter;
         mSeekBarViewModel = new SeekBarViewModel(backgroundExecutor);
         mSeekBarObserver = new SeekBarObserver(getView());
-        // Can't use the viewAttachLifecycle of media player because remove/add is used to adjust
-        // priority of players. As soon as it is removed, the lifecycle will end and the seek bar
-        // will stop updating. So, use the lifecycle of the parent instead.
-        // TODO: this parent is also detached, need to fix that
-        mSeekBarViewModel.getProgress().observe(viewAttachLifecycle(parent), mSeekBarObserver);
+        // TODO: we should pause this whenever the screen is off / panel is collapsed etc.
+        mSeekBarViewModel.getProgress().observeForever(mSeekBarObserver);
         SeekBar bar = getView().findViewById(R.id.media_progress_bar);
         bar.setOnSeekBarChangeListener(mSeekBarViewModel.getSeekBarListener());
         bar.setOnTouchListener(mSeekBarViewModel.getSeekBarTouchListener());
         loadDimens();
+    }
+
+    public void onDestroy() {
+        mSeekBarViewModel.getProgress().removeObserver(mSeekBarObserver);
+        makeInactive();
     }
 
     private void loadDimens() {
