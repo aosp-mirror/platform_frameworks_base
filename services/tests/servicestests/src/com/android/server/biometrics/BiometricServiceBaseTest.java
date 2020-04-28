@@ -17,7 +17,6 @@
 package com.android.server.biometrics;
 
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -80,11 +79,6 @@ public class BiometricServiceBaseTest {
         @Override
         protected String getLockoutBroadcastPermission() {
             return null;
-        }
-
-        @Override
-        protected long getHalDeviceId() {
-            return 0;
         }
 
         @Override
@@ -158,7 +152,7 @@ public class BiometricServiceBaseTest {
 
         mBiometricServiceBase.startClient(mClient, false /* initiatedByClient */);
 
-        verify(mClient).onError(anyLong(), anyInt(), anyInt());
+        verify(mClient).onError(anyInt(), anyInt());
         verify(mClient).destroy();
     }
 }

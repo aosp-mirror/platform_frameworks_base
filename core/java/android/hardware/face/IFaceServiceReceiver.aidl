@@ -22,14 +22,12 @@ import android.hardware.face.Face;
  * @hide
  */
 oneway interface IFaceServiceReceiver {
-    void onEnrollResult(long deviceId, int faceId, int remaining);
-    void onAcquired(long deviceId, int acquiredInfo, int vendorCode);
-    void onAuthenticationSucceeded(long deviceId, in Face face, int userId,
-            boolean isStrongBiometric);
-    void onAuthenticationFailed(long deviceId);
-    void onError(long deviceId, int error, int vendorCode);
-    void onRemoved(long deviceId, int faceId, int remaining);
-    void onEnumerated(long deviceId, int faceId, int remaining);
+    void onEnrollResult(in Face face, int remaining);
+    void onAcquired(int acquiredInfo, int vendorCode);
+    void onAuthenticationSucceeded(in Face face, int userId, boolean isStrongBiometric);
+    void onAuthenticationFailed();
+    void onError(int error, int vendorCode);
+    void onRemoved(in Face face, int remaining);
     void onFeatureSet(boolean success, int feature);
     void onFeatureGet(boolean success, int feature, boolean value);
 }

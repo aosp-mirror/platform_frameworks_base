@@ -84,42 +84,34 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
     private IFaceServiceReceiver mServiceReceiver = new IFaceServiceReceiver.Stub() {
 
         @Override // binder call
-        public void onEnrollResult(long deviceId, int faceId, int remaining) {
-            mHandler.obtainMessage(MSG_ENROLL_RESULT, remaining, 0,
-                    new Face(null, faceId, deviceId)).sendToTarget();
+        public void onEnrollResult(Face face, int remaining) {
+            mHandler.obtainMessage(MSG_ENROLL_RESULT, remaining, 0, face).sendToTarget();
         }
 
         @Override // binder call
-        public void onAcquired(long deviceId, int acquireInfo, int vendorCode) {
-            mHandler.obtainMessage(MSG_ACQUIRED, acquireInfo, vendorCode, deviceId).sendToTarget();
+        public void onAcquired(int acquireInfo, int vendorCode) {
+            mHandler.obtainMessage(MSG_ACQUIRED, acquireInfo, vendorCode).sendToTarget();
         }
 
         @Override // binder call
-        public void onAuthenticationSucceeded(long deviceId, Face face, int userId,
-                boolean isStrongBiometric) {
+        public void onAuthenticationSucceeded(Face face, int userId, boolean isStrongBiometric) {
             mHandler.obtainMessage(MSG_AUTHENTICATION_SUCCEEDED, userId, isStrongBiometric ? 1 : 0,
                     face).sendToTarget();
         }
 
         @Override // binder call
-        public void onAuthenticationFailed(long deviceId) {
+        public void onAuthenticationFailed() {
             mHandler.obtainMessage(MSG_AUTHENTICATION_FAILED).sendToTarget();
         }
 
         @Override // binder call
-        public void onError(long deviceId, int error, int vendorCode) {
-            mHandler.obtainMessage(MSG_ERROR, error, vendorCode, deviceId).sendToTarget();
+        public void onError(int error, int vendorCode) {
+            mHandler.obtainMessage(MSG_ERROR, error, vendorCode).sendToTarget();
         }
 
         @Override // binder call
-        public void onRemoved(long deviceId, int faceId, int remaining) {
-            mHandler.obtainMessage(MSG_REMOVED, remaining, 0,
-                    new Face(null, faceId, deviceId)).sendToTarget();
-        }
-
-        @Override
-        public void onEnumerated(long deviceId, int faceId, int remaining) {
-            // TODO: Finish. Low priority since it's not used.
+        public void onRemoved(Face face, int remaining) {
+            mHandler.obtainMessage(MSG_REMOVED, remaining, 0, face).sendToTarget();
         }
 
         @Override
@@ -593,8 +585,7 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
                         new IBiometricServiceLockoutResetCallback.Stub() {
 
                             @Override
-                            public void onLockoutReset(long deviceId,
-                                    IRemoteCallback serverCallback)
+                            public void onLockoutReset(IRemoteCallback serverCallback)
                                     throws RemoteException {
                                 try {
                                     final PowerManager.WakeLock wakeLock = powerManager.newWakeLock(
@@ -1043,8 +1034,7 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
                     sendEnrollResult((Face) msg.obj, msg.arg1 /* remaining */);
                     break;
                 case MSG_ACQUIRED:
-                    sendAcquiredResult((Long) msg.obj /* deviceId */, msg.arg1 /* acquire info */,
-                            msg.arg2 /* vendorCode */);
+                    sendAcquiredResult(msg.arg1 /* acquire info */, msg.arg2 /* vendorCode */);
                     break;
                 case MSG_AUTHENTICATION_SUCCEEDED:
                     sendAuthenticatedSucceeded((Face) msg.obj, msg.arg1 /* userId */,
@@ -1054,8 +1044,7 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
                     sendAuthenticatedFailed();
                     break;
                 case MSG_ERROR:
-                    sendErrorResult((Long) msg.obj /* deviceId */, msg.arg1 /* errMsgId */,
-                            msg.arg2 /* vendorCode */);
+                    sendErrorResult(msg.arg1 /* errMsgId */, msg.arg2 /* vendorCode */);
                     break;
                 case MSG_REMOVED:
                     sendRemovedResult((Face) msg.obj, msg.arg1 /* remaining */);
@@ -1103,7 +1092,7 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
         mRemovalCallback.onRemovalSucceeded(face, remaining);
     }
 
-    private void sendErrorResult(long deviceId, int errMsgId, int vendorCode) {
+    private void sendErrorResult(int errMsgId, int vendorCode) {
         // emulate HAL 2.1 behavior and send real errMsgId
         final int clientErrMsgId = errMsgId == FACE_ERROR_VENDOR
                 ? (vendorCode + FACE_ERROR_VENDOR_BASE) : errMsgId;
@@ -1139,7 +1128,7 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
         }
     }
 
-    private void sendAcquiredResult(long deviceId, int acquireInfo, int vendorCode) {
+    private void sendAcquiredResult(int acquireInfo, int vendorCode) {
         if (mAuthenticationCallback != null) {
             mAuthenticationCallback.onAuthenticationAcquired(acquireInfo);
         }
