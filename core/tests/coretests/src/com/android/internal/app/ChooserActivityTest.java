@@ -34,6 +34,7 @@ import static com.android.internal.app.ChooserListAdapter.SHORTCUT_TARGET_SCORE_
 import static com.android.internal.app.ChooserWrapperActivity.sOverrides;
 import static com.android.internal.app.MatcherUtils.first;
 
+import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -41,6 +42,8 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
@@ -55,6 +58,8 @@ import android.content.ClipboardManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ShortcutInfo;
@@ -302,7 +307,7 @@ public class ChooserActivityTest {
         waitForIdle();
         UsageStatsManager usm = activity.getUsageStatsManager();
         verify(sOverrides.resolverListController, times(1))
-                .topK(Mockito.any(List.class), Mockito.anyInt());
+                .topK(any(List.class), anyInt());
         assertThat(activity.getIsSelected(), is(false));
         sOverrides.onSafelyStartCallback = targetInfo -> {
             return true;
@@ -312,7 +317,7 @@ public class ChooserActivityTest {
                 .perform(click());
         waitForIdle();
         verify(sOverrides.resolverListController, times(1))
-                .updateChooserCounts(Mockito.anyString(), Mockito.anyInt(), Mockito.anyString());
+                .updateChooserCounts(Mockito.anyString(), anyInt(), Mockito.anyString());
         verify(sOverrides.resolverListController, times(1))
                 .updateModel(toChoose.activityInfo.getComponentName());
         assertThat(activity.getIsSelected(), is(true));
@@ -1748,6 +1753,54 @@ public class ChooserActivityTest {
         waitForIdle();
 
         assertThat(chosen[0], is(personalResolvedComponentInfos.get(1).getResolveInfoAt(0)));
+    }
+
+    @Test
+    public void testOneInitialIntent_noAutolaunch() {
+        List<ResolvedComponentInfo> personalResolvedComponentInfos =
+                createResolvedComponentsForTest(1);
+        when(sOverrides.resolverListController.getResolversForIntent(Mockito.anyBoolean(),
+                Mockito.anyBoolean(),
+                Mockito.isA(List.class)))
+                .thenReturn(new ArrayList<>(personalResolvedComponentInfos));
+        Intent chooserIntent = createChooserIntent(new Intent[] {new Intent("action.fake")});
+        ResolveInfo[] chosen = new ResolveInfo[1];
+        sOverrides.onSafelyStartCallback = targetInfo -> {
+            chosen[0] = targetInfo.getResolveInfo();
+            return true;
+        };
+        sOverrides.packageManager = mock(PackageManager.class);
+        ResolveInfo ri = createFakeResolveInfo();
+        when(sOverrides.packageManager.resolveActivity(any(Intent.class), anyInt())).thenReturn(ri);
+        waitForIdle();
+
+        mActivityRule.launchActivity(chooserIntent);
+        waitForIdle();
+
+        assertNull(chosen[0]);
+    }
+
+    private Intent createChooserIntent(Intent[] initialIntents) {
+        Intent chooserIntent = new Intent();
+        chooserIntent.setAction(Intent.ACTION_CHOOSER);
+        chooserIntent.putExtra(Intent.EXTRA_TEXT, "testing intent sending");
+        chooserIntent.putExtra(Intent.EXTRA_TITLE, "some title");
+        chooserIntent.putExtra(Intent.EXTRA_INTENT, createSendTextIntent());
+        chooserIntent.setType("text/plain");
+        if (initialIntents != null) {
+            chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, initialIntents);
+        }
+        return chooserIntent;
+    }
+
+    private ResolveInfo createFakeResolveInfo() {
+        ResolveInfo ri = new ResolveInfo();
+        ri.activityInfo = new ActivityInfo();
+        ri.activityInfo.name = "FakeActivityName";
+        ri.activityInfo.packageName = "fake.package.name";
+        ri.activityInfo.applicationInfo = new ApplicationInfo();
+        ri.activityInfo.applicationInfo.packageName = "fake.package.name";
+        return ri;
     }
 
     private Intent createSendTextIntent() {

@@ -301,7 +301,7 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
 
     private boolean rebuildTab(ResolverListAdapter activeListAdapter, boolean doPostProcessing) {
         if (shouldShowNoCrossProfileIntentsEmptyState(activeListAdapter)) {
-            activeListAdapter.postListReadyRunnable(doPostProcessing);
+            activeListAdapter.postListReadyRunnable(doPostProcessing, /* rebuildCompleted */ true);
             return false;
         }
         return activeListAdapter.rebuildList(doPostProcessing);
