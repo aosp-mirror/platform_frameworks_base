@@ -16,13 +16,9 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <!-- no translation found for no_upstream_notification_title (611650570559011140) -->
-    <skip />
-    <!-- no translation found for no_upstream_notification_message (6508394877641864863) -->
-    <skip />
-    <!-- no translation found for no_upstream_notification_disable_button (7609346639290990508) -->
-    <skip />
-    <!-- no translation found for upstream_roaming_notification_title (6032901176124830787) -->
-    <skip />
+    <string name="no_upstream_notification_title" msgid="611650570559011140">"ଟିଥରିଂ ପାଇଁ କୌଣସି ଇଣ୍ଟର୍ନେଟ୍ ସଂଯୋଗ ନାହିଁ"</string>
+    <string name="no_upstream_notification_message" msgid="6508394877641864863">"ଡିଭାଇସଗୁଡ଼ିକ ସଂଯୋଗ କରାଯାଇପାରିବ ନାହିଁ"</string>
+    <string name="no_upstream_notification_disable_button" msgid="7609346639290990508">"ଟିଥରିଂ ବନ୍ଦ କରନ୍ତୁ"</string>
+    <string name="upstream_roaming_notification_title" msgid="6032901176124830787">"ହଟସ୍ପଟ୍ କିମ୍ବା ଟିଥରିଂ ଚାଲୁ ଅଛି"</string>
     <string name="upstream_roaming_notification_message" msgid="7599056263326217523">"ରୋମିଂରେ ଥିବା ସମୟରେ ଅତିରିକ୍ତ ଶୁଳ୍କ ଲାଗୁ ହୋଇପାରେ"</string>
 </resources>
