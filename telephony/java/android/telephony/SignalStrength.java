@@ -83,6 +83,8 @@ public class SignalStrength implements Parcelable {
     // Effectively final. Timestamp is set during construction of SignalStrength
     private long mTimestampMillis;
 
+    private boolean mLteAsPrimaryInNrNsa = true;
+
     CellSignalStrengthCdma mCdma;
     CellSignalStrengthGsm mGsm;
     CellSignalStrengthWcdma mWcdma;
@@ -190,12 +192,16 @@ public class SignalStrength implements Parcelable {
     private CellSignalStrength getPrimary() {
         // This behavior is intended to replicate the legacy behavior of getLevel() by prioritizing
         // newer faster RATs for default/for display purposes.
+
+        if (mLteAsPrimaryInNrNsa) {
+            if (mLte.isValid()) return mLte;
+        }
+        if (mNr.isValid()) return mNr;
         if (mLte.isValid()) return mLte;
         if (mCdma.isValid()) return mCdma;
         if (mTdscdma.isValid()) return mTdscdma;
         if (mWcdma.isValid()) return mWcdma;
         if (mGsm.isValid()) return mGsm;
-        if (mNr.isValid()) return mNr;
         return mLte;
     }
 
@@ -270,6 +276,10 @@ public class SignalStrength implements Parcelable {
 
     /** @hide */
     public void updateLevel(PersistableBundle cc, ServiceState ss) {
+        if (cc != null) {
+            mLteAsPrimaryInNrNsa = cc.getBoolean(
+                    CarrierConfigManager.KEY_SIGNAL_STRENGTH_NR_NSA_USE_LTE_AS_PRIMARY_BOOL, true);
+        }
         mCdma.updateLevel(cc, ss);
         mGsm.updateLevel(cc, ss);
         mWcdma.updateLevel(cc, ss);
