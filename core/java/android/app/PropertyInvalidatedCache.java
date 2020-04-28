@@ -27,11 +27,13 @@ import android.util.Log;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
+import java.util.WeakHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -197,6 +199,14 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
     @GuardedBy("sCorkLock")
     private static final HashMap<String, Integer> sCorks = new HashMap<>();
 
+    /**
+     * Weakly references all cache objects in the current process, allowing us to iterate over
+     * them all for purposes like issuing debug dumps and reacting to memory pressure.
+     */
+    @GuardedBy("sCorkLock")
+    private static final WeakHashMap<PropertyInvalidatedCache, Void> sCaches =
+            new WeakHashMap<>();
+
     private final Object mLock = new Object();
 
     /**
@@ -241,6 +251,9 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
                     return size() > maxEntries;
                 }
             };
+        synchronized (sCorkLock) {
+            sCaches.put(this, null);
+        }
     }
 
     /**
@@ -248,6 +261,9 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
      */
     public final void clear() {
         synchronized (mLock) {
+            if (DEBUG) {
+                Log.d(TAG, "clearing cache for " + mPropertyName);
+            }
             mCache.clear();
         }
     }
@@ -709,5 +725,14 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
     public static void disableForTestMode() {
         Log.d(TAG, "disabling all caches in the process");
         sEnabled = false;
+    }
+
+    /**
+     * Return a list of caches alive at the current time.
+     */
+    public static ArrayList<PropertyInvalidatedCache> getActiveCaches() {
+        synchronized (sCorkLock) {
+            return new ArrayList<PropertyInvalidatedCache>(sCaches.keySet());
+        }
     }
 }
