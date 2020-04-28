@@ -34,11 +34,13 @@
 #include "idmap2/FileUtils.h"
 #include "idmap2/Idmap.h"
 #include "idmap2/SysTrace.h"
+#include "idmap2/ZipFile.h"
 #include "utils/String8.h"
 
 using android::IPCThreadState;
 using android::binder::Status;
 using android::idmap2::BinaryStreamVisitor;
+using android::idmap2::GetPackageCrc;
 using android::idmap2::Idmap;
 using android::idmap2::IdmapHeader;
 using android::idmap2::utils::kIdmapCacheDir;
@@ -48,6 +50,8 @@ using android::idmap2::utils::UidHasWriteAccessToPath;
 using PolicyBitmask = android::ResTable_overlayable_policy_header::PolicyBitmask;
 
 namespace {
+
+constexpr const char* kFrameworkPath = "/system/framework/framework-res.apk";
 
 Status ok() {
   return Status::ok();
@@ -109,8 +113,32 @@ Status Idmap2Service::verifyIdmap(const std::string& target_apk_path,
     return error("failed to parse idmap header");
   }
 
-  *_aidl_return =
-      strcmp(header->GetTargetPath().data(), target_apk_path.data()) == 0 && header->IsUpToDate();
+  if (strcmp(header->GetTargetPath().data(), target_apk_path.data()) != 0) {
+    *_aidl_return = false;
+    return ok();
+  }
+
+  if (target_apk_path != kFrameworkPath) {
+    *_aidl_return = (bool) header->IsUpToDate();
+  } else {
+    if (!android_crc_) {
+      // Loading the framework zip can take several milliseconds. Cache the crc of the framework
+      // resource APK to reduce repeated work during boot.
+      const auto target_zip = idmap2::ZipFile::Open(target_apk_path);
+      if (!target_zip) {
+        return error(base::StringPrintf("failed to open target %s", target_apk_path.c_str()));
+      }
+
+      const auto target_crc = GetPackageCrc(*target_zip);
+      if (!target_crc) {
+        return error(target_crc.GetErrorMessage());
+      }
+
+      android_crc_ = *target_crc;
+    }
+
+    *_aidl_return = (bool) header->IsUpToDate(android_crc_.value());
+  }
 
   // TODO(b/119328308): Check that the set of fulfilled policies of the overlay has not changed
   return ok();
