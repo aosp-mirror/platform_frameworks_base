@@ -33,7 +33,6 @@ class MediaViewManager @Inject constructor(
     private val activityStarter: ActivityStarter,
     mediaManager: MediaDataManager
 ) {
-    private var targetState: MediaState? = null
     val mediaCarousel: ViewGroup
     private val mediaContent: ViewGroup
     private val mediaPlayers: MutableMap<String, MediaControlPanel> = mutableMapOf()
@@ -139,5 +138,26 @@ class MediaViewManager @Inject constructor(
             view.progress = state.expansion
         }
         viewsExpanded = state.expansion > 0;
+    }
+
+    /**
+     * @param targetState the target state we're transitioning to
+     * @param animate should this be animated
+     */
+    fun performTransition(targetState: MediaState?, animate: Boolean, duration: Long,
+                          startDelay: Long) {
+        if (targetState == null) {
+            return
+        }
+        val newWidth = targetState.boundsOnScreen.width()
+        val newHeight = targetState.boundsOnScreen.height()
+        remeasureViews(newWidth, newHeight, animate, duration, startDelay)
+    }
+
+    private fun remeasureViews(newWidth: Int, newHeight: Int, animate: Boolean, duration: Long,
+                               startDelay: Long) {
+        for (mediaPlayer in mediaPlayers.values) {
+            mediaPlayer.setDimension(newWidth, newHeight, animate, duration, startDelay)
+        }
     }
 }

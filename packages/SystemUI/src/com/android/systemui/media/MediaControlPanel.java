@@ -36,6 +36,7 @@ import android.media.session.MediaController.PlaybackInfo;
 import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
 import android.service.media.MediaBrowserService;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -93,6 +94,7 @@ public class MediaControlPanel {
     private final Executor mForegroundExecutor;
     protected final Executor mBackgroundExecutor;
     private final ActivityStarter mActivityStarter;
+    private final LayoutAnimationHelper mLayoutAnimationHelper;
 
     private Context mContext;
     private MotionLayout mMediaNotifView;
@@ -109,6 +111,7 @@ public class MediaControlPanel {
     private String mKey;
     private int mAlbumArtSize;
     private int mAlbumArtRadius;
+    private int mViewWidth;
 
     public static final String MEDIA_PREFERENCES = "media_control_prefs";
     public static final String MEDIA_PREFERENCE_KEY = "browser_components";
@@ -176,6 +179,7 @@ public class MediaControlPanel {
         LayoutInflater inflater = LayoutInflater.from(mContext);
         mMediaNotifView = (MotionLayout) inflater.inflate(R.layout.qs_media_panel, parent, false);
         mBackground = mMediaNotifView.findViewById(R.id.media_background);
+        mLayoutAnimationHelper = new LayoutAnimationHelper(mMediaNotifView);
         mKeyFrames = mMediaNotifView.getDefinedTransitions().get(0).getKeyFrameList();
         mLocalMediaManager = routeManager;
         mForegroundExecutor = foregroundExecutor;
@@ -732,4 +736,32 @@ public class MediaControlPanel {
      * Called when a player can't be resumed to give it an opportunity to hide or remove itself
      */
     protected void removePlayer() { }
+
+    public void setDimension(int newWidth, int newHeight, boolean animate, long duration,
+            long startDelay) {
+        // Let's remeasure if our width changed. Our height is dependent on the expansion, so we
+        // won't animate if it changed
+        if (newWidth != mViewWidth) {
+            if (animate) {
+                mLayoutAnimationHelper.animatePendingSizeChange(duration, startDelay);
+            }
+            setViewWidth(newWidth);
+            mMediaNotifView.layout(0, 0, newWidth, mMediaNotifView.getMeasuredHeight());
+        }
+    }
+
+    protected void setViewWidth(int newWidth) {
+        ConstraintSet expandedSet = mMediaNotifView.getConstraintSet(R.id.expanded);
+        ConstraintSet collapsedSet = mMediaNotifView.getConstraintSet(R.id.collapsed);
+        collapsedSet.setGuidelineBegin(R.id.view_width, newWidth);
+        expandedSet.setGuidelineBegin(R.id.view_width, newWidth);
+        DisplayMetrics displayMetrics = getContext().getResources().getDisplayMetrics();
+        int widthSpec = View.MeasureSpec.makeMeasureSpec(displayMetrics.widthPixels,
+                View.MeasureSpec.AT_MOST);
+        int heightSpec = View.MeasureSpec.makeMeasureSpec(displayMetrics.heightPixels,
+                View.MeasureSpec.AT_MOST);
+        mMediaNotifView.setMinimumWidth(displayMetrics.widthPixels);
+        mMediaNotifView.measure(widthSpec, heightSpec);
+        mViewWidth = newWidth;
+    }
 }

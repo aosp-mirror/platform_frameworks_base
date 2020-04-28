@@ -24,9 +24,6 @@ import android.content.Context
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroupOverlay
-import com.android.settingslib.bluetooth.LocalBluetoothManager
-import com.android.settingslib.media.InfoMediaManager
-import com.android.settingslib.media.LocalMediaManager
 import com.android.systemui.Interpolators
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.StatusBarState
@@ -167,6 +164,7 @@ class MediaHierarchyManager @Inject constructor(
             return;
         }
         updateTargetState()
+        var animate = false
         if (isCurrentlyInGuidedTransformation()) {
             applyTargetStateIfNotAnimating()
         } else if (shouldAnimateTransition(currentHost, previousHost)) {
@@ -175,9 +173,12 @@ class MediaHierarchyManager @Inject constructor(
             animationStartState = currentState.copy()
             adjustAnimatorForTransition(previousLocation, desiredLocation)
             animator.start()
+            animate = true
         } else {
             cancelAnimationAndApplyDesiredState()
         }
+        mediaViewManager.performTransition(targetState, animate, animator.duration,
+                animator.startDelay)
     }
 
     private fun shouldAnimateTransition(currentHost: MediaHost, previousHost: MediaHost): Boolean {

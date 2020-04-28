@@ -23,7 +23,6 @@
     android:scrollbars="none"
     android:clipChildren="false"
     android:clipToPadding="false"
-    android:fillViewport="true"
     >
     <LinearLayout
         android:id="@+id/media_carousel"
