@@ -485,7 +485,15 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     @VisibleForTesting
     protected int getMaxShownPowerItems() {
         if (shouldUseControlsLayout()) {
-            return mResources.getInteger(com.android.systemui.R.integer.power_menu_max_columns);
+            int maxColumns =
+                    mResources.getInteger(com.android.systemui.R.integer.power_menu_max_columns);
+            // TODO: Overflow temporarily disabled on keyguard to prevent touch issues.
+            // Show an extra item on the keyguard because the overflow button currently disabled.
+            if (mKeyguardShowing) {
+                return maxColumns + 1;
+            } else {
+                return maxColumns;
+            }
         } else {
             return Integer.MAX_VALUE;
         }
@@ -2059,7 +2067,8 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             View overflowButton = findViewById(
                     com.android.systemui.R.id.global_actions_overflow_button);
             if (overflowButton != null) {
-                if (mOverflowAdapter.getCount() > 0) {
+                // TODO: Overflow button hidden on keyguard to temporarily prevent touch issues.
+                if (mOverflowAdapter.getCount() > 0 && !mKeyguardShowing) {
                     overflowButton.setOnClickListener((view) -> showPowerOverflowMenu());
                     LinearLayout.LayoutParams params =
                             (LinearLayout.LayoutParams) mGlobalActionsLayout.getLayoutParams();
