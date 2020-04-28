@@ -17,8 +17,12 @@
 package com.android.systemui;
 
 import android.content.Context;
+import android.content.res.Resources;
 
 import com.android.systemui.dagger.SystemUIRootComponent;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Class factory to provide car specific SystemUI components.
@@ -30,5 +34,27 @@ public class CarSystemUIFactory extends SystemUIFactory {
         return DaggerCarSystemUIRootComponent.builder()
                 .contextHolder(new ContextHolder(context))
                 .build();
+    }
+
+    @Override
+    public String[] getSystemUIServiceComponents(Resources resources) {
+        Set<String> names = new HashSet<>();
+
+        for (String s : super.getSystemUIServiceComponents(resources)) {
+            names.add(s);
+        }
+
+        for (String s : resources.getStringArray(R.array.config_systemUIServiceComponentsExclude)) {
+            names.remove(s);
+        }
+
+        for (String s : resources.getStringArray(R.array.config_systemUIServiceComponentsInclude)) {
+            names.add(s);
+        }
+
+        String[] finalNames = new String[names.size()];
+        names.toArray(finalNames);
+
+        return finalNames;
     }
 }

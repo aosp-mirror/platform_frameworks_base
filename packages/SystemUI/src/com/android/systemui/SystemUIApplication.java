@@ -139,7 +139,7 @@ public class SystemUIApplication extends Application implements
      */
 
     public void startServicesIfNeeded() {
-        String[] names = getResources().getStringArray(R.array.config_systemUIServiceComponents);
+        String[] names = SystemUIFactory.getInstance().getSystemUIServiceComponents(getResources());
         startServicesIfNeeded(/* metricsPrefix= */ "StartServices", names);
     }
 
@@ -150,8 +150,8 @@ public class SystemUIApplication extends Application implements
      * <p>This method must only be called from the main thread.</p>
      */
     void startSecondaryUserServicesIfNeeded() {
-        String[] names =
-                  getResources().getStringArray(R.array.config_systemUIServiceComponentsPerUser);
+        String[] names = SystemUIFactory.getInstance().getSystemUIServiceComponentsPerUser(
+                getResources());
         startServicesIfNeeded(/* metricsPrefix= */ "StartSecondaryServices", names);
     }
 
