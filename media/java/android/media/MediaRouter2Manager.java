@@ -314,7 +314,6 @@ public final class MediaRouter2Manager {
 
         //TODO: Ignore unknown route.
         if (sessionInfo.getTransferableRoutes().contains(route.getId())) {
-            //TODO: callbacks must be called after this.
             transferToRoute(sessionInfo, route);
             return;
         }
@@ -340,7 +339,6 @@ public final class MediaRouter2Manager {
             } catch (RemoteException ex) {
                 Log.e(TAG, "Unable to select media route", ex);
             }
-            releaseSession(sessionInfo);
         }
     }
 
@@ -489,6 +487,7 @@ public final class MediaRouter2Manager {
             notifyTransferFailed(matchingRequest.mOldSessionInfo, requestedRoute);
             return;
         }
+        releaseSession(matchingRequest.mOldSessionInfo);
         notifyTransferred(matchingRequest.mOldSessionInfo, sessionInfo);
     }
 
