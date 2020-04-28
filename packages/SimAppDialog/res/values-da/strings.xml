@@ -18,9 +18,9 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="8898068901680117589">"Dialogboks for app til SIM-kort"</string>
-    <string name="install_carrier_app_title" msgid="334729104862562585">"Aktivér mobilselskab"</string>
-    <string name="install_carrier_app_description" msgid="4014303558674923797">"Du skal installere appen <xliff:g id="ID_1">%1$s</xliff:g>, før du kan bruge dit nye SIM-kort."</string>
-    <string name="install_carrier_app_description_default" msgid="7356830245205847840">"Du skal installere appen for dit mobilselskab, før du kan bruge dit nye SIM-kort."</string>
+    <string name="install_carrier_app_title" msgid="334729104862562585">"Aktivér mobilnetværk"</string>
+    <string name="install_carrier_app_description" msgid="4014303558674923797">"Du skal installere appen <xliff:g id="ID_1">%1$s</xliff:g>, før dit nye SIM-kort kan fungere korrekt."</string>
+    <string name="install_carrier_app_description_default" msgid="7356830245205847840">"Du skal installere appen for dit mobilselskab, før dit nye SIM-kort kan fungere korrekt."</string>
     <string name="install_carrier_app_defer_action" msgid="2558576736886876209">"Ikke nu"</string>
     <string name="install_carrier_app_download_action" msgid="7859229305958538064">"Download app"</string>
 </resources>
