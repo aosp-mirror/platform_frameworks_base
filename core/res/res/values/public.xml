@@ -3022,6 +3022,7 @@
       <public name="gwpAsanMode" />
       <!-- @hide -->
       <public name="scrollCaptureHint" />
+      <public name="rollbackDataPolicy" />
     </public-group>
 
     <public-group type="drawable" first-id="0x010800b5">
