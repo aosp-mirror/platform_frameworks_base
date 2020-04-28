@@ -37,6 +37,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import android.annotation.UserIdInt;
+import android.app.PropertyInvalidatedCache;
 import android.content.pm.UserInfo;
 import android.content.pm.UserInfo.UserInfoFlag;
 import android.os.Looper;
@@ -78,6 +79,9 @@ public class UserManagerServiceUserInfoTest {
         if (Looper.myLooper() == null) {
             Looper.prepare();
         }
+        // Disable binder caches in this process.
+        PropertyInvalidatedCache.disableForTestMode();
+
         LocalServices.removeServiceForTest(UserManagerInternal.class);
         mUserManagerService = new UserManagerService(InstrumentationRegistry.getContext());
 
