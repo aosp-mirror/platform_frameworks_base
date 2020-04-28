@@ -1630,6 +1630,10 @@
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Molempien äänenvoimakkuuspainikkeiden pitkään painaminen laittaa päälle esteettömyysominaisuuden <xliff:g id="SERVICE">%1$s</xliff:g>. Tämä voi muuttaa laitteesi toimintaa.\n\nVoit muuttaa tätä pikanäppäintä kohdassa Asetukset &gt; Esteettömyys."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Laita päälle"</string>
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"Älä laita päälle"</string>
+    <!-- no translation found for accessibility_shortcut_menu_item_status_on (6608392117189732543) -->
+    <skip />
+    <!-- no translation found for accessibility_shortcut_menu_item_status_off (5531598275559472393) -->
+    <skip />
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Saako <xliff:g id="SERVICE">%1$s</xliff:g> laitteesi täyden käyttöoikeuden?"</string>
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Jos <xliff:g id="SERVICE">%1$s</xliff:g> otetaan käyttöön, laitteesi ei käytä näytön lukitusta tiedon salauksen parantamiseen."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Täysi käyttöoikeus sopii esteettömyyssovelluksille, mutta ei useimmille sovelluksille."</string>

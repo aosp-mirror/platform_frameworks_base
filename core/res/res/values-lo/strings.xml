@@ -1630,6 +1630,10 @@
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"ກົດປຸ່ມລະດັບສຽງທັງສອງຄ້າງໄວ້ສອງສາມວິນາທີເພື່ອເປີດໃຊ້ <xliff:g id="SERVICE">%1$s</xliff:g>, ຄຸນສົມບັດການຊ່ວຍເຂົ້າເຖິງ. ນີ້ອາດປ່ຽນວິທີການເຮັດວຽກຂອງອຸປະກອນທ່ານ.\n\nທ່ານສາມາດປ່ຽນທາງລັດນີ້ເປັນຄຸນສົມບັດອື່ນໄດ້ໃນການຕັ້ງຄ່າ &gt; ການຊ່ວຍເຂົ້າເຖິງ."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"ເປີດໃຊ້"</string>
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"ບໍ່ເປີດ"</string>
+    <!-- no translation found for accessibility_shortcut_menu_item_status_on (6608392117189732543) -->
+    <skip />
+    <!-- no translation found for accessibility_shortcut_menu_item_status_off (5531598275559472393) -->
+    <skip />
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"ອະນຸຍາດໃຫ້ <xliff:g id="SERVICE">%1$s</xliff:g> ຄວບຄຸມອຸປະກອນທ່ານໄດ້ເຕັມຮູບແບບບໍ?"</string>
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"ຫາກ​ທ່ານ​ເປີດ​ໃຊ້ <xliff:g id="SERVICE">%1$s</xliff:g>, ​ອຸ​ປະ​ກອນ​ຂອງ​ທ່ານ​ຈະ​ບໍ່​ໃຊ້​ການ​ລັອກ​ໜ້າ​ຈໍ​ຂອງ​ທ່ານ​ເພື່ອ​ເພີ່ມ​ການ​ເຂົ້າ​ລະ​ຫັດ​ຂໍ້​ມູນ."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"ການຄວບຄຸມແບບເຕັມຮູບແບບແມ່ນເໝາະສົມສຳລັບແອັບທີ່ຊ່ວຍທ່ານໃນດ້ານການຊ່ວຍເຂົ້າເຖິງ, ແຕ່ບໍ່ເໝາະສຳລັບທຸກແອັບ."</string>

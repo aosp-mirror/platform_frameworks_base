@@ -1630,6 +1630,10 @@
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Натиснете двата бутона за силата на звука и ги задръжте за няколко секунди, за да включите функцията за достъпност <xliff:g id="SERVICE">%1$s</xliff:g>. Това може да промени начина, по който работи устройството ви.\n\nМожете да зададете друга функция за този пряк път от „Настройки“ &gt; „Достъпност“."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Включване"</string>
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"Без включване"</string>
+    <!-- no translation found for accessibility_shortcut_menu_item_status_on (6608392117189732543) -->
+    <skip />
+    <!-- no translation found for accessibility_shortcut_menu_item_status_off (5531598275559472393) -->
+    <skip />
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Искате ли да разрешите на <xliff:g id="SERVICE">%1$s</xliff:g> да има пълен контрол над устройството ви?"</string>
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Ако включите <xliff:g id="SERVICE">%1$s</xliff:g>, устройството ви няма да подобрява шифроването на данни посредством опцията ви за заключване на екрана."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Пълният контрол е подходящ за приложенията, които помагат на потребителите със специални нужди, но не и за повечето приложения."</string>

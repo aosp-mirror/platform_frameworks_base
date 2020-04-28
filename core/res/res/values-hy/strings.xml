@@ -1405,8 +1405,8 @@
     <string name="ime_action_default" msgid="8265027027659800121">"Կատարել"</string>
     <string name="dial_number_using" msgid="6060769078933953531">"Հավաքել հեռախոսահամարը`\nօգտագործելով <xliff:g id="NUMBER">%s</xliff:g>-ը"</string>
     <string name="create_contact_using" msgid="6200708808003692594">"Ստեղծել կոնտակտ`\nօգտագործելով <xliff:g id="NUMBER">%s</xliff:g>-ը"</string>
-    <string name="grant_credentials_permission_message_header" msgid="5365733888842570481">"Հետևյալ մեկ կամ ավել հավելվածներ մուտքի թույլտվության հարցում են անում` այժմ և հետագայում ձեր հաշվին մուտք ունենալու համար:"</string>
-    <string name="grant_credentials_permission_message_footer" msgid="1886710210516246461">"Ցանկանու՞մ եք թույլատրել այս հարցումը:"</string>
+    <string name="grant_credentials_permission_message_header" msgid="5365733888842570481">"Հետևյալ մեկ կամ մի քանի հավելվածներին թույլտվություն է անհրաժեշտ՝ այժմ և հետագայում ձեր հաշվի տվյալներն օգտագործելու համար։"</string>
+    <string name="grant_credentials_permission_message_footer" msgid="1886710210516246461">"Թույլատրե՞լ"</string>
     <string name="grant_permissions_header_text" msgid="3420736827804657201">"Մուտքի հարցում"</string>
     <string name="allow" msgid="6195617008611933762">"Թույլատրել"</string>
     <string name="deny" msgid="6632259981847676572">"Մերժել"</string>
@@ -1630,6 +1630,10 @@
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Ձայնի կարգավորման երկու կոճակները մի քանի վայրկյան սեղմած պահելով կմիացնեք <xliff:g id="SERVICE">%1$s</xliff:g> ծառայությունը, որը հատուկ գործառույթ է։ Դրա արդյունքում սարքի աշխատաեղանակը կարող է փոխվել։\n\nԱյս դյուրանցումը մեկ այլ գործառույթով փոխելու համար անցեք Կարգավորումներ &gt; Հատուկ գործառույթներ։"</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Միացնել"</string>
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"Չմիացնել"</string>
+    <!-- no translation found for accessibility_shortcut_menu_item_status_on (6608392117189732543) -->
+    <skip />
+    <!-- no translation found for accessibility_shortcut_menu_item_status_off (5531598275559472393) -->
+    <skip />
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Թույլատրե՞լ <xliff:g id="SERVICE">%1$s</xliff:g> ծառայությանը կառավարել ձեր սարքը"</string>
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Եթե միացնեք <xliff:g id="SERVICE">%1$s</xliff:g> ծառայությունը, ձեր սարքը չի օգտագործի էկրանի կողպումը՝ տվյալների գաղտնագրումը բարելավելու համար:"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Ամբողջական վերահսկումն անհրաժեշտ է միայն այն հավելվածներին, որոնք օգնում են ձեզ հատուկ գործառույթներից օգտվելիս։"</string>
