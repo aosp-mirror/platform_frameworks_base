@@ -264,6 +264,46 @@ public class NetworkStatsFactoryTest extends NetworkStatsBaseTest {
     }
 
     @Test
+    public void testConcurrentVpns() throws Exception {
+        // Assume two VPNs are connected on two different network interfaces. VPN1 is using
+        // TEST_IFACE and VPN2 is using TEST_IFACE2.
+        final VpnInfo[] vpnInfos = new VpnInfo[] {
+                createVpnInfo(TUN_IFACE, new String[] {TEST_IFACE}),
+                createVpnInfo(TUN_IFACE2, new String[] {TEST_IFACE2})};
+        mFactory.updateVpnInfos(vpnInfos);
+
+        // create some traffic (assume 10 bytes of MTU for VPN interface and 1 byte encryption
+        // overhead per packet):
+        // 1000 bytes (100 packets) were sent, and 2000 bytes (200 packets) were received by UID_RED
+        // over VPN1.
+        // 700 bytes (70 packets) were sent, and 3000 bytes (300 packets) were received by UID_RED
+        // over VPN2.
+        // 500 bytes (50 packets) were sent, and 1000 bytes (100 packets) were received by UID_BLUE
+        // over VPN1.
+        // 250 bytes (25 packets) were sent, and 500 bytes (50 packets) were received by UID_BLUE
+        // over VPN2.
+        // VPN1 sent 1650 bytes (150 packets), and received 3300 (300 packets) over TEST_IFACE.
+        // Of 1650 bytes sent over WiFi, expect 1000 bytes attributed to UID_RED, 500 bytes
+        // attributed to UID_BLUE, and 150 bytes attributed to UID_VPN.
+        // Of 3300 bytes received over WiFi, expect 2000 bytes attributed to UID_RED, 1000 bytes
+        // attributed to UID_BLUE, and 300 bytes attributed to UID_VPN.
+        // VPN2 sent 1045 bytes (95 packets), and received 3850 (350 packets) over TEST_IFACE2.
+        // Of 1045 bytes sent over Cell, expect 700 bytes attributed to UID_RED, 250 bytes
+        // attributed to UID_BLUE, and 95 bytes attributed to UID_VPN.
+        // Of 3850 bytes received over Cell, expect 3000 bytes attributed to UID_RED, 500 bytes
+        // attributed to UID_BLUE, and 350 bytes attributed to UID_VPN.
+        final NetworkStats tunStats =
+                parseDetailedStats(R.raw.xt_qtaguid_vpn_one_underlying_two_vpn);
+
+        assertValues(tunStats, TEST_IFACE, UID_RED, 2000L, 200L, 1000L, 100L);
+        assertValues(tunStats, TEST_IFACE, UID_BLUE, 1000L, 100L, 500L, 50L);
+        assertValues(tunStats, TEST_IFACE2, UID_RED, 3000L, 300L, 700L, 70L);
+        assertValues(tunStats, TEST_IFACE2, UID_BLUE, 500L, 50L, 250L, 25L);
+        assertValues(tunStats, TEST_IFACE, UID_VPN, 300L, 0L, 150L, 0L);
+        assertValues(tunStats, TEST_IFACE2, UID_VPN, 350L, 0L, 95L, 0L);
+    }
+
+    @Test
     public void testVpnWithTwoUnderlyingIfaces_splitTraffic() throws Exception {
         // WiFi and Cell networks are connected and VPN is using WiFi (which has TEST_IFACE) and
         // Cell (which has TEST_IFACE2) and has declared both of them in its underlying network set.
