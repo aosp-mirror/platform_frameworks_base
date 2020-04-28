@@ -399,11 +399,17 @@ public class WindowManagerService extends IWindowManager.Stub
     private static final String HIERARCHICAL_ANIMATIONS_PROPERTY =
             "persist.wm.hierarchical_animations";
 
+    private static final String DISABLE_TRIPLE_BUFFERING_PROPERTY =
+            "ro.sf.disable_triple_buffer";
+
     /**
      * @see #HIERARCHICAL_ANIMATIONS_PROPERTY
      */
     static boolean sHierarchicalAnimations =
             SystemProperties.getBoolean(HIERARCHICAL_ANIMATIONS_PROPERTY, true);
+
+    static boolean sEnableTripleBuffering = !SystemProperties.getBoolean(
+            DISABLE_TRIPLE_BUFFERING_PROPERTY, false);
 
     // Enums for animation scale update types.
     @Retention(RetentionPolicy.SOURCE)
@@ -1604,6 +1610,14 @@ public class WindowManagerService extends IWindowManager.Stub
             // From now on, no exceptions or errors allowed!
 
             res = WindowManagerGlobal.ADD_OKAY;
+
+            if (mUseBLAST) {
+                res |= WindowManagerGlobal.ADD_FLAG_USE_BLAST;
+            }
+            if (sEnableTripleBuffering) {
+                res |= WindowManagerGlobal.ADD_FLAG_USE_TRIPLE_BUFFERING;
+            }
+
             if (displayContent.mCurrentFocus == null) {
                 displayContent.mWinAddedSinceNullFocus.add(win);
             }
@@ -3890,6 +3904,30 @@ public class WindowManagerService extends IWindowManager.Stub
                     return null;
                 }
                 return dc.addShellRoot(client, windowType);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
+    }
+
+    @Override
+    public void setShellRootAccessibilityWindow(int displayId, int windowType, IWindow target) {
+        if (mContext.checkCallingOrSelfPermission(MANAGE_APP_TOKENS)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Must hold permission " + MANAGE_APP_TOKENS);
+        }
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                final DisplayContent dc = mRoot.getDisplayContent(displayId);
+                if (dc == null) {
+                    return;
+                }
+                ShellRoot root = dc.mShellRoots.get(windowType);
+                if (root == null) {
+                    return;
+                }
+                root.setAccessibilityWindow(target);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);

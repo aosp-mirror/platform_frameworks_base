@@ -645,11 +645,6 @@ public final class InputMethodManager {
         @Override
         public void setCurrentRootView(ViewRootImpl rootView) {
             synchronized (mH) {
-                if (mCurRootView != null) {
-                    // Reset the last served view and restart window focus state of the root view.
-                    mCurRootView.getImeFocusController().setServedView(null);
-                    mRestartOnNextWindowFocus = true;
-                }
                 mCurRootView = rootView;
             }
         }

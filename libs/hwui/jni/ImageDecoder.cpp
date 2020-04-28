@@ -27,9 +27,9 @@
 #include <hwui/ImageDecoder.h>
 #include <HardwareBitmapUploader.h>
 
+#include <FrontBufferedStream.h>
 #include <SkAndroidCodec.h>
 #include <SkEncodedImageFormat.h>
-#include <SkFrontBufferedStream.h>
 #include <SkStream.h>
 
 #include <androidfw/Asset.h>
@@ -187,8 +187,7 @@ static jobject ImageDecoder_nCreateInputStream(JNIEnv* env, jobject /*clazz*/,
     }
 
     std::unique_ptr<SkStream> bufferedStream(
-        SkFrontBufferedStream::Make(std::move(stream),
-        SkCodec::MinBufferedBytesNeeded()));
+            skia::FrontBufferedStream::Make(std::move(stream), SkCodec::MinBufferedBytesNeeded()));
     return native_create(env, std::move(bufferedStream), source, preferAnimation);
 }
 

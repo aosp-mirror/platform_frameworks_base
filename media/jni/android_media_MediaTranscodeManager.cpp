@@ -100,3 +100,26 @@ int register_android_media_MediaTranscodeManager(JNIEnv *env) {
     return AndroidRuntime::registerNativeMethods(env,
                 "android/media/MediaTranscodeManager", gMethods, NELEM(gMethods));
 }
+
+jint JNI_OnLoad(JavaVM* vm, void* /* reserved */)
+{
+    JNIEnv* env = NULL;
+    jint result = -1;
+
+    if (vm->GetEnv((void**) &env, JNI_VERSION_1_4) != JNI_OK) {
+        ALOGE("ERROR: GetEnv failed\n");
+        return result;
+    }
+    assert(env != NULL);
+
+    if (register_android_media_MediaTranscodeManager(env) < 0) {
+        ALOGE("ERROR: MediaTranscodeManager native registration failed");
+        goto bail;
+    }
+
+    /* success -- return valid version number */
+    result = JNI_VERSION_1_4;
+
+bail:
+    return result;
+}

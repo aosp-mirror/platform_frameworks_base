@@ -85,7 +85,6 @@ public class SystemActionPerformer {
     private final AccessibilityAction mLegacyNotificationsAction;
     private final AccessibilityAction mLegacyQuickSettingsAction;
     private final AccessibilityAction mLegacyPowerDialogAction;
-    private final AccessibilityAction mLegacyToggleSplitScreenAction;
     private final AccessibilityAction mLegacyLockScreenAction;
     private final AccessibilityAction mLegacyTakeScreenshotAction;
 
@@ -142,10 +141,6 @@ public class SystemActionPerformer {
                 AccessibilityService.GLOBAL_ACTION_POWER_DIALOG,
                 mContext.getResources().getString(
                         R.string.accessibility_system_action_power_dialog_label));
-        mLegacyToggleSplitScreenAction = new AccessibilityAction(
-                AccessibilityService.GLOBAL_ACTION_TOGGLE_SPLIT_SCREEN,
-                mContext.getResources().getString(
-                        R.string.accessibility_system_action_toggle_split_screen_label));
         mLegacyLockScreenAction = new AccessibilityAction(
                 AccessibilityService.GLOBAL_ACTION_LOCK_SCREEN,
                 mContext.getResources().getString(
@@ -233,10 +228,6 @@ public class SystemActionPerformer {
         if (!mRegisteredSystemActions.containsKey(
                 AccessibilityService.GLOBAL_ACTION_POWER_DIALOG)) {
             systemActions.add(mLegacyPowerDialogAction);
-        }
-        if (!mRegisteredSystemActions.containsKey(
-                AccessibilityService.GLOBAL_ACTION_TOGGLE_SPLIT_SCREEN)) {
-            systemActions.add(mLegacyToggleSplitScreenAction);
         }
         if (!mRegisteredSystemActions.containsKey(
                 AccessibilityService.GLOBAL_ACTION_LOCK_SCREEN)) {

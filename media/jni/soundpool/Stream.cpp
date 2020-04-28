@@ -330,7 +330,9 @@ void Stream::play_l(const std::shared_ptr<Sound>& sound, int32_t nextStreamID,
                     AudioTrack::TRANSFER_DEFAULT,
                     nullptr /*offloadInfo*/, -1 /*uid*/, -1 /*pid*/,
                     mStreamManager->getAttributes());
-
+            // Set caller name so it can be logged in destructor.
+            // MediaMetricsConstants.h: AMEDIAMETRICS_PROP_CALLERNAME_VALUE_SOUNDPOOL
+            newTrack->setCallerName("soundpool");
             oldTrack = mAudioTrack;
             status = newTrack->initCheck();
             if (status != NO_ERROR) {

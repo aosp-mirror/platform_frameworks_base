@@ -2492,6 +2492,23 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     /**
+     * Expands the given rectangle by the region of window resize handle for freeform window.
+     * @param inOutRect The rectangle to update.
+     */
+    private void adjustRegionInFreefromWindowMode(Rect inOutRect) {
+        if (!inFreeformWindowingMode()) {
+            return;
+        }
+
+        // For freeform windows, we need the touch region to include the whole
+        // surface for the shadows.
+        final DisplayMetrics displayMetrics = getDisplayContent().getDisplayMetrics();
+        final int delta = WindowManagerService.dipToPixel(
+                RESIZE_HANDLE_WIDTH_IN_DP, displayMetrics);
+        inOutRect.inset(-delta, -delta);
+    }
+
+    /**
      * Updates the region for a window in an Activity that was a touch modal. This will limit
      * the outer touch to the activity stack region.
      * @param outRegion The region to update.
@@ -2514,14 +2531,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 getRootTask().getDimBounds(mTmpRect);
             }
         }
-        if (inFreeformWindowingMode()) {
-            // For freeform windows, we need the touch region to include the whole
-            // surface for the shadows.
-            final DisplayMetrics displayMetrics = getDisplayContent().getDisplayMetrics();
-            final int delta = WindowManagerService.dipToPixel(
-                    RESIZE_HANDLE_WIDTH_IN_DP, displayMetrics);
-            mTmpRect.inset(-delta, -delta);
-        }
+        adjustRegionInFreefromWindowMode(mTmpRect);
         outRegion.set(mTmpRect);
         cropRegionToStackBoundsIfNeeded(outRegion);
     }
@@ -3337,7 +3347,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
 
         final ActivityStack stack = task.getStack();
-        if (stack == null) {
+        if (stack == null || inFreeformWindowingMode()) {
             return;
         }
 
@@ -3356,6 +3366,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
 
         stack.getDimBounds(mTmpRect);
+        adjustRegionInFreefromWindowMode(mTmpRect);
         region.op(mTmpRect, Region.Op.INTERSECT);
     }
 
@@ -5598,7 +5609,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         @Override
         public void apply(Transaction t, SurfaceControl leash, long currentPlayTime) {
-            final float fraction = (float) currentPlayTime / getDuration();
+            final float fraction = getFraction(currentPlayTime);
             final float v = mInterpolator.getInterpolation(fraction);
             t.setPosition(leash, mFrom.x + (mTo.x - mFrom.x) * v,
                     mFrom.y + (mTo.y - mFrom.y) * v);
