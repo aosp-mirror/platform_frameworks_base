@@ -28,6 +28,7 @@ import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.CollectionUtils;
 
 import java.util.ArrayList;
@@ -38,8 +39,6 @@ import java.util.concurrent.Executor;
 /**
  * Helper class that watches for events that are triggered per subscription.
  */
-// TODO (b/152176562): Write tests to verify subscription changes generate corresponding
-//  register/unregister calls.
 public class NetworkStatsSubscriptionsMonitor extends
         SubscriptionManager.OnSubscriptionsChangedListener {
 
@@ -206,6 +205,11 @@ public class NetworkStatsSubscriptionsMonitor extends
             }
             mLastCollapsedRatType = collapsedRatType;
             mMonitor.mDelegate.onCollapsedRatTypeChanged(mSubscriberId, mLastCollapsedRatType);
+        }
+
+        @VisibleForTesting
+        public int getSubId() {
+            return mSubId;
         }
     }
 }
