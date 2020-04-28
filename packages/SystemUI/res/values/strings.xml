@@ -2712,6 +2712,8 @@
     <string name="controls_pin_use_alphanumeric">PIN contains letters or symbols</string>
     <!-- Controls PIN entry dialog, title [CHAR LIMIT=30] -->
     <string name="controls_pin_verify">Verify <xliff:g id="device" example="Backdoor lock">%s</xliff:g></string>
+    <!-- Controls PIN entry dialog, title when 1st attempt failed [CHAR LIMIT=30] -->
+    <string name="controls_pin_wrong">Wrong PIN</string>
     <!-- Controls PIN entry dialog, waiting to verify [CHAR LIMIT=30] -->
     <string name="controls_pin_verifying">Verifying\u2026</string>
     <!-- Controls PIN entry dialog, text hint [CHAR LIMIT=30] -->
@@ -2735,6 +2737,13 @@
 
     <!-- Error message indicating that a control timed out while waiting for an update [CHAR_LIMIT=30] -->
     <string name="controls_error_timeout">Inactive, check app</string>
+    <!-- Error message indicating that an unspecified error occurred while getting the status, and
+         a retry will be attempted [CHAR LIMIT=30] -->
+    <string name="controls_error_retryable">Error, retrying\u2026</string>
+    <!-- Error message indicating that the control is no longer available in the application [CHAR LIMIT=30] -->
+    <string name="controls_error_removed">Device removed</string>
+    <!-- Error message indicating that an unspecified error occurred while getting the status [CHAR LIMIT=30] -->
+    <string name="controls_error_generic">Can\u2019t load status</string>
     <!-- Error message indicating that a control action failed [CHAR_LIMIT=30] -->
     <string name="controls_error_failed">Error, try again</string>
     <!-- Stateless control message informing the user that a routine has started [CHAR_LIMIT=30] -->
