@@ -167,11 +167,17 @@ class ControlsUiControllerImpl @Inject constructor (
     private fun reload(parent: ViewGroup) {
         if (hidden) return
 
+        controlsListingController.get().removeCallback(listingCallback)
+        controlsController.get().unsubscribe()
+
         val fadeAnim = ObjectAnimator.ofFloat(parent, "alpha", 1.0f, 0.0f)
         fadeAnim.setInterpolator(AccelerateInterpolator(1.0f))
         fadeAnim.setDuration(FADE_IN_MILLIS)
         fadeAnim.addListener(object : AnimatorListenerAdapter() {
             override fun onAnimationEnd(animation: Animator) {
+                controlViewsById.clear()
+                controlsById.clear()
+
                 show(parent, dismissGlobalActions)
                 val showAnim = ObjectAnimator.ofFloat(parent, "alpha", 0.0f, 1.0f)
                 showAnim.setInterpolator(DecelerateInterpolator(1.0f))
@@ -445,21 +451,23 @@ class ControlsUiControllerImpl @Inject constructor (
         val listView = parent.requireViewById(R.id.global_actions_controls_list) as ViewGroup
         var lastRow: ViewGroup = createRow(inflater, listView)
         selectedStructure.controls.forEach {
-            if (lastRow.getChildCount() == maxColumns) {
-                lastRow = createRow(inflater, listView)
-            }
-            val baseLayout = inflater.inflate(
-                R.layout.controls_base_item, lastRow, false) as ViewGroup
-            lastRow.addView(baseLayout)
-            val cvh = ControlViewHolder(
-                baseLayout,
-                controlsController.get(),
-                uiExecutor,
-                bgExecutor
-            )
             val key = ControlKey(selectedStructure.componentName, it.controlId)
-            cvh.bindData(controlsById.getValue(key))
-            controlViewsById.put(key, cvh)
+            controlsById.get(key)?.let {
+                if (lastRow.getChildCount() == maxColumns) {
+                    lastRow = createRow(inflater, listView)
+                }
+                val baseLayout = inflater.inflate(
+                    R.layout.controls_base_item, lastRow, false) as ViewGroup
+                lastRow.addView(baseLayout)
+                val cvh = ControlViewHolder(
+                    baseLayout,
+                    controlsController.get(),
+                    uiExecutor,
+                    bgExecutor
+                )
+                cvh.bindData(it)
+                controlViewsById.put(key, cvh)
+            }
         }
 
         // add spacers if necessary to keep control size consistent
@@ -525,7 +533,6 @@ class ControlsUiControllerImpl @Inject constructor (
         if (newSelection != selectedStructure) {
             selectedStructure = newSelection
             updatePreferences(selectedStructure)
-            controlsListingController.get().removeCallback(listingCallback)
             reload(parent)
         }
     }
@@ -546,6 +553,7 @@ class ControlsUiControllerImpl @Inject constructor (
         parent.removeAllViews()
         controlsById.clear()
         controlViewsById.clear()
+
         controlsListingController.get().removeCallback(listingCallback)
 
         RenderInfo.clearCache()
