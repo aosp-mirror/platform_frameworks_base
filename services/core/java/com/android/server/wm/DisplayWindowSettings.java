@@ -642,8 +642,7 @@ class DisplayWindowSettings {
         if (mIdentifier == IDENTIFIER_PORT && displayInfo.address != null) {
             // Config suggests using port as identifier for physical displays.
             if (displayInfo.address instanceof DisplayAddress.Physical) {
-                byte port = ((DisplayAddress.Physical) displayInfo.address).getPort();
-                return "port:" + Byte.toUnsignedInt(port);
+                return "port:" + ((DisplayAddress.Physical) displayInfo.address).getPort();
             }
         }
         return displayInfo.uniqueId;
