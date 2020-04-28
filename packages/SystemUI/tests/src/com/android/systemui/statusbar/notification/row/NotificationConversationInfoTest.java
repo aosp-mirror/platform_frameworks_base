@@ -356,7 +356,10 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 applicationInfo);
         when(mMockPackageManager.getApplicationLabel(any())).thenReturn("Other");
 
-        NotificationEntry entry = new NotificationEntryBuilder().setSbn(mSbn).build();
+        NotificationEntry entry = new NotificationEntryBuilder()
+                .setSbn(mSbn)
+                .setShortcutInfo(mShortcutInfo)
+                .build();
         mNotificationInfo.bindNotification(
                 mShortcutManager,
                 mMockPackageManager,

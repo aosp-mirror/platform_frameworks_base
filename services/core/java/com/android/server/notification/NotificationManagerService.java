@@ -2721,12 +2721,12 @@ public class NotificationManagerService extends SystemService {
         }
         return text == null ? null : String.valueOf(text);
     }
-    
+
     protected void maybeRegisterMessageSent(NotificationRecord r) {
         Context appContext = r.getSbn().getPackageContext(getContext());
-        Notification.Builder nb = 
+        Notification.Builder nb =
                 Notification.Builder.recoverBuilder(appContext, r.getNotification());
-        if (nb.getStyle() instanceof Notification.MessagingStyle) {
+        if (nb.getStyle() instanceof Notification.MessagingStyle && r.getShortcutInfo() == null) {
             mPreferencesHelper.setMessageSent(r.getSbn().getPackageName(), r.getUid());
             handleSavePolicyFile();
         }
@@ -5630,7 +5630,7 @@ public class NotificationManagerService extends SystemService {
         if (mIsTelevision && (new Notification.TvExtender(notification)).getChannelId() != null) {
             channelId = (new Notification.TvExtender(notification)).getChannelId();
         }
-        String shortcutId = n.getShortcutId(getContext());
+        String shortcutId = n.getShortcutId();
         final NotificationChannel channel = mPreferencesHelper.getConversationNotificationChannel(
                 pkg, notificationUid, channelId, shortcutId,
                 true /* parent ok */, false /* includeDeleted */);
