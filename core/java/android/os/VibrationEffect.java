@@ -50,6 +50,9 @@ public abstract class VibrationEffect implements Parcelable {
     private static final int PARCEL_TOKEN_EFFECT = 3;
     private static final int PARCEL_TOKEN_COMPOSITION = 4;
 
+    // Stevens' coefficient to scale the perceived vibration intensity.
+    private static final float SCALE_GAMMA = 0.65f;
+
 
     /**
      * The default vibration strength of the device.
@@ -400,15 +403,76 @@ public abstract class VibrationEffect implements Parcelable {
     public abstract long getDuration();
 
     /**
-     * Scale the amplitude with the given constraints.
+     * Resolve default values into integer amplitude numbers.
      *
-     * This assumes that the previous value was in the range [0, MAX_AMPLITUDE]
+     * @param defaultAmplitude the default amplitude to apply, must be between 0 and
+     *                         MAX_AMPLITUDE
+     * @return this if amplitude value is already set, or a copy of this effect with given default
+     *         amplitude otherwise
+     *
      * @hide
      */
-    @TestApi
-    protected static int scale(int amplitude, float gamma, int maxAmplitude) {
-        float val = MathUtils.pow(amplitude / (float) MAX_AMPLITUDE, gamma);
-        return (int) (val * maxAmplitude);
+    public abstract VibrationEffect resolve(int defaultAmplitude);
+
+    /**
+     * Scale the vibration effect intensity with the given constraints.
+     *
+     * @param scaleFactor scale factor to be applied to the intensity. Values within [0,1) will
+     *                    scale down the intensity, values larger than 1 will scale up
+     * @return this if there is no scaling to be done, or a copy of this effect with scaled
+     *         vibration intensity otherwise
+     *
+     * @hide
+     */
+    public abstract VibrationEffect scale(float scaleFactor);
+
+    /**
+     * Scale given vibration intensity by the given factor.
+     *
+     * @param amplitude amplitude of the effect, must be between 0 and MAX_AMPLITUDE
+     * @param scaleFactor scale factor to be applied to the intensity. Values within [0,1) will
+     *                    scale down the intensity, values larger than 1 will scale up
+     *
+     * @hide
+     */
+    protected static int scale(int amplitude, float scaleFactor) {
+        return (int) (scale((float) amplitude / MAX_AMPLITUDE, scaleFactor) * MAX_AMPLITUDE);
+    }
+
+    /**
+     * Scale given vibration intensity by the given factor.
+     *
+     * @param intensity relative intensity of the effect, must be between 0 and 1
+     * @param scaleFactor scale factor to be applied to the intensity. Values within [0,1) will
+     *                    scale down the intensity, values larger than 1 will scale up
+     *
+     * @hide
+     */
+    protected static float scale(float intensity, float scaleFactor) {
+        // Applying gamma correction to the scale factor, which is the same as encoding the input
+        // value, scaling it, then decoding the scaled value.
+        float scale = MathUtils.pow(scaleFactor, 1f / SCALE_GAMMA);
+
+        if (scaleFactor <= 1) {
+            // Scale down is simply a gamma corrected application of scaleFactor to the intensity.
+            // Scale up requires a different curve to ensure the intensity will not become > 1.
+            return intensity * scale;
+        }
+
+        // Apply the scale factor a few more times to make the ramp curve closer to the raw scale.
+        float extraScale = MathUtils.pow(scaleFactor, 4f - scaleFactor);
+        float x = intensity * scale * extraScale;
+        float maxX = scale * extraScale; // scaled x for intensity == 1
+
+        float expX = MathUtils.exp(x);
+        float expMaxX = MathUtils.exp(maxX);
+
+        // Using f = tanh as the scale up function so the max value will converge.
+        // a = 1/f(maxX), used to scale f so that a*f(maxX) = 1 (the value will converge to 1).
+        float a = (expMaxX + 1f) / (expMaxX - 1f);
+        float fx = (expX - 1f) / (expX + 1f);
+
+        return a * fx;
     }
 
     /** @hide */
@@ -436,34 +500,18 @@ public abstract class VibrationEffect implements Parcelable {
             return mAmplitude;
         }
 
-        /**
-         * Scale the amplitude of this effect.
-         *
-         * @param gamma the gamma adjustment to apply
-         * @param maxAmplitude the new maximum amplitude of the effect, must be between 0 and
-         *         MAX_AMPLITUDE
-         * @throws IllegalArgumentException if maxAmplitude less than 0 or more than MAX_AMPLITUDE
-         *
-         * @return A {@link OneShot} effect with the same timing but scaled amplitude.
-         */
-        public OneShot scale(float gamma, int maxAmplitude) {
-            if (maxAmplitude > MAX_AMPLITUDE || maxAmplitude < 0) {
-                throw new IllegalArgumentException(
-                        "Amplitude is negative or greater than MAX_AMPLITUDE");
+        /** @hide */
+        @Override
+        public OneShot scale(float scaleFactor) {
+            if (scaleFactor == 1f || mAmplitude == DEFAULT_AMPLITUDE) {
+                // Just return this if there's no scaling to be done or if amplitude is not yet set.
+                return this;
             }
-            int newAmplitude = scale(mAmplitude, gamma, maxAmplitude);
-            return new OneShot(mDuration, newAmplitude);
+            return new OneShot(mDuration, scale(mAmplitude, scaleFactor));
         }
 
-        /**
-         * Resolve default values into integer amplitude numbers.
-         *
-         * @param defaultAmplitude the default amplitude to apply, must be between 0 and
-         *         MAX_AMPLITUDE
-         * @return A {@link OneShot} effect with same physical meaning but explicitly set amplitude
-         *
-         * @hide
-         */
+        /** @hide */
+        @Override
         public OneShot resolve(int defaultAmplitude) {
             if (defaultAmplitude > MAX_AMPLITUDE || defaultAmplitude < 0) {
                 throw new IllegalArgumentException(
@@ -475,6 +523,7 @@ public abstract class VibrationEffect implements Parcelable {
             return this;
         }
 
+        /** @hide */
         @Override
         public void validate() {
             if (mAmplitude < -1 || mAmplitude == 0 || mAmplitude > 255) {
@@ -576,58 +625,52 @@ public abstract class VibrationEffect implements Parcelable {
             return duration;
         }
 
-        /**
-         * Scale the Waveform with the given gamma and new max amplitude.
-         *
-         * @param gamma the gamma adjustment to apply
-         * @param maxAmplitude the new maximum amplitude of the effect, must be between 0 and
-         *         MAX_AMPLITUDE
-         * @throws IllegalArgumentException if maxAmplitude less than 0 or more than MAX_AMPLITUDE
-         *
-         * @return A {@link Waveform} effect with the same timings and repeat index
-         *         but scaled amplitude.
-         */
-        public Waveform scale(float gamma, int maxAmplitude) {
-            if (maxAmplitude > MAX_AMPLITUDE || maxAmplitude < 0) {
-                throw new IllegalArgumentException(
-                        "Amplitude is negative or greater than MAX_AMPLITUDE");
+        /** @hide */
+        @Override
+        public Waveform scale(float scaleFactor) {
+            if (scaleFactor == 1f) {
+                // Just return this if there's no scaling to be done.
+                return this;
             }
-            if (gamma == 1.0f && maxAmplitude == MAX_AMPLITUDE) {
-                // Just return a copy of the original if there's no scaling to be done.
-                return new Waveform(mTimings, mAmplitudes, mRepeat);
-            }
-
+            boolean scaled = false;
             int[] scaledAmplitudes = Arrays.copyOf(mAmplitudes, mAmplitudes.length);
             for (int i = 0; i < scaledAmplitudes.length; i++) {
-                scaledAmplitudes[i] = scale(scaledAmplitudes[i], gamma, maxAmplitude);
+                if (scaledAmplitudes[i] == DEFAULT_AMPLITUDE) {
+                    // Skip amplitudes that are not set.
+                    continue;
+                }
+                scaled = true;
+                scaledAmplitudes[i] = scale(scaledAmplitudes[i], scaleFactor);
+            }
+            if (!scaled) {
+                // Just return this if no scaling was done.
+                return this;
             }
             return new Waveform(mTimings, scaledAmplitudes, mRepeat);
         }
 
-        /**
-         * Resolve default values into integer amplitude numbers.
-         *
-         * @param defaultAmplitude the default amplitude to apply, must be between 0 and
-         *         MAX_AMPLITUDE
-         * @return A {@link Waveform} effect with same physical meaning but explicitly set
-         *         amplitude
-         *
-         * @hide
-         */
+        /** @hide */
+        @Override
         public Waveform resolve(int defaultAmplitude) {
             if (defaultAmplitude > MAX_AMPLITUDE || defaultAmplitude < 0) {
                 throw new IllegalArgumentException(
                         "Amplitude is negative or greater than MAX_AMPLITUDE");
             }
+            boolean resolved = false;
             int[] resolvedAmplitudes = Arrays.copyOf(mAmplitudes, mAmplitudes.length);
             for (int i = 0; i < resolvedAmplitudes.length; i++) {
                 if (resolvedAmplitudes[i] == DEFAULT_AMPLITUDE) {
                     resolvedAmplitudes[i] = defaultAmplitude;
+                    resolved = true;
                 }
+            }
+            if (!resolved) {
+                return this;
             }
             return new Waveform(mTimings, resolvedAmplitudes, mRepeat);
         }
 
+        /** @hide */
         @Override
         public void validate() {
             if (mTimings.length != mAmplitudes.length) {
@@ -730,14 +773,18 @@ public abstract class VibrationEffect implements Parcelable {
         private int mEffectStrength;
 
         public Prebaked(Parcel in) {
-            this(in.readInt(), in.readByte() != 0);
-            mEffectStrength = in.readInt();
+            this(in.readInt(), in.readByte() != 0, in.readInt());
         }
 
         public Prebaked(int effectId, boolean fallback) {
+            this(effectId, fallback, EffectStrength.MEDIUM);
+        }
+
+        /** @hide */
+        public Prebaked(int effectId, boolean fallback, int effectStrength) {
             mEffectId = effectId;
             mFallback = fallback;
-            mEffectStrength = EffectStrength.MEDIUM;
+            mEffectStrength = effectStrength;
         }
 
         public int getId() {
@@ -755,6 +802,20 @@ public abstract class VibrationEffect implements Parcelable {
         @Override
         public long getDuration() {
             return -1;
+        }
+
+        /** @hide */
+        @Override
+        public VibrationEffect resolve(int defaultAmplitude) {
+            // Prebaked effects already have default amplitude set, so ignore this.
+            return this;
+        }
+
+        /** @hide */
+        @Override
+        public Prebaked scale(float scaleFactor) {
+            // Prebaked effects cannot be scaled, so ignore this.
+            return this;
         }
 
         /**
@@ -785,6 +846,7 @@ public abstract class VibrationEffect implements Parcelable {
             }
         }
 
+        /** @hide */
         @Override
         public void validate() {
             switch (mEffectId) {
@@ -891,38 +953,29 @@ public abstract class VibrationEffect implements Parcelable {
             return -1;
         }
 
-        /**
-         * Scale all primitives of this effect.
-         *
-         * @param gamma the gamma adjustment to apply
-         * @param maxAmplitude the new maximum amplitude of the effect, must be between 0 and
-         *         MAX_AMPLITUDE
-         * @throws IllegalArgumentException if maxAmplitude less than 0 or more than MAX_AMPLITUDE
-         *
-         * @return A {@link Composed} effect with same but scaled primitives.
-         */
-        public Composed scale(float gamma, int maxAmplitude) {
-            if (maxAmplitude > MAX_AMPLITUDE || maxAmplitude < 0) {
-                throw new IllegalArgumentException(
-                        "Amplitude is negative or greater than MAX_AMPLITUDE");
-            }
-            if (gamma == 1.0f && maxAmplitude == MAX_AMPLITUDE) {
-                // Just return a copy of the original if there's no scaling to be done.
-                return new Composed(mPrimitiveEffects);
+        /** @hide */
+        @Override
+        public VibrationEffect resolve(int defaultAmplitude) {
+            // Primitive effects already have default primitive intensity set, so ignore this.
+            return this;
+        }
+
+        /** @hide */
+        @Override
+        public Composed scale(float scaleFactor) {
+            if (scaleFactor == 1f) {
+                // Just return this if there's no scaling to be done.
+                return this;
             }
             List<Composition.PrimitiveEffect> scaledPrimitives = new ArrayList<>();
             for (Composition.PrimitiveEffect primitive : mPrimitiveEffects) {
-                float adjustedScale = MathUtils.pow(primitive.scale, gamma);
-                float newScale = adjustedScale * maxAmplitude / (float) MAX_AMPLITUDE;
                 scaledPrimitives.add(new Composition.PrimitiveEffect(
-                        primitive.id, newScale, primitive.delay));
+                        primitive.id, scale(primitive.scale, scaleFactor), primitive.delay));
             }
             return new Composed(scaledPrimitives);
         }
 
-        /**
-         * @hide
-         */
+        /** @hide */
         @Override
         public void validate() {
             for (Composition.PrimitiveEffect effect : mPrimitiveEffects) {

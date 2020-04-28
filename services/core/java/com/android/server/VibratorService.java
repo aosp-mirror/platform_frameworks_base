@@ -99,17 +99,12 @@ public class VibratorService extends IVibratorService.Stub
     private static final int SCALE_HIGH = IExternalVibratorService.SCALE_HIGH; // 1
     private static final int SCALE_VERY_HIGH = IExternalVibratorService.SCALE_VERY_HIGH; // 2
 
-    // Gamma adjustments for scale levels.
-    private static final float SCALE_VERY_LOW_GAMMA = 2.0f;
-    private static final float SCALE_LOW_GAMMA = 1.5f;
-    private static final float SCALE_NONE_GAMMA = 1.0f;
-    private static final float SCALE_HIGH_GAMMA = 0.5f;
-    private static final float SCALE_VERY_HIGH_GAMMA = 0.25f;
-
-    // Max amplitudes for scale levels. If one is not listed, then the max amplitude is the default
-    // max amplitude.
-    private static final int SCALE_VERY_LOW_MAX_AMPLITUDE = 168; // 2/3 * 255
-    private static final int SCALE_LOW_MAX_AMPLITUDE = 192; // 3/4 * 255
+    // Scale factors for each level.
+    private static final float SCALE_FACTOR_VERY_LOW = 0.6f;
+    private static final float SCALE_FACTOR_LOW = 0.8f;
+    private static final float SCALE_FACTOR_NONE = 1f;
+    private static final float SCALE_FACTOR_HIGH = 1.2f;
+    private static final float SCALE_FACTOR_VERY_HIGH = 1.4f;
 
     // Default vibration attributes. Used when vibration is requested without attributes
     private static final VibrationAttributes DEFAULT_ATTRIBUTES =
@@ -344,22 +339,17 @@ public class VibratorService extends IVibratorService.Stub
         }
     }
 
+    /** Represents the scale that must be applied to a vibration effect intensity. */
     private static final class ScaleLevel {
-        public final float gamma;
-        public final int maxAmplitude;
+        public final float factor;
 
-        public ScaleLevel(float gamma) {
-            this(gamma, VibrationEffect.MAX_AMPLITUDE);
-        }
-
-        public ScaleLevel(float gamma, int maxAmplitude) {
-            this.gamma = gamma;
-            this.maxAmplitude = maxAmplitude;
+        ScaleLevel(float factor) {
+            this.factor = factor;
         }
 
         @Override
         public String toString() {
-            return "ScaleLevel{gamma=" + gamma + ", maxAmplitude=" + maxAmplitude + "}";
+            return "ScaleLevel{factor=" + factor + "}";
         }
     }
 
@@ -423,12 +413,11 @@ public class VibratorService extends IVibratorService.Stub
                 VibrationEffect.get(VibrationEffect.EFFECT_TICK, false));
 
         mScaleLevels = new SparseArray<>();
-        mScaleLevels.put(SCALE_VERY_LOW,
-                new ScaleLevel(SCALE_VERY_LOW_GAMMA, SCALE_VERY_LOW_MAX_AMPLITUDE));
-        mScaleLevels.put(SCALE_LOW, new ScaleLevel(SCALE_LOW_GAMMA, SCALE_LOW_MAX_AMPLITUDE));
-        mScaleLevels.put(SCALE_NONE, new ScaleLevel(SCALE_NONE_GAMMA));
-        mScaleLevels.put(SCALE_HIGH, new ScaleLevel(SCALE_HIGH_GAMMA));
-        mScaleLevels.put(SCALE_VERY_HIGH, new ScaleLevel(SCALE_VERY_HIGH_GAMMA));
+        mScaleLevels.put(SCALE_VERY_LOW, new ScaleLevel(SCALE_FACTOR_VERY_LOW));
+        mScaleLevels.put(SCALE_LOW, new ScaleLevel(SCALE_FACTOR_LOW));
+        mScaleLevels.put(SCALE_NONE, new ScaleLevel(SCALE_FACTOR_NONE));
+        mScaleLevels.put(SCALE_HIGH, new ScaleLevel(SCALE_FACTOR_HIGH));
+        mScaleLevels.put(SCALE_VERY_HIGH, new ScaleLevel(SCALE_FACTOR_VERY_HIGH));
 
         ServiceManager.addService(EXTERNAL_VIBRATOR_SERVICE, new ExternalVibratorService());
     }
@@ -997,7 +986,7 @@ public class VibratorService extends IVibratorService.Stub
         if (vib.effect instanceof VibrationEffect.Prebaked) {
             // Prebaked effects are always just a direct translation from intensity to
             // EffectStrength.
-            VibrationEffect.Prebaked prebaked = (VibrationEffect.Prebaked)vib.effect;
+            VibrationEffect.Prebaked prebaked = (VibrationEffect.Prebaked) vib.effect;
             prebaked.setEffectStrength(intensityToEffectStrength(intensity));
             return;
         }
@@ -1026,26 +1015,8 @@ public class VibratorService extends IVibratorService.Stub
             return;
         }
 
-        VibrationEffect scaledEffect = null;
-        if (vib.effect instanceof VibrationEffect.OneShot) {
-            VibrationEffect.OneShot oneShot = (VibrationEffect.OneShot) vib.effect;
-            oneShot = oneShot.resolve(mDefaultVibrationAmplitude);
-            scaledEffect = oneShot.scale(scale.gamma, scale.maxAmplitude);
-        } else if (vib.effect instanceof VibrationEffect.Waveform) {
-            VibrationEffect.Waveform waveform = (VibrationEffect.Waveform) vib.effect;
-            waveform = waveform.resolve(mDefaultVibrationAmplitude);
-            scaledEffect = waveform.scale(scale.gamma, scale.maxAmplitude);
-        } else if (vib.effect instanceof VibrationEffect.Composed) {
-            VibrationEffect.Composed composed = (VibrationEffect.Composed) vib.effect;
-            scaledEffect = composed.scale(scale.gamma, scale.maxAmplitude);
-        } else {
-            Slog.w(TAG, "Unable to apply intensity scaling, unknown VibrationEffect type");
-        }
-
-        if (scaledEffect != null) {
-            vib.originalEffect = vib.effect;
-            vib.effect = scaledEffect;
-        }
+        vib.originalEffect = vib.effect;
+        vib.effect = vib.effect.resolve(mDefaultVibrationAmplitude).scale(scale.factor);
     }
 
     private boolean shouldVibrateForRingtone() {
