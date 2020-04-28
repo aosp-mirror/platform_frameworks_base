@@ -10656,6 +10656,20 @@ public class PackageManagerService extends IPackageManager.Stub
         return resultList;
     }
 
+    private int getVendorPartitionVersion() {
+        final String version = SystemProperties.get("ro.vndk.version");
+        if (!version.isEmpty()) {
+            try {
+                return Integer.parseInt(version);
+            } catch (NumberFormatException ignore) {
+                if (ArrayUtils.contains(Build.VERSION.ACTIVE_CODENAMES, version)) {
+                    return Build.VERSION_CODES.CUR_DEVELOPMENT;
+                }
+            }
+        }
+        return Build.VERSION_CODES.P;
+    }
+
     @GuardedBy({"mInstallLock", "mLock"})
     private ScanResult scanPackageTracedLI(ParsedPackage parsedPackage,
             final @ParseFlags int parseFlags, @ScanFlags int scanFlags, long currentTime,
@@ -10837,7 +10851,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         // Scan as privileged apps that share a user with a priv-app.
         final boolean skipVendorPrivilegeScan = ((scanFlags & SCAN_AS_VENDOR) != 0)
-                && SystemProperties.getInt("ro.vndk.version", 28) < 28;
+                && getVendorPartitionVersion() < 28;
         if (((scanFlags & SCAN_AS_PRIVILEGED) == 0)
                 && !pkg.isPrivileged()
                 && (pkg.getSharedUserId() != null)
@@ -12012,6 +12026,20 @@ public class PackageManagerService extends IPackageManager.Stub
                             throw new PackageManagerException("Overlay "
                                     + pkg.getPackageName()
                                     + " is static and cannot be upgraded.");
+                        }
+                    } else {
+                        if ((scanFlags & SCAN_AS_VENDOR) != 0) {
+                            if (pkg.getTargetSdkVersion() < getVendorPartitionVersion()) {
+                                Slog.w(TAG, "System overlay " + pkg.getPackageName()
+                                        + " targets an SDK below the required SDK level of vendor"
+                                        + " overlays (" + getVendorPartitionVersion() + ")."
+                                        + " This will become an install error in a future release");
+                            }
+                        } else if (pkg.getTargetSdkVersion() < Build.VERSION.SDK_INT) {
+                            Slog.w(TAG, "System overlay " + pkg.getPackageName()
+                                    + " targets an SDK below the required SDK level of system"
+                                    + " overlays (" + Build.VERSION.SDK_INT + ")."
+                                    + " This will become an install error in a future release");
                         }
                     }
                 } else {
