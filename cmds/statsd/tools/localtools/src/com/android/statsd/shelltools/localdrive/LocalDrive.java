@@ -27,7 +27,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -112,17 +111,9 @@ public class LocalDrive {
         }
 
         List<String> connectedDevices = Utils.getDeviceSerials(sLogger);
-        if (connectedDevices == null || connectedDevices.size() == 0) {
-            sLogger.log(Level.SEVERE, "No device connected.");
-            return;
-        }
-        if (connectedDevices.size() == 1 && deviceSerial == null) {
-            deviceSerial = connectedDevices.get(0);
-        }
-
+        deviceSerial = Utils.chooseDevice(deviceSerial, connectedDevices,
+                Utils.getDefaultDevice(sLogger), sLogger);
         if (deviceSerial == null) {
-            sLogger.log(Level.SEVERE, "More than one devices connected. Please specify"
-                    + " with -s DEVICE_SERIAL");
             return;
         }
 
