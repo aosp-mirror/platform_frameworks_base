@@ -19,6 +19,7 @@ package com.android.systemui.doze;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -83,7 +84,16 @@ public class DozeDockHandlerTest extends SysuiTestCase {
     }
 
     @Test
+    public void onEvent_noneWhileEnabledAod_ignoresIfAlreadyNone() {
+        mDockManagerFake.setDockEvent(DockManager.STATE_NONE);
+
+        verify(mMachine, never()).requestState(eq(State.DOZE_AOD));
+    }
+
+    @Test
     public void onEvent_noneWhileEnabledAod_requestsAodState() {
+        mDockManagerFake.setDockEvent(DockManager.STATE_DOCKED);
+        clearInvocations(mMachine);
         mDockManagerFake.setDockEvent(DockManager.STATE_NONE);
 
         verify(mMachine).requestState(eq(State.DOZE_AOD));
@@ -91,6 +101,8 @@ public class DozeDockHandlerTest extends SysuiTestCase {
 
     @Test
     public void onEvent_noneWhileDisabledAod_requestsDozeState() {
+        mDockManagerFake.setDockEvent(DockManager.STATE_DOCKED);
+        clearInvocations(mMachine);
         doReturn(false).when(mConfig).alwaysOnEnabled(anyInt());
 
         mDockManagerFake.setDockEvent(DockManager.STATE_NONE);
