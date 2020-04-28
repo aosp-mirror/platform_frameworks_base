@@ -17,8 +17,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="ringtone_default" msgid="798836092118824500">"預設鈴聲"</string>
-    <!-- no translation found for notification_sound_default (8133121186242636840) -->
-    <skip />
+    <string name="notification_sound_default" msgid="8133121186242636840">"預設通知音效"</string>
     <string name="alarm_sound_default" msgid="4787646764557462649">"預設鬧鐘音效"</string>
     <string name="add_ringtone_text" msgid="6642389991738337529">"新增鈴聲"</string>
     <string name="add_alarm_text" msgid="3545497316166999225">"新增鬧鐘"</string>
