@@ -1774,10 +1774,39 @@ public class ChooserActivityTest {
         when(sOverrides.packageManager.resolveActivity(any(Intent.class), anyInt())).thenReturn(ri);
         waitForIdle();
 
-        mActivityRule.launchActivity(chooserIntent);
+        ChooserWrapperActivity activity = mActivityRule.launchActivity(chooserIntent);
         waitForIdle();
 
         assertNull(chosen[0]);
+        assertThat(activity.getPersonalListAdapter().getCallerTargetCount(), is(1));
+    }
+
+    @Test
+    public void testWorkTab_withInitialIntents_workTabDoesNotIncludePersonalInitialIntents() {
+        // enable the work tab feature flag
+        ResolverActivity.ENABLE_TABBED_VIEW = true;
+        markWorkProfileUserAvailable();
+        int workProfileTargets = 1;
+        List<ResolvedComponentInfo> personalResolvedComponentInfos =
+                createResolvedComponentsForTestWithOtherProfile(2, /* userId */ 10);
+        List<ResolvedComponentInfo> workResolvedComponentInfos =
+                createResolvedComponentsForTest(workProfileTargets);
+        setupResolverControllers(personalResolvedComponentInfos, workResolvedComponentInfos);
+        Intent[] initialIntents = {
+                new Intent("action.fake1"),
+                new Intent("action.fake2")
+        };
+        Intent chooserIntent = createChooserIntent(initialIntents);
+        sOverrides.packageManager = mock(PackageManager.class);
+        when(sOverrides.packageManager.resolveActivity(any(Intent.class), anyInt()))
+                .thenReturn(createFakeResolveInfo());
+        waitForIdle();
+
+        ChooserWrapperActivity activity = mActivityRule.launchActivity(chooserIntent);
+        waitForIdle();
+
+        assertThat(activity.getPersonalListAdapter().getCallerTargetCount(), is(2));
+        assertThat(activity.getWorkListAdapter().getCallerTargetCount(), is(0));
     }
 
     private Intent createChooserIntent(Intent[] initialIntents) {
