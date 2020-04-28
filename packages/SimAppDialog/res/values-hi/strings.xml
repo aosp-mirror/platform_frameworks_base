@@ -21,6 +21,6 @@
     <string name="install_carrier_app_title" msgid="334729104862562585">"माेबाइल सेवा चालू करें"</string>
     <string name="install_carrier_app_description" msgid="4014303558674923797">"नया सिम ठीक से काम करे, इसके लिए आपको <xliff:g id="ID_1">%1$s</xliff:g> ऐप्लिकेशन इंस्टॉल करना होगा"</string>
     <string name="install_carrier_app_description_default" msgid="7356830245205847840">"नया सिम ठीक से काम करे, इसके लिए आपको मोबाइल और इंटरनेट सेवा देने वाली कंपनी का ऐप डाउनलोड करना होगा"</string>
-    <string name="install_carrier_app_defer_action" msgid="2558576736886876209">"रद्द करें"</string>
+    <string name="install_carrier_app_defer_action" msgid="2558576736886876209">"अभी नहीं"</string>
     <string name="install_carrier_app_download_action" msgid="7859229305958538064">"ऐप्लिकेशन डाउनलोड करें"</string>
 </resources>
