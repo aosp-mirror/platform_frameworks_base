@@ -218,13 +218,7 @@ public class MmTelFeature extends ImsFeature {
      * {@link MmTelCapabilities#CAPABILITY_TYPE_UT}, and
      * {@link MmTelCapabilities#CAPABILITY_TYPE_SMS}.
      *
-     * The capabilities of this MmTelFeature will be set by the framework and can be queried with
-     * {@see #queryCapabilityStatus()}.
-     *
-     * This MmTelFeature can then return the status of each of these capabilities (enabled or not)
-     * by sending a {@see #notifyCapabilitiesStatusChanged} callback to the framework. The current
-     * status can also be queried using {@see #queryCapabilityStatus()}.
-     * @see #isCapable(int)
+     * The capabilities of this MmTelFeature will be set by the framework.
      */
     public static class MmTelCapabilities extends Capabilities {
 

@@ -6858,10 +6858,7 @@ public class AppOpsManager {
      * @param ops The operations to watch.
      * @param callback Where to report changes.
      *
-     * @see #isOperationActive
      * @see #stopWatchingActive
-     * @see #startOp(int, int, String, boolean, String, String)
-     * @see #finishOp(int, int, String, String)
      */
     // TODO: Uncomment below annotation once b/73559440 is fixed
     // @RequiresPermission(value=Manifest.permission.WATCH_APPOPS, conditional=true)
@@ -6909,10 +6906,7 @@ public class AppOpsManager {
      * long running and it has a clear start and stop delimiters. Unregistering a
      * non-registered callback has no effect.
      *
-     * @see #isOperationActive
      * @see #startWatchingActive
-     * @see #startOp(int, int, String, boolean, String, String)
-     * @see #finishOp(int, int, String, String)
      */
     public void stopWatchingActive(@NonNull OnOpActiveChangedListener callback) {
         synchronized (mActiveWatchers) {

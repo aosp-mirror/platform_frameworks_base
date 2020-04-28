@@ -62,8 +62,6 @@ public final class TelephonyDisplayInfo implements Parcelable {
      * {@link TelephonyManager#NETWORK_TYPE_LTE} network and has E-UTRA-NR Dual Connectivity(EN-DC)
      * capability or is currently connected to the secondary
      * {@link TelephonyManager#NETWORK_TYPE_NR} cellular network on millimeter wave bands.
-     *
-     * @see AccessNetworkConstants.NgranBands#FREQUENCY_RANGE_GROUP_2
      */
     public static final int OVERRIDE_NETWORK_TYPE_NR_NSA_MMWAVE = 4;
 

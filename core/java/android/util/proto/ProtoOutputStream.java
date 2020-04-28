@@ -2275,7 +2275,7 @@ public final class ProtoOutputStream extends ProtoStream {
     /**
      * Write an individual field tag by hand.
      *
-     * @see See <a href="https://developers.google.com/protocol-buffers/docs/encoding">Protobuf
+     * See <a href="https://developers.google.com/protocol-buffers/docs/encoding">Protobuf
      * Encoding</a> for details on the structure of how tags and data are written.
      */
     public void writeTag(int id, @WireType int wireType) {

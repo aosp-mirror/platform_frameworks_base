@@ -320,7 +320,7 @@ public class LineBreaker {
         /**
          * Returns the array of tab stops in pixels.
          *
-         * @see #setTabStops(float[], int)
+         * @see #setTabStops
          */
         public @Nullable float[] getTabStops() {
             return mVariableTabStops;
@@ -329,7 +329,7 @@ public class LineBreaker {
         /**
          * Returns the default tab stops in pixels.
          *
-         * @see #setTabStop(float[], int)
+         * @see #setTabStops
          */
         public @Px @FloatRange(from = 0) float getDefaultTabStop() {
             return mDefaultTabStop;

@@ -364,7 +364,7 @@ public final class MediaRoute2Info implements Parcelable {
      * In order to ensure uniqueness in {@link MediaRouter2} side, the value of this method
      * can be different from what was set in {@link MediaRoute2ProviderService}.
      *
-     * @see Builder#Builder(String, CharSequence)
+     * @see Builder#MediaRoute2Info.Builder(String, CharSequence)
      */
     @NonNull
     public String getId() {
