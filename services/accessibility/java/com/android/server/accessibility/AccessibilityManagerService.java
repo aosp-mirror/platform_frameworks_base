@@ -202,7 +202,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
     private final MainHandler mMainHandler;
 
-    private final SystemActionPerformer mSystemActionPerformer;
+    // Lazily initialized - access through getSystemActionPerfomer()
+    private SystemActionPerformer mSystemActionPerformer;
 
     private MagnificationController mMagnificationController;
 
@@ -300,8 +301,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         mActivityTaskManagerService = LocalServices.getService(ActivityTaskManagerInternal.class);
         mPackageManager = mContext.getPackageManager();
         mSecurityPolicy = new AccessibilitySecurityPolicy(mContext, this);
-        mSystemActionPerformer =
-                new SystemActionPerformer(mContext, mWindowManagerService, null, this);
         mA11yWindowManager = new AccessibilityWindowManager(mLock, mMainHandler,
                 mWindowManagerService, this, mSecurityPolicy, this);
         mA11yDisplayListener = new AccessibilityDisplayListener(mContext, mMainHandler);
@@ -678,7 +677,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         mSecurityPolicy.enforceCallerIsRecentsOrHasPermission(
                 Manifest.permission.MANAGE_ACCESSIBILITY,
                 FUNCTION_REGISTER_SYSTEM_ACTION);
-        mSystemActionPerformer.registerSystemAction(actionId, action);
+        getSystemActionPerformer().registerSystemAction(actionId, action);
     }
 
     /**
@@ -691,7 +690,15 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         mSecurityPolicy.enforceCallerIsRecentsOrHasPermission(
                 Manifest.permission.MANAGE_ACCESSIBILITY,
                 FUNCTION_UNREGISTER_SYSTEM_ACTION);
-        mSystemActionPerformer.unregisterSystemAction(actionId);
+        getSystemActionPerformer().unregisterSystemAction(actionId);
+    }
+
+    private SystemActionPerformer getSystemActionPerformer() {
+        if (mSystemActionPerformer == null) {
+            mSystemActionPerformer =
+                    new SystemActionPerformer(mContext, mWindowManagerService, null, this);
+        }
+        return mSystemActionPerformer;
     }
 
     @Override
@@ -803,7 +810,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         synchronized (mLock) {
             mUiAutomationManager.registerUiTestAutomationServiceLocked(owner, serviceClient,
                     mContext, accessibilityServiceInfo, sIdCounter++, mMainHandler,
-                    mSecurityPolicy, this, mWindowManagerService, mSystemActionPerformer,
+                    mSecurityPolicy, this, mWindowManagerService, getSystemActionPerformer(),
                     mA11yWindowManager, flags);
             onUserStateChangedLocked(getCurrentUserStateLocked());
         }
@@ -1567,7 +1574,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 if (service == null) {
                     service = new AccessibilityServiceConnection(userState, mContext, componentName,
                             installedService, sIdCounter++, mMainHandler, mLock, mSecurityPolicy,
-                            this, mWindowManagerService, mSystemActionPerformer,
+                            this, mWindowManagerService, getSystemActionPerformer(),
                             mA11yWindowManager, mActivityTaskManagerService);
                 } else if (userState.mBoundServices.contains(service)) {
                     continue;
@@ -2851,7 +2858,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     userState, mContext,
                     COMPONENT_NAME, info, sIdCounter++, mMainHandler, mLock, mSecurityPolicy,
                     AccessibilityManagerService.this, mWindowManagerService,
-                    mSystemActionPerformer, mA11yWindowManager, mActivityTaskManagerService) {
+                    getSystemActionPerformer(), mA11yWindowManager, mActivityTaskManagerService) {
                 @Override
                 public boolean supportsFlagForNotImportantViews(AccessibilityServiceInfo info) {
                     return true;
