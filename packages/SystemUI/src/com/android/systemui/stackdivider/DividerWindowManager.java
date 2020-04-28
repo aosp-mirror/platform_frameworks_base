@@ -27,6 +27,7 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMA
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 
 import android.graphics.PixelFormat;
+import android.graphics.Region;
 import android.os.Binder;
 import android.view.View;
 import android.view.WindowManager;
@@ -102,5 +103,13 @@ public class DividerWindowManager {
         if (changed) {
             mSystemWindows.updateViewLayout(mView, mLp);
         }
+    }
+
+    /** Sets the touch region to `touchRegion`. Use null to unset.*/
+    public void setTouchRegion(Region touchRegion) {
+        if (mView == null) {
+            return;
+        }
+        mSystemWindows.setTouchableRegion(mView, touchRegion);
     }
 }
