@@ -100,15 +100,15 @@ Result<std::string> ReadString(std::istream& stream) {
   return buf;
 }
 
-Result<uint32_t> GetCrc(const ZipFile& zip) {
+}  // namespace
+
+Result<uint32_t> GetPackageCrc(const ZipFile& zip) {
   const Result<uint32_t> a = zip.Crc("resources.arsc");
   const Result<uint32_t> b = zip.Crc("AndroidManifest.xml");
   return a && b
              ? Result<uint32_t>(*a ^ *b)
              : Error("failed to get CRC for \"%s\"", a ? "AndroidManifest.xml" : "resources.arsc");
 }
-
-}  // namespace
 
 std::unique_ptr<const IdmapHeader> IdmapHeader::FromBinaryStream(std::istream& stream) {
   std::unique_ptr<IdmapHeader> idmap_header(new IdmapHeader());
@@ -130,6 +130,20 @@ std::unique_ptr<const IdmapHeader> IdmapHeader::FromBinaryStream(std::istream& s
 }
 
 Result<Unit> IdmapHeader::IsUpToDate() const {
+  const std::unique_ptr<const ZipFile> target_zip = ZipFile::Open(target_path_);
+  if (!target_zip) {
+    return Error("failed to open target %s", GetTargetPath().to_string().c_str());
+  }
+
+  Result<uint32_t> target_crc = GetPackageCrc(*target_zip);
+  if (!target_crc) {
+    return Error("failed to get target crc");
+  }
+
+  return IsUpToDate(*target_crc);
+}
+
+Result<Unit> IdmapHeader::IsUpToDate(uint32_t target_crc) const {
   if (magic_ != kIdmapMagic) {
     return Error("bad magic: actual 0x%08x, expected 0x%08x", magic_, kIdmapMagic);
   }
@@ -138,19 +152,9 @@ Result<Unit> IdmapHeader::IsUpToDate() const {
     return Error("bad version: actual 0x%08x, expected 0x%08x", version_, kIdmapCurrentVersion);
   }
 
-  const std::unique_ptr<const ZipFile> target_zip = ZipFile::Open(target_path_);
-  if (!target_zip) {
-    return Error("failed to open target %s", GetTargetPath().to_string().c_str());
-  }
-
-  Result<uint32_t> target_crc = GetCrc(*target_zip);
-  if (!target_crc) {
-    return Error("failed to get target crc");
-  }
-
-  if (target_crc_ != *target_crc) {
+  if (target_crc_ != target_crc) {
     return Error("bad target crc: idmap version 0x%08x, file system version 0x%08x", target_crc_,
-                 *target_crc);
+                 target_crc);
   }
 
   const std::unique_ptr<const ZipFile> overlay_zip = ZipFile::Open(overlay_path_);
@@ -158,7 +162,7 @@ Result<Unit> IdmapHeader::IsUpToDate() const {
     return Error("failed to open overlay %s", GetOverlayPath().to_string().c_str());
   }
 
-  Result<uint32_t> overlay_crc = GetCrc(*overlay_zip);
+  Result<uint32_t> overlay_crc = GetPackageCrc(*overlay_zip);
   if (!overlay_crc) {
     return Error("failed to get overlay crc");
   }
@@ -304,13 +308,13 @@ Result<std::unique_ptr<const Idmap>> Idmap::FromApkAssets(const ApkAssets& targe
   header->magic_ = kIdmapMagic;
   header->version_ = kIdmapCurrentVersion;
 
-  Result<uint32_t> crc = GetCrc(*target_zip);
+  Result<uint32_t> crc = GetPackageCrc(*target_zip);
   if (!crc) {
     return Error(crc.GetError(), "failed to get zip CRC for target");
   }
   header->target_crc_ = *crc;
 
-  crc = GetCrc(*overlay_zip);
+  crc = GetPackageCrc(*overlay_zip);
   if (!crc) {
     return Error(crc.GetError(), "failed to get zip CRC for overlay");
   }
