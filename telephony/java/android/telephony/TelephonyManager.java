@@ -12977,4 +12977,21 @@ public class TelephonyManager {
         }
         return 0;
     }
+
+    /**
+     * Whether device can connect to 5G network when two SIMs are active.
+     * @hide
+     * TODO b/153669716: remove or make system API.
+     */
+    public boolean canConnectTo5GInDsdsMode() {
+        ITelephony telephony = getITelephony();
+        if (telephony == null) return true;
+        try {
+            return telephony.canConnectTo5GInDsdsMode();
+        } catch (RemoteException ex) {
+            return true;
+        } catch (NullPointerException ex) {
+            return true;
+        }
+    }
 }
