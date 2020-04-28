@@ -84,7 +84,7 @@
     <string name="failed_notification_title_template" msgid="2256217208186530973">"Принтерде ката кетти: <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="blocked_notification_title_template" msgid="1175435827331588646">"Принтер бөгөттөдү: <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="cancel" msgid="4373674107267141885">"Айнуу"</string>
-    <string name="restart" msgid="2472034227037808749">"Кайра баштоо"</string>
+    <string name="restart" msgid="2472034227037808749">"Өчүрүп күйгүзүү"</string>
     <string name="no_connection_to_printer" msgid="2159246915977282728">"Принтер менен байланыш жок"</string>
     <string name="reason_unknown" msgid="5507940196503246139">"белгисиз"</string>
     <string name="print_service_security_warning_title" msgid="2160752291246775320">"<xliff:g id="SERVICE">%1$s</xliff:g> колдоносузбу?"</string>
