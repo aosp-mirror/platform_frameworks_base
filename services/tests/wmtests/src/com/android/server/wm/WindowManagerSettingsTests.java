@@ -30,6 +30,7 @@ import static org.mockito.Mockito.verify;
 
 import android.content.ContentResolver;
 import android.net.Uri;
+import android.platform.test.annotations.Presubmit;
 import android.provider.Settings;
 
 import androidx.test.filters.SmallTest;
@@ -43,6 +44,7 @@ import org.junit.runner.RunWith;
  * Build/Install/Run:
  *  atest WmTests:WindowManagerSettingsTests
  */
+@Presubmit
 @SmallTest
 @RunWith(WindowTestRunner.class)
 public class WindowManagerSettingsTests extends WindowTestsBase {
