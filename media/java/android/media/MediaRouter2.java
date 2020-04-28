@@ -604,7 +604,8 @@ public final class MediaRouter2 {
 
         RoutingController oldController = getCurrentController();
         if (!oldController.releaseInternal(
-                /* shouldReleaseSession= */ true, /* shouldNotifyStop= */ false)) {
+                /* shouldReleaseSession= */ matchingRequest != null,
+                /* shouldNotifyStop= */ false)) {
             // Could not release the controller since it was just released by other thread.
             oldController = getSystemController();
         }
