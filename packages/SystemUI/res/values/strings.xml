@@ -644,6 +644,9 @@
     <!-- Content description to tell the user a notification has been removed from the notification shade -->
     <string name="accessibility_notification_dismissed">Notification dismissed.</string>
 
+    <!-- Content description to tell the user a bubble has been dismissed. -->
+    <string name="accessibility_bubble_dismissed">Bubble dismissed.</string>
+
     <!-- Content description for the notification shade panel (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_desc_notification_shade">Notification shade.</string>
     <!-- Content description for the quick settings panel (not shown on the screen). [CHAR LIMIT=NONE] -->
