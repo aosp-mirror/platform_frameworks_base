@@ -92,10 +92,10 @@ public abstract class ShortcutServiceInternal {
 
     public abstract void cacheShortcuts(int launcherUserId,
             @NonNull String callingPackage, @NonNull String packageName,
-            @NonNull List<String> shortcutIds, int userId);
+            @NonNull List<String> shortcutIds, int userId, int cacheFlags);
     public abstract void uncacheShortcuts(int launcherUserId,
             @NonNull String callingPackage, @NonNull String packageName,
-            @NonNull List<String> shortcutIds, int userId);
+            @NonNull List<String> shortcutIds, int userId, int cacheFlags);
 
     /**
      * Retrieves all of the direct share targets that match the given IntentFilter for the specified

@@ -198,7 +198,7 @@ public class ShortcutHelper {
         if (shortcutInfo.isLongLived() && !shortcutInfo.isCached()) {
             mShortcutServiceInternal.cacheShortcuts(user.getIdentifier(), "android",
                     shortcutInfo.getPackage(), Collections.singletonList(shortcutInfo.getId()),
-                    shortcutInfo.getUserId());
+                    shortcutInfo.getUserId(), ShortcutInfo.FLAG_CACHED_NOTIFICATIONS);
         }
     }
 

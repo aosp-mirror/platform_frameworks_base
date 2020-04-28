@@ -6154,7 +6154,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         // Make sure the shortcut is cached.
         verify(mShortcutServiceInternal).cacheShortcuts(
                 anyInt(), any(), eq(PKG), eq(Collections.singletonList(VALID_CONVO_SHORTCUT_ID)),
-                eq(USER_SYSTEM));
+                eq(USER_SYSTEM), eq(ShortcutInfo.FLAG_CACHED_NOTIFICATIONS));
 
         // Test: Remove the shortcut
         when(mLauncherApps.getShortcuts(any(), any())).thenReturn(null);
@@ -6227,7 +6227,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         // Make sure the shortcut is cached.
         verify(mShortcutServiceInternal).cacheShortcuts(
                 anyInt(), any(), eq(PKG), eq(Collections.singletonList(shortcutId)),
-                eq(USER_SYSTEM));
+                eq(USER_SYSTEM), eq(ShortcutInfo.FLAG_CACHED_NOTIFICATIONS));
 
         // Test: Remove the notification
         mBinderService.cancelNotificationWithTag(PKG, PKG, nr.getSbn().getTag(),

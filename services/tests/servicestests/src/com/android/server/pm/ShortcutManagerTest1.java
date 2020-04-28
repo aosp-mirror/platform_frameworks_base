@@ -137,6 +137,9 @@ import java.util.function.BiConsumer;
 @SmallTest
 public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
 
+    private static final int CACHE_OWNER_0 = LauncherApps.FLAG_CACHE_NOTIFICATION_SHORTCUTS;
+    private static final int CACHE_OWNER_1 = LauncherApps.FLAG_CACHE_BUBBLE_SHORTCUTS;
+
     @Override
     protected void tearDown() throws Exception {
         deleteUriFile("file32x32.jpg");
@@ -487,7 +490,8 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         mManager.pushDynamicShortcut(s8);
         assertEquals(4, getCallerShortcut("s8").getRank());
         runWithCaller(LAUNCHER_1, USER_0, () -> {
-            mLauncherApps.cacheShortcuts(CALLING_PACKAGE_1, list("s8"), HANDLE_USER_0);
+            mLauncherApps.cacheShortcuts(CALLING_PACKAGE_1, list("s8"), HANDLE_USER_0,
+                    CACHE_OWNER_0);
         });
 
         mManager.pushDynamicShortcut(s9);
@@ -1452,8 +1456,10 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
 
         // Cache 1 and 2
         runWithCaller(LAUNCHER_1, USER_0, () -> {
-            mLauncherApps.cacheShortcuts(CALLING_PACKAGE_1, list("s1", "s2"),
-                    HANDLE_USER_0);
+            mLauncherApps.cacheShortcuts(CALLING_PACKAGE_1, list("s1"),
+                    HANDLE_USER_0, CACHE_OWNER_0);
+            mLauncherApps.cacheShortcuts(CALLING_PACKAGE_1, list("s2"),
+                    HANDLE_USER_0, CACHE_OWNER_1);
         });
 
         setCaller(CALLING_PACKAGE_1);
@@ -1532,8 +1538,10 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
 
         // Cache some, but non long lived shortcuts will be ignored.
         runWithCaller(LAUNCHER_1, USER_0, () -> {
-            mLauncherApps.cacheShortcuts(CALLING_PACKAGE_1, list("s1", "s2", "s4"),
-                    HANDLE_USER_0);
+            mLauncherApps.cacheShortcuts(CALLING_PACKAGE_1, list("s1", "s2"),
+                    HANDLE_USER_0, CACHE_OWNER_0);
+            mLauncherApps.cacheShortcuts(CALLING_PACKAGE_1, list("s2", "s4"),
+                    HANDLE_USER_0, CACHE_OWNER_1);
         });
 
         setCaller(CALLING_PACKAGE_1);
@@ -1555,10 +1563,18 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         assertShortcutIds(mManager.getShortcuts(ShortcutManager.FLAG_MATCH_CACHED),
                 "s2", "s4");
 
+        runWithCaller(LAUNCHER_1, USER_0, () -> {
+            mLauncherApps.uncacheShortcuts(CALLING_PACKAGE_1, list("s2", "s4"),
+                    HANDLE_USER_0, CACHE_OWNER_0);
+        });
+        // s2 still cached by owner1. s4 wasn't cached by owner0 so didn't get removed.
+        assertShortcutIds(mManager.getShortcuts(ShortcutManager.FLAG_MATCH_CACHED),
+                "s2", "s4");
+
         // uncache a non-dynamic shortcut. Should be removed.
         runWithCaller(LAUNCHER_1, USER_0, () -> {
             mLauncherApps.uncacheShortcuts(CALLING_PACKAGE_1, list("s4"),
-                    HANDLE_USER_0);
+                    HANDLE_USER_0, CACHE_OWNER_1);
         });
         assertShortcutIds(mManager.getShortcuts(ShortcutManager.FLAG_MATCH_CACHED),
                 "s2");
@@ -1566,7 +1582,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         // Cache another shortcut
         runWithCaller(LAUNCHER_1, USER_0, () -> {
             mLauncherApps.cacheShortcuts(CALLING_PACKAGE_1, list("s3"),
-                    HANDLE_USER_0);
+                    HANDLE_USER_0, CACHE_OWNER_0);
         });
         assertShortcutIds(mManager.getShortcuts(ShortcutManager.FLAG_MATCH_CACHED),
                 "s2", "s3");
@@ -1594,7 +1610,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         // Cache All
         runWithCaller(LAUNCHER_1, USER_0, () -> {
             mLauncherApps.cacheShortcuts(CALLING_PACKAGE_1, list("s1", "s2", "s3", "s4"),
-                    HANDLE_USER_0);
+                    HANDLE_USER_0, CACHE_OWNER_0);
         });
 
         setCaller(CALLING_PACKAGE_1);
@@ -1792,8 +1808,10 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         setCaller(LAUNCHER_1);
 
         // Cache some shortcuts. Only long lived shortcuts can get cached.
-        mLauncherApps.cacheShortcuts(CALLING_PACKAGE_1, list("s1"), getCallingUser());
-        mLauncherApps.cacheShortcuts(CALLING_PACKAGE_3, list("s3"), getCallingUser());
+        mLauncherApps.cacheShortcuts(CALLING_PACKAGE_1, list("s1"), getCallingUser(),
+                CACHE_OWNER_0);
+        mLauncherApps.cacheShortcuts(CALLING_PACKAGE_3, list("s3"), getCallingUser(),
+                CACHE_OWNER_0);
 
         // Cached ones only
         assertShortcutIds(assertAllNotKeyFieldsOnly(
@@ -8732,7 +8750,8 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         assertTrue(mInternal.isSharingShortcut(USER_0, LAUNCHER_1, CALLING_PACKAGE_1, "s3", USER_0,
                 filter_any));
 
-        mLauncherApps.cacheShortcuts(CALLING_PACKAGE_1, list("s1", "s2"), HANDLE_USER_0);
+        mLauncherApps.cacheShortcuts(CALLING_PACKAGE_1, list("s1", "s2"), HANDLE_USER_0,
+                CACHE_OWNER_0);
         mLauncherApps.pinShortcuts(CALLING_PACKAGE_1, list("s3"), HANDLE_USER_0);
 
         runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {

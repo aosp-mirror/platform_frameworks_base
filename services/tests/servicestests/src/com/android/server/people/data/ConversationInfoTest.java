@@ -46,7 +46,8 @@ public final class ConversationInfoTest {
                 .setContactUri(CONTACT_URI)
                 .setContactPhoneNumber(PHONE_NUMBER)
                 .setNotificationChannelId(NOTIFICATION_CHANNEL_ID)
-                .setShortcutFlags(ShortcutInfo.FLAG_LONG_LIVED | ShortcutInfo.FLAG_CACHED)
+                .setShortcutFlags(ShortcutInfo.FLAG_LONG_LIVED
+                        | ShortcutInfo.FLAG_CACHED_NOTIFICATIONS)
                 .setImportant(true)
                 .setNotificationSilenced(true)
                 .setBubbled(true)
@@ -62,7 +63,7 @@ public final class ConversationInfoTest {
         assertEquals(PHONE_NUMBER, conversationInfo.getContactPhoneNumber());
         assertEquals(NOTIFICATION_CHANNEL_ID, conversationInfo.getNotificationChannelId());
         assertTrue(conversationInfo.isShortcutLongLived());
-        assertTrue(conversationInfo.isShortcutCached());
+        assertTrue(conversationInfo.isShortcutCachedForNotification());
         assertTrue(conversationInfo.isImportant());
         assertTrue(conversationInfo.isNotificationSilenced());
         assertTrue(conversationInfo.isBubbled());
@@ -84,7 +85,7 @@ public final class ConversationInfoTest {
         assertNull(conversationInfo.getContactPhoneNumber());
         assertNull(conversationInfo.getNotificationChannelId());
         assertFalse(conversationInfo.isShortcutLongLived());
-        assertFalse(conversationInfo.isShortcutCached());
+        assertFalse(conversationInfo.isShortcutCachedForNotification());
         assertFalse(conversationInfo.isImportant());
         assertFalse(conversationInfo.isNotificationSilenced());
         assertFalse(conversationInfo.isBubbled());

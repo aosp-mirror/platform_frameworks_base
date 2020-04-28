@@ -18,6 +18,8 @@ package com.android.server.pm;
 
 import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
+import static android.content.pm.LauncherApps.FLAG_CACHE_BUBBLE_SHORTCUTS;
+import static android.content.pm.LauncherApps.FLAG_CACHE_NOTIFICATION_SHORTCUTS;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -78,6 +80,7 @@ import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.CollectionUtils;
+import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
@@ -780,26 +783,28 @@ public class LauncherAppsService extends SystemService {
 
         @Override
         public void cacheShortcuts(String callingPackage, String packageName, List<String> ids,
-                UserHandle targetUser) {
+                UserHandle targetUser, int cacheFlags) {
             ensureStrictAccessShortcutsPermission(callingPackage);
             if (!canAccessProfile(targetUser.getIdentifier(), "Cannot cache shortcuts")) {
                 return;
             }
 
-            mShortcutServiceInternal.cacheShortcuts(getCallingUserId(),
-                    callingPackage, packageName, ids, targetUser.getIdentifier());
+            mShortcutServiceInternal.cacheShortcuts(
+                    getCallingUserId(), callingPackage, packageName, ids,
+                    targetUser.getIdentifier(), toShortcutsCacheFlags(cacheFlags));
         }
 
         @Override
         public void uncacheShortcuts(String callingPackage, String packageName, List<String> ids,
-                UserHandle targetUser) {
+                UserHandle targetUser, int cacheFlags) {
             ensureStrictAccessShortcutsPermission(callingPackage);
             if (!canAccessProfile(targetUser.getIdentifier(), "Cannot uncache shortcuts")) {
                 return;
             }
 
-            mShortcutServiceInternal.uncacheShortcuts(getCallingUserId(),
-                    callingPackage, packageName, ids, targetUser.getIdentifier());
+            mShortcutServiceInternal.uncacheShortcuts(
+                    getCallingUserId(), callingPackage, packageName, ids,
+                    targetUser.getIdentifier(), toShortcutsCacheFlags(cacheFlags));
         }
 
         @Override
@@ -1058,6 +1063,18 @@ public class LauncherAppsService extends SystemService {
                     user.getIdentifier(), debugMsg, false);
         }
 
+        private int toShortcutsCacheFlags(int cacheFlags) {
+            int ret = 0;
+            if (cacheFlags == FLAG_CACHE_NOTIFICATION_SHORTCUTS) {
+                ret = ShortcutInfo.FLAG_CACHED_NOTIFICATIONS;
+            } else if (cacheFlags == FLAG_CACHE_BUBBLE_SHORTCUTS) {
+                ret = ShortcutInfo.FLAG_CACHED_BUBBLES;
+            }
+            Preconditions.checkArgumentPositive(ret, "Invalid cache owner");
+
+            return ret;
+        }
+
         @VisibleForTesting
         void postToPackageMonitorHandler(Runnable r) {
             mCallbackHandler.post(r);
@@ -1154,7 +1171,7 @@ public class LauncherAppsService extends SystemService {
                 final int shortcutFlags = (matchDynamic ? ShortcutInfo.FLAG_DYNAMIC : 0)
                         | (matchPinned ? ShortcutInfo.FLAG_PINNED : 0)
                         | (matchManifest ? ShortcutInfo.FLAG_MANIFEST : 0)
-                        | (matchCached ? ShortcutInfo.FLAG_CACHED : 0);
+                        | (matchCached ? ShortcutInfo.FLAG_CACHED_ALL : 0);
 
                 for (int i = 0; i < shortcuts.size(); i++) {
                     final ShortcutInfo si = shortcuts.get(i);
