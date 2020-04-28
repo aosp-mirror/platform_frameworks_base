@@ -46,6 +46,10 @@ class Idmap2Service : public BinderService<Idmap2Service>, public BnIdmap2 {
                              const std::string& overlay_apk_path, int32_t fulfilled_policies,
                              bool enforce_overlayable, int32_t user_id,
                              aidl::nullable<std::string>* _aidl_return) override;
+
+ private:
+  // Cache the crc of the android framework package since the crc cannot change without a reboot.
+  std::optional<uint32_t> android_crc_;
 };
 
 }  // namespace android::os

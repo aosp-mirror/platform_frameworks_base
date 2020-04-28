@@ -74,6 +74,7 @@
 #include "androidfw/ResourceTypes.h"
 #include "androidfw/StringPiece.h"
 #include "idmap2/ResourceMapping.h"
+#include "idmap2/ZipFile.h"
 
 namespace android::idmap2 {
 
@@ -92,6 +93,9 @@ static constexpr const uint32_t kIdmapCurrentVersion = android::kIdmapCurrentVer
 // strings in the idmap are encoded char arrays of length 'kIdmapStringLength' (including mandatory
 // terminating null)
 static constexpr const size_t kIdmapStringLength = 256;
+
+// Retrieves a crc generated using all of the files within the zip that can affect idmap generation.
+Result<uint32_t> GetPackageCrc(const ZipFile& zip_info);
 
 class IdmapHeader {
  public:
@@ -129,6 +133,7 @@ class IdmapHeader {
   // field *must* be incremented. Because of this, we know that if the idmap
   // header is up-to-date the entire file is up-to-date.
   Result<Unit> IsUpToDate() const;
+  Result<Unit> IsUpToDate(uint32_t target_crc_) const;
 
   void accept(Visitor* v) const;
 
