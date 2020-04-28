@@ -92,35 +92,28 @@
         <item>com.android.vending</item>
     </string-array>
 
-    <!-- SystemUI Services: The classes of the stuff to start. -->
-    <string-array name="config_systemUIServiceComponents" translatable="false">
-        <item>com.android.systemui.util.NotificationChannels</item>
-        <item>com.android.systemui.keyguard.KeyguardViewMediator</item>
-<!--        <item>com.android.systemui.recents.Recents</item>-->
-<!--        <item>com.android.systemui.volume.VolumeUI</item>-->
-<!--        <item>com.android.systemui.stackdivider.Divider</item>-->
-<!--        <item>com.android.systemui.statusbar.phone.StatusBar</item>-->
-        <item>com.android.systemui.usb.StorageNotification</item>
-        <item>com.android.systemui.power.PowerUI</item>
-        <item>com.android.systemui.media.RingtonePlayer</item>
-<!--        <item>com.android.systemui.keyboard.KeyboardUI</item>-->
-<!--        <item>com.android.systemui.pip.PipUI</item>-->
-<!--        <item>com.android.systemui.shortcut.ShortcutKeyDispatcher</item>-->
-        <item>@string/config_systemUIVendorServiceComponent</item>
-        <item>com.android.systemui.util.leak.GarbageMonitor$Service</item>
-<!--        <item>com.android.systemui.LatencyTester</item>-->
-<!--        <item>com.android.systemui.globalactions.GlobalActionsComponent</item>-->
-        <item>com.android.systemui.ScreenDecorations</item>
-        <item>com.android.systemui.biometrics.AuthController</item>
-<!--        <item>com.android.systemui.SliceBroadcastRelayHandler</item>-->
-        <item>com.android.systemui.SizeCompatModeActivityController</item>
-<!--        <item>com.android.systemui.statusbar.notification.InstantAppNotifier</item>-->
-        <item>com.android.systemui.theme.ThemeOverlayController</item>
-        <item>com.android.systemui.toast.ToastUI</item>
+    <!-- The list of components to exclude from config_systemUIServiceComponents. -->
+    <string-array name="config_systemUIServiceComponentsExclude" translatable="false">
+        <item>com.android.systemui.recents.Recents</item>
+        <item>com.android.systemui.volume.VolumeUI</item>
+        <item>com.android.systemui.stackdivider.Divider</item>
+        <item>com.android.systemui.statusbar.phone.StatusBar</item>
+        <item>com.android.systemui.keyboard.KeyboardUI</item>
+        <item>com.android.systemui.pip.PipUI</item>
+        <item>com.android.systemui.shortcut.ShortcutKeyDispatcher</item>
+        <item>com.android.systemui.LatencyTester</item>
+        <item>com.android.systemui.globalactions.GlobalActionsComponent</item>
+        <item>com.android.systemui.SliceBroadcastRelayHandler</item>
+        <item>com.android.systemui.statusbar.notification.InstantAppNotifier</item>
+        <item>com.android.systemui.accessibility.WindowMagnification</item>
+        <item>com.android.systemui.accessibility.SystemActions</item>
+    </string-array>
+
+    <!-- The list of components to append to config_systemUIServiceComponents. -->
+    <string-array name="config_systemUIServiceComponentsInclude" translatable="false">
         <item>com.android.systemui.car.navigationbar.CarNavigationBar</item>
         <item>com.android.systemui.car.voicerecognition.ConnectedDeviceVoiceRecognitionNotifier</item>
         <item>com.android.systemui.car.window.SystemUIOverlayWindowManager</item>
         <item>com.android.systemui.car.volume.VolumeUI</item>
-        <item>com.android.systemui.car.sideloaded.SideLoadedAppController</item>
     </string-array>
 </resources>
