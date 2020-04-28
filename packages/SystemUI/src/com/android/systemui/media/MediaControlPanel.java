@@ -124,11 +124,7 @@ public class MediaControlPanel {
         @Override
         public void onPlaybackStateChanged(PlaybackState state) {
             final int s = state != null ? state.getState() : PlaybackState.STATE_NONE;
-            // When the playback state is NONE or CONNECTING, transition the player to the
-            // resumption state. State CONNECTING needs to be considered for Cast sessions. Ending
-            // a cast session in YT results in the CONNECTING state, which makes sense if you
-            // thinking of the session as waiting to connect to another cast device.
-            if (s == PlaybackState.STATE_NONE || s == PlaybackState.STATE_CONNECTING) {
+            if (s == PlaybackState.STATE_NONE) {
                 Log.d(TAG, "playback state change will trigger resumption, state=" + state);
                 clearControls();
                 makeInactive();
