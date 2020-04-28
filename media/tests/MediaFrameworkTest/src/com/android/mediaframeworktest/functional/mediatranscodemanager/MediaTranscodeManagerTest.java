@@ -14,31 +14,65 @@
  * limitations under the License.
  */
 
-package com.android.mediaframeworktest.functional.mediatranscodemanager;
+package com.android.mediaframeworktest.functional;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import android.content.Context;
 import android.media.MediaTranscodeManager;
+import android.test.ActivityInstrumentationTestCase2;
 import android.util.Log;
 
-import androidx.test.core.app.ApplicationProvider;
-import androidx.test.ext.junit.runners.AndroidJUnit4;
+import com.android.mediaframeworktest.MediaFrameworkTest;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
-@RunWith(AndroidJUnit4.class)
-public class MediaTranscodeManagerTest {
+/*
+ * Functional tests for MediaTranscodeManager in the media framework.
+ *
+ * To run this test suite:
+     make frameworks/base/media/tests/MediaFrameworkTest
+     make mediaframeworktest
+
+     adb install -r out/target/product/dream/data/app/mediaframeworktest.apk
+
+     adb shell am instrument -e class \
+     com.android.mediaframeworktest.functional.MediaTranscodeManagerTest \
+     -w com.android.mediaframeworktest/.MediaFrameworkTestRunner
+ *
+ */
+public class MediaTranscodeManagerTest
+        extends ActivityInstrumentationTestCase2<MediaFrameworkTest>  {
     private static final String TAG = "MediaTranscodeManagerTest";
+    private Context mContext;
+    private MediaTranscodeManager mMediaTranscodeManager = null;
 
     /**  The time to wait for the transcode operation to complete before failing the test. */
     private static final int TRANSCODE_TIMEOUT_SECONDS = 2;
+
+    public MediaTranscodeManagerTest() {
+        super("com.android.MediaTranscodeManagerTest", MediaFrameworkTest.class);
+    }
+
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        mContext = getActivity();
+        mMediaTranscodeManager =
+                MediaTranscodeManager.getInstance(mContext);
+        assertNotNull(mMediaTranscodeManager);
+    }
+
+    @Override
+    protected void tearDown() throws Exception {
+        super.tearDown();
+    }
 
     @Test
     public void testMediaTranscodeManager() throws InterruptedException {
@@ -49,12 +83,8 @@ public class MediaTranscodeManagerTest {
                 new MediaTranscodeManager.TranscodingRequest.Builder().build();
         Executor listenerExecutor = Executors.newSingleThreadExecutor();
 
-        MediaTranscodeManager mediaTranscodeManager =
-                MediaTranscodeManager.getInstance(ApplicationProvider.getApplicationContext());
-        assertNotNull(mediaTranscodeManager);
-
         MediaTranscodeManager.TranscodingJob job;
-        job = mediaTranscodeManager.enqueueTranscodingRequest(request, listenerExecutor,
+        job = mMediaTranscodeManager.enqueueTranscodingRequest(request, listenerExecutor,
                 transcodingJob -> {
                 Log.d(TAG, "Transcoding completed with result: " + transcodingJob.getResult());
                 transcodeCompleteSemaphore.release();

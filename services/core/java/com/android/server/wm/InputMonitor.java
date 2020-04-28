@@ -27,7 +27,6 @@ import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_FOCUS_LIGHT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_INPUT;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TASK_POSITIONING;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.graphics.Rect;
@@ -38,7 +37,6 @@ import android.os.Process;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.util.ArrayMap;
-import android.util.Log;
 import android.util.Slog;
 import android.view.InputApplicationHandle;
 import android.view.InputChannel;
@@ -138,18 +136,6 @@ final class InputMonitor {
 
                 // If there's a drag in flight, provide a pseudo-window to catch drag input
                 final boolean inDrag = mService.mDragDropController.dragDropActiveLocked();
-                final boolean inPositioning =
-                        mService.mTaskPositioningController.isPositioningLocked();
-                if (inPositioning) {
-                    if (DEBUG_TASK_POSITIONING) {
-                        Log.d(TAG_WM, "Inserting window handle for repositioning");
-                    }
-                    mService.mTaskPositioningController.showInputSurface(mInputTransaction,
-                            mDisplayId);
-                } else {
-                    mService.mTaskPositioningController.hideInputSurface(mInputTransaction,
-                            mDisplayId);
-                }
 
                 // Add all windows on the default display.
                 mUpdateInputForAllWindowsConsumer.updateInputWindows(inDrag);

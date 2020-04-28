@@ -382,8 +382,8 @@ class Dimmer {
 
         @Override
         public void apply(SurfaceControl.Transaction t, SurfaceControl sc, long currentPlayTime) {
-            float alpha = ((float) currentPlayTime / getDuration()) * (mToAlpha - mFromAlpha)
-                    + mFromAlpha;
+            final float fraction = getFraction(currentPlayTime);
+            final float alpha = fraction * (mToAlpha - mFromAlpha) + mFromAlpha;
             t.setAlpha(sc, alpha);
         }
 

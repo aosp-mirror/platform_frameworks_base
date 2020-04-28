@@ -130,11 +130,6 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
         Resources r = mContext.getResources();
 
         try {
-            CompletableFuture<List<Notification.Action>> smartActionsFuture =
-                    ScreenshotSmartActions.getSmartActionsFuture(
-                            mScreenshotId, mImageFileName, image, mSmartActionsProvider,
-                            mSmartActionsEnabled, isManagedProfile(mContext));
-
             // Save the screenshot to the MediaStore
             final ContentValues values = new ContentValues();
             values.put(MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES
@@ -147,6 +142,11 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
             values.put(MediaColumns.IS_PENDING, 1);
 
             final Uri uri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+
+            CompletableFuture<List<Notification.Action>> smartActionsFuture =
+                    ScreenshotSmartActions.getSmartActionsFuture(
+                            mScreenshotId, uri, image, mSmartActionsProvider,
+                            mSmartActionsEnabled, isManagedProfile(mContext));
 
             try {
                 // First, write the actual data for our screenshot
@@ -203,7 +203,7 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
                         1000);
                 smartActions.addAll(buildSmartActions(
                         ScreenshotSmartActions.getSmartActions(
-                                mScreenshotId, mImageFileName, smartActionsFuture, timeoutMs,
+                                mScreenshotId, smartActionsFuture, timeoutMs,
                                 mSmartActionsProvider),
                         mContext));
             }
@@ -228,6 +228,19 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
         }
 
         return null;
+    }
+
+    /**
+     * If we get a new screenshot request while this one is saving, we want to continue saving in
+     * the background but not return anything.
+     */
+    void ignoreResult() {
+        mParams.mActionsReadyListener = new GlobalScreenshot.ActionsReadyListener() {
+            @Override
+            void onActionsReady(GlobalScreenshot.SavedImageData imageData) {
+                // do nothing
+            }
+        };
     }
 
     @Override
@@ -311,6 +324,7 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
         editIntent.setData(uri);
         editIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         editIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+        editIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
 
         // Make sure pending intents for the system user are still unique across users
         // by setting the (otherwise unused) request code to the current user id.

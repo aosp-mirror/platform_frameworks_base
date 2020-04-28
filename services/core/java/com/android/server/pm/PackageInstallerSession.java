@@ -1490,6 +1490,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     private void onDataLoaderUnrecoverable() {
+        if (TextUtils.isEmpty(mPackageName)) {
+            // The package has not been installed.
+            return;
+        }
         final PackageManagerService packageManagerService = mPm;
         final String packageName = mPackageName;
         mHandler.post(() -> {
@@ -2616,12 +2620,14 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     case IDataLoaderStatusListener.DATA_LOADER_STOPPED:
                     case IDataLoaderStatusListener.DATA_LOADER_DESTROYED:
                         return;
-                    case IDataLoaderStatusListener.DATA_LOADER_UNRECOVERABLE:
-                        onDataLoaderUnrecoverable();
-                        return;
                 }
 
                 if (mDestroyed || mDataLoaderFinished) {
+                    switch (status) {
+                        case IDataLoaderStatusListener.DATA_LOADER_UNRECOVERABLE:
+                            onDataLoaderUnrecoverable();
+                            return;
+                    }
                     return;
                 }
 
@@ -2684,6 +2690,12 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                             }
                             break;
                         }
+                        case IDataLoaderStatusListener.DATA_LOADER_UNRECOVERABLE:
+                            mDataLoaderFinished = true;
+                            onSessionVerificationFailure(
+                                    new PackageManagerException(INSTALL_FAILED_MEDIA_UNAVAILABLE,
+                                            "DataLoader reported unrecoverable failure."));
+                            return;
                     }
                 } catch (RemoteException e) {
                     // In case of streaming failure we don't want to fail or commit the session.

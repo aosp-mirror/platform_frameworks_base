@@ -646,8 +646,8 @@ class ScreenRotationAnimation {
                     @Override
                     public void apply(SurfaceControl.Transaction t, SurfaceControl leash,
                         long currentPlayTime) {
-                        float fraction = (float)currentPlayTime / (float)getDuration();
-                        int color = (Integer) va.evaluate(fraction, startColor, endColor);
+                        final float fraction = getFraction(currentPlayTime);
+                        final int color = (Integer) va.evaluate(fraction, startColor, endColor);
                         Color middleColor = Color.valueOf(color);
                         rgbTmpFloat[0] = middleColor.red();
                         rgbTmpFloat[1] = middleColor.green();

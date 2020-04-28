@@ -53,7 +53,6 @@ import android.view.InputDevice;
 import android.view.InputEvent;
 import android.view.InputWindowHandle;
 import android.view.MotionEvent;
-import android.view.SurfaceControl;
 import android.view.WindowManager;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -268,9 +267,7 @@ class TaskPositioner implements IBinder.DeathRecipient {
         mDisplayContent.getDisplayRotation().pause();
 
         // Notify InputMonitor to take mDragWindowHandle.
-        final SurfaceControl.Transaction t = mService.mTransactionFactory.get();
-        mDisplayContent.getInputMonitor().updateInputWindowsImmediately(t);
-        t.syncInputWindows().apply();
+        mService.mTaskPositioningController.showInputSurface(win.getDisplayId());
 
         final DisplayMetrics displayMetrics = displayContent.getDisplayMetrics();
         mMinVisibleWidth = dipToPixel(MINIMUM_VISIBLE_WIDTH_IN_DP, displayMetrics);
@@ -301,6 +298,7 @@ class TaskPositioner implements IBinder.DeathRecipient {
             return;
         }
 
+        mService.mTaskPositioningController.hideInputSurface(mDisplayContent.getDisplayId());
         mService.mInputManager.unregisterInputChannel(mServerChannel);
 
         mInputEventReceiver.dispose();
