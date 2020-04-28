@@ -116,6 +116,9 @@ import android.widget.DateTimeView;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.colorextraction.ColorExtractor;
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.UiEvent;
+import com.android.internal.logging.UiEventLogger;
+import com.android.internal.logging.UiEventLoggerImpl;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.RegisterStatusBarResult;
@@ -301,6 +304,8 @@ public class StatusBar extends SystemUI implements DemoMode,
     /** If true, the lockscreen will show a distinct wallpaper */
     public static final boolean ENABLE_LOCKSCREEN_WALLPAPER = true;
 
+    private static final UiEventLogger sUiEventLogger = new UiEventLoggerImpl();
+
     static {
         boolean onlyCoreApps;
         try {
@@ -458,6 +463,44 @@ public class StatusBar extends SystemUI implements DemoMode,
             }
         }
     };
+
+    @VisibleForTesting
+    public enum StatusBarUiEvent implements UiEventLogger.UiEventEnum {
+        @UiEvent(doc = "Secured lockscreen is opened.")
+        LOCKSCREEN_OPEN_SECURE(405),
+
+        @UiEvent(doc = "Lockscreen without security is opened.")
+        LOCKSCREEN_OPEN_INSECURE(406),
+
+        @UiEvent(doc = "Secured lockscreen is closed.")
+        LOCKSCREEN_CLOSE_SECURE(407),
+
+        @UiEvent(doc = "Lockscreen without security is closed.")
+        LOCKSCREEN_CLOSE_INSECURE(408),
+
+        @UiEvent(doc = "Secured bouncer is opened.")
+        BOUNCER_OPEN_SECURE(409),
+
+        @UiEvent(doc = "Bouncer without security is opened.")
+        BOUNCER_OPEN_INSECURE(410),
+
+        @UiEvent(doc = "Secured bouncer is closed.")
+        BOUNCER_CLOSE_SECURE(411),
+
+        @UiEvent(doc = "Bouncer without security is closed.")
+        BOUNCER_CLOSE_INSECURE(412);
+
+        private final int mId;
+
+        StatusBarUiEvent(int id) {
+            mId = id;
+        }
+
+        @Override
+        public int getId() {
+            return mId;
+        }
+    }
 
     protected final H mHandler = createHandler();
 
@@ -2909,6 +2952,12 @@ public class StatusBar extends SystemUI implements DemoMode,
                     isSecure ? 1 : 0,
                     unlocked ? 1 : 0);
             mLastLoggedStateFingerprint = stateFingerprint;
+
+            StringBuilder uiEventValueBuilder = new StringBuilder();
+            uiEventValueBuilder.append(isBouncerShowing ? "BOUNCER" : "LOCKSCREEN");
+            uiEventValueBuilder.append(isShowing ? "_OPEN" : "_CLOSE");
+            uiEventValueBuilder.append(isSecure ? "_SECURE" : "_INSECURE");
+            sUiEventLogger.log(StatusBarUiEvent.valueOf(uiEventValueBuilder.toString()));
         }
     }
 
