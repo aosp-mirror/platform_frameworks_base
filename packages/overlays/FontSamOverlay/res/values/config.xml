@@ -13,14 +13,10 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.android.theme.icon.vessel"
-          android:versionCode="1"
-          android:versionName="1.0">
-    <overlay
-        android:targetPackage="android"
-        android:category="android.theme.customization.adaptive_icon_shape"
-        android:priority="1"/>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="config_bodyFontFamily" translatable="false">karla</string>
+    <string name="config_bodyFontFamilyMedium" translatable="false">karla-bold</string>
+    <string name="config_headlineFontFamily" translatable="false">fraunces</string>
+    <string name="config_headlineFontFamilyMedium" translatable="false">fraunces-semi-bold</string>
+</resources>
 
-    <application android:label="@string/icon_shape_vessel_overlay" android:hasCode="false"/>
-</manifest>
