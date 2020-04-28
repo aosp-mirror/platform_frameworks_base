@@ -3691,6 +3691,7 @@ package android.telecom {
   }
 
   public class TelecomManager {
+    method @NonNull public android.content.Intent createLaunchEmergencyDialerIntent(@Nullable String);
     method @NonNull @RequiresPermission("android.permission.READ_PRIVILEGED_PHONE_STATE") public java.util.List<android.telecom.PhoneAccountHandle> getCallCapablePhoneAccounts(boolean);
     method @RequiresPermission("android.permission.READ_PRIVILEGED_PHONE_STATE") public int getCurrentTtyMode();
     method @Nullable @RequiresPermission("android.permission.READ_PRIVILEGED_PHONE_STATE") public String getDefaultDialerPackage(@NonNull android.os.UserHandle);
