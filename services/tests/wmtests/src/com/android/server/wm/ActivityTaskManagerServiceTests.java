@@ -39,6 +39,7 @@ import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.platform.test.annotations.Presubmit;
 import android.view.IDisplayWindowListener;
 
 import androidx.test.filters.MediumTest;
@@ -57,6 +58,7 @@ import java.util.ArrayList;
  * Build/Install/Run:
  *  atest WmTests:ActivityTaskManagerServiceTests
  */
+@Presubmit
 @MediumTest
 @RunWith(WindowTestRunner.class)
 public class ActivityTaskManagerServiceTests extends ActivityTestsBase {
