@@ -24,12 +24,18 @@ LOCAL_REQUIRED_MODULES := \
 	AccentColorSpaceOverlay \
 	AccentColorGreenOverlay \
 	AccentColorPurpleOverlay \
+	AccentColorPaletteOverlay \
+	AccentColorCarbonOverlay \
+	AccentColorSandOverlay \
 	DisplayCutoutEmulationCornerOverlay \
 	DisplayCutoutEmulationDoubleOverlay \
         DisplayCutoutEmulationHoleOverlay \
 	DisplayCutoutEmulationTallOverlay \
 	DisplayCutoutEmulationWaterfallOverlay \
 	FontNotoSerifSourceOverlay \
+	FontKaiOverlay \
+	FontVictorOverlay \
+	FontSamOverlay \
 	IconPackCircularAndroidOverlay \
 	IconPackCircularLauncherOverlay \
 	IconPackCircularSettingsOverlay \
