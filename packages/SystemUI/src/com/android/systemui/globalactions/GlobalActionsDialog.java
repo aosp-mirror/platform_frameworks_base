@@ -616,10 +616,8 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                 getWalletPanelViewController(), mDepthController, mSysuiColorExtractor,
                 mStatusBarService, mNotificationShadeWindowController,
                 shouldShowControls() ? mControlsUiController : null, mBlurUtils,
-                shouldUseControlsLayout(), this::onRotate);
+                shouldUseControlsLayout(), this::onRotate, mKeyguardShowing);
         dialog.setCanceledOnTouchOutside(false); // Handled by the custom class.
-        dialog.setKeyguardShowing(mKeyguardShowing);
-
         dialog.setOnDismissListener(this);
         dialog.setOnShowListener(this);
 
@@ -1912,7 +1910,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                 SysuiColorExtractor sysuiColorExtractor, IStatusBarService statusBarService,
                 NotificationShadeWindowController notificationShadeWindowController,
                 ControlsUiController controlsUiController, BlurUtils blurUtils,
-                boolean useControlsLayout, Runnable onRotateCallback) {
+                boolean useControlsLayout, Runnable onRotateCallback, boolean keyguardShowing) {
             super(context, com.android.systemui.R.style.Theme_SystemUI_Dialog_GlobalActions);
             mContext = context;
             mAdapter = adapter;
@@ -1925,6 +1923,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             mBlurUtils = blurUtils;
             mUseControlsLayout = useControlsLayout;
             mOnRotateCallback = onRotateCallback;
+            mKeyguardShowing = keyguardShowing;
 
             // Window initialization
             Window window = getWindow();
