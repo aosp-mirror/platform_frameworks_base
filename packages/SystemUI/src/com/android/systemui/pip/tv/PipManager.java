@@ -708,7 +708,7 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
                     mActiveMediaSessionListener, null);
             updateMediaController(mMediaSessionManager.getActiveSessions(null));
             for (int i = mListeners.size() - 1; i >= 0; i--) {
-                mListeners.get(i).onPipEntered();
+                mListeners.get(i).onPipEntered(packageName);
             }
             updatePipVisibility(true);
         }
@@ -758,7 +758,7 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
          * because there's no guarantee for the PIP manager be return relavent information
          * correctly. (e.g. {@link isPipShown}).
          */
-        void onPipEntered();
+        void onPipEntered(String packageName);
         /** Invoked when a PIPed activity is closed. */
         void onPipActivityClosed();
         /** Invoked when the PIP menu gets shown. */
