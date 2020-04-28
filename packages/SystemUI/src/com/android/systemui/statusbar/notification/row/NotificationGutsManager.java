@@ -243,6 +243,9 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
             } else if (gutsView instanceof NotificationConversationInfo) {
                 initializeConversationNotificationInfo(
                         row, (NotificationConversationInfo) gutsView);
+            } else if (gutsView instanceof PartialConversationInfo) {
+                initializePartialConversationNotificationInfo(row,
+                        (PartialConversationInfo) gutsView);
             }
             return true;
         } catch (Exception e) {
@@ -348,7 +351,47 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
     }
 
     /**
-     * Sets up the {@link NotificationConversationInfo} inside the notification row's guts.
+     * Sets up the {@link PartialConversationInfo} inside the notification row's guts.
+     * @param row view to set up the guts for
+     * @param notificationInfoView view to set up/bind within {@code row}
+     */
+    @VisibleForTesting
+    void initializePartialConversationNotificationInfo(
+            final ExpandableNotificationRow row,
+            PartialConversationInfo notificationInfoView) throws Exception {
+        NotificationGuts guts = row.getGuts();
+        StatusBarNotification sbn = row.getEntry().getSbn();
+        String packageName = sbn.getPackageName();
+        // Settings link is only valid for notifications that specify a non-system user
+        NotificationInfo.OnSettingsClickListener onSettingsClick = null;
+        UserHandle userHandle = sbn.getUser();
+        PackageManager pmUser = StatusBar.getPackageManagerForUser(
+                mContext, userHandle.getIdentifier());
+
+        if (!userHandle.equals(UserHandle.ALL)
+                || mLockscreenUserManager.getCurrentUserId() == UserHandle.USER_SYSTEM) {
+            onSettingsClick = (View v, NotificationChannel channel, int appUid) -> {
+                mMetricsLogger.action(MetricsProto.MetricsEvent.ACTION_NOTE_INFO);
+                guts.resetFalsingCheck();
+                mOnSettingsClickListener.onSettingsClick(sbn.getKey());
+                startAppNotificationSettingsActivity(packageName, appUid, channel, row);
+            };
+        }
+
+        notificationInfoView.bindNotification(
+                pmUser,
+                mNotificationManager,
+                packageName,
+                row.getEntry().getChannel(),
+                row.getUniqueChannels(),
+                row.getEntry(),
+                onSettingsClick,
+                mDeviceProvisionedController.isDeviceProvisioned(),
+                row.getIsNonblockable());
+    }
+
+    /**
+     * Sets up the {@link ConversationInfo} inside the notification row's guts.
      * @param row view to set up the guts for
      * @param notificationInfoView view to set up/bind within {@code row}
      */
