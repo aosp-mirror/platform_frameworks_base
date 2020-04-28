@@ -551,11 +551,17 @@ final class AuthSession {
         try {
             switch (reason) {
                 case BiometricPrompt.DISMISSED_REASON_CREDENTIAL_CONFIRMED:
-                    mKeyStore.addAuthToken(credentialAttestation);
+                    if (credentialAttestation != null) {
+                        mKeyStore.addAuthToken(credentialAttestation);
+                    } else {
+                        Slog.e(TAG, "credentialAttestation is null");
+                    }
                 case BiometricPrompt.DISMISSED_REASON_BIOMETRIC_CONFIRMED:
                 case BiometricPrompt.DISMISSED_REASON_BIOMETRIC_CONFIRM_NOT_REQUIRED:
                     if (mTokenEscrow != null) {
                         mKeyStore.addAuthToken(mTokenEscrow);
+                    } else {
+                        Slog.e(TAG, "mTokenEscrow is null");
                     }
                     mClientReceiver.onAuthenticationSucceeded(
                             Utils.getAuthenticationTypeForResult(reason));
