@@ -93,7 +93,7 @@ class ChannelEditorDialogControllerTest : SysuiTestCase() {
         controller.prepareDialogForApp(TEST_APP_NAME, TEST_PACKAGE_NAME, TEST_UID,
                 setOf(channel1, channel2), appIcon, clickListener)
 
-        assertEquals(2, controller.providedChannels.size)
+        assertEquals(2, controller.paddedChannels.size)
     }
 
     @Test
@@ -104,7 +104,7 @@ class ChannelEditorDialogControllerTest : SysuiTestCase() {
                 setOf(channelDefault), appIcon, clickListener)
 
         assertEquals("No channels should be shown when there is only the miscellaneous channel",
-                0, controller.providedChannels.size)
+                0, controller.paddedChannels.size)
     }
 
     @Test
@@ -126,7 +126,7 @@ class ChannelEditorDialogControllerTest : SysuiTestCase() {
                 setOf(channel1), appIcon, clickListener)
 
         assertEquals("ChannelEditorDialog should fetch enough channels to show 4",
-                4, controller.providedChannels.size)
+                4, controller.paddedChannels.size)
     }
 
     @Test

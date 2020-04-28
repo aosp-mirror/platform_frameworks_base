@@ -24,7 +24,6 @@ import android.app.NotificationChannelGroup
 import android.app.NotificationManager.IMPORTANCE_NONE
 import android.app.NotificationManager.Importance
 import android.content.Context
-import android.content.DialogInterface
 import android.graphics.Color
 import android.graphics.PixelFormat
 import android.graphics.drawable.ColorDrawable
@@ -79,9 +78,10 @@ class ChannelEditorDialogController @Inject constructor(
     // Caller should set this if they care about when we dismiss
     var onFinishListener: OnChannelEditorDialogFinishedListener? = null
 
-    // Channels handed to us from NotificationInfo
     @VisibleForTesting
-    internal val providedChannels = mutableListOf<NotificationChannel>()
+    internal val paddedChannels = mutableListOf<NotificationChannel>()
+    // Channels handed to us from NotificationInfo
+    private val providedChannels = mutableListOf<NotificationChannel>()
 
     // Map from NotificationChannel to importance
     private val edits = mutableMapOf<NotificationChannel, Int>()
@@ -119,6 +119,8 @@ class ChannelEditorDialogController @Inject constructor(
         channelGroupList.clear()
         channelGroupList.addAll(fetchNotificationChannelGroups())
         buildGroupNameLookup()
+        providedChannels.clear()
+        providedChannels.addAll(channels)
         padToFourChannels(channels)
         initDialog()
 
@@ -134,21 +136,21 @@ class ChannelEditorDialogController @Inject constructor(
     }
 
     private fun padToFourChannels(channels: Set<NotificationChannel>) {
-        providedChannels.clear()
+        paddedChannels.clear()
         // First, add all of the given channels
-        providedChannels.addAll(channels.asSequence().take(4))
+        paddedChannels.addAll(channels.asSequence().take(4))
 
         // Then pad to 4 if we haven't been given that many
-        providedChannels.addAll(getDisplayableChannels(channelGroupList.asSequence())
-                .filterNot { providedChannels.contains(it) }
+        paddedChannels.addAll(getDisplayableChannels(channelGroupList.asSequence())
+                .filterNot { paddedChannels.contains(it) }
                 .distinct()
-                .take(4 - providedChannels.size))
+                .take(4 - paddedChannels.size))
 
         // If we only got one channel and it has the default miscellaneous tag, then we actually
         // are looking at an app with a targetSdk <= O, and it doesn't make much sense to show the
         // channel
-        if (providedChannels.size == 1 && DEFAULT_CHANNEL_ID == providedChannels[0].id) {
-            providedChannels.clear()
+        if (paddedChannels.size == 1 && DEFAULT_CHANNEL_ID == paddedChannels[0].id) {
+            paddedChannels.clear()
         }
     }
 
@@ -196,6 +198,7 @@ class ChannelEditorDialogController @Inject constructor(
         appNotificationsCurrentlyEnabled = null
 
         edits.clear()
+        paddedChannels.clear()
         providedChannels.clear()
         groupNameLookup.clear()
     }
@@ -292,16 +295,21 @@ class ChannelEditorDialogController @Inject constructor(
         dialog.apply {
             setContentView(R.layout.notif_half_shelf)
             setCanceledOnTouchOutside(true)
-            setOnDismissListener(object : DialogInterface.OnDismissListener {
-                override fun onDismiss(dialog: DialogInterface?) {
-                    onFinishListener?.onChannelEditorDialogFinished()
-                }
-            })
-            findViewById<ChannelEditorListView>(R.id.half_shelf_container)?.apply {
+            setOnDismissListener { onFinishListener?.onChannelEditorDialogFinished() }
+
+            val listView = findViewById<ChannelEditorListView>(R.id.half_shelf_container)
+            listView?.apply {
                 controller = this@ChannelEditorDialogController
                 appIcon = this@ChannelEditorDialogController.appIcon
                 appName = this@ChannelEditorDialogController.appName
-                channels = providedChannels
+                channels = paddedChannels
+            }
+
+            setOnShowListener {
+                // play a highlight animation for the given channels
+                for (channel in providedChannels) {
+                    listView?.highlightChannel(channel)
+                }
             }
 
             findViewById<TextView>(R.id.done_button)?.setOnClickListener {
