@@ -18,12 +18,15 @@ package android.content;
 
 import static android.view.Display.DEFAULT_DISPLAY;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertEquals;
 
 import android.app.ActivityThread;
 import android.hardware.display.DisplayManager;
 import android.os.UserHandle;
 
+import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
@@ -32,7 +35,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 /**
- *
  *  Build/Install/Run:
  *   atest FrameworksCoreTests:ContextTest
  */
@@ -45,6 +47,14 @@ public class ContextTest {
                 ActivityThread.currentActivityThread().getSystemContext();
 
         assertEquals(systemContext.getDisplay().getDisplayId(), systemContext.getDisplayId());
+    }
+
+    @Test
+    public void testDisplayIdForSystemUiContext() {
+        final Context systemUiContext =
+                ActivityThread.currentActivityThread().getSystemUiContext();
+
+        assertEquals(systemUiContext.getDisplay().getDisplayId(), systemUiContext.getDisplayId());
     }
 
     @Test
@@ -93,5 +103,28 @@ public class ContextTest {
         final Context testContext =
                 InstrumentationRegistry.getInstrumentation().getTargetContext();
         testContext.startActivityAsUser(new Intent(), new UserHandle(UserHandle.USER_ALL));
+    }
+
+    @Test
+    public void testIsUiContext_appContext_returnsFalse() {
+        final Context appContext = ApplicationProvider.getApplicationContext();
+
+        assertThat(appContext.isUiContext()).isFalse();
+    }
+
+    @Test
+    public void testIsUiContext_systemContext_returnsTrue() {
+        final Context systemContext =
+                ActivityThread.currentActivityThread().getSystemContext();
+
+        assertThat(systemContext.isUiContext()).isTrue();
+    }
+
+    @Test
+    public void testIsUiContext_systemUiContext_returnsTrue() {
+        final Context systemUiContext =
+                ActivityThread.currentActivityThread().getSystemUiContext();
+
+        assertThat(systemUiContext.isUiContext()).isTrue();
     }
 }
