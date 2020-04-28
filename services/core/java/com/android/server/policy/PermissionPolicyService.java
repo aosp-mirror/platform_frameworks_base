@@ -323,7 +323,7 @@ public final class PermissionPolicyService extends SystemService {
         // Force synchronization as permissions might have changed
         synchronizePermissionsAndAppOpsForUser(userId);
 
-        restoreReadPhoneStatePermissions();
+        restoreReadPhoneStatePermissions(userId);
 
         // Tell observers we are initialized for this user.
         if (callback != null) {
@@ -335,11 +335,12 @@ public final class PermissionPolicyService extends SystemService {
      * Ensure READ_PHONE_STATE user sensitive flags are assigned properly
      * TODO ntmyren: Remove once propagated, and state is repaired
      */
-    private void restoreReadPhoneStatePermissions() {
+    private void restoreReadPhoneStatePermissions(int userId) {
         PermissionControllerManager manager = new PermissionControllerManager(this.getContext(),
                 Handler.getMain());
         PackageManager pm = getContext().getPackageManager();
-        List<PackageInfo> packageInfos = pm.getInstalledPackages(MATCH_ALL | GET_PERMISSIONS);
+        List<PackageInfo> packageInfos = pm.getInstalledPackagesAsUser(
+                MATCH_ALL | GET_PERMISSIONS, userId);
         for (int i = packageInfos.size() - 1; i >= 0; i--) {
             PackageInfo pI = packageInfos.get(i);
             if (pI.requestedPermissions == null) {
