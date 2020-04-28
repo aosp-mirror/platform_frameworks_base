@@ -19,11 +19,8 @@ package android.graphics;
 import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Size;
-import android.util.proto.ProtoOutputStream;
 
 import java.io.PrintWriter;
-
 
 /**
  * Point holds two integer coordinates
@@ -75,6 +72,17 @@ public class Point implements Parcelable {
         return this.x == x && this.y == y;
     }
 
+    /**
+     * Dumps a human-readable shortened string of the point into the given
+     * stream
+     *
+     * @param pw The {@link PrintWriter} into which the string representation of
+     *           the point will be written.
+     */
+    public final void dump(@NonNull PrintWriter pw) {
+        pw.print("["); pw.print(x); pw.print(","); pw.print(y); pw.print("]");
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -100,11 +108,6 @@ public class Point implements Parcelable {
         return "Point(" + x + ", " + y + ")";
     }
 
-    /** @hide */
-    public void printShortString(@NonNull PrintWriter pw) {
-        pw.print("["); pw.print(x); pw.print(","); pw.print(y); pw.print("]");
-    }
-
     /**
      * Parcelable interface methods
      */
@@ -122,21 +125,6 @@ public class Point implements Parcelable {
     public void writeToParcel(Parcel out, int flags) {
         out.writeInt(x);
         out.writeInt(y);
-    }
-
-    /**
-     * Write to a protocol buffer output stream.
-     * Protocol buffer message definition at {@link android.graphics.PointProto}
-     *
-     * @param protoOutputStream Stream to write the Rect object to.
-     * @param fieldId           Field Id of the Rect as defined in the parent message
-     * @hide
-     */
-    public void dumpDebug(@NonNull ProtoOutputStream protoOutputStream, long fieldId) {
-        final long token = protoOutputStream.start(fieldId);
-        protoOutputStream.write(PointProto.X, x);
-        protoOutputStream.write(PointProto.Y, y);
-        protoOutputStream.end(token);
     }
 
     public static final @android.annotation.NonNull Parcelable.Creator<Point> CREATOR = new Parcelable.Creator<Point>() {
@@ -168,15 +156,5 @@ public class Point implements Parcelable {
     public void readFromParcel(@NonNull Parcel in) {
         x = in.readInt();
         y = in.readInt();
-    }
-
-    /** {@hide} */
-    public static @NonNull Point convert(@NonNull Size size) {
-        return new Point(size.getWidth(), size.getHeight());
-    }
-
-    /** {@hide} */
-    public static @NonNull Size convert(@NonNull Point point) {
-        return new Size(point.x, point.y);
     }
 }
