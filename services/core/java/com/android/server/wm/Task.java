@@ -3112,7 +3112,8 @@ class Task extends WindowContainer<WindowContainer> {
 
     @Override
     boolean showToCurrentUser() {
-        return mForceShowForAllUsers || showForAllUsers() || mWmService.isCurrentProfile(mUserId);
+        return mForceShowForAllUsers || showForAllUsers()
+                || mWmService.isCurrentProfile(getTopMostTask().mUserId);
     }
 
     void setForceShowForAllUsers(boolean forceShowForAllUsers) {
