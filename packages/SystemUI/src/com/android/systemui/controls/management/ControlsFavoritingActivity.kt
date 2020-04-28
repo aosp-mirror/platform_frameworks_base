@@ -31,6 +31,7 @@ import android.view.ViewStub
 import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.viewpager2.widget.ViewPager2
 import com.android.systemui.Prefs
 import com.android.systemui.R
@@ -65,6 +66,7 @@ class ControlsFavoritingActivity @Inject constructor(
         // If provided, show this structure page first
         const val EXTRA_STRUCTURE = "extra_structure"
         const val EXTRA_SINGLE_STRUCTURE = "extra_single_structure"
+        internal const val EXTRA_FROM_PROVIDER_SELECTOR = "extra_from_provider_selector"
         private const val TOOLTIP_PREFS_KEY = Prefs.Key.CONTROLS_STRUCTURE_SWIPE_TOOLTIP_COUNT
         private const val TOOLTIP_MAX_SHOWN = 2
     }
@@ -72,6 +74,7 @@ class ControlsFavoritingActivity @Inject constructor(
     private var component: ComponentName? = null
     private var appName: CharSequence? = null
     private var structureExtra: CharSequence? = null
+    private var fromProviderSelector = false
 
     private lateinit var structurePager: ViewPager2
     private lateinit var statusText: TextView
@@ -107,7 +110,10 @@ class ControlsFavoritingActivity @Inject constructor(
     }
 
     override fun onBackPressed() {
-        finish()
+        if (!fromProviderSelector) {
+            globalActionsComponent.handleShowGlobalActionsMenu()
+        }
+        animateExitAndFinish()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -118,6 +124,7 @@ class ControlsFavoritingActivity @Inject constructor(
         appName = intent.getCharSequenceExtra(EXTRA_APP)
         structureExtra = intent.getCharSequenceExtra(EXTRA_STRUCTURE) ?: ""
         component = intent.getParcelableExtra<ComponentName>(Intent.EXTRA_COMPONENT_NAME)
+        fromProviderSelector = intent.getBooleanExtra(EXTRA_FROM_PROVIDER_SELECTOR, false)
 
         bindViews()
     }
@@ -268,18 +275,38 @@ class ControlsFavoritingActivity @Inject constructor(
         bindButtons()
     }
 
+    private fun animateExitAndFinish() {
+        val rootView = requireViewById<ViewGroup>(R.id.controls_management_root)
+        ControlsAnimations.exitAnimation(
+                rootView,
+                object : Runnable {
+                    override fun run() {
+                        finish()
+                    }
+                }
+        ).start()
+    }
+
     private fun bindButtons() {
         otherAppsButton = requireViewById<Button>(R.id.other_apps).apply {
             setOnClickListener {
-                val i = Intent()
-                i.setComponent(
-                    ComponentName(context, ControlsProviderSelectorActivity::class.java))
+                val i = Intent().apply {
+                    component = ComponentName(context, ControlsProviderSelectorActivity::class.java)
+                }
+                if (doneButton.isEnabled) {
+                    // The user has made changes
+                    Toast.makeText(
+                            applicationContext,
+                            R.string.controls_favorite_toast_no_changes,
+                            Toast.LENGTH_SHORT
+                            ).show()
+                }
                 startActivity(i, ActivityOptions
                     .makeSceneTransitionAnimation(this@ControlsFavoritingActivity).toBundle())
+                animateExitAndFinish()
             }
         }
 
-        val rootView = requireViewById<ViewGroup>(R.id.controls_management_root)
         doneButton = requireViewById<Button>(R.id.done).apply {
             isEnabled = false
             setOnClickListener {
@@ -290,15 +317,7 @@ class ControlsFavoritingActivity @Inject constructor(
                         StructureInfo(component!!, it.structureName, favoritesForStorage)
                     )
                 }
-
-                ControlsAnimations.exitAnimation(
-                    rootView,
-                    object : Runnable {
-                        override fun run() {
-                            finish()
-                        }
-                    }
-                ).start()
+                animateExitAndFinish()
                 globalActionsComponent.handleShowGlobalActionsMenu()
             }
         }
