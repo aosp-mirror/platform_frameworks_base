@@ -20,8 +20,6 @@ import static com.android.server.backup.BackupManagerService.TAG;
 
 import android.util.Slog;
 
-import libcore.util.HexEncoding;
-
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
@@ -76,7 +74,11 @@ public class PasswordUtils {
      * Creates hex string representation of the byte array.
      */
     public static String byteArrayToHex(byte[] data) {
-        return HexEncoding.encodeToString(data, true);
+        StringBuilder buf = new StringBuilder(data.length * 2);
+        for (int i = 0; i < data.length; i++) {
+            buf.append(Byte.toHexString(data[i], true));
+        }
+        return buf.toString();
     }
 
     /**

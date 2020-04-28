@@ -36,7 +36,6 @@ oneway interface ICarrierMessagingService {
      * @param subId SMS subscription ID of the SIM
      * @param callback the callback to notify upon completion
      */
-    @UnsupportedAppUsage(maxTargetSdk = 28)
     void filterSms(
         in MessagePdu pdu, String format, int destPort, int subId,
         in ICarrierMessagingCallback callback);

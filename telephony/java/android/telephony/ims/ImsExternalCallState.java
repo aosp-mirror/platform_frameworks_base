@@ -213,7 +213,6 @@ public final class ImsExternalCallState implements Parcelable {
         return mIsHeld;
     }
 
-    @NonNull
     @Override
     public String toString() {
         return "ImsExternalCallState { mCallId = " + mCallId +

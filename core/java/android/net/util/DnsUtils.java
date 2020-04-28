@@ -141,17 +141,14 @@ public class DnsUtils {
      */
     public static @NonNull List<InetAddress> rfc6724Sort(@Nullable Network network,
             @NonNull List<InetAddress> answers) {
-        final ArrayList<SortableAddress> sortableAnswerList = new ArrayList<>();
-        for (InetAddress addr : answers) {
-            sortableAnswerList.add(new SortableAddress(addr, findSrcAddress(network, addr)));
-        }
+        List<SortableAddress> sortableAnswerList = new ArrayList<>();
+        answers.forEach(addr -> sortableAnswerList.add(
+                new SortableAddress(addr, findSrcAddress(network, addr))));
 
         Collections.sort(sortableAnswerList, sRfc6724Comparator);
 
         final List<InetAddress> sortedAnswers = new ArrayList<>();
-        for (SortableAddress ans : sortableAnswerList) {
-            sortedAnswers.add(ans.address);
-        }
+        sortableAnswerList.forEach(ans -> sortedAnswers.add(ans.address));
 
         return sortedAnswers;
     }

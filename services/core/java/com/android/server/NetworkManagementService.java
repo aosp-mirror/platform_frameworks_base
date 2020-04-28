@@ -34,6 +34,7 @@ import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_NAME_STANDBY;
 import static android.net.NetworkPolicyManager.FIREWALL_RULE_DEFAULT;
 import static android.net.NetworkStats.SET_DEFAULT;
 import static android.net.NetworkStats.STATS_PER_UID;
+import static android.net.NetworkStats.TAG_ALL;
 import static android.net.NetworkStats.TAG_NONE;
 import static android.net.TrafficStats.UID_TETHERING;
 
@@ -54,6 +55,7 @@ import android.net.IpPrefix;
 import android.net.LinkAddress;
 import android.net.Network;
 import android.net.NetworkPolicyManager;
+import android.net.NetworkStack;
 import android.net.NetworkStats;
 import android.net.NetworkUtils;
 import android.net.RouteInfo;
@@ -90,6 +92,7 @@ import com.android.internal.app.IBatteryStats;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.HexDump;
 import com.android.internal.util.Preconditions;
+import com.android.server.net.NetworkStatsFactory;
 
 import com.google.android.collect.Maps;
 
@@ -162,6 +165,8 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
 
     private final RemoteCallbackList<INetworkManagementEventObserver> mObservers =
             new RemoteCallbackList<>();
+
+    private final NetworkStatsFactory mStatsFactory = new NetworkStatsFactory();
 
     @GuardedBy("mTetheringStatsProviders")
     private final HashMap<ITetheringStatsProvider, String>
@@ -870,6 +875,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
 
     @Override
     public void setIPv6AddrGenMode(String iface, int mode) throws ServiceSpecificException {
+        NetworkStack.checkNetworkStackPermission(mContext);
         try {
             mNetdService.setIPv6AddrGenMode(iface, mode);
         } catch (RemoteException e) {
@@ -1008,15 +1014,11 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
 
     @Override
     public void startTethering(String[] dhcpRange) {
-        startTetheringWithConfiguration(true, dhcpRange);
-    }
-
-    @Override
-    public void startTetheringWithConfiguration(boolean usingLegacyDnsProxy, String[] dhcpRange) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         // an odd number of addrs will fail
+
         try {
-            mNetdService.tetherStartWithConfiguration(usingLegacyDnsProxy, dhcpRange);
+            mNetdService.tetherStart(dhcpRange);
         } catch (RemoteException | ServiceSpecificException e) {
             throw new IllegalStateException(e);
         }
@@ -1208,6 +1210,36 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
             mActiveIdleTimers.remove(iface);
             mDaemonHandler.post(() -> notifyInterfaceClassActivity(params.type, false,
                     SystemClock.elapsedRealtimeNanos(), -1, false));
+        }
+    }
+
+    @Override
+    public NetworkStats getNetworkStatsSummaryDev() {
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
+        try {
+            return mStatsFactory.readNetworkStatsSummaryDev();
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    @Override
+    public NetworkStats getNetworkStatsSummaryXt() {
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
+        try {
+            return mStatsFactory.readNetworkStatsSummaryXt();
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    @Override
+    public NetworkStats getNetworkStatsDetail() {
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
+        try {
+            return mStatsFactory.readNetworkStatsDetail();
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
         }
     }
 
@@ -1508,6 +1540,16 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
     public boolean isBandwidthControlEnabled() {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         return true;
+    }
+
+    @Override
+    public NetworkStats getNetworkStatsUidDetail(int uid, String[] ifaces) {
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
+        try {
+            return mStatsFactory.readNetworkStatsDetail(uid, ifaces, TAG_ALL);
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     private class NetdTetheringStatsProvider extends ITetheringStatsProvider.Stub {

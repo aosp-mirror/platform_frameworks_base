@@ -46,7 +46,6 @@ import android.os.StrictMode;
 import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
-import android.sysprop.ProductProperties;
 import android.text.TextUtils;
 import android.util.AndroidRuntimeException;
 import android.util.ArrayMap;
@@ -782,19 +781,6 @@ public final class LoadedApk {
             isBundledApp = false;
         }
 
-        // Similar to vendor apks, we should add /product/lib for apks from product partition
-        // when product apps are marked as unbundled. We cannot use the same way from vendor
-        // to check if lib path exists because there is possibility that /product/lib would not
-        // exist from legacy device while product apks are bundled. To make this clear, new
-        // property ("ro.product.apps.unbundled") is defined which should be true only when
-        // product apks are unbundled.
-        if (mApplicationInfo.getCodePath() != null
-                && mApplicationInfo.isProduct() && ProductProperties.unbundled_apps().orElse(false)
-                // TODO(b/128557860): Change target SDK version when version code R is available.
-                && getTargetSdkVersion() == Build.VERSION_CODES.CUR_DEVELOPMENT) {
-            isBundledApp = false;
-        }
-
         makePaths(mActivityThread, isBundledApp, mApplicationInfo, zipPaths, libPaths);
 
         String libraryPermittedPath = mDataDir;
@@ -878,6 +864,48 @@ public final class LoadedApk {
             StrictMode.ThreadPolicy oldPolicy = allowThreadDiskReads();
             try {
                 ApplicationLoaders.getDefault().addNative(mDefaultClassLoader, libPaths);
+            } finally {
+                setThreadPolicy(oldPolicy);
+            }
+        }
+
+        // /aepx/com.android.runtime/lib, /vendor/lib, /odm/lib and /product/lib
+        // are added to the native lib search paths of the classloader.
+        // Note that this is done AFTER the classloader is
+        // created by ApplicationLoaders.getDefault().getClassLoader(...). The
+        // reason is because if we have added the paths when creating the classloader
+        // above, the paths are also added to the search path of the linker namespace
+        // 'classloader-namespace', which will allow ALL libs in the paths to apps.
+        // Since only the libs listed in <partition>/etc/public.libraries.txt can be
+        // available to apps, we shouldn't add the paths then.
+        //
+        // However, we need to add the paths to the classloader (Java) though. This
+        // is because when a native lib is requested via System.loadLibrary(), the
+        // classloader first tries to find the requested lib in its own native libs
+        // search paths. If a lib is not found in one of the paths, dlopen() is not
+        // called at all. This can cause a problem that a vendor public native lib
+        // is accessible when directly opened via dlopen(), but inaccesible via
+        // System.loadLibrary(). In order to prevent the problem, we explicitly
+        // add the paths only to the classloader, and not to the native loader
+        // (linker namespace).
+        List<String> extraLibPaths = new ArrayList<>(4);
+        String abiSuffix = VMRuntime.getRuntime().is64Bit() ? "64" : "";
+        if (!defaultSearchPaths.contains("/apex/com.android.runtime/lib")) {
+            extraLibPaths.add("/apex/com.android.runtime/lib" + abiSuffix);
+        }
+        if (!defaultSearchPaths.contains("/vendor/lib")) {
+            extraLibPaths.add("/vendor/lib" + abiSuffix);
+        }
+        if (!defaultSearchPaths.contains("/odm/lib")) {
+            extraLibPaths.add("/odm/lib" + abiSuffix);
+        }
+        if (!defaultSearchPaths.contains("/product/lib")) {
+            extraLibPaths.add("/product/lib" + abiSuffix);
+        }
+        if (!extraLibPaths.isEmpty()) {
+            StrictMode.ThreadPolicy oldPolicy = allowThreadDiskReads();
+            try {
+                ApplicationLoaders.getDefault().addNative(mDefaultClassLoader, extraLibPaths);
             } finally {
                 setThreadPolicy(oldPolicy);
             }

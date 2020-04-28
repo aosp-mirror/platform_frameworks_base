@@ -86,7 +86,6 @@ public class UsbDebuggingActivity extends AlertActivity
         mAlwaysAllow = (CheckBox)checkbox.findViewById(com.android.internal.R.id.alwaysUse);
         mAlwaysAllow.setText(getString(R.string.usb_debugging_always));
         ap.mView = checkbox;
-        window.setCloseOnTouchOutside(false);
 
         setupAlert();
 

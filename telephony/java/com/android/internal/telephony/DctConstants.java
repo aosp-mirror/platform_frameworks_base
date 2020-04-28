@@ -17,8 +17,6 @@ package com.android.internal.telephony;
 
 import com.android.internal.util.Protocol;
 
-import dalvik.annotation.compat.UnsupportedAppUsage;
-
 /**
  * @hide
  */
@@ -39,34 +37,20 @@ public class DctConstants {
      *      RETRYING or CONNECTING: CONNECTING
      *      CONNECTED : CONNECTED or DISCONNECTING
      */
-    @UnsupportedAppUsage(implicitMember =
-            "values()[Lcom/android/internal/telephony/DctConstants$State;")
     public enum State {
-        @UnsupportedAppUsage
         IDLE,
-        @UnsupportedAppUsage
         CONNECTING,
-        @UnsupportedAppUsage
         RETRYING,
-        @UnsupportedAppUsage
         CONNECTED,
-        @UnsupportedAppUsage
         DISCONNECTING,
-        @UnsupportedAppUsage
         FAILED,
     }
 
-    @UnsupportedAppUsage(implicitMember =
-            "values()[Lcom/android/internal/telephony/DctConstants$Activity;")
     public enum Activity {
         NONE,
-        @UnsupportedAppUsage
         DATAIN,
-        @UnsupportedAppUsage
         DATAOUT,
-        @UnsupportedAppUsage
         DATAINANDOUT,
-        @UnsupportedAppUsage
         DORMANT
     }
 
@@ -111,6 +95,10 @@ public class DctConstants {
     public static final int EVENT_DATA_SERVICE_BINDING_CHANGED = BASE + 49;
     public static final int EVENT_DEVICE_PROVISIONED_CHANGE = BASE + 50;
     public static final int EVENT_DATA_ENABLED_OVERRIDE_RULES_CHANGED = BASE + 51;
+    public static final int EVENT_SERVICE_STATE_CHANGED = BASE + 52;
+    public static final int EVENT_5G_TIMER_HYSTERESIS = BASE + 53;
+    public static final int EVENT_5G_TIMER_WATCHDOG = BASE + 54;
+    public static final int EVENT_UPDATE_CARRIER_CONFIGS = BASE + 55;
 
     /***** Constants *****/
 
@@ -120,4 +108,9 @@ public class DctConstants {
 
     public static final String APN_TYPE_KEY = "apnType";
     public static final String PROVISIONING_URL_KEY = "provisioningUrl";
+    public static final String BANDWIDTH_SOURCE_MODEM_KEY = "modem";
+    public static final String BANDWIDTH_SOURCE_CARRIER_CONFIG_KEY = "carrier_config";
+    public static final String RAT_NAME_LTE = "LTE";
+    public static final String RAT_NAME_NR_NSA = "NR_NSA";
+    public static final String RAT_NAME_NR_NSA_MMWAVE = "NR_NSA_MMWAVE";
 }

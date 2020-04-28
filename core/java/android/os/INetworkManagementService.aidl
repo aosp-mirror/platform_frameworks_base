@@ -150,14 +150,6 @@ interface INetworkManagementService
     void startTethering(in String[] dhcpRanges);
 
     /**
-     * Start tethering services with the specified dhcp server range and
-     * DNS proxy config.
-     * {@code boolean} is used to control legacy DNS proxy server.
-     * {@code String[]} is a set of start end pairs defining the ranges.
-     */
-    void startTetheringWithConfiguration(boolean usingLegacyDnsProxy, in String[] dhcpRanges);
-
-    /**
      * Stop currently running tethering services
      */
     @UnsupportedAppUsage
@@ -184,7 +176,6 @@ interface INetworkManagementService
     /**
      * Returns a list of currently tethered interfaces
      */
-    @UnsupportedAppUsage
     String[] listTetheredInterfaces();
 
     /**
@@ -253,6 +244,27 @@ interface INetworkManagementService
     /**
      ** DATA USAGE RELATED
      **/
+
+    /**
+     * Return global network statistics summarized at an interface level,
+     * without any UID-level granularity.
+     */
+    NetworkStats getNetworkStatsSummaryDev();
+    NetworkStats getNetworkStatsSummaryXt();
+
+    /**
+     * Return detailed network statistics with UID-level granularity,
+     * including interface and tag details.
+     */
+    NetworkStats getNetworkStatsDetail();
+
+    /**
+     * Return detailed network statistics for the requested UID and interfaces,
+     * including interface and tag details.
+     * @param uid UID to obtain statistics for, or {@link NetworkStats#UID_ALL}.
+     * @param ifaces Interfaces to obtain statistics for, or {@link NetworkStats#INTERFACES_ALL}.
+     */
+    NetworkStats getNetworkStatsUidDetail(int uid, in String[] ifaces);
 
     /**
      * Return summary of network statistics all tethering interfaces.

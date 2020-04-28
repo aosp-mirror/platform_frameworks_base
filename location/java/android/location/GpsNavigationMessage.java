@@ -290,7 +290,6 @@ public class GpsNavigationMessage implements Parcelable {
         return 0;
     }
 
-    @NonNull
     @Override
     public String toString() {
         final String format = "   %-15s = %s\n";

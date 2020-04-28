@@ -18,8 +18,6 @@ package android.companion;
 
 /** @hide */
 interface ICompanionDeviceDiscoveryServiceCallback {
-    @UnsupportedAppUsage
     oneway void onDeviceSelected(String packageName, int userId, String deviceAddress);
-    @UnsupportedAppUsage
     oneway void onDeviceSelectionCancel();
 }

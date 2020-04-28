@@ -387,12 +387,6 @@
     </string-array>
 
     <!-- List of regexpressions describing the interface (if any) that represent tetherable
-         Wifi P2P interfaces.  If the device doesn't want to support tethering over Wifi P2p this
-         should be empty.  An example would be "p2p-p2p.*" -->
-    <string-array translatable="false" name="config_tether_wifi_p2p_regexs">
-    </string-array>
-
-    <!-- List of regexpressions describing the interface (if any) that represent tetherable
          WiMAX interfaces.  If the device doesn't want to support tethering over Wifi this
          should be empty.  An example would be "softap.*" -->
     <string-array translatable="false" name="config_tether_wimax_regexs">
@@ -438,18 +432,6 @@
         <item>eth3;12,13,14,15;ip=192.168.0.12/24;1</item>
         -->
     </string-array>
-
-    <!-- Configuration of network interfaces that support WakeOnLAN -->
-    <string-array translatable="false" name="config_wakeonlan_supported_interfaces">
-        <!--
-        <item>wlan0</item>
-        <item>eth0</item>
-        -->
-    </string-array>
-
-    <!-- Package name for the default CellBroadcastService module [DO NOT TRANSLATE] -->
-    <string name="cellbroadcast_default_package" translatable="false">com.android.cellbroadcastservice
-    </string>
 
     <!-- If the mobile hotspot feature requires provisioning, a package name and class name
         can be provided to launch a supported application that provisions the devices.
@@ -1319,9 +1301,6 @@
     <!-- Whether to use the strict phone number matcher in Kazakhstan. -->
     <bool name="config_use_strict_phone_number_comparation_for_kazakhstan">true</bool>
 
-    <!-- The character count of the minimum match for comparison phone numbers -->
-    <integer name="config_phonenumber_compare_min_match">7</integer>
-
     <!-- Display low battery warning when battery level dips to this value.
          Also, the battery stats are flushed to disk when we hit this level.  -->
     <integer name="config_criticalBatteryWarningLevel">5</integer>
@@ -1712,6 +1691,9 @@
          It is recommended that this value be no more than 250 ms.
          This feature should be disabled for most devices. -->
     <integer name="config_virtualKeyQuietTimeMillis">0</integer>
+
+    <!-- Flag indicating whether system user specific blacklist/whitelist is supported -->
+    <bool name="config_systemUserPackagesBlacklistSupported">false</bool>
 
     <!-- A list of potential packages, in priority order, that may contain an
          ephemeral resolver. Each package will be be queried for a component
@@ -2589,6 +2571,12 @@
          rmem_min,rmem_def,rmem_max,wmem_min,wmem_def,wmem_max -->
     <string name="config_wifi_tcp_buffers" translatable="false">524288,1048576,2097152,262144,524288,1048576</string>
 
+    <!-- What source to use to estimate link upstream and downstream bandwidth capacities.
+         Default is carrier_config, but it should be set to modem if the modem is returning
+         predictive (instead of instantaneous) bandwidth estimate.
+         Values are carrier_config and modem. -->
+    <string name="config_bandwidthEstimateSource">carrier_config</string>
+
     <!-- Whether WiFi display is supported by this device.
          There are many prerequisites for this feature to work correctly.
          Here are a few of them:
@@ -3026,30 +3014,12 @@
          empty string is passed in -->
     <string name="config_wlan_data_service_package" translatable="false"></string>
 
-    <!-- Cellular data service class name to bind to by default. If none is specified in an overlay, an
-         empty string is passed in -->
-    <string name="config_wwan_data_service_class" translatable="false"></string>
-
-    <!-- IWLAN data service class name to bind to by default. If none is specified in an overlay, an
-         empty string is passed in -->
-    <string name="config_wlan_data_service_class" translatable="false"></string>
-
     <bool name="config_networkSamplingWakesDevice">true</bool>
 
     <!--From SmsMessage-->
     <!--Support decoding the user data payload as pack GSM 8-bit (a GSM alphabet
         string that's stored in 8-bit unpacked format) characters.-->
     <bool translatable="false" name="config_sms_decode_gsm_8bit_data">false</bool>
-
-    <!-- Configures encoding type to parse the User Data of an SMS for reserved TP-DCS value.
-         Refer to SmsConstants.java
-         ENCODING_UNKNOWN = 0;
-         ENCODING_7BIT = 1;
-         ENCODING_8BIT = 2;
-         ENCODING_16BIT = 3;
-         ENCODING_KSC5601 = 4;
-         -->
-    <integer name="default_reserved_data_coding_scheme">2</integer>
 
     <!-- If EMS is not supported, framework breaks down EMS into single segment SMS
          and adds page info " x/y". This config is used to set which carrier doesn't
@@ -3233,7 +3203,9 @@
 
          The path is assumed to be specified in display coordinates with pixel units and in
          the display's native orientation, with the origin of the coordinate system at the
-         center top of the display.
+         center top of the display. Optionally, you can append either `@left` or `@right` to the
+         end of the path string, in order to change the path origin to either the top left,
+         or top right of the display.
 
          To facilitate writing device-independent emulation overlays, the marker `@dp` can be
          appended after the path string to interpret coordinates in dp instead of px units.
@@ -3895,21 +3867,13 @@
     <!-- Cellular network service package name to bind to by default. -->
     <string name="config_wwan_network_service_package" translatable="false">com.android.phone</string>
 
-    <!-- Cellular network service class name to bind to by default.-->
-    <string name="config_wwan_network_service_class" translatable="false"></string>
-
     <!-- IWLAN network service package name to bind to by default. If none is specified in an overlay, an
          empty string is passed in -->
     <string name="config_wlan_network_service_package" translatable="false"></string>
 
-    <!-- IWLAN network service class name to bind to by default. If none is specified in an overlay, an
-         empty string is passed in -->
-    <string name="config_wlan_network_service_class" translatable="false"></string>
     <!-- Telephony qualified networks service package name to bind to by default. -->
     <string name="config_qualified_networks_service_package" translatable="false"></string>
 
-    <!-- Telephony qualified networks service class name to bind to by default. -->
-    <string name="config_qualified_networks_service_class" translatable="false"></string>
     <!-- Wear devices: Controls the radios affected by Activity Mode. -->
     <string-array name="config_wearActivityModeRadios">
         <item>"wifi"</item>
@@ -4307,4 +4271,19 @@
          create additional screen real estate outside beyond the keyboard. Note that the user needs
          to have a confirmed way to dismiss the keyboard when desired. -->
     <bool name="config_automotiveHideNavBarForKeyboard">false</bool>
+
+    <!-- Component name that accepts ACTION_SEND intents for nearby (proximity-based) sharing.
+         Used by ChooserActivity. -->
+    <string translatable="false" name="config_defaultNearbySharingComponent"></string>
+
+    <!-- Boolean indicating whether frameworks needs to reset cell broadcast geo-fencing
+         check after reboot or airplane mode toggling -->
+    <bool translatable="false" name="reset_geo_fencing_check_after_boot_or_apm">false</bool>
+
+    <!-- Boolean indicating that the system will use autoSuspend. If set to false, autoSuspend
+         is not used and the system will only suspend upon an explicit request. -->
+    <bool translatable="false" name="config_enableAutoSuspend">true</bool>
+
+    <!-- Class name of the custom country detector to be used. -->
+    <string name="config_customCountryDetector" translatable="false">com.android.server.location.ComprehensiveCountryDetector</string>
 </resources>

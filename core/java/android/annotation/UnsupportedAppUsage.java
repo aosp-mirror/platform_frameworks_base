@@ -83,9 +83,8 @@ public @interface UnsupportedAppUsage {
      * <p>Possible values are:
      * <ul>
      *     <li>
-     *         An API level like {@link android.os.Build.VERSION_CODES#O} - in which case the API is
-     *         available up to and including the specified release. Or, in other words, the API is
-     *         blacklisted (unavailable) from the next API level from the one specified.
+     *         {@link android.os.Build.VERSION_CODES#O} or {@link android.os.Build.VERSION_CODES#P},
+     *         to limit access to apps targeting these SDKs (or earlier).
      *     </li>
      *     <li>
      *         absent (default value) - All apps can access this API, but doing so may result in
@@ -94,6 +93,10 @@ public @interface UnsupportedAppUsage {
      *     </li>
      *
      * </ul>
+     *
+     * Note, if this is set to {@link android.os.Build.VERSION_CODES#O}, apps targeting O
+     * maintenance releases will also be allowed to use the API, and similarly for any future
+     * maintenance releases of P.
      *
      * @return The maximum value for an apps targetSdkVersion in order to access this API.
      */
@@ -120,32 +123,6 @@ public @interface UnsupportedAppUsage {
      * @return A dex API signature.
      */
     String implicitMember() default "";
-
-    /**
-     * Public API alternatives to this API.
-     *
-     * <p>If non-empty, the string must be a description of the public API alternative(s) to this
-     * API. The explanation must contain at least one Javadoc link tag to public API methods or
-     * fields. e.g.:
-     * {@literal @UnsupportedAppUsage(publicAlternatives="Use {@link foo.bar.Baz#bat()} instead.")}
-     *
-     * <p>Any elements that can be deduced can be omitted, e.g.:
-     * <ul>
-     *      <li>
-     *          the class, if it's the same as for the annotated element.
-     *      </li>
-     *      <li>
-     *          the package name, if it's the same as for the annotated element.
-     *      </li>
-     *      <li>
-     *          the method parameters, if there is only one method with that name in the given
-     *          package and class.
-     *      </li>
-     * </ul>
-     * @return A Javadoc-formatted string.
-     */
-    @SuppressWarnings("JavadocReference")
-    String publicAlternatives() default "";
 
     /**
      * Container for {@link UnsupportedAppUsage} that allows it to be applied repeatedly to types.

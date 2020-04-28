@@ -286,7 +286,7 @@ public final class LocationAccessPolicy {
         }
         // If the user or profile is current, permission is granted.
         // Otherwise, uid must have INTERACT_ACROSS_USERS_FULL permission.
-        return isCurrentProfile(context, uid) || checkInteractAcrossUsersFull(context, uid, pid);
+        return isCurrentProfile(context, uid) || checkInteractAcrossUsersFull(context, pid, uid);
     }
 
     private static boolean isLocationModeEnabled(@NonNull Context context, @UserIdInt int userId) {

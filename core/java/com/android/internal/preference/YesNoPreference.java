@@ -23,8 +23,6 @@ import android.os.Parcelable;
 import android.preference.DialogPreference;
 import android.util.AttributeSet;
 
-import dalvik.annotation.compat.UnsupportedAppUsage;
-
 /**
  * The {@link YesNoPreference} is a preference to show a dialog with Yes and No
  * buttons.
@@ -42,7 +40,6 @@ public class YesNoPreference extends DialogPreference {
         this(context, attrs, defStyleAttr, 0);
     }
 
-    @UnsupportedAppUsage
     public YesNoPreference(Context context, AttributeSet attrs) {
         this(context, attrs, com.android.internal.R.attr.yesNoPreferenceStyle);
     }

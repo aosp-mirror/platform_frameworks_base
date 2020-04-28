@@ -16,7 +16,6 @@
 
 package android.provider;
 
-import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.content.Context;
 
@@ -140,7 +139,6 @@ public abstract class SearchIndexableData {
         context = ctx;
     }
 
-    @NonNull
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();

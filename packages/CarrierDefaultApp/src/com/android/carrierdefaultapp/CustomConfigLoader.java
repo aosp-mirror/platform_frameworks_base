@@ -19,6 +19,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.PersistableBundle;
 import android.telephony.CarrierConfigManager;
+import android.telephony.Rlog;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -26,6 +27,7 @@ import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.util.ArrayUtils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -42,7 +44,7 @@ public class CustomConfigLoader {
     private static final String INTER_GROUP_DELIMITER = "\\s*:\\s*";
 
     private static final String TAG = CustomConfigLoader.class.getSimpleName();
-    private static final boolean VDBG = Log.isLoggable(TAG, Log.VERBOSE);
+    private static final boolean VDBG = Rlog.isLoggable(TAG, Log.VERBOSE);
 
     /**
      * loads and parses the carrier config, return a list of carrier action for the given signal
@@ -68,7 +70,7 @@ public class CustomConfigLoader {
         // return an empty list if no match found
         List<Integer> actionList = new ArrayList<>();
         if (carrierConfigManager == null) {
-            Log.e(TAG, "load carrier config failure with carrier config manager uninitialized");
+            Rlog.e(TAG, "load carrier config failure with carrier config manager uninitialized");
             return actionList;
         }
         PersistableBundle b = carrierConfigManager.getConfig();
@@ -99,8 +101,8 @@ public class CustomConfigLoader {
                             .EXTRA_DEFAULT_NETWORK_AVAILABLE_KEY, false));
                     break;
                 default:
-                    Log.e(TAG, "load carrier config failure with un-configured key: "
-                            + intent.getAction());
+                    Rlog.e(TAG, "load carrier config failure with un-configured key: " +
+                            intent.getAction());
                     break;
             }
             if (!ArrayUtils.isEmpty(configs)) {
@@ -109,12 +111,12 @@ public class CustomConfigLoader {
                     matchConfig(config, arg1, arg2, actionList);
                     if (!actionList.isEmpty()) {
                         // return the first match
-                        if (VDBG) Log.d(TAG, "found match action list: " + actionList.toString());
+                        if (VDBG) Rlog.d(TAG, "found match action list: " + actionList.toString());
                         return actionList;
                     }
                 }
             }
-            Log.d(TAG, "no matching entry for signal: " + intent.getAction() + "arg1: " + arg1
+            Rlog.d(TAG, "no matching entry for signal: " + intent.getAction() + "arg1: " + arg1
                     + "arg2: " + arg2);
         }
         return actionList;
@@ -164,7 +166,7 @@ public class CustomConfigLoader {
                 try {
                     actionList.add(Integer.parseInt(idx));
                 } catch (NumberFormatException e) {
-                    Log.e(TAG, "NumberFormatException(string: " + idx + " config:" + config + "): "
+                    Rlog.e(TAG, "NumberFormatException(string: " + idx + " config:" + config + "): "
                             + e);
                 }
             }

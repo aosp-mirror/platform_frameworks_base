@@ -21,8 +21,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
-import android.os.Handler;
-import android.os.Looper;
 import android.os.RemoteException;
 import android.telephony.PhoneStateListener;
 import android.telephony.ServiceState;
@@ -41,19 +39,15 @@ public class DataConnectionStats extends BroadcastReceiver {
 
     private final Context mContext;
     private final IBatteryStats mBatteryStats;
-    private final Handler mListenerHandler;
-    private final PhoneStateListener mPhoneStateListener;
 
     private IccCardConstants.State mSimState = IccCardConstants.State.READY;
     private SignalStrength mSignalStrength;
     private ServiceState mServiceState;
     private int mDataState = TelephonyManager.DATA_DISCONNECTED;
 
-    public DataConnectionStats(Context context, Handler listenerHandler) {
+    public DataConnectionStats(Context context) {
         mContext = context;
         mBatteryStats = BatteryStatsService.getService();
-        mListenerHandler = listenerHandler;
-        mPhoneStateListener = new PhoneStateListenerImpl(listenerHandler.getLooper());
     }
 
     public void startMonitoring() {
@@ -69,7 +63,7 @@ public class DataConnectionStats extends BroadcastReceiver {
         filter.addAction(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
         filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
         filter.addAction(ConnectivityManager.INET_CONDITION_ACTION);
-        mContext.registerReceiver(this, filter, null /* broadcastPermission */, mListenerHandler);
+        mContext.registerReceiver(this, filter);
     }
 
     @Override
@@ -135,11 +129,7 @@ public class DataConnectionStats extends BroadcastReceiver {
                 && mServiceState.getState() != ServiceState.STATE_POWER_OFF;
     }
 
-    private class PhoneStateListenerImpl extends PhoneStateListener {
-        PhoneStateListenerImpl(Looper looper) {
-            super(looper);
-        }
-
+    private final PhoneStateListener mPhoneStateListener = new PhoneStateListener() {
         @Override
         public void onSignalStrengthsChanged(SignalStrength signalStrength) {
             mSignalStrength = signalStrength;

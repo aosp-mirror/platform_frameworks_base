@@ -48,6 +48,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.PermissionWhitelistFlags;
 import android.content.pm.PackageManagerInternal;
@@ -1646,9 +1647,9 @@ public class PermissionManagerService {
         } else if (pkg.isProduct()) {
             wlPermissions =
                     SystemConfig.getInstance().getProductPrivAppPermissions(pkg.packageName);
-        } else if (pkg.isSystemExt()) {
+        } else if (pkg.isProductServices()) {
             wlPermissions =
-                    SystemConfig.getInstance().getSystemExtPrivAppPermissions(
+                    SystemConfig.getInstance().getProductServicesPrivAppPermissions(
                             pkg.packageName);
         } else {
             wlPermissions = SystemConfig.getInstance().getPrivAppPermissions(pkg.packageName);
@@ -1682,9 +1683,9 @@ public class PermissionManagerService {
                     } else if (pkg.isProduct()) {
                         deniedPermissions = SystemConfig.getInstance()
                                 .getProductPrivAppDenyPermissions(pkg.packageName);
-                    } else if (pkg.isSystemExt()) {
+                    } else if (pkg.isProductServices()) {
                         deniedPermissions = SystemConfig.getInstance()
-                                .getSystemExtPrivAppDenyPermissions(pkg.packageName);
+                                .getProductServicesPrivAppDenyPermissions(pkg.packageName);
                     } else {
                         deniedPermissions = SystemConfig.getInstance()
                                 .getPrivAppDenyPermissions(pkg.packageName);
@@ -2601,7 +2602,7 @@ public class PermissionManagerService {
 
         // Make sure all dynamic permissions have been assigned to a package,
         // and make sure there are no dangling permissions.
-        flags = updatePermissions(changingPkgName, changingPkg, flags);
+        flags = updatePermissions(changingPkgName, changingPkg, flags, callback);
 
         synchronized (mLock) {
             if (mBackgroundPermissions == null) {
@@ -2651,7 +2652,8 @@ public class PermissionManagerService {
         Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
     }
 
-    private int updatePermissions(String packageName, PackageParser.Package pkg, int flags) {
+    private int updatePermissions(String packageName, PackageParser.Package pkg, int flags,
+            @Nullable PermissionCallback callback) {
         Set<BasePermission> needsUpdate = null;
         synchronized (mLock) {
             final Iterator<BasePermission> it = mSettings.mPermissions.values().iterator();
@@ -2665,6 +2667,44 @@ public class PermissionManagerService {
                         && (pkg == null || !hasPermission(pkg, bp.getName()))) {
                         Slog.i(TAG, "Removing old permission tree: " + bp.getName()
                                 + " from package " + bp.getSourcePackageName());
+                        if (bp.isRuntime()) {
+                            final int[] userIds = mUserManagerInt.getUserIds();
+                            final int numUserIds = userIds.length;
+                            for (int userIdNum = 0; userIdNum < numUserIds; userIdNum++) {
+                                final int userId = userIds[userIdNum];
+
+                                mPackageManagerInt.forEachPackage((Package p) -> {
+                                    final String pName = p.packageName;
+                                    final ApplicationInfo appInfo =
+                                            mPackageManagerInt.getApplicationInfo(pName, 0,
+                                                    Process.SYSTEM_UID, UserHandle.USER_SYSTEM);
+                                    if (appInfo != null
+                                            && appInfo.targetSdkVersion < Build.VERSION_CODES.M) {
+                                        return;
+                                    }
+
+                                    final String permissionName = bp.getName();
+                                    if (checkPermission(permissionName, pName, Process.SYSTEM_UID,
+                                            userId) == PackageManager.PERMISSION_GRANTED) {
+                                        try {
+                                            revokeRuntimePermission(
+                                                    permissionName,
+                                                    pName,
+                                                    false,
+                                                    userId,
+                                                    callback);
+                                        } catch (IllegalArgumentException e) {
+                                            Slog.e(TAG,
+                                                    "Failed to revoke "
+                                                            + permissionName
+                                                            + " from "
+                                                            + pName,
+                                                    e);
+                                        }
+                                    }
+                                });
+                            }
+                        }
                         flags |= UPDATE_PERMISSIONS_ALL;
                         it.remove();
                     }

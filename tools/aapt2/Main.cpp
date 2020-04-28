@@ -169,12 +169,12 @@ int MainImpl(int argc, char** argv) {
   aapt::text::Printer printer(&fout);
 
   aapt::StdErrDiagnostics diagnostics;
-  aapt::MainCommand main_command(&printer, &diagnostics);
+  auto main_command = new aapt::MainCommand(&printer, &diagnostics);
 
   // Add the daemon subcommand here so it cannot be called while executing the daemon
-  main_command.AddOptionalSubcommand(
+  main_command->AddOptionalSubcommand(
       aapt::util::make_unique<aapt::DaemonCommand>(&fout, &diagnostics));
-  return main_command.Execute(args, &std::cerr);
+  return main_command->Execute(args, &std::cerr);
 }
 
 int main(int argc, char** argv) {

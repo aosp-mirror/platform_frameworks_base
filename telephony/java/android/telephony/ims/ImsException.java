@@ -20,7 +20,6 @@ import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.content.pm.PackageManager;
-import android.telephony.SubscriptionManager;
 import android.text.TextUtils;
 
 import java.lang.annotation.Retention;
@@ -39,11 +38,11 @@ public final class ImsException extends Exception {
      */
     public static final int CODE_ERROR_UNSPECIFIED = 0;
     /**
-     * The operation has failed because there is no remote process available to service it. This
-     * may be due to a process crash or other illegal state.
+     * The operation has failed because there is no {@link ImsService} available to service it. This
+     * may be due to an {@link ImsService} crash or other illegal state.
      * <p>
      * This is a temporary error and the operation may be retried until the connection to the
-     * remote process is restored.
+     * {@link ImsService} is restored.
      */
     public static final int CODE_ERROR_SERVICE_UNAVAILABLE = 1;
 
@@ -56,23 +55,12 @@ public final class ImsException extends Exception {
      */
     public static final int CODE_ERROR_UNSUPPORTED_OPERATION = 2;
 
-    /**
-     * The subscription ID associated with this operation is invalid or not active.
-     * <p>
-     * This is a configuration error and there should be no retry. The subscription used for this
-     * operation is either invalid or has become inactive. The active subscriptions can be queried
-     * with {@link SubscriptionManager#getActiveSubscriptionInfoList()}.
-     * @hide
-     */
-    public static final int CODE_ERROR_INVALID_SUBSCRIPTION = 3;
-
     /**@hide*/
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = "CODE_ERROR_", value = {
             CODE_ERROR_UNSPECIFIED,
             CODE_ERROR_SERVICE_UNAVAILABLE,
-            CODE_ERROR_UNSUPPORTED_OPERATION,
-            CODE_ERROR_INVALID_SUBSCRIPTION
+            CODE_ERROR_UNSUPPORTED_OPERATION
     })
     public @interface ImsErrorCode {}
 

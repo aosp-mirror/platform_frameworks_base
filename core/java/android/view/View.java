@@ -4555,11 +4555,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     static class ListenerInfo {
-
-        @UnsupportedAppUsage
-        ListenerInfo() {
-        }
-
         /**
          * Listener used to dispatch focus change events.
          * This field should be made private, so it is hidden from the SDK.
@@ -16136,7 +16131,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * by the most recent call to {@link #measure(int, int)}.  This result is a bit mask
      * as defined by {@link #MEASURED_SIZE_MASK} and {@link #MEASURED_STATE_TOO_SMALL}.
      * This should be used during measurement and layout calculations only. Use
-     * {@link #getHeight()} to see how wide a view is after layout.
+     * {@link #getHeight()} to see how high a view is after layout.
      *
      * @return The measured height of this view as a bit mask.
      */
@@ -27847,10 +27842,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          */
         private int mClassification;
 
-        @UnsupportedAppUsage
-        private CheckForLongPress() {
-        }
-
         @Override
         public void run() {
             if ((mOriginalPressedState == isPressed()) && (mParent != null)
@@ -28336,11 +28327,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          * whenever possible.
          */
         static class InvalidateInfo {
-
-            @UnsupportedAppUsage
-            InvalidateInfo() {
-            }
-
             private static final int POOL_LIMIT = 10;
 
             private static final SynchronizedPool<InvalidateInfo> sPool =

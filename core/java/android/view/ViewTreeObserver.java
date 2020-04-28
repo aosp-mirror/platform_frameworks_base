@@ -218,11 +218,6 @@ public final class ViewTreeObserver {
      * @hide
      */
     public final static class InternalInsetsInfo {
-
-        @UnsupportedAppUsage
-        public InternalInsetsInfo() {
-        }
-
         /**
          * Offsets from the frame of the window at which the content of
          * windows behind it should be placed.

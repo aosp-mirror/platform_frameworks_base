@@ -1235,21 +1235,14 @@ public final class BatteryService extends SystemService {
         }
         @Override
         public void scheduleUpdate() throws RemoteException {
-            mHealthServiceWrapper.getHandlerThread().getThreadHandler().post(() -> {
-                traceBegin("HealthScheduleUpdate");
-                try {
-                    IHealth service = mHealthServiceWrapper.getLastService();
-                    if (service == null) {
-                        Slog.e(TAG, "no health service");
-                        return;
-                    }
-                    service.update();
-                } catch (RemoteException ex) {
-                    Slog.e(TAG, "Cannot call update on health HAL", ex);
-                } finally {
-                    traceEnd();
-                }
-            });
+            traceBegin("HealthScheduleUpdate");
+            try {
+                IHealth service = mHealthServiceWrapper.getLastService();
+                if (service == null) throw new RemoteException("no health service");
+                service.update();
+            } finally {
+                traceEnd();
+            }
         }
     }
 
@@ -1326,7 +1319,7 @@ public final class BatteryService extends SystemService {
                 Arrays.asList(INSTANCE_VENDOR, INSTANCE_HEALTHD);
 
         private final IServiceNotification mNotification = new Notification();
-        private final HandlerThread mHandlerThread = new HandlerThread("HealthServiceHwbinder");
+        private final HandlerThread mHandlerThread = new HandlerThread("HealthServiceRefresh");
         // These variables are fixed after init.
         private Callback mCallback;
         private IHealthSupplier mHealthSupplier;

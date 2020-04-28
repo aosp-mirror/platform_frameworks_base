@@ -9,6 +9,7 @@
 #include <androidfw/ResourceTypes.h>
 #include <androidfw/StreamingZipInflater.h>
 #include <androidfw/ZipFileRO.h>
+#include <cutils/jstring.h>
 #include <cutils/properties.h>
 #include <private/android_filesystem_config.h> // for AID_SYSTEM
 #include <utils/SortedVector.h>
@@ -83,9 +84,15 @@ namespace {
     }
 
     bool check_property(String16 property, String16 value) {
+        const char *prop;
+        const char *val;
+
+        prop = strndup16to8(property.string(), property.size());
         char propBuf[PROPERTY_VALUE_MAX];
-        property_get(String8(property).c_str(), propBuf, NULL);
-        return String8(value) == propBuf;
+        property_get(prop, propBuf, NULL);
+        val = strndup16to8(value.string(), value.size());
+
+        return (strcmp(propBuf, val) == 0);
     }
 
     int parse_overlay_tag(const ResXMLTree& parser, const char *target_package_name,

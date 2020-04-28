@@ -21,8 +21,6 @@ import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 
-import dalvik.annotation.compat.UnsupportedAppUsage;
-
 /**
  * @hide
  */
@@ -35,7 +33,6 @@ public final class RemoteCallback implements Parcelable {
     }
 
     private final OnResultListener mListener;
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     private final Handler mHandler;
     private final IRemoteCallback mCallback;
 

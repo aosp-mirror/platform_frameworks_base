@@ -49,6 +49,7 @@ import static android.telephony.CarrierConfigManager.KEY_DATA_WARNING_THRESHOLD_
 import static android.telephony.CarrierConfigManager.KEY_MONTHLY_DATA_CYCLE_DAY_INT;
 import static android.telephony.SubscriptionPlan.BYTES_UNLIMITED;
 import static android.telephony.SubscriptionPlan.LIMIT_BEHAVIOR_DISABLED;
+import static android.text.format.Time.TIMEZONE_UTC;
 
 import static com.android.server.net.NetworkPolicyManagerInternal.QUOTA_TYPE_JOBS;
 import static com.android.server.net.NetworkPolicyManagerInternal.QUOTA_TYPE_MULTIPATH;
@@ -127,6 +128,7 @@ import android.telephony.SubscriptionPlan;
 import android.telephony.TelephonyManager;
 import android.test.suitebuilder.annotation.MediumTest;
 import android.text.TextUtils;
+import android.text.format.Time;
 import android.util.DataUnit;
 import android.util.Log;
 import android.util.Pair;
@@ -182,7 +184,6 @@ import java.util.Calendar;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.TimeZone;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -212,7 +213,6 @@ public class NetworkPolicyManagerServiceTest {
      * Path on assets where files used by {@link NetPolicyXml} are located.
      */
     private static final String NETPOLICY_DIR = "NetworkPolicyManagerServiceTest/netpolicy";
-    private static final String TIMEZONE_UTC = "UTC";
 
     private BroadcastInterceptingContext mServiceContext;
     private File mPolicyDir;
@@ -1796,7 +1796,7 @@ public class NetworkPolicyManagerServiceTest {
     private static NetworkPolicy buildFakeMobilePolicy(int cycleDay, long warningBytes,
             long limitBytes, boolean inferred) {
         final NetworkTemplate template = buildTemplateMobileAll(FAKE_SUBSCRIBER_ID);
-        return new NetworkPolicy(template, cycleDay, TimeZone.getDefault().getID(), warningBytes,
+        return new NetworkPolicy(template, cycleDay, new Time().timezone, warningBytes,
                 limitBytes, SNOOZE_NEVER, SNOOZE_NEVER, true, inferred);
     }
 

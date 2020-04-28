@@ -5,7 +5,6 @@ package android {
     field public static final String ACCESS_NOTIFICATIONS = "android.permission.ACCESS_NOTIFICATIONS";
     field public static final String ACTIVITY_EMBEDDING = "android.permission.ACTIVITY_EMBEDDING";
     field public static final String APPROVE_INCIDENT_REPORTS = "android.permission.APPROVE_INCIDENT_REPORTS";
-    field public static final String BIND_CELL_BROADCAST_SERVICE = "android.permission.BIND_CELL_BROADCAST_SERVICE";
     field public static final String BRIGHTNESS_SLIDER_USAGE = "android.permission.BRIGHTNESS_SLIDER_USAGE";
     field public static final String CHANGE_APP_IDLE_STATE = "android.permission.CHANGE_APP_IDLE_STATE";
     field public static final String CLEAR_APP_USER_DATA = "android.permission.CLEAR_APP_USER_DATA";
@@ -793,8 +792,8 @@ package android.content.rollback {
   public final class RollbackManager {
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_ROLLBACKS, android.Manifest.permission.TEST_MANAGE_ROLLBACKS}) public void commitRollback(int, @NonNull java.util.List<android.content.pm.VersionedPackage>, @NonNull android.content.IntentSender);
     method @RequiresPermission(android.Manifest.permission.TEST_MANAGE_ROLLBACKS) public void expireRollbackForPackage(@NonNull String);
-    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_ROLLBACKS, android.Manifest.permission.TEST_MANAGE_ROLLBACKS}) public java.util.List<android.content.rollback.RollbackInfo> getAvailableRollbacks();
-    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_ROLLBACKS, android.Manifest.permission.TEST_MANAGE_ROLLBACKS}) public java.util.List<android.content.rollback.RollbackInfo> getRecentlyCommittedRollbacks();
+    method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_ROLLBACKS, android.Manifest.permission.TEST_MANAGE_ROLLBACKS}) @NonNull public java.util.List<android.content.rollback.RollbackInfo> getAvailableRollbacks();
+    method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_ROLLBACKS, android.Manifest.permission.TEST_MANAGE_ROLLBACKS}) @NonNull public java.util.List<android.content.rollback.RollbackInfo> getRecentlyCommittedRollbacks();
     method @RequiresPermission(android.Manifest.permission.TEST_MANAGE_ROLLBACKS) public void reloadPersistedData();
     field public static final String EXTRA_STATUS = "android.content.rollback.extra.STATUS";
     field public static final String EXTRA_STATUS_MESSAGE = "android.content.rollback.extra.STATUS_MESSAGE";
@@ -1078,7 +1077,7 @@ package android.location {
     method @NonNull public android.location.LocationRequest setExpireIn(long);
     method @NonNull public android.location.LocationRequest setFastestInterval(long);
     method @NonNull public android.location.LocationRequest setInterval(long);
-    method @NonNull @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public android.location.LocationRequest setLocationSettingsIgnored(boolean);
+    method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) @NonNull public android.location.LocationRequest setLocationSettingsIgnored(boolean);
     method @NonNull public android.location.LocationRequest setNumUpdates(int);
     method @NonNull public android.location.LocationRequest setProvider(@NonNull String);
     method @NonNull public android.location.LocationRequest setQuality(int);
@@ -1654,8 +1653,7 @@ package android.net.util {
     method public static void closeSocket(@Nullable java.io.FileDescriptor) throws java.io.IOException;
     method @NonNull public static java.net.SocketAddress makeNetlinkSocketAddress(int, int);
     method @NonNull public static java.net.SocketAddress makePacketSocketAddress(int, int);
-    method @Deprecated @NonNull public static java.net.SocketAddress makePacketSocketAddress(int, @NonNull byte[]);
-    method @NonNull public static java.net.SocketAddress makePacketSocketAddress(int, int, @NonNull byte[]);
+    method @NonNull public static java.net.SocketAddress makePacketSocketAddress(int, @NonNull byte[]);
   }
 
 }
@@ -1700,7 +1698,6 @@ package android.os {
   }
 
   public static class Build.VERSION {
-    field public static final String[] ACTIVE_CODENAMES;
     field public static final int FIRST_SDK_INT;
     field public static final int RESOURCES_SDK_INT;
   }
@@ -1853,8 +1850,8 @@ package android.os {
     method @RequiresPermission("android.permission.REQUEST_INCIDENT_REPORT_APPROVAL") public void cancelAuthorization(android.os.IncidentManager.AuthListener);
     method @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) public void deleteIncidentReports(android.net.Uri);
     method @RequiresPermission(android.Manifest.permission.APPROVE_INCIDENT_REPORTS) public void denyReport(android.net.Uri);
-    method @Nullable @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) public android.os.IncidentManager.IncidentReport getIncidentReport(android.net.Uri);
-    method @NonNull @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) public java.util.List<android.net.Uri> getIncidentReportList(String);
+    method @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) @Nullable public android.os.IncidentManager.IncidentReport getIncidentReport(android.net.Uri);
+    method @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) @NonNull public java.util.List<android.net.Uri> getIncidentReportList(String);
     method @RequiresPermission(android.Manifest.permission.APPROVE_INCIDENT_REPORTS) public java.util.List<android.os.IncidentManager.PendingReport> getPendingReports();
     method @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) public void reportIncident(android.os.IncidentReportArgs);
     method @RequiresPermission("android.permission.REQUEST_INCIDENT_REPORT_APPROVAL") public void requestAuthorization(int, String, int, android.os.IncidentManager.AuthListener);
@@ -2328,7 +2325,6 @@ package android.provider {
     method public static android.net.Uri scanFile(android.content.Context, java.io.File);
     method public static android.net.Uri scanFileFromShell(android.content.Context, java.io.File);
     method public static void scanVolume(android.content.Context, java.io.File);
-    method public static void waitForIdle(android.content.Context);
   }
 
   public final class Settings {
@@ -2400,7 +2396,7 @@ package android.security {
 package android.security.keystore {
 
   public abstract class AttestationUtils {
-    method @NonNull @RequiresPermission("android.permission.READ_PRIVILEGED_PHONE_STATE") public static java.security.cert.X509Certificate[] attestDeviceIds(android.content.Context, @NonNull int[], @NonNull byte[]) throws android.security.keystore.DeviceIdAttestationException;
+    method @RequiresPermission("android.permission.READ_PRIVILEGED_PHONE_STATE") @NonNull public static java.security.cert.X509Certificate[] attestDeviceIds(android.content.Context, @NonNull int[], @NonNull byte[]) throws android.security.keystore.DeviceIdAttestationException;
     field public static final int ID_TYPE_IMEI = 2; // 0x2
     field public static final int ID_TYPE_MEID = 3; // 0x3
     field public static final int ID_TYPE_SERIAL = 1; // 0x1
@@ -2737,21 +2733,8 @@ package android.service.quicksettings {
 
 package android.telecom {
 
-  public final class Call {
-    method public void enterBackgroundAudioProcessing();
-    method public void exitBackgroundAudioProcessing(boolean);
-  }
-
-  public static class Call.Details {
-    method public String getTelecomCallId();
-  }
-
   public final class CallAudioState implements android.os.Parcelable {
     ctor public CallAudioState(boolean, int, int, @Nullable android.bluetooth.BluetoothDevice, @NonNull java.util.Collection<android.bluetooth.BluetoothDevice>);
-  }
-
-  public static class CallScreeningService.CallResponse.Builder {
-    method public android.telecom.CallScreeningService.CallResponse.Builder setShouldScreenCallFurther(boolean);
   }
 
   public abstract class Conference extends android.telecom.Conferenceable {
@@ -2864,21 +2847,6 @@ package android.telephony {
     method @NonNull public android.telephony.NetworkRegistrationInfo.Builder setTransportType(int);
   }
 
-  public class PhoneNumberUtils {
-    method public static int getMinMatchForTest();
-    method @NonNull public static String getUsernameFromUriNumber(@NonNull String);
-    method public static boolean isUriNumber(@Nullable String);
-    method public static boolean isVoiceMailNumber(@NonNull android.content.Context, int, @Nullable String);
-    method public static void setMinMatchForTest(int);
-  }
-
-  public class PhoneStateListener {
-    method public void onOutgoingEmergencyCall(@NonNull android.telephony.emergency.EmergencyNumber);
-    method public void onOutgoingEmergencySms(@NonNull android.telephony.emergency.EmergencyNumber);
-    field @RequiresPermission("android.permission.READ_ACTIVE_EMERGENCY_SESSION") public static final int LISTEN_OUTGOING_EMERGENCY_CALL = 268435456; // 0x10000000
-    field @RequiresPermission("android.permission.READ_ACTIVE_EMERGENCY_SESSION") public static final int LISTEN_OUTGOING_EMERGENCY_SMS = 536870912; // 0x20000000
-  }
-
   public class ServiceState implements android.os.Parcelable {
     method public void addNetworkRegistrationInfo(android.telephony.NetworkRegistrationInfo);
     method public void setCdmaSystemAndNetworkId(int, int);
@@ -2892,7 +2860,6 @@ package android.telephony {
 
   public final class SmsManager {
     method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public int checkSmsShortCodeDestination(String, String);
-    method public void sendMultipartTextMessage(@NonNull String, @NonNull String, @NonNull java.util.List<java.lang.String>, @Nullable java.util.List<android.app.PendingIntent>, @Nullable java.util.List<android.app.PendingIntent>, @NonNull String);
     field public static final int SMS_CATEGORY_FREE_SHORT_CODE = 1; // 0x1
     field public static final int SMS_CATEGORY_NOT_SHORT_CODE = 0; // 0x0
     field public static final int SMS_CATEGORY_POSSIBLE_PREMIUM_SHORT_CODE = 3; // 0x3
@@ -2900,16 +2867,10 @@ package android.telephony {
     field public static final int SMS_CATEGORY_STANDARD_SHORT_CODE = 2; // 0x2
   }
 
-  public class SubscriptionManager {
-    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setDefaultVoiceSubscriptionId(int);
-  }
-
   public class TelephonyManager {
     method public int checkCarrierPrivilegesForPackage(String);
     method public int getCarrierIdListVersion();
-    method @Nullable public static android.content.ComponentName getDefaultRespondViaMessageApplication(@NonNull android.content.Context, boolean);
     method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public String getLine1AlphaTag();
-    method @NonNull public String getNetworkCountryIso(int);
     method public android.util.Pair<java.lang.Integer,java.lang.Integer> getRadioHalVersion();
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void refreshUiccProfile();
     method @Deprecated public void setCarrierTestOverride(String, String, String, String, String, String, String);
@@ -2919,14 +2880,6 @@ package android.telephony {
     field public static final int CARRIER_PRIVILEGE_STATUS_NO_ACCESS = 0; // 0x0
     field public static final int CARRIER_PRIVILEGE_STATUS_RULES_NOT_LOADED = -1; // 0xffffffff
     field public static final int UNKNOWN_CARRIER_ID_LIST_VERSION = -1; // 0xffffffff
-  }
-
-}
-
-package android.telephony.emergency {
-
-  public final class EmergencyNumber implements java.lang.Comparable<android.telephony.emergency.EmergencyNumber> android.os.Parcelable {
-    field public static final int EMERGENCY_NUMBER_SOURCE_TEST = 32; // 0x20
   }
 
 }
@@ -2961,7 +2914,7 @@ package android.telephony.mbms {
 
 package android.telephony.mbms.vendor {
 
-  public class MbmsDownloadServiceBase extends android.os.Binder implements android.os.IInterface {
+  public class MbmsDownloadServiceBase extends android.os.Binder {
     ctor public MbmsDownloadServiceBase();
     method public int addProgressListener(android.telephony.mbms.DownloadRequest, android.telephony.mbms.DownloadProgressListener) throws android.os.RemoteException;
     method public int addStatusListener(android.telephony.mbms.DownloadRequest, android.telephony.mbms.DownloadStatusListener) throws android.os.RemoteException;
@@ -2992,7 +2945,7 @@ package android.telephony.mbms.vendor {
     method public void updateGroupCall(int, long, @NonNull java.util.List<java.lang.Integer>, @NonNull java.util.List<java.lang.Integer>);
   }
 
-  public class MbmsStreamingServiceBase extends android.os.Binder implements android.os.IInterface {
+  public class MbmsStreamingServiceBase extends android.os.Binder {
     ctor public MbmsStreamingServiceBase();
     method public android.os.IBinder asBinder();
     method public void dispose(int) throws android.os.RemoteException;

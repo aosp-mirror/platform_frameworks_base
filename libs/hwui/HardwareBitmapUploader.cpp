@@ -302,7 +302,6 @@ static FormatInfo determineFormat(const SkBitmap& skBitmap, bool usingGL) {
     switch (skBitmap.info().colorType()) {
         case kRGBA_8888_SkColorType:
             formatInfo.isSupported = true;
-            [[fallthrough]];
         // ARGB_4444 is upconverted to RGBA_8888
         case kARGB_4444_SkColorType:
             formatInfo.pixelFormat = PIXEL_FORMAT_RGBA_8888;

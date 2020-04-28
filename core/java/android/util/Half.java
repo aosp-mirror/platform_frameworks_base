@@ -20,8 +20,6 @@ import android.annotation.HalfFloat;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 
-import libcore.util.FP16;
-
 /**
  * <p>The {@code Half} class is a wrapper and a utility class to manipulate half-precision 16-bit
  * <a href="https://en.wikipedia.org/wiki/Half-precision_floating-point_format">IEEE 754</a>
@@ -149,6 +147,25 @@ public final class Half extends Number implements Comparable<Half> {
      * Positive 0 of type half-precision float.
      */
     public static final @HalfFloat short POSITIVE_ZERO = (short) 0x0000;
+
+    private static final int FP16_SIGN_SHIFT        = 15;
+    private static final int FP16_SIGN_MASK         = 0x8000;
+    private static final int FP16_EXPONENT_SHIFT    = 10;
+    private static final int FP16_EXPONENT_MASK     = 0x1f;
+    private static final int FP16_SIGNIFICAND_MASK  = 0x3ff;
+    private static final int FP16_EXPONENT_BIAS     = 15;
+    private static final int FP16_COMBINED          = 0x7fff;
+    private static final int FP16_EXPONENT_MAX      = 0x7c00;
+
+    private static final int FP32_SIGN_SHIFT        = 31;
+    private static final int FP32_EXPONENT_SHIFT    = 23;
+    private static final int FP32_EXPONENT_MASK     = 0xff;
+    private static final int FP32_SIGNIFICAND_MASK  = 0x7fffff;
+    private static final int FP32_EXPONENT_BIAS     = 127;
+    private static final int FP32_QNAN_MASK         = 0x400000;
+
+    private static final int FP32_DENORMAL_MAGIC = 126 << 23;
+    private static final float FP32_DENORMAL_FLOAT = Float.intBitsToFloat(FP32_DENORMAL_MAGIC);
 
     private final @HalfFloat short mValue;
 
@@ -397,7 +414,16 @@ public final class Half extends Number implements Comparable<Half> {
      *          than {@code y}
      */
     public static int compare(@HalfFloat short x, @HalfFloat short y) {
-        return FP16.compare(x, y);
+        if (less(x, y)) return -1;
+        if (greater(x, y)) return 1;
+
+        // Collapse NaNs, akin to halfToIntBits(), but we want to keep
+        // (signed) short value types to preserve the ordering of -0.0
+        // and +0.0
+        short xBits = (x & FP16_COMBINED) > FP16_EXPONENT_MAX ? NaN : x;
+        short yBits = (y & FP16_COMBINED) > FP16_EXPONENT_MAX ? NaN : y;
+
+        return (xBits == yBits ? 0 : (xBits < yBits ? -1 : 1));
     }
 
     /**
@@ -414,7 +440,7 @@ public final class Half extends Number implements Comparable<Half> {
      * @see #halfToIntBits(short)
      */
     public static @HalfFloat short halfToShortBits(@HalfFloat short h) {
-        return (h & FP16.EXPONENT_SIGNIFICAND_MASK) > FP16.POSITIVE_INFINITY ? NaN : h;
+        return (h & FP16_COMBINED) > FP16_EXPONENT_MAX ? NaN : h;
     }
 
     /**
@@ -433,7 +459,7 @@ public final class Half extends Number implements Comparable<Half> {
      * @see #intBitsToHalf(int)
      */
     public static int halfToIntBits(@HalfFloat short h) {
-        return (h & FP16.EXPONENT_SIGNIFICAND_MASK) > FP16.POSITIVE_INFINITY ? NaN : h & 0xffff;
+        return (h & FP16_COMBINED) > FP16_EXPONENT_MAX ? NaN : h & 0xffff;
     }
 
     /**
@@ -479,7 +505,7 @@ public final class Half extends Number implements Comparable<Half> {
      *         of the second parameter
      */
     public static @HalfFloat short copySign(@HalfFloat short magnitude, @HalfFloat short sign) {
-        return (short) ((sign & FP16.SIGN_MASK) | (magnitude & FP16.EXPONENT_SIGNIFICAND_MASK));
+        return (short) ((sign & FP16_SIGN_MASK) | (magnitude & FP16_COMBINED));
     }
 
     /**
@@ -497,7 +523,7 @@ public final class Half extends Number implements Comparable<Half> {
      * @return The absolute value of the specified half-precision float
      */
     public static @HalfFloat short abs(@HalfFloat short h) {
-        return (short) (h & FP16.EXPONENT_SIGNIFICAND_MASK);
+        return (short) (h & FP16_COMBINED);
     }
 
     /**
@@ -512,18 +538,26 @@ public final class Half extends Number implements Comparable<Half> {
      * the result is zero (with the same sign)</li>
      * </ul>
      *
-     * <p class=note>
-     * <strong>Note:</strong> Unlike the identically named
-     * <code class=prettyprint>int java.lang.Math.round(float)</code> method,
-     * this returns a Half value stored in a short, <strong>not</strong> an
-     * actual short integer result.
-     *
      * @param h A half-precision float value
      * @return The value of the specified half-precision float rounded to the nearest
      *         half-precision float value
      */
     public static @HalfFloat short round(@HalfFloat short h) {
-        return FP16.rint(h);
+        int bits = h & 0xffff;
+        int e = bits & 0x7fff;
+        int result = bits;
+
+        if (e < 0x3c00) {
+            result &= FP16_SIGN_MASK;
+            result |= (0x3c00 & (e >= 0x3800 ? 0xffff : 0x0));
+        } else if (e < 0x6400) {
+            e = 25 - (e >> 10);
+            int mask = (1 << e) - 1;
+            result += (1 << (e - 1));
+            result &= ~mask;
+        }
+
+        return (short) result;
     }
 
     /**
@@ -543,7 +577,21 @@ public final class Half extends Number implements Comparable<Half> {
      *         greater than or equal to the specified half-precision float value
      */
     public static @HalfFloat short ceil(@HalfFloat short h) {
-        return FP16.ceil(h);
+        int bits = h & 0xffff;
+        int e = bits & 0x7fff;
+        int result = bits;
+
+        if (e < 0x3c00) {
+            result &= FP16_SIGN_MASK;
+            result |= 0x3c00 & -(~(bits >> 15) & (e != 0 ? 1 : 0));
+        } else if (e < 0x6400) {
+            e = 25 - (e >> 10);
+            int mask = (1 << e) - 1;
+            result += mask & ((bits >> 15) - 1);
+            result &= ~mask;
+        }
+
+        return (short) result;
     }
 
     /**
@@ -563,7 +611,21 @@ public final class Half extends Number implements Comparable<Half> {
      *         less than or equal to the specified half-precision float value
      */
     public static @HalfFloat short floor(@HalfFloat short h) {
-        return FP16.floor(h);
+        int bits = h & 0xffff;
+        int e = bits & 0x7fff;
+        int result = bits;
+
+        if (e < 0x3c00) {
+            result &= FP16_SIGN_MASK;
+            result |= 0x3c00 & (bits > 0x8000 ? 0xffff : 0x0);
+        } else if (e < 0x6400) {
+            e = 25 - (e >> 10);
+            int mask = (1 << e) - 1;
+            result += mask & -(bits >> 15);
+            result &= ~mask;
+        }
+
+        return (short) result;
     }
 
     /**
@@ -582,7 +644,19 @@ public final class Half extends Number implements Comparable<Half> {
      *         half-precision float value
      */
     public static @HalfFloat short trunc(@HalfFloat short h) {
-        return FP16.trunc(h);
+        int bits = h & 0xffff;
+        int e = bits & 0x7fff;
+        int result = bits;
+
+        if (e < 0x3c00) {
+            result &= FP16_SIGN_MASK;
+        } else if (e < 0x6400) {
+            e = 25 - (e >> 10);
+            int mask = (1 << e) - 1;
+            result &= ~mask;
+        }
+
+        return (short) result;
     }
 
     /**
@@ -598,7 +672,15 @@ public final class Half extends Number implements Comparable<Half> {
      * @return The smaller of the two specified half-precision values
      */
     public static @HalfFloat short min(@HalfFloat short x, @HalfFloat short y) {
-        return FP16.min(x, y);
+        if ((x & FP16_COMBINED) > FP16_EXPONENT_MAX) return NaN;
+        if ((y & FP16_COMBINED) > FP16_EXPONENT_MAX) return NaN;
+
+        if ((x & FP16_COMBINED) == 0 && (y & FP16_COMBINED) == 0) {
+            return (x & FP16_SIGN_MASK) != 0 ? x : y;
+        }
+
+        return ((x & FP16_SIGN_MASK) != 0 ? 0x8000 - (x & 0xffff) : x & 0xffff) <
+               ((y & FP16_SIGN_MASK) != 0 ? 0x8000 - (y & 0xffff) : y & 0xffff) ? x : y;
     }
 
     /**
@@ -615,7 +697,15 @@ public final class Half extends Number implements Comparable<Half> {
      * @return The larger of the two specified half-precision values
      */
     public static @HalfFloat short max(@HalfFloat short x, @HalfFloat short y) {
-        return FP16.max(x, y);
+        if ((x & FP16_COMBINED) > FP16_EXPONENT_MAX) return NaN;
+        if ((y & FP16_COMBINED) > FP16_EXPONENT_MAX) return NaN;
+
+        if ((x & FP16_COMBINED) == 0 && (y & FP16_COMBINED) == 0) {
+            return (x & FP16_SIGN_MASK) != 0 ? y : x;
+        }
+
+        return ((x & FP16_SIGN_MASK) != 0 ? 0x8000 - (x & 0xffff) : x & 0xffff) >
+               ((y & FP16_SIGN_MASK) != 0 ? 0x8000 - (y & 0xffff) : y & 0xffff) ? x : y;
     }
 
     /**
@@ -629,7 +719,11 @@ public final class Half extends Number implements Comparable<Half> {
      * @return True if x is less than y, false otherwise
      */
     public static boolean less(@HalfFloat short x, @HalfFloat short y) {
-        return FP16.less(x, y);
+        if ((x & FP16_COMBINED) > FP16_EXPONENT_MAX) return false;
+        if ((y & FP16_COMBINED) > FP16_EXPONENT_MAX) return false;
+
+        return ((x & FP16_SIGN_MASK) != 0 ? 0x8000 - (x & 0xffff) : x & 0xffff) <
+               ((y & FP16_SIGN_MASK) != 0 ? 0x8000 - (y & 0xffff) : y & 0xffff);
     }
 
     /**
@@ -643,7 +737,11 @@ public final class Half extends Number implements Comparable<Half> {
      * @return True if x is less than or equal to y, false otherwise
      */
     public static boolean lessEquals(@HalfFloat short x, @HalfFloat short y) {
-        return FP16.lessEquals(x, y);
+        if ((x & FP16_COMBINED) > FP16_EXPONENT_MAX) return false;
+        if ((y & FP16_COMBINED) > FP16_EXPONENT_MAX) return false;
+
+        return ((x & FP16_SIGN_MASK) != 0 ? 0x8000 - (x & 0xffff) : x & 0xffff) <=
+               ((y & FP16_SIGN_MASK) != 0 ? 0x8000 - (y & 0xffff) : y & 0xffff);
     }
 
     /**
@@ -657,7 +755,11 @@ public final class Half extends Number implements Comparable<Half> {
      * @return True if x is greater than y, false otherwise
      */
     public static boolean greater(@HalfFloat short x, @HalfFloat short y) {
-        return FP16.greater(x, y);
+        if ((x & FP16_COMBINED) > FP16_EXPONENT_MAX) return false;
+        if ((y & FP16_COMBINED) > FP16_EXPONENT_MAX) return false;
+
+        return ((x & FP16_SIGN_MASK) != 0 ? 0x8000 - (x & 0xffff) : x & 0xffff) >
+               ((y & FP16_SIGN_MASK) != 0 ? 0x8000 - (y & 0xffff) : y & 0xffff);
     }
 
     /**
@@ -671,7 +773,11 @@ public final class Half extends Number implements Comparable<Half> {
      * @return True if x is greater than y, false otherwise
      */
     public static boolean greaterEquals(@HalfFloat short x, @HalfFloat short y) {
-        return FP16.greaterEquals(x, y);
+        if ((x & FP16_COMBINED) > FP16_EXPONENT_MAX) return false;
+        if ((y & FP16_COMBINED) > FP16_EXPONENT_MAX) return false;
+
+        return ((x & FP16_SIGN_MASK) != 0 ? 0x8000 - (x & 0xffff) : x & 0xffff) >=
+               ((y & FP16_SIGN_MASK) != 0 ? 0x8000 - (y & 0xffff) : y & 0xffff);
     }
 
     /**
@@ -685,7 +791,10 @@ public final class Half extends Number implements Comparable<Half> {
      * @return True if x is equal to y, false otherwise
      */
     public static boolean equals(@HalfFloat short x, @HalfFloat short y) {
-        return FP16.equals(x, y);
+        if ((x & FP16_COMBINED) > FP16_EXPONENT_MAX) return false;
+        if ((y & FP16_COMBINED) > FP16_EXPONENT_MAX) return false;
+
+        return x == y || ((x | y) & FP16_COMBINED) == 0;
     }
 
     /**
@@ -695,7 +804,7 @@ public final class Half extends Number implements Comparable<Half> {
      * @return 1 if the value is positive, -1 if the value is negative
      */
     public static int getSign(@HalfFloat short h) {
-        return (h & FP16.SIGN_MASK) == 0 ? 1 : -1;
+        return (h & FP16_SIGN_MASK) == 0 ? 1 : -1;
     }
 
     /**
@@ -709,7 +818,7 @@ public final class Half extends Number implements Comparable<Half> {
      * @return The unbiased exponent of the specified value
      */
     public static int getExponent(@HalfFloat short h) {
-        return ((h >>> FP16.EXPONENT_SHIFT) & FP16.SHIFTED_EXPONENT_MASK) - FP16.EXPONENT_BIAS;
+        return ((h >>> FP16_EXPONENT_SHIFT) & FP16_EXPONENT_MASK) - FP16_EXPONENT_BIAS;
     }
 
     /**
@@ -720,7 +829,7 @@ public final class Half extends Number implements Comparable<Half> {
      * @return The significand, or significand, of the specified vlaue
      */
     public static int getSignificand(@HalfFloat short h) {
-        return h & FP16.SIGNIFICAND_MASK;
+        return h & FP16_SIGNIFICAND_MASK;
     }
 
     /**
@@ -732,7 +841,7 @@ public final class Half extends Number implements Comparable<Half> {
      *         false otherwise
      */
     public static boolean isInfinite(@HalfFloat short h) {
-        return FP16.isInfinite(h);
+        return (h & FP16_COMBINED) == FP16_EXPONENT_MAX;
     }
 
     /**
@@ -743,7 +852,7 @@ public final class Half extends Number implements Comparable<Half> {
      * @return True if the value is a NaN, false otherwise
      */
     public static boolean isNaN(@HalfFloat short h) {
-        return FP16.isNaN(h);
+        return (h & FP16_COMBINED) > FP16_EXPONENT_MAX;
     }
 
     /**
@@ -757,7 +866,7 @@ public final class Half extends Number implements Comparable<Half> {
      * @return True if the value is normalized, false otherwise
      */
     public static boolean isNormalized(@HalfFloat short h) {
-        return FP16.isNormalized(h);
+        return (h & FP16_EXPONENT_MAX) != 0 && (h & FP16_EXPONENT_MAX) != FP16_EXPONENT_MAX;
     }
 
     /**
@@ -776,7 +885,35 @@ public final class Half extends Number implements Comparable<Half> {
      * @return A normalized single-precision float value
      */
     public static float toFloat(@HalfFloat short h) {
-        return FP16.toFloat(h);
+        int bits = h & 0xffff;
+        int s = bits & FP16_SIGN_MASK;
+        int e = (bits >>> FP16_EXPONENT_SHIFT) & FP16_EXPONENT_MASK;
+        int m = (bits                        ) & FP16_SIGNIFICAND_MASK;
+
+        int outE = 0;
+        int outM = 0;
+
+        if (e == 0) { // Denormal or 0
+            if (m != 0) {
+                // Convert denorm fp16 into normalized fp32
+                float o = Float.intBitsToFloat(FP32_DENORMAL_MAGIC + m);
+                o -= FP32_DENORMAL_FLOAT;
+                return s == 0 ? o : -o;
+            }
+        } else {
+            outM = m << 13;
+            if (e == 0x1f) { // Infinite or NaN
+                outE = 0xff;
+                if (outM != 0) { // SNaNs are quieted
+                    outM |= FP32_QNAN_MASK;
+                }
+            } else {
+                outE = e - FP16_EXPONENT_BIAS + FP32_EXPONENT_BIAS;
+            }
+        }
+
+        int out = (s << 16) | (outE << FP32_EXPONENT_SHIFT) | outM;
+        return Float.intBitsToFloat(out);
     }
 
     /**
@@ -803,7 +940,44 @@ public final class Half extends Number implements Comparable<Half> {
      */
     @SuppressWarnings("StatementWithEmptyBody")
     public static @HalfFloat short toHalf(float f) {
-        return FP16.toHalf(f);
+        int bits = Float.floatToRawIntBits(f);
+        int s = (bits >>> FP32_SIGN_SHIFT    );
+        int e = (bits >>> FP32_EXPONENT_SHIFT) & FP32_EXPONENT_MASK;
+        int m = (bits                        ) & FP32_SIGNIFICAND_MASK;
+
+        int outE = 0;
+        int outM = 0;
+
+        if (e == 0xff) { // Infinite or NaN
+            outE = 0x1f;
+            outM = m != 0 ? 0x200 : 0;
+        } else {
+            e = e - FP32_EXPONENT_BIAS + FP16_EXPONENT_BIAS;
+            if (e >= 0x1f) { // Overflow
+                outE = 0x31;
+            } else if (e <= 0) { // Underflow
+                if (e < -10) {
+                    // The absolute fp32 value is less than MIN_VALUE, flush to +/-0
+                } else {
+                    // The fp32 value is a normalized float less than MIN_NORMAL,
+                    // we convert to a denorm fp16
+                    m = (m | 0x800000) >> (1 - e);
+                    if ((m & 0x1000) != 0) m += 0x2000;
+                    outM = m >> 13;
+                }
+            } else {
+                outE = e;
+                outM = m >> 13;
+                if ((m & 0x1000) != 0) {
+                    // Round to nearest "0.5" up
+                    int out = (outE << FP16_EXPONENT_SHIFT) | outM;
+                    out++;
+                    return (short) (out | (s << FP16_SIGN_SHIFT));
+                }
+            }
+        }
+
+        return (short) ((s << FP16_SIGN_SHIFT) | (outE << FP16_EXPONENT_SHIFT) | outM);
     }
 
     /**
@@ -899,6 +1073,40 @@ public final class Half extends Number implements Comparable<Half> {
      */
     @NonNull
     public static String toHexString(@HalfFloat short h) {
-        return FP16.toHexString(h);
+        StringBuilder o = new StringBuilder();
+
+        int bits = h & 0xffff;
+        int s = (bits >>> FP16_SIGN_SHIFT    );
+        int e = (bits >>> FP16_EXPONENT_SHIFT) & FP16_EXPONENT_MASK;
+        int m = (bits                        ) & FP16_SIGNIFICAND_MASK;
+
+        if (e == 0x1f) { // Infinite or NaN
+            if (m == 0) {
+                if (s != 0) o.append('-');
+                o.append("Infinity");
+            } else {
+                o.append("NaN");
+            }
+        } else {
+            if (s == 1) o.append('-');
+            if (e == 0) {
+                if (m == 0) {
+                    o.append("0x0.0p0");
+                } else {
+                    o.append("0x0.");
+                    String significand = Integer.toHexString(m);
+                    o.append(significand.replaceFirst("0{2,}$", ""));
+                    o.append("p-14");
+                }
+            } else {
+                o.append("0x1.");
+                String significand = Integer.toHexString(m);
+                o.append(significand.replaceFirst("0{2,}$", ""));
+                o.append('p');
+                o.append(Integer.toString(e - FP16_EXPONENT_BIAS));
+            }
+        }
+
+        return o.toString();
     }
 }

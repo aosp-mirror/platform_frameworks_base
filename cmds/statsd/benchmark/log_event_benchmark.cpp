@@ -54,9 +54,9 @@ static void getSimpleLogMsgData(log_msg* msg) {
     write4Bytes(99 /* a value to log*/, &buffer);
     buffer.push_back(EVENT_TYPE_LIST_STOP);
 
-    msg->entry.len = buffer.size();
+    msg->entry_v1.len = buffer.size();
     msg->entry.hdr_size = kLogMsgHeaderSize;
-    msg->entry.sec = time(nullptr);
+    msg->entry_v1.sec = time(nullptr);
     std::copy(buffer.begin(), buffer.end(), msg->buf + kLogMsgHeaderSize);
 }
 

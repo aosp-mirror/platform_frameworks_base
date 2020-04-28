@@ -89,8 +89,8 @@ public class SubscriptionInfo implements Parcelable {
     private int mCarrierId;
 
     /**
-     * The source of the name, NAME_SOURCE_DEFAULT_SOURCE, NAME_SOURCE_SIM_SOURCE or
-     * NAME_SOURCE_USER_INPUT.
+     * The source of the name, NAME_SOURCE_DEFAULT_SOURCE, NAME_SOURCE_SIM_SPN,
+     * NAME_SOURCE_SIM_PNN, or NAME_SOURCE_USER_INPUT.
      */
     private int mNameSource;
 
@@ -334,7 +334,7 @@ public class SubscriptionInfo implements Parcelable {
     }
 
     /**
-     * @return the source of the name, eg NAME_SOURCE_DEFAULT_SOURCE, NAME_SOURCE_SIM_SOURCE or
+     * @return the source of the name, eg NAME_SOURCE_DEFAULT_SOURCE, NAME_SOURCE_SIM_SPN or
      * NAME_SOURCE_USER_INPUT.
      * @hide
      */
@@ -760,7 +760,7 @@ public class SubscriptionInfo implements Parcelable {
     public String toString() {
         String iccIdToPrint = givePrintableIccid(mIccId);
         String cardStringToPrint = givePrintableIccid(mCardString);
-        return "{id=" + mId + " iccId=" + iccIdToPrint + " simSlotIndex=" + mSimSlotIndex
+        return "{id=" + mId + ", iccId=" + iccIdToPrint + " simSlotIndex=" + mSimSlotIndex
                 + " carrierId=" + mCarrierId + " displayName=" + mDisplayName
                 + " carrierName=" + mCarrierName + " nameSource=" + mNameSource
                 + " iconTint=" + mIconTint + " mNumber=" + Rlog.pii(Build.IS_DEBUGGABLE, mNumber)
@@ -768,11 +768,11 @@ public class SubscriptionInfo implements Parcelable {
                 + " mnc " + mMnc + "mCountryIso=" + mCountryIso + " isEmbedded " + mIsEmbedded
                 + " nativeAccessRules " + Arrays.toString(mNativeAccessRules)
                 + " cardString=" + cardStringToPrint + " cardId=" + mCardId
-                + " isOpportunistic=" + mIsOpportunistic + " mGroupUUID=" + mGroupUUID
+                + " isOpportunistic " + mIsOpportunistic + " mGroupUUID=" + mGroupUUID
                 + " mIsGroupDisabled=" + mIsGroupDisabled
                 + " profileClass=" + mProfileClass
-                + " ehplmns=" + Arrays.toString(mEhplmns)
-                + " hplmns=" + Arrays.toString(mHplmns)
+                + " ehplmns = " + Arrays.toString(mEhplmns)
+                + " hplmns = " + Arrays.toString(mHplmns)
                 + " subscriptionType=" + mSubscriptionType
                 + " mGroupOwner=" + mGroupOwner
                 + " carrierConfigAccessRules=" + mCarrierConfigAccessRules + "}";

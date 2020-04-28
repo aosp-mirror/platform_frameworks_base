@@ -26,8 +26,6 @@ import android.security.keystore.KeyPermanentlyInvalidatedException;
 import android.util.ArrayMap;
 import android.util.Log;
 
-import libcore.util.HexEncoding;
-
 import java.security.Key;
 import java.security.SecureRandom;
 import java.security.UnrecoverableKeyException;
@@ -73,7 +71,11 @@ public class RecoverySession implements AutoCloseable {
         SecureRandom secureRandom = new SecureRandom();
         byte[] sessionId = new byte[SESSION_ID_LENGTH_BYTES];
         secureRandom.nextBytes(sessionId);
-        return HexEncoding.encodeToString(sessionId, /*upperCase=*/ false);
+        StringBuilder sb = new StringBuilder();
+        for (byte b : sessionId) {
+            sb.append(Byte.toHexString(b, /*upperCase=*/ false));
+        }
+        return sb.toString();
     }
 
     /**

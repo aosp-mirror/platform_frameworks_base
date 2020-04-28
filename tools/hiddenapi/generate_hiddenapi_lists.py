@@ -29,7 +29,6 @@ FLAG_GREYLIST = "greylist"
 FLAG_BLACKLIST = "blacklist"
 FLAG_GREYLIST_MAX_O = "greylist-max-o"
 FLAG_GREYLIST_MAX_P = "greylist-max-p"
-FLAG_GREYLIST_MAX_Q = "greylist-max-q"
 FLAG_CORE_PLATFORM_API = "core-platform-api"
 FLAG_PUBLIC_API = "public-api"
 FLAG_SYSTEM_API = "system-api"
@@ -42,7 +41,6 @@ FLAGS_API_LIST = [
     FLAG_BLACKLIST,
     FLAG_GREYLIST_MAX_O,
     FLAG_GREYLIST_MAX_P,
-    FLAG_GREYLIST_MAX_Q,
 ]
 ALL_FLAGS = FLAGS_API_LIST + [
     FLAG_CORE_PLATFORM_API,

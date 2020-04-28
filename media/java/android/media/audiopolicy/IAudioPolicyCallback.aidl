@@ -34,8 +34,4 @@ oneway interface IAudioPolicyCallback {
 
     // callback for volume events
     void notifyVolumeAdjust(int adjustment);
-
-    // callback for unregistration (e.g. if policy couldn't automatically be re-registered after
-    // an audioserver crash)
-    void notifyUnregistration();
 }

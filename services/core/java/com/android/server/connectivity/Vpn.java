@@ -58,6 +58,7 @@ import android.net.NetworkFactory;
 import android.net.NetworkInfo;
 import android.net.NetworkInfo.DetailedState;
 import android.net.NetworkMisc;
+import android.net.NetworkUtils;
 import android.net.RouteInfo;
 import android.net.UidRange;
 import android.net.VpnService;
@@ -113,6 +114,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -199,22 +201,13 @@ public class Vpn {
      */
     private @NonNull List<String> mLockdownWhitelist = Collections.emptyList();
 
-     /**
-     * A memory of what UIDs this class told netd to block for the lockdown feature.
-     *
-     * Netd maintains ranges of UIDs for which network should be restricted to using only the VPN
-     * for the lockdown feature. This class manages these UIDs and sends this information to netd.
-     * To avoid sending the same commands multiple times (which would be wasteful) and to be able
-     * to revoke lists (when the rules should change), it's simplest to keep this cache of what
-     * netd knows, so it can be diffed and sent most efficiently.
-     *
-     * The contents of this list must only be changed when updating the UIDs lists with netd,
-     * since it needs to keep in sync with the picture netd has of them.
-     *
+    /**
+     * List of UIDs for which networking should be blocked until VPN is ready, during brief periods
+     * when VPN is not running. For example, during system startup or after a crash.
      * @see mLockdown
      */
     @GuardedBy("this")
-    private final Set<UidRange> mBlockedUidsAsToldToNetd = new ArraySet<>();
+    private Set<UidRange> mBlockedUsers = new ArraySet<>();
 
     // Handle of the user initiating VPN.
     private final int mUserHandle;
@@ -263,7 +256,7 @@ public class Vpn {
     }
 
     /**
-     * Update current state, dispatching event to listeners.
+     * Update current state, dispaching event to listeners.
      */
     @VisibleForTesting
     protected void updateState(DetailedState detailedState, String reason) {
@@ -909,6 +902,38 @@ public class Vpn {
     }
 
     /**
+     * Analyzes the passed LinkedProperties to figure out whether it routes to most of the IP space.
+     *
+     * This returns true if the passed LinkedProperties contains routes to either most of the IPv4
+     * space or to most of the IPv6 address space, where "most" is defined by the value of the
+     * MOST_IPV{4,6}_ADDRESSES_COUNT constants : if more than this number of addresses are matched
+     * by any of the routes, then it's decided that most of the space is routed.
+     * @hide
+     */
+    @VisibleForTesting
+    static boolean providesRoutesToMostDestinations(LinkProperties lp) {
+        final List<RouteInfo> routes = lp.getAllRoutes();
+        if (routes.size() > MAX_ROUTES_TO_EVALUATE) return true;
+        final Comparator<IpPrefix> prefixLengthComparator = IpPrefix.lengthComparator();
+        TreeSet<IpPrefix> ipv4Prefixes = new TreeSet<>(prefixLengthComparator);
+        TreeSet<IpPrefix> ipv6Prefixes = new TreeSet<>(prefixLengthComparator);
+        for (final RouteInfo route : routes) {
+            if (route.getType() == RouteInfo.RTN_UNREACHABLE) continue;
+            IpPrefix destination = route.getDestination();
+            if (destination.isIPv4()) {
+                ipv4Prefixes.add(destination);
+            } else {
+                ipv6Prefixes.add(destination);
+            }
+        }
+        if (NetworkUtils.routedIPv4AddressCount(ipv4Prefixes) > MOST_IPV4_ADDRESSES_COUNT) {
+            return true;
+        }
+        return NetworkUtils.routedIPv6AddressCount(ipv6Prefixes)
+                .compareTo(MOST_IPV6_ADDRESSES_COUNT) >= 0;
+    }
+
+    /**
      * Attempt to perform a seamless handover of VPNs by only updating LinkProperties without
      * registering a new NetworkAgent. This is not always possible if the new VPN configuration
      * has certain changes, in which case this method would just return {@code false}.
@@ -938,11 +963,10 @@ public class Vpn {
         // VPN either provide a default route (IPv4 or IPv6 or both), or they are a split tunnel
         // that falls back to the default network, which by definition provides INTERNET (unless
         // there is no default network, in which case none of this matters in any sense).
-        // Also, always setting the INTERNET bit guarantees that when a VPN applies to an app,
-        // the VPN will always be reported as the network by getDefaultNetwork and callbacks
-        // registered with registerDefaultNetworkCallback. This in turn protects the invariant
-        // that an app calling ConnectivityManager#bindProcessToNetwork(getDefaultNetwork())
-        // behaves the same as when it uses the default network.
+        // Also, it guarantees that when a VPN applies to an app, the VPN will always be reported
+        // as the network by getDefaultNetwork and registerDefaultNetworkCallback. This in turn
+        // protects the invariant that apps calling CM#bindProcessToNetwork(getDefaultNetwork())
+        // the same as if they use the default network.
         mNetworkCapabilities.addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
 
         mNetworkInfo.setDetailedState(DetailedState.CONNECTING, null, null);
@@ -1054,8 +1078,7 @@ public class Vpn {
             // TEMP use the old jni calls until there is support for netd address setting
             StringBuilder builder = new StringBuilder();
             for (LinkAddress address : config.addresses) {
-                builder.append(" ");
-                builder.append(address);
+                builder.append(" " + address);
             }
             if (jniSetAddresses(interfaze, builder.toString()) < 1) {
                 throw new IllegalArgumentException("At least one address must be specified");
@@ -1109,11 +1132,7 @@ public class Vpn {
             }
         } catch (RuntimeException e) {
             IoUtils.closeQuietly(tun);
-            // If this is not seamless handover, disconnect partially-established network when error
-            // occurs.
-            if (oldNetworkAgent != mNetworkAgent) {
-                agentDisconnect();
-            }
+            agentDisconnect();
             // restore old state
             mConfig = oldConfig;
             mConnection = oldConnection;
@@ -1139,7 +1158,7 @@ public class Vpn {
 
     // Note: Return type guarantees results are deduped and sorted, which callers require.
     private SortedSet<Integer> getAppsUids(List<String> packageNames, int userHandle) {
-        SortedSet<Integer> uids = new TreeSet<>();
+        SortedSet<Integer> uids = new TreeSet<Integer>();
         for (String app : packageNames) {
             int uid = getAppUid(app, userHandle);
             if (uid != -1) uids.add(uid);
@@ -1242,7 +1261,7 @@ public class Vpn {
         // UidRange#createForUser returns the entire range of UIDs available to a macro-user.
         // This is something like 0-99999 ; {@see UserHandle#PER_USER_RANGE}
         final UidRange userRange = UidRange.createForUser(userHandle);
-        final List<UidRange> ranges = new ArrayList<>();
+        final List<UidRange> ranges = new ArrayList<UidRange>();
         for (UidRange range : existingRanges) {
             if (userRange.containsRange(range)) {
                 ranges.add(range);
@@ -1334,7 +1353,7 @@ public class Vpn {
      *                {@link Vpn} goes through a VPN connection or is blocked until one is
      *                available, {@code false} to lift the requirement.
      *
-     * @see #mBlockedUidsAsToldToNetd
+     * @see #mBlockedUsers
      */
     @GuardedBy("this")
     private void setVpnForcedLocked(boolean enforce) {
@@ -1345,47 +1364,37 @@ public class Vpn {
             exemptedPackages = new ArrayList<>(mLockdownWhitelist);
             exemptedPackages.add(mPackage);
         }
-        final Set<UidRange> rangesToTellNetdToRemove = new ArraySet<>(mBlockedUidsAsToldToNetd);
+        final Set<UidRange> removedRanges = new ArraySet<>(mBlockedUsers);
 
-        final Set<UidRange> rangesToTellNetdToAdd;
+        Set<UidRange> addedRanges = Collections.emptySet();
         if (enforce) {
-            final Set<UidRange> rangesThatShouldBeBlocked =
-                    createUserAndRestrictedProfilesRanges(mUserHandle,
-                            /* allowedApplications */ null,
-                            /* disallowedApplications */ exemptedPackages);
+            addedRanges = createUserAndRestrictedProfilesRanges(mUserHandle,
+                    /* allowedApplications */ null,
+                    /* disallowedApplications */ exemptedPackages);
 
             // The UID range of the first user (0-99999) would block the IPSec traffic, which comes
             // directly from the kernel and is marked as uid=0. So we adjust the range to allow
             // it through (b/69873852).
-            for (UidRange range : rangesThatShouldBeBlocked) {
+            for (UidRange range : addedRanges) {
                 if (range.start == 0) {
-                    rangesThatShouldBeBlocked.remove(range);
+                    addedRanges.remove(range);
                     if (range.stop != 0) {
-                        rangesThatShouldBeBlocked.add(new UidRange(1, range.stop));
+                        addedRanges.add(new UidRange(1, range.stop));
                     }
                 }
             }
 
-            rangesToTellNetdToRemove.removeAll(rangesThatShouldBeBlocked);
-            rangesToTellNetdToAdd = rangesThatShouldBeBlocked;
-            // The ranges to tell netd to add are the ones that should be blocked minus the
-            // ones it already knows to block. Note that this will change the contents of
-            // rangesThatShouldBeBlocked, but the list of ranges that should be blocked is
-            // not used after this so it's fine to destroy it.
-            rangesToTellNetdToAdd.removeAll(mBlockedUidsAsToldToNetd);
-        } else {
-            rangesToTellNetdToAdd = Collections.emptySet();
+            removedRanges.removeAll(addedRanges);
+            addedRanges.removeAll(mBlockedUsers);
         }
 
-        // If mBlockedUidsAsToldToNetd used to be empty, this will always be a no-op.
-        setAllowOnlyVpnForUids(false, rangesToTellNetdToRemove);
-        // If nothing should be blocked now, this will now be a no-op.
-        setAllowOnlyVpnForUids(true, rangesToTellNetdToAdd);
+        setAllowOnlyVpnForUids(false, removedRanges);
+        setAllowOnlyVpnForUids(true, addedRanges);
     }
 
     /**
-     * Tell netd to add or remove a list of {@link UidRange}s to the list of UIDs that are only
-     * allowed to make connections through sockets that have had {@code protect()} called on them.
+     * Either add or remove a list of {@link UidRange}s to the list of UIDs that are only allowed
+     * to make connections through sockets that have had {@code protect()} called on them.
      *
      * @param enforce {@code true} to add to the blacklist, {@code false} to remove.
      * @param ranges {@link Collection} of {@link UidRange}s to add (if {@param enforce} is
@@ -1407,9 +1416,9 @@ public class Vpn {
             return false;
         }
         if (enforce) {
-            mBlockedUidsAsToldToNetd.addAll(ranges);
+            mBlockedUsers.addAll(ranges);
         } else {
-            mBlockedUidsAsToldToNetd.removeAll(ranges);
+            mBlockedUsers.removeAll(ranges);
         }
         return true;
     }
@@ -1576,18 +1585,17 @@ public class Vpn {
     /**
      * @param uid The target uid.
      *
-     * @return {@code true} if {@code uid} is included in one of the mBlockedUidsAsToldToNetd
-     * ranges and the VPN is not connected, or if the VPN is connected but does not apply to
-     * the {@code uid}.
+     * @return {@code true} if {@code uid} is included in one of the mBlockedUsers ranges and the
+     * VPN is not connected, or if the VPN is connected but does not apply to the {@code uid}.
      *
      * @apiNote This method don't check VPN lockdown status.
-     * @see #mBlockedUidsAsToldToNetd
+     * @see #mBlockedUsers
      */
     public synchronized boolean isBlockingUid(int uid) {
         if (mNetworkInfo.isConnected()) {
             return !appliesToUid(uid);
         } else {
-            return UidRange.containsUid(mBlockedUidsAsToldToNetd, uid);
+            return UidRange.containsUid(mBlockedUsers, uid);
         }
     }
 
@@ -1752,7 +1760,7 @@ public class Vpn {
             byte[] value = keyStore.get(Credentials.USER_CERTIFICATE + profile.ipsecServerCert);
             serverCert = (value == null) ? null : new String(value, StandardCharsets.UTF_8);
         }
-        if (userCert == null || caCert == null || serverCert == null) {
+        if (privateKey == null || userCert == null || caCert == null || serverCert == null) {
             throw new IllegalStateException("Cannot load credentials");
         }
 
@@ -1871,7 +1879,7 @@ public class Vpn {
      * Return the information of the current ongoing legacy VPN.
      * Callers are responsible for checking permissions if needed.
      */
-    private synchronized LegacyVpnInfo getLegacyVpnInfoPrivileged() {
+    public synchronized LegacyVpnInfo getLegacyVpnInfoPrivileged() {
         if (mLegacyVpnRunner == null) return null;
 
         final LegacyVpnInfo info = new LegacyVpnInfo();
@@ -2025,6 +2033,7 @@ public class Vpn {
 
         private void bringup() {
             // Catch all exceptions so we can clean up a few things.
+            boolean initFinished = false;
             try {
                 // Initialize the timer.
                 mBringupStartTime = SystemClock.elapsedRealtime();
@@ -2043,6 +2052,7 @@ public class Vpn {
                     throw new IllegalStateException("Cannot delete the state");
                 }
                 new File("/data/misc/vpn/abort").delete();
+                initFinished = true;
 
                 // Check if we need to restart any of the daemons.
                 boolean restart = false;
@@ -2102,6 +2112,7 @@ public class Vpn {
                     }
                     out.write(0xFF);
                     out.write(0xFF);
+                    out.flush();
 
                     // Wait for End-of-File.
                     InputStream in = mSockets[i].getInputStream();

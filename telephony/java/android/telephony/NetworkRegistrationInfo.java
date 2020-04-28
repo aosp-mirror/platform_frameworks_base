@@ -24,8 +24,8 @@ import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.telephony.AccessNetworkConstants.TransportType;
+import android.telephony.TelephonyManager.NetworkType;
 
-import android.telephony.Annotation.NetworkType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
@@ -501,7 +501,6 @@ public final class NetworkRegistrationInfo implements Parcelable {
         }
     }
 
-    @NonNull
     @Override
     public String toString() {
         return new StringBuilder("NetworkRegistrationInfo{")
@@ -532,7 +531,7 @@ public final class NetworkRegistrationInfo implements Parcelable {
     }
 
     @Override
-    public boolean equals(@Nullable Object o) {
+    public boolean equals(Object o) {
         if (this == o) return true;
 
         if (!(o instanceof NetworkRegistrationInfo)) {

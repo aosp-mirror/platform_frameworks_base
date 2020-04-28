@@ -20,7 +20,6 @@ import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityManager;
 import android.app.ActivityThread;
 import android.app.ApplicationErrorReport;
-import android.content.type.DefaultMimeMapFactory;
 import android.os.Build;
 import android.os.DeadObjectException;
 import android.os.Debug;
@@ -34,9 +33,6 @@ import com.android.internal.logging.AndroidConfig;
 import com.android.server.NetworkManagementSocketTagger;
 import dalvik.system.RuntimeHooks;
 import dalvik.system.VMRuntime;
-
-import libcore.content.type.MimeMap;
-
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -68,19 +64,6 @@ public class RuntimeInit {
         return Log.printlns(Log.LOG_ID_CRASH, Log.ERROR, tag, msg, tr);
     }
 
-    public static void logUncaught(String threadName, String processName, int pid, Throwable e) {
-        StringBuilder message = new StringBuilder();
-        // The "FATAL EXCEPTION" string is still used on Android even though
-        // apps can set a custom UncaughtExceptionHandler that renders uncaught
-        // exceptions non-fatal.
-        message.append("FATAL EXCEPTION: ").append(threadName).append("\n");
-        if (processName != null) {
-            message.append("Process: ").append(processName).append(", ");
-        }
-        message.append("PID: ").append(pid);
-        Clog_e(TAG, message.toString(), e);
-    }
-
     /**
      * Logs a message when a thread encounters an uncaught exception. By
      * default, {@link KillApplicationHandler} will terminate this process later,
@@ -102,7 +85,17 @@ public class RuntimeInit {
             if (mApplicationObject == null && (Process.SYSTEM_UID == Process.myUid())) {
                 Clog_e(TAG, "*** FATAL EXCEPTION IN SYSTEM PROCESS: " + t.getName(), e);
             } else {
-                logUncaught(t.getName(), ActivityThread.currentProcessName(), Process.myPid(), e);
+                StringBuilder message = new StringBuilder();
+                // The "FATAL EXCEPTION" string is still used on Android even though
+                // apps can set a custom UncaughtExceptionHandler that renders uncaught
+                // exceptions non-fatal.
+                message.append("FATAL EXCEPTION: ").append(t.getName()).append("\n");
+                final String processName = ActivityThread.currentProcessName();
+                if (processName != null) {
+                    message.append("Process: ").append(processName).append(", ");
+                }
+                message.append("PID: ").append(Process.myPid());
+                Clog_e(TAG, message.toString(), e);
             }
         }
     }
@@ -194,24 +187,6 @@ public class RuntimeInit {
                 }
             }
         }
-    }
-
-    /**
-     * Common initialization that (unlike {@link #commonInit()} should happen prior to
-     * the Zygote fork.
-     */
-    public static void preForkInit() {
-        if (DEBUG) Slog.d(TAG, "Entered preForkInit.");
-        RuntimeInit.enableDdms();
-        // TODO(b/142019040#comment13): Decide whether to load the default instance eagerly, i.e.
-        // MimeMap.setDefault(DefaultMimeMapFactory.create());
-        /*
-         * Replace libcore's minimal default mapping between MIME types and file
-         * extensions with a mapping that's suitable for Android. Android's mapping
-         * contains many more entries that are derived from IANA registrations but
-         * with several customizations (extensions, overrides).
-         */
-        MimeMap.setDefaultSupplier(DefaultMimeMapFactory::create);
     }
 
     @UnsupportedAppUsage
@@ -346,7 +321,7 @@ public class RuntimeInit {
 
     @UnsupportedAppUsage
     public static final void main(String[] argv) {
-        preForkInit();
+        enableDdms();
         if (argv.length == 2 && argv[1].equals("application")) {
             if (DEBUG) Slog.d(TAG, "RuntimeInit: Starting application");
             redirectLogStreams();
@@ -440,7 +415,7 @@ public class RuntimeInit {
     /**
      * Enable DDMS.
      */
-    private static void enableDdms() {
+    static final void enableDdms() {
         // Register handlers for DDM messages.
         android.ddm.DdmRegister.registerHandlers();
     }

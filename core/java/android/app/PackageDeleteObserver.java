@@ -22,11 +22,6 @@ import android.content.pm.IPackageDeleteObserver2;
 
 /** {@hide} */
 public class PackageDeleteObserver {
-
-    @UnsupportedAppUsage
-    public PackageDeleteObserver() {
-    }
-
     private final IPackageDeleteObserver2.Stub mBinder = new IPackageDeleteObserver2.Stub() {
         @Override
         public void onUserActionRequired(Intent intent) {

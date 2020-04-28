@@ -15,7 +15,6 @@
  */
 package android.os;
 
-import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 
@@ -45,7 +44,6 @@ public class ServiceSpecificException extends RuntimeException {
         this.errorCode = errorCode;
     }
 
-    @NonNull
     @Override
     public String toString() {
         return super.toString() + " (code " + errorCode + ")";

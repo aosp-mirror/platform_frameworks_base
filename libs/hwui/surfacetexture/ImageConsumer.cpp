@@ -71,16 +71,13 @@ public:
     void makeImage(sp<GraphicBuffer>& graphicBuffer, android_dataspace dataspace,
                    GrContext* context);
 
-    void newBufferContent(GrContext* context);
-
 private:
     // The only way to invoke dtor is with unref, when mUsageCount is 0.
     ~AutoBackendTextureRelease() {}
 
     GrBackendTexture mBackendTexture;
     GrAHardwareBufferUtils::DeleteImageProc mDeleteProc;
-    GrAHardwareBufferUtils::UpdateImageProc mUpdateProc;
-    GrAHardwareBufferUtils::TexImageCtx mImageCtx;
+    GrAHardwareBufferUtils::DeleteImageCtx mDeleteCtx;
 
     // Starting with refcount 1, because the first ref is held by SurfaceTexture. Additional refs
     // are held by SkImages.
@@ -104,8 +101,7 @@ AutoBackendTextureRelease::AutoBackendTextureRelease(GrContext* context, Graphic
         buffer->getWidth(),
         buffer->getHeight(),
         &mDeleteProc,
-        &mUpdateProc,
-        &mImageCtx,
+        &mDeleteCtx,
         createProtectedImage,
         backendFormat,
         false);
@@ -127,7 +123,7 @@ void AutoBackendTextureRelease::unref(bool releaseImage) {
     mUsageCount--;
     if (mUsageCount <= 0) {
         if (mBackendTexture.isValid()) {
-            mDeleteProc(mImageCtx);
+            mDeleteProc(mDeleteCtx);
             mBackendTexture = {};
         }
         delete this;
@@ -158,12 +154,6 @@ void AutoBackendTextureRelease::makeImage(sp<GraphicBuffer>& graphicBuffer,
     }
 }
 
-void AutoBackendTextureRelease::newBufferContent(GrContext* context) {
-    if (mBackendTexture.isValid()) {
-        mUpdateProc(mImageCtx, context);
-    }
-}
-
 void ImageConsumer::ImageSlot::createIfNeeded(sp<GraphicBuffer> graphicBuffer,
                                               android_dataspace dataspace, bool forceCreate,
                                               GrContext* context) {
@@ -176,8 +166,6 @@ void ImageConsumer::ImageSlot::createIfNeeded(sp<GraphicBuffer> graphicBuffer,
 
         if (!mTextureRelease) {
             mTextureRelease = new AutoBackendTextureRelease(context, graphicBuffer.get());
-        } else {
-            mTextureRelease->newBufferContent(context);
         }
 
         mDataspace = dataspace;

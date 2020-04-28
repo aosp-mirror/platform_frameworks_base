@@ -33,7 +33,6 @@ import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
-import android.telephony.Annotation.CallState;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
@@ -1413,7 +1412,7 @@ public class TelecomManager {
      * @hide
      */
     @SystemApi
-    public @CallState int getCallState() {
+    public @TelephonyManager.CallState int getCallState() {
         try {
             if (isServiceConnected()) {
                 return getTelecomService().getCallState();
@@ -2060,13 +2059,12 @@ public class TelecomManager {
     /**
      * Handles {@link Intent#ACTION_CALL} intents trampolined from UserCallActivity.
      * @param intent The {@link Intent#ACTION_CALL} intent to handle.
-     * @param callingPackageProxy The original package that called this before it was trampolined.
      * @hide
      */
-    public void handleCallIntent(Intent intent, String callingPackageProxy) {
+    public void handleCallIntent(Intent intent) {
         try {
             if (isServiceConnected()) {
-                getTelecomService().handleCallIntent(intent, callingPackageProxy);
+                getTelecomService().handleCallIntent(intent);
             }
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException handleCallIntent: " + e);

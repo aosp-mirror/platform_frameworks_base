@@ -30,8 +30,6 @@ oneway interface ICallScreeningAdapter {
 
     void silenceCall(String callId);
 
-    void screenCallFurther(String callId);
-
     void disallowCall(
             String callId,
             boolean shouldReject,

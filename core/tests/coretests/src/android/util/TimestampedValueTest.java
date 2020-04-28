@@ -55,12 +55,12 @@ public class TimestampedValueTest {
         TimestampedValue<String> stringValue = new TimestampedValue<>(1000, "Hello");
         Parcel parcel = Parcel.obtain();
         try {
-            parcel.writeParcelable(stringValue, 0);
+            TimestampedValue.writeToParcel(parcel, stringValue);
 
             parcel.setDataPosition(0);
 
             TimestampedValue<String> stringValueCopy =
-                    parcel.readParcelable(null /* classLoader */);
+                    TimestampedValue.readFromParcel(parcel, null /* classLoader */, String.class);
             assertEquals(stringValue, stringValueCopy);
         } finally {
             parcel.recycle();
@@ -72,12 +72,12 @@ public class TimestampedValueTest {
         TimestampedValue<String> stringValue = new TimestampedValue<>(1000, "Hello");
         Parcel parcel = Parcel.obtain();
         try {
-            parcel.writeParcelable(stringValue, 0);
+            TimestampedValue.writeToParcel(parcel, stringValue);
 
             parcel.setDataPosition(0);
 
-            TimestampedValue<String> stringValueCopy =
-                    parcel.readParcelable(null /* classLoader */);
+            TimestampedValue<Object> stringValueCopy =
+                    TimestampedValue.readFromParcel(parcel, null /* classLoader */, Object.class);
             assertEquals(stringValue, stringValueCopy);
         } finally {
             parcel.recycle();
@@ -85,15 +85,15 @@ public class TimestampedValueTest {
     }
 
     @Test
-    public void testParceling_valueClassNotParcelable() {
-        // This class is not one supported by Parcel.writeValue().
-        class NotParcelable {}
-
-        TimestampedValue<NotParcelable> notParcelableValue =
-                new TimestampedValue<>(1000, new NotParcelable());
+    public void testParceling_valueClassIncompatible() {
+        TimestampedValue<String> stringValue = new TimestampedValue<>(1000, "Hello");
         Parcel parcel = Parcel.obtain();
         try {
-            parcel.writeParcelable(notParcelableValue, 0);
+            TimestampedValue.writeToParcel(parcel, stringValue);
+
+            parcel.setDataPosition(0);
+
+            TimestampedValue.readFromParcel(parcel, null /* classLoader */, Double.class);
             fail();
         } catch (RuntimeException expected) {
         } finally {
@@ -106,11 +106,12 @@ public class TimestampedValueTest {
         TimestampedValue<String> nullValue = new TimestampedValue<>(1000, null);
         Parcel parcel = Parcel.obtain();
         try {
-            parcel.writeParcelable(nullValue, 0);
+            TimestampedValue.writeToParcel(parcel, nullValue);
 
             parcel.setDataPosition(0);
 
-            TimestampedValue<String> nullValueCopy = parcel.readParcelable(null /* classLoader */);
+            TimestampedValue<Object> nullValueCopy =
+                    TimestampedValue.readFromParcel(parcel, null /* classLoader */, String.class);
             assertEquals(nullValue, nullValueCopy);
         } finally {
             parcel.recycle();

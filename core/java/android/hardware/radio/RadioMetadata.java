@@ -269,7 +269,6 @@ public final class RadioMetadata implements Parcelable {
         mBundle = in.readBundle();
     }
 
-    @NonNull
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("RadioMetadata[");

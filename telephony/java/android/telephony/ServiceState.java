@@ -29,7 +29,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.telephony.AccessNetworkConstants.AccessNetworkType;
 import android.telephony.AccessNetworkConstants.TransportType;
-import android.telephony.Annotation.NetworkType;
 import android.telephony.NetworkRegistrationInfo.Domain;
 import android.telephony.NetworkRegistrationInfo.NRState;
 import android.text.TextUtils;
@@ -370,16 +369,15 @@ public class ServiceState implements Parcelable {
     /**
      * Create a new ServiceState from a intent notifier Bundle
      *
-     * This method is used by PhoneStateIntentReceiver, CellBroadcastReceiver, and maybe by
+     * This method is used by PhoneStateIntentReceiver and maybe by
      * external applications.
      *
      * @param m Bundle from intent notifier
      * @return newly created ServiceState
      * @hide
      */
-    @NonNull
     @UnsupportedAppUsage
-    public static ServiceState newFromBundle(@NonNull Bundle m) {
+    public static ServiceState newFromBundle(Bundle m) {
         ServiceState ret;
         ret = new ServiceState();
         ret.setFromNotifierBundle(m);
@@ -1624,7 +1622,7 @@ public class ServiceState implements Parcelable {
      * @hide
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
-    public @NetworkType int getDataNetworkType() {
+    public @TelephonyManager.NetworkType int getDataNetworkType() {
         final NetworkRegistrationInfo iwlanRegInfo = getNetworkRegistrationInfo(
                 NetworkRegistrationInfo.DOMAIN_PS, AccessNetworkConstants.TRANSPORT_TYPE_WLAN);
         final NetworkRegistrationInfo wwanRegInfo = getNetworkRegistrationInfo(
@@ -1651,7 +1649,7 @@ public class ServiceState implements Parcelable {
 
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
-    public @NetworkType int getVoiceNetworkType() {
+    public @TelephonyManager.NetworkType int getVoiceNetworkType() {
         final NetworkRegistrationInfo regState = getNetworkRegistrationInfo(
                 NetworkRegistrationInfo.DOMAIN_CS, AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
         if (regState != null) {

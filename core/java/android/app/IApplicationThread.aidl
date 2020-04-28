@@ -73,7 +73,7 @@ oneway interface IApplicationThread {
             boolean restrictedBackupMode, boolean persistent, in Configuration config,
             in CompatibilityInfo compatInfo, in Map services,
             in Bundle coreSettings, in String buildSerial, in AutofillOptions autofillOptions,
-            in ContentCaptureOptions contentCaptureOptions, in long[] disabledCompatChanges);
+            in ContentCaptureOptions contentCaptureOptions);
     void runIsolatedEntryPoint(in String entryPoint, in String[] entryPointArgs);
     void scheduleExit();
     void scheduleServiceArgs(IBinder token, in ParceledListSlice args);
@@ -137,7 +137,6 @@ oneway interface IApplicationThread {
             IVoiceInteractor voiceInteractor);
     void handleTrustStorageUpdate();
     void attachAgent(String path);
-    void attachStartupAgents(String dataDir);
     void scheduleApplicationInfoChanged(in ApplicationInfo ai);
     void setNetworkBlockSeq(long procStateSeq);
     void scheduleTransaction(in ClientTransaction transaction);

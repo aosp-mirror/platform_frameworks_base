@@ -1,8 +1,0 @@
-// Copyright 2007 The Android Open Source Project
-//
-
-java_binary {
-    name: "svc",
-    wrapper: "svc",
-    srcs: ["**/*.java"],
-}

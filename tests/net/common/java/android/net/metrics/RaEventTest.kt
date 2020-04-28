@@ -16,9 +16,11 @@
 
 package android.net.metrics
 
+import android.os.Parcelable
 import androidx.test.filters.SmallTest
 import androidx.test.runner.AndroidJUnit4
-import com.android.testutils.assertParcelSane
+import com.android.internal.util.ParcelableTestUtil
+import com.android.internal.util.TestUtils
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -28,6 +30,11 @@ private const val NO_LIFETIME: Long = -1L
 @RunWith(AndroidJUnit4::class)
 @SmallTest
 class RaEventTest {
+    private fun <T: Parcelable> testParcel(obj: T, fieldCount: Int) {
+        ParcelableTestUtil.assertFieldCountEquals(fieldCount, obj::class.java)
+        TestUtils.assertParcelingIsLossless(obj)
+    }
+
     @Test
     fun testConstructorAndParcel() {
         var raEvent = RaEvent.Builder().build()
@@ -67,6 +74,6 @@ class RaEventTest {
         assertEquals(5, raEvent.rdnssLifetime)
         assertEquals(6, raEvent.dnsslLifetime)
 
-        assertParcelSane(raEvent, 6)
+        testParcel(raEvent, 6)
     }
 }

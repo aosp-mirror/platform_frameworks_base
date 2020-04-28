@@ -123,7 +123,8 @@ TEST_F(ConvertTest, DuplicateEntriesWrittenOnce) {
 
   void* cookie = nullptr;
 
-  int32_t result = StartIteration(handle, &cookie, "res/theme/10", "");
+  ZipString prefix("res/theme/10");
+  int32_t result = StartIteration(handle, &cookie, &prefix, nullptr);
 
   // If this is -5, that means we've found a duplicate entry and this test has failed
   EXPECT_THAT(result, Eq(0));
@@ -132,7 +133,7 @@ TEST_F(ConvertTest, DuplicateEntriesWrittenOnce) {
   int count = 0;
 
   // Can't pass nullptrs into Next()
-  std::string zip_name;
+  ZipString zip_name;
   ZipEntry zip_data;
 
   while ((result = Next(cookie, &zip_data, &zip_name)) == 0) {

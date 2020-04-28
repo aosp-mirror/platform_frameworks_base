@@ -182,12 +182,6 @@ public class Process {
      */
     public static final int NETWORK_STACK_UID = 1073;
 
-    /**
-     * Defines the UID/GID for fs-verity certificate ownership in keystore.
-     * @hide
-     */
-    public static final int FSVERITY_CERT_UID = 1075;
-
     /** {@hide} */
     public static final int NOBODY_UID = 9999;
 
@@ -1003,7 +997,6 @@ public class Process {
      * your own log, or the Android Illuminati will find you some night and
      * beat you up.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public static final native void sendSignalQuiet(int pid, int signal);
     
     /** @hide */

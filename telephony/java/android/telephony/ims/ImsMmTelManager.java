@@ -25,26 +25,29 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.content.Context;
+import android.content.pm.IPackageManager;
+import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.os.ServiceSpecificException;
 import android.telephony.AccessNetworkConstants;
-import android.telephony.CarrierConfigManager;
 import android.telephony.SubscriptionManager;
 import android.telephony.ims.aidl.IImsCapabilityCallback;
+import android.telephony.ims.aidl.IImsRegistrationCallback;
 import android.telephony.ims.feature.ImsFeature;
 import android.telephony.ims.feature.MmTelFeature;
 import android.telephony.ims.stub.ImsRegistrationImplBase;
+import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.telephony.IIntegerConsumer;
 import com.android.internal.telephony.ITelephony;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.Executor;
-import java.util.function.Consumer;
 
 /**
  * A manager for the MmTel (Multimedia Telephony) feature of an IMS network, given an associated
@@ -58,7 +61,9 @@ import java.util.function.Consumer;
  * @hide
  */
 @SystemApi
-public class ImsMmTelManager implements RegistrationManager {
+public class ImsMmTelManager {
+
+    private static final String TAG = "ImsMmTelManager";
 
     /**
      * @hide
@@ -91,28 +96,105 @@ public class ImsMmTelManager implements RegistrationManager {
      * Callback class for receiving IMS network Registration callback events.
      * @see #registerImsRegistrationCallback(Executor, RegistrationCallback) (RegistrationCallback)
      * @see #unregisterImsRegistrationCallback(RegistrationCallback)
-     * @deprecated Use {@link RegistrationManager.RegistrationCallback} instead.
      */
-    // Do not add to this class, add to RegistrationManager.RegistrationCallback instead.
-    @Deprecated
-    public static class RegistrationCallback extends RegistrationManager.RegistrationCallback {
+    public static class RegistrationCallback {
+
+        private static class RegistrationBinder extends IImsRegistrationCallback.Stub {
+
+            // Translate ImsRegistrationImplBase API to new AccessNetworkConstant because WLAN
+            // and WWAN are more accurate constants.
+            private static final Map<Integer, Integer> IMS_REG_TO_ACCESS_TYPE_MAP =
+                    new HashMap<Integer, Integer>() {{
+                        // Map NONE to -1 to make sure that we handle the REGISTRATION_TECH_NONE
+                        // case, since it is defined.
+                        put(ImsRegistrationImplBase.REGISTRATION_TECH_NONE, -1);
+                        put(ImsRegistrationImplBase.REGISTRATION_TECH_LTE,
+                                AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
+                        put(ImsRegistrationImplBase.REGISTRATION_TECH_IWLAN,
+                                AccessNetworkConstants.TRANSPORT_TYPE_WLAN);
+                    }};
+
+            private final RegistrationCallback mLocalCallback;
+            private Executor mExecutor;
+
+            RegistrationBinder(RegistrationCallback localCallback) {
+                mLocalCallback = localCallback;
+            }
+
+            @Override
+            public void onRegistered(int imsRadioTech) {
+                if (mLocalCallback == null) return;
+
+                Binder.withCleanCallingIdentity(() -> mExecutor.execute(() ->
+                        mLocalCallback.onRegistered(getAccessType(imsRadioTech))));
+            }
+
+            @Override
+            public void onRegistering(int imsRadioTech) {
+                if (mLocalCallback == null) return;
+
+                Binder.withCleanCallingIdentity(() -> mExecutor.execute(() ->
+                        mLocalCallback.onRegistering(getAccessType(imsRadioTech))));
+            }
+
+            @Override
+            public void onDeregistered(ImsReasonInfo info) {
+                if (mLocalCallback == null) return;
+
+                Binder.withCleanCallingIdentity(() ->
+                        mExecutor.execute(() -> mLocalCallback.onUnregistered(info)));
+            }
+
+            @Override
+            public void onTechnologyChangeFailed(int imsRadioTech, ImsReasonInfo info) {
+                if (mLocalCallback == null) return;
+
+                Binder.withCleanCallingIdentity(() ->
+                        mExecutor.execute(() -> mLocalCallback.onTechnologyChangeFailed(
+                                getAccessType(imsRadioTech), info)));
+            }
+
+            @Override
+            public void onSubscriberAssociatedUriChanged(Uri[] uris) {
+                if (mLocalCallback == null) return;
+
+                Binder.withCleanCallingIdentity(() ->
+                        mExecutor.execute(() ->
+                                mLocalCallback.onSubscriberAssociatedUriChanged(uris)));
+            }
+
+            private void setExecutor(Executor executor) {
+                mExecutor = executor;
+            }
+
+            private static int getAccessType(int regType) {
+                if (!IMS_REG_TO_ACCESS_TYPE_MAP.containsKey(regType)) {
+                    Log.w("ImsMmTelManager", "RegistrationBinder - invalid regType returned: "
+                            + regType);
+                    return -1;
+                }
+                return IMS_REG_TO_ACCESS_TYPE_MAP.get(regType);
+            }
+        }
+
+        private final RegistrationBinder mBinder = new RegistrationBinder(this);
 
         /**
          * Notifies the framework when the IMS Provider is registered to the IMS network.
          *
-         * @param imsTransportType the radio access technology.
+         * @param imsTransportType the radio access technology. Valid values are defined in
+         * {@link android.telephony.AccessNetworkConstants.TransportType}.
          */
-        @Override
-        public void onRegistered(@AccessNetworkConstants.TransportType int imsTransportType) {
+        public void onRegistered(int imsTransportType) {
         }
 
         /**
          * Notifies the framework when the IMS Provider is trying to register the IMS network.
          *
-         * @param imsTransportType the radio access technology.
+         * @param imsTransportType the radio access technology. Valid values are defined in
+         * {@link android.telephony.AccessNetworkConstants.TransportType}.
          */
-        @Override
-        public void onRegistering(@AccessNetworkConstants.TransportType int imsTransportType) {
+        public void onRegistering(int imsTransportType) {
         }
 
         /**
@@ -120,20 +202,42 @@ public class ImsMmTelManager implements RegistrationManager {
          *
          * @param info the {@link ImsReasonInfo} associated with why registration was disconnected.
          */
-        @Override
         public void onUnregistered(@Nullable ImsReasonInfo info) {
         }
 
         /**
-         * A failure has occurred when trying to handover registration to another technology type.
+         * A failure has occurred when trying to handover registration to another technology type,
+         * defined in {@link android.telephony.AccessNetworkConstants.TransportType}
          *
-         * @param imsTransportType The transport type that has failed to handover registration to.
+         * @param imsTransportType The
+         *         {@link android.telephony.AccessNetworkConstants.TransportType}
+         *         transport type that has failed to handover registration to.
          * @param info A {@link ImsReasonInfo} that identifies the reason for failure.
          */
-        @Override
-        public void onTechnologyChangeFailed(
-                @AccessNetworkConstants.TransportType int imsTransportType,
-                @Nullable ImsReasonInfo info) {
+        public void onTechnologyChangeFailed(int imsTransportType, @Nullable ImsReasonInfo info) {
+        }
+
+        /**
+         * Returns a list of subscriber {@link Uri}s associated with this IMS subscription when
+         * it changes. Per RFC3455, an associated URI is a URI that the service provider has
+         * allocated to a user for their own usage. A user's phone number is typically one of the
+         * associated URIs.
+         * @param uris new array of subscriber {@link Uri}s that are associated with this IMS
+         *         subscription.
+         * @hide
+         */
+        public void onSubscriberAssociatedUriChanged(@Nullable Uri[] uris) {
+        }
+
+        /**@hide*/
+        public final IImsRegistrationCallback getBinder() {
+            return mBinder;
+        }
+
+        /**@hide*/
+        //Only exposed as public for compatibility with deprecated ImsManager APIs.
+        public void setExecutor(Executor executor) {
+            mBinder.setExecutor(executor);
         }
     }
 
@@ -209,7 +313,7 @@ public class ImsMmTelManager implements RegistrationManager {
         }
     }
 
-    private final int mSubId;
+    private int mSubId;
 
     /**
      * Create an instance of {@link ImsMmTelManager} for the subscription id specified.
@@ -254,10 +358,7 @@ public class ImsMmTelManager implements RegistrationManager {
      * the {@link ImsService} associated with the subscription is not available. This can happen if
      * the service crashed, for example. See {@link ImsException#getCode()} for a more detailed
      * reason.
-     * @deprecated Use {@link RegistrationManager#registerImsRegistrationCallback(Executor,
-     * RegistrationManager.RegistrationCallback)} instead.
      */
-    @Deprecated
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public void registerImsRegistrationCallback(@NonNull @CallbackExecutor Executor executor,
             @NonNull RegistrationCallback c) throws ImsException {
@@ -267,37 +368,13 @@ public class ImsMmTelManager implements RegistrationManager {
         if (executor == null) {
             throw new IllegalArgumentException("Must include a non-null Executor.");
         }
-        c.setExecutor(executor);
-        try {
-            getITelephony().registerImsRegistrationCallback(mSubId, c.getBinder());
-        } catch (ServiceSpecificException e) {
-            if (e.errorCode == ImsException.CODE_ERROR_INVALID_SUBSCRIPTION) {
-                // Rethrow as runtime error to keep API compatible.
-                throw new IllegalArgumentException(e.getMessage());
-            } else {
-                throw new ImsException(e.getMessage(), e.errorCode);
-            }
-        } catch (RemoteException | IllegalStateException e) {
-            throw new ImsException(e.getMessage(), ImsException.CODE_ERROR_SERVICE_UNAVAILABLE);
-        }
-    }
-
-    /**{@inheritDoc}*/
-    @Override
-    @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
-    public void registerImsRegistrationCallback(@NonNull @CallbackExecutor Executor executor,
-            @NonNull RegistrationManager.RegistrationCallback c) throws ImsException {
-        if (c == null) {
-            throw new IllegalArgumentException("Must include a non-null RegistrationCallback.");
-        }
-        if (executor == null) {
-            throw new IllegalArgumentException("Must include a non-null Executor.");
+        if (!isImsAvailableOnDevice()) {
+            throw new ImsException("IMS not available on device.",
+                    ImsException.CODE_ERROR_UNSUPPORTED_OPERATION);
         }
         c.setExecutor(executor);
         try {
             getITelephony().registerImsRegistrationCallback(mSubId, c.getBinder());
-        } catch (ServiceSpecificException e) {
-            throw new ImsException(e.getMessage(), e.errorCode);
         } catch (RemoteException | IllegalStateException e) {
             throw new ImsException(e.getMessage(), ImsException.CODE_ERROR_SERVICE_UNAVAILABLE);
         }
@@ -313,10 +390,9 @@ public class ImsMmTelManager implements RegistrationManager {
      * @param c The {@link RegistrationCallback} to be removed.
      * @see SubscriptionManager.OnSubscriptionsChangedListener
      * @see #registerImsRegistrationCallback(Executor, RegistrationCallback)
-     * @deprecated Use {@link #unregisterImsRegistrationCallback(
-     * RegistrationManager.RegistrationCallback)}.
+     * @throws IllegalArgumentException if the subscription ID associated with this callback is
+     * invalid.
      */
-    @Deprecated
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public void unregisterImsRegistrationCallback(@NonNull RegistrationCallback c) {
         if (c == null) {
@@ -324,69 +400,6 @@ public class ImsMmTelManager implements RegistrationManager {
         }
         try {
             getITelephony().unregisterImsRegistrationCallback(mSubId, c.getBinder());
-        } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
-        }
-    }
-
-    /**{@inheritDoc}*/
-    @Override
-    @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
-    public void unregisterImsRegistrationCallback(
-            @NonNull RegistrationManager.RegistrationCallback c) {
-        if (c == null) {
-            throw new IllegalArgumentException("Must include a non-null RegistrationCallback.");
-        }
-        try {
-            getITelephony().unregisterImsRegistrationCallback(mSubId, c.getBinder());
-        } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
-        }
-    }
-
-    /**{@inheritDoc}*/
-    @Override
-    @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
-    public void getRegistrationState(@NonNull @CallbackExecutor Executor executor,
-            @NonNull @ImsRegistrationState Consumer<Integer> stateCallback) {
-        if (stateCallback == null) {
-            throw new IllegalArgumentException("Must include a non-null callback.");
-        }
-        if (executor == null) {
-            throw new IllegalArgumentException("Must include a non-null Executor.");
-        }
-        try {
-            getITelephony().getImsMmTelRegistrationState(mSubId, new IIntegerConsumer.Stub() {
-                @Override
-                public void accept(int result) {
-                    executor.execute(() -> stateCallback.accept(result));
-                }
-            });
-        } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
-        }
-    }
-
-    /**{@inheritDoc}*/
-    @Override
-    @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
-    public void getRegistrationTransportType(@NonNull @CallbackExecutor Executor executor,
-            @NonNull @AccessNetworkConstants.TransportType
-                    Consumer<Integer> transportTypeCallback) {
-        if (transportTypeCallback == null) {
-            throw new IllegalArgumentException("Must include a non-null callback.");
-        }
-        if (executor == null) {
-            throw new IllegalArgumentException("Must include a non-null Executor.");
-        }
-        try {
-            getITelephony().getImsMmTelRegistrationTransportType(mSubId,
-                    new IIntegerConsumer.Stub() {
-                        @Override
-                        public void accept(int result) {
-                            executor.execute(() -> transportTypeCallback.accept(result));
-                        }
-                    });
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
@@ -400,7 +413,7 @@ public class ImsMmTelManager implements RegistrationManager {
      *
      * Use {@link SubscriptionManager.OnSubscriptionsChangedListener} to listen to
      * subscription changed events and call
-     * {@link #unregisterMmTelCapabilityCallback(CapabilityCallback)} to clean up.
+     * {@link #unregisterImsRegistrationCallback(RegistrationCallback)} to clean up.
      *
      * When the callback is registered, it will initiate the callback c to be called with the
      * current capabilities.
@@ -425,16 +438,13 @@ public class ImsMmTelManager implements RegistrationManager {
         if (executor == null) {
             throw new IllegalArgumentException("Must include a non-null Executor.");
         }
+        if (!isImsAvailableOnDevice()) {
+            throw new ImsException("IMS not available on device.",
+                    ImsException.CODE_ERROR_UNSUPPORTED_OPERATION);
+        }
         c.setExecutor(executor);
         try {
             getITelephony().registerMmTelCapabilityCallback(mSubId, c.getBinder());
-        } catch (ServiceSpecificException e) {
-            if (e.errorCode == ImsException.CODE_ERROR_INVALID_SUBSCRIPTION) {
-                // Rethrow as runtime error to keep API compatible.
-                throw new IllegalArgumentException(e.getMessage());
-            } else {
-                throw new ImsException(e.getMessage(), e.errorCode);
-            }
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }  catch (IllegalStateException e) {
@@ -450,6 +460,8 @@ public class ImsMmTelManager implements RegistrationManager {
      * inactive subscription, it will result in a no-op.
      * @param c The MmTel {@link CapabilityCallback} to be removed.
      * @see #registerMmTelCapabilityCallback(Executor, CapabilityCallback)
+     * @throws IllegalArgumentException if the subscription ID associated with this callback is
+     * invalid.
      */
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public void unregisterMmTelCapabilityCallback(@NonNull CapabilityCallback c) {
@@ -470,9 +482,12 @@ public class ImsMmTelManager implements RegistrationManager {
      * be enabled as long as the carrier has provisioned these services for the specified
      * subscription. Other IMS services (SMS/UT) are not affected by this user setting and depend on
      * carrier requirements.
-     * <p>
+     *
+     * Modifying this value may also trigger an IMS registration or deregistration, depending on
+     * whether or not the new value is enabled or disabled.
+     *
      * Note: If the carrier configuration for advanced calling is not editable or hidden, this
-     * method will always return the default value.
+     * method will do nothing and will instead always use the default value.
      *
      * @see android.telephony.CarrierConfigManager#KEY_CARRIER_VOLTE_PROVISIONING_REQUIRED_BOOL
      * @see android.telephony.CarrierConfigManager#KEY_EDITABLE_ENHANCED_4G_LTE_BOOL
@@ -480,21 +495,12 @@ public class ImsMmTelManager implements RegistrationManager {
      * @see android.telephony.CarrierConfigManager#KEY_ENHANCED_4G_LTE_ON_BY_DEFAULT_BOOL
      * @see android.telephony.CarrierConfigManager#KEY_CARRIER_VOLTE_AVAILABLE_BOOL
      * @see #setAdvancedCallingSettingEnabled(boolean)
-     * @throws IllegalArgumentException if the subscription associated with this operation is not
-     * active (SIM is not inserted, ESIM inactive) or invalid.
      * @return true if the user's setting for advanced calling is enabled, false otherwise.
      */
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public boolean isAdvancedCallingSettingEnabled() {
         try {
             return getITelephony().isAdvancedCallingSettingEnabled(mSubId);
-        } catch (ServiceSpecificException e) {
-            if (e.errorCode == ImsException.CODE_ERROR_INVALID_SUBSCRIPTION) {
-                // Rethrow as runtime error to keep API compatible.
-                throw new IllegalArgumentException(e.getMessage());
-            } else {
-                throw new RuntimeException(e.getMessage());
-            }
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
@@ -520,20 +526,12 @@ public class ImsMmTelManager implements RegistrationManager {
      * @see android.telephony.CarrierConfigManager#KEY_ENHANCED_4G_LTE_ON_BY_DEFAULT_BOOL
      * @see android.telephony.CarrierConfigManager#KEY_CARRIER_VOLTE_AVAILABLE_BOOL
      * @see #isAdvancedCallingSettingEnabled()
-     * @throws IllegalArgumentException if the subscription associated with this operation is not
-     * active (SIM is not inserted, ESIM inactive) or invalid.
      */
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     public void setAdvancedCallingSettingEnabled(boolean isEnabled) {
         try {
             getITelephony().setAdvancedCallingSettingEnabled(mSubId, isEnabled);
-        } catch (ServiceSpecificException e) {
-            if (e.errorCode == ImsException.CODE_ERROR_INVALID_SUBSCRIPTION) {
-                // Rethrow as runtime error to keep API compatible.
-                throw new IllegalArgumentException(e.getMessage());
-            } else {
-                throw new RuntimeException(e.getMessage());
-            }
+            return;
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
@@ -598,50 +596,7 @@ public class ImsMmTelManager implements RegistrationManager {
     }
 
     /**
-     * Query whether or not the requested MmTel capability is supported by the carrier on the
-     * specified network transport.
-     * <p>
-     * This is a configuration option and does not change. The only time this may change is if a
-     * new IMS configuration is loaded when there is a
-     * {@link CarrierConfigManager#ACTION_CARRIER_CONFIG_CHANGED} broadcast for this subscription.
-     * @param capability The capability that is being queried for support on the carrier network.
-     * @param transportType The transport type of the capability to check support for.
-     * @param executor The executor that the callback will be called with.
-     * @param callback A consumer containing a Boolean result specifying whether or not the
-     *                 capability is supported on this carrier network for the transport specified.
-     * @throws ImsException if the subscription is no longer valid or the IMS service is not
-     * available.
-     */
-    @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
-    public void isSupported(@MmTelFeature.MmTelCapabilities.MmTelCapability int capability,
-            @AccessNetworkConstants.TransportType int transportType,
-            @NonNull @CallbackExecutor Executor executor,
-            @NonNull Consumer<Boolean> callback) throws ImsException {
-        if (callback == null) {
-            throw new IllegalArgumentException("Must include a non-null Consumer.");
-        }
-        if (executor == null) {
-            throw new IllegalArgumentException("Must include a non-null Executor.");
-        }
-        try {
-            getITelephony().isMmTelCapabilitySupported(mSubId, new IIntegerConsumer.Stub() {
-                @Override
-                public void accept(int result) {
-                    executor.execute(() -> callback.accept(result == 1));
-                }
-            }, capability, transportType);
-        } catch (ServiceSpecificException sse) {
-            throw new ImsException(sse.getMessage(), sse.errorCode);
-        } catch (RemoteException e) {
-            e.rethrowAsRuntimeException();
-        }
-    }
-
-    /**
      * The user's setting for whether or not they have enabled the "Video Calling" setting.
-     *
-     * @throws IllegalArgumentException if the subscription associated with this operation is not
-     * active (SIM is not inserted, ESIM inactive) or invalid.
      * @return true if the user’s “Video Calling” setting is currently enabled.
      * @see #setVtSettingEnabled(boolean)
      */
@@ -649,13 +604,6 @@ public class ImsMmTelManager implements RegistrationManager {
     public boolean isVtSettingEnabled() {
         try {
             return getITelephony().isVtSettingEnabled(mSubId);
-        } catch (ServiceSpecificException e) {
-            if (e.errorCode == ImsException.CODE_ERROR_INVALID_SUBSCRIPTION) {
-                // Rethrow as runtime error to keep API compatible.
-                throw new IllegalArgumentException(e.getMessage());
-            } else {
-                throw new RuntimeException(e.getMessage());
-            }
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
@@ -663,22 +611,13 @@ public class ImsMmTelManager implements RegistrationManager {
 
     /**
      * Change the user's setting for Video Telephony and enable the Video Telephony capability.
-     *
-     * @throws IllegalArgumentException if the subscription associated with this operation is not
-     * active (SIM is not inserted, ESIM inactive) or invalid.
      * @see #isVtSettingEnabled()
      */
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     public void setVtSettingEnabled(boolean isEnabled) {
         try {
             getITelephony().setVtSettingEnabled(mSubId, isEnabled);
-        } catch (ServiceSpecificException e) {
-            if (e.errorCode == ImsException.CODE_ERROR_INVALID_SUBSCRIPTION) {
-                // Rethrow as runtime error to keep API compatible.
-                throw new IllegalArgumentException(e.getMessage());
-            } else {
-                throw new RuntimeException(e.getMessage());
-            }
+            return;
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
@@ -686,22 +625,12 @@ public class ImsMmTelManager implements RegistrationManager {
 
     /**
      * @return true if the user's setting for Voice over WiFi is enabled and false if it is not.
-     *
-     * @throws IllegalArgumentException if the subscription associated with this operation is not
-     * active (SIM is not inserted, ESIM inactive) or invalid.
      * @see #setVoWiFiSettingEnabled(boolean)
      */
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public boolean isVoWiFiSettingEnabled() {
         try {
             return getITelephony().isVoWiFiSettingEnabled(mSubId);
-        } catch (ServiceSpecificException e) {
-            if (e.errorCode == ImsException.CODE_ERROR_INVALID_SUBSCRIPTION) {
-                // Rethrow as runtime error to keep API compatible.
-                throw new IllegalArgumentException(e.getMessage());
-            } else {
-                throw new RuntimeException(e.getMessage());
-            }
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
@@ -709,9 +638,6 @@ public class ImsMmTelManager implements RegistrationManager {
 
     /**
      * Sets the user's setting for whether or not Voice over WiFi is enabled.
-     *
-     * @throws IllegalArgumentException if the subscription associated with this operation is not
-     * active (SIM is not inserted, ESIM inactive) or invalid.
      * @param isEnabled true if the user's setting for Voice over WiFi is enabled, false otherwise=
      * @see #isVoWiFiSettingEnabled()
      */
@@ -719,23 +645,13 @@ public class ImsMmTelManager implements RegistrationManager {
     public void setVoWiFiSettingEnabled(boolean isEnabled) {
         try {
             getITelephony().setVoWiFiSettingEnabled(mSubId, isEnabled);
-        } catch (ServiceSpecificException e) {
-            if (e.errorCode == ImsException.CODE_ERROR_INVALID_SUBSCRIPTION) {
-                // Rethrow as runtime error to keep API compatible.
-                throw new IllegalArgumentException(e.getMessage());
-            } else {
-                throw new RuntimeException(e.getMessage());
-            }
+            return;
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
     }
 
     /**
-     * Returns the user's voice over WiFi roaming setting associated with the current subscription.
-     *
-     * @throws IllegalArgumentException if the subscription associated with this operation is not
-     * active (SIM is not inserted, ESIM inactive) or invalid.
      * @return true if the user's setting for Voice over WiFi while roaming is enabled, false
      * if disabled.
      * @see #setVoWiFiRoamingSettingEnabled(boolean)
@@ -744,13 +660,6 @@ public class ImsMmTelManager implements RegistrationManager {
     public boolean isVoWiFiRoamingSettingEnabled() {
         try {
             return getITelephony().isVoWiFiRoamingSettingEnabled(mSubId);
-        } catch (ServiceSpecificException e) {
-            if (e.errorCode == ImsException.CODE_ERROR_INVALID_SUBSCRIPTION) {
-                // Rethrow as runtime error to keep API compatible.
-                throw new IllegalArgumentException(e.getMessage());
-            } else {
-                throw new RuntimeException(e.getMessage());
-            }
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
@@ -758,24 +667,15 @@ public class ImsMmTelManager implements RegistrationManager {
 
     /**
      * Change the user's setting for Voice over WiFi while roaming.
-     *
      * @param isEnabled true if the user's setting for Voice over WiFi while roaming is enabled,
      *     false otherwise.
-     * @throws IllegalArgumentException if the subscription associated with this operation is not
-     * active (SIM is not inserted, ESIM inactive) or invalid.
      * @see #isVoWiFiRoamingSettingEnabled()
      */
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     public void setVoWiFiRoamingSettingEnabled(boolean isEnabled) {
         try {
             getITelephony().setVoWiFiRoamingSettingEnabled(mSubId, isEnabled);
-        } catch (ServiceSpecificException e) {
-            if (e.errorCode == ImsException.CODE_ERROR_INVALID_SUBSCRIPTION) {
-                // Rethrow as runtime error to keep API compatible.
-                throw new IllegalArgumentException(e.getMessage());
-            } else {
-                throw new RuntimeException(e.getMessage());
-            }
+            return;
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
@@ -791,31 +691,19 @@ public class ImsMmTelManager implements RegistrationManager {
      * - {@link #WIFI_MODE_WIFI_ONLY}
      * - {@link #WIFI_MODE_CELLULAR_PREFERRED}
      * - {@link #WIFI_MODE_WIFI_PREFERRED}
-     * @throws IllegalArgumentException if the subscription associated with this operation is not
-     * active (SIM is not inserted, ESIM inactive) or invalid.
      * @see #setVoWiFiSettingEnabled(boolean)
      */
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     public void setVoWiFiNonPersistent(boolean isCapable, int mode) {
         try {
             getITelephony().setVoWiFiNonPersistent(mSubId, isCapable, mode);
-        } catch (ServiceSpecificException e) {
-            if (e.errorCode == ImsException.CODE_ERROR_INVALID_SUBSCRIPTION) {
-                // Rethrow as runtime error to keep API compatible.
-                throw new IllegalArgumentException(e.getMessage());
-            } else {
-                throw new RuntimeException(e.getMessage());
-            }
+            return;
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
     }
 
     /**
-     * Returns the user's voice over WiFi Roaming mode setting associated with the device.
-     *
-     * @throws IllegalArgumentException if the subscription associated with this operation is not
-     * active (SIM is not inserted, ESIM inactive) or invalid.
      * @return The Voice over WiFi Mode preference set by the user, which can be one of the
      * following:
      * - {@link #WIFI_MODE_WIFI_ONLY}
@@ -827,13 +715,6 @@ public class ImsMmTelManager implements RegistrationManager {
     public @WiFiCallingMode int getVoWiFiModeSetting() {
         try {
             return getITelephony().getVoWiFiModeSetting(mSubId);
-        } catch (ServiceSpecificException e) {
-            if (e.errorCode == ImsException.CODE_ERROR_INVALID_SUBSCRIPTION) {
-                // Rethrow as runtime error to keep API compatible.
-                throw new IllegalArgumentException(e.getMessage());
-            } else {
-                throw new RuntimeException(e.getMessage());
-            }
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
@@ -846,21 +727,13 @@ public class ImsMmTelManager implements RegistrationManager {
      * - {@link #WIFI_MODE_WIFI_ONLY}
      * - {@link #WIFI_MODE_CELLULAR_PREFERRED}
      * - {@link #WIFI_MODE_WIFI_PREFERRED}
-     * @throws IllegalArgumentException if the subscription associated with this operation is not
-     * active (SIM is not inserted, ESIM inactive) or invalid.
      * @see #getVoWiFiModeSetting()
      */
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     public void setVoWiFiModeSetting(@WiFiCallingMode int mode) {
         try {
             getITelephony().setVoWiFiModeSetting(mSubId, mode);
-        } catch (ServiceSpecificException e) {
-            if (e.errorCode == ImsException.CODE_ERROR_INVALID_SUBSCRIPTION) {
-                // Rethrow as runtime error to keep API compatible.
-                throw new IllegalArgumentException(e.getMessage());
-            } else {
-                throw new RuntimeException(e.getMessage());
-            }
+            return;
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
@@ -875,21 +748,12 @@ public class ImsMmTelManager implements RegistrationManager {
      *     - {@link #WIFI_MODE_WIFI_ONLY}
      *     - {@link #WIFI_MODE_CELLULAR_PREFERRED}
      *     - {@link #WIFI_MODE_WIFI_PREFERRED}
-     * @throws IllegalArgumentException if the subscription associated with this operation is not
-     * active (SIM is not inserted, ESIM inactive) or invalid.
      * @see #setVoWiFiRoamingSettingEnabled(boolean)
      */
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public @WiFiCallingMode int getVoWiFiRoamingModeSetting() {
         try {
             return getITelephony().getVoWiFiRoamingModeSetting(mSubId);
-        } catch (ServiceSpecificException e) {
-            if (e.errorCode == ImsException.CODE_ERROR_INVALID_SUBSCRIPTION) {
-                // Rethrow as runtime error to keep API compatible.
-                throw new IllegalArgumentException(e.getMessage());
-            } else {
-                throw new RuntimeException(e.getMessage());
-            }
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
@@ -904,21 +768,13 @@ public class ImsMmTelManager implements RegistrationManager {
      *     - {@link #WIFI_MODE_WIFI_ONLY}
      *     - {@link #WIFI_MODE_CELLULAR_PREFERRED}
      *     - {@link #WIFI_MODE_WIFI_PREFERRED}
-     * @throws IllegalArgumentException if the subscription associated with this operation is not
-     * active (SIM is not inserted, ESIM inactive) or invalid.
      * @see #getVoWiFiRoamingModeSetting()
      */
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     public void setVoWiFiRoamingModeSetting(@WiFiCallingMode int mode) {
         try {
             getITelephony().setVoWiFiRoamingModeSetting(mSubId, mode);
-        } catch (ServiceSpecificException e) {
-            if (e.errorCode == ImsException.CODE_ERROR_INVALID_SUBSCRIPTION) {
-                // Rethrow as runtime error to keep API compatible.
-                throw new IllegalArgumentException(e.getMessage());
-            } else {
-                throw new RuntimeException(e.getMessage());
-            }
+            return;
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
@@ -931,21 +787,13 @@ public class ImsMmTelManager implements RegistrationManager {
      * {@link android.provider.Settings.Secure#RTT_CALLING_MODE}, which is the global user setting
      * for RTT. That value is enabled/disabled separately by the user through the Accessibility
      * settings.
-     * @throws IllegalArgumentException if the subscription associated with this operation is not
-     * active (SIM is not inserted, ESIM inactive) or invalid.
      * @param isEnabled if true RTT should be enabled during calls made on this subscription.
      */
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     public void setRttCapabilitySetting(boolean isEnabled) {
         try {
             getITelephony().setRttCapabilitySetting(mSubId, isEnabled);
-        } catch (ServiceSpecificException e) {
-            if (e.errorCode == ImsException.CODE_ERROR_INVALID_SUBSCRIPTION) {
-                // Rethrow as runtime error to keep API compatible.
-                throw new IllegalArgumentException(e.getMessage());
-            } else {
-                throw new RuntimeException(e.getMessage());
-            }
+            return;
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
@@ -953,61 +801,32 @@ public class ImsMmTelManager implements RegistrationManager {
 
     /**
      * @return true if TTY over VoLTE is supported
-     *
-     * @throws IllegalArgumentException if the subscription associated with this operation is not
-     * active (SIM is not inserted, ESIM inactive) or invalid.
      * @see android.telecom.TelecomManager#getCurrentTtyMode
      * @see android.telephony.CarrierConfigManager#KEY_CARRIER_VOLTE_TTY_SUPPORTED_BOOL
      */
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
-    public boolean isTtyOverVolteEnabled() {
+    boolean isTtyOverVolteEnabled() {
         try {
             return getITelephony().isTtyOverVolteEnabled(mSubId);
-        } catch (ServiceSpecificException e) {
-            if (e.errorCode == ImsException.CODE_ERROR_INVALID_SUBSCRIPTION) {
-                // Rethrow as runtime error to keep API compatible.
-                throw new IllegalArgumentException(e.getMessage());
-            } else {
-                throw new RuntimeException(e.getMessage());
-            }
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
     }
 
-    /**
-     * Get the status of the MmTel Feature registered on this subscription.
-     * @param callback A callback containing an Integer describing the current state of the
-     *                 MmTel feature, Which will be one of the following:
-     *                 {@link ImsFeature#STATE_UNAVAILABLE},
-     *                {@link ImsFeature#STATE_INITIALIZING},
-     *                {@link ImsFeature#STATE_READY}. Will be called using the executor
-     *                 specified when the service state has been retrieved from the IMS service.
-     * @param executor The executor that will be used to call the callback.
-     * @throws ImsException if the IMS service associated with this subscription is not available or
-     * the IMS service is not available.
-     */
-    @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
-    public void getFeatureState(@NonNull @ImsFeature.ImsState Consumer<Integer> callback,
-            @NonNull @CallbackExecutor Executor executor) throws ImsException {
-        if (callback == null) {
-            throw new IllegalArgumentException("Must include a non-null Consumer.");
-        }
-        if (executor == null) {
-            throw new IllegalArgumentException("Must include a non-null Executor.");
+    private static boolean isImsAvailableOnDevice() {
+        IPackageManager pm = IPackageManager.Stub.asInterface(ServiceManager.getService("package"));
+        if (pm == null) {
+            // For some reason package manger is not available.. This will fail internally anyways,
+            // so do not throw error and allow.
+            return true;
         }
         try {
-            getITelephony().getImsMmTelFeatureState(mSubId, new IIntegerConsumer.Stub() {
-                @Override
-                public void accept(int result) {
-                    executor.execute(() -> callback.accept(result));
-                }
-            });
-        } catch (ServiceSpecificException sse) {
-            throw new ImsException(sse.getMessage(), sse.errorCode);
+            return pm.hasSystemFeature(PackageManager.FEATURE_TELEPHONY_IMS, 0);
         } catch (RemoteException e) {
-            e.rethrowAsRuntimeException();
+            // For some reason package manger is not available.. This will fail internally anyways,
+            // so do not throw error and allow.
         }
+        return true;
     }
 
     private static ITelephony getITelephony() {

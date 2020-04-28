@@ -36,6 +36,7 @@ import android.view.ViewGroup;
 import android.view.ViewHierarchyEncoder;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.inspector.InspectableProperty;
+import android.view.inspector.InspectionCompanion;
 import android.view.inspector.PropertyMapper;
 import android.view.inspector.PropertyReader;
 import android.widget.RemoteViews.RemoteView;
@@ -2025,11 +2026,6 @@ public class RelativeLayout extends ViewGroup {
          * A node with no dependent is considered a root of the graph.
          */
         static class Node {
-
-            @UnsupportedAppUsage
-            Node() {
-            }
-
             /**
              * The view representing this node in the layout.
              */

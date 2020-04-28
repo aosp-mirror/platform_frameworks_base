@@ -20,7 +20,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="mmcc_imsi_unknown_in_hlr" msgid="376893116792604964">"Δεν παρέχεται κάρτα SIM MM#2"</string>
-    <string name="mmcc_illegal_ms" msgid="1593063035884873292">"Η κάρτα SIM δεν επιτρέπεται MM#3"</string>
-    <string name="mmcc_illegal_me" msgid="4477688981805467729">"Το τηλέφωνο δεν επιτρέπεται MM#6"</string>
+    <string name="mmcc_imsi_unknown_in_hlr" msgid="8861901652350883183">"Δεν παρέχεται κάρτα SIM MM#2"</string>
+    <string name="mmcc_illegal_ms" msgid="2604694337529846283">"Η κάρτα SIM δεν επιτρέπεται MM#3"</string>
+    <string name="mmcc_illegal_me" msgid="3099618295079374317">"Το τηλέφωνο δεν επιτρέπεται MM#6"</string>
 </resources>

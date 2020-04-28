@@ -36,9 +36,7 @@ import com.android.internal.util.FastXmlSerializer;
 import libcore.io.IoUtils;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -58,9 +56,6 @@ import java.util.List;
 
 @RunWith(AndroidJUnit4.class)
 public class PackageInstallerSessionTest {
-    @Rule
-    public TemporaryFolder mTemporaryFolder = new TemporaryFolder();
-
     private File mTmpDir;
     private AtomicFile mSessionsFile;
     private static final String TAG_SESSIONS = "sessions";
@@ -70,7 +65,7 @@ public class PackageInstallerSessionTest {
 
     @Before
     public void setUp() throws Exception {
-        mTmpDir = mTemporaryFolder.newFolder("PackageInstallerSessionTest");
+        mTmpDir = IoUtils.createTemporaryDirectory("PackageInstallerSessionTest");
         mSessionsFile = new AtomicFile(
                 new File(mTmpDir.getAbsolutePath() + "/sessions.xml"), "package-session");
         MockitoAnnotations.initMocks(this);

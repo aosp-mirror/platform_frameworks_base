@@ -43,14 +43,13 @@ import androidx.test.filters.MediumTest;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import libcore.io.IoUtils;
+
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 
 import java.io.File;
-import java.io.IOException;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
@@ -63,16 +62,13 @@ import java.util.Set;
 @RunWith(AndroidJUnit4.class)
 @MediumTest
 public class PackageParserTest {
-    @Rule
-    public TemporaryFolder mTemporaryFolder = new TemporaryFolder();
-
     private File mTmpDir;
     private static final File FRAMEWORK = new File("/system/framework/framework-res.apk");
 
     @Before
-    public void setUp() throws IOException {
+    public void setUp() {
         // Create a new temporary directory for each of our tests.
-        mTmpDir = mTemporaryFolder.newFolder("PackageParserTest");
+        mTmpDir = IoUtils.createTemporaryDirectory("PackageParserTest");
     }
 
     @Test

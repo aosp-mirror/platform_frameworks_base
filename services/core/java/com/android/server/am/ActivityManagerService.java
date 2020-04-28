@@ -348,13 +348,10 @@ import com.android.server.ThreadPriorityBooster;
 import com.android.server.Watchdog;
 import com.android.server.am.ActivityManagerServiceDumpProcessesProto.UidObserverRegistrationProto;
 import com.android.server.appop.AppOpsService;
-import com.android.server.compat.CompatConfig;
-import com.android.server.compat.PlatformCompat;
 import com.android.server.contentcapture.ContentCaptureManagerInternal;
 import com.android.server.firewall.IntentFirewall;
 import com.android.server.job.JobSchedulerInternal;
 import com.android.server.pm.Installer;
-import com.android.server.pm.Installer.InstallerException;
 import com.android.server.uri.GrantUri;
 import com.android.server.uri.UriGrantsManagerInternal;
 import com.android.server.utils.PriorityDump;
@@ -365,8 +362,6 @@ import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.ActivityTaskManagerService;
 import com.android.server.wm.WindowManagerService;
 import com.android.server.wm.WindowProcessController;
-
-import dalvik.system.VMRuntime;
 
 import libcore.util.EmptyArray;
 
@@ -1562,8 +1557,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     // Encapsulates the global setting "hidden_api_blacklist_exemptions"
     final HiddenApiSettings mHiddenApiBlacklist;
 
-    private final PlatformCompat mPlatformCompat;
-
     PackageManagerInternal mPackageManagerInt;
 
     /**
@@ -2432,7 +2425,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         mProcStartHandler = null;
         mHiddenApiBlacklist = null;
         mFactoryTest = FACTORY_TEST_OFF;
-        mPlatformCompat = null;
     }
 
     // Note: This method is invoked on the main thread but may need to attach various
@@ -2568,9 +2560,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         };
 
         mHiddenApiBlacklist = new HiddenApiSettings(mHandler, mContext);
-
-        mPlatformCompat = (PlatformCompat) ServiceManager.getService(
-                Context.PLATFORM_COMPAT_SERVICE);
 
         Watchdog.getInstance().addMonitor(this);
         Watchdog.getInstance().addThread(mHandler);
@@ -3576,7 +3565,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public void crashApplication(int uid, int initialPid, String packageName, int userId,
-            String message) {
+            String message, boolean force) {
         if (checkCallingPermission(android.Manifest.permission.FORCE_STOP_PACKAGES)
                 != PackageManager.PERMISSION_GRANTED) {
             String msg = "Permission Denial: crashApplication() from pid="
@@ -3588,7 +3577,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         synchronized(this) {
-            mAppErrors.scheduleAppCrashLocked(uid, initialPid, packageName, userId, message);
+            mAppErrors.scheduleAppCrashLocked(uid, initialPid, packageName, userId,
+                    message, force);
         }
     }
 
@@ -4767,7 +4757,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @GuardedBy("this")
-    private final boolean attachApplicationLocked(IApplicationThread thread,
+    private boolean attachApplicationLocked(@NonNull IApplicationThread thread,
             int pid, int callingUid, long startSeq) {
 
         // Find the application record that is being attached...  either via
@@ -5020,9 +5010,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (preBindAgent != null) {
                 thread.attachAgent(preBindAgent);
             }
-            if ((app.info.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
-                thread.attachStartupAgents(app.info.dataDir);
-            }
+
 
             // Figure out whether the app needs to run in autofill compat mode.
             AutofillOptions autofillOptions = null;
@@ -5048,10 +5036,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             bindApplicationTimeMillis = SystemClock.elapsedRealtime();
             mAtmInternal.preBindApplication(app.getWindowProcessController());
             final ActiveInstrumentation instr2 = app.getActiveInstrumentation();
-            long[] disabledCompatChanges = CompatConfig.get().getDisabledChanges(app.info);
-            if (mPlatformCompat != null) {
-                mPlatformCompat.resetReporting(app.info);
-            }
             if (app.isolatedEntryPoint != null) {
                 // This is an isolated process which should just call an entry point instead of
                 // being bound to an application.
@@ -5067,8 +5051,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         new Configuration(app.getWindowProcessController().getConfiguration()),
                         app.compat, getCommonServicesLocked(app.isolated),
                         mCoreSettingsObserver.getCoreSettingsLocked(),
-                        buildSerial, autofillOptions, contentCaptureOptions,
-                        disabledCompatChanges);
+                        buildSerial, autofillOptions, contentCaptureOptions);
             } else {
                 thread.bindApplication(processName, appInfo, providers, null, profilerInfo,
                         null, null, null, testMode,
@@ -5077,8 +5060,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         new Configuration(app.getWindowProcessController().getConfiguration()),
                         app.compat, getCommonServicesLocked(app.isolated),
                         mCoreSettingsObserver.getCoreSettingsLocked(),
-                        buildSerial, autofillOptions, contentCaptureOptions,
-                        disabledCompatChanges);
+                        buildSerial, autofillOptions, contentCaptureOptions);
             }
             if (profilerInfo != null) {
                 profilerInfo.closeFd();
@@ -5189,6 +5171,9 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public final void attachApplication(IApplicationThread thread, long startSeq) {
+        if (thread == null) {
+            throw new SecurityException("Invalid application interface");
+        }
         synchronized (this) {
             int callingPid = Binder.getCallingPid();
             final int callingUid = Binder.getCallingUid();
@@ -5216,30 +5201,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             mCallFinishBooting = false;
         }
-
-        ArraySet<String> completedIsas = new ArraySet<String>();
-        for (String abi : Build.SUPPORTED_ABIS) {
-            ZYGOTE_PROCESS.establishZygoteConnectionForAbi(abi);
-            final String instructionSet = VMRuntime.getInstructionSet(abi);
-            if (!completedIsas.contains(instructionSet)) {
-                try {
-                    mInstaller.markBootComplete(VMRuntime.getInstructionSet(abi));
-                } catch (InstallerException e) {
-                    if (!VMRuntime.didPruneDalvikCache()) {
-                        // This is technically not the right filter, as different zygotes may
-                        // have made different pruning decisions. But the log is best effort,
-                        // anyways.
-                        Slog.w(TAG, "Unable to mark boot complete for abi: " + abi + " (" +
-                                e.getMessage() +")");
-                    }
-                }
-                completedIsas.add(instructionSet);
-            }
-        }
-
-        // Let the ART runtime in zygote and system_server know that the boot completed.
-        ZYGOTE_PROCESS.bootCompleted();
-        VMRuntime.bootCompleted();
 
         IntentFilter pkgFilter = new IntentFilter();
         pkgFilter.addAction(Intent.ACTION_QUERY_PACKAGE_RESTART);
@@ -5282,7 +5243,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             storageManager.commitChanges();
         } catch (Exception e) {
             PowerManager pm = (PowerManager)
-                     mInjector.getContext().getSystemService(Context.POWER_SERVICE);
+                     mContext.getSystemService(Context.POWER_SERVICE);
             pm.reboot("Checkpoint commit failed");
         }
 
@@ -7789,18 +7750,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                 false /* mountExtStorageFull */, abiOverride);
     }
 
-    @GuardedBy("this")
-    final ProcessRecord addAppLocked(ApplicationInfo info, String customProcess, boolean isolated,
-            boolean disableHiddenApiChecks, boolean mountExtStorageFull, String abiOverride) {
-        return addAppLocked(info, customProcess, isolated, disableHiddenApiChecks,
-                false /* disableTestApiChecks */, mountExtStorageFull, abiOverride);
-    }
-
     // TODO: Move to ProcessList?
     @GuardedBy("this")
     final ProcessRecord addAppLocked(ApplicationInfo info, String customProcess, boolean isolated,
-            boolean disableHiddenApiChecks, boolean disableTestApiChecks,
-            boolean mountExtStorageFull, String abiOverride) {
+            boolean disableHiddenApiChecks, boolean mountExtStorageFull, String abiOverride) {
         ProcessRecord app;
         if (!isolated) {
             app = getProcessRecordLocked(customProcess != null ? customProcess : info.processName,
@@ -7835,7 +7788,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             mPersistentStartingProcesses.add(app);
             mProcessList.startProcessLocked(app, new HostingRecord("added application",
                     customProcess != null ? customProcess : app.processName),
-                    disableHiddenApiChecks, disableTestApiChecks, mountExtStorageFull, abiOverride);
+                    disableHiddenApiChecks, mountExtStorageFull, abiOverride);
         }
 
         return app;
@@ -8285,6 +8238,21 @@ public class ActivityManagerService extends IActivityManager.Stub
         synchronized (this) {
             mProcessObservers.unregister(observer);
         }
+    }
+
+    private boolean isActiveInstrumentation(int uid) {
+        synchronized (ActivityManagerService.this) {
+            for (int i = mActiveInstrumentation.size() - 1; i >= 0; i--) {
+                final ActiveInstrumentation instrumentation = mActiveInstrumentation.get(i);
+                for (int j = instrumentation.mRunningProcesses.size() - 1; j >= 0; j--) {
+                    final ProcessRecord process = instrumentation.mRunningProcesses.get(j);
+                    if (process.uid == uid) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     @Override
@@ -15800,10 +15768,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 enforceCallingPermission(android.Manifest.permission.DISABLE_HIDDEN_API_CHECKS,
                         "disable hidden API checks");
             }
-            // Allow instrumented processes access to test APIs.
-            // TODO(satayev): make this configurable via testing framework.
-            boolean disableTestApiChecks = true;
-
             final boolean mountExtStorageFull = isCallerShell()
                     && (flags & INSTR_FLAG_MOUNT_EXTERNAL_STORAGE_FULL) != 0;
 
@@ -15818,7 +15782,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
 
             ProcessRecord app = addAppLocked(ai, defProcess, false, disableHiddenApiChecks,
-                    disableTestApiChecks, mountExtStorageFull, abiOverride);
+                    mountExtStorageFull, abiOverride);
             app.setActiveInstrumentation(activeInstr);
             activeInstr.mFinished = false;
             activeInstr.mRunningProcesses.add(app);
@@ -18534,6 +18498,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         public void unregisterProcessObserver(IProcessObserver processObserver) {
             ActivityManagerService.this.unregisterProcessObserver(processObserver);
+        }
+
+        @Override
+        public boolean isActiveInstrumentation(int uid) {
+            return ActivityManagerService.this.isActiveInstrumentation(uid);
         }
     }
 

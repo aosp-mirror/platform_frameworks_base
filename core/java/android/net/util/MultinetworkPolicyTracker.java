@@ -64,7 +64,7 @@ public class MultinetworkPolicyTracker {
 
     private final Context mContext;
     private final Handler mHandler;
-    private final Runnable mAvoidBadWifiCallback;
+    private final Runnable mReevaluateRunnable;
     private final List<Uri> mSettingsUris;
     private final ContentResolver mResolver;
     private final SettingObserver mSettingObserver;
@@ -81,7 +81,12 @@ public class MultinetworkPolicyTracker {
     public MultinetworkPolicyTracker(Context ctx, Handler handler, Runnable avoidBadWifiCallback) {
         mContext = ctx;
         mHandler = handler;
-        mAvoidBadWifiCallback = avoidBadWifiCallback;
+        mReevaluateRunnable = () -> {
+            if (updateAvoidBadWifi() && avoidBadWifiCallback != null) {
+                avoidBadWifiCallback.run();
+            }
+            updateMeteredMultipathPreference();
+        };
         mSettingsUris = Arrays.asList(
             Settings.Global.getUriFor(NETWORK_AVOID_BAD_WIFI),
             Settings.Global.getUriFor(NETWORK_METERED_MULTIPATH_PREFERENCE));
@@ -90,15 +95,15 @@ public class MultinetworkPolicyTracker {
         mBroadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                reevaluateInternal();
+                reevaluate();
             }
         };
 
-        TelephonyManager.from(ctx).listen(new PhoneStateListener(handler.getLooper()) {
+        TelephonyManager.from(ctx).listen(new PhoneStateListener() {
             @Override
             public void onActiveDataSubscriptionIdChanged(int subId) {
                 mActiveSubId = subId;
-                reevaluateInternal();
+                reevaluate();
             }
         }, PhoneStateListener.LISTEN_ACTIVE_DATA_SUBSCRIPTION_ID_CHANGE);
 
@@ -114,7 +119,7 @@ public class MultinetworkPolicyTracker {
         final IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
         mContext.registerReceiverAsUser(
-                mBroadcastReceiver, UserHandle.ALL, intentFilter, null, mHandler);
+                mBroadcastReceiver, UserHandle.ALL, intentFilter, null, null);
 
         reevaluate();
     }
@@ -159,17 +164,7 @@ public class MultinetworkPolicyTracker {
 
     @VisibleForTesting
     public void reevaluate() {
-        mHandler.post(this::reevaluateInternal);
-    }
-
-    /**
-     * Reevaluate the settings. Must be called on the handler thread.
-     */
-    private void reevaluateInternal() {
-        if (updateAvoidBadWifi() && mAvoidBadWifiCallback != null) {
-            mAvoidBadWifiCallback.run();
-        }
-        updateMeteredMultipathPreference();
+        mHandler.post(mReevaluateRunnable);
     }
 
     public boolean updateAvoidBadWifi() {

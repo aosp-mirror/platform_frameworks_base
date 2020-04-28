@@ -66,8 +66,7 @@
   <java-symbol type="id" name="content_preview_text_layout" />
   <java-symbol type="id" name="content_preview_title" />
   <java-symbol type="id" name="content_preview_title_layout" />
-  <java-symbol type="id" name="copy_button" />
-  <java-symbol type="id" name="file_copy_button" />
+  <java-symbol type="id" name="chooser_action_row" />
   <java-symbol type="id" name="current_scene" />
   <java-symbol type="id" name="scene_layoutid_cache" />
   <java-symbol type="id" name="customPanel" />
@@ -299,14 +298,9 @@
   <java-symbol type="bool" name="config_dynamic_bind_ims" />
   <java-symbol type="string" name="config_wwan_network_service_package" />
   <java-symbol type="string" name="config_wlan_network_service_package" />
-  <java-symbol type="string" name="config_wwan_network_service_class" />
-  <java-symbol type="string" name="config_wlan_network_service_class" />
   <java-symbol type="string" name="config_wwan_data_service_package" />
   <java-symbol type="string" name="config_wlan_data_service_package" />
-  <java-symbol type="string" name="config_wwan_data_service_class" />
-  <java-symbol type="string" name="config_wlan_data_service_class" />
   <java-symbol type="string" name="config_qualified_networks_service_package" />
-  <java-symbol type="string" name="config_qualified_networks_service_class" />
   <java-symbol type="bool" name="config_networkSamplingWakesDevice" />
   <java-symbol type="bool" name="config_showMenuShortcutsWhenKeyboardPresent" />
   <java-symbol type="bool" name="config_sip_wifi_only" />
@@ -314,13 +308,13 @@
   <java-symbol type="bool" name="config_sms_utf8_support" />
   <java-symbol type="bool" name="config_suspendWhenScreenOffDueToProximity" />
   <java-symbol type="bool" name="config_swipeDisambiguation" />
+  <java-symbol type="bool" name="config_systemUserPackagesBlacklistSupported" />
   <java-symbol type="bool" name="config_syncstorageengine_masterSyncAutomatically" />
   <java-symbol type="bool" name="config_ui_enableFadingMarquee" />
   <java-symbol type="bool" name="config_enableHapticTextHandle" />
   <java-symbol type="bool" name="config_use_strict_phone_number_comparation" />
   <java-symbol type="bool" name="config_use_strict_phone_number_comparation_for_russia" />
   <java-symbol type="bool" name="config_use_strict_phone_number_comparation_for_kazakhstan" />
-  <java-symbol type="integer" name="config_phonenumber_compare_min_match" />
   <java-symbol type="bool" name="config_single_volume" />
   <java-symbol type="bool" name="config_voice_capable" />
   <java-symbol type="bool" name="config_requireCallCapableAccountForHandle" />
@@ -524,6 +518,7 @@
   <java-symbol type="string" name="config_deviceSpecificDevicePolicyManagerService" />
   <java-symbol type="string" name="config_deviceSpecificAudioService" />
   <java-symbol type="integer" name="config_num_physical_slots" />
+  <java-symbol type="string" name="config_bandwidthEstimateSource" />
 
   <java-symbol type="color" name="tab_indicator_text_v4" />
 
@@ -590,12 +585,9 @@
   <java-symbol type="string" name="menu_space_shortcut_label" />
   <java-symbol type="string" name="menu_shift_shortcut_label" />
   <java-symbol type="string" name="menu_sym_shortcut_label" />
-  <java-symbol type="string" name="mobile_no_internet" />
   <java-symbol type="string" name="notification_title" />
-  <java-symbol type="string" name="other_networks_no_internet" />
   <java-symbol type="string" name="permission_request_notification_with_subtitle" />
   <java-symbol type="string" name="prepend_shortcut_label" />
-  <java-symbol type="string" name="private_dns_broken_detailed" />
   <java-symbol type="string" name="paste_as_plain_text" />
   <java-symbol type="string" name="replace" />
   <java-symbol type="string" name="undo" />
@@ -747,8 +739,6 @@
   <java-symbol type="string" name="config_default_dns_server" />
   <java-symbol type="string" name="config_ethernet_iface_regex" />
   <java-symbol type="array" name="config_ethernet_interfaces" />
-  <java-symbol type="array" name="config_wakeonlan_supported_interfaces" />
-  <java-symbol type="string" name="cellbroadcast_default_package" />
   <java-symbol type="string" name="config_forceVoiceInteractionServicePackage" />
   <java-symbol type="string" name="config_mms_user_agent" />
   <java-symbol type="string" name="config_mms_user_agent_profile_url" />
@@ -1919,7 +1909,6 @@
   <java-symbol type="bool" name="config_tether_upstream_automatic" />
   <java-symbol type="array" name="config_tether_usb_regexs" />
   <java-symbol type="array" name="config_tether_wifi_regexs" />
-  <java-symbol type="array" name="config_tether_wifi_p2p_regexs" />
   <java-symbol type="array" name="config_usbHostBlacklist" />
   <java-symbol type="array" name="config_serialPorts" />
   <java-symbol type="array" name="radioAttributes" />
@@ -2072,6 +2061,14 @@
   <java-symbol type="layout" name="safe_mode" />
   <java-symbol type="layout" name="simple_list_item_2_single_choice" />
   <java-symbol type="layout" name="app_error_dialog" />
+  <java-symbol type="string" name="wifi_cannot_connect_with_randomized_mac_title" />
+  <java-symbol type="string" name="wifi_cannot_connect_with_randomized_mac_message" />
+  <java-symbol type="string" name="wifi_disable_mac_randomization_dialog_title" />
+  <java-symbol type="string" name="wifi_disable_mac_randomization_dialog_message" />
+  <java-symbol type="string" name="wifi_disable_mac_randomization_dialog_confirm_text" />
+  <java-symbol type="string" name="wifi_disable_mac_randomization_dialog_success" />
+  <java-symbol type="string" name="wifi_disable_mac_randomization_dialog_failure" />
+  <java-symbol type="string" name="wifi_disable_mac_randomization_dialog_network_not_found" />
   <java-symbol type="plurals" name="wifi_available" />
   <java-symbol type="plurals" name="wifi_available_detailed" />
   <java-symbol type="string" name="wifi_available_title" />
@@ -2662,7 +2659,6 @@
   <java-symbol type="attr" name="ambientShadowAlpha" />
   <java-symbol type="attr" name="spotShadowAlpha" />
   <java-symbol type="bool" name="config_sms_decode_gsm_8bit_data" />
-  <java-symbol type="integer" name="default_reserved_data_coding_scheme" />
   <java-symbol type="dimen" name="text_size_small_material" />
   <java-symbol type="attr" name="checkMarkGravity" />
   <java-symbol type="layout" name="select_dialog_singlechoice_material" />
@@ -3060,7 +3056,8 @@
   <java-symbol type="color" name="notification_material_background_color" />
 
   <!-- Resolver target actions -->
-  <java-symbol type="array" name="resolver_target_actions" />
+  <java-symbol type="array" name="resolver_target_actions_pin" />
+  <java-symbol type="array" name="resolver_target_actions_unpin" />
 
   <java-symbol type="array" name="non_removable_euicc_slots" />
 
@@ -3693,6 +3690,8 @@
 
   <java-symbol type="bool" name="config_maskMainBuiltInDisplayCutout" />
 
+  <java-symbol type="string" name="config_customCountryDetector" />
+
   <!-- For Foldables -->
   <java-symbol type="bool" name="config_lidControlsDisplayFold" />
   <java-symbol type="string" name="config_foldedArea" />
@@ -3814,6 +3813,7 @@
   <java-symbol type="drawable" name="iconfactory_adaptive_icon_drawable_wrapper"/>
   <java-symbol type="dimen" name="notification_min_height" />
   <java-symbol type="dimen" name="resolver_icon_size"/>
+  <java-symbol type="dimen" name="resolver_grid_icon_size"/>
   <java-symbol type="dimen" name="resolver_badge_size"/>
   <java-symbol type="dimen" name="resolver_button_bar_spacing"/>
   <java-symbol type="dimen" name="resolver_icon_margin"/>
@@ -3852,5 +3852,12 @@
   <java-symbol type="drawable" name="android_logotype" />
   <java-symbol type="layout" name="platlogo_layout" />
 
+  <java-symbol type="id" name="chooser_copy_button" />
+  <java-symbol type="layout" name="chooser_action_button" />
+  <java-symbol type="dimen" name="chooser_action_button_icon_size" />
+  <java-symbol type="string" name="config_defaultNearbySharingComponent" />
+
   <java-symbol type="bool" name="config_automotiveHideNavBarForKeyboard" />
+  <java-symbol type="bool" name="reset_geo_fencing_check_after_boot_or_apm" />
+  <java-symbol type="bool" name="config_enableAutoSuspend" />
 </resources>

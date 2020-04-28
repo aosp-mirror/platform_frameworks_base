@@ -37,6 +37,7 @@ import android.telephony.ims.stub.ImsMultiEndpointImplBase;
 import android.telephony.ims.stub.ImsRegistrationImplBase;
 import android.telephony.ims.stub.ImsSmsImplBase;
 import android.telephony.ims.stub.ImsUtImplBase;
+import android.util.Log;
 
 import com.android.ims.internal.IImsCallSession;
 import com.android.ims.internal.IImsEcbm;
@@ -153,13 +154,17 @@ public class MmTelFeature extends ImsFeature {
         @Override
         public void changeCapabilitiesConfiguration(CapabilityChangeRequest request,
                 IImsCapabilityCallback c) {
-            MmTelFeature.this.requestChangeEnabledCapabilities(request, c);
+            synchronized (mLock) {
+                MmTelFeature.this.requestChangeEnabledCapabilities(request, c);
+            }
         }
 
         @Override
         public void queryCapabilityConfiguration(int capability, int radioTech,
                 IImsCapabilityCallback c) {
-            queryCapabilityConfigurationInternal(capability, radioTech, c);
+            synchronized (mLock) {
+                queryCapabilityConfigurationInternal(capability, radioTech, c);
+            }
         }
 
         @Override
@@ -242,8 +247,8 @@ public class MmTelFeature extends ImsFeature {
          * @param capabilities The capabilities that are supported for MmTel in the form of a
          *                     bitfield.
          */
-        public MmTelCapabilities(@MmTelCapability int capabilities) {
-            super(capabilities);
+        public MmTelCapabilities(int capabilities) {
+            mCapabilities = capabilities;
         }
 
         @IntDef(flag = true,
@@ -291,7 +296,6 @@ public class MmTelFeature extends ImsFeature {
             return super.isCapable(capabilities);
         }
 
-        @NonNull
         @Override
         public String toString() {
             StringBuilder builder = new StringBuilder("MmTel Capabilities - [");
@@ -362,25 +366,6 @@ public class MmTelFeature extends ImsFeature {
     @Retention(RetentionPolicy.SOURCE)
     public @interface ProcessCallResult {}
 
-    /**
-     * If the flag is present and true, it indicates that the incoming call is for USSD.
-     * <p>
-     * This is an optional boolean flag.
-     */
-    public static final String EXTRA_IS_USSD = "android.telephony.ims.feature.extra.IS_USSD";
-
-    /**
-     * If this flag is present and true, this call is marked as an unknown dialing call instead
-     * of an incoming call. An example of such a call is a call that is originated by sending
-     * commands (like AT commands) directly to the modem without Android involvement or dialing
-     * calls appearing over IMS when the modem does a silent redial from circuit-switched to IMS in
-     * certain situations.
-     * <p>
-     * This is an optional boolean flag.
-     */
-    public static final String EXTRA_IS_UNKNOWN_CALL =
-            "android.telephony.ims.feature.extra.IS_UNKNOWN_CALL";
-
     private IImsMmTelListener mListener;
 
     /**
@@ -393,6 +378,18 @@ public class MmTelFeature extends ImsFeature {
             if (mListener != null) {
                 onFeatureReady();
             }
+        }
+    }
+
+    private void queryCapabilityConfigurationInternal(int capability, int radioTech,
+            IImsCapabilityCallback c) {
+        boolean enabled = queryCapabilityConfiguration(capability, radioTech);
+        try {
+            if (c != null) {
+                c.onQueryCapabilityConfiguration(capability, radioTech, enabled);
+            }
+        } catch (RemoteException e) {
+            Log.e(LOG_TAG, "queryCapabilityConfigurationInternal called on dead binder!");
         }
     }
 
@@ -429,8 +426,6 @@ public class MmTelFeature extends ImsFeature {
     /**
      * Notify the framework of an incoming call.
      * @param c The {@link ImsCallSessionImplBase} of the new incoming call.
-     * @param extras A bundle containing extra parameters related to the call. See
-     * {@link #EXTRA_IS_UNKNOWN_CALL} and {@link #EXTRA_IS_USSD} above.
      */
     public final void notifyIncomingCall(@NonNull ImsCallSessionImplBase c,
             @NonNull Bundle extras) {
@@ -517,7 +512,6 @@ public class MmTelFeature extends ImsFeature {
      * @param capability The capability that we are querying the configuration for.
      * @return true if the capability is enabled, false otherwise.
      */
-    @Override
     public boolean queryCapabilityConfiguration(@MmTelCapabilities.MmTelCapability int capability,
             @ImsRegistrationImplBase.ImsRegistrationTech int radioTech) {
         // Base implementation - Override to provide functionality

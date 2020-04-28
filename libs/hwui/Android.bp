@@ -26,10 +26,8 @@ cc_defaults {
         // a problem
         "-Wno-free-nonheap-object",
 
-        // Clang is producing non-determistic binary when the new pass manager is
-        // enabled. Disable the new PM as a temporary workaround.
-        // b/142372146
-        "-fno-experimental-new-pass-manager",
+        // clang's warning is broken, see: https://llvm.org/bugs/show_bug.cgi?id=21629
+        "-Wno-missing-braces",
     ],
 
     include_dirs: [
@@ -233,6 +231,9 @@ cc_defaults {
         "VectorDrawable.cpp",
         "protos/graphicsstats.proto",
     ],
+
+    // Allow implicit fallthroughs in HardwareBitmapUploader.cpp until they are fixed.
+    cflags: ["-Wno-implicit-fallthrough"],
 
     proto: {
         export_proto_headers: true,

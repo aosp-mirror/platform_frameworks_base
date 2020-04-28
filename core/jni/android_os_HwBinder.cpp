@@ -152,7 +152,7 @@ status_t JHwBinder::onTransact(
         uint32_t flags,
         TransactCallback callback) {
     JNIEnv *env = AndroidRuntime::getJNIEnv();
-    bool isOneway = (flags & IBinder::FLAG_ONEWAY) != 0;
+    bool isOneway = (flags & TF_ONE_WAY) != 0;
     ScopedLocalRef<jobject> replyObj(env, nullptr);
     sp<JHwParcel> replyContext = nullptr;
 
@@ -188,7 +188,7 @@ status_t JHwBinder::onTransact(
         if (env->IsInstanceOf(excep, gErrorClass)) {
             /* It's an error */
             LOG(ERROR) << "Forcefully exiting";
-            _exit(1);
+            exit(1);
         } else {
             LOG(ERROR) << "Uncaught exception!";
         }
@@ -222,21 +222,6 @@ status_t JHwBinder::onTransact(
             NULL /* parcel */, false /* assumeOwnership */);
 
     return err;
-}
-
-bool validateCanUseHwBinder(const sp<hardware::IBinder>& binder) {
-    if (binder != nullptr && binder->localBinder() != nullptr) {
-        // untested/unsupported/inefficient
-        // see b/129150021, doesn't work with scatter-gather
-        //
-        // explicitly disabling until it is supported
-        // (note, even if this is fixed to work with scatter gather, we would also need
-        // to convert this to the Java object rather than re-wrapping with a proxy)
-        LOG(ERROR) << "Local Java Binder not supported.";
-        return false;
-    }
-
-    return true;
 }
 
 }  // namespace android
@@ -284,17 +269,28 @@ static void JHwBinder_native_registerService(
     }
 
     sp<hardware::IBinder> binder = JHwBinder::GetNativeBinder(env, thiz);
+
+    /* TODO(b/33440494) this is not right */
     sp<hidl::base::V1_0::IBase> base = new hidl::base::V1_0::BpHwBase(binder);
 
-    bool ok = hardware::details::registerAsServiceInternal(base, str.c_str()) == OK;
+    auto manager = hardware::defaultServiceManager();
+
+    if (manager == nullptr) {
+        LOG(ERROR) << "Could not get hwservicemanager.";
+        signalExceptionForError(env, UNKNOWN_ERROR, true /* canThrowRemoteException */);
+        return;
+    }
+
+    Return<bool> ret = manager->add(str.c_str(), base);
+
+    bool ok = ret.isOk() && ret;
 
     if (ok) {
         LOG(INFO) << "HwBinder: Starting thread pool for " << str.c_str();
         ::android::hardware::ProcessState::self()->startThreadPool();
     }
 
-    // avoiding richer error exceptions to stick with legacy behavior
-    signalExceptionForError(env, (ok ? OK : UNKNOWN_ERROR), true /*canThrowRemoteException*/);
+    signalExceptionForError(env, (ok ? OK : UNKNOWN_ERROR), true /* canThrowRemoteException */);
 }
 
 static jobject JHwBinder_native_getService(
@@ -328,9 +324,9 @@ static jobject JHwBinder_native_getService(
     sp<IBase> ret = getRawServiceInternal(ifaceName, serviceName, retry /* retry */, false /* getStub */);
     sp<hardware::IBinder> service = hardware::toBinder<hidl::base::V1_0::IBase>(ret);
 
-    if (service == nullptr || !validateCanUseHwBinder(service)) {
+    if (service == NULL) {
         signalExceptionForError(env, NAME_NOT_FOUND);
-        return nullptr;
+        return NULL;
     }
 
     LOG(INFO) << "HwBinder: Starting thread pool for getting: " << ifaceName << "/" << serviceName;

@@ -45,12 +45,12 @@ public final class TimeDetector {
      * signals are available such as those that come from more reliable sources or were
      * determined more recently.
      */
-    public void suggestPhoneTime(@NonNull PhoneTimeSuggestion timeSuggestion) {
+    public void suggestTime(@NonNull TimeSignal timeSignal) {
         if (DEBUG) {
-            Log.d(TAG, "suggestPhoneTime called: " + timeSuggestion);
+            Log.d(TAG, "suggestTime called: " + timeSignal);
         }
         try {
-            mITimeDetectorService.suggestPhoneTime(timeSuggestion);
+            mITimeDetectorService.suggestTime(timeSignal);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

@@ -58,7 +58,7 @@ enum : ApiVersion {
 };
 
 ApiVersion FindAttributeSdkLevel(const ResourceId& id);
-Maybe<ApiVersion> GetDevelopmentSdkCodeNameVersion(const android::StringPiece& code_name);
+std::pair<android::StringPiece, ApiVersion> GetDevelopmentSdkCodeNameAndVersion();
 
 }  // namespace aapt
 

@@ -40,10 +40,6 @@ public class InterfaceConfiguration implements Parcelable {
 
     private static final  String[] EMPTY_STRING_ARRAY = new String[0];
 
-    @UnsupportedAppUsage
-    public InterfaceConfiguration() {
-    }
-
     @Override
     public String toString() {
         final StringBuilder builder = new StringBuilder();

@@ -17,7 +17,6 @@
 package android.telephony.ims;
 
 import android.annotation.IntDef;
-import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
@@ -1191,8 +1190,6 @@ public final class ImsReasonInfo implements Parcelable {
     /**
      * @return the string format of {@link ImsReasonInfo}
      */
-    @NonNull
-    @Override
     public String toString() {
         return "ImsReasonInfo :: {" + mCode + ", " + mExtraCode + ", " + mExtraMessage + "}";
     }

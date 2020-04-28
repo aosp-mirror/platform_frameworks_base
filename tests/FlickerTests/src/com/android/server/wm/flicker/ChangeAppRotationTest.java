@@ -29,15 +29,11 @@ import android.util.Log;
 import android.view.Surface;
 
 import androidx.test.InstrumentationRegistry;
-import androidx.test.filters.FlakyTest;
 import androidx.test.filters.LargeTest;
 
 import org.junit.Before;
-import org.junit.FixMethodOrder;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.MethodSorters;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
@@ -48,19 +44,18 @@ import java.util.Collection;
  * Cycle through supported app rotations.
  * To run this test: {@code atest FlickerTest:ChangeAppRotationTest}
  */
-@LargeTest
 @RunWith(Parameterized.class)
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
+@LargeTest
 public class ChangeAppRotationTest extends FlickerTestBase {
-    private int mBeginRotation;
-    private int mEndRotation;
+    private int beginRotation;
+    private int endRotation;
 
     public ChangeAppRotationTest(String beginRotationName, String endRotationName,
             int beginRotation, int endRotation) {
-        this.mTestApp = new StandardAppHelper(InstrumentationRegistry.getInstrumentation(),
+        this.testApp = new StandardAppHelper(InstrumentationRegistry.getInstrumentation(),
                 "com.android.server.wm.flicker.testapp", "SimpleApp");
-        this.mBeginRotation = beginRotation;
-        this.mEndRotation = endRotation;
+        this.beginRotation = beginRotation;
+        this.endRotation = endRotation;
     }
 
     @Parameters(name = "{0}-{1}")
@@ -82,19 +77,15 @@ public class ChangeAppRotationTest extends FlickerTestBase {
     @Before
     public void runTransition() {
         super.runTransition(
-                changeAppRotation(mTestApp, mUiDevice, mBeginRotation, mEndRotation).build());
+                changeAppRotation(testApp, uiDevice, beginRotation, endRotation).build());
     }
 
-    @FlakyTest(bugId = 140855415)
-    @Ignore("Waiting bug feedback")
     @Test
     public void checkVisibility_navBarWindowIsAlwaysVisible() {
         checkResults(result -> assertThat(result)
                 .showsAboveAppWindow(NAVIGATION_BAR_WINDOW_TITLE).forAllEntries());
     }
 
-    @FlakyTest(bugId = 140855415)
-    @Ignore("Waiting bug feedback")
     @Test
     public void checkVisibility_statusBarWindowIsAlwaysVisible() {
         checkResults(result -> assertThat(result)
@@ -103,8 +94,8 @@ public class ChangeAppRotationTest extends FlickerTestBase {
 
     @Test
     public void checkPosition_navBarLayerRotatesAndScales() {
-        Rect startingPos = getNavigationBarPosition(mBeginRotation);
-        Rect endingPos = getNavigationBarPosition(mEndRotation);
+        Rect startingPos = getNavigationBarPosition(beginRotation);
+        Rect endingPos = getNavigationBarPosition(endRotation);
         checkResults(result -> {
                     LayersTraceSubject.assertThat(result)
                             .hasVisibleRegion(NAVIGATION_BAR_WINDOW_TITLE, startingPos)
@@ -117,22 +108,22 @@ public class ChangeAppRotationTest extends FlickerTestBase {
 
     @Test
     public void checkPosition_appLayerRotates() {
-        Rect startingPos = getAppPosition(mBeginRotation);
-        Rect endingPos = getAppPosition(mEndRotation);
+        Rect startingPos = getAppPosition(beginRotation);
+        Rect endingPos = getAppPosition(endRotation);
         Log.e(TAG, "startingPos=" + startingPos + " endingPos=" + endingPos);
         checkResults(result -> {
                     LayersTraceSubject.assertThat(result)
-                            .hasVisibleRegion(mTestApp.getPackage(), startingPos).inTheBeginning();
+                            .hasVisibleRegion(testApp.getPackage(), startingPos).inTheBeginning();
                     LayersTraceSubject.assertThat(result)
-                            .hasVisibleRegion(mTestApp.getPackage(), endingPos).atTheEnd();
+                            .hasVisibleRegion(testApp.getPackage(), endingPos).atTheEnd();
                 }
         );
     }
 
     @Test
     public void checkPosition_statusBarLayerScales() {
-        Rect startingPos = getStatusBarPosition(mBeginRotation);
-        Rect endingPos = getStatusBarPosition(mEndRotation);
+        Rect startingPos = getStatusBarPosition(beginRotation);
+        Rect endingPos = getStatusBarPosition(endRotation);
         checkResults(result -> {
                     LayersTraceSubject.assertThat(result)
                             .hasVisibleRegion(STATUS_BAR_WINDOW_TITLE, startingPos)
@@ -143,16 +134,12 @@ public class ChangeAppRotationTest extends FlickerTestBase {
         );
     }
 
-    @FlakyTest(bugId = 140855415)
-    @Ignore("Waiting bug feedback")
     @Test
     public void checkVisibility_navBarLayerIsAlwaysVisible() {
         checkResults(result -> LayersTraceSubject.assertThat(result)
                 .showsLayer(NAVIGATION_BAR_WINDOW_TITLE).forAllEntries());
     }
 
-    @FlakyTest(bugId = 140855415)
-    @Ignore("Waiting bug feedback")
     @Test
     public void checkVisibility_statusBarLayerIsAlwaysVisible() {
         checkResults(result -> LayersTraceSubject.assertThat(result)

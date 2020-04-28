@@ -88,6 +88,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AttributeSet;
 import android.util.Base64;
+import android.util.ByteStringUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.PackageUtils;
@@ -108,7 +109,6 @@ import com.android.server.SystemConfig;
 
 import libcore.io.IoUtils;
 import libcore.util.EmptyArray;
-import libcore.util.HexEncoding;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -620,6 +620,21 @@ public class PackageParser {
     }
 
     /**
+     * Generate and return the {@link PackageInfo} for a parsed package.
+     *
+     * @param p the parsed package.
+     * @param flags indicating which optional information is included.
+     */
+    @UnsupportedAppUsage
+    public static PackageInfo generatePackageInfo(PackageParser.Package p,
+            int gids[], int flags, long firstInstallTime, long lastUpdateTime,
+            Set<String> grantedPermissions, PackageUserState state) {
+
+        return generatePackageInfo(p, gids, flags, firstInstallTime, lastUpdateTime,
+                grantedPermissions, state, UserHandle.getCallingUserId());
+    }
+
+    /**
      * Returns true if the package is installed and not hidden, or if the caller
      * explicitly wanted all uninstalled and hidden packages as well.
      * @param appInfo The applicationInfo of the app being checked.
@@ -645,45 +660,8 @@ public class PackageParser {
         return checkUseInstalledOrHidden(0, state, null);
     }
 
-    /**
-     * Generate and return the {@link PackageInfo} for a parsed package.
-     *
-     * @param p the parsed package.
-     * @param flags indicating which optional information is included.
-     */
     @UnsupportedAppUsage
     public static PackageInfo generatePackageInfo(PackageParser.Package p,
-            int[] gids, int flags, long firstInstallTime, long lastUpdateTime,
-            Set<String> grantedPermissions, PackageUserState state) {
-
-        return generatePackageInfo(p, gids, flags, firstInstallTime, lastUpdateTime,
-                grantedPermissions, state, UserHandle.getCallingUserId());
-    }
-
-    @UnsupportedAppUsage
-    public static PackageInfo generatePackageInfo(PackageParser.Package p,
-            int[] gids, int flags, long firstInstallTime, long lastUpdateTime,
-            Set<String> grantedPermissions, PackageUserState state, int userId) {
-
-        return generatePackageInfo(p, null, gids, flags, firstInstallTime, lastUpdateTime,
-                grantedPermissions, state, userId);
-    }
-
-    /**
-     * PackageInfo generator specifically for apex files.
-     *
-     * @param pkg Package to generate info from. Should be derived from an apex.
-     * @param apexInfo Apex info relating to the package.
-     * @return PackageInfo
-     * @throws PackageParserException
-     */
-    public static PackageInfo generatePackageInfo(
-            PackageParser.Package pkg, ApexInfo apexInfo, int flags) {
-        return generatePackageInfo(pkg, apexInfo, EmptyArray.INT, flags, 0, 0,
-                Collections.emptySet(), new PackageUserState(), UserHandle.getCallingUserId());
-    }
-
-    private static PackageInfo generatePackageInfo(PackageParser.Package p, ApexInfo apexInfo,
             int gids[], int flags, long firstInstallTime, long lastUpdateTime,
             Set<String> grantedPermissions, PackageUserState state, int userId) {
         if (!checkUseInstalledOrHidden(flags, state, p.applicationInfo) || !p.isMatch(flags)) {
@@ -830,27 +808,8 @@ public class PackageParser {
                 }
             }
         }
-
-        if (apexInfo != null) {
-            File apexFile = new File(apexInfo.modulePath);
-
-            pi.applicationInfo.sourceDir = apexFile.getPath();
-            pi.applicationInfo.publicSourceDir = apexFile.getPath();
-            if (apexInfo.isFactory) {
-                pi.applicationInfo.flags |= ApplicationInfo.FLAG_SYSTEM;
-            } else {
-                pi.applicationInfo.flags &= ~ApplicationInfo.FLAG_SYSTEM;
-            }
-            if (apexInfo.isActive) {
-                pi.applicationInfo.flags |= ApplicationInfo.FLAG_INSTALLED;
-            } else {
-                pi.applicationInfo.flags &= ~ApplicationInfo.FLAG_INSTALLED;
-            }
-            pi.isApex = true;
-        }
-
         // deprecated method of getting signing certificates
-        if ((flags & PackageManager.GET_SIGNATURES) != 0) {
+        if ((flags&PackageManager.GET_SIGNATURES) != 0) {
             if (p.mSigningDetails.hasPastSigningCertificates()) {
                 // Package has included signing certificate rotation information.  Return the oldest
                 // cert so that programmatic checks keep working even if unaware of key rotation.
@@ -6261,8 +6220,7 @@ public class PackageParser {
             }
 
             // first see if the hash represents a single-signer in our signing history
-            byte[] sha256Bytes = sha256String == null
-                    ? null : HexEncoding.decode(sha256String, false /* allowSingleChar */);
+            byte[] sha256Bytes = ByteStringUtils.fromHexToByteArray(sha256String);
             if (hasSha256Certificate(sha256Bytes, flags)) {
                 return true;
             }
@@ -6956,8 +6914,8 @@ public class PackageParser {
         }
 
         /** @hide */
-        public boolean isSystemExt() {
-            return applicationInfo.isSystemExt();
+        public boolean isProductServices() {
+            return applicationInfo.isProductServices();
         }
 
         /** @hide */
@@ -8438,4 +8396,61 @@ public class PackageParser {
         }
     }
 
+    // TODO(b/129261524): Clean up API
+    /**
+     * PackageInfo parser specifically for apex files.
+     * NOTE: It will collect certificates
+     *
+     * @param apexInfo
+     * @return PackageInfo
+     * @throws PackageParserException
+     */
+    public static PackageInfo generatePackageInfoFromApex(ApexInfo apexInfo, int flags)
+            throws PackageParserException {
+        PackageParser pp = new PackageParser();
+        File apexFile = new File(apexInfo.packagePath);
+        final Package p = pp.parsePackage(apexFile, flags, false);
+        PackageUserState state = new PackageUserState();
+        PackageInfo pi = generatePackageInfo(p, EmptyArray.INT, flags, 0, 0,
+                Collections.emptySet(), state);
+        pi.applicationInfo.sourceDir = apexFile.getPath();
+        pi.applicationInfo.publicSourceDir = apexFile.getPath();
+        if (apexInfo.isFactory) {
+            pi.applicationInfo.flags |= ApplicationInfo.FLAG_SYSTEM;
+        } else {
+            pi.applicationInfo.flags &= ~ApplicationInfo.FLAG_SYSTEM;
+        }
+        if (apexInfo.isActive) {
+            pi.applicationInfo.flags |= ApplicationInfo.FLAG_INSTALLED;
+        } else {
+            pi.applicationInfo.flags &= ~ApplicationInfo.FLAG_INSTALLED;
+        }
+        pi.isApex = true;
+
+        // Collect certificates
+        if ((flags & PackageManager.GET_SIGNING_CERTIFICATES) != 0) {
+            collectCertificates(p, apexFile, false);
+            // Keep legacy mechanism for handling signatures. While this is deprecated, it's
+            // still part of the public API and needs to be maintained
+            if (p.mSigningDetails.hasPastSigningCertificates()) {
+                // Package has included signing certificate rotation information.  Return
+                // the oldest cert so that programmatic checks keep working even if unaware
+                // of key rotation.
+                pi.signatures = new Signature[1];
+                pi.signatures[0] = p.mSigningDetails.pastSigningCertificates[0];
+            } else if (p.mSigningDetails.hasSignatures()) {
+                // otherwise keep old behavior
+                int numberOfSigs = p.mSigningDetails.signatures.length;
+                pi.signatures = new Signature[numberOfSigs];
+                System.arraycopy(p.mSigningDetails.signatures, 0, pi.signatures, 0, numberOfSigs);
+            }
+            if (p.mSigningDetails != SigningDetails.UNKNOWN) {
+                // only return a valid SigningInfo if there is signing information to report
+                pi.signingInfo = new SigningInfo(p.mSigningDetails);
+            } else {
+                pi.signingInfo = null;
+            }
+        }
+        return pi;
+    }
 }

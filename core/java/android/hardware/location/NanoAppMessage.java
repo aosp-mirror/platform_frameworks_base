@@ -15,13 +15,10 @@
  */
 package android.hardware.location;
 
-import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
-
-import libcore.util.HexEncoding;
 
 import java.util.Arrays;
 
@@ -137,7 +134,7 @@ public final class NanoAppMessage implements Parcelable {
         out.writeByteArray(mMessageBody);
     }
 
-    public static final @NonNull Creator<NanoAppMessage> CREATOR =
+    public static final @android.annotation.NonNull Creator<NanoAppMessage> CREATOR =
             new Creator<NanoAppMessage>() {
                 @Override
                 public NanoAppMessage createFromParcel(Parcel in) {
@@ -150,7 +147,6 @@ public final class NanoAppMessage implements Parcelable {
                 }
             };
 
-    @NonNull
     @Override
     public String toString() {
         int length = mMessageBody.length;
@@ -162,7 +158,7 @@ public final class NanoAppMessage implements Parcelable {
             ret += "data = 0x";
         }
         for (int i = 0; i < Math.min(length, DEBUG_LOG_NUM_BYTES); i++) {
-            ret += HexEncoding.encodeToString(mMessageBody[i], true /* upperCase */);
+            ret += Byte.toHexString(mMessageBody[i], true /* upperCase */);
 
             if ((i + 1) % 4 == 0) {
                 ret += " ";

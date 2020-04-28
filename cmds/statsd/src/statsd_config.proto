@@ -343,6 +343,15 @@ message PerfettoDetails {
   optional bytes trace_config = 1;
 }
 
+message PerfprofdDetails {
+  // The |perfprofd_config| field is a proto-encoded message of type
+  // android.perfprofd.ProfilingConfig defined in
+  // //system/extras/perfprofd/. On device, statsd doesn't need to
+  // deserialize the message as it's just passed binary-encoded to
+  // the perfprofd service.
+  optional bytes perfprofd_config = 1;
+}
+
 message BroadcastSubscriberDetails {
   optional int64 subscriber_id = 1;
   repeated string cookie = 2;
@@ -364,12 +373,10 @@ message Subscription {
     IncidentdDetails incidentd_details = 4;
     PerfettoDetails perfetto_details = 5;
     BroadcastSubscriberDetails broadcast_subscriber_details = 6;
+    PerfprofdDetails perfprofd_details = 8;
   }
 
   optional float probability_of_informing = 7 [default = 1.1];
-
-  // This was used for perfprofd historically.
-  reserved 8;
 }
 
 enum ActivationType {

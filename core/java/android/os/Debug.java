@@ -278,13 +278,11 @@ public final class Debug
         /** @hide */
         public static final int OTHER_DALVIK_OTHER_ACCOUNTING = 22;
         /** @hide */
-        public static final int OTHER_DALVIK_OTHER_ZYGOTE_CODE_CACHE = 23;
+        public static final int OTHER_DALVIK_OTHER_CODE_CACHE = 23;
         /** @hide */
-        public static final int OTHER_DALVIK_OTHER_APP_CODE_CACHE = 24;
+        public static final int OTHER_DALVIK_OTHER_COMPILER_METADATA = 24;
         /** @hide */
-        public static final int OTHER_DALVIK_OTHER_COMPILER_METADATA = 25;
-        /** @hide */
-        public static final int OTHER_DALVIK_OTHER_INDIRECT_REFERENCE_TABLE = 26;
+        public static final int OTHER_DALVIK_OTHER_INDIRECT_REFERENCE_TABLE = 25;
         /** @hide */
         public static final int OTHER_DVK_STAT_DALVIK_OTHER_START =
                 OTHER_DALVIK_OTHER_LINEARALLOC - NUM_OTHER_STATS;
@@ -294,11 +292,11 @@ public final class Debug
 
         // Dex subsections (Boot vdex, App dex, and App vdex).
         /** @hide */
-        public static final int OTHER_DEX_BOOT_VDEX = 27;
+        public static final int OTHER_DEX_BOOT_VDEX = 26;
         /** @hide */
-        public static final int OTHER_DEX_APP_DEX = 28;
+        public static final int OTHER_DEX_APP_DEX = 27;
         /** @hide */
-        public static final int OTHER_DEX_APP_VDEX = 29;
+        public static final int OTHER_DEX_APP_VDEX = 28;
         /** @hide */
         public static final int OTHER_DVK_STAT_DEX_START = OTHER_DEX_BOOT_VDEX - NUM_OTHER_STATS;
         /** @hide */
@@ -306,9 +304,9 @@ public final class Debug
 
         // Art subsections (App image, boot image).
         /** @hide */
-        public static final int OTHER_ART_APP = 30;
+        public static final int OTHER_ART_APP = 29;
         /** @hide */
-        public static final int OTHER_ART_BOOT = 31;
+        public static final int OTHER_ART_BOOT = 30;
         /** @hide */
         public static final int OTHER_DVK_STAT_ART_START = OTHER_ART_APP - NUM_OTHER_STATS;
         /** @hide */
@@ -316,7 +314,7 @@ public final class Debug
 
         /** @hide */
         @UnsupportedAppUsage
-        public static final int NUM_DVK_STATS = OTHER_ART_BOOT + 1 - OTHER_DALVIK_NORMAL;
+        public static final int NUM_DVK_STATS = 14;
 
         /** @hide */
         public static final int NUM_CATEGORIES = 9;
@@ -542,8 +540,7 @@ public final class Debug
                 case OTHER_DALVIK_NON_MOVING: return ".NonMoving";
                 case OTHER_DALVIK_OTHER_LINEARALLOC: return ".LinearAlloc";
                 case OTHER_DALVIK_OTHER_ACCOUNTING: return ".GC";
-                case OTHER_DALVIK_OTHER_ZYGOTE_CODE_CACHE: return ".ZygoteJIT";
-                case OTHER_DALVIK_OTHER_APP_CODE_CACHE: return ".AppJIT";
+                case OTHER_DALVIK_OTHER_CODE_CACHE: return ".JITCache";
                 case OTHER_DALVIK_OTHER_COMPILER_METADATA: return ".CompilerMetadata";
                 case OTHER_DALVIK_OTHER_INDIRECT_REFERENCE_TABLE: return ".IndirectRef";
                 case OTHER_DEX_BOOT_VDEX: return ".Boot vdex";
@@ -725,9 +722,7 @@ public final class Debug
               + getOtherPrivate(OTHER_APK)
               + getOtherPrivate(OTHER_TTF)
               + getOtherPrivate(OTHER_DEX)
-                + getOtherPrivate(OTHER_OAT)
-                + getOtherPrivate(OTHER_DALVIK_OTHER_ZYGOTE_CODE_CACHE)
-                + getOtherPrivate(OTHER_DALVIK_OTHER_APP_CODE_CACHE);
+              + getOtherPrivate(OTHER_OAT);
         }
 
         /**
@@ -1690,8 +1685,6 @@ public final class Debug
      * such runtime statistic exists.
      *
      * <p>The following table lists the runtime statistics that the runtime supports.
-     * All statistics are approximate. Individual allocations may not be immediately reflected
-     * in the results.
      * Note runtime statistics may be added or removed in a future API level.</p>
      *
      * <table>

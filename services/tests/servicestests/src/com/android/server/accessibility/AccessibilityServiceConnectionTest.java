@@ -39,6 +39,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
 
+import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
 
 import org.junit.After;
@@ -67,6 +68,7 @@ public class AccessibilityServiceConnectionTest {
     @Mock AccessibilityServiceInfo mMockServiceInfo;
     @Mock ResolveInfo mMockResolveInfo;
     @Mock AccessibilityManagerService.SecurityPolicy mMockSecurityPolicy;
+    @Mock ActivityTaskManagerInternal mMockActivityTaskManagerInternal;
     @Mock AbstractAccessibilityServiceConnection.SystemSupport mMockSystemSupport;
     @Mock WindowManagerInternal mMockWindowManagerInternal;
     @Mock GlobalActionPerformer mMockGlobalActionPerformer;
@@ -89,7 +91,8 @@ public class AccessibilityServiceConnectionTest {
         mConnection = new AccessibilityServiceConnection(mMockUserState, mMockContext,
                 COMPONENT_NAME, mMockServiceInfo, SERVICE_ID, mHandler, new Object(),
                 mMockSecurityPolicy, mMockSystemSupport, mMockWindowManagerInternal,
-                mMockGlobalActionPerformer);
+                mMockGlobalActionPerformer, mMockActivityTaskManagerInternal);
+        when(mMockSecurityPolicy.canPerformGestures(mConnection)).thenReturn(true);
     }
 
     @After

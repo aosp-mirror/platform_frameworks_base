@@ -16,7 +16,6 @@
 
 package android.hardware.location;
 
-import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.os.Parcel;
@@ -80,7 +79,6 @@ public class MemoryRegion implements Parcelable{
         return mIsExecutable;
     }
 
-    @NonNull
     @Override
     public String toString() {
         String mask = "";

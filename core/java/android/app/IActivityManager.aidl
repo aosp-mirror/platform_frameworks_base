@@ -122,7 +122,6 @@ interface IActivityManager {
             in String resultData, in Bundle map, in String[] requiredPermissions,
             int appOp, in Bundle options, boolean serialized, boolean sticky, int userId);
     void unbroadcastIntent(in IApplicationThread caller, in Intent intent, int userId);
-    @UnsupportedAppUsage
     oneway void finishReceiver(in IBinder who, int resultCode, in String resultData, in Bundle map,
             boolean abortBroadcast, int flags);
     void attachApplication(in IApplicationThread app, long startSeq);
@@ -212,7 +211,6 @@ interface IActivityManager {
 
     @UnsupportedAppUsage
     ParceledListSlice getRecentTasks(int maxNum, int flags, int userId);
-    @UnsupportedAppUsage
     oneway void serviceDoneExecuting(in IBinder token, int type, int startId, int res);
     @UnsupportedAppUsage
     IIntentSender getIntentSender(int type, in String packageName, in IBinder token,
@@ -289,7 +287,8 @@ interface IActivityManager {
     void handleApplicationStrictModeViolation(in IBinder app, int penaltyMask,
             in StrictMode.ViolationInfo crashInfo);
     boolean isTopActivityImmersive();
-    void crashApplication(int uid, int initialPid, in String packageName, int userId, in String message);
+    void crashApplication(int uid, int initialPid, in String packageName, int userId,
+            in String message, boolean force);
     @UnsupportedAppUsage
     String getProviderMimeType(in Uri uri, int userId);
     // Cause the specified process to dump the specified heap.

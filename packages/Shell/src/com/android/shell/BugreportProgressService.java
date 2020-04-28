@@ -176,9 +176,9 @@ public class BugreportProgressService extends Service {
     // Passed to Message.obtain() when msg.arg2 is not used.
     private static final int UNUSED_ARG2 = -2;
 
-    // Maximum progress displayed in %.
-    private static final int CAPPED_PROGRESS = 99;
-    private static final int CAPPED_MAX = 100;
+    // Maximum progress displayed (like 99.00%).
+    private static final int CAPPED_PROGRESS = 9900;
+    private static final int CAPPED_MAX = 10000;
 
     /** Show the progress log every this percent. */
     private static final int LOG_PROGRESS_STEP = 10;
@@ -1079,7 +1079,9 @@ public class BugreportProgressService extends Service {
         }
         return new Notification.Builder(context, NOTIFICATION_CHANNEL_ID)
                 .addExtras(sNotificationBundle)
-                .setSmallIcon(R.drawable.ic_bug_report_black_24dp)
+                .setSmallIcon(
+                        isTv(context) ? R.drawable.ic_bug_report_black_24dp
+                                : com.android.internal.R.drawable.stat_sys_adb)
                 .setLocalOnly(true)
                 .setColor(context.getColor(
                         com.android.internal.R.color.system_notification_accent_color))
@@ -1410,7 +1412,7 @@ public class BugreportProgressService extends Service {
         return false;
     }
 
-    static boolean isTv(Context context) {
+    private static boolean isTv(Context context) {
         return context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_LEANBACK);
     }
 
@@ -1955,10 +1957,7 @@ public class BugreportProgressService extends Service {
 
         @Override
         public void onProgress(int progress) throws RemoteException {
-            if (progress > CAPPED_PROGRESS) {
-                progress = CAPPED_PROGRESS;
-            }
-            updateProgressInfo(progress, CAPPED_MAX);
+            updateProgressInfo(progress, 100 /* progress is already a percentage; so max = 100 */);
         }
 
         @Override
@@ -1969,6 +1968,46 @@ public class BugreportProgressService extends Service {
         @Override
         public void onFinished() throws RemoteException {
             // TODO(b/111441001): implement
+        }
+
+        @Override
+        public void onProgressUpdated(int progress) throws RemoteException {
+            /*
+             * Checks whether the progress changed in a way that should be displayed to the user:
+             * - info.progress / info.max represents the displayed progress
+             * - info.realProgress / info.realMax represents the real progress
+             * - since the real progress can decrease, the displayed progress is only updated if it
+             *   increases
+             * - the displayed progress is capped at a maximum (like 99%)
+             */
+            info.realProgress = progress;
+            final int oldPercentage = (CAPPED_MAX * info.progress) / info.max;
+            int newPercentage = (CAPPED_MAX * info.realProgress) / info.realMax;
+            int max = info.realMax;
+
+            if (newPercentage > CAPPED_PROGRESS) {
+                progress = newPercentage = CAPPED_PROGRESS;
+                max = CAPPED_MAX;
+            }
+
+            if (newPercentage > oldPercentage) {
+                updateProgressInfo(progress, max);
+            }
+        }
+
+        @Override
+        public void onMaxProgressUpdated(int maxProgress) throws RemoteException {
+            Log.d(TAG, "onMaxProgressUpdated: " + maxProgress);
+            info.realMax = maxProgress;
+        }
+
+        @Override
+        public void onSectionComplete(String title, int status, int size, int durationMs)
+                throws RemoteException {
+            if (DEBUG) {
+                Log.v(TAG, "Title: " + title + " Status: " + status + " Size: " + size
+                        + " Duration: " + durationMs + "ms");
+            }
         }
 
         public void dump(String prefix, PrintWriter pw) {

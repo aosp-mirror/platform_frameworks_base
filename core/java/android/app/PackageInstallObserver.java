@@ -23,11 +23,6 @@ import android.os.Bundle;
 
 /** {@hide} */
 public class PackageInstallObserver {
-
-    @UnsupportedAppUsage
-    public PackageInstallObserver() {
-    }
-
     private final IPackageInstallObserver2.Stub mBinder = new IPackageInstallObserver2.Stub() {
         @Override
         public void onUserActionRequired(Intent intent) {

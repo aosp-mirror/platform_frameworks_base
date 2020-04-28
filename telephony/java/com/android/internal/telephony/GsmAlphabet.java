@@ -40,6 +40,8 @@ import java.util.List;
 public class GsmAlphabet {
     private static final String TAG = "GSM";
 
+    private GsmAlphabet() { }
+
     /**
      * This escapes extended characters, and when present indicates that the
      * following character should be looked up in the "extended" table.
@@ -79,11 +81,6 @@ public class GsmAlphabet {
      * data.
      */
     public static class TextEncodingDetails {
-
-        @UnsupportedAppUsage
-        public TextEncodingDetails() {
-        }
-
         /**
          *The number of SMS's required to encode the text.
          */
@@ -1516,7 +1513,7 @@ public class GsmAlphabet {
             }
         }
 
-        sCharsToShiftTables = new SparseIntArray[numShiftTables];
+        sCharsToShiftTables = new SparseIntArray[numTables];
         for (int i = 0; i < numShiftTables; i++) {
             String shiftTable = sLanguageShiftTables[i];
 

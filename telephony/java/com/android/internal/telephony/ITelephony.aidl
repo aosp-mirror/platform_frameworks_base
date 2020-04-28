@@ -319,7 +319,6 @@ interface ITelephony {
     /**
      * Replaced by getDataActivityForSubId.
      */
-    @UnsupportedAppUsage(maxTargetSdk = 28)
     int getDataActivity();
 
     /**
@@ -337,7 +336,6 @@ interface ITelephony {
     /**
      * Replaced by getDataStateForSubId.
      */
-    @UnsupportedAppUsage(maxTargetSdk = 28)
     int getDataState();
 
     /**
@@ -866,11 +864,6 @@ interface ITelephony {
     String getImsService(int slotId, boolean isCarrierImsService);
 
     /**
-     * Get the MmTelFeature state attached to this subscription id.
-     */
-    void getImsMmTelFeatureState(int subId, IIntegerConsumer callback);
-
-    /**
      * Set the network selection mode to automatic.
      *
      * @param subId the id of the subscription to update.
@@ -1311,12 +1304,6 @@ interface ITelephony {
     int getSubIdForPhoneAccount(in PhoneAccount phoneAccount);
 
     /**
-     * Returns the subscription ID associated with the specified PhoneAccountHandle.
-     */
-    int getSubIdForPhoneAccountHandle(in PhoneAccountHandle phoneAccountHandle,
-            String callingPackage);
-
-    /**
      * Returns the PhoneAccountHandle associated with a subscription ID.
      */
     PhoneAccountHandle getPhoneAccountHandleForSubscriptionId(int subscriptionId);
@@ -1621,18 +1608,6 @@ interface ITelephony {
     String[] getForbiddenPlmns(int subId, int appType, String callingPackage);
 
     /**
-     * Set the forbidden PLMN list from the givven app type (ex APPTYPE_USIM) on a particular
-     * subscription.
-     *
-     * @param subId subId the id of the subscription
-     * @param appType appType the uicc app type, must be USIM or SIM.
-     * @param fplmns plmns the Forbiden plmns list that needed to be written to the SIM.
-     * @param content callingPackage the op Package name.
-     * @return number of fplmns that is successfully written to the SIM
-     */
-    int setForbiddenPlmns(int subId, int appType, in List<String> fplmns, String callingPackage);
-
-    /**
      * Check if phone is in emergency callback mode
      * @return true if phone is in emergency callback mode
      * @param subId the subscription ID that this action applies to.
@@ -1787,6 +1762,21 @@ interface ITelephony {
      boolean isInEmergencySmsMode();
 
     /**
+     * Get a list of SMS apps on a user.
+     */
+    String[] getSmsApps(int userId);
+
+    /**
+     * Get the default SMS app on a given user.
+     */
+    String getDefaultSmsApp(int userId);
+
+    /**
+     * Set the default SMS app to a given package on a given user.
+     */
+    void setDefaultSmsApp(int userId, String packageName);
+
+    /**
      * Return the modem radio power state for slot index.
      *
      */
@@ -1802,16 +1792,6 @@ interface ITelephony {
       * Removes an existing IMS registration status callback for the subscription specified.
       */
     void unregisterImsRegistrationCallback(int subId, IImsRegistrationCallback c);
-
-    /**
-     * Get the IMS service registration state for the MmTelFeature associated with this sub id.
-     */
-    void getImsMmTelRegistrationState(int subId, IIntegerConsumer consumer);
-
-    /**
-     * Get the transport type for the IMS service registration state.
-     */
-    void getImsMmTelRegistrationTransportType(int subId, IIntegerConsumer consumer);
 
     /**
      * Adds an IMS MmTel capabilities callback for the subscription specified.
@@ -1832,12 +1812,6 @@ interface ITelephony {
      * return true if the IMS MmTel capability for the given registration tech is available.
      */
     boolean isAvailable(int subId, int capability, int regTech);
-
-    /**
-     * Return whether or not the MmTel capability is supported for the requested transport type.
-     */
-    void isMmTelCapabilitySupported(int subId, IIntegerConsumer callback, int capability,
-            int transportType);
 
     /**
      * Returns true if the user's setting for 4G LTE is enabled, for the subscription specified.
@@ -2034,13 +2008,6 @@ interface ITelephony {
      */
     int getRadioHalVersion();
 
-    /**
-     * Returns true if the specified type of application (e.g. {@link #APPTYPE_CSIM} is present
-     * on the UICC card.
-     * @hide
-     */
-    boolean isApplicationOnUicc(int subId, int appType);
-
     boolean isModemEnabledForSlot(int slotIndex, String callingPackage);
 
     boolean isDataEnabledForApn(int apnType, int subId, String callingPackage);
@@ -2073,9 +2040,4 @@ interface ITelephony {
      * data might be disabled on non-default data subscription but explicitly turned on by settings.
      */
     boolean isDataAllowedInVoiceCall(int subId);
-
-    /**
-     * Command line command to enable or disable handling of CEP data for test purposes.
-     */
-    oneway void setCepEnabled(boolean isCepEnabled);
 }

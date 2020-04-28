@@ -1557,11 +1557,10 @@ class StorageManagerService extends IStorageManager.Stub
     }
 
     private void start() {
-        connectStoraged();
-        connectVold();
+        connect();
     }
 
-    private void connectStoraged() {
+    private void connect() {
         IBinder binder = ServiceManager.getService("storaged");
         if (binder != null) {
             try {
@@ -1570,7 +1569,7 @@ class StorageManagerService extends IStorageManager.Stub
                     public void binderDied() {
                         Slog.w(TAG, "storaged died; reconnecting");
                         mStoraged = null;
-                        connectStoraged();
+                        connect();
                     }
                 }, 0);
             } catch (RemoteException e) {
@@ -1584,17 +1583,7 @@ class StorageManagerService extends IStorageManager.Stub
             Slog.w(TAG, "storaged not found; trying again");
         }
 
-        if (mStoraged == null) {
-            BackgroundThread.getHandler().postDelayed(() -> {
-                connectStoraged();
-            }, DateUtils.SECOND_IN_MILLIS);
-        } else {
-            onDaemonConnected();
-        }
-    }
-
-    private void connectVold() {
-        IBinder binder = ServiceManager.getService("vold");
+        binder = ServiceManager.getService("vold");
         if (binder != null) {
             try {
                 binder.linkToDeath(new DeathRecipient() {
@@ -1602,7 +1591,7 @@ class StorageManagerService extends IStorageManager.Stub
                     public void binderDied() {
                         Slog.w(TAG, "vold died; reconnecting");
                         mVold = null;
-                        connectVold();
+                        connect();
                     }
                 }, 0);
             } catch (RemoteException e) {
@@ -1622,9 +1611,9 @@ class StorageManagerService extends IStorageManager.Stub
             Slog.w(TAG, "vold not found; trying again");
         }
 
-        if (mVold == null) {
+        if (mStoraged == null || mVold == null) {
             BackgroundThread.getHandler().postDelayed(() -> {
-                connectVold();
+                connect();
             }, DateUtils.SECOND_IN_MILLIS);
         } else {
             onDaemonConnected();

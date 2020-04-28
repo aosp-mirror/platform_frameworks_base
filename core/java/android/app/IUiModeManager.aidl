@@ -30,7 +30,6 @@ interface IUiModeManager {
     /**
      * Disables the car mode.
      */
-    @UnsupportedAppUsage(maxTargetSdk = 28)
     void disableCarMode(int flags);
 
     /**
@@ -62,4 +61,9 @@ interface IUiModeManager {
      * Tells if Night mode is locked or not.
      */
     boolean isNightModeLocked();
+
+    /**
+    * @hide
+    */
+    boolean setNightModeActivated(boolean active);
 }

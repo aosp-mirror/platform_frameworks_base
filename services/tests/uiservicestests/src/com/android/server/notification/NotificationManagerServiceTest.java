@@ -1017,6 +1017,20 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testCancelImmediatelyAfterEnqueueNotifiesListeners_ForegroundServiceFlag()
+            throws Exception {
+        final StatusBarNotification sbn = generateNotificationRecord(null).sbn;
+        sbn.getNotification().flags =
+                Notification.FLAG_ONGOING_EVENT | FLAG_FOREGROUND_SERVICE;
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, "tag",
+                sbn.getId(), sbn.getNotification(), sbn.getUserId());
+        mBinderService.cancelNotificationWithTag(PKG, "tag", sbn.getId(), sbn.getUserId());
+        waitForIdle();
+        verify(mListeners, times(1)).notifyPostedLocked(any(), any());
+        verify(mListeners, times(1)).notifyRemovedLocked(any(), anyInt(), any());
+    }
+
+    @Test
     public void testUserInitiatedClearAll_noLeak() throws Exception {
         final NotificationRecord n = generateNotificationRecord(
                 mTestNotificationChannel, 1, "group", true);
@@ -3664,9 +3678,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mService.simulatePackageDistractionBroadcast(
                 PackageManager.RESTRICTION_HIDE_NOTIFICATIONS, new String[] {"a", "b"});
         ArgumentCaptor<List<NotificationRecord>> captorHide = ArgumentCaptor.forClass(List.class);
-
-        // should be called only once.
-        verify(mListeners, times(1)).notifyHiddenLocked(captorHide.capture());
+        verify(mListeners, times(2)).notifyHiddenLocked(captorHide.capture());
         assertEquals(2, captorHide.getValue().size());
         assertEquals("a", captorHide.getValue().get(0).sbn.getPackageName());
         assertEquals("b", captorHide.getValue().get(1).sbn.getPackageName());
@@ -3675,9 +3687,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mService.simulatePackageDistractionBroadcast(
                 PackageManager.RESTRICTION_HIDE_FROM_SUGGESTIONS, new String[] {"a", "b"});
         ArgumentCaptor<List<NotificationRecord>> captorUnhide = ArgumentCaptor.forClass(List.class);
-
-        // should be called only once.
-        verify(mListeners, times(1)).notifyUnhiddenLocked(captorUnhide.capture());
+        verify(mListeners, times(2)).notifyUnhiddenLocked(captorUnhide.capture());
         assertEquals(2, captorUnhide.getValue().size());
         assertEquals("a", captorUnhide.getValue().get(0).sbn.getPackageName());
         assertEquals("b", captorUnhide.getValue().get(1).sbn.getPackageName());

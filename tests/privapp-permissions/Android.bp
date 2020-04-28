@@ -45,17 +45,17 @@ prebuilt_etc {
 }
 
 android_app {
-    name: "SystemExtPrivAppPermissionTest",
+    name: "ProductServicesPrivAppPermissionTest",
     sdk_version: "current",
     privileged: true,
-    manifest: "system_ext/AndroidManifest.xml",
-    system_ext_specific: true,
-    required: ["system_extprivapp-permissions-test.xml"],
+    manifest: "product_services/AndroidManifest.xml",
+    product_services_specific: true,
+    required: ["product_servicesprivapp-permissions-test.xml"],
 }
 
 prebuilt_etc {
-    name: "system_extprivapp-permissions-test.xml",
-    src: "system_ext/privapp-permissions-test.xml",
+    name: "product_servicesprivapp-permissions-test.xml",
+    src: "product_services/privapp-permissions-test.xml",
     sub_dir: "permissions",
-    system_ext_specific: true,
+    product_services_specific: true,
 }

@@ -16,9 +16,11 @@
 
 package android.net.metrics
 
+import android.os.Parcelable
 import androidx.test.filters.SmallTest
 import androidx.test.runner.AndroidJUnit4
-import com.android.testutils.assertParcelSane
+import com.android.internal.util.ParcelableTestUtil
+import com.android.internal.util.TestUtils
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -26,13 +28,18 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 @SmallTest
 class IpReachabilityEventTest {
+    private fun <T: Parcelable> testParcel(obj: T, fieldCount: Int) {
+        ParcelableTestUtil.assertFieldCountEquals(fieldCount, obj::class.java)
+        TestUtils.assertParcelingIsLossless(obj)
+    }
+
     @Test
     fun testConstructorAndParcel() {
         (IpReachabilityEvent.PROBE..IpReachabilityEvent.PROVISIONING_LOST_ORGANIC).forEach {
             val ipReachabilityEvent = IpReachabilityEvent(it)
             assertEquals(it, ipReachabilityEvent.eventType)
 
-            assertParcelSane(ipReachabilityEvent, 1)
+            testParcel(ipReachabilityEvent, 1)
         }
     }
 }

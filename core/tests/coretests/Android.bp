@@ -58,8 +58,6 @@ android_test {
 
     resource_dirs: ["res"],
     resource_zips: [":FrameworksCoreTests_apks_as_resources"],
-
-    data: [":BstatsTestApp"],
 }
 
 // Rules to copy all the test apks to the intermediate raw resource directory

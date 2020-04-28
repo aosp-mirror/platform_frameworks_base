@@ -190,7 +190,6 @@ import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -714,9 +713,6 @@ public final class ActivityThread extends ClientTransactionHandler {
 
     static final class CreateServiceData {
         @UnsupportedAppUsage
-        CreateServiceData() {
-        }
-        @UnsupportedAppUsage
         IBinder token;
         @UnsupportedAppUsage
         ServiceInfo info;
@@ -758,9 +754,6 @@ public final class ActivityThread extends ClientTransactionHandler {
 
     static final class AppBindData {
         @UnsupportedAppUsage
-        AppBindData() {
-        }
-        @UnsupportedAppUsage
         LoadedApk info;
         @UnsupportedAppUsage
         String processName;
@@ -796,8 +789,6 @@ public final class ActivityThread extends ClientTransactionHandler {
          */
         @Nullable
         ContentCaptureOptions contentCaptureOptions;
-
-        long[] disabledCompatChanges;
 
         @Override
         public String toString() {
@@ -1011,7 +1002,7 @@ public final class ActivityThread extends ClientTransactionHandler {
                 boolean isRestrictedBackupMode, boolean persistent, Configuration config,
                 CompatibilityInfo compatInfo, Map services, Bundle coreSettings,
                 String buildSerial, AutofillOptions autofillOptions,
-                ContentCaptureOptions contentCaptureOptions, long[] disabledCompatChanges) {
+                ContentCaptureOptions contentCaptureOptions) {
             if (services != null) {
                 if (false) {
                     // Test code to make sure the app could see the passed-in services.
@@ -1059,7 +1050,6 @@ public final class ActivityThread extends ClientTransactionHandler {
             data.buildSerial = buildSerial;
             data.autofillOptions = autofillOptions;
             data.contentCaptureOptions = contentCaptureOptions;
-            data.disabledCompatChanges = disabledCompatChanges;
             sendMessage(H.BIND_APPLICATION, data);
         }
 
@@ -1162,10 +1152,6 @@ public final class ActivityThread extends ClientTransactionHandler {
 
         public void attachAgent(String agent) {
             sendMessage(H.ATTACH_AGENT, agent);
-        }
-
-        public void attachStartupAgents(String dataDir) {
-            sendMessage(H.ATTACH_STARTUP_AGENTS, dataDir);
         }
 
         public void setSchedulingGroup(int group) {
@@ -1817,7 +1803,6 @@ public final class ActivityThread extends ClientTransactionHandler {
         public static final int EXECUTE_TRANSACTION = 159;
         public static final int RELAUNCH_ACTIVITY = 160;
         public static final int PURGE_RESOURCES = 161;
-        public static final int ATTACH_STARTUP_AGENTS = 162;
 
         String codeToString(int code) {
             if (DEBUG_MESSAGES) {
@@ -1861,7 +1846,6 @@ public final class ActivityThread extends ClientTransactionHandler {
                     case EXECUTE_TRANSACTION: return "EXECUTE_TRANSACTION";
                     case RELAUNCH_ACTIVITY: return "RELAUNCH_ACTIVITY";
                     case PURGE_RESOURCES: return "PURGE_RESOURCES";
-                    case ATTACH_STARTUP_AGENTS: return "ATTACH_STARTUP_AGENTS";
                 }
             }
             return Integer.toString(code);
@@ -2043,9 +2027,6 @@ public final class ActivityThread extends ClientTransactionHandler {
                     break;
                 case PURGE_RESOURCES:
                     schedulePurgeIdler();
-                    break;
-                case ATTACH_STARTUP_AGENTS:
-                    handleAttachStartupAgents((String) msg.obj);
                     break;
             }
             Object obj = msg.obj;
@@ -3742,27 +3723,6 @@ public final class ActivityThread extends ClientTransactionHandler {
         }
         if (classLoader != null) {
             attemptAttachAgent(agent, null);
-        }
-    }
-
-    static void handleAttachStartupAgents(String dataDir) {
-        try {
-            Path code_cache = ContextImpl.getCodeCacheDirBeforeBind(new File(dataDir)).toPath();
-            if (!Files.exists(code_cache)) {
-                return;
-            }
-            Path startup_path = code_cache.resolve("startup_agents");
-            if (Files.exists(startup_path)) {
-                for (Path p : Files.newDirectoryStream(startup_path)) {
-                    handleAttachAgent(
-                            p.toAbsolutePath().toString()
-                            + "="
-                            + dataDir,
-                            null);
-                }
-            }
-        } catch (Exception e) {
-            // Ignored.
         }
     }
 
@@ -6170,10 +6130,10 @@ public final class ActivityThread extends ClientTransactionHandler {
         if (data.trackAllocation) {
             DdmVmInternal.enableRecentAllocations(true);
         }
+
         // Note when this process has started.
         Process.setStartTimes(SystemClock.elapsedRealtime(), SystemClock.uptimeMillis());
 
-        AppCompatCallbacks.install(data.disabledCompatChanges);
         mBoundApplication = data;
         mConfiguration = new Configuration(data.config);
         mCompatConfiguration = new Configuration(data.config);

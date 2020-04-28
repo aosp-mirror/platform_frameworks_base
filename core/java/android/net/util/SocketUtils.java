@@ -69,35 +69,15 @@ public final class SocketUtils {
      */
     @NonNull
     public static SocketAddress makePacketSocketAddress(int protocol, int ifIndex) {
-        return new PacketSocketAddress(
-                protocol /* sll_protocol */,
-                ifIndex /* sll_ifindex */,
-                null /* sll_addr */);
+        return new PacketSocketAddress((short) protocol, ifIndex);
     }
 
     /**
      * Make a socket address that packet socket can send packets to.
-     * @deprecated Use {@link #makePacketSocketAddress(int, int, byte[])} instead.
      */
-    @Deprecated
     @NonNull
     public static SocketAddress makePacketSocketAddress(int ifIndex, @NonNull byte[] hwAddr) {
-        return new PacketSocketAddress(
-                0 /* sll_protocol */,
-                ifIndex /* sll_ifindex */,
-                hwAddr /* sll_addr */);
-    }
-
-    /**
-     * Make a socket address that packet socket can send packets to.
-     */
-    @NonNull
-    public static SocketAddress makePacketSocketAddress(int protocol, int ifIndex,
-            @NonNull byte[] hwAddr) {
-        return new PacketSocketAddress(
-                protocol /* sll_protocol */,
-                ifIndex /* sll_ifindex */,
-                hwAddr /* sll_addr */);
+        return new PacketSocketAddress(ifIndex, hwAddr);
     }
 
     /**

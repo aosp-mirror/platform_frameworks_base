@@ -43,16 +43,14 @@ interface ITelephonyRegistry {
     void listenForSubscriber(in int subId, String pkg, IPhoneStateListener callback, int events,
             boolean notifyNow);
     @UnsupportedAppUsage
-    void notifyCallStateForAllSubs(int state, String incomingNumber);
-    void notifyCallState(in int phoneId, in int subId, int state, String incomingNumber);
+    void notifyCallState(int state, String incomingNumber);
+    void notifyCallStateForPhoneId(in int phoneId, in int subId, int state, String incomingNumber);
     void notifyServiceStateForPhoneId(in int phoneId, in int subId, in ServiceState state);
     void notifySignalStrengthForPhoneId(in int phoneId, in int subId,
             in SignalStrength signalStrength);
     void notifyMessageWaitingChangedForPhoneId(in int phoneId, in int subId, in boolean mwi);
-    @UnsupportedAppUsage(maxTargetSdk = 28)
     void notifyCallForwardingChanged(boolean cfi);
     void notifyCallForwardingChangedForSubscriber(in int subId, boolean cfi);
-    @UnsupportedAppUsage(maxTargetSdk = 28)
     void notifyDataActivity(int state);
     void notifyDataActivityForSubscriber(in int subId, int state);
     void notifyDataConnection(int state, boolean isDataConnectivityPossible,
@@ -65,10 +63,8 @@ interface ITelephonyRegistry {
     @UnsupportedAppUsage
     void notifyDataConnectionFailed(String apnType);
     void notifyDataConnectionFailedForSubscriber(int phoneId, int subId, String apnType);
-    @UnsupportedAppUsage(maxTargetSdk = 28)
     void notifyCellLocation(in Bundle cellLocation);
     void notifyCellLocationForSubscriber(in int subId, in Bundle cellLocation);
-    @UnsupportedAppUsage(maxTargetSdk = 28)
     void notifyOtaspChanged(in int subId, in int otaspMode);
     @UnsupportedAppUsage
     void notifyCellInfo(in List<CellInfo> cellInfo);
@@ -93,10 +89,6 @@ interface ITelephonyRegistry {
     void notifyActiveDataSubIdChanged(int activeDataSubId);
     void notifyRadioPowerStateChanged(in int phoneId, in int subId, in int state);
     void notifyEmergencyNumberList(in int phoneId, in int subId);
-    void notifyOutgoingEmergencyCall(in int phoneId, in int subId,
-            in EmergencyNumber emergencyNumber);
-    void notifyOutgoingEmergencySms(in int phoneId, in int subId,
-            in EmergencyNumber emergencyNumber);
     void notifyCallQualityChanged(in CallQuality callQuality, int phoneId, int subId,
             int callNetworkType);
     void notifyImsDisconnectCause(int subId, in ImsReasonInfo imsReasonInfo);

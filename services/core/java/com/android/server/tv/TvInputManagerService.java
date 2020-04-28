@@ -67,7 +67,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
-import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.text.TextUtils;
@@ -128,6 +127,8 @@ public final class TvInputManagerService extends SystemService {
     private final SparseArray<UserState> mUserStates = new SparseArray<>();
 
     private final WatchLogHandler mWatchLogHandler;
+
+    private IBinder.DeathRecipient mDeathRecipient;
 
     public TvInputManagerService(Context context) {
         super(context);
@@ -483,7 +484,7 @@ public final class TvInputManagerService extends SystemService {
             userState.packageSet.clear();
             userState.contentRatingSystemList.clear();
             userState.clientStateMap.clear();
-            userState.mCallbacks.kill();
+            userState.callbackSet.clear();
             userState.mainSessionToken = null;
 
             mUserStates.remove(userId);
@@ -750,45 +751,39 @@ public final class TvInputManagerService extends SystemService {
         if (DEBUG) {
             Slog.d(TAG, "notifyInputAddedLocked(inputId=" + inputId + ")");
         }
-        int n = userState.mCallbacks.beginBroadcast();
-        for (int i = 0; i < n; ++i) {
+        for (ITvInputManagerCallback callback : userState.callbackSet) {
             try {
-                userState.mCallbacks.getBroadcastItem(i).onInputAdded(inputId);
+                callback.onInputAdded(inputId);
             } catch (RemoteException e) {
                 Slog.e(TAG, "failed to report added input to callback", e);
             }
         }
-        userState.mCallbacks.finishBroadcast();
     }
 
     private void notifyInputRemovedLocked(UserState userState, String inputId) {
         if (DEBUG) {
             Slog.d(TAG, "notifyInputRemovedLocked(inputId=" + inputId + ")");
         }
-        int n = userState.mCallbacks.beginBroadcast();
-        for (int i = 0; i < n; ++i) {
+        for (ITvInputManagerCallback callback : userState.callbackSet) {
             try {
-                userState.mCallbacks.getBroadcastItem(i).onInputRemoved(inputId);
+                callback.onInputRemoved(inputId);
             } catch (RemoteException e) {
                 Slog.e(TAG, "failed to report removed input to callback", e);
             }
         }
-        userState.mCallbacks.finishBroadcast();
     }
 
     private void notifyInputUpdatedLocked(UserState userState, String inputId) {
         if (DEBUG) {
             Slog.d(TAG, "notifyInputUpdatedLocked(inputId=" + inputId + ")");
         }
-        int n = userState.mCallbacks.beginBroadcast();
-        for (int i = 0; i < n; ++i) {
+        for (ITvInputManagerCallback callback : userState.callbackSet) {
             try {
-                userState.mCallbacks.getBroadcastItem(i).onInputUpdated(inputId);
+                callback.onInputUpdated(inputId);
             } catch (RemoteException e) {
                 Slog.e(TAG, "failed to report updated input to callback", e);
             }
         }
-        userState.mCallbacks.finishBroadcast();
     }
 
     private void notifyInputStateChangedLocked(UserState userState, String inputId,
@@ -798,15 +793,13 @@ public final class TvInputManagerService extends SystemService {
                     + ", state=" + state + ")");
         }
         if (targetCallback == null) {
-            int n = userState.mCallbacks.beginBroadcast();
-            for (int i = 0; i < n; ++i) {
+            for (ITvInputManagerCallback callback : userState.callbackSet) {
                 try {
-                    userState.mCallbacks.getBroadcastItem(i).onInputStateChanged(inputId, state);
+                    callback.onInputStateChanged(inputId, state);
                 } catch (RemoteException e) {
                     Slog.e(TAG, "failed to report state change to callback", e);
                 }
             }
-            userState.mCallbacks.finishBroadcast();
         } else {
             try {
                 targetCallback.onInputStateChanged(inputId, state);
@@ -828,24 +821,18 @@ public final class TvInputManagerService extends SystemService {
         }
         inputState.info = inputInfo;
 
-        int n = userState.mCallbacks.beginBroadcast();
-        for (int i = 0; i < n; ++i) {
+        for (ITvInputManagerCallback callback : userState.callbackSet) {
             try {
-                userState.mCallbacks.getBroadcastItem(i).onTvInputInfoUpdated(inputInfo);
+                callback.onTvInputInfoUpdated(inputInfo);
             } catch (RemoteException e) {
                 Slog.e(TAG, "failed to report updated input info to callback", e);
             }
         }
-        userState.mCallbacks.finishBroadcast();
     }
 
     private void setStateLocked(String inputId, int state, int userId) {
         UserState userState = getOrCreateUserStateLocked(userId);
         TvInputState inputState = userState.inputMap.get(inputId);
-        if (inputState == null) {
-            Slog.e(TAG, "failed to setStateLocked - unknown input id " + inputId);
-            return;
-        }
         ServiceState serviceState = userState.serviceStateMap.get(inputState.info.getComponent());
         int oldState = inputState.state;
         inputState.state = state;
@@ -1018,8 +1005,22 @@ public final class TvInputManagerService extends SystemService {
             try {
                 synchronized (mLock) {
                     final UserState userState = getOrCreateUserStateLocked(resolvedUserId);
-                    if (!userState.mCallbacks.register(callback)) {
-                        Slog.e(TAG, "client process has already died");
+                    userState.callbackSet.add(callback);
+                    mDeathRecipient = new IBinder.DeathRecipient() {
+                        @Override
+                        public void binderDied() {
+                            synchronized (mLock) {
+                                if (userState.callbackSet != null) {
+                                    userState.callbackSet.remove(callback);
+                                }
+                            }
+                        }
+                    };
+
+                    try {
+                        callback.asBinder().linkToDeath(mDeathRecipient, 0);
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "client process has already died", e);
                     }
                 }
             } finally {
@@ -1035,7 +1036,8 @@ public final class TvInputManagerService extends SystemService {
             try {
                 synchronized (mLock) {
                     UserState userState = getOrCreateUserStateLocked(resolvedUserId);
-                    userState.mCallbacks.unregister(callback);
+                    userState.callbackSet.remove(callback);
+                    callback.asBinder().unlinkToDeath(mDeathRecipient, 0);
                 }
             } finally {
                 Binder.restoreCallingIdentity(identity);
@@ -2106,13 +2108,11 @@ public final class TvInputManagerService extends SystemService {
                     }
                     pw.decreaseIndent();
 
-                    pw.println("mCallbacks:");
+                    pw.println("callbackSet:");
                     pw.increaseIndent();
-                    int n = userState.mCallbacks.beginBroadcast();
-                    for (int j = 0; j < n; ++j) {
-                        pw.println(userState.mCallbacks.getRegisteredCallbackItem(j).toString());
+                    for (ITvInputManagerCallback callback : userState.callbackSet) {
+                        pw.println(callback.toString());
                     }
-                    userState.mCallbacks.finishBroadcast();
                     pw.decreaseIndent();
 
                     pw.println("mainSessionToken: " + userState.mainSessionToken);
@@ -2143,9 +2143,8 @@ public final class TvInputManagerService extends SystemService {
         // A mapping from the token of a TV input session to its state.
         private final Map<IBinder, SessionState> sessionStateMap = new HashMap<>();
 
-        // A list of callbacks.
-        private final RemoteCallbackList<ITvInputManagerCallback> mCallbacks =
-                new RemoteCallbackList<ITvInputManagerCallback>();
+        // A set of callbacks.
+        private final Set<ITvInputManagerCallback> callbackSet = new HashSet<>();
 
         // The token of a "main" TV input session.
         private IBinder mainSessionToken = null;

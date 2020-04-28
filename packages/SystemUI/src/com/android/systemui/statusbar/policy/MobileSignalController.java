@@ -207,7 +207,13 @@ public class MobileSignalController extends SignalController<
         mNetworkToIconLookup.put(TelephonyManager.NETWORK_TYPE_EVDO_A, TelephonyIcons.THREE_G);
         mNetworkToIconLookup.put(TelephonyManager.NETWORK_TYPE_EVDO_B, TelephonyIcons.THREE_G);
         mNetworkToIconLookup.put(TelephonyManager.NETWORK_TYPE_EHRPD, TelephonyIcons.THREE_G);
-        mNetworkToIconLookup.put(TelephonyManager.NETWORK_TYPE_UMTS, TelephonyIcons.THREE_G);
+        if (mConfig.show4gFor3g) {
+            mNetworkToIconLookup.put(TelephonyManager.NETWORK_TYPE_UMTS,
+                    TelephonyIcons.FOUR_G);
+        } else {
+            mNetworkToIconLookup.put(TelephonyManager.NETWORK_TYPE_UMTS,
+                    TelephonyIcons.THREE_G);
+        }
         mNetworkToIconLookup.put(TelephonyManager.NETWORK_TYPE_TD_SCDMA, TelephonyIcons.THREE_G);
 
         if (!mConfig.showAtLeast3G) {

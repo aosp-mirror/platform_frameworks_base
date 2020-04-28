@@ -16,7 +16,6 @@
 
 package android.hardware.location;
 
-import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.location.Location;
 import android.os.Parcel;
@@ -73,7 +72,7 @@ public class GeofenceHardwareMonitorEvent implements Parcelable {
         return mLocation;
     }
 
-    public static final @NonNull Creator<GeofenceHardwareMonitorEvent> CREATOR =
+    public static final @android.annotation.NonNull Creator<GeofenceHardwareMonitorEvent> CREATOR =
             new Creator<GeofenceHardwareMonitorEvent>() {
                 @Override
                 public GeofenceHardwareMonitorEvent createFromParcel(Parcel source) {
@@ -109,7 +108,6 @@ public class GeofenceHardwareMonitorEvent implements Parcelable {
         parcel.writeParcelable(mLocation, flags);
     }
 
-    @NonNull
     @Override
     public String toString() {
         return String.format(

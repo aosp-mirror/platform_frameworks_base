@@ -97,11 +97,6 @@ public class StubTransaction extends SurfaceControl.Transaction {
     }
 
     @Override
-    public SurfaceControl.Transaction transferTouchFocus(IBinder fromToken, IBinder toToken) {
-        return this;
-    }
-
-    @Override
     public SurfaceControl.Transaction setGeometry(SurfaceControl sc, Rect sourceCrop,
             Rect destFrame, @Surface.Rotation int orientation) {
         return this;

@@ -336,7 +336,6 @@ public class Build {
         /**
          * @hide
          */
-        @TestApi
         @UnsupportedAppUsage
         public static final String[] ACTIVE_CODENAMES = "REL".equals(ALL_CODENAMES[0])
                 ? new String[0] : ALL_CODENAMES;
@@ -1187,7 +1186,7 @@ public class Build {
         ArrayList<Partition> partitions = new ArrayList();
 
         String[] names = new String[] {
-            "bootimage", "odm", "product", "system_ext", Partition.PARTITION_NAME_SYSTEM,
+            "bootimage", "odm", "product", "product_services", Partition.PARTITION_NAME_SYSTEM,
             "vendor"
         };
         for (String name : names) {

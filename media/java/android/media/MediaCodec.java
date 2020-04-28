@@ -362,7 +362,8 @@ import java.util.concurrent.locks.ReentrantLock;
    </tr>
    <tr>
     <td>FLAC</td>
-    <td>mandatory metadata block (called the STREAMINFO block),<br>
+    <td>"fLaC", the FLAC stream marker in ASCII,<br>
+        followed by the STREAMINFO block (the mandatory metadata block),<br>
         optionally followed by any number of other metadata blocks</td>
     <td class=NA>Not Used</td>
     <td class=NA>Not Used</td>
@@ -1702,22 +1703,20 @@ final public class MediaCodec {
                     break;
                 }
                 case EVENT_FRAME_RENDERED:
-                    Map<String, Object> map = (Map<String, Object>)msg.obj;
-                    for (int i = 0; ; ++i) {
-                        Object mediaTimeUs = map.get(i + "-media-time-us");
-                        Object systemNano = map.get(i + "-system-nano");
-                        OnFrameRenderedListener onFrameRenderedListener;
-                        synchronized (mListenerLock) {
-                            onFrameRenderedListener = mOnFrameRenderedListener;
+                    synchronized (mListenerLock) {
+                        Map<String, Object> map = (Map<String, Object>)msg.obj;
+                        for (int i = 0; ; ++i) {
+                            Object mediaTimeUs = map.get(i + "-media-time-us");
+                            Object systemNano = map.get(i + "-system-nano");
+                            if (mediaTimeUs == null || systemNano == null
+                                    || mOnFrameRenderedListener == null) {
+                                break;
+                            }
+                            mOnFrameRenderedListener.onFrameRendered(
+                                    mCodec, (long)mediaTimeUs, (long)systemNano);
                         }
-                        if (mediaTimeUs == null || systemNano == null
-                                || onFrameRenderedListener == null) {
-                            break;
-                        }
-                        onFrameRenderedListener.onFrameRendered(
-                                mCodec, (long)mediaTimeUs, (long)systemNano);
+                        break;
                     }
-                    break;
                 default:
                 {
                     break;

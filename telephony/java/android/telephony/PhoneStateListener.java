@@ -20,7 +20,6 @@ import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.os.Binder;
 import android.os.Build;
@@ -28,22 +27,18 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.Looper;
-import android.telephony.Annotation.CallState;
-import android.telephony.Annotation.RadioPowerState;
-import android.telephony.Annotation.SimActivationState;
-import android.telephony.Annotation.SrvccState;
 import android.telephony.emergency.EmergencyNumber;
 import android.telephony.ims.ImsReasonInfo;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.telephony.IPhoneStateListener;
 
-import dalvik.system.VMRuntime;
-
 import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
+
+import dalvik.system.VMRuntime;
 
 /**
  * A listener class for monitoring changes in specific telephony states
@@ -64,6 +59,17 @@ import java.util.concurrent.Executor;
 public class PhoneStateListener {
     private static final String LOG_TAG = "PhoneStateListener";
     private static final boolean DBG = false; // STOPSHIP if true
+
+    /**
+     * Limit on registrations of {@link PhoneStateListener}s on a per-pid
+     * basis. When this limit is exceeded, any calls to {@link TelephonyManager#listen} will fail
+     * with an {@link IllegalStateException}.
+     *
+     * {@link android.os.Process#PHONE_UID}, {@link android.os.Process#SYSTEM_UID}, and the uid that
+     * TelephonyRegistry runs under are exempt from this limit.
+     * @hide
+     */
+    public static final int PER_PID_REGISTRATION_LIMIT = 50;
 
     /**
      * Stop listening for updates.
@@ -306,6 +312,11 @@ public class PhoneStateListener {
      *  it could be the current active opportunistic subscription in use, or the
      *  subscription user selected as default data subscription in DSDS mode.
      *
+     *  Requires Permission: No permission is required to listen, but notification requires
+     *  {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE} or the calling
+     *  app has carrier privileges (see {@link TelephonyManager#hasCarrierPrivileges})
+     *  on any active subscription.
+     *
      *  @see #onActiveDataSubscriptionIdChanged
      */
     public static final int LISTEN_ACTIVE_DATA_SUBSCRIPTION_ID_CHANGE = 0x00400000;
@@ -361,32 +372,6 @@ public class PhoneStateListener {
     @RequiresPermission((android.Manifest.permission.READ_PRECISE_PHONE_STATE))
     @SystemApi
     public static final int LISTEN_IMS_CALL_DISCONNECT_CAUSES              = 0x08000000;
-
-    /**
-     * Listen for the emergency number placed from an outgoing call.
-     *
-     * <p>Requires permission {@link android.Manifest.permission#READ_ACTIVE_EMERGENCY_SESSION}
-     *
-     * @see #onOutgoingEmergencyCall
-     * @hide
-     */
-    @SystemApi
-    @TestApi
-    @RequiresPermission(Manifest.permission.READ_ACTIVE_EMERGENCY_SESSION)
-    public static final int LISTEN_OUTGOING_EMERGENCY_CALL                  = 0x10000000;
-
-    /**
-     * Listen for the emergency number placed from an outgoing SMS.
-     *
-     * <p>Requires permission {@link android.Manifest.permission#READ_ACTIVE_EMERGENCY_SESSION}
-     *
-     * @see #onOutgoingEmergencySms
-     * @hide
-     */
-    @SystemApi
-    @TestApi
-    @RequiresPermission(Manifest.permission.READ_ACTIVE_EMERGENCY_SESSION)
-    public static final int LISTEN_OUTGOING_EMERGENCY_SMS                   = 0x20000000;
 
     /*
      * Subscription used to listen to the phone state changes
@@ -571,7 +556,7 @@ public class PhoneStateListener {
      * privileges (see {@link TelephonyManager#hasCarrierPrivileges}), an empty string will be
      * passed as an argument.
      */
-    public void onCallStateChanged(@CallState int state, String phoneNumber) {
+    public void onCallStateChanged(@TelephonyManager.CallState int state, String phoneNumber) {
         // default implementation empty
     }
 
@@ -777,7 +762,7 @@ public class PhoneStateListener {
      * @hide
      */
     @SystemApi
-    public void onSrvccStateChanged(@SrvccState int srvccState) {
+    public void onSrvccStateChanged(@TelephonyManager.SrvccState int srvccState) {
 
     }
 
@@ -795,7 +780,7 @@ public class PhoneStateListener {
      * @hide
      */
     @SystemApi
-    public void onVoiceActivationStateChanged(@SimActivationState int state) {
+    public void onVoiceActivationStateChanged(@TelephonyManager.SimActivationState int state) {
     }
 
     /**
@@ -811,7 +796,7 @@ public class PhoneStateListener {
      * @param state is the current SIM data activation state
      * @hide
      */
-    public void onDataActivationStateChanged(@SimActivationState int state) {
+    public void onDataActivationStateChanged(@TelephonyManager.SimActivationState int state) {
     }
 
     /**
@@ -866,31 +851,6 @@ public class PhoneStateListener {
      */
     public void onEmergencyNumberListChanged(
             @NonNull Map<Integer, List<EmergencyNumber>> emergencyNumberList) {
-        // default implementation empty
-    }
-
-    /**
-     * Callback invoked when an outgoing call is placed to an emergency number.
-     *
-     * @param placedEmergencyNumber the emergency number {@link EmergencyNumber} the call is placed
-     *                              to.
-     * @hide
-     */
-    @SystemApi
-    @TestApi
-    public void onOutgoingEmergencyCall(@NonNull EmergencyNumber placedEmergencyNumber) {
-        // default implementation empty
-    }
-
-    /**
-     * Callback invoked when an outgoing SMS is placed to an emergency number.
-     *
-     * @param sentEmergencyNumber the emergency number {@link EmergencyNumber} the SMS is sent to.
-     * @hide
-     */
-    @SystemApi
-    @TestApi
-    public void onOutgoingEmergencySms(@NonNull EmergencyNumber sentEmergencyNumber) {
         // default implementation empty
     }
 
@@ -970,7 +930,7 @@ public class PhoneStateListener {
      * @hide
      */
     @SystemApi
-    public void onRadioPowerStateChanged(@RadioPowerState int state) {
+    public void onRadioPowerStateChanged(@TelephonyManager.RadioPowerState int state) {
         // default implementation empty
     }
 
@@ -1202,6 +1162,7 @@ public class PhoneStateListener {
                             () -> psl.onPhysicalChannelConfigurationChanged(configs)));
         }
 
+        @Override
         public void onEmergencyNumberListChanged(Map emergencyNumberList) {
             PhoneStateListener psl = mPhoneStateListenerWeakRef.get();
             if (psl == null) return;
@@ -1209,24 +1170,6 @@ public class PhoneStateListener {
             Binder.withCleanCallingIdentity(
                     () -> mExecutor.execute(
                             () -> psl.onEmergencyNumberListChanged(emergencyNumberList)));
-        }
-
-        public void onOutgoingEmergencyCall(@NonNull EmergencyNumber placedEmergencyNumber) {
-            PhoneStateListener psl = mPhoneStateListenerWeakRef.get();
-            if (psl == null) return;
-
-            Binder.withCleanCallingIdentity(
-                    () -> mExecutor.execute(
-                            () -> psl.onOutgoingEmergencyCall(placedEmergencyNumber)));
-        }
-
-        public void onOutgoingEmergencySms(@NonNull EmergencyNumber sentEmergencyNumber) {
-            PhoneStateListener psl = mPhoneStateListenerWeakRef.get();
-            if (psl == null) return;
-
-            Binder.withCleanCallingIdentity(
-                    () -> mExecutor.execute(
-                            () -> psl.onOutgoingEmergencySms(sentEmergencyNumber)));
         }
 
         public void onPhoneCapabilityChanged(PhoneCapability capability) {
@@ -1237,7 +1180,7 @@ public class PhoneStateListener {
                     () -> mExecutor.execute(() -> psl.onPhoneCapabilityChanged(capability)));
         }
 
-        public void onRadioPowerStateChanged(@RadioPowerState int state) {
+        public void onRadioPowerStateChanged(@TelephonyManager.RadioPowerState int state) {
             PhoneStateListener psl = mPhoneStateListenerWeakRef.get();
             if (psl == null) return;
 

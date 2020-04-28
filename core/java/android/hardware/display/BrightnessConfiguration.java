@@ -145,7 +145,6 @@ public final class BrightnessConfiguration implements Parcelable {
         return 0;
     }
 
-    @NonNull
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("BrightnessConfiguration{[");
@@ -185,7 +184,7 @@ public final class BrightnessConfiguration implements Parcelable {
     }
 
     @Override
-    public boolean equals(@Nullable Object o) {
+    public boolean equals(Object o) {
         if (o == this) {
             return true;
         }

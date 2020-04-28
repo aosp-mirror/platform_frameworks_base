@@ -17,39 +17,28 @@
 package com.android.server.wm.flicker;
 
 import static com.android.server.wm.flicker.CommonTransitions.editTextSetFocus;
+import static com.android.server.wm.flicker.WindowUtils.getDisplayBounds;
 
-import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.LargeTest;
-
-import com.android.server.wm.flicker.helpers.ImeAppHelper;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
-import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.MethodSorters;
-import org.junit.runners.Parameterized;
 
 /**
  * Test IME window opening transitions.
  * To run this test: {@code atest FlickerTests:OpenImeWindowTest}
  */
 @LargeTest
-@RunWith(Parameterized.class)
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class OpenImeWindowTest extends NonRotationTestBase {
+@RunWith(AndroidJUnit4.class)
+public class OpenImeWindowTest extends FlickerTestBase {
 
     private static final String IME_WINDOW_TITLE = "InputMethod";
 
-    public OpenImeWindowTest(String beginRotationName, int beginRotation) {
-        super(beginRotationName, beginRotation);
-
-        mTestApp = new ImeAppHelper(InstrumentationRegistry.getInstrumentation());
-    }
-
     @Before
     public void runTransition() {
-        run(editTextSetFocus((ImeAppHelper) mTestApp, mUiDevice, mBeginRotation)
+        super.runTransition(editTextSetFocus(uiDevice)
                 .includeJankyRuns().build());
     }
 
@@ -69,5 +58,11 @@ public class OpenImeWindowTest extends NonRotationTestBase {
                 .then()
                 .showsLayer(IME_WINDOW_TITLE)
                 .forAllEntries());
+    }
+
+    @Test
+    public void checkCoveredRegion_noUncoveredRegions() {
+        checkResults(result -> LayersTraceSubject.assertThat(result).coversRegion(
+                getDisplayBounds()).forAllEntries());
     }
 }

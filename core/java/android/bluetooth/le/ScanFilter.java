@@ -671,8 +671,6 @@ public final class ScanFilter implements Parcelable {
 
         /**
          * Set filter on on manufacturerData. A negative manufacturerId is considered as invalid id.
-         * <p>
-         * Note the first two bytes of the {@code manufacturerData} is the manufacturerId.
          *
          * @throws IllegalArgumentException If the {@code manufacturerId} is invalid.
          */

@@ -908,6 +908,7 @@ public class AudioManager {
 
     /** @hide */
     @UnsupportedAppUsage
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
     public void setMasterMute(boolean mute, int flags) {
         final IAudioService service = getService();
         try {
@@ -1506,22 +1507,21 @@ public class AudioManager {
      *     {@link AudioAttributes#ALLOW_CAPTURE_BY_ALL},
      *     {@link AudioAttributes#ALLOW_CAPTURE_BY_SYSTEM},
      *     {@link AudioAttributes#ALLOW_CAPTURE_BY_NONE}.
-     * @throws IllegalArgumentException if the argument is not a valid value.
+     * @throws RuntimeException if the argument is not a valid value.
      */
     public void setAllowedCapturePolicy(@AudioAttributes.CapturePolicy int capturePolicy) {
-        int flags = AudioAttributes.capturePolicyToFlags(capturePolicy, 0x0);
-        // TODO: got trough AudioService and save a cache to restore in case of AP crash
         // TODO: also pass the package in case multiple packages have the same UID
-        int result = AudioSystem.setAllowedCapturePolicy(Process.myUid(), flags);
-        if (result != AudioSystem.AUDIO_STATUS_OK) {
-            Log.e(TAG, "Could not setAllowedCapturePolicy: " + result);
-            return;
+        final IAudioService service = getService();
+        try {
+            int result = service.setAllowedCapturePolicy(capturePolicy);
+            if (result != AudioSystem.AUDIO_STATUS_OK) {
+                Log.e(TAG, "Could not setAllowedCapturePolicy: " + result);
+                return;
+            }
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
-        mCapturePolicy = capturePolicy;
     }
-
-    @AudioAttributes.CapturePolicy
-    private int mCapturePolicy = AudioAttributes.ALLOW_CAPTURE_BY_ALL;
 
     /**
      * Return the capture policy.
@@ -1530,7 +1530,13 @@ public class AudioManager {
      */
     @AudioAttributes.CapturePolicy
     public int getAllowedCapturePolicy() {
-        return mCapturePolicy;
+        int result = AudioAttributes.ALLOW_CAPTURE_BY_ALL;
+        try {
+            result = getService().getAllowedCapturePolicy();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to query allowed capture policy: " + e);
+        }
+        return result;
     }
 
     //====================================================================
@@ -1857,37 +1863,12 @@ public class AudioManager {
     }
 
     /**
-     * @hide
-     * Sets the microphone from switch mute on or off.
-     * <p>
-     * This method should only be used by InputManager to notify
-     * Audio Subsystem about Microphone Mute switch state.
-     *
-     * @param on set <var>true</var> to mute the microphone;
-     *           <var>false</var> to turn mute off
-     */
-    @UnsupportedAppUsage
-    public void setMicrophoneMuteFromSwitch(boolean on) {
-        final IAudioService service = getService();
-        try {
-            service.setMicrophoneMuteFromSwitch(on);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
      * Checks whether the microphone mute is on or off.
      *
      * @return true if microphone is muted, false if it's not
      */
     public boolean isMicrophoneMute() {
-        final IAudioService service = getService();
-        try {
-            return service.isMicrophoneMuted();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        return AudioSystem.isMicrophoneMuted();
     }
 
     /**

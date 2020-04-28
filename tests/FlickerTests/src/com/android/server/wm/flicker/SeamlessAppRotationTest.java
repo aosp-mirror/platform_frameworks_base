@@ -33,10 +33,8 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.LargeTest;
 
 import org.junit.Before;
-import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.MethodSorters;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
@@ -49,7 +47,6 @@ import java.util.Collection;
  */
 @LargeTest
 @RunWith(Parameterized.class)
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class SeamlessAppRotationTest extends FlickerTestBase {
     private int mBeginRotation;
     private int mEndRotation;
@@ -108,7 +105,7 @@ public class SeamlessAppRotationTest extends FlickerTestBase {
 
         super.runTransition(
                 changeAppRotation(mIntent, intentId, InstrumentationRegistry.getContext(),
-                        mUiDevice, mBeginRotation, mEndRotation).repeat(5).build());
+                        uiDevice, mBeginRotation, mEndRotation).repeat(5).build());
     }
 
     @Test

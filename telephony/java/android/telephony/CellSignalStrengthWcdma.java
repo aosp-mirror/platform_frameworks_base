@@ -245,12 +245,9 @@ public final class CellSignalStrengthWcdma extends CellSignalStrength implements
     }
 
     /**
-     * Get the Ec/No (Energy per chip over the noise spectral density) as dB.
+     * Get the Ec/No as dB
      *
-     * Reference: TS 25.133 Section 9.1.2.3
-     *
-     * @return the Ec/No of the measured cell in the range [-24, 1] or
-     * {@link android.telephony.CellInfo#UNAVAILABLE UNAVAILABLE} if unavailable
+     * @hide
      */
     public int getEcNo() {
         return mEcNo;

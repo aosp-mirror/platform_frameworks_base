@@ -22,7 +22,6 @@ import static android.system.OsConstants.ENOSYS;
 import static android.system.OsConstants.EPERM;
 import static android.system.OsConstants.EPIPE;
 
-import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
@@ -830,7 +829,7 @@ public class SoundTrigger {
         }
 
         @Override
-        public boolean equals(@Nullable Object obj) {
+        public boolean equals(Object obj) {
             if (this == obj)
                 return true;
             if (obj == null)
@@ -870,7 +869,6 @@ public class SoundTrigger {
             return true;
         }
 
-        @NonNull
         @Override
         public String toString() {
             return "RecognitionEvent [status=" + status + ", soundModelHandle=" + soundModelHandle

@@ -22,11 +22,13 @@ android_test {
         "services.appwidget",
         "services.autofill",
         "services.backup",
+        "services.contentsuggestions",
         "services.core",
         "services.devicepolicy",
         "services.net",
         "services.usage",
         "guava",
+        "androidx.test.core",
         "androidx.test.runner",
         "androidx.test.rules",
         "mockito-target-minus-junit4",
@@ -39,7 +41,6 @@ android_test {
         "platformprotosnano",
         "hamcrest-library",
         "servicestests-utils",
-        "xml-writer-device-lib",
     ],
 
     aidl: {
@@ -74,7 +75,7 @@ android_test {
         "libui",
         "libunwindstack",
         "libutils",
-        "netd_aidl_interface-cpp",
+        "netd_aidl_interface-V2-cpp",
     ],
 
     dxflags: ["--multi-dex"],
@@ -82,8 +83,6 @@ android_test {
     optimize: {
         enabled: false,
     },
-
-    data: [":JobTestApp"],
 }
 
 java_library {

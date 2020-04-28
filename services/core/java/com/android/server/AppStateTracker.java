@@ -700,16 +700,14 @@ public class AppStateTracker {
                 Slog.d(TAG,"onAppIdleStateChanged: " + packageName + " u" + userId
                         + (idle ? " idle" : " active") + " " + bucket);
             }
-            synchronized (mLock) {
-                final boolean changed;
-                if (bucket == UsageStatsManager.STANDBY_BUCKET_EXEMPTED) {
-                    changed = mExemptedPackages.add(userId, packageName);
-                } else {
-                    changed = mExemptedPackages.remove(userId, packageName);
-                }
-                if (changed) {
-                    mHandler.notifyExemptChanged();
-                }
+            final boolean changed;
+            if (bucket == UsageStatsManager.STANDBY_BUCKET_EXEMPTED) {
+                changed = mExemptedPackages.add(userId, packageName);
+            } else {
+                changed = mExemptedPackages.remove(userId, packageName);
+            }
+            if (changed) {
+                mHandler.notifyExemptChanged();
             }
         }
 

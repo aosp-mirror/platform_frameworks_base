@@ -144,7 +144,7 @@ public final class SharedUserSetting extends SettingBase {
         for (PackageParser.Package pkg : pkgList) {
             final boolean isPrivileged = isPrivileged() | pkg.isPrivileged();
             pkg.applicationInfo.seInfo = SELinuxMMAC.getSeInfo(pkg, isPrivileged,
-                seInfoTargetSdkVersion);
+                pkg.applicationInfo.targetSandboxVersion, seInfoTargetSdkVersion);
         }
     }
 

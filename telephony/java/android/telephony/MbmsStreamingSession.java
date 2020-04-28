@@ -82,7 +82,6 @@ public class MbmsStreamingSession implements AutoCloseable {
     };
 
     private InternalStreamingSessionCallback mInternalCallback;
-    private ServiceConnection mServiceConnection;
     private Set<StreamingService> mKnownActiveStreamingServices = new ArraySet<>();
 
     private final Context mContext;
@@ -169,7 +168,7 @@ public class MbmsStreamingSession implements AutoCloseable {
     public void close() {
         try {
             IMbmsStreamingService streamingService = mService.get();
-            if (streamingService == null || mServiceConnection == null) {
+            if (streamingService == null) {
                 // Ignore and return, assume already disposed.
                 return;
             }
@@ -178,13 +177,11 @@ public class MbmsStreamingSession implements AutoCloseable {
                 s.getCallback().stop();
             }
             mKnownActiveStreamingServices.clear();
-            mContext.unbindService(mServiceConnection);
         } catch (RemoteException e) {
             // Ignore for now
         } finally {
             mService.set(null);
             sIsInitialized.set(false);
-            mServiceConnection = null;
             mInternalCallback.stop();
         }
     }
@@ -289,69 +286,59 @@ public class MbmsStreamingSession implements AutoCloseable {
     }
 
     private int bindAndInitialize() {
-        mServiceConnection = new ServiceConnection() {
-            @Override
-            public void onServiceConnected(ComponentName name, IBinder service) {
-                IMbmsStreamingService streamingService =
-                        IMbmsStreamingService.Stub.asInterface(service);
-                int result;
-                try {
-                    result = streamingService.initialize(mInternalCallback,
-                            mSubscriptionId);
-                } catch (RemoteException e) {
-                    Log.e(LOG_TAG, "Service died before initialization");
-                    sendErrorToApp(
-                            MbmsErrors.InitializationErrors.ERROR_UNABLE_TO_INITIALIZE,
-                            e.toString());
-                    sIsInitialized.set(false);
-                    return;
-                } catch (RuntimeException e) {
-                    Log.e(LOG_TAG, "Runtime exception during initialization");
-                    sendErrorToApp(
-                            MbmsErrors.InitializationErrors.ERROR_UNABLE_TO_INITIALIZE,
-                            e.toString());
-                    sIsInitialized.set(false);
-                    return;
-                }
-                if (result == MbmsErrors.UNKNOWN) {
-                    // Unbind and throw an obvious error
-                    close();
-                    throw new IllegalStateException("Middleware must not return"
-                            + " an unknown error code");
-                }
-                if (result != MbmsErrors.SUCCESS) {
-                    sendErrorToApp(result, "Error returned during initialization");
-                    sIsInitialized.set(false);
-                    return;
-                }
-                try {
-                    streamingService.asBinder().linkToDeath(mDeathRecipient, 0);
-                } catch (RemoteException e) {
-                    sendErrorToApp(MbmsErrors.ERROR_MIDDLEWARE_LOST,
-                            "Middleware lost during initialization");
-                    sIsInitialized.set(false);
-                    return;
-                }
-                mService.set(streamingService);
-            }
+        return MbmsUtils.startBinding(mContext, MBMS_STREAMING_SERVICE_ACTION,
+                new ServiceConnection() {
+                    @Override
+                    public void onServiceConnected(ComponentName name, IBinder service) {
+                        IMbmsStreamingService streamingService =
+                                IMbmsStreamingService.Stub.asInterface(service);
+                        int result;
+                        try {
+                            result = streamingService.initialize(mInternalCallback,
+                                    mSubscriptionId);
+                        } catch (RemoteException e) {
+                            Log.e(LOG_TAG, "Service died before initialization");
+                            sendErrorToApp(
+                                    MbmsErrors.InitializationErrors.ERROR_UNABLE_TO_INITIALIZE,
+                                    e.toString());
+                            sIsInitialized.set(false);
+                            return;
+                        } catch (RuntimeException e) {
+                            Log.e(LOG_TAG, "Runtime exception during initialization");
+                            sendErrorToApp(
+                                    MbmsErrors.InitializationErrors.ERROR_UNABLE_TO_INITIALIZE,
+                                    e.toString());
+                            sIsInitialized.set(false);
+                            return;
+                        }
+                        if (result == MbmsErrors.UNKNOWN) {
+                            // Unbind and throw an obvious error
+                            close();
+                            throw new IllegalStateException("Middleware must not return"
+                                    + " an unknown error code");
+                        }
+                        if (result != MbmsErrors.SUCCESS) {
+                            sendErrorToApp(result, "Error returned during initialization");
+                            sIsInitialized.set(false);
+                            return;
+                        }
+                        try {
+                            streamingService.asBinder().linkToDeath(mDeathRecipient, 0);
+                        } catch (RemoteException e) {
+                            sendErrorToApp(MbmsErrors.ERROR_MIDDLEWARE_LOST,
+                                    "Middleware lost during initialization");
+                            sIsInitialized.set(false);
+                            return;
+                        }
+                        mService.set(streamingService);
+                    }
 
-            @Override
-            public void onServiceDisconnected(ComponentName name) {
-                sIsInitialized.set(false);
-                mService.set(null);
-            }
-
-            @Override
-            public void onNullBinding(ComponentName name) {
-                Log.w(LOG_TAG, "bindAndInitialize: Remote service returned null");
-                sendErrorToApp(MbmsErrors.ERROR_MIDDLEWARE_LOST,
-                        "Middleware service binding returned null");
-                sIsInitialized.set(false);
-                mService.set(null);
-                mContext.unbindService(this);
-            }
-        };
-        return MbmsUtils.startBinding(mContext, MBMS_STREAMING_SERVICE_ACTION, mServiceConnection);
+                    @Override
+                    public void onServiceDisconnected(ComponentName name) {
+                        sIsInitialized.set(false);
+                        mService.set(null);
+                    }
+                });
     }
 
     private void sendErrorToApp(int errorCode, String message) {

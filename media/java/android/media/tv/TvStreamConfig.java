@@ -16,8 +16,6 @@
 
 package android.media.tv;
 
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -89,7 +87,6 @@ public class TvStreamConfig implements Parcelable {
         return mGeneration;
     }
 
-    @NonNull
     @Override
     public String toString() {
         return "TvStreamConfig {mStreamId=" + mStreamId + ";" + "mType=" + mType + ";mGeneration="
@@ -166,7 +163,7 @@ public class TvStreamConfig implements Parcelable {
     }
 
     @Override
-    public boolean equals(@Nullable Object obj) {
+    public boolean equals(Object obj) {
         if (obj == null) return false;
         if (!(obj instanceof TvStreamConfig)) return false;
 

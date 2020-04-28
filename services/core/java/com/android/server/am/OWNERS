@@ -9,10 +9,6 @@ huiyu@google.com
 mwachens@google.com
 sudheersai@google.com
 suprabh@google.com
-varunshah@google.com
-kwekua@google.com
-bookatz@google.com
-jji@google.com
 
 # Windows & Activities
 ogunwale@google.com
@@ -35,3 +31,5 @@ michaelwr@google.com
 narayan@google.com
 
 per-file SettingsToPropertiesMapper.java = omakoto@google.com, svetoslavganov@google.com, yamasani@google.com
+
+per-file CarUserSwitchingDialog.java = keunyoung@google.com, felipeal@google.com, gurunagarajan@google.com

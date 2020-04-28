@@ -50,6 +50,7 @@ cc_defaults {
 
     srcs: [
         ":statsd_aidl",
+        ":ICarStatsService.aidl",
         "src/active_config_list.proto",
         "src/statsd_config.proto",
         "src/uid_data.proto",
@@ -69,8 +70,10 @@ cc_defaults {
         "src/config/ConfigKey.cpp",
         "src/config/ConfigListener.cpp",
         "src/config/ConfigManager.cpp",
+        "src/external/CarStatsPuller.cpp",
         "src/external/GpuStatsPuller.cpp",
         "src/external/Perfetto.cpp",
+        "src/external/Perfprofd.cpp",
         "src/external/StatsPuller.cpp",
         "src/external/StatsCallbackPuller.cpp",
         "src/external/StatsCompanionServicePuller.cpp",
@@ -108,6 +111,8 @@ cc_defaults {
         "src/socket/StatsSocketListener.cpp",
         "src/shell/ShellSubscriber.cpp",
         "src/shell/shell_config.proto",
+
+        ":perfprofd_aidl",
     ],
 
     local_include_dirs: [
@@ -132,6 +137,8 @@ cc_defaults {
         "libhardware",
         "libhardware_legacy",
         "libhidlbase",
+        "libhidltransport",
+        "libhwbinder",
         "android.frameworks.stats@1.0",
         "android.hardware.health@2.0",
         "android.hardware.power@1.0",
@@ -207,10 +214,6 @@ cc_test {
     ],
 
     srcs: [
-        // atom_field_options.proto needs field_options.proto, but that is
-        // not included in libprotobuf-cpp-lite, so compile it here.
-        ":libprotobuf-internal-protos",
-
         "src/atom_field_options.proto",
         "src/atoms.proto",
         "src/stats_log.proto",
@@ -272,11 +275,11 @@ cc_test {
     ],
 
     proto: {
-        type: "lite",
+        type: "full",
         include_dirs: ["external/protobuf/src"],
     },
 
-    shared_libs: ["libprotobuf-cpp-lite"],
+    shared_libs: ["libprotobuf-cpp-full"],
 
 }
 
@@ -289,10 +292,6 @@ cc_benchmark {
     defaults: ["statsd_defaults"],
 
     srcs: [
-        // atom_field_options.proto needs field_options.proto, but that is
-        // not included in libprotobuf-cpp-lite, so compile it here.
-        ":libprotobuf-internal-protos",
-
         "src/atom_field_options.proto",
         "src/atoms.proto",
         "src/stats_log.proto",
@@ -307,7 +306,7 @@ cc_benchmark {
     ],
 
     proto: {
-        type: "lite",
+        type: "full",
         include_dirs: ["external/protobuf/src"],
     },
 
@@ -329,14 +328,14 @@ cc_benchmark {
     shared_libs: [
         "libgtest_prod",
         "libstatslog",
-        "libprotobuf-cpp-lite",
+        "libprotobuf-cpp-full",
     ],
 }
 
 // ====  java proto device library (for test only)  ==============================
 java_library {
     name: "statsdprotolite",
-    sdk_version: "core_platform",
+    no_framework_libs: true,
     proto: {
         type: "lite",
         include_dirs: ["external/protobuf/src"],

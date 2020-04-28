@@ -114,7 +114,6 @@ public class Registrant
         }
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public Handler
     getHandler()
     {

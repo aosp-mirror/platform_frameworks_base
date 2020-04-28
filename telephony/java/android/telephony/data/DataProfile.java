@@ -25,8 +25,8 @@ import android.annotation.SystemApi;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.telephony.Annotation.ApnType;
 import android.telephony.TelephonyManager.NetworkTypeBitMask;
+import android.telephony.data.ApnSetting.ApnType;
 import android.telephony.data.ApnSetting.AuthType;
 import android.text.TextUtils;
 
@@ -257,7 +257,6 @@ public final class DataProfile implements Parcelable {
         return 0;
     }
 
-    @NonNull
     @Override
     public String toString() {
         return "DataProfile=" + mProfileId + "/" + mProtocolType + "/" + mAuthType
@@ -304,7 +303,7 @@ public final class DataProfile implements Parcelable {
     };
 
     @Override
-    public boolean equals(@Nullable Object o) {
+    public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         DataProfile that = (DataProfile) o;

@@ -16,8 +16,6 @@
 
 package com.android.server.audio;
 
-import android.annotation.NonNull;
-
 public interface PlayerFocusEnforcer {
 
     /**
@@ -27,24 +25,11 @@ public interface PlayerFocusEnforcer {
      * @param loser
      * @return
      */
-    boolean duckPlayers(@NonNull FocusRequester winner, @NonNull FocusRequester loser,
-                               boolean forceDuck);
+    public boolean duckPlayers(FocusRequester winner, FocusRequester loser, boolean forceDuck);
 
-    /**
-     * Unduck the players that had been ducked with
-     * {@link #duckPlayers(FocusRequester, FocusRequester, boolean)}
-     * @param winner
-     */
-    void unduckPlayers(@NonNull FocusRequester winner);
+    public void unduckPlayers(FocusRequester winner);
 
-    /**
-     * Mute players at the beginning of a call
-     * @param usagesToMute array of {@link android.media.AudioAttributes} usages to mute
-     */
-    void mutePlayersForCall(int[] usagesToMute);
+    public void mutePlayersForCall(int[] usagesToMute);
 
-    /**
-     * Unmute players at the end of a call
-     */
-    void unmutePlayersForCall();
+    public void unmutePlayersForCall();
 }

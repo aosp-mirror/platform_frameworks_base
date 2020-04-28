@@ -73,9 +73,6 @@ import android.view.autofill.AutofillManager.AutofillClient;
 import android.view.contentcapture.ContentCaptureManager.ContentCaptureClient;
 import android.view.textclassifier.TextClassificationManager;
 
-import com.android.internal.compat.IPlatformCompat;
-import com.android.internal.compat.IPlatformCompatNative;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -2398,44 +2395,6 @@ public abstract class Context {
             @Nullable String initialData, @Nullable  Bundle initialExtras);
 
     /**
-     * Version of
-     * {@link #sendOrderedBroadcast(Intent, String, BroadcastReceiver, Handler, int, String,
-     * Bundle)} that allows you to specify the App Op to enforce restrictions on which receivers
-     * the broadcast will be sent to.
-     *
-     * <p>See {@link BroadcastReceiver} for more information on Intent broadcasts.
-     *
-     * @param intent The Intent to broadcast; all receivers matching this
-     *               Intent will receive the broadcast.
-     * @param receiverPermission String naming a permissions that
-     *               a receiver must hold in order to receive your broadcast.
-     *               If null, no permission is required.
-     * @param receiverAppOp The app op associated with the broadcast. If null, no appOp is
-     *                      required. If both receiverAppOp and receiverPermission are non-null,
-     *                      a receiver must have both of them to
-     *                      receive the broadcast
-     * @param resultReceiver Your own BroadcastReceiver to treat as the final
-     *                       receiver of the broadcast.
-     * @param scheduler A custom Handler with which to schedule the
-     *                  resultReceiver callback; if null it will be
-     *                  scheduled in the Context's main thread.
-     * @param initialCode An initial value for the result code.  Often
-     *                    Activity.RESULT_OK.
-     * @param initialData An initial value for the result data.  Often
-     *                    null.
-     * @param initialExtras An initial value for the result extras.  Often
-     *                      null.
-     *
-     * @see #sendOrderedBroadcast(Intent, String, BroadcastReceiver, Handler, int, String, Bundle)
-     */
-    public void sendOrderedBroadcast(@RequiresPermission @NonNull Intent intent,
-            @Nullable String receiverPermission, @Nullable String receiverAppOp,
-            @Nullable BroadcastReceiver resultReceiver, @Nullable Handler scheduler,
-            int initialCode, @Nullable String initialData, @Nullable Bundle initialExtras) {
-        throw new RuntimeException("Not implemented. Must override in a subclass.");
-    }
-
-    /**
      * <p>Perform a {@link #sendBroadcast(Intent)} that is "sticky," meaning the
      * Intent you are sending stays around after the broadcast is complete,
      * so that others can quickly retrieve that data through the return
@@ -3113,7 +3072,7 @@ public abstract class Context {
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS)
-    @UnsupportedAppUsage(trackingBug = 136728678)
+    @UnsupportedAppUsage
     public boolean bindServiceAsUser(Intent service, ServiceConnection conn, int flags,
             Handler handler, UserHandle user) {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
@@ -3243,7 +3202,6 @@ public abstract class Context {
             TELEPHONY_SERVICE,
             TELEPHONY_SUBSCRIPTION_SERVICE,
             CARRIER_CONFIG_SERVICE,
-            EUICC_SERVICE,
             TELECOM_SERVICE,
             CLIPBOARD_SERVICE,
             INPUT_METHOD_SERVICE,
@@ -3274,8 +3232,6 @@ public abstract class Context {
             ROLE_SERVICE,
             //@hide ROLE_CONTROLLER_SERVICE,
             CAMERA_SERVICE,
-            //@hide: PLATFORM_COMPAT_SERVICE,
-            //@hide: PLATFORM_COMPAT_NATIVE_SERVICE,
             PRINT_SERVICE,
             CONSUMER_IR_SERVICE,
             //@hide: TRUST_SERVICE,
@@ -3436,8 +3392,6 @@ public abstract class Context {
      * @see android.telephony.SubscriptionManager
      * @see #CARRIER_CONFIG_SERVICE
      * @see android.telephony.CarrierConfigManager
-     * @see #EUICC_SERVICE
-     * @see android.telephony.euicc.EuiccManager
      * @see #INPUT_METHOD_SERVICE
      * @see android.view.inputmethod.InputMethodManager
      * @see #UI_MODE_SERVICE
@@ -4637,21 +4591,6 @@ public abstract class Context {
     public static final String STATS_MANAGER = "stats";
 
     /**
-     * Use with {@link android.os.ServiceManager.getService()} to retrieve a
-     * {@link IPlatformCompat} IBinder for communicating with the platform compat service.
-     * @hide
-     */
-    public static final String PLATFORM_COMPAT_SERVICE = "platform_compat";
-
-    /**
-     * Use with {@link android.os.ServiceManager.getService()} to retrieve a
-     * {@link IPlatformCompatNative} IBinder for native code communicating with the platform compat
-     * service.
-     * @hide
-     */
-    public static final String PLATFORM_COMPAT_NATIVE_SERVICE = "platform_compat_native";
-
-    /**
      * Service to capture a bugreport.
      * @see #getSystemService(String)
      * @see android.os.BugreportManager
@@ -4734,17 +4673,10 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve an
-     * {@link android.telephony.ims.ImsManager}.
+     * {@link android.telephony.ims.RcsManager}.
      * @hide
      */
-    public static final String TELEPHONY_IMS_SERVICE = "telephony_ims";
-
-    /**
-     * Use with {@link #getSystemService(String)} to retrieve an
-     * {@link android.telephony.ims.RcsMessageManager}.
-     * @hide
-     */
-    public static final String TELEPHONY_RCS_MESSAGE_SERVICE = "ircsmessage";
+    public static final String TELEPHONY_RCS_SERVICE = "ircs";
 
      /**
      * Use with {@link #getSystemService(String)} to retrieve an
@@ -4752,14 +4684,6 @@ public abstract class Context {
      * @hide
      */
     public static final String DYNAMIC_SYSTEM_SERVICE = "dynamic_system";
-
-    /**
-     * Use with {@link #getSystemService(String)} to retrieve an
-     * {@link android.os.telephony.TelephonyRegistryManager}.
-     * @hide
-     */
-    @SystemApi
-    public static final String TELEPHONY_REGISTRY_SERVICE = "telephony_registry";
 
     /**
      * Determine whether the given permission is allowed for a particular

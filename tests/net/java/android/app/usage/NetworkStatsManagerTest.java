@@ -202,7 +202,8 @@ public class NetworkStatsManagerTest {
         assertFalse(stats.hasNextBucket());
     }
 
-    private void assertBucketMatches(Entry expected, NetworkStats.Bucket actual) {
+    private void assertBucketMatches(Entry expected,
+            NetworkStats.Bucket actual) {
         assertEquals(expected.uid, actual.getUid());
         assertEquals(expected.rxBytes, actual.getRxBytes());
         assertEquals(expected.rxPackets, actual.getRxPackets());

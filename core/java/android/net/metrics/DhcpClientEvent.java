@@ -17,7 +17,6 @@
 package android.net.metrics;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
@@ -98,14 +97,13 @@ public final class DhcpClientEvent implements IpConnectivityLog.Event {
         return 0;
     }
 
-    @NonNull
     @Override
     public String toString() {
         return String.format("DhcpClientEvent(%s, %dms)", msg, durationMs);
     }
 
     @Override
-    public boolean equals(@Nullable Object obj) {
+    public boolean equals(Object obj) {
         if (obj == null || !(obj.getClass().equals(DhcpClientEvent.class))) return false;
         final DhcpClientEvent other = (DhcpClientEvent) obj;
         return TextUtils.equals(msg, other.msg)

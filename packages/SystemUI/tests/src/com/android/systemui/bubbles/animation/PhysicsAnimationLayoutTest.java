@@ -38,7 +38,6 @@ import androidx.test.filters.SmallTest;
 import com.google.android.collect.Sets;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InOrder;
@@ -77,7 +76,6 @@ public class PhysicsAnimationLayoutTest extends PhysicsAnimationLayoutTestCase {
     }
 
     @Test
-    @Ignore
     public void testHierarchyChanges() throws InterruptedException {
         mLayout.setActiveController(mTestableController);
         addOneMoreThanBubbleLimitBubbles();
@@ -103,7 +101,6 @@ public class PhysicsAnimationLayoutTest extends PhysicsAnimationLayoutTestCase {
     }
 
     @Test
-    @Ignore
     public void testUpdateValueNotChained() throws InterruptedException {
         mLayout.setActiveController(mTestableController);
         addOneMoreThanBubbleLimitBubbles();
@@ -130,13 +127,11 @@ public class PhysicsAnimationLayoutTest extends PhysicsAnimationLayoutTestCase {
     }
 
     @Test
-    @Ignore
     public void testUpdateValueXChained() throws InterruptedException {
         testChainedTranslationAnimations();
     }
 
     @Test
-    @Ignore
     public void testSetEndActions() throws InterruptedException {
         mLayout.setActiveController(mTestableController);
         addOneMoreThanBubbleLimitBubbles();
@@ -180,7 +175,6 @@ public class PhysicsAnimationLayoutTest extends PhysicsAnimationLayoutTestCase {
     }
 
     @Test
-    @Ignore
     public void testRemoveEndListeners() throws InterruptedException {
         mLayout.setActiveController(mTestableController);
         addOneMoreThanBubbleLimitBubbles();
@@ -219,7 +213,6 @@ public class PhysicsAnimationLayoutTest extends PhysicsAnimationLayoutTestCase {
     }
 
     @Test
-    @Ignore
     public void testSetController() throws InterruptedException {
         // Add the bubbles, then set the controller, to make sure that a controller added to an
         // already-initialized view works correctly.
@@ -276,7 +269,6 @@ public class PhysicsAnimationLayoutTest extends PhysicsAnimationLayoutTestCase {
     }
 
     @Test
-    @Ignore
     public void testArePropertiesAnimating() throws InterruptedException {
         mLayout.setActiveController(mTestableController);
         addOneMoreThanBubbleLimitBubbles();
@@ -301,7 +293,6 @@ public class PhysicsAnimationLayoutTest extends PhysicsAnimationLayoutTestCase {
     }
 
     @Test
-    @Ignore
     public void testCancelAllAnimations() throws InterruptedException {
         mLayout.setActiveController(mTestableController);
         addOneMoreThanBubbleLimitBubbles();
@@ -355,7 +346,6 @@ public class PhysicsAnimationLayoutTest extends PhysicsAnimationLayoutTestCase {
     }
 
     @Test
-    @Ignore
     public void testPhysicsAnimator() throws InterruptedException {
         mLayout.setActiveController(mTestableController);
         addOneMoreThanBubbleLimitBubbles();
@@ -400,7 +390,6 @@ public class PhysicsAnimationLayoutTest extends PhysicsAnimationLayoutTestCase {
     }
 
     @Test
-    @Ignore
     public void testAnimationsForChildrenFromIndex() throws InterruptedException {
         // Don't chain since we're going to invoke each animation independently.
         mTestableController.setChainedProperties(new HashSet<>());
@@ -426,7 +415,6 @@ public class PhysicsAnimationLayoutTest extends PhysicsAnimationLayoutTestCase {
     }
 
     @Test
-    @Ignore
     public void testAnimationsForChildrenFromIndex_noChildren() {
         mLayout.setActiveController(mTestableController);
 

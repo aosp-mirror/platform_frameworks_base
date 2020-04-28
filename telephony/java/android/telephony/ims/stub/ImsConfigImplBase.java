@@ -19,7 +19,6 @@ package android.telephony.ims.stub;
 import android.annotation.IntDef;
 import android.annotation.SystemApi;
 import android.content.Context;
-import android.os.PersistableBundle;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.telephony.ims.aidl.IImsConfig;
@@ -183,11 +182,6 @@ public class ImsConfigImplBase {
             return retVal;
         }
 
-        @Override
-        public void updateImsCarrierConfigs(PersistableBundle bundle) throws RemoteException {
-            getImsConfigImpl().updateImsCarrierConfigs(bundle);
-        }
-
         private ImsConfigImplBase getImsConfigImpl() throws RemoteException {
             ImsConfigImplBase ref = mImsConfigImplBaseWeakReference.get();
             if (ref == null) {
@@ -348,17 +342,6 @@ public class ImsConfigImplBase {
     }
 
     /**
-     * The framework has received an RCS autoconfiguration XML file for provisioning.
-     *
-     * @param config The XML file to be read, if not compressed, it should be in ASCII/UTF8 format.
-     * @param isCompressed The XML file is compressed in gzip format and must be decompressed
-     *         before being read.
-     * @hide
-     */
-    public void notifyRcsAutoConfigurationReceived(byte[] config, boolean isCompressed) {
-    }
-
-    /**
      * Sets the configuration value for this ImsService.
      *
      * @param item an integer key.
@@ -403,12 +386,5 @@ public class ImsConfigImplBase {
     public String getConfigString(int item) {
         // Base Implementation - To be overridden.
         return null;
-    }
-
-    /**
-     * @hide
-     */
-    public void updateImsCarrierConfigs(PersistableBundle bundle) {
-        // Base Implementation - Should be overridden
     }
 }

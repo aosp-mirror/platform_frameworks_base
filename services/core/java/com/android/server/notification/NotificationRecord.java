@@ -1289,6 +1289,18 @@ public final class NotificationRecord {
         return getLogMaker().setCategory(MetricsEvent.NOTIFICATION_ITEM);
     }
 
+    public boolean hasUndecoratedRemoteView() {
+        Notification notification = getNotification();
+        Class<? extends Notification.Style> style = notification.getNotificationStyle();
+        boolean hasDecoratedStyle = style != null
+                && (Notification.DecoratedCustomViewStyle.class.equals(style)
+                || Notification.DecoratedMediaCustomViewStyle.class.equals(style));
+        boolean hasCustomRemoteView = notification.contentView != null
+                || notification.bigContentView != null
+                || notification.headsUpContentView != null;
+        return hasCustomRemoteView && !hasDecoratedStyle;
+    }
+
     @VisibleForTesting
     static final class Light {
         public final int color;

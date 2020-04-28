@@ -1868,6 +1868,7 @@ public class BatteryStatsImpl extends BatteryStats {
             mCount = computeCurrentCountLocked();
             mUnpluggedReportedTotalTime = mCurrentReportedTotalTime = 0;
             mUnpluggedReportedCount = mCurrentReportedCount = 0;
+            mTrackingReportedValues = false;
         }
 
         public void setUpdateVersion(int version) {
@@ -4752,11 +4753,11 @@ public class BatteryStatsImpl extends BatteryStats {
             final long uptime = mClocks.uptimeMillis();
 
             boolean updateHistory = false;
-            if (isScreenDoze(state) && !isScreenDoze(oldState)) {
+            if (isScreenDoze(state)) {
                 mHistoryCur.states |= HistoryItem.STATE_SCREEN_DOZE_FLAG;
                 mScreenDozeTimer.startRunningLocked(elapsedRealtime);
                 updateHistory = true;
-            } else if (isScreenDoze(oldState) && !isScreenDoze(state)) {
+            } else if (isScreenDoze(oldState)) {
                 mHistoryCur.states &= ~HistoryItem.STATE_SCREEN_DOZE_FLAG;
                 mScreenDozeTimer.stopRunningLocked(elapsedRealtime);
                 updateHistory = true;

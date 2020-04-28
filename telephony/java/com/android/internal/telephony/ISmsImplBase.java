@@ -208,15 +208,4 @@ public class ISmsImplBase extends ISms.Stub {
             int subid, String callingApk, String destAddress, String countryIso) {
         throw new UnsupportedOperationException();
     }
-
-    @Override
-    public String getSmscAddressFromIccEfForSubscriber(int subId, String callingPackage) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean setSmscAddressOnIccEfForSubscriber(
-            String smsc, int subId, String callingPackage) {
-        throw new UnsupportedOperationException();
-    }
 }

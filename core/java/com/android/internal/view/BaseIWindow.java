@@ -16,11 +16,9 @@
 
 package com.android.internal.view;
 
-import android.annotation.UnsupportedAppUsage;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.input.InputManager;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
@@ -38,10 +36,6 @@ import com.android.internal.os.IResultReceiver;
 public class BaseIWindow extends IWindow.Stub {
     private IWindowSession mSession;
     public int mSeq;
-
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
-    public BaseIWindow() {
-    }
 
     public void setSession(IWindowSession session) {
         mSession = session;

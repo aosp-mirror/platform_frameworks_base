@@ -17,7 +17,6 @@
 package android.telephony.mbms;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.content.Intent;
@@ -382,7 +381,7 @@ public final class DownloadRequest implements Parcelable {
     }
 
     @Override
-    public boolean equals(@Nullable Object o) {
+    public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null) {
             return false;

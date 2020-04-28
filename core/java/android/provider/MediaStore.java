@@ -137,8 +137,6 @@ public final class MediaStore {
     public static final String VOLUME_EXTERNAL_PRIMARY = "external_primary";
 
     /** {@hide} */
-    public static final String WAIT_FOR_IDLE_CALL = "wait_for_idle";
-    /** {@hide} */
     public static final String SCAN_FILE_CALL = "scan_file";
     /** {@hide} */
     public static final String SCAN_VOLUME_CALL = "scan_volume";
@@ -3559,17 +3557,6 @@ public final class MediaStore {
             }
         } else {
             throw new IOException("User " + user + " must be unlocked and running");
-        }
-    }
-
-    /** @hide */
-    @TestApi
-    public static void waitForIdle(Context context) {
-        final ContentResolver resolver = context.getContentResolver();
-        try (ContentProviderClient client = resolver.acquireContentProviderClient(AUTHORITY)) {
-            client.call(WAIT_FOR_IDLE_CALL, null, null);
-        } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
         }
     }
 

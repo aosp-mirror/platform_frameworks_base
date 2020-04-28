@@ -1163,7 +1163,7 @@ public final class MandatoryStreamCombination {
             if (orderedPreviewSizes != null) {
                 for (Size size : orderedPreviewSizes) {
                     if ((mDisplaySize.getWidth() >= size.getWidth()) &&
-                            (mDisplaySize.getWidth() >= size.getHeight())) {
+                            (mDisplaySize.getHeight() >= size.getHeight())) {
                         return size;
                     }
                 }

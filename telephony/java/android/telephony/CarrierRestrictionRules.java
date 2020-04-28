@@ -323,7 +323,6 @@ public final class CarrierRestrictionRules implements Parcelable {
         }
     };
 
-    @NonNull
     @Override
     public String toString() {
         return "CarrierRestrictionRules(allowed:" + mAllowedCarriers + ", excluded:"

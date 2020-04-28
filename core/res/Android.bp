@@ -16,7 +16,7 @@
 
 android_app {
     name: "framework-res",
-    sdk_version: "core_platform",
+    no_framework_libs: true,
     certificate: "platform",
 
     // Soong special-cases framework-res to install this alongside
@@ -38,13 +38,4 @@ android_app {
     // Create package-export.apk, which other packages can use to get
     // PRODUCT-agnostic resource data like IDs and type definitions.
     export_package_resources: true,
-}
-
-// This logic can be removed once robolectric's transition to binary resources is complete
-filegroup {
-    name: "robolectric_framework_raw_res_files",
-    srcs: [
-        "assets/**/*",
-        "res/**/*",
-    ],
 }

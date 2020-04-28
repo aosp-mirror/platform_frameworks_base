@@ -17,8 +17,6 @@
 
 package android.telephony.ims.aidl;
 
-import android.os.PersistableBundle;
-
 import android.telephony.ims.aidl.IImsConfigCallback;
 
 import com.android.ims.ImsConfigListener;
@@ -39,5 +37,4 @@ interface IImsConfig {
     int setConfigInt(int item, int value);
     // Return result code defined in ImsConfig#OperationStatusConstants
     int setConfigString(int item, String value);
-    void updateImsCarrierConfigs(in PersistableBundle bundle);
 }

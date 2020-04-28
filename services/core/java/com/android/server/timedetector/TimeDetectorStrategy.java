@@ -18,7 +18,7 @@ package com.android.server.timedetector;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.timedetector.PhoneTimeSuggestion;
+import android.app.timedetector.TimeSignal;
 import android.content.Intent;
 import android.util.TimestampedValue;
 
@@ -72,7 +72,7 @@ public interface TimeDetectorStrategy {
     void initialize(@NonNull Callback callback);
 
     /** Process the suggested time. */
-    void suggestPhoneTime(@NonNull PhoneTimeSuggestion timeSuggestion);
+    void suggestTime(@NonNull TimeSignal timeSignal);
 
     /** Handle the auto-time setting being toggled on or off. */
     void handleAutoTimeDetectionToggle(boolean enabled);

@@ -44,6 +44,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
+import com.android.settingslib.utils.ThreadUtils;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.SystemUIFactory;
@@ -615,6 +616,15 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
                 StatsLog.write(StatsLog.KEYGUARD_BOUNCER_PASSWORD_ENTERED,
                     StatsLog.KEYGUARD_BOUNCER_PASSWORD_ENTERED__RESULT__SUCCESS);
                 mLockPatternUtils.reportSuccessfulPasswordAttempt(userId);
+                // Force a garbage collection in an attempt to erase any lockscreen password left in
+                // memory. Do it asynchronously with a 5-sec delay to avoid making the keyguard
+                // dismiss animation janky.
+                ThreadUtils.postOnBackgroundThread(() -> {
+                    try {
+                        Thread.sleep(5000);
+                    } catch (InterruptedException ignored) { }
+                    Runtime.getRuntime().gc();
+                });
             } else {
                 StatsLog.write(StatsLog.KEYGUARD_BOUNCER_PASSWORD_ENTERED,
                     StatsLog.KEYGUARD_BOUNCER_PASSWORD_ENTERED__RESULT__FAILURE);

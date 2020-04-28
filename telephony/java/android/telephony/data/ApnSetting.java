@@ -26,8 +26,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.provider.Telephony;
 import android.provider.Telephony.Carriers;
-import android.telephony.Annotation.ApnType;
-import android.telephony.Annotation.NetworkType;
 import android.telephony.Rlog;
 import android.telephony.ServiceState;
 import android.telephony.TelephonyManager;
@@ -110,6 +108,23 @@ public class ApnSetting implements Parcelable {
     public static final int TYPE_EMERGENCY = ApnTypes.EMERGENCY;
     /** APN type for MCX (Mission Critical Service) where X can be PTT/Video/Data */
     public static final int TYPE_MCX = ApnTypes.MCX;
+
+    /** @hide */
+    @IntDef(flag = true, prefix = { "TYPE_" }, value = {
+        TYPE_DEFAULT,
+        TYPE_MMS,
+        TYPE_SUPL,
+        TYPE_DUN,
+        TYPE_HIPRI,
+        TYPE_FOTA,
+        TYPE_IMS,
+        TYPE_CBS,
+        TYPE_IA,
+        TYPE_EMERGENCY,
+        TYPE_MCX
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ApnType {}
 
     // Possible values for authentication types.
     /** No authentication type. */
@@ -1191,7 +1206,7 @@ public class ApnSetting implements Parcelable {
             && !other.canHandleType(TYPE_DUN)
             && Objects.equals(this.mApnName, other.mApnName)
             && !typeSameAny(this, other)
-            && xorEqualsString(this.mProxyAddress, other.mProxyAddress)
+            && xorEquals(this.mProxyAddress, other.mProxyAddress)
             && xorEqualsInt(this.mProxyPort, other.mProxyPort)
             && xorEquals(this.mProtocol, other.mProtocol)
             && xorEquals(this.mRoamingProtocol, other.mRoamingProtocol)
@@ -1200,7 +1215,7 @@ public class ApnSetting implements Parcelable {
             && Objects.equals(this.mMvnoType, other.mMvnoType)
             && Objects.equals(this.mMvnoMatchData, other.mMvnoMatchData)
             && xorEquals(this.mMmsc, other.mMmsc)
-            && xorEqualsString(this.mMmsProxyAddress, other.mMmsProxyAddress)
+            && xorEquals(this.mMmsProxyAddress, other.mMmsProxyAddress)
             && xorEqualsInt(this.mMmsProxyPort, other.mMmsProxyPort))
             && Objects.equals(this.mNetworkTypeBitmask, other.mNetworkTypeBitmask)
             && Objects.equals(mApnSetId, other.mApnSetId)
@@ -1211,11 +1226,6 @@ public class ApnSetting implements Parcelable {
     // Equal or one is null.
     private boolean xorEquals(Object first, Object second) {
         return first == null || second == null || first.equals(second);
-    }
-
-    // Equal or one is null.
-    private boolean xorEqualsString(String first, String second) {
-        return TextUtils.isEmpty(first) || TextUtils.isEmpty(second) || first.equals(second);
     }
 
     // Equal or one is not specified.
@@ -1415,7 +1425,7 @@ public class ApnSetting implements Parcelable {
      *
      * @hide
      */
-    public boolean canSupportNetworkType(@NetworkType int networkType) {
+    public boolean canSupportNetworkType(@TelephonyManager.NetworkType int networkType) {
         // Do a special checking for GSM. In reality, GSM is a voice only network type and can never
         // be used for data. We allow it here because in some DSDS corner cases, on the non-DDS
         // sub, modem reports data rat unknown. In that case if voice is GSM and this APN supports
@@ -1944,9 +1954,8 @@ public class ApnSetting implements Parcelable {
          * {@link ApnSetting} built from this builder otherwise.
          */
         public ApnSetting build() {
-            if ((mApnTypeBitmask & (TYPE_DEFAULT | TYPE_MMS | TYPE_SUPL | TYPE_DUN | TYPE_HIPRI |
-                    TYPE_FOTA | TYPE_IMS | TYPE_CBS | TYPE_IA | TYPE_EMERGENCY | TYPE_MCX)) == 0
-                || TextUtils.isEmpty(mApnName) || TextUtils.isEmpty(mEntryName)) {
+            if ((mApnTypeBitmask & TYPE_ALL) == 0 || TextUtils.isEmpty(mApnName)
+                || TextUtils.isEmpty(mEntryName)) {
                 return null;
             }
             return new ApnSetting(this);

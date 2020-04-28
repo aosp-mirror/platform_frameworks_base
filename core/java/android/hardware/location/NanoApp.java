@@ -15,7 +15,6 @@
  */
 package android.hardware.location;
 
-import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -371,7 +370,6 @@ public class NanoApp implements Parcelable {
         }
     };
 
-    @NonNull
     @Override
     public String toString() {
         String retVal = "Id : " + mAppId;

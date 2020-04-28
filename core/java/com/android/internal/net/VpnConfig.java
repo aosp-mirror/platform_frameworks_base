@@ -108,10 +108,6 @@ public class VpnConfig implements Parcelable {
     public Network[] underlyingNetworks;
     public ProxyInfo proxyInfo;
 
-    @UnsupportedAppUsage
-    public VpnConfig() {
-    }
-
     public void updateAllowedFamilies(InetAddress address) {
         if (address instanceof Inet4Address) {
             allowIPv4 = true;

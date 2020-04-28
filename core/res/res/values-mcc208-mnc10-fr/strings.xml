@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-
-<resources xmlns:android="http://schemas.android.com/apk/res/android" xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="wifi_calling_off_summary" msgid="8720659586041656098">Utiliser les appels Wi-Fi lorsque le service est disponible</string>
-</resources>

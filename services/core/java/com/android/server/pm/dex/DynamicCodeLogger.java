@@ -26,6 +26,7 @@ import android.os.FileUtils;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.storage.StorageManager;
+import android.util.ByteStringUtils;
 import android.util.EventLog;
 import android.util.PackageUtils;
 import android.util.Slog;
@@ -36,8 +37,6 @@ import com.android.server.pm.Installer;
 import com.android.server.pm.Installer.InstallerException;
 import com.android.server.pm.dex.PackageDynamicCodeLoading.DynamicCodeFile;
 import com.android.server.pm.dex.PackageDynamicCodeLoading.PackageDynamicCode;
-
-import libcore.util.HexEncoding;
 
 import java.io.File;
 import java.io.IOException;
@@ -154,7 +153,7 @@ public class DynamicCodeLogger {
 
             // Valid SHA256 will be 256 bits, 32 bytes.
             if (hash != null && hash.length == 32) {
-                message = message + ' ' + HexEncoding.encodeToString(hash);
+                message = message + ' ' + ByteStringUtils.toHexString(hash);
             } else {
                 Slog.d(TAG, "Got no hash for " + filePath);
                 // File has probably been deleted.

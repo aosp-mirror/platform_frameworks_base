@@ -16,6 +16,9 @@
 
 package com.android.systemui.statusbar.car;
 
+import static com.android.systemui.statusbar.phone.BarTransitions.MODE_OPAQUE;
+import static com.android.systemui.statusbar.phone.BarTransitions.MODE_SEMI_TRANSPARENT;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
@@ -23,15 +26,24 @@ import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.car.Car;
+import android.car.CarNotConnectedException;
 import android.car.drivingstate.CarDrivingStateEvent;
 import android.car.drivingstate.CarUxRestrictionsManager;
 import android.car.hardware.power.CarPowerManager.CarPowerStateListener;
+import android.car.media.CarAudioManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.inputmethodservice.InputMethodService;
+import android.media.AudioManager;
+import android.os.Build;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.util.Log;
 import android.view.Display;
 import android.view.GestureDetector;
@@ -60,26 +72,50 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.BatteryMeterView;
 import com.android.systemui.CarSystemUIFactory;
 import com.android.systemui.Dependency;
+import com.android.systemui.ForegroundServiceController;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.SystemUIFactory;
+import com.android.systemui.car.SUWProgressController;
 import com.android.systemui.classifier.FalsingLog;
+import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.keyguard.ScreenLifecycle;
+import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.qs.car.CarQSFragment;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.statusbar.FlingAnimationUtils;
+import com.android.systemui.statusbar.NavigationBarController;
+import com.android.systemui.statusbar.NotificationListener;
+import com.android.systemui.statusbar.NotificationLockscreenUserManager;
+import com.android.systemui.statusbar.NotificationMediaManager;
+import com.android.systemui.statusbar.NotificationRemoteInputManager;
+import com.android.systemui.statusbar.NotificationViewHierarchyManager;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.car.hvac.HvacController;
 import com.android.systemui.statusbar.car.hvac.TemperatureView;
+import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.VisualStabilityManager;
+import com.android.systemui.statusbar.notification.logging.NotificationLogger;
+import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
+import com.android.systemui.statusbar.phone.AutoHideElement;
+import com.android.systemui.statusbar.phone.BarTransitions;
 import com.android.systemui.statusbar.phone.CollapsedStatusBarFragment;
+import com.android.systemui.statusbar.phone.LightBarController;
+import com.android.systemui.statusbar.phone.NotificationGroupAlertTransferHelper;
+import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
+import com.android.systemui.statusbar.policy.KeyguardMonitor;
+import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
+import com.android.systemui.statusbar.policy.ZenModeController;
+import com.android.systemui.volume.VolumeUI;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -90,6 +126,7 @@ import java.util.Map;
  */
 public class CarStatusBar extends StatusBar implements CarBatteryController.BatteryViewHandler {
     private static final String TAG = "CarStatusBar";
+    private static final int MODE_INVALID = -1;
     // used to calculate how fast to open or close the window
     private static final float DEFAULT_FLING_VELOCITY = 0;
     // max time a fling animation takes
@@ -127,15 +164,20 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
     private CarFacetButtonController mCarFacetButtonController;
     private ActivityManagerWrapper mActivityManagerWrapper;
     private DeviceProvisionedController mDeviceProvisionedController;
+    private SUWProgressController mSUWProgressController;
     private boolean mDeviceIsSetUpForUser = true;
+    private boolean mIsUserSetupInProgress = false;
     private HvacController mHvacController;
     private DrivingStateHelper mDrivingStateHelper;
     private PowerManagerHelper mPowerManagerHelper;
     private FlingAnimationUtils mFlingAnimationUtils;
     private SwitchToGuestTimer mSwitchToGuestTimer;
     private NotificationDataManager mNotificationDataManager;
+    private CarNotificationListener mCarNotificationListener;
     private NotificationClickHandlerFactory mNotificationClickHandlerFactory;
     private ScreenLifecycle mScreenLifecycle;
+    private CarAudioManager mCarAudioManager;
+    private VolumeUI mVolumeUI;
 
     // The container for the notifications.
     private CarNotificationView mNotificationView;
@@ -197,12 +239,58 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                 }
             };
 
+    private final CarAudioManager.CarVolumeCallback mVolumeChangeCallback =
+            new CarAudioManager.CarVolumeCallback() {
+                @Override
+                public void onGroupVolumeChanged(int zoneId, int groupId, int flags) {
+                    if (mVolumeUI == null && (flags & AudioManager.FLAG_SHOW_UI) != 0) {
+                        new Handler(Looper.getMainLooper()).post(() -> {
+                            // Initialize Volume UI
+                            mVolumeUI = new VolumeUI();
+                            mVolumeUI.mComponents = mComponents;
+                            mVolumeUI.mContext = mContext;
+                            mVolumeUI.start();
+                        });
+                        mCarAudioManager.unregisterCarVolumeCallback(mVolumeChangeCallback);
+                    }
+                }
+
+                @Override
+                public void onMasterMuteChanged(int zoneId, int flags) {
+                    // ignored
+                }
+            };
+
+    private boolean mBootCompleted = false;
+    private final BroadcastReceiver mBootCompletedReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            mBootCompleted = true;
+            String action = intent.getAction();
+            if (action != null && action.equals(Intent.ACTION_BOOT_COMPLETED)) {
+                initHvac();
+            }
+        }
+    };
+
+    private int mNavigationBarMode;
+    private BarTransitions mNavBarTransitions;
+
     @Override
     public void start() {
+        // Non blocking call to connect to car service. Call this early so that we'll be connected
+        // asap.
+        ((CarSystemUIFactory) SystemUIFactory.getInstance()).getCarServiceProvider(mContext);
+
+        // Defer some actions for CarStatusBar initialization until after boot complete event
+        registerBootCompletedReceiver();
+
         // get the provisioned state before calling the parent class since it's that flow that
         // builds the nav bar
         mDeviceProvisionedController = Dependency.get(DeviceProvisionedController.class);
+        mSUWProgressController = new SUWProgressController(mContext);
         mDeviceIsSetUpForUser = mDeviceProvisionedController.isCurrentUserSetup();
+        mIsUserSetupInProgress = mSUWProgressController.isCurrentUserSetupInProgress();
 
         // Keyboard related setup, before nav bars are created.
         mHideNavBarForKeyboard = mContext.getResources().getBoolean(
@@ -255,6 +343,13 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
 
         mHvacController.connectToCarService();
 
+        mSUWProgressController.addCallback(
+                new SUWProgressController.SUWProgressListener() {
+                    @Override
+                    public void onUserSetupInProgressChanged() {
+                        mHandler.post(() -> restartNavBarsIfNecessary());
+                    }
+                });
         mDeviceProvisionedController.addCallback(
                 new DeviceProvisionedController.DeviceProvisionedListener() {
                     @Override
@@ -264,6 +359,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
 
                     @Override
                     public void onUserSwitched() {
+                        mSUWProgressController.onUserSwitched();
                         mHandler.post(() -> restartNavBarsIfNecessary());
                     }
                 });
@@ -278,12 +374,154 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
 
         mPowerManagerHelper = new PowerManagerHelper(mContext, mCarPowerStateListener);
         mPowerManagerHelper.connectToCarService();
+
+        ((CarSystemUIFactory) SystemUIFactory.getInstance()).getCarServiceProvider(mContext)
+                .addListener((car, ready) -> {
+                    if (!ready || mCarAudioManager != null) {
+                        return;
+                    }
+                    try {
+                        mCarAudioManager = (CarAudioManager) car.getCarManager(Car.AUDIO_SERVICE);
+                        Log.d(TAG, "Registering mVolumeChangeCallback.");
+                        // This volume call back is never unregistered because CarStatusBar is
+                        // never destroyed.
+                        mCarAudioManager.registerCarVolumeCallback(mVolumeChangeCallback);
+                    } catch (CarNotConnectedException e) {
+                        Log.wtf(TAG, " mVolumeChangeCallback failed to connect to car ", e);
+                    }
+                });
+
+        mAutoHideController.setNavigationBar(new AutoHideElement() {
+            @Override
+            public void synchronizeState() {
+                checkNavBarModes();
+            }
+
+            @Override
+            public boolean isSemiTransparent() {
+                return mNavigationBarMode == MODE_SEMI_TRANSPARENT;
+            }
+        });
+    }
+
+    @Override
+    protected void getDependencies() {
+        // Keyguard
+        mKeyguardMonitor = Dependency.get(KeyguardMonitor.class);
+        mWakefulnessLifecycle = Dependency.get(WakefulnessLifecycle.class);
+        mScreenLifecycle = Dependency.get(ScreenLifecycle.class);
+
+        // Policy
+        mZenController = Dependency.get(ZenModeController.class);
+        if (Build.IS_USERDEBUG) {
+            mNetworkController = Dependency.get(NetworkController.class);
+        }
+
+        // Icon
+        mIconController = Dependency.get(StatusBarIconController.class);
+        mLightBarController = Dependency.get(LightBarController.class);
+
+        // Notifications
+        mEntryManager = Dependency.get(NotificationEntryManager.class);
+        mForegroundServiceController = Dependency.get(ForegroundServiceController.class);
+        mGroupAlertTransferHelper = Dependency.get(NotificationGroupAlertTransferHelper.class);
+        mGroupManager = Dependency.get(NotificationGroupManager.class);
+        mGutsManager = Dependency.get(NotificationGutsManager.class);
+        mLockscreenUserManager = Dependency.get(NotificationLockscreenUserManager.class);
+        mMediaManager = Dependency.get(NotificationMediaManager.class);
+        mNotificationListener = Dependency.get(NotificationListener.class);
+        mNotificationLogger = Dependency.get(NotificationLogger.class);
+        mRemoteInputManager = Dependency.get(NotificationRemoteInputManager.class);
+        mViewHierarchyManager = Dependency.get(NotificationViewHierarchyManager.class);
+        mVisualStabilityManager = Dependency.get(VisualStabilityManager.class);
+
+        // Others
+        mColorExtractor = Dependency.get(SysuiColorExtractor.class);
+        mNavigationBarController = Dependency.get(NavigationBarController.class);
+        mUserSwitcherController = Dependency.get(UserSwitcherController.class);
+    }
+
+    @Override
+    public void setSystemUiVisibility(int displayId, int vis, int fullscreenStackVis,
+            int dockedStackVis, int mask, Rect fullscreenStackBounds, Rect dockedStackBounds,
+            boolean navbarColorManagedByIme) {
+        // Ensure we store the systemUiVisibility flags before the super call overwrites it.
+        int oldVal = getSystemUiVisibility();
+
+        super.setSystemUiVisibility(displayId, vis, fullscreenStackVis, dockedStackVis, mask,
+                fullscreenStackBounds, dockedStackBounds, navbarColorManagedByIme);
+
+        if (displayId != getDisplayId()) {
+            return;
+        }
+
+        int newVal = (oldVal & ~mask) | (vis & mask);
+
+        // update navigation bar mode
+        int nbMode = mNavigationBarWindow == null ? MODE_INVALID : computeNavBarMode(oldVal,
+                newVal);
+        boolean nbModeChanged = nbMode != MODE_INVALID;
+        if (nbModeChanged) {
+            if (mNavigationBarMode != nbMode) {
+                mNavigationBarMode = nbMode;
+                checkNavBarModes();
+            }
+            mAutoHideController.touchAutoHide();
+        }
+
+        mLightBarController.onNavigationVisibilityChanged(
+                vis, mask, nbModeChanged, mNavigationBarMode, navbarColorManagedByIme);
+    }
+
+    @BarTransitions.TransitionMode
+    private int computeNavBarMode(int oldVis, int newVis) {
+        int oldMode = navBarMode(oldVis);
+        int newMode = navBarMode(newVis);
+        if (oldMode == newMode) {
+            return -1; // no mode change
+        }
+        return newMode;
+    }
+
+    @BarTransitions.TransitionMode
+    private int navBarMode(int vis) {
+        if ((vis & View.NAVIGATION_BAR_TRANSIENT) != 0) {
+            return MODE_SEMI_TRANSPARENT;
+        } else {
+            return MODE_OPAQUE;
+        }
+    }
+
+    /**
+     * Checks current navigation bar mode and make transitions.
+     */
+    private void checkNavBarModes() {
+        boolean anim = isDeviceInteractive() && mBottomNavBarVisible;
+        mNavBarTransitions.transitionTo(mNavigationBarMode, anim);
+    }
+
+    @Override
+    protected void setUpQuickSettingsTilePanel() {
+        // ignore.
+    }
+
+    private void registerBootCompletedReceiver() {
+        IntentFilter bootCompletedFilter = new IntentFilter(Intent.ACTION_BOOT_COMPLETED);
+        bootCompletedFilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
+        mContext.registerReceiver(mBootCompletedReceiver, bootCompletedFilter);
+    }
+
+    private void unregisterBootCompletedListener() {
+        mContext.unregisterReceiver(mBootCompletedReceiver);
     }
 
     private void restartNavBarsIfNecessary() {
         boolean currentUserSetup = mDeviceProvisionedController.isCurrentUserSetup();
-        if (mDeviceIsSetUpForUser != currentUserSetup) {
+        boolean currentUserSetupInProgress = mSUWProgressController.isCurrentUserSetupInProgress();
+        if (mIsUserSetupInProgress != currentUserSetupInProgress
+                || mDeviceIsSetUpForUser != currentUserSetup) {
             mDeviceIsSetUpForUser = currentUserSetup;
+            mIsUserSetupInProgress = currentUserSetupInProgress;
             restartNavBars();
         }
     }
@@ -295,7 +533,9 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
     private void restartNavBars() {
         // remove and reattach all hvac components such that we don't keep a reference to unused
         // ui elements
-        mHvacController.removeAllComponents();
+        if (mHvacController != null) {
+            mHvacController.removeAllComponents();
+        }
         mCarFacetButtonController.removeAll();
 
         if (mNavigationBarWindow != null) {
@@ -314,6 +554,9 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
         }
 
         buildNavBarContent();
+        if (mBootCompleted) {
+            initHvac();
+        }
         // If the UI was rebuilt (day/night change) while the keyguard was up we need to
         // correctly respect that state.
         if (mIsKeyguard) {
@@ -322,9 +565,20 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
         // CarFacetButtonController was reset therefore we need to re-add the status bar elements
         // to the controller.
         mCarFacetButtonController.addAllFacetButtons(mStatusBarWindow);
+
+        // Upon restarting the Navigation Bar, CarFacetButtonController should immediately apply the
+        // selection state that reflects the current task stack.
+        try {
+            mCarFacetButtonController.taskChanged(
+                    ActivityTaskManager.getService().getAllStackInfos());
+        } catch (Exception e) {
+            Log.e(TAG, "Getting StackInfo from activity manager failed", e);
+        }
     }
 
     private void addTemperatureViewToController(View v) {
+        if (v == null) return;
+
         if (v instanceof TemperatureView) {
             mHvacController.addHvacTextView((TemperatureView) v);
         } else if (v instanceof ViewGroup) {
@@ -334,7 +588,6 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
             }
         }
     }
-
     /**
      * Allows for showing or hiding just the navigation bars. This is indented to be used when
      * the full screen user selector is shown.
@@ -450,7 +703,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                 new HandleBarCloseNotificationGestureListener());
 
         mTopNavBarNotificationTouchListener = (v, event) -> {
-            if (!mDeviceIsSetUpForUser) {
+            if (!mDeviceIsSetUpForUser || mIsUserSetupInProgress) {
                 return true;
             }
             boolean consumed = openGestureDetector.onTouchEvent(event);
@@ -480,52 +733,32 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                     }
                 });
 
-        CarNotificationListener carNotificationListener = new CarNotificationListener();
         mCarUxRestrictionManagerWrapper = new CarUxRestrictionManagerWrapper();
-        // This can take time if car service is not ready up to this time.
-        // TODO(b/142808072) Refactor CarUxRestrictionManagerWrapper to allow setting
-        // CarUxRestrictionsManager later and switch to Car.CAR_WAIT_TIMEOUT_DO_NOT_WAIT.
-        Car.createCar(mContext, /* handler= */ null, Car.CAR_WAIT_TIMEOUT_WAIT_FOREVER,
-                (car, ready) -> {
-                    if (!ready) {
-                        return;
-                    }
-                    CarUxRestrictionsManager carUxRestrictionsManager =
-                            (CarUxRestrictionsManager)
-                                    car.getCarManager(Car.CAR_UX_RESTRICTION_SERVICE);
-                    mCarUxRestrictionManagerWrapper.setCarUxRestrictionsManager(
-                            carUxRestrictionsManager);
-                });
 
-        mNotificationDataManager = new NotificationDataManager();
-        mNotificationDataManager.setOnUnseenCountUpdateListener(
-                () -> {
-                    if (mNavigationBarView != null && mNotificationDataManager != null) {
-                        Boolean hasUnseen =
-                                mNotificationDataManager.getUnseenNotificationCount() > 0;
-                        if (mNavigationBarView != null) {
-                            mNavigationBarView.toggleNotificationUnseenIndicator(hasUnseen);
-                        }
+        if (mCarNotificationListener == null) {
+            // Only make and register a listener if we don't already have one since
+            // #connectNotificationsUI can be called multiple times on locale change.
+            mCarNotificationListener = new CarNotificationListener();
+            mNotificationDataManager = new NotificationDataManager();
 
-                        if (mLeftNavigationBarView != null) {
-                            mLeftNavigationBarView.toggleNotificationUnseenIndicator(hasUnseen);
-                        }
+            CarHeadsUpNotificationManager carHeadsUpNotificationManager =
+                    new CarSystemUIHeadsUpNotificationManager(mContext,
+                            mNotificationClickHandlerFactory, mNotificationDataManager);
+            mCarNotificationListener.registerAsSystemService(mContext,
+                    mCarUxRestrictionManagerWrapper,
+                    carHeadsUpNotificationManager, mNotificationDataManager);
+        }
 
-                        if (mRightNavigationBarView != null) {
-                            mRightNavigationBarView.toggleNotificationUnseenIndicator(hasUnseen);
-                        }
-                    }
-                });
+        mNotificationDataManager.setOnUnseenCountUpdateListener(() -> {
+            if (mNavigationBarView != null && mNotificationDataManager != null) {
+                onUseenCountUpdate(mNotificationDataManager.getUnseenNotificationCount());
+            }
+        });
 
         mEnableHeadsUpNotificationWhenNotificationShadeOpen = mContext.getResources().getBoolean(
                 R.bool.config_enableHeadsUpNotificationWhenNotificationShadeOpen);
-        CarHeadsUpNotificationManager carHeadsUpNotificationManager =
-                new CarSystemUIHeadsUpNotificationManager(mContext,
-                        mNotificationClickHandlerFactory, mNotificationDataManager);
-        mNotificationClickHandlerFactory.setNotificationDataManager(mNotificationDataManager);
 
-        carNotificationListener.registerAsSystemService(mContext, mCarUxRestrictionManagerWrapper,
-                carHeadsUpNotificationManager, mNotificationDataManager);
+        mNotificationClickHandlerFactory.setNotificationDataManager(mNotificationDataManager);
 
         mNotificationView = mStatusBarWindow.findViewById(R.id.notification_view);
         View glassPane = mStatusBarWindow.findViewById(R.id.glass_pane);
@@ -619,14 +852,45 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                 return handled || isTracking;
             }
         });
+        ((CarSystemUIFactory) SystemUIFactory.getInstance()).getCarServiceProvider(mContext)
+                .addListener((car, ready) -> {
+                    if (!ready) {
+                        return;
+                    }
+                    CarUxRestrictionsManager carUxRestrictionsManager =
+                            (CarUxRestrictionsManager)
+                                    car.getCarManager(Car.CAR_UX_RESTRICTION_SERVICE);
+                    mCarUxRestrictionManagerWrapper.setCarUxRestrictionsManager(
+                            carUxRestrictionsManager);
 
-        mNotificationViewController = new NotificationViewController(
-                mNotificationView,
-                PreprocessingManager.getInstance(mContext),
-                carNotificationListener,
-                mCarUxRestrictionManagerWrapper,
-                mNotificationDataManager);
-        mNotificationViewController.enable();
+                    mNotificationViewController = new NotificationViewController(
+                            mNotificationView,
+                            PreprocessingManager.getInstance(mContext),
+                            mCarNotificationListener,
+                            mCarUxRestrictionManagerWrapper,
+                            mNotificationDataManager);
+                    mNotificationViewController.enable();
+                });
+    }
+
+    /**
+     * This method is automatically called whenever there is an update to the number of unseen
+     * notifications. This method can be extended by OEMs to customize the desired logic.
+     */
+    protected void onUseenCountUpdate(int unseenNotificationCount) {
+        boolean hasUnseen = unseenNotificationCount > 0;
+
+        if (mNavigationBarView != null) {
+            mNavigationBarView.toggleNotificationUnseenIndicator(hasUnseen);
+        }
+
+        if (mLeftNavigationBarView != null) {
+            mLeftNavigationBarView.toggleNotificationUnseenIndicator(hasUnseen);
+        }
+
+        if (mRightNavigationBarView != null) {
+            mRightNavigationBarView.toggleNotificationUnseenIndicator(hasUnseen);
+        }
     }
 
     /**
@@ -741,7 +1005,9 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                     mNotificationViewController.setIsInForeground(false);
                     // let the status bar know that the panel is closed
                     setPanelExpanded(false);
+                    mAutoHideController.userAutoHide();
                 } else {
+                    mAutoHideController.cancelAutoHide();
                     mNotificationViewController.setIsInForeground(true);
                     // let the status bar know that the panel is open
                     mNotificationView.setVisibleNotificationsAsSeen();
@@ -787,22 +1053,24 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
     }
 
     private void buildNavBarContent() {
+        boolean shouldBuildNavBarContent = mDeviceIsSetUpForUser && !mIsUserSetupInProgress;
+
         // Always build top bar.
-        buildTopBar((mDeviceIsSetUpForUser) ? R.layout.car_top_navigation_bar :
+        buildTopBar(shouldBuildNavBarContent ? R.layout.car_top_navigation_bar :
                 R.layout.car_top_navigation_bar_unprovisioned);
 
         if (mShowBottom) {
-            buildBottomBar((mDeviceIsSetUpForUser) ? R.layout.car_navigation_bar :
+            buildBottomBar(shouldBuildNavBarContent ? R.layout.car_navigation_bar :
                     R.layout.car_navigation_bar_unprovisioned);
         }
 
         if (mShowLeft) {
-            buildLeft((mDeviceIsSetUpForUser) ? R.layout.car_left_navigation_bar :
+            buildLeft(shouldBuildNavBarContent ? R.layout.car_left_navigation_bar :
                     R.layout.car_left_navigation_bar_unprovisioned);
         }
 
         if (mShowRight) {
-            buildRight((mDeviceIsSetUpForUser) ? R.layout.car_right_navigation_bar :
+            buildRight(shouldBuildNavBarContent ? R.layout.car_right_navigation_bar :
                     R.layout.car_right_navigation_bar_unprovisioned);
         }
     }
@@ -814,6 +1082,8 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
         if (mShowBottom) {
             mNavigationBarWindow = (ViewGroup) View.inflate(mContext,
                     R.layout.navigation_bar_window, null);
+            mNavBarTransitions = new BarTransitions(mNavigationBarWindow,
+                    R.drawable.nav_background);
         }
         if (mShowLeft) {
             mLeftNavigationBarWindow = (ViewGroup) View.inflate(mContext,
@@ -911,6 +1181,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
         }
 
         mNavigationBarWindow.setVisibility(isKeyboardVisible ? View.GONE : View.VISIBLE);
+        setNotificationViewBottomMargin(isKeyboardVisible ? 0 : mNavigationBarWindow.getHeight());
         mBottomNavBarVisible = !isKeyboardVisible;
     }
 
@@ -923,7 +1194,6 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
             throw new RuntimeException("Unable to build top nav bar due to missing layout");
         }
         mTopNavigationBarView.setStatusBar(this);
-        addTemperatureViewToController(mTopNavigationBarView);
         mTopNavigationBarView.setStatusBarWindowTouchListener(mTopNavBarNotificationTouchListener);
     }
 
@@ -938,7 +1208,6 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
             throw new RuntimeException("Unable to build bottom nav bar due to missing layout");
         }
         mNavigationBarView.setStatusBar(this);
-        addTemperatureViewToController(mNavigationBarView);
         mNavigationBarView.setStatusBarWindowTouchListener(mNavBarNotificationTouchListener);
     }
 
@@ -950,7 +1219,6 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
             throw new RuntimeException("Unable to build left nav bar due to missing layout");
         }
         mLeftNavigationBarView.setStatusBar(this);
-        addTemperatureViewToController(mLeftNavigationBarView);
         mLeftNavigationBarView.setStatusBarWindowTouchListener(mNavBarNotificationTouchListener);
     }
 
@@ -963,8 +1231,25 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
             throw new RuntimeException("Unable to build right nav bar due to missing layout");
         }
         mRightNavigationBarView.setStatusBar(this);
-        addTemperatureViewToController(mRightNavigationBarView);
         mRightNavigationBarView.setStatusBarWindowTouchListener(mNavBarNotificationTouchListener);
+    }
+
+    private void initHvac() {
+        if (mHvacController == null) {
+            mHvacController = Dependency.get(HvacController.class);
+            mHvacController.connectToCarService();
+        }
+        addTemperatureViewToController(mTopNavigationBarView);
+        addTemperatureViewToController(mNavigationBarView);
+        addTemperatureViewToController(mLeftNavigationBarView);
+        addTemperatureViewToController(mRightNavigationBarView);
+    }
+
+    private void setNotificationViewBottomMargin(int bottomMargin) {
+        ViewGroup.MarginLayoutParams params =
+                (ViewGroup.MarginLayoutParams) mNotificationView.getLayoutParams();
+        params.setMargins(params.leftMargin, params.topMargin, params.rightMargin, bottomMargin);
+        mNotificationView.setLayoutParams(params);
     }
 
     @Override
@@ -1163,6 +1448,25 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
         // mode.
         mNotificationPanelBackground = getDefaultWallpaper();
         mScrimController.setScrimBehindDrawable(mNotificationPanelBackground);
+    }
+
+    @Override
+    public void onLocaleListChanged() {
+        // When locale changes we need to reload the notification panel with the new language
+        if (mNotificationView == null) {
+            return;
+        }
+
+        LayoutParams params = mNotificationView.getLayoutParams();
+        int index = mStatusBarWindow.indexOfChild(mNotificationView);
+
+        mStatusBarWindow.removeView(mNotificationView);
+
+        View v = View.inflate(mContext, R.layout.notification_center_activity, null);
+        mStatusBarWindow.addView(v, index, params);
+
+        restartNavBars();
+        connectNotificationsUI();
     }
 
     /**
@@ -1418,8 +1722,10 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
 
         @Override
         protected void setHeadsUpVisible() {
-            // if the Notifications panel is showing don't show the Heads up
-            if (!mEnableHeadsUpNotificationWhenNotificationShadeOpen && mPanelExpanded) {
+            // if the Notifications panel is showing or SUW for user is in progress then don't show
+            // heads up notifications
+            if ((!mEnableHeadsUpNotificationWhenNotificationShadeOpen && mPanelExpanded)
+                    || !mDeviceIsSetUpForUser || mIsUserSetupInProgress) {
                 return;
             }
 

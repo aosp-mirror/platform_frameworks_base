@@ -883,12 +883,8 @@ static jobject JHwParcel_native_readStrongBinder(JNIEnv *env, jobject thiz) {
 
     sp<hardware::IBinder> binder = parcel->readStrongBinder();
 
-    if (binder == nullptr) {
-        return nullptr;
-    }
-
-    if (!validateCanUseHwBinder(binder)) {
-        return nullptr;
+    if (binder == NULL) {
+        return NULL;
     }
 
     return JHwRemoteBinder::NewObject(env, binder);

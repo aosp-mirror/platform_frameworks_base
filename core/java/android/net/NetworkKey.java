@@ -16,7 +16,6 @@
 
 package android.net;
 
-import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.net.wifi.ScanResult;
@@ -153,7 +152,7 @@ public class NetworkKey implements Parcelable {
     }
 
     @Override
-    public boolean equals(@Nullable Object o) {
+    public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
@@ -167,7 +166,6 @@ public class NetworkKey implements Parcelable {
         return Objects.hash(type, wifiKey);
     }
 
-    @NonNull
     @Override
     public String toString() {
         switch (type) {

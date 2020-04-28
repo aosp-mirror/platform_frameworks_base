@@ -24,7 +24,7 @@
 #include <nativehelper/JNIHelp.h>
 #include <android_runtime/AndroidRuntime.h>
 #include <utils/threads.h>
-#include "Visualizer.h"
+#include "media/Visualizer.h"
 
 #include <nativehelper/ScopedUtfChars.h>
 

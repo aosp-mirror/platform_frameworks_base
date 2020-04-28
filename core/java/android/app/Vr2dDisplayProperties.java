@@ -18,7 +18,6 @@ package android.app;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -75,7 +74,6 @@ public final class Vr2dDisplayProperties implements Parcelable {
         return result;
     }
 
-    @NonNull
     @Override
     public String toString() {
         return "Vr2dDisplayProperties{"
@@ -88,7 +86,7 @@ public final class Vr2dDisplayProperties implements Parcelable {
     }
 
     @Override
-    public boolean equals(@Nullable Object o) {
+    public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 

@@ -192,37 +192,33 @@ public final class ActiveServices {
         @Override
         public void stopForegroundServicesForUidPackage(final int uid, final String packageName) {
             synchronized (mAm) {
-                stopAllForegroundServicesLocked(uid, packageName);
-            }
-        }
-    }
+                final ServiceMap smap = getServiceMapLocked(UserHandle.getUserId(uid));
+                final int N = smap.mServicesByInstanceName.size();
+                final ArrayList<ServiceRecord> toStop = new ArrayList<>(N);
+                for (int i = 0; i < N; i++) {
+                    final ServiceRecord r = smap.mServicesByInstanceName.valueAt(i);
+                    if (uid == r.serviceInfo.applicationInfo.uid
+                            || packageName.equals(r.serviceInfo.packageName)) {
+                        if (r.isForeground) {
+                            toStop.add(r);
+                        }
+                    }
+                }
 
-    void stopAllForegroundServicesLocked(final int uid, final String packageName) {
-        final ServiceMap smap = getServiceMapLocked(UserHandle.getUserId(uid));
-        final int N = smap.mServicesByInstanceName.size();
-        final ArrayList<ServiceRecord> toStop = new ArrayList<>(N);
-        for (int i = 0; i < N; i++) {
-            final ServiceRecord r = smap.mServicesByInstanceName.valueAt(i);
-            if (uid == r.serviceInfo.applicationInfo.uid
-                    || packageName.equals(r.serviceInfo.packageName)) {
-                if (r.isForeground) {
-                    toStop.add(r);
+                // Now stop them all
+                final int numToStop = toStop.size();
+                if (numToStop > 0 && DEBUG_FOREGROUND_SERVICE) {
+                    Slog.i(TAG, "Package " + packageName + "/" + uid
+                            + " entering FAS with foreground services");
+                }
+                for (int i = 0; i < numToStop; i++) {
+                    final ServiceRecord r = toStop.get(i);
+                    if (DEBUG_FOREGROUND_SERVICE) {
+                        Slog.i(TAG, "  Stopping fg for service " + r);
+                    }
+                    setServiceForegroundInnerLocked(r, 0, null, 0, 0);
                 }
             }
-        }
-
-        // Now stop them all
-        final int numToStop = toStop.size();
-        if (numToStop > 0 && DEBUG_FOREGROUND_SERVICE) {
-            Slog.i(TAG, "Package " + packageName + "/" + uid
-                    + " in FAS with foreground services");
-        }
-        for (int i = 0; i < numToStop; i++) {
-            final ServiceRecord r = toStop.get(i);
-            if (DEBUG_FOREGROUND_SERVICE) {
-                Slog.i(TAG, "  Stopping fg for service " + r);
-            }
-            setServiceForegroundInnerLocked(r, 0, null, 0, 0);
         }
     }
 
@@ -833,6 +829,15 @@ public final class ActiveServices {
         }
     }
 
+    void killMisbehavingService(ServiceRecord r,
+            int appUid, int appPid, String localPackageName) {
+        synchronized (mAm) {
+            stopServiceLocked(r);
+            mAm.crashApplication(appUid, appPid, localPackageName, -1,
+                    "Bad notification for startForeground", true /*force*/);
+        }
+    }
+
     IBinder peekServiceLocked(Intent service, String resolvedType, String callingPackage) {
         ServiceLookupResult r = retrieveServiceLocked(service, null, resolvedType, callingPackage,
                 Binder.getCallingPid(), Binder.getCallingUid(),
@@ -1014,23 +1019,12 @@ public final class ActiveServices {
                         }
                     }
                     if (!aa.mAppOnTop) {
-                        // Transitioning a fg-service host app out of top: if it's bg restricted,
-                        // it loses the fg service state now.
-                        if (!appRestrictedAnyInBackground(aa.mUid, aa.mPackageName)) {
-                            if (active == null) {
-                                active = new ArrayList<>();
-                            }
-                            if (DEBUG_FOREGROUND_SERVICE) Slog.d(TAG, "Adding active: pkg="
-                                    + aa.mPackageName + ", uid=" + aa.mUid);
-                            active.add(aa);
-                        } else {
-                            if (DEBUG_FOREGROUND_SERVICE) {
-                                Slog.d(TAG, "bg-restricted app "
-                                        + aa.mPackageName + "/" + aa.mUid
-                                        + " exiting top; demoting fg services ");
-                            }
-                            stopAllForegroundServicesLocked(aa.mUid, aa.mPackageName);
+                        if (active == null) {
+                            active = new ArrayList<>();
                         }
+                        if (DEBUG_FOREGROUND_SERVICE) Slog.d(TAG, "Adding active: pkg="
+                                + aa.mPackageName + ", uid=" + aa.mUid);
+                        active.add(aa);
                     }
                 }
                 smap.removeMessages(ServiceMap.MSG_UPDATE_FOREGROUND_APPS);
@@ -3165,8 +3159,11 @@ public final class ActiveServices {
                 }
             }
 
-            // If unbound while waiting to start, remove the pending service
-            mPendingServices.remove(s);
+            // If unbound while waiting to start and there is no connection left in this service,
+            // remove the pending service
+            if (s.getConnections().isEmpty()) {
+                mPendingServices.remove(s);
+            }
 
             if ((c.flags&Context.BIND_AUTO_CREATE) != 0) {
                 boolean hasAutoCreate = s.hasAutoCreateConnections();
@@ -3933,7 +3930,7 @@ public final class ActiveServices {
     void serviceForegroundCrash(ProcessRecord app, CharSequence serviceRecord) {
         mAm.crashApplication(app.uid, app.pid, app.info.packageName, app.userId,
                 "Context.startForegroundService() did not then call Service.startForeground(): "
-                    + serviceRecord);
+                    + serviceRecord, false /*force*/);
     }
 
     void scheduleServiceTimeoutLocked(ProcessRecord proc) {

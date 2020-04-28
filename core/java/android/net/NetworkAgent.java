@@ -16,7 +16,6 @@
 
 package android.net;
 
-import android.annotation.NonNull;
 import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.os.Build;
@@ -179,21 +178,7 @@ public abstract class NetworkAgent extends Handler {
      */
     public static final int EVENT_SOCKET_KEEPALIVE = BASE + 13;
 
-    /**
-     * Sent by ConnectivityService to inform this network transport of signal strength thresholds
-     * that when crossed should trigger a system wakeup and a NetworkCapabilities update.
-     *
-     *   obj = int[] describing signal strength thresholds.
-     */
-    public static final int CMD_SET_SIGNAL_STRENGTH_THRESHOLDS = BASE + 14;
-
-    /**
-     * Sent by ConnectivityService to the NeworkAgent to inform the agent to avoid
-     * automatically reconnecting to this network (e.g. via autojoin).  Happens
-     * when user selects "No" option on the "Stay connected?" dialog box.
-     */
-    public static final int CMD_PREVENT_AUTOMATIC_RECONNECT = BASE + 15;
-
+    // TODO: move the above 2 constants down so they are in order once merge conflicts are resolved
     /**
      * Sent by the KeepaliveTracker to NetworkAgent to add a packet filter.
      *
@@ -212,6 +197,21 @@ public abstract class NetworkAgent extends Handler {
      * arg1 = slot number of the keepalive packet filter to remove.
      */
     public static final int CMD_REMOVE_KEEPALIVE_PACKET_FILTER = BASE + 17;
+
+    /**
+     * Sent by ConnectivityService to inform this network transport of signal strength thresholds
+     * that when crossed should trigger a system wakeup and a NetworkCapabilities update.
+     *
+     *   obj = int[] describing signal strength thresholds.
+     */
+    public static final int CMD_SET_SIGNAL_STRENGTH_THRESHOLDS = BASE + 14;
+
+    /**
+     * Sent by ConnectivityService to the NeworkAgent to inform the agent to avoid
+     * automatically reconnecting to this network (e.g. via autojoin).  Happens
+     * when user selects "No" option on the "Stay connected?" dialog box.
+     */
+    public static final int CMD_PREVENT_AUTOMATIC_RECONNECT = BASE + 15;
 
     // TODO : remove these two constructors. They are a stopgap measure to help sheperding a number
     // of dependent changes that would conflict throughout the automerger graph. Having these
@@ -419,16 +419,7 @@ public abstract class NetworkAgent extends Handler {
         if (score < 0) {
             throw new IllegalArgumentException("Score must be >= 0");
         }
-        final NetworkScore ns = new NetworkScore();
-        ns.putIntExtension(NetworkScore.LEGACY_SCORE, score);
-        updateScore(ns);
-    }
-
-    /**
-     * Called by the bearer code when it has a new NetworkScore for this network.
-     */
-    public void updateScore(@NonNull NetworkScore ns) {
-        queueOrSendMessage(EVENT_NETWORK_SCORE_CHANGED, new NetworkScore(ns));
+        queueOrSendMessage(EVENT_NETWORK_SCORE_CHANGED,  score, 0);
     }
 
     /**
@@ -447,23 +438,15 @@ public abstract class NetworkAgent extends Handler {
     }
 
     /**
-     * Called by the bearer to indicate whether the network was manually selected by the user.
+     * Called by the bearer to indicate this network was manually selected by the user.
      * This should be called before the NetworkInfo is marked CONNECTED so that this
-     * Network can be given special treatment at that time.
-     *
-     * If {@code explicitlySelected} is {@code true}, and {@code acceptUnvalidated} is {@code true},
-     * then the system will switch to this network. If {@code explicitlySelected} is {@code true}
-     * and {@code acceptUnvalidated} is {@code false}, and the  network cannot be validated, the
-     * system will ask the user whether to switch to this network.  If the user confirms and selects
-     * "don't ask again", then the system will call {@link #saveAcceptUnvalidated} to persist the
-     * user's choice. Thus, if the transport ever calls this method with {@code explicitlySelected}
-     * set to {@code true} and {@code acceptUnvalidated} set to {@code false}, it must also
-     * implement {@link #saveAcceptUnvalidated} to respect the user's choice.
-     *
-     * If  {@code explicitlySelected} is {@code false} and {@code acceptUnvalidated} is
-     * {@code true}, the system will interpret this as the user having accepted partial connectivity
-     * on this network. Thus, the system will switch to the network and consider it validated even
-     * if it only provides partial connectivity, but the network is not otherwise treated specially.
+     * Network can be given special treatment at that time. If {@code acceptUnvalidated} is
+     * {@code true}, then the system will switch to this network. If it is {@code false} and the
+     * network cannot be validated, the system will ask the user whether to switch to this network.
+     * If the user confirms and selects "don't ask again", then the system will call
+     * {@link #saveAcceptUnvalidated} to persist the user's choice. Thus, if the transport ever
+     * calls this method with {@code acceptUnvalidated} set to {@code false}, it must also implement
+     * {@link #saveAcceptUnvalidated} to respect the user's choice.
      */
     public void explicitlySelected(boolean explicitlySelected, boolean acceptUnvalidated) {
         queueOrSendMessage(EVENT_SET_EXPLICITLY_SELECTED,

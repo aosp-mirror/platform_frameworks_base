@@ -17,8 +17,6 @@ package com.android.internal.telephony;
 
 import android.telephony.TelephonyManager;
 
-import dalvik.annotation.compat.UnsupportedAppUsage;
-
 /**
  * {@hide}
  */
@@ -67,26 +65,15 @@ public class IccCardConstants {
      *
      * The ordinal values much match {@link TelephonyManager#SIM_STATE_UNKNOWN} ...
      */
-    @UnsupportedAppUsage(implicitMember =
-            "values()[Lcom/android/internal/telephony/IccCardConstants$State;")
     public enum State {
-        @UnsupportedAppUsage
         UNKNOWN,        /** ordinal(0) == {@See TelephonyManager#SIM_STATE_UNKNOWN} */
-        @UnsupportedAppUsage
         ABSENT,         /** ordinal(1) == {@See TelephonyManager#SIM_STATE_ABSENT} */
-        @UnsupportedAppUsage
         PIN_REQUIRED,   /** ordinal(2) == {@See TelephonyManager#SIM_STATE_PIN_REQUIRED} */
-        @UnsupportedAppUsage
         PUK_REQUIRED,   /** ordinal(3) == {@See TelephonyManager#SIM_STATE_PUK_REQUIRED} */
-        @UnsupportedAppUsage
         NETWORK_LOCKED, /** ordinal(4) == {@See TelephonyManager#SIM_STATE_NETWORK_LOCKED} */
-        @UnsupportedAppUsage
         READY,          /** ordinal(5) == {@See TelephonyManager#SIM_STATE_READY} */
-        @UnsupportedAppUsage
         NOT_READY,      /** ordinal(6) == {@See TelephonyManager#SIM_STATE_NOT_READY} */
-        @UnsupportedAppUsage
         PERM_DISABLED,  /** ordinal(7) == {@See TelephonyManager#SIM_STATE_PERM_DISABLED} */
-        @UnsupportedAppUsage
         CARD_IO_ERROR,  /** ordinal(8) == {@See TelephonyManager#SIM_STATE_CARD_IO_ERROR} */
         CARD_RESTRICTED,/** ordinal(9) == {@See TelephonyManager#SIM_STATE_CARD_RESTRICTED} */
         LOADED;         /** ordinal(9) == {@See TelephonyManager#SIM_STATE_LOADED} */

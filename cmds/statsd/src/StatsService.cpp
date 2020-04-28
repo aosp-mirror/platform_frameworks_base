@@ -266,7 +266,9 @@ status_t StatsService::onTransact(uint32_t code, const Parcel& data, Parcel* rep
                     IResultReceiver::asInterface(data.readStrongBinder());
 
             err = command(in, out, err, args, resultReceiver);
-            resultReceiver->send(err);
+            if (resultReceiver != nullptr) {
+                resultReceiver->send(err);
+            }
             return NO_ERROR;
         }
         default: { return BnStatsManager::onTransact(code, data, reply, flags); }
@@ -411,12 +413,19 @@ status_t StatsService::command(int in, int out, int err, Vector<String8>& args,
             return cmd_trigger_active_config_broadcast(out, args);
         }
         if (!args[0].compare(String8("data-subscribe"))) {
-            if (mShellSubscriber == nullptr) {
-                mShellSubscriber = new ShellSubscriber(mUidMap, mPullerManager);
+            {
+                std::lock_guard<std::mutex> lock(mShellSubscriberMutex);
+                if (mShellSubscriber == nullptr) {
+                    mShellSubscriber = new ShellSubscriber(mUidMap, mPullerManager);
+                }
             }
             int timeoutSec = -1;
             if (argCount >= 2) {
                 timeoutSec = atoi(args[1].c_str());
+            }
+            if (resultReceiver == nullptr) {
+                ALOGI("Null resultReceiver given, no subscription will be started");
+                return UNEXPECTED_NULL;
             }
             mShellSubscriber->startNewSubscription(in, out, resultReceiver, timeoutSec);
             return NO_ERROR;
@@ -1385,7 +1394,10 @@ Status StatsService::sendBinaryPushStateChangedAtom(const android::String16& tra
 
 Status StatsService::sendWatchdogRollbackOccurredAtom(const int32_t rollbackTypeIn,
                                                       const android::String16& packageNameIn,
-                                                      const int64_t packageVersionCodeIn) {
+                                                      const int64_t packageVersionCodeIn,
+                                                      const int32_t rollbackReasonIn,
+                                                      const android::String16&
+                                                       failingPackageNameIn) {
     // Note: We skip the usage stats op check here since we do not have a package name.
     // This is ok since we are overloading the usage_stats permission.
     // This method only sends data, it does not receive it.
@@ -1407,7 +1419,8 @@ Status StatsService::sendWatchdogRollbackOccurredAtom(const int32_t rollbackType
     }
 
     android::util::stats_write(android::util::WATCHDOG_ROLLBACK_OCCURRED,
-            rollbackTypeIn, String8(packageNameIn).string(), packageVersionCodeIn);
+            rollbackTypeIn, String8(packageNameIn).string(), packageVersionCodeIn,
+            rollbackReasonIn, String8(failingPackageNameIn).string());
 
     // Fast return to save disk read.
     if (rollbackTypeIn != android::util::WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_SUCCESS

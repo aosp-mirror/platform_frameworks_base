@@ -11,5 +11,4 @@ android_app {
 
     srcs: ["src/**/*.java"],
 
-    platform_apis: true,
 }

@@ -30,7 +30,7 @@
     <string name="always_on_disconnected_message_separator" msgid="3310614409322581371">" "</string>
     <string name="always_on_disconnected_message_settings_link" msgid="6172280302829992412">"የቪፒኤን ቅንብሮችን ይቀይሩ"</string>
     <string name="configure" msgid="4905518375574791375">"አዋቅር"</string>
-    <string name="disconnect" msgid="971412338304200056">"አለያይ"</string>
+    <string name="disconnect" msgid="971412338304200056">"ግንኙነት አቋርጥ"</string>
     <string name="open_app" msgid="3717639178595958667">"መተግበሪያን ክፈት"</string>
     <string name="dismiss" msgid="6192859333764711227">"አሰናብት"</string>
 </resources>

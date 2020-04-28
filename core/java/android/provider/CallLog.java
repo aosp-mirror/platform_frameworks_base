@@ -35,7 +35,6 @@ import android.provider.ContactsContract.CommonDataKinds.Callable;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.provider.ContactsContract.Data;
 import android.provider.ContactsContract.DataUsageFeedback;
-import android.telecom.CallerInfo;
 import android.telecom.PhoneAccount;
 import android.telecom.PhoneAccountHandle;
 import android.telecom.TelecomManager;
@@ -43,6 +42,7 @@ import android.telephony.PhoneNumberUtils;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.android.internal.telephony.CallerInfo;
 import com.android.internal.telephony.PhoneConstants;
 
 import java.util.List;
@@ -728,11 +728,10 @@ public class CallLog {
             String accountAddress = getLogAccountAddress(context, accountHandle);
 
             int numberPresentation = getLogNumberPresentation(number, presentation);
-            String name = (ci != null) ? ci.getName() : "";
             if (numberPresentation != PRESENTATION_ALLOWED) {
                 number = "";
                 if (ci != null) {
-                    name = "";
+                    ci.name = "";
                 }
             }
 
@@ -761,7 +760,9 @@ public class CallLog {
             values.put(PHONE_ACCOUNT_ID, accountId);
             values.put(PHONE_ACCOUNT_ADDRESS, accountAddress);
             values.put(NEW, Integer.valueOf(1));
-            values.put(CACHED_NAME, name);
+            if ((ci != null) && (ci.name != null)) {
+                values.put(CACHED_NAME, ci.name);
+            }
             values.put(ADD_FOR_ALL_USERS, addForAllUsers ? 1 : 0);
 
             if (callType == MISSED_TYPE) {
@@ -772,7 +773,7 @@ public class CallLog {
             values.put(CALL_SCREENING_APP_NAME, charSequenceToString(callScreeningAppName));
             values.put(CALL_SCREENING_COMPONENT_NAME, callScreeningComponentName);
 
-            if ((ci != null) && (ci.getContactId() > 0)) {
+            if ((ci != null) && (ci.contactIdOrZero > 0)) {
                 // Update usage information for the number associated with the contact ID.
                 // We need to use both the number and the ID for obtaining a data ID since other
                 // contacts may have the same number.
@@ -786,18 +787,17 @@ public class CallLog {
                     cursor = resolver.query(Phone.CONTENT_URI,
                             new String[] { Phone._ID },
                             Phone.CONTACT_ID + " =? AND " + Phone.NORMALIZED_NUMBER + " =?",
-                            new String[] { String.valueOf(ci.getContactId()),
+                            new String[] { String.valueOf(ci.contactIdOrZero),
                                     normalizedPhoneNumber},
                             null);
                 } else {
-                    final String phoneNumber = ci.getPhoneNumber() != null
-                        ? ci.getPhoneNumber() : number;
+                    final String phoneNumber = ci.phoneNumber != null ? ci.phoneNumber : number;
                     cursor = resolver.query(
                             Uri.withAppendedPath(Callable.CONTENT_FILTER_URI,
                                     Uri.encode(phoneNumber)),
                             new String[] { Phone._ID },
                             Phone.CONTACT_ID + " =?",
-                            new String[] { String.valueOf(ci.getContactId()) },
+                            new String[] { String.valueOf(ci.contactIdOrZero) },
                             null);
                 }
 
@@ -967,23 +967,6 @@ public class CallLog {
                 // spam the call log with its own entries, causing entries from Telephony to be
                 // removed.
                 final Uri result = resolver.insert(uri, values);
-                if (result != null) {
-                    String lastPathSegment = result.getLastPathSegment();
-                    // When inserting into the call log, if ContentProvider#insert detect an appops
-                    // denial a non-null "silent rejection" URI is returned which ends in 0.
-                    // Example: content://call_log/calls/0
-                    // The 0 in the last part of the path indicates a fake call id of 0.
-                    // A denial when logging calls from the platform is bad; there is no other
-                    // logging to indicate that this has happened so we will check for that scenario
-                    // here and log a warning so we have a hint as to what is going on.
-                    if (lastPathSegment != null && lastPathSegment.equals("0")) {
-                        Log.w(LOG_TAG, "Failed to insert into call log due to appops denial;"
-                                + " resultUri=" + result);
-                    }
-                } else {
-                    Log.w(LOG_TAG, "Failed to insert into call log; null result uri.");
-                }
-
                 if (values.containsKey(PHONE_ACCOUNT_ID)
                         && !TextUtils.isEmpty(values.getAsString(PHONE_ACCOUNT_ID))
                         && values.containsKey(PHONE_ACCOUNT_COMPONENT_NAME)

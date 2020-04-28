@@ -1,18 +1,5 @@
 {
-  "presubmit-devicepolicy": [
-    {
-      "name": "CtsDevicePolicyManagerTestCases",
-      "options": [
-        {
-          "exclude-annotation": "android.platform.test.annotations.FlakyTest"
-        },
-        {
-          "exclude-annotation": "android.platform.test.annotations.LargeTest"
-        }
-      ]
-    }
-  ],
-  "postsubmit-devicepolicy": [
+  "postsubmit": [
     {
       "name": "CtsDevicePolicyManagerTestCases"
     }

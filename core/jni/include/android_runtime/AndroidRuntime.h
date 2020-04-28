@@ -131,7 +131,7 @@ private:
                                     const char* runtimeArg,
                                     const char* quotingArg);
     void parseExtraOpts(char* extraOptsBuf, const char* quotingArg);
-    int startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote, bool primary_zygote);
+    int startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote);
 
     Vector<JavaVMOption> mOptions;
     bool mExitWithoutCleanup;

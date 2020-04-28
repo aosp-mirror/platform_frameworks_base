@@ -189,15 +189,11 @@ public abstract class CellInfo implements Parcelable {
         mTimeStamp = ts;
     }
 
-    /**
-     * @return a {@link CellIdentity} instance.
-     */
+    /** @hide */
     @NonNull
     public abstract CellIdentity getCellIdentity();
 
-    /**
-     * @return a {@link CellSignalStrength} instance.
-     */
+    /** @hide */
     @NonNull
     public abstract CellSignalStrength getCellSignalStrength();
 

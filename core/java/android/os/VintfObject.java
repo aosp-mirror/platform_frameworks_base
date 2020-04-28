@@ -72,8 +72,6 @@ public class VintfObject {
      * ["android.hidl.manager@1.0", "android.hardware.camera.device@1.0",
      *  "android.hardware.camera.device@3.2"]. There are no duplicates.
      *
-     * For AIDL HALs, the version is stripped away
-     * (e.g. "android.hardware.light").
      * @hide
      */
     @TestApi

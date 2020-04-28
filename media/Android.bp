@@ -27,7 +27,7 @@ java_library {
     installable: true,
 
     // Make sure that the implementaion only relies on SDK or system APIs.
-    sdk_version: "core_platform",
+    no_framework_libs: true,
     libs: [
         // The order matters. android_system_* library should come later.
         "framework_media_annotation",
@@ -41,6 +41,13 @@ filegroup {
     name: "updatable-media-srcs",
     srcs: [
         ":mediasession2-srcs",
+    ],
+}
+
+filegroup {
+    name: "updatable-media-srcs-without-aidls",
+    srcs : [
+        ":mediasession2-srcs-without-aidls",
     ],
 }
 
@@ -60,7 +67,37 @@ filegroup {
         "apex/java/android/media/Session2Link.java",
         "apex/java/android/media/Session2Token.java",
     ],
-    path: "apex/java",
+}
+
+filegroup {
+    name: "mediasession2-srcs-without-aidls",
+    srcs: [
+        ":mediasession2-srcs",
+    ],
+    exclude_srcs: [
+        "apex/java/android/media/IMediaController2.aidl",
+        "apex/java/android/media/IMediaSession2.aidl",
+        "apex/java/android/media/IMediaSession2Service.aidl",
+    ],
+}
+
+filegroup {
+    name: "mediaplayer2-srcs",
+    srcs: [
+        "apex/java/android/media/CloseGuard.java",
+        "apex/java/android/media/DataSourceCallback.java",
+        "apex/java/android/media/DataSourceDesc.java",
+        "apex/java/android/media/UriDataSourceDesc.java",
+        "apex/java/android/media/FileDataSourceDesc.java",
+        "apex/java/android/media/Media2Utils.java",
+        "apex/java/android/media/MediaPlayer2Utils.java",
+        "apex/java/android/media/MediaPlayer2.java",
+        "apex/java/android/media/Media2HTTPService.java",
+        "apex/java/android/media/Media2HTTPConnection.java",
+        "apex/java/android/media/RoutingDelegate.java",
+        "apex/java/android/media/BufferingParams.java",
+        "apex/java/android/media/ProxyDataSourceCallback.java",
+    ],
 }
 
 metalava_updatable_media_args = " --error UnhiddenSystemApi " +
@@ -73,21 +110,21 @@ metalava_updatable_media_args = " --error UnhiddenSystemApi " +
 droidstubs {
     name: "updatable-media-stubs",
     srcs: [
-        ":updatable-media-srcs",
+        ":updatable-media-srcs-without-aidls",
         ":framework-media-annotation-srcs",
     ],
     args: metalava_updatable_media_args,
-    aidl: {
-        // TODO(b/135922046) remove this
-        include_dirs: ["frameworks/base/core/java"],
-    },
-    sdk_version: "system_current",
+    // Ideally, sdk_version here should be "current_system", but "current - 1" is used
+    // to avoid dependency cycle with framework.
+    sdk_version: "28",
 }
 
 java_library {
     name: "updatable_media_stubs",
     srcs: [":updatable-media-stubs"],
-    sdk_version: "system_current",
+    // Ideally, sdk_version here should be "current_system", but "current - 1" is used
+    // to avoid dependency cycle with framework.
+    sdk_version: "28",
 }
 
 java_library {

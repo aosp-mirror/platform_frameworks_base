@@ -21,11 +21,9 @@ import android.content.pm.PackageManager;
 import android.gsi.GsiInstallParams;
 import android.gsi.GsiProgress;
 import android.gsi.IGsiService;
-import android.gsi.IGsid;
 import android.os.Environment;
 import android.os.IBinder;
 import android.os.IBinder.DeathRecipient;
-import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
@@ -63,9 +61,7 @@ public class DynamicSystemService extends IDynamicSystemService.Stub implements 
          * re-initialized in this case.
          */
         binder.linkToDeath(recipient, 0);
-
-        IGsid gsid = IGsid.Stub.asInterface(binder);
-        return gsid.getClient();
+        return IGsiService.Stub.asInterface(binder);
     }
 
     /** implements DeathRecipient */
@@ -115,8 +111,7 @@ public class DynamicSystemService extends IDynamicSystemService.Stub implements 
     }
 
     @Override
-    public boolean startInstallation(String name, long size, boolean readOnly)
-            throws RemoteException {
+    public boolean startInstallation(long systemSize, long userdataSize) throws RemoteException {
         // priority from high to low: sysprop -> sdcard -> /data
         String path = SystemProperties.get("os.aot.path");
         if (path.isEmpty()) {
@@ -138,18 +133,11 @@ public class DynamicSystemService extends IDynamicSystemService.Stub implements 
             }
             Slog.i(TAG, "startInstallation -> " + path);
         }
-        IGsiService service = getGsiService();
         GsiInstallParams installParams = new GsiInstallParams();
         installParams.installDir = path;
-        installParams.name = name;
-        installParams.size = size;
-        installParams.wipe = readOnly;
-        installParams.readOnly = readOnly;
-        if (service.beginGsiInstall(installParams) != 0) {
-            Slog.i(TAG, "Failed to install " + name);
-            return false;
-        }
-        return true;
+        installParams.gsiSize = systemSize;
+        installParams.userdataSize = userdataSize;
+        return getGsiService().beginGsiInstall(installParams) == 0;
     }
 
     @Override
@@ -171,7 +159,7 @@ public class DynamicSystemService extends IDynamicSystemService.Stub implements 
             isInUse = getGsiService().isGsiRunning();
         } finally {
             if (!gsidWasRunning && !isInUse) {
-                mGsiService = null;
+                SystemProperties.set("ctl.stop", "gsid");
             }
         }
 
@@ -190,34 +178,28 @@ public class DynamicSystemService extends IDynamicSystemService.Stub implements 
 
     @Override
     public boolean remove() throws RemoteException {
-        return getGsiService().removeGsi();
+        return getGsiService().removeGsiInstall();
     }
 
     @Override
-    public boolean setEnable(boolean enable, boolean oneShot) throws RemoteException {
+    public boolean setEnable(boolean enable) throws RemoteException {
         IGsiService gsiService = getGsiService();
         if (enable) {
-            return gsiService.enableGsi(oneShot) == 0;
+            final int status = gsiService.getGsiBootStatus();
+            final boolean singleBoot = (status == IGsiService.BOOT_STATUS_SINGLE_BOOT);
+            return gsiService.setGsiBootable(singleBoot) == 0;
         } else {
-            return gsiService.disableGsi();
+            return gsiService.disableGsiInstall();
         }
     }
 
     @Override
-    public boolean setAshmem(ParcelFileDescriptor ashmem, long size) {
-        try {
-            return getGsiService().setGsiAshmem(ashmem, size);
-        } catch (RemoteException e) {
-            throw new RuntimeException(e.toString());
-        }
+    public boolean write(byte[] buf) throws RemoteException {
+        return getGsiService().commitGsiChunkFromMemory(buf);
     }
 
     @Override
-    public boolean submitFromAshmem(long size) {
-        try {
-            return getGsiService().commitGsiChunkFromAshmem(size);
-        } catch (RemoteException e) {
-            throw new RuntimeException(e.toString());
-        }
+    public boolean commit() throws RemoteException {
+        return getGsiService().setGsiBootable(true) == 0;
     }
 }

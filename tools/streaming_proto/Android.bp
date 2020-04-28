@@ -29,7 +29,7 @@ cc_defaults {
         "-Werror",
     ],
 
-    static_libs: ["libprotoc"],
+    shared_libs: ["libprotoc"],
 }
 
 cc_binary_host {
@@ -48,19 +48,4 @@ cc_binary_host {
     ],
 
     defaults: ["protoc-gen-stream-defaults"],
-}
-
-// ==========================================================
-// Build the java test
-// ==========================================================
-java_library {
-    name: "StreamingProtoTest",
-    srcs: [
-        "test/**/*.java",
-        "test/**/*.proto",
-    ],
-    proto: {
-        plugin: "javastream",
-    },
-    static_libs: ["libprotobuf-java-lite"],
 }

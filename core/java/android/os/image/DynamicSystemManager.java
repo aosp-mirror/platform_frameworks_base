@@ -20,7 +20,6 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
 import android.content.Context;
 import android.gsi.GsiProgress;
-import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 
 /**
@@ -53,38 +52,21 @@ public class DynamicSystemManager {
     /** The DynamicSystemManager.Session represents a started session for the installation. */
     public class Session {
         private Session() {}
-
         /**
-         * Set the file descriptor that points to a ashmem which will be used
-         * to fetch data during the submitFromAshmem.
+         * Write a chunk of the DynamicSystem system image
          *
-         * @param ashmem fd that points to a ashmem
-         * @param size size of the ashmem file
+         * @return {@code true} if the call succeeds. {@code false} if there is any native runtime
+         *     error.
          */
         @RequiresPermission(android.Manifest.permission.MANAGE_DYNAMIC_SYSTEM)
-        public boolean setAshmem(ParcelFileDescriptor ashmem, long size) {
+        public boolean write(byte[] buf) {
             try {
-                return mService.setAshmem(ashmem, size);
+                return mService.write(buf);
             } catch (RemoteException e) {
                 throw new RuntimeException(e.toString());
             }
         }
 
-        /**
-         * Submit bytes to the DSU partition from the ashmem previously set with
-         * setAshmem.
-         *
-         * @param size Number of bytes
-         * @return true on success, false otherwise.
-         */
-        @RequiresPermission(android.Manifest.permission.MANAGE_DYNAMIC_SYSTEM)
-        public boolean submitFromAshmem(int size) {
-            try {
-                return mService.submitFromAshmem(size);
-            } catch (RemoteException e) {
-                throw new RuntimeException(e.toString());
-            }
-        }
         /**
          * Finish write and make device to boot into the it after reboot.
          *
@@ -94,7 +76,7 @@ public class DynamicSystemManager {
         @RequiresPermission(android.Manifest.permission.MANAGE_DYNAMIC_SYSTEM)
         public boolean commit() {
             try {
-                return mService.setEnable(true, true);
+                return mService.commit();
             } catch (RemoteException e) {
                 throw new RuntimeException(e.toString());
             }
@@ -104,17 +86,16 @@ public class DynamicSystemManager {
      * Start DynamicSystem installation. This call may take an unbounded amount of time. The caller
      * may use another thread to call the getStartProgress() to get the progress.
      *
-     * @param name The DSU partition name
-     * @param size Size of the DSU image in bytes
-     * @param readOnly True if the partition is read only, e.g. system.
+     * @param systemSize system size in bytes
+     * @param userdataSize userdata size in bytes
      * @return {@code true} if the call succeeds. {@code false} either the device does not contain
      *     enough space or a DynamicSystem is currently in use where the {@link #isInUse} would be
      *     true.
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_DYNAMIC_SYSTEM)
-    public Session startInstallation(String name, long size, boolean readOnly) {
+    public Session startInstallation(long systemSize, long userdataSize) {
         try {
-            if (mService.startInstallation(name, size, readOnly)) {
+            if (mService.startInstallation(systemSize, userdataSize)) {
                 return new Session();
             } else {
                 return null;
@@ -207,9 +188,9 @@ public class DynamicSystemManager {
      * @return {@code true} if the call succeeds. {@code false} if there is no installed image.
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_DYNAMIC_SYSTEM)
-    public boolean setEnable(boolean enable, boolean oneShot) {
+    public boolean setEnable(boolean enable) {
         try {
-            return mService.setEnable(enable, oneShot);
+            return mService.setEnable(enable);
         } catch (RemoteException e) {
             throw new RuntimeException(e.toString());
         }

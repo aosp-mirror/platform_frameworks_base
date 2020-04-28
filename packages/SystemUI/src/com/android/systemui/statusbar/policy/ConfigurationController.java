@@ -24,7 +24,11 @@ import com.android.systemui.statusbar.policy.ConfigurationController.Configurati
  */
 public interface ConfigurationController extends CallbackController<ConfigurationListener> {
 
-    public void notifyThemeChanged();
+    /** Alert controller of a change in the configuration. */
+    void onConfigurationChanged(Configuration newConfiguration);
+
+    /** Alert controller of a change in between light and dark themes. */
+    void notifyThemeChanged();
 
     interface ConfigurationListener {
         default void onConfigChanged(Configuration newConfig) {}

@@ -33,38 +33,21 @@ void LayerDrawable::onDraw(SkCanvas* canvas) {
     }
 }
 
-static inline SkScalar isIntegerAligned(SkScalar x) {
-    return fabsf(roundf(x) - x) <= NON_ZERO_EPSILON;
+// This is a less-strict matrix.isTranslate() that will still report being translate-only
+// on imperceptibly small scaleX & scaleY values.
+static bool isBasicallyTranslate(const SkMatrix& matrix) {
+    if (!matrix.isScaleTranslate()) return false;
+    return MathUtils::isOne(matrix.getScaleX()) && MathUtils::isOne(matrix.getScaleY());
 }
 
-// Disable filtering when there is no scaling in screen coordinates and the corners have the same
-// fraction (for translate) or zero fraction (for any other rect-to-rect transform).
-static bool shouldFilterRect(const SkMatrix& matrix, const SkRect& srcRect, const SkRect& dstRect) {
-    if (!matrix.rectStaysRect()) return true;
-    SkRect dstDevRect = matrix.mapRect(dstRect);
-    float dstW, dstH;
-    if (MathUtils::isZero(matrix.getScaleX()) && MathUtils::isZero(matrix.getScaleY())) {
-        // Has a 90 or 270 degree rotation, although total matrix may also have scale factors
-        // in m10 and m01. Those scalings are automatically handled by mapRect so comparing
-        // dimensions is sufficient, but swap width and height comparison.
-        dstW = dstDevRect.height();
-        dstH = dstDevRect.width();
-    } else {
-        // Handle H/V flips or 180 rotation matrices. Axes may have been mirrored, but
-        // dimensions are still safe to compare directly.
-        dstW = dstDevRect.width();
-        dstH = dstDevRect.height();
-    }
-    if (!(MathUtils::areEqual(dstW, srcRect.width()) &&
-          MathUtils::areEqual(dstH, srcRect.height()))) {
-        return true;
-    }
-    // Device rect and source rect should be integer aligned to ensure there's no difference
-    // in how nearest-neighbor sampling is resolved.
-    return !(isIntegerAligned(srcRect.x()) &&
-             isIntegerAligned(srcRect.y()) &&
-             isIntegerAligned(dstDevRect.x()) &&
-             isIntegerAligned(dstDevRect.y()));
+static bool shouldFilter(const SkMatrix& matrix) {
+    if (!matrix.isScaleTranslate()) return true;
+
+    // We only care about meaningful scale here
+    bool noScale = MathUtils::isOne(matrix.getScaleX()) && MathUtils::isOne(matrix.getScaleY());
+    bool pixelAligned =
+            SkScalarIsInt(matrix.getTranslateX()) && SkScalarIsInt(matrix.getTranslateY());
+    return !(noScale && pixelAligned);
 }
 
 bool LayerDrawable::DrawLayer(GrContext* context, SkCanvas* canvas, Layer* layer,
@@ -131,21 +114,24 @@ bool LayerDrawable::DrawLayer(GrContext* context, SkCanvas* canvas, Layer* layer
                 skiaDestRect = SkRect::MakeIWH(layerWidth, layerHeight);
             }
             matrixInv.mapRect(&skiaDestRect);
-            // If (matrix is a rect-to-rect transform)
-            // and (src/dst buffers size match in screen coordinates)
-            // and (src/dst corners align fractionally),
+            // If (matrix is identity or an integer translation) and (src/dst buffers size match),
             // then use nearest neighbor, otherwise use bilerp sampling.
+            // Integer translation is defined as when src rect and dst rect align fractionally.
             // Skia TextureOp has the above logic build-in, but not NonAAFillRectOp. TextureOp works
             // only for SrcOver blending and without color filter (readback uses Src blending).
-            if (layer->getForceFilter() ||
-                shouldFilterRect(totalMatrix, skiaSrcRect, skiaDestRect)) {
+            bool isIntegerTranslate =
+                    isBasicallyTranslate(totalMatrix) &&
+                    SkScalarFraction(skiaDestRect.fLeft + totalMatrix[SkMatrix::kMTransX]) ==
+                            SkScalarFraction(skiaSrcRect.fLeft) &&
+                    SkScalarFraction(skiaDestRect.fTop + totalMatrix[SkMatrix::kMTransY]) ==
+                            SkScalarFraction(skiaSrcRect.fTop);
+            if (layer->getForceFilter() || !isIntegerTranslate) {
                 paint.setFilterQuality(kLow_SkFilterQuality);
             }
             canvas->drawImageRect(layerImage.get(), skiaSrcRect, skiaDestRect, &paint,
                                   SkCanvas::kFast_SrcRectConstraint);
         } else {
-            SkRect imageRect = SkRect::MakeIWH(layerImage->width(), layerImage->height());
-            if (layer->getForceFilter() || shouldFilterRect(totalMatrix, imageRect, imageRect)) {
+            if (layer->getForceFilter() || shouldFilter(totalMatrix)) {
                 paint.setFilterQuality(kLow_SkFilterQuality);
             }
             canvas->drawImage(layerImage.get(), 0, 0, &paint);

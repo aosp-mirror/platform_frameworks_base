@@ -35,8 +35,8 @@ import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.VersionedPackage;
-import android.net.ConnectivityModuleConnector;
-import android.net.ConnectivityModuleConnector.ConnectivityModuleHealthListener;
+import android.net.NetworkStackClient;
+import android.net.NetworkStackClient.NetworkStackHealthListener;
 import android.os.Handler;
 import android.os.test.TestLooper;
 import android.provider.DeviceConfig;
@@ -86,11 +86,11 @@ public class PackageWatchdogTest {
     private TestLooper mTestLooper;
     private Context mSpyContext;
     @Mock
-    private ConnectivityModuleConnector mConnectivityModuleConnector;
+    private NetworkStackClient mMockNetworkStackClient;
     @Mock
     private PackageManager mMockPackageManager;
     @Captor
-    private ArgumentCaptor<ConnectivityModuleHealthListener> mConnectivityModuleCallbackCaptor;
+    private ArgumentCaptor<NetworkStackHealthListener> mNetworkStackCallbackCaptor;
 
     @Before
     public void setUp() throws Exception {
@@ -269,7 +269,8 @@ public class PackageWatchdogTest {
 
         // Then fail APP_A below the threshold
         for (int i = 0; i < watchdog.getTriggerFailureCount() - 1; i++) {
-            watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)));
+            watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)),
+                    PackageWatchdog.FAILURE_REASON_UNKNOWN);
         }
 
         // Run handler so package failures are dispatched to observers
@@ -296,7 +297,8 @@ public class PackageWatchdogTest {
 
         // Then fail APP_C (not observed) above the threshold
         for (int i = 0; i < watchdog.getTriggerFailureCount(); i++) {
-            watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_C, VERSION_CODE)));
+            watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_C, VERSION_CODE)),
+                    PackageWatchdog.FAILURE_REASON_UNKNOWN);
         }
 
         // Run handler so package failures are dispatched to observers
@@ -331,7 +333,8 @@ public class PackageWatchdogTest {
         // Then fail APP_A (different version) above the threshold
         for (int i = 0; i < watchdog.getTriggerFailureCount(); i++) {
             watchdog.onPackageFailure(Arrays.asList(
-                            new VersionedPackage(APP_A, differentVersionCode)));
+                            new VersionedPackage(APP_A, differentVersionCode)),
+                    PackageWatchdog.FAILURE_REASON_UNKNOWN);
         }
 
         // Run handler so package failures are dispatched to observers
@@ -372,7 +375,8 @@ public class PackageWatchdogTest {
             watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE),
                     new VersionedPackage(APP_B, VERSION_CODE),
                     new VersionedPackage(APP_C, VERSION_CODE),
-                    new VersionedPackage(APP_D, VERSION_CODE)));
+                    new VersionedPackage(APP_D, VERSION_CODE)),
+                    PackageWatchdog.FAILURE_REASON_UNKNOWN);
         }
 
         // Run handler so package failures are dispatched to observers
@@ -422,7 +426,8 @@ public class PackageWatchdogTest {
 
         // Then fail APP_A above the threshold
         for (int i = 0; i < watchdog.getTriggerFailureCount(); i++) {
-            watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)));
+            watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)),
+                    PackageWatchdog.FAILURE_REASON_UNKNOWN);
         }
         // Run handler so package failures are dispatched to observers
         mTestLooper.dispatchAll();
@@ -439,7 +444,8 @@ public class PackageWatchdogTest {
 
         // Then fail APP_A again above the threshold
         for (int i = 0; i < watchdog.getTriggerFailureCount(); i++) {
-            watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)));
+            watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)),
+                    PackageWatchdog.FAILURE_REASON_UNKNOWN);
         }
         // Run handler so package failures are dispatched to observers
         mTestLooper.dispatchAll();
@@ -456,7 +462,8 @@ public class PackageWatchdogTest {
 
         // Then fail APP_A again above the threshold
         for (int i = 0; i < watchdog.getTriggerFailureCount(); i++) {
-            watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)));
+            watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)),
+                    PackageWatchdog.FAILURE_REASON_UNKNOWN);
         }
         // Run handler so package failures are dispatched to observers
         mTestLooper.dispatchAll();
@@ -473,7 +480,8 @@ public class PackageWatchdogTest {
 
         // Then fail APP_A again above the threshold
         for (int i = 0; i < watchdog.getTriggerFailureCount(); i++) {
-            watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)));
+            watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)),
+                    PackageWatchdog.FAILURE_REASON_UNKNOWN);
         }
         // Run handler so package failures are dispatched to observers
         mTestLooper.dispatchAll();
@@ -500,7 +508,8 @@ public class PackageWatchdogTest {
 
         // Then fail APP_A above the threshold
         for (int i = 0; i < watchdog.getTriggerFailureCount(); i++) {
-            watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)));
+            watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)),
+                    PackageWatchdog.FAILURE_REASON_UNKNOWN);
         }
 
         // Run handler so package failures are dispatched to observers
@@ -736,7 +745,7 @@ public class PackageWatchdogTest {
         wd.startObservingHealth(observer, Collections.singletonList(APP_A), SHORT_DURATION);
 
         // Notify of NetworkStack failure
-        mConnectivityModuleCallbackCaptor.getValue().onNetworkStackFailure(APP_A);
+        mNetworkStackCallbackCaptor.getValue().onNetworkStackFailure(APP_A);
 
         // Run handler so package failures are dispatched to observers
         mTestLooper.dispatchAll();
@@ -744,6 +753,44 @@ public class PackageWatchdogTest {
         // Verify the NetworkStack observer is notified
         assertEquals(1, observer.mFailedPackages.size());
         assertEquals(APP_A, observer.mFailedPackages.get(0));
+    }
+
+    /** Test that observers execute correctly for different failure reasons */
+    @Test
+    public void testFailureReasons() {
+        PackageWatchdog watchdog = createWatchdog();
+        TestObserver observer1 = new TestObserver(OBSERVER_NAME_1);
+        TestObserver observer2 = new TestObserver(OBSERVER_NAME_2);
+        TestObserver observer3 = new TestObserver(OBSERVER_NAME_3);
+        TestObserver observer4 = new TestObserver(OBSERVER_NAME_4);
+
+        watchdog.startObservingHealth(observer1, Arrays.asList(APP_A), SHORT_DURATION);
+        watchdog.startObservingHealth(observer2, Arrays.asList(APP_B), SHORT_DURATION);
+        watchdog.startObservingHealth(observer3, Arrays.asList(APP_C), SHORT_DURATION);
+        watchdog.startObservingHealth(observer4, Arrays.asList(APP_D), SHORT_DURATION);
+
+        for (int i = 0; i < watchdog.getTriggerFailureCount(); i++) {
+            watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)),
+                    PackageWatchdog.FAILURE_REASON_NATIVE_CRASH);
+            watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_B, VERSION_CODE)),
+                    PackageWatchdog.FAILURE_REASON_EXPLICIT_HEALTH_CHECK);
+            watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_C, VERSION_CODE)),
+                    PackageWatchdog.FAILURE_REASON_APP_CRASH);
+            watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_D, VERSION_CODE)),
+                    PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING);
+        }
+
+        // Run handler so requests are dispatched to the controller
+        mTestLooper.dispatchAll();
+
+        assertTrue(observer1.getLastFailureReason()
+                == PackageWatchdog.FAILURE_REASON_NATIVE_CRASH);
+        assertTrue(observer2.getLastFailureReason()
+                == PackageWatchdog.FAILURE_REASON_EXPLICIT_HEALTH_CHECK);
+        assertTrue(observer3.getLastFailureReason()
+                == PackageWatchdog.FAILURE_REASON_APP_CRASH);
+        assertTrue(observer4.getLastFailureReason()
+                == PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING);
     }
 
     private void adoptShellPermissions(String... permissions) {
@@ -782,18 +829,18 @@ public class PackageWatchdogTest {
         Handler handler = new Handler(mTestLooper.getLooper());
         PackageWatchdog watchdog =
                 new PackageWatchdog(mSpyContext, policyFile, handler, handler, controller,
-                        mConnectivityModuleConnector);
+                        mMockNetworkStackClient);
         // Verify controller is not automatically started
         assertFalse(controller.mIsEnabled);
         if (withPackagesReady) {
             // Only capture the NetworkStack callback for the latest registered watchdog
-            reset(mConnectivityModuleConnector);
+            reset(mMockNetworkStackClient);
             watchdog.onPackagesReady();
             // Verify controller by default is started when packages are ready
             assertTrue(controller.mIsEnabled);
 
-            verify(mConnectivityModuleConnector).registerHealthListener(
-                    mConnectivityModuleCallbackCaptor.capture());
+            verify(mMockNetworkStackClient).registerHealthListener(
+                    mNetworkStackCallbackCaptor.capture());
         }
         return watchdog;
     }
@@ -801,6 +848,7 @@ public class PackageWatchdogTest {
     private static class TestObserver implements PackageHealthObserver {
         private final String mName;
         private int mImpact;
+        private int mLastFailureReason;
         final List<String> mFailedPackages = new ArrayList<>();
 
         TestObserver(String name) {
@@ -817,13 +865,18 @@ public class PackageWatchdogTest {
             return mImpact;
         }
 
-        public boolean execute(VersionedPackage versionedPackage) {
+        public boolean execute(VersionedPackage versionedPackage, int failureReason) {
             mFailedPackages.add(versionedPackage.getPackageName());
+            mLastFailureReason = failureReason;
             return true;
         }
 
         public String getName() {
             return mName;
+        }
+
+        public int getLastFailureReason() {
+            return mLastFailureReason;
         }
     }
 

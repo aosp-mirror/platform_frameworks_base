@@ -35,15 +35,6 @@ public abstract class CellIdentity implements Parcelable {
     /** @hide */
     public static final int INVALID_CHANNEL_NUMBER = -1;
 
-    /**
-     * parameters for validation
-     * @hide
-     */
-    public static final int MCC_LENGTH = 3;
-
-    private static final int MNC_MIN_LENGTH = 2;
-    private static final int MNC_MAX_LENGTH = 3;
-
     // Log tag
     /** @hide */
     protected final String mTag;
@@ -216,17 +207,6 @@ public abstract class CellIdentity implements Parcelable {
         dest.writeString(mAlphaShort);
     }
 
-    /** Used by phone interface manager to verify if a given string is valid MccMnc
-     * @hide
-     */
-    public static boolean isValidPlmn(@NonNull String plmn) {
-        if (plmn.length() < MCC_LENGTH + MNC_MIN_LENGTH
-                || plmn.length() > MCC_LENGTH + MNC_MAX_LENGTH) {
-            return false;
-        }
-        return (isMcc(plmn.substring(0, MCC_LENGTH)) && isMnc(plmn.substring(MCC_LENGTH)));
-    }
-
     /**
      * Construct from Parcel
      * @hide
@@ -287,10 +267,10 @@ public abstract class CellIdentity implements Parcelable {
     /** @hide */
     private static boolean isMcc(@NonNull String mcc) {
         // ensure no out of bounds indexing
-        if (mcc.length() != MCC_LENGTH) return false;
+        if (mcc.length() != 3) return false;
 
         // Character.isDigit allows all unicode digits, not just [0-9]
-        for (int i = 0; i < MCC_LENGTH; i++) {
+        for (int i = 0; i < 3; i++) {
             if (mcc.charAt(i) < '0' || mcc.charAt(i) > '9') return false;
         }
 
@@ -300,7 +280,7 @@ public abstract class CellIdentity implements Parcelable {
     /** @hide */
     private static boolean isMnc(@NonNull String mnc) {
         // ensure no out of bounds indexing
-        if (mnc.length() < MNC_MIN_LENGTH || mnc.length() > MNC_MAX_LENGTH) return false;
+        if (mnc.length() < 2 || mnc.length() > 3) return false;
 
         // Character.isDigit allows all unicode digits, not just [0-9]
         for (int i = 0; i < mnc.length(); i++) {
@@ -309,5 +289,4 @@ public abstract class CellIdentity implements Parcelable {
 
         return true;
     }
-
 }

@@ -16,7 +16,6 @@
 
 package android.location;
 
-import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -1245,7 +1244,6 @@ public class GpsMeasurement implements Parcelable {
         return 0;
     }
 
-    @NonNull
     @Override
     public String toString() {
         final String format = "   %-29s = %s\n";

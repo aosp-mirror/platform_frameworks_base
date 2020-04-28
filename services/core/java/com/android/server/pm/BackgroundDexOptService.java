@@ -254,16 +254,9 @@ public class BackgroundDexOptService extends JobService {
             @Override
             public void run() {
                 int result = idleOptimization(pm, pkgs, BackgroundDexOptService.this);
-                if (result == OPTIMIZE_PROCESSED) {
-                    Log.i(TAG, "Idle optimizations completed.");
-                } else if (result == OPTIMIZE_ABORT_NO_SPACE_LEFT) {
-                    Log.w(TAG, "Idle optimizations aborted because of space constraints.");
-                } else if (result == OPTIMIZE_ABORT_BY_JOB_SCHEDULER) {
-                    Log.w(TAG, "Idle optimizations aborted by job scheduler.");
-                } else {
-                    Log.w(TAG, "Idle optimizations ended with unexpected code: " + result);
-                }
                 if (result != OPTIMIZE_ABORT_BY_JOB_SCHEDULER) {
+                    Log.w(TAG, "Idle optimizations aborted because of space constraints.");
+                    // If we didn't abort we ran to completion (or stopped because of space).
                     // Abandon our timeslice and do not reschedule.
                     jobFinished(jobParams, /* reschedule */ false);
                 }
@@ -281,7 +274,20 @@ public class BackgroundDexOptService extends JobService {
         mAbortIdleOptimization.set(false);
 
         long lowStorageThreshold = getLowStorageThreshold(context);
-        int result = idleOptimizePackages(pm, pkgs, lowStorageThreshold);
+        // Optimize primary apks.
+        int result = optimizePackages(pm, pkgs, lowStorageThreshold,
+            /*isForPrimaryDex=*/ true);
+        if (result == OPTIMIZE_ABORT_BY_JOB_SCHEDULER) {
+            return result;
+        }
+        if (supportSecondaryDex()) {
+            result = reconcileSecondaryDexFiles(pm.getDexManager());
+            if (result == OPTIMIZE_ABORT_BY_JOB_SCHEDULER) {
+                return result;
+            }
+            result = optimizePackages(pm, pkgs, lowStorageThreshold,
+                /*isForPrimaryDex=*/ false);
+        }
         return result;
     }
 
@@ -329,87 +335,43 @@ public class BackgroundDexOptService extends JobService {
         return 0;
     }
 
-    private int idleOptimizePackages(PackageManagerService pm, ArraySet<String> pkgs,
-            long lowStorageThreshold) {
-        ArraySet<String> updatedPackages = new ArraySet<>();
-
-        try {
-            final boolean supportSecondaryDex = supportSecondaryDex();
-
-            if (supportSecondaryDex) {
-                int result = reconcileSecondaryDexFiles(pm.getDexManager());
-                if (result == OPTIMIZE_ABORT_BY_JOB_SCHEDULER) {
-                    return result;
-                }
-            }
-
-            // Only downgrade apps when space is low on device.
-            // Threshold is selected above the lowStorageThreshold so that we can pro-actively clean
-            // up disk before user hits the actual lowStorageThreshold.
-            final long lowStorageThresholdForDowngrade = LOW_THRESHOLD_MULTIPLIER_FOR_DOWNGRADE
-                    * lowStorageThreshold;
-            boolean shouldDowngrade = shouldDowngrade(lowStorageThresholdForDowngrade);
-            Log.d(TAG, "Should Downgrade " + shouldDowngrade);
-            if (shouldDowngrade) {
-                Set<String> unusedPackages =
-                        pm.getUnusedPackages(mDowngradeUnusedAppsThresholdInMillis);
-                Log.d(TAG, "Unsused Packages " +  String.join(",", unusedPackages));
-
-                if (!unusedPackages.isEmpty()) {
-                    for (String pkg : unusedPackages) {
-                        int abortCode = abortIdleOptimizations(/*lowStorageThreshold*/ -1);
-                        if (abortCode != OPTIMIZE_CONTINUE) {
-                            // Should be aborted by the scheduler.
-                            return abortCode;
-                        }
-                        if (downgradePackage(pm, pkg, /*isForPrimaryDex*/ true)) {
-                            updatedPackages.add(pkg);
-                        }
-                        if (supportSecondaryDex) {
-                            downgradePackage(pm, pkg, /*isForPrimaryDex*/ false);
-                        }
-                    }
-
-                    pkgs = new ArraySet<>(pkgs);
-                    pkgs.removeAll(unusedPackages);
-                }
-            }
-
-            int primaryResult = optimizePackages(pm, pkgs, lowStorageThreshold,
-                    /*isForPrimaryDex*/ true, updatedPackages);
-            if (primaryResult != OPTIMIZE_PROCESSED) {
-                return primaryResult;
-            }
-
-            if (!supportSecondaryDex) {
-                return OPTIMIZE_PROCESSED;
-            }
-
-            int secondaryResult = optimizePackages(pm, pkgs, lowStorageThreshold,
-                    /*isForPrimaryDex*/ false, updatedPackages);
-            return secondaryResult;
-        } finally {
-            // Always let the pinner service know about changes.
-            notifyPinService(updatedPackages);
-        }
-    }
-
     private int optimizePackages(PackageManagerService pm, ArraySet<String> pkgs,
-            long lowStorageThreshold, boolean isForPrimaryDex, ArraySet<String> updatedPackages) {
+            long lowStorageThreshold, boolean isForPrimaryDex) {
+        ArraySet<String> updatedPackages = new ArraySet<>();
+        Set<String> unusedPackages = pm.getUnusedPackages(mDowngradeUnusedAppsThresholdInMillis);
+        Log.d(TAG, "Unsused Packages " +  String.join(",", unusedPackages));
+        // Only downgrade apps when space is low on device.
+        // Threshold is selected above the lowStorageThreshold so that we can pro-actively clean
+        // up disk before user hits the actual lowStorageThreshold.
+        final long lowStorageThresholdForDowngrade = LOW_THRESHOLD_MULTIPLIER_FOR_DOWNGRADE *
+                lowStorageThreshold;
+        boolean shouldDowngrade = shouldDowngrade(lowStorageThresholdForDowngrade);
+        Log.d(TAG, "Should Downgrade " + shouldDowngrade);
+        boolean dex_opt_performed = false;
         for (String pkg : pkgs) {
-            int abortCode = abortIdleOptimizations(lowStorageThreshold);
-            if (abortCode != OPTIMIZE_CONTINUE) {
-                // Either aborted by the scheduler or no space left.
-                return abortCode;
+            int abort_code = abortIdleOptimizations(lowStorageThreshold);
+            if (abort_code == OPTIMIZE_ABORT_BY_JOB_SCHEDULER) {
+                return abort_code;
             }
-
-            boolean dexOptPerformed = optimizePackage(pm, pkg, isForPrimaryDex);
-            if (dexOptPerformed) {
+            // Downgrade unused packages.
+            if (unusedPackages.contains(pkg) && shouldDowngrade) {
+                dex_opt_performed = downgradePackage(pm, pkg, isForPrimaryDex);
+            } else {
+                if (abort_code == OPTIMIZE_ABORT_NO_SPACE_LEFT) {
+                    // can't dexopt because of low space.
+                    continue;
+                }
+                dex_opt_performed = optimizePackage(pm, pkg, isForPrimaryDex);
+            }
+            if (dex_opt_performed) {
                 updatedPackages.add(pkg);
             }
         }
+
+        notifyPinService(updatedPackages);
         return OPTIMIZE_PROCESSED;
     }
+
 
     /**
      * Try to downgrade the package to a smaller compilation filter.

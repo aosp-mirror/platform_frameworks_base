@@ -29,6 +29,7 @@ import android.content.res.Resources;
 import android.telephony.PhoneNumberUtils;
 import android.telephony.Rlog;
 import android.text.TextUtils;
+import android.text.format.Time;
 
 import com.android.internal.telephony.EncodeException;
 import com.android.internal.telephony.GsmAlphabet;
@@ -38,13 +39,9 @@ import com.android.internal.telephony.SmsHeader;
 import com.android.internal.telephony.SmsMessageBase;
 import com.android.internal.telephony.uicc.IccUtils;
 
-import dalvik.annotation.compat.UnsupportedAppUsage;
-
 import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 
 /**
  * A Short Message Service message.
@@ -100,20 +97,12 @@ public class SmsMessage extends SmsMessageBase {
 
     private static final int INVALID_VALIDITY_PERIOD = -1;
 
-    @UnsupportedAppUsage
-    public SmsMessage() {
-    }
-
     public static class SubmitPdu extends SubmitPduBase {
-        @UnsupportedAppUsage
-        public SubmitPdu() {
-        }
     }
 
     /**
      * Create an SmsMessage from a raw PDU.
      */
-    @UnsupportedAppUsage
     public static SmsMessage createFromPdu(byte[] pdu) {
         try {
             SmsMessage msg = new SmsMessage();
@@ -178,7 +167,6 @@ public class SmsMessage extends SmsMessageBase {
      *
      * @hide
      */
-    @UnsupportedAppUsage
     public static SmsMessage createFromEfRecord(int index, byte[] data) {
         try {
             SmsMessage msg = new SmsMessage();
@@ -269,7 +257,6 @@ public class SmsMessage extends SmsMessageBase {
      *         Returns null on encode error.
      * @hide
      */
-    @UnsupportedAppUsage
     public static SubmitPdu getSubmitPdu(String scAddress,
             String destinationAddress, String message,
             boolean statusReportRequested, byte[] header) {
@@ -292,7 +279,6 @@ public class SmsMessage extends SmsMessageBase {
      *         Returns null on encode error.
      * @hide
      */
-    @UnsupportedAppUsage
     public static SubmitPdu getSubmitPdu(String scAddress,
             String destinationAddress, String message,
             boolean statusReportRequested, byte[] header, int encoding,
@@ -316,7 +302,6 @@ public class SmsMessage extends SmsMessageBase {
      *         Returns null on encode error.
      * @hide
      */
-    @UnsupportedAppUsage
     public static SubmitPdu getSubmitPdu(String scAddress,
             String destinationAddress, String message,
             boolean statusReportRequested, byte[] header, int encoding,
@@ -457,7 +442,6 @@ public class SmsMessage extends SmsMessageBase {
      * @throws UnsupportedEncodingException
      * @throws EncodeException if String is too large to encode
      */
-    @UnsupportedAppUsage
     private static byte[] encodeUCS2(String message, byte[] header)
             throws UnsupportedEncodingException, EncodeException {
         byte[] userData, textPart;
@@ -492,7 +476,6 @@ public class SmsMessage extends SmsMessageBase {
      *         address, if applicable, and the encoded message.
      *         Returns null on encode error.
      */
-    @UnsupportedAppUsage
     public static SubmitPdu getSubmitPdu(String scAddress,
             String destinationAddress, String message,
             boolean statusReportRequested) {
@@ -511,7 +494,6 @@ public class SmsMessage extends SmsMessageBase {
      *         address, if applicable, and the encoded message.
      *         Returns null on encode error.
      */
-    @UnsupportedAppUsage
     public static SubmitPdu getSubmitPdu(String scAddress,
             String destinationAddress, String message,
             boolean statusReportRequested, int validityPeriod) {
@@ -592,7 +574,6 @@ public class SmsMessage extends SmsMessageBase {
      * @param ret <code>SubmitPdu</code> containing the encoded SC
      *        address, if applicable, and the encoded message. Returns null on encode error.
      */
-    @UnsupportedAppUsage
     private static ByteArrayOutputStream getSubmitPduHead(
             String scAddress, String destinationAddress, byte mtiByte,
             boolean statusReportRequested, SubmitPdu ret) {
@@ -639,16 +620,12 @@ public class SmsMessage extends SmsMessageBase {
     }
 
     private static class PduParser {
-        @UnsupportedAppUsage
         byte mPdu[];
-        @UnsupportedAppUsage
         int mCur;
         SmsHeader mUserDataHeader;
         byte[] mUserData;
-        @UnsupportedAppUsage
         int mUserDataSeptetPadding;
 
-        @UnsupportedAppUsage
         PduParser(byte[] pdu) {
             mPdu = pdu;
             mCur = 0;
@@ -688,7 +665,6 @@ public class SmsMessage extends SmsMessageBase {
         /**
          * returns non-sign-extended byte value
          */
-        @UnsupportedAppUsage
         int getByte() {
             return mPdu[mCur++] & 0xff;
         }
@@ -745,21 +721,19 @@ public class SmsMessage extends SmsMessageBase {
             int timezoneOffset = IccUtils.gsmBcdByteToInt((byte) (tzByte & (~0x08)));
 
             timezoneOffset = ((tzByte & 0x08) == 0) ? timezoneOffset : -timezoneOffset;
-            // timezoneOffset is in quarter hours.
-            int timeZoneOffsetSeconds = timezoneOffset * 15 * 60;
+
+            Time time = new Time(Time.TIMEZONE_UTC);
 
             // It's 2006.  Should I really support years < 2000?
-            int fullYear = year >= 90 ? year + 1900 : year + 2000;
-            LocalDateTime localDateTime = LocalDateTime.of(
-                    fullYear,
-                    month /* 1-12 */,
-                    day,
-                    hour,
-                    minute,
-                    second);
-            long epochSeconds = localDateTime.toEpochSecond(ZoneOffset.UTC) - timeZoneOffsetSeconds;
-            // Convert to milliseconds.
-            return epochSeconds * 1000;
+            time.year = year >= 90 ? year + 1900 : year + 2000;
+            time.month = month - 1;
+            time.monthDay = day;
+            time.hour = hour;
+            time.minute = minute;
+            time.second = second;
+
+            // Timezone offset is in quarter hours.
+            return time.toMillis(true) - (timezoneOffset * 15 * 60 * 1000);
         }
 
         /**
@@ -830,7 +804,6 @@ public class SmsMessage extends SmsMessageBase {
          *
          * @return the user data payload, not including the headers
          */
-        @UnsupportedAppUsage
         byte[] getUserData() {
             return mUserData;
         }
@@ -887,7 +860,6 @@ public class SmsMessage extends SmsMessageBase {
          * @param byteCount the number of bytes in the user data payload
          * @return a String with the decoded characters
          */
-        @UnsupportedAppUsage
         String getUserDataUCS2(int byteCount) {
             String ret;
 
@@ -936,13 +908,12 @@ public class SmsMessage extends SmsMessageBase {
      * @param use7bitOnly ignore (but still count) illegal characters if true
      * @return TextEncodingDetails
      */
-    @UnsupportedAppUsage
     public static TextEncodingDetails calculateLength(CharSequence msgBody,
             boolean use7bitOnly) {
         CharSequence newMsgBody = null;
         Resources r = Resources.getSystem();
         if (r.getBoolean(com.android.internal.R.bool.config_sms_force_7bit_encoding)) {
-            newMsgBody = Sms7BitEncodingTranslator.translate(msgBody, false /* isCdmaFormat */);
+            newMsgBody = Sms7BitEncodingTranslator.translate(msgBody, false);
         }
         if (TextUtils.isEmpty(newMsgBody)) {
             newMsgBody = msgBody;
@@ -984,7 +955,6 @@ public class SmsMessage extends SmsMessageBase {
     }
 
     /** {@inheritDoc} */
-    @UnsupportedAppUsage
     @Override
     public boolean isMWIClearMessage() {
         if (mIsMwi && !mMwiSense) {
@@ -996,7 +966,6 @@ public class SmsMessage extends SmsMessageBase {
     }
 
     /** {@inheritDoc} */
-    @UnsupportedAppUsage
     @Override
     public boolean isMWISetMessage() {
         if (mIsMwi && mMwiSense) {
@@ -1008,7 +977,6 @@ public class SmsMessage extends SmsMessageBase {
     }
 
     /** {@inheritDoc} */
-    @UnsupportedAppUsage
     @Override
     public boolean isMwiDontStore() {
         if (mIsMwi && mMwiDontStore) {
@@ -1028,14 +996,12 @@ public class SmsMessage extends SmsMessageBase {
     }
 
     /** {@inheritDoc} */
-    @UnsupportedAppUsage
     @Override
     public int getStatus() {
         return mStatus;
     }
 
     /** {@inheritDoc} */
-    @UnsupportedAppUsage
     @Override
     public boolean isStatusReportMessage() {
         return mIsStatusReportMessage;
@@ -1248,7 +1214,6 @@ public class SmsMessage extends SmsMessageBase {
 
         int encodingType = ENCODING_UNKNOWN;
 
-        Resources r = Resources.getSystem();
         // Look up the data encoding scheme
         if ((mDataCodingScheme & 0x80) == 0) {
             userDataCompressed = (0 != (mDataCodingScheme & 0x20));
@@ -1270,6 +1235,7 @@ public class SmsMessage extends SmsMessageBase {
                 case 1: // 8 bit data
                     //Support decoding the user data payload as pack GSM 8-bit (a GSM alphabet string
                     //that's stored in 8-bit unpacked format) characters.
+                    Resources r = Resources.getSystem();
                     if (r.getBoolean(com.android.internal.
                             R.bool.config_sms_decode_gsm_8bit_data)) {
                         encodingType = ENCODING_8BIT;
@@ -1279,8 +1245,7 @@ public class SmsMessage extends SmsMessageBase {
                 case 3: // reserved
                     Rlog.w(LOG_TAG, "1 - Unsupported SMS data coding scheme "
                             + (mDataCodingScheme & 0xff));
-                    encodingType = r.getInteger(
-                            com.android.internal.R.integer.default_reserved_data_coding_scheme);
+                    encodingType = ENCODING_8BIT;
                     break;
                 }
             }
@@ -1434,6 +1399,7 @@ public class SmsMessage extends SmsMessageBase {
         case ENCODING_8BIT:
             //Support decoding the user data payload as pack GSM 8-bit (a GSM alphabet string
             //that's stored in 8-bit unpacked format) characters.
+            Resources r = Resources.getSystem();
             if (r.getBoolean(com.android.internal.
                     R.bool.config_sms_decode_gsm_8bit_data)) {
                 mMessageBody = p.getUserDataGSM8bit(count);

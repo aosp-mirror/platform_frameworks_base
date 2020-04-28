@@ -37,7 +37,6 @@ import android.os.Trace;
 import android.os.UserHandle;
 import android.os.ZygoteProcess;
 import android.os.storage.StorageManager;
-import android.provider.DeviceConfig;
 import android.security.keystore.AndroidKeyStoreProvider;
 import android.system.ErrnoException;
 import android.system.Os;
@@ -91,6 +90,11 @@ public class ZygoteInit {
 
     private static final int LOG_BOOT_PROGRESS_PRELOAD_START = 3020;
     private static final int LOG_BOOT_PROGRESS_PRELOAD_END = 3030;
+
+    /**
+     * when preloading, GC after allocating this many bytes
+     */
+    private static final int PRELOAD_GC_THRESHOLD = 50000;
 
     private static final String ABI_LIST_ARG = "--abi-list=";
 
@@ -248,18 +252,6 @@ public class ZygoteInit {
 
         InputStream is;
         try {
-            // If we are profiling the boot image, avoid preloading classes.
-            // Can't use device_config since we are the zygote.
-            String prop = SystemProperties.get(
-                    "persist.device_config.runtime_native_boot.profilebootclasspath", "");
-            // Might be empty if the property is unset since the default is "".
-            if (prop.length() == 0) {
-                prop = SystemProperties.get("dalvik.vm.profilebootclasspath", "");
-            }
-            if ("true".equals(prop)) {
-                return;
-            }
-
             is = new FileInputStream(PRELOADED_CLASSES);
         } catch (FileNotFoundException e) {
             Log.e(TAG, "Couldn't find " + PRELOADED_CLASSES + ".");
@@ -288,6 +280,11 @@ public class ZygoteInit {
             droppedPriviliges = true;
         }
 
+        // Alter the target heap utilization.  With explicit GCs this
+        // is not likely to have any effect.
+        float defaultUtilization = runtime.getTargetHeapUtilization();
+        runtime.setTargetHeapUtilization(0.8f);
+
         try {
             BufferedReader br =
                     new BufferedReader(new InputStreamReader(is), Zygote.SOCKET_BUFFER_SIZE);
@@ -303,6 +300,9 @@ public class ZygoteInit {
 
                 Trace.traceBegin(Trace.TRACE_TAG_DALVIK, line);
                 try {
+                    if (false) {
+                        Log.v(TAG, "Preloading " + line + "...");
+                    }
                     // Load and explicitly initialize the given class. Use
                     // Class.forName(String, boolean, ClassLoader) to avoid repeated stack lookups
                     // (to derive the caller's class-loader). Use true to force initialization, and
@@ -333,6 +333,8 @@ public class ZygoteInit {
             Log.e(TAG, "Error reading " + PRELOADED_CLASSES + ".", e);
         } finally {
             IoUtils.closeQuietly(is);
+            // Restore default.
+            runtime.setTargetHeapUtilization(defaultUtilization);
 
             // Fill in dex caches with classes, fields, and methods brought in by preloading.
             Trace.traceBegin(Trace.TRACE_TAG_DALVIK, "PreloadDexCaches");
@@ -472,16 +474,6 @@ public class ZygoteInit {
         ZygoteHooks.gcAndFinalize();
     }
 
-    private static boolean shouldProfileSystemServer() {
-        boolean defaultValue = SystemProperties.getBoolean("dalvik.vm.profilesystemserver",
-                /*default=*/ false);
-        // Can't use DeviceConfig since it's not initialized at this point.
-        return SystemProperties.getBoolean(
-                "persist.device_config." + DeviceConfig.NAMESPACE_RUNTIME_NATIVE_BOOT
-                        + ".profilesystemserver",
-                defaultValue);
-    }
-
     /**
      * Finish remaining work for the newly forked system server process.
      */
@@ -504,9 +496,10 @@ public class ZygoteInit {
             }
             // Capturing profiles is only supported for debug or eng builds since selinux normally
             // prevents it.
-            if (shouldProfileSystemServer() && (Build.IS_USERDEBUG || Build.IS_ENG)) {
+            boolean profileSystemServer = SystemProperties.getBoolean(
+                    "dalvik.vm.profilesystemserver", false);
+            if (profileSystemServer && (Build.IS_USERDEBUG || Build.IS_ENG)) {
                 try {
-                    Log.d(TAG, "Preparing system server profile");
                     prepareSystemServerProfile(systemServerClasspath);
                 } catch (Exception e) {
                     Log.wtf(TAG, "Failed to set up system server profile", e);
@@ -761,7 +754,7 @@ public class ZygoteInit {
                 "--setuid=1000",
                 "--setgid=1000",
                 "--setgroups=1001,1002,1003,1004,1005,1006,1007,1008,1009,1010,1018,1021,1023,"
-                        + "1024,1032,1065,3001,3002,3003,3006,3007,3009,3010,3011",
+                        + "1024,1032,1065,3001,3002,3003,3006,3007,3009,3010",
                 "--capabilities=" + capabilities + "," + capabilities,
                 "--nice-name=system_server",
                 "--runtime-args",
@@ -777,7 +770,9 @@ public class ZygoteInit {
             Zygote.applyDebuggerSystemProperty(parsedArgs);
             Zygote.applyInvokeWithSystemProperty(parsedArgs);
 
-            if (shouldProfileSystemServer()) {
+            boolean profileSystemServer = SystemProperties.getBoolean(
+                    "dalvik.vm.profilesystemserver", false);
+            if (profileSystemServer) {
                 parsedArgs.mRuntimeFlags |= Zygote.PROFILE_SYSTEM_SERVER;
             }
 
@@ -847,7 +842,7 @@ public class ZygoteInit {
             TimingsTraceLog bootTimingsTraceLog = new TimingsTraceLog(bootTimeTag,
                     Trace.TRACE_TAG_DALVIK);
             bootTimingsTraceLog.traceBegin("ZygoteInit");
-            RuntimeInit.preForkInit();
+            RuntimeInit.enableDdms();
 
             boolean startSystemServer = false;
             String zygoteSocketName = "zygote";

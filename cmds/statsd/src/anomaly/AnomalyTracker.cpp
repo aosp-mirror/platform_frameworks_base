@@ -24,7 +24,6 @@
 #include "subscriber/IncidentdReporter.h"
 #include "subscriber/SubscriberReporter.h"
 
-#include <inttypes.h>
 #include <statslog.h>
 #include <time.h>
 
@@ -225,7 +224,7 @@ void AnomalyTracker::declareAnomaly(const int64_t& timestampNs, int64_t metricId
     }
 
     if (!mSubscriptions.empty()) {
-        ALOGI("An anomaly (%" PRId64 ") %s has occurred! Informing subscribers.",
+        ALOGI("An anomaly (%lld) %s has occurred! Informing subscribers.",
                 mAlert.id(), key.toString().c_str());
         informSubscribers(key, metricId, metricValue);
     } else {

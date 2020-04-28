@@ -17,9 +17,6 @@
 package com.android.location.provider;
 
 import android.location.LocationRequest;
-import android.os.Build;
-
-import androidx.annotation.RequiresApi;
 
 import com.android.internal.location.ProviderRequest;
 
@@ -49,7 +46,6 @@ public final class ProviderRequestUnbundled {
         return mRequest.interval;
     }
 
-    @RequiresApi(Build.VERSION_CODES.Q)
     public boolean isLocationSettingsIgnored() {
         return mRequest.locationSettingsIgnored;
     }

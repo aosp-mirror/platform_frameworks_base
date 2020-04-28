@@ -1436,7 +1436,6 @@ static int register_android_media_MediaPlayer(JNIEnv *env)
 }
 extern int register_android_media_ImageReader(JNIEnv *env);
 extern int register_android_media_ImageWriter(JNIEnv *env);
-extern int register_android_media_JetPlayer(JNIEnv *env);
 extern int register_android_media_Crypto(JNIEnv *env);
 extern int register_android_media_Drm(JNIEnv *env);
 extern int register_android_media_Descrambler(JNIEnv *env);
@@ -1473,11 +1472,6 @@ jint JNI_OnLoad(JavaVM* vm, void* /* reserved */)
 
     if (register_android_media_ImageReader(env) < 0) {
         ALOGE("ERROR: ImageReader native registration failed");
-        goto bail;
-    }
-
-    if (register_android_media_JetPlayer(env) < 0) {
-        ALOGE("ERROR: JetPlayer native registration failed");
         goto bail;
     }
 

@@ -17,7 +17,6 @@
 
 package android.telephony.ims;
 
-import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -68,7 +67,6 @@ public final class ImsSuppServiceNotification implements Parcelable {
         history = in.createStringArray();
     }
 
-    @NonNull
     @Override
     public String toString() {
         return "{ notificationType=" + notificationType +

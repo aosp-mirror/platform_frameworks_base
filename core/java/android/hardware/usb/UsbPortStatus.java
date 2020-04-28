@@ -17,7 +17,6 @@
 package android.hardware.usb;
 
 import android.annotation.IntDef;
-import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.hardware.usb.V1_0.Constants;
 import android.os.Parcel;
@@ -323,7 +322,6 @@ public final class UsbPortStatus implements Parcelable {
         return mContaminantProtectionStatus;
     }
 
-    @NonNull
     @Override
     public String toString() {
         return "UsbPortStatus{connected=" + isConnected()
@@ -354,7 +352,7 @@ public final class UsbPortStatus implements Parcelable {
         dest.writeInt(mContaminantDetectionStatus);
     }
 
-    public static final @NonNull Parcelable.Creator<UsbPortStatus> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<UsbPortStatus> CREATOR =
             new Parcelable.Creator<UsbPortStatus>() {
         @Override
         public UsbPortStatus createFromParcel(Parcel in) {

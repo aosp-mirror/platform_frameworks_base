@@ -17,16 +17,17 @@
 package android.media;
 
 
+import java.io.FileDescriptor;
+import java.lang.ref.WeakReference;
+import java.lang.CloneNotSupportedException;
+
 import android.annotation.UnsupportedAppUsage;
 import android.content.res.AssetFileDescriptor;
-import android.os.Handler;
 import android.os.Looper;
+import android.os.Handler;
 import android.os.Message;
 import android.util.AndroidRuntimeException;
 import android.util.Log;
-
-import java.io.FileDescriptor;
-import java.lang.ref.WeakReference;
 
 /**
  * JetPlayer provides access to JET content playback and control.
@@ -119,9 +120,6 @@ public class JetPlayer
     
     private static JetPlayer singletonRef;
     
-    static {
-        System.loadLibrary("media_jni");
-    }
     
     //--------------------------------
     // Used exclusively by native code

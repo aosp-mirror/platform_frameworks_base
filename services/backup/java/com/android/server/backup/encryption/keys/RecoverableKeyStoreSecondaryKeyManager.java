@@ -20,10 +20,9 @@ import android.content.Context;
 import android.security.keystore.recovery.InternalRecoveryServiceException;
 import android.security.keystore.recovery.LockScreenRequiredException;
 import android.security.keystore.recovery.RecoveryController;
+import android.util.ByteStringUtils;
 
 import com.android.internal.annotations.VisibleForTesting;
-
-import libcore.util.HexEncoding;
 
 import java.security.SecureRandom;
 import java.security.UnrecoverableKeyException;
@@ -109,7 +108,7 @@ public class RecoverableKeyStoreSecondaryKeyManager {
     private String generateId() {
         byte[] id = new byte[BACKUP_KEY_SUFFIX_LENGTH_BITS / BITS_PER_BYTE];
         mSecureRandom.nextBytes(id);
-        return BACKUP_KEY_ALIAS_PREFIX + HexEncoding.encodeToString(id);
+        return BACKUP_KEY_ALIAS_PREFIX + ByteStringUtils.toHexString(id);
     }
 
     /** Constructs a {@link RecoverableKeyStoreSecondaryKeyManager}. */

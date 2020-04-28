@@ -22,6 +22,7 @@ import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.AppGlobals;
 import android.app.contentsuggestions.ClassificationsRequest;
+import android.app.contentsuggestions.ContentSuggestionsManager;
 import android.app.contentsuggestions.IClassificationsCallback;
 import android.app.contentsuggestions.ISelectionsCallback;
 import android.app.contentsuggestions.SelectionsRequest;
@@ -97,15 +98,19 @@ public final class ContentSuggestionsPerUserService extends
     void provideContextImageLocked(int taskId, @NonNull Bundle imageContextRequestExtras) {
         RemoteContentSuggestionsService service = ensureRemoteServiceLocked();
         if (service != null) {
-            ActivityManager.TaskSnapshot snapshot =
-                    mActivityTaskManagerInternal.getTaskSnapshotNoRestore(taskId, false);
             GraphicBuffer snapshotBuffer = null;
             int colorSpaceId = 0;
-            if (snapshot != null) {
-                snapshotBuffer = snapshot.getSnapshot();
-                ColorSpace colorSpace = snapshot.getColorSpace();
-                if (colorSpace != null) {
-                    colorSpaceId = colorSpace.getId();
+
+            // Skip taking TaskSnapshot when bitmap is provided.
+            if (!imageContextRequestExtras.containsKey(ContentSuggestionsManager.EXTRA_BITMAP)) {
+                ActivityManager.TaskSnapshot snapshot =
+                        mActivityTaskManagerInternal.getTaskSnapshotNoRestore(taskId, false);
+                if (snapshot != null) {
+                    snapshotBuffer = snapshot.getSnapshot();
+                    ColorSpace colorSpace = snapshot.getColorSpace();
+                    if (colorSpace != null) {
+                        colorSpaceId = colorSpace.getId();
+                    }
                 }
             }
 

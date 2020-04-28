@@ -23,6 +23,7 @@ cc_library_static {
         "com_android_server_AlarmManagerService.cpp",
         "com_android_server_am_BatteryStatsService.cpp",
         "com_android_server_connectivity_Vpn.cpp",
+        "com_android_server_connectivity_tethering_OffloadHardwareInterface.cpp",
         "com_android_server_ConsumerIrService.cpp",
         "com_android_server_devicepolicy_CryptoTestHelper.cpp",
         "com_android_server_HardwarePropertiesManagerService.cpp",
@@ -53,17 +54,13 @@ cc_library_static {
         "com_android_server_am_LowMemDetector.cpp",
         "onload.cpp",
         ":lib_networkStatsFactory_native",
-        ":tethering-jni-srcs",
     ],
 
     include_dirs: [
+        "bionic/libc/private",
         "frameworks/base/libs",
         "frameworks/native/services",
         "system/gatekeeper/include",
-    ],
-
-    header_libs: [
-        "bionic_libc_platform_headers",
     ],
 }
 
@@ -101,6 +98,8 @@ cc_defaults {
         "libGLESv2",
         "libnetutils",
         "libhidlbase",
+        "libhidltransport",
+        "libhwbinder",
         "libutils",
         "libhwui",
         "libbpf_android",
@@ -130,13 +129,11 @@ cc_defaults {
         "android.hardware.vibrator@1.1",
         "android.hardware.vibrator@1.2",
         "android.hardware.vibrator@1.3",
-        "android.hardware.vibrator@1.4",
         "android.hardware.vr@1.0",
         "android.frameworks.schedulerservice@1.0",
         "android.frameworks.sensorservice@1.0",
         "android.system.suspend@1.0",
         "suspend_control_aidl_interface-cpp",
-        "vintf-vibrator-cpp",
     ],
 
     static_libs: [

@@ -858,10 +858,7 @@ public final class BluetoothAdapter {
         if (DBG) {
             Log.d(TAG, "isLeEnabled(): " + BluetoothAdapter.nameForState(state));
         }
-        return (state == BluetoothAdapter.STATE_ON
-                || state == BluetoothAdapter.STATE_BLE_ON
-                || state == BluetoothAdapter.STATE_TURNING_ON
-                || state == BluetoothAdapter.STATE_TURNING_OFF);
+        return (state == BluetoothAdapter.STATE_ON || state == BluetoothAdapter.STATE_BLE_ON);
     }
 
     /**
@@ -1031,8 +1028,7 @@ public final class BluetoothAdapter {
      */
     @RequiresPermission(Manifest.permission.BLUETOOTH)
     @AdapterState
-    @UnsupportedAppUsage(publicAlternatives = "Use {@link #getState()} instead to determine "
-            + "whether you can use BLE & BT classic.")
+    @UnsupportedAppUsage
     public int getLeState() {
         int state = BluetoothAdapter.STATE_OFF;
 
@@ -1189,17 +1185,21 @@ public final class BluetoothAdapter {
     /**
      * Factory reset bluetooth settings.
      *
+     * <p>Requires the {@link android.Manifest.permission#BLUETOOTH_PRIVILEGED}
+     * permission
+     *
      * @return true to indicate that the config file was successfully cleared
      * @hide
      */
-    @SystemApi
-    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    @UnsupportedAppUsage
     public boolean factoryReset() {
         try {
             mServiceLock.readLock().lock();
-            if (mService != null) {
-                return mService.factoryReset();
+            if (mService != null && mService.factoryReset()
+                    && mManagerService != null && mManagerService.onFactoryReset()) {
+                return true;
             }
+            Log.e(TAG, "factoryReset(): Setting persist.bluetooth.factoryreset to retry later");
             SystemProperties.set("persist.bluetooth.factoryreset", "true");
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
@@ -1212,12 +1212,13 @@ public final class BluetoothAdapter {
     /**
      * Get the UUIDs supported by the local Bluetooth adapter.
      *
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
+     *
      * @return the UUIDs supported by the local Bluetooth Adapter.
      * @hide
      */
     @UnsupportedAppUsage
-    @RequiresPermission(Manifest.permission.BLUETOOTH)
-    public @NonNull ParcelUuid[] getUuids() {
+    public ParcelUuid[] getUuids() {
         if (getState() != STATE_ON) {
             return null;
         }
@@ -1473,6 +1474,7 @@ public final class BluetoothAdapter {
      * will return false. After turning on Bluetooth,
      * wait for {@link #ACTION_STATE_CHANGED} with {@link #STATE_ON}
      * to get the updated value.
+     * <p>Requires {@link android.Manifest.permission#WRITE_SECURE_SETTINGS}
      * <p>Applications cannot set the scan mode. They should use
      * <code>startActivityForResult(
      * BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE})
@@ -1484,8 +1486,7 @@ public final class BluetoothAdapter {
      * @return true if the scan mode was set, false otherwise
      * @hide
      */
-    @SystemApi
-    @RequiresPermission(Manifest.permission.BLUETOOTH)
+    @UnsupportedAppUsage
     public boolean setScanMode(@ScanMode int mode, int duration) {
         if (getState() != STATE_ON) {
             return false;
@@ -1503,34 +1504,9 @@ public final class BluetoothAdapter {
         return false;
     }
 
-    /**
-     * Set the Bluetooth scan mode of the local Bluetooth adapter.
-     * <p>The Bluetooth scan mode determines if the local adapter is
-     * connectable and/or discoverable from remote Bluetooth devices.
-     * <p>For privacy reasons, discoverable mode is automatically turned off
-     * after <code>duration</code> seconds. For example, 120 seconds should be
-     * enough for a remote device to initiate and complete its discovery
-     * process.
-     * <p>Valid scan mode values are:
-     * {@link #SCAN_MODE_NONE},
-     * {@link #SCAN_MODE_CONNECTABLE},
-     * {@link #SCAN_MODE_CONNECTABLE_DISCOVERABLE}.
-     * <p>If Bluetooth state is not {@link #STATE_ON}, this API
-     * will return false. After turning on Bluetooth,
-     * wait for {@link #ACTION_STATE_CHANGED} with {@link #STATE_ON}
-     * to get the updated value.
-     * <p>Applications cannot set the scan mode. They should use
-     * <code>startActivityForResult(
-     * BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE})
-     * </code>instead.
-     *
-     * @param mode valid scan mode
-     * @return true if the scan mode was set, false otherwise
-     * @hide
-     */
-    @SystemApi
-    @RequiresPermission(Manifest.permission.BLUETOOTH)
-    public boolean setScanMode(@ScanMode int mode) {
+    /** @hide */
+    @UnsupportedAppUsage
+    public boolean setScanMode(int mode) {
         if (getState() != STATE_ON) {
             return false;
         }
@@ -1583,8 +1559,6 @@ public final class BluetoothAdapter {
      * been called recently.
      * @hide
      */
-    @SystemApi
-    @RequiresPermission(Manifest.permission.BLUETOOTH)
     public long getDiscoveryEndMillis() {
         try {
             mServiceLock.readLock().lock();
@@ -2083,7 +2057,7 @@ public final class BluetoothAdapter {
      * BluetoothProfile}.
      * @hide
      */
-    public @NonNull List<Integer> getSupportedProfiles() {
+    public List<Integer> getSupportedProfiles() {
         final ArrayList<Integer> supportedProfiles = new ArrayList<Integer>();
 
         try {

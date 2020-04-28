@@ -6902,9 +6902,8 @@ std::unique_ptr<DynamicRefTable> DynamicRefTable::clone() const {
 status_t DynamicRefTable::load(const ResTable_lib_header* const header)
 {
     const uint32_t entryCount = dtohl(header->count);
-    const uint32_t sizeOfEntries = sizeof(ResTable_lib_entry) * entryCount;
     const uint32_t expectedSize = dtohl(header->header.size) - dtohl(header->header.headerSize);
-    if (sizeOfEntries > expectedSize) {
+    if (entryCount > (expectedSize / sizeof(ResTable_lib_entry))) {
         ALOGE("ResTable_lib_header size %u is too small to fit %u entries (x %u).",
                 expectedSize, entryCount, (uint32_t)sizeof(ResTable_lib_entry));
         return UNKNOWN_ERROR;
@@ -7403,12 +7402,12 @@ void ResTable::print_value(const Package* pkg, const Res_value& value) const
         print_complex(value.data, true);
         printf("\n");
     } else if (value.dataType >= Res_value::TYPE_FIRST_COLOR_INT
-            && value.dataType <= Res_value::TYPE_LAST_COLOR_INT) {
+            || value.dataType <= Res_value::TYPE_LAST_COLOR_INT) {
         printf("(color) #%08x\n", value.data);
     } else if (value.dataType == Res_value::TYPE_INT_BOOLEAN) {
         printf("(boolean) %s\n", value.data ? "true" : "false");
     } else if (value.dataType >= Res_value::TYPE_FIRST_INT
-            && value.dataType <= Res_value::TYPE_LAST_INT) {
+            || value.dataType <= Res_value::TYPE_LAST_INT) {
         printf("(int) 0x%08x or %d\n", value.data, value.data);
     } else {
         printf("(unknown type) t=0x%02x d=0x%08x (s=0x%04x r=0x%02x)\n",

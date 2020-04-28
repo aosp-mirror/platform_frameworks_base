@@ -26,14 +26,12 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.text.format.DateUtils;
+import android.text.format.Time;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.RemoteViews.RemoteView;
 
-import java.time.Clock;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.util.TimeZone;
 
 /**
  * This widget display an analogic clock with two hands for hours and
@@ -47,7 +45,7 @@ import java.time.ZoneId;
 @RemoteView
 @Deprecated
 public class AnalogClock extends View {
-    private Clock mClock;
+    private Time mCalendar;
 
     @UnsupportedAppUsage
     private Drawable mHourHand;
@@ -101,7 +99,7 @@ public class AnalogClock extends View {
             mMinuteHand = context.getDrawable(com.android.internal.R.drawable.clock_hand_minute);
         }
 
-        mClock = Clock.systemDefaultZone();
+        mCalendar = new Time();
 
         mDialWidth = mDial.getIntrinsicWidth();
         mDialHeight = mDial.getIntrinsicHeight();
@@ -134,7 +132,7 @@ public class AnalogClock extends View {
         // in the main thread, therefore the receiver can't run before this method returns.
 
         // The time zone may have changed while the receiver wasn't registered, so update the Time
-        mClock = Clock.systemDefaultZone();
+        mCalendar = new Time();
 
         // Make sure we update to the current time
         onTimeChanged();
@@ -243,18 +241,17 @@ public class AnalogClock extends View {
     }
 
     private void onTimeChanged() {
-        long nowMillis = mClock.millis();
-        LocalDateTime localDateTime = toLocalDateTime(nowMillis, mClock.getZone());
+        mCalendar.setToNow();
 
-        int hour = localDateTime.getHour();
-        int minute = localDateTime.getMinute();
-        int second = localDateTime.getSecond();
+        int hour = mCalendar.hour;
+        int minute = mCalendar.minute;
+        int second = mCalendar.second;
 
         mMinutes = minute + second / 60.0f;
         mHour = hour + mMinutes / 60.0f;
         mChanged = true;
 
-        updateContentDescription(nowMillis);
+        updateContentDescription(mCalendar);
     }
 
     private final BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
@@ -262,7 +259,7 @@ public class AnalogClock extends View {
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(Intent.ACTION_TIMEZONE_CHANGED)) {
                 String tz = intent.getStringExtra("time-zone");
-                mClock = Clock.system(ZoneId.of(tz));
+                mCalendar = new Time(TimeZone.getTimeZone(tz).getID());
             }
 
             onTimeChanged();
@@ -271,17 +268,10 @@ public class AnalogClock extends View {
         }
     };
 
-    private void updateContentDescription(long timeMillis) {
+    private void updateContentDescription(Time time) {
         final int flags = DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_24HOUR;
-        String contentDescription = DateUtils.formatDateTime(mContext, timeMillis, flags);
+        String contentDescription = DateUtils.formatDateTime(mContext,
+                time.toMillis(false), flags);
         setContentDescription(contentDescription);
-    }
-
-    private static LocalDateTime toLocalDateTime(long timeMillis, ZoneId zoneId) {
-        // java.time types like LocalDateTime / Instant can support the full range of "long millis"
-        // with room to spare so we do not need to worry about overflow / underflow and the
-        // resulting exceptions while the input to this class is a long.
-        Instant instant = Instant.ofEpochMilli(timeMillis);
-        return LocalDateTime.ofInstant(instant, zoneId);
     }
 }

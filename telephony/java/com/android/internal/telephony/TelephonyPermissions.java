@@ -178,7 +178,7 @@ public final class TelephonyPermissions {
         // We have READ_PHONE_STATE permission, so return true as long as the AppOps bit hasn't been
         // revoked.
         AppOpsManager appOps = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
-        return appOps.noteOp(AppOpsManager.OPSTR_READ_PHONE_STATE, uid, callingPackage)
+        return appOps.noteOp(AppOpsManager.OP_READ_PHONE_STATE, uid, callingPackage)
                 == AppOpsManager.MODE_ALLOWED;
     }
 
@@ -226,7 +226,7 @@ public final class TelephonyPermissions {
         // We have READ_PHONE_STATE permission, so return true as long as the AppOps bit hasn't been
         // revoked.
         AppOpsManager appOps = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
-        return appOps.noteOp(AppOpsManager.OPSTR_READ_PHONE_STATE, uid, callingPackage) ==
+        return appOps.noteOp(AppOpsManager.OP_READ_PHONE_STATE, uid, callingPackage) ==
                 AppOpsManager.MODE_ALLOWED;
     }
 
@@ -387,7 +387,7 @@ public final class TelephonyPermissions {
         ApplicationInfo callingPackageInfo = null;
         try {
             callingPackageInfo = context.getPackageManager().getApplicationInfoAsUser(
-                    callingPackage, 0, UserHandle.getUserHandleForUid(uid));
+                    callingPackage, 0, UserHandle.getUserId(uid));
             if (callingPackageInfo != null) {
                 if (callingPackageInfo.isSystemApp()) {
                     isPreinstalled = true;
@@ -468,7 +468,7 @@ public final class TelephonyPermissions {
         // We have READ_CALL_LOG permission, so return true as long as the AppOps bit hasn't been
         // revoked.
         AppOpsManager appOps = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
-        return appOps.noteOp(AppOpsManager.OPSTR_READ_CALL_LOG, uid, callingPackage) ==
+        return appOps.noteOp(AppOpsManager.OP_READ_CALL_LOG, uid, callingPackage) ==
                 AppOpsManager.MODE_ALLOWED;
     }
 
@@ -491,7 +491,7 @@ public final class TelephonyPermissions {
             String callingPackage, String message) {
         // Default SMS app can always read it.
         AppOpsManager appOps = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
-        if (appOps.noteOp(AppOpsManager.OPSTR_WRITE_SMS, uid, callingPackage) ==
+        if (appOps.noteOp(AppOpsManager.OP_WRITE_SMS, uid, callingPackage) ==
                 AppOpsManager.MODE_ALLOWED) {
             return true;
         }
@@ -508,18 +508,25 @@ public final class TelephonyPermissions {
         // Can be read with READ_SMS too.
         try {
             context.enforcePermission(android.Manifest.permission.READ_SMS, pid, uid, message);
-            return appOps.noteOp(AppOpsManager.OPSTR_READ_SMS, uid, callingPackage)
-                == AppOpsManager.MODE_ALLOWED;
-
+            int opCode = AppOpsManager.permissionToOpCode(android.Manifest.permission.READ_SMS);
+            if (opCode != AppOpsManager.OP_NONE) {
+                return appOps.noteOp(opCode, uid, callingPackage) == AppOpsManager.MODE_ALLOWED;
+            } else {
+                return true;
+            }
         } catch (SecurityException readSmsSecurityException) {
         }
         // Can be read with READ_PHONE_NUMBERS too.
         try {
             context.enforcePermission(android.Manifest.permission.READ_PHONE_NUMBERS, pid, uid,
                     message);
-            return appOps.noteOp(AppOpsManager.OPSTR_READ_PHONE_NUMBERS, uid, callingPackage)
-                == AppOpsManager.MODE_ALLOWED;
-
+            int opCode = AppOpsManager.permissionToOpCode(
+                    android.Manifest.permission.READ_PHONE_NUMBERS);
+            if (opCode != AppOpsManager.OP_NONE) {
+                return appOps.noteOp(opCode, uid, callingPackage) == AppOpsManager.MODE_ALLOWED;
+            } else {
+                return true;
+            }
         } catch (SecurityException readPhoneNumberSecurityException) {
         }
 

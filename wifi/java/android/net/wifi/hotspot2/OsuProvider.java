@@ -16,7 +16,6 @@
 
 package android.net.wifi.hotspot2;
 
-import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.graphics.drawable.Icon;
@@ -220,7 +219,7 @@ public final class OsuProvider implements Parcelable {
     }
 
     @Override
-    public boolean equals(@Nullable Object thatObject) {
+    public boolean equals(Object thatObject) {
         if (this == thatObject) {
             return true;
         }
@@ -247,7 +246,6 @@ public final class OsuProvider implements Parcelable {
                 mServerUri, mNetworkAccessIdentifier, mMethodList);
     }
 
-    @NonNull
     @Override
     public String toString() {
         return "OsuProvider{mOsuSsid=" + mOsuSsid

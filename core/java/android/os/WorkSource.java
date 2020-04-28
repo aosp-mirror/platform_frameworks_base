@@ -1,6 +1,5 @@
 package android.os;
 
-import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
@@ -40,17 +39,14 @@ public class WorkSource implements Parcelable {
      * The WorkSource object itself is not thread safe, but we need to
      * hold sTmpWorkSource lock while working with these statics.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     static final WorkSource sTmpWorkSource = new WorkSource(0);
     /**
      * For returning newbie work from a modification operation.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     static WorkSource sNewbWork;
     /**
      * For returning gone work form a modification operation.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     static WorkSource sGoneWork;
 
     /**
@@ -206,7 +202,7 @@ public class WorkSource implements Parcelable {
     }
 
     @Override
-    public boolean equals(@Nullable Object o) {
+    public boolean equals(Object o) {
         if (o instanceof WorkSource) {
             WorkSource other = (WorkSource) o;
 
@@ -623,7 +619,6 @@ public class WorkSource implements Parcelable {
         return changed;
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     private boolean updateLocked(WorkSource other, boolean set, boolean returnNewbs) {
         if (mNames == null && other.mNames == null) {
             return updateUidsLocked(other, set, returnNewbs);
@@ -990,7 +985,6 @@ public class WorkSource implements Parcelable {
             mTags = tags;
         }
 
-        @NonNull
         @Override
         public String toString() {
             StringBuilder result = new StringBuilder("WorkChain{");
@@ -1017,7 +1011,7 @@ public class WorkSource implements Parcelable {
         }
 
         @Override
-        public boolean equals(@Nullable Object o) {
+        public boolean equals(Object o) {
             if (o instanceof WorkChain) {
                 WorkChain other = (WorkChain) o;
 

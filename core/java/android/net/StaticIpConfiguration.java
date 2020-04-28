@@ -113,8 +113,8 @@ public final class StaticIpConfiguration implements Parcelable {
     }
 
     /**
-     * Get a {@link String} containing the comma separated domains to search when resolving host
-     * names on this link, in priority order.
+     * Get a {@link String} listing in priority order of the comma separated domains to search when
+     * resolving host names on the link.
      */
     public @Nullable String getDomains() {
         return domains;
@@ -236,7 +236,6 @@ public final class StaticIpConfiguration implements Parcelable {
         return lp;
     }
 
-    @NonNull
     @Override
     public String toString() {
         StringBuffer str = new StringBuffer();
@@ -268,7 +267,7 @@ public final class StaticIpConfiguration implements Parcelable {
     }
 
     @Override
-    public boolean equals(@Nullable Object obj) {
+    public boolean equals(Object obj) {
         if (this == obj) return true;
 
         if (!(obj instanceof StaticIpConfiguration)) return false;

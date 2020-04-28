@@ -18,7 +18,6 @@ package android.net.metrics;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
@@ -186,7 +185,6 @@ public final class ApfProgramEvent implements IpConnectivityLog.Event {
         return 0;
     }
 
-    @NonNull
     @Override
     public String toString() {
         String lifetimeString = (lifetime < Long.MAX_VALUE) ? lifetime + "s" : "forever";
@@ -195,7 +193,7 @@ public final class ApfProgramEvent implements IpConnectivityLog.Event {
     }
 
     @Override
-    public boolean equals(@Nullable Object obj) {
+    public boolean equals(Object obj) {
         if (obj == null || !(obj.getClass().equals(ApfProgramEvent.class))) return false;
         final ApfProgramEvent other = (ApfProgramEvent) obj;
         return lifetime == other.lifetime

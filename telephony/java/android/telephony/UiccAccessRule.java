@@ -15,7 +15,6 @@
  */
 package android.telephony;
 
-import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.content.pm.PackageInfo;
@@ -226,7 +225,7 @@ public final class UiccAccessRule implements Parcelable {
     }
 
     @Override
-    public boolean equals(@Nullable Object obj) {
+    public boolean equals(Object obj) {
         if (this == obj) {
             return true;
         }
@@ -249,7 +248,6 @@ public final class UiccAccessRule implements Parcelable {
         return result;
     }
 
-    @NonNull
     @Override
     public String toString() {
         return "cert: " + IccUtils.bytesToHexString(mCertificateHash) + " pkg: " +

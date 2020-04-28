@@ -77,8 +77,7 @@ public final class BluetoothServerSocket implements Closeable {
 
     private static final String TAG = "BluetoothServerSocket";
     private static final boolean DBG = false;
-    @UnsupportedAppUsage(publicAlternatives = "Use public {@link BluetoothServerSocket} API "
-            + "instead.")
+    @UnsupportedAppUsage
     /*package*/ final BluetoothSocket mSocket;
     private Handler mHandler;
     private int mMessage;

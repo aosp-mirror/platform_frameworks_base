@@ -34,8 +34,9 @@ AssertionResult ReadFileFromZipToString(const std::string& zip_path, const std::
                               << "': " << ::ErrorCodeString(result);
   }
 
+  ::ZipString name(file.c_str());
   ::ZipEntry entry;
-  result = ::FindEntry(handle, file.c_str(), &entry);
+  result = ::FindEntry(handle, name, &entry);
   if (result != 0) {
     ::CloseArchive(handle);
     return AssertionFailure() << "Could not find file '" << file << "' in zip '" << zip_path

@@ -19,7 +19,7 @@ package com.android.server.timedetector;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AlarmManager;
-import android.app.timedetector.PhoneTimeSuggestion;
+import android.app.timedetector.TimeSignal;
 import android.content.Intent;
 import android.util.Slog;
 import android.util.TimestampedValue;
@@ -48,8 +48,9 @@ public final class SimpleTimeDetectorStrategy implements TimeDetectorStrategy {
     // @NonNull after initialize()
     private Callback mCallback;
 
-    // Last phone suggestion.
-    @Nullable private PhoneTimeSuggestion mLastPhoneSuggestion;
+    // NITZ state.
+    @Nullable private TimestampedValue<Long> mLastNitzTime;
+
 
     // Information about the last time signal received: Used when toggling auto-time.
     @Nullable private TimestampedValue<Long> mLastSystemClockTime;
@@ -64,40 +65,46 @@ public final class SimpleTimeDetectorStrategy implements TimeDetectorStrategy {
     }
 
     @Override
-    public void suggestPhoneTime(@NonNull PhoneTimeSuggestion timeSuggestion) {
+    public void suggestTime(@NonNull TimeSignal timeSignal) {
+        if (!TimeSignal.SOURCE_ID_NITZ.equals(timeSignal.getSourceId())) {
+            Slog.w(TAG, "Ignoring signal from unsupported source: " + timeSignal);
+            return;
+        }
+
         // NITZ logic
 
-        boolean timeSuggestionIsValid =
-                validateNewPhoneSuggestion(timeSuggestion, mLastPhoneSuggestion);
-        if (!timeSuggestionIsValid) {
+        TimestampedValue<Long> newNitzUtcTime = timeSignal.getUtcTime();
+        boolean nitzTimeIsValid = validateNewNitzTime(newNitzUtcTime, mLastNitzTime);
+        if (!nitzTimeIsValid) {
             return;
         }
         // Always store the last NITZ value received, regardless of whether we go on to use it to
         // update the system clock. This is so that we can validate future NITZ signals.
-        mLastPhoneSuggestion = timeSuggestion;
+        mLastNitzTime = newNitzUtcTime;
 
         // System clock update logic.
 
         // Historically, Android has sent a telephony broadcast only when setting the time using
         // NITZ.
-        final boolean sendNetworkBroadcast = true;
+        final boolean sendNetworkBroadcast =
+                TimeSignal.SOURCE_ID_NITZ.equals(timeSignal.getSourceId());
 
-        final TimestampedValue<Long> newUtcTime = timeSuggestion.getUtcTime();
+        final TimestampedValue<Long> newUtcTime = newNitzUtcTime;
         setSystemClockIfRequired(newUtcTime, sendNetworkBroadcast);
     }
 
-    private static boolean validateNewPhoneSuggestion(@NonNull PhoneTimeSuggestion newSuggestion,
-            @Nullable PhoneTimeSuggestion lastSuggestion) {
+    private static boolean validateNewNitzTime(TimestampedValue<Long> newNitzUtcTime,
+            TimestampedValue<Long> lastNitzTime) {
 
-        if (lastSuggestion != null) {
-            long referenceTimeDifference = TimestampedValue.referenceTimeDifference(
-                    newSuggestion.getUtcTime(), lastSuggestion.getUtcTime());
+        if (lastNitzTime != null) {
+            long referenceTimeDifference =
+                    TimestampedValue.referenceTimeDifference(newNitzUtcTime, lastNitzTime);
             if (referenceTimeDifference < 0 || referenceTimeDifference > Integer.MAX_VALUE) {
                 // Out of order or bogus.
                 Slog.w(TAG, "validateNewNitzTime: Bad NITZ signal received."
                         + " referenceTimeDifference=" + referenceTimeDifference
-                        + " lastSuggestion=" + lastSuggestion
-                        + " newSuggestion=" + newSuggestion);
+                        + " lastNitzTime=" + lastNitzTime
+                        + " newNitzUtcTime=" + newNitzUtcTime);
                 return false;
             }
         }
@@ -175,7 +182,7 @@ public final class SimpleTimeDetectorStrategy implements TimeDetectorStrategy {
 
     @Override
     public void dump(@NonNull PrintWriter pw, @Nullable String[] args) {
-        pw.println("mLastPhoneSuggestion=" + mLastPhoneSuggestion);
+        pw.println("mLastNitzTime=" + mLastNitzTime);
         pw.println("mLastSystemClockTimeSet=" + mLastSystemClockTimeSet);
         pw.println("mLastSystemClockTime=" + mLastSystemClockTime);
         pw.println("mLastSystemClockTimeSendNetworkBroadcast="

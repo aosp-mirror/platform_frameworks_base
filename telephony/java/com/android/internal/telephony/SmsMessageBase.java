@@ -16,27 +16,23 @@
 
 package com.android.internal.telephony;
 
+import com.android.internal.telephony.GsmAlphabet.TextEncodingDetails;
+import com.android.internal.telephony.SmsConstants;
+import com.android.internal.telephony.SmsHeader;
+import java.text.BreakIterator;
+import java.util.Arrays;
+
 import android.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.provider.Telephony;
 import android.telephony.SmsMessage;
 import android.text.Emoji;
 
-import com.android.internal.telephony.GsmAlphabet.TextEncodingDetails;
-
-import java.text.BreakIterator;
-import java.util.Arrays;
-
 /**
  * Base class declaring the specific methods and members for SmsMessage.
  * {@hide}
  */
 public abstract class SmsMessageBase {
-
-    @UnsupportedAppUsage
-    public SmsMessageBase() {
-    }
-
     /** {@hide} The address of the SMSC. May be null */
     @UnsupportedAppUsage
     protected String mScAddress;

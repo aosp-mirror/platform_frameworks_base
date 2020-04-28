@@ -25,7 +25,6 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import android.annotation.NonNull;
 import android.annotation.StringRes;
 import android.app.ActivityThread;
-import android.app.AppCompatCallbacks;
 import android.app.INotificationManager;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.ComponentName;
@@ -39,8 +38,6 @@ import android.content.res.Resources.Theme;
 import android.database.sqlite.SQLiteCompatibilityWalFlags;
 import android.database.sqlite.SQLiteGlobal;
 import android.hardware.display.DisplayManagerInternal;
-import android.net.ConnectivityModuleConnector;
-import android.net.Network;
 import android.net.NetworkStackClient;
 import android.os.BaseBundle;
 import android.os.Binder;
@@ -91,8 +88,6 @@ import com.android.server.biometrics.iris.IrisService;
 import com.android.server.broadcastradio.BroadcastRadioService;
 import com.android.server.camera.CameraServiceProxy;
 import com.android.server.clipboard.ClipboardService;
-import com.android.server.compat.PlatformCompat;
-import com.android.server.compat.PlatformCompatNative;
 import com.android.server.connectivity.IpConnectivityMetrics;
 import com.android.server.contentcapture.ContentCaptureManagerInternal;
 import com.android.server.coverage.CoverageService;
@@ -640,16 +635,6 @@ public final class SystemServer {
         SystemServerInitThreadPool.get().submit(SystemConfig::getInstance, TAG_SYSTEM_CONFIG);
         traceEnd();
 
-        // Platform compat service is used by ActivityManagerService, PackageManagerService, and
-        // possibly others in the future. b/135010838.
-        traceBeginAndSlog("PlatformCompat");
-        PlatformCompat platformCompat = new PlatformCompat(mSystemContext);
-        ServiceManager.addService(Context.PLATFORM_COMPAT_SERVICE, platformCompat);
-        ServiceManager.addService(Context.PLATFORM_COMPAT_NATIVE_SERVICE,
-                new PlatformCompatNative(platformCompat));
-        AppCompatCallbacks.install(new long[0]);
-        traceEnd();
-
         // Wait for installd to finish starting up so that it has a chance to
         // create critical directories such as /data/user with the appropriate
         // permissions.  We need this to complete before we initialize other services.
@@ -1105,7 +1090,6 @@ public final class SystemServer {
             traceBeginAndSlog("SignedConfigService");
             SignedConfigService.registerUpdateReceiver(mSystemContext);
             traceEnd();
-
         } catch (RuntimeException e) {
             Slog.e("System", "******************************************");
             Slog.e("System", "************ Failure starting core service", e);
@@ -1284,14 +1268,6 @@ public final class SystemServer {
             } else {
                 Slog.d(TAG, "ContentSuggestionsService not defined by OEM");
             }
-
-            traceBeginAndSlog("InitConnectivityModuleConnector");
-            try {
-                ConnectivityModuleConnector.getInstance().init(context);
-            } catch (Throwable e) {
-                reportWtf("initializing ConnectivityModuleConnector", e);
-            }
-            traceEnd();
 
             traceBeginAndSlog("InitNetworkStackClient");
             try {
@@ -1473,13 +1449,16 @@ public final class SystemServer {
             }
             traceEnd();
 
-            traceBeginAndSlog("StartTimeDetectorService");
-            try {
-                mSystemServiceManager.startService(TIME_DETECTOR_SERVICE_CLASS);
-            } catch (Throwable e) {
-                reportWtf("starting StartTimeDetectorService service", e);
+            final boolean useNewTimeServices = true;
+            if (useNewTimeServices) {
+                traceBeginAndSlog("StartTimeDetectorService");
+                try {
+                    mSystemServiceManager.startService(TIME_DETECTOR_SERVICE_CLASS);
+                } catch (Throwable e) {
+                    reportWtf("starting StartTimeDetectorService service", e);
+                }
+                traceEnd();
             }
-            traceEnd();
 
             if (!isWatch) {
                 traceBeginAndSlog("StartSearchManagerService");
@@ -1495,6 +1474,8 @@ public final class SystemServer {
                 traceBeginAndSlog("StartWallpaperManagerService");
                 mSystemServiceManager.startService(WALLPAPER_SERVICE_CLASS);
                 traceEnd();
+            } else {
+                Slog.i(TAG, "Wallpaper service disabled by config");
             }
 
             traceBeginAndSlog("StartAudioService");
@@ -1677,7 +1658,12 @@ public final class SystemServer {
             if (!isWatch && !disableNetworkTime) {
                 traceBeginAndSlog("StartNetworkTimeUpdateService");
                 try {
-                    networkTimeUpdater = new NetworkTimeUpdateServiceImpl(context);
+                    if (useNewTimeServices) {
+                        networkTimeUpdater = new NewNetworkTimeUpdateService(context);
+                    } else {
+                        networkTimeUpdater = new OldNetworkTimeUpdateService(context);
+                    }
+                    Slog.d(TAG, "Using networkTimeUpdater class=" + networkTimeUpdater.getClass());
                     ServiceManager.addService("network_time_update_service", networkTimeUpdater);
                 } catch (Throwable e) {
                     reportWtf("starting NetworkTimeUpdate service", e);
@@ -2187,7 +2173,7 @@ public final class SystemServer {
                 // ActivityManagerService.mSystemReady and ActivityManagerService.mProcessesReady
                 // are set to true. Be careful if moving this to a different place in the
                 // startup sequence.
-                NetworkStackClient.getInstance().start();
+                NetworkStackClient.getInstance().start(context);
             } catch (Throwable e) {
                 reportWtf("starting Network Stack", e);
             }

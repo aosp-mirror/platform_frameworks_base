@@ -19,7 +19,6 @@ package android.telecom;
 import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.net.Uri;
 import android.os.Build;
@@ -118,20 +117,6 @@ public final class Call {
      * manifest.
      */
     public static final int STATE_PULLING_CALL = 11;
-
-    /**
-     * The state of a call that is active with the network, but the audio from the call is
-     * being intercepted by an app on the local device. Telecom does not hold audio focus in this
-     * state, and the call will be invisible to the user except for a persistent notification.
-     */
-    public static final int STATE_AUDIO_PROCESSING = 12;
-
-    /**
-     * The state of a call that is being presented to the user after being in
-     * {@link #STATE_AUDIO_PROCESSING}. The call is still active with the network in this case, and
-     * Telecom will hold audio focus and play a ringtone if appropriate.
-     */
-    public static final int STATE_SIMULATED_RINGING = 13;
 
     /**
      * The key to retrieve the optional {@code PhoneAccount}s Telecom can bundle with its Call
@@ -728,7 +713,6 @@ public final class Call {
         }
 
         /** {@hide} */
-        @TestApi
         public String getTelecomCallId() {
             return mTelecomCallId;
         }
@@ -1495,49 +1479,6 @@ public final class Call {
     }
 
     /**
-     * Instructs Telecom to put the call into the background audio processing state.
-     *
-     * This method can be called either when the call is in {@link #STATE_RINGING} or
-     * {@link #STATE_ACTIVE}. After Telecom acknowledges the request by setting the call's state to
-     * {@link #STATE_AUDIO_PROCESSING}, your app may setup the audio paths with the audio stack in
-     * order to capture and play audio on the call stream.
-     *
-     * This method can only be called by the default dialer app.
-     * @hide
-     */
-    @SystemApi
-    @TestApi
-    //@RequiresPermission(android.Manifest.permission.BACKGROUND_CALL_AUDIO)
-    public void enterBackgroundAudioProcessing() {
-        if (mState != STATE_ACTIVE && mState != STATE_RINGING) {
-            throw new IllegalStateException("Call must be active or ringing");
-        }
-        mInCallAdapter.enterBackgroundAudioProcessing(mTelecomCallId);
-    }
-
-    /**
-     * Instructs Telecom to come out of the background audio processing state requested by
-     * {@link #enterBackgroundAudioProcessing()} or from the call screening service.
-     *
-     * This method can only be called when the call is in {@link #STATE_AUDIO_PROCESSING}.
-     *
-     * @param shouldRing If true, Telecom will put the call into the
-     *                   {@link #STATE_SIMULATED_RINGING} state and notify other apps that there is
-     *                   a ringing call. Otherwise, the call will go into {@link #STATE_ACTIVE}
-     *                   immediately.
-     * @hide
-     */
-    @SystemApi
-    @TestApi
-    //@RequiresPermission(android.Manifest.permission.BACKGROUND_CALL_AUDIO)
-    public void exitBackgroundAudioProcessing(boolean shouldRing) {
-        if (mState != STATE_AUDIO_PROCESSING) {
-            throw new IllegalStateException("Call must in the audio processing state");
-        }
-        mInCallAdapter.exitBackgroundAudioProcessing(mTelecomCallId, shouldRing);
-    }
-
-    /**
      * Instructs this {@code Call} to play a dual-tone multi-frequency signaling (DTMF) tone.
      *
      * Any other currently playing DTMF tone in the specified call is immediately stopped.
@@ -2049,10 +1990,6 @@ public final class Call {
                 return "DISCONNECTING";
             case STATE_SELECT_PHONE_ACCOUNT:
                 return "SELECT_PHONE_ACCOUNT";
-            case STATE_SIMULATED_RINGING:
-                return "SIMULATED_RINGING";
-            case STATE_AUDIO_PROCESSING:
-                return "AUDIO_PROCESSING";
             default:
                 Log.w(Call.class, "Unknown state %d", state);
                 return "UNKNOWN";
@@ -2142,9 +2079,6 @@ public final class Call {
         }
 
         int state = parcelableCall.getState();
-        if (mTargetSdkVersion < Phone.SDK_VERSION_R && state == Call.STATE_SIMULATED_RINGING) {
-            state = Call.STATE_RINGING;
-        }
         boolean stateChanged = mState != state;
         if (stateChanged) {
             mState = state;

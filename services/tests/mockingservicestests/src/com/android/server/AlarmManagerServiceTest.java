@@ -24,6 +24,7 @@ import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_FREQUENT;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_RARE;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_WORKING_SET;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doCallRealMethod;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doThrow;
@@ -35,6 +36,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
 import static com.android.server.AlarmManagerService.ACTIVE_INDEX;
 import static com.android.server.AlarmManagerService.AlarmHandler.APP_STANDBY_BUCKET_CHANGED;
 import static com.android.server.AlarmManagerService.AlarmHandler.APP_STANDBY_PAROLE_CHANGED;
+import static com.android.server.AlarmManagerService.AlarmHandler.REMOVE_FOR_CANCELED;
 import static com.android.server.AlarmManagerService.Constants.KEY_ALLOW_WHILE_IDLE_LONG_TIME;
 import static com.android.server.AlarmManagerService.Constants.KEY_ALLOW_WHILE_IDLE_SHORT_TIME;
 import static com.android.server.AlarmManagerService.Constants.KEY_ALLOW_WHILE_IDLE_WHITELIST_DURATION;
@@ -79,9 +81,9 @@ import android.provider.Settings;
 import android.util.Log;
 import android.util.SparseArray;
 
-import androidx.test.filters.FlakyTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.dx.mockito.inline.extended.MockedVoidMethod;
 import com.android.internal.annotations.GuardedBy;
 
 import org.junit.After;
@@ -166,7 +168,6 @@ public class AlarmManagerServiceTest {
     }
 
     public class Injector extends AlarmManagerService.Injector {
-        boolean mIsAutomotiveOverride;
 
         Injector(Context context) {
             super(context);
@@ -256,6 +257,9 @@ public class AlarmManagerServiceTest {
                 .when(() -> LocalServices.getService(DeviceIdleController.LocalService.class));
         doReturn(mUsageStatsManagerInternal).when(
                 () -> LocalServices.getService(UsageStatsManagerInternal.class));
+        doCallRealMethod().when((MockedVoidMethod) () ->
+                LocalServices.addService(eq(AlarmManagerInternal.class), any()));
+        doCallRealMethod().when(() -> LocalServices.getService(AlarmManagerInternal.class));
         when(mUsageStatsManagerInternal.getAppStandbyBucket(eq(TEST_CALLING_PACKAGE),
                 eq(UserHandle.getUserId(TEST_CALLING_UID)), anyLong()))
                 .thenReturn(STANDBY_BUCKET_ACTIVE);
@@ -443,7 +447,6 @@ public class AlarmManagerServiceTest {
         assertEquals(expectedTriggerTime, mTestTimer.getElapsed());
     }
 
-    @FlakyTest(bugId = 130313408)
     @Test
     public void testEarliestAlarmSet() {
         final PendingIntent pi6 = getNewMockPendingIntent();
@@ -661,11 +664,15 @@ public class AlarmManagerServiceTest {
                 anyLong())).thenReturn(bucket);
         mAppStandbyListener.onAppIdleStateChanged(TEST_CALLING_PACKAGE,
                 UserHandle.getUserId(TEST_CALLING_UID), false, bucket, 0);
+        assertAndHandleMessageSync(APP_STANDBY_BUCKET_CHANGED);
+    }
+
+    private void assertAndHandleMessageSync(int what) {
         final ArgumentCaptor<Message> messageCaptor = ArgumentCaptor.forClass(Message.class);
         verify(mService.mHandler, atLeastOnce()).sendMessage(messageCaptor.capture());
         final Message lastMessage = messageCaptor.getValue();
         assertEquals("Unexpected message send to handler", lastMessage.what,
-                APP_STANDBY_BUCKET_CHANGED);
+                what);
         mService.mHandler.handleMessage(lastMessage);
     }
 
@@ -725,12 +732,7 @@ public class AlarmManagerServiceTest {
 
     private void assertAndHandleParoleChanged(boolean parole) {
         mAppStandbyListener.onParoleStateChanged(parole);
-        final ArgumentCaptor<Message> messageCaptor = ArgumentCaptor.forClass(Message.class);
-        verify(mService.mHandler, atLeastOnce()).sendMessage(messageCaptor.capture());
-        final Message lastMessage = messageCaptor.getValue();
-        assertEquals("Unexpected message send to handler", lastMessage.what,
-                APP_STANDBY_PAROLE_CHANGED);
-        mService.mHandler.handleMessage(lastMessage);
+        assertAndHandleMessageSync(APP_STANDBY_PAROLE_CHANGED);
     }
 
     @Test
@@ -1033,12 +1035,13 @@ public class AlarmManagerServiceTest {
     }
 
     @Test
-    public void alarmCountOnPendingIntentCancel() {
+    public void alarmCountOnRemoveForCanceled() {
+        final AlarmManagerInternal ami = LocalServices.getService(AlarmManagerInternal.class);
         final PendingIntent pi = getNewMockPendingIntent();
-        setTestAlarm(ELAPSED_REALTIME_WAKEUP, mNowElapsedTest + 123, pi);
-        verify(pi).registerCancelListener(mService.mOperationCancelListener);
+        setTestAlarm(ELAPSED_REALTIME, mNowElapsedTest + 12345, pi);
         assertEquals(1, mService.mAlarmsPerUid.get(TEST_CALLING_UID));
-        mService.mOperationCancelListener.onCancelled(pi);
+        ami.remove(pi);
+        assertAndHandleMessageSync(REMOVE_FOR_CANCELED);
         assertEquals(0, mService.mAlarmsPerUid.get(TEST_CALLING_UID));
     }
 
@@ -1047,5 +1050,6 @@ public class AlarmManagerServiceTest {
         if (mMockingSession != null) {
             mMockingSession.finishMocking();
         }
+        LocalServices.removeServiceForTest(AlarmManagerInternal.class);
     }
 }

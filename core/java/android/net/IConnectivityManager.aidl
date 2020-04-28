@@ -52,7 +52,6 @@ interface IConnectivityManager
     @UnsupportedAppUsage
     NetworkInfo getActiveNetworkInfo();
     NetworkInfo getActiveNetworkInfoForUid(int uid, boolean ignoreBlocked);
-    @UnsupportedAppUsage(maxTargetSdk = 28)
     NetworkInfo getNetworkInfo(int networkType);
     NetworkInfo getNetworkInfoForUid(in Network network, int uid, boolean ignoreBlocked);
     @UnsupportedAppUsage
@@ -113,7 +112,6 @@ interface IConnectivityManager
 
     int setUsbTethering(boolean enable, String callerPkg);
 
-    @UnsupportedAppUsage(maxTargetSdk = 28)
     void reportInetCondition(int networkType, int percentage);
 
     void reportNetworkConnectivity(in Network network, boolean hasConnectivity);

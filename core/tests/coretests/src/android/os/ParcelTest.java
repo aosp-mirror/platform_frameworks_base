@@ -43,8 +43,8 @@ public class ParcelTest {
 
         // WorkSource can be updated.
         p.writeInterfaceToken(INTERFACE_TOKEN_1);
-        assertEquals(true, p.replaceCallingWorkSourceUid(WORK_SOURCE_2));
-        assertEquals(WORK_SOURCE_2, p.readCallingWorkSourceUid());
+        assertEquals(true, p.replaceCallingWorkSourceUid(WORK_SOURCE_1));
+        assertEquals(WORK_SOURCE_1, p.readCallingWorkSourceUid());
 
         // WorkSource can be updated to unset value.
         assertEquals(true, p.replaceCallingWorkSourceUid(Binder.UNSET_WORKSOURCE));
@@ -56,16 +56,18 @@ public class ParcelTest {
     @Test
     public void testCallingWorkSourceUidAfterEnforce() {
         Parcel p = Parcel.obtain();
-        p.writeInterfaceToken(INTERFACE_TOKEN_1);
-        assertEquals(true, p.replaceCallingWorkSourceUid(WORK_SOURCE_1));
+        // Write headers manually so that we do not invoke #writeInterfaceToken.
+        p.writeInt(1);  // strict mode header
+        p.writeInt(WORK_SOURCE_1);  // worksource header.
+        p.writeString(INTERFACE_TOKEN_1);  // interface token.
         p.setDataPosition(0);
 
         p.enforceInterface(INTERFACE_TOKEN_1);
         assertEquals(WORK_SOURCE_1, p.readCallingWorkSourceUid());
 
         // WorkSource can be updated.
-        assertEquals(true, p.replaceCallingWorkSourceUid(WORK_SOURCE_2));
-        assertEquals(WORK_SOURCE_2, p.readCallingWorkSourceUid());
+        assertEquals(true, p.replaceCallingWorkSourceUid(WORK_SOURCE_1));
+        assertEquals(WORK_SOURCE_1, p.readCallingWorkSourceUid());
 
         p.recycle();
     }

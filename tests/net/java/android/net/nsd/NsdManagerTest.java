@@ -16,6 +16,8 @@
 
 package android.net.nsd;
 
+import static com.android.internal.util.TestUtils.waitForIdleHandler;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
@@ -38,7 +40,6 @@ import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.util.AsyncChannel;
-import com.android.testutils.HandlerUtilsKt;
 
 import org.junit.After;
 import org.junit.Before;
@@ -73,7 +74,7 @@ public class NsdManagerTest {
 
     @After
     public void tearDown() throws Exception {
-        HandlerUtilsKt.waitForIdle(mServiceHandler, mTimeoutMs);
+        mServiceHandler.waitForIdle(mTimeoutMs);
         mServiceHandler.chan.disconnect();
         mServiceHandler.stop();
         if (mManager != null) {
@@ -333,7 +334,7 @@ public class NsdManagerTest {
     }
 
     int verifyRequest(int expectedMessageType) {
-        HandlerUtilsKt.waitForIdle(mServiceHandler, mTimeoutMs);
+        mServiceHandler.waitForIdle(mTimeoutMs);
         verify(mServiceHandler, timeout(mTimeoutMs)).handleMessage(any());
         reset(mServiceHandler);
         Message received = mServiceHandler.getLastMessage();
@@ -363,6 +364,10 @@ public class NsdManagerTest {
         synchronized void setLastMessage(Message msg) {
             lastMessage = obtainMessage();
             lastMessage.copyFrom(msg);
+        }
+
+        void waitForIdle(long timeoutMs) {
+            waitForIdleHandler(this, timeoutMs);
         }
 
         @Override

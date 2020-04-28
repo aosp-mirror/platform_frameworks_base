@@ -201,6 +201,14 @@
          always-on display) -->
     <string name="doze_brightness_sensor_type" translatable="false"></string>
 
+    <!-- Override value to use for proximity sensor.  -->
+    <string name="proximity_sensor_type" translatable="false">@string/doze_brightness_sensor_type</string>
+
+    <!-- If using proximity_sensor_type, specifies a threshold value to distinguish near and
+         far break points. A sensor value less than or equal to this is considered "near". -->
+    <item name="proximity_sensor_threshold" translatable="false" format="float" type="dimen">
+        0</item>
+
     <!-- Doze: pulse parameter - how long does it take to fade in? -->
     <integer name="doze_pulse_duration_in">130</integer>
 
@@ -479,5 +487,29 @@
 
     <!-- Preferred refresh rate at keyguard, if supported by the display -->
     <integer name="config_keyguardRefreshRate">-1</integer>
+
+    <!-- Respect the drawable/rounded.xml that allow to customize as multiple radius corner path -->
+    <bool name="config_roundedCornerMultipleRadius">false</bool>
+
+    <!-- A path similar to frameworks/base/core/res/res/values/config.xml
+      config_mainBuiltInDisplayCutout that describes a path larger than the exact path of a display
+      cutout. If present as well as config_enableDisplayCutoutProtection is set to true, then
+      SystemUI will draw this "protection path" instead of the display cutout path that is normally
+      used for anti-aliasing.
+
+      This path will only be drawn when the front-facing camera turns on, otherwise the main
+      DisplayCutout path will be rendered
+       -->
+    <string translatable="false" name="config_frontBuiltInDisplayCutoutProtection"></string>
+
+    <!--  ID for the camera that needs extra protection -->
+    <string translatable="false" name="config_protectedCameraId"></string>
+
+    <!-- Comma-separated list of packages to exclude from camera protection e.g.
+    "com.android.systemui,com.android.xyz" -->
+    <string translatable="false" name="config_cameraProtectionExcludedPackages"></string>
+
+    <!--  Flag to turn on the rendering of the above path or not  -->
+    <bool name="config_enableDisplayCutoutProtection">false</bool>
 
 </resources>

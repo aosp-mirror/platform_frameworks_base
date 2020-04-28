@@ -843,16 +843,20 @@ public class SmsMessage {
     }
 
     /**
-     * GSM: For an SMS-STATUS-REPORT message, this returns the status field from the status report.
-     * This field indicates the status of a previously submitted SMS, if requested.
-     * See TS 23.040, 9.2.3.15 TP-Status for a description of values.
-     * CDMA: For not interfering with status codes from GSM, the value is shifted to the bits 31-16.
-     * The value is composed of an error class (bits 25-24) and a status code (bits 23-16). Possible
-     * codes are described in C.S0015-B, v2.0, 4.5.21.
+     * GSM:
+     * For an SMS-STATUS-REPORT message, this returns the status field from
+     * the status report.  This field indicates the status of a previously
+     * submitted SMS, if requested.  See TS 23.040, 9.2.3.15 TP-Status for a
+     * description of values.
+     * CDMA:
+     * For not interfering with status codes from GSM, the value is
+     * shifted to the bits 31-16.
+     * The value is composed of an error class (bits 25-24) and a status code (bits 23-16).
+     * Possible codes are described in C.S0015-B, v2.0, 4.5.21.
      *
-     * @return 0 for GSM or 2 shifted left by 16 for CDMA indicates the previously sent message was
-     *         received. See TS 23.040, 9.2.3.15 and C.S0015-B, v2.0, 4.5.21 for a description of
-     *         other possible values.
+     * @return 0 indicates the previously sent message was received.
+     *         See TS 23.040, 9.9.2.3.15 and C.S0015-B, v2.0, 4.5.21
+     *         for a description of other possible values.
      */
     public int getStatus() {
         return mWrappedSmsMessage.getStatus();

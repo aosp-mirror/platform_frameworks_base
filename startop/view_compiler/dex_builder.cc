@@ -16,6 +16,8 @@
 
 #include "dex_builder.h"
 
+#include "dex/descriptors_names.h"
+
 #include <fstream>
 #include <memory>
 
@@ -28,6 +30,8 @@ using std::string;
 using ::dex::kAccPublic;
 using Op = Instruction::Op;
 
+using Opcode = ::art::Instruction::Code;
+
 const TypeDescriptor TypeDescriptor::Int() { return TypeDescriptor{"I"}; };
 const TypeDescriptor TypeDescriptor::Void() { return TypeDescriptor{"V"}; };
 
@@ -39,29 +43,20 @@ constexpr uint8_t kDexFileMagic[]{0x64, 0x65, 0x78, 0x0a, 0x30, 0x33, 0x38, 0x00
 constexpr size_t kMaxEncodedStringLength{5};
 
 // Converts invoke-* to invoke-*/range
-constexpr ::dex::Opcode InvokeToInvokeRange(::dex::Opcode opcode) {
+constexpr Opcode InvokeToInvokeRange(Opcode opcode) {
   switch (opcode) {
-    case ::dex::Opcode::OP_INVOKE_VIRTUAL:
-      return ::dex::Opcode::OP_INVOKE_VIRTUAL_RANGE;
-    case ::dex::Opcode::OP_INVOKE_DIRECT:
-      return ::dex::Opcode::OP_INVOKE_DIRECT_RANGE;
-    case ::dex::Opcode::OP_INVOKE_STATIC:
-      return ::dex::Opcode::OP_INVOKE_STATIC_RANGE;
-    case ::dex::Opcode::OP_INVOKE_INTERFACE:
-      return ::dex::Opcode::OP_INVOKE_INTERFACE_RANGE;
+    case ::art::Instruction::INVOKE_VIRTUAL:
+      return ::art::Instruction::INVOKE_VIRTUAL_RANGE;
+    case ::art::Instruction::INVOKE_DIRECT:
+      return ::art::Instruction::INVOKE_DIRECT_RANGE;
+    case ::art::Instruction::INVOKE_STATIC:
+      return ::art::Instruction::INVOKE_STATIC_RANGE;
+    case ::art::Instruction::INVOKE_INTERFACE:
+      return ::art::Instruction::INVOKE_INTERFACE_RANGE;
     default:
       LOG(FATAL) << opcode << " is not a recognized invoke opcode.";
-      __builtin_unreachable();
+      UNREACHABLE();
   }
-}
-
-std::string DotToDescriptor(const char* class_name) {
-  std::string descriptor(class_name);
-  std::replace(descriptor.begin(), descriptor.end(), '.', '/');
-  if (descriptor.length() > 0 && descriptor[0] != '[') {
-    descriptor = "L" + descriptor + ";";
-  }
-  return descriptor;
 }
 
 }  // namespace
@@ -106,18 +101,6 @@ std::ostream& operator<<(std::ostream& out, const Instruction::Op& opcode) {
       return out;
     case Instruction::Op::kCheckCast:
       out << "kCheckCast";
-      return out;
-    case Instruction::Op::kGetStaticField:
-      out << "kGetStaticField";
-      return out;
-    case Instruction::Op::kSetStaticField:
-      out << "kSetStaticField";
-      return out;
-    case Instruction::Op::kGetInstanceField:
-      out << "kGetInstanceField";
-      return out;
-    case Instruction::Op::kSetInstanceField:
-      out << "kSetInstanceField";
       return out;
   }
 }
@@ -166,7 +149,7 @@ void WriteTestDexFile(const string& filename) {
 
   MethodBuilder method{cbuilder.CreateMethod("foo", Prototype{TypeDescriptor::Int(), string_type})};
 
-  LiveRegister result = method.AllocRegister();
+  Value result = method.MakeRegister();
 
   MethodDeclData string_length =
       dex_file.GetOrDeclareMethod(string_type, "length", Prototype{TypeDescriptor::Int()});
@@ -183,7 +166,7 @@ void WriteTestDexFile(const string& filename) {
 }
 
 TypeDescriptor TypeDescriptor::FromClassname(const std::string& name) {
-  return TypeDescriptor{DotToDescriptor(name.c_str())};
+  return TypeDescriptor{art::DotToDescriptor(name.c_str())};
 }
 
 DexBuilder::DexBuilder() : dex_file_{std::make_shared<ir::DexFile>()} {
@@ -224,11 +207,11 @@ ir::String* DexBuilder::GetOrAddString(const std::string& string) {
 
 ClassBuilder DexBuilder::MakeClass(const std::string& name) {
   auto* class_def = Alloc<ir::Class>();
-  ir::Type* type_def = GetOrAddType(DotToDescriptor(name.c_str()));
+  ir::Type* type_def = GetOrAddType(art::DotToDescriptor(name.c_str()));
   type_def->class_def = class_def;
 
   class_def->type = type_def;
-  class_def->super_class = GetOrAddType(DotToDescriptor("java.lang.Object"));
+  class_def->super_class = GetOrAddType(art::DotToDescriptor("java.lang.Object"));
   class_def->access_flags = kAccPublic;
   return ClassBuilder{this, name, class_def};
 }
@@ -244,23 +227,6 @@ ir::Type* DexBuilder::GetOrAddType(const std::string& descriptor) {
   type->orig_index = dex_file_->types_indexes.AllocateIndex();
   dex_file_->types_map[type->orig_index] = type;
   return type;
-}
-
-ir::FieldDecl* DexBuilder::GetOrAddField(TypeDescriptor parent, const std::string& name,
-                                         TypeDescriptor type) {
-  const auto key = std::make_tuple(parent, name);
-  if (field_decls_by_key_.find(key) != field_decls_by_key_.end()) {
-    return field_decls_by_key_[key];
-  }
-
-  ir::FieldDecl* field = Alloc<ir::FieldDecl>();
-  field->parent = GetOrAddType(parent);
-  field->name = GetOrAddString(name);
-  field->type = GetOrAddType(type);
-  field->orig_index = dex_file_->fields_indexes.AllocateIndex();
-  dex_file_->fields_map[field->orig_index] = field;
-  field_decls_by_key_[key] = field;
-  return field;
 }
 
 ir::Proto* Prototype::Encode(DexBuilder* dex) const {
@@ -319,7 +285,7 @@ ir::EncodedMethod* MethodBuilder::Encode() {
   CHECK(decl_->prototype != nullptr);
   size_t const num_args =
       decl_->prototype->param_types != nullptr ? decl_->prototype->param_types->types.size() : 0;
-  code->registers = NumRegisters() + num_args + kMaxScratchRegisters;
+  code->registers = num_registers_ + num_args + kMaxScratchRegisters;
   code->ins_count = num_args;
   EncodeInstructions();
   code->instructions = slicer::ArrayView<const ::dex::u2>(buffer_.data(), buffer_.size());
@@ -332,20 +298,7 @@ ir::EncodedMethod* MethodBuilder::Encode() {
   return method;
 }
 
-LiveRegister MethodBuilder::AllocRegister() {
-  // Find a free register
-  for (size_t i = 0; i < register_liveness_.size(); ++i) {
-    if (!register_liveness_[i]) {
-      register_liveness_[i] = true;
-      return LiveRegister{&register_liveness_, i};
-    }
-  }
-
-  // If we get here, all the registers are in use, so we have to allocate a new
-  // one.
-  register_liveness_.push_back(true);
-  return LiveRegister{&register_liveness_, register_liveness_.size() - 1};
-}
+Value MethodBuilder::MakeRegister() { return Value::Local(num_registers_++); }
 
 Value MethodBuilder::MakeLabel() {
   labels_.push_back({});
@@ -383,42 +336,37 @@ void MethodBuilder::EncodeInstructions() {
 void MethodBuilder::EncodeInstruction(const Instruction& instruction) {
   switch (instruction.opcode()) {
     case Instruction::Op::kReturn:
-      return EncodeReturn(instruction, ::dex::Opcode::OP_RETURN);
+      return EncodeReturn(instruction, ::art::Instruction::RETURN);
     case Instruction::Op::kReturnObject:
-      return EncodeReturn(instruction, ::dex::Opcode::OP_RETURN_OBJECT);
+      return EncodeReturn(instruction, ::art::Instruction::RETURN_OBJECT);
     case Instruction::Op::kMove:
     case Instruction::Op::kMoveObject:
       return EncodeMove(instruction);
     case Instruction::Op::kInvokeVirtual:
-      return EncodeInvoke(instruction, ::dex::Opcode::OP_INVOKE_VIRTUAL);
+      return EncodeInvoke(instruction, art::Instruction::INVOKE_VIRTUAL);
     case Instruction::Op::kInvokeDirect:
-      return EncodeInvoke(instruction, ::dex::Opcode::OP_INVOKE_DIRECT);
+      return EncodeInvoke(instruction, art::Instruction::INVOKE_DIRECT);
     case Instruction::Op::kInvokeStatic:
-      return EncodeInvoke(instruction, ::dex::Opcode::OP_INVOKE_STATIC);
+      return EncodeInvoke(instruction, art::Instruction::INVOKE_STATIC);
     case Instruction::Op::kInvokeInterface:
-      return EncodeInvoke(instruction, ::dex::Opcode::OP_INVOKE_INTERFACE);
+      return EncodeInvoke(instruction, art::Instruction::INVOKE_INTERFACE);
     case Instruction::Op::kBindLabel:
       return BindLabel(instruction.args()[0]);
     case Instruction::Op::kBranchEqz:
-      return EncodeBranch(::dex::Opcode::OP_IF_EQZ, instruction);
+      return EncodeBranch(art::Instruction::IF_EQZ, instruction);
     case Instruction::Op::kBranchNEqz:
-      return EncodeBranch(::dex::Opcode::OP_IF_NEZ, instruction);
+      return EncodeBranch(art::Instruction::IF_NEZ, instruction);
     case Instruction::Op::kNew:
       return EncodeNew(instruction);
     case Instruction::Op::kCheckCast:
       return EncodeCast(instruction);
-    case Instruction::Op::kGetStaticField:
-    case Instruction::Op::kSetStaticField:
-    case Instruction::Op::kGetInstanceField:
-    case Instruction::Op::kSetInstanceField:
-      return EncodeFieldOp(instruction);
   }
 }
 
-void MethodBuilder::EncodeReturn(const Instruction& instruction, ::dex::Opcode opcode) {
+void MethodBuilder::EncodeReturn(const Instruction& instruction, ::art::Instruction::Code opcode) {
   CHECK(!instruction.dest().has_value());
   if (instruction.args().size() == 0) {
-    Encode10x(::dex::Opcode::OP_RETURN_VOID);
+    Encode10x(art::Instruction::RETURN_VOID);
   } else {
     CHECK_EQ(1, instruction.args().size());
     size_t source = RegisterValue(instruction.args()[0]);
@@ -438,27 +386,27 @@ void MethodBuilder::EncodeMove(const Instruction& instruction) {
   if (source.is_immediate()) {
     // TODO: support more registers
     CHECK_LT(RegisterValue(*instruction.dest()), 16);
-    Encode11n(::dex::Opcode::OP_CONST_4, RegisterValue(*instruction.dest()), source.value());
+    Encode11n(art::Instruction::CONST_4, RegisterValue(*instruction.dest()), source.value());
   } else if (source.is_string()) {
     constexpr size_t kMaxRegisters = 256;
     CHECK_LT(RegisterValue(*instruction.dest()), kMaxRegisters);
     CHECK_LT(source.value(), 65536);  // make sure we don't need a jumbo string
-    Encode21c(::dex::Opcode::OP_CONST_STRING, RegisterValue(*instruction.dest()), source.value());
+    Encode21c(::art::Instruction::CONST_STRING, RegisterValue(*instruction.dest()), source.value());
   } else if (source.is_variable()) {
     // For the moment, we only use this when we need to reshuffle registers for
     // an invoke instruction, meaning we are too big for the 4-bit version.
     // We'll err on the side of caution and always generate the 16-bit form of
     // the instruction.
-    auto opcode = instruction.opcode() == Instruction::Op::kMove
-                        ? ::dex::Opcode::OP_MOVE_16
-                        : ::dex::Opcode::OP_MOVE_OBJECT_16;
+    Opcode opcode = instruction.opcode() == Instruction::Op::kMove
+                        ? ::art::Instruction::MOVE_16
+                        : ::art::Instruction::MOVE_OBJECT_16;
     Encode32x(opcode, RegisterValue(*instruction.dest()), RegisterValue(source));
   } else {
     UNIMPLEMENTED(FATAL);
   }
 }
 
-void MethodBuilder::EncodeInvoke(const Instruction& instruction, ::dex::Opcode opcode) {
+void MethodBuilder::EncodeInvoke(const Instruction& instruction, ::art::Instruction::Code opcode) {
   constexpr size_t kMaxArgs = 5;
 
   // Currently, we only support up to 5 arguments.
@@ -480,13 +428,13 @@ void MethodBuilder::EncodeInvoke(const Instruction& instruction, ::dex::Opcode o
     // first move all the arguments into contiguous temporary registers.
     std::array<Value, kMaxArgs> scratch = GetScratchRegisters<kMaxArgs>();
 
-    const auto& prototype = dex_->GetPrototypeByMethodId(instruction.index_argument());
+    const auto& prototype = dex_->GetPrototypeByMethodId(instruction.method_id());
     CHECK(prototype.has_value());
 
     for (size_t i = 0; i < instruction.args().size(); ++i) {
       Instruction::Op move_op;
-      if (opcode == ::dex::Opcode::OP_INVOKE_VIRTUAL ||
-          opcode == ::dex::Opcode::OP_INVOKE_DIRECT) {
+      if (opcode == ::art::Instruction::INVOKE_VIRTUAL ||
+          opcode == ::art::Instruction::INVOKE_DIRECT) {
         // In this case, there is an implicit `this` argument, which is always an object.
         if (i == 0) {
           move_op = Instruction::Op::kMoveObject;
@@ -504,12 +452,12 @@ void MethodBuilder::EncodeInvoke(const Instruction& instruction, ::dex::Opcode o
 
     Encode3rc(InvokeToInvokeRange(opcode),
               instruction.args().size(),
-              instruction.index_argument(),
+              instruction.method_id(),
               RegisterValue(scratch[0]));
   } else {
     Encode35c(opcode,
               instruction.args().size(),
-              instruction.index_argument(),
+              instruction.method_id(),
               arguments[0],
               arguments[1],
               arguments[2],
@@ -519,8 +467,8 @@ void MethodBuilder::EncodeInvoke(const Instruction& instruction, ::dex::Opcode o
 
   // If there is a return value, add a move-result instruction
   if (instruction.dest().has_value()) {
-    Encode11x(instruction.result_is_object() ? ::dex::Opcode::OP_MOVE_RESULT_OBJECT
-                                             : ::dex::Opcode::OP_MOVE_RESULT,
+    Encode11x(instruction.result_is_object() ? art::Instruction::MOVE_RESULT_OBJECT
+                                             : art::Instruction::MOVE_RESULT,
               RegisterValue(*instruction.dest()));
   }
 
@@ -528,7 +476,7 @@ void MethodBuilder::EncodeInvoke(const Instruction& instruction, ::dex::Opcode o
 }
 
 // Encodes a conditional branch that tests a single argument.
-void MethodBuilder::EncodeBranch(::dex::Opcode op, const Instruction& instruction) {
+void MethodBuilder::EncodeBranch(art::Instruction::Code op, const Instruction& instruction) {
   const auto& args = instruction.args();
   const auto& test_value = args[0];
   const auto& branch_target = args[1];
@@ -551,7 +499,7 @@ void MethodBuilder::EncodeNew(const Instruction& instruction) {
   const Value& type = instruction.args()[0];
   CHECK_LT(RegisterValue(*instruction.dest()), 256);
   CHECK(type.is_type());
-  Encode21c(::dex::Opcode::OP_NEW_INSTANCE, RegisterValue(*instruction.dest()), type.value());
+  Encode21c(::art::Instruction::NEW_INSTANCE, RegisterValue(*instruction.dest()), type.value());
 }
 
 void MethodBuilder::EncodeCast(const Instruction& instruction) {
@@ -563,62 +511,14 @@ void MethodBuilder::EncodeCast(const Instruction& instruction) {
   const Value& type = instruction.args()[0];
   CHECK_LT(RegisterValue(*instruction.dest()), 256);
   CHECK(type.is_type());
-  Encode21c(::dex::Opcode::OP_CHECK_CAST, RegisterValue(*instruction.dest()), type.value());
-}
-
-void MethodBuilder::EncodeFieldOp(const Instruction& instruction) {
-  const auto& args = instruction.args();
-  switch (instruction.opcode()) {
-    case Instruction::Op::kGetStaticField: {
-      CHECK(instruction.dest().has_value());
-      CHECK(instruction.dest()->is_variable());
-      CHECK_EQ(0, instruction.args().size());
-
-      Encode21c(::dex::Opcode::OP_SGET,
-                RegisterValue(*instruction.dest()),
-                instruction.index_argument());
-      break;
-    }
-    case Instruction::Op::kSetStaticField: {
-      CHECK(!instruction.dest().has_value());
-      CHECK_EQ(1, args.size());
-      CHECK(args[0].is_variable());
-
-      Encode21c(::dex::Opcode::OP_SPUT, RegisterValue(args[0]), instruction.index_argument());
-      break;
-    }
-    case Instruction::Op::kGetInstanceField: {
-      CHECK(instruction.dest().has_value());
-      CHECK(instruction.dest()->is_variable());
-      CHECK_EQ(1, instruction.args().size());
-
-      Encode22c(::dex::Opcode::OP_IGET,
-                RegisterValue(*instruction.dest()),
-                RegisterValue(args[0]),
-                instruction.index_argument());
-      break;
-    }
-    case Instruction::Op::kSetInstanceField: {
-      CHECK(!instruction.dest().has_value());
-      CHECK_EQ(2, args.size());
-      CHECK(args[0].is_variable());
-      CHECK(args[1].is_variable());
-
-      Encode22c(::dex::Opcode::OP_IPUT,
-                RegisterValue(args[1]),
-                RegisterValue(args[0]),
-                instruction.index_argument());
-      break;
-    }
-    default: { LOG(FATAL) << "Unsupported field operation"; }
-  }
+  Encode21c(::art::Instruction::CHECK_CAST, RegisterValue(*instruction.dest()), type.value());
 }
 
 size_t MethodBuilder::RegisterValue(const Value& value) const {
   if (value.is_register()) {
     return value.value();
   } else if (value.is_parameter()) {
-    return value.value() + NumRegisters() + kMaxScratchRegisters;
+    return value.value() + num_registers_ + kMaxScratchRegisters;
   }
   CHECK(false && "Must be either a parameter or a register");
   return 0;

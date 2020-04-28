@@ -208,9 +208,11 @@ public class StatusBarMobileView extends FrameLayout implements DarkReceiver,
 
     @Override
     public void onDarkChanged(Rect area, float darkIntensity, int tint) {
-        float intensity = isInArea(area, this) ? darkIntensity : 0;
+        if (!isInArea(area, this)) {
+            return;
+        }
         mMobileDrawable.setTintList(
-                ColorStateList.valueOf(mDualToneHandler.getSingleColor(intensity)));
+                ColorStateList.valueOf(mDualToneHandler.getSingleColor(darkIntensity)));
         ColorStateList color = ColorStateList.valueOf(getTint(area, this, tint));
         mIn.setImageTintList(color);
         mOut.setImageTintList(color);

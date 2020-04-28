@@ -290,7 +290,8 @@ final class HdmiCecKeycode {
             new KeycodeEntry(KeyEvent.KEYCODE_CHANNEL_UP, CEC_KEYCODE_CHANNEL_UP),
             new KeycodeEntry(KeyEvent.KEYCODE_CHANNEL_DOWN, CEC_KEYCODE_CHANNEL_DOWN),
             new KeycodeEntry(KeyEvent.KEYCODE_LAST_CHANNEL, CEC_KEYCODE_PREVIOUS_CHANNEL),
-            new KeycodeEntry(KeyEvent.KEYCODE_MEDIA_AUDIO_TRACK, CEC_KEYCODE_SOUND_SELECT),
+            // No Android keycode defined for CEC_KEYCODE_SOUND_SELECT
+            new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_SOUND_SELECT),
             new KeycodeEntry(KeyEvent.KEYCODE_TV_INPUT, CEC_KEYCODE_INPUT_SELECT),
             new KeycodeEntry(KeyEvent.KEYCODE_INFO, CEC_KEYCODE_DISPLAY_INFORMATION),
             // No Android keycode defined for CEC_KEYCODE_HELP

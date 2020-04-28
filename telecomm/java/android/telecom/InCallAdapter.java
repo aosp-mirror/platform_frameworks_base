@@ -16,8 +16,8 @@
 
 package android.telecom;
 
-import android.bluetooth.BluetoothDevice;
 import android.net.Uri;
+import android.bluetooth.BluetoothDevice;
 import android.os.Bundle;
 import android.os.RemoteException;
 
@@ -144,26 +144,6 @@ public final class InCallAdapter {
     public void setAudioRoute(int route) {
         try {
             mAdapter.setAudioRoute(route, null);
-        } catch (RemoteException e) {
-        }
-    }
-
-    /**
-     * @see Call#enterBackgroundAudioProcessing()
-     */
-    public void enterBackgroundAudioProcessing(String callId) {
-        try {
-            mAdapter.enterBackgroundAudioProcessing(callId);
-        } catch (RemoteException e) {
-        }
-    }
-
-    /**
-     * @see Call#exitBackgroundAudioProcessing(boolean)
-     */
-    public void exitBackgroundAudioProcessing(String callId, boolean shouldRing) {
-        try {
-            mAdapter.exitBackgroundAudioProcessing(callId, shouldRing);
         } catch (RemoteException e) {
         }
     }

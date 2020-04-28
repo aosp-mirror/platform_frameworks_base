@@ -1067,6 +1067,17 @@ public class KeyStore {
         return onUserPasswordChanged(UserHandle.getUserId(Process.myUid()), newPassword);
     }
 
+    /**
+     * Notify keystore about the latest user locked state. This is to support keyguard-bound key.
+     */
+    public void onUserLockedStateChanged(int userHandle, boolean locked) {
+        try {
+            mBinder.onKeyguardVisibilityChanged(locked, userHandle);
+        } catch (RemoteException e) {
+            Log.w(TAG, "Failed to update user locked state " + userHandle, e);
+        }
+    }
+
     private class KeyAttestationCallbackResult {
         private KeystoreResponse keystoreResponse;
         private KeymasterCertificateChain certificateChain;

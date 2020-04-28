@@ -123,7 +123,6 @@ public class RemoteCallbackList<E extends IInterface> {
             IBinder binder = callback.asBinder();
             try {
                 Callback cb = new Callback(callback, cookie);
-                unregister(callback);
                 binder.linkToDeath(cb, 0);
                 mCallbacks.put(binder, cb);
                 return true;

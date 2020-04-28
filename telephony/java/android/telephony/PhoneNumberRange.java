@@ -17,7 +17,6 @@
 package android.telephony;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -105,7 +104,7 @@ public final class PhoneNumberRange implements Parcelable {
     }
 
     @Override
-    public boolean equals(@Nullable Object o) {
+    public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         PhoneNumberRange that = (PhoneNumberRange) o;
@@ -120,7 +119,6 @@ public final class PhoneNumberRange implements Parcelable {
         return Objects.hash(mCountryCode, mPrefix, mLowerBound, mUpperBound);
     }
 
-    @NonNull
     @Override
     public String toString() {
         return "PhoneNumberRange{"

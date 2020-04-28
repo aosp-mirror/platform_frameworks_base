@@ -39,13 +39,6 @@ import java.util.HashMap;
  * Gives access to the system properties store.  The system properties
  * store contains a list of string key-value pairs.
  *
- * <p>Use this class only for the system properties that are local. e.g., within
- * an app, a partition, or a module. For system properties used across the
- * boundaries, formally define them in <code>*.sysprop</code> files and use the
- * auto-generated methods. For more information, see <a href=
- * "https://source.android.com/devices/architecture/sysprops-apis">Implementing
- * System Properties as APIs</a>.</p>
- *
  * {@hide}
  */
 @SystemApi
@@ -95,17 +88,12 @@ public class SystemProperties {
 
     @UnsupportedAppUsage
     private static native String native_get(String key);
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     private static native String native_get(String key, String def);
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     private static native int native_get_int(String key, int def);
     @UnsupportedAppUsage
     private static native long native_get_long(String key, long def);
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     private static native boolean native_get_boolean(String key, boolean def);
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     private static native void native_set(String key, String def);
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     private static native void native_add_change_callback();
     private static native void native_report_sysprop_change();
 
@@ -196,8 +184,6 @@ public class SystemProperties {
      * Set the value for the given {@code key} to {@code val}.
      *
      * @throws IllegalArgumentException if the {@code val} exceeds 91 characters
-     * @throws RuntimeException if the property cannot be set, for example, if it was blocked by
-     * SELinux. libc will log the underlying reason.
      * @hide
      */
     @UnsupportedAppUsage

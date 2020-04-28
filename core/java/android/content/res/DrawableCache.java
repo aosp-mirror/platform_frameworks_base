@@ -23,11 +23,6 @@ import android.graphics.drawable.Drawable;
  * Class which can be used to cache Drawable resources against a theme.
  */
 class DrawableCache extends ThemedResourceCache<Drawable.ConstantState> {
-
-    @UnsupportedAppUsage
-    DrawableCache() {
-    }
-
     /**
      * If the resource is cached, creates and returns a new instance of it.
      *

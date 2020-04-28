@@ -131,7 +131,7 @@ public final class BluetoothSocket implements Closeable {
     private boolean mExcludeSdp = false; /* when true no SPP SDP record will be created */
     private boolean mAuthMitm = false;   /* when true Man-in-the-middle protection will be enabled*/
     private boolean mMin16DigitPin = false; /* Minimum 16 digit pin for sec mode 2 connections */
-    @UnsupportedAppUsage(publicAlternatives = "Use {@link BluetoothSocket} public API instead.")
+    @UnsupportedAppUsage
     private ParcelFileDescriptor mPfd;
     @UnsupportedAppUsage
     private LocalSocket mSocket;
@@ -513,6 +513,20 @@ public final class BluetoothSocket implements Closeable {
     /*package*/ int available() throws IOException {
         if (VDBG) Log.d(TAG, "available: " + mSocketIS);
         return mSocketIS.available();
+    }
+
+    /**
+     * Wait until the data in sending queue is emptied. A polling version
+     * for flush implementation. Used to ensure the writing data afterwards will
+     * be packed in new RFCOMM frame.
+     *
+     * @throws IOException if an i/o error occurs.
+     */
+    @UnsupportedAppUsage
+    /*package*/ void flush() throws IOException {
+        if (mSocketOS == null) throw new IOException("flush is called on null OutputStream");
+        if (VDBG) Log.d(TAG, "flush: " + mSocketOS);
+        mSocketOS.flush();
     }
 
     /*package*/ int read(byte[] b, int offset, int length) throws IOException {

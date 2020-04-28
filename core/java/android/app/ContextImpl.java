@@ -72,7 +72,6 @@ import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
 import android.system.StructStat;
-import android.text.TextUtils;
 import android.util.AndroidRuntimeException;
 import android.util.ArrayMap;
 import android.util.Log;
@@ -740,19 +739,10 @@ class ContextImpl extends Context {
     public File getCodeCacheDir() {
         synchronized (mSync) {
             if (mCodeCacheDir == null) {
-                mCodeCacheDir = getCodeCacheDirBeforeBind(getDataDir());
+                mCodeCacheDir = new File(getDataDir(), "code_cache");
             }
             return ensurePrivateCacheDirExists(mCodeCacheDir, XATTR_INODE_CODE_CACHE);
         }
-    }
-
-    /**
-     * Helper for getting code-cache dir potentially before application bind.
-     *
-     * @hide
-     */
-    static File getCodeCacheDirBeforeBind(File dataDir) {
-        return new File(dataDir, "code_cache");
     }
 
     @Override
@@ -1328,19 +1318,6 @@ class ContextImpl extends Context {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
-    }
-
-    @Override
-    public void sendOrderedBroadcast(Intent intent, String receiverPermission,
-            String receiverAppOp, BroadcastReceiver resultReceiver, Handler scheduler,
-            int initialCode, String initialData, @Nullable Bundle initialExtras) {
-        int intAppOp = AppOpsManager.OP_NONE;
-        if (!TextUtils.isEmpty(receiverAppOp)) {
-            intAppOp = AppOpsManager.strOpToOp(receiverAppOp);
-        }
-        sendOrderedBroadcastAsUser(intent, getUser(),
-                receiverPermission, intAppOp, resultReceiver, scheduler, initialCode, initialData,
-                initialExtras);
     }
 
     @Override

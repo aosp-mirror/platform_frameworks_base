@@ -30,7 +30,6 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageInstaller.SessionInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.PackageParserException;
 import android.content.pm.PackageParser.SigningDetails;
 import android.content.pm.PackageParser.SigningDetails.SignatureSchemeVersion;
@@ -41,10 +40,10 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
+import android.os.ParcelableException;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.util.IntArray;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.apk.ApkSignatureVerifier;
@@ -106,22 +105,21 @@ public class StagingManager {
         return new ParceledListSlice<>(result);
     }
 
-    private void validateApexSignature(String apexPath, String packageName)
-            throws PackageManagerException {
+    private boolean validateApexSignature(String apexPath, String packageName) {
         final SigningDetails signingDetails;
         try {
             signingDetails = ApkSignatureVerifier.verify(apexPath, SignatureSchemeVersion.JAR);
         } catch (PackageParserException e) {
-            throw new PackageManagerException(SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
-                    "Failed to parse APEX package " + apexPath, e);
+            Slog.e(TAG, "Unable to parse APEX package: " + apexPath, e);
+            return false;
         }
 
-        final PackageInfo packageInfo = mApexManager.getPackageInfo(packageName,
-                ApexManager.MATCH_ACTIVE_PACKAGE);
+        final PackageInfo packageInfo = mApexManager.getPackageInfoForApexName(packageName);
+
         if (packageInfo == null) {
-            // This should never happen, because submitSessionToApexService ensures that no new
-            // apexes were installed.
-            throw new IllegalStateException("Unknown apex package " + packageName);
+            // Don't allow installation of new APEX.
+            Slog.e(TAG, "Attempted to install a new apex " + packageName + ". Rejecting");
+            return false;
         }
 
         final SigningDetails existingSigningDetails;
@@ -129,99 +127,73 @@ public class StagingManager {
             existingSigningDetails = ApkSignatureVerifier.verify(
                 packageInfo.applicationInfo.sourceDir, SignatureSchemeVersion.JAR);
         } catch (PackageParserException e) {
-            throw new PackageManagerException(SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
-                    "Failed to parse APEX package " + packageInfo.applicationInfo.sourceDir, e);
+            Slog.e(TAG, "Unable to parse APEX package: "
+                    + packageInfo.applicationInfo.sourceDir, e);
+            return false;
         }
 
         // Now that we have both sets of signatures, demand that they're an exact match.
         if (Signature.areExactMatch(existingSigningDetails.signatures, signingDetails.signatures)) {
-            return;
+            return true;
         }
 
-        throw new PackageManagerException(SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
-                "APK-container signature verification failed for package "
-                        + packageName + ". Signature of file "
-                        + apexPath + " does not match the signature of "
-                        + " the package already installed.");
+        return false;
     }
 
-    private List<PackageInfo> submitSessionToApexService(
-            @NonNull PackageInstallerSession session) throws PackageManagerException {
-        final IntArray childSessionsIds = new IntArray();
-        if (session.isMultiPackage()) {
-            for (int id : session.getChildSessionIds()) {
-                if (isApexSession(mStagedSessions.get(id))) {
-                    childSessionsIds.add(id);
-                }
-            }
-        }
-        // submitStagedSession will throw a PackageManagerException if apexd verification fails,
-        // which will be propagated to populate stagedSessionErrorMessage of this session.
-        final ApexInfoList apexInfoList = mApexManager.submitStagedSession(session.sessionId,
-                childSessionsIds.toArray());
-        final List<PackageInfo> result = new ArrayList<>();
-        for (ApexInfo apexInfo : apexInfoList.apexInfos) {
-            final PackageInfo packageInfo;
-            int flags = PackageManager.GET_META_DATA;
-            PackageParser.Package pkg;
-            try {
-                File apexFile = new File(apexInfo.modulePath);
-                PackageParser pp = new PackageParser();
-                pkg = pp.parsePackage(apexFile, flags, false);
-            } catch (PackageParserException e) {
-                throw new PackageManagerException(SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
-                        "Failed to parse APEX package " + apexInfo.modulePath, e);
-            }
-            packageInfo = PackageParser.generatePackageInfo(pkg, apexInfo, flags);
-            final PackageInfo activePackage = mApexManager.getPackageInfo(packageInfo.packageName,
-                    ApexManager.MATCH_ACTIVE_PACKAGE);
-            if (activePackage == null) {
-                Slog.w(TAG, "Attempting to install new APEX package " + packageInfo.packageName);
-                throw new PackageManagerException(SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
-                        "It is forbidden to install new APEX packages.");
-            }
-            checkRequiredVersionCode(session, activePackage);
-            checkDowngrade(session, activePackage, packageInfo);
-            result.add(packageInfo);
-        }
-        return result;
-    }
-
-    private void checkRequiredVersionCode(final PackageInstallerSession session,
-            final PackageInfo activePackage) throws PackageManagerException {
-        if (session.params.requiredInstalledVersionCode == PackageManager.VERSION_CODE_HIGHEST) {
-            return;
-        }
-        final long activeVersion = activePackage.applicationInfo.longVersionCode;
-        if (activeVersion != session.params.requiredInstalledVersionCode) {
-            if (!mApexManager.abortActiveSession()) {
-                Slog.e(TAG, "Failed to abort apex session " + session.sessionId);
-            }
-            throw new PackageManagerException(
+    private boolean submitSessionToApexService(@NonNull PackageInstallerSession session,
+                                               List<PackageInstallerSession> childSessions,
+                                               ApexInfoList apexInfoList) {
+        boolean submittedToApexd = mApexManager.submitStagedSession(
+                session.sessionId,
+                childSessions != null
+                        ? childSessions.stream().mapToInt(s -> s.sessionId).toArray() :
+                        new int[]{},
+                apexInfoList);
+        if (!submittedToApexd) {
+            session.setStagedSessionFailed(
                     SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
-                    "Installed version of APEX package " + activePackage.packageName
+                    "APEX staging failed, check logcat messages from apexd for more details.");
+            return false;
+        }
+        for (ApexInfo newPackage : apexInfoList.apexInfos) {
+            PackageInfo activePackage = mApexManager.getPackageInfoForApexName(
+                    newPackage.packageName);
+            if (activePackage == null) {
+                continue;
+            }
+            long activeVersion = activePackage.applicationInfo.longVersionCode;
+            if (session.params.requiredInstalledVersionCode
+                    != PackageManager.VERSION_CODE_HIGHEST) {
+                if (activeVersion != session.params.requiredInstalledVersionCode) {
+                    session.setStagedSessionFailed(
+                            SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
+                            "Installed version of APEX package " + newPackage.packageName
                             + " does not match required. Active version: " + activeVersion
                             + " required: " + session.params.requiredInstalledVersionCode);
-        }
-    }
 
-    private void checkDowngrade(final PackageInstallerSession session,
-            final PackageInfo activePackage, final PackageInfo newPackage)
-            throws PackageManagerException {
-        final long activeVersion = activePackage.applicationInfo.longVersionCode;
-        final long newVersionCode = newPackage.applicationInfo.longVersionCode;
-        boolean allowsDowngrade = PackageManagerServiceUtils.isDowngradePermitted(
-                session.params.installFlags, activePackage.applicationInfo.flags);
-        if (activeVersion > newVersionCode && !allowsDowngrade) {
-            if (!mApexManager.abortActiveSession()) {
-                Slog.e(TAG, "Failed to abort apex session " + session.sessionId);
+                    if (!mApexManager.abortActiveSession()) {
+                        Slog.e(TAG, "Failed to abort apex session " + session.sessionId);
+                    }
+                    return false;
+                }
             }
-            throw new PackageManagerException(
-                    SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
-                    "Downgrade of APEX package " + newPackage.packageName
-                            + " is not allowed. Active version: " + activeVersion
-                            + " attempted: " + newVersionCode);
+
+            boolean allowsDowngrade = PackageManagerServiceUtils.isDowngradePermitted(
+                    session.params.installFlags, activePackage.applicationInfo.flags);
+            if (activeVersion > newPackage.versionCode && !allowsDowngrade) {
+                session.setStagedSessionFailed(
+                        SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
+                        "Downgrade of APEX package " + newPackage.packageName
+                                + " is not allowed. Active version: " + activeVersion
+                                + " attempted: " + newPackage.versionCode);
+
+                if (!mApexManager.abortActiveSession()) {
+                    Slog.e(TAG, "Failed to abort apex session " + session.sessionId);
+                }
+                return false;
+            }
         }
+        return true;
     }
 
     private static boolean isApexSession(@NonNull PackageInstallerSession session) {
@@ -229,20 +201,31 @@ public class StagingManager {
     }
 
     private void preRebootVerification(@NonNull PackageInstallerSession session) {
-        final boolean hasApex = sessionContainsApex(session);
+        boolean success = true;
+
+        final ApexInfoList apexInfoList = new ApexInfoList();
         // APEX checks. For single-package sessions, check if they contain an APEX. For
         // multi-package sessions, find all the child sessions that contain an APEX.
-        if (hasApex) {
-            try {
-                final List<PackageInfo> apexPackages = submitSessionToApexService(session);
-                for (PackageInfo apexPackage : apexPackages) {
-                    validateApexSignature(apexPackage.applicationInfo.sourceDir,
-                            apexPackage.packageName);
-                }
-            } catch (PackageManagerException e) {
-                session.setStagedSessionFailed(e.error, e.getMessage());
-                return;
-            }
+        if (!session.isMultiPackage()
+                && isApexSession(session)) {
+            success = submitSessionToApexService(session, null, apexInfoList);
+
+        } else if (session.isMultiPackage()) {
+            List<PackageInstallerSession> childSessions =
+                    Arrays.stream(session.getChildSessionIds())
+                            // Retrieve cached sessions matching ids.
+                            .mapToObj(i -> mStagedSessions.get(i))
+                            // Filter only the ones containing APEX.
+                            .filter(childSession -> isApexSession(childSession))
+                            .collect(Collectors.toList());
+            if (!childSessions.isEmpty()) {
+                success = submitSessionToApexService(session, childSessions, apexInfoList);
+            } // else this is a staged multi-package session with no APEX files.
+        }
+
+        if (!success) {
+            // submitSessionToApexService will populate error.
+            return;
         }
 
         if (sessionContainsApk(session)) {
@@ -252,6 +235,25 @@ public class StagingManager {
                                 + "more information.");
                 // TODO(b/118865310): abort the session on apexd.
                 return;
+            }
+        }
+
+        if (apexInfoList.apexInfos != null && apexInfoList.apexInfos.length > 0) {
+            // For APEXes, we validate the signature here before we mark the session as ready,
+            // so we fail the session early if there is a signature mismatch. For APKs, the
+            // signature verification will be done by the package manager at the point at which
+            // it applies the staged install.
+            for (ApexInfo apexPackage : apexInfoList.apexInfos) {
+                if (!validateApexSignature(apexPackage.packagePath,
+                        apexPackage.packageName)) {
+                    session.setStagedSessionFailed(SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
+                            "APK-container signature verification failed for package "
+                                    + apexPackage.packageName + ". Signature of file "
+                                    + apexPackage.packagePath + " does not match the signature of "
+                                    + " the package already installed.");
+                    // TODO(b/118865310): abort the session on apexd.
+                    return;
+                }
             }
         }
 
@@ -272,24 +274,12 @@ public class StagingManager {
             }
         }
 
-        // Proactively mark session as ready before calling apexd. Although this call order looks
-        // counter-intuitive, this is the easiest way to ensure that session won't end up in the
-        // inconsistent state:
-        //  - If device gets rebooted right before call to apexd, then apexd will never activate
-        //      apex files of this staged session. This will result in StagingManager failing the
-        //      session.
-        // On the other hand, if the order of the calls was inverted (first call apexd, then mark
-        // session as ready), then if a device gets rebooted right after the call to apexd, only
-        // apex part of the train will be applied, leaving device in an inconsistent state.
         session.setStagedSessionReady();
-        if (!hasApex) {
-            // Session doesn't contain apex, nothing to do.
-            return;
-        }
-        try {
-            mApexManager.markStagedSessionReady(session.sessionId);
-        } catch (PackageManagerException e) {
-            session.setStagedSessionFailed(e.error, e.getMessage());
+        if (sessionContainsApex(session)
+                && !mApexManager.markStagedSessionReady(session.sessionId)) {
+            session.setStagedSessionFailed(SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
+                            "APEX staging failed, check logcat messages from apexd for more "
+                            + "details.");
         }
     }
 
@@ -414,29 +404,28 @@ public class StagingManager {
         } else {
             params.installFlags |= PackageManager.INSTALL_DISABLE_VERIFICATION;
         }
-        int apkSessionId = mPi.createSession(
-                params, originalSession.getInstallerPackageName(),
-                0 /* UserHandle.SYSTEM */);
-        PackageInstallerSession apkSession = mPi.getSession(apkSessionId);
-
         try {
+            int apkSessionId = mPi.createSession(
+                    params, originalSession.getInstallerPackageName(),
+                    0 /* UserHandle.SYSTEM */);
+            PackageInstallerSession apkSession = mPi.getSession(apkSessionId);
             apkSession.open();
             for (String apkFilePath : apkFilePaths) {
                 File apkFile = new File(apkFilePath);
                 ParcelFileDescriptor pfd = ParcelFileDescriptor.open(apkFile,
                         ParcelFileDescriptor.MODE_READ_ONLY);
-                long sizeBytes = pfd.getStatSize();
+                long sizeBytes = (pfd == null) ? -1 : pfd.getStatSize();
                 if (sizeBytes < 0) {
                     Slog.e(TAG, "Unable to get size of: " + apkFilePath);
                     return null;
                 }
                 apkSession.write(apkFile.getName(), 0, sizeBytes, pfd);
             }
-        } catch (IOException e) {
+            return apkSession;
+        } catch (IOException | ParcelableException e) {
             Slog.e(TAG, "Failure to install APK staged session " + originalSession.sessionId, e);
             return null;
         }
-        return apkSession;
     }
 
     private boolean commitApkSession(@NonNull PackageInstallerSession apkSession,
@@ -630,7 +619,7 @@ public class StagingManager {
         return false;
     }
 
-    void restoreSession(@NonNull PackageInstallerSession session) {
+    void restoreSession(@NonNull PackageInstallerSession session, boolean isDeviceUpgrading) {
         PackageInstallerSession sessionToResume = session;
         synchronized (mStagedSessions) {
             mStagedSessions.append(session.sessionId, session);
@@ -646,6 +635,13 @@ public class StagingManager {
                     sessionToResume = mStagedSessions.get(session.getParentSessionId());
                 }
             }
+        }
+        // The preconditions used during pre-reboot verification might have changed when device
+        // is upgrading. Updated staged sessions to activation failed before we resume the session.
+        if (isDeviceUpgrading && !sessionToResume.isStagedAndInTerminalState()) {
+            sessionToResume.setStagedSessionFailed(SessionInfo.STAGED_SESSION_ACTIVATION_FAILED,
+                        "Build fingerprint has changed");
+            return;
         }
         checkStateAndResume(sessionToResume);
     }

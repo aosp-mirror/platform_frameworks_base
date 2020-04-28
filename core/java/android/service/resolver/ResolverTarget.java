@@ -16,10 +16,13 @@
 
 package android.service.resolver;
 
-import android.annotation.NonNull;
 import android.annotation.SystemApi;
+import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.ArrayMap;
+
+import java.util.Map;
 
 /**
  * A ResolverTarget contains features by which an app or option will be ranked, in
@@ -170,7 +173,6 @@ public final class ResolverTarget implements Parcelable {
     }
 
     // serialize the class to a string.
-    @NonNull
     @Override
     public String toString() {
         return "ResolverTarget{"

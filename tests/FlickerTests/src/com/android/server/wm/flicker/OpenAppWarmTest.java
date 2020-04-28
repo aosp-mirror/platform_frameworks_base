@@ -17,69 +17,90 @@
 package com.android.server.wm.flicker;
 
 import static com.android.server.wm.flicker.CommonTransitions.openAppWarm;
+import static com.android.server.wm.flicker.WindowUtils.getDisplayBounds;
 import static com.android.server.wm.flicker.WmTraceSubject.assertThat;
 
 import androidx.test.InstrumentationRegistry;
-import androidx.test.filters.FlakyTest;
 import androidx.test.filters.LargeTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
-import org.junit.FixMethodOrder;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.MethodSorters;
-import org.junit.runners.Parameterized;
 
 /**
  * Test warm launch app.
  * To run this test: {@code atest FlickerTests:OpenAppWarmTest}
  */
 @LargeTest
-@RunWith(Parameterized.class)
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class OpenAppWarmTest extends NonRotationTestBase {
+@RunWith(AndroidJUnit4.class)
+public class OpenAppWarmTest extends FlickerTestBase {
 
-    public OpenAppWarmTest(String beginRotationName, int beginRotation) {
-        super(beginRotationName, beginRotation);
-
-        this.mTestApp = new StandardAppHelper(InstrumentationRegistry.getInstrumentation(),
+    public OpenAppWarmTest() {
+        this.testApp = new StandardAppHelper(InstrumentationRegistry.getInstrumentation(),
                 "com.android.server.wm.flicker.testapp", "SimpleApp");
     }
 
     @Before
     public void runTransition() {
-        super.runTransition(openAppWarm(mTestApp, mUiDevice, mBeginRotation)
-                .includeJankyRuns().build());
+        super.runTransition(openAppWarm(testApp, uiDevice).build());
+    }
+
+    @Test
+    public void checkVisibility_navBarIsAlwaysVisible() {
+        checkResults(result -> assertThat(result)
+                .showsAboveAppWindow(NAVIGATION_BAR_WINDOW_TITLE).forAllEntries());
+    }
+
+    @Test
+    public void checkVisibility_statusBarIsAlwaysVisible() {
+        checkResults(result -> assertThat(result)
+                .showsAboveAppWindow(STATUS_BAR_WINDOW_TITLE).forAllEntries());
     }
 
     @Test
     public void checkVisibility_wallpaperBecomesInvisible() {
         checkResults(result -> assertThat(result)
-                .showsBelowAppWindow("Wallpaper")
+                .showsBelowAppWindow("wallpaper")
                 .then()
-                .hidesBelowAppWindow("Wallpaper")
+                .hidesBelowAppWindow("wallpaper")
                 .forAllEntries());
     }
 
-    @FlakyTest(bugId = 140855415)
-    @Ignore("Waiting bug feedback")
     @Test
     public void checkZOrder_appWindowReplacesLauncherAsTopWindow() {
         checkResults(result -> assertThat(result)
                 .showsAppWindowOnTop(
-                        "com.android.launcher3/.Launcher")
+                        "com.google.android.apps.nexuslauncher/.NexusLauncherActivity")
                 .then()
-                .showsAppWindowOnTop(mTestApp.getPackage())
+                .showsAppWindowOnTop(testApp.getPackage())
                 .forAllEntries());
+    }
+
+    @Test
+    public void checkCoveredRegion_noUncoveredRegions() {
+        checkResults(result -> LayersTraceSubject.assertThat(result).coversRegion(
+                getDisplayBounds()).forAllEntries());
+    }
+
+    @Test
+    public void checkVisibility_navBarLayerIsAlwaysVisible() {
+        checkResults(result -> LayersTraceSubject.assertThat(result)
+                .showsLayer(NAVIGATION_BAR_WINDOW_TITLE).forAllEntries());
+    }
+
+    @Test
+    public void checkVisibility_statusBarLayerIsAlwaysVisible() {
+        checkResults(result -> LayersTraceSubject.assertThat(result)
+                .showsLayer(STATUS_BAR_WINDOW_TITLE).forAllEntries());
     }
 
     @Test
     public void checkVisibility_wallpaperLayerBecomesInvisible() {
         checkResults(result -> LayersTraceSubject.assertThat(result)
-                .showsLayer("Wallpaper")
+                .showsLayer("wallpaper")
                 .then()
-                .hidesLayer("Wallpaper")
+                .hidesLayer("wallpaper")
                 .forAllEntries());
     }
 }

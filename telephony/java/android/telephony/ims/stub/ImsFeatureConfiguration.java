@@ -16,13 +16,12 @@
 
 package android.telephony.ims.stub;
 
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.telephony.ims.feature.ImsFeature;
 import android.util.ArraySet;
+import android.util.Pair;
 
 import java.util.Set;
 
@@ -62,7 +61,7 @@ public final class ImsFeatureConfiguration implements Parcelable {
         }
 
         @Override
-        public boolean equals(@Nullable Object o) {
+        public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
 
@@ -79,10 +78,9 @@ public final class ImsFeatureConfiguration implements Parcelable {
             return result;
         }
 
-        @NonNull
         @Override
         public String toString() {
-            return "{s=" + slotId + ", f=" + ImsFeature.FEATURE_LOG_MAP.get(featureType) + "}";
+            return "{s=" + slotId + ", f=" + featureType + "}";
         }
     }
 

@@ -16,7 +16,6 @@
 
 package android.telephony.ims;
 
-import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
@@ -195,7 +194,6 @@ public final class ImsStreamMediaProfile implements Parcelable {
         mRttMode = profile.mRttMode;
     }
 
-    @NonNull
     @Override
     public String toString() {
         return "{ audioQuality=" + mAudioQuality +

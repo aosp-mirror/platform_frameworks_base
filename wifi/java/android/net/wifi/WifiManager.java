@@ -38,7 +38,6 @@ import android.net.DhcpInfo;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
-import android.net.NetworkStack;
 import android.net.wifi.hotspot2.IProvisioningCallback;
 import android.net.wifi.hotspot2.OsuProvider;
 import android.net.wifi.hotspot2.PasspointConfiguration;
@@ -533,25 +532,19 @@ public class WifiManager {
     @SystemApi
     public static final String EXTRA_PREVIOUS_WIFI_AP_STATE = "previous_wifi_state";
     /**
-     * The lookup key for a String extra that stores the interface name used for the Soft AP.
-     * This extra is included in the broadcast {@link #WIFI_AP_STATE_CHANGED_ACTION}.
-     * Retrieve its value with {@link android.content.Intent#getStringExtra(String)}.
+     * The interface used for the softap.
      *
      * @hide
      */
-    @SystemApi
-    public static final String EXTRA_WIFI_AP_INTERFACE_NAME =
-            "android.net.wifi.extra.WIFI_AP_INTERFACE_NAME";
+    public static final String EXTRA_WIFI_AP_INTERFACE_NAME = "wifi_ap_interface_name";
     /**
-     * The lookup key for an int extra that stores the intended IP mode for this Soft AP.
-     * One of {@link #IFACE_IP_MODE_TETHERED} or {@link #IFACE_IP_MODE_LOCAL_ONLY}.
-     * This extra is included in the broadcast {@link #WIFI_AP_STATE_CHANGED_ACTION}.
-     * Retrieve its value with {@link android.content.Intent#getIntExtra(String, int)}.
+     * The intended ip mode for this softap.
+     * @see #IFACE_IP_MODE_TETHERED
+     * @see #IFACE_IP_MODE_LOCAL_ONLY
      *
      * @hide
      */
-    @SystemApi
-    public static final String EXTRA_WIFI_AP_MODE = "android.net.wifi.extra.WIFI_AP_MODE";
+    public static final String EXTRA_WIFI_AP_MODE = "wifi_ap_mode";
 
     /** @hide */
     @IntDef(flag = false, prefix = { "WIFI_AP_STATE_" }, value = {
@@ -641,53 +634,40 @@ public class WifiManager {
      */
     public static final int SAP_START_FAILURE_NO_CHANNEL = 1;
 
-    /** @hide */
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef(prefix = {"IFACE_IP_MODE_"}, value = {
-            IFACE_IP_MODE_UNSPECIFIED,
-            IFACE_IP_MODE_CONFIGURATION_ERROR,
-            IFACE_IP_MODE_TETHERED,
-            IFACE_IP_MODE_LOCAL_ONLY})
-    public @interface IfaceIpMode {}
-
     /**
      * Interface IP mode unspecified.
      *
-     * @see #updateInterfaceIpState(String, int)
+     * @see updateInterfaceIpState(String, int)
      *
      * @hide
      */
-    @SystemApi
     public static final int IFACE_IP_MODE_UNSPECIFIED = -1;
 
     /**
      * Interface IP mode for configuration error.
      *
-     * @see #updateInterfaceIpState(String, int)
+     * @see updateInterfaceIpState(String, int)
      *
      * @hide
      */
-    @SystemApi
     public static final int IFACE_IP_MODE_CONFIGURATION_ERROR = 0;
 
     /**
      * Interface IP mode for tethering.
      *
-     * @see #updateInterfaceIpState(String, int)
+     * @see updateInterfaceIpState(String, int)
      *
      * @hide
      */
-    @SystemApi
     public static final int IFACE_IP_MODE_TETHERED = 1;
 
     /**
      * Interface IP mode for Local Only Hotspot.
      *
-     * @see #updateInterfaceIpState(String, int)
+     * @see updateInterfaceIpState(String, int)
      *
      * @hide
      */
-    @SystemApi
     public static final int IFACE_IP_MODE_LOCAL_ONLY = 2;
 
     /**
@@ -2559,21 +2539,16 @@ public class WifiManager {
     /**
      * Call allowing ConnectivityService to update WifiService with interface mode changes.
      *
-     * @param ifaceName String name of the updated interface, or null to represent all interfaces
-     * @param mode int representing the new mode, one of:
-     *             {@link #IFACE_IP_MODE_TETHERED},
-     *             {@link #IFACE_IP_MODE_LOCAL_ONLY},
-     *             {@link #IFACE_IP_MODE_CONFIGURATION_ERROR},
-     *             {@link #IFACE_IP_MODE_UNSPECIFIED}
+     * The possible modes include: {@link IFACE_IP_MODE_TETHERED},
+     *                             {@link IFACE_IP_MODE_LOCAL_ONLY},
+     *                             {@link IFACE_IP_MODE_CONFIGURATION_ERROR}
+     *
+     * @param ifaceName String name of the updated interface
+     * @param mode int representing the new mode
      *
      * @hide
      */
-    @SystemApi
-    @RequiresPermission(anyOf = {
-            android.Manifest.permission.NETWORK_STACK,
-            NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK
-    })
-    public void updateInterfaceIpState(@Nullable String ifaceName, @IfaceIpMode int mode) {
+    public void updateInterfaceIpState(String ifaceName, int mode) {
         try {
             mService.updateInterfaceIpState(ifaceName, mode);
         } catch (RemoteException e) {
@@ -2582,21 +2557,15 @@ public class WifiManager {
     }
 
     /**
-     * Start Soft AP (hotspot) mode with the specified configuration.
-     * Note that starting Soft AP mode may disable station mode operation if the device does not
-     * support concurrency.
-     * @param wifiConfig SSID, security and channel details as part of WifiConfiguration, or null to
-     *                   use the persisted Soft AP configuration that was previously set using
-     *                   {@link #setWifiApConfiguration(WifiConfiguration)}.
-     * @return {@code true} if the operation succeeded, {@code false} otherwise
+     * Start SoftAp mode with the specified configuration.
+     * Note that starting in access point mode disables station
+     * mode operation
+     * @param wifiConfig SSID, security and channel details as
+     *        part of WifiConfiguration
+     * @return {@code true} if the operation succeeds, {@code false} otherwise
      *
      * @hide
      */
-    @SystemApi
-    @RequiresPermission(anyOf = {
-            android.Manifest.permission.NETWORK_STACK,
-            NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK
-    })
     public boolean startSoftAp(@Nullable WifiConfiguration wifiConfig) {
         try {
             return mService.startSoftAp(wifiConfig);
@@ -2612,11 +2581,6 @@ public class WifiManager {
      *
      * @hide
      */
-    @SystemApi
-    @RequiresPermission(anyOf = {
-            android.Manifest.permission.NETWORK_STACK,
-            NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK
-    })
     public boolean stopSoftAp() {
         try {
             return mService.stopSoftAp();

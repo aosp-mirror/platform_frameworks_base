@@ -773,9 +773,9 @@ public class BatterySaverStateMachine {
 
         // Handle triggering the notification to show/hide when appropriate
         if (intReason == BatterySaverController.REASON_DYNAMIC_POWER_SAVINGS_AUTOMATIC_ON) {
-            runOnBgThread(this::triggerDynamicModeNotification);
+            triggerDynamicModeNotification();
         } else if (!enable) {
-            runOnBgThread(this::hideDynamicModeNotification);
+            hideDynamicModeNotification();
         }
 
         if (DEBUG) {
@@ -787,33 +787,42 @@ public class BatterySaverStateMachine {
 
     @VisibleForTesting
     void triggerDynamicModeNotification() {
-        NotificationManager manager = mContext.getSystemService(NotificationManager.class);
-        ensureNotificationChannelExists(manager, DYNAMIC_MODE_NOTIF_CHANNEL_ID,
-                R.string.dynamic_mode_notification_channel_name);
+        // The current lock is the PowerManager lock, which sits very low in the service lock
+        // hierarchy. We shouldn't call out to NotificationManager with the PowerManager lock.
+        runOnBgThread(() -> {
+            NotificationManager manager = mContext.getSystemService(NotificationManager.class);
+            ensureNotificationChannelExists(manager, DYNAMIC_MODE_NOTIF_CHANNEL_ID,
+                    R.string.dynamic_mode_notification_channel_name);
 
-        manager.notifyAsUser(TAG, DYNAMIC_MODE_NOTIFICATION_ID,
-                buildNotification(DYNAMIC_MODE_NOTIF_CHANNEL_ID,
-                        mContext.getResources().getString(R.string.dynamic_mode_notification_title),
-                        R.string.dynamic_mode_notification_summary,
-                        Intent.ACTION_POWER_USAGE_SUMMARY),
-                UserHandle.ALL);
+            manager.notifyAsUser(TAG, DYNAMIC_MODE_NOTIFICATION_ID,
+                    buildNotification(DYNAMIC_MODE_NOTIF_CHANNEL_ID,
+                            mContext.getResources().getString(
+                                    R.string.dynamic_mode_notification_title),
+                            R.string.dynamic_mode_notification_summary,
+                            Intent.ACTION_POWER_USAGE_SUMMARY),
+                    UserHandle.ALL);
+        });
     }
 
     @VisibleForTesting
     void triggerStickyDisabledNotification() {
-        NotificationManager manager = mContext.getSystemService(NotificationManager.class);
-        ensureNotificationChannelExists(manager, BATTERY_SAVER_NOTIF_CHANNEL_ID,
-                R.string.battery_saver_notification_channel_name);
+        // The current lock is the PowerManager lock, which sits very low in the service lock
+        // hierarchy. We shouldn't call out to NotificationManager with the PowerManager lock.
+        runOnBgThread(() -> {
+            NotificationManager manager = mContext.getSystemService(NotificationManager.class);
+            ensureNotificationChannelExists(manager, BATTERY_SAVER_NOTIF_CHANNEL_ID,
+                    R.string.battery_saver_notification_channel_name);
 
-        final String percentage = NumberFormat.getPercentInstance()
-                .format((double) mBatteryLevel / 100.0);
-        manager.notifyAsUser(TAG, STICKY_AUTO_DISABLED_NOTIFICATION_ID,
-                buildNotification(BATTERY_SAVER_NOTIF_CHANNEL_ID,
-                        mContext.getResources().getString(
-                                R.string.battery_saver_charged_notification_title, percentage),
-                        R.string.battery_saver_off_notification_summary,
-                        Settings.ACTION_BATTERY_SAVER_SETTINGS),
-                UserHandle.ALL);
+            final String percentage = NumberFormat.getPercentInstance()
+                    .format((double) mBatteryLevel / 100.0);
+            manager.notifyAsUser(TAG, STICKY_AUTO_DISABLED_NOTIFICATION_ID,
+                    buildNotification(BATTERY_SAVER_NOTIF_CHANNEL_ID,
+                            mContext.getResources().getString(
+                                    R.string.battery_saver_charged_notification_title, percentage),
+                            R.string.battery_saver_off_notification_summary,
+                            Settings.ACTION_BATTERY_SAVER_SETTINGS),
+                    UserHandle.ALL);
+        });
     }
 
     private void ensureNotificationChannelExists(NotificationManager manager,
@@ -854,8 +863,12 @@ public class BatterySaverStateMachine {
     }
 
     private void hideNotification(int notificationId) {
-        NotificationManager manager = mContext.getSystemService(NotificationManager.class);
-        manager.cancel(notificationId);
+        // The current lock is the PowerManager lock, which sits very low in the service lock
+        // hierarchy. We shouldn't call out to NotificationManager with the PowerManager lock.
+        runOnBgThread(() -> {
+            NotificationManager manager = mContext.getSystemService(NotificationManager.class);
+            manager.cancelAsUser(TAG, notificationId, UserHandle.ALL);
+        });
     }
 
     private void setStickyActive(boolean active) {

@@ -485,7 +485,6 @@ public final class ProgramSelector implements Parcelable {
         return new ProgramSelector(programType, primary, secondary, null);
     }
 
-    @NonNull
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("ProgramSelector(type=").append(mProgramType)
@@ -503,7 +502,7 @@ public final class ProgramSelector implements Parcelable {
     }
 
     @Override
-    public boolean equals(@Nullable Object obj) {
+    public boolean equals(Object obj) {
         if (this == obj) return true;
         if (!(obj instanceof ProgramSelector)) return false;
         ProgramSelector other = (ProgramSelector) obj;
@@ -599,7 +598,6 @@ public final class ProgramSelector implements Parcelable {
             return mValue;
         }
 
-        @NonNull
         @Override
         public String toString() {
             return "Identifier(" + mType + ", " + mValue + ")";
@@ -611,7 +609,7 @@ public final class ProgramSelector implements Parcelable {
         }
 
         @Override
-        public boolean equals(@Nullable Object obj) {
+        public boolean equals(Object obj) {
             if (this == obj) return true;
             if (!(obj instanceof Identifier)) return false;
             Identifier other = (Identifier) obj;

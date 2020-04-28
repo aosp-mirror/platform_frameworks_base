@@ -16,8 +16,6 @@
 
 package android.net.metrics;
 
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.os.Parcel;
@@ -87,7 +85,6 @@ public final class IpReachabilityEvent implements IpConnectivityLog.Event {
         }
     };
 
-    @NonNull
     @Override
     public String toString() {
         int hi = eventType & 0xff00;
@@ -97,7 +94,7 @@ public final class IpReachabilityEvent implements IpConnectivityLog.Event {
     }
 
     @Override
-    public boolean equals(@Nullable Object obj) {
+    public boolean equals(Object obj) {
         if (obj == null || !(obj.getClass().equals(IpReachabilityEvent.class))) return false;
         final IpReachabilityEvent other = (IpReachabilityEvent) obj;
         return eventType == other.eventType;

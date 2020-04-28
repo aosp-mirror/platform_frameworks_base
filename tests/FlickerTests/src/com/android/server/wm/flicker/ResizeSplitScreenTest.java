@@ -24,62 +24,64 @@ import static com.android.server.wm.flicker.WindowUtils.getNavigationBarHeight;
 import static com.google.common.truth.Truth.assertThat;
 
 import android.graphics.Rect;
+import android.platform.helpers.IAppHelper;
 import android.util.Rational;
 
 import androidx.test.InstrumentationRegistry;
-import androidx.test.filters.FlakyTest;
 import androidx.test.filters.LargeTest;
-
-import com.android.server.wm.flicker.helpers.ImeAppHelper;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
-import org.junit.FixMethodOrder;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.MethodSorters;
-import org.junit.runners.Parameterized;
 
 /**
  * Test split screen resizing window transitions.
  * To run this test: {@code atest FlickerTests:ResizeSplitScreenTest}
  */
 @LargeTest
-@RunWith(Parameterized.class)
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@FlakyTest(bugId = 140854698)
-@Ignore("Waiting bug feedback")
-public class ResizeSplitScreenTest extends NonRotationTestBase {
+@RunWith(AndroidJUnit4.class)
+public class ResizeSplitScreenTest extends FlickerTestBase {
 
-    private static String sSimpleActivity = "SimpleActivity";
-    private static String sImeActivity = "ImeActivity";
-
-    public ResizeSplitScreenTest(String beginRotationName, int beginRotation) {
-        super(beginRotationName, beginRotation);
-
-        this.mTestApp = new StandardAppHelper(InstrumentationRegistry.getInstrumentation(),
+    public ResizeSplitScreenTest() {
+        this.testApp = new StandardAppHelper(InstrumentationRegistry.getInstrumentation(),
                 "com.android.server.wm.flicker.testapp", "SimpleApp");
     }
 
     @Before
     public void runTransition() {
-        ImeAppHelper bottomApp = new ImeAppHelper(InstrumentationRegistry.getInstrumentation());
-        run(resizeSplitScreen(mTestApp, bottomApp, mUiDevice, mBeginRotation,
-                new Rational(1, 3), new Rational(2, 3))
-                .includeJankyRuns().build());
+        IAppHelper bottomApp = new StandardAppHelper(InstrumentationRegistry
+                .getInstrumentation(),
+                "com.android.server.wm.flicker.testapp", "ImeApp");
+        super.runTransition(resizeSplitScreen(testApp, bottomApp, uiDevice, new Rational(1, 3),
+                new Rational(2, 3)).includeJankyRuns().build());
+    }
+
+    @Test
+    public void checkVisibility_navBarLayerIsAlwaysVisible() {
+        checkResults(result -> LayersTraceSubject.assertThat(result)
+                .showsLayer(NAVIGATION_BAR_WINDOW_TITLE)
+                .forAllEntries());
+    }
+
+    @Test
+    public void checkVisibility_statusBarLayerIsAlwaysVisible() {
+        checkResults(result -> LayersTraceSubject.assertThat(result)
+                .showsLayer(STATUS_BAR_WINDOW_TITLE)
+                .forAllEntries());
     }
 
     @Test
     public void checkVisibility_topAppLayerIsAlwaysVisible() {
         checkResults(result -> LayersTraceSubject.assertThat(result)
-                .showsLayer(sSimpleActivity)
+                .showsLayer("SimpleActivity")
                 .forAllEntries());
     }
 
     @Test
     public void checkVisibility_bottomAppLayerIsAlwaysVisible() {
         checkResults(result -> LayersTraceSubject.assertThat(result)
-                .showsLayer(sImeActivity)
+                .showsLayer("ImeActivity")
                 .forAllEntries());
     }
 
@@ -140,11 +142,11 @@ public class ResizeSplitScreenTest extends NonRotationTestBase {
                     displayBounds.bottom - getNavigationBarHeight());
 
             LayersTraceSubject.assertThat(result)
-                    .hasVisibleRegion(sSimpleActivity, startingTopAppBounds)
+                    .hasVisibleRegion("SimpleActivity", startingTopAppBounds)
                     .atTheEnd();
 
             LayersTraceSubject.assertThat(result)
-                    .hasVisibleRegion(sImeActivity, startingBottomAppBounds)
+                    .hasVisibleRegion("ImeActivity", startingBottomAppBounds)
                     .atTheEnd();
         });
     }
@@ -166,14 +168,14 @@ public class ResizeSplitScreenTest extends NonRotationTestBase {
     @Test
     public void checkVisibility_topAppWindowIsAlwaysVisible() {
         checkResults(result -> WmTraceSubject.assertThat(result)
-                .showsAppWindow(sSimpleActivity)
+                .showsAppWindow("SimpleActivity")
                 .forAllEntries());
     }
 
     @Test
     public void checkVisibility_bottomAppWindowIsAlwaysVisible() {
         checkResults(result -> WmTraceSubject.assertThat(result)
-                .showsAppWindow(sImeActivity)
+                .showsAppWindow("ImeActivity")
                 .forAllEntries());
     }
 

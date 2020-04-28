@@ -1,8 +1,0 @@
-// Copyright 2012 The Android Open Source Project
-//
-
-java_binary {
-    name: "requestsync",
-    wrapper: "requestsync",
-    srcs: ["**/*.java"],
-}

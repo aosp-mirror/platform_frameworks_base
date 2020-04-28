@@ -832,11 +832,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
                 mService.setSystemAudioActivated(on);
                 mService.announceSystemAudioModeChange(on);
             }
-            if (on && !mArcEstablished) {
-                startArcAction(true);
-            } else if (!on) {
-                startArcAction(false);
-            }
+            startArcAction(on);
         }
     }
 
@@ -1635,10 +1631,6 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         removeAction(SystemAudioAutoInitiationAction.class);
         removeAction(SystemAudioStatusAction.class);
         removeAction(VolumeControlAction.class);
-
-        if (!mService.isControlEnabled()) {
-            setSystemAudioMode(false);
-        }
     }
 
     @ServiceThreadOnly

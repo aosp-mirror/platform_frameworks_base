@@ -16,7 +16,6 @@
 
 package android.app.backup;
 
-import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -53,7 +52,6 @@ public class RestoreDescription implements Parcelable {
     /** This package's restore data is a tarball-type full data stream */
     public static final int TYPE_FULL_STREAM = 2;
 
-    @NonNull
     @Override
     public String toString() {
         return "RestoreDescription{" + mPackageName + " : "

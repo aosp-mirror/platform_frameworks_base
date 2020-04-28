@@ -21,4 +21,5 @@ java_library_static {
         "network_stack.proto",
     ],
     sdk_version: "system_current",
+    no_framework_libs: true,
 }

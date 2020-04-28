@@ -16,7 +16,6 @@
 
 package android.util;
 
-import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 
@@ -300,18 +299,6 @@ public final class ArraySet<E> implements Collection<E>, Set<E> {
         this();
         if (set != null) {
             addAll(set);
-        }
-    }
-
-    /**
-     * Create a new ArraySet with items from the given array
-     */
-    public ArraySet(@Nullable E[] array) {
-        this();
-        if (array != null) {
-            for (E value : array) {
-                add(value);
-            }
         }
     }
 

@@ -18,17 +18,15 @@
 
 #include <algorithm>
 #include <string>
-#include <unordered_set>
+#include <unordered_map>
 #include <vector>
 
 using android::StringPiece;
 
 namespace aapt {
 
+static const char* sDevelopmentSdkCodeName = "Q";
 static ApiVersion sDevelopmentSdkLevel = 10000;
-static const auto sDevelopmentSdkCodeNames = std::unordered_set<StringPiece>({
-    "Q", "R"
-});
 
 static const std::vector<std::pair<uint16_t, ApiVersion>> sAttrIdMap = {
     {0x021c, 1},
@@ -74,9 +72,8 @@ ApiVersion FindAttributeSdkLevel(const ResourceId& id) {
   return iter->second;
 }
 
-Maybe<ApiVersion> GetDevelopmentSdkCodeNameVersion(const StringPiece& code_name) {
-  return (sDevelopmentSdkCodeNames.find(code_name) == sDevelopmentSdkCodeNames.end())
-      ? Maybe<ApiVersion>() : sDevelopmentSdkLevel;
+std::pair<StringPiece, ApiVersion> GetDevelopmentSdkCodeNameAndVersion() {
+  return std::make_pair(StringPiece(sDevelopmentSdkCodeName), sDevelopmentSdkLevel);
 }
 
 }  // namespace aapt

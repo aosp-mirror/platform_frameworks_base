@@ -314,20 +314,24 @@ class AppErrors {
     }
 
     void killAppAtUserRequestLocked(ProcessRecord app, Dialog fromDialog) {
-        app.setCrashing(false);
-        app.crashingReport = null;
-        app.setNotResponding(false);
-        app.notRespondingReport = null;
         if (app.anrDialog == fromDialog) {
             app.anrDialog = null;
         }
         if (app.waitDialog == fromDialog) {
             app.waitDialog = null;
         }
+        killAppImmediateLocked(app, "user-terminated", "user request after error");
+    }
+
+    private void killAppImmediateLocked(ProcessRecord app, String reason, String killReason) {
+        app.setCrashing(false);
+        app.crashingReport = null;
+        app.setNotResponding(false);
+        app.notRespondingReport = null;
         if (app.pid > 0 && app.pid != MY_PID) {
-            handleAppCrashLocked(app, "user-terminated" /*reason*/,
+            handleAppCrashLocked(app, reason,
                     null /*shortMsg*/, null /*longMsg*/, null /*stackTrace*/, null /*data*/);
-            app.kill("user request after error", true);
+            app.kill(killReason, true);
         }
     }
 
@@ -341,7 +345,7 @@ class AppErrors {
      * @param message
      */
     void scheduleAppCrashLocked(int uid, int initialPid, String packageName, int userId,
-            String message) {
+            String message, boolean force) {
         ProcessRecord proc = null;
 
         // Figure out which process to kill.  We don't trust that initialPid
@@ -374,6 +378,14 @@ class AppErrors {
         }
 
         proc.scheduleCrash(message);
+        if (force) {
+            // If the app is responsive, the scheduled crash will happen as expected
+            // and then the delayed summary kill will be a no-op.
+            final ProcessRecord p = proc;
+            mService.mHandler.postDelayed(
+                    () -> killAppImmediateLocked(p, "forced", "killed for invalid state"),
+                    5000L);
+        }
     }
 
     /**
@@ -430,7 +442,8 @@ class AppErrors {
                 RescueParty.noteAppCrash(mContext, r.uid);
             }
 
-            mPackageWatchdog.onPackageFailure(r.getPackageListWithVersionCode());
+            mPackageWatchdog.onPackageFailure(r.getPackageListWithVersionCode(),
+                    PackageWatchdog.FAILURE_REASON_APP_CRASH);
         }
 
         final int relaunchReason = r != null
@@ -884,7 +897,8 @@ class AppErrors {
         }
         // Notify PackageWatchdog without the lock held
         if (packageList != null) {
-            mPackageWatchdog.onPackageFailure(packageList);
+            mPackageWatchdog.onPackageFailure(packageList,
+                    PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING);
         }
     }
 

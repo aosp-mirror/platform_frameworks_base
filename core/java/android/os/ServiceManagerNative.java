@@ -17,40 +17,102 @@
 package android.os;
 
 import android.annotation.UnsupportedAppUsage;
+import java.util.ArrayList;
+
 
 /**
  * Native implementation of the service manager.  Most clients will only
- * care about asInterface().
- *
+ * care about getDefault() and possibly asInterface().
  * @hide
  */
-public final class ServiceManagerNative {
-    private ServiceManagerNative() {}
-
+public abstract class ServiceManagerNative extends Binder implements IServiceManager
+{
     /**
      * Cast a Binder object into a service manager interface, generating
      * a proxy if needed.
-     *
-     * TODO: delete this method and have clients use
-     *     IServiceManager.Stub.asInterface instead
      */
     @UnsupportedAppUsage
-    public static IServiceManager asInterface(IBinder obj) {
+    static public IServiceManager asInterface(IBinder obj)
+    {
         if (obj == null) {
             return null;
         }
+        IServiceManager in =
+            (IServiceManager)obj.queryLocalInterface(descriptor);
+        if (in != null) {
+            return in;
+        }
 
-        // ServiceManager is never local
         return new ServiceManagerProxy(obj);
+    }
+
+    public ServiceManagerNative()
+    {
+        attachInterface(this, descriptor);
+    }
+
+    public boolean onTransact(int code, Parcel data, Parcel reply, int flags)
+    {
+        try {
+            switch (code) {
+                case IServiceManager.GET_SERVICE_TRANSACTION: {
+                    data.enforceInterface(IServiceManager.descriptor);
+                    String name = data.readString();
+                    IBinder service = getService(name);
+                    reply.writeStrongBinder(service);
+                    return true;
+                }
+
+                case IServiceManager.CHECK_SERVICE_TRANSACTION: {
+                    data.enforceInterface(IServiceManager.descriptor);
+                    String name = data.readString();
+                    IBinder service = checkService(name);
+                    reply.writeStrongBinder(service);
+                    return true;
+                }
+
+                case IServiceManager.ADD_SERVICE_TRANSACTION: {
+                    data.enforceInterface(IServiceManager.descriptor);
+                    String name = data.readString();
+                    IBinder service = data.readStrongBinder();
+                    boolean allowIsolated = data.readInt() != 0;
+                    int dumpPriority = data.readInt();
+                    addService(name, service, allowIsolated, dumpPriority);
+                    return true;
+                }
+
+                case IServiceManager.LIST_SERVICES_TRANSACTION: {
+                    data.enforceInterface(IServiceManager.descriptor);
+                    int dumpPriority = data.readInt();
+                    String[] list = listServices(dumpPriority);
+                    reply.writeStringArray(list);
+                    return true;
+                }
+
+                case IServiceManager.SET_PERMISSION_CONTROLLER_TRANSACTION: {
+                    data.enforceInterface(IServiceManager.descriptor);
+                    IPermissionController controller =
+                            IPermissionController.Stub.asInterface(
+                                    data.readStrongBinder());
+                    setPermissionController(controller);
+                    return true;
+                }
+            }
+        } catch (RemoteException e) {
+        }
+
+        return false;
+    }
+
+    public IBinder asBinder()
+    {
+        return this;
     }
 }
 
-// This class should be deleted and replaced with IServiceManager.Stub whenever
-// mRemote is no longer used
 class ServiceManagerProxy implements IServiceManager {
     public ServiceManagerProxy(IBinder remote) {
         mRemote = remote;
-        mServiceManager = IServiceManager.Stub.asInterface(remote);
     }
 
     public IBinder asBinder() {
@@ -59,44 +121,84 @@ class ServiceManagerProxy implements IServiceManager {
 
     @UnsupportedAppUsage
     public IBinder getService(String name) throws RemoteException {
-        // Same as checkService (old versions of servicemanager had both methods).
-        return mServiceManager.checkService(name);
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IServiceManager.descriptor);
+        data.writeString(name);
+        mRemote.transact(GET_SERVICE_TRANSACTION, data, reply, 0);
+        IBinder binder = reply.readStrongBinder();
+        reply.recycle();
+        data.recycle();
+        return binder;
     }
 
     public IBinder checkService(String name) throws RemoteException {
-        return mServiceManager.checkService(name);
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IServiceManager.descriptor);
+        data.writeString(name);
+        mRemote.transact(CHECK_SERVICE_TRANSACTION, data, reply, 0);
+        IBinder binder = reply.readStrongBinder();
+        reply.recycle();
+        data.recycle();
+        return binder;
     }
 
     public void addService(String name, IBinder service, boolean allowIsolated, int dumpPriority)
             throws RemoteException {
-        mServiceManager.addService(name, service, allowIsolated, dumpPriority);
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IServiceManager.descriptor);
+        data.writeString(name);
+        data.writeStrongBinder(service);
+        data.writeInt(allowIsolated ? 1 : 0);
+        data.writeInt(dumpPriority);
+        mRemote.transact(ADD_SERVICE_TRANSACTION, data, reply, 0);
+        reply.recycle();
+        data.recycle();
     }
 
     public String[] listServices(int dumpPriority) throws RemoteException {
-        return mServiceManager.listServices(dumpPriority);
+        ArrayList<String> services = new ArrayList<String>();
+        int n = 0;
+        while (true) {
+            Parcel data = Parcel.obtain();
+            Parcel reply = Parcel.obtain();
+            data.writeInterfaceToken(IServiceManager.descriptor);
+            data.writeInt(n);
+            data.writeInt(dumpPriority);
+            n++;
+            try {
+                boolean res = mRemote.transact(LIST_SERVICES_TRANSACTION, data, reply, 0);
+                if (!res) {
+                    break;
+                }
+            } catch (RuntimeException e) {
+                // The result code that is returned by the C++ code can
+                // cause the call to throw an exception back instead of
+                // returning a nice result...  so eat it here and go on.
+                break;
+            }
+            services.add(reply.readString());
+            reply.recycle();
+            data.recycle();
+        }
+        String[] array = new String[services.size()];
+        services.toArray(array);
+        return array;
     }
 
-    public void registerForNotifications(String name, IServiceCallback cb)
+    public void setPermissionController(IPermissionController controller)
             throws RemoteException {
-        throw new RemoteException();
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IServiceManager.descriptor);
+        data.writeStrongBinder(controller.asBinder());
+        mRemote.transact(SET_PERMISSION_CONTROLLER_TRANSACTION, data, reply, 0);
+        reply.recycle();
+        data.recycle();
     }
 
-    public void unregisterForNotifications(String name, IServiceCallback cb)
-            throws RemoteException {
-        throw new RemoteException();
-    }
-
-    public boolean isDeclared(String name) throws RemoteException {
-        throw new RemoteException();
-    }
-
-    /**
-     * Same as mServiceManager but used by apps.
-     *
-     * Once this can be removed, ServiceManagerProxy should be removed entirely.
-     */
     @UnsupportedAppUsage
     private IBinder mRemote;
-
-    private IServiceManager mServiceManager;
 }

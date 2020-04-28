@@ -30,11 +30,6 @@ import android.os.RemoteException;
  * @hide
  */
 public abstract class TaskStackListener extends ITaskStackListener.Stub {
-
-    @UnsupportedAppUsage
-    public TaskStackListener() {
-    }
-
     @Override
     @UnsupportedAppUsage
     public void onTaskStackChanged() throws RemoteException {

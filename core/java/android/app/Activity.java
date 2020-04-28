@@ -76,6 +76,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager.ServiceNotFoundException;
 import android.os.StrictMode;
+import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.text.Selection;
@@ -7855,10 +7856,13 @@ public class Activity extends ContextThemeWrapper
         mFragments.dispatchStart();
         mFragments.reportLoaderStart();
 
-        // Warn app developers if the dynamic linker logged anything during startup.
         boolean isAppDebuggable =
                 (mApplication.getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
-        if (isAppDebuggable) {
+
+        // This property is set for all non-user builds except final release
+        boolean isDlwarningEnabled = SystemProperties.getInt("ro.bionic.ld.warning", 0) == 1;
+
+        if (isAppDebuggable || isDlwarningEnabled) {
             String dlwarning = getDlWarning();
             if (dlwarning != null) {
                 String appName = getApplicationInfo().loadLabel(getPackageManager())

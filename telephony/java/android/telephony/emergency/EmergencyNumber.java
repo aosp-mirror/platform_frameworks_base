@@ -18,7 +18,6 @@ package android.telephony.emergency;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
-import android.annotation.TestApi;
 import android.hardware.radio.V1_4.EmergencyNumberSource;
 import android.hardware.radio.V1_4.EmergencyServiceCategory;
 import android.os.Parcel;
@@ -185,7 +184,6 @@ public final class EmergencyNumber implements Parcelable, Comparable<EmergencyNu
      *
      * @hide
      */
-    @TestApi
     public static final int EMERGENCY_NUMBER_SOURCE_TEST =  1 << 5;
     /** Bit-field which indicates the number is from the modem config. */
     public static final int EMERGENCY_NUMBER_SOURCE_MODEM_CONFIG =

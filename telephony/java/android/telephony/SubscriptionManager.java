@@ -31,7 +31,6 @@ import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SuppressAutoDoc;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
-import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.app.BroadcastOptions;
 import android.app.PendingIntent;
@@ -55,7 +54,6 @@ import android.os.ParcelUuid;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.telephony.Annotation.NetworkType;
 import android.telephony.euicc.EuiccManager;
 import android.telephony.ims.ImsMmTelManager;
 import android.util.DisplayMetrics;
@@ -395,19 +393,19 @@ public class SubscriptionManager {
     public static final String NAME_SOURCE = "name_source";
 
     /**
-     * The name_source is the default
+     * The name_source is the default, which is from the carrier id.
      * @hide
      */
     public static final int NAME_SOURCE_DEFAULT_SOURCE = 0;
 
     /**
-     * The name_source is from the SIM
+     * The name_source is from SIM EF_SPN.
      * @hide
      */
-    public static final int NAME_SOURCE_SIM_SOURCE = 1;
+    public static final int NAME_SOURCE_SIM_SPN = 1;
 
     /**
-     * The name_source is from the user
+     * The name_source is from user input
      * @hide
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
@@ -418,6 +416,24 @@ public class SubscriptionManager {
      * @hide
      */
     public static final int NAME_SOURCE_CARRIER = 3;
+
+    /**
+     * The name_source is from SIM EF_PNN.
+     * @hide
+     */
+    public static final int NAME_SOURCE_SIM_PNN = 4;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"NAME_SOURCE_"},
+            value = {
+                    NAME_SOURCE_DEFAULT_SOURCE,
+                    NAME_SOURCE_SIM_SPN,
+                    NAME_SOURCE_USER_INPUT,
+                    NAME_SOURCE_CARRIER,
+                    NAME_SOURCE_SIM_PNN
+            })
+    public @interface SimDisplayNameSource {}
 
     /**
      * TelephonyProvider column name for the color of a SIM.
@@ -896,11 +912,6 @@ public class SubscriptionManager {
      * which has changed.
      */
     public static final String EXTRA_SUBSCRIPTION_INDEX = "android.telephony.extra.SUBSCRIPTION_INDEX";
-
-    /**
-     * Integer extra to specify SIM slot index.
-     */
-    public static final String EXTRA_SLOT_INDEX = "android.telephony.extra.SLOT_INDEX";
 
     private final Context mContext;
     private volatile INetworkPolicyManager mNetworkPolicy;
@@ -1676,13 +1687,12 @@ public class SubscriptionManager {
      * Set display name by simInfo index with name source
      * @param displayName the display name of SIM card
      * @param subId the unique SubscriptionInfo index in database
-     * @param nameSource 0: NAME_SOURCE_DEFAULT_SOURCE, 1: NAME_SOURCE_SIM_SOURCE,
-     *                   2: NAME_SOURCE_USER_INPUT
+     * @param nameSource SIM display name source
      * @return the number of records updated or < 0 if invalid subId
      * @hide
      */
     @UnsupportedAppUsage
-    public int setDisplayName(String displayName, int subId, int nameSource) {
+    public int setDisplayName(String displayName, int subId, @SimDisplayNameSource int nameSource) {
         if (VDBG) {
             logd("[setDisplayName]+  displayName:" + displayName + " subId:" + subId
                     + " nameSource:" + nameSource);
@@ -1869,40 +1879,17 @@ public class SubscriptionManager {
         return subId;
     }
 
-    /**
-     * Sets the system's default voice subscription id.
-     *
-     * On a data-only device, this is a no-op.
-     *
-     * May throw a {@link RuntimeException} if the provided subscription id is equal to
-     * {@link SubscriptionManager#DEFAULT_SUBSCRIPTION_ID}
-     *
-     * @param subscriptionId A valid subscription ID to set as the system default, or
-     *                       {@link SubscriptionManager#INVALID_SUBSCRIPTION_ID}
-     * @hide
-     */
-    @SystemApi
-    @TestApi
-    @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
-    public void setDefaultVoiceSubscriptionId(int subscriptionId) {
-        if (VDBG) logd("setDefaultVoiceSubId sub id = " + subscriptionId);
+    /** @hide */
+    public void setDefaultVoiceSubId(int subId) {
+        if (VDBG) logd("setDefaultVoiceSubId sub id = " + subId);
         try {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
             if (iSub != null) {
-                iSub.setDefaultVoiceSubId(subscriptionId);
+                iSub.setDefaultVoiceSubId(subId);
             }
         } catch (RemoteException ex) {
             // ignore it
         }
-    }
-
-    /**
-     * Same as {@link #setDefaultVoiceSubscriptionId(int)}, but preserved for backwards
-     * compatibility.
-     * @hide
-     */
-    public void setDefaultVoiceSubId(int subId) {
-        setDefaultVoiceSubscriptionId(subId);
     }
 
     /**
@@ -2125,13 +2112,13 @@ public class SubscriptionManager {
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public static boolean isValidSlotIndex(int slotIndex) {
-        return slotIndex >= 0 && slotIndex < TelephonyManager.getDefault().getActiveModemCount();
+        return slotIndex >= 0 && slotIndex < TelephonyManager.getDefault().getSimCount();
     }
 
     /** @hide */
     @UnsupportedAppUsage
     public static boolean isValidPhoneId(int phoneId) {
-        return phoneId >= 0 && phoneId < TelephonyManager.getDefault().getActiveModemCount();
+        return phoneId >= 0 && phoneId < TelephonyManager.getDefault().getPhoneCount();
     }
 
     /** @hide */
@@ -2152,7 +2139,6 @@ public class SubscriptionManager {
         if (VDBG) logd("putPhoneIdAndSubIdExtra: phoneId=" + phoneId + " subId=" + subId);
         intent.putExtra(PhoneConstants.SUBSCRIPTION_KEY, subId);
         intent.putExtra(EXTRA_SUBSCRIPTION_INDEX, subId);
-        intent.putExtra(EXTRA_SLOT_INDEX, phoneId);
         intent.putExtra(PhoneConstants.PHONE_KEY, phoneId);
     }
 
@@ -2321,19 +2307,14 @@ public class SubscriptionManager {
     }
 
     /**
-     * Returns the {@link Resources} from the given {@link Context} for the MCC/MNC associated with
-     * the subscription. If the subscription ID is invalid, the base resources are returned instead.
-     *
-     * Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
-     *
+     * Returns the resources associated with Subscription.
      * @param context Context object
-     * @param subId Subscription Id of Subscription whose resources are required
+     * @param subId Subscription Id of Subscription who's resources are required
      * @return Resources associated with Subscription.
      * @hide
      */
-    @NonNull
-    @SystemApi
-    public static Resources getResourcesForSubId(@NonNull Context context, int subId) {
+    @UnsupportedAppUsage
+    public static Resources getResourcesForSubId(Context context, int subId) {
         return getResourcesForSubId(context, subId, false);
     }
 
@@ -2444,8 +2425,12 @@ public class SubscriptionManager {
      * @param plans the list of plans. The first plan is always the primary and
      *            most important plan. Any additional plans are secondary and
      *            may not be displayed or used by decision making logic.
+     *            The list of all plans must meet the requirements defined in
+     *            SubscriptionPlan.Builder#setNetworkTypes(int[]).
      * @throws SecurityException if the caller doesn't meet the requirements
      *             outlined above.
+     * @throws IllegalArgumentException if plans don't meet the requirements
+     *             mentioned above.
      */
     public void setSubscriptionPlans(int subId, @NonNull List<SubscriptionPlan> plans) {
         try {

@@ -280,7 +280,6 @@ public final class BluetoothHeadset implements BluetoothProfile {
      * {@link #EXTRA_STATE} or {@link #EXTRA_PREVIOUS_STATE} of
      * {@link #ACTION_AUDIO_STATE_CHANGED} intent.
      */
-    public static final int STATE_AUDIO_CONNECTED = 12;
 
     /**
      * Intent used to broadcast the headset's indicator status
@@ -322,6 +321,8 @@ public final class BluetoothHeadset implements BluetoothProfile {
      */
     public static final String EXTRA_HF_INDICATORS_IND_VALUE =
             "android.bluetooth.headset.extra.HF_INDICATORS_IND_VALUE";
+
+    public static final int STATE_AUDIO_CONNECTED = 12;
 
     private static final int MESSAGE_HEADSET_SERVICE_CONNECTED = 100;
     private static final int MESSAGE_HEADSET_SERVICE_DISCONNECTED = 101;

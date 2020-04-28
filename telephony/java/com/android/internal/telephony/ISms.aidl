@@ -22,11 +22,20 @@ import android.os.Bundle;
 import android.telephony.IFinancialSmsCallback;
 import com.android.internal.telephony.SmsRawData;
 
-/**
- * Interface for applications to access the ICC phone book.
+/** Interface for applications to access the ICC phone book.
  *
- * See also SmsManager.java.
+ * <p>The following code snippet demonstrates a static method to
+ * retrieve the ISms interface from Android:</p>
+ * <pre>private static ISms getSmsInterface()
+            throws DeadObjectException {
+    IServiceManager sm = ServiceManagerNative.getDefault();
+    ISms ss;
+    ss = ISms.Stub.asInterface(sm.getService("isms"));
+    return ss;
+}
+ * </pre>
  */
+
 interface ISms {
     /**
      * Retrieves all messages currently stored on ICC.
@@ -586,23 +595,4 @@ interface ISms {
      * @param destAddress the destination address to test for possible short code
      */
     int checkSmsShortCodeDestination(int subId, String callingApk, String destAddress, String countryIso);
-
-    /**
-     * Gets the SMSC address from (U)SIM.
-     *
-     * @param subId the subscription Id.
-     * @param callingPackage the package name of the calling app.
-     * @return the SMSC address string, null if failed.
-     */
-    String getSmscAddressFromIccEfForSubscriber(int subId, String callingPackage);
-
-    /**
-     * Sets the SMSC address on (U)SIM.
-     *
-     * @param smsc the SMSC address string.
-     * @param subId the subscription Id.
-     * @param callingPackage the package name of the calling app.
-     * @return true for success, false otherwise.
-     */
-    boolean setSmscAddressOnIccEfForSubscriber(String smsc, int subId, String callingPackage);
 }

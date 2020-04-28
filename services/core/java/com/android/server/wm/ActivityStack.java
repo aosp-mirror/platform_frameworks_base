@@ -4112,13 +4112,9 @@ class ActivityStack extends ConfigurationContainer {
         final ActivityDisplay display = getDisplay();
         final ActivityRecord next = display.topRunningActivity(true /* considerKeyguardState */);
         final boolean isFloating = r.getConfiguration().windowConfiguration.tasksAreFloating();
-        // isNextNotYetVisible is to check if the next activity is invisible, or it has been
-        // requested to be invisible but its windows haven't reported as invisible. If so, it
-        // implied that the current finishing activity should be added into stopping list rather
-        // than destroying it immediately.
-        final boolean isNextNotYetVisible = next != null && (!next.nowVisible || !next.visible);
-        if (mode == FINISH_AFTER_VISIBLE && (r.visible || r.nowVisible) && isNextNotYetVisible
-                && !isFloating) {
+
+        if (mode == FINISH_AFTER_VISIBLE && (r.visible || r.nowVisible)
+                && next != null && !next.nowVisible && !isFloating) {
             if (!mStackSupervisor.mStoppingActivities.contains(r)) {
                 addToStopping(r, false /* scheduleIdle */, false /* idleDelayed */,
                         "finishCurrentActivityLocked");
@@ -4261,6 +4257,11 @@ class ActivityStack extends ConfigurationContainer {
 
     final boolean navigateUpToLocked(ActivityRecord srec, Intent destIntent, int resultCode,
             Intent resultData) {
+        if (!srec.attachedToProcess()) {
+            // Nothing to do if the caller is not attached, because this method should be called
+            // from an alive activity.
+            return false;
+        }
         final TaskRecord task = srec.getTaskRecord();
         final ArrayList<ActivityRecord> activities = task.mActivities;
         final int start = activities.indexOf(srec);
@@ -4314,14 +4315,14 @@ class ActivityStack extends ConfigurationContainer {
         }
 
         if (parent != null && foundParentInTask) {
+            final int callingUid = srec.info.applicationInfo.uid;
             final int parentLaunchMode = parent.info.launchMode;
             final int destIntentFlags = destIntent.getFlags();
             if (parentLaunchMode == ActivityInfo.LAUNCH_SINGLE_INSTANCE ||
                     parentLaunchMode == ActivityInfo.LAUNCH_SINGLE_TASK ||
                     parentLaunchMode == ActivityInfo.LAUNCH_SINGLE_TOP ||
                     (destIntentFlags & Intent.FLAG_ACTIVITY_CLEAR_TOP) != 0) {
-                parent.deliverNewIntentLocked(srec.info.applicationInfo.uid, destIntent,
-                        srec.packageName);
+                parent.deliverNewIntentLocked(callingUid, destIntent, srec.packageName);
             } else {
                 try {
                     ActivityInfo aInfo = AppGlobals.getPackageManager().getActivityInfo(
@@ -4334,10 +4335,10 @@ class ActivityStack extends ConfigurationContainer {
                             .setActivityInfo(aInfo)
                             .setResultTo(parent.appToken)
                             .setCallingPid(-1)
-                            .setCallingUid(parent.launchedFromUid)
-                            .setCallingPackage(parent.launchedFromPackage)
+                            .setCallingUid(callingUid)
+                            .setCallingPackage(srec.packageName)
                             .setRealCallingPid(-1)
-                            .setRealCallingUid(parent.launchedFromUid)
+                            .setRealCallingUid(callingUid)
                             .setComponentSpecified(true)
                             .execute();
                     foundParentInTask = res == ActivityManager.START_SUCCESS;

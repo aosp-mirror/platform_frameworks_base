@@ -29,6 +29,5 @@ interface IContentObserver
      * observed. selfUpdate is true if the update was caused by a call to
      * commit on the cursor that is being observed.
      */
-    @UnsupportedAppUsage
     oneway void onChange(boolean selfUpdate, in Uri uri, int userId);
 }

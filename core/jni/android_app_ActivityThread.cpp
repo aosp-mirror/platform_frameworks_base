@@ -24,7 +24,7 @@
 #include "core_jni_helpers.h"
 #include <unistd.h>
 
-#include <bionic/malloc.h>
+#include <bionic_malloc.h>
 
 namespace android {
 

@@ -354,7 +354,6 @@ public final class UserHandle implements Parcelable {
      * components -- user, app, isolated, etc.
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public static void formatUid(PrintWriter pw, int uid) {
         if (uid < Process.FIRST_APPLICATION_UID) {
             pw.print(uid);

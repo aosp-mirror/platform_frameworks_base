@@ -16,7 +16,6 @@
 
 package android.os;
 
-import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.os.IUpdateEngine;
 import android.os.IUpdateEngineCallback;
@@ -307,22 +306,6 @@ public class UpdateEngine {
     public void applyPayload(String url, long offset, long size, String[] headerKeyValuePairs) {
         try {
             mUpdateEngine.applyPayload(url, offset, size, headerKeyValuePairs);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Applies the payload passed as ParcelFileDescriptor {@code pfd} instead of
-     * using the {@code file://} scheme.
-     *
-     * <p>See {@link #applyPayload(String)} for {@code offset}, {@code size} and
-     * {@code headerKeyValuePairs} parameters.
-     */
-    public void applyPayload(@NonNull ParcelFileDescriptor pfd, long offset, long size,
-            @NonNull String[] headerKeyValuePairs) {
-        try {
-            mUpdateEngine.applyPayloadFd(pfd, offset, size, headerKeyValuePairs);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

@@ -40,10 +40,6 @@ public class MobileLinkQualityInfo extends LinkQualityInfo {
     private int mLteRssnr = UNKNOWN_INT;
     private int mLteCqi = UNKNOWN_INT;
 
-    @UnsupportedAppUsage
-    public MobileLinkQualityInfo() {
-    }
-
     /**
      * Implement the Parcelable interface.
      * @hide

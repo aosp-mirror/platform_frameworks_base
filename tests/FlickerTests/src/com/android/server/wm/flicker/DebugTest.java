@@ -22,50 +22,40 @@ import android.util.Rational;
 import android.view.Surface;
 
 import androidx.test.InstrumentationRegistry;
-import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.server.wm.flicker.helpers.ImeAppHelper;
-import com.android.server.wm.flicker.helpers.PipAppHelper;
-
-import org.junit.FixMethodOrder;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.MethodSorters;
 
 /**
  * Tests to help debug individual transitions, capture video recordings and create test cases.
  */
-@LargeTest
 @Ignore("Used for debugging transitions used in FlickerTests.")
 @RunWith(AndroidJUnit4.class)
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class DebugTest {
     private IAppHelper testApp = new StandardAppHelper(InstrumentationRegistry.getInstrumentation(),
             "com.android.server.wm.flicker.testapp", "SimpleApp");
     private UiDevice uiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
 
     /**
-     * atest FlickerTests:DebugTest#openAppCold
+     * atest FlickerTest:DebugTests#openAppCold
      */
     @Test
     public void openAppCold() {
-        CommonTransitions.openAppCold(testApp, uiDevice, Surface.ROTATION_0)
-                .recordAllRuns().build().run();
+        CommonTransitions.getOpenAppCold(testApp, uiDevice).recordAllRuns().build().run();
     }
 
     /**
-     * atest FlickerTests:DebugTest#openAppWarm
+     * atest FlickerTest:DebugTests#openAppWarm
      */
     @Test
     public void openAppWarm() {
-        CommonTransitions.openAppWarm(testApp, uiDevice, Surface.ROTATION_0)
-                .recordAllRuns().build().run();
+        CommonTransitions.openAppWarm(testApp, uiDevice).recordAllRuns().build().run();
     }
 
     /**
-     * atest FlickerTests:DebugTest#changeOrientationFromNaturalToLeft
+     * atest FlickerTest:DebugTests#changeOrientationFromNaturalToLeft
      */
     @Test
     public void changeOrientationFromNaturalToLeft() {
@@ -74,7 +64,7 @@ public class DebugTest {
     }
 
     /**
-     * atest FlickerTests:DebugTest#closeAppWithBackKey
+     * atest FlickerTest:DebugTests#closeAppWithBackKey
      */
     @Test
     public void closeAppWithBackKey() {
@@ -82,7 +72,7 @@ public class DebugTest {
     }
 
     /**
-     * atest FlickerTests:DebugTest#closeAppWithHomeKey
+     * atest FlickerTest:DebugTests#closeAppWithHomeKey
      */
     @Test
     public void closeAppWithHomeKey() {
@@ -90,7 +80,7 @@ public class DebugTest {
     }
 
     /**
-     * atest FlickerTests:DebugTest#openAppToSplitScreen
+     * atest FlickerTest:DebugTests#openAppToSplitScreen
      */
     @Test
     public void openAppToSplitScreen() {
@@ -99,7 +89,7 @@ public class DebugTest {
     }
 
     /**
-     * atest FlickerTests:DebugTest#splitScreenToLauncher
+     * atest FlickerTest:DebugTests#splitScreenToLauncher
      */
     @Test
     public void splitScreenToLauncher() {
@@ -109,80 +99,70 @@ public class DebugTest {
     }
 
     /**
-     * atest FlickerTests:DebugTest#resizeSplitScreen
+     * atest FlickerTest:DebugTests#resizeSplitScreen
      */
     @Test
     public void resizeSplitScreen() {
-        ImeAppHelper bottomApp = new ImeAppHelper(InstrumentationRegistry.getInstrumentation());
-        CommonTransitions.resizeSplitScreen(testApp, bottomApp, uiDevice, Surface.ROTATION_0,
-                new Rational(1, 3), new Rational(2, 3))
-                .includeJankyRuns().recordEachRun().build().run();
+        IAppHelper bottomApp = new StandardAppHelper(InstrumentationRegistry.getInstrumentation(),
+                "com.android.server.wm.flicker.testapp", "ImeApp");
+        CommonTransitions.resizeSplitScreen(testApp, bottomApp, uiDevice, new Rational(1, 3),
+                new Rational(2, 3)).includeJankyRuns().recordEachRun().build().run();
     }
 
     // IME tests
 
     /**
-     * atest FlickerTests:DebugTest#editTextSetFocus
+     * atest FlickerTest:DebugTests#editTextSetFocus
      */
     @Test
     public void editTextSetFocus() {
-        ImeAppHelper testApp = new ImeAppHelper(InstrumentationRegistry.getInstrumentation());
-        CommonTransitions.editTextSetFocus(testApp, uiDevice, Surface.ROTATION_0)
-                .includeJankyRuns().recordEachRun()
+        CommonTransitions.editTextSetFocus(uiDevice).includeJankyRuns().recordEachRun()
                 .build().run();
     }
 
     /**
-     * atest FlickerTests:DebugTest#editTextLoseFocusToHome
+     * atest FlickerTest:DebugTests#editTextLoseFocusToHome
      */
     @Test
     public void editTextLoseFocusToHome() {
-        ImeAppHelper testApp = new ImeAppHelper(InstrumentationRegistry.getInstrumentation());
-        CommonTransitions.editTextLoseFocusToHome(testApp, uiDevice, Surface.ROTATION_0)
-                .includeJankyRuns().recordEachRun()
+        CommonTransitions.editTextLoseFocusToHome(uiDevice).includeJankyRuns().recordEachRun()
                 .build().run();
     }
 
     /**
-     * atest FlickerTests:DebugTest#editTextLoseFocusToApp
+     * atest FlickerTest:DebugTests#editTextLoseFocusToApp
      */
     @Test
     public void editTextLoseFocusToApp() {
-        ImeAppHelper testApp = new ImeAppHelper(InstrumentationRegistry.getInstrumentation());
-        CommonTransitions.editTextLoseFocusToHome(testApp, uiDevice, Surface.ROTATION_0)
-                .includeJankyRuns().recordEachRun()
+        CommonTransitions.editTextLoseFocusToHome(uiDevice).includeJankyRuns().recordEachRun()
                 .build().run();
     }
 
     // PIP tests
 
     /**
-     * atest FlickerTests:DebugTest#enterPipMode
+     * atest FlickerTest:DebugTests#enterPipMode
      */
     @Test
     public void enterPipMode() {
-        PipAppHelper testApp = new PipAppHelper(InstrumentationRegistry.getInstrumentation());
-        CommonTransitions.enterPipMode(testApp, uiDevice).includeJankyRuns().recordEachRun()
-                .build().run();
+        CommonTransitions.enterPipMode(uiDevice).includeJankyRuns().recordEachRun().build().run();
     }
 
     /**
-     * atest FlickerTests:DebugTest#exitPipModeToHome
+     * atest FlickerTest:DebugTests#exitPipModeToHome
      */
     @Test
     public void exitPipModeToHome() {
-        PipAppHelper testApp = new PipAppHelper(InstrumentationRegistry.getInstrumentation());
-        CommonTransitions.exitPipModeToHome(testApp, uiDevice).includeJankyRuns().recordEachRun()
+        CommonTransitions.exitPipModeToHome(uiDevice).includeJankyRuns().recordEachRun()
                 .build().run();
     }
 
     /**
-     * atest FlickerTests:DebugTest#exitPipModeToApp
+     * atest FlickerTest:DebugTests#exitPipModeToApp
      */
     @Test
     public void exitPipModeToApp() {
-        PipAppHelper testApp = new PipAppHelper(InstrumentationRegistry.getInstrumentation());
-        CommonTransitions.exitPipModeToApp(testApp, uiDevice).includeJankyRuns().recordEachRun()
+        CommonTransitions.exitPipModeToApp(uiDevice).includeJankyRuns().recordEachRun()
                 .build().run();
     }
 }

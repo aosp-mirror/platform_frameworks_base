@@ -17,8 +17,6 @@
 package android.telephony;
 
 import android.annotation.IntDef;
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
@@ -41,7 +39,7 @@ import java.util.Objects;
  *   <li>Precise background call state.
  * </ul>
  *
- * @see android.telephony.Annotation.CallState which contains generic call states.
+ * @see android.telephony.TelephonyManager.CallState which contains generic call states.
  *
  * @hide
  */
@@ -278,7 +276,7 @@ public final class PreciseCallState implements Parcelable {
     }
 
     @Override
-    public boolean equals(@Nullable Object obj) {
+    public boolean equals(Object obj) {
         if (this == obj) {
             return true;
         }
@@ -296,7 +294,6 @@ public final class PreciseCallState implements Parcelable {
                 && mPreciseDisconnectCause == other.mPreciseDisconnectCause);
     }
 
-    @NonNull
     @Override
     public String toString() {
         StringBuffer sb = new StringBuffer();

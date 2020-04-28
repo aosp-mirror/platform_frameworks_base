@@ -18,7 +18,6 @@ package android.net.metrics;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.os.Parcel;
@@ -165,7 +164,6 @@ public final class ValidationProbeEvent implements IpConnectivityLog.Event {
         return Decoder.constants.get(probeType & 0xff00, "UNKNOWN");
     }
 
-    @NonNull
     @Override
     public String toString() {
         return String.format("ValidationProbeEvent(%s:%d %s, %dms)",
@@ -173,7 +171,7 @@ public final class ValidationProbeEvent implements IpConnectivityLog.Event {
     }
 
     @Override
-    public boolean equals(@Nullable Object obj) {
+    public boolean equals(Object obj) {
         if (obj == null || !(obj.getClass().equals(ValidationProbeEvent.class))) return false;
         final ValidationProbeEvent other = (ValidationProbeEvent) obj;
         return durationMs == other.durationMs

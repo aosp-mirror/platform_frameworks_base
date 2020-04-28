@@ -155,12 +155,9 @@ public class DozeScreenBrightness extends BroadcastReceiver implements DozeMachi
             }
 
             int scrimOpacity = -1;
-            if (mPaused || mScreenOff) {
-                // If AOD is paused, force the screen black until the
-                // sensor reports a new brightness. This ensures that when the screen comes on
-                // again, it will only show after the brightness sensor has stabilized,
-                // avoiding a potential flicker.
-                scrimOpacity = 255;
+            if (mLightSensor == null) {
+                // No light sensor, scrims are always transparent.
+                scrimOpacity = 0;
             } else if (brightnessReady) {
                 // Only unblank scrim once brightness is ready.
                 scrimOpacity = computeScrimOpacity(sensorValue);

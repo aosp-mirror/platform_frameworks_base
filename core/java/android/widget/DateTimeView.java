@@ -20,6 +20,7 @@ import static android.text.format.DateUtils.DAY_IN_MILLIS;
 import static android.text.format.DateUtils.HOUR_IN_MILLIS;
 import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 import static android.text.format.DateUtils.YEAR_IN_MILLIS;
+import static android.text.format.Time.getJulianDay;
 
 import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityThread;
@@ -31,6 +32,7 @@ import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.database.ContentObserver;
 import android.os.Handler;
+import android.text.format.Time;
 import android.util.AttributeSet;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.inspector.InspectableProperty;
@@ -39,14 +41,10 @@ import android.widget.RemoteViews.RemoteView;
 import com.android.internal.R;
 
 import java.text.DateFormat;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZoneId;
-import java.time.temporal.JulianFields;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.TimeZone;
 
 //
 // TODO
@@ -65,9 +63,8 @@ public class DateTimeView extends TextView {
     private static final int SHOW_TIME = 0;
     private static final int SHOW_MONTH_DAY_YEAR = 1;
 
-    private long mTimeMillis;
-    // The LocalDateTime equivalent of mTimeMillis but truncated to minute, i.e. no seconds / nanos.
-    private LocalDateTime mLocalTime;
+    Date mTime;
+    long mTimeMillis;
 
     int mLastDisplay = -1;
     DateFormat mLastFormat;
@@ -131,10 +128,11 @@ public class DateTimeView extends TextView {
 
     @android.view.RemotableViewMethod
     @UnsupportedAppUsage
-    public void setTime(long timeMillis) {
-        mTimeMillis = timeMillis;
-        LocalDateTime dateTime = toLocalDateTime(timeMillis, ZoneId.systemDefault());
-        mLocalTime = dateTime.withSecond(0);
+    public void setTime(long time) {
+        Time t = new Time();
+        t.set(time);
+        mTimeMillis = t.toMillis(false);
+        mTime = new Date(t.year-1900, t.month, t.monthDay, t.hour, t.minute, 0);
         update();
     }
 
@@ -167,7 +165,7 @@ public class DateTimeView extends TextView {
 
     @UnsupportedAppUsage
     void update() {
-        if (mLocalTime == null || getVisibility() == GONE) {
+        if (mTime == null || getVisibility() == GONE) {
             return;
         }
         if (mShowRelativeTime) {
@@ -176,27 +174,31 @@ public class DateTimeView extends TextView {
         }
 
         int display;
-        ZoneId zoneId = ZoneId.systemDefault();
+        Date time = mTime;
 
-        // localTime is the local time for mTimeMillis but at zero seconds past the minute.
-        LocalDateTime localTime = mLocalTime;
-        LocalDateTime localStartOfDay =
-                LocalDateTime.of(localTime.toLocalDate(), LocalTime.MIDNIGHT);
-        LocalDateTime localTomorrowStartOfDay = localStartOfDay.plusDays(1);
-        // now is current local time but at zero seconds past the minute.
-        LocalDateTime localNow = LocalDateTime.now(zoneId).withSecond(0);
+        Time t = new Time();
+        t.set(mTimeMillis);
+        t.second = 0;
 
-        long twelveHoursBefore = toEpochMillis(localTime.minusHours(12), zoneId);
-        long twelveHoursAfter = toEpochMillis(localTime.plusHours(12), zoneId);
-        long midnightBefore = toEpochMillis(localStartOfDay, zoneId);
-        long midnightAfter = toEpochMillis(localTomorrowStartOfDay, zoneId);
-        long time = toEpochMillis(localTime, zoneId);
-        long now = toEpochMillis(localNow, zoneId);
+        t.hour -= 12;
+        long twelveHoursBefore = t.toMillis(false);
+        t.hour += 12;
+        long twelveHoursAfter = t.toMillis(false);
+        t.hour = 0;
+        t.minute = 0;
+        long midnightBefore = t.toMillis(false);
+        t.monthDay++;
+        long midnightAfter = t.toMillis(false);
+
+        long nowMillis = System.currentTimeMillis();
+        t.set(nowMillis);
+        t.second = 0;
+        nowMillis = t.normalize(false);
 
         // Choose the display mode
         choose_display: {
-            if ((now >= midnightBefore && now < midnightAfter)
-                    || (now >= twelveHoursBefore && now < twelveHoursAfter)) {
+            if ((nowMillis >= midnightBefore && nowMillis < midnightAfter)
+                    || (nowMillis >= twelveHoursBefore && nowMillis < twelveHoursAfter)) {
                 display = SHOW_TIME;
                 break choose_display;
             }
@@ -225,7 +227,7 @@ public class DateTimeView extends TextView {
         }
 
         // Set the text
-        String text = format.format(new Date(time));
+        String text = format.format(mTime);
         setText(text);
 
         // Schedule the next update
@@ -234,7 +236,7 @@ public class DateTimeView extends TextView {
             mUpdateTimeMillis = twelveHoursAfter > midnightAfter ? twelveHoursAfter : midnightAfter;
         } else {
             // Currently showing the date
-            if (mTimeMillis < now) {
+            if (mTimeMillis < nowMillis) {
                 // If the time is in the past, don't schedule an update
                 mUpdateTimeMillis = 0;
             } else {
@@ -275,18 +277,15 @@ public class DateTimeView extends TextView {
             millisIncrease = HOUR_IN_MILLIS;
         } else if (duration < YEAR_IN_MILLIS) {
             // In weird cases it can become 0 because of daylight savings
-            LocalDateTime localDateTime = mLocalTime;
-            ZoneId zoneId = ZoneId.systemDefault();
-            LocalDateTime localNow = toLocalDateTime(now, zoneId);
-
-            count = Math.max(Math.abs(dayDistance(localDateTime, localNow)), 1);
+            TimeZone timeZone = TimeZone.getDefault();
+            count = Math.max(Math.abs(dayDistance(timeZone, mTimeMillis, now)), 1);
             result = String.format(getContext().getResources().getQuantityString(past
                             ? com.android.internal.R.plurals.duration_days_shortest
                             : com.android.internal.R.plurals.duration_days_shortest_future,
                             count),
                     count);
             if (past || count != 1) {
-                mUpdateTimeMillis = computeNextMidnight(localNow, zoneId);
+                mUpdateTimeMillis = computeNextMidnight(timeZone);
                 millisIncrease = -1;
             } else {
                 millisIncrease = DAY_IN_MILLIS;
@@ -312,13 +311,18 @@ public class DateTimeView extends TextView {
     }
 
     /**
-     * Returns the epoch millis for the next midnight in the specified timezone.
+     * @param timeZone the timezone we are in
+     * @return the timepoint in millis at UTC at midnight in the current timezone
      */
-    private static long computeNextMidnight(LocalDateTime time, ZoneId zoneId) {
-        // This ignores the chance of overflow: it should never happen.
-        LocalDate tomorrow = time.toLocalDate().plusDays(1);
-        LocalDateTime nextMidnight = LocalDateTime.of(tomorrow, LocalTime.MIDNIGHT);
-        return toEpochMillis(nextMidnight, zoneId);
+    private long computeNextMidnight(TimeZone timeZone) {
+        Calendar c = Calendar.getInstance();
+        c.setTimeZone(timeZone);
+        c.add(Calendar.DAY_OF_MONTH, 1);
+        c.set(Calendar.HOUR_OF_DAY, 0);
+        c.set(Calendar.MINUTE, 0);
+        c.set(Calendar.SECOND, 0);
+        c.set(Calendar.MILLISECOND, 0);
+        return c.getTimeInMillis();
     }
 
     @Override
@@ -336,10 +340,11 @@ public class DateTimeView extends TextView {
                 com.android.internal.R.string.now_string_shortest);
     }
 
-    // Return the number of days between the two dates.
-    private static int dayDistance(LocalDateTime start, LocalDateTime end) {
-        return (int) (end.getLong(JulianFields.JULIAN_DAY)
-                - start.getLong(JulianFields.JULIAN_DAY));
+    // Return the date difference for the two times in a given timezone.
+    private static int dayDistance(TimeZone timeZone, long startTime,
+            long endTime) {
+        return getJulianDay(endTime, timeZone.getOffset(endTime) / 1000)
+                - getJulianDay(startTime, timeZone.getOffset(startTime) / 1000);
     }
 
     private DateFormat getTimeFormat() {
@@ -384,11 +389,8 @@ public class DateTimeView extends TextView {
                         count);
             } else if (duration < YEAR_IN_MILLIS) {
                 // In weird cases it can become 0 because of daylight savings
-                LocalDateTime localDateTime = mLocalTime;
-                ZoneId zoneId = ZoneId.systemDefault();
-                LocalDateTime localNow = toLocalDateTime(now, zoneId);
-
-                count = Math.max(Math.abs(dayDistance(localDateTime, localNow)), 1);
+                TimeZone timeZone = TimeZone.getDefault();
+                count = Math.max(Math.abs(dayDistance(timeZone, mTimeMillis, now)), 1);
                 result = String.format(getContext().getResources().getQuantityString(past
                                 ? com.android.internal.
                                         R.plurals.duration_days_relative
@@ -523,18 +525,5 @@ public class DateTimeView extends TextView {
                 }
             }
         }
-    }
-
-    private static LocalDateTime toLocalDateTime(long timeMillis, ZoneId zoneId) {
-        // java.time types like LocalDateTime / Instant can support the full range of "long millis"
-        // with room to spare so we do not need to worry about overflow / underflow and the rsulting
-        // exceptions while the input to this class is a long.
-        Instant instant = Instant.ofEpochMilli(timeMillis);
-        return LocalDateTime.ofInstant(instant, zoneId);
-    }
-
-    private static long toEpochMillis(LocalDateTime time, ZoneId zoneId) {
-        Instant instant = time.toInstant(zoneId.getRules().getOffset(time));
-        return instant.toEpochMilli();
     }
 }

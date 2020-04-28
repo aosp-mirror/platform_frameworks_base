@@ -120,7 +120,7 @@ import javax.inject.Inject;
  * on clicks and view states of the nav bar.
  */
 public class NavigationBarFragment extends LifecycleFragment implements Callbacks,
-        NavigationModeController.ModeChangedListener {
+        NavigationModeController.ModeChangedListener, AutoHideElement {
 
     public static final String TAG = "NavigationBar";
     private static final boolean DEBUG = false;
@@ -137,6 +137,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
     private final MetricsLogger mMetricsLogger;
     private final DeviceProvisionedController mDeviceProvisionedController;
     private final StatusBarStateController mStatusBarStateController;
+    private final NavigationModeController mNavigationModeController;
 
     protected NavigationBarView mNavigationBarView = null;
 
@@ -253,6 +254,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         mAssistManager = assistManager;
         mAssistantAvailable = mAssistManager.getAssistInfoForUser(UserHandle.USER_CURRENT) != null;
         mOverviewProxyService = overviewProxyService;
+        mNavigationModeController = navigationModeController;
         mNavBarMode = navigationModeController.addListener(this);
     }
 
@@ -292,6 +294,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
     @Override
     public void onDestroy() {
         super.onDestroy();
+        mNavigationModeController.removeListener(this);
         mAccessibilityManagerWrapper.removeCallback(mAccessibilityListener);
         mContentResolver.unregisterContentObserver(mMagnificationObserver);
         mContentResolver.unregisterContentObserver(mAssistContentObserver);
@@ -538,9 +541,6 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
                     checkNavBarModes();
                 }
                 mAutoHideController.touchAutoHide();
-            }
-            if (mNavigationBarView != null) {
-                mNavigationBarView.onSystemUiVisibilityChanged(mSystemUiVisibility);
             }
         }
         mLightBarController.onNavigationVisibilityChanged(
@@ -970,8 +970,16 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         mAutoHideController.setNavigationBar(this);
     }
 
+    // AutoHideElement
+    @Override
     public boolean isSemiTransparent() {
         return mNavigationBarMode == MODE_SEMI_TRANSPARENT;
+    }
+
+    // AutoHideElement
+    @Override
+    public void synchronizeState() {
+        checkNavBarModes();
     }
 
     private void checkBarModes() {

@@ -1943,35 +1943,6 @@ public class AccountManager {
     }
 
     /**
-     * @hide
-     * Removes the shared account.
-     * @param account the account to remove
-     * @param user the user to remove the account from
-     * @return
-     */
-    public boolean removeSharedAccount(final Account account, UserHandle user) {
-        try {
-            boolean val = mService.removeSharedAccountAsUser(account, user.getIdentifier());
-            return val;
-        } catch (RemoteException re) {
-            throw re.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * @hide
-     * @param user
-     * @return
-     */
-    public Account[] getSharedAccounts(UserHandle user) {
-        try {
-            return mService.getSharedAccountsAsUser(user.getIdentifier());
-        } catch (RemoteException re) {
-            throw re.rethrowFromSystemServer();
-        }
-    }
-
-    /**
      * Confirms that the user knows the password for an account to make extra
      * sure they are the owner of the account.  The user-entered password can
      * be supplied directly, otherwise the authenticator for this account type
@@ -2257,8 +2228,6 @@ public class AccountManager {
     }
 
     private abstract class AmsTask extends FutureTask<Bundle> implements AccountManagerFuture<Bundle> {
-
-
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         final IAccountManagerResponse mResponse;
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)

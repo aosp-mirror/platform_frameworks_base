@@ -169,6 +169,7 @@ cc_library_shared {
         "android_media_AudioVolumeGroups.cpp",
         "android_media_AudioVolumeGroupCallback.cpp",
         "android_media_DeviceCallback.cpp",
+        "android_media_JetPlayer.cpp",
         "android_media_MediaMetricsJNI.cpp",
         "android_media_MicrophoneInfo.cpp",
         "android_media_midi.cpp",
@@ -217,6 +218,10 @@ cc_library_shared {
     ],
 
     include_dirs: [
+        // we need to access the private Bionic header
+        // <bionic_tls.h> in com_google_android_gles_jni_GLImpl.cpp
+        "bionic/libc/private",
+
         "external/skia/include/private",
         "external/skia/src/codec",
         "external/skia/src/core",
@@ -227,8 +232,6 @@ cc_library_shared {
         "system/media/camera/include",
         "system/media/private/camera/include",
     ],
-
-    header_libs: ["bionic_libc_platform_headers"],
 
     static_libs: [
         "libasync_safe",
@@ -293,6 +296,8 @@ cc_library_shared {
         "libnativeloader_lazy",
         "libmemunreachable",
         "libhidlbase",
+        "libhidltransport",
+        "libhwbinder",
         "libvintf",
         "libnativewindow",
         "libhwui",

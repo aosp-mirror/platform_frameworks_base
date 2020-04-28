@@ -42,10 +42,6 @@ java_library {
         "android.hidl.manager-V1.0-java",
     ],
 
-    plugins: [
-        "compat-changeid-annotation-processor",
-    ],
-
     // Uncomment to enable output of certain warnings (deprecated, unchecked)
     //javacflags: ["-Xlint"],
 
@@ -58,9 +54,4 @@ cc_library_shared {
     name: "libandroid_servers",
     defaults: ["libservices.core-libs"],
     whole_static_libs: ["libservices.core"],
-}
-
-platform_compat_config {
-    name: "services-platform-compat-config",
-    src: ":services",
 }

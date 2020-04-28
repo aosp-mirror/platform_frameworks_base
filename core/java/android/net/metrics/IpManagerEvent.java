@@ -17,8 +17,6 @@
 package android.net.metrics;
 
 import android.annotation.IntDef;
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.os.Parcel;
@@ -97,7 +95,6 @@ public final class IpManagerEvent implements IpConnectivityLog.Event {
         }
     };
 
-    @NonNull
     @Override
     public String toString() {
         return String.format("IpManagerEvent(%s, %dms)",
@@ -105,7 +102,7 @@ public final class IpManagerEvent implements IpConnectivityLog.Event {
     }
 
     @Override
-    public boolean equals(@Nullable Object obj) {
+    public boolean equals(Object obj) {
         if (obj == null || !(obj.getClass().equals(IpManagerEvent.class))) return false;
         final IpManagerEvent other = (IpManagerEvent) obj;
         return eventType == other.eventType

@@ -219,7 +219,6 @@ public class NanoAppInstanceInfo implements Parcelable {
         }
     };
 
-    @NonNull
     @Override
     public String toString() {
         String retVal = "handle : " + mHandle;

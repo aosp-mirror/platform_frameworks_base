@@ -17,7 +17,6 @@
 package android.net.metrics;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.os.Parcel;
@@ -86,7 +85,6 @@ public final class RaEvent implements IpConnectivityLog.Event {
         return 0;
     }
 
-    @NonNull
     @Override
     public String toString() {
         return new StringBuilder("RaEvent(lifetimes: ")
@@ -100,7 +98,7 @@ public final class RaEvent implements IpConnectivityLog.Event {
     }
 
     @Override
-    public boolean equals(@Nullable Object obj) {
+    public boolean equals(Object obj) {
         if (obj == null || !(obj.getClass().equals(RaEvent.class))) return false;
         final RaEvent other = (RaEvent) obj;
         return routerLifetime == other.routerLifetime

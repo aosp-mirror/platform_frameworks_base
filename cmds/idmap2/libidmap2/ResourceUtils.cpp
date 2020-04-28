@@ -103,16 +103,6 @@ Result<OverlayManifestInfo> ExtractOverlayManifestInfo(const std::string& path,
     info.priority = std::stoi(iter->second);
   }
 
-  iter = tag->find("requiredSystemPropertyName");
-  if (iter != tag->end()) {
-    info.requiredSystemPropertyName = iter->second;
-  }
-
-  iter = tag->find("requiredSystemPropertyValue");
-  if (iter != tag->end()) {
-    info.requiredSystemPropertyValue = iter->second;
-  }
-
   return info;
 }
 

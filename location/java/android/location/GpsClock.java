@@ -16,7 +16,6 @@
 
 package android.location;
 
-import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -438,7 +437,6 @@ public class GpsClock implements Parcelable {
         return 0;
     }
 
-    @NonNull
     @Override
     public String toString() {
         final String format = "   %-15s = %s\n";

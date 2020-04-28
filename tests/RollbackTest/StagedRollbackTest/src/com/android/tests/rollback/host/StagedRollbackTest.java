@@ -19,7 +19,6 @@ package com.android.tests.rollback.host;
 import static org.junit.Assert.assertTrue;
 
 import com.android.ddmlib.Log.LogLevel;
-import com.android.tradefed.device.DeviceNotAvailableException;
 import com.android.tradefed.log.LogUtil.CLog;
 import com.android.tradefed.testtype.DeviceJUnit4ClassRunner;
 import com.android.tradefed.testtype.junit4.BaseHostJUnit4Test;
@@ -98,7 +97,7 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
                 + "watchdog_request_timeout_millis 300000");
         // Simulate re-installation of new NetworkStack with rollbacks enabled
         getDevice().executeShellCommand("pm install -r --staged --enable-rollback "
-                + getNetworkStackPath());
+                + "/system/priv-app/NetworkStack/NetworkStack.apk");
 
         // Sleep to allow writes to disk before reboot
         Thread.sleep(5000);
@@ -144,7 +143,7 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
                 + "watchdog_request_timeout_millis 300000");
         // Simulate re-installation of new NetworkStack with rollbacks enabled
         getDevice().executeShellCommand("pm install -r --staged --enable-rollback "
-                + getNetworkStackPath());
+                + "/system/priv-app/NetworkStack/NetworkStack.apk");
 
         // Sleep to allow writes to disk before reboot
         Thread.sleep(5000);
@@ -167,10 +166,5 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         Thread.sleep(310000);
         // Verify rollback was not executed after health check deadline
         runPhase("assertNoNetworkStackRollbackCommitted");
-    }
-
-    private String getNetworkStackPath() throws DeviceNotAvailableException {
-        // Find the NetworkStack path (can be NetworkStack.apk or NetworkStackNext.apk)
-        return getDevice().executeShellCommand("ls /system/priv-app/NetworkStack*/*.apk");
     }
 }

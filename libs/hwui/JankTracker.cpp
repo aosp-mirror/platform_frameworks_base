@@ -139,7 +139,7 @@ void JankTracker::finishFrame(const FrameInfo& frame) {
         (*mGlobalData)->reportJank();
     }
 
-    bool isTripleBuffered = (mSwapDeadline - frame[FrameInfoIndex::IntendedVsync]) > (mFrameInterval * 0.1);
+    bool isTripleBuffered = mSwapDeadline > frame[FrameInfoIndex::IntendedVsync];
 
     mSwapDeadline = std::max(mSwapDeadline + mFrameInterval,
                              frame[FrameInfoIndex::IntendedVsync] + mFrameInterval);

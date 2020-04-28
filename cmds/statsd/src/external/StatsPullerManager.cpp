@@ -27,6 +27,7 @@
 #include "../logd/LogEvent.h"
 #include "../stats_log_util.h"
 #include "../statscompanion_util.h"
+#include "CarStatsPuller.h"
 #include "GpuStatsPuller.h"
 #include "PowerStatsPuller.h"
 #include "ResourceHealthManagerPuller.h"
@@ -119,10 +120,9 @@ std::map<int, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
          {.puller = new StatsCompanionServicePuller(android::util::BLUETOOTH_ACTIVITY_INFO)}},
         // system_elapsed_realtime
         {android::util::SYSTEM_ELAPSED_REALTIME,
-         {.coolDownNs = NS_PER_SEC,
-          .puller = new StatsCompanionServicePuller(android::util::SYSTEM_ELAPSED_REALTIME),
-          .pullTimeoutNs = NS_PER_SEC / 2,
-         }},
+         {.pullTimeoutNs = NS_PER_SEC / 2,
+          .coolDownNs = NS_PER_SEC,
+          .puller = new StatsCompanionServicePuller(android::util::SYSTEM_ELAPSED_REALTIME)}},
         // system_uptime
         {android::util::SYSTEM_UPTIME,
          {.puller = new StatsCompanionServicePuller(android::util::SYSTEM_UPTIME)}},
@@ -267,6 +267,13 @@ std::map<int, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
         // App ops
         {android::util::APP_OPS,
          {.puller = new StatsCompanionServicePuller(android::util::APP_OPS)}},
+        // VmsClientStats
+        {android::util::VMS_CLIENT_STATS,
+         {.additiveFields = {5, 6, 7, 8, 9, 10},
+          .puller = new CarStatsPuller(android::util::VMS_CLIENT_STATS)}},
+        // NotiifcationRemoteViews.
+        {android::util::NOTIFICATION_REMOTE_VIEWS,
+         {.puller = new StatsCompanionServicePuller(android::util::NOTIFICATION_REMOTE_VIEWS)}},
 };
 
 StatsPullerManager::StatsPullerManager() : mNextPullTimeNs(NO_ALARM_UPDATE) {

@@ -22,6 +22,7 @@
 #include <binder/IServiceManager.h>
 
 #include "external/Perfetto.h"
+#include "external/Perfprofd.h"
 #include "subscriber/IncidentdReporter.h"
 #include "subscriber/SubscriberReporter.h"
 
@@ -40,7 +41,7 @@ void triggerSubscribers(int64_t ruleId, int64_t metricId, const MetricDimensionK
 
     for (const Subscription& subscription : subscriptions) {
         if (subscription.probability_of_informing() < 1
-                && ((float)rand() / (float)RAND_MAX) >= subscription.probability_of_informing()) {
+                && ((float)rand() / RAND_MAX) >= subscription.probability_of_informing()) {
             // Note that due to float imprecision, 0.0 and 1.0 might not truly mean never/always.
             // The config writer was advised to use -0.1 and 1.1 for never/always.
             ALOGI("Fate decided that a subscriber would not be informed.");
@@ -62,6 +63,12 @@ void triggerSubscribers(int64_t ruleId, int64_t metricId, const MetricDimensionK
             case Subscription::SubscriberInformationCase::kBroadcastSubscriberDetails:
                 SubscriberReporter::getInstance().alertBroadcastSubscriber(configKey, subscription,
                                                                            dimensionKey);
+                break;
+            case Subscription::SubscriberInformationCase::kPerfprofdDetails:
+                if (!CollectPerfprofdTraceAndUploadToDropbox(subscription.perfprofd_details(),
+                                                             ruleId, configKey)) {
+                    ALOGW("Failed to generate perfprofd traces.");
+                }
                 break;
             default:
                 break;

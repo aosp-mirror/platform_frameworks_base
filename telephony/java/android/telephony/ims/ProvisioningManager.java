@@ -387,24 +387,6 @@ public class ProvisioningManager {
         }
     }
 
-    /**
-     * Notify the framework that an RCS autoconfiguration XML file has been received for
-     * provisioning.
-     * @param config The XML file to be read. ASCII/UTF8 encoded text if not compressed.
-     * @param isCompressed The XML file is compressed in gzip format and must be decompressed
-     *         before being read.
-     * @hide
-     */
-    @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
-    public void notifyRcsAutoConfigurationReceived(@NonNull byte[] config, boolean isCompressed) {
-        if (config == null) {
-            throw new IllegalArgumentException("Must include a non-null config XML file.");
-        }
-        // TODO: Connect to ImsConfigImplBase.
-        throw new UnsupportedOperationException("notifyRcsAutoConfigurationReceived is not"
-                + "supported");
-    }
-
     private static boolean isImsAvailableOnDevice() {
         IPackageManager pm = IPackageManager.Stub.asInterface(ServiceManager.getService("package"));
         if (pm == null) {

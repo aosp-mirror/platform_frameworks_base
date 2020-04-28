@@ -24,8 +24,8 @@ import android.os.Parcelable;
  *  Class that represents useful attributes of generic network links
  *  such as the upload/download throughput or packet error rate.
  *  Generally speaking, you should be dealing with instances of
- *  LinkQualityInfo subclasses, such as {@link android.net.WifiLinkQualityInfo}
- *  or {@link android.net.MobileLinkQualityInfo} which provide additional
+ *  LinkQualityInfo subclasses, such as {@link android.net.#WifiLinkQualityInfo}
+ *  or {@link android.net.#MobileLinkQualityInfo} which provide additional
  *  information.
  *  @hide
  */
