@@ -152,9 +152,13 @@ public class ShortcutHelper {
         if (shortcutInfo == null || !shortcutInfo.isLongLived() || !shortcutInfo.isEnabled()) {
             return false;
         }
-        return mShortcutServiceInternal.isSharingShortcut(callingUserId, "android",
+        // TODO (b/155016294) uncomment when sharing shortcuts are required
+        /*
+        mShortcutServiceInternal.isSharingShortcut(callingUserId, "android",
                 shortcutInfo.getPackage(), shortcutInfo.getId(), shortcutInfo.getUserId(),
                 SHARING_FILTER);
+         */
+        return true;
     }
 
     /**

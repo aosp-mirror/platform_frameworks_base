@@ -97,7 +97,6 @@ public class NotificationConversationInfo extends LinearLayout implements
     private String mDelegatePkg;
     private NotificationChannel mNotificationChannel;
     private ShortcutInfo mShortcutInfo;
-    private String mConversationId;
     private StatusBarNotification mSbn;
     @Nullable private Notification.BubbleMetadata mBubbleMetadata;
     private Context mUserContext;
@@ -233,14 +232,10 @@ public class NotificationConversationInfo extends LinearLayout implements
         mBuilderProvider = builderProvider;
 
         mShortcutManager = shortcutManager;
-        mConversationId = mNotificationChannel.getConversationId();
-        if (TextUtils.isEmpty(mNotificationChannel.getConversationId())) {
-            mConversationId = mSbn.getShortcutId(mContext);
-        }
-        if (TextUtils.isEmpty(mConversationId)) {
+        mShortcutInfo = entry.getRanking().getShortcutInfo();
+        if (mShortcutInfo == null) {
             throw new IllegalArgumentException("Does not have required information");
         }
-        mShortcutInfo = entry.getRanking().getShortcutInfo();
 
         mNotificationChannel = NotificationChannelHelper.createConversationChannelIfNeeded(
                 getContext(), mINotificationManager, entry, mNotificationChannel);
@@ -319,31 +314,9 @@ public class NotificationConversationInfo extends LinearLayout implements
 
     private void bindIcon(boolean important) {
         ImageView image = findViewById(R.id.conversation_icon);
-        if (mShortcutInfo != null) {
-            image.setImageDrawable(mIconFactory.getConversationDrawable(
-                    mShortcutInfo, mPackageName, mAppUid,
-                    important));
-        } else {
-            if (mSbn.getNotification().extras.getBoolean(EXTRA_IS_GROUP_CONVERSATION, false)) {
-                // TODO: maybe use a generic group icon, or a composite of recent senders
-                image.setImageDrawable(mPm.getDefaultActivityIcon());
-            } else {
-                final List<Notification.MessagingStyle.Message> messages =
-                        Notification.MessagingStyle.Message.getMessagesFromBundleArray(
-                                (Parcelable[]) mSbn.getNotification().extras.get(
-                                        Notification.EXTRA_MESSAGES));
+        image.setImageDrawable(mIconFactory.getConversationDrawable(
+                mShortcutInfo, mPackageName, mAppUid, important));
 
-                final Notification.MessagingStyle.Message latestMessage =
-                        Notification.MessagingStyle.findLatestIncomingMessage(messages);
-                Icon personIcon = latestMessage.getSenderPerson().getIcon();
-                if (personIcon != null) {
-                    image.setImageIcon(latestMessage.getSenderPerson().getIcon());
-                } else {
-                    // TODO: choose something better
-                    image.setImageDrawable(mPm.getDefaultActivityIcon());
-                }
-            }
-        }
     }
 
     private void bindPackage() {
