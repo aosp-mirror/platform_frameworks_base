@@ -1026,7 +1026,8 @@ public class ResolverActivity extends Activity implements
     }
 
     @Override // ResolverListCommunicator
-    public final void onPostListReady(ResolverListAdapter listAdapter, boolean doPostProcessing) {
+    public final void onPostListReady(ResolverListAdapter listAdapter, boolean doPostProcessing,
+            boolean rebuildCompleted) {
         if (isAutolaunching()) {
             return;
         }
@@ -1041,7 +1042,7 @@ public class ResolverActivity extends Activity implements
         }
         // showEmptyResolverListEmptyState can mark the tab as loaded,
         // which is a precondition for auto launching
-        if (maybeAutolaunchActivity()) {
+        if (rebuildCompleted && maybeAutolaunchActivity()) {
             return;
         }
         if (doPostProcessing) {
