@@ -234,6 +234,25 @@ public class ActivityStackTests extends ActivityTestsBase {
     }
 
     @Test
+    public void testRemoveOrganizedTask_UpdateStackReference() {
+        final ActivityStack rootHomeTask = mDefaultTaskDisplayArea.getRootHomeTask();
+        final ActivityRecord homeActivity = new ActivityBuilder(mService)
+                .setStack(rootHomeTask)
+                .setCreateTask(true)
+                .build();
+        final ActivityStack secondaryStack = (ActivityStack) WindowContainer.fromBinder(
+                mService.mTaskOrganizerController.createRootTask(rootHomeTask.getDisplayId(),
+                        WINDOWING_MODE_SPLIT_SCREEN_SECONDARY).token.asBinder());
+
+        rootHomeTask.reparent(secondaryStack, POSITION_TOP);
+        assertEquals(secondaryStack, rootHomeTask.getParent());
+
+        // This should call to {@link TaskDisplayArea#removeStackReferenceIfNeeded}.
+        homeActivity.removeImmediately();
+        assertNull(mDefaultTaskDisplayArea.getRootHomeTask());
+    }
+
+    @Test
     public void testStackInheritsDisplayWindowingMode() {
         final ActivityStack primarySplitScreen = mDefaultTaskDisplayArea.createStack(
                 WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_STANDARD, true /* onTop */);
