@@ -21,30 +21,20 @@ import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.annotation.IntDef
 import android.content.Context
-import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroupOverlay
-import android.widget.LinearLayout
-
 import com.android.settingslib.bluetooth.LocalBluetoothManager
 import com.android.settingslib.media.InfoMediaManager
 import com.android.settingslib.media.LocalMediaManager
 import com.android.systemui.Interpolators
-import com.android.systemui.R
-import com.android.systemui.dagger.qualifiers.Background
-import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.SysuiStatusBarStateController
-import com.android.systemui.statusbar.notification.VisualStabilityManager
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.animation.UniqueObjectHost
-import com.android.systemui.util.concurrency.DelayableExecutor
-import java.util.concurrent.Executor
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -55,18 +45,15 @@ import javax.inject.Singleton
 @Singleton
 class MediaHierarchyManager @Inject constructor(
     private val context: Context,
-    @Main private val foregroundExecutor: Executor,
-    @Background private val backgroundExecutor: DelayableExecutor,
-    private val localBluetoothManager: LocalBluetoothManager?,
-    private val visualStabilityManager: VisualStabilityManager,
     private val statusBarStateController: SysuiStatusBarStateController,
     private val keyguardStateController: KeyguardStateController,
     private val bypassController: KeyguardBypassController,
-    private val activityStarter: ActivityStarter,
-    mediaManager: MediaDataManager
+    private val mediaViewManager: MediaViewManager
 ) {
     private var rootOverlay: ViewGroupOverlay? = null
     private lateinit var currentState: MediaState
+    private val mediaCarousel
+        get() =  mediaViewManager.mediaCarousel
     private var animationStartState: MediaState? = null
     private var animator = ValueAnimator.ofFloat(0.0f, 1.0f).apply {
         interpolator = Interpolators.FAST_OUT_SLOW_IN
@@ -92,22 +79,10 @@ class MediaHierarchyManager @Inject constructor(
         })
     }
     private var targetState: MediaState? = null
-    private val mediaCarousel: ViewGroup
-    private val mediaContent: ViewGroup
-    private val mediaPlayers: MutableMap<String, MediaControlPanel> = mutableMapOf()
     private val mediaHosts = arrayOfNulls<MediaHost>(LOCATION_LOCKSCREEN + 1)
-    private val visualStabilityCallback = ::reorderAllPlayers
     private var previousLocation = -1
     private var desiredLocation = -1
     private var currentAttachmentLocation = -1
-
-    var shouldListen = true
-        set(value) {
-            field = value
-            for (player in mediaPlayers.values) {
-                player.setListening(shouldListen)
-            }
-        }
 
     var qsExpansion: Float = 0.0f
         set(value) {
@@ -122,92 +97,11 @@ class MediaHierarchyManager @Inject constructor(
         }
 
     init {
-        mediaCarousel = inflateMediaCarousel()
-        mediaContent = mediaCarousel.requireViewById(R.id.media_carousel)
-        mediaManager.addListener(object : MediaDataManager.Listener {
-            override fun onMediaDataLoaded(key: String, data: MediaData) {
-                updateView(key, data)
-            }
-
-            override fun onMediaDataRemoved(key: String) {
-                val removed = mediaPlayers.remove(key)
-                removed?.apply {
-                    mediaContent.removeView(removed.view)
-                    removed.onDestroy()
-                }
-            }
-        })
         statusBarStateController.addCallback(object : StatusBarStateController.StateListener {
             override fun onStateChanged(newState: Int) {
                 updateDesiredLocation()
             }
         })
-    }
-
-    private fun inflateMediaCarousel(): ViewGroup {
-        return LayoutInflater.from(context).inflate(
-                R.layout.media_carousel, UniqueObjectHost(context), false) as ViewGroup
-    }
-
-    private fun reorderAllPlayers() {
-        for (mediaPlayer in mediaPlayers.values) {
-            val view = mediaPlayer.view
-            if (mediaPlayer.isPlaying && mediaContent.indexOfChild(view) != 0) {
-                mediaContent.removeView(view)
-                mediaContent.addView(view, 0)
-            }
-        }
-        updateMediaPaddings()
-    }
-
-    private fun updateView(key: String, data: MediaData) {
-        var existingPlayer = mediaPlayers[key]
-        if (existingPlayer == null) {
-            // Set up listener for device changes
-            // TODO: integrate with MediaTransferManager?
-            val imm = InfoMediaManager(context, data.packageName,
-                    null /* notification */, localBluetoothManager)
-            val routeManager = LocalMediaManager(context, localBluetoothManager,
-                    imm, data.packageName)
-
-            existingPlayer = MediaControlPanel(context, mediaContent, routeManager,
-                    foregroundExecutor, backgroundExecutor, activityStarter)
-            mediaPlayers[key] = existingPlayer
-            val lp = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT)
-            existingPlayer.view.setLayoutParams(lp)
-            existingPlayer.setListening(shouldListen)
-            if (existingPlayer.isPlaying) {
-                mediaContent.addView(existingPlayer.view, 0)
-            } else {
-                mediaContent.addView(existingPlayer.view)
-            }
-        } else if (existingPlayer.isPlaying &&
-                mediaContent.indexOfChild(existingPlayer.view) != 0) {
-            if (visualStabilityManager.isReorderingAllowed) {
-                mediaContent.removeView(existingPlayer.view)
-                mediaContent.addView(existingPlayer.view, 0)
-            } else {
-                visualStabilityManager.addReorderingAllowedCallback(visualStabilityCallback)
-            }
-        }
-        existingPlayer.bind(data)
-        updateMediaPaddings()
-    }
-
-    private fun updateMediaPaddings() {
-        val padding = context.resources.getDimensionPixelSize(R.dimen.qs_media_padding)
-        val childCount = mediaContent.childCount
-        for (i in 0 until childCount) {
-            val mediaView = mediaContent.getChildAt(i)
-            val desiredPaddingEnd = if (i == childCount - 1) 0 else padding
-            val layoutParams = mediaView.layoutParams as ViewGroup.MarginLayoutParams
-            if (layoutParams.marginEnd != desiredPaddingEnd) {
-                layoutParams.marginEnd = desiredPaddingEnd
-                mediaView.layoutParams = layoutParams
-            }
-        }
-
     }
 
     /**
@@ -386,16 +280,16 @@ class MediaHierarchyManager @Inject constructor(
 
     private fun applyState(state: MediaState) {
         updateHostAttachment()
-        for (mediaPlayer in mediaPlayers.values) {
-            val view = mediaPlayer.view
-            view.progress = state.expansion
-        }
         val boundsOnScreen = state.boundsOnScreen
         if (currentAttachmentLocation == IN_OVERLAY) {
-            mediaCarousel.setLeftTopRightBottom(boundsOnScreen.left, boundsOnScreen.top,
-                    boundsOnScreen.right, boundsOnScreen.bottom)
+            mediaCarousel.setLeftTopRightBottom(
+                    boundsOnScreen.left,
+                    boundsOnScreen.top,
+                    boundsOnScreen.right,
+                    boundsOnScreen.bottom)
         }
         currentState = state.copy()
+        mediaViewManager.applyState(currentState)
     }
 
     private fun updateHostAttachment() {

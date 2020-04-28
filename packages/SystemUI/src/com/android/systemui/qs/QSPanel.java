@@ -545,7 +545,6 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
 
     public void setListening(boolean listening) {
         if (mListening == listening) return;
-        mMediaHost.setShouldListen(listening);
         if (mTileLayout != null) {
             mQSLogger.logAllTilesChangeListening(listening, getDumpableTag(), mCachedSpecs);
             mTileLayout.setListening(listening);

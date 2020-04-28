@@ -75,11 +75,6 @@ class MediaHost @Inject constructor(
         updateViewVisibility()
     }
 
-    fun setShouldListen(listen: Boolean) {
-        // TODO: look into listening more
-        mediaHierarchyManager.shouldListen = listen
-    }
-
     private fun updateViewVisibility() {
         if (showsOnlyActiveMedia) {
             visible = mediaDataManager.hasActiveMedia()
