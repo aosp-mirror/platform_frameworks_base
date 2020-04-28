@@ -23,7 +23,7 @@ import android.view.SurfaceControlViewHost;
  * {@hide}
  */
 oneway interface IInlineContentCallback {
-    void onContent(in SurfaceControlViewHost.SurfacePackage content);
+    void onContent(in SurfaceControlViewHost.SurfacePackage content, int width, int height);
     void onClick();
     void onLongClick();
 }
