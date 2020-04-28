@@ -268,7 +268,9 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
         NotificationEntry entry = mParent.getEntry();
         int personNotifType = mPeopleNotificationIdentifier
                 .getPeopleNotificationType(entry.getSbn(), entry.getRanking());
-        if (personNotifType != PeopleNotificationIdentifier.TYPE_NON_PERSON) {
+        if (personNotifType == PeopleNotificationIdentifier.TYPE_PERSON) {
+            mInfoItem = createPartialConversationItem(mContext);
+        } else if (personNotifType >= PeopleNotificationIdentifier.TYPE_FULL_PERSON) {
             mInfoItem = createConversationItem(mContext);
         } else {
             mInfoItem = createInfoItem(mContext);
@@ -663,6 +665,16 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
         NotificationConversationInfo infoContent =
                 (NotificationConversationInfo) LayoutInflater.from(context).inflate(
                         R.layout.notification_conversation_info, null, false);
+        return new NotificationMenuItem(context, infoDescription, infoContent,
+                R.drawable.ic_settings);
+    }
+
+    static NotificationMenuItem createPartialConversationItem(Context context) {
+        Resources res = context.getResources();
+        String infoDescription = res.getString(R.string.notification_menu_gear_description);
+        PartialConversationInfo infoContent =
+                (PartialConversationInfo) LayoutInflater.from(context).inflate(
+                        R.layout.partial_conversation_info, null, false);
         return new NotificationMenuItem(context, infoDescription, infoContent,
                 R.drawable.ic_settings);
     }
