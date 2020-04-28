@@ -76,8 +76,6 @@ public class NotificationChannelExtractorTest extends UiServiceTestCase {
 
     @Test
     public void testInvalidShortcutFlagEnabled_looksUpCorrectChannel() {
-        Settings.Global.putInt(mContext.getContentResolver(),
-                Settings.Global.REQUIRE_SHORTCUTS_FOR_CONVERSATIONS, 0);
 
         NotificationChannelExtractor extractor = new NotificationChannelExtractor();
         extractor.setConfig(mConfig);
@@ -96,7 +94,7 @@ public class NotificationChannelExtractorTest extends UiServiceTestCase {
         NotificationChannel updatedChannel =
                 new NotificationChannel("a", "", IMPORTANCE_HIGH);
         when(mConfig.getConversationNotificationChannel(
-                any(), anyInt(), eq("a"), eq(r.getSbn().getShortcutId(mContext)),
+                any(), anyInt(), eq("a"), eq(r.getSbn().getShortcutId()),
                 eq(true), eq(false)))
                 .thenReturn(updatedChannel);
 
@@ -106,8 +104,6 @@ public class NotificationChannelExtractorTest extends UiServiceTestCase {
 
     @Test
     public void testInvalidShortcutFlagDisabled_looksUpCorrectChannel() {
-        Settings.Global.putInt(mContext.getContentResolver(),
-                Settings.Global.REQUIRE_SHORTCUTS_FOR_CONVERSATIONS, 1);
 
         NotificationChannelExtractor extractor = new NotificationChannelExtractor();
         extractor.setConfig(mConfig);
