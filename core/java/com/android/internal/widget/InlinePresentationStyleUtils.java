@@ -52,10 +52,10 @@ public final class InlinePresentationStyleUtils {
         for (String key : keys) {
             Object value1 = bundle1.get(key);
             Object value2 = bundle2.get(key);
-            if (value1 instanceof Bundle && value2 instanceof Bundle
-                    && !bundleEquals((Bundle) value1, (Bundle) value2)) {
-                return false;
-            } else if (!Objects.equals(value1, value2)) {
+            final boolean equal = value1 instanceof Bundle && value2 instanceof Bundle
+                    ? bundleEquals((Bundle) value1, (Bundle) value2)
+                    : Objects.equals(value1, value2);
+            if (!equal) {
                 return false;
             }
         }
