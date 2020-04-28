@@ -51,6 +51,8 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import dagger.Lazy;
+
 /**
  * Automotive implementation of the {@link KeyguardViewController}. It controls the Keyguard View
  * that is mounted to the SystemUIOverlayWindow.
@@ -66,9 +68,10 @@ public class CarKeyguardViewController extends OverlayViewController implements
     private final CarServiceProvider mCarServiceProvider;
     private final KeyguardStateController mKeyguardStateController;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
+    private final Lazy<BiometricUnlockController> mBiometricUnlockControllerLazy;
     private final LockPatternUtils mLockPatternUtils;
     private final FalsingManager mFalsingManager;
-    private final KeyguardBypassController mKeyguardBypassController;
+    private final Lazy<KeyguardBypassController> mKeyguardBypassControllerLazy;
     private final DismissCallbackRegistry mDismissCallbackRegistry;
     private final ViewMediatorCallback mViewMediatorCallback;
     private final CarNavigationBarController mCarNavigationBarController;
@@ -109,14 +112,14 @@ public class CarKeyguardViewController extends OverlayViewController implements
             OverlayViewGlobalStateController overlayViewGlobalStateController,
             KeyguardStateController keyguardStateController,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
-            BiometricUnlockController biometricUnlockController,
+            Lazy<BiometricUnlockController> biometricUnlockControllerLazy,
             ViewMediatorCallback viewMediatorCallback,
             CarNavigationBarController carNavigationBarController,
             /* The params below are only used to reuse KeyguardBouncer */
             LockPatternUtils lockPatternUtils,
             DismissCallbackRegistry dismissCallbackRegistry,
             FalsingManager falsingManager,
-            KeyguardBypassController keyguardBypassController) {
+            Lazy<KeyguardBypassController> keyguardBypassControllerLazy) {
 
         super(R.id.keyguard_stub, overlayViewGlobalStateController);
 
@@ -125,14 +128,14 @@ public class CarKeyguardViewController extends OverlayViewController implements
         mCarServiceProvider = carServiceProvider;
         mKeyguardStateController = keyguardStateController;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
+        mBiometricUnlockControllerLazy = biometricUnlockControllerLazy;
         mLockPatternUtils = lockPatternUtils;
         mFalsingManager = falsingManager;
-        mKeyguardBypassController = keyguardBypassController;
+        mKeyguardBypassControllerLazy = keyguardBypassControllerLazy;
         mDismissCallbackRegistry = dismissCallbackRegistry;
         mViewMediatorCallback = viewMediatorCallback;
         mCarNavigationBarController = carNavigationBarController;
 
-        biometricUnlockController.setKeyguardViewController(this);
         registerUserSwitchedListener();
     }
 
@@ -142,7 +145,8 @@ public class CarKeyguardViewController extends OverlayViewController implements
                 mViewMediatorCallback, mLockPatternUtils,
                 getLayout().findViewById(R.id.keyguard_container), mDismissCallbackRegistry,
                 mExpansionCallback, mKeyguardStateController, mFalsingManager,
-                mKeyguardBypassController);
+                mKeyguardBypassControllerLazy.get());
+        mBiometricUnlockControllerLazy.get().setKeyguardViewController(this);
     }
 
     @Override
