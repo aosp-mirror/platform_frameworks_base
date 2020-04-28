@@ -58,6 +58,18 @@ public class ChooserWrapperActivity extends ChooserActivity {
         return multiProfilePagerAdapter;
     }
 
+    @Override
+    public ChooserListAdapter createChooserListAdapter(Context context, List<Intent> payloadIntents,
+            Intent[] initialIntents, List<ResolveInfo> rList, boolean filterLastUsed,
+            boolean useLayoutForBrowsables, ResolverListController resolverListController) {
+        PackageManager packageManager =
+                sOverrides.packageManager == null ? context.getPackageManager()
+                        : sOverrides.packageManager;
+        return new ChooserListAdapter(context, payloadIntents, initialIntents, rList,
+                filterLastUsed, resolverListController, useLayoutForBrowsables,
+                this, this, packageManager);
+    }
+
     ChooserListAdapter getAdapter() {
         return mChooserMultiProfilePagerAdapter.getActiveListAdapter();
     }
@@ -217,6 +229,7 @@ public class ChooserWrapperActivity extends ChooserActivity {
         public boolean hasCrossProfileIntents;
         public boolean isQuietModeEnabled;
         public AbstractMultiProfilePagerAdapter.Injector multiPagerAdapterInjector;
+        public PackageManager packageManager;
 
         public void reset() {
             onSafelyStartCallback = null;
@@ -235,6 +248,7 @@ public class ChooserWrapperActivity extends ChooserActivity {
             workProfileUserHandle = null;
             hasCrossProfileIntents = true;
             isQuietModeEnabled = false;
+            packageManager = null;
             multiPagerAdapterInjector = new AbstractMultiProfilePagerAdapter.Injector() {
                 @Override
                 public boolean hasCrossProfileIntents(List<Intent> intents, int sourceUserId,
