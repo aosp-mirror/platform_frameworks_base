@@ -614,7 +614,6 @@ public interface WindowManager extends ViewManager {
          * @see #TYPE_TOAST
          * @see #TYPE_SYSTEM_OVERLAY
          * @see #TYPE_PRIORITY_PHONE
-         * @see #TYPE_STATUS_BAR_PANEL
          * @see #TYPE_SYSTEM_DIALOG
          * @see #TYPE_KEYGUARD_DIALOG
          * @see #TYPE_SYSTEM_ERROR

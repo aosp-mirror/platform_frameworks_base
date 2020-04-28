@@ -1098,7 +1098,7 @@ public class AudioTrack extends PlayerBase
      * Can only be called only if the AudioTrack is opened in offload mode
      * {@see Builder#setOffloadedPlayback(boolean)}.
      * Can only be called only if the AudioTrack is in state {@link #PLAYSTATE_PLAYING}
-     * {@see #getPlaystate()}.
+     * {@see #getPlayState()}.
      * Use this method in the same thread as any write() operation.
      */
     public void setOffloadEndOfStream() {

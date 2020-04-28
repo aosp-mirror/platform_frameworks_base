@@ -379,8 +379,6 @@ public class PhoneStateListener {
      *
      * <p>Requires permission {@link android.Manifest.permission#READ_PHONE_STATE} or the calling
      * app has carrier privileges (see {@link TelephonyManager#hasCarrierPrivileges}).
-     *
-     * @see #onEmergencyNumberListChanged
      */
     public static final int LISTEN_EMERGENCY_NUMBER_LIST                   = 0x01000000;
 
@@ -459,7 +457,7 @@ public class PhoneStateListener {
      * <p>Requires permission {@link android.Manifest.permission#READ_PHONE_STATE} or the calling
      * app has carrier privileges (see {@link TelephonyManager#hasCarrierPrivileges}).
      *
-     * @see #onRegistrationFailed()
+     * @see #onRegistrationFailed
      */
     @RequiresPermission(Manifest.permission.READ_PHONE_STATE)
     public static final int LISTEN_REGISTRATION_FAILURE = 0x40000000;
@@ -470,7 +468,7 @@ public class PhoneStateListener {
      * <p>Requires permission {@link android.Manifest.permission#READ_PHONE_STATE} or the calling
      * app has carrier privileges (see {@link TelephonyManager#hasCarrierPrivileges}).
      *
-     * @see #onBarringInfoChanged()
+     * @see #onBarringInfoChanged
      */
     @RequiresPermission(Manifest.permission.READ_PHONE_STATE)
     public static final int LISTEN_BARRING_INFO = 0x80000000;
