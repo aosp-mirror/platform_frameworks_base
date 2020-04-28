@@ -159,6 +159,25 @@ public class DreamBackend {
         return null;
     }
 
+    /**
+     * Gets an icon from active dream.
+     */
+    public Drawable getActiveIcon() {
+        final ComponentName cn = getActiveDream();
+        if (cn != null) {
+            final PackageManager pm = mContext.getPackageManager();
+            try {
+                final ServiceInfo ri = pm.getServiceInfo(cn, 0);
+                if (ri != null) {
+                    return ri.loadIcon(pm);
+                }
+            } catch (PackageManager.NameNotFoundException exc) {
+                return null;
+            }
+        }
+        return null;
+    }
+
     public @WhenToDream int getWhenToDreamSetting() {
         if (!isEnabled()) {
             return NEVER;
