@@ -75,6 +75,12 @@ public class DozeDockHandler implements DozeMachine.Part {
         public void onEvent(int dockState) {
             if (DEBUG) Log.d(TAG, "dock event = " + dockState);
 
+            // Only act upon state changes, otherwise we might overwrite other transitions,
+            // like proximity sensor initialization.
+            if (mDockState == dockState) {
+                return;
+            }
+
             mDockState = dockState;
             if (isPulsing()) {
                 return;

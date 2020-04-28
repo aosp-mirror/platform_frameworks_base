@@ -22,6 +22,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import android.os.Looper;
 import android.os.test.TestLooper;
+import android.view.KeyEvent;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
@@ -152,5 +153,76 @@ public class HdmiCecLocalDevicePlaybackTest {
         mWokenUp = false;
         mHdmiCecLocalDevicePlayback.onHotplug(0, false);
         assertThat(mWokenUp).isFalse();
+    }
+
+    @Test
+    @Ignore("b/151147315")
+    public void sendVolumeKeyEvent_up_volumeEnabled() {
+        mHdmiControlService.setHdmiCecVolumeControlEnabled(true);
+        mHdmiCecLocalDevicePlayback.sendVolumeKeyEvent(KeyEvent.KEYCODE_VOLUME_UP, true);
+        mHdmiCecLocalDevicePlayback.sendVolumeKeyEvent(KeyEvent.KEYCODE_VOLUME_UP, false);
+
+        assertThat(hasSendKeyAction()).isTrue();
+    }
+
+    @Test
+    @Ignore("b/151147315")
+    public void sendVolumeKeyEvent_down_volumeEnabled() {
+        mHdmiControlService.setHdmiCecVolumeControlEnabled(true);
+        mHdmiCecLocalDevicePlayback.sendVolumeKeyEvent(KeyEvent.KEYCODE_VOLUME_DOWN, true);
+        mHdmiCecLocalDevicePlayback.sendVolumeKeyEvent(KeyEvent.KEYCODE_VOLUME_DOWN, false);
+
+        assertThat(hasSendKeyAction()).isTrue();
+    }
+
+    @Test
+    @Ignore("b/151147315")
+    public void sendVolumeKeyEvent_mute_volumeEnabled() {
+        mHdmiControlService.setHdmiCecVolumeControlEnabled(true);
+        mHdmiCecLocalDevicePlayback.sendVolumeKeyEvent(KeyEvent.KEYCODE_VOLUME_MUTE, true);
+        mHdmiCecLocalDevicePlayback.sendVolumeKeyEvent(KeyEvent.KEYCODE_VOLUME_MUTE, false);
+
+        assertThat(hasSendKeyAction()).isTrue();
+    }
+
+    @Test
+    @Ignore("b/151147315")
+    public void sendVolumeKeyEvent_up_volumeDisabled() {
+        mHdmiControlService.setHdmiCecVolumeControlEnabled(false);
+        mHdmiCecLocalDevicePlayback.sendVolumeKeyEvent(KeyEvent.KEYCODE_VOLUME_UP, true);
+        mHdmiCecLocalDevicePlayback.sendVolumeKeyEvent(KeyEvent.KEYCODE_VOLUME_UP, false);
+
+        assertThat(hasSendKeyAction()).isFalse();
+    }
+
+    @Test
+    @Ignore("b/151147315")
+    public void sendVolumeKeyEvent_down_volumeDisabled() {
+        mHdmiControlService.setHdmiCecVolumeControlEnabled(false);
+        mHdmiCecLocalDevicePlayback.sendVolumeKeyEvent(KeyEvent.KEYCODE_VOLUME_DOWN, true);
+        mHdmiCecLocalDevicePlayback.sendVolumeKeyEvent(KeyEvent.KEYCODE_VOLUME_DOWN, false);
+
+        assertThat(hasSendKeyAction()).isFalse();
+    }
+
+    @Test
+    @Ignore("b/151147315")
+    public void sendVolumeKeyEvent_mute_volumeDisabled() {
+        mHdmiControlService.setHdmiCecVolumeControlEnabled(false);
+        mHdmiCecLocalDevicePlayback.sendVolumeKeyEvent(KeyEvent.KEYCODE_VOLUME_MUTE, true);
+        mHdmiCecLocalDevicePlayback.sendVolumeKeyEvent(KeyEvent.KEYCODE_VOLUME_MUTE, false);
+
+        assertThat(hasSendKeyAction()).isFalse();
+    }
+
+    private boolean hasSendKeyAction() {
+        boolean match = false;
+        for (HdmiCecFeatureAction action : mHdmiCecLocalDevicePlayback.mActions) {
+            if (action instanceof SendKeyAction) {
+                match = true;
+                break;
+            }
+        }
+        return match;
     }
 }

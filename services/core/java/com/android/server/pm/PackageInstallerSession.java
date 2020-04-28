@@ -163,6 +163,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private static final int MSG_STREAM_VALIDATE_AND_COMMIT = 1;
     private static final int MSG_INSTALL = 2;
     private static final int MSG_ON_PACKAGE_INSTALLED = 3;
+    private static final int MSG_SESSION_VERIFICATION_FAILURE = 4;
 
     /** XML constants used for persisting a session */
     static final String TAG_SESSION = "session";
@@ -448,6 +449,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                             isInstallerDeviceOwnerOrAffiliatedProfileOwnerLocked(), userId,
                             packageName, returnCode, message, extras);
 
+                    break;
+                case MSG_SESSION_VERIFICATION_FAILURE:
+                    final int error = msg.arg1;
+                    final String detailMessage = (String) msg.obj;
+                    onSessionVerificationFailure(error, detailMessage);
                     break;
             }
 
@@ -1479,15 +1485,22 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     private PackageManagerException onSessionVerificationFailure(PackageManagerException e) {
-        // Session is sealed but could not be verified, we need to destroy it.
-        destroyInternal();
-        // Dispatch message to remove session from PackageInstallerService.
-        dispatchSessionFinished(e.error, ExceptionUtils.getCompleteMessage(e), null);
-
+        onSessionVerificationFailure(e.error, ExceptionUtils.getCompleteMessage(e));
         return e;
     }
 
+    private void onSessionVerificationFailure(int error, String detailMessage) {
+        // Session is sealed but could not be verified, we need to destroy it.
+        destroyInternal();
+        // Dispatch message to remove session from PackageInstallerService.
+        dispatchSessionFinished(error, detailMessage, null);
+    }
+
     private void onDataLoaderUnrecoverable() {
+        if (TextUtils.isEmpty(mPackageName)) {
+            // The package has not been installed.
+            return;
+        }
         final PackageManagerService packageManagerService = mPm;
         final String packageName = mPackageName;
         mHandler.post(() -> {
@@ -2610,12 +2623,14 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     case IDataLoaderStatusListener.DATA_LOADER_STOPPED:
                     case IDataLoaderStatusListener.DATA_LOADER_DESTROYED:
                         return;
-                    case IDataLoaderStatusListener.DATA_LOADER_UNRECOVERABLE:
-                        onDataLoaderUnrecoverable();
-                        return;
                 }
 
                 if (mDestroyed || mDataLoaderFinished) {
+                    switch (status) {
+                        case IDataLoaderStatusListener.DATA_LOADER_UNRECOVERABLE:
+                            onDataLoaderUnrecoverable();
+                            return;
+                    }
                     return;
                 }
 
@@ -2623,9 +2638,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     IDataLoader dataLoader = dataLoaderManager.getDataLoader(dataLoaderId);
                     if (dataLoader == null) {
                         mDataLoaderFinished = true;
-                        onSessionVerificationFailure(
-                                new PackageManagerException(INSTALL_FAILED_MEDIA_UNAVAILABLE,
-                                        "Failure to obtain data loader"));
+                        dispatchSessionVerificationFailure(INSTALL_FAILED_MEDIA_UNAVAILABLE,
+                                "Failure to obtain data loader");
                         return;
                     }
 
@@ -2670,14 +2684,18 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                         }
                         case IDataLoaderStatusListener.DATA_LOADER_IMAGE_NOT_READY: {
                             mDataLoaderFinished = true;
-                            onSessionVerificationFailure(
-                                    new PackageManagerException(INSTALL_FAILED_MEDIA_UNAVAILABLE,
-                                            "Failed to prepare image."));
+                            dispatchSessionVerificationFailure(INSTALL_FAILED_MEDIA_UNAVAILABLE,
+                                    "Failed to prepare image.");
                             if (manualStartAndDestroy) {
                                 dataLoader.destroy(dataLoaderId);
                             }
                             break;
                         }
+                        case IDataLoaderStatusListener.DATA_LOADER_UNRECOVERABLE:
+                            mDataLoaderFinished = true;
+                            dispatchSessionVerificationFailure(INSTALL_FAILED_MEDIA_UNAVAILABLE,
+                                    "DataLoader reported unrecoverable failure.");
+                            return;
                     }
                 } catch (RemoteException e) {
                     // In case of streaming failure we don't want to fail or commit the session.
@@ -2706,6 +2724,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
 
         return false;
+    }
+
+    private void dispatchSessionVerificationFailure(int error, String detailMessage) {
+        mHandler.obtainMessage(MSG_SESSION_VERIFICATION_FAILURE, error, -1,
+                detailMessage).sendToTarget();
     }
 
     @Override

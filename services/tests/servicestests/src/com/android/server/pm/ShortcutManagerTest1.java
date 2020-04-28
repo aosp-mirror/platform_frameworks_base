@@ -6734,6 +6734,21 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         mManager.hasShareTargets(CALLING_PACKAGE_1);
     }
 
+    public void testisSharingShortcut_permission() throws IntentFilter.MalformedMimeTypeException {
+        setCaller(LAUNCHER_1, USER_0);
+
+        IntentFilter filter_any = new IntentFilter();
+        filter_any.addDataType("*/*");
+
+        assertExpectException(SecurityException.class, "Missing permission", () ->
+                mInternal.isSharingShortcut(USER_0, LAUNCHER_1, CALLING_PACKAGE_1, "s1", USER_0,
+                        filter_any));
+
+        // Has permission, now it should pass.
+        mCallerPermissions.add(permission.MANAGE_APP_PREDICTIONS);
+        mManager.hasShareTargets(CALLING_PACKAGE_1);
+    }
+
     public void testDumpsys_crossProfile() {
         prepareCrossProfileDataSet();
         dumpsysOnLogcat("test1", /* force= */ true);
@@ -8642,6 +8657,61 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         assertFalse(mInternal.isSharingShortcut(USER_0, LAUNCHER_1, CALLING_PACKAGE_1, "s3", USER_0,
                 filter_any));
         assertFalse(mInternal.isSharingShortcut(USER_0, LAUNCHER_1, CALLING_PACKAGE_1, "s4", USER_0,
+                filter_any));
+    }
+
+    public void testIsSharingShortcut_PinnedAndCachedOnlyShortcuts()
+            throws IntentFilter.MalformedMimeTypeException {
+        addManifestShortcutResource(
+                new ComponentName(CALLING_PACKAGE_1, ShortcutActivity.class.getName()),
+                R.xml.shortcut_share_targets);
+        updatePackageVersion(CALLING_PACKAGE_1, 1);
+        mService.mPackageMonitor.onReceive(getTestContext(),
+                genPackageAddIntent(CALLING_PACKAGE_1, USER_0));
+
+        final ShortcutInfo s1 = makeShortcutWithCategory("s1",
+                set("com.test.category.CATEGORY1", "com.test.category.CATEGORY2"));
+        final ShortcutInfo s2 = makeShortcutWithCategory("s2",
+                set("com.test.category.CATEGORY5", "com.test.category.CATEGORY6"));
+        final ShortcutInfo s3 = makeShortcutWithCategory("s3",
+                set("com.test.category.CATEGORY5", "com.test.category.CATEGORY6"));
+        s1.setLongLived();
+        s2.setLongLived();
+
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            assertTrue(mManager.setDynamicShortcuts(list(s1, s2, s3)));
+            assertShortcutIds(assertAllNotKeyFieldsOnly(mManager.getDynamicShortcuts()),
+                    "s1", "s2", "s3");
+        });
+
+        IntentFilter filter_any = new IntentFilter();
+        filter_any.addDataType("*/*");
+
+        setCaller(LAUNCHER_1, USER_0);
+        mCallerPermissions.add(permission.MANAGE_APP_PREDICTIONS);
+
+        // Assert all are sharing shortcuts
+        assertTrue(mInternal.isSharingShortcut(USER_0, LAUNCHER_1, CALLING_PACKAGE_1, "s1", USER_0,
+                filter_any));
+        assertTrue(mInternal.isSharingShortcut(USER_0, LAUNCHER_1, CALLING_PACKAGE_1, "s2", USER_0,
+                filter_any));
+        assertTrue(mInternal.isSharingShortcut(USER_0, LAUNCHER_1, CALLING_PACKAGE_1, "s3", USER_0,
+                filter_any));
+
+        mLauncherApps.cacheShortcuts(CALLING_PACKAGE_1, list("s1", "s2"), HANDLE_USER_0);
+        mLauncherApps.pinShortcuts(CALLING_PACKAGE_1, list("s3"), HANDLE_USER_0);
+
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            // Remove one cached shortcut, and leave one cached-only and pinned-only shortcuts.
+            mManager.removeLongLivedShortcuts(list("s1"));
+            mManager.removeDynamicShortcuts(list("s2, s3"));
+        });
+
+        assertFalse(mInternal.isSharingShortcut(USER_0, LAUNCHER_1, CALLING_PACKAGE_1, "s1", USER_0,
+                filter_any));
+        assertTrue(mInternal.isSharingShortcut(USER_0, LAUNCHER_1, CALLING_PACKAGE_1, "s2", USER_0,
+                filter_any));
+        assertTrue(mInternal.isSharingShortcut(USER_0, LAUNCHER_1, CALLING_PACKAGE_1, "s3", USER_0,
                 filter_any));
     }
 

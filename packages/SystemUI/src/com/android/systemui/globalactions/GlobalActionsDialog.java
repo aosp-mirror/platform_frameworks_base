@@ -484,8 +484,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
      */
     @VisibleForTesting
     protected int getMaxShownPowerItems() {
-        // TODO: Overflow disabled on keyguard while we solve for touch blocking issues.
-        if (shouldUseControlsLayout() && !mKeyguardShowing) {
+        if (shouldUseControlsLayout()) {
             return mResources.getInteger(com.android.systemui.R.integer.power_menu_max_columns);
         } else {
             return Integer.MAX_VALUE;
@@ -2246,7 +2245,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             mShowing = false;
             resetOrientation();
             dismissPanel();
-            dismissOverflow();
+            dismissOverflow(true);
             if (mControlsUiController != null) mControlsUiController.hide();
             mNotificationShadeWindowController.setForceHasTopUi(mHadTopUi);
             mDepthController.updateGlobalDialogVisibility(0, null /* view */);
@@ -2259,9 +2258,13 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             }
         }
 
-        private void dismissOverflow() {
+        private void dismissOverflow(boolean immediate) {
             if (mOverflowPopup != null) {
-                mOverflowPopup.dismiss();
+                if (immediate) {
+                    mOverflowPopup.dismissImmediate();
+                } else {
+                    mOverflowPopup.dismiss();
+                }
             }
         }
 

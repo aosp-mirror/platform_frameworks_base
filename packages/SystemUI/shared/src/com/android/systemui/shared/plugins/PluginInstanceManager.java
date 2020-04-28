@@ -257,12 +257,8 @@ public class PluginInstanceManager<T extends Plugin> {
                     if (DEBUG) Log.d(TAG, "queryAll " + mAction);
                     for (int i = mPlugins.size() - 1; i >= 0; i--) {
                         PluginInfo<T> plugin = mPlugins.get(i);
-                        mListener.onPluginDisconnected(plugin.mPlugin);
-                        if (!(plugin.mPlugin instanceof PluginFragment)) {
-                            // Only call onDestroy for plugins that aren't fragments, as fragments
-                            // will get the onDestroy as part of the fragment lifecycle.
-                            plugin.mPlugin.onDestroy();
-                        }
+                        mMainHandler.obtainMessage(
+                                mMainHandler.PLUGIN_DISCONNECTED, plugin).sendToTarget();
                     }
                     mPlugins.clear();
                     handleQueryPlugins(null);

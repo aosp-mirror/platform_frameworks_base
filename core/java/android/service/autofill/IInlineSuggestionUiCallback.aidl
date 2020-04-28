@@ -28,7 +28,7 @@ import android.view.SurfaceControlViewHost;
 oneway interface IInlineSuggestionUiCallback {
     void onClick();
     void onLongClick();
-    void onContent(in SurfaceControlViewHost.SurfacePackage surface);
+    void onContent(in SurfaceControlViewHost.SurfacePackage surface, int width, int height);
     void onError();
     void onTransferTouchFocusToImeWindow(in IBinder sourceInputToken, int displayId);
     void onStartIntentSender(in IntentSender intentSender);
