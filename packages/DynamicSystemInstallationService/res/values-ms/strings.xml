@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_name" msgid="1329763481012806">"Kemas Kini Sistem Dinamik"</string>
-    <string name="notification_channel_name" msgid="4236645997978509780">"Kemas Kini Sistem Dinamik"</string>
-    <string name="keyguard_title" msgid="1804887096112528661">"Kemas Kini Sistem Dinamik"</string>
     <string name="keyguard_description" msgid="8582605799129954556">"Sila masukkan kata laluan dan teruskan ke Kemas Kini Sistem Dinamik"</string>
     <string name="notification_install_completed" msgid="6252047868415172643">"Sistem dinamik sudah sedia. Untuk mula menggunakan sistem ini, mulakan semula peranti anda"</string>
     <string name="notification_install_inprogress" msgid="7383334330065065017">"Pemasangan sedang dijalankan"</string>

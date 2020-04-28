@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_name" msgid="1329763481012806">"Dynamiske systemopdateringer"</string>
-    <string name="notification_channel_name" msgid="4236645997978509780">"Dynamiske systemopdateringer"</string>
-    <string name="keyguard_title" msgid="1804887096112528661">"Dynamiske systemopdateringer"</string>
     <string name="keyguard_description" msgid="8582605799129954556">"Angiv din adgangskode, og fortsæt til Dynamiske systemopdateringer"</string>
     <string name="notification_install_completed" msgid="6252047868415172643">"Det dynamiske system er klar. Hvis du vil begynde at bruge det, skal du genstarte din enhed."</string>
     <string name="notification_install_inprogress" msgid="7383334330065065017">"Installation i gang"</string>

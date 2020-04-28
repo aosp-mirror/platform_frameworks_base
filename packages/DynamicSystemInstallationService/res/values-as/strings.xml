@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_name" msgid="1329763481012806">"ডায়নামিক ছিষ্টেম আপডে\'টসমূহ"</string>
-    <string name="notification_channel_name" msgid="4236645997978509780">"ডায়নামিক ছিষ্টেম আপডে\'টসমূহ"</string>
-    <string name="keyguard_title" msgid="1804887096112528661">"ডায়নামিক ছিষ্টেম আপডে\'টসমূহ"</string>
     <string name="keyguard_description" msgid="8582605799129954556">"অনুগ্ৰহ কৰি আপোনাৰ পাছৱৰ্ডটো দিয়ক আৰু ডায়নামিক ছিষ্টেম আপডে\'টসমূহলৈ অব্যাহত ৰাখক"</string>
     <string name="notification_install_completed" msgid="6252047868415172643">"ডায়নামিক ছিষ্টেমটো সাজু। এইটো ব্যৱহাৰ কৰা আৰম্ভ কৰিবলৈ আপোনাৰ ডিভাইচটো ৰিষ্টাৰ্ট কৰক।"</string>
     <string name="notification_install_inprogress" msgid="7383334330065065017">"ইনষ্টল চলি আছে"</string>

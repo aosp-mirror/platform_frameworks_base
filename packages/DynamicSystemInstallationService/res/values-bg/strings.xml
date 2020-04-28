@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_name" msgid="1329763481012806">"Динамични актуализации на сист."</string>
-    <string name="notification_channel_name" msgid="4236645997978509780">"Динамични актуализации на сист."</string>
-    <string name="keyguard_title" msgid="1804887096112528661">"Динамични актуализации на сист."</string>
     <string name="keyguard_description" msgid="8582605799129954556">"Моля, въведете паролата си и продължете към функцията за динамични актуализации на системата"</string>
     <string name="notification_install_completed" msgid="6252047868415172643">"Динамичната система е готова. Рестартирайте устройството си, за да я използвате."</string>
     <string name="notification_install_inprogress" msgid="7383334330065065017">"Инсталиране – в ход"</string>

@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_name" msgid="1329763481012806">"ပြောင်းလဲနိုင်သောစနစ်အပ်ဒိတ်များ"</string>
-    <string name="notification_channel_name" msgid="4236645997978509780">"ပြောင်းလဲနိုင်သောစနစ်အပ်ဒိတ်များ"</string>
-    <string name="keyguard_title" msgid="1804887096112528661">"ပြောင်းလဲနိုင်သောစနစ်အပ်ဒိတ်များ"</string>
     <string name="keyguard_description" msgid="8582605799129954556">"သင့်စကားဝှက်ထည့်ပြီး ပြောင်းလဲနိုင်သော စနစ်အပ်ဒိတ်များသို့ ရှေ့ဆက်ပါ"</string>
     <string name="notification_install_completed" msgid="6252047868415172643">"ပြောင်းလဲနိုင်သောစနစ် အသင့်ဖြစ်ပါပြီ။ ၎င်းကို စတင်အသုံးပြုရန် သင့်စက်ကို ပြန်စပါ။"</string>
     <string name="notification_install_inprogress" msgid="7383334330065065017">"ထည့်သွင်းနေဆဲဖြစ်သည်"</string>

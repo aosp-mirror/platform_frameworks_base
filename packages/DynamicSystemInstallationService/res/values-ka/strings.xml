@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_name" msgid="1329763481012806">"სისტემის დინამიური განახლებები"</string>
-    <string name="notification_channel_name" msgid="4236645997978509780">"სისტემის დინამიური განახლებები"</string>
-    <string name="keyguard_title" msgid="1804887096112528661">"სისტემის დინამიური განახლებები"</string>
     <string name="keyguard_description" msgid="8582605799129954556">"გთხოვთ, შეიყვანოთ პაროლი სისტემის დინამიურ განახლებებზე გადასასვლელად"</string>
     <string name="notification_install_completed" msgid="6252047868415172643">"დინამიური სისტემა მზადაა. გადატვირთეთ მოწყობილობა მის გამოსაყენებლად."</string>
     <string name="notification_install_inprogress" msgid="7383334330065065017">"ინსტალირდება"</string>

@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_name" msgid="1329763481012806">"تحديثات النظام الديناميكية"</string>
-    <string name="notification_channel_name" msgid="4236645997978509780">"تحديثات النظام الديناميكية"</string>
-    <string name="keyguard_title" msgid="1804887096112528661">"تحديثات النظام الديناميكية"</string>
     <string name="keyguard_description" msgid="8582605799129954556">"يُرجى إدخال كلمة مرور والمتابعة إلى \"تحديثات النظام الديناميكية\""</string>
     <string name="notification_install_completed" msgid="6252047868415172643">"النظام الديناميكي جاهز. لبدء استخدامه، يجب إعادة تشغيل الجهاز."</string>
     <string name="notification_install_inprogress" msgid="7383334330065065017">"التثبيت قيد التقدّم."</string>

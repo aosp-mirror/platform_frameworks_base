@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_name" msgid="1329763481012806">"Δυναμικές ενημερώσεις συστήματος"</string>
-    <string name="notification_channel_name" msgid="4236645997978509780">"Δυναμικές ενημερώσεις συστήματος"</string>
-    <string name="keyguard_title" msgid="1804887096112528661">"Δυναμικές ενημερώσεις συστήματος"</string>
     <string name="keyguard_description" msgid="8582605799129954556">"Πληκτρολογήστε τον κωδικό σας και συνεχίστε στις Δυναμικές ενημερώσεις συστήματος."</string>
     <string name="notification_install_completed" msgid="6252047868415172643">"Οι δυναμικές συστήματος είναι έτοιμες. Για να ξεκινήσετε να τις χρησιμοποιείτε, επανεκκινήστε τη συσκευή σας."</string>
     <string name="notification_install_inprogress" msgid="7383334330065065017">"Εγκατάσταση σε εξέλιξη"</string>

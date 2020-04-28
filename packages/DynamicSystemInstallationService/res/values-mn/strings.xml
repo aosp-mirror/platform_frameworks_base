@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_name" msgid="1329763481012806">"Динамик системийн шинэчлэлт"</string>
-    <string name="notification_channel_name" msgid="4236645997978509780">"Динамик системийн шинэчлэлт"</string>
-    <string name="keyguard_title" msgid="1804887096112528661">"Динамик системийн шинэчлэлт"</string>
     <string name="keyguard_description" msgid="8582605799129954556">"Нууц үгээ оруулаад Динамик системийн шинэчлэлтийг үргэлжлүүлнэ үү"</string>
     <string name="notification_install_completed" msgid="6252047868415172643">"Динамик систем бэлэн боллоо. Түүнийг ашиглаж эхлэхийн тулд төхөөрөмжөө дахин эхлүүлнэ үү."</string>
     <string name="notification_install_inprogress" msgid="7383334330065065017">"Суулгаж байна"</string>
