@@ -519,6 +519,7 @@ public abstract class MediaRoute2ProviderService extends Service {
                     requestCreateSession));
         }
 
+        //TODO: Ignore requests with unknown session ID.
         @Override
         public void selectRoute(long requestId, String sessionId, String routeId) {
             if (!checkCallerisSystem()) {
