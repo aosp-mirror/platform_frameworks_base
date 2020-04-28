@@ -511,7 +511,7 @@
     <string name="alarm_template" msgid="3346777418136233330">"الساعة <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="6382760514842998629">"يوم <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="zen_mode_duration_settings_title" msgid="1553451650289651489">"المدة"</string>
-    <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"الطلب في كل مرة"</string>
+    <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"السؤال في كل مرة"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"إلى أن يتم إيقاف الوضع"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"للتو"</string>
     <string name="media_transfer_this_device_name" msgid="2716555073132169240">"مكبر صوت الهاتف"</string>

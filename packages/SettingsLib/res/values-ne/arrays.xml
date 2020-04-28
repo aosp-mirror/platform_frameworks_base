@@ -40,7 +40,7 @@
     <item msgid="8339720953594087771">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g>सँग जडान हुँदै..."</item>
     <item msgid="3028983857109369308">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g>को साथ प्रमाणित गर्दै…"</item>
     <item msgid="4287401332778341890">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g>बाट IP ठेगाना प्राप्त गर्दै…"</item>
-    <item msgid="1043944043827424501">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g>सँग जडित"</item>
+    <item msgid="1043944043827424501">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> मा जोडिएको छ"</item>
     <item msgid="7445993821842009653">"निलम्बित"</item>
     <item msgid="1175040558087735707">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g>बाट विच्छेदन गर्दै..."</item>
     <item msgid="699832486578171722">"विच्छेदन भएको"</item>
