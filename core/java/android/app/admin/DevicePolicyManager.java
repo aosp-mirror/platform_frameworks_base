@@ -10251,6 +10251,9 @@ public class DevicePolicyManager {
      * <p>
      * The confirm credentials screen can be created using
      * {@link android.app.KeyguardManager#createConfirmDeviceCredentialIntent}.
+     * <p>
+     * Starting from Android R, the organization color will no longer be used as the background
+     * color of the confirm credentials screen.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param color The 24bit (0xRRGGBB) representation of the color to be used.
