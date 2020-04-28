@@ -21,8 +21,6 @@ import android.annotation.Nullable;
 
 /**
  * An inspection companion provider that finds companions as inner classes or generated code.
- *
- * @see android.processor.view.inspector.PlatformInspectableProcessor
  */
 public class StaticInspectionCompanionProvider implements InspectionCompanionProvider {
     /**
