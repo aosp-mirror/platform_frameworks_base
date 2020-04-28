@@ -1831,6 +1831,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     public void resetTranslation() {
+        if (mMenuRow != null && mMenuRow.isMenuVisible()) {
+            return;
+        }
+
         if (mTranslateAnim != null) {
             mTranslateAnim.cancel();
         }
