@@ -314,24 +314,20 @@ class AppErrors {
     }
 
     void killAppAtUserRequestLocked(ProcessRecord app, Dialog fromDialog) {
+        app.crashing = false;
+        app.crashingReport = null;
+        app.notResponding = false;
+        app.notRespondingReport = null;
         if (app.anrDialog == fromDialog) {
             app.anrDialog = null;
         }
         if (app.waitDialog == fromDialog) {
             app.waitDialog = null;
         }
-        killAppImmediateLocked(app, "user-terminated", "user request after error");
-    }
-
-    private void killAppImmediateLocked(ProcessRecord app, String reason, String killReason) {
-        app.crashing = false;
-        app.crashingReport = null;
-        app.notResponding = false;
-        app.notRespondingReport = null;
         if (app.pid > 0 && app.pid != MY_PID) {
-            handleAppCrashLocked(app, reason,
+            handleAppCrashLocked(app, "user-terminated" /*reason*/,
                     null /*shortMsg*/, null /*longMsg*/, null /*stackTrace*/, null /*data*/);
-            app.kill(killReason, true);
+            app.kill("user request after error", true);
         }
     }
 
@@ -345,7 +341,7 @@ class AppErrors {
      * @param message
      */
     void scheduleAppCrashLocked(int uid, int initialPid, String packageName, int userId,
-            String message, boolean force) {
+            String message) {
         ProcessRecord proc = null;
 
         // Figure out which process to kill.  We don't trust that initialPid
@@ -378,14 +374,6 @@ class AppErrors {
         }
 
         proc.scheduleCrash(message);
-        if (force) {
-            // If the app is responsive, the scheduled crash will happen as expected
-            // and then the delayed summary kill will be a no-op.
-            final ProcessRecord p = proc;
-            mService.mHandler.postDelayed(
-                    () -> killAppImmediateLocked(p, "forced", "killed for invalid state"),
-                    5000L);
-        }
     }
 
     /**
