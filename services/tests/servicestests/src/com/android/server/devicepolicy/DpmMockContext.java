@@ -482,4 +482,9 @@ public class DpmMockContext extends MockContext {
     public int checkCallingPermission(String permission) {
         return spiedContext.checkCallingPermission(permission);
     }
+
+    @Override
+    public void startActivityAsUser(Intent intent, UserHandle userHandle) {
+        spiedContext.startActivityAsUser(intent, userHandle);
+    }
 }
