@@ -266,8 +266,7 @@ interface IActivityManager {
     boolean isImmersive(in IBinder token);
     void setImmersive(in IBinder token, boolean immersive);
     boolean isTopActivityImmersive();
-    void crashApplication(int uid, int initialPid, in String packageName, int userId,
-            in String message, boolean force);
+    void crashApplication(int uid, int initialPid, in String packageName, int userId, in String message);
     String getProviderMimeType(in Uri uri, int userId);
     IBinder newUriPermissionOwner(in String name);
     void grantUriPermissionFromOwner(in IBinder owner, int fromUid, in String targetPkg,
