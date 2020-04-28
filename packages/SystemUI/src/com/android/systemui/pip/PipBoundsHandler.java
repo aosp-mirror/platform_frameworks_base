@@ -126,6 +126,10 @@ public class PipBoundsHandler {
         mCurrentMinSize = minEdgeSize;
     }
 
+    protected float getAspectRatio() {
+        return mAspectRatio;
+    }
+
     /**
      * Sets both shelf visibility and its height if applicable.
      * @return {@code true} if the internal shelf state is changed, {@code false} otherwise.
@@ -419,7 +423,7 @@ public class PipBoundsHandler {
     /**
      * Populates the bounds on the screen that the PIP can be visible in.
      */
-    private void getInsetBounds(Rect outRect) {
+    protected void getInsetBounds(Rect outRect) {
         try {
             mWindowManager.getStableInsets(mContext.getDisplayId(), mTmpInsets);
             outRect.set(mTmpInsets.left + mScreenEdgeInsets.x,
