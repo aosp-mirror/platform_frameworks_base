@@ -47,16 +47,31 @@ object ChallengeDialogs {
      * [ControlAction#RESPONSE_CHALLENGE_PIN] responses, decided by the useAlphaNumeric
      * parameter.
      */
-    fun createPinDialog(cvh: ControlViewHolder, useAlphaNumeric: Boolean): Dialog? {
+    fun createPinDialog(
+        cvh: ControlViewHolder,
+        useAlphaNumeric: Boolean,
+        useRetryStrings: Boolean
+    ): Dialog? {
         val lastAction = cvh.lastAction
         if (lastAction == null) {
             Log.e(ControlsUiController.TAG,
                 "PIN Dialog attempted but no last action is set. Will not show")
             return null
         }
+        val res = cvh.context.resources
+        val (title, instructions) = if (useRetryStrings) {
+            Pair(
+                res.getString(R.string.controls_pin_wrong),
+                R.string.controls_pin_instructions_retry
+            )
+        } else {
+            Pair(
+                res.getString(R.string.controls_pin_verify, cvh.title.getText()),
+                R.string.controls_pin_instructions
+            )
+        }
         val builder = AlertDialog.Builder(cvh.context, STYLE).apply {
-            val res = cvh.context.resources
-            setTitle(res.getString(R.string.controls_pin_verify, cvh.title.getText()))
+            setTitle(title)
             setView(R.layout.controls_dialog_pin)
             setPositiveButton(
                 android.R.string.ok,
@@ -81,6 +96,7 @@ object ChallengeDialogs {
             }
             setOnShowListener(DialogInterface.OnShowListener { _ ->
                 val editText = requireViewById<EditText>(R.id.controls_pin_input)
+                editText.setHint(instructions)
                 val useAlphaCheckBox = requireViewById<CheckBox>(R.id.controls_pin_use_alpha)
                 useAlphaCheckBox.setChecked(useAlphaNumeric)
                 setInputType(editText, useAlphaCheckBox.isChecked())
