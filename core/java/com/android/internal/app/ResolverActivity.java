@@ -459,28 +459,6 @@ public class ResolverActivity extends Activity implements
             Intent[] initialIntents,
             List<ResolveInfo> rList,
             boolean filterLastUsed) {
-        // We only show the default app for the profile of the current user. The filterLastUsed
-        // flag determines whether to show a default app and that app is not shown in the
-        // resolver list. So filterLastUsed should be false for the other profile.
-        ResolverListAdapter personalAdapter = createResolverListAdapter(
-                /* context */ this,
-                /* payloadIntents */ mIntents,
-                initialIntents,
-                rList,
-                (filterLastUsed && UserHandle.myUserId()
-                        == getPersonalProfileUserHandle().getIdentifier()),
-                mUseLayoutForBrowsables,
-                /* userHandle */ getPersonalProfileUserHandle());
-        UserHandle workProfileUserHandle = getWorkProfileUserHandle();
-        ResolverListAdapter workAdapter = createResolverListAdapter(
-                /* context */ this,
-                /* payloadIntents */ mIntents,
-                initialIntents,
-                rList,
-                (filterLastUsed && UserHandle.myUserId()
-                        == workProfileUserHandle.getIdentifier()),
-                mUseLayoutForBrowsables,
-                /* userHandle */ workProfileUserHandle);
         // In the edge case when we have 0 apps in the current profile and >1 apps in the other,
         // the intent resolver is started in the other profile. Since this is the only case when
         // this happens, we check for it here and set the current profile's tab.
@@ -493,6 +471,28 @@ public class ResolverActivity extends Activity implements
                 selectedProfile = PROFILE_WORK;
             }
         }
+        // We only show the default app for the profile of the current user. The filterLastUsed
+        // flag determines whether to show a default app and that app is not shown in the
+        // resolver list. So filterLastUsed should be false for the other profile.
+        ResolverListAdapter personalAdapter = createResolverListAdapter(
+                /* context */ this,
+                /* payloadIntents */ mIntents,
+                selectedProfile == PROFILE_PERSONAL ? initialIntents : null,
+                rList,
+                (filterLastUsed && UserHandle.myUserId()
+                        == getPersonalProfileUserHandle().getIdentifier()),
+                mUseLayoutForBrowsables,
+                /* userHandle */ getPersonalProfileUserHandle());
+        UserHandle workProfileUserHandle = getWorkProfileUserHandle();
+        ResolverListAdapter workAdapter = createResolverListAdapter(
+                /* context */ this,
+                /* payloadIntents */ mIntents,
+                selectedProfile == PROFILE_WORK ? initialIntents : null,
+                rList,
+                (filterLastUsed && UserHandle.myUserId()
+                        == workProfileUserHandle.getIdentifier()),
+                mUseLayoutForBrowsables,
+                /* userHandle */ workProfileUserHandle);
         return new ResolverMultiProfilePagerAdapter(
                 /* context */ this,
                 personalAdapter,
