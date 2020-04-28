@@ -2215,6 +2215,7 @@ public class TelecomManager {
      * @hide
      */
     @SystemApi
+    @TestApi
     @NonNull
     public Intent createLaunchEmergencyDialerIntent(@Nullable String number) {
         ITelecomService service = getTelecomService();
