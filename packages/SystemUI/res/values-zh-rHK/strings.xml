@@ -97,7 +97,7 @@
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"裝置播放的音效，例如音樂、通話和鈴聲"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"麥克風"</string>
     <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"裝置音訊和麥克風"</string>
-    <string name="screenrecord_start" msgid="330991441575775004">"開始錄影"</string>
+    <string name="screenrecord_start" msgid="330991441575775004">"開始"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"正在錄影螢幕畫面"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"錄影螢幕畫面和音訊"</string>
     <string name="screenrecord_taps_label" msgid="1595690528298857649">"顯示輕觸螢幕的位置"</string>
@@ -999,8 +999,7 @@
     <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"隨時控制小視窗設定"</string>
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"輕按「管理」即可關閉此應用程式的小視窗"</string>
     <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"知道了"</string>
-    <!-- no translation found for bubbles_app_settings (5779443644062348657) -->
-    <skip />
+    <string name="bubbles_app_settings" msgid="5779443644062348657">"「<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>」設定"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"系統導覽已更新。如需變更，請前往「設定」。"</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"前往「設定」更新系統導覽"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"待機"</string>

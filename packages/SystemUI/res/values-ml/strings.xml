@@ -1004,16 +1004,11 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"സിസ്‌റ്റം നാവിഗേഷൻ അപ്‌ഡേറ്റ് ചെയ്‌തു. മാറ്റങ്ങൾ വരുത്താൻ ക്രമീകരണത്തിലേക്ക് പോവുക."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"സിസ്‌റ്റം നാവിഗേഷൻ അപ്‌ഡേറ്റ് ചെയ്യാൻ ക്രമീകരണത്തിലേക്ക് പോവുക"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"സ്‌റ്റാൻഡ്‌ബൈ"</string>
-    <!-- no translation found for priority_onboarding_show_at_top_text (1678400241025513541) -->
-    <skip />
-    <!-- no translation found for priority_onboarding_show_avatar_text (5756291381124091508) -->
-    <skip />
-    <!-- no translation found for priority_onboarding_appear_as_bubble_text (4227039772250263122) -->
-    <skip />
-    <!-- no translation found for priority_onboarding_ignores_dnd_text (2918952762719600529) -->
-    <skip />
-    <!-- no translation found for priority_onboarding_done_button_title (4569550984286506007) -->
-    <skip />
+    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"സംഭാഷണ വിഭാഗത്തിന്റെ മുകളിൽ കാണിക്കുക"</string>
+    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"ലോക്ക് സ്ക്രീനിൽ പ്രൊഫൈൽ ചിത്രം കാണിക്കുക"</string>
+    <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"ആപ്പുകളുടെ മുകളിൽ ഫ്ലോട്ടിംഗ് ബബിൾ ആയി ദൃശ്യമാകും"</string>
+    <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"\'ശല്യപ്പെടുത്തരുത്\' തടസ്സപ്പെടുത്തുക"</string>
+    <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"മനസ്സിലായി"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"മാഗ്നിഫിക്കേഷൻ ഓവർലേ വിൻഡോ"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"മാഗ്നിഫിക്കേഷൻ വിൻഡോ"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"മാഗ്നിഫിക്കേഷൻ വിൻഡോ നിയന്ത്രണങ്ങൾ"</string>

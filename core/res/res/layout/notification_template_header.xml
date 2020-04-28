@@ -24,12 +24,20 @@
     android:layout_height="@dimen/notification_header_height"
     android:clipChildren="false"
     style="?attr/notificationHeaderStyle">
-    <com.android.internal.widget.CachingIconView
-        android:id="@+id/icon"
-        android:layout_width="?attr/notificationHeaderIconSize"
-        android:layout_height="?attr/notificationHeaderIconSize"
-        android:layout_marginEnd="@dimen/notification_header_icon_margin_end"
+    <!-- Wrapper used to expand the width of the "space" containing the icon programmatically -->
+    <FrameLayout
+        android:id="@+id/header_icon_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <com.android.internal.widget.CachingIconView
+            android:id="@+id/icon"
+            android:layout_width="?attr/notificationHeaderIconSize"
+            android:layout_height="?attr/notificationHeaderIconSize"
+            android:layout_marginEnd="@dimen/notification_header_icon_margin_end"
+            android:layout_gravity="center"
         />
+    </FrameLayout>
     <TextView
         android:id="@+id/app_name_text"
         android:layout_width="wrap_content"

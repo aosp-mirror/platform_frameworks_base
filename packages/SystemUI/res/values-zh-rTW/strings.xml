@@ -999,8 +999,7 @@
     <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"你隨時可以控管對話框的各項設定"</string>
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"輕觸 [管理] 即可關閉來自這個應用程式的對話框"</string>
     <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"我知道了"</string>
-    <!-- no translation found for bubbles_app_settings (5779443644062348657) -->
-    <skip />
+    <string name="bubbles_app_settings" msgid="5779443644062348657">"「<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>」設定"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"系統操作機制已更新。如要進行變更，請前往「設定」。"</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"請前往「設定」更新系統操作機制"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"待機"</string>

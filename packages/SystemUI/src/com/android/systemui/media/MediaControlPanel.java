@@ -247,7 +247,7 @@ public class MediaControlPanel {
         // Try to find a browser service component for this app
         // TODO also check for a media button receiver intended for restarting (b/154127084)
         // Only check if we haven't tried yet or the session token changed
-        String pkgName = mController.getPackageName();
+        final String pkgName = mController.getPackageName();
         if (mServiceComponent == null && !mCheckedForResumption) {
             Log.d(TAG, "Checking for service component");
             PackageManager pm = mContext.getPackageManager();
@@ -283,18 +283,22 @@ public class MediaControlPanel {
 
         // Transfer chip
         mSeamless = mMediaNotifView.findViewById(R.id.media_seamless);
-        if (mSeamless != null && mLocalMediaManager != null) {
-            mSeamless.setVisibility(View.VISIBLE);
-            updateDevice(mLocalMediaManager.getCurrentConnectedDevice());
-            mSeamless.setOnClickListener(v -> {
-                final Intent intent = new Intent()
-                        .setAction(MediaOutputSliceConstants.ACTION_MEDIA_OUTPUT)
-                        .putExtra(MediaOutputSliceConstants.EXTRA_PACKAGE_NAME,
-                                mController.getPackageName())
-                        .putExtra(MediaOutputSliceConstants.KEY_MEDIA_SESSION_TOKEN, mToken);
-                mActivityStarter.startActivity(intent, false, true /* dismissShade */,
-                        Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            });
+        if (mSeamless != null) {
+            if (mLocalMediaManager != null) {
+                mSeamless.setVisibility(View.VISIBLE);
+                updateDevice(mLocalMediaManager.getCurrentConnectedDevice());
+                mSeamless.setOnClickListener(v -> {
+                    final Intent intent = new Intent()
+                            .setAction(MediaOutputSliceConstants.ACTION_MEDIA_OUTPUT)
+                            .putExtra(MediaOutputSliceConstants.EXTRA_PACKAGE_NAME,
+                                    mController.getPackageName())
+                            .putExtra(MediaOutputSliceConstants.KEY_MEDIA_SESSION_TOKEN, mToken);
+                    mActivityStarter.startActivity(intent, false, true /* dismissShade */,
+                            Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                });
+            } else {
+                Log.d(TAG, "LocalMediaManager is null. Not binding output chip for pkg=" + pkgName);
+            }
         }
 
         makeActive();
@@ -556,6 +560,7 @@ public class MediaControlPanel {
             deviceName.setText(device.getName());
         } else {
             // Reset to default
+            Log.d(TAG, "device is null. Not binding output chip.");
             iconView.setVisibility(View.GONE);
             deviceName.setText(com.android.internal.R.string.ext_media_seamless_action);
         }

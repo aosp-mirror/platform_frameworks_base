@@ -91,7 +91,7 @@
     <string name="screenrecord_name" msgid="2596401223859996572">"Снимач на екран"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Тековно известување за сесија за снимање на екранот"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Да се започне со снимање?"</string>
-    <string name="screenrecord_description" msgid="1123231719680353736">"При снимањето, системот на Android може да ги сними сите чувствителни податоци што се видливи на вашиот екран или пуштени на уредот. Ова вклучува лозинки, податоци за плаќање, фотографии, пораки и аудио."</string>
+    <string name="screenrecord_description" msgid="1123231719680353736">"При снимањето, системот Android може да ги сними сите чувствителни податоци што се видливи на вашиот екран или пуштени на уредот. Ова вклучува лозинки, податоци за плаќање, фотографии, пораки и аудио."</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Снимај аудио"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Аудио од уредот"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Звук од вашиот уред, како на пр., музика, повици и мелодии"</string>
@@ -211,7 +211,7 @@
     <string name="accessibility_signal_full" msgid="5920148525598637311">"Полн сигнал."</string>
     <string name="accessibility_desc_on" msgid="2899626845061427845">"Вклучена."</string>
     <string name="accessibility_desc_off" msgid="8055389500285421408">"Исклучено."</string>
-    <string name="accessibility_desc_connected" msgid="3082590384032624233">"Поврзана."</string>
+    <string name="accessibility_desc_connected" msgid="3082590384032624233">"Поврзано."</string>
     <string name="accessibility_desc_connecting" msgid="8011433412112903614">"Се поврзува."</string>
     <string name="data_connection_gprs" msgid="2752584037409568435">"GPRS"</string>
     <string name="data_connection_hspa" msgid="6096234094857660873">"HSPA"</string>
@@ -416,7 +416,7 @@
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Ноќно светло"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Вклуч. на зајдисонце"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"До изгрејсонце"</string>
-    <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"Ќе се вклучи во <xliff:g id="TIME">%s</xliff:g>"</string>
+    <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"Вклучување: <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"До <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_ui_mode_night_label" msgid="1398928270610780470">"Темна тема"</string>
     <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"Штедач на батерија"</string>
@@ -999,8 +999,7 @@
     <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Контролирајте ги балончињата во секое време"</string>
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Допрете „Управувајте“ за да ги исклучите балончињата од апликацијава"</string>
     <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"Сфатив"</string>
-    <!-- no translation found for bubbles_app_settings (5779443644062348657) -->
-    <skip />
+    <string name="bubbles_app_settings" msgid="5779443644062348657">"Поставки за <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Навигацијата на системот е ажурирана. За да извршите промени, одете во „Поставки“."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Одете во „Поставки“ за да ја ажурирате навигацијата на системот"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Подготвеност"</string>

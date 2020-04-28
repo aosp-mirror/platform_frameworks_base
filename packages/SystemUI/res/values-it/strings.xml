@@ -91,7 +91,7 @@
     <string name="screenrecord_name" msgid="2596401223859996572">"Registrazione dello schermo"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Notifica costante per una sessione di registrazione dello schermo"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Avviare la registrazione?"</string>
-    <string name="screenrecord_description" msgid="1123231719680353736">"Durante la registrazione, il sistema Android può catturare dati sensibili visibili sullo schermo o riprodotti sul tuo dispositivo. Sono incluse password, dati di pagamento, foto, messaggi e audio."</string>
+    <string name="screenrecord_description" msgid="1123231719680353736">"Durante la registrazione, il sistema Android può acquisire dati sensibili visibili sullo schermo o riprodotti sul tuo dispositivo, tra cui password, dati di pagamento, foto, messaggi e audio."</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Registra audio"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Audio del dispositivo"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Suoni del dispositivo, come musica, chiamate e suonerie"</string>
@@ -373,7 +373,7 @@
     <string name="quick_settings_user_title" msgid="8673045967216204537">"Utente"</string>
     <string name="quick_settings_user_new_user" msgid="3347905871336069666">"Nuovo utente"</string>
     <string name="quick_settings_wifi_label" msgid="2879507532983487244">"Wi-Fi"</string>
-    <string name="quick_settings_wifi_not_connected" msgid="4071097522427039160">"Non connesso"</string>
+    <string name="quick_settings_wifi_not_connected" msgid="4071097522427039160">"Non connessa"</string>
     <string name="quick_settings_wifi_no_network" msgid="6003178398713839313">"Nessuna rete"</string>
     <string name="quick_settings_wifi_off_label" msgid="4003379736176547594">"Wi-Fi disattivato"</string>
     <string name="quick_settings_wifi_on_label" msgid="2489928193654318511">"Wi-Fi attivo"</string>

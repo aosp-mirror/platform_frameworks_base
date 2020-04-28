@@ -192,7 +192,7 @@
     <string name="accessibility_data_two_bars" msgid="4576231688545173059">"Data dua batang."</string>
     <string name="accessibility_data_three_bars" msgid="3036562180893930325">"Data tiga batang."</string>
     <string name="accessibility_data_signal_full" msgid="283507058258113551">"Sinyal data penuh."</string>
-    <string name="accessibility_wifi_name" msgid="4863440268606851734">"Tersambung ke <xliff:g id="WIFI">%s</xliff:g>."</string>
+    <string name="accessibility_wifi_name" msgid="4863440268606851734">"Terhubung ke <xliff:g id="WIFI">%s</xliff:g>."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"Tersambung ke <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"Terhubung ke <xliff:g id="CAST">%s</xliff:g>."</string>
     <string name="accessibility_no_wimax" msgid="2014864207473859228">"Tidak ada WiMAX."</string>
@@ -203,7 +203,7 @@
     <string name="accessibility_ethernet_disconnected" msgid="2097190491174968655">"Ethernet terputus."</string>
     <string name="accessibility_ethernet_connected" msgid="3988347636883115213">"Ethernet tersambung."</string>
     <string name="accessibility_no_signal" msgid="1115622734914921920">"Tidak ada sinyal."</string>
-    <string name="accessibility_not_connected" msgid="4061305616351042142">"Tidak tersambung."</string>
+    <string name="accessibility_not_connected" msgid="4061305616351042142">"Tidak terhubung."</string>
     <string name="accessibility_zero_bars" msgid="1364823964848784827">"0 baris."</string>
     <string name="accessibility_one_bar" msgid="6312250030039240665">"Satu garis."</string>
     <string name="accessibility_two_bars" msgid="1335676987274417121">"Dua baris."</string>
@@ -373,7 +373,7 @@
     <string name="quick_settings_user_title" msgid="8673045967216204537">"Pengguna"</string>
     <string name="quick_settings_user_new_user" msgid="3347905871336069666">"Pengguna baru"</string>
     <string name="quick_settings_wifi_label" msgid="2879507532983487244">"Wi-Fi"</string>
-    <string name="quick_settings_wifi_not_connected" msgid="4071097522427039160">"Tidak Tersambung"</string>
+    <string name="quick_settings_wifi_not_connected" msgid="4071097522427039160">"Tidak Terhubung"</string>
     <string name="quick_settings_wifi_no_network" msgid="6003178398713839313">"Tidak Ada Jaringan"</string>
     <string name="quick_settings_wifi_off_label" msgid="4003379736176547594">"Wi-Fi Mati"</string>
     <string name="quick_settings_wifi_on_label" msgid="2489928193654318511">"Wi-Fi Aktif"</string>

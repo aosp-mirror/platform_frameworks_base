@@ -17,11 +17,16 @@ package com.android.settingslib.media;
 
 import static android.media.MediaRoute2Info.TYPE_BLUETOOTH_A2DP;
 import static android.media.MediaRoute2Info.TYPE_BUILTIN_SPEAKER;
+import static android.media.MediaRoute2Info.TYPE_DOCK;
 import static android.media.MediaRoute2Info.TYPE_GROUP;
+import static android.media.MediaRoute2Info.TYPE_HDMI;
 import static android.media.MediaRoute2Info.TYPE_HEARING_AID;
 import static android.media.MediaRoute2Info.TYPE_REMOTE_SPEAKER;
 import static android.media.MediaRoute2Info.TYPE_REMOTE_TV;
 import static android.media.MediaRoute2Info.TYPE_UNKNOWN;
+import static android.media.MediaRoute2Info.TYPE_USB_ACCESSORY;
+import static android.media.MediaRoute2Info.TYPE_USB_DEVICE;
+import static android.media.MediaRoute2Info.TYPE_USB_HEADSET;
 import static android.media.MediaRoute2Info.TYPE_WIRED_HEADPHONES;
 import static android.media.MediaRoute2Info.TYPE_WIRED_HEADSET;
 
@@ -101,6 +106,13 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
             case TYPE_WIRED_HEADSET:
             case TYPE_WIRED_HEADPHONES:
                 mType = MediaDeviceType.TYPE_3POINT5_MM_AUDIO_DEVICE;
+                break;
+            case TYPE_USB_DEVICE:
+            case TYPE_USB_HEADSET:
+            case TYPE_USB_ACCESSORY:
+            case TYPE_DOCK:
+            case TYPE_HDMI:
+                mType = MediaDeviceType.TYPE_USB_C_AUDIO_DEVICE;
                 break;
             case TYPE_HEARING_AID:
             case TYPE_BLUETOOTH_A2DP:
@@ -266,16 +278,22 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
 
     /**
      * Rules:
-     * 1. If there is one of the connected devices identified as a carkit, this carkit will
-     * be always on the top of the device list. Rule 2 and Rule 3 can’t overrule this rule.
+     * 1. If there is one of the connected devices identified as a carkit or fast pair device,
+     * the fast pair device will be always on the first of the device list and carkit will be
+     * second. Rule 2 and Rule 3 can’t overrule this rule.
      * 2. For devices without any usage data yet
      * WiFi device group sorted by alphabetical order + BT device group sorted by alphabetical
      * order + phone speaker
      * 3. For devices with usage record.
      * The most recent used one + device group with usage info sorted by how many times the
      * device has been used.
-     * 4. Phone device always in the top and the connected Bluetooth devices, cast devices and
-     * phone device will be always above on the disconnect Bluetooth devices.
+     * 4. The order is followed below rule:
+     *    1. USB-C audio device
+     *    2. 3.5 mm audio device
+     *    3. Bluetooth device
+     *    4. Cast device
+     *    5. Cast group device
+     *    6. Phone
      *
      * So the device list will look like 5 slots ranked as below.
      * Rule 4 + Rule 1 + the most recently used device + Rule 3 + Rule 2
@@ -295,39 +313,50 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
             }
         }
 
-        // Phone device always in the top.
-        if (mType == MediaDeviceType.TYPE_PHONE_DEVICE) {
-            return -1;
-        } else if (another.mType == MediaDeviceType.TYPE_PHONE_DEVICE) {
-            return 1;
-        }
-        // Check carkit
-        if (isCarKitDevice()) {
-            return -1;
-        } else if (another.isCarKitDevice()) {
-            return 1;
-        }
-        // Set last used device at the first item
-        String lastSelectedDevice = ConnectionRecordManager.getInstance().getLastSelectedDevice();
-        if (TextUtils.equals(lastSelectedDevice, getId())) {
-            return -1;
-        } else if (TextUtils.equals(lastSelectedDevice, another.getId())) {
-            return 1;
-        }
-        // Sort by how many times the device has been used if there is usage record
-        if ((mConnectedRecord != another.mConnectedRecord)
-                && (another.mConnectedRecord > 0 || mConnectedRecord > 0)) {
-            return (another.mConnectedRecord - mConnectedRecord);
-        }
-        // Both devices have never been used
-        // To devices with the same type, sort by alphabetical order
         if (mType == another.mType) {
+            // Check fast pair device
+            if (isFastPairDevice()) {
+                return -1;
+            } else if (another.isFastPairDevice()) {
+                return 1;
+            }
+
+            // Check carkit
+            if (isCarKitDevice()) {
+                return -1;
+            } else if (another.isCarKitDevice()) {
+                return 1;
+            }
+
+            // Set last used device at the first item
+            final String lastSelectedDevice = ConnectionRecordManager.getInstance()
+                    .getLastSelectedDevice();
+            if (TextUtils.equals(lastSelectedDevice, getId())) {
+                return -1;
+            } else if (TextUtils.equals(lastSelectedDevice, another.getId())) {
+                return 1;
+            }
+            // Sort by how many times the device has been used if there is usage record
+            if ((mConnectedRecord != another.mConnectedRecord)
+                    && (another.mConnectedRecord > 0 || mConnectedRecord > 0)) {
+                return (another.mConnectedRecord - mConnectedRecord);
+            }
+
+            // Both devices have never been used
+            // To devices with the same type, sort by alphabetical order
             final String s1 = getName();
             final String s2 = another.getName();
             return s1.compareToIgnoreCase(s2);
+        } else {
+            // Both devices have never been used, the priority is:
+            // 1. USB-C audio device
+            // 2. 3.5 mm audio device
+            // 3. Bluetooth device
+            // 4. Cast device
+            // 5. Cast group device
+            // 6. Phone
+            return mType < another.mType ? -1 : 1;
         }
-        // Both devices have never been used, the priority is Phone > Cast > Bluetooth
-        return mType - another.mType;
     }
 
     /**
@@ -335,6 +364,14 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
      * @return true if it is CarKit device
      */
     protected boolean isCarKitDevice() {
+        return false;
+    }
+
+    /**
+     * Check if it is FastPair device
+     * @return {@code true} if it is FastPair device, otherwise return {@code false}
+     */
+    protected boolean isFastPairDevice() {
         return false;
     }
 

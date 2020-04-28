@@ -52,7 +52,7 @@
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> को व्यवस्थापन गर्न <xliff:g id="APPLICATION">%1$s</xliff:g> खोल्ने हो?"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"<xliff:g id="APPLICATION">%1$s</xliff:g> लाई <xliff:g id="USB_DEVICE">%2$s</xliff:g> सञ्चालन गर्न खोल्ने हो?\nयो अनुप्रयोगलाई रेकर्ड गर्ने अनुमति प्रदान गरिएको छैन तर यसले USB यन्त्रमार्फत अडियो क्याप्चर गर्न सक्छ।"</string>
     <string name="usb_accessory_confirm_prompt" msgid="5728408382798643421">"<xliff:g id="USB_ACCESSORY">%2$s</xliff:g> को व्यवस्थापन गर्न <xliff:g id="APPLICATION">%1$s</xliff:g> खोल्ने हो?"</string>
-    <string name="usb_accessory_uri_prompt" msgid="6756649383432542382">"यस USB उपकरणसँग स्थापित अनुप्रयोग काम गर्दैन। यस उपकरणको बारेमा <xliff:g id="URL">%1$s</xliff:g> मा धेरै जान्नुहोस्"</string>
+    <string name="usb_accessory_uri_prompt" msgid="6756649383432542382">"यस USB उपकरणसँग स्थापित एप काम गर्दैन। यस उपकरणको बारेमा <xliff:g id="URL">%1$s</xliff:g> मा धेरै जान्नुहोस्"</string>
     <string name="title_usb_accessory" msgid="1236358027511638648">"USB सहयोगी"</string>
     <string name="label_view" msgid="6815442985276363364">"दृश्य"</string>
     <string name="always_use_device" msgid="210535878779644679">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> जडान भएको बेला सधैँ <xliff:g id="APPLICATION">%1$s</xliff:g> खोल्नुहोस्"</string>
@@ -85,14 +85,13 @@
     <string name="screenshot_failed_title" msgid="3259148215671936891">"स्क्रिनसट सुरक्षित गर्न सकिएन"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"स्क्रिनसट फेरि लिएर हेर्नुहोस्"</string>
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"भण्डारण ठाउँ सीमित भएका कारण स्क्रिनसट सुरक्षित गर्न सकिएन"</string>
-    <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"उक्त अनुप्रयोग वा तपाईंको संगठनले स्क्रिनसटहरू लिन दिँदैन"</string>
+    <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"उक्त एप वा तपाईंको संगठनले स्क्रिनसटहरू लिन दिँदैन"</string>
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"स्क्रिनसट हटाउनुहोस्"</string>
-    <!-- no translation found for screenshot_preview_description (7606510140714080474) -->
-    <skip />
+    <string name="screenshot_preview_description" msgid="7606510140714080474">"स्क्रिनसटको पूर्वावलोकन"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"स्क्रिन रेकर्डर"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"कुनै स्क्रिन रेकर्ड गर्ने सत्रका लागि चलिरहेको सूचना"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"रेकर्ड गर्न थाल्ने हो?"</string>
-    <string name="screenrecord_description" msgid="1123231719680353736">"रेकर्ड गर्दा, Android प्रणालीले तपाईंको स्क्रिनमा देखिने वा तपाईंको यन्त्रमा प्ले गरिने जुनसुकै संवेदनशील जानकारी समावेश गर्न सक्छ। यसमा पासवर्ड, भुक्तानीसम्बन्धी जानकारी, फोटो, सन्देश र अडियो समावेश हुन्छ।"</string>
+    <string name="screenrecord_description" msgid="1123231719680353736">"रेकर्ड गर्दा, Android प्रणालीले तपाईंको स्क्रिनमा देखिने वा तपाईंको यन्त्रमा प्ले गरिने सबै संवेदनशील जानकारी रेकर्ड गर्न सक्छ। यो जानकारीमा पासवर्ड, भुक्तानीसम्बन्धी जानकारी, फोटो, सन्देश र अडियो समावेश हुन्छ।"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"अडियो रेकर्ड गर्नुहोस्"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"यन्त्रको अडियो"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"तपाईंको यन्त्रका सङ्गीत, कल र रिङटोन जस्ता आवाज"</string>
@@ -101,13 +100,13 @@
     <string name="screenrecord_start" msgid="330991441575775004">"सुरु गर्नुहोस्"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"स्क्रिन रेकर्ड गर्दै"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"स्क्रिन र अडियो रेकर्ड गर्दै"</string>
-    <string name="screenrecord_taps_label" msgid="1595690528298857649">"स्क्रिन रेकर्ड गर्ने क्रममा स्पर्श गरिएका स्थानहरू देखाउनुहोस्"</string>
+    <string name="screenrecord_taps_label" msgid="1595690528298857649">"स्पर्श गरिएका स्थानहरू देखाउनुहोस्"</string>
     <string name="screenrecord_stop_text" msgid="6549288689506057686">"रोक्न ट्याप गर्नुहोस्"</string>
     <string name="screenrecord_stop_label" msgid="72699670052087989">"रोक्नुहोस्"</string>
     <string name="screenrecord_pause_label" msgid="6004054907104549857">"पज गर्नुहोस्"</string>
     <string name="screenrecord_resume_label" msgid="4972223043729555575">"जारी राख्नुहोस्"</string>
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"रद्द गर्नुहोस्"</string>
-    <string name="screenrecord_share_label" msgid="5025590804030086930">"आदान प्रदान गर्नुहोस्"</string>
+    <string name="screenrecord_share_label" msgid="5025590804030086930">"सेयर गर्नुहोस्"</string>
     <string name="screenrecord_delete_label" msgid="1376347010553987058">"मेट्नुहोस्"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"स्क्रिन रेकर्ड गर्ने कार्य रद्द गरियो"</string>
     <string name="screenrecord_save_message" msgid="490522052388998226">"स्क्रिन रेकर्डिङ सुरक्षित गरियो, हेर्न ट्याप गर्नुहोस्‌"</string>
@@ -118,7 +117,7 @@
     <string name="usb_preference_title" msgid="1439924437558480718">"USB फाइल सार्ने विकल्पहरू"</string>
     <string name="use_mtp_button_title" msgid="5036082897886518086">"मिडिया प्लेयर(MTP)को रूपमा माउन्ट गर्नुहोस्"</string>
     <string name="use_ptp_button_title" msgid="7676427598943446826">"क्यामेराको रूपमा माउन्ट गर्नुहोस् (PTP)"</string>
-    <string name="installer_cd_button_title" msgid="5499998592841984743">"म्याकको लागि एन्ड्रोइड फाइल ट्रान्सफर अनुप्रयोग स्थापना गर्नुहोस्"</string>
+    <string name="installer_cd_button_title" msgid="5499998592841984743">"म्याकको लागि एन्ड्रोइड फाइल ट्रान्सफर एप स्थापना गर्नुहोस्"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"पछाडि"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"गृह"</string>
     <string name="accessibility_menu" msgid="2701163794470513040">"मेनु"</string>
@@ -356,7 +355,7 @@
     <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="3003338571871392293">"श्रवण यन्त्रहरू"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"सक्रिय गर्दै…"</string>
     <string name="quick_settings_brightness_label" msgid="680259653088849563">"चमक"</string>
-    <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"स्वतःघुम्ने"</string>
+    <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"अटो रोटेट"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"स्क्रिन स्वतःघुम्ने"</string>
     <string name="accessibility_quick_settings_rotation_value" msgid="2916484894750819251">"<xliff:g id="ID_1">%s</xliff:g> मोड"</string>
     <string name="quick_settings_rotation_locked_label" msgid="4420863550666310319">"परिक्रमण लक गरिएको छ"</string>
@@ -431,8 +430,8 @@
     <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"स्रिनको रेकर्ड"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"सुरु गर्नुहोस्"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"रोक्नुहोस्"</string>
-    <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"अनुप्रयोगहरू बदल्न माथितिर स्वाइप गर्नुहोस्"</string>
-    <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"अनुप्रयोगहरू बदल्न द्रुत गतिमा दायाँतिर ड्र्याग गर्नुहोस्"</string>
+    <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"एपहरू बदल्न माथितिर स्वाइप गर्नुहोस्"</string>
+    <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"एपहरू बदल्न द्रुत गतिमा दायाँतिर ड्र्याग गर्नुहोस्"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"परिदृश्य टगल गर्नुहोस्"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"चार्ज भयो"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"चार्ज हुँदै"</string>
@@ -475,27 +474,27 @@
     <string name="user_add_user" msgid="4336657383006913022">"प्रयोगकर्ता थप्नुहोस्"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"नयाँ प्रयोगकर्ता"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"अतिथि हटाउने हो?"</string>
-    <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"यस सत्रमा सबै अनुप्रयोगहरू र डेटा मेटाइनेछ।"</string>
+    <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"यस सत्रमा सबै एपहरू र डेटा मेटाइनेछ।"</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"हटाउनुहोस्"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"पुनः स्वागत, अतिथि!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"तपाईं आफ्नो सत्र जारी गर्न चाहनुहुन्छ?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"सुरु गर्नुहोस्"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"हो, जारी राख्नुहोस्"</string>
     <string name="guest_notification_title" msgid="4434456703930764167">"अतिथि प्रयोगकर्ता"</string>
-    <string name="guest_notification_text" msgid="4202692942089571351">"अनुप्रयोगहरू र डेटा मेटाउन, अतिथि प्रयोगकर्ता हटाउनुहोस्"</string>
+    <string name="guest_notification_text" msgid="4202692942089571351">"एपहरू र डेटा मेटाउन, अतिथि प्रयोगकर्ता हटाउनुहोस्"</string>
     <string name="guest_notification_remove_action" msgid="4153019027696868099">"अतिथिलाई हटाउनुहोस्"</string>
     <string name="user_logout_notification_title" msgid="3644848998053832589">"प्रयोगकर्ता लगआउट गर्नुहोस्"</string>
     <string name="user_logout_notification_text" msgid="7441286737342997991">"वर्तमान प्रयोगकर्ता लगआउट गर्नुहोस्"</string>
     <string name="user_logout_notification_action" msgid="7974458760719361881">"प्रयोगकर्ता लगआउट गर्नुहोस्"</string>
     <string name="user_add_user_title" msgid="4172327541504825032">"नयाँ प्रयोगकर्ता थप्ने हो?"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"जब तपाईँले नयाँ प्रयोगकर्ता थप्नुहुन्छ, त्यस प्रयोगकर्ताले आफ्नो स्थान स्थापना गर्न पर्ने छ।\n\nकुनै पनि प्रयोगकर्ताले सबै अन्य प्रयोगकर्ताहरूका लागि अनुप्रयोगहरू अद्यावधिक गर्न सक्छन्।"</string>
+    <string name="user_add_user_message_short" msgid="2599370307878014791">"जब तपाईँले नयाँ प्रयोगकर्ता थप्नुहुन्छ, त्यस प्रयोगकर्ताले आफ्नो स्थान स्थापना गर्न पर्ने छ।\n\nकुनै पनि प्रयोगकर्ताले सबै अन्य प्रयोगकर्ताहरूका लागि एपहरू अद्यावधिक गर्न सक्छन्।"</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"प्रयोगकर्ताको सीमा पुग्यो"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="other">तपाईं अधिकतम <xliff:g id="COUNT">%d</xliff:g> प्रयोगहरू मात्र थप्न सक्नुहुन्छ।</item>
       <item quantity="one">एउटा प्रयोगकर्ता मात्र सिर्जना गर्न सकिन्छ।</item>
     </plurals>
     <string name="user_remove_user_title" msgid="9124124694835811874">"प्रयोगकर्ता हटाउन चाहनुहुन्छ?"</string>
-    <string name="user_remove_user_message" msgid="6702834122128031833">"यस प्रयोगकर्ताको सबै अनुप्रयोगहरू तथा डेटा हटाइने छ।"</string>
+    <string name="user_remove_user_message" msgid="6702834122128031833">"यस प्रयोगकर्ताको सबै एपहरू तथा डेटा हटाइने छ।"</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"हटाउनुहोस्"</string>
     <string name="battery_saver_notification_title" msgid="8419266546034372562">"ब्याट्री सेभर सक्रिय छ"</string>
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"प्रदर्शन र पृष्ठभूमि डेटा घटाउँनुहोस्"</string>
@@ -542,35 +541,35 @@
     <string name="disable_vpn" msgid="482685974985502922">"VPN असक्षम गर्नुहोस्"</string>
     <string name="disconnect_vpn" msgid="26286850045344557">"विच्छेद VPN"</string>
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"नीतिहरू हेर्नुहोस्"</string>
-    <string name="monitoring_description_named_management" msgid="7424612629468754552">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ले तपाईंको यन्त्रको व्यवस्थापन गर्छ।BREAK\n\nतपाईंका प्रशासकले सेटिङहरू, संस्थागत पहुँच, अनुप्रयोगहरू, तपाईंको यन्त्रसँग सम्बन्धित डेटा र तपाईंको यन्त्रको स्थानसम्बन्धी जानकारीको अनुगमन तथा व्यवस्थापन गर्न सक्नुहुन्छ।\n\nथप जानकारीका लागि आफ्नो प्रशासकलाई सम्पर्क गर्नुहोस्।"</string>
-    <string name="monitoring_description_management" msgid="8081910434889677718">"तपाईंको संगठनले तपाईंको यन्त्रको व्यवस्थापन गर्छ।\n\nतपाईंका प्रशासकले सेटिङहरू, संस्थागत पहुँच, अनुप्रयोगहरू, तपाईंको यन्त्रसँग सम्बन्धित डेटा र तपाईंको यन्त्रको स्थानसम्बन्धी जानकारीको अनुगमन तथा व्यवस्थापन गर्न सक्नुहुन्छ।\n\nथप जानकारीका लागि आफ्नो प्रशासकलाई सम्पर्क गर्नुहोस्।"</string>
+    <string name="monitoring_description_named_management" msgid="7424612629468754552">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ले तपाईंको यन्त्रको व्यवस्थापन गर्छ।BREAK\n\nतपाईंका प्रशासकले सेटिङहरू, संस्थागत पहुँच, एपहरू, तपाईंको यन्त्रसँग सम्बन्धित डेटा र तपाईंको यन्त्रको स्थानसम्बन्धी जानकारीको अनुगमन तथा व्यवस्थापन गर्न सक्नुहुन्छ।\n\nथप जानकारीका लागि आफ्नो प्रशासकलाई सम्पर्क गर्नुहोस्।"</string>
+    <string name="monitoring_description_management" msgid="8081910434889677718">"तपाईंको संगठनले तपाईंको यन्त्रको व्यवस्थापन गर्छ।\n\nतपाईंका प्रशासकले सेटिङहरू, संस्थागत पहुँच, एपहरू, तपाईंको यन्त्रसँग सम्बन्धित डेटा र तपाईंको यन्त्रको स्थानसम्बन्धी जानकारीको अनुगमन तथा व्यवस्थापन गर्न सक्नुहुन्छ।\n\nथप जानकारीका लागि आफ्नो प्रशासकलाई सम्पर्क गर्नुहोस्।"</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"तपाईंको संगठनले तपाईंको कार्य प्रोफाइलमा एउटा प्रमाणपत्र सम्बन्धी अख्तियार सुविधा स्थापित गऱ्यो। तपाईंको सुरक्षित नेटवर्क ट्राफिकको अनुगमन वा परिमार्जन हुनसक्छ।"</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"तपाईंको संगठनले तपाईंको कार्य प्रोफाइलमा एउटा प्रमाणपत्र सम्बन्धी अख्तियार सुविधा स्थापना गरेको छ। तपाईंको सुरक्षित नेटवर्क ट्राफिकको अनुगमन वा परिमार्जन हुनसक्छ।"</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"यस यन्त्रमा एउटा प्रमाणपत्र सम्बन्धी अख्तियार सुविधा स्थापना गरिएको छ। तपाईंको सुरक्षित नेटवर्कको ट्राफिकको अनुगमन वा परिमार्जन हुनसक्छ।"</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"तपाईंका प्रशासकले तपाईंको यन्त्रमा ट्राफिकको अनुगमन गर्ने नेटवर्क लग गर्ने प्रक्रियालाई सक्रिय गर्नुभएको छ।"</string>
-    <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"तपाईं इमेल, अनुप्रयोग र वेबसाइटहरू लगायत तपाईंको नेटवर्कको गतिविधिको अनुगमन गर्नसक्ने <xliff:g id="VPN_APP">%1$s</xliff:g> मा जडान हुनुहुन्छ।"</string>
-    <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"तपाईं इमेल, अनुप्रयोग र वेबसाइटहरू लगायत तपाईंको नेटवर्कको गतिविधिको अनुगमन गर्नसक्ने <xliff:g id="VPN_APP_0">%1$s</xliff:g> र <xliff:g id="VPN_APP_1">%2$s</xliff:g> मा जडान हुनुहुन्छ।"</string>
-    <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"तपाईंको कार्य प्रोफाइल तपाईंका इमेल, अनुप्रयोग र वेबसाइटहरू लगायत तपाईंको नेटवर्कको गतिविधिको अनुगमन गर्नसक्ने <xliff:g id="VPN_APP">%1$s</xliff:g> मा जडान छ।"</string>
-    <string name="monitoring_description_personal_profile_named_vpn" msgid="8179722332380953673">"तपाईंको व्यक्तिगत प्रोफाइल इमेल, अनुप्रयोग र वेबसाइटहरू लगायत तपाईंको नेटवर्कको गतिविधिको अनुगमन गर्नसक्ने <xliff:g id="VPN_APP">%1$s</xliff:g> मा जडान छ।"</string>
+    <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"तपाईं इमेल, एप र वेबसाइटहरू लगायत तपाईंको नेटवर्कको गतिविधिको अनुगमन गर्नसक्ने <xliff:g id="VPN_APP">%1$s</xliff:g> मा जडान हुनुहुन्छ।"</string>
+    <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"तपाईं इमेल, एप र वेबसाइटहरू लगायत तपाईंको नेटवर्कको गतिविधिको अनुगमन गर्नसक्ने <xliff:g id="VPN_APP_0">%1$s</xliff:g> र <xliff:g id="VPN_APP_1">%2$s</xliff:g> मा जडान हुनुहुन्छ।"</string>
+    <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"तपाईंको कार्य प्रोफाइल तपाईंका इमेल, एप र वेबसाइटहरू लगायत तपाईंको नेटवर्कको गतिविधिको अनुगमन गर्नसक्ने <xliff:g id="VPN_APP">%1$s</xliff:g> मा जडान छ।"</string>
+    <string name="monitoring_description_personal_profile_named_vpn" msgid="8179722332380953673">"तपाईंको व्यक्तिगत प्रोफाइल इमेल, एप र वेबसाइटहरू लगायत तपाईंको नेटवर्कको गतिविधिको अनुगमन गर्नसक्ने <xliff:g id="VPN_APP">%1$s</xliff:g> मा जडान छ।"</string>
     <string name="monitoring_description_do_header_generic" msgid="6130190408164834986">"तपाईंको यन्त्र <xliff:g id="DEVICE_OWNER_APP">%1$s</xliff:g> द्वारा व्यवस्थापन गरिएको छ।"</string>
     <string name="monitoring_description_do_header_with_name" msgid="2696255132542779511">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ले तपाईंको यन्त्रको व्यवस्थापन गर्न <xliff:g id="DEVICE_OWNER_APP">%2$s</xliff:g> को प्रयोग गर्दछ।"</string>
-    <string name="monitoring_description_do_body" msgid="7700878065625769970">"तपाईँको प्रशासकले सेटिङहरू, संस्थागत पहुँच, अनुप्रयोग, तपाईँको यन्त्रसँग सम्बन्धित डेटा र तपाईँको यन्त्रको स्थानसम्बन्धी जानकारीको अनुगमन तथा व्यवस्थापन गर्न सक्नुहुन्छ।"</string>
+    <string name="monitoring_description_do_body" msgid="7700878065625769970">"तपाईँको प्रशासकले सेटिङहरू, संस्थागत पहुँच, एप, तपाईँको यन्त्रसँग सम्बन्धित डेटा र तपाईँको यन्त्रको स्थानसम्बन्धी जानकारीको अनुगमन तथा व्यवस्थापन गर्न सक्नुहुन्छ।"</string>
     <string name="monitoring_description_do_learn_more_separator" msgid="1467280496376492558">" "</string>
     <string name="monitoring_description_do_learn_more" msgid="645149183455573790">"थप जान्नुहोस्"</string>
-    <string name="monitoring_description_do_body_vpn" msgid="7699280130070502303">"तपाईं <xliff:g id="VPN_APP">%1$s</xliff:g> मा जोडिनुभएको छ जसले इमेल, अनुप्रयोग र वेबसाइटहरू लगायत तपाईंको नेटवर्क सम्बन्धी गतिविधिको अनुगमन गर्न सक्छ।"</string>
+    <string name="monitoring_description_do_body_vpn" msgid="7699280130070502303">"तपाईं <xliff:g id="VPN_APP">%1$s</xliff:g> मा जोडिनुभएको छ जसले इमेल, एप र वेबसाइटहरू लगायत तपाईंको नेटवर्क सम्बन्धी गतिविधिको अनुगमन गर्न सक्छ।"</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"VPN सम्बन्धी सेटिङहरू खोल्नुहोस्"</string>
     <string name="monitoring_description_ca_cert_settings_separator" msgid="7107390013344435439">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="8329781950135541003">"खुला विश्वसनीय प्रमाणहरू"</string>
     <string name="monitoring_description_network_logging" msgid="577305979174002252">"तपाईँको प्रशासकले तपाईँको यन्त्रमा ट्राफिकको अनुगमन गर्ने नेटवर्कको लगिङलाई सक्रिय पार्नुभएको छ।\n\nथप जानकारीका लागि आफ्नो प्रशासकलाई सम्पर्क गर्नुहोस्।"</string>
-    <string name="monitoring_description_vpn" msgid="1685428000684586870">"तपाईँले VPN जडान गर्न अनुप्रयोगलाई अनुमति दिनुभयो।\n\nयो अनुप्रयोगले तपाईँका यन्त्र र  नेटवर्क गतिविधि लगायत इमेल, अनुप्रयोग र वेबसाइटहरू अनुगमन गर्न सक्छ।"</string>
-    <string name="monitoring_description_vpn_profile_owned" msgid="4964237035412372751">"तपाईंको कार्य प्रोफाइल <xliff:g id="ORGANIZATION">%1$s</xliff:g> ले व्यवस्थापन गर्दछ।\n\nतपाईंको प्रशासकले तपाईंको इमेल, अनुप्रयोग र वेबसाइट सहित नेटवर्कमा तपाईंको गतिविधिको अनुगमन गर्न सक्नुहुन्छ। \n\nथप जानकारीका लागि आफ्नो प्रशासकलाई सम्पर्क गर्नुहोस्।\n\n तपाईं एउटा VPN मा जडित हुनुहुन्छ। यस VPN ले नेटवर्कमा तपाईंको गतिविधिको अनुगमन गर्न सक्छ।"</string>
+    <string name="monitoring_description_vpn" msgid="1685428000684586870">"तपाईँले VPN जडान गर्न एपलाई अनुमति दिनुभयो।\n\nयो एपले तपाईँका यन्त्र र  नेटवर्क गतिविधि लगायत इमेल, एप र वेबसाइटहरू अनुगमन गर्न सक्छ।"</string>
+    <string name="monitoring_description_vpn_profile_owned" msgid="4964237035412372751">"तपाईंको कार्य प्रोफाइल <xliff:g id="ORGANIZATION">%1$s</xliff:g> ले व्यवस्थापन गर्दछ।\n\nतपाईंको प्रशासकले तपाईंको इमेल, एप र वेबसाइट सहित नेटवर्कमा तपाईंको गतिविधिको अनुगमन गर्न सक्नुहुन्छ। \n\nथप जानकारीका लागि आफ्नो प्रशासकलाई सम्पर्क गर्नुहोस्।\n\n तपाईं एउटा VPN मा जडित हुनुहुन्छ। यस VPN ले नेटवर्कमा तपाईंको गतिविधिको अनुगमन गर्न सक्छ।"</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
-    <string name="monitoring_description_app" msgid="376868879287922929">"तपाईं आफ्ना इमेल, अनुप्रयोग र वेवसाइटहरू लगायत तपाईंको नेटवर्कको गतिविधिको अनुगमन गर्नसक्ने <xliff:g id="APPLICATION">%1$s</xliff:g> मा जडान हुनुहुन्छ।"</string>
-    <string name="monitoring_description_app_personal" msgid="1970094872688265987">"तपाईं <xliff:g id="APPLICATION">%1$s</xliff:g> सँग जडित हुनुहुन्छ जसले इ-मेल, अनुप्रयोगहरू र वेबसाइट लगायतका तपाईंको निजी नेटवर्क गतिविधिका अनुगमन गर्न सक्छ।"</string>
-    <string name="branded_monitoring_description_app_personal" msgid="1703511985892688885">"तपाईं <xliff:g id="APPLICATION">%1$s</xliff:g> मा जोडिनुभएको छ जसले इमेल, अनुप्रयोग र वेबसाइटहरू लगायतको तपाईंको  व्यक्तिगत नेटवर्क सम्बन्धी गतिविधिको अनुगमन गर्न सक्छ।"</string>
-    <string name="monitoring_description_app_work" msgid="3713084153786663662">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> ले तपाईंको कार्य प्रोफाइलको व्यवस्थापन गर्छ। उक्त प्रोफाइल तपाईंका इमेल, अनुप्रयोग र वेवसाइटहरू लगायत तपाईंको नेटवर्कको गतिविधिको अनुगमन गर्नसक्ने <xliff:g id="APPLICATION">%2$s</xliff:g> मा जडान छ।\n\nथप जानकारीका लागि, आफ्ना प्रशासकलाई सम्पर्क गर्नुहोस्।"</string>
-    <string name="monitoring_description_app_personal_work" msgid="6175816356939166101">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> ले तपाईंको कार्य प्रोफाइलको व्यवस्थापन गर्छ। उक्त प्रोफाइल तपाईंका इमेल, अनुप्रयोग र वेवसाइटहरू लगायत तपाईंको नेटवर्कको गतिविधिको अनुगमन गर्नसक्ने <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> मा जडान छ। \n\nतपाईं आफ्नो व्यक्तिगत नेटवर्कको गतिविधिको अनुगमन गर्नसक्ने <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> मा पनि जडान हुनुहुन्छ।"</string>
+    <string name="monitoring_description_app" msgid="376868879287922929">"तपाईं आफ्ना इमेल, एप र वेवसाइटहरू लगायत तपाईंको नेटवर्कको गतिविधिको अनुगमन गर्नसक्ने <xliff:g id="APPLICATION">%1$s</xliff:g> मा जडान हुनुहुन्छ।"</string>
+    <string name="monitoring_description_app_personal" msgid="1970094872688265987">"तपाईं <xliff:g id="APPLICATION">%1$s</xliff:g> सँग जडित हुनुहुन्छ जसले इ-मेल, एपहरू र वेबसाइट लगायतका तपाईंको निजी नेटवर्क गतिविधिका अनुगमन गर्न सक्छ।"</string>
+    <string name="branded_monitoring_description_app_personal" msgid="1703511985892688885">"तपाईं <xliff:g id="APPLICATION">%1$s</xliff:g> मा जोडिनुभएको छ जसले इमेल, एप र वेबसाइटहरू लगायतको तपाईंको  व्यक्तिगत नेटवर्क सम्बन्धी गतिविधिको अनुगमन गर्न सक्छ।"</string>
+    <string name="monitoring_description_app_work" msgid="3713084153786663662">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> ले तपाईंको कार्य प्रोफाइलको व्यवस्थापन गर्छ। उक्त प्रोफाइल तपाईंका इमेल, एप र वेवसाइटहरू लगायत तपाईंको नेटवर्कको गतिविधिको अनुगमन गर्नसक्ने <xliff:g id="APPLICATION">%2$s</xliff:g> मा जडान छ।\n\nथप जानकारीका लागि, आफ्ना प्रशासकलाई सम्पर्क गर्नुहोस्।"</string>
+    <string name="monitoring_description_app_personal_work" msgid="6175816356939166101">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> ले तपाईंको कार्य प्रोफाइलको व्यवस्थापन गर्छ। उक्त प्रोफाइल तपाईंका इमेल, एप र वेवसाइटहरू लगायत तपाईंको नेटवर्कको गतिविधिको अनुगमन गर्नसक्ने <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> मा जडान छ। \n\nतपाईं आफ्नो व्यक्तिगत नेटवर्कको गतिविधिको अनुगमन गर्नसक्ने <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> मा पनि जडान हुनुहुन्छ।"</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"TrustAgent ले खुला राखेको"</string>
     <string name="keyguard_indication_trust_disabled" msgid="6820793704816727918">"तपाईँले नखोले सम्म उपकरण बन्द रहनेछ"</string>
     <string name="keyguard_indication_trust_unlocked_plugged_in" msgid="2323452175329362855">"<xliff:g id="KEYGUARD_INDICATION">%1$s</xliff:g>\n<xliff:g id="POWER_INDICATION">%2$s</xliff:g>"</string>
@@ -639,7 +638,7 @@
     <string name="output_service_bt_wifi" msgid="7186882540475524124">"ब्लुटुथ र Wi-Fi"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"प्रणाली UI ट्युनर"</string>
     <string name="show_battery_percentage" msgid="6235377891802910455">"इम्बेड गरिएको ब्याट्री प्रतिशत देखाउनुहोस्"</string>
-    <string name="show_battery_percentage_summary" msgid="9053024758304102915">"चार्ज नगरेको बेला वस्तुस्थिति पट्टी आइकन भित्र ब्याट्री प्रतिशत स्तर देखाउनुहोस्"</string>
+    <string name="show_battery_percentage_summary" msgid="9053024758304102915">"चार्ज नगरेको बेला स्टाटस बार आइकन भित्र ब्याट्री प्रतिशत स्तर देखाउनुहोस्"</string>
     <string name="quick_settings" msgid="6211774484997470203">"द्रुत सेटिङहरू"</string>
     <string name="status_bar" msgid="4357390266055077437">"स्थिति पट्टी"</string>
     <string name="overview" msgid="3522318590458536816">"परिदृश्य"</string>
@@ -666,7 +665,7 @@
     <string name="tuner_toast" msgid="3812684836514766951">"बधाईँ छ! सेटिङहरूमा प्रणाली UI ट्युनर थप गरिएको छ"</string>
     <string name="remove_from_settings" msgid="633775561782209994">"सेटिङहरूबाट हटाउनुहोस्"</string>
     <string name="remove_from_settings_prompt" msgid="551565437265615426">"प्रणाली UI ट्युनर सेटिङहरूबाट हटाउने र यसका सबै सुविधाहरू प्रयोग गर्न रोक्ने हो?"</string>
-    <string name="activity_not_found" msgid="8711661533828200293">"तपाईँको यन्त्रमा अनुप्रयोग स्थापना भएको छैन"</string>
+    <string name="activity_not_found" msgid="8711661533828200293">"तपाईँको यन्त्रमा एप स्थापना भएको छैन"</string>
     <string name="clock_seconds" msgid="8709189470828542071">"घडीमा सेकेन्ड देखाउनुहोस्"</string>
     <string name="clock_seconds_desc" msgid="2415312788902144817">"वस्तुस्थिति पट्टीको घडीमा सेकेन्ड देखाउनुहोस्। ब्याट्री आयु प्रभावित हुन सक्छ।"</string>
     <string name="qs_rearrange" msgid="484816665478662911">"द्रुत सेटिङहरू पुनः व्यवस्थित गर्नुहोस्"</string>
@@ -796,7 +795,7 @@
     <string name="keyboard_shortcut_group_system_notifications" msgid="3615971650562485878">"सूचनाहरू"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4856808328618265589">"किबोर्ड सर्टकटहरू"</string>
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"किबोर्डको लेआउट बदल्नुहोस्"</string>
-    <string name="keyboard_shortcut_group_applications" msgid="7386239431100651266">"अनुप्रयोगहरू"</string>
+    <string name="keyboard_shortcut_group_applications" msgid="7386239431100651266">"एपहरू"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="771606231466098742">"सहायता"</string>
     <string name="keyboard_shortcut_group_applications_browser" msgid="2776211137869809251">"ब्राउजर"</string>
     <string name="keyboard_shortcut_group_applications_contacts" msgid="2807268086386201060">"सम्पर्कहरू"</string>
@@ -915,7 +914,7 @@
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"अघिल्लोमा जानुहोस्"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"फोन अति नै तातिएकाले चिसिन बन्द भयो"</string>
     <string name="thermal_shutdown_message" msgid="7432744214105003895">"तपाईंको फोन अब सामान्य ढंगले चल्दै छ"</string>
-    <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"तपाईंको फोन अति नै तातिएकाले चिसिन बन्द भयो। तपाईंको फोन अब सामान्य ढंगले चल्दै छ।\n\nतपाईंले निम्न कुराहरू गर्नुभयो भने तपाईंको फोन अत्यन्त तातो हुनसक्छ:\n	• धेरै संसाधन खपत गर्ने अनुप्रयोगहरूको प्रयोग (जस्तै गेमिङ, भिडियो वा नेभिगेसन अनुप्रयोगहरू)\n	• ठूला फाइलहरूको डाउनलोड वा अपलोड\n	• उच्च तापक्रममा फोनको प्रयोग"</string>
+    <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"तपाईंको फोन अति नै तातिएकाले चिसिन बन्द भयो। तपाईंको फोन अब सामान्य ढंगले चल्दै छ।\n\nतपाईंले निम्न कुराहरू गर्नुभयो भने तपाईंको फोन अत्यन्त तातो हुनसक्छ:\n	• धेरै संसाधन खपत गर्ने एपहरूको प्रयोग (जस्तै गेमिङ, भिडियो वा नेभिगेसन एपहरू)\n	• ठूला फाइलहरूको डाउनलोड वा अपलोड\n	• उच्च तापक्रममा फोनको प्रयोग"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"फोन तातो भइरहेको छ"</string>
     <string name="high_temp_notif_message" msgid="163928048626045592">"फोन चिसो हुँदै गर्दा केही विशेषताहरूलाई सीमित गरिन्छ"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"तपाईंको फोन स्वतः चिसो हुने प्रयास गर्ने छ। तपाईं अझै पनि आफ्नो फोनको प्रयोग गर्न सक्नुहुन्छ तर त्यो अझ ढिलो चल्न सक्छ।\n\nचिसो भएपछि तपाईंको फोन सामान्य गतिमा चल्नेछ।"</string>
@@ -928,24 +927,24 @@
     <string name="lockscreen_unlock_right" msgid="4658008735541075346">"दायाँतिरको सर्टकटले पनि अनलक गर्छ"</string>
     <string name="lockscreen_none" msgid="4710862479308909198">"कुनै पनि होइन"</string>
     <string name="tuner_launch_app" msgid="3906265365971743305">"<xliff:g id="APP">%1$s</xliff:g> सुरु गर्नुहोस्"</string>
-    <string name="tuner_other_apps" msgid="7767462881742291204">"अन्य अनुप्रयोगहरू"</string>
+    <string name="tuner_other_apps" msgid="7767462881742291204">"अन्य एपहरू"</string>
     <string name="tuner_circle" msgid="5270591778160525693">"सर्कल"</string>
     <string name="tuner_plus" msgid="4130366441154416484">"प्लस चिन्ह"</string>
     <string name="tuner_minus" msgid="5258518368944598545">"माइनस चिन्ह"</string>
     <string name="tuner_left" msgid="5758862558405684490">"बायाँ"</string>
     <string name="tuner_right" msgid="8247571132790812149">"दायाँ"</string>
     <string name="tuner_menu" msgid="363690665924769420">"मेनु"</string>
-    <string name="tuner_app" msgid="6949280415826686972">"<xliff:g id="APP">%1$s</xliff:g> अनुप्रयोग"</string>
+    <string name="tuner_app" msgid="6949280415826686972">"<xliff:g id="APP">%1$s</xliff:g> एप"</string>
     <string name="notification_channel_alerts" msgid="3385787053375150046">"सतर्कताहरू"</string>
     <string name="notification_channel_battery" msgid="9219995638046695106">"ब्याट्री"</string>
     <string name="notification_channel_screenshot" msgid="7665814998932211997">"स्क्रिनशटहरू"</string>
     <string name="notification_channel_general" msgid="4384774889645929705">"सामान्य सन्देशहरू"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"भण्डारण"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"सङ्केतहरू"</string>
-    <string name="instant_apps" msgid="8337185853050247304">"तात्कालिक अनुप्रयोगहरू"</string>
+    <string name="instant_apps" msgid="8337185853050247304">"तात्कालिक एपहरू"</string>
     <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> चलिरहेको छ"</string>
-    <string name="instant_apps_message" msgid="6112428971833011754">"स्थापना नगरिकनै अनुप्रयोग खोलियो।"</string>
-    <string name="instant_apps_message_with_help" msgid="1816952263531203932">"स्थापना नगरिकनै अनुप्रयोग खोलियो। थप जान्न ट्याप गर्नुहोस्।"</string>
+    <string name="instant_apps_message" msgid="6112428971833011754">"स्थापना नगरिकनै एप खोलियो।"</string>
+    <string name="instant_apps_message_with_help" msgid="1816952263531203932">"स्थापना नगरिकनै एप खोलियो। थप जान्न ट्याप गर्नुहोस्।"</string>
     <string name="app_info" msgid="5153758994129963243">"एपसम्बन्धी जानकारी"</string>
     <string name="go_to_web" msgid="636673528981366511">"ब्राउजरमा जानुहोस्"</string>
     <string name="mobile_data" msgid="4564407557775397216">"मोबाइल डेटा"</string>
@@ -960,7 +959,7 @@
     <string name="qs_dnd_until" msgid="7844269319043747955">"<xliff:g id="ID_1">%s</xliff:g> सम्म"</string>
     <string name="qs_dnd_keep" msgid="3829697305432866434">"राख्नुहोस्"</string>
     <string name="qs_dnd_replace" msgid="7712119051407052689">"प्रतिस्थापन गर्नुहोस्"</string>
-    <string name="running_foreground_services_title" msgid="5137313173431186685">"पृष्ठभूमिमा चल्ने अनुप्रयोगहरू"</string>
+    <string name="running_foreground_services_title" msgid="5137313173431186685">"पृष्ठभूमिमा चल्ने एपहरू"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"ब्याट्री र डेटाका प्रयोग सम्बन्धी विवरणहरूका लागि ट्याप गर्नुहोस्"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"मोबाइल डेटा निष्क्रिय पार्ने हो?"</string>
     <string name="mobile_data_disable_message" msgid="8604966027899770415">"तपाईं <xliff:g id="CARRIER">%s</xliff:g> मार्फत डेटा वा इन्टरनेट प्रयोग गर्न सक्नुहुने छैन। Wi-Fi मार्फत मात्र इन्टरनेट उपलब्ध हुने छ।"</string>
@@ -983,7 +982,7 @@
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"सेन्सरहरू निष्क्रिय छन्"</string>
     <string name="device_services" msgid="1549944177856658705">"यन्त्रका सेवाहरू"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"शीर्षक छैन"</string>
-    <string name="restart_button_description" msgid="6916116576177456480">"यो अनुप्रयोग पुनः सुरु गर्न ट्याप गर्नुहोस् र फुल स्क्रिन मोडमा जानुहोस्।"</string>
+    <string name="restart_button_description" msgid="6916116576177456480">"यो एप पुनः सुरु गर्न ट्याप गर्नुहोस् र फुल स्क्रिन मोडमा जानुहोस्।"</string>
     <string name="bubbles_settings_button_description" msgid="7324245408859877545">"<xliff:g id="APP_NAME">%1$s</xliff:g> का बबलसम्बन्धी सेटिङहरू"</string>
     <string name="manage_bubbles_text" msgid="6856830436329494850">"व्यवस्थापन गर्नुहोस्"</string>
     <string name="bubble_content_description_single" msgid="5175160674436546329">"<xliff:g id="APP_NAME">%2$s</xliff:g> को <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
@@ -1005,16 +1004,11 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"प्रणालीको नेभिगेसन अद्यावधिक गरियो। परिवर्तन गर्न सेटिङमा जानुहोस्।"</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"प्रणालीको नेभिगेसन अद्यावधिक गर्न सेटिङमा जानुहोस्"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"स्ट्यान्डबाई"</string>
-    <!-- no translation found for priority_onboarding_show_at_top_text (1678400241025513541) -->
-    <skip />
-    <!-- no translation found for priority_onboarding_show_avatar_text (5756291381124091508) -->
-    <skip />
-    <!-- no translation found for priority_onboarding_appear_as_bubble_text (4227039772250263122) -->
-    <skip />
-    <!-- no translation found for priority_onboarding_ignores_dnd_text (2918952762719600529) -->
-    <skip />
-    <!-- no translation found for priority_onboarding_done_button_title (4569550984286506007) -->
-    <skip />
+    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"वार्तालाप खण्डको सिरानमा देखाइयोस्"</string>
+    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"लक स्क्रिनमा प्रोफाइल तस्बिर देखाइयोस्"</string>
+    <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"एपहरूमाथि तैरिने बबलका रूपमा देखाइयोस्"</string>
+    <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"बाधा नपुऱ्याउनुहोस् मोडलाई बेवास्ता गरियोस्"</string>
+    <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"बुझेँ"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"म्याग्निफिकेसन ओभरले विन्डो"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"म्याग्निफिकेसन विन्डो"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"म्याग्निफिकेसन विन्डोका नियन्त्रणहरू"</string>
@@ -1022,7 +1016,7 @@
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"आफ्ना जोडिएका यन्त्रहरूका लागि नियन्त्रण सुविधाहरू थप्नुहोस्"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"यन्त्र नियन्त्रण गर्ने विजेटहरू सेटअप गर्नुहोस्"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"आफ्ना नियन्त्रणहरूमाथि पहुँच राख्न पावर बटन थिचिराख्नुहोस्"</string>
-    <string name="controls_providers_title" msgid="6879775889857085056">"नियन्त्रणहरू थप्न अनुप्रयोग छनौट गर्नुहोस्"</string>
+    <string name="controls_providers_title" msgid="6879775889857085056">"नियन्त्रणहरू थप्न एप छनौट गर्नुहोस्"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> वटा नियन्त्र थपियो।</item>
       <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> नियन्त्र थपियो</item>
@@ -1047,7 +1041,7 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"थप हेर्न स्वाइप गर्नुहोस्"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"सिफारिसहरू लोड गर्दै"</string>
     <string name="controls_media_close_session" msgid="9023534788828414585">"यो मिडिया सत्र बन्द गर्नुहोस्"</string>
-    <string name="controls_error_timeout" msgid="794197289772728958">"निष्क्रिय छ, अनुप्रयोग जाँच गर्नु…"</string>
+    <string name="controls_error_timeout" msgid="794197289772728958">"निष्क्रिय छ, एप जाँच गर्नु…"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"त्रुटि भयो, फेरि प्रयास गर्नु…"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"कार्य हुँदै छ"</string>
     <string name="controls_added_tooltip" msgid="4842812921719153085">"नयाँ नियन्त्रण सुविधाहरू हेर्न पावर बटन थिचिराख्नुहोस्"</string>

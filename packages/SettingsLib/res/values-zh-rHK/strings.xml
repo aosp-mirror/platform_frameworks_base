@@ -435,7 +435,7 @@
     <string name="power_discharge_by" msgid="4113180890060388350">"電量剩餘約 <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"電量大約可用到<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"還可用到<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"電池電量可能將於<xliff:g id="TIME">%1$s</xliff:g>耗盡"</string>
+    <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"電池電量可能將於<xliff:g id="TIME">%1$s</xliff:g> 耗盡"</string>
     <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"剩餘電量少於 <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration" msgid="318215464914990578">"剩餘電量少於 <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="446388082266121894">"剩餘電量時間超過 <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>

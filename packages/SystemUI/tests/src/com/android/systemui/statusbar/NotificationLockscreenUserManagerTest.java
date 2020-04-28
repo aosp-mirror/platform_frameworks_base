@@ -20,6 +20,8 @@ import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.content.Intent.ACTION_USER_SWITCHED;
 import static android.provider.Settings.Secure.NOTIFICATION_NEW_INTERRUPTION_MODEL;
 
+import static com.android.systemui.statusbar.notification.stack.NotificationSectionsManager.BUCKET_MEDIA_CONTROLS;
+import static com.android.systemui.statusbar.notification.stack.NotificationSectionsManager.BUCKET_PEOPLE;
 import static com.android.systemui.statusbar.notification.stack.NotificationSectionsManager.BUCKET_SILENT;
 
 import static junit.framework.Assert.assertFalse;
@@ -42,6 +44,7 @@ import android.content.pm.UserInfo;
 import android.database.ContentObserver;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
@@ -99,6 +102,9 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
     private UserInfo mSecondaryUser;
     private UserInfo mWorkUser;
     private TestNotificationLockscreenUserManager mLockscreenUserManager;
+    private NotificationEntry mCurrentUserNotif;
+    private NotificationEntry mSecondaryUserNotif;
+    private NotificationEntry mWorkProfileNotif;
 
     @Before
     public void setUp() {
@@ -115,6 +121,21 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
                 mCurrentUser, mSecondaryUser, mWorkUser));
         mDependency.injectTestDependency(Dependency.MAIN_HANDLER,
                 Handler.createAsync(Looper.myLooper()));
+
+        Notification notifWithPrivateVisibility = new Notification();
+        notifWithPrivateVisibility.visibility = Notification.VISIBILITY_PRIVATE;
+        mCurrentUserNotif = new NotificationEntryBuilder()
+                .setNotification(notifWithPrivateVisibility)
+                .setUser(new UserHandle(mCurrentUser.id))
+                .build();
+        mSecondaryUserNotif = new NotificationEntryBuilder()
+                .setNotification(notifWithPrivateVisibility)
+                .setUser(new UserHandle(mSecondaryUser.id))
+                .build();
+        mWorkProfileNotif = new NotificationEntryBuilder()
+                .setNotification(notifWithPrivateVisibility)
+                .setUser(new UserHandle(mWorkUser.id))
+                .build();
 
         mLockscreenUserManager = new TestNotificationLockscreenUserManager(mContext);
         mLockscreenUserManager.setUpWithPresenter(mPresenter);
@@ -155,7 +176,7 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
         Settings.Secure.putIntForUser(mContext.getContentResolver(),
                 Settings.Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS, 0, mCurrentUser.id);
         mLockscreenUserManager.getLockscreenSettingsObserverForTest().onChange(false);
-        assertFalse(mLockscreenUserManager.userAllowsNotificationsInPublic(mCurrentUser.id));
+        assertFalse(mLockscreenUserManager.userAllowsPrivateNotificationsInPublic(mCurrentUser.id));
     }
 
     @Test
@@ -163,7 +184,7 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
         Settings.Secure.putIntForUser(mContext.getContentResolver(),
                 Settings.Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS, 0, mWorkUser.id);
         mLockscreenUserManager.getLockscreenSettingsObserverForTest().onChange(false);
-        assertFalse(mLockscreenUserManager.allowsManagedPrivateNotificationsInPublic());
+        assertFalse(mLockscreenUserManager.userAllowsPrivateNotificationsInPublic(mWorkUser.id));
     }
 
     @Test
@@ -171,7 +192,107 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
         Settings.Secure.putIntForUser(mContext.getContentResolver(),
                 Settings.Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS, 1, mWorkUser.id);
         mLockscreenUserManager.getLockscreenSettingsObserverForTest().onChange(false);
-        assertTrue(mLockscreenUserManager.allowsManagedPrivateNotificationsInPublic());
+        assertTrue(mLockscreenUserManager.userAllowsPrivateNotificationsInPublic(mWorkUser.id));
+    }
+
+    @Test
+    public void testCurrentUserPrivateNotificationsNotRedacted() {
+        // GIVEN current user doesn't allow private notifications to show
+        Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                Settings.Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS, 0, mCurrentUser.id);
+        mLockscreenUserManager.getLockscreenSettingsObserverForTest().onChange(false);
+
+        // THEN current user's notification is redacted
+        assertTrue(mLockscreenUserManager.needsRedaction(mCurrentUserNotif));
+    }
+
+    @Test
+    public void testCurrentUserPrivateNotificationsRedacted() {
+        // GIVEN current user allows private notifications to show
+        Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                Settings.Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS, 1, mCurrentUser.id);
+        mLockscreenUserManager.getLockscreenSettingsObserverForTest().onChange(false);
+
+        // THEN current user's notification isn't redacted
+        assertFalse(mLockscreenUserManager.needsRedaction(mCurrentUserNotif));
+    }
+
+    @Test
+    public void testWorkPrivateNotificationsRedacted() {
+        // GIVEN work profile doesn't private notifications to show
+        Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                Settings.Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS, 0, mWorkUser.id);
+        mLockscreenUserManager.getLockscreenSettingsObserverForTest().onChange(false);
+
+        // THEN work profile notification is redacted
+        assertTrue(mLockscreenUserManager.needsRedaction(mWorkProfileNotif));
+    }
+
+    @Test
+    public void testWorkPrivateNotificationsNotRedacted() {
+        // GIVEN work profile allows private notifications to show
+        Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                Settings.Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS, 1, mWorkUser.id);
+        mLockscreenUserManager.getLockscreenSettingsObserverForTest().onChange(false);
+
+        // THEN work profile notification isn't redacted
+        assertFalse(mLockscreenUserManager.needsRedaction(mWorkProfileNotif));
+    }
+
+    @Test
+    public void testWorkPrivateNotificationsNotRedacted_otherUsersRedacted() {
+        // GIVEN work profile allows private notifications to show but the other users don't
+        Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                Settings.Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS, 1, mWorkUser.id);
+        Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                Settings.Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS, 0, mCurrentUser.id);
+        Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                Settings.Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS, 0,
+                mSecondaryUser.id);
+        mLockscreenUserManager.getLockscreenSettingsObserverForTest().onChange(false);
+
+        // THEN the work profile notification doesn't need to be redacted
+        assertFalse(mLockscreenUserManager.needsRedaction(mWorkProfileNotif));
+
+        // THEN the current user and secondary user notifications do need to be redacted
+        assertTrue(mLockscreenUserManager.needsRedaction(mCurrentUserNotif));
+        assertTrue(mLockscreenUserManager.needsRedaction(mSecondaryUserNotif));
+    }
+
+    @Test
+    public void testWorkProfileRedacted_otherUsersNotRedacted() {
+        // GIVEN work profile doesn't allow private notifications to show but the other users do
+        Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                Settings.Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS, 0, mWorkUser.id);
+        Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                Settings.Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS, 1, mCurrentUser.id);
+        Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                Settings.Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS, 1,
+                mSecondaryUser.id);
+        mLockscreenUserManager.getLockscreenSettingsObserverForTest().onChange(false);
+
+        // THEN the work profile notification needs to be redacted
+        assertTrue(mLockscreenUserManager.needsRedaction(mWorkProfileNotif));
+
+        // THEN the current user and secondary user notifications don't need to be redacted
+        assertFalse(mLockscreenUserManager.needsRedaction(mCurrentUserNotif));
+        assertFalse(mLockscreenUserManager.needsRedaction(mSecondaryUserNotif));
+    }
+
+    @Test
+    public void testSecondaryUserNotRedacted_currentUserRedacted() {
+        // GIVEN secondary profile allows private notifications to show but the current user
+        // doesn't allow private notifications to show
+        Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                Settings.Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS, 0, mCurrentUser.id);
+        Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                Settings.Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS, 1,
+                mSecondaryUser.id);
+        mLockscreenUserManager.getLockscreenSettingsObserverForTest().onChange(false);
+
+        // THEN the secondary profile notification still needs to be redacted because the current
+        // user's setting takes precedence
+        assertTrue(mLockscreenUserManager.needsRedaction(mSecondaryUserNotif));
     }
 
     @Test
@@ -231,6 +352,45 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
                 .build();
         entry.setBucket(BUCKET_SILENT);
         assertFalse(mLockscreenUserManager.shouldShowOnKeyguard(entry));
+    }
+
+    @Test
+    public void testShowSilentNotificationsPeopleBucket_settingSaysHide() {
+        Settings.Secure.putInt(mContext.getContentResolver(),
+                Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS, 1);
+        Settings.Secure.putInt(mContext.getContentResolver(),
+                NOTIFICATION_NEW_INTERRUPTION_MODEL, 1);
+        Settings.Secure.putInt(mContext.getContentResolver(),
+                Settings.Secure.LOCK_SCREEN_SHOW_SILENT_NOTIFICATIONS, 0);
+
+        final Notification notification = mock(Notification.class);
+        when(notification.isForegroundService()).thenReturn(true);
+        NotificationEntry entry = new NotificationEntryBuilder()
+                .setImportance(IMPORTANCE_LOW)
+                .setNotification(notification)
+                .build();
+        entry.setBucket(BUCKET_PEOPLE);
+        assertFalse(mLockscreenUserManager.shouldShowOnKeyguard(entry));
+    }
+
+    @Test
+    public void testShowSilentNotificationsMediaBucket_settingSaysHide() {
+        Settings.Secure.putInt(mContext.getContentResolver(),
+                Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS, 1);
+        Settings.Secure.putInt(mContext.getContentResolver(),
+                NOTIFICATION_NEW_INTERRUPTION_MODEL, 1);
+        Settings.Secure.putInt(mContext.getContentResolver(),
+                Settings.Secure.LOCK_SCREEN_SHOW_SILENT_NOTIFICATIONS, 0);
+
+        final Notification notification = mock(Notification.class);
+        when(notification.isForegroundService()).thenReturn(true);
+        NotificationEntry entry = new NotificationEntryBuilder()
+                .setImportance(IMPORTANCE_LOW)
+                .setNotification(notification)
+                .build();
+        entry.setBucket(BUCKET_MEDIA_CONTROLS);
+        // always show media controls, even if they're silent
+        assertTrue(mLockscreenUserManager.shouldShowOnKeyguard(entry));
     }
 
     private class TestNotificationLockscreenUserManager

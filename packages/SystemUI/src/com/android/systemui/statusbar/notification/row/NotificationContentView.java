@@ -177,7 +177,7 @@ public class NotificationContentView extends FrameLayout {
 
     public NotificationContentView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        mHybridGroupManager = new HybridGroupManager(getContext(), this);
+        mHybridGroupManager = new HybridGroupManager(getContext());
         mMediaTransferManager = new MediaTransferManager(getContext());
         mSmartReplyConstants = Dependency.get(SmartReplyConstants.class);
         mSmartReplyController = Dependency.get(SmartReplyController.class);
@@ -1163,7 +1163,7 @@ public class NotificationContentView extends FrameLayout {
         if (mIsChildInGroup) {
             boolean isNewView = mSingleLineView == null;
             mSingleLineView = mHybridGroupManager.bindFromNotification(
-                    mSingleLineView, mStatusBarNotification.getNotification());
+                    mSingleLineView, mContractedChild, mStatusBarNotification, this);
             if (isNewView) {
                 updateViewVisibility(mVisibleType, VISIBLE_TYPE_SINGLELINE,
                         mSingleLineView, mSingleLineView);

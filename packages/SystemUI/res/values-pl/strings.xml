@@ -90,7 +90,7 @@
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Podgląd zrzutu ekranu"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Nagrywanie ekranu"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Stałe powiadomienie o sesji rejestrowania zawartości ekranu"</string>
-    <string name="screenrecord_start_label" msgid="1750350278888217473">"Rozpocząć rejestrowanie?"</string>
+    <string name="screenrecord_start_label" msgid="1750350278888217473">"Rozpocząć nagrywanie?"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"Podczas nagrywania system Android może rejestrować wszelkie informacji poufne wyświetlane na ekranie lub odtwarzane na urządzeniu. Dotyczy to m.in. haseł, szczegółów płatności, zdjęć, wiadomości i odtwarzanych dźwięków."</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Nagraj dźwięk"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Dźwięki odtwarzane na urządzeniu"</string>
@@ -108,7 +108,7 @@
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"Anuluj"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Udostępnij"</string>
     <string name="screenrecord_delete_label" msgid="1376347010553987058">"Usuń"</string>
-    <string name="screenrecord_cancel_success" msgid="1775448688137393901">"Anulowano rejestrowanie zawartości ekranu"</string>
+    <string name="screenrecord_cancel_success" msgid="1775448688137393901">"Anulowano nagrywanie zawartości ekranu"</string>
     <string name="screenrecord_save_message" msgid="490522052388998226">"Zapisano nagranie zawartości ekranu – kliknij, by je obejrzeć"</string>
     <string name="screenrecord_delete_description" msgid="1604522770162810570">"Usunięto nagranie zawartości ekranu"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"Błąd podczas usuwania nagrania zawartości ekranu"</string>
@@ -1009,8 +1009,7 @@
     <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Zarządzaj dymkami w dowolnym momencie"</string>
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Kliknij Zarządzaj, aby wyłączyć dymki z tej aplikacji"</string>
     <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"OK"</string>
-    <!-- no translation found for bubbles_app_settings (5779443644062348657) -->
-    <skip />
+    <string name="bubbles_app_settings" msgid="5779443644062348657">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> – ustawienia"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Nawigacja w systemie została zaktualizowana. Aby wprowadzić zmiany, otwórz Ustawienia."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Otwórz Ustawienia, by zaktualizować nawigację w systemie"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Tryb gotowości"</string>
