@@ -123,8 +123,6 @@ public class NotificationRecordTest extends UiServiceTestCase {
         when(mMockContext.getResources()).thenReturn(getContext().getResources());
         when(mMockContext.getPackageManager()).thenReturn(mPm);
         when(mMockContext.getContentResolver()).thenReturn(mContentResolver);
-        Settings.Global.putInt(mContext.getContentResolver(),
-                Settings.Global.REQUIRE_SHORTCUTS_FOR_CONVERSATIONS, 1);
         ApplicationInfo appInfo = new ApplicationInfo();
         appInfo.targetSdkVersion = Build.VERSION_CODES.O;
         when(mMockContext.getApplicationInfo()).thenReturn(appInfo);
@@ -1127,18 +1125,7 @@ public class NotificationRecordTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testIsConversation_nullShortcut() {
-        StatusBarNotification sbn = getMessagingStyleNotification();
-        NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
-        record.setShortcutInfo(null);
-
-        assertFalse(record.isConversation());
-    }
-
-    @Test
-    public void testIsConversation_bypassShortcutFlagEnabled() {
-        Settings.Global.putInt(mContext.getContentResolver(),
-                Settings.Global.REQUIRE_SHORTCUTS_FOR_CONVERSATIONS, 0);
+    public void testIsConversation_noShortcut() {
         StatusBarNotification sbn = getMessagingStyleNotification();
         NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
         record.setShortcutInfo(null);

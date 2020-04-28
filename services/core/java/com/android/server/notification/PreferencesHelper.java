@@ -116,7 +116,7 @@ public class PreferencesHelper implements RankingConfig {
     private static final String ATT_ENABLED = "enabled";
     private static final String ATT_USER_ALLOWED = "allowed";
     private static final String ATT_HIDE_SILENT = "hide_gentle";
-    private static final String ATT_SENT_MESSAGE = "sent_msg";
+    private static final String ATT_SENT_MESSAGE = "sent_invalid_msg";
 
     private static final int DEFAULT_PRIORITY = Notification.PRIORITY_DEFAULT;
     private static final int DEFAULT_VISIBILITY = NotificationManager.VISIBILITY_NO_OVERRIDE;
@@ -194,8 +194,6 @@ public class PreferencesHelper implements RankingConfig {
         updateBadgingEnabled();
         updateBubblesEnabled();
         syncChannelsBypassingDnd(mContext.getUserId());
-        mAllowInvalidShortcuts = Settings.Global.getInt(mContext.getContentResolver(),
-                Settings.Global.REQUIRE_SHORTCUTS_FOR_CONVERSATIONS, 0) == 0;
     }
 
     public void readXml(XmlPullParser parser, boolean forRestore, int userId)
@@ -1313,7 +1311,9 @@ public class PreferencesHelper implements RankingConfig {
             int N = r.channels.size();
             for (int i = 0; i < N; i++) {
                 final NotificationChannel nc = r.channels.valueAt(i);
-                if (!TextUtils.isEmpty(nc.getConversationId()) && !nc.isDeleted()) {
+                if (!TextUtils.isEmpty(nc.getConversationId())
+                        && !nc.isDeleted()
+                        && !nc.isDemoted()) {
                     ConversationChannelWrapper conversation = new ConversationChannelWrapper();
                     conversation.setPkg(r.pkg);
                     conversation.setUid(r.uid);
