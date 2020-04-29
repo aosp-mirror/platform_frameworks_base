@@ -262,7 +262,7 @@ public final class CustomDescription implements Parcelable {
          *
          * @param condition condition used to trigger the updates.
          * @param updates actions to be applied to the
-         * {@link #CustomDescription.Builder(RemoteViews) template presentation} when the condition
+         * {@link #Builder(RemoteViews) template presentation} when the condition
          * is satisfied.
          *
          * @return this builder

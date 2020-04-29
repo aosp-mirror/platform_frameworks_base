@@ -3513,7 +3513,7 @@ public class Notification implements Parcelable
         }
 
         /**
-         * @deprecated use {@link Notification.Builder#Notification.Builder(Context, String)}
+         * @deprecated use {@link #Builder(Context, String)}
          * instead. All posted Notifications must specify a NotificationChannel Id.
          */
         @Deprecated
@@ -3631,7 +3631,7 @@ public class Notification implements Parcelable
          * @param shortcutId the {@link ShortcutInfo#getId() id} of the shortcut this notification
          *                   is linked to
          *
-         * @see Notification.BubbleMetadata.Builder#Notification.BubbleMetadata.Builder(String)
+         * @see BubbleMetadata.Builder#Builder(String)
          */
         @NonNull
         public Builder setShortcutId(String shortcutId) {
@@ -5993,7 +5993,7 @@ public class Notification implements Parcelable
          * metadata matches the shortcutId set on the  notification builder, if one was set.
          * If the shortcutId's were specified but do not match, an exception is thrown here.
          *
-         * @see Notification.BubbleMetadata.Builder#Notification.BubbleMetadata.Builder(String)
+         * @see BubbleMetadata.Builder#Builder(String)
          * @see #setShortcutId(String)
          */
         @NonNull
@@ -7297,7 +7297,7 @@ public class Notification implements Parcelable
          * Should be unique amongst all individuals in the conversation, and should be
          * consistent during re-posts of the notification.
          *
-         * @see Message#Notification.MessagingStyle.Message(CharSequence, long, CharSequence)
+         * @see Message#Message(CharSequence, long, CharSequence)
          *
          * @return this object for method chaining
          *
@@ -7317,7 +7317,7 @@ public class Notification implements Parcelable
          * Should be <code>null</code> for messages by the current user, in which case
          * the platform will insert the user set in {@code MessagingStyle(Person)}.
          *
-         * @see Message#Notification.MessagingStyle.Message(CharSequence, long, CharSequence)
+         * @see Message#Message(CharSequence, long, CharSequence)
          *
          * @return this object for method chaining
          */

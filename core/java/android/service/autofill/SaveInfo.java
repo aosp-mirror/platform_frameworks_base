@@ -719,7 +719,7 @@ public final class SaveInfo implements Parcelable {
          *
          * <p>The sanitizer can also be used as an alternative for a
          * {@link #setValidator(Validator) validator}. If any of the {@code ids} is a
-         * {@link #SaveInfo.Builder(int, AutofillId[]) required id} and the {@code sanitizer} fails
+         * {@link #Builder(int, AutofillId[]) required id} and the {@code sanitizer} fails
          * because of it, then the save UI is not shown.
          *
          * @param sanitizer an implementation provided by the Android System.
@@ -777,7 +777,7 @@ public final class SaveInfo implements Parcelable {
          * Builds a new {@link SaveInfo} instance.
          *
          * @throws IllegalStateException if no
-         * {@link #SaveInfo.Builder(int, AutofillId[]) required ids},
+         * {@link #Builder(int, AutofillId[]) required ids},
          * or {@link #setOptionalIds(AutofillId[]) optional ids}, or {@link #FLAG_DELAY_SAVE}
          * were set
          */

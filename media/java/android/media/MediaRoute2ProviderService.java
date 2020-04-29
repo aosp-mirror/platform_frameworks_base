@@ -356,7 +356,7 @@ public abstract class MediaRoute2ProviderService extends Service {
      *                     {@link MediaRouter2}, or null if none. The contents of this bundle
      *                     may affect the result of session creation.
      *
-     * @see RoutingSessionInfo.Builder#RoutingSessionInfo.Builder(String, String)
+     * @see RoutingSessionInfo.Builder#Builder(String, String)
      * @see RoutingSessionInfo.Builder#addSelectedRoute(String)
      * @see RoutingSessionInfo.Builder#setControlHints(Bundle)
      */
