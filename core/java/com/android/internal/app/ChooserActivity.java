@@ -848,7 +848,8 @@ public class ChooserActivity extends ResolverActivity implements
                 /* context */ this,
                 adapter,
                 getPersonalProfileUserHandle(),
-                /* workProfileUserHandle= */ null);
+                /* workProfileUserHandle= */ null,
+                isSendAction(getTargetIntent()));
     }
 
     private ChooserMultiProfilePagerAdapter createChooserMultiProfilePagerAdapterForTwoProfiles(
@@ -878,7 +879,8 @@ public class ChooserActivity extends ResolverActivity implements
                 workAdapter,
                 selectedProfile,
                 getPersonalProfileUserHandle(),
-                getWorkProfileUserHandle());
+                getWorkProfileUserHandle(),
+                isSendAction(getTargetIntent()));
     }
 
     private int findSelectedProfile() {
