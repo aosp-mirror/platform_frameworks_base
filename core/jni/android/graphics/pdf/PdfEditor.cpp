@@ -111,7 +111,7 @@ static void nativeSetTransformAndClip(JNIEnv* env, jclass thiz, jlong documentPt
         jlong transformPtr, jint clipLeft, jint clipTop, jint clipRight, jint clipBottom) {
     FPDF_DOCUMENT document = reinterpret_cast<FPDF_DOCUMENT>(documentPtr);
 
-    FPDF_PAGE* page = (FPDF_PAGE*) FPDF_LoadPage(document, pageIndex);
+    FPDF_PAGE page = FPDF_LoadPage(document, pageIndex);
     if (!page) {
         jniThrowException(env, "java/lang/IllegalStateException",
                 "cannot open page");
