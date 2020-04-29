@@ -66,6 +66,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.never;
 
 import android.app.ActivityOptions;
@@ -1402,6 +1403,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
         final DisplayInfo rotatedInfo = mActivity.getFixedRotationTransformDisplayInfo();
         mActivity.finishFixedRotationTransform();
         final ScreenRotationAnimation rotationAnim = display.getRotationAnimation();
+        assertNotNull(rotationAnim);
         rotationAnim.setRotation(display.getPendingTransaction(), originalRotation);
 
         // Because the display doesn't rotate, the rotated activity needs to cancel the fixed
@@ -1409,8 +1411,18 @@ public class ActivityRecordTests extends ActivityTestsBase {
         verify(mActivity).onCancelFixedRotationTransform(rotatedInfo.rotation);
         assertTrue(mActivity.isFreezingScreen());
         assertFalse(displayRotation.isRotatingSeamlessly());
-        assertNotNull(rotationAnim);
         assertTrue(rotationAnim.isRotating());
+
+        // Simulate the remote rotation has completed and the configuration doesn't change, then
+        // the rotated activity should also be restored by clearing the transform.
+        displayRotation.updateRotationUnchecked(true /* forceUpdate */);
+        doReturn(false).when(displayRotation).isWaitingForRemoteRotation();
+        clearInvocations(mActivity);
+        display.mFixedRotationLaunchingApp = mActivity;
+        display.sendNewConfiguration();
+
+        assertNull(display.mFixedRotationLaunchingApp);
+        assertFalse(mActivity.hasFixedRotationTransform());
     }
 
     @Test
