@@ -261,10 +261,24 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
                 wct.setScreenSizeDp(mSplits.mSecondary.token,
                         mSplits.mSecondary.configuration.screenWidthDp,
                         mSplits.mSecondary.configuration.screenHeightDp);
+
+                wct.setBounds(mSplits.mPrimary.token, mSplitLayout.mAdjustedPrimary);
+                adjustAppBounds = new Rect(mSplits.mPrimary.configuration
+                        .windowConfiguration.getAppBounds());
+                adjustAppBounds.offset(0, mSplitLayout.mAdjustedPrimary.top
+                        - mSplitLayout.mPrimary.top);
+                wct.setAppBounds(mSplits.mPrimary.token, adjustAppBounds);
+                wct.setScreenSizeDp(mSplits.mPrimary.token,
+                        mSplits.mPrimary.configuration.screenWidthDp,
+                        mSplits.mPrimary.configuration.screenHeightDp);
             } else {
                 wct.setBounds(mSplits.mSecondary.token, mSplitLayout.mSecondary);
                 wct.setAppBounds(mSplits.mSecondary.token, null);
                 wct.setScreenSizeDp(mSplits.mSecondary.token,
+                        SCREEN_WIDTH_DP_UNDEFINED, SCREEN_HEIGHT_DP_UNDEFINED);
+                wct.setBounds(mSplits.mPrimary.token, mSplitLayout.mPrimary);
+                wct.setAppBounds(mSplits.mPrimary.token, null);
+                wct.setScreenSizeDp(mSplits.mPrimary.token,
                         SCREEN_WIDTH_DP_UNDEFINED, SCREEN_HEIGHT_DP_UNDEFINED);
             }
 

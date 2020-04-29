@@ -136,20 +136,25 @@ public class InsetsSource implements Parcelable {
         if (mTmpFrame.width() == relativeFrame.width()) {
             if (mTmpFrame.top == relativeFrame.top) {
                 return Insets.of(0, mTmpFrame.height(), 0, 0);
-            } else {
+            } else if (mTmpFrame.bottom == relativeFrame.bottom) {
                 return Insets.of(0, 0, 0, mTmpFrame.height());
+            }
+            // TODO: remove when insets are shell-customizable.
+            // This is a hack that says "if this is a top-inset (eg statusbar), always apply it
+            // to the top". It is used when adjusting primary split for IME.
+            if (mTmpFrame.top == 0) {
+                return Insets.of(0, mTmpFrame.height(), 0, 0);
             }
         }
         // Intersecting at left/right
         else if (mTmpFrame.height() == relativeFrame.height()) {
             if (mTmpFrame.left == relativeFrame.left) {
                 return Insets.of(mTmpFrame.width(), 0, 0, 0);
-            } else {
+            } else if (mTmpFrame.right == relativeFrame.right) {
                 return Insets.of(0, 0, mTmpFrame.width(), 0);
             }
-        } else {
-            return Insets.NONE;
         }
+        return Insets.NONE;
     }
 
     /**
