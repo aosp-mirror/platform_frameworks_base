@@ -123,7 +123,8 @@ public class InsetsControllerTest {
             }
             mTestClock = new OffsettableClock();
             mTestHandler = new TestHandler(null, mTestClock);
-            mController = new InsetsController(mViewRoot, (controller, type) -> {
+            mController = new InsetsController(new ViewRootInsetsControllerHost(mViewRoot),
+                    (controller, type) -> {
                 if (type == ITYPE_IME) {
                     return new InsetsSourceConsumer(type, controller.getState(),
                             Transaction::new, controller) {
