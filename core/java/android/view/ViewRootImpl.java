@@ -757,7 +757,7 @@ public final class ViewRootImpl implements ViewParent,
         mChoreographer = useSfChoreographer
                 ? Choreographer.getSfInstance() : Choreographer.getInstance();
         mDisplayManager = (DisplayManager)context.getSystemService(Context.DISPLAY_SERVICE);
-        mInsetsController = new InsetsController(this);
+        mInsetsController = new InsetsController(new ViewRootInsetsControllerHost(this));
 
         String processorOverrideName = context.getResources().getString(
                                     R.string.config_inputEventCompatProcessorOverrideClassName);
