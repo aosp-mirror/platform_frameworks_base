@@ -19,7 +19,6 @@ package com.android.internal.accessibility.dialog;
 import android.widget.BaseAdapter;
 import android.widget.CheckBox;
 import android.widget.ImageView;
-import android.widget.Switch;
 import android.widget.TextView;
 
 /**
@@ -30,6 +29,6 @@ abstract class TargetAdapter extends BaseAdapter {
         CheckBox mCheckBoxView;
         ImageView mIconView;
         TextView mLabelView;
-        Switch mSwitchItem;
+        TextView mStatusView;
     }
 }
