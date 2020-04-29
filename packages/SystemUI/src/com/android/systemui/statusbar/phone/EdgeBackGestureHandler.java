@@ -556,7 +556,8 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
 
     private void updateDisabledForQuickstep() {
         int rotation = mContext.getResources().getConfiguration().windowConfiguration.getRotation();
-        mDisabledForQuickstep = mStartingQuickstepRotation != rotation;
+        mDisabledForQuickstep = mStartingQuickstepRotation > -1 &&
+                mStartingQuickstepRotation != rotation;
     }
 
     @Override
