@@ -719,7 +719,7 @@
     <!-- Setting Checkbox summary whether to disable Wifi scan throttling [CHAR LIMIT=NONE] -->
     <string name="wifi_scan_throttling_summary">Reduces battery drain &amp; improves network performance</string>
     <!-- Setting Checkbox title whether to enable WiFi enhanced mac randomization. [CHAR LIMIT=NONE] -->
-    <string name="wifi_enhanced_mac_randomization_summary">This toggle affects MAC randomization behavior for client mode only.\nWhen this mode is activated, any networks that have MAC randomization enabled may have their MAC addresses re\u2011randomized during association, depending on when the client last disconnected from the network. Re\u2011randomization does not occur if the device reconnects in 4 hours or less.</string>
+    <string name="wifi_enhanced_mac_randomization_summary">When this mode is enabled, this device\u2019s MAC address may change each time it connects to a network that has MAC randomization enabled.</string>
     <!-- Label indicating network has been manually marked as metered -->
     <string name="wifi_metered_label">Metered</string>
     <!-- Label indicating network has been manually marked as unmetered -->
