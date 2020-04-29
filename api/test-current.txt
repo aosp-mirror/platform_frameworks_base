@@ -5277,12 +5277,13 @@ package android.widget {
 package android.window {
 
   public final class DisplayAreaInfo implements android.os.Parcelable {
-    ctor public DisplayAreaInfo(@NonNull android.window.WindowContainerToken, int);
+    ctor public DisplayAreaInfo(@NonNull android.window.WindowContainerToken, int, int);
     method public int describeContents();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.window.DisplayAreaInfo> CREATOR;
     field @NonNull public final android.content.res.Configuration configuration;
     field public final int displayId;
+    field public final int featureId;
     field @NonNull public final android.window.WindowContainerToken token;
   }
 
