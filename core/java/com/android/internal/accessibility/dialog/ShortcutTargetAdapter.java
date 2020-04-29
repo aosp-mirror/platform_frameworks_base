@@ -68,8 +68,8 @@ class ShortcutTargetAdapter extends TargetAdapter {
             holder.mIconView = convertView.findViewById(R.id.accessibility_shortcut_target_icon);
             holder.mLabelView = convertView.findViewById(
                     R.id.accessibility_shortcut_target_label);
-            holder.mSwitchItem = convertView.findViewById(
-                    R.id.accessibility_shortcut_target_switch_item);
+            holder.mStatusView = convertView.findViewById(
+                    R.id.accessibility_shortcut_target_status);
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();
