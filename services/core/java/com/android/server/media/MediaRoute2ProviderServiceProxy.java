@@ -315,9 +315,7 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
             return;
         }
 
-        sessionInfo = new RoutingSessionInfo.Builder(sessionInfo)
-                .setProviderId(getUniqueId())
-                .build();
+        sessionInfo = updateSessionInfo(sessionInfo);
 
         boolean duplicateSessionAlreadyExists = false;
         synchronized (mLock) {
@@ -348,9 +346,7 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
             return;
         }
 
-        sessionInfo = new RoutingSessionInfo.Builder(sessionInfo)
-                .setProviderId(getUniqueId())
-                .build();
+        sessionInfo = updateSessionInfo(sessionInfo);
 
         boolean found = false;
         synchronized (mLock) {
@@ -380,9 +376,7 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
             return;
         }
 
-        sessionInfo = new RoutingSessionInfo.Builder(sessionInfo)
-                .setProviderId(getUniqueId())
-                .build();
+        sessionInfo = updateSessionInfo(sessionInfo);
 
         boolean found = false;
         synchronized (mLock) {
@@ -401,6 +395,13 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
         }
 
         mCallback.onSessionReleased(this, sessionInfo);
+    }
+
+    private RoutingSessionInfo updateSessionInfo(RoutingSessionInfo sessionInfo) {
+        return new RoutingSessionInfo.Builder(sessionInfo)
+                .setOwnerPackageName(mComponentName.getPackageName())
+                .setProviderId(getUniqueId())
+                .build();
     }
 
     private void onRequestFailed(Connection connection, long requestId, int reason) {
