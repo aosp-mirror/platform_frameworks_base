@@ -160,7 +160,7 @@ public:
     //    }
     // Note that atomIndex is 1-indexed.
     inline int getUidFieldIndex() {
-        return mUidFieldIndex;
+        return static_cast<int>(mUidFieldIndex);
     }
 
     // Returns whether this LogEvent has an AttributionChain.
@@ -179,7 +179,7 @@ public:
     //    }
     // Note that atomIndex is 1-indexed.
     inline int getExclusiveStateFieldIndex() const {
-        return mExclusiveStateFieldIndex;
+        return static_cast<int>(mExclusiveStateFieldIndex);
     }
 
     // If a reset state is not sent in the StatsEvent, returns -1. Note that a
@@ -210,10 +210,6 @@ public:
 
     bool isValid() const {
         return mValid;
-    }
-
-    int32_t getErrorBitmask() const {
-        return mErrorBitmask;
     }
 
 private:
@@ -316,16 +312,16 @@ private:
     // The pid of the logging client (defaults to -1).
     int32_t mLogPid = -1;
 
-    // Bitmask of errors sent by StatsEvent/AStatsEvent.
-    int32_t mErrorBitmask = 0;
-
     // Annotations
     bool mTruncateTimestamp = false;
-    int mUidFieldIndex = -1;
-    int mAttributionChainStartIndex = -1;
-    int mAttributionChainEndIndex = -1;
-    int mExclusiveStateFieldIndex = -1;
     int mResetState = -1;
+
+    // Indexes within the FieldValue vector can be stored in 7 bits because
+    // that's the assumption enforced by the encoding used in FieldValue.
+    int8_t mUidFieldIndex = -1;
+    int8_t mAttributionChainStartIndex = -1;
+    int8_t mAttributionChainEndIndex = -1;
+    int8_t mExclusiveStateFieldIndex = -1;
 };
 
 void writeExperimentIdsToProto(const std::vector<int64_t>& experimentIds, std::vector<uint8_t>* protoOut);
