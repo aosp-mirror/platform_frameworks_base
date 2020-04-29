@@ -40,6 +40,7 @@ import com.android.systemui.plugins.qs.QSTile.SignalState;
 import com.android.systemui.plugins.qs.QSTile.State;
 import com.android.systemui.qs.customize.QSCustomizer;
 import com.android.systemui.qs.logging.QSLogger;
+import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
 import com.android.systemui.util.Utils;
@@ -86,10 +87,12 @@ public class QuickQSPanel extends QSPanel {
             @Main Executor foregroundExecutor,
             @Background DelayableExecutor backgroundExecutor,
             @Nullable LocalBluetoothManager localBluetoothManager,
-            ActivityStarter activityStarter
+            ActivityStarter activityStarter,
+            NotificationEntryManager entryManager
     ) {
         super(context, attrs, dumpManager, broadcastDispatcher, qsLogger,
-                foregroundExecutor, backgroundExecutor, localBluetoothManager, activityStarter);
+                foregroundExecutor, backgroundExecutor, localBluetoothManager, activityStarter,
+                entryManager);
         if (mFooter != null) {
             removeView(mFooter.getView());
         }
