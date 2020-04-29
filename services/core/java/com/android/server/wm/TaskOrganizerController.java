@@ -211,6 +211,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
 
         void removeTask(Task t) {
             if (t.mTaskAppearedSent) {
+                t.migrateToNewSurfaceControl();
                 t.mTaskAppearedSent = false;
                 mOrganizer.onTaskVanished(t);
             }
