@@ -2951,7 +2951,7 @@ public class StatsPullAtomService extends SystemService {
     }
 
     int processHistoricalOps(HistoricalOps histOps, int atomTag, List<StatsEvent> pulledData) {
-        int counter = 0;
+        int counter = 1;
         for (int uidIdx = 0; uidIdx < histOps.getUidCount(); uidIdx++) {
             final HistoricalUidOps uidOps = histOps.getUidOpsAt(uidIdx);
             final int uid = uidOps.getUid();

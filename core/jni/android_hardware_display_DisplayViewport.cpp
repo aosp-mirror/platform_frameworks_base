@@ -55,8 +55,8 @@ static struct {
 
 status_t android_hardware_display_DisplayViewport_toNative(JNIEnv* env, jobject viewportObj,
         DisplayViewport* viewport) {
-    static const jclass byteClass = FindClassOrDie(env, "java/lang/Byte");
-    static const jmethodID byteValue = env->GetMethodID(byteClass, "byteValue", "()B");
+    static const jclass intClass = FindClassOrDie(env, "java/lang/Integer");
+    static const jmethodID byteValue = env->GetMethodID(intClass, "byteValue", "()B");
 
     viewport->displayId = env->GetIntField(viewportObj, gDisplayViewportClassInfo.displayId);
     viewport->orientation = env->GetIntField(viewportObj, gDisplayViewportClassInfo.orientation);
@@ -122,8 +122,8 @@ int register_android_hardware_display_DisplayViewport(JNIEnv* env) {
     gDisplayViewportClassInfo.uniqueId = GetFieldIDOrDie(env,
             gDisplayViewportClassInfo.clazz, "uniqueId", "Ljava/lang/String;");
 
-    gDisplayViewportClassInfo.physicalPort = GetFieldIDOrDie(env,
-            gDisplayViewportClassInfo.clazz, "physicalPort", "Ljava/lang/Byte;");
+    gDisplayViewportClassInfo.physicalPort = GetFieldIDOrDie(env, gDisplayViewportClassInfo.clazz,
+                                                             "physicalPort", "Ljava/lang/Integer;");
 
     gDisplayViewportClassInfo.type = GetFieldIDOrDie(env,
             gDisplayViewportClassInfo.clazz, "type", "I");

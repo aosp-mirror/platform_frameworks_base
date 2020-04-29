@@ -80,7 +80,7 @@ import java.nio.charset.StandardCharsets;
 @RunWith(WindowTestRunner.class)
 public class DisplayWindowSettingsTests extends WindowTestsBase {
 
-    private static final byte DISPLAY_PORT = (byte) 0xFF;
+    private static final int DISPLAY_PORT = 0xFF;
     private static final long DISPLAY_MODEL = 0xEEEEEEEEL;
 
     private static final File TEST_FOLDER = getInstrumentation().getTargetContext().getCacheDir();
@@ -486,7 +486,7 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
                 DisplayAddress.fromPortAndModel(DISPLAY_PORT, DISPLAY_MODEL);
         mPrimaryDisplay.getDisplayInfo().address = displayAddress;
 
-        final String displayIdentifier = "port:" + Byte.toUnsignedInt(DISPLAY_PORT);
+        final String displayIdentifier = "port:" + DISPLAY_PORT;
         prepareDisplaySettings(displayIdentifier, true /* usePortAsId */);
 
         readAndAssertDisplaySettings(mPrimaryDisplay);
@@ -537,7 +537,7 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
         assertTrue(mStorage.wasWriteSuccessful());
 
         // Verify that settings were stored correctly.
-        assertEquals("Attribute value must be stored", "port:" + Byte.toUnsignedInt(DISPLAY_PORT),
+        assertEquals("Attribute value must be stored", "port:" + DISPLAY_PORT,
                 getStoredDisplayAttributeValue("name"));
         assertEquals("Attribute value must be stored", "true",
                 getStoredDisplayAttributeValue("shouldShowSystemDecors"));

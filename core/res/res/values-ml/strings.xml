@@ -1630,6 +1630,10 @@
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"രണ്ട് വോളിയം കീകളും അൽപ്പ നേരത്തേക്ക് അമർത്തിപ്പിടിക്കുന്നത് ഉപയോഗസഹായി ഫീച്ചറായ <xliff:g id="SERVICE">%1$s</xliff:g> എന്നതിനെ ഓണാക്കുന്നു. നിങ്ങളുടെ ഉപകരണം പ്രവർത്തിക്കുന്ന വിധം ഇത് മാറ്റിയേക്കാം.\n\nക്രമീകരണം &gt; ഉപയോഗസഹായി എന്നതിലെ മറ്റൊരു ഫീച്ചറിലേക്ക് നിങ്ങൾക്ക് ഈ കുറുക്കുവഴി മാറ്റാനാവും."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"ഓണാക്കുക"</string>
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"ഓണാക്കരുത്"</string>
+    <!-- no translation found for accessibility_shortcut_menu_item_status_on (6608392117189732543) -->
+    <skip />
+    <!-- no translation found for accessibility_shortcut_menu_item_status_off (5531598275559472393) -->
+    <skip />
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g> എന്നതിന് നിങ്ങളുടെ ഉപകരണത്തിന്മേൽ പൂർണ്ണ നിയന്ത്രണം അനുവദിക്കണോ?"</string>
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"<xliff:g id="SERVICE">%1$s</xliff:g> ഓണാക്കിയെങ്കിൽ, ഡാറ്റ എൻക്രിപ്‌ഷൻ മെച്ചപ്പെടുത്താൻ ഉപകരണം നിങ്ങളുടെ സ്‌ക്രീൻ ലോക്ക് ഉപയോഗിക്കില്ല."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"ഉപയോഗസഹായി ആവശ്യങ്ങൾക്കായി നിങ്ങളെ സഹായിക്കുന്ന ആപ്പുകൾക്ക് പൂർണ്ണ നിയന്ത്രണം അനുയോജ്യമാണെങ്കിലും മിക്ക ആപ്പുകൾക്കും അനുയോജ്യമല്ല."</string>

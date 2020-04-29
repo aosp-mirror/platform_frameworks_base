@@ -1431,15 +1431,15 @@ class Task extends WindowContainer<WindowContainer> {
 
     @Override
     void removeChild(WindowContainer child) {
-        // A rootable child task that is now being removed from an organized task. Making sure
-        // the stack references is keep updated.
-        if (mTaskOrganizer != null && mCreatedByOrganizer && child.asTask() != null) {
-            getDisplayArea().removeStackReferenceIfNeeded((ActivityStack) child);
-        }
         removeChild(child, "removeChild");
     }
 
     void removeChild(WindowContainer r, String reason) {
+        // A rootable child task that is now being removed from an organized task. Making sure
+        // the stack references is keep updated.
+        if (mTaskOrganizer != null && mCreatedByOrganizer && r.asTask() != null) {
+            getDisplayArea().removeStackReferenceIfNeeded((ActivityStack) r);
+        }
         if (!mChildren.contains(r)) {
             Slog.e(TAG, "removeChild: r=" + r + " not found in t=" + this);
             return;
@@ -3112,7 +3112,8 @@ class Task extends WindowContainer<WindowContainer> {
 
     @Override
     boolean showToCurrentUser() {
-        return mForceShowForAllUsers || showForAllUsers() || mWmService.isCurrentProfile(mUserId);
+        return mForceShowForAllUsers || showForAllUsers()
+                || mWmService.isCurrentProfile(getTopMostTask().mUserId);
     }
 
     void setForceShowForAllUsers(boolean forceShowForAllUsers) {

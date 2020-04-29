@@ -20,7 +20,6 @@ import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.ObjectAnimator
 import android.app.AlertDialog
-import android.app.Dialog
 import android.content.ComponentName
 import android.content.Context
 import android.content.DialogInterface
@@ -32,7 +31,6 @@ import android.graphics.drawable.LayerDrawable
 import android.os.Process
 import android.os.Vibrator
 import android.service.controls.Control
-import android.service.controls.actions.ControlAction
 import android.util.Log
 import android.util.TypedValue
 import android.view.ContextThemeWrapper
@@ -101,7 +99,6 @@ class ControlsUiControllerImpl @Inject constructor (
     private lateinit var parent: ViewGroup
     private lateinit var lastItems: List<SelectionItem>
     private var popup: ListPopupWindow? = null
-    private var activeDialog: Dialog? = null
     private var hidden = true
     private lateinit var dismissGlobalActions: Runnable
 
@@ -170,11 +167,17 @@ class ControlsUiControllerImpl @Inject constructor (
     private fun reload(parent: ViewGroup) {
         if (hidden) return
 
+        controlsListingController.get().removeCallback(listingCallback)
+        controlsController.get().unsubscribe()
+
         val fadeAnim = ObjectAnimator.ofFloat(parent, "alpha", 1.0f, 0.0f)
         fadeAnim.setInterpolator(AccelerateInterpolator(1.0f))
         fadeAnim.setDuration(FADE_IN_MILLIS)
         fadeAnim.addListener(object : AnimatorListenerAdapter() {
             override fun onAnimationEnd(animation: Animator) {
+                controlViewsById.clear()
+                controlsById.clear()
+
                 show(parent, dismissGlobalActions)
                 val showAnim = ObjectAnimator.ofFloat(parent, "alpha", 0.0f, 1.0f)
                 showAnim.setInterpolator(DecelerateInterpolator(1.0f))
@@ -448,21 +451,23 @@ class ControlsUiControllerImpl @Inject constructor (
         val listView = parent.requireViewById(R.id.global_actions_controls_list) as ViewGroup
         var lastRow: ViewGroup = createRow(inflater, listView)
         selectedStructure.controls.forEach {
-            if (lastRow.getChildCount() == maxColumns) {
-                lastRow = createRow(inflater, listView)
-            }
-            val baseLayout = inflater.inflate(
-                R.layout.controls_base_item, lastRow, false) as ViewGroup
-            lastRow.addView(baseLayout)
-            val cvh = ControlViewHolder(
-                baseLayout,
-                controlsController.get(),
-                uiExecutor,
-                bgExecutor
-            )
             val key = ControlKey(selectedStructure.componentName, it.controlId)
-            cvh.bindData(controlsById.getValue(key))
-            controlViewsById.put(key, cvh)
+            controlsById.get(key)?.let {
+                if (lastRow.getChildCount() == maxColumns) {
+                    lastRow = createRow(inflater, listView)
+                }
+                val baseLayout = inflater.inflate(
+                    R.layout.controls_base_item, lastRow, false) as ViewGroup
+                lastRow.addView(baseLayout)
+                val cvh = ControlViewHolder(
+                    baseLayout,
+                    controlsController.get(),
+                    uiExecutor,
+                    bgExecutor
+                )
+                cvh.bindData(it)
+                controlViewsById.put(key, cvh)
+            }
         }
 
         // add spacers if necessary to keep control size consistent
@@ -528,7 +533,6 @@ class ControlsUiControllerImpl @Inject constructor (
         if (newSelection != selectedStructure) {
             selectedStructure = newSelection
             updatePreferences(selectedStructure)
-            controlsListingController.get().removeCallback(listingCallback)
             reload(parent)
         }
     }
@@ -537,7 +541,11 @@ class ControlsUiControllerImpl @Inject constructor (
         Log.d(ControlsUiController.TAG, "hide()")
         hidden = true
         popup?.dismissImmediate()
-        activeDialog?.dismiss()
+
+        controlViewsById.forEach {
+            it.value.dismiss()
+        }
+
         ControlActionCoordinator.closeDialog()
 
         controlsController.get().unsubscribe()
@@ -545,13 +553,13 @@ class ControlsUiControllerImpl @Inject constructor (
         parent.removeAllViews()
         controlsById.clear()
         controlViewsById.clear()
+
         controlsListingController.get().removeCallback(listingCallback)
 
         RenderInfo.clearCache()
     }
 
     override fun onRefreshState(componentName: ComponentName, controls: List<Control>) {
-        Log.d(ControlsUiController.TAG, "onRefreshState()")
         controls.forEach { c ->
             controlsById.get(ControlKey(componentName, c.getControlId()))?.let {
                 Log.d(ControlsUiController.TAG, "onRefreshState() for id: " + c.getControlId())
@@ -569,23 +577,7 @@ class ControlsUiControllerImpl @Inject constructor (
     override fun onActionResponse(componentName: ComponentName, controlId: String, response: Int) {
         val key = ControlKey(componentName, controlId)
         uiExecutor.execute {
-            controlViewsById.get(key)?.let { cvh ->
-                when (response) {
-                    ControlAction.RESPONSE_CHALLENGE_PIN -> {
-                        activeDialog = ChallengeDialogs.createPinDialog(cvh, false)
-                        activeDialog?.show()
-                    }
-                    ControlAction.RESPONSE_CHALLENGE_PASSPHRASE -> {
-                        activeDialog = ChallengeDialogs.createPinDialog(cvh, true)
-                        activeDialog?.show()
-                    }
-                    ControlAction.RESPONSE_CHALLENGE_ACK -> {
-                        activeDialog = ChallengeDialogs.createConfirmationDialog(cvh)
-                        activeDialog?.show()
-                    }
-                    else -> cvh.actionResponse(response)
-                }
-            }
+            controlViewsById.get(key)?.actionResponse(response)
         }
     }
 

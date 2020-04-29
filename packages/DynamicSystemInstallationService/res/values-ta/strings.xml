@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_name" msgid="1329763481012806">"Dynamic System Updates"</string>
-    <string name="notification_channel_name" msgid="4236645997978509780">"Dynamic System Updates"</string>
-    <string name="keyguard_title" msgid="1804887096112528661">"Dynamic System Updates"</string>
     <string name="keyguard_description" msgid="8582605799129954556">"Dynamic System Updatesஸுக்குத் தொடர உங்கள் கடவுச்சொல்லை உள்ளிடவும்"</string>
     <string name="notification_install_completed" msgid="6252047868415172643">"Dynamic system தயாராக உள்ளது. இதைப் பயன்படுத்தத் தொடங்க உங்கள் சாதனத்தை மீண்டும் தொடங்கவும்."</string>
     <string name="notification_install_inprogress" msgid="7383334330065065017">"நிறுவப்படுகிறது"</string>

@@ -999,8 +999,7 @@
     <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"जुनसुकै बेला बबलहरू नियन्त्रण गर्नुहोस्"</string>
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"यो अनुप्रयोगबाट आएका बबलहरू निष्क्रिय पार्न व्यवस्थापन गर्नुहोस् नामक बटनमा ट्याप गर्नुहोस्"</string>
     <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"बुझेँ"</string>
-    <!-- no translation found for bubbles_app_settings (5779443644062348657) -->
-    <skip />
+    <string name="bubbles_app_settings" msgid="5779443644062348657">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> का सेटिङहरू"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"प्रणालीको नेभिगेसन अद्यावधिक गरियो। परिवर्तन गर्न सेटिङमा जानुहोस्।"</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"प्रणालीको नेभिगेसन अद्यावधिक गर्न सेटिङमा जानुहोस्"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"स्ट्यान्डबाई"</string>

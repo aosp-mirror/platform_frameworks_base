@@ -1630,6 +1630,10 @@
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Se tieni premuti entrambi i tasti del volume per qualche secondo verrà attivata la funzione di accessibilità <xliff:g id="SERVICE">%1$s</xliff:g>. Questa operazione potrebbe modificare il funzionamento del dispositivo.\n\nPuoi associare questa scorciatoia a un\'altra funzionalità in Impostazioni &gt; Accessibilità."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Attiva"</string>
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"Non attivare"</string>
+    <!-- no translation found for accessibility_shortcut_menu_item_status_on (6608392117189732543) -->
+    <skip />
+    <!-- no translation found for accessibility_shortcut_menu_item_status_off (5531598275559472393) -->
+    <skip />
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Vuoi consentire a <xliff:g id="SERVICE">%1$s</xliff:g> di avere il controllo totale del tuo dispositivo?"</string>
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Se attivi <xliff:g id="SERVICE">%1$s</xliff:g>, il dispositivo non utilizzerà il blocco schermo per migliorare la crittografia dei dati."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Il pieno controllo è appropriato per le app che rispondono alle tue esigenze di accessibilità, ma non per gran parte delle app."</string>

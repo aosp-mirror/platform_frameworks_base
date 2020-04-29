@@ -226,6 +226,23 @@ public class ThresholdSensorImplTest extends SysuiTestCase {
         waitForSensorManager();
     }
 
+    @Test
+    public void testAlertAfterPause() {
+        TestableListener listener = new TestableListener();
+
+        mThresholdSensor.register(listener);
+        waitForSensorManager();
+        mFakeProximitySensor.sendProximityResult(false);
+        assertTrue(listener.mBelow);
+        assertEquals(1, listener.mCallCount);
+
+        mThresholdSensor.pause();
+
+        mFakeProximitySensor.sendProximityResult(false);
+        assertTrue(listener.mBelow);
+        assertEquals(1, listener.mCallCount);
+    }
+
     static class TestableListener implements ThresholdSensor.Listener {
         boolean mBelow;
         long mTimestampNs;

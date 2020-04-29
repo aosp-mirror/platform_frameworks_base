@@ -256,9 +256,9 @@ public class PluginInstanceManager<T extends Plugin> {
                 case QUERY_ALL:
                     if (DEBUG) Log.d(TAG, "queryAll " + mAction);
                     for (int i = mPlugins.size() - 1; i >= 0; i--) {
-                        PluginInfo<T> plugin = mPlugins.get(i);
+                        PluginInfo<T> pluginInfo = mPlugins.get(i);
                         mMainHandler.obtainMessage(
-                                mMainHandler.PLUGIN_DISCONNECTED, plugin).sendToTarget();
+                                MainHandler.PLUGIN_DISCONNECTED, pluginInfo.mPlugin).sendToTarget();
                     }
                     mPlugins.clear();
                     handleQueryPlugins(null);

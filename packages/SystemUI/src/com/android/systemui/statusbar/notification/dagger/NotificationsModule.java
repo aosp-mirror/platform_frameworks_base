@@ -30,6 +30,7 @@ import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.settings.CurrentUserContextTracker;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
@@ -52,12 +53,14 @@ import com.android.systemui.statusbar.notification.logging.NotificationPanelLogg
 import com.android.systemui.statusbar.notification.logging.NotificationPanelLoggerImpl;
 import com.android.systemui.statusbar.notification.row.NotificationBlockingHelperManager;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
+import com.android.systemui.statusbar.notification.row.PriorityOnboardingDialogController;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.util.leak.LeakDetector;
 
 import java.util.concurrent.Executor;
 
+import javax.inject.Provider;
 import javax.inject.Singleton;
 
 import dagger.Binds;
@@ -107,7 +110,9 @@ public interface NotificationsModule {
             HighPriorityProvider highPriorityProvider,
             INotificationManager notificationManager,
             LauncherApps launcherApps,
-            ShortcutManager shortcutManager) {
+            ShortcutManager shortcutManager,
+            CurrentUserContextTracker contextTracker,
+            Provider<PriorityOnboardingDialogController.Builder> builderProvider) {
         return new NotificationGutsManager(
                 context,
                 visualStabilityManager,
@@ -117,7 +122,9 @@ public interface NotificationsModule {
                 highPriorityProvider,
                 notificationManager,
                 launcherApps,
-                shortcutManager);
+                shortcutManager,
+                contextTracker,
+                builderProvider);
     }
 
     /** Provides an instance of {@link VisualStabilityManager} */

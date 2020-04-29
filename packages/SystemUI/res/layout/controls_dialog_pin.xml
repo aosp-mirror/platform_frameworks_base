@@ -26,7 +26,6 @@
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:minHeight="48dp"
-      android:hint="@string/controls_pin_instructions"
       android:inputType="numberPassword" />
   <CheckBox
       android:id="@+id/controls_pin_use_alpha"

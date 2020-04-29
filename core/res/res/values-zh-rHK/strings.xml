@@ -1630,6 +1630,10 @@
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"同時按下兩個音量鍵幾秒，以開啟 <xliff:g id="SERVICE">%1$s</xliff:g> 無障礙功能。這可能會變更裝置的運作。\n\n您可在「設定」&gt;「無障礙功能」中變更此快速鍵。"</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"開啟"</string>
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"不要開啟"</string>
+    <!-- no translation found for accessibility_shortcut_menu_item_status_on (6608392117189732543) -->
+    <skip />
+    <!-- no translation found for accessibility_shortcut_menu_item_status_off (5531598275559472393) -->
+    <skip />
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"要允許 <xliff:g id="SERVICE">%1$s</xliff:g> 完全控制您的裝置嗎？"</string>
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"如果您開啟 <xliff:g id="SERVICE">%1$s</xliff:g>，裝置將無法使用螢幕鎖定功能加強資料加密。"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"為您提供所需無障礙功能的應用程式有權完全控制您的裝置，但大部分應用程式均沒有此權限。"</string>

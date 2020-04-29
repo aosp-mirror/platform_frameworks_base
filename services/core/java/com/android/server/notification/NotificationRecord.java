@@ -1386,10 +1386,6 @@ public final class NotificationRecord {
                 || !Notification.MessagingStyle.class.equals(notification.getNotificationStyle())) {
             return false;
         }
-        if (mShortcutInfo == null && Settings.Global.getInt(mContext.getContentResolver(),
-                Settings.Global.REQUIRE_SHORTCUTS_FOR_CONVERSATIONS, 0) == 1) {
-            return false;
-        }
         if (mIsNotConversationOverride) {
             return false;
         }

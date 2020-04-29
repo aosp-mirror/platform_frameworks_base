@@ -758,7 +758,7 @@
     <!-- The top padding of the clear all button -->
     <dimen name="clear_all_padding_top">12dp</dimen>
 
-    <dimen name="notification_section_header_height">56dp</dimen>
+    <dimen name="notification_section_header_height">48dp</dimen>
     <dimen name="notification_section_header_padding_left">16dp</dimen>
 
     <!-- Largest size an avatar might need to be drawn in the user picker, status bar, or
@@ -1310,4 +1310,9 @@
 
     <!-- Opacity at which the background for the shutdown UI will be drawn. -->
     <item name="shutdown_scrim_behind_alpha" format="float" type="dimen">0.95</item>
+
+    <!--  Allow CornerHandleView and PathSpecCornerPathRenderer to decouple from corner-radius -->
+    <dimen name="config_rounded_mask_size">@*android:dimen/rounded_corner_radius</dimen>
+    <dimen name="config_rounded_mask_size_top">@*android:dimen/rounded_corner_radius_top</dimen>
+    <dimen name="config_rounded_mask_size_bottom">@*android:dimen/rounded_corner_radius_bottom</dimen>
 </resources>

@@ -119,6 +119,7 @@
                 android:id="@+id/media_seamless"
                 android:background="@*android:drawable/media_seamless_background"
                 android:layout_weight="1"
+                android:forceHasOverlappingRendering="false"
             >
                 <ImageView
                     android:layout_width="@dimen/qs_seamless_icon_size"

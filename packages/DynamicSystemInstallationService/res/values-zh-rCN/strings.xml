@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_name" msgid="1329763481012806">"动态系统更新"</string>
-    <string name="notification_channel_name" msgid="4236645997978509780">"动态系统更新"</string>
-    <string name="keyguard_title" msgid="1804887096112528661">"动态系统更新"</string>
     <string name="keyguard_description" msgid="8582605799129954556">"请输入您的密码，以便继续使用动态系统更新"</string>
     <string name="notification_install_completed" msgid="6252047868415172643">"动态系统已准备就绪。重启您的设备即可开始使用动态系统。"</string>
     <string name="notification_install_inprogress" msgid="7383334330065065017">"正在安装"</string>

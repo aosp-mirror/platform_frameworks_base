@@ -16,7 +16,11 @@
 
 package com.android.systemui.controls.ui
 
-class UnknownBehavior : Behavior {
+import android.service.controls.Control
+
+import com.android.systemui.R
+
+class StatusBehavior : Behavior {
     lateinit var cvh: ControlViewHolder
 
     override fun initialize(cvh: ControlViewHolder) {
@@ -24,7 +28,13 @@ class UnknownBehavior : Behavior {
     }
 
     override fun bind(cws: ControlWithState) {
-        cvh.status.setText(cvh.context.getString(com.android.internal.R.string.loading))
+        val status = cws.control?.status ?: Control.STATUS_UNKNOWN
+        val msg = when (status) {
+            Control.STATUS_ERROR -> R.string.controls_error_generic
+            Control.STATUS_NOT_FOUND -> R.string.controls_error_removed
+            else -> com.android.internal.R.string.loading
+        }
+        cvh.status.setText(cvh.context.getString(msg))
         cvh.applyRenderInfo(false)
     }
 }

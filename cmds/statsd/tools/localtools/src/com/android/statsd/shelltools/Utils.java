@@ -229,4 +229,56 @@ public class Utils {
         }
         return null;
     }
+
+    /**
+     * Returns ANDROID_SERIAL environment variable, or null if that is undefined or unavailable.
+     * @param logger Destination of error messages.
+     * @return String value of ANDROID_SERIAL environment variable, or null.
+     */
+    public static String getDefaultDevice(Logger logger) {
+        try {
+            return System.getenv("ANDROID_SERIAL");
+        } catch (Exception ex) {
+            logger.log(Level.SEVERE, "Failed to check ANDROID_SERIAL environment variable.",
+                    ex);
+        }
+        return null;
+    }
+
+    /**
+     * Returns the device to use if one can be deduced, or null.
+     * @param device Command-line specified device, or null.
+     * @param connectedDevices List of all connected devices.
+     * @param defaultDevice Environment-variable specified device, or null.
+     * @param logger Destination of error messages.
+     * @return Device to use, or null.
+     */
+    public static String chooseDevice(String device, List<String> connectedDevices,
+            String defaultDevice, Logger logger) {
+        if (connectedDevices == null || connectedDevices.isEmpty()) {
+            logger.severe("No connected device.");
+            return null;
+        }
+        if (device != null) {
+            if (connectedDevices.contains(device)) {
+                return device;
+            }
+            logger.severe("Device not connected: " + device);
+            return null;
+        }
+        if (connectedDevices.size() == 1) {
+            return connectedDevices.get(0);
+        }
+        if (defaultDevice != null) {
+            if (connectedDevices.contains(defaultDevice)) {
+                return defaultDevice;
+            } else {
+                logger.severe("ANDROID_SERIAL device is not connected: " + defaultDevice);
+                return null;
+            }
+        }
+        logger.severe("More than one device is connected. Choose one"
+                + " with -s DEVICE_SERIAL or environment variable ANDROID_SERIAL.");
+        return null;
+    }
 }

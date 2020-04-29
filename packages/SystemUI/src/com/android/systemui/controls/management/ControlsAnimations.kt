@@ -76,6 +76,8 @@ object ControlsAnimations {
                     allowEnterTransitionOverlap = true
                     enterTransition = enterWindowTransition(view.getId())
                     exitTransition = exitWindowTransition(view.getId())
+                    reenterTransition = enterWindowTransition(view.getId())
+                    returnTransition = exitWindowTransition(view.getId())
                 }
             }
 
@@ -85,6 +87,11 @@ object ControlsAnimations {
                     ControlsAnimations.enterAnimation(view).start()
                     showAnimation = false
                 }
+            }
+
+            @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
+            fun resetAnimation() {
+                view.translationY = 0f
             }
         }
     }
