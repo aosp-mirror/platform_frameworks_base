@@ -36,7 +36,6 @@ import android.provider.Settings;
 import android.util.Slog;
 import android.view.LayoutInflater;
 import android.view.SurfaceControl;
-import android.view.SurfaceSession;
 import android.view.View;
 import android.window.TaskOrganizer;
 import android.window.WindowContainerToken;
@@ -94,7 +93,6 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
     private boolean mHomeStackResizable = false;
     private ForcedResizableInfoActivityController mForcedResizableController;
     private SystemWindows mSystemWindows;
-    final SurfaceSession mSurfaceSession = new SurfaceSession();
     private DisplayController mDisplayController;
     private DisplayImeController mImeController;
     final TransactionPool mTransactionPool;
@@ -493,7 +491,7 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
             return;
         }
         try {
-            mSplits.init(mSurfaceSession);
+            mSplits.init();
             // Set starting tile bounds based on middle target
             final WindowContainerTransaction tct = new WindowContainerTransaction();
             int midPos = mSplitLayout.getSnapAlgorithm().getMiddleTarget().position;
@@ -505,7 +503,6 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
             return;
         }
         ActivityManagerWrapper.getInstance().registerTaskStackListener(mActivityRestartListener);
-        update(mDisplayController.getDisplayContext(displayId).getResources().getConfiguration());
     }
 
     @Override
@@ -580,6 +577,15 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
             mView.setMinimizedDockStack(true, mHomeStackResizable);
             updateTouchable();
         }
+    }
+
+    void onTaskVanished() {
+        mHandler.post(this::removeDivider);
+    }
+
+    void onTasksReady() {
+        mHandler.post(() -> update(mDisplayController.getDisplayContext(
+                mContext.getDisplayId()).getResources().getConfiguration()));
     }
 
     void updateVisibility(final boolean visible) {

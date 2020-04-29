@@ -24,10 +24,10 @@ import android.content.Intent;
 import android.graphics.Rect;
 import android.os.IBinder;
 import android.view.ViewGroup;
-import android.window.TaskOrganizer;
-import android.window.WindowContainerTransaction;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
+import android.window.TaskOrganizer;
+import android.window.WindowContainerTransaction;
 
 public class TaskOrganizerPipTest extends Service {
     static final int PIP_WIDTH  = 640;
@@ -76,5 +76,6 @@ public class TaskOrganizerPipTest extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        mOrganizer.unregisterOrganizer();
     }
 }
