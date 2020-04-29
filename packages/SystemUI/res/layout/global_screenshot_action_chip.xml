@@ -19,11 +19,11 @@
     android:id="@+id/global_screenshot_action_chip"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_marginRight="@dimen/screenshot_action_chip_margin_right"
+    android:layout_marginEnd="@dimen/screenshot_action_chip_margin_right"
     android:layout_gravity="center"
     android:paddingVertical="@dimen/screenshot_action_chip_padding_vertical"
     android:background="@drawable/action_chip_background"
-    android:alpha="0"
+    android:alpha="0.0"
     android:gravity="center">
     <ImageView
         android:id="@+id/screenshot_action_chip_icon"

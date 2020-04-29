@@ -14,60 +14,89 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             android:layout_width="match_parent"
-             android:layout_height="match_parent">
-    <ImageView
-        android:id="@+id/global_screenshot_background"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:src="@android:color/black"
-        android:visibility="gone"/>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/global_screenshot_frame"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
     <ImageView
         android:id="@+id/global_screenshot_actions_background"
-        android:layout_height="400dp"
+        android:layout_height="@dimen/global_screenshot_bg_protection_height"
         android:layout_width="match_parent"
-        android:layout_gravity="bottom|center"
+        android:alpha="0.0"
         android:src="@drawable/screenshot_actions_background_protection"
-        android:alpha="0"/>
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+    <ImageView
+        android:id="@+id/global_screenshot_actions_container_background"
+        android:visibility="gone"
+        android:layout_height="0dp"
+        android:layout_width="0dp"
+        android:elevation="1dp"
+        android:background="@drawable/action_chip_container_background"
+        android:layout_marginStart="@dimen/screenshot_action_container_margin_horizontal"
+        app:layout_constraintBottom_toBottomOf="@+id/global_screenshot_actions_container"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/global_screenshot_actions_container"
+        app:layout_constraintEnd_toEndOf="@+id/global_screenshot_actions_container"/>
     <HorizontalScrollView
         android:id="@+id/global_screenshot_actions_container"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|left"
-        android:elevation="1dp"
-        android:fillViewport="true"
-        android:layout_marginHorizontal="@dimen/screenshot_action_container_margin_horizontal"
+        android:layout_marginEnd="@dimen/screenshot_action_container_margin_horizontal"
         android:layout_marginBottom="@dimen/screenshot_action_container_offset_y"
-        android:gravity="center"
-        android:paddingLeft="@dimen/screenshot_action_container_padding_left"
-        android:paddingRight="@dimen/screenshot_action_container_padding_right"
+        android:paddingHorizontal="@dimen/screenshot_action_container_padding_right"
         android:paddingVertical="@dimen/screenshot_action_container_padding_vertical"
-        android:visibility="gone"
+        android:elevation="1dp"
         android:scrollbars="none"
-        android:background="@drawable/action_chip_container_background">
+        app:layout_constraintHorizontal_bias="0"
+        app:layout_constraintWidth_percent="1.0"
+        app:layout_constraintWidth_max="wrap"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/global_screenshot_preview"
+        app:layout_constraintEnd_toEndOf="parent">
         <LinearLayout
             android:id="@+id/global_screenshot_actions"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
     </HorizontalScrollView>
     <ImageView
-        android:id="@+id/global_screenshot"
-        android:layout_width="wrap_content"
+        android:id="@+id/global_screenshot_animated_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:visibility="gone"
+        android:elevation="@dimen/screenshot_preview_elevation"
+        android:background="@drawable/screenshot_rounded_corners"
+        android:adjustViewBounds="true"/>
+    <ImageView
+        android:id="@+id/global_screenshot_preview"
+        android:layout_width="@dimen/global_screenshot_x_scale"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
+        android:layout_marginStart="@dimen/screenshot_offset_x"
+        android:layout_marginBottom="@dimen/screenshot_offset_y"
+        android:scaleType="fitEnd"
         android:elevation="@dimen/screenshot_preview_elevation"
         android:visibility="gone"
         android:background="@drawable/screenshot_rounded_corners"
         android:adjustViewBounds="true"
-        android:contentDescription="@string/screenshot_preview_description"/>
+        android:contentDescription="@string/screenshot_preview_description"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"/>
     <FrameLayout
         android:id="@+id/global_screenshot_dismiss_button"
         android:layout_width="@dimen/screenshot_dismiss_button_tappable_size"
         android:layout_height="@dimen/screenshot_dismiss_button_tappable_size"
         android:elevation="7dp"
         android:visibility="gone"
-        android:contentDescription="@string/screenshot_dismiss_ui_description">
+        android:contentDescription="@string/screenshot_dismiss_ui_description"
+        app:layout_constraintStart_toEndOf="@+id/global_screenshot_preview"
+        app:layout_constraintEnd_toEndOf="@+id/global_screenshot_preview"
+        app:layout_constraintTop_toTopOf="@+id/global_screenshot_preview"
+        app:layout_constraintBottom_toTopOf="@+id/global_screenshot_preview">
         <ImageView
             android:id="@+id/global_screenshot_dismiss_image"
             android:layout_width="match_parent"
@@ -79,14 +108,13 @@
         android:id="@+id/global_screenshot_flash"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:src="@android:color/white"
+        android:visibility="gone"
         android:elevation="@dimen/screenshot_preview_elevation"
-        android:visibility="gone"/>
+        android:src="@android:color/white"/>
     <com.android.systemui.screenshot.ScreenshotSelectorView
         android:id="@+id/global_screenshot_selector"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:visibility="gone"
         android:pointerIcon="crosshair"/>
-
-</FrameLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
