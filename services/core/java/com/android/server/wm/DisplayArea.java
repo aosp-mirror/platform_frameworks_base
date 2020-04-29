@@ -171,7 +171,7 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
 
     DisplayAreaInfo getDisplayAreaInfo() {
         DisplayAreaInfo info = new DisplayAreaInfo(mRemoteToken.toWindowContainerToken(),
-                getDisplayContent().getDisplayId());
+                getDisplayContent().getDisplayId(), mFeatureId);
         info.configuration.setTo(getConfiguration());
         return info;
     }
