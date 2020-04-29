@@ -37,13 +37,17 @@ import android.hardware.biometrics.BiometricPrompt;
 import android.hardware.biometrics.IBiometricAuthenticator;
 import android.hardware.biometrics.IBiometricSensorReceiver;
 import android.hardware.biometrics.IBiometricServiceReceiver;
+import android.hardware.biometrics.IBiometricSysuiReceiver;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
+import android.security.KeyStore;
 
 import androidx.test.filters.SmallTest;
+
+import com.android.internal.statusbar.IStatusBarService;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -65,6 +69,9 @@ public class AuthSessionTest {
     @Mock private BiometricService.SettingObserver mSettingObserver;
     @Mock private IBiometricSensorReceiver mSensorReceiver;
     @Mock private IBiometricServiceReceiver mClientReceiver;
+    @Mock private IStatusBarService mStatusBarService;
+    @Mock private IBiometricSysuiReceiver mSysuiReceiver;
+    @Mock private KeyStore mKeyStore;
 
     private Random mRandom;
     private IBinder mToken;
@@ -77,36 +84,19 @@ public class AuthSessionTest {
         MockitoAnnotations.initMocks(this);
         mRandom = new Random();
         mToken = new Binder();
-
         mSensors = new ArrayList<>();
-
-        IBiometricAuthenticator fingerprintAuthenticator = mock(IBiometricAuthenticator.class);
-        when(fingerprintAuthenticator.isHardwareDetected(any())).thenReturn(true);
-        when(fingerprintAuthenticator.hasEnrolledTemplates(anyInt(), any())).thenReturn(true);
-        mSensors.add(new BiometricSensor(0 /* id */,
-                TYPE_FINGERPRINT /* modality */,
-                Authenticators.BIOMETRIC_STRONG /* strength */,
-                fingerprintAuthenticator));
-
-        IBiometricAuthenticator  faceAuthenticator = mock(IBiometricAuthenticator.class);
-        when(faceAuthenticator.isHardwareDetected(any())).thenReturn(true);
-        when(faceAuthenticator.hasEnrolledTemplates(anyInt(), any())).thenReturn(true);
-        mSensors.add(new BiometricSensor(1 /* id */,
-                TYPE_FACE /* modality */,
-                Authenticators.BIOMETRIC_STRONG /* strength */,
-                faceAuthenticator));
-
-        when(mSettingObserver.getFaceEnabledForApps(anyInt())).thenReturn(true);
     }
 
     @Test
     public void testNewAuthSession_eligibleSensorsSetToStateUnknown() throws RemoteException {
+        setupFingerprint(0 /* id */);
+        setupFace(1 /* id */, false /* confirmationAlwaysRequired */);
+
         final AuthSession session = createAuthSession(mSensors,
                 false /* checkDevicePolicyManager */,
                 Authenticators.BIOMETRIC_STRONG,
                 0 /* operationId */,
                 0 /* userId */,
-                false /* requireConfirmation */,
                 0 /* callingUid */,
                 0 /* callingPid */,
                 0 /* callingUserId */);
@@ -119,6 +109,9 @@ public class AuthSessionTest {
     @Test
     public void testStartNewAuthSession()
             throws RemoteException {
+        setupFace(0 /* id */, false /* confirmationAlwaysRequired */);
+        setupFingerprint(1 /* id */);
+
         final boolean requireConfirmation = true;
         final long operationId = 123;
         final int userId = 10;
@@ -131,7 +124,6 @@ public class AuthSessionTest {
                 Authenticators.BIOMETRIC_STRONG,
                 operationId,
                 userId,
-                requireConfirmation,
                 callingUid,
                 callingPid,
                 callingUserId);
@@ -142,12 +134,12 @@ public class AuthSessionTest {
             assertEquals(0, sensor.getCookie());
         }
 
-        session.prepareAllSensorsForAuthentication();
+        session.goToInitialState();
         for (BiometricSensor sensor : session.mPreAuthInfo.eligibleSensors) {
             assertEquals(BiometricSensor.STATE_WAITING_FOR_COOKIE, sensor.getSensorState());
             assertTrue("Cookie must be >0", sensor.getCookie() > 0);
             verify(sensor.impl).prepareForAuthentication(
-                    eq(requireConfirmation),
+                    eq(sensor.confirmationSupported() && requireConfirmation),
                     eq(mToken),
                     eq(operationId),
                     eq(userId),
@@ -172,12 +164,8 @@ public class AuthSessionTest {
 
         final int cookie2 = session.mPreAuthInfo.eligibleSensors.get(1).getCookie();
         session.onCookieReceived(cookie2);
-        for (BiometricSensor sensor : session.mPreAuthInfo.eligibleSensors) {
-            assertEquals(BiometricSensor.STATE_COOKIE_RETURNED, sensor.getSensorState());
-        }
         assertTrue(session.allCookiesReceived());
 
-        session.startAllPreparedSensors();
         for (BiometricSensor sensor : session.mPreAuthInfo.eligibleSensors) {
             verify(sensor.impl).startPreparedClient(eq(sensor.getCookie()));
             assertEquals(BiometricSensor.STATE_AUTHENTICATING, sensor.getSensorState());
@@ -198,7 +186,7 @@ public class AuthSessionTest {
 
     private AuthSession createAuthSession(List<BiometricSensor> sensors,
             boolean checkDevicePolicyManager, @Authenticators.Types int authenticators,
-            long operationId, int userId, boolean requireConfirmation,
+            long operationId, int userId,
             int callingUid, int callingPid, int callingUserId)
             throws RemoteException {
 
@@ -207,9 +195,10 @@ public class AuthSessionTest {
         final PreAuthInfo preAuthInfo = createPreAuthInfo(sensors, userId, bundle,
                 checkDevicePolicyManager);
 
-        return new AuthSession(mRandom, preAuthInfo, mToken, operationId, userId, mSensorReceiver,
+        return new AuthSession(mStatusBarService, mSysuiReceiver, mKeyStore,
+                mRandom, preAuthInfo, mToken, operationId, userId, mSensorReceiver,
                 mClientReceiver, TEST_PACKAGE, bundle, callingUid,
-                callingPid, callingUserId, requireConfirmation);
+                callingPid, callingUserId, false /* debugEnabled */);
     }
 
     private Bundle createBiometricPromptBundle(@Authenticators.Types int authenticators) {
@@ -218,4 +207,46 @@ public class AuthSessionTest {
         return bundle;
     }
 
+
+    private void setupFingerprint(int id) throws RemoteException {
+        IBiometricAuthenticator fingerprintAuthenticator = mock(IBiometricAuthenticator.class);
+        when(fingerprintAuthenticator.isHardwareDetected(any())).thenReturn(true);
+        when(fingerprintAuthenticator.hasEnrolledTemplates(anyInt(), any())).thenReturn(true);
+        mSensors.add(new BiometricSensor(id,
+                TYPE_FINGERPRINT /* modality */,
+                Authenticators.BIOMETRIC_STRONG /* strength */,
+                fingerprintAuthenticator) {
+            @Override
+            boolean confirmationAlwaysRequired(int userId) {
+                return false; // no-op / unsupported
+            }
+
+            @Override
+            boolean confirmationSupported() {
+                return false; // fingerprint does not support confirmation
+            }
+        });
+    }
+
+    private void setupFace(int id, boolean confirmationAlwaysRequired) throws RemoteException {
+        IBiometricAuthenticator  faceAuthenticator = mock(IBiometricAuthenticator.class);
+        when(faceAuthenticator.isHardwareDetected(any())).thenReturn(true);
+        when(faceAuthenticator.hasEnrolledTemplates(anyInt(), any())).thenReturn(true);
+        mSensors.add(new BiometricSensor(id,
+                TYPE_FACE /* modality */,
+                Authenticators.BIOMETRIC_STRONG /* strength */,
+                faceAuthenticator) {
+            @Override
+            boolean confirmationAlwaysRequired(int userId) {
+                return confirmationAlwaysRequired;
+            }
+
+            @Override
+            boolean confirmationSupported() {
+                return true;
+            }
+        });
+
+        when(mSettingObserver.getFaceEnabledForApps(anyInt())).thenReturn(true);
+    }
 }

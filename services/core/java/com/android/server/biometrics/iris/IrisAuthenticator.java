@@ -48,7 +48,7 @@ public final class IrisAuthenticator extends IBiometricAuthenticator.Stub {
 
     @Override
     public void cancelAuthenticationFromService(IBinder token, String opPackageName, int callingUid,
-            int callingPid, int callingUserId, boolean fromClient) throws RemoteException {
+            int callingPid, int callingUserId) throws RemoteException {
     }
 
     @Override

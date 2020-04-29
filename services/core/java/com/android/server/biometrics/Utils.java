@@ -29,6 +29,7 @@ import static com.android.server.biometrics.PreAuthInfo.BIOMETRIC_NO_HARDWARE;
 import static com.android.server.biometrics.PreAuthInfo.CREDENTIAL_NOT_ENROLLED;
 
 import android.content.Context;
+import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.BiometricPrompt;
@@ -40,7 +41,7 @@ import android.provider.Settings;
 import android.util.Slog;
 
 public class Utils {
-    public static boolean isDebugEnabled(Context context, int targetUserId) {
+    static boolean isDebugEnabled(Context context, int targetUserId) {
         if (targetUserId == UserHandle.USER_NULL) {
             return false;
         }
@@ -61,7 +62,7 @@ public class Utils {
      * Combines {@link BiometricPrompt#KEY_ALLOW_DEVICE_CREDENTIAL} with
      * {@link BiometricPrompt#KEY_AUTHENTICATORS_ALLOWED}, as the former is not flexible enough.
      */
-    public static void combineAuthenticatorBundles(Bundle bundle) {
+    static void combineAuthenticatorBundles(Bundle bundle) {
         // Cache and remove explicit ALLOW_DEVICE_CREDENTIAL boolean flag from the bundle.
         final boolean deviceCredentialAllowed =
                 bundle.getBoolean(BiometricPrompt.KEY_ALLOW_DEVICE_CREDENTIAL, false);
@@ -85,7 +86,7 @@ public class Utils {
      * @param authenticators composed of one or more values from {@link Authenticators}
      * @return true if device credential is allowed.
      */
-    public static boolean isCredentialRequested(@Authenticators.Types int authenticators) {
+    static boolean isCredentialRequested(@Authenticators.Types int authenticators) {
         return (authenticators & Authenticators.DEVICE_CREDENTIAL) != 0;
     }
 
@@ -93,7 +94,7 @@ public class Utils {
      * @param bundle should be first processed by {@link #combineAuthenticatorBundles(Bundle)}
      * @return true if device credential is allowed.
      */
-    public static boolean isCredentialRequested(Bundle bundle) {
+    static boolean isCredentialRequested(Bundle bundle) {
         return isCredentialRequested(bundle.getInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED));
     }
 
@@ -103,7 +104,7 @@ public class Utils {
      * @param authenticators composed of one or more values from {@link Authenticators}
      * @return minimal allowed biometric strength or 0 if biometric authentication is not allowed.
      */
-    public static int getPublicBiometricStrength(@Authenticators.Types int authenticators) {
+    static int getPublicBiometricStrength(@Authenticators.Types int authenticators) {
         // Only biometrics WEAK and above are allowed to integrate with the public APIs.
         return authenticators & Authenticators.BIOMETRIC_WEAK;
     }
@@ -114,7 +115,7 @@ public class Utils {
      * @param bundle should be first processed by {@link #combineAuthenticatorBundles(Bundle)}
      * @return minimal allowed biometric strength or 0 if biometric authentication is not allowed.
      */
-    public static int getPublicBiometricStrength(Bundle bundle) {
+    static int getPublicBiometricStrength(Bundle bundle) {
         return getPublicBiometricStrength(
                 bundle.getInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED));
     }
@@ -125,7 +126,7 @@ public class Utils {
      * @param bundle should be first processed by {@link #combineAuthenticatorBundles(Bundle)}
      * @return true if biometric authentication is allowed.
      */
-    public static boolean isBiometricRequested(Bundle bundle) {
+    static boolean isBiometricRequested(Bundle bundle) {
         return getPublicBiometricStrength(bundle) != 0;
     }
 
@@ -134,7 +135,7 @@ public class Utils {
      * @param requestedStrength the strength that it must meet
      * @return true only if the sensor is at least as strong as the requested strength
      */
-    public static boolean isAtLeastStrength(int sensorStrength, int requestedStrength) {
+    static boolean isAtLeastStrength(int sensorStrength, int requestedStrength) {
         // Clear out any bits that are not reserved for biometric
         sensorStrength &= Authenticators.BIOMETRIC_MIN_STRENGTH;
 
@@ -160,7 +161,7 @@ public class Utils {
      * @param bundle
      * @return
      */
-    public static boolean isValidAuthenticatorConfig(Bundle bundle) {
+    static boolean isValidAuthenticatorConfig(Bundle bundle) {
         final int authenticators = bundle.getInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED);
         return isValidAuthenticatorConfig(authenticators);
     }
@@ -170,7 +171,7 @@ public class Utils {
      * @param authenticators
      * @return
      */
-    public static boolean isValidAuthenticatorConfig(int authenticators) {
+    static boolean isValidAuthenticatorConfig(int authenticators) {
         // The caller is not required to set the authenticators. But if they do, check the below.
         if (authenticators == 0) {
             return true;
@@ -213,7 +214,7 @@ public class Utils {
      * @param biometricConstantsCode see {@link BiometricConstants}
      * @return see {@link BiometricManager}
      */
-    public static int biometricConstantsToBiometricManager(int biometricConstantsCode) {
+    static int biometricConstantsToBiometricManager(int biometricConstantsCode) {
         final int biometricManagerCode;
 
         switch (biometricConstantsCode) {
@@ -253,7 +254,7 @@ public class Utils {
      *         BiometricPrompt.AuthenticationResult}.
      * @throws IllegalArgumentException if given an invalid dismissal reason.
      */
-    public static @AuthenticationResultType int getAuthenticationTypeForResult(int reason) {
+    static @AuthenticationResultType int getAuthenticationTypeForResult(int reason) {
         switch (reason) {
             case BiometricPrompt.DISMISSED_REASON_CREDENTIAL_CONFIRMED:
                 return BiometricPrompt.AUTHENTICATION_RESULT_TYPE_DEVICE_CREDENTIAL;
@@ -268,7 +269,7 @@ public class Utils {
     }
 
 
-    public static int authenticatorStatusToBiometricConstant(
+    static int authenticatorStatusToBiometricConstant(
             @PreAuthInfo.AuthenticatorStatus int status) {
         switch (status) {
             case BIOMETRIC_NO_HARDWARE:
@@ -293,5 +294,19 @@ public class Utils {
             default:
                 return BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE;
         }
+    }
+
+    static boolean isConfirmationSupported(@BiometricAuthenticator.Modality int modality) {
+        switch (modality) {
+            case BiometricAuthenticator.TYPE_FACE:
+            case BiometricAuthenticator.TYPE_IRIS:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    static int removeBiometricBits(@Authenticators.Types int authenticators) {
+        return authenticators &= ~Authenticators.BIOMETRIC_MIN_STRENGTH;
     }
 }

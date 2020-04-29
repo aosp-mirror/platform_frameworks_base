@@ -22,7 +22,7 @@ package android.hardware.biometrics;
 oneway interface IBiometricSensorReceiver {
     // Notify BiometricService that authentication was successful. If user confirmation is required,
     // the auth token must be submitted into KeyStore.
-    void onAuthenticationSucceeded(int sensorId, boolean requireConfirmation, in byte[] token);
+    void onAuthenticationSucceeded(int sensorId, in byte[] token);
     // Notify BiometricService authentication was rejected.
     void onAuthenticationFailed();
     // Notify BiometricService than an error has occured. Forward to the correct receiver depending

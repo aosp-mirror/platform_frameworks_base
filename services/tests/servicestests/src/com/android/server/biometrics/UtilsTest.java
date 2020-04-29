@@ -24,6 +24,7 @@ import static junit.framework.Assert.assertTrue;
 
 import static org.junit.Assert.assertNull;
 
+import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.BiometricPrompt;
@@ -252,5 +253,20 @@ public class UtilsTest {
     @Test(expected = IllegalArgumentException.class)
     public void testGetAuthResultType_throwsForInvalidReason() {
         Utils.getAuthenticationTypeForResult(BiometricPrompt.DISMISSED_REASON_NEGATIVE);
+    }
+
+    @Test
+    public void testConfirmationSupported() {
+        assertTrue(Utils.isConfirmationSupported(BiometricAuthenticator.TYPE_FACE));
+        assertTrue(Utils.isConfirmationSupported(BiometricAuthenticator.TYPE_IRIS));
+        assertFalse(Utils.isConfirmationSupported(BiometricAuthenticator.TYPE_FINGERPRINT));
+    }
+
+    @Test
+    public void testRemoveBiometricBits() {
+        @Authenticators.Types int authenticators = Integer.MAX_VALUE;
+        authenticators = Utils.removeBiometricBits(authenticators);
+        // All biometric bits are removed
+        assertEquals(0, authenticators & Authenticators.BIOMETRIC_MIN_STRENGTH);
     }
 }
