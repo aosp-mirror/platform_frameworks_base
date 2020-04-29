@@ -49,6 +49,7 @@ java_library {
         "com.android.media",
         "test_com.android.media",
     ],
+    min_sdk_version: "29",
 }
 
 filegroup {
