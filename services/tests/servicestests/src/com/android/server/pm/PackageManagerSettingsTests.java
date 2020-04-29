@@ -35,6 +35,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import android.annotation.NonNull;
+import android.app.PropertyInvalidatedCache;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -89,6 +90,12 @@ public class PackageManagerSettingsTests {
     @Before
     public void initializeMocks() {
         MockitoAnnotations.initMocks(this);
+    }
+
+    @Before
+    public void setup() {
+        // Disable binder caches in this process.
+        PropertyInvalidatedCache.disableForTestMode();
     }
 
     /** make sure our initialized KeySetManagerService metadata matches packages.xml */
