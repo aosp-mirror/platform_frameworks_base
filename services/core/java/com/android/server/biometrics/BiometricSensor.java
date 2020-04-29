@@ -33,7 +33,7 @@ import java.lang.annotation.RetentionPolicy;
  * including its current state.
  * TODO(b/141025588): Consider refactoring the tests to not rely on this implementation detail.
  */
-public class BiometricSensor {
+public abstract class BiometricSensor {
     private static final String TAG = "BiometricService/Sensor";
 
     // State is unknown. Usually this means we need the sensor but have not requested for
@@ -70,6 +70,17 @@ public class BiometricSensor {
     private @BiometricConstants.Errors int mError;
 
     private int mCookie; // invalid during STATE_UNKNOWN
+
+    /**
+     * @return true if the user's system settings specifies that this sensor always requires
+     * confirmation.
+     */
+    abstract boolean confirmationAlwaysRequired(int userId);
+
+    /**
+     * @return true if confirmation is supported by this sensor.
+     */
+    abstract boolean confirmationSupported();
 
     BiometricSensor(int id, int modality, int strength,
             IBiometricAuthenticator impl) {
@@ -112,9 +123,9 @@ public class BiometricSensor {
     }
 
     void goToStateCancelling(IBinder token, String opPackageName, int callingUid,
-            int callingPid, int callingUserId, boolean fromClient) throws RemoteException {
+            int callingPid, int callingUserId) throws RemoteException {
         impl.cancelAuthenticationFromService(token, opPackageName, callingUid, callingPid,
-                callingUserId, fromClient);
+                callingUserId);
         mSensorState = STATE_CANCELING;
     }
 
