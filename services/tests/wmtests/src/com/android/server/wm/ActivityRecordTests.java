@@ -1083,6 +1083,46 @@ public class ActivityRecordTests extends ActivityTestsBase {
     }
 
     /**
+     * Verify that complete finish request for an activity which the resume activity is translucent
+     * must ensure the visibilities of activities being updated.
+     */
+    @Test
+    public void testCompleteFinishing_ensureActivitiesVisible() {
+        final ActivityRecord firstActivity = new ActivityBuilder(mService).setTask(mTask).build();
+        firstActivity.mVisibleRequested = false;
+        firstActivity.nowVisible = false;
+        firstActivity.setState(STOPPED, "true");
+
+        final ActivityRecord secondActivity = new ActivityBuilder(mService).setTask(mTask).build();
+        secondActivity.mVisibleRequested = true;
+        secondActivity.nowVisible = true;
+        secondActivity.setState(PAUSED, "true");
+
+        final ActivityRecord translucentActivity =
+                new ActivityBuilder(mService).setTask(mTask).build();
+        translucentActivity.mVisibleRequested = true;
+        translucentActivity.nowVisible = true;
+        translucentActivity.setState(RESUMED, "true");
+
+        doReturn(false).when(translucentActivity).occludesParent();
+
+        // Finish the second activity
+        secondActivity.finishing = true;
+        secondActivity.completeFinishing("test");
+        verify(secondActivity.getDisplay()).ensureActivitiesVisible(null /* starting */,
+                0 /* configChanges */ , false /* preserveWindows */,
+                true /* notifyClients */);
+
+        // Finish the first activity
+        firstActivity.finishing = true;
+        firstActivity.mVisibleRequested = true;
+        firstActivity.completeFinishing("test");
+        verify(firstActivity.getDisplay(), times(2)).ensureActivitiesVisible(null /* starting */,
+                0 /* configChanges */ , false /* preserveWindows */,
+                true /* notifyClients */);
+    }
+
+    /**
      * Verify destroy activity request completes successfully.
      */
     @Test
