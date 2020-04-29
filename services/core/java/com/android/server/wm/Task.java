@@ -1930,9 +1930,11 @@ class Task extends WindowContainer<WindowContainer> {
         // Check if the new configuration supports persistent bounds (eg. is Freeform) and if so
         // restore the last recorded non-fullscreen bounds.
         final boolean prevPersistTaskBounds = getWindowConfiguration().persistTaskBounds();
-        final boolean nextPersistTaskBounds =
-                getRequestedOverrideConfiguration().windowConfiguration.persistTaskBounds()
-                || newParentConfig.windowConfiguration.persistTaskBounds();
+        boolean nextPersistTaskBounds =
+                getRequestedOverrideConfiguration().windowConfiguration.persistTaskBounds();
+        if (getRequestedOverrideWindowingMode() == WINDOWING_MODE_UNDEFINED) {
+            nextPersistTaskBounds = newParentConfig.windowConfiguration.persistTaskBounds();
+        }
         if (!prevPersistTaskBounds && nextPersistTaskBounds
                 && mLastNonFullscreenBounds != null && !mLastNonFullscreenBounds.isEmpty()) {
             // Bypass onRequestedOverrideConfigurationChanged here to avoid infinite loop.
