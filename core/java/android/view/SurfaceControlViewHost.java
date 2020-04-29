@@ -39,7 +39,7 @@ import java.util.Objects;
  * {@link SurfaceView#setChildSurfacePackage}.
  */
 public class SurfaceControlViewHost {
-    private ViewRootImpl mViewRoot;
+    private final ViewRootImpl mViewRoot;
     private WindowlessWindowManager mWm;
 
     private SurfaceControl mSurfaceControl;
@@ -223,6 +223,14 @@ public class SurfaceControlViewHost {
      */
     public @Nullable View getView() {
         return mViewRoot.getView();
+    }
+
+    /**
+     * @return the ViewRootImpl wrapped by this host.
+     * @hide
+     */
+    public IWindow getWindowToken() {
+        return mViewRoot.mWindow;
     }
 
     /**

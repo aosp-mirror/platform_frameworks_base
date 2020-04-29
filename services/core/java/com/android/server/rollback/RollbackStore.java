@@ -174,10 +174,7 @@ class RollbackStore {
     }
 
     private static @Nullable JSONArray extensionVersionsToJson(
-            @Nullable SparseIntArray extensionVersions) throws JSONException {
-        if (extensionVersions == null) {
-            return null;
-        }
+            SparseIntArray extensionVersions) throws JSONException {
         JSONArray array = new JSONArray();
         for (int i = 0; i < extensionVersions.size(); i++) {
             JSONObject entryJson = new JSONObject();
@@ -188,10 +185,10 @@ class RollbackStore {
         return array;
     }
 
-    private static @Nullable SparseIntArray extensionVersionsFromJson(@Nullable JSONArray json)
+    private static @Nullable SparseIntArray extensionVersionsFromJson(JSONArray json)
             throws JSONException {
         if (json == null) {
-            return null;
+            return new SparseIntArray(0);
         }
         SparseIntArray extensionVersions = new SparseIntArray(json.length());
         for (int i = 0; i < json.length(); i++) {

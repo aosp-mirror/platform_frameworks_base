@@ -37,6 +37,7 @@ import android.content.pm.PackageParser;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.UserInfo;
 import android.content.pm.VersionedPackage;
+import android.content.pm.parsing.ApkLiteParseUtils;
 import android.content.rollback.IRollbackManager;
 import android.content.rollback.RollbackInfo;
 import android.content.rollback.RollbackManager;
@@ -835,9 +836,9 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         }
 
         // Get information about the package to be installed.
-        PackageParser.PackageLite newPackage;
+        PackageParser.ApkLite newPackage;
         try {
-            newPackage = PackageParser.parsePackageLite(new File(session.resolvedBaseCodePath), 0);
+            newPackage = ApkLiteParseUtils.parseApkLite(new File(session.resolvedBaseCodePath), 0);
         } catch (PackageParser.PackageParserException e) {
             Slog.e(TAG, "Unable to parse new package", e);
             return false;
@@ -845,7 +846,8 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
 
         String packageName = newPackage.packageName;
         Slog.i(TAG, "Enabling rollback for install of " + packageName
-                + ", session:" + session.sessionId);
+                + ", session:" + session.sessionId
+                + ", rollbackDataPolicy=" + newPackage.rollbackDataPolicy);
 
         String installerPackageName = session.getInstallerPackageName();
         if (!enableRollbackAllowed(installerPackageName, packageName)) {

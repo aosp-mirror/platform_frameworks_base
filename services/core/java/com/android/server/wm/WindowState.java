@@ -23,6 +23,7 @@ import static android.app.AppOpsManager.OP_NONE;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_DREAM;
 import static android.app.WindowConfiguration.isSplitScreenWindowingMode;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
+import static android.graphics.GraphicsProtos.dumpPointProto;
 import static android.os.PowerManager.DRAW_WAKE_LOCK;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.SurfaceControl.Transaction;
@@ -3783,7 +3784,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mGivenContentInsets.dumpDebug(proto, GIVEN_CONTENT_INSETS);
         mWindowFrames.dumpDebug(proto, WINDOW_FRAMES);
         mAttrs.surfaceInsets.dumpDebug(proto, SURFACE_INSETS);
-        mSurfacePosition.dumpDebug(proto, SURFACE_POSITION);
+        dumpPointProto(mSurfacePosition, proto, SURFACE_POSITION);
         mWinAnimator.dumpDebug(proto, ANIMATOR);
         proto.write(ANIMATING_EXIT, mAnimatingExit);
         proto.write(REQUESTED_WIDTH, mRequestedWidth);
@@ -5625,8 +5626,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         @Override
         public void dumpDebugInner(ProtoOutputStream proto) {
             final long token = proto.start(MOVE);
-            mFrom.dumpDebug(proto, FROM);
-            mTo.dumpDebug(proto, TO);
+            dumpPointProto(mFrom, proto, FROM);
+            dumpPointProto(mTo, proto, TO);
             proto.write(DURATION_MS, mDuration);
             proto.end(token);
         }

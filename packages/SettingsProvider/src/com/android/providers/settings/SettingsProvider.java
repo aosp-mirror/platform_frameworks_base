@@ -23,12 +23,16 @@ import static android.os.Process.SYSTEM_UID;
 import static android.provider.Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_MAGNIFICATION_CONTROLLER;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_2BUTTON_OVERLAY;
 
+import static com.android.providers.settings.SettingsState.FALLBACK_FILE_SUFFIX;
+
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.AppGlobals;
 import android.app.backup.BackupManager;
+import android.app.job.JobInfo;
+import android.app.job.JobScheduler;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentProvider;
@@ -55,12 +59,14 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.DropBoxManager;
 import android.os.Environment;
+import android.os.FileUtils;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IUserRestrictionsListener;
 import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
+import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
@@ -95,6 +101,7 @@ import libcore.util.HexEncoding;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.ByteBuffer;
 import java.security.InvalidKeyException;
@@ -154,9 +161,11 @@ public class SettingsProvider extends ContentProvider {
 
     private static final String LOG_TAG = "SettingsProvider";
 
-    private static final String TABLE_SYSTEM = "system";
-    private static final String TABLE_SECURE = "secure";
-    private static final String TABLE_GLOBAL = "global";
+    public static final String TABLE_SYSTEM = "system";
+    public static final String TABLE_SECURE = "secure";
+    public static final String TABLE_GLOBAL = "global";
+    public static final String TABLE_SSAID = "ssaid";
+    public static final String TABLE_CONFIG = "config";
 
     // Old tables no longer exist.
     private static final String TABLE_FAVORITES = "favorites";
@@ -204,6 +213,10 @@ public class SettingsProvider extends ContentProvider {
 
     public static final String RESULT_ROWS_DELETED = "result_rows_deleted";
     public static final String RESULT_SETTINGS_LIST = "result_settings_list";
+
+    // Used for scheduling jobs to make a copy for the settings files
+    public static final int WRITE_FALLBACK_SETTINGS_FILES_JOB_ID = 1;
+    public static final long ONE_DAY_INTERVAL_MILLIS = 24 * 60 * 60 * 1000L;
 
     // Overlay specified settings whitelisted for Instant Apps
     private static final Set<String> OVERLAY_ALLOWED_GLOBAL_INSTANT_APP_SETTINGS = new ArraySet<>();
@@ -2385,6 +2398,68 @@ public class SettingsProvider extends ContentProvider {
         }
     }
 
+    /**
+     * Schedule the job service to make a copy of all the settings files.
+     */
+    public void scheduleWriteFallbackFilesJob() {
+        final Context context = getContext();
+        final JobScheduler jobScheduler =
+                (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
+        if (jobScheduler == null) {
+            // Might happen: SettingsProvider is created before JobSchedulerService in system server
+            return;
+        }
+        // Check if the job is already scheduled. If so, skip scheduling another one
+        if (jobScheduler.getPendingJob(WRITE_FALLBACK_SETTINGS_FILES_JOB_ID) != null) {
+            return;
+        }
+        // Back up all settings files
+        final PersistableBundle bundle = new PersistableBundle();
+        final File globalSettingsFile = mSettingsRegistry.getSettingsFile(
+                makeKey(SETTINGS_TYPE_GLOBAL, UserHandle.USER_SYSTEM));
+        final File systemSettingsFile = mSettingsRegistry.getSettingsFile(
+                makeKey(SETTINGS_TYPE_SYSTEM, UserHandle.USER_SYSTEM));
+        final File secureSettingsFile = mSettingsRegistry.getSettingsFile(
+                makeKey(SETTINGS_TYPE_SECURE, UserHandle.USER_SYSTEM));
+        final File ssaidSettingsFile = mSettingsRegistry.getSettingsFile(
+                makeKey(SETTINGS_TYPE_SSAID, UserHandle.USER_SYSTEM));
+        final File configSettingsFile = mSettingsRegistry.getSettingsFile(
+                makeKey(SETTINGS_TYPE_CONFIG, UserHandle.USER_SYSTEM));
+        bundle.putString(TABLE_GLOBAL, globalSettingsFile.getAbsolutePath());
+        bundle.putString(TABLE_SYSTEM, systemSettingsFile.getAbsolutePath());
+        bundle.putString(TABLE_SECURE, secureSettingsFile.getAbsolutePath());
+        bundle.putString(TABLE_SSAID, ssaidSettingsFile.getAbsolutePath());
+        bundle.putString(TABLE_CONFIG, configSettingsFile.getAbsolutePath());
+        // Schedule the job to write the fallback files, once daily when phone is charging
+        jobScheduler.schedule(new JobInfo.Builder(WRITE_FALLBACK_SETTINGS_FILES_JOB_ID,
+                new ComponentName(context, WriteFallbackSettingsFilesJobService.class))
+                .setExtras(bundle)
+                .setPeriodic(ONE_DAY_INTERVAL_MILLIS)
+                .setRequiresCharging(true)
+                .setPersisted(true)
+                .build());
+    }
+
+    /**
+     * For each file in the given list, if it exists, copy it to a back up file. Ignore failures.
+     * @param filePaths List of paths of files that need to be backed up
+     */
+    public static void writeFallBackSettingsFiles(List<String> filePaths) {
+        final int numFiles = filePaths.size();
+        for (int i = 0; i < numFiles; i++) {
+            final String filePath = filePaths.get(i);
+            final File originalFile = new File(filePath);
+            if (SettingsState.stateFileExists(originalFile)) {
+                final File fallBackFile = new File(filePath + FALLBACK_FILE_SUFFIX);
+                try {
+                    FileUtils.copy(originalFile, fallBackFile);
+                } catch (IOException ex) {
+                    Slog.w(LOG_TAG, "Failed to write fallback file for: " + filePath);
+                }
+            }
+        }
+    }
+
     final class SettingsRegistry {
         private static final String DROPBOX_TAG_USERLOG = "restricted_profile_ssaid";
 
@@ -3332,6 +3407,7 @@ public class SettingsProvider extends ContentProvider {
 
                     case MSG_NOTIFY_DATA_CHANGED: {
                         mBackupManager.dataChanged();
+                        scheduleWriteFallbackFilesJob();
                     } break;
                 }
             }

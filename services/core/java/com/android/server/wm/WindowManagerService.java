@@ -3911,6 +3911,30 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
+    public void setShellRootAccessibilityWindow(int displayId, int windowType, IWindow target) {
+        if (mContext.checkCallingOrSelfPermission(MANAGE_APP_TOKENS)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Must hold permission " + MANAGE_APP_TOKENS);
+        }
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                final DisplayContent dc = mRoot.getDisplayContent(displayId);
+                if (dc == null) {
+                    return;
+                }
+                ShellRoot root = dc.mShellRoots.get(windowType);
+                if (root == null) {
+                    return;
+                }
+                root.setAccessibilityWindow(target);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
+    }
+
+    @Override
     public void setDisplayWindowInsetsController(
             int displayId, IDisplayWindowInsetsController insetsController) {
         if (mContext.checkCallingOrSelfPermission(MANAGE_APP_TOKENS)

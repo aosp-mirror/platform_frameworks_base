@@ -1835,6 +1835,16 @@
             <enum name="discouraged" value="1" />
             <enum name="disallowed" value="2" />
         </attr>
+
+        <!-- Declare the policy to deal with user data when rollback is committed. -->
+        <attr name="rollbackDataPolicy">
+            <!-- User data will be restored during rollback. -->
+            <enum name="restore" value="0" />
+            <!-- User data will be wiped out during rollback. -->
+            <enum name="wipe" value="1" />
+            <!-- User data will remain unchanged during rollback. -->
+            <enum name="retain" value="2" />
+        </attr>
     </declare-styleable>
 
     <!-- An attribution is a logical part of an app and is identified by a tag.

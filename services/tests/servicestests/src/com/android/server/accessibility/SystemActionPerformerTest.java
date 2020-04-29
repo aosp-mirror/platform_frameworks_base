@@ -67,7 +67,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class SystemActionPerformerTest {
     private static final int LATCH_TIMEOUT_MS = 500;
-    private static final int LEGACY_SYSTEM_ACTION_COUNT = 9;
+    private static final int LEGACY_SYSTEM_ACTION_COUNT = 8;
     private static final int NEW_ACTION_ID = 20;
     private static final String LABEL_1 = "label1";
     private static final String LABEL_2 = "label2";

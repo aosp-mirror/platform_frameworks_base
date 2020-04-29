@@ -285,6 +285,8 @@ public class PipTaskOrganizer extends TaskOrganizer {
      * Meanwhile this callback is invoked whenever the task is removed. For instance:
      *   - as a result of removeStacksInWindowingModes from WM
      *   - activity itself is died
+     * Nevertheless, we simply update the internal state here as all the heavy lifting should
+     * have been done in WM.
      */
     @Override
     public void onTaskVanished(ActivityManager.RunningTaskInfo info) {
@@ -297,10 +299,6 @@ public class PipTaskOrganizer extends TaskOrganizer {
             Log.wtf(TAG, "Unrecognized token: " + token);
             return;
         }
-        final Rect boundsToRestore = mBoundsToRestore.remove(token.asBinder());
-        scheduleAnimateResizePip(mLastReportedBounds, boundsToRestore,
-                TRANSITION_DIRECTION_TO_FULLSCREEN, mEnterExitAnimationDuration,
-                null /* updateBoundsCallback */);
         mInPip = false;
     }
 

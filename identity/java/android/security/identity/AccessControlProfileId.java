@@ -25,6 +25,8 @@ public class AccessControlProfileId {
     /**
      * Constructs a new object holding a numerical identifier.
      *
+     * <p>The identifier must be a non-negative number and less than 32.
+     *
      * @param id the identifier.
      */
     public AccessControlProfileId(int id) {
