@@ -119,7 +119,6 @@ class WindowToken extends WindowContainer<WindowState> {
      * rotated by the given rotated display info, frames and insets.
      */
     private static class FixedRotationTransformState {
-        final WindowToken mOwner;
         final DisplayInfo mDisplayInfo;
         final DisplayFrames mDisplayFrames;
         final InsetsState mInsetsState;
@@ -133,10 +132,9 @@ class WindowToken extends WindowContainer<WindowState> {
         final ArrayList<WindowContainer<?>> mRotatedContainers = new ArrayList<>(3);
         boolean mIsTransforming = true;
 
-        FixedRotationTransformState(WindowToken owner, DisplayInfo rotatedDisplayInfo,
+        FixedRotationTransformState(DisplayInfo rotatedDisplayInfo,
                 DisplayFrames rotatedDisplayFrames, InsetsState rotatedInsetsState,
                 Configuration rotatedConfig, int currentRotation) {
-            mOwner = owner;
             mDisplayInfo = rotatedDisplayInfo;
             mDisplayFrames = rotatedDisplayFrames;
             mInsetsState = rotatedInsetsState;
@@ -482,6 +480,14 @@ class WindowToken extends WindowContainer<WindowState> {
         return mFixedRotationTransformState != null;
     }
 
+    /** Returns {@code true} if the given token shares the same transform. */
+    boolean hasFixedRotationTransform(WindowToken token) {
+        if (mFixedRotationTransformState == null || token == null) {
+            return false;
+        }
+        return this == token || mFixedRotationTransformState == token.mFixedRotationTransformState;
+    }
+
     boolean isFinishingFixedRotationTransform() {
         return mFixedRotationTransformState != null
                 && !mFixedRotationTransformState.mIsTransforming;
@@ -520,15 +526,14 @@ class WindowToken extends WindowContainer<WindowState> {
         final InsetsState insetsState = new InsetsState();
         mDisplayContent.getDisplayPolicy().simulateLayoutDisplay(displayFrames, insetsState,
                 mDisplayContent.getConfiguration().uiMode);
-        mFixedRotationTransformState = new FixedRotationTransformState(this, info, displayFrames,
+        mFixedRotationTransformState = new FixedRotationTransformState(info, displayFrames,
                 insetsState, new Configuration(config), mDisplayContent.getRotation());
         onConfigurationChanged(getParent().getConfiguration());
     }
 
     /**
      * Reuses the {@link FixedRotationTransformState} (if any) from the other WindowToken to this
-     * one. This takes the same effect as {@link #applyFixedRotationTransform}, but the linked state
-     * can only be cleared by the state owner.
+     * one. This takes the same effect as {@link #applyFixedRotationTransform}.
      */
     void linkFixedRotationTransform(WindowToken other) {
         if (mFixedRotationTransformState != null) {
@@ -543,28 +548,15 @@ class WindowToken extends WindowContainer<WindowState> {
         onConfigurationChanged(getParent().getConfiguration());
     }
 
-    /**
-     * Finishes the transform and continue updating the orientation change of display. Only the
-     * state owner can finish the transform state.
-     */
     void finishFixedRotationTransform() {
-        if (mFixedRotationTransformState == null || mFixedRotationTransformState.mOwner != this) {
-            return;
-        }
-        final boolean changed =
-                mDisplayContent.continueUpdateOrientationForDiffOrienLaunchingApp(this);
-        // If it is not the launching app or the display is not rotated, make sure the transform is
-        // cleared and the configuration is restored from parent.
-        if (!changed) {
-            clearFixedRotationTransform(null /* applyDisplayRotation */);
-        }
+        finishFixedRotationTransform(null /* applyDisplayRotation */);
     }
 
     /**
-     * Clears the transform and apply display rotation if the action is given. If the display will
+     * Finishes the transform and apply display rotation if the action is given. If the display will
      * not rotate, the transformed containers are restored to their original states.
      */
-    void clearFixedRotationTransform(Runnable applyDisplayRotation) {
+    void finishFixedRotationTransform(Runnable applyDisplayRotation) {
         final FixedRotationTransformState state = mFixedRotationTransformState;
         if (state == null) {
             return;
