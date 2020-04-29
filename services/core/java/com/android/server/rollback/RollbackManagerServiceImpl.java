@@ -808,6 +808,19 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         return enableRollbackForPackageSession(newRollback, packageSession);
     }
 
+    @WorkerThread
+    private int computeRollbackDataPolicy(int sessionPolicy, int manifestPolicy) {
+        assertInWorkerThread();
+        // TODO: In order not to break existing code, the policy specified in the manifest will take
+        // precedence only when it is not the default (i.e. RESTORE). We will remove
+        // SessionParams#setEnableRollback(boolean, int) and related code when Play has migrated to
+        // using the manifest to specify the policy.
+        if (manifestPolicy != PackageManager.RollbackDataPolicy.RESTORE) {
+            return manifestPolicy;
+        }
+        return sessionPolicy;
+    }
+
     /**
      * Do code and userdata backups to enable rollback of the given session.
      * In case of multiPackage sessions, <code>session</code> should be one of
@@ -845,9 +858,11 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         }
 
         String packageName = newPackage.packageName;
+        int rollbackDataPolicy = computeRollbackDataPolicy(
+                session.rollbackDataPolicy, newPackage.rollbackDataPolicy);
         Slog.i(TAG, "Enabling rollback for install of " + packageName
                 + ", session:" + session.sessionId
-                + ", rollbackDataPolicy=" + newPackage.rollbackDataPolicy);
+                + ", rollbackDataPolicy=" + rollbackDataPolicy);
 
         String installerPackageName = session.getInstallerPackageName();
         if (!enableRollbackAllowed(installerPackageName, packageName)) {
@@ -887,7 +902,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                     return false;
                 }
                 if (!rollback.enableForPackageInApex(
-                        apkInApex, apkPkgInfo.getLongVersionCode(), session.rollbackDataPolicy)) {
+                        apkInApex, apkPkgInfo.getLongVersionCode(), rollbackDataPolicy)) {
                     return false;
                 }
             }
@@ -903,7 +918,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         ApplicationInfo appInfo = pkgInfo.applicationInfo;
         return rollback.enableForPackage(packageName, newPackage.versionCode,
                 pkgInfo.getLongVersionCode(), isApex, appInfo.sourceDir,
-                appInfo.splitSourceDirs, session.rollbackDataPolicy);
+                appInfo.splitSourceDirs, rollbackDataPolicy);
     }
 
     @ExtThread
