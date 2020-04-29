@@ -35,6 +35,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.service.dreams.IDreamManager;
 import android.service.notification.NotificationStats;
 import android.service.notification.StatusBarNotification;
@@ -460,6 +461,29 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
                                         row, mStatusBar.isOccluded())),
                                 new UserHandle(UserHandle.getUserId(appUid)));
                 mActivityLaunchAnimator.setLaunchResult(launchResult, true /* isActivityIntent */);
+                if (shouldCollapse()) {
+                    // Putting it back on the main thread, since we're touching views
+                    mMainThreadHandler.post(() -> mCommandQueue.animateCollapsePanels(
+                            CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL, true /* force */));
+                }
+            });
+            return true;
+        }, null, false /* afterKeyguardGone */);
+    }
+
+    @Override
+    public void startHistoryIntent(boolean showHistory) {
+        mActivityStarter.dismissKeyguardThenExecute(() -> {
+            AsyncTask.execute(() -> {
+                Intent intent = showHistory ? new Intent(
+                        Settings.ACTION_NOTIFICATION_HISTORY) : new Intent(
+                        Settings.ACTION_NOTIFICATION_SETTINGS);
+                TaskStackBuilder tsb = TaskStackBuilder.create(mContext)
+                        .addNextIntent(new Intent(Settings.ACTION_NOTIFICATION_SETTINGS));
+                if (showHistory) {
+                    tsb.addNextIntent(intent);
+                }
+                tsb.startActivities();
                 if (shouldCollapse()) {
                     // Putting it back on the main thread, since we're touching views
                     mMainThreadHandler.post(() -> mCommandQueue.animateCollapsePanels(
