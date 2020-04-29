@@ -21,7 +21,6 @@ import static android.os.UserHandle.USER_SYSTEM;
 import static com.android.server.rollback.Rollback.rollbackStateFromString;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.content.pm.PackageManager;
 import android.content.pm.VersionedPackage;
 import android.content.rollback.PackageRollbackInfo;
@@ -178,7 +177,7 @@ class RollbackStore {
         return ceSnapshotInodes;
     }
 
-    private static @Nullable JSONArray extensionVersionsToJson(
+    private static @NonNull JSONArray extensionVersionsToJson(
             SparseIntArray extensionVersions) throws JSONException {
         JSONArray array = new JSONArray();
         for (int i = 0; i < extensionVersions.size(); i++) {
@@ -190,7 +189,7 @@ class RollbackStore {
         return array;
     }
 
-    private static @Nullable SparseIntArray extensionVersionsFromJson(JSONArray json)
+    private static @NonNull SparseIntArray extensionVersionsFromJson(JSONArray json)
             throws JSONException {
         if (json == null) {
             return new SparseIntArray(0);
