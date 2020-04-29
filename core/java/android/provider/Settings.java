@@ -2020,8 +2020,7 @@ public final class Settings {
      * In some cases, a matching Activity may not exist, so ensure you
      * safeguard against this.
      * <p>
-     * Input: The Intent's data URI specifies the application package name
-     * to be shown, with the "package" scheme.  That is "package:com.my.app".
+     * Input: Nothing.
      * <p>
      * Output: Nothing.
      */
