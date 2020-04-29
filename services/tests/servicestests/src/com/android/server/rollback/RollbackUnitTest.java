@@ -24,11 +24,17 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.VersionedPackage;
 import android.content.rollback.PackageRollbackInfo;
 import android.util.IntArray;
+import android.util.SparseIntArray;
 import android.util.SparseLongArray;
+
+import com.android.server.pm.PackageList;
+import com.android.server.pm.parsing.pkg.PackageImpl;
 
 import com.google.common.collect.Range;
 
@@ -44,6 +50,7 @@ import java.io.File;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 @RunWith(JUnit4.class)
 public class RollbackUnitTest {
@@ -56,10 +63,17 @@ public class RollbackUnitTest {
     private static final String INSTALLER = "some.installer";
 
     @Mock private AppDataRollbackHelper mMockDataHelper;
+    @Mock private PackageManagerInternal mMockPmi;
+
+    private List<String> mPackages;
+    private PackageList mPackageList;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        mPackages = new ArrayList<>();
+        mPackageList = new PackageList(mPackages, null);
+        when(mMockPmi.getPackageList()).thenReturn(mPackageList);
     }
 
     @Test
@@ -317,7 +331,7 @@ public class RollbackUnitTest {
     public void notifySessionWithSuccess() {
         int[] sessionIds = new int[]{ 7777, 8888 };
         Rollback rollback = new Rollback(123, new File("/test/testing"), -1, USER, INSTALLER,
-                sessionIds);
+                sessionIds, null);
         // The 1st invocation returns false because not all child sessions are notified.
         assertThat(rollback.notifySessionWithSuccess()).isFalse();
         // The 2nd invocation returns true because now all child sessions are notified.
@@ -328,7 +342,7 @@ public class RollbackUnitTest {
     public void allPackagesEnabled() {
         int[] sessionIds = new int[]{ 7777, 8888 };
         Rollback rollback = new Rollback(123, new File("/test/testing"), -1, USER, INSTALLER,
-                sessionIds);
+                sessionIds, null);
         // #allPackagesEnabled returns false when 1 out of 2 packages is enabled.
         rollback.info.getPackages().add(newPkgInfoFor(PKG_1, 12, 10, false));
         assertThat(rollback.allPackagesEnabled()).isFalse();
@@ -338,6 +352,85 @@ public class RollbackUnitTest {
         // #allPackagesEnabled returns true when 2 out of 2 packages are enabled.
         rollback.info.getPackages().add(newPkgInfoFor(PKG_2, 18, 12, true));
         assertThat(rollback.allPackagesEnabled()).isTrue();
+    }
+
+    @Test
+    public void minExtVerConstraintNotViolated() {
+        addPkgWithMinExtVersions("pkg0", new int[][] {{30, 4}});
+        addPkgWithMinExtVersions("pkg1", new int[][] {});
+        addPkgWithMinExtVersions("pkg2", new int[][] {{30, 5}, {31, 1}});
+        addPkgWithMinExtVersions("pkg3", new int[][] {{31, 7}, {32, 15}});
+
+        assertThat(Rollback.extensionVersionReductionWouldViolateConstraint(
+                sparseArrayFrom(new int[][] {{30, 5}}), mMockPmi)).isFalse();
+    }
+
+    @Test
+    public void minExtVerConstraintExists() {
+        addPkgWithMinExtVersions("pkg0", null);
+        addPkgWithMinExtVersions("pkg1", new int[][] {{30, 5}, {31, 1}});
+
+        assertThat(Rollback.extensionVersionReductionWouldViolateConstraint(
+                sparseArrayFrom(new int[][] {{30, 4}}), mMockPmi)).isTrue();
+    }
+
+    @Test
+    public void minExtVerConstraintExistsOnOnePackage() {
+        addPkgWithMinExtVersions("pkg0", new int[][] {{30, 4}});
+        addPkgWithMinExtVersions("pkg1", new int[][] {});
+        addPkgWithMinExtVersions("pkg2", new int[][] {{30, 5}, {31, 1}});
+        addPkgWithMinExtVersions("pkg3", new int[][] {{31, 7}, {32, 15}});
+
+        assertThat(Rollback.extensionVersionReductionWouldViolateConstraint(
+                sparseArrayFrom(new int[][] {{30, 4}}), mMockPmi)).isTrue();
+    }
+
+    @Test
+    public void minExtVerConstraintDifferentSdk() {
+        addPkgWithMinExtVersions("pkg0", null);
+        addPkgWithMinExtVersions("pkg1", new int[][] {{30, 5}, {31, 1}});
+
+        assertThat(Rollback.extensionVersionReductionWouldViolateConstraint(
+                sparseArrayFrom(new int[][] {{32, 4}}), mMockPmi)).isFalse();
+    }
+
+    @Test
+    public void minExtVerConstraintNoneRecordedOnRollback() {
+        addPkgWithMinExtVersions("pkg0", new int[][] {{30, 4}});
+        addPkgWithMinExtVersions("pkg1", new int[][] {});
+        addPkgWithMinExtVersions("pkg2", new int[][] {{30, 5}, {31, 1}});
+        addPkgWithMinExtVersions("pkg3", new int[][] {{31, 7}, {32, 15}});
+
+        assertThat(Rollback.extensionVersionReductionWouldViolateConstraint(
+                new SparseIntArray(0), mMockPmi)).isFalse();
+    }
+
+    @Test
+    public void minExtVerConstraintNoMinsRecorded() {
+        addPkgWithMinExtVersions("pkg0", null);
+        addPkgWithMinExtVersions("pkg1", null);
+
+        assertThat(Rollback.extensionVersionReductionWouldViolateConstraint(
+                sparseArrayFrom(new int[][] {{32, 4}}), mMockPmi)).isFalse();
+    }
+
+    private void addPkgWithMinExtVersions(String pkg, int[][] minExtVersions) {
+        mPackages.add(pkg);
+        PackageImpl pkgImpl = new PackageImpl(pkg, "baseCodePath", "codePath", null, false);
+        pkgImpl.setMinExtensionVersions(sparseArrayFrom(minExtVersions));
+
+        when(mMockPmi.getPackage(pkg)).thenReturn(pkgImpl);
+    }
+
+    private static SparseIntArray sparseArrayFrom(int[][] arr) {
+        if (arr == null) {
+            return null;
+        }
+        SparseIntArray result = new SparseIntArray(arr.length);
+        for (int[] pair : arr) {
+            result.put(pair[0], pair[1]);
+        }
+        return result;
     }
 
     private static PackageRollbackInfo newPkgInfoFor(
