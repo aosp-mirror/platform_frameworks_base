@@ -16,6 +16,8 @@
 
 package com.android.systemui.screenshot;
 
+import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
+import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.provider.DeviceConfig.NAMESPACE_SYSTEMUI;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 
@@ -61,6 +63,7 @@ import android.util.Slog;
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
+import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.View;
 import android.view.ViewGroup;
@@ -71,6 +74,7 @@ import android.view.animation.AccelerateInterpolator;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
+import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
@@ -183,24 +187,25 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
     private final Display mDisplay;
     private final DisplayMetrics mDisplayMetrics;
 
-    private final View mScreenshotLayout;
-    private final ScreenshotSelectorView mScreenshotSelectorView;
-    private final ImageView mScreenshotAnimatedView;
-    private final ImageView mScreenshotPreview;
-    private final ImageView mScreenshotFlash;
-    private final ImageView mActionsContainerBackground;
-    private final FrameLayout mActionsContainer;
-    private final LinearLayout mActionsView;
-    private final ImageView mBackgroundProtection;
-    private final FrameLayout mDismissButton;
-    private final ImageView mDismissImage;
+    private View mScreenshotLayout;
+    private ScreenshotSelectorView mScreenshotSelectorView;
+    private ImageView mScreenshotAnimatedView;
+    private ImageView mScreenshotPreview;
+    private ImageView mScreenshotFlash;
+    private ImageView mActionsContainerBackground;
+    private HorizontalScrollView mActionsContainer;
+    private LinearLayout mActionsView;
+    private ImageView mBackgroundProtection;
+    private FrameLayout mDismissButton;
 
     private Bitmap mScreenBitmap;
     private SaveImageInBackgroundTask mSaveInBgTask;
     private Animator mScreenshotAnimation;
     private Runnable mOnCompleteRunnable;
-    private boolean mInDarkMode = false;
     private Animator mDismissAnimation;
+    private boolean mInDarkMode = false;
+    private boolean mDirectionLTR = true;
+    private boolean mOrientationPortrait = true;
 
     private float mScreenshotOffsetXPx;
     private float mScreenshotOffsetYPx;
@@ -232,57 +237,18 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
      */
     @Inject
     public GlobalScreenshot(
-            Context context, @Main Resources resources, LayoutInflater layoutInflater,
+            Context context, @Main Resources resources,
             ScreenshotNotificationsController screenshotNotificationsController,
             UiEventLogger uiEventLogger) {
         mContext = context;
         mNotificationsController = screenshotNotificationsController;
         mUiEventLogger = uiEventLogger;
 
-        // Inflate the screenshot layout
-        mScreenshotLayout = layoutInflater.inflate(R.layout.global_screenshot, null);
-        mScreenshotAnimatedView =
-                mScreenshotLayout.findViewById(R.id.global_screenshot_animated_view);
-        mScreenshotAnimatedView.setClipToOutline(true);
-        mScreenshotAnimatedView.setOutlineProvider(new ViewOutlineProvider() {
-            @Override
-            public void getOutline(View view, Outline outline) {
-                outline.setRoundRect(new Rect(0, 0, view.getWidth(), view.getHeight()),
-                        ROUNDED_CORNER_RADIUS * view.getWidth());
-            }
-        });
-        mScreenshotPreview = mScreenshotLayout.findViewById(R.id.global_screenshot_preview);
-        mScreenshotPreview.setClipToOutline(true);
-        mScreenshotPreview.setOutlineProvider(new ViewOutlineProvider() {
-            @Override
-            public void getOutline(View view, Outline outline) {
-                outline.setRoundRect(new Rect(0, 0, view.getWidth(), view.getHeight()),
-                        ROUNDED_CORNER_RADIUS * view.getWidth());
-            }
-        });
-
-        mActionsContainerBackground = mScreenshotLayout.findViewById(
-                R.id.global_screenshot_actions_container_background);
-        mActionsContainer = mScreenshotLayout.findViewById(
-                R.id.global_screenshot_actions_container);
-        mActionsView = mScreenshotLayout.findViewById(R.id.global_screenshot_actions);
-        mBackgroundProtection = mScreenshotLayout.findViewById(
-                R.id.global_screenshot_actions_background);
-        mDismissButton = mScreenshotLayout.findViewById(R.id.global_screenshot_dismiss_button);
-        mDismissButton.setOnClickListener(view -> {
-            mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_EXPLICIT_DISMISSAL);
-            dismissScreenshot("dismiss_button", false);
-            mOnCompleteRunnable.run();
-        });
-        mDismissImage = mDismissButton.findViewById(R.id.global_screenshot_dismiss_image);
-
-        mScreenshotFlash = mScreenshotLayout.findViewById(R.id.global_screenshot_flash);
-        mScreenshotSelectorView = mScreenshotLayout.findViewById(R.id.global_screenshot_selector);
-        mScreenshotLayout.setFocusable(true);
-        mScreenshotSelectorView.setFocusable(true);
-        mScreenshotSelectorView.setFocusableInTouchMode(true);
-        mScreenshotAnimatedView.setPivotX(0);
-        mScreenshotAnimatedView.setPivotY(0);
+        reloadAssets();
+        Configuration config = mContext.getResources().getConfiguration();
+        mInDarkMode = config.isNightModeActive();
+        mDirectionLTR = config.getLayoutDirection() == View.LAYOUT_DIRECTION_LTR;
+        mOrientationPortrait = config.orientation == ORIENTATION_PORTRAIT;
 
         // Setup the window that we are going to use
         mWindowLayoutParams = new WindowManager.LayoutParams(
@@ -333,6 +299,121 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
         inoutInfo.touchableRegion.set(touchRegion);
     }
 
+    private void onConfigChanged(Configuration newConfig) {
+        boolean needsUpdate = false;
+        // dark mode
+        if (newConfig.isNightModeActive()) {
+            // Night mode is active, we're using dark theme
+            if (!mInDarkMode) {
+                mInDarkMode = true;
+                needsUpdate = true;
+            }
+        } else {
+            // Night mode is not active, we're using the light theme
+            if (mInDarkMode) {
+                mInDarkMode = false;
+                needsUpdate = true;
+            }
+        }
+
+        // RTL configuration
+        switch (newConfig.getLayoutDirection()) {
+            case View.LAYOUT_DIRECTION_LTR:
+                if (!mDirectionLTR) {
+                    mDirectionLTR = true;
+                    needsUpdate = true;
+                }
+                break;
+            case View.LAYOUT_DIRECTION_RTL:
+                if (mDirectionLTR) {
+                    mDirectionLTR = false;
+                    needsUpdate = true;
+                }
+                break;
+        }
+
+        // portrait/landscape orientation
+        switch (newConfig.orientation) {
+            case ORIENTATION_PORTRAIT:
+                if (!mOrientationPortrait) {
+                    mOrientationPortrait = true;
+                    needsUpdate = true;
+                }
+                break;
+            case ORIENTATION_LANDSCAPE:
+                if (mOrientationPortrait) {
+                    mOrientationPortrait = false;
+                    needsUpdate = true;
+                }
+                break;
+        }
+
+        if (needsUpdate) {
+            reloadAssets();
+        }
+    }
+
+    /**
+     * Update assets (called when the dark theme status changes). We only need to update the dismiss
+     * button and the actions container background, since the buttons are re-inflated on demand.
+     */
+    private void reloadAssets() {
+        boolean wasAttached = mScreenshotLayout != null && mScreenshotLayout.isAttachedToWindow();
+        if (wasAttached) {
+            mWindowManager.removeView(mScreenshotLayout);
+        }
+
+        // Inflate the screenshot layout
+        mScreenshotLayout = LayoutInflater.from(mContext).inflate(R.layout.global_screenshot, null);
+        mScreenshotAnimatedView =
+                mScreenshotLayout.findViewById(R.id.global_screenshot_animated_view);
+        mScreenshotAnimatedView.setClipToOutline(true);
+        mScreenshotAnimatedView.setOutlineProvider(new ViewOutlineProvider() {
+            @Override
+            public void getOutline(View view, Outline outline) {
+                outline.setRoundRect(new Rect(0, 0, view.getWidth(), view.getHeight()),
+                        ROUNDED_CORNER_RADIUS * view.getWidth());
+            }
+        });
+        mScreenshotPreview = mScreenshotLayout.findViewById(R.id.global_screenshot_preview);
+        mScreenshotPreview.setClipToOutline(true);
+        mScreenshotPreview.setOutlineProvider(new ViewOutlineProvider() {
+            @Override
+            public void getOutline(View view, Outline outline) {
+                outline.setRoundRect(new Rect(0, 0, view.getWidth(), view.getHeight()),
+                        ROUNDED_CORNER_RADIUS * view.getWidth());
+            }
+        });
+
+        mActionsContainerBackground = mScreenshotLayout.findViewById(
+                R.id.global_screenshot_actions_container_background);
+        mActionsContainer = mScreenshotLayout.findViewById(
+                R.id.global_screenshot_actions_container);
+        mActionsView = mScreenshotLayout.findViewById(R.id.global_screenshot_actions);
+        mBackgroundProtection = mScreenshotLayout.findViewById(
+                R.id.global_screenshot_actions_background);
+        mDismissButton = mScreenshotLayout.findViewById(R.id.global_screenshot_dismiss_button);
+        mDismissButton.setOnClickListener(view -> {
+            mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_EXPLICIT_DISMISSAL);
+            dismissScreenshot("dismiss_button", false);
+            mOnCompleteRunnable.run();
+        });
+
+        mScreenshotFlash = mScreenshotLayout.findViewById(R.id.global_screenshot_flash);
+        mScreenshotSelectorView = mScreenshotLayout.findViewById(R.id.global_screenshot_selector);
+        mScreenshotLayout.setFocusable(true);
+        mScreenshotSelectorView.setFocusable(true);
+        mScreenshotSelectorView.setFocusableInTouchMode(true);
+        mScreenshotAnimatedView.setPivotX(0);
+        mScreenshotAnimatedView.setPivotY(0);
+        mActionsContainer.setScrollX(0);
+
+        if (wasAttached) {
+            mWindowManager.addView(mScreenshotLayout, mWindowLayoutParams);
+        }
+    }
+
+
     /**
      * Creates a new worker thread and saves the screenshot to the media store.
      */
@@ -382,10 +463,8 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
         mScreenBitmap.setHasAlpha(false);
         mScreenBitmap.prepareToDraw();
 
-        updateDarkTheme();
+        onConfigChanged(mContext.getResources().getConfiguration());
 
-        mWindowManager.addView(mScreenshotLayout, mWindowLayoutParams);
-        mScreenshotLayout.getViewTreeObserver().addOnComputeInternalInsetsListener(this);
 
         if (mDismissAnimation != null && mDismissAnimation.isRunning()) {
             mDismissAnimation.cancel();
@@ -395,7 +474,6 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
     }
 
     void takeScreenshot(Consumer<Uri> finisher, Runnable onComplete) {
-        dismissScreenshot("new screenshot requested", true);
         mOnCompleteRunnable = onComplete;
 
         mDisplay.getRealMetrics(mDisplayMetrics);
@@ -407,7 +485,6 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
     void handleImageAsScreenshot(Bitmap screenshot, Rect screenshotScreenBounds,
             Insets visibleInsets, int taskId, Consumer<Uri> finisher, Runnable onComplete) {
         // TODO use taskId and visibleInsets
-        dismissScreenshot("new screenshot requested", true);
         mOnCompleteRunnable = onComplete;
         takeScreenshot(screenshot, finisher, screenshotScreenBounds);
     }
@@ -513,41 +590,6 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
     }
 
     /**
-     * Update assets (called when the dark theme status changes). We only need to update the
-     * dismiss
-     * button and the actions container background, since the buttons are re-inflated on demand.
-     */
-    private void reloadAssets() {
-        mDismissImage.setImageDrawable(mContext.getDrawable(R.drawable.screenshot_cancel));
-        mActionsContainerBackground.setBackground(
-                mContext.getDrawable(R.drawable.action_chip_container_background));
-    }
-
-    /**
-     * Checks the current dark theme status and updates if it has changed.
-     */
-    private void updateDarkTheme() {
-        int currentNightMode = mContext.getResources().getConfiguration().uiMode
-                & Configuration.UI_MODE_NIGHT_MASK;
-        switch (currentNightMode) {
-            case Configuration.UI_MODE_NIGHT_NO:
-                // Night mode is not active, we're using the light theme
-                if (mInDarkMode) {
-                    mInDarkMode = false;
-                    reloadAssets();
-                }
-                break;
-            case Configuration.UI_MODE_NIGHT_YES:
-                // Night mode is active, we're using dark theme
-                if (!mInDarkMode) {
-                    mInDarkMode = true;
-                    reloadAssets();
-                }
-                break;
-        }
-    }
-
-    /**
      * Starts the animation after taking the screenshot
      */
     private void startAnimation(final Consumer<Uri> finisher, int w, int h,
@@ -597,17 +639,33 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
             }
         });
         mScreenshotHandler.post(() -> {
-            // Play the shutter sound to notify that we've taken a screenshot
-            mCameraSound.play(MediaActionSound.SHUTTER_CLICK);
+            if (!mScreenshotLayout.isAttachedToWindow()) {
+                mWindowManager.addView(mScreenshotLayout, mWindowLayoutParams);
+            }
+            mScreenshotLayout.getViewTreeObserver().addOnComputeInternalInsetsListener(this);
 
-            mScreenshotPreview.setLayerType(View.LAYER_TYPE_HARDWARE, null);
-            mScreenshotPreview.buildLayer();
-            mScreenshotAnimation.start();
+            mScreenshotHandler.post(() -> {
+
+                // Play the shutter sound to notify that we've taken a screenshot
+                mCameraSound.play(MediaActionSound.SHUTTER_CLICK);
+
+                mScreenshotPreview.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+                mScreenshotPreview.buildLayer();
+                mScreenshotAnimation.start();
+            });
+
         });
+
     }
 
     private AnimatorSet createScreenshotDropInAnimation(int width, int height, Rect bounds) {
-        float cornerScale = mCornerSizeX / (float) width;
+        int rotation = mContext.getDisplay().getRotation();
+        float cornerScale;
+        if (rotation == Surface.ROTATION_90 || rotation == Surface.ROTATION_270) {
+            cornerScale = (mCornerSizeX / (float) height);
+        } else {
+            cornerScale = (mCornerSizeX / (float) width);
+        }
 
         mScreenshotAnimatedView.setScaleX(1);
         mScreenshotAnimatedView.setScaleY(1);
@@ -632,8 +690,7 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
 
         final PointF startPos = new PointF(bounds.centerX(), bounds.centerY());
         float finalX;
-        if (mContext.getResources().getConfiguration().getLayoutDirection()
-                == View.LAYOUT_DIRECTION_LTR) {
+        if (mDirectionLTR) {
             finalX = mScreenshotOffsetXPx + width * cornerScale / 2f;
         } else {
             finalX = width - mScreenshotOffsetXPx - width * cornerScale / 2f;
@@ -713,7 +770,6 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
     private ValueAnimator createScreenshotActionsShadeAnimation(SavedImageData imageData) {
         LayoutInflater inflater = LayoutInflater.from(mContext);
         mActionsView.removeAllViews();
-        mActionsContainer.setScrollX(0);
         mScreenshotLayout.invalidate();
         mScreenshotLayout.requestLayout();
         mScreenshotLayout.getViewTreeObserver().dispatchOnGlobalLayout();
@@ -803,13 +859,10 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
         animator.setDuration(SCREENSHOT_ACTIONS_EXPANSION_DURATION_MS);
         float alphaFraction = (float) SCREENSHOT_ACTIONS_ALPHA_DURATION_MS
                 / SCREENSHOT_ACTIONS_EXPANSION_DURATION_MS;
-        mActionsContainer.setVisibility(View.VISIBLE);
         mActionsContainer.setAlpha(0f);
         mActionsContainerBackground.setAlpha(0f);
+        mActionsContainer.setVisibility(View.VISIBLE);
         mActionsContainerBackground.setVisibility(View.VISIBLE);
-
-        mActionsContainer.setPivotX(0);
-        mActionsContainerBackground.setPivotX(0);
 
         animator.addUpdateListener(animation -> {
             float t = animation.getAnimatedFraction();
@@ -825,6 +878,10 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
                 chip.setAlpha(t);
                 chip.setScaleX(1 / containerScale); // invert to keep size of children constant
             }
+            mActionsContainer.setScrollX(mDirectionLTR ? 0 : mActionsContainer.getWidth());
+            mActionsContainer.setPivotX(mDirectionLTR ? 0 : mActionsContainer.getWidth());
+            mActionsContainerBackground.setPivotX(
+                    mDirectionLTR ? 0 : mActionsContainerBackground.getWidth());
         });
         return animator;
     }
