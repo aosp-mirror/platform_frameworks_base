@@ -41,6 +41,7 @@ import android.content.rollback.IRollbackManager;
 import android.content.rollback.RollbackInfo;
 import android.content.rollback.RollbackManager;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerExecutor;
@@ -49,12 +50,14 @@ import android.os.Process;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.ext.SdkExtensions;
 import android.provider.DeviceConfig;
 import android.util.IntArray;
 import android.util.Log;
 import android.util.LongArrayQueue;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
+import android.util.SparseIntArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.DumpUtils;
@@ -1274,14 +1277,27 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
 
         if (parentSession.isStaged()) {
             rollback = mRollbackStore.createStagedRollback(rollbackId, parentSessionId, userId,
-                    installerPackageName, packageSessionIds);
+                    installerPackageName, packageSessionIds, getExtensionVersions());
         } else {
             rollback = mRollbackStore.createNonStagedRollback(rollbackId, userId,
-                    installerPackageName, packageSessionIds);
+                    installerPackageName, packageSessionIds, getExtensionVersions());
         }
 
         mRollbacks.add(rollback);
         return rollback;
+    }
+
+    private SparseIntArray getExtensionVersions() {
+        // This list must be updated whenever the current API level is increased, or should be
+        // replaced when we have another way of determining the relevant SDK versions.
+        final int[] relevantSdkVersions = { Build.VERSION_CODES.R };
+
+        SparseIntArray result = new SparseIntArray(relevantSdkVersions.length);
+        for (int i = 0; i < relevantSdkVersions.length; i++) {
+            result.put(relevantSdkVersions[i],
+                    SdkExtensions.getExtensionVersion(relevantSdkVersions[i]));
+        }
+        return result;
     }
 
     /**
