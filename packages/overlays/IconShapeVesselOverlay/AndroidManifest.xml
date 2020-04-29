@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <!--
   ~ Copyright (C) 2020 The Android Open Source Project
   ~
@@ -14,8 +13,14 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <!-- Flower icon overlay -->
-    <string name="icon_shape_flower_overlay" translatable="false">Flower</string>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="com.android.theme.icon.vessel"
+          android:versionCode="1"
+          android:versionName="1.0">
+    <overlay
+        android:targetPackage="android"
+        android:category="android.theme.customization.adaptive_icon_shape"
+        android:priority="1"/>
 
-</resources>
+    <application android:label="@string/icon_shape_vessel_overlay" android:hasCode="false"/>
+</manifest>
