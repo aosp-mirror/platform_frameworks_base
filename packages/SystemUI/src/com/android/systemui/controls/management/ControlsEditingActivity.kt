@@ -16,7 +16,6 @@
 
 package com.android.systemui.controls.management
 
-import android.app.ActivityOptions
 import android.content.ComponentName
 import android.content.Intent
 import android.os.Bundle
@@ -70,10 +69,6 @@ class ControlsEditingActivity @Inject constructor(
         }
     }
 
-    override fun onBackPressed() {
-        finish()
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -102,6 +97,23 @@ class ControlsEditingActivity @Inject constructor(
         currentUserTracker.stopTracking()
     }
 
+    override fun onBackPressed() {
+        globalActionsComponent.handleShowGlobalActionsMenu()
+        animateExitAndFinish()
+    }
+
+    private fun animateExitAndFinish() {
+        val rootView = requireViewById<ViewGroup>(R.id.controls_management_root)
+        ControlsAnimations.exitAnimation(
+                rootView,
+                object : Runnable {
+                    override fun run() {
+                        finish()
+                    }
+                }
+        ).start()
+    }
+
     private fun bindViews() {
         setContentView(R.layout.controls_management)
 
@@ -124,35 +136,13 @@ class ControlsEditingActivity @Inject constructor(
     }
 
     private fun bindButtons() {
-        requireViewById<Button>(R.id.other_apps).apply {
-            visibility = View.VISIBLE
-            setText(R.string.controls_menu_add)
-            setOnClickListener {
-                saveFavorites()
-                val intent = Intent(this@ControlsEditingActivity,
-                        ControlsFavoritingActivity::class.java).apply {
-                    putExtras(this@ControlsEditingActivity.intent)
-                    putExtra(ControlsFavoritingActivity.EXTRA_SINGLE_STRUCTURE, true)
-                }
-                startActivity(intent, ActivityOptions
-                    .makeSceneTransitionAnimation(this@ControlsEditingActivity).toBundle())
-            }
-        }
-
         val rootView = requireViewById<ViewGroup>(R.id.controls_management_root)
         saveButton = requireViewById<Button>(R.id.done).apply {
             isEnabled = false
             setText(R.string.save)
             setOnClickListener {
                 saveFavorites()
-                ControlsAnimations.exitAnimation(
-                    rootView,
-                    object : Runnable {
-                        override fun run() {
-                            finish()
-                        }
-                    }
-                ).start()
+                animateExitAndFinish()
                 globalActionsComponent.handleShowGlobalActionsMenu()
             }
         }

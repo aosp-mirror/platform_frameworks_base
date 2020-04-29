@@ -17,8 +17,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="ringtone_default" msgid="798836092118824500">"Standard ringetone"</string>
-    <!-- no translation found for notification_sound_default (8133121186242636840) -->
-    <skip />
+    <string name="notification_sound_default" msgid="8133121186242636840">"Standard varsellyd"</string>
     <string name="alarm_sound_default" msgid="4787646764557462649">"Standard alarmlyd"</string>
     <string name="add_ringtone_text" msgid="6642389991738337529">"Legg til ringelyd"</string>
     <string name="add_alarm_text" msgid="3545497316166999225">"Legg til en alarm"</string>

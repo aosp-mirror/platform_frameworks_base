@@ -36,7 +36,7 @@
     <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"ବ୍ୟାଟେରୀ ସେଭର୍‌ ଚାଲୁ କରିବେ?"</string>
     <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"ବ୍ୟାଟେରୀ ସେଭର୍ ବିଷୟରେ"</string>
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"ଅନ୍‌ କରନ୍ତୁ"</string>
-    <string name="battery_saver_start_action" msgid="4553256017945469937">"ବ୍ୟାଟେରୀ ସେଭର୍‌ ଅନ୍ କରନ୍ତୁ"</string>
+    <string name="battery_saver_start_action" msgid="4553256017945469937">"ବ୍ୟାଟେରୀ ସେଭର୍‌ ଚାଲୁ କରନ୍ତୁ"</string>
     <string name="status_bar_settings_settings_button" msgid="534331565185171556">"ସେଟିଂସ୍"</string>
     <string name="status_bar_settings_wifi_button" msgid="7243072479837270946">"ୱାଇ-ଫାଇ"</string>
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"ଅଟୋ-ରୋଟେଟ୍‌ ସ୍କ୍ରିନ୍"</string>
@@ -999,8 +999,7 @@
     <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"ଯେ କୌଣସି ସମୟରେ ବବଲଗୁଡ଼ିକ ନିୟନ୍ତ୍ରଣ କରନ୍ତୁ"</string>
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"ଏହି ଆପର ବବଲଗୁଡ଼ିକ ବନ୍ଦ କରିବା ପାଇଁ \'ପରିଚାଳନା କରନ୍ତୁ\' ବଟନରେ ଟାପ୍ କରନ୍ତୁ"</string>
     <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"ବୁଝିଗଲି"</string>
-    <!-- no translation found for bubbles_app_settings (5779443644062348657) -->
-    <skip />
+    <string name="bubbles_app_settings" msgid="5779443644062348657">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> ସେଟିଂସ୍"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"ସିଷ୍ଟମ୍ ନାଭିଗେସନ୍ ଅପ୍‌ଡେଟ୍ ହୋଇଛି। ପରିବର୍ତ୍ତନ କରିବା ପାଇଁ, ସେଟିଂସ୍‌କୁ ଯାଆନ୍ତୁ।"</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"ସିଷ୍ଟମ୍ ନାଭିଗେସନ୍ ଅପ୍‌ଡେଟ୍ କରିବା ପାଇଁ ସେଟିଂସ୍‍କୁ ଯାଆନ୍ତୁ"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"ଷ୍ଟାଣ୍ଡବାଏ"</string>

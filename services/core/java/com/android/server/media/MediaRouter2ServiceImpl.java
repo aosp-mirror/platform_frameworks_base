@@ -1574,8 +1574,15 @@ class MediaRouter2ServiceImpl {
             }
 
             // Succeeded
-            notifySessionCreatedToRouter(matchingRequest.mRouterRecord,
-                    toOriginalRequestId(uniqueRequestId), sessionInfo);
+            if (sessionInfo.isSystemSession()
+                    && !matchingRequest.mRouterRecord.mHasModifyAudioRoutingPermission) {
+                notifySessionCreatedToRouter(matchingRequest.mRouterRecord,
+                        toOriginalRequestId(uniqueRequestId),
+                        mSystemProvider.getDefaultSessionInfo());
+            } else {
+                notifySessionCreatedToRouter(matchingRequest.mRouterRecord,
+                        toOriginalRequestId(uniqueRequestId), sessionInfo);
+            }
             mSessionToRouterMap.put(sessionInfo.getId(), routerRecord);
         }
 

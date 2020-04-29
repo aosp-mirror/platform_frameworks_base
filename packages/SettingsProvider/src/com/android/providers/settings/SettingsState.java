@@ -27,6 +27,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.Signature;
 import android.os.Binder;
 import android.os.Build;
+import android.os.FileUtils;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -100,6 +101,8 @@ final class SettingsState {
     public static final int MAX_BYTES_PER_APP_PACKAGE_LIMITED = 20000;
 
     public static final int VERSION_UNDEFINED = -1;
+
+    public static final String FALLBACK_FILE_SUFFIX = ".fallback";
 
     private static final String TAG_SETTINGS = "settings";
     private static final String TAG_SETTING = "setting";
@@ -266,7 +269,7 @@ final class SettingsState {
     public SettingsState(Context context, Object lock, File file, int key,
             int maxBytesPerAppPackage, Looper looper) {
         // It is important that we use the same lock as the settings provider
-        // to ensure multiple mutations on this state are atomicaly persisted
+        // to ensure multiple mutations on this state are atomically persisted
         // as the async persistence should be blocked while we make changes.
         mContext = context;
         mLock = lock;
@@ -998,24 +1001,56 @@ final class SettingsState {
     }
 
     @GuardedBy("mLock")
-    private void readStateSyncLocked() {
+    private void readStateSyncLocked() throws IllegalStateException {
         FileInputStream in;
+        AtomicFile file = new AtomicFile(mStatePersistFile);
         try {
-            in = new AtomicFile(mStatePersistFile).openRead();
+            in = file.openRead();
         } catch (FileNotFoundException fnfe) {
-            Slog.i(LOG_TAG, "No settings state " + mStatePersistFile);
+            Slog.w(LOG_TAG, "No settings state " + mStatePersistFile);
             logSettingsDirectoryInformation(mStatePersistFile);
             addHistoricalOperationLocked(HISTORICAL_OPERATION_INITIALIZE, null);
             return;
         }
+        if (parseStateFromXmlStreamLocked(in)) {
+            return;
+        }
+
+        // Settings file exists but is corrupted. Retry with the fallback file
+        final File statePersistFallbackFile = new File(
+                mStatePersistFile.getAbsolutePath() + FALLBACK_FILE_SUFFIX);
+        Slog.i(LOG_TAG, "Failed parsing settings file: " + mStatePersistFile
+                + ", retrying with fallback file: " + statePersistFallbackFile);
+        try {
+            in = new AtomicFile(statePersistFallbackFile).openRead();
+        } catch (FileNotFoundException fnfe) {
+            final String message = "No fallback file found for: " + mStatePersistFile;
+            Slog.wtf(LOG_TAG, message);
+            throw new IllegalStateException(message);
+        }
+        if (parseStateFromXmlStreamLocked(in)) {
+            // Parsed state from fallback file. Restore original file with fallback file
+            try {
+                FileUtils.copy(statePersistFallbackFile, mStatePersistFile);
+            } catch (IOException ignored) {
+                // Failed to copy, but it's okay because we already parsed states from fallback file
+            }
+        } else {
+            final String message = "Failed parsing settings file: " + mStatePersistFile;
+            Slog.wtf(LOG_TAG, message);
+            throw new IllegalStateException(message);
+        }
+    }
+
+    @GuardedBy("mLock")
+    private boolean parseStateFromXmlStreamLocked(FileInputStream in) {
         try {
             XmlPullParser parser = Xml.newPullParser();
             parser.setInput(in, StandardCharsets.UTF_8.name());
             parseStateLocked(parser);
+            return true;
         } catch (XmlPullParserException | IOException e) {
-            String message = "Failed parsing settings file: " + mStatePersistFile;
-            Slog.wtf(LOG_TAG, message);
-            throw new IllegalStateException(message, e);
+            return false;
         } finally {
             IoUtils.closeQuietly(in);
         }

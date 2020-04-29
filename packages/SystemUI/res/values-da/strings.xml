@@ -33,7 +33,7 @@
     <string name="invalid_charger_title" msgid="938685362320735167">"Enheden kan ikke oplades via USB"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"Brug den oplader, der fulgte med din enhed"</string>
     <string name="battery_low_why" msgid="2056750982959359863">"Indstillinger"</string>
-    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Vil du slå Batterisparefunktion til?"</string>
+    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Vil du aktivere Batterisparefunktion?"</string>
     <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"Om Batterisparefunktion"</string>
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"Aktivér"</string>
     <string name="battery_saver_start_action" msgid="4553256017945469937">"Aktivér batterisparefunktion"</string>
@@ -961,7 +961,7 @@
     <string name="qs_dnd_replace" msgid="7712119051407052689">"Erstat"</string>
     <string name="running_foreground_services_title" msgid="5137313173431186685">"Apps, der kører i baggrunden"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"Tryk for at se info om batteri- og dataforbrug"</string>
-    <string name="mobile_data_disable_title" msgid="5366476131671617790">"Vil du slå mobildata fra?"</string>
+    <string name="mobile_data_disable_title" msgid="5366476131671617790">"Vil du deaktivere mobildata?"</string>
     <string name="mobile_data_disable_message" msgid="8604966027899770415">"Du vil ikke have data- eller internetadgang via <xliff:g id="CARRIER">%s</xliff:g>. Der vil kun være adgang til internettet via Wi-Fi."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"dit mobilselskab"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"Indstillinger kan ikke bekræfte dit svar, da en app dækker for en anmodning om tilladelse."</string>

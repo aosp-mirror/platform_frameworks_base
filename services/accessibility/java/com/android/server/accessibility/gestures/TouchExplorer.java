@@ -566,6 +566,7 @@ public class TouchExplorer extends BaseEventStreamTransformation
                     // a given distance perform a drag.
                     mState.startDragging();
                     mDraggingPointerId = pointerId;
+                    adjustEventLocationForDrag(event);
                     event.setEdgeFlags(mReceivedPointerTracker.getLastReceivedDownEdgeFlags());
                     mDispatcher.sendMotionEvent(
                             event, MotionEvent.ACTION_DOWN, rawEvent, pointerIdBits, policyFlags);
@@ -793,10 +794,6 @@ public class TouchExplorer extends BaseEventStreamTransformation
      */
     private void handleMotionEventStateDelegating(
             MotionEvent event, MotionEvent rawEvent, int policyFlags) {
-        if (mGestureDetector.isMultiFingerGesturesEnabled()) {
-            // Multi-finger gestures conflict with this functionality.
-            return;
-        }
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN: {
                 Slog.e(LOG_TAG, "Delegating state can only be reached if "

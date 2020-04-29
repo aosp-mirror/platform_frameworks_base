@@ -26,7 +26,6 @@ import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Slog;
 
-import com.android.systemui.R;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
 /**
@@ -44,32 +43,18 @@ public class NotificationChannelHelper {
         if (!TextUtils.isEmpty(channel.getConversationId())) {
             return channel;
         }
-        final String conversationId = entry.getSbn().getShortcutId(context);
+        final String conversationId = entry.getSbn().getShortcutId();
         final String pkg = entry.getSbn().getPackageName();
         final int appUid = entry.getSbn().getUid();
-        if (TextUtils.isEmpty(conversationId) || TextUtils.isEmpty(pkg)) {
+        if (TextUtils.isEmpty(conversationId) || TextUtils.isEmpty(pkg)
+            || entry.getRanking().getShortcutInfo() == null) {
             return channel;
-        }
-
-        String name;
-        if (entry.getRanking().getShortcutInfo() != null) {
-            name = entry.getRanking().getShortcutInfo().getShortLabel().toString();
-        } else {
-            Bundle extras = entry.getSbn().getNotification().extras;
-            String nameString = extras.getString(Notification.EXTRA_CONVERSATION_TITLE);
-            if (TextUtils.isEmpty(nameString)) {
-                nameString = extras.getString(Notification.EXTRA_TITLE);
-            }
-            name = nameString;
         }
 
         // If this channel is not already a customized conversation channel, create
         // a custom channel
         try {
-            // TODO: When shortcuts are enforced remove this and use the shortcut label for naming
-            channel.setName(context.getString(
-                    R.string.notification_summary_message_format,
-                    name, channel.getName()));
+            channel.setName(getName(entry));
             notificationManager.createConversationNotificationChannelForPackage(
                     pkg, appUid, entry.getSbn().getKey(), channel,
                     conversationId);
@@ -80,5 +65,20 @@ public class NotificationChannelHelper {
             Slog.e(TAG, "Could not create conversation channel", e);
         }
         return channel;
+    }
+
+    private static String getName(NotificationEntry entry) {
+        if (entry.getRanking().getShortcutInfo().getShortLabel() != null) {
+            return entry.getRanking().getShortcutInfo().getShortLabel().toString();
+        }
+        Bundle extras = entry.getSbn().getNotification().extras;
+        String nameString = extras.getString(Notification.EXTRA_CONVERSATION_TITLE);
+        if (TextUtils.isEmpty(nameString)) {
+            nameString = extras.getString(Notification.EXTRA_TITLE);
+        }
+        if (TextUtils.isEmpty(nameString)) {
+            nameString = "fallback";
+        }
+        return nameString;
     }
 }

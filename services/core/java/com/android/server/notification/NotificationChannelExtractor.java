@@ -47,7 +47,7 @@ public class NotificationChannelExtractor implements NotificationSignalExtractor
         NotificationChannel updatedChannel = mConfig.getConversationNotificationChannel(
                 record.getSbn().getPackageName(),
                 record.getSbn().getUid(), record.getChannel().getId(),
-                record.getSbn().getShortcutId(mContext), true, false);
+                record.getSbn().getShortcutId(), true, false);
         record.updateNotificationChannel(updatedChannel);
 
         return null;

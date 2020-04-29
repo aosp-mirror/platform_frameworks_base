@@ -115,10 +115,9 @@ public class ConversationLayout extends FrameLayout
     private ImageResolver mImageResolver;
     private CachingIconView mConversationIconView;
     private View mConversationIconContainer;
-    private int mConversationIconTopPadding;
     private int mConversationIconTopPaddingExpandedGroup;
-    private int mConversationIconTopPaddingNoAppName;
-    private int mExpandedGroupMessagePaddingNoAppName;
+    private int mConversationIconTopPadding;
+    private int mExpandedGroupMessagePadding;
     private TextView mConversationText;
     private View mConversationIconBadge;
     private CachingIconView mConversationIconBadgeBg;
@@ -162,6 +161,7 @@ public class ConversationLayout extends FrameLayout
     private Rect mAppOpsTouchRect = new Rect();
     private float mMinTouchSize;
     private Icon mConversationIcon;
+    private View mAppNameDivider;
 
     public ConversationLayout(@NonNull Context context) {
         super(context);
@@ -261,14 +261,12 @@ public class ConversationLayout extends FrameLayout
                 R.dimen.conversation_avatar_size);
         mConversationAvatarSizeExpanded = getResources().getDimensionPixelSize(
                 R.dimen.conversation_avatar_size_group_expanded);
-        mConversationIconTopPadding = getResources().getDimensionPixelSize(
-                R.dimen.conversation_icon_container_top_padding);
         mConversationIconTopPaddingExpandedGroup = getResources().getDimensionPixelSize(
                 R.dimen.conversation_icon_container_top_padding_small_avatar);
-        mConversationIconTopPaddingNoAppName = getResources().getDimensionPixelSize(
-                R.dimen.conversation_icon_container_top_padding_no_app_name);
-        mExpandedGroupMessagePaddingNoAppName = getResources().getDimensionPixelSize(
-                R.dimen.expanded_group_conversation_message_padding_without_app_name);
+        mConversationIconTopPadding = getResources().getDimensionPixelSize(
+                R.dimen.conversation_icon_container_top_padding);
+        mExpandedGroupMessagePadding = getResources().getDimensionPixelSize(
+                R.dimen.expanded_group_conversation_message_padding);
         mExpandedGroupSideMargin = getResources().getDimensionPixelSize(
                 R.dimen.conversation_badge_side_margin_group_expanded);
         mExpandedGroupSideMarginFacePile = getResources().getDimensionPixelSize(
@@ -287,6 +285,7 @@ public class ConversationLayout extends FrameLayout
         mFallbackGroupChatName = getResources().getString(
                 R.string.conversation_title_fallback_group_chat);
         mAppName = findViewById(R.id.app_name_text);
+        mAppNameDivider = findViewById(R.id.app_name_divider);
         mAppNameGone = mAppName.getVisibility() == GONE;
         mAppName.setOnVisibilityChangedListener((visibility) -> {
             onAppNameVisibilityChanged();
@@ -524,6 +523,7 @@ public class ConversationLayout extends FrameLayout
         updateImageMessages();
         updatePaddingsBasedOnContentAvailability();
         updateActionListPadding();
+        updateAppNameDividerVisibility();
     }
 
     private void updateActionListPadding() {
@@ -685,27 +685,15 @@ public class ConversationLayout extends FrameLayout
     }
 
     private void updatePaddingsBasedOnContentAvailability() {
-        int containerTopPadding;
-        int messagingPadding = 0;
-        if (mIsOneToOne || mIsCollapsed) {
-            containerTopPadding = mConversationIconTopPadding;
-        } else {
-            if (mAppName.getVisibility() != GONE) {
-                // The app name is visible, let's center outselves in the two lines
-                containerTopPadding = mConversationIconTopPaddingExpandedGroup;
-            } else {
-                // App name is gone, let's center ourselves int he one remaining line
-                containerTopPadding = mConversationIconTopPaddingNoAppName;
-
-                // The app name is gone and we're a group, we'll need to add some extra padding
-                // to the messages, since otherwise it will overlap with the group
-                messagingPadding = mExpandedGroupMessagePaddingNoAppName;
-            }
-        }
+        int messagingPadding = mIsOneToOne || mIsCollapsed
+                ? 0
+                // Add some extra padding to the messages, since otherwise it will overlap with the
+                // group
+                : mExpandedGroupMessagePadding;
 
         mConversationIconContainer.setPaddingRelative(
                 mConversationIconContainer.getPaddingStart(),
-                containerTopPadding,
+                mConversationIconTopPadding,
                 mConversationIconContainer.getPaddingEnd(),
                 mConversationIconContainer.getPaddingBottom());
 
@@ -1214,8 +1202,12 @@ public class ConversationLayout extends FrameLayout
         boolean appNameGone = mAppName.getVisibility() == GONE;
         if (appNameGone != mAppNameGone) {
             mAppNameGone = appNameGone;
-            updatePaddingsBasedOnContentAvailability();
+            updateAppNameDividerVisibility();
         }
+    }
+
+    private void updateAppNameDividerVisibility() {
+        mAppNameDivider.setVisibility(mAppNameGone ? GONE : VISIBLE);
     }
 
     public void updateExpandability(boolean expandable, @Nullable OnClickListener onClickListener) {

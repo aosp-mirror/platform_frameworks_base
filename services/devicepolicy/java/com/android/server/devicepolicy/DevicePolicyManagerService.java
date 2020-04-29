@@ -15948,20 +15948,29 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      */
     private void updatePersonalAppsSuspension(int profileUserId, boolean unlocked) {
         final boolean suspended;
+        final int deadlineState;
+        final String poPackage;
         synchronized (getLockObject()) {
             final ActiveAdmin profileOwner = getProfileOwnerAdminLocked(profileUserId);
             if (profileOwner != null) {
-                final int deadlineState =
+                deadlineState =
                         updateProfileOffDeadlineLocked(profileUserId, profileOwner, unlocked);
                 suspended = profileOwner.mSuspendPersonalApps
                         || deadlineState == PROFILE_OFF_DEADLINE_REACHED;
-                Slog.d(LOG_TAG, String.format("Personal apps suspended: %b, deadline state: %d",
-                            suspended, deadlineState));
-                updateProfileOffDeadlineNotificationLocked(profileUserId, profileOwner,
-                        unlocked ? PROFILE_OFF_DEADLINE_DEFAULT : deadlineState);
+                poPackage = profileOwner.info.getPackageName();
             } else {
+                poPackage = null;
                 suspended = false;
+                deadlineState = PROFILE_OFF_DEADLINE_DEFAULT;
             }
+        }
+
+        Slog.d(LOG_TAG, String.format("Personal apps suspended: %b, deadline state: %d",
+                suspended, deadlineState));
+
+        if (poPackage != null) {
+            final int notificationState = unlocked ? PROFILE_OFF_DEADLINE_DEFAULT : deadlineState;
+            updateProfileOffDeadlineNotification(profileUserId, poPackage, notificationState);
         }
 
         final int parentUserId = getProfileParentId(profileUserId);
@@ -16067,38 +16076,34 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
-    private void updateProfileOffDeadlineNotificationLocked(int profileUserId,
-            @Nullable ActiveAdmin profileOwner, int notificationState) {
+    private void updateProfileOffDeadlineNotification(
+            int profileUserId, String profileOwnerPackage, int notificationState) {
 
         if (notificationState == PROFILE_OFF_DEADLINE_DEFAULT) {
             mInjector.getNotificationManager().cancel(SystemMessage.NOTE_PERSONAL_APPS_SUSPENDED);
             return;
         }
 
-        final String profileOwnerPackageName = profileOwner.info.getPackageName();
-        final long maxTimeOffDays =
-                TimeUnit.MILLISECONDS.toDays(profileOwner.mProfileMaximumTimeOffMillis);
-
         final Intent intent = new Intent(DevicePolicyManager.ACTION_CHECK_POLICY_COMPLIANCE);
-        intent.setPackage(profileOwnerPackageName);
+        intent.setPackage(profileOwnerPackage);
 
         final PendingIntent pendingIntent = mInjector.pendingIntentGetActivityAsUser(mContext,
                 0 /* requestCode */, intent, PendingIntent.FLAG_UPDATE_CURRENT,
                 null /* options */, UserHandle.of(profileUserId));
 
         // TODO(b/149075510): Only the first of the notifications should be dismissible.
-        final String title = mContext.getString(
+        final String text = mContext.getString(
                 notificationState == PROFILE_OFF_DEADLINE_WARNING
-                ? R.string.personal_apps_suspended_tomorrow_title
-                : R.string.personal_apps_suspended_title);
+                ? R.string.personal_apps_suspension_tomorrow_text
+                : R.string.personal_apps_suspension_text);
 
         final Notification notification =
                 new Notification.Builder(mContext, SystemNotificationChannels.DEVICE_ADMIN)
                         .setSmallIcon(android.R.drawable.stat_sys_warning)
                         .setOngoing(true)
-                        .setContentTitle(title)
-                        .setContentText(mContext.getString(
-                            R.string.personal_apps_suspended_text, maxTimeOffDays))
+                        .setContentTitle(mContext.getString(
+                                R.string.personal_apps_suspension_title))
+                        .setContentText(text)
                         .setColor(mContext.getColor(R.color.system_notification_accent_color))
                         .setContentIntent(pendingIntent)
                         .build();
