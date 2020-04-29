@@ -15,16 +15,19 @@
 package com.android.systemui.statusbar.phone;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.hardware.display.ColorDisplayManager;
 import android.hardware.display.NightDisplayListener;
 import android.os.Handler;
-import android.provider.Settings.Secure;
+import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.qs.AutoAddTracker;
 import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.qs.SecureSetting;
+import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.CastController.CastDevice;
 import com.android.systemui.statusbar.policy.DataSaverController;
@@ -32,18 +35,24 @@ import com.android.systemui.statusbar.policy.DataSaverController.Listener;
 import com.android.systemui.statusbar.policy.HotspotController;
 import com.android.systemui.statusbar.policy.HotspotController.Callback;
 
+import java.util.ArrayList;
+import java.util.Objects;
+
 import javax.inject.Inject;
 
 /**
  * Manages which tiles should be automatically added to QS.
  */
 public class AutoTileManager {
+    private static final String TAG = "AutoTileManager";
+
     public static final String HOTSPOT = "hotspot";
     public static final String SAVER = "saver";
     public static final String INVERSION = "inversion";
     public static final String WORK = "work";
     public static final String NIGHT = "night";
     public static final String CAST = "cast";
+    public static final String SETTING_SEPARATOR = ":";
 
     private final Context mContext;
     private final QSTileHost mHost;
@@ -54,6 +63,7 @@ public class AutoTileManager {
     private final ManagedProfileController mManagedProfileController;
     private final NightDisplayListener mNightDisplayListener;
     private final CastController mCastController;
+    private final ArrayList<AutoAddSetting> mAutoAddSettingList = new ArrayList<>();
 
     @Inject
     public AutoTileManager(Context context, AutoAddTracker autoAddTracker, QSTileHost host,
@@ -78,21 +88,6 @@ public class AutoTileManager {
         if (!mAutoTracker.isAdded(SAVER)) {
             dataSaverController.addCallback(mDataSaverListener);
         }
-        if (!mAutoTracker.isAdded(INVERSION)) {
-            mColorsSetting = new SecureSetting(mContext, mHandler,
-                    Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED) {
-                @Override
-                protected void handleValueChanged(int value, boolean observedChange) {
-                    if (mAutoTracker.isAdded(INVERSION)) return;
-                    if (value != 0) {
-                        mHost.addTile(INVERSION);
-                        mAutoTracker.setTileAdded(INVERSION);
-                        mHandler.post(() -> mColorsSetting.setListening(false));
-                    }
-                }
-            };
-            mColorsSetting.setListening(true);
-        }
         if (!mAutoTracker.isAdded(WORK)) {
             managedProfileController.addCallback(mProfileCallback);
         }
@@ -103,12 +98,10 @@ public class AutoTileManager {
         if (!mAutoTracker.isAdded(CAST)) {
             castController.addCallback(mCastCallback);
         }
+        populateSettingsList();
     }
 
     public void destroy() {
-        if (mColorsSetting != null) {
-            mColorsSetting.setListening(false);
-        }
         mAutoTracker.destroy();
         mHotspotController.removeCallback(mHotspotCallback);
         mDataSaverController.removeCallback(mDataSaverListener);
@@ -117,6 +110,42 @@ public class AutoTileManager {
             mNightDisplayListener.setCallback(null);
         }
         mCastController.removeCallback(mCastCallback);
+        int settingsN = mAutoAddSettingList.size();
+        for (int i = 0; i < settingsN; i++) {
+            mAutoAddSettingList.get(i).setListening(false);
+        }
+    }
+
+    /**
+     * Populates a list with the pairs setting:spec in the config resource.
+     * <p>
+     * This will only create {@link AutoAddSetting} objects for those tiles that have not been
+     * auto-added before, and set the corresponding {@link ContentObserver} to listening.
+     */
+    private void populateSettingsList() {
+        String [] autoAddList;
+        try {
+            autoAddList = mContext.getResources().getStringArray(
+                    R.array.config_quickSettingsAutoAdd);
+        } catch (Resources.NotFoundException e) {
+            Log.w(TAG, "Missing config resource");
+            return;
+        }
+        // getStringArray returns @NotNull, so if we got here, autoAddList is not null
+        for (String tile : autoAddList) {
+            String[] split = tile.split(SETTING_SEPARATOR);
+            if (split.length == 2) {
+                String setting = split[0];
+                String spec = split[1];
+                if (!mAutoTracker.isAdded(spec)) {
+                    AutoAddSetting s = new AutoAddSetting(mContext, mHandler, setting, spec);
+                    mAutoAddSettingList.add(s);
+                    s.setListening(true);
+                }
+            } else {
+                Log.w(TAG, "Malformed item in array: " + tile);
+            }
+        }
     }
 
     public void unmarkTileAsAutoAdded(String tabSpec) {
@@ -138,8 +167,6 @@ public class AutoTileManager {
                 public void onManagedProfileRemoved() {
                 }
             };
-
-    private SecureSetting mColorsSetting;
 
     private final DataSaverController.Listener mDataSaverListener = new Listener() {
         @Override
@@ -213,4 +240,47 @@ public class AutoTileManager {
             }
         }
     };
+
+    @VisibleForTesting
+    protected SecureSetting getSecureSettingForKey(String key) {
+        for (SecureSetting s : mAutoAddSettingList) {
+            if (Objects.equals(key, s.getKey())) {
+                return s;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Tracks tiles that should be auto added when a setting changes.
+     * <p>
+     * When the setting changes to a value different from 0, if the tile has not been auto added
+     * before, it will be added and the listener will be stopped.
+     */
+    private class AutoAddSetting extends SecureSetting {
+        private final String mSpec;
+
+        AutoAddSetting(Context context, Handler handler, String setting, String tileSpec) {
+            super(context, handler, setting);
+            mSpec = tileSpec;
+        }
+
+        @Override
+        protected void handleValueChanged(int value, boolean observedChange) {
+            if (mAutoTracker.isAdded(mSpec)) {
+                // This should not be listening anymore
+                mHandler.post(() -> setListening(false));
+                return;
+            }
+            if (value != 0) {
+                if (mSpec.startsWith(CustomTile.PREFIX)) {
+                    mHost.addTile(CustomTile.getComponentFromSpec(mSpec));
+                } else {
+                    mHost.addTile(mSpec);
+                }
+                mAutoTracker.setTileAdded(mSpec);
+                mHandler.post(() -> setListening(false));
+            }
+        }
+    }
 }
