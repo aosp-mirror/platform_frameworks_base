@@ -151,7 +151,9 @@ public class CarKeyguardViewController extends OverlayViewController implements
 
     @Override
     public void notifyKeyguardAuthenticated(boolean strongAuth) {
-        mBouncer.notifyKeyguardAuthenticated(strongAuth);
+        if (mBouncer != null) {
+            mBouncer.notifyKeyguardAuthenticated(strongAuth);
+        }
     }
 
     @Override
@@ -204,11 +206,15 @@ public class CarKeyguardViewController extends OverlayViewController implements
 
     @Override
     public void onFinishedGoingToSleep() {
-        mBouncer.onScreenTurnedOff();
+        if (mBouncer != null) {
+            mBouncer.onScreenTurnedOff();
+        }
     }
 
     @Override
     public void onCancelClicked() {
+        if (!mShowing) return;
+
         getOverlayViewGlobalStateController().setWindowFocusable(/* focusable= */ false);
         getOverlayViewGlobalStateController().setWindowNeedsInput(/* needsInput= */ false);
 
@@ -228,6 +234,8 @@ public class CarKeyguardViewController extends OverlayViewController implements
 
     @Override
     public void startPreHideAnimation(Runnable finishRunnable) {
+        if (!mShowing) return;
+
         mBouncer.startPreHideAnimation(finishRunnable);
     }
 
@@ -260,12 +268,12 @@ public class CarKeyguardViewController extends OverlayViewController implements
 
     @Override
     public boolean isBouncerShowing() {
-        return mBouncer.isShowing();
+        return mBouncer != null && mBouncer.isShowing();
     }
 
     @Override
     public boolean bouncerIsOrWillBeShowing() {
-        return mBouncer.isShowing() || mBouncer.inTransit();
+        return mBouncer != null && (mBouncer.isShowing() || mBouncer.inTransit());
     }
 
     @Override
