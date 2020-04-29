@@ -38,6 +38,7 @@ public class SensorModule {
                     .setSensorDelay(SensorManager.SENSOR_DELAY_NORMAL)
                     .setSensorResourceId(R.string.proximity_sensor_type)
                     .setThresholdResourceId(R.dimen.proximity_sensor_threshold)
+                    .setThresholdLatchResourceId(R.dimen.proximity_sensor_threshold_latch)
                     .build();
         } catch (IllegalStateException e) {
             Sensor defaultSensor = sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
@@ -56,6 +57,7 @@ public class SensorModule {
             return thresholdSensorBuilder
                     .setSensorResourceId(R.string.proximity_sensor_secondary_type)
                     .setThresholdResourceId(R.dimen.proximity_sensor_secondary_threshold)
+                    .setThresholdLatchResourceId(R.dimen.proximity_sensor_secondary_threshold_latch)
                     .build();
         } catch (IllegalStateException e) {
             return thresholdSensorBuilder.setSensor(null).setThresholdValue(0).build();
