@@ -226,6 +226,7 @@ class BubbleOverflowAdapter extends RecyclerView.Adapter<BubbleOverflowAdapter.V
         Bubble b = mBubbles.get(index);
 
         vh.iconView.setRenderedBubble(b);
+        vh.iconView.removeDotSuppressionFlag(BadgedImageView.SuppressionFlag.FLYOUT_VISIBLE);
         vh.iconView.setOnClickListener(view -> {
             mBubbles.remove(b);
             notifyDataSetChanged();
