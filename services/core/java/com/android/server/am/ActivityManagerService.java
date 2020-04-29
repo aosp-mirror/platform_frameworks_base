@@ -456,6 +456,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     static final String SYSTEM_DEBUGGABLE = "ro.debuggable";
 
+    static final String SYSTEM_USER_HOME_NEEDED = "ro.system_user_home_needed";
+
     public static final String ANR_TRACE_DIR = "/data/anr";
 
     // Maximum number of receivers an app can register.
@@ -9111,7 +9113,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             // to handle home activity in this case.
             if (UserManager.isSplitSystemUser() &&
                     Settings.Secure.getInt(mContext.getContentResolver(),
-                         Settings.Secure.USER_SETUP_COMPLETE, 0) != 0) {
+                         Settings.Secure.USER_SETUP_COMPLETE, 0) != 0
+                    || SystemProperties.getBoolean(SYSTEM_USER_HOME_NEEDED, false)) {
                 ComponentName cName = new ComponentName(mContext, SystemUserHomeActivity.class);
                 try {
                     AppGlobals.getPackageManager().setComponentEnabledSetting(cName,

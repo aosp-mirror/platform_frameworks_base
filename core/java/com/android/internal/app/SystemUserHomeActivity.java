@@ -17,10 +17,27 @@
 package com.android.internal.app;
 
 import android.app.Activity;
+import android.os.Bundle;
+import android.util.Log;
+
+import com.android.internal.R;
 
 /**
  * Placeholder home activity, which is always installed on the system user. At least one home
  * activity must be present and enabled in order for the system to boot.
  */
 public class SystemUserHomeActivity extends Activity {
+    private static final String TAG = "SystemUserHome";
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        Log.i(TAG, "onCreate");
+        setContentView(R.layout.system_user_home);
+    }
+
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.i(TAG, "onDestroy");
+    }
 }
