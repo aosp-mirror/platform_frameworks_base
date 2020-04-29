@@ -13,12 +13,14 @@
 // limitations under the License.
 
 #include "src/anomaly/AnomalyTracker.h"
-#include "../metrics/metrics_test_helper.h"
 
 #include <gtest/gtest.h>
 #include <math.h>
 #include <stdio.h>
+
 #include <vector>
+
+#include "tests/statsd_test_util.h"
 
 using namespace testing;
 using android::sp;
