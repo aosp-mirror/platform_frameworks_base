@@ -66,6 +66,10 @@ public class RegistrantList
         }
     }
 
+    public synchronized void removeAll() {
+        registrants.clear();
+    }
+
     @UnsupportedAppUsage
     public synchronized int
     size()
