@@ -21,9 +21,9 @@
 #include <vector>
 
 #include "../metrics/metrics_test_helper.h"
+#include "FieldValue.h"
 #include "annotations.h"
 #include "stats_event.h"
-#include "statslog_statsdtest.h"
 #include "tests/statsd_test_util.h"
 
 #ifdef __ANDROID__
@@ -33,207 +33,371 @@ namespace os {
 namespace statsd {
 
 using namespace testing;
-using std::make_shared;
 using std::shared_ptr;
 using std::vector;
-using testing::Contains;
 /*
  * Test merge isolated and host uid
  */
 namespace {
-int uidAtomTagId = util::CPU_CLUSTER_TIME;
-const vector<int> uidAdditiveFields = {3};
-int nonUidAtomTagId = util::SYSTEM_UPTIME;
-int timestamp = 1234;
-int isolatedUid = 30;
-int isolatedAdditiveData = 31;
-int isolatedNonAdditiveData = 32;
-int hostUid = 20;
-int hostAdditiveData = 21;
-int hostNonAdditiveData = 22;
+const int uidAtomTagId = 100;
+const vector<int> additiveFields = {3};
+const int nonUidAtomTagId = 200;
+const int timestamp = 1234;
+const int isolatedUid1 = 30;
+const int isolatedUid2 = 40;
+const int isolatedNonAdditiveData = 32;
+const int isolatedAdditiveData = 31;
+const int hostUid = 20;
+const int hostNonAdditiveData = 22;
+const int hostAdditiveData = 21;
+const int attributionAtomTagId = 300;
 
-void extractIntoVector(vector<shared_ptr<LogEvent>> events,
-                      vector<vector<int>>& ret) {
-    ret.clear();
-    status_t err;
-    for (const auto& event : events) {
-        vector<int> vec;
-        vec.push_back(event->GetInt(1, &err));
-        vec.push_back(event->GetInt(2, &err));
-        vec.push_back(event->GetInt(3, &err));
-        ret.push_back(vec);
-    }
-}
-
-std::shared_ptr<LogEvent> makeUidLogEvent(uint64_t timestampNs, int uid, int data1, int data2) {
-    AStatsEvent* statsEvent = AStatsEvent_obtain();
-    AStatsEvent_setAtomId(statsEvent, uidAtomTagId);
-    AStatsEvent_overwriteTimestamp(statsEvent, timestampNs);
-
-    AStatsEvent_writeInt32(statsEvent, uid);
-    AStatsEvent_addBoolAnnotation(statsEvent, ANNOTATION_ID_IS_UID, true);
-    AStatsEvent_writeInt32(statsEvent, data1);
-    AStatsEvent_writeInt32(statsEvent, data2);
-
-    std::shared_ptr<LogEvent> logEvent = std::make_unique<LogEvent>(/*uid=*/0, /*pid=*/0);
-    parseStatsEventToLogEvent(statsEvent, logEvent.get());
-    return logEvent;
-}
-
-std::shared_ptr<LogEvent> makeNonUidAtomLogEvent(uint64_t timestampNs, int data1) {
-    AStatsEvent* statsEvent = AStatsEvent_obtain();
-    AStatsEvent_setAtomId(statsEvent, nonUidAtomTagId);
-    AStatsEvent_overwriteTimestamp(statsEvent, timestampNs);
-    AStatsEvent_writeInt32(statsEvent, data1);
-
-    std::shared_ptr<LogEvent> logEvent = std::make_unique<LogEvent>(/*uid=*/0, /*pid=*/0);
-    parseStatsEventToLogEvent(statsEvent, logEvent.get());
-    return logEvent;
+sp<MockUidMap> makeMockUidMap() {
+    return makeMockUidMapForOneHost(hostUid, {isolatedUid1, isolatedUid2});
 }
 
 }  // anonymous namespace
 
-TEST(puller_util, MergeNoDimension) {
-    vector<shared_ptr<LogEvent>> inputData;
+TEST(PullerUtilTest, MergeNoDimension) {
+    vector<shared_ptr<LogEvent>> data = {
+            // 30->22->31
+            makeUidLogEvent(uidAtomTagId, timestamp, isolatedUid1, hostNonAdditiveData,
+                            isolatedAdditiveData),
 
-    // 30->22->31
-    inputData.push_back(
-            makeUidLogEvent(timestamp, isolatedUid, hostNonAdditiveData, isolatedAdditiveData));
+            // 20->22->21
+            makeUidLogEvent(uidAtomTagId, timestamp, hostUid, hostNonAdditiveData,
+                            hostAdditiveData),
+    };
 
-    // 20->22->21
-    inputData.push_back(makeUidLogEvent(timestamp, hostUid, hostNonAdditiveData, hostAdditiveData));
+    sp<MockUidMap> uidMap = makeMockUidMap();
+    mapAndMergeIsolatedUidsToHostUid(data, uidMap, uidAtomTagId, additiveFields);
 
-    sp<MockUidMap> uidMap = new NaggyMock<MockUidMap>();
-    EXPECT_CALL(*uidMap, getHostUidOrSelf(isolatedUid)).WillRepeatedly(Return(hostUid));
-    EXPECT_CALL(*uidMap, getHostUidOrSelf(Ne(isolatedUid))).WillRepeatedly(ReturnArg<0>());
-    mapAndMergeIsolatedUidsToHostUid(inputData, uidMap, uidAtomTagId, uidAdditiveFields);
-
-    vector<vector<int>> actual;
-    extractIntoVector(inputData, actual);
-    vector<int> expectedV1 = {20, 22, 52};
-    EXPECT_EQ(1, (int)actual.size());
-    EXPECT_THAT(actual, Contains(expectedV1));
+    ASSERT_EQ(1, (int)data.size());
+    const vector<FieldValue>* actualFieldValues = &data[0]->getValues();
+    ASSERT_EQ(3, actualFieldValues->size());
+    EXPECT_EQ(hostUid, actualFieldValues->at(0).mValue.int_value);
+    EXPECT_EQ(hostNonAdditiveData, actualFieldValues->at(1).mValue.int_value);
+    EXPECT_EQ(isolatedAdditiveData + hostAdditiveData, actualFieldValues->at(2).mValue.int_value);
 }
 
-TEST(puller_util, MergeWithDimension) {
-    vector<shared_ptr<LogEvent>> inputData;
+TEST(PullerUtilTest, MergeWithDimension) {
+    vector<shared_ptr<LogEvent>> data = {
+            // 30->32->31
+            makeUidLogEvent(uidAtomTagId, timestamp, isolatedUid1, isolatedNonAdditiveData,
+                            isolatedAdditiveData),
 
-    // 30->32->31
-    inputData.push_back(
-            makeUidLogEvent(timestamp, isolatedUid, isolatedNonAdditiveData, isolatedAdditiveData));
+            // 20->32->21
+            makeUidLogEvent(uidAtomTagId, timestamp, hostUid, isolatedNonAdditiveData,
+                            hostAdditiveData),
 
-    // 20->32->21
-    inputData.push_back(
-            makeUidLogEvent(timestamp, hostUid, isolatedNonAdditiveData, hostAdditiveData));
+            // 20->22->21
+            makeUidLogEvent(uidAtomTagId, timestamp, hostUid, hostNonAdditiveData,
+                            hostAdditiveData),
+    };
 
-    // 20->22->21
-    inputData.push_back(makeUidLogEvent(timestamp, hostUid, hostNonAdditiveData, hostAdditiveData));
+    sp<MockUidMap> uidMap = makeMockUidMap();
+    mapAndMergeIsolatedUidsToHostUid(data, uidMap, uidAtomTagId, additiveFields);
 
-    sp<MockUidMap> uidMap = new NaggyMock<MockUidMap>();
-    EXPECT_CALL(*uidMap, getHostUidOrSelf(isolatedUid)).WillRepeatedly(Return(hostUid));
-    EXPECT_CALL(*uidMap, getHostUidOrSelf(Ne(isolatedUid))).WillRepeatedly(ReturnArg<0>());
-    mapAndMergeIsolatedUidsToHostUid(inputData, uidMap, uidAtomTagId, uidAdditiveFields);
+    ASSERT_EQ(2, (int)data.size());
 
-    vector<vector<int>> actual;
-    extractIntoVector(inputData, actual);
-    vector<int> expectedV1 = {20, 22, 21};
-    vector<int> expectedV2 = {20, 32, 52};
-    EXPECT_EQ(2, (int)actual.size());
-    EXPECT_THAT(actual, Contains(expectedV1));
-    EXPECT_THAT(actual, Contains(expectedV2));
+    const vector<FieldValue>* actualFieldValues = &data[0]->getValues();
+    ASSERT_EQ(3, actualFieldValues->size());
+    EXPECT_EQ(hostUid, actualFieldValues->at(0).mValue.int_value);
+    EXPECT_EQ(hostNonAdditiveData, actualFieldValues->at(1).mValue.int_value);
+    EXPECT_EQ(hostAdditiveData, actualFieldValues->at(2).mValue.int_value);
+
+    actualFieldValues = &data[1]->getValues();
+    ASSERT_EQ(3, actualFieldValues->size());
+    EXPECT_EQ(hostUid, actualFieldValues->at(0).mValue.int_value);
+    EXPECT_EQ(isolatedNonAdditiveData, actualFieldValues->at(1).mValue.int_value);
+    EXPECT_EQ(hostAdditiveData + isolatedAdditiveData, actualFieldValues->at(2).mValue.int_value);
 }
 
-TEST(puller_util, NoMergeHostUidOnly) {
-    vector<shared_ptr<LogEvent>> inputData;
+TEST(PullerUtilTest, NoMergeHostUidOnly) {
+    vector<shared_ptr<LogEvent>> data = {
+            // 20->32->31
+            makeUidLogEvent(uidAtomTagId, timestamp, hostUid, isolatedNonAdditiveData,
+                            isolatedAdditiveData),
+
+            // 20->22->21
+            makeUidLogEvent(uidAtomTagId, timestamp, hostUid, hostNonAdditiveData,
+                            hostAdditiveData),
+    };
+
+    sp<MockUidMap> uidMap = makeMockUidMap();
+    mapAndMergeIsolatedUidsToHostUid(data, uidMap, uidAtomTagId, additiveFields);
+
+    ASSERT_EQ(2, (int)data.size());
+
+    const vector<FieldValue>* actualFieldValues = &data[0]->getValues();
+    ASSERT_EQ(3, actualFieldValues->size());
+    EXPECT_EQ(hostUid, actualFieldValues->at(0).mValue.int_value);
+    EXPECT_EQ(hostNonAdditiveData, actualFieldValues->at(1).mValue.int_value);
+    EXPECT_EQ(hostAdditiveData, actualFieldValues->at(2).mValue.int_value);
+
+    actualFieldValues = &data[1]->getValues();
+    ASSERT_EQ(3, actualFieldValues->size());
+    EXPECT_EQ(hostUid, actualFieldValues->at(0).mValue.int_value);
+    EXPECT_EQ(isolatedNonAdditiveData, actualFieldValues->at(1).mValue.int_value);
+    EXPECT_EQ(isolatedAdditiveData, actualFieldValues->at(2).mValue.int_value);
+}
+
+TEST(PullerUtilTest, IsolatedUidOnly) {
+    vector<shared_ptr<LogEvent>> data = {
+            // 30->32->31
+            makeUidLogEvent(uidAtomTagId, timestamp, isolatedUid1, isolatedNonAdditiveData,
+                            isolatedAdditiveData),
+
+            // 30->22->21
+            makeUidLogEvent(uidAtomTagId, timestamp, isolatedUid1, hostNonAdditiveData,
+                            hostAdditiveData),
+    };
+
+    sp<MockUidMap> uidMap = makeMockUidMap();
+    mapAndMergeIsolatedUidsToHostUid(data, uidMap, uidAtomTagId, additiveFields);
+
+    ASSERT_EQ(2, (int)data.size());
 
     // 20->32->31
-    inputData.push_back(
-            makeUidLogEvent(timestamp, hostUid, isolatedNonAdditiveData, isolatedAdditiveData));
+    const vector<FieldValue>* actualFieldValues = &data[0]->getValues();
+    ASSERT_EQ(3, actualFieldValues->size());
+    EXPECT_EQ(hostUid, actualFieldValues->at(0).mValue.int_value);
+    EXPECT_EQ(hostNonAdditiveData, actualFieldValues->at(1).mValue.int_value);
+    EXPECT_EQ(hostAdditiveData, actualFieldValues->at(2).mValue.int_value);
 
     // 20->22->21
-    inputData.push_back(makeUidLogEvent(timestamp, hostUid, hostNonAdditiveData, hostAdditiveData));
-
-    sp<MockUidMap> uidMap = new NaggyMock<MockUidMap>();
-    EXPECT_CALL(*uidMap, getHostUidOrSelf(isolatedUid)).WillRepeatedly(Return(hostUid));
-    EXPECT_CALL(*uidMap, getHostUidOrSelf(Ne(isolatedUid))).WillRepeatedly(ReturnArg<0>());
-    mapAndMergeIsolatedUidsToHostUid(inputData, uidMap, uidAtomTagId, uidAdditiveFields);
-
-    // 20->32->31
-    // 20->22->21
-    vector<vector<int>> actual;
-    extractIntoVector(inputData, actual);
-    vector<int> expectedV1 = {20, 32, 31};
-    vector<int> expectedV2 = {20, 22, 21};
-    EXPECT_EQ(2, (int)actual.size());
-    EXPECT_THAT(actual, Contains(expectedV1));
-    EXPECT_THAT(actual, Contains(expectedV2));
+    actualFieldValues = &data[1]->getValues();
+    ASSERT_EQ(3, actualFieldValues->size());
+    EXPECT_EQ(hostUid, actualFieldValues->at(0).mValue.int_value);
+    EXPECT_EQ(isolatedNonAdditiveData, actualFieldValues->at(1).mValue.int_value);
+    EXPECT_EQ(isolatedAdditiveData, actualFieldValues->at(2).mValue.int_value);
 }
 
-TEST(puller_util, IsolatedUidOnly) {
-    vector<shared_ptr<LogEvent>> inputData;
+TEST(PullerUtilTest, MultipleIsolatedUidToOneHostUid) {
+    vector<shared_ptr<LogEvent>> data = {
+            // 30->32->31
+            makeUidLogEvent(uidAtomTagId, timestamp, isolatedUid1, isolatedNonAdditiveData,
+                            isolatedAdditiveData),
 
-    // 30->32->31
-    inputData.push_back(
-            makeUidLogEvent(timestamp, hostUid, isolatedNonAdditiveData, isolatedAdditiveData));
+            // 31->32->21
+            makeUidLogEvent(uidAtomTagId, timestamp, isolatedUid2, isolatedNonAdditiveData,
+                            hostAdditiveData),
 
-    // 30->22->21
-    inputData.push_back(makeUidLogEvent(timestamp, hostUid, hostNonAdditiveData, hostAdditiveData));
+            // 20->32->21
+            makeUidLogEvent(uidAtomTagId, timestamp, hostUid, isolatedNonAdditiveData,
+                            hostAdditiveData),
+    };
 
-    sp<MockUidMap> uidMap = new NaggyMock<MockUidMap>();
-    EXPECT_CALL(*uidMap, getHostUidOrSelf(isolatedUid)).WillRepeatedly(Return(hostUid));
-    EXPECT_CALL(*uidMap, getHostUidOrSelf(Ne(isolatedUid))).WillRepeatedly(ReturnArg<0>());
-    mapAndMergeIsolatedUidsToHostUid(inputData, uidMap, uidAtomTagId, uidAdditiveFields);
+    sp<MockUidMap> uidMap = makeMockUidMap();
+    mapAndMergeIsolatedUidsToHostUid(data, uidMap, uidAtomTagId, additiveFields);
 
-    // 20->32->31
-    // 20->22->21
-    vector<vector<int>> actual;
-    extractIntoVector(inputData, actual);
-    vector<int> expectedV1 = {20, 32, 31};
-    vector<int> expectedV2 = {20, 22, 21};
-    EXPECT_EQ(2, (int)actual.size());
-    EXPECT_THAT(actual, Contains(expectedV1));
-    EXPECT_THAT(actual, Contains(expectedV2));
+    ASSERT_EQ(1, (int)data.size());
+
+    const vector<FieldValue>* actualFieldValues = &data[0]->getValues();
+    ASSERT_EQ(3, actualFieldValues->size());
+    EXPECT_EQ(hostUid, actualFieldValues->at(0).mValue.int_value);
+    EXPECT_EQ(isolatedNonAdditiveData, actualFieldValues->at(1).mValue.int_value);
+    EXPECT_EQ(isolatedAdditiveData + hostAdditiveData + hostAdditiveData,
+              actualFieldValues->at(2).mValue.int_value);
 }
 
-TEST(puller_util, MultipleIsolatedUidToOneHostUid) {
-    vector<shared_ptr<LogEvent>> inputData;
+TEST(PullerUtilTest, NoNeedToMerge) {
+    vector<shared_ptr<LogEvent>> data = {
+            // 32->31
+            CreateTwoValueLogEvent(nonUidAtomTagId, timestamp, isolatedNonAdditiveData,
+                                   isolatedAdditiveData),
 
-    // 30->32->31
-    inputData.push_back(
-            makeUidLogEvent(timestamp, isolatedUid, isolatedNonAdditiveData, isolatedAdditiveData));
+            // 22->21
+            CreateTwoValueLogEvent(nonUidAtomTagId, timestamp, hostNonAdditiveData,
+                                   hostAdditiveData),
 
-    // 31->32->21
-    inputData.push_back(
-            makeUidLogEvent(timestamp, isolatedUid + 1, isolatedNonAdditiveData, hostAdditiveData));
+    };
 
-    // 20->32->21
-    inputData.push_back(
-            makeUidLogEvent(timestamp, hostUid, isolatedNonAdditiveData, hostAdditiveData));
+    sp<MockUidMap> uidMap = makeMockUidMap();
+    mapAndMergeIsolatedUidsToHostUid(data, uidMap, nonUidAtomTagId, {} /*no additive fields*/);
 
-    sp<MockUidMap> uidMap = new NaggyMock<MockUidMap>();
-    EXPECT_CALL(*uidMap, getHostUidOrSelf(_)).WillRepeatedly(Return(hostUid));
-    mapAndMergeIsolatedUidsToHostUid(inputData, uidMap, uidAtomTagId, uidAdditiveFields);
+    ASSERT_EQ(2, (int)data.size());
 
-    vector<vector<int>> actual;
-    extractIntoVector(inputData, actual);
-    vector<int> expectedV1 = {20, 32, 73};
-    EXPECT_EQ(1, (int)actual.size());
-    EXPECT_THAT(actual, Contains(expectedV1));
+    const vector<FieldValue>* actualFieldValues = &data[0]->getValues();
+    ASSERT_EQ(2, actualFieldValues->size());
+    EXPECT_EQ(isolatedNonAdditiveData, actualFieldValues->at(0).mValue.int_value);
+    EXPECT_EQ(isolatedAdditiveData, actualFieldValues->at(1).mValue.int_value);
+
+    actualFieldValues = &data[1]->getValues();
+    ASSERT_EQ(2, actualFieldValues->size());
+    EXPECT_EQ(hostNonAdditiveData, actualFieldValues->at(0).mValue.int_value);
+    EXPECT_EQ(hostAdditiveData, actualFieldValues->at(1).mValue.int_value);
 }
 
-TEST(puller_util, NoNeedToMerge) {
-    vector<shared_ptr<LogEvent>> inputData;
+TEST(PullerUtilTest, MergeNoDimensionAttributionChain) {
+    vector<shared_ptr<LogEvent>> data = {
+            // 30->tag1->400->tag2->22->31
+            makeAttributionLogEvent(attributionAtomTagId, timestamp, {isolatedUid1, 400},
+                                    {"tag1", "tag2"}, hostNonAdditiveData, isolatedAdditiveData),
 
-    // 32
-    inputData.push_back(makeNonUidAtomLogEvent(timestamp, isolatedNonAdditiveData));
+            // 20->tag1->400->tag2->22->21
+            makeAttributionLogEvent(attributionAtomTagId, timestamp, {hostUid, 400},
+                                    {"tag1", "tag2"}, hostNonAdditiveData, hostAdditiveData),
+    };
 
-    // 22
-    inputData.push_back(makeNonUidAtomLogEvent(timestamp, hostNonAdditiveData));
+    sp<MockUidMap> uidMap = makeMockUidMap();
+    mapAndMergeIsolatedUidsToHostUid(data, uidMap, attributionAtomTagId, additiveFields);
 
-    sp<MockUidMap> uidMap = new NaggyMock<MockUidMap>();
-    mapAndMergeIsolatedUidsToHostUid(inputData, uidMap, nonUidAtomTagId, {} /*no additive fields*/);
+    ASSERT_EQ(1, (int)data.size());
+    const vector<FieldValue>* actualFieldValues = &data[0]->getValues();
+    ASSERT_EQ(6, actualFieldValues->size());
+    EXPECT_EQ(hostUid, actualFieldValues->at(0).mValue.int_value);
+    EXPECT_EQ("tag1", actualFieldValues->at(1).mValue.str_value);
+    EXPECT_EQ(400, actualFieldValues->at(2).mValue.int_value);
+    EXPECT_EQ("tag2", actualFieldValues->at(3).mValue.str_value);
+    EXPECT_EQ(hostNonAdditiveData, actualFieldValues->at(4).mValue.int_value);
+    EXPECT_EQ(isolatedAdditiveData + hostAdditiveData, actualFieldValues->at(5).mValue.int_value);
+}
 
-    EXPECT_EQ(2, (int)inputData.size());
+TEST(PullerUtilTest, MergeWithDimensionAttributionChain) {
+    vector<shared_ptr<LogEvent>> data = {
+            // 200->tag1->30->tag2->32->31
+            makeAttributionLogEvent(attributionAtomTagId, timestamp, {200, isolatedUid1},
+                                    {"tag1", "tag2"}, isolatedNonAdditiveData,
+                                    isolatedAdditiveData),
+
+            // 200->tag1->20->tag2->32->21
+            makeAttributionLogEvent(attributionAtomTagId, timestamp, {200, hostUid},
+                                    {"tag1", "tag2"}, isolatedNonAdditiveData, hostAdditiveData),
+
+            // 200->tag1->20->tag2->22->21
+            makeAttributionLogEvent(attributionAtomTagId, timestamp, {200, hostUid},
+                                    {"tag1", "tag2"}, hostNonAdditiveData, hostAdditiveData),
+    };
+
+    sp<MockUidMap> uidMap = makeMockUidMap();
+    mapAndMergeIsolatedUidsToHostUid(data, uidMap, attributionAtomTagId, additiveFields);
+
+    ASSERT_EQ(2, (int)data.size());
+
+    const vector<FieldValue>* actualFieldValues = &data[0]->getValues();
+    ASSERT_EQ(6, actualFieldValues->size());
+    EXPECT_EQ(200, actualFieldValues->at(0).mValue.int_value);
+    EXPECT_EQ("tag1", actualFieldValues->at(1).mValue.str_value);
+    EXPECT_EQ(hostUid, actualFieldValues->at(2).mValue.int_value);
+    EXPECT_EQ("tag2", actualFieldValues->at(3).mValue.str_value);
+    EXPECT_EQ(hostNonAdditiveData, actualFieldValues->at(4).mValue.int_value);
+    EXPECT_EQ(hostAdditiveData, actualFieldValues->at(5).mValue.int_value);
+
+    actualFieldValues = &data[1]->getValues();
+    ASSERT_EQ(6, actualFieldValues->size());
+    EXPECT_EQ(200, actualFieldValues->at(0).mValue.int_value);
+    EXPECT_EQ("tag1", actualFieldValues->at(1).mValue.str_value);
+    EXPECT_EQ(hostUid, actualFieldValues->at(2).mValue.int_value);
+    EXPECT_EQ("tag2", actualFieldValues->at(3).mValue.str_value);
+    EXPECT_EQ(isolatedNonAdditiveData, actualFieldValues->at(4).mValue.int_value);
+    EXPECT_EQ(hostAdditiveData + isolatedAdditiveData, actualFieldValues->at(5).mValue.int_value);
+}
+
+TEST(PullerUtilTest, NoMergeHostUidOnlyAttributionChain) {
+    vector<shared_ptr<LogEvent>> data = {
+            // 20->tag1->400->tag2->32->31
+            makeAttributionLogEvent(attributionAtomTagId, timestamp, {hostUid, 400},
+                                    {"tag1", "tag2"}, isolatedNonAdditiveData,
+                                    isolatedAdditiveData),
+
+            // 20->tag1->400->tag2->22->21
+            makeAttributionLogEvent(attributionAtomTagId, timestamp, {hostUid, 400},
+                                    {"tag1", "tag2"}, hostNonAdditiveData, hostAdditiveData),
+    };
+
+    sp<MockUidMap> uidMap = makeMockUidMap();
+    mapAndMergeIsolatedUidsToHostUid(data, uidMap, attributionAtomTagId, additiveFields);
+
+    ASSERT_EQ(2, (int)data.size());
+
+    const vector<FieldValue>* actualFieldValues = &data[0]->getValues();
+    ASSERT_EQ(6, actualFieldValues->size());
+    EXPECT_EQ(hostUid, actualFieldValues->at(0).mValue.int_value);
+    EXPECT_EQ("tag1", actualFieldValues->at(1).mValue.str_value);
+    EXPECT_EQ(400, actualFieldValues->at(2).mValue.int_value);
+    EXPECT_EQ("tag2", actualFieldValues->at(3).mValue.str_value);
+    EXPECT_EQ(hostNonAdditiveData, actualFieldValues->at(4).mValue.int_value);
+    EXPECT_EQ(hostAdditiveData, actualFieldValues->at(5).mValue.int_value);
+
+    actualFieldValues = &data[1]->getValues();
+    ASSERT_EQ(6, actualFieldValues->size());
+    EXPECT_EQ(hostUid, actualFieldValues->at(0).mValue.int_value);
+    EXPECT_EQ("tag1", actualFieldValues->at(1).mValue.str_value);
+    EXPECT_EQ(400, actualFieldValues->at(2).mValue.int_value);
+    EXPECT_EQ("tag2", actualFieldValues->at(3).mValue.str_value);
+    EXPECT_EQ(isolatedNonAdditiveData, actualFieldValues->at(4).mValue.int_value);
+    EXPECT_EQ(isolatedAdditiveData, actualFieldValues->at(5).mValue.int_value);
+}
+
+TEST(PullerUtilTest, IsolatedUidOnlyAttributionChain) {
+    vector<shared_ptr<LogEvent>> data = {
+            // 30->tag1->400->tag2->32->31
+            makeAttributionLogEvent(attributionAtomTagId, timestamp, {isolatedUid1, 400},
+                                    {"tag1", "tag2"}, isolatedNonAdditiveData,
+                                    isolatedAdditiveData),
+
+            // 30->tag1->400->tag2->22->21
+            makeAttributionLogEvent(attributionAtomTagId, timestamp, {isolatedUid1, 400},
+                                    {"tag1", "tag2"}, hostNonAdditiveData, hostAdditiveData),
+    };
+
+    sp<MockUidMap> uidMap = makeMockUidMap();
+    mapAndMergeIsolatedUidsToHostUid(data, uidMap, attributionAtomTagId, additiveFields);
+
+    ASSERT_EQ(2, (int)data.size());
+
+    // 20->tag1->400->tag2->32->31
+    const vector<FieldValue>* actualFieldValues = &data[0]->getValues();
+    ASSERT_EQ(6, actualFieldValues->size());
+    EXPECT_EQ(hostUid, actualFieldValues->at(0).mValue.int_value);
+    EXPECT_EQ("tag1", actualFieldValues->at(1).mValue.str_value);
+    EXPECT_EQ(400, actualFieldValues->at(2).mValue.int_value);
+    EXPECT_EQ("tag2", actualFieldValues->at(3).mValue.str_value);
+    EXPECT_EQ(hostNonAdditiveData, actualFieldValues->at(4).mValue.int_value);
+    EXPECT_EQ(hostAdditiveData, actualFieldValues->at(5).mValue.int_value);
+
+    // 20->tag1->400->tag2->22->21
+    actualFieldValues = &data[1]->getValues();
+    ASSERT_EQ(6, actualFieldValues->size());
+    EXPECT_EQ(hostUid, actualFieldValues->at(0).mValue.int_value);
+    EXPECT_EQ("tag1", actualFieldValues->at(1).mValue.str_value);
+    EXPECT_EQ(400, actualFieldValues->at(2).mValue.int_value);
+    EXPECT_EQ("tag2", actualFieldValues->at(3).mValue.str_value);
+    EXPECT_EQ(isolatedNonAdditiveData, actualFieldValues->at(4).mValue.int_value);
+    EXPECT_EQ(isolatedAdditiveData, actualFieldValues->at(5).mValue.int_value);
+}
+
+TEST(PullerUtilTest, MultipleIsolatedUidToOneHostUidAttributionChain) {
+    vector<shared_ptr<LogEvent>> data = {
+            // 30->tag1->400->tag2->32->31
+            makeAttributionLogEvent(attributionAtomTagId, timestamp, {isolatedUid1, 400},
+                                    {"tag1", "tag2"}, isolatedNonAdditiveData,
+                                    isolatedAdditiveData),
+
+            // 31->tag1->400->tag2->32->21
+            makeAttributionLogEvent(attributionAtomTagId, timestamp, {isolatedUid2, 400},
+                                    {"tag1", "tag2"}, isolatedNonAdditiveData, hostAdditiveData),
+
+            // 20->tag1->400->tag2->32->21
+            makeAttributionLogEvent(attributionAtomTagId, timestamp, {hostUid, 400},
+                                    {"tag1", "tag2"}, isolatedNonAdditiveData, hostAdditiveData),
+    };
+
+    sp<MockUidMap> uidMap = makeMockUidMap();
+    mapAndMergeIsolatedUidsToHostUid(data, uidMap, attributionAtomTagId, additiveFields);
+
+    ASSERT_EQ(1, (int)data.size());
+
+    const vector<FieldValue>* actualFieldValues = &data[0]->getValues();
+    ASSERT_EQ(6, actualFieldValues->size());
+    EXPECT_EQ(hostUid, actualFieldValues->at(0).mValue.int_value);
+    EXPECT_EQ("tag1", actualFieldValues->at(1).mValue.str_value);
+    EXPECT_EQ(400, actualFieldValues->at(2).mValue.int_value);
+    EXPECT_EQ("tag2", actualFieldValues->at(3).mValue.str_value);
+    EXPECT_EQ(isolatedNonAdditiveData, actualFieldValues->at(4).mValue.int_value);
+    EXPECT_EQ(isolatedAdditiveData + hostAdditiveData + hostAdditiveData,
+              actualFieldValues->at(5).mValue.int_value);
 }
 
 }  // namespace statsd
