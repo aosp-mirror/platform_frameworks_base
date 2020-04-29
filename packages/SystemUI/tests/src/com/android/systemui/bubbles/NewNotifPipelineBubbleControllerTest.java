@@ -26,7 +26,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -150,8 +149,6 @@ public class NewNotifPipelineBubbleControllerTest extends SysuiTestCase {
     private ExpandableNotificationRow mRow2;
     private ExpandableNotificationRow mNonBubbleNotifRow;
     @Mock
-    private BubbleController.BubbleStateChangeListener mBubbleStateChangeListener;
-    @Mock
     private BubbleController.BubbleExpandListener mBubbleExpandListener;
     @Mock
     private PendingIntent mDeleteIntent;
@@ -256,7 +253,6 @@ public class NewNotifPipelineBubbleControllerTest extends SysuiTestCase {
                 mSysUiState,
                 mock(INotificationManager.class));
         mBubbleController.addNotifCallback(mNotifCallback);
-        mBubbleController.setBubbleStateChangeListener(mBubbleStateChangeListener);
         mBubbleController.setExpandListener(mBubbleExpandListener);
 
         // Get a reference to the BubbleController's entry listener
@@ -269,8 +265,6 @@ public class NewNotifPipelineBubbleControllerTest extends SysuiTestCase {
     public void testAddBubble() {
         mBubbleController.updateBubble(mRow.getEntry());
         assertTrue(mBubbleController.hasBubbles());
-
-        verify(mBubbleStateChangeListener).onHasBubblesChanged(true);
     }
 
     @Test
@@ -286,13 +280,10 @@ public class NewNotifPipelineBubbleControllerTest extends SysuiTestCase {
         assertNotNull(mBubbleData.getBubbleInStackWithKey(mRow.getEntry().getKey()));
         assertTrue(mBubbleController.hasBubbles());
         verify(mNotifCallback, times(1)).invalidateNotifications(anyString());
-        verify(mBubbleStateChangeListener).onHasBubblesChanged(true);
 
         mBubbleController.removeBubble(mRow.getEntry(), BubbleController.DISMISS_USER_GESTURE);
-        assertFalse(mNotificationShadeWindowController.getBubblesShowing());
         assertNull(mBubbleData.getBubbleInStackWithKey(mRow.getEntry().getKey()));
         verify(mNotifCallback, times(2)).invalidateNotifications(anyString());
-        verify(mBubbleStateChangeListener).onHasBubblesChanged(false);
     }
 
     @Test
@@ -347,7 +338,6 @@ public class NewNotifPipelineBubbleControllerTest extends SysuiTestCase {
         assertTrue(mBubbleController.hasBubbles());
 
         mBubbleData.dismissAll(BubbleController.DISMISS_USER_GESTURE);
-        assertFalse(mNotificationShadeWindowController.getBubblesShowing());
         verify(mNotifCallback, times(3)).invalidateNotifications(anyString());
         assertNull(mBubbleData.getBubbleInStackWithKey(mRow.getEntry().getKey()));
         assertNull(mBubbleData.getBubbleInStackWithKey(mRow2.getEntry().getKey()));
@@ -365,14 +355,12 @@ public class NewNotifPipelineBubbleControllerTest extends SysuiTestCase {
         assertTrue(mBubbleController.hasBubbles());
         assertFalse(mBubbleController.isBubbleNotificationSuppressedFromShade(
                 mRow.getEntry()));
-        assertFalse(mNotificationShadeWindowController.getBubbleExpanded());
 
         // Expand the stack
         BubbleStackView stackView = mBubbleController.getStackView();
         mBubbleData.setExpanded(true);
         assertTrue(mBubbleController.isStackExpanded());
         verify(mBubbleExpandListener).onBubbleExpandChanged(true, mRow.getEntry().getKey());
-        assertTrue(mNotificationShadeWindowController.getBubbleExpanded());
 
         // Make sure the notif is suppressed
         assertTrue(mBubbleController.isBubbleNotificationSuppressedFromShade(mRow.getEntry()));
@@ -381,7 +369,6 @@ public class NewNotifPipelineBubbleControllerTest extends SysuiTestCase {
         mBubbleController.collapseStack();
         verify(mBubbleExpandListener).onBubbleExpandChanged(false, mRow.getEntry().getKey());
         assertFalse(mBubbleController.isStackExpanded());
-        assertFalse(mNotificationShadeWindowController.getBubbleExpanded());
     }
 
     @Test
@@ -495,7 +482,6 @@ public class NewNotifPipelineBubbleControllerTest extends SysuiTestCase {
         mEntryListener.onEntryAdded(mRow2.getEntry());
         mBubbleController.updateBubble(mRow.getEntry());
         mBubbleController.updateBubble(mRow2.getEntry());
-        verify(mBubbleStateChangeListener).onHasBubblesChanged(true);
 
         // Expand
         BubbleStackView stackView = mBubbleController.getStackView();
@@ -528,7 +514,6 @@ public class NewNotifPipelineBubbleControllerTest extends SysuiTestCase {
 
         // Make sure state changes and collapse happens
         verify(mBubbleExpandListener).onBubbleExpandChanged(false, mRow.getEntry().getKey());
-        verify(mBubbleStateChangeListener).onHasBubblesChanged(false);
         assertFalse(mBubbleController.hasBubbles());
     }
 
@@ -546,9 +531,6 @@ public class NewNotifPipelineBubbleControllerTest extends SysuiTestCase {
         verify(mBubbleExpandListener, never()).onBubbleExpandChanged(false /* expanded */,
                 mRow.getEntry().getKey());
         assertFalse(mBubbleController.isStackExpanded());
-
-        // # of bubbles should change
-        verify(mBubbleStateChangeListener).onHasBubblesChanged(true /* hasBubbles */);
     }
 
     @Test
@@ -564,9 +546,6 @@ public class NewNotifPipelineBubbleControllerTest extends SysuiTestCase {
         verify(mBubbleExpandListener).onBubbleExpandChanged(true /* expanded */,
                 mRow.getEntry().getKey());
         assertTrue(mBubbleController.isStackExpanded());
-
-        // # of bubbles should change
-        verify(mBubbleStateChangeListener).onHasBubblesChanged(true /* hasBubbles */);
     }
 
     @Test
@@ -584,9 +563,6 @@ public class NewNotifPipelineBubbleControllerTest extends SysuiTestCase {
         // Dot + flyout is hidden because notif is suppressed
         assertFalse(mBubbleData.getBubbleInStackWithKey(mRow.getEntry().getKey()).showDot());
         assertFalse(mBubbleData.getBubbleInStackWithKey(mRow.getEntry().getKey()).showFlyout());
-
-        // # of bubbles should change
-        verify(mBubbleStateChangeListener).onHasBubblesChanged(true /* hasBubbles */);
     }
 
     @Test
@@ -610,9 +586,6 @@ public class NewNotifPipelineBubbleControllerTest extends SysuiTestCase {
         // Dot + flyout is hidden because notif is suppressed
         assertFalse(mBubbleData.getBubbleInStackWithKey(mRow.getEntry().getKey()).showDot());
         assertFalse(mBubbleData.getBubbleInStackWithKey(mRow.getEntry().getKey()).showFlyout());
-
-        // # of bubbles should change
-        verify(mBubbleStateChangeListener).onHasBubblesChanged(true /* hasBubbles */);
     }
 
     @Test
@@ -630,7 +603,6 @@ public class NewNotifPipelineBubbleControllerTest extends SysuiTestCase {
         mEntryListener.onEntryAdded(mNonBubbleNotifRow.getEntry());
         mEntryListener.onEntryUpdated(mNonBubbleNotifRow.getEntry());
 
-        verify(mBubbleStateChangeListener, never()).onHasBubblesChanged(anyBoolean());
         assertThat(mBubbleController.hasBubbles()).isFalse();
     }
 

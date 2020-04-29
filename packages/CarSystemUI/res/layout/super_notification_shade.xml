@@ -44,14 +44,6 @@
     </com.android.systemui.statusbar.BackDropView>
 
     <com.android.systemui.statusbar.ScrimView
-        android:id="@+id/scrim_for_bubble"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:importantForAccessibility="no"
-        sysui:ignoreRightInset="true"
-    />
-
-    <com.android.systemui.statusbar.ScrimView
         android:id="@+id/scrim_behind"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

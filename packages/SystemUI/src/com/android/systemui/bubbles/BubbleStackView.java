@@ -108,7 +108,8 @@ import java.util.function.Consumer;
 /**
  * Renders bubbles in a stack and handles animating expanded and collapsed states.
  */
-public class BubbleStackView extends FrameLayout {
+public class BubbleStackView extends FrameLayout
+        implements ViewTreeObserver.OnComputeInternalInsetsListener {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "BubbleStackView" : TAG_BUBBLES;
 
     /** Animation durations for bubble stack user education views. **/
@@ -647,7 +648,6 @@ public class BubbleStackView extends FrameLayout {
     private boolean mShowingManage = false;
     private PhysicsAnimator.SpringConfig mManageSpringConfig = new PhysicsAnimator.SpringConfig(
             SpringForce.STIFFNESS_MEDIUM, SpringForce.DAMPING_RATIO_LOW_BOUNCY);
-
     @SuppressLint("ClickableViewAccessibility")
     public BubbleStackView(Context context, BubbleData data,
             @Nullable SurfaceSynchronizer synchronizer,
@@ -1052,14 +1052,24 @@ public class BubbleStackView extends FrameLayout {
     }
 
     @Override
-    public void getBoundsOnScreen(Rect outRect, boolean clipToParent) {
-        getBoundsOnScreen(outRect);
+    public void onComputeInternalInsets(ViewTreeObserver.InternalInsetsInfo inoutInfo) {
+        inoutInfo.setTouchableInsets(ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION);
+
+        getTouchableRegion(mTempRect);
+        inoutInfo.touchableRegion.set(mTempRect);
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        getViewTreeObserver().addOnComputeInternalInsetsListener(this);
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         getViewTreeObserver().removeOnPreDrawListener(mViewUpdater);
+        getViewTreeObserver().removeOnComputeInternalInsetsListener(this);
     }
 
     @Override
@@ -1960,8 +1970,16 @@ public class BubbleStackView extends FrameLayout {
         mAfterFlyoutHidden = null;
     }
 
-    @Override
-    public void getBoundsOnScreen(Rect outRect) {
+    /**
+     * Fills the Rect with the touchable region of the bubbles. This will be used by WindowManager
+     * to decide which touch events go to Bubbles.
+     *
+     * Bubbles is below the status bar/notification shade but above application windows. If you're
+     * trying to get touch events from the status bar or another higher-level window layer, you'll
+     * need to re-order TYPE_BUBBLES in WindowManagerPolicy so that we have the opportunity to steal
+     * them.
+     */
+    public void getTouchableRegion(Rect outRect) {
         if (mUserEducationView != null && mUserEducationView.getVisibility() == VISIBLE) {
             // When user education shows then capture all touches
             outRect.set(0, 0, getWidth(), getHeight());
@@ -1971,12 +1989,12 @@ public class BubbleStackView extends FrameLayout {
         if (!mIsExpanded) {
             if (getBubbleCount() > 0) {
                 mBubbleContainer.getChildAt(0).getBoundsOnScreen(outRect);
+                // Increase the touch target size of the bubble
+                outRect.top -= mBubbleTouchPadding;
+                outRect.left -= mBubbleTouchPadding;
+                outRect.right += mBubbleTouchPadding;
+                outRect.bottom += mBubbleTouchPadding;
             }
-            // Increase the touch target size of the bubble
-            outRect.top -= mBubbleTouchPadding;
-            outRect.left -= mBubbleTouchPadding;
-            outRect.right += mBubbleTouchPadding;
-            outRect.bottom += mBubbleTouchPadding;
         } else {
             mBubbleContainer.getBoundsOnScreen(outRect);
         }
