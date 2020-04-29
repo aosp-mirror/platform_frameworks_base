@@ -58,6 +58,7 @@ import java.text.ParseException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 
 /**
@@ -181,7 +182,7 @@ class Rollback {
     /**
      * The extension versions supported at the time of rollback creation.
      */
-    private final SparseIntArray mExtensionVersions;
+    @NonNull private final SparseIntArray mExtensionVersions;
 
     /**
      * Constructs a new, empty Rollback instance.
@@ -209,7 +210,7 @@ class Rollback {
         mState = ROLLBACK_STATE_ENABLING;
         mTimestamp = Instant.now();
         mPackageSessionIds = packageSessionIds != null ? packageSessionIds : new int[0];
-        mExtensionVersions = extensionVersions;
+        mExtensionVersions = Objects.requireNonNull(extensionVersions);
     }
 
     Rollback(int rollbackId, File backupDir, int stagedSessionId, int userId,
@@ -233,7 +234,7 @@ class Rollback {
         mState = state;
         mApkSessionId = apkSessionId;
         mRestoreUserDataInProgress = restoreUserDataInProgress;
-        mExtensionVersions = extensionVersions;
+        mExtensionVersions = Objects.requireNonNull(extensionVersions);
         // TODO(b/120200473): Include this field during persistence. This field will be used to
         // decide which rollback to expire when ACTION_PACKAGE_REPLACED is received. Note persisting
         // this field is not backward compatible. We won't fix b/120200473 until S to minimize the
