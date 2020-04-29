@@ -16,11 +16,16 @@
 
 package com.android.server.soundtrigger_middleware;
 
-import android.Manifest;
+import static android.Manifest.permission.CAPTURE_AUDIO_HOTWORD;
+import static android.Manifest.permission.RECORD_AUDIO;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.PermissionChecker;
+import android.media.permission.Identity;
+import android.media.permission.IdentityContext;
+import android.media.permission.PermissionUtil;
 import android.media.soundtrigger_middleware.ISoundTriggerCallback;
 import android.media.soundtrigger_middleware.ISoundTriggerMiddlewareService;
 import android.media.soundtrigger_middleware.ISoundTriggerModule;
@@ -42,12 +47,12 @@ import java.util.Objects;
 /**
  * This is a decorator of an {@link ISoundTriggerMiddlewareService}, which enforces permissions.
  * <p>
- * Every public method in this class, overriding an interface method, must follow the following
+ * Every public method in this class, overriding an interface method, must follow a similar
  * pattern:
  * <code><pre>
  * @Override public T method(S arg) {
  *     // Permission check.
- *     checkPermissions();
+ *     enforcePermissions*(...);
  *     return mDelegate.method(arg);
  * }
  * </pre></code>
@@ -68,18 +73,20 @@ public class SoundTriggerMiddlewarePermission implements ISoundTriggerMiddleware
 
     @Override
     public @NonNull
-    SoundTriggerModuleDescriptor[] listModules() throws RemoteException {
-        checkPermissions();
+    SoundTriggerModuleDescriptor[] listModules() {
+        Identity identity = getIdentity();
+        enforcePermissionsForPreflight(identity);
         return mDelegate.listModules();
     }
 
     @Override
     public @NonNull
     ISoundTriggerModule attach(int handle,
-            @NonNull ISoundTriggerCallback callback) throws RemoteException {
-        checkPermissions();
-        return new ModuleWrapper(
-                mDelegate.attach(handle, new CallbackWrapper(callback)));
+            @NonNull ISoundTriggerCallback callback) {
+        Identity identity = getIdentity();
+        enforcePermissionsForPreflight(identity);
+        ModuleWrapper wrapper = new ModuleWrapper(identity, callback);
+        return wrapper.attach(mDelegate.attach(handle, wrapper.getCallbackWrapper()));
     }
 
     @Override
@@ -91,7 +98,7 @@ public class SoundTriggerMiddlewarePermission implements ISoundTriggerMiddleware
     // Override toString() in order to have the delegate's ID in it.
     @Override
     public String toString() {
-        return mDelegate.toString();
+        return Objects.toString(mDelegate);
     }
 
     @Override
@@ -101,38 +108,88 @@ public class SoundTriggerMiddlewarePermission implements ISoundTriggerMiddleware
     }
 
     /**
-     * Throws a {@link SecurityException} if caller permanently doesn't have the given permission,
-     * or a {@link ServiceSpecificException} with a {@link Status#TEMPORARY_PERMISSION_DENIED} if
-     * caller temporarily doesn't have the right permissions to use this service.
+     * Get the identity context, or throws an InternalServerError if it has not been established.
+     *
+     * @return The identity.
      */
-    private void checkPermissions() {
-        enforcePermission(Manifest.permission.RECORD_AUDIO);
-        enforcePermission(Manifest.permission.CAPTURE_AUDIO_HOTWORD);
+    private static @NonNull
+    Identity getIdentity() {
+        return IdentityContext.getNonNull();
     }
 
     /**
-     * Throws a {@link SecurityException} if caller permanently doesn't have the given permission,
+     * Throws a {@link SecurityException} if originator permanently doesn't have the given
+     * permission,
      * or a {@link ServiceSpecificException} with a {@link Status#TEMPORARY_PERMISSION_DENIED} if
-     * caller temporarily doesn't have the given permission.
-     *
-     * @param permission The permission to check.
+     * originator temporarily doesn't have the right permissions to use this service.
      */
-    private void enforcePermission(String permission) {
-        final int status = PermissionChecker.checkCallingOrSelfPermissionForPreflight(mContext,
+    private void enforcePermissionsForPreflight(@NonNull Identity identity) {
+        enforcePermissionForPreflight(mContext, identity, RECORD_AUDIO);
+        enforcePermissionForPreflight(mContext, identity, CAPTURE_AUDIO_HOTWORD);
+    }
+
+    /**
+     * Throws a {@link SecurityException} iff the originator has permission to receive data.
+     */
+    void enforcePermissionsForDataDelivery(@NonNull Identity identity, @NonNull String reason) {
+        enforcePermissionForDataDelivery(mContext, identity, RECORD_AUDIO, reason);
+        enforcePermissionForDataDelivery(mContext, identity, CAPTURE_AUDIO_HOTWORD,
+                reason);
+    }
+
+    /**
+     * Throws a {@link SecurityException} iff the given identity has given permission to receive
+     * data.
+     *
+     * @param context    A {@link Context}, used for permission checks.
+     * @param identity   The identity to check.
+     * @param permission The identifier of the permission we want to check.
+     * @param reason     The reason why we're requesting the permission, for auditing purposes.
+     */
+    private static void enforcePermissionForDataDelivery(@NonNull Context context,
+            @NonNull Identity identity,
+            @NonNull String permission, @NonNull String reason) {
+        // TODO(ytai): We're temporarily ignoring proc state until we have a proper permission that
+        //  represents being able to use the microphone in the background. Otherwise, some of our
+        //  existing use-cases would break.
+        final int status = PermissionUtil.checkPermissionForDataDeliveryIgnoreProcState(context,
+                identity, permission, reason);
+        if (status != PermissionChecker.PERMISSION_GRANTED) {
+            throw new SecurityException(
+                    String.format("Failed to obtain permission %s for identity %s", permission,
+                            ObjectPrinter.print(identity, true, 16)));
+        }
+    }
+
+    /**
+     * Throws a {@link SecurityException} if originator permanently doesn't have the given
+     * permission, or a {@link ServiceSpecificException} with a {@link
+     * Status#TEMPORARY_PERMISSION_DENIED} if caller originator doesn't have the given permission.
+     *
+     * @param context    A {@link Context}, used for permission checks.
+     * @param identity   The identity to check.
+     * @param permission The identifier of the permission we want to check.
+     */
+    private static void enforcePermissionForPreflight(@NonNull Context context,
+            @NonNull Identity identity, @NonNull String permission) {
+        final int status = PermissionUtil.checkPermissionForPreflight(context, identity,
                 permission);
         switch (status) {
             case PermissionChecker.PERMISSION_GRANTED:
                 return;
             case PermissionChecker.PERMISSION_HARD_DENIED:
                 throw new SecurityException(
-                        String.format("Caller must have the %s permission.", permission));
+                        String.format("Failed to obtain permission %s for identity %s", permission,
+                                ObjectPrinter.print(identity, true, 16)));
             case PermissionChecker.PERMISSION_SOFT_DENIED:
                 throw new ServiceSpecificException(Status.TEMPORARY_PERMISSION_DENIED,
-                        String.format("Caller must have the %s permission.", permission));
+                        String.format("Failed to obtain permission %s for identity %s", permission,
+                                ObjectPrinter.print(identity, true, 16)));
             default:
                 throw new RuntimeException("Unexpected perimission check result.");
         }
     }
+
 
     @Override
     public void dump(PrintWriter pw) {
@@ -146,27 +203,40 @@ public class SoundTriggerMiddlewarePermission implements ISoundTriggerMiddleware
      * mentioned in {@link SoundTriggerModule} above. This class follows the same conventions.
      */
     private class ModuleWrapper extends ISoundTriggerModule.Stub {
-        private final ISoundTriggerModule mDelegate;
+        private ISoundTriggerModule mDelegate;
+        private final @NonNull Identity mOriginatorIdentity;
+        private final @NonNull CallbackWrapper mCallbackWrapper;
 
-        ModuleWrapper(@NonNull ISoundTriggerModule delegate) {
+        ModuleWrapper(@NonNull Identity originatorIdentity,
+                @NonNull ISoundTriggerCallback callback) {
+            mOriginatorIdentity = originatorIdentity;
+            mCallbackWrapper = new CallbackWrapper(callback);
+        }
+
+        ModuleWrapper attach(@NonNull ISoundTriggerModule delegate) {
             mDelegate = delegate;
+            return this;
+        }
+
+        ISoundTriggerCallback getCallbackWrapper() {
+            return mCallbackWrapper;
         }
 
         @Override
         public int loadModel(@NonNull SoundModel model) throws RemoteException {
-            checkPermissions();
+            enforcePermissions();
             return mDelegate.loadModel(model);
         }
 
         @Override
         public int loadPhraseModel(@NonNull PhraseSoundModel model) throws RemoteException {
-            checkPermissions();
+            enforcePermissions();
             return mDelegate.loadPhraseModel(model);
         }
 
         @Override
         public void unloadModel(int modelHandle) throws RemoteException {
-            checkPermissions();
+            enforcePermissions();
             mDelegate.unloadModel(modelHandle);
 
         }
@@ -174,32 +244,32 @@ public class SoundTriggerMiddlewarePermission implements ISoundTriggerMiddleware
         @Override
         public void startRecognition(int modelHandle, @NonNull RecognitionConfig config)
                 throws RemoteException {
-            checkPermissions();
+            enforcePermissions();
             mDelegate.startRecognition(modelHandle, config);
         }
 
         @Override
         public void stopRecognition(int modelHandle) throws RemoteException {
-            checkPermissions();
+            enforcePermissions();
             mDelegate.stopRecognition(modelHandle);
         }
 
         @Override
         public void forceRecognitionEvent(int modelHandle) throws RemoteException {
-            checkPermissions();
+            enforcePermissions();
             mDelegate.forceRecognitionEvent(modelHandle);
         }
 
         @Override
         public void setModelParameter(int modelHandle, int modelParam, int value)
                 throws RemoteException {
-            checkPermissions();
+            enforcePermissions();
             mDelegate.setModelParameter(modelHandle, modelParam, value);
         }
 
         @Override
         public int getModelParameter(int modelHandle, int modelParam) throws RemoteException {
-            checkPermissions();
+            enforcePermissions();
             return mDelegate.getModelParameter(modelHandle, modelParam);
         }
 
@@ -207,14 +277,14 @@ public class SoundTriggerMiddlewarePermission implements ISoundTriggerMiddleware
         @Nullable
         public ModelParameterRange queryModelParameterSupport(int modelHandle, int modelParam)
                 throws RemoteException {
-            checkPermissions();
+            enforcePermissions();
             return mDelegate.queryModelParameterSupport(modelHandle,
                     modelParam);
         }
 
         @Override
         public void detach() throws RemoteException {
-            checkPermissions();
+            enforcePermissions();
             mDelegate.detach();
         }
 
@@ -223,45 +293,56 @@ public class SoundTriggerMiddlewarePermission implements ISoundTriggerMiddleware
         public String toString() {
             return Objects.toString(mDelegate);
         }
-    }
 
-    private class CallbackWrapper implements ISoundTriggerCallback {
-        private final ISoundTriggerCallback mDelegate;
-
-        private CallbackWrapper(ISoundTriggerCallback delegate) {
-            mDelegate = delegate;
+        private void enforcePermissions() {
+            enforcePermissionsForPreflight(mOriginatorIdentity);
         }
 
-        @Override
-        public void onRecognition(int modelHandle, RecognitionEvent event) throws RemoteException {
-            mDelegate.onRecognition(modelHandle, event);
-        }
+        private class CallbackWrapper implements ISoundTriggerCallback {
+            private final ISoundTriggerCallback mDelegate;
 
-        @Override
-        public void onPhraseRecognition(int modelHandle, PhraseRecognitionEvent event)
-                throws RemoteException {
-            mDelegate.onPhraseRecognition(modelHandle, event);
-        }
+            private CallbackWrapper(ISoundTriggerCallback delegate) {
+                mDelegate = delegate;
+            }
 
-        @Override
-        public void onRecognitionAvailabilityChange(boolean available) throws RemoteException {
-            mDelegate.onRecognitionAvailabilityChange(available);
-        }
+            @Override
+            public void onRecognition(int modelHandle, RecognitionEvent event)
+                    throws RemoteException {
+                enforcePermissions("Sound trigger recognition.");
+                mDelegate.onRecognition(modelHandle, event);
+            }
 
-        @Override
-        public void onModuleDied() throws RemoteException {
-            mDelegate.onModuleDied();
-        }
+            @Override
+            public void onPhraseRecognition(int modelHandle, PhraseRecognitionEvent event)
+                    throws RemoteException {
+                enforcePermissions("Sound trigger phrase recognition.");
+                mDelegate.onPhraseRecognition(modelHandle, event);
+            }
 
-        @Override
-        public IBinder asBinder() {
-            return mDelegate.asBinder();
-        }
+            @Override
+            public void onRecognitionAvailabilityChange(boolean available) throws RemoteException {
+                mDelegate.onRecognitionAvailabilityChange(available);
+            }
 
-        // Override toString() in order to have the delegate's ID in it.
-        @Override
-        public String toString() {
-            return Objects.toString(mDelegate);
+            @Override
+            public void onModuleDied() throws RemoteException {
+                mDelegate.onModuleDied();
+            }
+
+            @Override
+            public IBinder asBinder() {
+                return mDelegate.asBinder();
+            }
+
+            // Override toString() in order to have the delegate's ID in it.
+            @Override
+            public String toString() {
+                return mDelegate.toString();
+            }
+
+            private void enforcePermissions(String reason) {
+                enforcePermissionsForDataDelivery(mOriginatorIdentity, reason);
+            }
         }
     }
 }

@@ -16,11 +16,10 @@
 
 package com.android.server.soundtrigger_middleware;
 
-import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.content.Context;
-import android.content.PermissionChecker;
+import android.media.permission.Identity;
+import android.media.permission.IdentityContext;
 import android.media.soundtrigger_middleware.ISoundTriggerCallback;
 import android.media.soundtrigger_middleware.ISoundTriggerMiddlewareService;
 import android.media.soundtrigger_middleware.ISoundTriggerModule;
@@ -113,11 +112,11 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
         ALIVE,
         DETACHED,
         DEAD
-    };
+    }
 
     private class ModuleState {
         final @NonNull SoundTriggerModuleProperties properties;
-        Set<ModuleService> sessions = new HashSet<>();
+        Set<Session> sessions = new HashSet<>();
 
         private ModuleState(@NonNull SoundTriggerModuleProperties properties) {
             this.properties = properties;
@@ -202,10 +201,9 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
 
             // From here on, every exception isn't client's fault.
             try {
-                ModuleService moduleService =
-                        new ModuleService(handle, callback);
-                moduleService.attach(mDelegate.attach(handle, moduleService));
-                return moduleService;
+                Session session = new Session(handle, callback);
+                session.attach(mDelegate.attach(handle, session.getCallbackWrapper()));
+                return session;
             } catch (Exception e) {
                 throw handleException(e);
             }
@@ -254,7 +252,7 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
                     pw.printf("Module %d\n%s\n", handle,
                             ObjectPrinter.print(module.properties, true, 16));
                     pw.println("=========================================");
-                    for (ModuleService session : module.sessions) {
+                    for (Session session : module.sessions) {
                         session.dump(pw);
                     }
                 }
@@ -284,7 +282,14 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
             /** Model is loaded, recognition is inactive. */
             LOADED,
             /** Model is loaded, recognition is active. */
-            ACTIVE
+            ACTIVE,
+            /**
+             * Model is active as far as the client is concerned, but loaded as far as the
+             * layers are concerned. This condition occurs when a recognition event that indicates
+             * the recognition for this model arrived from the underlying layer, but had not been
+             * delivered to the caller (most commonly, for permission reasons).
+             */
+            INTERCEPTED,
         }
 
         /** Activity state. */
@@ -357,9 +362,7 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
      * A wrapper around an {@link ISoundTriggerModule} implementation, to address the same aspects
      * mentioned in {@link SoundTriggerModule} above. This class follows the same conventions.
      */
-    private class ModuleService extends ISoundTriggerModule.Stub implements ISoundTriggerCallback,
-            IBinder.DeathRecipient {
-        private final ISoundTriggerCallback mCallback;
+    private class Session extends ISoundTriggerModule.Stub {
         private ISoundTriggerModule mDelegate;
         // While generally all the fields of this class must be changed under a lock, an exception
         // is made for the specific case of changing a model state from ACTIVE to LOADED, which
@@ -370,15 +373,17 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
         ConcurrentMap<Integer, ModelState> mLoadedModels = new ConcurrentHashMap<>();
         private final int mHandle;
         private ModuleStatus mState = ModuleStatus.ALIVE;
+        private final CallbackWrapper mCallbackWrapper;
+        private final Identity mOriginatorIdentity;
 
-        ModuleService(int handle, @NonNull ISoundTriggerCallback callback) {
-            mCallback = callback;
+        Session(int handle, @NonNull ISoundTriggerCallback callback) {
+            mCallbackWrapper = new CallbackWrapper(callback);
             mHandle = handle;
-            try {
-                mCallback.asBinder().linkToDeath(this, 0);
-            } catch (RemoteException e) {
-                throw e.rethrowAsRuntimeException();
-            }
+            mOriginatorIdentity = IdentityContext.get();
+        }
+
+        ISoundTriggerCallback getCallbackWrapper() {
+            return mCallbackWrapper;
         }
 
         void attach(@NonNull ISoundTriggerModule delegate) {
@@ -446,7 +451,7 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
                 }
                 if (modelState.getActivityState() != ModelState.Activity.LOADED) {
                     throw new IllegalStateException("Model with handle: " + modelHandle
-                            + " has invalid state for unloading: " + modelState.getActivityState());
+                            + " has invalid state for unloading");
                 }
 
                 // From here on, every exception isn't client's fault.
@@ -476,8 +481,7 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
                 }
                 if (modelState.getActivityState() != ModelState.Activity.LOADED) {
                     throw new IllegalStateException("Model with handle: " + modelHandle
-                            + " has invalid state for starting recognition: "
-                            + modelState.getActivityState());
+                            + " has invalid state for starting recognition");
                 }
 
                 // From here on, every exception isn't client's fault.
@@ -512,7 +516,12 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
 
                 // From here on, every exception isn't client's fault.
                 try {
-                    mDelegate.stopRecognition(modelHandle);
+                    // If the activity state is LOADED or INTERCEPTED, we skip delegating the
+                    // command, but still consider the call valid. In either case, the resulting
+                    // state is LOADED.
+                    if (modelState.getActivityState() == ModelState.Activity.ACTIVE) {
+                        mDelegate.stopRecognition(modelHandle);
+                    }
                     modelState.setActivityState(ModelState.Activity.LOADED);
                 } catch (Exception e) {
                     throw handleException(e);
@@ -538,7 +547,11 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
 
                 // From here on, every exception isn't client's fault.
                 try {
-                    mDelegate.forceRecognitionEvent(modelHandle);
+                    // If the activity state is LOADED or INTERCEPTED, we skip delegating the
+                    // command, but still consider the call valid.
+                    if (modelState.getActivityState() == ModelState.Activity.ACTIVE) {
+                        mDelegate.forceRecognitionEvent(modelHandle);
+                    }
                 } catch (Exception e) {
                     throw handleException(e);
                 }
@@ -658,7 +671,7 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
             try {
                 mDelegate.detach();
                 mState = ModuleStatus.DETACHED;
-                mCallback.asBinder().unlinkToDeath(this, 0);
+                mCallbackWrapper.detached();
                 mModules.get(mHandle).sessions.remove(this);
             } catch (RemoteException e) {
                 throw e.rethrowAsRuntimeException();
@@ -667,7 +680,9 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
 
         void dump(PrintWriter pw) {
             if (mState == ModuleStatus.ALIVE) {
-                pw.printf("Loaded models for session %s (handle, active)", toString());
+                pw.printf("Session %s, client: %s\n", toString(),
+                        ObjectPrinter.print(mOriginatorIdentity, true, 16));
+                pw.printf("Loaded models (handle, active, description):", toString());
                 pw.println();
                 pw.println("-------------------------------");
                 for (Map.Entry<Integer, ModelState> entry : mLoadedModels.entrySet()) {
@@ -684,10 +699,24 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
             }
         }
 
-        ////////////////////////////////////////////////////////////////////////////////////////////
-        // Callbacks
+        class CallbackWrapper implements ISoundTriggerCallback,
+                IBinder.DeathRecipient {
+            private final ISoundTriggerCallback mCallback;
 
-        @Override
+            CallbackWrapper(ISoundTriggerCallback callback) {
+                mCallback = callback;
+                try {
+                    mCallback.asBinder().linkToDeath(this, 0);
+                } catch (RemoteException e) {
+                    throw e.rethrowAsRuntimeException();
+                }
+            }
+
+            void detached() {
+                mCallback.asBinder().unlinkToDeath(this, 0);
+            }
+
+            @Override
         public void onRecognition(int modelHandle, @NonNull RecognitionEvent event) {
             // We cannot obtain a lock on SoundTriggerMiddlewareValidation.this, since this call
             // might be coming from the audio server (via setCaptureState()) while it is holding
@@ -696,18 +725,21 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
             // To avoid this problem, we use an atomic model activity state. There is a risk of the
             // model not being in the mLoadedModels map here, since it might have been stopped /
             // unloaded while the event was in flight.
-            if (event.status != RecognitionStatus.FORCED) {
-                ModelState modelState = mLoadedModels.get(modelHandle);
-                if (modelState != null) {
+            ModelState modelState = mLoadedModels.get(modelHandle);
+            if (modelState != null) {
+                if (event.status != RecognitionStatus.FORCED) {
                     modelState.setActivityState(ModelState.Activity.LOADED);
                 }
-            }
-            try {
-                mCallback.onRecognition(modelHandle, event);
-            } catch (RemoteException e) {
-                // Dead client will be handled by binderDied() - no need to handle here.
-                // In any case, client callbacks are considered best effort.
-                Log.e(TAG, "Client callback exception.", e);
+                try {
+                    mCallback.onRecognition(modelHandle, event);
+                } catch (Exception e) {
+                    // Dead client will be handled by binderDied() - no need to handle here.
+                    // In any case, client callbacks are considered best effort.
+                    Log.e(TAG, "Client callback exception.", e);
+                    if (event.status != RecognitionStatus.FORCED) {
+                        modelState.setActivityState(ModelState.Activity.INTERCEPTED);
+                    }
+                }
             }
         }
 
@@ -720,18 +752,21 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
             // To avoid this problem, we use an atomic model activity state. There is a risk of the
             // model not being in the mLoadedModels map here, since it might have been stopped /
             // unloaded while the event was in flight.
-            if (event.common.status != RecognitionStatus.FORCED) {
-                ModelState modelState = mLoadedModels.get(modelHandle);
-                if (modelState != null) {
-                    modelState.setActivityState(ModelState.Activity.LOADED);
+            ModelState modelState = mLoadedModels.get(modelHandle);
+            if (modelState != null) {
+                if (event.common.status != RecognitionStatus.FORCED) {
+                        modelState.setActivityState(ModelState.Activity.LOADED);
                 }
-            }
-            try {
-                mCallback.onPhraseRecognition(modelHandle, event);
-            } catch (RemoteException e) {
-                // Dead client will be handled by binderDied() - no need to handle here.
-                // In any case, client callbacks are considered best effort.
-                Log.e(TAG, "Client callback exception.", e);
+                try {
+                    mCallback.onPhraseRecognition(modelHandle, event);
+                } catch (Exception e) {
+                    // Dead client will be handled by binderDied() - no need to handle here.
+                    // In any case, client callbacks are considered best effort.
+                    Log.e(TAG, "Client callback exception.", e);
+                    if (event.common.status != RecognitionStatus.FORCED) {
+                        modelState.setActivityState(ModelState.Activity.INTERCEPTED);
+                    }
+                }
             }
         }
 
@@ -747,40 +782,52 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
             }
         }
 
-        @Override
-        public void onModuleDied() {
-            synchronized (SoundTriggerMiddlewareValidation.this) {
-                mState = ModuleStatus.DEAD;
-            }
-            // Trigger the callback outside of the lock to avoid deadlocks.
-            try {
-                mCallback.onModuleDied();
-            } catch (RemoteException e) {
-                // Dead client will be handled by binderDied() - no need to handle here.
-                // In any case, client callbacks are considered best effort.
-                Log.e(TAG, "Client callback exception.", e);
-            }
-
-        }
-
-        @Override
-        public void binderDied() {
-            // This is called whenever our client process dies.
-            synchronized (SoundTriggerMiddlewareValidation.this) {
-                try {
-                    // Gracefully stop all active recognitions and unload the models.
-                    for (Map.Entry<Integer, ModelState> entry :
-                            mLoadedModels.entrySet()) {
-                        // Idempotent call, no harm in calling even for models that are already
-                        // stopped.
-                        mDelegate.stopRecognition(entry.getKey());
-                        mDelegate.unloadModel(entry.getKey());
-                    }
-                    // Detach.
-                    detachInternal();
-                } catch (Exception e) {
-                    throw handleException(e);
+            @Override
+            public void onModuleDied() {
+                synchronized (SoundTriggerMiddlewareValidation.this) {
+                    mState = ModuleStatus.DEAD;
                 }
+                // Trigger the callback outside of the lock to avoid deadlocks.
+                try {
+                    mCallback.onModuleDied();
+                } catch (RemoteException e) {
+                    // Dead client will be handled by binderDied() - no need to handle here.
+                    // In any case, client callbacks are considered best effort.
+                    Log.e(TAG, "Client callback exception.", e);
+                }
+            }
+
+            @Override
+            public void binderDied() {
+                // This is called whenever our client process dies.
+                synchronized (SoundTriggerMiddlewareValidation.this) {
+                    try {
+                        // Gracefully stop all active recognitions and unload the models.
+                        for (Map.Entry<Integer, ModelState> entry :
+                                mLoadedModels.entrySet()) {
+                            if (entry.getValue().getActivityState()
+                                    == ModelState.Activity.ACTIVE) {
+                                mDelegate.stopRecognition(entry.getKey());
+                            }
+                            mDelegate.unloadModel(entry.getKey());
+                        }
+                        // Detach.
+                        detachInternal();
+                    } catch (Exception e) {
+                        throw handleException(e);
+                    }
+                }
+            }
+
+            @Override
+            public IBinder asBinder() {
+                return mCallback.asBinder();
+            }
+
+            // Override toString() in order to have the delegate's ID in it.
+            @Override
+            public String toString() {
+                return Objects.toString(mDelegate);
             }
         }
     }
