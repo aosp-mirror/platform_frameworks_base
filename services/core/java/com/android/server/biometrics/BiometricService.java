@@ -1504,11 +1504,17 @@ public class BiometricService extends SystemService {
         try {
             switch (reason) {
                 case BiometricPrompt.DISMISSED_REASON_CREDENTIAL_CONFIRMED:
-                    mKeyStore.addAuthToken(credentialAttestation);
+                    if (credentialAttestation != null) {
+                        mKeyStore.addAuthToken(credentialAttestation);
+                    } else {
+                        Slog.e(TAG, "Credential confirmed but attestation is null");
+                    }
                 case BiometricPrompt.DISMISSED_REASON_BIOMETRIC_CONFIRMED:
                 case BiometricPrompt.DISMISSED_REASON_BIOMETRIC_CONFIRM_NOT_REQUIRED:
                     if (mCurrentAuthSession.mTokenEscrow != null) {
                         mKeyStore.addAuthToken(mCurrentAuthSession.mTokenEscrow);
+                    } else {
+                        Slog.e(TAG, "mTokenEscrow is null");
                     }
                     mCurrentAuthSession.mClientReceiver.onAuthenticationSucceeded(
                             Utils.getAuthenticationTypeForResult(reason));
