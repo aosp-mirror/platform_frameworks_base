@@ -3023,31 +3023,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testPlaceholderConversationId_shortcutNotRequired() throws Exception {
-        Settings.Global.putInt(mContext.getContentResolver(),
-                Settings.Global.REQUIRE_SHORTCUTS_FOR_CONVERSATIONS, 0);
-
-        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger,
-                mAppOpsManager);
-
-        final String xml = "<ranking version=\"1\">\n"
-                + "<package name=\"" + PKG_O + "\" uid=\"" + UID_O + "\" >\n"
-                + "<channel id=\"id\" name=\"hi\" importance=\"3\" conv_id=\"foo:placeholder_id\"/>"
-                + "</package>"
-                + "</ranking>";
-        XmlPullParser parser = Xml.newPullParser();
-        parser.setInput(new BufferedInputStream(new ByteArrayInputStream(xml.getBytes())),
-                null);
-        parser.nextTag();
-        mHelper.readXml(parser, false, UserHandle.USER_ALL);
-
-        assertNotNull(mHelper.getNotificationChannel(PKG_O, UID_O, "id", true));
-    }
-
-    @Test
     public void testPlaceholderConversationId_shortcutRequired() throws Exception {
-        Settings.Global.putInt(mContext.getContentResolver(),
-                Settings.Global.REQUIRE_SHORTCUTS_FOR_CONVERSATIONS, 1);
         mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger,
                 mAppOpsManager);
 
@@ -3067,8 +3043,6 @@ public class PreferencesHelperTest extends UiServiceTestCase {
 
     @Test
     public void testNormalConversationId_shortcutRequired() throws Exception {
-        Settings.Global.putInt(mContext.getContentResolver(),
-                Settings.Global.REQUIRE_SHORTCUTS_FOR_CONVERSATIONS, 1);
         mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger,
                 mAppOpsManager);
 
@@ -3088,8 +3062,6 @@ public class PreferencesHelperTest extends UiServiceTestCase {
 
     @Test
     public void testNoConversationId_shortcutRequired() throws Exception {
-        Settings.Global.putInt(mContext.getContentResolver(),
-                Settings.Global.REQUIRE_SHORTCUTS_FOR_CONVERSATIONS, 1);
         mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger,
                 mAppOpsManager);
 
@@ -3271,6 +3243,19 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         channel.setConversationId("parent", "convo");
         mHelper.createNotificationChannel(PKG_O, UID_O, channel, true, false);
         mHelper.deleteNotificationChannel(PKG_O, UID_O, channel.getId());
+
+        assertThat(mHelper.getConversations(PKG_O, UID_O)).isEmpty();
+    }
+
+    @Test
+    public void testGetConversations_noDemoted() {
+        NotificationChannel parent = new NotificationChannel("parent", "p", 1);
+        mHelper.createNotificationChannel(PKG_O, UID_O, parent, true, false);
+        NotificationChannel channel =
+                new NotificationChannel("convo", "convo", IMPORTANCE_DEFAULT);
+        channel.setConversationId("parent", "convo");
+        channel.setDemoted(true);
+        mHelper.createNotificationChannel(PKG_O, UID_O, channel, true, false);
 
         assertThat(mHelper.getConversations(PKG_O, UID_O)).isEmpty();
     }

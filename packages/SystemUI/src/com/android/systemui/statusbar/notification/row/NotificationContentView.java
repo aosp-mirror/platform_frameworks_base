@@ -1347,11 +1347,11 @@ public class NotificationContentView extends FrameLayout {
         if (bubbleButton == null || actionContainer == null) {
             return;
         }
-        boolean isPerson =
+        boolean isPersonWithShortcut =
                 mPeopleIdentifier.getPeopleNotificationType(entry.getSbn(), entry.getRanking())
-                        != PeopleNotificationIdentifier.TYPE_NON_PERSON;
+                        >= PeopleNotificationIdentifier.TYPE_FULL_PERSON;
         boolean showButton = isBubblesEnabled()
-                && isPerson
+                && isPersonWithShortcut
                 && entry.getBubbleMetadata() != null;
         if (showButton) {
             Drawable d = mContext.getResources().getDrawable(entry.isBubble()

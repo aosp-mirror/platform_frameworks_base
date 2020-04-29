@@ -1021,6 +1021,9 @@
     <!-- QuickSettings: Text to prompt the user to stop an ongoing recording [CHAR LIMIT=20] -->
     <string name="quick_settings_screen_record_stop">Stop</string>
 
+    <!-- Default name for the media device shown in the output switcher when the name is not available [CHAR LIMIT=30] -->
+    <string name="media_seamless_remote_device">Device</string>
+
     <!-- Recents: Text that shows above the navigation bar after launching a few apps. [CHAR LIMIT=NONE] -->
     <string name="recents_swipe_up_onboarding">Swipe up to switch apps</string>
     <!-- Recents: Text that shows above the navigation bar after launching several apps. [CHAR LIMIT=NONE] -->
@@ -1843,6 +1846,9 @@
 
     <!-- [CHAR LIMIT=150] Notification Importance title: important conversation level -->
     <string name="notification_priority_title">Priority</string>
+
+    <!-- Text shown in notification guts for conversation notifications that don't implement the full feature -->
+    <string name="no_shortcut"><xliff:g id="app_name" example="YouTube">%1$s</xliff:g> does not support conversation specific settings</string>
 
     <!-- [CHAR LIMIT=NONE] Empty overflow title -->
     <string name="bubble_overflow_empty_title">No recent bubbles</string>
@@ -2690,6 +2696,9 @@
     <!-- Controls management editing screen, text to indicate that all the favorites have been removed [CHAR LIMIT=NONE] -->
     <string name="controls_favorite_removed">All controls removed</string>
 
+    <!-- Controls management favorites screen, See other apps with changes made [CHAR LIMIT=NONE] -->
+    <string name="controls_favorite_toast_no_changes">Changes not saved</string>
+
     <!-- Controls management controls screen error on load message [CHAR LIMIT=60] -->
     <string name="controls_favorite_load_error">The list of all controls could not be loaded.</string>
     <!-- Controls management controls screen header for Other zone [CHAR LIMIT=60] -->
@@ -2708,6 +2717,8 @@
     <string name="controls_pin_use_alphanumeric">PIN contains letters or symbols</string>
     <!-- Controls PIN entry dialog, title [CHAR LIMIT=30] -->
     <string name="controls_pin_verify">Verify <xliff:g id="device" example="Backdoor lock">%s</xliff:g></string>
+    <!-- Controls PIN entry dialog, title when 1st attempt failed [CHAR LIMIT=30] -->
+    <string name="controls_pin_wrong">Wrong PIN</string>
     <!-- Controls PIN entry dialog, waiting to verify [CHAR LIMIT=30] -->
     <string name="controls_pin_verifying">Verifying\u2026</string>
     <!-- Controls PIN entry dialog, text hint [CHAR LIMIT=30] -->
@@ -2731,6 +2742,13 @@
 
     <!-- Error message indicating that a control timed out while waiting for an update [CHAR_LIMIT=30] -->
     <string name="controls_error_timeout">Inactive, check app</string>
+    <!-- Error message indicating that an unspecified error occurred while getting the status, and
+         a retry will be attempted [CHAR LIMIT=30] -->
+    <string name="controls_error_retryable">Error, retrying\u2026</string>
+    <!-- Error message indicating that the control is no longer available in the application [CHAR LIMIT=30] -->
+    <string name="controls_error_removed">Device removed</string>
+    <!-- Error message indicating that an unspecified error occurred while getting the status [CHAR LIMIT=30] -->
+    <string name="controls_error_generic">Can\u2019t load status</string>
     <!-- Error message indicating that a control action failed [CHAR_LIMIT=30] -->
     <string name="controls_error_failed">Error, try again</string>
     <!-- Stateless control message informing the user that a routine has started [CHAR_LIMIT=30] -->

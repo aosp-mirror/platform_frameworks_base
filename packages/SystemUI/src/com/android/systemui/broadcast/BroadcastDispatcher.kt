@@ -60,7 +60,7 @@ private const val DEBUG = true
  *
  * Use only for IntentFilters with actions and optionally categories. It does not support,
  * permissions, schemes, data types, data authorities or priority different than 0.
- * Cannot be used for getting sticky broadcasts.
+ * Cannot be used for getting sticky broadcasts (either as return of registering or as re-delivery).
  */
 @Singleton
 open class BroadcastDispatcher @Inject constructor (

@@ -1141,6 +1141,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         if (mMenuRow.shouldUseDefaultMenuItems()) {
             ArrayList<MenuItem> items = new ArrayList<>();
             items.add(NotificationMenuRow.createConversationItem(mContext));
+            items.add(NotificationMenuRow.createPartialConversationItem(mContext));
             items.add(NotificationMenuRow.createInfoItem(mContext));
             items.add(NotificationMenuRow.createSnoozeItem(mContext));
             items.add(NotificationMenuRow.createAppOpsItem(mContext));
@@ -1837,6 +1838,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     public void resetTranslation() {
+        if (mMenuRow != null && mMenuRow.isMenuVisible()) {
+            return;
+        }
+
         if (mTranslateAnim != null) {
             mTranslateAnim.cancel();
         }

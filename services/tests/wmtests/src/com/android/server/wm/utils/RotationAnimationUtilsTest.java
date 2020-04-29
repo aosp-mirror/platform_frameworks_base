@@ -27,10 +27,12 @@ import android.graphics.GraphicBuffer;
 import android.graphics.Matrix;
 import android.graphics.PointF;
 import android.view.Surface;
+import android.platform.test.annotations.Presubmit;
 
 import org.junit.Before;
 import org.junit.Test;
 
+@Presubmit
 public class RotationAnimationUtilsTest {
 
     private static final int BITMAP_HEIGHT = 100;

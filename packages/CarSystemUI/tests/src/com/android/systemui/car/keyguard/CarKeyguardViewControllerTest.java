@@ -54,6 +54,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import dagger.Lazy;
+
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
 public class CarKeyguardViewControllerTest extends SysuiTestCase {
@@ -88,13 +90,13 @@ public class CarKeyguardViewControllerTest extends SysuiTestCase {
                 mOverlayViewGlobalStateController,
                 mock(KeyguardStateController.class),
                 mock(KeyguardUpdateMonitor.class),
-                mock(BiometricUnlockController.class),
+                () -> mock(BiometricUnlockController.class),
                 mock(ViewMediatorCallback.class),
                 mock(CarNavigationBarController.class),
                 mock(LockPatternUtils.class),
                 mock(DismissCallbackRegistry.class),
                 mock(FalsingManager.class),
-                mock(KeyguardBypassController.class)
+                () -> mock(KeyguardBypassController.class)
         );
     }
 
@@ -186,17 +188,17 @@ public class CarKeyguardViewControllerTest extends SysuiTestCase {
                 OverlayViewGlobalStateController overlayViewGlobalStateController,
                 KeyguardStateController keyguardStateController,
                 KeyguardUpdateMonitor keyguardUpdateMonitor,
-                BiometricUnlockController biometricUnlockController,
+                Lazy<BiometricUnlockController> biometricUnlockControllerLazy,
                 ViewMediatorCallback viewMediatorCallback,
                 CarNavigationBarController carNavigationBarController,
                 LockPatternUtils lockPatternUtils,
                 DismissCallbackRegistry dismissCallbackRegistry,
                 FalsingManager falsingManager,
-                KeyguardBypassController keyguardBypassController) {
+                Lazy<KeyguardBypassController> keyguardBypassControllerLazy) {
             super(context, mainHandler, carServiceProvider, overlayViewGlobalStateController,
-                    keyguardStateController, keyguardUpdateMonitor, biometricUnlockController,
+                    keyguardStateController, keyguardUpdateMonitor, biometricUnlockControllerLazy,
                     viewMediatorCallback, carNavigationBarController, lockPatternUtils,
-                    dismissCallbackRegistry, falsingManager, keyguardBypassController);
+                    dismissCallbackRegistry, falsingManager, keyguardBypassControllerLazy);
         }
 
         @Override
