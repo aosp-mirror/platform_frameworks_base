@@ -1106,6 +1106,8 @@ public class BubbleStackView extends FrameLayout {
         // R constants are not final so we cannot use switch-case here.
         if (action == AccessibilityNodeInfo.ACTION_DISMISS) {
             mBubbleData.dismissAll(BubbleController.DISMISS_ACCESSIBILITY_ACTION);
+            announceForAccessibility(
+                    getResources().getString(R.string.accessibility_bubble_dismissed));
             return true;
         } else if (action == AccessibilityNodeInfo.ACTION_COLLAPSE) {
             mBubbleData.setExpanded(false);
@@ -1136,32 +1138,29 @@ public class BubbleStackView extends FrameLayout {
         if (mBubbleData.getBubbles().isEmpty()) {
             return;
         }
-        Bubble topBubble = mBubbleData.getBubbles().get(0);
-        String appName = topBubble.getAppName();
-        Notification notification = topBubble.getEntry().getSbn().getNotification();
-        CharSequence titleCharSeq = notification.extras.getCharSequence(Notification.EXTRA_TITLE);
-        String titleStr = getResources().getString(R.string.notification_bubble_title);
-        if (titleCharSeq != null) {
-            titleStr = titleCharSeq.toString();
-        }
-        int moreCount = mBubbleContainer.getChildCount() - 1;
 
-        // Example: Title from app name.
-        String singleDescription = getResources().getString(
-                R.string.bubble_content_description_single, titleStr, appName);
+        for (int i = 0; i < mBubbleData.getBubbles().size(); i++) {
+            final Bubble bubble = mBubbleData.getBubbles().get(i);
+            final String appName = bubble.getAppName();
+            final Notification notification = bubble.getEntry().getSbn().getNotification();
+            final CharSequence titleCharSeq =
+                    notification.extras.getCharSequence(Notification.EXTRA_TITLE);
 
-        // Example: Title from app name and 4 more.
-        String stackDescription = getResources().getString(
-                R.string.bubble_content_description_stack, titleStr, appName, moreCount);
+            String titleStr = getResources().getString(R.string.notification_bubble_title);
+            if (titleCharSeq != null) {
+                titleStr = titleCharSeq.toString();
+            }
 
-        if (mIsExpanded) {
-            // TODO(b/129522932) - update content description for each bubble in expanded view.
-        } else {
-            // Collapsed stack.
-            if (moreCount > 0) {
-                mBubbleContainer.setContentDescription(stackDescription);
-            } else {
-                mBubbleContainer.setContentDescription(singleDescription);
+            if (bubble.getIconView() != null) {
+                if (mIsExpanded || i > 0) {
+                    bubble.getIconView().setContentDescription(getResources().getString(
+                            R.string.bubble_content_description_single, titleStr, appName));
+                } else {
+                    final int moreCount = mBubbleContainer.getChildCount() - 1;
+                    bubble.getIconView().setContentDescription(getResources().getString(
+                            R.string.bubble_content_description_stack,
+                            titleStr, appName, moreCount));
+                }
             }
         }
     }
