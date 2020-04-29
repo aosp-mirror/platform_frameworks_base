@@ -98,7 +98,8 @@ public class NotificationShellCmdTest extends UiServiceTestCase {
     }
 
     private void doCmd(String... args) {
-        new NotificationShellCmd(mMockService)
+        System.out.println("Running command: " + String.join(" ", args));
+        new TestNotificationShellCmd(mMockService)
                 .exec(mBinder, in, out, err, args, mCallback, mResultReceiver);
     }
 
@@ -266,5 +267,20 @@ public class NotificationShellCmdTest extends UiServiceTestCase {
             assertEquals(PEOPLE[i % PEOPLE.length], m.getSenderPerson().getName());
         }
 
+    }
+
+    /**
+     * Version of NotificationShellCmd that allows this atest to work properly despite coming in
+     * from the wrong uid.
+     */
+    private final class TestNotificationShellCmd extends NotificationShellCmd {
+        TestNotificationShellCmd(NotificationManagerService service) {
+            super(service);
+        }
+
+        @Override
+        protected boolean checkShellCommandPermission(int callingUid) {
+            return true;
+        }
     }
 }
