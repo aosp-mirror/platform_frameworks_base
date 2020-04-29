@@ -574,11 +574,17 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
     }
 
     private void update(Configuration configuration) {
+        final boolean isDividerHidden = mView != null && mView.isHidden();
+
         removeDivider();
         addDivider(configuration);
-        if (mMinimized && mView != null) {
-            mView.setMinimizedDockStack(true, mHomeStackResizable);
-            updateTouchable();
+
+        if (mView != null) {
+            if (mMinimized) {
+                mView.setMinimizedDockStack(true, mHomeStackResizable);
+                updateTouchable();
+            }
+            mView.setHidden(isDividerHidden);
         }
     }
 
