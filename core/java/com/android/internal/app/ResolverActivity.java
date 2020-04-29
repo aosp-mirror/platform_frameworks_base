@@ -1026,9 +1026,14 @@ public class ResolverActivity extends Activity implements
     }
 
     @Override // ResolverListCommunicator
-    public final void onPostListReady(ResolverListAdapter listAdapter, boolean doPostProcessing) {
+    public final void onPostListReady(ResolverListAdapter listAdapter, boolean doPostProcessing,
+            boolean rebuildCompleted) {
         if (isAutolaunching()) {
             return;
+        }
+        if (isIntentPicker()) {
+            ((ResolverMultiProfilePagerAdapter) mMultiProfilePagerAdapter)
+                    .setUseLayoutWithDefault(useLayoutWithDefault());
         }
         if (mMultiProfilePagerAdapter.shouldShowEmptyStateScreen(listAdapter)) {
             mMultiProfilePagerAdapter.showEmptyResolverListEmptyState(listAdapter);
@@ -1037,7 +1042,7 @@ public class ResolverActivity extends Activity implements
         }
         // showEmptyResolverListEmptyState can mark the tab as loaded,
         // which is a precondition for auto launching
-        if (maybeAutolaunchActivity()) {
+        if (rebuildCompleted && maybeAutolaunchActivity()) {
             return;
         }
         if (doPostProcessing) {
@@ -1782,13 +1787,14 @@ public class ResolverActivity extends Activity implements
             if (buttonBarDivider != null) {
                 buttonBarDivider.setVisibility(View.INVISIBLE);
             }
-            mMultiProfilePagerAdapter.onButtonLayoutHidden();
+            setButtonBarIgnoreOffset(/* ignoreOffset */ false);
             return;
         }
         if (buttonBarDivider != null) {
             buttonBarDivider.setVisibility(View.VISIBLE);
         }
         buttonLayout.setVisibility(View.VISIBLE);
+        setButtonBarIgnoreOffset(/* ignoreOffset */ true);
 
         if (!useLayoutWithDefault()) {
             int inset = mSystemWindowInsets != null ? mSystemWindowInsets.bottom : 0;
@@ -1800,6 +1806,21 @@ public class ResolverActivity extends Activity implements
         mAlwaysButton = (Button) buttonLayout.findViewById(R.id.button_always);
 
         resetAlwaysOrOnceButtonBar();
+    }
+
+    /**
+     * Updates the button bar container {@code ignoreOffset} layout param.
+     * <p>Setting this to {@code true} means that the button bar will be glued to the bottom of
+     * the screen.
+     */
+    private void setButtonBarIgnoreOffset(boolean ignoreOffset) {
+        View buttonBarContainer = findViewById(R.id.button_bar_container);
+        if (buttonBarContainer != null) {
+            ResolverDrawerLayout.LayoutParams layoutParams =
+                    (ResolverDrawerLayout.LayoutParams) buttonBarContainer.getLayoutParams();
+            layoutParams.ignoreOffset = ignoreOffset;
+            buttonBarContainer.setLayoutParams(layoutParams);
+        }
     }
 
     private void resetAlwaysOrOnceButtonBar() {

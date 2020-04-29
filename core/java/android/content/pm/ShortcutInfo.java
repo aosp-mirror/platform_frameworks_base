@@ -1759,6 +1759,12 @@ public final class ShortcutInfo implements Parcelable {
         return isDeclaredInManifest() && isVisibleToPublisher();
     }
 
+    /** @hide */
+    public boolean isNonManifestVisible() {
+        return !isDeclaredInManifest() && isVisibleToPublisher()
+                && (isPinned() || isCached() || isDynamic());
+    }
+
     /**
      * Return if a shortcut is immutable, in which case it cannot be modified with any of
      * {@link ShortcutManager} APIs.

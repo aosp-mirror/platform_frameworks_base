@@ -15,6 +15,8 @@
  */
 package com.android.server.devicepolicy;
 
+import static android.app.Notification.EXTRA_TEXT;
+import static android.app.Notification.EXTRA_TITLE;
 import static android.app.admin.DevicePolicyManager.DELEGATION_APP_RESTRICTIONS;
 import static android.app.admin.DevicePolicyManager.DELEGATION_CERT_INSTALL;
 import static android.app.admin.DevicePolicyManager.ID_TYPE_BASE_INFO;
@@ -195,9 +197,10 @@ public class DevicePolicyManagerTest extends DpmTestBase {
             PROFILE_OFF_START + PROFILE_OFF_TIMEOUT - TimeUnit.DAYS.toMillis(1);
     // Time when the apps should be suspended
     private static final long PROFILE_OFF_DEADLINE = PROFILE_OFF_START + PROFILE_OFF_TIMEOUT;
-    // Notification titles for setManagedProfileMaximumTimeOff tests:
-    private static final String PROFILE_OFF_WARNING_TITLE = "suspended_tomorrow";
-    private static final String PROFILE_OFF_SUSPENDED_TITLE = "suspended";
+    // Notification title and text for setManagedProfileMaximumTimeOff tests:
+    private static final String PROFILE_OFF_SUSPENSION_TITLE = "suspension_title";
+    private static final String PROFILE_OFF_SUSPENSION_TEXT = "suspension_text";
+    private static final String PROFILE_OFF_SUSPENSION_TOMORROW_TEXT = "suspension_tomorrow_text";
 
     @Override
     protected void setUp() throws Exception {
@@ -1576,7 +1579,9 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         dpms.approveCaCert(fourCerts.getList().get(1), userId, true);
         // a notification should be shown saying that there are two certificates left to approve.
         verify(getServices().notificationManager, timeout(1000))
-                .notifyAsUser(anyString(), anyInt(), argThat(hasTitle(TEST_STRING)), eq(user));
+                .notifyAsUser(anyString(), anyInt(), argThat(hasExtra(EXTRA_TITLE,
+                        TEST_STRING
+                )), eq(user));
     }
 
     /**
@@ -6317,7 +6322,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         verify(getServices().alarmManager, times(1)).set(anyInt(), eq(PROFILE_OFF_DEADLINE), any());
         // Now the user should see a warning notification.
         verify(getServices().notificationManager, times(1))
-                .notify(anyInt(), argThat(hasTitle(PROFILE_OFF_WARNING_TITLE)));
+                .notify(anyInt(), argThat(hasExtra(EXTRA_TITLE, PROFILE_OFF_SUSPENSION_TITLE,
+                        EXTRA_TEXT, PROFILE_OFF_SUSPENSION_TOMORROW_TEXT)));
         // Apps shouldn't be suspended yet.
         verifyZeroInteractions(getServices().ipackageManager);
         clearInvocations(getServices().alarmManager);
@@ -6331,7 +6337,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         verifyZeroInteractions(getServices().alarmManager);
         // Now the user should see a notification about suspended apps.
         verify(getServices().notificationManager, times(1))
-                .notify(anyInt(), argThat(hasTitle(PROFILE_OFF_SUSPENDED_TITLE)));
+                .notify(anyInt(), argThat(hasExtra(EXTRA_TITLE, PROFILE_OFF_SUSPENSION_TITLE,
+                        EXTRA_TEXT, PROFILE_OFF_SUSPENSION_TEXT)));
         // Verify that the apps are suspended.
         verify(getServices().ipackageManager, times(1)).setPackagesSuspendedAsUser(
                 any(), eq(true), any(), any(), any(), any(), anyInt());
@@ -6461,25 +6468,41 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         // Setup notification titles.
         when(mServiceContext.resources
-                .getString(R.string.personal_apps_suspended_tomorrow_title))
-                .thenReturn(PROFILE_OFF_WARNING_TITLE);
+                .getString(R.string.personal_apps_suspension_title))
+                .thenReturn(PROFILE_OFF_SUSPENSION_TITLE);
         when(mServiceContext.resources
-                .getString(R.string.personal_apps_suspended_title))
-                .thenReturn(PROFILE_OFF_SUSPENDED_TITLE);
+                .getString(R.string.personal_apps_suspension_text))
+                .thenReturn(PROFILE_OFF_SUSPENSION_TEXT);
+        when(mServiceContext.resources
+                .getString(R.string.personal_apps_suspension_tomorrow_text))
+                .thenReturn(PROFILE_OFF_SUSPENSION_TOMORROW_TEXT);
 
         clearInvocations(getServices().ipackageManager);
     }
 
-    private static Matcher<Notification> hasTitle(String expected) {
+    private static Matcher<Notification> hasExtra(String... extras) {
+        assertEquals("Odd numebr of extra key-values", 0, extras.length % 2);
         return new BaseMatcher<Notification>() {
             @Override
             public boolean matches(Object item) {
                 final Notification notification = (Notification) item;
-                return expected.equals(notification.extras.getString(Notification.EXTRA_TITLE));
+                for (int i = 0; i < extras.length / 2; i++) {
+                    if (!extras[i * 2 + 1].equals(notification.extras.getString(extras[i * 2]))) {
+                        return false;
+                    }
+                }
+                return true;
             }
             @Override
             public void describeTo(Description description) {
-                description.appendText("Notification{title=\"" + expected + "\"}");
+                description.appendText("Notification{");
+                for (int i = 0; i < extras.length / 2; i++) {
+                    if (i > 0) {
+                        description.appendText(",");
+                    }
+                    description.appendText(extras[i * 2] + "=\"" + extras[i * 2 + 1] + "\"");
+                }
+                description.appendText("}");
             }
         };
     }

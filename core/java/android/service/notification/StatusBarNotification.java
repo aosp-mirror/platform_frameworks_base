@@ -486,15 +486,8 @@ public class StatusBarNotification implements Parcelable {
     /**
      * @hide
      */
-    public String getShortcutId(Context context) {
-        String conversationId = getNotification().getShortcutId();
-        if (TextUtils.isEmpty(conversationId)
-                && (Settings.Global.getInt(context.getContentResolver(),
-                Settings.Global.REQUIRE_SHORTCUTS_FOR_CONVERSATIONS, 0) == 0)
-                && getNotification().getNotificationStyle() == Notification.MessagingStyle.class) {
-            conversationId = getId() + getTag() + PLACEHOLDER_CONVERSATION_ID;
-        }
-        return conversationId;
+    public String getShortcutId() {
+        return getNotification().getShortcutId();
     }
 
     /**

@@ -19,6 +19,7 @@ package com.android.systemui.media;
 import android.annotation.LayoutRes;
 import android.app.PendingIntent;
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -35,10 +36,12 @@ import android.media.MediaDescription;
 import android.media.MediaMetadata;
 import android.media.ThumbnailUtils;
 import android.media.session.MediaController;
+import android.media.session.MediaController.PlaybackInfo;
 import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
 import android.net.Uri;
 import android.service.media.MediaBrowserService;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -94,6 +97,7 @@ public class MediaControlPanel {
     public static final String MEDIA_PREFERENCE_KEY = "browser_components";
     private SharedPreferences mSharedPrefs;
     private boolean mCheckedForResumption = false;
+    private boolean mIsRemotePlayback;
 
     // Button IDs used in notifications
     protected static final int[] NOTIF_ACTION_IDS = {
@@ -245,7 +249,7 @@ public class MediaControlPanel {
         // Try to find a browser service component for this app
         // TODO also check for a media button receiver intended for restarting (b/154127084)
         // Only check if we haven't tried yet or the session token changed
-        String pkgName = mController.getPackageName();
+        final String pkgName = mController.getPackageName();
         if (mServiceComponent == null && !mCheckedForResumption) {
             Log.d(TAG, "Checking for service component");
             PackageManager pm = mContext.getPackageManager();
@@ -281,18 +285,29 @@ public class MediaControlPanel {
 
         // Transfer chip
         mSeamless = mMediaNotifView.findViewById(R.id.media_seamless);
-        if (mSeamless != null && mLocalMediaManager != null) {
-            mSeamless.setVisibility(View.VISIBLE);
-            updateDevice(mLocalMediaManager.getCurrentConnectedDevice());
-            mSeamless.setOnClickListener(v -> {
-                final Intent intent = new Intent()
-                        .setAction(MediaOutputSliceConstants.ACTION_MEDIA_OUTPUT)
-                        .putExtra(MediaOutputSliceConstants.EXTRA_PACKAGE_NAME,
-                                mController.getPackageName())
-                        .putExtra(MediaOutputSliceConstants.KEY_MEDIA_SESSION_TOKEN, mToken);
-                mActivityStarter.startActivity(intent, false, true /* dismissShade */,
-                        Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            });
+        if (mSeamless != null) {
+            if (mLocalMediaManager != null) {
+                mSeamless.setVisibility(View.VISIBLE);
+                updateDevice(mLocalMediaManager.getCurrentConnectedDevice());
+                mSeamless.setOnClickListener(v -> {
+                    final Intent intent = new Intent()
+                            .setAction(MediaOutputSliceConstants.ACTION_MEDIA_OUTPUT)
+                            .putExtra(MediaOutputSliceConstants.EXTRA_PACKAGE_NAME,
+                                    mController.getPackageName())
+                            .putExtra(MediaOutputSliceConstants.KEY_MEDIA_SESSION_TOKEN, mToken);
+                    mActivityStarter.startActivity(intent, false, true /* dismissShade */,
+                            Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                });
+            } else {
+                Log.d(TAG, "LocalMediaManager is null. Not binding output chip for pkg=" + pkgName);
+            }
+        }
+        PlaybackInfo playbackInfo = mController.getPlaybackInfo();
+        if (playbackInfo != null) {
+            mIsRemotePlayback = playbackInfo.getPlaybackType() == PlaybackInfo.PLAYBACK_TYPE_REMOTE;
+        } else {
+            Log.d(TAG, "PlaybackInfo was null. Defaulting to local playback.");
+            mIsRemotePlayback = false;
         }
 
         makeActive();
@@ -431,7 +446,7 @@ public class MediaControlPanel {
         // First look in URI fields
         for (String field : ART_URIS) {
             String uriString = metadata.getString(field);
-            if (uriString != null) {
+            if (!TextUtils.isEmpty(uriString)) {
                 albumArt = loadBitmapFromUri(Uri.parse(uriString));
                 if (albumArt != null) {
                     Log.d(TAG, "loaded art from " + field);
@@ -459,6 +474,17 @@ public class MediaControlPanel {
      * @return bitmap, or null if couldn't be loaded
      */
     private Bitmap loadBitmapFromUri(Uri uri) {
+        // ImageDecoder requires a scheme of the following types
+        if (uri.getScheme() == null) {
+            return null;
+        }
+
+        if (!uri.getScheme().equals(ContentResolver.SCHEME_CONTENT)
+                && !uri.getScheme().equals(ContentResolver.SCHEME_ANDROID_RESOURCE)
+                && !uri.getScheme().equals(ContentResolver.SCHEME_FILE)) {
+            return null;
+        }
+
         ImageDecoder.Source source = ImageDecoder.createSource(mContext.getContentResolver(), uri);
         try {
             return ImageDecoder.decodeBitmap(source);
@@ -528,7 +554,16 @@ public class MediaControlPanel {
         TextView deviceName = mSeamless.findViewById(R.id.media_seamless_text);
         deviceName.setTextColor(fgTintList);
 
-        if (device != null) {
+        if (mIsRemotePlayback) {
+            mSeamless.setEnabled(false);
+            mSeamless.setAlpha(0.38f);
+            iconView.setImageResource(R.drawable.ic_hardware_speaker);
+            iconView.setVisibility(View.VISIBLE);
+            iconView.setImageTintList(fgTintList);
+            deviceName.setText(R.string.media_seamless_remote_device);
+        } else if (device != null) {
+            mSeamless.setEnabled(true);
+            mSeamless.setAlpha(1f);
             Drawable icon = device.getIcon();
             iconView.setVisibility(View.VISIBLE);
             iconView.setImageTintList(fgTintList);
@@ -543,6 +578,9 @@ public class MediaControlPanel {
             deviceName.setText(device.getName());
         } else {
             // Reset to default
+            Log.d(TAG, "device is null. Not binding output chip.");
+            mSeamless.setEnabled(true);
+            mSeamless.setAlpha(1f);
             iconView.setVisibility(View.GONE);
             deviceName.setText(com.android.internal.R.string.ext_media_seamless_action);
         }

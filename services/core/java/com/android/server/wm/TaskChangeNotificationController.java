@@ -123,7 +123,7 @@ class TaskChangeNotificationController {
     private final TaskStackConsumer mNotifyActivityRestartAttempt = (l, m) -> {
         SomeArgs args = (SomeArgs) m.obj;
         l.onActivityRestartAttempt((RunningTaskInfo) args.arg1, args.argi1 != 0,
-                args.argi2 != 0);
+                args.argi2 != 0, args.argi3 != 0);
     };
 
     private final TaskStackConsumer mNotifyActivityForcedResizable = (l, m) -> {
@@ -368,12 +368,13 @@ class TaskChangeNotificationController {
      * running, but the task is either brought to the front or a new Intent is delivered to it.
      */
     void notifyActivityRestartAttempt(RunningTaskInfo task, boolean homeTaskVisible,
-            boolean clearedTask) {
+            boolean clearedTask, boolean wasVisible) {
         mHandler.removeMessages(NOTIFY_ACTIVITY_RESTART_ATTEMPT_LISTENERS_MSG);
         final SomeArgs args = SomeArgs.obtain();
         args.arg1 = task;
         args.argi1 = homeTaskVisible ? 1 : 0;
         args.argi2 = clearedTask ? 1 : 0;
+        args.argi3 = wasVisible ? 1 : 0;
         final Message msg = mHandler.obtainMessage(NOTIFY_ACTIVITY_RESTART_ATTEMPT_LISTENERS_MSG,
                         args);
         forAllLocalListeners(mNotifyActivityRestartAttempt, msg);

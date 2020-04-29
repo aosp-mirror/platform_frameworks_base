@@ -535,6 +535,12 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         return isNonblockable;
     }
 
+    private boolean isConversation() {
+        return mPeopleNotificationIdentifier
+                .getPeopleNotificationType(mEntry.getSbn(), mEntry.getRanking())
+                != PeopleNotificationIdentifier.TYPE_NON_PERSON;
+    }
+
     public void onNotificationUpdated() {
         for (NotificationContentView l : mLayouts) {
             l.onNotificationUpdated(mEntry);
@@ -547,7 +553,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             mMenuRow.setAppName(mAppName);
         }
         if (mIsSummaryWithChildren) {
-            mChildrenContainer.recreateNotificationHeader(mExpandClickListener);
+            mChildrenContainer.recreateNotificationHeader(mExpandClickListener, isConversation());
             mChildrenContainer.onNotificationUpdated();
         }
         if (mIconAnimationRunning) {
@@ -1135,6 +1141,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         if (mMenuRow.shouldUseDefaultMenuItems()) {
             ArrayList<MenuItem> items = new ArrayList<>();
             items.add(NotificationMenuRow.createConversationItem(mContext));
+            items.add(NotificationMenuRow.createPartialConversationItem(mContext));
             items.add(NotificationMenuRow.createInfoItem(mContext));
             items.add(NotificationMenuRow.createSnoozeItem(mContext));
             items.add(NotificationMenuRow.createAppOpsItem(mContext));
@@ -2349,8 +2356,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         mIsSummaryWithChildren = mChildrenContainer != null
                 && mChildrenContainer.getNotificationChildCount() > 0;
         if (mIsSummaryWithChildren && mChildrenContainer.getHeaderView() == null) {
-            mChildrenContainer.recreateNotificationHeader(mExpandClickListener
-            );
+            mChildrenContainer.recreateNotificationHeader(mExpandClickListener, isConversation());
         }
         getShowingLayout().updateBackgroundColor(false /* animate */);
         mPrivateLayout.updateExpandButtons(isExpandable());

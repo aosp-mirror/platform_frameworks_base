@@ -177,7 +177,7 @@ public class NotificationContentView extends FrameLayout {
 
     public NotificationContentView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        mHybridGroupManager = new HybridGroupManager(getContext(), this);
+        mHybridGroupManager = new HybridGroupManager(getContext());
         mMediaTransferManager = new MediaTransferManager(getContext());
         mSmartReplyConstants = Dependency.get(SmartReplyConstants.class);
         mSmartReplyController = Dependency.get(SmartReplyController.class);
@@ -1163,7 +1163,7 @@ public class NotificationContentView extends FrameLayout {
         if (mIsChildInGroup) {
             boolean isNewView = mSingleLineView == null;
             mSingleLineView = mHybridGroupManager.bindFromNotification(
-                    mSingleLineView, mStatusBarNotification.getNotification());
+                    mSingleLineView, mContractedChild, mStatusBarNotification, this);
             if (isNewView) {
                 updateViewVisibility(mVisibleType, VISIBLE_TYPE_SINGLELINE,
                         mSingleLineView, mSingleLineView);
@@ -1347,11 +1347,11 @@ public class NotificationContentView extends FrameLayout {
         if (bubbleButton == null || actionContainer == null) {
             return;
         }
-        boolean isPerson =
+        boolean isPersonWithShortcut =
                 mPeopleIdentifier.getPeopleNotificationType(entry.getSbn(), entry.getRanking())
-                        != PeopleNotificationIdentifier.TYPE_NON_PERSON;
+                        >= PeopleNotificationIdentifier.TYPE_FULL_PERSON;
         boolean showButton = isBubblesEnabled()
-                && isPerson
+                && isPersonWithShortcut
                 && entry.getBubbleMetadata() != null;
         if (showButton) {
             Drawable d = mContext.getResources().getDrawable(entry.isBubble()

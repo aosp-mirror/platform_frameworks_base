@@ -110,6 +110,7 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.ConcurrentUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.LocalServices;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.usage.AppIdleHistory.AppUsageHistory;
 
 import java.io.File;
@@ -1862,10 +1863,15 @@ public class AppStandbyController implements AppStandbyInternal {
 
         public List<UserHandle> getValidCrossProfileTargets(String pkg, int userId) {
             final int uid = mPackageManagerInternal.getPackageUidInternal(pkg, 0, userId);
+            final AndroidPackage aPkg = mPackageManagerInternal.getPackage(uid);
             if (uid < 0
-                    || !mPackageManagerInternal.getPackage(uid).isCrossProfile()
+                    || aPkg == null
+                    || !aPkg.isCrossProfile()
                     || !mCrossProfileAppsInternal
                             .verifyUidHasInteractAcrossProfilePermission(pkg, uid)) {
+                if (uid >= 0 && aPkg == null) {
+                    Slog.wtf(TAG, "Null package retrieved for UID " + uid);
+                }
                 return Collections.emptyList();
             }
             return mCrossProfileAppsInternal.getTargetUserProfiles(pkg, userId);

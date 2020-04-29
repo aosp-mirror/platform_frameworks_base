@@ -43,9 +43,10 @@ oneway interface ITaskStackListener {
      * @param homeVisible whether or not the home task is visible
      * @param clearedTask whether or not the launch activity also cleared the task as a part of
      * starting
+     * @param wasVisible whether the activity was visible before the restart attempt
      */
     void onActivityRestartAttempt(in ActivityManager.RunningTaskInfo task, boolean homeTaskVisible,
-            boolean clearedTask);
+            boolean clearedTask, boolean wasVisible);
 
     /**
      * Called when we launched an activity that we forced to be resizable.

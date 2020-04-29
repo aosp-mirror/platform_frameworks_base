@@ -319,9 +319,10 @@ public final class InlineSuggestionFactory {
             }
 
             @Override
-            public void onContent(SurfaceControlViewHost.SurfacePackage surface)
+            public void onContent(SurfaceControlViewHost.SurfacePackage surface, int width,
+                    int height)
                     throws RemoteException {
-                callback.onContent(surface);
+                callback.onContent(surface, width, height);
                 surface.release();
             }
 

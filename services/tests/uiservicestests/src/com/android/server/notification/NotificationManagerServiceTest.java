@@ -6589,14 +6589,45 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testRecordMessages() throws RemoteException {
+    public void testRecordMessages_invalidMsg() throws RemoteException {
         NotificationRecord nr =
                 generateMessageBubbleNotifRecord(mTestNotificationChannel,
-                        "testRecordMessages");
+                        "testRecordMessages_invalidMsg");
         mBinderService.enqueueNotificationWithTag(PKG, PKG, nr.getSbn().getTag(),
                 nr.getSbn().getId(), nr.getSbn().getNotification(), nr.getSbn().getUserId());
         waitForIdle();
 
         assertTrue(mBinderService.hasSentMessage(PKG, mUid));
+    }
+
+    @Test
+    public void testRecordMessages_validMsg() throws RemoteException {
+        // Messaging notification with shortcut info
+        Notification.BubbleMetadata metadata =
+                new Notification.BubbleMetadata.Builder("id").build();
+        Notification.Builder nb = getMessageStyleNotifBuilder(false /* addDefaultMetadata */,
+                null /* groupKey */, false /* isSummary */);
+        nb.setShortcutId("id");
+        nb.setBubbleMetadata(metadata);
+        StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, 1,
+                "testRecordMessages_validMsg", mUid, 0, nb.build(), new UserHandle(mUid), null, 0);
+        NotificationRecord nr = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
+
+        // Pretend the shortcut exists
+        List<ShortcutInfo> shortcutInfos = new ArrayList<>();
+        ShortcutInfo info = mock(ShortcutInfo.class);
+        when(info.getPackage()).thenReturn(PKG);
+        when(info.getId()).thenReturn("id");
+        when(info.getUserId()).thenReturn(USER_SYSTEM);
+        when(info.isLongLived()).thenReturn(true);
+        when(info.isEnabled()).thenReturn(true);
+        shortcutInfos.add(info);
+        when(mLauncherApps.getShortcuts(any(), any())).thenReturn(shortcutInfos);
+
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, nr.getSbn().getTag(),
+                nr.getSbn().getId(), nr.getSbn().getNotification(), nr.getSbn().getUserId());
+        waitForIdle();
+
+        assertFalse(mBinderService.hasSentMessage(PKG, mUid));
     }
 }
