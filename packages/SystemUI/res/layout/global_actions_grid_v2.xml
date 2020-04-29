@@ -20,8 +20,6 @@
         android:id="@android:id/list"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingLeft="@dimen/global_actions_grid_horizontal_padding"
-        android:paddingRight="@dimen/global_actions_grid_horizontal_padding"
         android:paddingTop="@dimen/global_actions_grid_vertical_padding"
         android:paddingBottom="@dimen/global_actions_grid_vertical_padding"
         android:orientation="horizontal"
