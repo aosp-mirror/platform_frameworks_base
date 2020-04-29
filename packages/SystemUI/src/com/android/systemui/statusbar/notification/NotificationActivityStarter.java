@@ -33,6 +33,8 @@ public interface NotificationActivityStarter {
     void startNotificationGutsIntent(Intent intent, int appUid,
             ExpandableNotificationRow row);
 
+    void startHistoryIntent(boolean showHistory);
+
     default boolean isCollapsingToShowActivityOverLockscreen() {
         return false;
     }
