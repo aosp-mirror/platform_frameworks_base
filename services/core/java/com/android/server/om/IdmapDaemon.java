@@ -44,7 +44,7 @@ class IdmapDaemon {
 
     // The amount of time in milliseconds to wait when attempting to connect to idmap service.
     private static final int SERVICE_CONNECT_TIMEOUT_MS = 5000;
-    private static final int SERVICE_CONNECT_INTERVAL_SLEEP_MS = 200;
+    private static final int SERVICE_CONNECT_INTERVAL_SLEEP_MS = 5;
 
     private static final String IDMAP_DAEMON = "idmap2d";
 
