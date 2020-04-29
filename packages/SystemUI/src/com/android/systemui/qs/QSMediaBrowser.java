@@ -82,7 +82,7 @@ public class QSMediaBrowser {
         public void onChildrenLoaded(String parentId,
                 List<MediaBrowser.MediaItem> children) {
             if (children.size() == 0) {
-                Log.e(TAG, "No children found");
+                Log.e(TAG, "No children found for " + mComponentName);
                 return;
             }
             // We ask apps to return a playable item as the first child when sending
