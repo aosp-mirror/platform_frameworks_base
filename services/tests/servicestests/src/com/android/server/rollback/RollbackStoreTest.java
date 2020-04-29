@@ -234,8 +234,8 @@ public class RollbackStoreTest {
 
     @Test
     public void loadFromJsonNoExtensionVersions() throws Exception {
-        Rollback expectedRb =
-                mRollbackStore.createNonStagedRollback(ID, USER, INSTALLER, null, null);
+        Rollback expectedRb = mRollbackStore.createNonStagedRollback(
+                ID, USER, INSTALLER, null, new SparseIntArray(0));
 
         expectedRb.setTimestamp(Instant.parse("2019-10-01T12:29:08.855Z"));
         expectedRb.setRestoreUserDataInProgress(true);
@@ -337,7 +337,8 @@ public class RollbackStoreTest {
 
     @Test
     public void saveAndDelete() {
-        Rollback rollback = mRollbackStore.createNonStagedRollback(ID, USER, INSTALLER, null, null);
+        Rollback rollback = mRollbackStore.createNonStagedRollback(
+                ID, USER, INSTALLER, null, new SparseIntArray(0));
 
         RollbackStore.saveRollback(rollback);
 
