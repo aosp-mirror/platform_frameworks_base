@@ -45,6 +45,8 @@ import android.view.MotionEvent;
 import android.view.accessibility.IWindowMagnificationConnectionCallback;
 
 import com.android.internal.util.test.FakeSettingsProvider;
+import com.android.server.LocalServices;
+import com.android.server.statusbar.StatusBarManagerInternal;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -60,14 +62,16 @@ public class WindowMagnificationManagerTest {
     private static final int CURRENT_USER_ID = UserHandle.USER_CURRENT;
 
     private MockWindowMagnificationConnection mMockConnection;
-    @Mock
-    private Context mContext;
+    @Mock private Context mContext;
+    @Mock private StatusBarManagerInternal mMockStatusBarManagerInternal;
     private MockContentResolver mResolver;
     private WindowMagnificationManager mWindowMagnificationManager;
 
     @Before
     public void setUp() throws RemoteException {
         MockitoAnnotations.initMocks(this);
+        LocalServices.removeServiceForTest(StatusBarManagerInternal.class);
+        LocalServices.addService(StatusBarManagerInternal.class, mMockStatusBarManagerInternal);
         mResolver = new MockContentResolver();
         mMockConnection = new MockWindowMagnificationConnection();
         mWindowMagnificationManager = new WindowMagnificationManager(mContext, CURRENT_USER_ID);
@@ -259,12 +263,22 @@ public class WindowMagnificationManagerTest {
     }
 
     @Test
-    public void isConnected_returnExpectedValue() throws RemoteException {
-        assertFalse(mWindowMagnificationManager.isConnected());
-
+    public void
+            requestConnectionToNull_disableAllMagnifiersAndRequestWindowMagnificationConnection()
+            throws RemoteException {
         mWindowMagnificationManager.setConnection(mMockConnection.getConnection());
+        mWindowMagnificationManager.enableWindowMagnifier(TEST_DISPLAY, 3f, NaN, NaN);
 
-        assertTrue(mWindowMagnificationManager.isConnected());
+        assertTrue(mWindowMagnificationManager.requestConnection(false));
+
+        verify(mMockConnection.getConnection()).disableWindowMagnification(TEST_DISPLAY);
+        verify(mMockStatusBarManagerInternal).requestWindowMagnificationConnection(false);
+    }
+
+    @Test
+    public void requestConnection_requestWindowMagnificationConnection() throws RemoteException {
+        assertTrue(mWindowMagnificationManager.requestConnection(true));
+        verify(mMockStatusBarManagerInternal).requestWindowMagnificationConnection(true);
     }
 
     private MotionEvent generatePointersDownEvent(PointF[] pointersLocation) {
