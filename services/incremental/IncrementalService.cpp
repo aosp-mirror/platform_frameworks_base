@@ -1708,13 +1708,17 @@ bool IncrementalService::DataLoaderStub::setTargetStatus(int newStatus) {
     {
         std::unique_lock lock(mStatusMutex);
         oldStatus = mTargetStatus;
-        mTargetStatus = newStatus;
-        mTargetStatusTs = Clock::now();
         curStatus = mCurrentStatus;
+        setTargetStatusLocked(newStatus);
     }
     LOG(DEBUG) << "Target status update for DataLoader " << mId << ": " << oldStatus << " -> "
                << newStatus << " (current " << curStatus << ")";
     return fsmStep();
+}
+
+void IncrementalService::DataLoaderStub::setTargetStatusLocked(int status) {
+    mTargetStatus = status;
+    mTargetStatusTs = Clock::now();
 }
 
 bool IncrementalService::DataLoaderStub::waitForStatus(int status, Clock::duration duration) {
@@ -1782,6 +1786,9 @@ bool IncrementalService::DataLoaderStub::fsmStep() {
     }
 
     switch (targetStatus) {
+        case IDataLoaderStatusListener::DATA_LOADER_UNAVAILABLE:
+            // Do nothing, this is a reset state.
+            break;
         case IDataLoaderStatusListener::DATA_LOADER_DESTROYED: {
             return destroy();
         }
@@ -1796,6 +1803,7 @@ bool IncrementalService::DataLoaderStub::fsmStep() {
         case IDataLoaderStatusListener::DATA_LOADER_CREATED:
             switch (currentStatus) {
                 case IDataLoaderStatusListener::DATA_LOADER_DESTROYED:
+                case IDataLoaderStatusListener::DATA_LOADER_UNAVAILABLE:
                     return bind();
                 case IDataLoaderStatusListener::DATA_LOADER_BOUND:
                     return create();
@@ -1825,9 +1833,15 @@ binder::Status IncrementalService::DataLoaderStub::onStatusChanged(MountId mount
         if (mCurrentStatus == newStatus) {
             return binder::Status::ok();
         }
+
         oldStatus = mCurrentStatus;
         mCurrentStatus = newStatus;
         targetStatus = mTargetStatus;
+
+        if (mCurrentStatus == IDataLoaderStatusListener::DATA_LOADER_UNAVAILABLE) {
+            // For unavailable, reset target status.
+            setTargetStatusLocked(IDataLoaderStatusListener::DATA_LOADER_UNAVAILABLE);
+        }
     }
 
     LOG(DEBUG) << "Current status update for DataLoader " << mId << ": " << oldStatus << " -> "
