@@ -1653,6 +1653,10 @@
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Dacă apăsați ambele taste de volum câteva secunde, activați funcția de accesibilitate <xliff:g id="SERVICE">%1$s</xliff:g>. Acest lucru poate schimba funcționarea dispozitivului.\n\nPuteți alege altă funcție pentru această comandă în Setări &gt; Accesibilitate."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Activați"</string>
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"Nu activați"</string>
+    <!-- no translation found for accessibility_shortcut_menu_item_status_on (6608392117189732543) -->
+    <skip />
+    <!-- no translation found for accessibility_shortcut_menu_item_status_off (5531598275559472393) -->
+    <skip />
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Permiteți serviciului <xliff:g id="SERVICE">%1$s</xliff:g> să aibă control total asupra dispozitivului dvs.?"</string>
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Dacă activați <xliff:g id="SERVICE">%1$s</xliff:g>, dispozitivul nu va folosi blocarea ecranului pentru a îmbunătăți criptarea datelor."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Controlul total este adecvat pentru aplicații care vă ajută cu accesibilitatea, însă nu pentru majoritatea aplicaților."</string>
@@ -2072,13 +2076,17 @@
     <string name="accessibility_system_action_notifications_label" msgid="6083767351772162010">"Notificări"</string>
     <string name="accessibility_system_action_quick_settings_label" msgid="4583900123506773783">"Setări rapide"</string>
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"Power Dialog"</string>
-    <string name="accessibility_system_action_toggle_split_screen_label" msgid="6626177163849387748">"Activați ecranul împărțit"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Ecran de blocare"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Captură de ecran"</string>
-    <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"Meniul Accesibilitate"</string>
+    <!-- no translation found for accessibility_system_action_accessibility_button_label (5941347017132886642) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_accessibility_button_chooser_label (6973618519666227981) -->
+    <skip />
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Bară cu legenda pentru <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> a fost adăugat la grupul RESTRICȚIONATE"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
+    <!-- no translation found for conversation_single_line_image_placeholder (6983271082911936900) -->
+    <skip />
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"Conversație"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"Conversație de grup"</string>
     <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>
