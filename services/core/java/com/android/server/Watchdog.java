@@ -62,7 +62,7 @@ import java.util.HashSet;
 import java.util.List;
 
 /** This class calls its monitor every minute. Killing this process if they don't return **/
-public class Watchdog extends Thread {
+public class Watchdog {
     static final String TAG = "Watchdog";
 
     /** Debug flag. */
@@ -130,6 +130,8 @@ public class Watchdog extends Thread {
     );
 
     private static Watchdog sWatchdog;
+
+    private final Thread mThread;
 
     /* This handler will be used to post message back onto the main thread */
     private final ArrayList<HandlerChecker> mHandlerCheckers = new ArrayList<>();
@@ -310,7 +312,7 @@ public class Watchdog extends Thread {
     }
 
     private Watchdog() {
-        super("watchdog");
+        mThread = new Thread(this::run, "watchdog");
         // Initialize handler checkers for each common thread we want to check.  Note
         // that we are not currently checking the background thread, since it can
         // potentially hold longer running operations with no guarantees about the timeliness
@@ -351,6 +353,13 @@ public class Watchdog extends Thread {
         // See the notes on DEFAULT_TIMEOUT.
         assert DB ||
                 DEFAULT_TIMEOUT > ZygoteConnectionConstants.WRAPPED_PID_TIMEOUT_MILLIS;
+    }
+
+    /**
+     * Called by SystemServer to cause the internal thread to begin execution.
+     */
+    public void start() {
+        mThread.start();
     }
 
     /**
@@ -549,8 +558,7 @@ public class Watchdog extends Thread {
         return pids;
     }
 
-    @Override
-    public void run() {
+    private void run() {
         boolean waitedHalf = false;
         while (true) {
             final List<HandlerChecker> blockedCheckers;
