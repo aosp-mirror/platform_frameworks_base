@@ -227,8 +227,8 @@ void LogEvent::parseAttributionChain(int32_t* pos, int32_t depth, bool* last,
     }
     // Check if at least one node was successfully parsed.
     if (mValues.size() - 1 > firstUidInChainIndex) {
-        mAttributionChainStartIndex = firstUidInChainIndex;
-        mAttributionChainEndIndex = mValues.size() - 1;
+        mAttributionChainStartIndex = static_cast<int8_t>(firstUidInChainIndex);
+        mAttributionChainEndIndex = static_cast<int8_t>(mValues.size() - 1);
     }
 
     parseAnnotations(numAnnotations, firstUidInChainIndex);
@@ -249,7 +249,7 @@ void LogEvent::parseIsUidAnnotation(uint8_t annotationType) {
     }
 
     bool isUid = readNextValue<uint8_t>();
-    if (isUid) mUidFieldIndex = mValues.size() - 1;
+    if (isUid) mUidFieldIndex = static_cast<int8_t>(mValues.size() - 1);
     mValues[mValues.size() - 1].mAnnotations.setUidField(isUid);
 }
 
@@ -290,7 +290,7 @@ void LogEvent::parseExclusiveStateAnnotation(uint8_t annotationType) {
     }
 
     const bool exclusiveState = readNextValue<uint8_t>();
-    mExclusiveStateFieldIndex = mValues.size() - 1;
+    mExclusiveStateFieldIndex = static_cast<int8_t>(mValues.size() - 1);
     mValues[getExclusiveStateFieldIndex()].mAnnotations.setExclusiveState(exclusiveState);
 }
 
@@ -408,7 +408,7 @@ bool LogEvent::parseBuffer(uint8_t* buf, size_t len) {
                 parseAttributionChain(pos, /*depth=*/0, last, getNumAnnotations(typeInfo));
                 break;
             case ERROR_TYPE:
-                mErrorBitmask = readNextValue<int32_t>();
+                /* mErrorBitmask =*/ readNextValue<int32_t>();
                 mValid = false;
                 break;
             default:
@@ -577,8 +577,8 @@ bool LogEvent::hasAttributionChain(std::pair<int, int>* indexRange) const {
     }
 
     if (nullptr != indexRange) {
-        indexRange->first = mAttributionChainStartIndex;
-        indexRange->second = mAttributionChainEndIndex;
+        indexRange->first = static_cast<int>(mAttributionChainStartIndex);
+        indexRange->second = static_cast<int>(mAttributionChainEndIndex);
     }
 
     return true;
