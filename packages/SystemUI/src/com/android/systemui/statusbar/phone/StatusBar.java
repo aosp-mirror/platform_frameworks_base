@@ -1301,6 +1301,9 @@ public class StatusBar extends SystemUI implements DemoMode,
                         .setNotificationPanelViewController(mNotificationPanelViewController)
                         .build();
 
+        ((NotificationListContainer) mStackScroller)
+                .setNotificationActivityStarter(mNotificationActivityStarter);
+
         mGutsManager.setNotificationActivityStarter(mNotificationActivityStarter);
 
         mNotificationsController.initialize(
