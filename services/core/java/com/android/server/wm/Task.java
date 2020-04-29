@@ -2006,6 +2006,14 @@ class Task extends WindowContainer<WindowContainer> {
         return (prevWinMode == WINDOWING_MODE_FREEFORM) != (newWinMode == WINDOWING_MODE_FREEFORM);
     }
 
+    @Override
+    void migrateToNewSurfaceControl() {
+        super.migrateToNewSurfaceControl();
+        mLastSurfaceSize.x = 0;
+        mLastSurfaceSize.y = 0;
+        updateSurfaceSize(getPendingTransaction());
+    }
+
     void updateSurfaceSize(SurfaceControl.Transaction transaction) {
         if (mSurfaceControl == null || mCreatedByOrganizer) {
             return;
@@ -4402,16 +4410,25 @@ class Task extends WindowContainer<WindowContainer> {
         return mHasBeenVisible;
     }
 
-    /** In the case that these three conditions are true, we want to send the Task to
-     * the organizer:
-     *     1. We have a SurfaceControl
-     *     2. An organizer has been set
-     *     3. We have finished drawing
+    /** In the case that these conditions are true, we want to send the Task to the organizer:
+     *     1. An organizer has been set
+     *     2. The Task was created by the organizer
+     *     or
+     *     2a. We have a SurfaceControl
+     *     2b. We have finished drawing
      * Any time any of these conditions are updated, the updating code should call
      * sendTaskAppeared.
      */
     boolean taskAppearedReady() {
-        return mSurfaceControl != null && mTaskOrganizer != null && getHasBeenVisible();
+        if (mTaskOrganizer == null) {
+            return false;
+        }
+
+        if (mCreatedByOrganizer) {
+            return true;
+        }
+
+        return mSurfaceControl != null && getHasBeenVisible();
     }
 
     private void sendTaskAppeared() {
@@ -4420,9 +4437,9 @@ class Task extends WindowContainer<WindowContainer> {
         }
     }
 
-    private void sendTaskVanished() {
-        if (mTaskOrganizer != null) {
-            mAtmService.mTaskOrganizerController.onTaskVanished(mTaskOrganizer, this);
+    private void sendTaskVanished(ITaskOrganizer organizer) {
+        if (organizer != null) {
+            mAtmService.mTaskOrganizerController.onTaskVanished(organizer, this);
         }
    }
 
@@ -4431,9 +4448,13 @@ class Task extends WindowContainer<WindowContainer> {
         if (mTaskOrganizer == organizer) {
             return false;
         }
-        // Let the old organizer know it has lost control.
-        sendTaskVanished();
+
+        ITaskOrganizer previousOrganizer = mTaskOrganizer;
+        // Update the new task organizer before calling sendTaskVanished since it could result in
+        // a new SurfaceControl getting created that would notify the old organizer about it.
         mTaskOrganizer = organizer;
+        // Let the old organizer know it has lost control.
+        sendTaskVanished(previousOrganizer);
 
         if (mTaskOrganizer != null) {
             sendTaskAppeared();

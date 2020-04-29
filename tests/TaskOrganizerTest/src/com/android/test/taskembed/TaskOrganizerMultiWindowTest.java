@@ -18,29 +18,24 @@ package com.android.test.taskembed;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 
-import android.app.ActivityManager;
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.os.Bundle;
-import android.os.IBinder;
-import android.os.RemoteException;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.SurfaceControl;
 import android.view.SurfaceHolder;
 import android.view.View;
 import android.view.ViewGroup;
-import android.window.ITaskOrganizer;
-import android.window.IWindowContainerTransactionCallback;
+import android.widget.LinearLayout;
 import android.window.TaskOrganizer;
 import android.window.WindowContainerTransaction;
-import android.widget.LinearLayout;
 import android.window.WindowContainerTransactionCallback;
-import android.window.WindowOrganizer;
 
 public class TaskOrganizerMultiWindowTest extends Activity {
     class SplitLayout extends LinearLayout implements View.OnTouchListener {
@@ -171,6 +166,12 @@ public class TaskOrganizerMultiWindowTest extends Activity {
         View splitView = new SplitLayout(this, mTaskView1, mTaskView2);
 
         setContentView(splitView);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mOrganizer.unregisterOrganizer();
     }
 
     private void addFlags(Intent intent) {
