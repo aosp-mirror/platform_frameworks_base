@@ -3441,6 +3441,11 @@ public class LockSettingsService extends ILockSettings.Stub {
         public boolean armRebootEscrow() {
             return mRebootEscrowManager.armRebootEscrowIfNeeded();
         }
+
+        @Override
+        public void refreshStrongAuthTimeout(int userId) {
+            mStrongAuth.refreshStrongAuthTimeout(userId);
+        }
     }
 
     private class RebootEscrowCallbacks implements RebootEscrowManager.Callbacks {

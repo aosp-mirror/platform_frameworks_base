@@ -5904,12 +5904,22 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
 
         final int userHandle = mInjector.userHandleGetCallingUserId();
+        boolean changed = false;
         synchronized (getLockObject()) {
             ActiveAdmin ap = getActiveAdminForCallerLocked(who,
                     DeviceAdminInfo.USES_POLICY_PROFILE_OWNER, parent);
             if (ap.strongAuthUnlockTimeout != timeoutMs) {
                 ap.strongAuthUnlockTimeout = timeoutMs;
                 saveSettingsLocked(userHandle);
+                changed = true;
+            }
+        }
+        if (changed) {
+            mLockSettingsInternal.refreshStrongAuthTimeout(userHandle);
+            // Refreshes the parent if profile has unified challenge, since the timeout would
+            // also affect the parent user in this case.
+            if (isManagedProfile(userHandle) && !isSeparateProfileChallengeEnabled(userHandle)) {
+                mLockSettingsInternal.refreshStrongAuthTimeout(getProfileParentId(userHandle));
             }
         }
     }

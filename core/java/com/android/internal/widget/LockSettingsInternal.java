@@ -107,4 +107,10 @@ public abstract class LockSettingsInternal {
      * @return true if the arming worked
      */
     public abstract boolean armRebootEscrow();
+
+
+    /**
+     * Refreshes pending strong auth timeout with the latest admin requirement set by device policy.
+     */
+    public abstract void refreshStrongAuthTimeout(int userId);
 }
