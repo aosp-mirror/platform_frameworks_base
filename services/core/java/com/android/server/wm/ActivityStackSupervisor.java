@@ -784,6 +784,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
 
             r.launchCount++;
             r.lastLaunchTime = SystemClock.uptimeMillis();
+            proc.setLastActivityLaunchTime(r.lastLaunchTime);
 
             if (DEBUG_ALL) Slog.v(TAG, "Launching: " + r);
 
