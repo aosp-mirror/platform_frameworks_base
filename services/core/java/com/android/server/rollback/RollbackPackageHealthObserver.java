@@ -36,9 +36,9 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.PowerManager;
 import android.os.SystemProperties;
-import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Slog;
+import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.FrameworkStatsLog;
@@ -56,9 +56,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -156,12 +154,11 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
             PackageWatchdog.getInstance(mContext).scheduleCheckAndMitigateNativeCrashes();
         }
 
-        List<Integer> rollbackIds = popLastStagedRollbackIds();
-        Iterator<Integer> rollbackIterator = rollbackIds.iterator();
-        while (rollbackIterator.hasNext()) {
-            int rollbackId = rollbackIterator.next();
-            WatchdogRollbackLogger.logRollbackStatusOnBoot(
-                    mContext, rollbackId, rollbackManager.getRecentlyCommittedRollbacks());
+        SparseArray<String> rollbackIds = popLastStagedRollbackIds();
+        for (int i = 0; i < rollbackIds.size(); i++) {
+            WatchdogRollbackLogger.logRollbackStatusOnBoot(mContext,
+                    rollbackIds.keyAt(i), rollbackIds.valueAt(i),
+                    rollbackManager.getRecentlyCommittedRollbacks());
         }
     }
 
@@ -224,7 +221,7 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
                         packageInstaller.getSessionInfo(sessionId);
                 if (sessionInfo.isStagedSessionReady() && markStagedSessionHandled(rollbackId)) {
                     mContext.unregisterReceiver(listener);
-                    saveStagedRollbackId(rollbackId);
+                    saveStagedRollbackId(rollbackId, logPackage);
                     WatchdogRollbackLogger.logEvent(logPackage,
                             FrameworkStatsLog
                             .WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_BOOT_TRIGGERED,
@@ -268,39 +265,54 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
         }
     }
 
-    private void saveStagedRollbackId(int stagedRollbackId) {
+    private void saveStagedRollbackId(int stagedRollbackId, @Nullable VersionedPackage logPackage) {
+        writeStagedRollbackId(mLastStagedRollbackIdsFile, stagedRollbackId, logPackage);
+    }
+
+    static void writeStagedRollbackId(File file, int stagedRollbackId,
+            @Nullable VersionedPackage logPackage) {
         try {
-            FileOutputStream fos = new FileOutputStream(
-                    mLastStagedRollbackIdsFile, /*append*/true);
+            FileOutputStream fos = new FileOutputStream(file, true);
             PrintWriter pw = new PrintWriter(fos);
-            pw.append(",").append(String.valueOf(stagedRollbackId));
+            String logPackageName = logPackage != null ? logPackage.getPackageName() : "";
+            pw.append(String.valueOf(stagedRollbackId)).append(",").append(logPackageName);
+            pw.println();
             pw.flush();
             FileUtils.sync(fos);
             pw.close();
         } catch (IOException e) {
             Slog.e(TAG, "Failed to save last staged rollback id", e);
+            file.delete();
+        }
+    }
+
+    private SparseArray<String> popLastStagedRollbackIds() {
+        try {
+            return readStagedRollbackIds(mLastStagedRollbackIdsFile);
+        } finally {
             mLastStagedRollbackIdsFile.delete();
         }
     }
 
-    private List<Integer> popLastStagedRollbackIds() {
-        try (BufferedReader reader =
-                     new BufferedReader(new FileReader(mLastStagedRollbackIdsFile))) {
-            String line = reader.readLine();
-            // line is of format : ",id1,id2,id3....,idn"
-            String[] sessionIdsStr = line.split(",");
-            ArrayList<Integer> result = new ArrayList<>();
-            for (String sessionIdStr: sessionIdsStr) {
-                if (!TextUtils.isEmpty(sessionIdStr.trim())) {
-                    result.add(Integer.parseInt(sessionIdStr));
+    static SparseArray<String> readStagedRollbackIds(File file) {
+        SparseArray<String> result = new SparseArray<>();
+        try {
+            String line;
+            BufferedReader reader = new BufferedReader(new FileReader(file));
+            while ((line = reader.readLine()) != null) {
+                // Each line is of the format: "id,logging_package"
+                String[] values = line.trim().split(",");
+                String rollbackId = values[0];
+                String logPackageName = "";
+                if (values.length > 1) {
+                    logPackageName = values[1];
                 }
+                result.put(Integer.parseInt(rollbackId), logPackageName);
             }
-            return result;
         } catch (Exception ignore) {
-            return Collections.emptyList();
-        } finally {
-            mLastStagedRollbackIdsFile.delete();
+            return new SparseArray<>();
         }
+        return result;
     }
 
 
