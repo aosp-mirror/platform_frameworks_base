@@ -1687,6 +1687,8 @@ class ActivityStack extends Task {
                     ensureActivitiesVisible(null /* starting */, 0 /* configChanges */,
                             !PRESERVE_WINDOWS);
                     nothingToResume = shouldSleepActivities();
+                } else if (next.currentLaunchCanTurnScreenOn() && next.canTurnScreenOn()) {
+                    nothingToResume = false;
                 }
             }
             if (nothingToResume) {
