@@ -93,7 +93,8 @@ public class SoundTriggerMiddlewareService extends ISoundTriggerMiddlewareServic
         return new ModuleService(mDelegate.attach(handle, callback));
     }
 
-    @Override protected void dump(FileDescriptor fd, PrintWriter fout, String[] args) {
+    @Override
+    protected void dump(FileDescriptor fd, PrintWriter fout, String[] args) {
         if (mDelegate instanceof Dumpable) {
             ((Dumpable) mDelegate).dump(fout);
         }
@@ -182,9 +183,10 @@ public class SoundTriggerMiddlewareService extends ISoundTriggerMiddlewareServic
             publishBinderService(Context.SOUND_TRIGGER_MIDDLEWARE_SERVICE,
                     new SoundTriggerMiddlewareService(
                             new SoundTriggerMiddlewareLogging(
-                                    new SoundTriggerMiddlewareValidation(
-                                            new SoundTriggerMiddlewareImpl(factories,
-                                                    new AudioSessionProviderImpl()),
+                                    new SoundTriggerMiddlewarePermission(
+                                            new SoundTriggerMiddlewareValidation(
+                                                    new SoundTriggerMiddlewareImpl(factories,
+                                                            new AudioSessionProviderImpl())),
                                             getContext()))));
         }
     }

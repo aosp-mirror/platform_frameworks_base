@@ -53,9 +53,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * This is a decorator of an {@link ISoundTriggerMiddlewareService}, which enforces permissions and
- * correct usage by the client, as well as makes sure that exceptions representing a server
- * malfunction do not get sent to the client.
+ * This is a decorator of an {@link ISoundTriggerMiddlewareService}, which enforces correct usage by
+ * the client, as well as makes sure that exceptions representing a server malfunction get sent to
+ * the client in a consistent manner, which cannot be confused with a client fault.
  * <p>
  * This is intended to extract the non-business logic out of the underlying implementation and thus
  * make it easier to maintain each one of those separate aspects. A design trade-off is being made
@@ -70,8 +70,6 @@ import java.util.concurrent.atomic.AtomicReference;
  * pattern:
  * <code><pre>
  * @Override public T method(S arg) {
- *     // Permission check.
- *     checkPermissions();
  *     // Input validation.
  *     ValidationUtil.validateS(arg);
  *     synchronized (this) {
@@ -95,9 +93,8 @@ import java.util.concurrent.atomic.AtomicReference;
  * with client-server separation.
  * <p>
  * <b>Exception handling approach:</b><br>
- * We make sure all client faults (permissions, argument and state validation) happen first, and
- * would throw {@link SecurityException}, {@link IllegalArgumentException}/
- * {@link NullPointerException} or {@link
+ * We make sure all client faults (argument and state validation) happen first, and
+ * would throw {@link IllegalArgumentException}/{@link NullPointerException} or {@link
  * IllegalStateException}, respectively. All those exceptions are treated specially by Binder and
  * will get sent back to the client.<br>
  * Once this is done, any subsequent fault is considered either a recoverable (expected) or
@@ -130,13 +127,11 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
     private AtomicReference<Boolean> mCaptureState = new AtomicReference<>();
 
     private final @NonNull ISoundTriggerMiddlewareInternal mDelegate;
-    private final @NonNull Context mContext;
     private Map<Integer, ModuleState> mModules;
 
     public SoundTriggerMiddlewareValidation(
-            @NonNull ISoundTriggerMiddlewareInternal delegate, @NonNull Context context) {
+            @NonNull ISoundTriggerMiddlewareInternal delegate) {
         mDelegate = delegate;
-        mContext = context;
     }
 
     /**
@@ -169,8 +164,6 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
     @Override
     public @NonNull
     SoundTriggerModuleDescriptor[] listModules() {
-        // Permission check.
-        checkPermissions();
         // Input validation (always valid).
 
         synchronized (this) {
@@ -193,8 +186,6 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
     @Override
     public @NonNull ISoundTriggerModule attach(int handle,
             @NonNull ISoundTriggerCallback callback) {
-        // Permission check.
-        checkPermissions();
         // Input validation.
         Objects.requireNonNull(callback);
         Objects.requireNonNull(callback.asBinder());
@@ -242,40 +233,6 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
     @Override
     public String toString() {
         return mDelegate.toString();
-    }
-
-    /**
-     * Throws a {@link SecurityException} if caller permanently doesn't have the given permission,
-     * or a {@link ServiceSpecificException} with a {@link Status#TEMPORARY_PERMISSION_DENIED} if
-     * caller temporarily doesn't have the right permissions to use this service.
-     */
-    void checkPermissions() {
-        enforcePermission(Manifest.permission.RECORD_AUDIO);
-        enforcePermission(Manifest.permission.CAPTURE_AUDIO_HOTWORD);
-    }
-
-    /**
-     * Throws a {@link SecurityException} if caller permanently doesn't have the given permission,
-     * or a {@link ServiceSpecificException} with a {@link Status#TEMPORARY_PERMISSION_DENIED} if
-     * caller temporarily doesn't have the given permission.
-     *
-     * @param permission The permission to check.
-     */
-    void enforcePermission(String permission) {
-        final int status = PermissionChecker.checkCallingOrSelfPermissionForPreflight(mContext,
-                permission);
-        switch (status) {
-            case PermissionChecker.PERMISSION_GRANTED:
-                return;
-            case PermissionChecker.PERMISSION_HARD_DENIED:
-                throw new SecurityException(
-                        String.format("Caller must have the %s permission.", permission));
-            case PermissionChecker.PERMISSION_SOFT_DENIED:
-                throw new ServiceSpecificException(Status.TEMPORARY_PERMISSION_DENIED,
-                        String.format("Caller must have the %s permission.", permission));
-            default:
-                throw new RuntimeException("Unexpected perimission check result.");
-        }
     }
 
     @Override
@@ -431,8 +388,6 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
 
         @Override
         public int loadModel(@NonNull SoundModel model) {
-            // Permission check.
-            checkPermissions();
             // Input validation.
             ValidationUtil.validateGenericModel(model);
 
@@ -455,8 +410,6 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
 
         @Override
         public int loadPhraseModel(@NonNull PhraseSoundModel model) {
-            // Permission check.
-            checkPermissions();
             // Input validation.
             ValidationUtil.validatePhraseModel(model);
 
@@ -479,8 +432,6 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
 
         @Override
         public void unloadModel(int modelHandle) {
-            // Permission check.
-            checkPermissions();
             // Input validation (always valid).
 
             synchronized (SoundTriggerMiddlewareValidation.this) {
@@ -510,8 +461,6 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
 
         @Override
         public void startRecognition(int modelHandle, @NonNull RecognitionConfig config) {
-            // Permission check.
-            checkPermissions();
             // Input validation.
             ValidationUtil.validateRecognitionConfig(config);
 
@@ -547,8 +496,6 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
 
         @Override
         public void stopRecognition(int modelHandle) {
-            // Permission check.
-            checkPermissions();
             // Input validation (always valid).
 
             synchronized (SoundTriggerMiddlewareValidation.this) {
@@ -575,8 +522,6 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
 
         @Override
         public void forceRecognitionEvent(int modelHandle) {
-            // Permission check.
-            checkPermissions();
             // Input validation (always valid).
 
             synchronized (SoundTriggerMiddlewareValidation.this) {
@@ -602,8 +547,6 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
 
         @Override
         public void setModelParameter(int modelHandle, int modelParam, int value) {
-            // Permission check.
-            checkPermissions();
             // Input validation.
             ValidationUtil.validateModelParameter(modelParam);
 
@@ -630,8 +573,6 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
 
         @Override
         public int getModelParameter(int modelHandle, int modelParam) {
-            // Permission check.
-            checkPermissions();
             // Input validation.
             ValidationUtil.validateModelParameter(modelParam);
 
@@ -659,8 +600,6 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
         @Override
         @Nullable
         public ModelParameterRange queryModelParameterSupport(int modelHandle, int modelParam) {
-            // Permission check.
-            checkPermissions();
             // Input validation.
             ValidationUtil.validateModelParameter(modelParam);
 
@@ -689,8 +628,6 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
 
         @Override
         public void detach() {
-            // Permission check.
-            checkPermissions();
             // Input validation (always valid).
 
             synchronized (SoundTriggerMiddlewareValidation.this) {
@@ -714,7 +651,7 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
         // Override toString() in order to have the delegate's ID in it.
         @Override
         public String toString() {
-            return Objects.toString(mDelegate.toString());
+            return Objects.toString(mDelegate);
         }
 
         private void detachInternal() {
