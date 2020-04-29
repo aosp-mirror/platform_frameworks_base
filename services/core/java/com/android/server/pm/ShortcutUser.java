@@ -21,6 +21,7 @@ import android.annotation.UserIdInt;
 import android.content.ComponentName;
 import android.content.pm.ShortcutManager;
 import android.metrics.LogMaker;
+import android.os.FileUtils;
 import android.text.TextUtils;
 import android.text.format.Formatter;
 import android.util.ArrayMap;
@@ -30,7 +31,6 @@ import android.util.Slog;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.internal.util.Preconditions;
 import com.android.server.pm.ShortcutService.DumpFilter;
 import com.android.server.pm.ShortcutService.InvalidFileFormatException;
 
@@ -54,6 +54,9 @@ import java.util.function.Consumer;
  */
 class ShortcutUser {
     private static final String TAG = ShortcutService.TAG;
+
+    static final String DIRECTORY_PACKAGES = "packages";
+    static final String DIRECTORY_LUANCHERS = "launchers";
 
     static final String TAG_ROOT = "user";
     private static final String TAG_LAUNCHER = "launcher";
@@ -354,6 +357,13 @@ class ShortcutUser {
                     mService.injectBuildFingerprint());
         }
 
+        if (!forBackup) {
+            // Since we are not handling package deletion yet, or any single package changes, just
+            // clean the directory and rewrite all the ShortcutPackageItems.
+            final File root = mService.injectUserDataPath(mUserId);
+            FileUtils.deleteContents(new File(root, DIRECTORY_PACKAGES));
+            FileUtils.deleteContents(new File(root, DIRECTORY_LUANCHERS));
+        }
         // Can't use forEachPackageItem due to the checked exceptions.
         {
             final int size = mLaunchers.size();
@@ -371,20 +381,47 @@ class ShortcutUser {
         out.endTag(null, TAG_ROOT);
     }
 
-    private void saveShortcutPackageItem(XmlSerializer out,
-            ShortcutPackageItem spi, boolean forBackup) throws IOException, XmlPullParserException {
+    private void saveShortcutPackageItem(XmlSerializer out, ShortcutPackageItem spi,
+            boolean forBackup) throws IOException, XmlPullParserException {
         if (forBackup) {
             if (spi.getPackageUserId() != spi.getOwnerUserId()) {
                 return; // Don't save cross-user information.
             }
+            spi.saveToXml(out, forBackup);
+        } else {
+            // Save each ShortcutPackageItem in a separate Xml file.
+            final File path = getShortcutPackageItemFile(spi);
+            if (ShortcutService.DEBUG) {
+                Slog.d(TAG, "Saving package item " + spi.getPackageName() + " to " + path);
+            }
+
+            path.getParentFile().mkdirs();
+            spi.saveToFile(path, forBackup);
         }
-        spi.saveToXml(out, forBackup);
+    }
+
+    private File getShortcutPackageItemFile(ShortcutPackageItem spi) {
+        boolean isShortcutLauncher = spi instanceof ShortcutLauncher;
+
+        final File path = new File(mService.injectUserDataPath(mUserId),
+                isShortcutLauncher ? DIRECTORY_LUANCHERS : DIRECTORY_PACKAGES);
+
+        final String fileName;
+        if (isShortcutLauncher) {
+            // Package user id and owner id can have different values for ShortcutLaunchers. Adding
+            // user Id to the file name to create a unique path. Owner id is used in the root path.
+            fileName = spi.getPackageName() + spi.getPackageUserId() + ".xml";
+        } else {
+            fileName = spi.getPackageName() + ".xml";
+        }
+
+        return new File(path, fileName);
     }
 
     public static ShortcutUser loadFromXml(ShortcutService s, XmlPullParser parser, int userId,
             boolean fromBackup) throws IOException, XmlPullParserException, InvalidFileFormatException {
         final ShortcutUser ret = new ShortcutUser(s, userId);
-
+        boolean readShortcutItems = false;
         try {
             ret.mKnownLocales = ShortcutService.parseStringAttribute(parser,
                     ATTR_KNOWN_LOCALES);
@@ -422,12 +459,14 @@ class ShortcutUser {
 
                             // Don't use addShortcut(), we don't need to save the icon.
                             ret.mPackages.put(shortcuts.getPackageName(), shortcuts);
+                            readShortcutItems = true;
                             continue;
                         }
 
                         case ShortcutLauncher.TAG_ROOT: {
                             ret.addLauncher(
                                     ShortcutLauncher.loadFromXml(parser, ret, userId, fromBackup));
+                            readShortcutItems = true;
                             continue;
                         }
                     }
@@ -438,7 +477,42 @@ class ShortcutUser {
             throw new ShortcutService.InvalidFileFormatException(
                     "Unable to parse file", e);
         }
+
+        if (readShortcutItems) {
+            // If the shortcuts info was read from the main Xml, skip reading from individual files.
+            // Data will get stored in the new format during the next call to saveToXml().
+            // TODO: ret.forAllPackageItems((ShortcutPackageItem item) -> item.markDirty());
+            s.scheduleSaveUser(userId);
+        } else {
+            final File root = s.injectUserDataPath(userId);
+
+            forAllFilesIn(new File(root, DIRECTORY_PACKAGES), (File f) -> {
+                final ShortcutPackage sp = ShortcutPackage.loadFromFile(s, ret, f, fromBackup);
+                if (sp != null) {
+                    ret.mPackages.put(sp.getPackageName(), sp);
+                }
+            });
+
+            forAllFilesIn(new File(root, DIRECTORY_LUANCHERS), (File f) -> {
+                final ShortcutLauncher sl =
+                        ShortcutLauncher.loadFromFile(f, ret, userId, fromBackup);
+                if (sl != null) {
+                    ret.addLauncher(sl);
+                }
+            });
+        }
+
         return ret;
+    }
+
+    private static void forAllFilesIn(File path, Consumer<File> callback) {
+        if (!path.exists()) {
+            return;
+        }
+        File[] list = path.listFiles();
+        for (File f : list) {
+            callback.accept(f);
+        }
     }
 
     public ComponentName getLastKnownLauncher() {
