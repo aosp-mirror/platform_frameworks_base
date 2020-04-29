@@ -9689,6 +9689,13 @@ public final class Settings {
                 "hdmi_control_auto_device_off_enabled";
 
         /**
+         * Whether or not media is shown automatically when bypassing as a heads up.
+         * @hide
+         */
+        public static final String SHOW_MEDIA_ON_QUICK_SETTINGS =
+                "qs_media_player";
+
+        /**
          * The interval in milliseconds at which location requests will be throttled when they are
          * coming from the background.
          *
