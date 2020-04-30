@@ -273,8 +273,7 @@ public class NotificationShadeWindowController implements Callback, Dumpable,
     private void applyFocusableFlag(State state) {
         boolean panelFocusable = state.mNotificationShadeFocusable && state.mPanelExpanded;
         if (state.mBouncerShowing && (state.mKeyguardOccluded || state.mKeyguardNeedsInput)
-                || ENABLE_REMOTE_INPUT && state.mRemoteInputActive
-                || state.mBubbleExpanded) {
+                || ENABLE_REMOTE_INPUT && state.mRemoteInputActive) {
             mLpChanged.flags &= ~LayoutParams.FLAG_NOT_FOCUSABLE;
             mLpChanged.flags &= ~LayoutParams.FLAG_ALT_FOCUSABLE_IM;
         } else if (state.isKeyguardShowingAndNotOccluded() || panelFocusable) {
@@ -320,7 +319,7 @@ public class NotificationShadeWindowController implements Callback, Dumpable,
     private boolean isExpanded(State state) {
         return !state.mForceCollapsed && (state.isKeyguardShowingAndNotOccluded()
                 || state.mPanelVisible || state.mKeyguardFadingAway || state.mBouncerShowing
-                || state.mHeadsUpShowing || state.mBubblesShowing
+                || state.mHeadsUpShowing
                 || state.mScrimsVisibility != ScrimController.TRANSPARENT)
                 || state.mBackgroundBlurRadius > 0;
     }
@@ -579,36 +578,6 @@ public class NotificationShadeWindowController implements Callback, Dumpable,
     }
 
     /**
-     * Sets whether there are bubbles showing on the screen.
-     */
-    public void setBubblesShowing(boolean bubblesShowing) {
-        mCurrentState.mBubblesShowing = bubblesShowing;
-        apply(mCurrentState);
-    }
-
-    /**
-     * The bubbles showing state for the status bar.
-     */
-    public boolean getBubblesShowing() {
-        return mCurrentState.mBubblesShowing;
-    }
-
-    /**
-     * Sets if there is a bubble being expanded on the screen.
-     */
-    public void setBubbleExpanded(boolean bubbleExpanded) {
-        mCurrentState.mBubbleExpanded = bubbleExpanded;
-        apply(mCurrentState);
-    }
-
-    /**
-     * Whether the bubble is shown in expanded state for the status bar.
-     */
-    public boolean getBubbleExpanded() {
-        return mCurrentState.mBubbleExpanded;
-    }
-
-    /**
      * Whether the status bar panel is expanded or not.
      */
     public boolean getPanelExpanded() {
@@ -679,8 +648,6 @@ public class NotificationShadeWindowController implements Callback, Dumpable,
         boolean mBackdropShowing;
         boolean mWallpaperSupportsAmbientMode;
         boolean mNotTouchable;
-        boolean mBubblesShowing;
-        boolean mBubbleExpanded;
         boolean mForceHasTopUi;
 
         /**
