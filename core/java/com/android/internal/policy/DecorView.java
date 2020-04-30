@@ -2019,8 +2019,15 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
             if (getForeground() != null) {
                 drawableChanged();
             }
-            getWindowInsetsController().setCaptionInsetsHeight(getCaptionInsetsHeight());
         }
+    }
+
+    /**
+     * An interface to be called when the caption visibility or height changed, to report the
+     * corresponding insets change to the InsetsController.
+     */
+    public void notifyCaptionHeightChanged() {
+        getWindowInsetsController().setCaptionInsetsHeight(getCaptionInsetsHeight());
     }
 
     void setWindow(PhoneWindow phoneWindow) {
@@ -2093,7 +2100,6 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
             mDecorCaptionView.onConfigurationChanged(displayWindowDecor);
             enableCaption(displayWindowDecor);
         }
-        getWindowInsetsController().setCaptionInsetsHeight(getCaptionInsetsHeight());
     }
 
     void onResourcesLoaded(LayoutInflater inflater, int layoutResource) {
