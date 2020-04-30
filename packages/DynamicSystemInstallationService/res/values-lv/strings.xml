@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="keyguard_description" msgid="8582605799129954556">"Ievadiet paroli un pārejiet uz funkciju Dinamiskie sistēmas atjauninājumi"</string>
+    <string name="notification_install_completed" msgid="6252047868415172643">"Dinamiskā sistēma ir gatava. Lai sāktu to izmantot, restartējiet ierīci."</string>
+    <string name="notification_install_inprogress" msgid="7383334330065065017">"Notiek instalēšana"</string>
+    <string name="notification_install_failed" msgid="4066039210317521404">"Instalēšana neizdevās"</string>
+    <string name="notification_image_validation_failed" msgid="2720357826403917016">"Attēla validācija neizdevās. Instalācija tiek priekšlaikus pārtraukta."</string>
+    <string name="notification_dynsystem_in_use" msgid="1053194595682188396">"Pašlaik darbojas dinamiska sistēma. Lai izmantotu sākotnējo Android versiju, restartējiet ierīci."</string>
+    <string name="notification_action_cancel" msgid="5929299408545961077">"Atcelt"</string>
+    <string name="notification_action_discard" msgid="1817481003134947493">"Atmest"</string>
+    <string name="notification_action_reboot_to_dynsystem" msgid="4015817159115912479">"Restartēt"</string>
+    <string name="notification_action_reboot_to_origin" msgid="4013901243271889897">"Restartēt"</string>
+    <string name="toast_dynsystem_discarded" msgid="1733249860276017050">"Dinamiskā sistēma tika atmesta"</string>
+    <string name="toast_failed_to_reboot_to_dynsystem" msgid="6336737274625452067">"Nevar restartēt vai ielādēt dinamisko sistēmu"</string>
+</resources>
