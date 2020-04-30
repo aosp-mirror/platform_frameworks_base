@@ -255,6 +255,8 @@
     <!-- no translation found for accessibility_work_mode (1280025758672376313) -->
     <skip />
     <string name="accessibility_notification_dismissed" msgid="4411652015138892952">"已关闭通知。"</string>
+    <!-- no translation found for accessibility_bubble_dismissed (270358867566720729) -->
+    <skip />
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"通知栏。"</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"快捷设置。"</string>
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"锁定屏幕。"</string>
