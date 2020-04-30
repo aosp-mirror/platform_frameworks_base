@@ -72,6 +72,7 @@ public class HybridConversationNotificationView extends HybridNotificationView {
         mFacePileProtectionWidth = getResources().getDimensionPixelSize(
                 R.dimen.conversation_single_line_face_pile_protection_width);
         mTransformationHelper.addViewTransformingToSimilar(mConversationIconView);
+        mTransformationHelper.addTransformedView(mConversationSenderName);
     }
 
     @Override
