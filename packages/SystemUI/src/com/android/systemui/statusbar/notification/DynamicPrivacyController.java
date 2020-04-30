@@ -54,9 +54,14 @@ public class DynamicPrivacyController implements KeyguardStateController.Callbac
     }
 
     @Override
+    public void onKeyguardFadingAwayChanged() {
+        onUnlockedChanged();
+    }
+
+    @Override
     public void onUnlockedChanged() {
         if (isDynamicPrivacyEnabled()) {
-            // We only want to notify our listeners if dynamic privacy is actually active
+            // We only want to notify our listeners if dynamic privacy is actually enabled
             boolean dynamicallyUnlocked = isDynamicallyUnlocked();
             if (dynamicallyUnlocked != mLastDynamicUnlocked || mCacheInvalid) {
                 mLastDynamicUnlocked = dynamicallyUnlocked;
