@@ -28,14 +28,19 @@ import android.media.MediaCodec.LinearBlock;
  */
 @SystemApi
 public class MediaEvent extends FilterEvent {
-    private native int nativeGetAudioHandle();
+    private long mNativeContext;
+    private final Object mLock = new Object();
+
+    private native Long nativeGetAudioHandle();
+    private native LinearBlock nativeGetLinearBlock();
+    private native void nativeFinalize();
 
     private final int mStreamId;
     private final boolean mIsPtsPresent;
     private final long mPts;
     private final long mDataLength;
     private final long mOffset;
-    private final LinearBlock mLinearBlock;
+    private LinearBlock mLinearBlock;
     private final boolean mIsSecureMemory;
     private final long mDataId;
     private final int mMpuSequenceNumber;
@@ -103,7 +108,12 @@ public class MediaEvent extends FilterEvent {
      */
     @Nullable
     public LinearBlock getLinearBlock() {
-        return mLinearBlock;
+        synchronized (mLock) {
+            if (mLinearBlock == null) {
+                mLinearBlock = nativeGetLinearBlock();
+            }
+            return mLinearBlock;
+        }
     }
 
     /**
@@ -162,5 +172,16 @@ public class MediaEvent extends FilterEvent {
     @Nullable
     public AudioDescriptor getExtraMetaData() {
         return mExtraMetaData;
+    }
+
+
+    /**
+     * Finalize the MediaEvent object.
+     * @hide
+     */
+    @Override
+    protected void finalize() {
+        nativeFinalize();
+        mNativeContext = 0;
     }
 }
