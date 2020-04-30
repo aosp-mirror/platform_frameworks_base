@@ -130,7 +130,6 @@ java_library_static {
         "dnsresolver_aidl_interface-V4-java",
         "netd_event_listener_interface-java",
         "overlayable_policy_aidl-java",
-        "SurfaceFlingerProperties",
     ],
 }
 
