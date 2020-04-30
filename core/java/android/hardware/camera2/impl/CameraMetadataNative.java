@@ -71,6 +71,8 @@ import android.util.Log;
 import android.util.Range;
 import android.util.Size;
 
+import dalvik.annotation.optimization.FastNative;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -356,7 +358,7 @@ public class CameraMetadataNative implements Parcelable {
      */
     public CameraMetadataNative(CameraMetadataNative other) {
         super();
-        mMetadataPtr = nativeAllocateCopy(other);
+        mMetadataPtr = nativeAllocateCopy(other.mMetadataPtr);
         if (mMetadataPtr == 0) {
             throw new OutOfMemoryError("Failed to allocate native CameraMetadata");
         }
@@ -398,7 +400,7 @@ public class CameraMetadataNative implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        nativeWriteToParcel(dest);
+        nativeWriteToParcel(dest, mMetadataPtr);
     }
 
     /**
@@ -440,7 +442,7 @@ public class CameraMetadataNative implements Parcelable {
     }
 
     public void readFromParcel(Parcel in) {
-        nativeReadFromParcel(in);
+        nativeReadFromParcel(in, mMetadataPtr);
     }
 
     /**
@@ -528,9 +530,9 @@ public class CameraMetadataNative implements Parcelable {
     public static final int NUM_TYPES = 6;
 
     private void close() {
-        // this sets mMetadataPtr to 0
-        nativeClose();
-        mMetadataPtr = 0; // set it to 0 again to prevent eclipse from making this field final
+        // Delete native pointer, but does not clear it
+        nativeClose(mMetadataPtr);
+        mMetadataPtr = 0;
     }
 
     private <T> T getBase(CameraCharacteristics.Key<T> key) {
@@ -550,7 +552,7 @@ public class CameraMetadataNative implements Parcelable {
         if (key.hasTag()) {
             tag = key.getTag();
         } else {
-            tag = nativeGetTagFromKeyLocal(key.getName());
+            tag = nativeGetTagFromKeyLocal(mMetadataPtr, key.getName());
             key.cacheTag(tag);
         }
         byte[] values = readValues(tag);
@@ -560,14 +562,14 @@ public class CameraMetadataNative implements Parcelable {
             if (key.mFallbackName == null) {
                 return null;
             }
-            tag = nativeGetTagFromKeyLocal(key.mFallbackName);
+            tag = nativeGetTagFromKeyLocal(mMetadataPtr, key.mFallbackName);
             values = readValues(tag);
             if (values == null) {
                 return null;
             }
         }
 
-        int nativeType = nativeGetTypeFromTagLocal(tag);
+        int nativeType = nativeGetTypeFromTagLocal(mMetadataPtr, tag);
         Marshaler<T> marshaler = getMarshalerForKey(key, nativeType);
         ByteBuffer buffer = ByteBuffer.wrap(values).order(ByteOrder.nativeOrder());
         return marshaler.unmarshal(buffer);
@@ -1514,7 +1516,7 @@ public class CameraMetadataNative implements Parcelable {
         if (key.hasTag()) {
             tag = key.getTag();
         } else {
-            tag = nativeGetTagFromKeyLocal(key.getName());
+            tag = nativeGetTagFromKeyLocal(mMetadataPtr, key.getName());
             key.cacheTag(tag);
         }
         if (value == null) {
@@ -1523,7 +1525,7 @@ public class CameraMetadataNative implements Parcelable {
             return;
         } // else update the entry to a new value
 
-        int nativeType = nativeGetTypeFromTagLocal(tag);
+        int nativeType = nativeGetTypeFromTagLocal(mMetadataPtr, tag);
         Marshaler<T> marshaler = getMarshalerForKey(key, nativeType);
         int size = marshaler.calculateMarshalSize(value);
 
@@ -1684,32 +1686,47 @@ public class CameraMetadataNative implements Parcelable {
     @UnsupportedAppUsage
     private long mMetadataPtr; // native std::shared_ptr<CameraMetadata>*
 
-    private native long nativeAllocate();
-    private native long nativeAllocateCopy(CameraMetadataNative other)
+    @FastNative
+    private static native long nativeAllocate();
+    @FastNative
+    private static native long nativeAllocateCopy(long ptr)
             throws NullPointerException;
 
-    private native synchronized void nativeWriteToParcel(Parcel dest);
-    private native synchronized void nativeReadFromParcel(Parcel source);
-    private native synchronized void nativeSwap(CameraMetadataNative other)
+    @FastNative
+    private static synchronized native void nativeWriteToParcel(Parcel dest, long ptr);
+    @FastNative
+    private static synchronized native void nativeReadFromParcel(Parcel source, long ptr);
+    @FastNative
+    private static synchronized native void nativeSwap(long ptr, long otherPtr)
             throws NullPointerException;
-    private native synchronized void nativeClose();
-    private native synchronized boolean nativeIsEmpty();
-    private native synchronized int nativeGetEntryCount();
+    @FastNative
+    private static synchronized native void nativeClose(long ptr);
+    @FastNative
+    private static synchronized native boolean nativeIsEmpty(long ptr);
+    @FastNative
+    private static synchronized native int nativeGetEntryCount(long ptr);
 
     @UnsupportedAppUsage
-    private native synchronized byte[] nativeReadValues(int tag);
-    private native synchronized void nativeWriteValues(int tag, byte[] src);
-    private native synchronized void nativeDump() throws IOException; // dump to ALOGD
+    @FastNative
+    private static synchronized native byte[] nativeReadValues(int tag, long ptr);
+    @FastNative
+    private static synchronized native void nativeWriteValues(int tag, byte[] src, long ptr);
+    private static synchronized native void nativeDump(long ptr) throws IOException; // dump to LOGD
 
-    private native synchronized ArrayList nativeGetAllVendorKeys(Class keyClass);
+    @FastNative
+    private static synchronized native ArrayList nativeGetAllVendorKeys(long ptr, Class keyClass);
     @UnsupportedAppUsage
-    private native synchronized int nativeGetTagFromKeyLocal(String keyName)
+    @FastNative
+    private static synchronized native int nativeGetTagFromKeyLocal(long ptr, String keyName)
             throws IllegalArgumentException;
     @UnsupportedAppUsage
-    private native synchronized int nativeGetTypeFromTagLocal(int tag)
+    @FastNative
+    private static synchronized native int nativeGetTypeFromTagLocal(long ptr, int tag)
             throws IllegalArgumentException;
+    @FastNative
     private static native int nativeGetTagFromKey(String keyName, long vendorId)
             throws IllegalArgumentException;
+    @FastNative
     private static native int nativeGetTypeFromTag(int tag, long vendorId)
             throws IllegalArgumentException;
 
@@ -1723,7 +1740,7 @@ public class CameraMetadataNative implements Parcelable {
      * @hide
      */
     public void swap(CameraMetadataNative other) {
-        nativeSwap(other);
+        nativeSwap(mMetadataPtr, other.mMetadataPtr);
         mCameraId = other.mCameraId;
         mHasMandatoryConcurrentStreams = other.mHasMandatoryConcurrentStreams;
         mDisplaySize = other.mDisplaySize;
@@ -1733,7 +1750,7 @@ public class CameraMetadataNative implements Parcelable {
      * @hide
      */
     public int getEntryCount() {
-        return nativeGetEntryCount();
+        return nativeGetEntryCount(mMetadataPtr);
     }
 
     /**
@@ -1742,12 +1759,12 @@ public class CameraMetadataNative implements Parcelable {
      * @hide
      */
     public boolean isEmpty() {
-        return nativeIsEmpty();
+        return nativeIsEmpty(mMetadataPtr);
     }
 
 
     /**
-     * Retrieves the pointer to the native CameraMetadata as a Java long.
+     * Retrieves the pointer to the native shared_ptr<CameraMetadata> as a Java long.
      *
      * @hide
      */
@@ -1764,7 +1781,7 @@ public class CameraMetadataNative implements Parcelable {
         if (keyClass == null) {
             throw new NullPointerException();
         }
-        return (ArrayList<K>) nativeGetAllVendorKeys(keyClass);
+        return (ArrayList<K>) nativeGetAllVendorKeys(mMetadataPtr, keyClass);
     }
 
     /**
@@ -1816,7 +1833,7 @@ public class CameraMetadataNative implements Parcelable {
      * @hide
      */
     public void writeValues(int tag, byte[] src) {
-        nativeWriteValues(tag, src);
+        nativeWriteValues(tag, src, mMetadataPtr);
     }
 
     /**
@@ -1832,7 +1849,7 @@ public class CameraMetadataNative implements Parcelable {
      */
     public byte[] readValues(int tag) {
         // TODO: Optimization. Native code returns a ByteBuffer instead.
-        return nativeReadValues(tag);
+        return nativeReadValues(tag, mMetadataPtr);
     }
 
     /**
@@ -1845,7 +1862,7 @@ public class CameraMetadataNative implements Parcelable {
      */
     public void dumpToLog() {
         try {
-            nativeDump();
+            nativeDump(mMetadataPtr);
         } catch (IOException e) {
             Log.wtf(TAG, "Dump logging failed", e);
         }
