@@ -47,14 +47,13 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:singleLine="true"
-
         android:paddingEnd="8dp"
         android:textAppearance="@*android:style/TextAppearance.DeviceDefault.Notification.Title"
     />
 
     <TextView
         android:id="@+id/conversation_notification_sender"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:singleLine="true"
         style="?attr/hybridNotificationTextStyle"
