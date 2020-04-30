@@ -29,6 +29,9 @@ import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.UiEvent;
+import com.android.internal.logging.UiEventLogger;
+import com.android.internal.logging.UiEventLoggerImpl;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.LatencyTracker;
 import com.android.keyguard.KeyguardConstants;
@@ -50,6 +53,8 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Map;
+import java.util.Optional;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -64,6 +69,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
     private static final boolean DEBUG_BIO_WAKELOCK = KeyguardConstants.DEBUG_BIOMETRIC_WAKELOCK;
     private static final long BIOMETRIC_WAKELOCK_TIMEOUT_MS = 15 * 1000;
     private static final String BIOMETRIC_WAKE_LOCK_NAME = "wake-and-unlock:wakelock";
+    private static final UiEventLogger UI_EVENT_LOGGER = new UiEventLoggerImpl();
 
     @IntDef(prefix = { "MODE_" }, value = {
             MODE_NONE,
@@ -171,6 +177,68 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
         }
     }
 
+    @VisibleForTesting
+    public enum BiometricUiEvent implements UiEventLogger.UiEventEnum {
+
+        @UiEvent(doc = "A biometric event of type fingerprint succeeded.")
+        BIOMETRIC_FINGERPRINT_SUCCESS(396),
+
+        @UiEvent(doc = "A biometric event of type fingerprint failed.")
+        BIOMETRIC_FINGERPRINT_FAILURE(397),
+
+        @UiEvent(doc = "A biometric event of type fingerprint errored.")
+        BIOMETRIC_FINGERPRINT_ERROR(398),
+
+        @UiEvent(doc = "A biometric event of type face unlock succeeded.")
+        BIOMETRIC_FACE_SUCCESS(399),
+
+        @UiEvent(doc = "A biometric event of type face unlock failed.")
+        BIOMETRIC_FACE_FAILURE(400),
+
+        @UiEvent(doc = "A biometric event of type face unlock errored.")
+        BIOMETRIC_FACE_ERROR(401),
+
+        @UiEvent(doc = "A biometric event of type iris succeeded.")
+        BIOMETRIC_IRIS_SUCCESS(402),
+
+        @UiEvent(doc = "A biometric event of type iris failed.")
+        BIOMETRIC_IRIS_FAILURE(403),
+
+        @UiEvent(doc = "A biometric event of type iris errored.")
+        BIOMETRIC_IRIS_ERROR(404);
+
+        private final int mId;
+
+        BiometricUiEvent(int id) {
+            mId = id;
+        }
+
+        @Override
+        public int getId() {
+            return mId;
+        }
+
+        static final Map<BiometricSourceType, BiometricUiEvent> ERROR_EVENT_BY_SOURCE_TYPE = Map.of(
+                BiometricSourceType.FINGERPRINT, BiometricUiEvent.BIOMETRIC_FINGERPRINT_ERROR,
+                BiometricSourceType.FACE, BiometricUiEvent.BIOMETRIC_FACE_ERROR,
+                BiometricSourceType.IRIS, BiometricUiEvent.BIOMETRIC_IRIS_ERROR
+        );
+
+        static final Map<BiometricSourceType, BiometricUiEvent> SUCCESS_EVENT_BY_SOURCE_TYPE =
+                Map.of(
+                    BiometricSourceType.FINGERPRINT, BiometricUiEvent.BIOMETRIC_FINGERPRINT_SUCCESS,
+                    BiometricSourceType.FACE, BiometricUiEvent.BIOMETRIC_FACE_SUCCESS,
+                    BiometricSourceType.IRIS, BiometricUiEvent.BIOMETRIC_IRIS_SUCCESS
+                );
+
+        static final Map<BiometricSourceType, BiometricUiEvent> FAILURE_EVENT_BY_SOURCE_TYPE =
+                Map.of(
+                    BiometricSourceType.FINGERPRINT, BiometricUiEvent.BIOMETRIC_FINGERPRINT_FAILURE,
+                    BiometricSourceType.FACE, BiometricUiEvent.BIOMETRIC_FACE_FAILURE,
+                    BiometricSourceType.IRIS, BiometricUiEvent.BIOMETRIC_IRIS_FAILURE
+                );
+    }
+
     @Inject
     public BiometricUnlockController(Context context, DozeScrimController dozeScrimController,
             KeyguardViewMediator keyguardViewMediator, ScrimController scrimController,
@@ -274,6 +342,9 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
         }
         mMetricsLogger.write(new LogMaker(MetricsEvent.BIOMETRIC_AUTH)
                 .setType(MetricsEvent.TYPE_SUCCESS).setSubtype(toSubtype(biometricSourceType)));
+        Optional.ofNullable(BiometricUiEvent.SUCCESS_EVENT_BY_SOURCE_TYPE.get(biometricSourceType))
+                .ifPresent(UI_EVENT_LOGGER::log);
+
         boolean unlockAllowed = mKeyguardBypassController.onBiometricAuthenticated(
                 biometricSourceType, isStrongBiometric);
         if (unlockAllowed) {
@@ -504,6 +575,8 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
     public void onBiometricAuthFailed(BiometricSourceType biometricSourceType) {
         mMetricsLogger.write(new LogMaker(MetricsEvent.BIOMETRIC_AUTH)
                 .setType(MetricsEvent.TYPE_FAILURE).setSubtype(toSubtype(biometricSourceType)));
+        Optional.ofNullable(BiometricUiEvent.FAILURE_EVENT_BY_SOURCE_TYPE.get(biometricSourceType))
+                .ifPresent(UI_EVENT_LOGGER::log);
         cleanup();
     }
 
@@ -513,6 +586,8 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
         mMetricsLogger.write(new LogMaker(MetricsEvent.BIOMETRIC_AUTH)
                 .setType(MetricsEvent.TYPE_ERROR).setSubtype(toSubtype(biometricSourceType))
                 .addTaggedData(MetricsEvent.FIELD_BIOMETRIC_AUTH_ERROR, msgId));
+        Optional.ofNullable(BiometricUiEvent.ERROR_EVENT_BY_SOURCE_TYPE.get(biometricSourceType))
+                .ifPresent(UI_EVENT_LOGGER::log);
         cleanup();
     }
 

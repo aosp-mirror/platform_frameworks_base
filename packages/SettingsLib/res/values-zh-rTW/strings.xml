@@ -253,7 +253,7 @@
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Wi-Fi 掃描調節"</string>
     <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Wi‑Fi 加強型 MAC 隨機化"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"行動數據連線一律保持啟用狀態"</string>
-    <string name="tethering_hardware_offload" msgid="4116053719006939161">"數據連線硬體加速"</string>
+    <string name="tethering_hardware_offload" msgid="4116053719006939161">"網路共用硬體加速"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"顯示沒有名稱的藍牙裝置"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"停用絕對音量功能"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"啟用 Gabeldorsche"</string>
@@ -299,7 +299,7 @@
     <string name="allow_mock_location_summary" msgid="179780881081354579">"允許模擬位置"</string>
     <string name="debug_view_attributes" msgid="3539609843984208216">"啟用檢視屬性檢查"</string>
     <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"即使 Wi‑Fi 連線已啟用，一律將行動數據連線保持啟用狀態 (以便快速切換網路)。"</string>
-    <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"使用數據連線硬體加速功能 (如果可用的話)"</string>
+    <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"使用網路共用硬體加速功能 (如果可用的話)"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"允許 USB 偵錯嗎？"</string>
     <string name="adb_warning_message" msgid="8145270656419669221">"USB 偵錯是針對應用程式開發而設計的功能，可讓你複製電腦和裝置中的資料、不需經由通知即可在裝置上安裝應用程式，以及讀取記錄資料。"</string>
     <string name="adbwifi_warning_title" msgid="727104571653031865">"要啟用無線偵錯嗎？"</string>

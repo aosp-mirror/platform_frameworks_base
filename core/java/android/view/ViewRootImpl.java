@@ -757,7 +757,7 @@ public final class ViewRootImpl implements ViewParent,
         mChoreographer = useSfChoreographer
                 ? Choreographer.getSfInstance() : Choreographer.getInstance();
         mDisplayManager = (DisplayManager)context.getSystemService(Context.DISPLAY_SERVICE);
-        mInsetsController = new InsetsController(this);
+        mInsetsController = new InsetsController(new ViewRootInsetsControllerHost(this));
 
         String processorOverrideName = context.getResources().getString(
                                     R.string.config_inputEventCompatProcessorOverrideClassName);
@@ -1793,8 +1793,9 @@ public final class ViewRootImpl implements ViewParent,
             // We only return the Surface the first time, as otherwise
             // it hasn't changed and there is no need to update.
             ret = mBlastBufferQueue.getSurface();
+        } else {
+            mBlastBufferQueue.update(mBlastSurfaceControl, width, height);
         }
-        mBlastBufferQueue.update(mBlastSurfaceControl, width, height);
 
         return ret;
     }

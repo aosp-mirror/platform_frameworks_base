@@ -620,6 +620,77 @@ public class QuotaControllerTest {
         assertEquals(expectedStats, inputStats);
     }
 
+    @Test
+    public void testUpdateExecutionStatsLocked_WithTimer() {
+        final long now = sElapsedRealtimeClock.millis();
+        setProcessState(ActivityManager.PROCESS_STATE_SERVICE);
+
+        ExecutionStats expectedStats = new ExecutionStats();
+        ExecutionStats inputStats = new ExecutionStats();
+        inputStats.windowSizeMs = expectedStats.windowSizeMs = 24 * HOUR_IN_MILLIS;
+        inputStats.jobCountLimit = expectedStats.jobCountLimit = mQcConstants.MAX_JOB_COUNT_RARE;
+        inputStats.sessionCountLimit = expectedStats.sessionCountLimit =
+                mQcConstants.MAX_SESSION_COUNT_RARE;
+        // Active timer isn't counted as session yet.
+        expectedStats.sessionCountInWindow = 0;
+        // Timer only, under quota.
+        for (int i = 1; i < mQcConstants.MAX_JOB_COUNT_RARE; ++i) {
+            JobStatus jobStatus = createJobStatus("testUpdateExecutionStatsLocked_WithTimer", i);
+            setStandbyBucket(RARE_INDEX, jobStatus); // 24 hour window
+            mQuotaController.maybeStartTrackingJobLocked(jobStatus, null);
+            mQuotaController.prepareForExecutionLocked(jobStatus);
+            advanceElapsedClock(7000);
+
+            expectedStats.expirationTimeElapsed = sElapsedRealtimeClock.millis();
+            expectedStats.executionTimeInWindowMs = expectedStats.executionTimeInMaxPeriodMs =
+                    7000 * i;
+            expectedStats.bgJobCountInWindow = expectedStats.bgJobCountInMaxPeriod = i;
+            mQuotaController.updateExecutionStatsLocked(SOURCE_USER_ID, SOURCE_PACKAGE, inputStats);
+            assertEquals(expectedStats, inputStats);
+            assertTrue(mQuotaController.isWithinQuotaLocked(SOURCE_USER_ID, SOURCE_PACKAGE,
+                    RARE_INDEX));
+        }
+
+        // Add old session. Make sure values are combined correctly.
+        mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
+                createTimingSession(sElapsedRealtimeClock.millis() - (6 * HOUR_IN_MILLIS),
+                        10 * MINUTE_IN_MILLIS, 5));
+        expectedStats.sessionCountInWindow = 1;
+
+        expectedStats.expirationTimeElapsed = sElapsedRealtimeClock.millis() + 18 * HOUR_IN_MILLIS;
+        expectedStats.executionTimeInWindowMs += 10 * MINUTE_IN_MILLIS;
+        expectedStats.executionTimeInMaxPeriodMs += 10 * MINUTE_IN_MILLIS;
+        expectedStats.bgJobCountInWindow += 5;
+        expectedStats.bgJobCountInMaxPeriod += 5;
+        // Active timer is under quota, so out of quota due to old session.
+        expectedStats.inQuotaTimeElapsed =
+                sElapsedRealtimeClock.millis() + 18 * HOUR_IN_MILLIS + 10 * MINUTE_IN_MILLIS;
+        mQuotaController.updateExecutionStatsLocked(SOURCE_USER_ID, SOURCE_PACKAGE, inputStats);
+        assertEquals(expectedStats, inputStats);
+        assertFalse(
+                mQuotaController.isWithinQuotaLocked(SOURCE_USER_ID, SOURCE_PACKAGE, RARE_INDEX));
+
+        // Quota should be exceeded due to activity in active timer.
+        JobStatus jobStatus = createJobStatus("testUpdateExecutionStatsLocked_WithTimer", 0);
+        setStandbyBucket(RARE_INDEX, jobStatus); // 24 hour window
+        mQuotaController.maybeStartTrackingJobLocked(jobStatus, null);
+        mQuotaController.prepareForExecutionLocked(jobStatus);
+        advanceElapsedClock(10000);
+
+        expectedStats.executionTimeInWindowMs += 10000;
+        expectedStats.executionTimeInMaxPeriodMs += 10000;
+        expectedStats.bgJobCountInWindow++;
+        expectedStats.bgJobCountInMaxPeriod++;
+        // Out of quota due to activity in active timer, so in quota time should be when enough
+        // time has passed since active timer.
+        expectedStats.inQuotaTimeElapsed =
+                sElapsedRealtimeClock.millis() + expectedStats.windowSizeMs;
+        mQuotaController.updateExecutionStatsLocked(SOURCE_USER_ID, SOURCE_PACKAGE, inputStats);
+        assertEquals(expectedStats, inputStats);
+        assertFalse(
+                mQuotaController.isWithinQuotaLocked(SOURCE_USER_ID, SOURCE_PACKAGE, RARE_INDEX));
+    }
+
     /**
      * Tests that getExecutionStatsLocked returns the correct stats.
      */

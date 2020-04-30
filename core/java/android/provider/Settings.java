@@ -2020,8 +2020,7 @@ public final class Settings {
      * In some cases, a matching Activity may not exist, so ensure you
      * safeguard against this.
      * <p>
-     * Input: The Intent's data URI specifies the application package name
-     * to be shown, with the "package" scheme.  That is "package:com.my.app".
+     * Input: Nothing.
      * <p>
      * Output: Nothing.
      */
@@ -13828,16 +13827,6 @@ public final class Settings {
          */
         public static final String SHOW_NOTIFICATION_CHANNEL_WARNINGS =
                 "show_notification_channel_warnings";
-
-        /**
-         * When enabled, requires all notifications in the conversation section to be backed
-         * by a long-lived sharing shortcut
-         *
-         * The value 1 - require a shortcut, 0 - do not require a shortcut
-         * @hide
-         */
-        public static final String REQUIRE_SHORTCUTS_FOR_CONVERSATIONS =
-                "require_shortcuts_for_conversations";
 
         /**
          * Whether cell is enabled/disabled
