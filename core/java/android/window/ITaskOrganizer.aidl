@@ -25,7 +25,14 @@ import android.window.WindowContainerToken;
  * {@hide}
  */
 oneway interface ITaskOrganizer {
-    void onTaskAppeared(in ActivityManager.RunningTaskInfo taskInfo);
+    /**
+     * A callback when the Task is available for the registered organizer. The client is responsible
+     * for releasing the SurfaceControl in the callback.
+     *
+     * @param taskInfo The information about the Task that's available
+     * @param leash A persistent leash for this Task.
+     */
+    void onTaskAppeared(in ActivityManager.RunningTaskInfo taskInfo, in SurfaceControl leash);
     void onTaskVanished(in ActivityManager.RunningTaskInfo taskInfo);
 
     /**
