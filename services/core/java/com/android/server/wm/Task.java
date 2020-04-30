@@ -3875,11 +3875,12 @@ class Task extends WindowContainer<WindowContainer> {
             pw.print(prefix); pw.print("mRootProcess="); pw.println(mRootProcess);
         }
         pw.print(prefix); pw.print("taskId=" + mTaskId); pw.println(" stackId=" + getRootTaskId());
-        pw.print(prefix + "mHasBeenVisible=" + getHasBeenVisible());
-        pw.print(" mResizeMode=" + ActivityInfo.resizeModeToString(mResizeMode));
-        pw.print(" mSupportsPictureInPicture=" + mSupportsPictureInPicture);
-        pw.print(" isResizeable=" + isResizeable());
-        pw.print(" lastActiveTime=" + lastActiveTime);
+        pw.print(prefix); pw.print("mHasBeenVisible="); pw.println(getHasBeenVisible());
+        pw.print(prefix); pw.print("mResizeMode=");
+        pw.print(ActivityInfo.resizeModeToString(mResizeMode));
+        pw.print(" mSupportsPictureInPicture="); pw.print(mSupportsPictureInPicture);
+        pw.print(" isResizeable="); pw.println(isResizeable());
+        pw.print(prefix); pw.print("lastActiveTime="); pw.print(lastActiveTime);
         pw.println(" (inactive for " + (getInactiveDuration() / 1000) + "s)");
     }
 
