@@ -430,6 +430,7 @@
     <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"畫面錄影"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"開始"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"停"</string>
+    <string name="media_seamless_remote_device" msgid="177033467332920464">"裝置"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"向上滑動即可切換應用程式"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"向右拖曳即可快速切換應用程式"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"切換概覽"</string>
@@ -712,6 +713,7 @@
     <string name="notification_channel_summary_priority" msgid="7415770044553264622">"在對話部分的頂部以小視窗顯示。"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"設定"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"重要"</string>
+    <string name="no_shortcut" msgid="7176375126961212514">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」不支援對話專用設定"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"沒有最近曾使用的小視窗"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"最近使用和關閉的小視窗會在這裡顯示"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"無法修改這些通知。"</string>
@@ -1003,6 +1005,11 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"系統導覽已更新。如需變更，請前往「設定」。"</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"前往「設定」更新系統導覽"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"待機"</string>
+    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"在對話部分的頂部顯示"</string>
+    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"在上鎖畫面顯示個人檔案相片"</string>
+    <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"在應用程式上以浮動小視窗顯示"</string>
+    <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"中斷「請勿騷擾」"</string>
+    <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"知道了"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"放大視窗"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"放大視窗控制項"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"裝置控制"</string>
@@ -1018,6 +1025,8 @@
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"從電源選單選擇要存取的控制項"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"按住並拖曳便可重新排列控制項"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"已移除所有控制項"</string>
+    <!-- no translation found for controls_favorite_toast_no_changes (7094494210840877931) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"無法載入完整控制項清單。"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"其他"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"加到裝置控制"</string>
@@ -1026,6 +1035,7 @@
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"已更新控制項"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"PIN 含有字母或符號"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"驗證<xliff:g id="DEVICE">%s</xliff:g>"</string>
+    <string name="controls_pin_wrong" msgid="6162694056042164211">"PIN 錯誤"</string>
     <string name="controls_pin_verifying" msgid="3755045989392131746">"正在驗證…"</string>
     <string name="controls_pin_instructions" msgid="6363309783822475238">"輸入 PIN"</string>
     <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"嘗試其他 PIN"</string>
@@ -1035,6 +1045,9 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"正在載入建議"</string>
     <string name="controls_media_close_session" msgid="9023534788828414585">"關閉此媒體版面"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"已停用，請檢查應用程式"</string>
+    <string name="controls_error_retryable" msgid="864025882878378470">"發生錯誤，正在重試…"</string>
+    <string name="controls_error_removed" msgid="6299213591234723805">"已移除裝置"</string>
+    <string name="controls_error_generic" msgid="352500456918362905">"無法載入狀態"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"發生錯誤，請再試一次"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"進行中"</string>
     <string name="controls_added_tooltip" msgid="4842812921719153085">"按住「開關」按鈕以查看新控制項"</string>

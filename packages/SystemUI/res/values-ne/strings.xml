@@ -430,6 +430,8 @@
     <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"स्रिनको रेकर्ड"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"सुरु गर्नुहोस्"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"रोक्नुहोस्"</string>
+    <!-- no translation found for media_seamless_remote_device (177033467332920464) -->
+    <skip />
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"एपहरू बदल्न माथितिर स्वाइप गर्नुहोस्"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"एपहरू बदल्न द्रुत गतिमा दायाँतिर ड्र्याग गर्नुहोस्"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"परिदृश्य टगल गर्नुहोस्"</string>
@@ -712,6 +714,8 @@
     <string name="notification_channel_summary_priority" msgid="7415770044553264622">"वार्तालाप खण्डको सिरानमा बबलका रूपमा देखा पर्छ।"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"सेटिङ"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"प्राथमिकता"</string>
+    <!-- no translation found for no_shortcut (7176375126961212514) -->
+    <skip />
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"हालैका बबलहरू छैनन्"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"हालैका बबल र खारेज गरिएका बबलहरू यहाँ देखिने छन्"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"यी सूचनाहरू परिमार्जन गर्न मिल्दैन।"</string>
@@ -1003,6 +1007,11 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"प्रणालीको नेभिगेसन अद्यावधिक गरियो। परिवर्तन गर्न सेटिङमा जानुहोस्।"</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"प्रणालीको नेभिगेसन अद्यावधिक गर्न सेटिङमा जानुहोस्"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"स्ट्यान्डबाई"</string>
+    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"वार्तालाप खण्डको सिरानमा देखाइयोस्"</string>
+    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"लक स्क्रिनमा प्रोफाइल तस्बिर देखाइयोस्"</string>
+    <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"एपहरूमाथि तैरिने बबलका रूपमा देखाइयोस्"</string>
+    <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"बाधा नपुऱ्याउनुहोस् मोडलाई बेवास्ता गरियोस्"</string>
+    <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"बुझेँ"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"म्याग्निफिकेसन विन्डो"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"म्याग्निफिकेसन विन्डोका नियन्त्रणहरू"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"यन्त्र नियन्त्रण गर्ने विजेटहरू"</string>
@@ -1018,6 +1027,8 @@
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"पावर मेनुबाट प्रयोग गर्न चाहेका नियन्त्रण सुविधाहरू छान्नुहोस्"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"नियन्त्रणहरूको क्रम मिलाउन तिनलाई थिचेर ड्र्याग गर्नुहोस्"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"सबै नियन्त्रणहरू हटाइए"</string>
+    <!-- no translation found for controls_favorite_toast_no_changes (7094494210840877931) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"सबै नियन्त्रणहरूको सूची लोड गर्न सकिएन।"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"अन्य"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"यन्त्र नियन्त्रण गर्ने विजेटहरूको सूचीमा थप्नुहोस्"</string>
@@ -1026,6 +1037,7 @@
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"नियन्त्रण सुविधाहरू अद्यावधिक गरिए"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"PIN मा अक्षर वा चिन्हहरू समाविष्ट हुन्छन्"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"<xliff:g id="DEVICE">%s</xliff:g> पुष्टि गर्नुहोस्"</string>
+    <string name="controls_pin_wrong" msgid="6162694056042164211">"PIN मिलेन"</string>
     <string name="controls_pin_verifying" msgid="3755045989392131746">"पुष्टि गर्दै…"</string>
     <string name="controls_pin_instructions" msgid="6363309783822475238">"PIN प्रविष्टि गर्नुहोस्"</string>
     <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"अर्को PIN प्रयोग गरी हेर्नु…"</string>
@@ -1035,6 +1047,9 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"सिफारिसहरू लोड गर्दै"</string>
     <string name="controls_media_close_session" msgid="9023534788828414585">"यो मिडिया सत्र बन्द गर्नुहोस्"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"निष्क्रिय छ, एप जाँच गर्नु…"</string>
+    <string name="controls_error_retryable" msgid="864025882878378470">"त्रुटि भयो, फेरि प्रयास गर्दै…"</string>
+    <string name="controls_error_removed" msgid="6299213591234723805">"यन्त्र हटाइयो"</string>
+    <string name="controls_error_generic" msgid="352500456918362905">"वस्तुस्थिति लोड गर्न सकिएन"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"त्रुटि भयो, फेरि प्रयास गर्नु…"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"कार्य हुँदै छ"</string>
     <string name="controls_added_tooltip" msgid="4842812921719153085">"नयाँ नियन्त्रण सुविधाहरू हेर्न पावर बटन थिचिराख्नुहोस्"</string>
