@@ -8992,6 +8992,10 @@ public class PackageManagerService extends IPackageManager.Stub
                         + parseResult.scanFile, throwable);
             }
 
+            if ((scanFlags & SCAN_AS_APK_IN_APEX) != 0 && errorCode != INSTALL_SUCCEEDED) {
+                mApexManager.reportErrorWithApkInApex(scanDir.getAbsolutePath());
+            }
+
             // Delete invalid userdata apps
             if ((scanFlags & SCAN_AS_SYSTEM) == 0
                     && errorCode != PackageManager.INSTALL_SUCCEEDED) {
