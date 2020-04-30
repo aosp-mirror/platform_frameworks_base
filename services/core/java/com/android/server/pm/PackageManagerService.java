@@ -4951,6 +4951,21 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
                 return ai;
             }
+            if ((flags & PackageManager.MATCH_APEX) != 0) {
+                // For APKs, PackageInfo.applicationInfo is not exactly the same as ApplicationInfo
+                // returned from getApplicationInfo, but for APEX packages difference shouldn't be
+                // very big.
+                // TODO(b/155328545): generate proper application info for APEXes as well.
+                int apexFlags = ApexManager.MATCH_ACTIVE_PACKAGE;
+                if ((flags & PackageManager.MATCH_SYSTEM_ONLY) != 0) {
+                    apexFlags = ApexManager.MATCH_FACTORY_PACKAGE;
+                }
+                final PackageInfo pi = mApexManager.getPackageInfo(packageName, apexFlags);
+                if (pi == null) {
+                    return null;
+                }
+                return pi.applicationInfo;
+            }
             if ("android".equals(packageName)||"system".equals(packageName)) {
                 return mAndroidApplication;
             }
