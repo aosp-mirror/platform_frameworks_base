@@ -104,7 +104,7 @@ public class NetworkStatsFactoryTest extends NetworkStatsBaseTest {
     }
 
     @Test
-    public void vpnRewriteTrafficThroughItself() throws Exception {
+    public void testVpnRewriteTrafficThroughItself() throws Exception {
         VpnInfo[] vpnInfos = new VpnInfo[] {createVpnInfo(new String[] {TEST_IFACE})};
         mFactory.updateVpnInfos(vpnInfos);
 
@@ -133,7 +133,7 @@ public class NetworkStatsFactoryTest extends NetworkStatsBaseTest {
     }
 
     @Test
-    public void vpnWithClat() throws Exception {
+    public void testVpnWithClat() throws Exception {
         VpnInfo[] vpnInfos = new VpnInfo[] {createVpnInfo(new String[] {CLAT_PREFIX + TEST_IFACE})};
         mFactory.updateVpnInfos(vpnInfos);
         mFactory.noteStackedIface(CLAT_PREFIX + TEST_IFACE, TEST_IFACE);
@@ -166,7 +166,7 @@ public class NetworkStatsFactoryTest extends NetworkStatsBaseTest {
     }
 
     @Test
-    public void vpnWithOneUnderlyingIface() throws Exception {
+    public void testVpnWithOneUnderlyingIface() throws Exception {
         VpnInfo[] vpnInfos = new VpnInfo[] {createVpnInfo(new String[] {TEST_IFACE})};
         mFactory.updateVpnInfos(vpnInfos);
 
@@ -189,7 +189,7 @@ public class NetworkStatsFactoryTest extends NetworkStatsBaseTest {
     }
 
     @Test
-    public void vpnWithOneUnderlyingIfaceAndOwnTraffic() throws Exception {
+    public void testVpnWithOneUnderlyingIfaceAndOwnTraffic() throws Exception {
         // WiFi network is connected and VPN is using WiFi (which has TEST_IFACE).
         VpnInfo[] vpnInfos = new VpnInfo[] {createVpnInfo(new String[] {TEST_IFACE})};
         mFactory.updateVpnInfos(vpnInfos);
@@ -217,7 +217,7 @@ public class NetworkStatsFactoryTest extends NetworkStatsBaseTest {
     }
 
     @Test
-    public void vpnWithOneUnderlyingIface_withCompression() throws Exception {
+    public void testVpnWithOneUnderlyingIface_withCompression() throws Exception {
         // WiFi network is connected and VPN is using WiFi (which has TEST_IFACE).
         VpnInfo[] vpnInfos = new VpnInfo[] {createVpnInfo(new String[] {TEST_IFACE})};
         mFactory.updateVpnInfos(vpnInfos);
@@ -238,7 +238,7 @@ public class NetworkStatsFactoryTest extends NetworkStatsBaseTest {
     }
 
     @Test
-    public void vpnWithTwoUnderlyingIfaces_packetDuplication() throws Exception {
+    public void testVpnWithTwoUnderlyingIfaces_packetDuplication() throws Exception {
         // WiFi and Cell networks are connected and VPN is using WiFi (which has TEST_IFACE) and
         // Cell (which has TEST_IFACE2) and has declared both of them in its underlying network set.
         // Additionally, VPN is duplicating traffic across both WiFi and Cell.
@@ -264,7 +264,7 @@ public class NetworkStatsFactoryTest extends NetworkStatsBaseTest {
     }
 
     @Test
-    public void vpnWithTwoUnderlyingIfaces_splitTraffic() throws Exception {
+    public void testVpnWithTwoUnderlyingIfaces_splitTraffic() throws Exception {
         // WiFi and Cell networks are connected and VPN is using WiFi (which has TEST_IFACE) and
         // Cell (which has TEST_IFACE2) and has declared both of them in its underlying network set.
         // Additionally, VPN is arbitrarily splitting traffic across WiFi and Cell.
@@ -291,7 +291,7 @@ public class NetworkStatsFactoryTest extends NetworkStatsBaseTest {
     }
 
     @Test
-    public void vpnWithTwoUnderlyingIfaces_splitTrafficWithCompression() throws Exception {
+    public void testVpnWithTwoUnderlyingIfaces_splitTrafficWithCompression() throws Exception {
         // WiFi and Cell networks are connected and VPN is using WiFi (which has TEST_IFACE) and
         // Cell (which has TEST_IFACE2) and has declared both of them in its underlying network set.
         // Additionally, VPN is arbitrarily splitting compressed traffic across WiFi and Cell.
@@ -314,7 +314,7 @@ public class NetworkStatsFactoryTest extends NetworkStatsBaseTest {
     }
 
     @Test
-    public void vpnWithIncorrectUnderlyingIface() throws Exception {
+    public void testVpnWithIncorrectUnderlyingIface() throws Exception {
         // WiFi and Cell networks are connected and VPN is using Cell (which has TEST_IFACE2),
         // but has declared only WiFi (TEST_IFACE) in its underlying network set.
         VpnInfo[] vpnInfos = new VpnInfo[] {createVpnInfo(new String[] {TEST_IFACE})};
