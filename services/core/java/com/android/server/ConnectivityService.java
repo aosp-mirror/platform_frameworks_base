@@ -18,6 +18,14 @@ package com.android.server;
 
 import static android.Manifest.permission.RECEIVE_DATA_ACTIVITY_CHANGE;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.net.ConnectivityDiagnosticsManager.ConnectivityReport.KEY_NETWORK_PROBES_ATTEMPTED_BITMASK;
+import static android.net.ConnectivityDiagnosticsManager.ConnectivityReport.KEY_NETWORK_PROBES_SUCCEEDED_BITMASK;
+import static android.net.ConnectivityDiagnosticsManager.ConnectivityReport.KEY_NETWORK_VALIDATION_RESULT;
+import static android.net.ConnectivityDiagnosticsManager.DataStallReport.DETECTION_METHOD_DNS_EVENTS;
+import static android.net.ConnectivityDiagnosticsManager.DataStallReport.DETECTION_METHOD_TCP_METRICS;
+import static android.net.ConnectivityDiagnosticsManager.DataStallReport.KEY_DNS_CONSECUTIVE_TIMEOUTS;
+import static android.net.ConnectivityDiagnosticsManager.DataStallReport.KEY_TCP_METRICS_COLLECTION_PERIOD_MILLIS;
+import static android.net.ConnectivityDiagnosticsManager.DataStallReport.KEY_TCP_PACKET_FAIL_RATE;
 import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
 import static android.net.ConnectivityManager.NETID_UNSET;
 import static android.net.ConnectivityManager.PRIVATE_DNS_MODE_OPPORTUNISTIC;
@@ -72,6 +80,7 @@ import android.net.ConnectionInfo;
 import android.net.ConnectivityDiagnosticsManager.ConnectivityReport;
 import android.net.ConnectivityDiagnosticsManager.DataStallReport;
 import android.net.ConnectivityManager;
+import android.net.DataStallReportParcelable;
 import android.net.ICaptivePortal;
 import android.net.IConnectivityDiagnosticsCallback;
 import android.net.IConnectivityManager;
@@ -108,6 +117,7 @@ import android.net.NetworkSpecifier;
 import android.net.NetworkStack;
 import android.net.NetworkStackClient;
 import android.net.NetworkState;
+import android.net.NetworkTestResultParcelable;
 import android.net.NetworkUtils;
 import android.net.NetworkWatchlistManager;
 import android.net.PrivateDnsConfigParcel;
@@ -2820,14 +2830,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
                     handleNetworkTested(nai, results.mTestResult,
                             (results.mRedirectUrl == null) ? "" : results.mRedirectUrl);
-
-                    // Invoke ConnectivityReport generation for this Network test event.
-                    final Message m =
-                            mConnectivityDiagnosticsHandler.obtainMessage(
-                                    ConnectivityDiagnosticsHandler.EVENT_NETWORK_TESTED,
-                                    new ConnectivityReportEvent(results.mTimestampMillis, nai));
-                    m.setData(msg.getData());
-                    mConnectivityDiagnosticsHandler.sendMessage(m);
                     break;
                 }
                 case EVENT_PROVISIONING_NOTIFICATION: {
@@ -3006,23 +3008,33 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         @Override
         public void notifyNetworkTested(int testResult, @Nullable String redirectUrl) {
-            notifyNetworkTestedWithExtras(testResult, redirectUrl, SystemClock.elapsedRealtime(),
-                    PersistableBundle.EMPTY);
+            // Legacy version of notifyNetworkTestedWithExtras.
+            // Would only be called if the system has a NetworkStack module older than the
+            // framework, which does not happen in practice.
         }
 
         @Override
-        public void notifyNetworkTestedWithExtras(
-                int testResult,
-                @Nullable String redirectUrl,
-                long timestampMillis,
-                @NonNull PersistableBundle extras) {
-            final Message msg =
-                    mTrackerHandler.obtainMessage(
-                            EVENT_NETWORK_TESTED,
-                            new NetworkTestedResults(
-                                    mNetId, testResult, timestampMillis, redirectUrl));
-            msg.setData(new Bundle(extras));
+        public void notifyNetworkTestedWithExtras(NetworkTestResultParcelable p) {
+            final Message msg = mTrackerHandler.obtainMessage(
+                    EVENT_NETWORK_TESTED,
+                    new NetworkTestedResults(
+                            mNetId, p.result, p.timestampMillis, p.redirectUrl));
             mTrackerHandler.sendMessage(msg);
+
+            // Invoke ConnectivityReport generation for this Network test event.
+            final NetworkAgentInfo nai = getNetworkAgentInfoForNetId(mNetId);
+            if (nai == null) return;
+            final Message m = mConnectivityDiagnosticsHandler.obtainMessage(
+                    ConnectivityDiagnosticsHandler.EVENT_NETWORK_TESTED,
+                    new ConnectivityReportEvent(p.timestampMillis, nai));
+
+            final PersistableBundle extras = new PersistableBundle();
+            extras.putInt(KEY_NETWORK_VALIDATION_RESULT, p.result);
+            extras.putInt(KEY_NETWORK_PROBES_SUCCEEDED_BITMASK, p.probesSucceeded);
+            extras.putInt(KEY_NETWORK_PROBES_ATTEMPTED_BITMASK, p.probesAttempted);
+
+            m.setData(new Bundle(extras));
+            mConnectivityDiagnosticsHandler.sendMessage(m);
         }
 
         @Override
@@ -3071,12 +3083,25 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
 
         @Override
-        public void notifyDataStallSuspected(
-                long timestampMillis, int detectionMethod, PersistableBundle extras) {
-            final Message msg =
-                    mConnectivityDiagnosticsHandler.obtainMessage(
-                            ConnectivityDiagnosticsHandler.EVENT_DATA_STALL_SUSPECTED,
-                            detectionMethod, mNetId, timestampMillis);
+        public void notifyDataStallSuspected(DataStallReportParcelable p) {
+            final Message msg = mConnectivityDiagnosticsHandler.obtainMessage(
+                    ConnectivityDiagnosticsHandler.EVENT_DATA_STALL_SUSPECTED,
+                    p.detectionMethod, mNetId, p.timestampMillis);
+
+            final PersistableBundle extras = new PersistableBundle();
+            switch (p.detectionMethod) {
+                case DETECTION_METHOD_DNS_EVENTS:
+                    extras.putInt(KEY_DNS_CONSECUTIVE_TIMEOUTS, p.dnsConsecutiveTimeouts);
+                    break;
+                case DETECTION_METHOD_TCP_METRICS:
+                    extras.putInt(KEY_TCP_PACKET_FAIL_RATE, p.tcpPacketFailRate);
+                    extras.putInt(KEY_TCP_METRICS_COLLECTION_PERIOD_MILLIS,
+                            p.tcpMetricsCollectionPeriodMillis);
+                    break;
+                default:
+                    log("Unknown data stall detection method, ignoring: " + p.detectionMethod);
+                    return;
+            }
             msg.setData(new Bundle(extras));
 
             // NetworkStateTrackerHandler currently doesn't take any actions based on data
