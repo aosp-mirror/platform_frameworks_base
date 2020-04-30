@@ -238,6 +238,11 @@ public class PipTaskOrganizer extends TaskOrganizer {
      * @param animationDurationMs duration in millisecond for the exiting PiP transition
      */
     public void dismissPip(int animationDurationMs) {
+        if (!mInPip || mToken == null) {
+            Log.wtf(TAG, "Not allowed to dismissPip in current state"
+                    + " mInPip=" + mInPip + " mToken=" + mToken);
+            return;
+        }
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         wct.setActivityWindowingMode(mToken, WINDOWING_MODE_UNDEFINED);
         WindowOrganizer.applyTransaction(wct);
