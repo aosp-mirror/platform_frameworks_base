@@ -29,6 +29,7 @@ import static com.android.server.wm.ActivityStack.ActivityState.PAUSING;
 import static com.android.server.wm.ActivityStack.ActivityState.RESUMED;
 import static com.android.server.wm.ActivityStack.ActivityState.STARTED;
 import static com.android.server.wm.ActivityStack.ActivityState.STOPPING;
+import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_ACTIVITY_STARTS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_CONFIGURATION;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_RELEASE;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_CONFIGURATION;
@@ -430,6 +431,11 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
 
     void setLastActivityLaunchTime(long launchTime) {
         if (launchTime <= mLastActivityLaunchTime) {
+            if (launchTime < mLastActivityLaunchTime) {
+                Slog.w(TAG,
+                        "Tried to set launchTime (" + launchTime + ") < mLastActivityLaunchTime ("
+                                + mLastActivityLaunchTime + ")");
+            }
             return;
         }
         mLastActivityLaunchTime = launchTime;
@@ -449,6 +455,10 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     boolean areBackgroundActivityStartsAllowed() {
         // allow if the whitelisting flag was explicitly set
         if (mAllowBackgroundActivityStarts) {
+            if (DEBUG_ACTIVITY_STARTS) {
+                Slog.d(TAG, "[WindowProcessController(" + mPid
+                        + ")] Activity start allowed: mAllowBackgroundActivityStarts = true");
+            }
             return true;
         }
         // allow if any activity in the caller has either started or finished very recently, and
@@ -460,19 +470,43 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             // let app to be able to start background activity even it's in grace period.
             if (mLastActivityLaunchTime > mAtm.getLastStopAppSwitchesTime()
                     || mLastActivityFinishTime > mAtm.getLastStopAppSwitchesTime()) {
+                if (DEBUG_ACTIVITY_STARTS) {
+                    Slog.d(TAG, "[WindowProcessController(" + mPid
+                            + ")] Activity start allowed: within "
+                            + ACTIVITY_BG_START_GRACE_PERIOD_MS + "ms grace period");
+                }
                 return true;
             }
+            if (DEBUG_ACTIVITY_STARTS) {
+                Slog.d(TAG, "[WindowProcessController(" + mPid + ")] Activity start within "
+                        + ACTIVITY_BG_START_GRACE_PERIOD_MS
+                        + "ms grace period but also within stop app switch window");
+            }
+
         }
         // allow if the proc is instrumenting with background activity starts privs
         if (mInstrumentingWithBackgroundActivityStartPrivileges) {
+            if (DEBUG_ACTIVITY_STARTS) {
+                Slog.d(TAG, "[WindowProcessController(" + mPid
+                        + ")] Activity start allowed: process instrumenting with background "
+                        + "activity starts privileges");
+            }
             return true;
         }
         // allow if the caller has an activity in any foreground task
         if (hasActivityInVisibleTask()) {
+            if (DEBUG_ACTIVITY_STARTS) {
+                Slog.d(TAG, "[WindowProcessController(" + mPid
+                        + ")] Activity start allowed: process has activity in foreground task");
+            }
             return true;
         }
         // allow if the caller is bound by a UID that's currently foreground
         if (isBoundByForegroundUid()) {
+            if (DEBUG_ACTIVITY_STARTS) {
+                Slog.d(TAG, "[WindowProcessController(" + mPid
+                        + ")] Activity start allowed: process bound by foreground uid");
+            }
             return true;
         }
         return false;
