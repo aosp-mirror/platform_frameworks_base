@@ -63,6 +63,8 @@ android_library {
         "androidx.lifecycle_lifecycle-extensions",
         "androidx.dynamicanimation_dynamicanimation",
         "androidx-constraintlayout_constraintlayout",
+        "kotlinx-coroutines-android",
+        "kotlinx-coroutines-core",
         "iconloader_base",
         "SystemUI-tags",
         "SystemUI-proto",
