@@ -2059,8 +2059,8 @@ public final class ShortcutInfo implements Parcelable {
         final ClassLoader cl = getClass().getClassLoader();
 
         mUserId = source.readInt();
-        mId = source.readString();
-        mPackageName = source.readString();
+        mId = source.readString8();
+        mPackageName = source.readString8();
         mActivity = source.readParcelable(cl);
         mFlags = source.readInt();
         mIconResId = source.readInt();
@@ -2082,12 +2082,12 @@ public final class ShortcutInfo implements Parcelable {
         mIntentPersistableExtrases = source.readParcelableArray(cl, PersistableBundle.class);
         mRank = source.readInt();
         mExtras = source.readParcelable(cl);
-        mBitmapPath = source.readString();
+        mBitmapPath = source.readString8();
 
-        mIconResName = source.readString();
-        mTitleResName = source.readString();
-        mTextResName = source.readString();
-        mDisabledMessageResName = source.readString();
+        mIconResName = source.readString8();
+        mTitleResName = source.readString8();
+        mTextResName = source.readString8();
+        mDisabledMessageResName = source.readString8();
 
         int N = source.readInt();
         if (N == 0) {
@@ -2095,20 +2095,20 @@ public final class ShortcutInfo implements Parcelable {
         } else {
             mCategories = new ArraySet<>(N);
             for (int i = 0; i < N; i++) {
-                mCategories.add(source.readString().intern());
+                mCategories.add(source.readString8().intern());
             }
         }
 
         mPersons = source.readParcelableArray(cl, Person.class);
         mLocusId = source.readParcelable(cl);
-        mIconUri = source.readString();
+        mIconUri = source.readString8();
     }
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(mUserId);
-        dest.writeString(mId);
-        dest.writeString(mPackageName);
+        dest.writeString8(mId);
+        dest.writeString8(mPackageName);
         dest.writeParcelable(mActivity, flags);
         dest.writeInt(mFlags);
         dest.writeInt(mIconResId);
@@ -2133,18 +2133,18 @@ public final class ShortcutInfo implements Parcelable {
         dest.writeParcelableArray(mIntentPersistableExtrases, flags);
         dest.writeInt(mRank);
         dest.writeParcelable(mExtras, flags);
-        dest.writeString(mBitmapPath);
+        dest.writeString8(mBitmapPath);
 
-        dest.writeString(mIconResName);
-        dest.writeString(mTitleResName);
-        dest.writeString(mTextResName);
-        dest.writeString(mDisabledMessageResName);
+        dest.writeString8(mIconResName);
+        dest.writeString8(mTitleResName);
+        dest.writeString8(mTextResName);
+        dest.writeString8(mDisabledMessageResName);
 
         if (mCategories != null) {
             final int N = mCategories.size();
             dest.writeInt(N);
             for (int i = 0; i < N; i++) {
-                dest.writeString(mCategories.valueAt(i));
+                dest.writeString8(mCategories.valueAt(i));
             }
         } else {
             dest.writeInt(0);
@@ -2152,7 +2152,7 @@ public final class ShortcutInfo implements Parcelable {
 
         dest.writeParcelableArray(mPersons, flags);
         dest.writeParcelable(mLocusId, flags);
-        dest.writeString(mIconUri);
+        dest.writeString8(mIconUri);
     }
 
     public static final @android.annotation.NonNull Creator<ShortcutInfo> CREATOR =
