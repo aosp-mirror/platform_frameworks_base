@@ -31,6 +31,9 @@ import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Log;
 
+import com.android.internal.logging.InstanceId;
+import com.android.internal.logging.InstanceIdSequence;
+import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
@@ -73,6 +76,7 @@ import javax.inject.Singleton;
 public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, Dumpable {
     private static final String TAG = "QSTileHost";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+    private static final int MAX_QS_INSTANCE_ID = 1 << 20;
 
     public static final String TILES_SETTING = Secure.QS_TILES;
 
@@ -85,6 +89,8 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
     private final DumpManager mDumpManager;
     private final BroadcastDispatcher mBroadcastDispatcher;
     private final QSLogger mQSLogger;
+    private final UiEventLogger mUiEventLogger;
+    private final InstanceIdSequence mInstanceIdSequence;
 
     private final List<Callback> mCallbacks = new ArrayList<>();
     private AutoTileManager mAutoTiles;
@@ -106,7 +112,8 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
             DumpManager dumpManager,
             BroadcastDispatcher broadcastDispatcher,
             Optional<StatusBar> statusBarOptional,
-            QSLogger qsLogger) {
+            QSLogger qsLogger,
+            UiEventLogger uiEventLogger) {
         mIconController = iconController;
         mContext = context;
         mUserContext = context;
@@ -114,8 +121,10 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
         mPluginManager = pluginManager;
         mDumpManager = dumpManager;
         mQSLogger = qsLogger;
+        mUiEventLogger = uiEventLogger;
         mBroadcastDispatcher = broadcastDispatcher;
 
+        mInstanceIdSequence = new InstanceIdSequence(MAX_QS_INSTANCE_ID);
         mServices = new TileServices(this, bgLooper, mBroadcastDispatcher);
         mStatusBarOptional = statusBarOptional;
 
@@ -135,6 +144,11 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
 
     public StatusBarIconController getIconController() {
         return mIconController;
+    }
+
+    @Override
+    public InstanceId getNewInstanceId() {
+        return mInstanceIdSequence.newInstanceId();
     }
 
     public void destroy() {
@@ -167,6 +181,11 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
 
     public QSLogger getQSLogger() {
         return mQSLogger;
+    }
+
+    @Override
+    public UiEventLogger getUiEventLogger() {
+        return mUiEventLogger;
     }
 
     @Override
