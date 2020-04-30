@@ -430,6 +430,7 @@
     <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"Rekaman Layar"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Mulai"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Berhenti"</string>
+    <string name="media_seamless_remote_device" msgid="177033467332920464">"Perangkat"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Geser ke atas untuk beralih aplikasi"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Tarik ke kanan untuk beralih aplikasi dengan cepat"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Aktifkan Ringkasan"</string>
@@ -712,6 +713,7 @@
     <string name="notification_channel_summary_priority" msgid="7415770044553264622">"Muncul di atas bagian percakapan dan ditampilkan sebagai balon."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Setelan"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritas"</string>
+    <string name="no_shortcut" msgid="7176375126961212514">"<xliff:g id="APP_NAME">%1$s</xliff:g> tidak mendukung setelan khusus percakapan"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Tidak ada balon baru-baru ini"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Balon yang baru dipakai dan balon yang telah ditutup akan muncul di sini"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Notifikasi ini tidak dapat diubah."</string>
@@ -1024,6 +1026,8 @@
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Pilih kontrol yang akan diakses dari menu daya"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Tahan &amp; tarik untuk mengatur ulang kontrol"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Semua kontrol dihapus"</string>
+    <!-- no translation found for controls_favorite_toast_no_changes (7094494210840877931) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Daftar semua kontrol tidak dapat dimuat."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Lainnya"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Tambahkan ke kontrol perangkat"</string>
@@ -1032,6 +1036,7 @@
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"Kontrol diperbarui"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"PIN berisi huruf atau simbol"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"Verifikasi <xliff:g id="DEVICE">%s</xliff:g>"</string>
+    <string name="controls_pin_wrong" msgid="6162694056042164211">"PIN salah"</string>
     <string name="controls_pin_verifying" msgid="3755045989392131746">"Memverifikasi …"</string>
     <string name="controls_pin_instructions" msgid="6363309783822475238">"Masukkan PIN"</string>
     <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"Coba PIN lain"</string>
@@ -1041,6 +1046,9 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Memuat rekomendasi"</string>
     <string name="controls_media_close_session" msgid="9023534788828414585">"Tutup sesi media ini"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Nonaktif, periksa aplikasi"</string>
+    <string name="controls_error_retryable" msgid="864025882878378470">"Error, mencoba lagi..."</string>
+    <string name="controls_error_removed" msgid="6299213591234723805">"Perangkat dihapus"</string>
+    <string name="controls_error_generic" msgid="352500456918362905">"Tidak dapat memuat status"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Error, coba lagi"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"Dalam proses"</string>
     <string name="controls_added_tooltip" msgid="4842812921719153085">"Tahan Tombol daya untuk melihat kontrol baru"</string>
