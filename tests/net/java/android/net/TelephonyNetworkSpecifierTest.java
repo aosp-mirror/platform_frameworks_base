@@ -19,7 +19,10 @@ package android.net;
 import static com.android.testutils.ParcelUtilsKt.assertParcelSane;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
+import android.net.wifi.WifiNetworkSpecifier;
 import android.telephony.SubscriptionManager;
 
 import androidx.test.filters.SmallTest;
@@ -32,6 +35,7 @@ import org.junit.Test;
 @SmallTest
 public class TelephonyNetworkSpecifierTest {
     private static final int TEST_SUBID = 5;
+    private static final String TEST_SSID = "Test123";
 
     /**
      * Validate that IllegalArgumentException will be thrown if build TelephonyNetworkSpecifier
@@ -78,5 +82,32 @@ public class TelephonyNetworkSpecifierTest {
                 .setSubscriptionId(TEST_SUBID)
                 .build();
         assertParcelSane(specifier, 1 /* fieldCount */);
+    }
+
+    /**
+     * Validate the behavior of method canBeSatisfiedBy().
+     */
+    @Test
+    public void testCanBeSatisfiedBy() {
+        final TelephonyNetworkSpecifier tns1 = new TelephonyNetworkSpecifier.Builder()
+                .setSubscriptionId(TEST_SUBID)
+                .build();
+        final TelephonyNetworkSpecifier tns2 = new TelephonyNetworkSpecifier.Builder()
+                .setSubscriptionId(TEST_SUBID)
+                .build();
+        final WifiNetworkSpecifier wns = new WifiNetworkSpecifier.Builder()
+                .setSsid(TEST_SSID)
+                .build();
+        final MatchAllNetworkSpecifier mans = new MatchAllNetworkSpecifier();
+
+        // Test equality
+        assertEquals(tns1, tns2);
+        assertTrue(tns1.canBeSatisfiedBy(tns1));
+        assertTrue(tns1.canBeSatisfiedBy(tns2));
+
+        // Test other edge cases.
+        assertFalse(tns1.canBeSatisfiedBy(null));
+        assertFalse(tns1.canBeSatisfiedBy(wns));
+        assertTrue(tns1.canBeSatisfiedBy(mans));
     }
 }
