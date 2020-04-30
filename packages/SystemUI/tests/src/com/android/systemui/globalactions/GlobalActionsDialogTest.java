@@ -32,6 +32,7 @@ import android.content.ContentResolver;
 import android.content.res.Resources;
 import android.media.AudioManager;
 import android.net.ConnectivityManager;
+import android.os.Handler;
 import android.os.UserManager;
 import android.service.dreams.IDreamManager;
 import android.telephony.TelephonyManager;
@@ -106,6 +107,7 @@ public class GlobalActionsDialogTest extends SysuiTestCase {
     @Mock private UiEventLogger mUiEventLogger;
     @Mock private RingerModeTracker mRingerModeTracker;
     @Mock private RingerModeLiveData mRingerModeLiveData;
+    @Mock private Handler mHandler;
 
     private TestableLooper mTestableLooper;
 
@@ -147,7 +149,8 @@ public class GlobalActionsDialogTest extends SysuiTestCase {
                 mControlsListingController,
                 mControlsController,
                 mUiEventLogger,
-                mRingerModeTracker
+                mRingerModeTracker,
+                mHandler
         );
         mGlobalActionsDialog.setZeroDialogPressDelayForTesting();
     }
