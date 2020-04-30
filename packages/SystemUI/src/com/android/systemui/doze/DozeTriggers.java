@@ -34,6 +34,9 @@ import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.UiEvent;
+import com.android.internal.logging.UiEventLogger;
+import com.android.internal.logging.UiEventLoggerImpl;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.Dependency;
 import com.android.systemui.broadcast.BroadcastDispatcher;
@@ -45,6 +48,7 @@ import com.android.systemui.util.sensors.ProximitySensor;
 import com.android.systemui.util.wakelock.WakeLock;
 
 import java.io.PrintWriter;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 /**
@@ -57,6 +61,8 @@ public class DozeTriggers implements DozeMachine.Part {
 
     /** adb shell am broadcast -a com.android.systemui.doze.pulse com.android.systemui */
     private static final String PULSE_ACTION = "com.android.systemui.doze.pulse";
+
+    private static final UiEventLogger UI_EVENT_LOGGER = new UiEventLoggerImpl();
 
     /**
      * Last value sent by the wake-display sensor.
@@ -87,6 +93,62 @@ public class DozeTriggers implements DozeMachine.Part {
     private boolean mPulsePending;
 
     private final MetricsLogger mMetricsLogger = Dependency.get(MetricsLogger.class);
+
+    @VisibleForTesting
+    public enum DozingUpdateUiEvent implements UiEventLogger.UiEventEnum {
+        @UiEvent(doc = "Dozing updated due to notification.")
+        DOZING_UPDATE_NOTIFICATION(433),
+
+        @UiEvent(doc = "Dozing updated due to sigmotion.")
+        DOZING_UPDATE_SIGMOTION(434),
+
+        @UiEvent(doc = "Dozing updated because sensor was picked up.")
+        DOZING_UPDATE_SENSOR_PICKUP(435),
+
+        @UiEvent(doc = "Dozing updated because sensor was double tapped.")
+        DOZING_UPDATE_SENSOR_DOUBLE_TAP(436),
+
+        @UiEvent(doc = "Dozing updated because sensor was long squeezed.")
+        DOZING_UPDATE_SENSOR_LONG_SQUEEZE(437),
+
+        @UiEvent(doc = "Dozing updated due to docking.")
+        DOZING_UPDATE_DOCKING(438),
+
+        @UiEvent(doc = "Dozing updated because sensor woke up.")
+        DOZING_UPDATE_SENSOR_WAKEUP(439),
+
+        @UiEvent(doc = "Dozing updated because sensor woke up the lockscreen.")
+        DOZING_UPDATE_SENSOR_WAKE_LOCKSCREEN(440),
+
+        @UiEvent(doc = "Dozing updated because sensor was tapped.")
+        DOZING_UPDATE_SENSOR_TAP(441);
+
+        private final int mId;
+
+        DozingUpdateUiEvent(int id) {
+            mId = id;
+        }
+
+        @Override
+        public int getId() {
+            return mId;
+        }
+
+        static DozingUpdateUiEvent fromReason(int reason) {
+            switch (reason) {
+                case 1: return DOZING_UPDATE_NOTIFICATION;
+                case 2: return DOZING_UPDATE_SIGMOTION;
+                case 3: return DOZING_UPDATE_SENSOR_PICKUP;
+                case 4: return DOZING_UPDATE_SENSOR_DOUBLE_TAP;
+                case 5: return DOZING_UPDATE_SENSOR_LONG_SQUEEZE;
+                case 6: return DOZING_UPDATE_DOCKING;
+                case 7: return DOZING_UPDATE_SENSOR_WAKEUP;
+                case 8: return DOZING_UPDATE_SENSOR_WAKE_LOCKSCREEN;
+                case 9: return DOZING_UPDATE_SENSOR_TAP;
+                default: return null;
+            }
+        }
+    }
 
     public DozeTriggers(Context context, DozeMachine machine, DozeHost dozeHost,
             AlarmManager alarmManager, AmbientDisplayConfiguration config,
@@ -225,6 +287,8 @@ public class DozeTriggers implements DozeMachine.Part {
         mMetricsLogger.write(new LogMaker(MetricsEvent.DOZING)
                 .setType(MetricsEvent.TYPE_UPDATE)
                 .setSubtype(reason));
+        Optional.ofNullable(DozingUpdateUiEvent.fromReason(reason))
+                .ifPresent(UI_EVENT_LOGGER::log);
         if (mDozeParameters.getDisplayNeedsBlanking()) {
             // Let's prepare the display to wake-up by drawing black.
             // This will cover the hardware wake-up sequence, where the display
@@ -402,6 +466,8 @@ public class DozeTriggers implements DozeMachine.Part {
         // Logs request pulse reason on AOD screen.
         mMetricsLogger.write(new LogMaker(MetricsEvent.DOZING)
                 .setType(MetricsEvent.TYPE_UPDATE).setSubtype(reason));
+        Optional.ofNullable(DozingUpdateUiEvent.fromReason(reason))
+                .ifPresent(UI_EVENT_LOGGER::log);
     }
 
     private boolean canPulse() {
