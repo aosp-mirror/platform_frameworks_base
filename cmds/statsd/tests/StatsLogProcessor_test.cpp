@@ -1691,6 +1691,111 @@ TEST(StatsLogProcessorTest, TestActivationsPersistAcrossSystemServerRestart) {
                             &buffer);
 }
 
+TEST(StatsLogProcessorTest_mapIsolatedUidToHostUid, LogHostUid) {
+    int hostUid = 20;
+    int isolatedUid = 30;
+    uint64_t eventTimeNs = 12355;
+    int atomId = 89;
+    int field1 = 90;
+    int field2 = 28;
+    sp<MockUidMap> mockUidMap = makeMockUidMapForOneHost(hostUid, {isolatedUid});
+    ConfigKey cfgKey;
+    StatsdConfig config = MakeConfig(false);
+    sp<StatsLogProcessor> processor =
+            CreateStatsLogProcessor(1, 1, config, cfgKey, nullptr, 0, mockUidMap);
+
+    shared_ptr<LogEvent> logEvent = makeUidLogEvent(atomId, eventTimeNs, hostUid, field1, field2);
+
+    processor->OnLogEvent(logEvent.get());
+
+    const vector<FieldValue>* actualFieldValues = &logEvent->getValues();
+    EXPECT_EQ(3, actualFieldValues->size());
+    EXPECT_EQ(hostUid, actualFieldValues->at(0).mValue.int_value);
+    EXPECT_EQ(field1, actualFieldValues->at(1).mValue.int_value);
+    EXPECT_EQ(field2, actualFieldValues->at(2).mValue.int_value);
+}
+
+TEST(StatsLogProcessorTest_mapIsolatedUidToHostUid, LogIsolatedUid) {
+    int hostUid = 20;
+    int isolatedUid = 30;
+    uint64_t eventTimeNs = 12355;
+    int atomId = 89;
+    int field1 = 90;
+    int field2 = 28;
+    sp<MockUidMap> mockUidMap = makeMockUidMapForOneHost(hostUid, {isolatedUid});
+    ConfigKey cfgKey;
+    StatsdConfig config = MakeConfig(false);
+    sp<StatsLogProcessor> processor =
+            CreateStatsLogProcessor(1, 1, config, cfgKey, nullptr, 0, mockUidMap);
+
+    shared_ptr<LogEvent> logEvent =
+            makeUidLogEvent(atomId, eventTimeNs, isolatedUid, field1, field2);
+
+    processor->OnLogEvent(logEvent.get());
+
+    const vector<FieldValue>* actualFieldValues = &logEvent->getValues();
+    EXPECT_EQ(3, actualFieldValues->size());
+    EXPECT_EQ(hostUid, actualFieldValues->at(0).mValue.int_value);
+    EXPECT_EQ(field1, actualFieldValues->at(1).mValue.int_value);
+    EXPECT_EQ(field2, actualFieldValues->at(2).mValue.int_value);
+}
+
+TEST(StatsLogProcessorTest_mapIsolatedUidToHostUid, LogHostUidAttributionChain) {
+    int hostUid = 20;
+    int isolatedUid = 30;
+    uint64_t eventTimeNs = 12355;
+    int atomId = 89;
+    int field1 = 90;
+    int field2 = 28;
+    sp<MockUidMap> mockUidMap = makeMockUidMapForOneHost(hostUid, {isolatedUid});
+    ConfigKey cfgKey;
+    StatsdConfig config = MakeConfig(false);
+    sp<StatsLogProcessor> processor =
+            CreateStatsLogProcessor(1, 1, config, cfgKey, nullptr, 0, mockUidMap);
+
+    shared_ptr<LogEvent> logEvent = makeAttributionLogEvent(atomId, eventTimeNs, {hostUid, 200},
+                                                            {"tag1", "tag2"}, field1, field2);
+
+    processor->OnLogEvent(logEvent.get());
+
+    const vector<FieldValue>* actualFieldValues = &logEvent->getValues();
+    EXPECT_EQ(6, actualFieldValues->size());
+    EXPECT_EQ(hostUid, actualFieldValues->at(0).mValue.int_value);
+    EXPECT_EQ("tag1", actualFieldValues->at(1).mValue.str_value);
+    EXPECT_EQ(200, actualFieldValues->at(2).mValue.int_value);
+    EXPECT_EQ("tag2", actualFieldValues->at(3).mValue.str_value);
+    EXPECT_EQ(field1, actualFieldValues->at(4).mValue.int_value);
+    EXPECT_EQ(field2, actualFieldValues->at(5).mValue.int_value);
+}
+
+TEST(StatsLogProcessorTest_mapIsolatedUidToHostUid, LogIsolatedUidAttributionChain) {
+    int hostUid = 20;
+    int isolatedUid = 30;
+    uint64_t eventTimeNs = 12355;
+    int atomId = 89;
+    int field1 = 90;
+    int field2 = 28;
+    sp<MockUidMap> mockUidMap = makeMockUidMapForOneHost(hostUid, {isolatedUid});
+    ConfigKey cfgKey;
+    StatsdConfig config = MakeConfig(false);
+    sp<StatsLogProcessor> processor =
+            CreateStatsLogProcessor(1, 1, config, cfgKey, nullptr, 0, mockUidMap);
+
+    shared_ptr<LogEvent> logEvent = makeAttributionLogEvent(atomId, eventTimeNs, {isolatedUid, 200},
+                                                            {"tag1", "tag2"}, field1, field2);
+
+    processor->OnLogEvent(logEvent.get());
+
+    const vector<FieldValue>* actualFieldValues = &logEvent->getValues();
+    EXPECT_EQ(6, actualFieldValues->size());
+    EXPECT_EQ(hostUid, actualFieldValues->at(0).mValue.int_value);
+    EXPECT_EQ("tag1", actualFieldValues->at(1).mValue.str_value);
+    EXPECT_EQ(200, actualFieldValues->at(2).mValue.int_value);
+    EXPECT_EQ("tag2", actualFieldValues->at(3).mValue.str_value);
+    EXPECT_EQ(field1, actualFieldValues->at(4).mValue.int_value);
+    EXPECT_EQ(field2, actualFieldValues->at(5).mValue.int_value);
+}
+
 #else
 GTEST_LOG_(INFO) << "This test does nothing.\n";
 #endif

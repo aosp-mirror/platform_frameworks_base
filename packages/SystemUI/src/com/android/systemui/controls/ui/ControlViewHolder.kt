@@ -19,6 +19,7 @@ package com.android.systemui.controls.ui
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
+import android.app.Dialog
 import android.content.Context
 import android.graphics.drawable.ClipDrawable
 import android.graphics.drawable.GradientDrawable
@@ -82,6 +83,8 @@ class ControlViewHolder(
     var cancelUpdate: Runnable? = null
     var behavior: Behavior? = null
     var lastAction: ControlAction? = null
+    private var lastChallengeDialog: Dialog? = null
+
     val deviceType: Int
         get() = cws.control?.let { it.getDeviceType() } ?: cws.ci.deviceType
     var dimmed: Boolean = false
@@ -140,7 +143,37 @@ class ControlViewHolder(
     }
 
     fun actionResponse(@ControlAction.ResponseResult response: Int) {
-        // TODO: b/150931809 - handle response codes
+        // OK responses signal normal behavior, and the app will provide control updates
+        val failedAttempt = lastChallengeDialog != null
+        when (response) {
+            ControlAction.RESPONSE_OK ->
+                lastChallengeDialog = null
+            ControlAction.RESPONSE_UNKNOWN -> {
+                lastChallengeDialog = null
+                setTransientStatus(context.resources.getString(R.string.controls_error_failed))
+            }
+            ControlAction.RESPONSE_FAIL -> {
+                lastChallengeDialog = null
+                setTransientStatus(context.resources.getString(R.string.controls_error_failed))
+            }
+            ControlAction.RESPONSE_CHALLENGE_PIN -> {
+                lastChallengeDialog = ChallengeDialogs.createPinDialog(this, false, failedAttempt)
+                lastChallengeDialog?.show()
+            }
+            ControlAction.RESPONSE_CHALLENGE_PASSPHRASE -> {
+                lastChallengeDialog = ChallengeDialogs.createPinDialog(this, true, failedAttempt)
+                lastChallengeDialog?.show()
+            }
+            ControlAction.RESPONSE_CHALLENGE_ACK -> {
+                lastChallengeDialog = ChallengeDialogs.createConfirmationDialog(this)
+                lastChallengeDialog?.show()
+            }
+        }
+    }
+
+    fun dismiss() {
+        lastChallengeDialog?.dismiss()
+        lastChallengeDialog = null
     }
 
     fun setTransientStatus(tempStatus: String) {
@@ -166,7 +199,9 @@ class ControlViewHolder(
         deviceType: Int
     ): KClass<out Behavior> {
         return when {
-            status == Control.STATUS_UNKNOWN -> UnknownBehavior::class
+            status == Control.STATUS_UNKNOWN -> StatusBehavior::class
+            status == Control.STATUS_ERROR -> StatusBehavior::class
+            status == Control.STATUS_NOT_FOUND -> StatusBehavior::class
             deviceType == DeviceTypes.TYPE_CAMERA -> TouchBehavior::class
             template is ToggleTemplate -> ToggleBehavior::class
             template is StatelessTemplate -> TouchBehavior::class
