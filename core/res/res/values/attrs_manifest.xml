@@ -1830,9 +1830,30 @@
         <!-- @hide no longer used, kept to preserve padding -->
         <attr name="allowAutoRevokePermissionsExemption" format="boolean" />
 
+        <!-- Declare the app's tolerance to having its permissions automatically revoked when unused for an extended
+             period of time -->
         <attr name="autoRevokePermissions">
+            <!-- App supports re-requesting its permissions if revoked.
+                 Revoking app's permissions doesn't cause user experience issues, aside from a repeated permission request.
+
+                 Permissions may be automatically revoked from an app if unused. The app must check and possibly request the
+                 necessary permission on each permission-gated call-->
             <enum name="allowed" value="0" />
+            <!-- App may experience degraded functionality when its previously-granted permissions are revoked.
+                 Revoking app's permissions may cause user experience issues, that are not critical to the user.
+
+                 Apps with this declaration can choose to request an exemption from auto revoke from user by starting
+                 an activity with {@code Intent.ACTION_AUTO_REVOKE_PERMISSIONS}. -->
             <enum name="discouraged" value="1" />
+            <!-- User may experience severe consequences if this app's permissions are revoked unexpectedly.
+
+                 E.g. app may fail to do a user-critical background job that may likely impact user's
+                 safety/security/device accessibility.
+
+                 This declaration may cause an additional review when publishing your app.
+
+                 Apps with this declaration are exempt from auto revoke by default, though the user has the final say
+                 in both revoking the permissions as well as the app's auto revoke exemption status. -->
             <enum name="disallowed" value="2" />
         </attr>
     </declare-styleable>
