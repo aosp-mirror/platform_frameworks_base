@@ -131,6 +131,7 @@ public class BubbleExpandedView extends LinearLayout {
                         }
                         try {
                             if (!mIsOverflow && mBubble.usingShortcutInfo()) {
+                                options.setApplyActivityFlagsForBubbles(true);
                                 mActivityView.startShortcutActivity(mBubble.getShortcutInfo(),
                                         options, null /* sourceBounds */);
                             } else {
