@@ -9408,7 +9408,8 @@ public class PackageManagerService extends IPackageManager.Stub
                                             getSharedLibLatestVersionSetting(scanResult))),
                             mSettings.mKeySetManagerService);
                     appIdCreated = optimisticallyRegisterAppId(scanResult);
-                    commitReconciledScanResultLocked(reconcileResult.get(pkgName));
+                    commitReconciledScanResultLocked(
+                            reconcileResult.get(pkgName), mUserManager.getUserIds());
                 } catch (PackageManagerException e) {
                     if (appIdCreated) {
                         cleanUpAppIdCreation(scanResult);
@@ -9429,8 +9430,13 @@ public class PackageManagerService extends IPackageManager.Stub
     // TODO:(b/135203078): Move to parsing
     private static void renameStaticSharedLibraryPackage(ParsedPackage parsedPackage) {
         // Derive the new package synthetic package name
-        parsedPackage.setPackageName(parsedPackage.getPackageName() + STATIC_SHARED_LIB_DELIMITER
-                + parsedPackage.getStaticSharedLibVersion());
+        parsedPackage.setPackageName(toStaticSharedLibraryPackageName(
+                parsedPackage.getPackageName(), parsedPackage.getStaticSharedLibVersion()));
+    }
+
+    private static String toStaticSharedLibraryPackageName(
+            String packageName, long libraryVersion) {
+        return packageName + STATIC_SHARED_LIB_DELIMITER + libraryVersion;
     }
 
     static String fixProcessName(String defProcessName, String processName) {
@@ -10371,7 +10377,7 @@ public class PackageManagerService extends IPackageManager.Stub
         final ArrayList<SharedLibraryInfo> sharedLibraryInfos = collectSharedLibraryInfos(
                 pkgSetting.pkg, availablePackages, mSharedLibraries, null);
         executeSharedLibrariesUpdateLPr(pkg, pkgSetting, changingLib, changingLibSetting,
-                sharedLibraryInfos);
+                sharedLibraryInfos, mUserManager.getUserIds());
     }
 
     private static ArrayList<SharedLibraryInfo> collectSharedLibraryInfos(AndroidPackage pkg,
@@ -10408,7 +10414,7 @@ public class PackageManagerService extends IPackageManager.Stub
     private void executeSharedLibrariesUpdateLPr(AndroidPackage pkg,
             @NonNull PackageSetting pkgSetting, @Nullable AndroidPackage changingLib,
             @Nullable PackageSetting changingLibSetting,
-            ArrayList<SharedLibraryInfo> usesLibraryInfos) {
+            ArrayList<SharedLibraryInfo> usesLibraryInfos, int[] allUsers) {
         // If the package provides libraries, clear their old dependencies.
         // This method will set them up again.
         applyDefiningSharedLibraryUpdateLocked(pkg, null, (definingLibrary, dependency) -> {
@@ -10424,6 +10430,30 @@ public class PackageManagerService extends IPackageManager.Stub
                         changingLibSetting);
             }
             pkgSetting.getPkgState().setUsesLibraryFiles(new ArrayList<>(usesLibraryFiles));
+            // let's make sure we mark all static shared libraries as installed for the same users
+            // that its dependent packages are installed for.
+            int[] installedUsers = new int[allUsers.length];
+            int installedUserCount = 0;
+            for (int u = 0; u < allUsers.length; u++) {
+                if (pkgSetting.getInstalled(allUsers[u])) {
+                    installedUsers[installedUserCount++] = allUsers[u];
+                }
+            }
+            for (SharedLibraryInfo sharedLibraryInfo : usesLibraryInfos) {
+                if (!sharedLibraryInfo.isStatic()) {
+                    continue;
+                }
+                final PackageSetting staticLibPkgSetting = getPackageSetting(
+                        toStaticSharedLibraryPackageName(sharedLibraryInfo.getPackageName(),
+                                sharedLibraryInfo.getLongVersion()));
+                if (staticLibPkgSetting == null) {
+                    Slog.wtf(TAG, "Shared lib without setting: " + sharedLibraryInfo);
+                    continue;
+                }
+                for (int u = 0; u < installedUserCount; u++) {
+                    staticLibPkgSetting.setInstalled(true, installedUsers[u]);
+                }
+            }
         } else {
             pkgSetting.getPkgState().setUsesLibraryInfos(Collections.emptyList())
                     .setUsesLibraryFiles(Collections.emptyList());
@@ -10917,7 +10947,7 @@ public class PackageManagerService extends IPackageManager.Stub
      */
     @GuardedBy({"mLock", "mInstallLock"})
     private AndroidPackage commitReconciledScanResultLocked(
-            @NonNull ReconciledPackage reconciledPkg) {
+            @NonNull ReconciledPackage reconciledPkg, int[] allUsers) {
         final ScanResult result = reconciledPkg.scanResult;
         final ScanRequest request = result.request;
         // TODO(b/135203078): Move this even further away
@@ -10976,7 +11006,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         if (reconciledPkg.collectedSharedLibraryInfos != null) {
             executeSharedLibrariesUpdateLPr(pkg, pkgSetting, null, null,
-                    reconciledPkg.collectedSharedLibraryInfos);
+                    reconciledPkg.collectedSharedLibraryInfos, allUsers);
         }
 
         final KeySetManagerService ksms = mSettings.mKeySetManagerService;
@@ -16521,7 +16551,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
             }
 
-            AndroidPackage pkg = commitReconciledScanResultLocked(reconciledPkg);
+            AndroidPackage pkg = commitReconciledScanResultLocked(reconciledPkg, request.mAllUsers);
             updateSettingsLI(pkg, reconciledPkg.installArgs, request.mAllUsers, res);
 
             final PackageSetting ps = mSettings.mPackages.get(packageName);
