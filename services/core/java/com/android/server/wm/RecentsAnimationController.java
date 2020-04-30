@@ -421,16 +421,17 @@ public class RecentsAnimationController implements DeathRecipient {
 
     @VisibleForTesting
     AnimationAdapter addAnimation(Task task, boolean isRecentTaskInvisible) {
-        return addAnimation(task, isRecentTaskInvisible, null /* finishedCallback */);
+        return addAnimation(task, isRecentTaskInvisible, false /* hidden */,
+                null /* finishedCallback */);
     }
 
     @VisibleForTesting
-    AnimationAdapter addAnimation(Task task, boolean isRecentTaskInvisible,
+    AnimationAdapter addAnimation(Task task, boolean isRecentTaskInvisible, boolean hidden,
             OnAnimationFinishedCallback finishedCallback) {
         ProtoLog.d(WM_DEBUG_RECENTS_ANIMATIONS, "addAnimation(%s)", task.getName());
         final TaskAnimationAdapter taskAdapter = new TaskAnimationAdapter(task,
                 isRecentTaskInvisible);
-        task.startAnimation(task.getPendingTransaction(), taskAdapter, false /* hidden */,
+        task.startAnimation(task.getPendingTransaction(), taskAdapter, hidden,
                 ANIMATION_TYPE_RECENTS, finishedCallback);
         task.commitPendingTransaction();
         mPendingAnimations.add(taskAdapter);
@@ -530,7 +531,7 @@ public class RecentsAnimationController implements DeathRecipient {
         final SparseBooleanArray recentTaskIds =
                 mService.mAtmService.getRecentTasks().getRecentTaskIds();
         TaskAnimationAdapter adapter = (TaskAnimationAdapter) addAnimation(task,
-                !recentTaskIds.get(task.mTaskId), finishedCallback);
+                !recentTaskIds.get(task.mTaskId), true /* hidden */, finishedCallback);
         mPendingNewTaskTargets.add(task.mTaskId);
         return adapter.createRemoteAnimationTarget();
     }
