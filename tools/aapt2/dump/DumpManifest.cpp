@@ -91,6 +91,7 @@ enum {
 };
 
 const std::string& kAndroidNamespace = "http://schemas.android.com/apk/res/android";
+constexpr int kCurrentDevelopmentVersion = 10000;
 
 /** Retrieves the attribute of the element with the specified attribute resource id. */
 static xml::Attribute* FindAttribute(xml::Element *el, uint32_t resd_id) {
@@ -325,7 +326,7 @@ class ManifestExtractor {
     ConfigDescription config;
     config.orientation = android::ResTable_config::ORIENTATION_PORT;
     config.density = android::ResTable_config::DENSITY_MEDIUM;
-    config.sdkVersion = 10000; // Very high.
+    config.sdkVersion = kCurrentDevelopmentVersion; // Very high.
     config.screenWidthDp = 320;
     config.screenHeightDp = 480;
     config.smallestScreenWidthDp = 320;
@@ -622,6 +623,8 @@ class UsesSdkBadging : public ManifestExtractor::Element {
     }
     if (target_sdk) {
       extractor()->RaiseTargetSdk(*target_sdk);
+    } else if (target_sdk_name) {
+      extractor()->RaiseTargetSdk(kCurrentDevelopmentVersion);
     }
   }
 
