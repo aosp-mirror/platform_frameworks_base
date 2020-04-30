@@ -249,6 +249,15 @@ public class InfoMediaManager extends MediaManager {
         return deviceList;
     }
 
+    void adjustSessionVolume(RoutingSessionInfo info, int volume) {
+        if (info == null) {
+            Log.w(TAG, "Unable to adjust session volume. RoutingSessionInfo is empty");
+            return;
+        }
+
+        mRouterManager.setSessionVolume(info, volume);
+    }
+
     /**
      * Adjust the volume of {@link android.media.RoutingSessionInfo}.
      *
@@ -350,6 +359,10 @@ public class InfoMediaManager extends MediaManager {
                 addMediaDevice(route);
             }
         }
+    }
+
+    List<RoutingSessionInfo> getActiveMediaSession() {
+        return mRouterManager.getActiveSessions();
     }
 
     private void buildAvailableRoutes() {

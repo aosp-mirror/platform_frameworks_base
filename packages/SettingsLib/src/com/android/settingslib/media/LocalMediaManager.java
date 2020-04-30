@@ -20,6 +20,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
+import android.media.RoutingSessionInfo;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -256,22 +257,6 @@ public class LocalMediaManager implements BluetoothCallback {
     }
 
     /**
-     * Find the active MediaDevice.
-     *
-     * @param type the media device type.
-     * @return MediaDevice list
-     */
-    public List<MediaDevice> getActiveMediaDevice(@MediaDevice.MediaDeviceType int type) {
-        final List<MediaDevice> devices = new ArrayList<>();
-        for (MediaDevice device : mMediaDevices) {
-            if (type == device.mType && device.getClientPackageName() != null) {
-                devices.add(device);
-            }
-        }
-        return devices;
-    }
-
-    /**
      * Add a MediaDevice to let it play current media.
      *
      * @param device MediaDevice
@@ -319,6 +304,23 @@ public class LocalMediaManager implements BluetoothCallback {
     /**
      * Adjust the volume of session.
      *
+     * @param sessionId the value of media session id
+     * @param volume the value of volume
+     */
+    public void adjustSessionVolume(String sessionId, int volume) {
+        final List<RoutingSessionInfo> infos = getActiveMediaSession();
+        for (RoutingSessionInfo info : infos) {
+            if (TextUtils.equals(sessionId, info.getId())) {
+                mInfoMediaManager.adjustSessionVolume(info, volume);
+                return;
+            }
+        }
+        Log.w(TAG, "adjustSessionVolume: Unable to find session: " + sessionId);
+    }
+
+    /**
+     * Adjust the volume of session.
+     *
      * @param volume the value of volume
      */
     public void adjustSessionVolume(int volume) {
@@ -350,6 +352,15 @@ public class LocalMediaManager implements BluetoothCallback {
      */
     public CharSequence getSessionName() {
         return mInfoMediaManager.getSessionName();
+    }
+
+    /**
+     * Gets the current active session.
+     *
+     * @return current active session list{@link android.media.RoutingSessionInfo}
+     */
+    public List<RoutingSessionInfo> getActiveMediaSession() {
+        return mInfoMediaManager.getActiveMediaSession();
     }
 
     private MediaDevice updateCurrentConnectedDevice() {
