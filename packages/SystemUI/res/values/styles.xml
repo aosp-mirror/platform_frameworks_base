@@ -258,7 +258,7 @@
 
     <style name="TextAppearance.AuthCredential.Title">
         <item name="android:fontFamily">google-sans</item>
-        <item name="android:paddingTop">16dp</item>
+        <item name="android:paddingTop">12dp</item>
         <item name="android:paddingHorizontal">24dp</item>
         <item name="android:textSize">24sp</item>
     </style>
@@ -278,7 +278,7 @@
     </style>
 
     <style name="TextAppearance.AuthCredential.Error">
-        <item name="android:paddingTop">12dp</item>
+        <item name="android:paddingTop">6dp</item>
         <item name="android:paddingHorizontal">24dp</item>
         <item name="android:textSize">14sp</item>
         <item name="android:textColor">?android:attr/colorError</item>

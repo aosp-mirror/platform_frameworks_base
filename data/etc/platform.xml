@@ -152,6 +152,8 @@
     <assign-permission name="android.permission.UPDATE_DEVICE_STATS" uid="media" />
     <assign-permission name="android.permission.UPDATE_APP_OPS_STATS" uid="media" />
     <assign-permission name="android.permission.GET_PROCESS_STATE_AND_OOM_SCORE" uid="media" />
+    <assign-permission name="android.permission.PACKAGE_USAGE_STATS" uid="media" />
+
     <assign-permission name="android.permission.INTERNET" uid="media" />
 
     <assign-permission name="android.permission.INTERNET" uid="shell" />
