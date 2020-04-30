@@ -430,6 +430,7 @@
     <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"Снимање екран"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Започни"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Сопри"</string>
+    <string name="media_seamless_remote_device" msgid="177033467332920464">"Уред"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Повлечете нагоре за да се префрлите од една на друга апликација"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Повлечете надесно за брзо префрлање меѓу апликациите"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Вклучи/исклучи преглед"</string>
@@ -712,6 +713,7 @@
     <string name="notification_channel_summary_priority" msgid="7415770044553264622">"Се појавува на горниот дел од разговорот и изгледа како балонче."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Поставки"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Приоритет"</string>
+    <string name="no_shortcut" msgid="7176375126961212514">"<xliff:g id="APP_NAME">%1$s</xliff:g> не поддржува поставки поврзани со разговорите"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Нема неодамнешни балончиња"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Неодамнешните и отфрлените балончиња ќе се појавуваат тука"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Овие известувања не може да се изменат"</string>
@@ -1024,6 +1026,8 @@
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Изберете ги контролите до кои ќе пристапувате од менито за вклучување"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Задржете и влечете за да ги преуредите контролите"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Сите контроли се отстранети"</string>
+    <!-- no translation found for controls_favorite_toast_no_changes (7094494210840877931) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Не можеше да се вчита списокот со сите контроли."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Друга"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Додајте во контроли за уредите"</string>
@@ -1032,6 +1036,7 @@
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"Контролите се ажурирани"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"PIN-кодот содржи букви или симболи"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"Потврдете го <xliff:g id="DEVICE">%s</xliff:g>"</string>
+    <string name="controls_pin_wrong" msgid="6162694056042164211">"Погрешен PIN"</string>
     <string name="controls_pin_verifying" msgid="3755045989392131746">"Се потврдува…"</string>
     <string name="controls_pin_instructions" msgid="6363309783822475238">"Внесете PIN"</string>
     <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"Обидете се со друг PIN"</string>
@@ -1041,6 +1046,9 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Се вчитуваат препораки"</string>
     <string name="controls_media_close_session" msgid="9023534788828414585">"Затвори ја аудиовизуелнава сесија"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Неактивна, провери апликација"</string>
+    <string name="controls_error_retryable" msgid="864025882878378470">"Грешка, повторен обид…"</string>
+    <string name="controls_error_removed" msgid="6299213591234723805">"Уредот е отстранет"</string>
+    <string name="controls_error_generic" msgid="352500456918362905">"Не може да се вчита статусот"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Грешка, обидете се повторно"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"Во тек"</string>
     <string name="controls_added_tooltip" msgid="4842812921719153085">"Задржете го копчето за вклучување за да ги видите новите контроли"</string>

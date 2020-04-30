@@ -430,6 +430,8 @@
     <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"اسکرین ریکارڈر کریں"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"آغاز"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"روکیں"</string>
+    <!-- no translation found for media_seamless_remote_device (177033467332920464) -->
+    <skip />
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"ایپس سوئچ کرنے کیلئے اوپر سوائپ کریں"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"تیزی سے ایپس کو سوئچ کرنے کے لیے دائیں طرف گھسیٹیں"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"مجموعی جائزہ ٹوگل کریں"</string>
@@ -712,6 +714,8 @@
     <string name="notification_channel_summary_priority" msgid="7415770044553264622">"گفتگو کے سیکشن میں سب سے اوپر دکھاتا ہے اور بلبلہ کے طور پر ظاہر ہوتا ہے۔"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"ترتیبات"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"ترجیح"</string>
+    <!-- no translation found for no_shortcut (7176375126961212514) -->
+    <skip />
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"کوئی حالیہ بلبلہ نہیں"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"حالیہ بلبلے اور برخاست شدہ بلبلے یہاں ظاہر ہوں گے"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"ان اطلاعات کی ترمیم نہیں کی جا سکتی۔"</string>
@@ -999,8 +1003,7 @@
     <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"کسی بھی وقت بلبلے کو کنٹرول کریں"</string>
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"اس ایپ سے بلبلوں کو آف کرنے کے لیے نظم کریں پر تھپتھپائیں"</string>
     <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"سمجھ آ گئی"</string>
-    <!-- no translation found for bubbles_app_settings (5779443644062348657) -->
-    <skip />
+    <string name="bubbles_app_settings" msgid="5779443644062348657">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> ترتیبات"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"سسٹم نیویگیشن اپ ڈیٹ کیا گیا۔ تبدیلیاں کرنے کے لیے، ترتیبات پر جائیں۔"</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"سسٹم نیویگیشن اپ ڈیٹ کرنے کے لیے ترتیبات پر جائیں"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"اسٹینڈ بائی"</string>
@@ -1025,6 +1028,8 @@
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"پاور مینو سے رسائی حاصل کرنے کے لیے کنٹرولز کو منتخب کریں"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"کنٹرولز کو دوبارہ ترتیب دینے کے ليے پکڑیں اور گھسیٹیں"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"سبھی کنٹرولز ہٹا دیے گئے"</string>
+    <!-- no translation found for controls_favorite_toast_no_changes (7094494210840877931) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"تمام کنٹرولز کی فہرست لوڈ نہیں کی جا سکی۔"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"دیگر"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"آلہ کے کنٹرولز میں شامل کریں"</string>
@@ -1033,6 +1038,7 @@
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"کنٹرولز اپ ڈیٹ کیے گئے"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"‏PIN میں حروف یا علامات شامل ہیں"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"<xliff:g id="DEVICE">%s</xliff:g> کی تصدیق کریں"</string>
+    <string name="controls_pin_wrong" msgid="6162694056042164211">"‏غلط PIN"</string>
     <string name="controls_pin_verifying" msgid="3755045989392131746">"توثیق ہو رہی ہے…"</string>
     <string name="controls_pin_instructions" msgid="6363309783822475238">"‏PIN درج کریں"</string>
     <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"‏کوئی دوسرا PIN آزمائیں"</string>
@@ -1042,6 +1048,9 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"تجاویز لوڈ ہو رہی ہیں"</string>
     <string name="controls_media_close_session" msgid="9023534788828414585">"اس میڈیا سیشن کو بند کریں"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"غیر فعال، ایپ چیک کریں"</string>
+    <string name="controls_error_retryable" msgid="864025882878378470">"خرابی، دوبارہ کوشش کی جا رہی ہے…"</string>
+    <string name="controls_error_removed" msgid="6299213591234723805">"آلہ ہٹا دیا گیا"</string>
+    <string name="controls_error_generic" msgid="352500456918362905">"صورتحال لوڈ نہیں ہو سکتی"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"خرابی، دوبارہ کوشش کریں"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"پیشرفت میں"</string>
     <string name="controls_added_tooltip" msgid="4842812921719153085">"نئے کنٹرولز دیکھنے کے لیے پاور بٹن کو دبائے رکھیں"</string>
