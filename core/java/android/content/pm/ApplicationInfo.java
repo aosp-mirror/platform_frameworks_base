@@ -25,7 +25,6 @@ import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.content.pm.ProcessInfo;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -39,8 +38,6 @@ import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.util.ArrayUtils;
-import com.android.internal.util.Parcelling;
-import com.android.internal.util.Parcelling.BuiltIn.ForBoolean;
 import com.android.server.SystemConfig;
 
 import java.lang.annotation.Retention;
@@ -1725,9 +1722,9 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         dest.writeString8(scanPublicSourceDir);
         dest.writeString8(sourceDir);
         dest.writeString8(publicSourceDir);
-        dest.writeStringArray(splitNames);
-        dest.writeStringArray(splitSourceDirs);
-        dest.writeStringArray(splitPublicSourceDirs);
+        dest.writeString8Array(splitNames);
+        dest.writeString8Array(splitSourceDirs);
+        dest.writeString8Array(splitPublicSourceDirs);
         dest.writeSparseArray((SparseArray) splitDependencies);
         dest.writeString8(nativeLibraryDir);
         dest.writeString8(secondaryNativeLibraryDir);
@@ -1735,10 +1732,10 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         dest.writeInt(nativeLibraryRootRequiresIsa ? 1 : 0);
         dest.writeString8(primaryCpuAbi);
         dest.writeString8(secondaryCpuAbi);
-        dest.writeStringArray(resourceDirs);
+        dest.writeString8Array(resourceDirs);
         dest.writeString8(seInfo);
         dest.writeString8(seInfoUser);
-        dest.writeStringArray(sharedLibraryFiles);
+        dest.writeString8Array(sharedLibraryFiles);
         dest.writeTypedList(sharedLibraryInfos);
         dest.writeString8(dataDir);
         dest.writeString8(deviceProtectedDataDir);
@@ -1760,7 +1757,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         dest.writeInt(category);
         dest.writeInt(targetSandboxVersion);
         dest.writeString8(classLoaderName);
-        dest.writeStringArray(splitClassLoaderNames);
+        dest.writeString8Array(splitClassLoaderNames);
         dest.writeInt(compileSdkVersion);
         dest.writeString8(compileSdkVersionCodename);
         dest.writeString8(appComponentFactory);
@@ -1806,9 +1803,9 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         scanPublicSourceDir = source.readString8();
         sourceDir = source.readString8();
         publicSourceDir = source.readString8();
-        splitNames = source.readStringArray();
-        splitSourceDirs = source.readStringArray();
-        splitPublicSourceDirs = source.readStringArray();
+        splitNames = source.createString8Array();
+        splitSourceDirs = source.createString8Array();
+        splitPublicSourceDirs = source.createString8Array();
         splitDependencies = source.readSparseArray(null);
         nativeLibraryDir = source.readString8();
         secondaryNativeLibraryDir = source.readString8();
@@ -1816,10 +1813,10 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         nativeLibraryRootRequiresIsa = source.readInt() != 0;
         primaryCpuAbi = source.readString8();
         secondaryCpuAbi = source.readString8();
-        resourceDirs = source.readStringArray();
+        resourceDirs = source.createString8Array();
         seInfo = source.readString8();
         seInfoUser = source.readString8();
-        sharedLibraryFiles = source.readStringArray();
+        sharedLibraryFiles = source.createString8Array();
         sharedLibraryInfos = source.createTypedArrayList(SharedLibraryInfo.CREATOR);
         dataDir = source.readString8();
         deviceProtectedDataDir = source.readString8();
@@ -1841,7 +1838,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         category = source.readInt();
         targetSandboxVersion = source.readInt();
         classLoaderName = source.readString8();
-        splitClassLoaderNames = source.readStringArray();
+        splitClassLoaderNames = source.createString8Array();
         compileSdkVersion = source.readInt();
         compileSdkVersionCodename = source.readString8();
         appComponentFactory = source.readString8();
