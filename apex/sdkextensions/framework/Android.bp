@@ -48,6 +48,7 @@ stubs_defaults {
     name: "framework-sdkextensions-stubs-defaults",
     srcs: [ ":framework-sdkextensions-sources" ],
     libs: [ "framework-annotations-lib" ],
+    dist: { dest: "framework-sdkextensions.txt" },
 }
 
 droidstubs {
@@ -55,7 +56,7 @@ droidstubs {
     defaults: [
         "framework-module-stubs-defaults-publicapi",
         "framework-sdkextensions-stubs-defaults",
-    ]
+    ],
 }
 
 droidstubs {
@@ -63,7 +64,7 @@ droidstubs {
     defaults: [
         "framework-module-stubs-defaults-systemapi",
         "framework-sdkextensions-stubs-defaults",
-    ]
+    ],
 }
 
 droidstubs {
@@ -71,7 +72,7 @@ droidstubs {
     defaults: [
         "framework-module-api-defaults-module_libs_api",
         "framework-sdkextensions-stubs-defaults",
-    ]
+    ],
 }
 
 droidstubs {
@@ -79,7 +80,7 @@ droidstubs {
     defaults: [
         "framework-module-stubs-defaults-module_libs_api",
         "framework-sdkextensions-stubs-defaults",
-    ]
+    ],
 }
 
 java_library {
@@ -89,7 +90,8 @@ java_library {
     visibility: [
         "//frameworks/base", // Framework
         "//frameworks/base/apex/sdkextensions", // sdkextensions SDK
-    ]
+    ],
+    dist: { dest: "framework-sdkextensions.jar" },
 }
 
 java_library {
@@ -99,7 +101,8 @@ java_library {
     visibility: [
         "//frameworks/base", // Framework
         "//frameworks/base/apex/sdkextensions", // sdkextensions SDK
-    ]
+    ],
+    dist: { dest: "framework-sdkextensions.jar" },
 }
 
 java_library {
@@ -109,5 +112,6 @@ java_library {
     visibility: [
         "//frameworks/base", // Framework
         "//frameworks/base/apex/sdkextensions", // sdkextensions SDK
-    ]
+    ],
+    dist: { dest: "framework-sdkextensions.jar" },
 }
