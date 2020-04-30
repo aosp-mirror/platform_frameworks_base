@@ -266,6 +266,14 @@ public class ActivityOptions {
             "android:activity.disallowEnterPictureInPictureWhileLaunching";
 
     /**
+     * Indicates flags should be applied to the launching activity such that it will behave
+     * correctly in a bubble.
+     * @hide
+     */
+    private static final String KEY_APPLY_ACTIVITY_FLAGS_FOR_BUBBLES =
+            "android:activity.applyActivityFlagsForBubbles";
+
+    /**
      * For Activity transitions, the calling Activity's TransitionListener used to
      * notify the called Activity when the shared element and the exit transitions
      * complete.
@@ -354,6 +362,7 @@ public class ActivityOptions {
     private int mSplitScreenCreateMode = SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
     private boolean mLockTaskMode = false;
     private boolean mDisallowEnterPictureInPictureWhileLaunching;
+    private boolean mApplyActivityFlagsForBubbles;
     private boolean mTaskAlwaysOnTop;
     private boolean mTaskOverlay;
     private boolean mTaskOverlayCanResume;
@@ -1033,6 +1042,8 @@ public class ActivityOptions {
                 SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT);
         mDisallowEnterPictureInPictureWhileLaunching = opts.getBoolean(
                 KEY_DISALLOW_ENTER_PICTURE_IN_PICTURE_WHILE_LAUNCHING, false);
+        mApplyActivityFlagsForBubbles = opts.getBoolean(
+                KEY_APPLY_ACTIVITY_FLAGS_FOR_BUBBLES, false);
         if (opts.containsKey(KEY_ANIM_SPECS)) {
             Parcelable[] specs = opts.getParcelableArray(KEY_ANIM_SPECS);
             mAnimSpecs = new AppTransitionAnimationSpec[specs.length];
@@ -1465,6 +1476,16 @@ public class ActivityOptions {
         return mDisallowEnterPictureInPictureWhileLaunching;
     }
 
+    /** @hide */
+    public void setApplyActivityFlagsForBubbles(boolean apply) {
+        mApplyActivityFlagsForBubbles = apply;
+    }
+
+    /**  @hide */
+    public boolean isApplyActivityFlagsForBubbles() {
+        return mApplyActivityFlagsForBubbles;
+    }
+
     /**
      * Update the current values in this ActivityOptions from those supplied
      * in <var>otherOptions</var>.  Any values
@@ -1662,6 +1683,9 @@ public class ActivityOptions {
         if (mDisallowEnterPictureInPictureWhileLaunching) {
             b.putBoolean(KEY_DISALLOW_ENTER_PICTURE_IN_PICTURE_WHILE_LAUNCHING,
                     mDisallowEnterPictureInPictureWhileLaunching);
+        }
+        if (mApplyActivityFlagsForBubbles) {
+            b.putBoolean(KEY_APPLY_ACTIVITY_FLAGS_FOR_BUBBLES, mApplyActivityFlagsForBubbles);
         }
         if (mAnimSpecs != null) {
             b.putParcelableArray(KEY_ANIM_SPECS, mAnimSpecs);
