@@ -46,12 +46,16 @@ import android.testing.TestableLooper.RunWithLooper;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.logging.InstanceId;
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.UiEventLogger;
+import com.android.internal.logging.testing.UiEventLoggerFake;
 import com.android.systemui.Dependency;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.qs.QSEvent;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.qs.logging.QSLogger;
@@ -83,6 +87,8 @@ public class QSTileImplTest extends SysuiTestCase {
     private QSTileHost mHost;
     private MetricsLogger mMetricsLogger;
     private StatusBarStateController mStatusBarStateController;
+    private UiEventLoggerFake mUiEventLoggerFake;
+    private InstanceId mInstanceId = InstanceId.fakeInstanceId(5);
 
     @Captor
     private ArgumentCaptor<LogMaker> mLogCaptor;
@@ -94,12 +100,15 @@ public class QSTileImplTest extends SysuiTestCase {
         mDependency.injectTestDependency(Dependency.BG_LOOPER, mTestableLooper.getLooper());
         mDependency.injectMockDependency(ActivityStarter.class);
         mMetricsLogger = mDependency.injectMockDependency(MetricsLogger.class);
+        mUiEventLoggerFake = new UiEventLoggerFake();
         mStatusBarStateController =
             mDependency.injectMockDependency(StatusBarStateController.class);
         mHost = mock(QSTileHost.class);
         when(mHost.indexOf(SPEC)).thenReturn(POSITION);
         when(mHost.getContext()).thenReturn(mContext.getBaseContext());
         when(mHost.getQSLogger()).thenReturn(mQsLogger);
+        when(mHost.getUiEventLogger()).thenReturn(mUiEventLoggerFake);
+        when(mHost.getNewInstanceId()).thenReturn(mInstanceId);
 
         mTile = spy(new TileImpl(mHost));
         mTile.mHandler = mTile.new H(mTestableLooper.getLooper());
@@ -110,6 +119,9 @@ public class QSTileImplTest extends SysuiTestCase {
     public void testClick_Metrics() {
         mTile.click();
         verify(mMetricsLogger).write(argThat(new TileLogMatcher(ACTION_QS_CLICK)));
+        assertEquals(1, mUiEventLoggerFake.numLogs());
+        UiEventLoggerFake.FakeUiEvent event = mUiEventLoggerFake.get(0);
+        assertEvent(QSEvent.QS_ACTION_CLICK, event);
     }
 
     @Test
@@ -133,6 +145,9 @@ public class QSTileImplTest extends SysuiTestCase {
     public void testSecondaryClick_Metrics() {
         mTile.secondaryClick();
         verify(mMetricsLogger).write(argThat(new TileLogMatcher(ACTION_QS_SECONDARY_CLICK)));
+        assertEquals(1, mUiEventLoggerFake.numLogs());
+        UiEventLoggerFake.FakeUiEvent event = mUiEventLoggerFake.get(0);
+        assertEvent(QSEvent.QS_ACTION_SECONDARY_CLICK, event);
     }
 
     @Test
@@ -156,6 +171,9 @@ public class QSTileImplTest extends SysuiTestCase {
     public void testLongClick_Metrics() {
         mTile.longClick();
         verify(mMetricsLogger).write(argThat(new TileLogMatcher(ACTION_QS_LONG_PRESS)));
+        assertEquals(1, mUiEventLoggerFake.numLogs());
+        UiEventLoggerFake.FakeUiEvent event = mUiEventLoggerFake.get(0);
+        assertEvent(QSEvent.QS_ACTION_LONG_PRESS, event);
     }
 
 
@@ -247,6 +265,13 @@ public class QSTileImplTest extends SysuiTestCase {
 
         mTile.handleSetListening(false);
         verify(mQsLogger).logTileChangeListening(SPEC, false);
+    }
+
+    private void assertEvent(UiEventLogger.UiEventEnum eventType,
+            UiEventLoggerFake.FakeUiEvent fakeEvent) {
+        assertEquals(eventType.getId(), fakeEvent.eventId);
+        assertEquals(SPEC, fakeEvent.packageName);
+        assertEquals(mInstanceId, fakeEvent.instanceId);
     }
 
     private class TileLogMatcher implements ArgumentMatcher<LogMaker> {

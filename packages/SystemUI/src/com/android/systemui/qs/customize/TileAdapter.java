@@ -41,8 +41,8 @@ import androidx.recyclerview.widget.RecyclerView.State;
 import androidx.recyclerview.widget.RecyclerView.ViewHolder;
 
 import com.android.internal.logging.UiEventLogger;
-import com.android.internal.logging.UiEventLoggerImpl;
 import com.android.systemui.R;
+import com.android.systemui.qs.QSEditEvent;
 import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.qs.customize.TileAdapter.Holder;
 import com.android.systemui.qs.customize.TileQueryHelper.TileInfo;
@@ -92,10 +92,11 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
     private int mAccessibilityFromIndex;
     private CharSequence mAccessibilityFromLabel;
     private QSTileHost mHost;
-    private UiEventLogger mUiEventLogger = new UiEventLoggerImpl();
+    private final UiEventLogger mUiEventLogger;
 
-    public TileAdapter(Context context) {
+    public TileAdapter(Context context, UiEventLogger uiEventLogger) {
         mContext = context;
+        mUiEventLogger = uiEventLogger;
         mAccessibilityManager = context.getSystemService(AccessibilityManager.class);
         mItemTouchHelper = new ItemTouchHelper(mCallbacks);
         mDecoration = new TileItemDecoration(context);
