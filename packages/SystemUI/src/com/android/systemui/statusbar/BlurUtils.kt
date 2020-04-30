@@ -38,8 +38,8 @@ open class BlurUtils @Inject constructor(
     @Main private val resources: Resources,
     dumpManager: DumpManager
 ) : Dumpable {
-    private val minBlurRadius = resources.getDimensionPixelSize(R.dimen.min_window_blur_radius)
-    private val maxBlurRadius = resources.getDimensionPixelSize(R.dimen.max_window_blur_radius)
+    val minBlurRadius = resources.getDimensionPixelSize(R.dimen.min_window_blur_radius)
+    val maxBlurRadius = resources.getDimensionPixelSize(R.dimen.max_window_blur_radius)
     private val blurSupportedSysProp = SystemProperties
             .getBoolean("ro.surface_flinger.supports_background_blur", false)
     private val blurDisabledSysProp = SystemProperties
