@@ -208,12 +208,9 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"سيتم محو بيانات جهازك."</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"تعذّر استخدام تطبيق المشرف. سيتم محو بيانات جهازك الآن.\n\nإذا كانت لديك أسئلة، اتصل بمشرف مؤسستك."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"تم إيقاف الطباعة بواسطة <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
-    <!-- no translation found for personal_apps_suspension_title (7561416677884286600) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspension_text (6115455688932935597) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspension_tomorrow_text (6322541302153673994) -->
-    <skip />
+    <string name="personal_apps_suspension_title" msgid="7561416677884286600">"تفعيل الملف الشخصي للعمل"</string>
+    <string name="personal_apps_suspension_text" msgid="6115455688932935597">"تم حظر تطبيقاتك الشخصية إلى أن تفعِّل ملفك الشخصي للعمل."</string>
+    <string name="personal_apps_suspension_tomorrow_text" msgid="6322541302153673994">"سيتم حظر تطبيقاتك الشخصية غدًا."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"تفعيل الملف الشخصي للعمل"</string>
     <string name="me" msgid="6207584824693813140">"أنا"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"خيارات الجهاز اللوحي"</string>
