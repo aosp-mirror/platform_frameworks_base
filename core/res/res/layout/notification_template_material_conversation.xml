@@ -157,12 +157,13 @@
                     <!-- App Name -->
                     <com.android.internal.widget.ObservableTextView
                         android:id="@+id/app_name_text"
+                        android:textAppearance="@style/TextAppearance.DeviceDefault.Notification.Info"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/conversation_content_start"
-                        android:textSize="12sp"
-                        android:layout_marginBottom="16dp"
-                        android:textAppearance="@style/TextAppearance.DeviceDefault.Notification.Info"
+                        android:layout_gravity="center"
+                        android:layout_marginStart="@dimen/notification_header_separating_margin"
+                        android:paddingTop="1sp"
+                        android:singleLine="true"
                     />
 
                     <TextView
