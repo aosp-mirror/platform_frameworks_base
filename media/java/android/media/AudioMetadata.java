@@ -166,8 +166,23 @@ public final class AudioMetadata {
          *
          * A Boolean value which is true if Atmos is present in an E-AC3 stream.
          */
+
+        // Since Boolean isn't handled by Parceling, we translate
+        // internally to KEY_HAS_ATMOS when sending through JNI.
+        // Consider deprecating this key for KEY_HAS_ATMOS in the future.
+        //
         @NonNull public static final Key<Boolean> KEY_ATMOS_PRESENT =
                 createKey("atmos-present", Boolean.class);
+
+        /**
+         * A key representing the presence of Atmos in an E-AC3 stream.
+         *
+         * An Integer value which is nonzero if Atmos is present in an E-AC3 stream.
+         * The integer representation is used for communication to the native side.
+         * @hide
+         */
+        @NonNull public static final Key<Integer> KEY_HAS_ATMOS =
+                createKey("has-atmos", Integer.class);
 
         /**
          * A key representing the audio encoding used for the stream.
@@ -731,6 +746,15 @@ public final class AudioMetadata {
                     Log.e(TAG, "Failed to unpack value for map");
                     return null;
                 }
+
+                // Special handling of KEY_ATMOS_PRESENT.
+                if (key.equals(Format.KEY_HAS_ATMOS.getName())
+                        && value.first == Format.KEY_HAS_ATMOS.getValueClass()) {
+                    ret.set(Format.KEY_ATMOS_PRESENT,
+                            (Boolean) ((int) value.second != 0));  // Translate Integer to Boolean
+                    continue; // Should we store both keys in the java table?
+                }
+
                 ret.set(createKey(key, value.first), value.first.cast(value.second));
             }
             return ret;
@@ -746,11 +770,19 @@ public final class AudioMetadata {
                 return false;
             }
             for (Key<?> key : obj.keySet()) {
+                Object value = obj.get(key);
+
+                // Special handling of KEY_ATMOS_PRESENT.
+                if (key == Format.KEY_ATMOS_PRESENT) {
+                    key = Format.KEY_HAS_ATMOS;
+                    value = (Integer) ((boolean) value ? 1 : 0); // Translate Boolean to Integer
+                }
+
                 if (!strDataPackage.pack(output, key.getName())) {
                     Log.i(TAG, "Failed to pack key: " + key.getName());
                     return false;
                 }
-                if (!OBJECT_PACKAGE.pack(output, new Pair<>(key.getValueClass(), obj.get(key)))) {
+                if (!OBJECT_PACKAGE.pack(output, new Pair<>(key.getValueClass(), value))) {
                     Log.i(TAG, "Failed to pack value: " + obj.get(key));
                     return false;
                 }
