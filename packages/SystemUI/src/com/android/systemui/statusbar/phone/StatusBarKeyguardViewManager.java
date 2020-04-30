@@ -152,6 +152,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     protected boolean mShowing;
     protected boolean mOccluded;
     protected boolean mRemoteInputActive;
+    private boolean mGlobalActionsVisible = false;
+    private boolean mLastGlobalActionsVisible = false;
     private boolean mDozing;
     private boolean mPulsing;
     private boolean mGesturalNav;
@@ -291,6 +293,14 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     @Override
     public void onQsExpansionChanged(float expansion) {
         updateLockIcon();
+    }
+
+    /**
+     * Update the global actions visibility state in order to show the navBar when active.
+     */
+    public void setGlobalActionsVisible(boolean isVisible) {
+        mGlobalActionsVisible = isVisible;
+        updateStates();
     }
 
     private void updateLockIcon() {
@@ -820,6 +830,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
 
         mFirstUpdate = false;
         mLastShowing = showing;
+        mLastGlobalActionsVisible = mGlobalActionsVisible;
         mLastOccluded = occluded;
         mLastBouncerShowing = bouncerShowing;
         mLastBouncerDismissible = bouncerDismissible;
@@ -864,7 +875,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         boolean keyguardWithGestureNav = (keyguardShowing && !mDozing || mPulsing && !mIsDocked)
                 && mGesturalNav;
         return (!keyguardShowing && !hideWhileDozing || mBouncer.isShowing()
-                || mRemoteInputActive || keyguardWithGestureNav);
+                || mRemoteInputActive || keyguardWithGestureNav
+                || mGlobalActionsVisible);
     }
 
     /**
@@ -876,7 +888,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         boolean keyguardWithGestureNav = (keyguardShowing && !mLastDozing
                 || mLastPulsing && !mLastIsDocked) && mLastGesturalNav;
         return (!keyguardShowing && !hideWhileDozing || mLastBouncerShowing
-                || mLastRemoteInputActive || keyguardWithGestureNav);
+                || mLastRemoteInputActive || keyguardWithGestureNav
+                || mLastGlobalActionsVisible);
     }
 
     public boolean shouldDismissOnMenuPressed() {

@@ -29,7 +29,6 @@ import android.content.res.Configuration
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.LayerDrawable
 import android.os.Process
-import android.os.Vibrator
 import android.service.controls.Control
 import android.util.Log
 import android.util.TypedValue
@@ -59,6 +58,8 @@ import com.android.systemui.controls.management.ControlsListingController
 import com.android.systemui.controls.management.ControlsProviderSelectorActivity
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.concurrency.DelayableExecutor
 import dagger.Lazy
 import java.text.Collator
@@ -75,7 +76,10 @@ class ControlsUiControllerImpl @Inject constructor (
     @Main val uiExecutor: DelayableExecutor,
     @Background val bgExecutor: DelayableExecutor,
     val controlsListingController: Lazy<ControlsListingController>,
-    @Main val sharedPreferences: SharedPreferences
+    @Main val sharedPreferences: SharedPreferences,
+    val controlActionCoordinator: ControlActionCoordinator,
+    private val activityStarter: ActivityStarter,
+    private val keyguardStateController: KeyguardStateController
 ) : ControlsUiController {
 
     companion object {
@@ -106,11 +110,6 @@ class ControlsUiControllerImpl @Inject constructor (
         get() = controlsController.get().available
 
     private lateinit var listingCallback: ControlsListingController.ControlsListingCallback
-
-    init {
-        val vibratorService = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-        ControlActionCoordinator.initialize(vibratorService, bgExecutor)
-    }
 
     private fun createCallback(
         onResult: (List<SelectionItem>) -> Unit
@@ -267,8 +266,16 @@ class ControlsUiControllerImpl @Inject constructor (
     private fun startActivity(context: Context, intent: Intent) {
         // Force animations when transitioning from a dialog to an activity
         intent.putExtra(ControlsUiController.EXTRA_ANIMATE, true)
-        context.startActivity(intent)
         dismissGlobalActions.run()
+
+        if (!keyguardStateController.isUnlocked()) {
+            activityStarter.dismissKeyguardThenExecute({
+                context.startActivity(intent)
+                true
+            }, null, true)
+        } else {
+            context.startActivity(intent)
+        }
     }
 
     private fun showControlsView(items: List<SelectionItem>) {
@@ -463,7 +470,8 @@ class ControlsUiControllerImpl @Inject constructor (
                     baseLayout,
                     controlsController.get(),
                     uiExecutor,
-                    bgExecutor
+                    bgExecutor,
+                    controlActionCoordinator
                 )
                 cvh.bindData(it)
                 controlViewsById.put(key, cvh)
@@ -545,9 +553,7 @@ class ControlsUiControllerImpl @Inject constructor (
         controlViewsById.forEach {
             it.value.dismiss()
         }
-
-        ControlActionCoordinator.closeDialog()
-
+        controlActionCoordinator.closeDialogs()
         controlsController.get().unsubscribe()
 
         parent.removeAllViews()
