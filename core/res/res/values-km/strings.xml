@@ -201,9 +201,9 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"ឧបករណ៍របស់អ្នកនឹងត្រូវបានលុប"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"មិនអាច​ប្រើ​កម្មវិធី​អ្នកគ្រប់គ្រង​បានទេ។ ឧបករណ៍​របស់អ្នក​នឹងលុប​ឥឡូវនេះ។\n\nប្រសិនបើ​អ្នកមាន​សំណួរផ្សេងៗ​ សូមទាក់ទង​ទៅអ្នក​គ្រប់គ្រង​ស្ថាប័ន​របស់​អ្នក។"</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"ការបោះពុម្ព​ត្រូវបាន​បិទ​ដោយ <xliff:g id="OWNER_APP">%s</xliff:g> ។"</string>
-    <string name="personal_apps_suspended_title" msgid="4543693107104417750">"ឈប់ទប់ស្កាត់កម្មវិធីផ្ទាល់ខ្លួនរបស់អ្នក"</string>
-    <string name="personal_apps_suspended_tomorrow_title" msgid="6414440257969874914">"កម្មវិធីនឹងត្រូវទប់ស្កាត់ថ្ងៃស្អែក"</string>
-    <string name="personal_apps_suspended_text" msgid="8954038765131038226">"អ្នកគ្រប់គ្រង​ផ្នែកព័ត៌មានវិទ្យា​របស់អ្នក​មិន​អនុញ្ញាតឱ្យ​ផ្អាក​កម្រងព័ត៌មាន​ការងារ​របស់អ្នក​លើសពី <xliff:g id="DAYS">%1$d</xliff:g> ថ្ងៃ​ទេ"</string>
+    <string name="personal_apps_suspension_title" msgid="7561416677884286600">"បើកកម្រងព័ត៌មានការងាររបស់អ្នក"</string>
+    <string name="personal_apps_suspension_text" msgid="6115455688932935597">"កម្មវិធីផ្ទាល់ខ្លួន​របស់អ្នកត្រូវ​បានទប់ស្កាត់ រហូតទាល់តែ​អ្នកបើក​កម្រងព័ត៌មាន​ការងាររបស់អ្នក"</string>
+    <string name="personal_apps_suspension_tomorrow_text" msgid="6322541302153673994">"កម្មវិធី​ផ្ទាល់ខ្លួន​របស់អ្នក​នឹងត្រូវបាន​ទប់ស្កាត់​នៅថ្ងៃស្អែក"</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"បើក​កម្រង​ព័ត៌មាន​ការងារ"</string>
     <string name="me" msgid="6207584824693813140">"ខ្ញុំ"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"ជម្រើស​កុំព្យូទ័រ​បន្ទះ"</string>
@@ -1632,10 +1632,8 @@
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"ការសង្កត់​គ្រាប់ចុច​កម្រិតសំឡេង​ទាំងពីរ​ឱ្យជាប់​រយៈពេល​ពីរបីវិនាទី​នឹងបើក <xliff:g id="SERVICE">%1$s</xliff:g> ដែលជា​មុខងារ​ភាពងាយប្រើ។ ការធ្វើ​បែបនេះ​អាចផ្លាស់ប្ដូរ​របៀបដែល​ឧបករណ៍​របស់អ្នក​ដំណើរការ។\n\nអ្នកអាច​ប្ដូរផ្លូវកាត់​នេះទៅ​មុខងារ​ផ្សេងទៀត​នៅក្នុង​ការកំណត់ &gt; ភាពងាយស្រួល។"</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"បើក"</string>
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"កុំបើក"</string>
-    <!-- no translation found for accessibility_shortcut_menu_item_status_on (6608392117189732543) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_menu_item_status_off (5531598275559472393) -->
-    <skip />
+    <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"បើក"</string>
+    <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"បិទ"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"អនុញ្ញាតឱ្យ <xliff:g id="SERVICE">%1$s</xliff:g> មានសិទ្ធិគ្រប់គ្រងឧបករណ៍​របស់អ្នក​ទាំងស្រុងឬ?"</string>
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"បើ​អ្នក​បើក <xliff:g id="SERVICE">%1$s</xliff:g> ឧបករណ៍របស់​អ្នកនឹង​មិន​ប្រើ​ការចាក់សោអេក្រង់របស់​អ្នក​ ដើម្បី​បង្កើន​ប្រសិទ្ធភាពការ​អ៊ីនគ្រីប​ទិន្នន័យ​ទេ។"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"ការគ្រប់គ្រង​ទាំងស្រុងមានលក្ខណៈ​សមស្របសម្រាប់​កម្មវិធី ដែលជួយអ្នក​ទាក់ទងនឹងការប្រើមុខងារភាពងាយស្រួល ប៉ុន្តែមិនសមស្របសម្រាប់​កម្មវិធីភាគច្រើនទេ។"</string>
@@ -1797,8 +1795,10 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"ធ្វើ​បច្ចុប្បន្នភាព​ដោយ​អ្នកគ្រប់គ្រង​របស់​អ្នក"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"លុប​ដោយ​អ្នកគ្រប់គ្រង​របស់​អ្នក"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"យល់ព្រម"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"ដើម្បី​បង្កើនកម្រិត​ថាមពលថ្ម កម្មវិធី​សន្សំ​ថ្ម៖\n·បើករចនាប័ទ្មងងឹត​\n·បិទ ឬដាក់កំហិតលើ​សកម្មភាពផ្ទៃខាងក្រោយ ឥទ្ធិពល​ជារូបភាពមួយចំនួន និងមុខងារផ្សេងទៀត​ដូចជា “Hey Google” ជាដើម\n\n"<annotation id="url">"ស្វែងយល់បន្ថែម"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"ដើម្បី​បង្កើនកម្រិត​ថាមពលថ្ម កម្មវិធី​សន្សំ​ថ្ម៖\n·បើករចនាប័ទ្មងងឹត​\n·បិទ ឬដាក់កំហិតលើ​សកម្មភាពផ្ទៃខាងក្រោយ ឥទ្ធិពល​ជារូបភាពមួយចំនួន និងមុខងារផ្សេងទៀត​ដូចជា “Hey Google” ជាដើម"</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (5997766757551917769) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (8587408568232177204) -->
+    <skip />
     <string name="data_saver_description" msgid="4995164271550590517">"ដើម្បីជួយកាត់បន្ថយការប្រើប្រាស់ទិន្នន័យ កម្មវិធីសន្សំសំចៃទិន្នន័យរារាំងកម្មវិធីមួយចំនួនមិនឲ្យបញ្ជូន ឬទទួលទិន្នន័យនៅផ្ទៃខាងក្រោយទេ។ កម្មវិធីដែលអ្នកកំពុងប្រើនាពេលបច្ចុប្បន្នអាចចូលប្រើប្រាស់​ទិន្នន័យបាន ប៉ុន្តែអាចនឹងមិនញឹកញាប់ដូចមុនទេ។ ឧទាហរណ៍ រូបភាពមិនបង្ហាញទេ លុះត្រាតែអ្នកប៉ះរូបភាពទាំងនោះ។"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"បើកកម្មវិធីសន្សំសំចៃទិន្នន័យ?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"បើក"</string>
@@ -2043,13 +2043,17 @@
     <string name="accessibility_system_action_notifications_label" msgid="6083767351772162010">"ការជូនដំណឹង"</string>
     <string name="accessibility_system_action_quick_settings_label" msgid="4583900123506773783">"ការកំណត់រហ័ស"</string>
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"ប្រអប់​ថាមពល"</string>
-    <string name="accessibility_system_action_toggle_split_screen_label" msgid="6626177163849387748">"បិទ/បើក​មុខងារ​បំបែកអេក្រង់"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"អេក្រង់ចាក់សោ"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"រូបថតអេក្រង់"</string>
-    <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"ម៉ឺនុយ​ភាពងាយស្រួល"</string>
+    <!-- no translation found for accessibility_system_action_accessibility_button_label (5941347017132886642) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_accessibility_button_chooser_label (6973618519666227981) -->
+    <skip />
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"របារពណ៌នា​អំពី <xliff:g id="APP_NAME">%1$s</xliff:g>។"</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> ត្រូវបានដាក់​ទៅក្នុងធុង​ដែលបានដាក់កំហិត"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>៖"</string>
+    <!-- no translation found for conversation_single_line_image_placeholder (6983271082911936900) -->
+    <skip />
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"ការ​សន្ទនា"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"ការសន្ទនា​ជាក្រុម"</string>
     <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>

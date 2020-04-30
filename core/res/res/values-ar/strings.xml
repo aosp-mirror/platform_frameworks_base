@@ -209,9 +209,12 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"سيتم محو بيانات جهازك."</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"تعذّر استخدام تطبيق المشرف. سيتم محو بيانات جهازك الآن.\n\nإذا كانت لديك أسئلة، اتصل بمشرف مؤسستك."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"تم إيقاف الطباعة بواسطة <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
-    <string name="personal_apps_suspended_title" msgid="4543693107104417750">"إزالة حظر تطبيقاتك الشخصية"</string>
-    <string name="personal_apps_suspended_tomorrow_title" msgid="6414440257969874914">"سيتم حظر التطبيقات غدًا"</string>
-    <string name="personal_apps_suspended_text" msgid="8954038765131038226">"لا يسمح لك مشرف تكنولوجيا المعلومات بإيقاف الملف الشخصي للعمل مؤقتًا أكثر من <xliff:g id="DAYS">%1$d</xliff:g> يوم."</string>
+    <!-- no translation found for personal_apps_suspension_title (7561416677884286600) -->
+    <skip />
+    <!-- no translation found for personal_apps_suspension_text (6115455688932935597) -->
+    <skip />
+    <!-- no translation found for personal_apps_suspension_tomorrow_text (6322541302153673994) -->
+    <skip />
     <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"تفعيل الملف الشخصي للعمل"</string>
     <string name="me" msgid="6207584824693813140">"أنا"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"خيارات الجهاز اللوحي"</string>
@@ -1718,10 +1721,8 @@
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"‏يؤدي الضغط مع الاستمرار لبضع ثوانٍ على كلا مفتاحَي التحكّم في مستوى الصوت إلى تفعيل <xliff:g id="SERVICE">%1$s</xliff:g> وهي إحدى ميزات إمكانية الوصول. يمكن أن يؤدي هذا الإجراء إلى تغيير كيفية عمل جهازك.\n\nيمكنك تغيير هذا الاختصار لاستخدامه مع ميزة أخرى في الإعدادات &gt; أدوات تمكين الوصول."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"تفعيل"</string>
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"عدم التفعيل"</string>
-    <!-- no translation found for accessibility_shortcut_menu_item_status_on (6608392117189732543) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_menu_item_status_off (5531598275559472393) -->
-    <skip />
+    <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"مفعّل"</string>
+    <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"غير مفعّل"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"هل تريد السماح لخدمة <xliff:g id="SERVICE">%1$s</xliff:g> بالتحكّم الكامل في جهازك؟"</string>
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"في حال تفعيل <xliff:g id="SERVICE">%1$s</xliff:g>، لن يستخدم جهازك ميزة قفل الشاشة لتحسين ترميز البيانات."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"إنّ التحكّم الكامل ليس ملائمًا لمعظم التطبيقات، باستثناء التطبيقات المعنية بسهولة الاستخدام."</string>
@@ -1887,8 +1888,10 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"تم التحديث بواسطة المشرف"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"تم الحذف بواسطة المشرف"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"حسنًا"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"‏لإطالة عمر البطارية، \"توفير شحن البطارية\":\n·تفعيل \"المظهر الداكن\"\n إيقاف النشاط في الخلفية وأيضًا بعض التأثيرات المرئية والميزات الأخرى، مثلاً \"Ok Google\" أو فرض قيود عليها\n\n"<annotation id="url">"مزيد من المعلومات"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"‏لإطالة عمر البطارية، \"توفير شحن البطارية\":\n·تفعيل \"المظهر الداكن\"\n إيقاف النشاط في الخلفية وأيضًا بعض التأثيرات المرئية والميزات الأخرى، مثلاً \"Ok Google\" أو فرض قيود عليها."</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (5997766757551917769) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (8587408568232177204) -->
+    <skip />
     <string name="data_saver_description" msgid="4995164271550590517">"للمساعدة في خفض استخدام البيانات، تمنع ميزة \"توفير البيانات\" بعض التطبيقات من إرسال البيانات وتلقّيها في الخلفية. يمكن للتطبيقات المتاحة لديك الآن استخدام البيانات، ولكن لا يمكنها الإكثار من ذلك. وهذا يعني أن الصور مثلاً لا تظهر حتى تنقر عليها."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"هل تريد تفعيل توفير البيانات؟"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"تفعيل"</string>
@@ -2177,13 +2180,17 @@
     <string name="accessibility_system_action_notifications_label" msgid="6083767351772162010">"الإشعارات"</string>
     <string name="accessibility_system_action_quick_settings_label" msgid="4583900123506773783">"الإعدادات السريعة"</string>
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"مربّع حوار الطاقة"</string>
-    <string name="accessibility_system_action_toggle_split_screen_label" msgid="6626177163849387748">"تبديل \"تقسيم الشاشة\""</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"شاشة القفل"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"لقطة شاشة"</string>
-    <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"قائمة \"سهولة الاستخدام\""</string>
+    <!-- no translation found for accessibility_system_action_accessibility_button_label (5941347017132886642) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_accessibility_button_chooser_label (6973618519666227981) -->
+    <skip />
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"شريط الشرح لتطبيق <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"تم وضع <xliff:g id="PACKAGE_NAME">%1$s</xliff:g> في الحزمة \"محظورة\"."</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
+    <!-- no translation found for conversation_single_line_image_placeholder (6983271082911936900) -->
+    <skip />
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"محادثة"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"محادثة جماعية"</string>
     <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>

@@ -203,9 +203,9 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"Jūsu ierīces dati tiks dzēsti"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Administratora lietotni nevar izmantot. Ierīcē saglabātie dati tiks dzēsti.\n\nJa jums ir kādi jautājumi, sazinieties ar savas organizācijas administratoru."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"Drukāšanu atspējoja <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
-    <string name="personal_apps_suspended_title" msgid="4543693107104417750">"Atbloķējiet person. lietotnes"</string>
-    <string name="personal_apps_suspended_tomorrow_title" msgid="6414440257969874914">"Lietotnes tiks bloķētas rīt"</string>
-    <string name="personal_apps_suspended_text" msgid="8954038765131038226">"Jūsu IT administrators neatļauj apturēt jūsu darba profila darbību ilgāk nekā <xliff:g id="DAYS">%1$d</xliff:g> dienas"</string>
+    <string name="personal_apps_suspension_title" msgid="7561416677884286600">"Darba profila ieslēgšana"</string>
+    <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Jūsu personīgās lietotnes būs bloķētas, līdz ieslēgsiet savu darba profilu."</string>
+    <string name="personal_apps_suspension_tomorrow_text" msgid="6322541302153673994">"Jūsu personīgās lietotnes rīt tiks bloķētas."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"Ieslēgt darba profilu"</string>
     <string name="me" msgid="6207584824693813140">"Man"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Planšetdatora opcijas"</string>
@@ -1652,10 +1652,8 @@
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Turot nospiestus abus skaļuma taustiņus dažas sekundes, tiek ieslēgta pieejamības funkcija <xliff:g id="SERVICE">%1$s</xliff:g>. Tas var mainīt ierīces darbību.\n\nŠo saīsni uz citu funkciju varat mainīt šeit: Iestatījumi &gt; Pieejamība."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Ieslēgt"</string>
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"Neieslēgt"</string>
-    <!-- no translation found for accessibility_shortcut_menu_item_status_on (6608392117189732543) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_menu_item_status_off (5531598275559472393) -->
-    <skip />
+    <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"IESLĒGTA"</string>
+    <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"IZSLĒGTA"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Vai atļaut pakalpojumam <xliff:g id="SERVICE">%1$s</xliff:g> pilnībā kontrolēt jūsu ierīci?"</string>
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Ja ieslēgsiet pakalpojumu <xliff:g id="SERVICE">%1$s</xliff:g>, ierīce neizmantos ekrāna bloķēšanu datu šifrēšanas uzlabošanai."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Pilnīga kontrole ir piemērota lietotnēm, kas nepieciešamas lietotājiem ar īpašām vajadzībām, taču ne lielākajai daļai lietotņu."</string>
@@ -1818,8 +1816,10 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Atjaunināja administrators"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Dzēsa administrators"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Labi"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Lai pagarinātu akumulatora darbības ilgumu, akumulatora jaudas taupīšanas režīmā tiek veiktas tālāk norādītās darbības.\n·Tiek ieslēgts tumšais motīvs.\n·Tiek izslēgtas vai ierobežotas darbības fonā, daži vizuālie efekti un citas funkcijas, piemēram, “Hey Google”.\n\n"<annotation id="url">"Uzzināt vairāk"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"Lai pagarinātu akumulatora darbības ilgumu, akumulatora jaudas taupīšanas režīmā tiek veiktas tālāk norādītās darbības.\n·Tiek ieslēgts tumšais motīvs.\n·Tiek izslēgtas vai ierobežotas darbības fonā, daži vizuālie efekti un citas funkcijas, piemēram, “Hey Google”."</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (5997766757551917769) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (8587408568232177204) -->
+    <skip />
     <string name="data_saver_description" msgid="4995164271550590517">"Lai samazinātu datu lietojumu, datu lietojuma samazinātājs neļauj dažām lietotnēm fonā nosūtīt vai saņemt datus. Lietotne, kuru pašlaik izmantojat, var piekļūt datiem, bet, iespējams, piekļūs tiem retāk (piemēram, attēli tiks parādīti tikai tad, kad tiem pieskarsieties)."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Vai ieslēgt datu lietojuma samazinātāju?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Ieslēgt"</string>
@@ -2075,13 +2075,17 @@
     <string name="accessibility_system_action_notifications_label" msgid="6083767351772162010">"Paziņojumi"</string>
     <string name="accessibility_system_action_quick_settings_label" msgid="4583900123506773783">"Ātrie iestatījumi"</string>
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"Barošanas dialoglodziņš"</string>
-    <string name="accessibility_system_action_toggle_split_screen_label" msgid="6626177163849387748">"Pārslēgt ekrāna sadalīšanu"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Bloķēt ekrānu"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Ekrānuzņēmums"</string>
-    <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"Pieejamības izvēlne"</string>
+    <!-- no translation found for accessibility_system_action_accessibility_button_label (5941347017132886642) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_accessibility_button_chooser_label (6973618519666227981) -->
+    <skip />
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Lietotnes <xliff:g id="APP_NAME">%1$s</xliff:g> subtitru josla."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"Pakotne “<xliff:g id="PACKAGE_NAME">%1$s</xliff:g>” ir ievietota ierobežotā kopā."</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
+    <!-- no translation found for conversation_single_line_image_placeholder (6983271082911936900) -->
+    <skip />
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"Saruna"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"Grupas saruna"</string>
     <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>
