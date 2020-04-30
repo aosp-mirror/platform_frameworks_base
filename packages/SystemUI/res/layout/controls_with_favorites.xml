@@ -21,14 +21,14 @@
       android:layout_height="match_parent"
       android:orientation="horizontal"
       android:layout_marginTop="@dimen/controls_top_margin"
-      android:layout_marginEnd="@dimen/controls_header_side_margin"
-      android:layout_marginStart="@dimen/controls_header_side_margin">
+      android:layout_marginBottom="@dimen/controls_header_bottom_margin">
 
     <!-- make sure the header stays centered in the layout by adding a spacer -->
     <Space
         android:layout_width="@dimen/controls_header_menu_size"
         android:layout_height="1dp" />
-
+    <!-- need to keep this outer view in order to have a correctly sized anchor
+         for the dropdown menu, as well as dropdown background in the right place -->
     <LinearLayout
         android:id="@+id/controls_header"
         android:orientation="horizontal"
@@ -38,15 +38,6 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:gravity="center">
-
-      <ImageView
-          android:id="@+id/app_icon"
-          android:layout_gravity="center"
-          android:layout_width="@dimen/controls_header_app_icon_size"
-          android:layout_height="@dimen/controls_header_app_icon_size"
-          android:contentDescription="@null"
-          android:layout_marginEnd="10dp" />
-
       <TextView
           style="@style/Control.Spinner.Header"
           android:clickable="false"
@@ -55,7 +46,6 @@
           android:layout_height="wrap_content"
           android:layout_gravity="center" />
     </LinearLayout>
-
     <ImageView
         android:id="@+id/controls_more"
         android:src="@drawable/ic_more_vert"
@@ -73,7 +63,6 @@
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:orientation="vertical"
-      android:paddingTop="30dp"
       android:layout_marginLeft="@dimen/global_actions_side_margin"
       android:layout_marginRight="@dimen/global_actions_side_margin" />
 </merge>

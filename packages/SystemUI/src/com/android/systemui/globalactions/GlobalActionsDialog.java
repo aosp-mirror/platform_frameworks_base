@@ -82,7 +82,6 @@ import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
 import android.widget.ListPopupWindow;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -2021,42 +2020,23 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         }
 
         private ListPopupWindow createPowerOverflowPopup() {
-            ListPopupWindow popup = new ListPopupWindow(new ContextThemeWrapper(
-                    mContext, com.android.systemui.R.style.Control_ListPopupWindow));
-            popup.setWindowLayoutType(WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY);
+            ListPopupWindow popup = new GlobalActionsPopupMenu(
+                    mContext, false /* isDropDownMode */);
             View overflowButton =
                     findViewById(com.android.systemui.R.id.global_actions_overflow_button);
             popup.setAnchorView(overflowButton);
-            int parentWidth = mGlobalActionsLayout.getWidth();
-            // arbitrarily set the menu width to half of parent
-            // TODO: Logic for menu sizing based on contents.
-            int halfParentWidth = Math.round(parentWidth * 0.5f);
-            popup.setContentWidth(halfParentWidth);
             popup.setAdapter(mOverflowAdapter);
-            popup.setModal(true);
             return popup;
         }
 
         private void showPowerOverflowMenu() {
-            mOverflowPopup.show();
-
-            // Width is fixed to slightly more than half of the GlobalActionsLayout container.
-            // TODO: Resize the width of this dialog based on the sizes of the items in it.
-            int width = Math.round(mGlobalActionsLayout.getWidth() * 0.6f);
-
-            ListView listView = mOverflowPopup.getListView();
-            listView.setDividerHeight(mContext.getResources()
-                    .getDimensionPixelSize(com.android.systemui.R.dimen.control_list_divider));
-            listView.setDivider(mContext.getResources().getDrawable(
-                    com.android.systemui.R.drawable.controls_list_divider));
-            mOverflowPopup.setWidth(width);
-            mOverflowPopup.setHorizontalOffset(-width + mOverflowPopup.getAnchorView().getWidth());
-            mOverflowPopup.setVerticalOffset(mOverflowPopup.getAnchorView().getHeight());
+            mOverflowPopup = createPowerOverflowPopup();
             mOverflowPopup.show();
         }
 
         private void hidePowerOverflowMenu() {
             mOverflowPopup.dismiss();
+            mOverflowPopup = null;
         }
 
         private void initializeLayout() {
@@ -2080,8 +2060,6 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             if (mContainer == null) {
                 mContainer = mGlobalActionsLayout;
             }
-
-            mOverflowPopup = createPowerOverflowPopup();
 
             View overflowButton = findViewById(
                     com.android.systemui.R.id.global_actions_overflow_button);
