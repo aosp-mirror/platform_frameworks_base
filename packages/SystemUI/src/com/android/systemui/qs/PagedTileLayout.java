@@ -22,7 +22,9 @@ import android.widget.Scroller;
 import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
+import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.R;
+import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.qs.QSPanel.QSTileLayout;
 import com.android.systemui.qs.QSPanel.TileRecord;
 
@@ -63,7 +65,7 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
     private int mLayoutDirection;
     private int mHorizontalClipBound;
     private final Rect mClippingRect;
-    private int mLastMaxHeight = -1;
+    private final UiEventLogger mUiEventLogger = QSEvents.INSTANCE.getQsUiEventsLogger();
 
     public PagedTileLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -75,6 +77,7 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
         mLayoutDirection = getLayoutDirection();
         mClippingRect = new Rect();
     }
+    private int mLastMaxHeight = -1;
 
     public void saveInstanceState(Bundle outState) {
         outState.putInt(CURRENT_PAGE, getCurrentItem());
@@ -124,6 +127,15 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
             page = mPages.size() - 1 - page;
         }
         return page;
+    }
+
+    // This will dump to the ui log all the tiles that are visible in this page
+    private void logVisibleTiles(TilePage page) {
+        for (int i = 0; i < page.mRecords.size(); i++) {
+            QSTile t = page.mRecords.get(i).tile;
+            mUiEventLogger.logWithInstanceId(QSEvent.QS_TILE_VISIBLE, 0, t.getMetricsSpec(),
+                    t.getInstanceId());
+        }
     }
 
     @Override
@@ -218,7 +230,11 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
         setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS);
         int currentItem = getCurrentPageNumber();
         for (int i = 0; i < mPages.size(); i++) {
-            mPages.get(i).setSelected(i == currentItem ? selected : false);
+            TilePage page = mPages.get(i);
+            page.setSelected(i == currentItem ? selected : false);
+            if (page.isSelected()) {
+                logVisibleTiles(page);
+            }
         }
         setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_AUTO);
     }
@@ -419,6 +435,7 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
                         mPageListener.onPageChanged(isLayoutRtl() ? position == mPages.size() - 1
                                 : position == 0);
                     }
+
                 }
 
                 @Override

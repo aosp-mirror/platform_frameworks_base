@@ -25,6 +25,7 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.util.DisplayMetrics;
 
+import com.android.internal.logging.testing.UiEventLoggerFake;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dock.DockManager;
@@ -68,7 +69,7 @@ public class BrightLineFalsingManagerTest extends SysuiTestCase {
         FalsingDataProvider falsingDataProvider = new FalsingDataProvider(dm);
         DeviceConfigProxy deviceConfigProxy = new DeviceConfigProxyFake();
         DockManager dockManager = new DockManagerFake();
-        mStatusBarStateController = new StatusBarStateControllerImpl();
+        mStatusBarStateController = new StatusBarStateControllerImpl(new UiEventLoggerFake());
         mStatusBarStateController.setState(StatusBarState.KEYGUARD);
         mFalsingManager = new BrightLineFalsingManager(falsingDataProvider,
                 mKeyguardUpdateMonitor, mProximitySensor, deviceConfigProxy, dockManager,
