@@ -218,4 +218,29 @@ public class MetricsFeatureProviderTest {
 
         assertThat(mProvider.getAttribution(activity)).isEqualTo(100);
     }
+
+    @Test
+    public void logSettingsTileClick_hasKey_shouldLog() {
+        final String key = "abc";
+        final boolean loggable = mProvider.logSettingsTileClick(key,
+                MetricsEvent.SETTINGS_GESTURES);
+
+        assertThat(loggable).isTrue();
+        verify(mLogWriter).action(
+                MetricsEvent.SETTINGS_GESTURES,
+                MetricsEvent.ACTION_SETTINGS_TILE_CLICK,
+                SettingsEnums.PAGE_UNKNOWN,
+                key,
+                0);
+    }
+
+    @Test
+    public void logSettingsTileClick_keyEmpty_shouldNotLog() {
+        final String key = "";
+        boolean loggable = mProvider.logSettingsTileClick(key,
+                MetricsEvent.SETTINGS_GESTURES);
+
+        assertThat(loggable).isFalse();
+        verifyNoMoreInteractions(mLogWriter);
+    }
 }
