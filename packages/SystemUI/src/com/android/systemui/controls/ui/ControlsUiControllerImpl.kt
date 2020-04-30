@@ -35,7 +35,6 @@ import android.util.TypedValue
 import android.view.ContextThemeWrapper
 import android.view.LayoutInflater
 import android.view.View
-import android.view.View.MeasureSpec
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.animation.AccelerateInterpolator
@@ -58,6 +57,7 @@ import com.android.systemui.controls.management.ControlsListingController
 import com.android.systemui.controls.management.ControlsProviderSelectorActivity
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.globalactions.GlobalActionsPopupMenu
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.concurrency.DelayableExecutor
@@ -287,14 +287,6 @@ class ControlsUiControllerImpl @Inject constructor (
         createMenu()
     }
 
-    private fun createPopup(): ListPopupWindow {
-        return ListPopupWindow(
-            ContextThemeWrapper(context, R.style.Control_ListPopupWindow)).apply {
-            setWindowLayoutType(WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY)
-            setModal(true)
-        }
-    }
-
     private fun createMenu() {
         val items = arrayOf(
             context.resources.getString(R.string.controls_menu_add),
@@ -306,7 +298,7 @@ class ControlsUiControllerImpl @Inject constructor (
         val anchor = parent.requireViewById<ImageView>(R.id.controls_more)
         anchor.setOnClickListener(object : View.OnClickListener {
             override fun onClick(v: View) {
-                popup = createPopup().apply {
+                popup = GlobalActionsPopupMenu(context, false /* isDropDownMode */).apply {
                     setAnchorView(anchor)
                     setAdapter(adapter)
                     setOnItemClickListener(object : AdapterView.OnItemClickListener {
@@ -329,20 +321,6 @@ class ControlsUiControllerImpl @Inject constructor (
                             dismiss()
                         }
                     })
-                    // need to call show() first in order to construct the listView
-                    show()
-                    var width = 0
-                    getListView()?.apply {
-                        // width should be between [.5, .9] of screen
-                        val parentWidth = this@ControlsUiControllerImpl.parent.getWidth()
-                        val widthSpec = MeasureSpec.makeMeasureSpec(
-                            (parentWidth * 0.9).toInt(), MeasureSpec.AT_MOST)
-                        val child = adapter.getView(0, null, this)
-                        child.measure(widthSpec, MeasureSpec.UNSPECIFIED)
-                        width = Math.max(child.getMeasuredWidth(), (parentWidth * 0.5).toInt())
-                    }
-                    setWidth(width)
-                    setHorizontalOffset(-width + anchor.getWidth())
                     show()
                 }
             }
@@ -408,9 +386,6 @@ class ControlsUiControllerImpl @Inject constructor (
             (getBackground() as LayerDrawable).getDrawable(1)
                 .setTint(context.resources.getColor(R.color.control_spinner_dropdown, null))
         }
-        parent.requireViewById<ImageView>(R.id.app_icon).apply {
-            setImageDrawable(selectionItem.icon)
-        }
 
         if (itemsWithStructure.size == 1) {
             spinner.setBackground(null)
@@ -420,9 +395,14 @@ class ControlsUiControllerImpl @Inject constructor (
         val anchor = parent.requireViewById<ViewGroup>(R.id.controls_header)
         anchor.setOnClickListener(object : View.OnClickListener {
             override fun onClick(v: View) {
-                popup = createPopup().apply {
+                popup = GlobalActionsPopupMenu(context, true /* isDropDownMode */).apply {
                     setAnchorView(anchor)
                     setAdapter(adapter)
+                    val theme = ContextThemeWrapper(context, R.style.Control_ListPopupWindow)
+                        .getTheme()
+                    setBackgroundDrawable(
+                        context.resources.getDrawable(R.drawable.rounded_bg_full, theme))
+
                     setOnItemClickListener(object : AdapterView.OnItemClickListener {
                         override fun onItemClick(
                             parent: AdapterView<*>,
@@ -435,14 +415,6 @@ class ControlsUiControllerImpl @Inject constructor (
                             dismiss()
                         }
                     })
-                    // need to call show() first in order to construct the listView
-                    show()
-                    getListView()?.apply {
-                        setDividerHeight(
-                            context.resources.getDimensionPixelSize(R.dimen.control_list_divider))
-                        setDivider(
-                            context.resources.getDrawable(R.drawable.controls_list_divider))
-                    }
                     show()
                 }
             }
