@@ -200,9 +200,9 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"ਤੁਹਾਡਾ ਡੀਵਾਈਸ ਮਿਟਾਇਆ ਜਾਏਗਾ"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"ਪ੍ਰਸ਼ਾਸਕ ਐਪ ਵਰਤੀ ਨਹੀਂ ਜਾ ਸਕਦੀ। ਹੁਣ ਤੁਹਾਡੇ ਡੀਵਾਈਸ ਦਾ ਡਾਟਾ ਮਿਟਾਇਆ ਜਾਵੇਗਾ।\n\nਜੇਕਰ ਤੁਹਾਡੇ ਕੋਲ ਕੋਈ ਸਵਾਲ ਹਨ, ਤਾਂ ਆਪਣੀ ਸੰਸਥਾ ਦੇ ਪ੍ਰਸ਼ਾਸਕ ਨੂੰ ਸੰਪਰਕ ਕਰੋ।"</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> ਵੱਲੋਂ ਪ੍ਰਿੰਟ ਕਰਨਾ ਬੰਦ ਕੀਤਾ ਗਿਆ।"</string>
-    <string name="personal_apps_suspended_title" msgid="4543693107104417750">"ਆਪਣੀਆਂ ਨਿੱਜੀ ਐਪਾਂ ਅਣਬਲਾਕ ਕਰੋ"</string>
-    <string name="personal_apps_suspended_tomorrow_title" msgid="6414440257969874914">"ਐਪਾਂ ਕੱਲ੍ਹ ਬਲਾਕ ਹੋ ਜਾਣਗੀਆਂ"</string>
-    <string name="personal_apps_suspended_text" msgid="8954038765131038226">"ਤੁਹਾਡਾ ਆਈ.ਟੀ. ਪ੍ਰਸ਼ਾਸਕ ਤੁਹਾਡੀ ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ ਨੂੰ <xliff:g id="DAYS">%1$d</xliff:g> ਦਿਨਾਂ ਤੋਂ ਵੱਧ ਸਮੇਂ ਤੱਕ ਦੀ ਇਜਾਜ਼ਤ ਨਹੀਂ ਦਿੰਦਾ"</string>
+    <string name="personal_apps_suspension_title" msgid="7561416677884286600">"ਆਪਣਾ ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ ਚਾਲੂ ਕਰੋ"</string>
+    <string name="personal_apps_suspension_text" msgid="6115455688932935597">"ਜਦੋਂ ਤੱਕ ਤੁਸੀਂ ਆਪਣਾ ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ ਚਾਲੂ ਨਹੀਂ ਕਰਦੇ ਤੁਹਾਡੀਆਂ ਨਿੱਜੀ ਐਪਾਂ ਬਲਾਕ ਰਹਿੰਦੀਆਂ ਹਨ"</string>
+    <string name="personal_apps_suspension_tomorrow_text" msgid="6322541302153673994">"ਕੱਲ੍ਹ ਨੂੰ ਤੁਹਾਡੀਆਂ ਨਿੱਜੀ ਐਪਾਂ ਬਲਾਕ ਕਰ ਦਿੱਤੀਆਂ ਜਾਣਗੀਆਂ"</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ ਚਾਲੂ ਕਰੋ"</string>
     <string name="me" msgid="6207584824693813140">"ਮੈਂ"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"ਟੈਬਲੈੱਟ ਵਿਕਲਪ"</string>
@@ -1631,10 +1631,8 @@
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"ਕੁਝ ਸਕਿੰਟਾਂ ਲਈ ਦੋਵੇਂ ਅਵਾਜ਼ੀ ਕੁੰਜੀਆਂ ਨੂੰ ਦਬਾਈ ਰੱਖਣਾ <xliff:g id="SERVICE">%1$s</xliff:g>, ਇੱਕ ਪਹੁੰਚਯੋਗਤਾ ਵਿਸ਼ੇਸ਼ਤਾ ਨੂੰ ਚਾਲੂ ਕਰ ਦਿੰਦਾ ਹੈ। ਇਹ ਤੁਹਾਡੇ ਡੀਵਾਈਸ ਦੇ ਕੰਮ ਕਰਨ ਦੇ ਤਰੀਕੇ ਨੂੰ ਬਦਲ ਸਕਦਾ ਹੈ।\n\nਸੈਟਿੰਗਾਂ ਅਤੇ ਪਹੁੰਚਯੋਗਤਾ ਵਿੱਚ ਤੁਸੀਂ ਇਸ ਸ਼ਾਰਟਕੱਟ ਨੂੰ ਕਿਸੇ ਹੋਰ ਵਿਸ਼ੇਸ਼ਤਾ ਵਿੱਚ ਬਦਲ ਸਕਦੇ ਹੋ।"</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"ਚਾਲੂ ਕਰੋ"</string>
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"ਚਾਲੂ ਨਾ ਕਰੋ"</string>
-    <!-- no translation found for accessibility_shortcut_menu_item_status_on (6608392117189732543) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_menu_item_status_off (5531598275559472393) -->
-    <skip />
+    <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"ਚਾਲੂ"</string>
+    <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"ਬੰਦ"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"ਕੀ <xliff:g id="SERVICE">%1$s</xliff:g> ਨੂੰ ਤੁਹਾਡੇ ਡੀਵਾਈਸ ਦਾ ਪੂਰਾ ਕੰਟਰੋਲ ਦੇਣਾ ਹੈ?"</string>
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"ਜੇਕਰ ਤੁਸੀਂ <xliff:g id="SERVICE">%1$s</xliff:g> ਚਾਲੂ ਕਰਦੇ ਹੋ, ਤਾਂ ਤੁਹਾਡਾ ਡੀਵਾਈਸ ਇਨਕ੍ਰਿਪਸ਼ਨ ਦਾ ਵਿਸਤਾਰ ਕਰਨ ਲਈ ਤੁਹਾਡੇ ਸਕ੍ਰੀਨ ਲਾਕ ਦੀ ਵਰਤੋਂ ਨਹੀਂ ਕਰੇਗਾ।"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"ਪੂਰਾ ਕੰਟਰੋਲ ਉਹਨਾਂ ਐਪਾਂ ਲਈ ਢੁਕਵਾਂ ਹੈ ਜੋ ਪਹੁੰਚਯੋਗਤਾ ਸੰਬੰਧੀ ਲੋੜਾਂ ਵਿੱਚ ਤੁਹਾਡੀ ਮਦਦ ਕਰਦੀਆਂ ਹਨ, ਪਰ ਜ਼ਿਆਦਾਤਰ ਐਪਾਂ ਲਈ ਢੁਕਵਾਂ ਨਹੀਂ ਹੁੰਦਾ।"</string>
@@ -1796,8 +1794,10 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"ਤੁਹਾਡੇ ਪ੍ਰਸ਼ਾਸਕ ਵੱਲੋਂ ਅੱਪਡੇਟ ਕੀਤਾ ਗਿਆ"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"ਤੁਹਾਡੇ ਪ੍ਰਸ਼ਾਸਕ ਵੱਲੋਂ ਮਿਟਾਇਆ ਗਿਆ"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ਠੀਕ ਹੈ"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"ਬੈਟਰੀ ਲਾਈਫ਼ ਵਧਾਉਣ ਲਈ, ਬੈਟਰੀ ਸੇਵਰ:\n ਗੂੜ੍ਹਾ ਥੀਮ ਚਾਲੂ ਕਰਦਾ ਹੈ\n ਬੈਕਗ੍ਰਾਊਂਡ ਸਰਗਰਮੀ, ਕੁਝ ਦ੍ਰਿਸ਼ਟੀਗਤ ਪ੍ਰਭਾਵਾਂ, ਅਤੇ \"Ok Google\" ਵਰਗੀਆਂ ਹੋਰ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਨੂੰ ਬੰਦ ਕਰਦਾ ਹੈ ਜਾਂ ਉਹਨਾਂ \'ਤੇ ਪਾਬੰਦੀ ਲਗਾਉਂਦਾ ਹੈ\n\n"<annotation id="url">"ਹੋਰ ਜਾਣੋ"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"ਬੈਟਰੀ ਲਾਈਫ਼ ਵਧਾਉਣ ਲਈ, ਬੈਟਰੀ ਸੇਵਰ:\n ਗੂੜ੍ਹਾ ਥੀਮ ਚਾਲੂ ਕਰਦਾ ਹੈ\n ਬੈਕਗ੍ਰਾਊਂਡ ਸਰਗਰਮੀ, ਕੁਝ ਦ੍ਰਿਸ਼ ਪ੍ਰਭਾਵਾਂ, ਅਤੇ \"Ok Google\" ਵਰਗੀਆਂ ਹੋਰ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਨੂੰ ਬੰਦ ਕਰਦਾ ਹੈ ਜਾਂ ਉਹਨਾਂ \'ਤੇ ਪਾਬੰਦੀ ਲਗਾਉਂਦਾ ਹੈ"</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (5997766757551917769) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (8587408568232177204) -->
+    <skip />
     <string name="data_saver_description" msgid="4995164271550590517">"ਡਾਟਾ ਵਰਤੋਂ ਘਟਾਉਣ ਵਿੱਚ ਮਦਦ ਲਈ, ਡਾਟਾ ਸੇਵਰ ਕੁਝ ਐਪਾਂ ਨੂੰ ਬੈਕਗ੍ਰਾਊਂਡ ਵਿੱਚ ਡਾਟਾ ਭੇਜਣ ਜਾਂ ਪ੍ਰਾਪਤ ਕਰਨ ਤੋਂ ਰੋਕਦਾ ਹੈ। ਤੁਹਾਡੇ ਵੱਲੋਂ ਵਰਤਮਾਨ ਤੌਰ \'ਤੇ ਵਰਤੀ ਜਾ ਰਹੀ ਐਪ ਡਾਟਾ \'ਤੇ ਪਹੁੰਚ ਕਰ ਸਕਦੀ ਹੈ, ਪਰ ਉਹ ਇੰਝ ਕਦੇ-ਕਦਾਈਂ ਕਰ ਸਕਦੀ ਹੈ। ਉਦਾਹਰਨ ਲਈ, ਇਸ ਦਾ ਮਤਲਬ ਇਹ ਹੋ ਸਕਦਾ ਹੈ ਕਿ ਚਿੱਤਰ ਤਦ ਤੱਕ ਨਹੀਂ ਪ੍ਰਦਰਸ਼ਿਤ ਕੀਤੇ ਜਾਂਦੇ, ਜਦੋਂ ਤੱਕ ਤੁਸੀਂ ਉਹਨਾਂ \'ਤੇ ਟੈਪ ਨਹੀਂ ਕਰਦੇ।"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"ਕੀ ਡਾਟਾ ਸੇਵਰ ਚਾਲੂ ਕਰਨਾ ਹੈ?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"ਚਾਲੂ ਕਰੋ"</string>

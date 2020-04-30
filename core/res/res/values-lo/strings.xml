@@ -200,9 +200,9 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"ອຸ​ປະ​ກອນ​ຂອງ​ທ່ານ​ຈະ​ຖືກ​ລຶບ"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"ບໍ່ສາມາດໃຊ້ແອັບຜູ້ເບິ່ງແຍງລະບົບໄດ້. ອຸປະກອນຂອງທ່ານຈະຖືກລຶບຂໍ້ມູນໃນຕອນນີ້.\n\nຫາກທ່ານມີຄຳຖາມ, ໃຫ້ຕິດຕໍ່ຜູ້ເບິ່ງແຍງລະບົບອົງກອນຂອງທ່ານ."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"ການພິມຖືກປິດໄວ້ໂດຍ <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
-    <string name="personal_apps_suspended_title" msgid="4543693107104417750">"ປົດບລັອກແອັບສ່ວນຕົວຂອງທ່ານ"</string>
-    <string name="personal_apps_suspended_tomorrow_title" msgid="6414440257969874914">"ແອັບຈະຖືກບລັອກໃນມື້ອື່ນ"</string>
-    <string name="personal_apps_suspended_text" msgid="8954038765131038226">"ຜູ້ເບິ່ງແຍງໄອທີຂອງທ່ານບໍ່ອະນຸຍາດໃຫ້ຢຸດໂປຣໄຟລ໌ວຽກຂອງທ່ານເກີນ <xliff:g id="DAYS">%1$d</xliff:g> ມື້ໄດ້"</string>
+    <string name="personal_apps_suspension_title" msgid="7561416677884286600">"ເປີດໃຊ້​ໂປຣ​ໄຟລ໌​ບ່ອນ​ເຮັດ​ວຽກ"</string>
+    <string name="personal_apps_suspension_text" msgid="6115455688932935597">"ແອັບສ່ວນຕົວຂອງທ່ານຈະຖືກບລັອກໄວ້ຈົນກວ່າທ່ານຈະເປີດໃຊ້​ໂປຣ​ໄຟລ໌​ບ່ອນ​ເຮັດ​ວຽກຂອງທ່ານ"</string>
+    <string name="personal_apps_suspension_tomorrow_text" msgid="6322541302153673994">"ແອັບສ່ວນຕົວຂອງທ່ານຈະຖືກບລັອກໄວ້ໃນມື້ອື່ນ"</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"ເປີດໃຊ້ໂປຣໄຟລ໌ບ່ອນເຮັດວຽກ"</string>
     <string name="me" msgid="6207584824693813140">"ຂ້າພະເຈົ້າ"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"ໂຕເລືອກແທັບເລັດ"</string>
@@ -1631,10 +1631,8 @@
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"ກົດປຸ່ມລະດັບສຽງທັງສອງຄ້າງໄວ້ສອງສາມວິນາທີເພື່ອເປີດໃຊ້ <xliff:g id="SERVICE">%1$s</xliff:g>, ຄຸນສົມບັດການຊ່ວຍເຂົ້າເຖິງ. ນີ້ອາດປ່ຽນວິທີການເຮັດວຽກຂອງອຸປະກອນທ່ານ.\n\nທ່ານສາມາດປ່ຽນທາງລັດນີ້ເປັນຄຸນສົມບັດອື່ນໄດ້ໃນການຕັ້ງຄ່າ &gt; ການຊ່ວຍເຂົ້າເຖິງ."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"ເປີດໃຊ້"</string>
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"ບໍ່ເປີດ"</string>
-    <!-- no translation found for accessibility_shortcut_menu_item_status_on (6608392117189732543) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_menu_item_status_off (5531598275559472393) -->
-    <skip />
+    <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"ເປີດ"</string>
+    <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"ປິດ"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"ອະນຸຍາດໃຫ້ <xliff:g id="SERVICE">%1$s</xliff:g> ຄວບຄຸມອຸປະກອນທ່ານໄດ້ເຕັມຮູບແບບບໍ?"</string>
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"ຫາກ​ທ່ານ​ເປີດ​ໃຊ້ <xliff:g id="SERVICE">%1$s</xliff:g>, ​ອຸ​ປະ​ກອນ​ຂອງ​ທ່ານ​ຈະ​ບໍ່​ໃຊ້​ການ​ລັອກ​ໜ້າ​ຈໍ​ຂອງ​ທ່ານ​ເພື່ອ​ເພີ່ມ​ການ​ເຂົ້າ​ລະ​ຫັດ​ຂໍ້​ມູນ."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"ການຄວບຄຸມແບບເຕັມຮູບແບບແມ່ນເໝາະສົມສຳລັບແອັບທີ່ຊ່ວຍທ່ານໃນດ້ານການຊ່ວຍເຂົ້າເຖິງ, ແຕ່ບໍ່ເໝາະສຳລັບທຸກແອັບ."</string>
@@ -1796,8 +1794,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"ຖືກອັບໂຫລດໂດຍຜູ້ເບິ່ງແຍງລະບົບຂອງທ່ານ"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"ຖືກລຶບອອກໂດຍຜູ້ເບິ່ງແຍງລະບົບຂອງທ່ານ"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ຕົກລົງ"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"ເພື່ອຍືດອາຍຸແບັດເຕີຣີ, ຕົວປະຢັດແບັດເຕີຣີຈະ:\n·ເປີດໃຊ້ຮູບແບບສີສັນມືດ\n·ປິດ ຫຼື ຈຳກັດການເຄື່ອນໄຫວໃນພື້ນຫຼັງ, ເອັບເຟັກດ້ານພາບບາງຢ່າງ ແລະ ຄຸນສົມບັດອື່ນໆ ເຊັ່ນ: “Hey Google”\n\n"<annotation id="url">"ສຶກສາເພີ່ມເຕີມ"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"ເພື່ອຍືດອາຍຸແບັດເຕີຣີ, ຕົວປະຢັດແບັດເຕີຣີຈະ:\n·ເປີດໃຊ້ຮູບແບບສີສັນມືດ\n·ປິດ ຫຼື ຈຳກັດການເຄື່ອນໄຫວໃນພື້ນຫຼັງ, ເອັບເຟັກດ້ານພາບບາງຢ່າງ ແລະ ຄຸນສົມບັດອື່ນໆ ເຊັ່ນ: “Hey Google”"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"ເພື່ອຍືດອາຍຸແບັດເຕີຣີ, ຕົວປະຢັດແບັດເຕີຣີຈະ:\n\n•ເປີດໃຊ້ຮູບແບບສີສັນມືດ\n•ປິດ ຫຼື ຈຳກັດການເຄື່ອນໄຫວໃນພື້ນຫຼັງ, ເອັບເຟັກດ້ານພາບບາງຢ່າງ ແລະ ຄຸນສົມບັດອື່ນໆ ເຊັ່ນ: “Hey Google”\n\n"<annotation id="url">"ສຶກສາເພີ່ມເຕີມ"</annotation></string>
+    <string name="battery_saver_description" msgid="8587408568232177204">"ເພື່ອຍືດອາຍຸແບັດເຕີຣີ, ຕົວປະຢັດແບັດເຕີຣີຈະ:\n\n•ເປີດໃຊ້ຮູບແບບສີສັນມືດ\n•ປິດ ຫຼື ຈຳກັດການເຄື່ອນໄຫວໃນພື້ນຫຼັງ, ເອັບເຟັກດ້ານພາບບາງຢ່າງ ແລະ ຄຸນສົມບັດອື່ນໆ ເຊັ່ນ: “Hey Google”"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"ເພື່ອຊ່ວຍຫຼຸດຜ່ອນການນຳໃຊ້ຂໍ້ມູນ, ຕົວປະຢັດອິນເຕີເນັດຈະປ້ອງກັນບໍ່ໃຫ້ບາງແອັບສົ່ງ ຫຼື ຮັບຂໍ້ມູນໃນພື້ນຫຼັງ. ແອັບໃດໜຶ່ງທີ່ທ່ານກຳລັງໃຊ້ຢູ່ຈະສາມາດເຂົ້າເຖິງຂໍ້ມູນໄດ້ ແຕ່ອາດເຂົ້າເຖິງໄດ້ຖີ່ໜ້ອຍລົງ. ນີ້ອາດໝາຍຄວາມວ່າ ຮູບພາບຕ່າງໆອາດບໍ່ສະແດງຈົນກວ່າທ່ານຈະແຕະໃສ່ກ່ອນ."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"ເປີດຕົວປະຢັດອິນເຕີເນັດບໍ?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"ເປີດໃຊ້"</string>
@@ -2044,15 +2042,12 @@
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"ກ່ອງໂຕ້ຕອບການເປີດປິດ"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"ໜ້າຈໍລັອກ"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"ຮູບໜ້າຈໍ"</string>
-    <!-- no translation found for accessibility_system_action_accessibility_button_label (5941347017132886642) -->
-    <skip />
-    <!-- no translation found for accessibility_system_action_accessibility_button_chooser_label (6973618519666227981) -->
-    <skip />
+    <string name="accessibility_system_action_accessibility_button_label" msgid="5941347017132886642">"ທາງລັດການຊ່ວຍເຂົ້າເຖິງຢູ່ໜ້າຈໍ"</string>
+    <string name="accessibility_system_action_accessibility_button_chooser_label" msgid="6973618519666227981">"ຕົວເລືອກທາງລັດການຊ່ວຍເຂົ້າເຖິງຢູ່ໜ້າຈໍ"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"ແຖບຄຳບັນຍາຍຂອງ <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> ຖືກວາງໄວ້ໃນກະຕ່າ \"ຈຳກັດ\" ແລ້ວ"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
-    <!-- no translation found for conversation_single_line_image_placeholder (6983271082911936900) -->
-    <skip />
+    <string name="conversation_single_line_image_placeholder" msgid="6983271082911936900">"ສົ່ງຮູບແລ້ວ"</string>
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"ການສົນທະນາ"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"ການສົນທະນາກຸ່ມ"</string>
     <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>

@@ -204,9 +204,12 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"תתבצע מחיקה של המכשיר"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"לא ניתן להשתמש באפליקציה של מנהל המערכת.\n\nאם יש לך שאלות, יש ליצור קשר עם מנהל המערכת של הארגון."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"ההדפסה הושבתה על ידי <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
-    <string name="personal_apps_suspended_title" msgid="4543693107104417750">"ביטול חסימה של אפל\' אישיות"</string>
-    <string name="personal_apps_suspended_tomorrow_title" msgid="6414440257969874914">"האפליקציות ייחסמו מחר"</string>
-    <string name="personal_apps_suspended_text" msgid="8954038765131038226">"‏מנהל ה-IT לא מתיר השהיה של יותר מ-<xliff:g id="DAYS">%1$d</xliff:g> ימים של פרופיל העבודה"</string>
+    <!-- no translation found for personal_apps_suspension_title (7561416677884286600) -->
+    <skip />
+    <!-- no translation found for personal_apps_suspension_text (6115455688932935597) -->
+    <skip />
+    <!-- no translation found for personal_apps_suspension_tomorrow_text (6322541302153673994) -->
+    <skip />
     <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"הפעלה של פרופיל העבודה"</string>
     <string name="me" msgid="6207584824693813140">"אני"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"אפשרויות טאבלט"</string>
@@ -1842,8 +1845,10 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"עודכנה על ידי מנהל המערכת"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"נמחקה על ידי מנהל המערכת"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"אישור"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"‏התכונה \'חיסכון בסוללה\':\n·מפעילה עיצוב כהה\n·מכבה או מגבילה פעילות ברקע, חלק מהאפקטים החזותיים ותכונות אחרות כמו \"Ok Google\", כדי להאריך את חיי הסוללה\n\n"<annotation id="url">"מידע נוסף"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"‏התכונה \'חיסכון בסוללה\':\n·מפעילה עיצוב כהה\n·מכבה או מגבילה פעילות ברקע, חלק מהאפקטים החזותיים ותכונות אחרות כמו \"Ok Google\", כדי להאריך את חיי הסוללה"</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (5997766757551917769) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (8587408568232177204) -->
+    <skip />
     <string name="data_saver_description" msgid="4995164271550590517">"‏כדי לסייע בהפחתת השימוש בנתונים, חוסך הנתונים (Data Saver) מונע מאפליקציות מסוימות שליחה או קבלה של נתונים ברקע. אפליקציה שבה נעשה שימוש כרגע יכולה לגשת לנתונים, אבל בתדירות נמוכה יותר. המשמעות היא, למשל, שתמונות יוצגו רק לאחר שמקישים עליהן."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"להפעיל את חוסך הנתונים?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"הפעל"</string>

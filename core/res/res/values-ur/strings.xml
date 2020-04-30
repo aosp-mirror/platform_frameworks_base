@@ -200,9 +200,9 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"آپ کا آلہ صاف کر دیا جائے گا"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"منتظم کی ایپ استعمال نہیں کی جا سکتی۔ آپ کا آلہ اب مٹا دیا جائے گا۔\n\nاگر آپ کے سوالات ہیں تو اپنی تنظیم کے منتظم سے رابطہ کریں۔"</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> نے پرنٹنگ کو غیر فعال کر دیا ہے۔"</string>
-    <string name="personal_apps_suspended_title" msgid="4543693107104417750">"اپنے ذاتی ایپس غیر مسدود کریں"</string>
-    <string name="personal_apps_suspended_tomorrow_title" msgid="6414440257969874914">"آئندہ کل ایپس کو مسدود کر دیا جائے گا"</string>
-    <string name="personal_apps_suspended_text" msgid="8954038765131038226">"‏آپ کا IT منتظم آپ کی دفتری پروفائل کو <xliff:g id="DAYS">%1$d</xliff:g> دن سے زیادہ موقوف ہونے کی اجازت نہیں دیتا ہے"</string>
+    <string name="personal_apps_suspension_title" msgid="7561416677884286600">"اپنی دفتری پروفائل آن کریں"</string>
+    <string name="personal_apps_suspension_text" msgid="6115455688932935597">"آپ کے ذاتی ایپس کو اس وقت تک بلاک کر دیا جاتا ہے جب تک کہ آپ اپنے ورک پروفایل کو آن نہیں کرتے"</string>
+    <string name="personal_apps_suspension_tomorrow_text" msgid="6322541302153673994">"آئندہ کل آپ کی ذاتی ایپس کو مسدود کر دیا جائے گا"</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"دفتری پروفائل آن کریں"</string>
     <string name="me" msgid="6207584824693813140">"میں"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"ٹیبلیٹ کے اختیارات"</string>
@@ -1631,10 +1631,8 @@
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"والیوم کی دونوں کلیدوں کو کچھ سیکنڈز تک دبائے رکھنے سے <xliff:g id="SERVICE">%1$s</xliff:g> ایکسیسبیلٹی خصوصیت آن ہو جاتی ہے۔ اس سے آپ کے آلے کے کام کرنے کا طریقہ تبدیل ہو سکتا ہے۔\n\nآپ ترتیبات اور ایکسیسبیلٹی میں دیگر خصوصیت کے لیے اس شارٹ کٹ کو تبدیل کر سکتے ہیں۔"</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"آن کریں"</string>
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"آن نہ کریں"</string>
-    <!-- no translation found for accessibility_shortcut_menu_item_status_on (6608392117189732543) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_menu_item_status_off (5531598275559472393) -->
-    <skip />
+    <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"آن"</string>
+    <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"آف"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g> کو آپ کے آلے کا مکمل کنٹرول حاصل کرنے کی اجازت دیں؟"</string>
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"اگر آپ <xliff:g id="SERVICE">%1$s</xliff:g> کو آن کرتے ہیں تو آپ کا آلہ ڈیٹا کی مرموزکاری کو بڑھانے کیلئے آپ کی اسکرین کا قفل استعمال نہیں کرے گا۔"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"مکمل کنٹرول ان ایپس کے لیے مناسب ہے جو ایکسیسبیلٹی کی ضروریات میں آپ کی مدد کرتی ہیں، لیکن زیادہ تر ایپس کیلئے مناسب نہیں۔"</string>
@@ -1796,8 +1794,10 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"آپ کے منتظم کے ذریعے اپ ڈیٹ کیا گیا"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"آپ کے منتظم کے ذریعے حذف کیا گیا"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ٹھیک ہے"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"‏بیٹری لائف کو بڑھانے کے لیے، بیٹری سیور:\n گہری تھیم کو آن کرتی ہے\n پس منظر کی سرگرمی، کچھ بصری اثرات اور دیگر خصوصیات جیسے کہ \"Ok Google\" کو آف یا محدود کرتی ہے\n\n"<annotation id="url">"مزید جانیں"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"‏بیٹری لائف کو بڑھانے کے لیے، بیٹری سیور:\n گہری تھیم کو آن کرتی ہے\n پس منظر کی سرگرمی، کچھ بصری اثرات اور دیگر خصوصیات جیسے کہ \"Ok Google\" کو آف یا محدود کرتی ہے"</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (5997766757551917769) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (8587408568232177204) -->
+    <skip />
     <string name="data_saver_description" msgid="4995164271550590517">"ڈیٹا کے استعمال کو کم کرنے میں مدد کیلئے، ڈیٹا سیور پس منظر میں کچھ ایپس کو ڈیٹا بھیجنے یا موصول کرنے سے روکتی ہے۔ آپ جو ایپ فی الحال استعمال کر رہے ہیں وہ ڈیٹا تک رسائی کر سکتی ہے مگر ہو سکتا ہے ایسا اکثر نہ ہو۔ اس کا مطلب مثال کے طور پر یہ ہو سکتا ہے کہ تصاویر تھپتھپانے تک ظاہر نہ ہوں۔"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"ڈیٹا سیور آن کریں؟"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"آن کریں"</string>
