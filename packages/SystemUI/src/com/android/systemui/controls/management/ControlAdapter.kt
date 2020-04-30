@@ -18,6 +18,7 @@ package com.android.systemui.controls.management
 
 import android.content.ComponentName
 import android.graphics.Rect
+import android.service.controls.Control
 import android.service.controls.DeviceTypes
 import android.view.LayoutInflater
 import android.view.View
@@ -46,9 +47,9 @@ class ControlAdapter(
 ) : RecyclerView.Adapter<Holder>() {
 
     companion object {
-        private const val TYPE_ZONE = 0
-        private const val TYPE_CONTROL = 1
-        private const val TYPE_DIVIDER = 2
+        const val TYPE_ZONE = 0
+        const val TYPE_CONTROL = 1
+        const val TYPE_DIVIDER = 2
     }
 
     val spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
@@ -142,7 +143,7 @@ sealed class Holder(view: View) : RecyclerView.ViewHolder(view) {
 /**
  * Holder for using with [DividerWrapper] to display a divider between zones.
  *
- * The divider can be shown or hidden. It also has a frame view the height of a control, that can
+ * The divider can be shown or hidden. It also has a view the height of a control, that can
  * be toggled visible or gone.
  */
 private class DividerHolder(view: View) : Holder(view) {
@@ -229,10 +230,25 @@ class MarginItemDecorator(
         parent: RecyclerView,
         state: RecyclerView.State
     ) {
-        outRect.apply {
-            top = topMargin
-            left = sideMargins
-            right = sideMargins
+        val position = parent.getChildAdapterPosition(view)
+        if (position == RecyclerView.NO_POSITION) return
+        val type = parent.adapter?.getItemViewType(position)
+        if (type == ControlAdapter.TYPE_CONTROL) {
+            outRect.apply {
+                top = topMargin
+                left = sideMargins
+                right = sideMargins
+                bottom = 0
+            }
+        } else if (type == ControlAdapter.TYPE_ZONE && position == 0) {
+            // add negative padding to the first zone to counteract the margin
+            val margin = (view.layoutParams as ViewGroup.MarginLayoutParams).topMargin
+            outRect.apply {
+                top = -margin
+                left = 0
+                right = 0
+                bottom = 0
+            }
         }
     }
 }

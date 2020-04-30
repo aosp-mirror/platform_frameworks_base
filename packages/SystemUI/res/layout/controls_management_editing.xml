@@ -22,6 +22,6 @@
     android:layout_height="match_parent"
     android:clipChildren="false"
     android:clipToPadding="false"
-    android:paddingTop="@dimen/controls_management_list_margin"
+    android:paddingTop="@dimen/controls_management_editing_list_margin"
 />
 
