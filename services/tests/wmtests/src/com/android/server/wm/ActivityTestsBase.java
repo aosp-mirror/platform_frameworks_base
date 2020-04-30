@@ -49,6 +49,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.service.voice.IVoiceInteractionSession;
+import android.view.SurfaceControl;
 import android.window.ITaskOrganizer;
 import android.window.WindowContainerToken;
 
@@ -552,7 +553,7 @@ class ActivityTestsBase extends SystemServiceTestsBase {
             mMoveToSecondaryOnEnter = move;
         }
         @Override
-        public void onTaskAppeared(ActivityManager.RunningTaskInfo info) {
+        public void onTaskAppeared(ActivityManager.RunningTaskInfo info, SurfaceControl leash) {
         }
         @Override
         public void onTaskVanished(ActivityManager.RunningTaskInfo info) {
