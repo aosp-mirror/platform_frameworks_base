@@ -149,6 +149,7 @@ class ControlsControllerImpl @Inject constructor (
             val user = intent.getIntExtra(Intent.EXTRA_USER_ID, UserHandle.USER_NULL)
             if (user == currentUserId) {
                 executor.execute {
+                    Log.d(TAG, "Restore finished, storing auxiliary favorites")
                     auxiliaryPersistenceWrapper.initialize()
                     listingController.removeCallback(listingCallback)
                     persistenceWrapper.storeFavorites(auxiliaryPersistenceWrapper.favorites)
@@ -219,6 +220,7 @@ class ControlsControllerImpl @Inject constructor (
 
                 // Check if something has been added or removed, if so, store the new list
                 if (changed) {
+                    Log.d(TAG, "Detected change in available services, storing updated favorites")
                     persistenceWrapper.storeFavorites(Favorites.getAllStructures())
                 }
             }
