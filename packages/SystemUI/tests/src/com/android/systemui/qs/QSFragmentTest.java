@@ -34,6 +34,7 @@ import androidx.test.filters.SmallTest;
 import androidx.test.filters.Suppress;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.UiEventLogger;
 import com.android.keyguard.CarrierText;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
@@ -106,7 +107,7 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
                 mock(PluginManager.class), mock(TunerService.class),
                 () -> mock(AutoTileManager.class), mock(DumpManager.class),
                 mock(BroadcastDispatcher.class), Optional.of(mock(StatusBar.class)),
-                mock(QSLogger.class));
+                mock(QSLogger.class), mock(UiEventLogger.class));
         qs.setHost(host);
 
         qs.setListening(true);

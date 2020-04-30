@@ -371,6 +371,11 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
         return MetricsEvent.QS_CUSTOM;
     }
 
+    @Override
+    public final String getMetricsSpec() {
+        return mComponent.getPackageName();
+    }
+
     public void startUnlockAndRun() {
         Dependency.get(ActivityStarter.class).postQSRunnableDismissingKeyguard(() -> {
             try {
