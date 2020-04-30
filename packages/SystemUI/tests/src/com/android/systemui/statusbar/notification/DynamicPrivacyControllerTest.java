@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.notification;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -81,6 +82,22 @@ public class DynamicPrivacyControllerTest extends SysuiTestCase {
     public void testNotifiedWhenEnabled() {
         when(mKeyguardStateController.canDismissLockScreen()).thenReturn(true);
         enableDynamicPrivacy();
+        mDynamicPrivacyController.onUnlockedChanged();
+        verify(mListener).onDynamicPrivacyChanged();
+    }
+
+    @Test
+    public void testNotifiedWhenKeyguardFadingAwayChanges() {
+        when(mKeyguardStateController.canDismissLockScreen()).thenReturn(false);
+        when(mKeyguardStateController.isKeyguardGoingAway()).thenReturn(false);
+        enableDynamicPrivacy();
+
+        when(mKeyguardStateController.isKeyguardFadingAway()).thenReturn(true);
+        mDynamicPrivacyController.onKeyguardFadingAwayChanged();
+        verify(mListener).onDynamicPrivacyChanged();
+        reset(mListener);
+
+        when(mKeyguardStateController.isKeyguardFadingAway()).thenReturn(false);
         mDynamicPrivacyController.onUnlockedChanged();
         verify(mListener).onDynamicPrivacyChanged();
     }
