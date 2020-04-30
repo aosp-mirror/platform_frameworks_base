@@ -430,6 +430,8 @@
     <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"ஸ்கிரீன் ரெக்கார்டு"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"தொடங்கு"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"நிறுத்து"</string>
+    <!-- no translation found for media_seamless_remote_device (177033467332920464) -->
+    <skip />
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"ஆப்ஸிற்கு இடையே மாற்றுவதற்கு, மேல்நோக்கி ஸ்வைப் செய்க"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"ஆப்ஸை வேகமாக மாற்ற, வலப்புறம் இழுக்கவும்"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"மேலோட்டப் பார்வையை நிலைமாற்று"</string>
@@ -712,6 +714,8 @@
     <string name="notification_channel_summary_priority" msgid="7415770044553264622">"உரையாடல் பிரிவின் மேற்பகுதியில் ஒரு குமிழாகக் காட்டப்படும்."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"அமைப்புகள்"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"முன்னுரிமை"</string>
+    <!-- no translation found for no_shortcut (7176375126961212514) -->
+    <skip />
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"சமீபத்திய குமிழ்கள் இல்லை"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"சமீபத்திய குமிழ்களும் நிராகரிக்கப்பட்ட குமிழ்களும் இங்கே தோன்றும்"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"இந்த அறிவிப்புகளை மாற்ற இயலாது."</string>
@@ -1025,6 +1029,8 @@
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"பவர் மெனுவில் இருந்து அணுகுவதற்கான கட்டுப்பாடுகளைத் தேர்ந்தெடுக்கலாம்"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"கட்டுப்பாடுகளை மறுவரிசைப்படுத்த அவற்றைப் பிடித்து இழுக்கவும்"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"கட்டுப்பாடுகள் அனைத்தும் அகற்றப்பட்டன"</string>
+    <!-- no translation found for controls_favorite_toast_no_changes (7094494210840877931) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"எல்லா கட்டுப்பாடுகளின் பட்டியலை ஏற்ற முடியவில்லை."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"பிற"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"சாதனக் கட்டுப்பாடுகளில் சேர்த்தல்"</string>
@@ -1033,6 +1039,7 @@
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"கட்டுப்பாடுகள் மாற்றப்பட்டன"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"பின்னில் எழுத்துகள் அல்லது குறிகள் உள்ளன"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"<xliff:g id="DEVICE">%s</xliff:g> ஐச் சரிபார்த்தல்"</string>
+    <string name="controls_pin_wrong" msgid="6162694056042164211">"தவறான பின்"</string>
     <string name="controls_pin_verifying" msgid="3755045989392131746">"சரிபார்க்கிறது…"</string>
     <string name="controls_pin_instructions" msgid="6363309783822475238">"பின்னை உள்ளிடுக"</string>
     <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"வேறு பின்னைப் பயன்படுத்தவும்"</string>
@@ -1042,6 +1049,9 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"பரிந்துரைகளை ஏற்றுகிறது"</string>
     <string name="controls_media_close_session" msgid="9023534788828414585">"இந்த மீடியா அமர்வை மூடுக"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"செயலில் இல்லை , சரிபார்க்கவும்"</string>
+    <string name="controls_error_retryable" msgid="864025882878378470">"பிழை, மீண்டும் முயல்கிறது…"</string>
+    <string name="controls_error_removed" msgid="6299213591234723805">"சாதனம் அகற்றப்பட்டது"</string>
+    <string name="controls_error_generic" msgid="352500456918362905">"நிலையைக் காட்ட முடியவில்லை"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"பிழை, மீண்டும் முயலவும்"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"செயல்பாட்டிலுள்ளது"</string>
     <string name="controls_added_tooltip" msgid="4842812921719153085">"புதிய கட்டுப்பாடுகளைப் பார்க்க பவர் பட்டனைப் பிடித்திருக்கவும்"</string>

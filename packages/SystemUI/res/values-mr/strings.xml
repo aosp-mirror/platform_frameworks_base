@@ -430,6 +430,8 @@
     <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"स्क्रीन रेकॉर्ड"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"सुरू"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"थांबा"</string>
+    <!-- no translation found for media_seamless_remote_device (177033467332920464) -->
+    <skip />
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"अ‍ॅप्स स्विच करण्यासाठी वर स्वाइप करा"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"अ‍ॅप्स वर झटपट स्विच करण्यासाठी उजवीकडे ड्रॅग करा"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"अवलोकन टॉगल करा."</string>
@@ -712,6 +714,8 @@
     <string name="notification_channel_summary_priority" msgid="7415770044553264622">"संभाषण विभागाच्या सर्वात वरती दिसते आणि बबलसारखे दिसते."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"सेटिंग्ज"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"प्राधान्य"</string>
+    <!-- no translation found for no_shortcut (7176375126961212514) -->
+    <skip />
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"अलीकडील कोणतेही बबल नाहीत"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"अलीकडील बबल आणि डिसमिस केलेले बबल येथे दिसतील"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"या सूचनांमध्ये सुधारणा केली जाऊ शकत नाही."</string>
@@ -999,8 +1003,7 @@
     <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"बबल कधीही नियंत्रित करा"</string>
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"या अ‍ॅपमधून बबल बंद करण्यासाठी व्यवस्थापित करा वर टॅप करा"</string>
     <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"समजले"</string>
-    <!-- no translation found for bubbles_app_settings (5779443644062348657) -->
-    <skip />
+    <string name="bubbles_app_settings" msgid="5779443644062348657">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> सेटिंग्ज"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"सिस्टम नेव्हिगेशन अपडेट केले. बदल करण्यासाठी, सेटिंग्जवर जा."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"सिस्टम नेव्हिगेशन अपडेट करण्यासाठी सेटिंग्जवर जा"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"स्टँडबाय"</string>
@@ -1025,6 +1028,8 @@
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"पॉवर मेनूमधून अ‍ॅक्सेस करण्यासाठी नियंत्रणे निवडा"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"नियंत्रणांची पुनर्रचना करण्यासाठी धरून ठेवा आणि ड्रॅग करा"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"सर्व नियंत्रणे काढून टाकली आहेत"</string>
+    <!-- no translation found for controls_favorite_toast_no_changes (7094494210840877931) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"सर्व नियंत्रणांची सूची लोड करता आली नाही."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"इतर"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"डिव्हाइस नियंत्रणांमध्ये जोडा"</string>
@@ -1033,6 +1038,7 @@
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"नियंत्रणे अपडेट केली आहेत"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"पिनमध्ये अक्षरांचा किंवा चिन्हांचा समावेश असतो"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"<xliff:g id="DEVICE">%s</xliff:g> ची पडताळणी करा"</string>
+    <string name="controls_pin_wrong" msgid="6162694056042164211">"चुकीचा पिन"</string>
     <string name="controls_pin_verifying" msgid="3755045989392131746">"पडताळणी करत आहे…"</string>
     <string name="controls_pin_instructions" msgid="6363309783822475238">"पिन एंटर करा"</string>
     <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"दुसरा पिन वापरून पहा"</string>
@@ -1042,6 +1048,9 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"शिफारशी लोड करत आहे"</string>
     <string name="controls_media_close_session" msgid="9023534788828414585">"हे मीडिया सेशन बंद करा"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"निष्क्रिय, ॲप तपासा"</string>
+    <string name="controls_error_retryable" msgid="864025882878378470">"एरर, पुन्हा प्रयत्न करत आहे…"</string>
+    <string name="controls_error_removed" msgid="6299213591234723805">"डिव्हाइस काढून टाकले आहे"</string>
+    <string name="controls_error_generic" msgid="352500456918362905">"स्थिती लोड करू शकत नाही"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"एरर, पुन्हा प्रयत्न करा"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"प्रगतीपथावर आहे"</string>
     <string name="controls_added_tooltip" msgid="4842812921719153085">"नवीन नियंत्रणे पाहण्यासाठी पॉवर बटण धरून ठेवा"</string>

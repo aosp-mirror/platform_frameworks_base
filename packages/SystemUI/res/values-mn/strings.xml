@@ -430,6 +430,7 @@
     <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"Дэлгэцийн бичлэг хийх"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Эхлүүлэх"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Зогсоох"</string>
+    <string name="media_seamless_remote_device" msgid="177033467332920464">"Төхөөрөмж"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Апп сэлгэхийн тулд дээш шударна уу"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Аппуудыг хурдан сэлгэхийн тулд баруун тийш чирнэ үү"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Тоймыг унтраах/асаах"</string>
@@ -712,6 +713,7 @@
     <string name="notification_channel_summary_priority" msgid="7415770044553264622">"Харилцан ярианы хэсгийн дээд талд, бөмбөлөг хэлбэрээр харагдана."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Тохиргоо"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Ач холбогдол"</string>
+    <string name="no_shortcut" msgid="7176375126961212514">"<xliff:g id="APP_NAME">%1$s</xliff:g> харилцан ярианы тодорхой тохиргоог дэмждэггүй"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Саяхны бөмбөлөг алга байна"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Саяхны бөмбөлгүүд болон үл хэрэгссэн бөмбөлгүүд энд харагдана"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Эдгээр мэдэгдлийг өөрчлөх боломжгүй."</string>
@@ -1024,6 +1026,8 @@
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Тэжээлийн цэсээс хандах хяналтуудыг сонгоно уу"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Хяналтуудыг дахин засварлахын тулд дараад чирнэ үү"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Бүх хяналтыг хассан"</string>
+    <!-- no translation found for controls_favorite_toast_no_changes (7094494210840877931) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Бүх хяналтын жагсаалтыг ачаалж чадсангүй."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Бусад"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Төхөөрөмжийн хяналт руу нэмэх"</string>
@@ -1032,6 +1036,7 @@
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"Хяналтуудыг шинэчиллээ"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"ПИН нь үсэг эсвэл дүрс тэмдэгт агуулдаг"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"<xliff:g id="DEVICE">%s</xliff:g>-г бататгах"</string>
+    <string name="controls_pin_wrong" msgid="6162694056042164211">"ПИН код буруу байна"</string>
     <string name="controls_pin_verifying" msgid="3755045989392131746">"Баталгаж байна…"</string>
     <string name="controls_pin_instructions" msgid="6363309783822475238">"ПИН оруулна уу"</string>
     <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"Өөр ПИН ашиглах"</string>
@@ -1041,6 +1046,9 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Зөвлөмжүүдийг ачаалж байна"</string>
     <string name="controls_media_close_session" msgid="9023534788828414585">"Медианы энэ харилцан үйлдлийг хаах"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Идэвхгүй байна, аппыг шалгана уу"</string>
+    <string name="controls_error_retryable" msgid="864025882878378470">"Алдаа, дахин оролдож байна…"</string>
+    <string name="controls_error_removed" msgid="6299213591234723805">"Төхөөрөмжийг хассан"</string>
+    <string name="controls_error_generic" msgid="352500456918362905">"Статус ачаалах боломжгүй"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Алдаа гарав, дахин оролдоно уу"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"Үргэлжилж байна"</string>
     <string name="controls_added_tooltip" msgid="4842812921719153085">"Шинэ хяналтыг харахын тулд асаах товчийг удаан дарна уу"</string>
