@@ -250,7 +250,7 @@ public class PipTaskOrganizer extends TaskOrganizer {
     }
 
     @Override
-    public void onTaskAppeared(ActivityManager.RunningTaskInfo info) {
+    public void onTaskAppeared(ActivityManager.RunningTaskInfo info, SurfaceControl leash) {
         Objects.requireNonNull(info, "Requires RunningTaskInfo");
         final Rect destinationBounds = mPipBoundsHandler.getDestinationBounds(
                 info.topActivity, getAspectRatioOrDefault(info.pictureInPictureParams),
@@ -259,7 +259,7 @@ public class PipTaskOrganizer extends TaskOrganizer {
         mTaskInfo = info;
         mToken = mTaskInfo.token;
         mInPip = true;
-        mLeash = mToken.getLeash();
+        mLeash = leash;
 
         final Rect currentBounds = mTaskInfo.configuration.windowConfiguration.getBounds();
         mBoundsToRestore.put(mToken.asBinder(), currentBounds);
