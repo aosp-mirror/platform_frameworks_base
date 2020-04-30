@@ -1200,6 +1200,7 @@
   <java-symbol type="string" name="personal_apps_suspension_title" />
   <java-symbol type="string" name="personal_apps_suspension_tomorrow_text" />
   <java-symbol type="string" name="personal_apps_suspension_text" />
+  <java-symbol type="string" name="personal_apps_suspended_turn_profile_on" />
   <java-symbol type="string" name="factory_reset_warning" />
   <java-symbol type="string" name="factory_reset_message" />
   <java-symbol type="string" name="lockscreen_transport_play_description" />
