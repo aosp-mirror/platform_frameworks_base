@@ -27,6 +27,8 @@ import android.graphics.Rect;
 import android.os.Binder;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
+import android.view.SurfaceControl;
+import android.window.DisplayAreaInfo;
 import android.window.IDisplayAreaOrganizer;
 
 import androidx.test.filters.SmallTest;
@@ -74,7 +76,8 @@ public class DisplayAreaOrganizerTest extends WindowTestsBase {
     @Test
     public void testAppearedVanished() throws RemoteException {
         IDisplayAreaOrganizer organizer = registerMockOrganizer(FEATURE_VENDOR_FIRST);
-        verify(organizer).onDisplayAreaAppeared(any());
+        verify(organizer)
+                .onDisplayAreaAppeared(any(DisplayAreaInfo.class), any(SurfaceControl.class));
 
         unregisterMockOrganizer(organizer);
         verify(organizer).onDisplayAreaVanished(any());
@@ -83,7 +86,8 @@ public class DisplayAreaOrganizerTest extends WindowTestsBase {
     @Test
     public void testChanged() throws RemoteException {
         IDisplayAreaOrganizer organizer = registerMockOrganizer(FEATURE_VENDOR_FIRST);
-        verify(organizer).onDisplayAreaAppeared(any());
+        verify(organizer)
+                .onDisplayAreaAppeared(any(DisplayAreaInfo.class), any(SurfaceControl.class));
 
         mDisplayContent.setBounds(new Rect(0, 0, 1000, 1000));
         verify(organizer).onDisplayAreaInfoChanged(any());
