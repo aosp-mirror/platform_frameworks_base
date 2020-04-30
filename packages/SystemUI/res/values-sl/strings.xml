@@ -255,6 +255,7 @@
     <!-- no translation found for accessibility_work_mode (1280025758672376313) -->
     <skip />
     <string name="accessibility_notification_dismissed" msgid="4411652015138892952">"Obvestilo je bilo odstranjeno."</string>
+    <string name="accessibility_bubble_dismissed" msgid="270358867566720729">"Oblaček je bil opuščen."</string>
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"Zaslon z obvestili."</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"Hitre nastavitve."</string>
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"Zaklenjen zaslon"</string>
@@ -1038,8 +1039,7 @@
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Izberite kontrolnike, do katerih želite imeti dostop prek menija za vklop/izklop"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Držite in povlecite, da prerazporedite kontrolnike"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Vsi kontrolniki so bili odstranjeni"</string>
-    <!-- no translation found for controls_favorite_toast_no_changes (7094494210840877931) -->
-    <skip />
+    <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Spremembe niso shranjene"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Seznama vseh kontrolnikov ni bilo mogoče naložiti."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Drugo"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Dodajanje med kontrolnike naprave"</string>

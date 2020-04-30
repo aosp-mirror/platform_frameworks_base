@@ -255,6 +255,8 @@
     <!-- no translation found for accessibility_work_mode (1280025758672376313) -->
     <skip />
     <string name="accessibility_notification_dismissed" msgid="4411652015138892952">"Értesítés elvetve."</string>
+    <!-- no translation found for accessibility_bubble_dismissed (270358867566720729) -->
+    <skip />
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"Értesítési felület."</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"Gyorsbeállítások."</string>
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"Lezárási képernyő."</string>
@@ -430,8 +432,7 @@
     <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"Képernyő rögzítése"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Kezdés"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Leállítás"</string>
-    <!-- no translation found for media_seamless_remote_device (177033467332920464) -->
-    <skip />
+    <string name="media_seamless_remote_device" msgid="177033467332920464">"Eszköz"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Váltás az alkalmazások között felfelé csúsztatással"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Húzza jobbra az ujját az alkalmazások közötti gyors váltáshoz"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Áttekintés be- és kikapcsolása"</string>
@@ -714,8 +715,7 @@
     <string name="notification_channel_summary_priority" msgid="7415770044553264622">"A beszélgetések szakaszának tetején, buborékként jelenik meg."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Beállítások"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritás"</string>
-    <!-- no translation found for no_shortcut (7176375126961212514) -->
-    <skip />
+    <string name="no_shortcut" msgid="7176375126961212514">"A(z) <xliff:g id="APP_NAME">%1$s</xliff:g> alkalmazás nem támogatja a beszélgetésspecifikus beállításokat"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Nincsenek buborékok a közelmúltból"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"A legutóbbi és az elvetett buborékok itt jelennek majd meg"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Ezeket az értesítéseket nem lehet módosítani."</string>

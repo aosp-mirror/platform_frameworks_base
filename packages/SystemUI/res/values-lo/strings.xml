@@ -255,6 +255,7 @@
     <!-- no translation found for accessibility_work_mode (1280025758672376313) -->
     <skip />
     <string name="accessibility_notification_dismissed" msgid="4411652015138892952">"ປິດການແຈ້ງເຕືອນແລ້ວ."</string>
+    <string name="accessibility_bubble_dismissed" msgid="270358867566720729">"ປິດ Bubble ໄສ້ແລ້ວ."</string>
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"ໜ້າຈໍແຈ້ງເຕືອນ."</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"ການຕັ້ງຄ່າດ່ວນ."</string>
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"ລັອກ​ໜ້າ​ຈໍ."</string>
@@ -1026,8 +1027,7 @@
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"ເລືອກການຄວບຄຸມເພື່ອເຂົ້າເຖິງຈາກເມນູເປີດປິດ"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"ກົດຄ້າງໄວ້ເພື່ອຈັດຮຽງການຄວບຄຸມຄືນໃໝ່"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"ລຶບການຄວບຄຸມທັງໝົດອອກແລ້ວ"</string>
-    <!-- no translation found for controls_favorite_toast_no_changes (7094494210840877931) -->
-    <skip />
+    <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"ບໍ່ໄດ້ບັນທຶກການປ່ຽນແປງໄວ້"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"ບໍ່ສາມາດໂຫຼດລາຍຊື່ການຄວບຄຸມທັງໝົດໄດ້."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"ອື່ນໆ"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"ເພີ່ມໃສ່ການຄວບຄຸມອຸປະກອນ"</string>
