@@ -24,6 +24,7 @@ import com.android.systemui.plugins.GlobalActions;
 import com.android.systemui.plugins.GlobalActions.GlobalActionsManager;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.CommandQueue.Callbacks;
+import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.policy.ExtensionController;
 import com.android.systemui.statusbar.policy.ExtensionController.Extension;
 
@@ -43,15 +44,18 @@ public class GlobalActionsComponent extends SystemUI implements Callbacks, Globa
     private GlobalActions mPlugin;
     private Extension<GlobalActions> mExtension;
     private IStatusBarService mBarService;
+    private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
 
     @Inject
     public GlobalActionsComponent(Context context, CommandQueue commandQueue,
             ExtensionController extensionController,
-            Provider<GlobalActions> globalActionsProvider) {
+            Provider<GlobalActions> globalActionsProvider,
+            StatusBarKeyguardViewManager statusBarKeyguardViewManager) {
         super(context);
         mCommandQueue = commandQueue;
         mExtensionController = extensionController;
         mGlobalActionsProvider = globalActionsProvider;
+        mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
     }
 
     @Override
@@ -81,6 +85,7 @@ public class GlobalActionsComponent extends SystemUI implements Callbacks, Globa
 
     @Override
     public void handleShowGlobalActionsMenu() {
+        mStatusBarKeyguardViewManager.setGlobalActionsVisible(true);
         mExtension.get().showGlobalActions(this);
     }
 
@@ -95,6 +100,7 @@ public class GlobalActionsComponent extends SystemUI implements Callbacks, Globa
     @Override
     public void onGlobalActionsHidden() {
         try {
+            mStatusBarKeyguardViewManager.setGlobalActionsVisible(false);
             mBarService.onGlobalActionsHidden();
         } catch (RemoteException e) {
         }
