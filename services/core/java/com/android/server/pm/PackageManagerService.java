@@ -6421,6 +6421,11 @@ public class PackageManagerService extends IPackageManager.Stub
             final ResolveInfo bestChoice =
                     chooseBestActivity(
                             intent, resolvedType, flags, privateResolveFlags, query, userId);
+            final boolean nonBrowserOnly =
+                    (privateResolveFlags & PackageManagerInternal.RESOLVE_NON_BROWSER_ONLY) != 0;
+            if (nonBrowserOnly && bestChoice != null && bestChoice.handleAllWebDataURI) {
+                return null;
+            }
             return bestChoice;
         } finally {
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
@@ -6608,9 +6613,13 @@ public class PackageManagerService extends IPackageManager.Stub
                 if (ri != null) {
                     return ri;
                 }
-                // If we have an ephemeral app, use it
+                int browserCount = 0;
                 for (int i = 0; i < N; i++) {
                     ri = query.get(i);
+                    if (ri.handleAllWebDataURI) {
+                        browserCount++;
+                    }
+                    // If we have an ephemeral app, use it
                     if (ri.activityInfo.applicationInfo.isInstantApp()) {
                         final String packageName = ri.activityInfo.packageName;
                         final PackageSetting ps = mSettings.mPackages.get(packageName);
@@ -6626,6 +6635,9 @@ public class PackageManagerService extends IPackageManager.Stub
                     return null;
                 }
                 ri = new ResolveInfo(mResolveInfo);
+                // if all resolve options are browsers, mark the resolver's info as if it were
+                // also a browser.
+                ri.handleAllWebDataURI = browserCount == N;
                 ri.activityInfo = new ActivityInfo(ri.activityInfo);
                 ri.activityInfo.labelRes = ResolverActivity.getLabelRes(intent.getAction());
                 // If all of the options come from the same package, show the application's
@@ -7136,7 +7148,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
                 // Check for results in the current profile.
                 result = filterIfNotSystemUser(mComponentResolver.queryActivities(
-                        intent, resolvedType, flags, privateResolveFlags, userId), userId);
+                        intent, resolvedType, flags, userId), userId);
                 addInstant = isInstantAppResolutionAllowed(intent, result, userId,
                         false /*skipPackageCheck*/);
                 // Check for cross profile results.
@@ -7235,7 +7247,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         | PackageManager.GET_RESOLVED_FILTER
                         | PackageManager.MATCH_INSTANT
                         | PackageManager.MATCH_VISIBLE_TO_INSTANT_APP_ONLY,
-                    0, userId);
+                    userId);
             for (int i = instantApps.size() - 1; i >= 0; --i) {
                 final ResolveInfo info = instantApps.get(i);
                 final String packageName = info.activityInfo.packageName;
@@ -7339,7 +7351,7 @@ public class PackageManagerService extends IPackageManager.Stub
             return null;
         }
         List<ResolveInfo> resultTargetUser = mComponentResolver.queryActivities(intent,
-                resolvedType, flags, 0, parentUserId);
+                resolvedType, flags, parentUserId);
 
         if (resultTargetUser == null || resultTargetUser.isEmpty()) {
             return null;
@@ -7787,7 +7799,7 @@ public class PackageManagerService extends IPackageManager.Stub
             String resolvedType, int flags, int sourceUserId) {
         int targetUserId = filter.getTargetUserId();
         List<ResolveInfo> resultTargetUser = mComponentResolver.queryActivities(intent,
-                resolvedType, flags, 0, targetUserId);
+                resolvedType, flags, targetUserId);
         if (resultTargetUser != null && isUserEnabled(targetUserId)) {
             // If all the matches in the target profile are suspended, return null.
             for (int i = resultTargetUser.size() - 1; i >= 0; i--) {
