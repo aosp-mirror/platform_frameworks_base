@@ -213,8 +213,16 @@ public class InsetsSource implements Parcelable {
 
     public InsetsSource(Parcel in) {
         mType = in.readInt();
-        mFrame = in.readParcelable(null /* loader */);
-        mVisibleFrame = in.readParcelable(null /* loader */);
+        if (in.readInt() != 0) {
+            mFrame = Rect.CREATOR.createFromParcel(in);
+        } else {
+            mFrame = null;
+        }
+        if (in.readInt() != 0) {
+            mVisibleFrame = Rect.CREATOR.createFromParcel(in);
+        } else {
+            mVisibleFrame = null;
+        }
         mVisible = in.readBoolean();
     }
 
@@ -226,8 +234,18 @@ public class InsetsSource implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(mType);
-        dest.writeParcelable(mFrame, 0 /* flags*/);
-        dest.writeParcelable(mVisibleFrame, 0 /* flags */);
+        if (mFrame != null) {
+            dest.writeInt(1);
+            mFrame.writeToParcel(dest, 0);
+        } else {
+            dest.writeInt(0);
+        }
+        if (mVisibleFrame != null) {
+            dest.writeInt(1);
+            mVisibleFrame.writeToParcel(dest, 0);
+        } else {
+            dest.writeInt(0);
+        }
         dest.writeBoolean(mVisible);
     }
 

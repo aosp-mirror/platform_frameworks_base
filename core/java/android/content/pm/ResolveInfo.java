@@ -443,7 +443,7 @@ public class ResolveInfo implements Parcelable {
         dest.writeInt(labelRes);
         TextUtils.writeToParcel(nonLocalizedLabel, dest, parcelableFlags);
         dest.writeInt(icon);
-        dest.writeString(resolvePackageName);
+        dest.writeString8(resolvePackageName);
         dest.writeInt(targetUserId);
         dest.writeInt(system ? 1 : 0);
         dest.writeInt(noResourceId ? 1 : 0);
@@ -491,7 +491,7 @@ public class ResolveInfo implements Parcelable {
         nonLocalizedLabel
                 = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
         icon = source.readInt();
-        resolvePackageName = source.readString();
+        resolvePackageName = source.readString8();
         targetUserId = source.readInt();
         system = source.readInt() != 0;
         noResourceId = source.readInt() != 0;
