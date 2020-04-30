@@ -53,7 +53,6 @@ cc_defaults {
         "libdataloader_aidl-cpp",
         "libincremental_aidl-cpp",
         "libincremental_manager_aidl-cpp",
-        "libnativehelper",
         "libprotobuf-cpp-lite",
         "service.incremental.proto",
         "libutils",
