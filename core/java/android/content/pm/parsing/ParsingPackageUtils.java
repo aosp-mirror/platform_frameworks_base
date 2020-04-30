@@ -346,12 +346,11 @@ public class ParsingPackageUtils {
             }
 
             final ParsingPackage pkg = result.getResult();
-            if (pkg.getTargetSdkVersion() >= Build.VERSION_CODES.R
-                    && assets.containsAllocatedTable()) {
+            if (assets.containsAllocatedTable()) {
                 final ParseResult<?> deferResult = input.deferError(
-                        "Targeting R+ (version" + Build.VERSION_CODES.R + " and above) requires the"
-                                + " resources.arsc of installed APKs to be stored uncompressed and"
-                                + " aligned on a 4-byte boundary",
+                        "Targeting R+ (version " + Build.VERSION_CODES.R + " and above) requires"
+                                + " the resources.arsc of installed APKs to be stored uncompressed"
+                                + " and aligned on a 4-byte boundary",
                         DeferredError.RESOURCES_ARSC_COMPRESSED);
                 if (deferResult.isError()) {
                     return input.error(INSTALL_PARSE_FAILED_RESOURCES_ARSC_COMPRESSED,
