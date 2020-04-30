@@ -302,13 +302,15 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     }
 
     private void showAutoSaverSuggestionNotification() {
+        final CharSequence message = mContext.getString(R.string.auto_saver_text);
         final Notification.Builder nb =
                 new Notification.Builder(mContext, NotificationChannels.HINTS)
                         .setSmallIcon(R.drawable.ic_power_saver)
                         .setWhen(0)
                         .setShowWhen(false)
                         .setContentTitle(mContext.getString(R.string.auto_saver_title))
-                        .setContentText(mContext.getString(R.string.auto_saver_text));
+                        .setStyle(new Notification.BigTextStyle().bigText(message))
+                        .setContentText(message);
         nb.setContentIntent(pendingBroadcast(ACTION_ENABLE_AUTO_SAVER));
         nb.setDeleteIntent(pendingBroadcast(ACTION_DISMISS_AUTO_SAVER_SUGGESTION));
         nb.addAction(0,
