@@ -16,11 +16,15 @@
 
 package com.android.server.pm;
 
+import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
+import static android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
+import android.app.ActivityOptions;
 import android.app.AppGlobals;
 import android.app.IApplicationThread;
 import android.app.PendingIntent;
@@ -863,6 +867,14 @@ public class LauncherAppsService extends SystemService {
                 return false;
             }
             // Note the target activity doesn't have to be exported.
+
+            // Flag for bubble
+            ActivityOptions options = ActivityOptions.fromBundle(startActivityOptions);
+            if (options != null && options.isApplyActivityFlagsForBubbles()) {
+                // Flag for bubble to make behaviour match documentLaunchMode=always.
+                intents[0].addFlags(FLAG_ACTIVITY_NEW_DOCUMENT);
+                intents[0].addFlags(FLAG_ACTIVITY_MULTIPLE_TASK);
+            }
 
             intents[0].addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             intents[0].setSourceBounds(sourceBounds);
