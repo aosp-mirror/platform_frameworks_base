@@ -115,6 +115,8 @@ public class TetheringConfigurationTest {
 
         when(mResources.getStringArray(R.array.config_tether_dhcp_range)).thenReturn(
                 new String[0]);
+        when(mResources.getInteger(R.integer.config_tether_offload_poll_interval)).thenReturn(
+                TetheringConfiguration.DEFAULT_TETHER_OFFLOAD_POLL_INTERVAL_MS);
         when(mResources.getStringArray(R.array.config_tether_usb_regexs)).thenReturn(new String[0]);
         when(mResources.getStringArray(R.array.config_tether_wifi_regexs))
                 .thenReturn(new String[]{ "test_wlan\\d" });
@@ -311,6 +313,23 @@ public class TetheringConfigurationTest {
                 new TetheringConfiguration(mMockContext, mLog, INVALID_SUBSCRIPTION_ID);
 
         assertFalse(cfg.enableLegacyDhcpServer);
+    }
+
+    @Test
+    public void testOffloadIntervalByResource() {
+        final TetheringConfiguration intervalByDefault =
+                new TetheringConfiguration(mMockContext, mLog, INVALID_SUBSCRIPTION_ID);
+        assertEquals(TetheringConfiguration.DEFAULT_TETHER_OFFLOAD_POLL_INTERVAL_MS,
+                intervalByDefault.getOffloadPollInterval());
+
+        final int[] testOverrides = {0, 3000, -1};
+        for (final int override : testOverrides) {
+            when(mResources.getInteger(R.integer.config_tether_offload_poll_interval)).thenReturn(
+                    override);
+            final TetheringConfiguration overrideByRes =
+                    new TetheringConfiguration(mMockContext, mLog, INVALID_SUBSCRIPTION_ID);
+            assertEquals(override, overrideByRes.getOffloadPollInterval());
+        }
     }
 
     @Test
