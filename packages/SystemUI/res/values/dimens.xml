@@ -326,6 +326,7 @@
     <dimen name="screenshot_action_chip_padding_middle">8dp</dimen>
     <dimen name="screenshot_action_chip_padding_end">16dp</dimen>
     <dimen name="screenshot_action_chip_text_size">14sp</dimen>
+    <dimen name="screenshot_dismissal_height_delta">80dp</dimen>
 
 
     <!-- The width of the view containing navigation buttons -->
