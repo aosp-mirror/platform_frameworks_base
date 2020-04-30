@@ -16,12 +16,14 @@
 
 package com.android.server.display;
 
+import android.annotation.Nullable;
 import android.content.Context;
 import android.database.ContentObserver;
 import android.graphics.SurfaceTexture;
 import android.os.Handler;
 import android.os.IBinder;
 import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Slog;
 import android.view.Display;
@@ -54,6 +56,10 @@ import java.util.regex.Pattern;
  * {@link android.provider.Settings.Global#OVERLAY_DISPLAY_DEVICES} setting. This setting should be
  * formatted as follows:
  * <pre>
+ * [display1];[display2];...
+ * </pre>
+ * with each display specified as:
+ * <pre>
  * [mode1]|[mode2]|...,[flag1],[flag2],...
  * </pre>
  * with each mode specified as:
@@ -63,22 +69,56 @@ import java.util.regex.Pattern;
  * Supported flags:
  * <ul>
  * <li><pre>secure</pre>: creates a secure display</li>
+ * <li><pre>own_content_only</pre>: only shows this display's own content</li>
+ * <li><pre>should_show_system_decorations</pre>: supports system decorations</li>
  * </ul>
- * </p>
+ * </p><p>
+ * Example:
+ * <ul>
+ * <li><code>1280x720/213</code>: make one overlay that is 1280x720 at 213dpi.</li>
+ * <li><code>1920x1080/320,secure;1280x720/213</code>: make two overlays, the first at 1080p and
+ * secure; the second at 720p.</li>
+ * <li><code>1920x1080/320|3840x2160/640</code>: make one overlay that is 1920x1080 at
+ * 213dpi by default, but can also be upscaled to 3840x2160 at 640dpi by the system if the
+ * display device allows.</li>
+ * <li>If the value is empty, then no overlay display devices are created.</li>
+ * </ul></p>
  */
 final class OverlayDisplayAdapter extends DisplayAdapter {
     static final String TAG = "OverlayDisplayAdapter";
     static final boolean DEBUG = false;
+
+    /**
+     * When this flag is set, the overlay display is considered secure.
+     * @see DisplayDeviceInfo#FLAG_SECURE
+     */
+    private static final String OVERLAY_DISPLAY_FLAG_SECURE = "secure";
+
+    /**
+     * When this flag is set, only show this display's own content; do not mirror the content of
+     * another display.
+     * @see DisplayDeviceInfo#FLAG_OWN_CONTENT_ONLY
+     */
+    private static final String OVERLAY_DISPLAY_FLAG_OWN_CONTENT_ONLY = "own_content_only";
+
+    /**
+     * When this flag is set, the overlay display should support system decorations.
+     * @see DisplayDeviceInfo#FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS
+     */
+    private static final String OVERLAY_DISPLAY_FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS =
+            "should_show_system_decorations";
 
     private static final int MIN_WIDTH = 100;
     private static final int MIN_HEIGHT = 100;
     private static final int MAX_WIDTH = 4096;
     private static final int MAX_HEIGHT = 4096;
 
-    private static final Pattern DISPLAY_PATTERN =
-            Pattern.compile("([^,]+)(,[a-z]+)*");
-    private static final Pattern MODE_PATTERN =
-            Pattern.compile("(\\d+)x(\\d+)/(\\d+)");
+    private static final String DISPLAY_SPLITTER = ";";
+    private static final String MODE_SPLITTER = "\\|";
+    private static final String FLAG_SPLITTER = ",";
+
+    private static final Pattern DISPLAY_PATTERN = Pattern.compile("([^,]+)(,[,_a-z]+)*");
+    private static final Pattern MODE_PATTERN = Pattern.compile("(\\d+)x(\\d+)/(\\d+)");
 
     // Unique id prefix for overlay displays.
     private static final String UNIQUE_ID_PREFIX = "overlay:";
@@ -154,7 +194,7 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
         }
 
         int count = 0;
-        for (String part : value.split(";")) {
+        for (String part : value.split(DISPLAY_SPLITTER)) {
             Matcher displayMatcher = DISPLAY_PATTERN.matcher(part);
             if (displayMatcher.matches()) {
                 if (count >= 4) {
@@ -164,7 +204,7 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
                 String modeString = displayMatcher.group(1);
                 String flagString = displayMatcher.group(2);
                 ArrayList<OverlayMode> modes = new ArrayList<>();
-                for (String mode : modeString.split("\\|")) {
+                for (String mode : modeString.split(MODE_SPLITTER)) {
                     Matcher modeMatcher = MODE_PATTERN.matcher(mode);
                     if (modeMatcher.matches()) {
                         try {
@@ -192,12 +232,13 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
                             com.android.internal.R.string.display_manager_overlay_display_name,
                             number);
                     int gravity = chooseOverlayGravity(number);
-                    boolean secure = flagString != null && flagString.contains(",secure");
+                    OverlayFlags flags = OverlayFlags.parseFlags(flagString);
 
                     Slog.i(TAG, "Showing overlay display device #" + number
-                            + ": name=" + name + ", modes=" + Arrays.toString(modes.toArray()));
+                            + ": name=" + name + ", modes=" + Arrays.toString(modes.toArray())
+                            + ", flags=" + flags);
 
-                    mOverlays.add(new OverlayDisplayHandle(name, modes, gravity, secure, number));
+                    mOverlays.add(new OverlayDisplayHandle(name, modes, gravity, flags, number));
                     continue;
                 }
             }
@@ -223,7 +264,7 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
         private final String mName;
         private final float mRefreshRate;
         private final long mDisplayPresentationDeadlineNanos;
-        private final boolean mSecure;
+        private final OverlayFlags mFlags;
         private final List<OverlayMode> mRawModes;
         private final Display.Mode[] mModes;
         private final int mDefaultMode;
@@ -234,16 +275,15 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
         private DisplayDeviceInfo mInfo;
         private int mActiveMode;
 
-        public OverlayDisplayDevice(IBinder displayToken, String name,
+        OverlayDisplayDevice(IBinder displayToken, String name,
                 List<OverlayMode> modes, int activeMode, int defaultMode,
                 float refreshRate, long presentationDeadlineNanos,
-                boolean secure, int state,
-                SurfaceTexture surfaceTexture, int number) {
+                OverlayFlags flags, int state, SurfaceTexture surfaceTexture, int number) {
             super(OverlayDisplayAdapter.this, displayToken, UNIQUE_ID_PREFIX + number);
             mName = name;
             mRefreshRate = refreshRate;
             mDisplayPresentationDeadlineNanos = presentationDeadlineNanos;
-            mSecure = secure;
+            mFlags = flags;
             mState = state;
             mSurfaceTexture = surfaceTexture;
             mRawModes = modes;
@@ -304,8 +344,14 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
                 mInfo.presentationDeadlineNanos = mDisplayPresentationDeadlineNanos +
                         1000000000L / (int) mRefreshRate;   // display's deadline + 1 frame
                 mInfo.flags = DisplayDeviceInfo.FLAG_PRESENTATION;
-                if (mSecure) {
+                if (mFlags.mSecure) {
                     mInfo.flags |= DisplayDeviceInfo.FLAG_SECURE;
+                }
+                if (mFlags.mOwnContentOnly) {
+                    mInfo.flags |= DisplayDeviceInfo.FLAG_OWN_CONTENT_ONLY;
+                }
+                if (mFlags.mShouldShowSystemDecorations) {
+                    mInfo.flags |= DisplayDeviceInfo.FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS;
                 }
                 mInfo.type = Display.TYPE_OVERLAY;
                 mInfo.touch = DisplayDeviceInfo.TOUCH_VIRTUAL;
@@ -363,19 +409,23 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
         private final String mName;
         private final List<OverlayMode> mModes;
         private final int mGravity;
-        private final boolean mSecure;
+        private final OverlayFlags mFlags;
         private final int mNumber;
 
         private OverlayDisplayWindow mWindow;
         private OverlayDisplayDevice mDevice;
         private int mActiveMode;
 
-        public OverlayDisplayHandle(String name, List<OverlayMode> modes, int gravity,
-                boolean secure, int number) {
+        OverlayDisplayHandle(
+                String name,
+                List<OverlayMode> modes,
+                int gravity,
+                OverlayFlags flags,
+                int number) {
             mName = name;
             mModes = modes;
             mGravity = gravity;
-            mSecure = secure;
+            mFlags = flags;
             mNumber = number;
 
             mActiveMode = 0;
@@ -405,10 +455,10 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
         public void onWindowCreated(SurfaceTexture surfaceTexture, float refreshRate,
                 long presentationDeadlineNanos, int state) {
             synchronized (getSyncRoot()) {
-                IBinder displayToken = SurfaceControl.createDisplay(mName, mSecure);
+                IBinder displayToken = SurfaceControl.createDisplay(mName, mFlags.mSecure);
                 mDevice = new OverlayDisplayDevice(displayToken, mName, mModes, mActiveMode,
                         DEFAULT_MODE_INDEX, refreshRate, presentationDeadlineNanos,
-                        mSecure, state, surfaceTexture, mNumber) {
+                        mFlags, state, surfaceTexture, mNumber) {
                     @Override
                     public void onModeChangedLocked(int index) {
                         onActiveModeChangedLocked(index);
@@ -446,7 +496,7 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
             pw.println("    mModes=" + Arrays.toString(mModes.toArray()));
             pw.println("    mActiveMode=" + mActiveMode);
             pw.println("    mGravity=" + mGravity);
-            pw.println("    mSecure=" + mSecure);
+            pw.println("    mFlags=" + mFlags);
             pw.println("    mNumber=" + mNumber);
 
             // Try to dump the window state.
@@ -463,8 +513,8 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
             public void run() {
                 OverlayMode mode = mModes.get(mActiveMode);
                 OverlayDisplayWindow window = new OverlayDisplayWindow(getContext(),
-                        mName, mode.mWidth, mode.mHeight, mode.mDensityDpi, mGravity, mSecure,
-                        OverlayDisplayHandle.this);
+                        mName, mode.mWidth, mode.mHeight, mode.mDensityDpi, mGravity,
+                        mFlags.mSecure, OverlayDisplayHandle.this);
                 window.show();
 
                 synchronized (getSyncRoot()) {
@@ -527,6 +577,62 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
                     .append("width=").append(mWidth)
                     .append(", height=").append(mHeight)
                     .append(", densityDpi=").append(mDensityDpi)
+                    .append("}")
+                    .toString();
+        }
+    }
+
+    /** Represents the flags of the overlay display. */
+    private static final class OverlayFlags {
+        /** See {@link #OVERLAY_DISPLAY_FLAG_SECURE}. */
+        final boolean mSecure;
+
+        /** See {@link #OVERLAY_DISPLAY_FLAG_OWN_CONTENT_ONLY}. */
+        final boolean mOwnContentOnly;
+
+        /** See {@link #OVERLAY_DISPLAY_FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS}. */
+        final boolean mShouldShowSystemDecorations;
+
+        OverlayFlags(
+                boolean secure,
+                boolean ownContentOnly,
+                boolean shouldShowSystemDecorations) {
+            mSecure = secure;
+            mOwnContentOnly = ownContentOnly;
+            mShouldShowSystemDecorations = shouldShowSystemDecorations;
+        }
+
+        static OverlayFlags parseFlags(@Nullable String flagString) {
+            if (TextUtils.isEmpty(flagString)) {
+                return new OverlayFlags(
+                        false /* secure */,
+                        false /* ownContentOnly */,
+                        false /* shouldShowSystemDecorations */);
+            }
+
+            boolean secure = false;
+            boolean ownContentOnly = false;
+            boolean shouldShowSystemDecorations = false;
+            for (String flag: flagString.split(FLAG_SPLITTER)) {
+                if (OVERLAY_DISPLAY_FLAG_SECURE.equals(flag)) {
+                    secure = true;
+                }
+                if (OVERLAY_DISPLAY_FLAG_OWN_CONTENT_ONLY.equals(flag)) {
+                    ownContentOnly = true;
+                }
+                if (OVERLAY_DISPLAY_FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS.equals(flag)) {
+                    shouldShowSystemDecorations = true;
+                }
+            }
+            return new OverlayFlags(secure, ownContentOnly, shouldShowSystemDecorations);
+        }
+
+        @Override
+        public String toString() {
+            return new StringBuilder("{")
+                    .append("secure=").append(mSecure)
+                    .append(", ownContentOnly=").append(mOwnContentOnly)
+                    .append(", shouldShowSystemDecorations=").append(mShouldShowSystemDecorations)
                     .append("}")
                     .toString();
         }
