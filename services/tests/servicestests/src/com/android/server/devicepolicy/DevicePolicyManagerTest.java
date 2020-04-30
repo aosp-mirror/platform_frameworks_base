@@ -1998,7 +1998,6 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     private static final Set<String> PROFILE_OWNER_ORGANIZATION_OWNED_GLOBAL_RESTRICTIONS =
             Sets.newSet(
                     UserManager.DISALLOW_CONFIG_DATE_TIME,
-                    UserManager.DISALLOW_ADD_USER,
                     UserManager.DISALLOW_BLUETOOTH_SHARING,
                     UserManager.DISALLOW_CONFIG_CELL_BROADCASTS,
                     UserManager.DISALLOW_CONFIG_MOBILE_NETWORKS,
@@ -4005,11 +4004,46 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         // Any caller should be able to call this method.
         assertFalse(dpm.isOrganizationOwnedDeviceWithManagedProfile());
         configureProfileOwnerOfOrgOwnedDevice(admin1, CALLER_USER_HANDLE);
+
+        verify(getServices().userManager).setUserRestriction(
+                eq(UserManager.DISALLOW_ADD_USER),
+                eq(true),
+                eq(UserHandle.of(UserHandle.USER_SYSTEM)));
+
         assertTrue(dpm.isOrganizationOwnedDeviceWithManagedProfile());
 
         // A random caller from another user should also be able to get the right result.
         mContext.binder.callingUid = DpmMockContext.ANOTHER_UID;
         assertTrue(dpm.isOrganizationOwnedDeviceWithManagedProfile());
+    }
+
+    public void testMarkOrganizationOwnedDevice_baseRestrictionsAdded() throws Exception {
+        addManagedProfile(admin1, DpmMockContext.CALLER_UID, admin1);
+
+        configureProfileOwnerOfOrgOwnedDevice(admin1, CALLER_USER_HANDLE);
+
+        // Base restriction DISALLOW_REMOVE_MANAGED_PROFILE added
+        verify(getServices().userManager).setUserRestriction(
+                eq(UserManager.DISALLOW_REMOVE_MANAGED_PROFILE),
+                eq(true),
+                eq(UserHandle.of(UserHandle.USER_SYSTEM)));
+
+        // Base restriction DISALLOW_ADD_USER added
+        verify(getServices().userManager).setUserRestriction(
+                eq(UserManager.DISALLOW_ADD_USER),
+                eq(true),
+                eq(UserHandle.of(UserHandle.USER_SYSTEM)));
+
+        // Assert base restrictions cannot be added or removed by admin
+        assertExpectException(SecurityException.class, null, () ->
+                parentDpm.addUserRestriction(admin1, UserManager.DISALLOW_REMOVE_MANAGED_PROFILE));
+        assertExpectException(SecurityException.class, null, () ->
+                parentDpm.clearUserRestriction(admin1,
+                        UserManager.DISALLOW_REMOVE_MANAGED_PROFILE));
+        assertExpectException(SecurityException.class, null, () ->
+                parentDpm.addUserRestriction(admin1, UserManager.DISALLOW_ADD_USER));
+        assertExpectException(SecurityException.class, null, () ->
+                parentDpm.clearUserRestriction(admin1, UserManager.DISALLOW_ADD_USER));
     }
 
     public void testSetTime() throws Exception {
