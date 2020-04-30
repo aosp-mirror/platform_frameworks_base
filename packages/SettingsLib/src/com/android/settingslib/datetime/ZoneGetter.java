@@ -242,7 +242,16 @@ public class ZoneGetter {
         final TimeZoneNames.NameType nameType =
                 tz.inDaylightTime(now) ? TimeZoneNames.NameType.LONG_DAYLIGHT
                         : TimeZoneNames.NameType.LONG_STANDARD;
-        return names.getDisplayName(tz.getID(), nameType, now.getTime());
+        return names.getDisplayName(getCanonicalZoneId(tz), nameType, now.getTime());
+    }
+
+    private static String getCanonicalZoneId(TimeZone timeZone) {
+        final String id = timeZone.getID();
+        final String canonicalId = android.icu.util.TimeZone.getCanonicalID(id);
+        if (canonicalId != null) {
+            return canonicalId;
+        }
+        return id;
     }
 
     private static void appendWithTtsSpan(SpannableStringBuilder builder, CharSequence content,
