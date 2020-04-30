@@ -29,6 +29,7 @@ import static org.mockito.Mockito.when;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.VersionedPackage;
 import android.content.rollback.PackageRollbackInfo;
+import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.util.SparseLongArray;
 
@@ -330,7 +331,7 @@ public class RollbackUnitTest {
     public void notifySessionWithSuccess() {
         int[] sessionIds = new int[]{ 7777, 8888 };
         Rollback rollback = new Rollback(123, new File("/test/testing"), -1, USER, INSTALLER,
-                sessionIds, null);
+                sessionIds, new SparseIntArray(0));
         // The 1st invocation returns false because not all child sessions are notified.
         assertThat(rollback.notifySessionWithSuccess()).isFalse();
         // The 2nd invocation returns true because now all child sessions are notified.
@@ -341,7 +342,7 @@ public class RollbackUnitTest {
     public void allPackagesEnabled() {
         int[] sessionIds = new int[]{ 7777, 8888 };
         Rollback rollback = new Rollback(123, new File("/test/testing"), -1, USER, INSTALLER,
-                sessionIds, null);
+                sessionIds, new SparseIntArray(0));
         // #allPackagesEnabled returns false when 1 out of 2 packages is enabled.
         rollback.info.getPackages().add(newPkgInfoFor(PKG_1, 12, 10, false));
         assertThat(rollback.allPackagesEnabled()).isFalse();
@@ -430,6 +431,26 @@ public class RollbackUnitTest {
             result.put(pair[0], pair[1]);
         }
         return result;
+    }
+
+    @Test
+    public void readAndWriteStagedRollbackIdsFile() throws Exception {
+        File testFile = File.createTempFile("test", ".txt");
+        RollbackPackageHealthObserver.writeStagedRollbackId(testFile, 2468, null);
+        RollbackPackageHealthObserver.writeStagedRollbackId(testFile, 12345,
+                new VersionedPackage("com.test.package", 1));
+        RollbackPackageHealthObserver.writeStagedRollbackId(testFile, 13579,
+                new VersionedPackage("com.test.package2", 2));
+        SparseArray<String> readInfo =
+                RollbackPackageHealthObserver.readStagedRollbackIds(testFile);
+        assertThat(readInfo.size()).isEqualTo(3);
+
+        assertThat(readInfo.keyAt(0)).isEqualTo(2468);
+        assertThat(readInfo.valueAt(0)).isEqualTo("");
+        assertThat(readInfo.keyAt(1)).isEqualTo(12345);
+        assertThat(readInfo.valueAt(1)).isEqualTo("com.test.package");
+        assertThat(readInfo.keyAt(2)).isEqualTo(13579);
+        assertThat(readInfo.valueAt(2)).isEqualTo("com.test.package2");
     }
 
     private static PackageRollbackInfo newPkgInfoFor(

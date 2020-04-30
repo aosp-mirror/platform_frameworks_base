@@ -24,6 +24,7 @@ import android.content.Context;
 import android.view.View;
 import android.view.accessibility.AccessibilityManager.ShortcutType;
 
+import com.android.internal.R;
 import com.android.internal.accessibility.common.ShortcutConstants.AccessibilityFragmentType;
 import com.android.internal.accessibility.common.ShortcutConstants.ShortcutMenuMode;
 import com.android.internal.accessibility.dialog.TargetAdapter.ViewHolder;
@@ -49,7 +50,11 @@ class ToggleAccessibilityServiceTarget extends AccessibilityServiceTarget {
 
         final boolean isEditMenuMode =
                 shortcutMenuMode == ShortcutMenuMode.EDIT;
-        holder.mSwitchItem.setVisibility(isEditMenuMode ? View.GONE : View.VISIBLE);
-        holder.mSwitchItem.setChecked(isAccessibilityServiceEnabled(getContext(), getId()));
+        holder.mStatusView.setVisibility(isEditMenuMode ? View.GONE : View.VISIBLE);
+
+        final int statusResId = isAccessibilityServiceEnabled(getContext(), getId())
+                ? R.string.accessibility_shortcut_menu_item_status_on
+                : R.string.accessibility_shortcut_menu_item_status_off;
+        holder.mStatusView.setText(getContext().getString(statusResId));
     }
 }

@@ -3349,6 +3349,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         final ActivityStack stack = task.getStack();
         if (stack == null || inFreeformWindowingMode()) {
+            handle.setTouchableRegionCrop(null);
             return;
         }
 

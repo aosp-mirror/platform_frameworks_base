@@ -2697,17 +2697,23 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                             }
                             break;
                         }
+                        case IDataLoaderStatusListener.DATA_LOADER_UNAVAILABLE: {
+                            // Don't fail or commit the session. Allow caller to commit again.
+                            sendPendingStreaming(mContext, mRemoteStatusReceiver, sessionId,
+                                    "DataLoader unavailable");
+                            break;
+                        }
                         case IDataLoaderStatusListener.DATA_LOADER_UNRECOVERABLE:
                             mDataLoaderFinished = true;
                             dispatchSessionVerificationFailure(INSTALL_FAILED_MEDIA_UNAVAILABLE,
                                     "DataLoader reported unrecoverable failure.");
-                            return;
+                            break;
                     }
                 } catch (RemoteException e) {
                     // In case of streaming failure we don't want to fail or commit the session.
                     // Just return from this method and allow caller to commit again.
                     sendPendingStreaming(mContext, mRemoteStatusReceiver, sessionId,
-                            new StreamingException(e));
+                            e.getMessage());
                 }
             }
         };
@@ -3065,13 +3071,13 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     private static void sendPendingStreaming(Context context, IntentSender target, int sessionId,
-            Throwable cause) {
+            @Nullable String cause) {
         final Intent intent = new Intent();
         intent.putExtra(PackageInstaller.EXTRA_SESSION_ID, sessionId);
         intent.putExtra(PackageInstaller.EXTRA_STATUS, PackageInstaller.STATUS_PENDING_STREAMING);
-        if (cause != null && !TextUtils.isEmpty(cause.getMessage())) {
+        if (!TextUtils.isEmpty(cause)) {
             intent.putExtra(PackageInstaller.EXTRA_STATUS_MESSAGE,
-                    "Staging Image Not Ready [" + cause.getMessage() + "]");
+                    "Staging Image Not Ready [" + cause + "]");
         } else {
             intent.putExtra(PackageInstaller.EXTRA_STATUS_MESSAGE, "Staging Image Not Ready");
         }

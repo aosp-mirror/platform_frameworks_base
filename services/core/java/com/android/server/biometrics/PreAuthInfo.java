@@ -27,6 +27,7 @@ import android.app.admin.DevicePolicyManager;
 import android.app.trust.ITrustManager;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricManager;
+import android.hardware.biometrics.BiometricPrompt;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.util.Pair;
@@ -73,8 +74,9 @@ class PreAuthInfo {
     // Sensors that can be used for this request (e.g. strong enough, enrolled, enabled).
     final List<BiometricSensor> eligibleSensors;
     // Sensors that cannot be used for this request. Pair<BiometricSensor, AuthenticatorStatus>
-    final List<Pair<BiometricSensor, Integer>> ineligibleSensors;
+    private final List<Pair<BiometricSensor, Integer>> mIneligibleSensors;
     final boolean credentialAvailable;
+    final boolean confirmationRequested;
 
     static PreAuthInfo create(ITrustManager trustManager,
             DevicePolicyManager devicePolicyManager,
@@ -82,6 +84,8 @@ class PreAuthInfo {
             List<BiometricSensor> sensors,
             int userId, Bundle bundle, String opPackageName, boolean checkDevicePolicyManager)
             throws RemoteException {
+        final boolean confirmationRequested = bundle.getBoolean(
+                BiometricPrompt.KEY_REQUIRE_CONFIRMATION, true /* default */);
         final boolean biometricRequested = Utils.isBiometricRequested(bundle);
         final int requestedStrength = Utils.getPublicBiometricStrength(bundle);
         final boolean credentialRequested = Utils.isCredentialRequested(bundle);
@@ -118,7 +122,7 @@ class PreAuthInfo {
         }
 
         return new PreAuthInfo(biometricRequested, requestedStrength, credentialRequested,
-                eligibleSensors, ineligibleSensors, credentialAvailable);
+                eligibleSensors, ineligibleSensors, credentialAvailable, confirmationRequested);
     }
 
     /**
@@ -222,14 +226,16 @@ class PreAuthInfo {
 
     private PreAuthInfo(boolean biometricRequested, int biometricStrengthRequested,
             boolean credentialRequested, List<BiometricSensor> eligibleSensors,
-            List<Pair<BiometricSensor, Integer>> ineligibleSensors, boolean credentialAvailable) {
+            List<Pair<BiometricSensor, Integer>> ineligibleSensors, boolean credentialAvailable,
+            boolean confirmationRequested) {
         mBiometricRequested = biometricRequested;
         mBiometricStrengthRequested = biometricStrengthRequested;
         this.credentialRequested = credentialRequested;
 
         this.eligibleSensors = eligibleSensors;
-        this.ineligibleSensors = ineligibleSensors;
+        this.mIneligibleSensors = ineligibleSensors;
         this.credentialAvailable = credentialAvailable;
+        this.confirmationRequested = confirmationRequested;
     }
 
     /**
@@ -253,9 +259,9 @@ class PreAuthInfo {
                 }
             } else {
                 // Pick the first sensor error if it exists
-                if (!ineligibleSensors.isEmpty()) {
-                    modality |= ineligibleSensors.get(0).first.modality;
-                    status = ineligibleSensors.get(0).second;
+                if (!mIneligibleSensors.isEmpty()) {
+                    modality |= mIneligibleSensors.get(0).first.modality;
+                    status = mIneligibleSensors.get(0).second;
                 } else {
                     modality |= TYPE_CREDENTIAL;
                     status = CREDENTIAL_NOT_ENROLLED;
@@ -269,9 +275,9 @@ class PreAuthInfo {
                  }
             } else {
                 // Pick the first sensor error if it exists
-                if (!ineligibleSensors.isEmpty()) {
-                    modality |= ineligibleSensors.get(0).first.modality;
-                    status = ineligibleSensors.get(0).second;
+                if (!mIneligibleSensors.isEmpty()) {
+                    modality |= mIneligibleSensors.get(0).first.modality;
+                    status = mIneligibleSensors.get(0).second;
                 } else {
                     modality |= TYPE_NONE;
                     status = BIOMETRIC_NO_HARDWARE;
@@ -374,7 +380,7 @@ class PreAuthInfo {
         string.append("}");
 
         string.append("\nIneligible:{");
-        for (Pair<BiometricSensor, Integer> ineligible : ineligibleSensors) {
+        for (Pair<BiometricSensor, Integer> ineligible : mIneligibleSensors) {
             string.append(ineligible.first).append(":").append(ineligible.second).append(" ");
         }
         string.append("}");

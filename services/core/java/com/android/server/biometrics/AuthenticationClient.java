@@ -109,10 +109,6 @@ public abstract class AuthenticationClient extends ClientMonitor {
         return getCookie() != 0;
     }
 
-    public boolean getRequireConfirmation() {
-        return mRequireConfirmation;
-    }
-
     @Override
     protected boolean isCryptoOperation() {
         return mOpId != 0;
@@ -178,8 +174,7 @@ public abstract class AuthenticationClient extends ClientMonitor {
                 }
                 if (isBiometricPrompt() && listener != null) {
                     // BiometricService will add the token to keystore
-                    listener.onAuthenticationSucceededInternal(getSensorId(),
-                            mRequireConfirmation, byteToken);
+                    listener.onAuthenticationSucceededInternal(getSensorId(), byteToken);
                 } else if (!isBiometricPrompt() && listener != null) {
                     if (isStrongBiometric()) {
                         KeyStore.getInstance().addAuthToken(byteToken);

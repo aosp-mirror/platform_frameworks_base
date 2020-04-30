@@ -37,19 +37,21 @@ import org.junit.runner.RunWith;
 public class ThresholdSensorImplTest extends SysuiTestCase {
 
     private ThresholdSensorImpl mThresholdSensor;
+    private FakeSensorManager mSensorManager;
+    private AsyncSensorManager mAsyncSensorManager;
     private FakeSensorManager.FakeProximitySensor mFakeProximitySensor;
 
     @Before
     public void setUp() throws Exception {
         allowTestableLooperAsMainThread();
-        FakeSensorManager sensorManager = new FakeSensorManager(getContext());
+        mSensorManager = new FakeSensorManager(getContext());
 
-        AsyncSensorManager asyncSensorManager = new AsyncSensorManager(
-                sensorManager, null, new Handler());
+        mAsyncSensorManager = new AsyncSensorManager(
+                mSensorManager, null, new Handler());
 
-        mFakeProximitySensor = sensorManager.getFakeProximitySensor();
+        mFakeProximitySensor = mSensorManager.getFakeProximitySensor();
         ThresholdSensorImpl.Builder thresholdSensorBuilder = new ThresholdSensorImpl.Builder(
-                null, asyncSensorManager);
+                null, mAsyncSensorManager);
         mThresholdSensor = (ThresholdSensorImpl) thresholdSensorBuilder
                 .setSensor(mFakeProximitySensor.getSensor())
                 .setThresholdValue(mFakeProximitySensor.getSensor().getMaximumRange())
@@ -224,6 +226,54 @@ public class ThresholdSensorImplTest extends SysuiTestCase {
         mThresholdSensor.unregister(listenerA);
         mThresholdSensor.unregister(listenerB);
         waitForSensorManager();
+    }
+
+    @Test
+    public void testHysteresis() {
+        float lowValue = 10f;
+        float highValue = 100f;
+        FakeSensorManager.FakeGenericSensor sensor = mSensorManager.getFakeLightSensor();
+        ThresholdSensorImpl.Builder thresholdSensorBuilder = new ThresholdSensorImpl.Builder(
+                null, mAsyncSensorManager);
+        ThresholdSensorImpl thresholdSensor = (ThresholdSensorImpl) thresholdSensorBuilder
+                .setSensor(sensor.getSensor())
+                .setThresholdValue(lowValue)
+                .setThresholdLatchValue(highValue)
+                .build();
+
+        TestableListener listener = new TestableListener();
+
+        assertFalse(thresholdSensor.isRegistered());
+        thresholdSensor.register(listener);
+        waitForSensorManager();
+        assertTrue(thresholdSensor.isRegistered());
+        assertEquals(0, listener.mCallCount);
+
+        sensor.sendSensorEvent(lowValue - 1);
+
+        assertTrue(listener.mBelow);
+        assertEquals(1, listener.mCallCount);
+
+        sensor.sendSensorEvent(lowValue + 1);
+
+        assertTrue(listener.mBelow);
+        assertEquals(1, listener.mCallCount);
+
+        sensor.sendSensorEvent(highValue + 1);
+
+        assertFalse(listener.mBelow);
+        assertEquals(2, listener.mCallCount);
+
+        sensor.sendSensorEvent(highValue - 1);
+
+        assertFalse(listener.mBelow);
+        assertEquals(2, listener.mCallCount);
+
+
+        sensor.sendSensorEvent(lowValue - 1);
+
+        assertTrue(listener.mBelow);
+        assertEquals(3, listener.mCallCount);
     }
 
     @Test

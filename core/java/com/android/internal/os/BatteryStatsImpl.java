@@ -4009,6 +4009,11 @@ public class BatteryStatsImpl extends BatteryStats {
             // Otherwise the parent's process state will get downgraded incorrectly
             return;
         }
+        // TODO(b/155216561): It is possible for isolated uids to be in a higher
+        // state than its parent uid. We should track the highest state within the union of host
+        // and isolated uids rather than only the parent uid.
+        FrameworkStatsLog.write(FrameworkStatsLog.UID_PROCESS_STATE_CHANGED, uid,
+                ActivityManager.processStateAmToProto(state));
         getUidStatsLocked(uid).updateUidProcessStateLocked(state);
     }
 

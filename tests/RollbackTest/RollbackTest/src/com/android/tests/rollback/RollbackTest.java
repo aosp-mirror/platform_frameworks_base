@@ -1176,28 +1176,34 @@ public class RollbackTest {
                     Manifest.permission.DELETE_PACKAGES,
                     Manifest.permission.TEST_MANAGE_ROLLBACKS);
 
-            Uninstall.packages(TestApp.A, TestApp.B);
-            Install.multi(TestApp.A1, TestApp.B1).commit();
+            Uninstall.packages(TestApp.A, TestApp.B, TestApp.C);
+            Install.multi(TestApp.A1, TestApp.B1, TestApp.C1).commit();
             // Write user data version = 1
             InstallUtils.processUserData(TestApp.A);
             InstallUtils.processUserData(TestApp.B);
+            InstallUtils.processUserData(TestApp.C);
 
             Install a2 = Install.single(TestApp.A2)
                     .setEnableRollback(PackageManager.RollbackDataPolicy.WIPE);
             Install b2 = Install.single(TestApp.B2)
                     .setEnableRollback(PackageManager.RollbackDataPolicy.RESTORE);
-            Install.multi(a2, b2).setEnableRollback().commit();
+            // The rollback data policy of C2 is specified in the manifest
+            Install c2 = Install.single(TestApp.C2).setEnableRollback();
+            Install.multi(a2, b2, c2).setEnableRollback().commit();
             // Write user data version = 2
             InstallUtils.processUserData(TestApp.A);
             InstallUtils.processUserData(TestApp.B);
+            InstallUtils.processUserData(TestApp.C);
 
             RollbackInfo info = RollbackUtils.getAvailableRollback(TestApp.A);
             RollbackUtils.rollback(info.getRollbackId());
             // Read user data version from userdata.txt
             // A's user data version is -1 for user data is wiped.
             // B's user data version is 1 as rollback committed.
+            // C's user data version is -1 for user data is wiped.
             assertThat(InstallUtils.getUserDataVersion(TestApp.A)).isEqualTo(-1);
             assertThat(InstallUtils.getUserDataVersion(TestApp.B)).isEqualTo(1);
+            assertThat(InstallUtils.getUserDataVersion(TestApp.C)).isEqualTo(-1);
         } finally {
             InstallUtils.dropShellPermissionIdentity();
         }

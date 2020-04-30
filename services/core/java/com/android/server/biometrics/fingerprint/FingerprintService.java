@@ -286,10 +286,11 @@ public class FingerprintService extends BiometricServiceBase {
 
         @Override // Binder call
         public void cancelAuthenticationFromService(final IBinder token, final String opPackageName,
-                int callingUid, int callingPid, int callingUserId, boolean fromClient) {
+                int callingUid, int callingPid, int callingUserId) {
             checkPermission(MANAGE_BIOMETRIC);
+            // Cancellation is from system server in this case.
             cancelAuthenticationInternal(token, opPackageName, callingUid, callingPid,
-                    callingUserId, fromClient);
+                    callingUserId, false /* fromClient */);
         }
 
         @Override // Binder call
