@@ -195,7 +195,6 @@ import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.service.vr.IVrManager;
 import android.service.vr.IVrStateCallbacks;
-import android.sysprop.SurfaceFlingerProperties;
 import android.text.format.DateUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -305,9 +304,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -4689,11 +4686,6 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     private static boolean queryWideColorGamutSupport() {
-        boolean defaultValue = false;
-        Optional<Boolean> hasWideColorProp = SurfaceFlingerProperties.has_wide_color_display();
-        if (hasWideColorProp.isPresent()) {
-            return hasWideColorProp.get();
-        }
         try {
             ISurfaceFlingerConfigs surfaceFlinger = ISurfaceFlingerConfigs.getService();
             OptionalBool hasWideColor = surfaceFlinger.hasWideColorDisplay();
@@ -4702,18 +4694,11 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         } catch (RemoteException e) {
             // Ignore, we're in big trouble if we can't talk to SurfaceFlinger's config store
-        } catch (NoSuchElementException e) {
-            return defaultValue;
         }
         return false;
     }
 
     private static boolean queryHdrSupport() {
-        boolean defaultValue = false;
-        Optional<Boolean> hasHdrProp = SurfaceFlingerProperties.has_HDR_display();
-        if (hasHdrProp.isPresent()) {
-            return hasHdrProp.get();
-        }
         try {
             ISurfaceFlingerConfigs surfaceFlinger = ISurfaceFlingerConfigs.getService();
             OptionalBool hasHdr = surfaceFlinger.hasHDRDisplay();
@@ -4722,8 +4707,6 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         } catch (RemoteException e) {
             // Ignore, we're in big trouble if we can't talk to SurfaceFlinger's config store
-        } catch (NoSuchElementException e) {
-            return defaultValue;
         }
         return false;
     }
