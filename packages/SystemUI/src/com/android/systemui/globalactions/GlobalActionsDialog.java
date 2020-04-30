@@ -234,6 +234,8 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     private SharedPreferences mControlsPreferences;
     private final RingerModeTracker mRingerModeTracker;
     private int mDialogPressDelay = DIALOG_PRESS_DELAY; // ms
+    private Handler mMainHandler;
+    private boolean mShowLockScreenCardsAndControls = false;
 
     @VisibleForTesting
     public enum GlobalActionsEvent implements UiEventLogger.UiEventEnum {
@@ -288,7 +290,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             @Background Executor backgroundExecutor,
             ControlsListingController controlsListingController,
             ControlsController controlsController, UiEventLogger uiEventLogger,
-            RingerModeTracker ringerModeTracker) {
+            RingerModeTracker ringerModeTracker, @Main Handler handler) {
         mContext = new ContextThemeWrapper(context, com.android.systemui.R.style.qs_theme);
         mWindowManagerFuncs = windowManagerFuncs;
         mAudioManager = audioManager;
@@ -317,6 +319,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         mBlurUtils = blurUtils;
         mRingerModeTracker = ringerModeTracker;
         mControlsController = controlsController;
+        mMainHandler = handler;
 
         // receive broadcasts
         IntentFilter filter = new IntentFilter();
@@ -352,10 +355,15 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         keyguardStateController.addCallback(new KeyguardStateController.Callback() {
             @Override
             public void onUnlockedChanged() {
-                if (mDialog != null && mDialog.mPanelController != null) {
+                if (mDialog != null) {
                     boolean unlocked = keyguardStateController.isUnlocked()
                             || keyguardStateController.canDismissLockScreen();
-                    mDialog.mPanelController.onDeviceLockStateChanged(unlocked);
+                    if (mDialog.mPanelController != null) {
+                        mDialog.mPanelController.onDeviceLockStateChanged(unlocked);
+                    }
+                    if (!mDialog.isShowingControls() && shouldShowControls()) {
+                        mDialog.showControls(mControlsUiController);
+                    }
                 }
             }
         });
@@ -370,6 +378,17 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         mControlsPreferences = userContext.getSharedPreferences(PREFS_CONTROLS_FILE,
             Context.MODE_PRIVATE);
 
+        // Listen for changes to show controls on the power menu while locked
+        onPowerMenuLockScreenSettingsChanged();
+        mContext.getContentResolver().registerContentObserver(
+                Settings.Secure.getUriFor(Settings.Secure.POWER_MENU_LOCKED_SHOW_CONTENT),
+                false /* notifyForDescendants */,
+                new ContentObserver(mMainHandler) {
+                    @Override
+                    public void onChange(boolean selfChange) {
+                        onPowerMenuLockScreenSettingsChanged();
+                    }
+                });
     }
 
     private void seedFavorites() {
@@ -485,15 +504,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     @VisibleForTesting
     protected int getMaxShownPowerItems() {
         if (shouldUseControlsLayout()) {
-            int maxColumns =
-                    mResources.getInteger(com.android.systemui.R.integer.power_menu_max_columns);
-            // TODO: Overflow temporarily disabled on keyguard to prevent touch issues.
-            // Show an extra item on the keyguard because the overflow button currently disabled.
-            if (mKeyguardShowing) {
-                return maxColumns + 1;
-            } else {
-                return maxColumns;
-            }
+            return mResources.getInteger(com.android.systemui.R.integer.power_menu_max_columns);
         } else {
             return Integer.MAX_VALUE;
         }
@@ -1804,7 +1815,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         }
     };
 
-    private ContentObserver mAirplaneModeObserver = new ContentObserver(new Handler()) {
+    private ContentObserver mAirplaneModeObserver = new ContentObserver(mMainHandler) {
         @Override
         public void onChange(boolean selfChange) {
             onAirplaneModeChanged();
@@ -1950,6 +1961,15 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             initializeLayout();
         }
 
+        private boolean isShowingControls() {
+            return mControlsUiController != null;
+        }
+
+        private void showControls(ControlsUiController controller) {
+            mControlsUiController = controller;
+            mControlsUiController.show(mControlsView, this::dismissForControlsActivity);
+        }
+
         private boolean shouldUsePanel() {
             return mPanelController != null && mPanelController.getPanelContent() != null;
         }
@@ -2066,8 +2086,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             View overflowButton = findViewById(
                     com.android.systemui.R.id.global_actions_overflow_button);
             if (overflowButton != null) {
-                // TODO: Overflow button hidden on keyguard to temporarily prevent touch issues.
-                if (mOverflowAdapter.getCount() > 0 && !mKeyguardShowing) {
+                if (mOverflowAdapter.getCount() > 0) {
                     overflowButton.setOnClickListener((view) -> showPowerOverflowMenu());
                     LinearLayout.LayoutParams params =
                             (LinearLayout.LayoutParams) mGlobalActionsLayout.getLayoutParams();
@@ -2354,7 +2373,9 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
     @VisibleForTesting
     protected boolean shouldShowControls() {
-        return mKeyguardStateController.isUnlocked()
+        boolean isUnlocked = mKeyguardStateController.isUnlocked()
+                || mKeyguardStateController.canDismissLockScreen();
+        return (isUnlocked || mShowLockScreenCardsAndControls)
                 && mControlsUiController.getAvailable()
                 && !mControlsServiceInfos.isEmpty();
     }
@@ -2362,5 +2383,10 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     protected boolean shouldUseControlsLayout() {
         // always use new controls layout
         return true;
+    }
+
+    private void onPowerMenuLockScreenSettingsChanged() {
+        mShowLockScreenCardsAndControls = Settings.Secure.getInt(mContentResolver,
+                Settings.Secure.POWER_MENU_LOCKED_SHOW_CONTENT, 0) != 0;
     }
 }
