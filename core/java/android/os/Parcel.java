@@ -1396,24 +1396,39 @@ public final class Parcel {
     }
 
     public final void writeStringArray(@Nullable String[] val) {
+        writeString16Array(val);
+    }
+
+    @Nullable
+    public final String[] createStringArray() {
+        return createString16Array();
+    }
+
+    public final void readStringArray(@NonNull String[] val) {
+        readString16Array(val);
+    }
+
+    /** {@hide} */
+    public final void writeString8Array(@Nullable String[] val) {
         if (val != null) {
             int N = val.length;
             writeInt(N);
             for (int i=0; i<N; i++) {
-                writeString(val[i]);
+                writeString8(val[i]);
             }
         } else {
             writeInt(-1);
         }
     }
 
+    /** {@hide} */
     @Nullable
-    public final String[] createStringArray() {
+    public final String[] createString8Array() {
         int N = readInt();
         if (N >= 0) {
             String[] val = new String[N];
             for (int i=0; i<N; i++) {
-                val[i] = readString();
+                val[i] = readString8();
             }
             return val;
         } else {
@@ -1421,11 +1436,52 @@ public final class Parcel {
         }
     }
 
-    public final void readStringArray(@NonNull String[] val) {
+    /** {@hide} */
+    public final void readString8Array(@NonNull String[] val) {
         int N = readInt();
         if (N == val.length) {
             for (int i=0; i<N; i++) {
-                val[i] = readString();
+                val[i] = readString8();
+            }
+        } else {
+            throw new RuntimeException("bad array lengths");
+        }
+    }
+
+    /** {@hide} */
+    public final void writeString16Array(@Nullable String[] val) {
+        if (val != null) {
+            int N = val.length;
+            writeInt(N);
+            for (int i=0; i<N; i++) {
+                writeString16(val[i]);
+            }
+        } else {
+            writeInt(-1);
+        }
+    }
+
+    /** {@hide} */
+    @Nullable
+    public final String[] createString16Array() {
+        int N = readInt();
+        if (N >= 0) {
+            String[] val = new String[N];
+            for (int i=0; i<N; i++) {
+                val[i] = readString16();
+            }
+            return val;
+        } else {
+            return null;
+        }
+    }
+
+    /** {@hide} */
+    public final void readString16Array(@NonNull String[] val) {
+        int N = readInt();
+        if (N == val.length) {
+            for (int i=0; i<N; i++) {
+                val[i] = readString16();
             }
         } else {
             throw new RuntimeException("bad array lengths");
@@ -2641,20 +2697,7 @@ public final class Parcel {
     @UnsupportedAppUsage
     @Nullable
     public final String[] readStringArray() {
-        String[] array = null;
-
-        int length = readInt();
-        if (length >= 0)
-        {
-            array = new String[length];
-
-            for (int i = 0 ; i < length ; i++)
-            {
-                array[i] = readString();
-            }
-        }
-
-        return array;
+        return createString16Array();
     }
 
     /**
