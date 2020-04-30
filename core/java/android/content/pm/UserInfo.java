@@ -457,14 +457,14 @@ public class UserInfo implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int parcelableFlags) {
         dest.writeInt(id);
-        dest.writeString(name);
-        dest.writeString(iconPath);
+        dest.writeString8(name);
+        dest.writeString8(iconPath);
         dest.writeInt(flags);
-        dest.writeString(userType);
+        dest.writeString8(userType);
         dest.writeInt(serialNumber);
         dest.writeLong(creationTime);
         dest.writeLong(lastLoggedInTime);
-        dest.writeString(lastLoggedInFingerprint);
+        dest.writeString8(lastLoggedInFingerprint);
         dest.writeBoolean(partial);
         dest.writeBoolean(preCreated);
         dest.writeInt(profileGroupId);
@@ -486,14 +486,14 @@ public class UserInfo implements Parcelable {
 
     private UserInfo(Parcel source) {
         id = source.readInt();
-        name = source.readString();
-        iconPath = source.readString();
+        name = source.readString8();
+        iconPath = source.readString8();
         flags = source.readInt();
-        userType = source.readString();
+        userType = source.readString8();
         serialNumber = source.readInt();
         creationTime = source.readLong();
         lastLoggedInTime = source.readLong();
-        lastLoggedInFingerprint = source.readString();
+        lastLoggedInFingerprint = source.readString8();
         partial = source.readBoolean();
         preCreated = source.readBoolean();
         profileGroupId = source.readInt();
