@@ -9766,7 +9766,7 @@ package android.service.euicc {
   public abstract class EuiccService extends android.app.Service {
     ctor public EuiccService();
     method public void dump(@NonNull java.io.PrintWriter);
-    method public int encodeSmdxSubjectAndReasonCode(@NonNull String, @NonNull String);
+    method public int encodeSmdxSubjectAndReasonCode(@Nullable String, @Nullable String);
     method @CallSuper public android.os.IBinder onBind(android.content.Intent);
     method public abstract int onDeleteSubscription(int, String);
     method public android.service.euicc.DownloadSubscriptionResult onDownloadSubscription(int, @NonNull android.telephony.euicc.DownloadableSubscription, boolean, boolean, @Nullable android.os.Bundle);
@@ -11059,6 +11059,7 @@ package android.telephony {
   }
 
   public class SmsMessage {
+    method @Nullable public static android.telephony.SmsMessage createFromNativeSmsSubmitPdu(@NonNull byte[], boolean);
     method @Nullable public static android.telephony.SmsMessage.SubmitPdu getSmsPdu(int, int, @Nullable String, @NonNull String, @NonNull String, long);
     method @NonNull @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public static byte[] getSubmitPduEncodedMessage(boolean, @NonNull String, @NonNull String, int, @IntRange(from=0) int, @IntRange(from=0) int, @IntRange(from=0, to=255) int, @IntRange(from=1, to=255) int, @IntRange(from=1, to=255) int);
   }

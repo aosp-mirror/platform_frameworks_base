@@ -339,6 +339,23 @@ public class SmsMessage {
     }
 
     /**
+     * Create an SmsMessage from a native SMS-Submit PDU, specified by Bluetooth Message Access
+     * Profile Specification v1.4.2 5.8.
+     * This is used by Bluetooth MAP profile to decode message when sending non UTF-8 SMS messages.
+     *
+     * @param data Message data.
+     * @param isCdma Indicates weather the type of the SMS is CDMA.
+     * @return An SmsMessage representing the message.
+     *
+     * @hide
+     */
+    @SystemApi
+    @Nullable
+    public static SmsMessage createFromNativeSmsSubmitPdu(@NonNull byte[] data, boolean isCdma) {
+        return null;
+    }
+
+    /**
      * Get the TP-Layer-Length for the given SMS-SUBMIT PDU Basically, the
      * length in bytes (not hex chars) less the SMSC header
      *
