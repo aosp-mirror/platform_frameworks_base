@@ -16134,6 +16134,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         final PendingIntent pendingIntent = mInjector.pendingIntentGetBroadcast(mContext,
                 0 /* requestCode */, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
+        final String buttonText =
+                mContext.getString(R.string.personal_apps_suspended_turn_profile_on);
+        final Notification.Action turnProfileOnButton =
+                new Notification.Action.Builder(null /* icon */, buttonText, pendingIntent).build();
+
         final String text = mContext.getString(
                 notificationState == PROFILE_OFF_DEADLINE_WARNING
                 ? R.string.personal_apps_suspension_tomorrow_text
@@ -16144,11 +16149,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 new Notification.Builder(mContext, SystemNotificationChannels.DEVICE_ADMIN)
                         .setSmallIcon(android.R.drawable.stat_sys_warning)
                         .setOngoing(ongoing)
+                        .setAutoCancel(false)
                         .setContentTitle(mContext.getString(
                                 R.string.personal_apps_suspension_title))
                         .setContentText(text)
+                        .setStyle(new Notification.BigTextStyle().bigText(text))
                         .setColor(mContext.getColor(R.color.system_notification_accent_color))
-                        .setContentIntent(pendingIntent)
+                        .addAction(turnProfileOnButton)
                         .build();
         mInjector.getNotificationManager().notify(
                 SystemMessage.NOTE_PERSONAL_APPS_SUSPENDED, notification);
