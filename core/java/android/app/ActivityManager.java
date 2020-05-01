@@ -2442,8 +2442,7 @@ public class ActivityManager {
      * has access to it.
      *
      * @see ActivityOptions#setLaunchDisplayId(int)
-     * @see android.view.Display.FLAG_PRIVATE
-     * @see android.view.Display.TYPE_VIRTUAL
+     * @see android.view.Display#FLAG_PRIVATE
      *
      * @param context Source context, from which an activity will be started.
      * @param displayId Target display id.
