@@ -30,17 +30,13 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
-import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyBoolean;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.doCallRealMethod;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -53,13 +49,11 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
-import android.os.IBinder;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
-import android.testing.PollingCheck;
 import android.testing.TestableLooper;
 import android.testing.UiThreadTest;
 import android.view.LayoutInflater;
@@ -68,7 +62,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
@@ -120,6 +113,8 @@ public class NotificationInfoTest extends SysuiTestCase {
     private PackageManager mMockPackageManager;
     @Mock
     private VisualStabilityManager mVisualStabilityManager;
+    @Mock
+    private ChannelEditorDialogController mChannelEditorDialogController;
 
     @Before
     public void setUp() throws Exception {
@@ -185,6 +180,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mMockPackageManager,
                 mMockINotificationManager,
                 mVisualStabilityManager,
+                mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
                 mNotificationChannelSet,
@@ -208,6 +204,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mMockPackageManager,
                 mMockINotificationManager,
                 mVisualStabilityManager,
+                mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
                 mNotificationChannelSet,
@@ -227,6 +224,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mMockPackageManager,
                 mMockINotificationManager,
                 mVisualStabilityManager,
+                mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
                 mNotificationChannelSet,
@@ -257,6 +255,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mMockPackageManager,
                 mMockINotificationManager,
                 mVisualStabilityManager,
+                mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
                 mNotificationChannelSet,
@@ -277,6 +276,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mMockPackageManager,
                 mMockINotificationManager,
                 mVisualStabilityManager,
+                mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
                 mNotificationChannelSet,
@@ -304,6 +304,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mMockPackageManager,
                 mMockINotificationManager,
                 mVisualStabilityManager,
+                mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
                 mNotificationChannelSet,
@@ -326,6 +327,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mMockPackageManager,
                 mMockINotificationManager,
                 mVisualStabilityManager,
+                mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
                 mNotificationChannelSet,
@@ -345,6 +347,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mMockPackageManager,
                 mMockINotificationManager,
                 mVisualStabilityManager,
+                mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mDefaultNotificationChannel,
                 mDefaultNotificationChannelSet,
@@ -368,6 +371,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mMockPackageManager,
                 mMockINotificationManager,
                 mVisualStabilityManager,
+                mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mDefaultNotificationChannel,
                 mDefaultNotificationChannelSet,
@@ -387,6 +391,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mMockPackageManager,
                 mMockINotificationManager,
                 mVisualStabilityManager,
+                mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
                 mNotificationChannelSet,
@@ -407,6 +412,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mMockPackageManager,
                 mMockINotificationManager,
                 mVisualStabilityManager,
+                mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
                 mNotificationChannelSet,
@@ -432,6 +438,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mMockPackageManager,
                 mMockINotificationManager,
                 mVisualStabilityManager,
+                mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
                 mNotificationChannelSet,
@@ -452,6 +459,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mMockPackageManager,
                 mMockINotificationManager,
                 mVisualStabilityManager,
+                mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
                 mNotificationChannelSet,
@@ -473,6 +481,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mMockPackageManager,
                 mMockINotificationManager,
                 mVisualStabilityManager,
+                mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
                 mNotificationChannelSet,
@@ -486,6 +495,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mMockPackageManager,
                 mMockINotificationManager,
                 mVisualStabilityManager,
+                mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
                 mNotificationChannelSet,
@@ -506,6 +516,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mMockPackageManager,
                 mMockINotificationManager,
                 mVisualStabilityManager,
+                mChannelEditorDialogController,
                 TEST_PACKAGE_NAME, mNotificationChannel,
                 createMultipleChannelSet(MULTIPLE_CHANNEL_COUNT),
                 mEntry,
@@ -531,6 +542,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mMockPackageManager,
                 mMockINotificationManager,
                 mVisualStabilityManager,
+                mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
                 createMultipleChannelSet(MULTIPLE_CHANNEL_COUNT),
@@ -552,6 +564,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mMockPackageManager,
                 mMockINotificationManager,
                 mVisualStabilityManager,
+                mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
                 createMultipleChannelSet(MULTIPLE_CHANNEL_COUNT),
@@ -573,6 +586,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mMockPackageManager,
                 mMockINotificationManager,
                 mVisualStabilityManager,
+                mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
                 mNotificationChannelSet,
@@ -596,6 +610,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mMockPackageManager,
                 mMockINotificationManager,
                 mVisualStabilityManager,
+                mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
                 mNotificationChannelSet,
@@ -614,6 +629,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mMockPackageManager,
                 mMockINotificationManager,
                 mVisualStabilityManager,
+                mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
                 mNotificationChannelSet,
@@ -632,6 +648,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mMockPackageManager,
                 mMockINotificationManager,
                 mVisualStabilityManager,
+                mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
                 mNotificationChannelSet,
@@ -653,6 +670,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mMockPackageManager,
                 mMockINotificationManager,
                 mVisualStabilityManager,
+                mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
                 mNotificationChannelSet,
@@ -677,6 +695,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mMockPackageManager,
                 mMockINotificationManager,
                 mVisualStabilityManager,
+                mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
                 mNotificationChannelSet,
@@ -701,6 +720,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mMockPackageManager,
                 mMockINotificationManager,
                 mVisualStabilityManager,
+                mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
                 mNotificationChannelSet,
@@ -726,6 +746,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mMockPackageManager,
                 mMockINotificationManager,
                 mVisualStabilityManager,
+                mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
                 mNotificationChannelSet,
@@ -751,6 +772,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mMockPackageManager,
                 mMockINotificationManager,
                 mVisualStabilityManager,
+                mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
                 mNotificationChannelSet,
@@ -782,6 +804,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mMockPackageManager,
                 mMockINotificationManager,
                 mVisualStabilityManager,
+                mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
                 mNotificationChannelSet,
@@ -814,6 +837,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mMockPackageManager,
                 mMockINotificationManager,
                 mVisualStabilityManager,
+                mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
                 mNotificationChannelSet,
@@ -846,6 +870,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mMockPackageManager,
                 mMockINotificationManager,
                 mVisualStabilityManager,
+                mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
                 mNotificationChannelSet,
@@ -881,6 +906,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mMockPackageManager,
                 mMockINotificationManager,
                 mVisualStabilityManager,
+                mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
                 mNotificationChannelSet,
@@ -915,6 +941,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mMockPackageManager,
                 mMockINotificationManager,
                 mVisualStabilityManager,
+                mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
                 mNotificationChannelSet,
@@ -940,6 +967,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mMockPackageManager,
                 mMockINotificationManager,
                 mVisualStabilityManager,
+                mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
                 mNotificationChannelSet,
@@ -968,6 +996,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mMockPackageManager,
                 mMockINotificationManager,
                 mVisualStabilityManager,
+                mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
                 mNotificationChannelSet,
@@ -999,6 +1028,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mMockPackageManager,
                 mMockINotificationManager,
                 mVisualStabilityManager,
+                mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
                 mNotificationChannelSet,
@@ -1025,6 +1055,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mMockPackageManager,
                 mMockINotificationManager,
                 mVisualStabilityManager,
+                mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
                 mNotificationChannelSet,
@@ -1056,6 +1087,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mMockPackageManager,
                 mMockINotificationManager,
                 mVisualStabilityManager,
+                mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
                 mNotificationChannelSet,
@@ -1080,6 +1112,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mMockPackageManager,
                 mMockINotificationManager,
                 mVisualStabilityManager,
+                mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
                 mNotificationChannelSet,
