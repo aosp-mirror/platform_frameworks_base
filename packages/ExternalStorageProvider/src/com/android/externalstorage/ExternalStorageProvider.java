@@ -32,6 +32,7 @@ import android.os.IBinder;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.DiskInfo;
+import android.os.storage.StorageEventListener;
 import android.os.storage.StorageManager;
 import android.os.storage.VolumeInfo;
 import android.provider.DocumentsContract;
@@ -119,6 +120,14 @@ public class ExternalStorageProvider extends FileSystemProvider {
         mUserManager = getContext().getSystemService(UserManager.class);
 
         updateVolumes();
+
+        mStorageManager.registerListener(new StorageEventListener() {
+                @Override
+                public void onVolumeStateChanged(VolumeInfo vol, int oldState, int newState) {
+                    updateVolumes();
+                }
+            });
+
         return true;
     }
 
