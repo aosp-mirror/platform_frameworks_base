@@ -123,6 +123,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
     @Mock private INotificationManager mINotificationManager;
     @Mock private LauncherApps mLauncherApps;
     @Mock private ShortcutManager mShortcutManager;
+    @Mock private ChannelEditorDialogController mChannelEditorDialogController;
     @Mock private PeopleNotificationIdentifier mPeopleNotificationIdentifier;
     @Mock private CurrentUserContextTracker mContextTracker;
     @Mock(answer = Answers.RETURNS_SELF)
@@ -144,7 +145,8 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
 
         mGutsManager = new NotificationGutsManager(mContext, mVisualStabilityManager,
                 () -> mStatusBar, mHandler, mAccessibilityManager, mHighPriorityProvider,
-                mINotificationManager, mLauncherApps, mShortcutManager, mContextTracker, mProvider);
+                mINotificationManager, mLauncherApps, mShortcutManager,
+                mChannelEditorDialogController, mContextTracker, mProvider);
         mGutsManager.setUpWithPresenter(mPresenter, mStackScroller,
                 mCheckSaveListener, mOnSettingsClickListener);
         mGutsManager.setNotificationActivityStarter(mNotificationActivityStarter);
@@ -350,6 +352,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 any(PackageManager.class),
                 any(INotificationManager.class),
                 eq(mVisualStabilityManager),
+                eq(mChannelEditorDialogController),
                 eq(statusBarNotification.getPackageName()),
                 any(NotificationChannel.class),
                 anySet(),
@@ -381,6 +384,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 any(PackageManager.class),
                 any(INotificationManager.class),
                 eq(mVisualStabilityManager),
+                eq(mChannelEditorDialogController),
                 eq(statusBarNotification.getPackageName()),
                 any(NotificationChannel.class),
                 anySet(),
@@ -410,6 +414,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 any(PackageManager.class),
                 any(INotificationManager.class),
                 eq(mVisualStabilityManager),
+                eq(mChannelEditorDialogController),
                 eq(statusBarNotification.getPackageName()),
                 any(NotificationChannel.class),
                 anySet(),
