@@ -79,6 +79,7 @@
     <color name="global_screenshot_button_icon">@color/GM2_blue_300</color>
     <color name="global_screenshot_dismiss_background">@color/GM2_grey_800</color>
     <color name="global_screenshot_dismiss_foreground">#FFFFFF</color>
+    <color name="global_screenshot_background_protection_start">#80000000</color> <!-- 50% black -->
 
 
     <!-- Biometric dialog colors -->

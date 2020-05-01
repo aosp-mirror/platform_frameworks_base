@@ -200,6 +200,7 @@
     <color name="global_screenshot_button_icon">@color/GM2_blue_500</color>
     <color name="global_screenshot_dismiss_background">#FFFFFF</color>
     <color name="global_screenshot_dismiss_foreground">@color/GM2_grey_500</color>
+    <color name="global_screenshot_background_protection_start">#40000000</color> <!-- 25% black -->
 
     <!-- GM2 colors -->
     <color name="GM2_grey_50">#F8F9FA</color>
