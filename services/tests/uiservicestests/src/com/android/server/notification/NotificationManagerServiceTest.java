@@ -6630,4 +6630,62 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         assertFalse(mBinderService.hasSentMessage(PKG, mUid));
     }
+
+    @Test
+    public void testCanPostFgsWhenOverLimit() throws RemoteException {
+        for (int i = 0; i < NotificationManagerService.MAX_PACKAGE_NOTIFICATIONS; i++) {
+            StatusBarNotification sbn = generateNotificationRecord(mTestNotificationChannel,
+                    i, null, false).getSbn();
+            mBinderService.enqueueNotificationWithTag(PKG, PKG,
+                    "testCanPostFgsWhenOverLimit",
+                    sbn.getId(), sbn.getNotification(), sbn.getUserId());
+        }
+
+        final StatusBarNotification sbn = generateNotificationRecord(null).getSbn();
+        sbn.getNotification().flags |= FLAG_FOREGROUND_SERVICE;
+        mBinderService.enqueueNotificationWithTag(PKG, PKG,
+                "testCanPostFgsWhenOverLimit - fgs over limit!",
+                sbn.getId(), sbn.getNotification(), sbn.getUserId());
+
+        waitForIdle();
+
+        StatusBarNotification[] notifs =
+                mBinderService.getActiveNotifications(sbn.getPackageName());
+        assertEquals(NotificationManagerService.MAX_PACKAGE_NOTIFICATIONS + 1, notifs.length);
+        assertEquals(NotificationManagerService.MAX_PACKAGE_NOTIFICATIONS + 1,
+                mService.getNotificationRecordCount());
+    }
+
+    @Test
+    public void testCannotPostNonFgsWhenOverLimit() throws RemoteException {
+        for (int i = 0; i < NotificationManagerService.MAX_PACKAGE_NOTIFICATIONS; i++) {
+            StatusBarNotification sbn = generateNotificationRecord(mTestNotificationChannel,
+                    i, null, false).getSbn();
+            mBinderService.enqueueNotificationWithTag(PKG, PKG,
+                    "testCanPostFgsWhenOverLimit",
+                    sbn.getId(), sbn.getNotification(), sbn.getUserId());
+            waitForIdle();
+        }
+
+        final StatusBarNotification sbn = generateNotificationRecord(mTestNotificationChannel,
+                100, null, false).getSbn();
+        sbn.getNotification().flags |= FLAG_FOREGROUND_SERVICE;
+        mBinderService.enqueueNotificationWithTag(PKG, PKG,
+                "testCanPostFgsWhenOverLimit - fgs over limit!",
+                sbn.getId(), sbn.getNotification(), sbn.getUserId());
+
+        final StatusBarNotification sbn2 = generateNotificationRecord(mTestNotificationChannel,
+                101, null, false).getSbn();
+        mBinderService.enqueueNotificationWithTag(PKG, PKG,
+                "testCanPostFgsWhenOverLimit - non fgs over limit!",
+                sbn2.getId(), sbn2.getNotification(), sbn2.getUserId());
+
+        waitForIdle();
+
+        StatusBarNotification[] notifs =
+                mBinderService.getActiveNotifications(sbn.getPackageName());
+        assertEquals(NotificationManagerService.MAX_PACKAGE_NOTIFICATIONS + 1, notifs.length);
+        assertEquals(NotificationManagerService.MAX_PACKAGE_NOTIFICATIONS + 1,
+                mService.getNotificationRecordCount());
+    }
 }

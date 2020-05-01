@@ -5959,13 +5959,15 @@ public class NotificationManagerService extends SystemService {
                     }
                 }
 
-                // limit the number of outstanding notificationrecords an app can have
-                int count = getNotificationCountLocked(pkg, userId, id, tag);
-                if (count >= MAX_PACKAGE_NOTIFICATIONS) {
-                    mUsageStats.registerOverCountQuota(pkg);
-                    Slog.e(TAG, "Package has already posted or enqueued " + count
-                            + " notifications.  Not showing more.  package=" + pkg);
-                    return false;
+                // limit the number of non-fgs outstanding notificationrecords an app can have
+                if (!r.getNotification().isForegroundService()) {
+                    int count = getNotificationCountLocked(pkg, userId, id, tag);
+                    if (count >= MAX_PACKAGE_NOTIFICATIONS) {
+                        mUsageStats.registerOverCountQuota(pkg);
+                        Slog.e(TAG, "Package has already posted or enqueued " + count
+                                + " notifications.  Not showing more.  package=" + pkg);
+                        return false;
+                    }
                 }
             }
         }
