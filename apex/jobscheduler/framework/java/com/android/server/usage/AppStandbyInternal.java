@@ -45,6 +45,14 @@ public interface AppStandbyInternal {
                 boolean idle, int bucket, int reason);
 
         /**
+         * Callback to inform listeners that the parole state has changed. This means apps are
+         * allowed to do work even if they're idle or in a low bucket.
+         */
+        public void onParoleStateChanged(boolean isParoleOn) {
+            // No-op by default
+        }
+
+        /**
          * Optional callback to inform the listener that the app has transitioned into
          * an active state due to user interaction.
          */
@@ -91,6 +99,11 @@ public interface AppStandbyInternal {
      */
     boolean isAppIdleFiltered(String packageName, int appId, int userId,
             long elapsedRealtime);
+
+    /**
+     * @return true if currently app idle parole mode is on.
+     */
+    boolean isInParole();
 
     int[] getIdleUidsForUser(int userId);
 

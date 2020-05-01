@@ -214,8 +214,7 @@ public class AppStandbyController implements AppStandbyInternal {
     private AppIdleHistory mAppIdleHistory;
 
     @GuardedBy("mPackageAccessListeners")
-    private ArrayList<AppIdleStateChangeListener>
-            mPackageAccessListeners = new ArrayList<>();
+    private final ArrayList<AppIdleStateChangeListener> mPackageAccessListeners = new ArrayList<>();
 
     /** Whether we've queried the list of carrier privileged apps. */
     @GuardedBy("mAppIdleLock")
@@ -235,6 +234,7 @@ public class AppStandbyController implements AppStandbyInternal {
     static final int MSG_FORCE_IDLE_STATE = 4;
     static final int MSG_CHECK_IDLE_STATES = 5;
     static final int MSG_REPORT_CONTENT_PROVIDER_USAGE = 8;
+    static final int MSG_PAROLE_STATE_CHANGED = 9;
     static final int MSG_ONE_TIME_CHECK_IDLE_STATES = 10;
     /** Check the state of one app: arg1 = userId, arg2 = uid, obj = (String) packageName */
     static final int MSG_CHECK_PACKAGE_IDLE_STATE = 11;
@@ -390,7 +390,16 @@ public class AppStandbyController implements AppStandbyInternal {
 
     @VisibleForTesting
     void setAppIdleEnabled(boolean enabled) {
-        mAppIdleEnabled = enabled;
+        synchronized (mAppIdleLock) {
+            if (mAppIdleEnabled != enabled) {
+                final boolean oldParoleState = isInParole();
+                mAppIdleEnabled = enabled;
+                if (isInParole() != oldParoleState) {
+                    postParoleStateChanged();
+                }
+            }
+        }
+
     }
 
     @Override
@@ -563,8 +572,20 @@ public class AppStandbyController implements AppStandbyInternal {
             if (mIsCharging != isCharging) {
                 if (DEBUG) Slog.d(TAG, "Setting mIsCharging to " + isCharging);
                 mIsCharging = isCharging;
+                postParoleStateChanged();
             }
         }
+    }
+
+    @Override
+    public boolean isInParole() {
+        return !mAppIdleEnabled || mIsCharging;
+    }
+
+    private void postParoleStateChanged() {
+        if (DEBUG) Slog.d(TAG, "Posting MSG_PAROLE_STATE_CHANGED");
+        mHandler.removeMessages(MSG_PAROLE_STATE_CHANGED);
+        mHandler.sendEmptyMessage(MSG_PAROLE_STATE_CHANGED);
     }
 
     @Override
@@ -1502,6 +1523,15 @@ public class AppStandbyController implements AppStandbyInternal {
         }
     }
 
+    private void informParoleStateChanged() {
+        final boolean paroled = isInParole();
+        synchronized (mPackageAccessListeners) {
+            for (AppIdleStateChangeListener listener : mPackageAccessListeners) {
+                listener.onParoleStateChanged(paroled);
+            }
+        }
+    }
+
     @Override
     public void flushToDisk(int userId) {
         synchronized (mAppIdleLock) {
@@ -1918,6 +1948,11 @@ public class AppStandbyController implements AppStandbyInternal {
                             (String) args.arg2, // package name
                             (int) args.arg3); // userId
                     args.recycle();
+                    break;
+
+                case MSG_PAROLE_STATE_CHANGED:
+                    if (DEBUG) Slog.d(TAG, "Parole state: " + isInParole());
+                    informParoleStateChanged();
                     break;
 
                 case MSG_CHECK_PACKAGE_IDLE_STATE:
