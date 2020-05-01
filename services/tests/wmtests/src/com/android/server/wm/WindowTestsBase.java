@@ -304,6 +304,20 @@ class WindowTestsBase extends SystemServiceTestsBase {
         }
     }
 
+    ActivityStack createTaskStackOnTaskDisplayArea(
+            int windowingMode, int activityType, TaskDisplayArea tda) {
+        synchronized (mWm.mGlobalLock) {
+            return new ActivityTestsBase.StackBuilder(
+                    tda.mDisplayContent.mWmService.mAtmService.mRootWindowContainer)
+                    .setTaskDisplayArea(tda)
+                    .setWindowingMode(windowingMode)
+                    .setActivityType(activityType)
+                    .setCreateActivity(false)
+                    .setIntent(new Intent())
+                    .build();
+        }
+    }
+
     /** Creates a {@link Task} and adds it to the specified {@link ActivityStack}. */
     Task createTaskInStack(ActivityStack stack, int userId) {
         return WindowTestUtils.createTaskInStack(mWm, stack, userId);
