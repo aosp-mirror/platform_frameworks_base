@@ -403,7 +403,8 @@ void NativeInputManager::setDisplayViewports(JNIEnv* env, jobjectArray viewportO
 
             DisplayViewport viewport;
             android_hardware_display_DisplayViewport_toNative(env, viewportObj, &viewport);
-            ALOGI("Viewport [%d] to add: %s", (int) i, viewport.uniqueId.c_str());
+            ALOGI("Viewport [%d] to add: %s, isActive: %s", (int)i, viewport.uniqueId.c_str(),
+                  toString(viewport.isActive));
             viewports.push_back(viewport);
 
             env->DeleteLocalRef(viewportObj);

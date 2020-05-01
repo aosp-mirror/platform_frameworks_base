@@ -50,6 +50,9 @@ public final class DisplayViewport {
     // True if this viewport is valid.
     public boolean valid;
 
+    // True if this viewport is active.
+    public boolean isActive;
+
     // The logical display id.
     public int displayId;
 
@@ -80,6 +83,7 @@ public final class DisplayViewport {
 
     public void copyFrom(DisplayViewport viewport) {
         valid = viewport.valid;
+        isActive = viewport.isActive;
         displayId = viewport.displayId;
         orientation = viewport.orientation;
         logicalFrame.set(viewport.logicalFrame);
@@ -112,6 +116,7 @@ public final class DisplayViewport {
 
         DisplayViewport other = (DisplayViewport) o;
         return valid == other.valid
+              && isActive == other.isActive
               && displayId == other.displayId
               && orientation == other.orientation
               && logicalFrame.equals(other.logicalFrame)
@@ -128,6 +133,7 @@ public final class DisplayViewport {
         final int prime = 31;
         int result = 1;
         result += prime * result + (valid ? 1 : 0);
+        result += prime * result + (isActive ? 1 : 0);
         result += prime * result + displayId;
         result += prime * result + orientation;
         result += prime * result + logicalFrame.hashCode();
@@ -147,6 +153,7 @@ public final class DisplayViewport {
     public String toString() {
         return "DisplayViewport{type=" + typeToString(type)
                 + ", valid=" + valid
+                + ", isActive=" + isActive
                 + ", displayId=" + displayId
                 + ", uniqueId='" + uniqueId + "'"
                 + ", physicalPort=" + physicalPort
