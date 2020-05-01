@@ -124,8 +124,10 @@ public class Canvas extends BaseCanvas {
         mDensity = bitmap.mDensity;
     }
 
-    /** @hide */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
+    /**
+     *  @hide Needed by android.graphics.pdf.PdfDocument, but should not be called from
+     *  outside the UI rendering module.
+     */
     public Canvas(long nativeCanvas) {
         if (nativeCanvas == 0) {
             throw new IllegalStateException();
@@ -1169,21 +1171,12 @@ public class Canvas extends BaseCanvas {
         /**
          * Black-and-White: Treat edges by just rounding to nearest pixel boundary
          */
-        BW(0),  //!< treat edges by just rounding to nearest pixel boundary
+        BW,
 
         /**
          * Antialiased: Treat edges by rounding-out, since they may be antialiased
          */
-        AA(1);
-
-        EdgeType(int nativeInt) {
-            this.nativeInt = nativeInt;
-        }
-
-        /**
-         * @hide
-         */
-        public final int nativeInt;
+        AA;
     }
 
     /**
@@ -1386,10 +1379,7 @@ public class Canvas extends BaseCanvas {
             this.nativeInt = nativeInt;
         }
 
-        /**
-         * @hide
-         */
-        public final int nativeInt;
+        /*package*/ final int nativeInt;
     }
 
     /**
