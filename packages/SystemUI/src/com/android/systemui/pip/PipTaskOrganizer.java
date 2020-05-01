@@ -214,6 +214,10 @@ public class PipTaskOrganizer extends TaskOrganizer {
         return new Rect(mLastReportedBounds);
     }
 
+    public boolean isInPip() {
+        return mInPip;
+    }
+
     /**
      * Registers {@link PipTransitionCallback} to receive transition callbacks.
      */
