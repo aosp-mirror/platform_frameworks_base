@@ -2169,7 +2169,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 int appId = UserHandle.getAppId(res.uid);
                 boolean isSystem = res.pkg.isSystem();
                 sendPackageAddedForNewUsers(packageName, isSystem || virtualPreload,
-                        virtualPreload /*startReceiver*/, appId, firstUserIds, firstInstantUserIds);
+                        virtualPreload /*startReceiver*/, appId, firstUserIds, firstInstantUserIds,
+                        dataLoaderType);
 
                 // Send added for users that don't see the package for the first time
                 Bundle extras = new Bundle(1);
@@ -12638,13 +12639,14 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     private void sendPackageAddedForUser(String packageName, PackageSetting pkgSetting,
-            int userId) {
+            int userId, int dataLoaderType) {
         final boolean isSystem = isSystemApp(pkgSetting) || isUpdatedSystemApp(pkgSetting);
         final boolean isInstantApp = pkgSetting.getInstantApp(userId);
         final int[] userIds = isInstantApp ? EMPTY_INT_ARRAY : new int[] { userId };
         final int[] instantUserIds = isInstantApp ? new int[] { userId } : EMPTY_INT_ARRAY;
         sendPackageAddedForNewUsers(packageName, isSystem /*sendBootCompleted*/,
-                false /*startReceiver*/, pkgSetting.appId, userIds, instantUserIds);
+                false /*startReceiver*/, pkgSetting.appId, userIds, instantUserIds,
+                dataLoaderType);
 
         // Send a session commit broadcast
         final PackageInstaller.SessionInfo info = new PackageInstaller.SessionInfo();
@@ -12655,7 +12657,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public void sendPackageAddedForNewUsers(String packageName, boolean sendBootCompleted,
-            boolean includeStopped, @AppIdInt int appId, int[] userIds, int[] instantUserIds) {
+            boolean includeStopped, @AppIdInt int appId, int[] userIds, int[] instantUserIds,
+            int dataLoaderType) {
         if (ArrayUtils.isEmpty(userIds) && ArrayUtils.isEmpty(instantUserIds)) {
             return;
         }
@@ -12664,6 +12667,7 @@ public class PackageManagerService extends IPackageManager.Stub
         final int uid = UserHandle.getUid(
                 (ArrayUtils.isEmpty(userIds) ? instantUserIds[0] : userIds[0]), appId);
         extras.putInt(Intent.EXTRA_UID, uid);
+        extras.putInt(PackageInstaller.EXTRA_DATA_LOADER_TYPE, dataLoaderType);
 
         sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED,
                 packageName, extras, 0, null, null, userIds, instantUserIds,
@@ -12781,7 +12785,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
             }
             if (sendAdded) {
-                sendPackageAddedForUser(packageName, pkgSetting, userId);
+                sendPackageAddedForUser(packageName, pkgSetting, userId, DataLoaderType.NONE);
                 return true;
             }
             if (sendRemoved) {
@@ -13014,7 +13018,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         prepareAppDataAfterInstallLIF(pkgSetting.pkg);
                     }
                 }
-                sendPackageAddedForUser(packageName, pkgSetting, userId);
+                sendPackageAddedForUser(packageName, pkgSetting, userId, DataLoaderType.NONE);
                 synchronized (mLock) {
                     updateSequenceNumberLP(pkgSetting, new int[]{ userId });
                 }
@@ -18313,7 +18317,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 PackageInstalledInfo installedInfo = appearedChildPackages.valueAt(i);
                 packageSender.sendPackageAddedForNewUsers(installedInfo.name,
                     true /*sendBootCompleted*/, false /*startReceiver*/,
-                    UserHandle.getAppId(installedInfo.uid), installedInfo.newUsers, null);
+                        UserHandle.getAppId(installedInfo.uid), installedInfo.newUsers, null,
+                        DataLoaderType.NONE);
             }
         }
 
@@ -25286,7 +25291,8 @@ interface PackageSender {
         final IIntentReceiver finishedReceiver, final int[] userIds, int[] instantUserIds,
         @Nullable SparseArray<int[]> broadcastWhitelist);
     void sendPackageAddedForNewUsers(String packageName, boolean sendBootCompleted,
-        boolean includeStopped, int appId, int[] userIds, int[] instantUserIds);
+            boolean includeStopped, int appId, int[] userIds, int[] instantUserIds,
+            int dataLoaderType);
     void notifyPackageAdded(String packageName, int uid);
     void notifyPackageChanged(String packageName, int uid);
     void notifyPackageRemoved(String packageName, int uid);
