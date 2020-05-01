@@ -206,6 +206,15 @@ public final class ConversationAction implements Parcelable {
         return mExtras;
     }
 
+    /** @hide */
+    public Builder toBuilder() {
+        return new Builder(mType)
+            .setTextReply(mTextReply)
+            .setAction(mAction)
+            .setConfidenceScore(mScore)
+            .setExtras(mExtras);
+    }
+
     /** Builder class to construct {@link ConversationAction}. */
     public static final class Builder {
         @Nullable
