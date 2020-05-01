@@ -126,7 +126,7 @@ public class UsageStatsDatabaseTest {
 
         mIntervalStats.majorVersion = 7;
         mIntervalStats.minorVersion = 8;
-        mIntervalStats.beginTime = time;
+        mIntervalStats.beginTime = time - 1;
         mIntervalStats.interactiveTracker.count = 2;
         mIntervalStats.interactiveTracker.duration = 111111;
         mIntervalStats.nonInteractiveTracker.count = 3;
