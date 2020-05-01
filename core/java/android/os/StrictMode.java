@@ -1022,7 +1022,6 @@ public final class StrictMode {
              * behaviors or empty states. Instead, apps should store data needed
              * while a user is locked under device protected storage areas.
              *
-             * @see Context#createCredentialProtectedStorageContext()
              * @see Context#createDeviceProtectedStorageContext()
              */
             public @NonNull Builder detectCredentialProtectedWhileLocked() {

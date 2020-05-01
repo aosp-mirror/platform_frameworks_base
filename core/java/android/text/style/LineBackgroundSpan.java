@@ -112,7 +112,7 @@ public interface LineBackgroundSpan extends ParagraphStyle
 
         /**
          * @return the color of this span.
-         * @see Standard#Standard(int)
+         * @see Standard#LineBackgroundSpan.Standard(int)
          */
         @ColorInt
         public final int getColor() {

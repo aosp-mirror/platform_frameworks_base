@@ -7940,7 +7940,6 @@ public abstract class PackageManager {
      *
      * @return true if the drawable represents the default activity icon, false otherwise
      * @see #getDefaultActivityIcon()
-     * @see PackageItemInfo#loadDefaultIcon(PackageManager)
      * @see #getActivityIcon
      * @see LauncherActivityInfo#getIcon(int)
      */
