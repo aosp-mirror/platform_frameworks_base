@@ -49,7 +49,6 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region;
 import android.os.Bundle;
-import android.os.Vibrator;
 import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
@@ -188,7 +187,6 @@ public class BubbleStackView extends FrameLayout
     private final SpringAnimation mExpandedViewYAnim;
     private final BubbleData mBubbleData;
 
-    private final Vibrator mVibrator;
     private final ValueAnimator mDesaturateAndDarkenAnimator;
     private final Paint mDesaturateAndDarkenPaint = new Paint();
 
@@ -700,8 +698,6 @@ public class BubbleStackView extends FrameLayout
         WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         // We use the real size & subtract screen decorations / window insets ourselves when needed
         wm.getDefaultDisplay().getRealSize(mDisplaySize);
-
-        mVibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
 
         mExpandedViewPadding = res.getDimensionPixelSize(R.dimen.bubble_expanded_view_padding);
         int elevation = res.getDimensionPixelSize(R.dimen.bubble_elevation);
@@ -2334,7 +2330,7 @@ public class BubbleStackView extends FrameLayout
                 getNormalizedXPosition(),
                 getNormalizedYPosition(),
                 bubble.showInShade(),
-                bubble.isOngoing(),
+                false /* isOngoing (unused) */,
                 false /* isAppForeground (unused) */);
     }
 }
