@@ -88,6 +88,14 @@ public interface ParseInput {
      */
     ParseResult<?> enableDeferredError(String packageName, int targetSdkVersion);
 
+    /**
+     * This will assign errorCode to {@link PackageManager#INSTALL_PARSE_FAILED_SKIPPED, used for
+     * packages which should be ignored by the caller.
+     *
+     * @see #error(int, String, Exception)
+     */
+    <ResultType> ParseResult<ResultType> skip(@NonNull String parseError);
+
     /** @see #error(int, String, Exception) */
     <ResultType> ParseResult<ResultType> error(int parseError);
 
