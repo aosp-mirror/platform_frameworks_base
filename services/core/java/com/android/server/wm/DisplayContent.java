@@ -90,7 +90,9 @@ import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_L
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_STACK;
 import static com.android.server.wm.DisplayContentProto.APP_TRANSITION;
+import static com.android.server.wm.DisplayContentProto.CAN_SHOW_IME;
 import static com.android.server.wm.DisplayContentProto.CLOSING_APPS;
+import static com.android.server.wm.DisplayContentProto.CURRENT_FOCUS;
 import static com.android.server.wm.DisplayContentProto.DISPLAY_FRAMES;
 import static com.android.server.wm.DisplayContentProto.DISPLAY_INFO;
 import static com.android.server.wm.DisplayContentProto.DISPLAY_READY;
@@ -98,6 +100,10 @@ import static com.android.server.wm.DisplayContentProto.DPI;
 import static com.android.server.wm.DisplayContentProto.FOCUSED_APP;
 import static com.android.server.wm.DisplayContentProto.FOCUSED_ROOT_TASK_ID;
 import static com.android.server.wm.DisplayContentProto.ID;
+import static com.android.server.wm.DisplayContentProto.IME_INSETS_SOURCE_PROVIDER;
+import static com.android.server.wm.DisplayContentProto.INPUT_METHOD_CONTROL_TARGET;
+import static com.android.server.wm.DisplayContentProto.INPUT_METHOD_INPUT_TARGET;
+import static com.android.server.wm.DisplayContentProto.INPUT_METHOD_TARGET;
 import static com.android.server.wm.DisplayContentProto.OPENING_APPS;
 import static com.android.server.wm.DisplayContentProto.RESUMED_ACTIVITY;
 import static com.android.server.wm.DisplayContentProto.ROOT_DISPLAY_AREA;
@@ -2864,7 +2870,26 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             proto.write(FOCUSED_ROOT_TASK_ID, INVALID_TASK_ID);
         }
         proto.write(DISPLAY_READY, isReady());
-
+        if (mInputMethodTarget != null) {
+            mInputMethodTarget.dumpDebug(proto, INPUT_METHOD_TARGET, logLevel);
+        }
+        if (mInputMethodInputTarget != null) {
+            mInputMethodInputTarget.dumpDebug(proto, INPUT_METHOD_INPUT_TARGET, logLevel);
+        }
+        if (mInputMethodControlTarget != null
+                && mInputMethodControlTarget.getWindow() != null) {
+            mInputMethodControlTarget.getWindow().dumpDebug(proto, INPUT_METHOD_CONTROL_TARGET,
+                    logLevel);
+        }
+        if (mCurrentFocus != null) {
+            mCurrentFocus.dumpDebug(proto, CURRENT_FOCUS, logLevel);
+        }
+        if (mInsetsStateController != null
+                && mInsetsStateController.getImeSourceProvider() != null) {
+            mInsetsStateController.getImeSourceProvider().dumpDebug(proto,
+                    IME_INSETS_SOURCE_PROVIDER, logLevel);
+        }
+        proto.write(CAN_SHOW_IME, canShowIme());
         proto.end(token);
     }
 
