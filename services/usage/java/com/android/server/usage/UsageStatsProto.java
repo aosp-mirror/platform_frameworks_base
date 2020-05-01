@@ -149,10 +149,6 @@ final class UsageStatsProto {
                     break;
             }
         }
-        if (stats.mLastTimeUsed == 0) {
-            // mLastTimeUsed was not assigned, assume default value of 0 plus beginTime;
-            stats.mLastTimeUsed = statsOut.beginTime;
-        }
         proto.end(token);
     }
 
@@ -289,10 +285,6 @@ final class UsageStatsProto {
                     configActive = proto.readBoolean(IntervalStatsProto.Configuration.ACTIVE);
                     break;
                 case ProtoInputStream.NO_MORE_FIELDS:
-                    if (configStats.mLastTimeActive == 0) {
-                        //mLastTimeActive was not assigned, assume default value of 0 plus beginTime
-                        configStats.mLastTimeActive = statsOut.beginTime;
-                    }
                     if (configActive) {
                         statsOut.activeConfiguration = configStats.mConfiguration;
                     }
@@ -336,21 +328,21 @@ final class UsageStatsProto {
             // Package not in Stringpool for some reason, write full string instead
             proto.write(IntervalStatsProto.UsageStats.PACKAGE, usageStats.mPackageName);
         }
-        // Time attributes stored as an offset of the beginTime.
-        proto.write(IntervalStatsProto.UsageStats.LAST_TIME_ACTIVE_MS,
-                usageStats.mLastTimeUsed - stats.beginTime);
+        UsageStatsProtoV2.writeOffsetTimestamp(proto,
+                IntervalStatsProto.UsageStats.LAST_TIME_ACTIVE_MS,
+                usageStats.mLastTimeUsed, stats.beginTime);
         proto.write(IntervalStatsProto.UsageStats.TOTAL_TIME_ACTIVE_MS,
                 usageStats.mTotalTimeInForeground);
         proto.write(IntervalStatsProto.UsageStats.LAST_EVENT,
                 usageStats.mLastEvent);
-        // Time attributes stored as an offset of the beginTime.
-        proto.write(IntervalStatsProto.UsageStats.LAST_TIME_SERVICE_USED_MS,
-                usageStats.mLastTimeForegroundServiceUsed - stats.beginTime);
+        UsageStatsProtoV2.writeOffsetTimestamp(proto,
+                IntervalStatsProto.UsageStats.LAST_TIME_SERVICE_USED_MS,
+                usageStats.mLastTimeForegroundServiceUsed, stats.beginTime);
         proto.write(IntervalStatsProto.UsageStats.TOTAL_TIME_SERVICE_USED_MS,
                 usageStats.mTotalTimeForegroundServiceUsed);
-        // Time attributes stored as an offset of the beginTime.
-        proto.write(IntervalStatsProto.UsageStats.LAST_TIME_VISIBLE_MS,
-                usageStats.mLastTimeVisible - stats.beginTime);
+        UsageStatsProtoV2.writeOffsetTimestamp(proto,
+                IntervalStatsProto.UsageStats.LAST_TIME_VISIBLE_MS,
+                usageStats.mLastTimeVisible, stats.beginTime);
         proto.write(IntervalStatsProto.UsageStats.TOTAL_TIME_VISIBLE_MS,
                 usageStats.mTotalTimeVisible);
         proto.write(IntervalStatsProto.UsageStats.APP_LAUNCH_COUNT, usageStats.mAppLaunchCount);
@@ -411,8 +403,9 @@ final class UsageStatsProto {
             throws IllegalArgumentException {
         final long token = proto.start(fieldId);
         configStats.mConfiguration.dumpDebug(proto, IntervalStatsProto.Configuration.CONFIG);
-        proto.write(IntervalStatsProto.Configuration.LAST_TIME_ACTIVE_MS,
-                configStats.mLastTimeActive - stats.beginTime);
+        UsageStatsProtoV2.writeOffsetTimestamp(proto,
+                IntervalStatsProto.Configuration.LAST_TIME_ACTIVE_MS,
+                configStats.mLastTimeActive, stats.beginTime);
         proto.write(IntervalStatsProto.Configuration.TOTAL_TIME_ACTIVE_MS,
                 configStats.mTotalTimeActive);
         proto.write(IntervalStatsProto.Configuration.COUNT, configStats.mActivationCount);
@@ -439,7 +432,8 @@ final class UsageStatsProto {
                 proto.write(IntervalStatsProto.Event.CLASS, event.mClass);
             }
         }
-        proto.write(IntervalStatsProto.Event.TIME_MS, event.mTimeStamp - stats.beginTime);
+        UsageStatsProtoV2.writeOffsetTimestamp(proto, IntervalStatsProto.Event.TIME_MS,
+                event.mTimeStamp, stats.beginTime);
         proto.write(IntervalStatsProto.Event.FLAGS, event.mFlags);
         proto.write(IntervalStatsProto.Event.TYPE, event.mEventType);
         proto.write(IntervalStatsProto.Event.INSTANCE_ID, event.mInstanceId);
@@ -566,10 +560,6 @@ final class UsageStatsProto {
                     }
                     break;
                 case ProtoInputStream.NO_MORE_FIELDS:
-                    if (statsOut.endTime == 0) {
-                        // endTime not assigned, assume default value of 0 plus beginTime
-                        statsOut.endTime = statsOut.beginTime;
-                    }
                     statsOut.upgradeIfNeeded();
                     return;
             }
@@ -585,7 +575,8 @@ final class UsageStatsProto {
     public static void write(OutputStream out, IntervalStats stats)
             throws IOException, IllegalArgumentException {
         final ProtoOutputStream proto = new ProtoOutputStream(out);
-        proto.write(IntervalStatsProto.END_TIME_MS, stats.endTime - stats.beginTime);
+        proto.write(IntervalStatsProto.END_TIME_MS,
+                UsageStatsProtoV2.getOffsetTimestamp(stats.endTime, stats.beginTime));
         proto.write(IntervalStatsProto.MAJOR_VERSION, stats.majorVersion);
         proto.write(IntervalStatsProto.MINOR_VERSION, stats.minorVersion);
         // String pool should be written before the rest of the usage stats
