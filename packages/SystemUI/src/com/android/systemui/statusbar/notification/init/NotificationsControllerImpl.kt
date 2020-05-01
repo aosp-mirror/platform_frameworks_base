@@ -25,8 +25,10 @@ import com.android.systemui.statusbar.notification.NotificationActivityStarter
 import com.android.systemui.statusbar.notification.NotificationClicker
 import com.android.systemui.statusbar.notification.NotificationEntryManager
 import com.android.systemui.statusbar.notification.NotificationListController
+import com.android.systemui.statusbar.notification.collection.NotifPipeline
 import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinderImpl
 import com.android.systemui.statusbar.notification.collection.init.NotifPipelineInitializer
+import com.android.systemui.statusbar.notification.collection.TargetSdkResolver
 import com.android.systemui.statusbar.notification.interruption.HeadsUpController
 import com.android.systemui.statusbar.notification.row.NotifBindPipelineInitializer
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer
@@ -56,6 +58,8 @@ class NotificationsControllerImpl @Inject constructor(
     private val featureFlags: FeatureFlags,
     private val notificationListener: NotificationListener,
     private val entryManager: NotificationEntryManager,
+    private val notifPipeline: Lazy<NotifPipeline>,
+    private val targetSdkResolver: TargetSdkResolver,
     private val newNotifPipeline: Lazy<NotifPipelineInitializer>,
     private val notifBindPipelineInitializer: NotifBindPipelineInitializer,
     private val deviceProvisionedController: DeviceProvisionedController,
@@ -102,8 +106,10 @@ class NotificationsControllerImpl @Inject constructor(
         }
 
         if (featureFlags.isNewNotifPipelineRenderingEnabled) {
+            targetSdkResolver.initialize(notifPipeline.get())
             // TODO
         } else {
+            targetSdkResolver.initialize(entryManager)
             remoteInputUriController.attach(entryManager)
             groupAlertTransferHelper.bind(entryManager, groupManager)
             headsUpManager.addListener(groupManager)
