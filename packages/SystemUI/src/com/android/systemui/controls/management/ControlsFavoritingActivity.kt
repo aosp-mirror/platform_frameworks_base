@@ -104,7 +104,9 @@ class ControlsFavoritingActivity @Inject constructor(
 
         override fun onServicesUpdated(serviceInfos: List<ControlsServiceInfo>) {
             if (serviceInfos.size > 1) {
-                otherAppsButton.visibility = View.VISIBLE
+                otherAppsButton.post {
+                    otherAppsButton.visibility = View.VISIBLE
+                }
             }
         }
     }
@@ -170,7 +172,7 @@ class ControlsFavoritingActivity @Inject constructor(
                     pageIndicator.setNumPages(listOfStructures.size)
                     pageIndicator.setLocation(0f)
                     pageIndicator.visibility =
-                        if (listOfStructures.size > 1) View.VISIBLE else View.GONE
+                        if (listOfStructures.size > 1) View.VISIBLE else View.INVISIBLE
 
                     ControlsAnimations.enterAnimation(pageIndicator).apply {
                         addListener(object : AnimatorListenerAdapter() {
