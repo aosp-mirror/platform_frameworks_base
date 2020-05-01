@@ -17,13 +17,14 @@
 package android.window;
 
 import android.window.DisplayAreaInfo;
+import android.view.SurfaceControl;
 
 /**
  * Interface for WindowManager to delegate control of display areas.
  * {@hide}
  */
 oneway interface IDisplayAreaOrganizer {
-    void onDisplayAreaAppeared(in DisplayAreaInfo displayAreaInfo);
+    void onDisplayAreaAppeared(in DisplayAreaInfo displayAreaInfo, in SurfaceControl leash);
     void onDisplayAreaVanished(in DisplayAreaInfo displayAreaInfo);
     void onDisplayAreaInfoChanged(in DisplayAreaInfo displayAreaInfo);
 }

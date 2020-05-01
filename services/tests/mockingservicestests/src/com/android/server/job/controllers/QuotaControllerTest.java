@@ -291,7 +291,6 @@ public class QuotaControllerTest {
     private JobStatus createJobStatus(String testTag, int jobId) {
         JobInfo jobInfo = new JobInfo.Builder(jobId,
                 new ComponentName(mContext, "TestQuotaJobService"))
-                .setMinimumLatency(Math.abs(jobId) + 1)
                 .build();
         return createJobStatus(testTag, SOURCE_PACKAGE, CALLING_UID, jobInfo);
     }
@@ -302,6 +301,9 @@ public class QuotaControllerTest {
                 jobInfo, callingUid, packageName, SOURCE_USER_ID, testTag);
         // Make sure tests aren't passing just because the default bucket is likely ACTIVE.
         js.setStandbyBucket(FREQUENT_INDEX);
+        // Make sure Doze and background-not-restricted don't affect tests.
+        js.setDeviceNotDozingConstraintSatisfied(/* state */ true, /* whitelisted */false);
+        js.setBackgroundNotRestrictedConstraintSatisfied(true);
         return js;
     }
 
@@ -649,6 +651,7 @@ public class QuotaControllerTest {
             assertEquals(expectedStats, inputStats);
             assertTrue(mQuotaController.isWithinQuotaLocked(SOURCE_USER_ID, SOURCE_PACKAGE,
                     RARE_INDEX));
+            assertTrue("Job not ready: " + jobStatus, jobStatus.isReady());
         }
 
         // Add old session. Make sure values are combined correctly.
@@ -689,6 +692,7 @@ public class QuotaControllerTest {
         assertEquals(expectedStats, inputStats);
         assertFalse(
                 mQuotaController.isWithinQuotaLocked(SOURCE_USER_ID, SOURCE_PACKAGE, RARE_INDEX));
+        assertFalse("Job unexpectedly ready: " + jobStatus, jobStatus.isReady());
     }
 
     /**
@@ -1325,6 +1329,7 @@ public class QuotaControllerTest {
         assertEquals(2, mQuotaController.getExecutionStatsLocked(
                 SOURCE_USER_ID, SOURCE_PACKAGE, ACTIVE_INDEX).jobCountInRateLimitingWindow);
         assertTrue(mQuotaController.isWithinQuotaLocked(jobStatus));
+        assertTrue(jobStatus.isReady());
     }
 
     @Test
@@ -1387,7 +1392,9 @@ public class QuotaControllerTest {
         mQuotaController.maybeStopTrackingJobLocked(unaffected, null, false);
 
         assertTrue(mQuotaController.isWithinQuotaLocked(unaffected));
+        assertTrue(unaffected.isReady());
         assertFalse(mQuotaController.isWithinQuotaLocked(fgStateChanger));
+        assertFalse(fgStateChanger.isReady());
         assertEquals(1,
                 mQuotaController.getTimingSessions(SOURCE_USER_ID, unaffectedPkgName).size());
         assertEquals(42,

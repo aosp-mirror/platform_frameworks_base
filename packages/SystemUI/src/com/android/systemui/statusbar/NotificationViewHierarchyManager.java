@@ -61,7 +61,7 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
 
     private final Handler mHandler;
 
-    /** Re-usable map of notifications to their sorted children.*/
+    /** Re-usable map of top-level notifications to their sorted children if any.*/
     private final HashMap<NotificationEntry, List<NotificationEntry>> mTmpChildOrderMap =
             new HashMap<>();
 
@@ -211,6 +211,8 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
                 }
                 orderedChildren.add(ent);
             } else {
+                // Top-level notif
+                mTmpChildOrderMap.put(ent, null);
                 toShow.add(ent.getRow());
             }
         }
@@ -288,7 +290,7 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
 
         }
 
-        mDynamicChildBindController.updateChildContentViews(mTmpChildOrderMap);
+        mDynamicChildBindController.updateContentViews(mTmpChildOrderMap);
         mVisualStabilityManager.onReorderingFinished();
         // clear the map again for the next usage
         mTmpChildOrderMap.clear();

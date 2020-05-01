@@ -169,7 +169,7 @@ public class DhcpServingParamsParcelExt extends DhcpServingParamsParcel {
      * <p>If not set, the default value is null.
      */
     public DhcpServingParamsParcelExt setSingleClientAddr(@Nullable Inet4Address clientAddr) {
-        this.clientAddr = clientAddr == null ? 0 : inet4AddressToIntHTH(clientAddr);
+        this.singleClientAddr = clientAddr == null ? 0 : inet4AddressToIntHTH(clientAddr);
         return this;
     }
 

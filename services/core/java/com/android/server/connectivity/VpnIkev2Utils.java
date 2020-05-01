@@ -24,7 +24,6 @@ import static android.net.ipsec.ike.SaProposal.ENCRYPTION_ALGORITHM_AES_GCM_12;
 import static android.net.ipsec.ike.SaProposal.ENCRYPTION_ALGORITHM_AES_GCM_16;
 import static android.net.ipsec.ike.SaProposal.ENCRYPTION_ALGORITHM_AES_GCM_8;
 import static android.net.ipsec.ike.SaProposal.INTEGRITY_ALGORITHM_AES_XCBC_96;
-import static android.net.ipsec.ike.SaProposal.INTEGRITY_ALGORITHM_HMAC_SHA1_96;
 import static android.net.ipsec.ike.SaProposal.INTEGRITY_ALGORITHM_HMAC_SHA2_256_128;
 import static android.net.ipsec.ike.SaProposal.INTEGRITY_ALGORITHM_HMAC_SHA2_384_192;
 import static android.net.ipsec.ike.SaProposal.INTEGRITY_ALGORITHM_HMAC_SHA2_512_256;
@@ -39,6 +38,7 @@ import android.content.Context;
 import android.net.Ikev2VpnProfile;
 import android.net.InetAddresses;
 import android.net.IpPrefix;
+import android.net.IpSecAlgorithm;
 import android.net.IpSecTransform;
 import android.net.Network;
 import android.net.RouteInfo;
@@ -83,6 +83,8 @@ import java.util.List;
  * @hide
  */
 public class VpnIkev2Utils {
+    private static final String TAG = VpnIkev2Utils.class.getSimpleName();
+
     static IkeSessionParams buildIkeSessionParams(
             @NonNull Context context, @NonNull Ikev2VpnProfile profile, @NonNull Network network) {
         final IkeIdentification localId = parseIkeIdentification(profile.getUserIdentity());
@@ -103,11 +105,11 @@ public class VpnIkev2Utils {
         return ikeOptionsBuilder.build();
     }
 
-    static ChildSessionParams buildChildSessionParams() {
+    static ChildSessionParams buildChildSessionParams(List<String> allowedAlgorithms) {
         final TunnelModeChildSessionParams.Builder childOptionsBuilder =
                 new TunnelModeChildSessionParams.Builder();
 
-        for (final ChildSaProposal childProposal : getChildSaProposals()) {
+        for (final ChildSaProposal childProposal : getChildSaProposals(allowedAlgorithms)) {
             childOptionsBuilder.addSaProposal(childProposal);
         }
 
@@ -144,7 +146,7 @@ public class VpnIkev2Utils {
     }
 
     private static List<IkeSaProposal> getIkeSaProposals() {
-        // TODO: filter this based on allowedAlgorithms
+        // TODO: Add ability to filter this when IKEv2 API is made Public API
         final List<IkeSaProposal> proposals = new ArrayList<>();
 
         // Encryption Algorithms: Currently only AES_CBC is supported.
@@ -160,7 +162,6 @@ public class VpnIkev2Utils {
         normalModeBuilder.addIntegrityAlgorithm(INTEGRITY_ALGORITHM_HMAC_SHA2_384_192);
         normalModeBuilder.addIntegrityAlgorithm(INTEGRITY_ALGORITHM_HMAC_SHA2_256_128);
         normalModeBuilder.addIntegrityAlgorithm(INTEGRITY_ALGORITHM_AES_XCBC_96);
-        normalModeBuilder.addIntegrityAlgorithm(INTEGRITY_ALGORITHM_HMAC_SHA1_96);
 
         // Add AEAD options
         final IkeSaProposal.Builder aeadBuilder = new IkeSaProposal.Builder();
@@ -187,38 +188,59 @@ public class VpnIkev2Utils {
         return proposals;
     }
 
-    private static List<ChildSaProposal> getChildSaProposals() {
-        // TODO: filter this based on allowedAlgorithms
+    /** Builds a child SA proposal based on the allowed IPsec algorithms */
+    private static List<ChildSaProposal> getChildSaProposals(List<String> allowedAlgorithms) {
         final List<ChildSaProposal> proposals = new ArrayList<>();
 
         // Add non-AEAD options
-        final ChildSaProposal.Builder normalModeBuilder = new ChildSaProposal.Builder();
+        if (Ikev2VpnProfile.hasNormalModeAlgorithms(allowedAlgorithms)) {
+            final ChildSaProposal.Builder normalModeBuilder = new ChildSaProposal.Builder();
 
-        // Encryption Algorithms: Currently only AES_CBC is supported.
-        normalModeBuilder.addEncryptionAlgorithm(ENCRYPTION_ALGORITHM_AES_CBC, KEY_LEN_AES_256);
-        normalModeBuilder.addEncryptionAlgorithm(ENCRYPTION_ALGORITHM_AES_CBC, KEY_LEN_AES_192);
-        normalModeBuilder.addEncryptionAlgorithm(ENCRYPTION_ALGORITHM_AES_CBC, KEY_LEN_AES_128);
+            // Encryption Algorithms:
+            // AES-CBC is currently the only supported encryption algorithm.
+            normalModeBuilder.addEncryptionAlgorithm(ENCRYPTION_ALGORITHM_AES_CBC, KEY_LEN_AES_256);
+            normalModeBuilder.addEncryptionAlgorithm(ENCRYPTION_ALGORITHM_AES_CBC, KEY_LEN_AES_192);
+            normalModeBuilder.addEncryptionAlgorithm(ENCRYPTION_ALGORITHM_AES_CBC, KEY_LEN_AES_128);
 
-        // Authentication/Integrity Algorithms
-        normalModeBuilder.addIntegrityAlgorithm(INTEGRITY_ALGORITHM_HMAC_SHA2_512_256);
-        normalModeBuilder.addIntegrityAlgorithm(INTEGRITY_ALGORITHM_HMAC_SHA2_384_192);
-        normalModeBuilder.addIntegrityAlgorithm(INTEGRITY_ALGORITHM_HMAC_SHA2_256_128);
-        normalModeBuilder.addIntegrityAlgorithm(INTEGRITY_ALGORITHM_HMAC_SHA1_96);
+            // Authentication/Integrity Algorithms:
+            // Guaranteed by Ikev2VpnProfile constructor to contain at least one of these.
+            if (allowedAlgorithms.contains(IpSecAlgorithm.AUTH_HMAC_SHA512)) {
+                normalModeBuilder.addIntegrityAlgorithm(INTEGRITY_ALGORITHM_HMAC_SHA2_512_256);
+            }
+            if (allowedAlgorithms.contains(IpSecAlgorithm.AUTH_HMAC_SHA384)) {
+                normalModeBuilder.addIntegrityAlgorithm(INTEGRITY_ALGORITHM_HMAC_SHA2_384_192);
+            }
+            if (allowedAlgorithms.contains(IpSecAlgorithm.AUTH_HMAC_SHA256)) {
+                normalModeBuilder.addIntegrityAlgorithm(INTEGRITY_ALGORITHM_HMAC_SHA2_256_128);
+            }
+
+            ChildSaProposal proposal = normalModeBuilder.build();
+            if (proposal.getIntegrityAlgorithms().isEmpty()) {
+                // Should be impossible; Verified in Ikev2VpnProfile.
+                Log.wtf(TAG, "Missing integrity algorithm when buildling Child SA proposal");
+            } else {
+                proposals.add(normalModeBuilder.build());
+            }
+        }
 
         // Add AEAD options
-        final ChildSaProposal.Builder aeadBuilder = new ChildSaProposal.Builder();
-        aeadBuilder.addEncryptionAlgorithm(ENCRYPTION_ALGORITHM_AES_GCM_16, KEY_LEN_AES_256);
-        aeadBuilder.addEncryptionAlgorithm(ENCRYPTION_ALGORITHM_AES_GCM_12, KEY_LEN_AES_256);
-        aeadBuilder.addEncryptionAlgorithm(ENCRYPTION_ALGORITHM_AES_GCM_8, KEY_LEN_AES_256);
-        aeadBuilder.addEncryptionAlgorithm(ENCRYPTION_ALGORITHM_AES_GCM_16, KEY_LEN_AES_192);
-        aeadBuilder.addEncryptionAlgorithm(ENCRYPTION_ALGORITHM_AES_GCM_12, KEY_LEN_AES_192);
-        aeadBuilder.addEncryptionAlgorithm(ENCRYPTION_ALGORITHM_AES_GCM_8, KEY_LEN_AES_192);
-        aeadBuilder.addEncryptionAlgorithm(ENCRYPTION_ALGORITHM_AES_GCM_16, KEY_LEN_AES_128);
-        aeadBuilder.addEncryptionAlgorithm(ENCRYPTION_ALGORITHM_AES_GCM_12, KEY_LEN_AES_128);
-        aeadBuilder.addEncryptionAlgorithm(ENCRYPTION_ALGORITHM_AES_GCM_8, KEY_LEN_AES_128);
+        if (Ikev2VpnProfile.hasAeadAlgorithms(allowedAlgorithms)) {
+            final ChildSaProposal.Builder aeadBuilder = new ChildSaProposal.Builder();
 
-        proposals.add(normalModeBuilder.build());
-        proposals.add(aeadBuilder.build());
+            // AES-GCM is currently the only supported AEAD algorithm
+            aeadBuilder.addEncryptionAlgorithm(ENCRYPTION_ALGORITHM_AES_GCM_16, KEY_LEN_AES_256);
+            aeadBuilder.addEncryptionAlgorithm(ENCRYPTION_ALGORITHM_AES_GCM_12, KEY_LEN_AES_256);
+            aeadBuilder.addEncryptionAlgorithm(ENCRYPTION_ALGORITHM_AES_GCM_8, KEY_LEN_AES_256);
+            aeadBuilder.addEncryptionAlgorithm(ENCRYPTION_ALGORITHM_AES_GCM_16, KEY_LEN_AES_192);
+            aeadBuilder.addEncryptionAlgorithm(ENCRYPTION_ALGORITHM_AES_GCM_12, KEY_LEN_AES_192);
+            aeadBuilder.addEncryptionAlgorithm(ENCRYPTION_ALGORITHM_AES_GCM_8, KEY_LEN_AES_192);
+            aeadBuilder.addEncryptionAlgorithm(ENCRYPTION_ALGORITHM_AES_GCM_16, KEY_LEN_AES_128);
+            aeadBuilder.addEncryptionAlgorithm(ENCRYPTION_ALGORITHM_AES_GCM_12, KEY_LEN_AES_128);
+            aeadBuilder.addEncryptionAlgorithm(ENCRYPTION_ALGORITHM_AES_GCM_8, KEY_LEN_AES_128);
+
+            proposals.add(aeadBuilder.build());
+        }
+
         return proposals;
     }
 

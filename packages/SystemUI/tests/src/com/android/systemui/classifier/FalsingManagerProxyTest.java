@@ -27,6 +27,7 @@ import android.util.DisplayMetrics;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.logging.testing.UiEventLoggerFake;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.brightline.BrightLineFalsingManager;
@@ -65,7 +66,8 @@ public class FalsingManagerProxyTest extends SysuiTestCase {
     private FakeExecutor mExecutor = new FakeExecutor(new FakeSystemClock());
     private FakeExecutor mUiBgExecutor = new FakeExecutor(new FakeSystemClock());
     private DockManager mDockManager = new DockManagerFake();
-    private StatusBarStateController mStatusBarStateController = new StatusBarStateControllerImpl();
+    private StatusBarStateController mStatusBarStateController =
+            new StatusBarStateControllerImpl(new UiEventLoggerFake());
 
     @Before
     public void setup() {

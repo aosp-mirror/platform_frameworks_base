@@ -2557,16 +2557,6 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             return (RemoteToken) binder;
         }
 
-        @Override
-        public SurfaceControl getLeash() {
-            final WindowContainer wc = getContainer();
-            if (wc == null) return null;
-            // We need to copy the SurfaceControl instead of returning the original
-            // because the Parcel FLAGS PARCELABLE_WRITE_RETURN_VALUE cause SurfaceControls
-            // to release themselves.
-            return new SurfaceControl(wc.getSurfaceControl());
-        }
-
         WindowContainerToken toWindowContainerToken() {
             if (mWindowContainerToken == null) {
                 mWindowContainerToken = new WindowContainerToken(this);

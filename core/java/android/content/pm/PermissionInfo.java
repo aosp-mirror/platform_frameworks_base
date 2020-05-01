@@ -618,8 +618,8 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
         super.writeToParcel(dest, parcelableFlags);
         dest.writeInt(protectionLevel);
         dest.writeInt(flags);
-        dest.writeString(group);
-        dest.writeString(backgroundPermission);
+        dest.writeString8(group);
+        dest.writeString8(backgroundPermission);
         dest.writeInt(descriptionRes);
         dest.writeInt(requestRes);
         TextUtils.writeToParcel(nonLocalizedDescription, dest, parcelableFlags);
@@ -678,8 +678,8 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
         super(source);
         protectionLevel = source.readInt();
         flags = source.readInt();
-        group = source.readString();
-        backgroundPermission = source.readString();
+        group = source.readString8();
+        backgroundPermission = source.readString8();
         descriptionRes = source.readInt();
         requestRes = source.readInt();
         nonLocalizedDescription = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);

@@ -40,8 +40,8 @@ import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.TextView
 import com.android.systemui.Interpolators
 import com.android.systemui.R
-import com.android.systemui.controls.ui.ControlActionCoordinator.MAX_LEVEL
-import com.android.systemui.controls.ui.ControlActionCoordinator.MIN_LEVEL
+import com.android.systemui.controls.ui.ControlViewHolder.Companion.MAX_LEVEL
+import com.android.systemui.controls.ui.ControlViewHolder.Companion.MIN_LEVEL
 import java.util.IllegalFormatException
 
 class ToggleRangeBehavior : Behavior {
@@ -141,7 +141,7 @@ class ToggleRangeBehavior : Behavior {
             ): Boolean {
                 val handled = when (action) {
                     AccessibilityNodeInfo.ACTION_CLICK -> {
-                        ControlActionCoordinator.toggle(cvh, template.getTemplateId(),
+                        cvh.controlActionCoordinator.toggle(cvh, template.getTemplateId(),
                             template.isChecked())
                         true
                     }
@@ -175,7 +175,7 @@ class ToggleRangeBehavior : Behavior {
     fun beginUpdateRange() {
         status.setTextSize(TypedValue.COMPLEX_UNIT_PX, context.getResources()
                 .getDimensionPixelSize(R.dimen.control_status_expanded).toFloat())
-        ControlActionCoordinator.setFocusedElement(cvh, cvh.controlsController)
+        cvh.controlActionCoordinator.setFocusedElement(cvh)
     }
 
     fun updateRange(level: Int, checked: Boolean, isDragging: Boolean) {
@@ -187,7 +187,7 @@ class ToggleRangeBehavior : Behavior {
         if (isDragging) {
             clipLayer.level = newLevel
             val isEdge = newLevel == MIN_LEVEL || newLevel == MAX_LEVEL
-            ControlActionCoordinator.drag(isEdge)
+            cvh.controlActionCoordinator.drag(isEdge)
         } else {
             rangeAnimator = ValueAnimator.ofInt(cvh.clipLayer.level, newLevel).apply {
                 addUpdateListener {
@@ -248,7 +248,7 @@ class ToggleRangeBehavior : Behavior {
         status.setText("$currentStatusText $currentRangeValue")
         cvh.action(FloatAction(rangeTemplate.getTemplateId(),
             findNearestStep(levelToRangeValue(clipLayer.getLevel()))))
-        ControlActionCoordinator.setFocusedElement(null, cvh.controlsController)
+        cvh.controlActionCoordinator.setFocusedElement(null)
     }
 
     fun findNearestStep(value: Float): Float {
@@ -282,7 +282,7 @@ class ToggleRangeBehavior : Behavior {
             if (isDragging) {
                 return
             }
-            ControlActionCoordinator.longPress(this@ToggleRangeBehavior.cvh)
+            cvh.controlActionCoordinator.longPress(this@ToggleRangeBehavior.cvh)
         }
 
         override fun onScroll(
@@ -309,7 +309,7 @@ class ToggleRangeBehavior : Behavior {
 
         override fun onSingleTapUp(e: MotionEvent): Boolean {
             val th = this@ToggleRangeBehavior
-            ControlActionCoordinator.toggle(th.cvh, th.template.getTemplateId(),
+            cvh.controlActionCoordinator.toggle(th.cvh, th.template.getTemplateId(),
                     th.template.isChecked())
             return true
         }

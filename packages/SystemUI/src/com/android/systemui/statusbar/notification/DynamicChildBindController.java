@@ -63,44 +63,52 @@ public class DynamicChildBindController {
     }
 
     /**
-     * Update the child content views, unbinding content views on children that won't be visible
-     * and binding content views on children that will be visible eventually.
+     * Update the content views, unbinding content views on children that won't be visible
+     * and binding content views on children that will be visible eventually and previously unbound
+     * children that are no longer children.
      *
-     * @param groupNotifs map of notification summaries to their children
+     * @param groupNotifs map of top-level notifs to their children, if any
      */
-    public void updateChildContentViews(
+    public void updateContentViews(
             Map<NotificationEntry, List<NotificationEntry>> groupNotifs) {
         for (NotificationEntry entry : groupNotifs.keySet()) {
             List<NotificationEntry> children = groupNotifs.get(entry);
+            if (children == null) {
+                if (!hasContent(entry)) {
+                    // Case where child is updated to be top level
+                    bindContent(entry);
+                }
+                continue;
+            }
             for (int j = 0; j < children.size(); j++) {
                 NotificationEntry childEntry = children.get(j);
                 if (j >= mChildBindCutoff) {
-                    if (hasChildContent(childEntry)) {
-                        freeChildContent(childEntry);
+                    if (hasContent(childEntry)) {
+                        freeContent(childEntry);
                     }
                 } else {
-                    if (!hasChildContent(childEntry)) {
-                        bindChildContent(childEntry);
+                    if (!hasContent(childEntry)) {
+                        bindContent(childEntry);
                     }
                 }
             }
         }
     }
 
-    private boolean hasChildContent(NotificationEntry entry) {
+    private boolean hasContent(NotificationEntry entry) {
         ExpandableNotificationRow row = entry.getRow();
         return row.getPrivateLayout().getContractedChild() != null
                 || row.getPrivateLayout().getExpandedChild() != null;
     }
 
-    private void freeChildContent(NotificationEntry entry) {
+    private void freeContent(NotificationEntry entry) {
         RowContentBindParams params = mStage.getStageParams(entry);
         params.markContentViewsFreeable(FLAG_CONTENT_VIEW_CONTRACTED);
         params.markContentViewsFreeable(FLAG_CONTENT_VIEW_EXPANDED);
         mStage.requestRebind(entry, null);
     }
 
-    private void bindChildContent(NotificationEntry entry) {
+    private void bindContent(NotificationEntry entry) {
         RowContentBindParams params = mStage.getStageParams(entry);
         params.requireContentViews(FLAG_CONTENT_VIEW_CONTRACTED);
         params.requireContentViews(FLAG_CONTENT_VIEW_EXPANDED);

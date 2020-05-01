@@ -176,6 +176,7 @@ public class KeyguardCoordinatorTest extends SysuiTestCase {
                 .setKey(mEntry.getKey())
                 .setImportance(IMPORTANCE_MIN)
                 .build());
+        when(mHighPriorityProvider.isHighPriority(mEntry)).thenReturn(false);
 
         // THEN filter out the entry
         assertTrue(mKeyguardFilter.shouldFilterOut(mEntry, 0));
@@ -197,7 +198,8 @@ public class KeyguardCoordinatorTest extends SysuiTestCase {
                 .setImportance(IMPORTANCE_MIN)
                 .build());
 
-        // WHEN its parent has a summary that exceeds threshold to show on lockscreen
+        // WHEN its parent does exceed threshold tot show on the lockscreen
+        when(mHighPriorityProvider.isHighPriority(parent)).thenReturn(true);
         parent.setSummary(new NotificationEntryBuilder()
                 .setImportance(IMPORTANCE_HIGH)
                 .build());
@@ -205,7 +207,8 @@ public class KeyguardCoordinatorTest extends SysuiTestCase {
         // THEN don't filter out the entry
         assertFalse(mKeyguardFilter.shouldFilterOut(entryWithParent, 0));
 
-        // WHEN its parent has a summary that doesn't exceed threshold to show on lockscreen
+        // WHEN its parent doesn't exceed threshold to show on lockscreen
+        when(mHighPriorityProvider.isHighPriority(parent)).thenReturn(false);
         parent.setSummary(new NotificationEntryBuilder()
                 .setImportance(IMPORTANCE_MIN)
                 .build());
@@ -248,5 +251,8 @@ public class KeyguardCoordinatorTest extends SysuiTestCase {
                 .thenReturn(true);
 
         // notification doesn't have a summary
+
+        // notification is high priority, so it shouldn't be filtered
+        when(mHighPriorityProvider.isHighPriority(mEntry)).thenReturn(true);
     }
 }

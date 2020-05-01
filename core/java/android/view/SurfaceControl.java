@@ -894,7 +894,7 @@ public final class SurfaceControl implements Parcelable {
             throw new IllegalArgumentException("source must not be null");
         }
 
-        mName = in.readString();
+        mName = in.readString8();
         mWidth = in.readInt();
         mHeight = in.readInt();
 
@@ -912,7 +912,7 @@ public final class SurfaceControl implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(mName);
+        dest.writeString8(mName);
         dest.writeInt(mWidth);
         dest.writeInt(mHeight);
         if (mNativeObject == 0) {

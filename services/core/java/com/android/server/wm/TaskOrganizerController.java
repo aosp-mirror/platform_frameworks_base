@@ -36,6 +36,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.view.SurfaceControl;
 import android.window.ITaskOrganizer;
 import android.window.ITaskOrganizerController;
 import android.window.WindowContainerToken;
@@ -112,7 +113,8 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
             final RunningTaskInfo taskInfo = task.getTaskInfo();
             mDeferTaskOrgCallbacksConsumer.accept(() -> {
                 try {
-                    mTaskOrganizer.onTaskAppeared(taskInfo);
+                    SurfaceControl outSurfaceControl = new SurfaceControl(task.getSurfaceControl());
+                    mTaskOrganizer.onTaskAppeared(taskInfo, outSurfaceControl);
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Exception sending onTaskAppeared callback", e);
                 }

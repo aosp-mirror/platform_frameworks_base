@@ -40,7 +40,10 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import javax.security.auth.x500.X500Principal;
@@ -106,6 +109,7 @@ public class Ikev2VpnProfileTest {
         assertTrue(profile.isBypassable());
         assertTrue(profile.isMetered());
         assertEquals(TEST_MTU, profile.getMaxMtu());
+        assertEquals(Ikev2VpnProfile.DEFAULT_ALGORITHMS, profile.getAllowedAlgorithms());
     }
 
     @Test
@@ -157,6 +161,78 @@ public class Ikev2VpnProfileTest {
         assertNull(profile.getPassword());
         assertNull(profile.getRsaPrivateKey());
         assertNull(profile.getUserCert());
+    }
+
+    @Test
+    public void testBuildWithAllowedAlgorithmsAead() throws Exception {
+        final Ikev2VpnProfile.Builder builder = getBuilderWithDefaultOptions();
+        builder.setAuthPsk(PSK_BYTES);
+
+        List<String> allowedAlgorithms = Arrays.asList(IpSecAlgorithm.AUTH_CRYPT_AES_GCM);
+        builder.setAllowedAlgorithms(allowedAlgorithms);
+
+        final Ikev2VpnProfile profile = builder.build();
+        assertEquals(allowedAlgorithms, profile.getAllowedAlgorithms());
+    }
+
+    @Test
+    public void testBuildWithAllowedAlgorithmsNormal() throws Exception {
+        final Ikev2VpnProfile.Builder builder = getBuilderWithDefaultOptions();
+        builder.setAuthPsk(PSK_BYTES);
+
+        List<String> allowedAlgorithms =
+                Arrays.asList(IpSecAlgorithm.AUTH_HMAC_SHA512, IpSecAlgorithm.CRYPT_AES_CBC);
+        builder.setAllowedAlgorithms(allowedAlgorithms);
+
+        final Ikev2VpnProfile profile = builder.build();
+        assertEquals(allowedAlgorithms, profile.getAllowedAlgorithms());
+    }
+
+    @Test
+    public void testSetAllowedAlgorithmsEmptyList() throws Exception {
+        final Ikev2VpnProfile.Builder builder = getBuilderWithDefaultOptions();
+
+        try {
+            builder.setAllowedAlgorithms(new ArrayList<>());
+            fail("Expected exception due to no valid algorithm set");
+        } catch (IllegalArgumentException expected) {
+        }
+    }
+
+    @Test
+    public void testSetAllowedAlgorithmsInvalidList() throws Exception {
+        final Ikev2VpnProfile.Builder builder = getBuilderWithDefaultOptions();
+        List<String> allowedAlgorithms = new ArrayList<>();
+
+        try {
+            builder.setAllowedAlgorithms(Arrays.asList(IpSecAlgorithm.AUTH_HMAC_SHA256));
+            fail("Expected exception due to missing encryption");
+        } catch (IllegalArgumentException expected) {
+        }
+
+        try {
+            builder.setAllowedAlgorithms(Arrays.asList(IpSecAlgorithm.CRYPT_AES_CBC));
+            fail("Expected exception due to missing authentication");
+        } catch (IllegalArgumentException expected) {
+        }
+    }
+
+    @Test
+    public void testSetAllowedAlgorithmsInsecureAlgorithm() throws Exception {
+        final Ikev2VpnProfile.Builder builder = getBuilderWithDefaultOptions();
+        List<String> allowedAlgorithms = new ArrayList<>();
+
+        try {
+            builder.setAllowedAlgorithms(Arrays.asList(IpSecAlgorithm.AUTH_HMAC_MD5));
+            fail("Expected exception due to insecure algorithm");
+        } catch (IllegalArgumentException expected) {
+        }
+
+        try {
+            builder.setAllowedAlgorithms(Arrays.asList(IpSecAlgorithm.AUTH_HMAC_SHA1));
+            fail("Expected exception due to insecure algorithm");
+        } catch (IllegalArgumentException expected) {
+        }
     }
 
     @Test

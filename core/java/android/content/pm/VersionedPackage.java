@@ -60,7 +60,7 @@ public final class VersionedPackage implements Parcelable {
     }
 
     private VersionedPackage(Parcel parcel) {
-        mPackageName = parcel.readString();
+        mPackageName = parcel.readString8();
         mVersionCode = parcel.readLong();
     }
 
@@ -116,7 +116,7 @@ public final class VersionedPackage implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
-        parcel.writeString(mPackageName);
+        parcel.writeString8(mPackageName);
         parcel.writeLong(mVersionCode);
     }
 

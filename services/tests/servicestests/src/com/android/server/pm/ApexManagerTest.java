@@ -273,6 +273,21 @@ public class ApexManagerTest {
         assertThat(mApexManager.uninstallApex(TEST_APEX_PKG)).isFalse();
     }
 
+    @Test
+    public void testReportErrorWithApkInApex() throws RemoteException {
+        when(mApexService.getActivePackages()).thenReturn(createApexInfo(true, true));
+        final ApexManager.ActiveApexInfo activeApex = mApexManager.getActiveApexInfos().get(0);
+        assertThat(activeApex.apexModuleName).isEqualTo(TEST_APEX_PKG);
+
+        when(mApexService.getAllPackages()).thenReturn(createApexInfo(true, true));
+        mApexManager.scanApexPackagesTraced(mPackageParser2,
+                ParallelPackageParser.makeExecutorService());
+
+        assertThat(mApexManager.isApkInApexInstallSuccess(activeApex.apexModuleName)).isTrue();
+        mApexManager.reportErrorWithApkInApex(activeApex.apexDirectory.getAbsolutePath());
+        assertThat(mApexManager.isApkInApexInstallSuccess(activeApex.apexModuleName)).isFalse();
+    }
+
     private ApexInfo[] createApexInfo(boolean isActive, boolean isFactory) {
         File apexFile = extractResource(TEST_APEX_PKG,  TEST_APEX_FILE_NAME);
         ApexInfo apexInfo = new ApexInfo();
@@ -281,6 +296,7 @@ public class ApexManagerTest {
         apexInfo.moduleName = TEST_APEX_PKG;
         apexInfo.modulePath = apexFile.getPath();
         apexInfo.versionCode = 191000070;
+        apexInfo.preinstalledModulePath = apexFile.getPath();
 
         return new ApexInfo[]{apexInfo};
     }
