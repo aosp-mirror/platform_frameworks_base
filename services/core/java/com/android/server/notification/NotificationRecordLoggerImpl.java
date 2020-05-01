@@ -16,6 +16,7 @@
 
 package com.android.server.notification;
 
+import com.android.internal.logging.InstanceId;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.UiEventLoggerImpl;
 import com.android.internal.util.FrameworkStatsLog;
@@ -30,7 +31,8 @@ public class NotificationRecordLoggerImpl implements NotificationRecordLogger {
 
     @Override
     public void maybeLogNotificationPosted(NotificationRecord r, NotificationRecord old,
-            int position, int buzzBeepBlink) {
+            int position, int buzzBeepBlink,
+            InstanceId groupId) {
         NotificationRecordPair p = new NotificationRecordPair(r, old);
         if (!p.shouldLogReported(buzzBeepBlink)) {
             return;
@@ -43,7 +45,7 @@ public class NotificationRecordLoggerImpl implements NotificationRecordLogger {
                 /* int32 notification_id_hash = 5 */ p.getNotificationIdHash(),
                 /* int32 channel_id_hash = 6 */ p.getChannelIdHash(),
                 /* string group_id_hash = 7 */ p.getGroupIdHash(),
-                /* int32 group_instance_id = 8 */ 0, // TODO generate and fill instance ids
+                /* int32 group_instance_id = 8 */ (groupId == null) ? 0 : groupId.getId(),
                 /* bool is_group_summary = 9 */ r.getSbn().getNotification().isGroupSummary(),
                 /* string category = 10 */ r.getSbn().getNotification().category,
                 /* int32 style = 11 */ p.getStyle(),
