@@ -112,6 +112,7 @@ public class MediaControlPanel {
     private int mAlbumArtSize;
     private int mAlbumArtRadius;
     private int mViewWidth;
+    private MediaMeasurementInput mLastMeasureInput;
 
     public static final String MEDIA_PREFERENCES = "media_control_prefs";
     public static final String MEDIA_PREFERENCE_KEY = "browser_components";
@@ -737,31 +738,31 @@ public class MediaControlPanel {
      */
     protected void removePlayer() { }
 
-    public void setDimension(int newWidth, int newHeight, boolean animate, long duration,
+    public void remeasure(@Nullable MediaMeasurementInput input, boolean animate, long duration,
             long startDelay) {
         // Let's remeasure if our width changed. Our height is dependent on the expansion, so we
         // won't animate if it changed
-        if (newWidth != mViewWidth) {
+        if (input != null && !input.sameAs(mLastMeasureInput)) {
+            mLastMeasureInput = input;
             if (animate) {
                 mLayoutAnimationHelper.animatePendingSizeChange(duration, startDelay);
             }
-            setViewWidth(newWidth);
-            mMediaNotifView.layout(0, 0, newWidth, mMediaNotifView.getMeasuredHeight());
+            remeasureInternal(input);
+            mMediaNotifView.layout(0, 0, mMediaNotifView.getMeasuredWidth(),
+                    mMediaNotifView.getMeasuredHeight());
         }
     }
 
-    protected void setViewWidth(int newWidth) {
+    public MediaMeasurementInput getLastMeasureInput() {
+        return mLastMeasureInput;
+    }
+
+    private void remeasureInternal(MediaMeasurementInput input) {
         ConstraintSet expandedSet = mMediaNotifView.getConstraintSet(R.id.expanded);
         ConstraintSet collapsedSet = mMediaNotifView.getConstraintSet(R.id.collapsed);
-        collapsedSet.setGuidelineBegin(R.id.view_width, newWidth);
-        expandedSet.setGuidelineBegin(R.id.view_width, newWidth);
-        DisplayMetrics displayMetrics = getContext().getResources().getDisplayMetrics();
-        int widthSpec = View.MeasureSpec.makeMeasureSpec(displayMetrics.widthPixels,
-                View.MeasureSpec.AT_MOST);
-        int heightSpec = View.MeasureSpec.makeMeasureSpec(displayMetrics.heightPixels,
-                View.MeasureSpec.AT_MOST);
-        mMediaNotifView.setMinimumWidth(displayMetrics.widthPixels);
-        mMediaNotifView.measure(widthSpec, heightSpec);
-        mViewWidth = newWidth;
+        int width = input.getWidth();
+        collapsedSet.setGuidelineBegin(R.id.view_width, width);
+        expandedSet.setGuidelineBegin(R.id.view_width, width);
+        mMediaNotifView.measure(input.getWidthMeasureSpec(), input.getHeightMeasureSpec());
     }
 }

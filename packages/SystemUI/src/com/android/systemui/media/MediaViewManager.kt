@@ -4,7 +4,6 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.LinearLayout
-
 import com.android.settingslib.bluetooth.LocalBluetoothManager
 import com.android.settingslib.media.InfoMediaManager
 import com.android.settingslib.media.LocalMediaManager
@@ -13,7 +12,8 @@ import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.statusbar.notification.VisualStabilityManager
-import com.android.systemui.util.animation.UniqueObjectHost
+import com.android.systemui.util.animation.MeasurementOutput
+import com.android.systemui.util.animation.UniqueObjectHostView
 import com.android.systemui.util.concurrency.DelayableExecutor
 import java.util.concurrent.Executor
 import javax.inject.Inject
@@ -33,12 +33,14 @@ class MediaViewManager @Inject constructor(
     private val activityStarter: ActivityStarter,
     mediaManager: MediaDataManager
 ) {
+    private var desiredState: MediaHost.MediaHostState? = null
+    private var currentState: MediaState? = null
     val mediaCarousel: ViewGroup
     private val mediaContent: ViewGroup
     private val mediaPlayers: MutableMap<String, MediaControlPanel> = mutableMapOf()
     private val visualStabilityCallback = ::reorderAllPlayers
 
-    private var viewsExpanded = true
+    private var currentlyExpanded = true
         set(value) {
             if (field != value) {
                 field = value
@@ -68,7 +70,7 @@ class MediaViewManager @Inject constructor(
 
     private fun inflateMediaCarousel(): ViewGroup {
         return LayoutInflater.from(context).inflate(
-                R.layout.media_carousel, UniqueObjectHost(context), false) as ViewGroup
+                R.layout.media_carousel, UniqueObjectHostView(context), false) as ViewGroup
     }
 
     private fun reorderAllPlayers() {
@@ -98,7 +100,7 @@ class MediaViewManager @Inject constructor(
             val lp = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT)
             existingPlayer.view.setLayoutParams(lp)
-            existingPlayer.setListening(viewsExpanded)
+            existingPlayer.setListening(currentlyExpanded)
             if (existingPlayer.isPlaying) {
                 mediaContent.addView(existingPlayer.view, 0)
             } else {
@@ -132,32 +134,48 @@ class MediaViewManager @Inject constructor(
 
     }
 
-    fun applyState(state: MediaState) {
+    fun setCurrentState(state: MediaState) {
+        currentState = state
+        currentlyExpanded = state.expansion > 0
         for (mediaPlayer in mediaPlayers.values) {
             val view = mediaPlayer.view
             view.progress = state.expansion
         }
-        viewsExpanded = state.expansion > 0;
     }
 
     /**
      * @param targetState the target state we're transitioning to
      * @param animate should this be animated
      */
-    fun performTransition(targetState: MediaState?, animate: Boolean, duration: Long,
-                          startDelay: Long) {
-        if (targetState == null) {
-            return
+    fun onDesiredStateChanged(targetState: MediaState?, animate: Boolean, duration: Long,
+                              startDelay: Long) {
+        if (targetState is MediaHost.MediaHostState) {
+            // This is a hosting view, let's remeasure our players
+            desiredState = targetState
+            val measurementInput = targetState.measurementInput
+            for (mediaPlayer in mediaPlayers.values) {
+                mediaPlayer.remeasure(measurementInput, animate, duration, startDelay)
+            }
         }
-        val newWidth = targetState.boundsOnScreen.width()
-        val newHeight = targetState.boundsOnScreen.height()
-        remeasureViews(newWidth, newHeight, animate, duration, startDelay)
     }
 
-    private fun remeasureViews(newWidth: Int, newHeight: Int, animate: Boolean, duration: Long,
-                               startDelay: Long) {
-        for (mediaPlayer in mediaPlayers.values) {
-            mediaPlayer.setDimension(newWidth, newHeight, animate, duration, startDelay)
+    /**
+     * Get a measurement for the given input state. This measures the first player and returns
+     * its bounds as if it were measured with the given measurement dimensions
+     */
+    fun obtainMeasurement(input: MediaMeasurementInput) : MeasurementOutput? {
+        val firstPlayer = mediaPlayers.values.firstOrNull() ?: return null
+        // Let's measure the size of the first player and return its height
+        val previousProgress = firstPlayer.view.progress
+        firstPlayer.view.progress = input.expansion
+        firstPlayer.remeasure(input, false /* animate */, 0, 0)
+        val result = MeasurementOutput(firstPlayer.view.measuredWidth,
+                firstPlayer.view.measuredHeight)
+        firstPlayer.view.progress = previousProgress
+        if (desiredState != null) {
+            // remeasure it to the old size again!
+            firstPlayer.remeasure(desiredState!!.measurementInput, false, 0, 0)
         }
+        return result
     }
 }

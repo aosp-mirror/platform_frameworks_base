@@ -31,7 +31,7 @@ import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.policy.KeyguardStateController
-import com.android.systemui.util.animation.UniqueObjectHost
+import com.android.systemui.util.animation.UniqueObjectHostView
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -45,7 +45,8 @@ class MediaHierarchyManager @Inject constructor(
     private val statusBarStateController: SysuiStatusBarStateController,
     private val keyguardStateController: KeyguardStateController,
     private val bypassController: KeyguardBypassController,
-    private val mediaViewManager: MediaViewManager
+    private val mediaViewManager: MediaViewManager,
+    private val mediaMeasurementProvider: MediaMeasurementManager
 ) {
     private var rootOverlay: ViewGroupOverlay? = null
     private lateinit var currentState: MediaState
@@ -108,7 +109,7 @@ class MediaHierarchyManager @Inject constructor(
      * @return the hostView associated with this location
      */
     fun register(mediaObject: MediaHost) : ViewGroup {
-        val viewHost = createUniqueObjectHost()
+        val viewHost = createUniqueObjectHost(mediaObject)
         mediaObject.hostView = viewHost;
         mediaHosts[mediaObject.location] = mediaObject
         if (mediaObject.location == desiredLocation) {
@@ -123,8 +124,10 @@ class MediaHierarchyManager @Inject constructor(
         return viewHost
     }
 
-    private fun createUniqueObjectHost(): UniqueObjectHost {
-        val viewHost = UniqueObjectHost(context)
+    private fun createUniqueObjectHost(host: MediaState): UniqueObjectHostView {
+        val viewHost = UniqueObjectHostView(context)
+        viewHost.measurementCache = mediaMeasurementProvider.obtainCache(host)
+
         viewHost.addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
             override fun onViewAttachedToWindow(p0: View?) {
                 if (rootOverlay == null) {
@@ -148,12 +151,16 @@ class MediaHierarchyManager @Inject constructor(
             val isNewView = this.desiredLocation == -1
             this.desiredLocation = desiredLocation
             // Let's perform a transition
-            performTransition(applyImmediately = isNewView)
+            val animate = shouldAnimateTransition(desiredLocation, previousLocation)
+            val (animDuration, delay) = getAnimationParams(previousLocation, desiredLocation)
+            mediaViewManager.onDesiredStateChanged(getHost(desiredLocation)?.currentState,
+                    animate, animDuration, delay)
+            performTransitionToNewLocation(isNewView, animate)
         }
     }
 
-    private fun performTransition(applyImmediately: Boolean) {
-        if (previousLocation < 0 || applyImmediately) {
+    private fun performTransitionToNewLocation(isNewView: Boolean, animate: Boolean) {
+        if (previousLocation < 0 || isNewView) {
             cancelAnimationAndApplyDesiredState()
             return
         }
@@ -161,29 +168,27 @@ class MediaHierarchyManager @Inject constructor(
         val previousHost = getHost(previousLocation)
         if (currentHost == null || previousHost == null) {
             cancelAnimationAndApplyDesiredState()
-            return;
         }
         updateTargetState()
-        var animate = false
         if (isCurrentlyInGuidedTransformation()) {
             applyTargetStateIfNotAnimating()
-        } else if (shouldAnimateTransition(currentHost, previousHost)) {
+        } else if (animate) {
             animator.cancel()
             // Let's animate to the new position, starting from the current position
             animationStartState = currentState.copy()
-            adjustAnimatorForTransition(previousLocation, desiredLocation)
+            adjustAnimatorForTransition(desiredLocation, previousLocation)
             animator.start()
-            animate = true
         } else {
             cancelAnimationAndApplyDesiredState()
         }
-        mediaViewManager.performTransition(targetState, animate, animator.duration,
-                animator.startDelay)
     }
 
-    private fun shouldAnimateTransition(currentHost: MediaHost, previousHost: MediaHost): Boolean {
-        if (currentHost.location == LOCATION_QQS
-                && previousHost.location == LOCATION_LOCKSCREEN
+    private fun shouldAnimateTransition(
+        @MediaLocation currentLocation: Int,
+        @MediaLocation previousLocation: Int
+    ): Boolean {
+        if (currentLocation == LOCATION_QQS
+                && previousLocation == LOCATION_LOCKSCREEN
                 && (statusBarStateController.leaveOpenOnKeyguardHide()
                         || statusBarStateController.state == StatusBarState.SHADE_LOCKED)) {
             // Usually listening to the isShown is enough to determine this, but there is some
@@ -193,7 +198,16 @@ class MediaHierarchyManager @Inject constructor(
         return mediaCarousel.isShown || animator.isRunning
     }
 
-    private fun adjustAnimatorForTransition(previousLocation: Int, desiredLocation: Int) {
+    private fun adjustAnimatorForTransition(desiredLocation: Int, previousLocation: Int) {
+        val (animDuration, delay) = getAnimationParams(previousLocation, desiredLocation)
+        animator.apply {
+            duration  = animDuration
+            startDelay = delay
+        }
+
+    }
+
+    private fun getAnimationParams(previousLocation: Int, desiredLocation: Int): Pair<Long, Long> {
         var animDuration = 200L
         var delay = 0L
         if (previousLocation == LOCATION_LOCKSCREEN && desiredLocation == LOCATION_QQS) {
@@ -206,11 +220,7 @@ class MediaHierarchyManager @Inject constructor(
         } else if (previousLocation == LOCATION_QQS && desiredLocation == LOCATION_LOCKSCREEN) {
             animDuration = StackStateAnimator.ANIMATION_DURATION_APPEAR_DISAPPEAR.toLong()
         }
-        animator.apply {
-            duration  = animDuration
-            startDelay = delay
-        }
-
+        return animDuration to delay
     }
 
     private fun applyTargetStateIfNotAnimating() {
@@ -290,7 +300,7 @@ class MediaHierarchyManager @Inject constructor(
                     boundsOnScreen.bottom)
         }
         currentState = state.copy()
-        mediaViewManager.applyState(currentState)
+        mediaViewManager.setCurrentState(currentState)
     }
 
     private fun updateHostAttachment() {

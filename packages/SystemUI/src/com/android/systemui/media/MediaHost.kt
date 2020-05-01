@@ -6,6 +6,8 @@ import android.view.View
 import android.view.View.OnAttachStateChangeListener
 import android.view.ViewGroup
 import com.android.systemui.media.MediaHierarchyManager.MediaLocation
+import com.android.systemui.util.animation.MeasurementInput
+import com.android.systemui.util.animation.MeasurementInputData
 import javax.inject.Inject
 
 class MediaHost @Inject constructor(
@@ -86,6 +88,7 @@ class MediaHost @Inject constructor(
     }
 
     class MediaHostState @Inject constructor() : MediaState {
+        var measurementInput: MediaMeasurementInput? = null
         override var expansion: Float = 0.0f
         override var showsOnlyActiveMedia: Boolean = false
         override val boundsOnScreen: Rect = Rect()
@@ -95,6 +98,7 @@ class MediaHost @Inject constructor(
             mediaHostState.expansion = expansion
             mediaHostState.showsOnlyActiveMedia = showsOnlyActiveMedia
             mediaHostState.boundsOnScreen.set(boundsOnScreen)
+            mediaHostState.measurementInput = measurementInput
             return mediaHostState
         }
 
@@ -111,7 +115,19 @@ class MediaHost @Inject constructor(
                     other.boundsOnScreen.bottom.toFloat(), amount).toInt()
             result.boundsOnScreen.set(left, top, right, bottom)
             result.showsOnlyActiveMedia = other.showsOnlyActiveMedia || showsOnlyActiveMedia
+            if (amount > 0.0f) {
+                if (other is MediaHostState) {
+                    result.measurementInput = other.measurementInput
+                }
+            }  else {
+                result.measurementInput
+            }
             return  result
+        }
+
+        override fun getMeasuringInput(input: MeasurementInput): MediaMeasurementInput {
+            measurementInput = MediaMeasurementInput(input, expansion)
+            return measurementInput as MediaMeasurementInput
         }
     }
 }
@@ -122,4 +138,20 @@ interface MediaState {
     val boundsOnScreen: Rect
     fun copy() : MediaState
     fun interpolate(other: MediaState, amount: Float) : MediaState
+    fun getMeasuringInput(input: MeasurementInput): MediaMeasurementInput
 }
+/**
+ * The measurement input for a Media View
+ */
+data class MediaMeasurementInput(
+    private val viewInput: MeasurementInput,
+    val expansion: Float) : MeasurementInput by viewInput {
+
+    override fun sameAs(input: MeasurementInput?): Boolean {
+        if (!(input is MediaMeasurementInput)) {
+            return false
+        }
+        return width == input.width && expansion == input.expansion
+    }
+}
+

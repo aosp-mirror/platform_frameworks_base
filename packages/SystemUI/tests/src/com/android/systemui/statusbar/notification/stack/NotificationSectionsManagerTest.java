@@ -45,7 +45,6 @@ import androidx.test.filters.SmallTest;
 import com.android.systemui.ActivityStarterDelegate;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.media.KeyguardMediaController;
-import com.android.systemui.media.MediaHierarchyManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager;
@@ -54,7 +53,6 @@ import com.android.systemui.statusbar.notification.row.ActivatableNotificationVi
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.dagger.NotificationRowComponent;
 import com.android.systemui.statusbar.policy.ConfigurationController;
-import com.android.systemui.util.animation.UniqueObjectHost;
 
 import org.junit.Before;
 import org.junit.Rule;
