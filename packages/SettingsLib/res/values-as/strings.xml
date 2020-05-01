@@ -284,7 +284,8 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"বেতাঁৰ ডিছপ্লে’ প্ৰমাণপত্ৰৰ বাবে বিকল্পসমূহ দেখুৱাওক"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"ৱাই-ফাই লগিঙৰ মাত্ৰা বঢ়াওক, Wi‑Fi পিকাৰত প্ৰতি SSID RSSI দেখুৱাওক"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"বেটাৰীৰ খৰচ কমায় আৰু নেটৱৰ্কৰ কাৰ্যক্ষমতা বৃদ্ধি কৰে"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"এই ট\'গল কৰা কার্যই MAC যাদৃচ্ছিকীকৰণৰ আচৰণ কেৱল ক্লায়েণ্ট ম\'ডৰ বাবে প্ৰভাৱিত কৰে।\nএই ম\'ডটো সক্ৰিয় কৰাৰ সময়ত, ক্লায়েণ্টে শেষবাৰৰ বাবে নেটৱর্কটোৰ পৰা কেতিয়া সংযোগ বিচ্ছিন্ন কৰিছে তাৰ ভিত্তিত MAC যাদৃচ্ছিকীকৰণ সক্ষম কৰি থোৱা যিকোনো নেটৱর্কৰ সংযোজনৰ সময়ত MAC ঠিকনাসমূহৰ পুনৰ যাদৃচ্ছিকীকৰণ হ\'ব পাৰে। ডিভাইচটো ৪ ঘণ্টা অথবা তাতকৈ কম সময়ৰ ভিতৰত পুনৰ সংযুক্ত হ\'লে পুনৰ যাদৃচ্ছিকীকৰণ নহয়।"</string>
+    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
+    <skip />
     <string name="wifi_metered_label" msgid="8737187690304098638">"নিৰিখ-নিৰ্দিষ্ট"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"নিৰিখ অনিৰ্দিষ্ট"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"লগাৰৰ বাফাৰৰ আকাৰ"</string>
@@ -373,8 +374,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"নেপথ্য এপসমূহৰ বাবে এপে সঁহাৰি দিয়া নাই ডায়ল\'গ প্ৰদৰ্শন কৰক"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"জাননী চ্চেনেলৰ সকীয়নিসমূহ দেখুৱাওক"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"কোনো এপে বৈধ চ্চেনেল নোহোৱাকৈ কোনো জাননী প\'ষ্ট কৰিলে স্ক্ৰীণত সকীয়নি প্ৰদৰ্শন হয়"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"বার্তালাপৰ জাননীৰ বাবে শ্বৰ্টকাট কাৰ্যকৰী কৰক"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"বার্তালাপৰ শাখাত প্ৰদর্শিত হ\'বলৈ জাননী কোনো দীর্ঘস্থায়ী শ্বেয়াৰিং শ্বৰ্টকাটৰ সমৰ্থিত হ\'ব লাগে"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"বাহ্যিক সঞ্চয়াগাৰত এপক বলেৰে অনুমতি দিয়ক"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"মেনিফেষ্টৰ মান যিয়েই নহওক, বাহ্যিক সঞ্চয়াগাৰত লিখিবলৈ যিকোনো এপক উপযুক্ত কৰি তোলে"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"বলেৰে কাৰ্যকলাপসমূহৰ আকাৰ সলনি কৰিব পৰা কৰক"</string>

@@ -284,7 +284,8 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Εμφάνιση επιλογών για πιστοποίηση ασύρματης οθόνης"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Αύξηση επιπέδου καταγ. Wi-Fi, εμφάνιση ανά SSID RSSI στο εργαλείο επιλογής Wi-Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Περιορίζει την κατανάλωση της μπαταρίας και βελτιώνει την απόδοση του δικτύου"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Αυτός ο διακόπτης επηρεάζει τη συμπεριφορά της ρύθμισης τυχαίας σειράς διευθύνσεων MAC μόνο για τη λειτουργία εφαρμογής πελάτη.\nΌταν αυτή η λειτουργία είναι ενεργοποιημένη, σε όλα τα δίκτυα που είναι ενεργή η ρύθμιση τυχαίας σειράς διευθύνσεων MAC ενδέχεται να αλλάξει ξανά η τυχαία σειρά των διευθύνσεων MAC κατά τη συσχέτιση, ανάλογα με το πότε έγινε η τελευταία αποσύνδεση της εφαρμογής πελάτη από το δίκτυο. Αν η συσκευή επανασυνδεθεί μέσα σε 4 ώρες ή λιγότερες, τότε δεν θα αλλάξει η τυχαία σειρά."</string>
+    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
+    <skip />
     <string name="wifi_metered_label" msgid="8737187690304098638">"Μέτρηση με βάση τη χρήση"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Χωρίς μέτρηση με βάση τη χρήση"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Μέγεθος προσωρινής μνήμης για τη λειτουργία καταγραφής"</string>
@@ -373,8 +374,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Εμφάνιση του παραθύρου \"Η εφαρμογή δεν αποκρίνεται\" για εφαρμογές παρασκηνίου"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Εμφάνιση προειδοπ. καναλιού ειδοπ."</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Εμφανίζει προειδοποίηση όταν μια εφαρμογή δημοσιεύει ειδοποίηση χωρίς έγκυρο κανάλι"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Επιβολή συντομεύσεων για ειδοποιήσεις συνομιλίας"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Να απαιτείται η υποστήριξη των ειδοπ. από μια συντόμευση κοινοποίησης μεγάλης διάρκειας για να εμφανίζονται στην ενότητα συνομιλίας"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Να επιτρέπονται υποχρεωτικά εφαρμογές σε εξωτ.συσ."</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Κάνει κάθε εφαρμογή κατάλληλη για εγγραφή σε εξωτερικό αποθηκευτικό χώρο, ανεξάρτητα από τις τιμές του μανιφέστου"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Αναγκαστική δυνατότητα αλλαγής μεγέθους δραστηριοτήτων"</string>

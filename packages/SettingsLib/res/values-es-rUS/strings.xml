@@ -284,7 +284,8 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Mostrar opciones de certificación de pantalla inalámbrica"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Aumentar nivel de registro Wi-Fi; mostrar por SSID RSSI en el selector de Wi-Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Reduce el consumo de batería y mejora el rendimiento de la red"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Esta activación afecta el comportamiento de aleatorización de MAC para el modo de cliente solamente.\nCuando este modo está activado, todas las redes que tienen aleatorización de MAC habilitada pueden volver a establecer de manera aleatoria sus direcciones MAC durante la asociación, según cuándo el cliente se desconectó por última vez de la red. El proceso volver a establecer de manera aleatoria no se produce si el dispositivo se vuelve a conectar en 4 horas o menos."</string>
+    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
+    <skip />
     <string name="wifi_metered_label" msgid="8737187690304098638">"Con uso medido"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Sin tarifa plana"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Tamaños de búfer de Logger"</string>
@@ -373,8 +374,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Mostrar diálogo cuando las apps en segundo plano no responden"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Alertas de notificaciones"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Advertencia en pantalla cuando una app publica una notificación sin canal válido"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Acc. dir. notif. de conv."</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Notif. requieren acc. dir. permanente de uso comp."</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Forzar permisos en almacenamiento externo"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Cualquier app puede escribirse en un almacenamiento externo, sin importar los valores del manifiesto"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Forzar actividades para que cambien de tamaño"</string>

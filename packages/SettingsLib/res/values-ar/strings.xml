@@ -179,7 +179,7 @@
     <string name="tts_engine_settings_title" msgid="7849477533103566291">"إعدادات <xliff:g id="TTS_ENGINE_NAME">%s</xliff:g>"</string>
     <string name="tts_engine_settings_button" msgid="477155276199968948">"تشغيل إعدادات المحرك"</string>
     <string name="tts_engine_preference_section_title" msgid="3861562305498624904">"المحرّك المفضّل"</string>
-    <string name="tts_general_section_title" msgid="8919671529502364567">"عامة"</string>
+    <string name="tts_general_section_title" msgid="8919671529502364567">"إعدادات عامة"</string>
     <string name="tts_reset_speech_pitch_title" msgid="7149398585468413246">"إعادة ضبط طبقة صوت الكلام"</string>
     <string name="tts_reset_speech_pitch_summary" msgid="6822904157021406449">"إعادة ضبط طبقة الصوت التي يتم قول النص بها على الإعداد التلقائي."</string>
   <string-array name="tts_rate_entries">
@@ -284,7 +284,8 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"عرض خيارات شهادة عرض شاشة لاسلكي"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"‏زيادة مستوى تسجيل Wi-Fi، وعرض لكل SSID RSSI في منتقي Wi-Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"لتقليل استنفاد البطارية وتحسين أداء الشبكة."</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"‏يؤثر مفتاح التبديل هذا في سلوك التوزيع العشوائي لعنوان MAC في وضع العميل فقط.\nعند تفعيل هذا الوضع، قد تتم عشوائيًا إعادة توزيع عناوين MAC أثناء الربط على أي شبكات تم تفعيل ميزة التوزيع العشوائي لعناوين MAC عليها، ويعتمد ذلك على آخر مرة تم فصل العميل فيها من الشبكة. لن تتم إعادة التوزيع العشوائي إذا تمت إعادة اتصال الجهاز خلال 4 ساعات أو أقل."</string>
+    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
+    <skip />
     <string name="wifi_metered_label" msgid="8737187690304098638">"تفرض تكلفة استخدام"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"بدون قياس"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"أحجام ذاكرة التخزين المؤقت للتسجيل"</string>
@@ -373,8 +374,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"عرض مربع الحوار \"التطبيق لا يستجيب\" مع تطبيقات الخلفية"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"عرض تحذيرات قناة الإشعار"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"عرض تحذير على الشاشة عندما ينشر تطبيق إشعارًا بدون قناة صالحة"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"فرض اختصارات لإشعارات المحادثات"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"يجب دعم الإشعارات باختصار مشاركة قديم لتظهر في قسم المحادثات."</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"السماح بإدراج التطبيقات في وحدة تخزين خارجية"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"تأهيل أي تطبيق بحيث تتم كتابته على وحدة تخزين خارجية، بغض النظر عن قيم البيان"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"فرض إمكانية تغيير حجم الأنشطة"</string>

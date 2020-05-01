@@ -284,7 +284,8 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Vezeték nélküli kijelző tanúsítványával kapcsolatos lehetőségek megjelenítése"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Wi‑Fi-naplózási szint növelése, RSSI/SSID megjelenítése a Wi‑Fi-választóban"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Csökkenti az akkumulátorhasználatot, és javítja a hálózat teljesítményét"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Kizárólag ügyfélmód esetében be- vagy kikapcsolja a MAC-címet randomizáló viselkedést.\nHa a mód aktív, az olyan hálózatokon, amelyeken engedélyezve van a MAC-címek randomizálása, a társítás során újra megtörténhet a randomizálás, attól függően, hogy az ügyfél mikor bontotta utoljára a kapcsolatot a hálózattal. Az ismételt randomizálás nem következik be, ha az eszköz négy órán belül újracsatlakozik."</string>
+    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
+    <skip />
     <string name="wifi_metered_label" msgid="8737187690304098638">"Forgalomkorlátos"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Nem forgalomkorlátos"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Naplózási puffer mérete"</string>
@@ -373,8 +374,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Az Alkalmazás nem válaszol ablak megjelenítése a háttérben futó alkalmazásoknál"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Értesítő csatorna figyelmeztetései"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Figyelmeztet, ha egy alkalmazás érvényes csatorna nélkül küld értesítést"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Gyorsparancsok kényszerítése beszélgetésértesítésekhez"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Megköveteli, hogy az értesítéseket hosszú életű megosztási gyorsparancs támogassa, hogy megjelenhessenek a beszélgetési szakaszban"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Külső tárhely alkalmazásainak engedélyezése"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Lehetővé teszi bármely alkalmazás külső tárhelyre való írását a jegyzékértékektől függetlenül"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Tevékenységek átméretezésének kényszerítése"</string>

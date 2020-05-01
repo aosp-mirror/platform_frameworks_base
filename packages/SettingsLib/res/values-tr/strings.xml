@@ -284,7 +284,8 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Kablosuz ekran sertifikası seçeneklerini göster"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Kablosuz günlük kaydı seviyesini artır. Kablosuz Seçici\'de her bir SSID RSSI için göster."</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Pili daha az harcar ve ağ performansını iyileştirir"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Bu geçiş, yalnızca istemci modu için MAC rastgele hale getirme davranışını etkiler.\nBu mod etkinleştirildiğinde, MAC rastgele seçimi etkin olan tüm ağların MAC adresleri, istemcinin ağla bağlantısının en son kesildiği zamana bağlı olarak ilişkilendirme sırasında yeniden rastgele seçilebilir. Cihaz 4 saat veya daha kısa süre içinde tekrar bağlanırsa yeniden rastgele hale getirme gerçekleşmez."</string>
+    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
+    <skip />
     <string name="wifi_metered_label" msgid="8737187690304098638">"Sayaçlı"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Sayaçsız"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Günlük Kaydedici arabellek boyutları"</string>
@@ -373,8 +374,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Arka plan uygulamalar için Uygulama Yanıt Vermiyor mesajını göster"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Bildirim kanalı uyarılarını göster"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Bir uygulama geçerli kanal olmadan bildirim yayınladığında ekranda uyarı gösterir"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Görüşme bildirimleri için kısayolları zorunlu kıl"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Bildirimlerin, görüşme bölümünde görünebilmesi için uzun ömürlü paylaşma kısayolu ile desteklenmesini gerektir"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Harici birimdeki uygulamalara izin vermeye zorla"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Manifest değerlerinden bağımsız olarak uygulamaları harici depolamaya yazmak için uygun hale getirir"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Etkinlikleri yeniden boyutlandırılabilmeye zorla"</string>
