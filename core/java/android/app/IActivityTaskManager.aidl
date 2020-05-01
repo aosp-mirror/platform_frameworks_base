@@ -300,8 +300,6 @@ interface IActivityTaskManager {
 
     void suppressResizeConfigChanges(boolean suppress);
     boolean moveTopActivityToPinnedStack(int stackId, in Rect bounds);
-    boolean isInMultiWindowMode(in IBinder token);
-    boolean isInPictureInPictureMode(in IBinder token);
     boolean enterPictureInPictureMode(in IBinder token, in PictureInPictureParams params);
     void setPictureInPictureParams(in IBinder token, in PictureInPictureParams params);
     void requestPictureInPictureMode(in IBinder token);
