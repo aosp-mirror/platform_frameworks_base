@@ -23,7 +23,9 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.graphics.Region;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.util.MergedConfiguration;
@@ -136,6 +138,23 @@ public class SystemWindows {
         }
         view.setLayoutParams(params);
         root.relayout((WindowManager.LayoutParams) params);
+    }
+
+    /**
+     * Sets the touchable region of a view's window. This will be cropped to the window size.
+     * @param view
+     * @param region
+     */
+    public void setTouchableRegion(@NonNull View view, Region region) {
+        SurfaceControlViewHost root = mViewRoots.get(view);
+        if (root == null) {
+            return;
+        }
+        WindowlessWindowManager wwm = root.getWindowlessWM();
+        if (!(wwm instanceof SysUiWindowManager)) {
+            return;
+        }
+        ((SysUiWindowManager) wwm).setTouchableRegionForWindow(view, region);
     }
 
     /**
@@ -288,6 +307,14 @@ public class SystemWindows {
 
         SurfaceControl getSurfaceControlForWindow(View rootView) {
             return getSurfaceControl(rootView);
+        }
+
+        void setTouchableRegionForWindow(View rootView, Region region) {
+            IBinder token = rootView.getWindowToken();
+            if (token == null) {
+                return;
+            }
+            setTouchRegion(token, region);
         }
     }
 
