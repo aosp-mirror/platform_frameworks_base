@@ -695,6 +695,7 @@
         </activity>
 
         <activity android:name=".controls.management.ControlsFavoritingActivity"
+                  android:label="@string/controls_favorite_default_title"
                   android:theme="@style/Theme.ControlsManagement"
                   android:excludeFromRecents="true"
                   android:showForAllUsers="true"
