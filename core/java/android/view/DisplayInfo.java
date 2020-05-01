@@ -385,7 +385,7 @@ public final class DisplayInfo implements Parcelable {
         displayId = source.readInt();
         address = source.readParcelable(null);
         deviceProductInfo = source.readParcelable(null);
-        name = source.readString();
+        name = source.readString8();
         appWidth = source.readInt();
         appHeight = source.readInt();
         smallestNominalAppWidth = source.readInt();
@@ -418,8 +418,8 @@ public final class DisplayInfo implements Parcelable {
         presentationDeadlineNanos = source.readLong();
         state = source.readInt();
         ownerUid = source.readInt();
-        ownerPackageName = source.readString();
-        uniqueId = source.readString();
+        ownerPackageName = source.readString8();
+        uniqueId = source.readString8();
         removeMode = source.readInt();
     }
 
@@ -431,7 +431,7 @@ public final class DisplayInfo implements Parcelable {
         dest.writeInt(displayId);
         dest.writeParcelable(address, flags);
         dest.writeParcelable(deviceProductInfo, flags);
-        dest.writeString(name);
+        dest.writeString8(name);
         dest.writeInt(appWidth);
         dest.writeInt(appHeight);
         dest.writeInt(smallestNominalAppWidth);
@@ -462,8 +462,8 @@ public final class DisplayInfo implements Parcelable {
         dest.writeLong(presentationDeadlineNanos);
         dest.writeInt(state);
         dest.writeInt(ownerUid);
-        dest.writeString(ownerPackageName);
-        dest.writeString(uniqueId);
+        dest.writeString8(ownerPackageName);
+        dest.writeString8(uniqueId);
         dest.writeInt(removeMode);
     }
 

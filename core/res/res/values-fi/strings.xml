@@ -201,9 +201,9 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"Laitteen tiedot poistetaan"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Hallintasovellusta ei voi käyttää. Laitteen tiedot pyyhitään.\n\nPyydä ohjeita järjestelmänvalvojaltasi."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> on poistanut tulostuksen käytöstä."</string>
-    <string name="personal_apps_suspended_title" msgid="4543693107104417750">"Kumoa omien sovellusten esto"</string>
-    <string name="personal_apps_suspended_tomorrow_title" msgid="6414440257969874914">"Sovellukset estetään huomenna"</string>
-    <string name="personal_apps_suspended_text" msgid="8954038765131038226">"IT-järjestelmänvalvoja ei anna keskeyttää työprofiiliasi yli <xliff:g id="DAYS">%1$d</xliff:g> päiväksi"</string>
+    <string name="personal_apps_suspension_title" msgid="7561416677884286600">"Laita työprofiilisi päälle"</string>
+    <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Henkilökohtaiset sovelluksesi estetään, kunnes laitat työprofiilisi päälle"</string>
+    <string name="personal_apps_suspension_tomorrow_text" msgid="6322541302153673994">"Henkilökohtaiset sovelluksesi estetään huomenna"</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"Laita työprofiili päälle"</string>
     <string name="me" msgid="6207584824693813140">"Minä"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Tablet-laitteen asetukset"</string>
@@ -1630,10 +1630,8 @@
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Molempien äänenvoimakkuuspainikkeiden pitkään painaminen laittaa päälle esteettömyysominaisuuden <xliff:g id="SERVICE">%1$s</xliff:g>. Tämä voi muuttaa laitteesi toimintaa.\n\nVoit muuttaa tätä pikanäppäintä kohdassa Asetukset &gt; Esteettömyys."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Laita päälle"</string>
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"Älä laita päälle"</string>
-    <!-- no translation found for accessibility_shortcut_menu_item_status_on (6608392117189732543) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_menu_item_status_off (5531598275559472393) -->
-    <skip />
+    <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"PÄÄLLÄ"</string>
+    <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"EI PÄÄLLÄ"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Saako <xliff:g id="SERVICE">%1$s</xliff:g> laitteesi täyden käyttöoikeuden?"</string>
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Jos <xliff:g id="SERVICE">%1$s</xliff:g> otetaan käyttöön, laitteesi ei käytä näytön lukitusta tiedon salauksen parantamiseen."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Täysi käyttöoikeus sopii esteettömyyssovelluksille, mutta ei useimmille sovelluksille."</string>
@@ -1795,8 +1793,10 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Järjestelmänvalvoja päivitti tämän."</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Järjestelmänvalvoja poisti tämän."</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Parantaakseen akunkestoa virransäästö\n·ottaa tumman teeman käyttöön\n·poistaa käytöstä tai rajoittaa taustatoimintoja, joitakin visuaalisia tehosteita ja muita ominaisuuksia (esim. Hei Google).\n\n"<annotation id="url">"Lue lisää"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"Parantaakseen akunkestoa virransäästö\n·ottaa tumman teeman käyttöön\n·poistaa käytöstä tai rajoittaa taustatoimintoja, joitakin visuaalisia tehosteita ja muita ominaisuuksia (esim. Hei Google)."</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (5997766757551917769) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (8587408568232177204) -->
+    <skip />
     <string name="data_saver_description" msgid="4995164271550590517">"Data Saver estää joitakin sovelluksia lähettämästä tai vastaanottamasta tietoja taustalla, jotta datan käyttöä voidaan vähentää. Käytössäsi oleva sovellus voi yhä käyttää dataa, mutta se saattaa tehdä niin tavallista harvemmin. Tämä voi tarkoittaa esimerkiksi sitä, että kuva ladataan vasta, kun kosketat sitä."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Otetaanko Data Saver käyttöön?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Ota käyttöön"</string>
@@ -2041,13 +2041,17 @@
     <string name="accessibility_system_action_notifications_label" msgid="6083767351772162010">"Ilmoitukset"</string>
     <string name="accessibility_system_action_quick_settings_label" msgid="4583900123506773783">"Pika-asetukset"</string>
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"Virran valintaikkuna"</string>
-    <string name="accessibility_system_action_toggle_split_screen_label" msgid="6626177163849387748">"Jaettu näyttö päälle/pois"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Lukitusnäyttö"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Kuvakaappaus"</string>
-    <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"Esteettömyysvalikko"</string>
+    <!-- no translation found for accessibility_system_action_accessibility_button_label (5941347017132886642) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_accessibility_button_chooser_label (6973618519666227981) -->
+    <skip />
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Tekstityspalkki: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> on nyt rajoitettujen ryhmässä"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
+    <!-- no translation found for conversation_single_line_image_placeholder (6983271082911936900) -->
+    <skip />
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"Keskustelu"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"Ryhmäkeskustelu"</string>
     <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>

@@ -22,8 +22,8 @@ import android.service.controls.Control
 import android.service.controls.templates.TemperatureControlTemplate
 
 import com.android.systemui.R
-import com.android.systemui.controls.ui.ControlActionCoordinator.MIN_LEVEL
-import com.android.systemui.controls.ui.ControlActionCoordinator.MAX_LEVEL
+import com.android.systemui.controls.ui.ControlViewHolder.Companion.MIN_LEVEL
+import com.android.systemui.controls.ui.ControlViewHolder.Companion.MAX_LEVEL
 
 class TemperatureControlBehavior : Behavior {
     lateinit var clipLayer: Drawable
@@ -35,7 +35,7 @@ class TemperatureControlBehavior : Behavior {
         this.cvh = cvh
 
         cvh.layout.setOnClickListener { _ ->
-            ControlActionCoordinator.touch(cvh, template.getTemplateId(), control)
+            cvh.controlActionCoordinator.touch(cvh, template.getTemplateId(), control)
         }
     }
 

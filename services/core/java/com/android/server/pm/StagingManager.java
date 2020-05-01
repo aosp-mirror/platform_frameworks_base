@@ -370,24 +370,9 @@ public class StagingManager {
     }
 
     /**
-     * Perform snapshot and restore as required both for APEXes themselves and for apks in APEX.
-     * Apks inside apex are not installed using apk-install flow. They are scanned from the system
-     * directory directly by PackageManager, as such, RollbackManager need to handle their data
-     * separately here.
+     * Utility function for extracting apex sessions out of multi-package/single session.
      */
-    private void snapshotAndRestoreForApexSession(PackageInstallerSession session) {
-        if (!sessionContainsApex(session)) {
-            return;
-        }
-
-        boolean doSnapshotOrRestore =
-                (session.params.installFlags & PackageManager.INSTALL_ENABLE_ROLLBACK) != 0
-                || session.params.installReason == PackageManager.INSTALL_REASON_ROLLBACK;
-        if (!doSnapshotOrRestore) {
-            return;
-        }
-
-        // Find all the apex sessions that needs processing
+    private List<PackageInstallerSession> extractApexSessions(PackageInstallerSession session) {
         List<PackageInstallerSession> apexSessions = new ArrayList<>();
         if (session.isMultiPackage()) {
             List<PackageInstallerSession> childrenSessions = new ArrayList<>();
@@ -407,6 +392,50 @@ public class StagingManager {
             }
         } else {
             apexSessions.add(session);
+        }
+        return apexSessions;
+    }
+
+    /**
+     * Checks if all apk-in-apex were installed without errors for all of the apex sessions. Throws
+     * error for any apk-in-apex failed to install.
+     *
+     * @throws PackageManagerException if any apk-in-apex failed to install
+     */
+    private void checkInstallationOfApkInApexSuccessful(PackageInstallerSession session)
+            throws PackageManagerException {
+        final List<PackageInstallerSession> apexSessions = extractApexSessions(session);
+        if (apexSessions.isEmpty()) {
+            return;
+        }
+
+        for (PackageInstallerSession apexSession : apexSessions) {
+            String packageName = apexSession.getPackageName();
+            if (!mApexManager.isApkInApexInstallSuccess(packageName)) {
+                throw new PackageManagerException(SessionInfo.STAGED_SESSION_ACTIVATION_FAILED,
+                        "Failed to install apk-in-apex of " + packageName);
+            }
+        }
+    }
+
+    /**
+     * Perform snapshot and restore as required both for APEXes themselves and for apks in APEX.
+     * Apks inside apex are not installed using apk-install flow. They are scanned from the system
+     * directory directly by PackageManager, as such, RollbackManager need to handle their data
+     * separately here.
+     */
+    private void snapshotAndRestoreForApexSession(PackageInstallerSession session) {
+        boolean doSnapshotOrRestore =
+                (session.params.installFlags & PackageManager.INSTALL_ENABLE_ROLLBACK) != 0
+                || session.params.installReason == PackageManager.INSTALL_REASON_ROLLBACK;
+        if (!doSnapshotOrRestore) {
+            return;
+        }
+
+        // Find all the apex sessions that needs processing
+        final List<PackageInstallerSession> apexSessions = extractApexSessions(session);
+        if (apexSessions.isEmpty()) {
+            return;
         }
 
         final UserManagerInternal um = LocalServices.getService(UserManagerInternal.class);
@@ -545,18 +574,19 @@ public class StagingManager {
             return;
         }
 
+        // Check if apex packages in the session failed to activate
         if (hasApex) {
             if (apexSessionInfo == null) {
-                String errorMsg = "apexd did not know anything about a staged session supposed to"
-                        + " be activated";
+                final String errorMsg = "apexd did not know anything about a staged session "
+                        + "supposed to be activated";
                 session.setStagedSessionFailed(SessionInfo.STAGED_SESSION_ACTIVATION_FAILED,
                         errorMsg);
                 abortCheckpoint(errorMsg);
                 return;
             }
             if (isApexSessionFailed(apexSessionInfo)) {
-                String errorMsg = "APEX activation failed. Check logcat messages from apexd for "
-                        + "more information.";
+                String errorMsg = "APEX activation failed. Check logcat messages from apexd "
+                        + "for more information.";
                 if (!TextUtils.isEmpty(mNativeFailureReason)) {
                     errorMsg = "Session reverted due to crashing native process: "
                             + mNativeFailureReason;
@@ -567,21 +597,26 @@ public class StagingManager {
                 return;
             }
             if (!apexSessionInfo.isActivated && !apexSessionInfo.isSuccess) {
-                // Apexd did not apply the session for some unknown reason. There is no guarantee
-                // that apexd will install it next time. Safer to proactively mark as failed.
-                String errorMsg = "Staged session " + session.sessionId + "at boot didn't "
-                        + "activate nor fail. Marking it as failed anyway.";
+                // Apexd did not apply the session for some unknown reason. There is no
+                // guarantee that apexd will install it next time. Safer to proactively mark
+                // it as failed.
+                final String errorMsg = "Staged session " + session.sessionId + "at boot "
+                        + "didn't activate nor fail. Marking it as failed anyway.";
                 session.setStagedSessionFailed(SessionInfo.STAGED_SESSION_ACTIVATION_FAILED,
                         errorMsg);
                 abortCheckpoint(errorMsg);
                 return;
             }
-            snapshotAndRestoreForApexSession(session);
-            Slog.i(TAG, "APEX packages in session " + session.sessionId
-                    + " were successfully activated. Proceeding with APK packages, if any");
         }
-        // The APEX part of the session is activated, proceed with the installation of APKs.
+        // Handle apk and apk-in-apex installation
         try {
+            if (hasApex) {
+                checkInstallationOfApkInApexSuccessful(session);
+                snapshotAndRestoreForApexSession(session);
+                Slog.i(TAG, "APEX packages in session " + session.sessionId
+                        + " were successfully activated. Proceeding with APK packages, if any");
+            }
+            // The APEX part of the session is activated, proceed with the installation of APKs.
             Slog.d(TAG, "Installing APK packages in session " + session.sessionId);
             installApksInSession(session);
         } catch (PackageManagerException e) {

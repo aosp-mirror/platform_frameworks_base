@@ -201,9 +201,9 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"Thiết bị của bạn sẽ bị xóa"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Không thể sử dụng ứng dụng quản trị. Thiết bị của bạn sẽ bị xóa ngay bây giờ.\n\nHãy liên hệ với quản trị viên của tổ chức nếu bạn có thắc mắc."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> đã tắt tính năng in."</string>
-    <string name="personal_apps_suspended_title" msgid="4543693107104417750">"Bỏ chặn ứng dụng cá nhân của bạn"</string>
-    <string name="personal_apps_suspended_tomorrow_title" msgid="6414440257969874914">"Các ứng dụng sẽ bị chặn vào ngày mai"</string>
-    <string name="personal_apps_suspended_text" msgid="8954038765131038226">"Quản trị viên CNTT không cho phép bạn tạm dừng hồ sơ công việc quá <xliff:g id="DAYS">%1$d</xliff:g> ngày"</string>
+    <string name="personal_apps_suspension_title" msgid="7561416677884286600">"Bật hồ sơ công việc của bạn"</string>
+    <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Ứng dụng cá nhân của bạn bị chặn cho tới khi bạn bật hồ sơ công việc"</string>
+    <string name="personal_apps_suspension_tomorrow_text" msgid="6322541302153673994">"Ứng dụng cá nhân của bạn sẽ bị chặn vào ngày mai"</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"Bật hồ sơ công việc"</string>
     <string name="me" msgid="6207584824693813140">"Tôi"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Tùy chọn máy tính bảng"</string>
@@ -1630,10 +1630,8 @@
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Thao tác nhấn và giữ cả hai phím âm lượng trong vài giây sẽ bật <xliff:g id="SERVICE">%1$s</xliff:g>, một tính năng hỗ trợ tiếp cận. Việc bật tính năng này có thể thay đổi cách thiết bị của bạn hoạt động.\n\nBạn có thể chuyển phím tắt này thành một tính năng khác trong phần Cài đặt &gt; Hỗ trợ tiếp cận."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Bật"</string>
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"Không bật"</string>
-    <!-- no translation found for accessibility_shortcut_menu_item_status_on (6608392117189732543) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_menu_item_status_off (5531598275559472393) -->
-    <skip />
+    <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"ĐANG BẬT"</string>
+    <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"ĐANG TẮT"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Cho phép <xliff:g id="SERVICE">%1$s</xliff:g> toàn quyền kiểm soát thiết bị của bạn?"</string>
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Nếu bạn bật <xliff:g id="SERVICE">%1$s</xliff:g>, thiết bị của bạn sẽ không dùng phương thức khóa màn hình để tăng cường mã hóa dữ liệu."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Bạn chỉ nên cấp toàn quyền kiểm soát cho những ứng dụng trợ giúp mình khi cần hỗ trợ tiếp cận, chứ không nên cấp cho hầu hết các ứng dụng."</string>
@@ -1795,8 +1793,10 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Do quản trị viên của bạn cập nhật"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Do quản trị viên của bạn xóa"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Để tăng thời lượng pin, Trình tiết kiệm pin sẽ:\n·Bật Giao diện tối\n·Tắt hoặc hạn chế hoạt động chạy trong nền, một số hiệu ứng hình ảnh và các tính năng khác như lệnh “Ok Google”\n\n"<annotation id="url">"Tìm hiểu thêm"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"Để tăng thời lượng pin, Trình tiết kiệm pin sẽ:\n·Bật giao diện tối\n·Tắt hoặc hạn chế hoạt động chạy trong nền, một số hiệu ứng hình ảnh và các tính năng khác như lệnh “Ok Google”"</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (5997766757551917769) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (8587408568232177204) -->
+    <skip />
     <string name="data_saver_description" msgid="4995164271550590517">"Để giúp giảm mức sử dụng dữ liệu, Trình tiết kiệm dữ liệu sẽ chặn một số ứng dụng gửi hoặc nhận dữ liệu trong nền. Ứng dụng mà bạn hiện sử dụng có thể dùng dữ liệu nhưng tần suất sẽ giảm. Ví dụ: hình ảnh sẽ không hiển thị cho đến khi bạn nhấn vào hình ảnh đó."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Bật Trình tiết kiệm dữ liệu?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Bật"</string>
@@ -2041,13 +2041,17 @@
     <string name="accessibility_system_action_notifications_label" msgid="6083767351772162010">"Thông báo"</string>
     <string name="accessibility_system_action_quick_settings_label" msgid="4583900123506773783">"Cài đặt nhanh"</string>
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"Hộp thoại thao tác với nguồn"</string>
-    <string name="accessibility_system_action_toggle_split_screen_label" msgid="6626177163849387748">"Bật/tắt chế độ chia đôi màn hình"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Khóa màn hình"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Chụp ảnh màn hình"</string>
-    <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"Trình đơn Hỗ trợ tiếp cận"</string>
+    <!-- no translation found for accessibility_system_action_accessibility_button_label (5941347017132886642) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_accessibility_button_chooser_label (6973618519666227981) -->
+    <skip />
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Thanh phụ đề của <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"Đã đưa <xliff:g id="PACKAGE_NAME">%1$s</xliff:g> vào bộ chứa BỊ HẠN CHẾ"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
+    <!-- no translation found for conversation_single_line_image_placeholder (6983271082911936900) -->
+    <skip />
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"Cuộc trò chuyện"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"Cuộc trò chuyện nhóm"</string>
     <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>

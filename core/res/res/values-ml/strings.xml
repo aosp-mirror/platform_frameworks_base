@@ -201,9 +201,9 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"നിങ്ങളുടെ ഉപകരണം മായ്‌ക്കും"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"അഡ്‌മിൻ ആപ്പ് ഉപയോഗിക്കാനാകില്ല. നിങ്ങളുടെ ഉപകരണം ഇപ്പോൾ മായ്ക്കപ്പെടും.\n\nനിങ്ങൾക്ക് ചോദ്യങ്ങൾ ഉണ്ടെങ്കിൽ, നിങ്ങളുടെ സ്ഥാപനത്തിന്റെ അഡ്‌മിനെ ബന്ധപ്പെടുക."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> പ്രിന്റിംഗ് പ്രവർത്തനരഹിതമാക്കി."</string>
-    <string name="personal_apps_suspended_title" msgid="4543693107104417750">"വ്യക്തിപര ആപ്പ് അൺബ്ലോക്കാക്കൂ"</string>
-    <string name="personal_apps_suspended_tomorrow_title" msgid="6414440257969874914">"ആപ്പുകൾ നാളെ ബ്ലോക്ക് ചെയ്യും"</string>
-    <string name="personal_apps_suspended_text" msgid="8954038765131038226">"നിങ്ങളുടെ ഔദ്യോഗിക പ്രൊഫൈൽ <xliff:g id="DAYS">%1$d</xliff:g> ദിവസത്തിൽ കൂടുതൽ താൽക്കാലികമായി നിർത്താൻ നിങ്ങളുടെ ഐടി അഡ്‌മിൻ അനുവദിക്കുന്നില്ല"</string>
+    <string name="personal_apps_suspension_title" msgid="7561416677884286600">"ഔദ്യോഗിക പ്രൊഫൈൽ ഓണാക്കുക"</string>
+    <string name="personal_apps_suspension_text" msgid="6115455688932935597">"നിങ്ങളുടെ ഔദ്യോഗിക പ്രൊഫൈൽ ഓണാക്കുന്നത് വരെ നിങ്ങളുടെ വ്യക്തിപരമായ ആപ്പുകൾ ബ്ലോക്കായിരിക്കും"</string>
+    <string name="personal_apps_suspension_tomorrow_text" msgid="6322541302153673994">"നിങ്ങളുടെ വ്യക്തിപര ആപ്പുകൾ നാളെ ബ്ലോക്ക് ചെയ്യും"</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"ഔദ്യോഗിക പ്രൊഫൈൽ ഓണാക്കുക"</string>
     <string name="me" msgid="6207584824693813140">"ഞാന്‍"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"ടാബ്‌ലെറ്റ് ഓപ്‌ഷനുകൾ"</string>
@@ -1630,10 +1630,8 @@
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"രണ്ട് വോളിയം കീകളും അൽപ്പ നേരത്തേക്ക് അമർത്തിപ്പിടിക്കുന്നത് ഉപയോഗസഹായി ഫീച്ചറായ <xliff:g id="SERVICE">%1$s</xliff:g> എന്നതിനെ ഓണാക്കുന്നു. നിങ്ങളുടെ ഉപകരണം പ്രവർത്തിക്കുന്ന വിധം ഇത് മാറ്റിയേക്കാം.\n\nക്രമീകരണം &gt; ഉപയോഗസഹായി എന്നതിലെ മറ്റൊരു ഫീച്ചറിലേക്ക് നിങ്ങൾക്ക് ഈ കുറുക്കുവഴി മാറ്റാനാവും."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"ഓണാക്കുക"</string>
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"ഓണാക്കരുത്"</string>
-    <!-- no translation found for accessibility_shortcut_menu_item_status_on (6608392117189732543) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_menu_item_status_off (5531598275559472393) -->
-    <skip />
+    <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"ഓണാണ്"</string>
+    <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"ഓഫാണ്"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g> എന്നതിന് നിങ്ങളുടെ ഉപകരണത്തിന്മേൽ പൂർണ്ണ നിയന്ത്രണം അനുവദിക്കണോ?"</string>
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"<xliff:g id="SERVICE">%1$s</xliff:g> ഓണാക്കിയെങ്കിൽ, ഡാറ്റ എൻക്രിപ്‌ഷൻ മെച്ചപ്പെടുത്താൻ ഉപകരണം നിങ്ങളുടെ സ്‌ക്രീൻ ലോക്ക് ഉപയോഗിക്കില്ല."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"ഉപയോഗസഹായി ആവശ്യങ്ങൾക്കായി നിങ്ങളെ സഹായിക്കുന്ന ആപ്പുകൾക്ക് പൂർണ്ണ നിയന്ത്രണം അനുയോജ്യമാണെങ്കിലും മിക്ക ആപ്പുകൾക്കും അനുയോജ്യമല്ല."</string>
@@ -1795,8 +1793,10 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"നിങ്ങളുടെ അഡ്‌മിൻ അപ്‌ഡേറ്റ് ചെയ്യുന്നത്"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"നിങ്ങളുടെ അഡ്‌മിൻ ഇല്ലാതാക്കുന്നത്"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ശരി"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"ബാറ്ററി ലെെഫ് വികസിപ്പിക്കാൻ, \'ബാറ്ററി ലാഭിക്കൽ\':\n ഡാർക്ക് തീം ഓണാക്കും\nപശ്ചാത്തല പ്രവർത്തനം, ചില വിഷ്വൽ ഇഫക്റ്റുകൾ, “ഹേയ് Google” പോലുള്ള മറ്റ് ഫീച്ചറുകൾ എന്നിവ ഓഫാക്കുകയോ നിയന്ത്രിക്കുകയോ ചെയ്യും\n\n"<annotation id="url">"കൂടുതലറിയുക"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"ബാറ്ററി ലെെഫ് വികസിപ്പിക്കാൻ, \'ബാറ്ററി ലാഭിക്കൽ\':\n ഡാർക്ക് തീം ഓണാക്കും\nപശ്ചാത്തല പ്രവർത്തനം, ചില വിഷ്വൽ ഇഫക്റ്റുകൾ, “ഹേയ് Google” പോലുള്ള മറ്റ് ഫീച്ചറുകൾ എന്നിവ ഓഫാക്കുകയോ നിയന്ത്രിക്കുകയോ ചെയ്യും"</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (5997766757551917769) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (8587408568232177204) -->
+    <skip />
     <string name="data_saver_description" msgid="4995164271550590517">"ഡാറ്റാ ഉപയോഗം കുറയ്ക്കാൻ സഹായിക്കുന്നതിനായി പശ്ചാത്തലത്തിൽ ഡാറ്റ അയയ്ക്കുകയോ സ്വീകരിക്കുകയോ ചെയ്യുന്നതിൽ നിന്ന് ചില ആപ്പുകളെ ഡാറ്റാ സേവർ തടയുന്നു. നിങ്ങൾ നിലവിൽ ഉപയോഗിക്കുന്ന ഒരു ആപ്പിന് ഡാറ്റ ആക്‌സസ് ചെയ്യാനാകും, എന്നാൽ വല്ലപ്പോഴും മാത്രമെ സംഭവിക്കുന്നുള്ളു. ഇതിനർത്ഥം, ഉദാഹരണമായി നിങ്ങൾ ടാപ്പ് ചെയ്യുന്നത് വരെ ചിത്രങ്ങൾ പ്രദ‍‍‍ർശിപ്പിക്കുകയില്ല എന്നാണ്."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"ഡാറ്റ സേവർ ഓണാക്കണോ?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"ഓണാക്കുക"</string>
@@ -2041,13 +2041,17 @@
     <string name="accessibility_system_action_notifications_label" msgid="6083767351772162010">"അറിയിപ്പുകൾ"</string>
     <string name="accessibility_system_action_quick_settings_label" msgid="4583900123506773783">"ദ്രുത ക്രമീകരണം"</string>
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"പവർ ഡയലോഗ്"</string>
-    <string name="accessibility_system_action_toggle_split_screen_label" msgid="6626177163849387748">"സ്‌ക്രീൻ വിഭജന മോഡ് മാറ്റുക"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"ലോക്ക് സ്‌ക്രീൻ"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"സ്ക്രീൻഷോട്ട്"</string>
-    <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"ഉപയോഗസഹായി മെനു"</string>
+    <!-- no translation found for accessibility_system_action_accessibility_button_label (5941347017132886642) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_accessibility_button_chooser_label (6973618519666227981) -->
+    <skip />
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g> എന്നതിന്റെ അടിക്കുറിപ്പ് ബാർ."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> നിയന്ത്രിത ബക്കറ്റിലേക്ക് നീക്കി"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
+    <!-- no translation found for conversation_single_line_image_placeholder (6983271082911936900) -->
+    <skip />
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"സംഭാഷണം"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"ഗ്രൂപ്പ് സംഭാഷണം"</string>
     <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>

@@ -30,6 +30,7 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 
+import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dump.DumpManager;
@@ -81,6 +82,8 @@ public class TileServicesTest extends SysuiTestCase {
     private StatusBar mStatusBar;
     @Mock
     private QSLogger mQSLogger;
+    @Mock
+    private UiEventLogger mUiEventLogger;
 
     @Before
     public void setUp() throws Exception {
@@ -98,7 +101,8 @@ public class TileServicesTest extends SysuiTestCase {
                 mDumpManager,
                 mBroadcastDispatcher,
                 Optional.of(mStatusBar),
-                mQSLogger);
+                mQSLogger,
+                mUiEventLogger);
         mTileService = new TestTileServices(host, Looper.getMainLooper(), mBroadcastDispatcher);
     }
 

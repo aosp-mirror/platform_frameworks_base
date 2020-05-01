@@ -24,6 +24,7 @@ import android.annotation.TestApi;
 import android.app.ActivityManager;
 import android.os.RemoteException;
 import android.util.Singleton;
+import android.view.SurfaceControl;
 
 import java.util.List;
 
@@ -59,7 +60,8 @@ public class TaskOrganizer extends WindowOrganizer {
     }
 
     @BinderThread
-    public void onTaskAppeared(@NonNull ActivityManager.RunningTaskInfo taskInfo) {}
+    public void onTaskAppeared(@NonNull ActivityManager.RunningTaskInfo taskInfo,
+            @NonNull SurfaceControl leash) {}
 
     @BinderThread
     public void onTaskVanished(@NonNull ActivityManager.RunningTaskInfo taskInfo) {}
@@ -155,8 +157,8 @@ public class TaskOrganizer extends WindowOrganizer {
     private final ITaskOrganizer mInterface = new ITaskOrganizer.Stub() {
 
         @Override
-        public void onTaskAppeared(ActivityManager.RunningTaskInfo taskInfo) {
-            TaskOrganizer.this.onTaskAppeared(taskInfo);
+        public void onTaskAppeared(ActivityManager.RunningTaskInfo taskInfo, SurfaceControl leash) {
+            TaskOrganizer.this.onTaskAppeared(taskInfo, leash);
         }
 
         @Override

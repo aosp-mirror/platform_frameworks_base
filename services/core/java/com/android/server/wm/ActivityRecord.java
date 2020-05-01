@@ -4626,7 +4626,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // the current contract for "auto-Pip" is that the app should enter it before onPause
             // returns. Just need to confirm this reasoning makes sense.
             final boolean deferHidingClient = canEnterPictureInPicture
-                    && !isState(STOPPING, STOPPED, PAUSED);
+                    && !isState(STARTED, STOPPING, STOPPED, PAUSED);
             setDeferHidingClient(deferHidingClient);
             setVisibility(false);
 
@@ -4637,9 +4637,16 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     // activity is hidden
                     supportsEnterPipOnTaskSwitch = false;
                     break;
-
-                case INITIALIZING:
                 case RESUMED:
+                    // If the app is capable of entering PIP, we should try pausing it now
+                    // so it can PIP correctly.
+                    if (deferHidingClient) {
+                        getRootTask().startPausingLocked(
+                                mStackSupervisor.mUserLeaving /* userLeaving */,
+                                false /* uiSleeping */, null /* resuming */);
+                        break;
+                    }
+                case INITIALIZING:
                 case PAUSING:
                 case PAUSED:
                 case STARTED:

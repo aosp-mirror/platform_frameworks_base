@@ -323,7 +323,7 @@ public final class PermissionPolicyService extends SystemService {
         // Force synchronization as permissions might have changed
         synchronizePermissionsAndAppOpsForUser(userId);
 
-        restoreReadPhoneStatePermissions(userId);
+        //restoreReadPhoneStatePermissions(userId);
 
         // Tell observers we are initialized for this user.
         if (callback != null) {

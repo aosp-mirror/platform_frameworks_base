@@ -61,6 +61,7 @@ import static com.android.server.wm.ActivityStackSupervisor.DEFER_RESUME;
 import static com.android.server.wm.ActivityStackSupervisor.ON_TOP;
 import static com.android.server.wm.ActivityStackSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.wm.ActivityStackSupervisor.TAG_TASKS;
+import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_ACTIVITY_STARTS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_CONFIGURATION;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_PERMISSIONS_REVIEW;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_RESULTS;
@@ -108,6 +109,7 @@ import android.os.UserManager;
 import android.service.voice.IVoiceInteractionSession;
 import android.text.TextUtils;
 import android.util.ArraySet;
+import android.util.DebugUtils;
 import android.util.Pools.SynchronizedPool;
 import android.util.Slog;
 
@@ -1195,6 +1197,9 @@ class ActivityStarter {
         final int callingAppId = UserHandle.getAppId(callingUid);
         if (callingUid == Process.ROOT_UID || callingAppId == Process.SYSTEM_UID
                 || callingAppId == Process.NFC_UID) {
+            if (DEBUG_ACTIVITY_STARTS) {
+                Slog.d(TAG, "Activity start allowed for important callingUid (" + callingUid + ")");
+            }
             return false;
         }
 
@@ -1208,6 +1213,11 @@ class ActivityStarter {
         final boolean isCallingUidPersistentSystemProcess =
                 callingUidProcState <= ActivityManager.PROCESS_STATE_PERSISTENT_UI;
         if (callingUidHasAnyVisibleWindow || isCallingUidPersistentSystemProcess) {
+            if (DEBUG_ACTIVITY_STARTS) {
+                Slog.d(TAG, "Activity start allowed: callingUidHasAnyVisibleWindow = " + callingUid
+                        + ", isCallingUidPersistentSystemProcess = "
+                        + isCallingUidPersistentSystemProcess);
+            }
             return false;
         }
         // take realCallingUid into consideration
@@ -1229,35 +1239,66 @@ class ActivityStarter {
         if (realCallingUid != callingUid) {
             // don't abort if the realCallingUid has a visible window
             if (realCallingUidHasAnyVisibleWindow) {
+                if (DEBUG_ACTIVITY_STARTS) {
+                    Slog.d(TAG, "Activity start allowed: realCallingUid (" + realCallingUid
+                            + ") has visible (non-toast) window");
+                }
                 return false;
             }
             // if the realCallingUid is a persistent system process, abort if the IntentSender
             // wasn't whitelisted to start an activity
             if (isRealCallingUidPersistentSystemProcess && allowBackgroundActivityStart) {
+                if (DEBUG_ACTIVITY_STARTS) {
+                    Slog.d(TAG, "Activity start allowed: realCallingUid (" + realCallingUid
+                            + ") is persistent system process AND intent sender whitelisted "
+                            + "(allowBackgroundActivityStart = true)");
+                }
                 return false;
             }
             // don't abort if the realCallingUid is an associated companion app
             if (mService.isAssociatedCompanionApp(UserHandle.getUserId(realCallingUid),
                     realCallingUid)) {
+                if (DEBUG_ACTIVITY_STARTS) {
+                    Slog.d(TAG, "Activity start allowed: realCallingUid (" + realCallingUid
+                            + ") is companion app");
+                }
                 return false;
             }
         }
         // don't abort if the callingUid has START_ACTIVITIES_FROM_BACKGROUND permission
         if (mService.checkPermission(START_ACTIVITIES_FROM_BACKGROUND, callingPid, callingUid)
                 == PERMISSION_GRANTED) {
+            if (DEBUG_ACTIVITY_STARTS) {
+                Slog.d(TAG,
+                        "Background activity start allowed: START_ACTIVITIES_FROM_BACKGROUND "
+                                + "permission granted for uid "
+                                + callingUid);
+            }
             return false;
         }
         // don't abort if the caller has the same uid as the recents component
         if (mSupervisor.mRecentTasks.isCallerRecents(callingUid)) {
+            if (DEBUG_ACTIVITY_STARTS) {
+                Slog.d(TAG, "Background activity start allowed: callingUid (" + callingUid
+                        + ") is recents");
+            }
             return false;
         }
         // don't abort if the callingUid is the device owner
         if (mService.isDeviceOwner(callingUid)) {
+            if (DEBUG_ACTIVITY_STARTS) {
+                Slog.d(TAG, "Background activity start allowed: callingUid (" + callingUid
+                        + ") is device owner");
+            }
             return false;
         }
         // don't abort if the callingUid has companion device
         final int callingUserId = UserHandle.getUserId(callingUid);
         if (mService.isAssociatedCompanionApp(callingUserId, callingUid)) {
+            if (DEBUG_ACTIVITY_STARTS) {
+                Slog.d(TAG, "Background activity start allowed: callingUid (" + callingUid
+                        + ") is companion app");
+            }
             return false;
         }
         // If we don't have callerApp at this point, no caller was provided to startActivity().
@@ -1273,6 +1314,10 @@ class ActivityStarter {
         if (callerApp != null) {
             // first check the original calling process
             if (callerApp.areBackgroundActivityStartsAllowed()) {
+                if (DEBUG_ACTIVITY_STARTS) {
+                    Slog.d(TAG, "Background activity start allowed: callerApp process (pid = "
+                            + callerApp.getPid() + ", uid = " + callerAppUid + ") is whitelisted");
+                }
                 return false;
             }
             // only if that one wasn't whitelisted, check the other ones
@@ -1282,6 +1327,11 @@ class ActivityStarter {
                 for (int i = uidProcesses.size() - 1; i >= 0; i--) {
                     final WindowProcessController proc = uidProcesses.valueAt(i);
                     if (proc != callerApp && proc.areBackgroundActivityStartsAllowed()) {
+                        if (DEBUG_ACTIVITY_STARTS) {
+                            Slog.d(TAG,
+                                    "Background activity start allowed: process " + proc.getPid()
+                                            + " from uid " + callerAppUid + " is whitelisted");
+                        }
                         return false;
                     }
                 }
@@ -1297,9 +1347,15 @@ class ActivityStarter {
         Slog.w(TAG, "Background activity start [callingPackage: " + callingPackage
                 + "; callingUid: " + callingUid
                 + "; isCallingUidForeground: " + isCallingUidForeground
+                + "; callingUidHasAnyVisibleWindow: " + callingUidHasAnyVisibleWindow
+                + "; callingUidProcState: " + DebugUtils.valueToString(ActivityManager.class,
+                "PROCESS_STATE_", callingUidProcState)
                 + "; isCallingUidPersistentSystemProcess: " + isCallingUidPersistentSystemProcess
                 + "; realCallingUid: " + realCallingUid
                 + "; isRealCallingUidForeground: " + isRealCallingUidForeground
+                + "; realCallingUidHasAnyVisibleWindow: " + realCallingUidHasAnyVisibleWindow
+                + "; realCallingUidProcState: " + DebugUtils.valueToString(ActivityManager.class,
+                "PROCESS_STATE_", realCallingUidProcState)
                 + "; isRealCallingUidPersistentSystemProcess: "
                 + isRealCallingUidPersistentSystemProcess
                 + "; originatingPendingIntent: " + originatingPendingIntent

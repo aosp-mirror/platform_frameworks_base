@@ -21,6 +21,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.TestApi;
 import android.os.RemoteException;
 import android.util.Singleton;
+import android.view.SurfaceControl;
 
 /**
  * Interface for WindowManager to delegate control of display areas.
@@ -64,7 +65,8 @@ public class DisplayAreaOrganizer extends WindowOrganizer {
         }
     }
 
-    public void onDisplayAreaAppeared(@NonNull DisplayAreaInfo displayAreaInfo) {}
+    public void onDisplayAreaAppeared(@NonNull DisplayAreaInfo displayAreaInfo,
+            @NonNull SurfaceControl leash) {}
 
     public void onDisplayAreaVanished(@NonNull DisplayAreaInfo displayAreaInfo) {}
 
@@ -76,8 +78,9 @@ public class DisplayAreaOrganizer extends WindowOrganizer {
     private final IDisplayAreaOrganizer mInterface = new IDisplayAreaOrganizer.Stub() {
 
         @Override
-        public void onDisplayAreaAppeared(@NonNull DisplayAreaInfo displayAreaInfo) {
-            DisplayAreaOrganizer.this.onDisplayAreaAppeared(displayAreaInfo);
+        public void onDisplayAreaAppeared(@NonNull DisplayAreaInfo displayAreaInfo,
+                @NonNull SurfaceControl leash) {
+            DisplayAreaOrganizer.this.onDisplayAreaAppeared(displayAreaInfo, leash);
         }
 
         @Override

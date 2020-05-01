@@ -39,6 +39,7 @@ private fun createServiceListing(context: Context): ServiceListing {
         setNoun("Controls Provider")
         setSetting("controls_providers")
         setTag("controls_providers")
+        setAddDeviceLockedFlags(true)
     }.build()
 }
 
@@ -70,23 +71,32 @@ class ControlsListingControllerImpl @VisibleForTesting constructor(
         private const val TAG = "ControlsListingControllerImpl"
     }
 
+    private var availableComponents = emptySet<ComponentName>()
     private var availableServices = emptyList<ServiceInfo>()
 
     override var currentUserId = ActivityManager.getCurrentUser()
         private set
 
     private val serviceListingCallback = ServiceListing.Callback {
-        Log.d(TAG, "ServiceConfig reloaded")
-        availableServices = it.toList()
+        val newServices = it.toList()
+        val newComponents =
+            newServices.mapTo(mutableSetOf<ComponentName>(), { s -> s.getComponentName() })
 
         backgroundExecutor.execute {
-            callbacks.forEach {
-                it.onServicesUpdated(getCurrentServices())
+            if (!newComponents.equals(availableComponents)) {
+                Log.d(TAG, "ServiceConfig reloaded, count: ${newComponents.size}")
+                availableComponents = newComponents
+                availableServices = newServices
+                val currentServices = getCurrentServices()
+                callbacks.forEach {
+                    it.onServicesUpdated(currentServices)
+                }
             }
         }
     }
 
     init {
+        Log.d(TAG, "Initializing")
         serviceListing.addCallback(serviceListingCallback)
         serviceListing.setListening(true)
         serviceListing.reload()
@@ -119,9 +129,10 @@ class ControlsListingControllerImpl @VisibleForTesting constructor(
      */
     override fun addCallback(listener: ControlsListingController.ControlsListingCallback) {
         backgroundExecutor.execute {
-            Log.d(TAG, "Subscribing callback")
+            val services = getCurrentServices()
+            Log.d(TAG, "Subscribing callback, service count: ${services.size}")
             callbacks.add(listener)
-            listener.onServicesUpdated(getCurrentServices())
+            listener.onServicesUpdated(services)
         }
     }
 

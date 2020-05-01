@@ -1,0 +1,21 @@
+<!--
+   Copyright (C) 2020 The Android Open Source Project
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+<vector android:height="24dp" android:tint="?android:attr/colorControlNormal" android:viewportHeight="24" android:viewportWidth="24" android:width="24dp" xmlns:android="http://schemas.android.com/apk/res/android">
+  <path android:fillColor="@android:color/white" android:pathData="M12,13.5c1.66,0,3-1.34,3-3s-1.34-3-3-3s-3,1.34-3,3S10.34,13.5,12,13.5z M12,9c0.83,0,1.5,0.67,1.5,1.5S12.83,12,12,12 s-1.5-0.67-1.5-1.5S11.17,9,12,9z"/>
+  <path android:fillColor="@android:color/white" android:pathData="M20.59,5H3.41L2,6.41v11.17L3.41,19h17.17L22,17.59V6.41L20.59,5z M6.96,17.5c0.76-1.3,3.52-2,5.04-2s4.28,0.7,5.04,2 H6.96z M20.5,17.5h-1.85C18.02,15.04,14.16,14,12,14s-6.02,1.04-6.65,3.5H3.5v-11h17V17.5z"/>
+  <path android:fillColor="@android:color/white" android:pathData="M 4 1.5 H 20 V 3 H 4 V 1.5 Z"/>
+  <path android:fillColor="@android:color/white" android:pathData="M 4 21 H 20 V 22.5 H 4 V 21 Z"/>
+</vector>

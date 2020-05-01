@@ -201,9 +201,9 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"기기가 삭제됩니다."</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"관리자 앱을 사용할 수 없습니다. 곧 기기가 삭제됩니다.\n\n궁금한 점이 있으면 조직의 관리자에게 문의하세요."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g>에 의해 사용 중지되었습니다."</string>
-    <string name="personal_apps_suspended_title" msgid="4543693107104417750">"개인 앱 차단 해제"</string>
-    <string name="personal_apps_suspended_tomorrow_title" msgid="6414440257969874914">"내일부터 앱이 차단됨"</string>
-    <string name="personal_apps_suspended_text" msgid="8954038765131038226">"IT 관리자가 <xliff:g id="DAYS">%1$d</xliff:g>일보다 오래 직장 프로필을 일시중지하도록 허용하지 않습니다."</string>
+    <string name="personal_apps_suspension_title" msgid="7561416677884286600">"직장 프로필 사용 설정"</string>
+    <string name="personal_apps_suspension_text" msgid="6115455688932935597">"직장 프로필을 사용 설정할 때까지 개인 앱이 차단됩니다."</string>
+    <string name="personal_apps_suspension_tomorrow_text" msgid="6322541302153673994">"개인 앱이 내일 차단됩니다."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"직장 프로필 사용 설정"</string>
     <string name="me" msgid="6207584824693813140">"나"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"태블릿 옵션"</string>
@@ -1630,10 +1630,8 @@
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"볼륨 키 2개를 몇 초 동안 길게 누르면 <xliff:g id="SERVICE">%1$s</xliff:g> 접근성 기능이 사용 설정됩니다. 이렇게 되면 기기 작동 방식이 달라질 수 있습니다.\n\n설정 &gt; 접근성에서 이 단축키를 다른 기능으로 변경할 수 있습니다."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"사용 설정"</string>
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"사용 안 함"</string>
-    <!-- no translation found for accessibility_shortcut_menu_item_status_on (6608392117189732543) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_menu_item_status_off (5531598275559472393) -->
-    <skip />
+    <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"사용"</string>
+    <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"사용 안함"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g>에서 기기를 완전히 제어하도록 허용하시겠습니까?"</string>
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"<xliff:g id="SERVICE">%1$s</xliff:g>을(를) 사용 설정하면 기기에서 데이터 암호화를 개선하기 위해 화면 잠금을 사용하지 않습니다."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"접근성 관련 지원을 제공하는 앱에는 완벽한 제어권을 부여하는 것이 좋으나, 대부분의 앱에는 적합하지 않습니다."</string>
@@ -1795,8 +1793,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"관리자에 의해 업데이트되었습니다."</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"관리자에 의해 삭제되었습니다."</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"확인"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"배터리 수명을 늘리기 위해 절전 모드가 다음과 같이 작동합니다.\n·어두운 테마를 사용 설정합니다.\n·백그라운드 활동, 일부 시각 효과 및 \'Hey Google\'과 같은 기타 기능을 사용 중지하거나 제한합니다.\n\n"<annotation id="url">"자세히 알아보기"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"배터리 수명을 늘리기 위해 절전 모드가 다음과 같이 작동합니다.\n·어두운 테마를 사용 설정합니다.\n·백그라운드 활동, 일부 시각 효과 및 \'Hey Google\'과 같은 기타 기능을 사용 중지하거나 제한합니다."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"배터리 수명을 늘리기 위해 절전 모드가 다음과 같이 작동합니다.\n\n•어두운 테마를 사용 설정합니다.\n•백그라운드 활동, 일부 시각 효과 및 \'Hey Google\'과 같은 기타 기능을 사용 중지하거나 제한합니다.\n\n"<annotation id="url">"자세히 알아보기"</annotation></string>
+    <string name="battery_saver_description" msgid="8587408568232177204">"배터리 수명을 늘리기 위해 절전 모드가 다음과 같이 작동합니다.\n\n•어두운 테마를 사용 설정합니다.\n•백그라운드 활동, 일부 시각 효과 및 \'Hey Google\'과 같은 기타 기능을 사용 중지하거나 제한합니다."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"데이터 사용량을 줄이기 위해 데이터 절약 모드는 일부 앱이 백그라운드에서 데이터를 전송하거나 수신하지 못하도록 합니다. 현재 사용 중인 앱에서 데이터에 액세스할 수 있지만 빈도가 줄어듭니다. 예를 들면, 이미지를 탭하기 전에는 이미지가 표시되지 않습니다."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"데이터 절약 모드를 사용 설정하시겠습니까?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"사용 설정"</string>
@@ -2041,13 +2039,14 @@
     <string name="accessibility_system_action_notifications_label" msgid="6083767351772162010">"알림"</string>
     <string name="accessibility_system_action_quick_settings_label" msgid="4583900123506773783">"빠른 설정"</string>
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"전원 대화상자"</string>
-    <string name="accessibility_system_action_toggle_split_screen_label" msgid="6626177163849387748">"화면 분할 모드 전환"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"잠금 화면"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"스크린샷"</string>
-    <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"접근성 메뉴"</string>
+    <string name="accessibility_system_action_accessibility_button_label" msgid="5941347017132886642">"터치식 접근성 단축키"</string>
+    <string name="accessibility_system_action_accessibility_button_chooser_label" msgid="6973618519666227981">"터치식 접근성 단축키 선택 도구"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g>의 자막 표시줄입니다."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> 항목이 RESTRICTED 버킷으로 이동함"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
+    <string name="conversation_single_line_image_placeholder" msgid="6983271082911936900">"이미지 보냄"</string>
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"대화"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"그룹 대화"</string>
     <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>

@@ -442,7 +442,7 @@ public class PackageInfo implements Parcelable {
         // Allow ApplicationInfo to be squashed.
         final boolean prevAllowSquashing = dest.allowSquashing();
         dest.writeString8(packageName);
-        dest.writeStringArray(splitNames);
+        dest.writeString8Array(splitNames);
         dest.writeInt(versionCode);
         dest.writeInt(versionCodeMajor);
         dest.writeString8(versionName);
@@ -465,7 +465,7 @@ public class PackageInfo implements Parcelable {
         dest.writeTypedArray(providers, parcelableFlags);
         dest.writeTypedArray(instrumentation, parcelableFlags);
         dest.writeTypedArray(permissions, parcelableFlags);
-        dest.writeStringArray(requestedPermissions);
+        dest.writeString8Array(requestedPermissions);
         dest.writeIntArray(requestedPermissionsFlags);
         dest.writeTypedArray(signatures, parcelableFlags);
         dest.writeTypedArray(configPreferences, parcelableFlags);
@@ -509,7 +509,7 @@ public class PackageInfo implements Parcelable {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private PackageInfo(Parcel source) {
         packageName = source.readString8();
-        splitNames = source.createStringArray();
+        splitNames = source.createString8Array();
         versionCode = source.readInt();
         versionCodeMajor = source.readInt();
         versionName = source.readString8();
@@ -530,7 +530,7 @@ public class PackageInfo implements Parcelable {
         providers = source.createTypedArray(ProviderInfo.CREATOR);
         instrumentation = source.createTypedArray(InstrumentationInfo.CREATOR);
         permissions = source.createTypedArray(PermissionInfo.CREATOR);
-        requestedPermissions = source.createStringArray();
+        requestedPermissions = source.createString8Array();
         requestedPermissionsFlags = source.createIntArray();
         signatures = source.createTypedArray(Signature.CREATOR);
         configPreferences = source.createTypedArray(ConfigurationInfo.CREATOR);

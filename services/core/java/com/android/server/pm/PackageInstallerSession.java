@@ -1124,21 +1124,52 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     private void handleStreamValidateAndCommit() {
-        boolean success = streamValidateAndCommit();
+        PackageManagerException unrecoverableFailure = null;
+        // This will track whether the session and any children were validated and are ready to
+        // progress to the next phase of install
+        boolean allSessionsReady = false;
+        try {
+            allSessionsReady = streamValidateAndCommit();
+        } catch (PackageManagerException e) {
+            unrecoverableFailure = e;
+        }
 
         if (isMultiPackage()) {
-            for (int i = mChildSessionIds.size() - 1; i >= 0; --i) {
+            int childCount = mChildSessionIds.size();
+
+            // This will contain all child sessions that do not encounter an unrecoverable failure
+            ArrayList<PackageInstallerSession> nonFailingSessions = new ArrayList<>(childCount);
+
+            for (int i = childCount - 1; i >= 0; --i) {
                 final int childSessionId = mChildSessionIds.keyAt(i);
                 // commit all children, regardless if any of them fail; we'll throw/return
                 // as appropriate once all children have been processed
-                if (!mSessionProvider.getSession(childSessionId)
-                        .streamValidateAndCommit()) {
-                    success = false;
+                try {
+                    PackageInstallerSession session = mSessionProvider.getSession(childSessionId);
+                    if (!session.streamValidateAndCommit()) {
+                        allSessionsReady = false;
+                    }
+                    nonFailingSessions.add(session);
+                } catch (PackageManagerException e) {
+                    allSessionsReady = false;
+                    if (unrecoverableFailure == null) {
+                        unrecoverableFailure = e;
+                    }
+                }
+            }
+            // If we encountered any unrecoverable failures, destroy all
+            // other impacted sessions besides the parent; that will be cleaned up by the
+            // ChildStatusIntentReceiver.
+            if (unrecoverableFailure != null) {
+                // fail other child sessions that did not already fail
+                for (int i = nonFailingSessions.size() - 1; i >= 0; --i) {
+                    PackageInstallerSession session = nonFailingSessions.get(i);
+                    session.onSessionVerificationFailure(unrecoverableFailure);
                 }
             }
         }
 
-        if (!success) {
+        if (!allSessionsReady) {
             return;
         }
 
@@ -1218,14 +1249,12 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                         mStatusReceiver.sendIntent(mContext, 0, intent, null, null);
                     } catch (IntentSender.SendIntentException ignore) {
                     }
-                } else {
+                } else { // failure, let's forward and clean up this session.
                     intent.putExtra(PackageInstaller.EXTRA_SESSION_ID,
                             PackageInstallerSession.this.sessionId);
                     mChildSessionsRemaining.clear(); // we're done. Don't send any more.
-                    try {
-                        mStatusReceiver.sendIntent(mContext, 0, intent, null, null);
-                    } catch (IntentSender.SendIntentException ignore) {
-                    }
+                    onSessionVerificationFailure(status,
+                            intent.getStringExtra(PackageInstaller.EXTRA_STATUS_MESSAGE));
                 }
             });
         }
@@ -1331,7 +1360,13 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         return true;
     }
 
-    private boolean streamValidateAndCommit() {
+    /**
+     * Returns true if the session is successfully validated and committed. Returns false if the
+     * dataloader could not be prepared. This can be called multiple times so long as no
+     * exception is thrown.
+     * @throws PackageManagerException on an unrecoverable error.
+     */
+    private boolean streamValidateAndCommit() throws PackageManagerException {
         synchronized (mLock) {
             if (mCommitted) {
                 return true;
@@ -1351,7 +1386,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
             mCommitted = true;
         }
-
         return true;
     }
 
@@ -1451,10 +1485,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
      * Prepare DataLoader and stream content for DataLoader sessions.
      * Validate the contents of all session.
      *
-     * @return false if validation failed.
+     * @return false if the data loader could not be prepared.
+     * @throws PackageManagerException when an unrecoverable exception is encountered
      */
     @GuardedBy("mLock")
-    private boolean streamAndValidateLocked() {
+    private boolean streamAndValidateLocked() throws PackageManagerException {
         try {
             // Read transfers from the original owner stay open, but as the session's data cannot
             // be modified anymore, there is no leak of information. For staged sessions, further
@@ -1474,16 +1509,14 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             if (params.isStaged) {
                 mStagingManager.checkNonOverlappingWithStagedSessions(this);
             }
-
             return true;
         } catch (PackageManagerException e) {
-            onSessionVerificationFailure(e);
+            throw onSessionVerificationFailure(e);
         } catch (Throwable e) {
             // Convert all exceptions into package manager exceptions as only those are handled
             // in the code above.
-            onSessionVerificationFailure(new PackageManagerException(e));
+            throw onSessionVerificationFailure(new PackageManagerException(e));
         }
-        return false;
     }
 
     private PackageManagerException onSessionVerificationFailure(PackageManagerException e) {

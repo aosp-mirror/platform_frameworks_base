@@ -201,9 +201,12 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"சாதனத் தரவு அழிக்கப்படும்"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"நிர்வாகி ஆப்ஸை உபயோகிக்க முடியாது. இப்போது, உங்கள் சாதனம் ஆரம்ப நிலைக்கு மீட்டமைக்கப்படும்.\n\nஏதேனும் கேள்விகள் இருப்பின், உங்கள் நிறுவனத்தின் நிர்வாகியைத் தொடர்புகொள்ளவும்."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"பிரிண்ட் செய்வதை <xliff:g id="OWNER_APP">%s</xliff:g> தடுத்துள்ளது."</string>
-    <string name="personal_apps_suspended_title" msgid="4543693107104417750">"தனிப்பட்ட ஆப்ஸை அனுமதியுங்கள்"</string>
-    <string name="personal_apps_suspended_tomorrow_title" msgid="6414440257969874914">"ஆப்ஸ் நாளை தடை செய்யப்படும்"</string>
-    <string name="personal_apps_suspended_text" msgid="8954038765131038226">"பணிக் கணக்கு <xliff:g id="DAYS">%1$d</xliff:g> நாட்களுக்கு மேல் இடைநிறுத்தப்படுவதை உங்கள் IT நிர்வாகி அனுமதிக்கவில்லை"</string>
+    <!-- no translation found for personal_apps_suspension_title (7561416677884286600) -->
+    <skip />
+    <!-- no translation found for personal_apps_suspension_text (6115455688932935597) -->
+    <skip />
+    <!-- no translation found for personal_apps_suspension_tomorrow_text (6322541302153673994) -->
+    <skip />
     <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"பணிக் கணக்கை ஆன் செய்"</string>
     <string name="me" msgid="6207584824693813140">"நான்"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"டேப்லெட் விருப்பங்கள்"</string>
@@ -1630,10 +1633,8 @@
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"இரண்டு ஒலியளவு விசைகளையும் சில விநாடிகள் பிடித்திருப்பதால் அணுகல்தன்மை அம்சமான <xliff:g id="SERVICE">%1$s</xliff:g> ஆன் ஆகும். இதனால் உங்கள் சாதனம் வேலை செய்யும் முறை மாறக்கூடும்.\n\nஅமைப்புகள் &gt; அணுகல்தன்மைக்குச் சென்று இந்த ஷார்ட்கட்டை வேறு அம்சத்திற்கு மாற்ற முடியும்."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"ஆன் செய்"</string>
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"ஆன் செய்யாதே"</string>
-    <!-- no translation found for accessibility_shortcut_menu_item_status_on (6608392117189732543) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_menu_item_status_off (5531598275559472393) -->
-    <skip />
+    <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"ஆன்"</string>
+    <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"ஆஃப்"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"உங்கள் சாதனத்தை முழுமையாகக் கட்டுப்படுத்த <xliff:g id="SERVICE">%1$s</xliff:g> சேவையை அனுமதிக்க வேண்டுமா?"</string>
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"<xliff:g id="SERVICE">%1$s</xliff:g> சேவையை ஆன் செய்தால் தரவு என்க்ரிப்ஷனை மேம்படுத்த சாதனம் திரைப் பூட்டைப் பயன்படுத்தாது."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"உங்களுக்கு உதவக்கூடிய ஆப்ஸுக்குக் தேவையான அணுகல்தன்மையை அளித்து முழுக் கட்டுப்பாட்டையும் அளிக்கலாம், ஆனால் பெரும்பாலான ஆப்ஸுக்கு இது பொருந்தாது."</string>
@@ -1795,8 +1796,10 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"உங்கள் நிர்வாகி புதுப்பித்துள்ளார்"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"உங்கள் நிர்வாகி நீக்கியுள்ளார்"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"சரி"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"பேட்டரி நிலையை நீட்டிப்பதற்காக, பேட்டரி சேமிப்பான்:\n·டார்க் தீமினை ஆன் செய்யும்\n·“Hey Google” போன்ற பிற அம்சங்கள், பின்னணி செயல்பாடுகள், சில விஷுவல் எஃபெக்ட்கள், ஆகியவற்றை ஆஃப் செய்யும் அல்லது கட்டுப்படுத்தும்\n\n"<annotation id="url">"மேலும் அறிக"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"பேட்டரி நிலையை நீட்டிப்பதற்காக, பேட்டரி சேமிப்பான்:\n·டார்க் தீமினை ஆன் செய்யும்\n·“Hey Google” போன்ற பிற அம்சங்கள், பின்னணி செயல்பாடுகள், சில விஷுவல் எஃபெக்ட்கள், ஆகியவற்றை ஆஃப் செய்யும் அல்லது கட்டுப்படுத்தும்"</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (5997766757551917769) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (8587408568232177204) -->
+    <skip />
     <string name="data_saver_description" msgid="4995164271550590517">"டேட்டா உபயோகத்தைக் குறைப்பதற்கு உதவ, பின்புலத்தில் டேட்டாவை அனுப்புவது அல்லது பெறுவதிலிருந்து சில ஆப்ஸை டேட்டா சேமிப்பான் தடுக்கும். தற்போது பயன்படுத்தும் ஆப்ஸானது எப்போதாவது டேட்டாவை அணுகலாம். எடுத்துக்காட்டாக, படங்களை நீங்கள் தட்டும் வரை அவை காட்டப்படாது."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"டேட்டா சேமிப்பானை இயக்கவா?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"இயக்கு"</string>
@@ -2041,13 +2044,17 @@
     <string name="accessibility_system_action_notifications_label" msgid="6083767351772162010">"அறிவிப்புகள்"</string>
     <string name="accessibility_system_action_quick_settings_label" msgid="4583900123506773783">"விரைவு அமைப்புகள்"</string>
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"பவர் உரையாடல்"</string>
-    <string name="accessibility_system_action_toggle_split_screen_label" msgid="6626177163849387748">"திரைப் பிரிப்பை நிலைமாற்று"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"பூட்டுத் திரை"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"ஸ்கிரீன்ஷாட்"</string>
-    <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"அணுகல்தன்மை மெனு"</string>
+    <!-- no translation found for accessibility_system_action_accessibility_button_label (5941347017132886642) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_accessibility_button_chooser_label (6973618519666227981) -->
+    <skip />
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g> ஆப்ஸின் தலைப்புப் பட்டி."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> என்பதை வரம்பிடப்பட்ட பக்கெட்திற்குள் சேர்க்கப்பட்டது"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
+    <!-- no translation found for conversation_single_line_image_placeholder (6983271082911936900) -->
+    <skip />
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"உரையாடல்"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"குழு உரையாடல்"</string>
     <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>

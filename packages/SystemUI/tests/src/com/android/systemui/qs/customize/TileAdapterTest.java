@@ -24,6 +24,7 @@ import android.testing.TestableLooper.RunWithLooper;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.logging.testing.UiEventLoggerFake;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.qs.QSTileHost;
 
@@ -42,7 +43,8 @@ public class TileAdapterTest extends SysuiTestCase {
 
     @Before
     public void setup() throws Exception {
-        TestableLooper.get(this).runWithLooper(() -> mTileAdapter = new TileAdapter(mContext));
+        TestableLooper.get(this).runWithLooper(() -> mTileAdapter =
+                new TileAdapter(mContext, new UiEventLoggerFake()));
     }
 
     @Test

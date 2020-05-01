@@ -2,9 +2,6 @@
   "presubmit": [
     {
       "name": "libiorap-java-tests"
-    },
-    {
-      "name": "iorap-functional-tests"
     }
   ],
   "imports": [

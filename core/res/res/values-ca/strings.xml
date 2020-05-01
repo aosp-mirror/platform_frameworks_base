@@ -201,9 +201,9 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"El contingut del dispositiu s\'esborrarà"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"No es pot utilitzar l\'aplicació d\'administració. S\'esborraran les dades del dispositiu.\n\nSi tens cap dubte, contacta amb l\'administrador de la teva organització."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> ha desactivat la impressió."</string>
-    <string name="personal_apps_suspended_title" msgid="4543693107104417750">"Desbloqueja les apps personals"</string>
-    <string name="personal_apps_suspended_tomorrow_title" msgid="6414440257969874914">"Les apps es bloquejaran demà"</string>
-    <string name="personal_apps_suspended_text" msgid="8954038765131038226">"L\'administrador de TI no permet posar en pausa el teu perfil de treball durant més de: <xliff:g id="DAYS">%1$d</xliff:g> dies"</string>
+    <string name="personal_apps_suspension_title" msgid="7561416677884286600">"Activa el perfil de treball"</string>
+    <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Les teves aplicacions personals estan bloquejades fins que activis el perfil de treball"</string>
+    <string name="personal_apps_suspension_tomorrow_text" msgid="6322541302153673994">"Les aplicacions personals es bloquejaran demà"</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"Activa el perfil de treball"</string>
     <string name="me" msgid="6207584824693813140">"Mi"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Opcions de la tauleta"</string>
@@ -1630,10 +1630,8 @@
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Si mantens premudes les dues tecles de volum durant uns segons, la funció d\'accessibilitat <xliff:g id="SERVICE">%1$s</xliff:g> s\'activarà. Això podria canviar el funcionament del teu dispositiu.\n\nPots canviar la funció d\'aquesta drecera a Configuració &gt; Accessibilitat."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Activa"</string>
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"No activis"</string>
-    <!-- no translation found for accessibility_shortcut_menu_item_status_on (6608392117189732543) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_menu_item_status_off (5531598275559472393) -->
-    <skip />
+    <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"ACTIVAT"</string>
+    <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"DESACTIVAT"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Vols permetre que <xliff:g id="SERVICE">%1$s</xliff:g> controli el teu dispositiu per complet?"</string>
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Si actives <xliff:g id="SERVICE">%1$s</xliff:g>, el dispositiu no farà servir el bloqueig de pantalla per millorar l\'encriptació de dades."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"El control total és adequat per a les aplicacions que t\'ajuden amb l\'accessibilitat, però no per a la majoria de les aplicacions."</string>
@@ -1795,8 +1793,10 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Actualitzat per l\'administrador"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Suprimit per l\'administrador"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"D\'acord"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Per allargar la durada de la bateria, el mode Estalvi de bateria:\n Activa el tema fosc\n Desactiva o restringeix l\'activitat en segon pla, alguns efectes visuals i altres funcions com \"Ok Google\"\n\n"<annotation id="url">"Més informació"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"Per allargar la durada de la bateria, el mode Estalvi de bateria:\n Activa el tema fosc\n Desactiva o restringeix l\'activitat en segon pla, alguns efectes visuals i altres funcions com \"Ok Google\""</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (5997766757551917769) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (8587408568232177204) -->
+    <skip />
     <string name="data_saver_description" msgid="4995164271550590517">"Per reduir l\'ús de dades, la funció Economitzador de dades evita que determinades aplicacions enviïn o rebin dades en segon pla. L\'aplicació que estiguis fent servir podrà accedir a les dades, però menys sovint. Això vol dir, per exemple, que les imatges no es mostraran fins que no les toquis."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Activar Economitzador de dades?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Activa"</string>
@@ -2041,13 +2041,17 @@
     <string name="accessibility_system_action_notifications_label" msgid="6083767351772162010">"Notificacions"</string>
     <string name="accessibility_system_action_quick_settings_label" msgid="4583900123506773783">"Configuració ràpida"</string>
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"Quadre de diàleg d\'engegada"</string>
-    <string name="accessibility_system_action_toggle_split_screen_label" msgid="6626177163849387748">"Commuta Pantalla dividida"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Pantalla de bloqueig"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Captura de pantalla"</string>
-    <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"Menú d\'accessibilitat"</string>
+    <!-- no translation found for accessibility_system_action_accessibility_button_label (5941347017132886642) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_accessibility_button_chooser_label (6973618519666227981) -->
+    <skip />
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Barra de títol de l\'aplicació <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> s\'ha transferit al segment RESTRINGIT"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
+    <!-- no translation found for conversation_single_line_image_placeholder (6983271082911936900) -->
+    <skip />
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"Conversa"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"Conversa de grup"</string>
     <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>

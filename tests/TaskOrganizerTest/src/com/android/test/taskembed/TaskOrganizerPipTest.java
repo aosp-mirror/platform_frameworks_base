@@ -23,6 +23,7 @@ import android.app.Service;
 import android.content.Intent;
 import android.graphics.Rect;
 import android.os.IBinder;
+import android.view.SurfaceControl;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
@@ -30,14 +31,14 @@ import android.window.TaskOrganizer;
 import android.window.WindowContainerTransaction;
 
 public class TaskOrganizerPipTest extends Service {
-    static final int PIP_WIDTH  = 640;
-    static final int PIP_HEIGHT = 360;
+    private static final int PIP_WIDTH  = 640;
+    private static final int PIP_HEIGHT = 360;
 
-    TaskView mTaskView;
+    private TaskView mTaskView;
 
     class Organizer extends TaskOrganizer {
-        public void onTaskAppeared(ActivityManager.RunningTaskInfo ti) {
-            mTaskView.reparentTask(ti.token);
+        public void onTaskAppeared(ActivityManager.RunningTaskInfo ti, SurfaceControl leash) {
+            mTaskView.reparentTask(ti.token, leash);
 
             final WindowContainerTransaction wct = new WindowContainerTransaction();
             wct.scheduleFinishEnterPip(ti.token, new Rect(0, 0, PIP_WIDTH, PIP_HEIGHT));
@@ -45,7 +46,7 @@ public class TaskOrganizerPipTest extends Service {
         }
     }
 
-    Organizer mOrganizer = new Organizer();
+    private Organizer mOrganizer = new Organizer();
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -66,7 +67,7 @@ public class TaskOrganizerPipTest extends Service {
         FrameLayout layout = new FrameLayout(this);
         ViewGroup.LayoutParams lp =
             new ViewGroup.LayoutParams(PIP_WIDTH, PIP_HEIGHT);
-        mTaskView = new TaskView(this, mOrganizer, WINDOWING_MODE_PINNED);
+        mTaskView = new TaskView(this);
         layout.addView(mTaskView, lp);
 
         WindowManager wm = getSystemService(WindowManager.class);

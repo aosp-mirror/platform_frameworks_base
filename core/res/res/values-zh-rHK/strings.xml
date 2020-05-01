@@ -201,9 +201,9 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"您的裝置將被清除"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"無法使用管理員應用程式。系統會現在清除您的裝置。\n\n如有任何疑問，請聯絡您的機構管理員。"</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"「<xliff:g id="OWNER_APP">%s</xliff:g>」暫停了列印。"</string>
-    <string name="personal_apps_suspended_title" msgid="4543693107104417750">"解除封鎖您的個人應用程式"</string>
-    <string name="personal_apps_suspended_tomorrow_title" msgid="6414440257969874914">"應用程式將於明天封鎖"</string>
-    <string name="personal_apps_suspended_text" msgid="8954038765131038226">"IT 管理員不允許您的工作設定檔暫停使用超過 <xliff:g id="DAYS">%1$d</xliff:g> 天"</string>
+    <string name="personal_apps_suspension_title" msgid="7561416677884286600">"開啟工作設定檔"</string>
+    <string name="personal_apps_suspension_text" msgid="6115455688932935597">"系統會封鎖您的個人應用程式，直至您開啟工作設定檔為止"</string>
+    <string name="personal_apps_suspension_tomorrow_text" msgid="6322541302153673994">"您的個人應用程式將於明天封鎖"</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"啟用工作設定檔"</string>
     <string name="me" msgid="6207584824693813140">"我本人"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"平板電腦選項"</string>
@@ -1630,10 +1630,8 @@
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"同時按下兩個音量鍵幾秒，以開啟 <xliff:g id="SERVICE">%1$s</xliff:g> 無障礙功能。這可能會變更裝置的運作。\n\n您可在「設定」&gt;「無障礙功能」中變更此快速鍵。"</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"開啟"</string>
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"不要開啟"</string>
-    <!-- no translation found for accessibility_shortcut_menu_item_status_on (6608392117189732543) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_menu_item_status_off (5531598275559472393) -->
-    <skip />
+    <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"開啟"</string>
+    <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"關閉"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"要允許 <xliff:g id="SERVICE">%1$s</xliff:g> 完全控制您的裝置嗎？"</string>
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"如果您開啟 <xliff:g id="SERVICE">%1$s</xliff:g>，裝置將無法使用螢幕鎖定功能加強資料加密。"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"為您提供所需無障礙功能的應用程式有權完全控制您的裝置，但大部分應用程式均沒有此權限。"</string>
@@ -1795,8 +1793,10 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"已由您的管理員更新"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"已由您的管理員刪除"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"好"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"為延長電池壽命，「省電模式」會：\n開啟深色主題背景\n關閉或限制背景活動、某些視覺效果和其他功能 (例如「Hey Google」)\n\n"<annotation id="url">"瞭解詳情"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"為延長電池壽命，「省電模式」會：\n開啟深色主題背景\n關閉或限制背景活動、某些視覺效果和其他功能 (例如「Hey Google」)"</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (5997766757551917769) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (8587408568232177204) -->
+    <skip />
     <string name="data_saver_description" msgid="4995164271550590517">"「數據節省模式」可防止部分應用程式在背景收發資料，以節省數據用量。您正在使用的應用程式可存取資料，但次數可能會減少。例如，圖片可能需要輕按才會顯示。"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"要開啟「數據節省模式」嗎？"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"開啟"</string>
@@ -2041,13 +2041,17 @@
     <string name="accessibility_system_action_notifications_label" msgid="6083767351772162010">"通知"</string>
     <string name="accessibility_system_action_quick_settings_label" msgid="4583900123506773783">"快速設定"</string>
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"電源對話框"</string>
-    <string name="accessibility_system_action_toggle_split_screen_label" msgid="6626177163849387748">"切換分割螢幕"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"將畫面上鎖"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"螢幕截圖"</string>
-    <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"無障礙功能選單"</string>
+    <!-- no translation found for accessibility_system_action_accessibility_button_label (5941347017132886642) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_accessibility_button_chooser_label (6973618519666227981) -->
+    <skip />
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」的說明列。"</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> 已納入受限制的儲存區"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>："</string>
+    <!-- no translation found for conversation_single_line_image_placeholder (6983271082911936900) -->
+    <skip />
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"對話"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"群組對話"</string>
     <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>

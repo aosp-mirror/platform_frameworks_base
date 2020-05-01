@@ -80,7 +80,7 @@ public class DynamicChildBindControllerTest extends SysuiTestCase {
         when(mBindStage.getStageParams(lastChild)).thenReturn(bindParams);
 
         // WHEN the controller gets the list
-        mDynamicChildBindController.updateChildContentViews(mGroupNotifs);
+        mDynamicChildBindController.updateContentViews(mGroupNotifs);
 
         // THEN we free content views
         verify(bindParams).markContentViewsFreeable(FLAG_CONTENT_VIEW_CONTRACTED);
@@ -101,7 +101,7 @@ public class DynamicChildBindControllerTest extends SysuiTestCase {
         when(mBindStage.getStageParams(lastChild)).thenReturn(bindParams);
 
         // WHEN the controller gets the list
-        mDynamicChildBindController.updateChildContentViews(mGroupNotifs);
+        mDynamicChildBindController.updateContentViews(mGroupNotifs);
 
         // THEN we bind content views
         verify(bindParams).requireContentViews(FLAG_CONTENT_VIEW_CONTRACTED);

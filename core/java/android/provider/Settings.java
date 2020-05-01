@@ -10779,13 +10779,33 @@ public final class Settings {
          * The associated value is a specially formatted string that describes the
          * size and density of simulated secondary display devices.
          * <p>
-         * Format: {width}x{height}/{dpi};...
+         * Format:
+         * <pre>
+         * [display1];[display2];...
+         * </pre>
+         * with each display specified as:
+         * <pre>
+         * [mode1]|[mode2]|...,[flag1],[flag2],...
+         * </pre>
+         * with each mode specified as:
+         * <pre>
+         * [width]x[height]/[densityDpi]
+         * </pre>
+         * Supported flags:
+         * <ul>
+         * <li><pre>secure</pre>: creates a secure display</li>
+         * <li><pre>own_content_only</pre>: only shows this display's own content</li>
+         * <li><pre>should_show_system_decorations</pre>: supports system decorations</li>
+         * </ul>
          * </p><p>
          * Example:
          * <ul>
          * <li><code>1280x720/213</code>: make one overlay that is 1280x720 at 213dpi.</li>
-         * <li><code>1920x1080/320;1280x720/213</code>: make two overlays, the first
-         * at 1080p and the second at 720p.</li>
+         * <li><code>1920x1080/320,secure;1280x720/213</code>: make two overlays, the first at
+         * 1080p and secure; the second at 720p.</li>
+         * <li><code>1920x1080/320|3840x2160/640</code>: make one overlay that is 1920x1080 at
+         * 213dpi by default, but can also be upscaled to 3840x2160 at 640dpi by the system if the
+         * display device allows.</li>
          * <li>If the value is empty, then no overlay display devices are created.</li>
          * </ul></p>
          *

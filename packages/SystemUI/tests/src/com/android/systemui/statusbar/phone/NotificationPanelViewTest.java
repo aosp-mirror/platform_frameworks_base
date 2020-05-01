@@ -47,6 +47,7 @@ import android.view.accessibility.AccessibilityManager;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.testing.UiEventLoggerFake;
 import com.android.internal.util.LatencyTracker;
 import com.android.keyguard.KeyguardClockSwitch;
 import com.android.keyguard.KeyguardUpdateMonitor;
@@ -207,7 +208,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
         NotificationWakeUpCoordinator coordinator =
                 new NotificationWakeUpCoordinator(
                         mock(HeadsUpManagerPhone.class),
-                        new StatusBarStateControllerImpl(),
+                        new StatusBarStateControllerImpl(new UiEventLoggerFake()),
                         mKeyguardBypassController,
                         mDozeParameters);
         PulseExpansionHandler expansionHandler = new PulseExpansionHandler(

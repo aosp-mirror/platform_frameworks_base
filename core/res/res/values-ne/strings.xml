@@ -201,9 +201,9 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"तपाईंको यन्त्र मेटिनेछ"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"प्रशासकको एप प्रयोग गर्न मिल्दैन। तपाईंको यन्त्रको डेटा अब मेटाइने छ।\n\nतपाईंसँग प्रश्नहरू भएका खण्डमा आफ्नो संगठनका प्रशासकसँग सम्पर्क गर्नुहोस्।"</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> ले छाप्ने कार्यलाई असक्षम पार्यो।"</string>
-    <string name="personal_apps_suspended_title" msgid="4543693107104417750">"आफ्ना व्यक्तिगत एपमाथिको रोक हटाउनु"</string>
-    <string name="personal_apps_suspended_tomorrow_title" msgid="6414440257969874914">"भोलि एपहरूलाई रोक लगाइने छ"</string>
-    <string name="personal_apps_suspended_text" msgid="8954038765131038226">"तपाईंका IT एडमिनले तपाईंको कार्यसम्बन्धी प्रोफाइल <xliff:g id="DAYS">%1$d</xliff:g> दिनभन्दा बढी पज गर्ने अनुमति दिनुभएको छैन"</string>
+    <string name="personal_apps_suspension_title" msgid="7561416677884286600">"आफ्नो कार्य प्रोफाइल सक्रिय गर्नुहोस्"</string>
+    <string name="personal_apps_suspension_text" msgid="6115455688932935597">"तपाईंले आफ्नो कार्य प्रोफाइल सक्रिय नगरुन्जेल तपाईंका व्यक्तिगत अनुप्रयोगहरूलाई रोक लगाइन्छ"</string>
+    <string name="personal_apps_suspension_tomorrow_text" msgid="6322541302153673994">"तपाईंका व्यक्तिगत अनुप्रयोगहरूलाई भोलि रोक लगाइने छ"</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"कार्यसम्बन्धी प्रोफाइल सक्रिय गर्नुहोस्"</string>
     <string name="me" msgid="6207584824693813140">"मलाई"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"ट्याब्लेट विकल्पहरू"</string>
@@ -1636,10 +1636,8 @@
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"केही सेकेन्डसम्म दुवै भोल्युम बटन थिचिराख्नुले <xliff:g id="SERVICE">%1$s</xliff:g> नामक पहुँचसम्बन्धी सुविधा  सक्रिय गर्छ। यसले तपाईंको यन्त्रले काम गर्ने तरिका परिवर्तन गर्न सक्छ।\n\nतपाईं सेटिङ &gt; पहुँचमा गई यो सर्टकटमार्फत अर्को सुविधा खुल्ने बनाउन सक्नुहुन्छ।"</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"सक्रिय गरियोस्"</string>
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"सक्रिय नगरियोस्"</string>
-    <!-- no translation found for accessibility_shortcut_menu_item_status_on (6608392117189732543) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_menu_item_status_off (5531598275559472393) -->
-    <skip />
+    <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"सक्रिय"</string>
+    <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"निष्क्रिय"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g> लाई तपाईंको यन्त्र पूर्ण रूपमा नियन्त्रण गर्न दिने हो?"</string>
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"तपाईंले <xliff:g id="SERVICE">%1$s</xliff:g> सक्रिय गर्नुभयो भने तपाईंको यन्त्रले डेटा इन्क्रिप्ट गर्ने सुविधाको स्तरोन्नति गर्न तपाईंको स्क्रिन लक सुविधाको प्रयोग गर्ने छैन।"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"तपाईंलाई पहुँच राख्न आवश्यक पर्ने कुरामा सहयोग गर्ने अनुप्रयोगहरूमाथि पूर्ण नियन्त्रण गर्नु उपयुक्त हुन्छ तर अधिकांश अनुप्रयोगहरूका हकमा यस्तो नियन्त्रण उपयुक्त हुँदैन।"</string>
@@ -1801,8 +1799,10 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"तपाईंका प्रशासकले अद्यावधिक गर्नुभएको"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"तपाईंका प्रशासकले मेट्नुभएको"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ठिक छ"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"ब्याट्रीको आयु लामो बनाउन ब्याट्री सेभरले:\n·अँध्यारो थिम सक्रिय गर्छ\n·पृष्ठभूमिका गतिविधि, कतिपय भिजुअल प्रभाव तथा “Hey Google” जस्ता अन्य सुविधाहरू निष्क्रिय वा सीमित पार्छ।\n\n"<annotation id="url">"थप जान्नुहोस्"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"ब्याट्रीको आयु बढाउन ब्याट्री सेभरले:\n·अँध्यारो थिम सक्रिय गर्छ\n·पृष्ठभूमिका गतिविधि, कतिपय भिजुअल प्रभाव तथा “Hey Google” जस्ता अन्य सुविधाहरू निष्क्रिय वा सीमित पार्छ।"</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (5997766757551917769) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (8587408568232177204) -->
+    <skip />
     <string name="data_saver_description" msgid="4995164271550590517">"डेटाको प्रयोगलाई कम गर्न डेटा सर्भरले केही अनुप्रयोगलाई पृष्ठभूमिमा डेटा पठाउन वा प्राप्त गर्न दिँदैन। तपाईंले हाल प्रयोग गरिरहनुभएको अनु्प्रयोगले डेटा चलाउन सक्छ, तर पहिला भन्दा कम अन्तरालमा मात्र। उदाहरणका लागि, तपाईले छविहरूमा ट्याप नगरेसम्म ती छविहरू देखिँदैनन्।"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"डेटा सेभर सक्रिय गर्ने हो?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"सक्रिय गर्नुहोस्"</string>
@@ -2047,13 +2047,17 @@
     <string name="accessibility_system_action_notifications_label" msgid="6083767351772162010">"सूचनाहरू"</string>
     <string name="accessibility_system_action_quick_settings_label" msgid="4583900123506773783">"द्रुत सेटिङहरू"</string>
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"पावर संवाद"</string>
-    <string name="accessibility_system_action_toggle_split_screen_label" msgid="6626177163849387748">"विभाजित स्क्रिन टगल गर्नुहोस्"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"लक स्क्रिन"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"स्क्रिनसट"</string>
-    <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"पहुँचसम्बन्धी मेनु"</string>
+    <!-- no translation found for accessibility_system_action_accessibility_button_label (5941347017132886642) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_accessibility_button_chooser_label (6973618519666227981) -->
+    <skip />
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g> को क्याप्सन बार।"</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> लाई प्रतिबन्धित बाल्टीमा राखियो"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
+    <!-- no translation found for conversation_single_line_image_placeholder (6983271082911936900) -->
+    <skip />
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"वार्तालाप"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"सामूहिक वार्तालाप"</string>
     <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>

@@ -480,7 +480,8 @@ public class BubbleData {
     }
 
     void overflowBubble(@DismissReason int reason, Bubble bubble) {
-        if (!(reason == BubbleController.DISMISS_AGED
+        if (bubble.getPendingIntentCanceled()
+                || !(reason == BubbleController.DISMISS_AGED
                 || reason == BubbleController.DISMISS_USER_GESTURE)) {
             return;
         }
