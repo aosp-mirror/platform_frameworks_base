@@ -1772,6 +1772,28 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testGroupInstanceIds() throws Exception {
+        final NotificationRecord group1 = generateNotificationRecord(
+                mTestNotificationChannel, 1, "group1", true);
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, "testFindGroupNotificationsLocked",
+                group1.getSbn().getId(), group1.getSbn().getNotification(),
+                group1.getSbn().getUserId());
+        waitForIdle();
+
+        // same group, child, should be returned
+        final NotificationRecord group1Child = generateNotificationRecord(
+                mTestNotificationChannel, 2, "group1", false);
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, "testFindGroupNotificationsLocked",
+                group1Child.getSbn().getId(),
+                group1Child.getSbn().getNotification(), group1Child.getSbn().getUserId());
+        waitForIdle();
+
+        assertEquals(2, mNotificationRecordLogger.numCalls());
+        assertEquals(mNotificationRecordLogger.get(0).getInstanceId(),
+                mNotificationRecordLogger.get(1).groupInstanceId.getId());
+    }
+
+    @Test
     public void testFindGroupNotificationsLocked() throws Exception {
         // make sure the same notification can be found in both lists and returned
         final NotificationRecord group1 = generateNotificationRecord(
