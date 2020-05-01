@@ -38,6 +38,7 @@ import android.view.InsetsState;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.function.TriConsumer;
 import com.android.server.wm.SurfaceAnimator.AnimationType;
 import com.android.server.wm.SurfaceAnimator.OnAnimationFinishedCallback;
@@ -288,6 +289,7 @@ class InsetsSourceProvider {
             t.deferTransactionUntil(leash, barrier, frameNumber);
         }
         mControlTarget = target;
+        updateVisibility();
         mControl = new InsetsSourceControl(mSource.getType(), leash,
                 new Point(mWin.getWindowFrames().mFrame.left, mWin.getWindowFrames().mFrame.top));
     }
@@ -330,13 +332,16 @@ class InsetsSourceProvider {
         updateVisibility();
     }
 
-    private void setServerVisible(boolean serverVisible) {
+    @VisibleForTesting
+    void setServerVisible(boolean serverVisible) {
         mServerVisible = serverVisible;
         updateVisibility();
     }
 
     private void updateVisibility() {
-        mSource.setVisible(mServerVisible && mClientVisible);
+        final boolean isClientControlled = mControlTarget != null
+                && mControlTarget.isClientControlled();
+        mSource.setVisible(mServerVisible && (!isClientControlled || mClientVisible));
     }
 
     InsetsSourceControl getControl(InsetsControlTarget target) {
@@ -408,10 +413,10 @@ class InsetsSourceProvider {
         public void onAnimationCancelled(SurfaceControl animationLeash) {
             if (mAdapter == this) {
                 mStateController.notifyControlRevoked(mControlTarget, InsetsSourceProvider.this);
-                setClientVisible(InsetsState.getDefaultVisibility(mSource.getType()));
                 mControl = null;
                 mControlTarget = null;
                 mAdapter = null;
+                setClientVisible(InsetsState.getDefaultVisibility(mSource.getType()));
             }
         }
 
