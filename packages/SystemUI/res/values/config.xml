@@ -322,6 +322,7 @@
         <item>com.android.systemui.accessibility.WindowMagnification</item>
         <item>com.android.systemui.accessibility.SystemActions</item>
         <item>com.android.systemui.toast.ToastUI</item>
+        <item>com.android.systemui.onehanded.OneHandedUI</item>
     </string-array>
 
     <!-- QS tile shape store width. negative implies fill configuration instead of stroke-->
@@ -569,4 +570,14 @@
     <integer name="controls_max_columns_adjust_below_width_dp">320</integer>
     <!-- If the config font scale is >= this value, potentially adjust the number of columns-->
     <item name="controls_max_columns_adjust_above_font_scale" translatable="false" format="float" type="dimen">1.25</item>
+
+    <!-- One handed mode default offset % of display size -->
+    <fraction name="config_one_handed_offset">50%</fraction>
+
+    <!-- Allow one handed to enable round corner -->
+    <bool name="config_one_handed_enable_round_corner">true</bool>
+
+    <!-- Animation duration for translating of one handed when trigger / dismiss. -->
+    <integer name="config_one_handed_translate_animation_duration">150</integer>
+
 </resources>

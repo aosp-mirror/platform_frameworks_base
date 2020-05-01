@@ -307,6 +307,11 @@ class DisplayAreaPolicyBuilder {
             return mAreaForLayer[windowLayerFromType];
         }
 
+        @VisibleForTesting
+        ArrayList<Feature> getFeatures() {
+            return mFeatures;
+        }
+
         public List<DisplayArea<? extends WindowContainer>> getDisplayAreas(Feature feature) {
             return mAreas.get(feature);
         }
