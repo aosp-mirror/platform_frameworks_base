@@ -146,16 +146,8 @@ public abstract class ClientTransactionHandler {
     /** Deliver result from another activity. */
     public abstract void handleSendResult(IBinder token, List<ResultInfo> results, String reason);
 
-    /** Deliver multi-window mode change notification. */
-    public abstract void handleMultiWindowModeChanged(IBinder token, boolean isInMultiWindowMode,
-            Configuration overrideConfig);
-
     /** Deliver new intent. */
     public abstract void handleNewIntent(IBinder token, List<ReferrerIntent> intents);
-
-    /** Deliver picture-in-picture mode change notification. */
-    public abstract void handlePictureInPictureModeChanged(IBinder token, boolean isInPipMode,
-            Configuration overrideConfig);
 
     /** Request that an activity enter picture-in-picture. */
     public abstract void handlePictureInPictureRequested(IBinder token);
