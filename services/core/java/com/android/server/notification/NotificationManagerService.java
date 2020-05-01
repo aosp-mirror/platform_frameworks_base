@@ -238,6 +238,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.compat.IPlatformCompat;
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
+import com.android.internal.logging.InstanceId;
 import com.android.internal.logging.InstanceIdSequence;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
@@ -6493,7 +6494,7 @@ public class NotificationManagerService extends SystemService {
 
                     // Log event to statsd
                     mNotificationRecordLogger.maybeLogNotificationPosted(r, old, position,
-                            buzzBeepBlinkLoggingCode);
+                            buzzBeepBlinkLoggingCode, getGroupInstanceId(n.getGroupKey()));
                 } finally {
                     int N = mEnqueuedNotifications.size();
                     for (int i = 0; i < N; i++) {
@@ -6506,6 +6507,21 @@ public class NotificationManagerService extends SystemService {
                 }
             }
         }
+    }
+
+    /**
+     *
+     */
+    @GuardedBy("mNotificationLock")
+    InstanceId getGroupInstanceId(String groupKey) {
+        if (groupKey == null) {
+            return null;
+        }
+        NotificationRecord group = mSummaryByGroupKey.get(groupKey);
+        if (group == null) {
+            return null;
+        }
+        return group.getSbn().getInstanceId();
     }
 
     /**
