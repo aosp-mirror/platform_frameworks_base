@@ -294,6 +294,7 @@
     <timezone code="ca">America/Cambridge_Bay</timezone>
     <timezone code="ca">America/Yellowknife</timezone>
     <timezone code="ca">America/Inuvik</timezone>
+    <timezone code="ca">America/Whitehorse</timezone>
     <timezone code="ca">America/Dawson_Creek</timezone>
     <timezone code="ca">America/Creston</timezone>
     <timezone code="ca">America/Fort_Nelson</timezone>
@@ -301,7 +302,6 @@
     <!-- CANADA, -8:00 -->
 
     <timezone code="ca">America/Vancouver</timezone>
-    <timezone code="ca">America/Whitehorse</timezone>
     <timezone code="ca">America/Dawson</timezone>
 
     <!-- COCOS (KEELING) ISLANDS, 6:30 -->
@@ -529,7 +529,7 @@
 
     <!-- GREENLAND, -3:00 -->
 
-    <timezone code="gl">America/Godthab</timezone>
+    <timezone code="gl">America/Nuuk</timezone>
 
     <!-- GREENLAND, -4:00 -->
 
@@ -711,12 +711,13 @@
     <!-- KAZAKHSTAN, 6:00 -->
 
     <timezone code="kz">Asia/Almaty</timezone>
-    <timezone code="kz">Asia/Qyzylorda</timezone>
+    <timezone code="kz">Asia/Qostanay</timezone>
 
     <!-- KAZAKHSTAN, 5:00 -->
 
     <timezone code="kz">Asia/Aqtau</timezone>
     <timezone code="kz">Asia/Oral</timezone>
+    <timezone code="kz">Asia/Qyzylorda</timezone>
     <timezone code="kz">Asia/Aqtobe</timezone>
     <timezone code="kz">Asia/Atyrau</timezone>
 
@@ -1076,13 +1077,12 @@
     <timezone code="ru">Europe/Astrakhan</timezone>
     <timezone code="ru">Europe/Ulyanovsk</timezone>
     <timezone code="ru">Europe/Saratov</timezone>
+    <timezone code="ru">Europe/Volgograd</timezone>
 
     <!-- RUSSIAN FEDERATION, 3:00 -->
 
     <timezone code="ru">Europe/Moscow</timezone>
-    <timezone code="ru">Europe/Volgograd</timezone>
     <timezone code="ru">Europe/Kirov</timezone>
-    <timezone code="ru">Europe/Simferopol</timezone>
 
     <!-- RUSSIAN FEDERATION, 2:00 -->
 
@@ -1245,6 +1245,7 @@
     <timezone code="ua">Europe/Kiev</timezone>
     <timezone code="ua">Europe/Uzhgorod</timezone>
     <timezone code="ua">Europe/Zaporozhye</timezone>
+    <timezone code="ua">Europe/Simferopol</timezone>
 
     <!-- UGANDA, 3:00 -->
 
