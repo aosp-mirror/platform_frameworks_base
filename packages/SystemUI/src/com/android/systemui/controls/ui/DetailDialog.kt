@@ -28,6 +28,7 @@ import android.view.WindowInsets.Type
 import android.view.WindowManager
 import android.widget.ImageView
 
+import com.android.internal.policy.ScreenDecorationsUtils
 import com.android.systemui.R
 
 /**
@@ -41,8 +42,12 @@ class DetailDialog(
 ) : Dialog(cvh.context, R.style.Theme_SystemUI_Dialog_Control_DetailPanel) {
 
     companion object {
-        private const val ALPHA = (0.8f * 255).toInt()
         private const val PANEL_TOP_OFFSET = "systemui.controls_panel_top_offset"
+        /*
+         * Indicate to the activity that it is being rendered in a bottomsheet, and they
+         * should optimize the layout for a smaller space.
+         */
+        private const val EXTRA_USE_PANEL = "controls.DISPLAY_IN_PANEL"
     }
 
     var activityView = ActivityView(context, null, 0, false)
@@ -50,6 +55,7 @@ class DetailDialog(
     val stateCallback: ActivityView.StateCallback = object : ActivityView.StateCallback() {
         override fun onActivityViewReady(view: ActivityView) {
             val launchIntent = Intent(intent)
+            launchIntent.putExtra(EXTRA_USE_PANEL, true)
 
             // Apply flags to make behaviour match documentLaunchMode=always.
             launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -111,6 +117,12 @@ class DetailDialog(
 
             setOnClickListener { dismiss() }
             (getParent() as View).setOnClickListener { dismiss() }
+        }
+
+        if (ScreenDecorationsUtils.supportsRoundedCornersOnWindows(context.getResources())) {
+            val cornerRadius = context.resources
+                .getDimensionPixelSize(R.dimen.controls_activity_view_corner_radius)
+            activityView.setCornerRadius(cornerRadius.toFloat())
         }
     }
 
