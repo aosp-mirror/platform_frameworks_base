@@ -1860,7 +1860,33 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 isIncrementalInstallation(),
                 packageNameToLog,
                 currentTimestamp - createdMillis,
-                returnCode);
+                returnCode,
+                getApksSize());
+    }
+
+    private long getApksSize() {
+        final PackageSetting ps = mPm.getPackageSetting(mPackageName);
+        if (ps == null) {
+            return 0;
+        }
+        final File apkDirOrPath = ps.codePath;
+        if (apkDirOrPath == null) {
+            return 0;
+        }
+        if (apkDirOrPath.isFile() && apkDirOrPath.getName().toLowerCase().endsWith(".apk")) {
+            return apkDirOrPath.length();
+        }
+        if (!apkDirOrPath.isDirectory()) {
+            return 0;
+        }
+        final File[] files = apkDirOrPath.listFiles();
+        long apksSize = 0;
+        for (int i = 0; i < files.length; i++) {
+            if (files[i].getName().toLowerCase().endsWith(".apk")) {
+                apksSize += files[i].length();
+            }
+        }
+        return apksSize;
     }
 
     /**
