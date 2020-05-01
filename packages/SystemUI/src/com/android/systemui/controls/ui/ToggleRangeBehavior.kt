@@ -145,6 +145,10 @@ class ToggleRangeBehavior : Behavior {
                             template.isChecked())
                         true
                     }
+                    AccessibilityNodeInfo.ACTION_LONG_CLICK -> {
+                        cvh.controlActionCoordinator.longPress(cvh)
+                        true
+                    }
                     AccessibilityNodeInfo.AccessibilityAction.ACTION_SET_PROGRESS.getId() -> {
                         if (arguments == null || !arguments.containsKey(
                                 AccessibilityNodeInfo.ACTION_ARGUMENT_PROGRESS_VALUE)) {
@@ -152,8 +156,8 @@ class ToggleRangeBehavior : Behavior {
                         } else {
                             val value = arguments.getFloat(
                                 AccessibilityNodeInfo.ACTION_ARGUMENT_PROGRESS_VALUE)
-                            val level = rangeToLevelValue(value - rangeTemplate.getCurrentValue())
-                            updateRange(level, template.isChecked(), /* isDragging */ false)
+                            val level = rangeToLevelValue(value)
+                            updateRange(level, template.isChecked(), /* isDragging */ true)
                             endUpdateRange()
                             true
                         }
@@ -168,7 +172,7 @@ class ToggleRangeBehavior : Behavior {
                 host: ViewGroup,
                 child: View,
                 event: AccessibilityEvent
-            ): Boolean = false
+            ): Boolean = true
         })
     }
 
@@ -180,14 +184,12 @@ class ToggleRangeBehavior : Behavior {
     fun updateRange(level: Int, checked: Boolean, isDragging: Boolean) {
         val newLevel = if (checked) Math.max(MIN_LEVEL, Math.min(MAX_LEVEL, level)) else MIN_LEVEL
 
-        if (newLevel == clipLayer.level) return
-
         rangeAnimator?.cancel()
         if (isDragging) {
             clipLayer.level = newLevel
             val isEdge = newLevel == MIN_LEVEL || newLevel == MAX_LEVEL
             cvh.controlActionCoordinator.drag(isEdge)
-        } else {
+        } else if (newLevel != clipLayer.level) {
             rangeAnimator = ValueAnimator.ofInt(cvh.clipLayer.level, newLevel).apply {
                 addUpdateListener {
                     cvh.clipLayer.level = it.animatedValue as Int
