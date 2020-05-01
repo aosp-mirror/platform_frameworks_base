@@ -470,6 +470,14 @@ message Atom {
         NetworkDhcpRenewReported network_dhcp_renew_reported = 291 [(module) = "network_stack"];
         NetworkValidationReported network_validation_reported = 292 [(module) = "network_stack"];
         NetworkStackQuirkReported network_stack_quirk_reported = 293 [(module) = "network_stack"];
+        MediametricsAudioRecordDeviceUsageReported mediametrics_audiorecorddeviceusage_reported =
+            294;
+        MediametricsAudioThreadDeviceUsageReported mediametrics_audiothreaddeviceusage_reported =
+            295;
+        MediametricsAudioTrackDeviceUsageReported mediametrics_audiotrackdeviceusage_reported =
+            296;
+        MediametricsAudioDeviceConnectionReported mediametrics_audiodeviceconnection_reported =
+            297;
 
         // StatsdStats tracks platform atoms with ids upto 500.
         // Update StatsdStats::kMaxPushedAtomId when atom ids here approach that value.
@@ -10548,4 +10556,238 @@ message AssistantInvocationReported {
 
     // Whether the Assistant handles were showing at the time of invocation.
     optional bool assistant_handles_showing = 6;
+}
+
+/**
+ * Logs when an AudioRecord finishes running on an audio device
+ *
+ * Logged from:
+ *   frameworks/av/services/mediametrics/AudioAnalytics.cpp
+ */
+message MediametricsAudioRecordDeviceUsageReported {
+    // The devices connected to this AudioRecord.
+    // A string OR of various input device categories, e.g. "DEVICE1|DEVICE2".
+    // See lookup<INPUT_DEVICE>() in frameworks/av/services/mediametrics/AudioTypes.cpp
+    // See audio_device_t in system/media/audio/include/system/audio-base.h
+    optional string devices = 1;
+
+    // The name of the remote device attached to the device, typically available for USB or BT.
+    // This may be empty for a fixed device, or separated by "|" if more than one.
+    optional string device_names = 2;
+
+    // The amount of time spent in the device as measured by the active track in AudioFlinger.
+    optional int64 device_time_nanos = 3;
+
+    // The audio data format used for encoding.
+    // An enumeration from system/media/audio/include/system/audio-base.h audio_format_t
+    optional string encoding = 4;
+
+    // The client-server buffer framecount.
+    // The framecount is generally between 960 - 48000 for PCM encoding.
+    // The framecount represents raw buffer size in bytes for non-PCM encoding.
+    optional int32 frame_count = 5;
+
+    // The number of audio intervals (contiguous, continuous playbacks).
+    optional int32 interval_count = 6;
+
+    // The sample rate of the AudioRecord.
+    // A number generally between 8000-96000 (frames per second).
+    optional int32 sample_rate = 7;
+
+    // The audio input flags used to construct the AudioRecord.
+    // A string OR from system/media/audio/include/system/audio-base.h audio_input_flags_t
+    optional string flags = 8;
+
+    // The santized package name of the audio client associated with the AudioRecord.
+    // See getSanitizedPackageNameAndVersionCode() in
+    // frameworks/av/services/mediametrics/MediaMetricsService.cpp
+    optional string package_name = 9;
+
+    // The selected device id (nonzero if a non-default device is selected)
+    optional int32 selected_device_id = 10;
+
+    // The caller of the AudioRecord.
+    // See lookup<CALLER_NAME>() in frameworks/av/services/mediametrics/AudioTypes.cpp
+    optional string caller = 11;
+
+    // The audio source for AudioRecord.
+    // An enumeration from system/media/audio/include/system/audio-base.h audio_source_t
+    optional string source = 12;
+}
+
+/**
+ * Logs when an AudioThread finishes running on an audio device
+ *
+ * Logged from:
+ *   frameworks/av/services/mediametrics/AudioAnalytics.cpp
+ */
+message MediametricsAudioThreadDeviceUsageReported {
+    // The devices connected to this audio thread.
+    // A string OR of various input device categories, e.g. "DEVICE1|DEVICE2".
+    // (for record threads):
+    // See lookup<INPUT_DEVICE> in frameworks/av/services/mediametrics/AudioTypes.cpp
+    // (for playback threads):
+    // See lookup<OUTPUT_DEVICE>() in frameworks/av/services/mediametrics/AudioTypes.cpp
+    // See audio_device_t in system/media/audio/include/system/audio-base.h
+    optional string devices = 1;
+
+    // The name of the remote device attached to the device, typically available for USB or BT.
+    // This may be empty for a fixed device, or separated by "|" if more than one.
+    optional string device_names = 2;
+
+    // The amount of time spent in the device as measured by the active track in AudioFlinger.
+    optional int64 device_time_nanos = 3;
+
+    // The audio data format used for encoding.
+    // An enumeration from system/media/audio/include/system/audio-base.h audio_format_t
+    optional string encoding = 4;
+
+    // The framecount of the buffer delivered to (or from) the HAL.
+    // The framecount is generally ~960 for PCM encoding.
+    // The framecount represents raw buffer size in bytes for non-PCM encoding.
+    optional int32 frame_count = 5;
+
+    // The number of audio intervals (contiguous, continuous playbacks).
+    optional int32 interval_count = 6;
+
+    // The sample rate of the audio thread.
+    // A number generally between 8000-96000 (frames per second).
+    optional int32 sample_rate = 7;
+
+    // The audio flags used to construct the thread
+    // (for record threads):
+    // A string OR from system/media/audio/include/system/audio-base.h audio_input_flags_t
+    // (for playback threads):
+    // A string OR from system/media/audio/include/system/audio-base.h audio_output_flags_t
+    optional string flags = 8;
+
+    // The number of underruns encountered for a playback thread or the
+    // number of overruns encountered for a capture thread.
+    optional int32 xruns = 9;
+
+    // The type of thread
+    // A thread type enumeration from
+    // frameworks/av/mediametrics/services/Translate.h
+    optional string type = 10;
+}
+
+/**
+ * Logs when an AudioTrack finishes running on an audio device
+ *
+ * Logged from:
+ *   frameworks/av/services/mediametrics/AudioAnalytics.cpp
+ */
+message MediametricsAudioTrackDeviceUsageReported {
+    // The output devices connected to this AudioTrack.
+    // A string OR of various output device categories, e.g. "DEVICE1|DEVICE2".
+    // See lookup<OUTPUT_DEVICE>() in frameworks/av/services/mediametrics/AudioTypes.cpp
+    // See audio_device_t in system/media/audio/include/system/audio-base.h
+    optional string devices = 1;
+
+    // The name of the remote device attached to the device, typically available for USB or BT.
+    // This may be empty for a fixed device, or separated by "|" if more than one.
+    optional string device_names = 2;
+
+    // The amount of time spent in the device as measured by the active track in AudioFlinger.
+    optional int64 device_time_nanos = 3;
+
+    // The audio data format used for encoding.
+    // An enumeration from system/media/audio/include/system/audio-base.h audio_format_t
+    optional string encoding = 4;
+
+    // The client-server buffer framecount.
+    // The framecount is generally between 960 - 48000 for PCM encoding.
+    // The framecount represents raw buffer size in bytes for non-PCM encoding.
+    // A static track (see traits) may have a very large framecount.
+    optional int32 frame_count = 5;
+
+    // The number of audio intervals (contiguous, continuous playbacks).
+    optional int32 interval_count = 6;
+
+    // The sample rate of the AudioTrack.
+    // A number generally between 8000-96000 (frames per second).
+    optional int32 sample_rate = 7;
+
+    // The audio flags used to construct the AudioTrack.
+    // A string OR from system/media/audio/include/system/audio-base.h audio_output_flags_t
+    optional string flags = 8;
+
+    // The number of underruns encountered.
+    optional int32 xruns = 9;
+
+    // The santized package name of the audio client associated with the AudioTrack.
+    // See getSanitizedPackageNameAndVersionCode() in
+    // frameworks/av/services/mediametrics/MediaMetricsService.cpp
+    optional string package_name = 10;
+
+    // The latency of the last sample in the buffer in milliseconds.
+    optional float device_latency_millis = 11;
+
+    // The startup time in milliseconds from start() to sample played.
+    optional float device_startup_millis = 12;
+
+    // The average volume of the track on the device [ 0.f - 1.f ]
+    optional float device_volume = 13;
+
+    // The selected device id (nonzero if a non-default device is selected)
+    optional int32 selected_device_id = 14;
+
+    // The stream_type category for the AudioTrack.
+    // An enumeration from system/media/audio/include/system/audio-base.h audio_stream_type_t
+    optional string stream_type = 15;
+
+    // The usage for the AudioTrack.
+    // An enumeration from system/media/audio/include/system/audio-base.h audio_usage_t
+    optional string usage = 16;
+
+    // The content type of the AudioTrack.
+    // An enumeration from system/media/audio/include/system/audio-base.h audio_content_type_t
+    optional string content_type = 17;
+
+    // The caller of the AudioTrack.
+    // See lookup<CALLER_NAME>() in frameworks/av/services/mediametrics/AudioTypes.cpp
+    optional string caller = 18;
+
+    // The traits of the AudioTrack.
+    // A string OR of different traits, may be empty string.
+    // Only "static" is supported for R.
+    // See lookup<TRACK_TRAITS>() in frameworks/av/services/mediametrics/AudioTypes.cpp
+    optional string traits = 19;
+}
+
+/**
+ * Logs the status of an audio device connection attempt.
+ *
+ * Logged from:
+ *   frameworks/av/services/mediametrics/AudioAnalytics.cpp
+ */
+message MediametricsAudioDeviceConnectionReported {
+    // The input devices represented by this report.
+    // A string OR of various input device categories, e.g. "DEVICE1|DEVICE2".
+    // See lookup<INPUT_DEVICE>() in frameworks/av/services/mediametrics/AudioTypes.cpp
+    // See audio_device_t in system/media/audio/include/system/audio-base.h
+    optional string input_devices = 1;
+
+    // The output devices represented by this report.
+    // A string OR of various output device categories.
+    // See lookup<OUTPUT_DEVICE>() in frameworks/av/services/mediametrics/AudioTypes.cpp
+    // See audio_device_t in system/media/audio/include/system/audio-base.h
+    optional string output_devices = 2;
+
+    // The name of the remote device attached to the device, typically available for USB or BT.
+    // This may be empty for a fixed device, or separated by "|" if more than one.
+    optional string device_names = 3;
+
+    // The result of the audio device connection.
+    // 0 indicates success: connection verified.
+    // 1 indicates unknown: connection not verified or not known if diverted properly.
+    // Other values indicate specific status.
+    // See DeviceConnectionResult in frameworks/av/services/mediametrics/AudioTypes.h
+    optional int32 result = 4;
+
+    // Average milliseconds of time to connect
+    optional float time_to_connect_millis = 5;
+
+    // Number of connections if aggregated statistics, otherwise 1.
+    optional int32 connection_count = 6;
 }
