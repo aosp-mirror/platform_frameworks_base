@@ -586,7 +586,8 @@ public class SettingsBackupTest {
                     Settings.Global.POWER_BUTTON_LONG_PRESS,
                     Settings.Global.POWER_BUTTON_VERY_LONG_PRESS,
                     Settings.Global.INTEGRITY_CHECK_INCLUDES_RULE_PROVIDER,
-                    Settings.Global.ADVANCED_BATTERY_USAGE_AMOUNT);
+                    Settings.Global.ADVANCED_BATTERY_USAGE_AMOUNT,
+                    Settings.Global.CACHED_APPS_FREEZER_ENABLED);
 
     private static final Set<String> BACKUP_BLACKLISTED_SECURE_SETTINGS =
              newHashSet(
