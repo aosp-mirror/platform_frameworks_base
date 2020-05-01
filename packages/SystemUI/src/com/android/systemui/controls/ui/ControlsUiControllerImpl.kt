@@ -517,15 +517,24 @@ class ControlsUiControllerImpl @Inject constructor (
         }
     }
 
-    override fun hide() {
-        Log.d(ControlsUiController.TAG, "hide()")
-        hidden = true
-        popup?.dismissImmediate()
+    override fun closeDialogs(immediately: Boolean) {
+        if (immediately) {
+            popup?.dismissImmediate()
+        } else {
+            popup?.dismiss()
+        }
+        popup = null
 
         controlViewsById.forEach {
             it.value.dismiss()
         }
         controlActionCoordinator.closeDialogs()
+    }
+
+    override fun hide() {
+        hidden = true
+
+        closeDialogs(true)
         controlsController.get().unsubscribe()
 
         parent.removeAllViews()
