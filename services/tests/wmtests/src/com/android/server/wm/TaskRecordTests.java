@@ -448,6 +448,21 @@ public class TaskRecordTests extends ActivityTestsBase {
     }
 
     @Test
+    public void testFullScreenTaskNotAdjustedByMinimalSize() {
+        final Task fullscreenTask = new TaskBuilder(mSupervisor).build();
+        final Rect originalTaskBounds = new Rect(fullscreenTask.getBounds());
+        final ActivityInfo aInfo = new ActivityInfo();
+        aInfo.windowLayout = new ActivityInfo.WindowLayout(0 /* width */, 0 /* widthFraction */,
+                    0 /* height */, 0 /* heightFraction */, 0 /* gravity */,
+                    originalTaskBounds.width() * 2 /* minWidth */,
+                    originalTaskBounds.height() * 2 /* minHeight */);
+        fullscreenTask.setMinDimensions(aInfo);
+        fullscreenTask.onConfigurationChanged(fullscreenTask.getParent().getConfiguration());
+
+        assertEquals(originalTaskBounds, fullscreenTask.getBounds());
+    }
+
+    @Test
     public void testInsetDisregardedWhenFreeformOverlapsNavBar() {
         TaskDisplayArea taskDisplayArea = mService.mRootWindowContainer.getDefaultTaskDisplayArea();
         ActivityStack stack = taskDisplayArea.createStack(WINDOWING_MODE_FULLSCREEN,
