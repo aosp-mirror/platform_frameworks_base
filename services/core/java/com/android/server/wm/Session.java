@@ -679,10 +679,10 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
 
     @Override
     public void updateInputChannel(IBinder channelToken, int displayId, SurfaceControl surface,
-            int flags) {
+            int flags, Region region) {
         final long identity = Binder.clearCallingIdentity();
         try {
-            mService.updateInputChannel(channelToken, displayId, surface, flags);
+            mService.updateInputChannel(channelToken, displayId, surface, flags, region);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
