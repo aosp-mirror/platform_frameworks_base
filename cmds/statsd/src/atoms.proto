@@ -9096,6 +9096,9 @@ message VoiceCallSession {
 
     // Whether the call was performed while roaming.
     optional bool is_roaming = 24;
+
+    // A random number used as the dimension field to pull multiple atoms.
+    optional int32 dimension = 25;
 }
 
 /**
