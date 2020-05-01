@@ -785,7 +785,7 @@ public final class AppExitInfoTracker {
     }
 
     void dumpHistoryProcessExitInfo(PrintWriter pw, String packageName) {
-        pw.println("ACTIVITY MANAGER LRU PROCESSES (dumpsys activity exit-info)");
+        pw.println("ACTIVITY MANAGER PROCESS EXIT INFO (dumpsys activity exit-info)");
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
         synchronized (mLock) {
             pw.println("Last Timestamp of Persistence Into Persistent Storage: "

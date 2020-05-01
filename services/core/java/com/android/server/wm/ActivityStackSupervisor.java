@@ -1936,11 +1936,14 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
     }
 
     static boolean printThisActivity(PrintWriter pw, ActivityRecord activity, String dumpPackage,
-            boolean needSep, String prefix) {
+            boolean needSep, String prefix, Runnable header) {
         if (activity != null) {
             if (dumpPackage == null || dumpPackage.equals(activity.packageName)) {
                 if (needSep) {
                     pw.println();
+                }
+                if (header != null) {
+                    header.run();
                 }
                 pw.print(prefix);
                 pw.println(activity);
@@ -1952,7 +1955,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
 
     static boolean dumpHistoryList(FileDescriptor fd, PrintWriter pw, List<ActivityRecord> list,
             String prefix, String label, boolean complete, boolean brief, boolean client,
-            String dumpPackage, boolean needNL, String header, Task lastTask) {
+            String dumpPackage, boolean needNL, Runnable header, Task lastTask) {
         String innerPrefix = null;
         String[] args = null;
         boolean printed = false;
@@ -1972,7 +1975,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                 needNL = false;
             }
             if (header != null) {
-                pw.println(header);
+                header.run();
                 header = null;
             }
             if (lastTask != r.getTask()) {

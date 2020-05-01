@@ -4926,7 +4926,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
         boolean printed = ActivityStackSupervisor.printThisActivity(pw,
                 mRootWindowContainer.getTopResumedActivity(),  dumpPackage, needSep,
-                "  ResumedActivity: ");
+                "  ResumedActivity: ", null);
         if (printed) {
             printedAnything = true;
             needSep = false;

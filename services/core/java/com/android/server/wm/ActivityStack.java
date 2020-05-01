@@ -162,6 +162,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 /**
@@ -2802,67 +2803,91 @@ class ActivityStack extends Task {
     }
 
     boolean dump(FileDescriptor fd, PrintWriter pw, boolean dumpAll, boolean dumpClient,
-            String dumpPackage, boolean needSep) {
-        pw.println("  Stack #" + getRootTaskId()
-                + ": type=" + activityTypeToString(getActivityType())
-                + " mode=" + windowingModeToString(getWindowingMode()));
-        pw.println("  isSleeping=" + shouldSleepActivities());
-        pw.println("  mBounds=" + getRequestedOverrideBounds());
-
-        boolean printed = dumpActivities(fd, pw, dumpAll, dumpClient, dumpPackage, needSep);
-
-        needSep = printed;
-        boolean pr = printThisActivity(pw, mPausingActivity, dumpPackage, needSep,
-                "    mPausingActivity: ");
-        if (pr) {
-            printed = true;
-            needSep = false;
-        }
-        pr = printThisActivity(pw, getResumedActivity(), dumpPackage, needSep,
-                "    mResumedActivity: ");
-        if (pr) {
-            printed = true;
-            needSep = false;
-        }
-        if (dumpAll) {
-            pr = printThisActivity(pw, mLastPausedActivity, dumpPackage, needSep,
-                    "    mLastPausedActivity: ");
-            if (pr) {
-                printed = true;
-                needSep = true;
+            String dumpPackage, final boolean needSep) {
+        Runnable headerPrinter = () -> {
+            if (needSep) {
+                pw.println();
             }
-            printed |= printThisActivity(pw, mLastNoHistoryActivity, dumpPackage,
-                    needSep, "    mLastNoHistoryActivity: ");
+            pw.println("  Stack #" + getRootTaskId()
+                    + ": type=" + activityTypeToString(getActivityType())
+                    + " mode=" + windowingModeToString(getWindowingMode()));
+            pw.println("  isSleeping=" + shouldSleepActivities());
+            pw.println("  mBounds=" + getRequestedOverrideBounds());
+        };
+
+        boolean printed = false;
+
+        if (dumpPackage == null) {
+            // If we are not filtering by package, we want to print absolutely everything,
+            // so always print the header even if there are no tasks/activities inside.
+            headerPrinter.run();
+            headerPrinter = null;
+            printed = true;
         }
+
+        printed |= printThisActivity(pw, mPausingActivity, dumpPackage, false,
+                "    mPausingActivity: ", null);
+        printed |= printThisActivity(pw, getResumedActivity(), dumpPackage, false,
+                "    mResumedActivity: ", null);
+        if (dumpAll) {
+            printed |= printThisActivity(pw, mLastPausedActivity, dumpPackage, false,
+                    "    mLastPausedActivity: ", null);
+            printed |= printThisActivity(pw, mLastNoHistoryActivity, dumpPackage,
+                    false, "    mLastNoHistoryActivity: ", null);
+        }
+
+        printed |= dumpActivities(fd, pw, dumpAll, dumpClient, dumpPackage, false, headerPrinter);
+
         return printed;
     }
 
     private boolean dumpActivities(FileDescriptor fd, PrintWriter pw, boolean dumpAll,
-            boolean dumpClient, String dumpPackage, boolean needSep) {
+            boolean dumpClient, String dumpPackage, boolean needSep, Runnable header) {
         if (!hasChild()) {
             return false;
         }
-        final String prefix = "    ";
+        final AtomicBoolean printedHeader = new AtomicBoolean(false);
+        final AtomicBoolean printed = new AtomicBoolean(false);
         forAllLeafTasks((task) -> {
-            if (needSep) {
-                pw.println("");
+            final String prefix = "    ";
+            Runnable headerPrinter = () -> {
+                printed.set(true);
+                if (!printedHeader.get()) {
+                    if (needSep) {
+                        pw.println("");
+                    }
+                    if (header != null) {
+                        header.run();
+                    }
+                    printedHeader.set(true);
+                }
+                pw.print(prefix); pw.print("* "); pw.println(task);
+                pw.print(prefix); pw.print("  mBounds=");
+                pw.println(task.getRequestedOverrideBounds());
+                pw.print(prefix); pw.print("  mMinWidth="); pw.print(task.mMinWidth);
+                pw.print(" mMinHeight="); pw.println(task.mMinHeight);
+                if (mLastNonFullscreenBounds != null) {
+                    pw.print(prefix);
+                    pw.print("  mLastNonFullscreenBounds=");
+                    pw.println(task.mLastNonFullscreenBounds);
+                }
+                task.dump(pw, prefix + "  ");
+            };
+            if (dumpPackage == null) {
+                // If we are not filtering by package, we want to print absolutely everything,
+                // so always print the header even if there are no activities inside.
+                headerPrinter.run();
+                headerPrinter = null;
             }
-            pw.println(prefix + "Task id #" + task.mTaskId);
-            pw.println(prefix + "mBounds=" + task.getRequestedOverrideBounds());
-            pw.println(prefix + "mMinWidth=" + task.mMinWidth);
-            pw.println(prefix + "mMinHeight=" + task.mMinHeight);
-            pw.println(prefix + "mLastNonFullscreenBounds=" + task.mLastNonFullscreenBounds);
-            pw.println(prefix + "* " + task);
-            task.dump(pw, prefix + "  ");
             final ArrayList<ActivityRecord> activities = new ArrayList<>();
             // Add activities by traversing the hierarchy from bottom to top, since activities
             // are dumped in reverse order in {@link ActivityStackSupervisor#dumpHistoryList()}.
             task.forAllActivities((Consumer<ActivityRecord>) activities::add,
                     false /* traverseTopToBottom */);
             dumpHistoryList(fd, pw, activities, prefix, "Hist", true, !dumpAll, dumpClient,
-                    dumpPackage, false, null, task);
+                    dumpPackage, false, headerPrinter, task);
         }, true /* traverseTopToBottom */);
-        return true;
+        return printed.get();
     }
 
     ArrayList<ActivityRecord> getDumpActivitiesLocked(String name) {
