@@ -22,23 +22,17 @@
 >
 
     <View
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/controls_management_list_margin"
-        />
-
-    <FrameLayout
         android:id="@+id/frame"
         android:layout_width="match_parent"
         android:layout_height="@dimen/control_height"
         android:visibility="gone"
     >
-    </FrameLayout>
+    </View>
     <View
         android:id="@+id/divider"
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:layout_marginBottom="10dp"
-        android:layout_marginStart="40dp"
-        android:layout_marginEnd="40dp"
+        android:layout_marginBottom="@dimen/controls_management_editing_divider_margin"
+        android:layout_marginTop="@dimen/controls_management_editing_divider_margin"
         android:background="#4dffffff" />
 </LinearLayout>
