@@ -31,6 +31,13 @@ interface ControlsUiController {
 
     fun show(parent: ViewGroup, dismissGlobalActions: Runnable)
     fun hide()
+
+    /**
+     * Request all open dialogs be closed. Set [immediately] to true to dismiss without
+     * animations.
+     */
+    fun closeDialogs(immediately: Boolean)
+
     fun onRefreshState(componentName: ComponentName, controls: List<Control>)
     fun onActionResponse(
         componentName: ComponentName,
