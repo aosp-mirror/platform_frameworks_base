@@ -64,6 +64,8 @@ import android.widget.TextView;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.compatibility.common.util.SystemUtil;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -343,7 +345,10 @@ public class ScreenDecorWindowTests {
         intent.addFlags(FLAG_ACTIVITY_NEW_TASK);
         final ActivityOptions options = ActivityOptions.makeBasic();
         options.setLaunchDisplayId(displayId);
-        final Activity activity = mInstrumentation.startActivitySync(intent, options.toBundle());
+
+        final Activity activity = SystemUtil.runWithShellPermissionIdentity(
+                () -> mInstrumentation.startActivitySync(intent, options.toBundle()),
+                "android.permission.ACTIVITY_EMBEDDING");
         waitForIdle();
 
         assertEquals(displayId, activity.getDisplayId());
