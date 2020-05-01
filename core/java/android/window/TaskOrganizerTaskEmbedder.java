@@ -75,7 +75,8 @@ public class TaskOrganizerTaskEmbedder extends TaskEmbedder {
         // infrastructure is ready.
         mTaskOrganizer.registerOrganizer(WINDOWING_MODE_MULTI_WINDOW);
         mTaskOrganizer.setInterceptBackPressedOnTaskRoot(true);
-        return true;
+
+        return super.onInitialize();
     }
 
     @Override
@@ -96,6 +97,7 @@ public class TaskOrganizerTaskEmbedder extends TaskEmbedder {
      */
     @Override
     public void start() {
+        super.start();
         if (DEBUG) {
             log("start");
         }
@@ -119,6 +121,7 @@ public class TaskOrganizerTaskEmbedder extends TaskEmbedder {
      */
     @Override
     public void stop() {
+        super.stop();
         if (DEBUG) {
             log("stop");
         }
@@ -143,6 +146,7 @@ public class TaskOrganizerTaskEmbedder extends TaskEmbedder {
      */
     @Override
     public void notifyBoundsChanged() {
+        super.notifyBoundsChanged();
         if (DEBUG) {
             log("notifyBoundsChanged: screenBounds=" + mHost.getScreenBounds());
         }
