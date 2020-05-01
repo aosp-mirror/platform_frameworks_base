@@ -7970,17 +7970,24 @@ public class WindowManagerService extends IWindowManager.Stub
         handleTaskFocusChange(touchedWindow.getTask());
     }
 
-    private void handleTaskFocusChange(Task task) {
+    @VisibleForTesting
+    void handleTaskFocusChange(Task task) {
         if (task == null) {
             return;
         }
 
-        final ActivityStack stack = task.getStack();
         // We ignore home stack since we don't want home stack to move to front when touched.
         // Specifically, in freeform we don't want tapping on home to cause the freeform apps to go
         // behind home. See b/117376413
-        if (stack.isActivityTypeHome()) {
-            return;
+        if (task.isActivityTypeHome()) {
+            // Only ignore home stack if the requested focus home Task is in the same
+            // TaskDisplayArea as the current focus Task.
+            TaskDisplayArea homeTda = task.getDisplayArea();
+            WindowState curFocusedWindow = getFocusedWindow();
+            if (curFocusedWindow != null && homeTda != null
+                    && curFocusedWindow.isDescendantOf(homeTda)) {
+                return;
+            }
         }
 
         try {
