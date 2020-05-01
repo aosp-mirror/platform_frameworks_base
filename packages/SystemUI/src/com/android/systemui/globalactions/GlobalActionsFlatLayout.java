@@ -90,11 +90,11 @@ public class GlobalActionsFlatLayout extends GlobalActionsLayout {
 
     @Override
     public float getAnimationOffsetX() {
-        return 0;
+        return getAnimationDistance();
     }
 
     @Override
     public float getAnimationOffsetY() {
-        return -getAnimationDistance();
+        return 0f;
     }
 }
