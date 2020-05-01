@@ -424,6 +424,11 @@ public abstract class TextClassifierService extends Service {
         return bundle.getParcelable(KEY_RESULT);
     }
 
+    /** @hide **/
+    public static <T extends Parcelable> void putResponse(Bundle bundle, T response) {
+        bundle.putParcelable(KEY_RESULT, response);
+    }
+
     /**
      * Callbacks for TextClassifierService results.
      *

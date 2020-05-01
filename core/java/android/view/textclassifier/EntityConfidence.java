@@ -88,6 +88,10 @@ final class EntityConfidence implements Parcelable {
         return 0;
     }
 
+    public Map<String, Float> toMap() {
+        return new ArrayMap(mEntityConfidence);
+    }
+
     @Override
     public String toString() {
         return mEntityConfidence.toString();
