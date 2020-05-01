@@ -16,9 +16,13 @@
 
 package com.android.internal.util;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import android.os.Binder;
 import android.os.Bundle;
 
 import androidx.test.filters.SmallTest;
@@ -109,5 +113,55 @@ public class InlinePresentationStyleUtilsTest {
         Bundle bundle2 = new Bundle();
         bundle2.putInt("KEY", 22);
         assertFalse(InlinePresentationStyleUtils.bundleEquals(bundle1, bundle2));
+    }
+
+    @Test
+    public void testFilterContentTypes_nullOrEmpty() {
+        InlinePresentationStyleUtils.filterContentTypes(null);
+        InlinePresentationStyleUtils.filterContentTypes(new Bundle());
+    }
+
+    @Test
+    public void testFilterContentTypes_basic() {
+        Bundle bundle = new Bundle();
+        bundle.putInt("int", 11);
+        bundle.putString("str", "test");
+        bundle.putString("null", null);
+
+        InlinePresentationStyleUtils.filterContentTypes(bundle);
+
+        assertEquals(11, bundle.getInt("int"));
+        assertEquals("test", bundle.getString("str"));
+        assertTrue(bundle.keySet().contains("null"));
+    }
+
+    @Test
+    public void testFilterContentTypes_binder_removedBinder() {
+        Bundle bundle = new Bundle();
+        bundle.putInt("int", 11);
+        bundle.putString("str", "test");
+        bundle.putString("null", null);
+        bundle.putBinder("binder", new Binder());
+
+        InlinePresentationStyleUtils.filterContentTypes(bundle);
+
+        assertEquals(11, bundle.getInt("int"));
+        assertEquals("test", bundle.getString("str"));
+        assertTrue(bundle.keySet().contains("null"));
+        assertNull(bundle.getBinder("binder"));
+    }
+
+    @Test
+    public void testFilterContentTypes_binderInChild_removedBinder() {
+        Bundle child = new Bundle();
+        child.putBinder("binder", new Binder());
+        Bundle bundle = new Bundle();
+        bundle.putBundle("child", child);
+
+        InlinePresentationStyleUtils.filterContentTypes(bundle);
+
+        Bundle child2 = bundle.getBundle("child");
+        assertNotNull(child2);
+        assertNull(child2.getBinder("binder"));
     }
 }
