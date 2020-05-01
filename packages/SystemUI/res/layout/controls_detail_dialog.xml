@@ -26,7 +26,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:layout_marginBottom="10dp">
+    android:layout_marginBottom="4dp">
     <ImageView
         android:id="@+id/control_detail_close"
         android:contentDescription="@string/accessibility_desc_close"
@@ -55,10 +55,7 @@
       android:layout_width="match_parent"
       android:layout_height="0dp"
       android:layout_weight="1"
-      android:paddingTop="@dimen/controls_activity_view_top_padding"
-      android:paddingLeft="@dimen/controls_activity_view_side_padding"
-      android:paddingRight="@dimen/controls_activity_view_side_padding"
-      android:background="@drawable/rounded_bg_top"
+      android:background="@android:color/black"
       android:orientation="vertical" />
 </LinearLayout>
 
