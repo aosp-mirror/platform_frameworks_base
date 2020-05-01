@@ -46,6 +46,8 @@ public class KeyguardUserSwitcher {
 
     private static final String TAG = "KeyguardUserSwitcher";
     private static final boolean ALWAYS_ON = false;
+    private static final float USER_SWITCH_ENABLED_ALPHA = 1.0f;
+    private static final float USER_SWITCH_DISABLED_ALPHA = 0.38f;
 
     private final Container mUserSwitcherContainer;
     private final KeyguardStatusBarView mStatusBarView;
@@ -293,6 +295,9 @@ public class KeyguardUserSwitcher {
                 mCurrentUserView = convertView;
             }
             convertView.setTag(item);
+            convertView.setAlpha(
+                    item.isCurrent || item.isSwitchToEnabled ? USER_SWITCH_ENABLED_ALPHA
+                            : USER_SWITCH_DISABLED_ALPHA);
             return convertView;
         }
 
