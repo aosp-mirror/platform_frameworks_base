@@ -890,8 +890,8 @@ public class RootActivityContainerTests extends WindowTestsBase {
 
         // Make sure the root task is valid and can be reused on default display.
         final Task stack = mRootWindowContainer.getValidLaunchStackInTaskDisplayArea(
-                mRootWindowContainer.getDefaultTaskDisplayArea(), activity, task, null,
-                null);
+                mRootWindowContainer.getDefaultTaskDisplayArea(), activity, task,
+                null /* options */, null /* launchParams */);
         assertEquals(task, stack);
     }
 
