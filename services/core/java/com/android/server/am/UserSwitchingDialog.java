@@ -116,6 +116,7 @@ class UserSwitchingDialog extends AlertDialog
                 viewMessage = res.getString(R.string.user_switching_message, mNewUser.name);
             }
         }
+        view.setAccessibilityPaneTitle(viewMessage);
         ((TextView) view.findViewById(R.id.message)).setText(viewMessage);
         setView(view);
     }
