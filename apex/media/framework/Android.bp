@@ -92,6 +92,7 @@ stubs_defaults {
         // TODO(b/135922046) remove this
         include_dirs: ["frameworks/base/core/java"],
     },
+    dist: { dest: "framework-media.txt" },
 }
 
 droidstubs {
@@ -130,18 +131,21 @@ java_library {
     name: "framework-media-stubs-publicapi",
     srcs: [":framework-media-stubs-srcs-publicapi"],
     defaults: ["framework-module-stubs-lib-defaults-publicapi"],
+    dist: { dest: "framework-media.jar" },
 }
 
 java_library {
     name: "framework-media-stubs-systemapi",
     srcs: [":framework-media-stubs-srcs-systemapi"],
     defaults: ["framework-module-stubs-lib-defaults-systemapi"],
+    dist: { dest: "framework-media.jar" },
 }
 
 java_library {
     name: "framework-media-stubs-module_libs_api",
     srcs: [":framework-media-stubs-srcs-module_libs_api"],
     defaults: ["framework-module-stubs-lib-defaults-module_libs_api"],
+    dist: { dest: "framework-media.jar" },
 }
 
 java_library {
