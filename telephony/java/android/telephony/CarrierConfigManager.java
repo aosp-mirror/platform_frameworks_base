@@ -4156,10 +4156,10 @@ public class CarrierConfigManager {
                 });
         sDefaults.putIntArray(KEY_LTE_RSRQ_THRESHOLDS_INT_ARRAY,
                 new int[] {
-                        -19, /* SIGNAL_STRENGTH_POOR */
+                        -20, /* SIGNAL_STRENGTH_POOR */
                         -17, /* SIGNAL_STRENGTH_MODERATE */
                         -14, /* SIGNAL_STRENGTH_GOOD */
-                        -12  /* SIGNAL_STRENGTH_GREAT */
+                        -11  /* SIGNAL_STRENGTH_GREAT */
                 });
         sDefaults.putIntArray(KEY_LTE_RSSNR_THRESHOLDS_INT_ARRAY,
                 new int[] {
@@ -4187,9 +4187,9 @@ public class CarrierConfigManager {
                 // Boundaries: [-20 dB, -3 dB]
                 new int[] {
                     -16, /* SIGNAL_STRENGTH_POOR */
-                    -11, /* SIGNAL_STRENGTH_MODERATE */
+                    -12, /* SIGNAL_STRENGTH_MODERATE */
                     -9, /* SIGNAL_STRENGTH_GOOD */
-                    -7  /* SIGNAL_STRENGTH_GREAT */
+                    -6  /* SIGNAL_STRENGTH_GREAT */
                 });
         sDefaults.putIntArray(KEY_5G_NR_SSSINR_THRESHOLDS_INT_ARRAY,
                 // Boundaries: [-23 dB, 40 dB]

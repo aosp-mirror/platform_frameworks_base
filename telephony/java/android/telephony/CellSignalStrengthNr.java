@@ -57,9 +57,9 @@ public final class CellSignalStrengthNr extends CellSignalStrength implements Pa
     // Boundaries: [-20 dB, -3 dB]
     private int[] mSsRsrqThresholds = new int[] {
             -16, /* SIGNAL_STRENGTH_POOR */
-            -11, /* SIGNAL_STRENGTH_MODERATE */
+            -12, /* SIGNAL_STRENGTH_MODERATE */
             -9, /* SIGNAL_STRENGTH_GOOD */
-            -7  /* SIGNAL_STRENGTH_GREAT */
+            -6  /* SIGNAL_STRENGTH_GREAT */
     };
 
     // Lifted from Default carrier configs and max range of SSSINR
