@@ -711,7 +711,7 @@ public class DexManager {
         for (String isa : getAppDexInstructionSets(info.primaryCpuAbi, info.secondaryCpuAbi)) {
             boolean newUpdate = mPackageDexUsage.record(searchResult.mOwningPackageName,
                     dexPath, userId, isa, /*primaryOrSplit*/ false,
-                    searchResult.mOwningPackageName,
+                    loadingPackage,
                     PackageDexUsage.VARIABLE_CLASS_LOADER_CONTEXT);
             update |= newUpdate;
         }

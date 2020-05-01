@@ -512,7 +512,7 @@ public class NotificationManagerService extends SystemService {
     private float mMaxPackageEnqueueRate = DEFAULT_MAX_NOTIFICATION_ENQUEUE_RATE;
 
     private NotificationHistoryManager mHistoryManager;
-    private SnoozeHelper mSnoozeHelper;
+    protected SnoozeHelper mSnoozeHelper;
     private GroupHelper mGroupHelper;
     private int mAutoGroupAtCount;
     private boolean mIsTelevision;
@@ -7913,7 +7913,7 @@ public class NotificationManagerService extends SystemService {
     void snoozeNotificationInt(String key, long duration, String snoozeCriterionId,
             ManagedServiceInfo listener) {
         String listenerName = listener == null ? null : listener.component.toShortString();
-        if (duration <= 0 && snoozeCriterionId == null || key == null) {
+        if ((duration <= 0 && snoozeCriterionId == null) || key == null) {
             return;
         }
 

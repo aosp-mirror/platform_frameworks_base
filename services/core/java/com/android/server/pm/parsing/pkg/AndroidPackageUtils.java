@@ -241,6 +241,10 @@ public class AndroidPackageUtils {
         return PackageInfo.composeLongVersionCode(pkg.getVersionCodeMajor(), pkg.getVersionCode());
     }
 
+    /**
+     * Returns false iff the provided flags include the {@link PackageManager#MATCH_SYSTEM_ONLY}
+     * flag and the provided package is not a system package. Otherwise returns {@code true}.
+     */
     public static boolean isMatchForSystemOnly(AndroidPackage pkg, int flags) {
         if ((flags & PackageManager.MATCH_SYSTEM_ONLY) != 0) {
             return pkg.isSystem();

@@ -11519,6 +11519,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         ViewParent parent = getParent();
         if (parent instanceof View) {
             return ((View) parent).getWindowInsetsController();
+        } else if (parent instanceof ViewRootImpl) {
+            // Between WindowManager.addView() and the first traversal AttachInfo isn't set yet.
+            return ((ViewRootImpl) parent).getInsetsController();
         }
         return null;
     }

@@ -200,9 +200,9 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"ඔබගේ උපාංගය මකා දැමෙනු ඇත"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"පරිපාලක යෙදුම භාවිතා කළ නොහැකිය. ඔබේ උපාංගය දැන් මකා දමනු ඇත.\n\nඔබට ප්‍රශ්න තිබේ නම්, ඔබේ සංවිධානයේ පරිපාලකට අමතන්න."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> විසින් මුද්‍රණය කිරීම අබල කර ඇත."</string>
-    <string name="personal_apps_suspended_title" msgid="4543693107104417750">"ඔබේ පෞද්ගලික යෙදුම් අනවහිර කර"</string>
-    <string name="personal_apps_suspended_tomorrow_title" msgid="6414440257969874914">"හෙට යෙදුම් අවහිර කරනු ඇත"</string>
-    <string name="personal_apps_suspended_text" msgid="8954038765131038226">"ඔබේ IT පරිපාලක ඔබේ කාර්යාල පැතිකඩ දින <xliff:g id="DAYS">%1$d</xliff:g>කට වඩා විරාම කිරීමට ඉඩ නොදේ"</string>
+    <string name="personal_apps_suspension_title" msgid="7561416677884286600">"ඔබේ කාර්යාල පැතිකඩ ඔන් කරන්න"</string>
+    <string name="personal_apps_suspension_text" msgid="6115455688932935597">"ඔබ ඔබගේ කාර්යාල පැතිකඩ ක්‍රියාත්මක කරන තෙක් ඔබගේ පෞද්ගලික යෙදුම් අවහිර කර ඇත"</string>
+    <string name="personal_apps_suspension_tomorrow_text" msgid="6322541302153673994">"ඔබේ පෞද්ගලික යෙදුම් හෙට අවහිර කරනු ඇත"</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"කාර්යාල පැතිකඩ ක්‍රියාත්මක කරන්න"</string>
     <string name="me" msgid="6207584824693813140">"මම"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"ටැබ්ලට විකල්ප"</string>
@@ -1633,10 +1633,8 @@
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"හඬ පරිමා යතුරු දෙකම තත්පර කීපයකට පහළට අල්ලාගෙන සිටීම ප්‍රවේශ්‍යතා විශේෂාංගයක් වන <xliff:g id="SERVICE">%1$s</xliff:g> ක්‍රියාත්මක කරයි. මෙය ඔබේ උපාංගය ක්‍රියා කරන ආකාරය වෙනස් කළ හැකිය.\n\nඔබට මෙම කෙටිමග සැකසීම් &gt; ප්‍රවේශ්‍යතාව හි තවත් විශේෂාංගයකට වෙනස් කළ හැකිය."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"ක්‍රියාත්මක කරන්න"</string>
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"ක්‍රියාත්මක නොකරන්න"</string>
-    <!-- no translation found for accessibility_shortcut_menu_item_status_on (6608392117189732543) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_menu_item_status_off (5531598275559472393) -->
-    <skip />
+    <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"සක්‍රියයි"</string>
+    <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"අක්‍රියයි"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g> හට ඔබේ උපාංගයේ සම්පූර්ණ පාලනය තබා ගැනීමට ඉඩ දෙන්නද?"</string>
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"ඔබ <xliff:g id="SERVICE">%1$s</xliff:g> ක්‍රියාත්මක කරන්නේ නම්, දත්ත සංකේතනය වැඩිදියුණු කිරීමට ඔබේ උපාංගය ඔබේ තිර අගුල භාවිත නොකරනු ඇත."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"පූර්ණ පාලනය ඔබට ප්‍රවේශ්‍යතා අවශ්‍යතා සමඟ උදවු කරන යෙදුම් සඳහා සුදුසු වන නමුත් බොහෝ යෙදුම් සඳහා සුදුසු නොවේ."</string>
@@ -1798,8 +1796,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"ඔබගේ පරිපාලක මඟින් යාවත්කාලීන කර ඇත"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"ඔබගේ පරිපාලක මඟින් මකා දමා ඇත"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"හරි"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"බැටරියේ ජීව කාලය දික් කිරීමට, බැටරි සුරැකුම:\n·අඳුරු තේමාව ක්‍රියාත්මක කරයි\n·පසුබිමේ ක්‍රියාකාරකම, සමහර දෘෂ්‍ය ප්‍රයෝග සහ “Hey Google” වැනි වෙනත් විශේෂාංග ක්‍රියාවිරහිත කරයි නැතහොත් අවහිර කරයි\n\n"<annotation id="url">"තව දැන ගන්න"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"බැටරියේ ජීව කාලය දික් කිරීමට, බැටරි සුරැකුම:\n·අඳුරු තේමාව ක්‍රියාත්මක කරයි\n·පසුබිමේ ක්‍රියාකාරකම, සමහර දෘෂ්‍ය ප්‍රයෝග සහ “Hey Google” වැනි වෙනත් විශේෂාංග ක්‍රියාවිරහිත කරයි නැතහොත් අවහිර කරයි"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"බැටරියේ ජීව කාලය දික් කිරීමට, බැටරි සුරැකුම:\n\n•අඳුරු තේමාව ක්‍රියාත්මක කරයි\n•පසුබිමේ ක්‍රියාකාරකම, සමහර දෘෂ්‍ය ප්‍රයෝග සහ “Hey Google” වැනි වෙනත් විශේෂාංග ක්‍රියාවිරහිත කරයි නැතහොත් අවහිර කරයි\n\n"<annotation id="url">"තව දැන ගන්න"</annotation></string>
+    <string name="battery_saver_description" msgid="8587408568232177204">"බැටරියේ ජීව කාලය දික් කිරීමට, බැටරි සුරැකුම:\n\n•අඳුරු තේමාව ක්‍රියාත්මක කරයි\n•පසුබිමේ ක්‍රියාකාරකම, සමහර දෘෂ්‍ය ප්‍රයෝග සහ “Hey Google” වැනි වෙනත් විශේෂාංග ක්‍රියාවිරහිත කරයි නැතහොත් අවහිර කරයි"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"දත්ත භාවිතය අඩු කිරීමට උදවු වීමට, දත්ත සුරැකුම සමහර යෙදුම් පසුබිමින් දත්ත යැවීම සහ ලබා ගැනීම වළක්වයි. ඔබ දැනට භාවිත කරන යෙදුමකට දත්ත වෙත පිවිසීමට හැකිය, නමුත් එසේ කරන්නේ කලාතුරකින් විය හැකිය. මෙයින් අදහස් වන්නේ, උදාහරණයක් ලෙස, එම රූප ඔබ ඒවාට තට්ටු කරන තෙක් සංදර්ශනය නොවන බවය."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"දත්ත සුරැකුම ක්‍රියාත්මක කරන්නද?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"ක්‍රියාත්මක කරන්න"</string>
@@ -2046,15 +2044,12 @@
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"බල සංවාදය"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"අගුලු තිරය"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"තිර රුව"</string>
-    <!-- no translation found for accessibility_system_action_accessibility_button_label (5941347017132886642) -->
-    <skip />
-    <!-- no translation found for accessibility_system_action_accessibility_button_chooser_label (6973618519666227981) -->
-    <skip />
+    <string name="accessibility_system_action_accessibility_button_label" msgid="5941347017132886642">"තිරය මත ප්‍රවේශ්‍යතා කෙටිමග"</string>
+    <string name="accessibility_system_action_accessibility_button_chooser_label" msgid="6973618519666227981">"තිරය මත ප්‍රවේශ්‍යතා කෙටිමං තෝරනය"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g> හි සිරස්තල තීරුව."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> අවහිර කළ බාල්දියට දමා ඇත"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
-    <!-- no translation found for conversation_single_line_image_placeholder (6983271082911936900) -->
-    <skip />
+    <string name="conversation_single_line_image_placeholder" msgid="6983271082911936900">"රූපයක් එව්වා"</string>
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"සංවාදය"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"සමූහ සංවාදය"</string>
     <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>

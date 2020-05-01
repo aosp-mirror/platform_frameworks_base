@@ -149,18 +149,18 @@ public final class StorageVolume implements Parcelable {
     }
 
     private StorageVolume(Parcel in) {
-        mId = in.readString();
-        mPath = new File(in.readString());
-        mInternalPath = new File(in.readString());
-        mDescription = in.readString();
+        mId = in.readString8();
+        mPath = new File(in.readString8());
+        mInternalPath = new File(in.readString8());
+        mDescription = in.readString8();
         mPrimary = in.readInt() != 0;
         mRemovable = in.readInt() != 0;
         mEmulated = in.readInt() != 0;
         mAllowMassStorage = in.readInt() != 0;
         mMaxFileSize = in.readLong();
         mOwner = in.readParcelable(null);
-        mFsUuid = in.readString();
-        mState = in.readString();
+        mFsUuid = in.readString8();
+        mState = in.readString8();
     }
 
     /**
@@ -503,17 +503,17 @@ public final class StorageVolume implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
-        parcel.writeString(mId);
-        parcel.writeString(mPath.toString());
-        parcel.writeString(mInternalPath.toString());
-        parcel.writeString(mDescription);
+        parcel.writeString8(mId);
+        parcel.writeString8(mPath.toString());
+        parcel.writeString8(mInternalPath.toString());
+        parcel.writeString8(mDescription);
         parcel.writeInt(mPrimary ? 1 : 0);
         parcel.writeInt(mRemovable ? 1 : 0);
         parcel.writeInt(mEmulated ? 1 : 0);
         parcel.writeInt(mAllowMassStorage ? 1 : 0);
         parcel.writeLong(mMaxFileSize);
         parcel.writeParcelable(mOwner, flags);
-        parcel.writeString(mFsUuid);
-        parcel.writeString(mState);
+        parcel.writeString8(mFsUuid);
+        parcel.writeString8(mState);
     }
 }

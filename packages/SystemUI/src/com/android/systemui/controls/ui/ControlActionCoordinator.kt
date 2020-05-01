@@ -16,89 +16,52 @@
 
 package com.android.systemui.controls.ui
 
-import android.app.Dialog
-import android.content.Intent
-import android.os.Vibrator
-import android.os.VibrationEffect
 import android.service.controls.Control
-import android.service.controls.actions.BooleanAction
-import android.service.controls.actions.CommandAction
-import android.view.HapticFeedbackConstants
-import com.android.systemui.controls.controller.ControlsController
-import com.android.systemui.util.concurrency.DelayableExecutor
 
-object ControlActionCoordinator {
-    const val MIN_LEVEL = 0
-    const val MAX_LEVEL = 10000
-
-    private var dialog: Dialog? = null
-    private var vibrator: Vibrator? = null
-
-    lateinit var bgExecutor: DelayableExecutor
-
-    fun closeDialog() {
-        dialog?.dismiss()
-        dialog = null
-    }
+/**
+ * All control interactions should be routed through this coordinator. It handles dispatching of
+ * actions, haptic support, and all detail panels
+ */
+interface ControlActionCoordinator {
 
     /**
-     * Create custom vibrations, all intended to create very subtle feedback while interacting
-     * with the controls.
+     * Close any dialogs which may have been open
      */
-    fun initialize(vibrator: Vibrator, bgExecutor: DelayableExecutor) {
-        this.vibrator = vibrator
-        this.bgExecutor = bgExecutor
-    }
+    fun closeDialogs()
 
-    fun toggle(cvh: ControlViewHolder, templateId: String, isChecked: Boolean) {
-        val effect = if (isChecked) Vibrations.toggleOnEffect else Vibrations.toggleOffEffect
-        vibrate(effect)
-        cvh.action(BooleanAction(templateId, !isChecked))
-    }
+    /**
+     * Create a [BooleanAction], and inform the service of a request to change the device state
+     *
+     * @param cvh [ControlViewHolder] for the control
+     * @param templateId id of the control's template, as given by the service
+     * @param isChecked new requested state of the control
+     */
+    fun toggle(cvh: ControlViewHolder, templateId: String, isChecked: Boolean)
 
-    fun touch(cvh: ControlViewHolder, templateId: String, control: Control) {
-        vibrate(Vibrations.toggleOnEffect)
-        if (cvh.usePanel()) {
-            showDialog(cvh, control.getAppIntent().getIntent())
-        } else {
-            cvh.action(CommandAction(templateId))
-        }
-    }
+    /**
+     * For non-toggle controls, touching may create a dialog or invoke a [CommandAction].
+     *
+     * @param cvh [ControlViewHolder] for the control
+     * @param templateId id of the control's template, as given by the service
+     * @param control the control as sent by the service
+     */
+    fun touch(cvh: ControlViewHolder, templateId: String, control: Control)
 
-    fun drag(isEdge: Boolean) {
-        if (isEdge) {
-            vibrate(Vibrations.rangeEdgeEffect)
-        } else {
-            vibrate(Vibrations.rangeMiddleEffect)
-        }
-    }
+    /**
+     * When a ToggleRange control is interacting with, a drag event is sent.
+     *
+     * @param isEdge did the drag event reach a control edge
+     */
+    fun drag(isEdge: Boolean)
 
     /**
      * All long presses will be shown in a 3/4 height bottomsheet panel, in order for the user to
      * retain context with their favorited controls in the power menu.
      */
-    fun longPress(cvh: ControlViewHolder) {
-        // Long press snould only be called when there is valid control state, otherwise ignore
-        cvh.cws.control?.let {
-            cvh.layout.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
-            showDialog(cvh, it.getAppIntent().getIntent())
-        }
-    }
+    fun longPress(cvh: ControlViewHolder)
 
-    private fun vibrate(effect: VibrationEffect) {
-        vibrator?.let {
-            bgExecutor.execute { it.vibrate(effect) }
-        }
-    }
-
-    private fun showDialog(cvh: ControlViewHolder, intent: Intent) {
-        dialog = DetailDialog(cvh, intent).also {
-            it.setOnDismissListener { _ -> dialog = null }
-            it.show()
-        }
-    }
-
-    fun setFocusedElement(cvh: ControlViewHolder?, controlsController: ControlsController) {
-        controlsController.onFocusChanged(cvh?.cws)
-    }
+    /**
+     * Event to inform the UI that the user has has focused on a single control.
+     */
+    fun setFocusedElement(cvh: ControlViewHolder?)
 }

@@ -3639,17 +3639,22 @@ public final class ProcessList {
             final int packageCount = app.pkgList.size();
             for (int j = 0; j < packageCount; j++) {
                 final String packageName = app.pkgList.keyAt(j);
-                if (updateFrameworkRes || packagesToUpdate.contains(packageName)) {
-                    try {
-                        final ApplicationInfo ai = AppGlobals.getPackageManager()
-                                .getApplicationInfo(packageName, STOCK_PM_FLAGS, app.userId);
-                        if (ai != null) {
-                            app.thread.scheduleApplicationInfoChanged(ai);
-                        }
-                    } catch (RemoteException e) {
-                        Slog.w(TAG, String.format("Failed to update %s ApplicationInfo for %s",
-                                packageName, app));
+                if (!updateFrameworkRes && !packagesToUpdate.contains(packageName)) {
+                    continue;
+                }
+                try {
+                    final ApplicationInfo ai = AppGlobals.getPackageManager()
+                            .getApplicationInfo(packageName, STOCK_PM_FLAGS, app.userId);
+                    if (ai == null) {
+                        continue;
                     }
+                    app.thread.scheduleApplicationInfoChanged(ai);
+                    if (ai.packageName.equals(app.info.packageName)) {
+                        app.info = ai;
+                    }
+                } catch (RemoteException e) {
+                    Slog.w(TAG, String.format("Failed to update %s ApplicationInfo for %s",
+                            packageName, app));
                 }
             }
         }

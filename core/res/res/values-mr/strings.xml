@@ -200,9 +200,9 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"तुमचे डिव्हाइस मिटविले जाईल"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"प्रशासक अ‍ॅप वापरता येणार नाही. तुमचे डिव्हाइस आता साफ केले जाईल.\n\nतुम्हाला कुठलेही प्रश्न असल्यास, तुमच्या संस्थेच्या प्रशासकाशी संपर्क साधा."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> नी प्रिंट करणे बंद केले आहे."</string>
-    <string name="personal_apps_suspended_title" msgid="4543693107104417750">"वैयक्तिक ॲप्स अनब्लॉक करा"</string>
-    <string name="personal_apps_suspended_tomorrow_title" msgid="6414440257969874914">"अ‍ॅप्स उद्या ब्लॉक केली जातील"</string>
-    <string name="personal_apps_suspended_text" msgid="8954038765131038226">"तुमचा आयटी अ‍ॅडमिन तुमची ऑफिस प्रोफाइल <xliff:g id="DAYS">%1$d</xliff:g> पेक्षा जास्त दिवसांसाठी थांबवण्याची अनुमती देत नाही"</string>
+    <string name="personal_apps_suspension_title" msgid="7561416677884286600">"तुमची कार्य प्रोफाइल सुरू करा"</string>
+    <string name="personal_apps_suspension_text" msgid="6115455688932935597">"तुम्ही तुमची कार्य प्रोफाइल सुरू करेपर्यंत तुमची वैयक्तिक ॲप्स ब्लॉक केली आहेत"</string>
+    <string name="personal_apps_suspension_tomorrow_text" msgid="6322541302153673994">"तुमची वैयक्तिक ॲप्स उद्या ब्लॉक केली जातील"</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"ऑफिस प्रोफाइल सुरू करा"</string>
     <string name="me" msgid="6207584824693813140">"मी"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"टॅबलेट पर्याय"</string>
@@ -1631,10 +1631,8 @@
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"दोन्ही व्हॉल्यूम की काही सेकंद धरून ठेवल्याने <xliff:g id="SERVICE">%1$s</xliff:g>, एक अ‍ॅक्सेसिबिलिटी वैशिष्ट्य सुरू होते. यामुळे तुमचे डिव्हाइस कसे काम करते हे पूर्णपणे बदलते.\n\nतुम्ही हा शॉर्टकट सेटिंग्ज &gt; अ‍ॅक्सेसिबिलिटी मध्ये बदलू शकता."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"सुरू करा"</string>
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"सुरू करू नका"</string>
-    <!-- no translation found for accessibility_shortcut_menu_item_status_on (6608392117189732543) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_menu_item_status_off (5531598275559472393) -->
-    <skip />
+    <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"सुरू आहे"</string>
+    <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"बंद आहे"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g> ला तुमचे डिव्हाइसच संपूर्णपणे नियंत्रित करायची अनुमती द्यायची का?"</string>
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"तुम्ही <xliff:g id="SERVICE">%1$s</xliff:g> सुरू केल्‍यास, तुमचे डिव्हाइस डेटा एंक्रिप्शनमध्ये सुधारणा करण्‍यासाठी स्क्रीन लॉक वापरणार नाही."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"जी ॲप्स तुमच्या ॲक्सेसिबिलिटी गरजा पूर्ण करतात अशा ॲप्ससाठी संपूर्ण नियंत्रण योग्य आहे. पण ते सर्व ॲप्सना लागू होईल असे नाही."</string>
@@ -1796,8 +1794,10 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"आपल्या प्रशासकाने अपडेट केले"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"आपल्या प्रशासकाने हटवले"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ओके"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"बॅटरी सेव्‍हर हे बॅटरीचे आयुष्य वाढवते:\n·गडद थीम सुरू करते \n· बॅकग्राउंड अ‍ॅक्टिव्हिटी, काही व्हिज्युअल इफेक्ट आणि \"Ok Google\" यासारखी वैशिष्ट्ये बंद किंवा मर्यादित करते.\n\n"<annotation id="url">"अधिक जाणून घ्या"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"बॅटरीचे आयुष्य वाढवण्यासाठी बॅटरी सेव्‍हर:\n·गडद थीम सुरू करते \n· बॅकग्राउंड अ‍ॅक्टिव्हिटी, काही व्हिज्युअल इफेक्ट आणि \"Ok Google\" यासारखी वैशिष्ट्ये बंद किंवा मर्यादित करते."</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (5997766757551917769) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (8587408568232177204) -->
+    <skip />
     <string name="data_saver_description" msgid="4995164271550590517">"डेटाचा वापर कमी करण्यात मदत करण्यासाठी काही अ‍ॅप्सना बॅकग्राउंडमध्ये डेटा पाठवण्यास किंवा मिळवण्यास डेटा सर्व्हर प्रतिबंध करतो. तुम्ही सध्या वापरत असलेले अ‍ॅप डेटा अ‍ॅक्सेस करू शकते, पण तसे खूप कमी वेळा होते. याचाच अर्थ असा की, तुम्ही इमेजवर टॅप करेपर्यंत त्या डिस्प्ले होणार नाहीत असे होऊ शकते."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"डेटा सेव्हर चालू करायचे?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"चालू करा"</string>

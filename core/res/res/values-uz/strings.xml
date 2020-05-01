@@ -200,9 +200,9 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"Qurilmangizdagi ma’lumotlar o‘chirib tashlanadi"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Administrator ilovasini ishlatib bo‘lmaydi. Qurilmada barcha ma’lumotlar o‘chirib tashlanadi.\n\nSavollaringiz bo‘lsa, administrator bilan bog‘laning."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"Chop etish funksiyasi <xliff:g id="OWNER_APP">%s</xliff:g> tomonidan faolsizlantirilgan."</string>
-    <string name="personal_apps_suspended_title" msgid="4543693107104417750">"Shaxsiy ilovalarni blokdan chiqaring"</string>
-    <string name="personal_apps_suspended_tomorrow_title" msgid="6414440257969874914">"Ilovalar ertaga bloklanadi"</string>
-    <string name="personal_apps_suspended_text" msgid="8954038765131038226">"AT administratoringiz ish profili <xliff:g id="DAYS">%1$d</xliff:g> kundan ortiq pauza qilinishini taqiqlagan"</string>
+    <string name="personal_apps_suspension_title" msgid="7561416677884286600">"Ish profilingizni yoqing"</string>
+    <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Ish profilingiz yoniqligida shaxsiy ilovalaringiz bloklanadi"</string>
+    <string name="personal_apps_suspension_tomorrow_text" msgid="6322541302153673994">"Shaxsiy ilovalaringiz ertaga bloklanadi"</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"Ish profilini yoqish"</string>
     <string name="me" msgid="6207584824693813140">"Men"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Planshet sozlamalari"</string>
@@ -1107,8 +1107,8 @@
     <string name="deleteText" msgid="4200807474529938112">"O‘chirish"</string>
     <string name="inputMethod" msgid="1784759500516314751">"Kiritish uslubi"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"Matn yozish"</string>
-    <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Xotirada bo‘sh joy tugamoqda"</string>
-    <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Ba‘zi tizim funksiyalari ishlamasligi mumkin"</string>
+    <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Xotirada joy yetarli emas"</string>
+    <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Ayrim funksiyalar ishlamasligi mumkin"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Tizim uchun xotirada joy yetarli emas. Avval 250 megabayt joy bo‘shatib, keyin qurilmani o‘chirib yoqing."</string>
     <string name="app_running_notification_title" msgid="8985999749231486569">"<xliff:g id="APP_NAME">%1$s</xliff:g> ishlamoqda"</string>
     <string name="app_running_notification_text" msgid="5120815883400228566">"Ilovani to‘xtatish yoki qo‘shimcha ma’lumot olish uchun bosing."</string>
@@ -1314,8 +1314,8 @@
     <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"Wi-Fi orqali debaggingni faolsizlantirish uchun bosing."</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"Xavfsizlik sinovi rejimi yoqildi"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"Xavfsizlik sinovi rejimini faolsizlantirish uchun zavod sozlamalariga qaytaring."</string>
-    <string name="console_running_notification_title" msgid="6087888939261635904">"Davomiy port terminali yoqildi"</string>
-    <string name="console_running_notification_message" msgid="7892751888125174039">"Samaradorlik pasaydi. Terminalni faolsizlantirish uchun operatsion tizim yuklagichini oching."</string>
+    <string name="console_running_notification_title" msgid="6087888939261635904">"Ketma-ket port konsoli yoqildi"</string>
+    <string name="console_running_notification_message" msgid="7892751888125174039">"Qurilma samaradorligi pasaydi. Konsolni faolsizlantirish uchun operatsion tizim yuklagichini oching."</string>
     <string name="usb_contaminant_detected_title" msgid="4359048603069159678">"USB portda suyuqlik yoki parcha bor"</string>
     <string name="usb_contaminant_detected_message" msgid="7346100585390795743">"USB port avtomatik tarzda faolsizlashtirildi. Batafsil axborot olish uchun bosing."</string>
     <string name="usb_contaminant_not_detected_title" msgid="2651167729563264053">"USB portdan foydalanish mumkin"</string>
@@ -1631,10 +1631,8 @@
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"<xliff:g id="SERVICE">%1$s</xliff:g> funksiyasini yoqish uchun ikkala tovush tugmalarini bir necha soniya bosib turing. Qurilmangiz ishlashida oʻzgarish yuz berishi mumkin.\n\nBu tezkor tugmalarni boshqa funksiyaga Sozlamalar ichidagi Maxsus imkoniyatlar orqali tayinlash mumkin."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Yoqilsin"</string>
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"Yoqilmasin"</string>
-    <!-- no translation found for accessibility_shortcut_menu_item_status_on (6608392117189732543) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_menu_item_status_off (5531598275559472393) -->
-    <skip />
+    <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"YONIQ"</string>
+    <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"YOQILMAGAN"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g> xizmatiga qurilmangizni boshqarish uchun toʻliq ruxsat berilsinmi?"</string>
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Agar <xliff:g id="SERVICE">%1$s</xliff:g> xizmatini yoqsangiz, qurilmangiz maʼlumotlarni shifrlashni kuchaytirish uchun ekran qulfidan foydalanmaydi."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Toʻliq nazorat maxsus imkoniyatlar bilan ishlovchi ilovalar uchun mos, lekin barcha ilovalar uchun emas."</string>
@@ -1796,8 +1794,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Administrator tomonidan yangilangan"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Administrator tomonidan o‘chirilgan"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Batareya quvvatini uzaytirish uchun Quvvat tejash funksiyasi:\n·Tungi mavzuni yoqadi\n·Fondagi harakatlar, vizual effektlar va “Hey Google” kabi boshqa funksiyalarni faolsizlantiradi\n\n"<annotation id="url">"Batafsil"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"Batareya quvvatini uzaytirish uchun Quvvat tejash funksiyasi:\n·Tungi mavzuni yoqadi\n·Fondagi harakatlar, vizual effektlar va “Hey Google” kabi boshqa funksiyalarni faolsizlantiradi"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"Batareya quvvatini uzaytirish uchun Quvvat tejash funksiyasi:\n\n•Tungi mavzuni yoqadi\n•Fondagi harakatlar, vizual effektlar va “Hey Google” kabi boshqa funksiyalarni faolsizlantiradi\n\n"<annotation id="url">"Batafsil"</annotation></string>
+    <string name="battery_saver_description" msgid="8587408568232177204">"Batareya quvvatini uzaytirish uchun Quvvat tejash funksiyasi:\n\n•Tungi mavzuni yoqadi\n•Fondagi harakatlar, vizual effektlar va “Hey Google” kabi boshqa funksiyalarni faolsizlantiradi"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Trafik tejash rejimida ayrim ilovalar uchun orqa fonda internetdan foydalanish imkoniyati cheklanadi. Siz ishlatayotgan ilova zaruratga qarab internet-trafik sarflashi mumkin, biroq cheklangan miqdorda. Masalan, rasmlar ustiga bosmaguningizcha ular yuklanmaydi."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Trafik tejash yoqilsinmi?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Yoqish"</string>
@@ -2044,15 +2042,12 @@
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"Quvvat muloqot oynasi"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Ekran qulfi"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Skrinshot"</string>
-    <!-- no translation found for accessibility_system_action_accessibility_button_label (5941347017132886642) -->
-    <skip />
-    <!-- no translation found for accessibility_system_action_accessibility_button_chooser_label (6973618519666227981) -->
-    <skip />
+    <string name="accessibility_system_action_accessibility_button_label" msgid="5941347017132886642">"Ekranda tezkor ishga tushirish"</string>
+    <string name="accessibility_system_action_accessibility_button_chooser_label" msgid="6973618519666227981">"Ekranda tezkor ishga tushirishni tanlagich"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g> taglavhalar paneli."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> cheklangan turkumga joylandi"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
-    <!-- no translation found for conversation_single_line_image_placeholder (6983271082911936900) -->
-    <skip />
+    <string name="conversation_single_line_image_placeholder" msgid="6983271082911936900">"rasm yuborildi"</string>
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"Suhbat"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"Guruh suhbati"</string>
     <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>

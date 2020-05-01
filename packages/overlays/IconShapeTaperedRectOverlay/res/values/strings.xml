@@ -13,15 +13,8 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- Tapered rect icon overlay -->
+    <string name="icon_shape_tapered_rect_overlay" translatable="false">Tapered Rect</string>
 
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.android.theme.icon.hexagon"
-          android:versionCode="1"
-          android:versionName="1.0">
-    <overlay
-        android:targetPackage="android"
-        android:category="android.theme.customization.adaptive_icon_shape"
-        android:priority="1"/>
-
-    <application android:label="@string/icon_shape_hexagon_overlay" android:hasCode="false"/>
-</manifest>
+</resources>

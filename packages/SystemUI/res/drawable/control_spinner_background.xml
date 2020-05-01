@@ -16,7 +16,7 @@
 
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android"
             android:paddingMode="stack"
-            android:paddingStart="0dp"
+            android:paddingStart="40dp"
             android:paddingEnd="40dp"
             android:paddingLeft="0dp"
             android:paddingRight="0dp">

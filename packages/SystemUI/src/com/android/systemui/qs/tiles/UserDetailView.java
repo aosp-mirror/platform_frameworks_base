@@ -26,10 +26,12 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.settingslib.RestrictedLockUtils;
 import com.android.systemui.R;
 import com.android.systemui.qs.PseudoGridView;
+import com.android.systemui.qs.QSUserSwitcherEvent;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 
 /**
@@ -48,8 +50,9 @@ public class UserDetailView extends PseudoGridView {
                 R.layout.qs_user_detail, parent, attach);
     }
 
-    public void createAndSetAdapter(UserSwitcherController controller) {
-        mAdapter = new Adapter(mContext, controller);
+    public void createAndSetAdapter(UserSwitcherController controller,
+            UiEventLogger uiEventLogger) {
+        mAdapter = new Adapter(mContext, controller, uiEventLogger);
         ViewGroupAdapterBridge.link(this, mAdapter);
     }
 
@@ -63,11 +66,14 @@ public class UserDetailView extends PseudoGridView {
         private final Context mContext;
         protected UserSwitcherController mController;
         private View mCurrentUserView;
+        private final UiEventLogger mUiEventLogger;
 
-        public Adapter(Context context, UserSwitcherController controller) {
+        public Adapter(Context context, UserSwitcherController controller,
+                UiEventLogger uiEventLogger) {
             super(controller);
             mContext = context;
             mController = controller;
+            mUiEventLogger = uiEventLogger;
         }
 
         @Override
@@ -127,6 +133,7 @@ public class UserDetailView extends PseudoGridView {
                 mController.startActivity(intent);
             } else if (tag.isSwitchToEnabled) {
                 MetricsLogger.action(mContext, MetricsEvent.QS_SWITCH_USER);
+                mUiEventLogger.log(QSUserSwitcherEvent.QS_USER_SWITCH);
                 if (!tag.isAddUser && !tag.isRestricted && !tag.isDisabledByAdmin) {
                     if (mCurrentUserView != null) {
                         mCurrentUserView.setActivated(false);

@@ -20,10 +20,14 @@ import android.content.Context
 import android.content.res.Configuration
 import android.view.View
 import android.view.ViewGroup
+import com.android.internal.logging.UiEventLogger
 import com.android.systemui.R
 import com.android.systemui.qs.TileLayout.exactly
 
-class DoubleLineTileLayout(context: Context) : ViewGroup(context), QSPanel.QSTileLayout {
+class DoubleLineTileLayout(
+    context: Context,
+    private val uiEventLogger: UiEventLogger
+) : ViewGroup(context), QSPanel.QSTileLayout {
 
     companion object {
         private const val NUM_LINES = 2
@@ -85,6 +89,13 @@ class DoubleLineTileLayout(context: Context) : ViewGroup(context), QSPanel.QSTil
         _listening = listening
         for (record in mRecords) {
             record.tile.setListening(this, listening)
+        }
+        if (listening) {
+            for (i in 0 until numVisibleTiles) {
+                val tile = mRecords[i].tile
+                uiEventLogger.logWithInstanceId(
+                        QSEvent.QQS_TILE_VISIBLE, 0, tile.metricsSpec, tile.instanceId)
+            }
         }
     }
 

@@ -257,6 +257,8 @@
     <!-- no translation found for accessibility_work_mode (1280025758672376313) -->
     <skip />
     <string name="accessibility_notification_dismissed" msgid="4411652015138892952">"सूचना खारिज की गई."</string>
+    <!-- no translation found for accessibility_bubble_dismissed (270358867566720729) -->
+    <skip />
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"सूचना शेड."</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"त्वरित सेटिंग."</string>
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"लॉक स्क्रीन."</string>
@@ -432,6 +434,7 @@
     <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"स्क्रीन रिकॉर्ड"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"शुरू करें"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"रोकें"</string>
+    <string name="media_seamless_remote_device" msgid="177033467332920464">"डिवाइस"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"ऐप्लिकेशन बदलने के लिए ऊपर स्वाइप करें"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"ऐप्लिकेशन को झटपट स्विच करने के लिए उसे दाईं ओर खींचें और छोड़ें"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"खास जानकारी टॉगल करें"</string>
@@ -714,6 +717,7 @@
     <string name="notification_channel_summary_priority" msgid="7415770044553264622">"यह बातचीत सेक्शन में सबसे ऊपर और एक बबल के तौर पर दिखती है."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"सेटिंग"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"प्राथमिकता"</string>
+    <string name="no_shortcut" msgid="7176375126961212514">"<xliff:g id="APP_NAME">%1$s</xliff:g> में हर बातचीत के लिए अलग सेटिंग तय नहीं की जा सकती"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"हाल ही के बबल्स मौजूद नहीं हैं"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"हाल ही के बबल्स और हटाए गए बबल्स यहां दिखेंगे"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"ये सूचनाएं नहीं बदली जा सकती हैं."</string>
@@ -1026,6 +1030,8 @@
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"पावर मेन्यू से ऐक्सेस करने के लिए कंट्रोल चुनें"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"कंट्रोल का क्रम फिर से बदलने के लिए उन्हें दबाकर रखें और खींचें"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"सभी कंट्रोल हटा दिए गए"</string>
+    <!-- no translation found for controls_favorite_toast_no_changes (7094494210840877931) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"सभी कंट्रोल की सूची लोड नहीं हो सकी."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"अन्य"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"डिवाइस कंट्रोल में जोड़ें"</string>
@@ -1034,6 +1040,7 @@
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"कंट्रोल अपडेट किए गए"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"पिन में अक्षर या चिह्न शामिल होते हैं"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"<xliff:g id="DEVICE">%s</xliff:g> की पुष्टि करें"</string>
+    <string name="controls_pin_wrong" msgid="6162694056042164211">"गलत पिन"</string>
     <string name="controls_pin_verifying" msgid="3755045989392131746">"पुष्टि की जा रही है…"</string>
     <string name="controls_pin_instructions" msgid="6363309783822475238">"पिन डालें"</string>
     <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"कोई और पिन आज़माएं"</string>
@@ -1043,6 +1050,9 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"सुझाव लोड हो रहे हैं"</string>
     <string name="controls_media_close_session" msgid="9023534788828414585">"इस मीडिया सेशन को बंद करें"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"काम नहीं कर रहा, ऐप जांचें"</string>
+    <string name="controls_error_retryable" msgid="864025882878378470">"कोई गड़बड़ी हुई, फिर से कोशिश की जा रही है…"</string>
+    <string name="controls_error_removed" msgid="6299213591234723805">"डिवाइस हटाया गया"</string>
+    <string name="controls_error_generic" msgid="352500456918362905">"स्थिति लोड नहीं की जा सकती"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"गड़बड़ी हुई, फिर से कोशिश करें"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"जारी है"</string>
     <string name="controls_added_tooltip" msgid="4842812921719153085">"नए कंट्रोल देखने के लिए पावर बटन दबाकर रखें"</string>

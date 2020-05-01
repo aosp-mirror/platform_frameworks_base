@@ -53,7 +53,8 @@ class ControlViewHolder(
     val layout: ViewGroup,
     val controlsController: ControlsController,
     val uiExecutor: DelayableExecutor,
-    val bgExecutor: DelayableExecutor
+    val bgExecutor: DelayableExecutor,
+    val controlActionCoordinator: ControlActionCoordinator
 ) {
 
     companion object {
@@ -65,6 +66,9 @@ class ControlViewHolder(
             DeviceTypes.TYPE_THERMOSTAT,
             DeviceTypes.TYPE_CAMERA
         )
+
+        const val MIN_LEVEL = 0
+        const val MAX_LEVEL = 10000
     }
 
     private val toggleBackgroundIntensity: Float = layout.context.resources
@@ -121,7 +125,7 @@ class ControlViewHolder(
         cws.control?.let {
             layout.setClickable(true)
             layout.setOnLongClickListener(View.OnLongClickListener() {
-                ControlActionCoordinator.longPress(this@ControlViewHolder)
+                controlActionCoordinator.longPress(this@ControlViewHolder)
                 true
             })
         }

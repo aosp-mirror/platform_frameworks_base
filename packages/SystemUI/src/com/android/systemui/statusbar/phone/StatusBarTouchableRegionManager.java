@@ -32,7 +32,6 @@ import android.view.WindowInsets;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.ScreenDecorations;
-import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
@@ -45,8 +44,8 @@ import javax.inject.Singleton;
 
 /**
  * Manages what parts of the status bar are touchable. Clients are primarily UI that display in the
- * status bar even though the UI doesn't look like part of the status bar. Currently this
- * includes HeadsUpNotifications and Bubbles.
+ * status bar even though the UI doesn't look like part of the status bar. Currently this consists
+ * of HeadsUpNotifications.
  */
 @Singleton
 public final class StatusBarTouchableRegionManager implements Dumpable {
@@ -55,7 +54,6 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
     private final Context mContext;
     private final HeadsUpManagerPhone mHeadsUpManager;
     private final NotificationShadeWindowController mNotificationShadeWindowController;
-    private final BubbleController mBubbleController;
 
     private boolean mIsStatusBarExpanded = false;
     private boolean mShouldAdjustInsets = false;
@@ -73,8 +71,7 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
             Context context,
             NotificationShadeWindowController notificationShadeWindowController,
             ConfigurationController configurationController,
-            HeadsUpManagerPhone headsUpManager,
-            BubbleController bubbleController
+            HeadsUpManagerPhone headsUpManager
     ) {
         mContext = context;
         initResources();
@@ -115,11 +112,6 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
 
         mNotificationShadeWindowController = notificationShadeWindowController;
         mNotificationShadeWindowController.setForcePluginOpenListener((forceOpen) -> {
-            updateTouchableRegion();
-        });
-
-        mBubbleController = bubbleController;
-        mBubbleController.setBubbleStateChangeListener((hasBubbles) -> {
             updateTouchableRegion();
         });
     }
@@ -172,12 +164,6 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
                     mStatusBarHeight);
             updateRegionForNotch(mTouchableRegion);
         }
-
-        // Update touchable region for bubbles
-        Rect bubbleRect = mBubbleController.getTouchableRegion();
-        if (bubbleRect != null) {
-            mTouchableRegion.union(bubbleRect);
-        }
         return mTouchableRegion;
     }
 
@@ -198,7 +184,6 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
                 && (mNotificationShadeWindowView.getRootWindowInsets().getDisplayCutout() != null);
         boolean shouldObserve = mHeadsUpManager.hasPinnedHeadsUp()
                         || mHeadsUpManager.isHeadsUpGoingAway()
-                        || mBubbleController.hasBubbles()
                         || mForceCollapsedUntilLayout
                         || hasCutoutInset
                         || mNotificationShadeWindowController.getForcePluginOpen();
@@ -266,7 +251,7 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
             }
 
             // Update touch insets to include any area needed for touching features that live in
-            // the status bar (ie: heads up notifications or bubbles)
+            // the status bar (ie: heads up notifications)
             info.setTouchableInsets(ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION);
             info.touchableRegion.set(calculateTouchableRegion());
         }

@@ -50,6 +50,7 @@ import android.util.Slog;
 import java.io.PrintWriter;
 import java.net.URISyntaxException;
 import java.util.Collections;
+import java.util.Date;
 
 /**
  * Implementation of `cmd notification` in NotificationManagerService.
@@ -73,7 +74,12 @@ public class NotificationShellCmd extends ShellCommand {
             + "  set_bubbles PACKAGE PREFERENCE (0=none 1=all 2=selected) "
                     + "[user_id (current user if not specified)]\n"
             + "  set_bubbles_channel PACKAGE CHANNEL_ID ALLOW "
-                    + "[user_id (current user if not specified)]\n";
+                    + "[user_id (current user if not specified)]\n"
+            + "  list\n"
+            + "  get <notification-key>\n"
+            + "  snooze --for <msec> <notification-key>\n"
+            + "  unsnooze <notification-key>\n"
+            ;
 
     private static final String NOTIFY_USAGE =
               "usage: cmd notification post [flags] <tag> <text>\n\n"
@@ -118,6 +124,10 @@ public class NotificationShellCmd extends ShellCommand {
         mPm = mDirectService.getContext().getPackageManager();
     }
 
+    protected boolean checkShellCommandPermission(int callingUid) {
+        return (callingUid == Process.ROOT_UID || callingUid == Process.SHELL_UID);
+    }
+
     @Override
     public int onCommand(String cmd) {
         if (cmd == null) {
@@ -140,7 +150,17 @@ public class NotificationShellCmd extends ShellCommand {
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
+
         final PrintWriter pw = getOutPrintWriter();
+
+        if (!checkShellCommandPermission(callingUid)) {
+            Slog.e(TAG, "error: permission denied: callingUid="
+                    + callingUid + " callingPackage=" + callingPackage);
+            pw.println("error: permission denied: callingUid="
+                    + callingUid + " callingPackage=" + callingPackage);
+            return 255;
+        }
+
         try {
             switch (cmd.replace('-', '_')) {
                 case "set_dnd": {
@@ -316,6 +336,100 @@ public class NotificationShellCmd extends ShellCommand {
                 case "notify":
                     doNotify(pw, callingPackage, callingUid);
                     break;
+                case "list":
+                    for (String key : mDirectService.mNotificationsByKey.keySet()) {
+                        pw.println(key);
+                    }
+                    break;
+                case "get": {
+                    final String key = getNextArgRequired();
+                    final NotificationRecord nr = mDirectService.getNotificationRecord(key);
+                    if (nr != null) {
+                        nr.dump(pw, "", mDirectService.getContext(), false);
+                    } else {
+                        pw.println("error: no active notification matching key: " + key);
+                        return 1;
+                    }
+                    break;
+                }
+                case "snoozed": {
+                    final StringBuilder sb = new StringBuilder();
+                    final SnoozeHelper sh = mDirectService.mSnoozeHelper;
+                    for (NotificationRecord nr : sh.getSnoozed()) {
+                        final String pkg = nr.getSbn().getPackageName();
+                        final String key = nr.getKey();
+                        pw.println(key + " snoozed, time="
+                                + sh.getSnoozeTimeForUnpostedNotification(
+                                        nr.getUserId(), pkg, key)
+                                + " context="
+                                + sh.getSnoozeContextForUnpostedNotification(
+                                        nr.getUserId(), pkg, key));
+                    }
+                    break;
+                }
+                case "unsnooze": {
+                    boolean mute = false;
+                    String key = getNextArgRequired();
+                    if ("--mute".equals(key)) {
+                        mute = true;
+                        key = getNextArgRequired();
+                    }
+                    if (null != mDirectService.mSnoozeHelper.getNotification(key)) {
+                        pw.println("unsnoozing: " + key);
+                        mDirectService.unsnoozeNotificationInt(key, null, mute);
+                    } else {
+                        pw.println("error: no snoozed otification matching key: " + key);
+                        return 1;
+                    }
+                    break;
+                }
+                case "snooze": {
+                    String subflag = getNextArg();
+                    if (subflag == null) {
+                        subflag = "help";
+                    } else if (subflag.startsWith("--")) {
+                        subflag = subflag.substring(2);
+                    }
+                    String flagarg = getNextArg();
+                    String key = getNextArg();
+                    if (key == null) subflag = "help";
+                    String criterion = null;
+                    long duration = 0;
+                    switch (subflag) {
+                        case "context":
+                        case "condition":
+                        case "criterion":
+                            criterion = flagarg;
+                            break;
+                        case "until":
+                        case "for":
+                        case "duration":
+                            duration = Long.parseLong(flagarg);
+                            break;
+                        default:
+                            pw.println("usage: cmd notification snooze (--for <msec> | "
+                                    + "--context <snooze-criterion-id>) <key>");
+                            return 1;
+                    }
+                    if (null == mDirectService.getNotificationRecord(key)) {
+                        pw.println("error: no notification matching key: " + key);
+                        return 1;
+                    }
+                    if (duration > 0 || criterion != null) {
+                        if (duration > 0) {
+                            pw.println(String.format("snoozing <%s> until time: %s", key,
+                                    new Date(System.currentTimeMillis() + duration)));
+                        } else {
+                            pw.println(String.format("snoozing <%s> until criterion: %s", key,
+                                    criterion));
+                        }
+                        mDirectService.snoozeNotificationInt(key, duration, criterion, null);
+                    } else {
+                        pw.println("error: invalid value for --" + subflag + ": " + flagarg);
+                        return 1;
+                    }
+                    break;
+                }
                 default:
                     return handleDefaultCommands(cmd);
             }

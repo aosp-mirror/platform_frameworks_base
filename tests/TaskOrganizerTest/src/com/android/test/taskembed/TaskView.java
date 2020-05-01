@@ -16,34 +16,27 @@
 
 package com.android.test.taskembed;
 
-import android.app.ActivityTaskManager;
 import android.content.Context;
-import android.window.TaskOrganizer;
-import android.window.WindowContainerToken;
 import android.view.SurfaceControl;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-import android.window.ITaskOrganizer;
+import android.window.WindowContainerToken;
 
 /**
  * Simple SurfaceView wrapper which registers a TaskOrganizer
  * after it's Surface is ready.
  */
 class TaskView extends SurfaceView implements SurfaceHolder.Callback {
-    final TaskOrganizer mTaskOrganizer;
-    final int mWindowingMode;
     WindowContainerToken mWc;
+    private SurfaceControl mLeash;
 
-    boolean mSurfaceCreated = false;
-    boolean mNeedsReparent;
+    private boolean mSurfaceCreated = false;
+    private boolean mNeedsReparent;
 
-    TaskView(Context c, TaskOrganizer o, int windowingMode) {
+    TaskView(Context c) {
         super(c);
         getHolder().addCallback(this);
         setZOrderOnTop(true);
-
-        mTaskOrganizer = o;
-        mWindowingMode = windowingMode;
     }
 
     @Override
@@ -63,27 +56,25 @@ class TaskView extends SurfaceView implements SurfaceHolder.Callback {
     public void surfaceDestroyed(SurfaceHolder holder) {
     }
 
-    void reparentTask(WindowContainerToken wc) {
+    void reparentTask(WindowContainerToken wc, SurfaceControl leash) {
         mWc = wc;
-        if (mSurfaceCreated == false) {
+        mLeash = leash;
+        if (!mSurfaceCreated) {
             mNeedsReparent = true;
         } else {
             reparentLeash();
         }
     }
 
-    void reparentLeash() {
+    private void reparentLeash() {
         SurfaceControl.Transaction t = new SurfaceControl.Transaction();
-        SurfaceControl leash = null;
-        try {
-            leash = mWc.getLeash();
-        } catch (Exception e) {
-            // System server died.. oh well
+        if (mLeash == null) {
+            return;
         }
 
-        t.reparent(leash, getSurfaceControl())
-            .setPosition(leash, 0, 0)
-            .show(leash)
+        t.reparent(mLeash, getSurfaceControl())
+            .setPosition(mLeash, 0, 0)
+            .show(mLeash)
             .apply();
     }
 }

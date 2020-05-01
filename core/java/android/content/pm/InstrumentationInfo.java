@@ -161,9 +161,9 @@ public class InstrumentationInfo extends PackageItemInfo implements Parcelable {
         dest.writeString8(targetProcesses);
         dest.writeString8(sourceDir);
         dest.writeString8(publicSourceDir);
-        dest.writeStringArray(splitNames);
-        dest.writeStringArray(splitSourceDirs);
-        dest.writeStringArray(splitPublicSourceDirs);
+        dest.writeString8Array(splitNames);
+        dest.writeString8Array(splitSourceDirs);
+        dest.writeString8Array(splitPublicSourceDirs);
         dest.writeSparseArray((SparseArray) splitDependencies);
         dest.writeString8(dataDir);
         dest.writeString8(deviceProtectedDataDir);
@@ -193,9 +193,9 @@ public class InstrumentationInfo extends PackageItemInfo implements Parcelable {
         targetProcesses = source.readString8();
         sourceDir = source.readString8();
         publicSourceDir = source.readString8();
-        splitNames = source.readStringArray();
-        splitSourceDirs = source.readStringArray();
-        splitPublicSourceDirs = source.readStringArray();
+        splitNames = source.createString8Array();
+        splitSourceDirs = source.createString8Array();
+        splitPublicSourceDirs = source.createString8Array();
         splitDependencies = source.readSparseArray(null);
         dataDir = source.readString8();
         deviceProtectedDataDir = source.readString8();

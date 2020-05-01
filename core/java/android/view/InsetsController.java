@@ -22,8 +22,6 @@ import static android.view.InsetsState.toInternalType;
 import static android.view.InsetsState.toPublicType;
 import static android.view.WindowInsets.Type.all;
 import static android.view.WindowInsets.Type.ime;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_APPEARANCE_CONTROLLED;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_BEHAVIOR_CONTROLLED;
 
 import android.animation.AnimationHandler;
 import android.animation.Animator;
@@ -43,7 +41,6 @@ import android.util.SparseArray;
 import android.view.InsetsSourceConsumer.ShowResult;
 import android.view.InsetsState.InternalInsetsType;
 import android.view.SurfaceControl.Transaction;
-import android.view.ViewTreeObserver.OnPreDrawListener;
 import android.view.WindowInsets.Type;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowInsetsAnimation.Bounds;
@@ -424,8 +421,14 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
     private final String TAG = "InsetsControllerImpl";
 
+    /** The local state */
     private final InsetsState mState = new InsetsState();
-    private final InsetsState mLastDispachedState = new InsetsState();
+
+    /** The state dispatched from server */
+    private final InsetsState mLastDispatchedState = new InsetsState();
+
+    /** The state sent to server */
+    private final InsetsState mRequestedState = new InsetsState();
 
     private final Rect mFrame = new Rect();
     private final BiFunction<InsetsController, Integer, InsetsSourceConsumer> mConsumerCreator;
@@ -539,24 +542,24 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     }
 
     public InsetsState getLastDispatchedState() {
-        return mLastDispachedState;
+        return mLastDispatchedState;
     }
 
     @VisibleForTesting
     public boolean onStateChanged(InsetsState state) {
         boolean localStateChanged = !mState.equals(state, true /* excludingCaptionInsets */)
                 || !captionInsetsUnchanged();
-        if (!localStateChanged && mLastDispachedState.equals(state)) {
+        if (!localStateChanged && mLastDispatchedState.equals(state)) {
             return false;
         }
         updateState(state);
-        mLastDispachedState.set(state, true /* copySources */);
+        mLastDispatchedState.set(state, true /* copySources */);
         applyLocalVisibilityOverride();
         if (localStateChanged) {
             mHost.notifyInsetsChanged();
         }
-        if (!mState.equals(mLastDispachedState, true /* excludingCaptionInsets */)) {
-            sendStateToWindowManager();
+        if (!mState.equals(mLastDispatchedState, true /* excludingCaptionInsets */)) {
+            updateRequestedState();
         }
         return true;
     }
@@ -629,8 +632,9 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             }
         }
 
-        int[] showTypes = new int[1];
-        int[] hideTypes = new int[1];
+        final boolean hasControl = mTmpControlArray.size() > 0;
+        final int[] showTypes = new int[1];
+        final int[] hideTypes = new int[1];
 
         // Ensure to update all existing source consumers
         for (int i = mSourceConsumers.size() - 1; i >= 0; i--) {
@@ -662,6 +666,12 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         }
         if (hideTypes[0] != 0) {
             applyAnimation(hideTypes[0], false /* show */, false /* fromIme */);
+        }
+        if (hasControl) {
+            // We might have changed our requested visibilities while we don't have the control,
+            // so we need to update our requested state once we have control. Otherwise, our
+            // requested state at the server side might be incorrect.
+            updateRequestedState();
         }
     }
 
@@ -992,7 +1002,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     @VisibleForTesting
     public void notifyVisibilityChanged() {
         mHost.notifyInsetsChanged();
-        sendStateToWindowManager();
+        updateRequestedState();
     }
 
     /**
@@ -1042,18 +1052,28 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     }
 
     /**
-     * Sends the local visibility state back to window manager.
+     * Sends the local visibility state back to window manager if it is changed.
      */
-    private void sendStateToWindowManager() {
-        InsetsState tmpState = new InsetsState();
+    private void updateRequestedState() {
+        boolean changed = false;
         for (int i = mSourceConsumers.size() - 1; i >= 0; i--) {
             final InsetsSourceConsumer consumer = mSourceConsumers.valueAt(i);
-            if (consumer.getType() == ITYPE_CAPTION_BAR) continue;
+            final @InternalInsetsType int type = consumer.getType();
+            if (type == ITYPE_CAPTION_BAR) {
+                continue;
+            }
             if (consumer.getControl() != null) {
-                tmpState.addSource(mState.getSource(consumer.getType()));
+                final InsetsSource localSource = mState.getSource(type);
+                if (!localSource.equals(mRequestedState.peekSource(type))) {
+                    mRequestedState.addSource(new InsetsSource(localSource));
+                    changed = true;
+                }
             }
         }
-        mHost.onInsetsModified(tmpState);
+        if (!changed) {
+            return;
+        }
+        mHost.onInsetsModified(mRequestedState);
     }
 
     @VisibleForTesting

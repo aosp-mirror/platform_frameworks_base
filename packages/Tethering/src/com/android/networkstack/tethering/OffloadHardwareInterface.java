@@ -308,7 +308,6 @@ public class OffloadHardwareInterface {
             return stats;
         }
 
-        mLog.log(logmsg + YIELDS + stats);
         return stats;
     }
 

@@ -116,14 +116,14 @@ public class InsetsSource implements Parcelable {
         if (!ignoreVisibility && !mVisible) {
             return Insets.NONE;
         }
-        if (!getIntersection(frame, relativeFrame, mTmpFrame)) {
-            return Insets.NONE;
-        }
         // During drag-move and drag-resizing, the caption insets position may not get updated
         // before the app frame get updated. To layout the app content correctly during drag events,
         // we always return the insets with the corresponding height covering the top.
         if (getType() == ITYPE_CAPTION_BAR) {
             return Insets.of(0, frame.height(), 0, 0);
+        }
+        if (!getIntersection(frame, relativeFrame, mTmpFrame)) {
+            return Insets.NONE;
         }
 
         // TODO: Currently, non-floating IME always intersects at bottom due to issues with cutout.
@@ -213,8 +213,16 @@ public class InsetsSource implements Parcelable {
 
     public InsetsSource(Parcel in) {
         mType = in.readInt();
-        mFrame = in.readParcelable(null /* loader */);
-        mVisibleFrame = in.readParcelable(null /* loader */);
+        if (in.readInt() != 0) {
+            mFrame = Rect.CREATOR.createFromParcel(in);
+        } else {
+            mFrame = null;
+        }
+        if (in.readInt() != 0) {
+            mVisibleFrame = Rect.CREATOR.createFromParcel(in);
+        } else {
+            mVisibleFrame = null;
+        }
         mVisible = in.readBoolean();
     }
 
@@ -226,8 +234,18 @@ public class InsetsSource implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(mType);
-        dest.writeParcelable(mFrame, 0 /* flags*/);
-        dest.writeParcelable(mVisibleFrame, 0 /* flags */);
+        if (mFrame != null) {
+            dest.writeInt(1);
+            mFrame.writeToParcel(dest, 0);
+        } else {
+            dest.writeInt(0);
+        }
+        if (mVisibleFrame != null) {
+            dest.writeInt(1);
+            mVisibleFrame.writeToParcel(dest, 0);
+        } else {
+            dest.writeInt(0);
+        }
         dest.writeBoolean(mVisible);
     }
 

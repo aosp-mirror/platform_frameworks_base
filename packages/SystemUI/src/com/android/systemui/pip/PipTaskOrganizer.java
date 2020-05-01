@@ -238,6 +238,11 @@ public class PipTaskOrganizer extends TaskOrganizer {
      * @param animationDurationMs duration in millisecond for the exiting PiP transition
      */
     public void dismissPip(int animationDurationMs) {
+        if (!mInPip || mToken == null) {
+            Log.wtf(TAG, "Not allowed to dismissPip in current state"
+                    + " mInPip=" + mInPip + " mToken=" + mToken);
+            return;
+        }
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         wct.setActivityWindowingMode(mToken, WINDOWING_MODE_UNDEFINED);
         WindowOrganizer.applyTransaction(wct);
@@ -250,7 +255,7 @@ public class PipTaskOrganizer extends TaskOrganizer {
     }
 
     @Override
-    public void onTaskAppeared(ActivityManager.RunningTaskInfo info) {
+    public void onTaskAppeared(ActivityManager.RunningTaskInfo info, SurfaceControl leash) {
         Objects.requireNonNull(info, "Requires RunningTaskInfo");
         final Rect destinationBounds = mPipBoundsHandler.getDestinationBounds(
                 info.topActivity, getAspectRatioOrDefault(info.pictureInPictureParams),
@@ -259,7 +264,7 @@ public class PipTaskOrganizer extends TaskOrganizer {
         mTaskInfo = info;
         mToken = mTaskInfo.token;
         mInPip = true;
-        mLeash = mToken.getLeash();
+        mLeash = leash;
 
         final Rect currentBounds = mTaskInfo.configuration.windowConfiguration.getBounds();
         mBoundsToRestore.put(mToken.asBinder(), currentBounds);

@@ -56,9 +56,12 @@ import android.widget.TextView;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
+import com.android.systemui.qs.QSDndEvent;
+import com.android.systemui.qs.QSEvents;
 import com.android.systemui.statusbar.policy.ZenModeController;
 
 import java.io.FileDescriptor;
@@ -103,6 +106,7 @@ public class ZenModePanel extends FrameLayout {
     private final TransitionHelper mTransitionHelper = new TransitionHelper();
     private final Uri mForeverId;
     private final ConfigurableTexts mConfigurableTexts;
+    private final UiEventLogger mUiEventLogger = QSEvents.INSTANCE.getQsUiEventsLogger();
 
     private String mTag = TAG + "/" + Integer.toHexString(System.identityHashCode(this));
 
@@ -662,6 +666,7 @@ public class ZenModePanel extends FrameLayout {
                     tag.rb.setChecked(true);
                     if (DEBUG) Log.d(mTag, "onCheckedChanged " + conditionId);
                     MetricsLogger.action(mContext, MetricsEvent.QS_DND_CONDITION_SELECT);
+                    mUiEventLogger.log(QSDndEvent.QS_DND_CONDITION_SELECT);
                     select(tag.condition);
                     announceConditionSelection(tag);
                 }
@@ -767,6 +772,7 @@ public class ZenModePanel extends FrameLayout {
 
     private void onClickTimeButton(View row, ConditionTag tag, boolean up, int rowId) {
         MetricsLogger.action(mContext, MetricsEvent.QS_DND_TIME, up);
+        mUiEventLogger.log(up ? QSDndEvent.QS_DND_TIME_UP : QSDndEvent.QS_DND_TIME_DOWN);
         Condition newCondition = null;
         final int N = MINUTE_BUCKETS.length;
         if (mBucketIndex == -1) {

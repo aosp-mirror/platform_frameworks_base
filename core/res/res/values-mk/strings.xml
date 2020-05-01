@@ -200,9 +200,9 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"Уредот ќе се избрише"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Апликацијата на администраторот не може да се користи. Уредот ќе се избрише сега.\n\nАко имате прашања, контактирајте со администраторот на организацијата."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"Печатењето е оневозможено од <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
-    <string name="personal_apps_suspended_title" msgid="4543693107104417750">"Деблокирајте лични апликации"</string>
-    <string name="personal_apps_suspended_tomorrow_title" msgid="6414440257969874914">"Блокирање на апликациите утре"</string>
-    <string name="personal_apps_suspended_text" msgid="8954038765131038226">"IT-администраторот не дозволува паузирање на работниот профил за повеќе од <xliff:g id="DAYS">%1$d</xliff:g> дена"</string>
+    <string name="personal_apps_suspension_title" msgid="7561416677884286600">"Вклучете го работниот профил"</string>
+    <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Вашите лични апликации се блокирани додека да го вклучите работниот профил"</string>
+    <string name="personal_apps_suspension_tomorrow_text" msgid="6322541302153673994">"Вашите лични апликации ќе се блокираат утре"</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"Вклучи го работниот профил"</string>
     <string name="me" msgid="6207584824693813140">"Јас"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Опции на таблет"</string>
@@ -1633,10 +1633,8 @@
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Ако ги задржите притиснати двете копчиња за јачина на звук неколку секунди, ќе се вклучи функцијата за пристапност <xliff:g id="SERVICE">%1$s</xliff:g>. Ова може да го промени начинот на функционирање на уредот.\n\nМоже да ја измените кратенкава да биде за друга функција во „Поставки &gt; Пристапност“."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Вклучи"</string>
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"Не вклучувај"</string>
-    <!-- no translation found for accessibility_shortcut_menu_item_status_on (6608392117189732543) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_menu_item_status_off (5531598275559472393) -->
-    <skip />
+    <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"ВКЛУЧЕНО"</string>
+    <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"ИСКЛУЧЕНО"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Дали дозволувате <xliff:g id="SERVICE">%1$s</xliff:g> да има целосна контрола врз вашиот уред?"</string>
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Ако вклучите <xliff:g id="SERVICE">%1$s</xliff:g>, уредот нема да го користи заклучувањето на екранот за да го подобри шифрирањето на податоците."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Целосната контрола е соодветна за апликации што ви помагаат со потребите за пристапност, но не и за повеќето апликации."</string>
@@ -1798,8 +1796,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Ажурирано од администраторот"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Избришано од администраторот"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Во ред"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"За да го продолжи траењето на батеријата, „Штедачот на батерија“:\n·вклучува темна тема\n·исклучува или ограничува активност во заднина, некои визуелни ефекти и други функции како „Hey Google“\n\n"<annotation id="url">"Дознајте повеќе"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"За да го продолжи траењето на батеријата, „Штедачот на батерија“:\n·вклучува „Темна тема“;\n·исклучува или ограничува активност во заднина, некои визуелни ефекти и други функции како „Ok Google“."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"За да го продолжи траењето на батеријата, „Штедачот на батерија“:\n\n•вклучува темна тема;\n•исклучува или ограничува активност во заднина, некои визуелни ефекти и други функции како „Ok Google“.\n\n"<annotation id="url">"Дознајте повеќе"</annotation></string>
+    <string name="battery_saver_description" msgid="8587408568232177204">"За да го продолжи траењето на батеријата, „Штедачот на батерија“:\n\n•вклучува темна тема;\n•исклучува или ограничува активност во заднина, некои визуелни ефекти и други функции како „Ok Google“."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"За да се намали користењето интернет, „Штедачот на интернет“ спречува дел од апликациите да испраќаат или да примаат податоци во заднина. Одредена апликација што ја користите ќе може да користи интернет, но можеби тоа ќе го прави поретко. Ова значи, на пример, дека сликите нема да се прикажуваат додека не ги допрете."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Да се вклучи „Штедач на интернет“?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Вклучи"</string>
@@ -2046,15 +2044,12 @@
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"Дијалог за напојување"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Заклучен екран"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Слика од екранот"</string>
-    <!-- no translation found for accessibility_system_action_accessibility_button_label (5941347017132886642) -->
-    <skip />
-    <!-- no translation found for accessibility_system_action_accessibility_button_chooser_label (6973618519666227981) -->
-    <skip />
+    <string name="accessibility_system_action_accessibility_button_label" msgid="5941347017132886642">"Кратенка за пристапност на екранот"</string>
+    <string name="accessibility_system_action_accessibility_button_chooser_label" msgid="6973618519666227981">"Избирач на кратенка за пристапност на екранот"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Насловна лента на <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> е ставен во корпата ОГРАНИЧЕНИ"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
-    <!-- no translation found for conversation_single_line_image_placeholder (6983271082911936900) -->
-    <skip />
+    <string name="conversation_single_line_image_placeholder" msgid="6983271082911936900">"испрати слика"</string>
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"Разговор"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"Групен разговор"</string>
     <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>

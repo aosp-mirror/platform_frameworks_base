@@ -185,7 +185,12 @@ public class MetricsFeatureProvider {
                 sourceMetricsCategory);
     }
 
-    private boolean logSettingsTileClick(String logKey, int sourceMetricsCategory) {
+    /**
+     * Logs an event when the setting key is clicked.
+     *
+     * @return true if the key is loggable, otherwise false
+     */
+    public boolean logSettingsTileClick(String logKey, int sourceMetricsCategory) {
         if (TextUtils.isEmpty(logKey)) {
             // Not loggable
             return false;

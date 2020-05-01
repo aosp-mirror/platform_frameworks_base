@@ -1680,7 +1680,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     public void reset() {
         mShowingPublicInitialized = false;
         unDismiss();
-        resetTranslation();
+        if (mMenuRow == null || !mMenuRow.isMenuVisible()) {
+            resetTranslation();
+        }
         onHeightReset();
         requestLayout();
     }
@@ -1838,10 +1840,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     public void resetTranslation() {
-        if (mMenuRow != null && mMenuRow.isMenuVisible()) {
-            return;
-        }
-
         if (mTranslateAnim != null) {
             mTranslateAnim.cancel();
         }

@@ -83,7 +83,7 @@ class SplitScreenTaskOrganizer extends TaskOrganizer {
     }
 
     @Override
-    public void onTaskAppeared(RunningTaskInfo taskInfo) {
+    public void onTaskAppeared(RunningTaskInfo taskInfo, SurfaceControl leash) {
         synchronized (this) {
             if (mPrimary == null || mSecondary == null) {
                 Log.w(TAG, "Received onTaskAppeared before creating root tasks " + taskInfo);
@@ -91,9 +91,9 @@ class SplitScreenTaskOrganizer extends TaskOrganizer {
             }
 
             if (taskInfo.token.equals(mPrimary.token)) {
-                mPrimarySurface = taskInfo.token.getLeash();
+                mPrimarySurface = leash;
             } else if (taskInfo.token.equals(mSecondary.token)) {
-                mSecondarySurface = taskInfo.token.getLeash();
+                mSecondarySurface = leash;
             }
 
             if (!mSplitScreenSupported && mPrimarySurface != null && mSecondarySurface != null) {

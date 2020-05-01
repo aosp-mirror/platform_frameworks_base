@@ -200,9 +200,9 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"系统将清空您的设备"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"无法使用管理应用，系统现在将清空您的设备。\n\n如有疑问，请与您所在单位的管理员联系。"</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"“<xliff:g id="OWNER_APP">%s</xliff:g>”已停用打印功能。"</string>
-    <string name="personal_apps_suspended_title" msgid="4543693107104417750">"取消屏蔽个人应用"</string>
-    <string name="personal_apps_suspended_tomorrow_title" msgid="6414440257969874914">"应用将于明日被屏蔽"</string>
-    <string name="personal_apps_suspended_text" msgid="8954038765131038226">"您的 IT 管理员不允许工作资料的暂停时间超过 <xliff:g id="DAYS">%1$d</xliff:g> 天"</string>
+    <string name="personal_apps_suspension_title" msgid="7561416677884286600">"开启工作资料"</string>
+    <string name="personal_apps_suspension_text" msgid="6115455688932935597">"系统已屏蔽您的个人应用。您需要开启工作资料，系统才会取消屏蔽这些应用"</string>
+    <string name="personal_apps_suspension_tomorrow_text" msgid="6322541302153673994">"系统将于明天屏蔽您的个人应用"</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"开启工作资料"</string>
     <string name="me" msgid="6207584824693813140">"我"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"平板电脑选项"</string>
@@ -1631,10 +1631,8 @@
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"同时按住两个音量键几秒钟，即可开启<xliff:g id="SERVICE">%1$s</xliff:g>无障碍功能。这样做可能会改变您设备的工作方式。\n\n您可以在“设置”&gt;“无障碍”中将此快捷方式更改为开启另一项功能。"</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"开启"</string>
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"不开启"</string>
-    <!-- no translation found for accessibility_shortcut_menu_item_status_on (6608392117189732543) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_menu_item_status_off (5531598275559472393) -->
-    <skip />
+    <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"开启"</string>
+    <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"关闭"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"要允许<xliff:g id="SERVICE">%1$s</xliff:g>完全控制您的设备吗？"</string>
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"如果您开启<xliff:g id="SERVICE">%1$s</xliff:g>，您的设备将无法使用屏幕锁定功能来增强数据加密效果。"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"对于能满足您的无障碍功能需求的应用，可授予其完全控制权限；但对大部分应用来说，都不适合授予此权限。"</string>
@@ -1796,8 +1794,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"已由您的管理员更新"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"已由您的管理员删除"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"确定"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"为了延长电池续航时间，省电模式会执行以下操作：\n开启深色主题\n关闭或限制后台活动、部分视觉效果和其他功能，例如“Ok Google”\n\n"<annotation id="url">"了解详情"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"为了延长电池续航时间，省电模式会执行以下操作：\n开启深色主题\n关闭或限制后台活动、部分视觉效果和其他功能，例如“Ok Google”"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"为了延长电池续航时间，省电模式会执行以下操作：\n\n• 开启深色主题\n• 关闭或限制后台活动、部分视觉效果和其他功能，例如“Ok Google”\n\n"<annotation id="url">"了解详情"</annotation></string>
+    <string name="battery_saver_description" msgid="8587408568232177204">"为了延长电池续航时间，省电模式会执行以下操作：\n\n• 开启深色主题\n• 关闭或限制后台活动、部分视觉效果和其他功能，例如“Ok Google”"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"为了减少流量消耗，流量节省程序会阻止某些应用在后台收发数据。您当前使用的应用可以收发数据，但频率可能会降低。举例而言，这可能意味着图片只有在您点按之后才会显示。"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"要开启流量节省程序吗？"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"开启"</string>
@@ -2044,15 +2042,12 @@
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"电源对话框"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"锁定屏幕"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"屏幕截图"</string>
-    <!-- no translation found for accessibility_system_action_accessibility_button_label (5941347017132886642) -->
-    <skip />
-    <!-- no translation found for accessibility_system_action_accessibility_button_chooser_label (6973618519666227981) -->
-    <skip />
+    <string name="accessibility_system_action_accessibility_button_label" msgid="5941347017132886642">"屏幕上的无障碍功能快捷方式"</string>
+    <string name="accessibility_system_action_accessibility_button_chooser_label" msgid="6973618519666227981">"屏幕上的无障碍功能快捷方式选择器"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g>的标题栏。"</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> 已被放入受限存储分区"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>："</string>
-    <!-- no translation found for conversation_single_line_image_placeholder (6983271082911936900) -->
-    <skip />
+    <string name="conversation_single_line_image_placeholder" msgid="6983271082911936900">"发送了一张图片"</string>
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"对话"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"群组对话"</string>
     <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>

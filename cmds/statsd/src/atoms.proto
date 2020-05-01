@@ -426,7 +426,7 @@ message Atom {
         UserLifecycleEventOccurred user_lifecycle_event_occurred = 265 [(module) = "framework"];
         AccessibilityShortcutReported accessibility_shortcut_reported =
             266 [(module) = "framework"];
-        AccessibilityServiceReported accessibility_service_reported = 267 [(module) = "framework"];
+        AccessibilityServiceReported accessibility_service_reported = 267 [(module) = "settings"];
         SdkExtensionStatus sdk_extension_status = 354;
 
         // StatsdStats tracks platform atoms with ids upto 500.
@@ -9453,7 +9453,7 @@ message UserLifecycleEventOccurred {
  * Logs when accessibility shortcut clicked.
  *
  * Logged from:
- *   frameworks/base/services/accessibility/java/com/android/server/accessibility/AccessibilityManagerService.java
+ *   frameworks/base/services/accessibility/java/com/android/server/accessibility
  */
 message AccessibilityShortcutReported {
     // The accessibility feature(including installed a11y service, framework a11y feature,
@@ -9473,7 +9473,7 @@ message AccessibilityShortcutReported {
  * Logs when accessibility service status changed.
  *
  * Logged from:
- *   frameworks/base/services/accessibility/java/com/android/server/accessibility/AccessibilityManagerService.java
+ *   packages/apps/Settings/src/com/android/settings/accessibility
  */
 message AccessibilityServiceReported {
     // The accessibility service package name.

@@ -255,6 +255,7 @@
     <!-- no translation found for accessibility_work_mode (1280025758672376313) -->
     <skip />
     <string name="accessibility_notification_dismissed" msgid="4411652015138892952">"Notificación rexeitada"</string>
+    <string name="accessibility_bubble_dismissed" msgid="270358867566720729">"Ignorouse a burbulla."</string>
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"Panel despregable"</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"Configuración rápida"</string>
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"Pantalla de bloqueo."</string>
@@ -430,6 +431,7 @@
     <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"Gravación da pantalla"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Iniciar"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Deter"</string>
+    <string name="media_seamless_remote_device" msgid="177033467332920464">"Dispositivo"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Pasar o dedo cara arriba para cambiar de aplicación"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Arrastra cara á dereita para cambiar de aplicacións rapidamente"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Activar/desactivar Visión xeral"</string>
@@ -712,6 +714,7 @@
     <string name="notification_channel_summary_priority" msgid="7415770044553264622">"Móstrase na parte superior da sección da conversa en forma de burbulla."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Configuración"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioridade"</string>
+    <string name="no_shortcut" msgid="7176375126961212514">"<xliff:g id="APP_NAME">%1$s</xliff:g> non admite opcións de configuración específicas para conversas"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Non hai burbullas recentes"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"As burbullas recentes e ignoradas aparecerán aquí."</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Estas notificacións non se poden modificar."</string>
@@ -1024,6 +1027,7 @@
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Escolle os controis para acceder desde o menú de acendido"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Para reorganizar os controis, mantenos premidos e arrástraos"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Quitáronse todos os controis"</string>
+    <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Non se gardaron os cambios"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Non se puido cargar a lista de todos os controis."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Outra"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Engadir ao control de dispositivos"</string>
@@ -1032,6 +1036,7 @@
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"Actualizáronse os controis"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"O PIN contén letras ou símbolos"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"Verificar <xliff:g id="DEVICE">%s</xliff:g>"</string>
+    <string name="controls_pin_wrong" msgid="6162694056042164211">"O PIN é incorrecto"</string>
     <string name="controls_pin_verifying" msgid="3755045989392131746">"Verificando…"</string>
     <string name="controls_pin_instructions" msgid="6363309783822475238">"Escribe o PIN"</string>
     <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"Proba con outro PIN"</string>
@@ -1041,6 +1046,9 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Cargando recomendacións"</string>
     <string name="controls_media_close_session" msgid="9023534788828414585">"Pechar esta sesión multimedia"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Inactivo. Comproba a app"</string>
+    <string name="controls_error_retryable" msgid="864025882878378470">"Erro. Tentando de novo…"</string>
+    <string name="controls_error_removed" msgid="6299213591234723805">"Quitouse o dispositivo"</string>
+    <string name="controls_error_generic" msgid="352500456918362905">"Non se puido cargar o estado"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Erro. Téntao de novo"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"En curso"</string>
     <string name="controls_added_tooltip" msgid="4842812921719153085">"Mantén premido o botón de acendido para ver os novos controis"</string>

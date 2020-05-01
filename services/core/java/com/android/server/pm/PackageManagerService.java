@@ -4949,6 +4949,21 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
                 return ai;
             }
+            if ((flags & PackageManager.MATCH_APEX) != 0) {
+                // For APKs, PackageInfo.applicationInfo is not exactly the same as ApplicationInfo
+                // returned from getApplicationInfo, but for APEX packages difference shouldn't be
+                // very big.
+                // TODO(b/155328545): generate proper application info for APEXes as well.
+                int apexFlags = ApexManager.MATCH_ACTIVE_PACKAGE;
+                if ((flags & PackageManager.MATCH_SYSTEM_ONLY) != 0) {
+                    apexFlags = ApexManager.MATCH_FACTORY_PACKAGE;
+                }
+                final PackageInfo pi = mApexManager.getPackageInfo(packageName, apexFlags);
+                if (pi == null) {
+                    return null;
+                }
+                return pi.applicationInfo;
+            }
             if ("android".equals(packageName)||"system".equals(packageName)) {
                 return mAndroidApplication;
             }
@@ -6399,6 +6414,11 @@ public class PackageManagerService extends IPackageManager.Stub
             final ResolveInfo bestChoice =
                     chooseBestActivity(
                             intent, resolvedType, flags, privateResolveFlags, query, userId);
+            final boolean nonBrowserOnly =
+                    (privateResolveFlags & PackageManagerInternal.RESOLVE_NON_BROWSER_ONLY) != 0;
+            if (nonBrowserOnly && bestChoice != null && bestChoice.handleAllWebDataURI) {
+                return null;
+            }
             return bestChoice;
         } finally {
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
@@ -6586,9 +6606,13 @@ public class PackageManagerService extends IPackageManager.Stub
                 if (ri != null) {
                     return ri;
                 }
-                // If we have an ephemeral app, use it
+                int browserCount = 0;
                 for (int i = 0; i < N; i++) {
                     ri = query.get(i);
+                    if (ri.handleAllWebDataURI) {
+                        browserCount++;
+                    }
+                    // If we have an ephemeral app, use it
                     if (ri.activityInfo.applicationInfo.isInstantApp()) {
                         final String packageName = ri.activityInfo.packageName;
                         final PackageSetting ps = mSettings.mPackages.get(packageName);
@@ -6604,6 +6628,9 @@ public class PackageManagerService extends IPackageManager.Stub
                     return null;
                 }
                 ri = new ResolveInfo(mResolveInfo);
+                // if all resolve options are browsers, mark the resolver's info as if it were
+                // also a browser.
+                ri.handleAllWebDataURI = browserCount == N;
                 ri.activityInfo = new ActivityInfo(ri.activityInfo);
                 ri.activityInfo.labelRes = ResolverActivity.getLabelRes(intent.getAction());
                 // If all of the options come from the same package, show the application's
@@ -7114,7 +7141,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
                 // Check for results in the current profile.
                 result = filterIfNotSystemUser(mComponentResolver.queryActivities(
-                        intent, resolvedType, flags, privateResolveFlags, userId), userId);
+                        intent, resolvedType, flags, userId), userId);
                 addInstant = isInstantAppResolutionAllowed(intent, result, userId,
                         false /*skipPackageCheck*/);
                 // Check for cross profile results.
@@ -7213,7 +7240,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         | PackageManager.GET_RESOLVED_FILTER
                         | PackageManager.MATCH_INSTANT
                         | PackageManager.MATCH_VISIBLE_TO_INSTANT_APP_ONLY,
-                    0, userId);
+                    userId);
             for (int i = instantApps.size() - 1; i >= 0; --i) {
                 final ResolveInfo info = instantApps.get(i);
                 final String packageName = info.activityInfo.packageName;
@@ -7317,7 +7344,7 @@ public class PackageManagerService extends IPackageManager.Stub
             return null;
         }
         List<ResolveInfo> resultTargetUser = mComponentResolver.queryActivities(intent,
-                resolvedType, flags, 0, parentUserId);
+                resolvedType, flags, parentUserId);
 
         if (resultTargetUser == null || resultTargetUser.isEmpty()) {
             return null;
@@ -7765,7 +7792,7 @@ public class PackageManagerService extends IPackageManager.Stub
             String resolvedType, int flags, int sourceUserId) {
         int targetUserId = filter.getTargetUserId();
         List<ResolveInfo> resultTargetUser = mComponentResolver.queryActivities(intent,
-                resolvedType, flags, 0, targetUserId);
+                resolvedType, flags, targetUserId);
         if (resultTargetUser != null && isUserEnabled(targetUserId)) {
             // If all the matches in the target profile are suspended, return null.
             for (int i = resultTargetUser.size() - 1; i >= 0; i--) {
@@ -8985,6 +9012,10 @@ public class PackageManagerService extends IPackageManager.Stub
                         + parseResult.scanFile, throwable);
             }
 
+            if ((scanFlags & SCAN_AS_APK_IN_APEX) != 0 && errorCode != INSTALL_SUCCEEDED) {
+                mApexManager.reportErrorWithApkInApex(scanDir.getAbsolutePath());
+            }
+
             // Delete invalid userdata apps
             if ((scanFlags & SCAN_AS_SYSTEM) == 0
                     && errorCode != PackageManager.INSTALL_SUCCEEDED) {
@@ -9382,7 +9413,8 @@ public class PackageManagerService extends IPackageManager.Stub
                                             getSharedLibLatestVersionSetting(scanResult))),
                             mSettings.mKeySetManagerService);
                     appIdCreated = optimisticallyRegisterAppId(scanResult);
-                    commitReconciledScanResultLocked(reconcileResult.get(pkgName));
+                    commitReconciledScanResultLocked(
+                            reconcileResult.get(pkgName), mUserManager.getUserIds());
                 } catch (PackageManagerException e) {
                     if (appIdCreated) {
                         cleanUpAppIdCreation(scanResult);
@@ -9403,8 +9435,13 @@ public class PackageManagerService extends IPackageManager.Stub
     // TODO:(b/135203078): Move to parsing
     private static void renameStaticSharedLibraryPackage(ParsedPackage parsedPackage) {
         // Derive the new package synthetic package name
-        parsedPackage.setPackageName(parsedPackage.getPackageName() + STATIC_SHARED_LIB_DELIMITER
-                + parsedPackage.getStaticSharedLibVersion());
+        parsedPackage.setPackageName(toStaticSharedLibraryPackageName(
+                parsedPackage.getPackageName(), parsedPackage.getStaticSharedLibVersion()));
+    }
+
+    private static String toStaticSharedLibraryPackageName(
+            String packageName, long libraryVersion) {
+        return packageName + STATIC_SHARED_LIB_DELIMITER + libraryVersion;
     }
 
     static String fixProcessName(String defProcessName, String processName) {
@@ -10345,7 +10382,7 @@ public class PackageManagerService extends IPackageManager.Stub
         final ArrayList<SharedLibraryInfo> sharedLibraryInfos = collectSharedLibraryInfos(
                 pkgSetting.pkg, availablePackages, mSharedLibraries, null);
         executeSharedLibrariesUpdateLPr(pkg, pkgSetting, changingLib, changingLibSetting,
-                sharedLibraryInfos);
+                sharedLibraryInfos, mUserManager.getUserIds());
     }
 
     private static ArrayList<SharedLibraryInfo> collectSharedLibraryInfos(AndroidPackage pkg,
@@ -10382,7 +10419,7 @@ public class PackageManagerService extends IPackageManager.Stub
     private void executeSharedLibrariesUpdateLPr(AndroidPackage pkg,
             @NonNull PackageSetting pkgSetting, @Nullable AndroidPackage changingLib,
             @Nullable PackageSetting changingLibSetting,
-            ArrayList<SharedLibraryInfo> usesLibraryInfos) {
+            ArrayList<SharedLibraryInfo> usesLibraryInfos, int[] allUsers) {
         // If the package provides libraries, clear their old dependencies.
         // This method will set them up again.
         applyDefiningSharedLibraryUpdateLocked(pkg, null, (definingLibrary, dependency) -> {
@@ -10398,6 +10435,30 @@ public class PackageManagerService extends IPackageManager.Stub
                         changingLibSetting);
             }
             pkgSetting.getPkgState().setUsesLibraryFiles(new ArrayList<>(usesLibraryFiles));
+            // let's make sure we mark all static shared libraries as installed for the same users
+            // that its dependent packages are installed for.
+            int[] installedUsers = new int[allUsers.length];
+            int installedUserCount = 0;
+            for (int u = 0; u < allUsers.length; u++) {
+                if (pkgSetting.getInstalled(allUsers[u])) {
+                    installedUsers[installedUserCount++] = allUsers[u];
+                }
+            }
+            for (SharedLibraryInfo sharedLibraryInfo : usesLibraryInfos) {
+                if (!sharedLibraryInfo.isStatic()) {
+                    continue;
+                }
+                final PackageSetting staticLibPkgSetting = getPackageSetting(
+                        toStaticSharedLibraryPackageName(sharedLibraryInfo.getPackageName(),
+                                sharedLibraryInfo.getLongVersion()));
+                if (staticLibPkgSetting == null) {
+                    Slog.wtf(TAG, "Shared lib without setting: " + sharedLibraryInfo);
+                    continue;
+                }
+                for (int u = 0; u < installedUserCount; u++) {
+                    staticLibPkgSetting.setInstalled(true, installedUsers[u]);
+                }
+            }
         } else {
             pkgSetting.getPkgState().setUsesLibraryInfos(Collections.emptyList())
                     .setUsesLibraryFiles(Collections.emptyList());
@@ -10891,7 +10952,7 @@ public class PackageManagerService extends IPackageManager.Stub
      */
     @GuardedBy({"mLock", "mInstallLock"})
     private AndroidPackage commitReconciledScanResultLocked(
-            @NonNull ReconciledPackage reconciledPkg) {
+            @NonNull ReconciledPackage reconciledPkg, int[] allUsers) {
         final ScanResult result = reconciledPkg.scanResult;
         final ScanRequest request = result.request;
         // TODO(b/135203078): Move this even further away
@@ -10950,7 +11011,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         if (reconciledPkg.collectedSharedLibraryInfos != null) {
             executeSharedLibrariesUpdateLPr(pkg, pkgSetting, null, null,
-                    reconciledPkg.collectedSharedLibraryInfos);
+                    reconciledPkg.collectedSharedLibraryInfos, allUsers);
         }
 
         final KeySetManagerService ksms = mSettings.mKeySetManagerService;
@@ -16495,7 +16556,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
             }
 
-            AndroidPackage pkg = commitReconciledScanResultLocked(reconciledPkg);
+            AndroidPackage pkg = commitReconciledScanResultLocked(reconciledPkg, request.mAllUsers);
             updateSettingsLI(pkg, reconciledPkg.installArgs, request.mAllUsers, res);
 
             final PackageSetting ps = mSettings.mPackages.get(packageName);

@@ -21,7 +21,6 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
-import android.app.TaskStackListener;
 import android.content.Context;
 import android.graphics.Rect;
 import android.util.Log;
@@ -215,14 +214,14 @@ public class TaskOrganizerTaskEmbedder extends TaskEmbedder {
 
     private class TaskOrganizerImpl extends TaskOrganizer {
         @Override
-        public void onTaskAppeared(ActivityManager.RunningTaskInfo taskInfo) {
+        public void onTaskAppeared(ActivityManager.RunningTaskInfo taskInfo, SurfaceControl leash) {
             if (DEBUG) {
                 log("taskAppeared: " + taskInfo.taskId);
             }
 
             mTaskInfo = taskInfo;
             mTaskToken = taskInfo.token;
-            mTaskLeash = mTaskToken.getLeash();
+            mTaskLeash = leash;
             mTransaction.reparent(mTaskLeash, mSurfaceControl)
                     .show(mTaskLeash)
                     .show(mSurfaceControl)
