@@ -2347,14 +2347,12 @@ public class ParsingPackageUtils {
             String propValue = sa.getString(
                     R.styleable.AndroidManifestResourceOverlay_requiredSystemPropertyValue);
             if (!PackageParser.checkRequiredSystemProperties(propName, propValue)) {
-                Slog.i(TAG, "Skipping target and overlay pair " + target + " and "
+                String message = "Skipping target and overlay pair " + target + " and "
                         + pkg.getBaseCodePath()
                         + ": overlay ignored due to required system property: "
-                        + propName + " with value: " + propValue);
-                return input.error("Skipping target and overlay pair " + target + " and "
-                        + pkg.getBaseCodePath()
-                        + ": overlay ignored due to required system property: "
-                        + propName + " with value: " + propValue);
+                        + propName + " with value: " + propValue;
+                Slog.i(TAG, message);
+                return input.skip(message);
             }
 
             return input.success(pkg.setOverlay(true)
