@@ -23,6 +23,7 @@ import android.content.pm.ConfigurationInfo
 import android.content.pm.FeatureInfo
 import android.content.pm.InstrumentationInfo
 import android.content.pm.PackageInfo
+import android.content.pm.PackageManager
 import android.content.pm.PackageParser
 import android.content.pm.PackageUserState
 import android.content.pm.PermissionInfo
@@ -168,6 +169,11 @@ open class AndroidPackageParsingTestBase {
 
         private fun <T> tryOrNull(block: () -> T) = try {
             block()
+        } catch (e: PackageParser.PackageParserException) {
+            if (e.error != PackageManager.INSTALL_PARSE_FAILED_SKIPPED) {
+                thrownInSetUp.add(e)
+            }
+            null
         } catch (t: Throwable) {
             thrownInSetUp.add(t)
             null
