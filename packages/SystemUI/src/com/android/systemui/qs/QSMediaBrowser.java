@@ -58,21 +58,25 @@ public class QSMediaBrowser {
         mContext = context;
         mCallback = callback;
         mComponentName = componentName;
+    }
 
+    /**
+     * Connects to the MediaBrowserService and looks for valid media. If a media item is returned
+     * by the service, QSMediaBrowser.Callback#addTrack will be called with its MediaDescription.
+     * QSMediaBrowser.Callback#onConnected and QSMediaBrowser.Callback#onError will also be called
+     * when the initial connection is successful, or an error occurs. Note that it is possible for
+     * the service to connect but for no playable tracks to be found later.
+     * QSMediaBrowser#disconnect will be called automatically with this function.
+     */
+    public void findRecentMedia() {
+        Log.d(TAG, "Connecting to " + mComponentName);
+        disconnect();
         Bundle rootHints = new Bundle();
         rootHints.putBoolean(MediaBrowserService.BrowserRoot.EXTRA_RECENT, true);
         mMediaBrowser = new MediaBrowser(mContext,
                 mComponentName,
                 mConnectionCallback,
                 rootHints);
-    }
-
-    /**
-     * Connects to the MediaBrowserService and looks for valid media. If a media item is returned
-     * by the service, QSMediaBrowser.Callback#addTrack will be called with its MediaDescription
-     */
-    public void findRecentMedia() {
-        Log.d(TAG, "Connecting to " + mComponentName);
         mMediaBrowser.connect();
     }
 
@@ -94,20 +98,22 @@ public class QSMediaBrowser {
             } else {
                 Log.e(TAG, "Child found but not playable for " + mComponentName);
             }
-            mMediaBrowser.disconnect();
+            disconnect();
         }
 
         @Override
         public void onError(String parentId) {
             Log.e(TAG, "Subscribe error for " + mComponentName + ": " + parentId);
-            mMediaBrowser.disconnect();
+            mCallback.onError();
+            disconnect();
         }
 
         @Override
         public void onError(String parentId, Bundle options) {
             Log.e(TAG, "Subscribe error for " + mComponentName + ": " + parentId
                     + ", options: " + options);
-            mMediaBrowser.disconnect();
+            mCallback.onError();
+            disconnect();
         }
     };
 
@@ -134,6 +140,8 @@ public class QSMediaBrowser {
         @Override
         public void onConnectionSuspended() {
             Log.d(TAG, "Connection suspended for " + mComponentName);
+            mCallback.onError();
+            disconnect();
         }
 
         /**
@@ -143,16 +151,28 @@ public class QSMediaBrowser {
         public void onConnectionFailed() {
             Log.e(TAG, "Connection failed for " + mComponentName);
             mCallback.onError();
+            disconnect();
         }
     };
 
     /**
-     * Connects to the MediaBrowserService and starts playback
+     * Disconnect the media browser. This should be called after restart or testConnection have
+     * completed to close the connection.
      */
-    public void restart() {
-        if (mMediaBrowser.isConnected()) {
+    public void disconnect() {
+        if (mMediaBrowser != null) {
             mMediaBrowser.disconnect();
         }
+        mMediaBrowser = null;
+    }
+
+    /**
+     * Connects to the MediaBrowserService and starts playback. QSMediaBrowser.Callback#onError or
+     * QSMediaBrowser.Callback#onConnected will be called depending on whether it was successful.
+     * QSMediaBrowser#disconnect should be called after this to ensure the connection is closed.
+     */
+    public void restart() {
+        disconnect();
         Bundle rootHints = new Bundle();
         rootHints.putBoolean(MediaBrowserService.BrowserRoot.EXTRA_RECENT, true);
         mMediaBrowser = new MediaBrowser(mContext, mComponentName,
@@ -165,6 +185,17 @@ public class QSMediaBrowser {
                         controller.getTransportControls();
                         controller.getTransportControls().prepare();
                         controller.getTransportControls().play();
+                        mCallback.onConnected();
+                    }
+
+                    @Override
+                    public void onConnectionFailed() {
+                        mCallback.onError();
+                    }
+
+                    @Override
+                    public void onConnectionSuspended() {
+                        mCallback.onError();
                     }
                 }, rootHints);
         mMediaBrowser.connect();
@@ -192,42 +223,44 @@ public class QSMediaBrowser {
     }
 
     /**
-     * Used to test if SystemUI is allowed to connect to the given component as a MediaBrowser
-     * @param mContext the context
-     * @param callback methods onConnected or onError will be called to indicate whether the
-     *                 connection was successful or not
-     * @param mComponentName Component name of the MediaBrowserService this browser will connect to
+     * Used to test if SystemUI is allowed to connect to the given component as a MediaBrowser.
+     * QSMediaBrowser.Callback#onError or QSMediaBrowser.Callback#onConnected will be called
+     * depending on whether it was successful.
+     * QSMediaBrowser#disconnect should be called after this to ensure the connection is closed.
      */
-    public static MediaBrowser testConnection(Context mContext, Callback callback,
-            ComponentName mComponentName) {
-        final MediaBrowser.ConnectionCallback mConnectionCallback =
+    public void testConnection() {
+        disconnect();
+        final MediaBrowser.ConnectionCallback connectionCallback =
                 new MediaBrowser.ConnectionCallback() {
                     @Override
                     public void onConnected() {
                         Log.d(TAG, "connected");
-                        callback.onConnected();
+                        if (mMediaBrowser.getRoot() == null) {
+                            mCallback.onError();
+                        } else {
+                            mCallback.onConnected();
+                        }
                     }
 
                     @Override
                     public void onConnectionSuspended() {
                         Log.d(TAG, "suspended");
-                        callback.onError();
+                        mCallback.onError();
                     }
 
                     @Override
                     public void onConnectionFailed() {
                         Log.d(TAG, "failed");
-                        callback.onError();
+                        mCallback.onError();
                     }
                 };
         Bundle rootHints = new Bundle();
         rootHints.putBoolean(MediaBrowserService.BrowserRoot.EXTRA_RECENT, true);
-        MediaBrowser browser = new MediaBrowser(mContext,
+        mMediaBrowser = new MediaBrowser(mContext,
                 mComponentName,
-                mConnectionCallback,
+                connectionCallback,
                 rootHints);
-        browser.connect();
-        return browser;
+        mMediaBrowser.connect();
     }
 
     /**
