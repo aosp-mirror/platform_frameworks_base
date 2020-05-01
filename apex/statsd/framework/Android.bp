@@ -93,6 +93,15 @@ droidstubs {
         "framework-module-stubs-defaults-publicapi",
         "framework-statsd-stubs-srcs-defaults",
     ],
+    check_api: {
+        last_released: {
+            api_file: ":framework-statsd.api.public.latest",
+            removed_api_file: ":framework-statsd-removed.api.public.latest",
+        },
+        api_lint: {
+            new_since: ":framework-statsd.api.public.latest",
+        },
+    },
 }
 
 droidstubs {
@@ -101,6 +110,15 @@ droidstubs {
         "framework-module-stubs-defaults-systemapi",
         "framework-statsd-stubs-srcs-defaults",
     ],
+    check_api: {
+        last_released: {
+            api_file: ":framework-statsd.api.system.latest",
+            removed_api_file: ":framework-statsd-removed.api.system.latest",
+        },
+        api_lint: {
+            new_since: ":framework-statsd.api.system.latest",
+        },
+    },
 }
 
 droidstubs {
@@ -109,6 +127,15 @@ droidstubs {
         "framework-module-api-defaults-module_libs_api",
         "framework-statsd-stubs-srcs-defaults",
     ],
+    check_api: {
+        last_released: {
+            api_file: ":framework-statsd.api.module-lib.latest",
+            removed_api_file: ":framework-statsd-removed.api.module-lib.latest",
+        },
+        api_lint: {
+            new_since: ":framework-statsd.api.module-lib.latest",
+        },
+    },
 }
 
 droidstubs {
