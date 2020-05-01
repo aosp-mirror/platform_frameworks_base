@@ -8030,7 +8030,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         updateInputChannel(clientChannel.getToken(), callingUid, callingPid, displayId, surface,
-                name, applicationHandle, flags);
+                name, applicationHandle, flags, null /* region */);
 
         clientChannel.transferTo(outInputChannel);
         clientChannel.dispose();
@@ -8042,7 +8042,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     private void updateInputChannel(IBinder channelToken, int callingUid, int callingPid,
             int displayId, SurfaceControl surface, String name,
-            InputApplicationHandle applicationHandle, int flags) {
+            InputApplicationHandle applicationHandle, int flags, Region region) {
         InputWindowHandle h = new InputWindowHandle(applicationHandle, displayId);
         h.token = channelToken;
         h.name = name;
@@ -8062,7 +8062,13 @@ public class WindowManagerService extends IWindowManager.Stub
 
         h.inputFeatures = 0;
 
-        h.replaceTouchableRegionWithCrop(null);
+        if (region == null) {
+            h.replaceTouchableRegionWithCrop(null);
+        } else {
+            h.touchableRegion.set(region);
+            h.replaceTouchableRegionWithCrop = false;
+            h.setTouchableRegionCrop(surface);
+        }
 
         SurfaceControl.Transaction t = mTransactionFactory.get();
         t.setInputWindowInfo(surface, h);
@@ -8076,7 +8082,7 @@ public class WindowManagerService extends IWindowManager.Stub
      * is undefined.
      */
     void updateInputChannel(IBinder channelToken, int displayId, SurfaceControl surface,
-            int flags) {
+            int flags, Region region) {
         final InputApplicationHandle applicationHandle;
         final String name;
         final EmbeddedWindowController.EmbeddedWindow win;
@@ -8091,7 +8097,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         updateInputChannel(channelToken, win.mOwnerUid, win.mOwnerPid, displayId, surface, name,
-                applicationHandle, flags);
+                applicationHandle, flags, region);
     }
 
     /** Return whether layer tracing is enabled */
