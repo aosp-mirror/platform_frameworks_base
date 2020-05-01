@@ -270,27 +270,8 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
             return;
         }
 
-        QSMediaPlayer player = null;
         String packageName = notif.getPackageName();
-        for (QSMediaPlayer p : mMediaPlayers) {
-            if (p.getKey() == null) {
-                // No notification key = loaded via mediabrowser, so just match on package
-                if (packageName.equals(p.getMediaPlayerPackage())) {
-                    Log.d(TAG, "Found matching resume player by package: " + packageName);
-                    player = p;
-                    break;
-                }
-            } else if (p.getMediaSessionToken().equals(token)) {
-                Log.d(TAG, "Found matching player by token " + packageName);
-                player = p;
-                break;
-            } else if (packageName.equals(p.getMediaPlayerPackage()) && key.equals(p.getKey())) {
-                // Also match if it's the same package and notification key
-                Log.d(TAG, "Found matching player by package " + packageName + ", " + key);
-                player = p;
-                break;
-            }
-        }
+        QSMediaPlayer player = findMediaPlayer(packageName, token, key);
 
         int playerWidth = (int) getResources().getDimension(R.dimen.qs_media_width);
         int padding = (int) getResources().getDimension(R.dimen.qs_media_padding);
@@ -299,7 +280,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         lp.setMarginEnd(padding);
 
         if (player == null) {
-            Log.d(TAG, "creating new player");
+            Log.d(TAG, "creating new player for " + packageName);
             // Set up listener for device changes
             // TODO: integrate with MediaTransferManager?
             InfoMediaManager imm = new InfoMediaManager(mContext, notif.getPackageName(),
@@ -329,6 +310,35 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         if (mMediaPlayers.size() > 0) {
             ((View) mMediaCarousel.getParent()).setVisibility(View.VISIBLE);
         }
+    }
+
+    /**
+     * Check for an existing media player using the given information
+     * @param packageName
+     * @param token
+     * @param key
+     * @return a player, or null if no match found
+     */
+    private QSMediaPlayer findMediaPlayer(String packageName, MediaSession.Token token,
+            String key) {
+        for (QSMediaPlayer player : mMediaPlayers) {
+            if (player.getKey() == null || key == null) {
+                // No notification key = loaded via mediabrowser, so just match on package
+                if (packageName.equals(player.getMediaPlayerPackage())) {
+                    Log.d(TAG, "Found matching resume player by package: " + packageName);
+                    return player;
+                }
+            } else if (player.getMediaSessionToken().equals(token)) {
+                Log.d(TAG, "Found matching player by token " + packageName);
+                return player;
+            } else if (packageName.equals(player.getMediaPlayerPackage())
+                    && key.equals(player.getKey())) {
+                // Also match if it's the same package and notification key
+                Log.d(TAG, "Found matching player by package " + packageName + ", " + key);
+                return player;
+            }
+        }
+        return null;
     }
 
     protected View getMediaPanel() {
@@ -369,26 +379,30 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
             }
 
             Log.d(TAG, "adding track from browser: " + desc + ", " + component);
-            QSMediaPlayer player = new QSMediaPlayer(mContext, QSPanel.this,
-                    null, mForegroundExecutor, mBackgroundExecutor, mActivityStarter);
 
+            // Check if there's an old player for this app
             String pkgName = component.getPackageName();
+            MediaSession.Token token = browser.getToken();
+            QSMediaPlayer player = findMediaPlayer(pkgName, token, null);
 
-            // Add controls to carousel
-            int playerWidth = (int) getResources().getDimension(R.dimen.qs_media_width);
-            int padding = (int) getResources().getDimension(R.dimen.qs_media_padding);
-            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(playerWidth,
-                    LayoutParams.MATCH_PARENT);
-            lp.setMarginStart(padding);
-            lp.setMarginEnd(padding);
-            mMediaCarousel.addView(player.getView(), lp);
-            ((View) mMediaCarousel.getParent()).setVisibility(View.VISIBLE);
-            mMediaPlayers.add(player);
+            if (player == null) {
+                player = new QSMediaPlayer(mContext, QSPanel.this,
+                        null, mForegroundExecutor, mBackgroundExecutor, mActivityStarter);
+
+                // Add to carousel
+                int playerWidth = (int) getResources().getDimension(R.dimen.qs_media_width);
+                int padding = (int) getResources().getDimension(R.dimen.qs_media_padding);
+                LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(playerWidth,
+                        LayoutParams.MATCH_PARENT);
+                lp.setMarginStart(padding);
+                lp.setMarginEnd(padding);
+                mMediaCarousel.addView(player.getView(), lp);
+                ((View) mMediaCarousel.getParent()).setVisibility(View.VISIBLE);
+                mMediaPlayers.add(player);
+            }
 
             int iconColor = Color.DKGRAY;
             int bgColor = Color.LTGRAY;
-
-            MediaSession.Token token = browser.getToken();
             player.setMediaSession(token, desc, iconColor, bgColor, browser.getAppIntent(),
                     pkgName);
         }
