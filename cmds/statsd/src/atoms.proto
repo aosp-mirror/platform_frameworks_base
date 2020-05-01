@@ -9344,6 +9344,8 @@ message PackageInstallerV2Reported {
     // Return_code 1 indicates success.
     // For full list, see frameworks/base/core/java/android/content/pm/PackageManager.java
     optional int32 return_code  = 4;
+    // Total size of the APKs installed for this package
+    optional int64 apks_size_bytes = 5;
 }
 
 /**
