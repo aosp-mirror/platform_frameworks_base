@@ -16,7 +16,10 @@
 
 package com.android.server.wm;
 
+import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
+import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL;
 import static android.window.DisplayAreaOrganizer.FEATURE_DEFAULT_TASK_CONTAINER;
+import static android.window.DisplayAreaOrganizer.FEATURE_ONE_HANDED;
 
 import android.content.res.Resources;
 import android.text.TextUtils;
@@ -110,6 +113,11 @@ public abstract class DisplayAreaPolicy {
             final List<TaskDisplayArea> tdaList = new ArrayList<>();
             tdaList.add(defaultTaskDisplayArea);
             return new DisplayAreaPolicyBuilder()
+                    .addFeature(new DisplayAreaPolicyBuilder.Feature.Builder(wmService.mPolicy,
+                            "OneHanded", FEATURE_ONE_HANDED)
+                            .all()
+                            .except(TYPE_NAVIGATION_BAR, TYPE_NAVIGATION_BAR_PANEL)
+                            .build())
                     .build(wmService, content, root, imeContainer, tdaList);
         }
     }

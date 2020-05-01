@@ -23,9 +23,9 @@ import static android.view.WindowManager.LayoutParams.TYPE_PRESENTATION;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 import static android.view.WindowManagerPolicyConstants.APPLICATION_LAYER;
 import static android.window.DisplayAreaOrganizer.FEATURE_DEFAULT_TASK_CONTAINER;
+import static android.window.DisplayAreaOrganizer.FEATURE_ONE_HANDED;
 
 import static com.android.server.wm.DisplayArea.Type.ABOVE_TASKS;
-import static com.android.server.wm.DisplayArea.Type.ANY;
 import static com.android.server.wm.DisplayAreaPolicyBuilder.Feature;
 
 import static org.hamcrest.Matchers.empty;
@@ -33,11 +33,13 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import static java.util.stream.Collectors.toList;
 
+import android.content.res.Resources;
 import android.platform.test.annotations.Presubmit;
 import android.view.SurfaceControl;
 
@@ -125,6 +127,39 @@ public class DisplayAreaPolicyBuilderTest {
 
         assertThat(expectedByMinLayer, is(equalTo(expectedByMaxLayer)));
         assertThat(actualOrder, is(equalTo(expectedByMaxLayer)));
+    }
+
+    @Test
+    public void testBuilder_defaultPolicy_hasOneHandedFeature() {
+        WindowManagerService wms = mSystemServices.getWindowManagerService();
+        DisplayArea.Root root = new SurfacelessDisplayAreaRoot(wms);
+        DisplayArea<WindowContainer> ime = new DisplayArea<>(wms, ABOVE_TASKS, "Ime");
+        DisplayContent displayContent = mock(DisplayContent.class);
+        TaskDisplayArea taskDisplayArea = new TaskDisplayArea(displayContent, wms, "Tasks",
+                FEATURE_DEFAULT_TASK_CONTAINER);
+        List<TaskDisplayArea> taskDisplayAreaList = new ArrayList<>();
+        taskDisplayAreaList.add(taskDisplayArea);
+
+        final DisplayAreaPolicy.Provider defaultProvider = DisplayAreaPolicy.Provider.fromResources(
+                resourcesWithProvider(""));
+        final DisplayAreaPolicyBuilder.Result defaultPolicy =
+                (DisplayAreaPolicyBuilder.Result) defaultProvider.instantiate(wms, displayContent,
+                        root, ime);
+        final List<Feature> features = defaultPolicy.getFeatures();
+        boolean hasOneHandedFeature = false;
+        for (int i = 0; i < features.size(); i++) {
+            hasOneHandedFeature |= features.get(i).getId() == FEATURE_ONE_HANDED;
+        }
+
+        assertTrue(hasOneHandedFeature);
+    }
+
+    private static Resources resourcesWithProvider(String provider) {
+        Resources mock = mock(Resources.class);
+        when(mock.getString(
+                com.android.internal.R.string.config_deviceSpecificDisplayAreaPolicyProvider))
+                .thenReturn(provider);
+        return mock;
     }
 
     private <K, V, R> Map<K, R> mapValues(Map<K, V> zSets, Function<V, R> f) {
