@@ -7286,6 +7286,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * @return the registered {@link OnLongClickListener} if there is one, {@code null} otherwise.
+     * @hide
+     */
+    @Nullable
+    public OnLongClickListener getOnLongClickListener() {
+        ListenerInfo li = mListenerInfo;
+        return (li != null) ? li.mOnLongClickListener : null;
+    }
+
+    /**
      * Register a callback to be invoked when this view is context clicked. If the view is not
      * context clickable, it becomes context clickable.
      *
