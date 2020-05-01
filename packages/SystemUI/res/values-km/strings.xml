@@ -430,6 +430,7 @@
     <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"ការថត​អេក្រង់"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"ចាប់ផ្ដើម"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"ឈប់"</string>
+    <string name="media_seamless_remote_device" msgid="177033467332920464">"ឧបករណ៍"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"អូស​ឡើង​លើ​ដើម្បី​ប្តូរ​កម្មវិធី"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"អូសទៅស្ដាំដើម្បីប្ដូរកម្មវិធីបានរហ័ស"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"បិទ/បើក​ទិដ្ឋភាពរួម"</string>
@@ -712,6 +713,7 @@
     <string name="notification_channel_summary_priority" msgid="7415770044553264622">"បង្ហាញ​នៅខាងលើផ្នែកសន្ទនា និង​បង្ហាញជាពពុះ។"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"ការកំណត់"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"អាទិភាព"</string>
+    <string name="no_shortcut" msgid="7176375126961212514">"<xliff:g id="APP_NAME">%1$s</xliff:g> មិនអាចប្រើ​ការកំណត់​ជាក់លាក់សម្រាប់ការសន្ទនា​បានទេ"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"មិនមាន​ពពុះ​ថ្មីៗ​ទេ"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"ពពុះថ្មីៗ​ និង​ពពុះដែលបានបិទ​​នឹង​បង្ហាញ​នៅទីនេះ"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"មិនអាច​កែប្រែ​ការជូនដំណឹង​ទាំងនេះ​បានទេ។"</string>
@@ -1003,6 +1005,11 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"បានធ្វើ​បច្ចុប្បន្នភាព​ការរុករកក្នុង​ប្រព័ន្ធ។ ដើម្បីធ្វើការផ្លាស់ប្ដូរ សូមចូលទៅ​កាន់ការកំណត់។"</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"ចូល​ទៅកាន់​ការកំណត់ ដើម្បី​ធ្វើបច្ចុប្បន្នភាព​ការរុករក​ក្នុង​ប្រព័ន្ធ"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"ផ្អាក​ដំណើរការ"</string>
+    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"បង្ហាញនៅ​ខាងលើ​ផ្នែកសន្ទនា"</string>
+    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"បង្ហាញរូបភាព​កម្រងព័ត៌មាន​នៅលើអេក្រង់​ចាក់សោ"</string>
+    <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"បង្ហាញជា​ពពុះអណ្ដែត​នៅផ្នែក​ខាងលើនៃ​កម្មវិធី"</string>
+    <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"ផ្អាក​មុខងារកុំរំខាន"</string>
+    <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"យល់ហើយ"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"វិនដូ​ការពង្រីក"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"វិនដូគ្រប់គ្រង​​ការពង្រីក"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"ផ្ទាំងគ្រប់គ្រងឧបករណ៍"</string>
@@ -1018,6 +1025,8 @@
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"ជ្រើសរើស​ការគ្រប់គ្រង ដើម្បី​ចូលប្រើ​ពីម៉ឺនុយ​ថាមពល"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"ចុច​ឱ្យ​ជាប់ រួចអូស​ដើម្បី​រៀបចំ​ការគ្រប់គ្រង​ឡើងវិញ"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"បាន​លុបការគ្រប់គ្រងទាំងអស់ហើយ"</string>
+    <!-- no translation found for controls_favorite_toast_no_changes (7094494210840877931) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"មិនអាច​ផ្ទុក​បញ្ជី​នៃការគ្រប់គ្រង​ទាំងអស់​បានទេ។"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"ផ្សេងៗ"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"បញ្ចូល​ទៅក្នុងផ្ទាំងគ្រប់គ្រងឧបករណ៍"</string>
@@ -1026,6 +1035,7 @@
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"បានធ្វើបច្ចុប្បន្នភាពការគ្រប់គ្រង"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"កូដ PIN មាន​អក្សរ ឬនិមិត្តសញ្ញា"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"ផ្ទៀងផ្ទាត់ <xliff:g id="DEVICE">%s</xliff:g>"</string>
+    <string name="controls_pin_wrong" msgid="6162694056042164211">"កូដ PIN មិន​ត្រឹមត្រូវ​"</string>
     <string name="controls_pin_verifying" msgid="3755045989392131746">"កំពុង​ផ្ទៀងផ្ទាត់…"</string>
     <string name="controls_pin_instructions" msgid="6363309783822475238">"បញ្ចូល​កូដ PIN"</string>
     <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"សាកល្បងប្រើ​កូដ PIN ផ្សេងទៀត"</string>
@@ -1035,6 +1045,9 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"កំពុងផ្ទុក​ការណែនាំ"</string>
     <string name="controls_media_close_session" msgid="9023534788828414585">"បិទវគ្គ​មេឌៀ​នេះ"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"អសកម្ម ពិនិត្យមើល​កម្មវិធី"</string>
+    <string name="controls_error_retryable" msgid="864025882878378470">"បញ្ហា កំពុងព្យាយាម​ម្ដងទៀត…"</string>
+    <string name="controls_error_removed" msgid="6299213591234723805">"បានលុប​ឧបករណ៍"</string>
+    <string name="controls_error_generic" msgid="352500456918362905">"មិនអាច​ផ្ទុក​ស្ថានភាព​បានទេ"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"មានបញ្ហា សូម​ព្យាយាម​ម្តងទៀត"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"កំពុងដំណើរការ"</string>
     <string name="controls_added_tooltip" msgid="4842812921719153085">"សង្កត់​ប៊ូតុង​ថាមពល ដើម្បី​មើលឃើញ​ការគ្រប់គ្រង​ថ្មីៗ"</string>

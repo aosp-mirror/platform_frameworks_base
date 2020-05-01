@@ -430,6 +430,8 @@
     <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"Gravação de ecrã"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Iniciar"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Parar"</string>
+    <!-- no translation found for media_seamless_remote_device (177033467332920464) -->
+    <skip />
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Deslizar rapidamente para cima para mudar de aplicação"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Arraste para a direita para mudar rapidamente de aplicação."</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Ativar/desativar Vista geral"</string>
@@ -712,6 +714,8 @@
     <string name="notification_channel_summary_priority" msgid="7415770044553264622">"Aparece na parte superior da secção de conversas e surge como um balão."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Definições"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioridade"</string>
+    <!-- no translation found for no_shortcut (7176375126961212514) -->
+    <skip />
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Nenhum balão recente"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Os balões recentes e ignorados vão aparecer aqui."</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Não é possível modificar estas notificações."</string>
@@ -1003,6 +1007,11 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"A navegação no sistema foi atualizada. Para efetuar alterações, aceda às Definições."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Aceda às Definições para atualizar a navegação no sistema."</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Modo de espera"</string>
+    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Aparecem na parte superior da secção de conversas."</string>
+    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Mostram a imagem do perfil no ecrã de bloqueio."</string>
+    <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Aparecem como balões flutuantes por cima de apps."</string>
+    <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Interrompem o modo Não incomodar."</string>
+    <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"OK"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Janela de ampliação"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Controlos da janela de ampliação"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"Controlos de dispositivos"</string>
@@ -1018,6 +1027,8 @@
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Escolha os controlos a que pretende aceder a partir do menu ligar/desligar."</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Toque sem soltar e arraste para reorganizar os controlos."</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Todos os controlos foram removidos."</string>
+    <!-- no translation found for controls_favorite_toast_no_changes (7094494210840877931) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Não foi possível carregar a lista dos controlos."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Outro"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Adicione aos controlos de dispositivos"</string>
@@ -1026,6 +1037,7 @@
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"Controlos atualizados"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"O PIN contém letras ou símbolos."</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"Valide <xliff:g id="DEVICE">%s</xliff:g>"</string>
+    <string name="controls_pin_wrong" msgid="6162694056042164211">"PIN incorreto"</string>
     <string name="controls_pin_verifying" msgid="3755045989392131746">"A validar…"</string>
     <string name="controls_pin_instructions" msgid="6363309783822475238">"Introduzir PIN"</string>
     <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"Experimente outro PIN."</string>
@@ -1035,6 +1047,9 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"A carregar recomendações…"</string>
     <string name="controls_media_close_session" msgid="9023534788828414585">"Fechar esta sessão multimédia"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Inativa. Consulte a app."</string>
+    <string name="controls_error_retryable" msgid="864025882878378470">"Erro. A tentar novamente…"</string>
+    <string name="controls_error_removed" msgid="6299213591234723805">"Dispositivo removido."</string>
+    <string name="controls_error_generic" msgid="352500456918362905">"Impossível carregar o estado."</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Erro. Tente novamente."</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"Em curso"</string>
     <string name="controls_added_tooltip" msgid="4842812921719153085">"Mantenha premido o botão ligar/desligar para ver os novos controlos."</string>
