@@ -1192,8 +1192,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final Configuration newConfig = new Configuration();
         newConfig.setTo(task.getRequestedOverrideConfiguration());
         Rect outBounds = newConfig.windowConfiguration.getBounds();
-        task.adjustForMinimalTaskDimensions(outBounds, outBounds);
-        task.computeConfigResourceOverrides(newConfig, task.getParent().getConfiguration());
+        final Configuration parentConfig = task.getParent().getConfiguration();
+        task.adjustForMinimalTaskDimensions(outBounds, outBounds, parentConfig);
+        task.computeConfigResourceOverrides(newConfig, parentConfig);
     }
 
     Task getTask() {
