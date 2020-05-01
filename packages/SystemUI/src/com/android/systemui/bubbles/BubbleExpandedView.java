@@ -19,9 +19,15 @@ package com.android.systemui.bubbles;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
+import static android.graphics.PixelFormat.TRANSPARENT;
 import static android.view.Display.INVALID_DISPLAY;
+import static android.view.InsetsState.ITYPE_IME;
 import static android.view.ViewRootImpl.NEW_INSETS_MODE_FULL;
 import static android.view.ViewRootImpl.sNewInsetsMode;
+import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
+import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
+import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL;
 
 import static com.android.systemui.bubbles.BubbleDebugConfig.DEBUG_BUBBLE_EXPANDED_VIEW;
 import static com.android.systemui.bubbles.BubbleDebugConfig.TAG_BUBBLES;
@@ -42,9 +48,12 @@ import android.graphics.Insets;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.ShapeDrawable;
+import android.hardware.display.VirtualDisplay;
+import android.os.Binder;
 import android.os.RemoteException;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.view.WindowInsets;
 import android.view.WindowManager;
@@ -62,6 +71,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
  */
 public class BubbleExpandedView extends LinearLayout {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "BubbleExpandedView" : TAG_BUBBLES;
+    private static final String WINDOW_TITLE = "ImeInsetsWindowWithoutContent";
 
     private enum ActivityViewStatus {
         // ActivityView is being initialized, cannot start an activity yet.
@@ -107,6 +117,9 @@ public class BubbleExpandedView extends LinearLayout {
     private WindowManager mWindowManager;
 
     private BubbleStackView mStackView;
+    private View mVirtualImeView;
+    private WindowManager mVirtualDisplayWindowManager;
+    private boolean mImeShowing = false;
 
     private ActivityView.StateCallback mStateCallback = new ActivityView.StateCallback() {
         @Override
@@ -317,11 +330,8 @@ public class BubbleExpandedView extends LinearLayout {
         mKeyboardVisible = false;
         mNeedsNewHeight = false;
         if (mActivityView != null) {
-            // TODO: Temporary hack to offset the view until we can properly inset Bubbles again.
             if (sNewInsetsMode == NEW_INSETS_MODE_FULL) {
-                mStackView.animate()
-                        .setDuration(100)
-                        .translationY(0);
+                setImeWindowToDisplay(0, 0);
             } else {
                 mActivityView.setForwardedInsets(Insets.of(0, 0, 0, 0));
             }
@@ -365,16 +375,59 @@ public class BubbleExpandedView extends LinearLayout {
                             : 0);
             final int insetsBottom = Math.max(activityViewBottom - keyboardTop, 0);
 
-            // TODO: Temporary hack to offset the view until we can properly inset Bubbles again.
             if (sNewInsetsMode == NEW_INSETS_MODE_FULL) {
-                mStackView.animate()
-                        .setDuration(100)
-                        .translationY(-insetsBottom)
-                        .withEndAction(() -> mActivityView.onLocationChanged());
+                setImeWindowToDisplay(getWidth(), insetsBottom);
             } else {
                 mActivityView.setForwardedInsets(Insets.of(0, 0, 0, insetsBottom));
             }
         }
+    }
+
+    private void setImeWindowToDisplay(int w, int h) {
+        if (getVirtualDisplayId() == INVALID_DISPLAY) {
+            return;
+        }
+        if (h == 0 || w == 0) {
+            if (mImeShowing) {
+                mVirtualImeView.setVisibility(GONE);
+                mImeShowing = false;
+            }
+            return;
+        }
+        final Context virtualDisplayContext = mContext.createDisplayContext(
+                getVirtualDisplay().getDisplay());
+
+        if (mVirtualDisplayWindowManager == null) {
+            mVirtualDisplayWindowManager =
+                    (WindowManager) virtualDisplayContext.getSystemService(Context.WINDOW_SERVICE);
+        }
+        if (mVirtualImeView == null) {
+            mVirtualImeView = new View(virtualDisplayContext);
+            mVirtualImeView.setVisibility(VISIBLE);
+            mVirtualDisplayWindowManager.addView(mVirtualImeView,
+                    getVirtualImeViewAttrs(w, h));
+        } else {
+            mVirtualDisplayWindowManager.updateViewLayout(mVirtualImeView,
+                    getVirtualImeViewAttrs(w, h));
+            mVirtualImeView.setVisibility(VISIBLE);
+        }
+
+        mImeShowing = true;
+    }
+
+    private WindowManager.LayoutParams getVirtualImeViewAttrs(int w, int h) {
+        // To use TYPE_NAVIGATION_BAR_PANEL instead of TYPE_IME_BAR to bypass the IME window type
+        // token check when adding the window.
+        final WindowManager.LayoutParams attrs =
+                new WindowManager.LayoutParams(w, h, TYPE_NAVIGATION_BAR_PANEL,
+                        FLAG_LAYOUT_NO_LIMITS | FLAG_NOT_FOCUSABLE | FLAG_NOT_TOUCHABLE,
+                        TRANSPARENT);
+        attrs.gravity = Gravity.BOTTOM;
+        attrs.setTitle(WINDOW_TITLE);
+        attrs.token = new Binder();
+        attrs.providesInsetsTypes = new int[]{ITYPE_IME};
+        attrs.alpha = 0.0f;
+        return attrs;
     }
 
     void setStackView(BubbleStackView stackView) {
@@ -569,5 +622,12 @@ public class BubbleExpandedView extends LinearLayout {
             return mActivityView.getVirtualDisplayId();
         }
         return INVALID_DISPLAY;
+    }
+
+    private VirtualDisplay getVirtualDisplay() {
+        if (usingActivityView()) {
+            return mActivityView.getVirtualDisplay();
+        }
+        return null;
     }
 }
