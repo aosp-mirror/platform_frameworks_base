@@ -266,7 +266,6 @@ public class NotificationSectionsManager implements StackScrollAlgorithm.Section
 
         final boolean showHeaders = mStatusBarStateController.getState() != StatusBarState.KEYGUARD;
         final boolean usingPeopleFiltering = mSectionsFeatureManager.isFilteringEnabled();
-        final boolean isKeyguard = mStatusBarStateController.getState() == StatusBarState.KEYGUARD;
         final boolean usingMediaControls = mSectionsFeatureManager.isMediaControlsEnabled();
 
         boolean peopleNotifsPresent = false;
@@ -274,7 +273,7 @@ public class NotificationSectionsManager implements StackScrollAlgorithm.Section
         int currentMediaControlsIdx = -1;
         // Currently, just putting media controls in the front and incrementing the position based
         // on the number of heads-up notifs.
-        int mediaControlsTarget = isKeyguard && usingMediaControls ? 0 : -1;
+        int mediaControlsTarget = usingMediaControls ? 0 : -1;
         int currentIncomingHeaderIdx = -1;
         int incomingHeaderTarget = -1;
         int currentPeopleHeaderIdx = -1;

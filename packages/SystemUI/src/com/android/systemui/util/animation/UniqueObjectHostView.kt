@@ -49,7 +49,7 @@ class UniqueObjectHostView(
             val (cachedWidth, cachedHeight) = measurementCache.obtainMeasurement(measurementInput)
             setMeasuredDimension(cachedWidth + paddingHorizontal, cachedHeight + paddingVertical)
         } else {
-            // Let's update what we have in the cache if it's not present yet
+            // Let's update what we have in the cache if it's present
             val child = getChildAt(0)!!
             val output = MeasurementOutput(child.measuredWidth, child.measuredHeight)
             measurementCache.putMeasurement(measurementInput, output)

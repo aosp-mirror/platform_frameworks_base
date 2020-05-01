@@ -59,7 +59,10 @@ class MediaHost @Inject constructor(
     }
 
     /**
-     * Initialize this MediaObject and create a host view
+     * Initialize this MediaObject and create a host view.
+     *
+     * @param location the location this host name has. Used to identify the host during
+     *                 transitions.
      */
     fun init(@MediaLocation location: Int) {
         this.location = location;

@@ -17,6 +17,9 @@
 package com.android.systemui.media
 
 import android.view.View
+import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.statusbar.StatusBarState
+import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.notification.stack.MediaHeaderView
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import javax.inject.Inject
@@ -29,8 +32,17 @@ import javax.inject.Singleton
 @Singleton
 class KeyguardMediaController @Inject constructor(
     private val mediaHost: MediaHost,
-    private val bypassController: KeyguardBypassController
+    private val bypassController: KeyguardBypassController,
+    private val statusBarStateController: SysuiStatusBarStateController
 ) {
+
+    init {
+        statusBarStateController.addCallback(object : StatusBarStateController.StateListener {
+            override fun onStateChanged(newState: Int) {
+                updateVisibility()
+            }
+        })
+    }
     private var view: MediaHeaderView? = null
 
     /**
@@ -38,18 +50,21 @@ class KeyguardMediaController @Inject constructor(
      */
     fun attach(mediaView: MediaHeaderView) {
         view = mediaView
-        mediaHost.visibleChangedListener = ::updateVisibility
+        // First let's set the desired state that we want for this host
+        mediaHost.visibleChangedListener = { updateVisibility() }
         mediaHost.expansion = 0.0f
         mediaHost.showsOnlyActiveMedia = true
+
+        // Let's now initialize this view, which also creates the host view for us.
         mediaHost.init(MediaHierarchyManager.LOCATION_LOCKSCREEN)
-        mediaView.setMediaHost(mediaHost.hostView)
-    /**
-     * Attach this controller to a media view, initializing its state
-     */
+        mediaView.setContentView(mediaHost.hostView)
     }
 
-    private fun updateVisibility(isVisible: Boolean) {
-        val shouldBeVisible = isVisible && !bypassController.bypassEnabled
+    private fun updateVisibility() {
+        val shouldBeVisible = mediaHost.visible
+                && !bypassController.bypassEnabled
+                && (statusBarStateController.state == StatusBarState.KEYGUARD ||
+                        statusBarStateController.state == StatusBarState.FULLSCREEN_USER_SWITCHER)
         view?.visibility = if (shouldBeVisible) View.VISIBLE else View.GONE
     }
 }

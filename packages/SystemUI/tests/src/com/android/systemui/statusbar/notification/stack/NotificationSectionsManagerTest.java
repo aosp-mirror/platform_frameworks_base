@@ -367,38 +367,6 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
         verify(mNssl).addView(mSectionsManager.getMediaControlsView(), 1);
     }
 
-    @Test
-    public void testMediaControls_RemoveWhenExitKeyguard() {
-        enableMediaControls();
-
-        // GIVEN a stack with media controls
-        setStackState(ChildType.MEDIA_CONTROLS, ChildType.ALERTING, ChildType.GENTLE_HEADER,
-                ChildType.GENTLE);
-
-        // WHEN we leave the keyguard
-        when(mStatusBarStateController.getState()).thenReturn(StatusBarState.SHADE);
-        mSectionsManager.updateSectionBoundaries();
-
-        // Then the media controls is removed
-        verify(mNssl).removeView(mSectionsManager.getMediaControlsView());
-    }
-
-    @Test
-    public void testMediaControls_RemoveWhenPullDownShade() {
-        enableMediaControls();
-
-        // GIVEN a stack with media controls
-        setStackState(ChildType.MEDIA_CONTROLS, ChildType.ALERTING, ChildType.GENTLE_HEADER,
-                ChildType.GENTLE);
-
-        // WHEN we pull down the shade on the keyguard
-        when(mStatusBarStateController.getState()).thenReturn(StatusBarState.SHADE_LOCKED);
-        mSectionsManager.updateSectionBoundaries();
-
-        // Then the media controls is removed
-        verify(mNssl).removeView(mSectionsManager.getMediaControlsView());
-    }
-
     private void enablePeopleFiltering() {
         when(mSectionsFeatureManager.isFilteringEnabled()).thenReturn(true);
         when(mSectionsFeatureManager.getNumberOfBuckets()).thenReturn(4);

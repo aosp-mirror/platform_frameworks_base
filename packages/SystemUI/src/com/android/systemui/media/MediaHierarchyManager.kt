@@ -53,6 +53,7 @@ class MediaHierarchyManager @Inject constructor(
     private val mediaCarousel
         get() =  mediaViewManager.mediaCarousel
     private var animationStartState: MediaState? = null
+    private var statusbarState: Int = statusBarStateController.state
     private var animator = ValueAnimator.ofFloat(0.0f, 1.0f).apply {
         interpolator = Interpolators.FAST_OUT_SLOW_IN
         addUpdateListener {
@@ -96,8 +97,15 @@ class MediaHierarchyManager @Inject constructor(
 
     init {
         statusBarStateController.addCallback(object : StatusBarStateController.StateListener {
-            override fun onStateChanged(newState: Int) {
+            override fun onStatePreChange(oldState: Int, newState: Int) {
+                // We're updating the location before the state change happens, since we want the
+                // location of the previous state to still be up to date when the animation starts
+                statusbarState = newState
                 updateDesiredLocation()
+            }
+
+            override fun onStateChanged(newState: Int) {
+                updateTargetState()
             }
         })
     }
@@ -168,14 +176,24 @@ class MediaHierarchyManager @Inject constructor(
         val previousHost = getHost(previousLocation)
         if (currentHost == null || previousHost == null) {
             cancelAnimationAndApplyDesiredState()
+            return
         }
         updateTargetState()
         if (isCurrentlyInGuidedTransformation()) {
             applyTargetStateIfNotAnimating()
         } else if (animate) {
             animator.cancel()
-            // Let's animate to the new position, starting from the current position
-            animationStartState = currentState.copy()
+            if (currentAttachmentLocation == IN_OVERLAY
+                    || !previousHost.hostView.isAttachedToWindow) {
+                // Let's animate to the new position, starting from the current position
+                // We also go in here in case the view was detached, since the bounds wouldn't
+                // be correct anymore
+                animationStartState = currentState.copy()
+            } else {
+                // otherwise, let's take the freshest state, since the current one could
+                // be outdated
+                animationStartState = previousHost.currentState.copy()
+            }
             adjustAnimatorForTransition(desiredLocation, previousLocation)
             animator.start()
         } else {
@@ -190,7 +208,7 @@ class MediaHierarchyManager @Inject constructor(
         if (currentLocation == LOCATION_QQS
                 && previousLocation == LOCATION_LOCKSCREEN
                 && (statusBarStateController.leaveOpenOnKeyguardHide()
-                        || statusBarStateController.state == StatusBarState.SHADE_LOCKED)) {
+                        || statusbarState == StatusBarState.SHADE_LOCKED)) {
             // Usually listening to the isShown is enough to determine this, but there is some
             // non-trivial reattaching logic happening that will make the view not-shown earlier
             return true
@@ -212,7 +230,7 @@ class MediaHierarchyManager @Inject constructor(
         var delay = 0L
         if (previousLocation == LOCATION_LOCKSCREEN && desiredLocation == LOCATION_QQS) {
             // Going to the full shade, let's adjust the animation duration
-            if (statusBarStateController.state == StatusBarState.SHADE
+            if (statusbarState == StatusBarState.SHADE
                     && keyguardStateController.isKeyguardFadingAway) {
                 delay = keyguardStateController.keyguardFadingAwayDelay
             }
@@ -330,8 +348,8 @@ class MediaHierarchyManager @Inject constructor(
     @MediaLocation
     private fun calculateLocation() : Int {
         val onLockscreen = (!bypassController.bypassEnabled
-                && (statusBarStateController.state == StatusBarState.KEYGUARD
-                || statusBarStateController.state == StatusBarState.FULLSCREEN_USER_SWITCHER))
+                && (statusbarState == StatusBarState.KEYGUARD
+                || statusbarState == StatusBarState.FULLSCREEN_USER_SWITCHER))
         return when {
             qsExpansion > 0.0f && !onLockscreen -> LOCATION_QS
             qsExpansion > 0.4f && onLockscreen -> LOCATION_QS

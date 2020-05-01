@@ -53,10 +53,10 @@ public class MediaHeaderView extends ActivatableNotificationView {
         setTintColor(color);
     }
 
-    public void setMediaHost(ViewGroup mediaHost) {
-        mContentView = mediaHost;
-        addView(mediaHost);
-        ViewGroup.LayoutParams layoutParams = mediaHost.getLayoutParams();
+    public void setContentView(ViewGroup contentView) {
+        mContentView = contentView;
+        addView(contentView);
+        ViewGroup.LayoutParams layoutParams = contentView.getLayoutParams();
         layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT;
         layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT;
     }
