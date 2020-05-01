@@ -63,6 +63,7 @@ class MediaViewManager @Inject constructor(
                 removed?.apply {
                     mediaContent.removeView(removed.view)
                     removed.onDestroy()
+                    updateMediaPaddings()
                 }
             }
         })
@@ -106,8 +107,9 @@ class MediaViewManager @Inject constructor(
             } else {
                 mediaContent.addView(existingPlayer.view)
             }
+            updatePlayerToCurrentState(existingPlayer)
         } else if (existingPlayer.isPlaying &&
-                mediaContent.indexOfChild(existingPlayer.view) != 0) {
+                    mediaContent.indexOfChild(existingPlayer.view) != 0) {
             if (visualStabilityManager.isReorderingAllowed) {
                 mediaContent.removeView(existingPlayer.view)
                 mediaContent.addView(existingPlayer.view, 0)
@@ -116,7 +118,18 @@ class MediaViewManager @Inject constructor(
             }
         }
         existingPlayer.bind(data)
+        // Resetting the progress to make sure it's taken into account for the latest
+        // motion model
+        existingPlayer.view.progress = currentState?.expansion ?: 0.0f
         updateMediaPaddings()
+    }
+
+    private fun updatePlayerToCurrentState(existingPlayer: MediaControlPanel) {
+        if (desiredState != null && desiredState!!.measurementInput != null) {
+            // make sure the player width is set to the current state
+            val measurementInput = desiredState!!.measurementInput!!
+            existingPlayer.setPlayerWidth(measurementInput.width)
+        }
     }
 
     private fun updateMediaPaddings() {
@@ -153,9 +166,14 @@ class MediaViewManager @Inject constructor(
             // This is a hosting view, let's remeasure our players
             desiredState = targetState
             val measurementInput = targetState.measurementInput
-            for (mediaPlayer in mediaPlayers.values) {
-                mediaPlayer.remeasure(measurementInput, animate, duration, startDelay)
-            }
+            remeasureAllPlayers(measurementInput, animate, duration, startDelay)
+        }
+    }
+
+    fun remeasureAllPlayers(measurementInput: MediaMeasurementInput?,
+                                    animate: Boolean, duration: Long, startDelay: Long) {
+        for (mediaPlayer in mediaPlayers.values) {
+            mediaPlayer.remeasure(measurementInput, animate, duration, startDelay)
         }
     }
 

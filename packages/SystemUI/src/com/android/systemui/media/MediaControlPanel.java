@@ -396,6 +396,8 @@ public class MediaControlPanel {
         // TODO: b/156036025 bring back media guts
 
         makeActive();
+        mMediaNotifView.updateState(R.id.collapsed, collapsedSet);
+        mMediaNotifView.updateState(R.id.expanded, expandedSet);
     }
 
     private Drawable createRoundedBitmap(Icon icon) {
@@ -753,16 +755,18 @@ public class MediaControlPanel {
         }
     }
 
-    public MediaMeasurementInput getLastMeasureInput() {
-        return mLastMeasureInput;
+    private void remeasureInternal(MediaMeasurementInput input) {
+        int width = input.getWidth();
+        setPlayerWidth(width);
+        mMediaNotifView.measure(input.getWidthMeasureSpec(), input.getHeightMeasureSpec());
     }
 
-    private void remeasureInternal(MediaMeasurementInput input) {
+    public void setPlayerWidth(int width) {
         ConstraintSet expandedSet = mMediaNotifView.getConstraintSet(R.id.expanded);
         ConstraintSet collapsedSet = mMediaNotifView.getConstraintSet(R.id.collapsed);
-        int width = input.getWidth();
         collapsedSet.setGuidelineBegin(R.id.view_width, width);
         expandedSet.setGuidelineBegin(R.id.view_width, width);
-        mMediaNotifView.measure(input.getWidthMeasureSpec(), input.getHeightMeasureSpec());
+        mMediaNotifView.updateState(R.id.collapsed, collapsedSet);
+        mMediaNotifView.updateState(R.id.expanded, expandedSet);
     }
 }

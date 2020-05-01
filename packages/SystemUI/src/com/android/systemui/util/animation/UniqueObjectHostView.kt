@@ -30,12 +30,10 @@ class UniqueObjectHostView(
     context: Context
 ) : FrameLayout(context) {
     lateinit var measurementCache : GuaranteedMeasurementCache
+    var firstMeasureListener: ((MeasurementInput) -> Unit)? = null
 
     @SuppressLint("DrawAllocation")
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        if (isCurrentHost()) {
-            super.onMeasure(widthMeasureSpec, heightMeasureSpec)
-        }
         val paddingHorizontal = paddingStart + paddingEnd
         val paddingVertical = paddingTop + paddingBottom
         val width = MeasureSpec.getSize(widthMeasureSpec) - paddingHorizontal
@@ -43,13 +41,18 @@ class UniqueObjectHostView(
         val height = MeasureSpec.getSize(heightMeasureSpec) - paddingVertical
         val heightSpec = MeasureSpec.makeMeasureSpec(height, MeasureSpec.getMode(heightMeasureSpec))
         val measurementInput = MeasurementInputData(widthSpec, heightSpec)
-        if (!isCurrentHost() || !measurementCache.contains(measurementInput)) {
+        firstMeasureListener?.apply {
+            invoke(measurementInput)
+            firstMeasureListener = null
+        }
+        if (!isCurrentHost()) {
             // We're not currently the host, let's get the dimension from our cache (this might
-            // perform a measuring if the cache doesn't have it yet
+            // perform a measuring if the cache doesn't have it yet)
             val (cachedWidth, cachedHeight) = measurementCache.obtainMeasurement(measurementInput)
             setMeasuredDimension(cachedWidth + paddingHorizontal, cachedHeight + paddingVertical)
         } else {
-            // Let's update what we have in the cache if it's present
+            super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+            // Let's update our cache
             val child = getChildAt(0)!!
             val output = MeasurementOutput(child.measuredWidth, child.measuredHeight)
             measurementCache.putMeasurement(measurementInput, output)

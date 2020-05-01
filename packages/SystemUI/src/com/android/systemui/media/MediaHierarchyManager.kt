@@ -132,9 +132,21 @@ class MediaHierarchyManager @Inject constructor(
         return viewHost
     }
 
-    private fun createUniqueObjectHost(host: MediaState): UniqueObjectHostView {
+    private fun createUniqueObjectHost(host: MediaHost): UniqueObjectHostView {
         val viewHost = UniqueObjectHostView(context)
         viewHost.measurementCache = mediaMeasurementProvider.obtainCache(host)
+        viewHost.firstMeasureListener =  { input ->
+            if (host.location == currentAttachmentLocation) {
+                // The first measurement of the attached view is happening, Let's make
+                // sure the player width is updated
+                val measuringInput = host.getMeasuringInput(input)
+                mediaViewManager.remeasureAllPlayers(
+                        measuringInput,
+                        animate = false,
+                        duration = 0,
+                        startDelay = 0)
+            }
+        }
 
         viewHost.addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
             override fun onViewAttachedToWindow(p0: View?) {
