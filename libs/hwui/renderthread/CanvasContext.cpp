@@ -440,6 +440,12 @@ void CanvasContext::draw() {
 
     if (dirty.isEmpty() && Properties::skipEmptyFrames && !surfaceRequiresRedraw()) {
         mCurrentFrameInfo->addFlag(FrameInfoFlags::SkippedFrame);
+        // Notify the callbacks, even if there's nothing to draw so they aren't waiting
+        // indefinitely
+        for (auto& func : mFrameCompleteCallbacks) {
+            std::invoke(func, mFrameNumber);
+        }
+        mFrameCompleteCallbacks.clear();
         return;
     }
 
