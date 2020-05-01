@@ -24,6 +24,7 @@ import static com.android.server.locksettings.LockSettingsStrongAuth.NON_STRONG_
 import static com.android.server.locksettings.LockSettingsStrongAuth.NON_STRONG_BIOMETRIC_TIMEOUT_ALARM_TAG;
 import static com.android.server.locksettings.LockSettingsStrongAuth.STRONG_AUTH_TIMEOUT_ALARM_TAG;
 
+import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
@@ -163,9 +164,11 @@ public class LockSettingsStrongAuthTest {
 
     @Test
     public void testReportSuccessfulStrongAuthUnlock_schedulePrimaryAuthTimeout() {
-        final long nextAlarmTime = 1000;
-        when(mInjector.getNextAlarmTimeMs(mDPM.getRequiredStrongAuthTimeout(null, PRIMARY_USER_ID)))
-                .thenReturn(nextAlarmTime);
+        final long currentTime = 1000;
+        final long timeout = 1000;
+        final long nextAlarmTime = currentTime + timeout;
+        when(mInjector.getElapsedRealtimeMs()).thenReturn(currentTime);
+        when(mDPM.getRequiredStrongAuthTimeout(null, PRIMARY_USER_ID)).thenReturn(timeout);
         mStrongAuth.reportSuccessfulStrongAuthUnlock(PRIMARY_USER_ID);
 
         waitForIdle();
@@ -175,6 +178,29 @@ public class LockSettingsStrongAuthTest {
         assertNotNull(alarm);
         // verify that the alarm is scheduled
         verifyAlarm(nextAlarmTime, STRONG_AUTH_TIMEOUT_ALARM_TAG, alarm);
+    }
+
+    @Test
+    public void testReportSuccessfulStrongAuthUnlock_testRefreshStrongAuthTimeout() {
+        final long currentTime = 1000;
+        final long oldTimeout = 5000;
+        final long nextAlarmTime = currentTime + oldTimeout;
+        when(mInjector.getElapsedRealtimeMs()).thenReturn(currentTime);
+        when(mDPM.getRequiredStrongAuthTimeout(null, PRIMARY_USER_ID)).thenReturn(oldTimeout);
+        mStrongAuth.reportSuccessfulStrongAuthUnlock(PRIMARY_USER_ID);
+        waitForIdle();
+
+        StrongAuthTimeoutAlarmListener alarm =
+                mStrongAuth.mStrongAuthTimeoutAlarmListenerForUser.get(PRIMARY_USER_ID);
+        assertEquals(currentTime, alarm.getLatestStrongAuthTime());
+        verifyAlarm(nextAlarmTime, STRONG_AUTH_TIMEOUT_ALARM_TAG, alarm);
+
+        final long newTimeout = 3000;
+        when(mDPM.getRequiredStrongAuthTimeout(null, PRIMARY_USER_ID)).thenReturn(newTimeout);
+        mStrongAuth.refreshStrongAuthTimeout(PRIMARY_USER_ID);
+        waitForIdle();
+        verify(mAlarmManager).cancel(alarm);
+        verifyAlarm(currentTime + newTimeout, STRONG_AUTH_TIMEOUT_ALARM_TAG, alarm);
     }
 
     @Test
