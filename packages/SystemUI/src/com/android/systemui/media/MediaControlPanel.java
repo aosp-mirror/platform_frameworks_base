@@ -98,6 +98,7 @@ public class MediaControlPanel {
     private SharedPreferences mSharedPrefs;
     private boolean mCheckedForResumption = false;
     private boolean mIsRemotePlayback;
+    private QSMediaBrowser mQSMediaBrowser;
 
     // Button IDs used in notifications
     protected static final int[] NOTIF_ACTION_IDS = {
@@ -232,6 +233,11 @@ public class MediaControlPanel {
             String key) {
         // Ensure that component names are updated if token has changed
         if (mToken == null || !mToken.equals(token)) {
+            if (mQSMediaBrowser != null) {
+                Log.d(TAG, "Disconnecting old media browser");
+                mQSMediaBrowser.disconnect();
+                mQSMediaBrowser = null;
+            }
             mToken = token;
             mServiceComponent = null;
             mCheckedForResumption = false;
@@ -618,8 +624,22 @@ public class MediaControlPanel {
         ImageButton btn = mMediaNotifView.findViewById(mActionIds[0]);
         btn.setOnClickListener(v -> {
             Log.d(TAG, "Attempting to restart session");
-            QSMediaBrowser browser = new QSMediaBrowser(mContext, null, mServiceComponent);
-            browser.restart();
+            if (mQSMediaBrowser != null) {
+                mQSMediaBrowser.disconnect();
+            }
+            mQSMediaBrowser = new QSMediaBrowser(mContext, new QSMediaBrowser.Callback(){
+                @Override
+                public void onConnected() {
+                    Log.d(TAG, "Successfully restarted");
+                }
+                @Override
+                public void onError() {
+                    Log.e(TAG, "Error restarting");
+                    mQSMediaBrowser.disconnect();
+                    mQSMediaBrowser = null;
+                }
+            }, mServiceComponent);
+            mQSMediaBrowser.restart();
         });
         btn.setImageDrawable(mContext.getResources().getDrawable(R.drawable.lb_ic_play));
         btn.setImageTintList(ColorStateList.valueOf(mForegroundColor));
@@ -654,13 +674,18 @@ public class MediaControlPanel {
      */
     private void tryUpdateResumptionList(ComponentName componentName) {
         Log.d(TAG, "Testing if we can connect to " + componentName);
-        QSMediaBrowser.testConnection(mContext,
+        if (mQSMediaBrowser != null) {
+            mQSMediaBrowser.disconnect();
+        }
+        mQSMediaBrowser = new QSMediaBrowser(mContext,
                 new QSMediaBrowser.Callback() {
                     @Override
                     public void onConnected() {
                         Log.d(TAG, "yes we can resume with " + componentName);
                         mServiceComponent = componentName;
                         updateResumptionList(componentName);
+                        mQSMediaBrowser.disconnect();
+                        mQSMediaBrowser = null;
                     }
 
                     @Override
@@ -671,9 +696,12 @@ public class MediaControlPanel {
                             // If it's not active and we can't resume, remove
                             removePlayer();
                         }
+                        mQSMediaBrowser.disconnect();
+                        mQSMediaBrowser = null;
                     }
                 },
                 componentName);
+        mQSMediaBrowser.testConnection();
     }
 
     /**
