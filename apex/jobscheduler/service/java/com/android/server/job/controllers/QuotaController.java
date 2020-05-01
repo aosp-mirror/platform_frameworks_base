@@ -64,7 +64,7 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.os.BackgroundThread;
+import com.android.server.JobSchedulerBackgroundThread;
 import com.android.server.LocalServices;
 import com.android.server.job.ConstantsProto;
 import com.android.server.job.JobSchedulerService;
@@ -1682,7 +1682,7 @@ public final class QuotaController extends StateController {
         public void onAppIdleStateChanged(final String packageName, final @UserIdInt int userId,
                 boolean idle, int bucket, int reason) {
             // Update job bookkeeping out of band.
-            BackgroundThread.getHandler().post(() -> {
+            JobSchedulerBackgroundThread.getHandler().post(() -> {
                 final int bucketIndex = JobSchedulerService.standbyBucketToBucketIndex(bucket);
                 if (DEBUG) {
                     Slog.i(TAG, "Moving pkg " + string(userId, packageName) + " to bucketIndex "
@@ -2482,7 +2482,7 @@ public final class QuotaController extends StateController {
 
                 if (changed) {
                     // Update job bookkeeping out of band.
-                    BackgroundThread.getHandler().post(() -> {
+                    JobSchedulerBackgroundThread.getHandler().post(() -> {
                         synchronized (mLock) {
                             invalidateAllExecutionStatsLocked();
                             maybeUpdateAllConstraintsLocked();
