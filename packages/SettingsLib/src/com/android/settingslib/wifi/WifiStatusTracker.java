@@ -214,6 +214,9 @@ public class WifiStatusTracker {
     }
 
     private void updateStatusLabel() {
+        if (mWifiManager == null) {
+            return;
+        }
         NetworkCapabilities networkCapabilities;
         final Network currentWifiNetwork = mWifiManager.getCurrentNetwork();
         if (currentWifiNetwork != null && currentWifiNetwork.equals(mDefaultNetwork)) {
