@@ -23,6 +23,10 @@ import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.SOM
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_NOT_REQUIRED;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.Dialog;
@@ -2174,24 +2178,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             mShowing = true;
             mHadTopUi = mNotificationShadeWindowController.getForceHasTopUi();
             mNotificationShadeWindowController.setForceHasTopUi(true);
-            mBackgroundDrawable.setAlpha(0);
-            mContainer.setTranslationX(mGlobalActionsLayout.getAnimationOffsetX());
-            mContainer.setTranslationY(mGlobalActionsLayout.getAnimationOffsetY());
-            mContainer.setAlpha(0);
-            mContainer.animate()
-                    .alpha(1)
-                    .translationX(0)
-                    .translationY(0)
-                    .setDuration(450)
-                    .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
-                    .setUpdateListener(animation -> {
-                        float animatedValue = animation.getAnimatedFraction();
-                        int alpha = (int) (animatedValue * mScrimAlpha * 255);
-                        mBackgroundDrawable.setAlpha(alpha);
-                        mDepthController.updateGlobalDialogVisibility(animatedValue,
-                                mGlobalActionsLayout);
-                    })
-                    .start();
+
             ViewGroup root = (ViewGroup) mGlobalActionsLayout.getRootView();
             root.setOnApplyWindowInsetsListener((v, windowInsets) -> {
                 if (mUseControlsLayout) {
@@ -2205,29 +2192,66 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             if (mControlsUiController != null) {
                 mControlsUiController.show(mControlsView, this::dismissForControlsActivity);
             }
+
+            mBackgroundDrawable.setAlpha(0);
+            float xOffset = mGlobalActionsLayout.getAnimationOffsetX();
+            ObjectAnimator alphaAnimator =
+                    ObjectAnimator.ofFloat(mContainer, "transitionAlpha", 0f, 1f);
+            alphaAnimator.setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN);
+            alphaAnimator.setDuration(183);
+            alphaAnimator.addUpdateListener((animation) -> {
+                float animatedValue = animation.getAnimatedFraction();
+                int alpha = (int) (animatedValue * mScrimAlpha * 255);
+                mBackgroundDrawable.setAlpha(alpha);
+                mDepthController.updateGlobalDialogVisibility(animatedValue,
+                        mGlobalActionsLayout);
+            });
+
+            ObjectAnimator xAnimator =
+                    ObjectAnimator.ofFloat(mContainer, "translationX", xOffset, 0f);
+            alphaAnimator.setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN);
+            alphaAnimator.setDuration(350);
+
+            AnimatorSet animatorSet = new AnimatorSet();
+            animatorSet.playTogether(alphaAnimator, xAnimator);
+            animatorSet.start();
         }
 
         @Override
         public void dismiss() {
             dismissWithAnimation(() -> {
                 mContainer.setTranslationX(0);
-                mContainer.setTranslationY(0);
-                mContainer.setAlpha(1);
-                mContainer.animate()
-                        .alpha(0)
-                        .translationX(mGlobalActionsLayout.getAnimationOffsetX())
-                        .translationY(mGlobalActionsLayout.getAnimationOffsetY())
-                        .setDuration(450)
-                        .withEndAction(this::completeDismiss)
-                        .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
-                        .setUpdateListener(animation -> {
-                            float animatedValue = 1f - animation.getAnimatedFraction();
-                            int alpha = (int) (animatedValue * mScrimAlpha * 255);
-                            mBackgroundDrawable.setAlpha(alpha);
-                            mDepthController.updateGlobalDialogVisibility(animatedValue,
-                                    mGlobalActionsLayout);
-                        })
-                        .start();
+                ObjectAnimator alphaAnimator =
+                        ObjectAnimator.ofFloat(mContainer, "transitionAlpha", 1f, 0f);
+                alphaAnimator.setInterpolator(Interpolators.FAST_OUT_LINEAR_IN);
+                alphaAnimator.setDuration(233);
+                alphaAnimator.addUpdateListener((animation) -> {
+                    float animatedValue = 1f - animation.getAnimatedFraction();
+                    int alpha = (int) (animatedValue * mScrimAlpha * 255);
+                    mBackgroundDrawable.setAlpha(alpha);
+                    mDepthController.updateGlobalDialogVisibility(animatedValue,
+                            mGlobalActionsLayout);
+                });
+
+                float xOffset = mGlobalActionsLayout.getAnimationOffsetX();
+                ObjectAnimator xAnimator =
+                        ObjectAnimator.ofFloat(mContainer, "translationX", 0f, xOffset);
+                alphaAnimator.setInterpolator(Interpolators.FAST_OUT_LINEAR_IN);
+                alphaAnimator.setDuration(350);
+
+                AnimatorSet animatorSet = new AnimatorSet();
+                animatorSet.playTogether(alphaAnimator, xAnimator);
+                animatorSet.addListener(new AnimatorListenerAdapter() {
+                    public void onAnimationEnd(Animator animation) {
+                        completeDismiss();
+                    }
+                });
+
+                animatorSet.start();
+
+                // close first, as popup windows will not fade during the animation
+                dismissOverflow(false);
+                if (mControlsUiController != null) mControlsUiController.closeDialogs(false);
             });
         }
 
