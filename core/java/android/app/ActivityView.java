@@ -29,6 +29,7 @@ import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.hardware.display.VirtualDisplay;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.util.AttributeSet;
@@ -441,6 +442,14 @@ public class ActivityView extends ViewGroup implements android.window.TaskEmbedd
      */
     public int getVirtualDisplayId() {
         return mTaskEmbedder.getDisplayId();
+    }
+
+    /**
+     * @hide
+     * @return virtual display.
+     */
+    public VirtualDisplay getVirtualDisplay() {
+        return mTaskEmbedder.getVirtualDisplay();
     }
 
     /**
