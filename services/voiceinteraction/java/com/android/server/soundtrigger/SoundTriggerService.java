@@ -443,6 +443,8 @@ public class SoundTriggerService extends SystemService {
 
             enforceCallingPermission(Manifest.permission.MANAGE_SOUND_TRIGGER);
 
+            enforceDetectionPermissions(detectionService);
+
             if (!isInitialized()) return STATUS_ERROR;
             if (DEBUG) {
                 Slog.i(TAG, "startRecognition(): id = " + soundModelId);
@@ -1529,6 +1531,16 @@ public class SoundTriggerService extends SystemService {
         if (mContext.checkCallingOrSelfPermission(permission)
                 != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Caller does not hold the permission " + permission);
+        }
+    }
+
+    private void enforceDetectionPermissions(ComponentName detectionService) {
+        PackageManager packageManager = mContext.getPackageManager();
+        String packageName = detectionService.getPackageName();
+        if (packageManager.checkPermission(Manifest.permission.CAPTURE_AUDIO_HOTWORD, packageName)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException(detectionService.getPackageName() + " does not have"
+                    + " permission " + Manifest.permission.CAPTURE_AUDIO_HOTWORD);
         }
     }
 
