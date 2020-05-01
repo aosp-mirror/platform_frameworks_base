@@ -614,9 +614,6 @@ public class UpdateEngine {
      * encountered. Device is corrupted, and future updates must not be applied.
      * The device cannot recover without flashing and factory resets.
      * </ul>
-     *
-     * @throws ServiceSpecificException if other transient errors has occurred.
-     * A reboot may or may not help resolving the issue.
      */
     @WorkerThread
     @ErrorCode

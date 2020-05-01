@@ -41,30 +41,31 @@ public class TestDriveTest {
     static class Expect {
         public boolean success;
         public Integer[] atoms;
-        public boolean onePushedAtomEvent;
-        public String extraPackage;
+        public boolean onePushedAtomEvent = false;
+        public String extraPackage = null;
         public String target;
+        public boolean terse = false;
 
         static Expect success(Integer... atoms) {
-            return new Expect(true, atoms, false, null,
+            return new Expect(true, atoms,
                     TARGET);
         }
-        Expect(boolean success, Integer[] atoms, boolean onePushedAtomEvent, String extraPackage,
-                String target) {
+        Expect(boolean success, Integer[] atoms, String target) {
             this.success = success;
             this.atoms = atoms;
-            this.onePushedAtomEvent = onePushedAtomEvent;
-            this.extraPackage = extraPackage;
             this.target = target;
         }
-        static final Expect FAILURE = new Expect(false, null,
-                false, null, null);
+        static final Expect FAILURE = new Expect(false, null, null);
         Expect onePushedAtomEvent() {
             this.onePushedAtomEvent = true;
             return this;
         }
         Expect extraPackage() {
             this.extraPackage = TestDriveTest.PACKAGE;
+            return this;
+        }
+        Expect terse() {
+            this.terse = true;
             return this;
         }
     }
@@ -118,6 +119,10 @@ public class TestDriveTest {
                         Expect.FAILURE},  // Two connected devices, no indication of which to use
                 new Object[]{new String[]{"-one", "244", "245"}, TARGET_ONLY, null,
                         Expect.success(244, 245).onePushedAtomEvent()},
+                new Object[]{new String[]{"-terse", "-one", "244", "245"}, TARGET_ONLY, null,
+                        Expect.success(244, 245).onePushedAtomEvent().terse()},
+                new Object[]{new String[]{"-one", "-terse", "244", "245"}, TARGET_ONLY, null,
+                        Expect.success(244, 245).onePushedAtomEvent().terse()},
                 new Object[]{new String[]{"-p", PACKAGE, "244", "245"}, TARGET_ONLY, null,
                         Expect.success(244, 245).extraPackage()},
                 new Object[]{new String[]{"-p", PACKAGE, "-one", "244", "245"}, TARGET_ONLY, null,
@@ -132,7 +137,23 @@ public class TestDriveTest {
                         Expect.success(244, 245).extraPackage().onePushedAtomEvent()},
                 new Object[]{new String[]{"-one", "-p", PACKAGE, "-s", TARGET, "244", "245"},
                         TARGET_AND_OTHER, null,
-                        Expect.success(244, 245).extraPackage().onePushedAtomEvent()}
+                        Expect.success(244, 245).extraPackage().onePushedAtomEvent()},
+                new Object[]{new String[]{"-terse", "-one", "-p", PACKAGE, "-s", TARGET,
+                        "244", "245"},
+                        TARGET_AND_OTHER, null,
+                        Expect.success(244, 245).extraPackage().onePushedAtomEvent().terse()},
+                new Object[]{new String[]{"-one", "-terse", "-p", PACKAGE, "-s", TARGET,
+                        "244", "245"},
+                        TARGET_AND_OTHER, null,
+                        Expect.success(244, 245).extraPackage().onePushedAtomEvent().terse()},
+                new Object[]{new String[]{"-one", "-p", PACKAGE, "-terse", "-s", TARGET,
+                        "244", "245"},
+                        TARGET_AND_OTHER, null,
+                        Expect.success(244, 245).extraPackage().onePushedAtomEvent().terse()},
+                new Object[]{new String[]{"-one", "-p", PACKAGE, "-s", TARGET, "-terse",
+                        "244", "245"},
+                        TARGET_AND_OTHER, null,
+                        Expect.success(244, 245).extraPackage().onePushedAtomEvent().terse()}
         );
     }
 
@@ -162,6 +183,11 @@ public class TestDriveTest {
             assertArrayEquals(mExpect.atoms, collectAtoms(mConfiguration));
             assertEquals(mExpect.onePushedAtomEvent, mConfiguration.mOnePushedAtomEvent);
             assertEquals(mExpect.target, mTestDrive.mDeviceSerial);
+            if (mExpect.terse) {
+                assertEquals(TestDrive.TerseDumper.class, mTestDrive.mDumper.getClass());
+            } else {
+                assertEquals(TestDrive.BasicDumper.class, mTestDrive.mDumper.getClass());
+            }
         } else {
             assertFalse(result);
         }

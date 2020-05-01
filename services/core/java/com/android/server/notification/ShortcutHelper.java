@@ -18,7 +18,7 @@ package com.android.server.notification;
 
 import static android.content.pm.LauncherApps.ShortcutQuery.FLAG_MATCH_CACHED;
 import static android.content.pm.LauncherApps.ShortcutQuery.FLAG_MATCH_DYNAMIC;
-import static android.content.pm.LauncherApps.ShortcutQuery.FLAG_MATCH_PINNED;
+import static android.content.pm.LauncherApps.ShortcutQuery.FLAG_MATCH_PINNED_BY_ANY_LAUNCHER;
 
 import android.annotation.NonNull;
 import android.content.IntentFilter;
@@ -176,7 +176,8 @@ public class ShortcutHelper {
             LauncherApps.ShortcutQuery query = new LauncherApps.ShortcutQuery();
             query.setPackage(packageName);
             query.setShortcutIds(Arrays.asList(shortcutId));
-            query.setQueryFlags(FLAG_MATCH_DYNAMIC | FLAG_MATCH_PINNED | FLAG_MATCH_CACHED);
+            query.setQueryFlags(
+                    FLAG_MATCH_DYNAMIC | FLAG_MATCH_PINNED_BY_ANY_LAUNCHER | FLAG_MATCH_CACHED);
             List<ShortcutInfo> shortcuts = mLauncherAppsService.getShortcuts(query, user);
             ShortcutInfo info = shortcuts != null && shortcuts.size() > 0
                     ? shortcuts.get(0)

@@ -22,7 +22,7 @@ import android.service.controls.Control
 import android.service.controls.templates.ToggleTemplate
 import android.view.View
 import com.android.systemui.R
-import com.android.systemui.controls.ui.ControlActionCoordinator.MAX_LEVEL
+import com.android.systemui.controls.ui.ControlViewHolder.Companion.MAX_LEVEL
 
 class ToggleBehavior : Behavior {
     lateinit var clipLayer: Drawable
@@ -35,7 +35,7 @@ class ToggleBehavior : Behavior {
         cvh.applyRenderInfo(false /* enabled */, 0 /* offset */, false /* animated */)
 
         cvh.layout.setOnClickListener(View.OnClickListener() {
-            ControlActionCoordinator.toggle(cvh, template.getTemplateId(), template.isChecked())
+            cvh.controlActionCoordinator.toggle(cvh, template.getTemplateId(), template.isChecked())
         })
     }
 

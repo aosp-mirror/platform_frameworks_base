@@ -15,6 +15,7 @@
  */
 package com.android.systemui.bubbles;
 
+import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PRIVATE;
 import static com.android.systemui.bubbles.BubbleDebugConfig.DEBUG_BUBBLE_DATA;
 import static com.android.systemui.bubbles.BubbleDebugConfig.TAG_BUBBLES;
@@ -73,6 +74,8 @@ public class BubbleData {
         @Nullable Bubble selectedBubble;
         @Nullable Bubble addedBubble;
         @Nullable Bubble updatedBubble;
+        @Nullable Bubble addedOverflowBubble;
+        @Nullable Bubble removedOverflowBubble;
         // Pair with Bubble and @DismissReason Integer
         final List<Pair<Bubble, Integer>> removedBubbles = new ArrayList<>();
 
@@ -91,10 +94,12 @@ public class BubbleData {
                     || addedBubble != null
                     || updatedBubble != null
                     || !removedBubbles.isEmpty()
+                    || addedOverflowBubble != null
+                    || removedOverflowBubble != null
                     || orderChanged;
         }
 
-        void bubbleRemoved(Bubble bubbleToRemove, @DismissReason  int reason) {
+        void bubbleRemoved(Bubble bubbleToRemove, @DismissReason int reason) {
             removedBubbles.add(new Pair<>(bubbleToRemove, reason));
         }
     }
@@ -232,6 +237,7 @@ public class BubbleData {
 
     private void moveOverflowBubbleToPending(Bubble b) {
         mOverflowBubbles.remove(b);
+        mStateChange.removedOverflowBubble = b;
         mPendingBubbles.add(b);
     }
 
@@ -439,8 +445,9 @@ public class BubbleData {
                 if (DEBUG_BUBBLE_DATA) {
                     Log.d(TAG, "Cancel overflow bubble: " + b);
                 }
-                mStateChange.bubbleRemoved(b, reason);
                 mOverflowBubbles.remove(b);
+                mStateChange.bubbleRemoved(b, reason);
+                mStateChange.removedOverflowBubble = b;
             }
             return;
         }
@@ -473,7 +480,8 @@ public class BubbleData {
     }
 
     void overflowBubble(@DismissReason int reason, Bubble bubble) {
-        if (!(reason == BubbleController.DISMISS_AGED
+        if (bubble.getPendingIntentCanceled()
+                || !(reason == BubbleController.DISMISS_AGED
                 || reason == BubbleController.DISMISS_USER_GESTURE)) {
             return;
         }
@@ -481,6 +489,7 @@ public class BubbleData {
             Log.d(TAG, "Overflowing: " + bubble);
         }
         mOverflowBubbles.add(0, bubble);
+        mStateChange.addedOverflowBubble = bubble;
         bubble.stopInflation();
         if (mOverflowBubbles.size() == mMaxOverflowBubbles + 1) {
             // Remove oldest bubble.
@@ -488,8 +497,9 @@ public class BubbleData {
             if (DEBUG_BUBBLE_DATA) {
                 Log.d(TAG, "Overflow full. Remove: " + oldest);
             }
-            mStateChange.bubbleRemoved(oldest, BubbleController.DISMISS_OVERFLOW_MAX_REACHED);
             mOverflowBubbles.remove(oldest);
+            mStateChange.removedOverflowBubble = oldest;
+            mStateChange.bubbleRemoved(oldest, BubbleController.DISMISS_OVERFLOW_MAX_REACHED);
         }
     }
 
@@ -772,7 +782,7 @@ public class BubbleData {
     /**
      * The set of bubbles in row.
      */
-    @VisibleForTesting(visibility = PRIVATE)
+    @VisibleForTesting(visibility = PACKAGE)
     public List<Bubble> getBubbles() {
         return Collections.unmodifiableList(mBubbles);
     }

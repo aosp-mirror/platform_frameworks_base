@@ -644,6 +644,9 @@
     <!-- Content description to tell the user a notification has been removed from the notification shade -->
     <string name="accessibility_notification_dismissed">Notification dismissed.</string>
 
+    <!-- Content description to tell the user a bubble has been dismissed. -->
+    <string name="accessibility_bubble_dismissed">Bubble dismissed.</string>
+
     <!-- Content description for the notification shade panel (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_desc_notification_shade">Notification shade.</string>
     <!-- Content description for the quick settings panel (not shown on the screen). [CHAR LIMIT=NONE] -->
@@ -2648,13 +2651,13 @@
     <string name="inattentive_sleep_warning_title">Standby</string>
 
     <!-- Priority conversation onboarding screen -->
-    <!--  Text explaining that priority conversations show at the top of the conversation section [CHAR LIMIT=50]  -->
+    <!--  Text explaining that priority conversations show at the top of the conversation section [CHAR LIMIT=75]  -->
     <string name="priority_onboarding_show_at_top_text">Show at top of conversation section</string>
-    <!--  Text explaining that priority conversations show an avatar on the lock screen [CHAR LIMIT=50]  -->
+    <!--  Text explaining that priority conversations show an avatar on the lock screen [CHAR LIMIT=75]  -->
     <string name="priority_onboarding_show_avatar_text">Show profile picture on lock screen</string>
-    <!--  Text explaining that priority conversations will appear as a bubble [CHAR LIMIT=50]  -->
+    <!--  Text explaining that priority conversations will appear as a bubble [CHAR LIMIT=75]  -->
     <string name="priority_onboarding_appear_as_bubble_text">Appear as a floating bubble on top of apps</string>
-    <!--  Text explaining that priority conversations can interrupt DnD settings [CHAR LIMIT=50]  -->
+    <!--  Text explaining that priority conversations can interrupt DnD settings [CHAR LIMIT=75]  -->
     <string name="priority_onboarding_ignores_dnd_text">Interrupt Do Not Disturb</string>
     <!--  Title for the affirmative button [CHAR LIMIT=50]  -->
     <string name="priority_onboarding_done_button_title">Got it</string>

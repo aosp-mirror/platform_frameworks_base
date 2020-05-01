@@ -784,10 +784,19 @@ public class InputMethodService extends AbstractInputMethodService {
         }
     }
 
-    // TODO(b/137800469): Add detailed docs explaining the inline suggestions process.
     /**
-     * This method should be implemented by subclass which supports displaying autofill inline
-     * suggestion.
+     * Called when Autofill is requesting an {@link InlineSuggestionsRequest} from the IME.
+     *
+     * <p>The Autofill Framework will first request the IME to create and send an
+     * {@link InlineSuggestionsRequest} back. Once Autofill Framework receives a valid request and
+     * also receives valid inline suggestions, they will be returned via
+     * {@link #onInlineSuggestionsResponse(InlineSuggestionsResponse)}.</p>
+     *
+     * <p>IME Lifecycle - The request will wait to be created after inputStarted</p>
+     *
+     * <p>If the IME wants to support displaying inline suggestions, they must set
+     * supportsInlineSuggestions in its XML and implement this method to return a valid
+     * {@link InlineSuggestionsRequest}.</p>
      *
      * @param uiExtras the extras that contain the UI renderer related information
      * @return an {@link InlineSuggestionsRequest} to be sent to Autofill.

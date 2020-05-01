@@ -304,6 +304,7 @@
     <!-- The padding on the global screenshot background image -->
     <dimen name="global_screenshot_legacy_bg_padding">20dp</dimen>
     <dimen name="global_screenshot_bg_padding">20dp</dimen>
+    <dimen name="global_screenshot_bg_protection_height">400dp</dimen>
     <dimen name="global_screenshot_x_scale">80dp</dimen>
     <dimen name="screenshot_preview_elevation">6dp</dimen>
     <dimen name="screenshot_offset_y">48dp</dimen>
@@ -326,6 +327,7 @@
     <dimen name="screenshot_action_chip_padding_middle">8dp</dimen>
     <dimen name="screenshot_action_chip_padding_end">16dp</dimen>
     <dimen name="screenshot_action_chip_text_size">14sp</dimen>
+    <dimen name="screenshot_dismissal_height_delta">80dp</dimen>
 
 
     <!-- The width of the view containing navigation buttons -->
@@ -993,7 +995,7 @@
     <dimen name="pip_expand_container_edge_margin">30dp</dimen>
 
     <!-- The touchable/draggable edge size for PIP resize. -->
-    <dimen name="pip_resize_edge_size">30dp</dimen>
+    <dimen name="pip_resize_edge_size">48dp</dimen>
 
     <!-- The corner radius for PiP window. -->
     <dimen name="pip_corner_radius">8dp</dimen>
@@ -1248,9 +1250,17 @@
     <!-- Home Controls -->
     <dimen name="controls_header_side_margin">4dp</dimen>
     <dimen name="controls_header_menu_size">48dp</dimen>
-    <dimen name="controls_header_app_icon_size">40dp</dimen>
-    <dimen name="controls_top_margin">44dp</dimen>
-    <dimen name="control_header_text_size">22sp</dimen>
+    <dimen name="controls_header_bottom_margin">24dp</dimen>
+    <dimen name="controls_header_app_icon_size">24dp</dimen>
+    <dimen name="controls_top_margin">48dp</dimen>
+    <dimen name="control_header_text_size">20sp</dimen>
+    <dimen name="control_item_text_size">16sp</dimen>
+    <dimen name="control_menu_item_text_size">16sp</dimen>
+    <dimen name="control_menu_item_min_height">56dp</dimen>
+    <dimen name="control_menu_vertical_padding">12dp</dimen>
+    <dimen name="control_menu_horizontal_padding">16dp</dimen>
+    <dimen name="control_spinner_padding_vertical">24dp</dimen>
+    <dimen name="control_spinner_padding_horizontal">20dp</dimen>
     <dimen name="control_text_size">14sp</dimen>
     <dimen name="control_icon_size">24dp</dimen>
     <dimen name="control_spacing">4dp</dimen>
@@ -1267,10 +1277,9 @@
     <fraction name="controls_dimmed_alpha">40%</fraction>
 
     <!-- Home Controls activity view detail panel-->
-    <dimen name="controls_activity_view_top_padding">25dp</dimen>
-    <dimen name="controls_activity_view_side_padding">12dp</dimen>
     <dimen name="controls_activity_view_top_offset">100dp</dimen>
     <dimen name="controls_activity_view_text_size">17sp</dimen>
+    <dimen name="controls_activity_view_corner_radius">@*android:dimen/config_bottomDialogCornerRadius</dimen>
 
     <!-- Home Controls management screens -->
     <dimen name="controls_management_top_padding">48dp</dimen>

@@ -3994,7 +3994,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
      * @param replaceVolumeUuid The volume of the packages to be updated are on, {@code null} for
      *                          all volumes
      * @param flags Control permission for which apps should be updated
-     * @param allPackages All currently known packages
      * @param callback Callback to call after permission changes
      */
     private void updatePermissions(final @Nullable String changingPkgName,
@@ -4108,7 +4107,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                             final int userId = userIds[userIdNum];
                             mPackageManagerInt.forEachPackage((AndroidPackage p) ->
                                     revokePermissionFromPackageForUser(p.getPackageName(),
-                                            bp.getName(), userId, callback));
+                                            bp.getName(), true, userId, callback));
                         }
                     }
                     it.remove();
@@ -4143,7 +4142,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
      * Revoke a runtime permission from a package for a given user ID.
      */
     private void revokePermissionFromPackageForUser(@NonNull String pName,
-            @NonNull String permissionName, int userId, @Nullable PermissionCallback callback) {
+            @NonNull String permissionName, boolean overridePolicy, int userId,
+            @Nullable PermissionCallback callback) {
         final ApplicationInfo appInfo =
                 mPackageManagerInt.getApplicationInfo(pName, 0,
                         Process.SYSTEM_UID, UserHandle.USER_SYSTEM);
@@ -4158,7 +4158,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 revokeRuntimePermissionInternal(
                         permissionName,
                         pName,
-                        false,
+                        overridePolicy,
                         Process.SYSTEM_UID,
                         userId,
                         callback);

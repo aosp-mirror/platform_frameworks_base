@@ -44,14 +44,16 @@ class ThresholdSensorImpl implements ThresholdSensor {
     private List<Listener> mListeners = new ArrayList<>();
     private Boolean mLastBelow;
     private String mTag;
+    private final float mThresholdLatch;
     private int mSensorDelay;
 
     private SensorEventListener mSensorEventListener = new SensorEventListener() {
         @Override
         public void onSensorChanged(SensorEvent event) {
             boolean below = event.values[0] < mThreshold;
+            boolean above = event.values[0] > mThresholdLatch;
             logDebug("Sensor value: " + event.values[0]);
-            onSensorEvent(below, event.timestamp);
+            onSensorEvent(below, above, event.timestamp);
         }
 
         @Override
@@ -60,10 +62,11 @@ class ThresholdSensorImpl implements ThresholdSensor {
     };
 
     private ThresholdSensorImpl(AsyncSensorManager sensorManager,
-            Sensor sensor, float threshold, int sensorDelay) {
+            Sensor sensor, float threshold, float thresholdLatch, int sensorDelay) {
         mSensorManager = sensorManager;
         mSensor = sensor;
         mThreshold = threshold;
+        mThresholdLatch = thresholdLatch;
         mSensorDelay = sensorDelay;
     }
 
@@ -165,13 +168,32 @@ class ThresholdSensorImpl implements ThresholdSensor {
         mLastBelow = null;  // Forget what we know.
     }
 
-    private void onSensorEvent(boolean below, long timestampNs) {
+    /**
+     * Call when the sensor reports a new value.
+     *
+     * Separate below-threshold and above-thresholds are specified. this allows latching behavior,
+     * where a different threshold can be specified for triggering the sensor depending on if it's
+     * going from above to below or below to above. To outside listeners of this class, the class
+     * still appears entirely binary.
+     */
+    private void onSensorEvent(boolean belowThreshold, boolean aboveThreshold, long timestampNs) {
         Assert.isMainThread();
-        if (!mRegistered || mLastBelow != null && mLastBelow == below) {
+        if (!mRegistered) {
             return;
         }
-        mLastBelow = below;
-        alertListenersInternal(below, timestampNs);
+        if (mLastBelow != null) {
+            // If we last reported below and are not yet above, change nothing.
+            if (mLastBelow && !aboveThreshold) {
+                return;
+            }
+            // If we last reported above and are not yet below, change nothing.
+            if (!mLastBelow && !belowThreshold) {
+                return;
+            }
+        }
+        mLastBelow = belowThreshold;
+        logDebug("Alerting below: " + belowThreshold);
+        alertListenersInternal(belowThreshold, timestampNs);
     }
 
 
@@ -192,9 +214,11 @@ class ThresholdSensorImpl implements ThresholdSensor {
         private final AsyncSensorManager mSensorManager;
         private int mSensorDelay = SensorManager.SENSOR_DELAY_NORMAL;;
         private float mThresholdValue;
+        private float mThresholdLatchValue;
         private Sensor mSensor;
         private boolean mSensorSet;
         private boolean mThresholdSet;
+        private boolean mThresholdLatchValueSet;
 
         @Inject
         Builder(@Main Resources resources, AsyncSensorManager sensorManager) {
@@ -222,6 +246,15 @@ class ThresholdSensorImpl implements ThresholdSensor {
             return this;
         }
 
+        Builder setThresholdLatchResourceId(int thresholdLatchResourceId) {
+            try {
+                setThresholdLatchValue(mResources.getFloat(thresholdLatchResourceId));
+            } catch (Resources.NotFoundException e) {
+                // no-op
+            }
+            return this;
+        }
+
         Builder setSensorType(String sensorType) {
             Sensor sensor = findSensorByType(sensorType);
             if (sensor != null) {
@@ -233,6 +266,15 @@ class ThresholdSensorImpl implements ThresholdSensor {
         Builder setThresholdValue(float thresholdValue) {
             mThresholdValue = thresholdValue;
             mThresholdSet = true;
+            if (!mThresholdLatchValueSet) {
+                mThresholdLatchValue = mThresholdValue;
+            }
+            return this;
+        }
+
+        Builder setThresholdLatchValue(float thresholdLatchValue) {
+            mThresholdLatchValue = thresholdLatchValue;
+            mThresholdLatchValueSet = true;
             return this;
         }
 
@@ -254,8 +296,13 @@ class ThresholdSensorImpl implements ThresholdSensor {
                 throw new IllegalStateException("A threshold was not successfully set.");
             }
 
+            if (mThresholdValue > mThresholdLatchValue) {
+                throw new IllegalStateException(
+                        "Threshold must be less than or equal to Threshold Latch");
+            }
+
             return new ThresholdSensorImpl(
-                    mSensorManager, mSensor, mThresholdValue, mSensorDelay);
+                    mSensorManager, mSensor, mThresholdValue, mThresholdLatchValue, mSensorDelay);
         }
 
         private Sensor findSensorByType(String sensorType) {

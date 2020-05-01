@@ -235,10 +235,8 @@ import android.app.servertransaction.ClientTransaction;
 import android.app.servertransaction.ClientTransactionItem;
 import android.app.servertransaction.DestroyActivityItem;
 import android.app.servertransaction.MoveToDisplayItem;
-import android.app.servertransaction.MultiWindowModeChangeItem;
 import android.app.servertransaction.NewIntentItem;
 import android.app.servertransaction.PauseActivityItem;
-import android.app.servertransaction.PipModeChangeItem;
 import android.app.servertransaction.ResumeActivityItem;
 import android.app.servertransaction.StartActivityItem;
 import android.app.servertransaction.StopActivityItem;
@@ -1155,11 +1153,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return;
         }
 
-        if (task.getStack().deferScheduleMultiWindowModeChanged()) {
-            // Don't do anything if we are currently deferring multi-window mode change.
-            return;
-        }
-
         // An activity is considered to be in multi-window mode if its task isn't fullscreen.
         final boolean inMultiWindowMode = inMultiWindowMode();
         if (inMultiWindowMode != mLastReportedMultiWindowMode) {
@@ -1167,17 +1160,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 updatePictureInPictureMode(null, false);
             } else {
                 mLastReportedMultiWindowMode = inMultiWindowMode;
-                scheduleMultiWindowModeChanged(getConfiguration());
+                computeConfigurationAfterMultiWindowModeChange();
+                ensureActivityConfiguration(0 /* globalChanges */, PRESERVE_WINDOWS,
+                        true /* ignoreVisibility */);
             }
-        }
-    }
-
-    private void scheduleMultiWindowModeChanged(Configuration overrideConfig) {
-        try {
-            mAtmService.getLifecycleManager().scheduleTransaction(app.getThread(), appToken,
-                    MultiWindowModeChangeItem.obtain(mLastReportedMultiWindowMode, overrideConfig));
-        } catch (Exception e) {
-            // If process died, I don't care.
         }
     }
 
@@ -1188,39 +1174,26 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         final boolean inPictureInPictureMode = inPinnedWindowingMode() && targetStackBounds != null;
         if (inPictureInPictureMode != mLastReportedPictureInPictureMode || forceUpdate) {
-            // Picture-in-picture mode change normal triggers also multi-window mode change
-            // except transitions between pip and split screen mode, so update that here in order.
-            // Set the last reported MW state to the same as the PiP state since we haven't yet
-            // actually resized the task (these callbacks need to proceed the configuration change
-            // from the resize).
-            // TODO(110009072): Once we move these callbacks to the client, remove all logic related
-            // to forcing the update of the picture-in-picture mode as a part of the PiP animation.
-            final boolean shouldScheduleMultiWindowModeChange =
-                    mLastReportedMultiWindowMode != inMultiWindowMode();
+            // Picture-in-picture mode changes also trigger a multi-window mode change as well, so
+            // update that here in order. Set the last reported MW state to the same as the PiP
+            // state since we haven't yet actually resized the task (these callbacks need to
+            // precede the configuration change from the resize.
             mLastReportedPictureInPictureMode = inPictureInPictureMode;
             mLastReportedMultiWindowMode = inPictureInPictureMode;
-            final Configuration newConfig = new Configuration();
             if (targetStackBounds != null && !targetStackBounds.isEmpty()) {
-                newConfig.setTo(task.getRequestedOverrideConfiguration());
-                Rect outBounds = newConfig.windowConfiguration.getBounds();
-                task.adjustForMinimalTaskDimensions(outBounds, outBounds);
-                task.computeConfigResourceOverrides(newConfig, task.getParent().getConfiguration());
+                computeConfigurationAfterMultiWindowModeChange();
             }
-            schedulePictureInPictureModeChanged(newConfig);
-            if (shouldScheduleMultiWindowModeChange) {
-                scheduleMultiWindowModeChanged(newConfig);
-            }
+            ensureActivityConfiguration(0 /* globalChanges */, PRESERVE_WINDOWS,
+                    true /* ignoreVisibility */);
         }
     }
 
-    private void schedulePictureInPictureModeChanged(Configuration overrideConfig) {
-        try {
-            mAtmService.getLifecycleManager().scheduleTransaction(app.getThread(), appToken,
-                    PipModeChangeItem.obtain(mLastReportedPictureInPictureMode,
-                            overrideConfig));
-        } catch (Exception e) {
-            // If process died, no one cares.
-        }
+    private void computeConfigurationAfterMultiWindowModeChange() {
+        final Configuration newConfig = new Configuration();
+        newConfig.setTo(task.getRequestedOverrideConfiguration());
+        Rect outBounds = newConfig.windowConfiguration.getBounds();
+        task.adjustForMinimalTaskDimensions(outBounds, outBounds);
+        task.computeConfigResourceOverrides(newConfig, task.getParent().getConfiguration());
     }
 
     Task getTask() {
@@ -2669,15 +2642,28 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return this;
         }
 
-        // Ensure activity visibilities and update lockscreen occluded/dismiss state when
-        // finishing the top activity that occluded keyguard. So that, the
-        // ActivityStack#mTopActivityOccludesKeyguard can be updated and the activity below won't
-        // be resumed.
-        if (isState(PAUSED)
-                && mStackSupervisor.getKeyguardController().isKeyguardLocked()
-                && getStack().topActivityOccludesKeyguard()) {
-            getDisplay().ensureActivitiesVisible(null /* starting */, 0 /* configChanges */,
-                    false /* preserveWindows */, false /* notifyClients */);
+        final boolean isCurrentVisible = mVisibleRequested || isState(PAUSED);
+        if (isCurrentVisible) {
+            final ActivityStack stack = getStack();
+            final ActivityRecord activity = stack.mResumedActivity;
+            boolean ensureVisibility = false;
+            if (activity != null && !activity.occludesParent()) {
+                // If the resume activity is not opaque, we need to make sure the visibilities of
+                // activities be updated, they may be seen by users.
+                ensureVisibility = true;
+            } else if (mStackSupervisor.getKeyguardController().isKeyguardLocked()
+                    && stack.topActivityOccludesKeyguard()) {
+                // Ensure activity visibilities and update lockscreen occluded/dismiss state when
+                // finishing the top activity that occluded keyguard. So that, the
+                // ActivityStack#mTopActivityOccludesKeyguard can be updated and the activity below
+                // won't be resumed.
+                ensureVisibility = true;
+            }
+
+            if (ensureVisibility) {
+                getDisplay().ensureActivitiesVisible(null /* starting */, 0 /* configChanges */,
+                        false /* preserveWindows */, true /* notifyClients */);
+            }
         }
 
         boolean activityRemoved = false;
@@ -2698,7 +2684,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // than destroy immediately.
         final boolean isNextNotYetVisible = next != null
                 && (!next.nowVisible || !next.mVisibleRequested);
-        if ((mVisibleRequested || isState(PAUSED)) && isNextNotYetVisible) {
+        if (isCurrentVisible && isNextNotYetVisible) {
             // Add this activity to the list of stopping activities. It will be processed and
             // destroyed when the next activity reports idle.
             addToStopping(false /* scheduleIdle */, false /* idleDelayed */,
@@ -4518,6 +4504,15 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return false;
         }
 
+        // Activity in a pinned stack should not be visible if the stack is in force hidden state.
+        // Typically due to the FLAG_FORCE_HIDDEN_FOR_PINNED_TASK set on the stack, which is a
+        // work around to send onStop before windowing mode change callbacks.
+        // See also ActivityStackSupervisor#removePinnedStackInSurfaceTransaction
+        // TODO: Should we ever be visible if the stack/task is invisible?
+        if (inPinnedWindowingMode() && stack.isForceHidden()) {
+            return false;
+        }
+
         // Check if the activity is on a sleeping display, and if it can turn it ON.
         if (getDisplay().isSleeping()) {
             final boolean canTurnScreenOn = !mSetToSleep || canTurnScreenOn()
@@ -4607,7 +4602,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // the current contract for "auto-Pip" is that the app should enter it before onPause
             // returns. Just need to confirm this reasoning makes sense.
             final boolean deferHidingClient = canEnterPictureInPicture
-                    && !isState(STOPPING, STOPPED, PAUSED);
+                    && !isState(STARTED, STOPPING, STOPPED, PAUSED);
             setDeferHidingClient(deferHidingClient);
             setVisibility(false);
 
@@ -4618,9 +4613,16 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     // activity is hidden
                     supportsEnterPipOnTaskSwitch = false;
                     break;
-
-                case INITIALIZING:
                 case RESUMED:
+                    // If the app is capable of entering PIP, we should try pausing it now
+                    // so it can PIP correctly.
+                    if (deferHidingClient) {
+                        getRootTask().startPausingLocked(
+                                mStackSupervisor.mUserLeaving /* userLeaving */,
+                                false /* uiSleeping */, null /* resuming */);
+                        break;
+                    }
+                case INITIALIZING:
                 case PAUSING:
                 case PAUSED:
                 case STARTED:

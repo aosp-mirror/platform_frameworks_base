@@ -258,7 +258,7 @@
 
     <style name="TextAppearance.AuthCredential.Title">
         <item name="android:fontFamily">google-sans</item>
-        <item name="android:paddingTop">16dp</item>
+        <item name="android:paddingTop">12dp</item>
         <item name="android:paddingHorizontal">24dp</item>
         <item name="android:textSize">24sp</item>
     </style>
@@ -278,7 +278,7 @@
     </style>
 
     <style name="TextAppearance.AuthCredential.Error">
-        <item name="android:paddingTop">12dp</item>
+        <item name="android:paddingTop">6dp</item>
         <item name="android:paddingHorizontal">24dp</item>
         <item name="android:textSize">14sp</item>
         <item name="android:textColor">?android:attr/colorError</item>
@@ -692,14 +692,16 @@
     <style name="Control" />
 
     <style name="Control.MenuItem">
-        <item name="android:fontFamily">@*android:string/config_bodyFontFamilyMedium</item>
-        <item name="android:textSize">@dimen/control_text_size</item>
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
+        <item name="android:textSize">@dimen/control_menu_item_text_size</item>
         <item name="android:textColor">@color/control_primary_text</item>
         <item name="android:singleLine">true</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:minHeight">@dimen/control_menu_item_min_height</item>
     </style>
 
     <style name="Control.Spinner">
-        <item name="android:textSize">@dimen/control_header_text_size</item>
+        <item name="android:textColor">@color/control_primary_text</item>
         <item name="android:fontFamily">@*android:string/config_headlineFontFamilyMedium</item>
         <item name="android:singleLine">true</item>
         <item name="android:ellipsize">end</item>
@@ -707,11 +709,12 @@
 
     <style name="Control.Spinner.Header">
         <item name="android:background">@drawable/control_spinner_background</item>
-        <item name="android:textColor">@color/control_primary_text</item>
+        <item name="android:textSize">@dimen/control_header_text_size</item>
     </style>
 
     <style name="Control.Spinner.Item">
-        <item name="android:textColor">@color/control_secondary_text</item>
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
+        <item name="android:textSize">@dimen/control_item_text_size</item>
     </style>
 
     <style name="TextAppearance.Control.Status">
@@ -735,7 +738,8 @@
         <item name="android:overlapAnchor">true</item>
 
         <!-- used to override dark/light theming -->
-        <item name="*android:colorPopupBackground">@color/GM2_grey_900</item>
+        <item name="*android:colorBackgroundFloating">@color/GM2_grey_800</item>
+        <item name="*android:colorPopupBackground">@color/GM2_grey_800</item>
     </style>
 
     <style name="TextAppearance.ControlSetup">

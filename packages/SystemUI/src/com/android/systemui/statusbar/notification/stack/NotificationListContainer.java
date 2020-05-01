@@ -23,6 +23,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
+import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.VisibilityLocationProvider;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.SimpleNotificationListContainer;
@@ -194,4 +195,6 @@ public interface NotificationListContainer extends ExpandableView.OnHeightChange
      * @param v the item to remove
      */
     void removeListItem(@NonNull NotificationListItem v);
+
+    void setNotificationActivityStarter(NotificationActivityStarter notificationActivityStarter);
 }

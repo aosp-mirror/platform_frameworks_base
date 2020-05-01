@@ -78,8 +78,8 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
     private final IStatusBarService mBarService;
     private final Lazy<KeyguardStateController> mKeyguardStateControllerLazy;
     private final ButtonSelectionStateController mButtonSelectionStateController;
-    private final PhoneStatusBarPolicy mIconPolicy;
-    private final StatusBarIconController mIconController;
+    private final Lazy<PhoneStatusBarPolicy> mIconPolicyLazy;
+    private final Lazy<StatusBarIconController> mIconControllerLazy;
 
     private final int mDisplayId;
 
@@ -124,8 +124,8 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
             IStatusBarService barService,
             Lazy<KeyguardStateController> keyguardStateControllerLazy,
             ButtonSelectionStateController buttonSelectionStateController,
-            PhoneStatusBarPolicy iconPolicy,
-            StatusBarIconController iconController
+            Lazy<PhoneStatusBarPolicy> iconPolicyLazy,
+            Lazy<StatusBarIconController> iconControllerLazy
     ) {
         super(context);
         mResources = resources;
@@ -140,8 +140,8 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
         mBarService = barService;
         mKeyguardStateControllerLazy = keyguardStateControllerLazy;
         mButtonSelectionStateController = buttonSelectionStateController;
-        mIconPolicy = iconPolicy;
-        mIconController = iconController;
+        mIconPolicyLazy = iconPolicyLazy;
+        mIconControllerLazy = iconControllerLazy;
 
         mDisplayId = context.getDisplayId();
     }
@@ -238,8 +238,8 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
         // Must be called on the main thread due to the use of observeForever() in
         // mIconPolicy.init().
         mMainHandler.post(() -> {
-            mIconPolicy.init();
-            mSignalPolicy = new StatusBarSignalPolicy(mContext, mIconController);
+            mIconPolicyLazy.get().init();
+            mSignalPolicy = new StatusBarSignalPolicy(mContext, mIconControllerLazy.get());
         });
     }
 

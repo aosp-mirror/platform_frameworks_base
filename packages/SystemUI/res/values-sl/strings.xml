@@ -434,6 +434,7 @@
     <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"Snemanje zaslona"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Začni"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Ustavi"</string>
+    <string name="media_seamless_remote_device" msgid="177033467332920464">"Naprava"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Za preklop aplikacij povlecite navzgor"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Povlecite v desno za hiter preklop med aplikacijami"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Vklop/izklop pregleda"</string>
@@ -718,6 +719,7 @@
     <string name="notification_channel_summary_priority" msgid="7415770044553264622">"Prikazano je na vrhu razdelka s pogovorom in v oblačku."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Nastavitve"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prednost"</string>
+    <string name="no_shortcut" msgid="7176375126961212514">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> ne podpira posebnih nastavitev za pogovore"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Ni nedavnih oblačkov"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Tukaj bodo prikazani tako nedavni kot tudi opuščeni oblački"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Za ta obvestila ni mogoče spremeniti nastavitev."</string>
@@ -1036,6 +1038,8 @@
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Izberite kontrolnike, do katerih želite imeti dostop prek menija za vklop/izklop"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Držite in povlecite, da prerazporedite kontrolnike"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Vsi kontrolniki so bili odstranjeni"</string>
+    <!-- no translation found for controls_favorite_toast_no_changes (7094494210840877931) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Seznama vseh kontrolnikov ni bilo mogoče naložiti."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Drugo"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Dodajanje med kontrolnike naprave"</string>
@@ -1044,6 +1048,7 @@
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"Kontrolniki so posodobljeni"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"Koda PIN vsebuje črke ali simbole"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"Preverjanje naprave <xliff:g id="DEVICE">%s</xliff:g>"</string>
+    <string name="controls_pin_wrong" msgid="6162694056042164211">"Napačna koda PIN"</string>
     <string name="controls_pin_verifying" msgid="3755045989392131746">"Preverjanje …"</string>
     <string name="controls_pin_instructions" msgid="6363309783822475238">"Vnesite kodo PIN"</string>
     <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"Poskusite z drugo kodo PIN"</string>
@@ -1053,6 +1058,9 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Nalaganje priporočil"</string>
     <string name="controls_media_close_session" msgid="9023534788828414585">"Zapri to sejo predstavnosti"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Neaktivno, poglejte aplikacijo"</string>
+    <string name="controls_error_retryable" msgid="864025882878378470">"Napaka, vnovični poskus …"</string>
+    <string name="controls_error_removed" msgid="6299213591234723805">"Naprava je bila odstranjena"</string>
+    <string name="controls_error_generic" msgid="352500456918362905">"Stanja ni mogoče naložiti"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Napaka, poskusite znova"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"V teku"</string>
     <string name="controls_added_tooltip" msgid="4842812921719153085">"Za ogled novih kontrolnikov pridržite gumb za vklop"</string>

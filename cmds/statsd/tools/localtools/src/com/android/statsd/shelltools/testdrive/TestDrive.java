@@ -25,6 +25,7 @@ import com.android.internal.os.StatsdConfigProto.SimpleAtomMatcher;
 import com.android.internal.os.StatsdConfigProto.StatsdConfig;
 import com.android.internal.os.StatsdConfigProto.TimeUnit;
 import com.android.os.AtomsProto.Atom;
+import com.android.os.StatsLog;
 import com.android.os.StatsLog.ConfigMetricsReport;
 import com.android.os.StatsLog.ConfigMetricsReportList;
 import com.android.os.StatsLog.StatsLogReport;
@@ -78,11 +79,12 @@ public class TestDrive {
 
     @VisibleForTesting
     String mDeviceSerial = null;
+    @VisibleForTesting
+    Dumper mDumper = new BasicDumper();
 
     public static void main(String[] args) {
         final Configuration configuration = new Configuration();
-
-        TestDrive testDrive = new TestDrive();
+        final TestDrive testDrive = new TestDrive();
         Utils.setUpLogger(LOGGER, false);
 
         if (!testDrive.processArgs(configuration, args,
@@ -94,7 +96,7 @@ public class TestDrive {
                 configuration.createConfig(), configuration.hasPulledAtoms(),
                 configuration.hasPushedAtoms());
         if (reports != null) {
-            configuration.dumpMetrics(reports);
+            configuration.dumpMetrics(reports, testDrive.mDumper);
         }
     }
 
@@ -116,6 +118,9 @@ public class TestDrive {
             if (remaining_args >= 2 && arg.equals("-one")) {
                 LOGGER.info("Creating one event metric to catch all pushed atoms.");
                 configuration.mOnePushedAtomEvent = true;
+            } else if (remaining_args >= 2 && arg.equals("-terse")) {
+                LOGGER.info("Terse output format.");
+                mDumper = new TerseDumper();
             } else if (remaining_args >= 3 && arg.equals("-p")) {
                 configuration.mAdditionalAllowedPackage = args[++first_arg];
             } else if (remaining_args >= 3 && arg.equals("-s")) {
@@ -198,12 +203,13 @@ public class TestDrive {
         String mAdditionalAllowedPackage = null;
         private final Set<Long> mTrackedMetrics = new HashSet<>();
 
-        private void dumpMetrics(ConfigMetricsReportList reportList) {
+        private void dumpMetrics(ConfigMetricsReportList reportList, Dumper dumper) {
             // We may get multiple reports. Take the last one.
             ConfigMetricsReport report = reportList.getReports(reportList.getReportsCount() - 1);
             for (StatsLogReport statsLog : report.getMetricsList()) {
                 if (isTrackedMetric(statsLog.getMetricId())) {
                     LOGGER.info(statsLog.toString());
+                    dumper.dump(statsLog);
                 }
             }
         }
@@ -338,6 +344,51 @@ public class TestDrive {
                             .setAtomId(Atom.TRAIN_INFO_FIELD_NUMBER)
                             .addPackages("AID_STATSD"))
                     .setHashStringsInMetricReport(false);
+        }
+    }
+
+    interface Dumper {
+        void dump(StatsLogReport report);
+    }
+
+    static class BasicDumper implements Dumper {
+        @Override
+        public void dump(StatsLogReport report) {
+            System.out.println(report.toString());
+        }
+    }
+
+    static class TerseDumper extends BasicDumper {
+        @Override
+        public void dump(StatsLogReport report) {
+            if (report.hasGaugeMetrics()) {
+                dumpGaugeMetrics(report);
+            }
+            if (report.hasEventMetrics()) {
+                dumpEventMetrics(report);
+            }
+        }
+        void dumpEventMetrics(StatsLogReport report) {
+            final List<StatsLog.EventMetricData> data = report.getEventMetrics().getDataList();
+            if (data.isEmpty()) {
+                return;
+            }
+            long firstTimestampNanos = data.get(0).getElapsedTimestampNanos();
+            for (StatsLog.EventMetricData event : data) {
+                final double deltaSec = (event.getElapsedTimestampNanos() - firstTimestampNanos)
+                        / 1e9;
+                System.out.println(
+                        String.format("+%.3fs: %s", deltaSec, event.getAtom().toString()));
+            }
+        }
+        void dumpGaugeMetrics(StatsLogReport report) {
+            final List<StatsLog.GaugeMetricData> data = report.getGaugeMetrics().getDataList();
+            if (data.isEmpty()) {
+                return;
+            }
+            for (StatsLog.GaugeMetricData gauge : data) {
+                System.out.println(gauge.toString());
+            }
         }
     }
 

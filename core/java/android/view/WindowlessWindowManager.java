@@ -16,16 +16,19 @@
 
 package android.view;
 
+import android.annotation.Nullable;
 import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.graphics.Region;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 import android.util.MergedConfiguration;
 
 import java.util.HashMap;
+import java.util.Objects;
 
 /**
 * A simplistic implementation of IWindowSession. Rather than managing Surfaces
@@ -42,6 +45,7 @@ public class WindowlessWindowManager implements IWindowSession {
         WindowManager.LayoutParams mParams = new WindowManager.LayoutParams();
         int mDisplayId;
         IBinder mInputChannelToken;
+        Region mInputRegion;
         State(SurfaceControl sc, WindowManager.LayoutParams p, int displayId,
                 IBinder inputChannelToken) {
             mSurfaceControl = sc;
@@ -93,6 +97,30 @@ public class WindowlessWindowManager implements IWindowSession {
             Log.w(TAG, "Unsupported overlapping resizes");
         }
         mResizeCompletionForWindow.put(window, callback);
+    }
+
+    protected void setTouchRegion(IBinder window, @Nullable Region region) {
+        State state;
+        synchronized (this) {
+            // Do everything while locked so that we synchronize with relayout. This should be a
+            // very infrequent operation.
+            state = mStateForWindow.get(window);
+            if (state == null) {
+                return;
+            }
+            if (Objects.equals(region, state.mInputRegion)) {
+                return;
+            }
+            state.mInputRegion = region != null ? new Region(region) : null;
+            if (state.mInputChannelToken != null) {
+                try {
+                    mRealWm.updateInputChannel(state.mInputChannelToken, state.mDisplayId,
+                            state.mSurfaceControl, state.mParams.flags, state.mInputRegion);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Failed to update surface input channel: ", e);
+                }
+            }
+        }
     }
 
     /**
@@ -234,7 +262,7 @@ public class WindowlessWindowManager implements IWindowSession {
                 && state.mInputChannelToken != null) {
             try {
                 mRealWm.updateInputChannel(state.mInputChannelToken, state.mDisplayId, sc,
-                        attrs.flags);
+                        attrs.flags, state.mInputRegion);
             } catch (RemoteException e) {
                 Log.e(TAG, "Failed to update surface input channel: ", e);
             }
@@ -409,7 +437,7 @@ public class WindowlessWindowManager implements IWindowSession {
 
     @Override
     public void updateInputChannel(IBinder channelToken, int displayId, SurfaceControl surface,
-            int flags) {
+            int flags, Region region) {
     }
 
     @Override

@@ -577,8 +577,11 @@ public class ExternalStorageProvider extends FileSystemProvider {
     public Cursor querySearchDocuments(String rootId, String[] projection, Bundle queryArgs)
             throws FileNotFoundException {
         final File parent;
+
         synchronized (mRootsLock) {
-            parent = mRoots.get(rootId).path;
+            RootInfo root = mRoots.get(rootId);
+            parent = root.visiblePath != null ? root.visiblePath
+                : root.path;
         }
 
         return querySearchDocuments(parent, projection, Collections.emptySet(), queryArgs);

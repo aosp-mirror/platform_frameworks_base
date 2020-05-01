@@ -6016,7 +6016,7 @@ public class PackageParser {
 
                 // the last entry in pastSigningCertificates is the current signer, ignore it
                 for (int i = 0; i < pastSigningCertificates.length - 1; i++) {
-                    if (pastSigningCertificates[i].equals(oldDetails.signatures[i])) {
+                    if (pastSigningCertificates[i].equals(oldDetails.signatures[0])) {
                         return true;
                     }
                 }

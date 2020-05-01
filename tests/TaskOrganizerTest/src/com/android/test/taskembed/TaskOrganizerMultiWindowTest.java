@@ -18,32 +18,27 @@ package com.android.test.taskembed;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 
-import android.app.ActivityManager;
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.os.Bundle;
-import android.os.IBinder;
-import android.os.RemoteException;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.SurfaceControl;
 import android.view.SurfaceHolder;
 import android.view.View;
 import android.view.ViewGroup;
-import android.window.ITaskOrganizer;
-import android.window.IWindowContainerTransactionCallback;
+import android.widget.LinearLayout;
 import android.window.TaskOrganizer;
 import android.window.WindowContainerTransaction;
-import android.widget.LinearLayout;
 import android.window.WindowContainerTransactionCallback;
-import android.window.WindowOrganizer;
 
 public class TaskOrganizerMultiWindowTest extends Activity {
-    class SplitLayout extends LinearLayout implements View.OnTouchListener {
+    static class SplitLayout extends LinearLayout implements View.OnTouchListener {
         View mView1;
         View mView2;
         View mDividerView;
@@ -99,8 +94,8 @@ public class TaskOrganizerMultiWindowTest extends Activity {
     class ResizingTaskView extends TaskView {
         final Intent mIntent;
         boolean launched = false;
-        ResizingTaskView(Context c, TaskOrganizer o, int windowingMode, Intent i) {
-            super(c, o, windowingMode);
+        ResizingTaskView(Context c, Intent i) {
+            super(c);
             mIntent = i;
         }
 
@@ -125,9 +120,9 @@ public class TaskOrganizerMultiWindowTest extends Activity {
         }
     }
 
-    TaskView mTaskView1;
-    TaskView mTaskView2;
-    boolean gotFirstTask = false;
+    private TaskView mTaskView1;
+    private TaskView mTaskView2;
+    private boolean mGotFirstTask = false;
 
     class Organizer extends TaskOrganizer {
         private int receivedTransactions = 0;
@@ -146,17 +141,17 @@ public class TaskOrganizerMultiWindowTest extends Activity {
         };
 
         @Override
-        public void onTaskAppeared(ActivityManager.RunningTaskInfo ti) {
-            if (!gotFirstTask) {
-                mTaskView1.reparentTask(ti.token);
-                gotFirstTask = true;
+        public void onTaskAppeared(ActivityManager.RunningTaskInfo ti, SurfaceControl leash) {
+            if (!mGotFirstTask) {
+                mTaskView1.reparentTask(ti.token, leash);
+                mGotFirstTask = true;
             } else {
-                mTaskView2.reparentTask(ti.token);
+                mTaskView2.reparentTask(ti.token, leash);
             }
         }
     }
 
-    Organizer mOrganizer = new Organizer();
+    private Organizer mOrganizer = new Organizer();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -164,27 +159,31 @@ public class TaskOrganizerMultiWindowTest extends Activity {
 
         mOrganizer.registerOrganizer(WINDOWING_MODE_MULTI_WINDOW);
 
-        mTaskView1 = new ResizingTaskView(this, mOrganizer, WINDOWING_MODE_MULTI_WINDOW,
-                makeSettingsIntent());
-        mTaskView2 = new ResizingTaskView(this, mOrganizer, WINDOWING_MODE_MULTI_WINDOW,
-                makeContactsIntent());
+        mTaskView1 = new ResizingTaskView(this, makeSettingsIntent());
+        mTaskView2 = new ResizingTaskView(this, makeContactsIntent());
         View splitView = new SplitLayout(this, mTaskView1, mTaskView2);
 
         setContentView(splitView);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mOrganizer.unregisterOrganizer();
     }
 
     private void addFlags(Intent intent) {
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_ANIMATION);
     }
 
-    Intent makeSettingsIntent() {
+    private Intent makeSettingsIntent() {
         Intent intent = new Intent();
         intent.setAction(android.provider.Settings.ACTION_SETTINGS);
         addFlags(intent);
         return intent;
     }
 
-    Intent makeContactsIntent() {
+    private Intent makeContactsIntent() {
         Intent intent = new Intent();
         intent.setAction(Intent.ACTION_MAIN);
         intent.addCategory(Intent.CATEGORY_APP_CONTACTS);
@@ -192,14 +191,14 @@ public class TaskOrganizerMultiWindowTest extends Activity {
         return intent;
     }
 
-    Bundle makeLaunchOptions(int width, int height) {
+    private Bundle makeLaunchOptions(int width, int height) {
         ActivityOptions o = ActivityOptions.makeBasic();
         o.setLaunchWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
         o.setLaunchBounds(new Rect(0, 0, width, height));
         return o.toBundle();
     }
 
-    void launchOrganizedActivity(Intent i, int width, int height) {
+    private void launchOrganizedActivity(Intent i, int width, int height) {
         startActivity(i, makeLaunchOptions(width, height));
     }
 }

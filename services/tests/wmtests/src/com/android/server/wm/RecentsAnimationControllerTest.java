@@ -344,9 +344,17 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
 
         mController.initialize(ACTIVITY_TYPE_HOME, new SparseBooleanArray(), homeActivity);
 
+        assertEquals(homeActivity, mDefaultDisplay.mFixedRotationLaunchingApp);
+
         // Check that the home app is in portrait
         assertEquals(Configuration.ORIENTATION_PORTRAIT,
                 homeActivity.getConfiguration().orientation);
+
+        // Home activity won't become top (return to landActivity), so its fixed rotation and the
+        // top rotated record should be cleared.
+        mController.cleanupAnimation(REORDER_MOVE_TO_ORIGINAL_POSITION);
+        assertFalse(homeActivity.hasFixedRotationTransform());
+        assertNull(mDefaultDisplay.mFixedRotationLaunchingApp);
     }
 
     @Test
@@ -401,12 +409,16 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         assertEquals(Configuration.ORIENTATION_PORTRAIT,
                 wallpapers.get(0).getConfiguration().orientation);
 
-        // Wallpaper's transform state is controlled by home, so the invocation should be no-op.
-        wallpaperWindowToken.finishFixedRotationTransform();
-        assertTrue(wallpaperWindowToken.hasFixedRotationTransform());
+        mController.cleanupAnimation(REORDER_MOVE_TO_TOP);
+        // The transform state should keep because we expect to listen the signal from the
+        // transition executed by moving the task to front.
+        assertTrue(homeActivity.hasFixedRotationTransform());
+        assertEquals(homeActivity, mDefaultDisplay.mFixedRotationLaunchingApp);
 
+        mDefaultDisplay.mFixedRotationTransitionListener.onAppTransitionFinishedLocked(
+                homeActivity.token);
         // Wallpaper's transform state should be cleared with home.
-        homeActivity.finishFixedRotationTransform();
+        assertFalse(homeActivity.hasFixedRotationTransform());
         assertFalse(wallpaperWindowToken.hasFixedRotationTransform());
     }
 

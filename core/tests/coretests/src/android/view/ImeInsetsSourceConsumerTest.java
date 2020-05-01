@@ -78,7 +78,8 @@ public class ImeInsetsSourceConsumerTest {
             } catch (BadTokenException e) {
                 // activity isn't running, we will ignore BadTokenException.
             }
-            mController = Mockito.spy(new InsetsController(viewRootImpl));
+            mController = Mockito.spy(new InsetsController(
+                    new ViewRootInsetsControllerHost(viewRootImpl)));
             final Rect rect = new Rect(5, 5, 5, 5);
             mController.calculateInsets(
                     false,

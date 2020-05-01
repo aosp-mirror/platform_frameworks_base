@@ -406,6 +406,40 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     /**
+     * Create a new SurfaceControl for this WindowContainer and migrate all properties to the new
+     * SurfaceControl. Properties include:
+     * 1. Children
+     * 2. Position
+     * 3. Z order
+     *
+     * Remove the old SurfaceControl since it's no longer needed.
+     *
+     * This is used to revoke control of the SurfaceControl from a client process that was
+     * previously organizing this WindowContainer.
+     */
+    void migrateToNewSurfaceControl() {
+        SurfaceControl.Transaction t = getPendingTransaction();
+        t.remove(mSurfaceControl);
+        // Clear the last position so the new SurfaceControl will get correct position
+        mLastSurfacePosition.set(0, 0);
+
+        createSurfaceControl(false /* force */);
+        if (mLastRelativeToLayer != null) {
+            t.setRelativeLayer(mSurfaceControl, mLastRelativeToLayer, mLastLayer);
+        } else {
+            t.setLayer(mSurfaceControl, mLastLayer);
+        }
+
+        for (int i = 0; i < mChildren.size(); i++)  {
+            SurfaceControl sc = mChildren.get(i).getSurfaceControl();
+            if (sc != null) {
+                t.reparent(sc, mSurfaceControl);
+            }
+        }
+        scheduleAnimation();
+    }
+
+    /**
      * Called when the surface is shown for the first time.
      */
     void onSurfaceShown(Transaction t) {
@@ -2521,16 +2555,6 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
         static RemoteToken fromBinder(IBinder binder) {
             return (RemoteToken) binder;
-        }
-
-        @Override
-        public SurfaceControl getLeash() {
-            final WindowContainer wc = getContainer();
-            if (wc == null) return null;
-            // We need to copy the SurfaceControl instead of returning the original
-            // because the Parcel FLAGS PARCELABLE_WRITE_RETURN_VALUE cause SurfaceControls
-            // to release themselves.
-            return new SurfaceControl(wc.getSurfaceControl());
         }
 
         WindowContainerToken toWindowContainerToken() {

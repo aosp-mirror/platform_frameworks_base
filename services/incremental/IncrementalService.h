@@ -187,6 +187,7 @@ private:
         bool destroy();
 
         bool setTargetStatus(int status);
+        void setTargetStatusLocked(int status);
         bool waitForStatus(int status, Clock::duration duration);
 
         bool fsmStep();

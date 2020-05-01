@@ -563,6 +563,48 @@ shared_ptr<LogEvent> CreateNoValuesLogEvent(int atomId, int64_t eventTimeNs) {
     return logEvent;
 }
 
+shared_ptr<LogEvent> makeUidLogEvent(int atomId, int64_t eventTimeNs, int uid, int data1,
+                                     int data2) {
+    AStatsEvent* statsEvent = AStatsEvent_obtain();
+    AStatsEvent_setAtomId(statsEvent, atomId);
+    AStatsEvent_overwriteTimestamp(statsEvent, eventTimeNs);
+
+    AStatsEvent_writeInt32(statsEvent, uid);
+    AStatsEvent_addBoolAnnotation(statsEvent, ANNOTATION_ID_IS_UID, true);
+    AStatsEvent_writeInt32(statsEvent, data1);
+    AStatsEvent_writeInt32(statsEvent, data2);
+
+    shared_ptr<LogEvent> logEvent = std::make_shared<LogEvent>(/*uid=*/0, /*pid=*/0);
+    parseStatsEventToLogEvent(statsEvent, logEvent.get());
+    return logEvent;
+}
+
+shared_ptr<LogEvent> makeAttributionLogEvent(int atomId, int64_t eventTimeNs,
+                                             const vector<int>& uids, const vector<string>& tags,
+                                             int data1, int data2) {
+    AStatsEvent* statsEvent = AStatsEvent_obtain();
+    AStatsEvent_setAtomId(statsEvent, atomId);
+    AStatsEvent_overwriteTimestamp(statsEvent, eventTimeNs);
+
+    writeAttribution(statsEvent, uids, tags);
+    AStatsEvent_writeInt32(statsEvent, data1);
+    AStatsEvent_writeInt32(statsEvent, data2);
+
+    shared_ptr<LogEvent> logEvent = std::make_shared<LogEvent>(/*uid=*/0, /*pid=*/0);
+    parseStatsEventToLogEvent(statsEvent, logEvent.get());
+    return logEvent;
+}
+
+sp<MockUidMap> makeMockUidMapForOneHost(int hostUid, const vector<int>& isolatedUids) {
+    sp<MockUidMap> uidMap = new NaggyMock<MockUidMap>();
+    EXPECT_CALL(*uidMap, getHostUidOrSelf(_)).WillRepeatedly(ReturnArg<0>());
+    for (const int isolatedUid : isolatedUids) {
+        EXPECT_CALL(*uidMap, getHostUidOrSelf(isolatedUid)).WillRepeatedly(Return(hostUid));
+    }
+
+    return uidMap;
+}
+
 std::unique_ptr<LogEvent> CreateScreenStateChangedEvent(
         uint64_t timestampNs, const android::view::DisplayStateEnum state) {
     AStatsEvent* statsEvent = AStatsEvent_obtain();
@@ -878,8 +920,7 @@ std::unique_ptr<LogEvent> CreateOverlayStateChangedEvent(int64_t timestampNs, co
 sp<StatsLogProcessor> CreateStatsLogProcessor(const int64_t timeBaseNs, const int64_t currentTimeNs,
                                               const StatsdConfig& config, const ConfigKey& key,
                                               const shared_ptr<IPullAtomCallback>& puller,
-                                              const int32_t atomTag) {
-    sp<UidMap> uidMap = new UidMap();
+                                              const int32_t atomTag, const sp<UidMap> uidMap) {
     sp<StatsPullerManager> pullerManager = new StatsPullerManager();
     if (puller != nullptr) {
         pullerManager->RegisterPullAtomCallback(/*uid=*/0, atomTag, NS_PER_SEC, NS_PER_SEC * 10, {},

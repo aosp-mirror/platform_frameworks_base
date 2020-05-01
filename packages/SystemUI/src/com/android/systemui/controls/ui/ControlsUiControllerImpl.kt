@@ -29,14 +29,12 @@ import android.content.res.Configuration
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.LayerDrawable
 import android.os.Process
-import android.os.Vibrator
 import android.service.controls.Control
 import android.util.Log
 import android.util.TypedValue
 import android.view.ContextThemeWrapper
 import android.view.LayoutInflater
 import android.view.View
-import android.view.View.MeasureSpec
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.animation.AccelerateInterpolator
@@ -59,6 +57,9 @@ import com.android.systemui.controls.management.ControlsListingController
 import com.android.systemui.controls.management.ControlsProviderSelectorActivity
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.globalactions.GlobalActionsPopupMenu
+import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.concurrency.DelayableExecutor
 import dagger.Lazy
 import java.text.Collator
@@ -75,7 +76,10 @@ class ControlsUiControllerImpl @Inject constructor (
     @Main val uiExecutor: DelayableExecutor,
     @Background val bgExecutor: DelayableExecutor,
     val controlsListingController: Lazy<ControlsListingController>,
-    @Main val sharedPreferences: SharedPreferences
+    @Main val sharedPreferences: SharedPreferences,
+    val controlActionCoordinator: ControlActionCoordinator,
+    private val activityStarter: ActivityStarter,
+    private val keyguardStateController: KeyguardStateController
 ) : ControlsUiController {
 
     companion object {
@@ -106,11 +110,6 @@ class ControlsUiControllerImpl @Inject constructor (
         get() = controlsController.get().available
 
     private lateinit var listingCallback: ControlsListingController.ControlsListingCallback
-
-    init {
-        val vibratorService = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-        ControlActionCoordinator.initialize(vibratorService, bgExecutor)
-    }
 
     private fun createCallback(
         onResult: (List<SelectionItem>) -> Unit
@@ -267,8 +266,16 @@ class ControlsUiControllerImpl @Inject constructor (
     private fun startActivity(context: Context, intent: Intent) {
         // Force animations when transitioning from a dialog to an activity
         intent.putExtra(ControlsUiController.EXTRA_ANIMATE, true)
-        context.startActivity(intent)
         dismissGlobalActions.run()
+
+        if (!keyguardStateController.isUnlocked()) {
+            activityStarter.dismissKeyguardThenExecute({
+                context.startActivity(intent)
+                true
+            }, null, true)
+        } else {
+            context.startActivity(intent)
+        }
     }
 
     private fun showControlsView(items: List<SelectionItem>) {
@@ -278,14 +285,6 @@ class ControlsUiControllerImpl @Inject constructor (
         createListView()
         createDropDown(items)
         createMenu()
-    }
-
-    private fun createPopup(): ListPopupWindow {
-        return ListPopupWindow(
-            ContextThemeWrapper(context, R.style.Control_ListPopupWindow)).apply {
-            setWindowLayoutType(WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY)
-            setModal(true)
-        }
     }
 
     private fun createMenu() {
@@ -299,7 +298,7 @@ class ControlsUiControllerImpl @Inject constructor (
         val anchor = parent.requireViewById<ImageView>(R.id.controls_more)
         anchor.setOnClickListener(object : View.OnClickListener {
             override fun onClick(v: View) {
-                popup = createPopup().apply {
+                popup = GlobalActionsPopupMenu(context, false /* isDropDownMode */).apply {
                     setAnchorView(anchor)
                     setAdapter(adapter)
                     setOnItemClickListener(object : AdapterView.OnItemClickListener {
@@ -322,20 +321,6 @@ class ControlsUiControllerImpl @Inject constructor (
                             dismiss()
                         }
                     })
-                    // need to call show() first in order to construct the listView
-                    show()
-                    var width = 0
-                    getListView()?.apply {
-                        // width should be between [.5, .9] of screen
-                        val parentWidth = this@ControlsUiControllerImpl.parent.getWidth()
-                        val widthSpec = MeasureSpec.makeMeasureSpec(
-                            (parentWidth * 0.9).toInt(), MeasureSpec.AT_MOST)
-                        val child = adapter.getView(0, null, this)
-                        child.measure(widthSpec, MeasureSpec.UNSPECIFIED)
-                        width = Math.max(child.getMeasuredWidth(), (parentWidth * 0.5).toInt())
-                    }
-                    setWidth(width)
-                    setHorizontalOffset(-width + anchor.getWidth())
                     show()
                 }
             }
@@ -401,9 +386,6 @@ class ControlsUiControllerImpl @Inject constructor (
             (getBackground() as LayerDrawable).getDrawable(1)
                 .setTint(context.resources.getColor(R.color.control_spinner_dropdown, null))
         }
-        parent.requireViewById<ImageView>(R.id.app_icon).apply {
-            setImageDrawable(selectionItem.icon)
-        }
 
         if (itemsWithStructure.size == 1) {
             spinner.setBackground(null)
@@ -413,9 +395,14 @@ class ControlsUiControllerImpl @Inject constructor (
         val anchor = parent.requireViewById<ViewGroup>(R.id.controls_header)
         anchor.setOnClickListener(object : View.OnClickListener {
             override fun onClick(v: View) {
-                popup = createPopup().apply {
+                popup = GlobalActionsPopupMenu(context, true /* isDropDownMode */).apply {
                     setAnchorView(anchor)
                     setAdapter(adapter)
+                    val theme = ContextThemeWrapper(context, R.style.Control_ListPopupWindow)
+                        .getTheme()
+                    setBackgroundDrawable(
+                        context.resources.getDrawable(R.drawable.rounded_bg_full, theme))
+
                     setOnItemClickListener(object : AdapterView.OnItemClickListener {
                         override fun onItemClick(
                             parent: AdapterView<*>,
@@ -428,14 +415,6 @@ class ControlsUiControllerImpl @Inject constructor (
                             dismiss()
                         }
                     })
-                    // need to call show() first in order to construct the listView
-                    show()
-                    getListView()?.apply {
-                        setDividerHeight(
-                            context.resources.getDimensionPixelSize(R.dimen.control_list_divider))
-                        setDivider(
-                            context.resources.getDrawable(R.drawable.controls_list_divider))
-                    }
                     show()
                 }
             }
@@ -463,7 +442,8 @@ class ControlsUiControllerImpl @Inject constructor (
                     baseLayout,
                     controlsController.get(),
                     uiExecutor,
-                    bgExecutor
+                    bgExecutor,
+                    controlActionCoordinator
                 )
                 cvh.bindData(it)
                 controlViewsById.put(key, cvh)
@@ -545,9 +525,7 @@ class ControlsUiControllerImpl @Inject constructor (
         controlViewsById.forEach {
             it.value.dismiss()
         }
-
-        ControlActionCoordinator.closeDialog()
-
+        controlActionCoordinator.closeDialogs()
         controlsController.get().unsubscribe()
 
         parent.removeAllViews()

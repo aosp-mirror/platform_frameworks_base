@@ -210,7 +210,7 @@ public final class SystemUiDeviceConfigFlags {
      * Allow touch passthrough above assist area during a session.
      */
     public static final String ASSIST_TAP_PASSTHROUGH = "assist_tap_passthrough";
-  
+
     /**
      * (bool) Whether to show handles when taught.
      */
@@ -392,6 +392,21 @@ public final class SystemUiDeviceConfigFlags {
      * (boolean) Whether to enable user-drag resizing for PIP.
      */
     public static final String PIP_USER_RESIZE = "pip_user_resize";
+
+    /**
+     * (float) Bottom height in DP for Back Gesture.
+     */
+    public static final String BACK_GESTURE_BOTTOM_HEIGHT = "back_gesture_bottom_height";
+
+    /**
+     * (float) Edge width in DP where touch down is allowed for Back Gesture.
+     */
+    public static final String BACK_GESTURE_EDGE_WIDTH = "back_gesture_edge_width";
+
+    /**
+     * (float) Slop multiplier for Back Gesture.
+     */
+    public static final String BACK_GESTURE_SLOP_MULTIPLIER = "back_gesture_slop_multiplier";
 
     private SystemUiDeviceConfigFlags() {
     }

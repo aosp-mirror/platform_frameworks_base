@@ -180,6 +180,7 @@ public abstract class PackageManager {
             GET_DISABLED_UNTIL_USED_COMPONENTS,
             GET_UNINSTALLED_PACKAGES,
             MATCH_HIDDEN_UNTIL_INSTALLED_COMPONENTS,
+            MATCH_APEX,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ApplicationInfoFlags {}
@@ -5951,9 +5952,9 @@ public abstract class PackageManager {
     /**
      * Return the label to use for this application.
      *
-     * @return Returns the label associated with this application, or null if
-     * it could not be found for any reason.
-     * @param info The application to get the label of.
+     * @return Returns a {@link CharSequence} containing the label associated with
+     * this application, or its name the  item does not have a label.
+     * @param info The {@link ApplicationInfo} of the application to get the label of.
      */
     @NonNull
     public abstract CharSequence getApplicationLabel(@NonNull ApplicationInfo info);

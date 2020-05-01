@@ -29,6 +29,7 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Rect;
+import android.graphics.Region;
 import android.graphics.Region.Op;
 import android.hardware.display.DisplayManager;
 import android.os.Bundle;
@@ -338,12 +339,12 @@ public class DividerView extends FrameLayout implements OnTouchListener,
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
         if (mFirstLayout) {
             // Wait for first layout so that the ViewRootImpl surface has been created.
             initializeSurfaceState();
             mFirstLayout = false;
         }
-        super.onLayout(changed, left, top, right, bottom);
         int minimizeLeft = 0;
         int minimizeTop = 0;
         if (mDockSide == WindowManager.DOCKED_TOP) {
@@ -783,6 +784,20 @@ public class DividerView extends FrameLayout implements OnTouchListener,
         setResizeDimLayer(t, false /* secondary */, 0.f /* alpha */);
         t.apply();
         mTiles.releaseTransaction(t);
+
+        // Get the actually-visible bar dimensions (relative to full window). This is a thin
+        // bar going through the center.
+        final Rect dividerBar = isHorizontalDivision()
+                ? new Rect(0, mDividerInsets, mSplitLayout.mDisplayLayout.width(),
+                mDividerInsets + mDividerSize)
+                : new Rect(mDividerInsets, 0, mDividerInsets + mDividerSize,
+                mSplitLayout.mDisplayLayout.height());
+        final Region touchRegion = new Region(dividerBar);
+        // Add in the "draggable" portion. While not visible, this is an expanded area that the
+        // user can interact with.
+        touchRegion.union(new Rect(mHandle.getLeft(), mHandle.getTop(),
+                mHandle.getRight(), mHandle.getBottom()));
+        mWindowManager.setTouchRegion(touchRegion);
     }
 
     public void setMinimizedDockStack(boolean minimized, boolean isHomeStackResizable) {

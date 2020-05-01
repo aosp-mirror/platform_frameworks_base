@@ -140,8 +140,12 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
 
     void setOrganizer(IDisplayAreaOrganizer organizer) {
         if (mOrganizer == organizer) return;
-        sendDisplayAreaVanished();
+        IDisplayAreaOrganizer lastOrganizer = mOrganizer;
+        // Update the new display area organizer before calling sendDisplayAreaVanished since it
+        // could result in a new SurfaceControl getting created that would notify the old organizer
+        // about it.
         mOrganizer = organizer;
+        sendDisplayAreaVanished(lastOrganizer);
         sendDisplayAreaAppeared();
     }
 
@@ -150,9 +154,10 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
         mOrganizerController.onDisplayAreaAppeared(mOrganizer, this);
     }
 
-    void sendDisplayAreaVanished() {
-        if (mOrganizer == null) return;
-        mOrganizerController.onDisplayAreaVanished(mOrganizer, this);
+    void sendDisplayAreaVanished(IDisplayAreaOrganizer organizer) {
+        if (organizer == null) return;
+        migrateToNewSurfaceControl();
+        mOrganizerController.onDisplayAreaVanished(organizer, this);
     }
 
     @Override
@@ -171,7 +176,7 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
 
     DisplayAreaInfo getDisplayAreaInfo() {
         DisplayAreaInfo info = new DisplayAreaInfo(mRemoteToken.toWindowContainerToken(),
-                getDisplayContent().getDisplayId());
+                getDisplayContent().getDisplayId(), mFeatureId);
         info.configuration.setTo(getConfiguration());
         return info;
     }

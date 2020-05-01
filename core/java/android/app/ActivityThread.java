@@ -17,6 +17,8 @@
 package android.app;
 
 import static android.app.ActivityManager.PROCESS_STATE_UNKNOWN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.app.servertransaction.ActivityLifecycleItem.ON_CREATE;
 import static android.app.servertransaction.ActivityLifecycleItem.ON_DESTROY;
 import static android.app.servertransaction.ActivityLifecycleItem.ON_PAUSE;
@@ -406,6 +408,9 @@ public final class ActivityThread extends ClientTransactionHandler {
     // Registry of remote cancellation transports pending a reply with reply handles.
     @GuardedBy("this")
     private @Nullable Map<SafeCancellationTransport, CancellationSignal> mRemoteCancellations;
+
+    private final Map<IBinder, Integer> mLastReportedWindowingMode = Collections.synchronizedMap(
+            new ArrayMap<>());
 
     private static final class ProviderKey {
         final String authority;
@@ -3087,6 +3092,11 @@ public final class ActivityThread extends ClientTransactionHandler {
         return mActivities.get(token);
     }
 
+    @VisibleForTesting(visibility = PACKAGE)
+    public Configuration getConfiguration() {
+        return mConfiguration;
+    }
+
     @Override
     public void updatePendingConfiguration(Configuration config) {
         synchronized (mResourcesManager) {
@@ -3324,6 +3334,8 @@ public final class ActivityThread extends ClientTransactionHandler {
                         " did not call through to super.onCreate()");
                 }
                 r.activity = activity;
+                mLastReportedWindowingMode.put(activity.getActivityToken(),
+                        config.windowConfiguration.getWindowingMode());
             }
             r.setState(ON_CREATE);
 
@@ -3743,32 +3755,6 @@ public final class ActivityThread extends ClientTransactionHandler {
         } finally {
             IoUtils.closeQuietly(fd);
             Binder.getTransactionTracker().clearTraces();
-        }
-    }
-
-    @Override
-    public void handleMultiWindowModeChanged(IBinder token, boolean isInMultiWindowMode,
-            Configuration overrideConfig) {
-        final ActivityClientRecord r = mActivities.get(token);
-        if (r != null) {
-            final Configuration newConfig = new Configuration(mConfiguration);
-            if (overrideConfig != null) {
-                newConfig.updateFrom(overrideConfig);
-            }
-            r.activity.dispatchMultiWindowModeChanged(isInMultiWindowMode, newConfig);
-        }
-    }
-
-    @Override
-    public void handlePictureInPictureModeChanged(IBinder token, boolean isInPipMode,
-            Configuration overrideConfig) {
-        final ActivityClientRecord r = mActivities.get(token);
-        if (r != null) {
-            final Configuration newConfig = new Configuration(mConfiguration);
-            if (overrideConfig != null) {
-                newConfig.updateFrom(overrideConfig);
-            }
-            r.activity.dispatchPictureInPictureModeChanged(isInPipMode, newConfig);
         }
     }
 
@@ -5269,8 +5255,15 @@ public final class ActivityThread extends ClientTransactionHandler {
             throw e.rethrowFromSystemServer();
         }
 
+        // Save the current windowing mode to be restored and compared to the new configuration's
+        // windowing mode (needed because we update the last reported windowing mode when launching
+        // an activity and we can't tell inside performLaunchActivity whether we are relaunching)
+        final int oldWindowingMode = mLastReportedWindowingMode.getOrDefault(
+                r.activity.getActivityToken(), WINDOWING_MODE_UNDEFINED);
         handleRelaunchActivityInner(r, configChanges, tmp.pendingResults, tmp.pendingIntents,
                 pendingActions, tmp.startsNotResumed, tmp.overrideConfig, "handleRelaunchActivity");
+        mLastReportedWindowingMode.put(r.activity.getActivityToken(), oldWindowingMode);
+        handleWindowingModeChangeIfNeeded(r.activity, r.activity.mCurrentConfig);
 
         if (pendingActions != null) {
             // Only report a successful relaunch to WindowManager.
@@ -5553,6 +5546,10 @@ public final class ActivityThread extends ClientTransactionHandler {
             throw new IllegalArgumentException("Activity token not set. Is the activity attached?");
         }
 
+        // multi-window / pip mode changes, if any, should be sent before the configuration change
+        // callback, see also PinnedStackTests#testConfigurationChangeOrderDuringTransition
+        handleWindowingModeChangeIfNeeded(activity, newConfig);
+
         boolean shouldChangeConfig = false;
         if (activity.mCurrentConfig == null) {
             shouldChangeConfig = true;
@@ -5744,6 +5741,35 @@ public final class ActivityThread extends ClientTransactionHandler {
                 }
             }
         }
+    }
+
+    /**
+     * Sends windowing mode change callbacks to {@link Activity} if applicable.
+     *
+     * See also {@link Activity#onMultiWindowModeChanged(boolean, Configuration)} and
+     * {@link Activity#onPictureInPictureModeChanged(boolean, Configuration)}
+     */
+    private void handleWindowingModeChangeIfNeeded(Activity activity,
+            Configuration newConfiguration) {
+        final int newWindowingMode = newConfiguration.windowConfiguration.getWindowingMode();
+        final IBinder token = activity.getActivityToken();
+        final int oldWindowingMode = mLastReportedWindowingMode.getOrDefault(token,
+                WINDOWING_MODE_UNDEFINED);
+        if (oldWindowingMode == newWindowingMode) return;
+        // PiP callback is sent before the MW one.
+        if (newWindowingMode == WINDOWING_MODE_PINNED) {
+            activity.dispatchPictureInPictureModeChanged(true, newConfiguration);
+        } else if (oldWindowingMode == WINDOWING_MODE_PINNED) {
+            activity.dispatchPictureInPictureModeChanged(false, newConfiguration);
+        }
+        final boolean wasInMultiWindowMode = WindowConfiguration.inMultiWindowMode(
+                oldWindowingMode);
+        final boolean nowInMultiWindowMode = WindowConfiguration.inMultiWindowMode(
+                newWindowingMode);
+        if (wasInMultiWindowMode != nowInMultiWindowMode) {
+            activity.dispatchMultiWindowModeChanged(nowInMultiWindowMode, newConfiguration);
+        }
+        mLastReportedWindowingMode.put(token, newWindowingMode);
     }
 
     /**

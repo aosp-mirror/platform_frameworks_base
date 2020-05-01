@@ -398,6 +398,7 @@ public class ServiceState implements Parcelable {
      * @hide
      */
     @NonNull
+    @UnsupportedAppUsage
     public static ServiceState newFromBundle(@NonNull Bundle m) {
         ServiceState ret;
         ret = new ServiceState();
@@ -1315,6 +1316,7 @@ public class ServiceState implements Parcelable {
      * @hide
      *
      */
+    @UnsupportedAppUsage
     public void fillInNotifierBundle(@NonNull Bundle m) {
         m.putParcelable(EXTRA_SERVICE_STATE, this);
         // serviceState already consists of below entries.

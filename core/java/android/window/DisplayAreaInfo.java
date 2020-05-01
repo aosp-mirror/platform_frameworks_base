@@ -43,15 +43,19 @@ public final class DisplayAreaInfo implements Parcelable {
      */
     public final int displayId;
 
-    public DisplayAreaInfo(@NonNull WindowContainerToken token, int displayId) {
+    public final int featureId;
+
+    public DisplayAreaInfo(@NonNull WindowContainerToken token, int displayId, int featureId) {
         this.token = token;
         this.displayId = displayId;
+        this.featureId = featureId;
     }
 
     private DisplayAreaInfo(Parcel in) {
         token = WindowContainerToken.CREATOR.createFromParcel(in);
         configuration.readFromParcel(in);
         displayId = in.readInt();
+        featureId = in.readInt();
     }
 
     @Override
@@ -59,6 +63,7 @@ public final class DisplayAreaInfo implements Parcelable {
         token.writeToParcel(dest, flags);
         configuration.writeToParcel(dest, flags);
         dest.writeInt(displayId);
+        dest.writeInt(featureId);
     }
 
     @NonNull

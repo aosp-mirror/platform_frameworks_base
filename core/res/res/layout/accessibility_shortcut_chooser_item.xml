@@ -49,12 +49,13 @@
         android:textColor="?attr/textColorPrimary"
         android:fontFamily="sans-serif-medium"/>
 
-    <Switch
-        android:id="@+id/accessibility_shortcut_target_switch_item"
+    <TextView
+        android:id="@+id/accessibility_shortcut_target_status"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@null"
-        android:clickable="false"
-        android:focusable="false"/>
+        android:textSize="20sp"
+        android:textColor="?attr/colorAccent"
+        android:fontFamily="sans-serif-medium"/>
+
 </LinearLayout>
 

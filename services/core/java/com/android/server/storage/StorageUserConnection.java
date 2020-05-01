@@ -242,7 +242,13 @@ public final class StorageUserConnection {
             }
 
             if (oldConnection != null) {
-                mContext.unbindService(oldConnection);
+                try {
+                    mContext.unbindService(oldConnection);
+                } catch (Exception e) {
+                    // Handle IllegalArgumentException that may be thrown if the user is already
+                    // stopped when we try to unbind
+                    Slog.w(TAG, "Failed to unbind service", e);
+                }
             }
         }
 

@@ -472,7 +472,7 @@ public final class JobStatus {
         if (standbyBucket == RESTRICTED_INDEX) {
             addDynamicConstraints(DYNAMIC_RESTRICTED_CONSTRAINTS);
         } else {
-            mReadyDynamicSatisfied = true;
+            mReadyDynamicSatisfied = false;
         }
 
         mLastSuccessfulRunTime = lastSuccessfulRunTime;
@@ -1132,8 +1132,8 @@ public final class JobStatus {
         }
         satisfiedConstraints = (satisfiedConstraints&~constraint) | (state ? constraint : 0);
         mSatisfiedConstraintsOfInterest = satisfiedConstraints & CONSTRAINTS_OF_INTEREST;
-        mReadyDynamicSatisfied =
-                mDynamicConstraints == (satisfiedConstraints & mDynamicConstraints);
+        mReadyDynamicSatisfied = mDynamicConstraints != 0
+                && mDynamicConstraints == (satisfiedConstraints & mDynamicConstraints);
         if (STATS_LOG_ENABLED && (STATSD_CONSTRAINTS_TO_LOG & constraint) != 0) {
             FrameworkStatsLog.write_non_chained(
                     FrameworkStatsLog.SCHEDULED_JOB_CONSTRAINT_CHANGED,
@@ -1184,8 +1184,8 @@ public final class JobStatus {
         }
 
         mDynamicConstraints |= constraints;
-        mReadyDynamicSatisfied =
-                mDynamicConstraints == (satisfiedConstraints & mDynamicConstraints);
+        mReadyDynamicSatisfied = mDynamicConstraints != 0
+                && mDynamicConstraints == (satisfiedConstraints & mDynamicConstraints);
     }
 
     /**
@@ -1196,8 +1196,8 @@ public final class JobStatus {
      */
     private void removeDynamicConstraints(int constraints) {
         mDynamicConstraints &= ~constraints;
-        mReadyDynamicSatisfied =
-                mDynamicConstraints == (satisfiedConstraints & mDynamicConstraints);
+        mReadyDynamicSatisfied = mDynamicConstraints != 0
+                && mDynamicConstraints == (satisfiedConstraints & mDynamicConstraints);
     }
 
     public long getLastSuccessfulRunTime() {
@@ -1241,8 +1241,8 @@ public final class JobStatus {
                 break;
             default:
                 satisfied |= constraint;
-                mReadyDynamicSatisfied =
-                        mDynamicConstraints == (satisfied & mDynamicConstraints);
+                mReadyDynamicSatisfied = mDynamicConstraints != 0
+                        && mDynamicConstraints == (satisfied & mDynamicConstraints);
                 break;
         }
 
@@ -1262,8 +1262,8 @@ public final class JobStatus {
                 mReadyWithinQuota = oldValue;
                 break;
             default:
-                mReadyDynamicSatisfied =
-                        mDynamicConstraints == (satisfiedConstraints & mDynamicConstraints);
+                mReadyDynamicSatisfied = mDynamicConstraints != 0
+                        && mDynamicConstraints == (satisfiedConstraints & mDynamicConstraints);
                 break;
         }
         return toReturn;

@@ -975,6 +975,15 @@ public class Environment {
     }
 
     /**
+     * Returns the path for android-specific OBB data on the SD card.
+     * @hide
+     */
+    public static File[] buildExternalStorageAndroidObbDirs() {
+        throwIfUserRequired();
+        return sCurrentUser.buildExternalStorageAndroidObbDirs();
+    }
+
+    /**
      * Generates the raw path to an application's data
      * @hide
      */

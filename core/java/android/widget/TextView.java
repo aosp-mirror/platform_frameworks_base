@@ -12626,7 +12626,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return getTextClassifier() == TextClassifier.NO_OP;
     }
 
-
     /**
      * Starts an ActionMode for the specified TextLinkSpan.
      *
@@ -12670,7 +12669,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         .setDefaultLocales(getTextLocales())
                         .build();
                 final Supplier<TextClassification> supplier = () ->
-                        getTextClassifier().classifyText(request);
+                        getTextClassificationSession().classifyText(request);
                 final Consumer<TextClassification> consumer = classification -> {
                     if (classification != null) {
                         if (!classification.getActions().isEmpty()) {

@@ -437,7 +437,6 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
                 guts.resetFalsingCheck();
                 mOnSettingsClickListener.onSettingsClick(sbn.getKey());
                 startAppNotificationSettingsActivity(packageName, appUid, channel, row);
-                notificationInfoView.closeControls(v, false);
             };
         }
         ConversationIconFactory iconFactoryLoader = new ConversationIconFactory(mContext,

@@ -34,8 +34,10 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.ISystemGestureExclusionListener;
 import android.view.InputChannel;
 import android.view.InputDevice;
@@ -50,6 +52,7 @@ import android.view.ViewConfiguration;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 
+import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.internal.policy.GestureNavigationSettingsObserver;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
@@ -144,9 +147,9 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
     // The right side edge width where touch down is allowed
     private int mEdgeWidthRight;
     // The bottom gesture area height
-    private int mBottomGestureHeight;
+    private float mBottomGestureHeight;
     // The slop to distinguish between horizontal and vertical motion
-    private final float mTouchSlop;
+    private float mTouchSlop;
     // Duration after which we consider the event as longpress.
     private final int mLongPressTimeout;
     private int mStartingQuickstepRotation = -1;
@@ -211,10 +214,6 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
         mPluginManager = pluginManager;
         Dependency.get(ProtoTracer.class).add(this);
 
-        // Reduce the default touch slop to ensure that we can intercept the gesture
-        // before the app starts to react to it.
-        // TODO(b/130352502) Tune this value and extract into a constant
-        mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop() * 0.75f;
         mLongPressTimeout = Math.min(MAX_LONG_PRESS_TIMEOUT,
                 ViewConfiguration.getLongPressTimeout());
 
@@ -233,8 +232,20 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
         mIsBackGestureAllowed =
                 !mGestureNavigationSettingsObserver.areNavigationButtonForcedVisible();
 
-        mBottomGestureHeight = res.getDimensionPixelSize(
+        final float defaultGestureHeight = res.getDimension(
                 com.android.internal.R.dimen.navigation_bar_gesture_height);
+        final float gestureHeight = DeviceConfig.getFloat(DeviceConfig.NAMESPACE_SYSTEMUI,
+                SystemUiDeviceConfigFlags.BACK_GESTURE_BOTTOM_HEIGHT,
+                defaultGestureHeight);
+        mBottomGestureHeight = TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP, gestureHeight, res.getDisplayMetrics());
+
+        // Reduce the default touch slop to ensure that we can intercept the gesture
+        // before the app starts to react to it.
+        // TODO(b/130352502) Tune this value and extract into a constant
+        final float backGestureSlop = DeviceConfig.getFloat(DeviceConfig.NAMESPACE_SYSTEMUI,
+                        SystemUiDeviceConfigFlags.BACK_GESTURE_SLOP_MULTIPLIER, 0.75f);
+        mTouchSlop = ViewConfiguration.get(mContext).getScaledTouchSlop() * backGestureSlop;
     }
 
     @Override
@@ -556,7 +567,8 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
 
     private void updateDisabledForQuickstep() {
         int rotation = mContext.getResources().getConfiguration().windowConfiguration.getRotation();
-        mDisabledForQuickstep = mStartingQuickstepRotation != rotation;
+        mDisabledForQuickstep = mStartingQuickstepRotation > -1 &&
+                mStartingQuickstepRotation != rotation;
     }
 
     @Override

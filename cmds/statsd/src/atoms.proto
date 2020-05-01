@@ -426,7 +426,7 @@ message Atom {
         UserLifecycleEventOccurred user_lifecycle_event_occurred = 265 [(module) = "framework"];
         AccessibilityShortcutReported accessibility_shortcut_reported =
             266 [(module) = "framework"];
-        AccessibilityServiceReported accessibility_service_reported = 267 [(module) = "framework"];
+        AccessibilityServiceReported accessibility_service_reported = 267 [(module) = "settings"];
         SdkExtensionStatus sdk_extension_status = 354;
 
         // StatsdStats tracks platform atoms with ids upto 500.
@@ -454,9 +454,9 @@ message Atom {
         BluetoothActivityInfo bluetooth_activity_info = 10007 [(module) = "framework"];
         ProcessMemoryState process_memory_state = 10013 [(module) = "framework"];
         SystemElapsedRealtime system_elapsed_realtime = 10014 [(module) = "framework"];
-        SystemUptime system_uptime = 10015 [(module) = "framework", (module) = "statsdtest"];
+        SystemUptime system_uptime = 10015 [(module) = "framework"];
         CpuActiveTime cpu_active_time = 10016 [(module) = "framework", (module) = "statsdtest"];
-        CpuClusterTime cpu_cluster_time = 10017 [(module) = "framework", (module) = "statsdtest"];
+        CpuClusterTime cpu_cluster_time = 10017 [(module) = "framework"];
         DiskSpace disk_space = 10018 [deprecated=true, (module) = "statsdtest"];
         RemainingBatteryCapacity remaining_battery_capacity = 10019 [(module) = "framework"];
         FullBatteryCapacity full_battery_capacity = 10020 [(module) = "framework"];
@@ -9453,7 +9453,7 @@ message UserLifecycleEventOccurred {
  * Logs when accessibility shortcut clicked.
  *
  * Logged from:
- *   frameworks/base/services/accessibility/java/com/android/server/accessibility/AccessibilityManagerService.java
+ *   frameworks/base/services/accessibility/java/com/android/server/accessibility
  */
 message AccessibilityShortcutReported {
     // The accessibility feature(including installed a11y service, framework a11y feature,
@@ -9473,7 +9473,7 @@ message AccessibilityShortcutReported {
  * Logs when accessibility service status changed.
  *
  * Logged from:
- *   frameworks/base/services/accessibility/java/com/android/server/accessibility/AccessibilityManagerService.java
+ *   packages/apps/Settings/src/com/android/settings/accessibility
  */
 message AccessibilityServiceReported {
     // The accessibility service package name.

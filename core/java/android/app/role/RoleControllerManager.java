@@ -21,6 +21,7 @@ import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.app.ActivityThread;
 import android.content.ComponentName;
 import android.content.Context;
@@ -48,6 +49,7 @@ import java.util.function.Consumer;
  * @hide
  */
 @SystemService(Context.ROLE_CONTROLLER_SERVICE)
+@TestApi
 public class RoleControllerManager {
 
     private static final String LOG_TAG = RoleControllerManager.class.getSimpleName();
@@ -73,6 +75,8 @@ public class RoleControllerManager {
      * PackageManagerService lock in constructor.
      *
      * @see #createWithInitializedRemoteServiceComponentName(Handler, Context)
+     *
+     * @hide
      */
     public static void initializeRemoteServiceComponentName(@NonNull Context context) {
         sRemoteServiceComponentName = getRemoteServiceComponentName(context);
@@ -83,6 +87,8 @@ public class RoleControllerManager {
      * name so that we can avoid acquiring the PackageManagerService lock in constructor.
      *
      * @see #initializeRemoteServiceComponentName(Context)
+     *
+     * @hide
      */
     @NonNull
     public static RoleControllerManager createWithInitializedRemoteServiceComponentName(
@@ -113,6 +119,9 @@ public class RoleControllerManager {
         }
     }
 
+    /**
+     * @hide
+     */
     public RoleControllerManager(@NonNull Context context) {
         this(getRemoteServiceComponentName(context), context.getMainThreadHandler(), context);
     }
@@ -128,6 +137,8 @@ public class RoleControllerManager {
 
     /**
      * @see RoleControllerService#onGrantDefaultRoles()
+     *
+     * @hide
      */
     public void grantDefaultRoles(@NonNull @CallbackExecutor Executor executor,
             @NonNull Consumer<Boolean> callback) {
@@ -141,6 +152,8 @@ public class RoleControllerManager {
 
     /**
      * @see RoleControllerService#onAddRoleHolder(String, String, int)
+     *
+     * @hide
      */
     public void onAddRoleHolder(@NonNull String roleName, @NonNull String packageName,
             @RoleManager.ManageHoldersFlags int flags, @NonNull RemoteCallback callback) {
@@ -155,6 +168,8 @@ public class RoleControllerManager {
 
     /**
      * @see RoleControllerService#onRemoveRoleHolder(String, String, int)
+     *
+     * @hide
      */
     public void onRemoveRoleHolder(@NonNull String roleName, @NonNull String packageName,
             @RoleManager.ManageHoldersFlags int flags, @NonNull RemoteCallback callback) {
@@ -169,6 +184,8 @@ public class RoleControllerManager {
 
     /**
      * @see RoleControllerService#onClearRoleHolders(String, int)
+     *
+     * @hide
      */
     public void onClearRoleHolders(@NonNull String roleName,
             @RoleManager.ManageHoldersFlags int flags, @NonNull RemoteCallback callback) {
@@ -186,6 +203,8 @@ public class RoleControllerManager {
      *
      * @deprecated Use {@link #isApplicationVisibleForRole(String, String, Executor, Consumer)}
      *             instead.
+     *
+     * @hide
      */
     @RequiresPermission(Manifest.permission.MANAGE_ROLE_HOLDERS)
     public void isApplicationQualifiedForRole(@NonNull String roleName, @NonNull String packageName,
@@ -201,8 +220,11 @@ public class RoleControllerManager {
 
     /**
      * @see RoleControllerService#onIsApplicationVisibleForRole(String, String)
+     *
+     * @hide
      */
     @RequiresPermission(Manifest.permission.MANAGE_ROLE_HOLDERS)
+    @TestApi
     public void isApplicationVisibleForRole(@NonNull String roleName, @NonNull String packageName,
             @NonNull @CallbackExecutor Executor executor, @NonNull Consumer<Boolean> callback) {
         AndroidFuture<Bundle> operation = mRemoteService.postAsync(service -> {
@@ -216,8 +238,11 @@ public class RoleControllerManager {
 
     /**
      * @see RoleControllerService#onIsRoleVisible(String)
+     *
+     * @hide
      */
     @RequiresPermission(Manifest.permission.MANAGE_ROLE_HOLDERS)
+    @TestApi
     public void isRoleVisible(@NonNull String roleName,
             @NonNull @CallbackExecutor Executor executor, @NonNull Consumer<Boolean> callback) {
         AndroidFuture<Bundle> operation = mRemoteService.postAsync(service -> {

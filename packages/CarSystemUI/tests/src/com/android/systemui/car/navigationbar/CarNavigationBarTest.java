@@ -91,7 +91,7 @@ public class CarNavigationBarTest extends SysuiTestCase {
                 mCarNavigationBarController, mWindowManager, mDeviceProvisionedController,
                 new CommandQueue(mContext), mAutoHideController, mButtonSelectionStateListener,
                 mHandler, mBackgroundHandler, mBarService, () -> mKeyguardStateController,
-                mButtonSelectionStateController, mIconPolicy, mIconController);
+                mButtonSelectionStateController, () -> mIconPolicy,  () -> mIconController);
     }
 
     @Test

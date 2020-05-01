@@ -430,6 +430,8 @@
     <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"Gravació de pantalla"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Inicia"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Atura"</string>
+    <!-- no translation found for media_seamless_remote_device (177033467332920464) -->
+    <skip />
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Llisca cap amunt per canviar d\'aplicació"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Arrossega el dit cap a la dreta per canviar ràpidament d\'aplicació"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Activa o desactiva Aplicacions recents"</string>
@@ -712,6 +714,8 @@
     <string name="notification_channel_summary_priority" msgid="7415770044553264622">"Es mostra com a bombolla a la part superior de la secció de converses."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Configuració"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritat"</string>
+    <!-- no translation found for no_shortcut (7176375126961212514) -->
+    <skip />
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"No hi ha bombolles recents"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Les bombolles recents i les ignorades es mostraran aquí"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Aquestes notificacions no es poden modificar."</string>
@@ -1024,6 +1028,8 @@
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Selecciona els controls per accedir-hi des del menú d\'engegada"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Mantén premut i arrossega per reorganitzar els controls"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"S\'han suprimit tots els controls"</string>
+    <!-- no translation found for controls_favorite_toast_no_changes (7094494210840877931) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"No s\'ha pogut carregar la llista completa de controls."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Altres"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Afegeix als controls de dispositius"</string>
@@ -1032,6 +1038,7 @@
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"S\'han actualitzat els controls"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"El PIN conté lletres o símbols"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"Verifica <xliff:g id="DEVICE">%s</xliff:g>"</string>
+    <string name="controls_pin_wrong" msgid="6162694056042164211">"PIN incorrecte"</string>
     <string name="controls_pin_verifying" msgid="3755045989392131746">"S\'està verificant…"</string>
     <string name="controls_pin_instructions" msgid="6363309783822475238">"Introdueix el PIN"</string>
     <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"Prova un altre PIN"</string>
@@ -1041,6 +1048,9 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Carregant les recomanacions"</string>
     <string name="controls_media_close_session" msgid="9023534788828414585">"Tanca aquesta sessió multimèdia"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Inactiu; comprova l\'aplicació"</string>
+    <string name="controls_error_retryable" msgid="864025882878378470">"Error. S\'està tornant a provar…"</string>
+    <string name="controls_error_removed" msgid="6299213591234723805">"El dispositiu s\'ha suprimit"</string>
+    <string name="controls_error_generic" msgid="352500456918362905">"No es pot carregar l\'estat"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Error; torna-ho a provar"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"En curs"</string>
     <string name="controls_added_tooltip" msgid="4842812921719153085">"Mantén premut el botó d\'engegada per veure controls nous"</string>

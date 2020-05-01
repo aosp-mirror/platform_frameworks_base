@@ -192,7 +192,6 @@ public final class MultiClientInputMethodManagerService {
                                 InlineSuggestionsRequestInfo requestInfo,
                                 IInlineSuggestionsRequestCallback cb) {
                             try {
-                                //TODO(b/137800469): support multi client IMEs.
                                 cb.onInlineSuggestionsUnsupported();
                             } catch (RemoteException e) {
                                 Slog.w(TAG, "Failed to call onInlineSuggestionsUnsupported.", e);

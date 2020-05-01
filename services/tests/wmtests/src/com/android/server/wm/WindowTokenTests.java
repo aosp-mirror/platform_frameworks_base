@@ -136,7 +136,7 @@ public class WindowTokenTests extends WindowTestsBase {
     }
 
     @Test
-    public void testClearFixedRotationTransform() {
+    public void testFinishFixedRotationTransform() {
         final WindowToken appToken = mAppWindow.mToken;
         final WindowToken wallpaperToken = mWallpaperWindow.mToken;
         final Configuration config = new Configuration(mDisplayContent.getConfiguration());
@@ -152,7 +152,7 @@ public class WindowTokenTests extends WindowTestsBase {
         assertEquals(targetRotation, wallpaperToken.getWindowConfiguration().getRotation());
 
         // The display doesn't rotate, the transformation will be canceled.
-        mAppWindow.mToken.clearFixedRotationTransform(null /* applyDisplayRotation */);
+        mAppWindow.mToken.finishFixedRotationTransform();
 
         // The window tokens should restore to the original rotation.
         assertEquals(originalRotation, appToken.getWindowConfiguration().getRotation());

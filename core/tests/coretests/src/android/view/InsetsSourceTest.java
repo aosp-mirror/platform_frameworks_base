@@ -16,6 +16,7 @@
 
 package android.view;
 
+import static android.view.InsetsState.ITYPE_CAPTION_BAR;
 import static android.view.InsetsState.ITYPE_IME;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 
@@ -46,11 +47,13 @@ public class InsetsSourceTest {
 
     private InsetsSource mSource = new InsetsSource(ITYPE_NAVIGATION_BAR);
     private InsetsSource mImeSource = new InsetsSource(ITYPE_IME);
+    private InsetsSource mCaptionSource = new InsetsSource(ITYPE_CAPTION_BAR);
 
     @Before
     public void setUp() {
         mSource.setVisible(true);
         mImeSource.setVisible(true);
+        mCaptionSource.setVisible(true);
     }
 
     @Test
@@ -99,6 +102,17 @@ public class InsetsSourceTest {
         Insets insets = mImeSource.calculateInsets(new Rect(0, 0, 500, 500),
                 false /* ignoreVisibility */);
         assertEquals(Insets.of(0, 0, 0, 100), insets);
+    }
+
+    @Test
+    public void testCalculateInsets_caption_resizing() {
+        mCaptionSource.setFrame(new Rect(0, 0, 100, 100));
+        Insets insets = mCaptionSource.calculateInsets(new Rect(0, 0, 200, 200), false);
+        assertEquals(Insets.of(0, 100, 0, 0), insets);
+        insets = mCaptionSource.calculateInsets(new Rect(0, 0, 50, 200), false);
+        assertEquals(Insets.of(0, 100, 0, 0), insets);
+        insets = mCaptionSource.calculateInsets(new Rect(100, 100, 200, 500), false);
+        assertEquals(Insets.of(0, 100, 0, 0), insets);
     }
 
     @Test

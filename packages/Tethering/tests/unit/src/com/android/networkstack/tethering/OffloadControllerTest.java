@@ -116,6 +116,12 @@ public class OffloadControllerTest {
     private final ArgumentCaptor<OffloadHardwareInterface.ControlCallback> mControlCallbackCaptor =
             ArgumentCaptor.forClass(OffloadHardwareInterface.ControlCallback.class);
     private MockContentResolver mContentResolver;
+    private OffloadController.Dependencies mDeps = new OffloadController.Dependencies() {
+        @Override
+        int getPerformPollInterval() {
+            return 0;
+        }
+    };
 
     @Before public void setUp() {
         MockitoAnnotations.initMocks(this);
@@ -150,7 +156,7 @@ public class OffloadControllerTest {
 
     private OffloadController makeOffloadController() throws Exception {
         OffloadController offload = new OffloadController(new Handler(Looper.getMainLooper()),
-                mHardware, mContentResolver, mStatsManager, new SharedLog("test"));
+                mHardware, mContentResolver, mStatsManager, new SharedLog("test"), mDeps);
         final ArgumentCaptor<OffloadController.OffloadTetheringStatsProvider>
                 tetherStatsProviderCaptor =
                 ArgumentCaptor.forClass(OffloadController.OffloadTetheringStatsProvider.class);

@@ -120,7 +120,7 @@ import java.util.UUID;
  *     &#64;Override
  *     public void onTrackDataFound(int i, &#64;NonNull TrackData trackData) {
  *       MediaFormat mediaFormat = trackData.mediaFormat;
- *       if (videoTrackIndex == -1 &&
+ *       if (videoTrackIndex == -1 &amp;&amp;
  *           mediaFormat
  *               .getString(MediaFormat.KEY_MIME, &#47;* defaultValue= *&#47; "")
  *               .startsWith("video/")) {
@@ -178,7 +178,7 @@ import java.util.UUID;
  *
  *    private void ensureSpaceInBuffer(int numberOfBytesToRead) {
  *      int requiredLength = bytesWrittenCount + numberOfBytesToRead;
- *      if (requiredLength > sampleDataBuffer.length) {
+ *      if (requiredLength &gt; sampleDataBuffer.length) {
  *        sampleDataBuffer = Arrays.copyOf(sampleDataBuffer, requiredLength);
  *      }
  *    }

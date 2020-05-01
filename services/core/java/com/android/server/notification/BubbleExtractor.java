@@ -17,7 +17,7 @@ package com.android.server.notification;
 
 import static android.app.Notification.FLAG_BUBBLE;
 import static android.app.Notification.FLAG_FOREGROUND_SERVICE;
-import static android.app.NotificationChannel.USER_LOCKED_ALLOW_BUBBLE;
+import static android.app.NotificationChannel.ALLOW_BUBBLE_OFF;
 import static android.app.NotificationManager.BUBBLE_PREFERENCE_ALL;
 import static android.app.NotificationManager.BUBBLE_PREFERENCE_NONE;
 import static android.app.NotificationManager.BUBBLE_PREFERENCE_SELECTED;
@@ -82,10 +82,7 @@ public class BubbleExtractor implements NotificationSignalExtractor {
             // the app is allowed but there's no channel to check
             record.setAllowBubble(true);
         } else if (bubblePreference == BUBBLE_PREFERENCE_ALL) {
-            // by default the channel is not allowed, only don't bubble if the user specified
-            boolean userLockedNoBubbles = !recordChannel.canBubble()
-                    && (recordChannel.getUserLockedFields() & USER_LOCKED_ALLOW_BUBBLE) != 0;
-            record.setAllowBubble(!userLockedNoBubbles);
+            record.setAllowBubble(recordChannel.getAllowBubbles() != ALLOW_BUBBLE_OFF);
         } else if (bubblePreference == BUBBLE_PREFERENCE_SELECTED) {
             record.setAllowBubble(recordChannel.canBubble());
         }

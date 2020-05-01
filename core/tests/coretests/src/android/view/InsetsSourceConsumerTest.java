@@ -89,7 +89,8 @@ public class InsetsSourceConsumerTest {
             state.addSource(mSpyInsetsSource);
 
             mConsumer = new InsetsSourceConsumer(ITYPE_STATUS_BAR, state,
-                    () -> mMockTransaction, new InsetsController(viewRootImpl));
+                    () -> mMockTransaction,
+                    new InsetsController(new ViewRootInsetsControllerHost(viewRootImpl)));
         });
         instrumentation.waitForIdleSync();
 

@@ -19208,6 +19208,8 @@ HSPLandroid/telephony/PreciseDataConnectionState;->toString()Ljava/lang/String;
 HSPLandroid/telephony/PreciseDataConnectionState;->writeToParcel(Landroid/os/Parcel;I)V
 HSPLandroid/telephony/Rlog;->d(Ljava/lang/String;Ljava/lang/String;)I
 HSPLandroid/telephony/ServiceState;->createLocationInfoSanitizedCopy(Z)Landroid/telephony/ServiceState;
+HSPLandroid/telephony/ServiceState;->fillInNotifierBundle(Landroid/os/Bundle;)V
+HSPLandroid/telephony/ServiceState;->newFromBundle(Landroid/os/Bundle;)Landroid/telephony/ServiceState;
 PLandroid/telephony/SignalStrength;-><init>(Landroid/telephony/SignalStrength;)V
 HPLandroid/telephony/SignalStrength;->copyFrom(Landroid/telephony/SignalStrength;)V
 HSPLandroid/telephony/SignalStrength;->isGsm()Z

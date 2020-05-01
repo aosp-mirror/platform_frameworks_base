@@ -36,7 +36,6 @@ import android.provider.Settings;
 import android.util.Slog;
 import android.view.LayoutInflater;
 import android.view.SurfaceControl;
-import android.view.SurfaceSession;
 import android.view.View;
 import android.window.TaskOrganizer;
 import android.window.WindowContainerToken;
@@ -94,7 +93,6 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
     private boolean mHomeStackResizable = false;
     private ForcedResizableInfoActivityController mForcedResizableController;
     private SystemWindows mSystemWindows;
-    final SurfaceSession mSurfaceSession = new SurfaceSession();
     private DisplayController mDisplayController;
     private DisplayImeController mImeController;
     final TransactionPool mTransactionPool;
@@ -263,10 +261,24 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
                 wct.setScreenSizeDp(mSplits.mSecondary.token,
                         mSplits.mSecondary.configuration.screenWidthDp,
                         mSplits.mSecondary.configuration.screenHeightDp);
+
+                wct.setBounds(mSplits.mPrimary.token, mSplitLayout.mAdjustedPrimary);
+                adjustAppBounds = new Rect(mSplits.mPrimary.configuration
+                        .windowConfiguration.getAppBounds());
+                adjustAppBounds.offset(0, mSplitLayout.mAdjustedPrimary.top
+                        - mSplitLayout.mPrimary.top);
+                wct.setAppBounds(mSplits.mPrimary.token, adjustAppBounds);
+                wct.setScreenSizeDp(mSplits.mPrimary.token,
+                        mSplits.mPrimary.configuration.screenWidthDp,
+                        mSplits.mPrimary.configuration.screenHeightDp);
             } else {
                 wct.setBounds(mSplits.mSecondary.token, mSplitLayout.mSecondary);
                 wct.setAppBounds(mSplits.mSecondary.token, null);
                 wct.setScreenSizeDp(mSplits.mSecondary.token,
+                        SCREEN_WIDTH_DP_UNDEFINED, SCREEN_HEIGHT_DP_UNDEFINED);
+                wct.setBounds(mSplits.mPrimary.token, mSplitLayout.mPrimary);
+                wct.setAppBounds(mSplits.mPrimary.token, null);
+                wct.setScreenSizeDp(mSplits.mPrimary.token,
                         SCREEN_WIDTH_DP_UNDEFINED, SCREEN_HEIGHT_DP_UNDEFINED);
             }
 
@@ -493,7 +505,7 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
             return;
         }
         try {
-            mSplits.init(mSurfaceSession);
+            mSplits.init();
             // Set starting tile bounds based on middle target
             final WindowContainerTransaction tct = new WindowContainerTransaction();
             int midPos = mSplitLayout.getSnapAlgorithm().getMiddleTarget().position;
@@ -505,7 +517,6 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
             return;
         }
         ActivityManagerWrapper.getInstance().registerTaskStackListener(mActivityRestartListener);
-        update(mDisplayController.getDisplayContext(displayId).getResources().getConfiguration());
     }
 
     @Override
@@ -574,12 +585,27 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
     }
 
     private void update(Configuration configuration) {
+        final boolean isDividerHidden = mView != null && mView.isHidden();
+
         removeDivider();
         addDivider(configuration);
-        if (mMinimized && mView != null) {
-            mView.setMinimizedDockStack(true, mHomeStackResizable);
-            updateTouchable();
+
+        if (mView != null) {
+            if (mMinimized) {
+                mView.setMinimizedDockStack(true, mHomeStackResizable);
+                updateTouchable();
+            }
+            mView.setHidden(isDividerHidden);
         }
+    }
+
+    void onTaskVanished() {
+        mHandler.post(this::removeDivider);
+    }
+
+    void onTasksReady() {
+        mHandler.post(() -> update(mDisplayController.getDisplayContext(
+                mContext.getDisplayId()).getResources().getConfiguration()));
     }
 
     void updateVisibility(final boolean visible) {

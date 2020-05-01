@@ -686,6 +686,23 @@ public class AudioSystem
         String effectName =  effects.length == 0 ? "None" : effects[0].name;
 
         if (cb != null) {
+            ArrayList<AudioPatch> audioPatches = new ArrayList<>();
+            if (AudioManager.listAudioPatches(audioPatches) == AudioManager.SUCCESS) {
+                boolean patchFound = false;
+                int patchHandle = recordingFormat[6];
+                for (AudioPatch patch : audioPatches) {
+                    if (patch.id() == patchHandle) {
+                        patchFound = true;
+                        break;
+                    }
+                }
+                if (!patchFound) {
+                    // The cached audio patches in AudioManager is not up-to-date.
+                    // Reset audio port generation to ensure callback side can
+                    // get up-to-date audio port information.
+                    AudioManager.resetAudioPortGeneration();
+                }
+            }
             // TODO receive package name from native
             cb.onRecordingConfigurationChanged(event, riid, uid, session, source, portId, silenced,
                                         recordingFormat, clientEffects, effects, activeSource, "");

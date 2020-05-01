@@ -2676,9 +2676,9 @@ class ActivityStack extends Task {
             mRootWindowContainer.ensureVisibilityAndConfig(null /* starting */,
                     getDisplay().mDisplayId, false /* markFrozenIfConfigChanged */,
                     false /* deferResume */);
+        } else {
+            mRootWindowContainer.resumeFocusedStacksTopActivities();
         }
-
-        mRootWindowContainer.resumeFocusedStacksTopActivities();
         return true;
     }
 
@@ -3342,23 +3342,6 @@ class ActivityStack extends Task {
         }
 
         getDisplayContent().getPinnedStackController().setActions(actions);
-    }
-
-    /**
-     * @return True if we are currently animating the pinned stack from fullscreen to non-fullscreen
-     *         bounds and we have a deferred PiP mode changed callback set with the animation.
-     */
-    public boolean deferScheduleMultiWindowModeChanged() {
-        if (inPinnedWindowingMode()) {
-            // For the pinned stack, the deferring of the multi-window mode changed is tied to the
-            // transition animation into picture-in-picture, and is called once the animation
-            // completes, or is interrupted in a way that would leave the stack in a non-fullscreen
-            // state.
-            // @see BoundsAnimationController
-            // @see BoundsAnimationControllerTests
-            return (mBoundsAnimatingRequested || mBoundsAnimating);
-        }
-        return false;
     }
 
     public boolean isForceScaled() {

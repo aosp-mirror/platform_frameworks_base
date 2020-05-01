@@ -385,10 +385,9 @@ public class NetworkStatsFactory {
         // Migrate data usage over a VPN to the TUN network.
         for (VpnInfo info : vpnArray) {
             delta.migrateTun(info.ownerUid, info.vpnIface, info.underlyingIfaces);
+            // Filter out debug entries as that may lead to over counting.
+            delta.filterDebugEntries();
         }
-
-        // Filter out debug entries as that may lead to over counting.
-        delta.filterDebugEntries();
 
         // Update mTunAnd464xlatAdjustedStats with migrated delta.
         mTunAnd464xlatAdjustedStats.combineAllValues(delta);

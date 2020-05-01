@@ -790,9 +790,7 @@ public class DisplayContentTests extends WindowTestsBase {
         final DisplayContent dc = createNewDisplay();
         dc.getDisplayRotation().setFixedToUserRotation(
                 IWindowManager.FIXED_TO_USER_ROTATION_DISABLED);
-        final int newOrientation = dc.getLastOrientation() == SCREEN_ORIENTATION_LANDSCAPE
-                ? SCREEN_ORIENTATION_PORTRAIT
-                : SCREEN_ORIENTATION_LANDSCAPE;
+        final int newOrientation = getRotatedOrientation(dc);
 
         final ActivityStack stack =
                 new ActivityTestsBase.StackBuilder(mWm.mAtmService.mRootWindowContainer)
@@ -812,9 +810,7 @@ public class DisplayContentTests extends WindowTestsBase {
         final DisplayContent dc = createNewDisplay();
         dc.getDisplayRotation().setFixedToUserRotation(
                 IWindowManager.FIXED_TO_USER_ROTATION_ENABLED);
-        final int newOrientation = dc.getLastOrientation() == SCREEN_ORIENTATION_LANDSCAPE
-                ? SCREEN_ORIENTATION_PORTRAIT
-                : SCREEN_ORIENTATION_LANDSCAPE;
+        final int newOrientation = getRotatedOrientation(dc);
 
         final ActivityStack stack =
                 new ActivityTestsBase.StackBuilder(mWm.mAtmService.mRootWindowContainer)
@@ -1083,7 +1079,8 @@ public class DisplayContentTests extends WindowTestsBase {
         mDisplayContent.prepareAppTransition(WindowManager.TRANSIT_ACTIVITY_OPEN,
                 false /* alwaysKeepCurrent */);
         mDisplayContent.mOpeningApps.add(app);
-        app.setRequestedOrientation(SCREEN_ORIENTATION_LANDSCAPE);
+        final int newOrientation = getRotatedOrientation(mDisplayContent);
+        app.setRequestedOrientation(newOrientation);
 
         assertTrue(app.isFixedRotationTransforming());
         assertTrue(mDisplayContent.getDisplayRotation().shouldRotateSeamlessly(
@@ -1124,12 +1121,25 @@ public class DisplayContentTests extends WindowTestsBase {
         mWallpaperWindow.mToken.onAnimationLeashCreated(t, null /* leash */);
         verify(t, never()).setPosition(any(), eq(0), eq(0));
 
+        // Launch another activity before the transition is finished.
+        final ActivityRecord app2 = new ActivityTestsBase.StackBuilder(mWm.mRoot)
+                .setDisplay(mDisplayContent).build().getTopMostActivity();
+        mDisplayContent.prepareAppTransition(WindowManager.TRANSIT_ACTIVITY_OPEN,
+                false /* alwaysKeepCurrent */);
+        mDisplayContent.mOpeningApps.add(app2);
+        app2.setRequestedOrientation(newOrientation);
+
+        // The activity should share the same transform state as the existing one.
+        assertTrue(app.hasFixedRotationTransform(app2));
+
+        // The display should be rotated after the launch is finished.
         mDisplayContent.mAppTransition.notifyAppTransitionFinishedLocked(app.token);
 
         // The animation in old rotation should be cancelled.
         assertFalse(closingApp.isAnimating());
-        // The display should be rotated after the launch is finished.
+        // The fixed rotation should be cleared and the new rotation is applied to display.
         assertFalse(app.hasFixedRotationTransform());
+        assertFalse(app2.hasFixedRotationTransform());
         assertEquals(config90.orientation, mDisplayContent.getConfiguration().orientation);
     }
 
@@ -1290,6 +1300,12 @@ public class DisplayContentTests extends WindowTestsBase {
         // Test backward traversal.
         mDisplayContent.forAllWindows(actualWindows::addLast, true /* traverseTopToBottom */);
         assertThat("topToBottom", actualWindows, is(reverseList(expectedWindowsBottomToTop)));
+    }
+
+    private static int getRotatedOrientation(DisplayContent dc) {
+        return dc.getLastOrientation() == SCREEN_ORIENTATION_LANDSCAPE
+                ? SCREEN_ORIENTATION_PORTRAIT
+                : SCREEN_ORIENTATION_LANDSCAPE;
     }
 
     private static List<WindowState> reverseList(List<WindowState> list) {

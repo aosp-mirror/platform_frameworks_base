@@ -971,8 +971,6 @@ public class PackageManagerTests extends AndroidTestCase {
             if (retainData) {
                 assertNotNull(info);
                 assertEquals(info.packageName, ip.pkg.packageName);
-                File file = new File(info.dataDir);
-                assertTrue(file.exists());
             } else {
                 assertNull(info);
             }
@@ -990,7 +988,6 @@ public class PackageManagerTests extends AndroidTestCase {
 
 
     @LargeTest
-    @Suppress // TODO(b/152007236): un-suppress when we root cause this
     public void testDeleteNormalInternalRetainData() throws Exception {
         deleteFromRawResource(0, PackageManager.DELETE_KEEP_DATA);
     }
@@ -2306,7 +2303,6 @@ public class PackageManagerTests extends AndroidTestCase {
         }
     }
 
-    @Suppress // TODO(b/152007236): un-suppress when we root cause this
     public void testIsSignedBy() throws Exception {
         PackageManager pm = getPm();
         String mPkgName = mContext.getPackageName();

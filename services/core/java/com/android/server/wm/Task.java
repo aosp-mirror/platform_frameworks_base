@@ -1930,9 +1930,11 @@ class Task extends WindowContainer<WindowContainer> {
         // Check if the new configuration supports persistent bounds (eg. is Freeform) and if so
         // restore the last recorded non-fullscreen bounds.
         final boolean prevPersistTaskBounds = getWindowConfiguration().persistTaskBounds();
-        final boolean nextPersistTaskBounds =
-                getRequestedOverrideConfiguration().windowConfiguration.persistTaskBounds()
-                || newParentConfig.windowConfiguration.persistTaskBounds();
+        boolean nextPersistTaskBounds =
+                getRequestedOverrideConfiguration().windowConfiguration.persistTaskBounds();
+        if (getRequestedOverrideWindowingMode() == WINDOWING_MODE_UNDEFINED) {
+            nextPersistTaskBounds = newParentConfig.windowConfiguration.persistTaskBounds();
+        }
         if (!prevPersistTaskBounds && nextPersistTaskBounds
                 && mLastNonFullscreenBounds != null && !mLastNonFullscreenBounds.isEmpty()) {
             // Bypass onRequestedOverrideConfigurationChanged here to avoid infinite loop.
@@ -2002,6 +2004,14 @@ class Task extends WindowContainer<WindowContainer> {
         // Only do an animation into and out-of freeform mode for now. Other mode
         // transition animations are currently handled by system-ui.
         return (prevWinMode == WINDOWING_MODE_FREEFORM) != (newWinMode == WINDOWING_MODE_FREEFORM);
+    }
+
+    @Override
+    void migrateToNewSurfaceControl() {
+        super.migrateToNewSurfaceControl();
+        mLastSurfaceSize.x = 0;
+        mLastSurfaceSize.y = 0;
+        updateSurfaceSize(getPendingTransaction());
     }
 
     void updateSurfaceSize(SurfaceControl.Transaction transaction) {
@@ -2299,27 +2309,31 @@ class Task extends WindowContainer<WindowContainer> {
             insideParentBounds = parentBounds.contains(resolvedBounds);
         }
 
+        // Non-null compatibility insets means the activity prefers to keep its original size, so
+        // out bounds doesn't need to be restricted by the parent or current display
+        final boolean customContainerPolicy = compatInsets != null;
+
         Rect outAppBounds = inOutConfig.windowConfiguration.getAppBounds();
         if (outAppBounds == null || outAppBounds.isEmpty()) {
+            // App-bounds hasn't been overridden, so calculate a value for it.
             inOutConfig.windowConfiguration.setAppBounds(mTmpFullBounds);
             outAppBounds = inOutConfig.windowConfiguration.getAppBounds();
-        }
-        // Non-null compatibility insets means the activity prefers to keep its original size, so
-        // the out bounds doesn't need to be restricted by the parent or current display.
-        final boolean customContainerPolicy = compatInsets != null;
-        if (!customContainerPolicy && windowingMode != WINDOWING_MODE_FREEFORM) {
-            final Rect containingAppBounds;
-            if (insideParentBounds) {
-                containingAppBounds = parentConfig.windowConfiguration.getAppBounds();
-            } else {
-                // Restrict appBounds to display non-decor rather than parent because the override
-                // bounds are beyond the parent. Otherwise, it won't match the overridden bounds.
-                final TaskDisplayArea displayArea = getDisplayArea();
-                containingAppBounds = displayArea != null
-                        ? displayArea.getWindowConfiguration().getAppBounds() : null;
-            }
-            if (containingAppBounds != null && !containingAppBounds.isEmpty()) {
-                outAppBounds.intersect(containingAppBounds);
+
+            if (!customContainerPolicy && windowingMode != WINDOWING_MODE_FREEFORM) {
+                final Rect containingAppBounds;
+                if (insideParentBounds) {
+                    containingAppBounds = parentConfig.windowConfiguration.getAppBounds();
+                } else {
+                    // Restrict appBounds to display non-decor rather than parent because the
+                    // override bounds are beyond the parent. Otherwise, it won't match the
+                    // overridden bounds.
+                    final TaskDisplayArea displayArea = getDisplayArea();
+                    containingAppBounds = displayArea != null
+                            ? displayArea.getWindowConfiguration().getAppBounds() : null;
+                }
+                if (containingAppBounds != null && !containingAppBounds.isEmpty()) {
+                    outAppBounds.intersect(containingAppBounds);
+                }
             }
         }
 
@@ -4400,16 +4414,25 @@ class Task extends WindowContainer<WindowContainer> {
         return mHasBeenVisible;
     }
 
-    /** In the case that these three conditions are true, we want to send the Task to
-     * the organizer:
-     *     1. We have a SurfaceControl
-     *     2. An organizer has been set
-     *     3. We have finished drawing
+    /** In the case that these conditions are true, we want to send the Task to the organizer:
+     *     1. An organizer has been set
+     *     2. The Task was created by the organizer
+     *     or
+     *     2a. We have a SurfaceControl
+     *     2b. We have finished drawing
      * Any time any of these conditions are updated, the updating code should call
      * sendTaskAppeared.
      */
     boolean taskAppearedReady() {
-        return mSurfaceControl != null && mTaskOrganizer != null && getHasBeenVisible();
+        if (mTaskOrganizer == null) {
+            return false;
+        }
+
+        if (mCreatedByOrganizer) {
+            return true;
+        }
+
+        return mSurfaceControl != null && getHasBeenVisible();
     }
 
     private void sendTaskAppeared() {
@@ -4418,9 +4441,9 @@ class Task extends WindowContainer<WindowContainer> {
         }
     }
 
-    private void sendTaskVanished() {
-        if (mTaskOrganizer != null) {
-            mAtmService.mTaskOrganizerController.onTaskVanished(mTaskOrganizer, this);
+    private void sendTaskVanished(ITaskOrganizer organizer) {
+        if (organizer != null) {
+            mAtmService.mTaskOrganizerController.onTaskVanished(organizer, this);
         }
    }
 
@@ -4429,9 +4452,13 @@ class Task extends WindowContainer<WindowContainer> {
         if (mTaskOrganizer == organizer) {
             return false;
         }
-        // Let the old organizer know it has lost control.
-        sendTaskVanished();
+
+        ITaskOrganizer previousOrganizer = mTaskOrganizer;
+        // Update the new task organizer before calling sendTaskVanished since it could result in
+        // a new SurfaceControl getting created that would notify the old organizer about it.
         mTaskOrganizer = organizer;
+        // Let the old organizer know it has lost control.
+        sendTaskVanished(previousOrganizer);
 
         if (mTaskOrganizer != null) {
             sendTaskAppeared();

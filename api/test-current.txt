@@ -732,6 +732,11 @@ package android.app.role {
     method public void onRoleHoldersChanged(@NonNull String, @NonNull android.os.UserHandle);
   }
 
+  public class RoleControllerManager {
+    method @RequiresPermission("android.permission.MANAGE_ROLE_HOLDERS") public void isApplicationVisibleForRole(@NonNull String, @NonNull String, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Boolean>);
+    method @RequiresPermission("android.permission.MANAGE_ROLE_HOLDERS") public void isRoleVisible(@NonNull String, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Boolean>);
+  }
+
   public final class RoleManager {
     method @RequiresPermission("android.permission.OBSERVE_ROLE_HOLDERS") public void addOnRoleHoldersChangedListenerAsUser(@NonNull java.util.concurrent.Executor, @NonNull android.app.role.OnRoleHoldersChangedListener, @NonNull android.os.UserHandle);
     method @RequiresPermission("android.permission.MANAGE_ROLE_HOLDERS") public void addRoleHolderAsUser(@NonNull String, @NonNull String, int, @NonNull android.os.UserHandle, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Boolean>);
@@ -5272,18 +5277,19 @@ package android.widget {
 package android.window {
 
   public final class DisplayAreaInfo implements android.os.Parcelable {
-    ctor public DisplayAreaInfo(@NonNull android.window.WindowContainerToken, int);
+    ctor public DisplayAreaInfo(@NonNull android.window.WindowContainerToken, int, int);
     method public int describeContents();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.window.DisplayAreaInfo> CREATOR;
     field @NonNull public final android.content.res.Configuration configuration;
     field public final int displayId;
+    field public final int featureId;
     field @NonNull public final android.window.WindowContainerToken token;
   }
 
   public class DisplayAreaOrganizer extends android.window.WindowOrganizer {
     ctor public DisplayAreaOrganizer();
-    method public void onDisplayAreaAppeared(@NonNull android.window.DisplayAreaInfo);
+    method public void onDisplayAreaAppeared(@NonNull android.window.DisplayAreaInfo, @NonNull android.view.SurfaceControl);
     method public void onDisplayAreaVanished(@NonNull android.window.DisplayAreaInfo);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public void registerOrganizer(int);
     field public static final int FEATURE_DEFAULT_TASK_CONTAINER = 1; // 0x1
@@ -5303,7 +5309,7 @@ package android.window {
     method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public static android.window.WindowContainerToken getImeTarget(int);
     method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public static java.util.List<android.app.ActivityManager.RunningTaskInfo> getRootTasks(int, @NonNull int[]);
     method @BinderThread public void onBackPressedOnTaskRoot(@NonNull android.app.ActivityManager.RunningTaskInfo);
-    method @BinderThread public void onTaskAppeared(@NonNull android.app.ActivityManager.RunningTaskInfo);
+    method @BinderThread public void onTaskAppeared(@NonNull android.app.ActivityManager.RunningTaskInfo, @NonNull android.view.SurfaceControl);
     method @BinderThread public void onTaskInfoChanged(@NonNull android.app.ActivityManager.RunningTaskInfo);
     method @BinderThread public void onTaskVanished(@NonNull android.app.ActivityManager.RunningTaskInfo);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public final void registerOrganizer(int);
@@ -5314,7 +5320,6 @@ package android.window {
 
   public final class WindowContainerToken implements android.os.Parcelable {
     method public int describeContents();
-    method @Nullable public android.view.SurfaceControl getLeash();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.window.WindowContainerToken> CREATOR;
   }

@@ -48,12 +48,6 @@ public:
                  void(const ConfigKey& configKey, wp<PullUidProvider> provider));
 };
 
-class MockUidMap : public UidMap {
- public:
-  MOCK_CONST_METHOD1(getHostUidOrSelf, int(int uid));
-  MOCK_CONST_METHOD1(getAppUid, std::set<int32_t>(const string& package));
-};
-
 HashableDimensionKey getMockedDimensionKey(int tagId, int key, std::string value);
 MetricDimensionKey getMockedMetricDimensionKey(int tagId, int key, std::string value);
 

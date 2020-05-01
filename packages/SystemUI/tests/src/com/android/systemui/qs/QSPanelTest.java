@@ -35,6 +35,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.internal.logging.testing.UiEventLoggerFake;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
@@ -44,6 +45,7 @@ import com.android.systemui.plugins.qs.QSTileView;
 import com.android.systemui.qs.customize.QSCustomizer;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
+import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 
 import org.junit.Before;
@@ -91,17 +93,21 @@ public class QSPanelTest extends SysuiTestCase {
     private LocalBluetoothManager mLocalBluetoothManager;
     @Mock
     private ActivityStarter mActivityStarter;
+    @Mock
+    private NotificationEntryManager mEntryManager;
+    private UiEventLoggerFake mUiEventLogger;
 
     @Before
     public void setup() throws Exception {
         MockitoAnnotations.initMocks(this);
 
         mTestableLooper = TestableLooper.get(this);
+        mUiEventLogger = new UiEventLoggerFake();
         mTestableLooper.runWithLooper(() -> {
             mMetricsLogger = mDependency.injectMockDependency(MetricsLogger.class);
             mQsPanel = new QSPanel(mContext, null, mDumpManager, mBroadcastDispatcher,
                     mQSLogger, mForegroundExecutor, mBackgroundExecutor,
-                    mLocalBluetoothManager, mActivityStarter);
+                    mLocalBluetoothManager, mActivityStarter, mEntryManager, mUiEventLogger);
             // Provides a parent with non-zero size for QSPanel
             mParentView = new FrameLayout(mContext);
             mParentView.addView(mQsPanel);
@@ -121,9 +127,17 @@ public class QSPanelTest extends SysuiTestCase {
         mQsPanel.setExpanded(true);
         verify(mMetricsLogger).visibility(eq(MetricsEvent.QS_PANEL), eq(true));
         verify(mQSLogger).logPanelExpanded(true, mQsPanel.getDumpableTag());
+        assertEquals(1, mUiEventLogger.numLogs());
+        assertEquals(QSEvent.QS_PANEL_EXPANDED.getId(), mUiEventLogger.eventId(0));
+        mUiEventLogger.getLogs().clear();
+
         mQsPanel.setExpanded(false);
         verify(mMetricsLogger).visibility(eq(MetricsEvent.QS_PANEL), eq(false));
         verify(mQSLogger).logPanelExpanded(false, mQsPanel.getDumpableTag());
+        assertEquals(1, mUiEventLogger.numLogs());
+        assertEquals(QSEvent.QS_PANEL_COLLAPSED.getId(), mUiEventLogger.eventId(0));
+        mUiEventLogger.getLogs().clear();
+
     }
 
     @Test

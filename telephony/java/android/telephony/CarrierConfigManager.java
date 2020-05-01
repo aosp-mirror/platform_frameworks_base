@@ -3053,20 +3053,21 @@ public class CarrierConfigManager {
      * This configuration allows the system UI to determine how long to continue to display 5G icons
      * when the device switches between different 5G scenarios.
      *
-     * There are six 5G scenarios:
+     * There are seven 5G scenarios:
      * 1. connected_mmwave: device currently connected to 5G cell as the secondary cell and using
      *    millimeter wave.
      * 2. connected: device currently connected to 5G cell as the secondary cell but not using
      *    millimeter wave.
-     * 3. not_restricted_rrc_idle: device camped on a network that has 5G capability(not necessary
+     * 3. not_restricted_rrc_idle: device camped on a network that has 5G capability (not necessary
      *    to connect a 5G cell as a secondary cell) and the use of 5G is not restricted and RRC
      *    currently in IDLE state.
-     * 4. not_restricted_rrc_con: device camped on a network that has 5G capability(not necessary
+     * 4. not_restricted_rrc_con: device camped on a network that has 5G capability (not necessary
      *    to connect a 5G cell as a secondary cell) and the use of 5G is not restricted and RRC
      *    currently in CONNECTED state.
-     * 5. restricted: device camped on a network that has 5G capability(not necessary to connect a
+     * 5. restricted: device camped on a network that has 5G capability (not necessary to connect a
      *    5G cell as a secondary cell) but the use of 5G is restricted.
-     * 6. any: any of the above scenarios, as well as none (not connected to 5G)
+     * 6. legacy: device is not camped on a network that has 5G capability
+     * 7. any: any of the above scenarios
      *
      * The configured string contains various timer rules separated by a semicolon.
      * Each rule will have three items: prior 5G scenario, current 5G scenario, and grace period
@@ -3098,20 +3099,21 @@ public class CarrierConfigManager {
      * This configuration extends {@link #KEY_5G_ICON_DISPLAY_GRACE_PERIOD_STRING} to allow the
      * system UI to continue displaying 5G icons after the initial timer expires.
      *
-     * There are six 5G scenarios:
+     * There are seven 5G scenarios:
      * 1. connected_mmwave: device currently connected to 5G cell as the secondary cell and using
      *    millimeter wave.
      * 2. connected: device currently connected to 5G cell as the secondary cell but not using
      *    millimeter wave.
-     * 3. not_restricted_rrc_idle: device camped on a network that has 5G capability(not necessary
+     * 3. not_restricted_rrc_idle: device camped on a network that has 5G capability (not necessary
      *    to connect a 5G cell as a secondary cell) and the use of 5G is not restricted and RRC
      *    currently in IDLE state.
-     * 4. not_restricted_rrc_con: device camped on a network that has 5G capability(not necessary
+     * 4. not_restricted_rrc_con: device camped on a network that has 5G capability (not necessary
      *    to connect a 5G cell as a secondary cell) and the use of 5G is not restricted and RRC
      *    currently in CONNECTED state.
-     * 5. restricted: device camped on a network that has 5G capability(not necessary to connect a
+     * 5. restricted: device camped on a network that has 5G capability (not necessary to connect a
      *    5G cell as a secondary cell) but the use of 5G is restricted.
-     * 6. any: any of the above scenarios, as well as none (not connected to 5G)
+     * 6. legacy: device is not camped on a network that has 5G capability
+     * 7. any: any of the above scenarios
      *
      * The configured string contains various timer rules separated by a semicolon.
      * Each rule will have three items: primary 5G scenario, secondary 5G scenario, and
@@ -4203,7 +4205,7 @@ public class CarrierConfigManager {
         sDefaults.putStringArray(KEY_BANDWIDTH_STRING_ARRAY, new String[]{
                 "GPRS:24,24", "EDGE:70,18", "UMTS:115,115", "CDMA-IS95A:14,14", "CDMA-IS95B:14,14",
                 "1xRTT:30,30", "EvDo-rev.0:750,48", "EvDo-rev.A:950,550", "HSDPA:4300,620",
-                "HSUPA:4300,1800", "HSPA:4300,1800", "EvDo-rev.B:1500,550:", "eHRPD:750,48",
+                "HSUPA:4300,1800", "HSPA:4300,1800", "EvDo-rev.B:1500,550", "eHRPD:750,48",
                 "HSPAP:13000,3400", "TD-SCDMA:115,115", "LTE:30000,15000", "NR_NSA:47000,15000",
                 "NR_NSA_MMWAVE:145000,15000", "NR_SA:145000,15000"});
         sDefaults.putBoolean(KEY_BANDWIDTH_NR_NSA_USE_LTE_VALUE_FOR_UPSTREAM_BOOL, false);

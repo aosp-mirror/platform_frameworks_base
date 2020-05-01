@@ -26,6 +26,7 @@ import android.os.Parcelable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -111,10 +112,19 @@ public final class SharedLibraryInfo implements Parcelable {
     }
 
     private SharedLibraryInfo(Parcel parcel) {
-        this(parcel.readString(), parcel.readString(), parcel.readArrayList(null),
-                parcel.readString(), parcel.readLong(),
-                parcel.readInt(), parcel.readParcelable(null), parcel.readArrayList(null),
-                parcel.createTypedArrayList(SharedLibraryInfo.CREATOR));
+        mPath = parcel.readString8();
+        mPackageName = parcel.readString8();
+        if (parcel.readInt() != 0) {
+            mCodePaths = Arrays.asList(parcel.createString8Array());
+        } else {
+            mCodePaths = null;
+        }
+        mName = parcel.readString8();
+        mVersion = parcel.readLong();
+        mType = parcel.readInt();
+        mDeclaringPackage = parcel.readParcelable(null);
+        mDependentPackages = parcel.readArrayList(null);
+        mDependencies = parcel.createTypedArrayList(SharedLibraryInfo.CREATOR);
     }
 
     /**
@@ -296,10 +306,15 @@ public final class SharedLibraryInfo implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
-        parcel.writeString(mPath);
-        parcel.writeString(mPackageName);
-        parcel.writeList(mCodePaths);
-        parcel.writeString(mName);
+        parcel.writeString8(mPath);
+        parcel.writeString8(mPackageName);
+        if (mCodePaths != null) {
+            parcel.writeInt(1);
+            parcel.writeString8Array(mCodePaths.toArray(new String[mCodePaths.size()]));
+        } else {
+            parcel.writeInt(0);
+        }
+        parcel.writeString8(mName);
         parcel.writeLong(mVersion);
         parcel.writeInt(mType);
         parcel.writeParcelable(mDeclaringPackage, flags);

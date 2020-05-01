@@ -56,6 +56,9 @@ import androidx.dynamicanimation.animation.DynamicAnimation;
 import androidx.dynamicanimation.animation.SpringAnimation;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.UiEvent;
+import com.android.internal.logging.UiEventLogger;
+import com.android.internal.logging.UiEventLoggerImpl;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
@@ -94,6 +97,8 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
     private static final float MIN_DRAG_SIZE = 10;
     // How much to scale the default slop by, to avoid accidental drags.
     private static final float SLOP_SCALE = 4f;
+
+    private static final UiEventLogger sUiEventLogger = new UiEventLoggerImpl();
 
     private KeyguardSecurityModel mSecurityModel;
     private LockPatternUtils mLockPatternUtils;
@@ -176,6 +181,44 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
         public void finish(boolean strongAuth, int targetUserId);
         public void reset();
         public void onCancelClicked();
+    }
+
+    @VisibleForTesting
+    public enum BouncerUiEvent implements UiEventLogger.UiEventEnum {
+        @UiEvent(doc = "Default UiEvent used for variable initialization.")
+        UNKNOWN(0),
+
+        @UiEvent(doc = "Bouncer is dismissed using extended security access.")
+        BOUNCER_DISMISS_EXTENDED_ACCESS(413),
+
+        @UiEvent(doc = "Bouncer is dismissed using biometric.")
+        BOUNCER_DISMISS_BIOMETRIC(414),
+
+        @UiEvent(doc = "Bouncer is dismissed without security access.")
+        BOUNCER_DISMISS_NONE_SECURITY(415),
+
+        @UiEvent(doc = "Bouncer is dismissed using password security.")
+        BOUNCER_DISMISS_PASSWORD(416),
+
+        @UiEvent(doc = "Bouncer is dismissed using sim security access.")
+        BOUNCER_DISMISS_SIM(417),
+
+        @UiEvent(doc = "Bouncer is successfully unlocked using password.")
+        BOUNCER_PASSWORD_SUCCESS(418),
+
+        @UiEvent(doc = "An attempt to unlock bouncer using password has failed.")
+        BOUNCER_PASSWORD_FAILURE(419);
+
+        private final int mId;
+
+        BouncerUiEvent(int id) {
+            mId = id;
+        }
+
+        @Override
+        public int getId() {
+            return mId;
+        }
     }
 
     public KeyguardSecurityContainer(Context context, AttributeSet attrs) {
@@ -574,17 +617,21 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
         boolean finish = false;
         boolean strongAuth = false;
         int eventSubtype = -1;
+        BouncerUiEvent uiEvent = BouncerUiEvent.UNKNOWN;
         if (mUpdateMonitor.getUserHasTrust(targetUserId)) {
             finish = true;
             eventSubtype = BOUNCER_DISMISS_EXTENDED_ACCESS;
+            uiEvent = BouncerUiEvent.BOUNCER_DISMISS_EXTENDED_ACCESS;
         } else if (mUpdateMonitor.getUserUnlockedWithBiometric(targetUserId)) {
             finish = true;
             eventSubtype = BOUNCER_DISMISS_BIOMETRIC;
+            uiEvent = BouncerUiEvent.BOUNCER_DISMISS_BIOMETRIC;
         } else if (SecurityMode.None == mCurrentSecuritySelection) {
             SecurityMode securityMode = mSecurityModel.getSecurityMode(targetUserId);
             if (SecurityMode.None == securityMode) {
                 finish = true; // no security required
                 eventSubtype = BOUNCER_DISMISS_NONE_SECURITY;
+                uiEvent = BouncerUiEvent.BOUNCER_DISMISS_NONE_SECURITY;
             } else {
                 showSecurityScreen(securityMode); // switch to the alternate security view
             }
@@ -596,6 +643,7 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
                     strongAuth = true;
                     finish = true;
                     eventSubtype = BOUNCER_DISMISS_PASSWORD;
+                    uiEvent = BouncerUiEvent.BOUNCER_DISMISS_PASSWORD;
                     break;
 
                 case SimPin:
@@ -606,6 +654,7 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
                             KeyguardUpdateMonitor.getCurrentUser())) {
                         finish = true;
                         eventSubtype = BOUNCER_DISMISS_SIM;
+                        uiEvent = BouncerUiEvent.BOUNCER_DISMISS_SIM;
                     } else {
                         showSecurityScreen(securityMode);
                     }
@@ -629,6 +678,9 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
         if (eventSubtype != -1) {
             mMetricsLogger.write(new LogMaker(MetricsEvent.BOUNCER)
                     .setType(MetricsEvent.TYPE_DISMISS).setSubtype(eventSubtype));
+        }
+        if (uiEvent != BouncerUiEvent.UNKNOWN) {
+            sUiEventLogger.log(uiEvent);
         }
         if (finish) {
             mSecurityCallback.finish(strongAuth, targetUserId);
@@ -735,6 +787,8 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
             }
             mMetricsLogger.write(new LogMaker(MetricsEvent.BOUNCER)
                     .setType(success ? MetricsEvent.TYPE_SUCCESS : MetricsEvent.TYPE_FAILURE));
+            sUiEventLogger.log(success ? BouncerUiEvent.BOUNCER_PASSWORD_SUCCESS
+                    : BouncerUiEvent.BOUNCER_PASSWORD_FAILURE);
         }
 
         public void reset() {

@@ -432,6 +432,8 @@
     <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"Ekrāna ierakstīšana"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Sākt"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Apturēt"</string>
+    <!-- no translation found for media_seamless_remote_device (177033467332920464) -->
+    <skip />
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Velciet augšup, lai pārslēgtu lietotnes"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Lai ātri pārslēgtu lietotnes, velciet pa labi"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Pārskata pārslēgšana"</string>
@@ -715,6 +717,8 @@
     <string name="notification_channel_summary_priority" msgid="7415770044553264622">"Tiek rādīta sarunas sadaļas augšdaļā kā burbulis."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Iestatījumi"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritārs"</string>
+    <!-- no translation found for no_shortcut (7176375126961212514) -->
+    <skip />
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Nav nesen aizvērtu burbuļu"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Šeit būs redzami nesen rādītie burbuļi un aizvērtie burbuļi"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Šos paziņojumus nevar modificēt."</string>
@@ -1030,6 +1034,8 @@
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Izvēlieties vadīklas, kurām piekļūt no barošanas izvēlnes"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Lai pārkārtotu vadīklas, turiet un velciet tās"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Visas vadīklas ir noņemtas"</string>
+    <!-- no translation found for controls_favorite_toast_no_changes (7094494210840877931) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Nevarēja ielādēt sarakstu ar visām vadīklām."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Cita"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Pievienošana ierīču vadīklām"</string>
@@ -1038,6 +1044,7 @@
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"Vadīklas atjauninātas"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"PIN ietver burtus vai simbolus."</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"Verifikācija: <xliff:g id="DEVICE">%s</xliff:g>"</string>
+    <string name="controls_pin_wrong" msgid="6162694056042164211">"Nepareizs PIN"</string>
     <string name="controls_pin_verifying" msgid="3755045989392131746">"Notiek verifikācija…"</string>
     <string name="controls_pin_instructions" msgid="6363309783822475238">"Ievadiet PIN."</string>
     <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"Izmēģiniet citu PIN"</string>
@@ -1047,6 +1054,9 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Notiek ieteikumu ielāde"</string>
     <string name="controls_media_close_session" msgid="9023534788828414585">"Aizvērt multivides sesiju"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Neaktīva, pārbaudiet lietotni"</string>
+    <string name="controls_error_retryable" msgid="864025882878378470">"Radās kļūda. Mēģina vēlreiz…"</string>
+    <string name="controls_error_removed" msgid="6299213591234723805">"Ierīce ir noņemta."</string>
+    <string name="controls_error_generic" msgid="352500456918362905">"Nevar ielādēt statusu."</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Radās kļūda. Mēģiniet vēlreiz."</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"Sākta"</string>
     <string name="controls_added_tooltip" msgid="4842812921719153085">"Nospiediet barošanas pogu un turiet to, lai skatītu jaunas vadīklas"</string>

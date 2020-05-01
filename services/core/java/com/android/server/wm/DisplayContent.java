@@ -280,7 +280,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
     private final DisplayArea.Root mRootDisplayArea = new DisplayArea.Root(mWmService);
 
-    private final DisplayAreaPolicy mDisplayAreaPolicy;
+    @VisibleForTesting
+    final DisplayAreaPolicy mDisplayAreaPolicy;
 
     private WindowState mTmpWindow;
     private WindowState mTmpWindow2;
@@ -494,9 +495,13 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * The launching activity which is using fixed rotation transformation.
      *
      * @see #handleTopActivityLaunchingInDifferentOrientation
+     * @see #setFixedRotationLaunchingApp
      * @see DisplayRotation#shouldRotateSeamlessly
      */
     ActivityRecord mFixedRotationLaunchingApp;
+
+    final FixedRotationTransitionListener mFixedRotationTransitionListener =
+            new FixedRotationTransitionListener();
 
     /** Windows added since {@link #mCurrentFocus} was set to null. Used for ANR blaming. */
     final ArrayList<WindowState> mWinAddedSinceNullFocus = new ArrayList<>();
@@ -928,6 +933,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         mAppTransition = new AppTransition(mWmService.mContext, mWmService, this);
         mAppTransition.registerListenerLocked(mWmService.mActivityManagerAppTransitionNotifier);
+        mAppTransition.registerListenerLocked(mFixedRotationTransitionListener);
         mAppTransitionController = new AppTransitionController(mWmService, this);
         mUnknownAppVisibilityController = new UnknownAppVisibilityController(mWmService, this);
 
@@ -1266,6 +1272,12 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         if (configUpdated) {
             return;
         }
+
+        // The display configuration doesn't change. If there is a launching transformed app, that
+        // means its request to change display configuration has been discarded, then it should
+        // respect to the current configuration of display.
+        clearFixedRotationLaunchingApp();
+
         // Something changed (E.g. device rotation), but no configuration update is needed.
         // E.g. changing device rotation by 180 degrees. Go ahead and perform surface placement to
         // unfreeze the display since we froze it when the rotation was updated in
@@ -1383,7 +1395,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 orientationSource != null ? orientationSource.asActivityRecord() : null;
         // Currently there is no use case from non-activity.
         if (r != null && handleTopActivityLaunchingInDifferentOrientation(r)) {
-            mFixedRotationLaunchingApp = r;
             // Display orientation should be deferred until the top fixed rotation is finished.
             return false;
         }
@@ -1448,47 +1459,66 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             return false;
         }
 
-        startFixedRotationTransform(r, rotation);
-        mAppTransition.registerListenerLocked(new WindowManagerInternal.AppTransitionListener() {
-            void done() {
-                r.finishFixedRotationTransform();
-                mAppTransition.unregisterListener(this);
-            }
-
-            @Override
-            public void onAppTransitionFinishedLocked(IBinder token) {
-                if (token == r.token) {
-                    done();
-                }
-            }
-
-            @Override
-            public void onAppTransitionCancelledLocked(int transit) {
-                done();
-            }
-
-            @Override
-            public void onAppTransitionTimeoutLocked() {
-                done();
-            }
-        });
+        setFixedRotationLaunchingApp(r, rotation);
         return true;
     }
 
-    /** @return {@code true} if the display orientation will be changed. */
-    boolean continueUpdateOrientationForDiffOrienLaunchingApp(WindowToken token) {
-        if (token != mFixedRotationLaunchingApp) {
-            return false;
+    /**
+     * Sets the provided record to {@link mFixedRotationLaunchingApp} if possible to apply fixed
+     * rotation transform to it and indicate that the display may be rotated after it is launched.
+     */
+    void setFixedRotationLaunchingApp(@NonNull ActivityRecord r, @Surface.Rotation int rotation) {
+        final WindowToken prevRotatedLaunchingApp = mFixedRotationLaunchingApp;
+        if (prevRotatedLaunchingApp != null
+                && prevRotatedLaunchingApp.getWindowConfiguration().getRotation() == rotation
+                // It is animating so we can expect there will have a transition callback.
+                && prevRotatedLaunchingApp.isAnimating(TRANSITION | PARENTS)) {
+            // It may be the case that multiple activities launch consecutively. Because their
+            // rotation are the same, the transformed state can be shared to avoid duplicating
+            // the heavy operations. This also benefits that the states of multiple activities
+            // are handled together.
+            r.linkFixedRotationTransform(prevRotatedLaunchingApp);
+            return;
+        }
+
+        if (!r.hasFixedRotationTransform()) {
+            startFixedRotationTransform(r, rotation);
+        }
+        mFixedRotationLaunchingApp = r;
+        if (prevRotatedLaunchingApp != null) {
+            prevRotatedLaunchingApp.finishFixedRotationTransform();
+        }
+    }
+
+    /**
+     * Continue updating the orientation change of display if it was deferred by a top activity
+     * launched in a different orientation.
+     */
+    void continueUpdateOrientationForDiffOrienLaunchingApp() {
+        if (mFixedRotationLaunchingApp == null) {
+            return;
         }
         // Update directly because the app which will change the orientation of display is ready.
         if (mDisplayRotation.updateOrientation(getOrientation(), false /* forceUpdate */)) {
             sendNewConfiguration();
-            return true;
+            return;
         }
-        // The display won't rotate (e.g. the orientation from sensor has updated again before
-        // applying rotation to display), so clear it to stop using seamless rotation.
+        // The orientation of display is not changed.
+        clearFixedRotationLaunchingApp();
+    }
+
+    /**
+     * Clears the {@link mFixedRotationLaunchingApp} without applying rotation to display. It is
+     * used when the display won't rotate (e.g. the orientation from sensor has updated again before
+     * applying rotation to display) but the launching app has been transformed. So the record need
+     * to be cleared and restored to stop using seamless rotation and rotated configuration.
+     */
+    private void clearFixedRotationLaunchingApp() {
+        if (mFixedRotationLaunchingApp == null) {
+            return;
+        }
+        mFixedRotationLaunchingApp.finishFixedRotationTransform();
         mFixedRotationLaunchingApp = null;
-        return false;
     }
 
     private void startFixedRotationTransform(WindowToken token, int rotation) {
@@ -2857,6 +2887,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         if (mLastStatusBarVisibility != 0) {
             pw.print("  mLastStatusBarVisibility=0x");
             pw.println(Integer.toHexString(mLastStatusBarVisibility));
+        }
+        if (mFixedRotationLaunchingApp != null) {
+            pw.println("  mFixedRotationLaunchingApp=" + mFixedRotationLaunchingApp);
         }
 
         pw.println();
@@ -5184,7 +5217,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         final int currRotation = currOverrideConfig.windowConfiguration.getRotation();
         final int overrideRotation = overrideConfiguration.windowConfiguration.getRotation();
         if (currRotation != ROTATION_UNDEFINED && currRotation != overrideRotation) {
-            applyRotationAndClearFixedRotation(currRotation, overrideRotation);
+            applyRotationAndFinishFixedRotation(currRotation, overrideRotation);
         }
         mCurrentOverrideConfigurationChanges = currOverrideConfig.diff(overrideConfiguration);
         super.onRequestedOverrideConfigurationChanged(overrideConfiguration);
@@ -5200,7 +5233,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * fixed rotation transform also needs to be cleared to make sure the rotated activity fits
      * the display naturally.
      */
-    private void applyRotationAndClearFixedRotation(int oldRotation, int newRotation) {
+    private void applyRotationAndFinishFixedRotation(int oldRotation, int newRotation) {
         if (mFixedRotationLaunchingApp == null) {
             applyRotation(oldRotation, newRotation);
             return;
@@ -5219,7 +5252,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             }
         });
 
-        mFixedRotationLaunchingApp.clearFixedRotationTransform(
+        mFixedRotationLaunchingApp.finishFixedRotationTransform(
                 () -> applyRotation(oldRotation, newRotation));
         mFixedRotationLaunchingApp = null;
     }
@@ -5492,6 +5525,75 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 return true; /* stop */
             }
         });
+    }
+
+    /** The entry for proceeding to handle {@link #mFixedRotationLaunchingApp}. */
+    class FixedRotationTransitionListener extends WindowManagerInternal.AppTransitionListener {
+
+        /**
+         * The animating activity which shows the recents task list. It is set between
+         * {@link RecentsAnimationController#initialize} and
+         * {@link RecentsAnimationController#cancelAnimation}.
+         */
+        private ActivityRecord mAnimatingRecents;
+
+        /**
+         * If the recents activity has a fixed orientation which is different from the current top
+         * activity, it will be rotated before being shown so we avoid a screen rotation animation
+         * when showing the Recents view.
+         */
+        void onStartRecentsAnimation(@NonNull ActivityRecord r) {
+            mAnimatingRecents = r;
+            rotateInDifferentOrientationIfNeeded(r);
+            if (r.hasFixedRotationTransform()) {
+                // Set the record so we can recognize it to continue to update display orientation
+                // if the recents activity becomes the top later.
+                setFixedRotationLaunchingApp(r, r.getWindowConfiguration().getRotation());
+            }
+        }
+
+        /**
+         * If {@link #mAnimatingRecents} still has fixed rotation, it should be moved to top so we
+         * don't clear {@link #mFixedRotationLaunchingApp} that will be handled by transition.
+         */
+        void onFinishRecentsAnimation() {
+            final ActivityRecord animatingRecents = mAnimatingRecents;
+            mAnimatingRecents = null;
+            if (animatingRecents != null && animatingRecents == mFixedRotationLaunchingApp
+                    && !animatingRecents.hasFixedRotationTransform()) {
+                // The recents activity won't be the top, such as giving up the swipe up gesture
+                // and return to the original top.
+                mFixedRotationLaunchingApp = null;
+            }
+        }
+
+        @Override
+        public void onAppTransitionFinishedLocked(IBinder token) {
+            final ActivityRecord r = getActivityRecord(token);
+            // Ignore the animating recents so the fixed rotation transform won't be switched twice
+            // by finishing the recents animation and moving it to top. That also avoids flickering
+            // due to wait for previous activity to be paused if it supports PiP that ignores the
+            // effect of resume-while-pausing.
+            if (r == null || r == mAnimatingRecents) {
+                return;
+            }
+            if (mFixedRotationLaunchingApp != null
+                    && mFixedRotationLaunchingApp.hasFixedRotationTransform(r)) {
+                continueUpdateOrientationForDiffOrienLaunchingApp();
+            } else {
+                r.finishFixedRotationTransform();
+            }
+        }
+
+        @Override
+        public void onAppTransitionCancelledLocked(int transit) {
+            continueUpdateOrientationForDiffOrienLaunchingApp();
+        }
+
+        @Override
+        public void onAppTransitionTimeoutLocked() {
+            continueUpdateOrientationForDiffOrienLaunchingApp();
+        }
     }
 
     class RemoteInsetsControlTarget implements InsetsControlTarget {

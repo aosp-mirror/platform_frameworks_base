@@ -3241,7 +3241,9 @@
   <java-symbol type="id" name="accessibility_shortcut_target_checkbox" />
   <java-symbol type="id" name="accessibility_shortcut_target_icon" />
   <java-symbol type="id" name="accessibility_shortcut_target_label" />
-  <java-symbol type="id" name="accessibility_shortcut_target_switch_item" />
+  <java-symbol type="id" name="accessibility_shortcut_target_status" />
+  <java-symbol type="string" name="accessibility_shortcut_menu_item_status_on" />
+  <java-symbol type="string" name="accessibility_shortcut_menu_item_status_off" />
 
   <!-- Accessibility Button -->
   <java-symbol type="layout" name="accessibility_button_chooser" />

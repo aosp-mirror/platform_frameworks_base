@@ -20,6 +20,7 @@ import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
 import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ASK;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
 import android.content.pm.PackageManager;
@@ -31,6 +32,8 @@ import android.util.ArraySet;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
+
+import com.android.server.pm.pkg.PackageStateUnserialized;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -299,5 +302,56 @@ public class PackageUserStateTest {
         params2 = createSuspendParams(dialogInfo2, appExtras2, launcherExtras2);
         // Everything is different
         assertThat(params1.equals(params2), is(false));
+    }
+
+    /**
+     * Test fix for b/149772100.
+     */
+    private static void assertLastPackageUsageUnset(
+            PackageStateUnserialized state) throws Exception {
+        for (int i = state.getLastPackageUsageTimeInMills().length - 1; i >= 0; --i) {
+            assertEquals(0L, state.getLastPackageUsageTimeInMills()[i]);
+        }
+    }
+    private static void assertLastPackageUsageSet(
+            PackageStateUnserialized state, int reason, long value) throws Exception {
+        for (int i = state.getLastPackageUsageTimeInMills().length - 1; i >= 0; --i) {
+            if (i == reason) {
+                assertEquals(value, state.getLastPackageUsageTimeInMills()[i]);
+            } else {
+                assertEquals(0L, state.getLastPackageUsageTimeInMills()[i]);
+            }
+        }
+    }
+    @Test
+    public void testPackageUseReasons() throws Exception {
+        final PackageStateUnserialized testState1 = new PackageStateUnserialized();
+        testState1.setLastPackageUsageTimeInMills(-1, 10L);
+        assertLastPackageUsageUnset(testState1);
+
+        final PackageStateUnserialized testState2 = new PackageStateUnserialized();
+        testState2.setLastPackageUsageTimeInMills(
+                PackageManager.NOTIFY_PACKAGE_USE_REASONS_COUNT, 20L);
+        assertLastPackageUsageUnset(testState2);
+
+        final PackageStateUnserialized testState3 = new PackageStateUnserialized();
+        testState3.setLastPackageUsageTimeInMills(Integer.MAX_VALUE, 30L);
+        assertLastPackageUsageUnset(testState3);
+
+        final PackageStateUnserialized testState4 = new PackageStateUnserialized();
+        testState4.setLastPackageUsageTimeInMills(0, 40L);
+        assertLastPackageUsageSet(testState4, 0, 40L);
+
+        final PackageStateUnserialized testState5 = new PackageStateUnserialized();
+        testState5.setLastPackageUsageTimeInMills(
+                PackageManager.NOTIFY_PACKAGE_USE_CONTENT_PROVIDER, 50L);
+        assertLastPackageUsageSet(
+                testState5, PackageManager.NOTIFY_PACKAGE_USE_CONTENT_PROVIDER, 50L);
+
+        final PackageStateUnserialized testState6 = new PackageStateUnserialized();
+        testState6.setLastPackageUsageTimeInMills(
+                PackageManager.NOTIFY_PACKAGE_USE_REASONS_COUNT - 1, 60L);
+        assertLastPackageUsageSet(
+                testState6, PackageManager.NOTIFY_PACKAGE_USE_REASONS_COUNT - 1, 60L);
     }
 }

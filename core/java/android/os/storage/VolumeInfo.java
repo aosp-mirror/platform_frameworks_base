@@ -181,22 +181,22 @@ public class VolumeInfo implements Parcelable {
 
     @UnsupportedAppUsage
     public VolumeInfo(Parcel parcel) {
-        id = parcel.readString();
+        id = parcel.readString8();
         type = parcel.readInt();
         if (parcel.readInt() != 0) {
             disk = DiskInfo.CREATOR.createFromParcel(parcel);
         } else {
             disk = null;
         }
-        partGuid = parcel.readString();
+        partGuid = parcel.readString8();
         mountFlags = parcel.readInt();
         mountUserId = parcel.readInt();
         state = parcel.readInt();
-        fsType = parcel.readString();
-        fsUuid = parcel.readString();
-        fsLabel = parcel.readString();
-        path = parcel.readString();
-        internalPath = parcel.readString();
+        fsType = parcel.readString8();
+        fsUuid = parcel.readString8();
+        fsLabel = parcel.readString8();
+        path = parcel.readString8();
+        internalPath = parcel.readString8();
     }
 
     @UnsupportedAppUsage
@@ -553,7 +553,7 @@ public class VolumeInfo implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
-        parcel.writeString(id);
+        parcel.writeString8(id);
         parcel.writeInt(type);
         if (disk != null) {
             parcel.writeInt(1);
@@ -561,14 +561,14 @@ public class VolumeInfo implements Parcelable {
         } else {
             parcel.writeInt(0);
         }
-        parcel.writeString(partGuid);
+        parcel.writeString8(partGuid);
         parcel.writeInt(mountFlags);
         parcel.writeInt(mountUserId);
         parcel.writeInt(state);
-        parcel.writeString(fsType);
-        parcel.writeString(fsUuid);
-        parcel.writeString(fsLabel);
-        parcel.writeString(path);
-        parcel.writeString(internalPath);
+        parcel.writeString8(fsType);
+        parcel.writeString8(fsUuid);
+        parcel.writeString8(fsLabel);
+        parcel.writeString8(path);
+        parcel.writeString8(internalPath);
     }
 }

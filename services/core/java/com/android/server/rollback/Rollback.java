@@ -27,6 +27,7 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.UserInfo;
 import android.content.pm.VersionedPackage;
 import android.content.rollback.PackageRollbackInfo;
@@ -36,14 +37,19 @@ import android.os.Binder;
 import android.os.ParcelFileDescriptor;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.ext.SdkExtensions;
 import android.text.TextUtils;
 import android.util.IntArray;
 import android.util.Slog;
+import android.util.SparseIntArray;
 import android.util.SparseLongArray;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.IndentingPrintWriter;
+import com.android.server.LocalServices;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import java.io.File;
 import java.io.IOException;
@@ -53,6 +59,7 @@ import java.text.ParseException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 
 /**
@@ -174,6 +181,11 @@ class Rollback {
     private int mNumPackageSessionsWithSuccess;
 
     /**
+     * The extension versions supported at the time of rollback creation.
+     */
+    @NonNull private final SparseIntArray mExtensionVersions;
+
+    /**
      * Constructs a new, empty Rollback instance.
      *
      * @param rollbackId the id of the rollback.
@@ -182,9 +194,11 @@ class Rollback {
      * @param userId the user that performed the install with rollback enabled.
      * @param installerPackageName the installer package name from the original install session.
      * @param packageSessionIds the session ids for all packages in the install.
+     * @param extensionVersions the extension versions supported at the time of rollback creation
      */
     Rollback(int rollbackId, File backupDir, int stagedSessionId, int userId,
-            String installerPackageName, int[] packageSessionIds) {
+            String installerPackageName, int[] packageSessionIds,
+            SparseIntArray extensionVersions) {
         this.info = new RollbackInfo(rollbackId,
                 /* packages */ new ArrayList<>(),
                 /* isStaged */ stagedSessionId != -1,
@@ -197,11 +211,13 @@ class Rollback {
         mState = ROLLBACK_STATE_ENABLING;
         mTimestamp = Instant.now();
         mPackageSessionIds = packageSessionIds != null ? packageSessionIds : new int[0];
+        mExtensionVersions = Objects.requireNonNull(extensionVersions);
     }
 
     Rollback(int rollbackId, File backupDir, int stagedSessionId, int userId,
              String installerPackageName) {
-        this(rollbackId, backupDir, stagedSessionId, userId, installerPackageName, null);
+        this(rollbackId, backupDir, stagedSessionId, userId, installerPackageName, null,
+                new SparseIntArray(0));
     }
 
     /**
@@ -209,7 +225,7 @@ class Rollback {
      */
     Rollback(RollbackInfo info, File backupDir, Instant timestamp, int stagedSessionId,
             @RollbackState int state, int apkSessionId, boolean restoreUserDataInProgress,
-            int userId, String installerPackageName) {
+            int userId, String installerPackageName, SparseIntArray extensionVersions) {
         this.info = info;
         mUserId = userId;
         mInstallerPackageName = installerPackageName;
@@ -219,6 +235,7 @@ class Rollback {
         mState = state;
         mApkSessionId = apkSessionId;
         mRestoreUserDataInProgress = restoreUserDataInProgress;
+        mExtensionVersions = Objects.requireNonNull(extensionVersions);
         // TODO(b/120200473): Include this field during persistence. This field will be used to
         // decide which rollback to expire when ACTION_PACKAGE_REPLACED is received. Note persisting
         // this field is not backward compatible. We won't fix b/120200473 until S to minimize the
@@ -280,6 +297,14 @@ class Rollback {
      */
     @Nullable String getInstallerPackageName() {
         return mInstallerPackageName;
+    }
+
+    /**
+     * Returns the extension versions that were supported at the time that the rollback was created,
+     * as a mapping from SdkVersion to ExtensionVersion.
+     */
+    SparseIntArray getExtensionVersions() {
+        return mExtensionVersions;
     }
 
     /**
@@ -449,6 +474,15 @@ class Rollback {
                         RollbackManager.STATUS_FAILURE_ROLLBACK_UNAVAILABLE,
                         "Rollback unavailable");
                 return;
+            }
+
+            if (containsApex() && wasCreatedAtLowerExtensionVersion()) {
+                PackageManagerInternal pmi = LocalServices.getService(PackageManagerInternal.class);
+                if (extensionVersionReductionWouldViolateConstraint(mExtensionVersions, pmi)) {
+                    sendFailure(context, statusReceiver, RollbackManager.STATUS_FAILURE,
+                            "Rollback may violate a minExtensionVersion constraint");
+                    return;
+                }
             }
 
             // Get a context to use to install the downgraded version of the package.
@@ -826,6 +860,56 @@ class Rollback {
         }
     }
 
+    /**
+     * Returns true if there is an app installed that specifies a minExtensionVersion greater
+     * than what was present at the time this Rollback was created.
+     */
+    @VisibleForTesting
+    static boolean extensionVersionReductionWouldViolateConstraint(
+            SparseIntArray rollbackExtVers, PackageManagerInternal pmi) {
+        if (rollbackExtVers.size() == 0) {
+            return false;
+        }
+        List<String> packages = pmi.getPackageList().getPackageNames();
+        for (int i = 0; i < packages.size(); i++) {
+            AndroidPackage pkg = pmi.getPackage(packages.get(i));
+            SparseIntArray minExtVers = pkg.getMinExtensionVersions();
+            if (minExtVers == null) {
+                continue;
+            }
+            for (int j = 0; j < rollbackExtVers.size(); j++) {
+                int minExt = minExtVers.get(rollbackExtVers.keyAt(j), -1);
+                if (rollbackExtVers.valueAt(j) < minExt) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Returns true if for any SDK version, the extension version recorded at the time of rollback
+     * creation is lower than the current extension version.
+     */
+    private boolean wasCreatedAtLowerExtensionVersion() {
+        for (int i = 0; i < mExtensionVersions.size(); i++) {
+            if (SdkExtensions.getExtensionVersion(mExtensionVersions.keyAt(i))
+                    > mExtensionVersions.valueAt(i)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean containsApex() {
+        for (PackageRollbackInfo pkgInfo : info.getPackages()) {
+            if (pkgInfo.isApex()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     void dump(IndentingPrintWriter ipw) {
         synchronized (mLock) {
             ipw.println(info.getRollbackId() + ":");
@@ -851,6 +935,12 @@ class Rollback {
                 }
                 ipw.decreaseIndent();
                 ipw.println("-committedSessionId: " + info.getCommittedSessionId());
+            }
+            if (mExtensionVersions.size() > 0) {
+                ipw.println("-extensionVersions:");
+                ipw.increaseIndent();
+                ipw.println(mExtensionVersions.toString());
+                ipw.decreaseIndent();
             }
             ipw.decreaseIndent();
         }

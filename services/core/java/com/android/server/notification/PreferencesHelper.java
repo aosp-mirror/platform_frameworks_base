@@ -166,13 +166,6 @@ public class PreferencesHelper implements RankingConfig {
 
     private boolean mAllowInvalidShortcuts = false;
 
-    private static final String BADGING_FORCED_TRUE = "force_badging_true_for_bug";
-
-    // STOPSHIP (b/142218092) this should be removed before ship
-    static boolean wasBadgingForcedTrue(Context context) {
-        return Settings.Secure.getInt(context.getContentResolver(), BADGING_FORCED_TRUE, 0) != 0;
-    }
-
     public PreferencesHelper(Context context, PackageManager pm, RankingHandler rankingHandler,
             ZenModeHelper zenHelper, NotificationChannelLogger notificationChannelLogger,
             AppOpsManager appOpsManager) {
@@ -182,14 +175,6 @@ public class PreferencesHelper implements RankingConfig {
         mPm = pm;
         mNotificationChannelLogger = notificationChannelLogger;
         mAppOps = appOpsManager;
-
-        // STOPSHIP (b/142218092) this should be removed before ship
-        if (!wasBadgingForcedTrue(context)) {
-            Settings.Secure.putInt(mContext.getContentResolver(),
-                    Settings.Secure.NOTIFICATION_BADGING,
-                    DEFAULT_SHOW_BADGE ? 1 : 0);
-            Settings.Secure.putInt(context.getContentResolver(), BADGING_FORCED_TRUE, 1);
-        }
 
         updateBadgingEnabled();
         updateBubblesEnabled();

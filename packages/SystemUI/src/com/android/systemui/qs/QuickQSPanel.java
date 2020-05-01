@@ -27,6 +27,7 @@ import android.view.Gravity;
 import android.view.View;
 import android.widget.LinearLayout;
 
+import com.android.internal.logging.UiEventLogger;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
@@ -40,6 +41,7 @@ import com.android.systemui.plugins.qs.QSTile.SignalState;
 import com.android.systemui.plugins.qs.QSTile.State;
 import com.android.systemui.qs.customize.QSCustomizer;
 import com.android.systemui.qs.logging.QSLogger;
+import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
 import com.android.systemui.util.Utils;
@@ -86,10 +88,13 @@ public class QuickQSPanel extends QSPanel {
             @Main Executor foregroundExecutor,
             @Background DelayableExecutor backgroundExecutor,
             @Nullable LocalBluetoothManager localBluetoothManager,
-            ActivityStarter activityStarter
+            ActivityStarter activityStarter,
+            NotificationEntryManager entryManager,
+            UiEventLogger uiEventLogger
     ) {
         super(context, attrs, dumpManager, broadcastDispatcher, qsLogger,
-                foregroundExecutor, backgroundExecutor, localBluetoothManager, activityStarter);
+                foregroundExecutor, backgroundExecutor, localBluetoothManager, activityStarter,
+                entryManager, uiEventLogger);
         if (mFooter != null) {
             removeView(mFooter.getView());
         }
@@ -115,9 +120,9 @@ public class QuickQSPanel extends QSPanel {
             lp2.setMarginStart(0);
             mHorizontalLinearLayout.addView(mMediaPlayer.getView(), lp2);
 
-            mTileLayout = new DoubleLineTileLayout(context);
+            mTileLayout = new DoubleLineTileLayout(context, mUiEventLogger);
             mMediaTileLayout = mTileLayout;
-            mRegularTileLayout = new HeaderTileLayout(context);
+            mRegularTileLayout = new HeaderTileLayout(context, mUiEventLogger);
             LayoutParams lp = new LayoutParams(0, LayoutParams.MATCH_PARENT, 1);
             lp.setMarginEnd(0);
             lp.setMarginStart(marginSize);
@@ -132,7 +137,7 @@ public class QuickQSPanel extends QSPanel {
             super.setPadding(0, 0, 0, 0);
         } else {
             sDefaultMaxTiles = getResources().getInteger(R.integer.quick_qs_panel_max_columns);
-            mTileLayout = new HeaderTileLayout(context);
+            mTileLayout = new HeaderTileLayout(context, mUiEventLogger);
             mTileLayout.setListening(mListening);
             addView((View) mTileLayout, 0 /* Between brightness and footer */);
             super.setPadding(0, 0, 0, 0);
@@ -309,13 +314,30 @@ public class QuickQSPanel extends QSPanel {
         super.setVisibility(visibility);
     }
 
+    @Override
+    protected QSEvent openPanelEvent() {
+        return QSEvent.QQS_PANEL_EXPANDED;
+    }
+
+    @Override
+    protected QSEvent closePanelEvent() {
+        return QSEvent.QQS_PANEL_COLLAPSED;
+    }
+
+    @Override
+    protected QSEvent tileVisibleEvent() {
+        return QSEvent.QQS_TILE_VISIBLE;
+    }
+
     private static class HeaderTileLayout extends TileLayout {
 
-        private boolean mListening;
+        private final UiEventLogger mUiEventLogger;
+
         private Rect mClippingBounds = new Rect();
 
-        public HeaderTileLayout(Context context) {
+        public HeaderTileLayout(Context context, UiEventLogger uiEventLogger) {
             super(context);
+            mUiEventLogger = uiEventLogger;
             setClipChildren(false);
             setClipToPadding(false);
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT,
@@ -439,6 +461,19 @@ public class QuickQSPanel extends QSPanel {
                 return getPaddingStart() + mCellMarginHorizontal;
             }
             return getPaddingStart() + column *  (mCellWidth + mCellMarginHorizontal);
+        }
+
+        @Override
+        public void setListening(boolean listening) {
+            boolean startedListening = !mListening && listening;
+            super.setListening(listening);
+            if (startedListening) {
+                for (int i = 0; i < getNumVisibleTiles(); i++) {
+                    QSTile tile = mRecords.get(i).tile;
+                    mUiEventLogger.logWithInstanceId(QSEvent.QQS_TILE_VISIBLE, 0,
+                            tile.getMetricsSpec(), tile.getInstanceId());
+                }
+            }
         }
     }
 }

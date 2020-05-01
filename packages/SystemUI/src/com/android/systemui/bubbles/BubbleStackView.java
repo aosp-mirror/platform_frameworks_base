@@ -108,7 +108,8 @@ import java.util.function.Consumer;
 /**
  * Renders bubbles in a stack and handles animating expanded and collapsed states.
  */
-public class BubbleStackView extends FrameLayout {
+public class BubbleStackView extends FrameLayout
+        implements ViewTreeObserver.OnComputeInternalInsetsListener {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "BubbleStackView" : TAG_BUBBLES;
 
     /** Animation durations for bubble stack user education views. **/
@@ -647,7 +648,6 @@ public class BubbleStackView extends FrameLayout {
     private boolean mShowingManage = false;
     private PhysicsAnimator.SpringConfig mManageSpringConfig = new PhysicsAnimator.SpringConfig(
             SpringForce.STIFFNESS_MEDIUM, SpringForce.DAMPING_RATIO_LOW_BOUNCY);
-
     @SuppressLint("ClickableViewAccessibility")
     public BubbleStackView(Context context, BubbleData data,
             @Nullable SurfaceSynchronizer synchronizer,
@@ -1052,14 +1052,24 @@ public class BubbleStackView extends FrameLayout {
     }
 
     @Override
-    public void getBoundsOnScreen(Rect outRect, boolean clipToParent) {
-        getBoundsOnScreen(outRect);
+    public void onComputeInternalInsets(ViewTreeObserver.InternalInsetsInfo inoutInfo) {
+        inoutInfo.setTouchableInsets(ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION);
+
+        getTouchableRegion(mTempRect);
+        inoutInfo.touchableRegion.set(mTempRect);
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        getViewTreeObserver().addOnComputeInternalInsetsListener(this);
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         getViewTreeObserver().removeOnPreDrawListener(mViewUpdater);
+        getViewTreeObserver().removeOnComputeInternalInsetsListener(this);
     }
 
     @Override
@@ -1106,6 +1116,8 @@ public class BubbleStackView extends FrameLayout {
         // R constants are not final so we cannot use switch-case here.
         if (action == AccessibilityNodeInfo.ACTION_DISMISS) {
             mBubbleData.dismissAll(BubbleController.DISMISS_ACCESSIBILITY_ACTION);
+            announceForAccessibility(
+                    getResources().getString(R.string.accessibility_bubble_dismissed));
             return true;
         } else if (action == AccessibilityNodeInfo.ACTION_COLLAPSE) {
             mBubbleData.setExpanded(false);
@@ -1136,32 +1148,29 @@ public class BubbleStackView extends FrameLayout {
         if (mBubbleData.getBubbles().isEmpty()) {
             return;
         }
-        Bubble topBubble = mBubbleData.getBubbles().get(0);
-        String appName = topBubble.getAppName();
-        Notification notification = topBubble.getEntry().getSbn().getNotification();
-        CharSequence titleCharSeq = notification.extras.getCharSequence(Notification.EXTRA_TITLE);
-        String titleStr = getResources().getString(R.string.notification_bubble_title);
-        if (titleCharSeq != null) {
-            titleStr = titleCharSeq.toString();
-        }
-        int moreCount = mBubbleContainer.getChildCount() - 1;
 
-        // Example: Title from app name.
-        String singleDescription = getResources().getString(
-                R.string.bubble_content_description_single, titleStr, appName);
+        for (int i = 0; i < mBubbleData.getBubbles().size(); i++) {
+            final Bubble bubble = mBubbleData.getBubbles().get(i);
+            final String appName = bubble.getAppName();
+            final Notification notification = bubble.getEntry().getSbn().getNotification();
+            final CharSequence titleCharSeq =
+                    notification.extras.getCharSequence(Notification.EXTRA_TITLE);
 
-        // Example: Title from app name and 4 more.
-        String stackDescription = getResources().getString(
-                R.string.bubble_content_description_stack, titleStr, appName, moreCount);
+            String titleStr = getResources().getString(R.string.notification_bubble_title);
+            if (titleCharSeq != null) {
+                titleStr = titleCharSeq.toString();
+            }
 
-        if (mIsExpanded) {
-            // TODO(b/129522932) - update content description for each bubble in expanded view.
-        } else {
-            // Collapsed stack.
-            if (moreCount > 0) {
-                mBubbleContainer.setContentDescription(stackDescription);
-            } else {
-                mBubbleContainer.setContentDescription(singleDescription);
+            if (bubble.getIconView() != null) {
+                if (mIsExpanded || i > 0) {
+                    bubble.getIconView().setContentDescription(getResources().getString(
+                            R.string.bubble_content_description_single, titleStr, appName));
+                } else {
+                    final int moreCount = mBubbleContainer.getChildCount() - 1;
+                    bubble.getIconView().setContentDescription(getResources().getString(
+                            R.string.bubble_content_description_stack,
+                            titleStr, appName, moreCount));
+                }
             }
         }
     }
@@ -1961,8 +1970,16 @@ public class BubbleStackView extends FrameLayout {
         mAfterFlyoutHidden = null;
     }
 
-    @Override
-    public void getBoundsOnScreen(Rect outRect) {
+    /**
+     * Fills the Rect with the touchable region of the bubbles. This will be used by WindowManager
+     * to decide which touch events go to Bubbles.
+     *
+     * Bubbles is below the status bar/notification shade but above application windows. If you're
+     * trying to get touch events from the status bar or another higher-level window layer, you'll
+     * need to re-order TYPE_BUBBLES in WindowManagerPolicy so that we have the opportunity to steal
+     * them.
+     */
+    public void getTouchableRegion(Rect outRect) {
         if (mUserEducationView != null && mUserEducationView.getVisibility() == VISIBLE) {
             // When user education shows then capture all touches
             outRect.set(0, 0, getWidth(), getHeight());
@@ -1972,12 +1989,12 @@ public class BubbleStackView extends FrameLayout {
         if (!mIsExpanded) {
             if (getBubbleCount() > 0) {
                 mBubbleContainer.getChildAt(0).getBoundsOnScreen(outRect);
+                // Increase the touch target size of the bubble
+                outRect.top -= mBubbleTouchPadding;
+                outRect.left -= mBubbleTouchPadding;
+                outRect.right += mBubbleTouchPadding;
+                outRect.bottom += mBubbleTouchPadding;
             }
-            // Increase the touch target size of the bubble
-            outRect.top -= mBubbleTouchPadding;
-            outRect.left -= mBubbleTouchPadding;
-            outRect.right += mBubbleTouchPadding;
-            outRect.bottom += mBubbleTouchPadding;
         } else {
             mBubbleContainer.getBoundsOnScreen(outRect);
         }

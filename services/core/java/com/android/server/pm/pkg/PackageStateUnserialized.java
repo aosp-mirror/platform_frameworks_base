@@ -21,7 +21,6 @@ import static java.util.Collections.emptyList;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageParser;
 import android.content.pm.SharedLibraryInfo;
 
 import com.android.internal.util.DataClass;
@@ -64,6 +63,12 @@ public class PackageStateUnserialized {
     }
 
     public PackageStateUnserialized setLastPackageUsageTimeInMills(int reason, long time) {
+        if (reason < 0) {
+            return this;
+        }
+        if (reason >= PackageManager.NOTIFY_PACKAGE_USE_REASONS_COUNT) {
+            return this;
+        }
         getLastPackageUsageTimeInMills()[reason] = time;
         return this;
     }

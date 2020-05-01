@@ -17,6 +17,7 @@
 #include <aidl/android/os/BnPullAtomCallback.h>
 #include <aidl/android/os/IPullAtomCallback.h>
 #include <aidl/android/os/IPullAtomResultReceiver.h>
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
 #include "frameworks/base/cmds/statsd/src/stats_log.pb.h"
@@ -24,6 +25,7 @@
 #include "src/StatsLogProcessor.h"
 #include "src/hash.h"
 #include "src/logd/LogEvent.h"
+#include "src/packages/UidMap.h"
 #include "src/stats_log_util.h"
 #include "stats_event.h"
 #include "statslog_statsdtest.h"
@@ -32,6 +34,7 @@ namespace android {
 namespace os {
 namespace statsd {
 
+using namespace testing;
 using ::aidl::android::os::BnPullAtomCallback;
 using ::aidl::android::os::IPullAtomCallback;
 using ::aidl::android::os::IPullAtomResultReceiver;
@@ -43,6 +46,12 @@ const int SCREEN_STATE_ATOM_ID = util::SCREEN_STATE_CHANGED;
 const int UID_PROCESS_STATE_ATOM_ID = util::UID_PROCESS_STATE_CHANGED;
 
 enum BucketSplitEvent { APP_UPGRADE, BOOT_COMPLETE };
+
+class MockUidMap : public UidMap {
+public:
+    MOCK_METHOD(int, getHostUidOrSelf, (int uid), (const));
+    MOCK_METHOD(std::set<int32_t>, getAppUid, (const string& package), (const));
+};
 
 // Converts a ProtoOutputStream to a StatsLogReport proto.
 StatsLogReport outputStreamToProto(ProtoOutputStream* proto);
@@ -212,6 +221,15 @@ std::shared_ptr<LogEvent> CreateNoValuesLogEvent(int atomId, int64_t eventTimeNs
 
 void CreateNoValuesLogEvent(LogEvent* logEvent, int atomId, int64_t eventTimeNs);
 
+std::shared_ptr<LogEvent> makeUidLogEvent(int atomId, int64_t eventTimeNs, int uid, int data1,
+                                          int data2);
+
+std::shared_ptr<LogEvent> makeAttributionLogEvent(int atomId, int64_t eventTimeNs,
+                                                  const vector<int>& uids,
+                                                  const vector<string>& tags, int data1, int data2);
+
+sp<MockUidMap> makeMockUidMapForOneHost(int hostUid, const vector<int>& isolatedUids);
+
 // Create log event for screen state changed.
 std::unique_ptr<LogEvent> CreateScreenStateChangedEvent(
         uint64_t timestampNs, const android::view::DisplayStateEnum state);
@@ -293,7 +311,8 @@ std::unique_ptr<LogEvent> CreateOverlayStateChangedEvent(int64_t timestampNs, co
 sp<StatsLogProcessor> CreateStatsLogProcessor(const int64_t timeBaseNs, const int64_t currentTimeNs,
                                               const StatsdConfig& config, const ConfigKey& key,
                                               const shared_ptr<IPullAtomCallback>& puller = nullptr,
-                                              const int32_t atomTag = 0 /*for puller only*/);
+                                              const int32_t atomTag = 0 /*for puller only*/,
+                                              const sp<UidMap> = new UidMap());
 
 // Util function to sort the log events by timestamp.
 void sortLogEventsByTimestamp(std::vector<std::unique_ptr<LogEvent>> *events);

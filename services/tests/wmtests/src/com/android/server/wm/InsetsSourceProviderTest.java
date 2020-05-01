@@ -189,4 +189,25 @@ public class InsetsSourceProviderTest extends WindowTestsBase {
         mProvider.onInsetsModified(target, state.getSource(ITYPE_STATUS_BAR));
         assertTrue(mSource.isVisible());
     }
+
+    @Test
+    public void testInsetGeometries() {
+        final WindowState statusBar = createWindow(null, TYPE_APPLICATION, "statusBar");
+        statusBar.getFrameLw().set(0, 0, 500, 100);
+        statusBar.mHasSurface = true;
+        mProvider.setWindow(statusBar, null, null);
+        mProvider.onPostLayout();
+        assertEquals(new Rect(0, 0, 500, 100), mProvider.getSource().getFrame());
+        // Still apply top insets if window overlaps even if it's top doesn't exactly match
+        // the inset-window's top.
+        assertEquals(Insets.of(0, 100, 0, 0),
+                mProvider.getSource().calculateInsets(new Rect(0, -100, 500, 400),
+                        false /* ignoreVisibility */));
+
+        // Don't apply left insets if window is left-of inset-window but still overlaps
+        statusBar.getFrameLw().set(100, 0, 0, 0);
+        assertEquals(Insets.of(0, 0, 0, 0),
+                mProvider.getSource().calculateInsets(new Rect(-100, 0, 400, 500),
+                        false /* ignoreVisibility */));
+    }
 }

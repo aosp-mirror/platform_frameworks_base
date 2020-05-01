@@ -336,6 +336,14 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
                 return false;
             }
         }
+
+        if (entry.hasJustLaunchedFullScreenIntent()) {
+            if (DEBUG_HEADS_UP) {
+                Log.d(TAG, "No alerting: recent fullscreen: " + sbn.getKey());
+            }
+            return false;
+        }
+
         return true;
     }
 
@@ -361,13 +369,6 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
         if (isSnoozedPackage(sbn)) {
             if (DEBUG_HEADS_UP) {
                 Log.d(TAG, "No alerting: snoozed package: " + sbn.getKey());
-            }
-            return false;
-        }
-
-        if (entry.hasJustLaunchedFullScreenIntent()) {
-            if (DEBUG_HEADS_UP) {
-                Log.d(TAG, "No alerting: recent fullscreen: " + sbn.getKey());
             }
             return false;
         }

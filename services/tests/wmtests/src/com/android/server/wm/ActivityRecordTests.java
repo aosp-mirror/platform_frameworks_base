@@ -66,6 +66,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.never;
 
 import android.app.ActivityOptions;
@@ -1083,6 +1084,46 @@ public class ActivityRecordTests extends ActivityTestsBase {
     }
 
     /**
+     * Verify that complete finish request for an activity which the resume activity is translucent
+     * must ensure the visibilities of activities being updated.
+     */
+    @Test
+    public void testCompleteFinishing_ensureActivitiesVisible() {
+        final ActivityRecord firstActivity = new ActivityBuilder(mService).setTask(mTask).build();
+        firstActivity.mVisibleRequested = false;
+        firstActivity.nowVisible = false;
+        firstActivity.setState(STOPPED, "true");
+
+        final ActivityRecord secondActivity = new ActivityBuilder(mService).setTask(mTask).build();
+        secondActivity.mVisibleRequested = true;
+        secondActivity.nowVisible = true;
+        secondActivity.setState(PAUSED, "true");
+
+        final ActivityRecord translucentActivity =
+                new ActivityBuilder(mService).setTask(mTask).build();
+        translucentActivity.mVisibleRequested = true;
+        translucentActivity.nowVisible = true;
+        translucentActivity.setState(RESUMED, "true");
+
+        doReturn(false).when(translucentActivity).occludesParent();
+
+        // Finish the second activity
+        secondActivity.finishing = true;
+        secondActivity.completeFinishing("test");
+        verify(secondActivity.getDisplay()).ensureActivitiesVisible(null /* starting */,
+                0 /* configChanges */ , false /* preserveWindows */,
+                true /* notifyClients */);
+
+        // Finish the first activity
+        firstActivity.finishing = true;
+        firstActivity.mVisibleRequested = true;
+        firstActivity.completeFinishing("test");
+        verify(firstActivity.getDisplay(), times(2)).ensureActivitiesVisible(null /* starting */,
+                0 /* configChanges */ , false /* preserveWindows */,
+                true /* notifyClients */);
+    }
+
+    /**
      * Verify destroy activity request completes successfully.
      */
     @Test
@@ -1362,6 +1403,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
         final DisplayInfo rotatedInfo = mActivity.getFixedRotationTransformDisplayInfo();
         mActivity.finishFixedRotationTransform();
         final ScreenRotationAnimation rotationAnim = display.getRotationAnimation();
+        assertNotNull(rotationAnim);
         rotationAnim.setRotation(display.getPendingTransaction(), originalRotation);
 
         // Because the display doesn't rotate, the rotated activity needs to cancel the fixed
@@ -1369,8 +1411,18 @@ public class ActivityRecordTests extends ActivityTestsBase {
         verify(mActivity).onCancelFixedRotationTransform(rotatedInfo.rotation);
         assertTrue(mActivity.isFreezingScreen());
         assertFalse(displayRotation.isRotatingSeamlessly());
-        assertNotNull(rotationAnim);
         assertTrue(rotationAnim.isRotating());
+
+        // Simulate the remote rotation has completed and the configuration doesn't change, then
+        // the rotated activity should also be restored by clearing the transform.
+        displayRotation.updateRotationUnchecked(true /* forceUpdate */);
+        doReturn(false).when(displayRotation).isWaitingForRemoteRotation();
+        clearInvocations(mActivity);
+        display.mFixedRotationLaunchingApp = mActivity;
+        display.sendNewConfiguration();
+
+        assertNull(display.mFixedRotationLaunchingApp);
+        assertFalse(mActivity.hasFixedRotationTransform());
     }
 
     @Test

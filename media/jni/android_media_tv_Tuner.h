@@ -18,10 +18,14 @@
 #define _ANDROID_MEDIA_TV_TUNER_H_
 
 #include <android/hardware/tv/tuner/1.0/ITuner.h>
+#include <C2BlockInternal.h>
+#include <C2HandleIonInternal.h>
+#include <C2ParamDef.h>
 #include <fmq/MessageQueue.h>
 #include <fstream>
 #include <string>
 #include <unordered_map>
+#include <utils/Mutex.h>
 #include <utils/RefBase.h>
 
 #include "jni.h"
@@ -30,6 +34,7 @@ using ::android::hardware::EventFlag;
 using ::android::hardware::MQDescriptorSync;
 using ::android::hardware::MessageQueue;
 using ::android::hardware::Return;
+using ::android::hardware::hidl_handle;
 using ::android::hardware::hidl_vec;
 using ::android::hardware::kSynchronizedReadWrite;
 using ::android::hardware::tv::tuner::V1_0::DemuxFilterEvent;
@@ -106,15 +111,48 @@ struct Dvr : public RefBase {
     int mFd;
 };
 
+struct MediaEvent : public RefBase {
+    MediaEvent(sp<IFilter> iFilter, hidl_handle avHandle, uint64_t dataId,
+        uint64_t dataLength, jobject obj);
+    ~MediaEvent();
+    jobject getLinearBlock();
+    uint64_t getAudioHandle();
+    void finalize();
+
+    sp<IFilter> mIFilter;
+    native_handle_t* mAvHandle;
+    uint64_t mDataId;
+    uint64_t mDataLength;
+    uint8_t* mBuffer;
+    android::Mutex mLock;
+    int mDataIdRefCnt;
+    int mAvHandleRefCnt;
+    jweak mMediaEventObj;
+    jweak mLinearBlockObj;
+    C2HandleIon* mIonHandle;
+    std::shared_ptr<C2Buffer> mC2Buffer;
+};
+
+struct Filter : public RefBase {
+    Filter(sp<IFilter> sp, jobject obj);
+    ~Filter();
+    int close();
+    sp<IFilter> getIFilter();
+    sp<IFilter> mFilterSp;
+    std::unique_ptr<MQ> mFilterMQ;
+    EventFlag* mFilterMQEventFlag;
+    jweak mFilterObj;
+};
+
 struct FilterCallback : public IFilterCallback {
     ~FilterCallback();
     virtual Return<void> onFilterEvent(const DemuxFilterEvent& filterEvent);
     virtual Return<void> onFilterStatus(const DemuxFilterStatus status);
 
-    void setFilter(const jobject filter);
-    jobject handleToLinearBlock(const native_handle_t* handle, uint32_t size);
+    void setFilter(const sp<Filter> filter);
 private:
     jweak mFilter;
+    sp<IFilter> mIFilter;
     jobjectArray getSectionEvent(
             jobjectArray& arr, const std::vector<DemuxFilterEvent::Event>& events);
     jobjectArray getMediaEvent(
@@ -142,17 +180,6 @@ struct FrontendCallback : public IFrontendCallback {
 
     jweak mObject;
     FrontendId mId;
-};
-
-struct Filter : public RefBase {
-    Filter(sp<IFilter> sp, jobject obj);
-    ~Filter();
-    int close();
-    sp<IFilter> getIFilter();
-    sp<IFilter> mFilterSp;
-    std::unique_ptr<MQ> mFilterMQ;
-    EventFlag* mFilterMQEventFlag;
-    jweak mFilterObj;
 };
 
 struct TimeFilter : public RefBase {
@@ -217,6 +244,14 @@ private:
     static jobject getIsdbs3FrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilities& caps);
     static jobject getIsdbsFrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilities& caps);
     static jobject getIsdbtFrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilities& caps);
+};
+
+class C2DataIdInfo : public C2Param {
+public:
+    C2DataIdInfo(uint32_t index, uint64_t value);
+private:
+    typedef C2GlobalParam<C2Info, C2Int64Value, 0> DummyInfo;
+    static const size_t kParamSize = sizeof(DummyInfo);
 };
 
 }  // namespace android

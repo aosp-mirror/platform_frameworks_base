@@ -1144,7 +1144,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         ScrimView scrimBehind = mNotificationShadeWindowView.findViewById(R.id.scrim_behind);
         ScrimView scrimInFront = mNotificationShadeWindowView.findViewById(R.id.scrim_in_front);
-        ScrimView scrimForBubble = mNotificationShadeWindowView.findViewById(R.id.scrim_for_bubble);
+        ScrimView scrimForBubble = mBubbleController.getScrimForBubble();
 
         mScrimController.setScrimVisibleListener(scrimsVisible -> {
             mNotificationShadeWindowController.setScrimsVisibility(scrimsVisible);
@@ -1300,6 +1300,9 @@ public class StatusBar extends SystemUI implements DemoMode,
                         .setNotificationPresenter(mPresenter)
                         .setNotificationPanelViewController(mNotificationPanelViewController)
                         .build();
+
+        ((NotificationListContainer) mStackScroller)
+                .setNotificationActivityStarter(mNotificationActivityStarter);
 
         mGutsManager.setNotificationActivityStarter(mNotificationActivityStarter);
 

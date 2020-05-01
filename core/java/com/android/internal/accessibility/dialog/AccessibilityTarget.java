@@ -74,7 +74,7 @@ abstract class AccessibilityTarget implements TargetOperations, OnTargetSelected
         holder.mCheckBoxView.setVisibility(isEditMenuMode ? View.VISIBLE : View.GONE);
         holder.mIconView.setImageDrawable(getIcon());
         holder.mLabelView.setText(getLabel());
-        holder.mSwitchItem.setVisibility(View.GONE);
+        holder.mStatusView.setVisibility(View.GONE);
     }
 
     @Override

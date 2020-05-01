@@ -90,7 +90,7 @@ public final class SelectionActionModeHelper {
         mTextView = mEditor.getTextView();
         mTextClassificationHelper = new TextClassificationHelper(
                 mTextView.getContext(),
-                mTextView::getTextClassifier,
+                mTextView::getTextClassificationSession,
                 getText(mTextView),
                 0, 1, mTextView.getTextLocales());
         mSelectionTracker = new SelectionTracker(mTextView);
@@ -500,7 +500,7 @@ public final class SelectionActionModeHelper {
             selectionEnd = sortedSelectionIndices[1];
         }
         mTextClassificationHelper.init(
-                mTextView::getTextClassifier,
+                mTextView::getTextClassificationSession,
                 getText(mTextView),
                 selectionStart, selectionEnd,
                 mTextView.getTextLocales());

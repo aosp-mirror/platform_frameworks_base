@@ -22,8 +22,6 @@ import static android.view.InsetsState.toInternalType;
 import static android.view.InsetsState.toPublicType;
 import static android.view.WindowInsets.Type.all;
 import static android.view.WindowInsets.Type.ime;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_APPEARANCE_CONTROLLED;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_BEHAVIOR_CONTROLLED;
 
 import android.animation.AnimationHandler;
 import android.animation.Animator;
@@ -37,15 +35,12 @@ import android.graphics.Insets;
 import android.graphics.Rect;
 import android.os.CancellationSignal;
 import android.os.Handler;
-import android.os.RemoteException;
 import android.util.ArraySet;
-import android.util.Log;
 import android.util.Pair;
 import android.util.SparseArray;
 import android.view.InsetsSourceConsumer.ShowResult;
 import android.view.InsetsState.InternalInsetsType;
 import android.view.SurfaceControl.Transaction;
-import android.view.ViewTreeObserver.OnPreDrawListener;
 import android.view.WindowInsets.Type;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowInsetsAnimation.Bounds;
@@ -53,6 +48,7 @@ import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
 import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
 import android.view.animation.PathInterpolator;
+import android.view.inputmethod.InputMethodManager;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
@@ -71,6 +67,91 @@ import java.util.function.BiFunction;
  * @hide
  */
 public class InsetsController implements WindowInsetsController, InsetsAnimationControlCallbacks {
+
+    public interface Host {
+
+        Handler getHandler();
+
+        /**
+         * Notifies host that {@link InsetsController#getState()} has changed.
+         */
+        void notifyInsetsChanged();
+
+        void dispatchWindowInsetsAnimationPrepare(@NonNull WindowInsetsAnimation animation);
+        Bounds dispatchWindowInsetsAnimationStart(
+                @NonNull WindowInsetsAnimation animation, @NonNull Bounds bounds);
+        WindowInsets dispatchWindowInsetsAnimationProgress(@NonNull WindowInsets insets,
+                @NonNull List<WindowInsetsAnimation> runningAnimations);
+        void dispatchWindowInsetsAnimationEnd(@NonNull WindowInsetsAnimation animation);
+
+        /**
+         * Requests host to apply surface params in synchronized manner.
+         */
+        void applySurfaceParams(final SyncRtSurfaceTransactionApplier.SurfaceParams... params);
+
+        /**
+         * @see ViewRootImpl#updateCompatSysUiVisibility(int, boolean, boolean)
+         */
+        void updateCompatSysUiVisibility(@InternalInsetsType int type, boolean visible,
+                boolean hasControl);
+
+        /**
+         * Called when insets have been modified by the client and should be reported back to WM.
+         */
+        void onInsetsModified(InsetsState insetsState);
+
+        /**
+         * @return Whether the host has any callbacks it wants to synchronize the animations with.
+         *         If there are no callbacks, the animation will be off-loaded to another thread and
+         *         slightly different animation curves are picked.
+         */
+        boolean hasAnimationCallbacks();
+
+        /**
+         * @see WindowInsetsController#setSystemBarsAppearance
+         */
+        void setSystemBarsAppearance(@Appearance int appearance, @Appearance int mask);
+
+        /**
+         * @see WindowInsetsController#getSystemBarsAppearance()
+         */
+        @Appearance int getSystemBarsAppearance();
+
+        /**
+         * @see WindowInsetsController#setSystemBarsBehavior
+         */
+        void setSystemBarsBehavior(@Behavior int behavior);
+
+        /**
+         * @see WindowInsetsController#getSystemBarsBehavior
+         */
+        @Behavior int getSystemBarsBehavior();
+
+        /**
+         * Releases a surface and ensure that this is done after {@link #applySurfaceParams} has
+         * finished applying params.
+         */
+        void releaseSurfaceControlFromRt(SurfaceControl surfaceControl);
+
+        /**
+         * If this host is a view hierarchy, adds a pre-draw runnable to ensure proper ordering as
+         * described in {@link WindowInsetsAnimation.Callback#onPrepare}.
+         *
+         * If this host isn't a view hierarchy, the runnable can be executed immediately.
+         */
+        void addOnPreDrawRunnable(Runnable r);
+
+        /**
+         * Adds a runnbale to be executed during {@link Choreographer#CALLBACK_INSETS_ANIMATION}
+         * phase.
+         */
+        void postInsetsAnimationCallback(Runnable r);
+
+        /**
+         * Obtains {@link InputMethodManager} instance from host.
+         */
+        InputMethodManager getInputMethodManager();
+    }
 
     private static final int ANIMATION_DURATION_SHOW_MS = 275;
     private static final int ANIMATION_DURATION_HIDE_MS = 340;
@@ -340,13 +421,19 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
     private final String TAG = "InsetsControllerImpl";
 
+    /** The local state */
     private final InsetsState mState = new InsetsState();
-    private final InsetsState mLastDispachedState = new InsetsState();
+
+    /** The state dispatched from server */
+    private final InsetsState mLastDispatchedState = new InsetsState();
+
+    /** The state sent to server */
+    private final InsetsState mRequestedState = new InsetsState();
 
     private final Rect mFrame = new Rect();
     private final BiFunction<InsetsController, Integer, InsetsSourceConsumer> mConsumerCreator;
     private final SparseArray<InsetsSourceConsumer> mSourceConsumers = new SparseArray<>();
-    private final ViewRootImpl mViewRoot;
+    private final Host mHost;
     private final Handler mHandler;
 
     private final SparseArray<InsetsSourceControl> mTmpControlArray = new SparseArray<>();
@@ -370,8 +457,6 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     private boolean mStartingAnimation;
     private int mCaptionInsetsHeight = 0;
 
-    private SyncRtSurfaceTransactionApplier mApplier;
-
     private Runnable mPendingControlTimeout = this::abortPendingImeControlRequest;
     private final ArrayList<OnControllableInsetsChangedListener> mControllableInsetsChangedListeners
             = new ArrayList<>();
@@ -379,31 +464,27 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     /** Set of inset types for which an animation was started since last resetting this field */
     private @InsetsType int mLastStartedAnimTypes;
 
-    public InsetsController(ViewRootImpl viewRoot) {
-        this(viewRoot, (controller, type) -> {
+    public InsetsController(Host host) {
+        this(host, (controller, type) -> {
             if (type == ITYPE_IME) {
                 return new ImeInsetsSourceConsumer(controller.mState, Transaction::new, controller);
             } else {
                 return new InsetsSourceConsumer(type, controller.mState, Transaction::new,
                         controller);
             }
-        }, viewRoot.mHandler);
+        }, host.getHandler());
     }
 
     @VisibleForTesting
-    public InsetsController(ViewRootImpl viewRoot,
+    public InsetsController(Host host,
             BiFunction<InsetsController, Integer, InsetsSourceConsumer> consumerCreator,
             Handler handler) {
-        mViewRoot = viewRoot;
+        mHost = host;
         mConsumerCreator = consumerCreator;
         mHandler = handler;
         mAnimCallback = () -> {
             mAnimCallbackScheduled = false;
             if (mRunningAnimations.isEmpty()) {
-                return;
-            }
-            if (mViewRoot.mView == null) {
-                // The view has already detached from window.
                 return;
             }
 
@@ -433,8 +514,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                     mLastInsets.isRound(), mLastInsets.shouldAlwaysConsumeSystemBars(),
                     mLastDisplayCutout, mLastLegacySoftInputMode, mLastLegacySystemUiFlags,
                     null /* typeSideMap */);
-            mViewRoot.mView.dispatchWindowInsetsAnimationProgress(insets,
-                    mUnmodifiableTmpRunningAnims);
+            mHost.dispatchWindowInsetsAnimationProgress(insets, mUnmodifiableTmpRunningAnims);
 
             for (int i = mTmpFinishedControls.size() - 1; i >= 0; i--) {
                 dispatchAnimationEnd(mTmpFinishedControls.get(i).getAnimation());
@@ -447,7 +527,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         if (mFrame.equals(frame)) {
             return;
         }
-        mViewRoot.notifyInsetsChanged();
+        mHost.notifyInsetsChanged();
         mFrame.set(frame);
     }
 
@@ -462,24 +542,24 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     }
 
     public InsetsState getLastDispatchedState() {
-        return mLastDispachedState;
+        return mLastDispatchedState;
     }
 
     @VisibleForTesting
     public boolean onStateChanged(InsetsState state) {
         boolean localStateChanged = !mState.equals(state, true /* excludingCaptionInsets */)
                 || !captionInsetsUnchanged();
-        if (!localStateChanged && mLastDispachedState.equals(state)) {
+        if (!localStateChanged && mLastDispatchedState.equals(state)) {
             return false;
         }
         updateState(state);
-        mLastDispachedState.set(state, true /* copySources */);
+        mLastDispatchedState.set(state, true /* copySources */);
         applyLocalVisibilityOverride();
         if (localStateChanged) {
-            mViewRoot.notifyInsetsChanged();
+            mHost.notifyInsetsChanged();
         }
-        if (!mState.equals(mLastDispachedState, true /* excludingCaptionInsets */)) {
-            sendStateToWindowManager();
+        if (!mState.equals(mLastDispatchedState, true /* excludingCaptionInsets */)) {
+            updateRequestedState();
         }
         return true;
     }
@@ -552,8 +632,9 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             }
         }
 
-        int[] showTypes = new int[1];
-        int[] hideTypes = new int[1];
+        final boolean hasControl = mTmpControlArray.size() > 0;
+        final int[] showTypes = new int[1];
+        final int[] hideTypes = new int[1];
 
         // Ensure to update all existing source consumers
         for (int i = mSourceConsumers.size() - 1; i >= 0; i--) {
@@ -585,6 +666,12 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         }
         if (hideTypes[0] != 0) {
             applyAnimation(hideTypes[0], false /* show */, false /* fromIme */);
+        }
+        if (hasControl) {
+            // We might have changed our requested visibilities while we don't have the control,
+            // so we need to update our requested state once we have control. Otherwise, our
+            // requested state at the server side might be incorrect.
+            updateRequestedState();
         }
     }
 
@@ -733,7 +820,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         final InsetsAnimationControlRunner runner = useInsetsAnimationThread
                 ? new InsetsAnimationThreadControlRunner(controls,
                         frame, mState, listener, typesReady, this, durationMs, interpolator,
-                        animationType, mViewRoot.mHandler)
+                        animationType, mHost.getHandler())
                 : new InsetsAnimationControlImpl(controls,
                         frame, mState, listener, typesReady, this, durationMs, interpolator,
                         animationType);
@@ -860,21 +947,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
     @Override
     public void applySurfaceParams(final SyncRtSurfaceTransactionApplier.SurfaceParams... params) {
-        if (mApplier == null) {
-            if (mViewRoot.mView == null) {
-                throw new IllegalStateException("View of the ViewRootImpl is not initiated.");
-            }
-            mApplier = new SyncRtSurfaceTransactionApplier(mViewRoot.mView);
-        }
-        if (mViewRoot.mView.isHardwareAccelerated()) {
-            mApplier.scheduleApply(false /* earlyWakeup */, params);
-        } else {
-            // Window doesn't support hardware acceleration, no synchronization for now.
-            // TODO(b/149342281): use mViewRoot.mSurface.getNextFrameNumber() to sync on every
-            //  frame instead.
-            mApplier.applyParams(new Transaction(), -1 /* frame */, false /* earlyWakeup */,
-                    params);
-        }
+        mHost.applySurfaceParams(params);
     }
 
     void notifyControlRevoked(InsetsSourceConsumer consumer) {
@@ -900,7 +973,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                 ArraySet<Integer> types = toInternalType(control.getTypes());
                 for (int j = types.size() - 1; j >= 0; j--) {
                     if (getSourceConsumer(types.valueAt(j)).notifyAnimationFinished()) {
-                        mViewRoot.notifyInsetsChanged();
+                        mHost.notifyInsetsChanged();
                     }
                 }
                 break;
@@ -928,8 +1001,8 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
     @VisibleForTesting
     public void notifyVisibilityChanged() {
-        mViewRoot.notifyInsetsChanged();
-        sendStateToWindowManager();
+        mHost.notifyInsetsChanged();
+        updateRequestedState();
     }
 
     /**
@@ -937,7 +1010,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
      */
     public void updateCompatSysUiVisibility(@InternalInsetsType int type, boolean visible,
             boolean hasControl) {
-        mViewRoot.updateCompatSysUiVisibility(type, visible, hasControl);
+        mHost.updateCompatSysUiVisibility(type, visible, hasControl);
     }
 
     /**
@@ -952,10 +1025,6 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
      */
     public void onWindowFocusLost() {
         getSourceConsumer(ITYPE_IME).onWindowFocusLost();
-    }
-
-    ViewRootImpl getViewRoot() {
-        return mViewRoot;
     }
 
     /**
@@ -983,23 +1052,28 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     }
 
     /**
-     * Sends the local visibility state back to window manager.
+     * Sends the local visibility state back to window manager if it is changed.
      */
-    private void sendStateToWindowManager() {
-        InsetsState tmpState = new InsetsState();
+    private void updateRequestedState() {
+        boolean changed = false;
         for (int i = mSourceConsumers.size() - 1; i >= 0; i--) {
             final InsetsSourceConsumer consumer = mSourceConsumers.valueAt(i);
-            if (consumer.getType() == ITYPE_CAPTION_BAR) continue;
+            final @InternalInsetsType int type = consumer.getType();
+            if (type == ITYPE_CAPTION_BAR) {
+                continue;
+            }
             if (consumer.getControl() != null) {
-                tmpState.addSource(mState.getSource(consumer.getType()));
+                final InsetsSource localSource = mState.getSource(type);
+                if (!localSource.equals(mRequestedState.peekSource(type))) {
+                    mRequestedState.addSource(new InsetsSource(localSource));
+                    changed = true;
+                }
             }
         }
-
-        try {
-            mViewRoot.mWindowSession.insetsModified(mViewRoot.mWindow, tmpState);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Failed to call insetsModified", e);
+        if (!changed) {
+            return;
         }
+        mHost.onInsetsModified(mRequestedState);
     }
 
     @VisibleForTesting
@@ -1009,7 +1083,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             return;
         }
 
-        boolean hasAnimationCallbacks = hasAnimationCallbacks();
+        boolean hasAnimationCallbacks = mHost.hasAnimationCallbacks();
         final InternalAnimationControlListener listener =
                 new InternalAnimationControlListener(show, hasAnimationCallbacks, types);
 
@@ -1022,13 +1096,6 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                 show ? LAYOUT_INSETS_DURING_ANIMATION_SHOWN : LAYOUT_INSETS_DURING_ANIMATION_HIDDEN,
                 !hasAnimationCallbacks /* useInsetsAnimationThread */);
 
-    }
-
-    private boolean hasAnimationCallbacks() {
-        if (mViewRoot.mView == null) {
-            return false;
-        }
-        return mViewRoot.mView.hasWindowInsetsAnimationCallback();
     }
 
     private void hideDirectly(
@@ -1064,37 +1131,28 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     public void startAnimation(InsetsAnimationControlImpl controller,
             WindowInsetsAnimationControlListener listener, int types,
             WindowInsetsAnimation animation, Bounds bounds) {
-        if (mViewRoot.mView == null) {
-            return;
-        }
-        mViewRoot.mView.dispatchWindowInsetsAnimationPrepare(animation);
-        mViewRoot.mView.getViewTreeObserver().addOnPreDrawListener(new OnPreDrawListener() {
-            @Override
-            public boolean onPreDraw() {
-                mViewRoot.mView.getViewTreeObserver().removeOnPreDrawListener(this);
-                if (controller.isCancelled()) {
-                    return true;
-                }
-                for (int i = mRunningAnimations.size() - 1; i >= 0; i--) {
-                    RunningAnimation runningAnimation = mRunningAnimations.get(i);
-                    if (runningAnimation.runner == controller) {
-                        runningAnimation.startDispatched = true;
-                    }
-                }
-                mViewRoot.mView.dispatchWindowInsetsAnimationStart(animation, bounds);
-                mStartingAnimation = true;
-                controller.mReadyDispatched = true;
-                listener.onReady(controller, types);
-                mStartingAnimation = false;
-                return true;
+        mHost.dispatchWindowInsetsAnimationPrepare(animation);
+        mHost.addOnPreDrawRunnable(() -> {
+            if (controller.isCancelled()) {
+                return;
             }
+            for (int i = mRunningAnimations.size() - 1; i >= 0; i--) {
+                RunningAnimation runningAnimation = mRunningAnimations.get(i);
+                if (runningAnimation.runner == controller) {
+                    runningAnimation.startDispatched = true;
+                }
+            }
+            mHost.dispatchWindowInsetsAnimationStart(animation, bounds);
+            mStartingAnimation = true;
+            controller.mReadyDispatched = true;
+            listener.onReady(controller, types);
+            mStartingAnimation = false;
         });
-        mViewRoot.mView.invalidate();
     }
 
     @VisibleForTesting
     public void dispatchAnimationEnd(WindowInsetsAnimation animation) {
-        mViewRoot.mView.dispatchWindowInsetsAnimationEnd(animation);
+        mHost.dispatchWindowInsetsAnimationEnd(animation);
     }
 
     @VisibleForTesting
@@ -1106,30 +1164,19 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             return;
         }
         if (!mAnimCallbackScheduled) {
-            mViewRoot.mChoreographer.postCallback(Choreographer.CALLBACK_INSETS_ANIMATION,
-                    mAnimCallback, null /* token*/);
+            mHost.postInsetsAnimationCallback(mAnimCallback);
             mAnimCallbackScheduled = true;
         }
     }
 
     @Override
     public void setSystemBarsAppearance(@Appearance int appearance, @Appearance int mask) {
-        mViewRoot.mWindowAttributes.privateFlags |= PRIVATE_FLAG_APPEARANCE_CONTROLLED;
-        final InsetsFlags insetsFlags = mViewRoot.mWindowAttributes.insetsFlags;
-        if (insetsFlags.appearance != appearance) {
-            insetsFlags.appearance = (insetsFlags.appearance & ~mask) | (appearance & mask);
-            mViewRoot.mWindowAttributesChanged = true;
-            mViewRoot.scheduleTraversals();
-        }
+        mHost.setSystemBarsAppearance(appearance, mask);
     }
 
     @Override
     public @Appearance int getSystemBarsAppearance() {
-        if ((mViewRoot.mWindowAttributes.privateFlags & PRIVATE_FLAG_APPEARANCE_CONTROLLED) == 0) {
-            // We only return the requested appearance, not the implied one.
-            return 0;
-        }
-        return mViewRoot.mWindowAttributes.insetsFlags.appearance;
+        return mHost.getSystemBarsAppearance();
     }
 
     @Override
@@ -1139,21 +1186,12 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
     @Override
     public void setSystemBarsBehavior(@Behavior int behavior) {
-        mViewRoot.mWindowAttributes.privateFlags |= PRIVATE_FLAG_BEHAVIOR_CONTROLLED;
-        if (mViewRoot.mWindowAttributes.insetsFlags.behavior != behavior) {
-            mViewRoot.mWindowAttributes.insetsFlags.behavior = behavior;
-            mViewRoot.mWindowAttributesChanged = true;
-            mViewRoot.scheduleTraversals();
-        }
+        mHost.setSystemBarsBehavior(behavior);
     }
 
     @Override
     public @Appearance int getSystemBarsBehavior() {
-        if ((mViewRoot.mWindowAttributes.privateFlags & PRIVATE_FLAG_BEHAVIOR_CONTROLLED) == 0) {
-            // We only return the requested behavior, not the implied one.
-            return 0;
-        }
-        return mViewRoot.mWindowAttributes.insetsFlags.behavior;
+        return mHost.getSystemBarsBehavior();
     }
 
     private @InsetsType int calculateControllableTypes() {
@@ -1198,22 +1236,12 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         mControllableInsetsChangedListeners.remove(listener);
     }
 
-    /**
-     * At the time we receive new leashes (e.g. InsetsSourceConsumer is processing
-     * setControl) we need to release the old leash. But we may have already scheduled
-     * a SyncRtSurfaceTransaction applier to use it from the RenderThread. To avoid
-     * synchronization issues we also release from the RenderThread so this release
-     * happens after any existing items on the work queue.
-     */
+    @Override
     public void releaseSurfaceControlFromRt(SurfaceControl sc) {
-        if (mViewRoot.mView != null && mViewRoot.mView.isHardwareAccelerated()) {
-            mViewRoot.registerRtFrameCallback(frame -> {
-                  sc.release();
-            });
-            // Make sure a frame gets scheduled.
-            mViewRoot.mView.invalidate();
-        } else {
-            sc.release();
-        }
+        mHost.releaseSurfaceControlFromRt(sc);
+    }
+
+    Host getHost() {
+        return mHost;
     }
 }

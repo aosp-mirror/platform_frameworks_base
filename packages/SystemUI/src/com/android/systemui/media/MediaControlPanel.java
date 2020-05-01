@@ -126,11 +126,7 @@ public class MediaControlPanel {
         @Override
         public void onPlaybackStateChanged(PlaybackState state) {
             final int s = state != null ? state.getState() : PlaybackState.STATE_NONE;
-            // When the playback state is NONE or CONNECTING, transition the player to the
-            // resumption state. State CONNECTING needs to be considered for Cast sessions. Ending
-            // a cast session in YT results in the CONNECTING state, which makes sense if you
-            // thinking of the session as waiting to connect to another cast device.
-            if (s == PlaybackState.STATE_NONE || s == PlaybackState.STATE_CONNECTING) {
+            if (s == PlaybackState.STATE_NONE) {
                 Log.d(TAG, "playback state change will trigger resumption, state=" + state);
                 clearControls();
                 makeInactive();
@@ -319,11 +315,8 @@ public class MediaControlPanel {
             appName.setTextColor(mForegroundColor);
         }
 
+        // Can be null!
         MediaMetadata mediaMetadata = mController.getMetadata();
-        if (mediaMetadata == null) {
-            Log.e(TAG, "Media metadata was null");
-            return;
-        }
 
         ImageView albumView = mMediaNotifView.findViewById(R.id.album_art);
         if (albumView != null) {
@@ -333,14 +326,20 @@ public class MediaControlPanel {
 
         // Song name
         TextView titleText = mMediaNotifView.findViewById(R.id.header_title);
-        String songName = mediaMetadata.getString(MediaMetadata.METADATA_KEY_TITLE);
+        String songName = "";
+        if (mediaMetadata != null) {
+            songName = mediaMetadata.getString(MediaMetadata.METADATA_KEY_TITLE);
+        }
         titleText.setText(songName);
         titleText.setTextColor(mForegroundColor);
 
         // Artist name (not in mini player)
         TextView artistText = mMediaNotifView.findViewById(R.id.header_artist);
         if (artistText != null) {
-            String artistName = mediaMetadata.getString(MediaMetadata.METADATA_KEY_ARTIST);
+            String artistName = "";
+            if (mediaMetadata != null) {
+                artistName = mediaMetadata.getString(MediaMetadata.METADATA_KEY_ARTIST);
+            }
             artistText.setText(artistName);
             artistText.setTextColor(mForegroundColor);
         }
@@ -443,21 +442,23 @@ public class MediaControlPanel {
     private void processAlbumArt(MediaMetadata metadata, Icon largeIcon, ImageView albumView) {
         Bitmap albumArt = null;
 
-        // First look in URI fields
-        for (String field : ART_URIS) {
-            String uriString = metadata.getString(field);
-            if (!TextUtils.isEmpty(uriString)) {
-                albumArt = loadBitmapFromUri(Uri.parse(uriString));
-                if (albumArt != null) {
-                    Log.d(TAG, "loaded art from " + field);
-                    break;
+        if (metadata != null) {
+            // First look in URI fields
+            for (String field : ART_URIS) {
+                String uriString = metadata.getString(field);
+                if (!TextUtils.isEmpty(uriString)) {
+                    albumArt = loadBitmapFromUri(Uri.parse(uriString));
+                    if (albumArt != null) {
+                        Log.d(TAG, "loaded art from " + field);
+                        break;
+                    }
                 }
             }
-        }
 
-        // Then check bitmap field
-        if (albumArt == null) {
-            albumArt = metadata.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART);
+            // Then check bitmap field
+            if (albumArt == null) {
+                albumArt = metadata.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART);
+            }
         }
 
         // Finally try the notification's largeIcon

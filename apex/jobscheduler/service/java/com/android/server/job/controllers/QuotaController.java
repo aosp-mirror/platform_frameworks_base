@@ -241,10 +241,11 @@ public final class QuotaController extends StateController {
                     + "bgJobCountInMaxPeriod=" + bgJobCountInMaxPeriod + ", "
                     + "sessionCountInWindow=" + sessionCountInWindow + ", "
                     + "inQuotaTime=" + inQuotaTimeElapsed + ", "
-                    + "jobCountExpirationTime=" + jobRateLimitExpirationTimeElapsed + ", "
-                    + "jobCountInRateLimitingWindow=" + jobCountInRateLimitingWindow + ", "
-                    + "sessionCountExpirationTime=" + sessionRateLimitExpirationTimeElapsed + ", "
-                    + "sessionCountInRateLimitingWindow=" + sessionCountInRateLimitingWindow;
+                    + "rateLimitJobCountExpirationTime=" + jobRateLimitExpirationTimeElapsed + ", "
+                    + "rateLimitJobCountWindow=" + jobCountInRateLimitingWindow + ", "
+                    + "rateLimitSessionCountExpirationTime="
+                    + sessionRateLimitExpirationTimeElapsed + ", "
+                    + "rateLimitSessionCountWindow=" + sessionCountInRateLimitingWindow;
         }
 
         @Override
@@ -863,12 +864,19 @@ public final class QuotaController extends StateController {
         stats.executionTimeInMaxPeriodMs = 0;
         stats.bgJobCountInMaxPeriod = 0;
         stats.sessionCountInWindow = 0;
-        stats.inQuotaTimeElapsed = 0;
+        if (stats.jobCountLimit == 0 || stats.sessionCountLimit == 0) {
+            // App won't be in quota until configuration changes.
+            stats.inQuotaTimeElapsed = Long.MAX_VALUE;
+        } else {
+            stats.inQuotaTimeElapsed = 0;
+        }
 
         Timer timer = mPkgTimers.get(userId, packageName);
         final long nowElapsed = sElapsedRealtimeClock.millis();
         stats.expirationTimeElapsed = nowElapsed + MAX_PERIOD_MS;
         if (timer != null && timer.isActive()) {
+            // Exclude active sessions from the session count so that new jobs aren't prevented
+            // from starting due to an app hitting the session limit.
             stats.executionTimeInWindowMs =
                     stats.executionTimeInMaxPeriodMs = timer.getCurrentDuration(nowElapsed);
             stats.bgJobCountInWindow = stats.bgJobCountInMaxPeriod = timer.getBgJobCount();
@@ -882,6 +890,10 @@ public final class QuotaController extends StateController {
             if (stats.executionTimeInMaxPeriodMs >= mMaxExecutionTimeIntoQuotaMs) {
                 stats.inQuotaTimeElapsed = Math.max(stats.inQuotaTimeElapsed,
                         nowElapsed - mMaxExecutionTimeIntoQuotaMs + MAX_PERIOD_MS);
+            }
+            if (stats.bgJobCountInWindow >= stats.jobCountLimit) {
+                stats.inQuotaTimeElapsed = Math.max(stats.inQuotaTimeElapsed,
+                        nowElapsed + stats.windowSizeMs);
             }
         }
 
@@ -1302,6 +1314,13 @@ public final class QuotaController extends StateController {
             // App hit the rate limit.
             inQuotaTimeElapsed = Math.max(inQuotaTimeElapsed,
                     stats.sessionRateLimitExpirationTimeElapsed);
+        }
+        if (inQuotaTimeElapsed <= sElapsedRealtimeClock.millis()) {
+            final long nowElapsed = sElapsedRealtimeClock.millis();
+            Slog.wtf(TAG,
+                    "In quota time is " + (nowElapsed - inQuotaTimeElapsed) + "ms old. Now="
+                            + nowElapsed + ", inQuotaTime=" + inQuotaTimeElapsed + ": " + stats);
+            inQuotaTimeElapsed = nowElapsed + 5 * MINUTE_IN_MILLIS;
         }
         mInQuotaAlarmListener.addAlarmLocked(userId, packageName, inQuotaTimeElapsed);
     }
@@ -1916,8 +1935,8 @@ public final class QuotaController extends StateController {
         @GuardedBy("mLock")
         private void setNextAlarmLocked(long earliestTriggerElapsed) {
             if (mAlarmQueue.size() > 0) {
-                final long nextTriggerTimeElapsed = Math.max(earliestTriggerElapsed,
-                        mAlarmQueue.peek().second);
+                final Pair<Package, Long> alarm = mAlarmQueue.peek();
+                final long nextTriggerTimeElapsed = Math.max(earliestTriggerElapsed, alarm.second);
                 // Only schedule the alarm if one of the following is true:
                 // 1. There isn't one currently scheduled
                 // 2. The new alarm is significantly earlier than the previous alarm. If it's
@@ -1928,7 +1947,8 @@ public final class QuotaController extends StateController {
                         || nextTriggerTimeElapsed < mTriggerTimeElapsed - 3 * MINUTE_IN_MILLIS
                         || mTriggerTimeElapsed < nextTriggerTimeElapsed) {
                     if (DEBUG) {
-                        Slog.d(TAG, "Scheduling start alarm at " + nextTriggerTimeElapsed);
+                        Slog.d(TAG, "Scheduling start alarm at " + nextTriggerTimeElapsed
+                                + " for app " + alarm.first);
                     }
                     mAlarmManager.set(AlarmManager.ELAPSED_REALTIME, nextTriggerTimeElapsed,
                             ALARM_TAG_QUOTA_CHECK, this, mHandler);

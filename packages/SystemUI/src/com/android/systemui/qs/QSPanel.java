@@ -52,7 +52,9 @@ import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.internal.statusbar.NotificationVisibility;
 import com.android.settingslib.Utils;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.settingslib.media.InfoMediaManager;
@@ -75,6 +77,9 @@ import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.settings.BrightnessController;
 import com.android.systemui.settings.ToggleSliderView;
+import com.android.systemui.statusbar.notification.NotificationEntryListener;
+import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController.BrightnessMirrorListener;
 import com.android.systemui.tuner.TunerService;
@@ -116,6 +121,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
     private final DelayableExecutor mBackgroundExecutor;
     private boolean mUpdateCarousel = false;
     private ActivityStarter mActivityStarter;
+    private NotificationEntryManager mNotificationEntryManager;
 
     protected boolean mExpanded;
     protected boolean mListening;
@@ -124,6 +130,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
     private BrightnessController mBrightnessController;
     private final DumpManager mDumpManager;
     private final QSLogger mQSLogger;
+    protected final UiEventLogger mUiEventLogger;
     protected QSTileHost mHost;
 
     protected QSSecurityFooter mFooter;
@@ -151,6 +158,15 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         }
     };
 
+    private final NotificationEntryListener mNotificationEntryListener =
+            new NotificationEntryListener() {
+        @Override
+        public void onEntryRemoved(NotificationEntry entry, NotificationVisibility visibility,
+                boolean removedByUser, int reason) {
+            checkToRemoveMediaNotification(entry);
+        }
+    };
+
     @Inject
     public QSPanel(
             @Named(VIEW_CONTEXT) Context context,
@@ -161,7 +177,9 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
             @Main Executor foregroundExecutor,
             @Background DelayableExecutor backgroundExecutor,
             @Nullable LocalBluetoothManager localBluetoothManager,
-            ActivityStarter activityStarter
+            ActivityStarter activityStarter,
+            NotificationEntryManager entryManager,
+            UiEventLogger uiEventLogger
     ) {
         super(context, attrs);
         mContext = context;
@@ -172,6 +190,8 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         mLocalBluetoothManager = localBluetoothManager;
         mBroadcastDispatcher = broadcastDispatcher;
         mActivityStarter = activityStarter;
+        mNotificationEntryManager = entryManager;
+        mUiEventLogger = uiEventLogger;
 
         setOrientation(VERTICAL);
 
@@ -407,6 +427,27 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         mHasLoadedMediaControls = true;
     }
 
+    private void checkToRemoveMediaNotification(NotificationEntry entry) {
+        if (!useQsMediaPlayer(mContext)) {
+            return;
+        }
+
+        if (!entry.isMediaNotification()) {
+            return;
+        }
+
+        // If this entry corresponds to an existing set of controls, clear the controls
+        // This will handle apps that use an action to clear their notification
+        for (QSMediaPlayer p : mMediaPlayers) {
+            if (p.getKey() != null && p.getKey().equals(entry.getKey())) {
+                Log.d(TAG, "Clearing controls since notification removed " + entry.getKey());
+                p.clearControls();
+                return;
+            }
+        }
+        Log.d(TAG, "Media notification removed but no player found " + entry.getKey());
+    }
+
     protected void addDivider() {
         mDivider = LayoutInflater.from(mContext).inflate(R.layout.qs_divider, this, false);
         mDivider.setBackgroundColor(Utils.applyAlpha(mDivider.getAlpha(),
@@ -473,6 +514,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
                 loadMediaResumptionControls();
             }
         }
+        mNotificationEntryManager.addNotificationEntryListener(mNotificationEntryListener);
     }
 
     @Override
@@ -489,6 +531,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         }
         mDumpManager.unregisterDumpable(getDumpableTag());
         mBroadcastDispatcher.unregisterReceiver(mUserChangeReceiver);
+        mNotificationEntryManager.removeNotificationEntryListener(mNotificationEntryListener);
         super.onDetachedFromWindow();
     }
 
@@ -639,8 +682,10 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         }
         mMetricsLogger.visibility(MetricsEvent.QS_PANEL, mExpanded);
         if (!mExpanded) {
+            mUiEventLogger.log(closePanelEvent());
             closeDetail();
         } else {
+            mUiEventLogger.log(openPanelEvent());
             logTiles();
         }
     }
@@ -745,6 +790,18 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
 
     protected QSTileView createTileView(QSTile tile, boolean collapsedView) {
         return mHost.createTileView(tile, collapsedView);
+    }
+
+    protected QSEvent openPanelEvent() {
+        return QSEvent.QS_PANEL_EXPANDED;
+    }
+
+    protected QSEvent closePanelEvent() {
+        return QSEvent.QS_PANEL_COLLAPSED;
+    }
+
+    protected QSEvent tileVisibleEvent() {
+        return QSEvent.QS_TILE_VISIBLE;
     }
 
     protected boolean shouldShowDetail() {

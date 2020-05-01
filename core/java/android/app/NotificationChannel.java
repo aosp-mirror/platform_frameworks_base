@@ -161,6 +161,19 @@ public final class NotificationChannel implements Parcelable {
             USER_LOCKED_ALLOW_BUBBLE
     };
 
+    /**
+     * @hide
+     */
+    public static final int DEFAULT_ALLOW_BUBBLE = -1;
+    /**
+     * @hide
+     */
+    public static final int ALLOW_BUBBLE_ON = 1;
+    /**
+     * @hide
+     */
+    public static final int ALLOW_BUBBLE_OFF = 0;
+
     private static final int DEFAULT_LIGHT_COLOR = 0;
     private static final int DEFAULT_VISIBILITY =
             NotificationManager.VISIBILITY_NO_OVERRIDE;
@@ -168,12 +181,6 @@ public final class NotificationChannel implements Parcelable {
             NotificationManager.IMPORTANCE_UNSPECIFIED;
     private static final boolean DEFAULT_DELETED = false;
     private static final boolean DEFAULT_SHOW_BADGE = true;
-    /**
-     * @hide
-     */
-    public static final int DEFAULT_ALLOW_BUBBLE = -1;
-    private static final int ALLOW_BUBBLE_ON = 1;
-    private static final int ALLOW_BUBBLE_OFF = 0;
 
     @UnsupportedAppUsage
     private String mId;

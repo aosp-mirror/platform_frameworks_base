@@ -1083,7 +1083,7 @@ public class AppOpsManager {
      * @hide
      */
     public static final int OP_ACTIVATE_PLATFORM_VPN = AppProtoEnums.APP_OP_ACTIVATE_PLATFORM_VPN;
-    /** @hide */
+    /** @hide Controls whether or not read logs are available for incremental installations. */
     public static final int OP_LOADER_USAGE_STATS = AppProtoEnums.APP_OP_LOADER_USAGE_STATS;
 
     // App op deprecated/removed.

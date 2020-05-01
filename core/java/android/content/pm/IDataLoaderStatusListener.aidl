@@ -40,11 +40,15 @@ oneway interface IDataLoaderStatusListener {
     /** Installation can't continue as DataLoader failed to stream necessary data. */
     const int DATA_LOADER_IMAGE_NOT_READY = 6;
 
+    /** DataLoader instance can't run at the moment, but might recover later.
+     *  It's up to system to decide if the app is still usable. */
+    const int DATA_LOADER_UNAVAILABLE = 7;
+
     /** DataLoader reports that this instance is invalid and can never be restored.
     *   Warning: this is a terminal status that data loader should use carefully and
     *            the system should almost never use - e.g. only if all recovery attempts
     *            fail and all retry limits are exceeded. */
-    const int DATA_LOADER_UNRECOVERABLE = 7;
+    const int DATA_LOADER_UNRECOVERABLE = 8;
 
     /** Data loader status callback */
     void onStatusChanged(in int dataLoaderId, in int status);

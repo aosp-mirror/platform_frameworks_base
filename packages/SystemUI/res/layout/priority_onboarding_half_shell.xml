@@ -30,7 +30,6 @@
         android:layout_width="@dimen/qs_panel_width"
         android:layout_height="wrap_content"
         android:paddingTop="16dp"
-        android:paddingBottom="16dp"
         android:paddingStart="16dp"
         android:paddingEnd="16dp"
         android:orientation="vertical"
@@ -44,7 +43,10 @@
             android:id="@+id/show_at_top_tip"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="4dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:paddingStart="4dp"
+            android:paddingEnd="4dp"
             android:orientation="horizontal"
             >
             <ImageView
@@ -58,13 +60,13 @@
             <TextView
                 android:id="@+id/show_at_top_text"
                 android:layout_width="wrap_content"
-                android:layout_height="48dp"
+                android:layout_height="wrap_content"
                 android:paddingStart="16dp"
                 android:paddingEnd="16dp"
                 android:gravity="center_vertical|start"
                 android:textSize="15sp"
                 android:ellipsize="end"
-                android:maxLines="1"
+                android:maxLines="2"
                 android:text="@string/priority_onboarding_show_at_top_text"
                 style="@style/TextAppearance.NotificationInfo"
                 />
@@ -75,7 +77,10 @@
             android:id="@+id/show_avatar_tip"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="4dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:paddingStart="4dp"
+            android:paddingEnd="4dp"
             android:orientation="horizontal"
             >
             <ImageView
@@ -89,13 +94,13 @@
             <TextView
                 android:id="@+id/avatar_text"
                 android:layout_width="wrap_content"
-                android:layout_height="48dp"
+                android:layout_height="wrap_content"
                 android:paddingStart="16dp"
                 android:paddingEnd="16dp"
                 android:gravity="center_vertical|start"
                 android:textSize="15sp"
                 android:ellipsize="end"
-                android:maxLines="1"
+                android:maxLines="2"
                 android:text="@string/priority_onboarding_show_avatar_text"
                 style="@style/TextAppearance.NotificationInfo"
                 />
@@ -108,7 +113,10 @@
             android:id="@+id/floating_bubble_tip"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="4dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:paddingStart="4dp"
+            android:paddingEnd="4dp"
             android:orientation="horizontal"
             >
 
@@ -123,13 +131,13 @@
             <TextView
                 android:id="@+id/bubble_text"
                 android:layout_width="wrap_content"
-                android:layout_height="48dp"
+                android:layout_height="wrap_content"
                 android:paddingStart="16dp"
                 android:paddingEnd="16dp"
                 android:gravity="center_vertical|start"
                 android:textSize="15sp"
                 android:ellipsize="end"
-                android:maxLines="1"
+                android:maxLines="2"
                 android:text="@string/priority_onboarding_appear_as_bubble_text"
                 style="@style/TextAppearance.NotificationInfo"
                 />
@@ -140,7 +148,10 @@
             android:id="@+id/ignore_dnd_tip"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="4dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:paddingStart="4dp"
+            android:paddingEnd="4dp"
             android:orientation="horizontal"
             >
 
@@ -155,13 +166,13 @@
             <TextView
                 android:id="@+id/dnd_text"
                 android:layout_width="wrap_content"
-                android:layout_height="48dp"
+                android:layout_height="wrap_content"
                 android:paddingStart="16dp"
                 android:paddingEnd="16dp"
                 android:gravity="center_vertical|start"
                 android:textSize="15sp"
                 android:ellipsize="end"
-                android:maxLines="1"
+                android:maxLines="2"
                 android:text="@string/priority_onboarding_ignores_dnd_text"
                 style="@style/TextAppearance.NotificationInfo"
                 />
@@ -173,7 +184,8 @@
             android:id="@+id/button_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="4dp"
+            android:paddingStart="4dp"
+            android:paddingEnd="4dp"
             android:orientation="horizontal"
             >
             <TextView

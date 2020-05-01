@@ -15,10 +15,13 @@
  */
 package com.android.server.notification;
 
-import static android.app.NotificationChannel.USER_LOCKED_ALLOW_BUBBLE;
+import static android.app.NotificationChannel.ALLOW_BUBBLE_OFF;
+import static android.app.NotificationChannel.ALLOW_BUBBLE_ON;
+import static android.app.NotificationChannel.DEFAULT_ALLOW_BUBBLE;
 import static android.app.NotificationManager.BUBBLE_PREFERENCE_ALL;
 import static android.app.NotificationManager.BUBBLE_PREFERENCE_NONE;
 import static android.app.NotificationManager.BUBBLE_PREFERENCE_SELECTED;
+import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
 
@@ -59,6 +62,7 @@ import org.mockito.MockitoAnnotations;
 @RunWith(AndroidJUnit4.class)
 public class BubbleExtractorTest extends UiServiceTestCase {
 
+    private static final String CHANNEL_ID = "bubbleExtractorChannelId";
     private static final String SHORTCUT_ID = "shortcut";
     private static final String PKG = "com.android.server.notification";
     private static final String TAG = null;
@@ -68,11 +72,10 @@ public class BubbleExtractorTest extends UiServiceTestCase {
     UserHandle mUser = UserHandle.of(ActivityManager.getCurrentUser());
 
     BubbleExtractor mBubbleExtractor;
+    NotificationChannel mChannel;
 
     @Mock
     RankingConfig mConfig;
-    @Mock
-    NotificationChannel mChannel;
     @Mock
     Notification.BubbleMetadata mBubbleMetadata;
     @Mock
@@ -95,7 +98,8 @@ public class BubbleExtractorTest extends UiServiceTestCase {
         mBubbleExtractor.setShortcutHelper(mShortcutHelper);
         mBubbleExtractor.setActivityManager(mActivityManager);
 
-        when(mConfig.getNotificationChannel(PKG, UID, "a", false)).thenReturn(mChannel);
+        mChannel = new NotificationChannel(CHANNEL_ID, CHANNEL_ID, IMPORTANCE_DEFAULT);
+        when(mConfig.getNotificationChannel(PKG, UID, CHANNEL_ID, false)).thenReturn(mChannel);
         when(mShortcutInfo.getId()).thenReturn(SHORTCUT_ID);
     }
 
@@ -147,10 +151,10 @@ public class BubbleExtractorTest extends UiServiceTestCase {
         when(mShortcutHelper.getValidShortcutInfo(SHORTCUT_ID, PKG, mUser)).thenReturn(answer);
     }
 
-    void setUpBubblesEnabled(boolean feature, int app, boolean channel) {
+    void setUpBubblesEnabled(boolean feature, int app, int channel) {
         when(mConfig.bubblesEnabled()).thenReturn(feature);
         when(mConfig.getBubblePreference(anyString(), anyInt())).thenReturn(app);
-        when(mChannel.canBubble()).thenReturn(channel);
+        mChannel.setAllowBubbles(channel);
     }
 
     //
@@ -161,9 +165,45 @@ public class BubbleExtractorTest extends UiServiceTestCase {
     public void testAppYesChannelNo() {
         setUpBubblesEnabled(true /* feature */,
                 BUBBLE_PREFERENCE_ALL /* app */,
-                false /* channel */);
+                ALLOW_BUBBLE_OFF /* channel */);
         NotificationRecord r = getNotificationRecord(true /* bubble */);
-        when(mChannel.getUserLockedFields()).thenReturn(USER_LOCKED_ALLOW_BUBBLE);
+        mBubbleExtractor.process(r);
+
+        assertFalse(r.canBubble());
+        assertFalse(r.getNotification().isBubbleNotification());
+    }
+
+    @Test
+    public void testAppYesChannelDefault() {
+        setUpBubblesEnabled(true /* feature */,
+                BUBBLE_PREFERENCE_ALL /* app */,
+                DEFAULT_ALLOW_BUBBLE /* channel */);
+        NotificationRecord r = getNotificationRecord(true /* bubble */);
+
+        mBubbleExtractor.process(r);
+
+        assertTrue(r.canBubble());
+    }
+
+    @Test
+    public void testAppYesChannelYes() {
+        setUpBubblesEnabled(true /* feature */,
+                BUBBLE_PREFERENCE_ALL /* app */,
+                ALLOW_BUBBLE_ON /* channel */);
+        NotificationRecord r = getNotificationRecord(true /* bubble */);
+
+        mBubbleExtractor.process(r);
+
+        assertTrue(r.canBubble());
+    }
+
+    @Test
+    public void testAppYesChannelYesFeatureNo() {
+        setUpBubblesEnabled(false /* feature */,
+                BUBBLE_PREFERENCE_ALL /* app */,
+                ALLOW_BUBBLE_ON /* channel */);
+        NotificationRecord r = getNotificationRecord(true /* bubble */);
+
         mBubbleExtractor.process(r);
 
         assertFalse(r.canBubble());
@@ -174,7 +214,7 @@ public class BubbleExtractorTest extends UiServiceTestCase {
     public void testAppNoChannelYes() throws Exception {
         setUpBubblesEnabled(true /* feature */,
                 BUBBLE_PREFERENCE_NONE /* app */,
-                true /* channel */);
+                ALLOW_BUBBLE_ON /* channel */);
         NotificationRecord r = getNotificationRecord(true /* bubble */);
 
         mBubbleExtractor.process(r);
@@ -184,22 +224,10 @@ public class BubbleExtractorTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testAppYesChannelYes() {
-        setUpBubblesEnabled(true /* feature */,
-                BUBBLE_PREFERENCE_ALL /* app */,
-                true /* channel */);
-        NotificationRecord r = getNotificationRecord(true /* bubble */);
-
-        mBubbleExtractor.process(r);
-
-        assertTrue(r.canBubble());
-    }
-
-    @Test
-    public void testAppNoChannelNo() {
+    public void testAppNoChannelDefault() {
         setUpBubblesEnabled(true /* feature */,
                 BUBBLE_PREFERENCE_NONE /* app */,
-                false /* channel */);
+                DEFAULT_ALLOW_BUBBLE /* channel */);
         NotificationRecord r = getNotificationRecord(true /* bubble */);
 
         mBubbleExtractor.process(r);
@@ -209,10 +237,10 @@ public class BubbleExtractorTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testAppYesChannelYesUserNo() {
-        setUpBubblesEnabled(false /* feature */,
-                BUBBLE_PREFERENCE_ALL /* app */,
-                true /* channel */);
+    public void testAppSelectedChannelDefault() {
+        setUpBubblesEnabled(true /* feature */,
+                BUBBLE_PREFERENCE_SELECTED /* app */,
+                DEFAULT_ALLOW_BUBBLE /* channel */);
         NotificationRecord r = getNotificationRecord(true /* bubble */);
 
         mBubbleExtractor.process(r);
@@ -225,7 +253,7 @@ public class BubbleExtractorTest extends UiServiceTestCase {
     public void testAppSelectedChannelNo() {
         setUpBubblesEnabled(true /* feature */,
                 BUBBLE_PREFERENCE_SELECTED /* app */,
-                false /* channel */);
+                ALLOW_BUBBLE_OFF /* channel */);
         NotificationRecord r = getNotificationRecord(true /* bubble */);
 
         mBubbleExtractor.process(r);
@@ -238,13 +266,25 @@ public class BubbleExtractorTest extends UiServiceTestCase {
     public void testAppSeletedChannelYes() {
         setUpBubblesEnabled(true /* feature */,
                 BUBBLE_PREFERENCE_SELECTED /* app */,
-                true /* channel */);
+                ALLOW_BUBBLE_ON /* channel */);
         NotificationRecord r = getNotificationRecord(true /* bubble */);
-        when(mChannel.getUserLockedFields()).thenReturn(USER_LOCKED_ALLOW_BUBBLE);
 
         mBubbleExtractor.process(r);
 
         assertTrue(r.canBubble());
+    }
+
+    @Test
+    public void testAppSeletedChannelYesFeatureNo() {
+        setUpBubblesEnabled(false /* feature */,
+                BUBBLE_PREFERENCE_SELECTED /* app */,
+                ALLOW_BUBBLE_ON /* channel */);
+        NotificationRecord r = getNotificationRecord(true /* bubble */);
+
+        mBubbleExtractor.process(r);
+
+        assertFalse(r.canBubble());
+        assertFalse(r.getNotification().isBubbleNotification());
     }
 
     //
@@ -255,7 +295,7 @@ public class BubbleExtractorTest extends UiServiceTestCase {
     public void testFlagBubble_false_previouslyRemoved() {
         setUpBubblesEnabled(true /* feature */,
                 BUBBLE_PREFERENCE_ALL /* app */,
-                true /* channel */);
+                DEFAULT_ALLOW_BUBBLE /* channel */);
         when(mActivityManager.isLowRamDevice()).thenReturn(false);
         setUpShortcutBubble(true /* isValid */);
 
@@ -272,7 +312,7 @@ public class BubbleExtractorTest extends UiServiceTestCase {
     public void testFlagBubble_true_shortcutBubble() {
         setUpBubblesEnabled(true /* feature */,
                 BUBBLE_PREFERENCE_ALL /* app */,
-                true /* channel */);
+                DEFAULT_ALLOW_BUBBLE /* channel */);
         when(mActivityManager.isLowRamDevice()).thenReturn(false);
         setUpShortcutBubble(true /* isValid */);
 
@@ -287,7 +327,7 @@ public class BubbleExtractorTest extends UiServiceTestCase {
     public void testFlagBubble_true_intentBubble() {
         setUpBubblesEnabled(true /* feature */,
                 BUBBLE_PREFERENCE_ALL /* app */,
-                true /* channel */);
+                DEFAULT_ALLOW_BUBBLE /* channel */);
         when(mActivityManager.isLowRamDevice()).thenReturn(false);
         setUpIntentBubble(true /* isValid */);
 
@@ -302,7 +342,7 @@ public class BubbleExtractorTest extends UiServiceTestCase {
     public void testFlagBubble_false_noIntentInvalidShortcut() {
         setUpBubblesEnabled(true /* feature */,
                 BUBBLE_PREFERENCE_ALL /* app */,
-                true /* channel */);
+                DEFAULT_ALLOW_BUBBLE /* channel */);
         when(mActivityManager.isLowRamDevice()).thenReturn(false);
         setUpShortcutBubble(false /* isValid */);
 
@@ -318,7 +358,7 @@ public class BubbleExtractorTest extends UiServiceTestCase {
     public void testFlagBubble_false_invalidIntentNoShortcut() {
         setUpBubblesEnabled(true /* feature */,
                 BUBBLE_PREFERENCE_ALL /* app */,
-                true /* channel */);
+                DEFAULT_ALLOW_BUBBLE /* channel */);
         when(mActivityManager.isLowRamDevice()).thenReturn(false);
         setUpIntentBubble(false /* isValid */);
 
@@ -334,7 +374,7 @@ public class BubbleExtractorTest extends UiServiceTestCase {
     public void testFlagBubble_false_noIntentNoShortcut() {
         setUpBubblesEnabled(true /* feature */,
                 BUBBLE_PREFERENCE_ALL /* app */,
-                true /* channel */);
+                DEFAULT_ALLOW_BUBBLE /* channel */);
         when(mActivityManager.isLowRamDevice()).thenReturn(false);
 
         // Shortcut here is for the notification not the bubble
@@ -349,7 +389,7 @@ public class BubbleExtractorTest extends UiServiceTestCase {
     public void testFlagBubble_false_noMetadata() {
         setUpBubblesEnabled(true /* feature */,
                 BUBBLE_PREFERENCE_ALL /* app */,
-                true /* channel */);
+                DEFAULT_ALLOW_BUBBLE /* channel */);
         when(mActivityManager.isLowRamDevice()).thenReturn(false);
 
         NotificationRecord r = getNotificationRecord(false /* bubble */);
@@ -363,7 +403,7 @@ public class BubbleExtractorTest extends UiServiceTestCase {
     public void testFlagBubble_false_notConversation() {
         setUpBubblesEnabled(true /* feature */,
                 BUBBLE_PREFERENCE_ALL /* app */,
-                true /* channel */);
+                DEFAULT_ALLOW_BUBBLE /* channel */);
         when(mActivityManager.isLowRamDevice()).thenReturn(false);
         setUpIntentBubble(true /* isValid */);
 
@@ -382,7 +422,7 @@ public class BubbleExtractorTest extends UiServiceTestCase {
     public void testFlagBubble_false_lowRamDevice() {
         setUpBubblesEnabled(true /* feature */,
                 BUBBLE_PREFERENCE_ALL /* app */,
-                true /* channel */);
+                DEFAULT_ALLOW_BUBBLE /* channel */);
         when(mActivityManager.isLowRamDevice()).thenReturn(true);
         setUpIntentBubble(true /* isValid */);
 
@@ -397,7 +437,7 @@ public class BubbleExtractorTest extends UiServiceTestCase {
     public void testFlagBubble_false_noIntent() {
         setUpBubblesEnabled(true /* feature */,
                 BUBBLE_PREFERENCE_ALL /* app */,
-                true /* channel */);
+                DEFAULT_ALLOW_BUBBLE /* channel */);
         when(mActivityManager.isLowRamDevice()).thenReturn(true);
         setUpIntentBubble(true /* isValid */);
         when(mPendingIntent.getIntent()).thenReturn(null);
@@ -413,7 +453,7 @@ public class BubbleExtractorTest extends UiServiceTestCase {
     public void testFlagBubble_false_noActivityInfo() {
         setUpBubblesEnabled(true /* feature */,
                 BUBBLE_PREFERENCE_ALL /* app */,
-                true /* channel */);
+                DEFAULT_ALLOW_BUBBLE /* channel */);
         when(mActivityManager.isLowRamDevice()).thenReturn(true);
         setUpIntentBubble(true /* isValid */);
         when(mPendingIntent.getIntent()).thenReturn(mIntent);
