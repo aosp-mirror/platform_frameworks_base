@@ -1288,7 +1288,11 @@ public final class MediaParser {
         }
 
         @Override
-        public int sampleData(DataReader input, int length, boolean allowEndOfInput)
+        public int sampleData(
+                DataReader input,
+                int length,
+                boolean allowEndOfInput,
+                @SampleDataPart int sampleDataPart)
                 throws IOException {
             mScratchDataReaderAdapter.setDataReader(input, length);
             long positionBeforeReading = mScratchDataReaderAdapter.getPosition();
@@ -1297,7 +1301,8 @@ public final class MediaParser {
         }
 
         @Override
-        public void sampleData(ParsableByteArray data, int length) {
+        public void sampleData(
+                ParsableByteArray data, int length, @SampleDataPart int sampleDataPart) {
             mScratchParsableByteArrayAdapter.resetWithByteArray(data, length);
             try {
                 mOutputConsumer.onSampleDataFound(mTrackIndex, mScratchParsableByteArrayAdapter);
