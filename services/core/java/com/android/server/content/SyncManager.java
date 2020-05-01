@@ -1819,7 +1819,8 @@ public class SyncManager {
         intent.putExtra(Intent.EXTRA_CLIENT_LABEL,
                 com.android.internal.R.string.sync_binding_label);
         intent.putExtra(Intent.EXTRA_CLIENT_INTENT, PendingIntent.getActivityAsUser(context, 0,
-                new Intent(Settings.ACTION_SYNC_SETTINGS), 0, null, UserHandle.of(userId)));
+                new Intent(Settings.ACTION_SYNC_SETTINGS), PendingIntent.FLAG_IMMUTABLE, null,
+                UserHandle.of(userId)));
 
         return intent;
     }
