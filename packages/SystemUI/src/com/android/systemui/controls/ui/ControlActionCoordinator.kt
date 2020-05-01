@@ -59,9 +59,4 @@ interface ControlActionCoordinator {
      * retain context with their favorited controls in the power menu.
      */
     fun longPress(cvh: ControlViewHolder)
-
-    /**
-     * Event to inform the UI that the user has has focused on a single control.
-     */
-    fun setFocusedElement(cvh: ControlViewHolder?)
 }
