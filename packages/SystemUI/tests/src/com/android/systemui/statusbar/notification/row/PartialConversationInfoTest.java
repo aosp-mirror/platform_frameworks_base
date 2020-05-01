@@ -98,6 +98,8 @@ public class PartialConversationInfoTest extends SysuiTestCase {
     private INotificationManager mMockINotificationManager;
     @Mock
     private PackageManager mMockPackageManager;
+    @Mock
+    private ChannelEditorDialogController mChannelEditorDialogController;
 
     @Mock
     private Icon mIcon;
@@ -160,6 +162,7 @@ public class PartialConversationInfoTest extends SysuiTestCase {
         mInfo.bindNotification(
                 mMockPackageManager,
                 mMockINotificationManager,
+                mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
                 mNotificationChannelSet,
@@ -181,6 +184,7 @@ public class PartialConversationInfoTest extends SysuiTestCase {
         mInfo.bindNotification(
                 mMockPackageManager,
                 mMockINotificationManager,
+                mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
                 mNotificationChannelSet,
@@ -207,6 +211,7 @@ public class PartialConversationInfoTest extends SysuiTestCase {
         mInfo.bindNotification(
                 mMockPackageManager,
                 mMockINotificationManager,
+                mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
                 mNotificationChannelSet,
@@ -223,6 +228,7 @@ public class PartialConversationInfoTest extends SysuiTestCase {
         mInfo.bindNotification(
                 mMockPackageManager,
                 mMockINotificationManager,
+                mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
                 mNotificationChannelSet,
@@ -250,6 +256,7 @@ public class PartialConversationInfoTest extends SysuiTestCase {
         mInfo.bindNotification(
                 mMockPackageManager,
                 mMockINotificationManager,
+                mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
                 mNotificationChannelSet,
@@ -267,6 +274,7 @@ public class PartialConversationInfoTest extends SysuiTestCase {
         mInfo.bindNotification(
                 mMockPackageManager,
                 mMockINotificationManager,
+                mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
                 mNotificationChannelSet,
@@ -291,6 +299,7 @@ public class PartialConversationInfoTest extends SysuiTestCase {
         mInfo.bindNotification(
                 mMockPackageManager,
                 mMockINotificationManager,
+                mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
                 mNotificationChannelSet,
@@ -310,6 +319,7 @@ public class PartialConversationInfoTest extends SysuiTestCase {
         mInfo.bindNotification(
                 mMockPackageManager,
                 mMockINotificationManager,
+                mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
                 mNotificationChannelSet,
@@ -327,6 +337,7 @@ public class PartialConversationInfoTest extends SysuiTestCase {
         mInfo.bindNotification(
                 mMockPackageManager,
                 mMockINotificationManager,
+                mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
                 mNotificationChannelSet,
@@ -349,6 +360,7 @@ public class PartialConversationInfoTest extends SysuiTestCase {
         mInfo.bindNotification(
                 mMockPackageManager,
                 mMockINotificationManager,
+                mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
                 mNotificationChannelSet,
@@ -365,6 +377,7 @@ public class PartialConversationInfoTest extends SysuiTestCase {
         mInfo.bindNotification(
                 mMockPackageManager,
                 mMockINotificationManager,
+                mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
                 mNotificationChannelSet,
@@ -383,6 +396,7 @@ public class PartialConversationInfoTest extends SysuiTestCase {
         mInfo.bindNotification(
                 mMockPackageManager,
                 mMockINotificationManager,
+                mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
                 mNotificationChannelSet,

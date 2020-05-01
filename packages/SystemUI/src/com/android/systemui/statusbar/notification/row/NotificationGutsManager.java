@@ -87,6 +87,7 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
     private final VisualStabilityManager mVisualStabilityManager;
     private final AccessibilityManager mAccessibilityManager;
     private final HighPriorityProvider mHighPriorityProvider;
+    private final ChannelEditorDialogController mChannelEditorDialogController;
 
     // Dependencies:
     private final NotificationLockscreenUserManager mLockscreenUserManager =
@@ -127,6 +128,7 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
             INotificationManager notificationManager,
             LauncherApps launcherApps,
             ShortcutManager shortcutManager,
+            ChannelEditorDialogController channelEditorDialogController,
             CurrentUserContextTracker contextTracker,
             Provider<PriorityOnboardingDialogController.Builder> builderProvider) {
         mContext = context;
@@ -140,6 +142,7 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
         mShortcutManager = shortcutManager;
         mContextTracker = contextTracker;
         mBuilderProvider = builderProvider;
+        mChannelEditorDialogController = channelEditorDialogController;
     }
 
     public void setUpWithPresenter(NotificationPresenter presenter,
@@ -348,6 +351,7 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
                 pmUser,
                 mNotificationManager,
                 mVisualStabilityManager,
+                mChannelEditorDialogController,
                 packageName,
                 row.getEntry().getChannel(),
                 row.getUniqueChannels(),
@@ -390,6 +394,7 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
         notificationInfoView.bindNotification(
                 pmUser,
                 mNotificationManager,
+                mChannelEditorDialogController,
                 packageName,
                 row.getEntry().getChannel(),
                 row.getUniqueChannels(),
