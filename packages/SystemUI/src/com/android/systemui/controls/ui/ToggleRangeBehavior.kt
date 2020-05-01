@@ -175,7 +175,6 @@ class ToggleRangeBehavior : Behavior {
     fun beginUpdateRange() {
         status.setTextSize(TypedValue.COMPLEX_UNIT_PX, context.getResources()
                 .getDimensionPixelSize(R.dimen.control_status_expanded).toFloat())
-        cvh.controlActionCoordinator.setFocusedElement(cvh)
     }
 
     fun updateRange(level: Int, checked: Boolean, isDragging: Boolean) {
@@ -248,7 +247,6 @@ class ToggleRangeBehavior : Behavior {
         status.setText("$currentStatusText $currentRangeValue")
         cvh.action(FloatAction(rangeTemplate.getTemplateId(),
             findNearestStep(levelToRangeValue(clipLayer.getLevel()))))
-        cvh.controlActionCoordinator.setFocusedElement(null)
     }
 
     fun findNearestStep(value: Float): Float {

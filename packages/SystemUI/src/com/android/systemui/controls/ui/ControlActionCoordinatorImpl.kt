@@ -26,13 +26,10 @@ import android.service.controls.actions.BooleanAction
 import android.service.controls.actions.CommandAction
 import android.util.Log
 import android.view.HapticFeedbackConstants
-import com.android.systemui.controls.controller.ControlsController
 import com.android.systemui.globalactions.GlobalActionsComponent
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.concurrency.DelayableExecutor
-
-import dagger.Lazy
 
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -41,7 +38,6 @@ import javax.inject.Singleton
 class ControlActionCoordinatorImpl @Inject constructor(
     private val context: Context,
     private val bgExecutor: DelayableExecutor,
-    private val controlsController: Lazy<ControlsController>,
     private val activityStarter: ActivityStarter,
     private val keyguardStateController: KeyguardStateController,
     private val globalActionsComponent: GlobalActionsComponent
@@ -93,10 +89,6 @@ class ControlActionCoordinatorImpl @Inject constructor(
                 showDialog(cvh, it.getAppIntent().getIntent())
             }
         }
-    }
-
-    override fun setFocusedElement(cvh: ControlViewHolder?) {
-        controlsController.get().onFocusChanged(cvh?.cws)
     }
 
     private fun bouncerOrRun(f: () -> Unit) {
