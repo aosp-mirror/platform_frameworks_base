@@ -23,13 +23,13 @@
 #include <GrContext.h>
 #include <GrTypes.h>
 #include <android/sync.h>
+#include <ui/FatVector.h>
 #include <vk/GrVkExtensions.h>
 #include <vk/GrVkTypes.h>
 
 #include "Properties.h"
 #include "RenderThread.h"
 #include "renderstate/RenderState.h"
-#include "utils/FatVector.h"
 #include "utils/TraceUtils.h"
 
 namespace android {
