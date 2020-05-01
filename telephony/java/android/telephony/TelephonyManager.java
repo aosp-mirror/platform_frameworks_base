@@ -4511,6 +4511,7 @@ public class TelephonyManager {
      *
      * @hide
      */
+    @SystemApi
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public @NonNull String[] getMergedImsisFromGroup() {
         try {
@@ -8035,7 +8036,7 @@ public class TelephonyManager {
      */
     @SuppressAutoDoc // No support carrier privileges (b/72967236).
     @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE)
-    public @Nullable String getManualNetworkSelectionPlmn() {
+    public @NonNull String getManualNetworkSelectionPlmn() {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null && isManualNetworkSelectionAllowed()) {

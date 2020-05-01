@@ -758,14 +758,14 @@ public class Intent implements Parcelable, Cloneable {
      * Activity Action: Creates a reminder.
      * <p>Input: {@link #EXTRA_TITLE} The title of the reminder that will be shown to the user.
      * {@link #EXTRA_TEXT} The reminder text that will be shown to the user. The intent should at
-     * least specify a title or a text. {@link #EXTRA_EPOCH_TIME} The time when the reminder will
+     * least specify a title or a text. {@link #EXTRA_TIME} The time when the reminder will
      * be shown to the user. The time is specified in milliseconds since the Epoch (optional).
      * </p>
      * <p>Output: Nothing.</p>
      *
      * @see #EXTRA_TITLE
      * @see #EXTRA_TEXT
-     * @see #EXTRA_EPOCH_TIME
+     * @see #EXTRA_TIME
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_CREATE_REMINDER = "android.intent.action.CREATE_REMINDER";
@@ -5784,7 +5784,7 @@ public class Intent implements Parcelable, Cloneable {
      * Type: long
      * </p>
      */
-    public static final String EXTRA_EPOCH_TIME = "android.intent.extra.EPOCH_TIME";
+    public static final String EXTRA_TIME = "android.intent.extra.TIME";
 
     /**
      * Extra sent with {@link #ACTION_TIMEZONE_CHANGED} specifying the new time zone of the device.
