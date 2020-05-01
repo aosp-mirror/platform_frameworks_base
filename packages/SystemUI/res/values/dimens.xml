@@ -1289,13 +1289,23 @@
 
     <!-- Home Controls management screens -->
     <dimen name="controls_management_top_padding">48dp</dimen>
-    <dimen name="controls_management_side_padding">8dp</dimen>
-    <dimen name="controls_management_titles_margin">8dp</dimen>
+    <dimen name="controls_management_side_padding">16dp</dimen>
+    <dimen name="controls_management_titles_margin">16dp</dimen>
+    <dimen name="controls_management_footer_side_margin">8dp</dimen>
     <dimen name="controls_management_list_margin">16dp</dimen>
-    <dimen name="controls_title_size">26sp</dimen>
+    <dimen name="controls_management_apps_list_margin">64dp</dimen>
+    <dimen name="controls_management_editing_list_margin">48dp</dimen>
+    <dimen name="controls_management_editing_divider_margin">24dp</dimen>
+    <dimen name="controls_management_apps_extra_side_margin">8dp</dimen>
+    <dimen name="controls_management_apps_top_margin"></dimen>
+    <dimen name="controls_management_zone_top_margin">32dp</dimen>
+    <dimen name="controls_management_page_indicator_height">24dp</dimen>
+    <dimen name="controls_management_checkbox_size">25dp</dimen>
+    <dimen name="controls_title_size">24sp</dimen>
+    <dimen name="controls_subtitle_size">16sp</dimen>
 
-    <dimen name="controls_app_icon_size">32dp</dimen>
-    <dimen name="controls_app_icon_frame_side_padding">8dp</dimen>
+    <dimen name="controls_app_icon_size">24dp</dimen>
+    <dimen name="controls_app_icon_frame_side_padding">16dp</dimen>
     <dimen name="controls_app_icon_frame_top_padding">4dp</dimen>
     <dimen name="controls_app_icon_frame_bottom_padding">@dimen/controls_app_icon_frame_top_padding</dimen>
     <dimen name="controls_app_bottom_margin">8dp</dimen>
