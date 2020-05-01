@@ -1109,9 +1109,15 @@ public class ResourcesManager {
             Slog.v(TAG, "Changing resources "
                     + resourcesImpl + " config to: " + config);
         }
-        int displayId = key.mDisplayId;
-        final boolean hasOverrideConfiguration = key.hasOverrideConfiguration();
+
         tmpConfig.setTo(config);
+
+        // Apply the override configuration before setting the display adjustments to ensure that
+        // the process config does not override activity display adjustments.
+        final boolean hasOverrideConfiguration = key.hasOverrideConfiguration();
+        if (hasOverrideConfiguration) {
+            tmpConfig.updateFrom(key.mOverrideConfiguration);
+        }
 
         // Get new DisplayMetrics based on the DisplayAdjustments given to the ResourcesImpl. Update
         // a copy if the CompatibilityInfo changed, because the ResourcesImpl object will handle the
@@ -1121,17 +1127,23 @@ public class ResourcesManager {
             daj = new DisplayAdjustments(daj);
             daj.setCompatibilityInfo(compat);
         }
+
+        final int displayId = key.mDisplayId;
         if (displayId == Display.DEFAULT_DISPLAY) {
-            daj.setConfiguration(config);
+            daj.setConfiguration(tmpConfig);
         }
         DisplayMetrics dm = getDisplayMetrics(displayId, daj);
         if (displayId != Display.DEFAULT_DISPLAY) {
             applyNonDefaultDisplayMetricsToConfiguration(dm, tmpConfig);
+
+            // Re-apply the override configuration to ensure that configuration contexts based on
+            // a display context (ex: createDisplayContext().createConfigurationContext()) have the
+            // correct override.
+            if (hasOverrideConfiguration) {
+                tmpConfig.updateFrom(key.mOverrideConfiguration);
+            }
         }
 
-        if (hasOverrideConfiguration) {
-            tmpConfig.updateFrom(key.mOverrideConfiguration);
-        }
         resourcesImpl.updateConfiguration(tmpConfig, dm, compat);
     }
 
