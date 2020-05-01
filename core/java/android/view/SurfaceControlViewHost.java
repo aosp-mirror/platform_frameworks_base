@@ -234,6 +234,14 @@ public class SurfaceControlViewHost {
     }
 
     /**
+     * @return the WindowlessWindowManager instance that this host is attached to.
+     * @hide
+     */
+    public @NonNull WindowlessWindowManager getWindowlessWM() {
+        return mWm;
+    }
+
+    /**
      * @hide
      */
     @TestApi
