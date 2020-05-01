@@ -204,7 +204,7 @@ public class TaskStackTests extends WindowTestsBase {
                 .when(windowConfiguration).getWindowingMode();
 
         // Prevent adjust task dimensions
-        doNothing().when(stack).adjustForMinimalTaskDimensions(any(), any());
+        doNothing().when(stack).adjustForMinimalTaskDimensions(any(), any(), any());
 
         final Rect stackBounds = new Rect(200, 200, 800, 1000);
         // Update surface position and size by the given bounds.
