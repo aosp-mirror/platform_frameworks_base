@@ -549,18 +549,27 @@ public class ActivityStartController {
         return mPendingRemoteAnimationRegistry;
     }
 
-    void dump(PrintWriter pw, String prefix, String dumpPackage) {
+    void dumpLastHomeActivityStartResult(PrintWriter pw, String prefix) {
         pw.print(prefix);
         pw.print("mLastHomeActivityStartResult=");
         pw.println(mLastHomeActivityStartResult);
+    }
 
-        if (mLastHomeActivityStartRecord != null) {
+    void dump(PrintWriter pw, String prefix, String dumpPackage) {
+        boolean dumped = false;
+
+        final boolean dumpPackagePresent = dumpPackage != null;
+
+        if (mLastHomeActivityStartRecord != null && (!dumpPackagePresent
+                || dumpPackage.equals(mLastHomeActivityStartRecord.packageName))) {
+            if (!dumped) {
+                dumped = true;
+                dumpLastHomeActivityStartResult(pw, prefix);
+            }
             pw.print(prefix);
             pw.println("mLastHomeActivityStartRecord:");
             mLastHomeActivityStartRecord.dump(pw, prefix + "  ", true /* dumpAll */);
         }
-
-        final boolean dumpPackagePresent = dumpPackage != null;
 
         if (mLastStarter != null) {
             final boolean dump = !dumpPackagePresent
@@ -569,6 +578,10 @@ public class ActivityStartController {
                             && dumpPackage.equals(mLastHomeActivityStartRecord.packageName));
 
             if (dump) {
+                if (!dumped) {
+                    dumped = true;
+                    dumpLastHomeActivityStartResult(pw, prefix);
+                }
                 pw.print(prefix);
                 mLastStarter.dump(pw, prefix + "  ");
 
@@ -578,7 +591,7 @@ public class ActivityStartController {
             }
         }
 
-        if (dumpPackagePresent) {
+        if (!dumped) {
             pw.print(prefix);
             pw.println("(nothing)");
         }
