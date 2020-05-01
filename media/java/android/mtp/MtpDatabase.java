@@ -165,6 +165,7 @@ public class MtpDatabase implements AutoCloseable {
             MtpConstants.PROPERTY_TRACK,
             MtpConstants.PROPERTY_ORIGINAL_RELEASE_DATE,
             MtpConstants.PROPERTY_DURATION,
+            MtpConstants.PROPERTY_GENRE,
             MtpConstants.PROPERTY_COMPOSER,
             MtpConstants.PROPERTY_AUDIO_WAVE_CODEC,
             MtpConstants.PROPERTY_BITRATE_TYPE,
