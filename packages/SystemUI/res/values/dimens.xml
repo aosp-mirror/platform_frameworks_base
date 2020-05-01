@@ -995,7 +995,7 @@
     <dimen name="pip_expand_container_edge_margin">30dp</dimen>
 
     <!-- The touchable/draggable edge size for PIP resize. -->
-    <dimen name="pip_resize_edge_size">30dp</dimen>
+    <dimen name="pip_resize_edge_size">48dp</dimen>
 
     <!-- The corner radius for PiP window. -->
     <dimen name="pip_corner_radius">8dp</dimen>
