@@ -84,6 +84,7 @@ stubs_defaults {
         "framework-annotations-lib",
     ],
     sdk_version: "system_current",
+    dist: { dest: "framework-statsd.txt" },
 }
 
 droidstubs {
@@ -100,7 +101,6 @@ droidstubs {
         "framework-module-stubs-defaults-systemapi",
         "framework-statsd-stubs-srcs-defaults",
     ],
-
 }
 
 droidstubs {
@@ -127,6 +127,7 @@ java_library {
         "//frameworks/base", // Framework
         "//frameworks/base/apex/statsd", // statsd apex
     ],
+    dist: { dest: "framework-statsd.jar" },
 }
 
 java_library {
@@ -137,6 +138,7 @@ java_library {
         "//frameworks/base", // Framework
         "//frameworks/base/apex/statsd", // statsd apex
     ],
+    dist: { dest: "framework-statsd.jar" },
 }
 
 java_library {
@@ -149,6 +151,7 @@ java_library {
         "//frameworks/opt/net/wifi/service", // wifi service
         "//packages/providers/MediaProvider", // MediaProvider apk
     ],
+    dist: { dest: "framework-statsd.jar" },
 }
 
 android_test {
