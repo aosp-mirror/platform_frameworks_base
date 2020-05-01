@@ -1444,10 +1444,6 @@ class ShortcutPackage extends ShortcutPackageItem {
                     // Don't adjust ranks for manifest shortcuts.
                     continue;
                 }
-                if (si.isCached() && !si.isDynamic()) {
-                    // Don't adjust ranks for cached shortcuts that are not dynamic anymore.
-                    continue;
-                }
                 // At this point, it must be dynamic.
                 if (!si.isDynamic()) {
                     s.wtf("Non-dynamic shortcut found.");
@@ -1984,7 +1980,7 @@ class ShortcutPackage extends ShortcutPackageItem {
             dynamicList.removeIf((si) -> !si.isDynamic());
 
             final ArrayList<ShortcutInfo> manifestList = new ArrayList<>(list);
-            dynamicList.removeIf((si) -> !si.isManifestShortcut());
+            manifestList.removeIf((si) -> !si.isManifestShortcut());
 
             verifyRanksSequential(dynamicList);
             verifyRanksSequential(manifestList);
