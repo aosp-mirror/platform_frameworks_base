@@ -5277,10 +5277,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             // of whether a layout was requested on that View.
             sIgnoreMeasureCache = targetSdkVersion < Build.VERSION_CODES.KITKAT;
 
-            Canvas.sCompatibilityRestore = targetSdkVersion < Build.VERSION_CODES.M;
-            Canvas.sCompatibilitySetBitmap = targetSdkVersion < Build.VERSION_CODES.O;
-            Canvas.setCompatibilityVersion(targetSdkVersion);
-
             // In M and newer, our widgets can pass a "hint" value in the size
             // for UNSPECIFIED MeasureSpecs. This lets child views of scrolling containers
             // know what the expected parent size is going to be, so e.g. list items can size

@@ -37,6 +37,7 @@ public final class Compatibility {
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static void setTargetSdkVersion(int targetSdkVersion) {
         sTargetSdkVersion = targetSdkVersion;
+        Canvas.setCompatibilityVersion(targetSdkVersion);
     }
 
     /**

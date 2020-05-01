@@ -51,10 +51,8 @@ import javax.microedition.khronos.opengles.GL;
  */
 public class Canvas extends BaseCanvas {
     private static int sCompatiblityVersion = 0;
-    /** @hide */
-    public static boolean sCompatibilityRestore = false;
-    /** @hide */
-    public static boolean sCompatibilitySetBitmap = false;
+    private static boolean sCompatibilityRestore = false;
+    private static boolean sCompatibilitySetBitmap = false;
 
     /** @hide */
     @UnsupportedAppUsage
@@ -1426,9 +1424,10 @@ public class Canvas extends BaseCanvas {
         nFreeTextLayoutCaches();
     }
 
-    /** @hide */
-    public static void setCompatibilityVersion(int apiLevel) {
+    /*package*/ static void setCompatibilityVersion(int apiLevel) {
         sCompatiblityVersion = apiLevel;
+        sCompatibilityRestore = apiLevel < Build.VERSION_CODES.M;
+        sCompatibilitySetBitmap = apiLevel < Build.VERSION_CODES.O;
         nSetCompatibilityVersion(apiLevel);
     }
 
