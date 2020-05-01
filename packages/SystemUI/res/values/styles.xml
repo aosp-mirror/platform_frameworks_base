@@ -734,6 +734,18 @@
         <item name="android:textSize">@dimen/control_text_size</item>
         <item name="android:textColor">@color/control_secondary_text</item>
     </style>
+    <style name="TextAppearance.Control.Management" >
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+    </style>
+    <style name="TextAppearance.Control.Management.Title">
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamilyMedium</item>
+        <item name="android:textSize">@dimen/controls_title_size</item>
+    </style>
+    <style name="TextAppearance.Control.Management.Subtitle">
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
+        <item name="android:textSize">@dimen/controls_subtitle_size</item>
+    </style>
+
     <style name="Control.ListPopupWindow" parent="@*android:style/Widget.DeviceDefault.ListPopupWindow">
         <item name="android:overlapAnchor">true</item>
 
