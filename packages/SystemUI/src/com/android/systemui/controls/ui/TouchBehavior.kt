@@ -23,7 +23,7 @@ import android.service.controls.Control
 import android.service.controls.templates.ControlTemplate
 
 import com.android.systemui.R
-import com.android.systemui.controls.ui.ControlActionCoordinator.MIN_LEVEL
+import com.android.systemui.controls.ui.ControlViewHolder.Companion.MIN_LEVEL
 
 /**
  * Supports touch events, but has no notion of state as the {@link ToggleBehavior} does. Must be
@@ -40,7 +40,7 @@ class TouchBehavior : Behavior {
         cvh.applyRenderInfo(false /* enabled */, 0 /* offset */, false /* animated */)
 
         cvh.layout.setOnClickListener(View.OnClickListener() {
-            ControlActionCoordinator.touch(cvh, template.getTemplateId(), control)
+            cvh.controlActionCoordinator.touch(cvh, template.getTemplateId(), control)
         })
     }
 

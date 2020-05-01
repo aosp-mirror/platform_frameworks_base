@@ -60,7 +60,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -290,6 +289,21 @@ public abstract class ApexManager {
     abstract void registerApkInApex(AndroidPackage pkg);
 
     /**
+     * Reports error raised during installation of apk-in-apex.
+     *
+     * @param scanDir the directory of the apex inside which apk-in-apex resides.
+     */
+    abstract void reportErrorWithApkInApex(String scanDirPath);
+
+    /**
+     * Returns true if there were no errors when installing apk-in-apex inside
+     * {@param apexPackageName}, otherwise false.
+     *
+     * @param apexPackageName Package name of the apk container of apex
+     */
+    abstract boolean isApkInApexInstallSuccess(String apexPackageName);
+
+    /**
      * Returns list of {@code packageName} of apks inside the given apex.
      * @param apexPackageName Package name of the apk container of apex
      */
@@ -367,6 +381,13 @@ public abstract class ApexManager {
          */
         @GuardedBy("mLock")
         private ArrayMap<String, List<String>> mApksInApex = new ArrayMap<>();
+
+        /**
+         * Contains the list of {@code Exception}s that were raised when installing apk-in-apex
+         * inside {@code apexModuleName}.
+         */
+        @GuardedBy("mLock")
+        private Set<String> mErrorWithApkInApex = new ArraySet<>();
 
         @GuardedBy("mLock")
         private List<PackageInfo> mAllPackagesCache;
@@ -733,9 +754,7 @@ public abstract class ApexManager {
         @Override
         void registerApkInApex(AndroidPackage pkg) {
             synchronized (mLock) {
-                final Iterator<ActiveApexInfo> it = mActiveApexInfosCache.iterator();
-                while (it.hasNext()) {
-                    final ActiveApexInfo aai = it.next();
+                for (ActiveApexInfo aai : mActiveApexInfosCache) {
                     if (pkg.getBaseCodePath().startsWith(aai.apexDirectory.getAbsolutePath())) {
                         List<String> apks = mApksInApex.get(aai.apexModuleName);
                         if (apks == null) {
@@ -745,6 +764,30 @@ public abstract class ApexManager {
                         apks.add(pkg.getPackageName());
                     }
                 }
+            }
+        }
+
+        @Override
+        void reportErrorWithApkInApex(String scanDirPath) {
+            synchronized (mLock) {
+                for (ActiveApexInfo aai : mActiveApexInfosCache) {
+                    if (scanDirPath.startsWith(aai.apexDirectory.getAbsolutePath())) {
+                        mErrorWithApkInApex.add(aai.apexModuleName);
+                    }
+                }
+            }
+        }
+
+        @Override
+        boolean isApkInApexInstallSuccess(String apexPackageName) {
+            synchronized (mLock) {
+                Preconditions.checkState(mPackageNameToApexModuleName != null,
+                        "APEX packages have not been scanned");
+                String moduleName = mPackageNameToApexModuleName.get(apexPackageName);
+                if (moduleName == null) {
+                    return false;
+                }
+                return !mErrorWithApkInApex.contains(moduleName);
             }
         }
 
@@ -1037,6 +1080,16 @@ public abstract class ApexManager {
         @Override
         void registerApkInApex(AndroidPackage pkg) {
             // No-op
+        }
+
+        @Override
+        void reportErrorWithApkInApex(String scanDirPath) {
+            // No-op
+        }
+
+        @Override
+        boolean isApkInApexInstallSuccess(String apexPackageName) {
+            return true;
         }
 
         @Override

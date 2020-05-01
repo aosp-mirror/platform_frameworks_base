@@ -134,5 +134,5 @@ java_library {
 java_library {
     name: "framework-tethering-stubs-module_libs_api",
     srcs: [":framework-tethering-stubs-srcs-module_libs_api"],
-    defaults: ["framework-module-stubs-lib-defaults-systemapi"],
+    defaults: ["framework-module-stubs-lib-defaults-module_libs_api"],
 }

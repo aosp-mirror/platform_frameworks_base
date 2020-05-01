@@ -1945,7 +1945,7 @@ public class SoundTrigger {
         Looper looper = handler != null ? handler.getLooper() : Looper.getMainLooper();
         try {
             return new SoundTriggerModule(getService(), moduleId, listener, looper);
-        } catch (RemoteException e) {
+        } catch (Exception e) {
             Log.e(TAG, "", e);
             return null;
         }

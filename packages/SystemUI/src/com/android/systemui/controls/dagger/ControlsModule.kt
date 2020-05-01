@@ -30,6 +30,8 @@ import com.android.systemui.controls.management.ControlsProviderSelectorActivity
 import com.android.systemui.controls.management.ControlsRequestDialog
 import com.android.systemui.controls.ui.ControlsUiController
 import com.android.systemui.controls.ui.ControlsUiControllerImpl
+import com.android.systemui.controls.ui.ControlActionCoordinator
+import com.android.systemui.controls.ui.ControlActionCoordinatorImpl
 import dagger.Binds
 import dagger.BindsOptionalOf
 import dagger.Module
@@ -54,6 +56,11 @@ abstract class ControlsModule {
 
     @Binds
     abstract fun provideUiController(controller: ControlsUiControllerImpl): ControlsUiController
+
+    @Binds
+    abstract fun provideControlActionCoordinator(
+        coordinator: ControlActionCoordinatorImpl
+    ): ControlActionCoordinator
 
     @BindsOptionalOf
     abstract fun optionalPersistenceWrapper(): ControlsFavoritePersistenceWrapper

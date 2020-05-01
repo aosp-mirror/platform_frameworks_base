@@ -65,6 +65,7 @@ import android.platform.test.annotations.Presubmit;
 import android.util.ArrayMap;
 import android.util.Rational;
 import android.view.Display;
+import android.view.SurfaceControl;
 import android.window.ITaskOrganizer;
 import android.window.WindowContainerTransaction;
 
@@ -133,7 +134,8 @@ public class WindowOrganizerTests extends WindowTestsBase {
         final ITaskOrganizer organizer = registerMockOrganizer();
 
         task.setTaskOrganizer(organizer);
-        verify(organizer).onTaskAppeared(any());
+        verify(organizer).onTaskAppeared(any(RunningTaskInfo.class), any(SurfaceControl.class));
+
 
         task.removeImmediately();
         verify(organizer).onTaskVanished(any());
@@ -147,11 +149,12 @@ public class WindowOrganizerTests extends WindowTestsBase {
 
         task.setTaskOrganizer(organizer);
 
-        verify(organizer, never()).onTaskAppeared(any());
+        verify(organizer, never())
+                .onTaskAppeared(any(RunningTaskInfo.class), any(SurfaceControl.class));
         task.setHasBeenVisible(true);
         assertTrue(stack.getHasBeenVisible());
 
-        verify(organizer).onTaskAppeared(any());
+        verify(organizer).onTaskAppeared(any(RunningTaskInfo.class), any(SurfaceControl.class));
 
         task.removeImmediately();
         verify(organizer).onTaskVanished(any());
@@ -167,7 +170,8 @@ public class WindowOrganizerTests extends WindowTestsBase {
         // that even though a TaskOrganizer is set remove doesn't emit
         // a vanish callback, because we never emitted appear.
         task.setTaskOrganizer(organizer);
-        verify(organizer, never()).onTaskAppeared(any());
+        verify(organizer, never())
+                .onTaskAppeared(any(RunningTaskInfo.class), any(SurfaceControl.class));
         task.removeImmediately();
         verify(organizer, never()).onTaskVanished(any());
     }
@@ -180,10 +184,10 @@ public class WindowOrganizerTests extends WindowTestsBase {
         final ITaskOrganizer organizer2 = registerMockOrganizer(WINDOWING_MODE_PINNED);
 
         task.setTaskOrganizer(organizer);
-        verify(organizer).onTaskAppeared(any());
+        verify(organizer).onTaskAppeared(any(RunningTaskInfo.class), any(SurfaceControl.class));
         task.setTaskOrganizer(organizer2);
         verify(organizer).onTaskVanished(any());
-        verify(organizer2).onTaskAppeared(any());
+        verify(organizer2).onTaskAppeared(any(RunningTaskInfo.class), any(SurfaceControl.class));
     }
 
     @Test
@@ -194,10 +198,10 @@ public class WindowOrganizerTests extends WindowTestsBase {
         final ITaskOrganizer organizer2 = registerMockOrganizer(WINDOWING_MODE_PINNED);
 
         stack.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
-        verify(organizer).onTaskAppeared(any());
+        verify(organizer).onTaskAppeared(any(RunningTaskInfo.class), any(SurfaceControl.class));
         stack.setWindowingMode(WINDOWING_MODE_PINNED);
         verify(organizer).onTaskVanished(any());
-        verify(organizer2).onTaskAppeared(any());
+        verify(organizer2).onTaskAppeared(any(RunningTaskInfo.class), any(SurfaceControl.class));
     }
 
     @Test
@@ -207,7 +211,8 @@ public class WindowOrganizerTests extends WindowTestsBase {
         final ITaskOrganizer organizer = registerMockOrganizer();
 
         stack.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
-        verify(organizer, never()).onTaskAppeared(any());
+        verify(organizer, never())
+                .onTaskAppeared(any(RunningTaskInfo.class), any(SurfaceControl.class));
         assertTrue(stack.isOrganized());
 
         mWm.mAtmService.mTaskOrganizerController.unregisterTaskOrganizer(organizer);
@@ -222,7 +227,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
         final ITaskOrganizer organizer = registerMockOrganizer();
 
         stack.setTaskOrganizer(organizer);
-        verify(organizer).onTaskAppeared(any());
+        verify(organizer).onTaskAppeared(any(RunningTaskInfo.class), any(SurfaceControl.class));
         assertTrue(stack.isOrganized());
 
         stack.setTaskOrganizer(null);
@@ -237,7 +242,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
         final ITaskOrganizer organizer = registerMockOrganizer();
 
         stack.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
-        verify(organizer).onTaskAppeared(any());
+        verify(organizer).onTaskAppeared(any(RunningTaskInfo.class), any(SurfaceControl.class));
         assertTrue(stack.isOrganized());
 
         mWm.mAtmService.mTaskOrganizerController.unregisterTaskOrganizer(organizer);
@@ -257,7 +262,8 @@ public class WindowOrganizerTests extends WindowTestsBase {
 
         // First organizer is registered, verify a task appears when changing windowing mode
         stack.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
-        verify(organizer, times(1)).onTaskAppeared(any());
+        verify(organizer, times(1))
+                .onTaskAppeared(any(RunningTaskInfo.class), any(SurfaceControl.class));
         assertTrue(stack.isOrganized());
 
         // Now we replace the registration and1 verify the new organizer receives tasks
@@ -265,7 +271,8 @@ public class WindowOrganizerTests extends WindowTestsBase {
         final ITaskOrganizer organizer2 = registerMockOrganizer(WINDOWING_MODE_MULTI_WINDOW);
         stack2.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
         // One each for task and task2
-        verify(organizer2, times(2)).onTaskAppeared(any());
+        verify(organizer2, times(2))
+                .onTaskAppeared(any(RunningTaskInfo.class), any(SurfaceControl.class));
         verify(organizer2, times(0)).onTaskVanished(any());
         // One for task
         verify(organizer).onTaskVanished(any());
@@ -274,11 +281,13 @@ public class WindowOrganizerTests extends WindowTestsBase {
         // Now we unregister the second one, the first one should automatically be reregistered
         // so we verify that it's now seeing changes.
         mWm.mAtmService.mTaskOrganizerController.unregisterTaskOrganizer(organizer2);
-        verify(organizer, times(3)).onTaskAppeared(any());
+        verify(organizer, times(3))
+                .onTaskAppeared(any(RunningTaskInfo.class), any(SurfaceControl.class));
         verify(organizer2, times(2)).onTaskVanished(any());
 
         stack3.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
-        verify(organizer, times(4)).onTaskAppeared(any());
+        verify(organizer, times(4))
+                .onTaskAppeared(any(RunningTaskInfo.class), any(SurfaceControl.class));
         verify(organizer2, times(2)).onTaskVanished(any());
         assertTrue(stack3.isOrganized());
     }
@@ -291,7 +300,8 @@ public class WindowOrganizerTests extends WindowTestsBase {
         final Task task = createTask(stack);
         final Task task2 = createTask(stack);
         stack.setWindowingMode(WINDOWING_MODE_PINNED);
-        verify(organizer, times(1)).onTaskAppeared(any());
+        verify(organizer, times(1))
+                .onTaskAppeared(any(RunningTaskInfo.class), any(SurfaceControl.class));
 
         stack.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
         verify(organizer, times(1)).onTaskVanished(any());
@@ -304,7 +314,8 @@ public class WindowOrganizerTests extends WindowTestsBase {
         stack.setWindowingMode(WINDOWING_MODE_PINNED);
 
         final ITaskOrganizer organizer = registerMockOrganizer(WINDOWING_MODE_PINNED);
-        verify(organizer, times(1)).onTaskAppeared(any());
+        verify(organizer, times(1))
+                .onTaskAppeared(any(RunningTaskInfo.class), any(SurfaceControl.class));
     }
 
     @Test
@@ -459,7 +470,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
     public void testTileAddRemoveChild() {
         ITaskOrganizer listener = new ITaskOrganizer.Stub() {
             @Override
-            public void onTaskAppeared(RunningTaskInfo taskInfo) { }
+            public void onTaskAppeared(RunningTaskInfo taskInfo, SurfaceControl leash) { }
 
             @Override
             public void onTaskVanished(RunningTaskInfo container) { }
@@ -515,7 +526,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
         final boolean[] called = {false};
         ITaskOrganizer listener = new ITaskOrganizer.Stub() {
             @Override
-            public void onTaskAppeared(RunningTaskInfo taskInfo) { }
+            public void onTaskAppeared(RunningTaskInfo taskInfo, SurfaceControl leash) { }
 
             @Override
             public void onTaskVanished(RunningTaskInfo container) { }
@@ -577,7 +588,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
         final ArrayMap<IBinder, RunningTaskInfo> lastReportedTiles = new ArrayMap<>();
         ITaskOrganizer listener = new ITaskOrganizer.Stub() {
             @Override
-            public void onTaskAppeared(RunningTaskInfo taskInfo) { }
+            public void onTaskAppeared(RunningTaskInfo taskInfo, SurfaceControl leash) { }
 
             @Override
             public void onTaskVanished(RunningTaskInfo container) { }
@@ -804,7 +815,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
         RunningTaskInfo mInfo;
 
         @Override
-        public void onTaskAppeared(RunningTaskInfo info) {
+        public void onTaskAppeared(RunningTaskInfo info, SurfaceControl leash) {
             mInfo = info;
         }
         @Override
@@ -907,12 +918,14 @@ public class WindowOrganizerTests extends WindowTestsBase {
         task.setTaskOrganizer(organizer);
         // setHasBeenVisible was already called once by the set-up code.
         task.setHasBeenVisible(true);
-        verify(organizer, times(1)).onTaskAppeared(any());
+        verify(organizer, times(1))
+                .onTaskAppeared(any(RunningTaskInfo.class), any(SurfaceControl.class));
 
         task.setTaskOrganizer(null);
         verify(organizer, times(1)).onTaskVanished(any());
         task.setTaskOrganizer(organizer);
-        verify(organizer, times(2)).onTaskAppeared(any());
+        verify(organizer, times(2))
+                .onTaskAppeared(any(RunningTaskInfo.class), any(SurfaceControl.class));
 
         task.removeImmediately();
         verify(organizer, times(2)).onTaskVanished(any());
