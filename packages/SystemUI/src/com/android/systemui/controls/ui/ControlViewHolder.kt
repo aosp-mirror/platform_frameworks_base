@@ -73,8 +73,6 @@ class ControlViewHolder(
 
     private val toggleBackgroundIntensity: Float = layout.context.resources
             .getFraction(R.fraction.controls_toggle_bg_intensity, 1, 1)
-    private val dimmedAlpha: Float = layout.context.resources
-            .getFraction(R.fraction.controls_dimmed_alpha, 1, 1)
     private var stateAnimator: ValueAnimator? = null
     private val baseLayer: GradientDrawable
     val icon: ImageView = layout.requireViewById(R.id.icon)
@@ -91,11 +89,6 @@ class ControlViewHolder(
 
     val deviceType: Int
         get() = cws.control?.let { it.getDeviceType() } ?: cws.ci.deviceType
-    var dimmed: Boolean = false
-        set(value) {
-            field = value
-            bindData(cws)
-        }
 
     init {
         val ld = layout.getBackground() as LayerDrawable
@@ -222,7 +215,6 @@ class ControlViewHolder(
 
         val fg = context.resources.getColorStateList(ri.foreground, context.theme)
         val bg = context.resources.getColor(R.color.control_default_background, context.theme)
-        val dimAlpha = if (dimmed) dimmedAlpha else 1f
         var (newClipColor, newAlpha) = if (enabled) {
             // allow color overrides for the enabled state only
             val color = cws.control?.getCustomColor()?.let {
@@ -269,7 +261,7 @@ class ControlViewHolder(
                         setColor(ColorUtils.blendARGB(oldColor, newClipColor, it.animatedFraction))
                         baseLayer.setColor(ColorUtils.blendARGB(oldBaseColor,
                                 newBaseColor, it.animatedFraction))
-                        layout.alpha = MathUtils.lerp(oldAlpha, dimAlpha, it.animatedFraction)
+                        layout.alpha = MathUtils.lerp(oldAlpha, 1f, it.animatedFraction)
                     }
                     addListener(object : AnimatorListenerAdapter() {
                         override fun onAnimationEnd(animation: Animator?) {
@@ -284,7 +276,7 @@ class ControlViewHolder(
                 alpha = newAlpha
                 setColor(newClipColor)
                 baseLayer.setColor(newBaseColor)
-                layout.alpha = dimAlpha
+                layout.alpha = 1f
             }
         }
     }
