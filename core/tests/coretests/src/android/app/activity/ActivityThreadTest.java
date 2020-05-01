@@ -44,8 +44,11 @@ import android.app.servertransaction.StopActivityItem;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.content.res.Resources;
+import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.os.IBinder;
+import android.util.DisplayMetrics;
 import android.util.MergedConfiguration;
 import android.view.Display;
 import android.view.View;
@@ -363,6 +366,58 @@ public class ActivityThreadTest {
                 activityThread.updatePendingConfiguration(originalAppConfig);
                 activityThread.handleConfigurationChanged(originalAppConfig);
             }
+        });
+    }
+
+    @Test
+    public void testHandleConfigurationChanged_DoesntOverrideActivityConfig() {
+        final TestActivity activity = mActivityTestRule.launchActivity(new Intent());
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            final Configuration oldActivityConfig =
+                    new Configuration(activity.getResources().getConfiguration());
+            final DisplayMetrics oldActivityMetrics = new DisplayMetrics();
+            activity.getDisplay().getMetrics(oldActivityMetrics);
+            final Resources oldAppResources = activity.getApplication().getResources();
+            final Configuration oldAppConfig =
+                    new Configuration(oldAppResources.getConfiguration());
+            final DisplayMetrics oldApplicationMetrics = new DisplayMetrics();
+            oldApplicationMetrics.setTo(oldAppResources.getDisplayMetrics());
+            assertEquals("Process config must match the top activity config by default",
+                    0, oldActivityConfig.diffPublicOnly(oldAppConfig));
+            assertEquals("Process config must match the top activity config by default",
+                    oldActivityMetrics, oldApplicationMetrics);
+
+            // Update the application configuration separately from activity config
+            final Configuration newAppConfig = new Configuration(oldAppConfig);
+            newAppConfig.densityDpi += 100;
+            newAppConfig.screenHeightDp += 100;
+            final Rect newBounds = new Rect(newAppConfig.windowConfiguration.getAppBounds());
+            newBounds.bottom += 100;
+            newAppConfig.windowConfiguration.setAppBounds(newBounds);
+            newAppConfig.windowConfiguration.setBounds(newBounds);
+            newAppConfig.seq++;
+
+            final ActivityThread activityThread = activity.getActivityThread();
+            activityThread.handleConfigurationChanged(newAppConfig);
+
+            // Verify that application config update was applied, but didn't change activity config.
+            assertEquals("Activity config must not change if the process config changes",
+                    oldActivityConfig, activity.getResources().getConfiguration());
+
+            final DisplayMetrics newActivityMetrics = new DisplayMetrics();
+            activity.getDisplay().getMetrics(newActivityMetrics);
+            assertEquals("Activity display size must not change if the process config changes",
+                    oldActivityMetrics, newActivityMetrics);
+            final Resources newAppResources = activity.getApplication().getResources();
+            assertEquals("Application config must be updated",
+                    newAppConfig, newAppResources.getConfiguration());
+            final DisplayMetrics newApplicationMetrics = new DisplayMetrics();
+            newApplicationMetrics.setTo(newAppResources.getDisplayMetrics());
+            assertNotEquals("Application display size must be updated after config update",
+                    oldApplicationMetrics, newApplicationMetrics);
+            assertNotEquals("Application display size must be updated after config update",
+                    newActivityMetrics, newApplicationMetrics);
         });
     }
 
