@@ -122,13 +122,19 @@ class MtpPropertyGroup {
                 type = MtpConstants.TYPE_STR;
                 break;
             case MtpConstants.PROPERTY_ARTIST:
+                column = Audio.AudioColumns.ARTIST;
                 type = MtpConstants.TYPE_STR;
                 break;
             case MtpConstants.PROPERTY_ALBUM_NAME:
+                column = Audio.AudioColumns.ALBUM;
                 type = MtpConstants.TYPE_STR;
                 break;
             case MtpConstants.PROPERTY_ALBUM_ARTIST:
                 column = Audio.AudioColumns.ALBUM_ARTIST;
+                type = MtpConstants.TYPE_STR;
+                break;
+            case MtpConstants.PROPERTY_GENRE:
+                column = Audio.AudioColumns.GENRE;
                 type = MtpConstants.TYPE_STR;
                 break;
             case MtpConstants.PROPERTY_COMPOSER:
