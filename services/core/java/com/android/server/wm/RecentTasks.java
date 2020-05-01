@@ -1718,9 +1718,31 @@ class RecentTasks {
         final int size = mTasks.size();
         for (int i = 0; i < size; i++) {
             final Task task = mTasks.get(i);
-            if (dumpPackage != null && (task.realActivity == null ||
-                    !dumpPackage.equals(task.realActivity.getPackageName()))) {
-                continue;
+            if (dumpPackage != null) {
+                boolean match = task.intent != null
+                        && task.intent.getComponent() != null
+                        && dumpPackage.equals(
+                        task.intent.getComponent().getPackageName());
+                if (!match) {
+                    match |= task.affinityIntent != null
+                            && task.affinityIntent.getComponent() != null
+                            && dumpPackage.equals(
+                            task.affinityIntent.getComponent().getPackageName());
+                }
+                if (!match) {
+                    match |= task.origActivity != null
+                            && dumpPackage.equals(task.origActivity.getPackageName());
+                }
+                if (!match) {
+                    match |= task.realActivity != null
+                            && dumpPackage.equals(task.realActivity.getPackageName());
+                }
+                if (!match) {
+                    match |= dumpPackage.equals(task.mCallingPackage);
+                }
+                if (!match) {
+                    continue;
+                }
             }
 
             if (!printedHeader) {
@@ -1743,6 +1765,31 @@ class RecentTasks {
                     0, true /* getTasksAllowed */, mService.getCurrentUserId(), SYSTEM_UID);
             for (int i = 0; i < tasks.size(); i++) {
                 final ActivityManager.RecentTaskInfo taskInfo = tasks.get(i);
+                if (dumpPackage != null) {
+                    boolean match = taskInfo.baseIntent != null
+                            && taskInfo.baseIntent.getComponent() != null
+                            && dumpPackage.equals(
+                                    taskInfo.baseIntent.getComponent().getPackageName());
+                    if (!match) {
+                        match |= taskInfo.baseActivity != null
+                                && dumpPackage.equals(taskInfo.baseActivity.getPackageName());
+                    }
+                    if (!match) {
+                        match |= taskInfo.topActivity != null
+                                && dumpPackage.equals(taskInfo.topActivity.getPackageName());
+                    }
+                    if (!match) {
+                        match |= taskInfo.origActivity != null
+                                && dumpPackage.equals(taskInfo.origActivity.getPackageName());
+                    }
+                    if (!match) {
+                        match |= taskInfo.realActivity != null
+                                && dumpPackage.equals(taskInfo.realActivity.getPackageName());
+                    }
+                    if (!match) {
+                        continue;
+                    }
+                }
                 if (!printedHeader) {
                     if (printedAnything) {
                         // Separate from the last block if it printed
