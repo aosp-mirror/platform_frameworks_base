@@ -16,7 +16,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="no_upstream_notification_title" msgid="5030042590486713460">"Tethering has no internet"</string>
+    <string name="no_upstream_notification_title" msgid="5030042590486713460">"टेदरिङमार्फत इन्टरनेट कनेक्सन प्राप्त हुन सकेन"</string>
     <string name="no_upstream_notification_message" msgid="3843613362272973447">"यन्त्रहरू कनेक्ट गर्न सकिएन"</string>
     <string name="no_upstream_notification_disable_button" msgid="6385491461813507624">"टेदरिङ निष्क्रिय पार्नुहोस्"</string>
     <string name="upstream_roaming_notification_title" msgid="3015912166812283303">"हटस्पट वा टेदरिङ सक्रिय छ"</string>
