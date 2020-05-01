@@ -16,6 +16,7 @@
 
 package com.android.server.notification;
 
+import com.android.internal.logging.InstanceId;
 import com.android.internal.logging.UiEventLogger;
 
 import java.util.ArrayList;
@@ -32,14 +33,16 @@ class NotificationRecordLoggerFake implements NotificationRecordLogger {
         static final int INVALID = -1;
         public int position = INVALID, buzzBeepBlink = INVALID;
         public boolean wasLogged;
+        public InstanceId groupInstanceId;
 
         CallRecord(NotificationRecord r, NotificationRecord old, int position,
-                int buzzBeepBlink) {
+                int buzzBeepBlink, InstanceId groupId) {
             super(r, old);
             this.position = position;
             this.buzzBeepBlink = buzzBeepBlink;
             wasLogged = shouldLogReported(buzzBeepBlink);
             event = wasLogged ? NotificationReportedEvent.fromRecordPair(this) : null;
+            groupInstanceId = groupId;
         }
 
         CallRecord(NotificationRecord r, UiEventLogger.UiEventEnum event) {
@@ -67,8 +70,8 @@ class NotificationRecordLoggerFake implements NotificationRecordLogger {
 
     @Override
     public void maybeLogNotificationPosted(NotificationRecord r, NotificationRecord old,
-            int position, int buzzBeepBlink) {
-        mCalls.add(new CallRecord(r, old, position, buzzBeepBlink));
+            int position, int buzzBeepBlink, InstanceId groupId) {
+        mCalls.add(new CallRecord(r, old, position, buzzBeepBlink, groupId));
     }
 
     @Override
