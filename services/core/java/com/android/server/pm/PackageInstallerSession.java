@@ -1847,11 +1847,16 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
     }
 
-    private void logDataLoaderInstallationSession(int returnCode, String extraMessage) {
+    private void logDataLoaderInstallationSession(int returnCode) {
+        // Skip logging the side-loaded app installations, as those are private and aren't reported
+        // anywhere; app stores already have a record of the installation and that's why reporting
+        // it here is fine
+        final String packageNameToLog =
+                (params.installFlags & PackageManager.INSTALL_FROM_ADB) == 0 ? mPackageName : "";
         final long currentTimestamp = System.currentTimeMillis();
         FrameworkStatsLog.write(FrameworkStatsLog.PACKAGE_INSTALLER_V2_REPORTED,
                 isIncrementalInstallation(),
-                mPackageName,
+                packageNameToLog,
                 currentTimestamp - createdMillis,
                 returnCode);
     }
@@ -2879,7 +2884,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
         mCallback.onSessionFinished(this, success);
         if (isDataLoaderInstallation()) {
-            logDataLoaderInstallationSession(returnCode, msg);
+            logDataLoaderInstallationSession(returnCode);
         }
     }
 
