@@ -29,9 +29,9 @@
 
 #include <hwui/MinikinSkia.h>
 #include <hwui/Typeface.h>
-#include <utils/FatVector.h>
 #include <minikin/FontFamily.h>
 #include <minikin/LocaleList.h>
+#include <ui/FatVector.h>
 
 #include <memory>
 
@@ -104,7 +104,7 @@ static jlong FontFamily_getFamilyReleaseFunc(CRITICAL_JNI_PARAMS) {
 
 static bool addSkTypeface(NativeFamilyBuilder* builder, sk_sp<SkData>&& data, int ttcIndex,
         jint weight, jint italic) {
-    uirenderer::FatVector<SkFontArguments::Axis, 2> skiaAxes;
+    FatVector<SkFontArguments::Axis, 2> skiaAxes;
     for (const auto& axis : builder->axes) {
         skiaAxes.emplace_back(SkFontArguments::Axis{axis.axisTag, axis.value});
     }
