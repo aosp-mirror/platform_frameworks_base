@@ -208,7 +208,6 @@ public class TestDrive {
             ConfigMetricsReport report = reportList.getReports(reportList.getReportsCount() - 1);
             for (StatsLogReport statsLog : report.getMetricsList()) {
                 if (isTrackedMetric(statsLog.getMetricId())) {
-                    LOGGER.info(statsLog.toString());
                     dumper.dump(statsLog);
                 }
             }
