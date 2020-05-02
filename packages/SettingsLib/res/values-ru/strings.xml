@@ -284,7 +284,8 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Показывать параметры сертификации беспроводных мониторов"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Вести подробный журнал, показывать RSSI для каждого SSID при выборе сети"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Уменьшает расход заряда батареи и улучшает работу сети"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Эта настройка влияет на использование случайных MAC-адресов только в клиентском режиме.\nВо время подключения к любой сети происходит повторное создание случайного MAC-адреса в зависимости от того, когда клиент последний раз отключался от сети. Это не происходит, если соединение возобновляется через четыре часа или раньше."</string>
+    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
+    <skip />
     <string name="wifi_metered_label" msgid="8737187690304098638">"Сеть с тарификацией трафика"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Сеть без тарификации трафика"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Размер буфера журнала"</string>
@@ -373,8 +374,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Уведомлять о том, что приложение, запущенное в фоновом режиме, не отвечает"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Показывать предупреждения канала передачи уведомлений"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Показывать предупреждение о новых уведомлениях приложения вне допустимого канала"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Принудительное использование ярлыков для уведомлений из чатов"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Обязательно дублировать уведомления с помощью долго отображаемых ярлыков, чтобы уведомления появлялись в разделе чатов"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Разрешить сохранение на внешние накопители"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Разрешить сохранение приложений на внешних накопителях (независимо от значений в манифесте)"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Изменение размера в многооконном режиме"</string>

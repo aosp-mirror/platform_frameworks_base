@@ -284,7 +284,8 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Sýna valkosti fyrir vottun þráðlausra skjáa"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Auka skráningarstig Wi-Fi, sýna RSSI fyrir hvert SSID í Wi-Fi vali"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Dregur úr rafhlöðunotkun og eykur netafköst"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Þessi rofi hefur eingöngu áhrif á slembival MAC-vistfanga fyrir biðlarastillingu.\nÞegar þessi stilling er virk geta öll netkerfi sem eru með slembival MAC-vistfanga virkt látið slembiraða MAC-vistföngum aftur við tengingu, allt eftir því hvenær biðlarinn aftengdist netinu síðast. Endurslembiröðun á sér ekki stað ef tækið tengist aftur innan fjögurra klukkustunda."</string>
+    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
+    <skip />
     <string name="wifi_metered_label" msgid="8737187690304098638">"Mæld notkun"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Notkun ekki mæld"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Annálsritastærðir biðminna"</string>
@@ -373,8 +374,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Sýna „Forrit svarar ekki“ fyrir bakgrunnsforrit"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Sýna viðvaranir tilkynningarásar"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Birtir viðvörun á skjánum þegar forrit birtir tilkynningu án gildrar rásar"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Þvinga flýtileiðir fyrir tilkynningar um samtöl"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Krefjast þess að flýtileiðir séu studdar af langvarandi deilingarflýtileið fyrir birtingu í samtalshluta"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Þvinga fram leyfi forrita í ytri geymslu"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Gerir öll forrit skrifanleg í ytra geymslurými, óháð gildum í upplýsingaskrá"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Þvinga breytanlega stærð virkni"</string>

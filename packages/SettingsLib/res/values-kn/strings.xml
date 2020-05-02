@@ -284,7 +284,8 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"ವೈರ್‌ಲೆಸ್‌‌‌ ಪ್ರದರ್ಶನ ಪ್ರಮಾಣೀಕರಣಕ್ಕಾಗಿ ಆಯ್ಕೆಗಳನ್ನು ತೋರಿಸು"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Wi‑Fi ಲಾಗಿಂಗ್ ಮಟ್ಟನ್ನು ಹೆಚ್ಚಿಸಿ, Wi‑Fi ಆಯ್ಕೆಯಲ್ಲಿ ಪ್ರತಿಯೊಂದು SSID RSSI ತೋರಿಸಿ"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"ಬ್ಯಾಟರಿ ಹೆಚ್ಚು ಬಾಳಿಕೆ ಬರುವಂತೆ ಮಾಡುತ್ತದೆ ಮತ್ತು ನೆಟ್‌ವರ್ಕ್‌ ಕಾರ್ಯಕ್ಷಮತೆಯನ್ನು ಸುಧಾರಿಸುತ್ತದೆ"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"ಈ ಟಾಗಲ್, ಕ್ಲೈಂಟ್‌ ಮೋಡ್‌ಗಾಗಿ ಮಾತ್ರ MAC ಯಾದೃಚ್ಛಿಕರಣ ವರ್ತನೆಯ ಮೇಲೆ ಪರಿಣಾಮ ಬೀರುತ್ತದೆ.\nಈ ಮೋಡ್ ಅನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿದಾಗ, MAC ಯಾದೃಚ್ಛಿಕರಣವನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿದ ಯಾವುದೇ ನೆಟ್‌ವರ್ಕ್ ಸಂಯೋಜನೆಯನ್ನು ಸ್ಥಾಪಿಸುವಾಗ MAC ವಿಳಾಸವನ್ನು ಮರು-ಯಾದೃಚ್ಛಿಕರಣಗೊಳಿಸಬಹುದು (ಕ್ಲೈಂಟ್ ಕೊನೆಯದಾಗಿ ಸಂಪರ್ಕ ಕಡಿತಗೊಳಿಸಿರುವುದನ್ನು ಅವಲಂಬಿಸಿರುತ್ತದೆ). ಸಾಧನವು 4 ಗಂಟೆಗಳು ಅಥವಾ ಕಡಿಮೆ ಸಮಯದಲ್ಲಿ ಮರುಸಂಪರ್ಕಿಸಿದರೆ, ಯಾವುದೇ ಮರು-ಯಾದೃಚ್ಛಿಕರಣ ಸಂಭವಿಸುವುದಿಲ್ಲ."</string>
+    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
+    <skip />
     <string name="wifi_metered_label" msgid="8737187690304098638">"ಮೀಟರ್ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"ಮೀಟರ್ ಮಾಡಲಾಗಿಲ್ಲ"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"ಲಾಗರ್ ಬಫರ್ ಗಾತ್ರಗಳು"</string>
@@ -373,8 +374,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"ಹಿನ್ನೆಲೆ ಅಪ್ಲಿಕೇಶನ್‌ಗಳಿಗಾಗಿ ಅಪ್ಲಿಕೇಶನ್ ಪ್ರತಿಕ್ರಿಯಿಸುತ್ತಿಲ್ಲ ಎಂಬ ಸಂಭಾಷಣೆ ತೋರಿಸಿ"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"ಅಧಿಸೂಚನೆ ಎಚ್ಚರಿಕೆ ತೋರಿಸಿ"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"ಅಮಾನ್ಯ ಚಾನಲ್ ಅಧಿಸೂಚನೆಗಾಗಿ ಪರದೆಯಲ್ಲಿ ಎಚ್ಚರಿಕೆ"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"ಸಂಭಾಷಣೆ ಅಧಿಸೂಚನೆಗಳಿಗಾಗಿ ಶಾರ್ಟ್‌ಕಟ್‌ಗಳನ್ನು ಜಾರಿಗೊಳಿಸಿ"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"ಸಂಭಾಷಣೆ ವಿಭಾಗದಲ್ಲಿ ಕಾಣಿಸಿಕೊಳ್ಳಲು, ಅಧಿಸೂಚನೆಗಳನ್ನು ದೀರ್ಘಕಾಲದ ಹಂಚಿಕೆ ಶಾರ್ಟ್‌ಕಟ್ ಮೂಲಕ ಬೆಂಬಲಿಸುವ ಅಗತ್ಯವಿದೆ"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"ಬಾಹ್ಯವಾಗಿ ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ಒತ್ತಾಯವಾಗಿ ಅನುಮತಿಸಿ"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"ಮ್ಯಾನಿಫೆಸ್ಟ್ ಮೌಲ್ಯಗಳು ಯಾವುದೇ ಆಗಿದ್ದರೂ, ಬಾಹ್ಯ ಸಂಗ್ರಹಣೆಗೆ ಬರೆಯಲು ಯಾವುದೇ ಅಪ್ಲಿಕೇಶನ್‌ ಅನ್ನು ಅರ್ಹಗೊಳಿಸುತ್ತದೆ"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"ಚಟುವಟಿಕೆಗಳನ್ನು ಮರುಗಾತ್ರಗೊಳಿಸುವಂತೆ ಒತ್ತಾಯ ಮಾಡಿ"</string>
@@ -436,14 +435,10 @@
     <string name="power_discharge_by_only" msgid="92545648425937000">"<xliff:g id="TIME">%1$s</xliff:g> ಸಮಯದವರೆಗೆ ಫೋನ್‌ ರನ್‌ ಆಗಬೇಕು"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"<xliff:g id="TIME">%1$s</xliff:g> ರವರೆಗೆ"</string>
     <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"<xliff:g id="TIME">%1$s</xliff:g> ಗಳಲ್ಲಿ ಬ್ಯಾಟರಿ ಮುಕ್ತಾಯವಾಗಬಹುದು"</string>
-    <!-- no translation found for power_remaining_less_than_duration_only (8956656616031395152) -->
-    <skip />
-    <!-- no translation found for power_remaining_less_than_duration (318215464914990578) -->
-    <skip />
-    <!-- no translation found for power_remaining_more_than_subtext (446388082266121894) -->
-    <skip />
-    <!-- no translation found for power_remaining_only_more_than_subtext (4873750633368888062) -->
-    <skip />
+    <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"<xliff:g id="THRESHOLD">%1$s</xliff:g> ಕ್ಕಿಂತ ಕಡಿಮೆ ಸಮಯ ಉಳಿದಿದೆ"</string>
+    <string name="power_remaining_less_than_duration" msgid="318215464914990578">"<xliff:g id="THRESHOLD">%1$s</xliff:g> ಕ್ಕಿಂತ ಕಡಿಮೆ ಸಮಯ ಉಳಿದಿದೆ (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_more_than_subtext" msgid="446388082266121894">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> ಕ್ಕಿಂತ ಹೆಚ್ಚು ಸಮಯ ಉಳಿದಿದೆ (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_only_more_than_subtext" msgid="4873750633368888062">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> ಕ್ಕಿಂತ ಹೆಚ್ಚು ಸಮಯ ಉಳಿದಿದೆ"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"ಫೋನ್ ಶೀಘ್ರದಲ್ಲೇ ಶಟ್ ಡೌನ್ ಆಗಬಹುದು"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"ಟ್ಯಾಬ್ಲೆಟ್‌‌ ಶೀಘ್ರದಲ್ಲೇ ಶಟ್ ಡೌನ್ ಆಗಬಹುದು"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"ಸಾಧನವು ಶೀಘ್ರದಲ್ಲೇ ಶಟ್ ಡೌನ್ ಆಗಬಹುದು"</string>

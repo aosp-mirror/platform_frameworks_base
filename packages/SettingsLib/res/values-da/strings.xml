@@ -284,7 +284,8 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Vis valgmuligheder for certificering af trådløs skærm"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Øg mængden af Wi‑Fi-logføring. Vis opdelt efter SSID RSSI i Wi‑Fi-vælgeren"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Reducerer batteriforbruget og forbedrer netværkets effektivitet"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Denne skift påvirker kun MAC-randomisering for klienttilstand.\nNår denne tilstand er aktiveret, kan netværk, der har Mac-randomisering aktiveret, få deres MAC-adresser randomiseret igen, når der oprettes forbindelse, afhængigt af hvornår klienten sidst afbrød forbindelse til netværket. Randomisering sker ikke igen, hvis enheden forbinder igen inden for højst 4 timer."</string>
+    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
+    <skip />
     <string name="wifi_metered_label" msgid="8737187690304098638">"Forbrugsafregnet"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Ikke forbrugsafregnet"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Størrelser for Logger-buffer"</string>
@@ -373,8 +374,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Vis dialogboksen \"Appen svarer ikke\" for baggrundsapps"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Vis advarsler om notifikationskanal"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Viser en advarsel, når en app sender en notifikation uden en gyldig kanal"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Kræv genveje til samtalenotifikationer"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Kræv, at notifikationer bakkes op af en langvarig delingsgenvej, hvis de skal vises i samtalesektionen"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Gennemtving tilladelse til eksternt lager"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Gør det muligt at overføre enhver app til et eksternt lager uafhængigt af manifestværdier"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Gennemtving, at aktiviteter kan tilpasses"</string>

@@ -284,7 +284,8 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Prikaz opcija za certifikaciju bežičnog prikaza"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Povećani nivo zapisnika za WiFi. Prikaz po SSID RSSI-ju u Biraču WiFi-ja"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Smanjuje potrošnju baterije i poboljšava performanse mreže"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Ovo aktiviranje/deaktiviranje utiče na ponašanje nasumičnog odabira MAC adrese isključivo za način rada klijenta.\nKada je taj način aktiviran, na svakoj mreži na kojoj je omogućen nasumični odabir MAC adrese može doći do ponovnog nasumičnog odabira MAC adrese za vrijeme povezivanja, u zavisnosti od toga kada je posljednji put prekinuta povezanost klijenta s mrežom. Do ponovnog nasumičnog odabira ne dolazi ako se uređaj ponovo poveže u roku od 4 sata ili ranije."</string>
+    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
+    <skip />
     <string name="wifi_metered_label" msgid="8737187690304098638">"S naplatom"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Mreža bez naplate"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Veličine međumemorije zapisnika"</string>
@@ -373,8 +374,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Prikaz dijaloga \"Aplikacija ne reagira\" za aplikacije pokrenute u pozadini"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Prikaži upozorenja kanala obavještenja"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Prikaz upozorenja na ekranu kada aplikacija pošalje obavještenje bez važećeg kanala"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Primijeni prečice za obavještenja o razgovorima"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Traži da obavještenja imaju dugotrajnu prečicu za dijeljenje radi prikaza u odjeljku za razgovore"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Nametni aplikacije na vanjskoj pohrani"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Omogućava upisivanje svih aplikacija u vanjsku pohranu, bez obzira na prikazane vrijednosti"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Nametni aktivnostima mijenjanje veličina"</string>

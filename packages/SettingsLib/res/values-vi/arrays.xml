@@ -152,7 +152,7 @@
   <string-array name="bluetooth_audio_active_device_summaries">
     <item msgid="8019740759207729126"></item>
     <item msgid="204248102837117183">", đang hoạt động"</item>
-    <item msgid="253388653486517049">", đang hoạt động (nội dung phương tiện)"</item>
+    <item msgid="253388653486517049">", đang hoạt động (nội dung nghe nhìn)"</item>
     <item msgid="5001852592115448348">", đang hoạt động (điện thoại)"</item>
   </string-array>
   <string-array name="select_logd_size_titles">

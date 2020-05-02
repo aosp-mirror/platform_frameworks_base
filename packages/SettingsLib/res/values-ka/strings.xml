@@ -284,7 +284,8 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"უსადენო ეკრანის სერტიფიცირების ვარიანტების ჩვენება"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Wi‑Fi-ს აღრიცხვის დონის გაზრდა, Wi‑Fi ამომრჩეველში ყოველ SSID RSSI-ზე ჩვენება"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"ამცირებს ბატარეის ხარჯვას და აუმჯობესებს ქსელის მუშაობას"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"ეს გადასართავი მხოლოდ კლიენტის რეჟიმში მოქმედებს MAC მისამართის შემთხვევითობაზე.\nამ რეჟიმის გააქტიურების შემთხვევაში, ნებისმიერმა ქსელმა, რომლისთვისაც MAC მისამართის შემთხვევითობა ჩართულია, შეიძლება ხელახლა მოახდინოს MAC მისამართთა შემთხვევითობის განხორციელება დაკავშირებისას, იმის გათვალისწინებით, თუ როდის გაწყვიტა კლიენტმა ბოლოს ქსელთან კავშირი. შემთხვევითობა აღარ განმეორდება, თუ ეს მოწყობილობა ქსელს 4 საათის ფარგლებში ან უფრო ნაკლებ დროში დაუკავშირდება."</string>
+    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
+    <skip />
     <string name="wifi_metered_label" msgid="8737187690304098638">"ლიმიტირებული"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"არალიმიტირებული"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"ჟურნალიზაციის ბუფერის ზომები"</string>
@@ -373,8 +374,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"„აპი არ რეაგირებს“ შეტყობინების ჩვენება, როცა ფონური აპლიკაცია არ პასუხობს"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"შეტყობინებათა არხის გაფრთხილებების ჩვენება"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"ეკრანზე აჩვენებს გაფრთხილებას, როცა აპი შეტყობინებას სწორი არხის გარეშე განათავსებს"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"მალსახმობების მოთხოვნა მიმოწერის შეტყობინებებისთვის"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"მოითხოვეთ, შეტყობინებები ეყრდნობოდეს ხანგრძლივად არსებულ გაზიარების მალსახმობებს მიმოწერის სექციაში გამოსაჩენად"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"აპების დაშვება გარე მეხსიერებაში"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"აპები ჩაიწერება გარე მეხსიერებაზე აღწერის ფაილების მნიშვნელობების მიუხედავად"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"ზომაცვლადი აქტივობების იძულება"</string>

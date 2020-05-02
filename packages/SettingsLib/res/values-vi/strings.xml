@@ -284,7 +284,8 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Hiển thị tùy chọn chứng nhận hiển thị không dây"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Tăng mức ghi nhật ký Wi‑Fi, hiển thị mỗi SSID RSSI trong bộ chọn Wi‑Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Giảm hao pin và cải thiện hiệu suất mạng"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Thao tác bật/tắt này chỉ ảnh hưởng đến hành vi tạo địa chỉ MAC ngẫu nhiên ở chế độ máy khách.\nKhi bạn kích hoạt chế độ này, tất cả các mạng đã bật tính năng tạo địa chỉ MAC ngẫu nhiên có thể tạo lại địa chỉ MAC ngẫu nhiên của chúng trong quá trình liên kết, tùy thuộc vào lần gần đây nhất máy khách ngắt kết nối với mạng. Các mạng này sẽ không thể tạo ngẫu nhiên lại nếu thiết bị kết nối lại trong vòng 4 giờ."</string>
+    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
+    <skip />
     <string name="wifi_metered_label" msgid="8737187690304098638">"Đo lượng dữ liệu"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Không đo lượng dữ liệu"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Kích thước bộ đệm của trình ghi nhật ký"</string>
@@ -373,8 +374,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Hiện hộp thoại Ứng dụng không phản hồi cho các ứng dụng nền"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Hiện cảnh báo kênh thông báo"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Hiện cảnh báo trên màn hình khi ứng dụng đăng thông báo mà không có kênh hợp lệ"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Áp dụng lối tắt cho thông báo của cuộc trò chuyện"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Để xuất hiện trong phần cuộc trò chuyện, thông báo phải có sự hỗ trợ của lối tắt chia sẻ lâu dài"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Buộc cho phép các ứng dụng trên bộ nhớ ngoài"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Cho phép ghi mọi ứng dụng đủ điều kiện vào bộ nhớ ngoài, bất kể giá trị tệp kê khai là gì"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Buộc các hoạt động có thể thay đổi kích thước"</string>

@@ -61,7 +61,7 @@
   <string-array name="bt_hci_snoop_log_entries">
     <item msgid="695678520785580527">"Desativado"</item>
     <item msgid="6336372935919715515">"Filtro ativado"</item>
-    <item msgid="2779123106632690576">"Ativada"</item>
+    <item msgid="2779123106632690576">"Ativado"</item>
   </string-array>
   <string-array name="bluetooth_avrcp_versions">
     <item msgid="8036025277512210160">"AVRCP 1.4 (padrão)"</item>

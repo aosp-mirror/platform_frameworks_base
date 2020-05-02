@@ -284,7 +284,8 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Mostrar opções de certificação de Display sem fio"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Aumentar o nível de registro de Wi-Fi; mostrar conforme o RSSI do SSID no seletor de Wi-Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Reduz o consumo de bateria e melhora o desempenho da rede"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Essa opção afeta o comportamento de ordem aleatória de MAC somente para o modo cliente.\nQuando esse modo é ativado, todas as redes que tiverem a ordem aleatória de MAC ativada poderão ter a ordem aleatória refeita durante a associação, dependendo de quando o cliente se desconectou da rede pela última vez. A ordem aleatória não será refeita se o dispositivo se reconectar em até quatro horas."</string>
+    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
+    <skip />
     <string name="wifi_metered_label" msgid="8737187690304098638">"Limitada"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Ilimitada"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Tamanhos de buffer de logger"</string>
@@ -373,8 +374,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Exibir a caixa de diálogo \"App não responde\" para apps em segundo plano"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Mostrar avisos de notificações"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Exibir aviso na tela quando um app posta notificação sem canal válido"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Usar atalhos para notificações de conversa"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Exigir que as notificações sejam apoiadas por um atalho de compartilhamento de longa duração para que elas possam aparecer na seção de conversa"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Forçar permissão de apps em armazenamento externo"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Qualificar apps para gravação em armazenamento externo, independentemente de valores de manifestos"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Forçar atividades a serem redimensionáveis"</string>
