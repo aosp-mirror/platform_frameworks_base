@@ -26185,9 +26185,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         /**
          * Returns the View object that had been passed to the
-         * {@link #View.DragShadowBuilder(View)}
+         * {@link #DragShadowBuilder(View)}
          * constructor.  If that View parameter was {@code null} or if the
-         * {@link #View.DragShadowBuilder()}
+         * {@link #DragShadowBuilder()}
          * constructor was used to instantiate the builder object, this method will return
          * null.
          *
