@@ -284,7 +284,8 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Pokaż opcje certyfikacji wyświetlacza bezprzewodowego"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Zwiększ poziom rejestrowania Wi‑Fi, pokazuj według RSSI SSID w selektorze Wi‑Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Zmniejsza zużycie baterii i zwiększa wydajność sieci"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Ten przełącznik wpływa na zachowanie randomizacji MAC tylko w przypadku trybu klienta.\nKiedy ten tryb jest aktywny, adresy MAC dowolnej sieci, która ma włączoną randomizację MAC, podczas powiązywania mogą zostać poddane ponownej randomizacji, w zależności od tego, kiedy klient ostatni raz rozłączył się z siecią. Ponowna randomizacja nie zachodzi, jeśli urządzenie połączy się ponownie w ciągu 4 lub mniejszej liczby godzin."</string>
+    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
+    <skip />
     <string name="wifi_metered_label" msgid="8737187690304098638">"Użycie danych jest mierzone"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Użycie danych nie jest mierzone"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Rozmiary bufora rejestratora"</string>
@@ -373,8 +374,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Wyświetlaj okno Aplikacja nie odpowiada dla aplikacji w tle"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Pokaż ostrzeżenia kanału powiadomień"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Wyświetla ostrzeżenie, gdy aplikacja publikuje powiadomienie bez prawidłowego kanału"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Wymuszaj skróty do powiadomień o rozmowie"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Wymagaj używania długoterminowych skrótów do udostępniania powiadomień, które pojawiałyby się w sekcji rozmowy"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Wymuś zezwalanie na aplikacje w pamięci zewnętrznej"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Pozwala na zapis aplikacji w pamięci zewnętrznej niezależnie od wartości w pliku manifestu"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Wymuś zmianę rozmiaru okien aktywności"</string>

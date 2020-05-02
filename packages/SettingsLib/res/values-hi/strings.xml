@@ -284,7 +284,8 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"वायरलेस डिसप्ले सर्टिफ़िकेशन के विकल्प दिखाएं"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"वाई-फ़ाई लॉगिंग का स्तर बढ़ाएं, वाई-फ़ाई पिकर में प्रति SSID RSSI दिखाएं"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"बैटरी की खपत कम और नेटवर्क की परफ़ॉर्मेंस बेहतर होती है"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"इस टॉगल से सिर्फ़ क्लाइंट मोड में, वाई-फ़ाई नेटवर्क से जुड़ते समय मैक पते को बदलने की सुविधा पर असर पड़ता है.\nजब इस मोड को चालू किया जाता है, तब ऐसे किसी भी नेटवर्क का मैक पता फिर से बदला जा सकता है जिन पर मैक पते को बदलने की सुविधा चालू होती है. ऐसा तभी होता है, जब वे नेटवर्क जुड़े हों. यह इस पर भी निर्भर करता है कि क्लाइंट ने उसे नेटवर्क से कब डिसकनेक्ट किया था. अगर डिवाइस चार घंटे या उससे कम में, फिर से कनेक्ट होता है, तो मैक पते को दोबारा बदला नहीं जा सकता."</string>
+    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
+    <skip />
     <string name="wifi_metered_label" msgid="8737187690304098638">"डेटा इस्तेमाल करने की सीमा तय की गई है"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"डेटा इस्तेमाल करने की सीमा तय नहीं की गई है"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"लॉगर बफ़र आकार"</string>
@@ -373,8 +374,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"बैकग्राउंड में चलने वाले ऐप्लिकेशन के लिए, यह ऐप्लिकेशन नहीं चल रहा मैसेज दिखाएं"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"सूचना चैनल चेतावनी दिखाएं"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"ऐप्लिकेशन, मान्य चैनल के बिना सूचना पोस्ट करे तो स्क्रीन पर चेतावनी दिखाएं"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"सिर्फ़ वही सूचनाएं दिखाएं जो बातचीत सेक्शन में सही शॉर्टकट के साथ भी लिंक हैं"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"ज़रूरी सूचनाओं के लिए ऐसा शेयरिंग शॉर्टकट होना चाहिए जो हमेशा (long-lived) मौजूद रहे, ताकि सूचनाओं को बातचीत वाले सेक्शन में देखा जा सके"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"ऐप्लिकेशन को बाहरी मेमोरी पर ही चलाएं"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"इससे कोई भी ऐप्लिकेशन बाहरी मेमोरी में रखने लायक बन जाता है चाहे उसकी मेनिफ़ेस्ट वैल्यू कुछ भी हो"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"विंडो के हिसाब से गतिविधियों का आकार बदल दें"</string>

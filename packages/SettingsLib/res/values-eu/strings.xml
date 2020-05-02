@@ -284,7 +284,8 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Erakutsi hari gabe bistaratzeko ziurtagiriaren aukerak"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Erakutsi datu gehiago wifi-sareetan saioa hastean. Erakutsi sarearen identifikatzailea eta seinalearen indarra wifi-sareen hautatzailean."</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Bateria gutxiago kontsumituko da, eta sarearen errendimendua hobetuko."</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Bezero modurako soilik MAC helbideak ausaz aukeratzeko eginbidearen portaerari eragiten dio etengailu honek.\nModu hau aktibatuta dagoenean, baliteke MAC helbideak ausaz aukeratzeko eginbidea aktibatuta daukaten sareen MAC helbideak berriro ausaz aukeratzea haiek lotu bitartean, bezeroa saretik deskonektatuta ematen duen denboraren arabera. Gailua lau ordu edo gutxiagoren buruan berriro konektatzen bada, ez da berriro MAC helbiderik ausaz aukeratuko."</string>
+    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
+    <skip />
     <string name="wifi_metered_label" msgid="8737187690304098638">"Sare neurtua"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Neurtu gabeko sarea"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Erregistroen buffer-tamainak"</string>
@@ -373,8 +374,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Erakutsi aplikazioak ez erantzutearen (ANR) leihoa atzeko planoan dabiltzan aplikazioen kasuan"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Erakutsi jakinarazpenen kanalen abisuak"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Bistaratu abisuak aplikazioek baliozko kanalik gabeko jakinarazpenak argitaratzean"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Erabili lasterbideak elkarrizketen jakinarazpenetan"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Eskatu jakinarazpenak partekatze-lasterbide iragankor batean oinarrituta egotea elkarrizketa-atalean agertzeko"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Behartu aplikazioak onartzea kanpoko memorian"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Aplikazioek kanpoko memorian idatz dezakete, ezarritako balioak kontuan izan gabe"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Behartu jardueren tamaina doitu ahal izatea"</string>

@@ -284,7 +284,8 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"ਵਾਇਰਲੈੱਸ ਡਿਸਪਲੇ ਪ੍ਰਮਾਣੀਕਰਨ ਲਈ ਚੋਣਾਂ ਪ੍ਰਦਰਸ਼ਿਤ ਕਰੋ"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"ਵਾਈ‑ਫਾਈ ਲੌਗਿੰਗ ਪੱਧਰ ਵਧਾਓ, ਵਾਈ‑ਫਾਈ Picker ਵਿੱਚ ਪ੍ਰਤੀ SSID RSSI ਦਿਖਾਓ"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"ਬੈਟਰੀ ਦੀ ਵਰਤੋਂ ਘਟਾ ਕੇ ਨੈੱਟਵਰਕ ਕਾਰਗੁਜ਼ਾਰੀ ਨੂੰ ਬਿਹਤਰ ਬਣਾਉਂਦਾ ਹੈ"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"ਇਹ ਟੌਗਲ ਸਿਰਫ਼ ਕਲਾਇੰਟ ਮੋਡ ਲਈ MAC ਦੇ ਬੇਤਰਤੀਬਵਾਰ ਵਿਵਹਾਰ \'ਤੇ ਅਸਰ ਪਾਉਂਦਾ ਹੈ।\nਜਦੋਂ ਇਸ ਮੋਡ ਨੂੰ ਕਿਰਿਆਸ਼ੀਲ ਕੀਤਾ ਜਾਂਦਾ ਹੈ, ਤਾਂ ਜਿਹੜੇ ਵੀ ਨੈੱਟਵਰਕਾਂ ਵਿੱਚ MAC ਬੇਤਰਤੀਬਵਾਰ ਚਾਲੂ ਹੈ ਉਹਨਾਂ ਦੇ MAC ਪਤਿਆਂ ਦਾ ਸਾਂਝੇਦਾਰੀ ਦੌਰਾਨ ਮੁੜ-ਬੇਤਰਤੀਬੀਕਰਨ ਕੀਤਾ ਜਾ ਸਕਦਾ ਹੈ, ਜੋ ਕਲਾਇੰਟ ਦੇ ਪਿਛਲੀ ਵਾਰ ਨੈੱਟਵਰਕ ਤੋਂ ਡਿਸਕਨੈਕਟ ਹੋਣ \'ਤੇ ਨਿਰਭਰ ਕਰਦਾ ਹੈ। ਜੇ ਡੀਵਾਈਸ 4 ਘੰਟੇ ਜਾਂ ਘੱਟ ਸਮੇਂ ਵਿੱਚ ਮੁੜ-ਕਨੈਕਟ ਹੋ ਜਾਂਦਾ ਹੈ, ਤਾਂ ਮੁੜ-ਬੇਤਰਤੀਬਵਾਰ ਨਹੀਂ ਹੋਵੇਗਾ।"</string>
+    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
+    <skip />
     <string name="wifi_metered_label" msgid="8737187690304098638">"ਮੀਟਰਬੱਧ ਕੀਤਾ ਗਿਆ"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"ਗੈਰ-ਮੀਟਰਬੱਧ ਕੀਤਾ ਗਿਆ"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"ਲੌਗਰ ਬਫ਼ਰ ਆਕਾਰ"</string>
@@ -373,8 +374,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"ਬੈਕਗ੍ਰਾਊਂਡ ਐਪਾਂ ਲਈ \'ਐਪ ਪ੍ਰਤਿਕਿਰਿਆ ਨਹੀਂ ਦੇ ਰਹੀ ਹੈ\' ਵਿੰਡੋ ਦਿਖਾਓ"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"ਸੂਚਨਾ ਚੈਨਲ ਚਿਤਾਵਨੀਆਂ ਦਿਖਾਓ"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"ਐਪ ਵੱਲੋਂ ਵੈਧ ਚੈਨਲ ਤੋਂ ਬਿਨਾਂ ਸੂਚਨਾ ਪੋਸਟ ਕਰਨ \'ਤੇ ਸਕ੍ਰੀਨ \'ਤੇ ਚਿਤਾਵਨੀ ਦਿਖਾਉਂਦੀ ਹੈ"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"ਗੱਲਬਾਤ ਸੰਬੰਧੀ ਸੂਚਨਾਵਾਂ ਲਈ ਸ਼ਾਰਟਕੱਟ ਲਾਗੂ ਕਰੋ"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"ਗੱਲਬਾਤ ਸੈਕਸ਼ਨ ਵਿੱਚ ਦਿਸਣ ਲਈ ਚਿਰਸਥਾਈ ਸਾਂਝਾਕਰਨ ਸ਼ਾਰਟਕੱਟ ਨਾਲ ਸੂਚਨਾਵਾਂ ਦਾ ਬੈਕਅੱਪ ਲੈਣਾ ਲੋੜੀਂਦਾ ਹੈ"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"ਐਪਾਂ ਨੂੰ ਜ਼ਬਰਦਸਤੀ ਬਾਹਰੀ ਸਟੋਰੇਜ \'ਤੇ ਆਗਿਆ ਦਿਓ"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"ਮੈਨੀਫੈਸਟ ਮੁੱਲਾਂ ਦੀ ਪਰਵਾਹ ਕੀਤੇ ਬਿਨਾਂ, ਕਿਸੇ ਵੀ ਐਪ ਨੂੰ ਬਾਹਰੀ ਸਟੋਰੇਜ \'ਤੇ ਲਿਖਣ ਦੇ ਯੋਗ ਬਣਾਉਂਦੀ ਹੈ"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"ਮੁੜ-ਆਕਾਰ ਬਦਲਣ ਲਈ ਸਰਗਰਮੀਆਂ \'ਤੇ ਜ਼ੋਰ ਦਿਓ"</string>

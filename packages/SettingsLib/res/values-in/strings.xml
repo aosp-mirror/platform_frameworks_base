@@ -284,7 +284,8 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Tampilkan opsi untuk sertifikasi layar nirkabel"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Tingkatkan level pencatatan log Wi-Fi, tampilkan per SSID RSSI di Pemilih Wi‑Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Memperlambat kehabisan baterai &amp; meningkatkan performa jaringan"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Pengaktifan mode ini memengaruhi perilaku pengacakan MAC hanya untuk mode klien.\nSaat mode ini diaktifkan, jaringan yang mengaktifkan pengacakan MAC mungkin mengalami pengacakan ulang alamat MAC selama terhubung, bergantung pada kapan klien terakhir kali terputus dari jaringan. Pengacakan ulang tidak terjadi jika perangkat terhubung kembali dalam 4 jam atau kurang."</string>
+    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
+    <skip />
     <string name="wifi_metered_label" msgid="8737187690304098638">"Berbayar"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Tidak berbayar"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Ukuran buffer pencatat log"</string>
@@ -373,8 +374,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Tampilkan dialog Aplikasi Tidak Merespons untuk aplikasi yang berjalan di background"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Tampilkan peringatan saluran notifikasi"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Menampilkan peringatan di layar saat aplikasi memposting notifikasi tanpa channel yang valid"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Terapkan pintasan untuk notifikasi percakapan"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Mengharuskan notifikasi didukung oleh pintasan berbagi yang berdurasi panjang untuk muncul di bagian percakapan"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Paksa izinkan aplikasi di eksternal"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Membuat semua aplikasi dapat ditulis ke penyimpanan eksternal, terlepas dari nilai manifes"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Paksa aktivitas agar ukurannya dapat diubah"</string>

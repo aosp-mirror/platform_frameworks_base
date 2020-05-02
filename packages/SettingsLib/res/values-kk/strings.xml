@@ -284,7 +284,8 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Сымсыз дисплей сертификаты опцияларын көрсету"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Wi‑Fi тіркеу деңгейін арттыру, Wi‑Fi таңдағанда әр SSID RSSI бойынша көрсету"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Батарея зарядының шығынын азайтады және желі жұмысын жақсартады."</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Бұл қосқыш тек клиент режимі үшін MAC рандомизациясының әрекетіне әсер етеді.\nБұл режим қосылған кезде, MAC рандомизациясы қосулы кез келген желі MAC мекенжайларын қайта рандомизациялайды. Бұл үшін клиенттің желіден ең соңғы ажыратылған уақыты негізге алынады. Құрылғы желіге 4 сағат немесе одан аз уақыт ішінде қайта қосылса, қайта рандомизацияланбайды."</string>
+    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
+    <skip />
     <string name="wifi_metered_label" msgid="8737187690304098638">"Трафик саналады"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Трафик саналмайды"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Журналға тіркеуші буферінің өлшемдері"</string>
@@ -373,8 +374,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Фондық қолданбалар үшін \"Қолданба жауап бермейді\" терезесін шығару"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Хабарландыру арнасының ескертулерін көрсету"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Қолданба жарамсыз арна арқылы хабарландыру жариялағанда, экранға ескерту шығарады"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Чат хабарландырулары үшін таңбашаларды пайдалану"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Хабарландырулар чат бөлімінде көрсетілуі үшін, оларды ұзақ көрсетілетін таңбаша арқылы міндетті түрде қайталап көрсету"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Сыртқы жадта қолданбаларға рұқсат ету"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Манифест мәндеріне қарамастан, кез келген қолданбаны сыртқы жадқа жазу мүмкіндігін береді"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Әрекеттердің өлшемін өзгертуге рұқсат ету"</string>

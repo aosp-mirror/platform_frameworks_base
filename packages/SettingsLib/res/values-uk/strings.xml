@@ -284,7 +284,8 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Показати параметри сертифікації бездротового екрана"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Показувати в журналі RSSI для кожного SSID під час вибору Wi-Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Зменшує споживання заряду акумулятора й підвищує ефективність роботи мережі"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Цей перемикач впливає на поведінку довільного вибору MAC-адрес лише для клієнтського режиму.\nКоли цей режим активовано, MAC-адреси мереж із довільним вибором цих адрес переназначаються під час зв\'язування залежно від часу останнього відключення клієнта від мережі. Повторний довільний вибір адрес не відбувається, якщо пристрій знову підключається протягом 4 годин."</string>
+    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
+    <skip />
     <string name="wifi_metered_label" msgid="8737187690304098638">"З тарифікацією трафіку"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Без тарифікації трафіку"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Розміри буфера журналу"</string>
@@ -373,8 +374,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Показувати вікно \"Додаток не відповідає\" для додатків у фоновому режимі"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Показувати застереження про канал"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"З’являється застереження, коли додаток надсилає сповіщення через недійсний канал"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Використовувати ярлики для сповіщень про чати"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Вимагати для сповіщень постійних ярликів доступу, щоб показувати їх у розділі чатів"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Примусово записувати додатки в зовнішню пам’ять"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Можна записувати додатки в зовнішню пам’ять, незалежно від значень у маніфесті"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Примусово масштабувати активність"</string>
