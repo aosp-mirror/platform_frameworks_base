@@ -308,7 +308,7 @@ public class LocalDisplayAdapterTest {
         doReturn(0).when(() -> SurfaceControl.getActiveColorMode(display.token));
         doReturn(new int[] { 0 }).when(
                 () -> SurfaceControl.getDisplayColorModes(display.token));
-        doReturn(new SurfaceControl.DesiredDisplayConfigSpecs(0, 60.f, 60.f))
+        doReturn(new SurfaceControl.DesiredDisplayConfigSpecs(0, 60.f, 60.f, 60.f, 60.f))
                 .when(() -> SurfaceControl.getDesiredDisplayConfigSpecs(display.token));
     }
 

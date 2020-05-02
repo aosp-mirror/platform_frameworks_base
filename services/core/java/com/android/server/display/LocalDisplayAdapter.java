@@ -310,9 +310,14 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 // list of available modes will take care of updating display config specs.
                 if (activeBaseMode != NO_DISPLAY_MODE_ID) {
                     if (mDisplayModeSpecs.baseModeId != activeBaseMode
-                            || mDisplayModeSpecs.refreshRateRange.min != configSpecs.minRefreshRate
-                            || mDisplayModeSpecs.refreshRateRange.max
-                                    != configSpecs.maxRefreshRate) {
+                            || mDisplayModeSpecs.primaryRefreshRateRange.min
+                                    != configSpecs.primaryRefreshRateMin
+                            || mDisplayModeSpecs.primaryRefreshRateRange.max
+                                    != configSpecs.primaryRefreshRateMax
+                            || mDisplayModeSpecs.appRequestRefreshRateRange.min
+                                    != configSpecs.appRequestRefreshRateMin
+                            || mDisplayModeSpecs.appRequestRefreshRateRange.max
+                                    != configSpecs.appRequestRefreshRateMax) {
                         mDisplayModeSpecsInvalid = true;
                         sendTraversalRequestLocked();
                     }
@@ -799,8 +804,10 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                         LocalDisplayDevice::setDesiredDisplayModeSpecsAsync, this,
                         getDisplayTokenLocked(),
                         new SurfaceControl.DesiredDisplayConfigSpecs(baseConfigId,
-                                mDisplayModeSpecs.refreshRateRange.min,
-                                mDisplayModeSpecs.refreshRateRange.max)));
+                                mDisplayModeSpecs.primaryRefreshRateRange.min,
+                                mDisplayModeSpecs.primaryRefreshRateRange.max,
+                                mDisplayModeSpecs.appRequestRefreshRateRange.min,
+                                mDisplayModeSpecs.appRequestRefreshRateRange.max)));
             }
         }
 
