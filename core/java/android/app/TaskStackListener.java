@@ -195,4 +195,8 @@ public abstract class TaskStackListener extends ITaskStackListener.Stub {
     @Override
     public void onTaskFocusChanged(int taskId, boolean focused) {
     }
+
+    @Override
+    public void onTaskRequestedOrientationChanged(int taskId, int requestedOrientation) {
+    }
 }

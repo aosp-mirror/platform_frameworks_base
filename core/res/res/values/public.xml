@@ -2979,105 +2979,48 @@
     <!-- @hide @SystemApi -->
     <public type="color" name="system_notification_accent_color" id="0x0106001c" />
 
+    <!-- ===============================================================
+     Resources added in version R of the platform
+     =============================================================== -->
+    <eat-comment />
 
-  <!-- ===============================================================
-       Resources added in version R of the platform
+    <public type="attr" name="importantForContentCapture" id="0x01010607" />
+    <public type="attr" name="forceQueryable" id="0x01010608"/>
+    <public type="attr" name="resourcesMap" id="0x01010609"/>
+    <public type="attr" name="animatedImageDrawable" id="0x0101060a"/>
+    <public type="attr" name="htmlDescription" id="0x0101060b"/>
+    <public type="attr" name="preferMinimalPostProcessing" id="0x0101060c"/>
+    <public type="attr" name="supportsInlineSuggestions" id="0x0101060d"/>
+    <public type="attr" name="crossProfile" id="0x0101060e"/>
+    <public type="attr" name="canTakeScreenshot" id="0x0101060f"/>
+    <!-- @hide @SystemApi -->
+    <public type="attr" name="sdkVersion" id="0x01010610" />
+    <!-- @hide @SystemApi -->
+    <public type="attr" name="minExtensionVersion" id="0x01010611" />
+    <public type="attr" name="allowNativeHeapPointerTagging" id="0x01010612" />
+    <public type="attr" name="autoRevokePermissions" id="0x01010613" />
+    <public type="attr" name="preserveLegacyExternalStorage" id="0x01010614" />
+    <public type="attr" name="mimeGroup" id="0x01010615" />
+    <public type="attr" name="gwpAsanMode" id="0x01010616" />
 
-       NOTE: add <public> elements within a <public-group> like so:
+    <!-- @hide @SystemApi -->
+    <public type="string" name="config_defaultCallRedirection" id="0x01040025" />
+    <!-- @hide @SystemApi -->
+    <public type="string" name="config_defaultCallScreening" id="0x01040026" />
+    <!-- @hide @SystemApi @TestApi -->
+    <public type="string" name="config_systemGallery" id="0x01040027" />
 
-       <public-group type="attr" first-id="0x01010531">
-           <public name="exampleAttr1" />
-           <public name="exampleAttr2" />
-       </public-group>
-
-       To add a new public-group block, choose an id value that is 1 greater
-       than the last of that item above. For example, the last "attr" id
-       value above is 0x01010530, so the public-group of attrs below has
-       the id value of 0x01010531.
-       =============================================================== -->
-  <eat-comment />
-
-    <public-group type="attr" first-id="0x01010607">
-      <public name="importantForContentCapture" />
-      <public name="forceQueryable" />
-      <public name="resourcesMap" />
-      <public name="animatedImageDrawable"/>
-      <public name="htmlDescription"/>
-      <public name="preferMinimalPostProcessing"/>
-      <!-- @removed -->
-      <public name="featureId" />
-      <public name="supportsInlineSuggestions" />
-      <public name="crossProfile" />
-      <public name="canTakeScreenshot"/>
-      <!-- @hide @SystemApi -->
-      <public name="sdkVersion" />
-      <!-- @hide @SystemApi -->
-      <public name="minExtensionVersion" />
-      <public name="allowNativeHeapPointerTagging" />
-      <!-- @hide no longer used, kept to preserve padding -->
-      <public name="allowAutoRevokePermissionsExemption"/>
-      <public name="autoRevokePermissions" />
-      <public name="preserveLegacyExternalStorage" />
-      <public name="mimeGroup" />
-      <public name="gwpAsanMode" />
-      <!-- @hide -->
-      <public name="scrollCaptureHint" />
-      <public name="rollbackDataPolicy" />
-    </public-group>
-
-    <public-group type="drawable" first-id="0x010800b5">
-    </public-group>
-
-    <public-group type="style" first-id="0x010302e5">
-    </public-group>
-
-    <public-group type="id" first-id="0x0102004a">
-      <public name="accessibilityActionPressAndHold" />
-    </public-group>
-
-    <public-group type="string" first-id="0x01040025">
-      <!-- @hide -->
-      <public name="notification_channel_network_status" />
-      <!-- @hide -->
-      <public name="notification_channel_network_alerts" />
-      <!-- @hide -->
-      <public name="notification_channel_network_available" />
-      <!-- @hide @SystemApi -->
-      <public name="config_defaultCallRedirection" />
-      <!-- @hide @SystemApi -->
-      <public name="config_defaultCallScreening" />
-      <!-- @hide @SystemApi @TestApi -->
-      <public name="config_systemGallery" />
-    </public-group>
-
-    <public-group type="bool" first-id="0x01110005">
-    </public-group>
-
-    <public-group type="dimen" first-id="0x01050008">
-    </public-group>
-
-    <public-group type="color" first-id="0x0106001d">
-    </public-group>
-
-    <public-group type="id" first-id="0x0102004b">
-      <public name="accessibilitySystemActionBack" />
-      <public name="accessibilitySystemActionHome" />
-      <public name="accessibilitySystemActionRecents" />
-      <public name="accessibilitySystemActionNotifications" />
-      <public name="accessibilitySystemActionQuickSettings" />
-      <public name="accessibilitySystemActionPowerDialog" />
-      <public name="accessibilitySystemActionToggleSplitScreen" />
-      <public name="accessibilitySystemActionLockScreen" />
-      <public name="accessibilitySystemActionTakeScreenshot" />
-      <public name="accessibilityActionImeEnter" />
-    </public-group>
-
-    <public-group type="string" first-id="0x0104002c">
-      <!-- @hide -->
-      <public name="config_customMediaKeyDispatcher" />
-      <!-- @hide -->
-      <public name="config_customSessionPolicyProvider" />
-    </public-group>
+    <public type="id" name="accessibilityActionPressAndHold" id="0x0102004a" />
+    <public type="id" name="accessibilitySystemActionBack" id="0x0102004b" />
+    <public type="id" name="accessibilitySystemActionHome" id="0x0102004c" />
+    <public type="id" name="accessibilitySystemActionRecents" id="0x0102004d" />
+    <public type="id" name="accessibilitySystemActionNotifications" id="0x0102004e" />
+    <public type="id" name="accessibilitySystemActionQuickSettings" id="0x0102004f" />
+    <public type="id" name="accessibilitySystemActionPowerDialog" id="0x01020050" />
+    <public type="id" name="accessibilitySystemActionToggleSplitScreen" id="0x01020051" />
+    <public type="id" name="accessibilitySystemActionLockScreen" id="0x01020052" />
+    <public type="id" name="accessibilitySystemActionTakeScreenshot" id="0x01020053" />
+    <public type="id" name="accessibilityActionImeEnter" id="0x01020054" />
 
   <!-- ===============================================================
      Resources added in version S of the platform
@@ -3096,8 +3039,37 @@
      =============================================================== -->
   <eat-comment />
 
-  <public-group type="attr" first-id="0x01010625">
+  <public-group type="attr" first-id="0x01010617">
+    <public name="rollbackDataPolicy" />
     <public name="allowClickWhenDisabled" />
+  </public-group>
+
+  <public-group type="drawable" first-id="0x010800b5">
+    <!-- drawable definitions go here -->
+  </public-group>
+
+  <public-group type="color" first-id="0x0106001d">
+    <!-- color definitions go here -->
+  </public-group>
+
+  <public-group type="dimen" first-id="0x01050008">
+    <!-- dimension definitions go here -->
+  </public-group>
+
+  <public-group type="bool" first-id="0x01110005">
+    <!-- boolean definitions go here -->
+  </public-group>
+
+  <public-group type="style" first-id="0x010302e5">
+    <!-- style definitions go here -->
+  </public-group>
+
+  <public-group type="string" first-id="0x01040028">
+    <!-- string definitions go here -->
+  </public-group>
+
+  <public-group type="id" first-id="0x01020055">
+    <!-- id definitions go here -->
   </public-group>
 
   <!-- ===============================================================
@@ -3108,4 +3080,5 @@
        Items added outside of a group may have their value recalculated
        every time something new is added to this file.
        =============================================================== -->
+
 </resources>
