@@ -36,6 +36,7 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.ISystemGestureExclusionListener;
@@ -232,13 +233,14 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
         mIsBackGestureAllowed =
                 !mGestureNavigationSettingsObserver.areNavigationButtonForcedVisible();
 
+        final DisplayMetrics dm = res.getDisplayMetrics();
         final float defaultGestureHeight = res.getDimension(
-                com.android.internal.R.dimen.navigation_bar_gesture_height);
+                com.android.internal.R.dimen.navigation_bar_gesture_height) / dm.density;
         final float gestureHeight = DeviceConfig.getFloat(DeviceConfig.NAMESPACE_SYSTEMUI,
                 SystemUiDeviceConfigFlags.BACK_GESTURE_BOTTOM_HEIGHT,
                 defaultGestureHeight);
-        mBottomGestureHeight = TypedValue.applyDimension(
-                TypedValue.COMPLEX_UNIT_DIP, gestureHeight, res.getDisplayMetrics());
+        mBottomGestureHeight = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, gestureHeight,
+                dm);
 
         // Reduce the default touch slop to ensure that we can intercept the gesture
         // before the app starts to react to it.
