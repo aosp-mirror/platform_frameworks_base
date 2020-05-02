@@ -24,7 +24,6 @@ import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
-import android.content.ContentInterface;
 import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -251,14 +250,14 @@ public final class DocumentsContract {
      * Get string array identifies the type or types of metadata returned
      * using DocumentsContract#getDocumentMetadata.
      *
-     * @see #getDocumentMetadata(ContentInterface, Uri)
+     * @see #getDocumentMetadata(ContentResolver, Uri)
      */
     public static final String METADATA_TYPES = "android:documentMetadataTypes";
 
     /**
      * Get Exif information using DocumentsContract#getDocumentMetadata.
      *
-     * @see #getDocumentMetadata(ContentInterface, Uri)
+     * @see #getDocumentMetadata(ContentResolver, Uri)
      */
     public static final String METADATA_EXIF = "android:documentExif";
 
@@ -266,7 +265,7 @@ public final class DocumentsContract {
      * Get total count of all documents currently stored under the given
      * directory tree. Only valid for {@link Document#MIME_TYPE_DIR} documents.
      *
-     * @see #getDocumentMetadata(ContentInterface, Uri)
+     * @see #getDocumentMetadata(ContentResolver, Uri)
      */
     public static final String METADATA_TREE_COUNT = "android:metadataTreeCount";
 
@@ -274,7 +273,7 @@ public final class DocumentsContract {
      * Get total size of all documents currently stored under the given
      * directory tree. Only valid for {@link Document#MIME_TYPE_DIR} documents.
      *
-     * @see #getDocumentMetadata(ContentInterface, Uri)
+     * @see #getDocumentMetadata(ContentResolver, Uri)
      */
     public static final String METADATA_TREE_SIZE = "android:metadataTreeSize";
 
@@ -405,7 +404,7 @@ public final class DocumentsContract {
          * Flag indicating that a document can be represented as a thumbnail.
          *
          * @see #COLUMN_FLAGS
-         * @see DocumentsContract#getDocumentThumbnail(ContentInterface, Uri,
+         * @see DocumentsContract#getDocumentThumbnail(ContentResolver, Uri,
          *      Point, CancellationSignal)
          * @see DocumentsProvider#openDocumentThumbnail(String, Point,
          *      android.os.CancellationSignal)
@@ -431,7 +430,7 @@ public final class DocumentsContract {
          * Flag indicating that a document is deletable.
          *
          * @see #COLUMN_FLAGS
-         * @see DocumentsContract#deleteDocument(ContentInterface, Uri)
+         * @see DocumentsContract#deleteDocument(ContentResolver, Uri)
          * @see DocumentsProvider#deleteDocument(String)
          */
         public static final int FLAG_SUPPORTS_DELETE = 1 << 2;
@@ -469,7 +468,7 @@ public final class DocumentsContract {
          * Flag indicating that a document can be renamed.
          *
          * @see #COLUMN_FLAGS
-         * @see DocumentsContract#renameDocument(ContentInterface, Uri, String)
+         * @see DocumentsContract#renameDocument(ContentResolver, Uri, String)
          * @see DocumentsProvider#renameDocument(String, String)
          */
         public static final int FLAG_SUPPORTS_RENAME = 1 << 6;
@@ -479,7 +478,7 @@ public final class DocumentsContract {
          * within the same document provider.
          *
          * @see #COLUMN_FLAGS
-         * @see DocumentsContract#copyDocument(ContentInterface, Uri, Uri)
+         * @see DocumentsContract#copyDocument(ContentResolver, Uri, Uri)
          * @see DocumentsProvider#copyDocument(String, String)
          */
         public static final int FLAG_SUPPORTS_COPY = 1 << 7;
@@ -489,7 +488,7 @@ public final class DocumentsContract {
          * within the same document provider.
          *
          * @see #COLUMN_FLAGS
-         * @see DocumentsContract#moveDocument(ContentInterface, Uri, Uri, Uri)
+         * @see DocumentsContract#moveDocument(ContentResolver, Uri, Uri, Uri)
          * @see DocumentsProvider#moveDocument(String, String, String)
          */
         public static final int FLAG_SUPPORTS_MOVE = 1 << 8;
@@ -513,7 +512,7 @@ public final class DocumentsContract {
          * Flag indicating that a document can be removed from a parent.
          *
          * @see #COLUMN_FLAGS
-         * @see DocumentsContract#removeDocument(ContentInterface, Uri, Uri)
+         * @see DocumentsContract#removeDocument(ContentResolver, Uri, Uri)
          * @see DocumentsProvider#removeDocument(String, String)
          */
         public static final int FLAG_SUPPORTS_REMOVE = 1 << 10;
@@ -549,7 +548,7 @@ public final class DocumentsContract {
          * using DocumentsContract#getDocumentMetadata
          *
          * @see #COLUMN_FLAGS
-         * @see DocumentsContract#getDocumentMetadata(ContentInterface, Uri)
+         * @see DocumentsContract#getDocumentMetadata(ContentResolver, Uri)
          */
         public static final int FLAG_SUPPORTS_METADATA = 1 << 14;
 
@@ -750,7 +749,7 @@ public final class DocumentsContract {
          * Flag indicating that this root can be ejected.
          *
          * @see #COLUMN_FLAGS
-         * @see DocumentsContract#ejectRoot(ContentInterface, Uri)
+         * @see DocumentsContract#ejectRoot(ContentResolver, Uri)
          * @see DocumentsProvider#ejectRoot(String)
          */
         public static final int FLAG_SUPPORTS_EJECT = 1 << 5;

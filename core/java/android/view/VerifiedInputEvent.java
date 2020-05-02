@@ -92,8 +92,6 @@ public abstract class VerifiedInputEvent implements Parcelable {
      * time base.
      *
      * @see InputEvent#getEventTime()
-     * @see KeyEvent#getEventTimeNano()
-     * @see MotionEvent#getEventTimeNano()
      */
     @SuppressLint("MethodNameUnits")
     public long getEventTimeNanos() {
