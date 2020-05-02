@@ -284,7 +284,8 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Zobraziť možnosti certifikácie bezdrôtového zobrazenia"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Zvýšiť úroveň denníkov Wi‑Fi, zobrazovať podľa SSID RSSI pri výbere siete Wi‑Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Znižuje používanie batérie a zlepšuje výkon siete"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Tento prepínač ovplyvňuje správanie randomizácie adresy MAC len pre režim klienta.\nKeď je tento režim aktivovaný, všetky siete s povolenou randomizáciou adresy MAC môžu mať svoje adresy MAC počas spájania opätovne randomizované v závislosti od toho, kedy sa klient od siete naposledy odpojil. Opätovná randomizácia nenastane, ak sa zariadenie znova pripojí do štyroch hodín."</string>
+    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
+    <skip />
     <string name="wifi_metered_label" msgid="8737187690304098638">"Merané"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Bez merania dát"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Vyrovnávacia pamäť nástroja denníkov"</string>
@@ -373,8 +374,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Zobrazovať dialógové okno „Aplikácia nereaguje“ pre aplikácie na pozadí"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Zobraziť hlásenia kanála upozornení"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Zobrazuje varovné hlásenie na obrazovke, keď aplikácia zverejní upozornenie bez platného kanála"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Vynútiť skratky pre upozornenia na konverzácie"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Vyžadovať zastúpenie upozornení dlhodobou skratkou na zdieľanie, aby sa zobrazili v sekcii konverzácie"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Vynútiť povolenie aplikácií na externom úložisku"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Umožňuje zapísať akúkoľvek aplikáciu do externého úložiska bez ohľadu na hodnoty v manifeste"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Vynútiť možnosť zmeny veľkosti aktivít"</string>

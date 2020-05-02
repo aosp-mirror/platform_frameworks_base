@@ -284,7 +284,8 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Mostra opzioni per la certificazione display wireless"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Aumenta livello di logging Wi-Fi, mostra SSID RSSI nel selettore Wi-Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Riduce il consumo della batteria e migliora le prestazioni della rete"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Questa opzione influenza il comportamento della randomizzazione MAC solo nella modalità client.\nQuando questa modalità è attiva, durante l\'associazione gli indirizzi MAC di tutte le reti con randomizzazione MAC abilitata potrebbero essere nuovamente sottoposti a randomizzazione, a seconda di quando il client è stato disconnesso l\'ultima volta dalla rete. La randomizzazione non viene eseguita nuovamente se il dispositivo si riconnette entro quattro ore."</string>
+    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
+    <skip />
     <string name="wifi_metered_label" msgid="8737187690304098638">"A consumo"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Non a consumo"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Dimensioni buffer logger"</string>
@@ -373,8 +374,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Mostra finestra di dialogo ANR per app in background"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Mostra avvisi canale di notifica"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Viene mostrato un avviso sullo schermo quando un\'app pubblica una notifica senza un canale valido"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Applica scorciatoie per notifiche delle conversazioni"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Richiedi il supporto di una scorciatoia di condivisione di lunga durata per la visualizzazione delle notifiche nella sezione delle conversazioni"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Forza autorizzazione app su memoria esterna"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Consente l\'installazione di qualsiasi app su memoria esterna, indipendentemente dai valori manifest"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Imponi formato modificabile alle attività"</string>

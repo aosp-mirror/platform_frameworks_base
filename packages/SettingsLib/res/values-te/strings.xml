@@ -284,7 +284,8 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"వైర్‌లెస్ ప్రదర్శన సర్టిఫికెట్ కోసం ఎంపికలను చూపు"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Wi‑Fi ఎంపికలో SSID RSSI ప్రకారం చూపబడే Wi‑Fi లాగింగ్ స్థాయిని పెంచండి"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"బ్యాటరీ శక్తి వినియోగాన్ని తగ్గించి &amp; నెట్‌వర్క్ పనితీరును మెరుగుపరుస్తుంది"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"క్లయింట్ మోడ్‌లో మాత్రమే MAC ర్యాండమైజేషన్ ప్రవర్తనను ఈ టోగుల్ ప్రభావితం చేస్తుంది.\nఈ మోడ్‌ను యాక్టివేట్ చేసినప్పుడు, క్లయింట్ చివరిసారిగా నెట్‌వర్క్ నుండి ఎప్పుడు డిస్‌కనెక్ట్ చేసారనే దానిని బట్టి, అనుబంధం జరిగేటప్పుడు MAC ర్యాండమైజేషన్ ఎనేబుల్ చేయబడిన ఏ నెట్‌వర్క్‌లు అయినా వాటి MAC చిరునామాలను తిరిగి ర్యాండమైజేషన్ చేయవచ్చు. పరికరం 4 గంటలు లేదా అంతకన్నా తక్కువ సమయంలో మళ్లీ కనెక్ట్ చేయబడితే తిరిగి ర్యాండమైజేషన్ చేయడమనేది జరగదు."</string>
+    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
+    <skip />
     <string name="wifi_metered_label" msgid="8737187690304098638">"గణించబడుతోంది"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"గణించబడటం లేదు"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"లాగర్ బఫర్ పరిమాణాలు"</string>
@@ -373,8 +374,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"నేపథ్య యాప్‌ల కోసం యాప్ ప్రతిస్పందించడం లేదు అనే డైలాగ్‌ను చూపు"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"ఛానెల్ హెచ్చరికల నోటిఫికేషన్‌‌ను చూపు"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"చెల్లుబాటు అయ్యే ఛానెల్ లేకుండా యాప్ నోటిఫికేషన్‌ను పోస్ట్ చేస్తున్నప్పుడు స్క్రీన్‌పై హెచ్చరికను చూపిస్తుంది"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"సంభాషణ నోటిఫికేషన్‌లకు షార్ట్‌కట్‌ల అమలు"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"సంభాషణల విభాగంలో కనిపించడానికి చిరకాలం నిలిచిపోయే భాగస్వామ్య సత్వరమార్గం ద్వారా నోటిఫికేషన్‌లకు మద్దతు ఉండాలి."</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"యాప్‌లను బాహ్య నిల్వలో తప్పనిసరిగా అనుమతించు"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"ఏ యాప్‌ని అయినా మానిఫెస్ట్ విలువలతో సంబంధం లేకుండా బాహ్య నిల్వలో సేవ్ చేయడానికి అనుమతిస్తుంది"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"కార్య‌క‌లాపాల విండోల ప‌రిమాణం మార్చ‌గ‌లిగేలా నిర్బంధించు"</string>

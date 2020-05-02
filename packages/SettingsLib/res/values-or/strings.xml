@@ -284,7 +284,8 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"ୱେୟାରଲେସ୍‌ ଡିସ୍‌ପ୍ଲେ ସାର୍ଟିଫିକେସନ୍ ପାଇଁ ବିକଳ୍ପ ଦେଖାନ୍ତୁ"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"ୱାଇ-ଫାଇ ଲଗିଙ୍ଗ ସ୍ତର ବଢ଼ାନ୍ତୁ, ୱାଇ-ଫାଇ ପିକର୍‌ରେ ପ୍ରତି SSID RSSI ଦେଖାନ୍ତୁ"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"ବ୍ୟାଟେରୀ ଖର୍ଚ୍ଚ କମ୍ ଏବଂ ନେଟ୍‌ୱାର୍କ କାର୍ଯ୍ୟକ୍ଷମତା ଉନ୍ନତ କରିଥାଏ"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"ଏହି ଟୋଗଲ୍ କେବଳ କ୍ଲାଏଣ୍ଟ ମୋଡ୍ ପାଇଁ MAC ରେଣ୍ଡମାଇଜେସନ୍ ବ୍ୟବହାରକୁ ପ୍ରଭାବିତ କରେ।\nଯେତେବେଳେ ଏହି ମୋଡକୁ ସକ୍ରିୟ କରାଯାଏ, ସେତେବେଳେ କ୍ଲାଏଣ୍ଟ ଗତଥର କେତେବେଳେ ନେଟୱାର୍କରୁ ସଂଯୋଗ ବିଚ୍ଛିନ୍ନ କରିଥିଲେ ତାହା ଉପରେ ନିର୍ଭର କରି, MAC ରେଣ୍ଡମାଇଜେସନ୍ ସକ୍ଷମ କରାଯାଇଥିବା ଯେ କୌଣସି ନେଟୱାର୍କର MAC ଠିକଣାଗୁଡ଼ିକୁ ସଂଯୋଜନ ସମୟରେ ପୁଣି ରେଣ୍ଡମାଇଜ୍ କରାଯାଇପାରେ। ଯଦି ଡିଭାଇସଟି 4 ଘଣ୍ଟା କିମ୍ବା ତାଠାରୁ କମ୍ ସମୟରେ ପୁଣି ସଂଯୋଗ କରେ, ତେବେ ପୁଣି ରେଣ୍ଡମାଇଜେସନ୍ ହୁଏ ନାହିଁ।"</string>
+    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
+    <skip />
     <string name="wifi_metered_label" msgid="8737187690304098638">"ମପାଯାଉଥିବା"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"ମପାଯାଉନଥିବା"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"ଲଗର୍‌ ବଫର୍‌ ସାଇଜ୍"</string>
@@ -373,8 +374,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"ବ୍ୟାକ୍‌ଗ୍ରାଉଣ୍ଡ ଆପ୍‌ଗୁଡ଼ିକ ପାଇଁ \"ଆପ୍‌ ଉତ୍ତର ଦେଉନାହିଁ\" ଡାୟଲଗ୍‌ ଦେଖାନ୍ତୁ"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"ବିଜ୍ଞପ୍ତି ଚେନାଲ୍ ଚେତାବନୀ ଦେଖାନ୍ତୁ"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"ବୈଧ ଚ୍ୟାନେଲ୍‌ ବିନା ଗୋଟିଏ ଆପ୍‌ ଏକ ବିଜ୍ଞପ୍ତି ପୋଷ୍ଟ କରିବାବେଳେ ଅନ୍‌-ସ୍କ୍ରୀନ୍‌ ସତର୍କତା ଦେଖାଏ"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"ବାର୍ତ୍ତାଳାପ ବିଜ୍ଞପ୍ତି ପାଇଁ ସର୍ଟକଟ ଲାଗୁ କରନ୍ତୁ"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"ବାର୍ତ୍ତାଳାପ ବିଭାଗରେ ଦେଖାଯିବା ପାଇଁ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକୁ ଏକ ଦୀର୍ଘ-ସ୍ଥାୟୀ ସେୟାରିଂ ସର୍ଟକଟର ସମର୍ଥନ ଆବଶ୍ୟକ"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"ଆପ୍‌କୁ ଏକ୍ସଟର୍ନଲ୍ ମେମୋରୀରେ ଫୋର୍ସ୍ ଅନୁମତି ଦିଅନ୍ତୁ"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"ଯେକୌଣସି ଆପ୍‌କୁ ଏକ୍ସଟର୍ନଲ୍ ଷ୍ଟୋରେଜ୍‌ରେ ଲେଖାଯୋଗ୍ୟ କରନ୍ତୁ, ମେନିଫେଷ୍ଟ ମୂଲ୍ୟ ଯାହା ହୋଇଥାଉ ନା କାହିଁକି"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"ୱିଣ୍ଡୋ ହିସାବରେ କାର୍ଯ୍ୟକଳାପର ଆକାର ବଦଳାନ୍ତୁ"</string>

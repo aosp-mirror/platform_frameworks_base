@@ -284,7 +284,8 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"ສະແດງໂຕເລືອກສຳລັບການສະແດງການຮັບຮອງລະບົບໄຮ້ສາຍ"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"ເພີ່ມ​ລະ​ດັບ​ການ​ເກັບ​ປະ​ຫວັດ Wi‑Fi, ສະ​ແດງ​ຕໍ່ SSID RSSI ​ໃນ​ Wi‑Fi Picker"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"ຫຼຸດການໃຊ້ແບັດເຕີຣີ ແລະ ປັບປຸງປະສິດທິພາບເຄືອຂ່າຍ"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"ການເປີດ/ປິດນີ້ຈະມີຜົນກັບພຶດຕິກຳການສຸ່ມ MAC ສຳລັບໂໝດລູກຂ່າຍເທົ່ານັ້ນ.\nເມື່ອເປີດໃຊ້ໂໝດນີ້, ເຄືອຂ່າຍໃດກໍຕາມທີ່ເປີດການນຳໃຊ້ການສຸ່ມ MAC ອາດສຸ່ມທີ່ຢູ່ MAC ຂອງເຂົາເຈົ້າຄືນໃໝ່ໃນລະຫວ່າງການເຊື່ອມໂຍງ, ຂຶ້ນກັບວ່າລູກຂ່າຍຕັດການເຊື່ອມຕໍ່ຈາກເຄືອຂ່າຍຫຼ້າສຸດຕອນໃດ. ການສຸ່ມໃໝ່ຈະບໍ່ເກີດຂຶ້ນຫາກອຸປະກອນເຊື່ອມຕໍ່ຄືນໃໝ່ພາຍໃນ 4 ຊົ່ວໂມງ ຫຼື ໜ້ອຍກວ່ານັ້ນ."</string>
+    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
+    <skip />
     <string name="wifi_metered_label" msgid="8737187690304098638">"ມີການວັດແທກ"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"ບໍ່ໄດ້ວັດແທກ"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"ຂະໜາດບັບເຟີຕົວບັນທຶກ"</string>
@@ -373,8 +374,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"ສະແດງກ່ອງຂໍ້ຄວາມບໍ່ຕອບສະໜອງແອັບສຳລັບແອັບພື້ນຫຼັງ"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"ສະແດງຄຳເຕືອນຊ່ອງການແຈ້ງເຕືອນ"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"ສະແດງຄຳເຕືອນໃນໜ້າຈໍເມື່ອແອັບໂພສການແຈ້ງເຕືອນໂດຍບໍ່ມີຊ່ອງທີ່ຖືກຕ້ອງ"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"ບັງຄັບໃຊ້ທາງລັດສຳລັບການແຈ້ງເຕືອນການສົນທະນາ"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"ຕ້ອງໃຊ້ການແຈ້ງເຕືອນເພື່ອຮັບການສະໜັບສະໜຸນໂດຍທາງລັດການແບ່ງປັນທີ່ຢູ່ດົນເພື່ອໃຫ້ປາກົດໃນພາກສ່ວນການສົນທະນາ"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"ບັງຄັບອະນຸຍາດແອັບ​ຢູ່​ພາຍນອກ"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"ເຮັດໃຫ້ທຸກແອັບມີສິດໄດ້ຮັບການຂຽນໃສ່ພື້ນທີ່ຈັດເກັບຂໍ້ມູນພາຍນອກ, ໂດຍບໍ່ຄຳນຶງເຖິງຄ່າ manifest"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"ບັງ​ຄັງ​ໃຫ້​ການ​ເຄື່ອນ​ໄຫວ​ປ່ຽນ​ຂະ​ໜາດ​ໄດ້"</string>

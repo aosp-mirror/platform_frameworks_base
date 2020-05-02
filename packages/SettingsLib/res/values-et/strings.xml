@@ -284,7 +284,8 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Juhtmeta ekraaniühenduse sertifitseerimisvalikute kuvamine"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Suurenda WiFi logimistaset, kuva WiFi valijas SSID RSSI järgi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Aeglustab aku tühjenemist ja parandab võrgu toimivust"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"See lüliti mõjutab MAC-aadressi juhuslikustamise käitumist ainult kliendirežiimis.\nSelle režiimi aktiveerimisel võidakse seostamise ajal MAC-aadressid uuesti juhuslikustada kõigi võrkude jaoks, millel on MAC-aadressi juhuslikustamine lubatud, olenevalt sellest, millal klient viimati ühenduse võrguga katkestas. Uuesti juhuslikustamist ei toimu juhul, kui seade loob uuesti ühenduse kuni 4 tunni jooksul."</string>
+    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
+    <skip />
     <string name="wifi_metered_label" msgid="8737187690304098638">"Mahupõhine"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Mittemahupõhine"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Logija puhvri suurused"</string>
@@ -373,8 +374,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Kuva taustarakenduste puhul dialoog Rakendus ei reageeri"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Kuva märguandekanali hoiatused"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Esitab ekraanil hoiatuse, kui rakendus postitab kehtiva kanalita märguande"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Otseteede jõustamine vestluste märguannete jaoks"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Nõutakse märguannete toetamist pikaajalise jagamise otseteega, et selle saaks vestluse jaotises kuvada"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Luba rakendused välises salvestusruumis"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Lubab mis tahes rakendusi kirjutada välisesse salvestusruumi manifesti väärtustest olenemata"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Muuda tegevuste suurused muudetavaks"</string>

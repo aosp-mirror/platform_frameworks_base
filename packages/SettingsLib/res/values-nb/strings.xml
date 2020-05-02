@@ -284,7 +284,8 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Vis alternativer for sertifisering av trådløs skjerm"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Øk Wi-Fi-loggenivå – vis per SSID RSSI i Wi-Fi-velgeren"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Reduserer batteriforbruket og forbedrer nettverksytelsen"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Denne av/på-bryteren påvirker bare atferden til MAC-tilfeldiggjøring for klientmodus.\nNår denne modusen er aktivert, kan nettverk som har tilfeldig valgt MAC, få MAC-adressen tilfeldig valgt på nytt under tilknytning, avhengig av når klienten sist ble koblet fra nettverket. Ny tilfeldiggjøring oppstår ikke hvis enheten kobler seg til igjen innen fire timer."</string>
+    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
+    <skip />
     <string name="wifi_metered_label" msgid="8737187690304098638">"Med datamåling"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Uten datamåling"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Bufferstørrelser for logg"</string>
@@ -373,8 +374,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Vis Appen svarer ikke-dialog for bakgrunnsapper"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Vis varselskanaladvarsler"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Viser advarsler på skjermen når apper publiserer varsler uten en gyldig kanal"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Håndhev snarveier for samtalevarsler"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Krev at varsler støttes av en langvarig delingssnarvei for å vises i samtaledelen"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Tving frem tillatelse for ekstern lagring av apper"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Dette gjør at alle apper kan lagres på eksterne lagringsmedier – uavhengig av manifestverdier"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Tving aktiviteter til å kunne endre størrelse"</string>

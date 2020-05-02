@@ -284,7 +284,8 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"വയർലെസ് ഡിസ്‌പ്ലേ സർട്ടിഫിക്കേഷനായി ഓപ്‌ഷനുകൾ ദൃശ്യമാക്കുക"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"വൈഫൈ പിക്കറിൽ ഓരോ SSID RSSI പ്രകാരം കാണിക്കാൻ വൈഫൈ ലോഗിംഗ് നില വർദ്ധിപ്പിക്കുക"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"ബാറ്ററി ചാർജ് വേഗത്തിൽ തീരുന്ന അവസ്ഥ കുറച്ച് നെറ്റ്‌വർക്ക് പ്രകടനം മെച്ചപ്പെടുത്തുന്നു"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"ഈ മാറ്റം ക്ലയന്റ് മോഡിലെ MAC ക്രമരഹിതമാക്കൽ പ്രവർത്തനരീതിയെ മാത്രമേ ബാധിക്കുകയുള്ളൂ.\nഈ മോഡ് സജീവമാക്കിക്കഴിഞ്ഞാൽ, MAC ക്രമരഹിതമാക്കൽ പ്രവർത്തനക്ഷമമാക്കിയിരിക്കുന്ന എല്ലാ നെറ്റ്‌വർക്കുകളിലും അസോസിയേഷൻ സമയത്ത്, ക്ലയന്റ് അവസാനമായി നെറ്റ്‌വർക്കിൽ നിന്ന് വിച്‌ഛേദിച്ച സമയത്തിന്റെ അടിസ്ഥാനത്തിൽ അവരുടെ MAC വിലാസങ്ങൾ വീണ്ടും ക്രമരഹിതമാക്കപ്പെടും. നാല് മണിക്കൂറോ അതിൽ കുറവ് സമയത്തിനുള്ളിലോ ഉപകരണം വീണ്ടും കണക്‌റ്റ് ചെയ്യുന്നില്ലെങ്കിൽ വീണ്ടും ക്രമരഹിതമാക്കൽ സംഭവിക്കില്ല."</string>
+    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
+    <skip />
     <string name="wifi_metered_label" msgid="8737187690304098638">"മീറ്റർ ചെയ്തത്"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"മീറ്റർമാപകമല്ലാത്തത്"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"ലോഗർ ബഫർ വലുപ്പം"</string>
@@ -373,8 +374,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"പ‌ശ്ചാത്തല ആപ്പുകൾക്കായി \'ആപ്പ് പ്രതികരിക്കുന്നില്ല\' ഡയലോഗ് പ്രദര്‍ശിപ്പിക്കുക"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"ചാനൽ മുന്നറിയിപ്പ് കാണിക്കൂ"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"സാധുതയുള്ള ചാനലിൽ അല്ലാതെ ഒരു ആപ്പ്, അറിയിപ്പ് പോസ്റ്റ് ചെയ്യുമ്പോൾ ഓൺ-സ്‌ക്രീൻ മുന്നറിയിപ്പ് ‌പ്രദർശിപ്പിക്കുന്നു"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"സംഭാഷണ അറിയിപ്പിലേക്ക് കുറുക്കുവഴികൾ നടപ്പിലാക്കൂ"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"സംഭാഷണ വിഭാഗത്തിൽ ദൃശ്യമാകാൻ അറിയിപ്പുകൾ ദീർഘകാലമായി പങ്കിടൽ കുറുക്കുവഴി പിന്തുടരണം"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"ബാഹ്യമായതിൽ നിർബന്ധിച്ച് അനുവദിക്കുക"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"മാനിഫെസ്റ്റ് മൂല്യങ്ങൾ പരിഗണിക്കാതെ, ബാഹ്യ സ്റ്റോറേജിലേക്ക് എഴുതപ്പെടുന്നതിന് ഏതൊരു ആപ്പിനെയും യോഗ്യമാക്കുന്നു"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"വലുപ്പം മാറ്റാൻ പ്രവർത്തനങ്ങളെ നിർബന്ധിക്കുക"</string>

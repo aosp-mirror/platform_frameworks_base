@@ -278,13 +278,14 @@
     <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"Ընտրեք մասնավոր DNS-ի ռեժիմը"</string>
     <string name="private_dns_mode_off" msgid="7065962499349997041">"Անջատված է"</string>
     <string name="private_dns_mode_opportunistic" msgid="1947864819060442354">"Ավտոմատ"</string>
-    <string name="private_dns_mode_provider" msgid="3619040641762557028">"Մասնավոր DNS ծառայության մատակարարի խնամորդի անունը"</string>
+    <string name="private_dns_mode_provider" msgid="3619040641762557028">"Մասնավոր DNS մատակարարի սերվերը"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"Մուտքագրեք DNS ծառայության մատակարարի խնամորդի անունը"</string>
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"Չհաջողվեց միանալ"</string>
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Ցույց տալ անլար էկրանների հավաստագրման ընտրանքները"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Բարձրացնել մակարդակը, Wi‑Fi ընտրիչում ամեն մի SSID-ի համար ցույց տալ RSSI"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Նվազեցնում է մարտկոցի սպառումը և լավացնում ցանցի աշխատանքը"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Այս կարգավորումը միացնում է MAC հասցեների պատահական ընտրությունը միայն սպասառուի ռեժիմում։\nԵրբ այս ռեժիմն ակտիվացված է, բոլոր ցանցերը, որոնց համար միացված է MAC հասցեների պատահական ընտրությունը, կապակցման ժամանակ կարող են նորից պատահական MAC հասցե ընտրել՝ կախված այն բանից, թե երբ է սպասառուն վերջին անգամ անջատվել ցանցից։ Պատահական ընտրության կրկնությունը տեղի չի ունենում, եթե սարքը նորից է միանում ցանցին 4 ժամից պակաս ժամանակահատվածում։"</string>
+    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
+    <skip />
     <string name="wifi_metered_label" msgid="8737187690304098638">"Վճարովի թրաֆիկ"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Անսահմանափակ թրաֆիկ"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Մատյանի բուֆերի չափերը"</string>
@@ -373,8 +374,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Ցուցադրել «Հավելվածը չի արձագանքում» պատուհանը ֆոնային հավելվածների համար"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Ցուցադրել ծանուցումների ալիքի զգուշացումները"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Էկրանին ցուցադրվում է զգուշացում, երբ որևէ հավելված փակցնում է ծանուցում առանց վավեր ալիքի"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Միացնել զրույցների ծանուցումների դյուրանցումները"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Պահանջել, որ ծանուցումները պահվեն երկարաժամկետ հասանելիության դյուրանցումով՝ զրույցների բաժնում հայտնվելու համար"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Թույլատրել պահումն արտաքին կրիչներում"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Թույլ է տալիս ցանկացած հավելված պահել արտաքին սարքում՝ մանիֆեստի արժեքներից անկախ"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Չափերի փոփոխում բազմապատուհան ռեժիմում"</string>

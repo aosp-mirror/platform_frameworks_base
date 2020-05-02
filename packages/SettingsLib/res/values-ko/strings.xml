@@ -284,7 +284,8 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"무선 디스플레이 인증서 옵션 표시"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Wi‑Fi 로깅 수준을 높이고, Wi‑Fi 선택도구에서 SSID RSSI당 값을 표시"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"배터리 소모를 줄이고 네트워크 성능 개선"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"이 전환은 클라이언트 모드의 MAC 무작위 순서 지정 방식에만 영향을 줍니다.\n이 모드를 활성화하면 네트워크와 클라이언트 연결이 끊긴 마지막 시점에 따라 MAC 무작위 순서 지정이 사용 설정된 네트워크에서 연결 중에 MAC 주소를 다시 무작위 순서로 지정할 수 있습니다. 기기가 4시간 이내에 재연결된 경우 무작위 순서 지정이 다시 발생하지 않습니다."</string>
+    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
+    <skip />
     <string name="wifi_metered_label" msgid="8737187690304098638">"종량제 네트워크"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"무제한 네트워크"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"로거 버퍼 크기"</string>
@@ -373,8 +374,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"백그라운드 앱과 관련해 앱 응답 없음 대화상자 표시"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"알림 채널 경고 표시"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"앱에서 유효한 채널 없이 알림을 게시하면 화면에 경고 표시"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"대화 알림에 단축키 적용"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"알림이 대화 섹션에 표시되려면 오래 지속되는 공유 단축키의 지원을 받도록 요구"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"외부에서 앱 강제 허용"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"매니페스트 값과 관계없이 모든 앱이 외부 저장소에 작성되도록 허용"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"활동의 크기가 조정 가능하도록 설정"</string>

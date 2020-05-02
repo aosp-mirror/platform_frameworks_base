@@ -284,7 +284,8 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Wys opsies vir draadlose skermsertifisering"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Verhoog Wi-Fi-aantekeningvlak, wys per SSID RSSI in Wi‑Fi-kieser"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Verlaag batteryverbruik en verbeter netwerk se werkverrigting"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Hierdie skakelaar beïnvloed MAC-verewekansiginggedrag net vir klantmodus.\nWanneer hierdie modus geaktiveer is, kan enige netwerke waarvoor MAC-verewekansiging geaktiveer is, se MAC-adresse tydens die assosiasie weer verewigkansig word, na gelang van wanneer die klant laas van die netwerk ontkoppel het. Herverewekansiging vind nie plaas as die toestel binne 4 uur of korter herkoppel nie."</string>
+    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
+    <skip />
     <string name="wifi_metered_label" msgid="8737187690304098638">"Beperk"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Onbeperk"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Loggerbuffer se groottes"</string>
@@ -373,8 +374,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Wys Program Reageer Nie-dialoog vir agtergrondprogramme"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Wys kennisgewingkanaalwaarskuwings"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Wys waarskuwing op skerm wanneer \'n program \'n kennisgewing sonder \'n geldige kanaal plaas"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Dwing kortpaaie vir gesprekkennisgewings af"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Kennisgewings moet deur \'n langleef-delingkortpad gerugsteun word om in gesprekafdeling te kan verskyn"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Dwing toelating op eksterne berging"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Maak dat enige program na eksterne berging geskryf kan word, ongeag manifeswaardes"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Dwing aktiwiteite om verstelbaar te wees"</string>

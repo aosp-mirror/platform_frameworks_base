@@ -80,6 +80,8 @@ final class ViewState {
     public static final int STATE_CHAR_REMOVED = 0x4000;
     /** Showing inline suggestions is not allowed for this View. */
     public static final int STATE_INLINE_DISABLED = 0x8000;
+    /** The View is waiting for an inline suggestions request from IME.*/
+    public static final int STATE_PENDING_CREATE_INLINE_REQUEST = 0x10000;
 
     public final AutofillId id;
 
