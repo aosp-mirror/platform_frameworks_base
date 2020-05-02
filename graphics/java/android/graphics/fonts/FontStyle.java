@@ -217,7 +217,7 @@ public final class FontStyle {
      /**
       * Gets the weight value
       *
-      * @see FontStyle#setWeight(int)
+      * @see #FontStyle(int, int)
       * @return a weight value
       */
     public @IntRange(from = 0, to = 1000) int getWeight() {
