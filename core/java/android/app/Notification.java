@@ -3631,7 +3631,7 @@ public class Notification implements Parcelable
          * @param shortcutId the {@link ShortcutInfo#getId() id} of the shortcut this notification
          *                   is linked to
          *
-         * @see Notification.BubbleMetadata.Builder#Builder(String)
+         * @see Notification.BubbleMetadata.Builder#Notification.BubbleMetadata.Builder(String)
          */
         @NonNull
         public Builder setShortcutId(String shortcutId) {
@@ -5993,7 +5993,7 @@ public class Notification implements Parcelable
          * metadata matches the shortcutId set on the  notification builder, if one was set.
          * If the shortcutId's were specified but do not match, an exception is thrown here.
          *
-         * @see Notification.BubbleMetadata.Builder#Builder(String)
+         * @see Notification.BubbleMetadata.Builder#Notification.BubbleMetadata.Builder(String)
          * @see #setShortcutId(String)
          */
         @NonNull
