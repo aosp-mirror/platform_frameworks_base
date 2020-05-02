@@ -535,7 +535,7 @@ public class MediaMetadataRetriever implements AutoCloseable {
      *         if such a frame cannot be retrieved. {@link Bitmap#getConfig()} can
      *         be used to query the actual {@link Bitmap.Config}.
      *
-     * @see {@link #getFrameAtTime(long, int, BitmapParams)}
+     * @see #getFrameAtTime(long, int, BitmapParams)
      */
     public @Nullable Bitmap getFrameAtTime(long timeUs, @Option int option) {
         if (option < OPTION_PREVIOUS_SYNC ||
@@ -581,7 +581,7 @@ public class MediaMetadataRetriever implements AutoCloseable {
      * @return A Bitmap containing a representative video frame, which
      *         can be null, if such a frame cannot be retrieved.
      *
-     * @see {@link #getFrameAtTime(long, int)}
+     * @see #getFrameAtTime(long, int)
      */
     public @Nullable Bitmap getFrameAtTime(
             long timeUs, @Option int option, @NonNull BitmapParams params) {
@@ -623,7 +623,7 @@ public class MediaMetadataRetriever implements AutoCloseable {
      *         be used to query the actual {@link Bitmap.Config}.
      * @throws IllegalArgumentException if passed in invalid option or width by height
      *         is less than or equal to 0.
-     * @see {@link #getScaledFrameAtTime(long, int, int, int, BitmapParams)}
+     * @see #getScaledFrameAtTime(long, int, int, int, BitmapParams)
      */
     public @Nullable Bitmap getScaledFrameAtTime(long timeUs, @Option int option,
             @IntRange(from=1) int dstWidth, @IntRange(from=1) int dstHeight) {
@@ -668,7 +668,7 @@ public class MediaMetadataRetriever implements AutoCloseable {
      *         scaled video frame, which can be null, if such a frame cannot be retrieved.
      * @throws IllegalArgumentException if passed in invalid option or width by height
      *         is less than or equal to 0.
-     * @see {@link #getScaledFrameAtTime(long, int, int, int)}
+     * @see #getScaledFrameAtTime(long, int, int, int)
      */
     public @Nullable Bitmap getScaledFrameAtTime(long timeUs, @Option int option,
             @IntRange(from=1) int dstWidth, @IntRange(from=1) int dstHeight,
