@@ -26,6 +26,7 @@ import android.os.Handler;
 import android.os.UserHandle;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
+import android.util.DisplayMetrics;
 import android.util.TypedValue;
 
 /**
@@ -99,12 +100,13 @@ public class GestureNavigationSettingsObserver extends ContentObserver {
     }
 
     private int getSensitivity(Resources userRes, String side) {
+        final DisplayMetrics dm = userRes.getDisplayMetrics();
         final float defaultInset = userRes.getDimension(
-                com.android.internal.R.dimen.config_backGestureInset);
+                com.android.internal.R.dimen.config_backGestureInset) / dm.density;
         final float backGestureInset = DeviceConfig.getFloat(DeviceConfig.NAMESPACE_SYSTEMUI,
                 BACK_GESTURE_EDGE_WIDTH, defaultInset);
         final float inset = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, backGestureInset,
-                userRes.getDisplayMetrics());
+                dm);
         final float scale = Settings.Secure.getFloatForUser(
                 mContext.getContentResolver(), side, 1.0f, UserHandle.USER_CURRENT);
         return (int) (inset * scale);
