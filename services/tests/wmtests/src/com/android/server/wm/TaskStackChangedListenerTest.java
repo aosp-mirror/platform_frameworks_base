@@ -22,6 +22,7 @@ import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentat
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import android.app.Activity;
@@ -41,6 +42,7 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.platform.test.annotations.Presubmit;
 import android.support.test.uiautomator.UiDevice;
 import android.text.TextUtils;
@@ -56,8 +58,10 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
 
 /**
  * Build/Install/Run:
@@ -391,6 +395,42 @@ public class TaskStackChangedListenerTest {
         }
     };
 
+    @Presubmit
+    @FlakyTest(bugId = 150409355)
+    @Test
+    public void testNotifyTaskRequestedOrientationChanged() throws Exception {
+        final ArrayBlockingQueue<int[]> taskIdAndOrientationQueue = new ArrayBlockingQueue<>(10);
+        registerTaskStackChangedListener(new TaskStackListener() {
+            @Override
+            public void onTaskRequestedOrientationChanged(int taskId, int requestedOrientation) {
+                int[] taskIdAndOrientation = new int[2];
+                taskIdAndOrientation[0] = taskId;
+                taskIdAndOrientation[1] = requestedOrientation;
+                taskIdAndOrientationQueue.offer(taskIdAndOrientation);
+            }
+        });
+
+        final LandscapeActivity activity =
+                (LandscapeActivity) startTestActivity(LandscapeActivity.class);
+
+        int[] taskIdAndOrientation = waitForResult(taskIdAndOrientationQueue,
+                candidate -> candidate[0] == activity.getTaskId());
+        assertNotNull(taskIdAndOrientation);
+        assertEquals(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE, taskIdAndOrientation[1]);
+
+        activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT);
+        taskIdAndOrientation = waitForResult(taskIdAndOrientationQueue,
+                candidate -> candidate[0] == activity.getTaskId());
+        assertNotNull(taskIdAndOrientation);
+        assertEquals(ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT, taskIdAndOrientation[1]);
+
+        activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+        taskIdAndOrientation = waitForResult(taskIdAndOrientationQueue,
+                candidate -> candidate[0] == activity.getTaskId());
+        assertNotNull(taskIdAndOrientation);
+        assertEquals(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED, taskIdAndOrientation[1]);
+    }
+
     /**
      * Starts the provided activity and returns the started instance.
      */
@@ -429,6 +469,19 @@ public class TaskStackChangedListenerTest {
                 throw new RuntimeException("Timed out waiting for task stack change notification");
             }
         } catch (InterruptedException e) {
+        }
+    }
+
+    private <T> T waitForResult(ArrayBlockingQueue<T> queue, Predicate<T> predicate) {
+        try {
+            final long timeout = SystemClock.uptimeMillis() + TimeUnit.SECONDS.toMillis(15);
+            T result;
+            do {
+                result = queue.poll(timeout - SystemClock.uptimeMillis(), TimeUnit.MILLISECONDS);
+            } while (result != null && !predicate.test(result));
+            return result;
+        } catch (InterruptedException e) {
+            return null;
         }
     }
 
@@ -563,4 +616,6 @@ public class TaskStackChangedListenerTest {
 
     // Activity that has {@link android.R.attr#resizeableActivity} attribute set to {@code true}
     public static class ActivityInActivityView extends TestActivity {}
+
+    public static class LandscapeActivity extends TestActivity {}
 }
