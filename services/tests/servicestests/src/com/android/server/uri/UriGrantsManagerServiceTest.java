@@ -70,8 +70,12 @@ public class UriGrantsManagerServiceTest {
         mLocalService = mService.getLocalService();
     }
 
+    /**
+     * Verify that a camera sharing a normally-private photo with a social media
+     * app in the same user issues a grant.
+     */
     @Test
-    public void testNeeded_normal() {
+    public void testNeeded_normal_sameUser() {
         final Intent intent = new Intent(Intent.ACTION_VIEW, URI_PHOTO_1).addFlags(FLAG_READ);
         final GrantUri expectedGrant = new GrantUri(USER_PRIMARY, URI_PHOTO_1, FLAG_READ);
 
@@ -80,6 +84,24 @@ public class UriGrantsManagerServiceTest {
                 USER_PRIMARY);
         assertEquals(PKG_SOCIAL, needed.targetPkg);
         assertEquals(UID_PRIMARY_SOCIAL, needed.targetUid);
+        assertEquals(FLAG_READ, needed.flags);
+        assertEquals(asSet(expectedGrant), needed.uris);
+    }
+
+    /**
+     * Verify that a camera sharing a normally-private photo with a social media
+     * app in a different user issues a grant.
+     */
+    @Test
+    public void testNeeded_normal_differentUser() {
+        final Intent intent = new Intent(Intent.ACTION_VIEW, URI_PHOTO_1).addFlags(FLAG_READ);
+        final GrantUri expectedGrant = new GrantUri(USER_PRIMARY, URI_PHOTO_1, FLAG_READ);
+
+        final NeededUriGrants needed = mService.checkGrantUriPermissionFromIntent(
+                UID_PRIMARY_CAMERA, PKG_SOCIAL, intent, intent.getFlags(), null,
+                USER_SECONDARY);
+        assertEquals(PKG_SOCIAL, needed.targetPkg);
+        assertEquals(UID_SECONDARY_SOCIAL, needed.targetUid);
         assertEquals(FLAG_READ, needed.flags);
         assertEquals(asSet(expectedGrant), needed.uris);
     }

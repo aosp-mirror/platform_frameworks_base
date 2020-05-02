@@ -44,6 +44,9 @@ public final class InlinePresentationSpec implements Parcelable {
     /**
      * The extras encoding the UI style information. Defaults to {@code Bundle.Empty} in which case
      * the default system UI style will be used.
+     *
+     * <p>Note: There should be no remote objects in the bundle, all included remote objects will
+     * be removed from the bundle before transmission.</p>
      */
     @NonNull
     private final Bundle mStyle;
@@ -122,6 +125,9 @@ public final class InlinePresentationSpec implements Parcelable {
     /**
      * The extras encoding the UI style information. Defaults to {@code Bundle.Empty} in which case
      * the default system UI style will be used.
+     *
+     * <p>Note: There should be no remote objects in the bundle, all included remote objects will
+     * be removed from the bundle before transmission.</p>
      */
     @DataClass.Generated.Member
     public @NonNull Bundle getStyle() {
@@ -260,6 +266,9 @@ public final class InlinePresentationSpec implements Parcelable {
         /**
          * The extras encoding the UI style information. Defaults to {@code Bundle.Empty} in which case
          * the default system UI style will be used.
+         *
+         * <p>Note: There should be no remote objects in the bundle, all included remote objects will
+         * be removed from the bundle before transmission.</p>
          */
         @DataClass.Generated.Member
         public @NonNull Builder setStyle(@NonNull Bundle value) {
@@ -293,7 +302,7 @@ public final class InlinePresentationSpec implements Parcelable {
     }
 
     @DataClass.Generated(
-            time = 1586935491105L,
+            time = 1588109681295L,
             codegenVersion = "1.0.15",
             sourceFile = "frameworks/base/core/java/android/widget/inline/InlinePresentationSpec.java",
             inputSignatures = "private final @android.annotation.NonNull android.util.Size mMinSize\nprivate final @android.annotation.NonNull android.util.Size mMaxSize\nprivate final @android.annotation.NonNull android.os.Bundle mStyle\nprivate static @android.annotation.NonNull android.os.Bundle defaultStyle()\nprivate  boolean styleEquals(android.os.Bundle)\npublic  void filterContentTypes()\nclass InlinePresentationSpec extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genEqualsHashCode=true, genToString=true, genBuilder=true)\nclass BaseBuilder extends java.lang.Object implements []")

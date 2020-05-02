@@ -1822,22 +1822,16 @@ class Task extends WindowContainer<WindowContainer> {
         }
     }
 
-    void adjustForMinimalTaskDimensions(Rect bounds, Rect previousBounds) {
-        final Rect parentBounds = getParent() != null ? getParent().getBounds() : null;
-        if (bounds == null
-                || (bounds.isEmpty() && (parentBounds == null || parentBounds.isEmpty()))) {
-            return;
-        }
+    void adjustForMinimalTaskDimensions(@NonNull Rect bounds, @NonNull Rect previousBounds,
+            @NonNull Configuration parentConfig) {
         int minWidth = mMinWidth;
         int minHeight = mMinHeight;
         // If the task has no requested minimal size, we'd like to enforce a minimal size
         // so that the user can not render the task too small to manipulate. We don't need
         // to do this for the pinned stack as the bounds are controlled by the system.
-        if (!inPinnedWindowingMode() && getStack() != null) {
+        if (!inPinnedWindowingMode()) {
             final int defaultMinSizeDp = mRootWindowContainer.mDefaultMinSizeOfResizeableTaskDp;
-            final DisplayContent display = getDisplayContent();
-            final float density =
-                    (float) display.getConfiguration().densityDpi / DisplayMetrics.DENSITY_DEFAULT;
+            final float density = (float) parentConfig.densityDpi / DisplayMetrics.DENSITY_DEFAULT;
             final int defaultMinSize = (int) (defaultMinSizeDp * density);
 
             if (minWidth == INVALID_MIN_SIZE) {
@@ -1850,6 +1844,7 @@ class Task extends WindowContainer<WindowContainer> {
         if (bounds.isEmpty()) {
             // If inheriting parent bounds, check if parent bounds adhere to minimum size. If they
             // do, we can just skip.
+            final Rect parentBounds = parentConfig.windowConfiguration.getBounds();
             if (parentBounds.width() >= minWidth && parentBounds.height() >= minHeight) {
                 return;
             }
@@ -2444,12 +2439,13 @@ class Task extends WindowContainer<WindowContainer> {
         }
 
         if (isLeafTask()) {
-            resolveLeafOnlyOverrideConfigs(newParentConfig);
+            resolveLeafOnlyOverrideConfigs(newParentConfig, mTmpBounds /* previousBounds */);
         }
         computeConfigResourceOverrides(getResolvedOverrideConfiguration(), newParentConfig);
     }
 
-    void resolveLeafOnlyOverrideConfigs(Configuration newParentConfig) {
+    private void resolveLeafOnlyOverrideConfigs(Configuration newParentConfig,
+            Rect previousBounds) {
         int windowingMode =
                 getResolvedOverrideConfiguration().windowConfiguration.getWindowingMode();
         if (windowingMode == WINDOWING_MODE_UNDEFINED) {
@@ -2462,9 +2458,12 @@ class Task extends WindowContainer<WindowContainer> {
             computeFullscreenBounds(outOverrideBounds, null /* refActivity */,
                     newParentConfig.windowConfiguration.getBounds(),
                     newParentConfig.orientation);
+            // The bounds for fullscreen mode shouldn't be adjusted by minimal size. Otherwise if
+            // the parent or display is smaller than the size, the content may be cropped.
+            return;
         }
 
-        adjustForMinimalTaskDimensions(outOverrideBounds, mTmpBounds);
+        adjustForMinimalTaskDimensions(outOverrideBounds, previousBounds, newParentConfig);
         if (windowingMode == WINDOWING_MODE_FREEFORM) {
             // by policy, make sure the window remains within parent somewhere
             final float density =
@@ -3875,11 +3874,12 @@ class Task extends WindowContainer<WindowContainer> {
             pw.print(prefix); pw.print("mRootProcess="); pw.println(mRootProcess);
         }
         pw.print(prefix); pw.print("taskId=" + mTaskId); pw.println(" stackId=" + getRootTaskId());
-        pw.print(prefix + "mHasBeenVisible=" + getHasBeenVisible());
-        pw.print(" mResizeMode=" + ActivityInfo.resizeModeToString(mResizeMode));
-        pw.print(" mSupportsPictureInPicture=" + mSupportsPictureInPicture);
-        pw.print(" isResizeable=" + isResizeable());
-        pw.print(" lastActiveTime=" + lastActiveTime);
+        pw.print(prefix); pw.print("mHasBeenVisible="); pw.println(getHasBeenVisible());
+        pw.print(prefix); pw.print("mResizeMode=");
+        pw.print(ActivityInfo.resizeModeToString(mResizeMode));
+        pw.print(" mSupportsPictureInPicture="); pw.print(mSupportsPictureInPicture);
+        pw.print(" isResizeable="); pw.println(isResizeable());
+        pw.print(prefix); pw.print("lastActiveTime="); pw.print(lastActiveTime);
         pw.println(" (inactive for " + (getInactiveDuration() / 1000) + "s)");
     }
 

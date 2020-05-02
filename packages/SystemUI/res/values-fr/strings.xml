@@ -430,6 +430,8 @@
     <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"Enregistrement de l\'écran"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Démarrer"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Arrêter"</string>
+    <!-- no translation found for media_seamless_remote_device (177033467332920464) -->
+    <skip />
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Balayer l\'écran vers le haut pour changer d\'application"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Déplacer vers la droite pour changer rapidement d\'application"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Activer/Désactiver l\'aperçu"</string>
@@ -712,6 +714,8 @@
     <string name="notification_channel_summary_priority" msgid="7415770044553264622">"S\'affiche en haut de la section des conversations et apparaît sous forme de bulle."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Paramètres"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritaire"</string>
+    <!-- no translation found for no_shortcut (7176375126961212514) -->
+    <skip />
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Aucune bulle récente"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Les bulles récentes et ignorées s\'afficheront ici"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Impossible de modifier ces notifications."</string>
@@ -1003,6 +1007,11 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Navigation système mise à jour. Pour apporter des modifications, accédez aux paramètres."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Accédez aux paramètres pour mettre à jour la navigation système"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Mode Veille imminent"</string>
+    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"En haut de la liste des conversations"</string>
+    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Photo de profil sur l\'écran de verrouillage"</string>
+    <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Sous forme d\'info-bulle au-dessus des applications"</string>
+    <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Interrompre Ne pas déranger"</string>
+    <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"OK"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Fenêtre d\'agrandissement"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Fenêtre des commandes d\'agrandissement"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"Commandes de contrôle des appareils"</string>
@@ -1018,6 +1027,8 @@
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Sélectionnez les commandes auxquelles vous souhaitez accéder depuis le menu de démarrage"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Appuyer et faire glisser pour réorganiser les commandes"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Toutes les commandes ont été supprimées"</string>
+    <!-- no translation found for controls_favorite_toast_no_changes (7094494210840877931) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Impossible de charger toutes les commandes."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Autre"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Ajouter aux commandes de contrôle des appareils"</string>
@@ -1026,6 +1037,7 @@
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"Commandes mises à jour"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"Le code contient des lettres ou des symboles"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"Valider <xliff:g id="DEVICE">%s</xliff:g>"</string>
+    <string name="controls_pin_wrong" msgid="6162694056042164211">"Code incorrect"</string>
     <string name="controls_pin_verifying" msgid="3755045989392131746">"Validation…"</string>
     <string name="controls_pin_instructions" msgid="6363309783822475238">"Saisissez le code"</string>
     <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"Essayez un autre code PIN"</string>
@@ -1035,6 +1047,9 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Chargement des recommandations"</string>
     <string name="controls_media_close_session" msgid="9023534788828414585">"Fermer cette session multimédia"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Délai expiré, vérifier l\'appli"</string>
+    <string name="controls_error_retryable" msgid="864025882878378470">"Erreur. Nouvelle tentative…"</string>
+    <string name="controls_error_removed" msgid="6299213591234723805">"Appareil supprimé"</string>
+    <string name="controls_error_generic" msgid="352500456918362905">"Impossible de charger l\'état"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Erreur. Veuillez réessayer."</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"En cours"</string>
     <string name="controls_added_tooltip" msgid="4842812921719153085">"Appuyez de manière prolongée sur le bouton Marche/Arrêt pour afficher les nouvelles commandes"</string>

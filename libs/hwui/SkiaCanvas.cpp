@@ -790,9 +790,11 @@ void SkiaCanvas::drawLayoutOnPath(const minikin::Layout& layout, float hOffset, 
         xform[i - start].fTx = pos.x() - tan.y() * y - halfWidth * tan.x();
         xform[i - start].fTy = pos.y() + tan.x() * y - halfWidth * tan.y();
     }
-    auto* finalCanvas = this->asSkCanvas();
+
+    sk_sp<SkTextBlob> textBlob(builder.make());
+
     apply_looper(&paintCopy, [&](const SkPaint& p) {
-        finalCanvas->drawTextBlob(builder.make(), 0, 0, paintCopy);
+        mCanvas->drawTextBlob(textBlob, 0, 0, p);
     });
 }
 

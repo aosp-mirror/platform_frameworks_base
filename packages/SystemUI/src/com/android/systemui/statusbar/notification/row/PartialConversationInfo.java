@@ -17,10 +17,6 @@
 package com.android.systemui.statusbar.notification.row;
 
 import static android.app.Notification.EXTRA_IS_GROUP_CONVERSATION;
-import static android.app.NotificationManager.IMPORTANCE_LOW;
-import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
-
-import static com.android.systemui.Interpolators.FAST_OUT_SLOW_IN;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
@@ -39,10 +35,6 @@ import android.os.Parcelable;
 import android.os.RemoteException;
 import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
-import android.transition.ChangeBounds;
-import android.transition.Fade;
-import android.transition.TransitionManager;
-import android.transition.TransitionSet;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
@@ -51,7 +43,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
@@ -108,6 +99,7 @@ public class PartialConversationInfo extends LinearLayout implements
     public void bindNotification(
             PackageManager pm,
             INotificationManager iNotificationManager,
+            ChannelEditorDialogController channelEditorDialogController,
             String pkg,
             NotificationChannel notificationChannel,
             Set<NotificationChannel> uniqueChannelsInRow,
@@ -127,7 +119,7 @@ public class PartialConversationInfo extends LinearLayout implements
         mDelegatePkg = mSbn.getOpPkg();
         mIsDeviceProvisioned = isDeviceProvisioned;
         mIsNonBlockable = isNonBlockable;
-        mChannelEditorDialogController = Dependency.get(ChannelEditorDialogController.class);
+        mChannelEditorDialogController = channelEditorDialogController;
         mUniqueChannelsInRow = uniqueChannelsInRow;
 
         bindHeader();

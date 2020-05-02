@@ -36,12 +36,14 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.runner.RunWith
 import org.junit.Test
+import org.mockito.Answers
 import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mock
+import org.mockito.Mockito
+import org.mockito.Mockito.`when`
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 
 @SmallTest
@@ -59,11 +61,16 @@ class ChannelEditorDialogControllerTest : SysuiTestCase() {
 
     @Mock
     private lateinit var mockNoMan: INotificationManager
+    @Mock(answer = Answers.RETURNS_SELF)
+    private lateinit var dialogBuilder: ChannelEditorDialog.Builder
+    @Mock
+    private lateinit var dialog: ChannelEditorDialog
 
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
-        controller = ChannelEditorDialogController(mContext, mockNoMan)
+        `when`(dialogBuilder.build()).thenReturn(dialog)
+        controller = ChannelEditorDialogController(mContext, mockNoMan, dialogBuilder)
 
         channel1 = NotificationChannel(TEST_CHANNEL, TEST_CHANNEL_NAME, IMPORTANCE_DEFAULT)
         channel2 = NotificationChannel(TEST_CHANNEL2, TEST_CHANNEL_NAME2, IMPORTANCE_DEFAULT)
@@ -86,7 +93,7 @@ class ChannelEditorDialogControllerTest : SysuiTestCase() {
         controller.prepareDialogForApp(TEST_APP_NAME, TEST_PACKAGE_NAME, TEST_UID,
                 setOf(channel1, channel2), appIcon, clickListener)
 
-        assertEquals(2, controller.providedChannels.size)
+        assertEquals(2, controller.paddedChannels.size)
     }
 
     @Test
@@ -97,7 +104,7 @@ class ChannelEditorDialogControllerTest : SysuiTestCase() {
                 setOf(channelDefault), appIcon, clickListener)
 
         assertEquals("No channels should be shown when there is only the miscellaneous channel",
-                0, controller.providedChannels.size)
+                0, controller.paddedChannels.size)
     }
 
     @Test
@@ -119,7 +126,7 @@ class ChannelEditorDialogControllerTest : SysuiTestCase() {
                 setOf(channel1), appIcon, clickListener)
 
         assertEquals("ChannelEditorDialog should fetch enough channels to show 4",
-                4, controller.providedChannels.size)
+                4, controller.paddedChannels.size)
     }
 
     @Test
@@ -147,7 +154,7 @@ class ChannelEditorDialogControllerTest : SysuiTestCase() {
         controller.prepareDialogForApp(TEST_APP_NAME, TEST_PACKAGE_NAME, TEST_UID,
                 setOf(channel1, channel2), appIcon, clickListener)
 
-        controller.appNotificationsEnabled = false
+        controller.proposeSetAppNotificationsEnabled(false)
         controller.apply()
 
         verify(mockNoMan, times(1)).setNotificationsEnabledForPackage(
@@ -162,7 +169,7 @@ class ChannelEditorDialogControllerTest : SysuiTestCase() {
 
         controller.prepareDialogForApp(TEST_APP_NAME, TEST_PACKAGE_NAME, TEST_UID,
                 setOf(channel1, channel2), appIcon, clickListener)
-        controller.appNotificationsEnabled = true
+        controller.proposeSetAppNotificationsEnabled(true)
         controller.apply()
 
         verify(mockNoMan, times(1)).setNotificationsEnabledForPackage(
@@ -171,12 +178,52 @@ class ChannelEditorDialogControllerTest : SysuiTestCase() {
 
     @Test
     fun testSettingsClickListenerNull_noCrash() {
+        // GIVEN editor dialog
         group.channels = listOf(channel1, channel2)
         controller.prepareDialogForApp(TEST_APP_NAME, TEST_PACKAGE_NAME, TEST_UID,
                 setOf(channel1, channel2), appIcon, null)
 
+        // WHEN user taps settings
         // Pass in any old view, it should never actually be used
         controller.launchSettings(View(context))
+
+        // THEN no crash
+    }
+
+    @Test
+    fun testDoneButtonSaysDone_noChanges() {
+        // GIVEN the editor dialog with no changes
+        `when`(dialogBuilder.build()).thenReturn(dialog)
+
+        group.channels = listOf(channel1, channel2)
+        controller.prepareDialogForApp(TEST_APP_NAME, TEST_PACKAGE_NAME, TEST_UID,
+                setOf(channel1, channel2), appIcon, null)
+
+        // WHEN the user proposes a change
+        controller.proposeEditForChannel(channel1, IMPORTANCE_NONE)
+
+        // THEN the "done" button has been updated to "apply"
+        verify(dialog).updateDoneButtonText(true /* hasChanges */)
+    }
+
+    @Test
+    fun testDoneButtonGoesBackToNormal_changeThenNoChange() {
+        val inOrderDialog = Mockito.inOrder(dialog)
+        // GIVEN the editor dialog with no changes
+        `when`(dialogBuilder.build()).thenReturn(dialog)
+
+        group.channels = listOf(channel1, channel2)
+        controller.prepareDialogForApp(TEST_APP_NAME, TEST_PACKAGE_NAME, TEST_UID,
+                setOf(channel1, channel2), appIcon, null)
+
+        // WHEN the user proposes a change
+        controller.proposeEditForChannel(channel1, IMPORTANCE_NONE)
+        // and WHEN the user sets the importance back to its original value
+        controller.proposeEditForChannel(channel1, channel1.importance)
+
+        // THEN the "done" button has been changed back to done
+        inOrderDialog.verify(dialog, times(1)).updateDoneButtonText(eq(true))
+        inOrderDialog.verify(dialog, times(1)).updateDoneButtonText(eq(false))
     }
 
     private val clickListener = object : NotificationInfo.OnSettingsClickListener {

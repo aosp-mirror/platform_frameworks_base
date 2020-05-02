@@ -134,6 +134,7 @@ stubs_defaults {
         "framework-wifi-util-lib",
     ],
     sdk_version: "module_current",
+    dist: { dest: "framework-wifi.txt" },
 }
 
 droidstubs {
@@ -172,6 +173,7 @@ java_library {
     name: "framework-wifi-stubs-publicapi",
     srcs: [":framework-wifi-stubs-srcs-publicapi"],
     defaults: ["framework-module-stubs-lib-defaults-publicapi"],
+    dist: { dest: "framework-wifi.jar" },
 }
 
 java_library {
@@ -179,6 +181,7 @@ java_library {
     srcs: [":framework-wifi-stubs-srcs-systemapi"],
     libs: ["framework-annotations-lib"],
     defaults: ["framework-module-stubs-lib-defaults-systemapi"],
+    dist: { dest: "framework-wifi.jar" },
 }
 
 java_library {
@@ -186,6 +189,7 @@ java_library {
     srcs: [":framework-wifi-stubs-srcs-module_libs_api"],
     libs: ["framework-annotations-lib"],
     defaults: ["framework-module-stubs-lib-defaults-module_libs_api"],
+    dist: { dest: "framework-wifi.jar" },
 }
 
 // defaults for tests that need to build against framework-wifi's @hide APIs

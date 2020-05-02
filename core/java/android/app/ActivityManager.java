@@ -1720,31 +1720,50 @@ public class ActivityManager {
                     configuration.windowConfiguration.getActivityType());
 
             pw.println(); pw.print("   ");
-            pw.print(" id=" + persistentId);
-            pw.print(" stackId=" + stackId);
-            pw.print(" userId=" + userId);
-            pw.print(" hasTask=" + (id != -1));
-            pw.print(" lastActiveTime=" + lastActiveTime);
-            pw.println(); pw.print("   ");
-            pw.print(" baseIntent=" + baseIntent);
-            pw.println(); pw.print("   ");
-            pw.print(" isExcluded="
-                    + ((baseIntent.getFlags() & FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS) != 0));
-            pw.print(" activityType=" + activityType);
-            pw.print(" windowingMode=" + windowingMode);
-            pw.print(" supportsSplitScreenMultiWindow=" + supportsSplitScreenMultiWindow);
+            pw.print(" id="); pw.print(persistentId);
+            pw.print(" stackId="); pw.print(stackId);
+            pw.print(" userId="); pw.print(userId);
+            pw.print(" hasTask="); pw.print((id != -1));
+            pw.print(" lastActiveTime="); pw.println(lastActiveTime);
+            pw.print("   "); pw.print(" baseIntent="); pw.println(baseIntent);
+            if (baseActivity != null) {
+                pw.print("   "); pw.print(" baseActivity=");
+                pw.println(baseActivity.toShortString());
+            }
+            if (topActivity != null) {
+                pw.print("   "); pw.print(" topActivity="); pw.println(topActivity.toShortString());
+            }
+            if (origActivity != null) {
+                pw.print("   "); pw.print(" origActivity=");
+                pw.println(origActivity.toShortString());
+            }
+            if (realActivity != null) {
+                pw.print("   "); pw.print(" realActivity=");
+                pw.println(realActivity.toShortString());
+            }
+            pw.print("   ");
+            pw.print(" isExcluded=");
+            pw.print(((baseIntent.getFlags() & FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS) != 0));
+            pw.print(" activityType="); pw.print(activityType);
+            pw.print(" windowingMode="); pw.print(windowingMode);
+            pw.print(" supportsSplitScreenMultiWindow=");
+            pw.println(supportsSplitScreenMultiWindow);
             if (taskDescription != null) {
-                pw.println(); pw.print("   ");
+                pw.print("   ");
                 final ActivityManager.TaskDescription td = taskDescription;
                 pw.print(" taskDescription {");
-                pw.print(" colorBackground=#" + Integer.toHexString(td.getBackgroundColor()));
-                pw.print(" colorPrimary=#" + Integer.toHexString(td.getPrimaryColor()));
-                pw.print(" iconRes=" + td.getIconResourcePackage() + "/" + td.getIconResource());
-                pw.print(" iconBitmap=" + (td.getIconFilename() != null
-                        || td.getInMemoryIcon() != null));
-                pw.print(" resizeMode=" + ActivityInfo.resizeModeToString(td.getResizeMode()));
-                pw.print(" minWidth=" + td.getMinWidth());
-                pw.print(" minHeight=" + td.getMinHeight());
+                pw.print(" colorBackground=#");
+                pw.print(Integer.toHexString(td.getBackgroundColor()));
+                pw.print(" colorPrimary=#");
+                pw.print(Integer.toHexString(td.getPrimaryColor()));
+                pw.print(" iconRes=");
+                pw.print(td.getIconResourcePackage() + "/" + td.getIconResource());
+                pw.print(" iconBitmap=");
+                pw.print(td.getIconFilename() != null || td.getInMemoryIcon() != null);
+                pw.print(" resizeMode=");
+                pw.print(ActivityInfo.resizeModeToString(td.getResizeMode()));
+                pw.print(" minWidth="); pw.print(td.getMinWidth());
+                pw.print(" minHeight="); pw.print(td.getMinHeight());
                 pw.println(" }");
             }
         }
@@ -2442,8 +2461,7 @@ public class ActivityManager {
      * has access to it.
      *
      * @see ActivityOptions#setLaunchDisplayId(int)
-     * @see android.view.Display.FLAG_PRIVATE
-     * @see android.view.Display.TYPE_VIRTUAL
+     * @see android.view.Display#FLAG_PRIVATE
      *
      * @param context Source context, from which an activity will be started.
      * @param displayId Target display id.

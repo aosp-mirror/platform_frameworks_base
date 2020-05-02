@@ -16,21 +16,30 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.os.Process.INVALID_UID;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
+import static android.window.DisplayAreaOrganizer.FEATURE_VENDOR_FIRST;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.pm.PackageManager;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
@@ -40,6 +49,10 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 
+/**
+ * Build/Install/Run:
+ *  atest WmTests:WindowManagerServiceTests
+ */
 @SmallTest
 @Presubmit
 @RunWith(WindowTestRunner.class)
@@ -104,5 +117,71 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         when(windowToken.getOwnerUid()).thenReturn(INVALID_UID);
 
         mWm.removeWindowToken(token, mDisplayContent.getDisplayId());
+    }
+
+    @Test
+    public void testTaskFocusChange_stackNotHomeType_focusChanges() throws RemoteException {
+        DisplayContent display = createNewDisplay();
+        // Current focused window
+        ActivityStack focusedStack = createTaskStackOnDisplay(
+                WINDOWING_MODE_FREEFORM, ACTIVITY_TYPE_STANDARD, display);
+        Task focusedTask = createTaskInStack(focusedStack, 0 /* userId */);
+        WindowState focusedWindow = createAppWindow(focusedTask, TYPE_APPLICATION, "App Window");
+        mDisplayContent.mCurrentFocus = focusedWindow;
+        // Tapped task
+        ActivityStack tappedStack = createTaskStackOnDisplay(
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, display);
+        Task tappedTask = createTaskInStack(tappedStack, 0 /* userId */);
+        spyOn(mWm.mActivityTaskManager);
+
+        mWm.handleTaskFocusChange(tappedTask);
+
+        verify(mWm.mActivityTaskManager).setFocusedTask(tappedTask.mTaskId);
+    }
+
+    @Test
+    public void testTaskFocusChange_stackHomeTypeWithSameTaskDisplayArea_focusDoesNotChange()
+            throws RemoteException {
+        DisplayContent display = createNewDisplay();
+        // Current focused window
+        ActivityStack focusedStack = createTaskStackOnDisplay(
+                WINDOWING_MODE_FREEFORM, ACTIVITY_TYPE_STANDARD, display);
+        Task focusedTask = createTaskInStack(focusedStack, 0 /* userId */);
+        WindowState focusedWindow = createAppWindow(focusedTask, TYPE_APPLICATION, "App Window");
+        mDisplayContent.mCurrentFocus = focusedWindow;
+        // Tapped home task
+        ActivityStack tappedStack = createTaskStackOnDisplay(
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME, display);
+        Task tappedTask = createTaskInStack(tappedStack, 0 /* userId */);
+        spyOn(mWm.mActivityTaskManager);
+
+        mWm.handleTaskFocusChange(tappedTask);
+
+        verify(mWm.mActivityTaskManager, never()).setFocusedTask(tappedTask.mTaskId);
+    }
+
+    @Test
+    public void testTaskFocusChange_stackHomeTypeWithDifferentTaskDisplayArea_focusChanges()
+            throws RemoteException {
+        DisplayContent display = createNewDisplay();
+        TaskDisplayArea secondTda =
+                new TaskDisplayArea(display, mWm, "Tapped TDA", FEATURE_VENDOR_FIRST);
+        display.mDisplayAreaPolicy.mRoot.addChild(secondTda, 1);
+        display.mDisplayAreaPolicy.mTaskDisplayAreas.add(secondTda);
+        // Current focused window
+        ActivityStack focusedStack = createTaskStackOnDisplay(
+                WINDOWING_MODE_FREEFORM, ACTIVITY_TYPE_STANDARD, display);
+        Task focusedTask = createTaskInStack(focusedStack, 0 /* userId */);
+        WindowState focusedWindow = createAppWindow(focusedTask, TYPE_APPLICATION, "App Window");
+        mDisplayContent.mCurrentFocus = focusedWindow;
+        // Tapped home task on another task display area
+        ActivityStack tappedStack = createTaskStackOnTaskDisplayArea(
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME, secondTda);
+        Task tappedTask = createTaskInStack(tappedStack, 0 /* userId */);
+        spyOn(mWm.mActivityTaskManager);
+
+        mWm.handleTaskFocusChange(tappedTask);
+
+        verify(mWm.mActivityTaskManager).setFocusedTask(tappedTask.mTaskId);
     }
 }

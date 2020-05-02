@@ -28,6 +28,7 @@ import com.android.systemui.bubbles.dagger.BubbleModule;
 import com.android.systemui.globalactions.GlobalActionsComponent;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.dagger.KeyguardModule;
+import com.android.systemui.onehanded.OneHandedUI;
 import com.android.systemui.pip.PipUI;
 import com.android.systemui.power.PowerUI;
 import com.android.systemui.recents.Recents;
@@ -95,6 +96,12 @@ public abstract class SystemUIBinder {
     @IntoMap
     @ClassKey(LatencyTester.class)
     public abstract SystemUI bindLatencyTester(LatencyTester sysui);
+
+    /** Inject into OneHandedUI. */
+    @Binds
+    @IntoMap
+    @ClassKey(OneHandedUI.class)
+    public abstract SystemUI bindOneHandedUI(OneHandedUI sysui);
 
     /** Inject into PipUI. */
     @Binds

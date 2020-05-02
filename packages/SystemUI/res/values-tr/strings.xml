@@ -430,6 +430,8 @@
     <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"Ekran Kaydı"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Başlat"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Durdur"</string>
+    <!-- no translation found for media_seamless_remote_device (177033467332920464) -->
+    <skip />
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Uygulamalar arasında geçiş yapmak için yukarı kaydırın"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Uygulamaları hızlıca değiştirmek için sağa kaydırın"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Genel bakışı aç/kapat"</string>
@@ -712,6 +714,8 @@
     <string name="notification_channel_summary_priority" msgid="7415770044553264622">"Görüşme bölümünün üstünde baloncuk olarak gösterilir."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Ayarlar"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Öncelik"</string>
+    <!-- no translation found for no_shortcut (7176375126961212514) -->
+    <skip />
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Son kapatılan baloncuk yok"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Son baloncuklar ve kapattığınız baloncuklar burada görünür"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Bu bildirimler değiştirilemez."</string>
@@ -1003,6 +1007,11 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Sistemde gezinme yöntemi güncellendi. Değişiklik yapmak için Ayarlar\'a gidin."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Sistemde gezinme yöntemini güncellemek için Ayarlar\'a gidin"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Beklemeye alınıyor"</string>
+    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Görüşme bölümünün üstünde gösterilir"</string>
+    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Kilit ekranında profil resmi gösterilir"</string>
+    <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Uygulamaların üzerinde kayan balon olarak görünür"</string>
+    <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Rahatsız Etmeyin\'i keser"</string>
+    <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"Anladım"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Büyütme Penceresi"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Büyütme Penceresi Kontrolleri"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"Cihaz denetimleri"</string>
@@ -1018,6 +1027,8 @@
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Güç menüsünden erişmek için denetimleri seçin"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Kontrolleri yeniden düzenlemek için basılı tutup sürükleyin"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Tüm kontroller kaldırıldı"</string>
+    <!-- no translation found for controls_favorite_toast_no_changes (7094494210840877931) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Tüm kontrollerin listesi yüklenemedi."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Diğer"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Cihaz denetimlerine ekle"</string>
@@ -1026,6 +1037,7 @@
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"Denetimler güncellendi"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"PIN, harf veya simge içerir"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"<xliff:g id="DEVICE">%s</xliff:g> cihazını doğrulayın"</string>
+    <string name="controls_pin_wrong" msgid="6162694056042164211">"Yanlış PIN"</string>
     <string name="controls_pin_verifying" msgid="3755045989392131746">"Doğrulanıyor…"</string>
     <string name="controls_pin_instructions" msgid="6363309783822475238">"PIN girin"</string>
     <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"Başka bir PIN deneyin"</string>
@@ -1035,6 +1047,9 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Öneriler yükleniyor"</string>
     <string name="controls_media_close_session" msgid="9023534788828414585">"Bu medya oturumunu kapat"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Devre dışı, uygulamaya bakın"</string>
+    <string name="controls_error_retryable" msgid="864025882878378470">"Hata, yeniden deneniyor…"</string>
+    <string name="controls_error_removed" msgid="6299213591234723805">"Cihaz kaldırıldı"</string>
+    <string name="controls_error_generic" msgid="352500456918362905">"Durum yüklenemiyor"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Hata, yeniden deneyin"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"Devam ediyor"</string>
     <string name="controls_added_tooltip" msgid="4842812921719153085">"Yeni kontrolleri görmek için Güç düğmesini basılı tutun"</string>

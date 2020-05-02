@@ -438,6 +438,8 @@
     <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"تسجيل الشاشة"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"بدء"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"إيقاف"</string>
+    <!-- no translation found for media_seamless_remote_device (177033467332920464) -->
+    <skip />
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"مرّر سريعًا لأعلى لتبديل التطبيقات"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"اسحب لليسار للتبديل السريع بين التطبيقات"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"تبديل \"النظرة العامة\""</string>
@@ -724,6 +726,8 @@
     <string name="notification_channel_summary_priority" msgid="7415770044553264622">"تظهر كفقاعة محادثة في أعلى قسم المحادثات"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"الإعدادات"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"الأولوية"</string>
+    <!-- no translation found for no_shortcut (7176375126961212514) -->
+    <skip />
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"ليس هناك فقاعات محادثات"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"ستظهر هنا أحدث فقاعات المحادثات وفقاعات المحادثات التي تم إغلاقها."</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"يتعذّر تعديل هذه الإشعارات."</string>
@@ -1023,6 +1027,11 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"تم تحديث التنقل داخل النظام. لإجراء التغييرات، يُرجى الانتقال إلى \"الإعدادات\"."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"الانتقال إلى \"الإعدادات\" لتعديل التنقل داخل النظام"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"وضع الاستعداد"</string>
+    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"تظهر في أعلى قسم المحادثات"</string>
+    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"تظهر صورة الملف الشخصي على شاشة القفل"</string>
+    <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"تظهر كفقاعة عائمة فوق التطبيقات"</string>
+    <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"لا تتقيّد بميزة \"عدم الإزعاج\""</string>
+    <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"حسنًا"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"نافذة التكبير"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"عناصر التحكم في نافذة التكبير"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"أدوات التحكم بالجهاز"</string>
@@ -1042,6 +1051,8 @@
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"اختيار عناصر التحكّم التي تريد الوصول إليها من قائمة التشغيل"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"اضغط مع الاستمرار واسحب لإعادة ترتيب عناصر التحكّم."</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"تمت إزالة كل عناصر التحكّم."</string>
+    <!-- no translation found for controls_favorite_toast_no_changes (7094494210840877931) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"تعذّر تحميل قائمة كل عناصر التحكّم."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"غير ذلك"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"إضافة إلى أدوات التحكم بالجهاز"</string>
@@ -1050,6 +1061,7 @@
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"تم تعديل عناصر التحكّم."</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"يشتمل رقم التعريف الشخصي على أحرف أو رموز."</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"إثبات ملكية <xliff:g id="DEVICE">%s</xliff:g>"</string>
+    <string name="controls_pin_wrong" msgid="6162694056042164211">"رقم تعريف شخصي خاطئ"</string>
     <string name="controls_pin_verifying" msgid="3755045989392131746">"جارٍ التحقّق…"</string>
     <string name="controls_pin_instructions" msgid="6363309783822475238">"إدخال رقم التعريف الشخصي"</string>
     <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"حاوِل إدخال رقم تعريف شخصي آخر"</string>
@@ -1059,6 +1071,9 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"جارٍ تحميل الاقتراحات"</string>
     <string name="controls_media_close_session" msgid="9023534788828414585">"إغلاق جلسة تشغيل الوسائط هذه"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"غير نشط، تحقّق من التطبيق."</string>
+    <string name="controls_error_retryable" msgid="864025882878378470">"حدث خطأ، جارٍ إعادة المحاولة…"</string>
+    <string name="controls_error_removed" msgid="6299213591234723805">"تمت إزالة الجهاز."</string>
+    <string name="controls_error_generic" msgid="352500456918362905">"يتعذّر تحميل الحالة."</string>
     <string name="controls_error_failed" msgid="960228639198558525">"حدث خطأ، يُرجى إعادة المحاولة."</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"قيد التقدم"</string>
     <string name="controls_added_tooltip" msgid="4842812921719153085">"اضغط مع الاستمرار على زر التشغيل لعرض عناصر التحكّم الجديدة."</string>

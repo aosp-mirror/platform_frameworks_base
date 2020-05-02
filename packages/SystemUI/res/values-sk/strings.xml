@@ -434,6 +434,8 @@
     <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"Záznam obrazovky"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Začať"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Ukončiť"</string>
+    <!-- no translation found for media_seamless_remote_device (177033467332920464) -->
+    <skip />
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Potiahnutím nahor prepnete aplikácie"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Presunutím doprava rýchlo prepnete aplikácie"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Prepnúť prehľad"</string>
@@ -718,6 +720,8 @@
     <string name="notification_channel_summary_priority" msgid="7415770044553264622">"Zobrazuje sa v hornej časti konverzácie ako bublina."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Nastavenia"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Priorita"</string>
+    <!-- no translation found for no_shortcut (7176375126961212514) -->
+    <skip />
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Žiadne nedávne bubliny"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Tu sa budú zobrazovať nedávne a zavreté bubliny"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Tieto upozornenia sa nedajú upraviť."</string>
@@ -1013,6 +1017,11 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Navigácia v systéme bola aktualizovaná. Ak chcete vykonať zmeny, prejdite do Nastavení."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Prejdite do Nastavení a aktualizujte navigáciu v systéme"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Pohotovostný režim"</string>
+    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Zobrazovať v hornej sekcii konverzácie"</string>
+    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Zobrazovať profilovú fotku na uzamknutej obrazovke"</string>
+    <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Zobrazovať ako plávajúce bubliny nad aplikáciami"</string>
+    <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Prerušovať režim bez vyrušení"</string>
+    <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"Dobre"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Okno priblíženia"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Ovládacie prvky okna priblíženia"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"Ovládanie zariadenia"</string>
@@ -1030,6 +1039,8 @@
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Vyberte si ovládacie prvky, ku ktorým chcete mať prístup v ponuke vypínača"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Ovládacie prvky môžete usporiadať pridržaním a presunutím"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Všetky ovládacie prvky boli odstránené"</string>
+    <!-- no translation found for controls_favorite_toast_no_changes (7094494210840877931) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Zoznam všetkých ovl. prvkov sa nepodarilo načítať."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Iné"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Pridanie do ovládania zariadenia"</string>
@@ -1038,6 +1049,7 @@
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"Ovládanie bolo aktualizované"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"Kód PIN obsahuje písmená alebo symboly"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"Overiť <xliff:g id="DEVICE">%s</xliff:g>"</string>
+    <string name="controls_pin_wrong" msgid="6162694056042164211">"Nesprávny PIN"</string>
     <string name="controls_pin_verifying" msgid="3755045989392131746">"Overuje sa…"</string>
     <string name="controls_pin_instructions" msgid="6363309783822475238">"Zadajte PIN"</string>
     <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"Vyskúšajte iný kód PIN"</string>
@@ -1047,6 +1059,9 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Načítavajú sa odporúčania"</string>
     <string name="controls_media_close_session" msgid="9023534788828414585">"Zavrieť túto reláciu média"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Neaktívne, preverte aplikáciu"</string>
+    <string name="controls_error_retryable" msgid="864025882878378470">"Chyba, skúša sa znova…"</string>
+    <string name="controls_error_removed" msgid="6299213591234723805">"Zariadenie je odstránené"</string>
+    <string name="controls_error_generic" msgid="352500456918362905">"Stav sa nepodarilo načítať"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Chyba, skúste to znova"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"Prebieha"</string>
     <string name="controls_added_tooltip" msgid="4842812921719153085">"Pridržaním vypínača zobrazíte nové ovládacie prvky"</string>

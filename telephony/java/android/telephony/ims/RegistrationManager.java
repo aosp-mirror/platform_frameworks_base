@@ -270,7 +270,7 @@ public interface RegistrationManager {
      * inactive subscription, it will result in a no-op.
      *
      * @param c The {@link RegistrationCallback} to be removed.
-     * @see SubscriptionManager.OnSubscriptionsChangedListener
+     * @see android.telephony.SubscriptionManager.OnSubscriptionsChangedListener
      * @see #registerImsRegistrationCallback(Executor, RegistrationCallback)
      */
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)

@@ -80,9 +80,9 @@ import android.os.Looper;
  * <p>An {@code AudioFocusRequest} instance always contains one of the four types of requests
  * explained above. It is passed when building an {@code AudioFocusRequest} instance with its
  * builder in the {@link Builder} constructor
- * {@link AudioFocusRequest.Builder#AudioFocusRequest.Builder(int)}, or
+ * {@link AudioFocusRequest.Builder#Builder(int)}, or
  * with {@link AudioFocusRequest.Builder#setFocusGain(int)} after copying an existing instance with
- * {@link AudioFocusRequest.Builder#AudioFocusRequest.Builder(AudioFocusRequest)}.
+ * {@link AudioFocusRequest.Builder#Builder(AudioFocusRequest)}.
  *
  * <h3>Qualifying your focus request</h3>
  * <h4>Use case requiring a focus request</h4>

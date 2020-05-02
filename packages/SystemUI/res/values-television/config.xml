@@ -41,5 +41,6 @@
         <item>com.android.systemui.SizeCompatModeActivityController</item>
         <item>com.android.systemui.statusbar.notification.InstantAppNotifier</item>
         <item>com.android.systemui.toast.ToastUI</item>
+        <item>com.android.systemui.onehanded.OneHandedUI</item>
     </string-array>
 </resources>

@@ -432,6 +432,7 @@
     <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"Snimanje ekrana"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Započnite"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Zaustavite"</string>
+    <string name="media_seamless_remote_device" msgid="177033467332920464">"Uređaj"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Prevucite prema gore za promjenu aplikacije"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Prevucite udesno za brzu promjenu aplikacija"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Pregled uključivanja/isključivanja"</string>
@@ -717,6 +718,7 @@
     <string name="notification_channel_summary_priority" msgid="7415770044553264622">"Prikazuje se na vrhu odjeljka za razgovor u vidu oblačića."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Postavke"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritet"</string>
+    <string name="no_shortcut" msgid="7176375126961212514">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> ne podržava postavke karakteristične za razgovor"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Nema nedavnih oblačića"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Nedavni i odbačeni oblačići će se pojaviti ovdje"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Ta obavještenja se ne mogu izmijeniti."</string>
@@ -1010,6 +1012,11 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Navigiranje sistemom je ažurirano. Da izvršite promjene, idite u Postavke."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Idite u Postavke da ažurirate navigiranje sistemom"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Stanje mirovanja"</string>
+    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Prikazuje se iznad odjeljka za razgovor"</string>
+    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Prikazuje sliku profila na zaključanom ekranu"</string>
+    <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Izgleda kao plutajući oblačić iznad aplikacija"</string>
+    <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Prekida način rada Ne ometaj"</string>
+    <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"Razumijem"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Prozor za uvećavanje"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Kontrole prozora za uvećavanje"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"Kontrole uređaja"</string>
@@ -1026,6 +1033,8 @@
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Izaberite kontrole za pristup iz menija napajanja"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Držite i prevucite da preuredite kontrole"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Sve kontrole su uklonjene"</string>
+    <!-- no translation found for controls_favorite_toast_no_changes (7094494210840877931) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Učitavanje liste svih kontrola nije uspjelo."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Drugo"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Dodajte u kontrole uređaja"</string>
@@ -1034,6 +1043,7 @@
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"Kontrole su ažurirane"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"PIN sadrži slova ili simbole"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"Potvrdite <xliff:g id="DEVICE">%s</xliff:g>"</string>
+    <string name="controls_pin_wrong" msgid="6162694056042164211">"Pogrešan PIN"</string>
     <string name="controls_pin_verifying" msgid="3755045989392131746">"Potvrđivanje…"</string>
     <string name="controls_pin_instructions" msgid="6363309783822475238">"Unesite PIN"</string>
     <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"Pokušajte s drugim PIN-om"</string>
@@ -1043,6 +1053,9 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Učitavanje preporuka"</string>
     <string name="controls_media_close_session" msgid="9023534788828414585">"Zatvori ovu medijsku sesiju"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Neaktivno, vidite aplikaciju"</string>
+    <string name="controls_error_retryable" msgid="864025882878378470">"Greška, ponovni pokušaj…"</string>
+    <string name="controls_error_removed" msgid="6299213591234723805">"Uređaj je uklonjen"</string>
+    <string name="controls_error_generic" msgid="352500456918362905">"Nije moguće učitati status"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Greška, pokušajte ponovo"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"U toku"</string>
     <string name="controls_added_tooltip" msgid="4842812921719153085">"Zadržite dugme za uključivanje da vidite nove kontrole"</string>

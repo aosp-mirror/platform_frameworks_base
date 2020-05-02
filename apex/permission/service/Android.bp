@@ -41,12 +41,14 @@ droidstubs {
     name: "service-permission-stubs-srcs",
     srcs: [ ":service-permission-sources" ],
     defaults: ["service-module-stubs-srcs-defaults"],
-    visibility: ["//visibility:private"]
+    visibility: ["//visibility:private"],
+    dist: { dest: "service-permission.txt" },
 }
 
 java_library {
     name: "service-permission-stubs",
     srcs: [":service-permission-stubs-srcs"],
     defaults: ["service-module-stubs-defaults"],
-    visibility: ["//frameworks/base/services/core"]
+    visibility: ["//frameworks/base/services/core"],
+    dist: { dest: "service-permission.jar" },
 }

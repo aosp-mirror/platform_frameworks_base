@@ -434,6 +434,8 @@
     <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"Ekrano įrašas"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Pradėti"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Stabdyti"</string>
+    <!-- no translation found for media_seamless_remote_device (177033467332920464) -->
+    <skip />
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Perbraukite aukštyn, kad perjungtumėte programas"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Vilkite į dešinę, kad greitai perjungtumėte programas"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Perjungti apžvalgą"</string>
@@ -718,6 +720,8 @@
     <string name="notification_channel_summary_priority" msgid="7415770044553264622">"Rodoma pokalbio skilties viršuje kaip burbulas."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Nustatymai"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritetas"</string>
+    <!-- no translation found for no_shortcut (7176375126961212514) -->
+    <skip />
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Nėra naujausių burbulų"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Naujausi ir atsisakyti burbulus bus rodomi čia"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Šių pranešimų keisti negalima."</string>
@@ -1013,6 +1017,11 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Sistemos naršymo funkcijos atnaujintos. Jei norite pakeisti, eikite į skiltį „Nustatymai“."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Eikite į skiltį „Nustatymai“, kad atnaujintumėte sistemos naršymo funkcijas"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Budėjimo laikas"</string>
+    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Rodyti pokalbių skilties viršuje"</string>
+    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Rodyti profilio nuotrauką užrakinimo ekrane"</string>
+    <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Rodyti kaip slankųjį debesėlį programų viršuje"</string>
+    <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Pertraukti netrukdymo režimą"</string>
+    <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"Supratau"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Didinimo langas"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Didinimo lango valdikliai"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"Įrenginio valdikliai"</string>
@@ -1030,6 +1039,8 @@
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Pasirinkite valdiklius, kuriuos norite pasiekti įjungimo meniu"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Norėdami pertvarkyti valdiklius, vilkite laikydami nuspaudę"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Visi valdikliai pašalinti"</string>
+    <!-- no translation found for controls_favorite_toast_no_changes (7094494210840877931) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Nepavyko įkelti visų valdiklių sąrašo."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Kita"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Pridėjimas prie įrenginio valdiklių"</string>
@@ -1038,6 +1049,7 @@
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"Valdikliai atnaujinti"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"PIN kodą sudaro raidės arba simboliai"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"<xliff:g id="DEVICE">%s</xliff:g> patvirtinimas"</string>
+    <string name="controls_pin_wrong" msgid="6162694056042164211">"Netinkamas PIN kodas"</string>
     <string name="controls_pin_verifying" msgid="3755045989392131746">"Patvirtinama…"</string>
     <string name="controls_pin_instructions" msgid="6363309783822475238">"Įveskite PIN kodą"</string>
     <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"Išbandykite kitą PIN kodą"</string>
@@ -1047,6 +1059,9 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Įkeliamos rekomendacijos"</string>
     <string name="controls_media_close_session" msgid="9023534788828414585">"Uždaryti šį medijos seansą"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Neaktyvu, patikrinkite progr."</string>
+    <string name="controls_error_retryable" msgid="864025882878378470">"Klaida, bandoma iš naujo…"</string>
+    <string name="controls_error_removed" msgid="6299213591234723805">"Įrenginys pašalintas"</string>
+    <string name="controls_error_generic" msgid="352500456918362905">"Nepavyko įkelti būsenos"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Klaida, bandykite dar kartą"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"Vyksta"</string>
     <string name="controls_added_tooltip" msgid="4842812921719153085">"Jei norite peržiūrėti naujus valdiklius, laikykite paspaudę maitinimo mygtuką"</string>

@@ -104,7 +104,9 @@ class ControlsFavoritingActivity @Inject constructor(
 
         override fun onServicesUpdated(serviceInfos: List<ControlsServiceInfo>) {
             if (serviceInfos.size > 1) {
-                otherAppsButton.visibility = View.VISIBLE
+                otherAppsButton.post {
+                    otherAppsButton.visibility = View.VISIBLE
+                }
             }
         }
     }
@@ -122,7 +124,7 @@ class ControlsFavoritingActivity @Inject constructor(
         val collator = Collator.getInstance(resources.configuration.locales[0])
         comparator = compareBy(collator) { it.structureName }
         appName = intent.getCharSequenceExtra(EXTRA_APP)
-        structureExtra = intent.getCharSequenceExtra(EXTRA_STRUCTURE) ?: ""
+        structureExtra = intent.getCharSequenceExtra(EXTRA_STRUCTURE)
         component = intent.getParcelableExtra<ComponentName>(Intent.EXTRA_COMPONENT_NAME)
         fromProviderSelector = intent.getBooleanExtra(EXTRA_FROM_PROVIDER_SELECTOR, false)
 
@@ -170,7 +172,7 @@ class ControlsFavoritingActivity @Inject constructor(
                     pageIndicator.setNumPages(listOfStructures.size)
                     pageIndicator.setLocation(0f)
                     pageIndicator.visibility =
-                        if (listOfStructures.size > 1) View.VISIBLE else View.GONE
+                        if (listOfStructures.size > 1) View.VISIBLE else View.INVISIBLE
 
                     ControlsAnimations.enterAnimation(pageIndicator).apply {
                         addListener(object : AnimatorListenerAdapter() {
@@ -204,7 +206,9 @@ class ControlsFavoritingActivity @Inject constructor(
                 override fun onPageSelected(position: Int) {
                     super.onPageSelected(position)
                     val name = listOfStructures[position].structureName
-                    titleView.text = if (!TextUtils.isEmpty(name)) name else appName
+                    val title = if (!TextUtils.isEmpty(name)) name else appName
+                    titleView.text = title
+                    setTitle(title)
                 }
 
                 override fun onPageScrolled(
@@ -259,7 +263,6 @@ class ControlsFavoritingActivity @Inject constructor(
 
         val title = structureExtra
             ?: (appName ?: resources.getText(R.string.controls_favorite_default_title))
-        setTitle(title)
         titleView = requireViewById<TextView>(R.id.title).apply {
             text = title
         }

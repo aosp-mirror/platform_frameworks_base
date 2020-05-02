@@ -7970,17 +7970,24 @@ public class WindowManagerService extends IWindowManager.Stub
         handleTaskFocusChange(touchedWindow.getTask());
     }
 
-    private void handleTaskFocusChange(Task task) {
+    @VisibleForTesting
+    void handleTaskFocusChange(Task task) {
         if (task == null) {
             return;
         }
 
-        final ActivityStack stack = task.getStack();
         // We ignore home stack since we don't want home stack to move to front when touched.
         // Specifically, in freeform we don't want tapping on home to cause the freeform apps to go
         // behind home. See b/117376413
-        if (stack.isActivityTypeHome()) {
-            return;
+        if (task.isActivityTypeHome()) {
+            // Only ignore home stack if the requested focus home Task is in the same
+            // TaskDisplayArea as the current focus Task.
+            TaskDisplayArea homeTda = task.getDisplayArea();
+            WindowState curFocusedWindow = getFocusedWindow();
+            if (curFocusedWindow != null && homeTda != null
+                    && curFocusedWindow.isDescendantOf(homeTda)) {
+                return;
+            }
         }
 
         try {
@@ -8023,7 +8030,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         updateInputChannel(clientChannel.getToken(), callingUid, callingPid, displayId, surface,
-                name, applicationHandle, flags);
+                name, applicationHandle, flags, null /* region */);
 
         clientChannel.transferTo(outInputChannel);
         clientChannel.dispose();
@@ -8035,7 +8042,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     private void updateInputChannel(IBinder channelToken, int callingUid, int callingPid,
             int displayId, SurfaceControl surface, String name,
-            InputApplicationHandle applicationHandle, int flags) {
+            InputApplicationHandle applicationHandle, int flags, Region region) {
         InputWindowHandle h = new InputWindowHandle(applicationHandle, displayId);
         h.token = channelToken;
         h.name = name;
@@ -8055,7 +8062,13 @@ public class WindowManagerService extends IWindowManager.Stub
 
         h.inputFeatures = 0;
 
-        h.replaceTouchableRegionWithCrop(null);
+        if (region == null) {
+            h.replaceTouchableRegionWithCrop(null);
+        } else {
+            h.touchableRegion.set(region);
+            h.replaceTouchableRegionWithCrop = false;
+            h.setTouchableRegionCrop(surface);
+        }
 
         SurfaceControl.Transaction t = mTransactionFactory.get();
         t.setInputWindowInfo(surface, h);
@@ -8069,7 +8082,7 @@ public class WindowManagerService extends IWindowManager.Stub
      * is undefined.
      */
     void updateInputChannel(IBinder channelToken, int displayId, SurfaceControl surface,
-            int flags) {
+            int flags, Region region) {
         final InputApplicationHandle applicationHandle;
         final String name;
         final EmbeddedWindowController.EmbeddedWindow win;
@@ -8084,7 +8097,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         updateInputChannel(channelToken, win.mOwnerUid, win.mOwnerPid, displayId, surface, name,
-                applicationHandle, flags);
+                applicationHandle, flags, region);
     }
 
     /** Return whether layer tracing is enabled */

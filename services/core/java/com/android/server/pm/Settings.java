@@ -3233,60 +3233,66 @@ public final class Settings {
             }
         }
 
-        // Read preferred apps from .../etc/preferred-apps directory.
-        File preferredDir = new File(Environment.getRootDirectory(), "etc/preferred-apps");
-        if (!preferredDir.exists() || !preferredDir.isDirectory()) {
-            return;
-        }
-        if (!preferredDir.canRead()) {
-            Slog.w(TAG, "Directory " + preferredDir + " cannot be read");
-            return;
-        }
+        // Read preferred apps from .../etc/preferred-apps directories.
+        int size = PackageManagerService.SYSTEM_PARTITIONS.size();
+        for (int index = 0; index < size; index++) {
+            PackageManagerService.ScanPartition partition =
+                    PackageManagerService.SYSTEM_PARTITIONS.get(index);
 
-        // Iterate over the files in the directory and scan .xml files
-        for (File f : preferredDir.listFiles()) {
-            if (!f.getPath().endsWith(".xml")) {
-                Slog.i(TAG, "Non-xml file " + f + " in " + preferredDir + " directory, ignoring");
-                continue;
-            }
-            if (!f.canRead()) {
-                Slog.w(TAG, "Preferred apps file " + f + " cannot be read");
+            File preferredDir = new File(partition.folder, "etc/preferred-apps");
+            if (!preferredDir.exists() || !preferredDir.isDirectory()) {
                 continue;
             }
 
-            if (PackageManagerService.DEBUG_PREFERRED) Log.d(TAG, "Reading default preferred " + f);
-            InputStream str = null;
-            try {
-                str = new BufferedInputStream(new FileInputStream(f));
-                XmlPullParser parser = Xml.newPullParser();
-                parser.setInput(str, null);
+            if (!preferredDir.canRead()) {
+                Slog.w(TAG, "Directory " + preferredDir + " cannot be read");
+                continue;
+            }
 
-                int type;
-                while ((type = parser.next()) != XmlPullParser.START_TAG
-                        && type != XmlPullParser.END_DOCUMENT) {
-                    ;
-                }
+            // Iterate over the files in the directory and scan .xml files
+            File[] files = preferredDir.listFiles();
+            if (ArrayUtils.isEmpty(files)) {
+                continue;
+            }
 
-                if (type != XmlPullParser.START_TAG) {
-                    Slog.w(TAG, "Preferred apps file " + f + " does not have start tag");
+            for (File f : files) {
+                if (!f.getPath().endsWith(".xml")) {
+                    Slog.i(TAG, "Non-xml file " + f + " in " + preferredDir
+                            + " directory, ignoring");
                     continue;
                 }
-                if (!"preferred-activities".equals(parser.getName())) {
-                    Slog.w(TAG, "Preferred apps file " + f
-                            + " does not start with 'preferred-activities'");
+                if (!f.canRead()) {
+                    Slog.w(TAG, "Preferred apps file " + f + " cannot be read");
                     continue;
                 }
-                readDefaultPreferredActivitiesLPw(parser, userId);
-            } catch (XmlPullParserException e) {
-                Slog.w(TAG, "Error reading apps file " + f, e);
-            } catch (IOException e) {
-                Slog.w(TAG, "Error reading apps file " + f, e);
-            } finally {
-                if (str != null) {
-                    try {
-                        str.close();
-                    } catch (IOException e) {
+                if (PackageManagerService.DEBUG_PREFERRED) {
+                    Log.d(TAG, "Reading default preferred " + f);
+                }
+
+                try (InputStream str = new BufferedInputStream(new FileInputStream(f))) {
+                    XmlPullParser parser = Xml.newPullParser();
+                    parser.setInput(str, null);
+
+                    int type;
+                    while ((type = parser.next()) != XmlPullParser.START_TAG
+                            && type != XmlPullParser.END_DOCUMENT) {
+                        ;
                     }
+
+                    if (type != XmlPullParser.START_TAG) {
+                        Slog.w(TAG, "Preferred apps file " + f + " does not have start tag");
+                        continue;
+                    }
+                    if (!"preferred-activities".equals(parser.getName())) {
+                        Slog.w(TAG, "Preferred apps file " + f
+                                + " does not start with 'preferred-activities'");
+                        continue;
+                    }
+                    readDefaultPreferredActivitiesLPw(parser, userId);
+                } catch (XmlPullParserException e) {
+                    Slog.w(TAG, "Error reading apps file " + f, e);
+                } catch (IOException e) {
+                    Slog.w(TAG, "Error reading apps file " + f, e);
                 }
             }
         }

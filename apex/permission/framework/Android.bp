@@ -46,6 +46,7 @@ stubs_defaults {
     name: "framework-permission-stubs-defaults",
     srcs: [ ":framework-permission-sources" ],
     libs: [ "framework-annotations-lib" ],
+    dist: { dest: "framework-permission.txt" },
 }
 
 droidstubs {
@@ -84,16 +85,19 @@ java_library {
     name: "framework-permission-stubs-publicapi",
     srcs: [ ":framework-permission-stubs-srcs-publicapi" ],
     defaults: ["framework-module-stubs-lib-defaults-publicapi"],
+    dist: { dest: "framework-permission.jar" },
 }
 
 java_library {
     name: "framework-permission-stubs-systemapi",
     srcs: [ ":framework-permission-stubs-srcs-systemapi" ],
     defaults: ["framework-module-stubs-lib-defaults-systemapi"],
+    dist: { dest: "framework-permission.jar" },
 }
 
 java_library {
     name: "framework-permission-stubs-module_libs_api",
     srcs: [ ":framework-permission-stubs-srcs-module_libs_api" ],
     defaults: ["framework-module-stubs-lib-defaults-module_libs_api"],
+    dist: { dest: "framework-permission.jar" },
 }

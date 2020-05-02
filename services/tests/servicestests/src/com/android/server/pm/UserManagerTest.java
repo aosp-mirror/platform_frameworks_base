@@ -802,6 +802,7 @@ public final class UserManagerTest {
 
     @Test
     public void testCreateProfile_withContextUserId() throws Exception {
+        assumeManagedUsersSupported();
         final int primaryUserId = mUserManager.getPrimaryUser().id;
 
         UserInfo userProfile = createProfileForUser("Managed 1",
@@ -820,6 +821,7 @@ public final class UserManagerTest {
 
     @Test
     public void testSetUserName_withContextUserId() throws Exception {
+        assumeManagedUsersSupported();
         final int primaryUserId = mUserManager.getPrimaryUser().id;
 
         UserInfo userInfo1 = createProfileForUser("Managed 1",
@@ -855,6 +857,7 @@ public final class UserManagerTest {
 
     @Test
     public void testGetUserIcon_withContextUserId() throws Exception {
+        assumeManagedUsersSupported();
         final int primaryUserId = mUserManager.getPrimaryUser().id;
 
         UserInfo userInfo1 = createProfileForUser("Managed 1",
@@ -975,8 +978,11 @@ public final class UserManagerTest {
     }
 
     private void assumeManagedUsersSupported() {
+        // In Automotive, if headless system user is enabled, a managed user cannot be created
+        // under a primary user.
         assumeTrue("device doesn't support managed users",
-                mPackageManager.hasSystemFeature(PackageManager.FEATURE_MANAGED_USERS));
+                mPackageManager.hasSystemFeature(PackageManager.FEATURE_MANAGED_USERS)
+                && (!isAutomotive() || !UserManager.isHeadlessSystemUserMode()));
     }
 
     private boolean isAutomotive() {
