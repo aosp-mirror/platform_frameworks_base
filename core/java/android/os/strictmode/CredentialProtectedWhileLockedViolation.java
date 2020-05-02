@@ -28,7 +28,6 @@ import android.content.Context;
  * store data needed while a user is locked under device protected storage
  * areas.
  *
- * @see Context#createCredentialProtectedStorageContext()
  * @see Context#createDeviceProtectedStorageContext()
  */
 public final class CredentialProtectedWhileLockedViolation extends Violation {
