@@ -3993,4 +3993,9 @@
   <java-symbol type="bool" name="config_assistantOnTopOfDream"/>
 
   <java-symbol type="string" name="config_overrideComponentUiPackage" />
+
+  <java-symbol type="string" name="notification_channel_network_status" />
+  <java-symbol type="string" name="notification_channel_network_alerts" />
+  <java-symbol type="string" name="notification_channel_network_available" />
+
 </resources>

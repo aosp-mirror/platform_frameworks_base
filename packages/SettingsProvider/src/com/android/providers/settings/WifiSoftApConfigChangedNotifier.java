@@ -44,7 +44,8 @@ public class WifiSoftApConfigChangedNotifier {
         // create channel, or update it if it already exists
         NotificationChannel channel = new NotificationChannel(
                 SystemNotificationChannels.NETWORK_STATUS,
-                context.getString(android.R.string.notification_channel_network_status),
+                context.getString(
+                        com.android.internal.R.string.notification_channel_network_status),
                 NotificationManager.IMPORTANCE_LOW);
         notificationManager.createNotificationChannel(channel);
 
