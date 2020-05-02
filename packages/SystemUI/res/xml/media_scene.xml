@@ -356,6 +356,7 @@
             android:id="@+id/media_progress_bar"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:alpha="0.0"
             app:layout_constraintTop_toBottomOf="@id/album_art"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="@id/view_width"
@@ -364,6 +365,7 @@
 
         <Constraint
             android:id="@+id/notification_media_progress_time"
+            android:alpha="0.0"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="35dp"

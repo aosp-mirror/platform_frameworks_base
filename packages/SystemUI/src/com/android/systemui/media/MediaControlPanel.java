@@ -36,7 +36,6 @@ import android.media.session.MediaController.PlaybackInfo;
 import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
 import android.service.media.MediaBrowserService;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -181,6 +180,7 @@ public class MediaControlPanel {
         mMediaNotifView = (MotionLayout) inflater.inflate(R.layout.qs_media_panel, parent, false);
         mBackground = mMediaNotifView.findViewById(R.id.media_background);
         mLayoutAnimationHelper = new LayoutAnimationHelper(mMediaNotifView);
+        GoneChildrenHideHelper.clipGoneChildrenOnLayout(mMediaNotifView);
         mKeyFrames = mMediaNotifView.getDefinedTransitions().get(0).getKeyFrameList();
         mLocalMediaManager = routeManager;
         mForegroundExecutor = foregroundExecutor;
@@ -255,6 +255,9 @@ public class MediaControlPanel {
 
         mController = new MediaController(mContext, mToken);
 
+        ConstraintSet expandedSet = mMediaNotifView.getConstraintSet(R.id.expanded);
+        ConstraintSet collapsedSet = mMediaNotifView.getConstraintSet(R.id.collapsed);
+
         // Try to find a browser service component for this app
         // TODO also check for a media button receiver intended for restarting (b/154127084)
         // Only check if we haven't tried yet or the session token changed
@@ -323,6 +326,8 @@ public class MediaControlPanel {
         if (mSeamless != null) {
             if (mLocalMediaManager != null) {
                 mSeamless.setVisibility(View.VISIBLE);
+                setVisibleAndAlpha(collapsedSet, R.id.media_seamless, true /*visible */);
+                setVisibleAndAlpha(expandedSet, R.id.media_seamless, true /*visible */);
                 updateDevice(mLocalMediaManager.getCurrentConnectedDevice());
                 mSeamless.setOnClickListener(v -> {
                     final Intent intent = new Intent()
@@ -344,9 +349,6 @@ public class MediaControlPanel {
             Log.d(TAG, "PlaybackInfo was null. Defaulting to local playback.");
             mIsRemotePlayback = false;
         }
-
-        ConstraintSet expandedSet = mMediaNotifView.getConstraintSet(R.id.expanded);
-        ConstraintSet collapsedSet = mMediaNotifView.getConstraintSet(R.id.collapsed);
         List<Integer> actionsWhenCollapsed = data.getActionsToShowInCompact();
         // Media controls
         int i = 0;
@@ -376,15 +378,14 @@ public class MediaControlPanel {
             });
             boolean visibleInCompat = actionsWhenCollapsed.contains(i);
             updateKeyFrameVisibility(actionId, visibleInCompat);
-            collapsedSet.setVisibility(actionId,
-                    visibleInCompat ? ConstraintSet.VISIBLE : ConstraintSet.GONE);
-            expandedSet.setVisibility(actionId, ConstraintSet.VISIBLE);
+            setVisibleAndAlpha(collapsedSet, actionId, visibleInCompat);
+            setVisibleAndAlpha(expandedSet, actionId, true /*visible */);
         }
 
         // Hide any unused buttons
         for (; i < ACTION_IDS.length; i++) {
-            expandedSet.setVisibility(ACTION_IDS[i], ConstraintSet.GONE);
-            collapsedSet.setVisibility(ACTION_IDS[i], ConstraintSet.GONE);
+            setVisibleAndAlpha(expandedSet, ACTION_IDS[i], false /*visible */);
+            setVisibleAndAlpha(collapsedSet, ACTION_IDS[i], false /*visible */);
         }
 
         // Seek Bar
@@ -604,8 +605,8 @@ public class MediaControlPanel {
         ConstraintSet expandedSet = mMediaNotifView.getConstraintSet(R.id.expanded);
         ConstraintSet collapsedSet = mMediaNotifView.getConstraintSet(R.id.collapsed);
         for (int i = 1; i < ACTION_IDS.length; i++) {
-            expandedSet.setVisibility(ACTION_IDS[i], ConstraintSet.GONE);
-            collapsedSet.setVisibility(ACTION_IDS[i], ConstraintSet.GONE);
+            setVisibleAndAlpha(expandedSet, ACTION_IDS[i], false /*visible */);
+            setVisibleAndAlpha(collapsedSet, ACTION_IDS[i], false /*visible */);
         }
 
         // Add a restart button
@@ -631,8 +632,8 @@ public class MediaControlPanel {
         });
         btn.setImageDrawable(mContext.getResources().getDrawable(R.drawable.lb_ic_play));
         btn.setImageTintList(ColorStateList.valueOf(mForegroundColor));
-        expandedSet.setVisibility(ACTION_IDS[0], ConstraintSet.VISIBLE);
-        collapsedSet.setVisibility(ACTION_IDS[0], ConstraintSet.VISIBLE);
+        setVisibleAndAlpha(expandedSet, ACTION_IDS[0], true /*visible */);
+        setVisibleAndAlpha(collapsedSet, ACTION_IDS[0], true /*visible */);
 
         mSeekBarViewModel.clearController();
         // TODO: fix guts
@@ -645,6 +646,11 @@ public class MediaControlPanel {
             options.setVisibility(View.VISIBLE);
             return true; // consumed click
         });
+    }
+
+    private void setVisibleAndAlpha(ConstraintSet set, int actionId, boolean visible) {
+        set.setVisibility(actionId, visible? ConstraintSet.VISIBLE : ConstraintSet.GONE);
+        set.setAlpha(actionId, visible ? 1.0f : 0.0f);
     }
 
     private void makeActive() {
