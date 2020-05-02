@@ -284,7 +284,8 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"顯示無線螢幕分享認證的選項"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"讓 Wi‑Fi 記錄功能升級，在 Wi‑Fi 選擇器中依每個 SSID RSSI 顯示 Wi‑Fi 詳細記錄"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"降低耗電量以及改善網路效能"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"這個切換鈕只會影響用戶端模式的 MAC 隨機化行為。\n這個模式開啟時，任何已啟用 MAC 隨機化的網路可能會在建立關聯時重新將 MAC 位址隨機化 (取決於用戶端上次中斷連線的時間)。如果裝置在 4 個小時內重新連線，就不會進行重新隨機化作業。"</string>
+    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
+    <skip />
     <string name="wifi_metered_label" msgid="8737187690304098638">"計量付費"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"非計量付費"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"記錄器緩衝區空間"</string>
@@ -373,8 +374,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"為背景應用程式顯示「應用程式無回應」對話方塊"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"顯示通知管道警告"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"當應用程式未經有效管道發布通知時，在畫面上顯示警告"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"強制執行對話通知捷徑"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"要求通知必須有永久分享捷徑支援，才能顯示在對話部分中"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"強制允許將應用程式寫入外部儲存空間"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"允許將任何應用程式寫入外部儲存空間 (無論資訊清單值為何)"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"將活動強制設為可調整大小"</string>

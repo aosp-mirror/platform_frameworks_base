@@ -284,7 +284,8 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"ताररहित प्रदर्शन प्रमाणीकरणका लागि विकल्पहरू देखाउनुहोस्"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Wi-Fi लग स्तर बढाउनुहोस्, Wi-Fi चयनकर्तामा प्रति SSID RSSI देखाइन्छ"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"ब्याट्रीको खपत कम गरी नेटवर्कको कार्यसम्पादनमा सुधार गर्दछ"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"यो टगलले क्लाइन्ट मोडमा मात्र MAC ठेगाना बदल्ने सुविधामा असर पार्न सक्छ।\nयो मोड सक्रिय हुँदा MAC बदल्ने सुविधा सक्षम पारेको कुनै पनि नेटवर्कको MAC ठेगाना पुनः बदल्न सकिन्छ। यसका लागि नेटवर्क कनेक्ट भएको हुनु पर्छ। यो कुरा क्लाइन्टले उक्त नेटवर्क पछिल्लो पटक कहिले डिस्कनेक्ट गरेको थियो भन्ने कुरामा पनि भर पर्छ। यन्त्र ४ घन्टा वा सोभन्दा कम समयमा फेरि कनेक्ट हुन्छ भने MAC ठेगाना पुनः बदलिँदैन।"</string>
+    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
+    <skip />
     <string name="wifi_metered_label" msgid="8737187690304098638">"सशुल्क वाइफाइ"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"मिटर नगरिएको"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"लगर बफर आकारहरू"</string>
@@ -373,8 +374,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"पृष्ठभूमिका एपहरूको संवादको प्रतिक्रिया नदिइरहेका एपहरू प्रदर्शन गर्नुहोस्"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"सूचना च्यानलका चेतावनी देखाउनुहोस्"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"अनुप्रयोगले कुनै मान्य च्यानल बिना सूचना पोस्ट गर्दा स्क्रिनमा चेतावनी देखाउँछ"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"कुराकानी नामक स्थानमा मान्य सर्टकटसँग पनि लिंक गरिएका सूचनाहरू मात्र देखाइयोस्"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"कुराकानी नामक स्थानमा सूचनाहरू देखिन सकून् भन्नाका खातिर ती सूचनामा सधैँ सक्रिय रहने (long-lived) सेयरिङ सर्टकट समावेश भएको हुनु पर्छ"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"बाह्यमा बल प्रयोगको अनुमति प्राप्त एपहरू"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"म्यानिफेेस्टका मानहरूको ख्याल नगरी कुनै पनि अनुप्रयोगलाई बाह्य भण्डारणमा लेख्न सकिने खाले बनाउँछ"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"आकार बदल्न योग्य हुने बनाउन गतिविधिहरूलाई बाध्यात्मक बनाउनुहोस्।"</string>

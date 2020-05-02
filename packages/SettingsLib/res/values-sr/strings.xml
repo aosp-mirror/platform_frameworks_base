@@ -284,7 +284,8 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Приказ опција за сертификацију бежичног екрана"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Повећава ниво евидентирања за Wi‑Fi. Приказ по SSID RSSI-у у бирачу Wi‑Fi мреже"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Смањује потрошњу батерије и побољшава учинак мреже"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Овај прекидач утиче на понашање насумичног разврставања MAC адреса само за режим клијента.\nКада се овај режим активира, за мреже на којима је омогућено насумично разврставање MAC адреса може да дође до поновног насумичног разврставања MAC адреса током повезивања, у зависности од тога када се клијент пре тога искључио са мреже. До поновног насумичног разврставања не долази ако се уређај поново повеже за 4 сата или мање."</string>
+    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
+    <skip />
     <string name="wifi_metered_label" msgid="8737187690304098638">"Са ограничењем"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Без ограничења"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Величине бафера података у програму за евидентирање"</string>
@@ -373,8 +374,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Прикажи дијалог Апликација не реагује за апликације у позадини"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Приказуј упозорења због канала за обавештења"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Приказује упозорење на екрану када апликација постави обавештење без важећег канала"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Примењуј пречице за обавештења о конверзацијама"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Захтева да обавештења имају и дугорочну пречицу за дељење како би се појављивала у одељку за конверзације"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Принудно дозволи апликације у спољној"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Омогућава уписивање свих апликација у спољну меморију, без обзира на вредности манифеста"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Принудно омогући промену величине активности"</string>

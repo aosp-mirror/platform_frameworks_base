@@ -284,7 +284,8 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Shfaq opsionet për certifikimin e ekranit valor"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Rrit nivelin regjistrues të Wi‑Fi duke shfaqur SSID RSSI-në te Zgjedhësi i Wi‑Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Zvogëlon shkarkimin e baterisë dhe përmirëson cilësinë e funksionimit të rrjetit"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Ky ndryshim ndikon te sjellja e renditjes së rastësishme të adresave MAC vetëm për modalitetin e klientit.\nKur aktivizohet ky modalitet, çdo rrjet që ka të aktivizuar renditjen e rastësishme të adresave MAC mund t\'i rirendisë adresat e veta MAC gjatë shoqërimit, në varësi të kohës kur është shkëputur klienti për herë të fundit nga rrjeti. Rirenditja e rastësishme nuk ndodh nëse pajisja lidhet brenda 4 orëve ose më pak."</string>
+    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
+    <skip />
     <string name="wifi_metered_label" msgid="8737187690304098638">"Me matje"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Pa matje"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Madhësitë e regjistruesit"</string>
@@ -373,8 +374,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Shfaq raportet ANR (Aplikacioni nuk përgjigjet) për aplikacionet në sfond"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Shfaq paralajmërimet e kanalit të njoftimeve"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Shfaq paralajmërimin në ekran kur një aplikacion poston një njoftim pa një kanal të vlefshëm"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Zbato shkurtoret për njoftimet e bisedave"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Kërko që informacionet të mbështeten nga një shkurtore ndarjeje afatgjatë që ato të shfaqen në seksionin e bashkëbisedimit"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Detyro lejimin në hapësirën e jashtme"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Bën që çdo aplikacion të jetë i përshtatshëm për t\'u shkruar në hapësirën ruajtëse të jashtme, pavarësisht nga vlerat e manifestit"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Detyro madhësinë e ndryshueshme për aktivitetet"</string>

@@ -284,7 +284,8 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Show options for wireless display certification"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Increase Wi‑Fi logging level, show per SSID RSSI in Wi‑Fi Picker"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Reduces battery drain and improves network performance"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"This toggle affects MAC randomisation behaviour for client mode only.\nWhen this mode is activated, any networks that have MAC randomisation enabled may have their MAC addresses re‑randomised during association, depending on when the client last disconnected from the network. Re‑randomisation does not occur if the device reconnects in four hours or less."</string>
+    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
+    <skip />
     <string name="wifi_metered_label" msgid="8737187690304098638">"Metered"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Unmetered"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Logger buffer sizes"</string>
@@ -373,8 +374,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Display App Not Responding dialogue for background apps"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Show notification channel warnings"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Displays on-screen warning when an app posts a notification without a valid channel"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Enforce shortcuts for conversation notifications"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Require notifications to be backed by a long-lived sharing shortcut in order to appear in the conversation section"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Force allow apps on external"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Makes any app eligible to be written to external storage, regardless of manifest values"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Force activities to be resizeable"</string>

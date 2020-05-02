@@ -284,7 +284,8 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Afficher les options pour la certification de l\'affichage sans fil"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Détailler les infos Wi-Fi, afficher par RSSI de SSID dans l\'outil de sélection Wi-Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Réduit la décharge de la batterie et améliore les performances du réseau"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Ce paramètre modifie uniquement le changement aléatoire de l\'adresse MAC en mode client.\nSi ce mode est activé, les réseaux pour lesquels le changement aléatoire d\'adresse MAC est activé peuvent faire l\'objet de nouveaux changements aléatoires d\'adresse lors des associations, en fonction du temps écoulé depuis la dernière fois que le client s\'est déconnecté du réseau. Aucun changement aléatoire d\'adresse n\'a lieu si un appareil se connecte à nouveau après un délai inférieur à quatre heures."</string>
+    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
+    <skip />
     <string name="wifi_metered_label" msgid="8737187690304098638">"Facturé à l\'usage"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Non facturé à l\'usage"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Tailles des tampons de l\'enregistreur"</string>
@@ -373,8 +374,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Afficher la boîte de dialogue \"L\'application ne répond plus\" pour les applications en arrière-plan"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Afficher les avertissements liés aux canaux de notification"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Afficher un avertissement lorsqu\'une application publie une notification sans canal valide"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Utiliser des raccourcis pour les notifications des conversations"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Exiger la sauvegarde des notifications via un raccourci de partage permanent pour qu\'elles s\'affichent dans la section des conversations"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Forcer l\'autorisation d\'applis sur stockage externe"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Autoriser l\'enregistrement de toute application sur un espace de stockage externe, indépendamment des valeurs du fichier manifeste"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Forcer le redimensionnement des activités"</string>

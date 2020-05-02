@@ -284,7 +284,8 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Opties weergeven voor certificering van draadloze weergave"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Logniveau voor wifi verhogen, weergeven per SSID RSSI in wifi-kiezer"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Verlaagt het batterijverbruik en verbetert de netwerkprestaties"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Deze schakelaar beïnvloedt het gedrag van MAC-herschikking uitsluitend voor de clientmodus.\nAls deze modus is ingeschakeld, worden de MAC-adressen van netwerken die MAC-herschikking hebben ingeschakeld, mogelijk opnieuw in willekeurige volgorde herschikt als verbinding wordt gemaakt. Dit is afhankelijk van wanneer de client voor het laatst de verbinding met het netwerk verbrak. Opnieuw herschikken gebeurt niet als het apparaat binnen vier uur opnieuw verbinding maakt."</string>
+    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
+    <skip />
     <string name="wifi_metered_label" msgid="8737187690304098638">"Met datalimiet"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Gratis"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Logger-buffergrootten"</string>
@@ -373,8 +374,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Dialoogvenster \'App reageert niet\' weergeven voor achtergrond-apps"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Kanaalwaarschuwingen voor meldingen weergeven"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Geeft een waarschuwing op het scherm weer wanneer een app een melding post zonder geldig kanaal"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Snelkoppelingen voor gespreksmeldingen afdwingen"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Vereisen dat meldingen een langdurige snelkoppeling voor delen krijgen om bij gesprekken te kunnen worden getoond"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Toestaan van apps op externe opslag afdwingen"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Hiermee komt elke app in aanmerking voor schrijven naar externe opslag, ongeacht de manifestwaarden"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Formaat activiteiten geforceerd aanpasbaar maken"</string>

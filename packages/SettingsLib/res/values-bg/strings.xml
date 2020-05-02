@@ -284,7 +284,8 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Показване на опциите за сертифициране на безжичния дисплей"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"По-подробно регистр. на Wi‑Fi – данни за RSSI на SSID в инстр. за избор на Wi‑Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Намалява изразходването на батерията и подобрява ефективността на мрежата"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Този превключвател оказва влияние върху поведението при рандомизиране на MAC адреси само в режим на клиентска програма.\nКогато този режим е активиран, MAC адресът на всяка мрежа, за която функцията за рандомизиране е включена, може да бъде повторно рандомизиран по време на свързването в зависимост от това, кога последно клиентската програма е прекратила връзката си с мрежата. Не възниква повторно рандомизиране, ако устройството отново установи връзка до 4 часа."</string>
+    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
+    <skip />
     <string name="wifi_metered_label" msgid="8737187690304098638">"С отчитане"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Без отчитане"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Размери на регистрац. буфери"</string>
@@ -373,8 +374,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Показване на диалоговия прозорец за грешки от типа ANR за приложенията на заден план"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Предупрежд. за канала за известия"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Показва се предупреждение, когато приложение публикува известие без валиден канал"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Налагане на преки пътища за извест. за разговори"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"За известията да се създава рез. копие чрез постоянен пряк път за споделяне, за да се показват в секцията с разговори"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Външно хран.: принуд. разрешаване на приложенията"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Всички приложения ще отговарят на условията да бъдат записвани във външното хранилище независимо от стойностите в манифеста"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Възможност за преоразмеряване на активностите"</string>
