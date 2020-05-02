@@ -732,7 +732,7 @@ public class Instrumentation {
          * a non-null value if the intent needs to be intercepted.
          *
          * <p> Whenever a new activity is started, this method will be called on instances created
-         * using {@link #Instrumentation.ActivityMonitor()} to check if there is a match. In case
+         * using {@link #ActivityMonitor()} to check if there is a match. In case
          * of a match, the activity start will be blocked and the returned result will be used.
          *
          * @param intent The intent used for starting the activity.

@@ -83,7 +83,7 @@ public final class AudioPlaybackCaptureConfiguration {
 
     /**
      * @return the {@code MediaProjection} used to build this object.
-     * @see Builder#AudioPlaybackCaptureConfiguration.Builder(MediaProjection)
+     * @see Builder#Builder(MediaProjection)
      */
     public @NonNull MediaProjection getMediaProjection() {
         return mProjection;

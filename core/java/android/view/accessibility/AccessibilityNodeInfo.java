@@ -5120,7 +5120,7 @@ public class AccessibilityNodeInfo implements Parcelable {
          * Obtains a pooled instance that is a clone of another one.
          *
          * <p>In most situations object pooling is not beneficial. Create a new instance using the
-         * constructor {@link AccessibilityNodeInfo.RangeInfo#AccessibilityNodeInfo.RangeInfo(int,
+         * constructor {@link AccessibilityNodeInfo.RangeInfo#RangeInfo(int,
          * float, float, float)} instead.
          *
          * @param other The instance to clone.
@@ -5135,7 +5135,7 @@ public class AccessibilityNodeInfo implements Parcelable {
          * Obtains a pooled instance.
          *
          * <p>In most situations object pooling is not beneficial. Create a new instance using the
-         * constructor {@link AccessibilityNodeInfo.RangeInfo#AccessibilityNodeInfo.RangeInfo(int,
+         * constructor {@link AccessibilityNodeInfo.RangeInfo#RangeInfo(int,
          * float, float, float)} instead.
          *
          * @param type The type of the range.
@@ -5271,7 +5271,7 @@ public class AccessibilityNodeInfo implements Parcelable {
          *
          * <p>In most situations object pooling is not beneficial. Create a new instance using the
          * constructor {@link
-         * AccessibilityNodeInfo.CollectionInfo#AccessibilityNodeInfo.CollectionInfo} instead.
+         * AccessibilityNodeInfo.CollectionInfo#CollectionInfo} instead.
          *
          * @param other The instance to clone.
          * @hide
@@ -5286,7 +5286,7 @@ public class AccessibilityNodeInfo implements Parcelable {
          *
          * <p>In most situations object pooling is not beneficial. Create a new instance using the
          * constructor {@link
-         * AccessibilityNodeInfo.CollectionInfo#AccessibilityNodeInfo.CollectionInfo(int, int,
+         * AccessibilityNodeInfo.CollectionInfo#CollectionInfo(int, int,
          * boolean)} instead.
          *
          * @param rowCount The number of rows, or -1 if count is unknown.
@@ -5303,7 +5303,7 @@ public class AccessibilityNodeInfo implements Parcelable {
          *
          * <p>In most situations object pooling is not beneficial. Create a new instance using the
          * constructor {@link
-         * AccessibilityNodeInfo.CollectionInfo#AccessibilityNodeInfo.CollectionInfo(int, int,
+         * AccessibilityNodeInfo.CollectionInfo#CollectionInfo(int, int,
          * boolean, int)} instead.
          *
          * @param rowCount The number of rows.
@@ -5440,7 +5440,7 @@ public class AccessibilityNodeInfo implements Parcelable {
          *
          * <p>In most situations object pooling is not beneficial. Create a new instance using the
          * constructor {@link
-         * AccessibilityNodeInfo.CollectionItemInfo#AccessibilityNodeInfo.CollectionItemInfo}
+         * AccessibilityNodeInfo.CollectionItemInfo#CollectionItemInfo}
          * instead.
          *
          * @param other The instance to clone.
@@ -5456,7 +5456,7 @@ public class AccessibilityNodeInfo implements Parcelable {
          *
          * <p>In most situations object pooling is not beneficial. Create a new instance using the
          * constructor {@link
-         * AccessibilityNodeInfo.CollectionItemInfo#AccessibilityNodeInfo.CollectionItemInfo(int,
+         * AccessibilityNodeInfo.CollectionItemInfo#CollectionItemInfo(int,
          * int, int, int, boolean)} instead.
          *
          * @param rowIndex The row index at which the item is located.
@@ -5476,7 +5476,7 @@ public class AccessibilityNodeInfo implements Parcelable {
          *
          * <p>In most situations object pooling is not beneficial. Creates a new instance using the
          * constructor {@link
-         * AccessibilityNodeInfo.CollectionItemInfo#AccessibilityNodeInfo.CollectionItemInfo(int,
+         * AccessibilityNodeInfo.CollectionItemInfo#CollectionItemInfo(int,
          * int, int, int, boolean, boolean)} instead.
          *
          * @param rowIndex The row index at which the item is located.
