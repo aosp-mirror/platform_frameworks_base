@@ -105,7 +105,7 @@ public final class ConversationActions implements Parcelable {
         /**
          * Represents the local user.
          *
-         * @see Builder#ConversationActions.Message.Builder(Person)
+         * @see Builder#Builder(Person)
          */
         @NonNull
         public static final Person PERSON_USER_SELF =
@@ -120,7 +120,7 @@ public final class ConversationActions implements Parcelable {
          * the remote user better, so that the underlying model could differentiate between
          * different remote users.
          *
-         * @see Builder#ConversationActions.Message.Builder(Person)
+         * @see Builder#Builder(Person)
          */
         @NonNull
         public static final Person PERSON_USER_OTHERS =
