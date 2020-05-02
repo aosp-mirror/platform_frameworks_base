@@ -96,7 +96,6 @@ class MockScheduledExecutorService implements ScheduledExecutorService {
     @Override
     public ScheduledFuture<?> scheduleAtFixedRate(Runnable command, long initialDelay, long period,
             TimeUnit unit) {
-        Preconditions.checkState(unit == TimeUnit.MILLISECONDS);
         return new MockScheduledFuture<>(command, period, unit);
     }
 
