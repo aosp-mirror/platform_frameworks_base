@@ -2957,8 +2957,8 @@ class ActivityStack extends Task {
             final int taskId = activity != null
                     ? mStackSupervisor.getNextTaskIdForUser(activity.mUserId)
                     : mStackSupervisor.getNextTaskIdForUser();
-            task = Task.create(
-                    mAtmService, taskId, info, intent, voiceSession, voiceInteractor, this);
+            task = new ActivityStack(mAtmService, taskId, info, intent, voiceSession,
+                    voiceInteractor, null /* taskDescription */, this);
 
             // add the task to stack first, mTaskPositioner might need the stack association
             addChild(task, toTop, (info.flags & FLAG_SHOW_FOR_ALL_USERS) != 0);
