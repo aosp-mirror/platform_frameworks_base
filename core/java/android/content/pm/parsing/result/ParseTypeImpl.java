@@ -147,6 +147,11 @@ public class ParseTypeImpl implements ParseInput, ParseResult<Object> {
     }
 
     @Override
+    public <ResultType> ParseResult<ResultType> skip(@NonNull String parseError) {
+        return error(PackageManager.INSTALL_PARSE_FAILED_SKIPPED, parseError);
+    }
+
+    @Override
     public <ResultType> ParseResult<ResultType> error(int parseError) {
         return error(parseError, null);
     }

@@ -22,8 +22,8 @@ import android.app.NotificationChannel
 import android.app.NotificationChannel.DEFAULT_CHANNEL_ID
 import android.app.NotificationChannelGroup
 import android.app.NotificationManager.IMPORTANCE_NONE
+import android.app.NotificationManager.Importance
 import android.content.Context
-import android.content.DialogInterface
 import android.graphics.Color
 import android.graphics.PixelFormat
 import android.graphics.drawable.ColorDrawable
@@ -37,8 +37,10 @@ import android.view.Window
 import android.view.WindowInsets.Type.statusBars
 import android.view.WindowManager
 import android.widget.TextView
+
 import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.R
+
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -59,11 +61,13 @@ private const val TAG = "ChannelDialogController"
 @Singleton
 class ChannelEditorDialogController @Inject constructor(
     c: Context,
-    private val noMan: INotificationManager
+    private val noMan: INotificationManager,
+    private val dialogBuilder: ChannelEditorDialog.Builder
 ) {
     val context: Context = c.applicationContext
 
-    lateinit var dialog: Dialog
+    private var prepared = false
+    private lateinit var dialog: ChannelEditorDialog
 
     private var appIcon: Drawable? = null
     private var appUid: Int? = null
@@ -74,13 +78,16 @@ class ChannelEditorDialogController @Inject constructor(
     // Caller should set this if they care about when we dismiss
     var onFinishListener: OnChannelEditorDialogFinishedListener? = null
 
-    // Channels handed to us from NotificationInfo
     @VisibleForTesting
-    internal val providedChannels = mutableListOf<NotificationChannel>()
+    internal val paddedChannels = mutableListOf<NotificationChannel>()
+    // Channels handed to us from NotificationInfo
+    private val providedChannels = mutableListOf<NotificationChannel>()
 
     // Map from NotificationChannel to importance
     private val edits = mutableMapOf<NotificationChannel, Int>()
-    var appNotificationsEnabled = true
+    private var appNotificationsEnabled = true
+    // System settings for app notifications
+    private var appNotificationsCurrentlyEnabled: Boolean? = null
 
     // Keep a mapping of NotificationChannel.getGroup() to the actual group name for display
     @VisibleForTesting
@@ -106,10 +113,18 @@ class ChannelEditorDialogController @Inject constructor(
         this.appNotificationsEnabled = checkAreAppNotificationsOn()
         this.onSettingsClickListener = onSettingsClickListener
 
+        // These will always start out the same
+        appNotificationsCurrentlyEnabled = appNotificationsEnabled
+
         channelGroupList.clear()
         channelGroupList.addAll(fetchNotificationChannelGroups())
         buildGroupNameLookup()
+        providedChannels.clear()
+        providedChannels.addAll(channels)
         padToFourChannels(channels)
+        initDialog()
+
+        prepared = true
     }
 
     private fun buildGroupNameLookup() {
@@ -121,21 +136,21 @@ class ChannelEditorDialogController @Inject constructor(
     }
 
     private fun padToFourChannels(channels: Set<NotificationChannel>) {
-        providedChannels.clear()
+        paddedChannels.clear()
         // First, add all of the given channels
-        providedChannels.addAll(channels.asSequence().take(4))
+        paddedChannels.addAll(channels.asSequence().take(4))
 
         // Then pad to 4 if we haven't been given that many
-        providedChannels.addAll(getDisplayableChannels(channelGroupList.asSequence())
-                .filterNot { providedChannels.contains(it) }
+        paddedChannels.addAll(getDisplayableChannels(channelGroupList.asSequence())
+                .filterNot { paddedChannels.contains(it) }
                 .distinct()
-                .take(4 - providedChannels.size))
+                .take(4 - paddedChannels.size))
 
         // If we only got one channel and it has the default miscellaneous tag, then we actually
         // are looking at an app with a targetSdk <= O, and it doesn't make much sense to show the
         // channel
-        if (providedChannels.size == 1 && DEFAULT_CHANNEL_ID == providedChannels[0].id) {
-            providedChannels.clear()
+        if (paddedChannels.size == 1 && DEFAULT_CHANNEL_ID == paddedChannels[0].id) {
+            paddedChannels.clear()
         }
     }
 
@@ -157,7 +172,9 @@ class ChannelEditorDialogController @Inject constructor(
     }
 
     fun show() {
-        initDialog()
+        if (!prepared) {
+            throw IllegalStateException("Must call prepareDialogForApp() before calling show()")
+        }
         dialog.show()
     }
 
@@ -178,8 +195,10 @@ class ChannelEditorDialogController @Inject constructor(
         appUid = null
         packageName = null
         appName = null
+        appNotificationsCurrentlyEnabled = null
 
         edits.clear()
+        paddedChannels.clear()
         providedChannels.clear()
         groupNameLookup.clear()
     }
@@ -188,12 +207,27 @@ class ChannelEditorDialogController @Inject constructor(
         return groupNameLookup[groupId] ?: ""
     }
 
-    fun proposeEditForChannel(channel: NotificationChannel, edit: Int) {
+    fun proposeEditForChannel(channel: NotificationChannel, @Importance edit: Int) {
         if (channel.importance == edit) {
             edits.remove(channel)
         } else {
             edits[channel] = edit
         }
+
+        dialog.updateDoneButtonText(hasChanges())
+    }
+
+    fun proposeSetAppNotificationsEnabled(enabled: Boolean) {
+        appNotificationsEnabled = enabled
+        dialog.updateDoneButtonText(hasChanges())
+    }
+
+    fun areAppNotificationsEnabled(): Boolean {
+        return appNotificationsEnabled
+    }
+
+    private fun hasChanges(): Boolean {
+        return edits.isNotEmpty() || (appNotificationsEnabled != appNotificationsCurrentlyEnabled)
     }
 
     @Suppress("unchecked_cast")
@@ -241,7 +275,7 @@ class ChannelEditorDialogController @Inject constructor(
             }
         }
 
-        if (appNotificationsEnabled != checkAreAppNotificationsOn()) {
+        if (appNotificationsEnabled != appNotificationsCurrentlyEnabled) {
             applyAppNotificationsOn(appNotificationsEnabled)
         }
     }
@@ -252,7 +286,8 @@ class ChannelEditorDialogController @Inject constructor(
     }
 
     private fun initDialog() {
-        dialog = Dialog(context)
+        dialogBuilder.setContext(context)
+        dialog = dialogBuilder.build()
 
         dialog.window?.requestFeature(Window.FEATURE_NO_TITLE)
         // Prevent a11y readers from reading the first element in the dialog twice
@@ -260,16 +295,21 @@ class ChannelEditorDialogController @Inject constructor(
         dialog.apply {
             setContentView(R.layout.notif_half_shelf)
             setCanceledOnTouchOutside(true)
-            setOnDismissListener(object : DialogInterface.OnDismissListener {
-                override fun onDismiss(dialog: DialogInterface?) {
-                    onFinishListener?.onChannelEditorDialogFinished()
-                }
-            })
-            findViewById<ChannelEditorListView>(R.id.half_shelf_container).apply {
+            setOnDismissListener { onFinishListener?.onChannelEditorDialogFinished() }
+
+            val listView = findViewById<ChannelEditorListView>(R.id.half_shelf_container)
+            listView?.apply {
                 controller = this@ChannelEditorDialogController
                 appIcon = this@ChannelEditorDialogController.appIcon
                 appName = this@ChannelEditorDialogController.appName
-                channels = providedChannels
+                channels = paddedChannels
+            }
+
+            setOnShowListener {
+                // play a highlight animation for the given channels
+                for (channel in providedChannels) {
+                    listView?.highlightChannel(channel)
+                }
             }
 
             findViewById<TextView>(R.id.done_button)?.setOnClickListener {
@@ -304,6 +344,28 @@ class ChannelEditorDialogController @Inject constructor(
             or WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
             or WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
             or WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED)
+}
+
+class ChannelEditorDialog(context: Context) : Dialog(context) {
+    fun updateDoneButtonText(hasChanges: Boolean) {
+        findViewById<TextView>(R.id.done_button)?.setText(
+                if (hasChanges)
+                    R.string.inline_ok_button
+                else
+                    R.string.inline_done_button)
+    }
+
+    class Builder @Inject constructor() {
+        private lateinit var context: Context
+        fun setContext(context: Context): Builder {
+            this.context = context
+            return this
+        }
+
+        fun build(): ChannelEditorDialog {
+            return ChannelEditorDialog(context)
+        }
+    }
 }
 
 interface OnChannelEditorDialogFinishedListener {

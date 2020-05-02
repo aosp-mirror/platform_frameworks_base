@@ -39,6 +39,7 @@ import android.util.Log;
 import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
+import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -71,20 +72,38 @@ public class NavigationModeController implements Dumpable {
     private BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-                    if (DEBUG) {
-                        Log.d(TAG, "ACTION_OVERLAY_CHANGED");
-                    }
-                    updateCurrentInteractionMode(true /* notify */);
+            if (DEBUG) {
+                Log.d(TAG, "ACTION_OVERLAY_CHANGED");
+            }
+            updateCurrentInteractionMode(true /* notify */);
         }
     };
 
+    private final DeviceProvisionedController.DeviceProvisionedListener mDeviceProvisionedCallback =
+            new DeviceProvisionedController.DeviceProvisionedListener() {
+                @Override
+                public void onUserSwitched() {
+                    if (DEBUG) {
+                        Log.d(TAG, "onUserSwitched: "
+                                + ActivityManagerWrapper.getInstance().getCurrentUserId());
+                    }
+
+                    // Update the nav mode for the current user
+                    updateCurrentInteractionMode(true /* notify */);
+                }
+            };
+
+
     @Inject
-    public NavigationModeController(Context context, @UiBackground Executor uiBgExecutor) {
+    public NavigationModeController(Context context,
+            DeviceProvisionedController deviceProvisionedController,
+            @UiBackground Executor uiBgExecutor) {
         mContext = context;
         mCurrentUserContext = context;
         mOverlayManager = IOverlayManager.Stub.asInterface(
                 ServiceManager.getService(Context.OVERLAY_SERVICE));
         mUiBgExecutor = uiBgExecutor;
+        deviceProvisionedController.addCallback(mDeviceProvisionedCallback);
 
         IntentFilter overlayFilter = new IntentFilter(ACTION_OVERLAY_CHANGED);
         overlayFilter.addDataScheme("package");

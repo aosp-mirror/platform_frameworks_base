@@ -21,4 +21,4 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:layout_marginTop="@dimen/controls_management_list_margin"/>
+    android:layout_marginTop="@dimen/controls_management_zone_top_margin"/>

@@ -221,7 +221,7 @@ public class InsetsPolicyTest extends WindowTestsBase {
         addNonFocusableWindow(TYPE_STATUS_BAR, "statusBar")
                 .getControllableInsetProvider().getSource().setVisible(false);
         addNonFocusableWindow(TYPE_NAVIGATION_BAR, "navBar")
-                .getControllableInsetProvider().getSource().setVisible(true);
+                .getControllableInsetProvider().setServerVisible(true);
 
         final InsetsPolicy policy = spy(mDisplayContent.getInsetsPolicy());
         doNothing().when(policy).startAnimation(anyBoolean(), any(), any());

@@ -98,6 +98,7 @@ public class MediaControlPanel {
     private SharedPreferences mSharedPrefs;
     private boolean mCheckedForResumption = false;
     private boolean mIsRemotePlayback;
+    private QSMediaBrowser mQSMediaBrowser;
 
     // Button IDs used in notifications
     protected static final int[] NOTIF_ACTION_IDS = {
@@ -232,6 +233,11 @@ public class MediaControlPanel {
             String key) {
         // Ensure that component names are updated if token has changed
         if (mToken == null || !mToken.equals(token)) {
+            if (mQSMediaBrowser != null) {
+                Log.d(TAG, "Disconnecting old media browser");
+                mQSMediaBrowser.disconnect();
+                mQSMediaBrowser = null;
+            }
             mToken = token;
             mServiceComponent = null;
             mCheckedForResumption = false;
@@ -315,11 +321,8 @@ public class MediaControlPanel {
             appName.setTextColor(mForegroundColor);
         }
 
+        // Can be null!
         MediaMetadata mediaMetadata = mController.getMetadata();
-        if (mediaMetadata == null) {
-            Log.e(TAG, "Media metadata was null");
-            return;
-        }
 
         ImageView albumView = mMediaNotifView.findViewById(R.id.album_art);
         if (albumView != null) {
@@ -329,14 +332,20 @@ public class MediaControlPanel {
 
         // Song name
         TextView titleText = mMediaNotifView.findViewById(R.id.header_title);
-        String songName = mediaMetadata.getString(MediaMetadata.METADATA_KEY_TITLE);
+        String songName = "";
+        if (mediaMetadata != null) {
+            songName = mediaMetadata.getString(MediaMetadata.METADATA_KEY_TITLE);
+        }
         titleText.setText(songName);
         titleText.setTextColor(mForegroundColor);
 
         // Artist name (not in mini player)
         TextView artistText = mMediaNotifView.findViewById(R.id.header_artist);
         if (artistText != null) {
-            String artistName = mediaMetadata.getString(MediaMetadata.METADATA_KEY_ARTIST);
+            String artistName = "";
+            if (mediaMetadata != null) {
+                artistName = mediaMetadata.getString(MediaMetadata.METADATA_KEY_ARTIST);
+            }
             artistText.setText(artistName);
             artistText.setTextColor(mForegroundColor);
         }
@@ -439,21 +448,23 @@ public class MediaControlPanel {
     private void processAlbumArt(MediaMetadata metadata, Icon largeIcon, ImageView albumView) {
         Bitmap albumArt = null;
 
-        // First look in URI fields
-        for (String field : ART_URIS) {
-            String uriString = metadata.getString(field);
-            if (!TextUtils.isEmpty(uriString)) {
-                albumArt = loadBitmapFromUri(Uri.parse(uriString));
-                if (albumArt != null) {
-                    Log.d(TAG, "loaded art from " + field);
-                    break;
+        if (metadata != null) {
+            // First look in URI fields
+            for (String field : ART_URIS) {
+                String uriString = metadata.getString(field);
+                if (!TextUtils.isEmpty(uriString)) {
+                    albumArt = loadBitmapFromUri(Uri.parse(uriString));
+                    if (albumArt != null) {
+                        Log.d(TAG, "loaded art from " + field);
+                        break;
+                    }
                 }
             }
-        }
 
-        // Then check bitmap field
-        if (albumArt == null) {
-            albumArt = metadata.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART);
+            // Then check bitmap field
+            if (albumArt == null) {
+                albumArt = metadata.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART);
+            }
         }
 
         // Finally try the notification's largeIcon
@@ -613,8 +624,22 @@ public class MediaControlPanel {
         ImageButton btn = mMediaNotifView.findViewById(mActionIds[0]);
         btn.setOnClickListener(v -> {
             Log.d(TAG, "Attempting to restart session");
-            QSMediaBrowser browser = new QSMediaBrowser(mContext, null, mServiceComponent);
-            browser.restart();
+            if (mQSMediaBrowser != null) {
+                mQSMediaBrowser.disconnect();
+            }
+            mQSMediaBrowser = new QSMediaBrowser(mContext, new QSMediaBrowser.Callback(){
+                @Override
+                public void onConnected() {
+                    Log.d(TAG, "Successfully restarted");
+                }
+                @Override
+                public void onError() {
+                    Log.e(TAG, "Error restarting");
+                    mQSMediaBrowser.disconnect();
+                    mQSMediaBrowser = null;
+                }
+            }, mServiceComponent);
+            mQSMediaBrowser.restart();
         });
         btn.setImageDrawable(mContext.getResources().getDrawable(R.drawable.lb_ic_play));
         btn.setImageTintList(ColorStateList.valueOf(mForegroundColor));
@@ -649,13 +674,18 @@ public class MediaControlPanel {
      */
     private void tryUpdateResumptionList(ComponentName componentName) {
         Log.d(TAG, "Testing if we can connect to " + componentName);
-        QSMediaBrowser.testConnection(mContext,
+        if (mQSMediaBrowser != null) {
+            mQSMediaBrowser.disconnect();
+        }
+        mQSMediaBrowser = new QSMediaBrowser(mContext,
                 new QSMediaBrowser.Callback() {
                     @Override
                     public void onConnected() {
                         Log.d(TAG, "yes we can resume with " + componentName);
                         mServiceComponent = componentName;
                         updateResumptionList(componentName);
+                        mQSMediaBrowser.disconnect();
+                        mQSMediaBrowser = null;
                     }
 
                     @Override
@@ -666,9 +696,12 @@ public class MediaControlPanel {
                             // If it's not active and we can't resume, remove
                             removePlayer();
                         }
+                        mQSMediaBrowser.disconnect();
+                        mQSMediaBrowser = null;
                     }
                 },
                 componentName);
+        mQSMediaBrowser.testConnection();
     }
 
     /**

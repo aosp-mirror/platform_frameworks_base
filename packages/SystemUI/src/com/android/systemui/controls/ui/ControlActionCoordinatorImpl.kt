@@ -19,6 +19,8 @@ package com.android.systemui.controls.ui
 import android.app.Dialog
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.content.pm.ResolveInfo
 import android.os.Vibrator
 import android.os.VibrationEffect
 import android.service.controls.Control
@@ -26,13 +28,12 @@ import android.service.controls.actions.BooleanAction
 import android.service.controls.actions.CommandAction
 import android.util.Log
 import android.view.HapticFeedbackConstants
-import com.android.systemui.controls.controller.ControlsController
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.globalactions.GlobalActionsComponent
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.concurrency.DelayableExecutor
-
-import dagger.Lazy
+import com.android.systemui.R
 
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -41,7 +42,7 @@ import javax.inject.Singleton
 class ControlActionCoordinatorImpl @Inject constructor(
     private val context: Context,
     private val bgExecutor: DelayableExecutor,
-    private val controlsController: Lazy<ControlsController>,
+    @Main private val uiExecutor: DelayableExecutor,
     private val activityStarter: ActivityStarter,
     private val keyguardStateController: KeyguardStateController,
     private val globalActionsComponent: GlobalActionsComponent
@@ -95,10 +96,6 @@ class ControlActionCoordinatorImpl @Inject constructor(
         }
     }
 
-    override fun setFocusedElement(cvh: ControlViewHolder?) {
-        controlsController.get().onFocusChanged(cvh?.cws)
-    }
-
     private fun bouncerOrRun(f: () -> Unit) {
         if (!keyguardStateController.isUnlocked()) {
             context.sendBroadcast(Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS))
@@ -118,9 +115,24 @@ class ControlActionCoordinatorImpl @Inject constructor(
     }
 
     private fun showDialog(cvh: ControlViewHolder, intent: Intent) {
-        dialog = DetailDialog(cvh, intent).also {
-            it.setOnDismissListener { _ -> dialog = null }
-            it.show()
+        bgExecutor.execute {
+            val activities: List<ResolveInfo> = cvh.context.packageManager.queryIntentActivities(
+                intent,
+                PackageManager.MATCH_DEFAULT_ONLY
+            )
+
+            uiExecutor.execute {
+                // make sure the intent is valid before attempting to open the dialog
+                if (activities.isNotEmpty()) {
+                    dialog = DetailDialog(cvh, intent).also {
+                        it.setOnDismissListener { _ -> dialog = null }
+                        it.show()
+                    }
+                } else {
+                    cvh.setTransientStatus(
+                        cvh.context.resources.getString(R.string.controls_error_failed))
+                }
+            }
         }
     }
 }

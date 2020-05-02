@@ -138,6 +138,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements
     private Clock mClockView;
     private DateView mDateView;
     private BatteryMeterView mBatteryRemainingIcon;
+    private RingerModeTracker mRingerModeTracker;
 
     // Used for RingerModeTracker
     private final LifecycleRegistry mLifecycle = new LifecycleRegistry(this);
@@ -159,10 +160,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         mDualToneHandler = new DualToneHandler(
                 new ContextThemeWrapper(context, R.style.QSHeaderTheme));
         mCommandQueue = commandQueue;
-        ringerModeTracker.getRingerModeInternal().observe(this, ringer -> {
-            mRingerMode = ringer;
-            updateStatusText();
-        });
+        mRingerModeTracker = ringerModeTracker;
     }
 
     @Override
@@ -429,6 +427,10 @@ public class QuickStatusBarHeader extends RelativeLayout implements
     @Override
     public void onAttachedToWindow() {
         super.onAttachedToWindow();
+        mRingerModeTracker.getRingerModeInternal().observe(this, ringer -> {
+            mRingerMode = ringer;
+            updateStatusText();
+        });
         mStatusBarIconController.addIconGroup(mIconManager);
         requestApplyInsets();
     }
@@ -466,6 +468,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements
     @VisibleForTesting
     public void onDetachedFromWindow() {
         setListening(false);
+        mRingerModeTracker.getRingerModeInternal().removeObservers(this);
         mStatusBarIconController.removeIconGroup(mIconManager);
         super.onDetachedFromWindow();
     }
