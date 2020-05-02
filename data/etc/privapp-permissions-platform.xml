@@ -409,6 +409,8 @@ applications that come with the platform
         <permission name="android.permission.ACCESS_TV_DESCRAMBLER" />
         <permission name="android.permission.ACCESS_TV_TUNER" />
         <permission name="android.permission.TUNER_RESOURCE_ACCESS" />
+        <!-- Permissions required for CTS test - TVInputManagerTest -->
+        <permission name="android.permission.TV_INPUT_HARDWARE" />
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">
