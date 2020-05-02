@@ -430,6 +430,8 @@
     <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"Képernyő rögzítése"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Kezdés"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Leállítás"</string>
+    <!-- no translation found for media_seamless_remote_device (177033467332920464) -->
+    <skip />
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Váltás az alkalmazások között felfelé csúsztatással"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Húzza jobbra az ujját az alkalmazások közötti gyors váltáshoz"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Áttekintés be- és kikapcsolása"</string>
@@ -712,6 +714,8 @@
     <string name="notification_channel_summary_priority" msgid="7415770044553264622">"A beszélgetések szakaszának tetején, buborékként jelenik meg."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Beállítások"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritás"</string>
+    <!-- no translation found for no_shortcut (7176375126961212514) -->
+    <skip />
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Nincsenek buborékok a közelmúltból"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"A legutóbbi és az elvetett buborékok itt jelennek majd meg"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Ezeket az értesítéseket nem lehet módosítani."</string>
@@ -1024,6 +1028,8 @@
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"A bekapcsológomb menüjéből hozzáférhető vezérlők kiválasztása"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Tartsa lenyomva, és húzza a vezérlők átrendezéséhez"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Minden vezérlő eltávolítva"</string>
+    <!-- no translation found for controls_favorite_toast_no_changes (7094494210840877931) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Nem sikerült betölteni az összes vezérlő listáját."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Más"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Hozzáadás az eszközvezérlőkhöz"</string>
@@ -1032,6 +1038,7 @@
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"Vezérlők frissítve"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"A PIN-kód betűket vagy szimbólumokat tartalmaz"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"<xliff:g id="DEVICE">%s</xliff:g> ellenőrzése"</string>
+    <string name="controls_pin_wrong" msgid="6162694056042164211">"Helytelen PIN-kód"</string>
     <string name="controls_pin_verifying" msgid="3755045989392131746">"Ellenőrzés…"</string>
     <string name="controls_pin_instructions" msgid="6363309783822475238">"PIN-kód megadása"</string>
     <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"Próbálkozzon másik PIN-kóddal"</string>
@@ -1041,6 +1048,9 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Javaslatok betöltése…"</string>
     <string name="controls_media_close_session" msgid="9023534788828414585">"Médiamunkamenet bezárása"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Inaktív, ellenőrizze az appot"</string>
+    <string name="controls_error_retryable" msgid="864025882878378470">"Hiba, újrapróbálkozás…"</string>
+    <string name="controls_error_removed" msgid="6299213591234723805">"Eszköz eltávolítva"</string>
+    <string name="controls_error_generic" msgid="352500456918362905">"Állapot betöltése sikertelen"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Hiba történt. Próbálja újra."</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"Folyamatban"</string>
     <string name="controls_added_tooltip" msgid="4842812921719153085">"Az új vezérlők megtekintéséhez tartsa nyomva a bekapcsológombot"</string>

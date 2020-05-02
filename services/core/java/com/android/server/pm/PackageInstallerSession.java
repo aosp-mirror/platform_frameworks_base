@@ -1847,13 +1847,44 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
     }
 
-    private void logDataLoaderInstallationSession(int returnCode, String extraMessage) {
+    private void logDataLoaderInstallationSession(int returnCode) {
+        // Skip logging the side-loaded app installations, as those are private and aren't reported
+        // anywhere; app stores already have a record of the installation and that's why reporting
+        // it here is fine
+        final String packageNameToLog =
+                (params.installFlags & PackageManager.INSTALL_FROM_ADB) == 0 ? mPackageName : "";
         final long currentTimestamp = System.currentTimeMillis();
         FrameworkStatsLog.write(FrameworkStatsLog.PACKAGE_INSTALLER_V2_REPORTED,
                 isIncrementalInstallation(),
-                mPackageName,
+                packageNameToLog,
                 currentTimestamp - createdMillis,
-                returnCode);
+                returnCode,
+                getApksSize());
+    }
+
+    private long getApksSize() {
+        final PackageSetting ps = mPm.getPackageSetting(mPackageName);
+        if (ps == null) {
+            return 0;
+        }
+        final File apkDirOrPath = ps.codePath;
+        if (apkDirOrPath == null) {
+            return 0;
+        }
+        if (apkDirOrPath.isFile() && apkDirOrPath.getName().toLowerCase().endsWith(".apk")) {
+            return apkDirOrPath.length();
+        }
+        if (!apkDirOrPath.isDirectory()) {
+            return 0;
+        }
+        final File[] files = apkDirOrPath.listFiles();
+        long apksSize = 0;
+        for (int i = 0; i < files.length; i++) {
+            if (files[i].getName().toLowerCase().endsWith(".apk")) {
+                apksSize += files[i].length();
+            }
+        }
+        return apksSize;
     }
 
     /**
@@ -2879,7 +2910,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
         mCallback.onSessionFinished(this, success);
         if (isDataLoaderInstallation()) {
-            logDataLoaderInstallationSession(returnCode, msg);
+            logDataLoaderInstallationSession(returnCode);
         }
     }
 

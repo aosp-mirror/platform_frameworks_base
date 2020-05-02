@@ -217,20 +217,6 @@ class ControlsUiControllerImpl @Inject constructor (
         }
     }
 
-    override fun onFocusChanged(focusedControl: ControlWithState?) {
-        controlViewsById.forEach { key: ControlKey, viewHolder: ControlViewHolder ->
-            val state = controlsById.get(key) ?: return@forEach
-            val shouldBeDimmed = focusedControl != null && state != focusedControl
-            if (viewHolder.dimmed == shouldBeDimmed) {
-                return@forEach
-            }
-
-            uiExecutor.execute {
-                viewHolder.dimmed = shouldBeDimmed
-            }
-        }
-    }
-
     private fun startFavoritingActivity(context: Context, si: StructureInfo) {
         startTargetedActivity(context, si, ControlsFavoritingActivity::class.java)
     }
@@ -517,15 +503,24 @@ class ControlsUiControllerImpl @Inject constructor (
         }
     }
 
-    override fun hide() {
-        Log.d(ControlsUiController.TAG, "hide()")
-        hidden = true
-        popup?.dismissImmediate()
+    override fun closeDialogs(immediately: Boolean) {
+        if (immediately) {
+            popup?.dismissImmediate()
+        } else {
+            popup?.dismiss()
+        }
+        popup = null
 
         controlViewsById.forEach {
             it.value.dismiss()
         }
         controlActionCoordinator.closeDialogs()
+    }
+
+    override fun hide() {
+        hidden = true
+
+        closeDialogs(true)
         controlsController.get().unsubscribe()
 
         parent.removeAllViews()

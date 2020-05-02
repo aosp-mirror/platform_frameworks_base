@@ -797,7 +797,6 @@ public final class CalendarContract {
          * to changes.
          *
          * @see DevicePolicyManager#getCrossProfileCalendarPackages(ComponentName)
-         * @see Settings.Secure#CROSS_PROFILE_CALENDAR_ENABLED
          */
         @NonNull
         public static final Uri ENTERPRISE_CONTENT_URI =
@@ -1796,7 +1795,6 @@ public final class CalendarContract {
          * to changes.
          *
          * @see DevicePolicyManager#getCrossProfileCalendarPackages(ComponentName)
-         * @see Settings.Secure#CROSS_PROFILE_CALENDAR_ENABLED
          */
         @NonNull
         public static final Uri ENTERPRISE_CONTENT_URI =
@@ -2010,7 +2008,6 @@ public final class CalendarContract {
          * {@link DevicePolicyManager#setCrossProfileCalendarPackages(ComponentName, Set)}.
          *
          * @see DevicePolicyManager#getCrossProfileCalendarPackages(ComponentName)
-         * @see Settings.Secure#CROSS_PROFILE_CALENDAR_ENABLED
          */
         @NonNull
         public static final Uri ENTERPRISE_CONTENT_URI =

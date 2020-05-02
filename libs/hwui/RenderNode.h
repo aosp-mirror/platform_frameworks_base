@@ -27,6 +27,8 @@
 
 #include <androidfw/ResourceTypes.h>
 
+#include <ui/FatVector.h>
+
 #include "AnimatorManager.h"
 #include "CanvasTransform.h"
 #include "Debug.h"
@@ -35,7 +37,6 @@
 #include "RenderProperties.h"
 #include "pipeline/skia/SkiaDisplayList.h"
 #include "pipeline/skia/SkiaLayer.h"
-#include "utils/FatVector.h"
 
 #include <vector>
 

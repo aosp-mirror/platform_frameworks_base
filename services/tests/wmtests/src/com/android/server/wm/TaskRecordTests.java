@@ -49,7 +49,6 @@ import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -67,15 +66,11 @@ import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.IBinder;
 import android.platform.test.annotations.Presubmit;
-import android.service.voice.IVoiceInteractionSession;
 import android.util.DisplayMetrics;
 import android.util.Xml;
 import android.view.DisplayInfo;
 
 import androidx.test.filters.MediumTest;
-
-import com.android.internal.app.IVoiceInteractor;
-import com.android.server.wm.Task.TaskFactory;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -122,11 +117,6 @@ public class TaskRecordTests extends ActivityTestsBase {
         assertEquals(expected.mLastNonFullscreenBounds, actual.mLastNonFullscreenBounds);
     }
 
-    @Test
-    public void testDefaultTaskFactoryNotNull() throws Exception {
-        assertNotNull(Task.getTaskFactory());
-    }
-
     /** Ensure we have no chance to modify the original intent. */
     @Test
     public void testCopyBaseIntentForTaskInfo() {
@@ -136,23 +126,6 @@ public class TaskRecordTests extends ActivityTestsBase {
 
         // The intent of info should be a copy so assert that they are different instances.
         assertThat(info.baseIntent, not(sameInstance(task.getBaseIntent())));
-    }
-
-    @Test
-    public void testCreateTestRecordUsingCustomizedFactory() throws Exception {
-        TestTaskFactory factory = new TestTaskFactory();
-        Task.setTaskFactory(factory);
-
-        try {
-            assertFalse(factory.mCreated);
-
-            Task.create(mService, 0 /*taskId*/, 0 /*activityType*/,
-                    new ActivityInfo(), new Intent(), false /* createdByOrganizer */);
-
-            assertTrue(factory.mCreated);
-        } finally {
-            Task.setTaskFactory(null);
-        }
     }
 
     @Test
@@ -448,6 +421,21 @@ public class TaskRecordTests extends ActivityTestsBase {
     }
 
     @Test
+    public void testFullScreenTaskNotAdjustedByMinimalSize() {
+        final Task fullscreenTask = new TaskBuilder(mSupervisor).build();
+        final Rect originalTaskBounds = new Rect(fullscreenTask.getBounds());
+        final ActivityInfo aInfo = new ActivityInfo();
+        aInfo.windowLayout = new ActivityInfo.WindowLayout(0 /* width */, 0 /* widthFraction */,
+                    0 /* height */, 0 /* heightFraction */, 0 /* gravity */,
+                    originalTaskBounds.width() * 2 /* minWidth */,
+                    originalTaskBounds.height() * 2 /* minHeight */);
+        fullscreenTask.setMinDimensions(aInfo);
+        fullscreenTask.onConfigurationChanged(fullscreenTask.getParent().getConfiguration());
+
+        assertEquals(originalTaskBounds, fullscreenTask.getBounds());
+    }
+
+    @Test
     public void testInsetDisregardedWhenFreeformOverlapsNavBar() {
         TaskDisplayArea taskDisplayArea = mService.mRootWindowContainer.getDefaultTaskDisplayArea();
         ActivityStack stack = taskDisplayArea.createStack(WINDOWING_MODE_FULLSCREEN,
@@ -525,8 +513,9 @@ public class TaskRecordTests extends ActivityTestsBase {
         info.packageName = DEFAULT_COMPONENT_PACKAGE_NAME;
         info.targetActivity = targetClassName;
 
-        final Task task = Task.create(mService, 1 /* taskId */, info, intent,
-                null /* voiceSession */, null /* voiceInteractor */, null /*stack*/);
+        final Task task = new ActivityStack(mService, 1 /* taskId */, info, intent,
+                null /* voiceSession */, null /* voiceInteractor */, null /* taskDescriptor */,
+                null /*stack*/);
         assertEquals("The alias activity component should be saved in task intent.", aliasClassName,
                 task.intent.getComponent().getClassName());
 
@@ -1022,49 +1011,5 @@ public class TaskRecordTests extends ActivityTestsBase {
                 0, false, null, 0, 0, 0, 0, 0, null, null, 0, false, false, false, 0,
                 0, null /*ActivityInfo*/, null /*_voiceSession*/, null /*_voiceInteractor*/,
                 null /*stack*/);
-    }
-
-    private static class TestTaskFactory extends TaskFactory {
-        private boolean mCreated = false;
-
-        @Override
-        Task create(ActivityTaskManagerService service, int taskId, int activityType,
-                ActivityInfo info, Intent intent, boolean createdByOrganizer) {
-            mCreated = true;
-            return null;
-        }
-
-        @Override
-        Task create(ActivityTaskManagerService service, int taskId, ActivityInfo info,
-                Intent intent, IVoiceInteractionSession voiceSession,
-                IVoiceInteractor voiceInteractor, ActivityStack stack) {
-            mCreated = true;
-            return null;
-        }
-
-        @Override
-        Task create(ActivityTaskManagerService service, int taskId, Intent intent,
-                Intent affinityIntent, String affinity, String rootAffinity,
-                ComponentName realActivity,
-                ComponentName origActivity, boolean rootWasReset, boolean autoRemoveRecents,
-                boolean askedCompatMode, int userId, int effectiveUid, String lastDescription,
-                long lastTimeMoved,
-                boolean neverRelinquishIdentity,
-                ActivityManager.TaskDescription lastTaskDescription,
-                int taskAffiliation, int prevTaskId, int nextTaskId, int taskAffiliationColor,
-                int callingUid, String callingPackage, String callingFeatureId, int resizeMode,
-                boolean supportsPictureInPicture,
-                boolean realActivitySuspended, boolean userSetupComplete, int minWidth,
-                int minHeight, ActivityStack stack) {
-            mCreated = true;
-            return null;
-        }
-
-        @Override
-        Task restoreFromXml(XmlPullParser in, ActivityStackSupervisor stackSupervisor)
-                throws IOException, XmlPullParserException {
-            mCreated = true;
-            return null;
-        }
     }
 }

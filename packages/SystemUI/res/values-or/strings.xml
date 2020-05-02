@@ -36,7 +36,7 @@
     <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"ବ୍ୟାଟେରୀ ସେଭର୍‌ ଚାଲୁ କରିବେ?"</string>
     <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"ବ୍ୟାଟେରୀ ସେଭର୍ ବିଷୟରେ"</string>
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"ଅନ୍‌ କରନ୍ତୁ"</string>
-    <string name="battery_saver_start_action" msgid="4553256017945469937">"ବ୍ୟାଟେରୀ ସେଭର୍‌ ଅନ୍ କରନ୍ତୁ"</string>
+    <string name="battery_saver_start_action" msgid="4553256017945469937">"ବ୍ୟାଟେରୀ ସେଭର୍‌ ଚାଲୁ କରନ୍ତୁ"</string>
     <string name="status_bar_settings_settings_button" msgid="534331565185171556">"ସେଟିଂସ୍"</string>
     <string name="status_bar_settings_wifi_button" msgid="7243072479837270946">"ୱାଇ-ଫାଇ"</string>
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"ଅଟୋ-ରୋଟେଟ୍‌ ସ୍କ୍ରିନ୍"</string>
@@ -430,6 +430,8 @@
     <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"ସ୍କ୍ରିନ୍ ରେକର୍ଡ"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"ଆରମ୍ଭ କରନ୍ତୁ"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"ବନ୍ଦ କରନ୍ତୁ"</string>
+    <!-- no translation found for media_seamless_remote_device (177033467332920464) -->
+    <skip />
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"ଆପ୍‌କୁ ବଦଳ କରିବା ପାଇଁ ସ୍ଵାଇପ୍ କରନ୍ତୁ"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"ଆପ୍‌ଗୁଡ଼ିକ ମଧ୍ୟରେ ଶୀଘ୍ର ବଦଳ କରିବା ପାଇଁ ଡାହାଣକୁ ଡ୍ରାଗ୍ କରନ୍ତୁ"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"ସଂକ୍ଷିପ୍ତ ବିବରଣୀକୁ ଟୋଗଲ୍ କରନ୍ତୁ"</string>
@@ -712,6 +714,8 @@
     <string name="notification_channel_summary_priority" msgid="7415770044553264622">"ଏହା ବାର୍ତ୍ତାଳାପ ବିଭାଗର ଶୀର୍ଷରେ ବବଲ୍ ଭାବେ ଦେଖାଯାଏ।"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"ସେଟିଂସ୍"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"ପ୍ରାଥମିକତା"</string>
+    <!-- no translation found for no_shortcut (7176375126961212514) -->
+    <skip />
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"ବର୍ତ୍ତମାନ କୌଣସି ବବଲ୍ ନାହିଁ"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"ବର୍ତ୍ତମାନର ଏବଂ ଖାରଜ କରାଯାଇଥିବା ବବଲଗୁଡ଼ିକ ଏଠାରେ ଦେଖାଯିବ"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"ଏହି ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକ ପରିବର୍ତ୍ତନ କରିହେବ ନାହିଁ।"</string>
@@ -999,8 +1003,7 @@
     <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"ଯେ କୌଣସି ସମୟରେ ବବଲଗୁଡ଼ିକ ନିୟନ୍ତ୍ରଣ କରନ୍ତୁ"</string>
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"ଏହି ଆପର ବବଲଗୁଡ଼ିକ ବନ୍ଦ କରିବା ପାଇଁ \'ପରିଚାଳନା କରନ୍ତୁ\' ବଟନରେ ଟାପ୍ କରନ୍ତୁ"</string>
     <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"ବୁଝିଗଲି"</string>
-    <!-- no translation found for bubbles_app_settings (5779443644062348657) -->
-    <skip />
+    <string name="bubbles_app_settings" msgid="5779443644062348657">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> ସେଟିଂସ୍"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"ସିଷ୍ଟମ୍ ନାଭିଗେସନ୍ ଅପ୍‌ଡେଟ୍ ହୋଇଛି। ପରିବର୍ତ୍ତନ କରିବା ପାଇଁ, ସେଟିଂସ୍‌କୁ ଯାଆନ୍ତୁ।"</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"ସିଷ୍ଟମ୍ ନାଭିଗେସନ୍ ଅପ୍‌ଡେଟ୍ କରିବା ପାଇଁ ସେଟିଂସ୍‍କୁ ଯାଆନ୍ତୁ"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"ଷ୍ଟାଣ୍ଡବାଏ"</string>
@@ -1025,6 +1028,8 @@
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"ପାୱାର ମେନୁରୁ ଆକ୍ସେସ୍ କରିବାକୁ ନିୟନ୍ତ୍ରଣଗୁଡ଼ିକୁ ବାଛନ୍ତୁ"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"ନିୟନ୍ତ୍ରଣଗୁଡ଼ିକ ପୁଣି ସଜାଇବାକୁ ସେଗୁଡ଼ିକୁ ଧରି ଟାଣନ୍ତୁ"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"ସମସ୍ତ ନିୟନ୍ତ୍ରଣ କାଢ଼ି ଦିଆଯାଇଛି"</string>
+    <!-- no translation found for controls_favorite_toast_no_changes (7094494210840877931) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"ସବୁ ନିୟନ୍ତ୍ରଣର ତାଲିକା ଲୋଡ୍ କରିପାରିଲା ନାହିଁ।"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"ଅନ୍ୟ"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"ଡିଭାଇସ୍ ନିୟନ୍ତ୍ରଣଗୁଡ଼ିକରେ ଯୋଗ କରନ୍ତୁ"</string>
@@ -1033,6 +1038,7 @@
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"ନିୟନ୍ତ୍ରଣଗୁଡ଼ିକ ଅପଡେଟ୍ କରାଯାଇଛି"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"PINରେ ଅକ୍ଷର କିମ୍ୱା ସଙ୍କେତଗୁଡ଼ିକ ଥାଏ"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"<xliff:g id="DEVICE">%s</xliff:g> ଯାଞ୍ଚ କରନ୍ତୁ"</string>
+    <string name="controls_pin_wrong" msgid="6162694056042164211">"ଭୁଲ PIN"</string>
     <string name="controls_pin_verifying" msgid="3755045989392131746">"ଯାଞ୍ଚ କରାଯାଉଛି…"</string>
     <string name="controls_pin_instructions" msgid="6363309783822475238">"PIN ଲେଖନ୍ତୁ"</string>
     <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"ଅନ୍ୟ ଏକ PIN ଚେଷ୍ଟା କରି ଦେଖନ୍ତୁ"</string>
@@ -1042,6 +1048,9 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"ସୁପାରିଶଗୁଡ଼ିକ ଲୋଡ୍ କରାଯାଉଛି"</string>
     <string name="controls_media_close_session" msgid="9023534788828414585">"ଏହି ମିଡିଆ ସେସନ୍ ବନ୍ଦ କରନ୍ତୁ"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"ନିଷ୍କ୍ରିୟ ଅଛି, ଆପ ଯାଞ୍ଚ କରନ୍ତୁ"</string>
+    <string name="controls_error_retryable" msgid="864025882878378470">"ତ୍ରୁଟି, ପୁଣି ଚେଷ୍ଟା କରୁଛି…"</string>
+    <string name="controls_error_removed" msgid="6299213591234723805">"ଡିଭାଇସ୍ କାଢ଼ି ଦିଆଯାଇଛି"</string>
+    <string name="controls_error_generic" msgid="352500456918362905">"ସ୍ଥିତି ଲୋଡ୍ କରାଯାଇପାରିବ ନାହିଁ"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"ତ୍ରୁଟି ହୋଇଛି, ପୁଣି ଚେଷ୍ଟା କର"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"ପ୍ରଗତିରେ ଅଛି"</string>
     <string name="controls_added_tooltip" msgid="4842812921719153085">"ନୂଆ ନିୟନ୍ତ୍ରଣଗୁଡ଼ିକୁ ଦେଖିବା ପାଇଁ ପାୱାର ବଟନକୁ ଧରି ରଖନ୍ତୁ"</string>

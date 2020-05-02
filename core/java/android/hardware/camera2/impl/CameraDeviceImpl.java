@@ -825,6 +825,7 @@ public class CameraDeviceImpl extends CameraDevice
         if (surface == null) throw new IllegalArgumentException("Surface is null");
 
         synchronized(mInterfaceLock) {
+            checkIfCameraClosedOrInError();
             int streamId = -1;
             for (int i = 0; i < mConfiguredOutputs.size(); i++) {
                 final List<Surface> surfaces = mConfiguredOutputs.valueAt(i).getSurfaces();
@@ -847,6 +848,7 @@ public class CameraDeviceImpl extends CameraDevice
                 maxCount);
 
         synchronized(mInterfaceLock) {
+            checkIfCameraClosedOrInError();
             int streamId = -1;
             for (int i = 0; i < mConfiguredOutputs.size(); i++) {
                 if (surface == mConfiguredOutputs.valueAt(i).getSurface()) {
@@ -865,6 +867,7 @@ public class CameraDeviceImpl extends CameraDevice
     public void updateOutputConfiguration(OutputConfiguration config)
             throws CameraAccessException {
         synchronized(mInterfaceLock) {
+            checkIfCameraClosedOrInError();
             int streamId = -1;
             for (int i = 0; i < mConfiguredOutputs.size(); i++) {
                 if (config.getSurface() == mConfiguredOutputs.valueAt(i).getSurface()) {
@@ -895,6 +898,7 @@ public class CameraDeviceImpl extends CameraDevice
         CameraOfflineSession ret;
 
         synchronized(mInterfaceLock) {
+            checkIfCameraClosedOrInError();
             if (mOfflineSessionImpl != null) {
                 throw new IllegalStateException("Switch to offline mode already in progress");
             }
@@ -987,6 +991,7 @@ public class CameraDeviceImpl extends CameraDevice
         if (surface == null) throw new IllegalArgumentException("Surface is null");
 
         synchronized(mInterfaceLock) {
+            checkIfCameraClosedOrInError();
             int streamId = -1;
             for (int i = 0; i < mConfiguredOutputs.size(); i++) {
                 if (surface == mConfiguredOutputs.valueAt(i).getSurface()) {
@@ -1009,6 +1014,8 @@ public class CameraDeviceImpl extends CameraDevice
         }
 
         synchronized(mInterfaceLock) {
+            checkIfCameraClosedOrInError();
+
             for (OutputConfiguration config : outputConfigs) {
                 int streamId = -1;
                 for (int i = 0; i < mConfiguredOutputs.size(); i++) {

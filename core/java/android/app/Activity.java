@@ -2748,11 +2748,7 @@ public class Activity extends ContextThemeWrapper
      * @return True if the activity is in multi-window mode.
      */
     public boolean isInMultiWindowMode() {
-        try {
-            return ActivityTaskManager.getService().isInMultiWindowMode(mToken);
-        } catch (RemoteException e) {
-        }
-        return false;
+        return mLastDispatchedIsInMultiWindowMode == Boolean.TRUE;
     }
 
     /**
@@ -2795,11 +2791,7 @@ public class Activity extends ContextThemeWrapper
      * @return True if the activity is in picture-in-picture mode.
      */
     public boolean isInPictureInPictureMode() {
-        try {
-            return ActivityTaskManager.getService().isInPictureInPictureMode(mToken);
-        } catch (RemoteException e) {
-        }
-        return false;
+        return mLastDispatchedIsInPictureInPictureMode == Boolean.TRUE;
     }
 
     /**
@@ -3751,7 +3743,6 @@ public class Activity extends ContextThemeWrapper
      * To receive this callback, you must return true from onKeyDown for the current
      * event stream.
      *
-     * @see KeyEvent.Callback#onKeyLongPress()
      * @see KeyEvent.Callback#onKeyLongPress(int, KeyEvent)
      */
     public boolean onKeyLongPress(int keyCode, KeyEvent event) {

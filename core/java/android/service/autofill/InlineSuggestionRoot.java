@@ -52,13 +52,8 @@ public class InlineSuggestionRoot extends FrameLayout {
     }
 
     @Override
-    public boolean onInterceptTouchEvent(MotionEvent ev) {
-        return true;
-    }
-
-    @Override
     @SuppressLint("ClickableViewAccessibility")
-    public boolean onTouchEvent(@NonNull MotionEvent event) {
+    public boolean dispatchTouchEvent(@NonNull MotionEvent event) {
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN: {
                 mDownX = event.getX();
@@ -80,6 +75,6 @@ public class InlineSuggestionRoot extends FrameLayout {
                 }
             } break;
         }
-        return super.onTouchEvent(event);
+        return super.dispatchTouchEvent(event);
     }
 }
