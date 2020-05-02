@@ -1464,8 +1464,23 @@ public final class SurfaceControl implements Parcelable {
      */
     public static final class DesiredDisplayConfigSpecs {
         public int defaultConfig;
-        public float minRefreshRate;
-        public float maxRefreshRate;
+        /**
+         * The primary refresh rate range represents display manager's general guidance on the
+         * display configs surface flinger will consider when switching refresh rates. Unless
+         * surface flinger has a specific reason to do otherwise, it will stay within this range.
+         */
+        public float primaryRefreshRateMin;
+        public float primaryRefreshRateMax;
+        /**
+         * The app request refresh rate range allows surface flinger to consider more display
+         * configs when switching refresh rates. Although surface flinger will generally stay within
+         * the primary range, specific considerations, such as layer frame rate settings specified
+         * via the setFrameRate() api, may cause surface flinger to go outside the primary
+         * range. Surface flinger never goes outside the app request range. The app request range
+         * will be greater than or equal to the primary refresh rate range, never smaller.
+         */
+        public float appRequestRefreshRateMin;
+        public float appRequestRefreshRateMax;
 
         public DesiredDisplayConfigSpecs() {}
 
@@ -1473,11 +1488,14 @@ public final class SurfaceControl implements Parcelable {
             copyFrom(other);
         }
 
-        public DesiredDisplayConfigSpecs(
-                int defaultConfig, float minRefreshRate, float maxRefreshRate) {
+        public DesiredDisplayConfigSpecs(int defaultConfig, float primaryRefreshRateMin,
+                float primaryRefreshRateMax, float appRequestRefreshRateMin,
+                float appRequestRefreshRateMax) {
             this.defaultConfig = defaultConfig;
-            this.minRefreshRate = minRefreshRate;
-            this.maxRefreshRate = maxRefreshRate;
+            this.primaryRefreshRateMin = primaryRefreshRateMin;
+            this.primaryRefreshRateMax = primaryRefreshRateMax;
+            this.appRequestRefreshRateMin = appRequestRefreshRateMin;
+            this.appRequestRefreshRateMax = appRequestRefreshRateMax;
         }
 
         @Override
@@ -1490,8 +1508,10 @@ public final class SurfaceControl implements Parcelable {
          */
         public boolean equals(DesiredDisplayConfigSpecs other) {
             return other != null && defaultConfig == other.defaultConfig
-                    && minRefreshRate == other.minRefreshRate
-                    && maxRefreshRate == other.maxRefreshRate;
+                    && primaryRefreshRateMin == other.primaryRefreshRateMin
+                    && primaryRefreshRateMax == other.primaryRefreshRateMax
+                    && appRequestRefreshRateMin == other.appRequestRefreshRateMin
+                    && appRequestRefreshRateMax == other.appRequestRefreshRateMax;
         }
 
         @Override
@@ -1504,14 +1524,18 @@ public final class SurfaceControl implements Parcelable {
          */
         public void copyFrom(DesiredDisplayConfigSpecs other) {
             defaultConfig = other.defaultConfig;
-            minRefreshRate = other.minRefreshRate;
-            maxRefreshRate = other.maxRefreshRate;
+            primaryRefreshRateMin = other.primaryRefreshRateMin;
+            primaryRefreshRateMax = other.primaryRefreshRateMax;
+            appRequestRefreshRateMin = other.appRequestRefreshRateMin;
+            appRequestRefreshRateMax = other.appRequestRefreshRateMax;
         }
 
         @Override
         public String toString() {
-            return String.format("defaultConfig=%d min=%.0f max=%.0f", defaultConfig,
-                    minRefreshRate, maxRefreshRate);
+            return String.format("defaultConfig=%d primaryRefreshRateRange=[%.0f %.0f]"
+                            + " appRequestRefreshRateRange=[%.0f %.0f]",
+                    defaultConfig, primaryRefreshRateMin, primaryRefreshRateMax,
+                    appRequestRefreshRateMin, appRequestRefreshRateMax);
         }
     }
 
