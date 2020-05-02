@@ -959,7 +959,7 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
             windowingMode = WINDOWING_MODE_UNDEFINED;
         }
 
-        final ActivityStack stack = (ActivityStack) Task.create(mAtmService, stackId, activityType,
+        final ActivityStack stack = new ActivityStack(mAtmService, stackId, activityType,
                 info, intent, createdByOrganizer);
         if (launchRootTask != null) {
             launchRootTask.addChild(stack, onTop ? POSITION_TOP : POSITION_BOTTOM);
