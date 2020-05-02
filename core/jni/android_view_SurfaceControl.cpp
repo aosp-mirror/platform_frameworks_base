@@ -170,8 +170,10 @@ static struct {
     jclass clazz;
     jmethodID ctor;
     jfieldID defaultConfig;
-    jfieldID minRefreshRate;
-    jfieldID maxRefreshRate;
+    jfieldID primaryRefreshRateMin;
+    jfieldID primaryRefreshRateMax;
+    jfieldID appRequestRefreshRateMin;
+    jfieldID appRequestRefreshRateMax;
 } gDesiredDisplayConfigSpecsClassInfo;
 
 class JNamedColorSpace {
@@ -906,13 +908,24 @@ static jboolean nativeSetDesiredDisplayConfigSpecs(JNIEnv* env, jclass clazz, jo
 
     jint defaultConfig = env->GetIntField(desiredDisplayConfigSpecs,
                                           gDesiredDisplayConfigSpecsClassInfo.defaultConfig);
-    jfloat minRefreshRate = env->GetFloatField(desiredDisplayConfigSpecs,
-                                               gDesiredDisplayConfigSpecsClassInfo.minRefreshRate);
-    jfloat maxRefreshRate = env->GetFloatField(desiredDisplayConfigSpecs,
-                                               gDesiredDisplayConfigSpecsClassInfo.maxRefreshRate);
+    jfloat primaryRefreshRateMin =
+            env->GetFloatField(desiredDisplayConfigSpecs,
+                               gDesiredDisplayConfigSpecsClassInfo.primaryRefreshRateMin);
+    jfloat primaryRefreshRateMax =
+            env->GetFloatField(desiredDisplayConfigSpecs,
+                               gDesiredDisplayConfigSpecsClassInfo.primaryRefreshRateMax);
+    jfloat appRequestRefreshRateMin =
+            env->GetFloatField(desiredDisplayConfigSpecs,
+                               gDesiredDisplayConfigSpecsClassInfo.appRequestRefreshRateMin);
+    jfloat appRequestRefreshRateMax =
+            env->GetFloatField(desiredDisplayConfigSpecs,
+                               gDesiredDisplayConfigSpecsClassInfo.appRequestRefreshRateMax);
 
-    size_t result = SurfaceComposerClient::setDesiredDisplayConfigSpecs(
-            token, defaultConfig, minRefreshRate, maxRefreshRate);
+    size_t result = SurfaceComposerClient::setDesiredDisplayConfigSpecs(token, defaultConfig,
+                                                                        primaryRefreshRateMin,
+                                                                        primaryRefreshRateMax,
+                                                                        appRequestRefreshRateMin,
+                                                                        appRequestRefreshRateMax);
     return result == NO_ERROR ? JNI_TRUE : JNI_FALSE;
 }
 
@@ -921,16 +934,23 @@ static jobject nativeGetDesiredDisplayConfigSpecs(JNIEnv* env, jclass clazz, job
     if (token == nullptr) return nullptr;
 
     int32_t defaultConfig;
-    float minRefreshRate;
-    float maxRefreshRate;
-    if (SurfaceComposerClient::getDesiredDisplayConfigSpecs(token, &defaultConfig, &minRefreshRate,
-                                                            &maxRefreshRate) != NO_ERROR) {
+    float primaryRefreshRateMin;
+    float primaryRefreshRateMax;
+    float appRequestRefreshRateMin;
+    float appRequestRefreshRateMax;
+    if (SurfaceComposerClient::getDesiredDisplayConfigSpecs(token, &defaultConfig,
+                                                            &primaryRefreshRateMin,
+                                                            &primaryRefreshRateMax,
+                                                            &appRequestRefreshRateMin,
+                                                            &appRequestRefreshRateMax) !=
+        NO_ERROR) {
         return nullptr;
     }
 
     return env->NewObject(gDesiredDisplayConfigSpecsClassInfo.clazz,
-                          gDesiredDisplayConfigSpecsClassInfo.ctor, defaultConfig, minRefreshRate,
-                          maxRefreshRate);
+                          gDesiredDisplayConfigSpecsClassInfo.ctor, defaultConfig,
+                          primaryRefreshRateMin, primaryRefreshRateMax, appRequestRefreshRateMin,
+                          appRequestRefreshRateMax);
 }
 
 static jint nativeGetActiveConfig(JNIEnv* env, jclass clazz, jobject tokenObj) {
@@ -1740,13 +1760,17 @@ int register_android_view_SurfaceControl(JNIEnv* env)
     gDesiredDisplayConfigSpecsClassInfo.clazz =
             MakeGlobalRefOrDie(env, desiredDisplayConfigSpecsClazz);
     gDesiredDisplayConfigSpecsClassInfo.ctor =
-            GetMethodIDOrDie(env, gDesiredDisplayConfigSpecsClassInfo.clazz, "<init>", "(IFF)V");
+            GetMethodIDOrDie(env, gDesiredDisplayConfigSpecsClassInfo.clazz, "<init>", "(IFFFF)V");
     gDesiredDisplayConfigSpecsClassInfo.defaultConfig =
             GetFieldIDOrDie(env, desiredDisplayConfigSpecsClazz, "defaultConfig", "I");
-    gDesiredDisplayConfigSpecsClassInfo.minRefreshRate =
-            GetFieldIDOrDie(env, desiredDisplayConfigSpecsClazz, "minRefreshRate", "F");
-    gDesiredDisplayConfigSpecsClassInfo.maxRefreshRate =
-            GetFieldIDOrDie(env, desiredDisplayConfigSpecsClazz, "maxRefreshRate", "F");
+    gDesiredDisplayConfigSpecsClassInfo.primaryRefreshRateMin =
+            GetFieldIDOrDie(env, desiredDisplayConfigSpecsClazz, "primaryRefreshRateMin", "F");
+    gDesiredDisplayConfigSpecsClassInfo.primaryRefreshRateMax =
+            GetFieldIDOrDie(env, desiredDisplayConfigSpecsClazz, "primaryRefreshRateMax", "F");
+    gDesiredDisplayConfigSpecsClassInfo.appRequestRefreshRateMin =
+            GetFieldIDOrDie(env, desiredDisplayConfigSpecsClazz, "appRequestRefreshRateMin", "F");
+    gDesiredDisplayConfigSpecsClassInfo.appRequestRefreshRateMax =
+            GetFieldIDOrDie(env, desiredDisplayConfigSpecsClazz, "appRequestRefreshRateMax", "F");
 
     return err;
 }
