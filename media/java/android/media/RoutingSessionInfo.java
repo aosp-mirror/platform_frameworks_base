@@ -130,7 +130,7 @@ public final class RoutingSessionInfo implements Parcelable {
      * In order to ensure uniqueness in {@link MediaRouter2} side, the value of this method
      * can be different from what was set in {@link MediaRoute2ProviderService}.
      *
-     * @see Builder#RoutingSessionInfo.Builder(String, String)
+     * @see Builder#Builder(String, String)
      */
     @NonNull
     public String getId() {
