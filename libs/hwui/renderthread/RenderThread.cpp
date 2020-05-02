@@ -27,7 +27,6 @@
 #include "pipeline/skia/SkiaOpenGLPipeline.h"
 #include "pipeline/skia/SkiaVulkanPipeline.h"
 #include "renderstate/RenderState.h"
-#include "utils/FatVector.h"
 #include "utils/TimeUtils.h"
 #include "utils/TraceUtils.h"
 
@@ -39,6 +38,8 @@
 #include <utils/Log.h>
 #include <utils/Mutex.h>
 #include <thread>
+
+#include <ui/FatVector.h>
 
 namespace android {
 namespace uirenderer {
