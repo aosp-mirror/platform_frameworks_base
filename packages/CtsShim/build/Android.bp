@@ -79,6 +79,7 @@ android_app {
         "com.android.apex.cts.shim.v2_unsigned_payload",
         "com.android.apex.cts.shim.v3",
     ],
+    min_sdk_version: "24",
 }
 
 //##########################################################
@@ -152,4 +153,5 @@ android_app {
         "com.android.apex.cts.shim.v2_unsigned_payload",
         "com.android.apex.cts.shim.v3",
     ],
+    min_sdk_version: "24",
 }
