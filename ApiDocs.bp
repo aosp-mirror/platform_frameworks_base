@@ -79,7 +79,7 @@ stubs_defaults {
         "sdk-dir",
         "api-versions-jars-dir",
     ],
-    previous_api: ":last-released-public-api",
+    previous_api: ":android.api.public.latest",
     merge_annotations_dirs: [
         "metalava-manual",
     ],
