@@ -57,12 +57,12 @@
     <string name="label_view" msgid="6815442985276363364">"Көрініс"</string>
     <string name="always_use_device" msgid="210535878779644679">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> қосылған кезде, <xliff:g id="APPLICATION">%1$s</xliff:g> қолданбасын ашу"</string>
     <string name="always_use_accessory" msgid="1977225429341838444">"<xliff:g id="USB_ACCESSORY">%2$s</xliff:g> қосылған кезде, <xliff:g id="APPLICATION">%1$s</xliff:g> қолданбасын ашу"</string>
-    <string name="usb_debugging_title" msgid="8274884945238642726">"USB жөндеуге рұқсат берілсін бе?"</string>
+    <string name="usb_debugging_title" msgid="8274884945238642726">"USB арқылы түзетуге рұқсат берілсін бе?"</string>
     <string name="usb_debugging_message" msgid="5794616114463921773">"Бұл компьютердің  RSA перне саусақ таңбасы:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="4003121804294739548">"Осы компьютерден әрқашан рұқсат беру"</string>
     <string name="usb_debugging_allow" msgid="1722643858015321328">"Рұқсат беру"</string>
-    <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"USB жөндеу рұқсат етілмеген"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"Бұл құрылғыға жаңа кірген пайдаланушы USB түзетуін іске қосылмайды. Бұл мүмкіндікті пайдалану үшін негізгі пайдаланушыға ауысыңыз."</string>
+    <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"USB арқылы түзетуге рұқсат етілмеген"</string>
+    <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"Бұл құрылғыға қазір кірген пайдаланушы USB арқылы түзетуді іске қосылмайды. Бұл мүмкіндікті пайдалану үшін негізгі пайдаланушыға ауысыңыз."</string>
     <string name="wifi_debugging_title" msgid="7300007687492186076">"Бұл желіде сымсыз түзетуге рұқсат етілсін бе?"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"Желі атауы (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nWi‑Fi мекенжайы (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
     <string name="wifi_debugging_always" msgid="2968383799517975155">"Осы желіде үнемі рұқсат ету"</string>
@@ -255,8 +255,7 @@
     <!-- no translation found for accessibility_work_mode (1280025758672376313) -->
     <skip />
     <string name="accessibility_notification_dismissed" msgid="4411652015138892952">"Хабар алынып тасталды."</string>
-    <!-- no translation found for accessibility_bubble_dismissed (270358867566720729) -->
-    <skip />
+    <string name="accessibility_bubble_dismissed" msgid="270358867566720729">"Қалқымалы анықтама өшірілді."</string>
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"Хабарландыру тақтасы"</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"Жылдам параметрлер."</string>
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"Бекіту экраны."</string>
@@ -753,7 +752,7 @@
     <string name="notification_menu_snooze_action" msgid="5415729610393475019">"Есіме салу"</string>
     <string name="notification_menu_settings_action" msgid="7085494017202764285">"Параметрлер"</string>
     <string name="snooze_undo" msgid="60890935148417175">"КЕРІ ҚАЙТАРУ"</string>
-    <string name="snoozed_for_time" msgid="7586689374860469469">"<xliff:g id="TIME_AMOUNT">%1$s</xliff:g> кідіртілді"</string>
+    <string name="snoozed_for_time" msgid="7586689374860469469">"<xliff:g id="TIME_AMOUNT">%1$s</xliff:g> кейінге қалдырылды"</string>
     <plurals name="snoozeHourOptions" formatted="false" msgid="2066838694120718170">
       <item quantity="other">%d сағат</item>
       <item quantity="one">%d сағат</item>
@@ -1028,8 +1027,7 @@
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"\"Қуат\" мәзірінен пайдалануға болатын басқару элементтерін таңдаңыз."</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Басқару элементтерінің ретін өзгерту үшін оларды басып тұрып сүйреңіз."</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Барлық басқару элементтері өшірілді."</string>
-    <!-- no translation found for controls_favorite_toast_no_changes (7094494210840877931) -->
-    <skip />
+    <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Өзгерістер сақталмады."</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Барлық басқару элементі тізімі жүктелмеді."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Басқа"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Құрылғы басқару виджеттеріне қосу"</string>

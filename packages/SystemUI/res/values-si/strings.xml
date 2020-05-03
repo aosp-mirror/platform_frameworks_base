@@ -255,8 +255,7 @@
     <!-- no translation found for accessibility_work_mode (1280025758672376313) -->
     <skip />
     <string name="accessibility_notification_dismissed" msgid="4411652015138892952">"දැනුම්දීම නිෂ්ප්‍රභා කරඇත."</string>
-    <!-- no translation found for accessibility_bubble_dismissed (270358867566720729) -->
-    <skip />
+    <string name="accessibility_bubble_dismissed" msgid="270358867566720729">"බුබුල ඉවත දමා ඇත."</string>
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"දැනුම්දීම් ආවරණය."</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"ක්ෂණික සැකසීම්."</string>
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"අගුළු තිරය."</string>
@@ -1028,8 +1027,7 @@
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"බල මෙනුවෙන් ප්‍රවේශ වීමට පාලන තෝරා ගන්න"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"පාලන නැවත පිළියෙළ කිරීමට අල්ලාගෙන සිට අදින්න"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"සියලු පාලන ඉවත් කර ඇත"</string>
-    <!-- no translation found for controls_favorite_toast_no_changes (7094494210840877931) -->
-    <skip />
+    <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"වෙනස් කිරීම් නොසුරැකිණි"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"සියලු පාලනවල ලැයිස්තුව පූරණය කළ නොහැකි විය."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"වෙනත්"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"උපාංග පාලන වෙත එක් කරන්න"</string>

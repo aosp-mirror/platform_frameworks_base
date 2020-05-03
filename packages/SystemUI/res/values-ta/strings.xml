@@ -1005,8 +1005,7 @@
     <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"குமிழ்களை எப்போது வேண்டுமானாலும் கட்டுப்படுத்தலாம்"</string>
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"இந்த ஆப்ஸிலிருந்து வரும் குமிழ்களை முடக்க, நிர்வகி என்பதைத் தட்டவும்"</string>
     <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"சரி"</string>
-    <!-- no translation found for bubbles_app_settings (5779443644062348657) -->
-    <skip />
+    <string name="bubbles_app_settings" msgid="5779443644062348657">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> அமைப்புகள்"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"சிஸ்டம் நேவிகேஷன் மாற்றப்பட்டது. மாற்றங்களைச் செய்ய ‘அமைப்புகளுக்குச்’ செல்லவும்."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"சிஸ்டம் நேவிகேஷனை மாற்ற ’அமைப்புகளுக்குச்’ செல்லவும்"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"இயக்க நேரம்"</string>
