@@ -45,6 +45,7 @@ enum {
     SDK_O_MR1 = 27,
     SDK_P = 28,
     SDK_Q = 29,
+    SDK_R = 30,
 };
 
 #endif // H_AAPT_SDK_CONSTANTS
