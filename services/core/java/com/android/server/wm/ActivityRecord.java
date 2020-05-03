@@ -5526,6 +5526,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // timeout should not be caused by this.
         if (stopped) {
             final ActivityStack stack = mRootWindowContainer.getTopDisplayFocusedStack();
+            if (stack == null) {
+                return this;
+            }
             // Try to use the one which is closest to top.
             ActivityRecord r = stack.getResumedActivity();
             if (r == null) {
