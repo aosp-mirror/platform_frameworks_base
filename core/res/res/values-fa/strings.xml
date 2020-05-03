@@ -1849,9 +1849,9 @@
     <string name="stk_cc_ussd_to_dial" msgid="3139884150741157610">"‏درخواست USSD به تماس معمولی تغییر کرد"</string>
     <string name="stk_cc_ussd_to_ss" msgid="4826846653052609738">"‏درخواست USSD به‌درخواست SS تغییر کرد"</string>
     <string name="stk_cc_ussd_to_ussd" msgid="8343001461299302472">"‏به‌ درخواست USSD جدید تغییر کرد"</string>
-    <string name="stk_cc_ussd_to_dial_video" msgid="429118590323618623">"‏درخواست USSD به تماس ویدیویی تغییر کرد"</string>
+    <string name="stk_cc_ussd_to_dial_video" msgid="429118590323618623">"‏درخواست USSD به تماس تصویری تغییر کرد"</string>
     <string name="stk_cc_ss_to_dial" msgid="4087396658768717077">"‏درخواست SS به تماس معمولی تغییر کرد"</string>
-    <string name="stk_cc_ss_to_dial_video" msgid="1324194624384312664">"‏درخواست SS به تماس ویدیویی تغییر کرد"</string>
+    <string name="stk_cc_ss_to_dial_video" msgid="1324194624384312664">"‏درخواست SS به تماس تصویری تغییر کرد"</string>
     <string name="stk_cc_ss_to_ussd" msgid="8417905193112944760">"‏درخواست SS به‌ درخواست USSD تغییر کرد"</string>
     <string name="stk_cc_ss_to_ss" msgid="132040645206514450">"‏به‌ درخواست SS جدید تغییر کرد"</string>
     <string name="notification_work_profile_content_description" msgid="5296477955677725799">"نمایه کاری"</string>
