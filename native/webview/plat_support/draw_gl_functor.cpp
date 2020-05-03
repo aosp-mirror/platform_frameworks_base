@@ -87,7 +87,7 @@ class DrawGLFunctor : public Functor {
     }
 
     // Invoke the DrawGL method.
-    g_aw_drawgl_function(view_context_, &aw_info, NULL);
+    g_aw_drawgl_function(view_context_, &aw_info, TRUE);
 
     return DrawGlInfo::kStatusDone;
   }
