@@ -8044,7 +8044,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 | LayoutParams.FLAG_SLIPPERY);
         h.layoutParamsFlags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | sanitizedFlags;
         h.layoutParamsType = 0;
-        h.dispatchingTimeoutNanos = -1;
+        h.dispatchingTimeoutNanos = DEFAULT_INPUT_DISPATCHING_TIMEOUT_NANOS;
         h.canReceiveKeys = false;
         h.hasFocus = false;
         h.hasWallpaper = false;
