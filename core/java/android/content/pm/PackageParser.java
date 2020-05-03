@@ -2008,6 +2008,7 @@ public class PackageParser {
                     Slog.i(TAG, "Skipping target and overlay pair " + pkg.mOverlayTarget + " and "
                         + pkg.baseCodePath+ ": overlay ignored due to required system property: "
                         + propName + " with value: " + propValue);
+                    mParseError = PackageManager.INSTALL_PARSE_FAILED_SKIPPED;
                     return null;
                 }
 

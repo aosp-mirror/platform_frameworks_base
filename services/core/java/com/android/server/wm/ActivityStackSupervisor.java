@@ -1092,8 +1092,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         final boolean uidPresentOnDisplay = displayContent.isUidPresent(callingUid);
 
         final int displayOwnerUid = displayContent.mDisplay.getOwnerUid();
-        if (displayContent.mDisplay.getType() == TYPE_VIRTUAL && displayOwnerUid != SYSTEM_UID
-                && displayOwnerUid != aInfo.applicationInfo.uid) {
+        if (displayContent.mDisplay.getType() == TYPE_VIRTUAL && displayOwnerUid != SYSTEM_UID) {
             // Limit launching on virtual displays, because their contents can be read from Surface
             // by apps that created them.
             if ((aInfo.flags & ActivityInfo.FLAG_ALLOW_EMBEDDED) == 0) {
@@ -1452,16 +1451,15 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         /**
          * Workaround: Force-stop all the activities in the pinned stack before we reparent them
          * to the fullscreen stack.  This is to guarantee that when we are removing a stack,
-         * that the client receives onStop() before it is reparented.  We do this by detaching
-         * the stack from the display so that it will be considered invisible when
-         * ensureActivitiesVisible() is called, and all of its activities will be marked
-         * invisible as well and added to the stopping list.  After which we process the
+         * that the client receives onStop() before new windowing mode is set.
+         * We do this by detaching the stack from the display so that it will be considered
+         * invisible when ensureActivitiesVisible() is called, and all of its activities will be
+         * marked invisible as well and added to the stopping list.  After which we process the
          * stopping list by handling the idle.
          */
         stack.cancelAnimation();
         stack.setForceHidden(FLAG_FORCE_HIDDEN_FOR_PINNED_TASK, true /* set */);
         stack.ensureActivitiesVisible(null, 0, PRESERVE_WINDOWS);
-        stack.setForceHidden(FLAG_FORCE_HIDDEN_FOR_PINNED_TASK, false /* set */);
         activityIdleInternal(null /* idleActivity */, false /* fromTimeout */,
                 true /* processPausingActivities */, null /* configuration */);
 
@@ -1478,6 +1476,9 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                 toDisplay.getDefaultTaskDisplayArea().positionStackAtBottom(stack);
             }
 
+            // Follow on the workaround: activities are kept force hidden till the new windowing
+            // mode is set.
+            stack.setForceHidden(FLAG_FORCE_HIDDEN_FOR_PINNED_TASK, false /* set */);
             mRootWindowContainer.ensureActivitiesVisible(null, 0, PRESERVE_WINDOWS);
             mRootWindowContainer.resumeFocusedStacksTopActivities();
         } finally {
@@ -1935,11 +1936,14 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
     }
 
     static boolean printThisActivity(PrintWriter pw, ActivityRecord activity, String dumpPackage,
-            boolean needSep, String prefix) {
+            boolean needSep, String prefix, Runnable header) {
         if (activity != null) {
             if (dumpPackage == null || dumpPackage.equals(activity.packageName)) {
                 if (needSep) {
                     pw.println();
+                }
+                if (header != null) {
+                    header.run();
                 }
                 pw.print(prefix);
                 pw.println(activity);
@@ -1951,7 +1955,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
 
     static boolean dumpHistoryList(FileDescriptor fd, PrintWriter pw, List<ActivityRecord> list,
             String prefix, String label, boolean complete, boolean brief, boolean client,
-            String dumpPackage, boolean needNL, String header, Task lastTask) {
+            String dumpPackage, boolean needNL, Runnable header, Task lastTask) {
         String innerPrefix = null;
         String[] args = null;
         boolean printed = false;
@@ -1971,7 +1975,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                 needNL = false;
             }
             if (header != null) {
-                pw.println(header);
+                header.run();
                 header = null;
             }
             if (lastTask != r.getTask()) {
@@ -2242,12 +2246,6 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
     }
 
     void scheduleUpdateMultiWindowMode(Task task) {
-        // If the stack is animating in a way where we will be forcing a multi-mode change at the
-        // end, then ensure that we defer all in between multi-window mode changes
-        if (task.getStack().deferScheduleMultiWindowModeChanged()) {
-            return;
-        }
-
         final PooledConsumer c = PooledLambda.obtainConsumer(
                 ActivityStackSupervisor::addToMultiWindowModeChangedList, this,
                 PooledLambda.__(ActivityRecord.class));

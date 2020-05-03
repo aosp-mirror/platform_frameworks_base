@@ -388,7 +388,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         Watchdog.getInstance().addThread(mHandler);
 
         mDefaultPermissionGrantPolicy = new DefaultPermissionGrantPolicy(
-                context, mHandlerThread.getLooper(), this);
+                context, mHandlerThread.getLooper());
         SystemConfig systemConfig = SystemConfig.getInstance();
         mSystemPermissions = systemConfig.getSystemPermissions();
         mGlobalGids = systemConfig.getGlobalGids();

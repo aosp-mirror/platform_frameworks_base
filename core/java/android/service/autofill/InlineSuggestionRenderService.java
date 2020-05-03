@@ -144,22 +144,24 @@ public abstract class InlineSuggestionRenderService extends Service {
             final SurfaceControlViewHost host = new SurfaceControlViewHost(this, getDisplay(),
                     hostInputToken);
             host.setView(suggestionRoot, lp);
-            suggestionRoot.setOnClickListener((v) -> {
+
+            // Set the suggestion view to be non-focusable so that if its background is set to a
+            // ripple drawable, the ripple won't be shown initially.
+            suggestionView.setFocusable(false);
+            suggestionView.setOnClickListener((v) -> {
                 try {
-                    if (suggestionView.hasOnClickListeners()) {
-                        suggestionView.callOnClick();
-                    }
                     callback.onClick();
                 } catch (RemoteException e) {
                     Log.w(TAG, "RemoteException calling onClick()");
                 }
             });
-
-            suggestionRoot.setOnLongClickListener((v) -> {
+            final View.OnLongClickListener onLongClickListener =
+                    suggestionView.getOnLongClickListener();
+            suggestionView.setOnLongClickListener((v) -> {
+                if (onLongClickListener != null) {
+                    onLongClickListener.onLongClick(v);
+                }
                 try {
-                    if (suggestionView.hasOnLongClickListeners()) {
-                        suggestionView.performLongClick();
-                    }
                     callback.onLongClick();
                 } catch (RemoteException e) {
                     Log.w(TAG, "RemoteException calling onLongClick()");

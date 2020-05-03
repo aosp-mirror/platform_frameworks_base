@@ -86,6 +86,8 @@ public class QuickStepContract {
     // enabled (since it's used to navigate back within the bubbled app, or to collapse the bubble
     // stack.
     public static final int SYSUI_STATE_BUBBLES_EXPANDED = 1 << 14;
+    // The one-handed mode is active
+    public static final int SYSUI_STATE_ONE_HANDED_ACTIVE = 1 << 15;
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({SYSUI_STATE_SCREEN_PINNING,

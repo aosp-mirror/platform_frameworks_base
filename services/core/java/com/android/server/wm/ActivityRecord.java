@@ -235,10 +235,8 @@ import android.app.servertransaction.ClientTransaction;
 import android.app.servertransaction.ClientTransactionItem;
 import android.app.servertransaction.DestroyActivityItem;
 import android.app.servertransaction.MoveToDisplayItem;
-import android.app.servertransaction.MultiWindowModeChangeItem;
 import android.app.servertransaction.NewIntentItem;
 import android.app.servertransaction.PauseActivityItem;
-import android.app.servertransaction.PipModeChangeItem;
 import android.app.servertransaction.ResumeActivityItem;
 import android.app.servertransaction.StartActivityItem;
 import android.app.servertransaction.StopActivityItem;
@@ -805,7 +803,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 pw.print(" icon=0x"); pw.print(Integer.toHexString(icon));
                 pw.print(" theme=0x"); pw.println(Integer.toHexString(theme));
         pw.println(prefix + "mLastReportedConfigurations:");
-        mLastReportedConfiguration.dump(pw, prefix + " ");
+        mLastReportedConfiguration.dump(pw, prefix + "  ");
 
         pw.print(prefix); pw.print("CurrentConfiguration="); pw.println(getConfiguration());
         if (!getRequestedOverrideConfiguration().equals(EMPTY)) {
@@ -841,7 +839,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                         pw.print(" iconFilename="); pw.print(taskDescription.getIconFilename());
                         pw.print(" primaryColor=");
                         pw.println(Integer.toHexString(taskDescription.getPrimaryColor()));
-                        pw.print(prefix + " backgroundColor=");
+                        pw.print(prefix); pw.print("  backgroundColor=");
                         pw.print(Integer.toHexString(taskDescription.getBackgroundColor()));
                         pw.print(" statusBarColor=");
                         pw.print(Integer.toHexString(taskDescription.getStatusBarColor()));
@@ -1155,11 +1153,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return;
         }
 
-        if (task.getStack().deferScheduleMultiWindowModeChanged()) {
-            // Don't do anything if we are currently deferring multi-window mode change.
-            return;
-        }
-
         // An activity is considered to be in multi-window mode if its task isn't fullscreen.
         final boolean inMultiWindowMode = inMultiWindowMode();
         if (inMultiWindowMode != mLastReportedMultiWindowMode) {
@@ -1167,17 +1160,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 updatePictureInPictureMode(null, false);
             } else {
                 mLastReportedMultiWindowMode = inMultiWindowMode;
-                scheduleMultiWindowModeChanged(getConfiguration());
+                computeConfigurationAfterMultiWindowModeChange();
+                ensureActivityConfiguration(0 /* globalChanges */, PRESERVE_WINDOWS,
+                        true /* ignoreVisibility */);
             }
-        }
-    }
-
-    private void scheduleMultiWindowModeChanged(Configuration overrideConfig) {
-        try {
-            mAtmService.getLifecycleManager().scheduleTransaction(app.getThread(), appToken,
-                    MultiWindowModeChangeItem.obtain(mLastReportedMultiWindowMode, overrideConfig));
-        } catch (Exception e) {
-            // If process died, I don't care.
         }
     }
 
@@ -1188,39 +1174,27 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         final boolean inPictureInPictureMode = inPinnedWindowingMode() && targetStackBounds != null;
         if (inPictureInPictureMode != mLastReportedPictureInPictureMode || forceUpdate) {
-            // Picture-in-picture mode change normal triggers also multi-window mode change
-            // except transitions between pip and split screen mode, so update that here in order.
-            // Set the last reported MW state to the same as the PiP state since we haven't yet
-            // actually resized the task (these callbacks need to proceed the configuration change
-            // from the resize).
-            // TODO(110009072): Once we move these callbacks to the client, remove all logic related
-            // to forcing the update of the picture-in-picture mode as a part of the PiP animation.
-            final boolean shouldScheduleMultiWindowModeChange =
-                    mLastReportedMultiWindowMode != inMultiWindowMode();
+            // Picture-in-picture mode changes also trigger a multi-window mode change as well, so
+            // update that here in order. Set the last reported MW state to the same as the PiP
+            // state since we haven't yet actually resized the task (these callbacks need to
+            // precede the configuration change from the resize.
             mLastReportedPictureInPictureMode = inPictureInPictureMode;
             mLastReportedMultiWindowMode = inPictureInPictureMode;
-            final Configuration newConfig = new Configuration();
             if (targetStackBounds != null && !targetStackBounds.isEmpty()) {
-                newConfig.setTo(task.getRequestedOverrideConfiguration());
-                Rect outBounds = newConfig.windowConfiguration.getBounds();
-                task.adjustForMinimalTaskDimensions(outBounds, outBounds);
-                task.computeConfigResourceOverrides(newConfig, task.getParent().getConfiguration());
+                computeConfigurationAfterMultiWindowModeChange();
             }
-            schedulePictureInPictureModeChanged(newConfig);
-            if (shouldScheduleMultiWindowModeChange) {
-                scheduleMultiWindowModeChanged(newConfig);
-            }
+            ensureActivityConfiguration(0 /* globalChanges */, PRESERVE_WINDOWS,
+                    true /* ignoreVisibility */);
         }
     }
 
-    private void schedulePictureInPictureModeChanged(Configuration overrideConfig) {
-        try {
-            mAtmService.getLifecycleManager().scheduleTransaction(app.getThread(), appToken,
-                    PipModeChangeItem.obtain(mLastReportedPictureInPictureMode,
-                            overrideConfig));
-        } catch (Exception e) {
-            // If process died, no one cares.
-        }
+    private void computeConfigurationAfterMultiWindowModeChange() {
+        final Configuration newConfig = new Configuration();
+        newConfig.setTo(task.getRequestedOverrideConfiguration());
+        Rect outBounds = newConfig.windowConfiguration.getBounds();
+        final Configuration parentConfig = task.getParent().getConfiguration();
+        task.adjustForMinimalTaskDimensions(outBounds, outBounds, parentConfig);
+        task.computeConfigResourceOverrides(newConfig, parentConfig);
     }
 
     Task getTask() {
@@ -4534,6 +4508,15 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         final ActivityStack stack = getRootTask();
         if (stack == null) {
+            return false;
+        }
+
+        // Activity in a pinned stack should not be visible if the stack is in force hidden state.
+        // Typically due to the FLAG_FORCE_HIDDEN_FOR_PINNED_TASK set on the stack, which is a
+        // work around to send onStop before windowing mode change callbacks.
+        // See also ActivityStackSupervisor#removePinnedStackInSurfaceTransaction
+        // TODO: Should we ever be visible if the stack/task is invisible?
+        if (inPinnedWindowingMode() && stack.isForceHidden()) {
             return false;
         }
 

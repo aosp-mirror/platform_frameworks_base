@@ -31,18 +31,15 @@
         android:id="@+id/title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textSize="@dimen/controls_title_size"
+        android:textAppearance="@style/TextAppearance.Control.Management.Title"
         android:textAlignment="center" />
-
-
 
     <TextView
         android:id="@+id/subtitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/controls_management_titles_margin"
-        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textAppearance="@style/TextAppearance.Control.Management.Subtitle"
         android:textAlignment="center" />
 
     <ViewStub
@@ -53,7 +50,7 @@
 
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="64dp">
+        android:layout_height="72dp">
 
         <View
             android:layout_width="match_parent"
@@ -64,7 +61,7 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:padding="4dp">
+            android:padding="@dimen/controls_management_footer_side_margin">
 
             <Button
                 android:id="@+id/other_apps"

@@ -26,6 +26,7 @@ import com.android.systemui.dagger.SystemUIBinder;
 import com.android.systemui.dagger.SystemUIDefaultModule;
 import com.android.systemui.dagger.SystemUIModule;
 import com.android.systemui.dagger.SystemUIRootComponent;
+import com.android.systemui.onehanded.dagger.OneHandedModule;
 
 import javax.inject.Singleton;
 
@@ -40,6 +41,7 @@ import dagger.Component;
         DefaultComponentBinder.class,
         DependencyProvider.class,
         DependencyBinder.class,
+        OneHandedModule.class,
         SystemServicesModule.class,
         SystemUIBinder.class,
         SystemUIModule.class,

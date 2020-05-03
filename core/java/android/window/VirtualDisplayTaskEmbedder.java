@@ -251,6 +251,14 @@ public class VirtualDisplayTaskEmbedder extends TaskEmbedder {
         return INVALID_DISPLAY;
     }
 
+    @Override
+    public VirtualDisplay getVirtualDisplay() {
+        if (isInitialized()) {
+            return mVirtualDisplay;
+        }
+        return null;
+    }
+
     /**
      * Check if container is ready to launch and create {@link ActivityOptions} to target the
      * virtual display.

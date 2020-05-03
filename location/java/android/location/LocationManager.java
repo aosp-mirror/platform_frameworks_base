@@ -2006,7 +2006,7 @@ public class LocationManager {
     @Deprecated
     @RequiresPermission(ACCESS_FINE_LOCATION)
     public boolean registerGnssStatusCallback(@NonNull GnssStatus.Callback callback) {
-        mGnssStatusListenerManager.addListener(callback, DIRECT_EXECUTOR);
+        mGnssStatusListenerManager.addListener(callback, null);
         return true;
     }
 

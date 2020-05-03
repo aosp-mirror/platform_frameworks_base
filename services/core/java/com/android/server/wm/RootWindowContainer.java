@@ -3602,31 +3602,40 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         boolean needSep = false;
         for (int displayNdx = getChildCount() - 1; displayNdx >= 0; --displayNdx) {
             DisplayContent displayContent = getChildAt(displayNdx);
+            if (printed) {
+                pw.println();
+            }
             pw.print("Display #"); pw.print(displayContent.mDisplayId);
             pw.println(" (activities from top to bottom):");
             for (int tdaNdx = displayContent.getTaskDisplayAreaCount() - 1; tdaNdx >= 0; --tdaNdx) {
                 final TaskDisplayArea taskDisplayArea = displayContent.getTaskDisplayAreaAt(tdaNdx);
                 for (int sNdx = taskDisplayArea.getStackCount() - 1; sNdx >= 0; --sNdx) {
                     final ActivityStack stack = taskDisplayArea.getStackAt(sNdx);
-                    pw.println();
-                    printed = stack.dump(fd, pw, dumpAll, dumpClient, dumpPackage, needSep);
-                    needSep = printed;
+                    if (needSep) {
+                        pw.println();
+                    }
+                    needSep = stack.dump(fd, pw, dumpAll, dumpClient, dumpPackage, false);
+                    printed |= needSep;
                 }
             }
-            pw.println(" (resumed activities in task display areas from top to bottom):");
             for (int tdaNdx = displayContent.getTaskDisplayAreaCount() - 1; tdaNdx >= 0; --tdaNdx) {
                 final TaskDisplayArea taskDisplayArea = displayContent.getTaskDisplayAreaAt(tdaNdx);
-                printThisActivity(pw, taskDisplayArea.getFocusedActivity(), dumpPackage, needSep,
-                        "   ResumedActivity:");
+                printed |= printThisActivity(pw, taskDisplayArea.getFocusedActivity(),
+                        dumpPackage, needSep, "    Resumed: ", () -> {
+                            pw.println("  Resumed activities in task display areas"
+                                    + " (from top to bottom):");
+                        });
             }
         }
 
         printed |= dumpHistoryList(fd, pw, mStackSupervisor.mFinishingActivities, "  ",
                 "Fin", false, !dumpAll,
-                false, dumpPackage, true, "  Activities waiting to finish:", null);
+                false, dumpPackage, true,
+                () -> { pw.println("  Activities waiting to finish:"); }, null);
         printed |= dumpHistoryList(fd, pw, mStackSupervisor.mStoppingActivities, "  ",
                 "Stop", false, !dumpAll,
-                false, dumpPackage, true, "  Activities waiting to stop:", null);
+                false, dumpPackage, true,
+                () -> { pw.println("  Activities waiting to stop:"); }, null);
 
         return printed;
     }

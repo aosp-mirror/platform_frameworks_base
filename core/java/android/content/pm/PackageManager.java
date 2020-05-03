@@ -1561,6 +1561,14 @@ public abstract class PackageManager {
      */
     public static final int INSTALL_PARSE_FAILED_RESOURCES_ARSC_COMPRESSED = -124;
 
+    /**
+     * Installation failed return code: the package was skipped and should be ignored.
+     *
+     * The reason for the skip is undefined.
+     * @hide
+     */
+    public static final int INSTALL_PARSE_FAILED_SKIPPED = -125;
+
     /** @hide */
     @IntDef(flag = true, prefix = { "DELETE_" }, value = {
             DELETE_KEEP_DATA,
@@ -7940,7 +7948,6 @@ public abstract class PackageManager {
      *
      * @return true if the drawable represents the default activity icon, false otherwise
      * @see #getDefaultActivityIcon()
-     * @see PackageItemInfo#loadDefaultIcon(PackageManager)
      * @see #getActivityIcon
      * @see LauncherActivityInfo#getIcon(int)
      */

@@ -253,10 +253,6 @@ public class IntervalStats {
                             }
                             break;
                     }
-                    if (event.mTimeStamp == 0) {
-                        //mTimestamp not set, assume default value 0 plus beginTime
-                        event.mTimeStamp = beginTime;
-                    }
                     return event;
             }
         }

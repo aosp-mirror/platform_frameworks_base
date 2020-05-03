@@ -304,6 +304,7 @@
     <!-- The padding on the global screenshot background image -->
     <dimen name="global_screenshot_legacy_bg_padding">20dp</dimen>
     <dimen name="global_screenshot_bg_padding">20dp</dimen>
+    <dimen name="global_screenshot_bg_protection_height">400dp</dimen>
     <dimen name="global_screenshot_x_scale">80dp</dimen>
     <dimen name="screenshot_preview_elevation">6dp</dimen>
     <dimen name="screenshot_offset_y">48dp</dimen>
@@ -995,7 +996,7 @@
     <dimen name="pip_expand_container_edge_margin">30dp</dimen>
 
     <!-- The touchable/draggable edge size for PIP resize. -->
-    <dimen name="pip_resize_edge_size">30dp</dimen>
+    <dimen name="pip_resize_edge_size">48dp</dimen>
 
     <!-- The corner radius for PiP window. -->
     <dimen name="pip_corner_radius">8dp</dimen>
@@ -1282,20 +1283,29 @@
     <fraction name="controls_dimmed_alpha">40%</fraction>
 
     <!-- Home Controls activity view detail panel-->
-    <dimen name="controls_activity_view_top_padding">25dp</dimen>
-    <dimen name="controls_activity_view_side_padding">12dp</dimen>
     <dimen name="controls_activity_view_top_offset">100dp</dimen>
     <dimen name="controls_activity_view_text_size">17sp</dimen>
+    <dimen name="controls_activity_view_corner_radius">@*android:dimen/config_bottomDialogCornerRadius</dimen>
 
     <!-- Home Controls management screens -->
     <dimen name="controls_management_top_padding">48dp</dimen>
-    <dimen name="controls_management_side_padding">8dp</dimen>
-    <dimen name="controls_management_titles_margin">8dp</dimen>
+    <dimen name="controls_management_side_padding">16dp</dimen>
+    <dimen name="controls_management_titles_margin">16dp</dimen>
+    <dimen name="controls_management_footer_side_margin">8dp</dimen>
     <dimen name="controls_management_list_margin">16dp</dimen>
-    <dimen name="controls_title_size">26sp</dimen>
+    <dimen name="controls_management_apps_list_margin">64dp</dimen>
+    <dimen name="controls_management_editing_list_margin">48dp</dimen>
+    <dimen name="controls_management_editing_divider_margin">24dp</dimen>
+    <dimen name="controls_management_apps_extra_side_margin">8dp</dimen>
+    <dimen name="controls_management_apps_top_margin"></dimen>
+    <dimen name="controls_management_zone_top_margin">32dp</dimen>
+    <dimen name="controls_management_page_indicator_height">24dp</dimen>
+    <dimen name="controls_management_checkbox_size">25dp</dimen>
+    <dimen name="controls_title_size">24sp</dimen>
+    <dimen name="controls_subtitle_size">16sp</dimen>
 
-    <dimen name="controls_app_icon_size">32dp</dimen>
-    <dimen name="controls_app_icon_frame_side_padding">8dp</dimen>
+    <dimen name="controls_app_icon_size">24dp</dimen>
+    <dimen name="controls_app_icon_frame_side_padding">16dp</dimen>
     <dimen name="controls_app_icon_frame_top_padding">4dp</dimen>
     <dimen name="controls_app_icon_frame_bottom_padding">@dimen/controls_app_icon_frame_top_padding</dimen>
     <dimen name="controls_app_bottom_margin">8dp</dimen>

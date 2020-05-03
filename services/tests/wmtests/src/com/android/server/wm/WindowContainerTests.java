@@ -23,6 +23,7 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.TRANSIT_TASK_OPEN;
+import static android.window.DisplayAreaOrganizer.FEATURE_DEFAULT_TASK_CONTAINER;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyFloat;
@@ -35,6 +36,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
+import static com.android.server.wm.DisplayArea.Type.ANY;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_SCREEN_ROTATION;
 import static com.android.server.wm.WindowContainer.AnimationFlags.CHILDREN;
@@ -837,6 +839,36 @@ public class WindowContainerTests extends WindowTestsBase {
         final ActivityRecord activity = WindowTestUtils.createActivityRecordInTask(mDisplayContent,
                 createTaskInStack(stack, 0 /* userId */));
         verifyWindowContainerApplyAnimation(stack, activity);
+    }
+
+    @Test
+    public void testGetDisplayArea() {
+        // WindowContainer
+        final WindowContainer windowContainer = new WindowContainer(mWm);
+
+        assertNull(windowContainer.getDisplayArea());
+
+        // ActivityStack > WindowContainer
+        final ActivityStack activityStack = createTaskStackOnDisplay(mDisplayContent);
+        activityStack.addChild(windowContainer, 0);
+        activityStack.setParent(null);
+
+        assertNull(windowContainer.getDisplayArea());
+        assertNull(activityStack.getDisplayArea());
+
+        // TaskDisplayArea > ActivityStack > WindowContainer
+        final TaskDisplayArea taskDisplayArea = new TaskDisplayArea(
+                mDisplayContent, mWm, "TaskDisplayArea", FEATURE_DEFAULT_TASK_CONTAINER);
+        taskDisplayArea.addChild(activityStack, 0);
+
+        assertEquals(taskDisplayArea, windowContainer.getDisplayArea());
+        assertEquals(taskDisplayArea, activityStack.getDisplayArea());
+        assertEquals(taskDisplayArea, taskDisplayArea.getDisplayArea());
+
+        // DisplayArea
+        final DisplayArea displayArea = new DisplayArea(mWm, ANY, "DisplayArea");
+
+        assertEquals(displayArea, displayArea.getDisplayArea());
     }
 
     private void verifyWindowContainerApplyAnimation(WindowContainer wc, ActivityRecord act) {

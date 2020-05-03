@@ -5293,6 +5293,7 @@ package android.window {
     method public void onDisplayAreaVanished(@NonNull android.window.DisplayAreaInfo);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public void registerOrganizer(int);
     field public static final int FEATURE_DEFAULT_TASK_CONTAINER = 1; // 0x1
+    field public static final int FEATURE_ONE_HANDED = 3; // 0x3
     field public static final int FEATURE_ROOT = 0; // 0x0
     field public static final int FEATURE_SYSTEM_FIRST = 0; // 0x0
     field public static final int FEATURE_SYSTEM_LAST = 10000; // 0x2710

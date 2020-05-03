@@ -280,7 +280,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
     private final DisplayArea.Root mRootDisplayArea = new DisplayArea.Root(mWmService);
 
-    private final DisplayAreaPolicy mDisplayAreaPolicy;
+    @VisibleForTesting
+    final DisplayAreaPolicy mDisplayAreaPolicy;
 
     private WindowState mTmpWindow;
     private WindowState mTmpWindow2;
@@ -5638,6 +5639,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             } catch (RemoteException e) {
                 Slog.w(TAG, "Failed to deliver showInsets", e);
             }
+        }
+
+        @Override
+        public boolean isClientControlled() {
+            return false;
         }
     }
 

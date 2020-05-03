@@ -198,21 +198,6 @@ public class ObjectPoolTests {
     }
 
     @Test
-    public void testRecycleMultiWindowModeChangeItem() {
-        MultiWindowModeChangeItem emptyItem = MultiWindowModeChangeItem.obtain(false, null);
-        MultiWindowModeChangeItem item = MultiWindowModeChangeItem.obtain(true, config());
-        assertNotSame(item, emptyItem);
-        assertFalse(item.equals(emptyItem));
-
-        item.recycle();
-        assertEquals(item, emptyItem);
-
-        MultiWindowModeChangeItem item2 = MultiWindowModeChangeItem.obtain(true, config());
-        assertSame(item, item2);
-        assertFalse(item2.equals(emptyItem));
-    }
-
-    @Test
     public void testRecycleNewIntentItem() {
         NewIntentItem emptyItem = NewIntentItem.obtain(null, false);
         NewIntentItem item = NewIntentItem.obtain(referrerIntentList(), false);
@@ -238,21 +223,6 @@ public class ObjectPoolTests {
         assertEquals(item, emptyItem);
 
         PauseActivityItem item2 = PauseActivityItem.obtain(true, false, 5, true);
-        assertSame(item, item2);
-        assertFalse(item2.equals(emptyItem));
-    }
-
-    @Test
-    public void testRecyclePipModeChangeItem() {
-        PipModeChangeItem emptyItem = PipModeChangeItem.obtain(false, null);
-        PipModeChangeItem item = PipModeChangeItem.obtain(true, config());
-        assertNotSame(item, emptyItem);
-        assertFalse(item.equals(emptyItem));
-
-        item.recycle();
-        assertEquals(item, emptyItem);
-
-        PipModeChangeItem item2 = PipModeChangeItem.obtain(true, config());
         assertSame(item, item2);
         assertFalse(item2.equals(emptyItem));
     }

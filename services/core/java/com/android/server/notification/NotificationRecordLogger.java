@@ -27,6 +27,7 @@ import android.os.Bundle;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationStats;
 
+import com.android.internal.logging.InstanceId;
 import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
 
@@ -48,10 +49,12 @@ public interface NotificationRecordLogger {
      * @param old The previous NotificationRecord.  Null if there was no previous record.
      * @param position The position at which this notification is ranked.
      * @param buzzBeepBlink Logging code reflecting whether this notification alerted the user.
+     * @param groupId The instance Id of the group summary notification, or null.
      */
     void maybeLogNotificationPosted(@Nullable NotificationRecord r,
             @Nullable NotificationRecord old,
-            int position, int buzzBeepBlink);
+            int position, int buzzBeepBlink,
+            InstanceId groupId);
 
     /**
      * Logs a notification cancel / dismiss event using UiEventReported (event ids from the

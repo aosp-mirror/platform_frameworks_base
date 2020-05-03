@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.notification.row
 
+import android.animation.ArgbEvaluator
+import android.animation.ValueAnimator
 import android.app.NotificationChannel
 import android.app.NotificationManager.IMPORTANCE_DEFAULT
 import android.app.NotificationManager.IMPORTANCE_NONE
@@ -33,8 +35,10 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.Switch
 import android.widget.TextView
+import com.android.settingslib.Utils
 
 import com.android.systemui.R
+import com.android.systemui.util.Assert
 
 /**
  * Half-shelf for notification channel controls
@@ -51,6 +55,7 @@ class ChannelEditorListView(c: Context, attrs: AttributeSet) : LinearLayout(c, a
 
     // The first row is for the entire app
     private lateinit var appControlRow: AppControlView
+    private val channelRows = mutableListOf<ChannelRow>()
 
     override fun onFinishInflate() {
         super.onFinishInflate()
@@ -58,8 +63,21 @@ class ChannelEditorListView(c: Context, attrs: AttributeSet) : LinearLayout(c, a
         appControlRow = findViewById(R.id.app_control)
     }
 
+    /**
+     * Play a highlight animation for the given channel (it really should exist but this will just
+     * fail silently if it doesn't)
+     */
+    fun highlightChannel(channel: NotificationChannel) {
+        Assert.isMainThread()
+        for (row in channelRows) {
+            if (row.channel == channel) {
+                row.playHighlight()
+            }
+        }
+    }
+
     private fun updateRows() {
-        val enabled = controller.appNotificationsEnabled
+        val enabled = controller.areAppNotificationsEnabled()
 
         val transition = AutoTransition()
         transition.duration = 200
@@ -83,13 +101,10 @@ class ChannelEditorListView(c: Context, attrs: AttributeSet) : LinearLayout(c, a
         TransitionManager.beginDelayedTransition(this, transition)
 
         // Remove any rows
-        val n = childCount
-        for (i in n.downTo(0)) {
-            val child = getChildAt(i)
-            if (child is ChannelRow) {
-                removeView(child)
-            }
+        for (row in channelRows) {
+            removeView(row)
         }
+        channelRows.clear()
 
         updateAppControlRow(enabled)
 
@@ -105,6 +120,8 @@ class ChannelEditorListView(c: Context, attrs: AttributeSet) : LinearLayout(c, a
         val row = inflater.inflate(R.layout.notif_half_shelf_row, null) as ChannelRow
         row.controller = controller
         row.channel = channel
+
+        channelRows.add(row)
         addView(row)
     }
 
@@ -114,7 +131,7 @@ class ChannelEditorListView(c: Context, attrs: AttributeSet) : LinearLayout(c, a
                 .getString(R.string.notification_channel_dialog_title, appName)
         appControlRow.switch.isChecked = enabled
         appControlRow.switch.setOnCheckedChangeListener { _, b ->
-            controller.appNotificationsEnabled = b
+            controller.proposeSetAppNotificationsEnabled(b)
             updateRows()
         }
     }
@@ -140,7 +157,13 @@ class ChannelRow(c: Context, attrs: AttributeSet) : LinearLayout(c, attrs) {
     private lateinit var channelName: TextView
     private lateinit var channelDescription: TextView
     private lateinit var switch: Switch
+    private val highlightColor: Int
     var gentle = false
+
+    init {
+        highlightColor = Utils.getColorAttrDefaultColor(
+                context, android.R.attr.colorControlHighlight)
+    }
 
     var channel: NotificationChannel? = null
         set(newValue) {
@@ -150,6 +173,7 @@ class ChannelRow(c: Context, attrs: AttributeSet) : LinearLayout(c, attrs) {
         }
 
     override fun onFinishInflate() {
+        super.onFinishInflate()
         channelName = findViewById(R.id.channel_name)
         channelDescription = findViewById(R.id.channel_description)
         switch = findViewById(R.id.toggle)
@@ -159,6 +183,22 @@ class ChannelRow(c: Context, attrs: AttributeSet) : LinearLayout(c, attrs) {
             }
         }
         setOnClickListener { switch.toggle() }
+    }
+
+    /**
+     * Play an animation that highlights this row
+     */
+    fun playHighlight() {
+        // Use 0 for the start value because our background is given to us by our parent
+        val fadeInLoop = ValueAnimator.ofObject(ArgbEvaluator(), 0, highlightColor)
+        fadeInLoop.duration = 200L
+        fadeInLoop.addUpdateListener { animator ->
+            setBackgroundColor(animator.animatedValue as Int)
+        }
+        fadeInLoop.repeatMode = ValueAnimator.REVERSE
+        // Repeat an odd number of times to we end up normal
+        fadeInLoop.repeatCount = 5
+        fadeInLoop.start()
     }
 
     private fun updateViews() {

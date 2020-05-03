@@ -19,6 +19,7 @@ package com.android.systemui.media
 import android.media.MediaMetadata
 import android.media.session.MediaController
 import android.media.session.PlaybackState
+import android.os.SystemClock
 import android.view.MotionEvent
 import android.view.View
 import android.widget.SeekBar
@@ -30,6 +31,38 @@ import androidx.lifecycle.LiveData
 import com.android.systemui.util.concurrency.DelayableExecutor
 
 private const val POSITION_UPDATE_INTERVAL_MILLIS = 100L
+
+private fun PlaybackState.isInMotion(): Boolean {
+    return this.state == PlaybackState.STATE_PLAYING ||
+            this.state == PlaybackState.STATE_FAST_FORWARDING ||
+            this.state == PlaybackState.STATE_REWINDING
+}
+
+/**
+ * Gets the playback position while accounting for the time since the [PlaybackState] was last
+ * retrieved.
+ *
+ * This method closely follows the implementation of
+ * [MediaSessionRecord#getStateWithUpdatedPosition].
+ */
+private fun PlaybackState.computePosition(duration: Long): Long {
+    var currentPosition = this.position
+    if (this.isInMotion()) {
+        val updateTime = this.getLastPositionUpdateTime()
+        val currentTime = SystemClock.elapsedRealtime()
+        if (updateTime > 0) {
+            var position = (this.playbackSpeed * (currentTime - updateTime)).toLong() +
+                    this.getPosition()
+            if (duration >= 0 && position > duration) {
+                position = duration.toLong()
+            } else if (position < 0) {
+                position = 0
+            }
+            currentPosition = position
+        }
+    }
+    return currentPosition
+}
 
 /** ViewModel for seek bar in QS media player. */
 class SeekBarViewModel(val bgExecutor: DelayableExecutor) {
@@ -98,7 +131,8 @@ class SeekBarViewModel(val bgExecutor: DelayableExecutor) {
 
     @AnyThread
     private fun checkPlaybackPosition(): Runnable = bgExecutor.executeDelayed({
-        val currentPosition = controller?.playbackState?.position?.toInt()
+        val duration = _data?.duration ?: -1
+        val currentPosition = playbackState?.computePosition(duration.toLong())?.toInt()
         if (currentPosition != null && _data.elapsedTime != currentPosition) {
             _data = _data.copy(elapsedTime = currentPosition)
         }
@@ -109,13 +143,7 @@ class SeekBarViewModel(val bgExecutor: DelayableExecutor) {
 
     @WorkerThread
     private fun shouldPollPlaybackPosition(): Boolean {
-        val state = playbackState?.state
-        val moving = if (state == null) false else
-                state == PlaybackState.STATE_PLAYING ||
-                state == PlaybackState.STATE_BUFFERING ||
-                state == PlaybackState.STATE_FAST_FORWARDING ||
-                state == PlaybackState.STATE_REWINDING
-        return moving && listening
+        return listening && playbackState?.isInMotion() ?: false
     }
 
     /** Gets a listener to attach to the seek bar to handle seeking. */

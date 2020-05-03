@@ -507,7 +507,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
         Task task1 = WindowContainer.fromBinder(info1.token.asBinder()).asTask();
         Configuration c = new Configuration(task1.getRequestedOverrideConfiguration());
         c.windowConfiguration.setBounds(newSize);
-        doNothing().when(stack).adjustForMinimalTaskDimensions(any(), any());
+        doNothing().when(stack).adjustForMinimalTaskDimensions(any(), any(), any());
         task1.onRequestedOverrideConfigurationChanged(c);
         assertEquals(newSize, stack.getBounds());
 

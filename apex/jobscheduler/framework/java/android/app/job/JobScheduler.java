@@ -41,7 +41,7 @@ import java.util.List;
  * system will execute this job on your application's {@link android.app.job.JobService}.
  * You identify the service component that implements the logic for your job when you
  * construct the JobInfo using
- * {@link android.app.job.JobInfo.Builder#JobInfo.Builder(int,android.content.ComponentName)}.
+ * {@link android.app.job.JobInfo.Builder#Builder(int,android.content.ComponentName)}.
  * </p>
  * <p>
  * The framework will be intelligent about when it executes jobs, and attempt to batch
@@ -153,7 +153,7 @@ public abstract class JobScheduler {
      * method is ignored.
      *
      * @param jobId unique identifier for the job to be canceled, as supplied to
-     *     {@link JobInfo.Builder#JobInfo.Builder(int, android.content.ComponentName)
+     *     {@link JobInfo.Builder#Builder(int, android.content.ComponentName)
      *     JobInfo.Builder(int, android.content.ComponentName)}.
      */
     public abstract void cancel(int jobId);
