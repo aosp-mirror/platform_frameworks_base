@@ -17,6 +17,6 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="enabled_by_admin" msgid="6630472777476410137">"管理者が有効にしました"</string>
-    <string name="disabled_by_admin" msgid="4023569940620832713">"管理者が無効にしました"</string>
+    <string name="enabled_by_admin" msgid="6630472777476410137">"管理者によって有効にされています"</string>
+    <string name="disabled_by_admin" msgid="4023569940620832713">"管理者により無効にされています"</string>
 </resources>
