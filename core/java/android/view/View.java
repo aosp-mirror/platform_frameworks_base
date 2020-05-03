@@ -7263,6 +7263,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * @return the registered {@link OnLongClickListener} if there is one, {@code null} otherwise.
+     * @hide
+     */
+    @Nullable
+    public OnLongClickListener getOnLongClickListener() {
+        ListenerInfo li = mListenerInfo;
+        return (li != null) ? li.mOnLongClickListener : null;
+    }
+
+    /**
      * Register a callback to be invoked when this view is context clicked. If the view is not
      * context clickable, it becomes context clickable.
      *
@@ -26175,9 +26185,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         /**
          * Returns the View object that had been passed to the
-         * {@link #View.DragShadowBuilder(View)}
+         * {@link #DragShadowBuilder(View)}
          * constructor.  If that View parameter was {@code null} or if the
-         * {@link #View.DragShadowBuilder()}
+         * {@link #DragShadowBuilder()}
          * constructor was used to instantiate the builder object, this method will return
          * null.
          *

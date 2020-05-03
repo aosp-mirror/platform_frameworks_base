@@ -190,6 +190,7 @@ public class PipTaskOrganizer extends TaskOrganizer {
     private @PipAnimationController.AnimationType int mOneShotAnimationType = ANIM_TYPE_BOUNDS;
     private PipSurfaceTransactionHelper.SurfaceControlTransactionFactory
             mSurfaceControlTransactionFactory;
+    private PictureInPictureParams mPictureInPictureParams;
 
     public PipTaskOrganizer(Context context, @NonNull PipBoundsHandler boundsHandler,
             @NonNull PipSurfaceTransactionHelper surfaceTransactionHelper,
@@ -211,6 +212,10 @@ public class PipTaskOrganizer extends TaskOrganizer {
 
     public Rect getLastReportedBounds() {
         return new Rect(mLastReportedBounds);
+    }
+
+    public boolean isInPip() {
+        return mInPip;
     }
 
     /**
@@ -257,8 +262,9 @@ public class PipTaskOrganizer extends TaskOrganizer {
     @Override
     public void onTaskAppeared(ActivityManager.RunningTaskInfo info, SurfaceControl leash) {
         Objects.requireNonNull(info, "Requires RunningTaskInfo");
+        mPictureInPictureParams = info.pictureInPictureParams;
         final Rect destinationBounds = mPipBoundsHandler.getDestinationBounds(
-                info.topActivity, getAspectRatioOrDefault(info.pictureInPictureParams),
+                info.topActivity, getAspectRatioOrDefault(mPictureInPictureParams),
                 null /* bounds */, getMinimalSize(info.topActivityInfo));
         Objects.requireNonNull(destinationBounds, "Missing destination bounds");
         mTaskInfo = info;
@@ -304,6 +310,7 @@ public class PipTaskOrganizer extends TaskOrganizer {
             Log.wtf(TAG, "Unrecognized token: " + token);
             return;
         }
+        mPictureInPictureParams = null;
         mInPip = false;
     }
 
@@ -311,7 +318,7 @@ public class PipTaskOrganizer extends TaskOrganizer {
     public void onTaskInfoChanged(ActivityManager.RunningTaskInfo info) {
         Objects.requireNonNull(mToken, "onTaskInfoChanged requires valid existing mToken");
         final PictureInPictureParams newParams = info.pictureInPictureParams;
-        if (!shouldUpdateDestinationBounds(newParams)) {
+        if (!applyPictureInPictureParams(newParams)) {
             Log.d(TAG, "Ignored onTaskInfoChanged with PiP param: " + newParams);
             return;
         }
@@ -359,7 +366,7 @@ public class PipTaskOrganizer extends TaskOrganizer {
         }
 
         final Rect newDestinationBounds = mPipBoundsHandler.getDestinationBounds(
-                mTaskInfo.topActivity, getAspectRatioOrDefault(mTaskInfo.pictureInPictureParams),
+                mTaskInfo.topActivity, getAspectRatioOrDefault(mPictureInPictureParams),
                 null /* bounds */, getMinimalSize(mTaskInfo.topActivityInfo));
         if (newDestinationBounds.equals(currentDestinationBounds)) return;
         if (animator.getAnimationType() == ANIM_TYPE_BOUNDS) {
@@ -373,12 +380,14 @@ public class PipTaskOrganizer extends TaskOrganizer {
      * @return {@code true} if the aspect ratio is changed since no other parameters within
      * {@link PictureInPictureParams} would affect the bounds.
      */
-    private boolean shouldUpdateDestinationBounds(PictureInPictureParams params) {
-        if (params == null || mTaskInfo.pictureInPictureParams == null) {
-            return params != mTaskInfo.pictureInPictureParams;
+    private boolean applyPictureInPictureParams(@NonNull PictureInPictureParams params) {
+        final boolean changed = (mPictureInPictureParams == null) ? true : !Objects.equals(
+                mPictureInPictureParams.getAspectRatioRational(), params.getAspectRatioRational());
+        if (changed) {
+            mPictureInPictureParams = params;
+            mPipBoundsHandler.onAspectRatioChanged(params.getAspectRatio());
         }
-        return !Objects.equals(mTaskInfo.pictureInPictureParams.getAspectRatioRational(),
-                params.getAspectRatioRational());
+        return changed;
     }
 
     /**

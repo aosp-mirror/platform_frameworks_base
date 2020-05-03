@@ -54,8 +54,12 @@
         <activity android:name="com.android.server.wm.TaskStackChangedListenerTest$ActivityViewTestActivity" />
         <activity android:name="com.android.server.wm.TaskStackChangedListenerTest$ActivityInActivityView"
                   android:resizeableActivity="true" />
+        <activity android:name="com.android.server.wm.TaskStackChangedListenerTest$LandscapeActivity"
+                  android:screenOrientation="sensorLandscape"
+                  android:showWhenLocked="true"
+                  android:turnScreenOn="true" />
         <activity android:name="com.android.server.wm.ScreenDecorWindowTests$TestActivity"
-                  android:showWhenLocked="true" />
+                  android:showWhenLocked="true" android:allowEmbedded="true"/>
     </application>
 
     <instrumentation

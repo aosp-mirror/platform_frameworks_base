@@ -803,7 +803,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 pw.print(" icon=0x"); pw.print(Integer.toHexString(icon));
                 pw.print(" theme=0x"); pw.println(Integer.toHexString(theme));
         pw.println(prefix + "mLastReportedConfigurations:");
-        mLastReportedConfiguration.dump(pw, prefix + " ");
+        mLastReportedConfiguration.dump(pw, prefix + "  ");
 
         pw.print(prefix); pw.print("CurrentConfiguration="); pw.println(getConfiguration());
         if (!getRequestedOverrideConfiguration().equals(EMPTY)) {
@@ -839,7 +839,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                         pw.print(" iconFilename="); pw.print(taskDescription.getIconFilename());
                         pw.print(" primaryColor=");
                         pw.println(Integer.toHexString(taskDescription.getPrimaryColor()));
-                        pw.print(prefix + " backgroundColor=");
+                        pw.print(prefix); pw.print("  backgroundColor=");
                         pw.print(Integer.toHexString(taskDescription.getBackgroundColor()));
                         pw.print(" statusBarColor=");
                         pw.print(Integer.toHexString(taskDescription.getStatusBarColor()));
@@ -1192,8 +1192,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final Configuration newConfig = new Configuration();
         newConfig.setTo(task.getRequestedOverrideConfiguration());
         Rect outBounds = newConfig.windowConfiguration.getBounds();
-        task.adjustForMinimalTaskDimensions(outBounds, outBounds);
-        task.computeConfigResourceOverrides(newConfig, task.getParent().getConfiguration());
+        final Configuration parentConfig = task.getParent().getConfiguration();
+        task.adjustForMinimalTaskDimensions(outBounds, outBounds, parentConfig);
+        task.computeConfigResourceOverrides(newConfig, parentConfig);
     }
 
     Task getTask() {

@@ -1092,8 +1092,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         final boolean uidPresentOnDisplay = displayContent.isUidPresent(callingUid);
 
         final int displayOwnerUid = displayContent.mDisplay.getOwnerUid();
-        if (displayContent.mDisplay.getType() == TYPE_VIRTUAL && displayOwnerUid != SYSTEM_UID
-                && displayOwnerUid != aInfo.applicationInfo.uid) {
+        if (displayContent.mDisplay.getType() == TYPE_VIRTUAL && displayOwnerUid != SYSTEM_UID) {
             // Limit launching on virtual displays, because their contents can be read from Surface
             // by apps that created them.
             if ((aInfo.flags & ActivityInfo.FLAG_ALLOW_EMBEDDED) == 0) {
@@ -1937,11 +1936,14 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
     }
 
     static boolean printThisActivity(PrintWriter pw, ActivityRecord activity, String dumpPackage,
-            boolean needSep, String prefix) {
+            boolean needSep, String prefix, Runnable header) {
         if (activity != null) {
             if (dumpPackage == null || dumpPackage.equals(activity.packageName)) {
                 if (needSep) {
                     pw.println();
+                }
+                if (header != null) {
+                    header.run();
                 }
                 pw.print(prefix);
                 pw.println(activity);
@@ -1953,7 +1955,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
 
     static boolean dumpHistoryList(FileDescriptor fd, PrintWriter pw, List<ActivityRecord> list,
             String prefix, String label, boolean complete, boolean brief, boolean client,
-            String dumpPackage, boolean needNL, String header, Task lastTask) {
+            String dumpPackage, boolean needNL, Runnable header, Task lastTask) {
         String innerPrefix = null;
         String[] args = null;
         boolean printed = false;
@@ -1973,7 +1975,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                 needNL = false;
             }
             if (header != null) {
-                pw.println(header);
+                header.run();
                 header = null;
             }
             if (lastTask != r.getTask()) {

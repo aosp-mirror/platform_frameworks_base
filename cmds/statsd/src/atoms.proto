@@ -427,6 +427,7 @@ message Atom {
         AccessibilityShortcutReported accessibility_shortcut_reported =
             266 [(module) = "framework"];
         AccessibilityServiceReported accessibility_service_reported = 267 [(module) = "settings"];
+        DocsUIDragAndDropReported docs_ui_drag_and_drop_reported = 268 [(module) = "docsui"];
         SdkExtensionStatus sdk_extension_status = 354;
 
         // StatsdStats tracks platform atoms with ids upto 500.
@@ -6481,6 +6482,15 @@ message DocsUIPickResultReported {
     optional int32 repeatedly_pick_times = 7;
 }
 
+/** Logs the drag and drop of files.
+
+ * Logged from:
+ *     package/app/DocumentsUI/src/com/android/documentsui/Metrics.java
+ */
+message DocsUIDragAndDropReported {
+    optional bool drag_initiated_from_docsui = 1;
+}
+
 /**
  * Logs when an app's memory is compacted.
  *
@@ -9334,6 +9344,8 @@ message PackageInstallerV2Reported {
     // Return_code 1 indicates success.
     // For full list, see frameworks/base/core/java/android/content/pm/PackageManager.java
     optional int32 return_code  = 4;
+    // Total size of the APKs installed for this package
+    optional int64 apks_size_bytes = 5;
 }
 
 /**

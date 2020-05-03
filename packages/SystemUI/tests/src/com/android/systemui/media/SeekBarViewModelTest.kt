@@ -362,28 +362,21 @@ public class SeekBarViewModelTest : SysuiTestCase() {
 
     @Test
     fun taskUpdatesProgress() {
-        // GIVEN that the PlaybackState contins the current position
-        val position = 200L
+        // GIVEN that the PlaybackState contins the initial position
+        val initialPosition = 0L
         val state = PlaybackState.Builder().run {
-            setState(PlaybackState.STATE_PLAYING, position, 1f)
+            setState(PlaybackState.STATE_PLAYING, initialPosition, 1f)
             build()
         }
         whenever(mockController.getPlaybackState()).thenReturn(state)
         viewModel.updateController(mockController, Color.RED)
-        // AND the playback state advances
-        val nextPosition = 300L
-        val nextState = PlaybackState.Builder().run {
-            setState(PlaybackState.STATE_PLAYING, nextPosition, 1f)
-            build()
-        }
-        whenever(mockController.getPlaybackState()).thenReturn(nextState)
         // WHEN the task runs
         with(fakeExecutor) {
             advanceClockToNext()
             runAllReady()
         }
-        // THEN elapsed time is captured
-        assertThat(viewModel.progress.value!!.elapsedTime).isEqualTo(nextPosition.toInt())
+        // THEN elapsed time has increased
+        assertThat(viewModel.progress.value!!.elapsedTime).isGreaterThan(initialPosition.toInt())
     }
 
     @Test
