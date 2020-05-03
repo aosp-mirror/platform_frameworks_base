@@ -101,7 +101,7 @@ droidstubs {
     arg_files: [
         "core/res/AndroidManifest.xml",
     ],
-    args: metalava_framework_docs_args + " --show-annotation android.annotation.SystemApi\\(client=android.annotation.SystemApi.Client.PRIVILEGED_APPS,process=android.annotation.SystemApi.Process.ALL\\) ",
+    args: metalava_framework_docs_args + " --show-annotation android.annotation.SystemApi\\(client=android.annotation.SystemApi.Client.PRIVILEGED_APPS\\) ",
     write_sdk_values: true,
 }
 

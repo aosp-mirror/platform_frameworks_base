@@ -284,7 +284,8 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"વાયરલેસ ડિસ્પ્લે પ્રમાણપત્ર માટેના વિકલ્પો બતાવો"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"વાઇ-ફાઇ લોગિંગ સ્તર વધારો, વાઇ-ફાઇ પીકરમાં SSID RSSI દીઠ બતાવો"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"બૅટરીનો ચાર્જ ઝડપથી ઓછો થવાનું ટાળે છે અને નેટવર્કની કાર્યક્ષમતામાં સુધારો કરે છે"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"આ ટોગલ માત્ર ક્લાયન્ટ મોડ માટે MAC રેન્ડમાઇઝ કરવાની વર્તણૂકને અસર કરે છે.\nઆ મોડ સક્રિય કરાય, ત્યારે MAC રેન્ડમાઇઝ કરવાનું ચાલુ કર્યું હોય તેવા કોઈપણ નેટવર્કના સંકલન દરમિયાન તેમના MAC ઍડ્રેસને રેન્ડમાઇઝ કરી શકાય છે અને તેનો આધાર ક્લાયન્ટ દ્વારા છેલ્લે ક્યારે નેટવર્કમાંથી ડિસ્કનેક્ટ કરાયું હતું તેના પર રહે છે. ડિવાઇસ 4 કલાક કે તેથી ઓછા સમયમાં ફરીથી કનેક્ટ થાય તો ફરી રેન્ડમાઇઝ કરાતું નથી."</string>
+    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
+    <skip />
     <string name="wifi_metered_label" msgid="8737187690304098638">"મીટર કરેલ"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"મીટર ન કરેલ"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"લોગર બફર કદ"</string>
@@ -373,8 +374,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"બૅકગ્રાઉન્ડ ઍપ માટે \"ઍપ પ્રતિસાદ આપતી નથી\" સંવાદ બતાવો"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"નોટિફિકેશન ચૅનલની ચેતવણી બતાવો"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"ઍપ્લિકેશન માન્ય ચૅનલ વિના નોટિફિકેશન પોસ્ટ કરે તો સ્ક્રીન પર ચેતવણી દેખાય છે"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"વાતચીત સૂચનો માટે શૉર્ટકટ"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"વાતચીત વિભાગમાં દેખાવા એક લાંબું ટકતા શેરિંગ શૉર્ટકટ દ્વારા ટેકો મેળવતા નોટિફિકેશન જરૂરી છે"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"બાહ્ય પર એપ્લિકેશનોને મંજૂરી આપવાની ફરજ પાડો"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"મેનિફેસ્ટ મૂલ્યોને ધ્યાનમાં લીધા સિવાય, કોઈપણ ઍપ્લિકેશનને બાહ્ય સ્ટોરેજ પર લખાવા માટે લાયક બનાવે છે"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"પ્રવૃત્તિઓને ફરીથી કદ યોગ્ય થવા માટે ફરજ પાડો"</string>

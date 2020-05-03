@@ -284,7 +284,8 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"显示无线显示认证选项"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"提升 WLAN 日志记录级别（在 WLAN 选择器中显示每个 SSID 的 RSSI）"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"降低耗电量以及改善网络性能"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"此切换开关仅会影响客户端模式的 MAC 地址随机分配行为。\n此模式开启后，系统可能会为已启用随机分配 MAC 地址功能的所有网络在关联期间重新随机分配 MAC 地址，具体取决于客户端上次断开网络连接的时间。如果设备在 4 小时或更短时间内重新连接到网络，系统便不会执行重新随机分配操作。"</string>
+    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
+    <skip />
     <string name="wifi_metered_label" msgid="8737187690304098638">"按流量计费"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"不按流量计费"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"日志记录器缓冲区大小"</string>
@@ -373,8 +374,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"为后台应用显示“应用无响应”对话框"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"显示通知渠道警告"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"当应用未经有效渠道发布通知时，在屏幕上显示警告"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"强制执行会话通知快捷方式"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"要求通知必须有长期共享快捷方式支持，才能显示在会话部分中"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"强制允许将应用写入外部存储设备"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"允许将任何应用写入外部存储设备（无论清单值是什么）"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"强制将活动设为可调整大小"</string>

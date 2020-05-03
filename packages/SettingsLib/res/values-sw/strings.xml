@@ -284,7 +284,8 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Onyesha chaguo za cheti cha kuonyesha pasiwaya"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Ongeza hatua ya uwekaji kumbukumbu ya Wi-Fi, onyesha kwa kila SSID RSSI kwenye Kichukuzi cha Wi-Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Hupunguza matumizi ya chaji ya betri na kuboresha utendaji wa mtandao"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Hali hii ya kugeuza huathiri utendaji wa kuweka nasibu kwenye anwani ya MAC katika hali ya kiteja pekee.\nWakati hali hii imewashwa, mitandao yoyote ambapo kipengele cha unasibu wa MAC kimewashwa inaweza kuruhusu anwani zao za MAC kuwekwa nasibu tena wakati wa ushirikiano, kulingana na mara ya mwisho kiteja kilipoacha kuunganisha kwenye mtandao. Tukio la kuweka unasibu tena halitokei ikiwa kifaa kitaunganisha tena baada ya muda usiozidi saa nne."</string>
+    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
+    <skip />
     <string name="wifi_metered_label" msgid="8737187690304098638">"Mtandao unapima data"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Mtandao usiopima data"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Ukubwa wa kiweka bafa ya kumbukumbu"</string>
@@ -373,8 +374,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Onyesha kidirisha cha Programu Kutorejesha Majibu kwa programu zinazotumika chinichini"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Onyesha arifa za maonyo ya kituo"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Huonyesha onyo kwenye skrini programu inapochapisha arifa bila kituo sahihi."</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Tekeleza njia za mkato za arifa za mazungumzo"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Weka mipangilio ili nakala za arifa zihifadhiwe kwa njia ya zamani ya mkato ya kushiriki ili zionekane katika sehemu ya mazungumzo"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Lazima uruhusu programu kwenye hifadhi ya nje"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Huruhusu programu yoyote iwekwe kwenye hifadhi ya nje, bila kujali thamani za faili ya maelezo"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Lazimisha shughuli ziweze kubadilishwa ukubwa"</string>

@@ -284,7 +284,8 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Pokaži možnosti za potrdilo brezžičnega zaslona"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Povečaj raven zapisovanja dnevnika za Wi-Fi; v izbirniku Wi‑Fi-ja pokaži glede na SSID RSSI"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Zmanjša porabo energije akumulatorja in izboljša delovanje omrežja"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"To stikalo vpliva na dodeljevanje naključnega naslova MAC samo v načinu odjemalca.\nKo je ta način aktiviran, se omrežjem, pri katerih je omogočeno naključno dodeljevanje naslova MAC, med povezovanjem morda dodeli nov naključen naslov MAC, kar je odvisno od tega, kdaj je odjemalec nazadnje prekinil povezavo z omrežjem. Dodelitev novega naključnega naslova se ne izvede, če naprava znova vzpostavi povezavo po največ štirih urah."</string>
+    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
+    <skip />
     <string name="wifi_metered_label" msgid="8737187690304098638">"Omejen prenos podatkov"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Z neomejenim prenosom podatkov"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Velikosti medpomnilnikov zapisovalnika dnevnika"</string>
@@ -373,8 +374,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Prikaz pogovornega okna za neodzivanje aplikacij v ozadju"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Pokaži opozorila kanala za obvestila"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Na zaslonu se pokaže opozorilo, ko aplikacija objavi obvestilo brez veljavnega kanala"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Uveljavitev bližnjic za obvestila pogovora"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Zahteva, da obvestila podpira dolgotrajna bližnjica za deljenje, da se prikažejo v razdelku s pogovorom"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Vsili omogočanje aplikacij v zunanji shrambi"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Poskrbi, da je ne glede na vrednosti v manifestu mogoče vsako aplikacijo zapisati v zunanjo shrambo"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Vsili spremembo velikosti za aktivnosti"</string>

@@ -1125,7 +1125,7 @@ class ActivityStarter {
 
         // If we are starting an activity that is not from the same uid as the currently resumed
         // one, check whether app switches are allowed.
-        if (voiceSession == null && (stack.getResumedActivity() == null
+        if (voiceSession == null && stack != null && (stack.getResumedActivity() == null
                 || stack.getResumedActivity().info.applicationInfo.uid != realCallingUid)) {
             if (!mService.checkAppSwitchAllowedLocked(callingPid, callingUid,
                     realCallingPid, realCallingUid, "Activity start")) {

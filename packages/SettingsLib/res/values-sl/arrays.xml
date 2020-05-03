@@ -40,7 +40,7 @@
     <item msgid="8339720953594087771">"Vzpostavljanje povezave z omrežjem <xliff:g id="NETWORK_NAME">%1$s</xliff:g> …"</item>
     <item msgid="3028983857109369308">"Preverjanje pristnosti v omrežju <xliff:g id="NETWORK_NAME">%1$s</xliff:g> …"</item>
     <item msgid="4287401332778341890">"Pridobivanje naslova IP od <xliff:g id="NETWORK_NAME">%1$s</xliff:g> …"</item>
-    <item msgid="1043944043827424501">"Povezava z omrežjem <xliff:g id="NETWORK_NAME">%1$s</xliff:g> je vzpostavljena"</item>
+    <item msgid="1043944043827424501">"Povezava z: <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</item>
     <item msgid="7445993821842009653">"Začasno ustavljeno"</item>
     <item msgid="1175040558087735707">"Prekinjanje povezave z omrežjem <xliff:g id="NETWORK_NAME">%1$s</xliff:g> …"</item>
     <item msgid="699832486578171722">"Prekinjena povezava"</item>

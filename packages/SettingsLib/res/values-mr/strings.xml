@@ -284,7 +284,8 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"वायरलेस डिस्प्ले प्रमाणिकरणाचे पर्याय दाखवा"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"वाय-फाय लॉगिंग स्‍तर वाढवा, वाय-फाय सिलेक्टरमध्‍ये प्रति SSID RSSI दर्शवा"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"बॅटरी जलदरीतीने संपण्यापासून रोखते आणि नेटवर्क परफॉर्मन्समध्ये सुधारणा करते"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"या टॉगलचा फक्त क्लायंट मोडसाठी MAC रँडमायझेशन वर्तनावर परिणाम होतो.\nहा मोड अ‍ॅक्टिव्हेट केलेला असताना, तुमच्या नेटवर्कवरून क्लायंट शेवटचा कधी डिस्कनेक्ट केला गेला त्यावर अवलंबून, संबद्धीकरणादरम्यान MAC रँडमायझेशन सुरू असलेल्या कोणत्याही नेटवर्कचे MAC अ‍ॅड्रेस पुन्हा रँडमाइझ केले जाऊ शकतात. डिव्हाइस चार तासांत किंवा त्यापेक्षा कमी वेळात पुन्हा कनेक्ट झाल्यास पुन्हा रँडमायझेशन होत नाही."</string>
+    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
+    <skip />
     <string name="wifi_metered_label" msgid="8737187690304098638">"मीटरने मोजलेले"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"मीटरने न मोजलेले"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"लॉगर बफर आकार"</string>
@@ -373,8 +374,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"बॅकग्राउंड अ‍ॅप्ससाठी अ‍ॅप प्रतिसाद देत नाही दाखवते"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"सूचना चॅनेल चेतावण्या दाखवा"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"एखादे अ‍ॅप वैध चॅनेलशिवाय सूचना पोस्ट करते तेव्हा स्क्रीनवर चेतावणी देते"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"संभाषण सूचना शॉर्टकट ठेवा"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"सूचनांना जुन्या शॉर्टकटचा सपोर्ट आवश्यक"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"बाह्यवर ॲप्सना अनुमती देण्याची सक्ती करा"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"manifest मूल्यांकडे दुर्लक्ष करून, कोणत्याही ॲपला बाह्य स्टोरेजवर लेखन केले जाण्यासाठी पात्र बनविते"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"ॲक्टिव्हिटीचा आकार बदलण्यायोग्य होण्याची सक्ती करा"</string>
@@ -436,14 +435,10 @@
     <string name="power_discharge_by_only" msgid="92545648425937000">"सुमारे <xliff:g id="TIME">%1$s</xliff:g> पर्यंत टिकावी"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"<xliff:g id="TIME">%1$s</xliff:g> पर्यंत"</string>
     <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"<xliff:g id="TIME">%1$s</xliff:g> वाजेपर्यंत बॅटरी संपू शकते"</string>
-    <!-- no translation found for power_remaining_less_than_duration_only (8956656616031395152) -->
-    <skip />
-    <!-- no translation found for power_remaining_less_than_duration (318215464914990578) -->
-    <skip />
-    <!-- no translation found for power_remaining_more_than_subtext (446388082266121894) -->
-    <skip />
-    <!-- no translation found for power_remaining_only_more_than_subtext (4873750633368888062) -->
-    <skip />
+    <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"<xliff:g id="THRESHOLD">%1$s</xliff:g> पेक्षा कमी शिल्लक आहे"</string>
+    <string name="power_remaining_less_than_duration" msgid="318215464914990578">"<xliff:g id="THRESHOLD">%1$s</xliff:g> पेक्षा कमी (<xliff:g id="LEVEL">%2$s</xliff:g>) शिल्लक आहे"</string>
+    <string name="power_remaining_more_than_subtext" msgid="446388082266121894">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> पेक्षा जास्त (<xliff:g id="LEVEL">%2$s</xliff:g>) शिल्लक आहे"</string>
+    <string name="power_remaining_only_more_than_subtext" msgid="4873750633368888062">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> पेक्षा जास्त शिल्लक आहे"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"फोन लवकरच बंद होऊ शकतो"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"टॅबलेट लवकरच बंद होऊ शकतो"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"डिव्हाइस लवकरच बंद होऊ शकते"</string>

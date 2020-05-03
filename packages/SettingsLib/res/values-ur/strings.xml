@@ -284,7 +284,8 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"وائرلیس ڈسپلے سرٹیفیکیشن کیلئے اختیارات دکھائیں"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"‏Wi‑Fi لاگنگ لیول میں اضافہ کریں، Wi‑Fi منتخب کنندہ میں فی SSID RSSI دکھائیں"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"بیٹری ڈرین کم کرتا ہے اور نیٹ ورک کارکردگی کو بہتر بناتا ہے"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"‏یہ ٹوگل صرف کلائنٹ وضع کے لئے MAC کی رینڈمائزیشن کو متاثر کرتا ہے۔\nجب یہ وضع فعال کی جاتی ہے، تو کسی بھی نیٹ ورکس میں جو MAC رینڈمائزیشن کو فعال کرتا ہے ان کے MAC ایڈریسز ایسوسی ایشن کے دوران دوبارہ رینڈمائز ہو سکتے ہیں، اس پر منحصر ہے کہ کلائنٹ کب آخری بار نیٹ ورک سے غیر منسلک ہوا۔ اگر آلہ 4 گھنٹوں یا اس سے کم وقت میں دوبارہ منسلک ہو، تو پھر دوبارہ رینڈمائزیشن کا امکان نہیں ہوتا ہے۔"</string>
+    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
+    <skip />
     <string name="wifi_metered_label" msgid="8737187690304098638">"میٹرڈ"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"غیر میٹر شدہ"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"لاگر بفر کے سائز"</string>
@@ -373,8 +374,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"پس منظر کی ایپس کیلئے \'ایپ جواب نہیں دے رہی ہے\' ڈائلاگ ڈسپلے کریں"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"چینل کی اطلاعی تنبیہات دکھائیں"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"کسی ایپ کی طرف سے درست چینل کے بغیر اطلاع پوسٹ ہونے پر آن اسکرین تنبیہ ڈسپلے کرتا ہے"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"بات چیت کی اطلاعات کے لیے شارٹ کٹس نافذ کریں"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"بات چیت کے سیکشن میں ظاہر ہونے کے لئے اطلاعات کو طویل مدت والے شیئرنگ شارٹ کٹ کے ذریعے حمایت کی ضرورت ہے"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"بیرونی پر ایپس کو زبردستی اجازت دیں"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"‏manifest اقدار سے قطع نظر، کسی بھی ایپ کو بیرونی اسٹوریج پر لکھے جانے کا اہل بناتا ہے"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"سرگرمیوں کو ری سائز ایبل بنائیں"</string>
@@ -436,14 +435,10 @@
     <string name="power_discharge_by_only" msgid="92545648425937000">"تقریباً <xliff:g id="TIME">%1$s</xliff:g> تک بیٹری چلے گی"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"<xliff:g id="TIME">%1$s</xliff:g> تک"</string>
     <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"<xliff:g id="TIME">%1$s</xliff:g> تک بیٹری ختم ہو سکتی ہے"</string>
-    <!-- no translation found for power_remaining_less_than_duration_only (8956656616031395152) -->
-    <skip />
-    <!-- no translation found for power_remaining_less_than_duration (318215464914990578) -->
-    <skip />
-    <!-- no translation found for power_remaining_more_than_subtext (446388082266121894) -->
-    <skip />
-    <!-- no translation found for power_remaining_only_more_than_subtext (4873750633368888062) -->
-    <skip />
+    <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"<xliff:g id="THRESHOLD">%1$s</xliff:g> سے کم باقی ہے"</string>
+    <string name="power_remaining_less_than_duration" msgid="318215464914990578">"<xliff:g id="THRESHOLD">%1$s</xliff:g> سے کم باقی ہے (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_more_than_subtext" msgid="446388082266121894">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> سے زیادہ باقی ہے (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_only_more_than_subtext" msgid="4873750633368888062">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> سے زیادہ باقی ہے"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"فون جلد ہی بند ہو سکتا ہے"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"ٹیبلیٹ جلد ہی بند ہو سکتا ہے"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"آلہ جلد ہی بند ہو سکتا ہے"</string>

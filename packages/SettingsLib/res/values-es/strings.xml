@@ -153,7 +153,7 @@
     <string name="unknown" msgid="3544487229740637809">"Desconocido"</string>
     <string name="running_process_item_user_label" msgid="3988506293099805796">"Usuario: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"Se han establecido algunos valores predeterminados"</string>
-    <string name="launch_defaults_none" msgid="8049374306261262709">"No se han establecido valores predeterminados"</string>
+    <string name="launch_defaults_none" msgid="8049374306261262709">"No se han establecido opciones predeterminadas"</string>
     <string name="tts_settings" msgid="8130616705989351312">"Ajustes de síntesis de voz"</string>
     <string name="tts_settings_title" msgid="7602210956640483039">"Síntesis de voz"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"Velocidad de la voz"</string>
@@ -207,7 +207,7 @@
     <string name="enable_adb_summary" msgid="3711526030096574316">"Activar el modo de depuración cuando el dispositivo esté conectado por USB"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"Revocar autorizaciones de depuración USB"</string>
     <string name="enable_adb_wireless" msgid="6973226350963971018">"Depuración inalámbrica"</string>
-    <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Activar el modo Depuración cuando tenga conexión Wi‑Fi"</string>
+    <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Activa el modo de depuración cuando haya conexión Wi‑Fi"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"Error"</string>
     <string name="adb_wireless_settings" msgid="2295017847215680229">"Depuración inalámbrica"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Para ver y utilizar los dispositivos disponibles, activa la depuración inalámbrica"</string>
@@ -226,12 +226,12 @@
     <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"Código de sincronización de Wi‑Fi"</string>
     <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"No se ha podido vincular"</string>
     <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"Comprueba que el dispositivo está conectado a la misma red."</string>
-    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"Vincula un dispositivo a través de Wi‑Fi con un código QR"</string>
+    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"Vincula un dispositivo mediante Wi‑Fi con un código QR"</string>
     <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"Vinculando dispositivo…"</string>
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"No se ha podido vincular el dispositivo. El código QR no era correcto o el dispositivo no estaba conectado a la misma red."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"Dirección IP y puerto"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Escanea el código QR"</string>
-    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Vincula un dispositivo a través de Wi‑Fi escaneando un código QR"</string>
+    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Vincula un dispositivo mediante Wi‑Fi escaneando un código QR"</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Conéctate a una red Wi-Fi"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, depuración, desarrollo"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Atajo a informe de errores"</string>
@@ -284,7 +284,8 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Mostrar opciones para la certificación de la pantalla inalámbrica"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Aumentar el nivel de registro de Wi-Fi y mostrar por SSID RSSI en el selector Wi-Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Reduce el consumo de batería y mejora el rendimiento de las redes"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Este interruptor solo afecta al comportamiento al aleatorizar direcciones MAC en el modo cliente.\nCuando este modo está activado, las direcciones MAC de las redes que tengan activada la aleatorización de la dirección MAC se pueden volver a aleatorizar durante la asociación. Esto depende de la última vez en la que el cliente se desconectó de la red. No se volverán a aleatorizar si transcurrieron 4 horas o menos desde la última conexión del dispositivo."</string>
+    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
+    <skip />
     <string name="wifi_metered_label" msgid="8737187690304098638">"Medida"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"No medida"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Tamaños del búfer para registrar"</string>
@@ -373,8 +374,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Mostrar el diálogo de que la aplicación no responde para aplicaciones en segundo plano"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Ver advertencias del canal de notificaciones"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Mostrar una advertencia en pantalla cuando una aplicación publica una notificación sin un canal válido"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Implementar atajos en notific. de conversaciones"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Exigir que las notificaciones tengan un atajo para compartir y que así aparezcan en la sección de conversaciones"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Forzar permitir aplicaciones de forma externa"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Hacer que cualquier aplicación se pueda escribir en un dispositivo de almacenamiento externo independientemente de los valores definidos"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Forzar el ajuste de tamaño de las actividades"</string>
