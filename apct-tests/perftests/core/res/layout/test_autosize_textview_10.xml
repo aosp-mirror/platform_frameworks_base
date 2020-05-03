@@ -38,5 +38,5 @@
           android:autoSizeTextType="uniform"
           android:autoSizeMinTextSize="10px"
           android:textSize="20px"
-          android:autoSizeStepGranularity="1px"/>
+          android:autoSizeStep="1px"/>
 
