@@ -284,7 +284,8 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Rodyti belaidžio rodymo sertifikavimo parinktis"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Padidinti „Wi‑Fi“ įrašymo į žurnalą lygį, rodyti SSID RSSI „Wi-Fi“ rinkiklyje"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Sumažinamas akumuliatoriaus eikvojimas ir patobulinamas tinklo našumas"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Perjungiamas tik atsitiktinis MAC adreso parinkimas dirbant kliento režimu.\nKai suaktyvintas šis režimas, visuose tinkluose, kuriuose įgalintas atsitiktinis MAC adreso parinkimas, susiejant šie adresai gali būti atsitiktinai parenkami iš naujo, atsižvelgiant į tai, kada klientas paskutinį kartą atsijungė nuo tinklo. Atsitiktinis MAC adreso parinkimas nevykdomas iš naujo, jei įrenginys vėl prisijungia ne daugiau nei po keturių valandų."</string>
+    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
+    <skip />
     <string name="wifi_metered_label" msgid="8737187690304098638">"Matuojamas"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Neišmatuotas"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Registruotuvo buferio dydžiai"</string>
@@ -373,8 +374,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Foninėse programose rodyti dialogo langą „Programa neatsako“"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Rodyti pran. kan. įspėj."</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Ekr. rod. įsp., kai progr. pask. pr. be tink. kan."</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Nustatyti pokalbio pranešimų šaukinius"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Kad pranešimai būtų rodomi pokalbių skiltyje, būtinas ilgalaikis jų bendrinimo šaukinys"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Priverstinai leisti programas išorinėje atmintin."</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Nustatoma, kad visas programas būtų galima įrašyti į išorinę saugyklą, nepaisant aprašo verčių"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Priv. nust., kad veiksm. b. g. atl. kelių d. lang."</string>

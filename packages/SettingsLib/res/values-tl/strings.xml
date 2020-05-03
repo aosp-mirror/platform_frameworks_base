@@ -284,7 +284,8 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Ipakita ang mga opsyon para sa certification ng wireless display"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Pataasin ang antas ng Wi‑Fi logging, ipakita sa bawat SSID RSSI sa Wi‑Fi Picker"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Binabawasan ang pagkaubos ng baterya at pinapahusay ang performance ng network"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Nakakaapekto ang toggle na ito sa pag-kilos ng pag-randomize ng MAC para lang sa client mode.\nKapag na-activate ang mode na ito, baka ma-randomize ulit ang MAC address ng anumang network na naka-enable ang pag-randomize sa MAC habang nagaganap ang pag-uugnay, depende kung kailan huling nadiskonekta ang client sa network. Hindi nangyayari ang pag-randomize ulit kung kumonekta ulit ang device sa loob ng 4 na oras o mas maaga."</string>
+    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
+    <skip />
     <string name="wifi_metered_label" msgid="8737187690304098638">"Nakametro"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Hindi Nakametro"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Mga laki ng buffer ng Logger"</string>
@@ -373,8 +374,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Ipakita ang dialog na Hindi Tumutugon ang App para sa mga app sa background"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Ipakita ang mga babala sa notification channel"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Nagpapakita ng babala sa screen kapag nag-post ang app ng notification nang walang wastong channel"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Magpatupad ng mga shortcut para sa mga notification ng pag-uusap"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Ipa-back up ang mga notification gamit ang long-lived na shortcut sa pagbabahagi para lumabas sa seksyong pag-uusap"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Puwersahang payagan ang mga app sa external"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Ginagawang kwalipikado ang anumang app na mailagay sa external na storage, anuman ang mga value ng manifest"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Sapilitang gawing resizable ang mga aktibidad"</string>

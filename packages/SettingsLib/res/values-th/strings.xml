@@ -284,7 +284,8 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"แสดงตัวเลือกสำหรับการรับรองการแสดงผล แบบไร้สาย"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"เพิ่มระดับการบันทึก Wi‑Fi แสดงต่อ SSID RSSI ในตัวเลือก Wi‑Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"ลดการเปลืองแบตเตอรี่และเพิ่มประสิทธิภาพเครือข่าย"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"การตั้งค่านี้ส่งผลต่อลักษณะการสุ่ม MAC ในโหมดไคลเอ็นต์เท่านั้น\nเมื่อเปิดใช้งานโหมดนี้ ทุกเครือข่ายที่มีการเปิดใช้การสุ่ม MAC อาจสุ่มที่อยู่ MAC ซ้ำในระหว่างการเชื่อมโยง ทั้งนี้ขึ้นอยู่กับว่าไคลเอ็นต์ยกเลิกการเชื่อมต่อกับเครือข่ายครั้งสุดท้ายเมื่อใด การสุ่มซ้ำจะไม่เกิดขึ้นหากอุปกรณ์เชื่อมต่ออีกครั้งภายในไม่เกิน 4 ชั่วโมง"</string>
+    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
+    <skip />
     <string name="wifi_metered_label" msgid="8737187690304098638">"มีการวัดปริมาณอินเทอร์เน็ต"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"ไม่มีการวัดปริมาณอินเทอร์เน็ต"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"ขนาดบัฟเฟอร์ของตัวบันทึก"</string>
@@ -373,8 +374,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"แสดงกล่องโต้ตอบ \"แอปไม่ตอบสนอง\" สำหรับแอปพื้นหลัง"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"แสดงคำเตือนจากช่องทางการแจ้งเตือน"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"แสดงคำเตือนบนหน้าจอเมื่อแอปโพสต์การแจ้งเตือนโดยไม่มีช่องทางที่ถูกต้อง"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"บังคับใช้ทางลัดสำหรับการแจ้งเตือนการสนทนา"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"ต้องทำให้การแจ้งเตือนปรากฏในส่วนการสนทนาได้อีกถ้ามีการปิดไปโดยใช้ทางลัดการแชร์ที่แสดงอยู่ตลอด"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"บังคับให้แอปสามารถใช้ที่เก็บภายนอก"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"เขียนแอปในพื้นที่เก็บข้อมูลภายนอกได้ โดยไม่คำนึงถึงค่าไฟล์ Manifest"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"บังคับให้กิจกรรมปรับขนาดได้"</string>

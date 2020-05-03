@@ -284,7 +284,8 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Mostra opcións para o certificado de visualización sen fíos"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Aumenta o nivel de rexistro da wifi, móstrao por SSID RSSI no selector de wifi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Reduce o consumo de batería e mellora o rendemento da rede"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Esta opción só lle afecta ao comportamento da selección aleatoria de enderezo MAC do modo de cliente.\nCando este modo está activado, os enderezos MAC das redes que teñan activada a selección automática de enderezo MAC pódense volver seleccionar aleatoriamente durante a asociación. Isto depende de cando se desconectase da rede cada cliente por última vez, xa que a selección aleatoria non se repite se transcorreron 4 horas ou menos desde a última conexión."</string>
+    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
+    <skip />
     <string name="wifi_metered_label" msgid="8737187690304098638">"Sen tarifa plana"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Con tarifa plana"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Tamaño dos búfers do rexistrador"</string>
@@ -373,8 +374,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Indica que unha aplicación en segundo plano non responde"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Mostrar avisos de notificacións"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Mostra avisos cando unha aplicación publica notificacións sen unha canle válida"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Usar atallos para notificacións de conversas"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Require que as notificacións teñan un atallo de uso compartido permanente para aparecer na sección de conversas"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Forzar permiso de aplicacións de forma externa"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Permite que calquera aplicación compatible se poida escribir nun almacenamento externo, independentemente dos valores do manifesto"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Forzar o axuste do tamaño das actividades"</string>

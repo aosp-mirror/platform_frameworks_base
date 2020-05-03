@@ -284,7 +284,8 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"නොරැහැන් සංදර්ශක සහතිකය සඳහා විකල්ප පෙන්වන්න"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Wi‑Fi ලොග් මට්ටම වැඩි කරන්න, Wi‑Fi තෝරනයෙහි SSID RSSI අනුව පෙන්වන්න"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"බැටරි බැසීම අඩු කරන අතර ජාල කාර්ය සාධනය වැඩි දියුණු කරයි"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"මෙම ටොගලය සේවාලාභී ප්‍රකාරය සඳහා පමණක් MAC සසම්භාවීකරණ හැසිරීමට බලපායි.\nමෙම ප්‍රකාරය සක්‍රිය කර ඇති විට, MAC සසම්භාවීකරණය සබල කර ඇති ඕනෑම ජාලයකට, සේවාලාභියා අවසන් වරට ජාලයෙන් විසන්ධි වූයේ කවදාද යන්න මත පදනම්ව සම්බන්ධය අතරතුර ඔවුන්ගේ MAC ලිපින යළි සසම්භාවිකරණය කර තිබිය හැකිය. උපාංගය පැය 4කින් හෝ ඊට අඩු කාලයකදී නැවත සම්බන්ධ වන්නේ නම් යළි සසම්භාවිකරණය සිදු නොවේ."</string>
+    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
+    <skip />
     <string name="wifi_metered_label" msgid="8737187690304098638">"මනිනු ලැබේ"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"මනින්නේ නැත"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"ලෝගයේ අන්තරාවක ප්‍රමාණය"</string>
@@ -373,8 +374,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"පසුබිම් යෙදුම්වලට යෙදුම ප්‍රතිචාර නොදක්වයි කවුළුව සංදර්ශනය කරන්න"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"දැනුම්දීම් නාලිකා අනතුරු ඇඟවීම් පෙන්."</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"යෙදුමක් වලංගු නාලිකාවකින් තොරව දැනුම්දීමක් පළ කරන විට තිරය-මත අනතුරු ඇඟවීමක් සංදර්ශනය කරයි."</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"සංවාද දැනුම් දීම් සඳහා කෙටිමං බලාත්මක කරන්න"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"සංවාද කොටසේ පෙනී සිටීම පිණිස දිගු කාලයක් පවතින බෙදා ගැනීමේ කෙටිමඟක් මඟින් දැනුම් දීම් අවහිර කිරීමට අවශ්‍ය වේ"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"බාහිර මත යෙදුම් ඉඩ දීම බල කරන්න"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"මැනිෆෙස්ට් අගයන් නොසලකා, ඕනෑම යෙදුමක් බාහිර ගබඩාවට ලිවීමට සුදුසුකම් ලබා දෙයි"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"ක්‍රියාකාරකම් ප්‍රතිප්‍රමාණ කළ හැකි බවට බල කරන්න"</string>

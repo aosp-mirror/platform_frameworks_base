@@ -284,7 +284,8 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"வயர்லெஸ் காட்சி சான்றுக்கான விருப்பங்களைக் காட்டு"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"வைஃபை நுழைவு அளவை அதிகரித்து, வைஃபை தேர்வுக் கருவியில் ஒவ்வொன்றிற்கும் SSID RSSI ஐ காட்டுக"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"பேட்டரி தீர்ந்துபோவதைக் குறைத்து நெட்வொர்க்கின் செயல்திறனை மேம்படுத்தும்"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"கிளையண்ட் பயன்முறைக்கான MAC ரேண்டம் ஆக்குதலை மட்டுமே இந்த நிலைமாற்றி பாதிக்கும்.\nஇந்தப் பயன்முறை இயக்கப்பட்டால் நெட்வொர்க்கிலிருந்து கிளையண்ட் கடைசியாக எப்போது துண்டிக்கப்பட்டது என்பதைப் பொறுத்து, MAC ரேண்டம் ஆக்குதல் இயக்கப்பட்டிருக்கும் நெட்வொர்க்குகள் இணைக்கப்படும்போது தங்கள் MAC முகவரிகளை மீண்டும் ரேண்டம் ஆக்கக்கூடும். சாதனம் 4 மணிநேரத்திலோ அதற்கு முன்னரோ மீண்டும் இணைக்கப்பட்டால் மீண்டும் ரேண்டம் ஆக்குதல் நிகழாது."</string>
+    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
+    <skip />
     <string name="wifi_metered_label" msgid="8737187690304098638">"கட்டண நெட்வொர்க்"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"கட்டணமில்லா நெட்வொர்க்"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"லாகர் பஃபர் அளவுகள்"</string>
@@ -373,8 +374,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"பின்புல ஆப்ஸுக்கு, ஆப்ஸ் பதிலளிக்கவில்லை என்ற செய்தியைக் காட்டும்"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"அறிவிப்புச் சேனல் எச்சரிக்கைகளைக் காட்டு"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"ஆப்ஸானது சரியான சேனல் இல்லாமல் அறிவிப்பை இடுகையிடும் போது, திரையில் எச்சரிக்கையைக் காட்டும்"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"உரையாடல் அறிவிப்புகளுக்கான ஷார்ட்கட்களை செயல்படுத்து"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"அறிவிப்புகளானது உரையாடல் பிரிவில் தோன்ற வேண்டும் எனில் அவை நீண்ட காலம் செயல்பாட்டில் இருந்த பகிர்தலுக்கான ஷார்ட்கட் ஆதரவைக் கொண்டிருக்க வேண்டும்"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"ஆப்ஸை வெளிப்புறச் சேமிப்பிடத்தில் அனுமதி"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"மேனிஃபெஸ்ட் மதிப்புகளைப் பொருட்படுத்தாமல், எல்லா ஆப்ஸையும் வெளிப்புறச் சேமிப்பிடத்தில் எழுத அனுமதிக்கும்"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"செயல்பாடுகளை அளவுமாறக்கூடியதாக அமை"</string>
@@ -436,14 +435,10 @@
     <string name="power_discharge_by_only" msgid="92545648425937000">"<xliff:g id="TIME">%1$s</xliff:g> வரை பயன்படுத்த முடியும்"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"<xliff:g id="TIME">%1$s</xliff:g> வரை"</string>
     <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"<xliff:g id="TIME">%1$s</xliff:g>க்கு பேட்டரி காலியாகிவிடக்கூடும்"</string>
-    <!-- no translation found for power_remaining_less_than_duration_only (8956656616031395152) -->
-    <skip />
-    <!-- no translation found for power_remaining_less_than_duration (318215464914990578) -->
-    <skip />
-    <!-- no translation found for power_remaining_more_than_subtext (446388082266121894) -->
-    <skip />
-    <!-- no translation found for power_remaining_only_more_than_subtext (4873750633368888062) -->
-    <skip />
+    <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"<xliff:g id="THRESHOLD">%1$s</xliff:g> ஐ விடக் குறைவாக உள்ளது"</string>
+    <string name="power_remaining_less_than_duration" msgid="318215464914990578">"<xliff:g id="THRESHOLD">%1$s</xliff:g> ஐ விடக் குறைவாக உள்ளது (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_more_than_subtext" msgid="446388082266121894">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g>க்கு மேல் உள்ளது (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_only_more_than_subtext" msgid="4873750633368888062">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g>க்கு மேல் உள்ளது"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"மொபைல் விரைவில் ஆஃப் ஆகக்கூடும்"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"டேப்லெட் விரைவில் ஆஃப் ஆகக்கூடும்"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"சாதனம் விரைவில் ஆஃப் ஆகக்கூடும்"</string>

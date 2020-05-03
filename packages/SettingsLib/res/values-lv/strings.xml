@@ -284,7 +284,8 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Rādīt bezvadu attēlošanas sertifikācijas iespējas"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Palieliniet Wi‑Fi reģistrēšanas līmeni; rādīt katram SSID RSSI Wi‑Fi atlasītājā."</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Samazina akumulatora izlādi un uzlabo tīkla veiktspēju"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Šis slēdzis ietekmē MAC adrešu nejaušas izveides darbību tikai klienta režīmā.\nJa šis režīms ir aktivizēts, visos tīklos, kuros MAC adrešu nejauša izveide ir iespējota, saistīšanas laikā MAC adreses var tikt atkārtoti nejauši izveidotas atkarībā no tā, kad klients pēdējoreiz pārtrauca savienojumu ar tīklu. Atkārtota nejauša izveide netiek veikta, ja ierīces savienojums tiek atjaunots ne vairāk kā 4 stundu laikā."</string>
+    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
+    <skip />
     <string name="wifi_metered_label" msgid="8737187690304098638">"Maksas"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Bezmaksas"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Reģistrētāja buferu lielumi"</string>
@@ -373,8 +374,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Rādīt fona lietotņu dialoglodziņu Lietotne nereaģē"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Paziņojumu kanāla brīdinājumi"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Brīdinājums ekrānā, kad lietotne publicē paziņojumu, nenorādot derīgu kanālu"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Ieviest saīsnes sarunu paziņojumiem"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Pieprasīt izmantot paziņojumiem ilgstošas darbības kopīgošanas saīsni rādīšanai sarunu sadaļā"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Lietotņu piespiedu atļaušana ārējā krātuvē"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Ļauj jebkuru lietotni ierakstīt ārējā krātuvē neatkarīgi no manifesta vērtības."</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Pielāgot darbības"</string>

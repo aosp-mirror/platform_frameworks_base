@@ -284,7 +284,8 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"‏הצג אפשרויות עבור אישור של תצוגת WiFi"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"‏העלה את רמת הרישום של Wi‑Fi ביומן, הצג לכל SSID RSSI ב-Wi‑Fi Picker"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"מפחית את קצב התרוקנות הסוללה ומשפר את ביצועי הרשת"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"‏לחצן החלפת המצב משפיע על התנהגות הרנדומיזציה של כתובות MAC במצב לקוח בלבד.\nכשמצב זה מופעל, ברשת שבה מופעלת רנדומיזציה של כתובות MAC, ייתכן שתתבצע רנדומיזציה מחדש של כתובות ה-MAC במהלך השיוך, בהתאם למועד הניתוק האחרון של הלקוח מהרשת. לא תתבצע רנדומיזציה מחדש אם המכשיר מתחבר מחדש תוך ארבע שעות או פחות."</string>
+    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
+    <skip />
     <string name="wifi_metered_label" msgid="8737187690304098638">"נמדדת"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"לא נמדדת"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"גדלי מאגר של יומן רישום"</string>
@@ -373,8 +374,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"הצגת תיבת דו-שיח של \'אפליקציה לא מגיבה\' עבור אפליקציות שפועלות ברקע"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"אזהרות לגבי ערוץ התראות"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"הצגת אזהרה כשאפליקציה שולחת התראה ללא ערוץ חוקי"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"אילוץ קיצורי דרך להתראות על שיחות"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"כדי שההודעות יופיעו בקטע השיחות, יש צורך בגיבוי שלהן באמצעות קיצור דרך לשיתוף בעל מחזור חיים ארוך"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"אילוץ הרשאת אפליקציות באחסון חיצוני"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"מאפשר כתיבה של כל אפליקציה באחסון חיצוני, ללא התחשבות בערכי המניפסט"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"אלץ יכולת קביעת גודל של הפעילויות"</string>

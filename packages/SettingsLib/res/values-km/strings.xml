@@ -284,7 +284,8 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"បង្ហាញ​ជម្រើស​សម្រាប់​សេចក្តីបញ្ជាក់ការបង្ហាញ​ឥត​ខ្សែ"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"បង្កើនកម្រិតកំណត់ហេតុ Wi-Fi បង្ហាញក្នុង SSID RSSI ក្នុងកម្មវិធីជ្រើសរើស Wi-Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"កាត់បន្ថយ​ការប្រើប្រាស់ថ្ម និងកែលម្អប្រតិបត្តិការ​បណ្ដាញ"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"ការបិទ/បើកនេះ​ប៉ះពាល់​ដល់សកម្មភាព​តម្រៀប MAC តាមលំដាប់​ចៃដន្យសម្រាប់មុខងារភ្ញៀវតែប៉ុណ្ណោះ។\nនៅពេលបើកដំណើរការមុខងារនេះ បណ្ដាញ​ទាំងឡាយដែល​បានបើក​ការតម្រៀប MAC តាមលំដាប់​ចៃដន្យប្រហែលជាត្រូវបានតម្រៀបអាសយដ្ឋាន MAC របស់វាតាមលំដាប់​ចៃដន្យឡើងវិញ អំឡុងពេលភ្ជាប់ ដោយផ្អែកលើពេលវេលាដែលមុខងារភ្ញៀវបានផ្ដាច់លើកចុងក្រោយពីបណ្ដាញ។ ការតម្រៀប​តាមលំដាប់​ចៃដន្យឡើងវិញ​មិនកើតឡើងទេ ប្រសិនបើ​ឧបករណ៍​ភ្ជាប់ឡើងវិញ​ក្នុងរយៈពេល 4 ម៉ោង ឬ​ឆាប់ជាងនេះ។"</string>
+    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
+    <skip />
     <string name="wifi_metered_label" msgid="8737187690304098638">"មានការកំណត់"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"មិនមានការកំណត់"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"ទំហំកន្លែងផ្ទុករបស់ logger"</string>
@@ -373,8 +374,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"បង្ហាញ​ប្រអប់​កម្មវិធី​មិន​ឆ្លើយតប​សម្រាប់​កម្មវិធី​ផ្ទៃ​ខាង​ក្រោយ"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"បង្ហាញការព្រមានអំពីបណ្តាញជូនដំណឹង"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"បង្ហាញការព្រមាននៅលើអេក្រង់ នៅពេលកម្មវិធីបង្ហោះការជូនដំណឹងដោយមិនមានបណ្តាញត្រឹមត្រូវ"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"ជំរុញឱ្យប្រើផ្លូវកាត់សម្រាប់ការជូនដំណឹងពីការសន្ទនា"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"តម្រូវឱ្យបម្រុងទុកការជូនដំណឹង តាមរយៈផ្លូវកាត់ចែករំលែកដែលមានអាយុកាលយូរទើបអាចបង្ហាញនៅក្នុងផ្នែកនៃការសន្ទនាបាន"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"បង្ខំឲ្យអនុញ្ញាតកម្មវិធីលើឧបករណ៍ផ្ទុកខាងក្រៅ"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"ធ្វើឲ្យកម្មវិធីទាំងឡាយមានសិទ្ធិសរសេរទៅកាន់ឧបករណ៍ផ្ទុកខាងក្រៅ ដោយមិនគិតពីតម្លៃជាក់លាក់"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"បង្ខំឲ្យសកម្មភាពអាចប្តូរទំហំបាន"</string>

@@ -284,7 +284,8 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"ওয়্যারলেস প্রদর্শন সার্টিফিকেশন জন্য বিকল্পগুলি দেখান"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"ওয়াই-ফাই লগিং স্তর বাড়ান, ওয়াই-ফাই চয়নকারীতে SSID RSSI অনুযায়ী দেখান"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"ব্যাটারির খরচ কমায় এবং নেটওয়ার্কের পারফর্ম্যান্স উন্নত করে"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"এই টগলটি কেবল ক্লায়েন্ট মোডের জন্য ম্যাক র‍্যান্ডমাইজেশন আচরণকে প্রভাবিত করে।\nযখন এই মোডটি চালু করা হয়, তখন ক্লায়েন্টটি কখন নেটওয়ার্ক থেকে ডিসকানেক্ট হয়েছিল তার উপর নির্ভর করে কানেকশনটি সর্বশেষ কানেক্ট হওয়ার পরে MAC র‍্যান্ডম দ্বারা চালু করা যেকোনও MAC অ্যাড্রেস যেকোনও নেটওয়ার্কে আবার র‍্যান্ডমাইজেশন করা যেতে পারে। যদি ডিভাইসটি ৪ ঘন্টা বা তারও কম সময়ে আবার কানেক্ট করা হয় তবে এটি আর র‍্যান্ডমাইজেশন হবে না।"</string>
+    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
+    <skip />
     <string name="wifi_metered_label" msgid="8737187690304098638">"মিটার্ড"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"পরিমাপ করা নয়"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"লগার বাফারের আকারগুলি"</string>
@@ -373,8 +374,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"ব্যাকগ্রাউন্ডের অ্যাপগুলির জন্য \'অ্যাপ থেকে সাড়া পাওয়া যাচ্ছে না\' মেসেজ দেখান"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"বিজ্ঞপ্তির সতর্কতা দেখুন"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"অ্যাপ সঠিক চ্যানেল ছাড়া বিজ্ঞপ্তি দেখালে সতর্ক করে"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"কথোপকথনের বিজ্ঞপ্তির জন্য শর্টকাট ব্যবহার করুন"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"কথোপকথন বিভাগে দেখানোর জন্য বিজ্ঞপ্তিতে অনেকটা সময় ধরে চলে এমন শেয়ারিং শর্টকাট যেন থাকে"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"বহিরাগততে বলপূর্বক মঞ্জুরি"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"ম্যানিফেস্ট মানগুলি নির্বিশেষে যেকোনো অ্যাপ্লিকেশানকে বাহ্যিক সঞ্চয়স্থানে লেখার উপযুক্ত বানায়"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"আকার পরিবর্তনযোগ্য করার জন্য ক্রিয়াকলাপগুলিকে জোর করুন"</string>
@@ -436,14 +435,10 @@
     <string name="power_discharge_by_only" msgid="92545648425937000">"আনুমানিক <xliff:g id="TIME">%1$s</xliff:g> পর্যন্ত চলবে"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"<xliff:g id="TIME">%1$s</xliff:g> পর্যন্ত"</string>
     <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"ব্যাটারির চার্জ <xliff:g id="TIME">%1$s</xliff:g>-এ শেষ হয়ে যেতে পারে"</string>
-    <!-- no translation found for power_remaining_less_than_duration_only (8956656616031395152) -->
-    <skip />
-    <!-- no translation found for power_remaining_less_than_duration (318215464914990578) -->
-    <skip />
-    <!-- no translation found for power_remaining_more_than_subtext (446388082266121894) -->
-    <skip />
-    <!-- no translation found for power_remaining_only_more_than_subtext (4873750633368888062) -->
-    <skip />
+    <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"<xliff:g id="THRESHOLD">%1$s</xliff:g>-এরও কম সময় চলবে"</string>
+    <string name="power_remaining_less_than_duration" msgid="318215464914990578">"<xliff:g id="THRESHOLD">%1$s</xliff:g>-এরও কম সময় চলবে (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_more_than_subtext" msgid="446388082266121894">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g>-এরও বেশি সময় চলবে (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_only_more_than_subtext" msgid="4873750633368888062">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g>-এরও বেশি সময় চলবে"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"ফোন শীঘ্রই বন্ধ হয়ে যেতে পারে"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"ট্যাবলেটটি শীঘ্রই বন্ধ হয়ে যেতে পারে"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"ডিভাইসটি শীঘ্রই বন্ধ হয়ে যেতে পারে"</string>

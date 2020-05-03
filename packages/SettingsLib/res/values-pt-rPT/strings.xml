@@ -284,7 +284,8 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Mostrar opções da certificação de display sem fios"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Aumentar o nível de reg. de Wi-Fi, mostrar por RSSI de SSID no Selec. de Wi-Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Reduz o consumo rápido da bateria e melhora o desempenho da rede"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Este botão ativar/desativar afeta o comportamento da seleção aleatória do MAC apenas para o modo de cliente.\nQuando este modo está ativado, qualquer rede que tenha a seleção aleatória do MAC ativa pode fazer com que os seus endereços MAC sejam novamente selecionados de forma aleatória durante a associação, dependendo de quando o cliente se desligou da rede pela última vez. A nova seleção aleatória não ocorre se a ligação do dispositivo for restabelecida em 4 horas ou menos."</string>
+    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
+    <skip />
     <string name="wifi_metered_label" msgid="8737187690304098638">"Acesso limitado"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Acesso ilimitado"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Tamanhos da memória intermédia do registo"</string>
@@ -373,8 +374,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Mostrar caixa de diálogo A aplicação não está a responder para aplicações em segundo plano"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Mostrar avisos do canal de notificações"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Mostra um aviso no ecrã quando uma aplicação publica uma notificação sem o canal ser válido"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Aplicar atalhos para notificações de conversas"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Solicitar cópia de seg. das notif. por atalho de partilha de longa duração p/ apresentação na secção de conversas"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Forçar permissão de apps no armazenamento externo"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Torna qualquer aplicação elegível para ser gravada no armazenamento externo, independentemente dos valores do manifesto"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Forçar as atividades a serem redimensionáveis"</string>

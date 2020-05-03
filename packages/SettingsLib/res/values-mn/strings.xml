@@ -284,7 +284,8 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Утасгүй дэлгэцийн сертификатын сонголтыг харуулах"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Wi‑Fi лог-н түвшинг нэмэгдүүлэх, Wi‑Fi Сонгогч дээрх SSID-д ногдох RSSI-г харуулах"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Батарей зарцуулалтыг бууруулж, сүлжээний гүйцэтгэлийг сайжруулдаг"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Унтраах эсвэл асаах нь зөвхөн клиент горимын MAC-г санамсаргүй байдлаар эмхлэх төлөвт нөлөөлнө.\nЭнэ горимыг идэвхжүүлсэн тохиолдолд клиентийг сүлжээнээс хамгийн сүүлд хэзээ салгаснаас хамаараад, холбоотой байх үеэр MAC-г санамсаргүй байдлаар эмхлэхийг идэвхжүүлсэн дурын сүлжээний MAC хаягуудыг санамсаргүй байдлаар дахин эмхэлж болзошгүй. Төхөөрөмж 4 цаг буюу түүнээс бага хугацаанд дахин холбогдвол санамсаргүй байдлаар дахин эмхлэх төлөв хэрэгжихгүй."</string>
+    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
+    <skip />
     <string name="wifi_metered_label" msgid="8737187690304098638">"Хязгаартай"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Хязгааргүй"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Логгерын буферын хэмжээ"</string>
@@ -373,8 +374,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Апп хариу өгөхгүй байна гэсэн харилцах цонхыг цаана байгаа аппад харуулах"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Мэдэгдлийн сувгийн анхааруулгыг харуулах"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Апп хүчинтэй суваггүйгээр мэдэгдэл гаргах үед дэлгэцэд сануулга харуулна"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Харилцан ярианы мэдэгдлийн товчлолыг хэрэгжүүлэх"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Харилцан ярианы хэсэгт харуулахын тулд санах ойд хадгалсан хуваалцах товчлолоор мэдэгдлийг нөөцлөхийг шаардах"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Аппыг гадаад санах ойд хадгалахыг зөвшөөрөх"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Манифест утгыг нь үл хамааран дурын апп-г гадаад санах ойд бичих боломжтой болгодог"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Үйл ажиллагааны хэмжээг өөрчилж болохуйц болгох"</string>
