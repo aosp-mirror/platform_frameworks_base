@@ -19,6 +19,7 @@
         <permission name="android.permission.ACCESS_NETWORK_STATE"/>
         <permission name="android.permission.ACCESS_WIFI_STATE"/>
         <permission name="android.permission.ACTIVITY_EMBEDDING"/>
+        <permission name="android.permission.BLUETOOTH_PRIVILEGED"/>
         <permission name="android.permission.INJECT_EVENTS"/>
         <!-- use for CarServiceUnitTest and CarServiceTest -->
         <permission name="android.permission.INTERACT_ACROSS_USERS"/>
