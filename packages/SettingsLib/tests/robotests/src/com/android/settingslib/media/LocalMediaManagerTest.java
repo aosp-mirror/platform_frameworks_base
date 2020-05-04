@@ -34,6 +34,7 @@ import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.media.MediaRoute2Info;
 import android.media.MediaRouter2Manager;
+import android.media.RoutingSessionInfo;
 
 import com.android.settingslib.bluetooth.A2dpProfile;
 import com.android.settingslib.bluetooth.CachedBluetoothDevice;
@@ -67,6 +68,7 @@ public class LocalMediaManagerTest {
     private static final String TEST_DEVICE_ID_3 = "device_id_3";
     private static final String TEST_CURRENT_DEVICE_ID = "currentDevice_id";
     private static final String TEST_PACKAGE_NAME = "com.test.playmusic";
+    private static final String TEST_SESSION_ID = "session_id";
 
     @Mock
     private InfoMediaManager mInfoMediaManager;
@@ -526,46 +528,24 @@ public class LocalMediaManagerTest {
     }
 
     @Test
-    public void getActiveMediaDevice_checkList() {
-        final List<MediaDevice> devices = new ArrayList<>();
-        final MediaDevice device1 = mock(MediaDevice.class);
-        final MediaDevice device2 = mock(MediaDevice.class);
-        final MediaDevice device3 = mock(MediaDevice.class);
-        device1.mType = MediaDevice.MediaDeviceType.TYPE_PHONE_DEVICE;
-        device2.mType = MediaDevice.MediaDeviceType.TYPE_CAST_DEVICE;
-        device3.mType = MediaDevice.MediaDeviceType.TYPE_BLUETOOTH_DEVICE;
-        when(device1.getClientPackageName()).thenReturn(TEST_DEVICE_ID_1);
-        when(device2.getClientPackageName()).thenReturn(TEST_DEVICE_ID_2);
-        when(device3.getClientPackageName()).thenReturn(TEST_DEVICE_ID_3);
-        when(device1.getId()).thenReturn(TEST_DEVICE_ID_1);
-        when(device2.getId()).thenReturn(TEST_DEVICE_ID_2);
-        when(device3.getId()).thenReturn(TEST_DEVICE_ID_3);
-        devices.add(device1);
-        devices.add(device2);
-        devices.add(device3);
-        mLocalMediaManager.registerCallback(mCallback);
-        mLocalMediaManager.mMediaDeviceCallback.onDeviceListAdded(devices);
-
-        List<MediaDevice> activeDevices = mLocalMediaManager.getActiveMediaDevice(
-                MediaDevice.MediaDeviceType.TYPE_PHONE_DEVICE);
-        assertThat(activeDevices).containsExactly(device1);
-
-        activeDevices = mLocalMediaManager.getActiveMediaDevice(
-                MediaDevice.MediaDeviceType.TYPE_CAST_DEVICE);
-        assertThat(activeDevices).containsExactly(device2);
-
-        activeDevices = mLocalMediaManager.getActiveMediaDevice(
-                MediaDevice.MediaDeviceType.TYPE_BLUETOOTH_DEVICE);
-        assertThat(activeDevices).containsExactly(device3);
-    }
-
-    @Test
     public void onDeviceAttributesChanged_shouldBeCalled() {
         mLocalMediaManager.registerCallback(mCallback);
 
         mLocalMediaManager.mDeviceAttributeChangeCallback.onDeviceAttributesChanged();
 
         verify(mCallback).onDeviceAttributesChanged();
+    }
+
+    @Test
+    public void getActiveMediaSession_verifyCorrectSession() {
+        final List<RoutingSessionInfo> routingSessionInfos = new ArrayList<>();
+        final RoutingSessionInfo info = mock(RoutingSessionInfo.class);
+        when(info.getId()).thenReturn(TEST_SESSION_ID);
+        routingSessionInfos.add(info);
+        when(mInfoMediaManager.getActiveMediaSession()).thenReturn(routingSessionInfos);
+
+        assertThat(mLocalMediaManager.getActiveMediaSession().get(0).getId())
+                .matches(TEST_SESSION_ID);
     }
 
     @Test
@@ -720,5 +700,18 @@ public class LocalMediaManagerTest {
 
         assertThat(mLocalMediaManager.mMediaDevices).hasSize(2);
         verify(mCallback).onDeviceListUpdate(any());
+    }
+
+    @Test
+    public void adjustSessionVolume_verifyCorrectSessionVolume() {
+        final List<RoutingSessionInfo> routingSessionInfos = new ArrayList<>();
+        final RoutingSessionInfo info = mock(RoutingSessionInfo.class);
+        when(info.getId()).thenReturn(TEST_SESSION_ID);
+        routingSessionInfos.add(info);
+        when(mInfoMediaManager.getActiveMediaSession()).thenReturn(routingSessionInfos);
+
+        mLocalMediaManager.adjustSessionVolume(TEST_SESSION_ID, 10);
+
+        verify(mInfoMediaManager).adjustSessionVolume(info, 10);
     }
 }
