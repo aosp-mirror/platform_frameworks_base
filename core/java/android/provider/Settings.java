@@ -5199,8 +5199,9 @@ public final class Settings {
     /**
      * Secure system settings, containing system preferences that applications
      * can read but are not allowed to write.  These are for preferences that
-     * the user must explicitly modify through the system UI or specialized
-     * APIs for those values, not modified directly by applications.
+     * the user must explicitly modify through the UI of a system app. Normal
+     * applications cannot modify the secure settings database, either directly
+     * or by calling the "put" methods that this class contains.
      */
     public static final class Secure extends NameValueTable {
         // NOTE: If you add new settings here, be sure to add them to
