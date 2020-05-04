@@ -2376,8 +2376,10 @@ class ActivityStack extends Task {
     boolean shouldUpRecreateTaskLocked(ActivityRecord srec, String destAffinity) {
         // Basic case: for simple app-centric recents, we need to recreate
         // the task if the affinity has changed.
+
+        final String affinity = ActivityRecord.getTaskAffinityWithUid(destAffinity, srec.getUid());
         if (srec == null || srec.getTask().affinity == null
-                || !srec.getTask().affinity.equals(destAffinity)) {
+                || !srec.getTask().affinity.equals(affinity)) {
             return true;
         }
         // Document-centric case: an app may be split in to multiple documents;
