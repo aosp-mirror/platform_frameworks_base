@@ -29,8 +29,6 @@ import android.telephony.AccessNetworkConstants;
 import android.telephony.NetworkRegistrationInfo;
 import android.telephony.ServiceState;
 
-import androidx.annotation.NonNull;
-
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.UserIcons;
 import com.android.launcher3.icons.IconFactory;
@@ -457,17 +455,19 @@ public class Utils {
         return state;
     }
 
-    /**
-     * Get the {@link Drawable} that represents the app icon
-     */
-    public static @NonNull Drawable getBadgedIcon(
-            @NonNull Context context, @NonNull ApplicationInfo appInfo) {
-        final UserHandle user = UserHandle.getUserHandleForUid(appInfo.uid);
+    /** Get the corresponding adaptive icon drawable. */
+    public static Drawable getBadgedIcon(Context context, Drawable icon, UserHandle user) {
         try (IconFactory iconFactory = IconFactory.obtain(context)) {
-            final Bitmap iconBmp = iconFactory.createBadgedIconBitmap(
-                    appInfo.loadUnbadgedIcon(context.getPackageManager()), user, false).icon;
+            final Bitmap iconBmp = iconFactory.createBadgedIconBitmap(icon, user,
+                    true /* shrinkNonAdaptiveIcons */).icon;
             return new BitmapDrawable(context.getResources(), iconBmp);
         }
+    }
+
+    /** Get the {@link Drawable} that represents the app icon */
+    public static Drawable getBadgedIcon(Context context, ApplicationInfo appInfo) {
+        return getBadgedIcon(context, appInfo.loadUnbadgedIcon(context.getPackageManager()),
+                UserHandle.getUserHandleForUid(appInfo.uid));
     }
 
     private static boolean isNotInIwlan(ServiceState serviceState) {
