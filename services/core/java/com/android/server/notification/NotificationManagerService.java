@@ -943,7 +943,8 @@ public class NotificationManagerService extends SystemService {
                         .addTaggedData(MetricsEvent.NOTIFICATION_LOCATION,
                                 nv.location.toMetricsEventEnum()));
                 mNotificationRecordLogger.log(
-                        NotificationRecordLogger.NotificationEvent.NOTIFICATION_ACTION_CLICKED, r);
+                        NotificationRecordLogger.NotificationEvent.fromAction(actionIndex,
+                                generatedByAssistant, action.isContextual()), r);
                 EventLogTags.writeNotificationActionClicked(key, actionIndex,
                         r.getLifespanMs(now), r.getFreshnessMs(now), r.getExposureMs(now),
                         nv.rank, nv.count);

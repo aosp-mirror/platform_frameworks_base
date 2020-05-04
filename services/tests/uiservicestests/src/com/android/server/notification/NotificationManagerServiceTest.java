@@ -4932,7 +4932,32 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 eq(r.getSbn()), eq(actionIndex), eq(action), eq(generatedByAssistant));
 
         assertEquals(1, mNotificationRecordLogger.numCalls());
-        assertEquals(NotificationRecordLogger.NotificationEvent.NOTIFICATION_ACTION_CLICKED,
+        assertEquals(
+                NotificationRecordLogger.NotificationEvent.NOTIFICATION_ACTION_CLICKED_2,
+                mNotificationRecordLogger.event(0));
+    }
+
+    @Test
+    public void testOnAssistantNotificationActionClick() {
+        final int actionIndex = 1;
+        final Notification.Action action =
+                new Notification.Action.Builder(null, "text", null).build();
+        final boolean generatedByAssistant = true;
+
+        NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
+        mService.addNotification(r);
+
+        NotificationVisibility notificationVisibility =
+                NotificationVisibility.obtain(r.getKey(), 1, 2, true);
+        mService.mNotificationDelegate.onNotificationActionClick(
+                10, 10, r.getKey(), actionIndex, action, notificationVisibility,
+                generatedByAssistant);
+        verify(mAssistants).notifyAssistantActionClicked(
+                eq(r.getSbn()), eq(actionIndex), eq(action), eq(generatedByAssistant));
+
+        assertEquals(1, mNotificationRecordLogger.numCalls());
+        assertEquals(
+                NotificationRecordLogger.NotificationEvent.NOTIFICATION_ASSIST_ACTION_CLICKED_1,
                 mNotificationRecordLogger.event(0));
     }
 
