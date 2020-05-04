@@ -1179,10 +1179,6 @@ package android.graphics.drawable {
     method public android.graphics.Xfermode getXfermode();
   }
 
-  public abstract class Drawable {
-    method public boolean hasFocusStateSpecified();
-  }
-
   public class ShapeDrawable extends android.graphics.drawable.Drawable {
     method public void setXfermode(@Nullable android.graphics.Xfermode);
   }
