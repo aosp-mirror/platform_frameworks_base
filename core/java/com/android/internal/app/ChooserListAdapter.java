@@ -21,6 +21,7 @@ import static com.android.internal.app.ChooserActivity.TARGET_TYPE_SHORTCUTS_FRO
 
 import android.app.ActivityManager;
 import android.app.prediction.AppPredictor;
+import android.app.prediction.AppTarget;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -98,6 +99,7 @@ public class ChooserListAdapter extends ResolverListAdapter {
     private int mValidServiceTargetsNum = 0;
     private final Map<ComponentName, Pair<List<ChooserTargetInfo>, Integer>>
             mParkingDirectShareTargets = new HashMap<>();
+    private final Map<ComponentName, Map<String, Integer>> mChooserTargetScores = new HashMap<>();
     private Set<ComponentName> mPendingChooserTargetService = new HashSet<>();
     private Set<ComponentName> mShortcutComponents = new HashSet<>();
     private final List<ChooserTargetInfo> mServiceTargets = new ArrayList<>();
@@ -409,6 +411,15 @@ public class ChooserListAdapter extends ResolverListAdapter {
         return null;
     }
 
+    /**
+     * Fetch surfaced direct share target info
+     */
+    public List<ChooserTargetInfo> getSurfacedTargetInfo() {
+        int maxSurfacedTargets = mChooserListCommunicator.getMaxRankedTargets();
+        return mServiceTargets.subList(0,
+                Math.min(maxSurfacedTargets, getSelectableServiceTargetCount()));
+    }
+
 
     /**
      * Evaluate targets for inclusion in the direct share area. May not be included
@@ -480,6 +491,50 @@ public class ChooserListAdapter extends ResolverListAdapter {
     }
 
     /**
+     * Store ChooserTarget ranking scores info wrapped in {@code targets}.
+     */
+    public void addChooserTargetRankingScore(List<AppTarget> targets) {
+        Log.i(TAG, "addChooserTargetRankingScore " + targets.size() + " targets score.");
+        for (AppTarget target : targets) {
+            if (target.getShortcutInfo() == null) {
+                continue;
+            }
+            ShortcutInfo shortcutInfo = target.getShortcutInfo();
+            if (!shortcutInfo.getId().equals(ChooserActivity.CHOOSER_TARGET)
+                    || shortcutInfo.getActivity() == null) {
+                continue;
+            }
+            ComponentName componentName = shortcutInfo.getActivity();
+            if (!mChooserTargetScores.containsKey(componentName)) {
+                mChooserTargetScores.put(componentName, new HashMap<>());
+            }
+            mChooserTargetScores.get(componentName).put(shortcutInfo.getShortLabel().toString(),
+                    shortcutInfo.getRank());
+        }
+        mChooserTargetScores.keySet().forEach(key -> rankTargetsWithinComponent(key));
+    }
+
+    /**
+     * Rank chooserTargets of the given {@code componentName} in mParkingDirectShareTargets as per
+     * available scores stored in mChooserTargetScores.
+     */
+    private void rankTargetsWithinComponent(ComponentName componentName) {
+        if (!mParkingDirectShareTargets.containsKey(componentName)
+                || !mChooserTargetScores.containsKey(componentName)) {
+            return;
+        }
+        Map<String, Integer> scores = mChooserTargetScores.get(componentName);
+        Collections.sort(mParkingDirectShareTargets.get(componentName).first, (o1, o2) -> {
+            // The score has been normalized between 0 and 2, the default is 1.
+            int score1 = scores.getOrDefault(
+                    ChooserUtil.md5(o1.getChooserTarget().getTitle().toString()), 1);
+            int score2 = scores.getOrDefault(
+                    ChooserUtil.md5(o2.getChooserTarget().getTitle().toString()), 1);
+            return score2 - score1;
+        });
+    }
+
+    /**
      * Park {@code targets} into memory for the moment to surface them later when view is refreshed.
      * Components pending on ChooserTargetService query are also recorded.
      */
@@ -517,6 +572,7 @@ public class ChooserListAdapter extends ResolverListAdapter {
                             new Pair<>(new ArrayList<>(), 0));
             parkingTargetInfoPair.first.addAll(parkingTargetInfos);
             mParkingDirectShareTargets.put(origComponentName, parkingTargetInfoPair);
+            rankTargetsWithinComponent(origComponentName);
             if (isShortcutResult) {
                 mShortcutComponents.add(origComponentName);
             }
