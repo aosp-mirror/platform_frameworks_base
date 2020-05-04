@@ -200,12 +200,9 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"சாதனத் தரவு அழிக்கப்படும்"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"நிர்வாகி ஆப்ஸை உபயோகிக்க முடியாது. இப்போது, உங்கள் சாதனம் ஆரம்ப நிலைக்கு மீட்டமைக்கப்படும்.\n\nஏதேனும் கேள்விகள் இருப்பின், உங்கள் நிறுவனத்தின் நிர்வாகியைத் தொடர்புகொள்ளவும்."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"பிரிண்ட் செய்வதை <xliff:g id="OWNER_APP">%s</xliff:g> தடுத்துள்ளது."</string>
-    <!-- no translation found for personal_apps_suspension_title (7561416677884286600) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspension_text (6115455688932935597) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspension_tomorrow_text (6322541302153673994) -->
-    <skip />
+    <string name="personal_apps_suspension_title" msgid="7561416677884286600">"பணிக் கணக்கை ஆன் செய்யுங்கள்"</string>
+    <string name="personal_apps_suspension_text" msgid="6115455688932935597">"பணிக் கணக்கை ஆன் செய்யும் வரை உங்கள் தனிப்பட்ட ஆப்ஸ் தடுக்கப்பட்டிருக்கும்"</string>
+    <string name="personal_apps_suspension_tomorrow_text" msgid="6322541302153673994">"நாளை உங்கள் தனிப்பட்ட ஆப்ஸ் தடுக்கப்படும்"</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"பணிக் கணக்கை ஆன் செய்"</string>
     <string name="me" msgid="6207584824693813140">"நான்"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"டேப்லெட் விருப்பங்கள்"</string>
