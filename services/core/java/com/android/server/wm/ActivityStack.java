@@ -1389,7 +1389,7 @@ class ActivityStack extends Task {
             boolean preserveWindows, boolean notifyClients) {
         mTopActivityOccludesKeyguard = false;
         mTopDismissingKeyguardActivity = null;
-        mStackSupervisor.getKeyguardController().beginActivityVisibilityUpdate();
+        mStackSupervisor.beginActivityVisibilityUpdate();
         try {
             mEnsureActivitiesVisibleHelper.process(
                     starting, configChanges, preserveWindows, notifyClients);
@@ -1400,7 +1400,7 @@ class ActivityStack extends Task {
                 notifyActivityDrawnLocked(null);
             }
         } finally {
-            mStackSupervisor.getKeyguardController().endActivityVisibilityUpdate();
+            mStackSupervisor.endActivityVisibilityUpdate();
         }
     }
 
