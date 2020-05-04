@@ -226,6 +226,10 @@ public class DataManager {
                 return;
             }
             String shortcutId = appTarget.getShortcutInfo().getId();
+            // Skip storing chooserTargets sharing events
+            if (ChooserActivity.CHOOSER_TARGET.equals(shortcutId)) {
+                return;
+            }
             if (packageData.getConversationStore().getConversation(shortcutId) == null) {
                 addOrUpdateConversationInfo(appTarget.getShortcutInfo());
             }
