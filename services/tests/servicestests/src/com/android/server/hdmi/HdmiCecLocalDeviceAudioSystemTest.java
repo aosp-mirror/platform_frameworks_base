@@ -75,7 +75,6 @@ public class HdmiCecLocalDeviceAudioSystemTest {
     private static final int HDMI_3_PHYSICAL_ADDRESS = 0x2300;
     private int mInvokeDeviceEventState;
     private HdmiDeviceInfo mDeviceInfo;
-    private boolean mMutingEnabled;
     private boolean mArcSupport;
     private HdmiPortInfo[] mHdmiPortInfo;
     private boolean mWokenUp;
@@ -159,8 +158,6 @@ public class HdmiCecLocalDeviceAudioSystemTest {
                 @Override
                 boolean readBooleanSystemProperty(String key, boolean defVal) {
                     switch (key) {
-                        case Constants.PROPERTY_SYSTEM_AUDIO_MODE_MUTING_ENABLE:
-                            return mMutingEnabled;
                         case Constants.PROPERTY_ARC_SUPPORT:
                             return mArcSupport;
                         default:
@@ -216,7 +213,6 @@ public class HdmiCecLocalDeviceAudioSystemTest {
         mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
         mTestLooper.dispatchAll();
         mNativeWrapper.clearResultMessages();
-        mMutingEnabled = true;
         mArcSupport = true;
         mInvokeDeviceEventState = 0;
         mDeviceInfo = null;
