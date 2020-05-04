@@ -112,7 +112,6 @@ import com.android.internal.util.IntPair;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.accessibility.magnification.WindowMagnificationManager;
-import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
 
@@ -1392,16 +1391,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 && (userState.getMagnificationModeLocked()
                 == Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
 
-        if (windowMagnificationEnabled == getWindowMagnificationMgr().isConnected()) {
+        if (!getWindowMagnificationMgr().requestConnection(windowMagnificationEnabled)) {
             return;
-        }
-        final long identity = Binder.clearCallingIdentity();
-        try {
-            final StatusBarManagerInternal service = LocalServices.getService(
-                    StatusBarManagerInternal.class);
-            service.requestWindowMagnificationConnection(windowMagnificationEnabled);
-        } finally {
-            Binder.restoreCallingIdentity(identity);
         }
         mMainHandler.sendMessage(obtainMessage(
                 AccessibilityManagerService::notifyMagnificationModeChangeToInputFilter,
