@@ -211,7 +211,7 @@ public abstract class CellIdentity implements Parcelable {
     }
 
     /** @hide */
-    protected String getPlmn() {
+    public @Nullable String getPlmn() {
         if (mMccStr == null || mMncStr == null) return null;
         return mMccStr + mMncStr;
     }
