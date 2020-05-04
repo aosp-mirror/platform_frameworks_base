@@ -125,6 +125,7 @@ public class PhoneStatusBarView extends PanelBar {
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
+        updateResources();
 
         // May trigger cutout space layout-ing
         if (updateOrientationAndCutout()) {
@@ -298,6 +299,24 @@ public class PhoneStatusBarView extends PanelBar {
         ViewGroup.LayoutParams layoutParams = getLayoutParams();
         mStatusBarHeight = getResources().getDimensionPixelSize(R.dimen.status_bar_height);
         layoutParams.height = mStatusBarHeight - waterfallTopInset;
+
+        int statusBarPaddingTop = getResources().getDimensionPixelSize(
+                R.dimen.status_bar_padding_top);
+        int statusBarPaddingStart = getResources().getDimensionPixelSize(
+                R.dimen.status_bar_padding_start);
+        int statusBarPaddingEnd = getResources().getDimensionPixelSize(
+                R.dimen.status_bar_padding_end);
+
+        View sbContents = findViewById(R.id.status_bar_contents);
+        sbContents.setPaddingRelative(
+                statusBarPaddingStart,
+                statusBarPaddingTop,
+                statusBarPaddingEnd,
+                0);
+
+        findViewById(R.id.notification_lights_out)
+                .setPaddingRelative(0, statusBarPaddingStart, 0, 0);
+
         setLayoutParams(layoutParams);
     }
 
