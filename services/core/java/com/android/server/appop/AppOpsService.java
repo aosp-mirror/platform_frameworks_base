@@ -2536,6 +2536,28 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
     }
 
+    private static ArrayList<ChangeRec> addChange(ArrayList<ChangeRec> reports,
+            int op, int uid, String packageName) {
+        boolean duplicate = false;
+        if (reports == null) {
+            reports = new ArrayList<>();
+        } else {
+            final int reportCount = reports.size();
+            for (int j = 0; j < reportCount; j++) {
+                ChangeRec report = reports.get(j);
+                if (report.op == op && report.pkg.equals(packageName)) {
+                    duplicate = true;
+                    break;
+                }
+            }
+        }
+        if (!duplicate) {
+            reports.add(new ChangeRec(op, uid, packageName));
+        }
+
+        return reports;
+    }
+
     private static HashMap<ModeCallback, ArrayList<ChangeRec>> addCallbacks(
             HashMap<ModeCallback, ArrayList<ChangeRec>> callbacks,
             int op, int uid, String packageName, ArraySet<ModeCallback> cbs) {
@@ -2549,22 +2571,9 @@ public class AppOpsService extends IAppOpsService.Stub {
         for (int i=0; i<N; i++) {
             ModeCallback cb = cbs.valueAt(i);
             ArrayList<ChangeRec> reports = callbacks.get(cb);
-            boolean duplicate = false;
-            if (reports == null) {
-                reports = new ArrayList<>();
-                callbacks.put(cb, reports);
-            } else {
-                final int reportCount = reports.size();
-                for (int j = 0; j < reportCount; j++) {
-                    ChangeRec report = reports.get(j);
-                    if (report.op == op && report.pkg.equals(packageName)) {
-                        duplicate = true;
-                        break;
-                    }
-                }
-            }
-            if (!duplicate) {
-                reports.add(new ChangeRec(op, uid, packageName));
+            ArrayList<ChangeRec> changed = addChange(reports, op, uid, packageName);
+            if (changed != reports) {
+                callbacks.put(cb, changed);
             }
         }
         return callbacks;
@@ -2602,6 +2611,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         enforceManageAppOpsModes(callingPid, callingUid, reqUid);
 
         HashMap<ModeCallback, ArrayList<ChangeRec>> callbacks = null;
+        ArrayList<ChangeRec> allChanges = new ArrayList<>();
         synchronized (this) {
             boolean changed = false;
             for (int i = mUidStates.size() - 1; i >= 0; i--) {
@@ -2622,6 +2632,9 @@ public class AppOpsService extends IAppOpsService.Stub {
                                         mOpModeWatchers.get(code));
                                 callbacks = addCallbacks(callbacks, code, uidState.uid, packageName,
                                         mPackageModeWatchers.get(packageName));
+
+                                allChanges = addChange(allChanges, code, uidState.uid,
+                                        packageName);
                             }
                         }
                     }
@@ -2661,6 +2674,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                             callbacks = addCallbacks(callbacks, curOp.op, uid, packageName,
                                     mPackageModeWatchers.get(packageName));
 
+                            allChanges = addChange(allChanges, curOp.op, uid, packageName);
                             curOp.removeAttributionsWithNoTime();
                             if (curOp.mAttributions.isEmpty()) {
                                 pkgOps.removeAt(j);
@@ -2693,6 +2707,15 @@ public class AppOpsService extends IAppOpsService.Stub {
                             AppOpsService::notifyOpChanged,
                             this, cb, rep.op, rep.uid, rep.pkg));
                 }
+            }
+        }
+
+        if (allChanges != null) {
+            int numChanges = allChanges.size();
+            for (int i = 0; i < numChanges; i++) {
+                ChangeRec change = allChanges.get(i);
+                notifyOpChangedSync(change.op, change.uid, change.pkg,
+                        AppOpsManager.opToDefaultMode(change.op));
             }
         }
     }
