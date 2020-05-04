@@ -70,7 +70,6 @@ class KeyguardController {
     private boolean mKeyguardGoingAway;
     private boolean mDismissalRequested;
     private int mBeforeUnoccludeTransit;
-    private int mVisibilityTransactionDepth;
     private final SparseArray<KeyguardDisplayState> mDisplayStates = new SparseArray<>();
     private final ActivityTaskManagerService mService;
     private RootWindowContainer mRootWindowContainer;
@@ -252,24 +251,6 @@ class KeyguardController {
     }
 
     /**
-     * Starts a batch of visibility updates.
-     */
-    void beginActivityVisibilityUpdate() {
-        mVisibilityTransactionDepth++;
-    }
-
-    /**
-     * Ends a batch of visibility updates. After all batches are done, this method makes sure to
-     * update lockscreen occluded/dismiss state if needed.
-     */
-    void endActivityVisibilityUpdate() {
-        mVisibilityTransactionDepth--;
-        if (mVisibilityTransactionDepth == 0) {
-            visibilitiesUpdated();
-        }
-    }
-
-    /**
      * @return True if we may show an activity while Keyguard is showing because we are in the
      *         process of dismissing it anyways, false otherwise.
      */
@@ -292,7 +273,11 @@ class KeyguardController {
                 && !mWindowManager.isKeyguardSecure(mService.getCurrentUserId());
     }
 
-    private void visibilitiesUpdated() {
+    /**
+     * Makes sure to update lockscreen occluded/dismiss state if needed after completing all
+     * visibility updates ({@link ActivityStackSupervisor#endActivityVisibilityUpdate}).
+     */
+    void visibilitiesUpdated() {
         boolean requestDismissKeyguard = false;
         for (int displayNdx = mRootWindowContainer.getChildCount() - 1;
              displayNdx >= 0; displayNdx--) {
@@ -568,7 +553,6 @@ class KeyguardController {
         pw.println(prefix + "  mKeyguardGoingAway=" + mKeyguardGoingAway);
         dumpDisplayStates(pw, prefix);
         pw.println(prefix + "  mDismissalRequested=" + mDismissalRequested);
-        pw.println(prefix + "  mVisibilityTransactionDepth=" + mVisibilityTransactionDepth);
         pw.println();
     }
 
