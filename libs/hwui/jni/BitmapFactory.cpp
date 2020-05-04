@@ -8,7 +8,6 @@
 #include "MimeType.h"
 #include "NinePatchPeeker.h"
 #include "SkAndroidCodec.h"
-#include "SkBRDAllocator.h"
 #include "SkMath.h"
 #include "SkPixelRef.h"
 #include "SkStream.h"
