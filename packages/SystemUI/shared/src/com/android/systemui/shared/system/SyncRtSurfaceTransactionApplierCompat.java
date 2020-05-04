@@ -23,8 +23,8 @@ import android.os.Handler;
 import android.os.Handler.Callback;
 import android.os.Message;
 import android.os.Trace;
-import android.view.Surface;
 import android.view.SurfaceControl;
+import android.view.SurfaceControl.Transaction;
 import android.view.View;
 import android.view.ViewRootImpl;
 
@@ -108,13 +108,12 @@ public class SyncRtSurfaceTransactionApplierCompat {
                     return;
                 }
                 Trace.traceBegin(Trace.TRACE_TAG_VIEW, "Sync transaction frameNumber=" + frame);
-                TransactionCompat t = new TransactionCompat();
+                Transaction t = new Transaction();
                 for (int i = params.length - 1; i >= 0; i--) {
                     SyncRtSurfaceTransactionApplierCompat.SurfaceParams surfaceParams =
                             params[i];
-                    SurfaceControlCompat surface = surfaceParams.surface;
-                    t.deferTransactionUntil(surface, mBarrierSurfaceControl, frame);
-                    applyParams(t, surfaceParams);
+                    t.deferTransactionUntil(surfaceParams.surface, mBarrierSurfaceControl, frame);
+                    surfaceParams.applyTo(t);
                 }
                 t.setEarlyWakeup();
                 t.apply();
@@ -152,31 +151,7 @@ public class SyncRtSurfaceTransactionApplierCompat {
 
     public static void applyParams(TransactionCompat t,
             SyncRtSurfaceTransactionApplierCompat.SurfaceParams params) {
-        if ((params.flags & FLAG_MATRIX) != 0) {
-            t.setMatrix(params.surface, params.matrix);
-        }
-        if ((params.flags & FLAG_WINDOW_CROP) != 0) {
-            t.setWindowCrop(params.surface, params.windowCrop);
-        }
-        if ((params.flags & FLAG_ALPHA) != 0) {
-            t.setAlpha(params.surface, params.alpha);
-        }
-        if ((params.flags & FLAG_LAYER) != 0) {
-            t.setLayer(params.surface, params.layer);
-        }
-        if ((params.flags & FLAG_CORNER_RADIUS) != 0) {
-            t.setCornerRadius(params.surface, params.cornerRadius);
-        }
-        if ((params.flags & FLAG_BACKGROUND_BLUR_RADIUS) != 0) {
-            t.setBackgroundBlurRadius(params.surface, params.backgroundBlurRadius);
-        }
-        if ((params.flags & FLAG_VISIBILITY) != 0) {
-            if (params.visible) {
-                t.show(params.surface);
-            } else {
-                t.hide(params.surface);
-            }
-        }
+        params.applyTo(t.mTransaction);
     }
 
     /**
@@ -210,7 +185,7 @@ public class SyncRtSurfaceTransactionApplierCompat {
 
     public static class SurfaceParams {
         public static class Builder {
-            final SurfaceControlCompat surface;
+            final SurfaceControl surface;
             int flags;
             float alpha;
             float cornerRadius;
@@ -224,6 +199,13 @@ public class SyncRtSurfaceTransactionApplierCompat {
              * @param surface The surface to modify.
              */
             public Builder(SurfaceControlCompat surface) {
+                this(surface.mSurfaceControl);
+            }
+
+            /**
+             * @param surface The surface to modify.
+             */
+            public Builder(SurfaceControl surface) {
                 this.surface = surface;
             }
 
@@ -317,11 +299,12 @@ public class SyncRtSurfaceTransactionApplierCompat {
          */
         public SurfaceParams(SurfaceControlCompat surface, float alpha, Matrix matrix,
                 Rect windowCrop, int layer, float cornerRadius) {
-            this(surface, FLAG_ALL & ~(FLAG_VISIBILITY | FLAG_BACKGROUND_BLUR_RADIUS), alpha,
+            this(surface.mSurfaceControl,
+                    FLAG_ALL & ~(FLAG_VISIBILITY | FLAG_BACKGROUND_BLUR_RADIUS), alpha,
                     matrix, windowCrop, layer, cornerRadius, 0 /* backgroundBlurRadius */, true);
         }
 
-        private SurfaceParams(SurfaceControlCompat surface, int flags, float alpha, Matrix matrix,
+        private SurfaceParams(SurfaceControl surface, int flags, float alpha, Matrix matrix,
                 Rect windowCrop, int layer, float cornerRadius, int backgroundBlurRadius,
                 boolean visible) {
             this.flags = flags;
@@ -336,8 +319,9 @@ public class SyncRtSurfaceTransactionApplierCompat {
         }
 
         private final int flags;
+        private final float[] mTmpValues = new float[9];
 
-        public final SurfaceControlCompat surface;
+        public final SurfaceControl surface;
         public final float alpha;
         public final float cornerRadius;
         public final int backgroundBlurRadius;
@@ -345,5 +329,33 @@ public class SyncRtSurfaceTransactionApplierCompat {
         public final Rect windowCrop;
         public final int layer;
         public final boolean visible;
+
+        public void applyTo(SurfaceControl.Transaction t) {
+            if ((flags & FLAG_MATRIX) != 0) {
+                t.setMatrix(surface, matrix, mTmpValues);
+            }
+            if ((flags & FLAG_WINDOW_CROP) != 0) {
+                t.setWindowCrop(surface, windowCrop);
+            }
+            if ((flags & FLAG_ALPHA) != 0) {
+                t.setAlpha(surface, alpha);
+            }
+            if ((flags & FLAG_LAYER) != 0) {
+                t.setLayer(surface, layer);
+            }
+            if ((flags & FLAG_CORNER_RADIUS) != 0) {
+                t.setCornerRadius(surface, cornerRadius);
+            }
+            if ((flags & FLAG_BACKGROUND_BLUR_RADIUS) != 0) {
+                t.setBackgroundBlurRadius(surface, backgroundBlurRadius);
+            }
+            if ((flags & FLAG_VISIBILITY) != 0) {
+                if (visible) {
+                    t.show(surface);
+                } else {
+                    t.hide(surface);
+                }
+            }
+        }
     }
 }
