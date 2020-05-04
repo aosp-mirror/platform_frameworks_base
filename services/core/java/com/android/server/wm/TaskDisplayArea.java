@@ -680,6 +680,13 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
         onStackOrderChanged(stack);
     }
 
+    void resetPreferredTopFocusableStackIfBelow(Task task) {
+        if (mPreferredTopFocusableStack != null
+                && mPreferredTopFocusableStack.compareTo(task) < 0) {
+            mPreferredTopFocusableStack = null;
+        }
+    }
+
     void positionStackAt(int position, ActivityStack child, boolean includingParents) {
         positionChildAt(position, child, includingParents);
         mDisplayContent.layoutAndAssignWindowLayersIfNeeded();
