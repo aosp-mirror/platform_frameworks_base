@@ -104,10 +104,10 @@ public class ViewRootInsetsControllerHost implements InsetsController.Host {
 
     @Override
     public void applySurfaceParams(SyncRtSurfaceTransactionApplier.SurfaceParams... params) {
+        if (mViewRoot.mView == null) {
+            throw new IllegalStateException("View of the ViewRootImpl is not initiated.");
+        }
         if (mApplier == null) {
-            if (mViewRoot.mView == null) {
-                throw new IllegalStateException("View of the ViewRootImpl is not initiated.");
-            }
             mApplier = new SyncRtSurfaceTransactionApplier(mViewRoot.mView);
         }
         if (mViewRoot.mView.isHardwareAccelerated()) {
