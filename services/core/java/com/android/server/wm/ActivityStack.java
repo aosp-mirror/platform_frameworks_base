@@ -1010,16 +1010,6 @@ class ActivityStack extends Task {
         }
     }
 
-    boolean isTopActivityFocusable() {
-        final ActivityRecord r = topRunningActivity();
-        return r != null ? r.isFocusable()
-                : (isFocusable() && getWindowConfiguration().canReceiveKeys());
-    }
-
-    boolean isFocusableAndVisible() {
-        return isTopActivityFocusable() && shouldBeVisible(null /* starting */);
-    }
-
     // TODO: Should each user have there own stacks?
     @Override
     void switchUser(int userId) {
