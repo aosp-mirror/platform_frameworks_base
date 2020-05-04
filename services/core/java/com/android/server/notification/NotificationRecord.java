@@ -1382,11 +1382,19 @@ public final class NotificationRecord {
      */
     public boolean isConversation() {
         Notification notification = getNotification();
-        if (mChannel.isDemoted()
-                || !Notification.MessagingStyle.class.equals(notification.getNotificationStyle())) {
+        if (!Notification.MessagingStyle.class.equals(notification.getNotificationStyle())) {
+            // very common; don't bother logging
+            return false;
+        }
+        if (mChannel.isDemoted()) {
             return false;
         }
         if (mIsNotConversationOverride) {
+            return false;
+        }
+        if (mTargetSdkVersion >= Build.VERSION_CODES.R
+            && Notification.MessagingStyle.class.equals(notification.getNotificationStyle())
+            && mShortcutInfo == null) {
             return false;
         }
         return true;
