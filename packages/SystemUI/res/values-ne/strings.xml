@@ -432,8 +432,7 @@
     <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"स्रिनको रेकर्ड"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"सुरु गर्नुहोस्"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"रोक्नुहोस्"</string>
-    <!-- no translation found for media_seamless_remote_device (177033467332920464) -->
-    <skip />
+    <string name="media_seamless_remote_device" msgid="177033467332920464">"यन्त्र"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"एपहरू बदल्न माथितिर स्वाइप गर्नुहोस्"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"एपहरू बदल्न द्रुत गतिमा दायाँतिर ड्र्याग गर्नुहोस्"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"परिदृश्य टगल गर्नुहोस्"</string>
@@ -716,8 +715,7 @@
     <string name="notification_channel_summary_priority" msgid="7415770044553264622">"वार्तालाप खण्डको सिरानमा बबलका रूपमा देखा पर्छ।"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"सेटिङ"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"प्राथमिकता"</string>
-    <!-- no translation found for no_shortcut (7176375126961212514) -->
-    <skip />
+    <string name="no_shortcut" msgid="7176375126961212514">"<xliff:g id="APP_NAME">%1$s</xliff:g> मा वार्तालापविशेषका लागि सेटिङ उपलब्ध छैन"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"हालैका बबलहरू छैनन्"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"हालैका बबल र खारेज गरिएका बबलहरू यहाँ देखिने छन्"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"यी सूचनाहरू परिमार्जन गर्न मिल्दैन।"</string>

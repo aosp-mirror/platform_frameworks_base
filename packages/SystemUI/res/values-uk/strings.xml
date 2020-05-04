@@ -255,8 +255,7 @@
     <!-- no translation found for accessibility_work_mode (1280025758672376313) -->
     <skip />
     <string name="accessibility_notification_dismissed" msgid="4411652015138892952">"Сповіщення відхилено."</string>
-    <!-- no translation found for accessibility_bubble_dismissed (270358867566720729) -->
-    <skip />
+    <string name="accessibility_bubble_dismissed" msgid="270358867566720729">"Спливаюче сповіщення закрито."</string>
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"Панель сповіщень."</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"Швидке налаштування."</string>
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"Заблокований екран."</string>
@@ -1040,8 +1039,7 @@
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Виберіть, які елементи керування будуть у меню \"Живлення\""</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Щоб змінити порядок елементів керування, перетягуйте їх"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Усі елементи керування вилучено"</string>
-    <!-- no translation found for controls_favorite_toast_no_changes (7094494210840877931) -->
-    <skip />
+    <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Зміни не збережено"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Не вдалося завантажити список усіх елементів керування."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Інше"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Додати до елементів керування пристроями"</string>
