@@ -422,6 +422,8 @@ public class StatsPullAtomService extends SystemService {
                         return pullAttributedAppOps(atomTag, data);
                     case FrameworkStatsLog.SETTING_SNAPSHOT:
                         return pullSettingsStats(atomTag, data);
+                    case FrameworkStatsLog.DISPLAY_WAKE_REASON:
+                        return pullDisplayWakeStats(atomTag, data);
                     default:
                         throw new UnsupportedOperationException("Unknown tagId=" + atomTag);
                 }
@@ -587,6 +589,7 @@ public class StatsPullAtomService extends SystemService {
         registerBatteryVoltage();
         registerBatteryCycleCount();
         registerSettingsStats();
+        registerDisplayWakeStats();
     }
 
     /**
@@ -3294,6 +3297,21 @@ public class StatsPullAtomService extends SystemService {
             Binder.restoreCallingIdentity(token);
         }
         return StatsManager.PULL_SUCCESS;
+    }
+
+    private void registerDisplayWakeStats() {
+        int tagId = FrameworkStatsLog.DISPLAY_WAKE_REASON;
+        mStatsManager.setPullAtomCallback(
+                tagId,
+                null, // use default PullAtomMetadata values
+                BackgroundThread.getExecutor(),
+                mStatsCallbackImpl
+        );
+    }
+
+    int pullDisplayWakeStats(int atomTag, List<StatsEvent> pulledData) {
+        //TODO: Denny, implement read/write DisplayWakeStats, b/154172964
+        return 0;
     }
 
     // Thermal event received from vendor thermal management subsystem
