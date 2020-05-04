@@ -98,6 +98,7 @@ abstract public class ManagedServices {
     private static final int ON_BINDING_DIED_REBIND_DELAY_MS = 10000;
     protected static final String ENABLED_SERVICES_SEPARATOR = ":";
     private static final String DB_VERSION_1 = "1";
+    private static final String DB_VERSION_2 = "2";
 
 
     /**
@@ -110,7 +111,7 @@ abstract public class ManagedServices {
     static final String ATT_VERSION = "version";
     static final String ATT_DEFAULTS = "defaults";
 
-    static final int DB_VERSION = 2;
+    static final int DB_VERSION = 3;
 
     static final int APPROVAL_BY_PACKAGE = 0;
     static final int APPROVAL_BY_COMPONENT = 1;
@@ -571,14 +572,16 @@ abstract public class ManagedServices {
                 }
             }
         }
-        boolean isVersionOne = TextUtils.isEmpty(version) || DB_VERSION_1.equals(version);
-        if (isVersionOne) {
-            upgradeToVersionTwo();
+        boolean isOldVersion = TextUtils.isEmpty(version)
+                || DB_VERSION_1.equals(version)
+                || DB_VERSION_2.equals(version);
+        if (isOldVersion) {
+            upgradeDefaultsXmlVersion();
         }
         rebindServices(false, USER_ALL);
     }
 
-    private void upgradeToVersionTwo() {
+    private void upgradeDefaultsXmlVersion() {
         // check if any defaults are loaded
         int defaultsSize = mDefaultComponents.size() + mDefaultPackages.size();
         if (defaultsSize == 0) {
