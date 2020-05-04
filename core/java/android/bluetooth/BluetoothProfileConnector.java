@@ -103,21 +103,14 @@ public abstract class BluetoothProfileConnector<T> {
 
     private void doUnbind() {
         synchronized (mConnection) {
-            try {
-                if (mService != null) {
-                    logDebug("Unbinding service...");
-                    try {
-                        mContext.unbindService(mConnection);
-                    } catch (IllegalArgumentException ie) {
-                        logError("Unable to unbind service: " + ie);
-                    } finally {
-                        mService = null;
-                    }
-                }
-            } finally {
-                if (mServiceListener != null) {
-                    mServiceListener.onServiceDisconnected(mProfileId);
-                    mServiceListener = null;
+            if (mService != null) {
+                logDebug("Unbinding service...");
+                try {
+                    mContext.unbindService(mConnection);
+                } catch (IllegalArgumentException ie) {
+                    logError("Unable to unbind service: " + ie);
+                } finally {
+                    mService = null;
                 }
             }
         }
@@ -138,6 +131,7 @@ public abstract class BluetoothProfileConnector<T> {
     }
 
     void disconnect() {
+        mServiceListener = null;
         IBluetoothManager mgr = BluetoothAdapter.getDefaultAdapter().getBluetoothManager();
         if (mgr != null) {
             try {
