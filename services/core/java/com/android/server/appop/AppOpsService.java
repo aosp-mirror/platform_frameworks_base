@@ -2545,11 +2545,11 @@ public class AppOpsService extends IAppOpsService.Stub {
         if (callbacks == null) {
             callbacks = new HashMap<>();
         }
-        boolean duplicate = false;
         final int N = cbs.size();
         for (int i=0; i<N; i++) {
             ModeCallback cb = cbs.valueAt(i);
             ArrayList<ChangeRec> reports = callbacks.get(cb);
+            boolean duplicate = false;
             if (reports == null) {
                 reports = new ArrayList<>();
                 callbacks.put(cb, reports);
