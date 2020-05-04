@@ -883,6 +883,25 @@ public final class AutofillManager {
     }
 
     /**
+     * Explicitly cancels the current session and requests a new autofill context.
+     *
+     * <p>Normally, the autofill context is automatically started if necessary when
+     * {@link #notifyViewEntered(View)} is called, but this method should be used in
+     * cases where it must be explicitly started or restarted. Currently, this method should only
+     * be called by
+     * {@link android.service.autofill.augmented.AugmentedAutofillService#requestAutofill(
+     * ComponentName, AutofillId)} to cancel the current session and trigger the autofill flow in
+     * a new session, giving the autofill service or the augmented autofill service a chance to
+     * send updated suggestions.
+     *
+     * @param view view requesting the new autofill context.
+     */
+    void requestAutofillFromNewSession(@NonNull View view) {
+        cancel();
+        notifyViewEntered(view);
+    }
+
+    /**
      * Explicitly requests a new autofill context for virtual views.
      *
      * <p>Normally, the autofill context is automatically started if necessary when
@@ -1403,7 +1422,7 @@ public final class AutofillManager {
      * methods such as {@link android.app.Activity#finish()}.
      */
     public void cancel() {
-        if (sVerbose) Log.v(TAG, "cancel() called by app");
+        if (sVerbose) Log.v(TAG, "cancel() called by app or augmented autofill service");
         if (!hasAutofillFeature()) {
             return;
         }
@@ -3484,7 +3503,7 @@ public final class AutofillManager {
             if (sVerbose) {
                 Log.v(TAG, "requestAutofill() by AugmentedAutofillService.");
             }
-            afm.post(() -> afm.requestAutofill(view));
+            afm.post(() -> afm.requestAutofillFromNewSession(view));
             return true;
         }
 
