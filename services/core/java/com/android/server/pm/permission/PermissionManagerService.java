@@ -4639,17 +4639,39 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         }
 
         @Override
-        public @NonNull ArrayList<PermissionInfo> getAllPermissionWithProtection(
+        public @NonNull ArrayList<PermissionInfo> getAllPermissionsWithProtection(
                 @PermissionInfo.Protection int protection) {
             ArrayList<PermissionInfo> matchingPermissions = new ArrayList<>();
 
-            synchronized (PermissionManagerService.this.mLock) {
+            synchronized (mLock) {
                 int numTotalPermissions = mSettings.mPermissions.size();
 
                 for (int i = 0; i < numTotalPermissions; i++) {
                     BasePermission bp = mSettings.mPermissions.valueAt(i);
 
                     if (bp.perm != null && bp.perm.getProtection() == protection) {
+                        matchingPermissions.add(
+                                PackageInfoUtils.generatePermissionInfo(bp.perm, 0));
+                    }
+                }
+            }
+
+            return matchingPermissions;
+        }
+
+        @Override
+        public @NonNull ArrayList<PermissionInfo> getAllPermissionsWithProtectionFlags(
+                @PermissionInfo.ProtectionFlags int protectionFlags) {
+            ArrayList<PermissionInfo> matchingPermissions = new ArrayList<>();
+
+            synchronized (mLock) {
+                int numTotalPermissions = mSettings.mPermissions.size();
+
+                for (int i = 0; i < numTotalPermissions; i++) {
+                    BasePermission bp = mSettings.mPermissions.valueAt(i);
+
+                    if (bp.perm != null && (bp.perm.getProtectionFlags() & protectionFlags)
+                            == protectionFlags) {
                         matchingPermissions.add(
                                 PackageInfoUtils.generatePermissionInfo(bp.perm, 0));
                     }
