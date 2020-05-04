@@ -1583,13 +1583,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         hasBeenLaunched = false;
         mStackSupervisor = supervisor;
 
-        // b/35954083: Limit task affinity to uid to avoid various issues associated with sharing
-        // affinity across uids.
-        final String uid = Integer.toString(info.applicationInfo.uid);
-        if (info.taskAffinity != null && !info.taskAffinity.startsWith(uid)) {
-            info.taskAffinity = uid + ":" + info.taskAffinity;
-        }
+        info.taskAffinity = getTaskAffinityWithUid(info.taskAffinity, info.applicationInfo.uid);
         taskAffinity = info.taskAffinity;
+        final String uid = Integer.toString(info.applicationInfo.uid);
         if (info.windowLayout != null && info.windowLayout.windowLayoutAffinity != null
                 && !info.windowLayout.windowLayoutAffinity.startsWith(uid)) {
             info.windowLayout.windowLayoutAffinity =
@@ -1645,6 +1641,22 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     ? (TaskDisplayArea) WindowContainer.fromBinder(daToken.asBinder()) : null;
             mHandoverLaunchDisplayId = options.getLaunchDisplayId();
         }
+    }
+
+    /**
+     * Generate the task affinity with uid. For b/35954083, Limit task affinity to uid to avoid
+     * issues associated with sharing affinity across uids.
+     *
+     * @param affinity The affinity of the activity.
+     * @param uid The user-ID that has been assigned to this application.
+     * @return The task affinity with uid.
+     */
+    static String getTaskAffinityWithUid(String affinity, int uid) {
+        final String uidStr = Integer.toString(uid);
+        if (affinity != null && !affinity.startsWith(uidStr)) {
+            affinity = uidStr + ":" + affinity;
+        }
+        return affinity;
     }
 
     static int getLockTaskLaunchMode(ActivityInfo aInfo, @Nullable ActivityOptions options) {
