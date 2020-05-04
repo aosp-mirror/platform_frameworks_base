@@ -63,7 +63,7 @@
     <string name="usb_debugging_allow" msgid="1722643858015321328">"Permitir"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"Depuración USB no permitida"</string>
     <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"El usuario con el que se ha iniciado sesión en este dispositivo no puede activar la depuración USB. Para utilizar esta función, inicia sesión con la cuenta de usuario principal."</string>
-    <string name="wifi_debugging_title" msgid="7300007687492186076">"¿Quieres permitir la depuración inalámbrica en esta red?"</string>
+    <string name="wifi_debugging_title" msgid="7300007687492186076">"¿Permitir la depuración inalámbrica en esta red?"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"Nombre de la red (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nDirección Wi‑Fi (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
     <string name="wifi_debugging_always" msgid="2968383799517975155">"Permitir siempre en esta red"</string>
     <string name="wifi_debugging_allow" msgid="4573224609684957886">"Permitir"</string>
@@ -255,8 +255,7 @@
     <!-- no translation found for accessibility_work_mode (1280025758672376313) -->
     <skip />
     <string name="accessibility_notification_dismissed" msgid="4411652015138892952">"Notificación ignorada"</string>
-    <!-- no translation found for accessibility_bubble_dismissed (270358867566720729) -->
-    <skip />
+    <string name="accessibility_bubble_dismissed" msgid="270358867566720729">"Burbuja cerrada."</string>
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"Pantalla de notificaciones"</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"Ajustes rápidos"</string>
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"Pantalla de bloqueo."</string>
@@ -1028,8 +1027,7 @@
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Elige los controles a los que acceder desde el menú de encendido"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Mantén pulsado y arrastra un control para reubicarlo"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Todos los controles quitados"</string>
-    <!-- no translation found for controls_favorite_toast_no_changes (7094494210840877931) -->
-    <skip />
+    <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"No se han guardado los cambios"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"No se ha podido cargar la lista de los controles."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Otros"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Añadir a control de dispositivos"</string>

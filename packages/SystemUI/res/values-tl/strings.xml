@@ -255,8 +255,7 @@
     <!-- no translation found for accessibility_work_mode (1280025758672376313) -->
     <skip />
     <string name="accessibility_notification_dismissed" msgid="4411652015138892952">"Na-dismiss ang notification."</string>
-    <!-- no translation found for accessibility_bubble_dismissed (270358867566720729) -->
-    <skip />
+    <string name="accessibility_bubble_dismissed" msgid="270358867566720729">"Na-dismiss na ang bubble."</string>
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"Notification shade."</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"Mga mabilisang setting."</string>
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"Lock screen."</string>
@@ -1028,8 +1027,7 @@
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Pumili ng mga kontrol na maa-access mula sa power menu"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"I-hold at i-drag para baguhin ang pagkakaayos ng mga kontrol"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Inalis ang lahat ng kontrol"</string>
-    <!-- no translation found for controls_favorite_toast_no_changes (7094494210840877931) -->
-    <skip />
+    <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Hindi na-save ang mga pagbabago"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Hindi ma-load ang listahan ng lahat ng control."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Iba pa"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Idagdag sa mga kontrol ng device"</string>

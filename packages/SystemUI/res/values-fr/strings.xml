@@ -255,8 +255,7 @@
     <!-- no translation found for accessibility_work_mode (1280025758672376313) -->
     <skip />
     <string name="accessibility_notification_dismissed" msgid="4411652015138892952">"Notification masquée"</string>
-    <!-- no translation found for accessibility_bubble_dismissed (270358867566720729) -->
-    <skip />
+    <string name="accessibility_bubble_dismissed" msgid="270358867566720729">"Bulle fermée."</string>
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"Volet des notifications"</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"Paramètres rapides"</string>
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"Écran de verrouillage"</string>
@@ -1028,8 +1027,7 @@
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Sélectionnez les commandes auxquelles vous souhaitez accéder depuis le menu de démarrage"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Appuyer et faire glisser pour réorganiser les commandes"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Toutes les commandes ont été supprimées"</string>
-    <!-- no translation found for controls_favorite_toast_no_changes (7094494210840877931) -->
-    <skip />
+    <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Les modifications n\'ont pas été enregistrées"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Impossible de charger toutes les commandes."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Autre"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Ajouter aux commandes de contrôle des appareils"</string>

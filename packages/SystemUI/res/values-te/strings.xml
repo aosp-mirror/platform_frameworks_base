@@ -432,8 +432,7 @@
     <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"స్క్రీన్ రికార్డ్"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"ప్రారంభించు"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"ఆపు"</string>
-    <!-- no translation found for media_seamless_remote_device (177033467332920464) -->
-    <skip />
+    <string name="media_seamless_remote_device" msgid="177033467332920464">"పరికరం"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"యాప్‌లను మార్చడం కోసం ఎగువకు స్వైప్ చేయండి"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"యాప్‌లను శీఘ్రంగా స్విచ్ చేయడానికి కుడి వైపుకు లాగండి"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"స్థూలదృష్టిని టోగుల్ చేయి"</string>
@@ -716,8 +715,7 @@
     <string name="notification_channel_summary_priority" msgid="7415770044553264622">"సంభాషణ విభాగానికి ఎగువున ఉంటుంది, బబుల్‌లాగా కనిపిస్తుంది."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"సెట్టింగ్‌లు"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"ప్రాధాన్యత"</string>
-    <!-- no translation found for no_shortcut (7176375126961212514) -->
-    <skip />
+    <string name="no_shortcut" msgid="7176375126961212514">"\'సంభాషణ నిర్దిష్ట సెట్టింగ్\'‌లకు <xliff:g id="APP_NAME">%1$s</xliff:g> సపోర్ట్ చేయదు"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"ఇటీవలి బబుల్స్ ఏవీ లేవు"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"ఇటీవలి బబుల్స్, తీసివేసిన బబుల్స్ ఇక్కడ కనిపిస్తాయి"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"ఈ నోటిఫికేషన్‌లను సవరించడం వీలుపడదు."</string>
