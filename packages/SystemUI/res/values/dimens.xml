@@ -1310,7 +1310,7 @@
     <dimen name="controls_card_margin">2dp</dimen>
     <item name="control_card_elevation" type="dimen" format="float">15</item>
 
-    <dimen name="controls_dialog_padding">8dp</dimen>
+    <dimen name="controls_dialog_padding">32dp</dimen>
     <dimen name="controls_dialog_control_width">200dp</dimen>
 
     <!-- Screen Record -->

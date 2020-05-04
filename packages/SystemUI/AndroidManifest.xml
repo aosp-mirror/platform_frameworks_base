@@ -718,7 +718,7 @@
             android:finishOnCloseSystemDialogs="true"
             android:showForAllUsers="true"
             android:clearTaskOnLaunch="true"
-            android:launchMode="singleTask"
+            android:launchMode="singleInstance"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboard|keyboardHidden"
             android:excludeFromRecents="true"
             android:visibleToInstantApps="true"/>
