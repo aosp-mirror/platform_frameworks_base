@@ -39,6 +39,7 @@ import com.android.internal.util.NotificationMessagingUtil;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.Prefs;
+import com.android.systemui.accessibility.ModeSwitchesController;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.doze.AlwaysOnDisplayPolicy;
@@ -227,4 +228,12 @@ public class DependencyProvider {
     static UiEventLogger provideUiEventLogger() {
         return new UiEventLoggerImpl();
     }
+
+    /** */
+    @Singleton
+    @Provides
+    public ModeSwitchesController providesModeSwitchesController(Context context) {
+        return new ModeSwitchesController(context);
+    }
+
 }
