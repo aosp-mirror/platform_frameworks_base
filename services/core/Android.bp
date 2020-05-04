@@ -148,6 +148,7 @@ java_genrule {
 
 java_library {
     name: "services.core",
+    defaults: ["services_defaults"],
     static_libs: ["services.core.priorityboosted"],
 }
 
