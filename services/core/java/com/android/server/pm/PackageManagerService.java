@@ -13150,7 +13150,9 @@ public class PackageManagerService extends IPackageManager.Stub
 
     private void enforceCanSetPackagesSuspendedAsUser(String callingPackage, int callingUid,
             int userId, String callingMethod) {
-        if (callingUid == Process.ROOT_UID || callingUid == Process.SYSTEM_UID) {
+        if (callingUid == Process.ROOT_UID
+                // Need to compare app-id to allow system dialogs access on secondary users
+                || UserHandle.getAppId(callingUid) == Process.SYSTEM_UID) {
             return;
         }
 
