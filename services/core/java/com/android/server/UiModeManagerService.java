@@ -777,6 +777,7 @@ final class UiModeManagerService extends SystemService {
                 pw.print(" ");
             }
             pw.println("");
+            pw.print(" waitScreenOff="); pw.print(mWaitForScreenOff);
             pw.print(" mComputedNightMode="); pw.print(mComputedNightMode);
             pw.print(" customStart="); pw.print(mCustomAutoNightModeStartMilliseconds);
             pw.print(" customEnd"); pw.print(mCustomAutoNightModeEndMilliseconds);
