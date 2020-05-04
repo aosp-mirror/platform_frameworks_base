@@ -116,7 +116,7 @@ public class AppIntegrityManagerServiceImplTest {
 
     // These are obtained by running the test and checking logcat.
     private static final String APP_CERT =
-            "C8A2E9BCCF597C2FB6DC66BEE293FC13F2FC47EC77BC6B2B0D52C11F51192AB8";
+            "F14CFECF5070874C05D3D2FA98E046BE20BDE02A0DC74BAF6B59C6A0E4C06850";
     // We use SHA256 for package names longer than 32 characters.
     private static final String INSTALLER_SHA256 =
             "30F41A7CBF96EE736A54DD6DF759B50ED3CC126ABCEF694E167C324F5976C227";
