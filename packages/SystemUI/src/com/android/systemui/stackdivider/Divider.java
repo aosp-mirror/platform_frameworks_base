@@ -813,4 +813,12 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
             updateVisibility(true /* visible */);
         }
     }
+
+    /** @return the container token for the secondary split root task. */
+    public WindowContainerToken getSecondaryRoot() {
+        if (mSplits == null || mSplits.mSecondary == null) {
+            return null;
+        }
+        return mSplits.mSecondary.token;
+    }
 }

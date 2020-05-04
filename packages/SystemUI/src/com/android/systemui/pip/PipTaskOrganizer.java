@@ -552,6 +552,9 @@ public class PipTaskOrganizer extends TaskOrganizer {
                     ? null : destinationBounds;
             // As for the final windowing mode, simply reset it to undefined.
             wct.setWindowingMode(mToken, WINDOWING_MODE_UNDEFINED);
+            if (mSplitDivider != null && direction == TRANSITION_DIRECTION_TO_SPLIT_SCREEN) {
+                wct.reparent(mToken, mSplitDivider.getSecondaryRoot(), true /* onTop */);
+            }
         } else {
             taskBounds = destinationBounds;
         }
