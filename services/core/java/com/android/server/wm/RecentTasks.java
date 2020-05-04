@@ -1031,9 +1031,13 @@ class RecentTasks {
     void add(Task task) {
         if (DEBUG_RECENTS_TRIM_TASKS) Slog.d(TAG, "add: task=" + task);
 
+        // Only allow trimming task if it is not updating visibility for activities, so the caller
+        // doesn't need to handle unexpected size and index when looping task containers.
+        final boolean canTrimTask = !mSupervisor.inActivityVisibilityUpdate();
+
         // Clean up the hidden tasks when going to home because the user may not be unable to return
         // to the task from recents.
-        if (!mHiddenTasks.isEmpty() && task.isActivityTypeHome()) {
+        if (canTrimTask && !mHiddenTasks.isEmpty() && task.isActivityTypeHome()) {
             removeUnreachableHiddenTasks(task.getWindowingMode());
         }
 
@@ -1155,7 +1159,9 @@ class RecentTasks {
         }
 
         // Trim the set of tasks to the active set
-        trimInactiveRecentTasks();
+        if (canTrimTask) {
+            trimInactiveRecentTasks();
+        }
         notifyTaskPersisterLocked(task, false /* flush */);
     }
 
