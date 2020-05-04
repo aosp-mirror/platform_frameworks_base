@@ -96,7 +96,9 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
      * @param displayId              The logical display id.
      */
     public WindowMagnificationGestureHandler(Context context,
-            WindowMagnificationManager windowMagnificationMgr, int displayId) {
+            WindowMagnificationManager windowMagnificationMgr,
+            MagnificationGestureHandler.ScaleChangedListener listener, int displayId) {
+        super(listener);
         if (DEBUG_ALL) {
             Slog.i(LOG_TAG,
                     "WindowMagnificationGestureHandler() , displayId = " + displayId + ")");
@@ -111,7 +113,25 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
         mDetectingState = new DetectingState(context);
         mObservePanningScalingState = new PanningScalingGestureState(
                 new PanningScalingHandler(context, MAX_SCALE, MIN_SCALE, true,
-                        mWindowMagnificationMgr));
+                        new PanningScalingHandler.MagnificationDelegate() {
+                            @Override
+                            public boolean processScroll(int displayId, float distanceX,
+                                    float distanceY) {
+                                return mWindowMagnificationMgr.processScroll(displayId, distanceX,
+                                        distanceY);
+                            }
+
+                            @Override
+                            public void setScale(int displayId, float scale) {
+                                mWindowMagnificationMgr.setScale(displayId, scale);
+                                mListener.onMagnificationScaleChanged(displayId, getMode());
+                            }
+
+                            @Override
+                            public float getScale(int displayId) {
+                                return mWindowMagnificationMgr.getScale(displayId);
+                            }
+                        }));
 
         mDebugOutputEventHistory = DEBUG_EVENT_STREAM ? new ArrayDeque<>() : null;
 
