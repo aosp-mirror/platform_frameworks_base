@@ -981,6 +981,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     protected static boolean sBrokenWindowBackground;
 
+    /**
+     * Prior to R, we were always forcing a layout of the entire hierarchy when insets changed from
+     * the server. This is inefficient and not all apps use it. Instead, we want to rely on apps
+     * calling {@link #requestLayout} when they need to relayout based on an insets change.
+     */
+    static boolean sForceLayoutWhenInsetsChanged;
+
     /** @hide */
     @IntDef({NOT_FOCUSABLE, FOCUSABLE, FOCUSABLE_AUTO})
     @Retention(RetentionPolicy.SOURCE)
@@ -5375,6 +5382,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
             GradientDrawable.sWrapNegativeAngleMeasurements =
                     targetSdkVersion >= Build.VERSION_CODES.Q;
+
+            sForceLayoutWhenInsetsChanged = targetSdkVersion < Build.VERSION_CODES.R;
+
             sCompatibilityDone = true;
         }
     }
