@@ -720,6 +720,8 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
 
     protected static final long INTERVAL = 10000;
 
+    // This doesn't need to match the max shortcuts limit in the framework, and tests should either
+    // use this or set their own limit for testing, without assuming any particular max value.
     protected static final int MAX_SHORTCUTS = 10;
 
     protected static final int MAX_UPDATES_PER_INTERVAL = 3;

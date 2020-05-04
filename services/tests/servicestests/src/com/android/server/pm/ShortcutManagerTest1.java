@@ -234,7 +234,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         assertEquals(ShortcutService.DEFAULT_RESET_INTERVAL_SEC * 1000,
                 mService.getResetIntervalForTest());
 
-        assertEquals(ShortcutService.DEFAULT_MAX_SHORTCUTS_PER_APP,
+        assertEquals(ShortcutService.DEFAULT_MAX_SHORTCUTS_PER_ACTIVITY,
                 mService.getMaxShortcutsForTest());
 
         assertEquals(ShortcutService.DEFAULT_MAX_UPDATES_PER_INTERVAL,
@@ -393,6 +393,8 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
     }
 
     public void testPushDynamicShortcut() {
+        // Change the max number of shortcuts.
+        mService.updateConfigurationLocked(ConfigConstants.KEY_MAX_SHORTCUTS + "=5");
 
         setCaller(CALLING_PACKAGE_1, USER_0);
 
@@ -400,12 +402,11 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         final ShortcutInfo s2 = makeShortcut("s2");
         final ShortcutInfo s3 = makeShortcut("s3");
         final ShortcutInfo s4 = makeShortcut("s4");
-
-        final ShortcutInfo s10 = makeShortcut("s10");
-        final ShortcutInfo s11 = makeShortcut("s11");
-        final ShortcutInfo s12 = makeShortcut("s12");
-        final ShortcutInfo s13 = makeShortcut("s13");
-        final ShortcutInfo s14 = makeShortcut("s14");
+        final ShortcutInfo s5 = makeShortcut("s5");
+        final ShortcutInfo s6 = makeShortcut("s6");
+        final ShortcutInfo s7 = makeShortcut("s7");
+        final ShortcutInfo s8 = makeShortcut("s8");
+        final ShortcutInfo s9 = makeShortcut("s9");
 
         // Test push as first shortcut
         mManager.pushDynamicShortcut(s1);
@@ -440,63 +441,61 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         mInjectedCurrentTimeMillis += INTERVAL; // reset
 
         // Test push as last
-        assertTrue(mManager.addDynamicShortcuts(makeShortcuts("s5", "s6", "s7", "s8", "s9")));
-        mManager.pushDynamicShortcut(s10);
+        mManager.pushDynamicShortcut(s5);
         assertShortcutIds(assertAllNotKeyFieldsOnly(mManager.getDynamicShortcuts()),
-                "s1", "s2", "s3", "s4", "s5", "s6", "s7", "s8", "s9", "s10");
-        assertEquals(0, getCallerShortcut("s10").getRank());
-        assertEquals(1, getCallerShortcut("s5").getRank());
-        assertEquals(6, getCallerShortcut("s3").getRank());
-        assertEquals(7, getCallerShortcut("s1").getRank());
-        assertEquals(8, getCallerShortcut("s2").getRank());
-        assertEquals(9, getCallerShortcut("s4").getRank());
+                "s1", "s2", "s3", "s4", "s5");
+        assertEquals(0, getCallerShortcut("s5").getRank());
+        assertEquals(1, getCallerShortcut("s3").getRank());
+        assertEquals(2, getCallerShortcut("s1").getRank());
+        assertEquals(3, getCallerShortcut("s2").getRank());
+        assertEquals(4, getCallerShortcut("s4").getRank());
 
         // Push when max has already reached
-        mManager.pushDynamicShortcut(s11);
+        mManager.pushDynamicShortcut(s6);
         assertShortcutIds(assertAllNotKeyFieldsOnly(mManager.getDynamicShortcuts()),
-                "s1", "s2", "s3", "s5", "s6", "s7", "s8", "s9", "s10", "s11");
-        assertEquals(0, getCallerShortcut("s11").getRank());
-        assertEquals(1, getCallerShortcut("s10").getRank());
-        assertEquals(9, getCallerShortcut("s2").getRank());
+                "s1", "s2", "s3", "s5", "s6");
+        assertEquals(0, getCallerShortcut("s6").getRank());
+        assertEquals(1, getCallerShortcut("s5").getRank());
+        assertEquals(4, getCallerShortcut("s2").getRank());
 
         mInjectedCurrentTimeMillis += INTERVAL; // reset
 
         // Push with different activity
-        s12.setActivity(makeComponent(ShortcutActivity2.class));
-        mManager.pushDynamicShortcut(s12);
+        s7.setActivity(makeComponent(ShortcutActivity2.class));
+        mManager.pushDynamicShortcut(s7);
         assertEquals(makeComponent(ShortcutActivity2.class),
-                getCallerShortcut("s12").getActivity());
-        assertEquals(0, getCallerShortcut("s12").getRank());
+                getCallerShortcut("s7").getActivity());
+        assertEquals(0, getCallerShortcut("s7").getRank());
 
         // Push to update shortcut with different activity
         final ShortcutInfo s1_2 = makeShortcut("s1");
         s1_2.setActivity(makeComponent(ShortcutActivity2.class));
         s1_2.setRank(1);
         mManager.pushDynamicShortcut(s1_2);
-        assertEquals(0, getCallerShortcut("s12").getRank());
+        assertEquals(0, getCallerShortcut("s7").getRank());
         assertEquals(1, getCallerShortcut("s1").getRank());
-        assertEquals(0, getCallerShortcut("s11").getRank());
-        assertEquals(1, getCallerShortcut("s10").getRank());
-        assertEquals(7, getCallerShortcut("s3").getRank());
-        assertEquals(8, getCallerShortcut("s2").getRank());
+        assertEquals(0, getCallerShortcut("s6").getRank());
+        assertEquals(1, getCallerShortcut("s5").getRank());
+        assertEquals(2, getCallerShortcut("s3").getRank());
+        assertEquals(3, getCallerShortcut("s2").getRank());
 
         mInjectedCurrentTimeMillis += INTERVAL; // reset
 
         // Test push when dropped shortcut is cached
-        s13.setLongLived();
-        s13.setRank(100);
-        mManager.pushDynamicShortcut(s13);
-        assertEquals(9, getCallerShortcut("s13").getRank());
+        s8.setLongLived();
+        s8.setRank(100);
+        mManager.pushDynamicShortcut(s8);
+        assertEquals(4, getCallerShortcut("s8").getRank());
         runWithCaller(LAUNCHER_1, USER_0, () -> {
-            mLauncherApps.cacheShortcuts(CALLING_PACKAGE_1, list("s13"), HANDLE_USER_0);
+            mLauncherApps.cacheShortcuts(CALLING_PACKAGE_1, list("s8"), HANDLE_USER_0);
         });
 
-        mManager.pushDynamicShortcut(s14);
+        mManager.pushDynamicShortcut(s9);
         assertShortcutIds(assertAllNotKeyFieldsOnly(mManager.getDynamicShortcuts()),
-                "s1", "s2", "s3", "s5", "s6", "s7", "s8", "s9", "s10", "s11", "s12", "s14");
+                "s1", "s2", "s3", "s5", "s6", "s7", "s9");
         // Verify s13 stayed as cached
         assertShortcutIds(mManager.getShortcuts(ShortcutManager.FLAG_MATCH_CACHED),
-                "s13");
+                "s8");
     }
 
     public void testUnlimitedCalls() {

@@ -169,7 +169,7 @@ public class ShortcutService extends IShortcutService.Stub {
     static final int DEFAULT_MAX_UPDATES_PER_INTERVAL = 10;
 
     @VisibleForTesting
-    static final int DEFAULT_MAX_SHORTCUTS_PER_APP = 10;
+    static final int DEFAULT_MAX_SHORTCUTS_PER_ACTIVITY = 15;
 
     @VisibleForTesting
     static final int DEFAULT_MAX_ICON_DIMENSION_DP = 96;
@@ -730,7 +730,7 @@ public class ShortcutService extends IShortcutService.Stub {
                 ConfigConstants.KEY_MAX_UPDATES_PER_INTERVAL, DEFAULT_MAX_UPDATES_PER_INTERVAL));
 
         mMaxShortcuts = Math.max(0, (int) parser.getLong(
-                ConfigConstants.KEY_MAX_SHORTCUTS, DEFAULT_MAX_SHORTCUTS_PER_APP));
+                ConfigConstants.KEY_MAX_SHORTCUTS, DEFAULT_MAX_SHORTCUTS_PER_ACTIVITY));
 
         final int iconDimensionDp = Math.max(1, injectIsLowRamDevice()
                 ? (int) parser.getLong(
