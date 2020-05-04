@@ -465,6 +465,7 @@ public class BubbleStackView extends FrameLayout
                     mBubbleData.setExpanded(!mBubbleData.isExpanded());
                 }
             }
+            mExpandedAnimationController.onGestureFinished();
         }
     };
 
