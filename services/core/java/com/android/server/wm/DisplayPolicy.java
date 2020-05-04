@@ -48,6 +48,7 @@ import static android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_OPAQUE_NAVIGATION_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_OPAQUE_STATUS_BARS;
 import static android.view.WindowInsetsController.BEHAVIOR_SHOW_BARS_BY_SWIPE;
+import static android.view.WindowInsetsController.BEHAVIOR_SHOW_BARS_BY_TOUCH;
 import static android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
 import static android.view.WindowManager.INPUT_CONSUMER_NAVIGATION;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
@@ -156,6 +157,7 @@ import android.view.InputDevice;
 import android.view.InputEvent;
 import android.view.InputEventReceiver;
 import android.view.InsetsFlags;
+import android.view.InsetsSource;
 import android.view.InsetsState;
 import android.view.InsetsState.InternalInsetsType;
 import android.view.MotionEvent;
@@ -391,7 +393,8 @@ public class DisplayPolicy {
     private boolean mDreamingLockscreen;
     private boolean mAllowLockscreenWhenOn;
 
-    private InputConsumer mInputConsumer = null;
+    @VisibleForTesting
+    InputConsumer mInputConsumer = null;
 
     private PointerLocationView mPointerLocationView;
 
@@ -1372,13 +1375,6 @@ public class DisplayPolicy {
             synchronized (mLock) {
                 mForceClearedSystemUiFlags &= ~View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
                 mDisplayContent.reevaluateStatusBarVisibility();
-                if (ViewRootImpl.sNewInsetsMode == NEW_INSETS_MODE_FULL && mNavigationBar != null) {
-                    final InsetsControlTarget target =
-                            mNavigationBar.getControllableInsetProvider().getControlTarget();
-                    if (target != null) {
-                        target.showInsets(Type.navigationBars(), false /* fromIme */);
-                    }
-                }
             }
         }
     };
@@ -1406,6 +1402,7 @@ public class DisplayPolicy {
                             if (mInputConsumer == null) {
                                 return;
                             }
+                            showNavigationBar();
                             // Any user activity always causes us to show the
                             // navigation controls, if they had been hidden.
                             // We also clear the low profile and only content
@@ -1437,6 +1434,16 @@ public class DisplayPolicy {
                 }
             } finally {
                 finishInputEvent(event, false /* handled */);
+            }
+        }
+
+        private void showNavigationBar() {
+            final InsetsSourceProvider provider = mDisplayContent.getInsetsStateController()
+                    .peekSourceProvider(ITYPE_NAVIGATION_BAR);
+            final InsetsControlTarget target =
+                    provider != null ? provider.getControlTarget() : null;
+            if (target != null) {
+                target.showInsets(Type.navigationBars(), false /* fromIme */);
             }
         }
     }
@@ -1500,9 +1507,13 @@ public class DisplayPolicy {
         // drive nav being hidden only by whether it is requested.
         final int sysui = mLastSystemUiFlags;
         final int behavior = mLastBehavior;
+        final InsetsSourceProvider provider =
+                mDisplayContent.getInsetsStateController().peekSourceProvider(ITYPE_NAVIGATION_BAR);
         boolean navVisible = ViewRootImpl.sNewInsetsMode != ViewRootImpl.NEW_INSETS_MODE_FULL
                 ? (sysui & View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) == 0
-                : isNavigationBarRequestedVisible();
+                : provider != null
+                        ? provider.isClientVisible()
+                        : InsetsState.getDefaultVisibility(ITYPE_NAVIGATION_BAR);
         boolean navTranslucent = (sysui
                 & (View.NAVIGATION_BAR_TRANSLUCENT | View.NAVIGATION_BAR_TRANSPARENT)) != 0;
         boolean immersive = (sysui & View.SYSTEM_UI_FLAG_IMMERSIVE) != 0
@@ -1517,7 +1528,7 @@ public class DisplayPolicy {
                 && (mNotificationShade.getAttrs().privateFlags
                 & PRIVATE_FLAG_STATUS_FORCE_SHOW_NAVIGATION) != 0;
 
-        updateHideNavInputEventReceiver(navVisible, navAllowedHidden);
+        updateHideNavInputEventReceiver();
 
         // For purposes of positioning and showing the nav bar, if we have decided that it can't
         // be hidden (because of the screen aspect ratio), then take that into account.
@@ -1539,30 +1550,38 @@ public class DisplayPolicy {
         mLastNotificationShadeForcesShowingNavigation = notificationShadeForcesShowingNavigation;
     }
 
-    boolean isNavigationBarRequestedVisible() {
-        final InsetsSourceProvider provider =
-                mDisplayContent.getInsetsStateController().peekSourceProvider(ITYPE_NAVIGATION_BAR);
-        return provider == null
-                ? InsetsState.getDefaultVisibility(ITYPE_NAVIGATION_BAR)
-                : provider.isClientVisible();
-    }
-
-    void updateHideNavInputEventReceiver(boolean navVisible, boolean navAllowedHidden) {
+    void updateHideNavInputEventReceiver() {
+        final InsetsSourceProvider provider = mDisplayContent.getInsetsStateController()
+                .peekSourceProvider(ITYPE_NAVIGATION_BAR);
+        final InsetsControlTarget navControlTarget =
+                provider != null ? provider.getControlTarget() : null;
+        final WindowState navControllingWin =
+                navControlTarget instanceof WindowState ? (WindowState) navControlTarget : null;
+        final InsetsState requestedState = navControllingWin != null
+                ? navControllingWin.getRequestedInsetsState() : null;
+        final InsetsSource navSource = requestedState != null
+                ? requestedState.peekSource(ITYPE_NAVIGATION_BAR) : null;
+        final boolean navVisible = navSource != null
+                ? navSource.isVisible() : InsetsState.getDefaultVisibility(ITYPE_NAVIGATION_BAR);
+        final boolean showBarsByTouch = navControllingWin != null
+                && navControllingWin.mAttrs.insetsFlags.behavior == BEHAVIOR_SHOW_BARS_BY_TOUCH;
         // When the navigation bar isn't visible, we put up a fake input window to catch all
         // touch events. This way we can detect when the user presses anywhere to bring back the
         // nav bar and ensure the application doesn't see the event.
-        if (navVisible || navAllowedHidden) {
+        if (navVisible || !showBarsByTouch) {
             if (mInputConsumer != null) {
                 mInputConsumer.dismiss();
                 mHandler.sendMessage(
                         mHandler.obtainMessage(MSG_DISPOSE_INPUT_CONSUMER, mInputConsumer));
                 mInputConsumer = null;
+                Slog.v(TAG, INPUT_CONSUMER_NAVIGATION + " dismissed.");
             }
         } else if (mInputConsumer == null && mStatusBar != null && canHideNavigationBar()) {
             mInputConsumer = mDisplayContent.getInputMonitor().createInputConsumer(
                     mHandler.getLooper(),
                     INPUT_CONSUMER_NAVIGATION,
                     HideNavInputEventReceiver::new);
+            Slog.v(TAG, INPUT_CONSUMER_NAVIGATION + " created.");
             // As long as mInputConsumer is active, hover events are not dispatched to the app
             // and the pointer icon is likely to become stale. Hide it to avoid confusion.
             InputManager.getInstance().setPointerIconType(PointerIcon.TYPE_NULL);
