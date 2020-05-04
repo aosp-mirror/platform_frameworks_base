@@ -1997,19 +1997,9 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
     private static final Set<String> PROFILE_OWNER_ORGANIZATION_OWNED_GLOBAL_RESTRICTIONS =
             Sets.newSet(
-                    UserManager.DISALLOW_CONFIG_DATE_TIME,
-                    UserManager.DISALLOW_BLUETOOTH_SHARING,
-                    UserManager.DISALLOW_CONFIG_CELL_BROADCASTS,
-                    UserManager.DISALLOW_CONFIG_MOBILE_NETWORKS,
-                    UserManager.DISALLOW_CONFIG_PRIVATE_DNS,
-                    UserManager.DISALLOW_CONFIG_TETHERING,
-                    UserManager.DISALLOW_DATA_ROAMING,
-                    UserManager.DISALLOW_SAFE_BOOT,
-                    UserManager.DISALLOW_SMS,
-                    UserManager.DISALLOW_USB_FILE_TRANSFER,
                     UserManager.DISALLOW_AIRPLANE_MODE,
-                    UserManager.DISALLOW_MOUNT_PHYSICAL_MEDIA,
-                    UserManager.DISALLOW_UNMUTE_MICROPHONE
+                    UserManager.DISALLOW_CONFIG_DATE_TIME,
+                    UserManager.DISALLOW_CONFIG_PRIVATE_DNS
             );
 
     private static final Set<String> PROFILE_OWNER_ORGANIZATION_OWNED_LOCAL_RESTRICTIONS =
@@ -2021,7 +2011,17 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                     UserManager.DISALLOW_CONTENT_SUGGESTIONS,
                     UserManager.DISALLOW_DEBUGGING_FEATURES,
                     UserManager.DISALLOW_SHARE_LOCATION,
-                    UserManager.DISALLOW_OUTGOING_CALLS
+                    UserManager.DISALLOW_OUTGOING_CALLS,
+                    UserManager.DISALLOW_BLUETOOTH_SHARING,
+                    UserManager.DISALLOW_CONFIG_CELL_BROADCASTS,
+                    UserManager.DISALLOW_CONFIG_MOBILE_NETWORKS,
+                    UserManager.DISALLOW_CONFIG_TETHERING,
+                    UserManager.DISALLOW_DATA_ROAMING,
+                    UserManager.DISALLOW_SAFE_BOOT,
+                    UserManager.DISALLOW_SMS,
+                    UserManager.DISALLOW_USB_FILE_TRANSFER,
+                    UserManager.DISALLOW_MOUNT_PHYSICAL_MEDIA,
+                    UserManager.DISALLOW_UNMUTE_MICROPHONE
             );
 
     public void testSetUserRestriction_asPoOfOrgOwnedDevice() throws Exception {
@@ -2045,8 +2045,9 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         parentDpm.setCameraDisabled(admin1, true);
         verify(getServices().userManagerInternal).setDevicePolicyUserRestrictions(
                 eq(CALLER_USER_HANDLE),
-                MockUtils.checkUserRestrictions(UserManager.DISALLOW_CAMERA),
-                MockUtils.checkUserRestrictions(CALLER_USER_HANDLE),
+                MockUtils.checkUserRestrictions(),
+                MockUtils.checkUserRestrictions(UserHandle.USER_SYSTEM,
+                        UserManager.DISALLOW_CAMERA),
                 eq(false));
         DpmTestUtils.assertRestrictions(
                 DpmTestUtils.newRestrictions(UserManager.DISALLOW_CAMERA),
