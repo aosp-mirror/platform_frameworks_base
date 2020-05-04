@@ -1794,10 +1794,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Actualitzat per l\'administrador"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Suprimit per l\'administrador"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"D\'acord"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (5997766757551917769) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (8587408568232177204) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"Per allargar la durada de la bateria, el mode Estalvi de bateria fa el següent:\n\n• Activa el tema fosc.\n• Desactiva o restringeix l\'activitat en segon pla, alguns efectes visuals i altres funcions com \"Ok Google\".\n\n"<annotation id="url">"Més informació"</annotation></string>
+    <string name="battery_saver_description" msgid="8587408568232177204">"Per allargar la durada de la bateria, el mode Estalvi de bateria fa el següent:\n\n• Activa el tema fosc.\n• Desactiva o restringeix l\'activitat en segon pla, alguns efectes visuals i altres funcions com \"Ok Google\"."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Per reduir l\'ús de dades, la funció Economitzador de dades evita que determinades aplicacions enviïn o rebin dades en segon pla. L\'aplicació que estiguis fent servir podrà accedir a les dades, però menys sovint. Això vol dir, per exemple, que les imatges no es mostraran fins que no les toquis."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Activar Economitzador de dades?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Activa"</string>
@@ -2044,15 +2042,12 @@
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"Quadre de diàleg d\'engegada"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Pantalla de bloqueig"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Captura de pantalla"</string>
-    <!-- no translation found for accessibility_system_action_accessibility_button_label (5941347017132886642) -->
-    <skip />
-    <!-- no translation found for accessibility_system_action_accessibility_button_chooser_label (6973618519666227981) -->
-    <skip />
+    <string name="accessibility_system_action_accessibility_button_label" msgid="5941347017132886642">"Drecera d\'accessibilitat en pantalla"</string>
+    <string name="accessibility_system_action_accessibility_button_chooser_label" msgid="6973618519666227981">"Selector de dreceres d\'accessibilitat en pantalla"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Barra de títol de l\'aplicació <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> s\'ha transferit al segment RESTRINGIT"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
-    <!-- no translation found for conversation_single_line_image_placeholder (6983271082911936900) -->
-    <skip />
+    <string name="conversation_single_line_image_placeholder" msgid="6983271082911936900">"ha enviat una imatge"</string>
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"Conversa"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"Conversa de grup"</string>
     <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>

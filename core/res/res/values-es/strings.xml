@@ -327,7 +327,7 @@
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"Puedes tocar y pellizcar la pantalla, deslizar el dedo y hacer otros gestos."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Gestos de huellas digitales"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Puede capturar los gestos realizados en el sensor de huellas digitales del dispositivo."</string>
-    <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Hacer captura de pantalla"</string>
+    <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Hacer captura"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Puede hacer capturas de la pantalla."</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"inhabilitar o modificar la barra de estado"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Permite que la aplicación inhabilite la barra de estado o añada y elimine iconos del sistema."</string>
@@ -1794,10 +1794,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Actualizado por el administrador"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Eliminado por el administrador"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Aceptar"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (5997766757551917769) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (8587408568232177204) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"Para que la batería dure más, Ahorro de batería:\n\n• Activa el tema oscuro\n•Desactiva o restringe actividad en segundo plano, algunos efectos visuales y otras funciones como \"Ok Google\"\n\n"<annotation id="url">"Más información"</annotation></string>
+    <string name="battery_saver_description" msgid="8587408568232177204">"Para que la batería dure más, Ahorro de batería:\n\n• Activa el tema oscuro\n•Desactiva o restringe actividad en segundo plano, algunos efectos visuales y otras funciones como \"Ok Google\""</string>
     <string name="data_saver_description" msgid="4995164271550590517">"El modo Ahorro de datos evita que algunas aplicaciones envíen o reciban datos en segundo plano, lo que puede reducir el uso de datos. Una aplicación activa puede acceder a los datos, aunque con menos frecuencia. Esto significa que es posible que, por ejemplo, algunas imágenes no se muestren hasta que las toques."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"¿Activar Ahorro de datos?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Activar"</string>
@@ -1890,7 +1888,7 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> no está disponible en este momento. Esta opción se administra en <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Más información"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Anular pausa de aplicación"</string>
-    <string name="work_mode_off_title" msgid="5503291976647976560">"¿Activar el perfil de trabajo?"</string>
+    <string name="work_mode_off_title" msgid="5503291976647976560">"¿Activar perfil de trabajo?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"Tus aplicaciones, notificaciones, datos y otras funciones del perfil de trabajo se activarán"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Activar"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"La aplicación no está disponible"</string>
@@ -2044,15 +2042,12 @@
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"Abrir cuadro de diálogo"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Pantalla de bloqueo"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Captura de pantalla"</string>
-    <!-- no translation found for accessibility_system_action_accessibility_button_label (5941347017132886642) -->
-    <skip />
-    <!-- no translation found for accessibility_system_action_accessibility_button_chooser_label (6973618519666227981) -->
-    <skip />
+    <string name="accessibility_system_action_accessibility_button_label" msgid="5941347017132886642">"Acceso directo de accesibilidad en pantalla"</string>
+    <string name="accessibility_system_action_accessibility_button_chooser_label" msgid="6973618519666227981">"Opción de acceso directo de accesibilidad en pantalla"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Barra de subtítulos de <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> se ha incluido en el grupo de restringidos"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
-    <!-- no translation found for conversation_single_line_image_placeholder (6983271082911936900) -->
-    <skip />
+    <string name="conversation_single_line_image_placeholder" msgid="6983271082911936900">"ha enviado una imagen"</string>
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"Conversación"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"Conversación de grupo"</string>
     <string name="unread_convo_overflow" msgid="920517615597353833">"+ <xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>"</string>

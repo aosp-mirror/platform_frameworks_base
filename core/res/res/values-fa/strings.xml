@@ -201,8 +201,8 @@
     <string name="factory_reset_message" msgid="2657049595153992213">"برنامه سرپرست سیستم را نمی‌توان استفاده کرد. دستگاه شما در این لحظه پاک می‌شود.\n\nاگر سؤالی دارید، با سرپرست سیستم سازمانتان تماس بگیرید."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> چاپ کردن را غیرفعال کرده است."</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"نمایه کاری‌تان را روشن کنید"</string>
-    <string name="personal_apps_suspension_text" msgid="6115455688932935597">"تا زمانی‌که نمایه کاری‌تان را روشن نکنید، برنامه‌های شخصی‌تان مسدود هستند"</string>
-    <string name="personal_apps_suspension_tomorrow_text" msgid="6322541302153673994">"برنامه‌های شخصی‌تان فردا مسدود می‌شوند"</string>
+    <string name="personal_apps_suspension_text" msgid="6115455688932935597">"تا زمانی‌که نمایه کاری‌تان را روشن نکنید، برنامه‌های شخصی‌تان مسدودند"</string>
+    <string name="personal_apps_suspension_tomorrow_text" msgid="6322541302153673994">"برنامه‌های شخصی‌تان فردا مسدود خواهند شد"</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"روشن کردن نمایه کاری"</string>
     <string name="me" msgid="6207584824693813140">"من"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"گزینه‌های رایانهٔ لوحی"</string>
@@ -1794,10 +1794,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"توسط سرپرست سیستم به‌روزرسانی شد"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"توسط سرپرست سیستم حذف شد"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"تأیید"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (5997766757551917769) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (8587408568232177204) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"‏برای افزایش عمر باتری، «بهینه‌سازی باتری»:\n\n•«طرح زمینه تیره» را روشن می‌کند\n•فعالیت پس‌زمینه، برخی جلوه‌های بصری، و دیگر ویژگی‌ها مانند «Ok Google» را خاموش یا محدود می‌کند\n\n"<annotation id="url">"بیشتر بدانید"</annotation></string>
+    <string name="battery_saver_description" msgid="8587408568232177204">"‏برای افزایش عمر باتری، «بهینه‌سازی باتری»:\n\n•«طرح زمینه تیره» را روشن می‌کند\n•فعالیت پس‌زمینه، برخی جلوه‌های بصری، و دیگر ویژگی‌ها مانند «Ok Google» را خاموش یا محدود می‌کند"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"«صرفه‌جویی داده»، برای کمک به کاهش مصرف داده، از ارسال و دریافت داده در پس‌زمینه ازطرف بعضی برنامه‌ها جلوگیری می‌کند. برنامه‌ای که درحال‌حاضر استفاده می‌کنید می‌تواند به داده‌ها دسترسی داشته باشد اما دفعات دسترسی آن محدود است.این یعنی، برای مثال، تصاویر تازمانی‌که روی آن‌ها ضربه نزنید نشان داده نمی‌شوند."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"«صرفه‌جویی داده» روشن شود؟"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"روشن کردن"</string>
@@ -1851,9 +1849,9 @@
     <string name="stk_cc_ussd_to_dial" msgid="3139884150741157610">"‏درخواست USSD به تماس معمولی تغییر کرد"</string>
     <string name="stk_cc_ussd_to_ss" msgid="4826846653052609738">"‏درخواست USSD به‌درخواست SS تغییر کرد"</string>
     <string name="stk_cc_ussd_to_ussd" msgid="8343001461299302472">"‏به‌ درخواست USSD جدید تغییر کرد"</string>
-    <string name="stk_cc_ussd_to_dial_video" msgid="429118590323618623">"‏درخواست USSD به تماس ویدیویی تغییر کرد"</string>
+    <string name="stk_cc_ussd_to_dial_video" msgid="429118590323618623">"‏درخواست USSD به تماس تصویری تغییر کرد"</string>
     <string name="stk_cc_ss_to_dial" msgid="4087396658768717077">"‏درخواست SS به تماس معمولی تغییر کرد"</string>
-    <string name="stk_cc_ss_to_dial_video" msgid="1324194624384312664">"‏درخواست SS به تماس ویدیویی تغییر کرد"</string>
+    <string name="stk_cc_ss_to_dial_video" msgid="1324194624384312664">"‏درخواست SS به تماس تصویری تغییر کرد"</string>
     <string name="stk_cc_ss_to_ussd" msgid="8417905193112944760">"‏درخواست SS به‌ درخواست USSD تغییر کرد"</string>
     <string name="stk_cc_ss_to_ss" msgid="132040645206514450">"‏به‌ درخواست SS جدید تغییر کرد"</string>
     <string name="notification_work_profile_content_description" msgid="5296477955677725799">"نمایه کاری"</string>
@@ -2044,15 +2042,12 @@
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"کادر گفتگوی روشن/خاموش"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"صفحه قفل"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"نماگرفت"</string>
-    <!-- no translation found for accessibility_system_action_accessibility_button_label (5941347017132886642) -->
-    <skip />
-    <!-- no translation found for accessibility_system_action_accessibility_button_chooser_label (6973618519666227981) -->
-    <skip />
+    <string name="accessibility_system_action_accessibility_button_label" msgid="5941347017132886642">"میان‌بر دسترس‌پذیری روی صفحه"</string>
+    <string name="accessibility_system_action_accessibility_button_chooser_label" msgid="6973618519666227981">"انتخاب‌گر میان‌بر دسترس‌پذیری روی صفحه"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"نوار شرح <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> در سطل «محدودشده» قرار گرفت"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
-    <!-- no translation found for conversation_single_line_image_placeholder (6983271082911936900) -->
-    <skip />
+    <string name="conversation_single_line_image_placeholder" msgid="6983271082911936900">"تصویری ارسال کرد"</string>
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"مکالمه"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"مکالمه گروهی"</string>
     <string name="unread_convo_overflow" msgid="920517615597353833">"+<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>"</string>
