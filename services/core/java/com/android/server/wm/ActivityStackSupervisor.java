@@ -332,11 +332,10 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
     PowerManager.WakeLock mGoingToSleepWakeLock;
 
     /**
-     * Temporary rect used during docked stack resize calculation so we don't need to create a new
-     * object each time.
+     * Used to keep {@link RootWindowContainer#ensureActivitiesVisible} from being entered
+     * recursively. And only update keyguard states once the nested updates are done.
      */
-    private final Rect tempRect = new Rect();
-    private final ActivityOptions mTmpOptions = ActivityOptions.makeBasic();
+    private int mVisibilityTransactionDepth;
 
     private ActivityMetricsLogger mActivityMetricsLogger;
 
@@ -1925,6 +1924,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         pw.print(prefix);
         pw.println("mCurTaskIdForUser=" + mCurTaskIdForUser);
         pw.println(prefix + "mUserStackInFront=" + mRootWindowContainer.mUserStackInFront);
+        pw.println(prefix + "mVisibilityTransactionDepth=" + mVisibilityTransactionDepth);
         if (!mWaitingForActivityVisible.isEmpty()) {
             pw.println(prefix + "mWaitingForActivityVisible=");
             for (int i = 0; i < mWaitingForActivityVisible.size(); ++i) {
@@ -2311,6 +2311,24 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
     void wakeUp(String reason) {
         mPowerManager.wakeUp(SystemClock.uptimeMillis(), PowerManager.WAKE_REASON_APPLICATION,
                 "android.server.am:TURN_ON:" + reason);
+    }
+
+    /** Starts a batch of visibility updates. */
+    void beginActivityVisibilityUpdate() {
+        mVisibilityTransactionDepth++;
+    }
+
+    /** Ends a batch of visibility updates. */
+    void endActivityVisibilityUpdate() {
+        mVisibilityTransactionDepth--;
+        if (mVisibilityTransactionDepth == 0) {
+            getKeyguardController().visibilitiesUpdated();
+        }
+    }
+
+    /** Returns {@code true} if the caller is on the path to update visibility. */
+    boolean inActivityVisibilityUpdate() {
+        return mVisibilityTransactionDepth > 0;
     }
 
     /**
