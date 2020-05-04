@@ -1306,9 +1306,9 @@
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Жалғанған құрылғы зарядталуда. Қосымша параметрлер үшін түртіңіз."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Аналогтық аудиожабдық анықталды"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"Жалғанған құрылғы бұл телефонмен үйлесімсіз. Қосымша ақпарат алу үшін түртіңіз."</string>
-    <string name="adb_active_notification_title" msgid="408390247354560331">"USB түзетуі қосылған"</string>
+    <string name="adb_active_notification_title" msgid="408390247354560331">"USB арқылы түзету қосылған"</string>
     <string name="adb_active_notification_message" msgid="5617264033476778211">"USB арқылы түзетуді өшіру үшін түртіңіз"</string>
-    <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"USB түзетуін өшіру үшін таңдаңыз."</string>
+    <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"USB арқылы түзетуді өшіру үшін таңдаңыз."</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"Сымсыз түзету байланыстырылды"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"Сымсыз түзетуді өшіру үшін түртіңіз."</string>
     <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"Сымсыз түзетуді өшіріңіз."</string>
@@ -1889,7 +1889,7 @@
     <string name="app_suspended_more_details" msgid="211260942831587014">"Толығырақ"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Қолданбаны қайта қосу"</string>
     <string name="work_mode_off_title" msgid="5503291976647976560">"Жұмыс профилі қосылсын ба?"</string>
-    <string name="work_mode_off_message" msgid="8417484421098563803">"Жұмыс қолданбалары, хабарландырулар, деректер және басқа да жұмыс профильдерінің мүмкіндіктері қосылады"</string>
+    <string name="work_mode_off_message" msgid="8417484421098563803">"Жұмыс қолданбалары, хабарландырулар, деректер және жұмыс профилінің басқа да мүмкіндіктері қосылады."</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Қосу"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Қолданба қолжетімді емес"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> қазір қолжетімді емес."</string>
@@ -1922,7 +1922,7 @@
     <string name="app_category_maps" msgid="6395725487922533156">"Карта және навигация"</string>
     <string name="app_category_productivity" msgid="1844422703029557883">"Өнімділік"</string>
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"Құрылғы жады"</string>
-    <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"USB арқылы жөндеу"</string>
+    <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"USB арқылы түзету"</string>
     <string name="time_picker_hour_label" msgid="4208590187662336864">"сағат"</string>
     <string name="time_picker_minute_label" msgid="8307452311269824553">"минут"</string>
     <string name="time_picker_header_text" msgid="9073802285051516688">"Уақытты реттеу"</string>

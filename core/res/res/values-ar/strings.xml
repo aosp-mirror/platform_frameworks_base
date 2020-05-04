@@ -1886,10 +1886,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"تم التحديث بواسطة المشرف"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"تم الحذف بواسطة المشرف"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"حسنًا"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (5997766757551917769) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (8587408568232177204) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"‏لإطالة عمر البطارية، \"توفير شحن البطارية\":\n\n• تفعيل \"المظهر الداكن\"\n• إيقاف النشاط في الخلفية وأيضًا بعض التأثيرات المرئية والميزات الأخرى، مثلاً \"Ok Google\" أو فرض قيود عليها\n\n"<annotation id="url">"مزيد من المعلومات"</annotation></string>
+    <string name="battery_saver_description" msgid="8587408568232177204">"‏لإطالة عمر البطارية، \"توفير شحن البطارية\":\n\n• تفعيل \"المظهر الداكن\"\n• إيقاف النشاط في الخلفية وأيضًا بعض التأثيرات المرئية والميزات الأخرى، مثلاً \"Ok Google\" أو فرض قيود عليها."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"للمساعدة في خفض استخدام البيانات، تمنع ميزة \"توفير البيانات\" بعض التطبيقات من إرسال البيانات وتلقّيها في الخلفية. يمكن للتطبيقات المتاحة لديك الآن استخدام البيانات، ولكن لا يمكنها الإكثار من ذلك. وهذا يعني أن الصور مثلاً لا تظهر حتى تنقر عليها."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"هل تريد تفعيل توفير البيانات؟"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"تفعيل"</string>
@@ -2180,15 +2178,12 @@
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"مربّع حوار الطاقة"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"شاشة القفل"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"لقطة شاشة"</string>
-    <!-- no translation found for accessibility_system_action_accessibility_button_label (5941347017132886642) -->
-    <skip />
-    <!-- no translation found for accessibility_system_action_accessibility_button_chooser_label (6973618519666227981) -->
-    <skip />
+    <string name="accessibility_system_action_accessibility_button_label" msgid="5941347017132886642">"اختصار أدوات تمكين الوصول على الشاشة"</string>
+    <string name="accessibility_system_action_accessibility_button_chooser_label" msgid="6973618519666227981">"منتقي اختصارات أدوات تمكين الوصول على الشاشة"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"شريط الشرح لتطبيق <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"تم وضع <xliff:g id="PACKAGE_NAME">%1$s</xliff:g> في الحزمة \"محظورة\"."</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
-    <!-- no translation found for conversation_single_line_image_placeholder (6983271082911936900) -->
-    <skip />
+    <string name="conversation_single_line_image_placeholder" msgid="6983271082911936900">"أُرسِلت صورة"</string>
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"محادثة"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"محادثة جماعية"</string>
     <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>
