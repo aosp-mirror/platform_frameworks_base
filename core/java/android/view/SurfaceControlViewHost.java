@@ -272,8 +272,8 @@ public class SurfaceControlViewHost {
      * and render the object unusable.
      */
     public void release() {
+        // ViewRoot will release mSurfaceControl for us.
         mViewRoot.die(false /* immediate */);
-        mSurfaceControl.release();
     }
 
     /**
