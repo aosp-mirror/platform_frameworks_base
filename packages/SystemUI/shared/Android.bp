@@ -38,9 +38,7 @@ android_library {
         "PluginCoreLib",
     ],
 
-    // Enforce that the library is built against java 7 so that there are
-    // no compatibility issues with launcher
-    java_version: "1.7",
 
+    java_version: "1.8",
     min_sdk_version: "26",
 }
