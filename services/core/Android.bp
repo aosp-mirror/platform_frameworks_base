@@ -53,8 +53,8 @@ java_library_static {
         "android.hardware.configstore-V1.0-java",
         "android.hardware.contexthub-V1.0-java",
         "android.hidl.manager-V1.2-java",
-        "dnsresolver_aidl_interface-V4-java",
-        "netd_event_listener_interface-java",
+        "dnsresolver_aidl_interface-java",
+        "netd_aidl_interfaces-platform-java",
     ],
 }
 
