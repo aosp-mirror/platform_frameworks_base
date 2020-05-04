@@ -249,6 +249,9 @@ public final class AutofillManagerService
         resolver.registerContentObserver(Settings.Global.getUriFor(
                 Settings.Global.AUTOFILL_MAX_VISIBLE_DATASETS), false, observer,
                 UserHandle.USER_ALL);
+        resolver.registerContentObserver(Settings.Secure.getUriFor(
+                Settings.Secure.SELECTED_INPUT_METHOD_SUBTYPE), false, observer,
+                UserHandle.USER_ALL);
     }
 
     @Override // from AbstractMasterSystemService
@@ -263,6 +266,9 @@ public final class AutofillManagerService
             case Settings.Global.AUTOFILL_MAX_VISIBLE_DATASETS:
                 setMaxVisibleDatasetsFromSettings();
                 break;
+            case Settings.Secure.SELECTED_INPUT_METHOD_SUBTYPE:
+                handleInputMethodSwitch(userId);
+                break;
             default:
                 Slog.w(TAG, "Unexpected property (" + property + "); updating cache instead");
                 // fall through
@@ -270,6 +276,23 @@ public final class AutofillManagerService
                 synchronized (mLock) {
                     updateCachedServiceLocked(userId);
                 }
+        }
+    }
+
+    private void handleInputMethodSwitch(@UserIdInt int userId) {
+        // TODO(b/156903336): Used the SettingsObserver with a background thread maybe slow to
+        // respond to the IME switch in certain situations.
+        // See: services/core/java/com/android/server/FgThread.java
+        // In particular, the shared background thread could be doing relatively long-running
+        // operations like saving state to disk (in addition to simply being a background priority),
+        // which can cause operations scheduled on it to be delayed for a user-noticeable amount
+        // of time.
+
+        synchronized (mLock) {
+            final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
+            if (service != null) {
+                service.onSwitchInputMethod();
+            }
         }
     }
 
