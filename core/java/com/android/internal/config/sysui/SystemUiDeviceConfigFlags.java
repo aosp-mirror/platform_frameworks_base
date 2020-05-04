@@ -389,6 +389,11 @@ public final class SystemUiDeviceConfigFlags {
     public static final String APPEND_DIRECT_SHARE_ENABLED = "append_direct_share_enabled";
 
     /**
+     * (boolean) Whether ChooserTargets ranking on Sharesheet is enabled.
+     */
+    public static final String CHOOSER_TARGET_RANKING_ENABLED = "chooser_target_ranking_enabled";
+
+    /**
      * (boolean) Whether to enable user-drag resizing for PIP.
      */
     public static final String PIP_USER_RESIZE = "pip_user_resize";
