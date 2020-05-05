@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.appops;
+package com.android.server.appop;
 
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.inOrder;
@@ -24,7 +24,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import android.app.AppOpsManager;
-import android.app.AppOpsManager.OnOpNotedListener;
+import android.app.AppOpsManager.OnOpStartedListener;
 import android.content.Context;
 import android.os.Process;
 
@@ -36,68 +36,68 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InOrder;
 
-/**
- * Tests watching noted ops.
- */
+/** Tests watching started ops. */
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class AppOpsNotedWatcherTest {
+public class AppOpsStartedWatcherTest {
 
     private static final long NOTIFICATION_TIMEOUT_MILLIS = 5000;
 
     @Test
-    public void testWatchNotedOps() {
+    public void testWatchStartedOps() {
         // Create a mock listener
-        final OnOpNotedListener listener = mock(OnOpNotedListener.class);
+        final OnOpStartedListener listener = mock(OnOpStartedListener.class);
 
-        // Start watching noted ops
+        // Start watching started ops
         final AppOpsManager appOpsManager = getContext().getSystemService(AppOpsManager.class);
-        appOpsManager.startWatchingNoted(new int[]{AppOpsManager.OP_FINE_LOCATION,
+        appOpsManager.startWatchingStarted(new int[]{AppOpsManager.OP_FINE_LOCATION,
                 AppOpsManager.OP_CAMERA}, listener);
 
-        // Note some ops
-        appOpsManager.noteOp(AppOpsManager.OP_FINE_LOCATION, Process.myUid(),
-                getContext().getPackageName());
-        appOpsManager.noteOp(AppOpsManager.OP_CAMERA, Process.myUid(),
-                getContext().getPackageName());
+        // Start some ops
+        appOpsManager.startOp(AppOpsManager.OP_FINE_LOCATION);
+        appOpsManager.startOp(AppOpsManager.OP_CAMERA);
+        appOpsManager.startOp(AppOpsManager.OP_RECORD_AUDIO);
 
-        // Verify that we got called for the ops being noted
+        // Verify that we got called for the ops being started
         final InOrder inOrder = inOrder(listener);
         inOrder.verify(listener, timeout(NOTIFICATION_TIMEOUT_MILLIS)
-                .times(1)).onOpNoted(eq(AppOpsManager.OP_FINE_LOCATION),
+                .times(1)).onOpStarted(eq(AppOpsManager.OP_FINE_LOCATION),
                 eq(Process.myUid()), eq(getContext().getPackageName()),
                 eq(AppOpsManager.MODE_ALLOWED));
         inOrder.verify(listener, timeout(NOTIFICATION_TIMEOUT_MILLIS)
-                .times(1)).onOpNoted(eq(AppOpsManager.OP_CAMERA),
+                .times(1)).onOpStarted(eq(AppOpsManager.OP_CAMERA),
                 eq(Process.myUid()), eq(getContext().getPackageName()),
                 eq(AppOpsManager.MODE_ALLOWED));
 
         // Stop watching
-        appOpsManager.stopWatchingNoted(listener);
+        appOpsManager.stopWatchingStarted(listener);
 
         // This should be the only two callbacks we got
         verifyNoMoreInteractions(listener);
 
-        // Note the op again and verify it isn't being watched
-        appOpsManager.noteOp(AppOpsManager.OP_FINE_LOCATION);
+        // Start the op again and verify it isn't being watched
+        appOpsManager.startOp(AppOpsManager.OP_FINE_LOCATION);
+        appOpsManager.finishOp(AppOpsManager.OP_FINE_LOCATION);
         verifyNoMoreInteractions(listener);
 
-        // Start watching again
-        appOpsManager.startWatchingNoted(new int[]{AppOpsManager.OP_FINE_LOCATION,
-                AppOpsManager.OP_CAMERA}, listener);
+        // Start watching an op again (only CAMERA this time)
+        appOpsManager.startWatchingStarted(new int[]{AppOpsManager.OP_CAMERA}, listener);
 
-        // Note the op again
-        appOpsManager.noteOp(AppOpsManager.OP_FINE_LOCATION, Process.myUid(),
-                getContext().getPackageName());
+        // Note the ops again
+        appOpsManager.startOp(AppOpsManager.OP_CAMERA);
+        appOpsManager.startOp(AppOpsManager.OP_FINE_LOCATION);
 
         // Verify it's watched again
         verify(listener, timeout(NOTIFICATION_TIMEOUT_MILLIS)
-                .times(2)).onOpNoted(eq(AppOpsManager.OP_FINE_LOCATION),
+                .times(2)).onOpStarted(eq(AppOpsManager.OP_CAMERA),
                 eq(Process.myUid()), eq(getContext().getPackageName()),
                 eq(AppOpsManager.MODE_ALLOWED));
+        verifyNoMoreInteractions(listener);
 
         // Finish up
-        appOpsManager.stopWatchingNoted(listener);
+        appOpsManager.finishOp(AppOpsManager.OP_CAMERA);
+        appOpsManager.finishOp(AppOpsManager.OP_FINE_LOCATION);
+        appOpsManager.stopWatchingStarted(listener);
     }
 
     private static Context getContext() {
