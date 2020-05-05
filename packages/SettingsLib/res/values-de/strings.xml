@@ -222,11 +222,11 @@
     <string name="adb_device_fingerprint_title_format" msgid="291504822917843701">"Fingerabdruck des Geräts: <xliff:g id="FINGERPRINT_PARAM">%1$s</xliff:g>"</string>
     <string name="adb_wireless_connection_failed_title" msgid="664211177427438438">"Verbindung fehlgeschlagen"</string>
     <string name="adb_wireless_connection_failed_message" msgid="9213896700171602073">"Prüfe, ob <xliff:g id="DEVICE_NAME">%1$s</xliff:g> mit dem richtigen Netzwerk verbunden ist"</string>
-    <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"Mit einem Gerät koppeln"</string>
+    <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"Mit Gerät koppeln"</string>
     <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"WLAN-Kopplungscode"</string>
     <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"Kopplung fehlgeschlagen"</string>
     <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"Prüfe, ob das Gerät mit demselben Netzwerk verbunden ist."</string>
-    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"Scanne einen QR-Code, um ein Gerät über WLAN zu koppeln"</string>
+    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"Scanne einen QR-Code, um das Gerät über WLAN zu koppeln"</string>
     <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"Gerät wird gekoppelt…"</string>
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Das Gerät konnte nicht gekoppelt werden. Der QR-Code war nicht korrekt oder das Gerät ist nicht mit demselben Netzwerk verbunden."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP-Adresse &amp; Port"</string>
