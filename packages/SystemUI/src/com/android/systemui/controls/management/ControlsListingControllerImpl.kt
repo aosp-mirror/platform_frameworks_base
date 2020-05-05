@@ -66,6 +66,8 @@ class ControlsListingControllerImpl @VisibleForTesting constructor(
     )
 
     private var serviceListing = serviceListingBuilder(context)
+    // All operations in background thread
+    private val callbacks = mutableSetOf<ControlsListingController.ControlsListingCallback>()
 
     companion object {
         private const val TAG = "ControlsListingControllerImpl"
@@ -115,9 +117,6 @@ class ControlsListingControllerImpl @VisibleForTesting constructor(
             serviceListing.reload()
         }
     }
-
-    // All operations in background thread
-    private val callbacks = mutableSetOf<ControlsListingController.ControlsListingCallback>()
 
     /**
      * Adds a callback to this controller.
