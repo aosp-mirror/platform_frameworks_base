@@ -54,6 +54,7 @@ import android.graphics.Rect;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.ServiceManager;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
@@ -756,8 +757,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         boolean showFooterView = (showDismissView || hasActiveNotifications())
                 && mStatusBarState != StatusBarState.KEYGUARD
                 && !mRemoteInputManager.getController().isRemoteInputActive();
-        boolean showHistory = Settings.Secure.getInt(mContext.getContentResolver(),
-                Settings.Secure.NOTIFICATION_HISTORY_ENABLED, 0) == 1;
+        boolean showHistory = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                Settings.Secure.NOTIFICATION_HISTORY_ENABLED, 0, UserHandle.USER_CURRENT) == 1;
 
         updateFooterView(showFooterView, showDismissView, showHistory);
     }
@@ -5730,8 +5731,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                 R.layout.status_bar_no_notifications, this, false);
         view.setText(R.string.empty_shade_text);
         view.setOnClickListener(v -> {
-            final boolean showHistory = Settings.Secure.getInt(mContext.getContentResolver(),
-                    Settings.Secure.NOTIFICATION_HISTORY_ENABLED, 0) == 1;
+            final boolean showHistory = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                    Settings.Secure.NOTIFICATION_HISTORY_ENABLED, 0, UserHandle.USER_CURRENT) == 1;
             Intent intent = showHistory ? new Intent(
                     Settings.ACTION_NOTIFICATION_HISTORY) : new Intent(
                     Settings.ACTION_NOTIFICATION_SETTINGS);
