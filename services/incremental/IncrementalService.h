@@ -188,17 +188,17 @@ private:
 
         bool setTargetStatus(int status);
         void setTargetStatusLocked(int status);
-        bool waitForStatus(int status, Clock::duration duration);
 
         bool fsmStep();
 
         IncrementalService& mService;
+
+        std::mutex mMutex;
         MountId mId = kInvalidStorageId;
         content::pm::DataLoaderParamsParcel mParams;
         content::pm::FileSystemControlParcel mControl;
         DataLoaderStatusListener mListener;
 
-        std::mutex mStatusMutex;
         std::condition_variable mStatusCondition;
         int mCurrentStatus = content::pm::IDataLoaderStatusListener::DATA_LOADER_DESTROYED;
         int mTargetStatus = content::pm::IDataLoaderStatusListener::DATA_LOADER_DESTROYED;
