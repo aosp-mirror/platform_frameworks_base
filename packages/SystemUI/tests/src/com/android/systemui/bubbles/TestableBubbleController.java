@@ -55,14 +55,15 @@ public class TestableBubbleController extends BubbleController {
             FeatureFlags featureFlags,
             DumpManager dumpManager,
             FloatingContentCoordinator floatingContentCoordinator,
+            BubbleDataRepository dataRepository,
             SysUiState sysUiState,
             INotificationManager notificationManager) {
         super(context,
                 notificationShadeWindowController, statusBarStateController, shadeController,
                 data, Runnable::run, configurationController, interruptionStateProvider,
                 zenModeController, lockscreenUserManager, groupManager, entryManager,
-                notifPipeline, featureFlags, dumpManager, floatingContentCoordinator, sysUiState,
-                notificationManager);
+                notifPipeline, featureFlags, dumpManager, floatingContentCoordinator,
+                dataRepository, sysUiState, notificationManager);
         setInflateSynchronously(true);
     }
 }
