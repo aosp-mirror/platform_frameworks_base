@@ -63,6 +63,7 @@ import com.android.internal.telephony.ISetOpportunisticDataCallback;
 import com.android.internal.telephony.ISub;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.util.HandlerExecutor;
+import com.android.internal.util.FunctionalUtils;
 import com.android.internal.util.Preconditions;
 import com.android.telephony.Rlog;
 
@@ -149,21 +150,49 @@ public class SubscriptionManager {
 
     private static final int MAX_CACHE_SIZE = 4;
 
-    private static PropertyInvalidatedCache<Void, Integer> sDefaultSubIdCache =
-            new PropertyInvalidatedCache<Void, Integer>(
-                    MAX_CACHE_SIZE, CACHE_KEY_DEFAULT_SUB_ID_PROPERTY) {
-            @Override
-            protected Integer recompute(Void query) {
-                return getDefaultSubscriptionIdInternal();
-            }};
+    private static class SubscriptionPropertyInvalidatedCache<T>
+            extends PropertyInvalidatedCache<Void, T> {
+        private final FunctionalUtils.ThrowingFunction<ISub, T> mSubscriptionInterfaceMethod;
+        private final String mCacheKeyProperty;
+        private final T mDefaultValue;
 
-    private static PropertyInvalidatedCache<Void, Integer> sDefaultDataSubIdCache =
-            new PropertyInvalidatedCache<Void, Integer>(
-                    MAX_CACHE_SIZE, CACHE_KEY_DEFAULT_DATA_SUB_ID_PROPERTY) {
-            @Override
-            protected Integer recompute(Void query) {
-                return getDefaultDataSubscriptionIdInternal();
-            }};
+        SubscriptionPropertyInvalidatedCache(
+                FunctionalUtils.ThrowingFunction<ISub, T> subscriptionInterfaceMethod,
+                String cacheKeyProperty,
+                T defaultValue) {
+            super(MAX_CACHE_SIZE, cacheKeyProperty);
+            mSubscriptionInterfaceMethod = subscriptionInterfaceMethod;
+            mCacheKeyProperty = cacheKeyProperty;
+            mDefaultValue = defaultValue;
+        }
+
+        @Override
+        protected T recompute(Void aVoid) {
+            T result = mDefaultValue;
+
+            try {
+                ISub iSub = TelephonyManager.getSubscriptionService();
+                if (iSub != null) {
+                    result = mSubscriptionInterfaceMethod.applyOrThrow(iSub);
+                }
+            } catch (Exception ex) {
+                Rlog.w(LOG_TAG, "Failed to recompute cache key for " + mCacheKeyProperty);
+            }
+
+            if (VDBG) logd("recomputing " + mCacheKeyProperty + ", result = " + result);
+            return result;
+        }
+    }
+
+    private static SubscriptionPropertyInvalidatedCache<Integer> sDefaultSubIdCache =
+            new SubscriptionPropertyInvalidatedCache<>(ISub::getDefaultSubId,
+                    CACHE_KEY_DEFAULT_SUB_ID_PROPERTY,
+                    INVALID_SUBSCRIPTION_ID);
+
+    private static SubscriptionPropertyInvalidatedCache<Integer> sDefaultDataSubIdCache =
+            new SubscriptionPropertyInvalidatedCache<>(ISub::getDefaultDataSubId,
+                    CACHE_KEY_DEFAULT_DATA_SUB_ID_PROPERTY,
+                    INVALID_SUBSCRIPTION_ID);
 
     private static PropertyInvalidatedCache<Void, Integer> sDefaultSmsSubIdCache =
             new SubscriptionPropertyInvalidatedCache<>(ISub::getDefaultSmsSubId,
@@ -1892,22 +1921,6 @@ public class SubscriptionManager {
         return sDefaultSubIdCache.query(null);
     }
 
-    private static int getDefaultSubscriptionIdInternal() {
-        int subId = INVALID_SUBSCRIPTION_ID;
-
-        try {
-            ISub iSub = TelephonyManager.getSubscriptionService();
-            if (iSub != null) {
-                subId = iSub.getDefaultSubId();
-            }
-        } catch (RemoteException ex) {
-            // ignore it
-        }
-
-        if (VDBG) logd("getDefaultSubId=" + subId);
-        return subId;
-    }
-
     /**
      * Returns the system's default voice subscription id.
      *
@@ -2047,22 +2060,6 @@ public class SubscriptionManager {
      */
     public static int getDefaultDataSubscriptionId() {
         return sDefaultDataSubIdCache.query(null);
-    }
-
-    private static int getDefaultDataSubscriptionIdInternal() {
-        int subId = INVALID_SUBSCRIPTION_ID;
-
-        try {
-            ISub iSub = TelephonyManager.getSubscriptionService();
-            if (iSub != null) {
-                subId = iSub.getDefaultDataSubId();
-            }
-        } catch (RemoteException ex) {
-            // ignore it
-        }
-
-        if (VDBG) logd("getDefaultDataSubscriptionId, sub id = " + subId);
-        return subId;
     }
 
     /**

@@ -1124,6 +1124,7 @@ filegroup {
         "core/java/com/android/internal/os/SomeArgs.java",
         "core/java/com/android/internal/util/BitwiseInputStream.java",
         "core/java/com/android/internal/util/BitwiseOutputStream.java",
+        "core/java/com/android/internal/util/FunctionalUtils.java",
         "core/java/com/android/internal/util/HexDump.java",
         "core/java/com/android/internal/util/IndentingPrintWriter.java",
         "core/java/com/android/internal/util/Preconditions.java",
