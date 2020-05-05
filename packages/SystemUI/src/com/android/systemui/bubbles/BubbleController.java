@@ -153,6 +153,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     private final NotificationGroupManager mNotificationGroupManager;
     private final ShadeController mShadeController;
     private final FloatingContentCoordinator mFloatingContentCoordinator;
+    private final BubbleDataRepository mDataRepository;
 
     private BubbleData mBubbleData;
     private ScrimView mBubbleScrim;
@@ -294,13 +295,14 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
             FeatureFlags featureFlags,
             DumpManager dumpManager,
             FloatingContentCoordinator floatingContentCoordinator,
+            BubbleDataRepository dataRepository,
             SysUiState sysUiState,
             INotificationManager notificationManager) {
         this(context, notificationShadeWindowController, statusBarStateController, shadeController,
                 data, null /* synchronizer */, configurationController, interruptionStateProvider,
                 zenModeController, notifUserManager, groupManager, entryManager,
-                notifPipeline, featureFlags, dumpManager, floatingContentCoordinator, sysUiState,
-                notificationManager);
+                notifPipeline, featureFlags, dumpManager, floatingContentCoordinator,
+                dataRepository, sysUiState, notificationManager);
     }
 
     /**
@@ -322,6 +324,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
             FeatureFlags featureFlags,
             DumpManager dumpManager,
             FloatingContentCoordinator floatingContentCoordinator,
+            BubbleDataRepository dataRepository,
             SysUiState sysUiState,
             INotificationManager notificationManager) {
         dumpManager.registerDumpable(TAG, this);
@@ -331,6 +334,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         mNotifUserManager = notifUserManager;
         mZenModeController = zenModeController;
         mFloatingContentCoordinator = floatingContentCoordinator;
+        mDataRepository = dataRepository;
         mINotificationManager = notificationManager;
         mZenModeController.addCallback(new ZenModeController.Callback() {
             @Override
@@ -1018,6 +1022,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
             // Do removals, if any.
             ArrayList<Pair<Bubble, Integer>> removedBubbles =
                     new ArrayList<>(update.removedBubbles);
+            ArrayList<Bubble> bubblesToBeRemovedFromRepository = new ArrayList<>();
             for (Pair<Bubble, Integer> removed : removedBubbles) {
                 final Bubble bubble = removed.first;
                 @DismissReason final int reason = removed.second;
@@ -1026,6 +1031,9 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                 // If the bubble is removed for user switching, leave the notification in place.
                 if (reason == DISMISS_USER_CHANGED) {
                     continue;
+                }
+                if (reason == DISMISS_NOTIF_CANCEL) {
+                    bubblesToBeRemovedFromRepository.add(bubble);
                 }
                 if (!mBubbleData.hasBubbleInStackWithKey(bubble.getKey())) {
                     if (!mBubbleData.hasOverflowBubbleWithKey(bubble.getKey())
@@ -1056,9 +1064,12 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                     }
                 }
             }
+            mDataRepository.removeBubbles(mCurrentUserId, bubblesToBeRemovedFromRepository);
 
             if (update.addedBubble != null) {
+                mDataRepository.addBubble(mCurrentUserId, update.addedBubble);
                 mStackView.addBubble(update.addedBubble);
+
             }
 
             if (update.updatedBubble != null) {
@@ -1068,6 +1079,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
             // At this point, the correct bubbles are inflated in the stack.
             // Make sure the order in bubble data is reflected in bubble row.
             if (update.orderChanged) {
+                mDataRepository.addBubbles(mCurrentUserId, update.bubbles);
                 mStackView.updateBubbleOrder(update.bubbles);
             }
 
