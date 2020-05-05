@@ -80,12 +80,6 @@ public final class RecordingCanvas extends DisplayListCanvas {
         return nFinishRecording(mNativeCanvasWrapper);
     }
 
-    /** @hide */
-    @Override
-    public boolean isRecordingFor(Object o) {
-        return o == mNode;
-    }
-
     ///////////////////////////////////////////////////////////////////////////
     // Constructors
     ///////////////////////////////////////////////////////////////////////////
@@ -147,12 +141,12 @@ public final class RecordingCanvas extends DisplayListCanvas {
 
     @Override
     public void enableZ() {
-        nInsertReorderBarrier(mNativeCanvasWrapper, true);
+        nEnableZ(mNativeCanvasWrapper, true);
     }
 
     @Override
     public void disableZ() {
-        nInsertReorderBarrier(mNativeCanvasWrapper, false);
+        nEnableZ(mNativeCanvasWrapper, false);
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -302,7 +296,7 @@ public final class RecordingCanvas extends DisplayListCanvas {
     @CriticalNative
     private static native int nGetMaximumTextureHeight();
     @CriticalNative
-    private static native void nInsertReorderBarrier(long renderer, boolean enableReorder);
+    private static native void nEnableZ(long renderer, boolean enableZ);
     @CriticalNative
     private static native long nFinishRecording(long renderer);
     @CriticalNative

@@ -69,7 +69,7 @@ public:
 
     virtual void drawVectorDrawable(VectorDrawableRoot* vectorDrawable) override;
 
-    virtual void insertReorderBarrier(bool enableReorder) override;
+    virtual void enableZ(bool enableZ) override;
     virtual void drawLayer(uirenderer::DeferredLayerUpdater* layerHandle) override;
     virtual void drawRenderNode(uirenderer::RenderNode* renderNode) override;
     virtual void callDrawGLFunction(Functor* functor,

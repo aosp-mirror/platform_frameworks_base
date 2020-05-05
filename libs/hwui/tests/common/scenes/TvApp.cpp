@@ -67,7 +67,7 @@ public:
         mBg = createBitmapNode(canvas, 0xFF9C27B0, 0, 0, width, height);
         canvas.drawRenderNode(mBg.get());
 
-        canvas.insertReorderBarrier(true);
+        canvas.enableZ(true);
         mSingleBitmap = mAllocator(dp(160), dp(120), kRGBA_8888_SkColorType,
                                    [](SkBitmap& skBitmap) { skBitmap.eraseColor(0xFF0000FF); });
 
@@ -80,7 +80,7 @@ public:
                 mCards.push_back(card);
             }
         }
-        canvas.insertReorderBarrier(false);
+        canvas.enableZ(false);
     }
 
     void doFrame(int frameNr) override {

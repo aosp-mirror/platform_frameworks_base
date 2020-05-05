@@ -108,27 +108,27 @@ protected:
 TEST(RenderNodeDrawable, zReorder) {
     auto parent = TestUtils::createSkiaNode(0, 0, 100, 100, [](RenderProperties& props,
                                                                SkiaRecordingCanvas& canvas) {
-        canvas.insertReorderBarrier(true);
-        canvas.insertReorderBarrier(false);
+        canvas.enableZ(true);
+        canvas.enableZ(false);
         drawOrderedNode(&canvas, 0, 10.0f);  // in reorder=false at this point, so played inorder
         drawOrderedRect(&canvas, 1);
-        canvas.insertReorderBarrier(true);
+        canvas.enableZ(true);
         drawOrderedNode(&canvas, 6, 2.0f);
         drawOrderedRect(&canvas, 3);
         drawOrderedNode(&canvas, 4, 0.0f);
         drawOrderedRect(&canvas, 5);
         drawOrderedNode(&canvas, 2, -2.0f);
         drawOrderedNode(&canvas, 7, 2.0f);
-        canvas.insertReorderBarrier(false);
+        canvas.enableZ(false);
         drawOrderedRect(&canvas, 8);
         drawOrderedNode(&canvas, 9, -10.0f);  // in reorder=false at this point, so played inorder
-        canvas.insertReorderBarrier(true);    // reorder a node ahead of drawrect op
+        canvas.enableZ(true);    // reorder a node ahead of drawrect op
         drawOrderedRect(&canvas, 11);
         drawOrderedNode(&canvas, 10, -1.0f);
-        canvas.insertReorderBarrier(false);
-        canvas.insertReorderBarrier(true);  // test with two empty reorder sections
-        canvas.insertReorderBarrier(true);
-        canvas.insertReorderBarrier(false);
+        canvas.enableZ(false);
+        canvas.enableZ(true);  // test with two empty reorder sections
+        canvas.enableZ(true);
+        canvas.enableZ(false);
         drawOrderedRect(&canvas, 12);
     });
 
@@ -1142,7 +1142,7 @@ TEST(ReorderBarrierDrawable, testShadowMatrix) {
             0, 0, CANVAS_WIDTH, CANVAS_HEIGHT,
             [](RenderProperties& props, SkiaRecordingCanvas& canvas) {
                 canvas.translate(TRANSLATE_X, TRANSLATE_Y);
-                canvas.insertReorderBarrier(true);
+                canvas.enableZ(true);
 
                 auto node = TestUtils::createSkiaNode(
                         CASTER_X, CASTER_Y, CASTER_X + CASTER_WIDTH, CASTER_Y + CASTER_HEIGHT,
@@ -1152,7 +1152,7 @@ TEST(ReorderBarrierDrawable, testShadowMatrix) {
                             props.mutableOutline().setShouldClip(true);
                         });
                 canvas.drawRenderNode(node.get());
-                canvas.insertReorderBarrier(false);
+                canvas.enableZ(false);
             });
 
     // create a canvas not backed by any device/pixels, but with dimensions to avoid quick rejection

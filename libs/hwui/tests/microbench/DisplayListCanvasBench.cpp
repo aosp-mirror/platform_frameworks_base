@@ -133,14 +133,14 @@ void BM_DisplayListCanvas_basicViewGroupDraw(benchmark::State& benchState) {
         int clipRestoreCount = canvas->save(SaveFlags::MatrixClip);
         canvas->clipRect(1, 1, 199, 199, SkClipOp::kIntersect);
 
-        canvas->insertReorderBarrier(true);
+        canvas->enableZ(true);
 
         // Draw child loop
         for (int i = 0; i < benchState.range(0); i++) {
             canvas->drawRenderNode(child.get());
         }
 
-        canvas->insertReorderBarrier(false);
+        canvas->enableZ(false);
         canvas->restoreToCount(clipRestoreCount);
 
         delete canvas->finishRecording();

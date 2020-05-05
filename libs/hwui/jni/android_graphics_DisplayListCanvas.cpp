@@ -124,10 +124,10 @@ static jint android_view_DisplayListCanvas_getMaxTextureSize(CRITICAL_JNI_PARAMS
 #endif
 }
 
-static void android_view_DisplayListCanvas_insertReorderBarrier(CRITICAL_JNI_PARAMS_COMMA jlong canvasPtr,
+static void android_view_DisplayListCanvas_enableZ(CRITICAL_JNI_PARAMS_COMMA jlong canvasPtr,
         jboolean reorderEnable) {
     Canvas* canvas = reinterpret_cast<Canvas*>(canvasPtr);
-    canvas->insertReorderBarrier(reorderEnable);
+    canvas->enableZ(reorderEnable);
 }
 
 static jlong android_view_DisplayListCanvas_finishRecording(CRITICAL_JNI_PARAMS_COMMA jlong canvasPtr) {
@@ -194,7 +194,7 @@ static JNINativeMethod gMethods[] = {
     { "nResetDisplayListCanvas",  "(JJII)V",    (void*) android_view_DisplayListCanvas_resetDisplayListCanvas },
     { "nGetMaximumTextureWidth",  "()I",        (void*) android_view_DisplayListCanvas_getMaxTextureSize },
     { "nGetMaximumTextureHeight", "()I",        (void*) android_view_DisplayListCanvas_getMaxTextureSize },
-    { "nInsertReorderBarrier",    "(JZ)V",      (void*) android_view_DisplayListCanvas_insertReorderBarrier },
+    { "nEnableZ",                 "(JZ)V",      (void*) android_view_DisplayListCanvas_enableZ },
     { "nFinishRecording",         "(J)J",       (void*) android_view_DisplayListCanvas_finishRecording },
     { "nDrawRenderNode",          "(JJ)V",      (void*) android_view_DisplayListCanvas_drawRenderNode },
     { "nDrawTextureLayer",        "(JJ)V",      (void*) android_view_DisplayListCanvas_drawTextureLayer },

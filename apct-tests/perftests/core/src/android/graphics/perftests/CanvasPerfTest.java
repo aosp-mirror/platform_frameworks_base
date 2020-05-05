@@ -54,11 +54,11 @@ public class CanvasPerfTest {
             canvas = node.start(200, 200);
             int save = canvas.save();
             canvas.clipRect(1, 1, 199, 199);
-            canvas.insertReorderBarrier();
+            canvas.enableZ();
             for (int i = 0; i < 5; i++) {
                 canvas.drawRenderNode(child);
             }
-            canvas.insertInorderBarrier();
+            canvas.disableZ();
             canvas.restoreToCount(save);
             node.end(canvas);
         }
