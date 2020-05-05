@@ -617,6 +617,14 @@ public final class ProcessStatsService extends IProcessStats.Stub {
         return newHighWaterMark;
     }
 
+    /**
+     * @return The threshold to decide if a given association should be dumped into metrics.
+     */
+    @Override
+    public long getMinAssociationDumpDuration() {
+        return mAm.mConstants.MIN_ASSOC_LOG_DURATION;
+    }
+
     private ParcelFileDescriptor protoToParcelFileDescriptor(ProcessStats stats, int section)
             throws IOException {
         final ParcelFileDescriptor[] fds = ParcelFileDescriptor.createPipe();
