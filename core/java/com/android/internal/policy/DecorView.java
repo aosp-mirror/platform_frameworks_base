@@ -324,6 +324,14 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         return mBackgroundFallback.getDrawable();
     }
 
+    @Nullable View getStatusBarBackgroundView() {
+        return mStatusColorViewState.view;
+    }
+
+    @Nullable View getNavigationBarBackgroundView() {
+        return mNavigationColorViewState.view;
+    }
+
     @Override
     public boolean gatherTransparentRegion(Region region) {
         boolean statusOpaque = gatherTransparentRegion(mStatusColorViewState, region);
