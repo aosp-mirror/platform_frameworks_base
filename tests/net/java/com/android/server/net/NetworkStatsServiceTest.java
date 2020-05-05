@@ -60,14 +60,13 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.app.AlarmManager;
 import android.app.usage.NetworkStatsManager;
 import android.content.Context;
@@ -95,8 +94,6 @@ import android.os.Message;
 import android.os.Messenger;
 import android.os.PowerManager;
 import android.os.SimpleClock;
-import android.telephony.PhoneStateListener;
-import android.telephony.ServiceState;
 import android.telephony.TelephonyManager;
 
 import androidx.test.InstrumentationRegistry;
@@ -126,6 +123,7 @@ import java.io.File;
 import java.time.Clock;
 import java.time.ZoneOffset;
 import java.util.Objects;
+import java.util.concurrent.Executor;
 
 /**
  * Tests for {@link NetworkStatsService}.
@@ -168,14 +166,13 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
     private @Mock NetworkStatsSettings mSettings;
     private @Mock IBinder mBinder;
     private @Mock AlarmManager mAlarmManager;
-    private @Mock TelephonyManager mTelephonyManager;
+    @Mock
+    private NetworkStatsSubscriptionsMonitor mNetworkStatsSubscriptionsMonitor;
     private HandlerThread mHandlerThread;
 
     private NetworkStatsService mService;
     private INetworkStatsSession mSession;
     private INetworkManagementEventObserver mNetworkObserver;
-    @Nullable
-    private PhoneStateListener mPhoneStateListener;
 
     private final Clock mClock = new SimpleClock(ZoneOffset.UTC) {
         @Override
@@ -203,8 +200,8 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
         mHandlerThread = new HandlerThread("HandlerThread");
         final NetworkStatsService.Dependencies deps = makeDependencies();
         mService = new NetworkStatsService(mServiceContext, mNetManager, mAlarmManager, wakeLock,
-                mClock, mTelephonyManager, mSettings,
-                mStatsFactory, new NetworkStatsObservers(), mStatsDir, getBaseDir(mStatsDir), deps);
+                mClock, mSettings, mStatsFactory, new NetworkStatsObservers(), mStatsDir,
+                getBaseDir(mStatsDir), deps);
 
         mElapsedRealtime = 0L;
 
@@ -224,12 +221,6 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
                 ArgumentCaptor.forClass(INetworkManagementEventObserver.class);
         verify(mNetManager).registerObserver(networkObserver.capture());
         mNetworkObserver = networkObserver.getValue();
-
-        // Capture the phone state listener that created by service.
-        final ArgumentCaptor<PhoneStateListener> phoneStateListenerCaptor =
-                ArgumentCaptor.forClass(PhoneStateListener.class);
-        verify(mTelephonyManager).listen(phoneStateListenerCaptor.capture(), anyInt());
-        mPhoneStateListener = phoneStateListenerCaptor.getValue();
     }
 
     @NonNull
@@ -238,6 +229,14 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
             @Override
             public HandlerThread makeHandlerThread() {
                 return mHandlerThread;
+            }
+
+            @Override
+            public NetworkStatsSubscriptionsMonitor makeSubscriptionsMonitor(
+                    @NonNull Context context, @NonNull Executor executor,
+                    @NonNull NetworkStatsService service) {
+
+                return mNetworkStatsSubscriptionsMonitor;
             }
         };
     }
@@ -678,10 +677,9 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
 
     // TODO: support per IMSI state
     private void setMobileRatTypeAndWaitForIdle(int ratType) {
-        final ServiceState mockSs = mock(ServiceState.class);
-        when(mockSs.getDataNetworkType()).thenReturn(ratType);
-        mPhoneStateListener.onServiceStateChanged(mockSs);
-
+        when(mNetworkStatsSubscriptionsMonitor.getRatTypeForSubscriberId(anyString()))
+                .thenReturn(ratType);
+        mService.handleOnCollapsedRatTypeChanged();
         HandlerUtilsKt.waitForIdle(mHandlerThread, WAIT_TIMEOUT);
     }
 
