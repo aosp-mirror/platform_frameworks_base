@@ -49,6 +49,7 @@ import javax.inject.Singleton;
 @Singleton
 public class HvacController {
     public static final String TAG = "HvacController";
+    private static final boolean DEBUG = true;
 
     private final CarServiceProvider mCarServiceProvider;
     private final Set<TemperatureView> mRegisteredViews = new HashSet<>();
@@ -70,6 +71,9 @@ public class HvacController {
                         new HvacKey(propertyId, areaId));
                 if (temperatureViews != null && !temperatureViews.isEmpty()) {
                     float value = (float) val.getValue();
+                    if (DEBUG) {
+                        Log.d(TAG, "onChangeEvent: " + areaId + ":" + propertyId + ":" + value);
+                    }
                     for (TemperatureView tempView : temperatureViews) {
                         tempView.setTemp(value);
                     }
@@ -145,6 +149,9 @@ public class HvacController {
     private void initComponent(TemperatureView view) {
         int id = view.getPropertyId();
         int zone = view.getAreaId();
+        if (DEBUG) {
+            Log.d(TAG, "initComponent: " + zone + ":" + id);
+        }
 
         try {
             if (mHvacManager != null
