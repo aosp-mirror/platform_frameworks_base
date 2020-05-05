@@ -281,9 +281,9 @@ public final class SharesheetModelScorerTest {
 
         verify(mDataManager, times(1)).queryAppLaunchCount(anyInt(), anyLong(), anyLong(),
                 anySet());
-        assertEquals(0.9f, mShareTarget5.getScore(), DELTA);
-        assertEquals(0.81f, mShareTarget3.getScore(), DELTA);
-        assertEquals(0.729f, mShareTarget1.getScore(), DELTA);
+        assertEquals(0.3f, mShareTarget5.getScore(), DELTA);
+        assertEquals(0.27f, mShareTarget3.getScore(), DELTA);
+        assertEquals(0.243f, mShareTarget1.getScore(), DELTA);
         assertEquals(0f, mShareTarget2.getScore(), DELTA);
         assertEquals(0f, mShareTarget4.getScore(), DELTA);
         assertEquals(0f, mShareTarget6.getScore(), DELTA);
