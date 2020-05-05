@@ -62,6 +62,13 @@
     <string-array translatable="false" name="config_tether_dhcp_range">
     </string-array>
 
+    <!-- Used to config periodic polls tether offload stats from tethering offload HAL to make the
+     data warnings work. 5000(ms) by default. If the device doesn't want to poll tether
+     offload stats, this should be -1. Note that this setting could be override by
+     runtime resource overlays.
+    -->
+    <integer translatable="false" name="config_tether_offload_poll_interval">5000</integer>
+
     <!-- Array of ConnectivityManager.TYPE_{BLUETOOTH, ETHERNET, MOBILE, MOBILE_DUN, MOBILE_HIPRI,
          WIFI} values allowable for tethering.
 
