@@ -21,6 +21,7 @@ import static com.android.systemui.bubbles.BubbleDebugConfig.TAG_BUBBLES;
 import static com.android.systemui.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME;
 
 import android.app.Activity;
+import android.app.Notification;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -32,6 +33,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -103,7 +105,7 @@ public class BubbleOverflowActivity extends Activity {
                 - res.getDimensionPixelSize(R.dimen.bubble_overflow_padding);
         final int viewHeight = recyclerViewHeight / rows;
 
-        mAdapter = new BubbleOverflowAdapter(mOverflowBubbles,
+        mAdapter = new BubbleOverflowAdapter(getApplicationContext(), mOverflowBubbles,
                 mBubbleController::promoteBubbleFromOverflow, viewWidth, viewHeight);
         mRecyclerView.setAdapter(mAdapter);
 
@@ -221,13 +223,15 @@ public class BubbleOverflowActivity extends Activity {
 }
 
 class BubbleOverflowAdapter extends RecyclerView.Adapter<BubbleOverflowAdapter.ViewHolder> {
+    private Context mContext;
     private Consumer<Bubble> mPromoteBubbleFromOverflow;
     private List<Bubble> mBubbles;
     private int mWidth;
     private int mHeight;
 
-    public BubbleOverflowAdapter(List<Bubble> list, Consumer<Bubble> promoteBubble, int width,
-            int height) {
+    public BubbleOverflowAdapter(Context context, List<Bubble> list, Consumer<Bubble> promoteBubble,
+            int width, int height) {
+        mContext = context;
         mBubbles = list;
         mPromoteBubbleFromOverflow = promoteBubble;
         mWidth = width;
@@ -259,6 +263,32 @@ class BubbleOverflowAdapter extends RecyclerView.Adapter<BubbleOverflowAdapter.V
             notifyDataSetChanged();
             mPromoteBubbleFromOverflow.accept(b);
         });
+
+        final CharSequence titleCharSeq =
+                b.getEntry().getSbn().getNotification().extras.getCharSequence(
+                        Notification.EXTRA_TITLE);
+        String titleStr = mContext.getResources().getString(R.string.notification_bubble_title);
+        if (titleCharSeq != null) {
+            titleStr = titleCharSeq.toString();
+        }
+        vh.iconView.setContentDescription(mContext.getResources().getString(
+                R.string.bubble_content_description_single, titleStr, b.getAppName()));
+
+        vh.iconView.setAccessibilityDelegate(
+                new View.AccessibilityDelegate() {
+                    @Override
+                    public void onInitializeAccessibilityNodeInfo(View host,
+                            AccessibilityNodeInfo info) {
+                        super.onInitializeAccessibilityNodeInfo(host, info);
+                        // Talkback prompts "Double tap to add back to stack"
+                        // instead of the default "Double tap to activate"
+                        info.addAction(
+                                new AccessibilityNodeInfo.AccessibilityAction(
+                                        AccessibilityNodeInfo.ACTION_CLICK,
+                                        mContext.getResources().getString(
+                                                R.string.bubble_accessibility_action_add_back)));
+                    }
+                });
 
         Bubble.FlyoutMessage message = b.getFlyoutMessage();
         if (message != null && message.senderName != null) {

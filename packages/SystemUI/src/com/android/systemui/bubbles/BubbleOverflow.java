@@ -79,6 +79,8 @@ public class BubbleOverflow implements BubbleViewProvider {
         mOverflowBtn = (BadgedImageView) mInflater.inflate(R.layout.bubble_overflow_button,
                 parentViewGroup /* root */,
                 false /* attachToRoot */);
+        mOverflowBtn.setContentDescription(mContext.getResources().getString(
+                R.string.bubble_overflow_button_content_description));
 
         TypedArray ta = mContext.obtainStyledAttributes(
                 new int[]{android.R.attr.colorBackgroundFloating});
