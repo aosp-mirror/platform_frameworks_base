@@ -1634,21 +1634,23 @@ public final class ActiveServices {
                 new AppOpsManager.OnOpNotedListener() {
                     @Override
                     public void onOpNoted(int op, int uid, String pkgName, int result) {
-                        if (uid == mProcessRecord.uid && isNotTop()) {
-                            incrementOpCount(op, result == AppOpsManager.MODE_ALLOWED);
-                        }
+                        incrementOpCountIfNeeded(op, uid, result);
                     }
         };
 
-        private final AppOpsManager.OnOpActiveChangedInternalListener mOpActiveCallback =
-                new AppOpsManager.OnOpActiveChangedInternalListener() {
+        private final AppOpsManager.OnOpStartedListener mOpStartedCallback =
+                new AppOpsManager.OnOpStartedListener() {
                     @Override
-                    public void onOpActiveChanged(int op, int uid, String pkgName, boolean active) {
-                        if (uid == mProcessRecord.uid && active && isNotTop()) {
-                            incrementOpCount(op, true);
-                        }
+                    public void onOpStarted(int op, int uid, String pkgName, int result) {
+                        incrementOpCountIfNeeded(op, uid, result);
                     }
         };
+
+        private void incrementOpCountIfNeeded(int op, int uid, @AppOpsManager.Mode int result) {
+            if (uid == mProcessRecord.uid && isNotTop()) {
+                incrementOpCount(op, result == AppOpsManager.MODE_ALLOWED);
+            }
+        }
 
         private boolean isNotTop() {
             return mProcessRecord.getCurProcState() != ActivityManager.PROCESS_STATE_TOP;
@@ -1674,7 +1676,7 @@ public final class ActiveServices {
             mNumFgs++;
             if (mNumFgs == 1) {
                 mAppOpsManager.startWatchingNoted(LOGGED_AP_OPS, mOpNotedCallback);
-                mAppOpsManager.startWatchingActive(LOGGED_AP_OPS, mOpActiveCallback);
+                mAppOpsManager.startWatchingStarted(LOGGED_AP_OPS, mOpStartedCallback);
             }
         }
 
@@ -1684,7 +1686,7 @@ public final class ActiveServices {
                 mDestroyed = true;
                 logFinalValues();
                 mAppOpsManager.stopWatchingNoted(mOpNotedCallback);
-                mAppOpsManager.stopWatchingActive(mOpActiveCallback);
+                mAppOpsManager.stopWatchingStarted(mOpStartedCallback);
             }
         }
 
