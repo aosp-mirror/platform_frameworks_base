@@ -836,7 +836,7 @@ public class VpnService extends Service {
          * @param isMetered {@code true} if VPN network should be treated as metered regardless of
          *     underlying network meteredness
          * @return this {@link Builder} object to facilitate chaining method calls
-         * @see #setUnderlyingNetworks(Networks[])
+         * @see #setUnderlyingNetworks(Network[])
          * @see ConnectivityManager#isActiveNetworkMetered()
          */
         @NonNull

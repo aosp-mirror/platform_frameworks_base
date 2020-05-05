@@ -294,7 +294,7 @@ public class NotificationManager {
      * </p>
      * </p>
      *
-     * @see {@link #addAutomaticZenRule(AutomaticZenRule)}
+     * @see #addAutomaticZenRule(AutomaticZenRule)
      */
     @SdkConstant(SdkConstant.SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_AUTOMATIC_ZEN_RULE =
