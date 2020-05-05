@@ -200,15 +200,6 @@ public class InsetsSourceConsumer {
     }
 
     boolean applyLocalVisibilityOverride() {
-        return applyLocalVisibilityOverride(false /* notifyWithoutControl */);
-    }
-
-    /**
-     * @param notifyWithoutControl set it true when the caller wants to notify the visibility
-     *                             changes even if the consumer doesn't have the control.
-     * @return true if it needs to notify the visibility changes to the controller
-     */
-    private boolean applyLocalVisibilityOverride(boolean notifyWithoutControl) {
         InsetsSource source = mState.peekSource(mType);
         final boolean isVisible = source != null && source.isVisible();
         final boolean hasControl = mSourceControl != null;
@@ -220,7 +211,7 @@ public class InsetsSourceConsumer {
 
         // If we don't have control, we are not able to change the visibility.
         if (!hasControl) {
-            return notifyWithoutControl;
+            return false;
         }
         if (isVisible == mRequestedVisible) {
             return false;
@@ -302,9 +293,7 @@ public class InsetsSourceConsumer {
             mRequestedVisible = requestedVisible;
             mIsAnimationPending = false;
         }
-        // We need to notify the visibility changed even if we don't have mSourceControl in order
-        // to update color views.
-        if (applyLocalVisibilityOverride(true  /* notifyWithoutControl */)) {
+        if (applyLocalVisibilityOverride()) {
             mController.notifyVisibilityChanged();
         }
     }
