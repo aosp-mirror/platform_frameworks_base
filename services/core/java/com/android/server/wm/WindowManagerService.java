@@ -2250,7 +2250,7 @@ public class WindowManagerService extends IWindowManager.Stub
             win.mRelayoutCalled = true;
             win.mInRelayout = true;
 
-            win.mViewVisibility = viewVisibility;
+            win.setViewVisibility(viewVisibility);
             ProtoLog.i(WM_DEBUG_SCREEN_ON,
                     "Relayout %s: oldVis=%d newVis=%d. %s", win, oldVisibility,
                             viewVisibility, new RuntimeException().fillInStackTrace());
