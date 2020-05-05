@@ -148,20 +148,24 @@ public class SubscriptionManager {
     public static final String CACHE_KEY_ACTIVE_DATA_SUB_ID_PROPERTY =
             "cache_key.telephony.get_active_data_sub_id";
 
+    /** @hide */
+    public static final String CACHE_KEY_SLOT_INDEX_PROPERTY =
+            "cache_key.telephony.get_slot_index";
+
     private static final int MAX_CACHE_SIZE = 4;
 
-    private static class SubscriptionPropertyInvalidatedCache<T>
+    private static class VoidPropertyInvalidatedCache<T>
             extends PropertyInvalidatedCache<Void, T> {
-        private final FunctionalUtils.ThrowingFunction<ISub, T> mSubscriptionInterfaceMethod;
+        private final FunctionalUtils.ThrowingFunction<ISub, T> mInterfaceMethod;
         private final String mCacheKeyProperty;
         private final T mDefaultValue;
 
-        SubscriptionPropertyInvalidatedCache(
+        VoidPropertyInvalidatedCache(
                 FunctionalUtils.ThrowingFunction<ISub, T> subscriptionInterfaceMethod,
                 String cacheKeyProperty,
                 T defaultValue) {
             super(MAX_CACHE_SIZE, cacheKeyProperty);
-            mSubscriptionInterfaceMethod = subscriptionInterfaceMethod;
+            mInterfaceMethod = subscriptionInterfaceMethod;
             mCacheKeyProperty = cacheKeyProperty;
             mDefaultValue = defaultValue;
         }
@@ -173,7 +177,7 @@ public class SubscriptionManager {
             try {
                 ISub iSub = TelephonyManager.getSubscriptionService();
                 if (iSub != null) {
-                    result = mSubscriptionInterfaceMethod.applyOrThrow(iSub);
+                    result = mInterfaceMethod.applyOrThrow(iSub);
                 }
             } catch (Exception ex) {
                 Rlog.w(LOG_TAG, "Failed to recompute cache key for " + mCacheKeyProperty);
@@ -184,25 +188,70 @@ public class SubscriptionManager {
         }
     }
 
-    private static SubscriptionPropertyInvalidatedCache<Integer> sDefaultSubIdCache =
-            new SubscriptionPropertyInvalidatedCache<>(ISub::getDefaultSubId,
+    private static class IntegerPropertyInvalidatedCache<T>
+            extends PropertyInvalidatedCache<Integer, T> {
+        private final FunctionalUtils.ThrowingBiFunction<ISub, Integer, T> mInterfaceMethod;
+        private final String mCacheKeyProperty;
+        private final T mDefaultValue;
+
+        IntegerPropertyInvalidatedCache(
+                FunctionalUtils.ThrowingBiFunction<ISub, Integer, T> subscriptionInterfaceMethod,
+                String cacheKeyProperty,
+                T defaultValue) {
+            super(MAX_CACHE_SIZE, cacheKeyProperty);
+            mInterfaceMethod = subscriptionInterfaceMethod;
+            mCacheKeyProperty = cacheKeyProperty;
+            mDefaultValue = defaultValue;
+        }
+
+        @Override
+        protected T recompute(Integer query) {
+            T result = mDefaultValue;
+
+            try {
+                ISub iSub = TelephonyManager.getSubscriptionService();
+                if (iSub != null) {
+                    result = mInterfaceMethod.applyOrThrow(iSub, query);
+                }
+            } catch (Exception ex) {
+                Rlog.w(LOG_TAG, "Failed to recompute cache key for " + mCacheKeyProperty);
+            }
+
+            if (VDBG) logd("recomputing " + mCacheKeyProperty + ", result = " + result);
+            return result;
+        }
+    }
+
+    private static VoidPropertyInvalidatedCache<Integer> sDefaultSubIdCache =
+            new VoidPropertyInvalidatedCache<>(ISub::getDefaultSubId,
                     CACHE_KEY_DEFAULT_SUB_ID_PROPERTY,
                     INVALID_SUBSCRIPTION_ID);
 
-    private static SubscriptionPropertyInvalidatedCache<Integer> sDefaultDataSubIdCache =
-            new SubscriptionPropertyInvalidatedCache<>(ISub::getDefaultDataSubId,
+    private static VoidPropertyInvalidatedCache<Integer> sDefaultDataSubIdCache =
+            new VoidPropertyInvalidatedCache<>(ISub::getDefaultDataSubId,
                     CACHE_KEY_DEFAULT_DATA_SUB_ID_PROPERTY,
                     INVALID_SUBSCRIPTION_ID);
 
-    private static PropertyInvalidatedCache<Void, Integer> sDefaultSmsSubIdCache =
-            new SubscriptionPropertyInvalidatedCache<>(ISub::getDefaultSmsSubId,
+    private static VoidPropertyInvalidatedCache<Integer> sDefaultSmsSubIdCache =
+            new VoidPropertyInvalidatedCache<>(ISub::getDefaultSmsSubId,
                     CACHE_KEY_DEFAULT_SMS_SUB_ID_PROPERTY,
                     INVALID_SUBSCRIPTION_ID);
 
-    private static PropertyInvalidatedCache<Void, Integer> sActiveDataSubIdCache =
-            new SubscriptionPropertyInvalidatedCache<>(ISub::getActiveDataSubscriptionId,
+    private static VoidPropertyInvalidatedCache<Integer> sActiveDataSubIdCache =
+            new VoidPropertyInvalidatedCache<>(ISub::getActiveDataSubscriptionId,
                     CACHE_KEY_ACTIVE_DATA_SUB_ID_PROPERTY,
                     INVALID_SUBSCRIPTION_ID);
+
+    private static IntegerPropertyInvalidatedCache<Integer> sSlotIndexCache =
+            new IntegerPropertyInvalidatedCache<>(ISub::getSlotIndex,
+                    CACHE_KEY_SLOT_INDEX_PROPERTY,
+                    INVALID_SIM_SLOT_INDEX);
+
+    /** Cache depends on getDefaultSubId, so we use the defaultSubId cache key */
+    private static IntegerPropertyInvalidatedCache<Integer> sPhoneIdCache =
+            new IntegerPropertyInvalidatedCache<>(ISub::getPhoneId,
+                    CACHE_KEY_DEFAULT_SUB_ID_PROPERTY,
+                    INVALID_PHONE_INDEX);
 
     /**
      * Generates a content {@link Uri} used to receive updates on simInfo change
@@ -1250,7 +1299,6 @@ public class SubscriptionManager {
         }
 
         return subInfo;
-
     }
 
     /**
@@ -1820,25 +1868,7 @@ public class SubscriptionManager {
      * subscriptionId doesn't have an associated slot index.
      */
     public static int getSlotIndex(int subscriptionId) {
-        if (!isValidSubscriptionId(subscriptionId)) {
-            if (DBG) {
-                logd("[getSlotIndex]- supplied subscriptionId is invalid.");
-            }
-        }
-
-        int result = INVALID_SIM_SLOT_INDEX;
-
-        try {
-            ISub iSub = TelephonyManager.getSubscriptionService();
-            if (iSub != null) {
-                result = iSub.getSlotIndex(subscriptionId);
-            }
-        } catch (RemoteException ex) {
-            // ignore it
-        }
-
-        return result;
-
+        return sSlotIndexCache.query(subscriptionId);
     }
 
     /**
@@ -1877,27 +1907,7 @@ public class SubscriptionManager {
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public static int getPhoneId(int subId) {
-        if (!isValidSubscriptionId(subId)) {
-            if (DBG) {
-                logd("[getPhoneId]- fail");
-            }
-            return INVALID_PHONE_INDEX;
-        }
-
-        int result = INVALID_PHONE_INDEX;
-
-        try {
-            ISub iSub = TelephonyManager.getSubscriptionService();
-            if (iSub != null) {
-                result = iSub.getPhoneId(subId);
-            }
-        } catch (RemoteException ex) {
-            // ignore it
-        }
-
-        if (VDBG) logd("[getPhoneId]- phoneId=" + result);
-        return result;
-
+        return sPhoneIdCache.query(subId);
     }
 
     private static void logd(String msg) {
@@ -3330,16 +3340,9 @@ public class SubscriptionManager {
         PropertyInvalidatedCache.invalidateCache(CACHE_KEY_ACTIVE_DATA_SUB_ID_PROPERTY);
     }
 
-    /**
-     * Clears all process-local binder caches.
-     *
-     * @hide
-     */
-    public static void clearCaches() {
-        sDefaultSubIdCache.clear();
-        sDefaultDataSubIdCache.clear();
-        sActiveDataSubIdCache.clear();
-        sDefaultSmsSubIdCache.clear();
+    /** @hide */
+    public static void invalidateSlotIndexCaches() {
+        PropertyInvalidatedCache.invalidateCache(CACHE_KEY_SLOT_INDEX_PROPERTY);
     }
 
     /**
@@ -3352,5 +3355,20 @@ public class SubscriptionManager {
         sDefaultDataSubIdCache.disableLocal();
         sActiveDataSubIdCache.disableLocal();
         sDefaultSmsSubIdCache.disableLocal();
+        sSlotIndexCache.disableLocal();
+        sPhoneIdCache.disableLocal();
+    }
+
+    /**
+     * Clears all process-local binder caches.
+     *
+     * @hide */
+    public static void clearCaches() {
+        sDefaultSubIdCache.clear();
+        sDefaultDataSubIdCache.clear();
+        sActiveDataSubIdCache.clear();
+        sDefaultSmsSubIdCache.clear();
+        sSlotIndexCache.clear();
+        sPhoneIdCache.clear();
     }
 }
