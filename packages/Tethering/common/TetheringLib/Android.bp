@@ -67,6 +67,7 @@ java_library {
 stubs_defaults {
     name: "framework-tethering-stubs-defaults",
     srcs: [":framework-tethering-srcs"],
+    dist: { dest: "framework-tethering.txt" },
 }
 
 filegroup {
@@ -123,16 +124,19 @@ java_library {
     name: "framework-tethering-stubs-publicapi",
     srcs: [":framework-tethering-stubs-srcs-publicapi"],
     defaults: ["framework-module-stubs-lib-defaults-publicapi"],
+    dist: { dest: "framework-tethering.jar" },
 }
 
 java_library {
     name: "framework-tethering-stubs-systemapi",
     srcs: [":framework-tethering-stubs-srcs-systemapi"],
     defaults: ["framework-module-stubs-lib-defaults-systemapi"],
+    dist: { dest: "framework-tethering.jar" },
 }
 
 java_library {
     name: "framework-tethering-stubs-module_libs_api",
     srcs: [":framework-tethering-stubs-srcs-module_libs_api"],
     defaults: ["framework-module-stubs-lib-defaults-module_libs_api"],
+    dist: { dest: "framework-tethering.jar" },
 }
