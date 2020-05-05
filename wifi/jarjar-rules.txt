@@ -1,6 +1,7 @@
 ## used by service-wifi ##
 
 # Network Stack AIDL interface.
+rule android.net.DataStallReportParcelable* com.android.wifi.x.@0
 rule android.net.DhcpResultsParcelable* com.android.wifi.x.@0
 rule android.net.IIpMemoryStore* com.android.wifi.x.@0
 rule android.net.IIpMemoryStoreCallbacks* com.android.wifi.x.@0
@@ -14,6 +15,7 @@ rule android.net.Layer2InformationParcelable* com.android.wifi.x.@0
 rule android.net.Layer2PacketParcelable* com.android.wifi.x.@0
 rule android.net.MarkMaskParcel* com.android.wifi.x.@0
 rule android.net.NattKeepalivePacketDataParcelable* com.android.wifi.x.@0
+rule android.net.NetworkTestResultParcelable* com.android.wifi.x.@0
 rule android.net.PrivateDnsConfigParcel* com.android.wifi.x.@0
 rule android.net.ProvisioningConfigurationParcelable* com.android.wifi.x.@0
 rule android.net.ResolverParamsParcel* com.android.wifi.x.@0
