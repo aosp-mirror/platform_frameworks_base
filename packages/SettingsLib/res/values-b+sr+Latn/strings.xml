@@ -284,8 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Prikaz opcija za sertifikaciju bežičnog ekrana"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Povećava nivo evidentiranja za Wi‑Fi. Prikaz po SSID RSSI-u u biraču Wi‑Fi mreže"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Smanjuje potrošnju baterije i poboljšava učinak mreže"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Kada je ovaj režim omogućen, MAC adresa ovog uređaja može da se promeni svaki put kada se poveže sa mrežom na kojoj je omogućeno nasumično razvrstavanje MAC adresa."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Sa ograničenjem"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Bez ograničenja"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Veličine bafera podataka u programu za evidentiranje"</string>

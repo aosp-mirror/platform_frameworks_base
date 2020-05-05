@@ -284,8 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"顯示無線螢幕分享認證的選項"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"讓 Wi‑Fi 記錄功能升級，在 Wi‑Fi 選擇器中依每個 SSID RSSI 顯示 Wi‑Fi 詳細紀錄"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"減低耗電量並改善網絡表現"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"啟用這個模式後，每次連線到啟用了 MAC 隨機化的網路時，這部裝置的 MAC 位址都可能會有所變更。"</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"按用量收費"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"不限數據用量收費"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"記錄器緩衝區空間"</string>

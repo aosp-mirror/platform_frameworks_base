@@ -284,8 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"ကြိုးမဲ့ အခင်းအကျင်း အသိအမှတ်ပြုလက်မှတ်အတွက် ရွေးချယ်စရာများပြရန်"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Wi‑Fi မှတ်တမ်းတင်ခြင်း နှုန်းအားမြင့်ကာ၊ Wi‑Fi ရွေးရာတွင် SSID RSSI ဖြင့်ပြပါ"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"ဘက်ထရီ အသုံးပြုမှုကို လျှော့ကျစေပြီး ကွန်ရက်စွမ်းဆောင်ရည်ကို ပိုမိုကောင်းမွန်စေသည်"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"ဤမုဒ်ကို ဖွင့်ထားသည့်အခါ MAC ကျပန်းပြုလုပ်ထားသည့် ကွန်ရက်သို့ ချိတ်ဆက်လိုက်သည့်အခါတိုင်း ဤစက်၏ MAC လိပ်စာ ပြောင်းသွားပါမည်။"</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"အခမဲ့ မဟုတ်ပါ"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"အခမဲ့"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"မှတ်တမ်းကြားခံနယ် အရွယ်အစားများ"</string>
