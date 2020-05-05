@@ -43,7 +43,7 @@ import java.util.List;
 public abstract class AbstractResolverComparator implements Comparator<ResolvedComponentInfo> {
 
     private static final int NUM_OF_TOP_ANNOTATIONS_TO_USE = 3;
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = true;
     private static final String TAG = "AbstractResolverComp";
 
     protected AfterCompute mAfterCompute;

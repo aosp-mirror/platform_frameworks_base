@@ -1,0 +1,25 @@
+
+java_plugin {
+    name: "error_prone_android_framework",
+
+    static_libs: [
+        "error_prone_android_framework_lib",
+    ],
+}
+
+java_library_host {
+    name: "error_prone_android_framework_lib",
+
+    srcs: ["java/**/*.java"],
+
+    static_libs: [
+        "//external/error_prone:error_prone_core",
+        "//external/dagger2:dagger2-auto-service",
+    ],
+
+    plugins: [
+        "//external/dagger2:dagger2-auto-service",
+    ],
+
+    javacflags: ["-verbose"],
+}

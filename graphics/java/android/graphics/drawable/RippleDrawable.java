@@ -378,7 +378,6 @@ public class RippleDrawable extends LayerDrawable {
         return true;
     }
 
-    /** @hide */
     @Override
     public boolean hasFocusStateSpecified() {
         return true;

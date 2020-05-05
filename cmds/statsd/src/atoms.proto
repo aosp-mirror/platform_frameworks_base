@@ -435,7 +435,7 @@ message Atom {
     }
 
     // Pulled events will start at field 10000.
-    // Next: 10080
+    // Next: 10082
     oneof pulled {
         WifiBytesTransfer wifi_bytes_transfer = 10000 [(module) = "framework"];
         WifiBytesTransferByFgBg wifi_bytes_transfer_by_fg_bg = 10001 [(module) = "framework"];
@@ -526,6 +526,7 @@ message Atom {
         SimSlotState sim_slot_state = 10078 [(module) = "telephony"];
         SupportedRadioAccessFamily supported_radio_access_family = 10079 [(module) = "telephony"];
         SettingSnapshot setting_snapshot = 10080 [(module) = "framework"];
+        DisplayWakeReason display_wake_reason = 10081 [(module) = "framework"];
     }
 
     // DO NOT USE field numbers above 100,000 in AOSP.
@@ -9507,4 +9508,16 @@ message AccessibilityServiceReported {
     // The definition of the service status.
     // From frameworks/base/core/proto/android/stats/accessibility/accessibility_enums.proto.
     optional android.stats.accessibility.ServiceStatus service_status = 2;
+}
+
+
+message DisplayWakeReason {
+    // Wake_up_reason code
+    // If LOWORD(wake_up_reason) = 0
+    //     reference to HIWORD(wake_up_reason) PowerManager.WAKE_REASON_XXX
+    //     else reference wake_up_reason to
+    //     frameworks/base/services/core/java/com/android/server/power/Notifier.java#DispWakeupReason
+    optional int32 wake_up_reason = 1;
+    // Count of wake up by reason
+    optional int32 wake_times = 2;
 }

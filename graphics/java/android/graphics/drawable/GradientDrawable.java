@@ -1164,7 +1164,6 @@ public class GradientDrawable extends Drawable {
                 || (s.mTint != null && s.mTint.isStateful());
     }
 
-    /** @hide */
     @Override
     public boolean hasFocusStateSpecified() {
         final GradientState s = mGradientState;

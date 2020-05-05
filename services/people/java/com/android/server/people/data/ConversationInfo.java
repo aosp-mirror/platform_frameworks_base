@@ -62,8 +62,6 @@ public class ConversationInfo {
 
     private static final int FLAG_DEMOTED = 1 << 6;
 
-    private static final int FLAG_NOTIFICATION_SETTING_CHANGED = 1 << 7;
-
     @IntDef(flag = true, prefix = {"FLAG_"}, value = {
             FLAG_IMPORTANT,
             FLAG_NOTIFICATION_SILENCED,
@@ -72,7 +70,6 @@ public class ConversationInfo {
             FLAG_PERSON_BOT,
             FLAG_CONTACT_STARRED,
             FLAG_DEMOTED,
-            FLAG_NOTIFICATION_SETTING_CHANGED,
     })
     @Retention(RetentionPolicy.SOURCE)
     private @interface ConversationFlags {
@@ -186,11 +183,6 @@ public class ConversationInfo {
     /** Whether the associated contact is marked as starred by the user. */
     public boolean isContactStarred() {
         return hasConversationFlags(FLAG_CONTACT_STARRED);
-    }
-
-    /** Whether the conversation's notification setting has ever been changed by the user. */
-    boolean isNotificationSettingChanged() {
-        return hasConversationFlags(FLAG_NOTIFICATION_SETTING_CHANGED);
     }
 
     @Override
@@ -497,10 +489,6 @@ public class ConversationInfo {
 
         Builder setContactStarred(boolean value) {
             return setConversationFlag(FLAG_CONTACT_STARRED, value);
-        }
-
-        Builder setNotificationSettingChanged(boolean value) {
-            return setConversationFlag(FLAG_NOTIFICATION_SETTING_CHANGED, value);
         }
 
         private Builder setConversationFlag(@ConversationFlags int flags, boolean value) {

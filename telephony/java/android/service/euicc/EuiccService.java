@@ -327,8 +327,8 @@ public abstract class EuiccService extends Service {
      * @throws UnsupportedOperationException when sections has more than four layers (e.g 5.8.1.2)
      *                                       or when an number is bigger than 15
      */
-    public int encodeSmdxSubjectAndReasonCode(@NonNull String subjectCode,
-            @NonNull String reasonCode) {
+    public int encodeSmdxSubjectAndReasonCode(@Nullable String subjectCode,
+            @Nullable String reasonCode) {
         final int maxSupportedSection = 3;
         final int maxSupportedDigit = 15;
         final int bitsPerSection = 4;

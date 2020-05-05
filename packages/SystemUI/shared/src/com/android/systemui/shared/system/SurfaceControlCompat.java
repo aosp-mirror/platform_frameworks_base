@@ -20,6 +20,9 @@ import android.view.SurfaceControl;
 import android.view.View;
 import android.view.ViewRootImpl;
 
+/**
+ * TODO: Remove this class
+ */
 public class SurfaceControlCompat {
     final SurfaceControl mSurfaceControl;
 
@@ -36,5 +39,9 @@ public class SurfaceControlCompat {
 
     public boolean isValid() {
         return mSurfaceControl != null && mSurfaceControl.isValid();
+    }
+
+    public SurfaceControl getSurfaceControl() {
+        return mSurfaceControl;
     }
 }

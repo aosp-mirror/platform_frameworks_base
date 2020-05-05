@@ -19,6 +19,7 @@ package com.android.server.accessibility.magnification;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.Rect;
+import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.provider.Settings;
@@ -32,7 +33,9 @@ import android.view.accessibility.IWindowMagnificationConnectionCallback;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.BackgroundThread;
+import com.android.server.LocalServices;
 import com.android.server.accessibility.MagnificationController;
+import com.android.server.statusbar.StatusBarManagerInternal;
 
 /**
  * A class to manipulate window magnification through {@link WindowMagnificationConnectionWrapper}
@@ -111,8 +114,48 @@ public final class WindowMagnificationManager implements
      *
      * @return {@code true} if {@link IWindowMagnificationConnection} is available
      */
-    public boolean isConnected() {
+    @GuardedBy("mLock")
+    private boolean isConnected() {
         return mConnectionWrapper != null;
+    }
+
+    /**
+     * Requests {@link IWindowMagnificationConnection} through
+     * {@link StatusBarManagerInternal#requestWindowMagnificationConnection(boolean)} and
+     * destroys all window magnifiers if necessary.
+     *
+     * @param connect {@code true} if needs connection, otherwise set the connection to null and
+     *                            destroy all window magnifiers.
+     * @return {@code true} if {@link IWindowMagnificationConnection} state is going to change.
+     */
+    public boolean requestConnection(boolean connect) {
+        synchronized (mLock) {
+            if (connect == isConnected()) {
+                return false;
+            }
+            if (!connect) {
+                disableAllWindowMagnifiers();
+            }
+        }
+
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            final StatusBarManagerInternal service = LocalServices.getService(
+                    StatusBarManagerInternal.class);
+            service.requestWindowMagnificationConnection(connect);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+        return true;
+    }
+
+    @GuardedBy("mLock")
+    private void disableAllWindowMagnifiers() {
+        for (int i = 0; i < mWindowMagnifiers.size(); i++) {
+            final WindowMagnifier magnifier = mWindowMagnifiers.valueAt(i);
+            magnifier.disable();
+        }
+        mWindowMagnifiers.clear();
     }
 
     private void resetWindowMagnifiers() {

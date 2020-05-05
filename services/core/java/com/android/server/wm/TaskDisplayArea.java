@@ -680,6 +680,13 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
         onStackOrderChanged(stack);
     }
 
+    void resetPreferredTopFocusableStackIfBelow(Task task) {
+        if (mPreferredTopFocusableStack != null
+                && mPreferredTopFocusableStack.compareTo(task) < 0) {
+            mPreferredTopFocusableStack = null;
+        }
+    }
+
     void positionStackAt(int position, ActivityStack child, boolean includingParents) {
         positionChildAt(position, child, includingParents);
         mDisplayContent.layoutAndAssignWindowLayersIfNeeded();
@@ -959,7 +966,7 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
             windowingMode = WINDOWING_MODE_UNDEFINED;
         }
 
-        final ActivityStack stack = (ActivityStack) Task.create(mAtmService, stackId, activityType,
+        final ActivityStack stack = new ActivityStack(mAtmService, stackId, activityType,
                 info, intent, createdByOrganizer);
         if (launchRootTask != null) {
             launchRootTask.addChild(stack, onTop ? POSITION_TOP : POSITION_BOTTOM);

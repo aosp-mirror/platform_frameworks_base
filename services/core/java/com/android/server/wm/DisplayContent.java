@@ -1393,6 +1393,13 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         final WindowContainer orientationSource = getLastOrientationSource();
         final ActivityRecord r =
                 orientationSource != null ? orientationSource.asActivityRecord() : null;
+        if (r != null && r.getTask() != null
+                && orientation != r.getTask().mLastReportedRequestedOrientation) {
+            final Task task = r.getTask();
+            task.mLastReportedRequestedOrientation = orientation;
+            mAtmService.getTaskChangeNotificationController()
+                    .notifyTaskRequestedOrientationChanged(task.mTaskId, orientation);
+        }
         // Currently there is no use case from non-activity.
         if (r != null && handleTopActivityLaunchingInDifferentOrientation(r)) {
             // Display orientation should be deferred until the top fixed rotation is finished.
