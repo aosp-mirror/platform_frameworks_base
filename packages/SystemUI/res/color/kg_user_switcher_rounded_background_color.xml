@@ -17,6 +17,7 @@
   -->
 
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:state_activated="true" android:color="@color/kg_user_switcher_activated_background_color" />
+    <item android:state_activated="true" android_state_enabled="true" android:color="@color/kg_user_switcher_activated_background_color" />
+    <item android:state_pressed="true" android:state_enabled="true" android:color="@color/kg_user_switcher_activated_background_color" />
     <item android:color="@android:color/transparent" />
 </selector>
