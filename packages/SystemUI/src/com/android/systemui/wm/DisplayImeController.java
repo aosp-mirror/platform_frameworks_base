@@ -21,6 +21,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.content.res.Configuration;
 import android.graphics.Point;
+import android.graphics.Rect;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.util.Slog;
@@ -188,7 +189,16 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
             if (mInsetsState.equals(insetsState)) {
                 return;
             }
+
+            final InsetsSource newSource = insetsState.getSource(InsetsState.ITYPE_IME);
+            final Rect newFrame = newSource.getFrame();
+            final Rect oldFrame = mInsetsState.getSource(InsetsState.ITYPE_IME).getFrame();
+
             mInsetsState.set(insetsState, true /* copySources */);
+            if (mImeShowing && !newFrame.equals(oldFrame) && newSource.isVisible()) {
+                if (DEBUG) Slog.d(TAG, "insetsChanged when IME showing, restart animation");
+                startAnimation(mImeShowing, true /* forceRestart */);
+            }
         }
 
         @Override
