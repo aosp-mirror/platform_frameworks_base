@@ -104,7 +104,6 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.TRANSIT_ACTIVITY_CLOSE;
-import static android.view.WindowManager.TRANSIT_DOCK_TASK_FROM_RECENTS;
 import static android.view.WindowManager.TRANSIT_TASK_CLOSE;
 import static android.view.WindowManager.TRANSIT_TASK_OPEN_BEHIND;
 import static android.view.WindowManager.TRANSIT_UNSET;
@@ -1892,13 +1891,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     private int getStartingWindowType(boolean newTask, boolean taskSwitch, boolean processRunning,
             boolean allowTaskSnapshot, boolean activityCreated, boolean fromRecents,
             ActivityManager.TaskSnapshot snapshot) {
-        if (getDisplayContent().mAppTransition.getAppTransition()
-                == TRANSIT_DOCK_TASK_FROM_RECENTS) {
-            // TODO(b/34099271): Remove this statement to add back the starting window and figure
-            // out why it causes flickering, the starting window appears over the thumbnail while
-            // the docked from recents transition occurs
-            return STARTING_WINDOW_TYPE_NONE;
-        } else if (newTask || !processRunning || (taskSwitch && !activityCreated)) {
+        if (newTask || !processRunning || (taskSwitch && !activityCreated)) {
             return STARTING_WINDOW_TYPE_SPLASH_SCREEN;
         } else if (taskSwitch && allowTaskSnapshot) {
             if (snapshotOrientationSameAsTask(snapshot) || (snapshot != null && fromRecents)) {
