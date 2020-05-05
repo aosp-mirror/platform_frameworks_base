@@ -297,6 +297,13 @@ class TaskSnapshotController {
             Slog.w(TAG_WM, "Failed to take screenshot. No main window for " + task);
             return false;
         }
+        if (activity.hasFixedRotationTransform()) {
+            if (DEBUG_SCREENSHOT) {
+                Slog.i(TAG_WM, "Skip taking screenshot. App has fixed rotation " + activity);
+            }
+            // The activity is in a temporal state that it has different rotation than the task.
+            return false;
+        }
 
         builder.setIsRealSnapshot(true);
         builder.setId(System.currentTimeMillis());

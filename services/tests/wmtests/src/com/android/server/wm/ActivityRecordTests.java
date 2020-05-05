@@ -1404,6 +1404,10 @@ public class ActivityRecordTests extends ActivityTestsBase {
 
         assertTrue(displayRotation.isRotatingSeamlessly());
 
+        // The launching rotated app should not be cleared when waiting for remote rotation.
+        display.continueUpdateOrientationForDiffOrienLaunchingApp();
+        assertNotNull(display.mFixedRotationLaunchingApp);
+
         // Simulate the rotation has been updated to previous one, e.g. sensor updates before the
         // remote rotation is completed.
         doReturn(originalRotation).when(displayRotation).rotationForOrientation(

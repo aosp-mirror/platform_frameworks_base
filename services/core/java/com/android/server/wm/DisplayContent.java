@@ -1511,6 +1511,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             sendNewConfiguration();
             return;
         }
+        if (mDisplayRotation.isWaitingForRemoteRotation()) {
+            // There is pending rotation change to apply.
+            return;
+        }
         // The orientation of display is not changed.
         clearFixedRotationLaunchingApp();
     }
