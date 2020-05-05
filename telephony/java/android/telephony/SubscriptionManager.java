@@ -140,6 +140,10 @@ public class SubscriptionManager {
             "cache_key.telephony.get_default_data_sub_id";
 
     /** @hide */
+    public static final String CACHE_KEY_DEFAULT_SMS_SUB_ID_PROPERTY =
+            "cache_key.telephony.get_default_sms_sub_id";
+
+    /** @hide */
     public static final String CACHE_KEY_ACTIVE_DATA_SUB_ID_PROPERTY =
             "cache_key.telephony.get_active_data_sub_id";
 
@@ -161,13 +165,15 @@ public class SubscriptionManager {
                 return getDefaultDataSubscriptionIdInternal();
             }};
 
+    private static PropertyInvalidatedCache<Void, Integer> sDefaultSmsSubIdCache =
+            new SubscriptionPropertyInvalidatedCache<>(ISub::getDefaultSmsSubId,
+                    CACHE_KEY_DEFAULT_SMS_SUB_ID_PROPERTY,
+                    INVALID_SUBSCRIPTION_ID);
+
     private static PropertyInvalidatedCache<Void, Integer> sActiveDataSubIdCache =
-            new PropertyInvalidatedCache<Void, Integer>(
-                    MAX_CACHE_SIZE, CACHE_KEY_ACTIVE_DATA_SUB_ID_PROPERTY) {
-            @Override
-            protected Integer recompute(Void query) {
-                return getActiveDataSubscriptionIdInternal();
-            }};
+            new SubscriptionPropertyInvalidatedCache<>(ISub::getActiveDataSubscriptionId,
+                    CACHE_KEY_ACTIVE_DATA_SUB_ID_PROPERTY,
+                    INVALID_SUBSCRIPTION_ID);
 
     /**
      * Generates a content {@link Uri} used to receive updates on simInfo change
@@ -1984,19 +1990,7 @@ public class SubscriptionManager {
      * @return the default SMS subscription Id.
      */
     public static int getDefaultSmsSubscriptionId() {
-        int subId = INVALID_SUBSCRIPTION_ID;
-
-        try {
-            ISub iSub = TelephonyManager.getSubscriptionService();
-            if (iSub != null) {
-                subId = iSub.getDefaultSmsSubId();
-            }
-        } catch (RemoteException ex) {
-            // ignore it
-        }
-
-        if (VDBG) logd("getDefaultSmsSubscriptionId, sub id = " + subId);
-        return subId;
+        return sDefaultSmsSubIdCache.query(null);
     }
 
     /**
@@ -3300,17 +3294,6 @@ public class SubscriptionManager {
         return sActiveDataSubIdCache.query(null);
     }
 
-    private static int getActiveDataSubscriptionIdInternal() {
-        try {
-            ISub iSub = TelephonyManager.getSubscriptionService();
-            if (iSub != null) {
-                return iSub.getActiveDataSubscriptionId();
-            }
-        } catch (RemoteException ex) {
-        }
-        return SubscriptionManager.INVALID_SUBSCRIPTION_ID;
-    }
-
     /**
      * Helper method that puts a subscription id on an intent with the constants:
      * PhoneConstant.SUBSCRIPTION_KEY and SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX.
@@ -3337,6 +3320,11 @@ public class SubscriptionManager {
     }
 
     /** @hide */
+    public static void invalidateDefaultSmsSubIdCaches() {
+        PropertyInvalidatedCache.invalidateCache(CACHE_KEY_DEFAULT_SMS_SUB_ID_PROPERTY);
+    }
+
+    /** @hide */
     public static void invalidateActiveDataSubIdCaches() {
         PropertyInvalidatedCache.invalidateCache(CACHE_KEY_ACTIVE_DATA_SUB_ID_PROPERTY);
     }
@@ -3350,6 +3338,7 @@ public class SubscriptionManager {
         sDefaultSubIdCache.clear();
         sDefaultDataSubIdCache.clear();
         sActiveDataSubIdCache.clear();
+        sDefaultSmsSubIdCache.clear();
     }
 
     /**
@@ -3361,5 +3350,6 @@ public class SubscriptionManager {
         sDefaultSubIdCache.disableLocal();
         sDefaultDataSubIdCache.disableLocal();
         sActiveDataSubIdCache.disableLocal();
+        sDefaultSmsSubIdCache.disableLocal();
     }
 }
