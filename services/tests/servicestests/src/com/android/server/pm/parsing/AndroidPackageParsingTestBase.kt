@@ -30,10 +30,8 @@ import android.content.pm.PermissionInfo
 import android.content.pm.ProviderInfo
 import android.os.Debug
 import android.os.Environment
-import android.os.ServiceManager
 import android.util.SparseArray
 import androidx.test.platform.app.InstrumentationRegistry
-import com.android.internal.compat.IPlatformCompat
 import com.android.server.pm.PackageManagerService
 import com.android.server.pm.PackageSetting
 import com.android.server.pm.parsing.pkg.AndroidPackage
@@ -63,27 +61,7 @@ open class AndroidPackageParsingTestBase {
             setCallback { false /* hasFeature */ }
         }
 
-        private val platformCompat = IPlatformCompat.Stub
-                .asInterface(ServiceManager.getService(Context.PLATFORM_COMPAT_SERVICE))
-
-        protected val packageParser2 = PackageParser2(null /* separateProcesses */,
-                false /* onlyCoreApps */, context.resources.displayMetrics, null /* cacheDir */,
-                object : PackageParser2.Callback() {
-                    override fun isChangeEnabled(
-                        changeId: Long,
-                        appInfo: ApplicationInfo
-                    ): Boolean {
-                        // This test queries PlatformCompat because prebuilts in the tree
-                        // may not be updated to be compliant with the latest enforcement checks.
-                        return platformCompat.isChangeEnabled(changeId, appInfo)
-                    }
-
-                    // Assume the device doesn't support anything. This will affect permission
-                    // parsing and will force <uses-permission/> declarations to include all
-                    // requiredNotFeature permissions and exclude all requiredFeature permissions.
-                    // This mirrors the old behavior.
-                    override fun hasFeature(feature: String) = false
-                })
+        protected val packageParser2 = PackageParser2.forParsingFileWithDefaults()
 
         /**
          * It would be difficult to mock all possibilities, so just use the APKs on device.
