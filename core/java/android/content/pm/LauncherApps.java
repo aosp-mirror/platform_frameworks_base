@@ -1870,7 +1870,7 @@ public class LauncherApps {
      * an {@link #ACTION_CONFIRM_PIN_SHORTCUT} or {@link #ACTION_CONFIRM_PIN_APPWIDGET} intent
      * respectively to the default launcher app.
      *
-     * <h3>Request of the {@link #REQUEST_TYPE_SHORTCUT} type.
+     * <h3>Request of the {@link #REQUEST_TYPE_SHORTCUT} type.</h3>
      *
      * <p>A {@link #REQUEST_TYPE_SHORTCUT} request represents a request to pin a
      * {@link ShortcutInfo}.  If the launcher accepts a request, call {@link #accept()},
@@ -1887,7 +1887,7 @@ public class LauncherApps {
      *
      * <p>See also {@link ShortcutManager} for more details.
      *
-     * <h3>Request of the {@link #REQUEST_TYPE_APPWIDGET} type.
+     * <h3>Request of the {@link #REQUEST_TYPE_APPWIDGET} type.</h3>
      *
      * <p>A {@link #REQUEST_TYPE_SHORTCUT} request represents a request to pin a
      * an AppWidget.  If the launcher accepts a request, call {@link #accept(Bundle)} with
