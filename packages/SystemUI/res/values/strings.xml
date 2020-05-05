@@ -2710,9 +2710,9 @@
     <!-- Controls dialog title [CHAR LIMIT=40] -->
     <string name="controls_dialog_title">Add to device controls</string>
     <!-- Controls dialog add to favorites [CHAR LIMIT=40] -->
-    <string name="controls_dialog_ok">Add to favorites</string>
-    <!-- Controls dialog message [CHAR LIMIT=NONE] -->
-    <string name="controls_dialog_message"><xliff:g id="app" example="System UI">%s</xliff:g> suggested this control to add to your favorites.</string>
+    <string name="controls_dialog_ok">Add</string>
+    <!-- Controls dialog message. Indicates app that suggested this control [CHAR LIMIT=NONE] -->
+    <string name="controls_dialog_message">Suggested by <xliff:g id="app" example="System UI">%s</xliff:g></string>
     <!-- Controls dialog confirmation [CHAR LIMIT=30] -->
     <string name="controls_dialog_confirmation">Controls updated</string>
 
