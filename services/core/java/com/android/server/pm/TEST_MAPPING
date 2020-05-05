@@ -37,6 +37,9 @@
         },
         {
           "include-filter": "android.content.pm.cts.PackageManagerShellCommandIncrementalTest"
+        },
+        {
+          "include-filter": "android.content.pm.cts.PackageManagerTest"
         }
       ]
     },
