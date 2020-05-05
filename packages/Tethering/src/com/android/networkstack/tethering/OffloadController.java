@@ -77,7 +77,8 @@ public class OffloadController {
     private static final boolean DBG = false;
     private static final String ANYIP = "0.0.0.0";
     private static final ForwardedStats EMPTY_STATS = new ForwardedStats();
-    private static final int DEFAULT_PERFORM_POLL_INTERVAL_MS = 5000;
+    @VisibleForTesting
+    static final int DEFAULT_PERFORM_POLL_INTERVAL_MS = 5000;
 
     @VisibleForTesting
     enum StatsType {
