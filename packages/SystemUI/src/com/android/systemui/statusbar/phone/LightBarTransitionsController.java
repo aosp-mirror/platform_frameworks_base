@@ -97,6 +97,7 @@ public class LightBarTransitionsController implements Dumpable, Callbacks,
 
     public void restoreState(Bundle savedInstanceState) {
         setIconTintInternal(savedInstanceState.getFloat(EXTRA_DARK_INTENSITY, 0));
+        mNextDarkIntensity = mDarkIntensity;
     }
 
     @Override
