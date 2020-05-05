@@ -416,6 +416,11 @@ public class InfoMediaManagerTest {
     }
 
     @Test
+    public void adjustSessionVolume_routingSessionInfoIsNull_noCrash() {
+        mInfoMediaManager.adjustSessionVolume(null, 10);
+    }
+
+    @Test
     public void adjustSessionVolume_packageNameIsNull_noCrash() {
         mInfoMediaManager.mPackageName = null;
 
@@ -484,6 +489,14 @@ public class InfoMediaManagerTest {
         mShadowRouter2Manager.setRoutingSessions(routingSessionInfos);
 
         assertThat(mInfoMediaManager.getSessionVolume()).isEqualTo(-1);
+    }
+
+    @Test
+    public void getActiveMediaSession_returnActiveSession() {
+        final List<RoutingSessionInfo> infos = new ArrayList<>();
+        mShadowRouter2Manager.setActiveSessions(infos);
+
+        assertThat(mInfoMediaManager.getActiveMediaSession()).containsExactlyElementsIn(infos);
     }
 
     @Test
