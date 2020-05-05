@@ -634,6 +634,11 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
         }
     }
 
+    void onSplitDismissed() {
+        mMinimized = false;
+        updateVisibility(false /* visible */);
+    }
+
     /** Switch to minimized state if appropriate */
     public void setMinimized(final boolean minimized) {
         if (DEBUG) Slog.d(TAG, "posting ext setMinimized " + minimized + " vis:" + mVisible);
