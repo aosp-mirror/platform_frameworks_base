@@ -33,6 +33,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 
 import android.platform.test.annotations.Presubmit;
+import android.util.proto.ProtoOutputStream;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Builder;
 import android.view.SurfaceControl.Transaction;
@@ -51,6 +52,8 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.io.PrintWriter;
 
 /**
  * Test class for {@link SurfaceAnimatorTest}.
@@ -267,6 +270,27 @@ public class SurfaceAnimatorTest extends WindowTestsBase {
         assertFalse(mDeferFinishAnimatable.mFinishedCallbackCalled);
     }
 
+    @Test
+    public void testDeferFinishFromAdapter() {
+
+        DeferredFinishAdapter deferredFinishAdapter = new DeferredFinishAdapter();
+        // Start animation
+        mAnimatable.mSurfaceAnimator.startAnimation(mTransaction, deferredFinishAdapter,
+                true /* hidden */,
+                ANIMATION_TYPE_APP_TRANSITION);
+        assertAnimating(mAnimatable);
+        deferredFinishAdapter.mFinishCallback.onAnimationFinished(ANIMATION_TYPE_APP_TRANSITION,
+                deferredFinishAdapter);
+
+        assertAnimating(mAnimatable);
+        assertFalse(mAnimatable.mFinishedCallbackCalled);
+        // Now end defer finishing.
+        deferredFinishAdapter.mEndDeferFinishCallback.run();
+        assertNotAnimating(mAnimatable);
+        assertTrue(mAnimatable.mFinishedCallbackCalled);
+        verify(mTransaction).remove(eq(deferredFinishAdapter.mAnimationLeash));
+    }
+
     private OnAnimationFinishedCallback startDeferFinishAnimatable(AnimationAdapter anim) {
         mDeferFinishAnimatable.mSurfaceAnimator.startAnimation(mTransaction, anim,
                 true /* hidden */, ANIMATION_TYPE_APP_TRANSITION);
@@ -381,6 +405,53 @@ public class SurfaceAnimatorTest extends WindowTestsBase {
         DeferFinishAnimatable(WindowManagerService wm, SurfaceSession session,
                 Transaction transaction) {
             super(wm, session, transaction);
+        }
+
+        @Override
+        public boolean shouldDeferAnimationFinish(Runnable endDeferFinishCallback) {
+            mEndDeferFinishCallback = endDeferFinishCallback;
+            return true;
+        }
+    }
+
+    private static class DeferredFinishAdapter implements AnimationAdapter {
+
+        private Runnable mEndDeferFinishCallback;
+        private OnAnimationFinishedCallback mFinishCallback;
+        private SurfaceControl mAnimationLeash;
+
+        @Override
+        public boolean getShowWallpaper() {
+            return true;
+        }
+
+        @Override
+        public void startAnimation(SurfaceControl animationLeash, Transaction t, int type,
+                OnAnimationFinishedCallback finishCallback) {
+            mFinishCallback = finishCallback;
+            mAnimationLeash = animationLeash;
+        }
+
+        @Override
+        public void onAnimationCancelled(SurfaceControl animationLeash) {
+        }
+
+        @Override
+        public long getDurationHint() {
+            return 100;
+        }
+
+        @Override
+        public long getStatusBarTransitionsStartTime() {
+            return 100;
+        }
+
+        @Override
+        public void dump(PrintWriter pw, String prefix) {
+        }
+
+        @Override
+        public void dumpDebug(ProtoOutputStream proto) {
         }
 
         @Override
