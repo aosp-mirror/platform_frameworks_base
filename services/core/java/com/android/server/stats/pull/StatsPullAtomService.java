@@ -21,7 +21,7 @@ import static android.app.AppOpsManager.OP_FLAG_TRUSTED_PROXY;
 import static android.app.usage.NetworkStatsManager.FLAG_AUGMENT_WITH_SUBSCRIPTION_PLAN;
 import static android.content.pm.PackageInfo.REQUESTED_PERMISSION_GRANTED;
 import static android.content.pm.PermissionInfo.PROTECTION_DANGEROUS;
-import static android.net.NetworkTemplate.getAllCollapsedRatTypes;
+import static android.net.NetworkTemplate.NETWORK_TYPE_ALL;
 import static android.os.Debug.getIonHeapsSizeKb;
 import static android.os.Process.getUidForPid;
 import static android.os.storage.VolumeInfo.TYPE_PRIVATE;
@@ -729,27 +729,25 @@ public class StatsPullAtomService extends SystemService {
             int atomTag, @NonNull List<StatsEvent> pulledData, boolean withFgbg) {
         final NetworkTemplate template = NetworkTemplate.buildTemplateWifiWildcard();
         final NetworkStats stats = getUidNetworkStatsSinceBoot(template, withFgbg);
-        if (stats != null) {
-            addNetworkStats(atomTag, pulledData, stats, withFgbg, 0 /* ratType */);
-            return StatsManager.PULL_SUCCESS;
-        }
-        return StatsManager.PULL_SKIP;
+
+        // Return with PULL_SKIP to indicate there is an error.
+        if (stats == null) return StatsManager.PULL_SKIP;
+
+        addNetworkStats(atomTag, pulledData, stats, withFgbg, 0 /* ratType */);
+        return StatsManager.PULL_SUCCESS;
     }
 
     private int pullMobileBytesTransfer(
             int atomTag, @NonNull List<StatsEvent> pulledData, boolean withFgbg) {
-        int ret = StatsManager.PULL_SKIP;
-        for (final int ratType : getAllCollapsedRatTypes()) {
-            final NetworkTemplate template =
-                    NetworkTemplate.buildTemplateMobileWithRatType(null, ratType);
-            final NetworkStats stats = getUidNetworkStatsSinceBoot(template, withFgbg);
-            if (stats != null) {
-                addNetworkStats(atomTag, pulledData, stats, withFgbg, ratType);
-                ret = StatsManager.PULL_SUCCESS; // If any of them is not null, then success.
-            }
-        }
-        // If there is no data return PULL_SKIP to avoid wasting performance adding empty stats.
-        return ret;
+        final NetworkTemplate template =
+                NetworkTemplate.buildTemplateMobileWithRatType(null, NETWORK_TYPE_ALL);
+        final NetworkStats stats = getUidNetworkStatsSinceBoot(template, withFgbg);
+
+        // Return with PULL_SKIP to indicate there is an error.
+        if (stats == null) return StatsManager.PULL_SKIP;
+
+        addNetworkStats(atomTag, pulledData, stats, withFgbg, NETWORK_TYPE_ALL);
+        return StatsManager.PULL_SUCCESS;
     }
 
     private void addNetworkStats(int atomTag, @NonNull List<StatsEvent> ret,
@@ -769,13 +767,6 @@ public class StatsPullAtomService extends SystemService {
             e.writeLong(entry.rxPackets);
             e.writeLong(entry.txBytes);
             e.writeLong(entry.txPackets);
-            switch (atomTag) {
-                case FrameworkStatsLog.MOBILE_BYTES_TRANSFER:
-                case FrameworkStatsLog.MOBILE_BYTES_TRANSFER_BY_FG_BG:
-                    e.writeInt(ratType);
-                    break;
-                default:
-            }
             ret.add(e.build());
         }
     }
