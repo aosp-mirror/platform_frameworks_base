@@ -191,6 +191,7 @@ static void setPowerBoostWithHandle(sp<IPowerAidl> handle, Boost boost, int32_t 
 
     auto ret = handle->setBoost(boost, durationMs);
     processPowerHalReturn(ret.isOk(), "setPowerBoost");
+    SurfaceComposerClient::notifyPowerBoost(static_cast<int32_t>(boost));
 }
 
 static void setPowerBoost(Boost boost, int32_t durationMs) {
@@ -268,6 +269,7 @@ static void sendPowerHint(PowerHint hintId, uint32_t data) {
                 sp<IPowerAidl> handle = gPowerHalAidl_;
                 lock.unlock();
                 setPowerBoostWithHandle(handle, Boost::INTERACTION, data);
+                SurfaceComposerClient::notifyPowerBoost(static_cast<int32_t>(Boost::INTERACTION));
                 break;
             } else if (hintId == PowerHint::LAUNCH) {
                 sp<IPowerAidl> handle = gPowerHalAidl_;
@@ -300,7 +302,6 @@ static void sendPowerHint(PowerHint hintId, uint32_t data) {
             return;
         }
     }
-    SurfaceComposerClient::notifyPowerHint(static_cast<int32_t>(hintId));
 }
 
 void android_server_PowerManagerService_userActivity(nsecs_t eventTime, int32_t eventType) {
