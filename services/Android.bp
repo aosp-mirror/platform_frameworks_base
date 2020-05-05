@@ -122,13 +122,13 @@ droidstubs {
             removed_api_file: "api/removed.txt",
         },
         last_released: {
-            api_file: ":last-released-system-server-api",
+            api_file: ":android.api.system-server.latest",
             removed_api_file: "api/removed.txt",
             baseline_file: ":system-server-api-incompatibilities-with-last-released"
         },
         api_lint: {
             enabled: true,
-            new_since: ":last-released-system-server-api",
+            new_since: ":android.api.system-server.latest",
             baseline_file: "api/lint-baseline.txt",
         },
     },
