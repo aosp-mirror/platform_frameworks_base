@@ -2504,20 +2504,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         return list;
     }
 
-    void deferUpdateBounds(int activityType) {
-        final ActivityStack stack = getStack(WINDOWING_MODE_UNDEFINED, activityType);
-        if (stack != null) {
-            stack.deferUpdateBounds();
-        }
-    }
-
-    void continueUpdateBounds(int activityType) {
-        final ActivityStack stack = getStack(WINDOWING_MODE_UNDEFINED, activityType);
-        if (stack != null) {
-            stack.continueUpdateBounds();
-        }
-    }
-
     @Override
     public void onDisplayAdded(int displayId) {
         if (DEBUG_STACK) Slog.v(TAG, "Display added displayId=" + displayId);
