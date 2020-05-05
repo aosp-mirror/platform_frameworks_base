@@ -16,7 +16,7 @@
   -->
 
 <!-- Carousel for media controls -->
-<HorizontalScrollView
+<com.android.systemui.media.UnboundHorizontalScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -34,4 +34,4 @@
         >
         <!-- QSMediaPlayers will be added here dynamically -->
     </LinearLayout>
-</HorizontalScrollView>
+</com.android.systemui.media.UnboundHorizontalScrollView>

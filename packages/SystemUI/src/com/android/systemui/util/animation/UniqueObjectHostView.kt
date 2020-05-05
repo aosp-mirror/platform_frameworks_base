@@ -22,15 +22,20 @@ import android.view.View
 import android.widget.FrameLayout
 
 /**
- * A special view that hosts a unique object, which only exists once, but can transition between
- * different hosts. If the view currently hosts the unique object, it's measuring it normally,
- * but if it's not attached, it will obtain the size by requesting a measure.
+ * A special view that is designed to host a single "unique object". The unique object is
+ * dynamically added and removed from this view and may transition to other UniqueObjectHostViews
+ * available in the system.
+ * This is useful to share a singular instance of a view that can transition between completely
+ * independent parts of the view hierarchy.
+ * If the view currently hosts the unique object, it's measuring it normally,
+ * but if it's not attached, it will obtain the size by requesting a measure, as if it were
+ * always attached.
  */
 class UniqueObjectHostView(
     context: Context
 ) : FrameLayout(context) {
     lateinit var measurementCache : GuaranteedMeasurementCache
-    var firstMeasureListener: ((MeasurementInput) -> Unit)? = null
+    var onMeasureListener: ((MeasurementInput) -> Unit)? = null
 
     @SuppressLint("DrawAllocation")
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
@@ -41,13 +46,18 @@ class UniqueObjectHostView(
         val height = MeasureSpec.getSize(heightMeasureSpec) - paddingVertical
         val heightSpec = MeasureSpec.makeMeasureSpec(height, MeasureSpec.getMode(heightMeasureSpec))
         val measurementInput = MeasurementInputData(widthSpec, heightSpec)
-        firstMeasureListener?.apply {
+        onMeasureListener?.apply {
             invoke(measurementInput)
-            firstMeasureListener = null
         }
         if (!isCurrentHost()) {
             // We're not currently the host, let's get the dimension from our cache (this might
             // perform a measuring if the cache doesn't have it yet)
+            // The goal here is that the view will always have a consistent measuring, regardless
+            // if it's attached or not.
+            // The behavior is therefore very similar to the view being persistently attached to
+            // this host, which can prevent flickers. It also makes sure that we always know
+            // the size of the view during transitions even if it has never been attached here
+            // before.
             val (cachedWidth, cachedHeight) = measurementCache.obtainMeasurement(measurementInput)
             setMeasuredDimension(cachedWidth + paddingHorizontal, cachedHeight + paddingVertical)
         } else {

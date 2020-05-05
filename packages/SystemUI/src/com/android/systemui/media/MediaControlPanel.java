@@ -47,6 +47,7 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
+import androidx.annotation.UiThread;
 import androidx.constraintlayout.motion.widget.Key;
 import androidx.constraintlayout.motion.widget.KeyAttributes;
 import androidx.constraintlayout.motion.widget.KeyFrames;
@@ -111,7 +112,6 @@ public class MediaControlPanel {
     private int mAlbumArtSize;
     private int mAlbumArtRadius;
     private int mViewWidth;
-    private MediaMeasurementInput mLastMeasureInput;
 
     public static final String MEDIA_PREFERENCES = "media_control_prefs";
     public static final String MEDIA_PREFERENCE_KEY = "browser_components";
@@ -188,7 +188,6 @@ public class MediaControlPanel {
         mActivityStarter = activityStarter;
         mSeekBarViewModel = new SeekBarViewModel(backgroundExecutor);
         mSeekBarObserver = new SeekBarObserver(getView());
-        // TODO: we should pause this whenever the screen is off / panel is collapsed etc.
         mSeekBarViewModel.getProgress().observeForever(mSeekBarObserver);
         SeekBar bar = getView().findViewById(R.id.media_progress_bar);
         bar.setOnSeekBarChangeListener(mSeekBarViewModel.getSeekBarListener());
@@ -261,7 +260,7 @@ public class MediaControlPanel {
         // Try to find a browser service component for this app
         // TODO also check for a media button receiver intended for restarting (b/154127084)
         // Only check if we haven't tried yet or the session token changed
-        final String pkgName = mController.getPackageName();
+        final String pkgName = data.getPackageName();
         if (mServiceComponent == null && !mCheckedForResumption) {
             Log.d(TAG, "Checking for service component");
             PackageManager pm = mContext.getPackageManager();
@@ -301,8 +300,7 @@ public class MediaControlPanel {
 
         // App icon
         ImageView appIcon = mMediaNotifView.requireViewById(R.id.icon);
-        // TODO: look at iconDrawable
-        Drawable iconDrawable = data.getAppIcon();
+        Drawable iconDrawable = data.getAppIcon().mutate();
         iconDrawable.setTint(mForegroundColor);
         appIcon.setImageDrawable(iconDrawable);
 
@@ -389,7 +387,7 @@ public class MediaControlPanel {
         }
 
         // Seek Bar
-        final MediaController controller = new MediaController(getContext(), data.getToken());
+        final MediaController controller = getController();
         mBackgroundExecutor.execute(
                 () -> mSeekBarViewModel.updateController(controller, data.getForegroundColor()));
 
@@ -397,10 +395,13 @@ public class MediaControlPanel {
         // TODO: b/156036025 bring back media guts
 
         makeActive();
+
+        // Update both constraint sets to regenerate the animation.
         mMediaNotifView.updateState(R.id.collapsed, collapsedSet);
         mMediaNotifView.updateState(R.id.expanded, expandedSet);
     }
 
+    @UiThread
     private Drawable createRoundedBitmap(Icon icon) {
         if (icon == null) {
             return null;
@@ -746,25 +747,12 @@ public class MediaControlPanel {
      */
     protected void removePlayer() { }
 
-    public void remeasure(@Nullable MediaMeasurementInput input, boolean animate, long duration,
-            long startDelay) {
-        // Let's remeasure if our width changed. Our height is dependent on the expansion, so we
-        // won't animate if it changed
-        if (input != null && !input.sameAs(mLastMeasureInput)) {
-            mLastMeasureInput = input;
-            if (animate) {
-                mLayoutAnimationHelper.animatePendingSizeChange(duration, startDelay);
-            }
-            remeasureInternal(input);
-            mMediaNotifView.layout(0, 0, mMediaNotifView.getMeasuredWidth(),
-                    mMediaNotifView.getMeasuredHeight());
+    public void measure(@Nullable MediaMeasurementInput input) {
+        if (input != null) {
+            int width = input.getWidth();
+            setPlayerWidth(width);
+            mMediaNotifView.measure(input.getWidthMeasureSpec(), input.getHeightMeasureSpec());
         }
-    }
-
-    private void remeasureInternal(MediaMeasurementInput input) {
-        int width = input.getWidth();
-        setPlayerWidth(width);
-        mMediaNotifView.measure(input.getWidthMeasureSpec(), input.getHeightMeasureSpec());
     }
 
     public void setPlayerWidth(int width) {
@@ -774,5 +762,9 @@ public class MediaControlPanel {
         expandedSet.setGuidelineBegin(R.id.view_width, width);
         mMediaNotifView.updateState(R.id.collapsed, collapsedSet);
         mMediaNotifView.updateState(R.id.expanded, expandedSet);
+    }
+
+    public void animatePendingSizeChange(long duration, long startDelay) {
+        mLayoutAnimationHelper.animatePendingSizeChange(duration, startDelay);
     }
 }

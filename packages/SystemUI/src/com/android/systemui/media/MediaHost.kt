@@ -7,7 +7,6 @@ import android.view.View.OnAttachStateChangeListener
 import android.view.ViewGroup
 import com.android.systemui.media.MediaHierarchyManager.MediaLocation
 import com.android.systemui.util.animation.MeasurementInput
-import com.android.systemui.util.animation.MeasurementInputData
 import javax.inject.Inject
 
 class MediaHost @Inject constructor(

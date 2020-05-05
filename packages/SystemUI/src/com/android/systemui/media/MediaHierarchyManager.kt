@@ -48,6 +48,11 @@ class MediaHierarchyManager @Inject constructor(
     private val mediaViewManager: MediaViewManager,
     private val mediaMeasurementProvider: MediaMeasurementManager
 ) {
+    /**
+     * The root overlay of the hierarchy. This is where the media notification is attached to
+     * whenever the view is transitioning from one host to another. It also make sure that the
+     * view is always in its final state when it is attached to a view host.
+     */
     private var rootOverlay: ViewGroupOverlay? = null
     private lateinit var currentState: MediaState
     private val mediaCarousel
@@ -79,9 +84,24 @@ class MediaHierarchyManager @Inject constructor(
     }
     private var targetState: MediaState? = null
     private val mediaHosts = arrayOfNulls<MediaHost>(LOCATION_LOCKSCREEN + 1)
-    private var previousLocation = -1
-    private var desiredLocation = -1
-    private var currentAttachmentLocation = -1
+
+    /**
+     * The last location where this view was at before going to the desired location. This is
+     * useful for guided transitions.
+     */
+    @MediaLocation private var previousLocation = -1
+
+    /**
+     * The desired location where the view will be at the end of the transition.
+     */
+    @MediaLocation private var desiredLocation = -1
+
+    /**
+     * The current attachment location where the view is currently attached.
+     * Usually this matches the desired location except for animations whenever a view moves
+     * to the new desired location, during which it is in [IN_OVERLAY].
+     */
+    @MediaLocation private var currentAttachmentLocation = -1
 
     var qsExpansion: Float = 0.0f
         set(value) {
@@ -135,16 +155,12 @@ class MediaHierarchyManager @Inject constructor(
     private fun createUniqueObjectHost(host: MediaHost): UniqueObjectHostView {
         val viewHost = UniqueObjectHostView(context)
         viewHost.measurementCache = mediaMeasurementProvider.obtainCache(host)
-        viewHost.firstMeasureListener =  { input ->
-            if (host.location == currentAttachmentLocation) {
-                // The first measurement of the attached view is happening, Let's make
-                // sure the player width is updated
+        viewHost.onMeasureListener =  { input ->
+            if (host.location == desiredLocation) {
+                // Measurement of the currently active player is happening, Let's make
+                // sure the player width is up to date
                 val measuringInput = host.getMeasuringInput(input)
-                mediaViewManager.remeasureAllPlayers(
-                        measuringInput,
-                        animate = false,
-                        duration = 0,
-                        startDelay = 0)
+                mediaViewManager.setPlayerWidth(measuringInput.width)
             }
         }
 
@@ -162,6 +178,10 @@ class MediaHierarchyManager @Inject constructor(
         return viewHost
     }
 
+    /**
+     * Updates the location that the view should be in. If it changes, an animation may be triggered
+     * going from the old desired location to the new one.
+     */
     private fun updateDesiredLocation() {
         val desiredLocation = calculateLocation()
         if (desiredLocation != this.desiredLocation) {
@@ -173,7 +193,7 @@ class MediaHierarchyManager @Inject constructor(
             // Let's perform a transition
             val animate = shouldAnimateTransition(desiredLocation, previousLocation)
             val (animDuration, delay) = getAnimationParams(previousLocation, desiredLocation)
-            mediaViewManager.onDesiredStateChanged(getHost(desiredLocation)?.currentState,
+            mediaViewManager.onDesiredLocationChanged(getHost(desiredLocation)?.currentState,
                     animate, animDuration, delay)
             performTransitionToNewLocation(isNewView, animate)
         }
@@ -262,6 +282,9 @@ class MediaHierarchyManager @Inject constructor(
         }
     }
 
+    /**
+     * Updates the state that the view wants to be in at the end of the animation.
+     */
     private fun updateTargetState() {
         if (isCurrentlyInGuidedTransformation()) {
             val progress = getTransformationProgress()
@@ -320,17 +343,17 @@ class MediaHierarchyManager @Inject constructor(
     }
 
     private fun applyState(state: MediaState) {
+        currentState = state.copy()
+        mediaViewManager.setCurrentState(currentState)
         updateHostAttachment()
-        val boundsOnScreen = state.boundsOnScreen
         if (currentAttachmentLocation == IN_OVERLAY) {
+            val boundsOnScreen = state.boundsOnScreen
             mediaCarousel.setLeftTopRightBottom(
                     boundsOnScreen.left,
                     boundsOnScreen.top,
                     boundsOnScreen.right,
                     boundsOnScreen.bottom)
         }
-        currentState = state.copy()
-        mediaViewManager.setCurrentState(currentState)
     }
 
     private fun updateHostAttachment() {
@@ -348,6 +371,7 @@ class MediaHierarchyManager @Inject constructor(
                 rootOverlay!!.add(mediaCarousel)
             } else {
                 targetHost.addView(mediaCarousel)
+                mediaViewManager.onViewReattached()
             }
         }
     }
