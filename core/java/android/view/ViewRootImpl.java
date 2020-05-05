@@ -1584,6 +1584,11 @@ public final class ViewRootImpl implements ViewParent,
         mApplyInsetsRequested = true;
         requestLayout();
 
+        // See comment for View.sForceLayoutWhenInsetsChanged
+        if (View.sForceLayoutWhenInsetsChanged && mView != null) {
+            forceLayout(mView);
+        }
+
         // If this changes during traversal, no need to schedule another one as it will dispatch it
         // during the current traversal.
         if (!mIsInTraversal) {

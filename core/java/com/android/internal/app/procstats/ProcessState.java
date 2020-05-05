@@ -50,6 +50,7 @@ import android.os.UserHandle;
 import android.service.procstats.ProcessStatsProto;
 import android.service.procstats.ProcessStatsStateProto;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.DebugUtils;
 import android.util.Log;
 import android.util.LongSparseArray;
@@ -59,6 +60,7 @@ import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 import android.util.proto.ProtoUtils;
 
+import com.android.internal.app.ProcessMap;
 import com.android.internal.app.procstats.ProcessStats.PackageState;
 import com.android.internal.app.procstats.ProcessStats.ProcessStateHolder;
 import com.android.internal.app.procstats.ProcessStats.TotalMemoryUseCollection;
@@ -1420,7 +1422,8 @@ public final class ProcessState {
 
     /** Similar to {@code #dumpDebug}, but with a reduced/aggregated subset of states. */
     public void dumpAggregatedProtoForStatsd(ProtoOutputStream proto, long fieldId,
-            String procName, int uid, long now) {
+            String procName, int uid, long now,
+            final ProcessMap<ArraySet<PackageState>> procToPkgMap) {
         // Group proc stats by aggregated type (only screen state + process state)
         SparseLongArray durationByState = new SparseLongArray();
         boolean didCurState = false;
@@ -1524,6 +1527,8 @@ public final class ProcessState {
             proto.end(stateToken);
         }
 
+        mStats.dumpFilteredAssociationStatesProtoForProc(proto, ProcessStatsProto.ASSOCS,
+                now, this, procToPkgMap);
         proto.end(token);
     }
 }

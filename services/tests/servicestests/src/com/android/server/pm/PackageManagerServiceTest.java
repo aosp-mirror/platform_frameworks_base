@@ -53,7 +53,7 @@ public class PackageManagerServiceTest {
 
             public void sendPackageAddedForNewUsers(String packageName,
                     boolean sendBootComplete, boolean includeStopped, int appId,
-                    int[] userIds, int[] instantUserIds) {
+                    int[] userIds, int[] instantUserIds, int dataLoaderType) {
             }
 
             @Override
