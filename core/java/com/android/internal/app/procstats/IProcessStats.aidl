@@ -45,4 +45,9 @@ interface IProcessStats {
      */
      long getCommittedStatsMerged(long highWaterMarkMs, int section, boolean doAggregate,
         out List<ParcelFileDescriptor> committedStats, out ProcessStats mergedStats);
+
+    /**
+     * @return The threshold to decide if a given association should be dumped into metrics.
+     */
+    long getMinAssociationDumpDuration();
 }
