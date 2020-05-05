@@ -201,7 +201,7 @@ class SplitScreenTaskOrganizer extends TaskOrganizer {
                             + mPrimary.topActivityType + "  " + mSecondary.topActivityType);
                 }
                 WindowManagerProxy.applyDismissSplit(this, true /* dismissOrMaximize */);
-                mDivider.updateVisibility(false /* visible */);
+                mDivider.onSplitDismissed();
             } else if (!primaryIsEmpty && primaryWasEmpty && secondaryWasEmpty) {
                 // Wasn't in split-mode (both were empty), but now that the primary split is
                 // populated, we should fully enter split by moving everything else into secondary.
