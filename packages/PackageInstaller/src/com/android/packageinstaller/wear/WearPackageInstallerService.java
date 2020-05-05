@@ -22,11 +22,11 @@ import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.FeatureInfo;
 import android.content.pm.IPackageDeleteObserver;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageParser;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
@@ -49,6 +49,7 @@ import com.android.packageinstaller.R;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -244,47 +245,50 @@ public class WearPackageInstallerService extends Service {
                 Log.e(TAG, "Could not create a temp file from FD for " + packageName);
                 return;
             }
-            PackageParser.Package pkg = PackageUtil.getPackageInfo(this, tempFile);
-            if (pkg == null) {
+            PackageInfo pkgInfo = PackageUtil.getPackageInfo(this, tempFile,
+                    PackageManager.GET_PERMISSIONS | PackageManager.GET_CONFIGURATIONS);
+            if (pkgInfo == null) {
                 Log.e(TAG, "Could not parse apk information for " + packageName);
                 return;
             }
 
-            if (!pkg.packageName.equals(packageName)) {
+            if (!pkgInfo.packageName.equals(packageName)) {
                 Log.e(TAG, "Wearable Package Name has to match what is provided for " +
                         packageName);
                 return;
             }
 
-            pkg.applicationInfo.sourceDir = tempFile.getPath();
-            pkg.applicationInfo.publicSourceDir = tempFile.getPath();
+            ApplicationInfo appInfo = pkgInfo.applicationInfo;
+            appInfo.sourceDir = tempFile.getPath();
+            appInfo.publicSourceDir = tempFile.getPath();
             getLabelAndUpdateNotification(packageName,
-                    getString(R.string.installing_app, pkg.applicationInfo.loadLabel(pm)));
+                    getString(R.string.installing_app, appInfo.loadLabel(pm)));
 
-            List<String> wearablePerms = pkg.requestedPermissions;
+            List<String> wearablePerms = Arrays.asList(pkgInfo.requestedPermissions);
 
             // Log if the installed pkg has a higher version number.
             if (existingPkgInfo != null) {
-                if (existingPkgInfo.getLongVersionCode() == pkg.getLongVersionCode()) {
+                long longVersionCode = pkgInfo.getLongVersionCode();
+                if (existingPkgInfo.getLongVersionCode() == longVersionCode) {
                     if (skipIfSameVersion) {
-                        Log.w(TAG, "Version number (" + pkg.getLongVersionCode() +
+                        Log.w(TAG, "Version number (" + longVersionCode +
                                 ") of new app is equal to existing app for " + packageName +
                                 "; not installing due to versionCheck");
                         return;
                     } else {
-                        Log.w(TAG, "Version number of new app (" + pkg.getLongVersionCode() +
+                        Log.w(TAG, "Version number of new app (" + longVersionCode +
                                 ") is equal to existing app for " + packageName);
                     }
-                } else if (existingPkgInfo.getLongVersionCode() > pkg.getLongVersionCode()) {
+                } else if (existingPkgInfo.getLongVersionCode() > longVersionCode) {
                     if (skipIfLowerVersion) {
                         // Starting in Feldspar, we are not going to allow downgrades of any app.
-                        Log.w(TAG, "Version number of new app (" + pkg.getLongVersionCode() +
+                        Log.w(TAG, "Version number of new app (" + longVersionCode +
                                 ") is lower than existing app ( "
                                 + existingPkgInfo.getLongVersionCode() +
                                 ") for " + packageName + "; not installing due to versionCheck");
                         return;
                     } else {
-                        Log.w(TAG, "Version number of new app (" + pkg.getLongVersionCode() +
+                        Log.w(TAG, "Version number of new app (" + longVersionCode +
                                 ") is lower than existing app ( "
                                 + existingPkgInfo.getLongVersionCode() + ") for " + packageName);
                     }
@@ -309,14 +313,12 @@ public class WearPackageInstallerService extends Service {
 
             // Check that the wearable has all the features.
             boolean hasAllFeatures = true;
-            if (pkg.reqFeatures != null) {
-                for (FeatureInfo feature : pkg.reqFeatures) {
-                    if (feature.name != null && !pm.hasSystemFeature(feature.name) &&
-                            (feature.flags & FeatureInfo.FLAG_REQUIRED) != 0) {
-                        Log.e(TAG, "Wearable does not have required feature: " + feature +
-                                " for " + packageName);
-                        hasAllFeatures = false;
-                    }
+            for (FeatureInfo feature : pkgInfo.reqFeatures) {
+                if (feature.name != null && !pm.hasSystemFeature(feature.name) &&
+                        (feature.flags & FeatureInfo.FLAG_REQUIRED) != 0) {
+                    Log.e(TAG, "Wearable does not have required feature: " + feature +
+                            " for " + packageName);
+                    hasAllFeatures = false;
                 }
             }
 
@@ -328,8 +330,8 @@ public class WearPackageInstallerService extends Service {
             // wearable package.
             // If the app is targeting API level 23, we will also start a service in ClockworkHome
             // which will ultimately prompt the user to accept/reject permissions.
-            if (checkPerms && !checkPermissions(pkg, companionSdkVersion, companionDeviceVersion,
-                    permUri, wearablePerms, tempFile)) {
+            if (checkPerms && !checkPermissions(pkgInfo, companionSdkVersion,
+                    companionDeviceVersion, permUri, wearablePerms, tempFile)) {
                 Log.w(TAG, "Wearable does not have enough permissions.");
                 return;
             }
@@ -382,7 +384,7 @@ public class WearPackageInstallerService extends Service {
         }
     }
 
-    private boolean checkPermissions(PackageParser.Package pkg, int companionSdkVersion,
+    private boolean checkPermissions(PackageInfo pkgInfo, int companionSdkVersion,
             int companionDeviceVersion, Uri permUri, List<String> wearablePermissions,
             File apkFile) {
         // Assumption: We are running on Android O.
@@ -390,12 +392,12 @@ public class WearPackageInstallerService extends Service {
         // app. If the Wear App is then not targeting M, there may be permissions that are not
         // granted on the Phone app (by the user) right now and we cannot just grant it for the Wear
         // app.
-        if (pkg.applicationInfo.targetSdkVersion >= Build.VERSION_CODES.M) {
+        if (pkgInfo.applicationInfo.targetSdkVersion >= Build.VERSION_CODES.M) {
             // Install the app if Wear App is ready for the new perms model.
             return true;
         }
 
-        if (!doesWearHaveUngrantedPerms(pkg.packageName, permUri, wearablePermissions)) {
+        if (!doesWearHaveUngrantedPerms(pkgInfo.packageName, permUri, wearablePermissions)) {
             // All permissions requested by the watch are already granted on the phone, no need
             // to do anything.
             return true;
