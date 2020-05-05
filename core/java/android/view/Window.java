@@ -26,6 +26,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StyleRes;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.app.WindowConfiguration;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
@@ -1793,6 +1794,24 @@ public abstract class Window {
      * @return Returns the top-level window decor view.
      */
     public abstract @NonNull View getDecorView();
+
+    /**
+     * @return the status bar background view or null.
+     * @hide
+     */
+    @TestApi
+    public @Nullable View getStatusBarBackgroundView() {
+        return null;
+    }
+
+    /**
+     * @return the navigation bar background view or null.
+     * @hide
+     */
+    @TestApi
+    public @Nullable View getNavigationBarBackgroundView() {
+        return null;
+    }
 
     /**
      * Retrieve the current decor view, but only if it has already been created;

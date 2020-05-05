@@ -38,6 +38,7 @@ import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.KeyguardManager;
 import android.app.SearchManager;
@@ -3948,5 +3949,17 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     @Override
     public void removeScrollCaptureCallback(@NonNull ScrollCaptureCallback callback) {
         getViewRootImpl().removeScrollCaptureCallback(callback);
+    }
+
+    @Override
+    @Nullable
+    public View getStatusBarBackgroundView() {
+        return mDecor != null ? mDecor.getStatusBarBackgroundView() : null;
+    }
+
+    @Override
+    @Nullable
+    public View getNavigationBarBackgroundView() {
+        return mDecor != null ? mDecor.getNavigationBarBackgroundView() : null;
     }
 }
