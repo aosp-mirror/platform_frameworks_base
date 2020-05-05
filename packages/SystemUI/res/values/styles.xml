@@ -620,6 +620,10 @@
         <item name="rotateButtonScaleX">-1</item>
     </style>
 
+    <style name="MediaPlayer.Button" parent="@android:style/Widget.Material.Button.Borderless.Small">
+        <item name="android:background">@null</item>
+    </style>
+
     <!-- Used to style charging animation AVD animation -->
     <style name="ChargingAnim" />
 
