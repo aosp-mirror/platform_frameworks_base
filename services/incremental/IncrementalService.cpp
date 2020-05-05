@@ -1670,9 +1670,15 @@ IncrementalService::DataLoaderStub::~DataLoaderStub() = default;
 
 void IncrementalService::DataLoaderStub::cleanupResources() {
     requestDestroy();
+
+    auto now = Clock::now();
+
+    std::unique_lock lock(mMutex);
     mParams = {};
     mControl = {};
-    waitForStatus(IDataLoaderStatusListener::DATA_LOADER_DESTROYED, std::chrono::seconds(60));
+    mStatusCondition.wait_until(lock, now + 60s, [this] {
+        return mCurrentStatus == IDataLoaderStatusListener::DATA_LOADER_DESTROYED;
+    });
     mListener = {};
     mId = kInvalidStorageId;
 }
@@ -1706,7 +1712,7 @@ bool IncrementalService::DataLoaderStub::requestDestroy() {
 bool IncrementalService::DataLoaderStub::setTargetStatus(int newStatus) {
     int oldStatus, curStatus;
     {
-        std::unique_lock lock(mStatusMutex);
+        std::unique_lock lock(mMutex);
         oldStatus = mTargetStatus;
         curStatus = mCurrentStatus;
         setTargetStatusLocked(newStatus);
@@ -1719,13 +1725,6 @@ bool IncrementalService::DataLoaderStub::setTargetStatus(int newStatus) {
 void IncrementalService::DataLoaderStub::setTargetStatusLocked(int status) {
     mTargetStatus = status;
     mTargetStatusTs = Clock::now();
-}
-
-bool IncrementalService::DataLoaderStub::waitForStatus(int status, Clock::duration duration) {
-    auto now = Clock::now();
-    std::unique_lock lock(mStatusMutex);
-    return mStatusCondition.wait_until(lock, now + duration,
-                                       [this, status] { return mCurrentStatus == status; });
 }
 
 bool IncrementalService::DataLoaderStub::bind() {
@@ -1776,7 +1775,7 @@ bool IncrementalService::DataLoaderStub::fsmStep() {
     int currentStatus;
     int targetStatus;
     {
-        std::unique_lock lock(mStatusMutex);
+        std::unique_lock lock(mMutex);
         currentStatus = mCurrentStatus;
         targetStatus = mTargetStatus;
     }
@@ -1828,8 +1827,9 @@ binder::Status IncrementalService::DataLoaderStub::onStatusChanged(MountId mount
     }
 
     int targetStatus, oldStatus;
+    DataLoaderStatusListener listener;
     {
-        std::unique_lock lock(mStatusMutex);
+        std::unique_lock lock(mMutex);
         if (mCurrentStatus == newStatus) {
             return binder::Status::ok();
         }
@@ -1837,6 +1837,8 @@ binder::Status IncrementalService::DataLoaderStub::onStatusChanged(MountId mount
         oldStatus = mCurrentStatus;
         mCurrentStatus = newStatus;
         targetStatus = mTargetStatus;
+
+        listener = mListener;
 
         if (mCurrentStatus == IDataLoaderStatusListener::DATA_LOADER_UNAVAILABLE) {
             // For unavailable, reset target status.
@@ -1847,8 +1849,8 @@ binder::Status IncrementalService::DataLoaderStub::onStatusChanged(MountId mount
     LOG(DEBUG) << "Current status update for DataLoader " << mId << ": " << oldStatus << " -> "
                << newStatus << " (target " << targetStatus << ")";
 
-    if (mListener) {
-        mListener->onStatusChanged(mountId, newStatus);
+    if (listener) {
+        listener->onStatusChanged(mountId, newStatus);
     }
 
     fsmStep();
