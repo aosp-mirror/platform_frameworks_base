@@ -45,7 +45,6 @@ import static android.os.Process.SYSTEM_UID;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.TYPE_VIRTUAL;
-import static android.view.WindowManager.TRANSIT_DOCK_TASK_FROM_RECENTS;
 
 import static com.android.server.wm.ActivityStack.ActivityState.PAUSED;
 import static com.android.server.wm.ActivityStack.ActivityState.PAUSING;
@@ -915,6 +914,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
             if (DEBUG_STATES) Slog.v(TAG_STATES,
                     "Moving to PAUSED: " + r + " (starting in paused state)");
             r.setState(PAUSED, "realStartActivityLocked");
+            mRootWindowContainer.executeAppTransitionForAllDisplay();
         }
         // Perform OOM scoring after the activity state is set, so the process can be updated with
         // the latest state.
@@ -2513,8 +2513,6 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                 // not run into issues where we still need to draw the task in recents but the
                 // docked stack is already created.
                 deferUpdateRecentsHomeStackBounds();
-                // TODO(multi-display): currently recents animation only support default display.
-                mWindowManager.prepareAppTransition(TRANSIT_DOCK_TASK_FROM_RECENTS, false);
                 // TODO(task-hierarchy): Remove when tiles are in hierarchy.
                 // Unset launching windowing mode to prevent creating split-screen-primary stack
                 // in RWC#anyTaskForId() below.
