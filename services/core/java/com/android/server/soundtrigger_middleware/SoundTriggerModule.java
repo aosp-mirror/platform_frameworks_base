@@ -35,8 +35,10 @@ import android.os.RemoteException;
 import android.os.ServiceSpecificException;
 import android.util.Log;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -166,12 +168,23 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient {
     }
 
     @Override
-    public synchronized void serviceDied(long cookie) {
+    public void serviceDied(long cookie) {
         Log.w(TAG, String.format("Underlying HAL driver died."));
-        for (Session session : mActiveSessions) {
-            session.moduleDied();
+        List<ISoundTriggerCallback> callbacks = new ArrayList<>(mActiveSessions.size());
+        synchronized (this) {
+            for (Session session : mActiveSessions) {
+                callbacks.add(session.moduleDied());
+            }
+            reset();
         }
-        reset();
+        // Trigger the callbacks outside of the lock to avoid deadlocks.
+        for (ISoundTriggerCallback callback : callbacks) {
+            try {
+                callback.onModuleDied();
+            } catch (RemoteException e) {
+                throw e.rethrowAsRuntimeException();
+            }
+        }
     }
 
     /**
@@ -379,15 +392,13 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient {
 
         /**
          * The underlying module HAL is dead.
+         * @return The client callback that needs to be invoked to notify the client.
          */
-        private void moduleDied() {
-            try {
-                mCallback.onModuleDied();
-                removeSession(this);
-                mCallback = null;
-            } catch (RemoteException e) {
-                e.rethrowAsRuntimeException();
-            }
+        private ISoundTriggerCallback moduleDied() {
+            ISoundTriggerCallback callback = mCallback;
+            removeSession(this);
+            mCallback = null;
+            return callback;
         }
 
         private void checkValid() {

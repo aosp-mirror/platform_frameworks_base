@@ -783,15 +783,17 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
         @Override
         public void onModuleDied() {
             synchronized (SoundTriggerMiddlewareValidation.this) {
-                try {
-                    mState = ModuleStatus.DEAD;
-                    mCallback.onModuleDied();
-                } catch (RemoteException e) {
-                    // Dead client will be handled by binderDied() - no need to handle here.
-                    // In any case, client callbacks are considered best effort.
-                    Log.e(TAG, "Client callback exception.", e);
-                }
+                mState = ModuleStatus.DEAD;
             }
+            // Trigger the callback outside of the lock to avoid deadlocks.
+            try {
+                mCallback.onModuleDied();
+            } catch (RemoteException e) {
+                // Dead client will be handled by binderDied() - no need to handle here.
+                // In any case, client callbacks are considered best effort.
+                Log.e(TAG, "Client callback exception.", e);
+            }
+
         }
 
         @Override
