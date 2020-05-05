@@ -38,6 +38,7 @@ import static android.view.WindowManager.TRANSIT_WALLPAPER_OPEN;
 
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
+import static com.android.server.wm.AppTransition.MAX_APP_TRANSITION_DURATION;
 import static com.android.server.wm.AppWindowTokenProto.ALL_DRAWN;
 import static com.android.server.wm.AppWindowTokenProto.APP_STOPPED;
 import static com.android.server.wm.AppWindowTokenProto.CLIENT_HIDDEN;
@@ -2695,7 +2696,16 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                 displayConfig.uiMode, displayConfig.orientation, frame, displayFrame, insets,
                 surfaceInsets, stableInsets, isVoiceInteraction, freeform, getTask().mTaskId);
         if (a != null) {
-            if (DEBUG_ANIM) logWithStack(TAG, "Loaded animation " + a + " for " + this);
+            if (a != null) {
+                // Setup the maximum app transition duration to prevent malicious app may set a long
+                // animation duration or infinite repeat counts for the app transition through
+                // ActivityOption#makeCustomAnimation or WindowManager#overridePendingTransition.
+                a.restrictDuration(MAX_APP_TRANSITION_DURATION);
+            }
+            if (DEBUG_ANIM) {
+                logWithStack(TAG, "Loaded animation " + a + " for " + this
+                        + ", duration: " + ((a != null) ? a.getDuration() : 0));
+            }
             final int containingWidth = frame.width();
             final int containingHeight = frame.height();
             a.initialize(containingWidth, containingHeight, width, height);

@@ -170,6 +170,7 @@ public class AppTransition implements Dump {
     private static final int MAX_CLIP_REVEAL_TRANSITION_DURATION = 420;
     private static final int THUMBNAIL_APP_TRANSITION_DURATION = 336;
     private static final long APP_TRANSITION_TIMEOUT_MS = 5000;
+    static final int MAX_APP_TRANSITION_DURATION = 3 * 1000; // 3 secs.
 
     private final Context mContext;
     private final WindowManagerService mService;
