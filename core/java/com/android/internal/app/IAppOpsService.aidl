@@ -27,6 +27,7 @@ import com.android.internal.app.IAppOpsCallback;
 import com.android.internal.app.IAppOpsActiveCallback;
 import com.android.internal.app.IAppOpsAsyncNotedCallback;
 import com.android.internal.app.IAppOpsNotedCallback;
+import com.android.internal.app.IAppOpsStartedCallback;
 import com.android.internal.app.MessageSamplingConfig;
 
 interface IAppOpsService {
@@ -90,6 +91,9 @@ interface IAppOpsService {
     void startWatchingActive(in int[] ops, IAppOpsActiveCallback callback);
     void stopWatchingActive(IAppOpsActiveCallback callback);
     boolean isOperationActive(int code, int uid, String packageName);
+
+    void startWatchingStarted(in int[] ops, IAppOpsStartedCallback callback);
+    void stopWatchingStarted(IAppOpsStartedCallback callback);
 
     void startWatchingModeWithFlags(int op, String packageName, int flags, IAppOpsCallback callback);
 
