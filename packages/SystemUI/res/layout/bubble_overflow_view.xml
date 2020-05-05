@@ -36,6 +36,8 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:maxLines="1"
+        android:lines="2"
+        android:ellipsize="end"
         android:layout_gravity="center"
         android:paddingTop="@dimen/bubble_overflow_text_padding"
         android:gravity="center"/>
