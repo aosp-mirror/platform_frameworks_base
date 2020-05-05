@@ -1972,7 +1972,13 @@ public class LockSettingsService extends ILockSettings.Stub {
     public VerifyCredentialResponse verifyCredential(LockscreenCredential credential,
             long challenge, int userId) {
         checkPasswordReadPermission(userId);
-        return doVerifyCredential(credential, CHALLENGE_FROM_CALLER, challenge, userId,
+        @ChallengeType int challengeType = CHALLENGE_FROM_CALLER;
+        if (challenge == 0) {
+            Slog.w(TAG, "VerifyCredential called with challenge=0");
+            challengeType = CHALLENGE_NONE;
+
+        }
+        return doVerifyCredential(credential, challengeType, challenge, userId,
                 null /* progressCallback */);
     }
 
