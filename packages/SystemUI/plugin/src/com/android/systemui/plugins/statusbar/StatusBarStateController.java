@@ -40,6 +40,11 @@ public interface StatusBarStateController {
     boolean isDozing();
 
     /**
+     * Is device pulsing.
+     */
+    boolean isPulsing();
+
+    /**
      * Adds a state listener
      */
     void addCallback(StateListener listener);
