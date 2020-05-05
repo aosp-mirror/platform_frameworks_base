@@ -27,6 +27,7 @@ import com.android.systemui.car.CarDeviceProvisionedControllerImpl;
 import com.android.systemui.car.keyguard.CarKeyguardViewController;
 import com.android.systemui.car.statusbar.CarStatusBar;
 import com.android.systemui.car.statusbar.CarStatusBarKeyguardViewManager;
+import com.android.systemui.car.statusbar.DummyNotificationShadeWindowController;
 import com.android.systemui.car.volume.CarVolumeDialogComponent;
 import com.android.systemui.dagger.SystemUIRootComponent;
 import com.android.systemui.dock.DockManager;
@@ -47,6 +48,7 @@ import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.KeyguardEnvironmentImpl;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
+import com.android.systemui.statusbar.phone.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.ShadeControllerImpl;
 import com.android.systemui.statusbar.phone.StatusBar;
@@ -156,4 +158,8 @@ public abstract class CarSystemUIModule {
     @Binds
     abstract CarDeviceProvisionedController bindCarDeviceProvisionedController(
             CarDeviceProvisionedControllerImpl deviceProvisionedController);
+
+    @Binds
+    abstract NotificationShadeWindowController bindNotificationShadeWindowController(
+            DummyNotificationShadeWindowController notificationShadeWindowController);
 }
