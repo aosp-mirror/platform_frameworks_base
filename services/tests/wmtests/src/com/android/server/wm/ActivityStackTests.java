@@ -66,6 +66,7 @@ import android.app.ActivityManager;
 import android.app.IApplicationThread;
 import android.content.ComponentName;
 import android.content.pm.ActivityInfo;
+import android.os.Binder;
 import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
 
@@ -1288,6 +1289,27 @@ public class ActivityStackTests extends ActivityTestsBase {
         assertTrue(firstActivity.finishing);
         // The caller uid of the new activity should be the current real caller.
         assertEquals(starter.mRequest.callingUid, secondActivity.getUid());
+    }
+
+    @Test
+    public void testShouldUpRecreateTaskLockedWithCorrectAffinityFormat() {
+        final String affinity = "affinity";
+        final ActivityRecord activity = new ActivityBuilder(mService).setAffinity(affinity)
+                .setUid(Binder.getCallingUid()).setCreateTask(true).build();
+        activity.getTask().affinity = activity.taskAffinity;
+
+        assertFalse(mStack.shouldUpRecreateTaskLocked(activity, affinity));
+    }
+
+    @Test
+    public void testShouldUpRecreateTaskLockedWithWrongAffinityFormat() {
+        final String affinity = "affinity";
+        final ActivityRecord activity = new ActivityBuilder(mService).setAffinity(affinity)
+                .setUid(Binder.getCallingUid()).setCreateTask(true).build();
+        activity.getTask().affinity = activity.taskAffinity;
+        final String fakeAffinity = activity.getUid() + activity.taskAffinity;
+
+        assertTrue(mStack.shouldUpRecreateTaskLocked(activity, fakeAffinity));
     }
 
     @Test

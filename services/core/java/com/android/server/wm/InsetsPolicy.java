@@ -25,7 +25,6 @@ import static android.view.InsetsController.ANIMATION_TYPE_SHOW;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.view.SyncRtSurfaceTransactionApplier.applyParams;
-import static android.view.WindowInsetsController.BEHAVIOR_SHOW_BARS_BY_TOUCH;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_STATUS_FORCE_SHOW_NAVIGATION;
 
@@ -95,13 +94,7 @@ class InsetsPolicy {
                 || focusedWin != getNavControlTarget(focusedWin)
                 || focusedWin.getRequestedInsetsState().getSource(ITYPE_NAVIGATION_BAR)
                         .isVisible());
-        updateHideNavInputEventReceiver();
-    }
-
-    private void updateHideNavInputEventReceiver() {
-        mPolicy.updateHideNavInputEventReceiver(mPolicy.isNavigationBarRequestedVisible(),
-                mFocusedWin != null
-                        && mFocusedWin.mAttrs.insetsFlags.behavior != BEHAVIOR_SHOW_BARS_BY_TOUCH);
+        mPolicy.updateHideNavInputEventReceiver();
     }
 
     boolean isHidden(@InternalInsetsType int type) {
@@ -201,7 +194,7 @@ class InsetsPolicy {
         if (windowState == getNavControlTarget(mFocusedWin)) {
             mNavBar.setVisible(state.getSource(ITYPE_NAVIGATION_BAR).isVisible());
         }
-        updateHideNavInputEventReceiver();
+        mPolicy.updateHideNavInputEventReceiver();
     }
 
     /**

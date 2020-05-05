@@ -28,9 +28,11 @@ import android.content.Intent;
 import android.content.pm.ResolveInfo;
 import android.os.Message;
 import android.os.UserHandle;
+import android.provider.DeviceConfig;
 import android.util.Log;
 
 import com.android.internal.app.ResolverActivity.ResolvedComponentInfo;
+import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -48,7 +50,6 @@ import java.util.stream.Collectors;
 class AppPredictionServiceResolverComparator extends AbstractResolverComparator {
 
     private static final String TAG = "APSResolverComparator";
-    private static final boolean DEBUG = false;
 
     private final AppPredictor mAppPredictor;
     private final Context mContext;
@@ -60,6 +61,11 @@ class AppPredictionServiceResolverComparator extends AbstractResolverComparator 
     // If this is non-null (and this is not destroyed), it means APS is disabled and we should fall
     // back to using the ResolverRankerService.
     private ResolverRankerServiceResolverComparator mResolverRankerService;
+
+    private boolean mAppendDirectShareEnabled = DeviceConfig.getBoolean(
+            DeviceConfig.NAMESPACE_SYSTEMUI,
+            SystemUiDeviceConfigFlags.APPEND_DIRECT_SHARE_ENABLED,
+            true);
 
     AppPredictionServiceResolverComparator(
                 Context context,
@@ -113,9 +119,7 @@ class AppPredictionServiceResolverComparator extends AbstractResolverComparator 
         mAppPredictor.sortTargets(appTargets, Executors.newSingleThreadExecutor(),
                 sortedAppTargets -> {
                     if (sortedAppTargets.isEmpty()) {
-                        if (DEBUG) {
-                            Log.d(TAG, "AppPredictionService disabled. Using resolver.");
-                        }
+                        Log.i(TAG, "AppPredictionService disabled. Using resolver.");
                         // APS for chooser is disabled. Fallback to resolver.
                         mResolverRankerService =
                                 new ResolverRankerServiceResolverComparator(
@@ -123,9 +127,7 @@ class AppPredictionServiceResolverComparator extends AbstractResolverComparator 
                                         () -> mHandler.sendEmptyMessage(RANKER_SERVICE_RESULT));
                         mResolverRankerService.compute(targets);
                     } else {
-                        if (DEBUG) {
-                            Log.d(TAG, "AppPredictionService response received");
-                        }
+                        Log.i(TAG, "AppPredictionService response received");
                         Message msg =
                             Message.obtain(mHandler, RANKER_SERVICE_RESULT, sortedAppTargets);
                         msg.sendToTarget();
@@ -145,8 +147,11 @@ class AppPredictionServiceResolverComparator extends AbstractResolverComparator 
                         target.getRank()));
             }
             for (int i = 0; i < sortedAppTargets.size(); i++) {
-                mTargetRanks.put(new ComponentName(sortedAppTargets.get(i).getPackageName(),
-                        sortedAppTargets.get(i).getClassName()), i);
+                ComponentName componentName = new ComponentName(
+                        sortedAppTargets.get(i).getPackageName(),
+                        sortedAppTargets.get(i).getClassName());
+                mTargetRanks.put(componentName, i);
+                Log.i(TAG, "handleResultMessage, sortedAppTargets #" + i + ": " + componentName);
             }
         } else if (msg.obj == null && mResolverRankerService == null) {
             Log.e(TAG, "Unexpected null result");
@@ -167,7 +172,7 @@ class AppPredictionServiceResolverComparator extends AbstractResolverComparator 
         if (mResolverRankerService != null) {
             return mResolverRankerService.getScore(name);
         }
-        if (!mTargetScores.isEmpty()) {
+        if (mAppendDirectShareEnabled && !mTargetScores.isEmpty()) {
             return mTargetScores.get(name);
         }
         Integer rank = mTargetRanks.get(name);

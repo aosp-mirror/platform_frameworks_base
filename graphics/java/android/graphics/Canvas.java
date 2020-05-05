@@ -34,8 +34,6 @@ import libcore.util.NativeAllocationRegistry;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-import javax.microedition.khronos.opengles.GL;
-
 /**
  * The Canvas class holds the "draw" calls. To draw something, you need
  * 4 basic components: A Bitmap to hold the pixels, a Canvas to host
@@ -51,10 +49,8 @@ import javax.microedition.khronos.opengles.GL;
  */
 public class Canvas extends BaseCanvas {
     private static int sCompatiblityVersion = 0;
-    /** @hide */
-    public static boolean sCompatibilityRestore = false;
-    /** @hide */
-    public static boolean sCompatibilitySetBitmap = false;
+    private static boolean sCompatibilityRestore = false;
+    private static boolean sCompatibilitySetBitmap = false;
 
     /** @hide */
     @UnsupportedAppUsage
@@ -134,19 +130,6 @@ public class Canvas extends BaseCanvas {
         mFinalizer = NoImagePreloadHolder.sRegistry.registerNativeAllocation(
                 this, mNativeCanvasWrapper);
         mDensity = Bitmap.getDefaultDensity();
-    }
-
-    /**
-     * Returns null.
-     *
-     * @deprecated This method is not supported and should not be invoked.
-     *
-     * @hide
-     */
-    @Deprecated
-    @UnsupportedAppUsage
-    protected GL getGL() {
-        return null;
     }
 
     /**
@@ -1426,9 +1409,10 @@ public class Canvas extends BaseCanvas {
         nFreeTextLayoutCaches();
     }
 
-    /** @hide */
-    public static void setCompatibilityVersion(int apiLevel) {
+    /*package*/ static void setCompatibilityVersion(int apiLevel) {
         sCompatiblityVersion = apiLevel;
+        sCompatibilityRestore = apiLevel < Build.VERSION_CODES.M;
+        sCompatibilitySetBitmap = apiLevel < Build.VERSION_CODES.O;
         nSetCompatibilityVersion(apiLevel);
     }
 

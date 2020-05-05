@@ -5432,10 +5432,12 @@
     <string name="accessibility_system_action_lock_screen_label">Lock Screen</string>
     <!-- Label for taking screenshot action [CHAR LIMIT=NONE] -->
     <string name="accessibility_system_action_screenshot_label">Screenshot</string>
-    <!-- Label for showing accessibility shortcut action [CHAR LIMIT=NONE] -->
-    <string name="accessibility_system_action_accessibility_button_label">On-screen Accessibility Shortcut</string>
-    <!-- Label for showing accessibility shortcut menu action [CHAR LIMIT=NONE] -->
-    <string name="accessibility_system_action_accessibility_button_chooser_label">On-screen Accessibility Shortcut Chooser</string>
+    <!-- Label for triggering on-screen accessibility shortcut action [CHAR LIMIT=NONE] -->
+    <string name="accessibility_system_action_on_screen_a11y_shortcut_label">On-screen Accessibility Shortcut</string>
+    <!-- Label for showing on-screen accessibility shortcut chooser action [CHAR LIMIT=NONE] -->
+    <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label">On-screen Accessibility Shortcut Chooser</string>
+    <!-- Label for triggering hardware accessibility shortcut action [CHAR LIMIT=NONE] -->
+    <string name="accessibility_system_action_hardware_a11y_shortcut_label">Accessibility Shortcut</string>
     <!-- Accessibility description of caption view -->
     <string name="accessibility_freeform_caption">Caption bar of <xliff:g id="app_name">%1$s</xliff:g>.</string>
 
