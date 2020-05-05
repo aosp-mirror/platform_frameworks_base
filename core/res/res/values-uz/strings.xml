@@ -472,7 +472,7 @@
     <string name="permdesc_transmitIr" product="tablet" msgid="5884738958581810253">"Dasturga planshetdagi infraqizil antenadan foydalanish ruxsatini beradi."</string>
     <string name="permdesc_transmitIr" product="tv" msgid="3278506969529173281">"Ilovaga Android TV qurilmangizning infraqizil uzatkichidan foydalanish huquqini beradi."</string>
     <string name="permdesc_transmitIr" product="default" msgid="8484193849295581808">"Dasturga telefondagi infraqizil antenadan foydalanish ruxsatini beradi."</string>
-    <string name="permlab_setWallpaper" msgid="6959514622698794511">"fonga rasm o‘rnatish"</string>
+    <string name="permlab_setWallpaper" msgid="6959514622698794511">"fonga rasm tanlash"</string>
     <string name="permdesc_setWallpaper" msgid="2973996714129021397">"Ilova tizim uchun orqa fon rasmlarini o‘rnatishi mumkin."</string>
     <string name="permlab_setWallpaperHints" msgid="1153485176642032714">"fon rasmi o‘lchamini moslash"</string>
     <string name="permdesc_setWallpaperHints" msgid="6257053376990044668">"Ilova tizimning orqa fon rasmlari uchun o‘lchamlarini ko‘rsatishi mumkin."</string>
@@ -1221,7 +1221,7 @@
     <string name="volume_music_hint_silent_ringtone_selected" msgid="1514829655029062233">"Ovozsiz rejim tanlandi"</string>
     <string name="volume_call" msgid="7625321655265747433">"Suhbat vaqtidagi tovush balandligi"</string>
     <string name="volume_bluetooth_call" msgid="2930204618610115061">"Kiruvchi bluetooth tovushi"</string>
-    <string name="volume_alarm" msgid="4486241060751798448">"Signal tovushi"</string>
+    <string name="volume_alarm" msgid="4486241060751798448">"Signal balandligi"</string>
     <string name="volume_notification" msgid="6864412249031660057">"Eslatma tovushi"</string>
     <string name="volume_unknown" msgid="4041914008166576293">"Tovush balandligi"</string>
     <string name="volume_icon_description_bluetooth" msgid="7540388479345558400">"Bluetooth tovushi"</string>
@@ -2042,8 +2042,12 @@
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"Quvvat muloqot oynasi"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Ekran qulfi"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Skrinshot"</string>
-    <string name="accessibility_system_action_accessibility_button_label" msgid="5941347017132886642">"Ekranda tezkor ishga tushirish"</string>
-    <string name="accessibility_system_action_accessibility_button_chooser_label" msgid="6973618519666227981">"Ekranda tezkor ishga tushirishni tanlagich"</string>
+    <!-- no translation found for accessibility_system_action_on_screen_a11y_shortcut_label (8488701469459210309) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_on_screen_a11y_shortcut_chooser_label (1057878690209817886) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_hardware_a11y_shortcut_label (5764644187715255107) -->
+    <skip />
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g> taglavhalar paneli."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> cheklangan turkumga joylandi"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
