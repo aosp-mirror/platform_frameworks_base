@@ -720,7 +720,7 @@
     <string name="notification_channel_summary_priority" msgid="7415770044553264622">"Zobrazuje se v horní části sekce konverzace a má podobu bubliny."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Nastavení"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Priorita"</string>
-    <string name="no_shortcut" msgid="7176375126961212514">"Aplikace <xliff:g id="APP_NAME">%1$s</xliff:g> nepodporuje specifická nastavení pro konverzaci"</string>
+    <string name="no_shortcut" msgid="7176375126961212514">"Aplikace <xliff:g id="APP_NAME">%1$s</xliff:g> nepodporuje nastavení specifická pro konverzaci"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Žádné nedávné bubliny"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Zde se budou zobrazovat nedávné bubliny a zavřené bubliny"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Tato oznámení nelze upravit."</string>

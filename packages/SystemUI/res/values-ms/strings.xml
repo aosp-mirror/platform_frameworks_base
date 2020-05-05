@@ -965,7 +965,7 @@
     <string name="running_foreground_services_title" msgid="5137313173431186685">"Apl yang berjalan di latar belakang"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"Ketik untuk mendapatkan butiran tentang penggunaan kuasa bateri dan data"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"Matikan data mudah alih?"</string>
-    <string name="mobile_data_disable_message" msgid="8604966027899770415">"Anda tiada akses kepada data atau Internet melalui <xliff:g id="CARRIER">%s</xliff:g>. Internet hanya tersedia melaui Wi-Fi."</string>
+    <string name="mobile_data_disable_message" msgid="8604966027899770415">"Anda tidak akan mempunyai akses kepada data atau Internet melalui <xliff:g id="CARRIER">%s</xliff:g>. Internet hanya tersedia melaui Wi-Fi."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"pembawa anda"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"Oleh sebab apl melindungi permintaan kebenaran, Tetapan tidak dapat mengesahkan jawapan anda."</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"Benarkan <xliff:g id="APP_0">%1$s</xliff:g> menunjukkan <xliff:g id="APP_2">%2$s</xliff:g> hirisan?"</string>

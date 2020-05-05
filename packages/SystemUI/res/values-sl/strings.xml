@@ -439,7 +439,7 @@
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Za preklop aplikacij povlecite navzgor"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Povlecite v desno za hiter preklop med aplikacijami"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Vklop/izklop pregleda"</string>
-    <string name="expanded_header_battery_charged" msgid="5307907517976548448">"Akumulator napolnjen"</string>
+    <string name="expanded_header_battery_charged" msgid="5307907517976548448">"Baterija napolnjena"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"Polnjenje"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="757991461445765011">"<xliff:g id="CHARGING_TIME">%s</xliff:g> do napolnjenosti"</string>
     <string name="expanded_header_battery_not_charging" msgid="809409140358955848">"Se ne polni"</string>

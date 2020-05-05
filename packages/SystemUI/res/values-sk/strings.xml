@@ -163,7 +163,7 @@
     <string name="biometric_dialog_last_pin_attempt_before_wipe_user" msgid="4159878829962411168">"Ak pri ďalšom pokuse zadáte nesprávny kód PIN, tento používateľ bude odstránený."</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_user" msgid="4695682515465063885">"Ak pri ďalšom pokuse zadáte nesprávne heslo, tento používateľ bude odstránený."</string>
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"Ak pri ďalšom pokuse zadáte nesprávny vzor, váš pracovný profil a jeho dáta budú odstránené."</string>
-    <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"Ak pri ďalšom pokuse zadáte nesprávny kód PIN, váš pracovný profil a jeho dáta budú odstránené."</string>
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"Ak pri ďalšom pokuse zadáte nesprávny PIN, váš pracovný profil a jeho dáta budú odstránené."</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"Ak pri ďalšom pokuse zadáte nesprávne heslo, váš pracovný profil a jeho dáta budú odstránené."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"Príliš veľa chybných pokusov. Dáta tohto zariadenia budú odstránené."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"Príliš veľa chybných pokusov. Tento používateľ bude odstránený."</string>

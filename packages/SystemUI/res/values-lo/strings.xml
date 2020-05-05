@@ -57,7 +57,7 @@
     <string name="label_view" msgid="6815442985276363364">"ເບິ່ງ"</string>
     <string name="always_use_device" msgid="210535878779644679">"ເປີດ <xliff:g id="APPLICATION">%1$s</xliff:g> ທຸກເທື່ອທີ່ເຊື່ອມຕໍ່ <xliff:g id="USB_DEVICE">%2$s</xliff:g>"</string>
     <string name="always_use_accessory" msgid="1977225429341838444">"ເປີດ <xliff:g id="APPLICATION">%1$s</xliff:g> ທຸກເທື່ອທີ່ເຊື່ອມຕໍ່ <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>"</string>
-    <string name="usb_debugging_title" msgid="8274884945238642726">"ອະນຸຍາດການດີບັ໊ກຜ່ານ USB?"</string>
+    <string name="usb_debugging_title" msgid="8274884945238642726">"ອະນຸຍາດການດີບັກຜ່ານ USB?"</string>
     <string name="usb_debugging_message" msgid="5794616114463921773">"ລາຍນິ້ມື RSA ຂອງຄອມພິວເຕີແມ່ນ:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="4003121804294739548">"ອະນຸຍາດຈາກຄອມພິວເຕີນີ້ຕະຫຼອດ"</string>
     <string name="usb_debugging_allow" msgid="1722643858015321328">"ອະນຸຍາດ"</string>

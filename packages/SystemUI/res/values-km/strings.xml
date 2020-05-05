@@ -714,7 +714,7 @@
     <string name="notification_channel_summary_priority" msgid="7415770044553264622">"បង្ហាញ​នៅខាងលើផ្នែកសន្ទនា និង​បង្ហាញជាពពុះ។"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"ការកំណត់"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"អាទិភាព"</string>
-    <string name="no_shortcut" msgid="7176375126961212514">"<xliff:g id="APP_NAME">%1$s</xliff:g> មិនអាចប្រើ​ការកំណត់​ជាក់លាក់សម្រាប់ការសន្ទនា​បានទេ"</string>
+    <string name="no_shortcut" msgid="7176375126961212514">"<xliff:g id="APP_NAME">%1$s</xliff:g> មិនអាចប្រើ​ការកំណត់​ជាក់លាក់ចំពោះការសន្ទនា​បានទេ"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"មិនមាន​ពពុះ​ថ្មីៗ​ទេ"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"ពពុះថ្មីៗ​ និង​ពពុះដែលបានបិទ​​នឹង​បង្ហាញ​នៅទីនេះ"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"មិនអាច​កែប្រែ​ការជូនដំណឹង​ទាំងនេះ​បានទេ។"</string>

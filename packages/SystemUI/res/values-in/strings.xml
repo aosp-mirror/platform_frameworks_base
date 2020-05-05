@@ -435,7 +435,7 @@
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Geser ke atas untuk beralih aplikasi"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Tarik ke kanan untuk beralih aplikasi dengan cepat"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Aktifkan Ringkasan"</string>
-    <string name="expanded_header_battery_charged" msgid="5307907517976548448">"Terisi"</string>
+    <string name="expanded_header_battery_charged" msgid="5307907517976548448">"Terisi penuh"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"Mengisi daya"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="757991461445765011">"<xliff:g id="CHARGING_TIME">%s</xliff:g> sampai penuh"</string>
     <string name="expanded_header_battery_not_charging" msgid="809409140358955848">"Tidak mengisi daya"</string>
