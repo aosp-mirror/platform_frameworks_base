@@ -3603,12 +3603,6 @@
     <!-- Whether the device supports quick settings and its associated APIs -->
     <bool name="config_quickSettingsSupported">true</bool>
 
-    <!-- Comma separated list of extra quick settings tiles to be added to the default set as
-         defined in SystemUi (com.android.systemui.R.string.quick_settings_tiles_default).
-         Custom tiles (TileService) must be specified as "custom(pkg_name/class_in_package)"
-         (without the quotes, both absolute and relative class works). -->
-    <string name="config_defaultExtraQuickSettingsTiles" translatable="false"></string>
-
     <!-- The component name, flattened to a string, for the default autofill service
          to  enabled for an user. This service must be trusted, as it can be activated
          without explicit consent of the user. If no autofill service with the
