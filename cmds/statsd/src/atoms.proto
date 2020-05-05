@@ -4900,8 +4900,6 @@ message MobileBytesTransfer {
     optional int64 tx_bytes = 4;
 
     optional int64 tx_packets = 5;
-
-    optional int32 rat_type = 6;
 }
 
 /**
@@ -4924,8 +4922,6 @@ message MobileBytesTransferByFgBg {
     optional int64 tx_bytes = 5;
 
     optional int64 tx_packets = 6;
-
-    optional int32 rat_type = 7;
 }
 
 /**
