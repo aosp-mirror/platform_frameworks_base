@@ -846,6 +846,23 @@ class WindowStateAnimator {
         }
     }
 
+    private boolean shouldConsumeMainWindowSizeTransaction() {
+      // We only consume the transaction when the client is calling relayout
+      // because this is the only time we know the frameNumber will be valid
+      // due to the client renderer being paused. Put otherwise, only when
+      // mInRelayout is true can we guarantee the next frame will contain
+      // the most recent configuration.
+      if (!mWin.mInRelayout) return false;
+      // Since we can only do this for one window, we focus on the main application window
+      if (mAttrType != TYPE_BASE_APPLICATION) return false;
+      final Task task = mWin.getTask();
+      if (task == null) return false;
+      if (task.getMainWindowSizeChangeTransaction() == null) return false;
+      // Likewise we only focus on the task root, since we can only use one window
+      if (!mWin.mActivityRecord.isRootOfTask()) return false;
+      return true;
+    }
+
     void setSurfaceBoundariesLocked(final boolean recoveringMemory) {
         if (mSurfaceController == null) {
             return;
@@ -886,8 +903,9 @@ class WindowStateAnimator {
             clipRect = mTmpClipRect;
         }
 
-        if (w.mInRelayout && (mAttrType == TYPE_BASE_APPLICATION) && (task != null)
-                && (task.getMainWindowSizeChangeTransaction() != null)) {
+        if (shouldConsumeMainWindowSizeTransaction()) {
+            task.getSurfaceControl().deferTransactionUntil(mWin.getClientViewRootSurface(),
+                    mWin.getFrameNumber());
             mSurfaceController.deferTransactionUntil(mWin.getClientViewRootSurface(),
                     mWin.getFrameNumber());
             SurfaceControl.mergeToGlobalTransaction(task.getMainWindowSizeChangeTransaction());
