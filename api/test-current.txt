@@ -4966,6 +4966,11 @@ package android.view {
     method @Nullable public static AutoCloseable startRenderingCommandsCapture(android.view.View, java.util.concurrent.Executor, java.util.concurrent.Callable<java.io.OutputStream>);
   }
 
+  public abstract class Window {
+    method @Nullable public android.view.View getNavigationBarBackgroundView();
+    method @Nullable public android.view.View getStatusBarBackgroundView();
+  }
+
   public interface WindowManager extends android.view.ViewManager {
     method public default void setShouldShowIme(int, boolean);
     method public default void setShouldShowSystemDecors(int, boolean);
