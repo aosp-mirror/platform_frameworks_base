@@ -200,12 +200,9 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"Gailuko datuak ezabatu egingo dira"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Ezin da erabili administratzeko aplikazioa. Ezabatu egingo da gailuko eduki guztia.\n\nZalantzarik baduzu, jarri erakundeko administratzailearekin harremanetan."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> aplikazioak desgaitu egin du inprimatzeko aukera."</string>
-    <!-- no translation found for personal_apps_suspension_title (7561416677884286600) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspension_text (6115455688932935597) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspension_tomorrow_text (6322541302153673994) -->
-    <skip />
+    <string name="personal_apps_suspension_title" msgid="7561416677884286600">"Aktibatu laneko profila"</string>
+    <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Aplikazio pertsonalak blokeatuta egongo dira laneko profila aktibatzen duzun arte"</string>
+    <string name="personal_apps_suspension_tomorrow_text" msgid="6322541302153673994">"Aplikazio pertsonalak bihar blokeatuko dira"</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"Aktibatu laneko profila"</string>
     <string name="me" msgid="6207584824693813140">"Ni"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Tabletaren aukerak"</string>
@@ -1797,10 +1794,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Administratzaileak eguneratu du"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Administratzaileak ezabatu du"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Ados"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (5997766757551917769) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (8587408568232177204) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"Bateriaren iraupena luzatzeko, erabili bateria-aurrezlea:\n\n•Gai iluna aktibatzen du.\n•Desaktibatu edo murriztu egiten ditu atzeko planoko jarduerak, zenbait efektu bisual eta beste eginbide batzuk, hala nola \"Ok Google\".\n\n"<annotation id="url">"Lortu informazio gehiago"</annotation></string>
+    <string name="battery_saver_description" msgid="8587408568232177204">"Bateriaren iraupena luzatzeko, erabili bateria-aurrezlea:\n\n•Gai iluna aktibatzen du.\n•Desaktibatu edo murriztu egiten ditu atzeko planoko jarduerak, zenbait efektu bisual eta beste eginbide batzuk, hala nola \"Ok Google\"."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Datuen erabilera murrizteko, atzeko planoan datuak bidaltzea eta jasotzea galarazten die datu-aurrezleak aplikazio batzuei. Une honetan erabiltzen ari zaren aplikazioak atzitu egin ahal izango ditu datuak, baina baliteke maiztasun txikiagoarekin atzitzea. Horrela, adibidez, baliteke irudiak ez erakustea haiek sakatu arte."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Datu-aurrezlea aktibatu nahi duzu?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Aktibatu"</string>
@@ -2047,15 +2042,12 @@
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"Piztu edo itzaltzeko leihoa"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Pantaila blokeatua"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Pantaila-argazkia"</string>
-    <!-- no translation found for accessibility_system_action_accessibility_button_label (5941347017132886642) -->
-    <skip />
-    <!-- no translation found for accessibility_system_action_accessibility_button_chooser_label (6973618519666227981) -->
-    <skip />
+    <string name="accessibility_system_action_accessibility_button_label" msgid="5941347017132886642">"Pantailako erabilerraztasun-lasterbidea"</string>
+    <string name="accessibility_system_action_accessibility_button_chooser_label" msgid="6973618519666227981">"Pantailako erabilerraztasun-lasterbideen hautatzailea"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g> aplikazioko azpitituluen barra."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"Murriztuen edukiontzian ezarri da <xliff:g id="PACKAGE_NAME">%1$s</xliff:g>"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
-    <!-- no translation found for conversation_single_line_image_placeholder (6983271082911936900) -->
-    <skip />
+    <string name="conversation_single_line_image_placeholder" msgid="6983271082911936900">"erabiltzaileak irudi bat bidali du"</string>
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"Elkarrizketa"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"Taldeko elkarrizketa"</string>
     <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>

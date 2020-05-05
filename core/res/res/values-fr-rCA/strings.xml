@@ -1794,10 +1794,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Mise à jour par votre administrateur"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Supprimé par votre administrateur"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (5997766757551917769) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (8587408568232177204) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"Pour prolonger l\'autonomie de la pile, l\'économiseur de pile effectue les actions suivantes :\n\n•·Active le thème sombre\n•·Désactive ou limite l\'activité en arrière-plan, certains effets visuels et d\'autres fonctionnalités, comme « Ok Google »\n\n"<annotation id="url">"En savoir plus"</annotation></string>
+    <string name="battery_saver_description" msgid="8587408568232177204">"Pour prolonger l\'autonomie de la pile, l\'économiseur de pile effectue les actions suivantes :\n\n•·Active le thème sombre\n•·Désactive ou limite l\'activité en arrière-plan, certains effets visuels et d\'autres fonctionnalités, comme « Ok Google »"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Pour aider à diminuer l\'utilisation des données, la fonctionnalité Économiseur de données empêche certaines applications d\'envoyer ou de recevoir des données en arrière-plan. Une application que vous utilisez actuellement peut accéder à des données, mais peut le faire moins souvent. Cela peut signifier, par exemple, que les images ne s\'affichent pas jusqu\'à ce que vous les touchiez."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Activer l\'économiseur de données?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Activer"</string>
@@ -2044,15 +2042,12 @@
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"Boîte de dialogue sur l\'alimentation"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Écran de verrouillage"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Capture d\'écran"</string>
-    <!-- no translation found for accessibility_system_action_accessibility_button_label (5941347017132886642) -->
-    <skip />
-    <!-- no translation found for accessibility_system_action_accessibility_button_chooser_label (6973618519666227981) -->
-    <skip />
+    <string name="accessibility_system_action_accessibility_button_label" msgid="5941347017132886642">"Raccourci d\'accessibilité à l\'écran"</string>
+    <string name="accessibility_system_action_accessibility_button_chooser_label" msgid="6973618519666227981">"Sélecteur de raccourci d\'accessibilité à l\'écran"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Barre de légende de l\'application <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> a été placé dans le compartiment RESTREINT"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g> :"</string>
-    <!-- no translation found for conversation_single_line_image_placeholder (6983271082911936900) -->
-    <skip />
+    <string name="conversation_single_line_image_placeholder" msgid="6983271082911936900">"a envoyé une image"</string>
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"Conversation"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"Conversation de groupe"</string>
     <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>

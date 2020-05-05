@@ -120,6 +120,7 @@ import com.android.server.SystemConfig;
 import com.android.server.Watchdog;
 import com.android.server.compat.PlatformCompat;
 import com.android.server.pm.dex.DexManager;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.wm.ActivityServiceConnectionsHolder;
 import com.android.server.wm.WindowManagerService;
 
@@ -2169,7 +2170,12 @@ public final class ProcessList {
         Map<String, Pair<String, Long>> result = new ArrayMap<>(packages.length);
         int userId = UserHandle.getUserId(uid);
         for (String packageName : packages) {
-            String volumeUuid = pmInt.getPackage(packageName).getVolumeUuid();
+            AndroidPackage androidPackage = pmInt.getPackage(packageName);
+            if (androidPackage == null) {
+                Slog.w(TAG, "Unknown package:" + packageName);
+                continue;
+            }
+            String volumeUuid = androidPackage.getVolumeUuid();
             long inode = pmInt.getCeDataInode(packageName, userId);
             if (inode == 0) {
                 Slog.w(TAG, packageName + " inode == 0 (b/152760674)");

@@ -1010,16 +1010,6 @@ class ActivityStack extends Task {
         }
     }
 
-    boolean isTopActivityFocusable() {
-        final ActivityRecord r = topRunningActivity();
-        return r != null ? r.isFocusable()
-                : (isFocusable() && getWindowConfiguration().canReceiveKeys());
-    }
-
-    boolean isFocusableAndVisible() {
-        return isTopActivityFocusable() && shouldBeVisible(null /* starting */);
-    }
-
     // TODO: Should each user have there own stacks?
     @Override
     void switchUser(int userId) {
@@ -1389,7 +1379,7 @@ class ActivityStack extends Task {
             boolean preserveWindows, boolean notifyClients) {
         mTopActivityOccludesKeyguard = false;
         mTopDismissingKeyguardActivity = null;
-        mStackSupervisor.getKeyguardController().beginActivityVisibilityUpdate();
+        mStackSupervisor.beginActivityVisibilityUpdate();
         try {
             mEnsureActivitiesVisibleHelper.process(
                     starting, configChanges, preserveWindows, notifyClients);
@@ -1400,7 +1390,7 @@ class ActivityStack extends Task {
                 notifyActivityDrawnLocked(null);
             }
         } finally {
-            mStackSupervisor.getKeyguardController().endActivityVisibilityUpdate();
+            mStackSupervisor.endActivityVisibilityUpdate();
         }
     }
 
@@ -1688,6 +1678,8 @@ class ActivityStack extends Task {
                     ensureActivitiesVisible(null /* starting */, 0 /* configChanges */,
                             !PRESERVE_WINDOWS);
                     nothingToResume = shouldSleepActivities();
+                } else if (next.currentLaunchCanTurnScreenOn() && next.canTurnScreenOn()) {
+                    nothingToResume = false;
                 }
             }
             if (nothingToResume) {
@@ -2374,8 +2366,10 @@ class ActivityStack extends Task {
     boolean shouldUpRecreateTaskLocked(ActivityRecord srec, String destAffinity) {
         // Basic case: for simple app-centric recents, we need to recreate
         // the task if the affinity has changed.
+
+        final String affinity = ActivityRecord.getTaskAffinityWithUid(destAffinity, srec.getUid());
         if (srec == null || srec.getTask().affinity == null
-                || !srec.getTask().affinity.equals(destAffinity)) {
+                || !srec.getTask().affinity.equals(affinity)) {
             return true;
         }
         // Document-centric case: an app may be split in to multiple documents;
