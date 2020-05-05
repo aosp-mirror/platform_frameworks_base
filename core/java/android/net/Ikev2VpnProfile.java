@@ -803,7 +803,7 @@ public final class Ikev2VpnProfile extends PlatformVpnProfile {
          * @param isMetered {@code true} if the VPN network should be treated as metered regardless
          *     of underlying network meteredness. Defaults to {@code true}.
          * @return this {@link Builder} object to facilitate chaining of method calls
-         * @see NetworkCapabilities.NET_CAPABILITY_NOT_METERED
+         * @see NetworkCapabilities#NET_CAPABILITY_NOT_METERED
          */
         @NonNull
         public Builder setMetered(boolean isMetered) {

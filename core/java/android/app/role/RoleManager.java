@@ -102,8 +102,6 @@ public final class RoleManager {
 
     /**
      * The name of the emergency role
-     *
-     * @see android.telephony.TelephonyManager#ACTION_EMERGENCY_ASSISTANCE
      */
     public static final String ROLE_EMERGENCY = "android.app.role.EMERGENCY";
 
