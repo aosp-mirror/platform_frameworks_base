@@ -81,11 +81,18 @@ bool FileDescriptorWhitelist::IsAllowed(const std::string& path) const {
   }
 
   // Framework jars are allowed.
-  static const char* kFrameworksPrefix = "/system/framework/";
+  static const char* kFrameworksPrefix[] = {
+          "/system/framework/",
+          "/system_ext/framework/",
+  };
+
   static const char* kJarSuffix = ".jar";
-  if (android::base::StartsWith(path, kFrameworksPrefix)
-      && android::base::EndsWith(path, kJarSuffix)) {
-    return true;
+
+  for (const auto& frameworks_prefix : kFrameworksPrefix) {
+    if (android::base::StartsWith(path, frameworks_prefix)
+        && android::base::EndsWith(path, kJarSuffix)) {
+      return true;
+    }
   }
 
   // Jars from the ART APEX are allowed.
