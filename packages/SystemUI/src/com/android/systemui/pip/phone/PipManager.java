@@ -200,6 +200,7 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
             DeviceConfigProxy deviceConfig,
             PipBoundsHandler pipBoundsHandler,
             PipSnapAlgorithm pipSnapAlgorithm,
+            PipTaskOrganizer pipTaskOrganizer,
             PipSurfaceTransactionHelper surfaceTransactionHelper,
             Divider divider) {
         mContext = context;
@@ -215,8 +216,7 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
 
         final IActivityTaskManager activityTaskManager = ActivityTaskManager.getService();
         mPipBoundsHandler = pipBoundsHandler;
-        mPipTaskOrganizer = new PipTaskOrganizer(context, pipBoundsHandler,
-                surfaceTransactionHelper, divider);
+        mPipTaskOrganizer = pipTaskOrganizer;
         mPipTaskOrganizer.registerPipTransitionCallback(this);
         mInputConsumerController = InputConsumerController.getPipInputConsumer();
         mMediaController = new PipMediaController(context, mActivityManager, broadcastDispatcher);

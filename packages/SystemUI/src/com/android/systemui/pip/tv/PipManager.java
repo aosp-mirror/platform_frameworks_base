@@ -233,6 +233,7 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
     @Inject
     public PipManager(Context context, BroadcastDispatcher broadcastDispatcher,
             PipBoundsHandler pipBoundsHandler,
+            PipTaskOrganizer pipTaskOrganizer,
             PipSurfaceTransactionHelper surfaceTransactionHelper,
             Divider divider) {
         if (mInitialized) {
@@ -250,8 +251,7 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
 
         mResizeAnimationDuration = context.getResources()
                 .getInteger(R.integer.config_pipResizeAnimationDuration);
-        mPipTaskOrganizer = new PipTaskOrganizer(mContext, mPipBoundsHandler,
-                surfaceTransactionHelper, divider);
+        mPipTaskOrganizer = pipTaskOrganizer;
         mPipTaskOrganizer.registerPipTransitionCallback(this);
         mActivityTaskManager = ActivityTaskManager.getService();
         ActivityManagerWrapper.getInstance().registerTaskStackListener(mTaskStackListener);
