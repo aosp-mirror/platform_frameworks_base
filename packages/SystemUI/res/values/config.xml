@@ -128,6 +128,13 @@
         night,dark,dnd,flashlight,rotation,location
     </string>
 
+    <!-- Tiles to auto add to Quick Settings upon first change of a given secure setting.
+         The syntax is setting-name:spec. If the tile is a TileService, the spec should be specified
+         as custom(package/class). Relative class name is supported. -->
+    <string-array name="config_quickSettingsAutoAdd" translatable="false">
+        <item>accessibility_display_inversion_enabled:inversion</item>
+    </string-array>
+
     <!-- Whether or not the RSSI tile is capitalized or not. -->
     <bool name="quick_settings_rssi_tile_capitalization">true</bool>
 
