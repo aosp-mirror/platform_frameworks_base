@@ -110,6 +110,22 @@ public class AppOpsActiveWatcherTest {
 
         // We should not be getting any callbacks
         verifyNoMoreInteractions(listener);
+
+        // Start watching op again
+        appOpsManager.startWatchingActive(new String[] {AppOpsManager.OPSTR_CAMERA},
+                getContext().getMainExecutor(), listener);
+
+        // Start the op
+        appOpsManager.startOp(AppOpsManager.OP_CAMERA);
+
+        // We should get the callback again (and since we reset the listener, we therefore expect 1)
+        verify(listener, timeout(NOTIFICATION_TIMEOUT_MILLIS)
+                .times(1)).onOpActiveChanged(eq(AppOpsManager.OPSTR_CAMERA),
+                eq(Process.myUid()), eq(getContext().getPackageName()), eq(true));
+
+        // Finish up
+        appOpsManager.finishOp(AppOpsManager.OP_CAMERA);
+        appOpsManager.stopWatchingActive(listener);
     }
 
     @Test

@@ -66,6 +66,7 @@ import com.android.internal.app.IAppOpsAsyncNotedCallback;
 import com.android.internal.app.IAppOpsCallback;
 import com.android.internal.app.IAppOpsNotedCallback;
 import com.android.internal.app.IAppOpsService;
+import com.android.internal.app.IAppOpsStartedCallback;
 import com.android.internal.app.MessageSamplingConfig;
 import com.android.internal.os.RuntimeInit;
 import com.android.internal.os.ZygoteInit;
@@ -199,6 +200,10 @@ public class AppOpsManager {
 
     @GuardedBy("mActiveWatchers")
     private final ArrayMap<OnOpActiveChangedListener, IAppOpsActiveCallback> mActiveWatchers =
+            new ArrayMap<>();
+
+    @GuardedBy("mStartedWatchers")
+    private final ArrayMap<OnOpStartedListener, IAppOpsStartedCallback> mStartedWatchers =
             new ArrayMap<>();
 
     @GuardedBy("mNotedWatchers")
@@ -6367,6 +6372,25 @@ public class AppOpsManager {
         default void onOpActiveChanged(int op, int uid, String packageName, boolean active) { }
     }
 
+    /**
+     * Callback for notification of an op being started.
+     *
+     * @hide
+     */
+    public interface OnOpStartedListener {
+        /**
+         * Called when an op was started.
+         *
+         * Note: This is only for op starts. It is not called when an op is noted or stopped.
+         *
+         * @param op The op code.
+         * @param uid The UID performing the operation.
+         * @param packageName The package performing the operation.
+         * @param result The result of the start.
+         */
+        void onOpStarted(int op, int uid, String packageName, int result);
+    }
+
     AppOpsManager(Context context, IAppOpsService service) {
         mContext = context;
         mService = service;
@@ -6922,6 +6946,73 @@ public class AppOpsManager {
     }
 
     /**
+     * Start watching for started app-ops.
+     * An app-op may be long running and it has a clear start delimiter.
+     * If an op start is attempted by any package, you will get a callback.
+     * To change the watched ops for a registered callback you need to unregister and register it
+     * again.
+     *
+     * <p> If you don't hold the {@code android.Manifest.permission#WATCH_APPOPS} permission
+     * you can watch changes only for your UID.
+     *
+     * @param ops The operations to watch.
+     * @param callback Where to report changes.
+     *
+     * @see #stopWatchingStarted(OnOpStartedListener)
+     * @see #startWatchingActive(int[], OnOpActiveChangedListener)
+     * @see #startWatchingNoted(int[], OnOpNotedListener)
+     * @see #startOp(int, int, String, boolean, String, String)
+     * @see #finishOp(int, int, String, String)
+     *
+     * @hide
+     */
+     @RequiresPermission(value=Manifest.permission.WATCH_APPOPS, conditional=true)
+     public void startWatchingStarted(@NonNull int[] ops, @NonNull OnOpStartedListener callback) {
+         IAppOpsStartedCallback cb;
+         synchronized (mStartedWatchers) {
+             if (mStartedWatchers.containsKey(callback)) {
+                 return;
+             }
+             cb = new IAppOpsStartedCallback.Stub() {
+                 @Override
+                 public void opStarted(int op, int uid, String packageName, int mode) {
+                     callback.onOpStarted(op, uid, packageName, mode);
+                 }
+             };
+             mStartedWatchers.put(callback, cb);
+         }
+         try {
+             mService.startWatchingStarted(ops, cb);
+         } catch (RemoteException e) {
+             throw e.rethrowFromSystemServer();
+         }
+    }
+
+    /**
+     * Stop watching for started app-ops.
+     * An app-op may be long running and it has a clear start delimiter.
+     * Henceforth, if an op start is attempted by any package, you will not get a callback.
+     * Unregistering a non-registered callback has no effect.
+     *
+     * @see #startWatchingStarted(int[], OnOpStartedListener)
+     * @see #startOp(int, int, String, boolean, String, String)
+     *
+     * @hide
+     */
+    public void stopWatchingStarted(@NonNull OnOpStartedListener callback) {
+        synchronized (mStartedWatchers) {
+            final IAppOpsStartedCallback cb = mStartedWatchers.remove(callback);
+            if (cb != null) {
+                try {
+                    mService.stopWatchingStarted(cb);
+                } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
+                }
+            }
+        }
+    }
+
+    /**
      * Start watching for noted app ops. An app op may be immediate or long running.
      * Immediate ops are noted while long running ones are started and stopped. This
      * method allows registering a listener to be notified when an app op is noted. If
@@ -6935,6 +7026,7 @@ public class AppOpsManager {
      * @param callback Where to report changes.
      *
      * @see #startWatchingActive(int[], OnOpActiveChangedListener)
+     * @see #startWatchingStarted(int[], OnOpStartedListener)
      * @see #stopWatchingNoted(OnOpNotedListener)
      * @see #noteOp(String, int, String, String, String)
      *
@@ -6974,7 +7066,7 @@ public class AppOpsManager {
      */
     public void stopWatchingNoted(@NonNull OnOpNotedListener callback) {
         synchronized (mNotedWatchers) {
-            final IAppOpsNotedCallback cb = mNotedWatchers.get(callback);
+            final IAppOpsNotedCallback cb = mNotedWatchers.remove(callback);
             if (cb != null) {
                 try {
                     mService.stopWatchingNoted(cb);
