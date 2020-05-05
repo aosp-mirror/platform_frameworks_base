@@ -37,6 +37,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.metrics.LogMaker;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -152,7 +153,8 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
                 NOTIFICATION_NEW_INTERRUPTION_MODEL, 0);
         Settings.Secure.putInt(mContext.getContentResolver(),
                 NOTIFICATION_NEW_INTERRUPTION_MODEL, 1);
-        Settings.Secure.putInt(mContext.getContentResolver(), NOTIFICATION_HISTORY_ENABLED, 1);
+        Settings.Secure.putIntForUser(mContext.getContentResolver(), NOTIFICATION_HISTORY_ENABLED,
+                1, UserHandle.USER_CURRENT);
 
         // Inject dependencies before initializing the layout
         mDependency.injectMockDependency(VisualStabilityManager.class);
