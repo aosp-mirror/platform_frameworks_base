@@ -253,7 +253,7 @@ public class ChooserActivity extends ResolverActivity implements
     private boolean mChooserTargetRankingEnabled = DeviceConfig.getBoolean(
             DeviceConfig.NAMESPACE_SYSTEMUI,
             SystemUiDeviceConfigFlags.CHOOSER_TARGET_RANKING_ENABLED,
-            false);
+            true);
 
     private Bundle mReplacementExtras;
     private IntentSender mChosenComponentSender;
