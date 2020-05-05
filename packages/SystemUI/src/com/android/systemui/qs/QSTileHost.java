@@ -454,11 +454,8 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
 
         final Resources res = context.getResources();
         final String defaultTileList = res.getString(R.string.quick_settings_tiles_default);
-        final String extraTileList = res.getString(
-                com.android.internal.R.string.config_defaultExtraQuickSettingsTiles);
 
         tiles.addAll(Arrays.asList(defaultTileList.split(",")));
-        tiles.addAll(Arrays.asList(extraTileList.split(",")));
         if (Build.IS_DEBUGGABLE
                 && GarbageMonitor.MemoryTile.ADD_TO_DEFAULT_ON_DEBUGGABLE_BUILDS) {
             tiles.add(GarbageMonitor.MemoryTile.TILE_SPEC);
