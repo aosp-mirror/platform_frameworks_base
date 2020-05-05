@@ -1007,7 +1007,7 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Systemsteuerungseinstellungen wurden angepasst. Änderungen kannst du in den Einstellungen vornehmen."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Gehe zu den Einstellungen, um die Systemsteuerung anzupassen"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Standby"</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Oben im Bereich für Unterhaltungen anzeigen"</string>
+    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Oben im Bereich \"Unterhaltungen\" anzeigen"</string>
     <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Profilbild auf Sperrbildschirm anzeigen"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Unverankertes Infofeld über anderen Apps"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"\"Bitte nicht stören\" unterbrechen"</string>

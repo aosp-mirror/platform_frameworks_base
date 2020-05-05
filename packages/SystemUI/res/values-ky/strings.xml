@@ -714,7 +714,7 @@
     <string name="notification_channel_summary_priority" msgid="7415770044553264622">"Жазышуу бөлүмүнүн жогорку жагында көрсөтүлүп, калкып чыкма билдирме катары пайда болот."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Жөндөөлөр"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Маанилүүлүгү"</string>
-    <string name="no_shortcut" msgid="7176375126961212514">"<xliff:g id="APP_NAME">%1$s</xliff:g> жазышууга тийиштүү жөндөөлөрдү колдоого албайт"</string>
+    <string name="no_shortcut" msgid="7176375126961212514">"<xliff:g id="APP_NAME">%1$s</xliff:g> колдонмосунда жазышууга болбойт"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Акыркы калкып чыкма билдирмелер жок"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Кайра жөнөтүлгөн жана жабылган калкып чыкма билдирмелер ушул жерде көрүнөт"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Бул билдирмелерди өзгөртүүгө болбойт."</string>

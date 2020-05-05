@@ -714,7 +714,7 @@
     <string name="notification_channel_summary_priority" msgid="7415770044553264622">"Ցուցադրվում է «Խոսակցություններ» բաժնում և հայտնվում է ամպիկի տեսքով։"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Կարգավորումներ"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Կարևոր"</string>
-    <string name="no_shortcut" msgid="7176375126961212514">"<xliff:g id="APP_NAME">%1$s</xliff:g> հավելվածը չի աջակցում զրույցի հատուկ կարգավորումները"</string>
+    <string name="no_shortcut" msgid="7176375126961212514">"<xliff:g id="APP_NAME">%1$s</xliff:g> հավելվածը չի աջակցում զրույցի կարգավորումները"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Վերջին ամպիկներ չկան"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Այստեղ կցուցադրվեն վերջերս օգտագործված և փակված ամպիկները, որոնք կկարողանաք հեշտությամբ վերաբացել"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Այս ծանուցումները չեն կարող փոփոխվել:"</string>
