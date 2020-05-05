@@ -315,4 +315,15 @@ public abstract class UsageStatsManagerInternal {
      * @return {@code true} if the pruning was successful, {@code false} otherwise
      */
     public abstract boolean pruneUninstalledPackagesData(@UserIdInt int userId);
+
+    /**
+     * Called by {@link com.android.server.usage.UsageStatsIdleService} between 24 to 48 hours of
+     * when the user is first unlocked to update the usage stats package mappings data that might
+     * be stale or have existed from a restore and belongs to packages that are not installed for
+     * this user anymore.
+     * Note: this is only executed for the system user.
+     *
+     * @return {@code true} if the updating was successful, {@code false} otherwise
+     */
+    public abstract boolean updatePackageMappingsData();
 }
