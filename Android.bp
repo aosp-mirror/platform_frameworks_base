@@ -608,7 +608,7 @@ filegroup {
 java_library {
     name: "framework-annotations-lib",
     srcs: [ ":framework-annotations" ],
-    sdk_version: "current",
+    sdk_version: "core_current",
 }
 
 filegroup {
@@ -739,7 +739,7 @@ java_library {
         "core/proto/android/privacy.proto",
         "core/proto/android/section.proto",
     ],
-    sdk_version: "current",
+    sdk_version: "9",
     srcs: [
         "core/proto/**/*.proto",
         "libs/incident/proto/android/os/**/*.proto",
@@ -762,6 +762,7 @@ java_library {
         "core/proto/android/privacy.proto",
         "core/proto/android/section.proto",
     ],
+    sdk_version: "core_current",
     // Protos have lots of MissingOverride and similar.
     errorprone: {
         javacflags: ["-XepDisableAllChecks"],
