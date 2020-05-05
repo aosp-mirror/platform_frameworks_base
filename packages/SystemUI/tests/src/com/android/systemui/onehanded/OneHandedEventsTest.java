@@ -78,6 +78,8 @@ public class OneHandedEventsTest extends SysuiTestCase {
                         "writeEvent one_handed_trigger_app_taps_out"},
                 {OneHandedEvents.EVENT_ONE_HANDED_TRIGGER_TIMEOUT_OUT,
                         "writeEvent one_handed_trigger_timeout_out"},
+                {OneHandedEvents.EVENT_ONE_HANDED_TRIGGER_SCREEN_OFF_OUT,
+                        "writeEvent one_handed_trigger_screen_off_out"},
                 // Settings toggles
                 {OneHandedEvents.EVENT_ONE_HANDED_SETTINGS_ENABLED_ON,
                         "writeEvent one_handed_settings_enabled_on"},

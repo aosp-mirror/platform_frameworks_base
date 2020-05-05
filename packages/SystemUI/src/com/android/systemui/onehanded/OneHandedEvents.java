@@ -16,8 +16,6 @@
 
 package com.android.systemui.onehanded;
 
-import android.util.Log;
-
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
@@ -44,17 +42,18 @@ public class OneHandedEvents {
     public static final int EVENT_ONE_HANDED_TRIGGER_ROTATION_OUT = 4;
     public static final int EVENT_ONE_HANDED_TRIGGER_APP_TAPS_OUT = 5;
     public static final int EVENT_ONE_HANDED_TRIGGER_TIMEOUT_OUT = 6;
+    public static final int EVENT_ONE_HANDED_TRIGGER_SCREEN_OFF_OUT = 7;
     // Settings toggles
-    public static final int EVENT_ONE_HANDED_SETTINGS_ENABLED_ON = 7;
-    public static final int EVENT_ONE_HANDED_SETTINGS_ENABLED_OFF = 8;
-    public static final int EVENT_ONE_HANDED_SETTINGS_APP_TAPS_EXIT_ON = 9;
-    public static final int EVENT_ONE_HANDED_SETTINGS_APP_TAPS_EXIT_OFF = 10;
-    public static final int EVENT_ONE_HANDED_SETTINGS_TIMEOUT_EXIT_ON = 11;
-    public static final int EVENT_ONE_HANDED_SETTINGS_TIMEOUT_EXIT_OFF = 12;
-    public static final int EVENT_ONE_HANDED_SETTINGS_TIMEOUT_SECONDS_NEVER = 13;
-    public static final int EVENT_ONE_HANDED_SETTINGS_TIMEOUT_SECONDS_4 = 14;
-    public static final int EVENT_ONE_HANDED_SETTINGS_TIMEOUT_SECONDS_8 = 15;
-    public static final int EVENT_ONE_HANDED_SETTINGS_TIMEOUT_SECONDS_12 = 16;
+    public static final int EVENT_ONE_HANDED_SETTINGS_ENABLED_ON = 8;
+    public static final int EVENT_ONE_HANDED_SETTINGS_ENABLED_OFF = 9;
+    public static final int EVENT_ONE_HANDED_SETTINGS_APP_TAPS_EXIT_ON = 10;
+    public static final int EVENT_ONE_HANDED_SETTINGS_APP_TAPS_EXIT_OFF = 11;
+    public static final int EVENT_ONE_HANDED_SETTINGS_TIMEOUT_EXIT_ON = 12;
+    public static final int EVENT_ONE_HANDED_SETTINGS_TIMEOUT_EXIT_OFF = 13;
+    public static final int EVENT_ONE_HANDED_SETTINGS_TIMEOUT_SECONDS_NEVER = 14;
+    public static final int EVENT_ONE_HANDED_SETTINGS_TIMEOUT_SECONDS_4 = 15;
+    public static final int EVENT_ONE_HANDED_SETTINGS_TIMEOUT_SECONDS_8 = 16;
+    public static final int EVENT_ONE_HANDED_SETTINGS_TIMEOUT_SECONDS_12 = 17;
 
     private static final String[] EVENT_TAGS = {
             "one_handed_trigger_gesture_in",
@@ -64,6 +63,7 @@ public class OneHandedEvents {
             "one_handed_trigger_rotation_out",
             "one_handed_trigger_app_taps_out",
             "one_handed_trigger_timeout_out",
+            "one_handed_trigger_screen_off_out",
             "one_handed_settings_enabled_on",
             "one_handed_settings_enabled_off",
             "one_handed_settings_app_taps_exit_on",
@@ -101,7 +101,10 @@ public class OneHandedEvents {
         ONE_HANDED_TRIGGER_APP_TAPS_OUT(371),
 
         @UiEvent(doc = "One-Handed trigger out when one-handed mode times up")
-        ONE_HANDED_TRIGGER_TIMEOUT_OUT(372);
+        ONE_HANDED_TRIGGER_TIMEOUT_OUT(372),
+
+        @UiEvent(doc = "One-Handed trigger out when screen off")
+        ONE_HANDED_TRIGGER_SCREEN_OFF_OUT(449);
 
         private final int mId;
 
@@ -168,7 +171,7 @@ public class OneHandedEvents {
      */
     public static void writeEvent(int tag) {
         final long time = System.currentTimeMillis();
-        Log.i(TAG, logEvent(tag));
+        logEvent(tag);
         if (sCallback != null) {
             sCallback.writeEvent(time, tag);
         }
@@ -207,6 +210,9 @@ public class OneHandedEvents {
                 break;
             case EVENT_ONE_HANDED_TRIGGER_TIMEOUT_OUT:
                 sUiEventLogger.log(OneHandedTriggerEvent.ONE_HANDED_TRIGGER_TIMEOUT_OUT);
+                break;
+            case EVENT_ONE_HANDED_TRIGGER_SCREEN_OFF_OUT:
+                sUiEventLogger.log(OneHandedTriggerEvent.ONE_HANDED_TRIGGER_SCREEN_OFF_OUT);
                 break;
             // Settings
             case EVENT_ONE_HANDED_SETTINGS_ENABLED_ON:

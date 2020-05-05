@@ -147,7 +147,6 @@ public class OneHandedTimeoutHandler implements Dumpable {
     }
 
     private static void onStop() {
-        // TODO (b/149366439) UIEvent metrics add here, timeout stop  one handed
         for (int i = sListeners.size() - 1; i >= 0; i--) {
             final TimeoutListener listener = sListeners.get(i);
             listener.onTimeout(sTimeout);
