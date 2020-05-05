@@ -50,6 +50,7 @@ class SharesheetModelScorer {
     private static final float RECENCY_SCORE_SUBSEQUENT_DECAY = 0.02F;
     private static final long ONE_MONTH_WINDOW = TimeUnit.DAYS.toMillis(30);
     private static final long FOREGROUND_APP_PROMO_TIME_WINDOW = TimeUnit.MINUTES.toMillis(10);
+    private static final float FREQUENTLY_USED_APP_SCORE_INITIAL_DECAY = 0.3F;
     private static final float FREQUENTLY_USED_APP_SCORE_DECAY = 0.9F;
     @VisibleForTesting
     static final float FOREGROUND_APP_WEIGHT = 0F;
@@ -219,6 +220,7 @@ class SharesheetModelScorer {
         Map<String, Integer> appLaunchCountsMap = dataManager.queryAppLaunchCount(
                 callingUserId, now - ONE_MONTH_WINDOW, now, shareTargetMap.keySet());
         List<Pair<String, Integer>> appLaunchCounts = new ArrayList<>();
+        minValidScore *= FREQUENTLY_USED_APP_SCORE_INITIAL_DECAY;
         for (Map.Entry<String, Integer> entry : appLaunchCountsMap.entrySet()) {
             if (entry.getValue() > 0) {
                 appLaunchCounts.add(new Pair(entry.getKey(), entry.getValue()));
@@ -233,8 +235,8 @@ class SharesheetModelScorer {
             if (target.getScore() > 0f) {
                 continue;
             }
-            minValidScore *= FREQUENTLY_USED_APP_SCORE_DECAY;
             target.setScore(minValidScore);
+            minValidScore *= FREQUENTLY_USED_APP_SCORE_DECAY;
             if (DEBUG) {
                 Slog.d(TAG, String.format(
                         "SharesheetModel: promoteFrequentUsedApps packageName: %s, className: %s,"
