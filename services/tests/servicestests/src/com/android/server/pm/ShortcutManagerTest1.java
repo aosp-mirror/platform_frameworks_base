@@ -1582,6 +1582,41 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                 "s2");
     }
 
+    public void testCachedShortcuts_canPassShortcutLimit() {
+        // Change the max number of shortcuts.
+        mService.updateConfigurationLocked(ConfigConstants.KEY_MAX_SHORTCUTS + "=4");
+
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            assertTrue(mManager.setDynamicShortcuts(list(makeLongLivedShortcut("s1"),
+                    makeLongLivedShortcut("s2"), makeLongLivedShortcut("s3"),
+                    makeLongLivedShortcut("s4"))));
+        });
+
+        // Cache All
+        runWithCaller(LAUNCHER_1, USER_0, () -> {
+            mLauncherApps.cacheShortcuts(CALLING_PACKAGE_1, list("s1", "s2", "s3", "s4"),
+                    HANDLE_USER_0);
+        });
+
+        setCaller(CALLING_PACKAGE_1);
+
+        // Get dynamic shortcuts
+        assertShortcutIds(mManager.getShortcuts(ShortcutManager.FLAG_MATCH_DYNAMIC),
+                "s1", "s2", "s3", "s4");
+        // Get cached shortcuts
+        assertShortcutIds(mManager.getShortcuts(ShortcutManager.FLAG_MATCH_CACHED),
+                "s1", "s2", "s3", "s4");
+
+        assertTrue(mManager.setDynamicShortcuts(makeShortcuts("sx1", "sx2", "sx3", "sx4")));
+
+        // Get dynamic shortcuts
+        assertShortcutIds(mManager.getShortcuts(ShortcutManager.FLAG_MATCH_DYNAMIC),
+                "sx1", "sx2", "sx3", "sx4");
+        // Get cached shortcuts
+        assertShortcutIds(mManager.getShortcuts(ShortcutManager.FLAG_MATCH_CACHED),
+                "s1", "s2", "s3", "s4");
+    }
+
     // === Test for launcher side APIs ===
 
     public void testGetShortcuts() {
