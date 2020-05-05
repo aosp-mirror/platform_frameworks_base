@@ -73,7 +73,6 @@ public class BubbleOverflow implements BubbleViewProvider {
         updateIcon(mContext, parentViewGroup);
     }
 
-    // TODO(b/149146374) Propagate theme change to bubbles in overflow.
     void updateIcon(Context context, ViewGroup parentViewGroup) {
         mInflater = LayoutInflater.from(context);
         mOverflowBtn = (BadgedImageView) mInflater.inflate(R.layout.bubble_overflow_button,
