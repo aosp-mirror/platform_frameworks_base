@@ -825,18 +825,6 @@ public class ResolverDrawerLayout extends ViewGroup {
                     return true;
                 }
                 break;
-            case AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD:
-            case R.id.accessibilityActionScrollUp:
-                if (mCollapseOffset < mCollapsibleHeight) {
-                    smoothScrollTo(mCollapsibleHeight, 0);
-                    return true;
-                } else if ((mCollapseOffset < mCollapsibleHeight + mUncollapsibleHeight)
-                        && isDismissable()) {
-                    smoothScrollTo(mCollapsibleHeight + mUncollapsibleHeight, 0);
-                    mDismissOnScrollerFinished = true;
-                    return true;
-                }
-                break;
             case AccessibilityNodeInfo.ACTION_COLLAPSE:
                 if (mCollapseOffset < mCollapsibleHeight) {
                     smoothScrollTo(mCollapsibleHeight, 0);
@@ -886,7 +874,6 @@ public class ResolverDrawerLayout extends ViewGroup {
             }
             if ((mCollapseOffset < mCollapsibleHeight + mUncollapsibleHeight)
                     && ((mCollapseOffset < mCollapsibleHeight) || isDismissable())) {
-                info.addAction(AccessibilityAction.ACTION_SCROLL_BACKWARD);
                 info.addAction(AccessibilityAction.ACTION_SCROLL_UP);
                 info.setScrollable(true);
             }

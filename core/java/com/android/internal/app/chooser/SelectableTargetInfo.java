@@ -44,7 +44,6 @@ import com.android.internal.app.ResolverListAdapter.ActivityInfoPresentationGett
 import com.android.internal.app.SimpleIconFactory;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -134,6 +133,10 @@ public final class SelectableTargetInfo implements ChooserTargetInfo {
 
     public boolean isSuspended() {
         return mIsSuspended;
+    }
+
+    public DisplayResolveInfo getDisplayResolveInfo() {
+        return mSourceInfo;
     }
 
     private Drawable getChooserTargetIconDrawable(ChooserTarget target,
