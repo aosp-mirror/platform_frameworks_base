@@ -9112,7 +9112,11 @@ public class TelephonyManager {
     @Deprecated
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public void setDataEnabled(int subId, boolean enable) {
-        setDataEnabledWithReason(subId, DATA_ENABLED_REASON_USER, enable);
+        try {
+            setDataEnabledWithReason(subId, DATA_ENABLED_REASON_USER, enable);
+        } catch (RuntimeException e) {
+            Log.e(TAG, "Error calling setDataEnabledWithReason e:" + e);
+        }
     }
 
     /**
@@ -9319,7 +9323,12 @@ public class TelephonyManager {
     @Deprecated
     @SystemApi
     public boolean getDataEnabled(int subId) {
-        return isDataEnabledWithReason(DATA_ENABLED_REASON_USER);
+        try {
+            return isDataEnabledWithReason(DATA_ENABLED_REASON_USER);
+        } catch (RuntimeException e) {
+            Log.e(TAG, "Error calling isDataEnabledWithReason e:" + e);
+        }
+        return false;
     }
 
     /**
@@ -10878,7 +10887,11 @@ public class TelephonyManager {
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public void setCarrierDataEnabled(boolean enabled) {
-        setDataEnabledWithReason(DATA_ENABLED_REASON_CARRIER, enabled);
+        try {
+            setDataEnabledWithReason(DATA_ENABLED_REASON_CARRIER, enabled);
+        } catch (RuntimeException e) {
+            Log.e(TAG, "Error calling setDataEnabledWithReason e:" + e);
+        }
     }
 
     /**
@@ -10970,7 +10983,11 @@ public class TelephonyManager {
     @Deprecated
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     public void setPolicyDataEnabled(boolean enabled) {
-        setDataEnabledWithReason(DATA_ENABLED_REASON_POLICY, enabled);
+        try {
+            setDataEnabledWithReason(DATA_ENABLED_REASON_POLICY, enabled);
+        } catch (RuntimeException e) {
+            Log.e(TAG, "Error calling setDataEnabledWithReason e:" + e);
+        }
     }
 
     /** @hide */
