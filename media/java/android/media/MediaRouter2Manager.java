@@ -24,7 +24,6 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.media.session.MediaController;
 import android.media.session.MediaSessionManager;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -344,14 +343,6 @@ public final class MediaRouter2Manager {
 
     /**
      * Requests a volume change for a route asynchronously.
-     */
-    //TODO: remove this.
-    public void requestSetVolume(MediaRoute2Info route, int volume) {
-        setRouteVolume(route, volume);
-    }
-
-    /**
-     * Requests a volume change for a route asynchronously.
      * <p>
      * It may have no effect if the route is currently not selected.
      * </p>
@@ -576,19 +567,8 @@ public final class MediaRouter2Manager {
         }
         for (CallbackRecord record : mCallbackRecords) {
             record.mExecutor.execute(() -> record.mCallback
-                    .onControlCategoriesChanged(packageName, preferredFeatures));
-        }
-        for (CallbackRecord record : mCallbackRecords) {
-            record.mExecutor.execute(() -> record.mCallback
                     .onPreferredFeaturesChanged(packageName, preferredFeatures));
         }
-    }
-
-    /**
-     * @hide
-     */
-    public RoutingController getControllerForSession(@NonNull RoutingSessionInfo sessionInfo) {
-        return new RoutingController(sessionInfo);
     }
 
     /**
@@ -790,148 +770,6 @@ public final class MediaRouter2Manager {
         }
     }
 
-    //TODO: Remove this.
-    /**
-     * A class to control media routing session in media route provider.
-     * With routing controller, an application can select a route into the session or deselect
-     * a route in the session.
-     */
-    public final class RoutingController {
-        private final Object mControllerLock = new Object();
-        @GuardedBy("mControllerLock")
-        private RoutingSessionInfo mSessionInfo;
-
-        RoutingController(@NonNull RoutingSessionInfo sessionInfo) {
-            mSessionInfo = sessionInfo;
-        }
-
-        /**
-         * Releases the session
-         */
-        public void release() {
-            synchronized (mControllerLock) {
-                releaseSession(mSessionInfo);
-            }
-        }
-
-        /**
-         * Gets the ID of the session
-         */
-        @NonNull
-        public String getSessionId() {
-            synchronized (mControllerLock) {
-                return mSessionInfo.getId();
-            }
-        }
-
-        /**
-         * Gets the client package name of the session
-         */
-        @NonNull
-        public String getClientPackageName() {
-            synchronized (mControllerLock) {
-                return mSessionInfo.getClientPackageName();
-            }
-        }
-
-        /**
-         * @return the control hints used to control route session if available.
-         */
-        @Nullable
-        public Bundle getControlHints() {
-            synchronized (mControllerLock) {
-                return mSessionInfo.getControlHints();
-            }
-        }
-
-        /**
-         * @return the unmodifiable list of currently selected routes
-         */
-        @NonNull
-        public List<MediaRoute2Info> getSelectedRoutes() {
-            return MediaRouter2Manager.this.getSelectedRoutes(mSessionInfo);
-        }
-
-        /**
-         * @return the unmodifiable list of selectable routes for the session.
-         */
-        @NonNull
-        public List<MediaRoute2Info> getSelectableRoutes() {
-            return MediaRouter2Manager.this.getSelectableRoutes(mSessionInfo);
-        }
-
-        /**
-         * @return the unmodifiable list of deselectable routes for the session.
-         */
-        @NonNull
-        public List<MediaRoute2Info> getDeselectableRoutes() {
-            return MediaRouter2Manager.this.getDeselectableRoutes(mSessionInfo);
-        }
-
-        /**
-         * @return the unmodifiable list of transferable routes for the session.
-         */
-        @NonNull
-        public List<MediaRoute2Info> getTransferableRoutes() {
-            List<String> routeIds;
-            synchronized (mControllerLock) {
-                routeIds = mSessionInfo.getTransferableRoutes();
-            }
-            return getRoutesWithIds(routeIds);
-        }
-
-        /**
-         * Selects a route for the remote session. The given route must satisfy all of the
-         * following conditions:
-         * <ul>
-         * <li>ID should not be included in {@link #getSelectedRoutes()}</li>
-         * <li>ID should be included in {@link #getSelectableRoutes()}</li>
-         * </ul>
-         * If the route doesn't meet any of above conditions, it will be ignored.
-         *
-         * @see #getSelectedRoutes()
-         * @see #getSelectableRoutes()
-         */
-        public void selectRoute(@NonNull MediaRoute2Info route) {
-            MediaRouter2Manager.this.selectRoute(mSessionInfo, route);
-        }
-
-        /**
-         * Deselects a route from the remote session. The given route must satisfy all of the
-         * following conditions:
-         * <ul>
-         * <li>ID should be included in {@link #getSelectedRoutes()}</li>
-         * <li>ID should be included in {@link #getDeselectableRoutes()}</li>
-         * </ul>
-         * If the route doesn't meet any of above conditions, it will be ignored.
-         *
-         * @see #getSelectedRoutes()
-         * @see #getDeselectableRoutes()
-         */
-        public void deselectRoute(@NonNull MediaRoute2Info route) {
-            MediaRouter2Manager.this.deselectRoute(mSessionInfo, route);
-        }
-
-        /**
-         * Transfers session to the given rotue.
-         */
-        public void transferToRoute(@NonNull MediaRoute2Info route) {
-            MediaRouter2Manager.this.transferToRoute(mSessionInfo, route);
-        }
-
-        /**
-         * Gets the session info of the session
-         *
-         * @hide
-         */
-        @NonNull
-        public RoutingSessionInfo getSessionInfo() {
-            synchronized (mControllerLock) {
-                return mSessionInfo;
-            }
-        }
-    }
-
     /**
      * Interface for receiving events about media routing changes.
      */
@@ -975,16 +813,6 @@ public final class MediaRouter2Manager {
          */
         public void onTransferFailed(@NonNull RoutingSessionInfo session,
                 @NonNull MediaRoute2Info route) { }
-
-        //TODO: Remove this.
-        /**
-         * Called when the preferred route features of an app is changed.
-         *
-         * @param packageName the package name of the application
-         * @param preferredFeatures the list of preferred route features set by an application.
-         */
-        public void onControlCategoriesChanged(@NonNull String packageName,
-                @NonNull List<String> preferredFeatures) {}
 
         /**
          * Called when the preferred route features of an app is changed.
