@@ -559,6 +559,10 @@
 
     <dimen name="resolver_max_width">480dp</dimen>
 
+    <!-- Tile Stroke width -->
+    <dimen name="config_qsTileStrokeWidthActive">-1dp</dimen>
+    <dimen name="config_qsTileStrokeWidthInactive">-1dp</dimen>
+
     <!-- Amount to reduce the size of the circular mask by (to compensate for
          aliasing effects). This is only used on circular displays. -->
     <dimen name="circular_display_mask_thickness">1px</dimen>

@@ -94,9 +94,9 @@ public class QSTileBaseView extends com.android.systemui.plugins.qs.QSTileView {
         int padding = context.getResources().getDimensionPixelSize(R.dimen.qs_quick_tile_padding);
         mIconFrame = new FrameLayout(context);
         mStrokeWidthActive = context.getResources()
-                .getDimension(R.dimen.config_qsTileStrokeWidthActive);
+                .getDimension(com.android.internal.R.dimen.config_qsTileStrokeWidthActive);
         mStrokeWidthInactive = context.getResources()
-                .getDimension(R.dimen.config_qsTileStrokeWidthInactive);
+                .getDimension(com.android.internal.R.dimen.config_qsTileStrokeWidthInactive);
         int size = context.getResources().getDimensionPixelSize(R.dimen.qs_quick_tile_size);
         addView(mIconFrame, new LayoutParams(size, size));
         mBg = new ImageView(getContext());
