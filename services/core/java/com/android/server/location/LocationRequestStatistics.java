@@ -16,6 +16,7 @@
 
 package com.android.server.location;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.SystemClock;
 import android.util.Log;
@@ -25,6 +26,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.IndentingPrintWriter;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Objects;
 
@@ -121,14 +123,30 @@ public class LocationRequestStatistics {
             this.mProviderName = providerName;
         }
 
+        @NonNull
+        @Override
+        public String toString() {
+            return mProviderName + ": " + mPackageName
+                    + (mFeatureId == null ? "" : ": " + mFeatureId);
+        }
+
+        /**
+         * Sort by provider, then package, then feature
+         */
         @Override
         public int compareTo(PackageProviderKey other) {
             final int providerCompare = mProviderName.compareTo(other.mProviderName);
             if (providerCompare != 0) {
                 return providerCompare;
-            } else {
-                return mProviderName.compareTo(other.mProviderName);
             }
+
+            final int packageCompare = mPackageName.compareTo(other.mPackageName);
+            if (packageCompare != 0) {
+                return packageCompare;
+            }
+
+            return Objects.compare(mFeatureId, other.mFeatureId, Comparator
+                    .nullsFirst(String::compareTo));
         }
 
         @Override

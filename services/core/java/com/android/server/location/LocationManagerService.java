@@ -2667,8 +2667,7 @@ public class LocationManagerService extends ILocationManager.Stub {
                     mRequestStatistics.statistics);
             for (Map.Entry<PackageProviderKey, PackageStatistics> entry
                     : sorted.entrySet()) {
-                PackageProviderKey key = entry.getKey();
-                ipw.println(key.mPackageName + ": " + key.mProviderName + ": " + entry.getValue());
+                ipw.println(entry.getKey() + ": " + entry.getValue());
             }
             ipw.decreaseIndent();
 
