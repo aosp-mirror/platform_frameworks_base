@@ -20210,4 +20210,15 @@ public class ActivityManagerService extends IActivityManager.Stub
             mUsageStatsService.reportLocusUpdate(activity, userId, locusId, appToken);
         }
     }
+
+    @Override
+    public boolean isAppFreezerSupported() {
+        final long token = Binder.clearCallingIdentity();
+
+        try {
+            return mOomAdjuster.mCachedAppOptimizer.isFreezerSupported();
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
 }
