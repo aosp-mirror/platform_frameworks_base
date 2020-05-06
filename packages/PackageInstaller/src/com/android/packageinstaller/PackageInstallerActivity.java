@@ -38,8 +38,6 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.content.pm.PackageParser;
-import android.content.pm.PackageUserState;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Process;
@@ -526,18 +524,16 @@ public class PackageInstallerActivity extends AlertActivity {
 
             case ContentResolver.SCHEME_FILE: {
                 File sourceFile = new File(packageUri.getPath());
-                PackageParser.Package parsed = PackageUtil.getPackageInfo(this, sourceFile);
+                mPkgInfo = PackageUtil.getPackageInfo(this, sourceFile,
+                        PackageManager.GET_PERMISSIONS);
 
                 // Check for parse errors
-                if (parsed == null) {
+                if (mPkgInfo == null) {
                     Log.w(TAG, "Parse error when parsing manifest. Discontinuing installation");
                     showDialogInner(DLG_PACKAGE_ERROR);
                     setPmResult(PackageManager.INSTALL_FAILED_INVALID_APK);
                     return false;
                 }
-                mPkgInfo = PackageParser.generatePackageInfo(parsed, null,
-                        PackageManager.GET_PERMISSIONS, 0, 0, null,
-                        new PackageUserState());
                 mAppSnippet = PackageUtil.getAppSnippet(this, mPkgInfo.applicationInfo, sourceFile);
             } break;
 
