@@ -407,7 +407,7 @@ public final class CachedAppOptimizer {
     /**
      * Determines whether the freezer is correctly supported by this system
      */
-    public boolean isFreezerSupported() {
+    public static boolean isFreezerSupported() {
         boolean supported = false;
         FileReader fr = null;
 
