@@ -37,7 +37,6 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.util.DeviceConfigProxy;
 import com.android.systemui.util.sensors.ProximitySensor;
-import com.android.systemui.util.sensors.ThresholdSensor;
 
 import java.io.PrintWriter;
 import java.util.ArrayDeque;
@@ -77,7 +76,7 @@ public class BrightLineFalsingManager implements FalsingManager {
 
     private final List<FalsingClassifier> mClassifiers;
 
-    private ThresholdSensor.Listener mSensorEventListener = this::onProximityEvent;
+    private ProximitySensor.ProximitySensorListener mSensorEventListener = this::onProximityEvent;
 
     private final KeyguardUpdateMonitorCallback mKeyguardUpdateCallback =
             new KeyguardUpdateMonitorCallback() {
@@ -241,7 +240,7 @@ public class BrightLineFalsingManager implements FalsingManager {
         mClassifiers.forEach((classifier) -> classifier.onTouchEvent(motionEvent));
     }
 
-    private void onProximityEvent(ThresholdSensor.ThresholdSensorEvent proximityEvent) {
+    private void onProximityEvent(ProximitySensor.ProximityEvent proximityEvent) {
         // TODO: some of these classifiers might allow us to abort early, meaning we don't have to
         // make these calls.
         mClassifiers.forEach((classifier) -> classifier.onProximityEvent(proximityEvent));

@@ -255,6 +255,7 @@
     <!-- no translation found for accessibility_work_mode (1280025758672376313) -->
     <skip />
     <string name="accessibility_notification_dismissed" msgid="4411652015138892952">"اعلان ردشد."</string>
+    <string name="accessibility_bubble_dismissed" msgid="270358867566720729">"ابزارک اعلان رد شد."</string>
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"مجموعه اعلان."</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"تنظیمات سریع."</string>
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"صفحه قفل."</string>
@@ -1026,8 +1027,7 @@
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"برای دسترسی از منوی روشن/خاموش، کنترل‌ها را انتخاب کنید"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"برای تغییر دادن ترتیب کنترل‌ها، آن‌ها را نگه دارید و بکشید"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"همه کنترل‌ها برداشته شده‌اند"</string>
-    <!-- no translation found for controls_favorite_toast_no_changes (7094494210840877931) -->
-    <skip />
+    <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"تغییرات ذخیره نشد"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"فهرست همه کنترل‌ها را نمی‌توان بارگیری کرد."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"موارد دیگر"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"افزودن به کنترل‌های دستگاه"</string>
@@ -1048,7 +1048,7 @@
     <string name="controls_error_timeout" msgid="794197289772728958">"غیرفعال، برنامه را بررسی کنید"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"خطا، درحال تلاش مجدد…"</string>
     <string name="controls_error_removed" msgid="6299213591234723805">"دستگاه برداشته شد"</string>
-    <string name="controls_error_generic" msgid="352500456918362905">"وضعیت بارگیری نشد"</string>
+    <string name="controls_error_generic" msgid="352500456918362905">"وضعیت بار نشد"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"خطا، دوباره امتحان کنید"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"درحال انجام"</string>
     <string name="controls_added_tooltip" msgid="4842812921719153085">"برای دیدن کنترل‌های جدید، دکمه روشن/خاموش را پایین نگه دارید"</string>

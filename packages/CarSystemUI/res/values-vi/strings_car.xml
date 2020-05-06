@@ -25,11 +25,4 @@
     <string name="car_new_user" msgid="2994965724661108420">"Người dùng mới"</string>
     <string name="user_add_user_message_setup" msgid="116571509380700718">"Khi bạn thêm một người dùng mới, họ cần thiết lập không gian của mình."</string>
     <string name="user_add_user_message_update" msgid="537998123816022363">"Bất kỳ người dùng nào cũng có thể cập nhật ứng dụng cho tất cả những người dùng khác."</string>
-    <string name="unlock_dialog_message_default" msgid="5191342790144198303">"Đang chờ…"</string>
-    <string name="unlock_dialog_message_start" msgid="2056051634260057722">"Đang tìm thiết bị tin cậy..."</string>
-    <string name="unlock_dialog_button_text_pin" msgid="2355722402286210467">"Nhập mã PIN"</string>
-    <string name="unlock_dialog_button_text_pattern" msgid="919729228822916459">"Nhập hình mở khóa"</string>
-    <string name="unlock_dialog_button_text_password" msgid="4488693104982042162">"Nhập mật khẩu"</string>
-    <string name="unlock_dialog_default_user_name" msgid="1264108892674521380">"Tên mặc định"</string>
-    <string name="unlock_dialog_title" msgid="4625161964216150870">"Mở khóa cuộc hội thoại"</string>
 </resources>

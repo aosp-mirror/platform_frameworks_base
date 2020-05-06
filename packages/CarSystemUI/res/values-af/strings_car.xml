@@ -25,11 +25,4 @@
     <string name="car_new_user" msgid="2994965724661108420">"Nuwe gebruiker"</string>
     <string name="user_add_user_message_setup" msgid="116571509380700718">"Wanneer jy \'n nuwe gebruiker byvoeg, moet daardie persoon hul spasie opstel."</string>
     <string name="user_add_user_message_update" msgid="537998123816022363">"Enige gebruiker kan programme vir al die ander gebruikers opdateer."</string>
-    <string name="unlock_dialog_message_default" msgid="5191342790144198303">"Wag tans …"</string>
-    <string name="unlock_dialog_message_start" msgid="2056051634260057722">"Kyk tans vir vertroude toestel …"</string>
-    <string name="unlock_dialog_button_text_pin" msgid="2355722402286210467">"Voer eerder PIN in"</string>
-    <string name="unlock_dialog_button_text_pattern" msgid="919729228822916459">"Voer eerder patroon in"</string>
-    <string name="unlock_dialog_button_text_password" msgid="4488693104982042162">"Voer eerder wagwoord in"</string>
-    <string name="unlock_dialog_default_user_name" msgid="1264108892674521380">"Versteknaam"</string>
-    <string name="unlock_dialog_title" msgid="4625161964216150870">"Ontsluit dialoog"</string>
 </resources>

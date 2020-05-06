@@ -136,8 +136,7 @@ public class ProximityClassifierTest extends ClassifierTest {
         motionEvent.recycle();
     }
 
-    private ProximitySensor.ThresholdSensorEvent createSensorEvent(
-            boolean covered, long timestampMs) {
-        return new ProximitySensor.ThresholdSensorEvent(covered, timestampMs * NS_PER_MS);
+    private ProximitySensor.ProximityEvent createSensorEvent(boolean covered, long timestampMs) {
+        return new ProximitySensor.ProximityEvent(covered, timestampMs * NS_PER_MS);
     }
 }

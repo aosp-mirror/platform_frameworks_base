@@ -178,6 +178,11 @@ public class StatusBarStateControllerImpl implements SysuiStatusBarStateControll
     }
 
     @Override
+    public boolean isPulsing() {
+        return mPulsing;
+    }
+
+    @Override
     public float getDozeAmount() {
         return mDozeAmount;
     }

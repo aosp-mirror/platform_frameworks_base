@@ -229,7 +229,7 @@ public interface NotificationRecordLogger {
         NOTIFICATION_NOT_POSTED_SNOOZED(319),
         @UiEvent(doc = "Notification was clicked.")
         NOTIFICATION_CLICKED(320),
-        @UiEvent(doc = "Notification action was clicked.")
+        @UiEvent(doc = "Notification action was clicked; unexpected position.")
         NOTIFICATION_ACTION_CLICKED(321),
         @UiEvent(doc = "Notification detail was expanded due to non-user action.")
         NOTIFICATION_DETAIL_OPEN_SYSTEM(327),
@@ -245,7 +245,24 @@ public interface NotificationRecordLogger {
         NOTIFICATION_SMART_REPLIED(332),
         @UiEvent(doc = "Notification smart reply action was visible.")
         NOTIFICATION_SMART_REPLY_VISIBLE(333),
-        ;
+        @UiEvent(doc = "App-generated notification action at position 0 was clicked.")
+        NOTIFICATION_ACTION_CLICKED_0(450),
+        @UiEvent(doc = "App-generated notification action at position 1 was clicked.")
+        NOTIFICATION_ACTION_CLICKED_1(451),
+        @UiEvent(doc = "App-generated notification action at position 2 was clicked.")
+        NOTIFICATION_ACTION_CLICKED_2(452),
+        @UiEvent(doc = "Contextual notification action at position 0 was clicked.")
+        NOTIFICATION_CONTEXTUAL_ACTION_CLICKED_0(453),
+        @UiEvent(doc = "Contextual notification action at position 1 was clicked.")
+        NOTIFICATION_CONTEXTUAL_ACTION_CLICKED_1(454),
+        @UiEvent(doc = "Contextual notification action at position 2 was clicked.")
+        NOTIFICATION_CONTEXTUAL_ACTION_CLICKED_2(455),
+        @UiEvent(doc = "Notification assistant generated notification action at 0 was clicked.")
+        NOTIFICATION_ASSIST_ACTION_CLICKED_0(456),
+        @UiEvent(doc = "Notification assistant generated notification action at 1 was clicked.")
+        NOTIFICATION_ASSIST_ACTION_CLICKED_1(457),
+        @UiEvent(doc = "Notification assistant generated notification action at 2 was clicked.")
+        NOTIFICATION_ASSIST_ACTION_CLICKED_2(458);
 
         private final int mId;
         NotificationEvent(int id) {
@@ -263,6 +280,21 @@ public interface NotificationRecordLogger {
                 return expanded ? NOTIFICATION_DETAIL_OPEN_USER : NOTIFICATION_DETAIL_CLOSE_USER;
             }
             return expanded ? NOTIFICATION_DETAIL_OPEN_SYSTEM : NOTIFICATION_DETAIL_CLOSE_SYSTEM;
+        }
+        public static NotificationEvent fromAction(int index, boolean isAssistant,
+                boolean isContextual) {
+            if (index < 0 || index > 2) {
+                return NOTIFICATION_ACTION_CLICKED;
+            }
+            if (isAssistant) {  // Assistant actions are contextual by definition
+                return NotificationEvent.values()[
+                        NOTIFICATION_ASSIST_ACTION_CLICKED_0.ordinal() + index];
+            }
+            if (isContextual) {
+                return NotificationEvent.values()[
+                        NOTIFICATION_CONTEXTUAL_ACTION_CLICKED_0.ordinal() + index];
+            }
+            return NotificationEvent.values()[NOTIFICATION_ACTION_CLICKED_0.ordinal() + index];
         }
     }
 

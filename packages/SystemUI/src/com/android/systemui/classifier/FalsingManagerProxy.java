@@ -87,7 +87,7 @@ public class FalsingManagerProxy implements FalsingManager, Dumpable {
         mUiBgExecutor = uiBgExecutor;
         mStatusBarStateController = statusBarStateController;
         mProximitySensor.setTag(PROXIMITY_SENSOR_TAG);
-        mProximitySensor.setDelay(SensorManager.SENSOR_DELAY_GAME);
+        mProximitySensor.setSensorDelay(SensorManager.SENSOR_DELAY_GAME);
         mDeviceConfig = deviceConfig;
         mDeviceConfigListener =
                 properties -> onDeviceConfigPropertiesChanged(context, properties.getNamespace());

@@ -25,11 +25,4 @@
     <string name="car_new_user" msgid="2994965724661108420">"కొత్త యూజర్"</string>
     <string name="user_add_user_message_setup" msgid="116571509380700718">"మీరు కొత్త యూజర్‌ను జోడించినప్పుడు, ఆ వ్యక్తి తన ప్రదేశాన్ని సెటప్ చేసుకోవాలి."</string>
     <string name="user_add_user_message_update" msgid="537998123816022363">"ఏ యూజర్ అయినా మిగతా అందరు యూజర్‌ల కోసం యాప్‌లను అప్‌డేట్ చేయవచ్చు."</string>
-    <string name="unlock_dialog_message_default" msgid="5191342790144198303">"వేచి ఉంది…"</string>
-    <string name="unlock_dialog_message_start" msgid="2056051634260057722">"నమ్మదగిన డివైస్‌కై వెతుకుతోంది"</string>
-    <string name="unlock_dialog_button_text_pin" msgid="2355722402286210467">"బదులుగా పిన్‌ను ఎంటర్ చేయండి"</string>
-    <string name="unlock_dialog_button_text_pattern" msgid="919729228822916459">"బదులుగా ఆకృతిని ఎంటర్ చేయండి"</string>
-    <string name="unlock_dialog_button_text_password" msgid="4488693104982042162">"బదులు, పాస్‌వర్డ్ ఎంటర్ చేయండి"</string>
-    <string name="unlock_dialog_default_user_name" msgid="1264108892674521380">"డిఫాల్ట్ పేరు"</string>
-    <string name="unlock_dialog_title" msgid="4625161964216150870">"డైలాగ్‌ను అన్‌లాక్ చేయండి"</string>
 </resources>

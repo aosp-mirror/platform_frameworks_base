@@ -61,7 +61,7 @@
     <string name="speed_label_medium" msgid="9078405312828606976">"Орто"</string>
     <string name="speed_label_fast" msgid="2677719134596044051">"Ылдам"</string>
     <string name="speed_label_very_fast" msgid="8215718029533182439">"Абдан ылдам"</string>
-    <string name="wifi_passpoint_expired" msgid="6540867261754427561">"Мөөнөтү бүткөн"</string>
+    <string name="wifi_passpoint_expired" msgid="6540867261754427561">"Эскирип калган"</string>
     <string name="preference_summary_default_combination" msgid="2644094566845577901">"<xliff:g id="STATE">%1$s</xliff:g>/<xliff:g id="DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="bluetooth_disconnected" msgid="7739366554710388701">"Ажыратылган"</string>
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"Ажыратылууда…"</string>
@@ -76,7 +76,7 @@
     <string name="bluetooth_connected_no_headset_battery_level" msgid="2661863370509206428">"Туташып турат (телефониясыз), батареянын деңгээли – <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp_battery_level" msgid="6499078454894324287">"Туташып турат (медиасыз), батареянын деңгээли – <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="8477440576953067242">"Туташып турат (телефониясыз же медиасыз), батареянын деңгээли – <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
-    <string name="bluetooth_active_battery_level" msgid="3450745316700494425">"Жигердүү, батареянын деңгээли: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_active_battery_level" msgid="3450745316700494425">"Иштеп жатат, батареянын деңгээли: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_active_battery_level_untethered" msgid="2706188607604205362">"Активдүү, сол: Батареянын деңгээли <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, оң: Батареянын деңгээли <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"Батареянын деңгээли: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"Сол: Батареянын деңгээли <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, оң: Батареянын деңгээли <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
@@ -284,7 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Зымсыз мониторлорду тастыктамалоо параметрлери көрүнүп турат"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Wi-Fi тандалганда ар бир SSID үчүн RSSI көрүнүп турат"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Батареянын коротулушун чектеп, тармактын иштешин жакшыртат"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Бул жөндөөнүн өчүрүлүшү/күйгүзүлүшү MAC даректерин башаламан түзүү тартибине кардар режиминде гана таасирин тийгизет.\nБул режим иштетилсе, MAC даректерин башаламан түзүү иштетилген бардык тармактарда байланышуу учурунда, кардар тармактан акыркы жолу качан ажыратылганына жараша, алардын MAC даректери кайрадан башаламан түзүлүшү мүмкүн. Эгер түзмөк 4 саатка жетпеген убакытта кайра туташтырылса, даректерди башаламан түзүү аракети аткарылбайт."</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Бул режим өчүрүлгөндөн кийин түзмөк MAC даректи башаламан иретте түзүү функциясы иштетилген тармакка туташкан сайын анын MAC дареги өзгөрүшү мүмкүн."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Трафик ченелет"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Чектелбеген тармак"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Журнал буферинин өлчөмү"</string>
@@ -373,8 +373,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Фондогу колдонмо жооп бербей жатат деп билдирип турат"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Билдирмелер каналынын эскертүүлөрүн көрсөтүү"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Тыюу салынган каналдын колдонмосунун жаңы билдирмелери тууралуу эскертүүлөр көрүнөт"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Жазышуу билдирмелери үчүн ыкчам баскычтарды иштетиңиз"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Жазышуу бөлүмүндө көрсөтүү үчүн билдирмелерди узак убакытка колдонулуучу ыкчам баскычтар менен колдоону талап кылыңыз"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Тышкы сактагычка сактоого уруксат берүү"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Манифест маанилерине карабастан бардык колдонмолорду тышкы сактагычка сактоого уруксат берет"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Бир нече терезе режиминде өлчөмдү өзгөртүү"</string>
@@ -436,14 +434,10 @@
     <string name="power_discharge_by_only" msgid="92545648425937000">"Болжол менен саат <xliff:g id="TIME">%1$s</xliff:g> өчөт"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"<xliff:g id="TIME">%1$s</xliff:g> чейин"</string>
     <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Батарея <xliff:g id="TIME">%1$s</xliff:g> отуруп калышы мүмкүн"</string>
-    <!-- no translation found for power_remaining_less_than_duration_only (8956656616031395152) -->
-    <skip />
-    <!-- no translation found for power_remaining_less_than_duration (318215464914990578) -->
-    <skip />
-    <!-- no translation found for power_remaining_more_than_subtext (446388082266121894) -->
-    <skip />
-    <!-- no translation found for power_remaining_only_more_than_subtext (4873750633368888062) -->
-    <skip />
+    <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"<xliff:g id="THRESHOLD">%1$s</xliff:g> азыраак калды"</string>
+    <string name="power_remaining_less_than_duration" msgid="318215464914990578">"<xliff:g id="THRESHOLD">%1$s</xliff:g> азыраак калды (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_more_than_subtext" msgid="446388082266121894">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> көбүрөөк калды (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_only_more_than_subtext" msgid="4873750633368888062">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> көбүрөөк калды"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"Телефон бир аздан кийин өчүп калышы мүмкүн"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"Планшет бир аздан кийин өчүп калышы мүмкүн"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"Түзмөк бир аздан кийин өчүп калышы мүмкүн"</string>
@@ -458,7 +452,7 @@
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Ыкчам кубатталууда"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Жай кубатталууда"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Кубат алган жок"</string>
-    <string name="battery_info_status_not_charging" msgid="8330015078868707899">"Сайылып турат, учурда кубаттоо мүмкүн эмес"</string>
+    <string name="battery_info_status_not_charging" msgid="8330015078868707899">"сайылып турат, бирок кубатталган жок"</string>
     <string name="battery_info_status_full" msgid="4443168946046847468">"Толук"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Администратор тарабынан көзөмөлдөнөт"</string>
     <string name="disabled" msgid="8017887509554714950">"Өчүрүлгөн"</string>

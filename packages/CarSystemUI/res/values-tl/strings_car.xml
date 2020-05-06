@@ -25,11 +25,4 @@
     <string name="car_new_user" msgid="2994965724661108420">"Bagong User"</string>
     <string name="user_add_user_message_setup" msgid="116571509380700718">"Kapag nagdagdag ka ng bagong user, kailangang i-set up ng taong iyon ang kanyang espasyo."</string>
     <string name="user_add_user_message_update" msgid="537998123816022363">"Puwedeng i-update ng sinumang user ang mga app para sa lahat ng iba pang user."</string>
-    <string name="unlock_dialog_message_default" msgid="5191342790144198303">"Naghihintay…"</string>
-    <string name="unlock_dialog_message_start" msgid="2056051634260057722">"Hinahanap ang trusted device…"</string>
-    <string name="unlock_dialog_button_text_pin" msgid="2355722402286210467">"Ilagay na lang ang PIN"</string>
-    <string name="unlock_dialog_button_text_pattern" msgid="919729228822916459">"Ilagay na lang ang Pattern"</string>
-    <string name="unlock_dialog_button_text_password" msgid="4488693104982042162">"Ilagay na lang ang Password"</string>
-    <string name="unlock_dialog_default_user_name" msgid="1264108892674521380">"Default na Pangalan"</string>
-    <string name="unlock_dialog_title" msgid="4625161964216150870">"I-unlock ang Dialogue"</string>
 </resources>

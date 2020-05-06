@@ -20,7 +20,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="dock_alignment_slow_charging" product="default" msgid="6997633396534416792">"Réalignez le téléphone pour le recharger plus rapidement"</string>
-    <string name="dock_alignment_not_charging" product="default" msgid="3980752926226749808">"Réalignez le téléphone pour effectuer la recharge sans fil"</string>
+    <string name="dock_alignment_not_charging" product="default" msgid="3980752926226749808">"Réalignez le téléphone pour le recharger sans fil"</string>
     <string name="inattentive_sleep_warning_message" product="tv" msgid="6844464574089665063">"L\'appareil Android TV va bientôt s\'éteindre. Appuyez sur un bouton pour le laisser allumé."</string>
     <string name="inattentive_sleep_warning_message" product="default" msgid="5693904520452332224">"L\'appareil va bientôt s\'éteindre. Interagissez avec lui pour le laisser allumé."</string>
     <string name="keyguard_missing_sim_message" product="tablet" msgid="5018086454277963787">"Aucune carte SIM n\'est insérée dans la tablette."</string>

@@ -81,8 +81,7 @@ public class DozeSensors {
 
     public DozeSensors(Context context, AlarmManager alarmManager, AsyncSensorManager sensorManager,
             DozeParameters dozeParameters, AmbientDisplayConfiguration config, WakeLock wakeLock,
-            Callback callback, Consumer<Boolean> proxCallback, DozeLog dozeLog,
-            ProximitySensor proximitySensor) {
+            Callback callback, Consumer<Boolean> proxCallback, DozeLog dozeLog) {
         mContext = context;
         mAlarmManager = alarmManager;
         mSensorManager = sensorManager;
@@ -154,12 +153,12 @@ public class DozeSensors {
                         dozeLog),
         };
 
-        mProximitySensor = proximitySensor;
+        mProximitySensor = new ProximitySensor(context.getResources(), sensorManager);
         setProxListening(false);  // Don't immediately start listening when we register.
         mProximitySensor.register(
                 proximityEvent -> {
                     if (proximityEvent != null) {
-                        mProxCallback.accept(!proximityEvent.getBelow());
+                        mProxCallback.accept(!proximityEvent.getNear());
                     }
                 });
     }

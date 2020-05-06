@@ -21,6 +21,7 @@ import android.os.RemoteException;
 import android.util.ExceptionUtils;
 
 import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -189,6 +190,32 @@ public class FunctionalUtils {
         default R apply(T t) {
             try {
                 return applyOrThrow(t);
+            } catch (Exception ex) {
+                throw ExceptionUtils.propagate(ex);
+            }
+        }
+    }
+
+    /**
+     * A {@link BiFunction} that allows throwing checked exceptions from its single abstract method.
+     *
+     * Can be used together with {@link #uncheckExceptions} to effectively turn a lambda expression
+     * that throws a checked exception into a regular {@link BiFunction}
+     *
+     * @param <T> see {@link BiFunction}
+     * @param <U> see {@link BiFunction}
+     * @param <R> see {@link BiFunction}
+     */
+    @FunctionalInterface
+    @SuppressWarnings("FunctionalInterfaceMethodChanged")
+    public interface ThrowingBiFunction<T, U, R> extends BiFunction<T, U, R> {
+        /** @see ThrowingFunction */
+        R applyOrThrow(T t, U u) throws Exception;
+
+        @Override
+        default R apply(T t, U u) {
+            try {
+                return applyOrThrow(t, u);
             } catch (Exception ex) {
                 throw ExceptionUtils.propagate(ex);
             }

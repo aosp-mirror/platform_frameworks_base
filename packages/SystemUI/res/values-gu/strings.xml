@@ -255,6 +255,8 @@
     <!-- no translation found for accessibility_work_mode (1280025758672376313) -->
     <skip />
     <string name="accessibility_notification_dismissed" msgid="4411652015138892952">"સૂચના કાઢી નાખી."</string>
+    <!-- no translation found for accessibility_bubble_dismissed (270358867566720729) -->
+    <skip />
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"નોટિફિકેશન શેડ."</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"ઝડપી સેટિંગ્સ."</string>
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"લૉક સ્ક્રીન."</string>
@@ -430,8 +432,7 @@
     <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"સ્ક્રીન રેકૉર્ડ કરો"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"શરૂ કરો"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"રોકો"</string>
-    <!-- no translation found for media_seamless_remote_device (177033467332920464) -->
-    <skip />
+    <string name="media_seamless_remote_device" msgid="177033467332920464">"ડિવાઇસ"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"ઍપ સ્વિચ કરવા માટે ઉપરની તરફ સ્વાઇપ કરો"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"ઍપને ઝડપથી સ્વિચ કરવા માટે જમણે ખેંચો"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"ઝલકને ટૉગલ કરો"</string>
@@ -714,8 +715,7 @@
     <string name="notification_channel_summary_priority" msgid="7415770044553264622">"વાતચીત વિભાગની ટોચ પર બતાવે છે અને બબલ તરીકે દેખાય છે."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"સેટિંગ"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"પ્રાધાન્યતા"</string>
-    <!-- no translation found for no_shortcut (7176375126961212514) -->
-    <skip />
+    <string name="no_shortcut" msgid="7176375126961212514">"<xliff:g id="APP_NAME">%1$s</xliff:g> વાતચીત માટેના ચોક્કસ સેટિંગને સપોર્ટ કરતી નથી"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"તાજેતરના કોઈ બબલ નથી"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"એકદમ નવા બબલ અને છોડી દીધેલા બબલ અહીં દેખાશે"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"આ નોટિફિકેશનમાં કોઈ ફેરફાર થઈ શકશે નહીં."</string>
@@ -961,7 +961,7 @@
     <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"ખલેલ પાડશો નહીં એક ઍપ્લિકેશન દ્વારા ચાલુ કરાયું હતું (<xliff:g id="ID_1">%s</xliff:g>)."</string>
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"ખલેલ પાડશો નહીં એક સ્વચાલિત નિયમ અથવા ઍપ્લિકેશન દ્વારા ચાલુ કરાયું હતું."</string>
     <string name="qs_dnd_until" msgid="7844269319043747955">"<xliff:g id="ID_1">%s</xliff:g> સુધી"</string>
-    <string name="qs_dnd_keep" msgid="3829697305432866434">"રાખો"</string>
+    <string name="qs_dnd_keep" msgid="3829697305432866434">"Keep"</string>
     <string name="qs_dnd_replace" msgid="7712119051407052689">"બદલો"</string>
     <string name="running_foreground_services_title" msgid="5137313173431186685">"પૃષ્ઠભૂમિમાં ચાલી રહેલ ઍપ્લિકેશનો"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"બૅટરી અને ડેટા વપરાશ વિશેની વિગતો માટે ટૅપ કરો"</string>

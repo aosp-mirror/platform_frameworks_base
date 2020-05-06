@@ -284,7 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"ကြိုးမဲ့ အခင်းအကျင်း အသိအမှတ်ပြုလက်မှတ်အတွက် ရွေးချယ်စရာများပြရန်"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Wi‑Fi မှတ်တမ်းတင်ခြင်း နှုန်းအားမြင့်ကာ၊ Wi‑Fi ရွေးရာတွင် SSID RSSI ဖြင့်ပြပါ"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"ဘက်ထရီ အသုံးပြုမှုကို လျှော့ကျစေပြီး ကွန်ရက်စွမ်းဆောင်ရည်ကို ပိုမိုကောင်းမွန်စေသည်"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"ဤဖွင့်ပိတ်ခလုတ်က ကလိုင်းယင့်မုဒ် အတွက်သာ MAC ကျပန်းပြုလုပ်ခြင်း အပြုအမူကို သက်ရောက်စေသည်။\nဤမုဒ်အသုံးပြုသည့်အခါ MAC ကျပန်းပြုလုပ်ခြင်း ဖွင့်ထားသော ကွန်ရက်များသည် ကွန်ရက်မှ ကလိုင်းယင့် ချိတ်ဆက်မှုဖြုတ်သည့် နောက်ဆုံးအချိန်ပေါ် မူတည်၍ ချိတ်ဆက်နေစဉ်အတွင်း ၎င်းတို့၏ MAC လိပ်စာများကို ပြန်လည်ကျပန်းပြုလုပ်နိုင်သည်။ စက်သည် ၄ နာရီအတွင်း ပြန်ချိန်ဆက်ထားပါက ပြန်လည်ကျပန်းပြုလုပ်မည် မဟုတ်ပါ။"</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"ဤမုဒ်ကို ဖွင့်ထားသည့်အခါ MAC ကျပန်းပြုလုပ်ထားသည့် ကွန်ရက်သို့ ချိတ်ဆက်လိုက်သည့်အခါတိုင်း ဤစက်၏ MAC လိပ်စာ ပြောင်းသွားပါမည်။"</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"အခမဲ့ မဟုတ်ပါ"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"အခမဲ့"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"မှတ်တမ်းကြားခံနယ် အရွယ်အစားများ"</string>
@@ -373,8 +373,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"နောက်ခံ အက်ပ်များအတွက် \'အက်ပ်တုံ့ပြန်မှုမရှိ\' ဟု ပြရန်"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"ချန်နယ်သတိပေးချက်များပြပါ"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"ချန်နယ်မရှိဘဲ အကြောင်းကြားလျှင် စကရင်တွင်သတိပေးသည်"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"ဖြတ်လမ်းလင့်ခ် သုံးရန်"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"အချိန်ကြာမျှဝေသော ဖြတ်လမ်းလင့်ခ် သုံးရန် လိုအပ်သည်"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"ပြင်ပစက်တွင် အက်ပ်များခွင့်ပြုရန်"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"တိကျစွာ သတ်မှတ်ထားသည့်တန်ဖိုးများရှိသော်လည်း၊ ပြင်ပသိုလှောင်ခန်းများသို့ မည်သည့်အက်ပ်ကိုမဆို ဝင်ရောက်ခွင့်ပြုပါ"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"လုပ်ဆောင်ချက်များ အရွယ်ပြောင်းနိုင်ခြင်း"</string>

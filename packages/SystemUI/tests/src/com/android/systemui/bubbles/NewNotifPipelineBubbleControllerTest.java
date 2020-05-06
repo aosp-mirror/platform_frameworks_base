@@ -135,6 +135,8 @@ public class NewNotifPipelineBubbleControllerTest extends SysuiTestCase {
     @Mock
     private FloatingContentCoordinator mFloatingContentCoordinator;
     @Mock
+    private BubbleDataRepository mDataRepository;
+    @Mock
     private NotificationShadeWindowView mNotificationShadeWindowView;
 
     private SysUiState mSysUiState = new SysUiState();
@@ -250,6 +252,7 @@ public class NewNotifPipelineBubbleControllerTest extends SysuiTestCase {
                 mFeatureFlagsNewPipeline,
                 mDumpManager,
                 mFloatingContentCoordinator,
+                mDataRepository,
                 mSysUiState,
                 mock(INotificationManager.class));
         mBubbleController.addNotifCallback(mNotifCallback);

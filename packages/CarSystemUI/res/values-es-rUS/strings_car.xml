@@ -25,11 +25,4 @@
     <string name="car_new_user" msgid="2994965724661108420">"Usuario nuevo"</string>
     <string name="user_add_user_message_setup" msgid="116571509380700718">"Cuando agregues un usuario nuevo, esa persona deberá configurar su espacio."</string>
     <string name="user_add_user_message_update" msgid="537998123816022363">"Cualquier usuario podrá actualizar las apps de otras personas."</string>
-    <string name="unlock_dialog_message_default" msgid="5191342790144198303">"Esperando…"</string>
-    <string name="unlock_dialog_message_start" msgid="2056051634260057722">"Buscando disp. de confianza…"</string>
-    <string name="unlock_dialog_button_text_pin" msgid="2355722402286210467">"Ingresar PIN"</string>
-    <string name="unlock_dialog_button_text_pattern" msgid="919729228822916459">"Ingresar patrón"</string>
-    <string name="unlock_dialog_button_text_password" msgid="4488693104982042162">"Ingresar contraseña"</string>
-    <string name="unlock_dialog_default_user_name" msgid="1264108892674521380">"Nombre predeterminado"</string>
-    <string name="unlock_dialog_title" msgid="4625161964216150870">"Desbloquea el diálogo"</string>
 </resources>

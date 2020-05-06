@@ -25,11 +25,4 @@
     <string name="car_new_user" msgid="2994965724661108420">"Yeni istifadəçi"</string>
     <string name="user_add_user_message_setup" msgid="116571509380700718">"Yeni istifadəçi əlavə etdiyinizdə həmin şəxs öz yerini təyin etməlidir."</string>
     <string name="user_add_user_message_update" msgid="537998123816022363">"İstənilən istifadəçi digər bütün istifadəçilər üçün tətbiqləri güncəlləyə bilər."</string>
-    <string name="unlock_dialog_message_default" msgid="5191342790144198303">"Gözlənilir…"</string>
-    <string name="unlock_dialog_message_start" msgid="2056051634260057722">"Güvənli cihazlar axtarılır…"</string>
-    <string name="unlock_dialog_button_text_pin" msgid="2355722402286210467">"Əvəzinə PIN daxil edin"</string>
-    <string name="unlock_dialog_button_text_pattern" msgid="919729228822916459">"Əvəzinə model daxil edin"</string>
-    <string name="unlock_dialog_button_text_password" msgid="4488693104982042162">"Əvəzinə parol daxil edin"</string>
-    <string name="unlock_dialog_default_user_name" msgid="1264108892674521380">"Defolt ad"</string>
-    <string name="unlock_dialog_title" msgid="4625161964216150870">"Kilidaçma dialoqu"</string>
 </resources>

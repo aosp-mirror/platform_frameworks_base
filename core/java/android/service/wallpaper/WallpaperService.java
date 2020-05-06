@@ -16,11 +16,6 @@
 
 package android.service.wallpaper;
 
-import static android.graphics.Matrix.MSCALE_X;
-import static android.graphics.Matrix.MSCALE_Y;
-import static android.graphics.Matrix.MSKEW_X;
-import static android.graphics.Matrix.MSKEW_Y;
-
 import android.annotation.FloatRange;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
@@ -36,7 +31,6 @@ import android.content.Intent;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Matrix;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -129,8 +123,7 @@ public abstract class WallpaperService extends Service {
     private static final int MSG_WINDOW_MOVED = 10035;
     private static final int MSG_TOUCH_EVENT = 10040;
     private static final int MSG_REQUEST_WALLPAPER_COLORS = 10050;
-    private static final int MSG_ZOOM = 10100;
-    private static final int MSG_SCALE_PREVIEW = 10110;
+    private static final int MSG_SCALE = 10100;
 
     private static final int NOTIFY_COLORS_RATE_LIMIT_MS = 1000;
 
@@ -185,7 +178,6 @@ public abstract class WallpaperService extends Service {
                 WindowManager.LayoutParams.PRIVATE_FLAG_WANTS_OFFSET_NOTIFICATIONS;
         int mCurWindowFlags = mWindowFlags;
         int mCurWindowPrivateFlags = mWindowPrivateFlags;
-        Rect mPreviewSurfacePosition;
         final Rect mVisibleInsets = new Rect();
         final Rect mWinFrame = new Rect();
         final Rect mContentInsets = new Rect();
@@ -202,8 +194,6 @@ public abstract class WallpaperService extends Service {
         final InsetsSourceControl[] mTempControls = new InsetsSourceControl[0];
         final MergedConfiguration mMergedConfiguration = new MergedConfiguration();
         private final Point mSurfaceSize = new Point();
-        private final Matrix mTmpMatrix = new Matrix();
-        private final float[] mTmpValues = new float[9];
 
         final WindowManager.LayoutParams mLayout
                 = new WindowManager.LayoutParams();
@@ -376,7 +366,7 @@ public abstract class WallpaperService extends Service {
                         Message msg = mCaller.obtainMessage(MSG_WALLPAPER_OFFSETS);
                         mCaller.sendMessage(msg);
                     }
-                    Message msg = mCaller.obtainMessageI(MSG_ZOOM, Float.floatToIntBits(zoom));
+                    Message msg = mCaller.obtainMessageI(MSG_SCALE, Float.floatToIntBits(zoom));
                     mCaller.sendMessage(msg);
                 }
             }
@@ -757,8 +747,6 @@ public abstract class WallpaperService extends Service {
                     out.println(mMergedConfiguration.getMergedConfiguration());
             out.print(prefix); out.print("mLayout="); out.println(mLayout);
             out.print(prefix); out.print("mZoom="); out.println(mZoom);
-            out.print(prefix); out.print("mPreviewSurfacePosition=");
-                    out.println(mPreviewSurfacePosition);
             synchronized (mLock) {
                 out.print(prefix); out.print("mPendingXOffset="); out.print(mPendingXOffset);
                         out.print(" mPendingXOffset="); out.println(mPendingXOffset);
@@ -920,6 +908,7 @@ public abstract class WallpaperService extends Service {
                             mInsetsState, mTempControls, mSurfaceSize, mTmpSurfaceControl);
                     if (mSurfaceControl.isValid()) {
                         mSurfaceHolder.mSurface.copyFrom(mSurfaceControl);
+                        mSurfaceControl.release();
                     }
 
                     if (DEBUG) Log.v(TAG, "New surface: " + mSurfaceHolder.mSurface
@@ -1074,7 +1063,6 @@ public abstract class WallpaperService extends Service {
                         if (redrawNeeded) {
                             mSession.finishDrawing(mWindow, null /* postDrawTransaction */);
                         }
-                        reposition();
                         mIWallpaperEngine.reportShown();
                     }
                 } catch (RemoteException ex) {
@@ -1083,39 +1071,6 @@ public abstract class WallpaperService extends Service {
                     TAG, "Layout: x=" + mLayout.x + " y=" + mLayout.y +
                     " w=" + mLayout.width + " h=" + mLayout.height);
             }
-        }
-
-        private void scalePreview(Rect position) {
-            if (isPreview() && mPreviewSurfacePosition == null && position != null
-                    || mPreviewSurfacePosition != null
-                    && !mPreviewSurfacePosition.equals(position)) {
-                mPreviewSurfacePosition = position;
-                if (mSurfaceControl.isValid()) {
-                    reposition();
-                } else {
-                    updateSurface(false, false, false);
-                }
-            }
-        }
-
-        private void reposition() {
-            if (mPreviewSurfacePosition == null) {
-                return;
-            }
-            if (DEBUG) {
-                Log.i(TAG, "reposition: rect: " + mPreviewSurfacePosition);
-            }
-
-            mTmpMatrix.setTranslate(mPreviewSurfacePosition.left, mPreviewSurfacePosition.top);
-            mTmpMatrix.postScale(((float) mPreviewSurfacePosition.width()) / mCurWidth,
-                    ((float) mPreviewSurfacePosition.height()) / mCurHeight);
-            mTmpMatrix.getValues(mTmpValues);
-            SurfaceControl.Transaction t = new SurfaceControl.Transaction();
-            t.setPosition(mSurfaceControl, mPreviewSurfacePosition.left,
-                    mPreviewSurfacePosition.top);
-            t.setMatrix(mSurfaceControl, mTmpValues[MSCALE_X], mTmpValues[MSKEW_Y],
-                    mTmpValues[MSKEW_X], mTmpValues[MSCALE_Y]);
-            t.apply();
         }
 
         void attach(IWallpaperEngineWrapper wrapper) {
@@ -1459,7 +1414,7 @@ public abstract class WallpaperService extends Service {
         }
 
         public void setZoomOut(float scale) {
-            Message msg = mCaller.obtainMessageI(MSG_ZOOM, Float.floatToIntBits(scale));
+            Message msg = mCaller.obtainMessageI(MSG_SCALE, Float.floatToIntBits(scale));
             mCaller.sendMessage(msg);
         }
 
@@ -1487,11 +1442,6 @@ public abstract class WallpaperService extends Service {
 
         public void detach() {
             mDetached.set(true);
-        }
-
-        public void scalePreview(Rect position) {
-            Message msg = mCaller.obtainMessageO(MSG_SCALE_PREVIEW, position);
-            mCaller.sendMessage(msg);
         }
 
         private void doDetachEngine() {
@@ -1540,11 +1490,8 @@ public abstract class WallpaperService extends Service {
                 case MSG_UPDATE_SURFACE:
                     mEngine.updateSurface(true, false, false);
                     break;
-                case MSG_ZOOM:
+                case MSG_SCALE:
                     mEngine.setZoom(Float.intBitsToFloat(message.arg1));
-                    break;
-                case MSG_SCALE_PREVIEW:
-                    mEngine.scalePreview((Rect) message.obj);
                     break;
                 case MSG_VISIBILITY_CHANGED:
                     if (DEBUG) Log.v(TAG, "Visibility change in " + mEngine

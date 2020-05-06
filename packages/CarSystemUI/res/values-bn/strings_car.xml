@@ -25,11 +25,4 @@
     <string name="car_new_user" msgid="2994965724661108420">"নতুন ব্যবহারকারী"</string>
     <string name="user_add_user_message_setup" msgid="116571509380700718">"নতুন ব্যবহারকারী যোগ করলে, তার স্পেস তাকে সেট-আপ করে নিতে হবে।"</string>
     <string name="user_add_user_message_update" msgid="537998123816022363">"যেকোনও ব্যবহারকারী বাকি সব ব্যবহারকারীর জন্য অ্যাপ আপডেট করতে পারবেন।"</string>
-    <string name="unlock_dialog_message_default" msgid="5191342790144198303">"অপেক্ষা করা হচ্ছে…"</string>
-    <string name="unlock_dialog_message_start" msgid="2056051634260057722">"বিশ্বস্ত ডিভাইস খোঁজা হচ্ছে…"</string>
-    <string name="unlock_dialog_button_text_pin" msgid="2355722402286210467">"এর পরিবর্তে পিন লিখুন"</string>
-    <string name="unlock_dialog_button_text_pattern" msgid="919729228822916459">"এর পরিবর্তে প্যাটার্ন আঁকুন"</string>
-    <string name="unlock_dialog_button_text_password" msgid="4488693104982042162">"এর পরিবর্তে পাসওয়ার্ড লিখুন"</string>
-    <string name="unlock_dialog_default_user_name" msgid="1264108892674521380">"ডিফল্ট নাম"</string>
-    <string name="unlock_dialog_title" msgid="4625161964216150870">"ডায়ালগ আনলক করুন"</string>
 </resources>

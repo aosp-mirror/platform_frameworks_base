@@ -60,8 +60,8 @@ public class AsyncSensorManager extends SensorManager
     private final List<SensorManagerPlugin> mPlugins;
 
     @Inject
-    public AsyncSensorManager(SensorManager sensorManager, PluginManager pluginManager) {
-        this(sensorManager, pluginManager, null);
+    public AsyncSensorManager(Context context, PluginManager pluginManager) {
+        this(context.getSystemService(SensorManager.class), pluginManager, null);
     }
 
     @VisibleForTesting

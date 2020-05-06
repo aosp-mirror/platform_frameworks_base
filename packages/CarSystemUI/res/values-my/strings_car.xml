@@ -25,11 +25,4 @@
     <string name="car_new_user" msgid="2994965724661108420">"အသုံးပြုသူ အသစ်"</string>
     <string name="user_add_user_message_setup" msgid="116571509380700718">"အသုံးပြုသူအသစ် ထည့်သည့်အခါ ထိုသူသည် မိမိ၏ နေရာကို စနစ်ထည့်သွင်းရပါမည်။"</string>
     <string name="user_add_user_message_update" msgid="537998123816022363">"အခြားအသုံးပြုသူ အားလုံးအတွက် အက်ပ်များကို မည်သူမဆို အပ်ဒိတ်လုပ်နိုင်သည်။"</string>
-    <string name="unlock_dialog_message_default" msgid="5191342790144198303">"စောင့်နေသည်…"</string>
-    <string name="unlock_dialog_message_start" msgid="2056051634260057722">"စိတ်ချရသည့်စက် ရှာနေသည်…"</string>
-    <string name="unlock_dialog_button_text_pin" msgid="2355722402286210467">"ထိုအစား ပင်နံပါတ်ထည့်ရန်"</string>
-    <string name="unlock_dialog_button_text_pattern" msgid="919729228822916459">"ထိုအစား ပုံစံထည့်ရန်"</string>
-    <string name="unlock_dialog_button_text_password" msgid="4488693104982042162">"ထိုအစား စကားဝှက်ထည့်ရန်"</string>
-    <string name="unlock_dialog_default_user_name" msgid="1264108892674521380">"မူလအမည်"</string>
-    <string name="unlock_dialog_title" msgid="4625161964216150870">"လော့ခ်ဖွင့်သည့် ဒိုင်ယာလော့ခ်"</string>
 </resources>

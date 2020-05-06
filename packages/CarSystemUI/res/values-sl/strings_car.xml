@@ -25,11 +25,4 @@
     <string name="car_new_user" msgid="2994965724661108420">"Nov uporabnik"</string>
     <string name="user_add_user_message_setup" msgid="116571509380700718">"Ko dodate novega uporabnika, mora ta nastaviti svoj prostor."</string>
     <string name="user_add_user_message_update" msgid="537998123816022363">"Vsak uporabnik lahko posodobi aplikacije za vse druge uporabnike."</string>
-    <string name="unlock_dialog_message_default" msgid="5191342790144198303">"Čakanje …"</string>
-    <string name="unlock_dialog_message_start" msgid="2056051634260057722">"Iskanje zaup. vredne naprave …"</string>
-    <string name="unlock_dialog_button_text_pin" msgid="2355722402286210467">"Namesto tega vnesite kodo PIN"</string>
-    <string name="unlock_dialog_button_text_pattern" msgid="919729228822916459">"Namesto tega vnesite vzorec"</string>
-    <string name="unlock_dialog_button_text_password" msgid="4488693104982042162">"Namesto tega vnesite geslo"</string>
-    <string name="unlock_dialog_default_user_name" msgid="1264108892674521380">"Privzeto ime"</string>
-    <string name="unlock_dialog_title" msgid="4625161964216150870">"Pogovorno okno za odklepanje"</string>
 </resources>
