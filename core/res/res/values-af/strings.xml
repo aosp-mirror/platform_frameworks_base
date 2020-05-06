@@ -2042,8 +2042,12 @@
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"Kragdialoog"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Sluitskerm"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Skermkiekie"</string>
-    <string name="accessibility_system_action_accessibility_button_label" msgid="5941347017132886642">"Toeganklikheidkortpad op skerm"</string>
-    <string name="accessibility_system_action_accessibility_button_chooser_label" msgid="6973618519666227981">"Toeganklikheidkortpadkieser op skerm"</string>
+    <!-- no translation found for accessibility_system_action_on_screen_a11y_shortcut_label (8488701469459210309) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_on_screen_a11y_shortcut_chooser_label (1057878690209817886) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_hardware_a11y_shortcut_label (5764644187715255107) -->
+    <skip />
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g> se onderskrifbalk."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> is in die BEPERK-groep geplaas"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>

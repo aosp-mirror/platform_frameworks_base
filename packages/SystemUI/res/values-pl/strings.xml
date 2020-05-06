@@ -720,7 +720,7 @@
     <string name="notification_channel_summary_priority" msgid="7415770044553264622">"Wyświetla się u góry sekcji rozmów i ma postać dymku."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Ustawienia"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Priorytet"</string>
-    <string name="no_shortcut" msgid="7176375126961212514">"Aplikacja <xliff:g id="APP_NAME">%1$s</xliff:g> nie obsługuje ustawień dotyczących rozmowy"</string>
+    <string name="no_shortcut" msgid="7176375126961212514">"Aplikacja <xliff:g id="APP_NAME">%1$s</xliff:g> nie obsługuje ustawień rozmowy"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Brak ostatnich dymków"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Tutaj będą pojawiać się ostatnie i odrzucone dymki"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Tych powiadomień nie można zmodyfikować."</string>

@@ -284,8 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Zobraziť možnosti certifikácie bezdrôtového zobrazenia"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Zvýšiť úroveň denníkov Wi‑Fi, zobrazovať podľa SSID RSSI pri výbere siete Wi‑Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Znižuje používanie batérie a zlepšuje výkon siete"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Keď je tento režim aktivovaný, adresa MAC tohto zariadenia sa môže pri každom pripojení k sieti s aktivovanou randomizáciou adries MAC zmeniť."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Merané"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Bez merania dát"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Vyrovnávacia pamäť nástroja denníkov"</string>

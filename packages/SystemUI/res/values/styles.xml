@@ -768,6 +768,10 @@
         <item name="android:textSize">16sp</item>
     </style>
 
-    <style name="Theme.ControlsRequestDialog" parent="@style/Theme.SystemUI.MediaProjectionAlertDialog"/>
+    <!-- The attributes used for title (textAppearanceLarge) and message (textAppearanceMedium)
+         are already as necessary:
+          * Title: headline, medium 20sp
+          * Message: body, 16 sp -->
+    <style name="Theme.ControlsRequestDialog" parent="@*android:style/Theme.DeviceDefault.Dialog.Alert"/>
 
 </resources>

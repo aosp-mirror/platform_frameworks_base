@@ -38,10 +38,12 @@ import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.inOrder
+import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
+import java.util.concurrent.Executor
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
@@ -101,6 +103,21 @@ class ControlsListingControllerImplTest : SysuiTestCase() {
     fun testInitialStateListening() {
         verify(mockSL).setListening(true)
         verify(mockSL).reload()
+    }
+
+    @Test
+    fun testImmediateListingReload_doesNotCrash() {
+        val exec = Executor { it.run() }
+        val mockServiceListing = mock(ServiceListing::class.java)
+        var callback: ServiceListing.Callback? = null
+        `when`(mockServiceListing.addCallback(any<ServiceListing.Callback>())).then {
+            callback = it.getArgument(0)
+            Unit
+        }
+        `when`(mockServiceListing.reload()).then {
+            callback?.onServicesReloaded(listOf(serviceInfo))
+        }
+        ControlsListingControllerImpl(mContext, exec, { mockServiceListing })
     }
 
     @Test

@@ -284,8 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Simsiz monitorlarni sertifikatlash parametrini ko‘rsatish"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Wi-Fi ulanishini tanlashda har bir SSID uchun jurnalda ko‘rsatilsin"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Batareya sarfini tejaydi va tarmoq samaradorligini oshiradi"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Bu rejim yoqilganda qurilmaning MAC manzili tasodifiy MAC manzillar yaratish imkoniyatli tarmoqqa har safar ulanganda almashishi mumkin."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Trafik hisoblanadigan tarmoq"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Trafik hisobi yuritilmaydigan tarmoq"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Jurnal buferi hajmi"</string>

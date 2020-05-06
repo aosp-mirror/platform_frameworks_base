@@ -74,10 +74,17 @@ public class BluetoothMidiEncoderTest {
         }
 
         void compareWithExpected(final byte[][] expected) {
+            // The data travels through the encoder in another thread
+            // so there is the potential for a race condition.
+            try {
+                Thread.sleep(50);
+                writeComplete(); // flushes any pending data
+            } catch (InterruptedException e) {
+            }
             byte[][] actualRows = mReceiver.getBuffers();
-            assertEquals(expected.length, actualRows.length);
+            int minRows = Math.min(expected.length, actualRows.length);
             // Compare the gathered rows with the expected rows.
-            for (int i = 0; i < expected.length; i++) {
+            for (int i = 0; i < minRows; i++) {
                 byte[] expectedRow = expected[i];
                 Log.d(TAG, "expectedRow = "
                         + MidiFramer.formatMidiData(expectedRow, 0, expectedRow.length));
@@ -89,6 +96,7 @@ public class BluetoothMidiEncoderTest {
                     assertEquals(expectedRow[k], actualRow[k]);
                 }
             }
+            assertEquals(expected.length, actualRows.length);
         }
 
         void writeComplete() {
@@ -115,8 +123,11 @@ public class BluetoothMidiEncoderTest {
                 (byte) 0x80, // high bit of header must be set
                 (byte) 0x80, // high bit of timestamp
                 (byte) 0x90, 0x40, 0x64,
-                // encoder converts to running status
-                0x47, 0x72
+                },
+                {
+                (byte) 0x80, // high bit of header must be set
+                (byte) 0x80, // high bit of timestamp
+                (byte) 0x90, 0x47, 0x72
                 }};
         EncoderChecker checker = new EncoderChecker();
         checker.send(new byte[] {(byte) 0x90, 0x40, 0x64, (byte) 0x90, 0x47, 0x72});
@@ -129,7 +140,9 @@ public class BluetoothMidiEncoderTest {
                 (byte) 0x80, // high bit of header must be set
                 (byte) 0x80, // high bit of timestamp
                 (byte) 0x93, 0x40, 0x60,
-                // two channels so no running status
+                },
+                {
+                (byte) 0x80, // high bit of header must be set
                 (byte) 0x80, // high bit of timestamp
                 (byte) 0x95, 0x47, 0x64
                 }};
@@ -166,9 +179,6 @@ public class BluetoothMidiEncoderTest {
         checker.send(new byte[] {(byte) 0x90, 0x40, 0x64}, timestamp);
         timestamp += 2 * NANOS_PER_MSEC;
         checker.send(new byte[] {(byte) 0x90, 0x47, 0x72}, timestamp);
-        // Tell the encoder that the first packet has been written to the
-        // hardware. So it can flush the two pending notes.
-        checker.writeComplete();
         checker.compareWithExpected(encoded);
     }
 
@@ -207,9 +217,6 @@ public class BluetoothMidiEncoderTest {
         checker.send(new byte[] {(byte) 0xF0, 0x7D, // experimental SysEx
                 0x01, 0x02});
         checker.send(new byte[] {0x03, 0x04, 0x05, (byte) 0xF7});
-        // Tell the encoder that the first packet has been written to the
-        // hardware. So it can flush the remaining data.
-        checker.writeComplete();
         checker.compareWithExpected(encoded);
     }
 

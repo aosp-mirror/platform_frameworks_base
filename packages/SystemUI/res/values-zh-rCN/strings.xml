@@ -414,7 +414,7 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"上限为<xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"<xliff:g id="DATA_LIMIT">%s</xliff:g>警告"</string>
     <string name="quick_settings_work_mode_label" msgid="2754212289804324685">"工作资料"</string>
-    <string name="quick_settings_night_display_label" msgid="8180030659141778180">"夜间模式"</string>
+    <string name="quick_settings_night_display_label" msgid="8180030659141778180">"护眼模式"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"在日落时开启"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"在日出时关闭"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"在<xliff:g id="TIME">%s</xliff:g> 开启"</string>

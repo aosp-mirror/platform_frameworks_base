@@ -284,8 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Vis valgmuligheder for certificering af trådløs skærm"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Øg mængden af Wi‑Fi-logføring. Vis opdelt efter SSID RSSI i Wi‑Fi-vælgeren"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Reducerer batteriforbruget og forbedrer netværkets effektivitet"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Når denne tilstand er aktiveret, skifter enhedens MAC-adresse muligvis, hver gang den opretter forbindelse til et netværk, hvor MAC-randomisering er aktiveret."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Forbrugsafregnet"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Ikke forbrugsafregnet"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Størrelser for Logger-buffer"</string>

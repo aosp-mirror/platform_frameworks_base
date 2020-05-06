@@ -284,8 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Покажи ги опциите за безжичен приказ на сертификат"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Зголеми Wi‑Fi ниво на пријавување, прикажи по SSID RSSI во Wi‑Fi бирач"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Го намалува искористувањето на батеријата и ја подобрува изведбата на мрежата"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Кога е овозможен режимов, MAC-адресата на уредов може да се промени секој пат кога ќе се поврзе со мрежа што има овозможена рандомизација на MAC-адреси."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Со ограничен интернет"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Без ограничен интернет"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Величини на меѓумеморија за дневникот"</string>

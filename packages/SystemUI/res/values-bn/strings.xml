@@ -715,7 +715,7 @@
     <string name="notification_channel_summary_priority" msgid="7415770044553264622">"কথোপকথন বিভাগের উপরে বাবল হিসেবে দেখা যায়।"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"সেটিংস"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"অগ্রাধিকার"</string>
-    <string name="no_shortcut" msgid="7176375126961212514">"<xliff:g id="APP_NAME">%1$s</xliff:g> অ্যাপে কথোপকথন নির্দিষ্ট সেটিংস কাজ করে না"</string>
+    <string name="no_shortcut" msgid="7176375126961212514">"<xliff:g id="APP_NAME">%1$s</xliff:g> অ্যাপে কথোপকথনের ক্ষেত্রে প্রযোজ্য সেটিংস কাজ করে না"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"কোনও সাম্প্রতিক বাবল নেই"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"সাম্প্রতিক ও বাতিল করা বাবল এখানে দেখা যাবে"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"এই বিজ্ঞপ্তিগুলি পরিবর্তন করা যাবে না।"</string>

@@ -16,8 +16,6 @@
 
 package com.android.server.people.prediction;
 
-import static com.google.common.truth.Truth.assertThat;
-
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -274,8 +272,20 @@ public final class ShareTargetPredictorTest {
                 mUpdatePredictionsMethod);
 
         verify(mUpdatePredictionsMethod).accept(mAppTargetCaptor.capture());
-        assertThat(mAppTargetCaptor.getValue()).containsExactly(
-                appTarget4, appTarget3, appTarget2, appTarget1, appTarget5);
+        List<AppTarget> res = mAppTargetCaptor.getValue();
+        assertEquals(5, res.size());
+        checkAppTarget(appTarget4, res.get(0));
+        checkAppTarget(appTarget3, res.get(1));
+        checkAppTarget(appTarget2, res.get(2));
+        checkAppTarget(appTarget1, res.get(3));
+        checkAppTarget(appTarget5, res.get(4));
+    }
+
+    private static void checkAppTarget(AppTarget expected, AppTarget actual) {
+        assertEquals(expected.getId(), actual.getId());
+        assertEquals(expected.getClassName(), actual.getClassName());
+        assertEquals(expected.getPackageName(), actual.getPackageName());
+        assertEquals(expected.getUser(), actual.getUser());
     }
 
     private static ShareShortcutInfo buildShareShortcut(
