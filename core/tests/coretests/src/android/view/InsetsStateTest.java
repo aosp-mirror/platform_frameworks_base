@@ -20,6 +20,8 @@ import static android.view.InsetsState.ISIDE_BOTTOM;
 import static android.view.InsetsState.ISIDE_TOP;
 import static android.view.InsetsState.ITYPE_BOTTOM_GESTURES;
 import static android.view.InsetsState.ITYPE_CAPTION_BAR;
+import static android.view.InsetsState.ITYPE_CLIMATE_BAR;
+import static android.view.InsetsState.ITYPE_EXTRA_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_IME;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
@@ -179,6 +181,38 @@ public class InsetsStateTest {
             Rect visibleInsets = mState.calculateVisibleInsets(
                     new Rect(0, 0, 150, 400), SOFT_INPUT_ADJUST_NOTHING);
             assertEquals(new Rect(0, 300, 0, 0), visibleInsets);
+        }
+    }
+
+    @Test
+    public void testCalculateInsets_extraNavRightStatusTop() throws Exception {
+        try (InsetsModeSession session =
+                     new InsetsModeSession(ViewRootImpl.NEW_INSETS_MODE_FULL)) {
+            mState.getSource(ITYPE_STATUS_BAR).setFrame(new Rect(0, 0, 100, 100));
+            mState.getSource(ITYPE_STATUS_BAR).setVisible(true);
+            mState.getSource(ITYPE_EXTRA_NAVIGATION_BAR).setFrame(new Rect(80, 0, 100, 300));
+            mState.getSource(ITYPE_EXTRA_NAVIGATION_BAR).setVisible(true);
+            WindowInsets insets = mState.calculateInsets(new Rect(0, 0, 100, 300), null, false,
+                    false, DisplayCutout.NO_CUTOUT, 0, 0, null);
+            assertEquals(Insets.of(0, 100, 20, 0), insets.getSystemWindowInsets());
+            assertEquals(Insets.of(0, 100, 0, 0), insets.getInsets(Type.statusBars()));
+            assertEquals(Insets.of(0, 0, 20, 0), insets.getInsets(Type.navigationBars()));
+        }
+    }
+
+    @Test
+    public void testCalculateInsets_navigationRightClimateTop() throws Exception {
+        try (InsetsModeSession session =
+                     new InsetsModeSession(ViewRootImpl.NEW_INSETS_MODE_FULL)) {
+            mState.getSource(ITYPE_CLIMATE_BAR).setFrame(new Rect(0, 0, 100, 100));
+            mState.getSource(ITYPE_CLIMATE_BAR).setVisible(true);
+            mState.getSource(ITYPE_NAVIGATION_BAR).setFrame(new Rect(80, 0, 100, 300));
+            mState.getSource(ITYPE_NAVIGATION_BAR).setVisible(true);
+            WindowInsets insets = mState.calculateInsets(new Rect(0, 0, 100, 300), null, false,
+                    false, DisplayCutout.NO_CUTOUT, 0, 0, null);
+            assertEquals(Insets.of(0, 100, 20, 0), insets.getSystemWindowInsets());
+            assertEquals(Insets.of(0, 100, 0, 0), insets.getInsets(Type.statusBars()));
+            assertEquals(Insets.of(0, 0, 20, 0), insets.getInsets(Type.navigationBars()));
         }
     }
 
