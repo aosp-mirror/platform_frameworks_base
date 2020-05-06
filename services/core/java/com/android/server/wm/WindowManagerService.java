@@ -926,8 +926,14 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         void updateFixedRotationTransform() {
-            mIsFixedRotationTransformEnabled = Settings.Global.getInt(mContext.getContentResolver(),
-                    FIXED_ROTATION_TRANSFORM_SETTING_NAME, 0) != 0;
+            final int enabled = Settings.Global.getInt(mContext.getContentResolver(),
+                    FIXED_ROTATION_TRANSFORM_SETTING_NAME, 2);
+            if (enabled == 2) {
+                // Make sure who read the settings won't use inconsistent default value.
+                Settings.Global.putInt(mContext.getContentResolver(),
+                        FIXED_ROTATION_TRANSFORM_SETTING_NAME, 1);
+            }
+            mIsFixedRotationTransformEnabled = enabled != 0;
         }
     }
 
