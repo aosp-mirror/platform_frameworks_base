@@ -223,6 +223,7 @@ import android.content.pm.VersionedPackage;
 import android.content.pm.dex.ArtManager;
 import android.content.pm.dex.DexMetadataHelper;
 import android.content.pm.dex.IArtManager;
+import android.content.pm.parsing.ApkLiteParseUtils;
 import android.content.pm.parsing.ParsingPackageUtils;
 import android.content.pm.parsing.component.ParsedActivity;
 import android.content.pm.parsing.component.ParsedInstrumentation;
@@ -232,6 +233,8 @@ import android.content.pm.parsing.component.ParsedPermission;
 import android.content.pm.parsing.component.ParsedProcess;
 import android.content.pm.parsing.component.ParsedProvider;
 import android.content.pm.parsing.component.ParsedService;
+import android.content.pm.parsing.result.ParseResult;
+import android.content.pm.parsing.result.ParseTypeImpl;
 import android.content.res.Resources;
 import android.content.rollback.IRollbackManager;
 import android.database.ContentObserver;
@@ -9057,7 +9060,7 @@ public class PackageManagerService extends IPackageManager.Stub
         try {
             Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "collectCertificates");
             parsedPackage.setSigningDetails(
-                    ParsingPackageUtils.collectCertificates(parsedPackage, skipVerify));
+                    ParsingPackageUtils.getSigningDetails(parsedPackage, skipVerify));
         } catch (PackageParserException e) {
             throw PackageManagerException.from(e);
         } finally {
@@ -15241,12 +15244,21 @@ public class PackageManagerService extends IPackageManager.Stub
                     && mIntegrityVerificationCompleted && mEnableRollbackCompleted) {
                 if ((installFlags & PackageManager.INSTALL_DRY_RUN) != 0) {
                     String packageName = "";
-                    try {
-                        PackageLite packageInfo =
-                                new PackageParser().parsePackageLite(origin.file, 0);
-                        packageName = packageInfo.packageName;
-                    } catch (PackageParserException e) {
-                        Slog.e(TAG, "Can't parse package at " + origin.file.getAbsolutePath(), e);
+                    ParseResult<PackageLite> result = ApkLiteParseUtils.parsePackageLite(
+                            new ParseTypeImpl(
+                                    (changeId, packageName1, targetSdkVersion) -> {
+                                        ApplicationInfo appInfo = new ApplicationInfo();
+                                        appInfo.packageName = packageName1;
+                                        appInfo.targetSdkVersion = targetSdkVersion;
+                                        return mPackageParserCallback.isChangeEnabled(changeId,
+                                                appInfo);
+                                    }).reset(),
+                            origin.file, 0);
+                    if (result.isError()) {
+                        Slog.e(TAG, "Can't parse package at " + origin.file.getAbsolutePath(),
+                                result.getException());
+                    } else {
+                        packageName = result.getResult().packageName;
                     }
                     try {
                         observer.onPackageInstalled(packageName, mRet, "Dry run", new Bundle());
@@ -17055,7 +17067,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 parsedPackage.setSigningDetails(args.signingDetails);
             } else {
                 parsedPackage.setSigningDetails(
-                        ParsingPackageUtils.collectCertificates(parsedPackage, false /* skipVerify */));
+                        ParsingPackageUtils.getSigningDetails(parsedPackage, false /* skipVerify */));
             }
         } catch (PackageParserException e) {
             throw new PrepareFailure("Failed collect during installPackageLI", e);
