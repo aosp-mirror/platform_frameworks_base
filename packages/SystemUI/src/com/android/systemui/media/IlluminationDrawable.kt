@@ -12,11 +12,14 @@ import android.graphics.ColorFilter
 import android.graphics.Paint
 import android.graphics.PixelFormat
 import android.graphics.RadialGradient
+import android.graphics.Rect
 import android.graphics.Shader
 import android.graphics.drawable.Drawable
 import android.util.AttributeSet
 import android.util.MathUtils
 import android.util.MathUtils.lerp
+import android.view.MotionEvent
+import android.view.View
 import androidx.annotation.Keep
 import com.android.internal.graphics.ColorUtils
 import com.android.internal.graphics.ColorUtils.blendARGB
@@ -26,6 +29,8 @@ import org.xmlpull.v1.XmlPullParser
 
 private const val BACKGROUND_ANIM_DURATION = 370L
 private const val RIPPLE_ANIM_DURATION = 800L
+private const val RIPPLE_DOWN_PROGRESS = 0.05f
+private const val RIPPLE_CANCEL_DURATION = 200L
 private val GRADIENT_STOPS = floatArrayOf(0.2f, 1f)
 
 private data class RippleData(
@@ -50,7 +55,7 @@ class IlluminationDrawable : Drawable() {
     private var tmpHsl = floatArrayOf(0f, 0f, 0f)
     private var paint = Paint()
 
-    var backgroundColor = Color.TRANSPARENT
+    private var backgroundColor = Color.TRANSPARENT
     set(value) {
         if (value == field) {
             return
@@ -59,7 +64,52 @@ class IlluminationDrawable : Drawable() {
         animateBackground()
     }
 
-    private var rippleAnimation: AnimatorSet? = null
+    /**
+     * Draw a small highlight under the finger before expanding (or cancelling) it.
+     */
+    private var pressed: Boolean = false
+        set(value) {
+            if (value == field) {
+                return
+            }
+            field = value
+
+            if (value) {
+                rippleAnimation?.cancel()
+                rippleData.alpha = 1f
+                rippleData.progress = RIPPLE_DOWN_PROGRESS
+            } else {
+                rippleAnimation?.cancel()
+                rippleAnimation = ValueAnimator.ofFloat(rippleData.alpha, 0f).apply {
+                    duration = RIPPLE_CANCEL_DURATION
+                    interpolator = Interpolators.LINEAR_OUT_SLOW_IN
+                    addUpdateListener {
+                        rippleData.alpha = it.animatedValue as Float
+                        invalidateSelf()
+                    }
+                    addListener(object : AnimatorListenerAdapter() {
+                        var cancelled = false
+                        override fun onAnimationCancel(animation: Animator?) {
+                            cancelled = true;
+                        }
+
+                        override fun onAnimationEnd(animation: Animator?) {
+                            if (cancelled) {
+                                return
+                            }
+                            rippleData.progress = 0f
+                            rippleData.alpha = 0f
+                            rippleAnimation = null
+                            invalidateSelf()
+                        }
+                    })
+                    start()
+                }
+            }
+            invalidateSelf()
+        }
+
+    private var rippleAnimation: Animator? = null
     private var backgroundAnimation: ValueAnimator? = null
 
     /**
@@ -147,16 +197,10 @@ class IlluminationDrawable : Drawable() {
     }
 
     /**
-     * Draws an animated ripple that expands from {@param x} and  {@param y} fading away.
-     *
-     * @param x X position of gradient centroid.
-     * @param y Y position of gradient centroid.
+     * Draws an animated ripple that expands fading away.
      */
-    fun illuminate(x: Int, y: Int) {
-        rippleData.x = x.toFloat()
-        rippleData.y = y.toFloat()
+    private fun illuminate() {
         rippleData.alpha = 1f
-        rippleData.progress = 0f
         invalidateSelf()
 
         rippleAnimation?.cancel()
@@ -169,7 +213,7 @@ class IlluminationDrawable : Drawable() {
                     rippleData.alpha = it.animatedValue as Float
                     invalidateSelf()
                 }
-            }, ValueAnimator.ofFloat(0f, 1f).apply {
+            }, ValueAnimator.ofFloat(rippleData.progress, 1f).apply {
                 duration = RIPPLE_ANIM_DURATION
                 interpolator = Interpolators.LINEAR_OUT_SLOW_IN
                 addUpdateListener {
@@ -185,6 +229,36 @@ class IlluminationDrawable : Drawable() {
                 }
             })
             start()
+        }
+    }
+
+    /**
+     * Setup touch events on a view such as tapping it would trigger effects on this drawable.
+     * @param target View receiving touched.
+     * @param container View that holds this drawable.
+     */
+    fun setupTouch(target: View, container: View) {
+        val containerRect = Rect()
+        target.setOnTouchListener { view: View, event: MotionEvent ->
+            container.getGlobalVisibleRect(containerRect)
+            rippleData.x = event.rawX - containerRect.left
+            rippleData.y = event.rawY - containerRect.top
+
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    pressed = true
+                }
+                MotionEvent.ACTION_MOVE -> {
+                    invalidateSelf()
+                }
+                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                    pressed = false
+                    if (event.action == MotionEvent.ACTION_UP) {
+                        illuminate()
+                    }
+                }
+            }
+            false
         }
     }
 }
