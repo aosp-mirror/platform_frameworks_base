@@ -633,4 +633,18 @@
         <item>@color/bt_color_bg_7</item>
     </integer-array>
 
+    <!-- Cached apps freezer modes -->
+    <array name="cached_apps_freezer_entries">
+        <item>@string/cached_apps_freezer_device_default</item>
+        <item>@string/cached_apps_freezer_enabled</item>
+        <item>@string/cached_apps_freezer_disabled</item>
+    </array>
+
+    <!-- Values for cached apps freezer modes -->
+    <array name="cached_apps_freezer_values">
+        <item>device_default</item>
+        <item>enabled</item>
+        <item>disabled</item>
+    </array>
+
 </resources>
