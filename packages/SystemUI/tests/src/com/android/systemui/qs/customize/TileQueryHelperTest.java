@@ -23,10 +23,10 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -41,6 +41,7 @@ import android.content.pm.ServiceInfo;
 import android.provider.Settings;
 import android.service.quicksettings.Tile;
 import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper;
 import android.text.TextUtils;
 import android.util.ArraySet;
 
@@ -50,10 +51,6 @@ import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.qs.QSTileHost;
-import com.android.systemui.qs.logging.QSLogger;
-import com.android.systemui.qs.tiles.HotspotTile;
-import com.android.systemui.statusbar.policy.DataSaverController;
-import com.android.systemui.statusbar.policy.HotspotController;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
 
@@ -63,6 +60,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -73,6 +71,7 @@ import java.util.Set;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
+@TestableLooper.RunWithLooper
 public class TileQueryHelperTest extends SysuiTestCase {
     private static final String CURRENT_TILES = "wifi,dnd,nfc";
     private static final String ONLY_STOCK_TILES = "wifi,dnd";
@@ -99,8 +98,6 @@ public class TileQueryHelperTest extends SysuiTestCase {
     private QSTileHost mQSTileHost;
     @Mock
     private PackageManager mPackageManager;
-    @Mock
-    private QSLogger mQSLogger;
     @Captor
     private ArgumentCaptor<List<TileQueryHelper.TileInfo>> mCaptor;
 
@@ -112,8 +109,8 @@ public class TileQueryHelperTest extends SysuiTestCase {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
+
         mContext.setMockPackageManager(mPackageManager);
-        when(mQSTileHost.getQSLogger()).thenReturn(mQSLogger);
 
         mState = new QSTile.State();
         doAnswer(invocation -> {
@@ -279,11 +276,10 @@ public class TileQueryHelperTest extends SysuiTestCase {
     }
 
     @Test
-    public void testQueryTiles_notAvailableDestroyed_isNotNullSpec() {
-        HotspotController mockHC = mock(HotspotController.class);
-        DataSaverController mockDSC = mock(DataSaverController.class);
-        when(mockHC.isHotspotSupported()).thenReturn(false);
-        HotspotTile t = new HotspotTile(mQSTileHost, mockHC, mockDSC);
+    public void testQueryTiles_notAvailableDestroyed_tileSpecIsSet() {
+        Settings.Secure.putString(mContext.getContentResolver(), Settings.Secure.QS_TILES, null);
+
+        QSTile t = mock(QSTile.class);
         when(mQSTileHost.createTile("hotspot")).thenReturn(t);
 
         mContext.getOrCreateTestableResources().addOverride(R.string.quick_settings_tiles_stock,
@@ -292,6 +288,8 @@ public class TileQueryHelperTest extends SysuiTestCase {
         mTileQueryHelper.queryTiles(mQSTileHost);
 
         FakeExecutor.exhaustExecutors(mMainExecutor, mBgExecutor);
-        verify(mQSLogger).logTileDestroyed(eq("hotspot"), anyString());
+        InOrder verifier = inOrder(t);
+        verifier.verify(t).setTileSpec("hotspot");
+        verifier.verify(t).destroy();
     }
 }
