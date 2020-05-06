@@ -396,8 +396,13 @@ public class ParsingPackageUtils {
                 }
             }
 
-            pkg.setVolumeUuid(volumeUuid)
-                    .setSigningDetails(SigningDetails.UNKNOWN);
+            pkg.setVolumeUuid(volumeUuid);
+
+            if ((flags & PackageParser.PARSE_COLLECT_CERTIFICATES) != 0) {
+                pkg.setSigningDetails(getSigningDetails(pkg, false));
+            } else {
+                pkg.setSigningDetails(SigningDetails.UNKNOWN);
+            }
 
             return input.success(pkg);
         } catch (Exception e) {
@@ -449,7 +454,7 @@ public class ParsingPackageUtils {
      */
     private ParseResult<ParsingPackage> parseBaseApk(ParseInput input, String apkPath,
             String codePath, Resources res, XmlResourceParser parser, int flags)
-            throws XmlPullParserException, IOException {
+            throws XmlPullParserException, IOException, PackageParserException {
         final String splitName;
         final String pkgName;
 
