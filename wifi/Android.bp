@@ -143,6 +143,16 @@ droidstubs {
         "framework-module-stubs-defaults-publicapi",
         "framework-wifi-stubs-srcs-defaults",
     ],
+    check_api: {
+        last_released: {
+            api_file: ":framework-wifi.api.public.latest",
+            removed_api_file: ":framework-wifi-removed.api.public.latest",
+        },
+        api_lint: {
+            new_since: ":framework-wifi.api.public.latest",
+            baseline_file: "api/lint-baseline.txt",
+        },
+    },
 }
 
 droidstubs {
@@ -151,6 +161,16 @@ droidstubs {
         "framework-module-stubs-defaults-systemapi",
         "framework-wifi-stubs-srcs-defaults",
     ],
+    check_api: {
+        last_released: {
+            api_file: ":framework-wifi.api.system.latest",
+            removed_api_file: ":framework-wifi-removed.api.system.latest",
+        },
+        api_lint: {
+            new_since: ":framework-wifi.api.system.latest",
+            baseline_file: "api/system-lint-baseline.txt",
+        },
+    },
 }
 
 droidstubs {
@@ -159,6 +179,15 @@ droidstubs {
         "framework-module-api-defaults-module_libs_api",
         "framework-wifi-stubs-srcs-defaults",
     ],
+    check_api: {
+        last_released: {
+            api_file: ":framework-wifi.api.module-lib.latest",
+            removed_api_file: ":framework-wifi-removed.api.module-lib.latest",
+        },
+        api_lint: {
+            new_since: ":framework-wifi.api.module-lib.latest",
+        },
+    },
 }
 
 droidstubs {
