@@ -88,4 +88,12 @@ public abstract class SecureSetting extends ContentObserver implements Listenabl
     public int getCurrentUser() {
         return mUserId;
     }
+
+    public String getKey() {
+        return mSettingName;
+    }
+
+    public boolean isListening() {
+        return mListening;
+    }
 }

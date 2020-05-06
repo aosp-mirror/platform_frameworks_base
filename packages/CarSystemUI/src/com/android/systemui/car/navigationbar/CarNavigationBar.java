@@ -44,8 +44,8 @@ import com.android.systemui.R;
 import com.android.systemui.SystemUI;
 import com.android.systemui.car.CarDeviceProvisionedController;
 import com.android.systemui.car.CarDeviceProvisionedListener;
-import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.statusbar.AutoHideUiElement;
 import com.android.systemui.statusbar.CommandQueue;
@@ -58,6 +58,7 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 
@@ -74,7 +75,7 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
     private final AutoHideController mAutoHideController;
     private final ButtonSelectionStateListener mButtonSelectionStateListener;
     private final Handler mMainHandler;
-    private final Handler mBgHandler;
+    private final Executor mUiBgExecutor;
     private final IStatusBarService mBarService;
     private final Lazy<KeyguardStateController> mKeyguardStateControllerLazy;
     private final ButtonSelectionStateController mButtonSelectionStateController;
@@ -105,8 +106,10 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
     private boolean mDeviceIsSetUpForUser = true;
     private boolean mIsUserSetupInProgress = false;
 
-    private @BarTransitions.TransitionMode int mStatusBarMode;
-    private @BarTransitions.TransitionMode int mNavigationBarMode;
+    @BarTransitions.TransitionMode
+    private int mStatusBarMode;
+    @BarTransitions.TransitionMode
+    private int mNavigationBarMode;
     private boolean mStatusBarTransientShown;
     private boolean mNavBarTransientShown;
 
@@ -120,7 +123,7 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
             AutoHideController autoHideController,
             ButtonSelectionStateListener buttonSelectionStateListener,
             @Main Handler mainHandler,
-            @Background Handler bgHandler,
+            @UiBackground Executor uiBgExecutor,
             IStatusBarService barService,
             Lazy<KeyguardStateController> keyguardStateControllerLazy,
             ButtonSelectionStateController buttonSelectionStateController,
@@ -136,7 +139,7 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
         mAutoHideController = autoHideController;
         mButtonSelectionStateListener = buttonSelectionStateListener;
         mMainHandler = mainHandler;
-        mBgHandler = bgHandler;
+        mUiBgExecutor = uiBgExecutor;
         mBarService = barService;
         mKeyguardStateControllerLazy = keyguardStateControllerLazy;
         mButtonSelectionStateController = buttonSelectionStateController;
@@ -232,7 +235,7 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
         mActivityManagerWrapper = ActivityManagerWrapper.getInstance();
         mActivityManagerWrapper.registerTaskStackListener(mButtonSelectionStateListener);
 
-        mBgHandler.post(() -> mCarNavigationBarController.connectToHvac());
+        mUiBgExecutor.execute(mCarNavigationBarController::connectToHvac);
 
         // Lastly, call to the icon policy to install/update all the icons.
         // Must be called on the main thread due to the use of observeForever() in

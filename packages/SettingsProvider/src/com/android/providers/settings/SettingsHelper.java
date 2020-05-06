@@ -225,8 +225,7 @@ public class SettingsHelper {
     @VisibleForTesting
     public boolean isReplacedSystemSetting(String setting) {
         // This list should not be modified.
-        if (!Settings.System.MASTER_MONO.equals(setting)
-                && !Settings.System.SCREEN_OFF_TIMEOUT.equals(setting)) {
+        if (!Settings.System.SCREEN_OFF_TIMEOUT.equals(setting)) {
             return false;
         }
         // If this flag is set, values for the system settings from the list above have been

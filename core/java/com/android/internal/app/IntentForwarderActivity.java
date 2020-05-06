@@ -80,6 +80,12 @@ public class IntentForwarderActivity extends Activity  {
     protected ExecutorService mExecutorService;
 
     @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mExecutorService.shutdown();
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mInjector = createInjector();
@@ -121,16 +127,19 @@ public class IntentForwarderActivity extends Activity  {
         final int callingUserId = getUserId();
         final Intent newIntent = canForward(intentReceived, getUserId(), targetUserId,
                 mInjector.getIPackageManager(), getContentResolver());
-        if (newIntent != null) {
-            newIntent.prepareToLeaveUser(callingUserId);
-            maybeShowDisclosureAsync(intentReceived, newIntent, targetUserId, userMessageId);
-            CompletableFuture.runAsync(() -> startActivityAsCaller(
-                    newIntent, targetUserId), mExecutorService);
-        } else {
+
+        if (newIntent == null) {
             Slog.wtf(TAG, "the intent: " + intentReceived + " cannot be forwarded from user "
                     + callingUserId + " to user " + targetUserId);
+            finish();
+            return;
         }
-        finish();
+
+        newIntent.prepareToLeaveUser(callingUserId);
+        maybeShowDisclosureAsync(intentReceived, newIntent, targetUserId, userMessageId);
+        CompletableFuture.runAsync(() ->
+                        startActivityAsCaller(newIntent, targetUserId), mExecutorService)
+                .thenAcceptAsync(result -> finish(), getApplicationContext().getMainExecutor());
     }
 
     private void maybeShowDisclosureAsync(
@@ -166,8 +175,6 @@ public class IntentForwarderActivity extends Activity  {
             Slog.wtf(TAG, "Unable to launch as UID " + launchedFromUid + " package "
                     + launchedFromPackage + ", while running in "
                     + ActivityThread.currentProcessName(), e);
-        } finally {
-            mExecutorService.shutdown();
         }
     }
 

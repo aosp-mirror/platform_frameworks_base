@@ -288,7 +288,7 @@ public final class AssociationState {
     /**
      * All known sources for this target component...  uid -> process name -> source state.
      */
-    private final ArrayMap<SourceKey, SourceState> mSources = new ArrayMap<>();
+    final ArrayMap<SourceKey, SourceState> mSources = new ArrayMap<>();
 
     private static final SourceKey sTmpSourceKey = new SourceKey(0, null, null);
 

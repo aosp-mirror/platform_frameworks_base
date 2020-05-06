@@ -214,7 +214,6 @@ public final class DozeServiceHost implements DozeHost {
             dozing = false;
         }
 
-
         mStatusBarStateController.setIsDozing(dozing);
     }
 
