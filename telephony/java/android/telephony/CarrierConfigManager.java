@@ -3040,6 +3040,95 @@ public class CarrierConfigManager {
             "5g_icon_display_grace_period_sec_int";
 
     /**
+     * This configuration allows the system UI to determine how long to continue to display 5G icons
+     * when the device switches between different 5G scenarios.
+     *
+     * There are six 5G scenarios:
+     * 1. connected_mmwave: device currently connected to 5G cell as the secondary cell and using
+     *    millimeter wave.
+     * 2. connected: device currently connected to 5G cell as the secondary cell but not using
+     *    millimeter wave.
+     * 3. not_restricted_rrc_idle: device camped on a network that has 5G capability(not necessary
+     *    to connect a 5G cell as a secondary cell) and the use of 5G is not restricted and RRC
+     *    currently in IDLE state.
+     * 4. not_restricted_rrc_con: device camped on a network that has 5G capability(not necessary
+     *    to connect a 5G cell as a secondary cell) and the use of 5G is not restricted and RRC
+     *    currently in CONNECTED state.
+     * 5. restricted: device camped on a network that has 5G capability(not necessary to connect a
+     *    5G cell as a secondary cell) but the use of 5G is restricted.
+     * 6. any: any of the above scenarios, as well as none (not connected to 5G)
+     *
+     * The configured string contains various timer rules separated by a semicolon.
+     * Each rule will have three items: prior 5G scenario, current 5G scenario, and grace period
+     * in seconds before changing the icon. When the 5G state changes from the prior to the current
+     * 5G scenario, the system UI will continue to show the icon for the prior 5G scenario (defined
+     * in {@link #KEY_5G_ICON_CONFIGURATION_STRING}) for the amount of time specified by the grace
+     * period. If the prior 5G scenario is reestablished, the timer will reset and start again if
+     * the UE changes 5G scenarios again. Defined states (5G scenarios #1-5) take precedence over
+     * 'any' (5G scenario #6), and unspecified transitions have a default grace period of 0.
+     * The order of rules in the configuration determines the priority (the first applicable timer
+     * rule will be used).
+     *
+     * Here is an example: "connected_mmwave,connected,30;connected_mmwave,any,10;connected,any,10"
+     * This configuration defines 3 timers:
+     * 1. When UE goes from 'connected_mmwave' to 'connected', system UI will continue to display
+     *    the 5G icon for 'connected_mmwave' for 30 seconds.
+     * 2. When UE goes from 'connected_mmwave' to any other state (except for connected, since
+     *    rule 1 would be used instead), system UI will continue to display the 5G icon for
+     *    'connected_mmwave' for 10 seconds.
+     * 3. When UE goes from 'connected' to any other state, system UI will continue to display the
+     *    5G icon for 'connected' for 10 seconds.
+     *
+     * @hide
+     */
+    public static final String KEY_5G_ICON_DISPLAY_GRACE_PERIOD_STRING =
+            "5g_icon_display_grace_period_string";
+
+    /**
+     * This configuration extends {@link #KEY_5G_ICON_DISPLAY_GRACE_PERIOD_STRING} to allow the
+     * system UI to continue displaying 5G icons after the initial timer expires.
+     *
+     * There are six 5G scenarios:
+     * 1. connected_mmwave: device currently connected to 5G cell as the secondary cell and using
+     *    millimeter wave.
+     * 2. connected: device currently connected to 5G cell as the secondary cell but not using
+     *    millimeter wave.
+     * 3. not_restricted_rrc_idle: device camped on a network that has 5G capability(not necessary
+     *    to connect a 5G cell as a secondary cell) and the use of 5G is not restricted and RRC
+     *    currently in IDLE state.
+     * 4. not_restricted_rrc_con: device camped on a network that has 5G capability(not necessary
+     *    to connect a 5G cell as a secondary cell) and the use of 5G is not restricted and RRC
+     *    currently in CONNECTED state.
+     * 5. restricted: device camped on a network that has 5G capability(not necessary to connect a
+     *    5G cell as a secondary cell) but the use of 5G is restricted.
+     * 6. any: any of the above scenarios, as well as none (not connected to 5G)
+     *
+     * The configured string contains various timer rules separated by a semicolon.
+     * Each rule will have three items: primary 5G scenario, secondary 5G scenario, and
+     * grace period in seconds before changing the icon. When the timer for the primary 5G timer
+     * expires, the system UI will continue to show the icon for the primary 5G scenario (defined
+     * in {@link #KEY_5G_ICON_CONFIGURATION_STRING}) for the amount of time specified by the grace
+     * period. If the primary 5G scenario is reestablished, the timers will reset and the system UI
+     * will continue to display the icon for the primary 5G scenario without interruption. If the
+     * secondary 5G scenario is lost, the timer will reset and the icon will reflect the true state.
+     * Defined states (5G scenarios #1-5) take precedence over 'any' (5G scenario #6), and
+     * unspecified transitions have a default grace period of 0. The order of rules in the
+     * configuration determines the priority (the first applicable timer rule will be used).
+     *
+     * Here is an example: "connected,not_restricted_rrc_idle,30"
+     * This configuration defines a secondary timer that extends the primary 'connected' timer.
+     * When the primary 'connected' timer expires while the UE is in the 'not_restricted_rrc_idle'
+     * 5G state, system UI will continue to display the 5G icon for 'connected' for 30 seconds.
+     * If the 5G state returns to 'connected', the timer will be reset without change to the icon,
+     * and if the 5G state changes to neither 'connected' not 'not_restricted_rrc_idle', the icon
+     * will change to reflect the true state.
+     *
+     * @hide
+     */
+    public static final String KEY_5G_ICON_DISPLAY_SECONDARY_GRACE_PERIOD_STRING =
+            "5g_icon_display_secondary_grace_period_string";
+
+    /**
      * Controls time in milliseconds until DcTracker reevaluates 5G connection state.
      * @hide
      */
@@ -4089,6 +4178,8 @@ public class CarrierConfigManager {
         sDefaults.putString(KEY_5G_ICON_CONFIGURATION_STRING,
                 "connected_mmwave:5G,connected:5G,not_restricted_rrc_idle:5G,"
                         + "not_restricted_rrc_con:5G");
+        sDefaults.putString(KEY_5G_ICON_DISPLAY_GRACE_PERIOD_STRING, "");
+        sDefaults.putString(KEY_5G_ICON_DISPLAY_SECONDARY_GRACE_PERIOD_STRING, "");
         sDefaults.putInt(KEY_5G_ICON_DISPLAY_GRACE_PERIOD_SEC_INT, 0);
         /* Default value is 1 hour. */
         sDefaults.putLong(KEY_5G_WATCHDOG_TIME_MS_LONG, 3600000);
