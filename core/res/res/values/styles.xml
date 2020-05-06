@@ -248,12 +248,6 @@ please see styles_device_defaults.xml.
         <item name="windowExitAnimation">@anim/fast_fade_out</item>
     </style>
 
-    <!-- Window animations for screen savers. {@hide} -->
-    <style name="Animation.Dream">
-        <item name="windowEnterAnimation">@anim/slow_fade_in</item>
-        <item name="windowExitAnimation">@anim/fast_fade_out</item>
-    </style>
-
     <!-- Status Bar Styles -->
     <style name="TextAppearance.StatusBar">
         <item name="textAppearance">?attr/textAppearanceSmall</item>
