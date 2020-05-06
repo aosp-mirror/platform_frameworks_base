@@ -58,7 +58,7 @@ public class DreamManager {
     @RequiresPermission(android.Manifest.permission.WRITE_DREAM_STATE)
     public void startDream(@NonNull ComponentName name) {
         try {
-            mService.testDream(mContext.getUserId(), name);
+            mService.dream();
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
@@ -98,5 +98,23 @@ public class DreamManager {
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Returns whether the device is Dreaming.
+     *
+     * <p> This is only used for testing the dream service APIs.
+     *
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.READ_DREAM_STATE)
+    public boolean isDreaming() {
+        try {
+            return mService.isDreaming();
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+        return false;
     }
 }
