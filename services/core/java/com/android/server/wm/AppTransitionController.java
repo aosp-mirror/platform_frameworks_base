@@ -166,19 +166,13 @@ public class AppTransitionController {
         // done behind a dream window.
         final ArraySet<Integer> activityTypes = collectActivityTypes(mDisplayContent.mOpeningApps,
                 mDisplayContent.mClosingApps, mDisplayContent.mChangingContainers);
-        final boolean allowAnimations = mDisplayContent.getDisplayPolicy().allowAppAnimationsLw();
-        final ActivityRecord animLpActivity = allowAnimations
-                ? findAnimLayoutParamsToken(transit, activityTypes)
-                : null;
-        final ActivityRecord topOpeningApp = allowAnimations
-                ? getTopApp(mDisplayContent.mOpeningApps, false /* ignoreHidden */)
-                : null;
-        final ActivityRecord topClosingApp = allowAnimations
-                ? getTopApp(mDisplayContent.mClosingApps, false /* ignoreHidden */)
-                : null;
-        final ActivityRecord topChangingApp = allowAnimations
-                ? getTopApp(mDisplayContent.mChangingContainers, false /* ignoreHidden */)
-                : null;
+        final ActivityRecord animLpActivity = findAnimLayoutParamsToken(transit, activityTypes);
+        final ActivityRecord topOpeningApp =
+                getTopApp(mDisplayContent.mOpeningApps, false /* ignoreHidden */);
+        final ActivityRecord topClosingApp =
+                getTopApp(mDisplayContent.mClosingApps, false /* ignoreHidden */);
+        final ActivityRecord topChangingApp =
+                getTopApp(mDisplayContent.mChangingContainers, false /* ignoreHidden */);
         final WindowManager.LayoutParams animLp = getAnimLp(animLpActivity);
         overrideWithRemoteAnimationIfSet(animLpActivity, transit, activityTypes);
 
