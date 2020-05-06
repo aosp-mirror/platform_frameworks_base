@@ -326,13 +326,12 @@ void GaugeMetricProducer::pullAndMatchEventsLocked(const int64_t timestampNs) {
         return;
     }
     const int64_t pullDelayNs = getElapsedRealtimeNs() - timestampNs;
+    StatsdStats::getInstance().notePullDelay(mPullTagId, pullDelayNs);
     if (pullDelayNs > mMaxPullDelayNs) {
         ALOGE("Pull finish too late for atom %d", mPullTagId);
         StatsdStats::getInstance().notePullExceedMaxDelay(mPullTagId);
-        StatsdStats::getInstance().notePullDelay(mPullTagId, pullDelayNs);
         return;
     }
-    StatsdStats::getInstance().notePullDelay(mPullTagId, pullDelayNs);
     for (const auto& data : allData) {
         LogEvent localCopy = data->makeCopy();
         localCopy.setElapsedTimestampNs(timestampNs);
@@ -413,6 +412,13 @@ void GaugeMetricProducer::onDataPulled(const std::vector<std::shared_ptr<LogEven
                                        bool pullSuccess, int64_t originalPullTimeNs) {
     std::lock_guard<std::mutex> lock(mMutex);
     if (!pullSuccess || allData.size() == 0) {
+        return;
+    }
+    const int64_t pullDelayNs = getElapsedRealtimeNs() - originalPullTimeNs;
+    StatsdStats::getInstance().notePullDelay(mPullTagId, pullDelayNs);
+    if (pullDelayNs > mMaxPullDelayNs) {
+        ALOGE("Pull finish too late for atom %d", mPullTagId);
+        StatsdStats::getInstance().notePullExceedMaxDelay(mPullTagId);
         return;
     }
     for (const auto& data : allData) {
