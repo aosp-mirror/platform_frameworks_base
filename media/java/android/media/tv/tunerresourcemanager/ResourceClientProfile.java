@@ -17,6 +17,7 @@
 package android.media.tv.tunerresourcemanager;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
@@ -81,7 +82,7 @@ public final class ResourceClientProfile implements Parcelable {
      *                OEM. The id of the useCaseVendor should be passed through this parameter. Any
      *                undefined use case would cause IllegalArgumentException.
      */
-    public ResourceClientProfile(@NonNull String tvInputSessionId,
+    public ResourceClientProfile(@Nullable String tvInputSessionId,
                                  int useCase) {
         mTvInputSessionId = tvInputSessionId;
         mUseCase = useCase;
@@ -92,7 +93,7 @@ public final class ResourceClientProfile implements Parcelable {
      *
      * @return the value of the tv input session id.
      */
-    @NonNull
+    @Nullable
     public String getTvInputSessionId() {
         return mTvInputSessionId;
     }
