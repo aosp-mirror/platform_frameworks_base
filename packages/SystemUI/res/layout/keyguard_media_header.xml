@@ -124,7 +124,7 @@
             android:layout_gravity="center"
         >
             <ImageButton
-                style="@android:style/Widget.Material.Button.Borderless.Small"
+                style="@style/MediaPlayer.Button"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:gravity="center"
@@ -132,7 +132,7 @@
                 android:id="@+id/action0"
             />
             <ImageButton
-                style="@android:style/Widget.Material.Button.Borderless.Small"
+                style="@style/MediaPlayer.Button"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:gravity="center"
@@ -140,7 +140,7 @@
                 android:id="@+id/action1"
             />
             <ImageButton
-                style="@android:style/Widget.Material.Button.Borderless.Small"
+                style="@style/MediaPlayer.Button"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:gravity="center"
