@@ -41,6 +41,7 @@ public class WindowlessWindowManager implements IWindowSession {
     private final static String TAG = "WindowlessWindowManager";
 
     private class State {
+        //TODO : b/150190730 we should create it when view show and release it when view invisible.
         SurfaceControl mSurfaceControl;
         WindowManager.LayoutParams mParams = new WindowManager.LayoutParams();
         int mDisplayId;
@@ -239,21 +240,19 @@ public class WindowlessWindowManager implements IWindowSession {
         }
         WindowManager.LayoutParams attrs = state.mParams;
 
-        final Rect surfaceInsets = attrs.surfaceInsets;
-        int width = surfaceInsets != null ?
-                attrs.width + surfaceInsets.left + surfaceInsets.right : attrs.width;
-        int height = surfaceInsets != null ?
-                attrs.height + surfaceInsets.top + surfaceInsets.bottom : attrs.height;
-
-        t.setBufferSize(sc, width, height)
-            .setOpaque(sc, isOpaque(attrs));
         if (viewFlags == View.VISIBLE) {
-            t.show(sc);
+            final Rect surfaceInsets = attrs.surfaceInsets;
+            int width = surfaceInsets != null
+                    ? attrs.width + surfaceInsets.left + surfaceInsets.right : attrs.width;
+            int height = surfaceInsets != null
+                    ? attrs.height + surfaceInsets.top + surfaceInsets.bottom : attrs.height;
+
+            t.setBufferSize(sc, width, height).setOpaque(sc, isOpaque(attrs)).show(sc).apply();
+            outSurfaceControl.copyFrom(sc);
         } else {
-            t.hide(sc);
+            t.hide(sc).apply();
+            outSurfaceControl.release();
         }
-        t.apply();
-        outSurfaceControl.copyFrom(sc);
         outFrame.set(0, 0, attrs.width, attrs.height);
 
         mergedConfiguration.setConfiguration(mConfiguration, mConfiguration);
