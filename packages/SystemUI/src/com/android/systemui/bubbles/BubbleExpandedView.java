@@ -57,6 +57,7 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.WindowInsets;
 import android.view.WindowManager;
+import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.LinearLayout;
 
 import com.android.internal.policy.ScreenDecorationsUtils;
@@ -455,6 +456,19 @@ public class BubbleExpandedView extends LinearLayout {
             mBubble = bubble;
             mSettingsIcon.setContentDescription(getResources().getString(
                     R.string.bubbles_settings_button_description, bubble.getAppName()));
+
+            mSettingsIcon.setAccessibilityDelegate(
+                    new AccessibilityDelegate() {
+                        @Override
+                        public void onInitializeAccessibilityNodeInfo(View host,
+                                AccessibilityNodeInfo info) {
+                            super.onInitializeAccessibilityNodeInfo(host, info);
+                            // On focus, have TalkBack say
+                            // "Actions available. Use swipe up then right to view."
+                            // in addition to the default "double tap to activate".
+                            mStackView.setupLocalMenu(info);
+                        }
+                    });
 
             if (isNew) {
                 mPendingIntent = mBubble.getBubbleIntent();
