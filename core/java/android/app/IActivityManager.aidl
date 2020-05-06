@@ -673,4 +673,9 @@ interface IActivityManager {
      * @param state The customized state data
      */
     void setProcessStateSummary(in byte[] state);
+
+    /**
+     * Return whether the app freezer is supported (true) or not (false) by this system.
+     */
+    boolean isAppFreezerSupported();
 }
