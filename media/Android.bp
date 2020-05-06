@@ -29,6 +29,7 @@ java_library {
     // TODO: build against stable API surface. Use core_platform for now to avoid
     // link-check failure with exoplayer building against "current".
     sdk_version: "core_platform",
+    min_sdk_version: "29",
     libs: [
         // The order matters. android_system_* library should come later.
         "framework_media_annotation",
