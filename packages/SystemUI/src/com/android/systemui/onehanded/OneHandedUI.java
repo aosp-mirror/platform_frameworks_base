@@ -58,10 +58,12 @@ public class OneHandedUI extends SystemUI implements CommandQueue.Callbacks, Dum
     private final ContentObserver mEnabledObserver = new ContentObserver(mMainHandler) {
         @Override
         public void onChange(boolean selfChange) {
-            // TODO (b/149366439) UIEvent metrics add here, user config timeout in settings
+            final boolean enabled = OneHandedSettingsUtil.getSettingsOneHandedModeEnabled(
+                    mContext.getContentResolver());
+            OneHandedEvents.writeEvent(enabled
+                    ? OneHandedEvents.EVENT_ONE_HANDED_SETTINGS_ENABLED_ON
+                    : OneHandedEvents.EVENT_ONE_HANDED_SETTINGS_ENABLED_OFF);
             if (mOneHandedManager != null) {
-                final boolean enabled = OneHandedSettingsUtil.getSettingsOneHandedModeEnabled(
-                        mContext.getContentResolver());
                 mOneHandedManager.setOneHandedEnabled(enabled);
             }
         }
@@ -70,10 +72,29 @@ public class OneHandedUI extends SystemUI implements CommandQueue.Callbacks, Dum
     private final ContentObserver mTimeoutObserver = new ContentObserver(mMainHandler) {
         @Override
         public void onChange(boolean selfChange) {
-            // TODO (b/149366439) UIEvent metrics add here, user config timeout in settings
+            final int newTimeout = OneHandedSettingsUtil.getSettingsOneHandedModeTimeout(
+                    mContext.getContentResolver());
+            int metricsId = OneHandedEvents.OneHandedSettingsTogglesEvent.INVALID.getId();
+            switch (newTimeout) {
+                case OneHandedSettingsUtil.ONE_HANDED_TIMEOUT_NEVER:
+                    metricsId = OneHandedEvents.EVENT_ONE_HANDED_SETTINGS_TIMEOUT_SECONDS_NEVER;
+                    break;
+                case OneHandedSettingsUtil.ONE_HANDED_TIMEOUT_SHORT_IN_SECONDS:
+                    metricsId = OneHandedEvents.EVENT_ONE_HANDED_SETTINGS_TIMEOUT_SECONDS_4;
+                    break;
+                case OneHandedSettingsUtil.ONE_HANDED_TIMEOUT_MEDIUM_IN_SECONDS:
+                    metricsId = OneHandedEvents.EVENT_ONE_HANDED_SETTINGS_TIMEOUT_SECONDS_8;
+                    break;
+                case OneHandedSettingsUtil.ONE_HANDED_TIMEOUT_LONG_IN_SECONDS:
+                    metricsId = OneHandedEvents.EVENT_ONE_HANDED_SETTINGS_TIMEOUT_SECONDS_12;
+                    break;
+                default:
+                    // do nothing
+                    break;
+            }
+            OneHandedEvents.writeEvent(metricsId);
+
             if (mTimeoutHandler != null) {
-                final int newTimeout = OneHandedSettingsUtil.getSettingsOneHandedModeTimeout(
-                        mContext.getContentResolver());
                 mTimeoutHandler.setTimeout(newTimeout);
             }
         }
@@ -82,7 +103,10 @@ public class OneHandedUI extends SystemUI implements CommandQueue.Callbacks, Dum
     private final ContentObserver mTaskChangeExitObserver = new ContentObserver(mMainHandler) {
         @Override
         public void onChange(boolean selfChange) {
-            // TODO (b/149366439) UIEvent metrics add here, user config tap app exit in settings
+            OneHandedEvents.writeEvent(OneHandedSettingsUtil.getSettingsTapsAppToExit(
+                    mContext.getContentResolver())
+                    ? OneHandedEvents.EVENT_ONE_HANDED_SETTINGS_APP_TAPS_EXIT_ON
+                    : OneHandedEvents.EVENT_ONE_HANDED_SETTINGS_APP_TAPS_EXIT_OFF);
         }
     };
 
@@ -119,7 +143,10 @@ public class OneHandedUI extends SystemUI implements CommandQueue.Callbacks, Dum
     }
 
     private void setupTimeoutListener() {
-        mTimeoutHandler.registerTimeoutListener(timeoutTime -> stopOneHanded());
+        mTimeoutHandler.registerTimeoutListener(timeoutTime -> {
+            OneHandedEvents.writeEvent(OneHandedEvents.EVENT_ONE_HANDED_TRIGGER_TIMEOUT_OUT);
+            stopOneHanded();
+        });
     }
 
     private void setupKeyguardUpdateMonitor() {
@@ -149,6 +176,7 @@ public class OneHandedUI extends SystemUI implements CommandQueue.Callbacks, Dum
         final ScreenLifecycle.Observer mScreenObserver = new ScreenLifecycle.Observer() {
             @Override
             public void onScreenTurningOff() {
+                OneHandedEvents.writeEvent(OneHandedEvents.EVENT_ONE_HANDED_TRIGGER_SCREEN_OFF_OUT);
                 stopOneHanded();
             }
         };
@@ -180,7 +208,7 @@ public class OneHandedUI extends SystemUI implements CommandQueue.Callbacks, Dum
             return;
         }
         if ((vis & InputMethodService.IME_VISIBLE) != 0) {
-            // TODO (b/149366439) UIEvent metrics add here, IME trigger to exit
+            OneHandedEvents.writeEvent(OneHandedEvents.EVENT_ONE_HANDED_TRIGGER_POP_IME_OUT);
             stopOneHanded();
         }
     }
@@ -190,7 +218,7 @@ public class OneHandedUI extends SystemUI implements CommandQueue.Callbacks, Dum
      */
     public void startOneHanded() {
         mOneHandedManager.startOneHanded();
-        // TODO (b/149366439) MetricsEvent add here, user start OneHanded
+        OneHandedEvents.writeEvent(OneHandedEvents.EVENT_ONE_HANDED_TRIGGER_GESTURE_IN);
     }
 
     /**
@@ -198,7 +226,7 @@ public class OneHandedUI extends SystemUI implements CommandQueue.Callbacks, Dum
      */
     public void stopOneHanded() {
         mOneHandedManager.stopOneHanded();
-        // TODO (b/149366439) MetricsEvent add here, user stop OneHanded
+        OneHandedEvents.writeEvent(OneHandedEvents.EVENT_ONE_HANDED_TRIGGER_GESTURE_OUT);
     }
 
     /**

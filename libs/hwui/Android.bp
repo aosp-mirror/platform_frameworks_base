@@ -197,6 +197,13 @@ droidstubs {
         "framework-graphics-stubs-srcs-defaults",
         "framework-module-api-defaults-module_libs_api",
     ],
+    check_api: {
+        // Disable api_lint that the defaults enable
+        // TODO: enable this
+        api_lint: {
+            enabled: false,
+        },
+    },
 }
 
 droidstubs {
@@ -213,6 +220,13 @@ droidstubs {
         "framework-graphics-stubs-srcs-defaults",
         "framework-module-stubs-defaults-publicapi",
     ],
+    check_api: {
+        // Disable api_lint that the defaults enable
+        // TODO: enable this
+        api_lint: {
+            enabled: false,
+        },
+    },
 }
 
 droidstubs {
@@ -221,6 +235,13 @@ droidstubs {
         "framework-graphics-stubs-srcs-defaults",
         "framework-module-stubs-defaults-systemapi",
     ],
+    check_api: {
+        // Disable api_lint that the defaults enable
+        // TODO: enable this
+        api_lint: {
+            enabled: false,
+        },
+    },
 }
 
 java_library {

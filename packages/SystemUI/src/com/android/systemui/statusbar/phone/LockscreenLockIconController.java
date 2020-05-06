@@ -76,7 +76,6 @@ public class LockscreenLockIconController {
     private boolean mKeyguardShowing;
     private boolean mKeyguardJustShown;
     private boolean mBlockUpdates;
-    private boolean mDozing;
     private boolean mSimLocked;
     private boolean mTransientBiometricsError;
     private boolean mDocked;
@@ -452,7 +451,8 @@ public class LockscreenLockIconController {
             shouldUpdate = false;
         }
         if (shouldUpdate && mLockIcon != null) {
-            mLockIcon.update(state, mDozing, mKeyguardJustShown);
+            mLockIcon.update(state,
+                    mStatusBarStateController.isDozing(), mKeyguardJustShown);
         }
         mLastState = state;
         mKeyguardJustShown = false;
@@ -480,7 +480,6 @@ public class LockscreenLockIconController {
     }
 
     private void setDozing(boolean isDozing) {
-        mDozing = isDozing;
         update();
     }
 
@@ -495,7 +494,7 @@ public class LockscreenLockIconController {
      * @return true if the visibility changed
      */
     private boolean updateIconVisibility() {
-        boolean onAodOrDocked = mDozing || mDocked;
+        boolean onAodOrDocked = mStatusBarStateController.isDozing() && mDocked;
         boolean invisible = onAodOrDocked || mWakeAndUnlockRunning || mShowingLaunchAffordance;
         if (mKeyguardBypassController.getBypassEnabled() && !mBouncerShowingScrimmed) {
             if ((mHeadsUpManagerPhone.isHeadsUpGoingAway()

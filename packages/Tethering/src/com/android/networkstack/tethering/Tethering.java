@@ -273,7 +273,13 @@ public class Tethering {
         mHandler = mTetherMasterSM.getHandler();
         mOffloadController = new OffloadController(mHandler,
                 mDeps.getOffloadHardwareInterface(mHandler, mLog), mContext.getContentResolver(),
-                statsManager, mLog, new OffloadController.Dependencies());
+                statsManager, mLog, new OffloadController.Dependencies() {
+
+                    @Override
+                    public TetheringConfiguration getTetherConfig() {
+                        return mConfig;
+                    }
+                });
         mUpstreamNetworkMonitor = mDeps.getUpstreamNetworkMonitor(mContext, mTetherMasterSM, mLog,
                 TetherMasterSM.EVENT_UPSTREAM_CALLBACK);
         mForwardedDownstreams = new LinkedHashSet<>();

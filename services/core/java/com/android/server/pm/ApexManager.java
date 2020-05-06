@@ -509,7 +509,7 @@ public abstract class ApexManager {
                     ParsedPackage pp = parseResult.parsedPackage;
                     try {
                         pp.setSigningDetails(
-                                ParsingPackageUtils.collectCertificates(pp, false));
+                                ParsingPackageUtils.getSigningDetails(pp, false));
                     } catch (PackageParserException e) {
                         throw new IllegalStateException(
                                 "Unable to collect certificates for " + ai.modulePath, e);

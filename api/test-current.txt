@@ -4679,6 +4679,7 @@ package android.telephony.mbms.vendor {
   public class MbmsDownloadServiceBase extends android.os.Binder implements android.os.IInterface {
     ctor public MbmsDownloadServiceBase();
     method public int addProgressListener(android.telephony.mbms.DownloadRequest, android.telephony.mbms.DownloadProgressListener) throws android.os.RemoteException;
+    method public int addServiceAnnouncementFile(int, @NonNull byte[]);
     method public int addStatusListener(android.telephony.mbms.DownloadRequest, android.telephony.mbms.DownloadStatusListener) throws android.os.RemoteException;
     method public android.os.IBinder asBinder();
     method public int cancelDownload(android.telephony.mbms.DownloadRequest) throws android.os.RemoteException;
@@ -4960,6 +4961,11 @@ package android.view {
   public class ViewDebug {
     method @Deprecated @Nullable public static AutoCloseable startRenderingCommandsCapture(android.view.View, java.util.concurrent.Executor, java.util.function.Function<android.graphics.Picture,java.lang.Boolean>);
     method @Nullable public static AutoCloseable startRenderingCommandsCapture(android.view.View, java.util.concurrent.Executor, java.util.concurrent.Callable<java.io.OutputStream>);
+  }
+
+  public abstract class Window {
+    method @Nullable public android.view.View getNavigationBarBackgroundView();
+    method @Nullable public android.view.View getStatusBarBackgroundView();
   }
 
   public interface WindowManager extends android.view.ViewManager {

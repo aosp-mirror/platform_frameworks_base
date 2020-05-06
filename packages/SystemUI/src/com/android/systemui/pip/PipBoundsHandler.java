@@ -43,11 +43,13 @@ import android.window.WindowContainerTransaction;
 import java.io.PrintWriter;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 /**
  * Handles bounds calculation for PIP on Phone and other form factors, it keeps tracking variant
  * state changes originated from Window Manager and is the source of truth for PiP window bounds.
  */
+@Singleton
 public class PipBoundsHandler {
 
     private static final String TAG = PipBoundsHandler.class.getSimpleName();

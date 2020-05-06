@@ -5241,25 +5241,13 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * the display naturally.
      */
     private void applyRotationAndFinishFixedRotation(int oldRotation, int newRotation) {
-        if (mFixedRotationLaunchingApp == null) {
+        final WindowToken rotatedLaunchingApp = mFixedRotationLaunchingApp;
+        if (rotatedLaunchingApp == null) {
             applyRotation(oldRotation, newRotation);
             return;
         }
 
-        // The display may be about to rotate seamlessly, and the animation of closing apps may
-        // still animate in old rotation. So make sure the outdated animation won't show on the
-        // rotated display.
-        forAllActivities(a -> {
-            if (a.nowVisible && a != mFixedRotationLaunchingApp
-                    && a.getWindowConfiguration().getRotation() != newRotation) {
-                final WindowContainer<?> w = a.getAnimatingContainer();
-                if (w != null) {
-                    w.cancelAnimation();
-                }
-            }
-        });
-
-        mFixedRotationLaunchingApp.finishFixedRotationTransform(
+        rotatedLaunchingApp.finishFixedRotationTransform(
                 () -> applyRotation(oldRotation, newRotation));
         mFixedRotationLaunchingApp = null;
     }
