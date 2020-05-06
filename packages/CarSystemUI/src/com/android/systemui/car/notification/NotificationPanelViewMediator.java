@@ -26,8 +26,15 @@ import com.android.systemui.car.navigationbar.CarNavigationBarController;
 import com.android.systemui.car.window.OverlayViewMediator;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 
-/** The view mediator which attaches the view controller to other elements of the system ui. */
-public abstract class NotificationPanelViewMediator implements OverlayViewMediator,
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+/**
+ * The view mediator which attaches the view controller to other elements of the system ui. Disables
+ * drag open behavior of the notification panel from any navigation bar.
+ */
+@Singleton
+public class NotificationPanelViewMediator implements OverlayViewMediator,
         ConfigurationController.ConfigurationListener {
 
     private final CarNavigationBarController mCarNavigationBarController;
@@ -36,6 +43,7 @@ public abstract class NotificationPanelViewMediator implements OverlayViewMediat
     private final CarDeviceProvisionedController mCarDeviceProvisionedController;
     private final ConfigurationController mConfigurationController;
 
+    @Inject
     public NotificationPanelViewMediator(
             CarNavigationBarController carNavigationBarController,
             NotificationPanelViewController notificationPanelViewController,
