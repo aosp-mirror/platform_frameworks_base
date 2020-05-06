@@ -41,6 +41,15 @@ droidstubs {
     name: "service-permission-stubs-srcs",
     srcs: [ ":service-permission-sources" ],
     defaults: ["service-module-stubs-srcs-defaults"],
+    check_api: {
+        last_released: {
+            api_file: ":service-permission.api.system-server.latest",
+            removed_api_file: ":service-permission-removed.api.system-server.latest",
+        },
+        api_lint: {
+            new_since: ":service-permission.api.system-server.latest",
+        },
+    },
     visibility: ["//visibility:private"],
     dist: { dest: "service-permission.txt" },
 }

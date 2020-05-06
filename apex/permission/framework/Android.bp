@@ -55,6 +55,15 @@ droidstubs {
         "framework-module-stubs-defaults-publicapi",
         "framework-permission-stubs-defaults",
     ],
+    check_api: {
+        last_released: {
+            api_file: ":framework-permission.api.public.latest",
+            removed_api_file: ":framework-permission-removed.api.public.latest",
+        },
+        api_lint: {
+            new_since: ":framework-permission.api.public.latest",
+        },
+    },
 }
 
 droidstubs {
@@ -63,6 +72,15 @@ droidstubs {
         "framework-module-stubs-defaults-systemapi",
         "framework-permission-stubs-defaults",
     ],
+    check_api: {
+        last_released: {
+            api_file: ":framework-permission.api.system.latest",
+            removed_api_file: ":framework-permission-removed.api.system.latest",
+        },
+        api_lint: {
+            new_since: ":framework-permission.api.system.latest",
+        },
+    },
 }
 
 droidstubs {
@@ -71,6 +89,15 @@ droidstubs {
         "framework-module-api-defaults-module_libs_api",
         "framework-permission-stubs-defaults",
     ],
+    check_api: {
+        last_released: {
+            api_file: ":framework-permission.api.module-lib.latest",
+            removed_api_file: ":framework-permission-removed.api.module-lib.latest",
+        },
+        api_lint: {
+            new_since: ":framework-permission.api.module-lib.latest",
+        },
+    },
 }
 
 droidstubs {
