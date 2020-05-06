@@ -44,7 +44,7 @@ public class SensorModule {
             Sensor defaultSensor = sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
             return thresholdSensorBuilder
                     .setSensor(defaultSensor)
-                    .setThresholdValue(defaultSensor.getMaximumRange())
+                    .setThresholdValue(defaultSensor != null ? defaultSensor.getMaximumRange() : 0)
                     .build();
         }
     }
