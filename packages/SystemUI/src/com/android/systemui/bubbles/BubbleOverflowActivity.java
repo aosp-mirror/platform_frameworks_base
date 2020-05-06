@@ -41,6 +41,7 @@ import android.widget.TextView;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.android.internal.util.ContrastColorUtil;
 import com.android.systemui.R;
 
 import java.util.ArrayList;
@@ -241,6 +242,8 @@ class BubbleOverflowAdapter extends RecyclerView.Adapter<BubbleOverflowAdapter.V
     @Override
     public BubbleOverflowAdapter.ViewHolder onCreateViewHolder(ViewGroup parent,
             int viewType) {
+
+        // Set layout for overflow bubble view.
         LinearLayout overflowView = (LinearLayout) LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.bubble_overflow_view, parent, false);
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
@@ -249,6 +252,18 @@ class BubbleOverflowAdapter extends RecyclerView.Adapter<BubbleOverflowAdapter.V
         params.width = mWidth;
         params.height = mHeight;
         overflowView.setLayoutParams(params);
+
+        // Ensure name has enough contrast.
+        final TypedArray ta = mContext.obtainStyledAttributes(
+                new int[]{android.R.attr.colorBackgroundFloating, android.R.attr.textColorPrimary});
+        final int bgColor = ta.getColor(0, Color.WHITE);
+        int textColor = ta.getColor(1, Color.BLACK);
+        textColor = ContrastColorUtil.ensureTextContrast(textColor, bgColor, true);
+        ta.recycle();
+
+        TextView viewName = overflowView.findViewById(R.id.bubble_view_name);
+        viewName.setTextColor(textColor);
+
         return new ViewHolder(overflowView);
     }
 
