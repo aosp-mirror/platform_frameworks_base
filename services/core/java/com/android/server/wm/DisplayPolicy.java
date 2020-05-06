@@ -3154,16 +3154,6 @@ public class DisplayPolicy {
         return 0;
     }
 
-    /**
-     * Return true if it is okay to perform animations for an app transition
-     * that is about to occur. You may return false for this if, for example,
-     * the dream window is currently displayed so the switch should happen
-     * immediately.
-     */
-    public boolean allowAppAnimationsLw() {
-        return !mShowingDream;
-    }
-
     private void requestTransientBars(WindowState swipeTarget) {
         if (!mService.mPolicy.isUserSetupComplete()) {
             // Swipe-up for navigation bar is disabled during setup
