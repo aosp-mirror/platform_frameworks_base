@@ -152,17 +152,6 @@ public abstract class ActivityTaskManagerInternal {
             IVoiceInteractor mInteractor);
 
     /**
-     * Callback for window manager to let activity manager know that the app transition was
-     * cancelled.
-     */
-    public abstract void notifyAppTransitionCancelled();
-
-    /**
-     * Callback for window manager to let activity manager know that the app transition is finished.
-     */
-    public abstract void notifyAppTransitionFinished();
-
-    /**
      * Returns the top activity from each of the currently visible stacks. The first entry will be
      * the focused activity.
      */

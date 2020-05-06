@@ -6079,20 +6079,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
 
         @Override
-        public void notifyAppTransitionFinished() {
-            synchronized (mGlobalLock) {
-                mStackSupervisor.notifyAppTransitionDone();
-            }
-        }
-
-        @Override
-        public void notifyAppTransitionCancelled() {
-            synchronized (mGlobalLock) {
-                mStackSupervisor.notifyAppTransitionDone();
-            }
-        }
-
-        @Override
         public List<IBinder> getTopVisibleActivities() {
             synchronized (mGlobalLock) {
                 return mRootWindowContainer.getTopVisibleActivities();

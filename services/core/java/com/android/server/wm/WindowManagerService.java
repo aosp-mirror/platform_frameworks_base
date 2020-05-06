@@ -1064,12 +1064,10 @@ public class WindowManagerService extends IWindowManager.Stub
 
         @Override
         public void onAppTransitionCancelledLocked(int transit) {
-            mAtmInternal.notifyAppTransitionCancelled();
         }
 
         @Override
         public void onAppTransitionFinishedLocked(IBinder token) {
-            mAtmInternal.notifyAppTransitionFinished();
             final ActivityRecord atoken = mRoot.getActivityRecord(token);
             if (atoken == null) {
                 return;
