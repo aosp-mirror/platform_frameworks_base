@@ -33,6 +33,7 @@ import android.os.Trace;
 import android.provider.DeviceConfig;
 import android.provider.DeviceConfig.OnPropertiesChangedListener;
 import android.provider.DeviceConfig.Properties;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.EventLog;
 import android.util.Slog;
@@ -443,7 +444,13 @@ public final class CachedAppOptimizer {
      */
     @GuardedBy("mPhenotypeFlagLock")
     private void updateUseFreezer() {
-        if (DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER_NATIVE_BOOT,
+        final String configOverride = Settings.Global.getString(mAm.mContext.getContentResolver(),
+                Settings.Global.CACHED_APPS_FREEZER_ENABLED);
+
+        if ("disabled".equals(configOverride)) {
+            mUseFreezer = false;
+        } else if ("enabled".equals(configOverride)
+                || DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER_NATIVE_BOOT,
                     KEY_USE_FREEZER, DEFAULT_USE_FREEZER)) {
             mUseFreezer = isFreezerSupported();
         }
