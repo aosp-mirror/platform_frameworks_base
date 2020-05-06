@@ -33,6 +33,7 @@ class BubblePersistentRepository @Inject constructor(
             "overflow_bubbles.xml"), "overflow-bubbles")
 
     fun persistsToDisk(bubbles: List<BubbleXmlEntity>): Boolean {
+        if (DEBUG) Log.d(TAG, "persisting ${bubbles.size} bubbles")
         synchronized(bubbleFile) {
             val stream: FileOutputStream = try { bubbleFile.startWrite() } catch (e: IOException) {
                 Log.e(TAG, "Failed to save bubble file", e)
@@ -41,6 +42,7 @@ class BubblePersistentRepository @Inject constructor(
             try {
                 writeXml(stream, bubbles)
                 bubbleFile.finishWrite(stream)
+                if (DEBUG) Log.d(TAG, "persisted ${bubbles.size} bubbles")
                 return true
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to save bubble file, restoring backup", e)
@@ -49,6 +51,16 @@ class BubblePersistentRepository @Inject constructor(
         }
         return false
     }
+
+    fun readFromDisk(): List<BubbleXmlEntity> {
+        synchronized(bubbleFile) {
+            try { return bubbleFile.openRead().use(::readXml) } catch (e: Throwable) {
+                Log.e(TAG, "Failed to open bubble file", e)
+            }
+            return emptyList()
+        }
+    }
 }
 
 private const val TAG = "BubblePersistentRepository"
+private const val DEBUG = false
