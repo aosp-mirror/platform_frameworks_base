@@ -32,6 +32,8 @@ import com.android.internal.util.Preconditions
 import com.android.systemui.Dumpable
 import java.io.FileDescriptor
 import java.io.PrintWriter
+import java.lang.IllegalArgumentException
+import java.lang.IllegalStateException
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -211,7 +213,12 @@ class UserBroadcastDispatcher(
          */
         override fun run() {
             if (registered.get()) {
-                context.unregisterReceiver(this@UserBroadcastDispatcher)
+                try {
+                    context.unregisterReceiver(this@UserBroadcastDispatcher)
+                } catch (e: IllegalArgumentException) {
+                    Log.e(TAG, "Trying to unregister unregistered receiver for user $userId",
+                            IllegalStateException(e))
+                }
                 registered.set(false)
             }
             // Short interval without receiver, this can be problematic
