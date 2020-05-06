@@ -82,6 +82,11 @@ bool StatsPuller::Pull(std::vector<std::shared_ptr<LogEvent>>* data) {
         mapAndMergeIsolatedUidsToHostUid(mCachedData, mUidMap, mTagId, mAdditiveFields);
     }
 
+    if (mCachedData.empty()) {
+        VLOG("Data pulled is empty");
+        StatsdStats::getInstance().noteEmptyData(mTagId);
+    }
+
     (*data) = mCachedData;
     return mHasGoodData;
 }

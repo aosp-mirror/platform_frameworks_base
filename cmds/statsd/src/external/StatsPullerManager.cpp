@@ -111,12 +111,14 @@ bool StatsPullerManager::PullLocked(int tagId, const ConfigKey& configKey,
         if (uidProviderIt == mPullUidProviders.end()) {
             ALOGE("Error pulling tag %d. No pull uid provider for config key %s", tagId,
                   configKey.ToString().c_str());
+            StatsdStats::getInstance().notePullUidProviderNotFound(tagId);
             return false;
         }
         sp<PullUidProvider> pullUidProvider = uidProviderIt->second.promote();
         if (pullUidProvider == nullptr) {
             ALOGE("Error pulling tag %d, pull uid provider for config %s is gone.", tagId,
                   configKey.ToString().c_str());
+            StatsdStats::getInstance().notePullUidProviderNotFound(tagId);
             return false;
         }
         uids = pullUidProvider->getPullAtomUids(tagId);
@@ -140,6 +142,7 @@ bool StatsPullerManager::PullLocked(int tagId, const vector<int32_t>& uids,
                 return ret;
             }
         }
+        StatsdStats::getInstance().notePullerNotFound(tagId);
         ALOGW("StatsPullerManager: Unknown tagId %d", tagId);
         return false;  // Return early since we don't know what to pull.
     } else {
@@ -288,10 +291,7 @@ void StatsPullerManager::OnAlarmFired(int64_t elapsedTimeNs) {
     for (const auto& pullInfo : needToPull) {
         vector<shared_ptr<LogEvent>> data;
         bool pullSuccess = PullLocked(pullInfo.first->atomTag, pullInfo.first->configKey, &data);
-        if (pullSuccess) {
-            StatsdStats::getInstance().notePullDelay(pullInfo.first->atomTag,
-                                                     getElapsedRealtimeNs() - elapsedTimeNs);
-        } else {
+        if (!pullSuccess) {
             VLOG("pull failed at %lld, will try again later", (long long)elapsedTimeNs);
         }
 
