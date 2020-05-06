@@ -183,21 +183,17 @@ public class QSMediaPlayer extends MediaControlPanel {
                     continue;
                 }
 
+                if (mMediaNotifView.getBackground() instanceof IlluminationDrawable) {
+                    ((IlluminationDrawable) mMediaNotifView.getBackground())
+                            .setupTouch(thisBtn, mMediaNotifView);
+                }
+
                 Drawable thatIcon = thatBtn.getDrawable();
                 thisBtn.setImageDrawable(thatIcon.mutate());
                 thisBtn.setVisibility(View.VISIBLE);
                 thisBtn.setOnClickListener(v -> {
                     Log.d(TAG, "clicking on other button");
                     thatBtn.performClick();
-                    if (mMediaNotifView.getBackground() instanceof IlluminationDrawable) {
-                        Rect mediaRect = new Rect();
-                        Rect buttonRect = new Rect();
-                        mMediaNotifView.getGlobalVisibleRect(mediaRect);
-                        thisBtn.getGlobalVisibleRect(buttonRect);
-                        ((IlluminationDrawable) mMediaNotifView.getBackground()).illuminate(
-                                buttonRect.centerX() - mediaRect.left,
-                                buttonRect.centerY() - mediaRect.top);
-                    }
                 });
             }
 

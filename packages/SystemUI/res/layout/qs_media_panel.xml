@@ -197,7 +197,7 @@
             android:gravity="center"
             >
             <ImageButton
-                style="@android:style/Widget.Material.Button.Borderless.Small"
+                style="@style/MediaPlayer.Button"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:layout_marginStart="8dp"
@@ -207,7 +207,7 @@
                 android:id="@+id/action0"
             />
             <ImageButton
-                style="@android:style/Widget.Material.Button.Borderless.Small"
+                style="@style/MediaPlayer.Button"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:layout_marginStart="8dp"
@@ -217,7 +217,7 @@
                 android:id="@+id/action1"
             />
             <ImageButton
-                style="@android:style/Widget.Material.Button.Borderless.Small"
+                style="@style/MediaPlayer.Button"
                 android:layout_width="52dp"
                 android:layout_height="52dp"
                 android:layout_marginStart="8dp"
@@ -227,7 +227,7 @@
                 android:id="@+id/action2"
             />
             <ImageButton
-                style="@android:style/Widget.Material.Button.Borderless.Small"
+                style="@style/MediaPlayer.Button"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:layout_marginStart="8dp"
@@ -237,7 +237,7 @@
                 android:id="@+id/action3"
             />
             <ImageButton
-                style="@android:style/Widget.Material.Button.Borderless.Small"
+                style="@style/MediaPlayer.Button"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:layout_marginStart="8dp"
