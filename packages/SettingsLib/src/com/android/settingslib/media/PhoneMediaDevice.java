@@ -41,7 +41,10 @@ public class PhoneMediaDevice extends MediaDevice {
 
     private static final String TAG = "PhoneMediaDevice";
 
-    public static final String ID = "phone_media_device_id_1";
+    public static final String PHONE_ID = "phone_media_device_id";
+    // For 3.5 mm wired headset
+    public static final String WIRED_HEADSET_ID = "wired_headset_media_device_id";
+    public static final String USB_HEADSET_ID = "usb_headset_media_device_id";
 
     private String mSummary = "";
 
@@ -109,7 +112,25 @@ public class PhoneMediaDevice extends MediaDevice {
 
     @Override
     public String getId() {
-        return ID;
+        String id;
+        switch (mRouteInfo.getType()) {
+            case TYPE_WIRED_HEADSET:
+            case TYPE_WIRED_HEADPHONES:
+                id = WIRED_HEADSET_ID;
+                break;
+            case TYPE_USB_DEVICE:
+            case TYPE_USB_HEADSET:
+            case TYPE_USB_ACCESSORY:
+            case TYPE_DOCK:
+            case TYPE_HDMI:
+                id = USB_HEADSET_ID;
+                break;
+            case TYPE_BUILTIN_SPEAKER:
+            default:
+                id = PHONE_ID;
+                break;
+        }
+        return id;
     }
 
     @Override
