@@ -189,8 +189,8 @@ public class SystemWindows {
     public SurfaceControl getViewSurface(View rootView) {
         for (int i = 0; i < mPerDisplay.size(); ++i) {
             for (int iWm = 0; iWm < mPerDisplay.valueAt(i).mWwms.size(); ++iWm) {
-                SurfaceControl out =
-                        mPerDisplay.valueAt(i).mWwms.get(iWm).getSurfaceControlForWindow(rootView);
+                SurfaceControl out = mPerDisplay.valueAt(i).mWwms.valueAt(iWm)
+                        .getSurfaceControlForWindow(rootView);
                 if (out != null) {
                     return out;
                 }
