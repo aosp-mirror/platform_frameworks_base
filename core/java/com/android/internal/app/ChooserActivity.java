@@ -157,6 +157,7 @@ public class ChooserActivity extends ResolverActivity implements
     private static final String TAG = "ChooserActivity";
     private AppPredictor mPersonalAppPredictor;
     private AppPredictor mWorkAppPredictor;
+    private boolean mShouldDisplayLandscape;
 
     @UnsupportedAppUsage
     public ChooserActivity() {
@@ -696,6 +697,8 @@ public class ChooserActivity extends ResolverActivity implements
             mCallerChooserTargets = targets;
         }
 
+        mShouldDisplayLandscape = shouldDisplayLandscape(
+                getResources().getConfiguration().orientation);
         setRetainInOnStop(intent.getBooleanExtra(EXTRA_PRIVATE_RETAIN_IN_ON_STOP, false));
         super.onCreate(savedInstanceState, target, title, defaultTitleRes, initialIntents,
                 null, false);
@@ -1035,6 +1038,7 @@ public class ChooserActivity extends ResolverActivity implements
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
 
+        mShouldDisplayLandscape = shouldDisplayLandscape(newConfig.orientation);
         adjustPreviewWidth(newConfig.orientation, null);
         updateStickyContentPreview();
     }
@@ -1048,7 +1052,7 @@ public class ChooserActivity extends ResolverActivity implements
 
     private void adjustPreviewWidth(int orientation, View parent) {
         int width = -1;
-        if (shouldDisplayLandscape(orientation)) {
+        if (mShouldDisplayLandscape) {
             width = getResources().getDimensionPixelSize(R.dimen.chooser_preview_width);
         }
 
@@ -2831,6 +2835,19 @@ public class ChooserActivity extends ResolverActivity implements
                 .setSubtype(previewType));
     }
 
+    class ViewHolderBase extends RecyclerView.ViewHolder {
+        private int mViewType;
+
+        ViewHolderBase(View itemView, int viewType) {
+            super(itemView);
+            this.mViewType = viewType;
+        }
+
+        int getViewType() {
+            return mViewType;
+        }
+    }
+
     /**
      * Used to bind types of individual item including
      * {@link ChooserGridAdapter#VIEW_TYPE_NORMAL},
@@ -2838,12 +2855,12 @@ public class ChooserActivity extends ResolverActivity implements
      * {@link ChooserGridAdapter#VIEW_TYPE_PROFILE},
      * and {@link ChooserGridAdapter#VIEW_TYPE_AZ_LABEL}.
      */
-    final class ItemViewHolder extends RecyclerView.ViewHolder {
+    final class ItemViewHolder extends ViewHolderBase {
         ResolverListAdapter.ViewHolder mWrappedViewHolder;
         int mListPosition = ChooserListAdapter.NO_POSITION;
 
-        ItemViewHolder(View itemView, boolean isClickable) {
-            super(itemView);
+        ItemViewHolder(View itemView, boolean isClickable, int viewType) {
+            super(itemView, viewType);
             mWrappedViewHolder = new ResolverListAdapter.ViewHolder(itemView);
             if (isClickable) {
                 itemView.setOnClickListener(v -> startSelected(mListPosition,
@@ -2861,9 +2878,9 @@ public class ChooserActivity extends ResolverActivity implements
     /**
      * Add a footer to the list, to support scrolling behavior below the navbar.
      */
-    final class FooterViewHolder extends RecyclerView.ViewHolder {
-        FooterViewHolder(View itemView) {
-            super(itemView);
+    final class FooterViewHolder extends ViewHolderBase {
+        FooterViewHolder(View itemView, int viewType) {
+            super(itemView, viewType);
         }
     }
 
@@ -2974,7 +2991,7 @@ public class ChooserActivity extends ResolverActivity implements
 
         int getMaxTargetsPerRow() {
             int maxTargets = MAX_TARGETS_PER_ROW_PORTRAIT;
-            if (shouldDisplayLandscape(getResources().getConfiguration().orientation)) {
+            if (mShouldDisplayLandscape) {
                 maxTargets = MAX_TARGETS_PER_ROW_LANDSCAPE;
             }
             return maxTargets;
@@ -3082,13 +3099,14 @@ public class ChooserActivity extends ResolverActivity implements
         public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             switch (viewType) {
                 case VIEW_TYPE_CONTENT_PREVIEW:
-                    return new ItemViewHolder(createContentPreviewView(parent), false);
+                    return new ItemViewHolder(createContentPreviewView(parent), false, viewType);
                 case VIEW_TYPE_PROFILE:
-                    return new ItemViewHolder(createProfileView(parent), false);
+                    return new ItemViewHolder(createProfileView(parent), false, viewType);
                 case VIEW_TYPE_AZ_LABEL:
-                    return new ItemViewHolder(createAzLabelView(parent), false);
+                    return new ItemViewHolder(createAzLabelView(parent), false, viewType);
                 case VIEW_TYPE_NORMAL:
-                    return new ItemViewHolder(mChooserListAdapter.createView(parent), true);
+                    return new ItemViewHolder(
+                            mChooserListAdapter.createView(parent), true, viewType);
                 case VIEW_TYPE_DIRECT_SHARE:
                 case VIEW_TYPE_CALLER_AND_RANK:
                     return createItemGroupViewHolder(viewType, parent);
@@ -3096,7 +3114,7 @@ public class ChooserActivity extends ResolverActivity implements
                     Space sp = new Space(parent.getContext());
                     sp.setLayoutParams(new RecyclerView.LayoutParams(
                             LayoutParams.MATCH_PARENT, mFooterHeight));
-                    return new FooterViewHolder(sp);
+                    return new FooterViewHolder(sp, viewType);
                 default:
                     // Since we catch all possible viewTypes above, no chance this is being called.
                     return null;
@@ -3105,7 +3123,7 @@ public class ChooserActivity extends ResolverActivity implements
 
         @Override
         public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-            int viewType = getItemViewType(position);
+            int viewType = ((ViewHolderBase) holder).getViewType();
             switch (viewType) {
                 case VIEW_TYPE_DIRECT_SHARE:
                 case VIEW_TYPE_CALLER_AND_RANK:
@@ -3216,7 +3234,6 @@ public class ChooserActivity extends ResolverActivity implements
             }
 
             viewGroup.setTag(holder);
-
             return holder;
         }
 
@@ -3243,14 +3260,15 @@ public class ChooserActivity extends ResolverActivity implements
                 parentGroup.addView(row2);
 
                 mDirectShareViewHolder = new DirectShareViewHolder(parentGroup,
-                        Lists.newArrayList(row1, row2), getMaxTargetsPerRow());
+                        Lists.newArrayList(row1, row2), getMaxTargetsPerRow(), viewType);
                 loadViewsIntoGroup(mDirectShareViewHolder);
 
                 return mDirectShareViewHolder;
             } else {
                 ViewGroup row = (ViewGroup) mLayoutInflater.inflate(R.layout.chooser_row, parent,
                         false);
-                ItemGroupViewHolder holder = new SingleRowViewHolder(row, getMaxTargetsPerRow());
+                ItemGroupViewHolder holder =
+                        new SingleRowViewHolder(row, getMaxTargetsPerRow(), viewType);
                 loadViewsIntoGroup(holder);
 
                 return holder;
@@ -3412,14 +3430,14 @@ public class ChooserActivity extends ResolverActivity implements
      * {@link ChooserGridAdapter#VIEW_TYPE_DIRECT_SHARE},
      * and {@link ChooserGridAdapter#VIEW_TYPE_CALLER_AND_RANK}.
      */
-    abstract class ItemGroupViewHolder extends RecyclerView.ViewHolder {
+    abstract class ItemGroupViewHolder extends ViewHolderBase {
         protected int mMeasuredRowHeight;
         private int[] mItemIndices;
         protected final View[] mCells;
         private final int mColumnCount;
 
-        ItemGroupViewHolder(int cellCount, View itemView) {
-            super(itemView);
+        ItemGroupViewHolder(int cellCount, View itemView, int viewType) {
+            super(itemView, viewType);
             this.mCells = new View[cellCount];
             this.mItemIndices = new int[cellCount];
             this.mColumnCount = cellCount;
@@ -3465,8 +3483,8 @@ public class ChooserActivity extends ResolverActivity implements
     class SingleRowViewHolder extends ItemGroupViewHolder {
         private final ViewGroup mRow;
 
-        SingleRowViewHolder(ViewGroup row, int cellCount) {
-            super(cellCount, row);
+        SingleRowViewHolder(ViewGroup row, int cellCount, int viewType) {
+            super(cellCount, row, viewType);
 
             this.mRow = row;
         }
@@ -3508,8 +3526,9 @@ public class ChooserActivity extends ResolverActivity implements
 
         private final boolean[] mCellVisibility;
 
-        DirectShareViewHolder(ViewGroup parent, List<ViewGroup> rows, int cellCountPerRow) {
-            super(rows.size() * cellCountPerRow, parent);
+        DirectShareViewHolder(ViewGroup parent, List<ViewGroup> rows, int cellCountPerRow,
+                int viewType) {
+            super(rows.size() * cellCountPerRow, parent, viewType);
 
             this.mParent = parent;
             this.mRows = rows;
