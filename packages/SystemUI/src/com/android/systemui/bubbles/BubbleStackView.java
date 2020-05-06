@@ -1076,26 +1076,27 @@ public class BubbleStackView extends FrameLayout
     @Override
     public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfoInternal(info);
+        setupLocalMenu(info);
+    }
 
-        // Custom actions.
+    void setupLocalMenu(AccessibilityNodeInfo info) {
+        Resources res = mContext.getResources();
+
+        // Custom local actions.
         AccessibilityAction moveTopLeft = new AccessibilityAction(R.id.action_move_top_left,
-                getContext().getResources()
-                        .getString(R.string.bubble_accessibility_action_move_top_left));
+                res.getString(R.string.bubble_accessibility_action_move_top_left));
         info.addAction(moveTopLeft);
 
         AccessibilityAction moveTopRight = new AccessibilityAction(R.id.action_move_top_right,
-                getContext().getResources()
-                        .getString(R.string.bubble_accessibility_action_move_top_right));
+                res.getString(R.string.bubble_accessibility_action_move_top_right));
         info.addAction(moveTopRight);
 
         AccessibilityAction moveBottomLeft = new AccessibilityAction(R.id.action_move_bottom_left,
-                getContext().getResources()
-                        .getString(R.string.bubble_accessibility_action_move_bottom_left));
+                res.getString(R.string.bubble_accessibility_action_move_bottom_left));
         info.addAction(moveBottomLeft);
 
         AccessibilityAction moveBottomRight = new AccessibilityAction(R.id.action_move_bottom_right,
-                getContext().getResources()
-                        .getString(R.string.bubble_accessibility_action_move_bottom_right));
+                res.getString(R.string.bubble_accessibility_action_move_bottom_right));
         info.addAction(moveBottomRight);
 
         // Default actions.
