@@ -4426,11 +4426,6 @@ public class PackageManagerService extends IPackageManager.Stub
         if (getInstantAppPackageName(callingUid) != null) {
             throw new SecurityException("Instant applications don't have access to this method");
         }
-        if (!mUserManager.exists(userId)) {
-            throw new SecurityException("User doesn't exist");
-        }
-        mPermissionManager.enforceCrossUserPermission(
-                callingUid, userId, false, false, "checkPackageStartable");
         final boolean userKeyUnlocked = StorageManager.isUserKeyUnlocked(userId);
         synchronized (mLock) {
             final PackageSetting ps = mSettings.mPackages.get(packageName);
@@ -5803,15 +5798,9 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public ChangedPackages getChangedPackages(int sequenceNumber, int userId) {
-        final int callingUid = Binder.getCallingUid();
-        if (getInstantAppPackageName(callingUid) != null) {
+        if (getInstantAppPackageName(Binder.getCallingUid()) != null) {
             return null;
         }
-        if (!mUserManager.exists(userId)) {
-            return null;
-        }
-        mPermissionManager.enforceCrossUserPermission(
-                callingUid, userId, false, false, "getChangedPackages");
         synchronized (mLock) {
             if (sequenceNumber >= mChangedPackagesSequenceNumber) {
                 return null;
@@ -8816,10 +8805,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
     private ProviderInfo resolveContentProviderInternal(String name, int flags, int userId) {
         if (!mUserManager.exists(userId)) return null;
-        final int callingUid = Binder.getCallingUid();
-        mPermissionManager.enforceCrossUserPermission(
-                callingUid, userId, false, false, "resolveContentProvider");
         flags = updateFlagsForComponent(flags, userId);
+        final int callingUid = Binder.getCallingUid();
         final ProviderInfo providerInfo = mComponentResolver.queryProvider(name, flags, userId);
         if (providerInfo == null) {
             return null;
