@@ -22,6 +22,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.media.MediaDescription;
@@ -38,6 +39,7 @@ import android.widget.TextView;
 
 import com.android.settingslib.media.LocalMediaManager;
 import com.android.systemui.R;
+import com.android.systemui.media.IlluminationDrawable;
 import com.android.systemui.media.MediaControlPanel;
 import com.android.systemui.media.SeekBarObserver;
 import com.android.systemui.media.SeekBarViewModel;
@@ -173,7 +175,7 @@ public class QSMediaPlayer extends MediaControlPanel {
             LinearLayout parentActionsLayout = (LinearLayout) actionsContainer;
             int i = 0;
             for (; i < parentActionsLayout.getChildCount() && i < QS_ACTION_IDS.length; i++) {
-                ImageButton thisBtn = mMediaNotifView.findViewById(QS_ACTION_IDS[i]);
+                final ImageButton thisBtn = mMediaNotifView.findViewById(QS_ACTION_IDS[i]);
                 ImageButton thatBtn = parentActionsLayout.findViewById(NOTIF_ACTION_IDS[i]);
                 if (thatBtn == null || thatBtn.getDrawable() == null
                         || thatBtn.getVisibility() != View.VISIBLE) {
@@ -187,6 +189,15 @@ public class QSMediaPlayer extends MediaControlPanel {
                 thisBtn.setOnClickListener(v -> {
                     Log.d(TAG, "clicking on other button");
                     thatBtn.performClick();
+                    if (mMediaNotifView.getBackground() instanceof IlluminationDrawable) {
+                        Rect mediaRect = new Rect();
+                        Rect buttonRect = new Rect();
+                        mMediaNotifView.getGlobalVisibleRect(mediaRect);
+                        thisBtn.getGlobalVisibleRect(buttonRect);
+                        ((IlluminationDrawable) mMediaNotifView.getBackground()).illuminate(
+                                buttonRect.centerX() - mediaRect.left,
+                                buttonRect.centerY() - mediaRect.top);
+                    }
                 });
             }
 
