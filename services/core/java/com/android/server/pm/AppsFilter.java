@@ -725,7 +725,7 @@ public class AppsFilter {
             }
             final PackageSetting callingPkgSetting;
             final ArraySet<PackageSetting> callingSharedPkgSettings;
-            Trace.beginSection("callingSetting instanceof");
+            Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "callingSetting instanceof");
             if (callingSetting instanceof PackageSetting) {
                 callingPkgSetting = (PackageSetting) callingSetting;
                 callingSharedPkgSettings = null;
@@ -733,7 +733,7 @@ public class AppsFilter {
                 callingPkgSetting = null;
                 callingSharedPkgSettings = ((SharedUserSetting) callingSetting).packages;
             }
-            Trace.endSection();
+            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
 
             if (callingPkgSetting != null) {
                 if (callingPkgSetting.pkg != null
@@ -769,7 +769,7 @@ public class AppsFilter {
                 return false;
             }
             final String targetName = targetPkg.getPackageName();
-            Trace.beginSection("getAppId");
+            Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "getAppId");
             final int callingAppId;
             if (callingPkgSetting != null) {
                 callingAppId = callingPkgSetting.appId;
@@ -777,7 +777,7 @@ public class AppsFilter {
                 callingAppId = callingSharedPkgSettings.valueAt(0).appId; // all should be the same
             }
             final int targetAppId = targetPkgSetting.appId;
-            Trace.endSection();
+            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
             if (callingAppId == targetAppId) {
                 if (DEBUG_LOGGING) {
                     log(callingSetting, targetPkgSetting, "same app id");
@@ -786,7 +786,7 @@ public class AppsFilter {
             }
 
             try {
-                Trace.beginSection("hasPermission");
+                Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "hasPermission");
                 if (callingSetting.getPermissionsState().hasPermission(
                         Manifest.permission.QUERY_ALL_PACKAGES, UserHandle.getUserId(callingUid))) {
                     if (DEBUG_LOGGING) {
@@ -795,10 +795,10 @@ public class AppsFilter {
                     return false;
                 }
             } finally {
-                Trace.endSection();
+                Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
             }
             try {
-                Trace.beginSection("mForceQueryable");
+                Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "mForceQueryable");
                 if (mForceQueryable.contains(targetAppId)) {
                     if (DEBUG_LOGGING) {
                         log(callingSetting, targetPkgSetting, "force queryable");
@@ -806,10 +806,10 @@ public class AppsFilter {
                     return false;
                 }
             } finally {
-                Trace.endSection();
+                Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
             }
             try {
-                Trace.beginSection("mQueriesViaPackage");
+                Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "mQueriesViaPackage");
                 if (mQueriesViaPackage.contains(callingAppId, targetAppId)) {
                     if (DEBUG_LOGGING) {
                         log(callingSetting, targetPkgSetting, "queries package");
@@ -817,10 +817,10 @@ public class AppsFilter {
                     return false;
                 }
             } finally {
-                Trace.endSection();
+                Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
             }
             try {
-                Trace.beginSection("mQueriesViaComponent");
+                Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "mQueriesViaComponent");
                 if (mQueriesViaComponent.contains(callingAppId, targetAppId)) {
                     if (DEBUG_LOGGING) {
                         log(callingSetting, targetPkgSetting, "queries component");
@@ -828,11 +828,11 @@ public class AppsFilter {
                     return false;
                 }
             } finally {
-                Trace.endSection();
+                Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
             }
 
             try {
-                Trace.beginSection("mImplicitlyQueryable");
+                Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "mImplicitlyQueryable");
                 final int targetUid = UserHandle.getUid(userId, targetAppId);
                 if (mImplicitlyQueryable.contains(callingUid, targetUid)) {
                     if (DEBUG_LOGGING) {
@@ -841,11 +841,11 @@ public class AppsFilter {
                     return false;
                 }
             } finally {
-                Trace.endSection();
+                Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
             }
 
             try {
-                Trace.beginSection("mOverlayReferenceMapper");
+                Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "mOverlayReferenceMapper");
                 if (callingSharedPkgSettings != null) {
                     int size = callingSharedPkgSettings.size();
                     for (int index = 0; index < size; index++) {
@@ -868,7 +868,7 @@ public class AppsFilter {
                     }
                 }
             } finally {
-                Trace.endSection();
+                Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
             }
 
 
