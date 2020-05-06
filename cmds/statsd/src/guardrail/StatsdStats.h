@@ -371,21 +371,30 @@ public:
                      int32_t lastAtomTag, int32_t uid, int32_t pid);
 
     /**
-     * Records that the pull of an atom has failed
+     * Records that the pull of an atom has failed. Eg, if the client indicated the pull failed, if
+     * the pull timed out, or if the outgoing binder call failed.
+     * This count will only increment if the puller was actually invoked.
+     *
+     * It does not include a pull not occurring due to not finding the appropriate
+     * puller. These cases are covered in other counts.
      */
     void notePullFailed(int atomId);
 
     /**
-     * Records that the pull of StatsCompanionService atom has failed
+     * Records that the pull of an atom has failed due to not having a uid provider.
      */
-    void noteStatsCompanionPullFailed(int atomId);
+    void notePullUidProviderNotFound(int atomId);
 
     /**
-     * Records that the pull of a StatsCompanionService atom has failed due to a failed binder
-     * transaction. This can happen when StatsCompanionService returns too
-     * much data (the max Binder parcel size is 1MB)
+     * Records that the pull of an atom has failed due not finding a puller registered by a
+     * trusted uid.
      */
-    void noteStatsCompanionPullBinderTransactionFailed(int atomId);
+    void notePullerNotFound(int atomId);
+
+    /**
+     * Records that the pull has failed due to the outgoing binder call failing.
+     */
+    void notePullBinderCallFailed(int atomId);
 
     /**
      * A pull with no data occurred
@@ -503,12 +512,13 @@ public:
         long pullTimeout = 0;
         long pullExceedMaxDelay = 0;
         long pullFailed = 0;
-        long statsCompanionPullFailed = 0;
-        long statsCompanionPullBinderTransactionFailed = 0;
+        long pullUidProviderNotFound = 0;
+        long pullerNotFound = 0;
         long emptyData = 0;
         long registeredCount = 0;
         long unregisteredCount = 0;
         int32_t atomErrorCount = 0;
+        long binderCallFailCount = 0;
     } PulledAtomStats;
 
     typedef struct {
