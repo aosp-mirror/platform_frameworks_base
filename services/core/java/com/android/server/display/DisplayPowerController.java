@@ -1067,12 +1067,22 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                     mColorFadeEnabled && mPowerState.getColorFadeLevel() == 1.0f;
             final boolean brightnessIsTemporary =
                     mAppliedTemporaryBrightness || mAppliedTemporaryAutoBrightnessAdjustment;
-            if (initialRampSkip || hasBrightnessBuckets
-                    || wasOrWillBeInVr || !isDisplayContentVisible || brightnessIsTemporary) {
-                animateScreenBrightness(brightnessState, SCREEN_ANIMATION_RATE_MINIMUM);
-            } else {
-                animateScreenBrightness(brightnessState,
-                        slowChange ? mBrightnessRampRateSlow : mBrightnessRampRateFast);
+            // We only want to animate the brightness if it is between 0.0f and 1.0f.
+            // brightnessState can contain the values -1.0f and NaN, which we do not want to
+            // animate to. To avoid this, we check the value first.
+            // If the brightnessState is off (-1.0f) we still want to animate to the minimum
+            // brightness (0.0f) to accommodate for LED displays, which can appear bright to the
+            // user even when the display is all black.
+            float animateValue = brightnessState == PowerManager.BRIGHTNESS_OFF_FLOAT
+                    ? PowerManager.BRIGHTNESS_MIN : brightnessState;
+            if (isValidBrightnessValue(animateValue)) {
+                if (initialRampSkip || hasBrightnessBuckets
+                        || wasOrWillBeInVr || !isDisplayContentVisible || brightnessIsTemporary) {
+                    animateScreenBrightness(animateValue, SCREEN_ANIMATION_RATE_MINIMUM);
+                } else {
+                    animateScreenBrightness(animateValue,
+                            slowChange ? mBrightnessRampRateSlow : mBrightnessRampRateFast);
+                }
             }
 
             if (!brightnessIsTemporary) {
