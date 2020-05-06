@@ -567,11 +567,15 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     private void updateState(InsetsState newState) {
         mState.setDisplayFrame(newState.getDisplayFrame());
         for (int i = newState.getSourcesCount() - 1; i >= 0; i--) {
-            InsetsSource source = newState.sourceAt(i);
-            getSourceConsumer(source.getType()).updateSource(source);
+            final InsetsSource source = newState.sourceAt(i);
+            final int type = source.getType();
+            final InsetsSourceConsumer consumer = getSourceConsumer(type);
+            consumer.updateSource(source);
+            mHost.updateCompatSysUiVisibility(type, source.isVisible(),
+                    consumer.getControl() != null);
         }
         for (int i = mState.getSourcesCount() - 1; i >= 0; i--) {
-            InsetsSource source = mState.sourceAt(i);
+            final InsetsSource source = mState.sourceAt(i);
             if (newState.peekSource(source.getType()) == null) {
                 mState.removeSource(source.getType());
             }
@@ -1003,14 +1007,6 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     public void notifyVisibilityChanged() {
         mHost.notifyInsetsChanged();
         updateRequestedState();
-    }
-
-    /**
-     * @see ViewRootImpl#updateCompatSysUiVisibility(int, boolean, boolean)
-     */
-    public void updateCompatSysUiVisibility(@InternalInsetsType int type, boolean visible,
-            boolean hasControl) {
-        mHost.updateCompatSysUiVisibility(type, visible, hasControl);
     }
 
     /**

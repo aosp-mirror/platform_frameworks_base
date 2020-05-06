@@ -1967,6 +1967,10 @@ public final class ViewRootImpl implements ViewParent,
             mCompatibleVisibilityInfo.globalVisibility =
                     (mCompatibleVisibilityInfo.globalVisibility & ~View.SYSTEM_UI_FLAG_LOW_PROFILE)
                             | (mAttachInfo.mSystemUiVisibility & View.SYSTEM_UI_FLAG_LOW_PROFILE);
+            if (mDispatchedSystemUiVisibility != mCompatibleVisibilityInfo.globalVisibility) {
+                mHandler.sendMessage(mHandler.obtainMessage(
+                        MSG_DISPATCH_SYSTEM_UI_VISIBILITY, mCompatibleVisibilityInfo));
+            }
             if (mAttachInfo.mKeepScreenOn != oldScreenOn
                     || mAttachInfo.mSystemUiVisibility != params.subtreeSystemUiVisibility
                     || mAttachInfo.mHasSystemUiListeners != params.hasSystemUiListeners) {
@@ -2020,7 +2024,7 @@ public final class ViewRootImpl implements ViewParent,
             info.globalVisibility |= systemUiFlag;
         }
         if (mDispatchedSystemUiVisibility != info.globalVisibility) {
-            scheduleTraversals();
+            mHandler.sendMessage(mHandler.obtainMessage(MSG_DISPATCH_SYSTEM_UI_VISIBILITY, info));
         }
     }
 
@@ -2467,9 +2471,6 @@ public final class ViewRootImpl implements ViewParent,
         if (mAttachInfo.mForceReportNewAttributes) {
             mAttachInfo.mForceReportNewAttributes = false;
             params = lp;
-        }
-        if (sNewInsetsMode == NEW_INSETS_MODE_FULL) {
-            handleDispatchSystemUiVisibilityChanged(mCompatibleVisibilityInfo);
         }
 
         if (mFirst || mAttachInfo.mViewVisibilityChanged) {
