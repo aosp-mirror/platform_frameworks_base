@@ -892,7 +892,7 @@ public class WifiManager {
      * The RSSI (signal strength) has changed.
      *
      * Receiver Required Permission: android.Manifest.permission.ACCESS_WIFI_STATE
-     * @see {@link #EXTRA_NEW_RSSI}
+     * @see #EXTRA_NEW_RSSI
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String RSSI_CHANGED_ACTION = "android.net.wifi.RSSI_CHANGED";
