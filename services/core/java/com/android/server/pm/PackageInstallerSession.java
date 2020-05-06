@@ -86,6 +86,8 @@ import android.content.pm.PackageParser.PackageLite;
 import android.content.pm.PackageParser.PackageParserException;
 import android.content.pm.dex.DexMetadataHelper;
 import android.content.pm.parsing.ApkLiteParseUtils;
+import android.content.pm.parsing.result.ParseResult;
+import android.content.pm.parsing.result.ParseTypeImpl;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Binder;
@@ -2016,15 +2018,16 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
         // Verify that all staged packages are internally consistent
         final ArraySet<String> stagedSplits = new ArraySet<>();
+        ParseTypeImpl input = ParseTypeImpl.forDefaultParsing();
         for (File addedFile : addedFiles) {
-            final ApkLite apk;
-            try {
-                apk = ApkLiteParseUtils.parseApkLite(
-                        addedFile, PackageParser.PARSE_COLLECT_CERTIFICATES);
-            } catch (PackageParserException e) {
-                throw PackageManagerException.from(e);
+            ParseResult<ApkLite> result = ApkLiteParseUtils.parseApkLite(input.reset(),
+                    addedFile, PackageParser.PARSE_COLLECT_CERTIFICATES);
+            if (result.isError()) {
+                throw new PackageManagerException(result.getErrorCode(),
+                        result.getErrorMessage(), result.getException());
             }
 
+            final ApkLite apk = result.getResult();
             if (!stagedSplits.add(apk.splitName)) {
                 throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
                         "Split " + apk.splitName + " was defined multiple times");
@@ -2113,16 +2116,22 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
 
         } else {
-            final PackageLite existing;
-            final ApkLite existingBase;
             ApplicationInfo appInfo = pkgInfo.applicationInfo;
-            try {
-                existing = PackageParser.parsePackageLite(new File(appInfo.getCodePath()), 0);
-                existingBase = ApkLiteParseUtils.parseApkLite(new File(appInfo.getBaseCodePath()),
-                        PackageParser.PARSE_COLLECT_CERTIFICATES);
-            } catch (PackageParserException e) {
-                throw PackageManagerException.from(e);
+            ParseResult<PackageLite> pkgLiteResult = ApkLiteParseUtils.parsePackageLite(
+                    input.reset(), new File(appInfo.getCodePath()), 0);
+            if (pkgLiteResult.isError()) {
+                throw new PackageManagerException(PackageManager.INSTALL_FAILED_INTERNAL_ERROR,
+                        pkgLiteResult.getErrorMessage(), pkgLiteResult.getException());
             }
+            final PackageLite existing = pkgLiteResult.getResult();
+            ParseResult<ApkLite> apkLiteResult = ApkLiteParseUtils.parseApkLite(input.reset(),
+                    new File(appInfo.getBaseCodePath()),
+                    PackageParser.PARSE_COLLECT_CERTIFICATES);
+            if (apkLiteResult.isError()) {
+                throw new PackageManagerException(PackageManager.INSTALL_FAILED_INTERNAL_ERROR,
+                        apkLiteResult.getErrorMessage(), apkLiteResult.getException());
+            }
+            final ApkLite existingBase = apkLiteResult.getResult();
 
             assertApkConsistentLocked("Existing base", existingBase);
 
