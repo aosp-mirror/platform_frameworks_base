@@ -454,7 +454,6 @@ public class BubbleStackView extends FrameLayout
                     // that means overflow was previously expanded. Set the selected bubble
                     // internally without going through BubbleData (which would ignore it since it's
                     // already selected).
-                    mBubbleData.setShowingOverflow(true);
                     setSelectedBubble(clickedBubble);
                 }
             } else {
@@ -1342,7 +1341,10 @@ public class BubbleStackView extends FrameLayout
         }
         if (bubbleToSelect == null || bubbleToSelect.getKey() != BubbleOverflow.KEY) {
             mBubbleData.setShowingOverflow(false);
+        } else {
+            mBubbleData.setShowingOverflow(true);
         }
+
         final BubbleViewProvider previouslySelected = mExpandedBubble;
         mExpandedBubble = bubbleToSelect;
         updatePointerPosition();
