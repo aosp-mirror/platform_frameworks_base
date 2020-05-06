@@ -28,6 +28,7 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 
 import com.android.systemui.R;
+import com.android.systemui.media.IlluminationDrawable;
 import com.android.systemui.media.MediaControlPanel;
 import com.android.systemui.plugins.ActivityStarter;
 
@@ -102,6 +103,11 @@ public class QuickQSMediaPlayer extends MediaControlPanel {
                         || thatBtn.getVisibility() != View.VISIBLE) {
                     thisBtn.setVisibility(View.GONE);
                     continue;
+                }
+
+                if (mMediaNotifView.getBackground() instanceof IlluminationDrawable) {
+                    ((IlluminationDrawable) mMediaNotifView.getBackground())
+                            .setupTouch(thisBtn, mMediaNotifView);
                 }
 
                 Drawable thatIcon = thatBtn.getDrawable();
