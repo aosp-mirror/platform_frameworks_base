@@ -120,7 +120,7 @@ public class AppPredictionPerUserService extends
                     this::removeAppPredictionSessionInfo));
         }
         final boolean serviceExists = resolveService(sessionId, s ->
-                s.onCreatePredictionSession(context, sessionId));
+                s.onCreatePredictionSession(context, sessionId), true);
         if (!serviceExists) {
             mSessionInfos.remove(sessionId);
         }
@@ -132,7 +132,7 @@ public class AppPredictionPerUserService extends
     @GuardedBy("mLock")
     public void notifyAppTargetEventLocked(@NonNull AppPredictionSessionId sessionId,
             @NonNull AppTargetEvent event) {
-        resolveService(sessionId, s -> s.notifyAppTargetEvent(sessionId, event));
+        resolveService(sessionId, s -> s.notifyAppTargetEvent(sessionId, event), false);
     }
 
     /**
@@ -142,7 +142,7 @@ public class AppPredictionPerUserService extends
     public void notifyLaunchLocationShownLocked(@NonNull AppPredictionSessionId sessionId,
             @NonNull String launchLocation, @NonNull ParceledListSlice targetIds) {
         resolveService(sessionId, s ->
-                s.notifyLaunchLocationShown(sessionId, launchLocation, targetIds));
+                s.notifyLaunchLocationShown(sessionId, launchLocation, targetIds), false);
     }
 
     /**
@@ -151,7 +151,7 @@ public class AppPredictionPerUserService extends
     @GuardedBy("mLock")
     public void sortAppTargetsLocked(@NonNull AppPredictionSessionId sessionId,
             @NonNull ParceledListSlice targets, @NonNull IPredictionCallback callback) {
-        resolveService(sessionId, s -> s.sortAppTargets(sessionId, targets, callback));
+        resolveService(sessionId, s -> s.sortAppTargets(sessionId, targets, callback), true);
     }
 
     /**
@@ -161,7 +161,7 @@ public class AppPredictionPerUserService extends
     public void registerPredictionUpdatesLocked(@NonNull AppPredictionSessionId sessionId,
             @NonNull IPredictionCallback callback) {
         final boolean serviceExists = resolveService(sessionId, s ->
-                s.registerPredictionUpdates(sessionId, callback));
+                s.registerPredictionUpdates(sessionId, callback), false);
         final AppPredictionSessionInfo sessionInfo = mSessionInfos.get(sessionId);
         if (serviceExists && sessionInfo != null) {
             sessionInfo.addCallbackLocked(callback);
@@ -175,7 +175,7 @@ public class AppPredictionPerUserService extends
     public void unregisterPredictionUpdatesLocked(@NonNull AppPredictionSessionId sessionId,
             @NonNull IPredictionCallback callback) {
         final boolean serviceExists = resolveService(sessionId, s ->
-                s.unregisterPredictionUpdates(sessionId, callback));
+                s.unregisterPredictionUpdates(sessionId, callback), false);
         final AppPredictionSessionInfo sessionInfo = mSessionInfos.get(sessionId);
         if (serviceExists && sessionInfo != null) {
             sessionInfo.removeCallbackLocked(callback);
@@ -187,7 +187,7 @@ public class AppPredictionPerUserService extends
      */
     @GuardedBy("mLock")
     public void requestPredictionUpdateLocked(@NonNull AppPredictionSessionId sessionId) {
-        resolveService(sessionId, s -> s.requestPredictionUpdate(sessionId));
+        resolveService(sessionId, s -> s.requestPredictionUpdate(sessionId), true);
     }
 
     /**
@@ -196,7 +196,7 @@ public class AppPredictionPerUserService extends
     @GuardedBy("mLock")
     public void onDestroyPredictionSessionLocked(@NonNull AppPredictionSessionId sessionId) {
         final boolean serviceExists = resolveService(sessionId, s ->
-                s.onDestroyPredictionSession(sessionId));
+                s.onDestroyPredictionSession(sessionId), false);
         final AppPredictionSessionInfo sessionInfo = mSessionInfos.get(sessionId);
         if (serviceExists && sessionInfo != null) {
             sessionInfo.destroy();
@@ -304,7 +304,8 @@ public class AppPredictionPerUserService extends
     @GuardedBy("mLock")
     @Nullable
     protected boolean resolveService(@NonNull final AppPredictionSessionId sessionId,
-            @NonNull final AbstractRemoteService.AsyncRequest<IPredictionService> cb) {
+            @NonNull final AbstractRemoteService.AsyncRequest<IPredictionService> cb,
+            boolean sendImmediately) {
         final AppPredictionSessionInfo sessionInfo = mSessionInfos.get(sessionId);
         if (sessionInfo == null) return false;
         if (sessionInfo.mUsesPeopleService) {
@@ -322,7 +323,13 @@ public class AppPredictionPerUserService extends
         } else {
             final RemoteAppPredictionService service = getRemoteServiceLocked();
             if (service != null) {
-                service.scheduleOnResolvedService(cb);
+                // TODO(b/155887722): implement a priority system so that latency-sensitive
+                // requests gets executed first.
+                if (sendImmediately) {
+                    service.executeOnResolvedService(cb);
+                } else {
+                    service.scheduleOnResolvedService(cb);
+                }
             }
             return service != null;
         }
