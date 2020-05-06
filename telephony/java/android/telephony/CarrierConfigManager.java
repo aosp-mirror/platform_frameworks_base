@@ -3025,21 +3025,6 @@ public class CarrierConfigManager {
     public static final String KEY_5G_ICON_CONFIGURATION_STRING = "5g_icon_configuration_string";
 
     /**
-     * Timeout in seconds for displaying 5G icon, default value is 0 which means the timer is
-     * disabled.
-     *
-     * System UI will show the 5G icon and start a timer with the timeout from this config when the
-     * device connects to a 5G cell. System UI stops displaying 5G icon when both the device
-     * disconnects from 5G cell and the timer is expired.
-     *
-     * If 5G is reacquired during this timer, the timer is canceled and restarted when 5G is next
-     * lost. Allows us to momentarily lose 5G without blinking the icon.
-     * @hide
-     */
-    public static final String KEY_5G_ICON_DISPLAY_GRACE_PERIOD_SEC_INT =
-            "5g_icon_display_grace_period_sec_int";
-
-    /**
      * This configuration allows the system UI to determine how long to continue to display 5G icons
      * when the device switches between different 5G scenarios.
      *
@@ -4180,7 +4165,6 @@ public class CarrierConfigManager {
                         + "not_restricted_rrc_con:5G");
         sDefaults.putString(KEY_5G_ICON_DISPLAY_GRACE_PERIOD_STRING, "");
         sDefaults.putString(KEY_5G_ICON_DISPLAY_SECONDARY_GRACE_PERIOD_STRING, "");
-        sDefaults.putInt(KEY_5G_ICON_DISPLAY_GRACE_PERIOD_SEC_INT, 0);
         /* Default value is 1 hour. */
         sDefaults.putLong(KEY_5G_WATCHDOG_TIME_MS_LONG, 3600000);
         sDefaults.putBoolean(KEY_UNMETERED_NR_NSA_BOOL, false);
