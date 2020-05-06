@@ -376,6 +376,9 @@ class SettingsProtoDumpUtil {
                 Settings.Global.BUGREPORT_IN_POWER_MENU,
                 GlobalSettingsProto.BUGREPORT_IN_POWER_MENU);
         dumpSetting(s, p,
+                Settings.Global.CACHED_APPS_FREEZER_ENABLED,
+                GlobalSettingsProto.CACHED_APPS_FREEZER_ENABLED);
+        dumpSetting(s, p,
                 Settings.Global.CALL_AUTO_RETRY,
                 GlobalSettingsProto.CALL_AUTO_RETRY);
 

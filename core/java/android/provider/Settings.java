@@ -14075,6 +14075,14 @@ public final class Settings {
                 "zram_enabled";
 
         /**
+         * Whether the app freezer is enabled on this device.
+         * The value of "enabled" enables the app freezer, "disabled" disables it and
+         * "device_default" will let the system decide whether to enable the freezer or not
+         * @hide
+         */
+        public static final String CACHED_APPS_FREEZER_ENABLED = "cached_apps_freezer";
+
+        /**
          * Configuration flags for smart replies in notifications.
          * This is encoded as a key=value list, separated by commas. Ex:
          *
