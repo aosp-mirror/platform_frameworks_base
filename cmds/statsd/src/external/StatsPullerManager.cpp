@@ -354,6 +354,11 @@ void StatsPullerManager::RegisterPullAtomCallback(const int uid, const int32_t a
     std::lock_guard<std::mutex> _l(mLock);
     VLOG("RegisterPullerCallback: adding puller for tag %d", atomTag);
 
+    if (callback == nullptr) {
+        ALOGW("SetPullAtomCallback called with null callback for atom %d.", atomTag);
+        return;
+    }
+
     StatsdStats::getInstance().notePullerCallbackRegistrationChanged(atomTag, /*registered=*/true);
     int64_t actualCoolDownNs = coolDownNs < kMinCoolDownNs ? kMinCoolDownNs : coolDownNs;
     int64_t actualTimeoutNs = timeoutNs > kMaxTimeoutNs ? kMaxTimeoutNs : timeoutNs;
