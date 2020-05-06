@@ -456,12 +456,15 @@ message StatsdStatsReport {
         optional int64 pull_timeout = 10;
         optional int64 pull_exceed_max_delay = 11;
         optional int64 pull_failed = 12;
-        optional int64 stats_companion_pull_failed = 13;
-        optional int64 stats_companion_pull_binder_transaction_failed = 14;
+        optional int64 stats_companion_pull_failed = 13 [deprecated = true];
+        optional int64 stats_companion_pull_binder_transaction_failed = 14 [deprecated = true];
         optional int64 empty_data = 15;
         optional int64 registered_count = 16;
         optional int64 unregistered_count = 17;
         optional int32 atom_error_count = 18;
+        optional int64 binder_call_failed = 19;
+        optional int64 failed_uid_provider_not_found = 20;
+        optional int64 puller_not_found = 21;
     }
     repeated PulledAtomStats pulled_atom_stats = 10;
 
