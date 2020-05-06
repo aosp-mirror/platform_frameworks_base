@@ -4437,4 +4437,11 @@
     <bool name="config_pdp_reject_enable_retry">false</bool>
     <!-- pdp data reject retry delay in ms -->
     <integer name="config_pdp_reject_retry_delay_ms">-1</integer>
+
+    <!-- Package name that is recognized as an actor for the packages listed in
+         @array/config_overlayableConfiguratorTargets. If an overlay targeting one of the listed
+         targets is signed with the same signature as the configurator, the overlay will be granted
+         the "actor" policy. -->
+    <string name="config_overlayableConfigurator" translatable="false" />
+    <string-array name="config_overlayableConfiguratorTargets" translatable="false" />
 </resources>
