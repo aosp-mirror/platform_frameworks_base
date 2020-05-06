@@ -130,7 +130,13 @@ public class ExpandableNotificationRowController {
         mView.setOnDismissRunnable(mOnDismissRunnable);
         mView.setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);
         if (mAllowLongPress) {
-            mView.setLongPressListener(mNotificationGutsManager::openGuts);
+            mView.setLongPressListener((v, x, y, item) -> {
+                if (mView.isSummaryWithChildren()) {
+                    mView.expandNotification();
+                    return true;
+                }
+                return mNotificationGutsManager.openGuts(v, x, y, item);
+            });
         }
         if (ENABLE_REMOTE_INPUT) {
             mView.setDescendantFocusability(ViewGroup.FOCUS_BEFORE_DESCENDANTS);
