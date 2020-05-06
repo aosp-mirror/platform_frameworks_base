@@ -110,7 +110,7 @@ droidstubs {
         },
         last_released: {
             api_file: ":android.api.public.latest",
-            removed_api_file: "api/removed.txt",
+            removed_api_file: ":removed.api.public.latest",
             baseline_file: ":public-api-incompatibilities-with-last-released",
         },
         api_lint: {
@@ -152,7 +152,7 @@ droidstubs {
         },
         last_released: {
             api_file: ":android.api.system.latest",
-            removed_api_file: "api/system-removed.txt",
+            removed_api_file: ":removed.api.system.latest",
             baseline_file: ":system-api-incompatibilities-with-last-released"
         },
         api_lint: {
@@ -216,7 +216,7 @@ droidstubs {
         },
         last_released: {
             api_file: ":android.api.module-lib.latest",
-            removed_api_file: "api/module-lib-removed.txt",
+            removed_api_file: ":removed.api.module-lib.latest",
             baseline_file: ":module-lib-api-incompatibilities-with-last-released"
         },
         api_lint: {
