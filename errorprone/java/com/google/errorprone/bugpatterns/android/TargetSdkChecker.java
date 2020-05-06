@@ -34,6 +34,27 @@ import com.sun.source.tree.BinaryTree;
 import com.sun.source.tree.ExpressionTree;
 import com.sun.source.tree.Tree.Kind;
 
+/**
+ * Over the years we've had several obscure bugs related to how SDK level
+ * comparisons are performed, specifically during the window of time where we've
+ * started distributing the "frankenbuild" to developers.
+ * <p>
+ * Consider the case where a framework developer shipping release "R" wants to
+ * only grant a specific behavior to modern apps; they could write this in two
+ * different ways:
+ * <ol>
+ * <li>if (targetSdkVersion > Build.VERSION_CODES.Q) {
+ * <li>if (targetSdkVersion >= Build.VERSION_CODES.R) {
+ * </ol>
+ * The safer of these two options is (2), which will ensure that developers only
+ * get the behavior when <em>both</em> the app and the platform agree on the
+ * specific SDK level having shipped.
+ * <p>
+ * Consider the breakage that would happen with option (1) if we started
+ * shipping APKs that are based on the final R SDK, but are then installed on
+ * earlier preview releases which still consider R to be CUR_DEVELOPMENT; they'd
+ * risk crashing due to behaviors that were never part of the official R SDK.
+ */
 @AutoService(BugChecker.class)
 @BugPattern(
     name = "AndroidFrameworkTargetSdk",
