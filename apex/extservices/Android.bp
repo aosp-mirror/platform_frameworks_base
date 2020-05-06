@@ -21,7 +21,7 @@ apex {
 apex_defaults {
     name: "com.android.extservices-defaults",
     updatable: true,
-    min_sdk_version: "R",
+    min_sdk_version: "current",
     key: "com.android.extservices.key",
     certificate: ":com.android.extservices.certificate",
     apps: ["ExtServices"],
