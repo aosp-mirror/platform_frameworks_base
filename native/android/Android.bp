@@ -98,6 +98,14 @@ cc_library_shared {
     },
 }
 
+// Header-only library used for atrace in platform NDK builds
+cc_library_headers {
+    name: "libandroid_trace",
+    host_supported: true,
+    vendor_available: true,
+    export_include_dirs: ["trace"],
+}
+
 // Network library.
 cc_library_shared {
     name: "libandroid_net",
