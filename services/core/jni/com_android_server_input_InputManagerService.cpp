@@ -1453,9 +1453,13 @@ static jint nativeInjectInputEvent(JNIEnv* env, jclass /* clazz */,
             return INPUT_EVENT_INJECTION_FAILED;
         }
 
-        return (jint) im->getInputManager()->getDispatcher()->injectInputEvent(
-                & keyEvent, injectorPid, injectorUid, syncMode, timeoutMillis,
-                uint32_t(policyFlags));
+        const int32_t result =
+                im->getInputManager()->getDispatcher()->injectInputEvent(&keyEvent, injectorPid,
+                                                                         injectorUid, syncMode,
+                                                                         std::chrono::milliseconds(
+                                                                                 timeoutMillis),
+                                                                         uint32_t(policyFlags));
+        return static_cast<jint>(result);
     } else if (env->IsInstanceOf(inputEventObj, gMotionEventClassInfo.clazz)) {
         const MotionEvent* motionEvent = android_view_MotionEvent_getNativePtr(env, inputEventObj);
         if (!motionEvent) {
@@ -1463,9 +1467,13 @@ static jint nativeInjectInputEvent(JNIEnv* env, jclass /* clazz */,
             return INPUT_EVENT_INJECTION_FAILED;
         }
 
-        return (jint) im->getInputManager()->getDispatcher()->injectInputEvent(
-                motionEvent, injectorPid, injectorUid, syncMode, timeoutMillis,
-                uint32_t(policyFlags));
+        const int32_t result =
+                (jint)im->getInputManager()
+                        ->getDispatcher()
+                        ->injectInputEvent(motionEvent, injectorPid, injectorUid, syncMode,
+                                           std::chrono::milliseconds(timeoutMillis),
+                                           uint32_t(policyFlags));
+        return static_cast<jint>(result);
     } else {
         jniThrowRuntimeException(env, "Invalid input event type.");
         return INPUT_EVENT_INJECTION_FAILED;
