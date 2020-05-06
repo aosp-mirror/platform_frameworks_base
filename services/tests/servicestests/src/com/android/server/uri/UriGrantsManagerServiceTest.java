@@ -171,7 +171,7 @@ public class UriGrantsManagerServiceTest {
         final Uri uri = Uri.parse("content://" + PKG_COMPLEX + "/");
         {
             final Intent intent = new Intent(Intent.ACTION_VIEW, uri)
-                    .addFlags(FLAG_READ);
+                    .addFlags(FLAG_READ | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             assertNull(mService.checkGrantUriPermissionFromIntent(UID_PRIMARY_COMPLEX, PKG_SOCIAL,
                     intent, intent.getFlags(), null, USER_PRIMARY));
         }
