@@ -28,7 +28,6 @@ import android.os.Binder;
 import android.os.IPullAtomCallback;
 import android.os.IPullAtomResultReceiver;
 import android.os.IStatsManagerService;
-import android.os.IStatsd;
 import android.os.RemoteException;
 import android.os.StatsFrameworkInitializer;
 import android.util.AndroidException;
@@ -55,9 +54,6 @@ public final class StatsManager {
 
     private static final Object sLock = new Object();
     private final Context mContext;
-
-    @GuardedBy("sLock")
-    private IStatsd mService;
 
     @GuardedBy("sLock")
     private IStatsManagerService mStatsManagerService;
