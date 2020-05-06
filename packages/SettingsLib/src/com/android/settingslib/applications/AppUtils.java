@@ -140,4 +140,15 @@ public class AppUtils {
                 .isSystemModule(packageName);
     }
 
+    /**
+     * Returns a boolean indicating whether a given package is a mainline module.
+     */
+    public static boolean isMainlineModule(Context context, String packageName) {
+        final PackageManager pm = context.getPackageManager();
+        try {
+            return pm.getModuleInfo(packageName, 0 /* flags */) != null;
+        } catch (PackageManager.NameNotFoundException e) {
+            return false;
+        }
+    }
 }
