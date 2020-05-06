@@ -27,10 +27,13 @@ import android.util.Log;
 import androidx.annotation.IntDef;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.settingslib.bluetooth.A2dpProfile;
 import com.android.settingslib.bluetooth.BluetoothCallback;
 import com.android.settingslib.bluetooth.CachedBluetoothDevice;
 import com.android.settingslib.bluetooth.CachedBluetoothDeviceManager;
+import com.android.settingslib.bluetooth.HearingAidProfile;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
+import com.android.settingslib.bluetooth.LocalBluetoothProfile;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -430,7 +433,8 @@ public class LocalMediaManager implements BluetoothCallback {
                         cachedDeviceManager.findDevice(device);
                 if (cachedDevice != null) {
                     if (cachedDevice.getBondState() == BluetoothDevice.BOND_BONDED
-                            && !cachedDevice.isConnected()) {
+                            && !cachedDevice.isConnected()
+                            && isA2dpOrHearingAidDevice(cachedDevice)) {
                         deviceCount++;
                         cachedBluetoothDeviceList.add(cachedDevice);
                         if (deviceCount >= MAX_DISCONNECTED_DEVICE_NUM) {
@@ -452,6 +456,15 @@ public class LocalMediaManager implements BluetoothCallback {
                 }
             }
             return new ArrayList<>(mDisconnectedMediaDevices);
+        }
+
+        private boolean isA2dpOrHearingAidDevice(CachedBluetoothDevice device) {
+            for (LocalBluetoothProfile profile : device.getConnectableProfiles()) {
+                if (profile instanceof A2dpProfile || profile instanceof HearingAidProfile) {
+                    return true;
+                }
+            }
+            return false;
         }
 
         @Override
