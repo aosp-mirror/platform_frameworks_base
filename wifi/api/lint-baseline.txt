@@ -1,0 +1,13 @@
+// Baseline format: 1.0
+GenericException: android.net.wifi.WifiManager.LocalOnlyHotspotReservation#finalize():
+    Methods must not throw generic exceptions (`java.lang.Throwable`)
+GenericException: android.net.wifi.WifiManager.MulticastLock#finalize():
+    Methods must not throw generic exceptions (`java.lang.Throwable`)
+GenericException: android.net.wifi.WifiManager.WifiLock#finalize():
+    Methods must not throw generic exceptions (`java.lang.Throwable`)
+
+
+VisiblySynchronized: PsiThisExpression:WifiManager.this:
+    Internal locks must not be exposed (synchronizing on this or class is still externally observable): method android.net.wifi.WifiManager.WifiLock.finalize()
+VisiblySynchronized: android.net.wifi.WifiManager.WifiLock#finalize():
+    Internal locks must not be exposed (synchronizing on this or class is still externally observable): method android.net.wifi.WifiManager.WifiLock.finalize()
