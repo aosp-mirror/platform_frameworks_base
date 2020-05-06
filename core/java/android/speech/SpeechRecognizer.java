@@ -283,8 +283,8 @@ public class SpeechRecognizer {
             } else {
                 serviceIntent.setComponent(mServiceComponent);
             }
-            
-            if (!mContext.bindService(serviceIntent, mConnection, Context.BIND_AUTO_CREATE)) {
+            if (!mContext.bindService(serviceIntent, mConnection,
+                    Context.BIND_AUTO_CREATE | Context.BIND_INCLUDE_CAPABILITIES)) {
                 Log.e(TAG, "bind to recognition service failed");
                 mConnection = null;
                 mService = null;
