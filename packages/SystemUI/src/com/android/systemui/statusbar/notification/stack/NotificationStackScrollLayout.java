@@ -566,6 +566,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         mRoundnessManager.setAnimatedChildren(mChildrenToAddAnimated);
         mRoundnessManager.setOnRoundingChangedCallback(this::invalidate);
         addOnExpandedHeightChangedListener(mRoundnessManager::setExpanded);
+        mLockscreenUserManager.addUserChangedListener(userId ->
+                updateSensitiveness(false /* animated */));
         setOutlineProvider(mOutlineProvider);
 
         // Blocking helper manager wants to know the expanded state, update as well.
@@ -4602,7 +4604,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
-    private void setHideSensitive(boolean hideSensitive, boolean animate) {
+    private void updateSensitiveness(boolean animate) {
+        boolean hideSensitive = mLockscreenUserManager.isAnyProfilePublicMode();
         if (hideSensitive != mAmbientState.isHideSensitive()) {
             int childCount = getChildCount();
             for (int i = 0; i < childCount; i++) {
@@ -5306,7 +5309,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
 
         SysuiStatusBarStateController state = (SysuiStatusBarStateController)
                 Dependency.get(StatusBarStateController.class);
-        setHideSensitive(publicMode, state.goingToFullShade() /* animate */);
+        updateSensitiveness(state.goingToFullShade() /* animate */);
         setDimmed(onKeyguard, state.fromShadeLocked() /* animate */);
         setExpandingEnabled(!onKeyguard);
         ActivatableNotificationView activatedChild = getActivatedChild();
