@@ -1144,9 +1144,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 // as appropriate once all children have been processed
                 try {
                     PackageInstallerSession session = mSessionProvider.getSession(childSessionId);
-                    if (!session.streamValidateAndCommit()) {
-                        allSessionsReady = false;
-                    }
+                    allSessionsReady &= session.streamValidateAndCommit();
                     nonFailingSessions.add(session);
                 } catch (PackageManagerException e) {
                     allSessionsReady = false;
@@ -1155,10 +1153,14 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     }
                 }
             }
-            // If we encountered any unrecoverable failures, destroy all
-            // other impacted sessions besides the parent; that will be cleaned up by the
-            // ChildStatusIntentReceiver.
+            // If we encountered any unrecoverable failures, destroy all other sessions including
+            // the parent
             if (unrecoverableFailure != null) {
+                // {@link #streamValidateAndCommit()} calls
+                // {@link #onSessionVerificationFailure(PackageManagerException)}, but we don't
+                // expect it to ever do so for parent sessions. Call that on this parent to clean
+                // it up and notify listeners of the error.
+                onSessionVerificationFailure(unrecoverableFailure);
                 // fail other child sessions that did not already fail
                 for (int i = nonFailingSessions.size() - 1; i >= 0; --i) {
                     PackageInstallerSession session = nonFailingSessions.get(i);
@@ -1225,6 +1227,15 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         public void statusUpdate(Intent intent) {
             mHandler.post(() -> {
                 if (mChildSessionsRemaining.size() == 0) {
+                    // no children to deal with, ignore.
+                    return;
+                }
+                final boolean destroyed;
+                synchronized (mLock) {
+                    destroyed = mDestroyed;
+                }
+                if (destroyed) {
+                    // the parent has already been terminated, ignore.
                     return;
                 }
                 final int sessionId = intent.getIntExtra(
@@ -1251,8 +1262,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     intent.putExtra(PackageInstaller.EXTRA_SESSION_ID,
                             PackageInstallerSession.this.sessionId);
                     mChildSessionsRemaining.clear(); // we're done. Don't send any more.
-                    onSessionVerificationFailure(status,
-                            intent.getStringExtra(PackageInstaller.EXTRA_STATUS_MESSAGE));
+                    try {
+                        mStatusReceiver.sendIntent(mContext, 0, intent, null, null);
+                    } catch (IntentSender.SendIntentException ignore) {
+                    }
                 }
             });
         }
@@ -1365,6 +1378,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
      * @throws PackageManagerException on an unrecoverable error.
      */
     private boolean streamValidateAndCommit() throws PackageManagerException {
+        // TODO(patb): since the work done here for a parent session in a multi-package install is
+        //             mostly superficial, consider splitting this method for the parent and
+        //             single / child sessions.
         synchronized (mLock) {
             if (mCommitted) {
                 return true;
