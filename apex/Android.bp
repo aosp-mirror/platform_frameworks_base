@@ -74,6 +74,9 @@ stubs_defaults {
             api_file: "api/current.txt",
             removed_api_file: "api/removed.txt",
         },
+        api_lint: {
+            enabled: true,
+        },
     },
     dist: {
         targets: ["sdk", "win_sdk"],
@@ -92,6 +95,9 @@ stubs_defaults {
         current: {
             api_file: "api/system-current.txt",
             removed_api_file: "api/system-removed.txt",
+        },
+        api_lint: {
+            enabled: true,
         },
     },
     dist: {
@@ -151,6 +157,9 @@ stubs_defaults {
             api_file: "api/module-lib-current.txt",
             removed_api_file: "api/module-lib-removed.txt",
         },
+        api_lint: {
+            enabled: true,
+        },
     },
     dist: {
         targets: ["sdk", "win_sdk"],
@@ -176,6 +185,9 @@ stubs_defaults {
         current: {
             api_file: "api/current.txt",
             removed_api_file: "api/removed.txt",
+        },
+        api_lint: {
+            enabled: true,
         },
     },
     dist: {
