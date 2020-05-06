@@ -27,20 +27,17 @@ import com.android.systemui.statusbar.notification.NotificationFilter
 import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager
 import com.android.systemui.statusbar.notification.collection.provider.HighPriorityProvider
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier
-import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier.Companion.TYPE_IMPORTANT_PERSON
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier.Companion.TYPE_NON_PERSON
-import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier.Companion.TYPE_PERSON
 import com.android.systemui.statusbar.notification.stack.NotificationSectionsManager.BUCKET_ALERTING
 import com.android.systemui.statusbar.notification.stack.NotificationSectionsManager.BUCKET_HEADS_UP
 import com.android.systemui.statusbar.notification.stack.NotificationSectionsManager.BUCKET_PEOPLE
 import com.android.systemui.statusbar.notification.stack.NotificationSectionsManager.BUCKET_SILENT
-
+import com.android.systemui.statusbar.notification.stack.NotificationSectionsManager.PriorityBucket
 import com.android.systemui.statusbar.phone.NotificationGroupManager
 import com.android.systemui.statusbar.policy.HeadsUpManager
 import dagger.Lazy
-import java.util.Objects;
+import java.util.Objects
 import javax.inject.Inject
-import kotlin.Comparator
 
 private const val TAG = "NotifRankingManager"
 
@@ -140,33 +137,36 @@ open class NotificationRankingManager @Inject constructor(
                 .filterNot(notifFilter::shouldFilterOut)
                 .sortedWith(rankingComparator)
                 .toList()
-        for (entry in filtered) {
-            assignBucketForEntry(entry)
-        }
+        assignBuckets(filtered)
         return filtered
     }
 
-    private fun assignBucketForEntry(entry: NotificationEntry) {
+    private fun assignBuckets(entries: List<NotificationEntry>) {
+        entries.forEach { it.bucket = getBucketForEntry(it) }
+        if (!usePeopleFiltering) {
+            // If we don't have a Conversation section, just assign buckets normally based on the
+            // content.
+            return
+        }
+        // If HUNs are not continuous with the top section, break out into a new Incoming section.
+        entries.asReversed().asSequence().zipWithNext().forEach { (next, entry) ->
+            if (entry.isRowHeadsUp && entry.bucket > next.bucket) {
+                entry.bucket = BUCKET_HEADS_UP
+            }
+        }
+    }
+
+    @PriorityBucket
+    private fun getBucketForEntry(entry: NotificationEntry): Int {
         val isHeadsUp = entry.isRowHeadsUp
         val isMedia = isImportantMedia(entry)
         val isSystemMax = entry.isSystemMax()
-        setBucket(entry, isHeadsUp, isMedia, isSystemMax)
-    }
-
-    private fun setBucket(
-        entry: NotificationEntry,
-        isHeadsUp: Boolean,
-        isMedia: Boolean,
-        isSystemMax: Boolean
-    ) {
-        if (usePeopleFiltering && isHeadsUp) {
-            entry.bucket = BUCKET_HEADS_UP
-        } else if (usePeopleFiltering && entry.getPeopleNotificationType() != TYPE_NON_PERSON) {
-            entry.bucket = BUCKET_PEOPLE
-        } else if (isHeadsUp || isMedia || isSystemMax || entry.isHighPriority()) {
-            entry.bucket = BUCKET_ALERTING
-        } else {
-            entry.bucket = BUCKET_SILENT
+        return when {
+            usePeopleFiltering && entry.getPeopleNotificationType() != TYPE_NON_PERSON ->
+                BUCKET_PEOPLE
+            isHeadsUp || isMedia || isSystemMax || entry.isHighPriority() ->
+                BUCKET_ALERTING
+            else -> BUCKET_SILENT
         }
     }
 
