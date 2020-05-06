@@ -46,6 +46,8 @@ import android.media.tv.TvInputHardwareInfo;
 import android.media.tv.TvInputInfo;
 import android.media.tv.TvInputService.PriorityHintUseCaseType;
 import android.media.tv.TvStreamConfig;
+import android.media.tv.tunerresourcemanager.ResourceClientProfile;
+import android.media.tv.tunerresourcemanager.TunerResourceManager;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -179,7 +181,7 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                 Slog.e(TAG, "onDeviceUnavailable: Cannot find a connection with " + deviceId);
                 return;
             }
-            connection.resetLocked(null, null, null, null, null);
+            connection.resetLocked(null, null, null, null, null, null);
             mConnections.remove(deviceId);
             buildHardwareListLocked();
             TvInputHardwareInfo info = connection.getHardwareInfoLocked();
@@ -369,25 +371,34 @@ class TvInputHardwareManager implements TvInputHal.Callback {
         if (callback == null) {
             throw new NullPointerException();
         }
+        TunerResourceManager trm = (TunerResourceManager) mContext.getSystemService(
+                Context.TV_TUNER_RESOURCE_MGR_SERVICE);
         synchronized (mLock) {
             Connection connection = mConnections.get(deviceId);
             if (connection == null) {
                 Slog.e(TAG, "Invalid deviceId : " + deviceId);
                 return null;
             }
-            // TODO: check with TRM to compare the client's priority with the current holder's
-            // priority. If lower, do nothing.
-            if (checkUidChangedLocked(connection, callingUid, resolvedUserId)) {
-                TvInputHardwareImpl hardware =
-                        new TvInputHardwareImpl(connection.getHardwareInfoLocked());
-                try {
-                    callback.asBinder().linkToDeath(connection, 0);
-                } catch (RemoteException e) {
-                    hardware.release();
-                    return null;
-                }
-                connection.resetLocked(hardware, callback, info, callingUid, resolvedUserId);
+
+            ResourceClientProfile profile =
+                    new ResourceClientProfile(tvInputSessionId, priorityHint);
+            ResourceClientProfile holderProfile = connection.getResourceClientProfileLocked();
+            if (holderProfile != null && trm != null
+                    && !trm.isHigherPriority(profile, holderProfile)) {
+                Slog.d(TAG, "Acquiring does not show higher priority than the current holder."
+                        + " Device id:" + deviceId);
+                return null;
             }
+            TvInputHardwareImpl hardware =
+                    new TvInputHardwareImpl(connection.getHardwareInfoLocked());
+            try {
+                callback.asBinder().linkToDeath(connection, 0);
+            } catch (RemoteException e) {
+                hardware.release();
+                return null;
+            }
+            connection.resetLocked(hardware, callback, info, callingUid, resolvedUserId,
+                    profile);
             return connection.getHardwareLocked();
         }
     }
@@ -411,7 +422,7 @@ class TvInputHardwareManager implements TvInputHal.Callback {
             if (callback != null) {
                 callback.asBinder().unlinkToDeath(connection, 0);
             }
-            connection.resetLocked(null, null, null, null, null);
+            connection.resetLocked(null, null, null, null, null, null);
         }
     }
 
@@ -621,6 +632,7 @@ class TvInputHardwareManager implements TvInputHal.Callback {
         private Integer mCallingUid = null;
         private Integer mResolvedUserId = null;
         private Runnable mOnFirstFrameCaptured;
+        private ResourceClientProfile mResourceClientProfile = null;
 
         public Connection(TvInputHardwareInfo hardwareInfo) {
             mHardwareInfo = hardwareInfo;
@@ -629,7 +641,8 @@ class TvInputHardwareManager implements TvInputHal.Callback {
         // *Locked methods assume TvInputHardwareManager.mLock is held.
 
         public void resetLocked(TvInputHardwareImpl hardware, ITvInputHardwareCallback callback,
-                TvInputInfo info, Integer callingUid, Integer resolvedUserId) {
+                TvInputInfo info, Integer callingUid, Integer resolvedUserId,
+                ResourceClientProfile profile) {
             if (mHardware != null) {
                 try {
                     mCallback.onReleased();
@@ -644,6 +657,7 @@ class TvInputHardwareManager implements TvInputHal.Callback {
             mCallingUid = callingUid;
             mResolvedUserId = resolvedUserId;
             mOnFirstFrameCaptured = null;
+            mResourceClientProfile = profile;
 
             if (mHardware != null && mCallback != null) {
                 try {
@@ -698,10 +712,14 @@ class TvInputHardwareManager implements TvInputHal.Callback {
             return mOnFirstFrameCaptured;
         }
 
+        public ResourceClientProfile getResourceClientProfileLocked() {
+            return mResourceClientProfile;
+        }
+
         @Override
         public void binderDied() {
             synchronized (mLock) {
-                resetLocked(null, null, null, null, null);
+                resetLocked(null, null, null, null, null, null);
             }
         }
 
@@ -713,6 +731,7 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                     + ", mConfigs: " + Arrays.toString(mConfigs)
                     + ", mCallingUid: " + mCallingUid
                     + ", mResolvedUserId: " + mResolvedUserId
+                    + ", mResourceClientProfile: " + mResourceClientProfile
                     + " }";
         }
 
