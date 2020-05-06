@@ -16,6 +16,7 @@
 package com.android.systemui.bubbles
 
 import android.annotation.UserIdInt
+import android.util.Log
 import com.android.systemui.bubbles.storage.BubblePersistentRepository
 import com.android.systemui.bubbles.storage.BubbleVolatileRepository
 import com.android.systemui.bubbles.storage.BubbleXmlEntity
@@ -35,36 +36,39 @@ internal class BubbleDataRepository @Inject constructor(
 ) {
 
     private val ioScope = CoroutineScope(Dispatchers.IO)
+    private val uiScope = CoroutineScope(Dispatchers.Main)
     private var job: Job? = null
 
     /**
      * Adds the bubble in memory, then persists the snapshot after adding the bubble to disk
      * asynchronously.
      */
-    fun addBubble(@UserIdInt userId: Int, bubble: Bubble) {
-        volatileRepository.addBubble(
-            BubbleXmlEntity(userId, bubble.packageName, bubble.shortcutInfo?.id ?: return))
-        persistToDisk()
-    }
+    fun addBubble(@UserIdInt userId: Int, bubble: Bubble) = addBubbles(userId, listOf(bubble))
 
     /**
      * Adds the bubble in memory, then persists the snapshot after adding the bubble to disk
      * asynchronously.
      */
     fun addBubbles(@UserIdInt userId: Int, bubbles: List<Bubble>) {
-        volatileRepository.addBubbles(bubbles.mapNotNull {
-            val shortcutId = it.shortcutInfo?.id ?: return@mapNotNull null
-            BubbleXmlEntity(userId, it.packageName, shortcutId)
-        })
-        persistToDisk()
+        if (DEBUG) Log.d(TAG, "adding ${bubbles.size} bubbles")
+        val entities = transform(userId, bubbles).also(volatileRepository::addBubbles)
+        if (entities.isNotEmpty()) persistToDisk()
     }
 
+    /**
+     * Removes the bubbles from memory, then persists the snapshot to disk asynchronously.
+     */
     fun removeBubbles(@UserIdInt userId: Int, bubbles: List<Bubble>) {
-        volatileRepository.removeBubbles(bubbles.mapNotNull {
-            val shortcutId = it.shortcutInfo?.id ?: return@mapNotNull null
-            BubbleXmlEntity(userId, it.packageName, shortcutId)
-        })
-        persistToDisk()
+        if (DEBUG) Log.d(TAG, "removing ${bubbles.size} bubbles")
+        val entities = transform(userId, bubbles).also(volatileRepository::removeBubbles)
+        if (entities.isNotEmpty()) persistToDisk()
+    }
+
+    private fun transform(userId: Int, bubbles: List<Bubble>): List<BubbleXmlEntity> {
+        return bubbles.mapNotNull { b ->
+            val shortcutId = b.shortcutInfo?.id ?: return@mapNotNull null
+            BubbleXmlEntity(userId, b.packageName, shortcutId)
+        }
     }
 
     /**
@@ -92,4 +96,19 @@ internal class BubbleDataRepository @Inject constructor(
             persistentRepository.persistsToDisk(volatileRepository.bubbles)
         }
     }
+
+    /**
+     * Load bubbles from disk.
+     */
+    fun loadBubbles(cb: (List<Bubble>) -> Unit) = ioScope.launch {
+        val bubbleXmlEntities = persistentRepository.readFromDisk()
+        volatileRepository.addBubbles(bubbleXmlEntities)
+        uiScope.launch {
+            // TODO: transform bubbleXmlEntities into bubbles
+            // cb(bubbles)
+        }
+    }
 }
+
+private const val TAG = "BubbleDataRepository"
+private const val DEBUG = false

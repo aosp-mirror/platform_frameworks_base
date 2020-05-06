@@ -18,6 +18,10 @@ package com.android.systemui.bubbles.storage
 import com.android.internal.util.FastXmlSerializer
 import org.xmlpull.v1.XmlSerializer
 import java.io.IOException
+import android.util.Xml
+import com.android.internal.util.XmlUtils
+import org.xmlpull.v1.XmlPullParser
+import java.io.InputStream
 import java.io.OutputStream
 import java.nio.charset.StandardCharsets
 
@@ -57,4 +61,35 @@ private fun writeXmlEntry(serializer: XmlSerializer, bubble: BubbleXmlEntity) {
     } catch (e: IOException) {
         throw RuntimeException(e)
     }
+}
+
+/**
+ * Reads the bubbles from xml file.
+ */
+fun readXml(stream: InputStream): List<BubbleXmlEntity> {
+    val bubbles = mutableListOf<BubbleXmlEntity>()
+    val parser: XmlPullParser = Xml.newPullParser()
+    parser.setInput(stream, StandardCharsets.UTF_8.name())
+    XmlUtils.beginDocument(parser, TAG_BUBBLES)
+    val outerDepth = parser.depth
+    while (XmlUtils.nextElementWithin(parser, outerDepth)) {
+        bubbles.add(readXmlEntry(parser) ?: continue)
+    }
+    return bubbles
+}
+
+private fun readXmlEntry(parser: XmlPullParser): BubbleXmlEntity? {
+    while (parser.eventType != XmlPullParser.START_TAG) { parser.next() }
+    return BubbleXmlEntity(
+            parser.getAttributeWithName(ATTR_USER_ID)?.toInt() ?: return null,
+            parser.getAttributeWithName(ATTR_PACKAGE) ?: return null,
+            parser.getAttributeWithName(ATTR_SHORTCUT_ID) ?: return null
+    )
+}
+
+private fun XmlPullParser.getAttributeWithName(name: String): String? {
+    for (i in 0 until attributeCount) {
+        if (getAttributeName(i) == name) return getAttributeValue(i)
+    }
+    return null
 }
