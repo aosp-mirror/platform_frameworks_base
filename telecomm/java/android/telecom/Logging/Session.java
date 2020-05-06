@@ -17,6 +17,7 @@
 package android.telecom.Logging;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.telecom.Log;
@@ -59,10 +60,12 @@ public class Session {
     public static class Info implements Parcelable {
         public final String sessionId;
         public final String methodPath;
+        public final String ownerInfo;
 
-        private Info(String id, String path) {
+        private Info(String id, String path, String owner) {
             sessionId = id;
             methodPath = path;
+            ownerInfo = owner;
         }
 
         public static Info getInfo (Session s) {
@@ -70,7 +73,28 @@ public class Session {
             // not get multiple stacking external sessions (unless we have DEBUG level logging or
             // lower).
             return new Info(s.getFullSessionId(), s.getFullMethodPath(
-                    !Log.DEBUG && s.isSessionExternal()));
+                    !Log.DEBUG && s.isSessionExternal()), s.getOwnerInfo());
+        }
+
+        public static Info getExternalInfo(Session s, @Nullable String ownerInfo) {
+            // When creating session information for an existing session, the caller may pass in a
+            // context to be passed along to the recipient of the external session info.
+            // So, for example, if telecom has an active session with owner 'cad', and Telecom is
+            // calling into Telephony and providing external session info, it would pass in 'cast'
+            // as the owner info.  This would result in Telephony seeing owner info 'cad/cast',
+            // which would make it very clear in the Telephony logs the chain of package calls which
+            // ultimately resulted in the logs.
+            String newInfo = ownerInfo != null && s.getOwnerInfo() != null
+                    // If we've got both, concatenate them.
+                    ? s.getOwnerInfo() + "/" + ownerInfo
+                    // Otherwise use whichever is present.
+                    : ownerInfo != null ? ownerInfo : s.getOwnerInfo();
+
+            // Create Info based on the truncated method path if the session is external, so we do
+            // not get multiple stacking external sessions (unless we have DEBUG level logging or
+            // lower).
+            return new Info(s.getFullSessionId(), s.getFullMethodPath(
+                    !Log.DEBUG && s.isSessionExternal()), newInfo);
         }
 
         /** Responsible for creating Info objects for deserialized Parcels. */
@@ -80,7 +104,8 @@ public class Session {
                     public Info createFromParcel(Parcel source) {
                         String id = source.readString();
                         String methodName = source.readString();
-                        return new Info(id, methodName);
+                        String ownerInfo = source.readString();
+                        return new Info(id, methodName, ownerInfo);
                     }
 
                     @Override
@@ -100,6 +125,7 @@ public class Session {
         public void writeToParcel(Parcel destination, int flags) {
             destination.writeString(sessionId);
             destination.writeString(methodPath);
+            destination.writeString(ownerInfo);
         }
     }
 
@@ -204,6 +230,14 @@ public class Session {
 
     public Info getInfo() {
         return Info.getInfo(this);
+    }
+
+    public Info getExternalInfo(@Nullable String ownerInfo) {
+        return Info.getExternalInfo(this, ownerInfo);
+    }
+
+    public String getOwnerInfo() {
+        return mOwnerInfo;
     }
 
     @VisibleForTesting
