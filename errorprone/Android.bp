@@ -20,6 +20,4 @@ java_library_host {
     plugins: [
         "//external/dagger2:dagger2-auto-service",
     ],
-
-    javacflags: ["-verbose"],
 }
