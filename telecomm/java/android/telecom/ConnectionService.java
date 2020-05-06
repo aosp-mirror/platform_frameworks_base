@@ -2102,12 +2102,12 @@ public abstract class ConnectionService extends Service {
 
 
     private void abort(String callId) {
-        Log.d(this, "abort %s", callId);
+        Log.i(this, "abort %s", callId);
         findConnectionForAction(callId, "abort").onAbort();
     }
 
     private void answerVideo(String callId, int videoState) {
-        Log.d(this, "answerVideo %s", callId);
+        Log.i(this, "answerVideo %s", callId);
         if (mConnectionById.containsKey(callId)) {
             findConnectionForAction(callId, "answer").onAnswer(videoState);
         } else {
@@ -2116,7 +2116,7 @@ public abstract class ConnectionService extends Service {
     }
 
     private void answer(String callId) {
-        Log.d(this, "answer %s", callId);
+        Log.i(this, "answer %s", callId);
         if (mConnectionById.containsKey(callId)) {
             findConnectionForAction(callId, "answer").onAnswer();
         } else {
@@ -2125,12 +2125,12 @@ public abstract class ConnectionService extends Service {
     }
 
     private void deflect(String callId, Uri address) {
-        Log.d(this, "deflect %s", callId);
+        Log.i(this, "deflect %s", callId);
         findConnectionForAction(callId, "deflect").onDeflect(address);
     }
 
     private void reject(String callId) {
-        Log.d(this, "reject %s", callId);
+        Log.i(this, "reject %s", callId);
         if (mConnectionById.containsKey(callId)) {
             findConnectionForAction(callId, "reject").onReject();
         } else {
@@ -2139,34 +2139,34 @@ public abstract class ConnectionService extends Service {
     }
 
     private void reject(String callId, String rejectWithMessage) {
-        Log.d(this, "reject %s with message", callId);
+        Log.i(this, "reject %s with message", callId);
         findConnectionForAction(callId, "reject").onReject(rejectWithMessage);
     }
 
     private void reject(String callId, @android.telecom.Call.RejectReason int rejectReason) {
-        Log.d(this, "reject %s with reason %d", callId, rejectReason);
+        Log.i(this, "reject %s with reason %d", callId, rejectReason);
         findConnectionForAction(callId, "reject").onReject(rejectReason);
     }
 
     private void transfer(String callId, Uri number, boolean isConfirmationRequired) {
-        Log.d(this, "transfer %s", callId);
+        Log.i(this, "transfer %s", callId);
         findConnectionForAction(callId, "transfer").onTransfer(number, isConfirmationRequired);
     }
 
     private void consultativeTransfer(String callId, String otherCallId) {
-        Log.d(this, "consultativeTransfer %s", callId);
+        Log.i(this, "consultativeTransfer %s", callId);
         Connection connection1 = findConnectionForAction(callId, "consultativeTransfer");
         Connection connection2 = findConnectionForAction(otherCallId, " consultativeTransfer");
         connection1.onTransfer(connection2);
     }
 
     private void silence(String callId) {
-        Log.d(this, "silence %s", callId);
+        Log.i(this, "silence %s", callId);
         findConnectionForAction(callId, "silence").onSilence();
     }
 
     private void disconnect(String callId) {
-        Log.d(this, "disconnect %s", callId);
+        Log.i(this, "disconnect %s", callId);
         if (mConnectionById.containsKey(callId)) {
             findConnectionForAction(callId, "disconnect").onDisconnect();
         } else {
@@ -2175,7 +2175,7 @@ public abstract class ConnectionService extends Service {
     }
 
     private void hold(String callId) {
-        Log.d(this, "hold %s", callId);
+        Log.i(this, "hold %s", callId);
         if (mConnectionById.containsKey(callId)) {
             findConnectionForAction(callId, "hold").onHold();
         } else {
@@ -2184,7 +2184,7 @@ public abstract class ConnectionService extends Service {
     }
 
     private void unhold(String callId) {
-        Log.d(this, "unhold %s", callId);
+        Log.i(this, "unhold %s", callId);
         if (mConnectionById.containsKey(callId)) {
             findConnectionForAction(callId, "unhold").onUnhold();
         } else {
@@ -2193,7 +2193,7 @@ public abstract class ConnectionService extends Service {
     }
 
     private void onCallAudioStateChanged(String callId, CallAudioState callAudioState) {
-        Log.d(this, "onAudioStateChanged %s %s", callId, callAudioState);
+        Log.i(this, "onAudioStateChanged %s %s", callId, callAudioState);
         if (mConnectionById.containsKey(callId)) {
             findConnectionForAction(callId, "onCallAudioStateChanged").setCallAudioState(
                     callAudioState);
@@ -2204,7 +2204,7 @@ public abstract class ConnectionService extends Service {
     }
 
     private void playDtmfTone(String callId, char digit) {
-        Log.d(this, "playDtmfTone %s %c", callId, digit);
+        Log.i(this, "playDtmfTone %s %c", callId, digit);
         if (mConnectionById.containsKey(callId)) {
             findConnectionForAction(callId, "playDtmfTone").onPlayDtmfTone(digit);
         } else {
@@ -2213,7 +2213,7 @@ public abstract class ConnectionService extends Service {
     }
 
     private void stopDtmfTone(String callId) {
-        Log.d(this, "stopDtmfTone %s", callId);
+        Log.i(this, "stopDtmfTone %s", callId);
         if (mConnectionById.containsKey(callId)) {
             findConnectionForAction(callId, "stopDtmfTone").onStopDtmfTone();
         } else {
@@ -2222,7 +2222,7 @@ public abstract class ConnectionService extends Service {
     }
 
     private void conference(String callId1, String callId2) {
-        Log.d(this, "conference %s, %s", callId1, callId2);
+        Log.i(this, "conference %s, %s", callId1, callId2);
 
         // Attempt to get second connection or conference.
         Connection connection2 = findConnectionForAction(callId2, "conference");
@@ -2269,7 +2269,7 @@ public abstract class ConnectionService extends Service {
     }
 
     private void splitFromConference(String callId) {
-        Log.d(this, "splitFromConference(%s)", callId);
+        Log.i(this, "splitFromConference(%s)", callId);
 
         Connection connection = findConnectionForAction(callId, "splitFromConference");
         if (connection == getNullConnection()) {
@@ -2284,7 +2284,7 @@ public abstract class ConnectionService extends Service {
     }
 
     private void mergeConference(String callId) {
-        Log.d(this, "mergeConference(%s)", callId);
+        Log.i(this, "mergeConference(%s)", callId);
         Conference conference = findConferenceForAction(callId, "mergeConference");
         if (conference != null) {
             conference.onMerge();
@@ -2292,7 +2292,7 @@ public abstract class ConnectionService extends Service {
     }
 
     private void swapConference(String callId) {
-        Log.d(this, "swapConference(%s)", callId);
+        Log.i(this, "swapConference(%s)", callId);
         Conference conference = findConferenceForAction(callId, "swapConference");
         if (conference != null) {
             conference.onSwap();
@@ -2300,7 +2300,7 @@ public abstract class ConnectionService extends Service {
     }
 
     private void addConferenceParticipants(String callId, List<Uri> participants) {
-        Log.d(this, "addConferenceParticipants(%s)", callId);
+        Log.i(this, "addConferenceParticipants(%s)", callId);
         if (mConnectionById.containsKey(callId)) {
             findConnectionForAction(callId, "addConferenceParticipants")
                     .onAddConferenceParticipants(participants);
@@ -2318,7 +2318,7 @@ public abstract class ConnectionService extends Service {
      * @param callId The ID of the call to pull.
      */
     private void pullExternalCall(String callId) {
-        Log.d(this, "pullExternalCall(%s)", callId);
+        Log.i(this, "pullExternalCall(%s)", callId);
         Connection connection = findConnectionForAction(callId, "pullExternalCall");
         if (connection != null) {
             connection.onPullExternalCall();
@@ -2335,7 +2335,7 @@ public abstract class ConnectionService extends Service {
      * @param extras Extras associated with the event.
      */
     private void sendCallEvent(String callId, String event, Bundle extras) {
-        Log.d(this, "sendCallEvent(%s, %s)", callId, event);
+        Log.i(this, "sendCallEvent(%s, %s)", callId, event);
         Connection connection = findConnectionForAction(callId, "sendCallEvent");
         if (connection != null) {
             connection.onCallEvent(event, extras);
@@ -2348,7 +2348,7 @@ public abstract class ConnectionService extends Service {
      * @param callId The ID of the call which completed handover.
      */
     private void notifyHandoverComplete(String callId) {
-        Log.d(this, "notifyHandoverComplete(%s)", callId);
+        Log.i(this, "notifyHandoverComplete(%s)", callId);
         Connection connection = findConnectionForAction(callId, "notifyHandoverComplete");
         if (connection != null) {
             connection.onHandoverComplete();
@@ -2368,7 +2368,7 @@ public abstract class ConnectionService extends Service {
      * @param extras The new extras bundle.
      */
     private void handleExtrasChanged(String callId, Bundle extras) {
-        Log.d(this, "handleExtrasChanged(%s, %s)", callId, extras);
+        Log.i(this, "handleExtrasChanged(%s, %s)", callId, extras);
         if (mConnectionById.containsKey(callId)) {
             findConnectionForAction(callId, "handleExtrasChanged").handleExtrasChanged(extras);
         } else if (mConferenceById.containsKey(callId)) {
@@ -2377,7 +2377,7 @@ public abstract class ConnectionService extends Service {
     }
 
     private void startRtt(String callId, Connection.RttTextStream rttTextStream) {
-        Log.d(this, "startRtt(%s)", callId);
+        Log.i(this, "startRtt(%s)", callId);
         if (mConnectionById.containsKey(callId)) {
             findConnectionForAction(callId, "startRtt").onStartRtt(rttTextStream);
         } else if (mConferenceById.containsKey(callId)) {
@@ -2386,7 +2386,7 @@ public abstract class ConnectionService extends Service {
     }
 
     private void stopRtt(String callId) {
-        Log.d(this, "stopRtt(%s)", callId);
+        Log.i(this, "stopRtt(%s)", callId);
         if (mConnectionById.containsKey(callId)) {
             findConnectionForAction(callId, "stopRtt").onStopRtt();
         } else if (mConferenceById.containsKey(callId)) {
@@ -2395,7 +2395,7 @@ public abstract class ConnectionService extends Service {
     }
 
     private void handleRttUpgradeResponse(String callId, Connection.RttTextStream rttTextStream) {
-        Log.d(this, "handleRttUpgradeResponse(%s, %s)", callId, rttTextStream == null);
+        Log.i(this, "handleRttUpgradeResponse(%s, %s)", callId, rttTextStream == null);
         if (mConnectionById.containsKey(callId)) {
             findConnectionForAction(callId, "handleRttUpgradeResponse")
                     .handleRttUpgradeResponse(rttTextStream);
@@ -2405,7 +2405,7 @@ public abstract class ConnectionService extends Service {
     }
 
     private void onPostDialContinue(String callId, boolean proceed) {
-        Log.d(this, "onPostDialContinue(%s)", callId);
+        Log.i(this, "onPostDialContinue(%s)", callId);
         findConnectionForAction(callId, "stopDtmfTone").onPostDialContinue(proceed);
     }
 
