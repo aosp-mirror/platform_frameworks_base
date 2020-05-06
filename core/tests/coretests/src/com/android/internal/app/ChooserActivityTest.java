@@ -1763,7 +1763,8 @@ public class ChooserActivityTest {
                 Mockito.anyBoolean(),
                 Mockito.isA(List.class)))
                 .thenReturn(new ArrayList<>(personalResolvedComponentInfos));
-        Intent chooserIntent = createChooserIntent(new Intent[] {new Intent("action.fake")});
+        Intent chooserIntent = createChooserIntent(createSendTextIntent(),
+                new Intent[] {new Intent("action.fake")});
         ResolveInfo[] chosen = new ResolveInfo[1];
         sOverrides.onSafelyStartCallback = targetInfo -> {
             chosen[0] = targetInfo.getResolveInfo();
@@ -1796,7 +1797,7 @@ public class ChooserActivityTest {
                 new Intent("action.fake1"),
                 new Intent("action.fake2")
         };
-        Intent chooserIntent = createChooserIntent(initialIntents);
+        Intent chooserIntent = createChooserIntent(createSendTextIntent(), initialIntents);
         sOverrides.packageManager = mock(PackageManager.class);
         when(sOverrides.packageManager.resolveActivity(any(Intent.class), anyInt()))
                 .thenReturn(createFakeResolveInfo());
@@ -1809,12 +1810,74 @@ public class ChooserActivityTest {
         assertThat(activity.getWorkListAdapter().getCallerTargetCount(), is(0));
     }
 
-    private Intent createChooserIntent(Intent[] initialIntents) {
+    @Test
+    public void testWorkTab_xProfileIntentsDisabled_personalToWork_nonSendIntent_emptyStateShown() {
+        // enable the work tab feature flag
+        ResolverActivity.ENABLE_TABBED_VIEW = true;
+        markWorkProfileUserAvailable();
+        int workProfileTargets = 4;
+        List<ResolvedComponentInfo> personalResolvedComponentInfos =
+                createResolvedComponentsForTestWithOtherProfile(3, /* userId */ 10);
+        List<ResolvedComponentInfo> workResolvedComponentInfos =
+                createResolvedComponentsForTest(workProfileTargets);
+        sOverrides.hasCrossProfileIntents = false;
+        setupResolverControllers(personalResolvedComponentInfos, workResolvedComponentInfos);
+        Intent[] initialIntents = {
+                new Intent("action.fake1"),
+                new Intent("action.fake2")
+        };
+        Intent chooserIntent = createChooserIntent(new Intent(), initialIntents);
+        sOverrides.packageManager = mock(PackageManager.class);
+        when(sOverrides.packageManager.resolveActivity(any(Intent.class), anyInt()))
+                .thenReturn(createFakeResolveInfo());
+
+        final ChooserWrapperActivity activity = mActivityRule.launchActivity(chooserIntent);
+        waitForIdle();
+        onView(withText(R.string.resolver_work_tab)).perform(click());
+        waitForIdle();
+        onView(withId(R.id.contentPanel))
+                .perform(swipeUp());
+
+        onView(withText(R.string.resolver_cant_access_work_apps))
+                .check(matches(isDisplayed()));
+    }
+
+    @Test
+    public void testWorkTab_noWorkAppsAvailable_nonSendIntent_emptyStateShown() {
+        // enable the work tab feature flag
+        ResolverActivity.ENABLE_TABBED_VIEW = true;
+        markWorkProfileUserAvailable();
+        List<ResolvedComponentInfo> personalResolvedComponentInfos =
+                createResolvedComponentsForTest(3);
+        List<ResolvedComponentInfo> workResolvedComponentInfos =
+                createResolvedComponentsForTest(0);
+        setupResolverControllers(personalResolvedComponentInfos, workResolvedComponentInfos);
+        Intent[] initialIntents = {
+                new Intent("action.fake1"),
+                new Intent("action.fake2")
+        };
+        Intent chooserIntent = createChooserIntent(new Intent(), initialIntents);
+        sOverrides.packageManager = mock(PackageManager.class);
+        when(sOverrides.packageManager.resolveActivity(any(Intent.class), anyInt()))
+                .thenReturn(createFakeResolveInfo());
+
+        mActivityRule.launchActivity(chooserIntent);
+        waitForIdle();
+        onView(withId(R.id.contentPanel))
+                .perform(swipeUp());
+        onView(withText(R.string.resolver_work_tab)).perform(click());
+        waitForIdle();
+
+        onView(withText(R.string.resolver_no_work_apps_available_resolve))
+                .check(matches(isDisplayed()));
+    }
+
+    private Intent createChooserIntent(Intent intent, Intent[] initialIntents) {
         Intent chooserIntent = new Intent();
         chooserIntent.setAction(Intent.ACTION_CHOOSER);
         chooserIntent.putExtra(Intent.EXTRA_TEXT, "testing intent sending");
         chooserIntent.putExtra(Intent.EXTRA_TITLE, "some title");
-        chooserIntent.putExtra(Intent.EXTRA_INTENT, createSendTextIntent());
+        chooserIntent.putExtra(Intent.EXTRA_INTENT, intent);
         chooserIntent.setType("text/plain");
         if (initialIntents != null) {
             chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, initialIntents);
