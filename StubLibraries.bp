@@ -48,7 +48,6 @@ stubs_defaults {
         ":opt-telephony-srcs",
         ":opt-net-voip-srcs",
         ":art-module-public-api-stubs-source",
-        ":conscrypt.module.public.api.stubs.source",
         ":android_icu4j_public_api_files",
     ],
     libs: ["framework-internal-utils"],
@@ -65,7 +64,10 @@ stubs_defaults {
 stubs_defaults {
     name: "metalava-full-api-stubs-default",
     defaults: ["metalava-base-api-stubs-default"],
-    srcs: [":framework-updatable-sources"],
+    srcs: [
+        ":conscrypt.module.public.api.stubs.source",
+        ":framework-updatable-sources",
+    ],
     sdk_version: "core_platform",
 }
 
