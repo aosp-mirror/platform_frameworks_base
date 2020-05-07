@@ -30,6 +30,7 @@ import static android.util.MathUtils.abs;
 import static android.util.MathUtils.constrain;
 
 import static com.android.internal.util.FrameworkStatsLog.ANNOTATION_ID_IS_UID;
+import static com.android.internal.util.FrameworkStatsLog.ANNOTATION_ID_TRUNCATE_TIMESTAMP;
 import static com.android.server.am.MemoryStatUtil.readMemoryStatFromFilesystem;
 import static com.android.server.stats.pull.IonMemoryUtil.readProcessSystemIonHeapSizesFromDebugfs;
 import static com.android.server.stats.pull.IonMemoryUtil.readSystemIonHeapSizeFromDebugfs;
@@ -755,6 +756,13 @@ public class StatsPullAtomService extends SystemService {
             stats.getValues(j, entry);
             StatsEvent.Builder e = StatsEvent.newBuilder();
             e.setAtomId(atomTag);
+            switch (atomTag) {
+                case FrameworkStatsLog.MOBILE_BYTES_TRANSFER:
+                case FrameworkStatsLog.MOBILE_BYTES_TRANSFER_BY_FG_BG:
+                    e.addBooleanAnnotation(ANNOTATION_ID_TRUNCATE_TIMESTAMP, true);
+                    break;
+                default:
+            }
             e.writeInt(entry.uid);
             e.addBooleanAnnotation(ANNOTATION_ID_IS_UID, true);
             if (withFgbg) {
