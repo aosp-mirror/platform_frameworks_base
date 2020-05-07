@@ -50,9 +50,11 @@ import com.android.internal.infra.AndroidFuture;
 import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.Preconditions;
 
+import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -493,6 +495,11 @@ public abstract class PermissionControllerService extends Service {
                 packageName = Preconditions.checkNotNull(packageName,
                         "packageName cannot be null");
                 onOneTimePermissionSessionTimeout(packageName);
+            }
+
+            @Override
+            protected void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
+                PermissionControllerService.this.dump(fd, writer, args);
             }
         };
     }
