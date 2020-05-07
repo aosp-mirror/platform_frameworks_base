@@ -39,7 +39,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.IActivityManager;
 import android.app.Notification;
@@ -90,7 +89,7 @@ public class NotificationRecordTest extends UiServiceTestCase {
     @Mock private PackageManager mPm;
     @Mock private ContentResolver mContentResolver;
 
-    private final String pkg = PKG_N_MR1;
+    private final String mPkg = PKG_O;
     private final int uid = 9583;
     private final int id1 = 1;
     private final String tag1 = "tag1";
@@ -198,10 +197,14 @@ public class NotificationRecordTest extends UiServiceTestCase {
         }
 
         Notification n = builder.build();
-        return new StatusBarNotification(pkg, pkg, id1, tag1, uid, uid, n, mUser, null, uid);
+        return new StatusBarNotification(mPkg, mPkg, id1, tag1, uid, uid, n, mUser, null, uid);
     }
 
     private StatusBarNotification getMessagingStyleNotification() {
+        return getMessagingStyleNotification(mPkg);
+    }
+
+    private StatusBarNotification getMessagingStyleNotification(String pkg) {
         final Builder builder = new Builder(mMockContext)
                 .setContentTitle("foo")
                 .setSmallIcon(android.R.drawable.sym_def_app_icon);
@@ -658,7 +661,7 @@ public class NotificationRecordTest extends UiServiceTestCase {
 
         Bundle signals = new Bundle();
         signals.putInt(Adjustment.KEY_USER_SENTIMENT, USER_SENTIMENT_NEGATIVE);
-        record.addAdjustment(new Adjustment(pkg, record.getKey(), signals, null, sbn.getUserId()));
+        record.addAdjustment(new Adjustment(mPkg, record.getKey(), signals, null, sbn.getUserId()));
 
         record.applyAdjustments();
 
@@ -687,7 +690,7 @@ public class NotificationRecordTest extends UiServiceTestCase {
 
         Bundle signals = new Bundle();
         signals.putInt(Adjustment.KEY_USER_SENTIMENT, USER_SENTIMENT_NEGATIVE);
-        record.addAdjustment(new Adjustment(pkg, record.getKey(), signals, null, sbn.getUserId()));
+        record.addAdjustment(new Adjustment(mPkg, record.getKey(), signals, null, sbn.getUserId()));
         record.applyAdjustments();
 
         assertEquals(USER_SENTIMENT_POSITIVE, record.getUserSentiment());
@@ -705,7 +708,7 @@ public class NotificationRecordTest extends UiServiceTestCase {
 
         Bundle signals = new Bundle();
         signals.putInt(Adjustment.KEY_USER_SENTIMENT, USER_SENTIMENT_NEGATIVE);
-        record.addAdjustment(new Adjustment(pkg, record.getKey(), signals, null, sbn.getUserId()));
+        record.addAdjustment(new Adjustment(mPkg, record.getKey(), signals, null, sbn.getUserId()));
 
         record.applyAdjustments();
 
@@ -1131,6 +1134,15 @@ public class NotificationRecordTest extends UiServiceTestCase {
         record.setShortcutInfo(null);
 
         assertTrue(record.isConversation());
+    }
+
+    @Test
+    public void testIsConversation_noShortcut_targetsR() {
+        StatusBarNotification sbn = getMessagingStyleNotification(PKG_R);
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
+        record.setShortcutInfo(null);
+
+        assertFalse(record.isConversation());
     }
 
     @Test
