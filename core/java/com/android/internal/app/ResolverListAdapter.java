@@ -54,6 +54,7 @@ import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.ResolverActivity.ResolvedComponentInfo;
 import com.android.internal.app.chooser.DisplayResolveInfo;
+import com.android.internal.app.chooser.SelectableTargetInfo;
 import com.android.internal.app.chooser.TargetInfo;
 
 import java.util.ArrayList;
@@ -549,6 +550,15 @@ public class ResolverListAdapter extends BaseAdapter {
             getLoadLabelTask((DisplayResolveInfo) info, holder).execute();
         } else {
             holder.bindLabel(info.getDisplayLabel(), info.getExtendedInfo());
+            if (info instanceof SelectableTargetInfo) {
+                // direct share targets should append the application name for a better readout
+                DisplayResolveInfo rInfo = ((SelectableTargetInfo) info).getDisplayResolveInfo();
+                CharSequence appName = rInfo != null ? rInfo.getDisplayLabel() : "";
+                CharSequence extendedInfo = info.getExtendedInfo();
+                String contentDescription = String.join(" ", info.getDisplayLabel(),
+                        extendedInfo != null ? extendedInfo : "", appName);
+                holder.updateContentDescription(contentDescription);
+            }
         }
 
         if (info.isSuspended()) {
@@ -697,6 +707,12 @@ public class ResolverListAdapter extends BaseAdapter {
                 text2.setVisibility(View.VISIBLE);
                 text2.setText(subLabel);
             }
+
+            itemView.setContentDescription(null);
+        }
+
+        public void updateContentDescription(String description) {
+            itemView.setContentDescription(description);
         }
     }
 
