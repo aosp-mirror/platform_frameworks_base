@@ -58,9 +58,6 @@ public class Canvas extends BaseCanvas {
         return mNativeCanvasWrapper;
     }
 
-    /** @hide */
-    public boolean isRecordingFor(Object o) { return false; }
-
     // may be null
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 117521088)
     private Bitmap mBitmap;
@@ -187,22 +184,6 @@ public class Canvas extends BaseCanvas {
         }
 
         mBitmap = bitmap;
-    }
-
-    /**
-     * @deprecated use {@link #enableZ()} instead
-     * @hide */
-    @Deprecated
-    public void insertReorderBarrier() {
-        enableZ();
-    }
-
-    /**
-     * @deprecated use {@link #disableZ()} instead
-     * @hide */
-    @Deprecated
-    public void insertInorderBarrier() {
-        disableZ();
     }
 
     /**
