@@ -276,14 +276,15 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
     @Override
     public void showAuthenticationDialog(Bundle bundle, IBiometricServiceReceiverInternal receiver,
             int biometricModality, boolean requireConfirmation, int userId, String opPackageName,
-            long operationId) {
+            long operationId, int sysUiSessionId) {
         final int authenticators = Utils.getAuthenticators(bundle);
 
         if (DEBUG) {
             Log.d(TAG, "showAuthenticationDialog, authenticators: " + authenticators
                     + ", biometricModality: " + biometricModality
                     + ", requireConfirmation: " + requireConfirmation
-                    + ", operationId: " + operationId);
+                    + ", operationId: " + operationId
+                    + ", sysUiSessionId: " + sysUiSessionId);
         }
         SomeArgs args = SomeArgs.obtain();
         args.arg1 = bundle;
@@ -293,6 +294,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
         args.argi2 = userId;
         args.arg4 = opPackageName;
         args.arg5 = operationId;
+        args.argi3 = sysUiSessionId;
 
         boolean skipAnimation = false;
         if (mCurrentDialog != null) {
@@ -382,6 +384,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
         final int userId = args.argi2;
         final String opPackageName = (String) args.arg4;
         final long operationId = (long) args.arg5;
+        final int sysUiSessionId = args.argi3;
 
         // Create a new dialog but do not replace the current one yet.
         final AuthDialog newDialog = buildDialog(
@@ -391,7 +394,8 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
                 type,
                 opPackageName,
                 skipAnimation,
-                operationId);
+                operationId,
+                sysUiSessionId);
 
         if (newDialog == null) {
             Log.e(TAG, "Unsupported type: " + type);
@@ -403,7 +407,8 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
                     + " savedState: " + savedState
                     + " mCurrentDialog: " + mCurrentDialog
                     + " newDialog: " + newDialog
-                    + " type: " + type);
+                    + " type: " + type
+                    + " sysUiSessionId: " + sysUiSessionId);
         }
 
         if (mCurrentDialog != null) {
@@ -458,7 +463,8 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
     }
 
     protected AuthDialog buildDialog(Bundle biometricPromptBundle, boolean requireConfirmation,
-            int userId, int type, String opPackageName, boolean skipIntro, long operationId) {
+            int userId, int type, String opPackageName, boolean skipIntro, long operationId,
+            int sysUiSessionId) {
         return new AuthContainerView.Builder(mContext)
                 .setCallback(this)
                 .setBiometricPromptBundle(biometricPromptBundle)
@@ -467,6 +473,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
                 .setOpPackageName(opPackageName)
                 .setSkipIntro(skipIntro)
                 .setOperationId(operationId)
+                .setSysUiSessionId(sysUiSessionId)
                 .build(type);
     }
 }
