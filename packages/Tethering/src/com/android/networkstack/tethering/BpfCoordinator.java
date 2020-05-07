@@ -41,6 +41,8 @@ import android.util.SparseArray;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 /**
  *  This coordinator is responsible for providing BPF offload relevant functionality.
  *  - Get tethering stats.
@@ -49,10 +51,11 @@ import androidx.annotation.Nullable;
  */
 public class BpfCoordinator {
     private static final String TAG = BpfCoordinator.class.getSimpleName();
-    // TODO: Make it customizable.
-    private static final int DEFAULT_PERFORM_POLL_INTERVAL_MS = 5000;
+    @VisibleForTesting
+    static final int DEFAULT_PERFORM_POLL_INTERVAL_MS = 5000; // TODO: Make it customizable.
 
-    private enum StatsType {
+    @VisibleForTesting
+    enum StatsType {
         STATS_PER_IFACE,
         STATS_PER_UID,
     }
@@ -86,6 +89,7 @@ public class BpfCoordinator {
         maybeSchedulePollingStats();
     };
 
+    @VisibleForTesting
     static class Dependencies {
         int getPerformPollInterval() {
             // TODO: Consider make this configurable.
@@ -169,7 +173,8 @@ public class BpfCoordinator {
      * A BPF tethering stats provider to provide network statistics to the system.
      * Note that this class's data may only be accessed on the handler thread.
      */
-    private class BpfTetherStatsProvider extends NetworkStatsProvider {
+    @VisibleForTesting
+    class BpfTetherStatsProvider extends NetworkStatsProvider {
         // The offloaded traffic statistics per interface that has not been reported since the
         // last call to pushTetherStats. Only the interfaces that were ever tethering upstreams
         // and has pending tether stats delta are included in this NetworkStats object.
@@ -193,7 +198,8 @@ public class BpfCoordinator {
             // no-op
         }
 
-        private void pushTetherStats() {
+        @VisibleForTesting
+        void pushTetherStats() {
             try {
                 // The token is not used for now. See b/153606961.
                 notifyStatsUpdated(0 /* token */, mIfaceStats, mUidStats);
