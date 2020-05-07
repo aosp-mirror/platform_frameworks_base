@@ -28,9 +28,9 @@ import android.view.WindowManager;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.car.CarDeviceProvisionedController;
+import com.android.systemui.car.window.OverlayViewGlobalStateController;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -42,12 +42,11 @@ import org.mockito.MockitoAnnotations;
 @TestableLooper.RunWithLooper
 @SmallTest
 public class CarHeadsUpNotificationSystemContainerTest extends SysuiTestCase {
-    private CarHeadsUpNotificationSystemContainer mDefaultController;
-    private CarHeadsUpNotificationSystemContainer mOverrideEnabledController;
+    private CarHeadsUpNotificationSystemContainer mCarHeadsUpNotificationSystemContainer;
     @Mock
     private CarDeviceProvisionedController mCarDeviceProvisionedController;
     @Mock
-    private NotificationPanelViewController mNotificationPanelViewController;
+    private OverlayViewGlobalStateController mOverlayViewGlobalStateController;
     @Mock
     private WindowManager mWindowManager;
 
@@ -58,76 +57,63 @@ public class CarHeadsUpNotificationSystemContainerTest extends SysuiTestCase {
 
     @Before
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.initMocks(/* testClass= */this);
 
-        when(mNotificationPanelViewController.isPanelExpanded()).thenReturn(false);
-        when(mCarDeviceProvisionedController.isCurrentUserSetup()).thenReturn(true);
-        when(mCarDeviceProvisionedController.isCurrentUserSetupInProgress()).thenReturn(false);
+        when(mOverlayViewGlobalStateController.shouldShowHUN()).thenReturn(true);
+        when(mCarDeviceProvisionedController.isCurrentUserFullySetup()).thenReturn(true);
 
         TestableResources testableResources = mContext.getOrCreateTestableResources();
 
-        testableResources.addOverride(
-                R.bool.config_enableHeadsUpNotificationWhenNotificationShadeOpen, false);
-
-        mDefaultController = new CarHeadsUpNotificationSystemContainer(mContext,
+        mCarHeadsUpNotificationSystemContainer = new CarHeadsUpNotificationSystemContainer(mContext,
                 testableResources.getResources(), mCarDeviceProvisionedController, mWindowManager,
-                () -> mNotificationPanelViewController);
-
-        testableResources.addOverride(
-                R.bool.config_enableHeadsUpNotificationWhenNotificationShadeOpen, true);
-
-        mOverrideEnabledController = new CarHeadsUpNotificationSystemContainer(mContext,
-                testableResources.getResources(), mCarDeviceProvisionedController, mWindowManager,
-                () -> mNotificationPanelViewController);
+                mOverlayViewGlobalStateController);
     }
 
     @Test
     public void testDisplayNotification_firstNotification_isVisible() {
-        mDefaultController.displayNotification(mNotificationView);
-        assertThat(mDefaultController.isVisible()).isTrue();
+        mCarHeadsUpNotificationSystemContainer.displayNotification(mNotificationView);
+        assertThat(mCarHeadsUpNotificationSystemContainer.isVisible()).isTrue();
     }
 
     @Test
     public void testRemoveNotification_lastNotification_isInvisible() {
-        mDefaultController.displayNotification(mNotificationView);
-        mDefaultController.removeNotification(mNotificationView);
-        assertThat(mDefaultController.isVisible()).isFalse();
+        mCarHeadsUpNotificationSystemContainer.displayNotification(mNotificationView);
+        mCarHeadsUpNotificationSystemContainer.removeNotification(mNotificationView);
+        assertThat(mCarHeadsUpNotificationSystemContainer.isVisible()).isFalse();
     }
 
     @Test
     public void testRemoveNotification_nonLastNotification_isVisible() {
-        mDefaultController.displayNotification(mNotificationView);
-        mDefaultController.displayNotification(mNotificationView2);
-        mDefaultController.removeNotification(mNotificationView);
-        assertThat(mDefaultController.isVisible()).isTrue();
+        mCarHeadsUpNotificationSystemContainer.displayNotification(mNotificationView);
+        mCarHeadsUpNotificationSystemContainer.displayNotification(mNotificationView2);
+        mCarHeadsUpNotificationSystemContainer.removeNotification(mNotificationView);
+        assertThat(mCarHeadsUpNotificationSystemContainer.isVisible()).isTrue();
     }
 
     @Test
-    public void testDisplayNotification_userSetupInProgress_isInvisible() {
-        when(mCarDeviceProvisionedController.isCurrentUserSetupInProgress()).thenReturn(true);
-        mDefaultController.displayNotification(mNotificationView);
-        assertThat(mDefaultController.isVisible()).isFalse();
+    public void testDisplayNotification_userFullySetupTrue_isInvisible() {
+        mCarHeadsUpNotificationSystemContainer.displayNotification(mNotificationView);
+        assertThat(mCarHeadsUpNotificationSystemContainer.isVisible()).isTrue();
 
     }
 
     @Test
-    public void testDisplayNotification_userSetupIncomplete_isInvisible() {
-        when(mCarDeviceProvisionedController.isCurrentUserSetup()).thenReturn(false);
-        mDefaultController.displayNotification(mNotificationView);
-        assertThat(mDefaultController.isVisible()).isFalse();
+    public void testDisplayNotification_userFullySetupFalse_isInvisible() {
+        when(mCarDeviceProvisionedController.isCurrentUserFullySetup()).thenReturn(false);
+        mCarHeadsUpNotificationSystemContainer.displayNotification(mNotificationView);
+        assertThat(mCarHeadsUpNotificationSystemContainer.isVisible()).isFalse();
     }
 
     @Test
-    public void testDisplayNotification_notificationPanelExpanded_isInvisible() {
-        when(mNotificationPanelViewController.isPanelExpanded()).thenReturn(true);
-        mDefaultController.displayNotification(mNotificationView);
-        assertThat(mDefaultController.isVisible()).isFalse();
+    public void testDisplayNotification_overlayWindowStateShouldShowHUNFalse_isInvisible() {
+        when(mOverlayViewGlobalStateController.shouldShowHUN()).thenReturn(false);
+        mCarHeadsUpNotificationSystemContainer.displayNotification(mNotificationView);
+        assertThat(mCarHeadsUpNotificationSystemContainer.isVisible()).isFalse();
     }
 
     @Test
-    public void testDisplayNotification_notificationPanelExpandedEnabledHUNWhenOpen_isVisible() {
-        when(mNotificationPanelViewController.isPanelExpanded()).thenReturn(true);
-        mOverrideEnabledController.displayNotification(mNotificationView);
-        assertThat(mOverrideEnabledController.isVisible()).isTrue();
+    public void testDisplayNotification_overlayWindowStateShouldShowHUNTrue_isVisible() {
+        mCarHeadsUpNotificationSystemContainer.displayNotification(mNotificationView);
+        assertThat(mCarHeadsUpNotificationSystemContainer.isVisible()).isTrue();
     }
 }
