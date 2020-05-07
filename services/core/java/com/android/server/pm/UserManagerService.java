@@ -4525,8 +4525,8 @@ public class UserManagerService extends IUserManager.Stub {
             switch(cmd) {
                 case "list":
                     return runList(pw, shell);
-                case "list-missing-system-packages":
-                    return runListMissingSystemPackages(pw, shell);
+                case "report-system-user-package-whitelist-problems":
+                    return runReportPackageWhitelistProblems(pw, shell);
                 default:
                     return shell.handleDefaultCommands(cmd);
             }
@@ -4593,17 +4593,22 @@ public class UserManagerService extends IUserManager.Stub {
         }
     }
 
-    private int runListMissingSystemPackages(PrintWriter pw, Shell shell) {
+    private int runReportPackageWhitelistProblems(PrintWriter pw, Shell shell) {
         boolean verbose = false;
-        boolean force = false;
+        boolean criticalOnly = false;
+        int mode = UserSystemPackageInstaller.USER_TYPE_PACKAGE_WHITELIST_MODE_NONE;
         String opt;
         while ((opt = shell.getNextOption()) != null) {
             switch (opt) {
                 case "-v":
+                case "--verbose":
                     verbose = true;
                     break;
-                case "--force":
-                    force = true;
+                case "--critical-only":
+                    criticalOnly = true;
+                    break;
+                case "--mode":
+                    mode = Integer.parseInt(shell.getNextArgRequired());
                     break;
                 default:
                     pw.println("Invalid option: " + opt);
@@ -4611,8 +4616,12 @@ public class UserManagerService extends IUserManager.Stub {
             }
         }
 
+        Slog.d(LOG_TAG, "runReportPackageWhitelistProblems(): verbose=" + verbose
+                + ", criticalOnly=" + criticalOnly
+                + ", mode=" + UserSystemPackageInstaller.modeToString(mode));
+
         try (IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ")) {
-            mSystemPackageInstaller.dumpMissingSystemPackages(ipw, force, verbose);
+            mSystemPackageInstaller.dumpPackageWhitelistProblems(ipw, mode, verbose, criticalOnly);
         }
         return 0;
     }
@@ -5185,13 +5194,18 @@ public class UserManagerService extends IUserManager.Stub {
             final PrintWriter pw = getOutPrintWriter();
             pw.println("User manager (user) commands:");
             pw.println("  help");
-            pw.println("    Print this help text.");
+            pw.println("    Prints this help text.");
             pw.println("");
             pw.println("  list [-v] [-all]");
             pw.println("    Prints all users on the system.");
-            pw.println("  list-missing-system-packages [-v] [--force]");
-            pw.println("    Prints all system packages that were not explicitly configured to be "
-                    + "installed.");
+            pw.println("  report-system-user-package-whitelist-problems [-v | --verbose] "
+                    + "[--critical-only] [--mode MODE]");
+            pw.println("    Reports all issues on user-type package whitelist XML files. Options:");
+            pw.println("    -v | --verbose : shows extra info, like number of issues");
+            pw.println("    --critical-only: show only critical issues, excluding warnings");
+            pw.println("    --mode MODE: shows what errors would be if device used mode MODE (where"
+                    + " MODE is the whitelist mode integer as defined by "
+                    + "config_userTypePackageWhitelistMode)");
         }
     }
 
