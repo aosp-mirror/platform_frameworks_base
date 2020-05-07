@@ -149,6 +149,8 @@ import com.android.server.policy.SoftRestrictedPermissionPolicy;
 
 import libcore.util.EmptyArray;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
@@ -415,6 +417,11 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 new PermissionManagerServiceInternalImpl();
         LocalServices.addService(PermissionManagerServiceInternal.class, localService);
         LocalServices.addService(PermissionManagerInternal.class, localService);
+    }
+
+    @Override
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        mContext.getSystemService(PermissionControllerManager.class).dump(fd, pw, args);
     }
 
     /**
