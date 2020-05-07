@@ -29,6 +29,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.AudioManager;
 import android.media.MediaRoute2Info;
+import android.text.TextUtils;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
 
@@ -210,7 +211,11 @@ class BluetoothRouteProvider {
         newBtRoute.btDevice = device;
         // Current / Max volume will be set when connected.
         // TODO: Is there any BT device which has fixed volume?
-        newBtRoute.route = new MediaRoute2Info.Builder(device.getAddress(), device.getName())
+        String deviceName = device.getName();
+        if (TextUtils.isEmpty(deviceName)) {
+            deviceName = mContext.getResources().getText(R.string.unknownName).toString();
+        }
+        newBtRoute.route = new MediaRoute2Info.Builder(device.getAddress(), deviceName)
                 .addFeature(MediaRoute2Info.FEATURE_LIVE_AUDIO)
                 .setConnectionState(MediaRoute2Info.CONNECTION_STATE_DISCONNECTED)
                 .setDescription(mContext.getResources().getText(
