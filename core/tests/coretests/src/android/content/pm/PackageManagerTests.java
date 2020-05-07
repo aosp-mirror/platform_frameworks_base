@@ -2548,9 +2548,18 @@ public class PackageManagerTests extends AndroidTestCase {
             } else {
                 installFromRawResource(apk2Name, apk2, 0, false, false, -1,
                         PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
-                int match = mContext.getPackageManager().checkSignatures(pkg1.getPackageName(),
-                        pkg2.getPackageName());
-                assertEquals(expMatchResult, match);
+                // TODO: All checkSignatures tests should return the same result regardless of
+                // querying by package name or uid; however if there are any edge cases where
+                // individual packages within a shareduid are compared with signatures that do not
+                // match the full lineage of the shareduid this method should be overloaded to
+                // accept the expected response for the uid query.
+                PackageManager pm = getPm();
+                int matchByName = pm.checkSignatures(pkg1.getPackageName(), pkg2.getPackageName());
+                int pkg1Uid = pm.getApplicationInfo(pkg1.getPackageName(), 0).uid;
+                int pkg2Uid = pm.getApplicationInfo(pkg2.getPackageName(), 0).uid;
+                int matchByUid = pm.checkSignatures(pkg1Uid, pkg2Uid);
+                assertEquals(expMatchResult, matchByName);
+                assertEquals(expMatchResult, matchByUid);
             }
         } finally {
             if (cleanUp) {

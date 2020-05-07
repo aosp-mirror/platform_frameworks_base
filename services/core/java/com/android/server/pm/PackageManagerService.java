@@ -5966,25 +5966,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     || shouldFilterApplicationLocked(ps2, callingUid, callingUserId)) {
                 return PackageManager.SIGNATURE_UNKNOWN_PACKAGE;
             }
-            SigningDetails p1SigningDetails = p1.getSigningDetails();
-            SigningDetails p2SigningDetails = p2.getSigningDetails();
-            int result = compareSignatures(p1SigningDetails.signatures,
-                    p2SigningDetails.signatures);
-            // To support backwards compatibility with clients of this API expecting pre-key
-            // rotation results if either of the packages has a signing lineage the oldest signer
-            // in the lineage is used for signature verification.
-            if (result != PackageManager.SIGNATURE_MATCH && (
-                    p1SigningDetails.hasPastSigningCertificates()
-                            || p2SigningDetails.hasPastSigningCertificates())) {
-                Signature[] p1Signatures = p1SigningDetails.hasPastSigningCertificates()
-                        ? new Signature[]{p1SigningDetails.pastSigningCertificates[0]}
-                        : p1SigningDetails.signatures;
-                Signature[] p2Signatures = p2SigningDetails.hasPastSigningCertificates()
-                        ? new Signature[]{p2SigningDetails.pastSigningCertificates[0]}
-                        : p2SigningDetails.signatures;
-                result = compareSignatures(p1Signatures, p2Signatures);
-            }
-            return result;
+            return checkSignaturesInternal(p1.getSigningDetails(), p2.getSigningDetails());
         }
     }
 
@@ -5998,21 +5980,21 @@ public class PackageManagerService extends IPackageManager.Stub
         final int appId2 = UserHandle.getAppId(uid2);
         // reader
         synchronized (mLock) {
-            Signature[] s1;
-            Signature[] s2;
+            SigningDetails p1SigningDetails;
+            SigningDetails p2SigningDetails;
             Object obj = mSettings.getSettingLPr(appId1);
             if (obj != null) {
                 if (obj instanceof SharedUserSetting) {
                     if (isCallerInstantApp) {
                         return PackageManager.SIGNATURE_UNKNOWN_PACKAGE;
                     }
-                    s1 = ((SharedUserSetting)obj).signatures.mSigningDetails.signatures;
+                    p1SigningDetails = ((SharedUserSetting) obj).signatures.mSigningDetails;
                 } else if (obj instanceof PackageSetting) {
                     final PackageSetting ps = (PackageSetting) obj;
                     if (shouldFilterApplicationLocked(ps, callingUid, callingUserId)) {
                         return PackageManager.SIGNATURE_UNKNOWN_PACKAGE;
                     }
-                    s1 = ps.signatures.mSigningDetails.signatures;
+                    p1SigningDetails = ps.signatures.mSigningDetails;
                 } else {
                     return PackageManager.SIGNATURE_UNKNOWN_PACKAGE;
                 }
@@ -6025,21 +6007,51 @@ public class PackageManagerService extends IPackageManager.Stub
                     if (isCallerInstantApp) {
                         return PackageManager.SIGNATURE_UNKNOWN_PACKAGE;
                     }
-                    s2 = ((SharedUserSetting)obj).signatures.mSigningDetails.signatures;
+                    p2SigningDetails = ((SharedUserSetting) obj).signatures.mSigningDetails;
                 } else if (obj instanceof PackageSetting) {
                     final PackageSetting ps = (PackageSetting) obj;
                     if (shouldFilterApplicationLocked(ps, callingUid, callingUserId)) {
                         return PackageManager.SIGNATURE_UNKNOWN_PACKAGE;
                     }
-                    s2 = ps.signatures.mSigningDetails.signatures;
+                    p2SigningDetails = ps.signatures.mSigningDetails;
                 } else {
                     return PackageManager.SIGNATURE_UNKNOWN_PACKAGE;
                 }
             } else {
                 return PackageManager.SIGNATURE_UNKNOWN_PACKAGE;
             }
-            return compareSignatures(s1, s2);
+            return checkSignaturesInternal(p1SigningDetails, p2SigningDetails);
         }
+    }
+
+    private int checkSignaturesInternal(SigningDetails p1SigningDetails,
+            SigningDetails p2SigningDetails) {
+        if (p1SigningDetails == null) {
+            return p2SigningDetails == null
+                    ? PackageManager.SIGNATURE_NEITHER_SIGNED
+                    : PackageManager.SIGNATURE_FIRST_NOT_SIGNED;
+        }
+        if (p2SigningDetails == null) {
+            return PackageManager.SIGNATURE_SECOND_NOT_SIGNED;
+        }
+        int result = compareSignatures(p1SigningDetails.signatures, p2SigningDetails.signatures);
+        if (result == PackageManager.SIGNATURE_MATCH) {
+            return result;
+        }
+        // To support backwards compatibility with clients of this API expecting pre-key
+        // rotation results if either of the packages has a signing lineage the oldest signer
+        // in the lineage is used for signature verification.
+        if (p1SigningDetails.hasPastSigningCertificates()
+                || p2SigningDetails.hasPastSigningCertificates()) {
+            Signature[] p1Signatures = p1SigningDetails.hasPastSigningCertificates()
+                    ? new Signature[]{p1SigningDetails.pastSigningCertificates[0]}
+                    : p1SigningDetails.signatures;
+            Signature[] p2Signatures = p2SigningDetails.hasPastSigningCertificates()
+                    ? new Signature[]{p2SigningDetails.pastSigningCertificates[0]}
+                    : p2SigningDetails.signatures;
+            result = compareSignatures(p1Signatures, p2Signatures);
+        }
+        return result;
     }
 
     @Override
