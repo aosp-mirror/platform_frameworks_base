@@ -4377,4 +4377,9 @@
 
     <!-- Class name of the custom country detector to be used. -->
     <string name="config_customCountryDetector" translatable="false">com.android.server.location.ComprehensiveCountryDetector</string>
+
+    <!-- pdp data retry for cause 29, 33 and 55-->
+    <bool name="config_pdp_reject_enable_retry">false</bool>
+    <!--pdp data reject retry delay in ms-->
+    <integer name="config_pdp_reject_retry_delay_ms">-1</integer>
 </resources>
