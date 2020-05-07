@@ -99,6 +99,7 @@ import static com.android.server.wm.DisplayContentProto.WINDOW_CONTAINER;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_FOCUS;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_FOCUS_LIGHT;
+import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_IME;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_ORIENTATION;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_SCREEN_ON;
 import static com.android.server.wm.ProtoLogGroup.WM_SHOW_TRANSACTIONS;
@@ -3494,7 +3495,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         if (target == mInputMethodTarget && mInputMethodTargetWaitingAnim == targetWaitingAnim) {
             return;
         }
-
+        ProtoLog.i(WM_DEBUG_IME, "setInputMethodTarget %s", target);
         mInputMethodTarget = target;
         mInputMethodTargetWaitingAnim = targetWaitingAnim;
         assignWindowLayers(true /* setLayoutNeeded */);
@@ -3508,6 +3509,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      */
     void setInputMethodInputTarget(WindowState target) {
         if (mInputMethodInputTarget != target) {
+            ProtoLog.i(WM_DEBUG_IME, "setInputMethodInputTarget %s", target);
             mInputMethodInputTarget = target;
             updateImeControlTarget();
         }
@@ -3515,6 +3517,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
     private void updateImeControlTarget() {
         mInputMethodControlTarget = computeImeControlTarget();
+        ProtoLog.i(WM_DEBUG_IME, "updateImeControlTarget %s",
+                mInputMethodControlTarget.getWindow());
         mInsetsStateController.onImeControlTargetChanged(mInputMethodControlTarget);
     }
 
