@@ -167,4 +167,8 @@
     <keyboard-layout android:name="keyboard_layout_belarusian"
             android:label="@string/keyboard_layout_belarusian"
             android:keyboardLayout="@raw/keyboard_layout_belarusian" />
+
+    <keyboard-layout android:name="keyboard_layout_mongolian"
+            android:label="@string/keyboard_layout_mongolian"
+            android:keyboardLayout="@raw/keyboard_layout_mongolian" />
 </keyboard-layouts>
