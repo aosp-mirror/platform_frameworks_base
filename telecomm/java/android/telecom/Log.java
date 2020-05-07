@@ -16,7 +16,9 @@
 
 package android.telecom;
 
+import android.annotation.NonNull;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.ComponentName;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Build;
@@ -29,8 +31,10 @@ import android.text.TextUtils;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.IndentingPrintWriter;
 
+import java.util.Arrays;
 import java.util.IllegalFormatException;
 import java.util.Locale;
+import java.util.stream.Collectors;
 
 /**
  * Manages logging for the entire module.
@@ -210,6 +214,16 @@ public class Log {
 
     public static Session.Info getExternalSession() {
         return getSessionManager().getExternalSession();
+    }
+
+    /**
+     * Retrieves external session information, providing a context for the recipient of the session
+     * info where the external session came from.
+     * @param ownerInfo The external owner info.
+     * @return New {@link Session.Info} instance with owner info set.
+     */
+    public static Session.Info getExternalSession(@NonNull String ownerInfo) {
+        return getSessionManager().getExternalSession(ownerInfo);
     }
 
     public static void cancelSubsession(Session subsession) {
@@ -480,5 +494,35 @@ public class Log {
             msg = format + " (An error occurred while formatting the message.)";
         }
         return String.format(Locale.US, "%s: %s%s", prefix, msg, sessionPostfix);
+    }
+
+    /**
+     * Generates an abbreviated version of the package name from a component.
+     * E.g. com.android.phone becomes cap
+     * @param componentName The component name to abbreviate.
+     * @return Abbreviation of empty string if component is null.
+     * @hide
+     */
+    public static String getPackageAbbreviation(ComponentName componentName) {
+        if (componentName == null) {
+            return "";
+        }
+        return getPackageAbbreviation(componentName.getPackageName());
+    }
+
+    /**
+     * Generates an abbreviated version of the package name.
+     * E.g. com.android.phone becomes cap
+     * @param packageName The packageName name to abbreviate.
+     * @return Abbreviation of empty string if package is null.
+     * @hide
+     */
+    public static String getPackageAbbreviation(String packageName) {
+        if (packageName == null) {
+            return "";
+        }
+        return Arrays.stream(packageName.split("\\."))
+                .map(s -> s.substring(0,1))
+                .collect(Collectors.joining(""));
     }
 }

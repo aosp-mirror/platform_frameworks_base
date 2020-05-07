@@ -51,7 +51,6 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageParser.ApkLite;
 import android.content.pm.PackageParser.PackageLite;
-import android.content.pm.PackageParser.PackageParserException;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
@@ -63,6 +62,8 @@ import android.content.pm.dex.ArtManager;
 import android.content.pm.dex.DexMetadataHelper;
 import android.content.pm.dex.ISnapshotRuntimeProfileCallback;
 import android.content.pm.parsing.ApkLiteParseUtils;
+import android.content.pm.parsing.result.ParseResult;
+import android.content.pm.parsing.result.ParseTypeImpl;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.content.rollback.IRollbackManager;
@@ -505,6 +506,7 @@ class PackageManagerShellCommand extends ShellCommand {
 
         long sessionSize = 0;
 
+        ParseTypeImpl input = ParseTypeImpl.forDefaultParsing();
         for (String inPath : inPaths) {
             final ParcelFileDescriptor fd = openFileForSystem(inPath, "r");
             if (fd == null) {
@@ -512,12 +514,19 @@ class PackageManagerShellCommand extends ShellCommand {
                 throw new IllegalArgumentException("Error: Can't open file: " + inPath);
             }
             try {
-                ApkLite baseApk = ApkLiteParseUtils.parseApkLite(fd.getFileDescriptor(), inPath, 0);
-                PackageLite pkgLite = new PackageLite(null, baseApk, null, null, null, null,
-                        null, null);
+                ParseResult<ApkLite> apkLiteResult = ApkLiteParseUtils.parseApkLite(
+                        input.reset(), fd.getFileDescriptor(), inPath, 0);
+                if (apkLiteResult.isError()) {
+                    throw new IllegalArgumentException(
+                            "Error: Failed to parse APK file: " + inPath + ": "
+                                    + apkLiteResult.getErrorMessage(),
+                            apkLiteResult.getException());
+                }
+                PackageLite pkgLite = new PackageLite(null, apkLiteResult.getResult(), null, null,
+                        null, null, null, null);
                 sessionSize += PackageHelper.calculateInstalledSize(pkgLite,
                         params.sessionParams.abiOverride, fd.getFileDescriptor());
-            } catch (PackageParserException | IOException e) {
+            } catch (IOException e) {
                 getErrPrintWriter().println("Error: Failed to parse APK file: " + inPath);
                 throw new IllegalArgumentException(
                         "Error: Failed to parse APK file: " + inPath, e);

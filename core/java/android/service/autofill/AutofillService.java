@@ -455,7 +455,7 @@ import android.view.autofill.AutofillValue;
  * heuristics purposes, but it should not be sent to external servers.
  *
  * <a name="FieldClassification"></a>
- * <h3>Metrics and field classification</h3
+ * <h3>Metrics and field classification</h3>
  *
  * <p>The service can call {@link #getFillEventHistory()} to get metrics representing the user
  * actions, and then use these metrics to improve its heuristics.

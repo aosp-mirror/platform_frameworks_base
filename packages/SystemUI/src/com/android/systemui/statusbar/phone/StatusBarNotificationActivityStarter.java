@@ -483,7 +483,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
                 if (showHistory) {
                     tsb.addNextIntent(intent);
                 }
-                tsb.startActivities();
+                tsb.startActivities(null, UserHandle.CURRENT);
                 if (shouldCollapse()) {
                     // Putting it back on the main thread, since we're touching views
                     mMainThreadHandler.post(() -> mCommandQueue.animateCollapsePanels(
