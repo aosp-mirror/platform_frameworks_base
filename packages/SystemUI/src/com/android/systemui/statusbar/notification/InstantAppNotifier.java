@@ -288,7 +288,7 @@ public class InstantAppNotifier extends SystemUI
                                 mContext,
                                 0,
                                 new Intent(Intent.ACTION_VIEW).setData(Uri.parse(helpUrl)),
-                                0,
+                                PendingIntent.FLAG_IMMUTABLE,
                                 null,
                                 user)
                         : null;
