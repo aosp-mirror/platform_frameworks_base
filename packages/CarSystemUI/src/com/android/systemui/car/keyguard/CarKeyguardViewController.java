@@ -213,7 +213,7 @@ public class CarKeyguardViewController extends OverlayViewController implements
 
     @Override
     public void onCancelClicked() {
-        if (!mShowing) return;
+        if (mBouncer == null) return;
 
         getOverlayViewGlobalStateController().setWindowFocusable(/* focusable= */ false);
         getOverlayViewGlobalStateController().setWindowNeedsInput(/* needsInput= */ false);
@@ -234,7 +234,7 @@ public class CarKeyguardViewController extends OverlayViewController implements
 
     @Override
     public void startPreHideAnimation(Runnable finishRunnable) {
-        if (!mShowing) return;
+        if (mBouncer == null) return;
 
         mBouncer.startPreHideAnimation(finishRunnable);
     }
