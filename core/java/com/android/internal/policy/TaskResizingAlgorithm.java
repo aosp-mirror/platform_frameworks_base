@@ -91,14 +91,14 @@ public class TaskResizingAlgorithm {
         int width = right - left;
         int height = bottom - top;
         if ((ctrlType & CTRL_LEFT) != 0) {
-            width = Math.max(minVisibleWidth, width - deltaX);
+            width = Math.max(minVisibleWidth, Math.min(width - deltaX, maxVisibleSize.x));
         } else if ((ctrlType & CTRL_RIGHT) != 0) {
-            width = Math.max(minVisibleWidth, width + deltaX);
+            width = Math.max(minVisibleWidth, Math.min(width + deltaX, maxVisibleSize.x));
         }
         if ((ctrlType & CTRL_TOP) != 0) {
-            height = Math.max(minVisibleHeight, height - deltaY);
+            height = Math.max(minVisibleHeight, Math.min(height - deltaY, maxVisibleSize.y));
         } else if ((ctrlType & CTRL_BOTTOM) != 0) {
-            height = Math.max(minVisibleHeight, height + deltaY);
+            height = Math.max(minVisibleHeight, Math.min(height + deltaY, maxVisibleSize.y));
         }
 
         // If we have to preserve the orientation - check that we are doing so.

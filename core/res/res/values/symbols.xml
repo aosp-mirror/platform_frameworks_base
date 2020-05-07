@@ -1577,7 +1577,6 @@
   <java-symbol type="style" name="Animation.Tooltip" />
   <java-symbol type="style" name="Animation.TypingFilter" />
   <java-symbol type="style" name="Animation.TypingFilterRestore" />
-  <java-symbol type="style" name="Animation.Dream" />
   <java-symbol type="style" name="Theme.DeviceDefault.Dialog.Alert" />
   <java-symbol type="style" name="Theme.DeviceDefault.Light.Dialog.Alert" />
   <java-symbol type="style" name="Theme.Dialog.Alert" />
@@ -1822,6 +1821,9 @@
   <java-symbol type="anim" name="rotation_animation_jump_exit" />
   <java-symbol type="anim" name="rotation_animation_xfade_exit" />
   <java-symbol type="anim" name="rotation_animation_enter" />
+  <java-symbol type="anim" name="dream_activity_open_exit" />
+  <java-symbol type="anim" name="dream_activity_open_enter" />
+  <java-symbol type="anim" name="dream_activity_close_exit" />
   <java-symbol type="array" name="config_autoBrightnessButtonBacklightValues" />
   <java-symbol type="array" name="config_autoBrightnessKeyboardBacklightValues" />
   <java-symbol type="array" name="config_autoBrightnessLcdBacklightValues" />
@@ -3998,4 +4000,11 @@
   <java-symbol type="string" name="notification_channel_network_alerts" />
   <java-symbol type="string" name="notification_channel_network_available" />
 
+  <!-- For Pdn throttle feature -->
+  <java-symbol type="bool" name="config_pdp_reject_enable_retry" />
+  <java-symbol type="integer" name="config_pdp_reject_retry_delay_ms" />
+  <java-symbol type="string" name="config_pdp_reject_dialog_title" />
+  <java-symbol type="string" name="config_pdp_reject_user_authentication_failed" />
+  <java-symbol type="string" name="config_pdp_reject_service_not_subscribed" />
+  <java-symbol type="string" name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" />
 </resources>

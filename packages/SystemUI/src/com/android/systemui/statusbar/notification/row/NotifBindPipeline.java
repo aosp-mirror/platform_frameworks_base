@@ -115,6 +115,9 @@ public final class NotifBindPipeline {
         mLogger.logManagedRow(entry.getKey());
 
         final BindEntry bindEntry = getBindEntry(entry);
+        if (bindEntry == null) {
+            return;
+        }
         bindEntry.row = row;
         if (bindEntry.invalidated) {
             requestPipelineRun(entry);
@@ -223,11 +226,6 @@ public final class NotifBindPipeline {
 
     private @NonNull BindEntry getBindEntry(NotificationEntry entry) {
         final BindEntry bindEntry = mBindEntries.get(entry);
-        if (bindEntry == null) {
-            throw new IllegalStateException(
-                    String.format("Attempting bind on an inactive notification. key: %s",
-                            entry.getKey()));
-        }
         return bindEntry;
     }
 

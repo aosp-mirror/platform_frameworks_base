@@ -154,5 +154,12 @@
     <declare-styleable name="CaptionsToggleImageButton">
         <attr name="optedOut" format="boolean" />
     </declare-styleable>
+
+    <declare-styleable name="IlluminationDrawable">
+        <attr name="highlight" format="integer" />
+        <attr name="cornerRadius" format="dimension" />
+        <attr name="rippleMinSize" format="dimension" />
+        <attr name="rippleMaxSize" format="dimension" />
+    </declare-styleable>
 </resources>
 

@@ -1848,24 +1848,22 @@ public class Canvas extends BaseCanvas {
     }
 
     /**
-     * Draws the specified bitmap as an N-patch (most often, a 9-patches.)
+     * Draws the specified bitmap as an N-patch (most often, a 9-patch.)
      *
      * @param patch The ninepatch object to render
      * @param dst The destination rectangle.
      * @param paint The paint to draw the bitmap with. may be null
-     * @hide
      */
     public void drawPatch(@NonNull NinePatch patch, @NonNull Rect dst, @Nullable Paint paint) {
         super.drawPatch(patch, dst, paint);
     }
 
     /**
-     * Draws the specified bitmap as an N-patch (most often, a 9-patches.)
+     * Draws the specified bitmap as an N-patch (most often, a 9-patch.)
      *
      * @param patch The ninepatch object to render
      * @param dst The destination rectangle.
      * @param paint The paint to draw the bitmap with. may be null
-     * @hide
      */
     public void drawPatch(@NonNull NinePatch patch, @NonNull RectF dst, @Nullable Paint paint) {
         super.drawPatch(patch, dst, paint);

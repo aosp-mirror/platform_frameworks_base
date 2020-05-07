@@ -21,9 +21,8 @@ import static android.Manifest.permission.FORCE_PERSISTABLE_URI_PERMISSIONS;
 import static android.Manifest.permission.GET_APP_GRANTED_URI_PERMISSIONS;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.app.ActivityManagerInternal.ALLOW_FULL_ONLY;
+import static android.content.Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION;
 import static android.content.Intent.FLAG_GRANT_PREFIX_URI_PERMISSION;
-import static android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION;
-import static android.content.Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
 import static android.content.pm.PackageManager.MATCH_ANY_USER;
 import static android.content.pm.PackageManager.MATCH_DEBUG_TRIAGED_MISSING;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
@@ -1138,8 +1137,8 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
             targetHoldsPermission = false;
         }
 
-        final boolean basicGrant = (modeFlags & ~(FLAG_GRANT_READ_URI_PERMISSION
-                | FLAG_GRANT_WRITE_URI_PERMISSION)) == 0;
+        final boolean basicGrant = (modeFlags
+                & (FLAG_GRANT_PERSISTABLE_URI_PERMISSION | FLAG_GRANT_PREFIX_URI_PERMISSION)) == 0;
         if (basicGrant && targetHoldsPermission) {
             // When caller holds permission, and this is a simple permission
             // grant, we can skip generating any bookkeeping; when any advanced

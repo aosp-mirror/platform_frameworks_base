@@ -302,7 +302,10 @@ TEST(StatsdStatsTest, TestPullAtomStats) {
     stats.notePullerCallbackRegistrationChanged(util::DISK_SPACE, true);
     stats.notePullerCallbackRegistrationChanged(util::DISK_SPACE, false);
     stats.notePullerCallbackRegistrationChanged(util::DISK_SPACE, true);
-
+    stats.notePullBinderCallFailed(util::DISK_SPACE);
+    stats.notePullUidProviderNotFound(util::DISK_SPACE);
+    stats.notePullerNotFound(util::DISK_SPACE);
+    stats.notePullerNotFound(util::DISK_SPACE);
 
     vector<uint8_t> output;
     stats.dumpStats(&output, false);
@@ -322,6 +325,9 @@ TEST(StatsdStatsTest, TestPullAtomStats) {
     EXPECT_EQ(3335L, report.pulled_atom_stats(0).max_pull_delay_nanos());
     EXPECT_EQ(2L, report.pulled_atom_stats(0).registered_count());
     EXPECT_EQ(1L, report.pulled_atom_stats(0).unregistered_count());
+    EXPECT_EQ(1L, report.pulled_atom_stats(0).binder_call_failed());
+    EXPECT_EQ(1L, report.pulled_atom_stats(0).failed_uid_provider_not_found());
+    EXPECT_EQ(2L, report.pulled_atom_stats(0).puller_not_found());
 }
 
 TEST(StatsdStatsTest, TestAtomMetricsStats) {
