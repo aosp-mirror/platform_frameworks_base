@@ -29,12 +29,11 @@ import android.widget.FrameLayout;
 import com.android.car.notification.R;
 import com.android.car.notification.headsup.CarHeadsUpNotificationContainer;
 import com.android.systemui.car.CarDeviceProvisionedController;
+import com.android.systemui.car.window.OverlayViewGlobalStateController;
 import com.android.systemui.dagger.qualifiers.Main;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-
-import dagger.Lazy;
 
 /**
  * A controller for SysUI's HUN display.
@@ -42,28 +41,28 @@ import dagger.Lazy;
 @Singleton
 public class CarHeadsUpNotificationSystemContainer implements CarHeadsUpNotificationContainer {
     private final CarDeviceProvisionedController mCarDeviceProvisionedController;
-    private final Lazy<NotificationPanelViewController> mNotificationPanelViewControllerLazy;
+    private final OverlayViewGlobalStateController mOverlayViewGlobalStateController;
 
     private final ViewGroup mWindow;
     private final FrameLayout mHeadsUpContentFrame;
-
-    private final boolean mEnableHeadsUpNotificationWhenNotificationShadeOpen;
 
     @Inject
     CarHeadsUpNotificationSystemContainer(Context context,
             @Main Resources resources,
             CarDeviceProvisionedController deviceProvisionedController,
             WindowManager windowManager,
-            Lazy<NotificationPanelViewController> notificationPanelViewControllerLazy) {
+            OverlayViewGlobalStateController overlayViewGlobalStateController) {
         mCarDeviceProvisionedController = deviceProvisionedController;
-        mNotificationPanelViewControllerLazy = notificationPanelViewControllerLazy;
+        mOverlayViewGlobalStateController = overlayViewGlobalStateController;
 
         boolean showOnBottom = resources.getBoolean(R.bool.config_showHeadsUpNotificationOnBottom);
 
+        // Use TYPE_STATUS_BAR_SUB_PANEL window type since we need to find a window that is above
+        // status bar but below navigation bar.
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 WindowManager.LayoutParams.WRAP_CONTENT,
-                WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG,
+                WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL,
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                         | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
                 PixelFormat.TRANSLUCENT);
@@ -78,15 +77,11 @@ public class CarHeadsUpNotificationSystemContainer implements CarHeadsUpNotifica
         windowManager.addView(mWindow, lp);
         mWindow.setVisibility(View.INVISIBLE);
         mHeadsUpContentFrame = mWindow.findViewById(R.id.headsup_content);
-
-        mEnableHeadsUpNotificationWhenNotificationShadeOpen = resources.getBoolean(
-                R.bool.config_enableHeadsUpNotificationWhenNotificationShadeOpen);
     }
 
     private void animateShow() {
-        if ((mEnableHeadsUpNotificationWhenNotificationShadeOpen
-                || !mNotificationPanelViewControllerLazy.get().isPanelExpanded())
-                && mCarDeviceProvisionedController.isCurrentUserFullySetup()) {
+        if (mCarDeviceProvisionedController.isCurrentUserFullySetup()
+                && mOverlayViewGlobalStateController.shouldShowHUN()) {
             mWindow.setVisibility(View.VISIBLE);
         }
     }
