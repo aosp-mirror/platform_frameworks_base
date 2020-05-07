@@ -27,7 +27,7 @@ java_defaults {
         "androidx.annotation_annotation",
         "netd_aidl_interface-V3-java",
         "netlink-client",
-        "networkstack-aidl-interfaces-unstable-java",
+        "networkstack-aidl-interfaces-java",
         "android.hardware.tetheroffload.config-V1.0-java",
         "android.hardware.tetheroffload.control-V1.0-java",
         "net-utils-framework-common",
