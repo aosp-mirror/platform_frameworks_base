@@ -154,18 +154,7 @@ public class PackageParserTest {
 
     @Test
     public void test_serializePackage() throws Exception {
-        try (PackageParser2 pp = new PackageParser2(null, false, null, mTmpDir,
-                new PackageParser2.Callback() {
-                    @Override
-                    public boolean isChangeEnabled(long changeId, @NonNull ApplicationInfo appInfo) {
-                        return true;
-                    }
-
-                    @Override
-                    public boolean hasFeature(String feature) {
-                        return false;
-                    }
-                })) {
+        try (PackageParser2 pp = PackageParser2.forParsingFileWithDefaults()) {
             ParsedPackage pkg = pp.parsePackage(FRAMEWORK, 0 /* parseFlags */,
                     true /* useCaches */);
 

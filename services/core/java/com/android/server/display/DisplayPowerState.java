@@ -146,7 +146,7 @@ final class DisplayPowerState {
     /**
      * Sets the display brightness.
      *
-     * @param brightness The brightness, ranges from 0 (minimum / off) to 255 (brightest).
+     * @param brightness The brightness, ranges from 0.0f (minimum / off) to 1.0f (brightest).
      */
     public void setScreenBrightness(float brightness) {
         if (mScreenBrightness != brightness) {

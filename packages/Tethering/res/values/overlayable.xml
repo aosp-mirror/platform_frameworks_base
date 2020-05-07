@@ -24,6 +24,7 @@
             <item type="array" name="config_tether_bluetooth_regexs"/>
             <item type="array" name="config_tether_dhcp_range"/>
             <item type="bool" name="config_tether_enable_legacy_dhcp_server"/>
+            <item type="integer" name="config_tether_offload_poll_interval"/>
             <item type="array" name="config_tether_upstream_types"/>
             <item type="bool" name="config_tether_upstream_automatic"/>
             <!-- Configuration values for tethering entitlement check -->

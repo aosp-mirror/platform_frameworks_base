@@ -39,12 +39,6 @@ class BubbleVolatileRepository @Inject constructor() {
         get() = entities.toList()
 
     /**
-     * Add the bubble to memory and perform a de-duplication. In case the bubble already exists,
-     * the bubble will be moved to the last.
-     */
-    fun addBubble(bubble: BubbleXmlEntity) = addBubbles(listOf(bubble))
-
-    /**
      * Add the bubbles to memory and perform a de-duplication. In case a bubble already exists,
      * it will be moved to the last.
      */
@@ -55,7 +49,7 @@ class BubbleVolatileRepository @Inject constructor() {
         if (entities.size + bubbles.size >= CAPACITY) {
             entities.drop(entities.size + bubbles.size - CAPACITY)
         }
-        entities.addAll(bubbles.reversed())
+        entities.addAll(bubbles)
     }
 
     @Synchronized

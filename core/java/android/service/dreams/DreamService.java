@@ -1052,7 +1052,6 @@ public class DreamService extends Service implements Window.Callback {
         mWindow.requestFeature(Window.FEATURE_NO_TITLE);
 
         WindowManager.LayoutParams lp = mWindow.getAttributes();
-        lp.windowAnimations = com.android.internal.R.style.Animation_Dream;
         lp.flags |= (WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
                     | WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR
                     | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED

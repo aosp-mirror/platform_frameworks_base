@@ -86,6 +86,7 @@ bool StatsCallbackPuller::PullInternal(vector<shared_ptr<LogEvent>>* data) {
     // in unit tests. In process calls are not oneway.
     Status status = mCallback->onPullAtom(mTagId, resultReceiver);
     if (!status.isOk()) {
+        StatsdStats::getInstance().notePullBinderCallFailed(mTagId);
         return false;
     }
 

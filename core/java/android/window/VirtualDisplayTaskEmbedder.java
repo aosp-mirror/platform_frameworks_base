@@ -21,7 +21,6 @@ import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_C
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC;
 import static android.view.Display.INVALID_DISPLAY;
 
-import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
@@ -40,7 +39,6 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.IWindow;
 import android.view.IWindowManager;
 import android.view.IWindowSession;
 import android.view.InputDevice;
@@ -134,19 +132,14 @@ public class VirtualDisplayTaskEmbedder extends TaskEmbedder {
             e.rethrowAsRuntimeException();
         }
 
-        if (mHost.getWindow() != null) {
-            updateLocationAndTapExcludeRegion();
-        }
-        return true;
+        return super.onInitialize();
     }
 
     @Override
     protected boolean onRelease() {
+        super.onRelease();
         // Clear activity view geometry for IME on this display
         clearActivityViewGeometryForIme();
-
-        // Clear tap-exclude region (if any) for this window.
-        clearTapExcludeRegion();
 
         if (mTaskStackListener != null) {
             try {
@@ -170,9 +163,9 @@ public class VirtualDisplayTaskEmbedder extends TaskEmbedder {
      */
     @Override
     public void start() {
+        super.start();
         if (isInitialized()) {
             mVirtualDisplay.setDisplayState(true);
-            updateLocationAndTapExcludeRegion();
         }
     }
 
@@ -181,20 +174,11 @@ public class VirtualDisplayTaskEmbedder extends TaskEmbedder {
      */
     @Override
     public void stop() {
+        super.stop();
         if (isInitialized()) {
             mVirtualDisplay.setDisplayState(false);
             clearActivityViewGeometryForIme();
-            clearTapExcludeRegion();
         }
-    }
-
-    /**
-     * This should be called whenever the position or size of the surface changes
-     * or if touchable areas above the surface are added or removed.
-     */
-    @Override
-    public void notifyBoundsChanged() {
-        updateLocationAndTapExcludeRegion();
     }
 
     /**
@@ -298,12 +282,13 @@ public class VirtualDisplayTaskEmbedder extends TaskEmbedder {
      * This should be called whenever the position or size of the surface changes
      * or if touchable areas above the surface are added or removed.
      */
-    private void updateLocationAndTapExcludeRegion() {
+    @Override
+    protected void updateLocationAndTapExcludeRegion() {
+        super.updateLocationAndTapExcludeRegion();
         if (!isInitialized() || mHost.getWindow() == null) {
             return;
         }
         reportLocation(mHost.getScreenToTaskMatrix(), mHost.getPositionInWindow());
-        applyTapExcludeRegion(mHost.getWindow(), mHost.getTapExcludeRegion());
     }
 
     /**
@@ -332,40 +317,11 @@ public class VirtualDisplayTaskEmbedder extends TaskEmbedder {
     }
 
     /**
-     * Call to update the tap exclude region for the window.
-     * <p>
-     * This should not normally be called directly, but through
-     * {@link #updateLocationAndTapExcludeRegion()}. This method
-     * is provided as an optimization when managing multiple TaskSurfaces within a view.
-     *
-     * @see IWindowSession#updateTapExcludeRegion(IWindow, Region)
-     */
-    private void applyTapExcludeRegion(IWindow window, @Nullable Region tapExcludeRegion) {
-        try {
-            IWindowSession session = WindowManagerGlobal.getWindowSession();
-            session.updateTapExcludeRegion(window, tapExcludeRegion);
-        } catch (RemoteException e) {
-            e.rethrowAsRuntimeException();
-        }
-    }
-
-    /**
      * @see InputMethodManager#reportActivityView(int, Matrix)
      */
     private void clearActivityViewGeometryForIme() {
         final int displayId = getDisplayId();
         mContext.getSystemService(InputMethodManager.class).reportActivityView(displayId, null);
-    }
-
-    /**
-     * Removes the tap exclude region set by {@link #updateLocationAndTapExcludeRegion()}.
-     */
-    private void clearTapExcludeRegion() {
-        if (mHost.getWindow() == null) {
-            Log.w(TAG, "clearTapExcludeRegion: not attached to window!");
-            return;
-        }
-        applyTapExcludeRegion(mHost.getWindow(), null);
     }
 
     private static KeyEvent createKeyEvent(int action, int code, int displayId) {
