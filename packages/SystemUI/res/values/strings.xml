@@ -2611,6 +2611,10 @@
     <!-- Text used for content description of settings button in the header of expanded bubble
          view. [CHAR_LIMIT=NONE] -->
     <string name="bubbles_settings_button_description">Settings for <xliff:g id="app_name" example="YouTube">%1$s</xliff:g> bubbles</string>
+    <!-- Content description for button that shows bubble overflow on click [CHAR LIMIT=NONE] -->
+    <string name="bubble_overflow_button_content_description">Overflow</string>
+    <!-- Action to add overflow bubble back to stack. [CHAR LIMIT=NONE] -->
+    <string name="bubble_accessibility_action_add_back">Add back to stack</string>
     <!-- The text for the manage bubbles link. [CHAR LIMIT=NONE] -->
     <string name="manage_bubbles_text">Manage</string>
     <!-- Content description when a bubble is focused. [CHAR LIMIT=NONE] -->
