@@ -1891,6 +1891,10 @@ public final class SystemServer {
                     || mPackageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK)) {
                 t.traceBegin("StartTvInputManager");
                 mSystemServiceManager.startService(TvInputManagerService.class);
+                t.traceEnd();
+            }
+
+            if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_TUNER)) {
                 t.traceBegin("StartTunerResourceManager");
                 mSystemServiceManager.startService(TunerResourceManagerService.class);
                 t.traceEnd();
