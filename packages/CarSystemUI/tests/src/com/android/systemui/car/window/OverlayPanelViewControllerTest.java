@@ -339,7 +339,7 @@ public class OverlayPanelViewControllerTest extends SysuiTestCase {
 
         mOverlayPanelViewController.setPanelVisible(true);
 
-        verify(mOverlayViewGlobalStateController).setWindowVisible(true);
+        verify(mOverlayViewGlobalStateController).showView(mOverlayPanelViewController);
     }
 
     @Test
@@ -349,7 +349,7 @@ public class OverlayPanelViewControllerTest extends SysuiTestCase {
 
         mOverlayPanelViewController.setPanelVisible(true);
 
-        verify(mOverlayViewGlobalStateController, never()).setWindowVisible(true);
+        verify(mOverlayViewGlobalStateController, never()).showView(mOverlayPanelViewController);
     }
 
     @Test
@@ -377,7 +377,7 @@ public class OverlayPanelViewControllerTest extends SysuiTestCase {
 
         mOverlayPanelViewController.setPanelVisible(false);
 
-        verify(mOverlayViewGlobalStateController).setWindowVisible(false);
+        verify(mOverlayViewGlobalStateController).hideView(mOverlayPanelViewController);
     }
 
     @Test
@@ -387,7 +387,7 @@ public class OverlayPanelViewControllerTest extends SysuiTestCase {
 
         mOverlayPanelViewController.setPanelVisible(false);
 
-        verify(mOverlayViewGlobalStateController, never()).setWindowVisible(false);
+        verify(mOverlayViewGlobalStateController, never()).hideView(mOverlayPanelViewController);
     }
 
     @Test
@@ -428,10 +428,6 @@ public class OverlayPanelViewControllerTest extends SysuiTestCase {
 
     private static class TestOverlayPanelViewController extends OverlayPanelViewController {
 
-        private boolean mShouldAnimateCollapsePanel;
-        private boolean mShouldAnimateExpandPanel;
-        private boolean mShouldAllowClosingScroll;
-
         boolean mOnAnimateCollapsePanelCalled;
         boolean mAnimateCollapsePanelCalled;
         boolean mOnAnimateExpandPanelCalled;
@@ -440,6 +436,9 @@ public class OverlayPanelViewControllerTest extends SysuiTestCase {
         boolean mOnExpandAnimationEndCalled;
         boolean mOnOpenScrollStartEnd;
         List<Integer> mOnScrollHeights;
+        private boolean mShouldAnimateCollapsePanel;
+        private boolean mShouldAnimateExpandPanel;
+        private boolean mShouldAllowClosingScroll;
 
         TestOverlayPanelViewController(
                 Context context,

@@ -16,9 +16,10 @@
 
 package com.android.systemui.car.keyguard;
 
-import static com.google.common.truth.Truth.assertThat;
-
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -29,7 +30,6 @@ import android.os.Handler;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
 
 import com.android.internal.widget.LockPatternUtils;
@@ -40,7 +40,6 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.car.CarServiceProvider;
 import com.android.systemui.car.navigationbar.CarNavigationBarController;
 import com.android.systemui.car.window.OverlayViewGlobalStateController;
-import com.android.systemui.car.window.SystemUIOverlayWindowController;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.statusbar.phone.BiometricUnlockController;
@@ -51,6 +50,7 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -61,27 +61,19 @@ import dagger.Lazy;
 public class CarKeyguardViewControllerTest extends SysuiTestCase {
 
     private TestableCarKeyguardViewController mCarKeyguardViewController;
-    private OverlayViewGlobalStateController mOverlayViewGlobalStateController;
-    private ViewGroup mBaseLayout;
 
+    @Mock
+    private OverlayViewGlobalStateController mOverlayViewGlobalStateController;
     @Mock
     private KeyguardBouncer mBouncer;
     @Mock
     private CarNavigationBarController mCarNavigationBarController;
-    @Mock
-    private SystemUIOverlayWindowController mSystemUIOverlayWindowController;
     @Mock
     private CarKeyguardViewController.OnKeyguardCancelClickedListener mCancelClickedListener;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-
-        mOverlayViewGlobalStateController = new OverlayViewGlobalStateController(
-                mCarNavigationBarController, mSystemUIOverlayWindowController);
-        mBaseLayout = (ViewGroup) LayoutInflater.from(mContext).inflate(
-                R.layout.sysui_overlay_window, /* root= */ null);
-        when(mSystemUIOverlayWindowController.getBaseLayout()).thenReturn(mBaseLayout);
 
         mCarKeyguardViewController = new TestableCarKeyguardViewController(
                 mContext,
@@ -98,6 +90,8 @@ public class CarKeyguardViewControllerTest extends SysuiTestCase {
                 mock(FalsingManager.class),
                 () -> mock(KeyguardBypassController.class)
         );
+        mCarKeyguardViewController.inflate((ViewGroup) LayoutInflater.from(mContext).inflate(
+                R.layout.sysui_overlay_window, /* root= */ null));
     }
 
     @Test
@@ -113,8 +107,7 @@ public class CarKeyguardViewControllerTest extends SysuiTestCase {
         when(mBouncer.isSecure()).thenReturn(true);
         mCarKeyguardViewController.show(/* options= */ null);
 
-        assertThat(mBaseLayout.findViewById(R.id.keyguard_container).getVisibility()).isEqualTo(
-                View.VISIBLE);
+        verify(mOverlayViewGlobalStateController).showView(eq(mCarKeyguardViewController), any());
     }
 
     @Test
@@ -130,8 +123,17 @@ public class CarKeyguardViewControllerTest extends SysuiTestCase {
         when(mBouncer.isSecure()).thenReturn(false);
         mCarKeyguardViewController.show(/* options= */ null);
 
-        assertThat(mBaseLayout.findViewById(R.id.keyguard_container).getVisibility()).isEqualTo(
-                View.GONE);
+        // Here we check for both showView and hideView since the current implementation of show
+        // with bouncer being not secure has the following method execution orders:
+        // 1) show -> start -> showView
+        // 2) show -> reset -> dismissAndCollapse -> hide -> stop -> hideView
+        // Hence, we want to make sure that showView is called before hideView and not in any
+        // other combination.
+        InOrder inOrder = inOrder(mOverlayViewGlobalStateController);
+        inOrder.verify(mOverlayViewGlobalStateController).showView(eq(mCarKeyguardViewController),
+                any());
+        inOrder.verify(mOverlayViewGlobalStateController).hideView(eq(mCarKeyguardViewController),
+                any());
     }
 
     @Test
@@ -156,8 +158,11 @@ public class CarKeyguardViewControllerTest extends SysuiTestCase {
         mCarKeyguardViewController.show(/* options= */ null);
         mCarKeyguardViewController.hide(/* startTime= */ 0, /* fadeoutDelay= */ 0);
 
-        assertThat(mBaseLayout.findViewById(R.id.keyguard_container).getVisibility()).isEqualTo(
-                View.GONE);
+        InOrder inOrder = inOrder(mOverlayViewGlobalStateController);
+        inOrder.verify(mOverlayViewGlobalStateController).showView(eq(mCarKeyguardViewController),
+                any());
+        inOrder.verify(mOverlayViewGlobalStateController).hideView(eq(mCarKeyguardViewController),
+                any());
     }
 
     @Test

@@ -54,7 +54,6 @@ public class OverlayViewController {
         mOverlayViewGlobalStateController.hideView(/* viewController= */ this, this::hide);
     }
 
-
     /**
      * Inflate layout owned by controller.
      */
@@ -72,7 +71,7 @@ public class OverlayViewController {
     }
 
     /**
-     * Returns [@code true} if layout owned by controller has been inflated.
+     * Returns {@code true} if layout owned by controller has been inflated.
      */
     public final boolean isInflated() {
         return mLayout != null;
@@ -124,5 +123,19 @@ public class OverlayViewController {
     /** Returns the {@link OverlayViewGlobalStateController}. */
     protected final OverlayViewGlobalStateController getOverlayViewGlobalStateController() {
         return mOverlayViewGlobalStateController;
+    }
+
+    /**
+     * Returns {@code true} if heads up notifications should be displayed over this view.
+     */
+    protected boolean shouldShowHUN() {
+        return true;
+    }
+
+    /**
+     * Returns {@code true} if navigation bar should be displayed over this view.
+     */
+    protected boolean shouldShowNavigationBar() {
+        return false;
     }
 }
