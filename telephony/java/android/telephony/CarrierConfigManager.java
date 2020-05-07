@@ -3705,6 +3705,17 @@ public class CarrierConfigManager {
     public static final String KEY_MISSED_INCOMING_CALL_SMS_ORIGINATOR_STRING_ARRAY =
             "missed_incoming_call_sms_originator_string_array";
 
+
+    /**
+     * String array of Apn Type configurations.
+     * The entries should be of form "APN_TYPE_NAME:priority".
+     * priority is an integer that is sorted from highest to lowest.
+     * example: cbs:5
+     *
+     * @hide
+     */
+    public static final String KEY_APN_PRIORITY_STRING_ARRAY = "apn_priority_string_array";
+
     /**
      * The patterns of missed incoming call sms. This is the regular expression used for
      * matching the missed incoming call's date, time, and caller id. The pattern should match
@@ -4236,6 +4247,10 @@ public class CarrierConfigManager {
         sDefaults.putLong(KEY_DATA_SWITCH_VALIDATION_MIN_GAP_LONG, TimeUnit.DAYS.toMillis(1));
         sDefaults.putStringArray(KEY_MISSED_INCOMING_CALL_SMS_ORIGINATOR_STRING_ARRAY,
                 new String[0]);
+        sDefaults.putStringArray(KEY_APN_PRIORITY_STRING_ARRAY, new String[] {
+                "default:0", "mms:2", "supl:2", "dun:2", "hipri:3", "fota:2",
+                "ims:2", "cbs:2", "ia:2", "emergency:2", "mcx:3", "xcap:3"
+        });
         sDefaults.putStringArray(KEY_MISSED_INCOMING_CALL_SMS_PATTERN_STRING_ARRAY, new String[0]);
     }
 
