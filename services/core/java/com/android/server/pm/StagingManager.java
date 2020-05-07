@@ -75,7 +75,11 @@ import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
 import com.android.server.rollback.WatchdogRollbackLogger;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -100,6 +104,9 @@ public class StagingManager {
     private final PreRebootVerificationHandler mPreRebootVerificationHandler;
     private final Supplier<PackageParser2> mPackageParserSupplier;
 
+    private final File mFailureReasonFile = new File("/metadata/staged-install/failure_reason.txt");
+    private String mFailureReason;
+
     @GuardedBy("mStagedSessions")
     private final SparseArray<PackageInstallerSession> mStagedSessions = new SparseArray<>();
 
@@ -120,6 +127,12 @@ public class StagingManager {
         mPowerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         mPreRebootVerificationHandler = new PreRebootVerificationHandler(
                 BackgroundThread.get().getLooper());
+
+        if (mFailureReasonFile.exists()) {
+            try (BufferedReader reader = new BufferedReader(new FileReader(mFailureReasonFile))) {
+                mFailureReason = reader.readLine();
+            } catch (Exception ignore) { }
+        }
     }
 
     private void updateStoredSession(@NonNull PackageInstallerSession sessionInfo) {
@@ -350,10 +363,19 @@ public class StagingManager {
     }
 
     // Reverts apex sessions and user data (if checkpoint is supported). Also reboots the device.
-    private void abortCheckpoint(String errorMsg) {
-        Slog.e(TAG, "Aborting checkpoint: " + errorMsg);
+    private void abortCheckpoint(int sessionId, String errorMsg) {
+        String failureReason = "Failed to install sessionId: " + sessionId + " Error: " + errorMsg;
+        Slog.e(TAG, failureReason);
         try {
             if (supportsCheckpoint() && needsCheckpoint()) {
+                // Store failure reason for next reboot
+                try (BufferedWriter writer =
+                             new BufferedWriter(new FileWriter(mFailureReasonFile))) {
+                    writer.write(failureReason);
+                } catch (Exception e) {
+                    Slog.w(TAG, "Failed to save failure reason: ", e);
+                }
+
                 // Only revert apex sessions if device supports updating apex
                 if (mApexManager.isApexSupported()) {
                     mApexManager.revertActiveSessions();
@@ -559,14 +581,12 @@ public class StagingManager {
             // If checkpoint is supported, then we only resume sessions if we are in checkpointing
             // mode. If not, we fail all sessions.
             if (supportsCheckpoint() && !needsCheckpoint()) {
-                // TODO(b/146343545): Persist failure reason across checkpoint reboot
-                Slog.d(TAG, "Reverting back to safe state. Marking " + session.sessionId
-                        + " as failed.");
-                String errorMsg = "Reverting back to safe state";
-                if (!TextUtils.isEmpty(mNativeFailureReason)) {
-                    errorMsg = "Entered fs-rollback mode and reverted session due to crashing "
-                            + "native process: " + mNativeFailureReason;
+                String errorMsg = "Reverting back to safe state. Marking " + session.sessionId
+                        + " as failed";
+                if (!TextUtils.isEmpty(mFailureReason)) {
+                    errorMsg = errorMsg + ": " + mFailureReason;
                 }
+                Slog.d(TAG, errorMsg);
                 session.setStagedSessionFailed(SessionInfo.STAGED_SESSION_UNKNOWN, errorMsg);
                 return;
             }
@@ -591,7 +611,7 @@ public class StagingManager {
                         + "supposed to be activated";
                 session.setStagedSessionFailed(SessionInfo.STAGED_SESSION_ACTIVATION_FAILED,
                         errorMsg);
-                abortCheckpoint(errorMsg);
+                abortCheckpoint(session.sessionId, errorMsg);
                 return;
             }
             if (isApexSessionFailed(apexSessionInfo)) {
@@ -603,7 +623,7 @@ public class StagingManager {
                 }
                 session.setStagedSessionFailed(SessionInfo.STAGED_SESSION_ACTIVATION_FAILED,
                         errorMsg);
-                abortCheckpoint(errorMsg);
+                abortCheckpoint(session.sessionId, errorMsg);
                 return;
             }
             if (!apexSessionInfo.isActivated && !apexSessionInfo.isSuccess) {
@@ -614,7 +634,7 @@ public class StagingManager {
                         + "didn't activate nor fail. Marking it as failed anyway.";
                 session.setStagedSessionFailed(SessionInfo.STAGED_SESSION_ACTIVATION_FAILED,
                         errorMsg);
-                abortCheckpoint(errorMsg);
+                abortCheckpoint(session.sessionId, errorMsg);
                 return;
             }
         }
@@ -631,7 +651,7 @@ public class StagingManager {
             installApksInSession(session);
         } catch (PackageManagerException e) {
             session.setStagedSessionFailed(e.error, e.getMessage());
-            abortCheckpoint(e.getMessage());
+            abortCheckpoint(session.sessionId, e.getMessage());
 
             // If checkpoint is not supported, we have to handle failure for one staged session.
             if (!hasApex) {
@@ -1132,6 +1152,8 @@ public class StagingManager {
                 ctx.unregisterReceiver(this);
             }
         }, new IntentFilter(Intent.ACTION_BOOT_COMPLETED));
+
+        mFailureReasonFile.delete();
     }
 
     private static class LocalIntentReceiverAsync {
