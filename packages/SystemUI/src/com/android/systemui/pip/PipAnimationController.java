@@ -376,7 +376,8 @@ public class PipAnimationController {
                     // NOTE: intentionally does not apply the transaction here.
                     // this end transaction should get executed synchronously with the final
                     // WindowContainerTransaction in task organizer
-                    getSurfaceTransactionHelper().resetScale(tx, leash, getDestinationBounds());
+                    getSurfaceTransactionHelper().resetScale(tx, leash, getDestinationBounds())
+                            .crop(tx, leash, getDestinationBounds());
                 }
             };
         }
