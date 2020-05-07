@@ -18,6 +18,7 @@ package android.view.autofill;
 
 import static android.service.autofill.FillRequest.FLAG_MANUAL_REQUEST;
 import static android.service.autofill.FillRequest.FLAG_PASSWORD_INPUT_TYPE;
+import static android.service.autofill.FillRequest.FLAG_VIEW_NOT_FOCUSED;
 import static android.view.autofill.Helper.sDebug;
 import static android.view.autofill.Helper.sVerbose;
 import static android.view.autofill.Helper.toList;
@@ -879,7 +880,11 @@ public final class AutofillManager {
      * @param view view requesting the new autofill context.
      */
     public void requestAutofill(@NonNull View view) {
-        notifyViewEntered(view, FLAG_MANUAL_REQUEST);
+        int flags = FLAG_MANUAL_REQUEST;
+        if (!view.isFocused()) {
+            flags |= FLAG_VIEW_NOT_FOCUSED;
+        }
+        notifyViewEntered(view, flags);
     }
 
     /**
@@ -926,7 +931,11 @@ public final class AutofillManager {
      * @param absBounds absolute boundaries of the virtual view in the screen.
      */
     public void requestAutofill(@NonNull View view, int virtualId, @NonNull Rect absBounds) {
-        notifyViewEntered(view, virtualId, absBounds, FLAG_MANUAL_REQUEST);
+        int flags = FLAG_MANUAL_REQUEST;
+        if (!view.isFocused()) {
+            flags |= FLAG_VIEW_NOT_FOCUSED;
+        }
+        notifyViewEntered(view, virtualId, absBounds, flags);
     }
 
     /**
