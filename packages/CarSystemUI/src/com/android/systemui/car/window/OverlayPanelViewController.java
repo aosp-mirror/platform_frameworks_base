@@ -375,10 +375,10 @@ public abstract class OverlayPanelViewController extends OverlayViewController {
         }
 
         if (visible && !getOverlayViewGlobalStateController().isWindowVisible()) {
-            getOverlayViewGlobalStateController().setWindowVisible(true);
+            getOverlayViewGlobalStateController().showView(/* panelViewController= */ this);
         }
         if (!visible && getOverlayViewGlobalStateController().isWindowVisible()) {
-            getOverlayViewGlobalStateController().setWindowVisible(false);
+            getOverlayViewGlobalStateController().hideView(/* panelViewController= */ this);
         }
         getLayout().setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
         getOverlayViewGlobalStateController().setWindowFocusable(visible);

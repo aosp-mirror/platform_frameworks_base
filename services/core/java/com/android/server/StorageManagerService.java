@@ -1579,6 +1579,14 @@ class StorageManagerService extends IStorageManager.Stub
                 writeSettingsLocked();
             }
         }
+
+        if (newState == VolumeInfo.STATE_MOUNTED) {
+            // Private volumes can be unmounted and re-mounted even after a user has
+            // been unlocked; on devices that support encryption keys tied to the filesystem,
+            // this requires setting up the keys again.
+            prepareUserStorageIfNeeded(vol);
+        }
+
         // This is a blocking call to Storage Service which needs to process volume state changed
         // before notifying other listeners.
         // Intentionally called without the mLock to avoid deadlocking from the Storage Service.
@@ -3266,10 +3274,38 @@ class StorageManagerService extends IStorageManager.Stub
         }
     }
 
+    private void prepareUserStorageIfNeeded(VolumeInfo vol) {
+        if (vol.type != VolumeInfo.TYPE_PRIVATE) {
+            return;
+        }
+
+        final UserManager um = mContext.getSystemService(UserManager.class);
+        final UserManagerInternal umInternal =
+                LocalServices.getService(UserManagerInternal.class);
+
+        for (UserInfo user : um.getUsers(false /* includeDying */)) {
+            final int flags;
+            if (umInternal.isUserUnlockingOrUnlocked(user.id)) {
+                flags = StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE;
+            } else if (umInternal.isUserRunning(user.id)) {
+                flags = StorageManager.FLAG_STORAGE_DE;
+            } else {
+                continue;
+            }
+
+            prepareUserStorageInternal(vol.fsUuid, user.id, user.serialNumber, flags);
+        }
+    }
+
     @Override
     public void prepareUserStorage(String volumeUuid, int userId, int serialNumber, int flags) {
         enforcePermission(android.Manifest.permission.STORAGE_INTERNAL);
 
+        prepareUserStorageInternal(volumeUuid, userId, serialNumber, flags);
+    }
+
+    private void prepareUserStorageInternal(String volumeUuid, int userId, int serialNumber,
+            int flags) {
         try {
             mVold.prepareUserStorage(volumeUuid, userId, serialNumber, flags);
             // After preparing user storage, we should check if we should mount data mirror again,

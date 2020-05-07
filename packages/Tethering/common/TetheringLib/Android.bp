@@ -94,6 +94,15 @@ droidstubs {
         "framework-module-stubs-defaults-publicapi",
         "framework-tethering-stubs-defaults",
     ],
+    check_api: {
+        last_released: {
+            api_file: ":framework-tethering.api.public.latest",
+            removed_api_file: ":framework-tethering-removed.api.public.latest",
+        },
+        api_lint: {
+            new_since: ":framework-tethering.api.public.latest",
+        },
+    },
 }
 
 droidstubs {
@@ -102,6 +111,15 @@ droidstubs {
         "framework-module-stubs-defaults-systemapi",
         "framework-tethering-stubs-defaults",
     ],
+    check_api: {
+        last_released: {
+            api_file: ":framework-tethering.api.system.latest",
+            removed_api_file: ":framework-tethering-removed.api.system.latest",
+        },
+        api_lint: {
+            new_since: ":framework-tethering.api.system.latest",
+        },
+    },
 }
 
 droidstubs {
@@ -110,6 +128,15 @@ droidstubs {
         "framework-module-api-defaults-module_libs_api",
         "framework-tethering-stubs-defaults",
     ],
+    check_api: {
+        last_released: {
+            api_file: ":framework-tethering.api.module-lib.latest",
+            removed_api_file: ":framework-tethering-removed.api.module-lib.latest",
+        },
+        api_lint: {
+            new_since: ":framework-tethering.api.module-lib.latest",
+        },
+    },
 }
 
 droidstubs {

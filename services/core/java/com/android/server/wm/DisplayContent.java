@@ -2547,6 +2547,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
         for (int i = mTapExcludedWindows.size() - 1; i >= 0; i--) {
             final WindowState win = mTapExcludedWindows.get(i);
+            if (!win.isVisibleLw()) {
+                continue;
+            }
             win.getTouchableRegion(mTmpRegion);
             mTouchExcludeRegion.op(mTmpRegion, Region.Op.UNION);
         }

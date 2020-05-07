@@ -1517,6 +1517,10 @@ public class PackageParser {
                 ? null : "must have at least one '.' separator";
     }
 
+    /**
+     * @deprecated Use {@link android.content.pm.parsing.ApkLiteParseUtils#parsePackageSplitNames}
+     */
+    @Deprecated
     public static Pair<String, String> parsePackageSplitNames(XmlPullParser parser,
             AttributeSet attrs) throws IOException, XmlPullParserException,
             PackageParserException {

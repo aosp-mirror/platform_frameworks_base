@@ -26,6 +26,8 @@ import static android.net.NetworkStats.UID_TETHERING;
 import static android.net.netstats.provider.NetworkStatsProvider.QUOTA_UNLIMITED;
 import static android.provider.Settings.Global.TETHER_OFFLOAD_DISABLED;
 
+import static com.android.networkstack.tethering.TetheringConfiguration.DEFAULT_TETHER_OFFLOAD_POLL_INTERVAL_MS;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.usage.NetworkStatsManager;
@@ -77,7 +79,6 @@ public class OffloadController {
     private static final boolean DBG = false;
     private static final String ANYIP = "0.0.0.0";
     private static final ForwardedStats EMPTY_STATS = new ForwardedStats();
-    private static final int DEFAULT_PERFORM_POLL_INTERVAL_MS = 5000;
 
     @VisibleForTesting
     enum StatsType {
@@ -134,11 +135,9 @@ public class OffloadController {
     private final Dependencies mDeps;
 
     // TODO: Put more parameters in constructor into dependency object.
-    static class Dependencies {
-        int getPerformPollInterval() {
-            // TODO: Consider make this configurable.
-            return DEFAULT_PERFORM_POLL_INTERVAL_MS;
-        }
+    interface Dependencies {
+        @NonNull
+        TetheringConfiguration getTetherConfig();
     }
 
     public OffloadController(Handler h, OffloadHardwareInterface hwi,
@@ -452,12 +451,16 @@ public class OffloadController {
         if (mHandler.hasCallbacks(mScheduledPollingTask)) {
             mHandler.removeCallbacks(mScheduledPollingTask);
         }
-        mHandler.postDelayed(mScheduledPollingTask, mDeps.getPerformPollInterval());
+        mHandler.postDelayed(mScheduledPollingTask,
+                mDeps.getTetherConfig().getOffloadPollInterval());
     }
 
     private boolean isPollingStatsNeeded() {
         return started() && mRemainingAlertQuota > 0
-                && !TextUtils.isEmpty(currentUpstreamInterface());
+                && !TextUtils.isEmpty(currentUpstreamInterface())
+                && mDeps.getTetherConfig() != null
+                && mDeps.getTetherConfig().getOffloadPollInterval()
+                >= DEFAULT_TETHER_OFFLOAD_POLL_INTERVAL_MS;
     }
 
     private boolean maybeUpdateDataLimit(String iface) {

@@ -80,6 +80,13 @@ public class RemoteAppPredictionService extends
     }
 
     /**
+     * Execute async request on remote service immediately instead of sending it to Handler queue.
+     */
+    public void executeOnResolvedService(@NonNull AsyncRequest<IPredictionService> request) {
+        executeAsyncRequest(request);
+    }
+
+    /**
      * Failure callback
      */
     public interface RemoteAppPredictionServiceCallbacks

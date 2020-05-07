@@ -18,12 +18,16 @@ package android.content.pm.parsing.result;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.parsing.ParsingUtils;
+import android.os.ServiceManager;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Slog;
 
+import com.android.internal.compat.IPlatformCompat;
 import com.android.internal.util.CollectionUtils;
 
 /** @hide */
@@ -59,6 +63,28 @@ public class ParseTypeImpl implements ParseInput, ParseResult<Object> {
 
     private String mPackageName;
     private Integer mTargetSdkVersion;
+
+    /**
+     * Assumes {@link Context#PLATFORM_COMPAT_SERVICE} is available to the caller. For use
+     * with {@link android.content.pm.parsing.ApkLiteParseUtils} or similar where parsing is
+     * done outside of {@link com.android.server.pm.PackageManagerService}.
+     */
+    public static ParseTypeImpl forDefaultParsing() {
+        IPlatformCompat platformCompat = IPlatformCompat.Stub.asInterface(
+                ServiceManager.getService(Context.PLATFORM_COMPAT_SERVICE));
+        return new ParseTypeImpl((changeId, packageName, targetSdkVersion) -> {
+            ApplicationInfo appInfo = new ApplicationInfo();
+            appInfo.packageName = packageName;
+            appInfo.targetSdkVersion = targetSdkVersion;
+            try {
+                return platformCompat.isChangeEnabled(changeId, appInfo);
+            } catch (Exception e) {
+                // This shouldn't happen, but assume enforcement if it does
+                Slog.wtf(ParsingUtils.TAG, "IPlatformCompat query failed", e);
+                return true;
+            }
+        });
+    }
 
     /**
      * @param callback if nullable, fallback to manual targetSdk > Q check

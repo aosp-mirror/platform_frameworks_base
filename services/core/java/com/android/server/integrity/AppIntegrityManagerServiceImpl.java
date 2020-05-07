@@ -571,7 +571,7 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
             // APK signatures is already verified elsewhere in PackageManager. We do not need to
             // verify it again since it could cause a timeout for large APKs.
             pkg.setSigningDetails(
-                    ParsingPackageUtils.collectCertificates(pkg, /* skipVerify= */ true));
+                    ParsingPackageUtils.getSigningDetails(pkg, /* skipVerify= */ true));
             return PackageInfoUtils.generate(
                     pkg,
                     null,

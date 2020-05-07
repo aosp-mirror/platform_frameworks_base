@@ -25,6 +25,7 @@ import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.PackageParserException;
 import android.content.pm.parsing.ParsingPackage;
 import android.content.pm.parsing.ParsingPackageUtils;
+import android.content.pm.parsing.ParsingUtils;
 import android.content.pm.parsing.result.ParseInput;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.pm.parsing.result.ParseTypeImpl;
@@ -35,7 +36,7 @@ import android.os.SystemClock;
 import android.util.DisplayMetrics;
 import android.util.Slog;
 
-import com.android.server.compat.PlatformCompat;
+import com.android.internal.compat.IPlatformCompat;
 import com.android.server.pm.PackageManagerService;
 import com.android.server.pm.parsing.pkg.PackageImpl;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
@@ -58,14 +59,21 @@ public class PackageParser2 implements AutoCloseable {
      *
      * This must be called inside the system process as it relies on {@link ServiceManager}.
      */
+    @NonNull
     public static PackageParser2 forParsingFileWithDefaults() {
-        PlatformCompat platformCompat =
-                (PlatformCompat) ServiceManager.getService(Context.PLATFORM_COMPAT_SERVICE);
+        IPlatformCompat platformCompat = IPlatformCompat.Stub.asInterface(
+                ServiceManager.getService(Context.PLATFORM_COMPAT_SERVICE));
         return new PackageParser2(null /* separateProcesses */, false /* onlyCoreApps */,
                 null /* displayMetrics */, null /* cacheDir */, new Callback() {
             @Override
             public boolean isChangeEnabled(long changeId, @NonNull ApplicationInfo appInfo) {
-                return platformCompat.isChangeEnabled(changeId, appInfo);
+                try {
+                    return platformCompat.isChangeEnabled(changeId, appInfo);
+                } catch (Exception e) {
+                    // This shouldn't happen, but assume enforcement if it does
+                    Slog.wtf(ParsingUtils.TAG, "IPlatformCompat query failed", e);
+                    return true;
+                }
             }
 
             @Override

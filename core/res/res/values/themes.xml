@@ -704,6 +704,7 @@ please see themes_device_defaults.xml.
     <style name="Theme.Dream">
         <item name="windowBackground">@color/black</item>
         <item name="windowDisablePreview">true</item>
+        <item name="windowActivityTransitions">true</item>
     </style>
 
     <!-- Default theme for dialog windows and activities (on API level 10 and lower),

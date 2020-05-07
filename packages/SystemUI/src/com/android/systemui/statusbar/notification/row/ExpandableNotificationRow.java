@@ -2366,6 +2366,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         updateChildrenVisibility();
         applyChildrenRoundness();
     }
+
+    protected void expandNotification() {
+        mExpandClickListener.onClick(this);
+    }
+
     /**
      * Returns the number of channels covered by the notification row (including its children if
      * it's a summary notification).
