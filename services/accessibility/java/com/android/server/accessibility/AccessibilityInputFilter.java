@@ -562,15 +562,20 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
     }
 
     /**
-     * Called when the magnification mode is changed on specific display.
+     * Called to refresh the magnification mode on the given display.
+     * It's responsible for changing {@link MagnificationGestureHandler} based on the current mode.
+     *
      * @param display The logical display
      */
     @MainThread
-    public void onMagnificationModeChanged(Display display) {
+    public void refreshMagnificationMode(Display display) {
         final int displayId = display.getDisplayId();
         final MagnificationGestureHandler magnificationGestureHandler =
                 mMagnificationGestureHandler.get(displayId);
         if (magnificationGestureHandler == null) {
+            return;
+        }
+        if (magnificationGestureHandler.getMode() == mAms.getMagnificationMode(displayId)) {
             return;
         }
         magnificationGestureHandler.onDestroy();

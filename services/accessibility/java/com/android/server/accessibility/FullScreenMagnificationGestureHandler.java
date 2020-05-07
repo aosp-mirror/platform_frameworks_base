@@ -40,6 +40,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
+import android.provider.Settings;
 import android.util.Log;
 import android.util.MathUtils;
 import android.util.Slog;
@@ -276,6 +277,11 @@ class FullScreenMagnificationGestureHandler extends MagnificationGestureHandler 
                 mDetectingState.toggleShortcutTriggered();
             }
         }
+    }
+
+    @Override
+    public int getMode() {
+        return Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
     }
 
     void clearAndTransitionToStateDetecting() {

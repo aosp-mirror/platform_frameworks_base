@@ -18,7 +18,9 @@ package com.android.server.accessibility.magnification;
 
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -52,6 +54,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.invocation.InvocationOnMock;
 
 /**
  * Tests for WindowMagnificationManager.
@@ -77,6 +80,13 @@ public class WindowMagnificationManagerTest {
         mWindowMagnificationManager = new WindowMagnificationManager(mContext, CURRENT_USER_ID);
 
         when(mContext.getContentResolver()).thenReturn(mResolver);
+        doAnswer((InvocationOnMock invocation) -> {
+            final boolean connect =  (Boolean) invocation.getArguments()[0];
+            mWindowMagnificationManager.setConnection(
+                    connect ? mMockConnection.getConnection() : null);
+            return null;
+        }).when(mMockStatusBarManagerInternal).requestWindowMagnificationConnection(anyBoolean());
+
         mResolver.addProvider(Settings.AUTHORITY, new FakeSettingsProvider());
         Settings.Secure.putFloatForUser(mResolver,
                 Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE, 2.5f,
@@ -279,6 +289,15 @@ public class WindowMagnificationManagerTest {
     public void requestConnection_requestWindowMagnificationConnection() throws RemoteException {
         assertTrue(mWindowMagnificationManager.requestConnection(true));
         verify(mMockStatusBarManagerInternal).requestWindowMagnificationConnection(true);
+    }
+
+    @Test
+    public void isConnected_requestConnection_expectedValue() throws RemoteException {
+        mWindowMagnificationManager.requestConnection(true);
+        assertTrue(mWindowMagnificationManager.isConnected());
+
+        mWindowMagnificationManager.requestConnection(false);
+        assertFalse(mWindowMagnificationManager.isConnected());
     }
 
     private MotionEvent generatePointersDownEvent(PointF[] pointersLocation) {

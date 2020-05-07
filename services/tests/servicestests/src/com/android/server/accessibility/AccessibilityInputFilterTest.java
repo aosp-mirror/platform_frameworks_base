@@ -272,7 +272,7 @@ public class AccessibilityInputFilterTest {
         EventStreamTransformation nextEventStream = getMagnificationGestureHandlerFromEventHandler(
                 DEFAULT_DISPLAY).getNext();
 
-        mA11yInputFilter.onMagnificationModeChanged(mDisplayList.get(DEFAULT_DISPLAY));
+        mA11yInputFilter.refreshMagnificationMode(mDisplayList.get(DEFAULT_DISPLAY));
 
         MagnificationGestureHandler handler =
                 getMagnificationGestureHandlerFromEventHandler(DEFAULT_DISPLAY);
@@ -295,7 +295,7 @@ public class AccessibilityInputFilterTest {
         EventStreamTransformation nextEventStream = getMagnificationGestureHandlerFromEventHandler(
                 DEFAULT_DISPLAY).getNext();
 
-        mA11yInputFilter.onMagnificationModeChanged(mDisplayList.get(DEFAULT_DISPLAY));
+        mA11yInputFilter.refreshMagnificationMode(mDisplayList.get(DEFAULT_DISPLAY));
 
         MagnificationGestureHandler handler =
                 getMagnificationGestureHandlerFromEventHandler(DEFAULT_DISPLAY);
