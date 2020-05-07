@@ -366,29 +366,87 @@ public class AppStandbyControllerTests {
                         mInjector.mElapsedRealtime, false));
     }
 
+    private static class TestParoleListener extends AppIdleStateChangeListener {
+        private boolean mIsParoleOn = false;
+        private CountDownLatch mLatch;
+        private boolean mIsExpecting = false;
+        private boolean mExpectedParoleState;
+
+        boolean getParoleState() {
+            synchronized (this) {
+                return mIsParoleOn;
+            }
+        }
+
+        void rearmLatch(boolean expectedParoleState) {
+            synchronized (this) {
+                mLatch = new CountDownLatch(1);
+                mIsExpecting = true;
+                mExpectedParoleState = expectedParoleState;
+            }
+        }
+
+        void awaitOnLatch(long time) throws Exception {
+            mLatch.await(time, TimeUnit.MILLISECONDS);
+        }
+
+        @Override
+        public void onAppIdleStateChanged(String packageName, int userId, boolean idle,
+                int bucket, int reason) {
+        }
+
+        @Override
+        public void onParoleStateChanged(boolean isParoleOn) {
+            synchronized (this) {
+                // Only record information if it is being looked for
+                if (mLatch != null && mLatch.getCount() > 0) {
+                    mIsParoleOn = isParoleOn;
+                    if (mIsExpecting && isParoleOn == mExpectedParoleState) {
+                        mLatch.countDown();
+                    }
+                }
+            }
+        }
+    }
+
     @Test
     public void testIsAppIdle_Charging() throws Exception {
+        TestParoleListener paroleListener = new TestParoleListener();
+        mController.addListener(paroleListener);
+
         setChargingState(mController, false);
         mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RARE,
                 REASON_MAIN_FORCED_BY_SYSTEM);
         assertEquals(STANDBY_BUCKET_RARE, getStandbyBucket(mController, PACKAGE_1));
         assertTrue(mController.isAppIdleFiltered(PACKAGE_1, UID_1, USER_ID, 0));
         assertTrue(mController.isAppIdleFiltered(PACKAGE_1, UID_1, USER_ID, false));
+        assertFalse(mController.isInParole());
 
+        paroleListener.rearmLatch(true);
         setChargingState(mController, true);
+        paroleListener.awaitOnLatch(2000);
+        assertTrue(paroleListener.getParoleState());
         assertEquals(STANDBY_BUCKET_RARE, getStandbyBucket(mController, PACKAGE_1));
         assertFalse(mController.isAppIdleFiltered(PACKAGE_1, UID_1, USER_ID, 0));
         assertFalse(mController.isAppIdleFiltered(PACKAGE_1, UID_1, USER_ID, false));
+        assertTrue(mController.isInParole());
 
+        paroleListener.rearmLatch(false);
         setChargingState(mController, false);
+        paroleListener.awaitOnLatch(2000);
+        assertFalse(paroleListener.getParoleState());
         assertEquals(STANDBY_BUCKET_RARE, getStandbyBucket(mController, PACKAGE_1));
         assertTrue(mController.isAppIdleFiltered(PACKAGE_1, UID_1, USER_ID, 0));
         assertTrue(mController.isAppIdleFiltered(PACKAGE_1, UID_1, USER_ID, false));
+        assertFalse(mController.isInParole());
     }
 
     @Test
     public void testIsAppIdle_Enabled() throws Exception {
         setChargingState(mController, false);
+        TestParoleListener paroleListener = new TestParoleListener();
+        mController.addListener(paroleListener);
+
         setAppIdleEnabled(mController, true);
         mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RARE,
                 REASON_MAIN_FORCED_BY_SYSTEM);
@@ -396,11 +454,17 @@ public class AppStandbyControllerTests {
         assertTrue(mController.isAppIdleFiltered(PACKAGE_1, UID_1, USER_ID, 0));
         assertTrue(mController.isAppIdleFiltered(PACKAGE_1, UID_1, USER_ID, false));
 
+        paroleListener.rearmLatch(false);
         setAppIdleEnabled(mController, false);
+        paroleListener.awaitOnLatch(2000);
+        assertTrue(paroleListener.mIsParoleOn);
         assertFalse(mController.isAppIdleFiltered(PACKAGE_1, UID_1, USER_ID, 0));
         assertFalse(mController.isAppIdleFiltered(PACKAGE_1, UID_1, USER_ID, false));
 
+        paroleListener.rearmLatch(true);
         setAppIdleEnabled(mController, true);
+        paroleListener.awaitOnLatch(2000);
+        assertFalse(paroleListener.getParoleState());
         assertEquals(STANDBY_BUCKET_RARE, getStandbyBucket(mController, PACKAGE_1));
         assertTrue(mController.isAppIdleFiltered(PACKAGE_1, UID_1, USER_ID, 0));
         assertTrue(mController.isAppIdleFiltered(PACKAGE_1, UID_1, USER_ID, false));
