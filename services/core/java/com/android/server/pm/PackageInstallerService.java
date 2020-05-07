@@ -676,7 +676,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         session = new PackageInstallerSession(mInternalCallback, mContext, mPm, this,
                 mInstallThread.getLooper(), mStagingManager, sessionId, userId, callingUid,
                 installSource, params, createdMillis,
-                stageDir, stageCid, null, false, false, false, null, SessionInfo.INVALID_ID,
+                stageDir, stageCid, null, false, false, false, false, null, SessionInfo.INVALID_ID,
                 false, false, false, SessionInfo.STAGED_SESSION_NO_ERROR, "");
 
         synchronized (mSessions) {
@@ -830,7 +830,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         synchronized (mSessions) {
             final PackageInstallerSession session = mSessions.get(sessionId);
 
-            return session != null
+            return (session != null && !(session.isStaged() && session.isDestroyed()))
                     ? session.generateInfoForCaller(true /*withIcon*/, Binder.getCallingUid())
                     : null;
         }
@@ -851,7 +851,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         synchronized (mSessions) {
             for (int i = 0; i < mSessions.size(); i++) {
                 final PackageInstallerSession session = mSessions.valueAt(i);
-                if (session.userId == userId && !session.hasParentSessionId()) {
+                if (session.userId == userId && !session.hasParentSessionId()
+                        && !(session.isStaged() && session.isDestroyed())) {
                     result.add(session.generateInfoForCaller(false, callingUid));
                 }
             }
