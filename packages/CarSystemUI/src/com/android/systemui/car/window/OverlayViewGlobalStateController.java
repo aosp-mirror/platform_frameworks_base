@@ -16,14 +16,17 @@
 
 package com.android.systemui.car.window;
 
+import android.annotation.Nullable;
 import android.util.Log;
 
 import androidx.annotation.VisibleForTesting;
 
 import com.android.systemui.car.navigationbar.CarNavigationBarController;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -39,11 +42,17 @@ import javax.inject.Singleton;
  */
 @Singleton
 public class OverlayViewGlobalStateController {
+    private static final boolean DEBUG = false;
     private static final String TAG = OverlayViewGlobalStateController.class.getSimpleName();
+    private static final int UNKNOWN_Z_ORDER = -1;
     private final SystemUIOverlayWindowController mSystemUIOverlayWindowController;
     private final CarNavigationBarController mCarNavigationBarController;
     @VisibleForTesting
-    Set<String> mShownSet;
+    Map<OverlayViewController, Integer> mZOrderMap;
+    @VisibleForTesting
+    SortedMap<Integer, OverlayViewController> mZOrderVisibleSortedMap;
+    @VisibleForTesting
+    OverlayViewController mHighestZOrder;
 
     @Inject
     public OverlayViewGlobalStateController(
@@ -52,7 +61,8 @@ public class OverlayViewGlobalStateController {
         mSystemUIOverlayWindowController = systemUIOverlayWindowController;
         mSystemUIOverlayWindowController.attach();
         mCarNavigationBarController = carNavigationBarController;
-        mShownSet = new HashSet<>();
+        mZOrderMap = new HashMap<>();
+        mZOrderVisibleSortedMap = new TreeMap<>();
     }
 
     /**
@@ -66,51 +76,127 @@ public class OverlayViewGlobalStateController {
     }
 
     /**
-     * Show content in Overlay Window.
+     * Show content in Overlay Window using {@link OverlayPanelViewController}.
+     *
+     * This calls {@link OverlayViewGlobalStateController#showView(OverlayViewController, Runnable)}
+     * where the runnable is nullified since the actual showing of the panel is handled by the
+     * controller itself.
      */
-    public void showView(OverlayViewController viewController, Runnable show) {
-        if (mShownSet.isEmpty()) {
-            mCarNavigationBarController.hideBars();
-            setWindowVisible(true);
-        }
-
-        inflateView(viewController);
-
-        show.run();
-        mShownSet.add(viewController.getClass().getName());
-
-        Log.d(TAG, "Content shown: " + viewController.getClass().getName());
+    public void showView(OverlayPanelViewController panelViewController) {
+        showView(panelViewController, /* show= */ null);
     }
 
     /**
-     * Hide content in Overlay Window.
+     * Show content in Overlay Window using {@link OverlayViewController}.
      */
-    public void hideView(OverlayViewController viewController, Runnable hide) {
+    public void showView(OverlayViewController viewController, @Nullable Runnable show) {
+        debugLog();
+        if (mZOrderVisibleSortedMap.isEmpty()) {
+            setWindowVisible(true);
+        }
+        if (!(viewController instanceof OverlayPanelViewController)) {
+            inflateView(viewController);
+        }
+
+        if (show != null) {
+            show.run();
+        }
+
+        updateInternalsWhenShowingView(viewController);
+        refreshNavigationBarVisibility();
+
+        Log.d(TAG, "Content shown: " + viewController.getClass().getName());
+        debugLog();
+    }
+
+    private void updateInternalsWhenShowingView(OverlayViewController viewController) {
+        int zOrder;
+        if (mZOrderMap.containsKey(viewController)) {
+            zOrder = mZOrderMap.get(viewController);
+        } else {
+            zOrder = mSystemUIOverlayWindowController.getBaseLayout().indexOfChild(
+                    viewController.getLayout());
+            mZOrderMap.put(viewController, zOrder);
+        }
+
+        mZOrderVisibleSortedMap.put(zOrder, viewController);
+
+        refreshHighestZOrderWhenShowingView(viewController);
+    }
+
+    private void refreshHighestZOrderWhenShowingView(OverlayViewController viewController) {
+        if (mZOrderMap.getOrDefault(mHighestZOrder, UNKNOWN_Z_ORDER) < mZOrderMap.get(
+                viewController)) {
+            mHighestZOrder = viewController;
+        }
+    }
+
+    /**
+     * Hide content in Overlay Window using {@link OverlayPanelViewController}.
+     *
+     * This calls {@link OverlayViewGlobalStateController#hideView(OverlayViewController, Runnable)}
+     * where the runnable is nullified since the actual hiding of the panel is handled by the
+     * controller itself.
+     */
+    public void hideView(OverlayPanelViewController panelViewController) {
+        hideView(panelViewController, /* hide= */ null);
+    }
+
+    /**
+     * Hide content in Overlay Window using {@link OverlayViewController}.
+     */
+    public void hideView(OverlayViewController viewController, @Nullable Runnable hide) {
+        debugLog();
         if (!viewController.isInflated()) {
             Log.d(TAG, "Content cannot be hidden since it isn't inflated: "
                     + viewController.getClass().getName());
             return;
         }
-        if (!mShownSet.contains(viewController.getClass().getName())) {
-            Log.d(TAG, "Content cannot be hidden since it isn't shown: "
+        if (!mZOrderMap.containsKey(viewController)) {
+            Log.d(TAG, "Content cannot be hidden since it has never been shown: "
+                    + viewController.getClass().getName());
+            return;
+        }
+        if (!mZOrderVisibleSortedMap.containsKey(mZOrderMap.get(viewController))) {
+            Log.d(TAG, "Content cannot be hidden since it isn't currently shown: "
                     + viewController.getClass().getName());
             return;
         }
 
-        hide.run();
-        mShownSet.remove(viewController.getClass().getName());
+        if (hide != null) {
+            hide.run();
+        }
 
-        if (mShownSet.isEmpty()) {
-            mCarNavigationBarController.showBars();
+        mZOrderVisibleSortedMap.remove(mZOrderMap.get(viewController));
+        refreshHighestZOrderWhenHidingView(viewController);
+        refreshNavigationBarVisibility();
+
+        if (mZOrderVisibleSortedMap.isEmpty()) {
             setWindowVisible(false);
         }
 
         Log.d(TAG, "Content hidden: " + viewController.getClass().getName());
+        debugLog();
     }
 
-    /** Sets the window visibility state. */
-    public void setWindowVisible(boolean expanded) {
-        mSystemUIOverlayWindowController.setWindowVisible(expanded);
+    private void refreshHighestZOrderWhenHidingView(OverlayViewController viewController) {
+        if (mZOrderVisibleSortedMap.isEmpty()) {
+            mHighestZOrder = null;
+            return;
+        }
+        if (!mHighestZOrder.equals(viewController)) {
+            return;
+        }
+
+        mHighestZOrder = mZOrderVisibleSortedMap.get(mZOrderVisibleSortedMap.lastKey());
+    }
+
+    private void refreshNavigationBarVisibility() {
+        if (mZOrderVisibleSortedMap.isEmpty() || mHighestZOrder.shouldShowNavigationBar()) {
+            mCarNavigationBarController.showBars();
+        } else {
+            mCarNavigationBarController.hideBars();
+        }
     }
 
     /** Returns {@code true} is the window is visible. */
@@ -118,13 +204,14 @@ public class OverlayViewGlobalStateController {
         return mSystemUIOverlayWindowController.isWindowVisible();
     }
 
-    /** Sets the focusable flag of the sysui overlawy window. */
-    public void setWindowFocusable(boolean focusable) {
-        mSystemUIOverlayWindowController.setWindowFocusable(focusable);
+    private void setWindowVisible(boolean visible) {
+        mSystemUIOverlayWindowController.setWindowVisible(visible);
     }
 
-    /** Sets the {@link android.view.WindowManager.LayoutParams#FLAG_ALT_FOCUSABLE_IM} flag of the
-     * sysui overlay window */
+    /**
+     * Sets the {@link android.view.WindowManager.LayoutParams#FLAG_ALT_FOCUSABLE_IM} flag of the
+     * sysui overlay window.
+     */
     public void setWindowNeedsInput(boolean needsInput) {
         mSystemUIOverlayWindowController.setWindowNeedsInput(needsInput);
     }
@@ -134,10 +221,34 @@ public class OverlayViewGlobalStateController {
         return mSystemUIOverlayWindowController.isWindowFocusable();
     }
 
+    /** Sets the focusable flag of the sysui overlawy window. */
+    public void setWindowFocusable(boolean focusable) {
+        mSystemUIOverlayWindowController.setWindowFocusable(focusable);
+    }
+
     /** Inflates the view controlled by the given view controller. */
     public void inflateView(OverlayViewController viewController) {
         if (!viewController.isInflated()) {
             viewController.inflate(mSystemUIOverlayWindowController.getBaseLayout());
         }
+    }
+
+    /**
+     * Return {@code true} if OverlayWindow is in a state where HUNs should be displayed above it.
+     */
+    public boolean shouldShowHUN() {
+        return mZOrderVisibleSortedMap.isEmpty() || mHighestZOrder.shouldShowHUN();
+    }
+
+    private void debugLog() {
+        if (!DEBUG) {
+            return;
+        }
+
+        Log.d(TAG, "mHighestZOrder: " + mHighestZOrder);
+        Log.d(TAG, "mZOrderVisibleSortedMap.size(): " + mZOrderVisibleSortedMap.size());
+        Log.d(TAG, "mZOrderVisibleSortedMap: " + mZOrderVisibleSortedMap);
+        Log.d(TAG, "mZOrderMap.size(): " + mZOrderMap.size());
+        Log.d(TAG, "mZOrderMap: " + mZOrderMap);
     }
 }
