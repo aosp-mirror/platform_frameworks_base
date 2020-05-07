@@ -139,19 +139,21 @@ void CanvasContext::destroy() {
     mAnimationContext->destroy();
 }
 
+static void setBufferCount(ANativeWindow* window, uint32_t extraBuffers) {
+    int query_value;
+    int err = window->query(window, NATIVE_WINDOW_MIN_UNDEQUEUED_BUFFERS, &query_value);
+    if (err != 0 || query_value < 0) {
+        ALOGE("window->query failed: %s (%d) value=%d", strerror(-err), err, query_value);
+        return;
+    }
+    auto min_undequeued_buffers = static_cast<uint32_t>(query_value);
+
+    int bufferCount = min_undequeued_buffers + 2 + extraBuffers;
+    native_window_set_buffer_count(window, bufferCount);
+}
+
 void CanvasContext::setSurface(ANativeWindow* window, bool enableTimeout) {
     ATRACE_CALL();
-
-    if (window) {
-        mNativeSurface = std::make_unique<ReliableSurface>(window);
-        mNativeSurface->init();
-        if (enableTimeout) {
-            // TODO: Fix error handling & re-shorten timeout
-            ANativeWindow_setDequeueTimeout(window, 4000_ms);
-        }
-    } else {
-        mNativeSurface = nullptr;
-    }
 
     if (mRenderAheadDepth == 0 && DeviceInfo::get()->getMaxRefreshRate() > 66.6f) {
         mFixedRenderAhead = false;
@@ -161,9 +163,24 @@ void CanvasContext::setSurface(ANativeWindow* window, bool enableTimeout) {
         mRenderAheadCapacity = mRenderAheadDepth;
     }
 
+    if (window) {
+        mNativeSurface = std::make_unique<ReliableSurface>(window);
+        mNativeSurface->init();
+        if (enableTimeout) {
+            // TODO: Fix error handling & re-shorten timeout
+            ANativeWindow_setDequeueTimeout(window, 4000_ms);
+        }
+        mNativeSurface->setExtraBufferCount(mRenderAheadCapacity);
+    } else {
+        mNativeSurface = nullptr;
+    }
+
     bool hasSurface = mRenderPipeline->setSurface(
-            mNativeSurface ? mNativeSurface->getNativeWindow() : nullptr, mSwapBehavior,
-            mRenderAheadCapacity);
+            mNativeSurface ? mNativeSurface->getNativeWindow() : nullptr, mSwapBehavior);
+
+    if (mNativeSurface && !mNativeSurface->didSetExtraBuffers()) {
+        setBufferCount(mNativeSurface->getNativeWindow(), mRenderAheadCapacity);
+    }
 
     mFrameNumber = -1;
 
