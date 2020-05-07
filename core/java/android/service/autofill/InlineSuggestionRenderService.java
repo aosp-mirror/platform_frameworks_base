@@ -33,12 +33,15 @@ import android.os.Looper;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.util.Log;
+import android.util.LruCache;
 import android.util.Size;
 import android.view.Display;
 import android.view.SurfaceControlViewHost;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+
+import java.lang.ref.WeakReference;
 
 /**
  * A service that renders an inline presentation view given the {@link InlinePresentation}.
@@ -64,6 +67,27 @@ public abstract class InlineSuggestionRenderService extends Service {
     private final Handler mHandler = new Handler(Looper.getMainLooper(), null, true);
 
     private IInlineSuggestionUiCallback mCallback;
+
+
+    /**
+     * A local LRU cache keeping references to the inflated {@link SurfaceControlViewHost}s, so
+     * they can be released properly when no longer used. Each view needs to be tracked separately,
+     * therefore for simplicity we use the hash code of the value object as key in the cache.
+     */
+    private final LruCache<InlineSuggestionUiImpl, Boolean> mActiveInlineSuggestions =
+            new LruCache<InlineSuggestionUiImpl, Boolean>(30) {
+                @Override
+                public void entryRemoved(boolean evicted, InlineSuggestionUiImpl key,
+                        Boolean oldValue,
+                        Boolean newValue) {
+                    if (evicted) {
+                        Log.w(TAG,
+                                "Hit max=100 entries in the cache. Releasing oldest one to make "
+                                        + "space.");
+                        key.releaseSurfaceControlViewHost();
+                    }
+                }
+            };
 
     /**
      * If the specified {@code width}/{@code height} is an exact value, then it will be returned as
@@ -169,8 +193,14 @@ public abstract class InlineSuggestionRenderService extends Service {
                 return true;
             });
 
-            sendResult(callback, host.getSurfacePackage(), measuredSize.getWidth(),
-                    measuredSize.getHeight());
+            try {
+                InlineSuggestionUiImpl uiImpl = new InlineSuggestionUiImpl(host, mHandler);
+                mActiveInlineSuggestions.put(uiImpl, true);
+                callback.onContent(new InlineSuggestionUiWrapper(uiImpl), host.getSurfacePackage(),
+                        measuredSize.getWidth(), measuredSize.getHeight());
+            } catch (RemoteException e) {
+                Log.w(TAG, "RemoteException calling onContent()");
+            }
         } finally {
             updateDisplay(Display.DEFAULT_DISPLAY);
         }
@@ -181,12 +211,87 @@ public abstract class InlineSuggestionRenderService extends Service {
         callback.sendResult(rendererInfo);
     }
 
-    private void sendResult(@NonNull IInlineSuggestionUiCallback callback,
-            @Nullable SurfaceControlViewHost.SurfacePackage surface, int width, int height) {
-        try {
-            callback.onContent(surface, width, height);
-        } catch (RemoteException e) {
-            Log.w(TAG, "RemoteException calling onContent(" + surface + ")");
+    /**
+     * A wrapper class around the {@link InlineSuggestionUiImpl} to ensure it's not strongly
+     * reference by the remote system server process.
+     */
+    private static final class InlineSuggestionUiWrapper extends
+            android.service.autofill.IInlineSuggestionUi.Stub {
+
+        private final WeakReference<InlineSuggestionUiImpl> mUiImpl;
+
+        InlineSuggestionUiWrapper(InlineSuggestionUiImpl uiImpl) {
+            mUiImpl = new WeakReference<>(uiImpl);
+        }
+
+        @Override
+        public void releaseSurfaceControlViewHost() {
+            final InlineSuggestionUiImpl uiImpl = mUiImpl.get();
+            if (uiImpl != null) {
+                uiImpl.releaseSurfaceControlViewHost();
+            }
+        }
+
+        @Override
+        public void getSurfacePackage(ISurfacePackageResultCallback callback) {
+            final InlineSuggestionUiImpl uiImpl = mUiImpl.get();
+            if (uiImpl != null) {
+                uiImpl.getSurfacePackage(callback);
+            }
+        }
+    }
+
+    /**
+     * Keeps track of a SurfaceControlViewHost to ensure it's released when its lifecycle ends.
+     *
+     * <p>This class is thread safe, because all the outside calls are piped into a single
+     *  handler thread to be processed.
+     */
+    private final class InlineSuggestionUiImpl {
+
+        @Nullable
+        private SurfaceControlViewHost mViewHost;
+        @NonNull
+        private final Handler mHandler;
+
+        InlineSuggestionUiImpl(SurfaceControlViewHost viewHost, Handler handler) {
+            this.mViewHost = viewHost;
+            this.mHandler = handler;
+        }
+
+        /**
+         * Call {@link SurfaceControlViewHost#release()} to release it. After this, this view is
+         * not usable, and any further calls to the
+         * {@link #getSurfacePackage(ISurfacePackageResultCallback)} will get {@code null} result.
+         */
+        public void releaseSurfaceControlViewHost() {
+            mHandler.post(() -> {
+                if (mViewHost == null) {
+                    return;
+                }
+                Log.v(TAG, "Releasing inline suggestion view host");
+                mViewHost.release();
+                mViewHost = null;
+                InlineSuggestionRenderService.this.mActiveInlineSuggestions.remove(
+                        InlineSuggestionUiImpl.this);
+                Log.v(TAG, "Removed the inline suggestion from the cache, current size="
+                        + InlineSuggestionRenderService.this.mActiveInlineSuggestions.size());
+            });
+        }
+
+        /**
+         * Sends back a new {@link android.view.SurfaceControlViewHost.SurfacePackage} if the view
+         * is not released, {@code null} otherwise.
+         */
+        public void getSurfacePackage(ISurfacePackageResultCallback callback) {
+            Log.d(TAG, "getSurfacePackage");
+            mHandler.post(() -> {
+                try {
+                    callback.onResult(mViewHost == null ? null : mViewHost.getSurfacePackage());
+                } catch (RemoteException e) {
+                    Log.w(TAG, "RemoteException calling onSurfacePackage");
+                }
+            });
         }
     }
 

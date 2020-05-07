@@ -24,14 +24,11 @@ import android.annotation.Nullable;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.os.IBinder;
-import android.os.RemoteException;
 import android.service.autofill.Dataset;
 import android.service.autofill.FillResponse;
-import android.service.autofill.IInlineSuggestionUiCallback;
 import android.service.autofill.InlinePresentation;
 import android.text.TextUtils;
 import android.util.Slog;
-import android.view.SurfaceControlViewHost;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillManager;
 import android.view.autofill.AutofillValue;
@@ -41,12 +38,8 @@ import android.view.inputmethod.InlineSuggestionsRequest;
 import android.view.inputmethod.InlineSuggestionsResponse;
 import android.widget.inline.InlinePresentationSpec;
 
-import com.android.internal.view.inline.IInlineContentCallback;
 import com.android.internal.view.inline.IInlineContentProvider;
-import com.android.server.LocalServices;
-import com.android.server.UiThread;
 import com.android.server.autofill.RemoteInlineSuggestionRenderService;
-import com.android.server.inputmethod.InputMethodManagerInternal;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -70,6 +63,27 @@ public final class InlineSuggestionFactory {
          * Callback to start Intent in client app.
          */
         void startIntentSender(@NonNull IntentSender intentSender, @NonNull Intent intent);
+    }
+
+    /**
+     * Returns a copy of the response, that internally copies the {@link IInlineContentProvider}
+     * so that it's not reused by the remote IME process across different inline suggestions.
+     * See {@link InlineContentProviderImpl} for why this is needed.
+     */
+    @NonNull
+    public static InlineSuggestionsResponse copy(@NonNull InlineSuggestionsResponse response) {
+        final ArrayList<InlineSuggestion> copiedInlineSuggestions = new ArrayList<>();
+        for (InlineSuggestion inlineSuggestion : response.getInlineSuggestions()) {
+            final IInlineContentProvider contentProvider = inlineSuggestion.getContentProvider();
+            if (contentProvider instanceof InlineContentProviderImpl) {
+                copiedInlineSuggestions.add(new
+                        InlineSuggestion(inlineSuggestion.getInfo(),
+                        ((InlineContentProviderImpl) contentProvider).copy()));
+            } else {
+                copiedInlineSuggestions.add(inlineSuggestion);
+            }
+        }
+        return new InlineSuggestionsResponse(copiedInlineSuggestions);
     }
 
     /**
@@ -276,78 +290,20 @@ public final class InlineSuggestionFactory {
                 inlinePresentation.isPinned());
     }
 
-    private static IInlineContentProvider.Stub createInlineContentProvider(
+    private static IInlineContentProvider createInlineContentProvider(
             @NonNull InlinePresentation inlinePresentation, @Nullable Runnable onClickAction,
             @NonNull Runnable onErrorCallback,
             @NonNull Consumer<IntentSender> intentSenderConsumer,
             @Nullable RemoteInlineSuggestionRenderService remoteRenderService,
             @Nullable IBinder hostInputToken,
             int displayId) {
-        return new IInlineContentProvider.Stub() {
-            @Override
-            public void provideContent(int width, int height, IInlineContentCallback callback) {
-                UiThread.getHandler().post(() -> {
-                    final IInlineSuggestionUiCallback uiCallback = createInlineSuggestionUiCallback(
-                            callback, onClickAction, onErrorCallback, intentSenderConsumer);
-
-                    if (remoteRenderService == null) {
-                        Slog.e(TAG, "RemoteInlineSuggestionRenderService is null");
-                        return;
-                    }
-
-                    remoteRenderService.renderSuggestion(uiCallback, inlinePresentation,
-                            width, height, hostInputToken, displayId);
-                });
-            }
-        };
-    }
-
-    private static IInlineSuggestionUiCallback.Stub createInlineSuggestionUiCallback(
-            @NonNull IInlineContentCallback callback, @NonNull Runnable onAutofillCallback,
-            @NonNull Runnable onErrorCallback,
-            @NonNull Consumer<IntentSender> intentSenderConsumer) {
-        return new IInlineSuggestionUiCallback.Stub() {
-            @Override
-            public void onClick() throws RemoteException {
-                onAutofillCallback.run();
-                callback.onClick();
-            }
-
-            @Override
-            public void onLongClick() throws RemoteException {
-                callback.onLongClick();
-            }
-
-            @Override
-            public void onContent(SurfaceControlViewHost.SurfacePackage surface, int width,
-                    int height)
-                    throws RemoteException {
-                callback.onContent(surface, width, height);
-                surface.release();
-            }
-
-            @Override
-            public void onError() throws RemoteException {
-                onErrorCallback.run();
-            }
-
-            @Override
-            public void onTransferTouchFocusToImeWindow(IBinder sourceInputToken, int displayId)
-                    throws RemoteException {
-                final InputMethodManagerInternal inputMethodManagerInternal =
-                        LocalServices.getService(InputMethodManagerInternal.class);
-                if (!inputMethodManagerInternal.transferTouchFocusToImeWindow(sourceInputToken,
-                        displayId)) {
-                    Slog.e(TAG, "Cannot transfer touch focus from suggestion to IME");
-                    onErrorCallback.run();
-                }
-            }
-
-            @Override
-            public void onStartIntentSender(IntentSender intentSender) {
-                intentSenderConsumer.accept(intentSender);
-            }
-        };
+        RemoteInlineSuggestionViewConnector
+                remoteInlineSuggestionViewConnector = new RemoteInlineSuggestionViewConnector(
+                remoteRenderService, inlinePresentation, hostInputToken, displayId, onClickAction,
+                onErrorCallback, intentSenderConsumer);
+        InlineContentProviderImpl inlineContentProvider = new InlineContentProviderImpl(
+                remoteInlineSuggestionViewConnector, null);
+        return inlineContentProvider;
     }
 
     private InlineSuggestionFactory() {
