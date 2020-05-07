@@ -64,6 +64,7 @@ import android.animation.LayoutTransition;
 import android.annotation.AnyThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UiContext;
 import android.app.ActivityManager;
 import android.app.ActivityThread;
 import android.app.ResourcesManager;
@@ -349,6 +350,7 @@ public final class ViewRootImpl implements ViewParent,
     @GuardedBy("mWindowCallbacks")
     final ArrayList<WindowCallbacks> mWindowCallbacks = new ArrayList<>();
     @UnsupportedAppUsage
+    @UiContext
     public final Context mContext;
 
     @UnsupportedAppUsage
@@ -719,11 +721,11 @@ public final class ViewRootImpl implements ViewParent,
                 false /* useSfChoreographer */);
     }
 
-    public ViewRootImpl(Context context, Display display, IWindowSession session) {
+    public ViewRootImpl(@UiContext Context context, Display display, IWindowSession session) {
         this(context, display, session, false /* useSfChoreographer */);
     }
 
-    public ViewRootImpl(Context context, Display display, IWindowSession session,
+    public ViewRootImpl(@UiContext Context context, Display display, IWindowSession session,
             boolean useSfChoreographer) {
         mContext = context;
         mWindowSession = session;

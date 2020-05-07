@@ -20,6 +20,7 @@ import static android.os.StrictMode.vmIncorrectContextUseEnabled;
 
 import android.annotation.FloatRange;
 import android.annotation.TestApi;
+import android.annotation.UiContext;
 import android.app.Activity;
 import android.app.AppGlobals;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -391,7 +392,7 @@ public class ViewConfiguration {
      * @see #get(android.content.Context)
      * @see android.util.DisplayMetrics
      */
-    private ViewConfiguration(Context context) {
+    private ViewConfiguration(@UiContext Context context) {
         mConstructedWithContext = true;
         final Resources res = context.getResources();
         final DisplayMetrics metrics = res.getDisplayMetrics();
@@ -498,7 +499,8 @@ public class ViewConfiguration {
      *                be {@link Activity} or other {@link Context} created with
      *                {@link Context#createWindowContext(int, Bundle)}.
      */
-    public static ViewConfiguration get(Context context) {
+
+    public static ViewConfiguration get(@UiContext Context context) {
         if (!context.isUiContext() && vmIncorrectContextUseEnabled()) {
             final String errorMessage = "Tried to access UI constants from a non-visual Context:"
                     + context;

@@ -35,6 +35,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.StyleRes;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
+import android.annotation.UiContext;
 import android.app.VoiceInteractor.Request;
 import android.app.admin.DevicePolicyManager;
 import android.app.assist.AssistContent;
@@ -727,6 +728,7 @@ import java.util.function.Consumer;
  * upload, independent of whether the original activity is paused, stopped,
  * or finished.
  */
+@UiContext
 public class Activity extends ContextThemeWrapper
         implements LayoutInflater.Factory2,
         Window.Callback, KeyEvent.Callback,
