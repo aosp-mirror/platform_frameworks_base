@@ -170,6 +170,8 @@ public class BiometricService extends SystemService {
         final String mOpPackageName;
         // Info to be shown on BiometricDialog when all cookies are returned.
         final Bundle mBundle;
+        // Random id associated to this AuthSession
+        final int mSysUiSessionId;
         final int mCallingUid;
         final int mCallingPid;
         final int mCallingUserId;
@@ -203,11 +205,13 @@ public class BiometricService extends SystemService {
             mClientReceiver = receiver;
             mOpPackageName = opPackageName;
             mBundle = bundle;
+            mSysUiSessionId = mRandom.nextInt();
             mCallingUid = callingUid;
             mCallingPid = callingPid;
             mCallingUserId = callingUserId;
             mModality = modality;
             mRequireConfirmation = requireConfirmation;
+            Slog.d(TAG, "New AuthSession, mSysUiSessionId: " + mSysUiSessionId);
         }
 
         boolean isCrypto() {
@@ -1457,7 +1461,8 @@ public class BiometricService extends SystemService {
                                 false /* requireConfirmation */,
                                 mCurrentAuthSession.mUserId,
                                 mCurrentAuthSession.mOpPackageName,
-                                mCurrentAuthSession.mSessionId);
+                                mCurrentAuthSession.mSessionId,
+                                mCurrentAuthSession.mSysUiSessionId);
                     } else {
                         mPendingAuthSession.mClientReceiver.onError(modality, error, vendorCode);
                         mPendingAuthSession = null;
@@ -1674,7 +1679,8 @@ public class BiometricService extends SystemService {
                     mStatusBarService.showAuthenticationDialog(mCurrentAuthSession.mBundle,
                             mInternalReceiver, modality, requireConfirmation, userId,
                             mCurrentAuthSession.mOpPackageName,
-                            mCurrentAuthSession.mSessionId);
+                            mCurrentAuthSession.mSessionId,
+                            mCurrentAuthSession.mSysUiSessionId);
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Remote exception", e);
                 }
@@ -1760,7 +1766,8 @@ public class BiometricService extends SystemService {
                         false /* requireConfirmation */,
                         mCurrentAuthSession.mUserId,
                         mCurrentAuthSession.mOpPackageName,
-                        sessionId);
+                        sessionId,
+                        mCurrentAuthSession.mSysUiSessionId);
             } else {
                 mPendingAuthSession.mState = STATE_AUTH_CALLED;
                 for (AuthenticatorWrapper authenticator : mAuthenticators) {
