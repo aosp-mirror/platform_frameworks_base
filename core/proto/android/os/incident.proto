@@ -34,7 +34,7 @@ import "frameworks/base/core/proto/android/os/statsdata.proto";
 import "frameworks/base/core/proto/android/os/system_properties.proto";
 import "frameworks/base/core/proto/android/providers/settings.proto";
 import "frameworks/base/core/proto/android/server/activitymanagerservice.proto";
-import "frameworks/base/core/proto/android/server/alarmmanagerservice.proto";
+import "frameworks/base/core/proto/android/server/alarm/alarmmanagerservice.proto";
 import "frameworks/base/core/proto/android/server/bluetooth_manager_service.proto";
 import "frameworks/base/core/proto/android/server/fingerprint.proto";
 import "frameworks/base/core/proto/android/server/jobscheduler.proto";
@@ -317,7 +317,7 @@ message IncidentProto {
         (section).args = "activity --proto processes"
     ];
 
-    optional com.android.server.AlarmManagerServiceDumpProto alarm = 3016 [
+    optional com.android.server.alarm.AlarmManagerServiceDumpProto alarm = 3016 [
         (section).type = SECTION_DUMPSYS,
         (section).args = "alarm --proto"
     ];
