@@ -47,7 +47,7 @@ public final class RemoteInlineSuggestionRenderService extends
 
     private static final String TAG = "RemoteInlineSuggestionRenderService";
 
-    private final int mIdleUnbindTimeoutMs = 5000;
+    private final long mIdleUnbindTimeoutMs = PERMANENT_BOUND_TIMEOUT_MS;
 
     RemoteInlineSuggestionRenderService(Context context, ComponentName componentName,
             String serviceInterface, int userId, InlineSuggestionRenderCallbacks callback,
