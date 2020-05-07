@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-package com.android.internal.view.inline;
+package android.service.autofill;
 
-import com.android.internal.view.inline.IInlineContentCallback;
+import android.service.autofill.ISurfacePackageResultCallback;
 
 /**
- * Binder interface for a process to request the inline content from the other process.
- * {@hide}
+ * Interface to interact with a remote inline suggestion UI.
+ *
+ * @hide
  */
-oneway interface IInlineContentProvider {
-    void provideContent(int width, int height, in IInlineContentCallback callback);
-    void requestSurfacePackage();
-    void onSurfacePackageReleased();
+oneway interface IInlineSuggestionUi {
+    void getSurfacePackage(ISurfacePackageResultCallback callback);
+    void releaseSurfaceControlViewHost();
 }
