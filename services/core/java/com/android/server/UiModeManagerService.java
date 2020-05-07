@@ -450,6 +450,14 @@ final class UiModeManagerService extends SystemService {
         return oldNightMode != mNightMode;
     }
 
+    private static long toMilliSeconds(LocalTime t) {
+        return t.toNanoOfDay() / 1000;
+    }
+
+    private static LocalTime fromMilliseconds(long t) {
+        return LocalTime.ofNanoOfDay(t * 1000);
+    }
+
     private void registerScreenOffEventLocked() {
         if (mPowerSave) return;
         mWaitForScreenOff = true;
@@ -1385,8 +1393,11 @@ final class UiModeManagerService extends SystemService {
             pw.println("UiModeManager service (uimode) commands:");
             pw.println("  help");
             pw.println("    Print this help text.");
-            pw.println("  night [yes|no|auto]");
+            pw.println("  night [yes|no|auto|custom]");
             pw.println("    Set or read night mode.");
+            pw.println("  time [start|end] <ISO time>");
+            pw.println("    Set custom start/end schedule time"
+                    + " (night mode must be set to custom to apply).");
         }
 
         @Override
@@ -1399,6 +1410,8 @@ final class UiModeManagerService extends SystemService {
                 switch (cmd) {
                     case "night":
                         return handleNightMode();
+                    case "time":
+                        return handleCustomTime();
                     default:
                         return handleDefaultCommands(cmd);
                 }
@@ -1407,6 +1420,34 @@ final class UiModeManagerService extends SystemService {
                 err.println("Remote exception: " + e);
             }
             return -1;
+        }
+
+        private int handleCustomTime() throws RemoteException {
+            final String modeStr = getNextArg();
+            if (modeStr == null) {
+                printCustomTime();
+                return 0;
+            }
+            switch (modeStr) {
+                case "start":
+                    final String start = getNextArg();
+                    mInterface.setCustomNightModeStart(toMilliSeconds(LocalTime.parse(start)));
+                    return 0;
+                case "end":
+                    final String end = getNextArg();
+                    mInterface.setCustomNightModeEnd(toMilliSeconds(LocalTime.parse(end)));
+                    return 0;
+                default:
+                    getErrPrintWriter().println("command must be in [start|end]");
+                    return -1;
+            }
+        }
+
+        private void printCustomTime() throws RemoteException {
+            getOutPrintWriter().println("start " + fromMilliseconds(
+                    mInterface.getCustomNightModeStart()).toString());
+            getOutPrintWriter().println("end " + fromMilliseconds(
+                    mInterface.getCustomNightModeEnd()).toString());
         }
 
         private int handleNightMode() throws RemoteException {
@@ -1424,7 +1465,8 @@ final class UiModeManagerService extends SystemService {
                 return 0;
             } else {
                 err.println("Error: mode must be '" + NIGHT_MODE_STR_YES + "', '"
-                        + NIGHT_MODE_STR_NO + "', or '" + NIGHT_MODE_STR_AUTO + "'");
+                        + NIGHT_MODE_STR_NO + "', or '" + NIGHT_MODE_STR_AUTO
+                        +  "', or '" + NIGHT_MODE_STR_CUSTOM + "'");
                 return -1;
             }
         }
