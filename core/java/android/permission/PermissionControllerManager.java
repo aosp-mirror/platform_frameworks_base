@@ -56,10 +56,15 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.infra.AndroidFuture;
 import com.android.internal.infra.RemoteStream;
 import com.android.internal.infra.ServiceConnector;
+import com.android.internal.os.TransferPipe;
 import com.android.internal.util.CollectionUtils;
 
 import libcore.util.EmptyArray;
 
+import java.io.FileDescriptor;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
@@ -67,7 +72,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 /**
@@ -473,6 +480,36 @@ public final class PermissionControllerManager {
                 Binder.restoreCallingIdentity(token);
             }
         }, executor);
+    }
+
+    /**
+     * Dump permission controller state.
+     *
+     * @hide
+     */
+    public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @Nullable String[] args) {
+        CompletableFuture<Throwable> dumpResult = new CompletableFuture<>();
+        mRemoteService.postForResult(
+                service -> TransferPipe.dumpAsync(service.asBinder(), args))
+                .whenComplete(
+                        (dump, err) -> {
+                            try (FileOutputStream out = new FileOutputStream(fd)) {
+                                out.write(dump);
+                            } catch (IOException | NullPointerException e) {
+                                Log.e(TAG, "Could for forwards permission controller dump", e);
+                            }
+
+                            dumpResult.complete(err);
+                        });
+
+        try {
+            Throwable err = dumpResult.get(UNBIND_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
+            if (err != null) {
+                throw err;
+            }
+        } catch (Throwable e) {
+            Log.e(TAG, "Could not dump permission controller state", e);
+        }
     }
 
     /**
