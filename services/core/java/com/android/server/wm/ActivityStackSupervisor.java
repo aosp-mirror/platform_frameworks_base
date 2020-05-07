@@ -1459,6 +1459,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         mService.deferWindowLayout();
         try {
             stack.setWindowingMode(WINDOWING_MODE_UNDEFINED);
+            stack.setBounds(null);
             if (toDisplay.getDisplayId() != stack.getDisplayId()) {
                 stack.reparent(toDisplay.getDefaultTaskDisplayArea(), false /* onTop */);
             } else {
