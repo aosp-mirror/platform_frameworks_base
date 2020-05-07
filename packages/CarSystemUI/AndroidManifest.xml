@@ -25,6 +25,11 @@
     <uses-permission android:name="android.car.permission.CAR_ENROLL_TRUST"/>
     <!-- This permission is required to get bluetooth broadcast. -->
     <uses-permission android:name="android.permission.BLUETOOTH" />
+    <!-- These permissions are required to implement icons based on role holders. -->
+    <uses-permission android:name="android.permission.OBSERVE_ROLE_HOLDERS"/>
+    <uses-permission android:name="android.permission.MANAGE_ROLE_HOLDERS"/>
+    <!-- This permission is required to access app information from other users. -->
+    <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS"/>
     <!-- This permission is required to check the foreground user id. -->
     <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL" />
 </manifest>
