@@ -37,6 +37,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.view.IInlineSuggestionsRequestCallback;
 import com.android.internal.view.IInlineSuggestionsResponseCallback;
 import com.android.internal.view.InlineSuggestionsRequestInfo;
+import com.android.server.autofill.ui.InlineSuggestionFactory;
 import com.android.server.inputmethod.InputMethodManagerInternal;
 
 import java.lang.ref.WeakReference;
@@ -242,7 +243,8 @@ final class AutofillInlineSuggestionsRequestSession {
         }
         if (sDebug) Log.d(TAG, "Send inline response: " + response.getInlineSuggestions().size());
         try {
-            mResponseCallback.onInlineSuggestionsResponse(mAutofillId, response);
+            mResponseCallback.onInlineSuggestionsResponse(mAutofillId,
+                    InlineSuggestionFactory.copy(response));
         } catch (RemoteException e) {
             Slog.e(TAG, "RemoteException sending InlineSuggestionsResponse to IME");
         }
