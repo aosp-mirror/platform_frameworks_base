@@ -2013,7 +2013,7 @@ class Task extends WindowContainer<WindowContainer> {
     }
 
     void updateSurfaceSize(SurfaceControl.Transaction transaction) {
-        if (mSurfaceControl == null || mCreatedByOrganizer) {
+        if (mSurfaceControl == null || isOrganized()) {
             return;
         }
 
