@@ -21,6 +21,10 @@ import static android.media.MediaRoute2Info.TYPE_USB_DEVICE;
 import static android.media.MediaRoute2Info.TYPE_WIRED_HEADPHONES;
 import static android.media.MediaRoute2Info.TYPE_WIRED_HEADSET;
 
+import static com.android.settingslib.media.PhoneMediaDevice.PHONE_ID;
+import static com.android.settingslib.media.PhoneMediaDevice.USB_HEADSET_ID;
+import static com.android.settingslib.media.PhoneMediaDevice.WIRED_HEADSET_ID;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Mockito.when;
@@ -107,5 +111,23 @@ public class PhoneMediaDeviceTest {
 
         assertThat(mPhoneMediaDevice.getName())
                 .isEqualTo(mContext.getString(R.string.media_transfer_this_device_name));
+    }
+
+    @Test
+    public void getId_returnCorrectId() {
+        when(mInfo.getType()).thenReturn(TYPE_WIRED_HEADPHONES);
+
+        assertThat(mPhoneMediaDevice.getId())
+                .isEqualTo(WIRED_HEADSET_ID);
+
+        when(mInfo.getType()).thenReturn(TYPE_USB_DEVICE);
+
+        assertThat(mPhoneMediaDevice.getId())
+                .isEqualTo(USB_HEADSET_ID);
+
+        when(mInfo.getType()).thenReturn(TYPE_BUILTIN_SPEAKER);
+
+        assertThat(mPhoneMediaDevice.getId())
+                .isEqualTo(PHONE_ID);
     }
 }
