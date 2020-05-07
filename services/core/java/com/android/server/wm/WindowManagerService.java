@@ -72,6 +72,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_QS_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 import static android.view.WindowManager.LayoutParams.TYPE_VOICE_INTERACTION;
+import static android.view.WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static android.view.WindowManager.REMOVE_CONTENT_MODE_UNDEFINED;
 import static android.view.WindowManagerGlobal.ADD_OKAY;
@@ -926,8 +927,14 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         void updateFixedRotationTransform() {
-            mIsFixedRotationTransformEnabled = Settings.Global.getInt(mContext.getContentResolver(),
-                    FIXED_ROTATION_TRANSFORM_SETTING_NAME, 0) != 0;
+            final int enabled = Settings.Global.getInt(mContext.getContentResolver(),
+                    FIXED_ROTATION_TRANSFORM_SETTING_NAME, 2);
+            if (enabled == 2) {
+                // Make sure who read the settings won't use inconsistent default value.
+                Settings.Global.putInt(mContext.getContentResolver(),
+                        FIXED_ROTATION_TRANSFORM_SETTING_NAME, 1);
+            }
+            mIsFixedRotationTransformEnabled = enabled != 0;
         }
     }
 
@@ -1367,6 +1374,7 @@ public class WindowManagerService extends IWindowManager.Stub
             case TYPE_NOTIFICATION_SHADE:
             case TYPE_NAVIGATION_BAR:
             case TYPE_INPUT_METHOD_DIALOG:
+            case TYPE_VOLUME_OVERLAY:
                 return true;
         }
         return false;

@@ -253,7 +253,7 @@ public class ChooserActivity extends ResolverActivity implements
     private boolean mChooserTargetRankingEnabled = DeviceConfig.getBoolean(
             DeviceConfig.NAMESPACE_SYSTEMUI,
             SystemUiDeviceConfigFlags.CHOOSER_TARGET_RANKING_ENABLED,
-            false);
+            true);
 
     private Bundle mReplacementExtras;
     private IntentSender mChosenComponentSender;
@@ -884,7 +884,8 @@ public class ChooserActivity extends ResolverActivity implements
                 /* context */ this,
                 adapter,
                 getPersonalProfileUserHandle(),
-                /* workProfileUserHandle= */ null);
+                /* workProfileUserHandle= */ null,
+                isSendAction(getTargetIntent()));
     }
 
     private ChooserMultiProfilePagerAdapter createChooserMultiProfilePagerAdapterForTwoProfiles(
@@ -914,7 +915,8 @@ public class ChooserActivity extends ResolverActivity implements
                 workAdapter,
                 selectedProfile,
                 getPersonalProfileUserHandle(),
-                getWorkProfileUserHandle());
+                getWorkProfileUserHandle(),
+                isSendAction(getTargetIntent()));
     }
 
     private int findSelectedProfile() {

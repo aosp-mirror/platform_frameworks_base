@@ -1365,4 +1365,12 @@
     <!-- Name for the guest user [CHAR LIMIT=35] -->
     <string name="guest_nickname">Guest</string>
 
+    <!-- List entry in developer settings to choose default device/system behavior for the app freezer [CHAR LIMIT=30]-->
+    <string name="cached_apps_freezer_device_default">Device default</string>
+    <!-- List entry in developer settings to disable the app freezer in developer settings [CHAR LIMIT=30]-->
+    <string name="cached_apps_freezer_disabled">Disabled</string>
+    <!-- List entry in developer settings to enable the app freezer in developer settings [CHAR LIMIT=30]-->
+    <string name="cached_apps_freezer_enabled">Enabled</string>
+    <!-- Developer setting dialog prompting the user to reboot after changing the app freezer setting [CHAR LIMIT=NONE]-->
+    <string name="cached_apps_freezer_reboot_dialog_text">Your device must be rebooted for this change to apply. Reboot now or cancel.</string>
 </resources>

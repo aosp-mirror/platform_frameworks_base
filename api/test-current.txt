@@ -431,6 +431,7 @@ package android.app {
   }
 
   public class DreamManager {
+    method @RequiresPermission("android.permission.READ_DREAM_STATE") public boolean isDreaming();
     method @RequiresPermission("android.permission.WRITE_DREAM_STATE") public void setActiveDream(@NonNull android.content.ComponentName);
     method @RequiresPermission("android.permission.WRITE_DREAM_STATE") public void startDream(@NonNull android.content.ComponentName);
     method @RequiresPermission("android.permission.WRITE_DREAM_STATE") public void stopDream();

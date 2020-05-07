@@ -80,6 +80,8 @@ java_library {
         "services.usb",
         "services.voiceinteraction",
         "services.wifi",
+        "service-blobstore",
+        "service-jobscheduler",
         "android.hidl.base-V1.0-java",
     ],
 
@@ -135,7 +137,7 @@ droidstubs {
         },
         last_released: {
             api_file: ":android.api.system-server.latest",
-            removed_api_file: "api/removed.txt",
+            removed_api_file: ":removed.api.system-server.latest",
             baseline_file: ":system-server-api-incompatibilities-with-last-released"
         },
         api_lint: {

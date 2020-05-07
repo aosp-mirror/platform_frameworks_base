@@ -18,4 +18,7 @@
 -->
 <resources>
     <bool name="config_use_sim_language_file">false</bool>
+
+    <bool name="config_pdp_rejeect_enable_retry">true</bool>
+    <integer name="config_pdp_reject_retry_delay_ms">45000</integer>
 </resources>
