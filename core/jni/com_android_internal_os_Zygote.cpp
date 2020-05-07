@@ -1557,8 +1557,8 @@ static void isolateJitProfile(JNIEnv* env, jobjectArray pkg_data_info_list,
   }
 }
 
-static void BindMountStorageToLowerFs(const userid_t user_id, const char* dir_name,
-    const char* package, fail_fn_t fail_fn) {
+static void BindMountStorageToLowerFs(const userid_t user_id, const uid_t uid,
+    const char* dir_name, const char* package, fail_fn_t fail_fn) {
 
   bool hasSdcardFs = IsFilesystemSupported("sdcardfs");
   std::string source;
@@ -1570,6 +1570,9 @@ static void BindMountStorageToLowerFs(const userid_t user_id, const char* dir_na
   }
   std::string target = StringPrintf("/storage/emulated/%d/%s/%s", user_id, dir_name, package);
 
+  // As the parent is mounted as tmpfs, we need to create the target dir here.
+  PrepareDirIfNotPresent(target, 0700, uid, uid, fail_fn);
+
   if (access(source.c_str(), F_OK) != 0) {
     fail_fn(CREATE_ERROR("Error accessing %s: %s", source.c_str(), strerror(errno)));
   }
@@ -1579,9 +1582,8 @@ static void BindMountStorageToLowerFs(const userid_t user_id, const char* dir_na
   BindMount(source, target, fail_fn);
 }
 
-// Bind mount all obb & data directories that are visible to this app.
-// If app data isolation is not enabled for this process, bind mount the whole obb
-// and data directory instead.
+// Mount tmpfs on Android/data and Android/obb, then bind mount all app visible package
+// directories in data and obb directories.
 static void BindMountStorageDirs(JNIEnv* env, jobjectArray pkg_data_info_list,
     uid_t uid, const char* process_name, jstring managed_nice_name, fail_fn_t fail_fn) {
 
@@ -1595,12 +1597,18 @@ static void BindMountStorageDirs(JNIEnv* env, jobjectArray pkg_data_info_list,
     fail_fn(CREATE_ERROR("Data package list cannot be empty"));
   }
 
+  // Create tmpfs on Android/obb and Android/data so these 2 dirs won't enter fuse anymore.
+  std::string androidObbDir = StringPrintf("/storage/emulated/%d/Android/obb", user_id);
+  MountAppDataTmpFs(androidObbDir, fail_fn);
+  std::string androidDataDir = StringPrintf("/storage/emulated/%d/Android/data", user_id);
+  MountAppDataTmpFs(androidDataDir, fail_fn);
+
   // Bind mount each package obb directory
   for (int i = 0; i < size; i += 3) {
     jstring package_str = (jstring) (env->GetObjectArrayElement(pkg_data_info_list, i));
     std::string packageName = extract_fn(package_str).value();
-    BindMountStorageToLowerFs(user_id, "Android/obb", packageName.c_str(), fail_fn);
-    BindMountStorageToLowerFs(user_id, "Android/data", packageName.c_str(), fail_fn);
+    BindMountStorageToLowerFs(user_id, uid, "Android/obb", packageName.c_str(), fail_fn);
+    BindMountStorageToLowerFs(user_id, uid, "Android/data", packageName.c_str(), fail_fn);
   }
 }
 
@@ -1675,9 +1683,10 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids,
             uid, process_name, managed_nice_name, fail_fn);
     isolateJitProfile(env, pkg_data_info_list, uid, process_name, managed_nice_name, fail_fn);
   }
-  if (mount_external != MOUNT_EXTERNAL_INSTALLER &&
-      mount_external != MOUNT_EXTERNAL_PASS_THROUGH &&
-      mount_storage_dirs) {
+  // MOUNT_EXTERNAL_INSTALLER, MOUNT_EXTERNAL_PASS_THROUGH, MOUNT_EXTERNAL_ANDROID_WRITABLE apps
+  // will have mount_storage_dirs == false here (set by ProcessList.needsStorageDataIsolation()),
+  // and hence they won't bind mount storage dirs.
+  if (mount_storage_dirs) {
     BindMountStorageDirs(env, pkg_data_info_list, uid, process_name, managed_nice_name, fail_fn);
   }
 
