@@ -1075,8 +1075,12 @@ public class DreamService extends Service implements Window.Callback {
 
                     @Override
                     public void onViewDetachedFromWindow(View v) {
-                        mActivity = null;
-                        finish();
+                        if (mActivity == null || !mActivity.isChangingConfigurations()) {
+                            // Only stop the dream if the view is not detached by relaunching
+                            // activity for configuration changes.
+                            mActivity = null;
+                            finish();
+                        }
                     }
                 });
     }
