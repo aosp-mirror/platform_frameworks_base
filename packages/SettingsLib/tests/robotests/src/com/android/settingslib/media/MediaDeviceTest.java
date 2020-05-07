@@ -29,13 +29,9 @@ import static org.mockito.Mockito.when;
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageStats;
 import android.media.MediaRoute2Info;
 import android.media.MediaRouter2Manager;
 
-import com.android.settingslib.R;
 import com.android.settingslib.bluetooth.A2dpProfile;
 import com.android.settingslib.bluetooth.CachedBluetoothDevice;
 import com.android.settingslib.bluetooth.HearingAidProfile;
@@ -49,8 +45,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
-import org.robolectric.Shadows;
-import org.robolectric.shadows.ShadowPackageManager;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -70,8 +64,6 @@ public class MediaDeviceTest {
     private static final String ROUTER_ID_2 = "RouterId_2";
     private static final String ROUTER_ID_3 = "RouterId_3";
     private static final String TEST_PACKAGE_NAME = "com.test.playmusic";
-    private static final String TEST_PACKAGE_NAME2 = "com.test.playmusic2";
-    private static final String TEST_APPLICATION_LABEL = "playmusic";
     private final BluetoothClass mHeadreeClass =
             new BluetoothClass(BluetoothClass.Device.AUDIO_VIDEO_HEADPHONES);
     private final BluetoothClass mCarkitClass =
@@ -125,10 +117,6 @@ public class MediaDeviceTest {
     private InfoMediaDevice mInfoMediaDevice3;
     private List<MediaDevice> mMediaDevices = new ArrayList<>();
     private PhoneMediaDevice mPhoneMediaDevice;
-    private ShadowPackageManager mShadowPackageManager;
-    private ApplicationInfo mAppInfo;
-    private PackageInfo mPackageInfo;
-    private PackageStats mPackageStats;
 
     @Before
     public void setUp() {
@@ -457,41 +445,6 @@ public class MediaDeviceTest {
         when(mRouteInfo1.getClientPackageName()).thenReturn(TEST_PACKAGE_NAME);
 
         assertThat(mInfoMediaDevice1.getClientPackageName()).isEqualTo(TEST_PACKAGE_NAME);
-    }
-
-    private void initPackage() {
-        mShadowPackageManager = Shadows.shadowOf(mContext.getPackageManager());
-        mAppInfo = new ApplicationInfo();
-        mAppInfo.flags = ApplicationInfo.FLAG_INSTALLED;
-        mAppInfo.packageName = TEST_PACKAGE_NAME;
-        mAppInfo.name = TEST_APPLICATION_LABEL;
-        mPackageInfo = new PackageInfo();
-        mPackageInfo.packageName = TEST_PACKAGE_NAME;
-        mPackageInfo.applicationInfo = mAppInfo;
-        mPackageStats = new PackageStats(TEST_PACKAGE_NAME);
-    }
-
-    @Test
-    public void getClientAppLabel_matchedPackageName_returnLabel() {
-        initPackage();
-        when(mRouteInfo1.getClientPackageName()).thenReturn(TEST_PACKAGE_NAME);
-
-        assertThat(mInfoMediaDevice1.getClientAppLabel()).isEqualTo(
-                mContext.getResources().getString(R.string.unknown));
-
-        mShadowPackageManager.addPackage(mPackageInfo, mPackageStats);
-
-        assertThat(mInfoMediaDevice1.getClientAppLabel()).isEqualTo(TEST_APPLICATION_LABEL);
-    }
-
-    @Test
-    public void getClientAppLabel_noMatchedPackageName_returnDefault() {
-        initPackage();
-        mShadowPackageManager.addPackage(mPackageInfo, mPackageStats);
-        when(mRouteInfo1.getClientPackageName()).thenReturn(TEST_PACKAGE_NAME2);
-
-        assertThat(mInfoMediaDevice1.getClientAppLabel()).isEqualTo(
-                mContext.getResources().getString(R.string.unknown));
     }
 
     @Test
