@@ -28,6 +28,7 @@ import android.service.controls.Control
 import android.service.controls.DeviceTypes
 import android.service.controls.actions.ControlAction
 import android.service.controls.templates.ControlTemplate
+import android.service.controls.templates.RangeTemplate
 import android.service.controls.templates.StatelessTemplate
 import android.service.controls.templates.TemperatureControlTemplate
 import android.service.controls.templates.ToggleRangeTemplate
@@ -69,6 +70,25 @@ class ControlViewHolder(
 
         const val MIN_LEVEL = 0
         const val MAX_LEVEL = 10000
+
+        fun findBehaviorClass(
+            status: Int,
+            template: ControlTemplate,
+            deviceType: Int
+        ): KClass<out Behavior> {
+            return when {
+                status == Control.STATUS_UNKNOWN -> StatusBehavior::class
+                status == Control.STATUS_ERROR -> StatusBehavior::class
+                status == Control.STATUS_NOT_FOUND -> StatusBehavior::class
+                deviceType == DeviceTypes.TYPE_CAMERA -> TouchBehavior::class
+                template is ToggleTemplate -> ToggleBehavior::class
+                template is StatelessTemplate -> TouchBehavior::class
+                template is ToggleRangeTemplate -> ToggleRangeBehavior::class
+                template is RangeTemplate -> ToggleRangeBehavior::class
+                template is TemperatureControlTemplate -> TemperatureControlBehavior::class
+                else -> DefaultBehavior::class
+            }
+        }
     }
 
     private val toggleBackgroundIntensity: Float = layout.context.resources
@@ -123,18 +143,7 @@ class ControlViewHolder(
             })
         }
 
-        val clazz = findBehavior(controlStatus, template, deviceType)
-        if (behavior == null || behavior!!::class != clazz) {
-            // Behavior changes can signal a change in template from the app or
-            // first time setup
-            behavior = clazz.java.newInstance()
-            behavior?.initialize(this)
-
-            // let behaviors define their own, if necessary, and clear any existing ones
-            layout.setAccessibilityDelegate(null)
-        }
-
-        behavior?.bind(cws)
+        behavior = bindBehavior(behavior, findBehaviorClass(controlStatus, template, deviceType))
 
         layout.setContentDescription("${title.text} ${subtitle.text} ${status.text}")
     }
@@ -190,25 +199,30 @@ class ControlViewHolder(
 
     fun usePanel(): Boolean = deviceType in ControlViewHolder.FORCE_PANEL_DEVICES
 
-    private fun findBehavior(
-        status: Int,
-        template: ControlTemplate,
-        deviceType: Int
-    ): KClass<out Behavior> {
-        return when {
-            status == Control.STATUS_UNKNOWN -> StatusBehavior::class
-            status == Control.STATUS_ERROR -> StatusBehavior::class
-            status == Control.STATUS_NOT_FOUND -> StatusBehavior::class
-            deviceType == DeviceTypes.TYPE_CAMERA -> TouchBehavior::class
-            template is ToggleTemplate -> ToggleBehavior::class
-            template is StatelessTemplate -> TouchBehavior::class
-            template is ToggleRangeTemplate -> ToggleRangeBehavior::class
-            template is TemperatureControlTemplate -> TemperatureControlBehavior::class
-            else -> DefaultBehavior::class
+    fun bindBehavior(
+        existingBehavior: Behavior?,
+        clazz: KClass<out Behavior>,
+        offset: Int = 0
+    ): Behavior {
+        val behavior = if (existingBehavior == null || existingBehavior!!::class != clazz) {
+            // Behavior changes can signal a change in template from the app or
+            // first time setup
+            val newBehavior = clazz.java.newInstance()
+            newBehavior.initialize(this)
+
+            // let behaviors define their own, if necessary, and clear any existing ones
+            layout.setAccessibilityDelegate(null)
+            newBehavior
+        } else {
+            existingBehavior
+        }
+
+        return behavior.also {
+            it.bind(cws, offset)
         }
     }
 
-    internal fun applyRenderInfo(enabled: Boolean, offset: Int = 0, animated: Boolean = true) {
+    internal fun applyRenderInfo(enabled: Boolean, offset: Int, animated: Boolean = true) {
         setEnabled(enabled)
 
         val ri = RenderInfo.lookup(context, cws.componentName, deviceType, enabled, offset)
