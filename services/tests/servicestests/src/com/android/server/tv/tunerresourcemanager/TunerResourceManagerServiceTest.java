@@ -64,6 +64,7 @@ public class TunerResourceManagerServiceTest {
     private Context mContextSpy;
     @Mock private ITvInputManager mITvInputManagerMock;
     private TunerResourceManagerService mTunerResourceManagerService;
+    private boolean mIsForeground;
 
     private static final class TestResourcesReclaimListener extends IResourcesReclaimListener.Stub {
         boolean mReclaimed;
@@ -104,7 +105,12 @@ public class TunerResourceManagerServiceTest {
         TvInputManager tvInputManager = new TvInputManager(mITvInputManagerMock, 0);
         mContextSpy = spy(new ContextWrapper(InstrumentationRegistry.getTargetContext()));
         when(mContextSpy.getSystemService(Context.TV_INPUT_SERVICE)).thenReturn(tvInputManager);
-        mTunerResourceManagerService = new TunerResourceManagerService(mContextSpy);
+        mTunerResourceManagerService = new TunerResourceManagerService(mContextSpy) {
+            @Override
+            protected boolean isForeground(int pid) {
+                return mIsForeground;
+            }
+        };
         mTunerResourceManagerService.onStart(true /*isForTesting*/);
     }
 
@@ -736,5 +742,23 @@ public class TunerResourceManagerServiceTest {
         assertThat(mTunerResourceManagerService.requestDescramblerInternal(request, desHandle))
                 .isTrue();
         assertThat(mTunerResourceManagerService.getResourceIdFromHandle(desHandle[0])).isEqualTo(0);
+    }
+
+    @Test
+    public void isHigherPriorityTest() {
+        mIsForeground = false;
+        ResourceClientProfile backgroundPlaybackProfile =
+                new ResourceClientProfile(null /*sessionId*/,
+                        TvInputService.PRIORITY_HINT_USE_CASE_TYPE_PLAYBACK);
+        ResourceClientProfile backgroundRecordProfile =
+                new ResourceClientProfile(null /*sessionId*/,
+                        TvInputService.PRIORITY_HINT_USE_CASE_TYPE_RECORD);
+        int backgroundPlaybackPriority = mTunerResourceManagerService.getClientPriority(
+                TvInputService.PRIORITY_HINT_USE_CASE_TYPE_PLAYBACK, 0);
+        int backgroundRecordPriority = mTunerResourceManagerService.getClientPriority(
+                TvInputService.PRIORITY_HINT_USE_CASE_TYPE_RECORD, 0);
+        assertThat(mTunerResourceManagerService.isHigherPriorityInternal(backgroundPlaybackProfile,
+                backgroundRecordProfile)).isEqualTo(
+                        (backgroundPlaybackPriority > backgroundRecordPriority));
     }
 }

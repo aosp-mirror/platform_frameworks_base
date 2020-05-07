@@ -584,11 +584,6 @@ void ValueMetricProducer::accumulateEvents(const std::vector<std::shared_ptr<Log
         return;
     }
 
-    if (allData.size() == 0) {
-        VLOG("Data pulled is empty");
-        StatsdStats::getInstance().noteEmptyData(mPullTagId);
-    }
-
     mMatchedMetricDimensionKeys.clear();
     for (const auto& data : allData) {
         LogEvent localCopy = data->makeCopy();

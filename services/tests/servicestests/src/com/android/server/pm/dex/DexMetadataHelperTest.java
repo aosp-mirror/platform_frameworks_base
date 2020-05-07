@@ -28,8 +28,13 @@ import android.content.pm.PackageParser.ApkLite;
 import android.content.pm.PackageParser.PackageLite;
 import android.content.pm.PackageParser.PackageParserException;
 import android.content.pm.dex.DexMetadataHelper;
+import android.content.pm.parsing.ApkLiteParseUtils;
+import android.content.pm.parsing.result.ParseInput;
+import android.content.pm.parsing.result.ParseResult;
+import android.content.pm.parsing.result.ParseTypeImpl;
 import android.os.FileUtils;
 
+import androidx.annotation.NonNull;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -208,9 +213,12 @@ public class DexMetadataHelperTest {
             throws IOException, PackageParserException {
         copyApkToToTmpDir("install_split_base.apk", R.raw.install_split_base);
         File dm = createDexMetadataFile("install_split_base.apk");
-        PackageParser.PackageLite pkg = new PackageParser().parsePackageLite(mTmpDir,
-                0 /* flags */);
-
+        ParseResult<PackageLite> result = ApkLiteParseUtils.parsePackageLite(
+                ParseTypeImpl.forDefaultParsing().reset(), mTmpDir, 0 /* flags */);
+        if (result.isError()) {
+            throw new IllegalStateException(result.getErrorMessage(), result.getException());
+        }
+        PackageParser.PackageLite pkg = result.getResult();
         Assert.assertEquals(dm.length(), DexMetadataHelper.getPackageDexMetadataSize(pkg));
     }
 

@@ -29,8 +29,12 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;
 import android.content.pm.PermissionInfo;
+import android.content.pm.parsing.PackageInfoWithoutStateUtils;
+import android.content.pm.parsing.ParsingPackage;
+import android.content.pm.parsing.ParsingPackageUtils;
 import android.content.pm.parsing.component.ParsedComponent;
 import android.content.pm.parsing.component.ParsedPermission;
+import android.content.pm.parsing.result.ParseResult;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.FileUtils;
@@ -518,10 +522,15 @@ public class PackageParserLegacyCoreTest {
         apexInfo.versionCode = 191000070;
         int flags = PackageManager.GET_META_DATA | PackageManager.GET_SIGNING_CERTIFICATES;
 
-        PackageParser pp = new PackageParser();
-        PackageParser.Package p = pp.parsePackage(apexFile, flags, false);
-        PackageParser.collectCertificates(p, false);
-        PackageInfo pi = PackageParser.generatePackageInfo(p, apexInfo, flags);
+        ParseResult<ParsingPackage> result = ParsingPackageUtils.parseDefaultOneTime(apexFile,
+                flags, false /*collectCertificates*/);
+        if (result.isError()) {
+            throw new IllegalStateException(result.getErrorMessage(), result.getException());
+        }
+
+        ParsingPackage pkg = result.getResult();
+        pkg.setSigningDetails(ParsingPackageUtils.getSigningDetails(pkg, false));
+        PackageInfo pi = PackageInfoWithoutStateUtils.generate(pkg, apexInfo, flags);
 
         assertEquals("com.google.android.tzdata", pi.applicationInfo.packageName);
         assertTrue(pi.applicationInfo.enabled);

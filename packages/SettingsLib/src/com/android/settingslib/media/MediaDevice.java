@@ -180,7 +180,7 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
      */
 
     public void requestSetVolume(int volume) {
-        mRouterManager.requestSetVolume(mRouteInfo, volume);
+        mRouterManager.setRouteVolume(mRouteInfo, volume);
     }
 
     /**

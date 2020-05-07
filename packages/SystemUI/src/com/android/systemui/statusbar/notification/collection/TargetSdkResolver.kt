@@ -28,10 +28,9 @@ import javax.inject.Singleton
 
 @Singleton
 class TargetSdkResolver @Inject constructor(
-    private val context: Context,
-    private val collection: CommonNotifCollection
+    private val context: Context
 ) {
-    init {
+    fun initialize(collection: CommonNotifCollection) {
         collection.addCollectionListener(object : NotifCollectionListener {
             override fun onEntryBind(entry: NotificationEntry, sbn: StatusBarNotification) {
                 entry.targetSdk = resolveNotificationSdk(sbn)

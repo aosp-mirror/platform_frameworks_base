@@ -46,6 +46,7 @@ import androidx.test.runner.lifecycle.Stage;
 
 import org.junit.AfterClass;
 import org.junit.Assume;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
@@ -71,6 +72,12 @@ public class RecentsAnimationPerfTest extends WindowManagerPerfTestBase {
             new PerfTestActivityRule(true /* launchActivity */);
 
     private long mMeasuredTimeNs;
+
+    /**
+     * Used to skip each test method if there is error. It cannot be raised in static setup because
+     * that will break the amount of target method count.
+     */
+    private static Exception sSetUpClassException;
 
     @Parameterized.Parameter(0)
     public int intervalBetweenOperations;
@@ -107,13 +114,19 @@ public class RecentsAnimationPerfTest extends WindowManagerPerfTestBase {
             sRecentsIntent =
                     new Intent().setComponent(homeIsRecents ? defaultHome : recentsComponent);
         } catch (Exception e) {
-            Assume.assumeNoException(e);
+            sSetUpClassException = e;
         }
     }
 
     @AfterClass
     public static void tearDownClass() {
+        sSetUpClassException = null;
         sUiAutomation.dropShellPermissionIdentity();
+    }
+
+    @Before
+    public void setUp() {
+        Assume.assumeNoException(sSetUpClassException);
     }
 
     /** Simulate the timing of touch. */

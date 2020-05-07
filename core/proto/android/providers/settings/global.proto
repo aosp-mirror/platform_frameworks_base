@@ -169,6 +169,7 @@ message GlobalSettingsProto {
 
     optional SettingProto boot_count = 22 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto bugreport_in_power_menu = 23 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto cached_apps_freezer_enabled = 152 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto call_auto_retry = 24 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
     message CaptivePortal {
@@ -1059,5 +1060,5 @@ message GlobalSettingsProto {
 
     // Please insert fields in alphabetical order and group them into messages
     // if possible (to avoid reaching the method limit).
-    // Next tag = 152;
+    // Next tag = 153;
 }

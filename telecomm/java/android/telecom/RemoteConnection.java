@@ -30,13 +30,16 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.telecom.Logging.Session;
 import android.view.Surface;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 /**
  * A connection provided to a {@link ConnectionService} by another {@code ConnectionService}
@@ -655,6 +658,8 @@ public final class RemoteConnection {
     private int mCallerDisplayNamePresentation;
     private RemoteConference mConference;
     private Bundle mExtras;
+    private String mCallingPackage;
+    private String mCallingPackageAbbreviation;
 
     /**
      * @hide
@@ -667,6 +672,13 @@ public final class RemoteConnection {
         mConnectionService = connectionService;
         mConnected = true;
         mState = Connection.STATE_INITIALIZING;
+        if (request != null && request.getExtras() != null
+                && request.getExtras().containsKey(
+                        Connection.EXTRA_REMOTE_CONNECTION_ORIGINATING_PACKAGE_NAME)) {
+            mCallingPackage = request.getExtras().getString(
+                    Connection.EXTRA_REMOTE_CONNECTION_ORIGINATING_PACKAGE_NAME);
+            mCallingPackageAbbreviation = Log.getPackageAbbreviation(mCallingPackage);
+        }
     }
 
     /**
@@ -705,6 +717,8 @@ public final class RemoteConnection {
         Bundle newExtras = new Bundle();
         newExtras.putString(Connection.EXTRA_ORIGINAL_CONNECTION_ID, callId);
         putExtras(newExtras);
+        mCallingPackage = callingPackage;
+        mCallingPackageAbbreviation = Log.getPackageAbbreviation(mCallingPackage);
     }
 
     /**
@@ -899,11 +913,14 @@ public final class RemoteConnection {
      * Instructs this {@code RemoteConnection} to abort.
      */
     public void abort() {
+        Log.startSession("RC.a", getActiveOwnerInfo());
         try {
             if (mConnected) {
-                mConnectionService.abort(mConnectionId, null /*Session.Info*/);
+                mConnectionService.abort(mConnectionId, Log.getExternalSession());
             }
         } catch (RemoteException ignored) {
+        } finally {
+            Log.endSession();
         }
     }
 
@@ -911,11 +928,14 @@ public final class RemoteConnection {
      * Instructs this {@link Connection#STATE_RINGING} {@code RemoteConnection} to answer.
      */
     public void answer() {
+        Log.startSession("RC.an", getActiveOwnerInfo());
         try {
             if (mConnected) {
-                mConnectionService.answer(mConnectionId, null /*Session.Info*/);
+               mConnectionService.answer(mConnectionId, Log.getExternalSession());
             }
         } catch (RemoteException ignored) {
+        } finally {
+            Log.endSession();
         }
     }
 
@@ -925,11 +945,14 @@ public final class RemoteConnection {
      * @hide
      */
     public void answer(int videoState) {
+        Log.startSession("RC.an2", getActiveOwnerInfo());
         try {
             if (mConnected) {
                 mConnectionService.answerVideo(mConnectionId, videoState, null /*Session.Info*/);
             }
         } catch (RemoteException ignored) {
+        } finally {
+            Log.endSession();
         }
     }
 
@@ -937,11 +960,14 @@ public final class RemoteConnection {
      * Instructs this {@link Connection#STATE_RINGING} {@code RemoteConnection} to reject.
      */
     public void reject() {
+        Log.startSession("RC.r", getActiveOwnerInfo());
         try {
             if (mConnected) {
                 mConnectionService.reject(mConnectionId, null /*Session.Info*/);
             }
         } catch (RemoteException ignored) {
+        } finally {
+            Log.endSession();
         }
     }
 
@@ -949,11 +975,14 @@ public final class RemoteConnection {
      * Instructs this {@code RemoteConnection} to go on hold.
      */
     public void hold() {
+        Log.startSession("RC.h", getActiveOwnerInfo());
         try {
             if (mConnected) {
                 mConnectionService.hold(mConnectionId, null /*Session.Info*/);
             }
         } catch (RemoteException ignored) {
+        } finally {
+            Log.endSession();
         }
     }
 
@@ -961,11 +990,14 @@ public final class RemoteConnection {
      * Instructs this {@link Connection#STATE_HOLDING} call to release from hold.
      */
     public void unhold() {
+        Log.startSession("RC.u", getActiveOwnerInfo());
         try {
             if (mConnected) {
                 mConnectionService.unhold(mConnectionId, null /*Session.Info*/);
             }
         } catch (RemoteException ignored) {
+        } finally {
+            Log.endSession();
         }
     }
 
@@ -973,11 +1005,15 @@ public final class RemoteConnection {
      * Instructs this {@code RemoteConnection} to disconnect.
      */
     public void disconnect() {
+        Log.startSession("RC.d", getActiveOwnerInfo());
         try {
             if (mConnected) {
-                mConnectionService.disconnect(mConnectionId, null /*Session.Info*/);
+                mConnectionService.disconnect(mConnectionId, Log.getExternalSession(
+                        mCallingPackageAbbreviation));
             }
         } catch (RemoteException ignored) {
+        } finally {
+            Log.endSession();
         }
     }
 
@@ -991,11 +1027,14 @@ public final class RemoteConnection {
      *         value must be one of {@code '0'} through {@code '9'}, {@code '*'} or {@code '#'}.
      */
     public void playDtmfTone(char digit) {
+        Log.startSession("RC.pDT", getActiveOwnerInfo());
         try {
             if (mConnected) {
                 mConnectionService.playDtmfTone(mConnectionId, digit, null /*Session.Info*/);
             }
         } catch (RemoteException ignored) {
+        } finally {
+            Log.endSession();
         }
     }
 
@@ -1007,11 +1046,14 @@ public final class RemoteConnection {
      * currently playing, this method will do nothing.
      */
     public void stopDtmfTone() {
+        Log.startSession("RC.sDT", getActiveOwnerInfo());
         try {
             if (mConnected) {
                 mConnectionService.stopDtmfTone(mConnectionId, null /*Session.Info*/);
             }
         } catch (RemoteException ignored) {
+        } finally {
+            Log.endSession();
         }
     }
 
@@ -1037,12 +1079,16 @@ public final class RemoteConnection {
      * @param proceed Whether or not to continue with the post-dial sequence.
      */
     public void postDialContinue(boolean proceed) {
+        Log.startSession("RC.pDC", getActiveOwnerInfo());
         try {
             if (mConnected) {
                 mConnectionService.onPostDialContinue(mConnectionId, proceed,
                         null /*Session.Info*/);
             }
         } catch (RemoteException ignored) {
+            // bliss
+        } finally {
+            Log.endSession();
         }
     }
 
@@ -1052,11 +1098,14 @@ public final class RemoteConnection {
      * See {@link Call#pullExternalCall()} for more information.
      */
     public void pullExternalCall() {
+        Log.startSession("RC.pEC", getActiveOwnerInfo());
         try {
             if (mConnected) {
                 mConnectionService.pullExternalCall(mConnectionId, null /*Session.Info*/);
             }
         } catch (RemoteException ignored) {
+        } finally {
+            Log.endSession();
         }
     }
 
@@ -1079,12 +1128,15 @@ public final class RemoteConnection {
      * @param state The audio state of this {@code RemoteConnection}.
      */
     public void setCallAudioState(CallAudioState state) {
+        Log.startSession("RC.sCAS", getActiveOwnerInfo());
         try {
             if (mConnected) {
                 mConnectionService.onCallAudioStateChanged(mConnectionId, state,
                         null /*Session.Info*/);
             }
         } catch (RemoteException ignored) {
+        } finally {
+            Log.endSession();
         }
     }
 
@@ -1095,12 +1147,15 @@ public final class RemoteConnection {
      * @hide
      */
     public void startRtt(@NonNull Connection.RttTextStream rttTextStream) {
+        Log.startSession("RC.sR", getActiveOwnerInfo());
         try {
             if (mConnected) {
                 mConnectionService.startRtt(mConnectionId, rttTextStream.getFdFromInCall(),
                         rttTextStream.getFdToInCall(), null /*Session.Info*/);
             }
         } catch (RemoteException ignored) {
+        } finally {
+            Log.endSession();
         }
     }
 
@@ -1110,11 +1165,14 @@ public final class RemoteConnection {
      * @hide
      */
     public void stopRtt() {
+        Log.startSession("RC.stR", getActiveOwnerInfo());
         try {
             if (mConnected) {
                 mConnectionService.stopRtt(mConnectionId, null /*Session.Info*/);
             }
         } catch (RemoteException ignored) {
+        } finally {
+            Log.endSession();
         }
     }
 
@@ -1128,6 +1186,7 @@ public final class RemoteConnection {
      *                      the in-call app.
      */
     public void sendRttUpgradeResponse(@Nullable Connection.RttTextStream rttTextStream) {
+        Log.startSession("RC.sRUR", getActiveOwnerInfo());
         try {
             if (mConnected) {
                 if (rttTextStream == null) {
@@ -1140,6 +1199,8 @@ public final class RemoteConnection {
                 }
             }
         } catch (RemoteException ignored) {
+        } finally {
+            Log.endSession();
         }
     }
 
@@ -1162,6 +1223,22 @@ public final class RemoteConnection {
      */
     public RemoteConference getConference() {
         return mConference;
+    }
+
+    /**
+     * Get the owner info for the currently active session.  We want to make sure that any owner
+     * info from the original call into the connection manager gets retained so that the full
+     * context of the calls can be traced down to Telephony.
+     * Example: Telecom will provide owner info in it's external session info that indicates
+     * 'cast' as the calling owner.
+     * @return The active owner
+     */
+    private String getActiveOwnerInfo() {
+        Session.Info info = Log.getExternalSession();
+        if (info == null) {
+            return null;
+        }
+        return info.ownerInfo;
     }
 
     /** {@hide} */
