@@ -1415,18 +1415,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         return mLaunchParamsController;
     }
 
-    private void deferUpdateRecentsHomeStackBounds() {
-        mRootWindowContainer.deferUpdateBounds(ACTIVITY_TYPE_RECENTS);
-        mRootWindowContainer.deferUpdateBounds(ACTIVITY_TYPE_HOME);
-    }
-
-    private void continueUpdateRecentsHomeStackBounds() {
-        mRootWindowContainer.continueUpdateBounds(ACTIVITY_TYPE_RECENTS);
-        mRootWindowContainer.continueUpdateBounds(ACTIVITY_TYPE_HOME);
-    }
-
     void notifyAppTransitionDone() {
-        continueUpdateRecentsHomeStackBounds();
         for (int i = mResizingTasksDuringAnimation.size() - 1; i >= 0; i--) {
             final int taskId = mResizingTasksDuringAnimation.valueAt(i);
             final Task task =
@@ -2509,10 +2498,6 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         mService.deferWindowLayout();
         try {
             if (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
-                // Defer updating the stack in which recents is until the app transition is done, to
-                // not run into issues where we still need to draw the task in recents but the
-                // docked stack is already created.
-                deferUpdateRecentsHomeStackBounds();
                 // TODO(task-hierarchy): Remove when tiles are in hierarchy.
                 // Unset launching windowing mode to prevent creating split-screen-primary stack
                 // in RWC#anyTaskForId() below.
@@ -2522,7 +2507,6 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
             task = mRootWindowContainer.anyTaskForId(taskId,
                     MATCH_TASK_IN_STACKS_OR_RECENT_TASKS_AND_RESTORE, activityOptions, ON_TOP);
             if (task == null) {
-                continueUpdateRecentsHomeStackBounds();
                 mWindowManager.executeAppTransition();
                 throw new IllegalArgumentException(
                         "startActivityFromRecents: Task " + taskId + " not found.");
