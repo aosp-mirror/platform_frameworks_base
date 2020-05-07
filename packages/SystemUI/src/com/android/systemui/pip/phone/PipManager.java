@@ -96,7 +96,7 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
     private final DisplayChangeController.OnDisplayChangingListener mRotationController = (
             int displayId, int fromRotation, int toRotation, WindowContainerTransaction t) -> {
         final boolean changed = mPipBoundsHandler.onDisplayRotationChanged(mTmpNormalBounds,
-                displayId, fromRotation, toRotation, t);
+                mPipTaskOrganizer.getLastReportedBounds(), displayId, fromRotation, toRotation, t);
         if (changed) {
             updateMovementBounds(mTmpNormalBounds, true /* fromRotation */,
                     false /* fromImeAdjustment */, false /* fromShelfAdjustment */);
