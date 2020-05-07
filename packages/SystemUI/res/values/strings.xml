@@ -240,6 +240,8 @@
 
     <!-- Notification title displayed for screen recording [CHAR LIMIT=50]-->
     <string name="screenrecord_name">Screen Recorder</string>
+    <!-- Processing screen recoding video in the background [CHAR LIMIT=30]-->
+    <string name="screenrecord_background_processing_label">Processing screen recording</string>
     <!-- Description of the screen recording notification channel [CHAR LIMIT=NONE]-->
     <string name="screenrecord_channel_description">Ongoing notification for a screen record session</string>
     <!-- Title for the screen prompting the user to begin recording their screen [CHAR LIMIT=NONE]-->
