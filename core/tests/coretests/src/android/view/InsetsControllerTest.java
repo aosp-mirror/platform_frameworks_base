@@ -245,14 +245,14 @@ public class InsetsControllerTest {
             mController.applyImeVisibility(true /* setVisible */);
             mController.show(Type.all());
             // quickly jump to final state by cancelling it.
-            mController.cancelExistingAnimation();
+            mController.cancelExistingAnimations();
             assertTrue(mController.getSourceConsumer(navBar.getType()).isRequestedVisible());
             assertTrue(mController.getSourceConsumer(statusBar.getType()).isRequestedVisible());
             assertTrue(mController.getSourceConsumer(ime.getType()).isRequestedVisible());
 
             mController.applyImeVisibility(false /* setVisible */);
             mController.hide(Type.all());
-            mController.cancelExistingAnimation();
+            mController.cancelExistingAnimations();
             assertFalse(mController.getSourceConsumer(navBar.getType()).isRequestedVisible());
             assertFalse(mController.getSourceConsumer(statusBar.getType()).isRequestedVisible());
             assertFalse(mController.getSourceConsumer(ime.getType()).isRequestedVisible());
@@ -268,10 +268,10 @@ public class InsetsControllerTest {
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
             mController.getSourceConsumer(ITYPE_IME).onWindowFocusGained();
             mController.applyImeVisibility(true);
-            mController.cancelExistingAnimation();
+            mController.cancelExistingAnimations();
             assertTrue(mController.getSourceConsumer(ime.getType()).isRequestedVisible());
             mController.applyImeVisibility(false);
-            mController.cancelExistingAnimation();
+            mController.cancelExistingAnimations();
             assertFalse(mController.getSourceConsumer(ime.getType()).isRequestedVisible());
             mController.getSourceConsumer(ITYPE_IME).onWindowFocusLost();
         });
@@ -291,7 +291,7 @@ public class InsetsControllerTest {
             mController.hide(types);
             assertEquals(ANIMATION_TYPE_HIDE, mController.getAnimationType(ITYPE_NAVIGATION_BAR));
             assertEquals(ANIMATION_TYPE_HIDE, mController.getAnimationType(ITYPE_STATUS_BAR));
-            mController.cancelExistingAnimation();
+            mController.cancelExistingAnimations();
             assertEquals(ANIMATION_TYPE_NONE, mController.getAnimationType(ITYPE_NAVIGATION_BAR));
             assertEquals(ANIMATION_TYPE_NONE, mController.getAnimationType(ITYPE_STATUS_BAR));
             assertFalse(mController.getSourceConsumer(navBar.getType()).isRequestedVisible());
@@ -302,7 +302,7 @@ public class InsetsControllerTest {
             mController.show(types);
             assertEquals(ANIMATION_TYPE_SHOW, mController.getAnimationType(ITYPE_NAVIGATION_BAR));
             assertEquals(ANIMATION_TYPE_SHOW, mController.getAnimationType(ITYPE_STATUS_BAR));
-            mController.cancelExistingAnimation();
+            mController.cancelExistingAnimations();
             assertTrue(mController.getSourceConsumer(navBar.getType()).isRequestedVisible());
             assertTrue(mController.getSourceConsumer(statusBar.getType()).isRequestedVisible());
             assertFalse(mController.getSourceConsumer(ime.getType()).isRequestedVisible());
@@ -321,21 +321,21 @@ public class InsetsControllerTest {
             int types = Type.navigationBars() | Type.systemBars();
             // test show select types.
             mController.show(types);
-            mController.cancelExistingAnimation();
+            mController.cancelExistingAnimations();
             assertTrue(mController.getSourceConsumer(navBar.getType()).isRequestedVisible());
             assertTrue(mController.getSourceConsumer(statusBar.getType()).isRequestedVisible());
             assertFalse(mController.getSourceConsumer(ime.getType()).isRequestedVisible());
 
             // test hide all
             mController.hide(Type.all());
-            mController.cancelExistingAnimation();
+            mController.cancelExistingAnimations();
             assertFalse(mController.getSourceConsumer(navBar.getType()).isRequestedVisible());
             assertFalse(mController.getSourceConsumer(statusBar.getType()).isRequestedVisible());
             assertFalse(mController.getSourceConsumer(ime.getType()).isRequestedVisible());
 
             // test single show
             mController.show(Type.navigationBars());
-            mController.cancelExistingAnimation();
+            mController.cancelExistingAnimations();
             assertTrue(mController.getSourceConsumer(navBar.getType()).isRequestedVisible());
             assertFalse(mController.getSourceConsumer(statusBar.getType()).isRequestedVisible());
             assertFalse(mController.getSourceConsumer(ime.getType()).isRequestedVisible());
@@ -363,7 +363,7 @@ public class InsetsControllerTest {
             mController.hide(Type.systemBars());
             assertEquals(ANIMATION_TYPE_HIDE, mController.getAnimationType(ITYPE_NAVIGATION_BAR));
             assertEquals(ANIMATION_TYPE_HIDE, mController.getAnimationType(ITYPE_STATUS_BAR));
-            mController.cancelExistingAnimation();
+            mController.cancelExistingAnimations();
             assertFalse(mController.getSourceConsumer(navBar.getType()).isRequestedVisible());
             assertFalse(mController.getSourceConsumer(statusBar.getType()).isRequestedVisible());
             assertFalse(mController.getSourceConsumer(ime.getType()).isRequestedVisible());
@@ -372,7 +372,7 @@ public class InsetsControllerTest {
             mController.show(Type.systemBars());
             assertEquals(ANIMATION_TYPE_SHOW, mController.getAnimationType(ITYPE_NAVIGATION_BAR));
             assertEquals(ANIMATION_TYPE_SHOW, mController.getAnimationType(ITYPE_STATUS_BAR));
-            mController.cancelExistingAnimation();
+            mController.cancelExistingAnimations();
             assertTrue(mController.getSourceConsumer(navBar.getType()).isRequestedVisible());
             assertTrue(mController.getSourceConsumer(statusBar.getType()).isRequestedVisible());
             assertFalse(mController.getSourceConsumer(ime.getType()).isRequestedVisible());
@@ -383,7 +383,7 @@ public class InsetsControllerTest {
             mController.hide(Type.navigationBars());
             assertEquals(ANIMATION_TYPE_HIDE, mController.getAnimationType(ITYPE_NAVIGATION_BAR));
             assertEquals(ANIMATION_TYPE_NONE, mController.getAnimationType(ITYPE_STATUS_BAR));
-            mController.cancelExistingAnimation();
+            mController.cancelExistingAnimations();
             assertFalse(mController.getSourceConsumer(navBar.getType()).isRequestedVisible());
             assertTrue(mController.getSourceConsumer(statusBar.getType()).isRequestedVisible());
             assertFalse(mController.getSourceConsumer(ime.getType()).isRequestedVisible());
@@ -391,7 +391,7 @@ public class InsetsControllerTest {
             mController.hide(Type.systemBars());
             assertEquals(ANIMATION_TYPE_NONE, mController.getAnimationType(ITYPE_NAVIGATION_BAR));
             assertEquals(ANIMATION_TYPE_HIDE, mController.getAnimationType(ITYPE_STATUS_BAR));
-            mController.cancelExistingAnimation();
+            mController.cancelExistingAnimations();
             assertFalse(mController.getSourceConsumer(navBar.getType()).isRequestedVisible());
             assertFalse(mController.getSourceConsumer(statusBar.getType()).isRequestedVisible());
             assertFalse(mController.getSourceConsumer(ime.getType()).isRequestedVisible());
@@ -411,13 +411,13 @@ public class InsetsControllerTest {
             // show two at a time and hide one by one.
             mController.show(types);
             mController.hide(Type.navigationBars());
-            mController.cancelExistingAnimation();
+            mController.cancelExistingAnimations();
             assertFalse(mController.getSourceConsumer(navBar.getType()).isRequestedVisible());
             assertTrue(mController.getSourceConsumer(statusBar.getType()).isRequestedVisible());
             assertFalse(mController.getSourceConsumer(ime.getType()).isRequestedVisible());
 
             mController.hide(Type.systemBars());
-            mController.cancelExistingAnimation();
+            mController.cancelExistingAnimations();
             assertFalse(mController.getSourceConsumer(navBar.getType()).isRequestedVisible());
             assertFalse(mController.getSourceConsumer(statusBar.getType()).isRequestedVisible());
             assertFalse(mController.getSourceConsumer(ime.getType()).isRequestedVisible());
@@ -431,7 +431,7 @@ public class InsetsControllerTest {
 
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
             mController.hide(Type.statusBars());
-            mController.cancelExistingAnimation();
+            mController.cancelExistingAnimations();
             assertFalse(mController.getSourceConsumer(ITYPE_STATUS_BAR).isRequestedVisible());
             assertFalse(mController.getState().getSource(ITYPE_STATUS_BAR).isVisible());
 
@@ -446,7 +446,7 @@ public class InsetsControllerTest {
             // Gaining control
             mController.onControlsChanged(createSingletonControl(ITYPE_STATUS_BAR));
             assertEquals(ANIMATION_TYPE_HIDE, mController.getAnimationType(ITYPE_STATUS_BAR));
-            mController.cancelExistingAnimation();
+            mController.cancelExistingAnimations();
             assertFalse(mController.getSourceConsumer(ITYPE_STATUS_BAR).isRequestedVisible());
             assertFalse(mController.getState().getSource(ITYPE_STATUS_BAR).isVisible());
         });
@@ -468,7 +468,7 @@ public class InsetsControllerTest {
             mController.onControlsChanged(createSingletonControl(ITYPE_IME));
 
             assertEquals(ANIMATION_TYPE_SHOW, mController.getAnimationType(ITYPE_IME));
-            mController.cancelExistingAnimation();
+            mController.cancelExistingAnimations();
             assertTrue(mController.getSourceConsumer(ITYPE_IME).isRequestedVisible());
             assertTrue(mController.getState().getSource(ITYPE_IME).isVisible());
         });
@@ -489,7 +489,7 @@ public class InsetsControllerTest {
             mController.show(ime(), true /* fromIme */);
 
             assertEquals(ANIMATION_TYPE_SHOW, mController.getAnimationType(ITYPE_IME));
-            mController.cancelExistingAnimation();
+            mController.cancelExistingAnimations();
             assertTrue(mController.getSourceConsumer(ITYPE_IME).isRequestedVisible());
             assertTrue(mController.getState().getSource(ITYPE_IME).isVisible());
         });
@@ -658,7 +658,7 @@ public class InsetsControllerTest {
                     mController.getState().getSource(ITYPE_IME).getFrame());
             assertNotEquals(new Rect(4, 5, 6, 7),
                     mController.getState().getSource(ITYPE_IME).getVisibleFrame());
-            mController.cancelExistingAnimation();
+            mController.cancelExistingAnimations();
             assertEquals(new Rect(0, 1, 2, 3),
                     mController.getState().getSource(ITYPE_IME).getFrame());
             assertEquals(new Rect(4, 5, 6, 7),
