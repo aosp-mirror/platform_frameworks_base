@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY;
+import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static android.view.WindowManager.LayoutParams.TYPE_MAGNIFICATION_OVERLAY;
 
@@ -681,7 +682,9 @@ final class AccessibilityController {
                 final int visibleWindowCount = visibleWindows.size();
                 for (int i = visibleWindowCount - 1; i >= 0; i--) {
                     WindowState windowState = visibleWindows.valueAt(i);
-                    if ((windowState.mAttrs.type == TYPE_MAGNIFICATION_OVERLAY)
+                    final int windowType = windowState.mAttrs.type;
+                    if ((windowType == TYPE_MAGNIFICATION_OVERLAY
+                            || windowType == TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY)
                             || ((windowState.mAttrs.privateFlags
                             & PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY) != 0)) {
                         continue;
