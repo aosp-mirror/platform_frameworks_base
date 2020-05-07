@@ -208,7 +208,6 @@ public class UserRestrictionsUtils {
             Sets.newArraySet(
                     UserManager.DISALLOW_CONFIG_DATE_TIME,
                     UserManager.DISALLOW_CAMERA,
-                    UserManager.DISALLOW_ADD_USER,
                     UserManager.DISALLOW_BLUETOOTH,
                     UserManager.DISALLOW_BLUETOOTH_SHARING,
                     UserManager.DISALLOW_CONFIG_CELL_BROADCASTS,
