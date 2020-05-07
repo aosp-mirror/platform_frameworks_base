@@ -250,6 +250,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     private static final int NOTIFICATION_LOCATION_UNKNOWN = 0;
 
+    private static final String VALID_CONVO_SHORTCUT_ID = "shortcut";
+
     @Mock
     private NotificationListeners mListeners;
     @Mock private NotificationAssistants mAssistants;
@@ -470,6 +472,19 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mShortcutHelper = mService.getShortcutHelper();
         mShortcutHelper.setLauncherApps(mLauncherApps);
         mShortcutHelper.setShortcutServiceInternal(mShortcutServiceInternal);
+
+        // Pretend the shortcut exists
+        List<ShortcutInfo> shortcutInfos = new ArrayList<>();
+        ShortcutInfo info = mock(ShortcutInfo.class);
+        when(info.getPackage()).thenReturn(PKG);
+        when(info.getId()).thenReturn(VALID_CONVO_SHORTCUT_ID);
+        when(info.getUserId()).thenReturn(USER_SYSTEM);
+        when(info.isLongLived()).thenReturn(true);
+        when(info.isEnabled()).thenReturn(true);
+        shortcutInfos.add(info);
+        when(mLauncherApps.getShortcuts(any(), any())).thenReturn(shortcutInfos);
+        when(mShortcutServiceInternal.isSharingShortcut(anyInt(), anyString(), anyString(),
+                anyString(), anyInt(), any())).thenReturn(true);
 
         // Set the testable bubble extractor
         RankingHelper rankingHelper = mService.getRankingHelper();
@@ -704,6 +719,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 )
                 .setActions(replyAction)
                 .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .setShortcutId(VALID_CONVO_SHORTCUT_ID)
                 .setGroupSummary(isSummary);
         if (groupKey != null) {
             nb.setGroup(groupKey);
@@ -6100,7 +6116,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testNotificationBubbles_flagRemoved_whenShortcutRemoved()
             throws RemoteException {
-        final String shortcutId = "someshortcutId";
         setUpPrefsForBubbles(PKG, mUid,
                 true /* global */,
                 BUBBLE_PREFERENCE_ALL /* app */,
@@ -6111,27 +6126,16 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         // Messaging notification with shortcut info
         Notification.BubbleMetadata metadata =
-                new Notification.BubbleMetadata.Builder(shortcutId).build();
+                new Notification.BubbleMetadata.Builder(VALID_CONVO_SHORTCUT_ID).build();
         Notification.Builder nb = getMessageStyleNotifBuilder(false /* addDefaultMetadata */,
                 null /* groupKey */, false /* isSummary */);
-        nb.setShortcutId(shortcutId);
+        nb.setShortcutId(VALID_CONVO_SHORTCUT_ID);
         nb.setBubbleMetadata(metadata);
         StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, 1,
                 "tag", mUid, 0, nb.build(), new UserHandle(mUid), null, 0);
         NotificationRecord nr = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
 
-        // Pretend the shortcut exists
-        List<ShortcutInfo> shortcutInfos = new ArrayList<>();
-        ShortcutInfo info = mock(ShortcutInfo.class);
-        when(info.getPackage()).thenReturn(PKG);
-        when(info.getId()).thenReturn(shortcutId);
-        when(info.getUserId()).thenReturn(USER_SYSTEM);
-        when(info.isLongLived()).thenReturn(true);
-        when(info.isEnabled()).thenReturn(true);
-        shortcutInfos.add(info);
-        when(mLauncherApps.getShortcuts(any(), any())).thenReturn(shortcutInfos);
-        when(mShortcutServiceInternal.isSharingShortcut(anyInt(), anyString(), anyString(),
-                anyString(), anyInt(), any())).thenReturn(true);
+
 
         // Test: Send the bubble notification
         mBinderService.enqueueNotificationWithTag(PKG, PKG, nr.getSbn().getTag(),
@@ -6149,7 +6153,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         // Make sure the shortcut is cached.
         verify(mShortcutServiceInternal).cacheShortcuts(
-                anyInt(), any(), eq(PKG), eq(Collections.singletonList(shortcutId)),
+                anyInt(), any(), eq(PKG), eq(Collections.singletonList(VALID_CONVO_SHORTCUT_ID)),
                 eq(USER_SYSTEM));
 
         // Test: Remove the shortcut
@@ -6613,6 +6617,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         convo2.setNotificationChannel(channel2);
         convos.add(convo2);
         when(mPreferencesHelper.getConversations(anyString(), anyInt())).thenReturn(convos);
+        when(mLauncherApps.getShortcuts(any(), any())).thenReturn(null);
 
         List<ConversationChannelWrapper> conversations =
                 mBinderService.getConversationsForPackage(PKG_P, mUid).getList();
@@ -6640,6 +6645,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         NotificationRecord nr =
                 generateMessageBubbleNotifRecord(mTestNotificationChannel,
                         "testRecordMessages_invalidMsg");
+        when(mLauncherApps.getShortcuts(any(), any())).thenReturn(null);
         mBinderService.enqueueNotificationWithTag(PKG, PKG, nr.getSbn().getTag(),
                 nr.getSbn().getId(), nr.getSbn().getNotification(), nr.getSbn().getUserId());
         waitForIdle();
@@ -6659,17 +6665,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, 1,
                 "testRecordMessages_validMsg", mUid, 0, nb.build(), new UserHandle(mUid), null, 0);
         NotificationRecord nr = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
-
-        // Pretend the shortcut exists
-        List<ShortcutInfo> shortcutInfos = new ArrayList<>();
-        ShortcutInfo info = mock(ShortcutInfo.class);
-        when(info.getPackage()).thenReturn(PKG);
-        when(info.getId()).thenReturn("id");
-        when(info.getUserId()).thenReturn(USER_SYSTEM);
-        when(info.isLongLived()).thenReturn(true);
-        when(info.isEnabled()).thenReturn(true);
-        shortcutInfos.add(info);
-        when(mLauncherApps.getShortcuts(any(), any())).thenReturn(shortcutInfos);
 
         mBinderService.enqueueNotificationWithTag(PKG, PKG, nr.getSbn().getTag(),
                 nr.getSbn().getId(), nr.getSbn().getNotification(), nr.getSbn().getUserId());
