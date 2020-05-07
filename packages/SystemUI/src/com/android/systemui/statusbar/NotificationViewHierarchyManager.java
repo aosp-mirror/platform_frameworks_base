@@ -184,8 +184,11 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
             mLowPriorityInflationHelper.recheckLowPriorityViewAndInflate(ent, ent.getRow());
             boolean isChildInGroup = mGroupManager.isChildInGroupWithSummary(ent.getSbn());
 
-            boolean groupChangesAllowed = mVisualStabilityManager.areGroupChangesAllowed()
-                    || !ent.hasFinishedInitialization();
+            boolean groupChangesAllowed =
+                    mVisualStabilityManager.areGroupChangesAllowed() // user isn't looking at notifs
+                    || !ent.hasFinishedInitialization() // notif recently added
+                    || !mListContainer.containsView(ent.getRow()); // notif recently unfiltered
+
             NotificationEntry parent = mGroupManager.getGroupSummary(ent.getSbn());
             if (!groupChangesAllowed) {
                 // We don't to change groups while the user is looking at them
