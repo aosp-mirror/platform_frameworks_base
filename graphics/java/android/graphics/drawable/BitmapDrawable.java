@@ -17,6 +17,7 @@
 package android.graphics.drawable;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.pm.ActivityInfo.Config;
 import android.content.res.ColorStateList;
@@ -238,9 +239,10 @@ public class BitmapDrawable extends Drawable {
         }
     }
 
-    /** @hide */
-    @UnsupportedAppUsage
-    public void setBitmap(Bitmap bitmap) {
+    /**
+     * Switch to a new Bitmap object.
+     */
+    public void setBitmap(@Nullable Bitmap bitmap) {
         if (mBitmapState.mBitmap != bitmap) {
             mBitmapState.mBitmap = bitmap;
             computeBitmapSize();
