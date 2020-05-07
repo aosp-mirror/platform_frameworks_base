@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.phone;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.service.notification.StatusBarNotification;
 import android.util.ArraySet;
@@ -454,7 +455,7 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener, State
      * If there is a {@link NotificationGroup} associated with the provided entry, this method
      * will update the suppression of that group.
      */
-    public void updateSuppression(NotificationEntry entry) {
+    public void updateSuppression(@NonNull final NotificationEntry entry) {
         NotificationGroup group = mGroupMap.get(getGroupKey(entry.getSbn()));
         if (group != null) {
             updateSuppression(group);
