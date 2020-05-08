@@ -178,6 +178,9 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     // Perform polling, persist network, and register the global alert again.
     private static final int MSG_PERFORM_POLL_REGISTER_ALERT = 2;
     private static final int MSG_UPDATE_IFACES = 3;
+    // A message for broadcasting ACTION_NETWORK_STATS_UPDATED in handler thread to prevent
+    // deadlock.
+    private static final int MSG_BROADCAST_NETWORK_STATS_UPDATED = 4;
 
     /** Flags to control detail level of poll event. */
     private static final int FLAG_PERSIST_NETWORK = 0x1;
@@ -384,6 +387,13 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                 case MSG_PERFORM_POLL_REGISTER_ALERT: {
                     performPoll(FLAG_PERSIST_NETWORK);
                     registerGlobalAlert();
+                    break;
+                }
+                case MSG_BROADCAST_NETWORK_STATS_UPDATED: {
+                    final Intent updatedIntent = new Intent(ACTION_NETWORK_STATS_UPDATED);
+                    updatedIntent.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+                    mContext.sendBroadcastAsUser(updatedIntent, UserHandle.ALL,
+                            READ_NETWORK_USAGE_HISTORY);
                     break;
                 }
             }
@@ -1513,10 +1523,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         }
 
         // finally, dispatch updated event to any listeners
-        final Intent updatedIntent = new Intent(ACTION_NETWORK_STATS_UPDATED);
-        updatedIntent.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-        mContext.sendBroadcastAsUser(updatedIntent, UserHandle.ALL,
-                READ_NETWORK_USAGE_HISTORY);
+        mHandler.sendMessage(mHandler.obtainMessage(MSG_BROADCAST_NETWORK_STATS_UPDATED));
 
         Trace.traceEnd(TRACE_TAG_NETWORK);
     }

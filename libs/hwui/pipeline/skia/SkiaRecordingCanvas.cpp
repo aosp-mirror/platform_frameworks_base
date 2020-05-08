@@ -57,7 +57,7 @@ void SkiaRecordingCanvas::initDisplayList(uirenderer::RenderNode* renderNode, in
 
 uirenderer::DisplayList* SkiaRecordingCanvas::finishRecording() {
     // close any existing chunks if necessary
-    insertReorderBarrier(false);
+    enableZ(false);
     mRecorder.restoreToCount(1);
     return mDisplayList.release();
 }
@@ -85,8 +85,8 @@ void SkiaRecordingCanvas::drawCircle(uirenderer::CanvasPropertyPrimitive* x,
     drawDrawable(mDisplayList->allocateDrawable<AnimatedCircle>(x, y, radius, paint));
 }
 
-void SkiaRecordingCanvas::insertReorderBarrier(bool enableReorder) {
-    if (mCurrentBarrier && enableReorder) {
+void SkiaRecordingCanvas::enableZ(bool enableZ) {
+    if (mCurrentBarrier && enableZ) {
         // Already in a re-order section, nothing to do
         return;
     }
@@ -98,7 +98,7 @@ void SkiaRecordingCanvas::insertReorderBarrier(bool enableReorder) {
         mCurrentBarrier = nullptr;
         drawDrawable(drawable);
     }
-    if (enableReorder) {
+    if (enableZ) {
         mCurrentBarrier =
                 mDisplayList->allocateDrawable<StartReorderBarrierDrawable>(mDisplayList.get());
         drawDrawable(mCurrentBarrier);

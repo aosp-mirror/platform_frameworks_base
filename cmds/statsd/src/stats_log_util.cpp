@@ -74,12 +74,13 @@ const int FIELD_ID_DATA_ERROR = 9;
 const int FIELD_ID_PULL_TIMEOUT = 10;
 const int FIELD_ID_PULL_EXCEED_MAX_DELAY = 11;
 const int FIELD_ID_PULL_FAILED = 12;
-const int FIELD_ID_STATS_COMPANION_FAILED = 13;
-const int FIELD_ID_STATS_COMPANION_BINDER_TRANSACTION_FAILED = 14;
 const int FIELD_ID_EMPTY_DATA = 15;
 const int FIELD_ID_PULL_REGISTERED_COUNT = 16;
 const int FIELD_ID_PULL_UNREGISTERED_COUNT = 17;
 const int FIELD_ID_ATOM_ERROR_COUNT = 18;
+const int FIELD_ID_BINDER_CALL_FAIL_COUNT = 19;
+const int FIELD_ID_PULL_UID_PROVIDER_NOT_FOUND = 20;
+const int FIELD_ID_PULLER_NOT_FOUND = 21;
 
 // for AtomMetricStats proto
 const int FIELD_ID_ATOM_METRIC_STATS = 17;
@@ -483,10 +484,6 @@ void writePullerStatsToStream(const std::pair<int, StatsdStats::PulledAtomStats>
                        (long long)pair.second.pullExceedMaxDelay);
     protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_PULL_FAILED,
                        (long long)pair.second.pullFailed);
-    protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_STATS_COMPANION_FAILED,
-                       (long long)pair.second.statsCompanionPullFailed);
-    protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_STATS_COMPANION_BINDER_TRANSACTION_FAILED,
-                       (long long)pair.second.statsCompanionPullBinderTransactionFailed);
     protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_EMPTY_DATA,
                        (long long)pair.second.emptyData);
     protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_PULL_REGISTERED_COUNT,
@@ -494,6 +491,12 @@ void writePullerStatsToStream(const std::pair<int, StatsdStats::PulledAtomStats>
     protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_PULL_UNREGISTERED_COUNT,
                        (long long) pair.second.unregisteredCount);
     protoOutput->write(FIELD_TYPE_INT32 | FIELD_ID_ATOM_ERROR_COUNT, pair.second.atomErrorCount);
+    protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_BINDER_CALL_FAIL_COUNT,
+                       (long long)pair.second.binderCallFailCount);
+    protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_PULL_UID_PROVIDER_NOT_FOUND,
+                       (long long)pair.second.pullUidProviderNotFound);
+    protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_PULLER_NOT_FOUND,
+                       (long long)pair.second.pullerNotFound);
     protoOutput->end(token);
 }
 

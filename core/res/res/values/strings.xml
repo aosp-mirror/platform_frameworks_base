@@ -5738,4 +5738,13 @@ ul.</string>
     <string name="PERSOSUBSTATE_SIM_IMPI_SUCCESS">IMPI unlock successful.</string>
     <!-- Success message displayed on SIM NS_SP Depersonalization panel [CHAR LIMIT=none] -->
     <string name="PERSOSUBSTATE_SIM_NS_SP_SUCCESS">Network subset service provider unlock successful.</string>
+
+    <!-- pdp data reject dialog string for cause 29, 33 and 55 [CHAR LIMIT=100] -->
+    <string name="config_pdp_reject_dialog_title"></string>
+    <!-- pdp data reject dialog string for cause 29 (USER_AUTHENTICATION) [CHAR LIMIT=100] -->
+    <string name="config_pdp_reject_user_authentication_failed"></string>
+    <!-- pdp data reject dialog string for cause 33 (SERVICE_OPTION_NOT_SUBSCRIBED) [CHAR LIMIT=100] -->
+    <string name="config_pdp_reject_service_not_subscribed"></string>
+    <!-- pdp data reject dialog string for cause 55 (MULTI_CONN_TO_SAME_PDN_NOT_ALLOWED) [CHAR LIMIT=100] -->
+    <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed"></string>
 </resources>

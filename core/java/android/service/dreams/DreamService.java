@@ -1052,7 +1052,6 @@ public class DreamService extends Service implements Window.Callback {
         mWindow.requestFeature(Window.FEATURE_NO_TITLE);
 
         WindowManager.LayoutParams lp = mWindow.getAttributes();
-        lp.windowAnimations = com.android.internal.R.style.Animation_Dream;
         lp.flags |= (WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
                     | WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR
                     | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
@@ -1076,8 +1075,12 @@ public class DreamService extends Service implements Window.Callback {
 
                     @Override
                     public void onViewDetachedFromWindow(View v) {
-                        mActivity = null;
-                        finish();
+                        if (mActivity == null || !mActivity.isChangingConfigurations()) {
+                            // Only stop the dream if the view is not detached by relaunching
+                            // activity for configuration changes.
+                            mActivity = null;
+                            finish();
+                        }
                     }
                 });
     }

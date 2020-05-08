@@ -14,13 +14,9 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License
   -->
-<shape xmlns:android="http://schemas.android.com/apk/res/android"
-    android:shape="rectangle">
-    <solid android:color="?android:attr/colorBackgroundFloating" />
-    <corners
-        android:bottomLeftRadius="@dimen/qs_media_corner_radius"
-        android:topLeftRadius="@dimen/qs_media_corner_radius"
-        android:bottomRightRadius="@dimen/qs_media_corner_radius"
-        android:topRightRadius="@dimen/qs_media_corner_radius"
-    />
-</shape>
+<com.android.systemui.media.IlluminationDrawable
+    xmlns:systemui="http://schemas.android.com/apk/res-auto"
+    systemui:rippleMinSize="30dp"
+    systemui:rippleMaxSize="135dp"
+    systemui:highlight="15"
+    systemui:cornerRadius="@dimen/qs_media_corner_radius" />

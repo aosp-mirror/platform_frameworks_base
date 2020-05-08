@@ -4421,4 +4421,8 @@
     <!-- Set to true to make assistant show in front of the dream/screensaver. -->
     <bool name="config_assistantOnTopOfDream">false</bool>
 
+    <!-- pdp data retry for cause 29, 33 and 55 -->
+    <bool name="config_pdp_reject_enable_retry">false</bool>
+    <!-- pdp data reject retry delay in ms -->
+    <integer name="config_pdp_reject_retry_delay_ms">-1</integer>
 </resources>

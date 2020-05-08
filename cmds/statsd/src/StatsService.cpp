@@ -343,9 +343,11 @@ status_t StatsService::handleShellCommand(int in, int out, int err, const char**
         if (!utf8Args[0].compare(String8("print-logs"))) {
             return cmd_print_logs(out, utf8Args);
         }
+
         if (!utf8Args[0].compare(String8("send-active-configs"))) {
             return cmd_trigger_active_config_broadcast(out, utf8Args);
         }
+
         if (!utf8Args[0].compare(String8("data-subscribe"))) {
             {
                 std::lock_guard<std::mutex> lock(mShellSubscriberMutex);

@@ -635,10 +635,11 @@ public class UserManager {
 
     /**
      * Specifies if a user is disallowed from adding new users. This can only be set by device
-     * owners, profile owners on the primary user or profile owners of organization-owned managed
-     * profiles on the parent profile. The default value is <code>false</code>.
+     * owners or profile owners on the primary user. The default value is <code>false</code>.
      * <p>This restriction has no effect on secondary users and managed profiles since only the
      * primary user can add other users.
+     * <p> When the device is an organization-owned device provisioned with a managed profile,
+     * this restriction will be set as a base restriction which cannot be removed by any admin.
      *
      * <p>Key for user restrictions.
      * <p>Type: Boolean
