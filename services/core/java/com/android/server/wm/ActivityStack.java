@@ -702,10 +702,8 @@ class ActivityStack extends Task {
         // Need to make sure windowing mode is supported. If we in the process of creating the stack
         // no need to resolve the windowing mode again as it is already resolved to the right mode.
         if (!creating) {
-            if (!taskDisplayArea.isValidWindowingMode(windowingMode, null /* ActivityRecord */,
-                    topTask, getActivityType())) {
-                windowingMode = WINDOWING_MODE_UNDEFINED;
-            }
+            windowingMode = taskDisplayArea.validateWindowingMode(windowingMode,
+                    null /* ActivityRecord */, topTask, getActivityType());
         }
         if (taskDisplayArea.getRootSplitScreenPrimaryTask() == this
                 && windowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY) {
