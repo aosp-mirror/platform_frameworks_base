@@ -137,9 +137,6 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     private static final boolean DEBUG = false;
     private static final boolean DEBUG_LIVE = true;
 
-    // This 100MB limitation is defined in RecordingCanvas.
-    private static final int MAX_BITMAP_SIZE = 100 * 1024 * 1024;
-
     public static class Lifecycle extends SystemService {
         private IWallpaperManagerService mService;
 
@@ -657,14 +654,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 //  may be we can try to remove this optimized way in the future,
                 //  that means, we will always go into the 'else' block.
 
-                // This is just a quick estimation, may be smaller than it is.
-                long estimateSize = options.outWidth * options.outHeight * 4;
-
-                // A bitmap over than MAX_BITMAP_SIZE will make drawBitmap() fail.
-                // Please see: RecordingCanvas#throwIfCannotDraw.
-                if (estimateSize < MAX_BITMAP_SIZE) {
-                    success = FileUtils.copyFile(wallpaper.wallpaperFile, wallpaper.cropFile);
-                }
+                success = FileUtils.copyFile(wallpaper.wallpaperFile, wallpaper.cropFile);
 
                 if (!success) {
                     wallpaper.cropFile.delete();
@@ -672,6 +662,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 }
 
                 if (DEBUG) {
+                    // This is just a quick estimation, may be smaller than it is.
+                    long estimateSize = options.outWidth * options.outHeight * 4;
                     Slog.v(TAG, "Null crop of new wallpaper, estimate size="
                             + estimateSize + ", success=" + success);
                 }
@@ -751,13 +743,6 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                                     + " h=" + wpData.mHeight);
                             Slog.v(TAG, "  out: w=" + finalCrop.getWidth()
                                     + " h=" + finalCrop.getHeight());
-                        }
-
-                        // A bitmap over than MAX_BITMAP_SIZE will make drawBitmap() fail.
-                        // Please see: RecordingCanvas#throwIfCannotDraw.
-                        if (finalCrop.getByteCount() > MAX_BITMAP_SIZE) {
-                            throw new RuntimeException(
-                                    "Too large bitmap, limit=" + MAX_BITMAP_SIZE);
                         }
 
                         f = new FileOutputStream(wallpaper.cropFile);
