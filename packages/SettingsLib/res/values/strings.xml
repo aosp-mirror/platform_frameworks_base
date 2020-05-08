@@ -1373,4 +1373,7 @@
     <string name="cached_apps_freezer_enabled">Enabled</string>
     <!-- Developer setting dialog prompting the user to reboot after changing the app freezer setting [CHAR LIMIT=NONE]-->
     <string name="cached_apps_freezer_reboot_dialog_text">Your device must be rebooted for this change to apply. Reboot now or cancel.</string>
+
+    <!-- A content description for work profile app [CHAR LIMIT=35] -->
+    <string name="accessibility_work_profile_app_description">Work <xliff:g id="app_name" example="Camera">%s</xliff:g></string>
 </resources>
