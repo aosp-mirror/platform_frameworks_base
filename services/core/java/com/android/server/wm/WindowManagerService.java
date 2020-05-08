@@ -1384,6 +1384,7 @@ public class WindowManagerService extends IWindowManager.Stub
             DisplayCutout.ParcelableWrapper outDisplayCutout, InputChannel outInputChannel,
             InsetsState outInsetsState, InsetsSourceControl[] outActiveControls,
             int requestUserId) {
+        Arrays.fill(outActiveControls, null);
         int[] appOp = new int[1];
         final boolean isRoundedCornerOverlay = (attrs.privateFlags
                 & PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY) != 0;
@@ -2130,6 +2131,7 @@ public class WindowManagerService extends IWindowManager.Stub
             SurfaceControl outSurfaceControl, InsetsState outInsetsState,
             InsetsSourceControl[] outActiveControls, Point outSurfaceSize,
             SurfaceControl outBLASTSurfaceControl) {
+        Arrays.fill(outActiveControls, null);
         int result = 0;
         boolean configChanged;
         final int pid = Binder.getCallingPid();
@@ -2467,23 +2469,20 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     private void getInsetsSourceControls(WindowState win, InsetsSourceControl[] outControls) {
-        if (outControls != null) {
-            final InsetsSourceControl[] controls =
-                    win.getDisplayContent().getInsetsStateController().getControlsForDispatch(win);
-            Arrays.fill(outControls, null);
-            if (controls != null) {
-                final int length = Math.min(controls.length, outControls.length);
-                for (int i = 0; i < length; i++) {
-                    // We will leave the critical section before returning the leash to the client,
-                    // so we need to copy the leash to prevent others release the one that we are
-                    // about to return.
-                    // TODO: We will have an extra copy if the client is not local.
-                    //       For now, we rely on GC to release it.
-                    //       Maybe we can modify InsetsSourceControl.writeToParcel so it can release
-                    //       the extra leash as soon as possible.
-                    outControls[i] = controls[i] != null
-                            ? new InsetsSourceControl(controls[i]) : null;
-                }
+        final InsetsSourceControl[] controls =
+                win.getDisplayContent().getInsetsStateController().getControlsForDispatch(win);
+        if (controls != null) {
+            final int length = Math.min(controls.length, outControls.length);
+            for (int i = 0; i < length; i++) {
+                // We will leave the critical section before returning the leash to the client,
+                // so we need to copy the leash to prevent others release the one that we are
+                // about to return.
+                // TODO: We will have an extra copy if the client is not local.
+                //       For now, we rely on GC to release it.
+                //       Maybe we can modify InsetsSourceControl.writeToParcel so it can release
+                //       the extra leash as soon as possible.
+                outControls[i] = controls[i] != null
+                        ? new InsetsSourceControl(controls[i]) : null;
             }
         }
     }
