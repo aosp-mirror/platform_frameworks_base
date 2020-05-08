@@ -94,7 +94,6 @@ import android.view.autofill.AutofillValue;
 import android.view.autofill.IAutoFillManagerClient;
 import android.view.autofill.IAutofillWindowPresenter;
 import android.view.inputmethod.InlineSuggestionsRequest;
-import android.view.inputmethod.InlineSuggestionsResponse;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
@@ -102,7 +101,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.autofill.ui.AutoFillUI;
-import com.android.server.autofill.ui.InlineSuggestionFactory;
+import com.android.server.autofill.ui.InlineFillUi;
 import com.android.server.autofill.ui.PendingUi;
 import com.android.server.inputmethod.InputMethodManagerInternal;
 
@@ -2662,10 +2661,20 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             }
         } else if (viewState.id.equals(this.mCurrentViewId)
                 && (viewState.getState() & ViewState.STATE_INLINE_SHOWN) != 0) {
-            requestShowInlineSuggestionsLocked(viewState.getResponse(), filterText);
+            if ((viewState.getState() & ViewState.STATE_INLINE_DISABLED) != 0) {
+                final FillResponse response = viewState.getResponse();
+                if (response != null) {
+                    response.getDatasets().clear();
+                }
+                mInlineSessionController.deleteInlineFillUiLocked(viewState.id);
+            } else {
+                mInlineSessionController.filterInlineFillUiLocked(mCurrentViewId, filterText);
+            }
         } else if (viewState.id.equals(this.mCurrentViewId)
                 && (viewState.getState() & ViewState.STATE_TRIGGERED_AUGMENTED_AUTOFILL) != 0) {
             if (!TextUtils.isEmpty(filterText)) {
+                // TODO: we should be able to replace this with controller#filterInlineFillUiLocked
+                // to accomplish filtering for augmented autofill.
                 mInlineSessionController.hideInlineSuggestionsUiLocked(mCurrentViewId);
             }
         }
@@ -2816,26 +2825,15 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             return false;
         }
 
-        final ViewState currentView = mViewStates.get(focusedId);
-        if ((currentView.getState() & ViewState.STATE_INLINE_DISABLED) != 0) {
-            response.getDatasets().clear();
-        }
-        InlineSuggestionsResponse inlineSuggestionsResponse =
-                InlineSuggestionFactory.createInlineSuggestionsResponse(
-                        inlineSuggestionsRequest.get(), response, filterText, focusedId,
-                        this, () -> {
-                            synchronized (mLock) {
-                                mInlineSessionController.hideInlineSuggestionsUiLocked(
-                                        focusedId);
-                            }
-                        }, remoteRenderService);
-        if (inlineSuggestionsResponse == null) {
-            Slog.w(TAG, "InlineSuggestionFactory created null response");
-            return false;
-        }
-
-        return mInlineSessionController.onInlineSuggestionsResponseLocked(focusedId,
-                inlineSuggestionsResponse);
+        InlineFillUi inlineFillUi = InlineFillUi.forAutofill(
+                inlineSuggestionsRequest.get(), response, focusedId, filterText,
+                /*uiCallback*/this, /*onErrorCallback*/ () -> {
+                    synchronized (mLock) {
+                        mInlineSessionController.hideInlineSuggestionsUiLocked(
+                                focusedId);
+                    }
+                }, remoteRenderService);
+        return mInlineSessionController.setInlineFillUiLocked(inlineFillUi);
     }
 
     boolean isDestroyed() {
@@ -3119,11 +3117,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
         final AutofillId focusedId = mCurrentViewId;
 
-        final Function<InlineSuggestionsResponse, Boolean> inlineSuggestionsResponseCallback =
+        final Function<InlineFillUi, Boolean> inlineSuggestionsResponseCallback =
                 response -> {
                     synchronized (mLock) {
-                        return mInlineSessionController.onInlineSuggestionsResponseLocked(
-                                focusedId, response);
+                        return mInlineSessionController.setInlineFillUiLocked(response);
                     }
                 };
         final Consumer<InlineSuggestionsRequest> requestAugmentedAutofill =

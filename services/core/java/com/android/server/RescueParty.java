@@ -253,10 +253,7 @@ public class RescueParty {
             logCriticalInfo(Log.DEBUG,
                     "Finished rescue level " + levelToString(level));
         } catch (Throwable t) {
-            final String msg = ExceptionUtils.getCompleteMessage(t);
-            EventLogTags.writeRescueFailure(level, msg);
-            logCriticalInfo(Log.ERROR,
-                    "Failed rescue level " + levelToString(level) + ": " + msg);
+            logRescueException(level, t);
         }
     }
 
@@ -274,9 +271,29 @@ public class RescueParty {
                 resetAllSettings(context, Settings.RESET_MODE_TRUSTED_DEFAULTS, failedPackage);
                 break;
             case LEVEL_FACTORY_RESET:
-                RecoverySystem.rebootPromptAndWipeUserData(context, TAG);
+                // Request the reboot from a separate thread to avoid deadlock on PackageWatchdog
+                // when device shutting down.
+                Runnable runnable = new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            RecoverySystem.rebootPromptAndWipeUserData(context, TAG);
+                        } catch (Throwable t) {
+                            logRescueException(level, t);
+                        }
+                    }
+                };
+                Thread thread = new Thread(runnable);
+                thread.start();
                 break;
         }
+    }
+
+    private static void logRescueException(int level, Throwable t) {
+        final String msg = ExceptionUtils.getCompleteMessage(t);
+        EventLogTags.writeRescueFailure(level, msg);
+        logCriticalInfo(Log.ERROR,
+                "Failed rescue level " + levelToString(level) + ": " + msg);
     }
 
     private static int mapRescueLevelToUserImpact(int rescueLevel) {

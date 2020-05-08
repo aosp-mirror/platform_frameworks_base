@@ -237,27 +237,28 @@ public:
     /* --- InputDispatcherPolicyInterface implementation --- */
 
     virtual void notifySwitch(nsecs_t when, uint32_t switchValues, uint32_t switchMask,
-            uint32_t policyFlags);
+                              uint32_t policyFlags) override;
     virtual void notifyConfigurationChanged(nsecs_t when);
-    virtual nsecs_t notifyANR(const sp<InputApplicationHandle>& inputApplicationHandle,
-            const sp<IBinder>& token,
-            const std::string& reason);
+    virtual nsecs_t notifyAnr(const sp<InputApplicationHandle>& inputApplicationHandle,
+                              const sp<IBinder>& token, const std::string& reason) override;
     virtual void notifyInputChannelBroken(const sp<IBinder>& token);
-    virtual void notifyFocusChanged(const sp<IBinder>& oldToken, const sp<IBinder>& newToken);
-    virtual bool filterInputEvent(const InputEvent* inputEvent, uint32_t policyFlags);
-    virtual void getDispatcherConfiguration(InputDispatcherConfiguration* outConfig);
-    virtual void interceptKeyBeforeQueueing(const KeyEvent* keyEvent, uint32_t& policyFlags);
+    virtual void notifyFocusChanged(const sp<IBinder>& oldToken,
+                                    const sp<IBinder>& newToken) override;
+    virtual bool filterInputEvent(const InputEvent* inputEvent, uint32_t policyFlags) override;
+    virtual void getDispatcherConfiguration(InputDispatcherConfiguration* outConfig) override;
+    virtual void interceptKeyBeforeQueueing(const KeyEvent* keyEvent,
+                                            uint32_t& policyFlags) override;
     virtual void interceptMotionBeforeQueueing(const int32_t displayId, nsecs_t when,
-            uint32_t& policyFlags);
-    virtual nsecs_t interceptKeyBeforeDispatching(
-            const sp<IBinder>& token,
-            const KeyEvent* keyEvent, uint32_t policyFlags);
-    virtual bool dispatchUnhandledKey(const sp<IBinder>& token,
-            const KeyEvent* keyEvent, uint32_t policyFlags, KeyEvent* outFallbackKeyEvent);
-    virtual void pokeUserActivity(nsecs_t eventTime, int32_t eventType);
-    virtual bool checkInjectEventsPermissionNonReentrant(
-            int32_t injectorPid, int32_t injectorUid);
-    virtual void onPointerDownOutsideFocus(const sp<IBinder>& touchedToken);
+                                               uint32_t& policyFlags) override;
+    virtual nsecs_t interceptKeyBeforeDispatching(const sp<IBinder>& token,
+                                                  const KeyEvent* keyEvent,
+                                                  uint32_t policyFlags) override;
+    virtual bool dispatchUnhandledKey(const sp<IBinder>& token, const KeyEvent* keyEvent,
+                                      uint32_t policyFlags, KeyEvent* outFallbackKeyEvent) override;
+    virtual void pokeUserActivity(nsecs_t eventTime, int32_t eventType) override;
+    virtual bool checkInjectEventsPermissionNonReentrant(int32_t injectorPid,
+                                                         int32_t injectorUid) override;
+    virtual void onPointerDownOutsideFocus(const sp<IBinder>& touchedToken) override;
 
     /* --- PointerControllerPolicyInterface implementation --- */
 
@@ -692,9 +693,8 @@ static jobject getInputApplicationHandleObjLocalRef(JNIEnv* env,
     return handle->getInputApplicationHandleObjLocalRef(env);
 }
 
-
-nsecs_t NativeInputManager::notifyANR(const sp<InputApplicationHandle>& inputApplicationHandle,
-        const sp<IBinder>& token, const std::string& reason) {
+nsecs_t NativeInputManager::notifyAnr(const sp<InputApplicationHandle>& inputApplicationHandle,
+                                      const sp<IBinder>& token, const std::string& reason) {
 #if DEBUG_INPUT_DISPATCHER_POLICY
     ALOGD("notifyANR");
 #endif
@@ -1453,9 +1453,13 @@ static jint nativeInjectInputEvent(JNIEnv* env, jclass /* clazz */,
             return INPUT_EVENT_INJECTION_FAILED;
         }
 
-        return (jint) im->getInputManager()->getDispatcher()->injectInputEvent(
-                & keyEvent, injectorPid, injectorUid, syncMode, timeoutMillis,
-                uint32_t(policyFlags));
+        const int32_t result =
+                im->getInputManager()->getDispatcher()->injectInputEvent(&keyEvent, injectorPid,
+                                                                         injectorUid, syncMode,
+                                                                         std::chrono::milliseconds(
+                                                                                 timeoutMillis),
+                                                                         uint32_t(policyFlags));
+        return static_cast<jint>(result);
     } else if (env->IsInstanceOf(inputEventObj, gMotionEventClassInfo.clazz)) {
         const MotionEvent* motionEvent = android_view_MotionEvent_getNativePtr(env, inputEventObj);
         if (!motionEvent) {
@@ -1463,9 +1467,13 @@ static jint nativeInjectInputEvent(JNIEnv* env, jclass /* clazz */,
             return INPUT_EVENT_INJECTION_FAILED;
         }
 
-        return (jint) im->getInputManager()->getDispatcher()->injectInputEvent(
-                motionEvent, injectorPid, injectorUid, syncMode, timeoutMillis,
-                uint32_t(policyFlags));
+        const int32_t result =
+                (jint)im->getInputManager()
+                        ->getDispatcher()
+                        ->injectInputEvent(motionEvent, injectorPid, injectorUid, syncMode,
+                                           std::chrono::milliseconds(timeoutMillis),
+                                           uint32_t(policyFlags));
+        return static_cast<jint>(result);
     } else {
         jniThrowRuntimeException(env, "Invalid input event type.");
         return INPUT_EVENT_INJECTION_FAILED;

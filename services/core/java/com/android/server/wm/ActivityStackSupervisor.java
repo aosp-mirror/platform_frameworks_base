@@ -69,7 +69,6 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLAS
 import static com.android.server.wm.ActivityTaskManagerService.ANIMATE;
 import static com.android.server.wm.ActivityTaskManagerService.H.FIRST_SUPERVISOR_STACK_MSG;
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_NONE;
-import static com.android.server.wm.RootWindowContainer.MATCH_TASK_IN_STACKS_ONLY;
 import static com.android.server.wm.RootWindowContainer.MATCH_TASK_IN_STACKS_OR_RECENT_TASKS;
 import static com.android.server.wm.RootWindowContainer.MATCH_TASK_IN_STACKS_OR_RECENT_TASKS_AND_RESTORE;
 import static com.android.server.wm.RootWindowContainer.TAG_STATES;
@@ -125,7 +124,6 @@ import android.os.UserManager;
 import android.os.WorkSource;
 import android.provider.MediaStore;
 import android.util.ArrayMap;
-import android.util.ArraySet;
 import android.util.MergedConfiguration;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -363,11 +361,6 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
      * determine whether to invoke the task stack change listener after pausing.
      */
     boolean mAppVisibilitiesChangedSinceLastPause;
-
-    /**
-     * Set of tasks that are in resizing mode during an app transition to fill the "void".
-     */
-    private final ArraySet<Integer> mResizingTasksDuringAnimation = new ArraySet<>();
 
     private KeyguardController mKeyguardController;
 
@@ -1415,18 +1408,6 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         return mLaunchParamsController;
     }
 
-    void notifyAppTransitionDone() {
-        for (int i = mResizingTasksDuringAnimation.size() - 1; i >= 0; i--) {
-            final int taskId = mResizingTasksDuringAnimation.valueAt(i);
-            final Task task =
-                    mRootWindowContainer.anyTaskForId(taskId, MATCH_TASK_IN_STACKS_ONLY);
-            if (task != null) {
-                task.setTaskDockedResizing(false);
-            }
-        }
-        mResizingTasksDuringAnimation.clear();
-    }
-
     void setSplitScreenResizing(boolean resizing) {
         if (resizing == mDockedStackResizing) {
             return;
@@ -1459,6 +1440,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         mService.deferWindowLayout();
         try {
             stack.setWindowingMode(WINDOWING_MODE_UNDEFINED);
+            stack.setBounds(null);
             if (toDisplay.getDisplayId() != stack.getDisplayId()) {
                 stack.reparent(toDisplay.getDefaultTaskDisplayArea(), false /* onTop */);
             } else {
@@ -2460,16 +2442,6 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         }
     }
 
-    /**
-     * Puts a task into resizing mode during the next app transition.
-     *
-     * @param task The task to put into resizing mode
-     */
-    void setResizingDuringAnimation(Task task) {
-        mResizingTasksDuringAnimation.add(task.mTaskId);
-        task.setTaskDockedResizing(true);
-    }
-
     int startActivityFromRecents(int callingPid, int callingUid, int taskId,
             SafeActivityOptions options) {
         Task task = null;
@@ -2497,22 +2469,12 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
 
         mService.deferWindowLayout();
         try {
-            if (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
-                // TODO(task-hierarchy): Remove when tiles are in hierarchy.
-                // Unset launching windowing mode to prevent creating split-screen-primary stack
-                // in RWC#anyTaskForId() below.
-                activityOptions.setLaunchWindowingMode(WINDOWING_MODE_UNDEFINED);
-            }
-
             task = mRootWindowContainer.anyTaskForId(taskId,
                     MATCH_TASK_IN_STACKS_OR_RECENT_TASKS_AND_RESTORE, activityOptions, ON_TOP);
             if (task == null) {
                 mWindowManager.executeAppTransition();
                 throw new IllegalArgumentException(
                         "startActivityFromRecents: Task " + taskId + " not found.");
-            } else if (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY
-                    && task.getWindowingMode() != windowingMode) {
-                mService.moveTaskToSplitScreenPrimaryTask(task, true /* toTop */);
             }
 
             if (windowingMode != WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
@@ -2561,12 +2523,6 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                     false /* validateIncomingUser */, null /* originatingPendingIntent */,
                     false /* allowBackgroundActivityStart */);
         } finally {
-            if (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY && task != null) {
-                // If we are launching the task in the docked stack, put it into resizing mode so
-                // the window renders full-screen with the background filling the void. Also only
-                // call this at the end to make sure that tasks exists on the window manager side.
-                setResizingDuringAnimation(task);
-            }
             mService.continueWindowLayout();
         }
     }

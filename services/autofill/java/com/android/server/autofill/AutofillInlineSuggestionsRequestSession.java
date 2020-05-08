@@ -27,7 +27,6 @@ import android.content.ComponentName;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
-import android.util.Log;
 import android.util.Slog;
 import android.view.autofill.AutofillId;
 import android.view.inputmethod.InlineSuggestionsRequest;
@@ -37,6 +36,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.view.IInlineSuggestionsRequestCallback;
 import com.android.internal.view.IInlineSuggestionsResponseCallback;
 import com.android.internal.view.InlineSuggestionsRequestInfo;
+import com.android.server.autofill.ui.InlineFillUi;
 import com.android.server.inputmethod.InputMethodManagerInternal;
 
 import java.lang.ref.WeakReference;
@@ -105,7 +105,7 @@ final class AutofillInlineSuggestionsRequestSession {
     private boolean mImeInputViewStarted;
     @GuardedBy("mLock")
     @Nullable
-    private InlineSuggestionsResponse mInlineSuggestionsResponse;
+    private InlineFillUi mInlineFillUi;
     @GuardedBy("mLock")
     private boolean mPreviousResponseIsNotEmpty;
 
@@ -155,18 +155,20 @@ final class AutofillInlineSuggestionsRequestSession {
      * @return false if the IME callback is not available.
      */
     @GuardedBy("mLock")
-    boolean onInlineSuggestionsResponseLocked(@NonNull AutofillId autofillId,
-            @NonNull InlineSuggestionsResponse inlineSuggestionsResponse) {
+    boolean onInlineSuggestionsResponseLocked(@NonNull InlineFillUi inlineFillUi) {
         if (mDestroyed) {
             return false;
         }
-        if (sDebug) Log.d(TAG, "onInlineSuggestionsResponseLocked called for:" + autofillId);
+        if (sDebug) {
+            Slog.d(TAG,
+                    "onInlineSuggestionsResponseLocked called for:" + inlineFillUi.getAutofillId());
+        }
         if (mImeRequest == null || mResponseCallback == null) {
             return false;
         }
         // TODO(b/151123764): each session should only correspond to one field.
-        mAutofillId = autofillId;
-        mInlineSuggestionsResponse = inlineSuggestionsResponse;
+        mAutofillId = inlineFillUi.getAutofillId();
+        mInlineFillUi = inlineFillUi;
         maybeUpdateResponseToImeLocked();
         return true;
     }
@@ -190,12 +192,12 @@ final class AutofillInlineSuggestionsRequestSession {
         if (mDestroyed) {
             return;
         }
-        if (sDebug) Log.d(TAG, "onCreateInlineSuggestionsRequestLocked called: " + mAutofillId);
+        if (sDebug) Slog.d(TAG, "onCreateInlineSuggestionsRequestLocked called: " + mAutofillId);
         mInputMethodManagerInternal.onCreateInlineSuggestionsRequest(mUserId,
                 new InlineSuggestionsRequestInfo(mComponentName, mAutofillId, mUiExtras),
                 new InlineSuggestionsRequestCallbackImpl(this));
         mTimeoutCallback = () -> {
-            Log.w(TAG, "Timed out waiting for IME callback InlineSuggestionsRequest.");
+            Slog.w(TAG, "Timed out waiting for IME callback InlineSuggestionsRequest.");
             handleOnReceiveImeRequest(null, null);
         };
         mHandler.postDelayed(mTimeoutCallback, CREATE_INLINE_SUGGESTIONS_REQUEST_TIMEOUT_MS);
@@ -206,7 +208,7 @@ final class AutofillInlineSuggestionsRequestSession {
      */
     @GuardedBy("mLock")
     private void maybeUpdateResponseToImeLocked() {
-        if (sVerbose) Log.v(TAG, "maybeUpdateResponseToImeLocked called");
+        if (sVerbose) Slog.v(TAG, "maybeUpdateResponseToImeLocked called");
         if (mDestroyed || mResponseCallback == null) {
             return;
         }
@@ -216,18 +218,19 @@ final class AutofillInlineSuggestionsRequestSession {
             // Although the inline suggestions should disappear when IME hides which removes them
             // from the view hierarchy, but we still send an empty response to be extra safe.
 
-            if (sVerbose) Log.v(TAG, "Send empty inline response");
+            if (sVerbose) Slog.v(TAG, "Send empty inline response");
             updateResponseToImeUncheckLocked(new InlineSuggestionsResponse(Collections.EMPTY_LIST));
             mPreviousResponseIsNotEmpty = false;
-        } else if (mImeInputViewStarted && mInlineSuggestionsResponse != null && match(mAutofillId,
+        } else if (mImeInputViewStarted && mInlineFillUi != null && match(mAutofillId,
                 mImeCurrentFieldId)) {
             // 2. if IME is visible, and response is not null, send the response
-            boolean isEmptyResponse = mInlineSuggestionsResponse.getInlineSuggestions().isEmpty();
+            InlineSuggestionsResponse response = mInlineFillUi.getInlineSuggestionsResponse();
+            boolean isEmptyResponse = response.getInlineSuggestions().isEmpty();
             if (isEmptyResponse && !mPreviousResponseIsNotEmpty) {
                 // No-op if both the previous response and current response are empty.
                 return;
             }
-            updateResponseToImeUncheckLocked(mInlineSuggestionsResponse);
+            updateResponseToImeUncheckLocked(response);
             mPreviousResponseIsNotEmpty = !isEmptyResponse;
         }
     }
@@ -240,7 +243,7 @@ final class AutofillInlineSuggestionsRequestSession {
         if (mDestroyed) {
             return;
         }
-        if (sDebug) Log.d(TAG, "Send inline response: " + response.getInlineSuggestions().size());
+        if (sDebug) Slog.d(TAG, "Send inline response: " + response.getInlineSuggestions().size());
         try {
             mResponseCallback.onInlineSuggestionsResponse(mAutofillId, response);
         } catch (RemoteException e) {
@@ -262,7 +265,7 @@ final class AutofillInlineSuggestionsRequestSession {
             mImeRequestReceived = true;
 
             if (mTimeoutCallback != null) {
-                if (sVerbose) Log.v(TAG, "removing timeout callback");
+                if (sVerbose) Slog.v(TAG, "removing timeout callback");
                 mHandler.removeCallbacks(mTimeoutCallback);
                 mTimeoutCallback = null;
             }
@@ -333,7 +336,7 @@ final class AutofillInlineSuggestionsRequestSession {
         @BinderThread
         @Override
         public void onInlineSuggestionsUnsupported() throws RemoteException {
-            if (sDebug) Log.d(TAG, "onInlineSuggestionsUnsupported() called.");
+            if (sDebug) Slog.d(TAG, "onInlineSuggestionsUnsupported() called.");
             final AutofillInlineSuggestionsRequestSession session = mSession.get();
             if (session != null) {
                 session.mHandler.sendMessage(obtainMessage(
@@ -346,7 +349,7 @@ final class AutofillInlineSuggestionsRequestSession {
         @Override
         public void onInlineSuggestionsRequest(InlineSuggestionsRequest request,
                 IInlineSuggestionsResponseCallback callback) {
-            if (sDebug) Log.d(TAG, "onInlineSuggestionsRequest() received: " + request);
+            if (sDebug) Slog.d(TAG, "onInlineSuggestionsRequest() received: " + request);
             final AutofillInlineSuggestionsRequestSession session = mSession.get();
             if (session != null) {
                 session.mHandler.sendMessage(obtainMessage(
@@ -357,7 +360,7 @@ final class AutofillInlineSuggestionsRequestSession {
 
         @Override
         public void onInputMethodStartInput(AutofillId imeFieldId) throws RemoteException {
-            if (sVerbose) Log.v(TAG, "onInputMethodStartInput() received on " + imeFieldId);
+            if (sVerbose) Slog.v(TAG, "onInputMethodStartInput() received on " + imeFieldId);
             final AutofillInlineSuggestionsRequestSession session = mSession.get();
             if (session != null) {
                 session.mHandler.sendMessage(obtainMessage(
@@ -369,14 +372,14 @@ final class AutofillInlineSuggestionsRequestSession {
         @Override
         public void onInputMethodShowInputRequested(boolean requestResult) throws RemoteException {
             if (sVerbose) {
-                Log.v(TAG, "onInputMethodShowInputRequested() received: " + requestResult);
+                Slog.v(TAG, "onInputMethodShowInputRequested() received: " + requestResult);
             }
         }
 
         @BinderThread
         @Override
         public void onInputMethodStartInputView() {
-            if (sVerbose) Log.v(TAG, "onInputMethodStartInputView() received");
+            if (sVerbose) Slog.v(TAG, "onInputMethodStartInputView() received");
             final AutofillInlineSuggestionsRequestSession session = mSession.get();
             if (session != null) {
                 session.mHandler.sendMessage(obtainMessage(
@@ -388,7 +391,7 @@ final class AutofillInlineSuggestionsRequestSession {
         @BinderThread
         @Override
         public void onInputMethodFinishInputView() {
-            if (sVerbose) Log.v(TAG, "onInputMethodFinishInputView() received");
+            if (sVerbose) Slog.v(TAG, "onInputMethodFinishInputView() received");
             final AutofillInlineSuggestionsRequestSession session = mSession.get();
             if (session != null) {
                 session.mHandler.sendMessage(obtainMessage(
@@ -399,7 +402,7 @@ final class AutofillInlineSuggestionsRequestSession {
 
         @Override
         public void onInputMethodFinishInput() throws RemoteException {
-            if (sVerbose) Log.v(TAG, "onInputMethodFinishInput() received");
+            if (sVerbose) Slog.v(TAG, "onInputMethodFinishInput() received");
             final AutofillInlineSuggestionsRequestSession session = mSession.get();
             if (session != null) {
                 session.mHandler.sendMessage(obtainMessage(

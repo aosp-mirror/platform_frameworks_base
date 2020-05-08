@@ -24,4 +24,6 @@ import com.android.internal.view.inline.IInlineContentCallback;
  */
 oneway interface IInlineContentProvider {
     void provideContent(int width, int height, in IInlineContentCallback callback);
+    void requestSurfacePackage();
+    void onSurfacePackageReleased();
 }

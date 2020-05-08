@@ -18,17 +18,19 @@ package android.service.autofill;
 
 import android.content.IntentSender;
 import android.os.IBinder;
+import android.service.autofill.IInlineSuggestionUi;
 import android.view.SurfaceControlViewHost;
 
 /**
- * Interface to receive events from inline suggestions.
+ * Interface to receive events from a remote inline suggestion UI.
  *
  * @hide
  */
 oneway interface IInlineSuggestionUiCallback {
     void onClick();
     void onLongClick();
-    void onContent(in SurfaceControlViewHost.SurfacePackage surface, int width, int height);
+    void onContent(in IInlineSuggestionUi content, in SurfaceControlViewHost.SurfacePackage surface,
+                   int width, int height);
     void onError();
     void onTransferTouchFocusToImeWindow(in IBinder sourceInputToken, int displayId);
     void onStartIntentSender(in IntentSender intentSender);
