@@ -96,9 +96,9 @@ public abstract class TetheringDependencies {
     /**
      * Get a reference to the EntitlementManager to be used by tethering.
      */
-    public EntitlementManager getEntitlementManager(Context ctx, StateMachine target,
-            SharedLog log, int what) {
-        return new EntitlementManager(ctx, target, log, what);
+    public EntitlementManager getEntitlementManager(Context ctx, Handler h, SharedLog log,
+            Runnable callback) {
+        return new EntitlementManager(ctx, h, log, callback);
     }
 
     /**
