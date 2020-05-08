@@ -35,6 +35,7 @@ import static com.android.internal.util.function.pooled.PooledLambda.obtainMessa
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityThread;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -57,6 +58,7 @@ import android.media.MediaRecorder;
 import android.media.soundtrigger.ISoundTriggerDetectionService;
 import android.media.soundtrigger.ISoundTriggerDetectionServiceClient;
 import android.media.soundtrigger.SoundTriggerDetectionService;
+import android.media.soundtrigger_middleware.Identity;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -223,7 +225,21 @@ public class SoundTriggerService extends SystemService {
 
     private synchronized void initSoundTriggerHelper() {
         if (mSoundTriggerHelper == null) {
-            mSoundTriggerHelper = new SoundTriggerHelper(mContext);
+            Identity middlemanIdentity = new Identity();
+            middlemanIdentity.packageName = ActivityThread.currentOpPackageName();
+
+            mSoundTriggerHelper = new SoundTriggerHelper(mContext, (moduleId,
+                    listener) -> {
+                // TODO(ytai): This is a temporary hack to retain prior behavior, which
+                //  makes
+                //  assumptions about process affinity and Binder context.
+                Identity originatorIdentity = new Identity();
+                originatorIdentity.uid = Binder.getCallingUid();
+                originatorIdentity.pid = Binder.getCallingUid();
+
+                return SoundTrigger.attachModuleAsMiddleman(moduleId, listener, null,
+                        middlemanIdentity, originatorIdentity);
+            });
         }
     }
 

@@ -2116,7 +2116,7 @@ public class SoundTrigger {
      * @hide
      */
     @UnsupportedAppUsage
-    public static SoundTriggerModule attachModule(int moduleId,
+    private static SoundTriggerModule attachModule(int moduleId,
             @NonNull StatusListener listener,
             @Nullable Handler handler) {
         // TODO(ytai): This is a temporary hack to retain prior behavior, which makes
