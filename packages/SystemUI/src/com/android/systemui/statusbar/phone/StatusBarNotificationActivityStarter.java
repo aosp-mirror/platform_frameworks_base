@@ -285,18 +285,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
         mLogger.logHandleClickAfterKeyguardDismissed(sbn.getKey());
 
         // TODO: Some of this code may be able to move to NotificationEntryManager.
-        if (mHeadsUpManager != null && mHeadsUpManager.isAlerting(sbn.getKey())) {
-            // Release the HUN notification to the shade.
-
-            if (mPresenter.isPresenterFullyCollapsed()) {
-                HeadsUpUtil.setIsClickedHeadsUpNotification(row, true);
-            }
-            //
-            // In most cases, when FLAG_AUTO_CANCEL is set, the notification will
-            // become canceled shortly by NoMan, but we can't assume that.
-            mHeadsUpManager.removeNotification(sbn.getKey(),
-                    true /* releaseImmediately */);
-        }
+        removeHUN(row);
         NotificationEntry parentToCancel = null;
         if (shouldAutoCancel(sbn) && mGroupManager.isOnlyChildInGroup(sbn)) {
             NotificationEntry summarySbn = mGroupManager.getLogicalGroupSummary(sbn);
@@ -461,8 +450,12 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
                                         row, mStatusBar.isOccluded())),
                                 new UserHandle(UserHandle.getUserId(appUid)));
                 mActivityLaunchAnimator.setLaunchResult(launchResult, true /* isActivityIntent */);
+
+                // Putting it back on the main thread, since we're touching views
+                mMainThreadHandler.post(() -> {
+                    removeHUN(row);
+                });
                 if (shouldCollapse()) {
-                    // Putting it back on the main thread, since we're touching views
                     mMainThreadHandler.post(() -> mCommandQueue.animateCollapsePanels(
                             CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL, true /* force */));
                 }
@@ -492,6 +485,20 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
             });
             return true;
         }, null, false /* afterKeyguardGone */);
+    }
+
+    private void removeHUN(ExpandableNotificationRow row) {
+        String key = row.getEntry().getSbn().getKey();
+        if (mHeadsUpManager != null && mHeadsUpManager.isAlerting(key)) {
+            // Release the HUN notification to the shade.
+            if (mPresenter.isPresenterFullyCollapsed()) {
+                HeadsUpUtil.setIsClickedHeadsUpNotification(row, true);
+            }
+
+            // In most cases, when FLAG_AUTO_CANCEL is set, the notification will
+            // become canceled shortly by NoMan, but we can't assume that.
+            mHeadsUpManager.removeNotification(key, true /* releaseImmediately */);
+        }
     }
 
     private void handleFullScreenIntent(NotificationEntry entry) {
