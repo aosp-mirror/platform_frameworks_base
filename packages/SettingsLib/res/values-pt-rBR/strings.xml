@@ -223,7 +223,7 @@
     <string name="adb_wireless_connection_failed_title" msgid="664211177427438438">"Falha na conexão"</string>
     <string name="adb_wireless_connection_failed_message" msgid="9213896700171602073">"Verifique se o <xliff:g id="DEVICE_NAME">%1$s</xliff:g> está conectado à rede correta"</string>
     <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"Parear com o dispositivo"</string>
-    <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"Código de pareamento de Wi‑Fi"</string>
+    <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"Código de pareamento por Wi‑Fi"</string>
     <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"Falha no pareamento"</string>
     <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"Verifique se o dispositivo está conectado à mesma rede."</string>
     <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"Parear dispositivo na rede Wi‑Fi fazendo a leitura do código QR"</string>
@@ -549,4 +549,10 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"Adicionar convidado"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Remover convidado"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Convidado"</string>
+    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Padrão do dispositivo"</string>
+    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Desativado"</string>
+    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Ativado"</string>
+    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"É necessário reinicializar o dispositivo para que a mudança seja aplicada. Faça isso agora ou cancele."</string>
+    <!-- no translation found for accessibility_work_profile_app_description (5470883112342119165) -->
+    <skip />
 </resources>
