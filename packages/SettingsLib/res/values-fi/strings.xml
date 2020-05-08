@@ -24,7 +24,7 @@
     <string name="wifi_security_none" msgid="7392696451280611452">"Ei mitään"</string>
     <string name="wifi_remembered" msgid="3266709779723179188">"Tallennettu"</string>
     <string name="wifi_disconnected" msgid="7054450256284661757">"Yhteys katkaistu"</string>
-    <string name="wifi_disabled_generic" msgid="2651916945380294607">"Pois käytöstä"</string>
+    <string name="wifi_disabled_generic" msgid="2651916945380294607">"Pois päältä"</string>
     <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"IP-kokoonpanovirhe"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="1302938248432705534">"Ei yhteyttä – verkko huonolaatuinen"</string>
     <string name="wifi_disabled_wifi_failure" msgid="8819554899148331100">"Wi-Fi-yhteysvirhe"</string>
@@ -276,7 +276,7 @@
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="2040810756832027227">"Striimaus: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="7887550926056143018">"Yksityinen DNS"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"Valitse yksityinen DNS-tila"</string>
-    <string name="private_dns_mode_off" msgid="7065962499349997041">"Pois käytöstä"</string>
+    <string name="private_dns_mode_off" msgid="7065962499349997041">"Pois päältä"</string>
     <string name="private_dns_mode_opportunistic" msgid="1947864819060442354">"Automaattinen"</string>
     <string name="private_dns_mode_provider" msgid="3619040641762557028">"Yksityisen DNS-tarjoajan isäntänimi"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"Anna isäntänimi tai DNS-tarjoaja"</string>
@@ -284,8 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Näytä langattoman näytön sertifiointiin liittyvät asetukset."</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Lisää Wi‑Fin lokikirjaustasoa, näytä SSID RSSI -kohtaisesti Wi‑Fi-valitsimessa."</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Vähentää virrankulutusta ja parantaa verkon toimintaa"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Kun tämä tila on päällä, laitteen MAC-osoite voi muuttua aina, kun laite yhdistää verkkoon, jossa MAC-satunnaistaminen on käytössä."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Maksullinen"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Maksuton"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Lokipuskurien koot"</string>
@@ -399,7 +398,7 @@
   </string-array>
     <string name="inactive_apps_title" msgid="5372523625297212320">"Valmiustilasovellukset"</string>
     <string name="inactive_app_inactive_summary" msgid="3161222402614236260">"Ei käytössä. Ota käyttöön koskettamalla."</string>
-    <string name="inactive_app_active_summary" msgid="8047630990208722344">"Käytössä. Poista käytöstä koskettamalla."</string>
+    <string name="inactive_app_active_summary" msgid="8047630990208722344">"Aktiivinen. Vaihda koskettamalla."</string>
     <string name="standby_bucket_summary" msgid="5128193447550429600">"Sovelluksen valmiusluokka: <xliff:g id="BUCKET"> %s</xliff:g>"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Käynnissä olevat palvelut"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Tarkastele ja hallitse käynnissä olevia palveluita."</string>
@@ -456,7 +455,7 @@
     <string name="battery_info_status_not_charging" msgid="8330015078868707899">"Kytketty virtalähteeseen, lataaminen ei onnistu"</string>
     <string name="battery_info_status_full" msgid="4443168946046847468">"Täynnä"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Järjestelmänvalvoja hallinnoi tätä asetusta."</string>
-    <string name="disabled" msgid="8017887509554714950">"Pois käytöstä"</string>
+    <string name="disabled" msgid="8017887509554714950">"Pois päältä"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Sallittu"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"Ei sallittu"</string>
     <string name="install_other_apps" msgid="3232595082023199454">"Tuntemattomien sovellusten asentaminen"</string>
@@ -550,4 +549,14 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"Lisää vieras"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Poista vieras"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Vieras"</string>
+    <!-- no translation found for cached_apps_freezer_device_default (2616594131750144342) -->
+    <skip />
+    <!-- no translation found for cached_apps_freezer_disabled (4816382260660472042) -->
+    <skip />
+    <!-- no translation found for cached_apps_freezer_enabled (8866703500183051546) -->
+    <skip />
+    <!-- no translation found for cached_apps_freezer_reboot_dialog_text (695330563489230096) -->
+    <skip />
+    <!-- no translation found for accessibility_work_profile_app_description (5470883112342119165) -->
+    <skip />
 </resources>

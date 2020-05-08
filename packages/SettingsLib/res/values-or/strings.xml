@@ -153,7 +153,7 @@
     <string name="unknown" msgid="3544487229740637809">"ଅଜଣା"</string>
     <string name="running_process_item_user_label" msgid="3988506293099805796">"ଉପଯୋଗକର୍ତ୍ତା: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"କିଛି ପୂର୍ବ-ନିର୍ଦ୍ଧାରିତ ମାନ ସେଟ୍‌ ହୋଇଛି"</string>
-    <string name="launch_defaults_none" msgid="8049374306261262709">"କୌଣସି ପୂର୍ବ-ନିର୍ଦ୍ଧାରଣ ସେଟ୍‍ ହୋଇନାହିଁ"</string>
+    <string name="launch_defaults_none" msgid="8049374306261262709">"କୌଣସି ଡିଫଲ୍ଟ ସେଟ୍‍ ହୋଇନାହିଁ"</string>
     <string name="tts_settings" msgid="8130616705989351312">"ଟେକ୍ସଟ-ରୁ-ସ୍ପିଚ୍ ସେଟିଂସ୍"</string>
     <string name="tts_settings_title" msgid="7602210956640483039">"ଟେକ୍ସଟ-ରୁ-ସ୍ପିଚ୍ ଆଉଟପୁଟ୍‌"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"ସ୍ପିଚ୍‌ ରେଟ୍"</string>
@@ -203,9 +203,9 @@
     <string name="vpn_settings_not_available" msgid="2894137119965668920">"VPN ସେଟିଙ୍ଗ ଏହି ଉପଯୋଗକର୍ତ୍ତାଙ୍କ ପାଇଁ ଉପଲବ୍ଧ ନୁହେଁ"</string>
     <string name="tethering_settings_not_available" msgid="266821736434699780">"ଏହି ଉପଯୋଗକର୍ତ୍ତାଙ୍କ ପାଇଁ ଟିଥରିଙ୍ଗ ସେଟିଙ୍ଗ ଉପଲବ୍ଧ ନାହିଁ"</string>
     <string name="apn_settings_not_available" msgid="1147111671403342300">"ଆକ୍ସେସ୍‌ ପଏଣ୍ଟ ନାମର ସେଟିଙ୍ଗ ଏହି ଉପଯୋଗକର୍ତ୍ତାଙ୍କ ପାଇଁ ଉପଲବ୍ଧ ନାହିଁ"</string>
-    <string name="enable_adb" msgid="8072776357237289039">"USB ଡିବଗ୍‌ ହେଉଛି"</string>
+    <string name="enable_adb" msgid="8072776357237289039">"USB ଡିବଗିଂ"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"USB ସଂଯୁକ୍ତ ହେବାବେଳେ ଡିବଗ୍‌ ମୋଡ୍‌"</string>
-    <string name="clear_adb_keys" msgid="3010148733140369917">"USB ଡିବଗିଙ୍ଗ ଅଧିକାରକୁ କାଢ଼ିଦିଅନ୍ତୁ"</string>
+    <string name="clear_adb_keys" msgid="3010148733140369917">"USB ଡିବଗିଂ ଅଧିକାରକୁ ବାତିଲ୍ କରନ୍ତୁ"</string>
     <string name="enable_adb_wireless" msgid="6973226350963971018">"ୱାୟାରଲେସ୍ ଡିବଗିଂ"</string>
     <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"ୱାଇ-ଫାଇ ସଂଯୁକ୍ତ ଥିବା ବେଳେ ଡିବଗ୍ ମୋଡ୍"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"ତ୍ରୁଟି"</string>
@@ -222,7 +222,7 @@
     <string name="adb_device_fingerprint_title_format" msgid="291504822917843701">"ଡିଭାଇସ୍ ଫିଙ୍ଗରପ୍ରିଣ୍ଟ: <xliff:g id="FINGERPRINT_PARAM">%1$s</xliff:g>"</string>
     <string name="adb_wireless_connection_failed_title" msgid="664211177427438438">"ସଂଯୋଗ ବିଫଳ ହେଲା"</string>
     <string name="adb_wireless_connection_failed_message" msgid="9213896700171602073">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> ଫୋନ୍ ନେଟୱାର୍କ ସହ ସଂଯୁକ୍ତ ଥିବା ସୁନିଶ୍ଚିତ କରନ୍ତୁ"</string>
-    <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"ଡିଭାଇସରୁ ପେୟାର୍ କରନ୍ତୁ"</string>
+    <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"ଡିଭାଇସରେ ପେୟାର୍ କରନ୍ତୁ"</string>
     <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"ୱାଇ-ଫାଇ ପେୟାରିଂ କୋଡ୍"</string>
     <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"ପେୟାରିଂ ବିଫଳ ହେଲା"</string>
     <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"ଡିଭାଇସଟି ସମାନ ନେଟୱାର୍କରେ ସଂଯୋଗ ହୋଇଥିବା ସୁନିଶ୍ଚିତ କରନ୍ତୁ।"</string>
@@ -284,8 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"ୱେୟାରଲେସ୍‌ ଡିସ୍‌ପ୍ଲେ ସାର୍ଟିଫିକେସନ୍ ପାଇଁ ବିକଳ୍ପ ଦେଖାନ୍ତୁ"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"ୱାଇ-ଫାଇ ଲଗିଙ୍ଗ ସ୍ତର ବଢ଼ାନ୍ତୁ, ୱାଇ-ଫାଇ ପିକର୍‌ରେ ପ୍ରତି SSID RSSI ଦେଖାନ୍ତୁ"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"ବ୍ୟାଟେରୀ ଖର୍ଚ୍ଚ କମ୍ ଏବଂ ନେଟ୍‌ୱାର୍କ କାର୍ଯ୍ୟକ୍ଷମତା ଉନ୍ନତ କରିଥାଏ"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"ଯେତେବେଳେ ଏହି ମୋଡ୍ ସକ୍ଷମ ହୁଏ, ପ୍ରତ୍ୟେକ ଥର MAC ରେଣ୍ଡୋମାଇଜେସନ୍ ସକ୍ଷମ ଥିବା କୌଣସି ନେଟୱାର୍କ ସହ ଏହି ଡିଭାଇସ୍ ସଂଯୋଗ ହେଲେ ଏହାର MAC ଠିକଣା ବଦଳିପାରେ।"</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"ମପାଯାଉଥିବା"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"ମପାଯାଉନଥିବା"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"ଲଗର୍‌ ବଫର୍‌ ସାଇଜ୍"</string>
@@ -550,4 +549,14 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"ଅତିଥି ଯୋଗ କରନ୍ତୁ"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"ଅତିଥିଙ୍କୁ କାଢ଼ି ଦିଅନ୍ତୁ"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"ଅତିଥି"</string>
+    <!-- no translation found for cached_apps_freezer_device_default (2616594131750144342) -->
+    <skip />
+    <!-- no translation found for cached_apps_freezer_disabled (4816382260660472042) -->
+    <skip />
+    <!-- no translation found for cached_apps_freezer_enabled (8866703500183051546) -->
+    <skip />
+    <!-- no translation found for cached_apps_freezer_reboot_dialog_text (695330563489230096) -->
+    <skip />
+    <!-- no translation found for accessibility_work_profile_app_description (5470883112342119165) -->
+    <skip />
 </resources>

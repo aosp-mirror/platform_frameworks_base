@@ -224,7 +224,7 @@
     <string name="adb_wireless_connection_failed_message" msgid="9213896700171602073">"Hakikisha kuwa <xliff:g id="DEVICE_NAME">%1$s</xliff:g> kimeunganishwa kwenye mtandao sahihi"</string>
     <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"Oanisha na kifaa"</string>
     <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"Msimbo wa kuoanisha wa Wi-Fi"</string>
-    <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"Imeshindwa kuunganisha"</string>
+    <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"Imeshindwa kuoanisha"</string>
     <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"Hakikisha kuwa kifaa kimeunganishwa kwenye mtandao mmoja."</string>
     <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"Oanisha kifaa kupitia Wi-Fi kwa kuchanganua msimbo wa QR"</string>
     <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"Inaoanisha kifaa…"</string>
@@ -549,4 +549,10 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"Weka mgeni"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Ondoa mgeni"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Mgeni"</string>
+    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Hali chaguomsingi ya kifaa"</string>
+    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Imezimwa"</string>
+    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Imewashwa"</string>
+    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Ni lazima uwashe tena kifaa chako ili mabadiliko haya yatekelezwe. Washa tena sasa au ughairi."</string>
+    <!-- no translation found for accessibility_work_profile_app_description (5470883112342119165) -->
+    <skip />
 </resources>

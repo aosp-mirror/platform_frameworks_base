@@ -153,7 +153,7 @@
     <string name="unknown" msgid="3544487229740637809">"ناشناس"</string>
     <string name="running_process_item_user_label" msgid="3988506293099805796">"کاربر: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"بعضی پیش‌فرض‌ها تنظیم شده‌اند"</string>
-    <string name="launch_defaults_none" msgid="8049374306261262709">"هیچ پیش‌فرضی تنظیم نشده است"</string>
+    <string name="launch_defaults_none" msgid="8049374306261262709">"پیش‌فرضی تنظیم نشده است"</string>
     <string name="tts_settings" msgid="8130616705989351312">"تنظیمات متن به گفتار"</string>
     <string name="tts_settings_title" msgid="7602210956640483039">"خروجی تبدیل متن به گفتار"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"سرعت گفتار"</string>
@@ -549,4 +549,10 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"افزودن مهمان"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"حذف مهمان"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"مهمان"</string>
+    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"پیش‌فرض دستگاه"</string>
+    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"غیرفعال"</string>
+    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"فعال"</string>
+    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"برای اعمال این تغییر، دستگاهتان باید راه‌اندازی مجدد شود. اکنون راه‌اندازی مجدد کنید یا لغو کنید."</string>
+    <!-- no translation found for accessibility_work_profile_app_description (5470883112342119165) -->
+    <skip />
 </resources>

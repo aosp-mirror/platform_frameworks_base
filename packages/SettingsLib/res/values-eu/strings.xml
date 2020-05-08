@@ -284,8 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Erakutsi hari gabe bistaratzeko ziurtagiriaren aukerak"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Erakutsi datu gehiago wifi-sareetan saioa hastean. Erakutsi sarearen identifikatzailea eta seinalearen indarra wifi-sareen hautatzailean."</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Bateria gutxiago kontsumituko da, eta sarearen errendimendua hobetuko."</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Modu hau gaituta dagoenean, baliteke gailuaren MAC helbidea aldatzea MAC helbideak ausaz antolatzeko aukera gaituta daukan sare batera konektatzen den bakoitzean."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Sare neurtua"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Neurtu gabeko sarea"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Erregistroen buffer-tamainak"</string>
@@ -550,4 +549,10 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"Gehitu gonbidatua"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Kendu gonbidatua"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Gonbidatua"</string>
+    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Gailuaren balio lehenetsia"</string>
+    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Desgaituta"</string>
+    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Gaituta"</string>
+    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Aldaketa aplikatzeko, berrabiarazi egin behar da gailua. Berrabiaraz ezazu orain, edo utzi bertan behera."</string>
+    <!-- no translation found for accessibility_work_profile_app_description (5470883112342119165) -->
+    <skip />
 </resources>

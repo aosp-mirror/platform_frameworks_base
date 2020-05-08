@@ -210,7 +210,7 @@
     <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Wi‑Fi가 연결되었을 때 디버그 모드 사용"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"오류"</string>
     <string name="adb_wireless_settings" msgid="2295017847215680229">"무선 디버깅"</string>
-    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"사용 가능한 기기를 보고 사용하려면 무선 디버깅을 사용 설정하세요."</string>
+    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"사용 가능한 기기를 확인하고 사용하려면 무선 디버깅을 사용 설정하세요."</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"QR 코드로 기기 페어링"</string>
     <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"QR 코드 스캐너를 사용하여 새 기기 페어링"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"페어링 코드로 기기 페어링"</string>
@@ -549,4 +549,14 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"게스트 추가"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"게스트 삭제"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"게스트"</string>
+    <!-- no translation found for cached_apps_freezer_device_default (2616594131750144342) -->
+    <skip />
+    <!-- no translation found for cached_apps_freezer_disabled (4816382260660472042) -->
+    <skip />
+    <!-- no translation found for cached_apps_freezer_enabled (8866703500183051546) -->
+    <skip />
+    <!-- no translation found for cached_apps_freezer_reboot_dialog_text (695330563489230096) -->
+    <skip />
+    <!-- no translation found for accessibility_work_profile_app_description (5470883112342119165) -->
+    <skip />
 </resources>
