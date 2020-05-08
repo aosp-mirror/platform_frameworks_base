@@ -61,7 +61,7 @@
   <string-array name="bt_hci_snoop_log_entries">
     <item msgid="695678520785580527">"Ei käytössä"</item>
     <item msgid="6336372935919715515">"Suodatus käytössä"</item>
-    <item msgid="2779123106632690576">"Käytössä"</item>
+    <item msgid="2779123106632690576">"Päällä"</item>
   </string-array>
   <string-array name="bluetooth_avrcp_versions">
     <item msgid="8036025277512210160">"AVRCP 1.4 (oletus)"</item>
@@ -242,7 +242,7 @@
     <item msgid="1212561935004167943">"Korosta testatut piirtokom. vihreällä"</item>
   </string-array>
   <string-array name="track_frame_time_entries">
-    <item msgid="634406443901014984">"Pois käytöstä"</item>
+    <item msgid="634406443901014984">"Pois päältä"</item>
     <item msgid="1288760936356000927">"Ruudulla palkkeina"</item>
     <item msgid="5023908510820531131">"Kohteessa <xliff:g id="AS_TYPED_COMMAND">adb shell dumpsys gfxinfo</xliff:g>"</item>
   </string-array>
