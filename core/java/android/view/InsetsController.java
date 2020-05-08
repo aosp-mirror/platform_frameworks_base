@@ -667,7 +667,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         if (hideTypes[0] != 0) {
             applyAnimation(hideTypes[0], false /* show */, false /* fromIme */);
         }
-        if (hasControl) {
+        if (hasControl && mRequestedState.getSourcesCount() > 0) {
             // We might have changed our requested visibilities while we don't have the control,
             // so we need to update our requested state once we have control. Otherwise, our
             // requested state at the server side might be incorrect.
@@ -1065,7 +1065,14 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             if (consumer.getControl() != null) {
                 final InsetsSource localSource = mState.getSource(type);
                 if (!localSource.equals(mRequestedState.peekSource(type))) {
+                    // Our requested state is stale. Update it here and send it to window manager.
                     mRequestedState.addSource(new InsetsSource(localSource));
+                    changed = true;
+                }
+                if (!localSource.equals(mLastDispatchedState.peekSource(type))) {
+                    // The server state is not what we expected. This can happen while we don't have
+                    // the control. Since we have the control now, we need to send our request again
+                    // to modify the server state.
                     changed = true;
                 }
             }
