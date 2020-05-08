@@ -16,6 +16,8 @@
 
 package com.android.systemui.media;
 
+import static com.android.systemui.util.SysuiLifecycle.viewAttachLifecycle;
+
 import android.annotation.LayoutRes;
 import android.app.PendingIntent;
 import android.content.ComponentName;
@@ -28,9 +30,9 @@ import android.content.pm.ResolveInfo;
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.ImageDecoder;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
-import android.graphics.drawable.Icon;
 import android.graphics.drawable.RippleDrawable;
 import android.media.MediaDescription;
 import android.media.MediaMetadata;
@@ -50,10 +52,12 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.motion.widget.MotionLayout;
+import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.core.graphics.drawable.RoundedBitmapDrawable;
 import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory;
 
@@ -65,6 +69,9 @@ import com.android.systemui.R;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.qs.QSMediaBrowser;
 import com.android.systemui.util.Assert;
+import com.android.systemui.util.concurrency.DelayableExecutor;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.util.List;
@@ -76,6 +83,18 @@ import java.util.concurrent.Executor;
 public class MediaControlPanel {
     private static final String TAG = "MediaControlPanel";
     @Nullable private final LocalMediaManager mLocalMediaManager;
+
+    // Button IDs for QS controls
+    static final int[] ACTION_IDS = {
+            R.id.action0,
+            R.id.action1,
+            R.id.action2,
+            R.id.action3,
+            R.id.action4
+    };
+
+    private final SeekBarViewModel mSeekBarViewModel;
+    private final SeekBarObserver mSeekBarObserver;
     private final Executor mForegroundExecutor;
     protected final Executor mBackgroundExecutor;
     private final ActivityStarter mActivityStarter;
@@ -92,23 +111,12 @@ public class MediaControlPanel {
     private boolean mIsRegistered = false;
     private String mKey;
 
-    private final int[] mActionIds;
-
     public static final String MEDIA_PREFERENCES = "media_control_prefs";
     public static final String MEDIA_PREFERENCE_KEY = "browser_components";
     private SharedPreferences mSharedPrefs;
     private boolean mCheckedForResumption = false;
     private boolean mIsRemotePlayback;
     private QSMediaBrowser mQSMediaBrowser;
-
-    // Button IDs used in notifications
-    protected static final int[] NOTIF_ACTION_IDS = {
-            com.android.internal.R.id.action0,
-            com.android.internal.R.id.action1,
-            com.android.internal.R.id.action2,
-            com.android.internal.R.id.action3,
-            com.android.internal.R.id.action4
-    };
 
     // URI fields to try loading album art from
     private static final String[] ART_URIS = {
@@ -183,12 +191,11 @@ public class MediaControlPanel {
      * @param activityStarter activity starter
      */
     public MediaControlPanel(Context context, ViewGroup parent,
-            @Nullable LocalMediaManager routeManager, @LayoutRes int layoutId, int[] actionIds,
-            Executor foregroundExecutor, Executor backgroundExecutor,
-            ActivityStarter activityStarter) {
+            @Nullable LocalMediaManager routeManager, Executor foregroundExecutor,
+            DelayableExecutor backgroundExecutor, ActivityStarter activityStarter) {
         mContext = context;
         LayoutInflater inflater = LayoutInflater.from(mContext);
-        mMediaNotifView = (MotionLayout) inflater.inflate(layoutId, parent, false);
+        mMediaNotifView = (MotionLayout) inflater.inflate(R.layout.qs_media_panel, parent, false);
         // TODO(b/150854549): removeOnAttachStateChangeListener when this doesn't inflate views
         // mStateListener shouldn't need to be unregistered since this object shares the same
         // lifecycle with the inflated view. It would be better, however, if this controller used an
@@ -196,18 +203,39 @@ public class MediaControlPanel {
         // mStateListener to be unregistered in detach.
         mMediaNotifView.addOnAttachStateChangeListener(mStateListener);
         mLocalMediaManager = routeManager;
-        mActionIds = actionIds;
         mForegroundExecutor = foregroundExecutor;
         mBackgroundExecutor = backgroundExecutor;
         mActivityStarter = activityStarter;
+        mSeekBarViewModel = new SeekBarViewModel(backgroundExecutor);
+        mSeekBarObserver = new SeekBarObserver(getView());
+        // Can't use the viewAttachLifecycle of media player because remove/add is used to adjust
+        // priority of players. As soon as it is removed, the lifecycle will end and the seek bar
+        // will stop updating. So, use the lifecycle of the parent instead.
+        // TODO: this parent is also detached, need to fix that
+        mSeekBarViewModel.getProgress().observe(viewAttachLifecycle(parent), mSeekBarObserver);
+        SeekBar bar = getView().findViewById(R.id.media_progress_bar);
+        bar.setOnSeekBarChangeListener(mSeekBarViewModel.getSeekBarListener());
+        bar.setOnTouchListener(mSeekBarViewModel.getSeekBarTouchListener());
     }
 
     /**
      * Get the view used to display media controls
      * @return the view
      */
-    public View getView() {
+    public MotionLayout getView() {
         return mMediaNotifView;
+    }
+
+    /**
+     * Sets the listening state of the player.
+     *
+     * Should be set to true when the QS panel is open. Otherwise, false. This is a signal to avoid
+     * unnecessary work when the QS panel is closed.
+     *
+     * @param listening True when player should be active. Otherwise, false.
+     */
+    public void setListening(boolean listening) {
+        mSeekBarViewModel.setListening(listening);
     }
 
     /**
@@ -219,20 +247,12 @@ public class MediaControlPanel {
     }
 
     /**
-     * Update the media panel view for the given media session
-     * @param token
-     * @param iconDrawable
-     * @param largeIcon
-     * @param iconColor
-     * @param bgColor
-     * @param contentIntent
-     * @param appNameString
-     * @param key
+     * Bind this view based on the data given
      */
-    public void setMediaSession(MediaSession.Token token, Drawable iconDrawable, Icon largeIcon,
-            int iconColor, int bgColor, PendingIntent contentIntent, String appNameString,
-            String key) {
-        // Ensure that component names are updated if token has changed
+    public void bind(@NotNull MediaData data) {
+        mToken = data.getToken();
+        mForegroundColor = data.getForegroundColor();
+        mBackgroundColor = data.getBackgroundColor();
         if (mToken == null || !mToken.equals(token)) {
             if (mQSMediaBrowser != null) {
                 Log.d(TAG, "Disconnecting old media browser");
@@ -244,8 +264,6 @@ public class MediaControlPanel {
             mCheckedForResumption = false;
         }
 
-        mForegroundColor = iconColor;
-        mBackgroundColor = bgColor;
         mController = new MediaController(mContext, mToken);
         mKey = key;
 
@@ -258,6 +276,7 @@ public class MediaControlPanel {
             PackageManager pm = mContext.getPackageManager();
             Intent resumeIntent = new Intent(MediaBrowserService.SERVICE_INTERFACE);
             List<ResolveInfo> resumeInfo = pm.queryIntentServices(resumeIntent, 0);
+            // TODO: look into this resumption
             if (resumeInfo != null) {
                 for (ResolveInfo inf : resumeInfo) {
                     if (inf.serviceInfo.packageName.equals(mController.getPackageName())) {
@@ -272,20 +291,33 @@ public class MediaControlPanel {
 
         mController.registerCallback(mSessionCallback);
 
+        albumView.setImageDrawable(data.getArtwork());
+
         mMediaNotifView.setBackgroundTintList(ColorStateList.valueOf(mBackgroundColor));
 
         // Click action
-        if (contentIntent != null) {
+        PendingIntent clickIntent = data.getClickIntent();
+        if (clickIntent != null) {
             mMediaNotifView.setOnClickListener(v -> {
-                mActivityStarter.postStartActivityDismissingKeyguard(contentIntent);
+                mActivityStarter.postStartActivityDismissingKeyguard(clickIntent);
             });
         }
 
         // App icon
-        ImageView appIcon = mMediaNotifView.findViewById(R.id.icon);
+        ImageView appIcon = mMediaNotifView.requireViewById(R.id.icon);
+        // TODO: look at iconDrawable
+        Drawable iconDrawable = data.getAppIcon();
         iconDrawable.setTint(mForegroundColor);
         appIcon.setImageDrawable(iconDrawable);
 
+        TextView titleText = mMediaNotifView.requireViewById(R.id.header_title);
+        titleText.setText(data.getSong());
+        TextView appName = mMediaNotifView.requireViewById(R.id.app_name);
+        appName.setText(data.getApp());
+        appName.setTextColor(mForegroundColor);
+        TextView artistText = mMediaNotifView.requireViewById(R.id.header_artist);
+        artistText.setText(data.getArtist());
+        artistText.setTextColor(mForegroundColor);
         // Transfer chip
         mSeamless = mMediaNotifView.findViewById(R.id.media_seamless);
         if (mSeamless != null) {
@@ -312,6 +344,54 @@ public class MediaControlPanel {
             Log.d(TAG, "PlaybackInfo was null. Defaulting to local playback.");
             mIsRemotePlayback = false;
         }
+
+        ConstraintSet expandedSet = mMediaNotifView.getConstraintSet(R.id.expanded);
+        ConstraintSet collapsedSet = mMediaNotifView.getConstraintSet(R.id.collapsed);
+        List<Integer> actionsWhenCollapsed = data.getActionsToShowInCompact();
+        // Media controls
+        int i = 0;
+        List<MediaAction> actionIcons = data.getActions();
+        for (; i < actionIcons.size() && i < ACTION_IDS.length; i++) {
+            final ImageButton button = mMediaNotifView.findViewById(ACTION_IDS[i]);
+            MediaAction mediaAction = actionIcons.get(i);
+            button.setImageDrawable(mediaAction.getDrawable());
+            button.setContentDescription(mediaAction.getContentDescription());
+            button.setImageTintList(ColorStateList.valueOf(mForegroundColor));
+            PendingIntent actionIntent = mediaAction.getIntent();
+
+            if (mMediaNotifView.getBackground() instanceof IlluminationDrawable) {
+                ((IlluminationDrawable) mMediaNotifView.getBackground())
+                        .setupTouch(button, mMediaNotifView);
+            }
+
+            button.setOnClickListener(v -> {
+                if (actionIntent != null) {
+                    try {
+                        actionIntent.send();
+                    } catch (PendingIntent.CanceledException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+            boolean visibleInCompat = actionsWhenCollapsed.contains(i);
+            collapsedSet.setVisibility(ACTION_IDS[i],
+                    visibleInCompat ? ConstraintSet.VISIBLE : ConstraintSet.GONE);
+            expandedSet.setVisibility(ACTION_IDS[i], ConstraintSet.VISIBLE);
+        }
+
+        // Hide any unused buttons
+        for (; i < ACTION_IDS.length; i++) {
+            expandedSet.setVisibility(ACTION_IDS[i], ConstraintSet.GONE);
+            collapsedSet.setVisibility(ACTION_IDS[i], ConstraintSet.GONE);
+        }
+
+        // Seek Bar
+        final MediaController controller = new MediaController(getContext(), data.getToken());
+        mBackgroundExecutor.execute(
+                () -> mSeekBarViewModel.updateController(controller, data.getForegroundColor()));
+
+        // Set up long press menu
+        // TODO: b/156036025 bring back media guts
 
         makeActive();
 
@@ -614,15 +694,16 @@ public class MediaControlPanel {
      */
     protected void resetButtons() {
         // Hide all the old buttons
-        for (int i = 0; i < mActionIds.length; i++) {
-            ImageButton thisBtn = mMediaNotifView.findViewById(mActionIds[i]);
-            if (thisBtn != null) {
-                thisBtn.setVisibility(View.GONE);
-            }
+
+        ConstraintSet expandedSet = mMediaNotifView.getConstraintSet(R.id.expanded);
+        ConstraintSet collapsedSet = mMediaNotifView.getConstraintSet(R.id.collapsed);
+        for (int i = 1; i < ACTION_IDS.length; i++) {
+            expandedSet.setVisibility(ACTION_IDS[i], ConstraintSet.GONE);
+            collapsedSet.setVisibility(ACTION_IDS[i], ConstraintSet.GONE);
         }
 
         // Add a restart button
-        ImageButton btn = mMediaNotifView.findViewById(mActionIds[0]);
+        ImageButton btn = mMediaNotifView.findViewById(ACTION_IDS[0]);
         btn.setOnClickListener(v -> {
             Log.d(TAG, "Attempting to restart session");
             if (mQSMediaBrowser != null) {
@@ -644,7 +725,20 @@ public class MediaControlPanel {
         });
         btn.setImageDrawable(mContext.getResources().getDrawable(R.drawable.lb_ic_play));
         btn.setImageTintList(ColorStateList.valueOf(mForegroundColor));
-        btn.setVisibility(View.VISIBLE);
+        expandedSet.setVisibility(ACTION_IDS[0], ConstraintSet.VISIBLE);
+        collapsedSet.setVisibility(ACTION_IDS[0], ConstraintSet.VISIBLE);
+
+        mSeekBarViewModel.clearController();
+        // TODO: fix guts
+        //        View guts = mMediaNotifView.findViewById(R.id.media_guts);
+        View options = mMediaNotifView.findViewById(R.id.qs_media_controls_options);
+
+        mMediaNotifView.setOnLongClickListener(v -> {
+            // Replace player view with close/cancel view
+//            guts.setVisibility(View.GONE);
+            options.setVisibility(View.VISIBLE);
+            return true; // consumed click
+        });
     }
 
     private void makeActive() {
@@ -668,7 +762,6 @@ public class MediaControlPanel {
             mIsRegistered = false;
         }
     }
-
     /**
      * Verify that we can connect to the given component with a MediaBrowser, and if so, add that
      * component to the list of resumption components

@@ -18,38 +18,36 @@ package com.android.systemui.qs;
 
 import static com.android.systemui.util.InjectionInflationController.VIEW_CONTEXT;
 
-import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
+import androidx.annotation.NonNull;
 import com.android.internal.logging.UiEventLogger;
-import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
-import com.android.systemui.dagger.qualifiers.Background;
-import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.media.MediaData;
+import com.android.systemui.media.MediaHierarchyManager;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTile.SignalState;
 import com.android.systemui.plugins.qs.QSTile.State;
 import com.android.systemui.qs.customize.QSCustomizer;
 import com.android.systemui.qs.logging.QSLogger;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
 import com.android.systemui.util.Utils;
-import com.android.systemui.util.concurrency.DelayableExecutor;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -63,20 +61,34 @@ public class QuickQSPanel extends QSPanel {
     private static final String TAG = "QuickQSPanel";
     // Start it at 6 so a non-zero value can be obtained statically.
     private static int sDefaultMaxTiles = 6;
+    private final NotificationMediaManager mNotificationMediaManager;
 
     private boolean mDisabledByPolicy;
     private int mMaxTiles;
     protected QSPanel mFullPanel;
-    private QuickQSMediaPlayer mMediaPlayer;
     /** Whether or not the QS media player feature is enabled. */
     private boolean mUsingMediaPlayer;
     /** Whether or not the QuickQSPanel currently contains a media player. */
-    private boolean mHasMediaPlayer;
+    private boolean mShowHorizontalTileLayout;
     private LinearLayout mHorizontalLinearLayout;
 
     // Only used with media
-    private QSTileLayout mMediaTileLayout;
+    private QSTileLayout mHorizontalTileLayout;
     private QSTileLayout mRegularTileLayout;
+    private int mLastOrientation = -1;
+    private ViewGroup mMediaHost;
+    private final NotificationMediaManager.MediaListener mMediaCallback
+            = new NotificationMediaManager.MediaListener() {
+        @Override
+        public void onMediaDataLoaded(@NonNull String key, @NonNull MediaData data) {
+            switchTileLayout();
+        }
+
+        @Override
+        public void onMediaDataRemoved(@NonNull String key) {
+            switchTileLayout();
+        }
+    };
 
     @Inject
     public QuickQSPanel(
@@ -85,16 +97,14 @@ public class QuickQSPanel extends QSPanel {
             DumpManager dumpManager,
             BroadcastDispatcher broadcastDispatcher,
             QSLogger qsLogger,
-            @Main Executor foregroundExecutor,
-            @Background DelayableExecutor backgroundExecutor,
-            @Nullable LocalBluetoothManager localBluetoothManager,
+            MediaHierarchyManager mediaHierarchyManager,
+            NotificationMediaManager notificationMediaManager,
             ActivityStarter activityStarter,
-            NotificationEntryManager entryManager,
             UiEventLogger uiEventLogger
     ) {
         super(context, attrs, dumpManager, broadcastDispatcher, qsLogger,
-                foregroundExecutor, backgroundExecutor, localBluetoothManager, activityStarter,
-                entryManager, uiEventLogger);
+                mediaHierarchyManager, activityStarter, uiEventLogger);
+        mNotificationMediaManager = notificationMediaManager;
         if (mFooter != null) {
             removeView(mFooter.getView());
         }
@@ -107,23 +117,17 @@ public class QuickQSPanel extends QSPanel {
 
         mUsingMediaPlayer = Utils.useQsMediaPlayer(context);
         if (mUsingMediaPlayer) {
+            mNotificationMediaManager.addCallback(mMediaCallback);
             mHorizontalLinearLayout = new LinearLayout(mContext);
             mHorizontalLinearLayout.setOrientation(LinearLayout.HORIZONTAL);
             mHorizontalLinearLayout.setClipChildren(false);
             mHorizontalLinearLayout.setClipToPadding(false);
 
-            int marginSize = (int) mContext.getResources().getDimension(R.dimen.qqs_media_spacing);
-            mMediaPlayer = new QuickQSMediaPlayer(mContext, mHorizontalLinearLayout,
-                    foregroundExecutor, backgroundExecutor, activityStarter);
-            LayoutParams lp2 = new LayoutParams(0, LayoutParams.MATCH_PARENT, 1);
-            lp2.setMarginEnd(marginSize);
-            lp2.setMarginStart(0);
-            mHorizontalLinearLayout.addView(mMediaPlayer.getView(), lp2);
-
             mTileLayout = new DoubleLineTileLayout(context, mUiEventLogger);
-            mMediaTileLayout = mTileLayout;
+            mHorizontalTileLayout = mTileLayout;
             mRegularTileLayout = new HeaderTileLayout(context, mUiEventLogger);
             LayoutParams lp = new LayoutParams(0, LayoutParams.MATCH_PARENT, 1);
+            int marginSize = (int) mContext.getResources().getDimension(R.dimen.qqs_media_spacing);
             lp.setMarginEnd(0);
             lp.setMarginStart(marginSize);
             mHorizontalLinearLayout.addView((View) mTileLayout, lp);
@@ -135,6 +139,7 @@ public class QuickQSPanel extends QSPanel {
             ((View) mRegularTileLayout).setVisibility(View.GONE);
             addView((View) mRegularTileLayout, 0);
             super.setPadding(0, 0, 0, 0);
+            reAttachMediaHost();
         } else {
             sDefaultMaxTiles = getResources().getInteger(R.integer.quick_qs_panel_max_columns);
             mTileLayout = new HeaderTileLayout(context, mUiEventLogger);
@@ -144,8 +149,24 @@ public class QuickQSPanel extends QSPanel {
         }
     }
 
-    public QuickQSMediaPlayer getMediaPlayer() {
-        return mMediaPlayer;
+    private void reAttachMediaHost() {
+        ViewGroup newParent = shouldUseHorizontalTileLayout() ? mHorizontalLinearLayout : this;
+        ViewGroup currentParent = (ViewGroup) mMediaHost.getParent();
+        if (currentParent != newParent) {
+            if (currentParent != null) {
+                currentParent.removeView(mMediaHost);
+            }
+            newParent.addView(mMediaHost);
+            ViewGroup.LayoutParams layoutParams = mMediaHost.getLayoutParams();
+            layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT;
+            layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT;
+        }
+    }
+
+    @Override
+    protected void addMediaHostView() {
+        mMediaHost = mMediaHiearchyManager.createMediaHost(
+                MediaHierarchyManager.LOCATION_QQS);
     }
 
     @Override
@@ -167,6 +188,7 @@ public class QuickQSPanel extends QSPanel {
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         Dependency.get(TunerService.class).removeTunable(mNumTiles);
+        mNotificationMediaManager.removeCallback(mMediaCallback);
     }
 
     @Override
@@ -191,10 +213,19 @@ public class QuickQSPanel extends QSPanel {
         super.drawTile(r, state);
     }
 
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        if (newConfig.orientation != mLastOrientation) {
+            mLastOrientation = newConfig.orientation;
+            switchTileLayout();
+        }
+    }
+
     boolean switchTileLayout() {
         if (!mUsingMediaPlayer) return false;
-        mHasMediaPlayer = mMediaPlayer.hasMediaSession();
-        if (mHasMediaPlayer && mHorizontalLinearLayout.getVisibility() == View.GONE) {
+        mShowHorizontalTileLayout = shouldUseHorizontalTileLayout();
+        if (mShowHorizontalTileLayout && mHorizontalLinearLayout.getVisibility() == View.GONE) {
             mHorizontalLinearLayout.setVisibility(View.VISIBLE);
             ((View) mRegularTileLayout).setVisibility(View.GONE);
             mTileLayout.setListening(false);
@@ -202,11 +233,13 @@ public class QuickQSPanel extends QSPanel {
                 mTileLayout.removeTile(record);
                 record.tile.removeCallback(record.callback);
             }
-            mTileLayout = mMediaTileLayout;
+            mTileLayout = mHorizontalTileLayout;
             if (mHost != null) setTiles(mHost.getTiles());
             mTileLayout.setListening(mListening);
+            reAttachMediaHost();
             return true;
-        } else if (!mHasMediaPlayer && mHorizontalLinearLayout.getVisibility() == View.VISIBLE) {
+        } else if (!mShowHorizontalTileLayout
+                && mHorizontalLinearLayout.getVisibility() == View.VISIBLE) {
             mHorizontalLinearLayout.setVisibility(View.GONE);
             ((View) mRegularTileLayout).setVisibility(View.VISIBLE);
             mTileLayout.setListening(false);
@@ -217,14 +250,21 @@ public class QuickQSPanel extends QSPanel {
             mTileLayout = mRegularTileLayout;
             if (mHost != null) setTiles(mHost.getTiles());
             mTileLayout.setListening(mListening);
+            reAttachMediaHost();
             return true;
         }
         return false;
     }
 
-    /** Returns true if this panel currently contains a media player. */
-    public boolean hasMediaPlayer() {
-        return mHasMediaPlayer;
+    private boolean shouldUseHorizontalTileLayout() {
+        return mNotificationMediaManager.hasActiveMedia()
+                && getResources().getConfiguration().orientation
+                        == Configuration.ORIENTATION_LANDSCAPE;
+    }
+
+    /** Returns true if this panel currently uses a horizontal tile layout. */
+    public boolean usesHorizontalLayout() {
+        return mShowHorizontalTileLayout;
     }
 
     @Override

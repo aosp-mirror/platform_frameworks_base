@@ -29,10 +29,12 @@ import android.content.Intent;
 import android.provider.Settings;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.keyguard.KeyguardMediaPlayer;
 import com.android.systemui.R;
+import com.android.systemui.media.KeyguardMediaController;
+import com.android.systemui.media.MediaHierarchyManager;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.StatusBarState;
@@ -74,8 +76,8 @@ public class NotificationSectionsManager implements StackScrollAlgorithm.Section
     private final StatusBarStateController mStatusBarStateController;
     private final ConfigurationController mConfigurationController;
     private final PeopleHubViewAdapter mPeopleHubViewAdapter;
-    private final KeyguardMediaPlayer mKeyguardMediaPlayer;
     private final NotificationSectionsFeatureManager mSectionsFeatureManager;
+    private final KeyguardMediaController mKeyguardMediaController;
     private final int mNumberOfSections;
 
     private final PeopleHubViewBoundary mPeopleHubViewBoundary = new PeopleHubViewBoundary() {
@@ -123,15 +125,16 @@ public class NotificationSectionsManager implements StackScrollAlgorithm.Section
             StatusBarStateController statusBarStateController,
             ConfigurationController configurationController,
             PeopleHubViewAdapter peopleHubViewAdapter,
-            KeyguardMediaPlayer keyguardMediaPlayer,
+            MediaHierarchyManager mediaHiearchyManager,
+            KeyguardMediaController keyguardMediaController,
             NotificationSectionsFeatureManager sectionsFeatureManager) {
         mActivityStarter = activityStarter;
         mStatusBarStateController = statusBarStateController;
         mConfigurationController = configurationController;
         mPeopleHubViewAdapter = peopleHubViewAdapter;
-        mKeyguardMediaPlayer = keyguardMediaPlayer;
         mSectionsFeatureManager = sectionsFeatureManager;
         mNumberOfSections = mSectionsFeatureManager.getNumberOfBuckets();
+        mKeyguardMediaController = keyguardMediaController;
     }
 
     NotificationSection[] createSectionsForBuckets() {
@@ -205,12 +208,9 @@ public class NotificationSectionsManager implements StackScrollAlgorithm.Section
         mIncomingHeader.setHeaderText(R.string.notification_section_header_incoming);
         mIncomingHeader.setOnHeaderClickListener(this::onGentleHeaderClick);
 
-        if (mMediaControlsView != null) {
-            mKeyguardMediaPlayer.unbindView();
-        }
         mMediaControlsView = reinflateView(mMediaControlsView, layoutInflater,
                 R.layout.keyguard_media_header);
-        mKeyguardMediaPlayer.bindView(mMediaControlsView);
+        mKeyguardMediaController.attach(mMediaControlsView);
     }
 
     /** Listener for when the "clear all" button is clicked on the gentle notification header. */

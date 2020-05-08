@@ -269,14 +269,6 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
             count++;
         }
 
-
-        if (Utils.useQsMediaPlayer(mQsPanel.getContext())) {
-            View qsMediaView = mQsPanel.getMediaPanel();
-            View qqsMediaView = mQuickQsPanel.getMediaPlayer().getView();
-            translationXBuilder.addFloat(qsMediaView, "alpha", 0, 1);
-            translationXBuilder.addFloat(qqsMediaView, "alpha", 1, 0);
-        }
-
         if (mAllowFancy) {
             // Make brightness appear static position and alpha in through second half.
             View brightness = mQsPanel.getBrightnessView();

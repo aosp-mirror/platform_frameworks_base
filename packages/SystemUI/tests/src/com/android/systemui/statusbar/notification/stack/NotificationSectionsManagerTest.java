@@ -42,9 +42,9 @@ import android.view.ViewGroup;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.keyguard.KeyguardMediaPlayer;
 import com.android.systemui.ActivityStarterDelegate;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.media.MediaHierarchyManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager;
@@ -53,6 +53,7 @@ import com.android.systemui.statusbar.notification.row.ActivatableNotificationVi
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.dagger.NotificationRowComponent;
 import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.systemui.util.animation.UniqueObjectHost;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -74,7 +75,7 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
     @Mock private StatusBarStateController mStatusBarStateController;
     @Mock private ConfigurationController mConfigurationController;
     @Mock private PeopleHubViewAdapter mPeopleHubAdapter;
-    @Mock private KeyguardMediaPlayer mKeyguardMediaPlayer;
+    @Mock private MediaHierarchyManager mMediaHierarchyManager;
     @Mock private NotificationSectionsFeatureManager mSectionsFeatureManager;
     @Mock private NotificationRowComponent mNotificationRowComponent;
     @Mock private ActivatableNotificationViewController mActivatableNotificationViewController;
@@ -87,13 +88,15 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
         when(mNotificationRowComponent.getActivatableNotificationViewController()).thenReturn(
                 mActivatableNotificationViewController
         );
+        when(mMediaHierarchyManager.createMediaHost(any())).thenReturn(
+                new UniqueObjectHost(getContext()));
         mSectionsManager =
                 new NotificationSectionsManager(
                         mActivityStarterDelegate,
                         mStatusBarStateController,
                         mConfigurationController,
                         mPeopleHubAdapter,
-                        mKeyguardMediaPlayer,
+                        mMediaHierarchyManager,
                         mSectionsFeatureManager
                 );
         // Required in order for the header inflation to work properly
