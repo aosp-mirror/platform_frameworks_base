@@ -26,6 +26,7 @@ import com.android.server.pm.parsing.AndroidPackageInfoFlagBehaviorTest.Companio
 import com.android.server.pm.parsing.pkg.AndroidPackage
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
@@ -102,6 +103,7 @@ class AndroidPackageInfoFlagBehaviorTest : AndroidPackageParsingTestBase() {
     lateinit var param: Param<Any>
 
     @Test
+    @Ignore("b/155935153")
     fun fieldPresence() {
         oldPackages.asSequence().zip(newPackages.asSequence())
                 .forEach { (old, new) ->
@@ -124,6 +126,7 @@ class AndroidPackageInfoFlagBehaviorTest : AndroidPackageParsingTestBase() {
     }
 
     @Test
+    @Ignore("b/155935153")
     fun fieldAbsence() {
         newPackages.forEach {
             val newWithoutFlag = param.newPkgFunction(it, 0)
