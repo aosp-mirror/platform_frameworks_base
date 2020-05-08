@@ -109,6 +109,7 @@ import android.app.ActivityManager.TaskSnapshot;
 import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
 import android.app.AppGlobals;
+import android.app.PictureInPictureParams;
 import android.app.TaskInfo;
 import android.app.WindowConfiguration;
 import android.content.ComponentName;
@@ -487,6 +488,12 @@ class Task extends WindowContainer<WindowContainer> {
      * Prevent duplicate calls to onTaskAppeared.
      */
     boolean mTaskAppearedSent;
+
+    /**
+     * Last Picture-in-Picture params applicable to the task. Updated when the app
+     * enters Picture-in-Picture or when setPictureInPictureParams is called.
+     */
+    PictureInPictureParams mPictureInPictureParams = new PictureInPictureParams.Builder().build();
 
     /**
      * This task was created by the task organizer which has the following implementations.
@@ -3585,11 +3592,10 @@ class Task extends WindowContainer<WindowContainer> {
         info.resizeMode = top != null ? top.mResizeMode : mResizeMode;
         info.topActivityType = top.getActivityType();
 
-        ActivityRecord rootActivity = top.getRootActivity();
-        if (rootActivity == null || rootActivity.pictureInPictureArgs.empty()) {
+        if (mPictureInPictureParams.empty()) {
             info.pictureInPictureParams = null;
         } else {
-            info.pictureInPictureParams = rootActivity.pictureInPictureArgs;
+            info.pictureInPictureParams = mPictureInPictureParams;
         }
         info.topActivityInfo = mReuseActivitiesReport.top != null
                 ? mReuseActivitiesReport.top.info
@@ -4505,7 +4511,8 @@ class Task extends WindowContainer<WindowContainer> {
         updateShadowsRadius(hasFocus, getPendingTransaction());
     }
 
-    void onPictureInPictureParamsChanged() {
+    void setPictureInPictureParams(PictureInPictureParams p) {
+        mPictureInPictureParams.copyOnlySet(p);
         if (isOrganized()) {
             mAtmService.mTaskOrganizerController.dispatchTaskInfoChanged(this, true /* force */);
         }
