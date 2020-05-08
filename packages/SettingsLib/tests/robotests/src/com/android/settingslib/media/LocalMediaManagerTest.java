@@ -41,6 +41,7 @@ import com.android.settingslib.bluetooth.CachedBluetoothDevice;
 import com.android.settingslib.bluetooth.CachedBluetoothDeviceManager;
 import com.android.settingslib.bluetooth.HearingAidProfile;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
+import com.android.settingslib.bluetooth.LocalBluetoothProfile;
 import com.android.settingslib.bluetooth.LocalBluetoothProfileManager;
 import com.android.settingslib.testutils.shadow.ShadowBluetoothAdapter;
 
@@ -560,6 +561,10 @@ public class LocalMediaManagerTest {
         mLocalMediaManager.mMediaDevices.add(device3);
         mLocalMediaManager.mMediaDevices.add(mLocalMediaManager.mPhoneDevice);
 
+        final List<LocalBluetoothProfile> profiles = new ArrayList<>();
+        final A2dpProfile a2dpProfile = mock(A2dpProfile.class);
+        profiles.add(a2dpProfile);
+
         final List<BluetoothDevice> bluetoothDevices = new ArrayList<>();
         final BluetoothDevice bluetoothDevice = mock(BluetoothDevice.class);
         final CachedBluetoothDevice cachedDevice = mock(CachedBluetoothDevice.class);
@@ -571,6 +576,7 @@ public class LocalMediaManagerTest {
         when(cachedManager.findDevice(bluetoothDevice)).thenReturn(cachedDevice);
         when(cachedDevice.getBondState()).thenReturn(BluetoothDevice.BOND_BONDED);
         when(cachedDevice.isConnected()).thenReturn(false);
+        when(cachedDevice.getConnectableProfiles()).thenReturn(profiles);
 
         when(device1.getId()).thenReturn(TEST_DEVICE_ID_1);
         when(device2.getId()).thenReturn(TEST_DEVICE_ID_2);
@@ -634,6 +640,10 @@ public class LocalMediaManagerTest {
         mLocalMediaManager.mMediaDevices.add(device3);
         mLocalMediaManager.mMediaDevices.add(mLocalMediaManager.mPhoneDevice);
 
+        final List<LocalBluetoothProfile> profiles = new ArrayList<>();
+        final A2dpProfile a2dpProfile = mock(A2dpProfile.class);
+        profiles.add(a2dpProfile);
+
         final List<BluetoothDevice> bluetoothDevices = new ArrayList<>();
         final BluetoothDevice bluetoothDevice = mock(BluetoothDevice.class);
         final BluetoothDevice bluetoothDevice2 = mock(BluetoothDevice.class);
@@ -662,6 +672,7 @@ public class LocalMediaManagerTest {
         when(cachedDevice.getBondState()).thenReturn(BluetoothDevice.BOND_BONDED);
         when(cachedDevice.isConnected()).thenReturn(false);
         when(cachedDevice.getDevice()).thenReturn(bluetoothDevice);
+        when(cachedDevice.getConnectableProfiles()).thenReturn(profiles);
         when(bluetoothDevice.getBluetoothClass()).thenReturn(bluetoothClass);
         when(bluetoothClass.getDeviceClass()).thenReturn(AUDIO_VIDEO_HEADPHONES);
 

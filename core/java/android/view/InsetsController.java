@@ -1117,7 +1117,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
      * Cancel on-going animation to show/hide {@link InsetsType}.
      */
     @VisibleForTesting
-    public void cancelExistingAnimation() {
+    public void cancelExistingAnimations() {
         cancelExistingControllers(all());
     }
 

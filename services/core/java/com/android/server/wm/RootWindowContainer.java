@@ -2170,7 +2170,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             final boolean singleActivity = task.getChildCount() == 1;
             final ActivityStack stack;
             if (singleActivity) {
-                stack = r.getRootTask();
+                stack = (ActivityStack) task;
             } else {
                 // In the case of multiple activities, we will create a new task for it and then
                 // move the PIP activity into the task.
@@ -2182,6 +2182,11 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 // On the other hand, ActivityRecord#onParentChanged takes care of setting the
                 // up-to-dated pinned stack information on this newly created stack.
                 r.reparent(stack, MAX_VALUE, reason);
+            }
+            if (stack.getParent() != taskDisplayArea) {
+                // stack is nested, but pinned tasks need to be direct children of their
+                // display area, so reparent.
+                stack.reparent(taskDisplayArea, true /* onTop */);
             }
             stack.setWindowingMode(WINDOWING_MODE_PINNED);
 
@@ -2502,20 +2507,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             }
         }
         return list;
-    }
-
-    void deferUpdateBounds(int activityType) {
-        final ActivityStack stack = getStack(WINDOWING_MODE_UNDEFINED, activityType);
-        if (stack != null) {
-            stack.deferUpdateBounds();
-        }
-    }
-
-    void continueUpdateBounds(int activityType) {
-        final ActivityStack stack = getStack(WINDOWING_MODE_UNDEFINED, activityType);
-        if (stack != null) {
-            stack.continueUpdateBounds();
-        }
     }
 
     @Override
