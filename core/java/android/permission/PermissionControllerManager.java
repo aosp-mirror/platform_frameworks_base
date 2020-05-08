@@ -56,15 +56,11 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.infra.AndroidFuture;
 import com.android.internal.infra.RemoteStream;
 import com.android.internal.infra.ServiceConnector;
-import com.android.internal.os.TransferPipe;
 import com.android.internal.util.CollectionUtils;
 
 import libcore.util.EmptyArray;
 
 import java.io.FileDescriptor;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
@@ -72,7 +68,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -88,6 +83,7 @@ import java.util.function.Consumer;
 public final class PermissionControllerManager {
     private static final String TAG = PermissionControllerManager.class.getSimpleName();
 
+    private static final long REQUEST_TIMEOUT_MILLIS = 60000;
     private static final long UNBIND_TIMEOUT_MILLIS = 10000;
     private static final int CHUNK_SIZE = 4 * 1024;
 
@@ -224,6 +220,11 @@ public final class PermissionControllerManager {
                     @Override
                     protected Handler getJobHandler() {
                         return handler;
+                    }
+
+                    @Override
+                    protected long getRequestTimeoutMs() {
+                        return REQUEST_TIMEOUT_MILLIS;
                     }
 
                     @Override
@@ -487,28 +488,12 @@ public final class PermissionControllerManager {
      *
      * @hide
      */
-    public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @Nullable String[] args) {
-        CompletableFuture<Throwable> dumpResult = new CompletableFuture<>();
-        mRemoteService.postForResult(
-                service -> TransferPipe.dumpAsync(service.asBinder(), args))
-                .whenComplete(
-                        (dump, err) -> {
-                            try (FileOutputStream out = new FileOutputStream(fd)) {
-                                out.write(dump);
-                            } catch (IOException | NullPointerException e) {
-                                Log.e(TAG, "Could for forwards permission controller dump", e);
-                            }
-
-                            dumpResult.complete(err);
-                        });
-
+    public void dump(@NonNull FileDescriptor fd, @Nullable String[] args) {
         try {
-            Throwable err = dumpResult.get(UNBIND_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
-            if (err != null) {
-                throw err;
-            }
-        } catch (Throwable e) {
-            Log.e(TAG, "Could not dump permission controller state", e);
+            mRemoteService.post(service -> service.asBinder().dump(fd, args))
+                    .get(REQUEST_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
+        } catch (Exception e) {
+            Log.e(TAG, "Could not get dump", e);
         }
     }
 
