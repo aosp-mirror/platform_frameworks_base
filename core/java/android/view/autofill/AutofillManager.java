@@ -1894,7 +1894,13 @@ public final class AutofillManager {
                 final SyncResultReceiver receiver = new SyncResultReceiver(SYNC_CALLS_TIMEOUT_MS);
                 mService.addClient(mServiceClient, client.autofillClientGetComponentName(),
                         userId, receiver);
-                final int flags = receiver.getIntResult();
+                int flags = 0;
+                try {
+                    flags = receiver.getIntResult();
+                } catch (SyncResultReceiver.TimeoutException e) {
+                    Log.w(TAG, "Failed to initialize autofill: " + e);
+                    return;
+                }
                 mEnabled = (flags & FLAG_ADD_CLIENT_ENABLED) != 0;
                 sDebug = (flags & FLAG_ADD_CLIENT_DEBUG) != 0;
                 sVerbose = (flags & FLAG_ADD_CLIENT_VERBOSE) != 0;
