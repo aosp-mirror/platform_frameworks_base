@@ -61,6 +61,7 @@ extern int register_android_graphics_Path(JNIEnv* env);
 extern int register_android_graphics_PathMeasure(JNIEnv* env);
 extern int register_android_graphics_Picture(JNIEnv*);
 extern int register_android_graphics_Region(JNIEnv* env);
+extern int register_android_graphics_TextureLayer(JNIEnv* env);
 extern int register_android_graphics_animation_NativeInterpolatorFactory(JNIEnv* env);
 extern int register_android_graphics_animation_RenderNodeAnimator(JNIEnv* env);
 extern int register_android_graphics_drawable_AnimatedVectorDrawable(JNIEnv* env);
@@ -76,7 +77,6 @@ extern int register_android_graphics_text_LineBreaker(JNIEnv *env);
 extern int register_android_util_PathParser(JNIEnv* env);
 extern int register_android_view_DisplayListCanvas(JNIEnv* env);
 extern int register_android_view_RenderNode(JNIEnv* env);
-extern int register_android_view_TextureLayer(JNIEnv* env);
 extern int register_android_view_ThreadedRenderer(JNIEnv* env);
 
 #ifdef NDEBUG
@@ -123,6 +123,7 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_graphics_Picture),
     REG_JNI(register_android_graphics_Region),
     REG_JNI(register_android_graphics_Shader),
+    REG_JNI(register_android_graphics_TextureLayer),
     REG_JNI(register_android_graphics_Typeface),
     REG_JNI(register_android_graphics_YuvImage),
     REG_JNI(register_android_graphics_animation_NativeInterpolatorFactory),
@@ -140,7 +141,6 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_util_PathParser),
     REG_JNI(register_android_view_RenderNode),
     REG_JNI(register_android_view_DisplayListCanvas),
-    REG_JNI(register_android_view_TextureLayer),
     REG_JNI(register_android_view_ThreadedRenderer),
 };
 
