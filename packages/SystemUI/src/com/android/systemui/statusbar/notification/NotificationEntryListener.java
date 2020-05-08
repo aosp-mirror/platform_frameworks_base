@@ -90,7 +90,7 @@ public interface NotificationEntryListener {
      * @param removedByUser true if the notification was removed by a user action
      */
     default void onEntryRemoved(
-            NotificationEntry entry,
+            @NonNull NotificationEntry entry,
             @Nullable NotificationVisibility visibility,
             boolean removedByUser,
             int reason) {

@@ -19,6 +19,8 @@ package com.android.systemui.statusbar.notification.collection;
 import static com.android.systemui.statusbar.notification.collection.NotifCollection.REASON_NOT_CANCELED;
 import static com.android.systemui.statusbar.notification.collection.NotificationEntry.DismissState.NOT_DISMISSED;
 
+import com.android.systemui.statusbar.NotificationInteractionTracker;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -35,6 +37,7 @@ public class ListDumper {
      */
     public static String dumpTree(
             List<ListEntry> entries,
+            NotificationInteractionTracker interactionTracker,
             boolean includeRecordKeeping,
             String indent) {
         StringBuilder sb = new StringBuilder();
@@ -46,7 +49,8 @@ public class ListDumper {
                     indent,
                     sb,
                     true,
-                    includeRecordKeeping);
+                    includeRecordKeeping,
+                    interactionTracker.hasUserInteractedWith(entry.getKey()));
             if (entry instanceof GroupEntry) {
                 GroupEntry ge = (GroupEntry) entry;
                 List<NotificationEntry> children = ge.getChildren();
@@ -56,7 +60,8 @@ public class ListDumper {
                             childEntryIndent,
                             sb,
                             true,
-                            includeRecordKeeping);
+                            includeRecordKeeping,
+                            interactionTracker.hasUserInteractedWith(entry.getKey()));
                 }
             }
         }
@@ -80,7 +85,8 @@ public class ListDumper {
                     indent,
                     sb,
                     false,
-                    includeRecordKeeping);
+                    includeRecordKeeping,
+                    false);
         }
         return sb.toString();
     }
@@ -91,7 +97,9 @@ public class ListDumper {
             String indent,
             StringBuilder sb,
             boolean includeParent,
-            boolean includeRecordKeeping) {
+            boolean includeRecordKeeping,
+            boolean hasBeenInteractedWith
+    ) {
         sb.append(indent)
                 .append("[").append(index).append("] ")
                 .append(entry.getKey());
@@ -156,6 +164,8 @@ public class ListDumper {
                         .append(notifEntry.getDismissState())
                         .append(" ");
             }
+
+            rksb.append("interacted=").append(hasBeenInteractedWith ? "yes" : "no").append(" ");
 
             String rkString = rksb.toString();
             if (!rkString.isEmpty()) {

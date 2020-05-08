@@ -45,7 +45,6 @@ import android.view.RemoteAnimationAdapter;
 import android.view.View;
 
 import com.android.internal.logging.MetricsLogger;
-import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.ActivityIntentHelper;
@@ -59,6 +58,7 @@ import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.FeatureFlags;
+import com.android.systemui.statusbar.NotificationClickNotifier;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
@@ -103,7 +103,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
     private final NotifCollection mNotifCollection;
     private final HeadsUpManagerPhone mHeadsUpManager;
     private final ActivityStarter mActivityStarter;
-    private final IStatusBarService mBarService;
+    private final NotificationClickNotifier mClickNotifier;
     private final StatusBarStateController mStatusBarStateController;
     private final StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     private final KeyguardManager mKeyguardManager;
@@ -142,7 +142,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
             NotifCollection notifCollection,
             HeadsUpManagerPhone headsUpManager,
             ActivityStarter activityStarter,
-            IStatusBarService statusBarService,
+            NotificationClickNotifier clickNotifier,
             StatusBarStateController statusBarStateController,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             KeyguardManager keyguardManager,
@@ -177,7 +177,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
         mNotifCollection = notifCollection;
         mHeadsUpManager = headsUpManager;
         mActivityStarter = activityStarter;
-        mBarService = statusBarService;
+        mClickNotifier = clickNotifier;
         mStatusBarStateController = statusBarStateController;
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
         mKeyguardManager = keyguardManager;
@@ -379,11 +379,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
                 NotificationLogger.getNotificationLocation(entry);
         final NotificationVisibility nv = NotificationVisibility.obtain(notificationKey,
                 rank, count, true, location);
-        try {
-            mBarService.onNotificationClick(notificationKey, nv);
-        } catch (RemoteException ex) {
-            // system process is dead if we're here.
-        }
+        mClickNotifier.onNotificationClick(notificationKey, nv);
 
         if (!isBubble) {
             if (parentToCancelFinal != null) {
@@ -651,7 +647,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
         private final NotifCollection mNotifCollection;
         private final HeadsUpManagerPhone mHeadsUpManager;
         private final ActivityStarter mActivityStarter;
-        private final IStatusBarService mStatusBarService;
+        private final NotificationClickNotifier mClickNotifier;
         private final StatusBarStateController mStatusBarStateController;
         private final StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
         private final KeyguardManager mKeyguardManager;
@@ -689,7 +685,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
                 NotifCollection notifCollection,
                 HeadsUpManagerPhone headsUpManager,
                 ActivityStarter activityStarter,
-                IStatusBarService statusBarService,
+                NotificationClickNotifier clickNotifier,
                 StatusBarStateController statusBarStateController,
                 StatusBarKeyguardViewManager statusBarKeyguardViewManager,
                 KeyguardManager keyguardManager,
@@ -720,7 +716,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
             mNotifCollection = notifCollection;
             mHeadsUpManager = headsUpManager;
             mActivityStarter = activityStarter;
-            mStatusBarService = statusBarService;
+            mClickNotifier = clickNotifier;
             mStatusBarStateController = statusBarStateController;
             mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
             mKeyguardManager = keyguardManager;
@@ -777,7 +773,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
                     mNotifCollection,
                     mHeadsUpManager,
                     mActivityStarter,
-                    mStatusBarService,
+                    mClickNotifier,
                     mStatusBarStateController,
                     mStatusBarKeyguardViewManager,
                     mKeyguardManager,

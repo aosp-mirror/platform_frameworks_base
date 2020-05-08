@@ -44,6 +44,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.statusbar.NotificationInteractionTracker;
 import com.android.systemui.statusbar.notification.collection.ShadeListBuilder.OnRenderListListener;
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeFinalizeFilterListener;
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeRenderListListener;
@@ -86,6 +87,7 @@ public class ShadeListBuilderTest extends SysuiTestCase {
 
     @Mock private ShadeListBuilderLogger mLogger;
     @Mock private NotifCollection mNotifCollection;
+    @Mock private NotificationInteractionTracker mInteractionTracker;
     @Spy private OnBeforeTransformGroupsListener mOnBeforeTransformGroupsListener;
     @Spy private OnBeforeSortListener mOnBeforeSortListener;
     @Spy private OnBeforeFinalizeFilterListener mOnBeforeFinalizeFilterListener;
@@ -107,7 +109,8 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         allowTestableLooperAsMainThread();
 
-        mListBuilder = new ShadeListBuilder(mSystemClock, mLogger, mock(DumpManager.class));
+        mListBuilder = new ShadeListBuilder(
+                mSystemClock, mLogger, mock(DumpManager.class), mInteractionTracker);
         mListBuilder.setOnRenderListListener(mOnRenderListListener);
 
         mListBuilder.attach(mNotifCollection);
@@ -1280,7 +1283,7 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         } catch (AssertionError err) {
             throw new AssertionError(
                     "List under test failed verification:\n" + dumpTree(mBuiltList,
-                            true, ""), err);
+                            mInteractionTracker, true, ""), err);
         }
     }
 

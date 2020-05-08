@@ -36,6 +36,7 @@ import androidx.annotation.NonNull;
 
 import com.android.systemui.Dumpable;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.statusbar.NotificationInteractionTracker;
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeFinalizeFilterListener;
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeRenderListListener;
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeSortListener;
@@ -73,6 +74,7 @@ import javax.inject.Singleton;
 public class ShadeListBuilder implements Dumpable {
     private final SystemClock mSystemClock;
     private final ShadeListBuilderLogger mLogger;
+    private final NotificationInteractionTracker mInteractionTracker;
 
     private List<ListEntry> mNotifList = new ArrayList<>();
     private List<ListEntry> mNewNotifList = new ArrayList<>();
@@ -105,10 +107,12 @@ public class ShadeListBuilder implements Dumpable {
     public ShadeListBuilder(
             SystemClock systemClock,
             ShadeListBuilderLogger logger,
-            DumpManager dumpManager) {
+            DumpManager dumpManager,
+            NotificationInteractionTracker interactionTracker) {
         Assert.isMainThread();
         mSystemClock = systemClock;
         mLogger = logger;
+        mInteractionTracker = interactionTracker;
         dumpManager.registerDumpable(TAG, this);
     }
 
@@ -821,6 +825,7 @@ public class ShadeListBuilder implements Dumpable {
 
         pw.println(ListDumper.dumpTree(
                 getShadeList(),
+                mInteractionTracker,
                 true,
                 "\t\t"));
     }

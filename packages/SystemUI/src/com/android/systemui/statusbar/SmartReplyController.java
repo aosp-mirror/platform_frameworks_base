@@ -35,6 +35,7 @@ import java.util.Set;
 public class SmartReplyController {
     private final IStatusBarService mBarService;
     private final NotificationEntryManager mEntryManager;
+    private final NotificationClickNotifier mClickNotifier;
     private Set<String> mSendingKeys = new ArraySet<>();
     private Callback mCallback;
 
@@ -42,9 +43,11 @@ public class SmartReplyController {
      * Injected constructor. See {@link StatusBarModule}.
      */
     public SmartReplyController(NotificationEntryManager entryManager,
-            IStatusBarService statusBarService) {
+            IStatusBarService statusBarService,
+            NotificationClickNotifier clickNotifier) {
         mBarService = statusBarService;
         mEntryManager = entryManager;
+        mClickNotifier = clickNotifier;
     }
 
     public void setCallback(Callback callback) {
@@ -78,12 +81,8 @@ public class SmartReplyController {
                 NotificationLogger.getNotificationLocation(entry);
         final NotificationVisibility nv = NotificationVisibility.obtain(
                 entry.getKey(), rank, count, true, location);
-        try {
-            mBarService.onNotificationActionClick(
-                    entry.getKey(), actionIndex, action, nv, generatedByAssistant);
-        } catch (RemoteException e) {
-            // Nothing to do, system going down
-        }
+        mClickNotifier.onNotificationActionClick(
+                entry.getKey(), actionIndex, action, nv, generatedByAssistant);
     }
 
     /**
