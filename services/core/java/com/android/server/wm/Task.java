@@ -82,7 +82,6 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_TASKS
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.ActivityTaskManagerService.TAG_STACK;
-import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_DOCKED_DIVIDER;
 import static com.android.server.wm.IdentifierProto.HASH_CODE;
 import static com.android.server.wm.IdentifierProto.TITLE;
 import static com.android.server.wm.IdentifierProto.USER_ID;
@@ -110,7 +109,6 @@ import android.app.ActivityManager.TaskSnapshot;
 import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
 import android.app.AppGlobals;
-import android.app.PictureInPictureParams;
 import android.app.TaskInfo;
 import android.app.WindowConfiguration;
 import android.content.ComponentName;
@@ -489,12 +487,6 @@ class Task extends WindowContainer<WindowContainer> {
      * Prevent duplicate calls to onTaskAppeared.
      */
     boolean mTaskAppearedSent;
-
-    /**
-     * Last Picture-in-Picture params applicable to the task. Updated when the app
-     * enters Picture-in-Picture or when setPictureInPictureParams is called.
-     */
-    PictureInPictureParams mPictureInPictureParams = new PictureInPictureParams.Builder().build();
 
     /**
      * This task was created by the task organizer which has the following implementations.
@@ -2013,7 +2005,7 @@ class Task extends WindowContainer<WindowContainer> {
     }
 
     void updateSurfaceSize(SurfaceControl.Transaction transaction) {
-        if (mSurfaceControl == null || mCreatedByOrganizer) {
+        if (mSurfaceControl == null || isOrganized()) {
             return;
         }
 
@@ -3059,15 +3051,6 @@ class Task extends WindowContainer<WindowContainer> {
         return mDragResizeMode;
     }
 
-    /**
-     * Puts this task into docked drag resizing mode. See {@link DragResizeMode}.
-     *
-     * @param resizing Whether to put the task into drag resize mode.
-     */
-    public void setTaskDockedResizing(boolean resizing) {
-        setDragResizing(resizing, DRAG_RESIZE_MODE_DOCKED_DIVIDER);
-    }
-
     void adjustBoundsForDisplayChangeIfNeeded(final DisplayContent displayContent) {
         if (displayContent == null) {
             return;
@@ -3602,10 +3585,11 @@ class Task extends WindowContainer<WindowContainer> {
         info.resizeMode = top != null ? top.mResizeMode : mResizeMode;
         info.topActivityType = top.getActivityType();
 
-        if (mPictureInPictureParams.empty()) {
+        ActivityRecord rootActivity = top.getRootActivity();
+        if (rootActivity == null || rootActivity.pictureInPictureArgs.empty()) {
             info.pictureInPictureParams = null;
         } else {
-            info.pictureInPictureParams = mPictureInPictureParams;
+            info.pictureInPictureParams = rootActivity.pictureInPictureArgs;
         }
         info.topActivityInfo = mReuseActivitiesReport.top != null
                 ? mReuseActivitiesReport.top.info
@@ -4521,8 +4505,7 @@ class Task extends WindowContainer<WindowContainer> {
         updateShadowsRadius(hasFocus, getPendingTransaction());
     }
 
-    void setPictureInPictureParams(PictureInPictureParams p) {
-        mPictureInPictureParams.copyOnlySet(p);
+    void onPictureInPictureParamsChanged() {
         if (isOrganized()) {
             mAtmService.mTaskOrganizerController.dispatchTaskInfoChanged(this, true /* force */);
         }

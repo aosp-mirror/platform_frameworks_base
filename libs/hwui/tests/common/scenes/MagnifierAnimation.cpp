@@ -56,9 +56,9 @@ public:
                                       (float)magnifier->height(), 0, 0, (float)props.getWidth(),
                                       (float)props.getHeight(), nullptr);
                 });
-        canvas.insertReorderBarrier(true);
+        canvas.enableZ(true);
         canvas.drawRenderNode(zoomImageView.get());
-        canvas.insertReorderBarrier(false);
+        canvas.enableZ(false);
     }
 
     void doFrame(int frameNr) override {

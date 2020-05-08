@@ -73,6 +73,7 @@ public class NotificationPanelViewController extends OverlayPanelViewController 
     private final CarNotificationListener mCarNotificationListener;
     private final NotificationClickHandlerFactory mNotificationClickHandlerFactory;
     private final StatusBarStateController mStatusBarStateController;
+    private final boolean mEnableHeadsUpNotificationWhenNotificationShadeOpen;
 
     private float mInitialBackgroundAlpha;
     private float mBackgroundAlphaDiff;
@@ -144,11 +145,25 @@ public class NotificationPanelViewController extends OverlayPanelViewController 
                             + " percentage");
         }
         mBackgroundAlphaDiff = finalBackgroundAlpha - mInitialBackgroundAlpha;
+
+        mEnableHeadsUpNotificationWhenNotificationShadeOpen = mResources.getBoolean(
+                com.android.car.notification.R.bool
+                        .config_enableHeadsUpNotificationWhenNotificationShadeOpen);
     }
 
     @Override
     protected void onFinishInflate() {
         reinflate();
+    }
+
+    @Override
+    protected boolean shouldShowNavigationBar() {
+        return true;
+    }
+
+    @Override
+    protected boolean shouldShowHUN() {
+        return mEnableHeadsUpNotificationWhenNotificationShadeOpen;
     }
 
     /** Reinflates the view. */

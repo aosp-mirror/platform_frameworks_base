@@ -57,8 +57,8 @@ public:
         LOG_ALWAYS_FATAL("SkiaCanvas does not produce a DisplayList");
         return nullptr;
     }
-    virtual void insertReorderBarrier(bool enableReorder) override {
-        LOG_ALWAYS_FATAL("SkiaCanvas does not support reordering barriers");
+    virtual void enableZ(bool enableZ) override {
+        LOG_ALWAYS_FATAL("SkiaCanvas does not support enableZ");
     }
 
     virtual void setBitmap(const SkBitmap& bitmap) override;

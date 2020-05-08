@@ -10,6 +10,8 @@ android_test {
         "androidx.test.ext.junit",
         "androidx.test.rules",
         "android-ex-camera2",
+        "android-support-test",
+        "testng"
     ],
     platform_apis: true,
 }

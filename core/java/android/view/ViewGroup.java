@@ -4130,13 +4130,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
     @Override
     protected void dispatchDraw(Canvas canvas) {
-        boolean usingRenderNodeProperties = canvas.isRecordingFor(mRenderNode);
         final int childrenCount = mChildrenCount;
         final View[] children = mChildren;
         int flags = mGroupFlags;
 
         if ((flags & FLAG_RUN_ANIMATION) != 0 && canAnimate()) {
-            final boolean buildCache = !isHardwareAccelerated();
             for (int i = 0; i < childrenCount; i++) {
                 final View child = children[i];
                 if ((child.mViewFlags & VISIBILITY_MASK) == VISIBLE) {
@@ -4177,12 +4175,12 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         boolean more = false;
         final long drawingTime = getDrawingTime();
 
-        if (usingRenderNodeProperties) canvas.insertReorderBarrier();
+        canvas.enableZ();
         final int transientCount = mTransientIndices == null ? 0 : mTransientIndices.size();
         int transientIndex = transientCount != 0 ? 0 : -1;
         // Only use the preordered list if not HW accelerated, since the HW pipeline will do the
         // draw reordering internally
-        final ArrayList<View> preorderedList = usingRenderNodeProperties
+        final ArrayList<View> preorderedList = isHardwareAccelerated()
                 ? null : buildOrderedChildList();
         final boolean customOrder = preorderedList == null
                 && isChildrenDrawingOrderEnabled();
@@ -4229,7 +4227,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 more |= drawChild(canvas, child, drawingTime);
             }
         }
-        if (usingRenderNodeProperties) canvas.insertInorderBarrier();
+        canvas.disableZ();
 
         if (isShowingLayoutBounds()) {
             onDebugDraw(canvas);

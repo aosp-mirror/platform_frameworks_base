@@ -440,24 +440,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
             if (!(relevantState && mExpansionAffectsAlpha)) {
                 return;
             }
-            applyExpansionToAlpha();
-            if (mUpdatePending) {
-                return;
-            }
-            setOrAdaptCurrentAnimation(mScrimBehind);
-            setOrAdaptCurrentAnimation(mScrimInFront);
-            setOrAdaptCurrentAnimation(mScrimForBubble);
-            dispatchScrimState(mScrimBehind.getViewAlpha());
-
-            // Reset wallpaper timeout if it's already timeout like expanding panel while PULSING
-            // and docking.
-            if (mWallpaperVisibilityTimedOut) {
-                mWallpaperVisibilityTimedOut = false;
-                DejankUtils.postAfterTraversal(() -> {
-                    mTimeTicker.schedule(mDozeParameters.getWallpaperAodDuration(),
-                            AlarmTimeout.MODE_IGNORE_IF_SCHEDULED);
-                });
-            }
+            applyAndDispatchExpansion();
         }
     }
 
@@ -510,6 +493,27 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
         if (isNaN(mBehindAlpha) || isNaN(mInFrontAlpha)) {
             throw new IllegalStateException("Scrim opacity is NaN for state: " + mState
                     + ", front: " + mInFrontAlpha + ", back: " + mBehindAlpha);
+        }
+    }
+
+    private void applyAndDispatchExpansion() {
+        applyExpansionToAlpha();
+        if (mUpdatePending) {
+            return;
+        }
+        setOrAdaptCurrentAnimation(mScrimBehind);
+        setOrAdaptCurrentAnimation(mScrimInFront);
+        setOrAdaptCurrentAnimation(mScrimForBubble);
+        dispatchScrimState(mScrimBehind.getViewAlpha());
+
+        // Reset wallpaper timeout if it's already timeout like expanding panel while PULSING
+        // and docking.
+        if (mWallpaperVisibilityTimedOut) {
+            mWallpaperVisibilityTimedOut = false;
+            DejankUtils.postAfterTraversal(() -> {
+                mTimeTicker.schedule(mDozeParameters.getWallpaperAodDuration(),
+                        AlarmTimeout.MODE_IGNORE_IF_SCHEDULED);
+            });
         }
     }
 
@@ -1006,6 +1010,9 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
 
     public void setExpansionAffectsAlpha(boolean expansionAffectsAlpha) {
         mExpansionAffectsAlpha = expansionAffectsAlpha;
+        if (expansionAffectsAlpha) {
+            applyAndDispatchExpansion();
+        }
     }
 
     public void setKeyguardOccluded(boolean keyguardOccluded) {

@@ -3023,14 +3023,14 @@ message LauncherUIChanged {
     optional string component_name = 11;
 
     // (x, y) coordinate and the index information of the target on the container
-    optional int32 grid_x = 12;
-    optional int32 grid_y = 13;
-    optional int32 page_id = 14;
+    optional int32 grid_x = 12 [default = -1];
+    optional int32 grid_y = 13 [default = -1];
+    optional int32 page_id = 14 [default = -2];
 
     // e.g., folder icon's (x, y) location and index information on the workspace
-    optional int32 grid_x_parent = 15;
-    optional int32 grid_y_parent = 16;
-    optional int32 page_id_parent = 17;
+    optional int32 grid_x_parent = 15 [default = -1];
+    optional int32 grid_y_parent = 16 [default = -1];
+    optional int32 page_id_parent = 17 [default = -2];
 
     // e.g., SEARCHBOX_ALLAPPS, FOLDER_WORKSPACE
     optional int32 hierarchy = 18;
@@ -3038,7 +3038,7 @@ message LauncherUIChanged {
     optional bool is_work_profile = 19;
 
     // Used to store the predicted rank of the target
-    optional int32 rank = 20;
+    optional int32 rank = 20 [default = -1];
 
     // e.g., folderLabelState can be captured in the following two fields
     optional int32 from_state = 21;
@@ -3046,6 +3046,9 @@ message LauncherUIChanged {
 
     // e.g., autofilled or suggested texts that are not user entered
     optional string edittext = 23;
+
+    // e.g., number of contents inside a container (e.g., icons inside a folder)
+    optional int32 cardinality = 24;
 }
 
 /**
@@ -3066,22 +3069,34 @@ message LauncherStaticLayout {
     optional string component_name = 6;
 
     // (x, y) coordinate and the index information of the target on the container
-    optional int32 grid_x = 7;
-    optional int32 grid_y = 8;
-    optional int32 page_id = 9;
+    optional int32 grid_x = 7 [default = -1];
+    optional int32 grid_y = 8 [default = -1];
+    optional int32 page_id = 9 [default = -2];
 
     // e.g., folder icon's (x, y) location and index information on the workspace
-    optional int32 grid_x_parent = 10;
-    optional int32 grid_y_parent = 11;
-    optional int32 page_id_parent = 12;
+    // e.g., when used with widgets target, use these values for (span_x, span_y)
+    optional int32 grid_x_parent = 10 [default = -1];
+    optional int32 grid_y_parent = 11 [default = -1];
+    optional int32 page_id_parent = 12 [default = -2];
 
-    // e.g., WORKSPACE, HOTSEAT, FOLDER_WORKSPACE, FOLDER_HOTSEAT
+    // UNKNOWN = 0
+    // HOTSEAT = 1
+    // WORKSPACE = 2
+    // FOLDER_HOTSEAT = 3
+    // FOLDER_WORKSPACE = 4
     optional int32 hierarchy = 13;
 
     optional bool is_work_profile = 14;
 
     // e.g., PIN, WIDGET TRAY, APPS TRAY, PREDICTION
     optional int32 origin = 15;
+
+    // e.g., number of icons inside a folder
+    optional int32 cardinality = 16;
+
+    // e.g., (x, y) span of the widget inside homescreen grid system
+    optional int32 span_x = 17 [default = 1];
+    optional int32 span_y = 18 [default = 1];
 }
 
 /**
