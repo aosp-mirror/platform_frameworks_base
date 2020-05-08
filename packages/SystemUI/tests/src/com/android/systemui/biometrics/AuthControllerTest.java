@@ -470,7 +470,8 @@ public class AuthControllerTest extends SysuiTestCase {
                 true /* requireConfirmation */,
                 0 /* userId */,
                 "testPackage",
-                0 /* operationId */);
+                0 /* operationId */,
+                0 /* sysUiSessionId */);
     }
 
     private Bundle createTestDialogBundle(int authenticators) {
@@ -508,7 +509,7 @@ public class AuthControllerTest extends SysuiTestCase {
         @Override
         protected AuthDialog buildDialog(Bundle biometricPromptBundle,
                 boolean requireConfirmation, int userId, int type, String opPackageName,
-                boolean skipIntro, long operationId) {
+                boolean skipIntro, long operationId, int sysUiSessionId) {
 
             mLastBiometricPromptBundle = biometricPromptBundle;
 
