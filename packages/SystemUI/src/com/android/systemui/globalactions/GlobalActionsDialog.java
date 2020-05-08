@@ -2379,7 +2379,8 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                 || mKeyguardStateController.canDismissLockScreen();
         return (isUnlocked || mShowLockScreenCardsAndControls)
                 && mControlsUiController.getAvailable()
-                && !mControlsServiceInfos.isEmpty();
+                && !mControlsServiceInfos.isEmpty()
+                && mDeviceProvisioned;
     }
     // TODO: Remove legacy layout XML and classes.
     protected boolean shouldUseControlsLayout() {
