@@ -63,6 +63,7 @@ import android.app.usage.UsageEvents;
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -107,6 +108,10 @@ public class AppStandbyControllerTests {
     private static final int UID_1 = 10000;
     private static final String PACKAGE_EXEMPTED_1 = "com.android.exempted";
     private static final int UID_EXEMPTED_1 = 10001;
+    private static final String PACKAGE_SYSTEM_HEADFULL = "com.example.system.headfull";
+    private static final int UID_SYSTEM_HEADFULL = 10002;
+    private static final String PACKAGE_SYSTEM_HEADLESS = "com.example.system.headless";
+    private static final int UID_SYSTEM_HEADLESS = 10003;
     private static final int USER_ID = 0;
     private static final int USER_ID2 = 10;
     private static final UserHandle USER_HANDLE_USER2 = new UserHandle(USER_ID2);
@@ -305,18 +310,33 @@ public class AppStandbyControllerTests {
         pie.packageName = PACKAGE_EXEMPTED_1;
         packages.add(pie);
 
+        PackageInfo pis = new PackageInfo();
+        pis.activities = new ActivityInfo[]{mock(ActivityInfo.class)};
+        pis.applicationInfo = new ApplicationInfo();
+        pis.applicationInfo.uid = UID_SYSTEM_HEADFULL;
+        pis.applicationInfo.flags = ApplicationInfo.FLAG_SYSTEM;
+        pis.packageName = PACKAGE_SYSTEM_HEADFULL;
+        packages.add(pis);
+
+        PackageInfo pish = new PackageInfo();
+        pish.applicationInfo = new ApplicationInfo();
+        pish.applicationInfo.uid = UID_SYSTEM_HEADLESS;
+        pish.applicationInfo.flags = ApplicationInfo.FLAG_SYSTEM;
+        pish.packageName = PACKAGE_SYSTEM_HEADLESS;
+        packages.add(pish);
+
         doReturn(packages).when(mockPm).getInstalledPackagesAsUser(anyInt(), anyInt());
         try {
-            doReturn(UID_1).when(mockPm).getPackageUidAsUser(eq(PACKAGE_1), anyInt());
-            doReturn(UID_1).when(mockPm).getPackageUidAsUser(eq(PACKAGE_1), anyInt(), anyInt());
-            doReturn(UID_EXEMPTED_1).when(mockPm).getPackageUidAsUser(eq(PACKAGE_EXEMPTED_1),
-                    anyInt());
-            doReturn(UID_EXEMPTED_1).when(mockPm).getPackageUidAsUser(eq(PACKAGE_EXEMPTED_1),
-                    anyInt(), anyInt());
-            doReturn(pi.applicationInfo).when(mockPm).getApplicationInfo(eq(pi.packageName),
-                    anyInt());
-            doReturn(pie.applicationInfo).when(mockPm).getApplicationInfo(eq(pie.packageName),
-                    anyInt());
+            for (int i = 0; i < packages.size(); ++i) {
+                PackageInfo pkg = packages.get(i);
+
+                doReturn(pkg.applicationInfo.uid).when(mockPm)
+                        .getPackageUidAsUser(eq(pkg.packageName), anyInt());
+                doReturn(pkg.applicationInfo.uid).when(mockPm)
+                        .getPackageUidAsUser(eq(pkg.packageName), anyInt(), anyInt());
+                doReturn(pkg.applicationInfo).when(mockPm)
+                        .getApplicationInfo(eq(pkg.packageName), anyInt());
+            }
         } catch (PackageManager.NameNotFoundException nnfe) {}
     }
 
@@ -514,7 +534,11 @@ public class AppStandbyControllerTests {
     }
 
     private void assertBucket(int bucket) {
-        assertEquals(bucket, getStandbyBucket(mController, PACKAGE_1));
+        assertBucket(bucket, PACKAGE_1);
+    }
+
+    private void assertBucket(int bucket, String pkg) {
+        assertEquals(bucket, getStandbyBucket(mController, pkg));
     }
 
     private void assertNotBucket(int bucket) {
@@ -1460,6 +1484,32 @@ public class AppStandbyControllerTests {
         assertBucket(STANDBY_BUCKET_RESTRICTED);
         mController.maybeUnrestrictBuggyApp("com.random.package", USER_ID);
         assertBucket(STANDBY_BUCKET_RESTRICTED);
+    }
+
+    @Test
+    public void testSystemHeadlessAppElevated() {
+        reportEvent(mController, USER_INTERACTION, mInjector.mElapsedRealtime, PACKAGE_1);
+        reportEvent(mController, USER_INTERACTION, mInjector.mElapsedRealtime,
+                PACKAGE_SYSTEM_HEADFULL);
+        reportEvent(mController, USER_INTERACTION, mInjector.mElapsedRealtime,
+                PACKAGE_SYSTEM_HEADLESS);
+        mInjector.mElapsedRealtime += RESTRICTED_THRESHOLD;
+
+
+        mController.setAppStandbyBucket(PACKAGE_SYSTEM_HEADFULL, USER_ID, STANDBY_BUCKET_RARE,
+                REASON_MAIN_TIMEOUT);
+        assertBucket(STANDBY_BUCKET_RARE, PACKAGE_SYSTEM_HEADFULL);
+
+        // Make sure headless system apps don't get lowered.
+        mController.setAppStandbyBucket(PACKAGE_SYSTEM_HEADLESS, USER_ID, STANDBY_BUCKET_RARE,
+                REASON_MAIN_TIMEOUT);
+        assertBucket(STANDBY_BUCKET_ACTIVE, PACKAGE_SYSTEM_HEADLESS);
+
+        // Package 1 doesn't have activities and is headless, but is not a system app, so it can
+        // be lowered.
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RARE,
+                REASON_MAIN_TIMEOUT);
+        assertBucket(STANDBY_BUCKET_RARE, PACKAGE_1);
     }
 
     private String getAdminAppsStr(int userId) {
