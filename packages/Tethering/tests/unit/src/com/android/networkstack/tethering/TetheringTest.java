@@ -367,9 +367,9 @@ public class TetheringTest {
         }
 
         @Override
-        public EntitlementManager getEntitlementManager(Context ctx, StateMachine target,
-                SharedLog log, int what) {
-            mEntitleMgr = spy(super.getEntitlementManager(ctx, target, log, what));
+        public EntitlementManager getEntitlementManager(Context ctx, Handler h, SharedLog log,
+                Runnable callback) {
+            mEntitleMgr = spy(super.getEntitlementManager(ctx, h, log, callback));
             return mEntitleMgr;
         }
 
@@ -1754,10 +1754,12 @@ public class TetheringTest {
         final FileDescriptor mockFd = mock(FileDescriptor.class);
         final PrintWriter mockPw = mock(PrintWriter.class);
         runUsbTethering(null);
+        mLooper.startAutoDispatch();
         mTethering.dump(mockFd, mockPw, new String[0]);
         verify(mConfig).dump(any());
         verify(mEntitleMgr).dump(any());
         verify(mOffloadCtrl).dump(any());
+        mLooper.stopAutoDispatch();
     }
 
     // TODO: Test that a request for hotspot mode doesn't interfere with an
