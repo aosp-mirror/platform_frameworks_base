@@ -125,7 +125,7 @@ public class SystemWindows {
      */
     public void removeView(View view) {
         SurfaceControlViewHost root = mViewRoots.remove(view);
-        root.die();
+        root.release();
     }
 
     /**

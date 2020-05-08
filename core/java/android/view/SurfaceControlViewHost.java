@@ -275,12 +275,4 @@ public class SurfaceControlViewHost {
         // ViewRoot will release mSurfaceControl for us.
         mViewRoot.die(false /* immediate */);
     }
-
-    /**
-     * Tell this viewroot to clean itself up.
-     * @hide
-     */
-    public void die() {
-        mViewRoot.die(false /* immediate */);
-    }
 }
