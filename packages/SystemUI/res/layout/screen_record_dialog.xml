@@ -59,29 +59,16 @@
                 android:layout_gravity="center"
                 android:layout_weight="0"
                 android:layout_marginRight="@dimen/screenrecord_dialog_padding"/>
-            <LinearLayout
+            <Spinner
+                android:id="@+id/screen_recording_options"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_weight="1">
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_gravity="center_vertical"
-                    android:text="@string/screenrecord_audio_label"
-                    android:textColor="?android:attr/textColorPrimary"
-                    android:textAppearance="?android:attr/textAppearanceMedium"/>
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:id="@+id/audio_type"
-                    android:text="@string/screenrecord_mic_label"
-                    android:textAppearance="?android:attr/textAppearanceSmall"/>
-            </LinearLayout>
+                android:layout_height="48dp"
+                android:prompt="@string/screenrecord_audio_label"/>
             <Switch
                 android:layout_width="wrap_content"
                 android:layout_height="48dp"
-                android:layout_weight="0"
+                android:layout_weight="1"
+                android:layout_gravity="end"
                 android:id="@+id/screenrecord_audio_switch"/>
         </LinearLayout>
 
@@ -102,7 +89,8 @@
                 android:id="@+id/screenrecord_taps_switch"
                 android:text="@string/screenrecord_taps_label"
                 android:textColor="?android:attr/textColorPrimary"
-                android:textAppearance="?android:attr/textAppearanceMedium"/>
+                android:textAppearance="?android:attr/textAppearanceSmall"/>
+
         </LinearLayout>
     </LinearLayout>
 
