@@ -930,6 +930,8 @@ filegroup {
     srcs: [
         "core/java/android/os/incremental/IIncrementalService.aidl",
         "core/java/android/os/incremental/IncrementalNewFileParams.aidl",
+        "core/java/android/os/incremental/IStorageHealthListener.aidl",
+        "core/java/android/os/incremental/StorageHealthCheckParams.aidl",
     ],
     path: "core/java",
 }

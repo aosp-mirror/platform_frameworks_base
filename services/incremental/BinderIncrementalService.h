@@ -41,8 +41,11 @@ public:
     binder::Status openStorage(const std::string& path, int32_t* _aidl_return) final;
     binder::Status createStorage(
             const ::std::string& path, const ::android::content::pm::DataLoaderParamsParcel& params,
-            const ::android::sp<::android::content::pm::IDataLoaderStatusListener>& listener,
-            int32_t createMode, int32_t* _aidl_return) final;
+            int32_t createMode,
+            const ::android::sp<::android::content::pm::IDataLoaderStatusListener>& statusListener,
+            const ::android::os::incremental::StorageHealthCheckParams& healthCheckParams,
+            const ::android::sp<IStorageHealthListener>& healthListener,
+            int32_t* _aidl_return) final;
     binder::Status createLinkedStorage(const std::string& path, int32_t otherStorageId,
                                        int32_t createMode, int32_t* _aidl_return) final;
     binder::Status makeBindMount(int32_t storageId, const std::string& sourcePath,
@@ -55,8 +58,7 @@ public:
     binder::Status makeDirectories(int32_t storageId, const std::string& path,
                                    int32_t* _aidl_return) final;
     binder::Status makeFile(int32_t storageId, const std::string& path,
-                            const ::android::os::incremental::IncrementalNewFileParams& params,
-                            int32_t* _aidl_return) final;
+                            const IncrementalNewFileParams& params, int32_t* _aidl_return) final;
     binder::Status makeFileFromRange(int32_t storageId, const std::string& targetPath,
                                      const std::string& sourcePath, int64_t start, int64_t end,
                                      int32_t* _aidl_return) final;
