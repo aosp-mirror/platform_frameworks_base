@@ -232,7 +232,8 @@ public class PipTouchHandler {
                 mMenuController, mSnapAlgorithm, mFlingAnimationUtils, floatingContentCoordinator);
         mPipResizeGestureHandler =
                 new PipResizeGestureHandler(context, pipBoundsHandler, mMotionHelper,
-                        deviceConfig, pipTaskOrganizer);
+                        deviceConfig, pipTaskOrganizer, this::getMovementBounds,
+                        this::updateMovementBounds);
         mTouchState = new PipTouchState(ViewConfiguration.get(context), mHandler,
                 () -> mMenuController.showMenu(MENU_STATE_FULL, mMotionHelper.getBounds(),
                         mMovementBounds, true /* allowMenuTimeout */, willResizeMenu()));
@@ -941,6 +942,10 @@ public class PipTouchHandler {
         boolean isMenuExpanded = mMenuState == MENU_STATE_FULL;
         mPipBoundsHandler.setMinEdgeSize(
                 isMenuExpanded  && willResizeMenu() ? mExpandedShortestEdgeSize : 0);
+    }
+
+    private Rect getMovementBounds() {
+        return mMovementBounds;
     }
 
     /**
