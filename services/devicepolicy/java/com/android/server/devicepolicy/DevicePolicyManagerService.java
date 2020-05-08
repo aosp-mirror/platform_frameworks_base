@@ -4567,9 +4567,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 }
                 if (isProfileOwner(adminReceiver, userHandle)) {
                     if (isProfileOwnerOfOrganizationOwnedDevice(userHandle)) {
+                        UserHandle parentUserHandle = UserHandle.of(getProfileParentId(userHandle));
                         mUserManager.setUserRestriction(UserManager.DISALLOW_REMOVE_MANAGED_PROFILE,
-                                false,
-                                UserHandle.of(getProfileParentId(userHandle)));
+                                false, parentUserHandle);
+                        mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_USER,
+                                false, parentUserHandle);
                     }
                     final ActiveAdmin admin = getActiveAdminUncheckedLocked(adminReceiver,
                             userHandle, /* parent */ false);
@@ -7213,6 +7215,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     mUserManager.setUserRestriction(
                             UserManager.DISALLOW_REMOVE_MANAGED_PROFILE, false,
                             UserHandle.SYSTEM);
+                    mUserManager.setUserRestriction(
+                            UserManager.DISALLOW_ADD_USER, false, UserHandle.SYSTEM);
 
                     // Device-wide policies set by the profile owner need to be cleaned up here.
                     mLockPatternUtils.setDeviceOwnerInfo(null);
@@ -13824,6 +13828,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
 
             mUserManager.setUserRestriction(UserManager.DISALLOW_REMOVE_MANAGED_PROFILE, true,
+                    parentUser);
+            mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_USER, true,
                     parentUser);
         });
 

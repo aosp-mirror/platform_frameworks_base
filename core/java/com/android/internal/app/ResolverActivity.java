@@ -182,6 +182,8 @@ public class ResolverActivity extends Activity implements
     private BroadcastReceiver mWorkProfileStateReceiver;
     private UserHandle mHeaderCreatorUser;
 
+    private UserHandle mWorkProfileUserHandle;
+
     /**
      * Get the string resource to be used as a label for the link to the resolver activity for an
      * action.
@@ -363,6 +365,7 @@ public class ResolverActivity extends Activity implements
         // a more complicated UI that the current voice interaction flow is not able
         // to handle.
         boolean filterLastUsed = mSupportsAlwaysUseOption && !isVoiceInteraction();
+        mWorkProfileUserHandle = fetchWorkProfileUserProfile();
         mMultiProfilePagerAdapter = createMultiProfilePagerAdapter(initialIntents, rList, filterLastUsed);
         if (configureContentView()) {
             return;
@@ -527,13 +530,18 @@ public class ResolverActivity extends Activity implements
         return UserHandle.of(ActivityManager.getCurrentUser());
     }
     protected @Nullable UserHandle getWorkProfileUserHandle() {
+        return mWorkProfileUserHandle;
+    }
+
+    protected @Nullable UserHandle fetchWorkProfileUserProfile() {
+        mWorkProfileUserHandle = null;
         UserManager userManager = getSystemService(UserManager.class);
         for (final UserInfo userInfo : userManager.getProfiles(ActivityManager.getCurrentUser())) {
             if (userInfo.isManagedProfile()) {
-                return userInfo.getUserHandle();
+                mWorkProfileUserHandle = userInfo.getUserHandle();
             }
         }
-        return null;
+        return mWorkProfileUserHandle;
     }
 
     private boolean hasWorkProfile() {
