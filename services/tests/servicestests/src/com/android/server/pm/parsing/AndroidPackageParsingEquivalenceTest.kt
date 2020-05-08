@@ -20,6 +20,7 @@ import android.content.pm.PackageManager
 import android.platform.test.annotations.Presubmit
 import com.google.common.truth.Expect
 import com.google.common.truth.Truth.assertWithMessage
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 
@@ -34,6 +35,7 @@ class AndroidPackageParsingEquivalenceTest : AndroidPackageParsingTestBase() {
     val expect = Expect.create()
 
     @Test
+    @Ignore("b/155935153")
     fun applicationInfoEquality() {
         val flags = PackageManager.GET_META_DATA or PackageManager.GET_SHARED_LIBRARY_FILES
         val oldAppInfo = oldPackages.asSequence().map { oldAppInfo(it, flags) }
@@ -53,6 +55,7 @@ class AndroidPackageParsingEquivalenceTest : AndroidPackageParsingTestBase() {
     }
 
     @Test
+    @Ignore("b/155935153")
     fun packageInfoEquality() {
         val flags = PackageManager.GET_ACTIVITIES or
                 PackageManager.GET_CONFIGURATIONS or
