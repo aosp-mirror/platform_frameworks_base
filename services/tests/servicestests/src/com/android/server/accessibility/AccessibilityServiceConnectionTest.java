@@ -129,8 +129,11 @@ public class AccessibilityServiceConnectionTest {
     public void bind_requestsContextToBindService() {
         mConnection.bindLocked();
         verify(mMockContext).bindServiceAsUser(any(Intent.class), eq(mConnection),
-                eq(Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE_WHILE_AWAKE
-                | Context.BIND_ALLOW_BACKGROUND_ACTIVITY_STARTS), any(UserHandle.class));
+                eq(Context.BIND_AUTO_CREATE
+                        | Context.BIND_FOREGROUND_SERVICE_WHILE_AWAKE
+                        | Context.BIND_ALLOW_BACKGROUND_ACTIVITY_STARTS
+                        | Context.BIND_INCLUDE_CAPABILITIES),
+                any(UserHandle.class));
     }
 
     @Test
