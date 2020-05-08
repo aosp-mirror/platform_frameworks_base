@@ -235,7 +235,7 @@
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"‏يُرجى الاتصال بشبكة Wi-Fi."</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"‏adb، تصحيح الأخطاء، مطور برامج"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"اختصار تقرير الأخطاء"</string>
-    <string name="bugreport_in_power_summary" msgid="1885529649381831775">"عرض زر في قائمة خيارات التشغيل لإعداد تقرير بالأخطاء"</string>
+    <string name="bugreport_in_power_summary" msgid="1885529649381831775">"عرض زر في قائمة زر التشغيل لإعداد تقرير بالأخطاء"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"البقاء في الوضع النشط"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"لا يتم مطلقًا دخول الشاشة في وضع السكون أثناء الشحن"</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"تفعيل سجلّ تطفل بواجهة وحدة تحكم المضيف في بلوتوث"</string>
@@ -284,8 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"عرض خيارات شهادة عرض شاشة لاسلكي"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"‏زيادة مستوى تسجيل Wi-Fi، وعرض لكل SSID RSSI في منتقي Wi-Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"لتقليل استنفاد البطارية وتحسين أداء الشبكة."</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"‏عند تفعيل هذا الوضع، قد يتم تغيير عنوان MAC لهذا الجهاز في كل مرة تتصل فيها بشبكة تم تفعيل التوزيع العشوائي لعناوين MAC عليها."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"تفرض تكلفة استخدام"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"بدون قياس"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"أحجام ذاكرة التخزين المؤقت للتسجيل"</string>
@@ -554,4 +553,12 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"إضافة ضيف"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"إزالة جلسة الضيف"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"ضيف"</string>
+    <!-- no translation found for cached_apps_freezer_device_default (2616594131750144342) -->
+    <skip />
+    <!-- no translation found for cached_apps_freezer_disabled (4816382260660472042) -->
+    <skip />
+    <!-- no translation found for cached_apps_freezer_enabled (8866703500183051546) -->
+    <skip />
+    <!-- no translation found for cached_apps_freezer_reboot_dialog_text (695330563489230096) -->
+    <skip />
 </resources>

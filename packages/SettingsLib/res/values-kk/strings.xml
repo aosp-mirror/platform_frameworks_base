@@ -203,9 +203,9 @@
     <string name="vpn_settings_not_available" msgid="2894137119965668920">"VPN параметрлері осы пайдаланушы үшін қол жетімді емес"</string>
     <string name="tethering_settings_not_available" msgid="266821736434699780">"Тетеринг параметрлері осы пайдаланушы үшін қол жетімді емес"</string>
     <string name="apn_settings_not_available" msgid="1147111671403342300">"Кіру нүктесі атауының параметрлері осы пайдаланушы үшін қол жетімді емес"</string>
-    <string name="enable_adb" msgid="8072776357237289039">"USB жөндеу"</string>
-    <string name="enable_adb_summary" msgid="3711526030096574316">"USB жалғанғандағы жөндеу режимі"</string>
-    <string name="clear_adb_keys" msgid="3010148733140369917">"USB жөндеу рұқсаттарынан бас тарту"</string>
+    <string name="enable_adb" msgid="8072776357237289039">"USB арқылы түзету"</string>
+    <string name="enable_adb_summary" msgid="3711526030096574316">"USB жалғанғандағы түзету режимі"</string>
+    <string name="clear_adb_keys" msgid="3010148733140369917">"USB арқылы түзету рұқсаттарынан бас тарту"</string>
     <string name="enable_adb_wireless" msgid="6973226350963971018">"Сымсыз түзету"</string>
     <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Wi‑Fi желісіне жалғанған кездегі түзету режимі"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"Қате"</string>
@@ -284,8 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Сымсыз дисплей сертификаты опцияларын көрсету"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Wi‑Fi тіркеу деңгейін арттыру, Wi‑Fi таңдағанда әр SSID RSSI бойынша көрсету"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Батарея зарядының шығынын азайтады және желі жұмысын жақсартады."</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Бұл режим қосулы болса, құрылғының MAC мекенжайы MAC рандомизациясы қосулы желіге жалғанған сайын өзгеруі мүмкін."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Трафик саналады"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Трафик саналмайды"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Журналға тіркеуші буферінің өлшемдері"</string>
@@ -301,11 +300,11 @@
     <string name="debug_view_attributes" msgid="3539609843984208216">"Көру төлсипатын тексеруді қосу"</string>
     <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"Wi‑Fi қосулы кезде де мобильдік интернетті өшірмеу (желіні жылдам ауыстыру үшін)"</string>
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"Тетеринг режиміндегі аппараттық жеделдетуді пайдалану (қолжетімді болса)"</string>
-    <string name="adb_warning_title" msgid="7708653449506485728">"USB жөндеулеріне рұқсат берілсін бе?"</string>
-    <string name="adb_warning_message" msgid="8145270656419669221">"USB жөндеу дамыту мақсаттарына ғана арналған. Оны компьютер және құрылғы арасында дерек көшіру, құрылғыға ескертусіз қолданба орнату және тіркелім деректерін оқу үшін қолданыңыз."</string>
+    <string name="adb_warning_title" msgid="7708653449506485728">"USB арқылы түзетуге рұқсат берілсін бе?"</string>
+    <string name="adb_warning_message" msgid="8145270656419669221">"USB арқылы түзету дамыту мақсаттарына ғана арналған. Оны компьютер және құрылғы арасында дерек көшіру, құрылғыға ескертусіз қолданба орнату және журнал деректерін оқу үшін қолданыңыз."</string>
     <string name="adbwifi_warning_title" msgid="727104571653031865">"Сымсыз түзетуге рұқсат берілсін бе?"</string>
     <string name="adbwifi_warning_message" msgid="8005936574322702388">"Сымсыз түзету функциясы дамыту мақсаттарына ғана арналған. Оны компьютер және құрылғы арасында дерек көшіру, құрылғыға ескертусіз қолданба орнату және журнал деректерін оқу үшін қолданыңыз."</string>
-    <string name="adb_keys_warning_message" msgid="2968555274488101220">"Бұған дейін рұқсат берілген барлық компьютерлерде USB жөндеу функциясына тыйым салынсын ба?"</string>
+    <string name="adb_keys_warning_message" msgid="2968555274488101220">"Бұған дейін рұқсат берілген барлық компьютерлерде USB арқылы түзету функциясына тыйым салынсын ба?"</string>
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"Жетілдіру параметрлеріне рұқсат берілсін бе?"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"Бұл параметрлер жетілдіру мақсатында ғана қолданылады. Олар құрылғыңыз бен қолданбаларыңыздың бұзылуына немесе әдеттен тыс әрекеттерге себеп болуы мүмкін."</string>
     <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"USB арқылы орнатылған қолданбаларды растау"</string>
@@ -318,10 +317,10 @@
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Жергілікті шелл-код қол жетімділігін ұсынатын терминалды қолданбаны қосу"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP тексеру"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"HDCP (кең жолақты сандық мазмұн қорғау) тексеру мүмкіндігін орнату"</string>
-    <string name="debug_debugging_category" msgid="535341063709248842">"Жөндеу"</string>
+    <string name="debug_debugging_category" msgid="535341063709248842">"Түзету"</string>
     <string name="debug_app" msgid="8903350241392391766">"Жөндеу қолданбасын таңдау"</string>
     <string name="debug_app_not_set" msgid="1934083001283807188">"Жөндеу қолданбалары орнатылмаған"</string>
-    <string name="debug_app_set" msgid="6599535090477753651">"Жөндеу қолданбасы: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="debug_app_set" msgid="6599535090477753651">"Түзету қолданбасы: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="select_application" msgid="2543228890535466325">"Қолданба таңдау"</string>
     <string name="no_application" msgid="9038334538870247690">"Ешнәрсе"</string>
     <string name="wait_for_debugger" msgid="7461199843335409809">"Жөндеушіні күту"</string>
@@ -550,4 +549,12 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"Қонақты енгізу"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Қонақты өшіру"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Қонақ"</string>
+    <!-- no translation found for cached_apps_freezer_device_default (2616594131750144342) -->
+    <skip />
+    <!-- no translation found for cached_apps_freezer_disabled (4816382260660472042) -->
+    <skip />
+    <!-- no translation found for cached_apps_freezer_enabled (8866703500183051546) -->
+    <skip />
+    <!-- no translation found for cached_apps_freezer_reboot_dialog_text (695330563489230096) -->
+    <skip />
 </resources>

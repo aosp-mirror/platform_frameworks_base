@@ -284,8 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Afișați opțiunile pentru certificarea Ecran wireless"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Măriți niv. de înr. prin Wi‑Fi, afișați în fcț. de SSID RSSI în Selectorul Wi‑Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Reduce descărcarea bateriei și îmbunătățește performanța rețelei"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Când acest mod este activat, adresa MAC a dispozitivului se poate schimba de fiecare dată când se conectează la o rețea care are activată randomizarea MAC."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Contorizată"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Necontorizată"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Dimensiunile memoriei temporare a jurnalului"</string>
@@ -551,4 +550,12 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"Adăugați un invitat"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Ștergeți invitatul"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Invitat"</string>
+    <!-- no translation found for cached_apps_freezer_device_default (2616594131750144342) -->
+    <skip />
+    <!-- no translation found for cached_apps_freezer_disabled (4816382260660472042) -->
+    <skip />
+    <!-- no translation found for cached_apps_freezer_enabled (8866703500183051546) -->
+    <skip />
+    <!-- no translation found for cached_apps_freezer_reboot_dialog_text (695330563489230096) -->
+    <skip />
 </resources>

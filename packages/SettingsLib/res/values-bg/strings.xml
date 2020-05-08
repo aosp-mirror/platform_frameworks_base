@@ -284,8 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Показване на опциите за сертифициране на безжичния дисплей"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"По-подробно регистр. на Wi‑Fi – данни за RSSI на SSID в инстр. за избор на Wi‑Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Намалява изразходването на батерията и подобрява ефективността на мрежата"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Когато този режим е включен, MAC адресът на устройството може да се променя при всяко свързване с мрежа, за която е активирана функцията за рандомизиране на MAC адреса."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"С отчитане"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Без отчитане"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Размери на регистрац. буфери"</string>
@@ -550,4 +549,12 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"Добавяне на гост"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Премахване на госта"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Гост"</string>
+    <!-- no translation found for cached_apps_freezer_device_default (2616594131750144342) -->
+    <skip />
+    <!-- no translation found for cached_apps_freezer_disabled (4816382260660472042) -->
+    <skip />
+    <!-- no translation found for cached_apps_freezer_enabled (8866703500183051546) -->
+    <skip />
+    <!-- no translation found for cached_apps_freezer_reboot_dialog_text (695330563489230096) -->
+    <skip />
 </resources>

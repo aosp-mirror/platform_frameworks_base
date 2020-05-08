@@ -203,29 +203,29 @@
     <string name="vpn_settings_not_available" msgid="2894137119965668920">"Бул колдонуучу VPN жөндөөлөрүн колдоно албайт"</string>
     <string name="tethering_settings_not_available" msgid="266821736434699780">"Бул колдонуучу модем режиминин жөндөөлөрүн өзгөртө албайт"</string>
     <string name="apn_settings_not_available" msgid="1147111671403342300">"Бул колдонуучу мүмкүндүк алуу түйүнүнүн аталышынын жөндөөлөрүн колдоно албайт"</string>
-    <string name="enable_adb" msgid="8072776357237289039">"USB аркылуу мүчүлүштүктөрдү оңдоо"</string>
+    <string name="enable_adb" msgid="8072776357237289039">"USB аркылуу мүчүлүштүктөрдү аныктоо"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"USB компьютерге сайылганда мүчүлүштүктөрдү оңдоо режими иштейт"</string>
-    <string name="clear_adb_keys" msgid="3010148733140369917">"USB аркылуу мүчүлүштүктөрдү оңдоо уруксатын артка кайтаруу"</string>
-    <string name="enable_adb_wireless" msgid="6973226350963971018">"Мүчүлүштүктөрдү Wi-Fi аркылуу оңдоо"</string>
-    <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Wi‑Fi\'га туташтырылганда мүчүлүштүктөрдү оңдоо режими"</string>
+    <string name="clear_adb_keys" msgid="3010148733140369917">"USB аркылуу мүчүлүштүктөрдү аныктоо уруксатын артка кайтаруу"</string>
+    <string name="enable_adb_wireless" msgid="6973226350963971018">"Мүчүлүштүктөрдү Wi-Fi аркылуу аныктоо"</string>
+    <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Wi‑Fi\'га туташканда, мүчүлүштүктөрдү аныктоо режими иштейт оңдоо режими"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"Ката"</string>
-    <string name="adb_wireless_settings" msgid="2295017847215680229">"Мүчүлүштүктөрдү Wi-Fi аркылуу оңдоо"</string>
-    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Жеткиликтүү түзмөктөрдү көрүү үчүн мүчүлүштүктөрдү Wi-Fi аркылуу оңдоону күйгүзүңүз"</string>
-    <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"QR кодун колдонуп, түзмөктү жупташтырыңыз"</string>
+    <string name="adb_wireless_settings" msgid="2295017847215680229">"Мүчүлүштүктөрдү Wi-Fi аркылуу аныктоо"</string>
+    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Жеткиликтүү түзмөктөрдү көрүү үчүн, мүчүлүштүктөрдү Wi-Fi аркылуу аныктоону күйгүзүңүз"</string>
+    <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Түзмөктү QR коду аркылуу жупташтыруу"</string>
     <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"QR кодунун сканерин колдонуп, жаңы түзмөктөрдү жупташтырыңыз"</string>
-    <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Жупташтыруучу код менен түзмөктү жупташтырыңыз"</string>
-    <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Алты сандан турган кодду колдонуп, жаңы түзмөктөрдү жупташтырыңыз"</string>
+    <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Түзмөктү атайын код аркылуу жупташтыруу"</string>
+    <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Жаңы түзмөктөрдү алты сандан турган код аркылуу жупташтырасыз"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"Жупташтырылган түзмөктөр"</string>
     <string name="adb_wireless_device_connected_summary" msgid="3039660790249148713">"Учурда туташып турган түзмөктөр"</string>
     <string name="adb_wireless_device_details_title" msgid="7129369670526565786">"Түзмөктүн чоо-жайы"</string>
     <string name="adb_device_forget" msgid="193072400783068417">"Унутулсун"</string>
     <string name="adb_device_fingerprint_title_format" msgid="291504822917843701">"Түзмөктөгү манжа изи: <xliff:g id="FINGERPRINT_PARAM">%1$s</xliff:g>"</string>
-    <string name="adb_wireless_connection_failed_title" msgid="664211177427438438">"Туташкан жок"</string>
+    <string name="adb_wireless_connection_failed_title" msgid="664211177427438438">"Байланышкан жок"</string>
     <string name="adb_wireless_connection_failed_message" msgid="9213896700171602073">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> туура тармакка туташып турганын текшериңиз"</string>
     <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"Түзмөктү жупташтыруу"</string>
     <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"Wi‑Fi жупташтыруучу коду"</string>
     <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"Жупташтырылган жок"</string>
-    <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"Түзмөк бир тармакка туташканын текшериңиз."</string>
+    <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"Түзмөк бир тармакка туташып турушу керек."</string>
     <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"QR кодун скандап, түзмөктү Wi‑Fi аркылуу жупташтырыңыз"</string>
     <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"Түзмөк жупташтырылууда…"</string>
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Түзмөк жупташтырылган жок. QR коду туура эмес же түзмөк бир тармакка туташпай турат."</string>
@@ -284,8 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Зымсыз мониторлорду тастыктамалоо параметрлери көрүнүп турат"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Wi-Fi тандалганда ар бир SSID үчүн RSSI көрүнүп турат"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Батареянын коротулушун чектеп, тармактын иштешин жакшыртат"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Бул режим өчүрүлгөндөн кийин түзмөк MAC даректи башаламан иретте түзүү функциясы иштетилген тармакка туташкан сайын анын MAC дареги өзгөрүшү мүмкүн."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Трафик ченелет"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Чектелбеген тармак"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Журнал буферинин өлчөмү"</string>
@@ -304,7 +303,7 @@
     <string name="adb_warning_title" msgid="7708653449506485728">"USB аркылуу жөндөөгө уруксат бересизби?"</string>
     <string name="adb_warning_message" msgid="8145270656419669221">"USB-жөндөө - өндүрүү максатында гана  түзүлгөн. Аны компүтериңиз менен түзмөгүңүздүн ортосунда берилиштерди алмашуу, түзмөгүңүзгө колдонмолорду эскертүүсүз орнотуу жана лог берилиштерин окуу үчүн колдонсоңуз болот."</string>
     <string name="adbwifi_warning_title" msgid="727104571653031865">"Мүчүлүштүктөрдү Wi-Fi аркылуу оңдоого уруксат берилсинби?"</string>
-    <string name="adbwifi_warning_message" msgid="8005936574322702388">"Мүчүлүштүктөрдү Wi-Fi аркылуу оңдоо – өндүрүү максатында гана түзүлгөн. Аны компьютериңиз менен түзмөгүңүздүн ортосунда маалыматты алмашуу, колдонмолорду түзмөгүңүзгө эскертүүсүз орнотуу жана маалыматтар таржымалын окуу үчүн колдонсоңуз болот."</string>
+    <string name="adbwifi_warning_message" msgid="8005936574322702388">"Мүчүлүштүктөрдү Wi-Fi аркылуу аныктоо – өндүрүү максатында гана түзүлгөн. Аны компьютериңиз менен түзмөгүңүздүн ортосунда маалыматты алмашуу, колдонмолорду түзмөгүңүзгө эскертүүсүз орнотуу жана маалыматтар таржымалын окуу үчүн колдонсоңуз болот."</string>
     <string name="adb_keys_warning_message" msgid="2968555274488101220">"Сиз мурун USB жөндөөлөрүнө уруксат берген бардык компүтерлердин жеткиси жокко чыгарылсынбы?"</string>
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"Жөндөөлөрдү өзгөртүү"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"Бул орнотуулар өндүрүүчүлөр үчүн гана берилген. Булар түзмөгүңүздүн колдонмолорун бузулушуна же туура эмес иштешине алып келиши мүмкүн."</string>
@@ -318,7 +317,7 @@
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Жергиликтүү буйрук кабыгын сунуштаган терминалга уруксат берүү"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP текшерүү"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"HDCP текшерүү тартиби"</string>
-    <string name="debug_debugging_category" msgid="535341063709248842">"Мүчүлүштүктөрдү оңдоо"</string>
+    <string name="debug_debugging_category" msgid="535341063709248842">"Мүчүлүштүктөрдү аныктоо"</string>
     <string name="debug_app" msgid="8903350241392391766">"Мүчүлүштүктөрдү оңдоочу колдонмону тандоо"</string>
     <string name="debug_app_not_set" msgid="1934083001283807188">"Бир дагы колдонмо орнотула элек."</string>
     <string name="debug_app_set" msgid="6599535090477753651">"Жөндөөчү колдонмо: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
@@ -361,7 +360,7 @@
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"GPU мүчүлүштүктөрдү оңдоо катмарларын иштетүү"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"GPU мүчүлүштүктөрдү оңдоо катмарларын иштетет"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Кызмат көрсөтүүчүнү оозеки киргизүүнү иштетет"</string>
-    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Түзмөккө байланыштуу кызмат көрсөтүүчүнүн кирүүлөрү боюнча мүчүлүштүк тууралуу кабар берүү камтылсын. Анда купуя маалымат көрсөтүлүп, батарея тезирээк отуруп жана/же сактагычтан көбүрөөк орун ээлениши мүмкүн."</string>
+    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Түзмөккө байланыштуу кызмат көрсөтүүчүнүн кирүүлөрү боюнча мүчүлүштүк тууралуу кабарлоо камтылсын. Анда купуя маалымат көрсөтүлүп, батарея тезирээк отуруп жана/же сактагычтан көбүрөөк орун ээлениши мүмкүн."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Терезелердин анимациясы"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Өткөрүү анимацснн шкаласы"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Анимациянын узактыгы"</string>
@@ -550,4 +549,12 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"Конок кошуу"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Конокту өчүрүү"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Конок"</string>
+    <!-- no translation found for cached_apps_freezer_device_default (2616594131750144342) -->
+    <skip />
+    <!-- no translation found for cached_apps_freezer_disabled (4816382260660472042) -->
+    <skip />
+    <!-- no translation found for cached_apps_freezer_enabled (8866703500183051546) -->
+    <skip />
+    <!-- no translation found for cached_apps_freezer_reboot_dialog_text (695330563489230096) -->
+    <skip />
 </resources>

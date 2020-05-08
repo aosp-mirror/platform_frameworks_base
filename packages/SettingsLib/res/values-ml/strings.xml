@@ -153,7 +153,7 @@
     <string name="unknown" msgid="3544487229740637809">"അജ്ഞാതം"</string>
     <string name="running_process_item_user_label" msgid="3988506293099805796">"ഉപയോക്താവ്: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"സ്ഥിരമായ ചിലത് സജ്ജീകരിച്ചു"</string>
-    <string name="launch_defaults_none" msgid="8049374306261262709">"സ്ഥിരമായൊന്നും സജ്ജീകരിച്ചിട്ടില്ല"</string>
+    <string name="launch_defaults_none" msgid="8049374306261262709">"ഡിഫോൾട്ടുകളൊന്നും സജ്ജീകരിച്ചിട്ടില്ല"</string>
     <string name="tts_settings" msgid="8130616705989351312">"ടെക്‌സ്റ്റ്-ടു-സ്‌പീച്ച് ക്രമീകരണങ്ങൾ"</string>
     <string name="tts_settings_title" msgid="7602210956640483039">"ടെക്‌സ്റ്റ്-ടു-സ്‌പീച്ച് ഔട്ട്‌പുട്ട്"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"വായനയുടെ വേഗത"</string>
@@ -207,7 +207,7 @@
     <string name="enable_adb_summary" msgid="3711526030096574316">"USB കണ‌ക്റ്റുചെയ്‌തിരിക്കുമ്പോഴുള്ള ഡീബഗ് മോഡ്"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"USB ഡീബഗ്ഗിംഗ് അംഗീകാരം പിൻവലിക്കുക"</string>
     <string name="enable_adb_wireless" msgid="6973226350963971018">"വയർലെസ് ഡീബഗ്ഗിംഗ്"</string>
-    <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"വൈഫൈ കണക്റ്റ് ചെയ്‌തിരിക്കുമ്പോൾ ഡീബഗ് ചെയ്യൽ മോഡിലാക്കുക"</string>
+    <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"വൈഫൈ കണക്റ്റ് ചെയ്‌തിരിക്കുമ്പോൾ ഡീബഗ് മോഡിലാക്കുക"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"പിശക്"</string>
     <string name="adb_wireless_settings" msgid="2295017847215680229">"വയർലെസ് ഡീബഗ്ഗിംഗ്"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"ലഭ്യമായ ഉപകരണങ്ങൾ കാണാനും ഉപയോഗിക്കാനും വയർലെസ് ഡീബഗ്ഗിംഗ് ഓണാക്കുക"</string>
@@ -284,8 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"വയർലെസ് ഡിസ്‌പ്ലേ സർട്ടിഫിക്കേഷനായി ഓപ്‌ഷനുകൾ ദൃശ്യമാക്കുക"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"വൈഫൈ പിക്കറിൽ ഓരോ SSID RSSI പ്രകാരം കാണിക്കാൻ വൈഫൈ ലോഗിംഗ് നില വർദ്ധിപ്പിക്കുക"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"ബാറ്ററി ചാർജ് വേഗത്തിൽ തീരുന്ന അവസ്ഥ കുറച്ച് നെറ്റ്‌വർക്ക് പ്രകടനം മെച്ചപ്പെടുത്തുന്നു"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"ഈ മോഡ് പ്രവർത്തനക്ഷമമാക്കുമ്പോൾ, MAC ക്രമരഹിതമാക്കൽ പ്രവർത്തനക്ഷമമാക്കിയിരിക്കുന്ന നെറ്റ്‌വർക്കിലേക്ക് കണക്റ്റ് ചെയ്യുമ്പോഴെല്ലാം ഈ ഉപകരണത്തിന്റെ MAC വിലാസം മാറിയേക്കാം."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"മീറ്റർ ചെയ്തത്"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"മീറ്റർമാപകമല്ലാത്തത്"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"ലോഗർ ബഫർ വലുപ്പം"</string>
@@ -550,4 +549,12 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"അതിഥിയെ ചേർക്കുക"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"അതിഥിയെ നീക്കം ചെയ്യുക"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"അതിഥി"</string>
+    <!-- no translation found for cached_apps_freezer_device_default (2616594131750144342) -->
+    <skip />
+    <!-- no translation found for cached_apps_freezer_disabled (4816382260660472042) -->
+    <skip />
+    <!-- no translation found for cached_apps_freezer_enabled (8866703500183051546) -->
+    <skip />
+    <!-- no translation found for cached_apps_freezer_reboot_dialog_text (695330563489230096) -->
+    <skip />
 </resources>

@@ -284,8 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Wys opsies vir draadlose skermsertifisering"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Verhoog Wi-Fi-aantekeningvlak, wys per SSID RSSI in Wi‑Fi-kieser"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Verlaag batteryverbruik en verbeter netwerk se werkverrigting"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Wanneer hierdie modus geaktiveer is, kan hierdie toestel se MAC-adres verander elke keer wanneer dit aan \'n netwerk koppel waarvoor MAC-verewekansiging geaktiveer is."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Beperk"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Onbeperk"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Loggerbuffer se groottes"</string>
@@ -550,4 +549,8 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"Voeg gas by"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Verwyder gas"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Gas"</string>
+    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Toestelverstek"</string>
+    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Gedeaktiveer"</string>
+    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Geaktiveer"</string>
+    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Jou toestel moet herselflaai om hierdie verandering toe te pas. Herselflaai nou of kanselleer."</string>
 </resources>

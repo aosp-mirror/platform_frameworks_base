@@ -23,7 +23,7 @@
     <string name="wifi_fail_to_scan" msgid="2333336097603822490">"無法掃瞄網絡"</string>
     <string name="wifi_security_none" msgid="7392696451280611452">"無"</string>
     <string name="wifi_remembered" msgid="3266709779723179188">"已儲存"</string>
-    <string name="wifi_disconnected" msgid="7054450256284661757">"已解除連接"</string>
+    <string name="wifi_disconnected" msgid="7054450256284661757">"已中斷連線"</string>
     <string name="wifi_disabled_generic" msgid="2651916945380294607">"已停用"</string>
     <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"IP 設定失敗"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="1302938248432705534">"網絡品質欠佳，因此無法連線"</string>
@@ -284,8 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"顯示無線螢幕分享認證的選項"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"讓 Wi‑Fi 記錄功能升級，在 Wi‑Fi 選擇器中依每個 SSID RSSI 顯示 Wi‑Fi 詳細紀錄"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"減低耗電量並改善網絡表現"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"啟用此模式後，每次連接至已啟用 MAC 隨機處理的網絡時，此裝置的 MAC 位址都可能會變更。"</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"按用量收費"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"不限數據用量收費"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"記錄器緩衝區空間"</string>
@@ -550,4 +549,12 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"新增訪客"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"移除訪客"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"訪客"</string>
+    <!-- no translation found for cached_apps_freezer_device_default (2616594131750144342) -->
+    <skip />
+    <!-- no translation found for cached_apps_freezer_disabled (4816382260660472042) -->
+    <skip />
+    <!-- no translation found for cached_apps_freezer_enabled (8866703500183051546) -->
+    <skip />
+    <!-- no translation found for cached_apps_freezer_reboot_dialog_text (695330563489230096) -->
+    <skip />
 </resources>
