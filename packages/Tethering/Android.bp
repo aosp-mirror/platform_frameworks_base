@@ -52,6 +52,11 @@ android_library {
 cc_library {
     name: "libtetherutilsjni",
     sdk_version: "current",
+    apex_available: [
+        "//apex_available:platform", // Used by InProcessTethering
+        "com.android.tethering",
+    ],
+    min_sdk_version: "current",
     srcs: [
         "jni/android_net_util_TetheringUtils.cpp",
     ],
@@ -124,4 +129,5 @@ android_app {
     // The permission configuration *must* be included to ensure security of the device
     required: ["NetworkPermissionConfig"],
     apex_available: ["com.android.tethering"],
+    min_sdk_version: "current",
 }
