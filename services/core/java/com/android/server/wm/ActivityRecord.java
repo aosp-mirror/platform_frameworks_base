@@ -570,7 +570,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     private final WindowState.UpdateReportedVisibilityResults mReportedVisibilityResults =
             new WindowState.UpdateReportedVisibilityResults();
 
-    boolean mUseTransferredAnimation;
+    private boolean mUseTransferredAnimation;
 
     /**
      * @see #currentLaunchCanTurnScreenOn()
@@ -3369,12 +3369,14 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 }
                 setClientVisible(fromActivity.mClientVisible);
 
-                transferAnimation(fromActivity);
+                if (fromActivity.isAnimating()) {
+                    transferAnimation(fromActivity);
 
-                // When transferring an animation, we no longer need to apply an animation to the
-                // the token we transfer the animation over. Thus, set this flag to indicate we've
-                // transferred the animation.
-                mUseTransferredAnimation = true;
+                    // When transferring an animation, we no longer need to apply an animation to
+                    // the token we transfer the animation over. Thus, set this flag to indicate
+                    // we've transferred the animation.
+                    mUseTransferredAnimation = true;
+                }
 
                 mWmService.updateFocusedWindowLocked(
                         UPDATE_FOCUS_WILL_PLACE_SURFACES, true /*updateInputWindows*/);
