@@ -190,6 +190,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private static final String ATTR_SESSION_STAGE_CID = "sessionStageCid";
     private static final String ATTR_PREPARED = "prepared";
     private static final String ATTR_COMMITTED = "committed";
+    private static final String ATTR_DESTROYED = "destroyed";
     private static final String ATTR_SEALED = "sealed";
     private static final String ATTR_MULTI_PACKAGE = "multiPackage";
     private static final String ATTR_PARENT_SESSION_ID = "parentSessionId";
@@ -533,7 +534,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             int sessionId, int userId, int installerUid, @NonNull InstallSource installSource,
             SessionParams params, long createdMillis,
             File stageDir, String stageCid, InstallationFile[] files, boolean prepared,
-            boolean committed, boolean sealed,
+            boolean committed, boolean destroyed, boolean sealed,
             @Nullable int[] childSessionIds, int parentSessionId, boolean isReady,
             boolean isFailed, boolean isApplied, int stagedSessionErrorCode,
             String stagedSessionErrorMessage) {
@@ -579,6 +580,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
         mPrepared = prepared;
         mCommitted = committed;
+        mDestroyed = destroyed;
         mStagedSessionReady = isReady;
         mStagedSessionFailed = isFailed;
         mStagedSessionApplied = isApplied;
@@ -710,6 +712,13 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     boolean isCommitted() {
         synchronized (mLock) {
             return mCommitted;
+        }
+    }
+
+    /** {@hide} */
+    boolean isDestroyed() {
+        synchronized (mLock) {
+            return mDestroyed;
         }
     }
 
@@ -1063,6 +1072,19 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private void assertCallerIsOwnerOrRootLocked() {
         final int callingUid = Binder.getCallingUid();
         if (callingUid != Process.ROOT_UID && callingUid != mInstallerUid) {
+            throw new SecurityException("Session does not belong to uid " + callingUid);
+        }
+    }
+
+    /**
+     * Check if the caller is the owner of this session. Otherwise throw a
+     * {@link SecurityException}.
+     */
+    @GuardedBy("mLock")
+    private void assertCallerIsOwnerOrRootOrSystemLocked() {
+        final int callingUid = Binder.getCallingUid();
+        if (callingUid != Process.ROOT_UID && callingUid != mInstallerUid
+                && callingUid != Process.SYSTEM_UID) {
             throw new SecurityException("Session does not belong to uid " + callingUid);
         }
     }
@@ -2552,7 +2574,13 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                             + mParentSessionId +  " and may not be abandoned directly.");
         }
         synchronized (mLock) {
-            assertCallerIsOwnerOrRootLocked();
+            if (params.isStaged && mDestroyed) {
+                // If a user abandons staged session in an unsafe state, then system will try to
+                // abandon the destroyed staged session when it is safe on behalf of the user.
+                assertCallerIsOwnerOrRootOrSystemLocked();
+            } else {
+                assertCallerIsOwnerOrRootLocked();
+            }
 
             if (isStagedAndInTerminalState()) {
                 // We keep the session in the database if it's in a finalized state. It will be
@@ -2562,11 +2590,12 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 return;
             }
             if (mCommitted && params.isStaged) {
-                synchronized (mLock) {
-                    mDestroyed = true;
+                mDestroyed = true;
+                if (!mStagingManager.abortCommittedSessionLocked(this)) {
+                    // Do not clean up the staged session from system. It is not safe yet.
+                    mCallback.onStagedSessionChanged(this);
+                    return;
                 }
-                mStagingManager.abortCommittedSession(this);
-
                 cleanStageDir();
             }
 
@@ -2926,6 +2955,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     /** {@hide} */
     void setStagedSessionReady() {
         synchronized (mLock) {
+            if (mDestroyed) return; // Do not allow destroyed staged session to change state
             mStagedSessionReady = true;
             mStagedSessionApplied = false;
             mStagedSessionFailed = false;
@@ -2939,6 +2969,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     void setStagedSessionFailed(@StagedSessionErrorCode int errorCode,
                                 String errorMessage) {
         synchronized (mLock) {
+            if (mDestroyed) return; // Do not allow destroyed staged session to change state
             mStagedSessionReady = false;
             mStagedSessionApplied = false;
             mStagedSessionFailed = true;
@@ -2953,6 +2984,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     /** {@hide} */
     void setStagedSessionApplied() {
         synchronized (mLock) {
+            if (mDestroyed) return; // Do not allow destroyed staged session to change state
             mStagedSessionReady = false;
             mStagedSessionApplied = true;
             mStagedSessionFailed = false;
@@ -3197,7 +3229,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
      */
     void write(@NonNull XmlSerializer out, @NonNull File sessionsDir) throws IOException {
         synchronized (mLock) {
-            if (mDestroyed) {
+            if (mDestroyed && !params.isStaged) {
                 return;
             }
 
@@ -3223,6 +3255,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
             writeBooleanAttribute(out, ATTR_PREPARED, isPrepared());
             writeBooleanAttribute(out, ATTR_COMMITTED, isCommitted());
+            writeBooleanAttribute(out, ATTR_DESTROYED, isDestroyed());
             writeBooleanAttribute(out, ATTR_SEALED, isSealed());
 
             writeBooleanAttribute(out, ATTR_MULTI_PACKAGE, params.isMultiPackage);
@@ -3352,6 +3385,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         final String stageCid = readStringAttribute(in, ATTR_SESSION_STAGE_CID);
         final boolean prepared = readBooleanAttribute(in, ATTR_PREPARED, true);
         final boolean committed = readBooleanAttribute(in, ATTR_COMMITTED);
+        final boolean destroyed = readBooleanAttribute(in, ATTR_DESTROYED);
         final boolean sealed = readBooleanAttribute(in, ATTR_SEALED);
         final int parentSessionId = readIntAttribute(in, ATTR_PARENT_SESSION_ID,
                 SessionInfo.INVALID_ID);
@@ -3473,7 +3507,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         return new PackageInstallerSession(callback, context, pm, sessionProvider,
                 installerThread, stagingManager, sessionId, userId, installerUid,
                 installSource, params, createdMillis, stageDir, stageCid, fileArray,
-                prepared, committed, sealed, childSessionIdsArray, parentSessionId,
+                prepared, committed, destroyed, sealed, childSessionIdsArray, parentSessionId,
                 isReady, isFailed, isApplied, stagedSessionErrorCode, stagedSessionErrorMessage);
     }
 }

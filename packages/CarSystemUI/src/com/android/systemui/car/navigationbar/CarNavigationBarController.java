@@ -73,7 +73,7 @@ public class CarNavigationBarController {
     }
 
     /**
-     * Hides all navigation bars.
+     * Hides all system bars.
      */
     public void hideBars() {
         if (mTopView != null) {
@@ -85,7 +85,7 @@ public class CarNavigationBarController {
     }
 
     /**
-     * Shows all navigation bars.
+     * Shows all system bars.
      */
     public void showBars() {
         if (mTopView != null) {
