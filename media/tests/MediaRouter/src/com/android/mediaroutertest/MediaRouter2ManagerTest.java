@@ -26,6 +26,7 @@ import static com.android.mediaroutertest.StubMediaRoute2ProviderService.FEATURE
 import static com.android.mediaroutertest.StubMediaRoute2ProviderService.FEATURE_SPECIAL;
 import static com.android.mediaroutertest.StubMediaRoute2ProviderService.ROUTE_ID1;
 import static com.android.mediaroutertest.StubMediaRoute2ProviderService.ROUTE_ID2;
+import static com.android.mediaroutertest.StubMediaRoute2ProviderService.ROUTE_ID4_TO_SELECT_AND_DESELECT;
 import static com.android.mediaroutertest.StubMediaRoute2ProviderService.ROUTE_ID5_TO_TRANSFER_TO;
 import static com.android.mediaroutertest.StubMediaRoute2ProviderService.ROUTE_ID_FIXED_VOLUME;
 import static com.android.mediaroutertest.StubMediaRoute2ProviderService.ROUTE_ID_SPECIAL_FEATURE;
@@ -68,6 +69,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
@@ -564,6 +566,41 @@ public class MediaRouter2ManagerTest {
         assertTrue(successLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
 
         assertFalse(failureLatch.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS));
+    }
+
+    /**
+     * Tests if getSelectableRoutes and getDeselectableRoutes filter routes based on
+     * selected routes
+     */
+    @Test
+    public void testGetSelectableRoutes_notReturnsSelectedRoutes() throws Exception {
+        Map<String, MediaRoute2Info> routes = waitAndGetRoutesWithManager(FEATURES_ALL);
+        addRouterCallback(new RouteCallback() {});
+
+        CountDownLatch onSessionCreatedLatch = new CountDownLatch(1);
+
+        addManagerCallback(new MediaRouter2Manager.Callback() {
+            @Override
+            public void onTransferred(RoutingSessionInfo oldSessionInfo,
+                    RoutingSessionInfo newSessionInfo) {
+                assertNotNull(newSessionInfo);
+                List<String> selectedRoutes = mManager.getSelectedRoutes(newSessionInfo).stream()
+                        .map(MediaRoute2Info::getId)
+                        .collect(Collectors.toList());
+                for (MediaRoute2Info selectableRoute :
+                        mManager.getSelectableRoutes(newSessionInfo)) {
+                    assertFalse(selectedRoutes.contains(selectableRoute.getId()));
+                }
+                for (MediaRoute2Info deselectableRoute :
+                        mManager.getDeselectableRoutes(newSessionInfo)) {
+                    assertTrue(selectedRoutes.contains(deselectableRoute.getId()));
+                }
+                onSessionCreatedLatch.countDown();
+            }
+        });
+
+        mManager.selectRoute(mPackageName, routes.get(ROUTE_ID4_TO_SELECT_AND_DESELECT));
+        assertTrue(onSessionCreatedLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
     }
 
     Map<String, MediaRoute2Info> waitAndGetRoutesWithManager(List<String> routeFeatures)
