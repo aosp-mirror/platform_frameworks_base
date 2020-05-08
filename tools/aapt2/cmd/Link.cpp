@@ -1659,9 +1659,12 @@ class Linker {
       return 1;
     }
 
-    // First extract the Package name without modifying it (via --rename-manifest-package).
-    if (Maybe<AppInfo> maybe_app_info =
+    // Determine the package name under which to merge resources.
+    if (options_.rename_resources_package) {
+      context_->SetCompilationPackage(options_.rename_resources_package.value());
+    } else if (Maybe<AppInfo> maybe_app_info =
             ExtractAppInfoFromManifest(manifest_xml.get(), context_->GetDiagnostics())) {
+      // Extract the package name from the manifest ignoring the value of --rename-manifest-package.
       const AppInfo& app_info = maybe_app_info.value();
       context_->SetCompilationPackage(app_info.package);
     }
