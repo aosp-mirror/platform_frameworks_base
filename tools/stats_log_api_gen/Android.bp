@@ -122,13 +122,6 @@ cc_library {
         "liblog",
         "libcutils",
     ],
-    target: {
-        android: {
-            shared_libs: ["libstatssocket"],
-        },
-        host: {
-            static_libs: ["libstatssocket"],
-        },
-    },
+    static_libs: ["libstatssocket"],
 }
 
