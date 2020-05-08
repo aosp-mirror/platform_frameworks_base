@@ -88,6 +88,7 @@ import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.DumpUtils;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
@@ -810,6 +811,13 @@ public class UsageStatsService extends SystemService implements
                     } catch (IllegalArgumentException iae) {
                         Slog.e(TAG, "Failed to note usage start", iae);
                     }
+                    FrameworkStatsLog.write(
+                            FrameworkStatsLog.APP_USAGE_EVENT_OCCURRED,
+                            mPackageManagerInternal.getPackageUid(event.mPackage, 0, userId),
+                            event.mPackage,
+                            event.mClass,
+                            FrameworkStatsLog
+                                .APP_USAGE_EVENT_OCCURRED__EVENT_TYPE__MOVE_TO_FOREGROUND);
                     break;
                 case Event.ACTIVITY_PAUSED:
                     if (event.mTaskRootPackage == null) {
@@ -824,6 +832,13 @@ public class UsageStatsService extends SystemService implements
                             event.mTaskRootClass = prevData.mTaskRootClass;
                         }
                     }
+                    FrameworkStatsLog.write(
+                            FrameworkStatsLog.APP_USAGE_EVENT_OCCURRED,
+                            mPackageManagerInternal.getPackageUid(event.mPackage, 0, userId),
+                            event.mPackage,
+                            event.mClass,
+                            FrameworkStatsLog
+                                .APP_USAGE_EVENT_OCCURRED__EVENT_TYPE__MOVE_TO_BACKGROUND);
                     break;
                 case Event.ACTIVITY_DESTROYED:
                     // Treat activity destroys like activity stops.
