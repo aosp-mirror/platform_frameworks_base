@@ -306,7 +306,7 @@ class UserSystemPackageInstaller {
                 + numberErrors + " errors:");
 
         boolean doWtf = !isImplicitWhitelistMode(mode);
-        for (int i = 0; i < numberWarnings; i++) {
+        for (int i = 0; i < numberErrors; i++) {
             final String msg = errors.get(i);
             if (doWtf) {
                 Slog.wtf(TAG, msg);
