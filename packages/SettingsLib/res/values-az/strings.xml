@@ -458,7 +458,7 @@
     <string name="disabled" msgid="8017887509554714950">"Deaktiv"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"İcazə verilib"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"İcazə verilməyib"</string>
-    <string name="install_other_apps" msgid="3232595082023199454">"Naməlum tətbiqlərin quraşdırılması"</string>
+    <string name="install_other_apps" msgid="3232595082023199454">"Tanınmayan tətbiqlərin quraşdırılması"</string>
     <string name="home" msgid="973834627243661438">"Ayarların əsas səhifəsi"</string>
   <string-array name="battery_labels">
     <item msgid="7878690469765357158">"0%"</item>
@@ -549,4 +549,14 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"Qonaq əlavə edin"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Qonağı silin"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Qonaq"</string>
+    <!-- no translation found for cached_apps_freezer_device_default (2616594131750144342) -->
+    <skip />
+    <!-- no translation found for cached_apps_freezer_disabled (4816382260660472042) -->
+    <skip />
+    <!-- no translation found for cached_apps_freezer_enabled (8866703500183051546) -->
+    <skip />
+    <!-- no translation found for cached_apps_freezer_reboot_dialog_text (695330563489230096) -->
+    <skip />
+    <!-- no translation found for accessibility_work_profile_app_description (5470883112342119165) -->
+    <skip />
 </resources>
