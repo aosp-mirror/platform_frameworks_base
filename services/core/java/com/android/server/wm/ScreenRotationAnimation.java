@@ -732,13 +732,6 @@ class ScreenRotationAnimation {
                 mService.mAnimator.mBulkUpdateParams |= WindowSurfacePlacer.SET_UPDATE_ROTATION;
                 kill();
                 mService.updateRotation(false, false);
-                AccessibilityController accessibilityController = mService.mAccessibilityController;
-
-                if (accessibilityController != null) {
-                    // We just finished rotation animation which means we did not
-                    // announce the rotation and waited for it to end, announce now.
-                    accessibilityController.onRotationChangedLocked(mDisplayContent);
-                }
             }
         }
 
