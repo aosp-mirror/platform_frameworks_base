@@ -17,6 +17,7 @@
 #pragma once
 
 #include <android-base/unique_fd.h>
+#include <system/window.h>
 #include <apex/window.h>
 #include <utils/Errors.h>
 #include <utils/Macros.h>
@@ -49,6 +50,16 @@ public:
         return ret;
     }
 
+    void setExtraBufferCount(size_t extraBuffers) {
+        std::lock_guard _lock{mMutex};
+        mExtraBuffers = extraBuffers;
+    }
+
+    bool didSetExtraBuffers() const {
+        std::lock_guard _lock{mMutex};
+        return mDidSetExtraBuffers;
+    }
+
 private:
     ANativeWindow* mWindow;
 
@@ -62,6 +73,9 @@ private:
     base::unique_fd mReservedFenceFd;
     bool mHasDequeuedBuffer = false;
     int mBufferQueueState = OK;
+    size_t mExtraBuffers = 0;
+    size_t mExpectedBufferCount = 0;
+    bool mDidSetExtraBuffers = false;
 
     bool isFallbackBuffer(const ANativeWindowBuffer* windowBuffer) const;
     ANativeWindowBuffer* acquireFallbackBuffer(int error);
@@ -81,6 +95,8 @@ private:
 
     static int hook_perform(ANativeWindow* window, ANativeWindow_performFn perform, void* data,
                             int operation, va_list args);
+    static int hook_query(const ANativeWindow* window, ANativeWindow_queryFn query, void* data,
+            int what, int* value);
 };
 
 };  // namespace android::uirenderer::renderthread
