@@ -53,6 +53,11 @@ public interface BatteryController extends DemoMode, Dumpable,
     boolean isAodPowerSave();
 
     /**
+     * Initializes the class.
+     */
+    default void init() { }
+
+    /**
      * Returns {@code true} if reverse is supported.
      */
     default boolean isReverseSupported() { return false; }
