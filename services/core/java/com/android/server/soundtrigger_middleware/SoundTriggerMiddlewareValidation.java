@@ -171,9 +171,22 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
             // From here on, every exception isn't client's fault.
             try {
                 SoundTriggerModuleDescriptor[] result = mDelegate.listModules();
-                mModules = new HashMap<>(result.length);
-                for (SoundTriggerModuleDescriptor desc : result) {
-                    mModules.put(desc.handle, new ModuleState(desc.properties));
+                if (mModules == null) {
+                    mModules = new HashMap<>(result.length);
+                    for (SoundTriggerModuleDescriptor desc : result) {
+                        mModules.put(desc.handle, new ModuleState(desc.properties));
+                    }
+                } else {
+                    if (result.length != mModules.size()) {
+                        throw new RuntimeException(
+                                "listModules must always return the same result.");
+                    }
+                    for (SoundTriggerModuleDescriptor desc : result) {
+                        if (!mModules.containsKey(desc.handle)) {
+                            throw new RuntimeException(
+                                    "listModules must always return the same result.");
+                        }
+                    }
                 }
                 return result;
             } catch (Exception e) {
@@ -680,6 +693,7 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
 
         void dump(PrintWriter pw) {
             if (mState == ModuleStatus.ALIVE) {
+                pw.println("-------------------------------");
                 pw.printf("Session %s, client: %s\n", toString(),
                         ObjectPrinter.print(mOriginatorIdentity, true, 16));
                 pw.printf("Loaded models (handle, active, description):", toString());
@@ -693,6 +707,7 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
                     pw.print(entry.getValue().description);
                     pw.println();
                 }
+                pw.println();
             } else {
                 pw.printf("Session %s is dead", toString());
                 pw.println();
