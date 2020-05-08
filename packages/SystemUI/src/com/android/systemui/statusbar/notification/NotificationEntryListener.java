@@ -20,6 +20,8 @@ import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.StatusBarNotification;
 
+import androidx.annotation.NonNull;
+
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.NotificationContentInflater.InflationFlag;
@@ -96,7 +98,7 @@ public interface NotificationEntryListener {
      * @param removedByUser true if the notification was removed by a user action
      */
     default void onEntryRemoved(
-            NotificationEntry entry,
+            @NonNull NotificationEntry entry,
             @Nullable NotificationVisibility visibility,
             boolean removedByUser) {
     }

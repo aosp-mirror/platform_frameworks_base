@@ -71,6 +71,7 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
     @Mock private NotificationData mNotificationData;
     @Mock private DeviceProvisionedController mDeviceProvisionedController;
     @Mock private StatusBarKeyguardViewManager mKeyguardViewManager;
+    @Mock private NotificationClickNotifier mClickNotifier;
 
     private int mCurrentUserId;
     private TestNotificationLockscreenUserManager mLockscreenUserManager;
@@ -185,7 +186,7 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
     private class TestNotificationLockscreenUserManager
             extends NotificationLockscreenUserManagerImpl {
         public TestNotificationLockscreenUserManager(Context context) {
-            super(context);
+            super(context, mClickNotifier);
         }
 
         public BroadcastReceiver getBaseBroadcastReceiverForTest() {

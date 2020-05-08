@@ -54,6 +54,7 @@ import android.graphics.drawable.Icon;
 import android.media.session.MediaSession;
 import android.os.Bundle;
 import android.os.Process;
+import android.os.SystemClock;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationListenerService.Ranking;
 import android.service.notification.SnoozeCriterion;
@@ -339,7 +340,10 @@ public class NotificationDataTest extends SysuiTestCase {
         when(ranking.getSnoozeCriteria()).thenReturn(snoozeCriterions);
 
         NotificationEntry entry =
-                new NotificationEntry(mMockStatusBarNotification, ranking);
+                new NotificationEntry(
+                        mMockStatusBarNotification,
+                        ranking,
+                        SystemClock.uptimeMillis());
 
         assertEquals(systemGeneratedSmartActions, entry.systemGeneratedSmartActions);
         assertEquals(NOTIFICATION_CHANNEL, entry.channel);

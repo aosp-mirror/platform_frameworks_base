@@ -55,6 +55,7 @@ import com.android.systemui.shared.system.DevicePolicyManagerWrapper;
 import com.android.systemui.shared.system.PackageManagerWrapper;
 import com.android.systemui.statusbar.AmbientPulseManager;
 import com.android.systemui.statusbar.NavigationBarController;
+import com.android.systemui.statusbar.NotificationClickNotifier;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationMediaManager;
@@ -302,6 +303,7 @@ public class Dependency extends SystemUI {
     @Inject Lazy<ChannelEditorDialogController> mChannelEditorDialogController;
     @Inject Lazy<INotificationManager> mINotificationManager;
     @Inject Lazy<FalsingManager> mFalsingManager;
+    @Inject Lazy<NotificationClickNotifier> mClickNotifier;
 
     @Inject
     public Dependency() {
@@ -479,6 +481,7 @@ public class Dependency extends SystemUI {
         mProviders.put(ChannelEditorDialogController.class, mChannelEditorDialogController::get);
         mProviders.put(INotificationManager.class, mINotificationManager::get);
         mProviders.put(FalsingManager.class, mFalsingManager::get);
+        mProviders.put(NotificationClickNotifier.class, mClickNotifier::get);
 
         // TODO(b/118592525): to support multi-display , we start to add something which is
         //                    per-display, while others may be global. I think it's time to add

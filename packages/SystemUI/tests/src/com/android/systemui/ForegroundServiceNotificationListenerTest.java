@@ -20,63 +20,84 @@ import static com.android.systemui.ForegroundServiceLifetimeExtender.MIN_FGS_TIM
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
+import android.app.ActivityManager;
 import android.app.Notification;
+import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.systemui.statusbar.NotificationInteractionTracker;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.util.time.FakeSystemClock;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
-public class ForegroundServiceLifetimeExtenderTest extends SysuiTestCase {
-    private ForegroundServiceLifetimeExtender mExtender = new ForegroundServiceLifetimeExtender();
-    private StatusBarNotification mSbn;
+public class ForegroundServiceNotificationListenerTest extends SysuiTestCase {
+    private static final String TEST_PACKAGE_NAME = "test";
+    private static final int TEST_UID = 0;
+
+    private ForegroundServiceLifetimeExtender mExtender;
     private NotificationEntry mEntry;
+    private StatusBarNotification mSbn;
     private Notification mNotif;
+    private final FakeSystemClock mClock = new FakeSystemClock();
+
+    @Mock
+    private NotificationInteractionTracker mInteractionTracker;
 
     @Before
     public void setup() {
+        MockitoAnnotations.initMocks(this);
+        mExtender = new ForegroundServiceLifetimeExtender(mInteractionTracker, mClock);
+
         mNotif = new Notification.Builder(mContext, "")
                 .setSmallIcon(R.drawable.ic_person)
                 .setContentTitle("Title")
                 .setContentText("Text")
                 .build();
 
-        mSbn = mock(StatusBarNotification.class);
-        when(mSbn.getNotification()).thenReturn(mNotif);
-
-        mEntry = new NotificationEntry(mSbn);
+        mSbn = new StatusBarNotification(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, 0, null, TEST_UID,
+        0, mNotif, new UserHandle(ActivityManager.getCurrentUser()), null, 0);
+        mEntry = new NotificationEntry(mSbn, mClock.uptimeMillis());
     }
 
+    /**
+     * ForegroundServiceLifetimeExtenderTest
+     */
     @Test
     public void testShouldExtendLifetime_should_foreground() {
         // Extend the lifetime of a FGS notification iff it has not been visible
         // for the minimum time
         mNotif.flags |= Notification.FLAG_FOREGROUND_SERVICE;
-        when(mSbn.getPostTime()).thenReturn(System.currentTimeMillis());
+
+        // No time has elapsed, keep showing
         assertTrue(mExtender.shouldExtendLifetime(mEntry));
     }
 
     @Test
     public void testShouldExtendLifetime_shouldNot_foreground() {
         mNotif.flags |= Notification.FLAG_FOREGROUND_SERVICE;
-        when(mSbn.getPostTime()).thenReturn(System.currentTimeMillis() - MIN_FGS_TIME_MS - 1);
+
+        // Entry was created at mClock.uptimeMillis(), advance it MIN_FGS_TIME_MS + 1
+        mClock.advanceTime(MIN_FGS_TIME_MS + 1);
         assertFalse(mExtender.shouldExtendLifetime(mEntry));
     }
 
     @Test
     public void testShouldExtendLifetime_shouldNot_notForeground() {
         mNotif.flags = 0;
-        when(mSbn.getPostTime()).thenReturn(System.currentTimeMillis() - MIN_FGS_TIME_MS - 1);
+
+        // Entry was created at mClock.uptimeMillis(), advance it MIN_FGS_TIME_MS + 1
+        mClock.advanceTime(MIN_FGS_TIME_MS + 1);
         assertFalse(mExtender.shouldExtendLifetime(mEntry));
     }
 }

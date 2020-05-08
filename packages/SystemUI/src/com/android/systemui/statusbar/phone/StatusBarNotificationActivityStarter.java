@@ -42,7 +42,6 @@ import android.util.Log;
 import android.view.RemoteAnimationAdapter;
 
 import com.android.internal.logging.MetricsLogger;
-import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.ActivityIntentHelper;
@@ -54,6 +53,7 @@ import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.NotificationClickNotifier;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
@@ -97,7 +97,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
     private final HeadsUpManagerPhone mHeadsUpManager;
     private final KeyguardManager mKeyguardManager;
     private final ActivityLaunchAnimator mActivityLaunchAnimator;
-    private final IStatusBarService mBarService;
+    private final NotificationClickNotifier mClickNotifier;
     private final CommandQueue mCommandQueue;
     private final IDreamManager mDreamManager;
     private final Handler mMainThreadHandler;
@@ -116,7 +116,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
             HeadsUpManagerPhone headsUpManager,
             ActivityStarter activityStarter,
             ActivityLaunchAnimator activityLaunchAnimator,
-            IStatusBarService statusBarService,
+            NotificationClickNotifier clickNotifier,
             StatusBarStateController statusBarStateController,
             KeyguardManager keyguardManager,
             IDreamManager dreamManager,
@@ -138,7 +138,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
         mPresenter = presenter;
         mHeadsUpManager = headsUpManager;
         mActivityLaunchAnimator = activityLaunchAnimator;
-        mBarService = statusBarService;
+        mClickNotifier = clickNotifier;
         mCommandQueue = commandQueue;
         mKeyguardManager = keyguardManager;
         mDreamManager = dreamManager;
@@ -334,11 +334,8 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
                         mEntryManager.getNotificationData().get(notificationKey));
         final NotificationVisibility nv = NotificationVisibility.obtain(notificationKey,
                 rank, count, true, location);
-        try {
-            mBarService.onNotificationClick(notificationKey, nv);
-        } catch (RemoteException ex) {
-            // system process is dead if we're here.
-        }
+        mClickNotifier.onNotificationClick(notificationKey, nv);
+
         if (!isBubble) {
             if (parentToCancelFinal != null) {
                 removeNotification(parentToCancelFinal);

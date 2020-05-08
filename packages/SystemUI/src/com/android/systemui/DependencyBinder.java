@@ -70,6 +70,8 @@ import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.statusbar.policy.ZenModeControllerImpl;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerServiceImpl;
+import com.android.systemui.util.time.SystemClock;
+import com.android.systemui.util.time.SystemClockImpl;
 import com.android.systemui.volume.VolumeDialogControllerImpl;
 
 import dagger.Binds;
@@ -241,4 +243,9 @@ public abstract class DependencyBinder {
      */
     @Binds
     public abstract FalsingManager provideFalsingmanager(FalsingManagerProxy falsingManagerImpl);
+
+    /**
+     */
+    @Binds
+    public abstract SystemClock provideSystemClock(SystemClockImpl systemClock);
 }
