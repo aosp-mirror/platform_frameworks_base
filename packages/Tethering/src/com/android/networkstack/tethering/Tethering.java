@@ -516,8 +516,12 @@ public class Tethering {
             }
             mActiveTetheringRequests.put(request.tetheringType, request);
 
-            mEntitlementMgr.startProvisioningIfNeeded(request.tetheringType,
-                    request.showProvisioningUi);
+            if (request.exemptFromEntitlementCheck) {
+                mEntitlementMgr.setExemptedDownstreamType(request.tetheringType);
+            } else {
+                mEntitlementMgr.startProvisioningIfNeeded(request.tetheringType,
+                        request.showProvisioningUi);
+            }
             enableTetheringInternal(request.tetheringType, true /* enabled */, listener);
         });
     }
