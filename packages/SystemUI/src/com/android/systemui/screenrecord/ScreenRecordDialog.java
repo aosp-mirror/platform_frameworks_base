@@ -16,16 +16,29 @@
 
 package com.android.systemui.screenrecord;
 
+import static com.android.systemui.screenrecord.ScreenRecordingAudioSource.INTERNAL;
+import static com.android.systemui.screenrecord.ScreenRecordingAudioSource.MIC;
+import static com.android.systemui.screenrecord.ScreenRecordingAudioSource.MIC_AND_INTERNAL;
+import static com.android.systemui.screenrecord.ScreenRecordingAudioSource.NONE;
+
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
+import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.Spinner;
 import android.widget.Switch;
 
 import com.android.systemui.R;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -35,10 +48,15 @@ import javax.inject.Inject;
 public class ScreenRecordDialog extends Activity {
     private static final long DELAY_MS = 3000;
     private static final long INTERVAL_MS = 1000;
+    private static final String TAG = "ScreenRecordDialog";
 
     private final RecordingController mController;
-    private Switch mAudioSwitch;
     private Switch mTapsSwitch;
+    private Switch mAudioSwitch;
+    private Spinner mOptions;
+    private List<ScreenRecordingAudioSource> mModes;
+    private int mSelected;
+
 
     @Inject
     public ScreenRecordDialog(RecordingController controller) {
@@ -68,17 +86,32 @@ public class ScreenRecordDialog extends Activity {
             finish();
         });
 
+        mModes = new ArrayList<>();
+        mModes.add(INTERNAL);
+        mModes.add(MIC);
+        mModes.add(MIC_AND_INTERNAL);
+
         mAudioSwitch = findViewById(R.id.screenrecord_audio_switch);
         mTapsSwitch = findViewById(R.id.screenrecord_taps_switch);
+        mOptions = findViewById(R.id.screen_recording_options);
+        ArrayAdapter a = new ScreenRecordingAdapter(getApplicationContext(),
+                android.R.layout.simple_spinner_dropdown_item,
+                mModes);
+        a.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        mOptions.setAdapter(a);
+
     }
 
     private void requestScreenCapture() {
-        boolean useAudio = mAudioSwitch.isChecked();
         boolean showTaps = mTapsSwitch.isChecked();
+        ScreenRecordingAudioSource audioMode = mAudioSwitch.isChecked()
+                ? (ScreenRecordingAudioSource) mOptions.getSelectedItem()
+                : NONE;
         PendingIntent startIntent = PendingIntent.getForegroundService(this,
                 RecordingService.REQUEST_CODE,
                 RecordingService.getStartIntent(
-                        ScreenRecordDialog.this, RESULT_OK, null, useAudio, showTaps),
+                        ScreenRecordDialog.this, RESULT_OK,
+                        audioMode.ordinal(), showTaps),
                 PendingIntent.FLAG_UPDATE_CURRENT);
         PendingIntent stopIntent = PendingIntent.getService(this,
                 RecordingService.REQUEST_CODE,
