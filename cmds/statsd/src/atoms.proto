@@ -149,8 +149,10 @@ message Atom {
         HardwareFailed hardware_failed = 72;
         PhysicalDropDetected physical_drop_detected = 73;
         ChargeCyclesReported charge_cycles_reported = 74;
-        MobileConnectionStateChanged mobile_connection_state_changed = 75;
-        MobileRadioTechnologyChanged mobile_radio_technology_changed = 76;
+        MobileConnectionStateChanged mobile_connection_state_changed =
+                75 [(log_from_module) = "telephony"];
+        MobileRadioTechnologyChanged mobile_radio_technology_changed =
+                76 [(log_from_module) = "telephony"];
         UsbDeviceAttached usb_device_attached = 77;
         AppCrashOccurred app_crash_occurred = 78;
         ANROccurred anr_occurred = 79;
