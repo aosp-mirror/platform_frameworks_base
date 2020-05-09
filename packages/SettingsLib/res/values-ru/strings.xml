@@ -551,4 +551,14 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"Добавить аккаунт гостя"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Удалить аккаунт гостя"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Гость"</string>
+    <!-- no translation found for cached_apps_freezer_device_default (2616594131750144342) -->
+    <skip />
+    <!-- no translation found for cached_apps_freezer_disabled (4816382260660472042) -->
+    <skip />
+    <!-- no translation found for cached_apps_freezer_enabled (8866703500183051546) -->
+    <skip />
+    <!-- no translation found for cached_apps_freezer_reboot_dialog_text (695330563489230096) -->
+    <skip />
+    <!-- no translation found for accessibility_work_profile_app_description (5470883112342119165) -->
+    <skip />
 </resources>

@@ -225,7 +225,7 @@
     <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"与设备配对"</string>
     <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"WLAN 配对码"</string>
     <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"配对失败"</string>
-    <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"确保设备已连接到同一网络。"</string>
+    <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"请确保设备已连接到同一网络。"</string>
     <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"扫描二维码即可通过 WLAN 配对设备"</string>
     <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"正在配对设备…"</string>
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"无法配对设备。可能是因为二维码不正确，或者设备未连接到同一网络。"</string>
@@ -284,8 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"显示无线显示认证选项"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"提升 WLAN 日志记录级别（在 WLAN 选择器中显示每个 SSID 的 RSSI）"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"降低耗电量以及改善网络性能"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"启用此模式后，每当此设备连接到已启用随机分配 MAC 地址功能的网络时，它的 MAC 地址就可能会发生更改。"</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"按流量计费"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"不按流量计费"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"日志记录器缓冲区大小"</string>
@@ -550,4 +549,14 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"添加访客"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"移除访客"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"访客"</string>
+    <!-- no translation found for cached_apps_freezer_device_default (2616594131750144342) -->
+    <skip />
+    <!-- no translation found for cached_apps_freezer_disabled (4816382260660472042) -->
+    <skip />
+    <!-- no translation found for cached_apps_freezer_enabled (8866703500183051546) -->
+    <skip />
+    <!-- no translation found for cached_apps_freezer_reboot_dialog_text (695330563489230096) -->
+    <skip />
+    <!-- no translation found for accessibility_work_profile_app_description (5470883112342119165) -->
+    <skip />
 </resources>

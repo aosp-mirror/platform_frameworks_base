@@ -26,6 +26,7 @@ import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -93,6 +94,7 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -258,6 +260,19 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         verify(mRow).setRemoved();
 
         assertNull(mEntryManager.getActiveNotificationUnfiltered(mSbn.getKey()));
+    }
+
+    @Test
+    public void testRemoveUninflatedNotification_removesNotificationFromAllNotifsList() {
+        // GIVEN an uninflated entry is added
+        mEntryManager.addNotification(mSbn, mRankingMap);
+        assertTrue(entriesContainKey(mEntryManager.getAllNotifs(), mSbn.getKey()));
+
+        // WHEN the uninflated entry is removed
+        mEntryManager.performRemoveNotification(mSbn, UNDEFINED_DISMISS_REASON);
+
+        // THEN the entry is still removed from the allNotifications list
+        assertFalse(entriesContainKey(mEntryManager.getAllNotifs(), mSbn.getKey()));
     }
 
     @Test
@@ -544,6 +559,15 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
     }
 
     /* End annex */
+
+    private boolean entriesContainKey(Collection<NotificationEntry> entries, String key) {
+        for (NotificationEntry entry : entries) {
+            if (entry.getSbn().getKey().equals(key)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     private Notification.Action createAction() {
         return new Notification.Action.Builder(

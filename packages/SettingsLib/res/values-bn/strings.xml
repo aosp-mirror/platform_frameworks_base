@@ -153,7 +153,7 @@
     <string name="unknown" msgid="3544487229740637809">"অজানা"</string>
     <string name="running_process_item_user_label" msgid="3988506293099805796">"ব্যবহারকারী: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"কিছু ডিফল্ট সেট করা রয়েছে"</string>
-    <string name="launch_defaults_none" msgid="8049374306261262709">"কোনো ডিফল্ট সেট করা নেই"</string>
+    <string name="launch_defaults_none" msgid="8049374306261262709">"কোনও ডিফল্ট সেট করা নেই"</string>
     <string name="tts_settings" msgid="8130616705989351312">"পাঠ্য থেকে ভাষ্য আউটপুট সেটিংস"</string>
     <string name="tts_settings_title" msgid="7602210956640483039">"টেক্সট-টু-স্পিচ"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"কথা বলার হার"</string>
@@ -284,8 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"ওয়্যারলেস প্রদর্শন সার্টিফিকেশন জন্য বিকল্পগুলি দেখান"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"ওয়াই-ফাই লগিং স্তর বাড়ান, ওয়াই-ফাই চয়নকারীতে SSID RSSI অনুযায়ী দেখান"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"ব্যাটারির খরচ কমায় এবং নেটওয়ার্কের পারফর্ম্যান্স উন্নত করে"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"এই মোডটি চালু থাকার সময়, MAC র‍্যান্ডমাইজেশন চালু হওয়া এমন কোনও নেটওয়ার্কে কানেক্ট করার সময় এই ডিভাইসের MAC অ্যাড্রেস পরিবর্তিত হতে পারে।"</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"মিটার্ড"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"পরিমাপ করা নয়"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"লগার বাফারের আকারগুলি"</string>
@@ -550,4 +549,14 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"অতিথি যোগ করুন"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"অতিথি সরান"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"অতিথি"</string>
+    <!-- no translation found for cached_apps_freezer_device_default (2616594131750144342) -->
+    <skip />
+    <!-- no translation found for cached_apps_freezer_disabled (4816382260660472042) -->
+    <skip />
+    <!-- no translation found for cached_apps_freezer_enabled (8866703500183051546) -->
+    <skip />
+    <!-- no translation found for cached_apps_freezer_reboot_dialog_text (695330563489230096) -->
+    <skip />
+    <!-- no translation found for accessibility_work_profile_app_description (5470883112342119165) -->
+    <skip />
 </resources>

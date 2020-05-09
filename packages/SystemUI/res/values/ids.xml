@@ -144,5 +144,10 @@
 
     <!-- NotificationPanelView -->
     <item type="id" name="notification_panel" />
+
+    <!-- Screen Recording -->
+    <item type="id" name="screen_recording_options" />
+    <item type="id" name="screen_recording_dialog_source_text" />
+    <item type="id" name="screen_recording_dialog_source_description" />
 </resources>
 

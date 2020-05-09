@@ -124,13 +124,7 @@ static int write_java_methods(FILE* out, const SignatureInfoMap& signatureInfoMa
         // Print method body.
         string indent("");
         if (supportQ) {
-            // TODO(b/146235828): Use just SDK_INT check once it is incremented from
-            // Q.
-            fprintf(out, "        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.Q\n");
-            fprintf(out,
-                    "                || (Build.VERSION.SDK_INT == "
-                    "Build.VERSION_CODES.Q\n");
-            fprintf(out, "                    && Build.VERSION.PREVIEW_SDK_INT > 0)) {\n");
+            fprintf(out, "        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.Q) {\n");
             indent = "    ";
         }
 

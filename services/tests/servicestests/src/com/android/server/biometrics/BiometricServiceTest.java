@@ -186,7 +186,8 @@ public class BiometricServiceTest {
                 anyBoolean() /* requireConfirmation */,
                 anyInt() /* userId */,
                 eq(TEST_PACKAGE_NAME),
-                anyLong() /* sessionId */);
+                anyLong() /* sessionId */,
+                anyInt() /* sysUiSessionId */);
     }
 
     @Test
@@ -269,7 +270,8 @@ public class BiometricServiceTest {
                 eq(false) /* requireConfirmation */,
                 anyInt() /* userId */,
                 eq(TEST_PACKAGE_NAME),
-                anyLong() /* sessionId */);
+                anyLong() /* sessionId */,
+                anyInt() /* sysUiSessionId */);
     }
 
     @Test
@@ -407,7 +409,8 @@ public class BiometricServiceTest {
                 anyBoolean() /* requireConfirmation */,
                 anyInt() /* userId */,
                 eq(TEST_PACKAGE_NAME),
-                anyLong() /* sessionId */);
+                anyLong() /* sessionId */,
+                anyInt() /* sysUiSessionId */);
 
         // Hardware authenticated
         final byte[] HAT = generateRandomHAT();
@@ -462,7 +465,8 @@ public class BiometricServiceTest {
                 anyBoolean() /* requireConfirmation */,
                 anyInt() /* userId */,
                 eq(TEST_PACKAGE_NAME),
-                anyLong() /* sessionId */);
+                anyLong() /* sessionId */,
+                anyInt() /* sysUiSessionId */);
     }
 
     @Test
@@ -610,7 +614,8 @@ public class BiometricServiceTest {
                 anyBoolean() /* requireConfirmation */,
                 anyInt() /* userId */,
                 anyString(),
-                anyLong() /* sessionId */);
+                anyLong() /* sessionId */,
+                anyInt() /* sysUiSessionId */);
     }
 
     @Test
@@ -711,7 +716,8 @@ public class BiometricServiceTest {
                 anyBoolean() /* requireConfirmation */,
                 anyInt() /* userId */,
                 eq(TEST_PACKAGE_NAME),
-                anyLong() /* sessionId */);
+                anyLong() /* sessionId */,
+                anyInt() /* sysUiSessionId */);
     }
 
     @Test
@@ -1207,7 +1213,8 @@ public class BiometricServiceTest {
                 anyBoolean() /* requireConfirmation */,
                 anyInt() /* userId */,
                 eq(TEST_PACKAGE_NAME),
-                anyLong() /* sessionId */);
+                anyLong() /* sessionId */,
+                anyInt() /* sysUiSessionId */);
 
         // Requesting strong and credential, when credential is setup
         resetReceiver();
@@ -1227,7 +1234,8 @@ public class BiometricServiceTest {
                 anyBoolean() /* requireConfirmation */,
                 anyInt() /* userId */,
                 eq(TEST_PACKAGE_NAME),
-                anyLong() /* sessionId */);
+                anyLong() /* sessionId */,
+                anyInt() /* sysUiSessionId */);
 
         // Un-downgrading the authenticator allows successful strong auth
         for (BiometricService.AuthenticatorWrapper wrapper : mBiometricService.mAuthenticators) {
@@ -1250,7 +1258,8 @@ public class BiometricServiceTest {
                 anyBoolean() /* requireConfirmation */,
                 anyInt() /* userId */,
                 eq(TEST_PACKAGE_NAME),
-                anyLong() /* sessionId */);
+                anyLong() /* sessionId */,
+                anyInt() /* sysUiSessionId */);
     }
 
     @Test(expected = IllegalStateException.class)

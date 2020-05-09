@@ -31,6 +31,7 @@ import android.os.PowerManager;
 import android.os.PowerManagerInternal;
 import android.os.PowerSaveState;
 import android.os.RemoteException;
+import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import com.android.server.twilight.TwilightManager;
@@ -54,6 +55,7 @@ import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -144,7 +146,7 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
         addLocalService(PowerManagerInternal.class, mLocalPowerManager);
         addLocalService(TwilightManager.class, mTwilightManager);
         
-        mUiManagerService = new UiModeManagerService(mContext);
+        mUiManagerService = new UiModeManagerService(mContext, true);
         try {
             mUiManagerService.onBootPhase(SystemService.PHASE_SYSTEM_SERVICES_READY);
         } catch (SecurityException e) {/* ignore for permission denial */}

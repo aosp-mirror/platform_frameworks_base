@@ -432,7 +432,7 @@ public abstract class AuthBiometricView extends LinearLayout {
         Utils.notifyAccessibilityContentChanged(mAccessibilityManager, this);
     }
 
-    public void updateState(@BiometricState int newState) {
+    void updateState(@BiometricState int newState) {
         Log.v(TAG, "newState: " + newState);
 
         switch (newState) {
@@ -453,8 +453,10 @@ public abstract class AuthBiometricView extends LinearLayout {
                 }
                 announceForAccessibility(getResources()
                         .getString(R.string.biometric_dialog_authenticated));
-                mHandler.postDelayed(() -> mCallback.onAction(Callback.ACTION_AUTHENTICATED),
-                        getDelayAfterAuthenticatedDurationMs());
+                mHandler.postDelayed(() -> {
+                    Log.d(TAG, "Sending ACTION_AUTHENTICATED");
+                    mCallback.onAction(Callback.ACTION_AUTHENTICATED);
+                }, getDelayAfterAuthenticatedDurationMs());
                 break;
 
             case STATE_PENDING_CONFIRMATION:

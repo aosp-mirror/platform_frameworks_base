@@ -171,6 +171,7 @@ public class CarKeyguardViewController extends OverlayViewController implements
         mKeyguardStateController.notifyKeyguardState(mShowing, /* occluded= */ false);
         mCarNavigationBarController.showAllKeyguardButtons(/* isSetUp= */ true);
         start();
+        getOverlayViewGlobalStateController().setWindowFocusable(/* focusable= */ true);
         reset(/* hideBouncerWhenShowing= */ false);
         notifyKeyguardUpdateMonitor();
     }
@@ -185,6 +186,7 @@ public class CarKeyguardViewController extends OverlayViewController implements
         mBouncer.hide(/* destroyView= */ true);
         mCarNavigationBarController.hideAllKeyguardButtons(/* isSetUp= */ true);
         stop();
+        getOverlayViewGlobalStateController().setWindowFocusable(/* focusable= */ false);
         mKeyguardStateController.notifyKeyguardDoneFading();
         mViewMediatorCallback.keyguardGone();
         notifyKeyguardUpdateMonitor();
@@ -213,7 +215,7 @@ public class CarKeyguardViewController extends OverlayViewController implements
 
     @Override
     public void onCancelClicked() {
-        if (!mShowing) return;
+        if (mBouncer == null) return;
 
         getOverlayViewGlobalStateController().setWindowFocusable(/* focusable= */ false);
         getOverlayViewGlobalStateController().setWindowNeedsInput(/* needsInput= */ false);
@@ -229,19 +231,20 @@ public class CarKeyguardViewController extends OverlayViewController implements
 
     @Override
     public void dismissAndCollapse() {
-        hide(/* startTime= */ 0, /* fadeoutDuration= */ 0);
+        if (!mBouncer.isSecure()) {
+            hide(/* startTime= */ 0, /* fadeoutDuration= */ 0);
+        }
     }
 
     @Override
     public void startPreHideAnimation(Runnable finishRunnable) {
-        if (!mShowing) return;
+        if (mBouncer == null) return;
 
         mBouncer.startPreHideAnimation(finishRunnable);
     }
 
     @Override
     public void setNeedsInput(boolean needsInput) {
-        getOverlayViewGlobalStateController().setWindowFocusable(needsInput);
         getOverlayViewGlobalStateController().setWindowNeedsInput(needsInput);
     }
 
