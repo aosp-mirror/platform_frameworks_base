@@ -284,8 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Simsiz displey sertifikatlaşması üçün seçimləri göstərir"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Wi‑Fi giriş səviyyəsini qaldırın, Wi‑Fi seçəndə hər SSID RSSI üzrə göstərin"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Batareya istifadəsini azaldır &amp; şəbəkə performansını yaxşılaşdırır"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Bu rejim deaktiv edildikdə, bu cihaz hər dəfə MAC randomizasiyası aktiv edilmiş şəbəkəyə qoşulanda onun MAC ünvanı dəyişə bilər."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Ödənişli"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Limitsiz"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Logger bufer ölçüləri"</string>
@@ -459,7 +458,7 @@
     <string name="disabled" msgid="8017887509554714950">"Deaktiv"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"İcazə verilib"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"İcazə verilməyib"</string>
-    <string name="install_other_apps" msgid="3232595082023199454">"Naməlum tətbiqlərin quraşdırılması"</string>
+    <string name="install_other_apps" msgid="3232595082023199454">"Tanınmayan tətbiqlərin quraşdırılması"</string>
     <string name="home" msgid="973834627243661438">"Ayarların əsas səhifəsi"</string>
   <string-array name="battery_labels">
     <item msgid="7878690469765357158">"0%"</item>
@@ -550,4 +549,12 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"Qonaq əlavə edin"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Qonağı silin"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Qonaq"</string>
+    <!-- no translation found for cached_apps_freezer_device_default (2616594131750144342) -->
+    <skip />
+    <!-- no translation found for cached_apps_freezer_disabled (4816382260660472042) -->
+    <skip />
+    <!-- no translation found for cached_apps_freezer_enabled (8866703500183051546) -->
+    <skip />
+    <!-- no translation found for cached_apps_freezer_reboot_dialog_text (695330563489230096) -->
+    <skip />
 </resources>

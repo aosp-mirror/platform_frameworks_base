@@ -148,12 +148,12 @@
     <string name="tether_settings_title_bluetooth" msgid="916519902721399656">"Bluetooth modem"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="1727111807207577322">"Modem"</string>
     <string name="tether_settings_title_all" msgid="8910259483383010470">"Modem rejimi"</string>
-    <string name="managed_user_title" msgid="449081789742645723">"Barcha ishchi ilovalar"</string>
+    <string name="managed_user_title" msgid="449081789742645723">"Barcha ishga oid ilovalar"</string>
     <string name="user_guest" msgid="6939192779649870792">"Mehmon"</string>
     <string name="unknown" msgid="3544487229740637809">"Noma’lum"</string>
     <string name="running_process_item_user_label" msgid="3988506293099805796">"Foydalanuvchi: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"Ba’zi birlamchi sozlamalar o‘rnatilgan"</string>
-    <string name="launch_defaults_none" msgid="8049374306261262709">"Birlamchi sozlamalar o‘rnatilmagan"</string>
+    <string name="launch_defaults_none" msgid="8049374306261262709">"Birlamchi sozlamalar belgilanmagan"</string>
     <string name="tts_settings" msgid="8130616705989351312">"Nutq sintezi sozlamalari"</string>
     <string name="tts_settings_title" msgid="7602210956640483039">"Nutq sintezi"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"Nutq tezligi"</string>
@@ -284,8 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Simsiz monitorlarni sertifikatlash parametrini ko‘rsatish"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Wi-Fi ulanishini tanlashda har bir SSID uchun jurnalda ko‘rsatilsin"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Batareya sarfini tejaydi va tarmoq samaradorligini oshiradi"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Bu rejim yoqilganda qurilmaning MAC manzili tasodifiy MAC manzillar yaratish imkoniyati mavjud tarmoqqa har safar ulanganda almashishi mumkin."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Trafik hisoblanadigan tarmoq"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Trafik hisobi yuritilmaydigan tarmoq"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Jurnal buferi hajmi"</string>
@@ -550,4 +549,8 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"Mehmon kiritish"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Mehmon rejimini olib tashlash"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Mehmon"</string>
+    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Qurilma standarti"</string>
+    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Yoqilmagan"</string>
+    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Yoniq"</string>
+    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Oʻzgarishlar qurilma oʻchib yonganda bajariladi. Hoziroq oʻchib yoqish yoki bekor qilish."</string>
 </resources>

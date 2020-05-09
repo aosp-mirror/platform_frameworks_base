@@ -196,7 +196,7 @@
     <string name="choose_profile" msgid="343803890897657450">"Odabir profila"</string>
     <string name="category_personal" msgid="6236798763159385225">"Osobno"</string>
     <string name="category_work" msgid="4014193632325996115">"Posao"</string>
-    <string name="development_settings_title" msgid="140296922921597393">"Za razvojne programere"</string>
+    <string name="development_settings_title" msgid="140296922921597393">"Opcije za razvojne programere"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Omogući opcije za razvojne programere"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Postavljanje opcija za razvoj aplikacije"</string>
     <string name="development_settings_not_available" msgid="355070198089140951">"Opcije razvojnih programera nisu dostupne za ovog korisnika"</string>
@@ -284,8 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Prikaz opcija za certifikaciju bežičnog prikaza"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Povećana razina prijave na Wi‑Fi, prikaz po SSID RSSI-ju u Biraču Wi‑Fi-ja"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Smanjuje potrošnju baterije i poboljšava rad mreže"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Kada je omogućen ovaj način, MAC adresa ovog uređaja može se promijeniti svaki put kad se uređaj poveže s mrežom na kojoj je omogućen nasumični odabir MAC-a."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"S ograničenim prometom"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Bez ograničenja prometa"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Veličine međuspremnika zapisnika"</string>
@@ -551,4 +550,12 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"Dodavanje gosta"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Uklanjanje gosta"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Gost"</string>
+    <!-- no translation found for cached_apps_freezer_device_default (2616594131750144342) -->
+    <skip />
+    <!-- no translation found for cached_apps_freezer_disabled (4816382260660472042) -->
+    <skip />
+    <!-- no translation found for cached_apps_freezer_enabled (8866703500183051546) -->
+    <skip />
+    <!-- no translation found for cached_apps_freezer_reboot_dialog_text (695330563489230096) -->
+    <skip />
 </resources>

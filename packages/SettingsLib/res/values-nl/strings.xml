@@ -284,8 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Opties weergeven voor certificering van draadloze weergave"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Logniveau voor wifi verhogen, weergeven per SSID RSSI in wifi-kiezer"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Verlaagt het batterijverbruik en verbetert de netwerkprestaties"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Als deze modus is ingeschakeld, kan het MAC-adres van dit apparaat elke keer wijzigen als het verbinding maakt met een netwerk waarvoor MAC-herschikking is ingeschakeld."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Met datalimiet"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Gratis"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Logger-buffergrootten"</string>
@@ -550,4 +549,8 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"Gast toevoegen"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Gast verwijderen"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Gast"</string>
+    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Apparaatstandaard"</string>
+    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Uitgeschakeld"</string>
+    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Ingeschakeld"</string>
+    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Je apparaat moet opnieuw worden opgestart om deze wijziging toe te passen. Start nu opnieuw op of annuleer de wijziging."</string>
 </resources>

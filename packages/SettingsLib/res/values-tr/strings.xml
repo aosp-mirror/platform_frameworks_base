@@ -284,8 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Kablosuz ekran sertifikası seçeneklerini göster"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Kablosuz günlük kaydı seviyesini artır. Kablosuz Seçici\'de her bir SSID RSSI için göster."</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Pili daha az harcar ve ağ performansını iyileştirir"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Bu mod etkinleştirildiğinde, bu cihaz MAC rastgele hale getirme işlevi açık olan bir ağa her bağlandığında cihazın MAC adresi değişebilir."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Sayaçlı"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Sayaçsız"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Günlük Kaydedici arabellek boyutları"</string>
@@ -550,4 +549,8 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"Misafir ekle"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Misafir oturumunu kaldır"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Misafir"</string>
+    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Cihaz varsayılanı"</string>
+    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Devre dışı"</string>
+    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Etkin"</string>
+    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Bu değişikliğin geçerli olması için cihazının yeniden başlatılması gerekir. Şimdi yeniden başlatın veya iptal edin."</string>
 </resources>

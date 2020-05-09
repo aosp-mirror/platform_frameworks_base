@@ -211,9 +211,9 @@
     <string name="adb_wireless_error" msgid="721958772149779856">"Chyba"</string>
     <string name="adb_wireless_settings" msgid="2295017847215680229">"Bezdrôtové ladenie"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Ak chcete zobraziť a používať dostupné zariadenia, zapnite bezdrôtové ladenie"</string>
-    <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Spárovať zariadenie pomocou QR kódu"</string>
+    <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Spárovať zariadenie QR kódom"</string>
     <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"Spárujte nové zariadenia pomocou skenera QR kódov"</string>
-    <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Spárovať zariadenie pomocou párovacieho kódu"</string>
+    <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Spárovať zariadenie párovacím kódom"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Spárujte nové zariadenia pomocou šesťmiestneho kódu"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"Spárované zariadenia"</string>
     <string name="adb_wireless_device_connected_summary" msgid="3039660790249148713">"Aktuálne pripojené"</string>
@@ -226,15 +226,15 @@
     <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"Párovací kód siete Wi-Fi"</string>
     <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"Párovanie zlyhalo"</string>
     <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"Skontrolujte, či je zariadenie pripojené k rovnakej sieti."</string>
-    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"Spárujte zariadenie cez sieť Wi-Fi naskenovaním QR kódu"</string>
+    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"Spárujte zariadenie cez Wi-Fi naskenovaním QR kódu"</string>
     <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"Páruje sa zariadenie…"</string>
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Zariadenie sa nepodarilo spárovať. Buď bol QR kód nesprávny, alebo zariadenie nie je pripojené k rovnakej sieti."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"Adresa IP a port"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Naskenujte QR kód"</string>
-    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Spárujte zariadenie cez sieť Wi-Fi naskenovaním QR kódu"</string>
+    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Spárujte zariadenie cez Wi-Fi naskenovaním QR kódu"</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Pripojte sa k sieti Wi‑Fi"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, ladenie, dev"</string>
-    <string name="bugreport_in_power" msgid="8664089072534638709">"Skratka hlásenia chyby"</string>
+    <string name="bugreport_in_power" msgid="8664089072534638709">"Odkaz na hlásenie chyby"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Zobraziť v hlavnej ponuke tlačidlo na vytvorenie hlásenia chyby"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"Nevypínať obrazovku"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"Obrazovka sa pri nabíjaní neprepne do režimu spánku"</string>
@@ -284,8 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Zobraziť možnosti certifikácie bezdrôtového zobrazenia"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Zvýšiť úroveň denníkov Wi‑Fi, zobrazovať podľa SSID RSSI pri výbere siete Wi‑Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Znižuje používanie batérie a zlepšuje výkon siete"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Keď je tento režim aktivovaný, adresa MAC tohto zariadenia sa môže pri každom pripojení k sieti s aktivovanou randomizáciou adries MAC zmeniť."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Merané"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Bez merania dát"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Vyrovnávacia pamäť nástroja denníkov"</string>
@@ -552,4 +551,12 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"Pridať hosťa"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Odobrať hosťa"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Hosť"</string>
+    <!-- no translation found for cached_apps_freezer_device_default (2616594131750144342) -->
+    <skip />
+    <!-- no translation found for cached_apps_freezer_disabled (4816382260660472042) -->
+    <skip />
+    <!-- no translation found for cached_apps_freezer_enabled (8866703500183051546) -->
+    <skip />
+    <!-- no translation found for cached_apps_freezer_reboot_dialog_text (695330563489230096) -->
+    <skip />
 </resources>

@@ -284,8 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"የገመድ አልባ ማሳያ እውቅና ማረጋገጫ አማራጮችን አሳይ"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"የWi‑Fi ምዝግብ ማስታወሻ አያያዝ ደረጃ ጨምር፣ በWi‑Fi መምረጫ ውስጥ በአንድ SSID RSSI አሳይ"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"የባትሪ መላሸቅን ይቀንሳል እንዲሁም የአውታረ መረብ አፈጻጸም ብቃትን ያሻሽላል"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"ይህ ሁነታ ስራ ሲጀምር ይህ መሣሪያ የዘፈቀደ የማክ አድራሻ ስራ ከነቃለት አውታረ መረብ ጋር በተገናኘ እያንዳንዱ ጊዜ የመሣሪያው የማክ አድራሻ ሊቀየር ይችላል።"</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"የሚለካ"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"ያልተለካ"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"የምዝግብ ማስታወሻ ያዥ መጠኖች"</string>
@@ -550,4 +549,8 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"እንግዳን አክል"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"እንግዳን አስወግድ"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"እንግዳ"</string>
+    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"የመሣሪያ ነባሪ"</string>
+    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"ተሰናክሏል"</string>
+    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"ነቅቷል"</string>
+    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"የእርስዎን መሣሪያ ይህ ለው ለማመልከት እንደገና መነሣት አለበት። አሁን እንደገና ያስነሡ ወይም ይተዉት።"</string>
 </resources>
