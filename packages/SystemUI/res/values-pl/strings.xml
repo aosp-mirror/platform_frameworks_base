@@ -89,6 +89,8 @@
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"Zamknij zrzut ekranu"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Podgląd zrzutu ekranu"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Nagrywanie ekranu"</string>
+    <!-- no translation found for screenrecord_background_processing_label (7244617554884238898) -->
+    <skip />
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Stałe powiadomienie o sesji rejestrowania zawartości ekranu"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Rozpocząć nagrywanie?"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"Podczas nagrywania system Android może rejestrować wszelkie informacje poufne wyświetlane na ekranie lub odtwarzane na urządzeniu. Dotyczy to m.in. haseł, szczegółów płatności, zdjęć, wiadomości i odtwarzanych dźwięków."</string>
@@ -515,6 +517,8 @@
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Usuń wszystkie"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Zarządzaj"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Historia"</string>
+    <!-- no translation found for notification_section_header_incoming (5295312809341711367) -->
+    <skip />
     <string name="notification_section_header_gentle" msgid="3044910806569985386">"Ciche powiadomienia"</string>
     <string name="notification_section_header_alerting" msgid="3168140660646863240">"Alerty"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Rozmowy"</string>
@@ -655,7 +659,7 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"Pokaż tryb demonstracyjny"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Alarm"</string>
-    <string name="status_bar_work" msgid="5238641949837091056">"Profil służbowy"</string>
+    <string name="status_bar_work" msgid="5238641949837091056">"Profil do pracy"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Tryb samolotowy"</string>
     <string name="add_tile" msgid="6239678623873086686">"Dodaj nazwę"</string>
     <string name="broadcast_tile" msgid="5224010633596487481">"Rozgłaszana nazwa"</string>
@@ -665,7 +669,7 @@
     <string name="alarm_template_far" msgid="3561752195856839456">"w: <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_detail" msgid="544463655956179791">"Szybkie ustawienia, <xliff:g id="TITLE">%s</xliff:g>."</string>
     <string name="accessibility_status_bar_hotspot" msgid="2888479317489131669">"Hotspot"</string>
-    <string name="accessibility_managed_profile" msgid="4703836746209377356">"Profil służbowy"</string>
+    <string name="accessibility_managed_profile" msgid="4703836746209377356">"Profil do pracy"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Dobra zabawa, ale nie dla każdego"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"Kalibrator System UI udostępnia dodatkowe sposoby dostrajania i dostosowywania interfejsu Androida. Te eksperymentalne funkcje mogą się zmienić, popsuć lub zniknąć w przyszłych wersjach. Zachowaj ostrożność."</string>
     <string name="tuner_persistent_warning" msgid="230466285569307806">"Te eksperymentalne funkcje mogą się zmienić, popsuć lub zniknąć w przyszłych wersjach. Zachowaj ostrożność."</string>
@@ -997,6 +1001,10 @@
     <string name="music_controls_no_title" msgid="4166497066552290938">"Bez tytułu"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"Kliknij, by uruchomić tę aplikację ponownie i przejść w tryb pełnoekranowy."</string>
     <string name="bubbles_settings_button_description" msgid="7324245408859877545">"Ustawienia dymków aplikacji <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for bubble_overflow_button_content_description (5523744621434300510) -->
+    <skip />
+    <!-- no translation found for bubble_accessibility_action_add_back (6217995665917123890) -->
+    <skip />
     <string name="manage_bubbles_text" msgid="6856830436329494850">"Zarządzaj"</string>
     <string name="bubble_content_description_single" msgid="5175160674436546329">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> z aplikacji <xliff:g id="APP_NAME">%2$s</xliff:g>"</string>
     <string name="bubble_content_description_stack" msgid="7907610717462651870">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> z aplikacji <xliff:g id="APP_NAME">%2$s</xliff:g> i jeszcze <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g>"</string>
@@ -1043,8 +1051,8 @@
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Nie udało się wczytać listy elementów sterujących."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Inne"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Dodaj do sterowania urządzeniami"</string>
-    <string name="controls_dialog_ok" msgid="7011816381344485651">"Dodaj do ulubionych"</string>
-    <string name="controls_dialog_message" msgid="6292099631702047540">"Aplikacja <xliff:g id="APP">%s</xliff:g> zaproponowała dodanie tego elementu sterującego do ulubionych."</string>
+    <string name="controls_dialog_ok" msgid="2770230012857881822">"Dodaj"</string>
+    <string name="controls_dialog_message" msgid="342066938390663844">"Sugestia: <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"Zaktualizowano elementy sterujące"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"Kod PIN zawiera litery lub symbole"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"Sprawdź urządzenie <xliff:g id="DEVICE">%s</xliff:g>"</string>
