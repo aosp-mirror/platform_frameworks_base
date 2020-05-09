@@ -255,6 +255,7 @@
     <!-- no translation found for accessibility_work_mode (1280025758672376313) -->
     <skip />
     <string name="accessibility_notification_dismissed" msgid="4411652015138892952">"Obvestilo je bilo odstranjeno."</string>
+    <string name="accessibility_bubble_dismissed" msgid="270358867566720729">"Oblaček je bil opuščen."</string>
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"Zaslon z obvestili."</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"Hitre nastavitve."</string>
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"Zaklenjen zaslon"</string>
@@ -438,7 +439,7 @@
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Za preklop aplikacij povlecite navzgor"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Povlecite v desno za hiter preklop med aplikacijami"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Vklop/izklop pregleda"</string>
-    <string name="expanded_header_battery_charged" msgid="5307907517976548448">"Akumulator napolnjen"</string>
+    <string name="expanded_header_battery_charged" msgid="5307907517976548448">"Baterija napolnjena"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"Polnjenje"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="757991461445765011">"<xliff:g id="CHARGING_TIME">%s</xliff:g> do napolnjenosti"</string>
     <string name="expanded_header_battery_not_charging" msgid="809409140358955848">"Se ne polni"</string>
@@ -514,6 +515,7 @@
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Izbriši vse"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Upravljanje"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Zgodovina"</string>
+    <string name="notification_section_header_incoming" msgid="5295312809341711367">"Dohodno"</string>
     <string name="notification_section_header_gentle" msgid="3044910806569985386">"Tiha obvestila"</string>
     <string name="notification_section_header_alerting" msgid="3168140660646863240">"Obvestila z opozorilom"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Pogovori"</string>
@@ -674,7 +676,7 @@
     <string name="remove_from_settings_prompt" msgid="551565437265615426">"Ali želite odstraniti Uglaševalnik uporabniškega vmesnika sistema iz nastavitev in prenehati uporabljati vse njegove funkcije?"</string>
     <string name="activity_not_found" msgid="8711661533828200293">"Aplikacija ni nameščena v napravi"</string>
     <string name="clock_seconds" msgid="8709189470828542071">"Prikaz sekund pri uri"</string>
-    <string name="clock_seconds_desc" msgid="2415312788902144817">"Prikaže sekunde pri uri v vrstici stanja. To lahko vpliva na čas delovanja pri akumulatorskem napajanju."</string>
+    <string name="clock_seconds_desc" msgid="2415312788902144817">"Prikaže sekunde pri uri v vrstici stanja. To lahko vpliva na čas delovanja pri baterijskem napajanju."</string>
     <string name="qs_rearrange" msgid="484816665478662911">"Preuredi hitre nastavitve"</string>
     <string name="show_brightness" msgid="6700267491672470007">"Prikaz svetlosti v hitrih nastavitvah"</string>
     <string name="experimental" msgid="3549865454812314826">"Poskusno"</string>
@@ -986,8 +988,8 @@
     <string name="auto_saver_title" msgid="6873691178754086596">"Dotaknite se za načrtovanje varčevanja z energijo baterije"</string>
     <string name="auto_saver_text" msgid="3214960308353838764">"Vklop, če je verjetno, da se bo baterija izpraznila"</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"Ne, hvala"</string>
-    <string name="auto_saver_enabled_title" msgid="4294726198280286333">"Urnik varčevanja z energijo akumulatorja je vklopljen"</string>
-    <string name="auto_saver_enabled_text" msgid="7889491183116752719">"Varčevanje z energijo akumulatorja se bo samodejno vklopilo, ko bo energija akumulatorja pod <xliff:g id="PERCENTAGE">%d</xliff:g> %%."</string>
+    <string name="auto_saver_enabled_title" msgid="4294726198280286333">"Urnik varčevanja z energijo baterije je vklopljen"</string>
+    <string name="auto_saver_enabled_text" msgid="7889491183116752719">"Varčevanje z energijo baterije se bo samodejno vklopilo, ko bo energija baterije pod <xliff:g id="PERCENTAGE">%d</xliff:g> %%."</string>
     <string name="open_saver_setting_action" msgid="2111461909782935190">"Nastavitve"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"V redu"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Izvoz kopice SysUI"</string>
@@ -996,6 +998,8 @@
     <string name="music_controls_no_title" msgid="4166497066552290938">"Brez naslova"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"Dotaknite se za vnovični zagon te aplikacije in preklop v celozaslonski način."</string>
     <string name="bubbles_settings_button_description" msgid="7324245408859877545">"Nastavitve za oblačke aplikacije <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="bubble_overflow_button_content_description" msgid="5523744621434300510">"Prelivanje"</string>
+    <string name="bubble_accessibility_action_add_back" msgid="6217995665917123890">"Dodaj nazaj v sklad"</string>
     <string name="manage_bubbles_text" msgid="6856830436329494850">"Upravljanje"</string>
     <string name="bubble_content_description_single" msgid="5175160674436546329">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> (<xliff:g id="APP_NAME">%2$s</xliff:g>)"</string>
     <string name="bubble_content_description_stack" msgid="7907610717462651870">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> iz aplikacije <xliff:g id="APP_NAME">%2$s</xliff:g> in toliko drugih: <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g>"</string>
@@ -1038,13 +1042,12 @@
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Izberite kontrolnike, do katerih želite imeti dostop prek menija za vklop/izklop"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Držite in povlecite, da prerazporedite kontrolnike"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Vsi kontrolniki so bili odstranjeni"</string>
-    <!-- no translation found for controls_favorite_toast_no_changes (7094494210840877931) -->
-    <skip />
+    <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Spremembe niso shranjene"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Seznama vseh kontrolnikov ni bilo mogoče naložiti."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Drugo"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Dodajanje med kontrolnike naprave"</string>
-    <string name="controls_dialog_ok" msgid="7011816381344485651">"Dodaj med priljubljene"</string>
-    <string name="controls_dialog_message" msgid="6292099631702047540">"Aplikacija <xliff:g id="APP">%s</xliff:g> je predlagala, da ta kontrolnik dodate med priljubljene."</string>
+    <string name="controls_dialog_ok" msgid="2770230012857881822">"Dodaj"</string>
+    <string name="controls_dialog_message" msgid="342066938390663844">"Predlagala aplikacija <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"Kontrolniki so posodobljeni"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"Koda PIN vsebuje črke ali simbole"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"Preverjanje naprave <xliff:g id="DEVICE">%s</xliff:g>"</string>
