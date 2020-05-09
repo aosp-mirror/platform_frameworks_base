@@ -703,7 +703,7 @@
   <string-array name="phoneTypes">
     <item msgid="8996339953292723951">"خانه"</item>
     <item msgid="7740243458912727194">"تلفن همراه"</item>
-    <item msgid="8526146065496663766">"محل کار"</item>
+    <item msgid="8526146065496663766">"کاری"</item>
     <item msgid="8150904584178569699">"نمابر محل کار"</item>
     <item msgid="4537253139152229577">"نمابر خانه"</item>
     <item msgid="6751245029698664340">"پی‌جو"</item>
@@ -712,7 +712,7 @@
   </string-array>
   <string-array name="emailAddressTypes">
     <item msgid="7786349763648997741">"خانه"</item>
-    <item msgid="435564470865989199">"محل کار"</item>
+    <item msgid="435564470865989199">"کاری"</item>
     <item msgid="4199433197875490373">"سایر موارد"</item>
     <item msgid="3233938986670468328">"سفارشی"</item>
   </string-array>
@@ -724,7 +724,7 @@
   </string-array>
   <string-array name="imAddressTypes">
     <item msgid="588088543406993772">"خانه"</item>
-    <item msgid="5503060422020476757">"محل کار"</item>
+    <item msgid="5503060422020476757">"کاری"</item>
     <item msgid="2530391194653760297">"سایر موارد"</item>
     <item msgid="7640927178025203330">"سفارشی"</item>
   </string-array>
@@ -746,7 +746,7 @@
     <string name="phoneTypeCustom" msgid="5120365721260686814">"سفارشی"</string>
     <string name="phoneTypeHome" msgid="3880132427643623588">"خانه"</string>
     <string name="phoneTypeMobile" msgid="1178852541462086735">"تلفن همراه"</string>
-    <string name="phoneTypeWork" msgid="6604967163358864607">"محل کار"</string>
+    <string name="phoneTypeWork" msgid="6604967163358864607">"کاری"</string>
     <string name="phoneTypeFaxWork" msgid="6757519896109439123">"نمابر محل کار"</string>
     <string name="phoneTypeFaxHome" msgid="6678559953115904345">"نمابر خانه"</string>
     <string name="phoneTypePager" msgid="576402072263522767">"پی‌جو"</string>
@@ -761,7 +761,7 @@
     <string name="phoneTypeTelex" msgid="2558783611711876562">"تلکس"</string>
     <string name="phoneTypeTtyTdd" msgid="532038552105328779">"TTY TDD"</string>
     <string name="phoneTypeWorkMobile" msgid="7522314392003565121">"تلفن همراه محل کار"</string>
-    <string name="phoneTypeWorkPager" msgid="3748332310638505234">"پی‌جوی محل کار"</string>
+    <string name="phoneTypeWorkPager" msgid="3748332310638505234">"پی‌جوی کاری"</string>
     <string name="phoneTypeAssistant" msgid="757550783842231039">"دستیار"</string>
     <string name="phoneTypeMms" msgid="1799747455131365989">"فراپیام"</string>
     <string name="eventTypeCustom" msgid="3257367158986466481">"سفارشی"</string>
@@ -770,7 +770,7 @@
     <string name="eventTypeOther" msgid="530671238533887997">"سایر موارد"</string>
     <string name="emailTypeCustom" msgid="1809435350482181786">"سفارشی"</string>
     <string name="emailTypeHome" msgid="1597116303154775999">"خانه"</string>
-    <string name="emailTypeWork" msgid="2020095414401882111">"محل کار"</string>
+    <string name="emailTypeWork" msgid="2020095414401882111">"کاری"</string>
     <string name="emailTypeOther" msgid="5131130857030897465">"سایر موارد"</string>
     <string name="emailTypeMobile" msgid="787155077375364230">"تلفن همراه"</string>
     <string name="postalTypeCustom" msgid="5645590470242939129">"سفارشی"</string>
@@ -791,7 +791,7 @@
     <string name="imProtocolIcq" msgid="2410325380427389521">"ICQ"</string>
     <string name="imProtocolJabber" msgid="7919269388889582015">"Jabber"</string>
     <string name="imProtocolNetMeeting" msgid="4985002408136148256">"NetMeeting"</string>
-    <string name="orgTypeWork" msgid="8684458700669564172">"محل کار"</string>
+    <string name="orgTypeWork" msgid="8684458700669564172">"کاری"</string>
     <string name="orgTypeOther" msgid="5450675258408005553">"سایر موارد"</string>
     <string name="orgTypeCustom" msgid="1126322047677329218">"سفارشی"</string>
     <string name="relationTypeCustom" msgid="282938315217441351">"سفارشی"</string>
@@ -1148,7 +1148,7 @@
     <string name="whichImageCaptureApplication" msgid="2737413019463215284">"تصویربرداری با"</string>
     <string name="whichImageCaptureApplicationNamed" msgid="8820702441847612202">"‏تصویربرداری با %1$s"</string>
     <string name="whichImageCaptureApplicationLabel" msgid="6505433734824988277">"تصویربرداری"</string>
-    <string name="alwaysUse" msgid="3153558199076112903">"استفاده به صورت پیش‌فرض برای این عملکرد."</string>
+    <string name="alwaysUse" msgid="3153558199076112903">"استفاده به‌صورت پیش‌فرض برای این عملکرد."</string>
     <string name="use_a_different_app" msgid="4987790276170972776">"استتفاده از یک برنامه دیگر"</string>
     <string name="clearDefaultHintMsg" msgid="1325866337702524936">"‏پیش‌فرض را در تنظیمات سیستم&gt; برنامه‎ها&gt; مورد بارگیری شده پاک کنید."</string>
     <string name="chooseActivity" msgid="8563390197659779956">"انتخاب عملکرد"</string>
@@ -1427,7 +1427,7 @@
     <string name="vpn_text_long" msgid="278540576806169831">"به <xliff:g id="SESSION">%s</xliff:g> متصل شد. برای مدیریت شبکه ضربه بزنید."</string>
     <string name="vpn_lockdown_connecting" msgid="6096725311950342607">"‏در حال اتصال VPN همیشه فعال…"</string>
     <string name="vpn_lockdown_connected" msgid="2853127976590658469">"‏VPN همیشه فعال متصل شد"</string>
-    <string name="vpn_lockdown_disconnected" msgid="5573611651300764955">"‏ارتباط VPN همیشه روشن قطع شد"</string>
+    <string name="vpn_lockdown_disconnected" msgid="5573611651300764955">"‏از «VPN همیشه روشن» قطع شد"</string>
     <string name="vpn_lockdown_error" msgid="4453048646854247947">"‏به «VPN همیشه روشن» متصل نشد"</string>
     <string name="vpn_lockdown_config" msgid="8331697329868252169">"‏تغییر شبکه یا تنظیمات VPN"</string>
     <string name="upload_file" msgid="8651942222301634271">"انتخاب فایل"</string>
@@ -1889,7 +1889,7 @@
     <string name="app_suspended_more_details" msgid="211260942831587014">"بیشتر بدانید"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"لغو توقف موقت برنامه"</string>
     <string name="work_mode_off_title" msgid="5503291976647976560">"نمایه کاری روشن شود؟"</string>
-    <string name="work_mode_off_message" msgid="8417484421098563803">"برنامه‌ها، اعلان‌ها، داده‌ها و سایر قابلیت‌های نمایه کاری شما روشن خواهد شد"</string>
+    <string name="work_mode_off_message" msgid="8417484421098563803">"برنامه‌ها، اعلان‌ها، داده‌ها، و سایر ویژگی‌های نمایه کاری شما روشن خواهد شد"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"روشن کردن"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"برنامه در دسترس نیست"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> درحال‌حاضر در دسترس نیست."</string>
@@ -2042,12 +2042,9 @@
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"کادر گفتگوی روشن/خاموش"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"صفحه قفل"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"نماگرفت"</string>
-    <!-- no translation found for accessibility_system_action_on_screen_a11y_shortcut_label (8488701469459210309) -->
-    <skip />
-    <!-- no translation found for accessibility_system_action_on_screen_a11y_shortcut_chooser_label (1057878690209817886) -->
-    <skip />
-    <!-- no translation found for accessibility_system_action_hardware_a11y_shortcut_label (5764644187715255107) -->
-    <skip />
+    <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"میان‌بر دسترس‌پذیری روی صفحه"</string>
+    <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"انتخاب‌گر میان‌بر دسترس‌پذیری روی صفحه"</string>
+    <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"میان‌بر دسترسی‌پذیری"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"نوار شرح <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> در سطل «محدودشده» قرار گرفت"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
@@ -2181,4 +2178,8 @@
     <string name="PERSOSUBSTATE_SIM_ICCID_SUCCESS" msgid="8058678548991999545">"‏قفل ICCID باز شد."</string>
     <string name="PERSOSUBSTATE_SIM_IMPI_SUCCESS" msgid="2545608067978550571">"‏قفل IMPI باز شد."</string>
     <string name="PERSOSUBSTATE_SIM_NS_SP_SUCCESS" msgid="4352382949744625007">"قفل ارائه‌دهنده خدمات زیرمجموعه شبکه باز شد."</string>
+    <string name="config_pdp_reject_dialog_title" msgid="4072057179246785727"></string>
+    <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
+    <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
+    <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
 </resources>
