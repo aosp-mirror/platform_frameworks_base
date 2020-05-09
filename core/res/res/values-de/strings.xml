@@ -537,7 +537,8 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"Ermöglicht der App, deine Fotosammlung zu ändern."</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"Standorte aus meiner Mediensammlung abrufen"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"Ermöglicht der App, Standorte aus deiner Mediensammlung abzurufen."</string>
-    <string name="biometric_dialog_default_title" msgid="5284880398508155088">"Deine Identität bestätigen"</string>
+    <!-- no translation found for biometric_dialog_default_title (55026799173208210) -->
+    <skip />
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Biometrische Hardware nicht verfügbar"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Authentifizierung abgebrochen"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Nicht erkannt"</string>
@@ -1793,10 +1794,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Von deinem Administrator aktualisiert"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Von deinem Administrator gelöscht"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (5997766757551917769) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (8587408568232177204) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"Der Energiesparmodus sorgt für eine längere Akkulaufzeit:\n\n• Das dunkle Design wird aktiviert\n• Hintergrundaktivitäten, einige optische Effekte und weitere Funktionen wie \"Ok Google\" werden abgeschaltet oder eingeschränkt\n\n"<annotation id="url">"Weitere Informationen"</annotation></string>
+    <string name="battery_saver_description" msgid="8587408568232177204">"Der Energiesparmodus sorgt für eine längere Akkulaufzeit:\n\n• Das dunkle Design wird aktiviert\n• Hintergrundaktivitäten, einige optische Effekte und weitere Funktionen wie \"Ok Google\" werden abgeschaltet oder eingeschränkt"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Der Datensparmodus verhindert zum einen, dass manche Apps im Hintergrund Daten senden oder empfangen, sodass weniger Daten verbraucht werden. Zum anderen werden die Datenzugriffe der gerade aktiven App eingeschränkt, was z. B. dazu führen kann, dass Bilder erst angetippt werden müssen, bevor sie sichtbar werden."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Datensparmodus aktivieren?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Aktivieren"</string>
@@ -2043,15 +2042,13 @@
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"Kleines Fenster für Akkustand"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Sperrbildschirm"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Screenshot"</string>
-    <!-- no translation found for accessibility_system_action_accessibility_button_label (5941347017132886642) -->
-    <skip />
-    <!-- no translation found for accessibility_system_action_accessibility_button_chooser_label (6973618519666227981) -->
-    <skip />
+    <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"Kurzbefehl für Bildschirmbedienungshilfen"</string>
+    <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"Auswahl für Kurzbefehle für Bildschirmbedienungshilfen"</string>
+    <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"Kurzbefehl für Bedienungshilfen"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Untertitelleiste von <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> wurde in den BESCHRÄNKT-Bucket gelegt"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
-    <!-- no translation found for conversation_single_line_image_placeholder (6983271082911936900) -->
-    <skip />
+    <string name="conversation_single_line_image_placeholder" msgid="6983271082911936900">"hat ein Bild gesendet"</string>
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"Unterhaltung"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"Gruppenunterhaltung"</string>
     <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>
@@ -2181,4 +2178,8 @@
     <string name="PERSOSUBSTATE_SIM_ICCID_SUCCESS" msgid="8058678548991999545">"ICCID-Entsperrung war erfolgreich."</string>
     <string name="PERSOSUBSTATE_SIM_IMPI_SUCCESS" msgid="2545608067978550571">"IMPI-Entsperrung war erfolgreich."</string>
     <string name="PERSOSUBSTATE_SIM_NS_SP_SUCCESS" msgid="4352382949744625007">"Entsperrung des subnetz- und mobilfunkanbietergebundenen Geräts war erfolgreich."</string>
+    <string name="config_pdp_reject_dialog_title" msgid="4072057179246785727"></string>
+    <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
+    <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
+    <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
 </resources>
