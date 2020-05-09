@@ -49,12 +49,12 @@ class NotificationSectionsFeatureManagerTest : SysuiTestCase() {
         manager!!.clearCache()
         originalQsMediaPlayer = Settings.System.getInt(context.getContentResolver(),
                 "qs_media_player", 1)
-        Settings.System.putInt(context.getContentResolver(), "qs_media_player", 0)
+        Settings.Global.putInt(context.getContentResolver(), "qs_media_player", 0)
     }
 
     @After
     public fun teardown() {
-        Settings.System.putInt(context.getContentResolver(), "qs_media_player",
+        Settings.Global.putInt(context.getContentResolver(), "qs_media_player",
                 originalQsMediaPlayer)
     }
 
