@@ -253,8 +253,8 @@
       <item quantity="other">Мүчүлүштүк тууралуу кабарлоо үчүн <xliff:g id="NUMBER_1">%d</xliff:g> секундда скриншот алынат.</item>
       <item quantity="one">Мүчүлүштүк тууралуу кабарлоо үчүн <xliff:g id="NUMBER_0">%d</xliff:g> секундда скриншот алынат.</item>
     </plurals>
-    <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"Мүчүлүштүк тууралуу кабар берүү үчүн скриншот тартылды"</string>
-    <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"Мүчүлүштүк тууралуу кабар берүү үчүн скриншот тартылган жок"</string>
+    <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"Мүчүлүштүк тууралуу кабарлоо үчүн скриншот тартылды"</string>
+    <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"Мүчүлүштүк тууралуу кабарлоо үчүн скриншот тартылган жок"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"Үнсүз режим"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"Добушу ӨЧҮК"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"Добушу КҮЙҮК"</string>
@@ -1889,7 +1889,7 @@
     <string name="app_suspended_more_details" msgid="211260942831587014">"Кеңири маалымат"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Колдонмону иштетүү"</string>
     <string name="work_mode_off_title" msgid="5503291976647976560">"Жумуш профили күйгүзүлсүнбү?"</string>
-    <string name="work_mode_off_message" msgid="8417484421098563803">"Жумуш колдонмолоруңуз, эскертмелериңиз, дайын-даректериңиз жана жумуш профилинин башка функциялары күйгүзүлөт."</string>
+    <string name="work_mode_off_message" msgid="8417484421098563803">"Жумуш колдонмолоруңуз, билдирмелериңиз, дайын-даректериңиз жана жумуш профилинин башка функциялары күйгүзүлөт."</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Күйгүзүү"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Колдонмо учурда жеткиликсиз"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> учурда жеткиликсиз"</string>
@@ -1922,7 +1922,7 @@
     <string name="app_category_maps" msgid="6395725487922533156">"Карталар жана чабыттоо"</string>
     <string name="app_category_productivity" msgid="1844422703029557883">"Өндүрүш категориясы"</string>
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"Түзмөктүн сактагычы"</string>
-    <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"USB аркылуу мүчүлүштүктөрдү оңдоо"</string>
+    <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"USB аркылуу мүчүлүштүктөрдү аныктоо"</string>
     <string name="time_picker_hour_label" msgid="4208590187662336864">"саат"</string>
     <string name="time_picker_minute_label" msgid="8307452311269824553">"мүнөт"</string>
     <string name="time_picker_header_text" msgid="9073802285051516688">"Убакытты коюу"</string>
@@ -2042,12 +2042,9 @@
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"Кубат диалогу"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Кулпуланган экран"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Скриншот"</string>
-    <!-- no translation found for accessibility_system_action_on_screen_a11y_shortcut_label (8488701469459210309) -->
-    <skip />
-    <!-- no translation found for accessibility_system_action_on_screen_a11y_shortcut_chooser_label (1057878690209817886) -->
-    <skip />
-    <!-- no translation found for accessibility_system_action_hardware_a11y_shortcut_label (5764644187715255107) -->
-    <skip />
+    <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"Ыкчам иштетүү"</string>
+    <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"Ыкчам иштетүү менюсу"</string>
+    <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"Ыкчам иштетүү"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g> колдонмосунун маалымат тилкеси."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> ЧЕКТЕЛГЕН чакага коюлган"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
@@ -2181,4 +2178,8 @@
     <string name="PERSOSUBSTATE_SIM_ICCID_SUCCESS" msgid="8058678548991999545">"ICCID кулпусу ийгиликтүү ачылды."</string>
     <string name="PERSOSUBSTATE_SIM_IMPI_SUCCESS" msgid="2545608067978550571">"IMPI кулпусу ийгиликтүү ачылды."</string>
     <string name="PERSOSUBSTATE_SIM_NS_SP_SUCCESS" msgid="4352382949744625007">"Кичи тармак операторунун кулпусу ийгиликтүү ачылды."</string>
+    <string name="config_pdp_reject_dialog_title" msgid="4072057179246785727"></string>
+    <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
+    <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
+    <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
 </resources>
