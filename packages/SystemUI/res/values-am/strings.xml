@@ -89,6 +89,8 @@
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"ቅጽበታዊ ገጽ እይታን አሰናብት"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"የቅጽበታዊ ገጽ ዕይታ ቅድመ-ዕይታ"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"የማያ መቅጃ"</string>
+    <!-- no translation found for screenrecord_background_processing_label (7244617554884238898) -->
+    <skip />
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"ለአንድ የማያ ገጽ ቀረጻ ክፍለ-ጊዜ በመካሄድ ያለ ማሳወቂያ"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"መቅረጽ ይጀመር?"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"እየቀረጹ ሳለ የAndroid ስርዓት በማያ ገጽዎ ላይ የሚታይ ወይም በመሣሪያዎ ላይ የሚጫወት ማንኛውም ሚስጥራዊነት ያለው መረጃን መያዝ ይችላል። ይህ የይለፍ ቃላትን፣ የክፍያ መረጃን፣ ፎቶዎችን፣ መልዕክቶችን እና ኦዲዮን ያካትታል።"</string>
@@ -509,6 +511,8 @@
     <string name="clear_all_notifications_text" msgid="348312370303046130">"ሁሉንም አጽዳ"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"ያቀናብሩ"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"ታሪክ"</string>
+    <!-- no translation found for notification_section_header_incoming (5295312809341711367) -->
+    <skip />
     <string name="notification_section_header_gentle" msgid="3044910806569985386">"ጸጥ ያሉ ማሳወቂያዎች"</string>
     <string name="notification_section_header_alerting" msgid="3168140660646863240">"የማንቂያ ማሳወቂያዎች"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"ውይይቶች"</string>
@@ -987,6 +991,10 @@
     <string name="music_controls_no_title" msgid="4166497066552290938">"ርዕስ የለም"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"ይህን መተግበሪያ እንደገና ለማስጀመር መታ ያድርጉ እና ወደ ሙሉ ማያ ገጽ ይሂዱ።"</string>
     <string name="bubbles_settings_button_description" msgid="7324245408859877545">"ቅንብሮች ለ <xliff:g id="APP_NAME">%1$s</xliff:g> አረፋዎች"</string>
+    <!-- no translation found for bubble_overflow_button_content_description (5523744621434300510) -->
+    <skip />
+    <!-- no translation found for bubble_accessibility_action_add_back (6217995665917123890) -->
+    <skip />
     <string name="manage_bubbles_text" msgid="6856830436329494850">"ያቀናብሩ"</string>
     <string name="bubble_content_description_single" msgid="5175160674436546329">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> ከ<xliff:g id="APP_NAME">%2$s</xliff:g>"</string>
     <string name="bubble_content_description_stack" msgid="7907610717462651870">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> ከ <xliff:g id="APP_NAME">%2$s</xliff:g> እና <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g> ተጨማሪ"</string>
@@ -1031,8 +1039,8 @@
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"የሁሉም መቆጣጠሪያዎች ዝርዝር ሊጫን አልተቻለም።"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"ሌላ"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"ወደ የመሣሪያ መቆጣጠሪያዎች ያክሉ"</string>
-    <string name="controls_dialog_ok" msgid="7011816381344485651">"ወደ ተወዳጆች አክል"</string>
-    <string name="controls_dialog_message" msgid="6292099631702047540">"<xliff:g id="APP">%s</xliff:g> ይህን ቁጥጥር ወደ ተወዳጆችዎ እንዲታከል ሐሳብ ጠቁሟል።"</string>
+    <string name="controls_dialog_ok" msgid="2770230012857881822">"አክል"</string>
+    <string name="controls_dialog_message" msgid="342066938390663844">"በ<xliff:g id="APP">%s</xliff:g> የተጠቆመ"</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"መቆጣጠሪያዎች ተዘምነዋል"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"ፒን ፊደሎችን ወይም ምልክቶችን ይይዛል"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"<xliff:g id="DEVICE">%s</xliff:g> አረጋግጥ"</string>
