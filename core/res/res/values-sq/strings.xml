@@ -1897,7 +1897,7 @@
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Kontrollo për përditësim"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Ke mesazhe të reja"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Hap aplikacionin SMS për ta parë"</string>
-    <string name="profile_encrypted_title" msgid="9001208667521266472">"Disa funksione mund të jenë të kufizuara"</string>
+    <string name="profile_encrypted_title" msgid="9001208667521266472">"Disa veçori mund të jenë të kufizuara"</string>
     <string name="profile_encrypted_detail" msgid="5279730442756849055">"Profili i punës është i kyçur"</string>
     <string name="profile_encrypted_message" msgid="1128512616293157802">"Trokit për ta shkyçur profilin e punës"</string>
     <string name="usb_mtp_launch_notification_title" msgid="774319638256707227">"U lidh me <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
@@ -2042,8 +2042,9 @@
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"Dialogu i energjisë"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Ekrani i kyçjes"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Pamja e ekranit"</string>
-    <string name="accessibility_system_action_accessibility_button_label" msgid="5941347017132886642">"Shkurtorja e qasshmërisë në ekran"</string>
-    <string name="accessibility_system_action_accessibility_button_chooser_label" msgid="6973618519666227981">"Zgjedhësi i shkurtores së qasshmërisë në ekran"</string>
+    <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"Shkurtorja e qasshmërisë në ekran"</string>
+    <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"Zgjedhësi i shkurtores së qasshmërisë në ekran"</string>
+    <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"Shkurtorja e qasshmërisë"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Shiriti i nëntitullit të <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> është vendosur në grupin E KUFIZUAR"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
@@ -2177,4 +2178,8 @@
     <string name="PERSOSUBSTATE_SIM_ICCID_SUCCESS" msgid="8058678548991999545">"Shkyçja e ICCID ishte e suksesshme."</string>
     <string name="PERSOSUBSTATE_SIM_IMPI_SUCCESS" msgid="2545608067978550571">"Shkyçja e IMPI ishte e suksesshme."</string>
     <string name="PERSOSUBSTATE_SIM_NS_SP_SUCCESS" msgid="4352382949744625007">"Shkyçja e ofruesit të shërbimit të nënrenditjes së rrjetit ishte e suksesshme."</string>
+    <string name="config_pdp_reject_dialog_title" msgid="4072057179246785727"></string>
+    <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
+    <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
+    <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
 </resources>
