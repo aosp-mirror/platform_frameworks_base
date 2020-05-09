@@ -4367,4 +4367,9 @@
     <!-- Boolean indicating whether frameworks needs to reset cell broadcast geo-fencing
          check after reboot or airplane mode toggling -->
     <bool translatable="false" name="reset_geo_fencing_check_after_boot_or_apm">false</bool>
+
+    <!-- pdp data retry for cause 29, 33 and 55-->
+    <bool name="config_pdp_reject_enable_retry">false</bool>
+    <!--pdp data reject retry delay in ms-->
+    <integer name="config_pdp_reject_retry_delay_ms">-1</integer>
 </resources>

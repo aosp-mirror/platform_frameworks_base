@@ -3872,4 +3872,12 @@
 
   <java-symbol type="bool" name="config_automotiveHideNavBarForKeyboard" />
   <java-symbol type="bool" name="reset_geo_fencing_check_after_boot_or_apm" />
+
+  <!-- For Pdn throttle feature -->
+  <java-symbol type="bool" name="config_pdp_reject_enable_retry" />
+  <java-symbol type="integer" name="config_pdp_reject_retry_delay_ms" />
+  <java-symbol type="string" name="config_pdp_reject_dialog_title" />
+  <java-symbol type="string" name="config_pdp_reject_user_authentication_failed" />
+  <java-symbol type="string" name="config_pdp_reject_service_not_subscribed" />
+  <java-symbol type="string" name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" />
 </resources>

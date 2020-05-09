@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-/*
-** Copyright 2014, The Android Open Source Project
+/* //device/apps/common/assets/res/any/strings.xml
+**
+** Copyright 2020, The Android Open Source Project
 **
 ** Licensed under the Apache License, Version 2.0 (the "License");
 ** you may not use this file except in compliance with the License.
@@ -16,9 +17,9 @@
 ** limitations under the License.
 */
 -->
-<resources>
-    <bool name="config_use_sim_language_file">false</bool>
-
-    <bool name="config_pdp_reject_enable_retry">true</bool>
-    <integer name="config_pdp_reject_retry_delay_ms">45000</integer>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="config_pdp_reject_dialog_title"></string>
+    <string name="config_pdp_reject_user_authentication_failed">AUTHENTICATION FAILURE -29-.</string>
+    <string name="config_pdp_reject_service_not_subscribed">NOT SUBSCRIBED TO SERVICE -33-.</string>
+    <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed">Multiple PDN connections for a given APN not allowed -55-.</string>
 </resources>
