@@ -255,8 +255,27 @@ public final class UserTypeDetails {
         pw.print(prefix); pw.print("mDefaultUserInfoFlags: ");
         pw.println(UserInfo.flagsToString(mDefaultUserInfoPropertyFlags));
         pw.print(prefix); pw.print("mLabel: "); pw.println(mLabel);
-        pw.print(prefix); pw.println("mDefaultRestrictions: ");
-        UserRestrictionsUtils.dumpRestrictions(pw, prefix + "    ", mDefaultRestrictions);
+
+        if (isSystem()) {
+            pw.print(prefix); pw.println("config_defaultFirstUserRestrictions: ");
+            try {
+                final Bundle restrictions = new Bundle();
+                final String[] defaultFirstUserRestrictions = Resources.getSystem().getStringArray(
+                        com.android.internal.R.array.config_defaultFirstUserRestrictions);
+                for (String userRestriction : defaultFirstUserRestrictions) {
+                    if (UserRestrictionsUtils.isValidRestriction(userRestriction)) {
+                        restrictions.putBoolean(userRestriction, true);
+                    }
+                }
+                UserRestrictionsUtils.dumpRestrictions(pw, prefix + "    ", restrictions);
+            } catch (Resources.NotFoundException e) {
+                pw.print(prefix); pw.println("    none - resource not found");
+            }
+        } else {
+            pw.print(prefix); pw.println("mDefaultRestrictions: ");
+            UserRestrictionsUtils.dumpRestrictions(pw, prefix + "    ", mDefaultRestrictions);
+        }
+
         pw.print(prefix); pw.print("mIconBadge: "); pw.println(mIconBadge);
         pw.print(prefix); pw.print("mBadgePlain: "); pw.println(mBadgePlain);
         pw.print(prefix); pw.print("mBadgeNoBackground: "); pw.println(mBadgeNoBackground);
