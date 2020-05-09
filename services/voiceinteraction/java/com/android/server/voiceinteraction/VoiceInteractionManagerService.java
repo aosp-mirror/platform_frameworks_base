@@ -23,6 +23,7 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
+import android.app.ActivityThread;
 import android.app.AppGlobals;
 import android.app.role.OnRoleHoldersChangedListener;
 import android.app.role.RoleManager;
@@ -48,6 +49,9 @@ import android.hardware.soundtrigger.SoundTrigger.KeyphraseSoundModel;
 import android.hardware.soundtrigger.SoundTrigger.ModelParamRange;
 import android.hardware.soundtrigger.SoundTrigger.ModuleProperties;
 import android.hardware.soundtrigger.SoundTrigger.RecognitionConfig;
+import android.media.permission.ClearCallingIdentityContext;
+import android.media.permission.Identity;
+import android.media.permission.SafeCloseable;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -114,6 +118,7 @@ public class VoiceInteractionManagerService extends SystemService {
     final ArraySet<Integer> mLoadedKeyphraseIds = new ArraySet<>();
     ShortcutServiceInternal mShortcutServiceInternal;
     SoundTriggerInternal mSoundTriggerInternal;
+    SoundTriggerInternal.Session mSoundTriggerSession;
 
     private final RemoteCallbackList<IVoiceInteractionSessionListener>
             mVoiceInteractionSessionListeners = new RemoteCallbackList<>();
@@ -158,7 +163,14 @@ public class VoiceInteractionManagerService extends SystemService {
         if (PHASE_SYSTEM_SERVICES_READY == phase) {
             mShortcutServiceInternal = Objects.requireNonNull(
                     LocalServices.getService(ShortcutServiceInternal.class));
-            mSoundTriggerInternal = LocalServices.getService(SoundTriggerInternal.class);
+            // TODO(ytai): temporary hack
+            Identity identity = new Identity();
+            identity.packageName = ActivityThread.currentOpPackageName();
+            try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
+                mSoundTriggerInternal = LocalServices.getService(
+                        SoundTriggerInternal.class);
+                mSoundTriggerSession = mSoundTriggerInternal.attachAsOriginator(identity);
+            }
         } else if (phase == PHASE_THIRD_PARTY_APPS_CAN_START) {
             mServiceStub.systemRunning(isSafeMode());
         }
@@ -1014,7 +1026,7 @@ public class VoiceInteractionManagerService extends SystemService {
             final long caller = Binder.clearCallingIdentity();
             boolean deleted = false;
             try {
-                int unloadStatus = mSoundTriggerInternal.unloadKeyphraseModel(keyphraseId);
+                int unloadStatus = mSoundTriggerSession.unloadKeyphraseModel(keyphraseId);
                 if (unloadStatus != SoundTriggerInternal.STATUS_OK) {
                     Slog.w(TAG, "Unable to unload keyphrase sound model:" + unloadStatus);
                 }
@@ -1100,7 +1112,7 @@ public class VoiceInteractionManagerService extends SystemService {
 
                 final long caller = Binder.clearCallingIdentity();
                 try {
-                    return mSoundTriggerInternal.getModuleProperties();
+                    return mSoundTriggerSession.getModuleProperties();
                 } finally {
                     Binder.restoreCallingIdentity(caller);
                 }
@@ -1135,7 +1147,7 @@ public class VoiceInteractionManagerService extends SystemService {
                     synchronized (this) {
                         mLoadedKeyphraseIds.add(keyphraseId);
                     }
-                    return mSoundTriggerInternal.startRecognition(
+                    return mSoundTriggerSession.startRecognition(
                             keyphraseId, soundModel, callback, recognitionConfig);
                 }
             } finally {
@@ -1152,7 +1164,7 @@ public class VoiceInteractionManagerService extends SystemService {
 
             final long caller = Binder.clearCallingIdentity();
             try {
-                return mSoundTriggerInternal.stopRecognition(keyphraseId, callback);
+                return mSoundTriggerSession.stopRecognition(keyphraseId, callback);
             } finally {
                 Binder.restoreCallingIdentity(caller);
             }
@@ -1167,7 +1179,7 @@ public class VoiceInteractionManagerService extends SystemService {
 
             final long caller = Binder.clearCallingIdentity();
             try {
-                return mSoundTriggerInternal.setParameter(keyphraseId, modelParam, value);
+                return mSoundTriggerSession.setParameter(keyphraseId, modelParam, value);
             } finally {
                 Binder.restoreCallingIdentity(caller);
             }
@@ -1182,7 +1194,7 @@ public class VoiceInteractionManagerService extends SystemService {
 
             final long caller = Binder.clearCallingIdentity();
             try {
-                return mSoundTriggerInternal.getParameter(keyphraseId, modelParam);
+                return mSoundTriggerSession.getParameter(keyphraseId, modelParam);
             } finally {
                 Binder.restoreCallingIdentity(caller);
             }
@@ -1198,7 +1210,7 @@ public class VoiceInteractionManagerService extends SystemService {
 
             final long caller = Binder.clearCallingIdentity();
             try {
-                return mSoundTriggerInternal.queryParameter(keyphraseId, modelParam);
+                return mSoundTriggerSession.queryParameter(keyphraseId, modelParam);
             } finally {
                 Binder.restoreCallingIdentity(caller);
             }
@@ -1208,7 +1220,7 @@ public class VoiceInteractionManagerService extends SystemService {
             for (int i = 0; i < mLoadedKeyphraseIds.size(); i++) {
                 final long caller = Binder.clearCallingIdentity();
                 try {
-                    int status = mSoundTriggerInternal.unloadKeyphraseModel(
+                    int status = mSoundTriggerSession.unloadKeyphraseModel(
                             mLoadedKeyphraseIds.valueAt(i));
                     if (status != SoundTriggerInternal.STATUS_OK) {
                         Slog.w(TAG, "Failed to unload keyphrase " + mLoadedKeyphraseIds.valueAt(i)
@@ -1421,6 +1433,7 @@ public class VoiceInteractionManagerService extends SystemService {
                 }
             }
             mSoundTriggerInternal.dump(fd, pw, args);
+            mSoundTriggerSession.dump(fd, pw, args);
         }
 
         @Override

@@ -58,6 +58,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.function.BiFunction;
 
@@ -138,7 +139,6 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
         mPowerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         mModelDataMap = new HashMap<UUID, ModelData>();
         mKeyphraseUuidMap = new HashMap<Integer, UUID>();
-        mPhoneStateListener = new MyCallStateListener();
         if (status != SoundTrigger.STATUS_OK || modules.size() == 0) {
             Slog.w(TAG, "listModules status=" + status + ", # of modules=" + modules.size());
             mModuleProperties = null;
@@ -152,6 +152,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
         if (looper == null) {
             looper = Looper.getMainLooper();
         }
+        mPhoneStateListener = new MyCallStateListener(looper);
         if (looper != null) {
             mHandler = new Handler(looper) {
                 @Override
@@ -1049,6 +1050,10 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
     }
 
     class MyCallStateListener extends PhoneStateListener {
+        MyCallStateListener(@NonNull Looper looper) {
+            super(Objects.requireNonNull(looper));
+        }
+
         @Override
         public void onCallStateChanged(int state, String arg1) {
             if (DBG) Slog.d(TAG, "onCallStateChanged: " + state);
