@@ -18,6 +18,7 @@
 
 #include <android/content/pm/BnDataLoaderStatusListener.h>
 #include <android/content/pm/DataLoaderParamsParcel.h>
+#include <android/content/pm/FileSystemControlParcel.h>
 #include <android/content/pm/IDataLoaderStatusListener.h>
 #include <android/os/incremental/BnIncrementalServiceConnector.h>
 #include <binder/IAppOpsCallback.h>
@@ -160,7 +161,7 @@ private:
         DataLoaderStub(IncrementalService& service, MountId id,
                        content::pm::DataLoaderParamsParcel&& params,
                        content::pm::FileSystemControlParcel&& control,
-                       const DataLoaderStatusListener* externalListener);
+                       const DataLoaderStatusListener* externalListener, std::string&& healthPath);
         ~DataLoaderStub();
         // Cleans up the internal state and invalidates DataLoaderStub. Any subsequent calls will
         // result in an error.
@@ -178,6 +179,10 @@ private:
     private:
         binder::Status onStatusChanged(MountId mount, int newStatus) final;
 
+        void registerForPendingReads();
+        void unregisterFromPendingReads();
+        int onPendingReads();
+
         bool isValid() const { return mId != kInvalidStorageId; }
         sp<content::pm::IDataLoader> getDataLoader();
 
@@ -191,6 +196,16 @@ private:
 
         bool fsmStep();
 
+        // Watching for pending reads.
+        void healthStatusOk();
+        // Pending reads detected, waiting for Xsecs to confirm blocked state.
+        void healthStatusReadsPending();
+        // There are reads pending for X+secs, waiting for additional Ysecs to confirm unhealthy
+        // state.
+        void healthStatusBlocked();
+        // There are reads pending for X+Ysecs, marking storage as unhealthy.
+        void healthStatusUnhealthy();
+
         IncrementalService& mService;
 
         std::mutex mMutex;
@@ -203,6 +218,9 @@ private:
         int mCurrentStatus = content::pm::IDataLoaderStatusListener::DATA_LOADER_DESTROYED;
         int mTargetStatus = content::pm::IDataLoaderStatusListener::DATA_LOADER_DESTROYED;
         TimePoint mTargetStatusTs = {};
+
+        std::string mHealthPath;
+        incfs::UniqueControl mHealthControl;
     };
     using DataLoaderStubPtr = sp<DataLoaderStub>;
 
@@ -300,12 +318,15 @@ private:
                         const incfs::FileId& libFileId, std::string_view targetLibPath,
                         Clock::time_point scheduledTs);
 
+    void runCmdLooper();
+
 private:
     const std::unique_ptr<VoldServiceWrapper> mVold;
     const std::unique_ptr<DataLoaderManagerWrapper> mDataLoaderManager;
     const std::unique_ptr<IncFsWrapper> mIncFs;
     const std::unique_ptr<AppOpsManagerWrapper> mAppOpsManager;
     const std::unique_ptr<JniWrapper> mJni;
+    const std::unique_ptr<LooperWrapper> mLooper;
     const std::string mIncrementalDir;
 
     mutable std::mutex mLock;
@@ -319,13 +340,16 @@ private:
     std::atomic_bool mSystemReady = false;
     StorageId mNextId = 0;
 
+    std::atomic_bool mRunning{true};
+
     using Job = std::function<void()>;
     std::unordered_map<MountId, std::vector<Job>> mJobQueue;
     MountId mPendingJobsMount = kInvalidStorageId;
     std::condition_variable mJobCondition;
     std::mutex mJobMutex;
     std::thread mJobProcessor;
-    bool mRunning = true;
+
+    std::thread mCmdLooperThread;
 };
 
 } // namespace android::incremental

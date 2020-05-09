@@ -284,8 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"បង្ហាញ​ជម្រើស​សម្រាប់​សេចក្តីបញ្ជាក់ការបង្ហាញ​ឥត​ខ្សែ"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"បង្កើនកម្រិតកំណត់ហេតុ Wi-Fi បង្ហាញក្នុង SSID RSSI ក្នុងកម្មវិធីជ្រើសរើស Wi-Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"កាត់បន្ថយ​ការប្រើប្រាស់ថ្ម និងកែលម្អប្រតិបត្តិការ​បណ្ដាញ"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"នៅពេលបើក​មុខងារនេះ អាសយដ្ឋាន MAC របស់ឧបករណ៍នេះ​អាចផ្លាស់ប្ដូរ​ រាល់ពេល​ដែលវា​ភ្ជាប់ជាមួយ​បណ្ដាញ​ដែលបានបើក​ការតម្រៀប MAC តាមលំដាប់ចៃដន្យ។"</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"មានការកំណត់"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"មិនមានការកំណត់"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"ទំហំកន្លែងផ្ទុករបស់ logger"</string>
@@ -550,4 +549,14 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"បញ្ចូល​ភ្ញៀវ"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"លុប​​​ភ្ញៀវ"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"ភ្ញៀវ"</string>
+    <!-- no translation found for cached_apps_freezer_device_default (2616594131750144342) -->
+    <skip />
+    <!-- no translation found for cached_apps_freezer_disabled (4816382260660472042) -->
+    <skip />
+    <!-- no translation found for cached_apps_freezer_enabled (8866703500183051546) -->
+    <skip />
+    <!-- no translation found for cached_apps_freezer_reboot_dialog_text (695330563489230096) -->
+    <skip />
+    <!-- no translation found for accessibility_work_profile_app_description (5470883112342119165) -->
+    <skip />
 </resources>

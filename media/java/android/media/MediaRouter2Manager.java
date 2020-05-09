@@ -635,8 +635,11 @@ public final class MediaRouter2Manager {
     public List<MediaRoute2Info> getSelectedRoutes(@NonNull RoutingSessionInfo sessionInfo) {
         Objects.requireNonNull(sessionInfo, "sessionInfo must not be null");
 
-        List<String> routeIds = sessionInfo.getSelectedRoutes();
-        return getRoutesWithIds(routeIds);
+        synchronized (sLock) {
+            return sessionInfo.getSelectedRoutes().stream().map(mRoutes::get)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+        }
     }
 
     /**
@@ -646,8 +649,15 @@ public final class MediaRouter2Manager {
     public List<MediaRoute2Info> getSelectableRoutes(@NonNull RoutingSessionInfo sessionInfo) {
         Objects.requireNonNull(sessionInfo, "sessionInfo must not be null");
 
-        List<String> routeIds = sessionInfo.getSelectableRoutes();
-        return getRoutesWithIds(routeIds);
+        List<String> selectedRouteIds = sessionInfo.getSelectedRoutes();
+
+        synchronized (sLock) {
+            return sessionInfo.getSelectableRoutes().stream()
+                    .filter(routeId -> !selectedRouteIds.contains(routeId))
+                    .map(mRoutes::get)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+        }
     }
 
     /**
@@ -657,8 +667,15 @@ public final class MediaRouter2Manager {
     public List<MediaRoute2Info> getDeselectableRoutes(@NonNull RoutingSessionInfo sessionInfo) {
         Objects.requireNonNull(sessionInfo, "sessionInfo must not be null");
 
-        List<String> routeIds = sessionInfo.getDeselectableRoutes();
-        return getRoutesWithIds(routeIds);
+        List<String> selectedRouteIds = sessionInfo.getSelectedRoutes();
+
+        synchronized (sLock) {
+            return sessionInfo.getDeselectableRoutes().stream()
+                    .filter(routeId -> selectedRouteIds.contains(routeId))
+                    .map(mRoutes::get)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+        }
     }
 
     /**
@@ -838,14 +855,6 @@ public final class MediaRouter2Manager {
         return TextUtils.equals(volumeControlId, sessionInfo.getOriginalId())
                 && TextUtils.equals(mediaController.getPackageName(),
                 sessionInfo.getOwnerPackageName());
-    }
-
-    private List<MediaRoute2Info> getRoutesWithIds(List<String> routeIds) {
-        synchronized (sLock) {
-            return routeIds.stream().map(mRoutes::get)
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toList());
-        }
     }
 
     /**

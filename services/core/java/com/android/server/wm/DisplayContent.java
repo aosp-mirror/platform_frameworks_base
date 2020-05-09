@@ -54,7 +54,6 @@ import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
-import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.FLAG_SPLIT_TOUCH;
 import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
@@ -1620,9 +1619,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             }
         }
 
-        // Announce rotation only if we will not animate as we already have the
-        // windows in final state. Otherwise, we make this call at the rotation end.
-        if (screenRotationAnimation == null && mWmService.mAccessibilityController != null) {
+        if (mWmService.mAccessibilityController != null) {
             mWmService.mAccessibilityController.onRotationChangedLocked(this);
         }
     }
@@ -3707,8 +3704,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     boolean hasSecureWindowOnScreen() {
-        final WindowState win = getWindow(
-                w -> w.isOnScreen() && (w.mAttrs.flags & FLAG_SECURE) != 0);
+        final WindowState win = getWindow(w -> w.isOnScreen() && mWmService.isSecureLocked(w));
         return win != null;
     }
 

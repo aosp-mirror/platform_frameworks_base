@@ -549,4 +549,10 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"ເພີ່ມແຂກ"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"ລຶບແຂກອອກ"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"ແຂກ"</string>
+    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"ຄ່າເລີ່ມຕົ້ນອຸປະກອນ"</string>
+    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"ປິດການນຳໃຊ້ແລ້ວ"</string>
+    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"ເປີດການນຳໃຊ້ແລ້ວ"</string>
+    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"ທ່ານຕ້ອງປິດເປີດອຸປະກອນຄືນໃໝ່ເພື່ອນຳໃຊ້ການປ່ຽນແປງນີ້. ປິດເປີດໃໝ່ດຽວນີ້ ຫຼື ຍົກເລີກ."</string>
+    <!-- no translation found for accessibility_work_profile_app_description (5470883112342119165) -->
+    <skip />
 </resources>

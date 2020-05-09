@@ -30,9 +30,9 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.PackageParserException;
 import android.content.pm.parsing.PackageInfoWithoutStateUtils;
-import android.content.pm.parsing.ParsingPackageUtils;
 import android.os.Binder;
 import android.os.Environment;
 import android.os.RemoteException;
@@ -50,7 +50,6 @@ import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.server.pm.parsing.PackageParser2;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
-import com.android.server.pm.parsing.pkg.ParsedPackage;
 import com.android.server.utils.TimingsTraceAndSlog;
 
 import com.google.android.collect.Lists;
@@ -491,7 +490,7 @@ public abstract class ApexManager {
 
             for (ApexInfo ai : allPkgs) {
                 File apexFile = new File(ai.modulePath);
-                parallelPackageParser.submit(apexFile, 0);
+                parallelPackageParser.submit(apexFile, PackageParser.PARSE_COLLECT_CERTIFICATES);
                 parsingApexInfo.put(apexFile, ai);
             }
 
@@ -504,18 +503,8 @@ public abstract class ApexManager {
                 ApexInfo ai = parsingApexInfo.get(parseResult.scanFile);
 
                 if (throwable == null) {
-                    // Unfortunately, ParallelPackageParser won't collect certificates for us. We
-                    // need to manually collect them here.
-                    ParsedPackage pp = parseResult.parsedPackage;
-                    try {
-                        pp.setSigningDetails(
-                                ParsingPackageUtils.getSigningDetails(pp, false));
-                    } catch (PackageParserException e) {
-                        throw new IllegalStateException(
-                                "Unable to collect certificates for " + ai.modulePath, e);
-                    }
                     final PackageInfo packageInfo = PackageInfoWithoutStateUtils.generate(
-                            pp, ai, flags);
+                            parseResult.parsedPackage, ai, flags);
                     if (packageInfo == null) {
                         throw new IllegalStateException("Unable to generate package info: "
                                 + ai.modulePath);

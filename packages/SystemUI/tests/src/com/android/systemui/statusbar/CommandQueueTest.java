@@ -410,11 +410,12 @@ public class CommandQueueTest extends SysuiTestCase {
         Bundle bundle = new Bundle();
         String packageName = "test";
         final long operationId = 1;
+        final int sysUiSessionId = 2;
         mCommandQueue.showAuthenticationDialog(bundle, null /* receiver */, 1, true, 3,
-                packageName, operationId);
+                packageName, operationId, sysUiSessionId);
         waitForIdleSync();
         verify(mCallbacks).showAuthenticationDialog(eq(bundle), eq(null), eq(1), eq(true), eq(3),
-                eq(packageName), eq(operationId));
+                eq(packageName), eq(operationId), eq(sysUiSessionId));
     }
 
     @Test
