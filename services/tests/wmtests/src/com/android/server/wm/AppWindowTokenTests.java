@@ -31,10 +31,12 @@ import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
+import static android.view.WindowManager.TRANSIT_ACTIVITY_OPEN;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_AFTER_ANIM;
 import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_BEFORE_ANIM;
 import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_NONE;
@@ -58,6 +60,8 @@ import android.view.WindowManager;
 
 import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
+
+import com.android.server.wm.SurfaceAnimator.OnAnimationFinishedCallback;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -363,6 +367,30 @@ public class AppWindowTokenTests extends WindowTestsBase {
         waitUntilHandlersIdle();
         assertNoStartingWindow(activity1);
         assertHasStartingWindow(activity2);
+    }
+
+    @Test
+    public void testTransferStartingWindowCanAnimate() {
+        final ActivityRecord activity1 = createIsolatedTestActivityRecord();
+        final ActivityRecord activity2 = createIsolatedTestActivityRecord();
+        activity1.addStartingWindow(mPackageName,
+                android.R.style.Theme, null, "Test", 0, 0, 0, 0, null, true, true, false, true,
+                false, false);
+        waitUntilHandlersIdle();
+        activity2.addStartingWindow(mPackageName,
+                android.R.style.Theme, null, "Test", 0, 0, 0, 0, activity1.appToken.asBinder(),
+                true, true, false, true, false, false);
+        waitUntilHandlersIdle();
+        assertNoStartingWindow(activity1);
+        assertHasStartingWindow(activity2);
+
+        // Assert that bottom activity is allowed to do animation.
+        doReturn(true).when(activity2).okToAnimate();
+        doReturn(true).when(activity2).isAnimating();
+        final OnAnimationFinishedCallback onAnimationFinishedCallback =
+                mock(OnAnimationFinishedCallback.class);
+        assertTrue(activity2.applyAnimation(null, TRANSIT_ACTIVITY_OPEN, true, false,
+                onAnimationFinishedCallback));
     }
 
     private ActivityRecord createIsolatedTestActivityRecord() {

@@ -47,7 +47,7 @@ import com.android.server.FgThread;
  *
  * See also {@link RemoteInlineSuggestionUi} for relevant information.
  */
-public final class InlineContentProviderImpl extends IInlineContentProvider.Stub {
+final class InlineContentProviderImpl extends IInlineContentProvider.Stub {
 
     // TODO(b/153615023): consider not holding strong reference to heavy objects in this stub, to
     //  avoid memory leak in case the client app is holding the remote reference for a longer

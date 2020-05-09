@@ -1477,7 +1477,7 @@
     <string name="permdesc_mediaLocation">Allows the app to read locations from your media collection.</string>
 
     <!-- Title shown when the system-provided biometric dialog is shown, asking the user to authenticate. [CHAR LIMIT=40] -->
-    <string name="biometric_dialog_default_title">Verify it\u2018s you</string>
+    <string name="biometric_dialog_default_title">Verify it\u2019s you</string>
     <!-- Message shown when biometric hardware is not available [CHAR LIMIT=50] -->
     <string name="biometric_error_hw_unavailable">Biometric hardware unavailable</string>
     <!-- Message shown when biometric authentication was canceled by the user [CHAR LIMIT=50] -->

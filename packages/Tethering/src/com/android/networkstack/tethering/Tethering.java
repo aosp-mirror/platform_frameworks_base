@@ -284,8 +284,9 @@ public class Tethering {
         filter.addAction(ACTION_CARRIER_CONFIG_CHANGED);
         // EntitlementManager will send EVENT_UPSTREAM_PERMISSION_CHANGED when cellular upstream
         // permission is changed according to entitlement check result.
-        mEntitlementMgr = mDeps.getEntitlementManager(mContext, mTetherMasterSM, mLog,
-                TetherMasterSM.EVENT_UPSTREAM_PERMISSION_CHANGED);
+        mEntitlementMgr = mDeps.getEntitlementManager(mContext, mHandler, mLog,
+                () -> mTetherMasterSM.sendMessage(
+                TetherMasterSM.EVENT_UPSTREAM_PERMISSION_CHANGED));
         mEntitlementMgr.setOnUiEntitlementFailedListener((int downstream) -> {
             mLog.log("OBSERVED UiEnitlementFailed");
             stopTethering(downstream);
@@ -515,8 +516,12 @@ public class Tethering {
             }
             mActiveTetheringRequests.put(request.tetheringType, request);
 
-            mEntitlementMgr.startProvisioningIfNeeded(request.tetheringType,
-                    request.showProvisioningUi);
+            if (request.exemptFromEntitlementCheck) {
+                mEntitlementMgr.setExemptedDownstreamType(request.tetheringType);
+            } else {
+                mEntitlementMgr.startProvisioningIfNeeded(request.tetheringType,
+                        request.showProvisioningUi);
+            }
             enableTetheringInternal(request.tetheringType, true /* enabled */, listener);
         });
     }

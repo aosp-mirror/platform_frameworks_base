@@ -38,13 +38,11 @@ import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IS_SCREEN_DECOR;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
-import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL;
 
@@ -344,82 +342,6 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         assertInsetByTopBottom(mWindow.getVisibleFrameLw(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
         assertInsetByTopBottom(mWindow.getContentFrameLw(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
         assertInsetByTopBottom(mWindow.getDecorFrame(), 0, 0);
-    }
-
-    // TODO(b/118118435): remove after migration
-    @Test
-    public void layoutWindowLw_appDrawsBarsLegacy() {
-        assumeTrue(ViewRootImpl.sNewInsetsMode != ViewRootImpl.NEW_INSETS_MODE_FULL);
-
-        mWindow.mAttrs.flags =
-                FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR | FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
-        addWindow(mWindow);
-
-        mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
-        mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
-
-        assertInsetByTopBottom(mWindow.getParentFrame(), 0, 0);
-        assertInsetByTopBottom(mWindow.getStableFrameLw(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
-        assertInsetByTopBottom(mWindow.getContentFrameLw(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
-        assertInsetByTopBottom(mWindow.getDecorFrame(), 0, 0);
-        assertInsetBy(mWindow.getDisplayFrameLw(), 0, 0, 0, 0);
-    }
-
-    // TODO(b/118118435): remove after migration
-    @Test
-    public void layoutWindowLw_appWontDrawBars() {
-        assumeTrue(ViewRootImpl.sNewInsetsMode != ViewRootImpl.NEW_INSETS_MODE_FULL);
-
-        mWindow.mAttrs.flags = FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR;
-        addWindow(mWindow);
-
-        mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
-        mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
-
-        assertInsetByTopBottom(mWindow.getParentFrame(), 0, NAV_BAR_HEIGHT);
-        assertInsetByTopBottom(mWindow.getStableFrameLw(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
-        assertInsetByTopBottom(mWindow.getContentFrameLw(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
-        assertInsetByTopBottom(mWindow.getDecorFrame(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
-        assertInsetByTopBottom(mWindow.getDisplayFrameLw(), 0, NAV_BAR_HEIGHT);
-    }
-
-    // TODO(b/118118435): remove after migration
-    @Test
-    public void layoutWindowLw_appWontDrawBars_forceStatusAndNav() throws Exception {
-        assumeTrue(ViewRootImpl.sNewInsetsMode != ViewRootImpl.NEW_INSETS_MODE_FULL);
-
-        mWindow.mAttrs.flags = FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR;
-        mWindow.mAttrs.privateFlags = PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS;
-        addWindow(mWindow);
-
-        mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
-        mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
-
-        assertInsetByTopBottom(mWindow.getParentFrame(), 0, 0);
-        assertInsetByTopBottom(mWindow.getStableFrameLw(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
-        assertInsetByTopBottom(mWindow.getContentFrameLw(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
-        assertInsetByTopBottom(mWindow.getDecorFrame(), 0, 0);
-        assertInsetByTopBottom(mWindow.getDisplayFrameLw(), 0, 0);
-    }
-
-    // TODO(b/118118435): remove after migration (keyguard dialog is not special with the new logic)
-    @Test
-    public void layoutWindowLw_keyguardDialog_hideNav() {
-        mWindow.mAttrs.type = TYPE_KEYGUARD_DIALOG;
-        mWindow.mAttrs.flags =
-                FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR | FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
-        mWindow.mAttrs.systemUiVisibility = SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
-        mWindow.mAttrs.setFitInsetsTypes(0 /* types */);
-        addWindow(mWindow);
-
-        mDisplayPolicy.beginLayoutLw(mFrames, 0 /* uiMode */);
-        mDisplayPolicy.layoutWindowLw(mWindow, null /* attached */, mFrames);
-
-        assertInsetByTopBottom(mWindow.getParentFrame(), 0, 0);
-        assertInsetByTopBottom(mWindow.getStableFrameLw(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
-        assertInsetByTopBottom(mWindow.getContentFrameLw(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
-        assertInsetByTopBottom(mWindow.getDecorFrame(), 0, 0);
-        assertInsetByTopBottom(mWindow.getDisplayFrameLw(), 0, 0);
     }
 
     @Test

@@ -17,17 +17,17 @@
 package com.android.server.autofill;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.autofill.AutofillId;
 import android.view.inputmethod.InlineSuggestionsRequest;
-import android.view.inputmethod.InlineSuggestionsResponse;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.server.autofill.ui.InlineFillUi;
 import com.android.server.inputmethod.InputMethodManagerInternal;
 
-import java.util.Collections;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -46,8 +46,12 @@ final class AutofillInlineSessionController {
     @NonNull
     private final Handler mHandler;
 
+    @Nullable
     @GuardedBy("mLock")
     private AutofillInlineSuggestionsRequestSession mSession;
+    @Nullable
+    @GuardedBy("mLock")
+    private InlineFillUi mInlineFillUi;
 
     AutofillInlineSessionController(InputMethodManagerInternal inputMethodManagerInternal,
             int userId, ComponentName componentName, Handler handler, Object lock) {
@@ -72,16 +76,16 @@ final class AutofillInlineSessionController {
         // TODO(b/151123764): rename the method to better reflect what it does.
         if (mSession != null) {
             // Send an empty response to IME and destroy the existing session.
-            mSession.onInlineSuggestionsResponseLocked(mSession.getAutofillIdLocked(),
-                    new InlineSuggestionsResponse(Collections.EMPTY_LIST));
+            mSession.onInlineSuggestionsResponseLocked(
+                    InlineFillUi.emptyUi(mSession.getAutofillIdLocked()));
             mSession.destroySessionLocked();
+            mInlineFillUi = null;
         }
         // TODO(b/151123764): consider reusing the same AutofillInlineSession object for the
         // same field.
         mSession = new AutofillInlineSuggestionsRequestSession(mInputMethodManagerInternal, mUserId,
                 mComponentName, mHandler, mLock, autofillId, requestConsumer, uiExtras);
         mSession.onCreateInlineSuggestionsRequestLocked();
-
     }
 
     /**
@@ -101,30 +105,63 @@ final class AutofillInlineSessionController {
 
     /**
      * Requests the IME to hide the current suggestions, if any. Returns true if the message is sent
-     * to the IME.
+     * to the IME. This only hides the UI temporarily. For example if user starts typing/deleting
+     * characters, new filterText will kick in and may revive the suggestion UI.
      */
     @GuardedBy("mLock")
     boolean hideInlineSuggestionsUiLocked(@NonNull AutofillId autofillId) {
         if (mSession != null) {
-            return mSession.onInlineSuggestionsResponseLocked(autofillId,
-                    new InlineSuggestionsResponse(Collections.EMPTY_LIST));
+            return mSession.onInlineSuggestionsResponseLocked(InlineFillUi.emptyUi(autofillId));
         }
         return false;
     }
 
     /**
-     * Requests showing the inline suggestion in the IME when the IME becomes visible and is focused
-     * on the {@code autofillId}.
-     *
-     * @return false if there is no session, or if the IME callback is not available in the session.
+     * Permanently delete the current inline fill UI. Notify the IME to hide the suggestions as
+     * well.
      */
     @GuardedBy("mLock")
-    boolean onInlineSuggestionsResponseLocked(@NonNull AutofillId autofillId,
-            @NonNull InlineSuggestionsResponse inlineSuggestionsResponse) {
-        // TODO(b/151123764): rename the method to better reflect what it does.
-        if (mSession != null) {
-            return mSession.onInlineSuggestionsResponseLocked(autofillId,
-                    inlineSuggestionsResponse);
+    boolean deleteInlineFillUiLocked(@NonNull AutofillId autofillId) {
+        mInlineFillUi = null;
+        return hideInlineSuggestionsUiLocked(autofillId);
+    }
+
+    /**
+     * Updates the inline fill UI with the filter text. It'll send updated inline suggestions to
+     * the IME.
+     */
+    @GuardedBy("mLock")
+    boolean filterInlineFillUiLocked(@NonNull AutofillId autofillId, @Nullable String filterText) {
+        if (mInlineFillUi != null && mInlineFillUi.getAutofillId().equals(autofillId)) {
+            mInlineFillUi.setFilterText(filterText);
+            return requestImeToShowInlineSuggestionsLocked();
+        }
+        return false;
+    }
+
+    /**
+     * Set the current inline fill UI. It'll request the IME to show the inline suggestions when
+     * the IME becomes visible and is focused on the {@code autofillId}.
+     *
+     * @return false if the suggestions are not sent to IME because there is no session, or if the
+     * IME callback is not available in the session.
+     */
+    @GuardedBy("mLock")
+    boolean setInlineFillUiLocked(@NonNull InlineFillUi inlineFillUi) {
+        mInlineFillUi = inlineFillUi;
+        return requestImeToShowInlineSuggestionsLocked();
+    }
+
+    /**
+     * Sends the suggestions from the current inline fill UI to the IME.
+     *
+     * @return false if the suggestions are not sent to IME because there is no session, or if the
+     * IME callback is not available in the session.
+     */
+    @GuardedBy("mLock")
+    private boolean requestImeToShowInlineSuggestionsLocked() {
+        if (mSession != null && mInlineFillUi != null) {
+            return mSession.onInlineSuggestionsResponseLocked(mInlineFillUi);
         }
         return false;
     }

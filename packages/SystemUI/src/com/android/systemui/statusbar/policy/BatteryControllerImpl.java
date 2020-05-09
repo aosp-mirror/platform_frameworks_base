@@ -81,7 +81,7 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
 
     @VisibleForTesting
     @Inject
-    protected BatteryControllerImpl(Context context, EnhancedEstimates enhancedEstimates,
+    public BatteryControllerImpl(Context context, EnhancedEstimates enhancedEstimates,
             PowerManager powerManager, BroadcastDispatcher broadcastDispatcher,
             @Main Handler mainHandler, @Background Handler bgHandler) {
         mContext = context;
@@ -90,10 +90,6 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
         mPowerManager = powerManager;
         mEstimates = enhancedEstimates;
         mBroadcastDispatcher = broadcastDispatcher;
-
-        registerReceiver();
-        updatePowerSave();
-        updateEstimate();
     }
 
     private void registerReceiver() {
@@ -102,6 +98,13 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
         filter.addAction(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED);
         filter.addAction(ACTION_LEVEL_TEST);
         mBroadcastDispatcher.registerReceiver(this, filter);
+    }
+
+    @Override
+    public void init() {
+        registerReceiver();
+        updatePowerSave();
+        updateEstimate();
     }
 
     @Override
