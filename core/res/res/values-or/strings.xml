@@ -142,7 +142,7 @@
     <string name="wfcSpnFormat_wifi" msgid="1376356951297043426">"ୱାଇ-ଫାଇ"</string>
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="7178561009225028264">"ୱାଇଫାଇ କଲିଂ"</string>
     <string name="wfcSpnFormat_vowifi" msgid="8371335230890725606">"VoWifi"</string>
-    <string name="wifi_calling_off_summary" msgid="5626710010766902560">"ଅଫ୍"</string>
+    <string name="wifi_calling_off_summary" msgid="5626710010766902560">"ବନ୍ଦ"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1035175836270943089">"ୱାଇ-ଫାଇ ମାଧ୍ୟମରେ କଲ୍ କରନ୍ତୁ"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="4958965609212575619">"ମୋବାଇଲ ନେଟ୍‌ୱର୍କ ମାଧ୍ୟମରେ କଲ୍ କରନ୍ତୁ"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="104951993894678665">"କେବଳ ୱାଇ-ଫାଇ"</string>
@@ -1119,7 +1119,7 @@
     <string name="dialog_alert_title" msgid="651856561974090712">"ଧ୍ୟାନଦିଅନ୍ତୁ"</string>
     <string name="loading" msgid="3138021523725055037">"ଲୋଡ୍ କରାଯାଉଛି…"</string>
     <string name="capital_on" msgid="2770685323900821829">"ଚାଲୁ"</string>
-    <string name="capital_off" msgid="7443704171014626777">"ଅଫ୍"</string>
+    <string name="capital_off" msgid="7443704171014626777">"ବନ୍ଦ"</string>
     <string name="checked" msgid="9179896827054513119">"ଯାଞ୍ଚ ହୋଇଛି"</string>
     <string name="not_checked" msgid="7972320087569023342">"ଯାଞ୍ଚ ହୋଇନାହିଁ"</string>
     <string name="whichApplication" msgid="5432266899591255759">"ବ୍ୟବହାର କରି କାର୍ଯ୍ୟ ସମ୍ପୂର୍ଣ୍ଣ କରନ୍ତୁ"</string>
@@ -1231,7 +1231,7 @@
     <string name="volume_icon_description_notification" msgid="579091344110747279">"ବିଜ୍ଞପ୍ତି ଭଲ୍ୟୁମ୍‍"</string>
     <string name="ringtone_default" msgid="9118299121288174597">"ଡିଫଲ୍ଟ ରିଙ୍ଗଟୋନ୍‌"</string>
     <string name="ringtone_default_with_actual" msgid="2709686194556159773">"ଡିଫଲ୍ଟ (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
-    <string name="ringtone_silent" msgid="397111123930141876">"କିଛିନୁହେଁ"</string>
+    <string name="ringtone_silent" msgid="397111123930141876">"କିଛି ନାହିଁ"</string>
     <string name="ringtone_picker_title" msgid="667342618626068253">"ରିଙ୍ଗଟୋନ୍‌"</string>
     <string name="ringtone_picker_title_alarm" msgid="7438934548339024767">"ଆଲାରାମ୍ ଶବ୍ଦ"</string>
     <string name="ringtone_picker_title_notification" msgid="6387191794719608122">"ବିଜ୍ଞପ୍ତି ଶବ୍ଦ"</string>
@@ -1796,7 +1796,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ଠିକ୍ ଅଛି"</string>
     <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"ବ୍ୟାଟେରୀ ଲାଇଫ୍ ବଢ଼ାଇବାକୁ ବ୍ୟାଟେରୀ ସେଭର୍:\n\n•ଗାଢ଼ା ଥିମ୍ ଚାଲୁ କରେ\n•ପୃଷ୍ଠପଟ କାର୍ଯ୍ୟକଳାପ, କିଛି ଭିଜୁଆଲ୍ ପ୍ରଭାବ ଏବଂ “Hey Google” ପରି ଅନ୍ୟ ଫିଚରଗୁଡ଼ିକୁ ବନ୍ଦ କିମ୍ବା ପ୍ରତିବନ୍ଧିତ କରିଥାଏ\n\n"<annotation id="url">"ଅଧିକ ଜାଣନ୍ତୁ"</annotation></string>
     <string name="battery_saver_description" msgid="8587408568232177204">"ବ୍ୟାଟେରୀ ଲାଇଫ୍ ବଢ଼ାଇବାକୁ ବ୍ୟାଟେରୀ ସେଭର୍:\n\n•ଗାଢ଼ା ଥିମ୍ ଚାଲୁ କରେ\n•ପୃଷ୍ଠପଟ କାର୍ଯ୍ୟକଳାପ, କିଛି ଭିଜୁଆଲ୍ ପ୍ରଭାବ ଏବଂ “Hey Google” ପରି ଅନ୍ୟ ଫିଚରଗୁଡ଼ିକୁ ବନ୍ଦ କିମ୍ବା ପ୍ରତିବନ୍ଧିତ କରିଥାଏ"</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"ଡାଟା ବ୍ୟବହାର କମ୍‍ କରିବାରେ ସାହାଯ୍ୟ କରିବାକୁ, ଡାଟା ସେଭର୍‍ ବ୍ୟାକ୍‌ଗ୍ରାଉଣ୍ଡରେ ଡାଟା ପଠାଇବା କିମ୍ବା ପ୍ରାପ୍ତ କରିବାକୁ କିଛି ଆପ୍‍କୁ ବାରଣ କରେ। ଆପଣ ବର୍ତ୍ତମାନ ବ୍ୟବହାର କରୁଥିବା ଆପ୍‍, ଡାଟା ଆକ୍ସେସ୍‍ କରିପାରେ, କିନ୍ତୁ ଏହା କମ୍‍ ଥର କରିପାରେ। ଏହାର ଅର୍ଥ ହୋଇପାରେ ଯେମିତି ଆପଣ ଟାପ୍‍ ନକରିବା ପର୍ଯ୍ୟନ୍ତ ଇମେଜ୍‍ ଡିସପ୍ଲେ ହୁଏ ନାହିଁ।"</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"ଡାଟା ବ୍ୟବହାର କମ୍‍ କରିବାରେ ସାହାଯ୍ୟ କରିବାକୁ, ଡାଟା ସେଭର୍‍ ବ୍ୟାକ୍‌ଗ୍ରାଉଣ୍ଡରେ ଡାଟା ପଠାଇବା କିମ୍ବା ପ୍ରାପ୍ତ କରିବାକୁ କିଛି ଆପ୍‍କୁ ବାରଣ କରେ। ଆପଣ ବର୍ତ୍ତମାନ ବ୍ୟବହାର କରୁଥିବା ଆପ୍‍, ଡାଟା ଆକ୍ସେସ୍‍ କରିପାରେ, କିନ୍ତୁ ଏହା କମ୍‍ ଥର କରିପାରେ। ଏହାର ଅର୍ଥ ହୋଇପାରେ ଯେମିତି ଆପଣ ଇମେଜଗୁଡ଼ିକୁ ଟାପ୍‍ ନକରିବା ପର୍ଯ୍ୟନ୍ତ ସେଗୁଡ଼ିକ ଡିସପ୍ଲେ ହୁଏ ନାହିଁ।"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"ଡାଟା ସେଭର୍‌ ଚାଲୁ କରିବେ?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"ଚାଲୁ କରନ୍ତୁ"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
@@ -1922,7 +1922,7 @@
     <string name="app_category_maps" msgid="6395725487922533156">"ମାନଚିତ୍ର ଓ ନେଭିଗେଶନ୍‍"</string>
     <string name="app_category_productivity" msgid="1844422703029557883">"ଉତ୍ପାଦକତା"</string>
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"ଡିଭାଇସ୍‌ ଷ୍ଟୋରେଜ୍‌"</string>
-    <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"USB ଡିବଗିଙ୍ଗ"</string>
+    <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"USB ଡିବଗିଂ"</string>
     <string name="time_picker_hour_label" msgid="4208590187662336864">"ଘଣ୍ଟା"</string>
     <string name="time_picker_minute_label" msgid="8307452311269824553">"ମିନିଟ୍"</string>
     <string name="time_picker_header_text" msgid="9073802285051516688">"ସମୟ ସେଟ୍‌ କରନ୍ତୁ"</string>
@@ -2042,12 +2042,9 @@
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"ପାୱାର ଡାୟଲଗ୍ ଖୋଲନ୍ତୁ"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"ସ୍କ୍ରିନ୍ ଲକ୍ କରନ୍ତୁ"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"ସ୍କ୍ରି‍ନ୍‍ସଟ୍ ନିଅନ୍ତୁ"</string>
-    <!-- no translation found for accessibility_system_action_on_screen_a11y_shortcut_label (8488701469459210309) -->
-    <skip />
-    <!-- no translation found for accessibility_system_action_on_screen_a11y_shortcut_chooser_label (1057878690209817886) -->
-    <skip />
-    <!-- no translation found for accessibility_system_action_hardware_a11y_shortcut_label (5764644187715255107) -->
-    <skip />
+    <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"ଅନ୍-ସ୍କ୍ରିନ୍ ଆକ୍ସେସିବିଲିଟୀ ସର୍ଟକଟ୍"</string>
+    <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"ଅନ୍-ସ୍କ୍ରିନ୍ ଆକ୍ସେସିବିଲିଟୀ ସର୍ଟକଟ୍ ବାଛିବା ସୁବିଧା"</string>
+    <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"ଆକ୍ସେସିବିଲିଟୀ ସର୍ଟକଟ୍"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g>ର କ୍ୟାପ୍ସନ୍ ବାର୍।"</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g>କୁ ପ୍ରତିବନ୍ଧିତ ବକେଟରେ ରଖାଯାଇଛି"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
@@ -2181,4 +2178,8 @@
     <string name="PERSOSUBSTATE_SIM_ICCID_SUCCESS" msgid="8058678548991999545">"ICCID ଅନଲକ୍ କରିବା ସଫଳ ହୋଇଛି।"</string>
     <string name="PERSOSUBSTATE_SIM_IMPI_SUCCESS" msgid="2545608067978550571">"IMPI ଅନଲକ୍ କରିବା ସଫଳ ହୋଇଛି।"</string>
     <string name="PERSOSUBSTATE_SIM_NS_SP_SUCCESS" msgid="4352382949744625007">"ନେଟୱାର୍କ ସବସେଟର ସେବା ପ୍ରଦାନକାରୀକୁ ଅନଲକ୍ କରିବା ସଫଳ ହୋଇଛି।"</string>
+    <string name="config_pdp_reject_dialog_title" msgid="4072057179246785727"></string>
+    <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
+    <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
+    <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
 </resources>

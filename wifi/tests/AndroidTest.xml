@@ -30,9 +30,5 @@
     <object type="module_controller"
             class="com.android.tradefed.testtype.suite.module.MainlineTestModuleController">
         <option name="mainline-module-package-name" value="com.google.android.wifi" />
-        <!-- TODO(b/151836001): com.android.wifi doesn't guarantee it is a Mainline module since
-              it could still be OEM customized. Workaround so that this test will still run on
-              AOSP builds. -->
-        <option name="mainline-module-package-name" value="com.android.wifi" />
     </object>
 </configuration>
