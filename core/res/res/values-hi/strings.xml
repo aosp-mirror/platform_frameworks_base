@@ -1796,7 +1796,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ठीक है"</string>
     <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"बैटरी लाइफ़ बढ़ाने के लिए, बैटरी सेवर:\n\n•गहरे रंग वाली थीम चालू करता है\n•बैकग्राउंड की गतिविधि, कुछ विज़ुअल इफ़ेक्ट, और \"Hey Google\" जैसी दूसरी सुविधाएं इस्तेमाल करने से रोकता है या उन्हें बंद कर देता है\n\n"<annotation id="url">"ज़्यादा जानें"</annotation></string>
     <string name="battery_saver_description" msgid="8587408568232177204">"बैटरी लाइफ़ बढ़ाने के लिए, बैटरी सेवर:\n\n•गहरे रंग वाली थीम चालू करता है\n•बैकग्राउंड की गतिविधि, कुछ विज़ुअल इफ़ेक्ट, और \"Hey Google\" जैसी दूसरी सुविधाएं इस्तेमाल करने से रोकता है या उन्हें बंद कर देता है"</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"डेटा खर्च को कम करने के लिए, डेटा सेवर कुछ ऐप्लिकेशन को बैकग्राउंड में डेटा भेजने या डेटा पाने से रोकता है. फ़िलहाल, आप जिस ऐप्लिकेशन का इस्तेमाल कर रहे हैं वह डेटा ऐक्सेस कर सकता है, लेकिन ऐसा कभी-कभी ही हो पाएगा. उदाहरण के लिए, इमेज तब तक दिखाई नहीं देंगी जब तक कि आप उन पर टैप नहीं करते."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"डेटा खर्च को कम करने के लिए, डेटा बचाने की सेटिंग कुछ ऐप्लिकेशन को बैकग्राउंड में डेटा भेजने या डेटा पाने से रोकती है. फ़िलहाल, आप जिस ऐप्लिकेशन का इस्तेमाल कर रहे हैं वह डेटा ऐक्सेस कर सकता है, लेकिन ऐसा कभी-कभी ही हो पाएगा. उदाहरण के लिए, इमेज तब तक दिखाई नहीं देंगी जब तक कि आप उन पर टैप नहीं करते."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"डेटा बचाने की सेटिंग चालू करें?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"चालू करें"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
@@ -2042,8 +2042,9 @@
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"पावर डायलॉग खोलें"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"स्क्रीन लॉक करें"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"स्क्रीनशॉट लें"</string>
-    <string name="accessibility_system_action_accessibility_button_label" msgid="5941347017132886642">"स्क्रीन पर दिखने वाला सुलभता का शॉर्टकट"</string>
-    <string name="accessibility_system_action_accessibility_button_chooser_label" msgid="6973618519666227981">"स्क्रीन पर दिखने वाले सुलभता के शॉर्टकट को चुनने की सुविधा"</string>
+    <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"स्क्रीन पर दिखने वाला सुलभता का शॉर्टकट"</string>
+    <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"स्क्रीन पर दिखने वाले सुलभता के शॉर्टकट को चुनने का मेन्यू"</string>
+    <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"सुलभता का शॉर्टकट"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g> का कैप्शन बार."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> को प्रतिबंधित बकेट में रखा गया है"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
@@ -2177,4 +2178,8 @@
     <string name="PERSOSUBSTATE_SIM_ICCID_SUCCESS" msgid="8058678548991999545">"आईसीसीआईडी को अनलॉक किया गया."</string>
     <string name="PERSOSUBSTATE_SIM_IMPI_SUCCESS" msgid="2545608067978550571">"आईएमपीआई को अनलॉक किया गया."</string>
     <string name="PERSOSUBSTATE_SIM_NS_SP_SUCCESS" msgid="4352382949744625007">"नेटवर्क के सबसेट की सेवा देने वाली कंपनी के लॉक को अनलॉक किया गया."</string>
+    <string name="config_pdp_reject_dialog_title" msgid="4072057179246785727"></string>
+    <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
+    <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
+    <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
 </resources>

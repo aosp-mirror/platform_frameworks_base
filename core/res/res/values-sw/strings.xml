@@ -1889,7 +1889,7 @@
     <string name="app_suspended_more_details" msgid="211260942831587014">"Pata maelezo zaidi"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Acha kusimamisha programu"</string>
     <string name="work_mode_off_title" msgid="5503291976647976560">"Ungependa kuwasha wasifu wa kazini?"</string>
-    <string name="work_mode_off_message" msgid="8417484421098563803">"Hatua hii itawasha data, arifa, programu za kazini, arifa na vipengele vingine vya wasifu wa kazini"</string>
+    <string name="work_mode_off_message" msgid="8417484421098563803">"Hatua hii itawasha data, arifa, programu za kazini na vipengele vingine vya wasifu wa kazini"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Washa"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Programu haipatikani"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> haipatikani hivi sasa."</string>
@@ -2042,12 +2042,13 @@
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"Kidirisha cha Nishati"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Skrini Iliyofungwa"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Picha ya skrini"</string>
-    <string name="accessibility_system_action_accessibility_button_label" msgid="5941347017132886642">"Njia ya Mkato ya Ufikivu kwenye Skrini"</string>
-    <string name="accessibility_system_action_accessibility_button_chooser_label" msgid="6973618519666227981">"Kichagua Njia ya Mkato ya Ufikivu kwenye Skrini"</string>
+    <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"Njia ya Mkato ya Ufikivu kwenye Skrini"</string>
+    <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"Kichagua Njia ya Mkato ya Ufikivu kwenye Skrini"</string>
+    <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"Njia ya Mkato ya Ufikivu"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Upau wa manukuu wa <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> kimewekwa katika kikundi KILICHODHIBITIWA"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
-    <string name="conversation_single_line_image_placeholder" msgid="6983271082911936900">"imetuma picha"</string>
+    <string name="conversation_single_line_image_placeholder" msgid="6983271082911936900">"alituma picha"</string>
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"Mazungumzo"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"Mazungumzo ya Kikundi"</string>
     <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>
@@ -2177,4 +2178,8 @@
     <string name="PERSOSUBSTATE_SIM_ICCID_SUCCESS" msgid="8058678548991999545">"Imefungua kwa kutumia ICCID."</string>
     <string name="PERSOSUBSTATE_SIM_IMPI_SUCCESS" msgid="2545608067978550571">"Imefungua kwa kutumia IMPI."</string>
     <string name="PERSOSUBSTATE_SIM_NS_SP_SUCCESS" msgid="4352382949744625007">"Imefungua kadi ya mtoa huduma ya mtandao mdogo."</string>
+    <string name="config_pdp_reject_dialog_title" msgid="4072057179246785727"></string>
+    <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
+    <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
+    <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
 </resources>
