@@ -141,7 +141,7 @@ class WindowToken extends WindowContainer<WindowState> {
             mRotatedOverrideConfiguration = rotatedConfig;
             // This will use unrotate as rotate, so the new and old rotation are inverted.
             mRotator = new SeamlessRotator(rotatedDisplayInfo.rotation, currentRotation,
-                    rotatedDisplayInfo);
+                    rotatedDisplayInfo, true /* applyFixedTransformationHint */);
         }
 
         /**
