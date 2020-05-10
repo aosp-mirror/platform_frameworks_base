@@ -208,15 +208,21 @@ public final class PermissionPolicyService extends SystemService {
         for (int i = 0; i < appOpPermissionInfosSize; i++) {
             final PermissionInfo appOpPermissionInfo = appOpPermissionInfos.get(i);
 
-            final int appOpCode = AppOpsManager.permissionToOpCode(appOpPermissionInfo.name);
-            if (appOpCode != OP_NONE) {
-                mAppOpPermissions.add(appOpPermissionInfo.name);
-
-                try {
-                    appOpsService.startWatchingMode(appOpCode, null, mAppOpsCallback);
-                } catch (RemoteException e) {
-                    Slog.wtf(LOG_TAG, "Cannot set up app-ops listener", e);
-                }
+            switch (appOpPermissionInfo.name) {
+                case android.Manifest.permission.ACCESS_NOTIFICATIONS:
+                case android.Manifest.permission.MANAGE_IPSEC_TUNNELS:
+                    continue;
+                default:
+                    final int appOpCode = AppOpsManager.permissionToOpCode(
+                            appOpPermissionInfo.name);
+                    if (appOpCode != OP_NONE) {
+                        mAppOpPermissions.add(appOpPermissionInfo.name);
+                        try {
+                            appOpsService.startWatchingMode(appOpCode, null, mAppOpsCallback);
+                        } catch (RemoteException e) {
+                            Slog.wtf(LOG_TAG, "Cannot set up app-ops listener", e);
+                        }
+                    }
             }
         }
 
