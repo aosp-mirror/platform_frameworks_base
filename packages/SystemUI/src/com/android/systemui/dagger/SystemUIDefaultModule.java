@@ -20,10 +20,15 @@ import static com.android.systemui.Dependency.ALLOW_NOTIFICATION_LONG_PRESS_NAME
 import static com.android.systemui.Dependency.LEAK_REPORT_EMAIL_NAME;
 
 import android.content.Context;
+import android.os.Handler;
+import android.os.PowerManager;
 
 import androidx.annotation.Nullable;
 
 import com.android.keyguard.KeyguardViewController;
+import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.dagger.qualifiers.Background;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.dock.DockManagerImpl;
 import com.android.systemui.plugins.qs.QSFactory;
@@ -81,10 +86,17 @@ public abstract class SystemUIDefaultModule {
     abstract NotificationLockscreenUserManager bindNotificationLockscreenUserManager(
             NotificationLockscreenUserManagerImpl notificationLockscreenUserManager);
 
-    @Binds
+    @Provides
     @Singleton
-    public abstract BatteryController provideBatteryController(
-            BatteryControllerImpl controllerImpl);
+    static BatteryController provideBatteryController(Context context,
+            EnhancedEstimates enhancedEstimates, PowerManager powerManager,
+            BroadcastDispatcher broadcastDispatcher, @Main Handler mainHandler,
+            @Background Handler bgHandler) {
+        BatteryController bC = new BatteryControllerImpl(context, enhancedEstimates, powerManager,
+                broadcastDispatcher, mainHandler, bgHandler);
+        bC.init();
+        return bC;
+    }
 
     @Binds
     @Singleton

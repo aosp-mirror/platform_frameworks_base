@@ -205,7 +205,7 @@
     <string name="apn_settings_not_available" msgid="1147111671403342300">"การตั้งค่าจุดเข้าใช้งานไม่สามารถใช้ได้สำหรับผู้ใช้รายนี้"</string>
     <string name="enable_adb" msgid="8072776357237289039">"การแก้ไขข้อบกพร่อง USB"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"โหมดแก้ไขข้อบกพร่องเมื่อเชื่อมต่อ USB"</string>
-    <string name="clear_adb_keys" msgid="3010148733140369917">"ยกเลิกการให้สิทธิ์การแก้ปัญหา USB"</string>
+    <string name="clear_adb_keys" msgid="3010148733140369917">"เพิกถอนการให้สิทธิ์การแก้ไขข้อบกพร่อง USB"</string>
     <string name="enable_adb_wireless" msgid="6973226350963971018">"การแก้ไขข้อบกพร่องผ่าน Wi-Fi"</string>
     <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"โหมดแก้ไขข้อบกพร่องเมื่อเชื่อมต่อ Wi-Fi"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"ข้อผิดพลาด"</string>
@@ -284,8 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"แสดงตัวเลือกสำหรับการรับรองการแสดงผล แบบไร้สาย"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"เพิ่มระดับการบันทึก Wi‑Fi แสดงต่อ SSID RSSI ในตัวเลือก Wi‑Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"ลดการเปลืองแบตเตอรี่และเพิ่มประสิทธิภาพเครือข่าย"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"เมื่อเปิดใช้โหมดนี้ ที่อยู่ MAC ของอุปกรณ์นี้อาจเปลี่ยนทุกครั้งที่เชื่อมต่อกับเครือข่ายที่มีการเปิดใช้การสุ่ม MAC"</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"มีการวัดปริมาณอินเทอร์เน็ต"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"ไม่มีการวัดปริมาณอินเทอร์เน็ต"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"ขนาดบัฟเฟอร์ของตัวบันทึก"</string>
@@ -360,7 +359,7 @@
     <string name="track_frame_time" msgid="522674651937771106">"การแสดงผล HWUI ตามโปรไฟล์"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"เปิดใช้เลเยอร์การแก้ไขข้อบกพร่อง GPU"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"อนุญาตให้โหลดเลเยอร์การแก้ไขข้อบกพร่อง GPU สำหรับแอปแก้ไขข้อบกพร่อง"</string>
-    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"เปิดบันทึกเวนเดอร์เพิ่มเติม"</string>
+    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"เปิดการบันทึกเวนเดอร์แบบละเอียด"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"รวมบันทึกเวนเดอร์เพิ่มเติมเฉพาะอุปกรณ์ไว้ในรายงานข้อบกพร่อง ซึ่งอาจมีข้อมูลส่วนตัว ใช้แบตเตอรี่มากขึ้น และ/หรือใช้พื้นที่เก็บข้อมูลมากขึ้น"</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"อัตราการเคลื่อนไหวของหน้าต่าง"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"อัตราการเคลื่อนไหวของการเปลี่ยนภาพ"</string>
@@ -550,4 +549,14 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"เพิ่มผู้เข้าร่วม"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"นำผู้เข้าร่วมออก"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"ผู้ใช้ชั่วคราว"</string>
+    <!-- no translation found for cached_apps_freezer_device_default (2616594131750144342) -->
+    <skip />
+    <!-- no translation found for cached_apps_freezer_disabled (4816382260660472042) -->
+    <skip />
+    <!-- no translation found for cached_apps_freezer_enabled (8866703500183051546) -->
+    <skip />
+    <!-- no translation found for cached_apps_freezer_reboot_dialog_text (695330563489230096) -->
+    <skip />
+    <!-- no translation found for accessibility_work_profile_app_description (5470883112342119165) -->
+    <skip />
 </resources>

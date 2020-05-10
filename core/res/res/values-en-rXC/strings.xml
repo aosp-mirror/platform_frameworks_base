@@ -2178,4 +2178,8 @@
     <string name="PERSOSUBSTATE_SIM_ICCID_SUCCESS" msgid="8058678548991999545">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‏‏‏‏‏‎‏‎‏‏‎‎‎‏‎‏‏‎‏‎‏‏‏‎‎‎‏‏‎‎‎‏‏‏‏‏‎‏‏‏‎‏‎‎‏‏‏‏‏‏‎‎‎‏‏‏‎‎‏‎ICCID unlock successful.‎‏‎‎‏‎"</string>
     <string name="PERSOSUBSTATE_SIM_IMPI_SUCCESS" msgid="2545608067978550571">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‎‏‏‎‏‎‏‎‎‏‏‏‏‎‏‎‎‎‏‎‎‎‎‏‏‎‎‏‏‏‏‎‏‎‏‎‎‏‏‏‎‏‎‏‏‎‏‏‏‎‏‎‎‏‎‏‎‏‏‎IMPI unlock successful.‎‏‎‎‏‎"</string>
     <string name="PERSOSUBSTATE_SIM_NS_SP_SUCCESS" msgid="4352382949744625007">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‏‎‎‎‏‏‎‎‏‏‎‏‏‎‎‎‏‎‏‎‎‏‏‏‎‏‏‏‎‎‏‏‏‎‏‏‏‏‏‏‏‏‎‏‏‎‎‎‏‎‏‎‏‏‎‏‏‏‏‎Network subset service provider unlock successful.‎‏‎‎‏‎"</string>
+    <string name="config_pdp_reject_dialog_title" msgid="4072057179246785727"></string>
+    <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
+    <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
+    <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
 </resources>

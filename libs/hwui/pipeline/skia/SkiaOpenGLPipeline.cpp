@@ -157,21 +157,7 @@ void SkiaOpenGLPipeline::onStop() {
     }
 }
 
-static void setBufferCount(ANativeWindow* window, uint32_t extraBuffers) {
-    int query_value;
-    int err = window->query(window, NATIVE_WINDOW_MIN_UNDEQUEUED_BUFFERS, &query_value);
-    if (err != 0 || query_value < 0) {
-        ALOGE("window->query failed: %s (%d) value=%d", strerror(-err), err, query_value);
-        return;
-    }
-    auto min_undequeued_buffers = static_cast<uint32_t>(query_value);
-
-    int bufferCount = min_undequeued_buffers + 2 + extraBuffers;
-    native_window_set_buffer_count(window, bufferCount);
-}
-
-bool SkiaOpenGLPipeline::setSurface(ANativeWindow* surface, SwapBehavior swapBehavior,
-                                    uint32_t extraBuffers) {
+bool SkiaOpenGLPipeline::setSurface(ANativeWindow* surface, SwapBehavior swapBehavior) {
     if (mEglSurface != EGL_NO_SURFACE) {
         mEglManager.destroySurface(mEglSurface);
         mEglSurface = EGL_NO_SURFACE;
@@ -189,7 +175,6 @@ bool SkiaOpenGLPipeline::setSurface(ANativeWindow* surface, SwapBehavior swapBeh
     if (mEglSurface != EGL_NO_SURFACE) {
         const bool preserveBuffer = (swapBehavior != SwapBehavior::kSwap_discardBuffer);
         mBufferPreserved = mEglManager.setPreserveBuffer(mEglSurface, preserveBuffer);
-        setBufferCount(surface, extraBuffers);
         return true;
     }
 

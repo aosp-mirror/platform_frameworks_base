@@ -398,7 +398,7 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, context_lost) {
     auto surface = context.surface();
     auto pipeline = std::make_unique<SkiaOpenGLPipeline>(renderThread);
     EXPECT_FALSE(pipeline->isSurfaceReady());
-    EXPECT_TRUE(pipeline->setSurface(surface.get(), SwapBehavior::kSwap_default, 0));
+    EXPECT_TRUE(pipeline->setSurface(surface.get(), SwapBehavior::kSwap_default));
     EXPECT_TRUE(pipeline->isSurfaceReady());
     renderThread.destroyRenderingContext();
     EXPECT_FALSE(pipeline->isSurfaceReady());

@@ -153,7 +153,7 @@
     <string name="unknown" msgid="3544487229740637809">"Невядома"</string>
     <string name="running_process_item_user_label" msgid="3988506293099805796">"Карыстальнiк: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"Усталяваны некаторыя стандартныя налады"</string>
-    <string name="launch_defaults_none" msgid="8049374306261262709">"Параметры па змаўчанні не ўсталяваныя"</string>
+    <string name="launch_defaults_none" msgid="8049374306261262709">"Стандартныя налады не зададзены"</string>
     <string name="tts_settings" msgid="8130616705989351312">"Налады Text-to-speech"</string>
     <string name="tts_settings_title" msgid="7602210956640483039">"Сінтэз маўлення"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"Хуткасць маўлення"</string>
@@ -284,8 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Паказаць опцыі сертыфікацыі бесправаднога экрана"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Пры выбары сеткі Wi-Fi указваць у журнале RSSI для кожнага SSID"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Зніжае расход зараду акумулятара і павышае прадукцыйнасць мабільных сетак"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Калі ўключаны гэты рэжым, MAC-адрас гэтай прылады можа змяняцца падчас кожнага падключэння да сеткі з актыўнай рандамізацыяй MAC-адрасоў."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Сетка з улікам трафіка"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Сетка без уліку трафіка"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Памеры буфера журнала"</string>
@@ -552,4 +551,14 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"Дадаць госця"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Выдаліць госця"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Госць"</string>
+    <!-- no translation found for cached_apps_freezer_device_default (2616594131750144342) -->
+    <skip />
+    <!-- no translation found for cached_apps_freezer_disabled (4816382260660472042) -->
+    <skip />
+    <!-- no translation found for cached_apps_freezer_enabled (8866703500183051546) -->
+    <skip />
+    <!-- no translation found for cached_apps_freezer_reboot_dialog_text (695330563489230096) -->
+    <skip />
+    <!-- no translation found for accessibility_work_profile_app_description (5470883112342119165) -->
+    <skip />
 </resources>

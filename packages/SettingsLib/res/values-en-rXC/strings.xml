@@ -549,4 +549,10 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‏‎‏‏‏‏‏‎‏‏‎‎‎‎‎‏‎‏‎‎‏‎‏‎‏‎‎‏‎‎‎‏‎‎‏‏‏‏‎‏‏‎‏‏‎‎‎‎‎‎‎‏‏‏‏‏‏‎‎‏‏‎‏‏‏‎‎‏‎‏‎Add guest‎‏‎‎‏‎"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‏‎‏‏‏‏‏‏‏‎‏‎‎‎‏‏‏‏‏‏‏‏‎‎‏‎‎‏‎‎‎‏‎‎‏‎‏‎‏‏‏‎‏‎‏‎‎‏‎‎‏‏‎‎‎‎‎‎‏‏‎‎‏‎‎‏‏‏‎‎‎‎Remove guest‎‏‎‎‏‎"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‏‎‏‏‏‏‏‏‏‎‏‎‏‏‏‏‏‏‎‎‎‎‎‏‏‎‎‎‏‎‎‎‏‎‏‎‎‎‏‏‏‎‎‎‏‏‎‎‏‏‎‏‏‎‎‏‏‏‎‎‎‏‏‎‎‏‎‏‏‎‏‎Guest‎‏‎‎‏‎"</string>
+    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‏‎‏‏‏‏‏‎‏‎‎‏‎‎‎‏‎‏‎‎‎‎‎‎‎‎‎‎‏‎‎‏‏‏‏‏‏‏‏‏‏‎‎‎‎‎‎‏‎‏‎‏‏‎‏‏‎‎‏‎‎‏‎‏‎‏‎‏‏‎‎Device default‎‏‎‎‏‎"</string>
+    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‏‎‏‏‏‏‏‏‏‎‎‎‎‏‎‏‏‎‏‎‏‏‏‎‎‏‏‏‎‏‎‎‎‏‎‎‏‎‏‏‏‎‏‎‏‎‏‎‎‏‎‏‎‎‏‎‎‎‎‏‎‎‎‏‏‏‎‏‎‏‎‎Disabled‎‏‎‎‏‎"</string>
+    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‏‎‏‏‏‏‏‏‏‏‏‏‎‏‏‎‎‎‎‏‏‎‎‏‏‎‏‏‎‏‏‏‏‎‏‏‎‏‏‎‎‎‎‏‎‎‏‎‎‎‏‏‏‏‏‏‎‎‏‏‏‎‏‎‎‎‏‏‎‏‎‎Enabled‎‏‎‎‏‎"</string>
+    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‏‎‏‏‏‏‎‎‏‎‎‏‏‎‏‎‎‏‏‎‎‏‎‎‏‏‏‏‎‏‏‏‎‏‏‎‏‎‏‎‎‏‏‎‎‎‏‏‏‏‏‏‎‏‏‎‏‏‎‏‎‎‎‏‎‎‎‎‎Your device must be rebooted for this change to apply. Reboot now or cancel.‎‏‎‎‏‎"</string>
+    <!-- no translation found for accessibility_work_profile_app_description (5470883112342119165) -->
+    <skip />
 </resources>
