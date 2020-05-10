@@ -329,7 +329,8 @@ public class NetworkControllerImpl extends BroadcastReceiver
         return mDataSaverController;
     }
 
-    private void registerListeners() {
+    @VisibleForTesting
+    void registerListeners() {
         for (int i = 0; i < mMobileSignalControllers.size(); i++) {
             MobileSignalController mobileSignalController = mMobileSignalControllers.valueAt(i);
             mobileSignalController.registerListener();
@@ -364,6 +365,18 @@ public class NetworkControllerImpl extends BroadcastReceiver
         // Initial setup of WifiSignalController. Handled as if we had received a sticky broadcast
         // of WifiManager.WIFI_STATE_CHANGED_ACTION or WifiManager.NETWORK_STATE_CHANGED_ACTION
         mReceiverHandler.post(mWifiSignalController::fetchInitialState);
+
+        // Initial setup of mLastServiceState. Only run if there is no service state yet.
+        // Each MobileSignalController will also get their corresponding
+        mReceiverHandler.post(() -> {
+            if (mLastServiceState == null) {
+                mLastServiceState = mPhone.getServiceState();
+                if (mMobileSignalControllers.size() == 0) {
+                    recalculateEmergency();
+                }
+            }
+        });
+
         updateMobileControllers();
 
         // Initial setup of emergency information. Handled as if we had received a sticky broadcast
