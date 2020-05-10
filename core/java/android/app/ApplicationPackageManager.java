@@ -1574,7 +1574,7 @@ public class ApplicationPackageManager extends PackageManager {
         }
         Drawable badge = new LauncherIcons(mContext).getBadgeDrawable(
                 getUserManager().getUserIconBadgeResId(user.getIdentifier()),
-                getUserBadgeColor(user));
+                getUserBadgeColor(user, false));
         return getBadgedDrawable(icon, badge, null, true);
     }
 
@@ -1588,8 +1588,16 @@ public class ApplicationPackageManager extends PackageManager {
         return getBadgedDrawable(drawable, badgeDrawable, badgeLocation, true);
     }
 
-    /** Returns the color of the user's actual badge (not the badge's shadow). */
-    private int getUserBadgeColor(UserHandle user) {
+    /**
+     * Returns the color of the user's actual badge (not the badge's shadow).
+     * @param checkTheme whether to check the theme to determine the badge color. This should be
+     *                   true if the background is determined by the theme. Otherwise, if
+     *                   checkTheme is false, returns the color assuming a light background.
+     */
+    private int getUserBadgeColor(UserHandle user, boolean checkTheme) {
+        if (checkTheme && mContext.getResources().getConfiguration().isNightModeActive()) {
+            return getUserManager().getUserBadgeDarkColor(user.getIdentifier());
+        }
         return getUserManager().getUserBadgeColor(user.getIdentifier());
     }
 
@@ -1603,11 +1611,14 @@ public class ApplicationPackageManager extends PackageManager {
         }
         Drawable badgeForeground = getDrawableForDensity(
                 getUserManager().getUserBadgeResId(user.getIdentifier()), density);
-        badgeForeground.setTint(getUserBadgeColor(user));
+        badgeForeground.setTint(getUserBadgeColor(user, false));
         Drawable badge = new LayerDrawable(new Drawable[] {badgeColor, badgeForeground });
         return badge;
     }
 
+    /**
+     * Returns the badge color based on whether device has dark theme enabled or not.
+     */
     @Override
     public Drawable getUserBadgeForDensityNoBackground(UserHandle user, int density) {
         if (!hasUserBadge(user.getIdentifier())) {
@@ -1616,7 +1627,7 @@ public class ApplicationPackageManager extends PackageManager {
         Drawable badge = getDrawableForDensity(
                 getUserManager().getUserBadgeNoBackgroundResId(user.getIdentifier()), density);
         if (badge != null) {
-            badge.setTint(getUserBadgeColor(user));
+            badge.setTint(getUserBadgeColor(user, true));
         }
         return badge;
     }
