@@ -260,7 +260,7 @@ final class AutofillManagerServiceImpl
         if (isEnabledLocked()) return FLAG_ADD_CLIENT_ENABLED;
 
         // Check if it's enabled for augmented autofill
-        if (isAugmentedAutofillServiceAvailableLocked()
+        if (componentName != null && isAugmentedAutofillServiceAvailableLocked()
                 && isWhitelistedForAugmentedAutofillLocked(componentName)) {
             return FLAG_ADD_CLIENT_ENABLED_FOR_AUGMENTED_AUTOFILL_ONLY;
         }

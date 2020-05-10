@@ -570,7 +570,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     private final WindowState.UpdateReportedVisibilityResults mReportedVisibilityResults =
             new WindowState.UpdateReportedVisibilityResults();
 
-    boolean mUseTransferredAnimation;
+    private boolean mUseTransferredAnimation;
 
     /**
      * @see #currentLaunchCanTurnScreenOn()
@@ -1160,8 +1160,14 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             } else {
                 mLastReportedMultiWindowMode = inMultiWindowMode;
                 computeConfigurationAfterMultiWindowModeChange();
-                ensureActivityConfiguration(0 /* globalChanges */, PRESERVE_WINDOWS,
-                        true /* ignoreVisibility */);
+                // If the activity is in stopping or stopped state, for instance, it's in the
+                // split screen task and not the top one, the last configuration it should keep
+                // is the one before multi-window mode change.
+                final ActivityState state = getState();
+                if (state != STOPPED && state != STOPPING) {
+                    ensureActivityConfiguration(0 /* globalChanges */, PRESERVE_WINDOWS,
+                            true /* ignoreVisibility */);
+                }
             }
         }
     }
@@ -1281,6 +1287,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
 
         if (stack != null && stack.topRunningActivity() == this) {
+            // carry over the PictureInPictureParams to the parent stack without calling
+            // TaskOrganizerController#dispatchTaskInfoChanged.
+            // this is to ensure the stack holding up-to-dated pinned stack information
+            // when activity is re-parented to enter pip mode, see also
+            // RootWindowContainer#moveActivityToPinnedStack
+            stack.mPictureInPictureParams.copyOnlySet(pictureInPictureArgs);
             // make ensure the TaskOrganizer still works after re-parenting
             if (firstWindowDrawn) {
                 stack.setHasBeenVisible(true);
@@ -3363,12 +3375,14 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 }
                 setClientVisible(fromActivity.mClientVisible);
 
-                transferAnimation(fromActivity);
+                if (fromActivity.isAnimating()) {
+                    transferAnimation(fromActivity);
 
-                // When transferring an animation, we no longer need to apply an animation to the
-                // the token we transfer the animation over. Thus, set this flag to indicate we've
-                // transferred the animation.
-                mUseTransferredAnimation = true;
+                    // When transferring an animation, we no longer need to apply an animation to
+                    // the token we transfer the animation over. Thus, set this flag to indicate
+                    // we've transferred the animation.
+                    mUseTransferredAnimation = true;
+                }
 
                 mWmService.updateFocusedWindowLocked(
                         UPDATE_FOCUS_WILL_PLACE_SURFACES, true /*updateInputWindows*/);
@@ -7770,6 +7784,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     void setPictureInPictureParams(PictureInPictureParams p) {
         pictureInPictureArgs.copyOnlySet(p);
-        getTask().getRootTask().onPictureInPictureParamsChanged();
+        getTask().getRootTask().setPictureInPictureParams(p);
     }
 }
