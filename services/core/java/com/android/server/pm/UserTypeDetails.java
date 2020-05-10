@@ -116,11 +116,23 @@ public final class UserTypeDetails {
      */
     private final @Nullable int[] mBadgeColors;
 
+    /**
+     * Resource ID ({@link ColorRes}) of the colors badge put on icons when in dark theme.
+     * (The value is a resource ID referring to the color; it is not the color value itself).
+     *
+     * <p>This is an array because, in general, there may be multiple users of the same user type.
+     * In this case, the user is indexed according to its {@link UserInfo#profileBadge}.
+     *
+     * <p>Must be set if mIconBadge is set.
+     */
+    private final @Nullable int[] mDarkThemeBadgeColors;
+
     private UserTypeDetails(@NonNull String name, boolean enabled, int maxAllowed,
             @UserInfoFlag int baseType, @UserInfoFlag int defaultUserInfoPropertyFlags, int label,
             int maxAllowedPerParent,
             int iconBadge, int badgePlain, int badgeNoBackground,
             @Nullable int[] badgeLabels, @Nullable int[] badgeColors,
+            @Nullable int[] darkThemeBadgeColors,
             @Nullable Bundle defaultRestrictions) {
         this.mName = name;
         this.mEnabled = enabled;
@@ -136,6 +148,7 @@ public final class UserTypeDetails {
         this.mLabel = label;
         this.mBadgeLabels = badgeLabels;
         this.mBadgeColors = badgeColors;
+        this.mDarkThemeBadgeColors = darkThemeBadgeColors;
     }
 
     /**
@@ -222,6 +235,19 @@ public final class UserTypeDetails {
         return mBadgeColors[Math.min(badgeIndex, mBadgeColors.length - 1)];
     }
 
+    /**
+     * Returns the Resource ID of the badgeIndexth dark theme badge color, where the badgeIndex is
+     * expected to be the {@link UserInfo#profileBadge} of the user.
+     * If dark theme badge colors haven't been set, use the light theme badge color.
+     * If badgeIndex exceeds the number of colors, returns the color for the highest index.
+     */
+    public @ColorRes int getDarkThemeBadgeColor(int badgeIndex) {
+        if (mDarkThemeBadgeColors == null || mDarkThemeBadgeColors.length == 0 || badgeIndex < 0) {
+            return getBadgeColor(badgeIndex);
+        }
+        return mDarkThemeBadgeColors[Math.min(badgeIndex, mDarkThemeBadgeColors.length - 1)];
+    }
+
     public boolean isProfile() {
         return (mBaseType & UserInfo.FLAG_PROFILE) != 0;
     }
@@ -283,6 +309,8 @@ public final class UserTypeDetails {
         pw.println(mBadgeLabels != null ? mBadgeLabels.length : "0(null)");
         pw.print(prefix); pw.print("mBadgeColors.length: ");
         pw.println(mBadgeColors != null ? mBadgeColors.length : "0(null)");
+        pw.print(prefix); pw.print("mDarkThemeBadgeColors.length: ");
+        pw.println(mDarkThemeBadgeColors != null ? mDarkThemeBadgeColors.length : "0(null)");
     }
 
     /** Builder for a {@link UserTypeDetails}; see that class for documentation. */
@@ -298,6 +326,7 @@ public final class UserTypeDetails {
         private int mLabel = Resources.ID_NULL;
         private @Nullable int[] mBadgeLabels = null;
         private @Nullable int[] mBadgeColors = null;
+        private @Nullable int[] mDarkThemeBadgeColors = null;
         private @DrawableRes int mIconBadge = Resources.ID_NULL;
         private @DrawableRes int mBadgePlain = Resources.ID_NULL;
         private @DrawableRes int mBadgeNoBackground = Resources.ID_NULL;
@@ -339,6 +368,14 @@ public final class UserTypeDetails {
 
         public Builder setBadgeColors(@ColorRes int ... badgeColors) {
             mBadgeColors = badgeColors;
+            return this;
+        }
+
+        /**
+         * The badge colors when the badge is on a dark background.
+         */
+        public Builder setDarkThemeBadgeColors(@ColorRes int ... darkThemeBadgeColors) {
+            mDarkThemeBadgeColors = darkThemeBadgeColors;
             return this;
         }
 
@@ -385,10 +422,10 @@ public final class UserTypeDetails {
                 Preconditions.checkArgument(mBadgeColors != null && mBadgeColors.length != 0,
                         "UserTypeDetails " + mName + " has badge but no badgeColors.");
             }
-
             return new UserTypeDetails(mName, mEnabled, mMaxAllowed, mBaseType,
                     mDefaultUserInfoPropertyFlags, mLabel, mMaxAllowedPerParent,
                     mIconBadge, mBadgePlain, mBadgeNoBackground, mBadgeLabels, mBadgeColors,
+                    mDarkThemeBadgeColors == null ? mBadgeColors : mDarkThemeBadgeColors,
                     mDefaultRestrictions);
         }
 

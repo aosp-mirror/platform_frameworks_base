@@ -79,6 +79,7 @@
     <uses-permission android:name="android.permission.READ_DREAM_STATE"/>
     <uses-permission android:name="android.permission.WRITE_DREAM_STATE"/>
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
+    <uses-permission android:name="android.permission.MODIFY_DAY_NIGHT_MODE"/>
 
     <!-- Uses API introduced in O (26) -->
     <uses-sdk android:minSdkVersion="1"
