@@ -19,10 +19,14 @@ package com.android.internal.accessibility.dialog;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL;
 import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_BUTTON;
 
+import static com.android.internal.accessibility.AccessibilityShortcutController.MAGNIFICATION_COMPONENT_NAME;
+import static com.android.internal.accessibility.AccessibilityShortcutController.MAGNIFICATION_CONTROLLER_NAME;
 import static com.android.internal.accessibility.dialog.AccessibilityTargetHelper.getTargets;
+import static com.android.internal.accessibility.util.AccessibilityStatsLogUtils.logAccessibilityButtonLongPressStatus;
 
 import android.annotation.Nullable;
 import android.app.Activity;
+import android.content.ComponentName;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.text.TextUtils;
@@ -87,6 +91,12 @@ public class AccessibilityButtonChooserActivity extends Activity {
         gridview.setAdapter(new ButtonTargetAdapter(mTargets));
         gridview.setOnItemClickListener((parent, view, position, id) -> {
             final String key = Settings.Secure.ACCESSIBILITY_BUTTON_TARGET_COMPONENT;
+            String name = mTargets.get(position).getId();
+            if (name.equals(MAGNIFICATION_CONTROLLER_NAME)) {
+                name = MAGNIFICATION_COMPONENT_NAME.flattenToString();
+            }
+            final ComponentName componentName = ComponentName.unflattenFromString(name);
+            logAccessibilityButtonLongPressStatus(componentName);
             Settings.Secure.putString(getContentResolver(), key, mTargets.get(position).getId());
             finish();
         });
