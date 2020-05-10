@@ -481,6 +481,13 @@ final class UsageStatsProto {
                     }
                 }
                 break;
+            case UsageEvents.Event.LOCUS_ID_SET:
+                if (event.mLocusId != null) {
+                    final int locusIdIndex = stats.mStringCache.indexOf(event.mLocusId);
+                    if (locusIdIndex >= 0) {
+                        proto.write(IntervalStatsProto.Event.LOCUS_ID_INDEX, locusIdIndex + 1);
+                    }
+                }
         }
         proto.end(token);
     }
