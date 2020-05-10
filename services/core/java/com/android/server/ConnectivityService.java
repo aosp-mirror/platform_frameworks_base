@@ -5969,7 +5969,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
             // Start or stop DNS64 detection and 464xlat according to network state.
             networkAgent.clatd.update();
             notifyIfacesChangedForNetworkStats();
-            networkAgent.networkMonitor().notifyLinkPropertiesChanged(newLp);
+            networkAgent.networkMonitor().notifyLinkPropertiesChanged(
+                    new LinkProperties(newLp, true /* parcelSensitiveFields */));
             if (networkAgent.everConnected) {
                 notifyNetworkCallbacks(networkAgent, ConnectivityManager.CALLBACK_IP_CHANGED);
             }
@@ -7149,7 +7150,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 networkAgent.networkMonitor().setAcceptPartialConnectivity();
             }
             networkAgent.networkMonitor().notifyNetworkConnected(
-                    networkAgent.linkProperties, networkAgent.networkCapabilities);
+                    new LinkProperties(networkAgent.linkProperties,
+                            true /* parcelSensitiveFields */),
+                    networkAgent.networkCapabilities);
             scheduleUnvalidatedPrompt(networkAgent);
 
             // Whether a particular NetworkRequest listen should cause signal strength thresholds to
