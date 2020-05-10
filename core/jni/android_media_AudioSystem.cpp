@@ -1149,6 +1149,21 @@ static constexpr size_t array_size(const T (&)[N]) {
     return N;
 }
 
+static jintArray convertEncapsulationInfoFromNative(JNIEnv *env, uint32_t encapsulationInfo) {
+    std::vector<int> encapsulation;
+    // Ignore the first bit, which is ENCAPSULATION_.*_NONE, as an empty array
+    // should be returned if no encapsulation is supported.
+    encapsulationInfo >>= 1;
+    for (int bitPosition = 1; encapsulationInfo; encapsulationInfo >>= 1, bitPosition++) {
+        if (encapsulationInfo & 1) {
+            encapsulation.push_back(bitPosition);
+        }
+    }
+    jintArray result = env->NewIntArray(encapsulation.size());
+    env->SetIntArrayRegion(result, 0, encapsulation.size(), (jint *)encapsulation.data());
+    return result;
+}
+
 static jint convertAudioPortFromNative(JNIEnv *env,
                                            jobject *jAudioPort, const struct audio_port *nAudioPort)
 {
@@ -1156,6 +1171,8 @@ static jint convertAudioPortFromNative(JNIEnv *env,
     jintArray jSamplingRates = NULL;
     jintArray jChannelMasks = NULL;
     jintArray jChannelIndexMasks = NULL;
+    jintArray jEncapsulationModes = NULL;
+    jintArray jEncapsulationMetadataTypes = NULL;
     int* cFormats = NULL;
     jintArray jFormats = NULL;
     jobjectArray jGains = NULL;
@@ -1316,11 +1333,16 @@ static jint convertAudioPortFromNative(JNIEnv *env,
     if (nAudioPort->type == AUDIO_PORT_TYPE_DEVICE) {
         ALOGV("convertAudioPortFromNative is a device %08x", nAudioPort->ext.device.type);
         jstring jAddress = env->NewStringUTF(nAudioPort->ext.device.address);
-        *jAudioPort = env->NewObject(gAudioDevicePortClass, gAudioDevicePortCstor,
-                                     jHandle, jDeviceName,
-                                     jSamplingRates, jChannelMasks, jChannelIndexMasks,
-                                     jFormats, jGains,
-                                     nAudioPort->ext.device.type, jAddress);
+        jEncapsulationModes =
+                convertEncapsulationInfoFromNative(env, nAudioPort->ext.device.encapsulation_modes);
+        jEncapsulationMetadataTypes =
+                convertEncapsulationInfoFromNative(env,
+                                                   nAudioPort->ext.device
+                                                           .encapsulation_metadata_types);
+        *jAudioPort = env->NewObject(gAudioDevicePortClass, gAudioDevicePortCstor, jHandle,
+                                     jDeviceName, jSamplingRates, jChannelMasks, jChannelIndexMasks,
+                                     jFormats, jGains, nAudioPort->ext.device.type, jAddress,
+                                     jEncapsulationModes, jEncapsulationMetadataTypes);
         env->DeleteLocalRef(jAddress);
     } else if (nAudioPort->type == AUDIO_PORT_TYPE_MIX) {
         ALOGV("convertAudioPortFromNative is a mix");
@@ -1361,6 +1383,12 @@ exit:
     }
     if (jChannelIndexMasks != NULL) {
         env->DeleteLocalRef(jChannelIndexMasks);
+    }
+    if (jEncapsulationModes != NULL) {
+        env->DeleteLocalRef(jEncapsulationModes);
+    }
+    if (jEncapsulationMetadataTypes != NULL) {
+        env->DeleteLocalRef(jEncapsulationMetadataTypes);
     }
     if (cFormats != NULL) {
         delete[] cFormats;
@@ -2615,8 +2643,10 @@ int register_android_media_AudioSystem(JNIEnv *env)
 
     jclass audioDevicePortClass = FindClassOrDie(env, "android/media/AudioDevicePort");
     gAudioDevicePortClass = MakeGlobalRefOrDie(env, audioDevicePortClass);
-    gAudioDevicePortCstor = GetMethodIDOrDie(env, audioDevicePortClass, "<init>",
-            "(Landroid/media/AudioHandle;Ljava/lang/String;[I[I[I[I[Landroid/media/AudioGain;ILjava/lang/String;)V");
+    gAudioDevicePortCstor =
+            GetMethodIDOrDie(env, audioDevicePortClass, "<init>",
+                             "(Landroid/media/AudioHandle;Ljava/lang/String;[I[I[I[I"
+                             "[Landroid/media/AudioGain;ILjava/lang/String;[I[I)V");
 
     // When access AudioPort as AudioDevicePort
     gAudioPortFields.mType = GetFieldIDOrDie(env, audioDevicePortClass, "mType", "I");
