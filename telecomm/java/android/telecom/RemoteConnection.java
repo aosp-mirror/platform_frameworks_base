@@ -658,7 +658,6 @@ public final class RemoteConnection {
     private int mCallerDisplayNamePresentation;
     private RemoteConference mConference;
     private Bundle mExtras;
-    private String mCallingPackage;
     private String mCallingPackageAbbreviation;
 
     /**
@@ -675,9 +674,9 @@ public final class RemoteConnection {
         if (request != null && request.getExtras() != null
                 && request.getExtras().containsKey(
                         Connection.EXTRA_REMOTE_CONNECTION_ORIGINATING_PACKAGE_NAME)) {
-            mCallingPackage = request.getExtras().getString(
+            String callingPackage = request.getExtras().getString(
                     Connection.EXTRA_REMOTE_CONNECTION_ORIGINATING_PACKAGE_NAME);
-            mCallingPackageAbbreviation = Log.getPackageAbbreviation(mCallingPackage);
+            mCallingPackageAbbreviation = Log.getPackageAbbreviation(callingPackage);
         }
     }
 
@@ -717,8 +716,7 @@ public final class RemoteConnection {
         Bundle newExtras = new Bundle();
         newExtras.putString(Connection.EXTRA_ORIGINAL_CONNECTION_ID, callId);
         putExtras(newExtras);
-        mCallingPackage = callingPackage;
-        mCallingPackageAbbreviation = Log.getPackageAbbreviation(mCallingPackage);
+        mCallingPackageAbbreviation = Log.getPackageAbbreviation(callingPackage);
     }
 
     /**
@@ -916,7 +914,8 @@ public final class RemoteConnection {
         Log.startSession("RC.a", getActiveOwnerInfo());
         try {
             if (mConnected) {
-                mConnectionService.abort(mConnectionId, Log.getExternalSession());
+                mConnectionService.abort(mConnectionId, Log.getExternalSession(
+                        mCallingPackageAbbreviation));
             }
         } catch (RemoteException ignored) {
         } finally {
@@ -931,7 +930,8 @@ public final class RemoteConnection {
         Log.startSession("RC.an", getActiveOwnerInfo());
         try {
             if (mConnected) {
-               mConnectionService.answer(mConnectionId, Log.getExternalSession());
+               mConnectionService.answer(mConnectionId, Log.getExternalSession(
+                       mCallingPackageAbbreviation));
             }
         } catch (RemoteException ignored) {
         } finally {
@@ -948,7 +948,8 @@ public final class RemoteConnection {
         Log.startSession("RC.an2", getActiveOwnerInfo());
         try {
             if (mConnected) {
-                mConnectionService.answerVideo(mConnectionId, videoState, null /*Session.Info*/);
+                mConnectionService.answerVideo(mConnectionId, videoState,
+                        Log.getExternalSession(mCallingPackageAbbreviation));
             }
         } catch (RemoteException ignored) {
         } finally {
@@ -963,7 +964,8 @@ public final class RemoteConnection {
         Log.startSession("RC.r", getActiveOwnerInfo());
         try {
             if (mConnected) {
-                mConnectionService.reject(mConnectionId, null /*Session.Info*/);
+                mConnectionService.reject(mConnectionId, Log.getExternalSession(
+                        mCallingPackageAbbreviation));
             }
         } catch (RemoteException ignored) {
         } finally {
@@ -978,7 +980,8 @@ public final class RemoteConnection {
         Log.startSession("RC.h", getActiveOwnerInfo());
         try {
             if (mConnected) {
-                mConnectionService.hold(mConnectionId, null /*Session.Info*/);
+                mConnectionService.hold(mConnectionId, Log.getExternalSession(
+                        mCallingPackageAbbreviation));
             }
         } catch (RemoteException ignored) {
         } finally {
@@ -993,7 +996,8 @@ public final class RemoteConnection {
         Log.startSession("RC.u", getActiveOwnerInfo());
         try {
             if (mConnected) {
-                mConnectionService.unhold(mConnectionId, null /*Session.Info*/);
+                mConnectionService.unhold(mConnectionId, Log.getExternalSession(
+                        mCallingPackageAbbreviation));
             }
         } catch (RemoteException ignored) {
         } finally {
