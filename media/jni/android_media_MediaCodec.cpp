@@ -1233,7 +1233,7 @@ static void android_media_MediaCodec_native_enableOnFrameRenderedListener(
         jboolean enabled) {
     sp<JMediaCodec> codec = getMediaCodec(env, thiz);
 
-    if (codec == NULL) {
+    if (codec == NULL || codec->initCheck() != OK) {
         throwExceptionAsNecessary(env, INVALID_OPERATION);
         return;
     }
@@ -1249,7 +1249,7 @@ static void android_media_MediaCodec_native_setCallback(
         jobject cb) {
     sp<JMediaCodec> codec = getMediaCodec(env, thiz);
 
-    if (codec == NULL) {
+    if (codec == NULL || codec->initCheck() != OK) {
         throwExceptionAsNecessary(env, INVALID_OPERATION);
         return;
     }
@@ -1269,7 +1269,7 @@ static void android_media_MediaCodec_native_configure(
         jint flags) {
     sp<JMediaCodec> codec = getMediaCodec(env, thiz);
 
-    if (codec == NULL) {
+    if (codec == NULL || codec->initCheck() != OK) {
         throwExceptionAsNecessary(env, INVALID_OPERATION);
         return;
     }
@@ -1317,7 +1317,7 @@ static void android_media_MediaCodec_native_setSurface(
         jobject jsurface) {
     sp<JMediaCodec> codec = getMediaCodec(env, thiz);
 
-    if (codec == NULL) {
+    if (codec == NULL || codec->initCheck() != OK) {
         throwExceptionAsNecessary(env, INVALID_OPERATION);
         return;
     }
@@ -1440,7 +1440,7 @@ static void android_media_MediaCodec_setInputSurface(
     ALOGV("android_media_MediaCodec_setInputSurface");
 
     sp<JMediaCodec> codec = getMediaCodec(env, thiz);
-    if (codec == NULL) {
+    if (codec == NULL || codec->initCheck() != OK) {
         throwExceptionAsNecessary(env, INVALID_OPERATION);
         return;
     }
@@ -1464,7 +1464,7 @@ static jobject android_media_MediaCodec_createInputSurface(JNIEnv* env,
     ALOGV("android_media_MediaCodec_createInputSurface");
 
     sp<JMediaCodec> codec = getMediaCodec(env, thiz);
-    if (codec == NULL) {
+    if (codec == NULL || codec->initCheck() != OK) {
         throwExceptionAsNecessary(env, INVALID_OPERATION);
         return NULL;
     }
@@ -1487,7 +1487,7 @@ static void android_media_MediaCodec_start(JNIEnv *env, jobject thiz) {
 
     sp<JMediaCodec> codec = getMediaCodec(env, thiz);
 
-    if (codec == NULL) {
+    if (codec == NULL || codec->initCheck() != OK) {
         throwExceptionAsNecessary(env, INVALID_OPERATION);
         return;
     }
@@ -1502,7 +1502,7 @@ static void android_media_MediaCodec_stop(JNIEnv *env, jobject thiz) {
 
     sp<JMediaCodec> codec = getMediaCodec(env, thiz);
 
-    if (codec == NULL) {
+    if (codec == NULL || codec->initCheck() != OK) {
         throwExceptionAsNecessary(env, INVALID_OPERATION);
         return;
     }
@@ -1517,7 +1517,7 @@ static void android_media_MediaCodec_reset(JNIEnv *env, jobject thiz) {
 
     sp<JMediaCodec> codec = getMediaCodec(env, thiz);
 
-    if (codec == NULL) {
+    if (codec == NULL || codec->initCheck() != OK) {
         throwExceptionAsNecessary(env, INVALID_OPERATION);
         return;
     }
@@ -1539,7 +1539,7 @@ static void android_media_MediaCodec_flush(JNIEnv *env, jobject thiz) {
 
     sp<JMediaCodec> codec = getMediaCodec(env, thiz);
 
-    if (codec == NULL) {
+    if (codec == NULL || codec->initCheck() != OK) {
         throwExceptionAsNecessary(env, INVALID_OPERATION);
         return;
     }
@@ -1561,7 +1561,7 @@ static void android_media_MediaCodec_queueInputBuffer(
 
     sp<JMediaCodec> codec = getMediaCodec(env, thiz);
 
-    if (codec == NULL) {
+    if (codec == NULL || codec->initCheck() != OK) {
         throwExceptionAsNecessary(env, INVALID_OPERATION);
         return;
     }
@@ -1720,7 +1720,7 @@ static void android_media_MediaCodec_queueSecureInputBuffer(
 
     sp<JMediaCodec> codec = getMediaCodec(env, thiz);
 
-    if (codec == NULL) {
+    if (codec == NULL || codec->initCheck() != OK) {
         throwExceptionAsNecessary(env, INVALID_OPERATION);
         return;
     }
@@ -2109,7 +2109,7 @@ static void android_media_MediaCodec_native_queueLinearBlock(
 
     sp<JMediaCodec> codec = getMediaCodec(env, thiz);
 
-    if (codec == nullptr) {
+    if (codec == nullptr || codec->initCheck() != OK) {
         throwExceptionAsNecessary(env, INVALID_OPERATION);
         return;
     }
@@ -2178,7 +2178,7 @@ static void android_media_MediaCodec_native_queueHardwareBuffer(
 
     sp<JMediaCodec> codec = getMediaCodec(env, thiz);
 
-    if (codec == NULL) {
+    if (codec == NULL || codec->initCheck() != OK) {
         throwExceptionAsNecessary(env, INVALID_OPERATION);
         return;
     }
@@ -2227,7 +2227,7 @@ static void android_media_MediaCodec_native_getOutputFrame(
 
     sp<JMediaCodec> codec = getMediaCodec(env, thiz);
 
-    if (codec == NULL) {
+    if (codec == NULL || codec->initCheck() != OK) {
         throwExceptionAsNecessary(env, INVALID_OPERATION);
         return;
     }
@@ -2244,7 +2244,7 @@ static jint android_media_MediaCodec_dequeueInputBuffer(
 
     sp<JMediaCodec> codec = getMediaCodec(env, thiz);
 
-    if (codec == NULL) {
+    if (codec == NULL || codec->initCheck() != OK) {
         throwExceptionAsNecessary(env, INVALID_OPERATION);
         return -1;
     }
@@ -2265,7 +2265,7 @@ static jint android_media_MediaCodec_dequeueOutputBuffer(
 
     sp<JMediaCodec> codec = getMediaCodec(env, thiz);
 
-    if (codec == NULL) {
+    if (codec == NULL || codec->initCheck() != OK) {
         throwExceptionAsNecessary(env, INVALID_OPERATION);
         return 0;
     }
@@ -2288,7 +2288,7 @@ static void android_media_MediaCodec_releaseOutputBuffer(
 
     sp<JMediaCodec> codec = getMediaCodec(env, thiz);
 
-    if (codec == NULL) {
+    if (codec == NULL || codec->initCheck() != OK) {
         throwExceptionAsNecessary(env, INVALID_OPERATION);
         return;
     }
@@ -2303,7 +2303,7 @@ static void android_media_MediaCodec_signalEndOfInputStream(JNIEnv* env,
     ALOGV("android_media_MediaCodec_signalEndOfInputStream");
 
     sp<JMediaCodec> codec = getMediaCodec(env, thiz);
-    if (codec == NULL) {
+    if (codec == NULL || codec->initCheck() != OK) {
         throwExceptionAsNecessary(env, INVALID_OPERATION);
         return;
     }
@@ -2319,7 +2319,7 @@ static jobject android_media_MediaCodec_getFormatNative(
 
     sp<JMediaCodec> codec = getMediaCodec(env, thiz);
 
-    if (codec == NULL) {
+    if (codec == NULL || codec->initCheck() != OK) {
         throwExceptionAsNecessary(env, INVALID_OPERATION);
         return NULL;
     }
@@ -2342,7 +2342,7 @@ static jobject android_media_MediaCodec_getOutputFormatForIndexNative(
 
     sp<JMediaCodec> codec = getMediaCodec(env, thiz);
 
-    if (codec == NULL) {
+    if (codec == NULL || codec->initCheck() != OK) {
         throwExceptionAsNecessary(env, INVALID_OPERATION);
         return NULL;
     }
@@ -2365,7 +2365,7 @@ static jobjectArray android_media_MediaCodec_getBuffers(
 
     sp<JMediaCodec> codec = getMediaCodec(env, thiz);
 
-    if (codec == NULL) {
+    if (codec == NULL || codec->initCheck() != OK) {
         throwExceptionAsNecessary(env, INVALID_OPERATION);
         return NULL;
     }
@@ -2391,7 +2391,7 @@ static jobject android_media_MediaCodec_getBuffer(
 
     sp<JMediaCodec> codec = getMediaCodec(env, thiz);
 
-    if (codec == NULL) {
+    if (codec == NULL || codec->initCheck() != OK) {
         throwExceptionAsNecessary(env, INVALID_OPERATION);
         return NULL;
     }
@@ -2417,7 +2417,7 @@ static jobject android_media_MediaCodec_getImage(
 
     sp<JMediaCodec> codec = getMediaCodec(env, thiz);
 
-    if (codec == NULL) {
+    if (codec == NULL || codec->initCheck() != OK) {
         throwExceptionAsNecessary(env, INVALID_OPERATION);
         return NULL;
     }
@@ -2443,7 +2443,7 @@ static jobject android_media_MediaCodec_getName(
 
     sp<JMediaCodec> codec = getMediaCodec(env, thiz);
 
-    if (codec == NULL) {
+    if (codec == NULL || codec->initCheck() != OK) {
         throwExceptionAsNecessary(env, INVALID_OPERATION);
         return NULL;
     }
@@ -2466,7 +2466,7 @@ static jobject android_media_MediaCodec_getOwnCodecInfo(
 
     sp<JMediaCodec> codec = getMediaCodec(env, thiz);
 
-    if (codec == NULL) {
+    if (codec == NULL || codec->initCheck() != OK) {
         throwExceptionAsNecessary(env, INVALID_OPERATION);
         return NULL;
     }
@@ -2489,7 +2489,7 @@ android_media_MediaCodec_native_getMetrics(JNIEnv *env, jobject thiz)
     ALOGV("android_media_MediaCodec_native_getMetrics");
 
     sp<JMediaCodec> codec = getMediaCodec(env, thiz);
-    if (codec == NULL ) {
+    if (codec == NULL || codec->initCheck() != OK) {
         jniThrowException(env, "java/lang/IllegalStateException", NULL);
         return 0;
     }
@@ -2518,7 +2518,7 @@ static void android_media_MediaCodec_setParameters(
 
     sp<JMediaCodec> codec = getMediaCodec(env, thiz);
 
-    if (codec == NULL) {
+    if (codec == NULL || codec->initCheck() != OK) {
         throwExceptionAsNecessary(env, INVALID_OPERATION);
         return;
     }
@@ -2537,7 +2537,7 @@ static void android_media_MediaCodec_setVideoScalingMode(
         JNIEnv *env, jobject thiz, jint mode) {
     sp<JMediaCodec> codec = getMediaCodec(env, thiz);
 
-    if (codec == NULL) {
+    if (codec == NULL || codec->initCheck() != OK) {
         throwExceptionAsNecessary(env, INVALID_OPERATION);
         return;
     }
@@ -2555,7 +2555,7 @@ static void android_media_MediaCodec_setAudioPresentation(
         JNIEnv *env, jobject thiz, jint presentationId, jint programId) {
     sp<JMediaCodec> codec = getMediaCodec(env, thiz);
 
-    if (codec == NULL) {
+    if (codec == NULL || codec->initCheck() != OK) {
         throwExceptionAsNecessary(env, INVALID_OPERATION);
         return;
     }
