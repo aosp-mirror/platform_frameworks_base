@@ -16,11 +16,11 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="tethered_notification_title" msgid="6426563586025792944">"數據連線或無線基地台已啟用"</string>
+    <string name="tethered_notification_title" msgid="6426563586025792944">"網路共用或無線基地台已啟用"</string>
     <string name="tethered_notification_message" msgid="64800879503420696">"輕觸即可進行設定。"</string>
-    <string name="disable_tether_notification_title" msgid="3004509127903564191">"數據連線已停用"</string>
+    <string name="disable_tether_notification_title" msgid="3004509127903564191">"網路共用已停用"</string>
     <string name="disable_tether_notification_message" msgid="6717523799293901476">"詳情請洽你的管理員"</string>
-    <string name="notification_channel_tethering_status" msgid="2663463891530932727">"無線基地台與數據連線狀態"</string>
+    <string name="notification_channel_tethering_status" msgid="2663463891530932727">"無線基地台與網路共用狀態"</string>
     <string name="no_upstream_notification_title" msgid="1204601824631788482"></string>
     <string name="no_upstream_notification_message" msgid="8586582938243032621"></string>
     <string name="no_upstream_notification_disable_button" msgid="8800919436924640822"></string>
