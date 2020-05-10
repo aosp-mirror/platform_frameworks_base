@@ -1664,6 +1664,15 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         filter.addAction(TelephonyManager.ACTION_PHONE_STATE_CHANGED);
         filter.addAction(DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED);
         mBroadcastDispatcher.registerReceiverWithHandler(mBroadcastReceiver, filter, mHandler);
+        // Since ACTION_SERVICE_STATE is being moved to a non-sticky broadcast, trigger the
+        // listener now with the service state from the default sub.
+        mBackgroundExecutor.execute(() -> {
+            int subId = SubscriptionManager.getDefaultSubscriptionId();
+            ServiceState serviceState = mContext.getSystemService(TelephonyManager.class)
+                    .getServiceStateForSubscriber(subId);
+            mHandler.sendMessage(
+                    mHandler.obtainMessage(MSG_SERVICE_STATE_CHANGE, subId, 0, serviceState));
+        });
 
         mHandler.post(this::registerRingerTracker);
 

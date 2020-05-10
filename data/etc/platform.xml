@@ -199,6 +199,9 @@
     <split-permission name="android.permission.WRITE_EXTERNAL_STORAGE">
         <new-permission name="android.permission.READ_EXTERNAL_STORAGE" />
     </split-permission>
+    <split-permission name="android.permission.READ_PRIVILEGED_PHONE_STATE">
+        <new-permission name="android.permission.READ_PHONE_STATE" />
+    </split-permission>
     <split-permission name="android.permission.READ_CONTACTS"
                       targetSdk="16">
         <new-permission name="android.permission.READ_CALL_LOG" />
