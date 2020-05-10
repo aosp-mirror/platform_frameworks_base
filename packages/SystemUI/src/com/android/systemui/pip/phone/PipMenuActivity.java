@@ -27,7 +27,7 @@ import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_ALL
 import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_CONTROLLER_MESSENGER;
 import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_DISMISS_FRACTION;
 import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_MENU_STATE;
-import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_MOVEMENT_BOUNDS;
+import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_SHOW_MENU_WITH_DELAY;
 import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_STACK_BOUNDS;
 import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_WILL_RESIZE_MENU;
 import static com.android.systemui.pip.phone.PipMenuActivityController.MENU_STATE_CLOSE;
@@ -138,9 +138,9 @@ public class PipMenuActivity extends Activity {
                     final Bundle data = (Bundle) msg.obj;
                     showMenu(data.getInt(EXTRA_MENU_STATE),
                             data.getParcelable(EXTRA_STACK_BOUNDS),
-                            data.getParcelable(EXTRA_MOVEMENT_BOUNDS),
                             data.getBoolean(EXTRA_ALLOW_TIMEOUT),
-                            data.getBoolean(EXTRA_WILL_RESIZE_MENU));
+                            data.getBoolean(EXTRA_WILL_RESIZE_MENU),
+                            data.getBoolean(EXTRA_SHOW_MENU_WITH_DELAY));
                     break;
                 }
                 case MESSAGE_POKE_MENU:
@@ -177,12 +177,7 @@ public class PipMenuActivity extends Activity {
     private Messenger mToControllerMessenger;
     private Messenger mMessenger = new Messenger(mHandler);
 
-    private final Runnable mFinishRunnable = new Runnable() {
-        @Override
-        public void run() {
-            hideMenu();
-        }
-    };
+    private final Runnable mFinishRunnable = this::hideMenu;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -321,8 +316,8 @@ public class PipMenuActivity extends Activity {
         // Do nothing
     }
 
-    private void showMenu(int menuState, Rect stackBounds, Rect movementBounds,
-            boolean allowMenuTimeout, boolean resizeMenuOnShow) {
+    private void showMenu(int menuState, Rect stackBounds, boolean allowMenuTimeout,
+            boolean resizeMenuOnShow, boolean withDelay) {
         mAllowMenuTimeout = allowMenuTimeout;
         if (mMenuState != menuState) {
             // Disallow touches if the menu needs to resize while showing, and we are transitioning
@@ -335,7 +330,6 @@ public class PipMenuActivity extends Activity {
             if (mMenuContainerAnimator != null) {
                 mMenuContainerAnimator.cancel();
             }
-            notifyMenuStateChange(menuState, resizeMenuOnShow);
             mMenuContainerAnimator = new AnimatorSet();
             ObjectAnimator menuAnim = ObjectAnimator.ofFloat(mMenuContainer, View.ALPHA,
                     mMenuContainer.getAlpha(), 1f);
@@ -359,7 +353,13 @@ public class PipMenuActivity extends Activity {
                     }
                 });
             }
-            mMenuContainerAnimator.start();
+            if (withDelay) {
+                // starts the menu container animation after window expansion is completed
+                notifyMenuStateChange(menuState, resizeMenuOnShow, mMenuContainerAnimator::start);
+            } else {
+                notifyMenuStateChange(menuState, resizeMenuOnShow, null /* callback */);
+                mMenuContainerAnimator.start();
+            }
         } else {
             // If we are already visible, then just start the delayed dismiss and unregister any
             // existing input consumers from the previous drag
@@ -382,7 +382,7 @@ public class PipMenuActivity extends Activity {
         if (mMenuState != MENU_STATE_NONE) {
             cancelDelayedFinish();
             if (notifyMenuVisibility) {
-                notifyMenuStateChange(MENU_STATE_NONE, mResize);
+                notifyMenuStateChange(MENU_STATE_NONE, mResize, null /* callback */);
             }
             mMenuContainerAnimator = new AnimatorSet();
             ObjectAnimator menuAnim = ObjectAnimator.ofFloat(mMenuContainer, View.ALPHA,
@@ -434,10 +434,10 @@ public class PipMenuActivity extends Activity {
         final int menuState = intent.getIntExtra(EXTRA_MENU_STATE, MENU_STATE_NONE);
         if (menuState != MENU_STATE_NONE) {
             Rect stackBounds = intent.getParcelableExtra(EXTRA_STACK_BOUNDS);
-            Rect movementBounds = intent.getParcelableExtra(EXTRA_MOVEMENT_BOUNDS);
             boolean allowMenuTimeout = intent.getBooleanExtra(EXTRA_ALLOW_TIMEOUT, true);
             boolean willResizeMenu = intent.getBooleanExtra(EXTRA_WILL_RESIZE_MENU, false);
-            showMenu(menuState, stackBounds, movementBounds, allowMenuTimeout, willResizeMenu);
+            boolean withDelay = intent.getBooleanExtra(EXTRA_SHOW_MENU_WITH_DELAY, false);
+            showMenu(menuState, stackBounds, allowMenuTimeout, willResizeMenu, withDelay);
         }
     }
 
@@ -540,13 +540,14 @@ public class PipMenuActivity extends Activity {
         mBackgroundDrawable.setAlpha(alpha);
     }
 
-    private void notifyMenuStateChange(int menuState, boolean resize) {
+    private void notifyMenuStateChange(int menuState, boolean resize, Runnable callback) {
         mMenuState = menuState;
         mResize = resize;
         Message m = Message.obtain();
         m.what = PipMenuActivityController.MESSAGE_MENU_STATE_CHANGED;
         m.arg1 = menuState;
         m.arg2 = resize ?  1 : 0;
+        m.obj = callback;
         sendMessage(m, "Could not notify controller of PIP menu visibility");
     }
 
