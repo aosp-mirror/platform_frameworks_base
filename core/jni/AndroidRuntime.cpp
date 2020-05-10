@@ -18,38 +18,36 @@
 #define LOG_TAG "AndroidRuntime"
 #define LOG_NDEBUG 1
 
-#include <android_runtime/AndroidRuntime.h>
-
 #include <android-base/macros.h>
 #include <android-base/properties.h>
 #include <android/graphics/jni_runtime.h>
+#include <android_runtime/AndroidRuntime.h>
+#include <assert.h>
 #include <binder/IBinder.h>
 #include <binder/IPCThreadState.h>
 #include <binder/IServiceManager.h>
-#include <utils/Log.h>
-#include <utils/misc.h>
-#include <utils/Trace.h>
 #include <binder/Parcel.h>
-#include <utils/threads.h>
+#include <bionic/malloc.h>
 #include <cutils/properties.h>
-#include <server_configurable_flags/get_flags.h>
-
-#include "jni.h"
+#include <dirent.h>
+#include <dlfcn.h>
 #include <nativehelper/JNIHelp.h>
 #include <nativehelper/JniInvocation.h>
-#include "android_util_Binder.h"
-
-#include <stdio.h>
+#include <server_configurable_flags/get_flags.h>
 #include <signal.h>
+#include <stdio.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <signal.h>
-#include <dirent.h>
-#include <assert.h>
-#include <bionic/malloc.h>
+#include <utils/Log.h>
+#include <utils/Trace.h>
+#include <utils/misc.h>
+#include <utils/threads.h>
 
 #include <string>
 #include <vector>
+
+#include "android_util_Binder.h"
+#include "jni.h"
 
 using namespace android;
 using android::base::GetProperty;
@@ -78,6 +76,7 @@ extern int register_android_hardware_camera2_CameraMetadata(JNIEnv *env);
 extern int register_android_hardware_camera2_legacy_LegacyCameraDevice(JNIEnv *env);
 extern int register_android_hardware_camera2_legacy_PerfMeasurement(JNIEnv *env);
 extern int register_android_hardware_camera2_DngCreator(JNIEnv *env);
+extern int register_android_hardware_display_DisplayManagerGlobal(JNIEnv* env);
 extern int register_android_hardware_HardwareBuffer(JNIEnv *env);
 extern int register_android_hardware_SensorManager(JNIEnv *env);
 extern int register_android_hardware_SerialPort(JNIEnv *env);
@@ -1519,6 +1518,7 @@ static const RegJNIRec gRegJNI[] = {
         REG_JNI(register_android_hardware_camera2_legacy_LegacyCameraDevice),
         REG_JNI(register_android_hardware_camera2_legacy_PerfMeasurement),
         REG_JNI(register_android_hardware_camera2_DngCreator),
+        REG_JNI(register_android_hardware_display_DisplayManagerGlobal),
         REG_JNI(register_android_hardware_HardwareBuffer),
         REG_JNI(register_android_hardware_SensorManager),
         REG_JNI(register_android_hardware_SerialPort),
