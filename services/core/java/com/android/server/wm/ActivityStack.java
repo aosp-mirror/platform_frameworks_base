@@ -1276,6 +1276,8 @@ class ActivityStack extends Task {
             prev.cpuTimeAtResume = 0; // reset it
         }
 
+        mRootWindowContainer.ensureActivitiesVisible(resuming, 0, !PRESERVE_WINDOWS);
+
         // Notify when the task stack has changed, but only if visibilities changed (not just
         // focus). Also if there is an active pinned stack - we always want to notify it about
         // task stack changes, because its positioning may depend on it.
@@ -1284,8 +1286,6 @@ class ActivityStack extends Task {
             mAtmService.getTaskChangeNotificationController().notifyTaskStackChanged();
             mStackSupervisor.mAppVisibilitiesChangedSinceLastPause = false;
         }
-
-        mRootWindowContainer.ensureActivitiesVisible(resuming, 0, !PRESERVE_WINDOWS);
     }
 
     boolean isTopStackInDisplayArea() {

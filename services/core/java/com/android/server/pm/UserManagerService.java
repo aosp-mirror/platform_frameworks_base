@@ -1330,6 +1330,9 @@ public class UserManagerService extends IUserManager.Stub {
         return userTypeDetails.getBadgeLabel(badgeIndex);
     }
 
+    /**
+     * @return the color (not the resource ID) to be used for the user's badge in light theme
+     */
     @Override
     public @ColorRes int getUserBadgeColorResId(@UserIdInt int userId) {
         checkManageOrInteractPermissionIfCallerInOtherProfileGroup(userId,
@@ -1337,11 +1340,26 @@ public class UserManagerService extends IUserManager.Stub {
         final UserInfo userInfo = getUserInfoNoChecks(userId);
         final UserTypeDetails userTypeDetails = getUserTypeDetails(userInfo);
         if (userInfo == null || userTypeDetails == null || !userTypeDetails.hasBadge()) {
+            Slog.e(LOG_TAG, "Requested badge dark color for non-badged user " + userId);
+            return Resources.ID_NULL;
+        }
+        return userTypeDetails.getBadgeColor(userInfo.profileBadge);
+    }
+
+    /**
+     * @return the color (not the resource ID) to be used for the user's badge in dark theme
+     */
+    @Override
+    public @ColorRes int getUserBadgeDarkColorResId(@UserIdInt int userId) {
+        checkManageOrInteractPermissionIfCallerInOtherProfileGroup(userId,
+                "getUserBadgeDarkColorResId");
+        final UserInfo userInfo = getUserInfoNoChecks(userId);
+        final UserTypeDetails userTypeDetails = getUserTypeDetails(userInfo);
+        if (userInfo == null || userTypeDetails == null || !userTypeDetails.hasBadge()) {
             Slog.e(LOG_TAG, "Requested badge color for non-badged user " + userId);
             return Resources.ID_NULL;
         }
-        final int badgeIndex = userInfo.profileBadge;
-        return userTypeDetails.getBadgeColor(badgeIndex);
+        return userTypeDetails.getDarkThemeBadgeColor(userInfo.profileBadge);
     }
 
     @Override
