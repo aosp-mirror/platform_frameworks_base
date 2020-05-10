@@ -73,8 +73,11 @@ public class AccessibilityShortcutController {
             new ComponentName("com.android.server.accessibility", "ColorInversion");
     public static final ComponentName DALTONIZER_COMPONENT_NAME =
             new ComponentName("com.android.server.accessibility", "Daltonizer");
+    // TODO(b/147990389): Use MAGNIFICATION_COMPONENT_NAME to replace.
     public static final String MAGNIFICATION_CONTROLLER_NAME =
             "com.android.server.accessibility.MagnificationController";
+    public static final ComponentName MAGNIFICATION_COMPONENT_NAME =
+            new ComponentName("com.android.server.accessibility", "Magnification");
 
     private static final AudioAttributes VIBRATION_ATTRIBUTES = new AudioAttributes.Builder()
             .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
