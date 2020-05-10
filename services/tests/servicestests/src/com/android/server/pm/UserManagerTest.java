@@ -347,6 +347,10 @@ public final class UserManagerTest {
         final int badgeIndex = userInfo.profileBadge;
         assertThat(mUserManager.getUserBadgeColor(userId)).isEqualTo(
                 Resources.getSystem().getColor(userTypeDetails.getBadgeColor(badgeIndex), null));
+        assertThat(mUserManager.getUserBadgeDarkColor(userId)).isEqualTo(
+                Resources.getSystem().getColor(userTypeDetails.getDarkThemeBadgeColor(badgeIndex),
+                        null));
+
         assertThat(mUserManager.getBadgedLabelForUser("Test", asHandle(userId))).isEqualTo(
                 Resources.getSystem().getString(userTypeDetails.getBadgeLabel(badgeIndex), "Test"));
 
