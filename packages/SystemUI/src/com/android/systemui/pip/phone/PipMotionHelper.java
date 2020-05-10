@@ -21,6 +21,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.IActivityTaskManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.graphics.Rect;
 import android.os.Debug;
@@ -123,6 +124,29 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
      */
     private boolean mSpringingToTouch = false;
 
+    /**
+     * Gets set in {@link #animateToExpandedState(Rect, Rect, Rect, Runnable)}, this callback is
+     * used to show menu activity when the expand animation is completed.
+     */
+    private Runnable mPostPipTransitionCallback;
+
+    private final PipTaskOrganizer.PipTransitionCallback mPipTransitionCallback =
+            new PipTaskOrganizer.PipTransitionCallback() {
+        @Override
+        public void onPipTransitionStarted(ComponentName activity, int direction) {}
+
+        @Override
+        public void onPipTransitionFinished(ComponentName activity, int direction) {
+            if (mPostPipTransitionCallback != null) {
+                mPostPipTransitionCallback.run();
+                mPostPipTransitionCallback = null;
+            }
+        }
+
+        @Override
+        public void onPipTransitionCanceled(ComponentName activity, int direction) {}
+    };
+
     public PipMotionHelper(Context context, IActivityTaskManager activityTaskManager,
             PipTaskOrganizer pipTaskOrganizer, PipMenuActivityController menuController,
             PipSnapAlgorithm snapAlgorithm, FlingAnimationUtils flingAnimationUtils,
@@ -135,6 +159,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
         mFlingAnimationUtils = flingAnimationUtils;
         mFloatingContentCoordinator = floatingContentCoordinator;
         onConfigurationChanged();
+        mPipTaskOrganizer.registerPipTransitionCallback(mPipTransitionCallback);
     }
 
     @NonNull
@@ -375,9 +400,10 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
      * Animates the PiP to the expanded state to show the menu.
      */
     float animateToExpandedState(Rect expandedBounds, Rect movementBounds,
-            Rect expandedMovementBounds) {
+            Rect expandedMovementBounds, Runnable callback) {
         float savedSnapFraction = mSnapAlgorithm.getSnapFraction(new Rect(mBounds), movementBounds);
         mSnapAlgorithm.applySnapFraction(expandedBounds, expandedMovementBounds, savedSnapFraction);
+        mPostPipTransitionCallback = callback;
         resizeAndAnimatePipUnchecked(expandedBounds, EXPAND_STACK_TO_MENU_DURATION);
         return savedSnapFraction;
     }
