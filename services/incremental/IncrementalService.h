@@ -161,8 +161,7 @@ private:
         DataLoaderStub(IncrementalService& service, MountId id,
                        content::pm::DataLoaderParamsParcel&& params,
                        content::pm::FileSystemControlParcel&& control,
-                       incfs::UniqueControl&& healthControl,
-                       const DataLoaderStatusListener* externalListener);
+                       const DataLoaderStatusListener* externalListener, std::string&& healthPath);
         ~DataLoaderStub();
         // Cleans up the internal state and invalidates DataLoaderStub. Any subsequent calls will
         // result in an error.
@@ -180,9 +179,9 @@ private:
     private:
         binder::Status onStatusChanged(MountId mount, int newStatus) final;
 
-        void addToCmdLooperLocked();
-        void removeFromCmdLooperLocked();
-        int onCmdLooperEvent();
+        void registerForPendingReads();
+        void unregisterFromPendingReads();
+        int onPendingReads();
 
         bool isValid() const { return mId != kInvalidStorageId; }
         sp<content::pm::IDataLoader> getDataLoader();
@@ -197,13 +196,22 @@ private:
 
         bool fsmStep();
 
+        // Watching for pending reads.
+        void healthStatusOk();
+        // Pending reads detected, waiting for Xsecs to confirm blocked state.
+        void healthStatusReadsPending();
+        // There are reads pending for X+secs, waiting for additional Ysecs to confirm unhealthy
+        // state.
+        void healthStatusBlocked();
+        // There are reads pending for X+Ysecs, marking storage as unhealthy.
+        void healthStatusUnhealthy();
+
         IncrementalService& mService;
 
         std::mutex mMutex;
         MountId mId = kInvalidStorageId;
         content::pm::DataLoaderParamsParcel mParams;
         content::pm::FileSystemControlParcel mControl;
-        incfs::UniqueControl mHealthControl;
         DataLoaderStatusListener mListener;
 
         std::condition_variable mStatusCondition;
@@ -211,7 +219,8 @@ private:
         int mTargetStatus = content::pm::IDataLoaderStatusListener::DATA_LOADER_DESTROYED;
         TimePoint mTargetStatusTs = {};
 
-        TimePoint mEarliestMissingPageTs{Clock::duration::max()};
+        std::string mHealthPath;
+        incfs::UniqueControl mHealthControl;
     };
     using DataLoaderStubPtr = sp<DataLoaderStub>;
 
