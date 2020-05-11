@@ -103,7 +103,8 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
     private KeyguardSecurityModel mSecurityModel;
     private LockPatternUtils mLockPatternUtils;
 
-    private KeyguardSecurityViewFlipper mSecurityViewFlipper;
+    @VisibleForTesting
+    KeyguardSecurityViewFlipper mSecurityViewFlipper;
     private boolean mIsVerifyUnlockOnly;
     private SecurityMode mCurrentSecuritySelection = SecurityMode.Invalid;
     private KeyguardSecurityView mCurrentSecurityView;
@@ -375,6 +376,9 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
     }
 
     public boolean startDisappearAnimation(Runnable onFinishRunnable) {
+        if (mCurrentSecuritySelection == SecurityMode.Password) {
+            mSecurityViewFlipper.getWindowInsetsController().hide(WindowInsets.Type.ime());
+        }
         if (mCurrentSecuritySelection != SecurityMode.None) {
             return getSecurityView(mCurrentSecuritySelection).startDisappearAnimation(
                     onFinishRunnable);
@@ -397,7 +401,8 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
         return mSecurityViewFlipper.getTitle();
     }
 
-    private KeyguardSecurityView getSecurityView(SecurityMode securityMode) {
+    @VisibleForTesting
+    protected KeyguardSecurityView getSecurityView(SecurityMode securityMode) {
         final int securityViewIdForMode = getSecurityViewIdForMode(securityMode);
         KeyguardSecurityView view = null;
         final int children = mSecurityViewFlipper.getChildCount();
