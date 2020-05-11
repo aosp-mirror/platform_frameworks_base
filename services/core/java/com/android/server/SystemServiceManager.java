@@ -222,6 +222,7 @@ public class SystemServiceManager {
         if (phase == SystemService.PHASE_BOOT_COMPLETED) {
             final long totalBootTime = SystemClock.uptimeMillis() - mRuntimeStartUptime;
             t.logDuration("TotalBootTime", totalBootTime);
+            SystemServerInitThreadPool.shutdown();
         }
     }
 
