@@ -118,7 +118,7 @@ public class ExpandedAnimationController
 
     public ExpandedAnimationController(Point displaySize, int expandedViewPadding,
             int orientation) {
-        updateOrientation(orientation, displaySize);
+        updateResources(orientation, displaySize);
         mExpandedViewPadding = expandedViewPadding;
     }
 
@@ -168,7 +168,7 @@ public class ExpandedAnimationController
      * @param orientation Landscape or portrait.
      * @param displaySize Updated display size.
      */
-    public void updateOrientation(int orientation, Point displaySize) {
+    public void updateResources(int orientation, Point displaySize) {
         mScreenOrientation = orientation;
         mDisplaySize = displaySize;
         if (mLayout != null) {

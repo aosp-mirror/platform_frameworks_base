@@ -788,8 +788,8 @@ public class BubbleStackView extends FrameLayout
 
         mOrientationChangedListener =
                 (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
-                    mExpandedAnimationController.updateOrientation(mOrientation, mDisplaySize);
-                    mStackAnimationController.updateOrientation(mOrientation);
+                    mExpandedAnimationController.updateResources(mOrientation, mDisplaySize);
+                    mStackAnimationController.updateResources(mOrientation);
 
                     // Reposition & adjust the height for new orientation
                     if (mIsExpanded) {
@@ -1005,7 +1005,7 @@ public class BubbleStackView extends FrameLayout
             mBubbleOverflow.setUpOverflow(mBubbleContainer, this);
         } else {
             mBubbleContainer.removeView(mBubbleOverflow.getBtn());
-            mBubbleOverflow.updateIcon(mContext, this);
+            mBubbleOverflow.updateIcon(mContext,this);
             overflowBtnIndex = mBubbleContainer.getChildCount();
         }
         mBubbleContainer.addView(mBubbleOverflow.getBtn(), overflowBtnIndex,
@@ -1050,6 +1050,28 @@ public class BubbleStackView extends FrameLayout
 
         mManageMenu.setVisibility(View.INVISIBLE);
         mShowingManage = false;
+    }
+
+    /** Respond to the display size change by recalculating view size and location. */
+    public void onDisplaySizeChanged() {
+        setUpOverflow();
+
+        WindowManager wm = (WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE);
+        wm.getDefaultDisplay().getRealSize(mDisplaySize);
+        Resources res = getContext().getResources();
+        mStatusBarHeight = res.getDimensionPixelSize(
+                com.android.internal.R.dimen.status_bar_height);
+        mBubblePaddingTop = res.getDimensionPixelSize(R.dimen.bubble_padding_top);
+        mBubbleSize = getResources().getDimensionPixelSize(R.dimen.individual_bubble_size);
+        for (Bubble b : mBubbleData.getBubbles()) {
+            if (b.getIconView() == null) {
+                Log.d(TAG, "Display size changed. Icon null: " + b);
+                continue;
+            }
+            b.getIconView().setLayoutParams(new LayoutParams(mBubbleSize, mBubbleSize));
+        }
+        mExpandedAnimationController.updateResources(mOrientation, mDisplaySize);
+        mStackAnimationController.updateResources(mOrientation);
     }
 
     @Override
@@ -1291,7 +1313,7 @@ public class BubbleStackView extends FrameLayout
         Log.d(TAG, "was asked to remove Bubble, but didn't find the view! " + bubble);
     }
 
-    private void updateOverflowBtnVisibility(boolean apply) {
+    private void updateOverflowBtnVisibility() {
         if (!BubbleExperimentConfig.allowBubbleOverflow(mContext)) {
             return;
         }
@@ -1300,11 +1322,6 @@ public class BubbleStackView extends FrameLayout
                 Log.d(TAG, "Show overflow button.");
             }
             mBubbleOverflow.setBtnVisible(VISIBLE);
-            if (apply) {
-                mExpandedAnimationController.expandFromStack(() -> {
-                    updatePointerPosition();
-                } /* after */);
-            }
         } else {
             if (DEBUG_BUBBLE_STACK_VIEW) {
                 Log.d(TAG, "Collapsed. Hide overflow button.");
@@ -1561,7 +1578,7 @@ public class BubbleStackView extends FrameLayout
             Log.d(TAG, BubbleDebugConfig.formatBubblesString(getBubblesOnScreen(),
                     mExpandedBubble));
         }
-        updateOverflowBtnVisibility(/* apply */ false);
+        updateOverflowBtnVisibility();
         mBubbleContainer.cancelAllAnimations();
         mExpandedAnimationController.collapseBackToStack(
                 mStackAnimationController.getStackPositionAlongNearestHorizontalEdge()
@@ -1585,7 +1602,7 @@ public class BubbleStackView extends FrameLayout
         beforeExpandedViewAnimation();
 
         mBubbleContainer.setActiveController(mExpandedAnimationController);
-        updateOverflowBtnVisibility(/* apply */ false);
+        updateOverflowBtnVisibility();
         mExpandedAnimationController.expandFromStack(() -> {
             updatePointerPosition();
             afterExpandedViewAnimation();

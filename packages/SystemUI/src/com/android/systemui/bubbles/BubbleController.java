@@ -198,6 +198,11 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     /** Last known orientation, used to detect orientation changes in {@link #onConfigChanged}. */
     private int mOrientation = Configuration.ORIENTATION_UNDEFINED;
 
+    /**
+     * Last known screen density, used to detect display size changes in {@link #onConfigChanged}.
+     */
+    private int mDensityDpi = Configuration.DENSITY_DPI_UNDEFINED;
+
     private boolean mInflateSynchronously;
 
     // TODO (b/145659174): allow for multiple callbacks to support the "shadow" new notif pipeline
@@ -729,9 +734,16 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
 
     @Override
     public void onConfigChanged(Configuration newConfig) {
-        if (mStackView != null && newConfig != null && newConfig.orientation != mOrientation) {
-            mOrientation = newConfig.orientation;
-            mStackView.onOrientationChanged(newConfig.orientation);
+        if (mStackView != null && newConfig != null) {
+            if (newConfig.orientation != mOrientation) {
+                mOrientation = newConfig.orientation;
+                mStackView.onOrientationChanged(newConfig.orientation);
+            }
+            if (newConfig.densityDpi != mDensityDpi) {
+                mDensityDpi = newConfig.densityDpi;
+                mBubbleIconFactory = new BubbleIconFactory(mContext);
+                mStackView.onDisplaySizeChanged();
+            }
         }
     }
 
