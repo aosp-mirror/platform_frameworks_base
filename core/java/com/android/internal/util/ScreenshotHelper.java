@@ -132,6 +132,7 @@ public class ScreenshotHelper {
                     }
                 };
     }
+
     private static final String TAG = "ScreenshotHelper";
 
     // Time until we give up on the screenshot & show an error instead.
@@ -145,8 +146,6 @@ public class ScreenshotHelper {
     public ScreenshotHelper(Context context) {
         mContext = context;
     }
-
-
 
     /**
      * Request a screenshot be taken.
@@ -284,8 +283,8 @@ public class ScreenshotHelper {
                             break;
                         case SCREENSHOT_MSG_PROCESS_COMPLETE:
                             synchronized (mScreenshotLock) {
-                                if (mScreenshotConnection == myConn) {
-                                    mContext.unbindService(mScreenshotConnection);
+                                if (myConn != null && mScreenshotConnection == myConn) {
+                                    mContext.unbindService(myConn);
                                     mScreenshotConnection = null;
                                     mScreenshotService = null;
                                 }
