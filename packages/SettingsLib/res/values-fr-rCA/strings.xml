@@ -553,6 +553,5 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Désactivé"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Activé"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Votre appareil doit être redémarré pour que ce changement prenne effet. Redémarrez-le maintenant ou annulez la modification."</string>
-    <!-- no translation found for accessibility_work_profile_app_description (5470883112342119165) -->
-    <skip />
+    <string name="accessibility_work_profile_app_description" msgid="5470883112342119165">"<xliff:g id="APP_NAME">%s</xliff:g> (travail)"</string>
 </resources>

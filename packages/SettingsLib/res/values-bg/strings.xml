@@ -549,14 +549,9 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"Добавяне на гост"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Премахване на госта"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Гост"</string>
-    <!-- no translation found for cached_apps_freezer_device_default (2616594131750144342) -->
-    <skip />
-    <!-- no translation found for cached_apps_freezer_disabled (4816382260660472042) -->
-    <skip />
-    <!-- no translation found for cached_apps_freezer_enabled (8866703500183051546) -->
-    <skip />
-    <!-- no translation found for cached_apps_freezer_reboot_dialog_text (695330563489230096) -->
-    <skip />
-    <!-- no translation found for accessibility_work_profile_app_description (5470883112342119165) -->
-    <skip />
+    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Стандартна настройка за у-вото"</string>
+    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Деактивирано"</string>
+    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Активирано"</string>
+    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"За да бъде приложена тази промяна, устройството ви трябва да бъде рестартирано. Рестартирайте сега или анулирайте."</string>
+    <string name="accessibility_work_profile_app_description" msgid="5470883112342119165">"<xliff:g id="APP_NAME">%s</xliff:g> за работа"</string>
 </resources>
