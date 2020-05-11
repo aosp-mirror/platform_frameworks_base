@@ -65,6 +65,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -709,6 +710,35 @@ public final class MediaParser {
      */
     public static final String PARAMETER_TS_ENABLE_HDMV_DTS_AUDIO_STREAMS =
             "android.media.mediaparser.ts.enableHdmvDtsAudioStreams";
+    /**
+     * Sets whether encryption data should be sent in-band with the sample data, as per {@link
+     * OutputConsumer#onSampleDataFound}. {@code boolean} expected. Default value is {@code false}.
+     *
+     * <p>If this parameter is set, encrypted samples' data will be prefixed with the encryption
+     * information bytes. The format for in-band encryption information is:
+     *
+     * <ul>
+     *   <li>(1 byte) {@code encryption_signal_byte}: Most significant bit signals whether the
+     *       encryption data contains subsample encryption data. The remaining bits contain {@code
+     *       initialization_vector_size}.
+     *   <li>({@code initialization_vector_size} bytes) Initialization vector.
+     *   <li>If subsample encryption data is present, as per {@code encryption_signal_byte}, the
+     *       encryption data also contains:
+     *       <ul>
+     *         <li>(2 bytes) {@code subsample_encryption_data_length}.
+     *         <li>({@code subsample_encryption_data_length * 6} bytes) Subsample encryption data
+     *             (repeated {@code subsample_encryption_data_length} times):
+     *             <ul>
+     *               <li>(2 bytes) Size of a clear section in sample.
+     *               <li>(4 bytes) Size of an encryption section in sample.
+     *             </ul>
+     *       </ul>
+     * </ul>
+     *
+     * @hide
+     */
+    public static final String PARAMETER_IN_BAND_CRYPTO_INFO =
+            "android.media.mediaparser.inBandCryptoInfo";
 
     // Private constants.
 
@@ -718,6 +748,21 @@ public final class MediaParser {
     private static final String TS_MODE_SINGLE_PMT = "single_pmt";
     private static final String TS_MODE_MULTI_PMT = "multi_pmt";
     private static final String TS_MODE_HLS = "hls";
+    private static final int BYTES_PER_SUBSAMPLE_ENCRYPTION_ENTRY = 6;
+
+    @IntDef(
+            value = {
+                STATE_READING_SIGNAL_BYTE,
+                STATE_READING_INIT_VECTOR,
+                STATE_READING_SUBSAMPLE_ENCRYPTION_SIZE,
+                STATE_READING_SUBSAMPLE_ENCRYPTION_DATA
+            })
+    private @interface EncryptionDataReadState {}
+
+    private static final int STATE_READING_SIGNAL_BYTE = 0;
+    private static final int STATE_READING_INIT_VECTOR = 1;
+    private static final int STATE_READING_SUBSAMPLE_ENCRYPTION_SIZE = 2;
+    private static final int STATE_READING_SUBSAMPLE_ENCRYPTION_DATA = 3;
 
     // Instance creation methods.
 
@@ -853,6 +898,7 @@ public final class MediaParser {
     private final DataReaderAdapter mScratchDataReaderAdapter;
     private final ParsableByteArrayAdapter mScratchParsableByteArrayAdapter;
     @Nullable private final Constructor<DrmInitData.SchemeInitData> mSchemeInitDataConstructor;
+    private boolean mInBandCryptoInfo;
     private String mParserName;
     private Extractor mExtractor;
     private ExtractorInput mExtractorInput;
@@ -899,6 +945,9 @@ public final class MediaParser {
                 && !TS_MODE_HLS.equals(value)
                 && !TS_MODE_MULTI_PMT.equals(value)) {
             throw new IllegalArgumentException(PARAMETER_TS_MODE + " does not accept: " + value);
+        }
+        if (PARAMETER_IN_BAND_CRYPTO_INFO.equals(parameterName)) {
+            mInBandCryptoInfo = (boolean) value;
         }
         mParserParameters.put(parameterName, value);
         return this;
@@ -1274,9 +1323,23 @@ public final class MediaParser {
     private class TrackOutputAdapter implements TrackOutput {
 
         private final int mTrackIndex;
+        private final CryptoInfo mCryptoInfo;
+
+        @EncryptionDataReadState private int mEncryptionDataReadState;
+        private int mEncryptionDataSizeToSubtractFromSampleDataSize;
+        private int mEncryptionVectorSize;
+        private boolean mHasSubsampleEncryptionData;
+        private CryptoInfo.Pattern mEncryptionPattern;
 
         private TrackOutputAdapter(int trackIndex) {
             mTrackIndex = trackIndex;
+            mCryptoInfo = new CryptoInfo();
+            mCryptoInfo.iv = new byte[16]; // Size documented in CryptoInfo.
+            mCryptoInfo.numBytesOfClearData = new int[0];
+            mCryptoInfo.numBytesOfEncryptedData = new int[0];
+            mEncryptionDataReadState = STATE_READING_SIGNAL_BYTE;
+            mEncryptionPattern =
+                    new CryptoInfo.Pattern(/* blocksToEncrypt= */ 0, /* blocksToSkip= */ 0);
         }
 
         @Override
@@ -1303,6 +1366,98 @@ public final class MediaParser {
         @Override
         public void sampleData(
                 ParsableByteArray data, int length, @SampleDataPart int sampleDataPart) {
+            if (sampleDataPart == SAMPLE_DATA_PART_ENCRYPTION && !mInBandCryptoInfo) {
+                while (length > 0) {
+                    switch (mEncryptionDataReadState) {
+                        case STATE_READING_SIGNAL_BYTE:
+                            int encryptionSignalByte = data.readUnsignedByte();
+                            length--;
+                            mHasSubsampleEncryptionData = ((encryptionSignalByte >> 7) & 1) != 0;
+                            mEncryptionVectorSize = encryptionSignalByte & 0x7F;
+                            mEncryptionDataSizeToSubtractFromSampleDataSize =
+                                    mEncryptionVectorSize + 1; // Signal byte.
+                            mEncryptionDataReadState = STATE_READING_INIT_VECTOR;
+                            break;
+                        case STATE_READING_INIT_VECTOR:
+                            Arrays.fill(mCryptoInfo.iv, (byte) 0); // Ensure 0-padding.
+                            data.readBytes(mCryptoInfo.iv, /* offset= */ 0, mEncryptionVectorSize);
+                            length -= mEncryptionVectorSize;
+                            if (mHasSubsampleEncryptionData) {
+                                mEncryptionDataReadState = STATE_READING_SUBSAMPLE_ENCRYPTION_SIZE;
+                            } else {
+                                mCryptoInfo.numSubSamples = 0;
+                                mEncryptionDataReadState = STATE_READING_SIGNAL_BYTE;
+                            }
+                            break;
+                        case STATE_READING_SUBSAMPLE_ENCRYPTION_SIZE:
+                            int numSubSamples = data.readUnsignedShort();
+                            mCryptoInfo.numSubSamples = numSubSamples;
+                            if (mCryptoInfo.numBytesOfClearData.length < numSubSamples) {
+                                mCryptoInfo.numBytesOfClearData = new int[numSubSamples];
+                                mCryptoInfo.numBytesOfEncryptedData = new int[numSubSamples];
+                            }
+                            length -= 2;
+                            mEncryptionDataSizeToSubtractFromSampleDataSize +=
+                                    2 + numSubSamples * BYTES_PER_SUBSAMPLE_ENCRYPTION_ENTRY;
+                            mEncryptionDataReadState = STATE_READING_SUBSAMPLE_ENCRYPTION_DATA;
+                            break;
+                        case STATE_READING_SUBSAMPLE_ENCRYPTION_DATA:
+                            for (int i = 0; i < mCryptoInfo.numSubSamples; i++) {
+                                mCryptoInfo.numBytesOfClearData[i] = data.readUnsignedShort();
+                                mCryptoInfo.numBytesOfEncryptedData[i] = data.readInt();
+                            }
+                            length -=
+                                    mCryptoInfo.numSubSamples
+                                            * BYTES_PER_SUBSAMPLE_ENCRYPTION_ENTRY;
+                            mEncryptionDataReadState = STATE_READING_SIGNAL_BYTE;
+                            if (length != 0) {
+                                throw new IllegalStateException();
+                            }
+                            break;
+                        default:
+                            // Never happens.
+                            throw new IllegalStateException();
+                    }
+                }
+            } else {
+                outputSampleData(data, length);
+            }
+        }
+
+        @Override
+        public void sampleMetadata(
+                long timeUs, int flags, int size, int offset, @Nullable CryptoData cryptoData) {
+            mOutputConsumer.onSampleCompleted(
+                    mTrackIndex,
+                    timeUs,
+                    getMediaParserFlags(flags),
+                    size - mEncryptionDataSizeToSubtractFromSampleDataSize,
+                    offset,
+                    getPopulatedCryptoInfo(cryptoData));
+            mEncryptionDataReadState = STATE_READING_SIGNAL_BYTE;
+            mEncryptionDataSizeToSubtractFromSampleDataSize = 0;
+        }
+
+        @Nullable
+        private CryptoInfo getPopulatedCryptoInfo(@Nullable CryptoData cryptoData) {
+            if (cryptoData == null) {
+                // The sample is not encrypted.
+                return null;
+            }
+            mCryptoInfo.key = cryptoData.encryptionKey;
+            // ExoPlayer modes match MediaCodec modes.
+            mCryptoInfo.mode = cryptoData.cryptoMode;
+            if (cryptoData.clearBlocks != 0) {
+                // Content is pattern-encrypted.
+                mCryptoInfo.setPattern(mEncryptionPattern);
+                mEncryptionPattern.set(cryptoData.encryptedBlocks, cryptoData.clearBlocks);
+            } else {
+                mCryptoInfo.setPattern(null);
+            }
+            return mCryptoInfo;
+        }
+
+        private void outputSampleData(ParsableByteArray data, int length) {
             mScratchParsableByteArrayAdapter.resetWithByteArray(data, length);
             try {
                 mOutputConsumer.onSampleDataFound(mTrackIndex, mScratchParsableByteArrayAdapter);
@@ -1310,13 +1465,6 @@ public final class MediaParser {
                 // Unexpected.
                 throw new RuntimeException(e);
             }
-        }
-
-        @Override
-        public void sampleMetadata(
-                long timeUs, int flags, int size, int offset, CryptoData encryptionData) {
-            mOutputConsumer.onSampleCompleted(
-                    mTrackIndex, timeUs, flags, size, offset, toCryptoInfo(encryptionData));
         }
     }
 
@@ -1519,11 +1667,6 @@ public final class MediaParser {
         }
     }
 
-    private static CryptoInfo toCryptoInfo(TrackOutput.CryptoData encryptionData) {
-        // TODO: Implement.
-        return null;
-    }
-
     /** Returns a new {@link SeekPoint} equivalent to the given {@code exoPlayerSeekPoint}. */
     private static SeekPoint toSeekPoint(
             com.google.android.exoplayer2.extractor.SeekPoint exoPlayerSeekPoint) {
@@ -1541,6 +1684,19 @@ public final class MediaParser {
                                 + ".");
             }
         }
+    }
+
+    private static int getMediaParserFlags(int flags) {
+        @SampleFlags int result = 0;
+        result |= (flags & C.BUFFER_FLAG_ENCRYPTED) != 0 ? SAMPLE_FLAG_ENCRYPTED : 0;
+        result |= (flags & C.BUFFER_FLAG_KEY_FRAME) != 0 ? SAMPLE_FLAG_KEY_FRAME : 0;
+        result |= (flags & C.BUFFER_FLAG_DECODE_ONLY) != 0 ? SAMPLE_FLAG_DECODE_ONLY : 0;
+        result |=
+                (flags & C.BUFFER_FLAG_HAS_SUPPLEMENTAL_DATA) != 0
+                        ? SAMPLE_FLAG_HAS_SUPPLEMENTAL_DATA
+                        : 0;
+        result |= (flags & C.BUFFER_FLAG_LAST_SAMPLE) != 0 ? SAMPLE_FLAG_LAST_SAMPLE : 0;
+        return result;
     }
 
     @Nullable
@@ -1598,6 +1754,7 @@ public final class MediaParser {
         expectedTypeByParameterName.put(PARAMETER_TS_IGNORE_SPLICE_INFO_STREAM, Boolean.class);
         expectedTypeByParameterName.put(PARAMETER_TS_DETECT_ACCESS_UNITS, Boolean.class);
         expectedTypeByParameterName.put(PARAMETER_TS_ENABLE_HDMV_DTS_AUDIO_STREAMS, Boolean.class);
+        expectedTypeByParameterName.put(PARAMETER_IN_BAND_CRYPTO_INFO, Boolean.class);
         EXPECTED_TYPE_BY_PARAMETER_NAME = Collections.unmodifiableMap(expectedTypeByParameterName);
     }
 }
