@@ -549,14 +549,10 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"게스트 추가"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"게스트 삭제"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"게스트"</string>
-    <!-- no translation found for cached_apps_freezer_device_default (2616594131750144342) -->
-    <skip />
-    <!-- no translation found for cached_apps_freezer_disabled (4816382260660472042) -->
-    <skip />
-    <!-- no translation found for cached_apps_freezer_enabled (8866703500183051546) -->
-    <skip />
-    <!-- no translation found for cached_apps_freezer_reboot_dialog_text (695330563489230096) -->
-    <skip />
+    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"기기 기본값"</string>
+    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"사용 중지됨"</string>
+    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"사용 설정됨"</string>
+    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"변경사항을 적용하려면 기기를 재부팅해야 합니다. 지금 재부팅하거나 취소하세요."</string>
     <!-- no translation found for accessibility_work_profile_app_description (5470883112342119165) -->
     <skip />
 </resources>

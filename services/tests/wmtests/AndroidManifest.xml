@@ -58,6 +58,8 @@
                   android:screenOrientation="sensorLandscape"
                   android:showWhenLocked="true"
                   android:turnScreenOn="true" />
+        <activity android:name="com.android.server.wm.TaskStackChangedListenerTest$ResumeWhilePausingActivity"
+                  android:resumeWhilePausing="true"/>
         <activity android:name="com.android.server.wm.ScreenDecorWindowTests$TestActivity"
                   android:showWhenLocked="true" android:allowEmbedded="true"/>
     </application>
