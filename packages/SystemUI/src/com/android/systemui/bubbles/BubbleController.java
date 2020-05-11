@@ -634,7 +634,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                 // themselves.
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT,
-                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                WindowManager.LayoutParams.TYPE_TRUSTED_APPLICATION_OVERLAY,
                 // Start not focusable - we'll become focusable when expanded so the ActivityView
                 // can use the IME.
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
