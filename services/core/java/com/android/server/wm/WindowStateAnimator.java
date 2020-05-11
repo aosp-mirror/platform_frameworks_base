@@ -1257,19 +1257,25 @@ class WindowStateAnimator {
         mYOffset = dy;
         mWallpaperScale = scale;
 
-        try {
-            if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG, ">>> OPEN TRANSACTION setWallpaperOffset");
-            mService.openSurfaceTransaction();
-            setWallpaperPositionAndScale(dx, dy, scale, false);
-        } catch (RuntimeException e) {
-            Slog.w(TAG, "Error positioning surface of " + mWin
-                    + " pos=(" + dx + "," + dy + ")", e);
-        } finally {
-            mService.closeSurfaceTransaction("setWallpaperOffset");
-            if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
-                    "<<< CLOSE TRANSACTION setWallpaperOffset");
-            return true;
+        if (mSurfaceController != null) {
+            try {
+                if (SHOW_LIGHT_TRANSACTIONS) {
+                    Slog.i(TAG, ">>> OPEN TRANSACTION setWallpaperOffset");
+                }
+                mService.openSurfaceTransaction();
+                setWallpaperPositionAndScale(dx, dy, scale, false);
+            } catch (RuntimeException e) {
+                Slog.w(TAG, "Error positioning surface of " + mWin
+                        + " pos=(" + dx + "," + dy + ")", e);
+            } finally {
+                mService.closeSurfaceTransaction("setWallpaperOffset");
+                if (SHOW_LIGHT_TRANSACTIONS) {
+                    Slog.i(TAG, "<<< CLOSE TRANSACTION setWallpaperOffset");
+                }
+            }
         }
+
+        return true;
     }
 
     private void setWallpaperPositionAndScale(int dx, int dy, float scale,
