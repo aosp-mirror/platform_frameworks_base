@@ -13209,7 +13209,9 @@ public class TelephonyManager {
                 service.userActivity();
             }
         } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
+            // one-way notification, if telephony is not available, it is okay to not throw
+            // exception here.
+            Log.w(TAG, "notifyUserActivity exception: " + e.getMessage());
         }
     }
 
