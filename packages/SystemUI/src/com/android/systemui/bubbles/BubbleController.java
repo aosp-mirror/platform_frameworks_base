@@ -280,31 +280,6 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         }
     }
 
-    public BubbleController(Context context,
-            NotificationShadeWindowController notificationShadeWindowController,
-            StatusBarStateController statusBarStateController,
-            ShadeController shadeController,
-            BubbleData data,
-            ConfigurationController configurationController,
-            NotificationInterruptStateProvider interruptionStateProvider,
-            ZenModeController zenModeController,
-            NotificationLockscreenUserManager notifUserManager,
-            NotificationGroupManager groupManager,
-            NotificationEntryManager entryManager,
-            NotifPipeline notifPipeline,
-            FeatureFlags featureFlags,
-            DumpManager dumpManager,
-            FloatingContentCoordinator floatingContentCoordinator,
-            BubbleDataRepository dataRepository,
-            SysUiState sysUiState,
-            INotificationManager notificationManager) {
-        this(context, notificationShadeWindowController, statusBarStateController, shadeController,
-                data, null /* synchronizer */, configurationController, interruptionStateProvider,
-                zenModeController, notifUserManager, groupManager, entryManager,
-                notifPipeline, featureFlags, dumpManager, floatingContentCoordinator,
-                dataRepository, sysUiState, notificationManager);
-    }
-
     /**
      * Injected constructor. See {@link BubbleModule}.
      */
@@ -326,7 +301,8 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
             FloatingContentCoordinator floatingContentCoordinator,
             BubbleDataRepository dataRepository,
             SysUiState sysUiState,
-            INotificationManager notificationManager) {
+            INotificationManager notificationManager,
+            WindowManager windowManager) {
         dumpManager.registerDumpable(TAG, this);
         mContext = context;
         mShadeController = shadeController;
@@ -395,7 +371,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         }
         mSurfaceSynchronizer = synchronizer;
 
-        mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
+        mWindowManager = windowManager;
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
 
