@@ -354,13 +354,19 @@ public class StagingManager {
         Slog.e(TAG, "Aborting checkpoint: " + errorMsg);
         try {
             if (supportsCheckpoint() && needsCheckpoint()) {
-                mApexManager.revertActiveSessions();
+                // Only revert apex sessions if device supports updating apex
+                if (mApexManager.isApexSupported()) {
+                    mApexManager.revertActiveSessions();
+                }
                 PackageHelper.getStorageManager().abortChanges(
                         "StagingManager initiated", false /*retry*/);
             }
         } catch (Exception e) {
             Slog.wtf(TAG, "Failed to abort checkpoint", e);
-            mApexManager.revertActiveSessions();
+            // Only revert apex sessions if device supports updating apex
+            if (mApexManager.isApexSupported()) {
+                mApexManager.revertActiveSessions();
+            }
             mPowerManager.reboot(null);
         }
     }
