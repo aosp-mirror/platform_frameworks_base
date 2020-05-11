@@ -92,6 +92,9 @@ public class NetworkAgentWrapper implements TestableNetworkCallback.HasNetwork {
                 break;
             case TRANSPORT_VPN:
                 mNetworkCapabilities.removeCapability(NET_CAPABILITY_NOT_VPN);
+                // VPNs deduce the SUSPENDED capability from their underlying networks and there
+                // is no public API to let VPN services set it.
+                mNetworkCapabilities.removeCapability(NET_CAPABILITY_NOT_SUSPENDED);
                 mScore = ConnectivityConstants.VPN_DEFAULT_SCORE;
                 break;
             default:
