@@ -295,6 +295,7 @@ class ActivityTestsBase extends SystemServiceTestsBase {
                 // fullscreen value is normally read from resources in ctor, so for testing we need
                 // to set it somewhere else since we can't mock resources.
                 doReturn(true).when(activity).occludesParent();
+                doReturn(true).when(activity).fillsParent();
                 mTask.addChild(activity);
                 // Make visible by default...
                 activity.setVisible(true);
