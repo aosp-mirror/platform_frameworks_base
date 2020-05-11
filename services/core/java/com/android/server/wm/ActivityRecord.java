@@ -1160,8 +1160,14 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             } else {
                 mLastReportedMultiWindowMode = inMultiWindowMode;
                 computeConfigurationAfterMultiWindowModeChange();
-                ensureActivityConfiguration(0 /* globalChanges */, PRESERVE_WINDOWS,
-                        true /* ignoreVisibility */);
+                // If the activity is in stopping or stopped state, for instance, it's in the
+                // split screen task and not the top one, the last configuration it should keep
+                // is the one before multi-window mode change.
+                final ActivityState state = getState();
+                if (state != STOPPED && state != STOPPING) {
+                    ensureActivityConfiguration(0 /* globalChanges */, PRESERVE_WINDOWS,
+                            true /* ignoreVisibility */);
+                }
             }
         }
     }
