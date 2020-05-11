@@ -514,16 +514,27 @@ public final class BluetoothLeScanner {
         @Override
         public void onScanResult(final ScanResult scanResult) {
             Attributable.setAttributionSource(scanResult, mAttributionSource);
+            if (Log.isLoggable(TAG, Log.DEBUG)) {
+                Log.d(TAG, "onScanResult() - mScannerId=" + mScannerId);
+            }
             if (VDBG) Log.d(TAG, "onScanResult() - " + scanResult.toString());
 
             // Check null in case the scan has been stopped
             synchronized (this) {
-                if (mScannerId <= 0) return;
+                if (mScannerId <= 0) {
+                    if (Log.isLoggable(TAG, Log.DEBUG)) {
+                        Log.d(TAG, "Ignoring result as scan stopped.");
+                    }
+                    return;
+                };
             }
             Handler handler = new Handler(Looper.getMainLooper());
             handler.post(new Runnable() {
                 @Override
                 public void run() {
+                    if (Log.isLoggable(TAG, Log.DEBUG)) {
+                        Log.d(TAG, "onScanResult() - handler run");
+                    }
                     mScanCallback.onScanResult(ScanSettings.CALLBACK_TYPE_ALL_MATCHES, scanResult);
                 }
             });
