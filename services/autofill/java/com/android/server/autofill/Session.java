@@ -2374,9 +2374,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     @GuardedBy("mLock")
     private boolean shouldStartNewPartitionLocked(@NonNull AutofillId id) {
         final ViewState currentView = mViewStates.get(id);
-        if (mResponses == null && currentView != null
-                && (currentView.getState() & ViewState.STATE_PENDING_CREATE_INLINE_REQUEST) == 0) {
-            return true;
+        if (mResponses == null) {
+            return currentView != null && (currentView.getState()
+                    & ViewState.STATE_PENDING_CREATE_INLINE_REQUEST) == 0;
         }
 
         if (mExpiredResponse) {
