@@ -137,7 +137,7 @@ public class RecordingController
      * Check if the recording is ongoing
      * @return
      */
-    public boolean isRecording() {
+    public synchronized boolean isRecording() {
         return mIsRecording;
     }
 
@@ -157,7 +157,7 @@ public class RecordingController
      * Update the current status
      * @param isRecording
      */
-    public void updateState(boolean isRecording) {
+    public synchronized void updateState(boolean isRecording) {
         mIsRecording = isRecording;
         for (RecordingStateChangeCallback cb : mListeners) {
             if (isRecording) {
