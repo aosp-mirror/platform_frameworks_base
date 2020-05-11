@@ -1215,6 +1215,14 @@ public interface WindowManager extends ViewManager {
         public static final int TYPE_STATUS_BAR_ADDITIONAL = FIRST_SYSTEM_WINDOW + 41;
 
         /**
+         * Similar to TYPE_APPLICATION_OVERLAY, but trusted to overlay other windows since it is
+         * is coming from the system.
+         * @hide
+         */
+        // TODO(b/155781676): Remove and replace call points with trustedOverlay when that is ready.
+        public static final int TYPE_TRUSTED_APPLICATION_OVERLAY = FIRST_SYSTEM_WINDOW + 42;
+
+        /**
          * End of types of system windows.
          */
         public static final int LAST_SYSTEM_WINDOW      = 2999;
