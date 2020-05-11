@@ -29,6 +29,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.IRotationWatcher.Stub;
 import android.view.MotionEvent;
 import android.view.Surface;
@@ -54,6 +55,7 @@ import java.util.function.Consumer;
 /** Contains logic that deals with showing a rotate suggestion button with animation. */
 public class RotationButtonController {
 
+    private static final String TAG = "StatusBar/RotationButtonController";
     private static final int BUTTON_FADE_IN_OUT_DURATION_MS = 100;
     private static final int NAVBAR_HIDDEN_PENDING_ICON_TIMEOUT_MS = 20000;
 
@@ -139,6 +141,9 @@ public class RotationButtonController {
         try {
             WindowManagerGlobal.getWindowManagerService()
                     .watchRotation(mRotationWatcher, mContext.getDisplay().getDisplayId());
+        } catch (IllegalArgumentException e) {
+            mListenersRegistered = false;
+            Log.w(TAG, "RegisterListeners for the display failed");
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
