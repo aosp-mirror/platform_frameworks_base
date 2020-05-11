@@ -416,7 +416,7 @@ public class ViewConfiguration {
                 com.android.internal.R.dimen.config_ambiguousGestureMultiplier,
                 multiplierValue,
                 true /*resolveRefs*/);
-        mAmbiguousGestureMultiplier = multiplierValue.getFloat();
+        mAmbiguousGestureMultiplier = Math.max(1.0f, multiplierValue.getFloat());
 
         // Size of the screen in bytes, in ARGB_8888 format
         final WindowManager windowManager = context.getSystemService(WindowManager.class);
