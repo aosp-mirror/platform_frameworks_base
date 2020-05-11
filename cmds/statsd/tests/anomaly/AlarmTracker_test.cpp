@@ -56,7 +56,7 @@ TEST(AlarmTrackerTest, TestTriggerTimestamp) {
 
     currentTimeSec = startMillis / MS_PER_SEC + 7000;
     firedAlarmSet = subscriberAlarmMonitor->popSoonerThan(static_cast<uint32_t>(currentTimeSec));
-    EXPECT_EQ(firedAlarmSet.size(), 1u);
+    ASSERT_EQ(firedAlarmSet.size(), 1u);
     tracker.informAlarmsFired(currentTimeSec * NS_PER_SEC, firedAlarmSet);
     EXPECT_TRUE(firedAlarmSet.empty());
     EXPECT_EQ(tracker.mAlarmSec, (int64_t)(startMillis / MS_PER_SEC + 15 + 2 * 60 * 60));

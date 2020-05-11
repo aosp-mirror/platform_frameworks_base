@@ -76,7 +76,7 @@ TEST(GaugeMetricE2eTest, TestRandomSamplePulledEvents) {
     auto processor =
             CreateStatsLogProcessor(baseTimeNs, configAddedTimeNs, config, cfgKey,
                                     SharedRefBase::make<FakeSubsystemSleepCallback>(), ATOM_TAG);
-    EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
+    ASSERT_EQ(processor->mMetricsManagers.size(), 1u);
     EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
     processor->mPullerManager->ForceClearPullerCache();
 
@@ -87,7 +87,7 @@ TEST(GaugeMetricE2eTest, TestRandomSamplePulledEvents) {
 
     // When creating the config, the gauge metric producer should register the alarm at the
     // end of the current bucket.
-    EXPECT_EQ((size_t)1, processor->mPullerManager->mReceivers.size());
+    ASSERT_EQ((size_t)1, processor->mPullerManager->mReceivers.size());
     EXPECT_EQ(bucketSizeNs,
               processor->mPullerManager->mReceivers.begin()->second.front().intervalNs);
     int64_t& nextPullTimeNs =
@@ -141,30 +141,30 @@ TEST(GaugeMetricE2eTest, TestRandomSamplePulledEvents) {
     backfillDimensionPath(&reports);
     backfillStringInReport(&reports);
     backfillStartEndTimestamp(&reports);
-    EXPECT_EQ(1, reports.reports_size());
-    EXPECT_EQ(1, reports.reports(0).metrics_size());
+    ASSERT_EQ(1, reports.reports_size());
+    ASSERT_EQ(1, reports.reports(0).metrics_size());
     StatsLogReport::GaugeMetricDataWrapper gaugeMetrics;
     sortMetricDataByDimensionsValue(reports.reports(0).metrics(0).gauge_metrics(), &gaugeMetrics);
-    EXPECT_GT((int)gaugeMetrics.data_size(), 1);
+    ASSERT_GT((int)gaugeMetrics.data_size(), 1);
 
     auto data = gaugeMetrics.data(0);
     EXPECT_EQ(ATOM_TAG, data.dimensions_in_what().field());
-    EXPECT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
+    ASSERT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
     EXPECT_EQ(1 /* subsystem name field */,
               data.dimensions_in_what().value_tuple().dimensions_value(0).field());
     EXPECT_FALSE(data.dimensions_in_what().value_tuple().dimensions_value(0).value_str().empty());
-    EXPECT_EQ(6, data.bucket_info_size());
+    ASSERT_EQ(6, data.bucket_info_size());
 
-    EXPECT_EQ(1, data.bucket_info(0).atom_size());
-    EXPECT_EQ(1, data.bucket_info(0).elapsed_timestamp_nanos_size());
+    ASSERT_EQ(1, data.bucket_info(0).atom_size());
+    ASSERT_EQ(1, data.bucket_info(0).elapsed_timestamp_nanos_size());
     EXPECT_EQ(configAddedTimeNs + 55, data.bucket_info(0).elapsed_timestamp_nanos(0));
-    EXPECT_EQ(0, data.bucket_info(0).wall_clock_timestamp_nanos_size());
+    ASSERT_EQ(0, data.bucket_info(0).wall_clock_timestamp_nanos_size());
     EXPECT_EQ(baseTimeNs + 2 * bucketSizeNs, data.bucket_info(0).start_bucket_elapsed_nanos());
     EXPECT_EQ(baseTimeNs + 3 * bucketSizeNs, data.bucket_info(0).end_bucket_elapsed_nanos());
     EXPECT_TRUE(data.bucket_info(0).atom(0).subsystem_sleep_state().subsystem_name().empty());
     EXPECT_GT(data.bucket_info(0).atom(0).subsystem_sleep_state().time_millis(), 0);
 
-    EXPECT_EQ(1, data.bucket_info(1).atom_size());
+    ASSERT_EQ(1, data.bucket_info(1).atom_size());
     EXPECT_EQ(baseTimeNs + 3 * bucketSizeNs + 1, data.bucket_info(1).elapsed_timestamp_nanos(0));
     EXPECT_EQ(baseTimeNs + 3 * bucketSizeNs + 1, data.bucket_info(1).elapsed_timestamp_nanos(0));
     EXPECT_EQ(baseTimeNs + 3 * bucketSizeNs, data.bucket_info(1).start_bucket_elapsed_nanos());
@@ -172,32 +172,32 @@ TEST(GaugeMetricE2eTest, TestRandomSamplePulledEvents) {
     EXPECT_TRUE(data.bucket_info(1).atom(0).subsystem_sleep_state().subsystem_name().empty());
     EXPECT_GT(data.bucket_info(1).atom(0).subsystem_sleep_state().time_millis(), 0);
 
-    EXPECT_EQ(1, data.bucket_info(2).atom_size());
-    EXPECT_EQ(1, data.bucket_info(2).elapsed_timestamp_nanos_size());
+    ASSERT_EQ(1, data.bucket_info(2).atom_size());
+    ASSERT_EQ(1, data.bucket_info(2).elapsed_timestamp_nanos_size());
     EXPECT_EQ(baseTimeNs + 4 * bucketSizeNs + 1, data.bucket_info(2).elapsed_timestamp_nanos(0));
     EXPECT_EQ(baseTimeNs + 4 * bucketSizeNs, data.bucket_info(2).start_bucket_elapsed_nanos());
     EXPECT_EQ(baseTimeNs + 5 * bucketSizeNs, data.bucket_info(2).end_bucket_elapsed_nanos());
     EXPECT_TRUE(data.bucket_info(2).atom(0).subsystem_sleep_state().subsystem_name().empty());
     EXPECT_GT(data.bucket_info(2).atom(0).subsystem_sleep_state().time_millis(), 0);
 
-    EXPECT_EQ(1, data.bucket_info(3).atom_size());
-    EXPECT_EQ(1, data.bucket_info(3).elapsed_timestamp_nanos_size());
+    ASSERT_EQ(1, data.bucket_info(3).atom_size());
+    ASSERT_EQ(1, data.bucket_info(3).elapsed_timestamp_nanos_size());
     EXPECT_EQ(baseTimeNs + 5 * bucketSizeNs + 1, data.bucket_info(3).elapsed_timestamp_nanos(0));
     EXPECT_EQ(baseTimeNs + 5 * bucketSizeNs, data.bucket_info(3).start_bucket_elapsed_nanos());
     EXPECT_EQ(baseTimeNs + 6 * bucketSizeNs, data.bucket_info(3).end_bucket_elapsed_nanos());
     EXPECT_TRUE(data.bucket_info(3).atom(0).subsystem_sleep_state().subsystem_name().empty());
     EXPECT_GT(data.bucket_info(3).atom(0).subsystem_sleep_state().time_millis(), 0);
 
-    EXPECT_EQ(1, data.bucket_info(4).atom_size());
-    EXPECT_EQ(1, data.bucket_info(4).elapsed_timestamp_nanos_size());
+    ASSERT_EQ(1, data.bucket_info(4).atom_size());
+    ASSERT_EQ(1, data.bucket_info(4).elapsed_timestamp_nanos_size());
     EXPECT_EQ(baseTimeNs + 7 * bucketSizeNs + 1, data.bucket_info(4).elapsed_timestamp_nanos(0));
     EXPECT_EQ(baseTimeNs + 7 * bucketSizeNs, data.bucket_info(4).start_bucket_elapsed_nanos());
     EXPECT_EQ(baseTimeNs + 8 * bucketSizeNs, data.bucket_info(4).end_bucket_elapsed_nanos());
     EXPECT_TRUE(data.bucket_info(4).atom(0).subsystem_sleep_state().subsystem_name().empty());
     EXPECT_GT(data.bucket_info(4).atom(0).subsystem_sleep_state().time_millis(), 0);
 
-    EXPECT_EQ(1, data.bucket_info(5).atom_size());
-    EXPECT_EQ(1, data.bucket_info(5).elapsed_timestamp_nanos_size());
+    ASSERT_EQ(1, data.bucket_info(5).atom_size());
+    ASSERT_EQ(1, data.bucket_info(5).elapsed_timestamp_nanos_size());
     EXPECT_EQ(baseTimeNs + 8 * bucketSizeNs + 2, data.bucket_info(5).elapsed_timestamp_nanos(0));
     EXPECT_EQ(baseTimeNs + 8 * bucketSizeNs, data.bucket_info(5).start_bucket_elapsed_nanos());
     EXPECT_EQ(baseTimeNs + 9 * bucketSizeNs, data.bucket_info(5).end_bucket_elapsed_nanos());
@@ -215,7 +215,7 @@ TEST(GaugeMetricE2eTest, TestConditionChangeToTrueSamplePulledEvents) {
     auto processor =
             CreateStatsLogProcessor(baseTimeNs, configAddedTimeNs, config, cfgKey,
                                     SharedRefBase::make<FakeSubsystemSleepCallback>(), ATOM_TAG);
-    EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
+    ASSERT_EQ(processor->mMetricsManagers.size(), 1u);
     EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
     processor->mPullerManager->ForceClearPullerCache();
 
@@ -259,30 +259,30 @@ TEST(GaugeMetricE2eTest, TestConditionChangeToTrueSamplePulledEvents) {
     backfillDimensionPath(&reports);
     backfillStringInReport(&reports);
     backfillStartEndTimestamp(&reports);
-    EXPECT_EQ(1, reports.reports_size());
-    EXPECT_EQ(1, reports.reports(0).metrics_size());
+    ASSERT_EQ(1, reports.reports_size());
+    ASSERT_EQ(1, reports.reports(0).metrics_size());
     StatsLogReport::GaugeMetricDataWrapper gaugeMetrics;
     sortMetricDataByDimensionsValue(reports.reports(0).metrics(0).gauge_metrics(), &gaugeMetrics);
-    EXPECT_GT((int)gaugeMetrics.data_size(), 1);
+    ASSERT_GT((int)gaugeMetrics.data_size(), 1);
 
     auto data = gaugeMetrics.data(0);
     EXPECT_EQ(ATOM_TAG, data.dimensions_in_what().field());
-    EXPECT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
+    ASSERT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
     EXPECT_EQ(1 /* subsystem name field */,
               data.dimensions_in_what().value_tuple().dimensions_value(0).field());
     EXPECT_FALSE(data.dimensions_in_what().value_tuple().dimensions_value(0).value_str().empty());
-    EXPECT_EQ(3, data.bucket_info_size());
+    ASSERT_EQ(3, data.bucket_info_size());
 
-    EXPECT_EQ(1, data.bucket_info(0).atom_size());
-    EXPECT_EQ(1, data.bucket_info(0).elapsed_timestamp_nanos_size());
+    ASSERT_EQ(1, data.bucket_info(0).atom_size());
+    ASSERT_EQ(1, data.bucket_info(0).elapsed_timestamp_nanos_size());
     EXPECT_EQ(configAddedTimeNs + 55, data.bucket_info(0).elapsed_timestamp_nanos(0));
-    EXPECT_EQ(0, data.bucket_info(0).wall_clock_timestamp_nanos_size());
+    ASSERT_EQ(0, data.bucket_info(0).wall_clock_timestamp_nanos_size());
     EXPECT_EQ(baseTimeNs + 2 * bucketSizeNs, data.bucket_info(0).start_bucket_elapsed_nanos());
     EXPECT_EQ(baseTimeNs + 3 * bucketSizeNs, data.bucket_info(0).end_bucket_elapsed_nanos());
     EXPECT_TRUE(data.bucket_info(0).atom(0).subsystem_sleep_state().subsystem_name().empty());
     EXPECT_GT(data.bucket_info(0).atom(0).subsystem_sleep_state().time_millis(), 0);
 
-    EXPECT_EQ(1, data.bucket_info(1).atom_size());
+    ASSERT_EQ(1, data.bucket_info(1).atom_size());
     EXPECT_EQ(baseTimeNs + 3 * bucketSizeNs + 100, data.bucket_info(1).elapsed_timestamp_nanos(0));
     EXPECT_EQ(configAddedTimeNs + 55, data.bucket_info(0).elapsed_timestamp_nanos(0));
     EXPECT_EQ(baseTimeNs + 3 * bucketSizeNs, data.bucket_info(1).start_bucket_elapsed_nanos());
@@ -290,8 +290,8 @@ TEST(GaugeMetricE2eTest, TestConditionChangeToTrueSamplePulledEvents) {
     EXPECT_TRUE(data.bucket_info(1).atom(0).subsystem_sleep_state().subsystem_name().empty());
     EXPECT_GT(data.bucket_info(1).atom(0).subsystem_sleep_state().time_millis(), 0);
 
-    EXPECT_EQ(2, data.bucket_info(2).atom_size());
-    EXPECT_EQ(2, data.bucket_info(2).elapsed_timestamp_nanos_size());
+    ASSERT_EQ(2, data.bucket_info(2).atom_size());
+    ASSERT_EQ(2, data.bucket_info(2).elapsed_timestamp_nanos_size());
     EXPECT_EQ(baseTimeNs + 7 * bucketSizeNs + 1, data.bucket_info(2).elapsed_timestamp_nanos(0));
     EXPECT_EQ(baseTimeNs + 7 * bucketSizeNs + 10, data.bucket_info(2).elapsed_timestamp_nanos(1));
     EXPECT_EQ(baseTimeNs + 7 * bucketSizeNs, data.bucket_info(2).start_bucket_elapsed_nanos());
@@ -312,7 +312,7 @@ TEST(GaugeMetricE2eTest, TestRandomSamplePulledEvent_LateAlarm) {
     auto processor =
             CreateStatsLogProcessor(baseTimeNs, configAddedTimeNs, config, cfgKey,
                                     SharedRefBase::make<FakeSubsystemSleepCallback>(), ATOM_TAG);
-    EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
+    ASSERT_EQ(processor->mMetricsManagers.size(), 1u);
     EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
     processor->mPullerManager->ForceClearPullerCache();
 
@@ -323,7 +323,7 @@ TEST(GaugeMetricE2eTest, TestRandomSamplePulledEvent_LateAlarm) {
 
     // When creating the config, the gauge metric producer should register the alarm at the
     // end of the current bucket.
-    EXPECT_EQ((size_t)1, processor->mPullerManager->mReceivers.size());
+    ASSERT_EQ((size_t)1, processor->mPullerManager->mReceivers.size());
     EXPECT_EQ(bucketSizeNs,
               processor->mPullerManager->mReceivers.begin()->second.front().intervalNs);
     int64_t& nextPullTimeNs =
@@ -359,29 +359,29 @@ TEST(GaugeMetricE2eTest, TestRandomSamplePulledEvent_LateAlarm) {
     backfillDimensionPath(&reports);
     backfillStringInReport(&reports);
     backfillStartEndTimestamp(&reports);
-    EXPECT_EQ(1, reports.reports_size());
-    EXPECT_EQ(1, reports.reports(0).metrics_size());
+    ASSERT_EQ(1, reports.reports_size());
+    ASSERT_EQ(1, reports.reports(0).metrics_size());
     StatsLogReport::GaugeMetricDataWrapper gaugeMetrics;
     sortMetricDataByDimensionsValue(reports.reports(0).metrics(0).gauge_metrics(), &gaugeMetrics);
-    EXPECT_GT((int)gaugeMetrics.data_size(), 1);
+    ASSERT_GT((int)gaugeMetrics.data_size(), 1);
 
     auto data = gaugeMetrics.data(0);
     EXPECT_EQ(ATOM_TAG, data.dimensions_in_what().field());
-    EXPECT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
+    ASSERT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
     EXPECT_EQ(1 /* subsystem name field */,
               data.dimensions_in_what().value_tuple().dimensions_value(0).field());
     EXPECT_FALSE(data.dimensions_in_what().value_tuple().dimensions_value(0).value_str().empty());
-    EXPECT_EQ(3, data.bucket_info_size());
+    ASSERT_EQ(3, data.bucket_info_size());
 
-    EXPECT_EQ(1, data.bucket_info(0).atom_size());
-    EXPECT_EQ(1, data.bucket_info(0).elapsed_timestamp_nanos_size());
+    ASSERT_EQ(1, data.bucket_info(0).atom_size());
+    ASSERT_EQ(1, data.bucket_info(0).elapsed_timestamp_nanos_size());
     EXPECT_EQ(configAddedTimeNs + 55, data.bucket_info(0).elapsed_timestamp_nanos(0));
     EXPECT_EQ(baseTimeNs + 2 * bucketSizeNs, data.bucket_info(0).start_bucket_elapsed_nanos());
     EXPECT_EQ(baseTimeNs + 3 * bucketSizeNs, data.bucket_info(0).end_bucket_elapsed_nanos());
     EXPECT_TRUE(data.bucket_info(0).atom(0).subsystem_sleep_state().subsystem_name().empty());
     EXPECT_GT(data.bucket_info(0).atom(0).subsystem_sleep_state().time_millis(), 0);
 
-    EXPECT_EQ(1, data.bucket_info(1).atom_size());
+    ASSERT_EQ(1, data.bucket_info(1).atom_size());
     EXPECT_EQ(configAddedTimeNs + 3 * bucketSizeNs + 11,
               data.bucket_info(1).elapsed_timestamp_nanos(0));
     EXPECT_EQ(configAddedTimeNs + 55, data.bucket_info(0).elapsed_timestamp_nanos(0));
@@ -390,8 +390,8 @@ TEST(GaugeMetricE2eTest, TestRandomSamplePulledEvent_LateAlarm) {
     EXPECT_TRUE(data.bucket_info(1).atom(0).subsystem_sleep_state().subsystem_name().empty());
     EXPECT_GT(data.bucket_info(1).atom(0).subsystem_sleep_state().time_millis(), 0);
 
-    EXPECT_EQ(1, data.bucket_info(2).atom_size());
-    EXPECT_EQ(1, data.bucket_info(2).elapsed_timestamp_nanos_size());
+    ASSERT_EQ(1, data.bucket_info(2).atom_size());
+    ASSERT_EQ(1, data.bucket_info(2).elapsed_timestamp_nanos_size());
     EXPECT_EQ(baseTimeNs + 6 * bucketSizeNs + 12, data.bucket_info(2).elapsed_timestamp_nanos(0));
     EXPECT_EQ(baseTimeNs + 6 * bucketSizeNs, data.bucket_info(2).start_bucket_elapsed_nanos());
     EXPECT_EQ(baseTimeNs + 7 * bucketSizeNs, data.bucket_info(2).end_bucket_elapsed_nanos());
@@ -420,7 +420,7 @@ TEST(GaugeMetricE2eTest, TestRandomSamplePulledEventsWithActivation) {
     auto processor =
             CreateStatsLogProcessor(baseTimeNs, configAddedTimeNs, config, cfgKey,
                                     SharedRefBase::make<FakeSubsystemSleepCallback>(), ATOM_TAG);
-    EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
+    ASSERT_EQ(processor->mMetricsManagers.size(), 1u);
     EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
     processor->mPullerManager->ForceClearPullerCache();
 
@@ -432,7 +432,7 @@ TEST(GaugeMetricE2eTest, TestRandomSamplePulledEventsWithActivation) {
 
     // When creating the config, the gauge metric producer should register the alarm at the
     // end of the current bucket.
-    EXPECT_EQ((size_t)1, processor->mPullerManager->mReceivers.size());
+    ASSERT_EQ((size_t)1, processor->mPullerManager->mReceivers.size());
     EXPECT_EQ(bucketSizeNs,
               processor->mPullerManager->mReceivers.begin()->second.front().intervalNs);
     int64_t& nextPullTimeNs =
@@ -479,45 +479,45 @@ TEST(GaugeMetricE2eTest, TestRandomSamplePulledEventsWithActivation) {
     backfillDimensionPath(&reports);
     backfillStringInReport(&reports);
     backfillStartEndTimestamp(&reports);
-    EXPECT_EQ(1, reports.reports_size());
-    EXPECT_EQ(1, reports.reports(0).metrics_size());
+    ASSERT_EQ(1, reports.reports_size());
+    ASSERT_EQ(1, reports.reports(0).metrics_size());
     StatsLogReport::GaugeMetricDataWrapper gaugeMetrics;
     sortMetricDataByDimensionsValue(reports.reports(0).metrics(0).gauge_metrics(), &gaugeMetrics);
-    EXPECT_GT((int)gaugeMetrics.data_size(), 0);
+    ASSERT_GT((int)gaugeMetrics.data_size(), 0);
 
     auto data = gaugeMetrics.data(0);
     EXPECT_EQ(ATOM_TAG, data.dimensions_in_what().field());
-    EXPECT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
+    ASSERT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
     EXPECT_EQ(1 /* subsystem name field */,
               data.dimensions_in_what().value_tuple().dimensions_value(0).field());
     EXPECT_FALSE(data.dimensions_in_what().value_tuple().dimensions_value(0).value_str().empty());
-    EXPECT_EQ(3, data.bucket_info_size());
+    ASSERT_EQ(3, data.bucket_info_size());
 
     auto bucketInfo = data.bucket_info(0);
-    EXPECT_EQ(1, bucketInfo.atom_size());
-    EXPECT_EQ(1, bucketInfo.elapsed_timestamp_nanos_size());
+    ASSERT_EQ(1, bucketInfo.atom_size());
+    ASSERT_EQ(1, bucketInfo.elapsed_timestamp_nanos_size());
     EXPECT_EQ(activationNs, bucketInfo.elapsed_timestamp_nanos(0));
-    EXPECT_EQ(0, bucketInfo.wall_clock_timestamp_nanos_size());
+    ASSERT_EQ(0, bucketInfo.wall_clock_timestamp_nanos_size());
     EXPECT_EQ(baseTimeNs + 3 * bucketSizeNs, bucketInfo.start_bucket_elapsed_nanos());
     EXPECT_EQ(baseTimeNs + 4 * bucketSizeNs, bucketInfo.end_bucket_elapsed_nanos());
     EXPECT_TRUE(bucketInfo.atom(0).subsystem_sleep_state().subsystem_name().empty());
     EXPECT_GT(bucketInfo.atom(0).subsystem_sleep_state().time_millis(), 0);
 
     bucketInfo = data.bucket_info(1);
-    EXPECT_EQ(1, bucketInfo.atom_size());
-    EXPECT_EQ(1, bucketInfo.elapsed_timestamp_nanos_size());
+    ASSERT_EQ(1, bucketInfo.atom_size());
+    ASSERT_EQ(1, bucketInfo.elapsed_timestamp_nanos_size());
     EXPECT_EQ(baseTimeNs + 4 * bucketSizeNs + 1, bucketInfo.elapsed_timestamp_nanos(0));
-    EXPECT_EQ(0, bucketInfo.wall_clock_timestamp_nanos_size());
+    ASSERT_EQ(0, bucketInfo.wall_clock_timestamp_nanos_size());
     EXPECT_EQ(baseTimeNs + 4 * bucketSizeNs, bucketInfo.start_bucket_elapsed_nanos());
     EXPECT_EQ(baseTimeNs + 5 * bucketSizeNs, bucketInfo.end_bucket_elapsed_nanos());
     EXPECT_TRUE(bucketInfo.atom(0).subsystem_sleep_state().subsystem_name().empty());
     EXPECT_GT(bucketInfo.atom(0).subsystem_sleep_state().time_millis(), 0);
 
     bucketInfo = data.bucket_info(2);
-    EXPECT_EQ(1, bucketInfo.atom_size());
-    EXPECT_EQ(1, bucketInfo.elapsed_timestamp_nanos_size());
+    ASSERT_EQ(1, bucketInfo.atom_size());
+    ASSERT_EQ(1, bucketInfo.elapsed_timestamp_nanos_size());
     EXPECT_EQ(baseTimeNs + 5 * bucketSizeNs + 2, bucketInfo.elapsed_timestamp_nanos(0));
-    EXPECT_EQ(0, bucketInfo.wall_clock_timestamp_nanos_size());
+    ASSERT_EQ(0, bucketInfo.wall_clock_timestamp_nanos_size());
     EXPECT_EQ(MillisToNano(NanoToMillis(baseTimeNs + 5 * bucketSizeNs)),
               bucketInfo.start_bucket_elapsed_nanos());
     EXPECT_EQ(MillisToNano(NanoToMillis(activationNs + ttlNs + 1)),
@@ -538,7 +538,7 @@ TEST(GaugeMetricE2eTest, TestRandomSamplePulledEventsNoCondition) {
     auto processor = CreateStatsLogProcessor(baseTimeNs, configAddedTimeNs, config, cfgKey,
                                              SharedRefBase::make<FakeSubsystemSleepCallback>(),
                                              ATOM_TAG);
-    EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
+    ASSERT_EQ(processor->mMetricsManagers.size(), 1u);
     EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
     processor->mPullerManager->ForceClearPullerCache();
 
@@ -548,7 +548,7 @@ TEST(GaugeMetricE2eTest, TestRandomSamplePulledEventsNoCondition) {
 
     // When creating the config, the gauge metric producer should register the alarm at the
     // end of the current bucket.
-    EXPECT_EQ((size_t)1, processor->mPullerManager->mReceivers.size());
+    ASSERT_EQ((size_t)1, processor->mPullerManager->mReceivers.size());
     EXPECT_EQ(bucketSizeNs,
               processor->mPullerManager->mReceivers.begin()->second.front().intervalNs);
     int64_t& nextPullTimeNs =
@@ -572,43 +572,43 @@ TEST(GaugeMetricE2eTest, TestRandomSamplePulledEventsNoCondition) {
     backfillDimensionPath(&reports);
     backfillStringInReport(&reports);
     backfillStartEndTimestamp(&reports);
-    EXPECT_EQ(1, reports.reports_size());
-    EXPECT_EQ(1, reports.reports(0).metrics_size());
+    ASSERT_EQ(1, reports.reports_size());
+    ASSERT_EQ(1, reports.reports(0).metrics_size());
     StatsLogReport::GaugeMetricDataWrapper gaugeMetrics;
     sortMetricDataByDimensionsValue(
             reports.reports(0).metrics(0).gauge_metrics(), &gaugeMetrics);
-    EXPECT_GT((int)gaugeMetrics.data_size(), 0);
+    ASSERT_GT((int)gaugeMetrics.data_size(), 0);
 
     auto data = gaugeMetrics.data(0);
     EXPECT_EQ(ATOM_TAG, data.dimensions_in_what().field());
-    EXPECT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
+    ASSERT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
     EXPECT_EQ(1 /* subsystem name field */,
               data.dimensions_in_what().value_tuple().dimensions_value(0).field());
     EXPECT_FALSE(data.dimensions_in_what().value_tuple().dimensions_value(0).value_str().empty());
-    EXPECT_EQ(3, data.bucket_info_size());
+    ASSERT_EQ(3, data.bucket_info_size());
 
-    EXPECT_EQ(1, data.bucket_info(0).atom_size());
-    EXPECT_EQ(1, data.bucket_info(0).elapsed_timestamp_nanos_size());
+    ASSERT_EQ(1, data.bucket_info(0).atom_size());
+    ASSERT_EQ(1, data.bucket_info(0).elapsed_timestamp_nanos_size());
     EXPECT_EQ(configAddedTimeNs, data.bucket_info(0).elapsed_timestamp_nanos(0));
-    EXPECT_EQ(0, data.bucket_info(0).wall_clock_timestamp_nanos_size());
+    ASSERT_EQ(0, data.bucket_info(0).wall_clock_timestamp_nanos_size());
     EXPECT_EQ(baseTimeNs + 2 * bucketSizeNs, data.bucket_info(0).start_bucket_elapsed_nanos());
     EXPECT_EQ(baseTimeNs + 3 * bucketSizeNs, data.bucket_info(0).end_bucket_elapsed_nanos());
     EXPECT_TRUE(data.bucket_info(0).atom(0).subsystem_sleep_state().subsystem_name().empty());
     EXPECT_GT(data.bucket_info(0).atom(0).subsystem_sleep_state().time_millis(), 0);
 
-    EXPECT_EQ(1, data.bucket_info(1).atom_size());
-    EXPECT_EQ(1, data.bucket_info(1).elapsed_timestamp_nanos_size());
+    ASSERT_EQ(1, data.bucket_info(1).atom_size());
+    ASSERT_EQ(1, data.bucket_info(1).elapsed_timestamp_nanos_size());
     EXPECT_EQ(baseTimeNs + 3 * bucketSizeNs + 1, data.bucket_info(1).elapsed_timestamp_nanos(0));
-    EXPECT_EQ(0, data.bucket_info(1).wall_clock_timestamp_nanos_size());
+    ASSERT_EQ(0, data.bucket_info(1).wall_clock_timestamp_nanos_size());
     EXPECT_EQ(baseTimeNs + 3 * bucketSizeNs, data.bucket_info(1).start_bucket_elapsed_nanos());
     EXPECT_EQ(baseTimeNs + 4 * bucketSizeNs, data.bucket_info(1).end_bucket_elapsed_nanos());
     EXPECT_TRUE(data.bucket_info(1).atom(0).subsystem_sleep_state().subsystem_name().empty());
     EXPECT_GT(data.bucket_info(1).atom(0).subsystem_sleep_state().time_millis(), 0);
 
-    EXPECT_EQ(1, data.bucket_info(2).atom_size());
-    EXPECT_EQ(1, data.bucket_info(2).elapsed_timestamp_nanos_size());
+    ASSERT_EQ(1, data.bucket_info(2).atom_size());
+    ASSERT_EQ(1, data.bucket_info(2).elapsed_timestamp_nanos_size());
     EXPECT_EQ(baseTimeNs + 4 * bucketSizeNs + 4, data.bucket_info(2).elapsed_timestamp_nanos(0));
-    EXPECT_EQ(0, data.bucket_info(2).wall_clock_timestamp_nanos_size());
+    ASSERT_EQ(0, data.bucket_info(2).wall_clock_timestamp_nanos_size());
     EXPECT_EQ(baseTimeNs + 4 * bucketSizeNs, data.bucket_info(2).start_bucket_elapsed_nanos());
     EXPECT_EQ(baseTimeNs + 5 * bucketSizeNs, data.bucket_info(2).end_bucket_elapsed_nanos());
     EXPECT_TRUE(data.bucket_info(2).atom(0).subsystem_sleep_state().subsystem_name().empty());
