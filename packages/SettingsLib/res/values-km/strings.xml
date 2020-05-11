@@ -549,12 +549,8 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"បញ្ចូល​ភ្ញៀវ"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"លុប​​​ភ្ញៀវ"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"ភ្ញៀវ"</string>
-    <!-- no translation found for cached_apps_freezer_device_default (2616594131750144342) -->
-    <skip />
-    <!-- no translation found for cached_apps_freezer_disabled (4816382260660472042) -->
-    <skip />
-    <!-- no translation found for cached_apps_freezer_enabled (8866703500183051546) -->
-    <skip />
-    <!-- no translation found for cached_apps_freezer_reboot_dialog_text (695330563489230096) -->
-    <skip />
+    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"លំនាំដើម​របស់ឧបករណ៍"</string>
+    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"បានបិទ"</string>
+    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"បានបើក"</string>
+    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"ត្រូវតែ​ចាប់ផ្ដើម​ឧបករណ៍​របស់អ្នក​ឡើងវិញ ទើប​ការផ្លាស់ប្ដូរ​នេះ​ត្រូវបានអនុវត្ត​។ ចាប់ផ្ដើមឡើងវិញ​ឥឡូវនេះ ឬ​បោះបង់​។"</string>
 </resources>

@@ -195,7 +195,7 @@
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"انتخاب نمایه"</string>
     <string name="category_personal" msgid="6236798763159385225">"شخصی"</string>
-    <string name="category_work" msgid="4014193632325996115">"محل کار"</string>
+    <string name="category_work" msgid="4014193632325996115">"کاری"</string>
     <string name="development_settings_title" msgid="140296922921597393">"گزینه‌های برنامه‌نویسان"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"فعال کردن گزینه‌های برنامه‌نویس"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"تنظیم گزینه‌های مربوط به طراحی برنامه"</string>
@@ -253,7 +253,7 @@
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"‏محدود کردن اسکن کردن Wi‑Fi"</string>
     <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"‏تصادفی‌سازی MAC بهبودیافته برای Wi-Fi"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"داده تلفن همراه همیشه فعال باشد"</string>
-    <string name="tethering_hardware_offload" msgid="4116053719006939161">"شتاب سخت‌افزاری اتصال به اینترنت با تلفن همراه"</string>
+    <string name="tethering_hardware_offload" msgid="4116053719006939161">"شتاب سخت‌افزاری اشتراک‌گذاری اینترنت"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"نمایش دستگاه‌های بلوتوث بدون نام"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"غیرفعال کردن میزان صدای مطلق"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"‏فعال کردن Gabeldorsche"</string>
@@ -486,7 +486,7 @@
     <string name="ims_reg_status_registered" msgid="884916398194885457">"ثبت‌شده"</string>
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"ثبت نشده است"</string>
     <string name="status_unavailable" msgid="5279036186589861608">"در دسترس نیست"</string>
-    <string name="wifi_status_mac_randomized" msgid="466382542497832189">"‏ویژگی تصادفی‌سازی MAC فعال است"</string>
+    <string name="wifi_status_mac_randomized" msgid="466382542497832189">"‏ویژگی MAC تصادفی است"</string>
     <plurals name="wifi_tether_connected_summary" formatted="false" msgid="6317236306047306139">
       <item quantity="one">‏%1$d دستگاه متصل</item>
       <item quantity="other">‏%1$d دستگاه متصل</item>

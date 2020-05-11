@@ -23,7 +23,7 @@
     <string name="wifi_fail_to_scan" msgid="2333336097603822490">"Nie można wyszukać sieci."</string>
     <string name="wifi_security_none" msgid="7392696451280611452">"Brak"</string>
     <string name="wifi_remembered" msgid="3266709779723179188">"Zapisana"</string>
-    <string name="wifi_disconnected" msgid="7054450256284661757">"Rozłączona"</string>
+    <string name="wifi_disconnected" msgid="7054450256284661757">"Rozłączono"</string>
     <string name="wifi_disabled_generic" msgid="2651916945380294607">"Wyłączona"</string>
     <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"Błąd konfiguracji IP"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="1302938248432705534">"Brak połączenia z powodu słabego sygnału sieci"</string>
@@ -63,7 +63,7 @@
     <string name="speed_label_very_fast" msgid="8215718029533182439">"Bardzo szybka"</string>
     <string name="wifi_passpoint_expired" msgid="6540867261754427561">"Ważność wygasła"</string>
     <string name="preference_summary_default_combination" msgid="2644094566845577901">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="DESCRIPTION">%2$s</xliff:g>"</string>
-    <string name="bluetooth_disconnected" msgid="7739366554710388701">"Rozłączona"</string>
+    <string name="bluetooth_disconnected" msgid="7739366554710388701">"Rozłączono"</string>
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"Rozłączanie..."</string>
     <string name="bluetooth_connecting" msgid="5871702668260192755">"Łączenie..."</string>
     <string name="bluetooth_connected" msgid="8065345572198502293">"Połączono – <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
@@ -551,12 +551,8 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"Dodaj gościa"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Usuń gościa"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Gość"</string>
-    <!-- no translation found for cached_apps_freezer_device_default (2616594131750144342) -->
-    <skip />
-    <!-- no translation found for cached_apps_freezer_disabled (4816382260660472042) -->
-    <skip />
-    <!-- no translation found for cached_apps_freezer_enabled (8866703500183051546) -->
-    <skip />
-    <!-- no translation found for cached_apps_freezer_reboot_dialog_text (695330563489230096) -->
-    <skip />
+    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Ustawienie domyślne urządzenia"</string>
+    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Wyłączono"</string>
+    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Włączono"</string>
+    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Wprowadzenie zmiany wymaga ponownego uruchomienia urządzenia. Uruchom ponownie teraz lub anuluj."</string>
 </resources>
