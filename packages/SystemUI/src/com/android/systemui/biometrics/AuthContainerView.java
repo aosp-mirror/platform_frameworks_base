@@ -113,6 +113,7 @@ public class AuthContainerView extends LinearLayout
         int mModalityMask;
         boolean mSkipIntro;
         long mOperationId;
+        int mSysUiSessionId;
     }
 
     public static class Builder {
@@ -155,6 +156,11 @@ public class AuthContainerView extends LinearLayout
 
         public Builder setOperationId(long operationId) {
             mConfig.mOperationId = operationId;
+            return this;
+        }
+
+        public Builder setSysUiSessionId(int sysUiSessionId) {
+            mConfig.mSysUiSessionId = sysUiSessionId;
             return this;
         }
 
@@ -203,6 +209,9 @@ public class AuthContainerView extends LinearLayout
     final class BiometricCallback implements AuthBiometricView.Callback {
         @Override
         public void onAction(int action) {
+            Log.d(TAG, "onAction: " + action
+                    + ", sysUiSessionId: " + mConfig.mSysUiSessionId
+                    + ", state: " + mContainerState);
             switch (action) {
                 case AuthBiometricView.Callback.ACTION_AUTHENTICATED:
                     animateAway(AuthDialogCallback.DISMISSED_BIOMETRIC_AUTHENTICATED);
@@ -461,13 +470,13 @@ public class AuthContainerView extends LinearLayout
         if (animate) {
             animateAway(false /* sendReason */, 0 /* reason */);
         } else {
-            removeWindowIfAttached();
+            removeWindowIfAttached(false /* sendReason */);
         }
     }
 
     @Override
     public void dismissFromSystemServer() {
-        removeWindowIfAttached();
+        removeWindowIfAttached(true /* sendReason */);
     }
 
     @Override
@@ -540,7 +549,7 @@ public class AuthContainerView extends LinearLayout
 
         final Runnable endActionRunnable = () -> {
             setVisibility(View.INVISIBLE);
-            removeWindowIfAttached();
+            removeWindowIfAttached(true /* sendReason */);
         };
 
         postOnAnimation(() -> {
@@ -575,19 +584,24 @@ public class AuthContainerView extends LinearLayout
     }
 
     private void sendPendingCallbackIfNotNull() {
-        Log.d(TAG, "pendingCallback: " + mPendingCallbackReason);
+        Log.d(TAG, "pendingCallback: " + mPendingCallbackReason
+                + " sysUISessionId: " + mConfig.mSysUiSessionId);
         if (mPendingCallbackReason != null) {
             mConfig.mCallback.onDismissed(mPendingCallbackReason, mCredentialAttestation);
             mPendingCallbackReason = null;
         }
     }
 
-    private void removeWindowIfAttached() {
-        sendPendingCallbackIfNotNull();
+    private void removeWindowIfAttached(boolean sendReason) {
+        if (sendReason) {
+            sendPendingCallbackIfNotNull();
+        }
 
         if (mContainerState == STATE_GONE) {
+            Log.w(TAG, "Container already STATE_GONE, mSysUiSessionId: " + mConfig.mSysUiSessionId);
             return;
         }
+        Log.d(TAG, "Removing container, mSysUiSessionId: " + mConfig.mSysUiSessionId);
         mContainerState = STATE_GONE;
         mWindowManager.removeView(this);
     }
