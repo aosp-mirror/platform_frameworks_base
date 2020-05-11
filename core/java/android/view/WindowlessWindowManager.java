@@ -191,6 +191,7 @@ public class WindowlessWindowManager implements IWindowSession {
             throw new IllegalArgumentException(
                     "Invalid window token (never added or removed already)");
         }
+
         try (SurfaceControl.Transaction t = new SurfaceControl.Transaction()) {
             t.remove(state.mSurfaceControl).apply();
         }
