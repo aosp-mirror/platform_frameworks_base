@@ -16150,18 +16150,24 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 ? R.string.personal_apps_suspension_tomorrow_text
                 : R.string.personal_apps_suspension_text);
         final boolean ongoing = notificationState == PROFILE_OFF_DEADLINE_REACHED;
+        final int color = mContext.getColor(R.color.personal_apps_suspension_notification_color);
+        final Bundle extras = new Bundle();
+        // TODO: Create a separate string for this.
+        extras.putString(Notification.EXTRA_SUBSTITUTE_APP_NAME,
+                mContext.getString(R.string.notification_work_profile_content_description));
 
         final Notification notification =
                 new Notification.Builder(mContext, SystemNotificationChannels.DEVICE_ADMIN)
-                        .setSmallIcon(android.R.drawable.stat_sys_warning)
+                        .setSmallIcon(R.drawable.ic_corp_badge_no_background)
                         .setOngoing(ongoing)
                         .setAutoCancel(false)
                         .setContentTitle(mContext.getString(
                                 R.string.personal_apps_suspension_title))
                         .setContentText(text)
                         .setStyle(new Notification.BigTextStyle().bigText(text))
-                        .setColor(mContext.getColor(R.color.system_notification_accent_color))
+                        .setColor(color)
                         .addAction(turnProfileOnButton)
+                        .addExtras(extras)
                         .build();
         mInjector.getNotificationManager().notify(
                 SystemMessage.NOTE_PERSONAL_APPS_SUSPENDED, notification);
