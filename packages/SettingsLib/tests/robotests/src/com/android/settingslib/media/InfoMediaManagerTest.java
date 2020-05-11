@@ -625,6 +625,15 @@ public class InfoMediaManagerTest {
     }
 
     @Test
+    public void onSessionUpdated_shouldDispatchDataChanged() {
+        mInfoMediaManager.registerCallback(mCallback);
+
+        mInfoMediaManager.mMediaRouterCallback.onSessionUpdated(mock(RoutingSessionInfo.class));
+
+        verify(mCallback).onDeviceAttributesChanged();
+    }
+
+    @Test
     public void addMediaDevice_verifyDeviceTypeCanCorrespondToMediaDevice() {
         final MediaRoute2Info route2Info = mock(MediaRoute2Info.class);
         final CachedBluetoothDeviceManager cachedBluetoothDeviceManager =
