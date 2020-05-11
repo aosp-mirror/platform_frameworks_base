@@ -230,6 +230,7 @@ class ActivityTestsBase extends SystemServiceTestsBase {
         }
 
         ActivityRecord build() {
+            SystemServicesTestRule.checkHoldsLock(mService.mGlobalLock);
             try {
                 mService.deferWindowLayout();
                 return buildInner();
@@ -394,6 +395,8 @@ class ActivityTestsBase extends SystemServiceTestsBase {
         }
 
         Task build() {
+            SystemServicesTestRule.checkHoldsLock(mSupervisor.mService.mGlobalLock);
+
             if (mStack == null && mCreateStack) {
                 TaskDisplayArea displayArea = mTaskDisplayArea != null ? mTaskDisplayArea
                         : mSupervisor.mRootWindowContainer.getDefaultTaskDisplayArea();
@@ -501,6 +504,8 @@ class ActivityTestsBase extends SystemServiceTestsBase {
         }
 
         ActivityStack build() {
+            SystemServicesTestRule.checkHoldsLock(mRootWindowContainer.mWmService.mGlobalLock);
+
             final int stackId = mStackId >= 0 ? mStackId : mTaskDisplayArea.getNextStackId();
             final ActivityStack stack = mTaskDisplayArea.createStackUnchecked(
                     mWindowingMode, mActivityType, stackId, mOnTop, mInfo, mIntent,
