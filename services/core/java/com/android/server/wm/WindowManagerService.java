@@ -7750,6 +7750,33 @@ public class WindowManagerService extends IWindowManager.Stub
                 return w != null ? w.getName() : null;
             }
         }
+
+        @Override
+        public String getImeControlTargetNameForLogging(int displayId) {
+            synchronized (mGlobalLock) {
+                final DisplayContent dc = mRoot.getDisplayContent(displayId);
+                if (dc == null) {
+                    return null;
+                }
+                final InsetsControlTarget target = dc.mInputMethodControlTarget;
+                if (target == null) {
+                    return null;
+                }
+                final WindowState win = target.getWindow();
+                return win != null ? win.getName() : target.toString();
+            }
+        }
+
+        @Override
+        public String getImeTargetNameForLogging(int displayId) {
+            synchronized (mGlobalLock) {
+                final DisplayContent dc = mRoot.getDisplayContent(displayId);
+                if (dc == null) {
+                    return null;
+                }
+                return dc.mInputMethodTarget != null ? dc.mInputMethodTarget.getName() : null;
+            }
+        }
     }
 
     void registerAppFreezeListener(AppFreezeListener listener) {

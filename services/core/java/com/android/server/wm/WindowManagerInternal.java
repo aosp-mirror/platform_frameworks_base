@@ -576,4 +576,24 @@ public abstract class WindowManagerInternal {
      * @return The corresponding {@link WindowState#getName()}
      */
     public abstract String getWindowName(@NonNull IBinder binder);
+
+    /**
+     * Return the window name of IME Insets control target.
+     *
+     * @param displayId The ID of the display which input method is currently focused.
+     * @return The corresponding {@link WindowState#getName()}
+     */
+    public abstract @Nullable String getImeControlTargetNameForLogging(int displayId);
+
+    /**
+     * Return the current window name of the input method is on top of.
+     *
+     * Note that the concept of this window is only reparent the target window behind the input
+     * method window, it may different with the window which reported by
+     * {@code InputMethodManagerService#reportStartInput} which has input connection.
+     *
+     * @param displayId The ID of the display which input method is currently focused.
+     * @return The corresponding {@link WindowState#getName()}
+     */
+    public abstract @Nullable String getImeTargetNameForLogging(int displayId);
 }
