@@ -196,7 +196,6 @@ public class TaskStackChangedListenerTest {
      */
     @Test
     @Presubmit
-    @FlakyTest(bugId = 130388819)
     public void testTaskChangeCallBacks() throws Exception {
         final Object[] params = new Object[2];
         final CountDownLatch taskCreatedLaunchLatch = new CountDownLatch(1);
