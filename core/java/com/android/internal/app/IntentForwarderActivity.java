@@ -18,6 +18,8 @@ package com.android.internal.app;
 
 import static android.content.pm.PackageManager.MATCH_DEFAULT_ONLY;
 
+import static com.android.internal.app.ResolverActivity.EXTRA_SELECTED_PROFILE;
+
 import android.annotation.Nullable;
 import android.annotation.StringRes;
 import android.app.Activity;
@@ -26,6 +28,7 @@ import android.app.ActivityThread;
 import android.app.AppGlobals;
 import android.app.admin.DevicePolicyManager;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -73,6 +76,9 @@ public class IntentForwarderActivity extends Activity  {
             = new HashSet<>(Arrays.asList("sms", "smsto", "mms", "mmsto"));
 
     private static final String TEL_SCHEME = "tel";
+
+    private static final ComponentName RESOLVER_COMPONENT_NAME =
+            new ComponentName("android", ResolverActivity.class.getName());
 
     private Injector mInjector;
 
@@ -136,21 +142,50 @@ public class IntentForwarderActivity extends Activity  {
         }
 
         newIntent.prepareToLeaveUser(callingUserId);
-        maybeShowDisclosureAsync(intentReceived, newIntent, targetUserId, userMessageId);
-        CompletableFuture.runAsync(() ->
-                        startActivityAsCaller(newIntent, targetUserId), mExecutorService)
-                .thenAcceptAsync(result -> finish(), getApplicationContext().getMainExecutor());
+        final CompletableFuture<ResolveInfo> targetResolveInfoFuture =
+                mInjector.resolveActivityAsUser(newIntent, MATCH_DEFAULT_ONLY, targetUserId);
+        targetResolveInfoFuture
+                .thenApplyAsync(targetResolveInfo -> {
+                    if (isResolverActivityResolveInfo(targetResolveInfo)) {
+                        launchResolverActivityWithCorrectTab(intentReceived, className, newIntent,
+                                callingUserId, targetUserId);
+                        return targetResolveInfo;
+                    }
+                    startActivityAsCaller(newIntent, targetUserId);
+                    return targetResolveInfo;
+                }, mExecutorService)
+                .thenAcceptAsync(result -> {
+                    maybeShowDisclosure(intentReceived, result, userMessageId);
+                    finish();
+                }, getApplicationContext().getMainExecutor());
     }
 
-    private void maybeShowDisclosureAsync(
-            Intent intentReceived, Intent newIntent, int userId, int messageId) {
-        final CompletableFuture<ResolveInfo> resolveInfoFuture =
-                mInjector.resolveActivityAsUser(newIntent, MATCH_DEFAULT_ONLY, userId);
-        resolveInfoFuture.thenAcceptAsync(ri -> {
-            if (shouldShowDisclosure(ri, intentReceived)) {
-                mInjector.showToast(messageId, Toast.LENGTH_LONG);
-            }
-        }, getApplicationContext().getMainExecutor());
+    private boolean isIntentForwarderResolveInfo(ResolveInfo resolveInfo) {
+        if (resolveInfo == null) {
+            return false;
+        }
+        ActivityInfo activityInfo = resolveInfo.activityInfo;
+        if (activityInfo == null) {
+            return false;
+        }
+        if (!"android".equals(activityInfo.packageName)) {
+            return false;
+        }
+        return activityInfo.name.equals(FORWARD_INTENT_TO_PARENT)
+                || activityInfo.name.equals(FORWARD_INTENT_TO_MANAGED_PROFILE);
+    }
+
+    private boolean isResolverActivityResolveInfo(@Nullable ResolveInfo resolveInfo) {
+        return resolveInfo != null
+                && resolveInfo.activityInfo != null
+                && RESOLVER_COMPONENT_NAME.equals(resolveInfo.activityInfo.getComponentName());
+    }
+
+    private void maybeShowDisclosure(
+            Intent intentReceived, ResolveInfo resolveInfo, int messageId) {
+        if (shouldShowDisclosure(resolveInfo, intentReceived)) {
+            mInjector.showToast(messageId, Toast.LENGTH_LONG);
+        }
     }
 
     private void startActivityAsCaller(Intent newIntent, int userId) {
@@ -185,7 +220,7 @@ public class IntentForwarderActivity extends Activity  {
         // when cross-profile intents are disabled.
         int selectedProfile = findSelectedProfile(className);
         sanitizeIntent(intentReceived);
-        intentReceived.putExtra(ChooserActivity.EXTRA_SELECTED_PROFILE, selectedProfile);
+        intentReceived.putExtra(EXTRA_SELECTED_PROFILE, selectedProfile);
         Intent innerIntent = intentReceived.getParcelableExtra(Intent.EXTRA_INTENT);
         if (innerIntent == null) {
             Slog.wtf(TAG, "Cannot start a chooser intent with no extra " + Intent.EXTRA_INTENT);
@@ -193,6 +228,25 @@ public class IntentForwarderActivity extends Activity  {
         }
         sanitizeIntent(innerIntent);
         startActivityAsCaller(intentReceived, null, null, false, getUserId());
+        finish();
+    }
+
+    private void launchResolverActivityWithCorrectTab(Intent intentReceived, String className,
+            Intent newIntent, int callingUserId, int targetUserId) {
+        // When showing the intent resolver, instead of forwarding to the other profile,
+        // we launch it in the current user and select the other tab. This fixes b/155874820.
+        //
+        // In the case when there are 0 targets in the current profile and >1 apps in the other
+        // profile, the package manager launches the intent resolver in the other profile.
+        // If that's the case, we launch the resolver in the target user instead (other profile).
+        ResolveInfo callingResolveInfo = mInjector.resolveActivityAsUser(
+                newIntent, MATCH_DEFAULT_ONLY, callingUserId).join();
+        int userId = isIntentForwarderResolveInfo(callingResolveInfo)
+                ? targetUserId : callingUserId;
+        int selectedProfile = findSelectedProfile(className);
+        sanitizeIntent(intentReceived);
+        intentReceived.putExtra(EXTRA_SELECTED_PROFILE, selectedProfile);
+        startActivityAsCaller(intentReceived, null, null, false, userId);
         finish();
     }
 
