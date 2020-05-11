@@ -374,7 +374,7 @@
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"सूचना च्यानलका चेतावनी देखाउनुहोस्"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"अनुप्रयोगले कुनै मान्य च्यानल बिना सूचना पोस्ट गर्दा स्क्रिनमा चेतावनी देखाउँछ"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"बाह्यमा बल प्रयोगको अनुमति प्राप्त एपहरू"</string>
-    <string name="force_allow_on_external_summary" msgid="8525425782530728238">"म्यानिफेेस्टका मानहरूको ख्याल नगरी कुनै पनि अनुप्रयोगलाई बाह्य भण्डारणमा लेख्न सकिने खाले बनाउँछ"</string>
+    <string name="force_allow_on_external_summary" msgid="8525425782530728238">"म्यानिफेेस्टका मानहरूको ख्याल नगरी कुनै पनि एपलाई बाह्य भण्डारणमा लेख्न सकिने खाले बनाउँछ"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"आकार बदल्न योग्य हुने बनाउन गतिविधिहरूलाई बाध्यात्मक बनाउनुहोस्।"</string>
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"म्यानिफेेस्ट मानहरूको ख्याल नगरी, बहु-विन्डोको लागि सबै रिसाइज गर्न सकिने गतिविधिहरू बनाउनुहोस्।"</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"फ्रिफर्म विन्डोहरू सक्रिय गर्नुहोस्"</string>
@@ -428,10 +428,10 @@
     <string name="power_discharging_duration_enhanced" msgid="1800465736237672323">"तपाईंको प्रयोगको आधारमा लगभग <xliff:g id="TIME_REMAINING">%1$s</xliff:g> बाँकी छ (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <!-- no translation found for power_remaining_duration_only_short (7438846066602840588) -->
     <skip />
-    <string name="power_discharge_by_enhanced" msgid="563438403581662942">"तपाईंको प्रयोगका आधारमा लगभग <xliff:g id="TIME">%1$s</xliff:g> सम्म टिक्नु पर्छ (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_discharge_by_only_enhanced" msgid="3268796172652988877">"तपाईंको प्रयोगका आधारमा लगभग <xliff:g id="TIME">%1$s</xliff:g> सम्म टिक्नु पर्छ"</string>
-    <string name="power_discharge_by" msgid="4113180890060388350">"ब्याट्री लगभग <xliff:g id="TIME">%1$s</xliff:g> सम्म टिक्नु पर्छ (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_discharge_by_only" msgid="92545648425937000">"लगभग <xliff:g id="TIME">%1$s</xliff:g> सम्म टिक्नु पर्छ"</string>
+    <string name="power_discharge_by_enhanced" msgid="563438403581662942">"तपाईंको प्रयोगका आधारमा लगभग <xliff:g id="TIME">%1$s</xliff:g> सम्म टिक्छ (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_discharge_by_only_enhanced" msgid="3268796172652988877">"तपाईंको प्रयोगका आधारमा लगभग <xliff:g id="TIME">%1$s</xliff:g> सम्म टिक्छ"</string>
+    <string name="power_discharge_by" msgid="4113180890060388350">"ब्याट्री लगभग <xliff:g id="TIME">%1$s</xliff:g> सम्म टिक्छ (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_discharge_by_only" msgid="92545648425937000">"लगभग <xliff:g id="TIME">%1$s</xliff:g> सम्म टिक्छ"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"<xliff:g id="TIME">%1$s</xliff:g> सम्म"</string>
     <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"ब्याट्री <xliff:g id="TIME">%1$s</xliff:g> बजेसम्ममा सकिन सक्छ"</string>
     <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"<xliff:g id="THRESHOLD">%1$s</xliff:g> भन्दा कम समय बाँकी छ"</string>

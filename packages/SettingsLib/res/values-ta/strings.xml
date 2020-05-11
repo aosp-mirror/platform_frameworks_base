@@ -284,8 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"வயர்லெஸ் காட்சி சான்றுக்கான விருப்பங்களைக் காட்டு"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"வைஃபை நுழைவு அளவை அதிகரித்து, வைஃபை தேர்வுக் கருவியில் ஒவ்வொன்றிற்கும் SSID RSSI ஐ காட்டுக"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"பேட்டரி தீர்ந்துபோவதைக் குறைத்து நெட்வொர்க்கின் செயல்திறனை மேம்படுத்தும்"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization_summary (1210663439867489931) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"இந்தப் பயன்முறை இயக்கப்படும்போது இந்தச் சாதனத்தின் MAC முகவரியானது ஒவ்வொரு முறை MAC ரேண்டம் ஆக்குதல் இயக்கப்பட்டிருக்கும் நெட்வொர்க்குடன் இணைக்கப்படும்போதும் மாறக்கூடும்."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"கட்டண நெட்வொர்க்"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"கட்டணமில்லா நெட்வொர்க்"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"லாகர் பஃபர் அளவுகள்"</string>
@@ -550,12 +549,8 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"கெஸ்ட்டைச் சேர்"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"கெஸ்ட்டை அகற்று"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"கெஸ்ட்"</string>
-    <!-- no translation found for cached_apps_freezer_device_default (2616594131750144342) -->
-    <skip />
-    <!-- no translation found for cached_apps_freezer_disabled (4816382260660472042) -->
-    <skip />
-    <!-- no translation found for cached_apps_freezer_enabled (8866703500183051546) -->
-    <skip />
-    <!-- no translation found for cached_apps_freezer_reboot_dialog_text (695330563489230096) -->
-    <skip />
+    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"சாதனத்தின் இயல்புநிலை"</string>
+    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"முடக்கப்பட்டது"</string>
+    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"இயக்கப்பட்டது"</string>
+    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"இந்த மாற்றங்கள் செயல்படுத்தப்பட உங்கள் சாதனத்தை மறுபடி தொடங்க வேண்டும். இப்போதே மறுபடி தொடங்கவும் அல்லது ரத்துசெய்யவும்."</string>
 </resources>
