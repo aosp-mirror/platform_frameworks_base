@@ -25,7 +25,7 @@ public class ImeAppAutoFocusHelper extends ImeAppHelper {
         super(instr, "ImeAppAutoFocus");
     }
 
-    public void clickEditTextWidget(UiDevice device) {
+    public void openIME(UiDevice device) {
         // do nothing (the app is focused automatically)
     }
 }
