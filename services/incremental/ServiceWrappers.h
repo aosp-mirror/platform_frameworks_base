@@ -26,6 +26,7 @@
 #include <binder/Status.h>
 #include <incfs.h>
 #include <jni.h>
+#include <utils/Looper.h>
 
 #include <memory>
 #include <span>
@@ -106,6 +107,16 @@ public:
     virtual void initializeForCurrentThread() const = 0;
 };
 
+class LooperWrapper {
+public:
+    virtual ~LooperWrapper() = default;
+    virtual int addFd(int fd, int ident, int events, android::Looper_callbackFunc callback,
+                      void* data) = 0;
+    virtual int removeFd(int fd) = 0;
+    virtual void wake() = 0;
+    virtual int pollAll(int timeoutMillis) = 0;
+};
+
 class ServiceManagerWrapper {
 public:
     virtual ~ServiceManagerWrapper() = default;
@@ -114,6 +125,7 @@ public:
     virtual std::unique_ptr<IncFsWrapper> getIncFs() = 0;
     virtual std::unique_ptr<AppOpsManagerWrapper> getAppOpsManager() = 0;
     virtual std::unique_ptr<JniWrapper> getJni() = 0;
+    virtual std::unique_ptr<LooperWrapper> getLooper() = 0;
 };
 
 // --- Real stuff ---
@@ -127,6 +139,7 @@ public:
     std::unique_ptr<IncFsWrapper> getIncFs() final;
     std::unique_ptr<AppOpsManagerWrapper> getAppOpsManager() final;
     std::unique_ptr<JniWrapper> getJni() final;
+    std::unique_ptr<LooperWrapper> getLooper() final;
 
 private:
     template <class INTERFACE>

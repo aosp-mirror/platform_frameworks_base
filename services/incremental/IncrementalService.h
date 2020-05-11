@@ -18,6 +18,7 @@
 
 #include <android/content/pm/BnDataLoaderStatusListener.h>
 #include <android/content/pm/DataLoaderParamsParcel.h>
+#include <android/content/pm/FileSystemControlParcel.h>
 #include <android/content/pm/IDataLoaderStatusListener.h>
 #include <android/os/incremental/BnIncrementalServiceConnector.h>
 #include <binder/IAppOpsCallback.h>
@@ -160,6 +161,7 @@ private:
         DataLoaderStub(IncrementalService& service, MountId id,
                        content::pm::DataLoaderParamsParcel&& params,
                        content::pm::FileSystemControlParcel&& control,
+                       incfs::UniqueControl&& healthControl,
                        const DataLoaderStatusListener* externalListener);
         ~DataLoaderStub();
         // Cleans up the internal state and invalidates DataLoaderStub. Any subsequent calls will
@@ -177,6 +179,10 @@ private:
 
     private:
         binder::Status onStatusChanged(MountId mount, int newStatus) final;
+
+        void addToCmdLooperLocked();
+        void removeFromCmdLooperLocked();
+        int onCmdLooperEvent();
 
         bool isValid() const { return mId != kInvalidStorageId; }
         sp<content::pm::IDataLoader> getDataLoader();
@@ -197,12 +203,15 @@ private:
         MountId mId = kInvalidStorageId;
         content::pm::DataLoaderParamsParcel mParams;
         content::pm::FileSystemControlParcel mControl;
+        incfs::UniqueControl mHealthControl;
         DataLoaderStatusListener mListener;
 
         std::condition_variable mStatusCondition;
         int mCurrentStatus = content::pm::IDataLoaderStatusListener::DATA_LOADER_DESTROYED;
         int mTargetStatus = content::pm::IDataLoaderStatusListener::DATA_LOADER_DESTROYED;
         TimePoint mTargetStatusTs = {};
+
+        TimePoint mEarliestMissingPageTs{Clock::duration::max()};
     };
     using DataLoaderStubPtr = sp<DataLoaderStub>;
 
@@ -300,12 +309,15 @@ private:
                         const incfs::FileId& libFileId, std::string_view targetLibPath,
                         Clock::time_point scheduledTs);
 
+    void runCmdLooper();
+
 private:
     const std::unique_ptr<VoldServiceWrapper> mVold;
     const std::unique_ptr<DataLoaderManagerWrapper> mDataLoaderManager;
     const std::unique_ptr<IncFsWrapper> mIncFs;
     const std::unique_ptr<AppOpsManagerWrapper> mAppOpsManager;
     const std::unique_ptr<JniWrapper> mJni;
+    const std::unique_ptr<LooperWrapper> mLooper;
     const std::string mIncrementalDir;
 
     mutable std::mutex mLock;
@@ -319,13 +331,16 @@ private:
     std::atomic_bool mSystemReady = false;
     StorageId mNextId = 0;
 
+    std::atomic_bool mRunning{true};
+
     using Job = std::function<void()>;
     std::unordered_map<MountId, std::vector<Job>> mJobQueue;
     MountId mPendingJobsMount = kInvalidStorageId;
     std::condition_variable mJobCondition;
     std::mutex mJobMutex;
     std::thread mJobProcessor;
-    bool mRunning = true;
+
+    std::thread mCmdLooperThread;
 };
 
 } // namespace android::incremental
