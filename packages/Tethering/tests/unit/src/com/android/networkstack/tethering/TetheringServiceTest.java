@@ -83,8 +83,7 @@ public final class TetheringServiceTest {
         mTetheringConnector = mockConnector.getTetheringConnector();
         final MockTetheringService service = mockConnector.getService();
         mTethering = service.getTethering();
-        verify(mTethering).startStateMachineUpdaters();
-        when(mTethering.hasTetherableConfiguration()).thenReturn(true);
+        when(mTethering.isTetheringSupported()).thenReturn(true);
     }
 
     @After
@@ -97,7 +96,7 @@ public final class TetheringServiceTest {
         when(mTethering.tether(TEST_IFACE_NAME)).thenReturn(TETHER_ERROR_NO_ERROR);
         final TestTetheringResult result = new TestTetheringResult();
         mTetheringConnector.tether(TEST_IFACE_NAME, TEST_CALLER_PKG, TEST_ATTRIBUTION_TAG, result);
-        verify(mTethering).hasTetherableConfiguration();
+        verify(mTethering).isTetheringSupported();
         verify(mTethering).tether(TEST_IFACE_NAME);
         verifyNoMoreInteractions(mTethering);
         result.assertResult(TETHER_ERROR_NO_ERROR);
@@ -109,7 +108,7 @@ public final class TetheringServiceTest {
         final TestTetheringResult result = new TestTetheringResult();
         mTetheringConnector.untether(TEST_IFACE_NAME, TEST_CALLER_PKG, TEST_ATTRIBUTION_TAG,
                 result);
-        verify(mTethering).hasTetherableConfiguration();
+        verify(mTethering).isTetheringSupported();
         verify(mTethering).untether(TEST_IFACE_NAME);
         verifyNoMoreInteractions(mTethering);
         result.assertResult(TETHER_ERROR_NO_ERROR);
@@ -121,7 +120,7 @@ public final class TetheringServiceTest {
         final TestTetheringResult result = new TestTetheringResult();
         mTetheringConnector.setUsbTethering(true /* enable */, TEST_CALLER_PKG,
                 TEST_ATTRIBUTION_TAG, result);
-        verify(mTethering).hasTetherableConfiguration();
+        verify(mTethering).isTetheringSupported();
         verify(mTethering).setUsbTethering(true /* enable */);
         verifyNoMoreInteractions(mTethering);
         result.assertResult(TETHER_ERROR_NO_ERROR);
@@ -133,7 +132,7 @@ public final class TetheringServiceTest {
         final TetheringRequestParcel request = new TetheringRequestParcel();
         request.tetheringType = TETHERING_WIFI;
         mTetheringConnector.startTethering(request, TEST_CALLER_PKG, TEST_ATTRIBUTION_TAG, result);
-        verify(mTethering).hasTetherableConfiguration();
+        verify(mTethering).isTetheringSupported();
         verify(mTethering).startTethering(eq(request), eq(result));
         verifyNoMoreInteractions(mTethering);
     }
@@ -143,7 +142,7 @@ public final class TetheringServiceTest {
         final TestTetheringResult result = new TestTetheringResult();
         mTetheringConnector.stopTethering(TETHERING_WIFI, TEST_CALLER_PKG, TEST_ATTRIBUTION_TAG,
                 result);
-        verify(mTethering).hasTetherableConfiguration();
+        verify(mTethering).isTetheringSupported();
         verify(mTethering).stopTethering(TETHERING_WIFI);
         verifyNoMoreInteractions(mTethering);
         result.assertResult(TETHER_ERROR_NO_ERROR);
@@ -154,7 +153,7 @@ public final class TetheringServiceTest {
         final ResultReceiver result = new ResultReceiver(null);
         mTetheringConnector.requestLatestTetheringEntitlementResult(TETHERING_WIFI, result,
                 true /* showEntitlementUi */, TEST_CALLER_PKG, TEST_ATTRIBUTION_TAG);
-        verify(mTethering).hasTetherableConfiguration();
+        verify(mTethering).isTetheringSupported();
         verify(mTethering).requestLatestTetheringEntitlementResult(eq(TETHERING_WIFI),
                 eq(result), eq(true) /* showEntitlementUi */);
         verifyNoMoreInteractions(mTethering);
@@ -181,7 +180,7 @@ public final class TetheringServiceTest {
     public void testStopAllTethering() throws Exception {
         final TestTetheringResult result = new TestTetheringResult();
         mTetheringConnector.stopAllTethering(TEST_CALLER_PKG, TEST_ATTRIBUTION_TAG, result);
-        verify(mTethering).hasTetherableConfiguration();
+        verify(mTethering).isTetheringSupported();
         verify(mTethering).untetherAll();
         verifyNoMoreInteractions(mTethering);
         result.assertResult(TETHER_ERROR_NO_ERROR);
@@ -191,7 +190,7 @@ public final class TetheringServiceTest {
     public void testIsTetheringSupported() throws Exception {
         final TestTetheringResult result = new TestTetheringResult();
         mTetheringConnector.isTetheringSupported(TEST_CALLER_PKG, TEST_ATTRIBUTION_TAG, result);
-        verify(mTethering).hasTetherableConfiguration();
+        verify(mTethering).isTetheringSupported();
         verifyNoMoreInteractions(mTethering);
         result.assertResult(TETHER_ERROR_NO_ERROR);
     }
