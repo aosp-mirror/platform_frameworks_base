@@ -6420,7 +6420,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         // Allow binder tracing, and application-generated systrace messages if we're profileable.
         boolean isAppProfileable = data.appInfo.isProfileableByShell();
         Trace.setAppTracingAllowed(isAppProfileable);
-        if (isAppProfileable && data.enableBinderTracking) {
+        if ((isAppProfileable || Build.IS_DEBUGGABLE) && data.enableBinderTracking) {
             Binder.enableTracing();
         }
 
