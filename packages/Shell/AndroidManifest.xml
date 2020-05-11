@@ -248,6 +248,9 @@
     <!-- Permission required for testing system audio effect APIs. -->
     <uses-permission android:name="android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS"/>
 
+    <!-- Permissions needed to test shared libraries -->
+    <uses-permission android:name="android.permission.ACCESS_SHARED_LIBRARIES" />
+
     <application android:label="@string/app_label"
                 android:theme="@android:style/Theme.DeviceDefault.DayNight"
                 android:defaultToDeviceProtectedStorage="true"
