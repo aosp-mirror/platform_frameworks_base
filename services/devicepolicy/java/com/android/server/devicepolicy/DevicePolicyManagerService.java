@@ -984,6 +984,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 // (ACTION_DATE_CHANGED), or when manual clock adjustment is made
                 // (ACTION_TIME_CHANGED)
                 updateSystemUpdateFreezePeriodsRecord(/* saveIfChanged */ true);
+                final int userId = getManagedUserId(UserHandle.USER_SYSTEM);
+                if (userId >= 0) {
+                    updatePersonalAppsSuspension(userId, mUserManager.isUserUnlocked(userId));
+                }
             } else if (ACTION_PROFILE_OFF_DEADLINE.equals(action)) {
                 Slog.i(LOG_TAG, "Profile off deadline alarm was triggered");
                 final int userId = getManagedUserId(UserHandle.USER_SYSTEM);
@@ -15912,15 +15916,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     false /* parent */);
             // DO shouldn't be able to use this method.
             enforceProfileOwnerOfOrganizationOwnedDevice(admin);
-            final DevicePolicyData userData =
-                    getUserData(getProfileParentId(mInjector.userHandleGetCallingUserId()));
-            if (!userData.mAppsSuspended) {
-                return PERSONAL_APPS_NOT_SUSPENDED;
-            } else {
-                final long deadline = admin.mProfileOffDeadline;
-                return makeSuspensionReasons(admin.mSuspendPersonalApps,
-                        deadline != 0 && System.currentTimeMillis() > deadline);
-            }
+            final long deadline = admin.mProfileOffDeadline;
+            final int result = makeSuspensionReasons(admin.mSuspendPersonalApps,
+                    deadline != 0 && mInjector.systemCurrentTimeMillis() > deadline);
+            Slog.d(LOG_TAG, String.format("getPersonalAppsSuspendedReasons user: %d; result: %d",
+                    mInjector.userHandleGetCallingUserId(), result));
+            return result;
         }
     }
 
@@ -16033,8 +16034,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             int profileUserId, ActiveAdmin profileOwner, boolean unlocked) {
         final long now = mInjector.systemCurrentTimeMillis();
         if (profileOwner.mProfileOffDeadline != 0 && now > profileOwner.mProfileOffDeadline) {
-            // Profile off deadline is already reached.
-            Slog.i(LOG_TAG, "Profile off deadline has been reached.");
+            Slog.i(LOG_TAG, "Profile off deadline has been reached, unlocked: " + unlocked);
+            if (profileOwner.mProfileOffDeadline != -1) {
+                // Move the deadline far to the past so that it cannot be rolled back by TZ change.
+                profileOwner.mProfileOffDeadline = -1;
+                saveSettingsLocked(profileUserId);
+            }
             return PROFILE_OFF_DEADLINE_REACHED;
         }
         boolean shouldSaveSettings = false;
