@@ -4783,16 +4783,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (!task.hasChild(this)) {
             throw new IllegalStateException("Activity not found in its task");
         }
-        final ActivityRecord activityAbove = task.getActivityAbove(this);
-        if (activityAbove == null) {
-            // It's the topmost activity in the task - should become resumed now
-            return true;
-        }
-        // Check if activity above is finishing now and this one becomes the topmost in task.
-        if (activityAbove.finishing) {
-            return true;
-        }
-        return false;
+        return task.topRunningActivity() == this;
     }
 
     void handleAlreadyVisible() {
