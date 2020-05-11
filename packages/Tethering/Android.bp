@@ -114,6 +114,7 @@ android_app {
     // InProcessTethering is a replacement for Tethering
     overrides: ["Tethering"],
     apex_available: ["com.android.tethering"],
+    min_sdk_version: "current",
 }
 
 // Updatable tethering packaged as an application
