@@ -1369,7 +1369,7 @@ public class ZenModeHelper {
                 .setContentTitle(mContext.getResources().getString(title))
                 .setContentText(mContext.getResources().getString(content))
                 .setContentIntent(PendingIntent.getActivity(mContext, 0, onboardingIntent,
-                        PendingIntent.FLAG_UPDATE_CURRENT))
+                        PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE))
                 .setAutoCancel(true)
                 .setLocalOnly(true)
                 .addExtras(extras)
