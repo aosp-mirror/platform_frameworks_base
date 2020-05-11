@@ -884,7 +884,6 @@ public class PipTouchHandler {
 
             final PointF vel = touchState.getVelocity();
             final float velocity = PointF.length(vel.x, vel.y);
-            final boolean isFling = velocity > mFlingAnimationUtils.getMinVelocityPxPerSecond();
 
             if (touchState.isDragging()) {
                 Runnable endAction = null;
@@ -899,13 +898,9 @@ public class PipTouchHandler {
                     endAction = mMenuController::hideMenu;
                 }
 
-                if (isFling) {
-                    mMotionHelper.flingToSnapTarget(vel.x, vel.y,
-                            PipTouchHandler.this::updateDismissFraction /* updateAction */,
-                            endAction /* endAction */);
-                } else {
-                    mMotionHelper.animateToClosestSnapTarget();
-                }
+                mMotionHelper.flingToSnapTarget(vel.x, vel.y,
+                        PipTouchHandler.this::updateDismissFraction /* updateAction */,
+                        endAction /* endAction */);
             } else if (mTouchState.isDoubleTap()) {
                 // Expand to fullscreen if this is a double tap
                 // the PiP should be frozen until the transition ends
