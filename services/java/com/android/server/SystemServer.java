@@ -584,7 +584,6 @@ public final class SystemServer {
             startBootstrapServices(t);
             startCoreServices(t);
             startOtherServices(t);
-            SystemServerInitThreadPool.shutdown();
         } catch (Throwable ex) {
             Slog.e("System", "******************************************");
             Slog.e("System", "************ Failure starting system services", ex);
