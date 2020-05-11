@@ -16,6 +16,8 @@
 
 package com.android.server.policy;
 
+import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
+
 import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -336,6 +338,8 @@ class LegacyGlobalActions implements DialogInterface.OnDismissListener, DialogIn
                     }
         });
         dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
+        // Don't acquire soft keyboard focus, to avoid destroying state when capturing bugreports
+        mDialog.getWindow().setFlags(FLAG_ALT_FOCUSABLE_IM, FLAG_ALT_FOCUSABLE_IM);
 
         dialog.setOnDismissListener(this);
 
