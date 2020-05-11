@@ -309,6 +309,7 @@ public class AuthContainerView extends LinearLayout
             return true;
         });
 
+        setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
         setFocusableInTouchMode(true);
         requestFocus();
     }
