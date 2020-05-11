@@ -938,6 +938,21 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
     }
 
     @Override
+    public void uninstallExistingPackage(VersionedPackage versionedPackage,
+            String callerPackageName, IntentSender statusReceiver, int userId) {
+        final int callingUid = Binder.getCallingUid();
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.DELETE_PACKAGES, null);
+        mPermissionManager.enforceCrossUserPermission(callingUid, userId, true, true, "uninstall");
+        if ((callingUid != Process.SHELL_UID) && (callingUid != Process.ROOT_UID)) {
+            mAppOps.checkPackage(callingUid, callerPackageName);
+        }
+
+        final PackageDeleteObserverAdapter adapter = new PackageDeleteObserverAdapter(mContext,
+                statusReceiver, versionedPackage.getPackageName(), false, userId);
+        mPm.deleteExistingPackageAsUser(versionedPackage, adapter.getBinder(), userId);
+    }
+
+    @Override
     public void installExistingPackage(String packageName, int installFlags, int installReason,
             IntentSender statusReceiver, int userId, List<String> whiteListedPermissions) {
         mPm.installExistingPackageAsUser(packageName, userId, installFlags, installReason,
