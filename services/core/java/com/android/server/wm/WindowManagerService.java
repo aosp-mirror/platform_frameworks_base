@@ -8030,26 +8030,15 @@ public class WindowManagerService extends IWindowManager.Stub
             IWindow window, IBinder hostInputToken, int flags, InputChannel outInputChannel) {
         final InputApplicationHandle applicationHandle;
         final String name;
-        final InputChannel[] inputChannels;
         final InputChannel clientChannel;
-        final InputChannel serverChannel;
         synchronized (mGlobalLock) {
             EmbeddedWindowController.EmbeddedWindow win =
-                    new EmbeddedWindowController.EmbeddedWindow(window,
+                    new EmbeddedWindowController.EmbeddedWindow(this, window,
                             mInputToWindowMap.get(hostInputToken), callingUid, callingPid);
-            name = win.getName();
-
-            inputChannels = InputChannel.openInputChannelPair(name);
-            serverChannel = inputChannels[0];
-            clientChannel = inputChannels[1];
-            mInputManager.registerInputChannel(serverChannel);
+            clientChannel = win.openInputChannel();
             mEmbeddedWindowController.add(clientChannel.getToken(), win);
-            if (serverChannel.getToken() != clientChannel.getToken()) {
-                throw new IllegalStateException("Client and Server channel are expected to"
-                        + "be the same");
-            }
-
             applicationHandle = win.getApplicationHandle();
+            name = win.getName();
         }
 
         updateInputChannel(clientChannel.getToken(), callingUid, callingPid, displayId, surface,
@@ -8057,10 +8046,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
         clientChannel.transferTo(outInputChannel);
         clientChannel.dispose();
-        // Prevent the java finalizer from breaking the input channel. But we won't
-        // do any further management so we just release the java ref and let the
-        // InputDispatcher hold the last ref.
-        serverChannel.release();
     }
 
     private void updateInputChannel(IBinder channelToken, int callingUid, int callingPid,
