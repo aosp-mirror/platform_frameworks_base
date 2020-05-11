@@ -1203,6 +1203,7 @@
   <java-symbol type="string" name="personal_apps_suspension_tomorrow_text" />
   <java-symbol type="string" name="personal_apps_suspension_text" />
   <java-symbol type="string" name="personal_apps_suspended_turn_profile_on" />
+  <java-symbol type="string" name="notification_work_profile_content_description" />
   <java-symbol type="string" name="factory_reset_warning" />
   <java-symbol type="string" name="factory_reset_message" />
   <java-symbol type="string" name="lockscreen_transport_play_description" />
@@ -4006,6 +4007,8 @@
   <java-symbol type="string" name="notification_channel_network_status" />
   <java-symbol type="string" name="notification_channel_network_alerts" />
   <java-symbol type="string" name="notification_channel_network_available" />
+
+  <java-symbol type="color" name="personal_apps_suspension_notification_color" />
 
   <!-- For Pdn throttle feature -->
   <java-symbol type="bool" name="config_pdp_reject_enable_retry" />
