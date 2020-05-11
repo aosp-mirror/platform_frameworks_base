@@ -1276,6 +1276,10 @@
     <dimen name="control_status_padding">3dp</dimen>
     <fraction name="controls_toggle_bg_intensity">5%</fraction>
     <fraction name="controls_dimmed_alpha">40%</fraction>
+    <dimen name="controls_setup_top_margin">16dp</dimen>
+    <dimen name="controls_setup_title">22sp</dimen>
+    <dimen name="controls_setup_subtitle">14sp</dimen>
+    <dimen name="controls_setup_vertical_padding">52dp</dimen>
 
     <!-- Home Controls activity view detail panel-->
     <dimen name="controls_activity_view_top_offset">100dp</dimen>
