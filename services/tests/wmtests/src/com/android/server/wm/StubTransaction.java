@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import android.annotation.NonNull;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.Region;
@@ -263,6 +264,17 @@ public class StubTransaction extends SurfaceControl.Transaction {
 
     @Override
     public SurfaceControl.Transaction setShadowRadius(SurfaceControl sc, float shadowRadius) {
+        return this;
+    }
+
+    @Override
+    public SurfaceControl.Transaction setFixedTransformHint(SurfaceControl sc,
+            @Surface.Rotation int transformHint) {
+        return this;
+    }
+
+    @Override
+    public SurfaceControl.Transaction unsetFixedTransformHint(@NonNull SurfaceControl sc) {
         return this;
     }
 }
