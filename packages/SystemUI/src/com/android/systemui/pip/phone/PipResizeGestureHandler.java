@@ -174,7 +174,21 @@ public class PipResizeGestureHandler {
         }
     }
 
-    private boolean isWithinTouchRegion(int x, int y) {
+    /**
+     * Check whether the current x,y coordinate is within the region in which drag-resize should
+     * start.
+     * This consists of 4 small squares on the 4 corners of the PIP window, a quarter of which
+     * overlaps with the PIP window while the rest goes outside of the PIP window.
+     *  _ _           _ _
+     * |_|_|_________|_|_|
+     * |_|_|         |_|_|
+     *   |     PIP     |
+     *   |   WINDOW    |
+     *  _|_           _|_
+     * |_|_|_________|_|_|
+     * |_|_|         |_|_|
+     */
+    public boolean isWithinTouchRegion(int x, int y) {
         final Rect currentPipBounds = mMotionHelper.getBounds();
         if (currentPipBounds == null) {
             return false;
@@ -195,37 +209,40 @@ public class PipResizeGestureHandler {
         mTmpRegion.op(mTmpBottomLeftCorner, Region.Op.UNION);
         mTmpRegion.op(mTmpBottomRightCorner, Region.Op.UNION);
 
+        return mTmpRegion.contains(x, y);
+    }
+
+    private void setCtrlType(int x, int y) {
+        final Rect currentPipBounds = mMotionHelper.getBounds();
+
         Rect movementBounds = mMovementBoundsSupplier.get();
         mDisplayBounds.set(movementBounds.left,
                 movementBounds.top,
                 movementBounds.right + currentPipBounds.width(),
                 movementBounds.bottom + currentPipBounds.height());
-        if (mTmpRegion.contains(x, y)) {
-            if (mTmpTopLeftCorner.contains(x, y) && currentPipBounds.top != mDisplayBounds.top
-                    && currentPipBounds.left != mDisplayBounds.left) {
-                mCtrlType |= CTRL_LEFT;
-                mCtrlType |= CTRL_TOP;
-            }
-            if (mTmpTopRightCorner.contains(x, y) && currentPipBounds.top != mDisplayBounds.top
-                    && currentPipBounds.right != mDisplayBounds.right) {
-                mCtrlType |= CTRL_RIGHT;
-                mCtrlType |= CTRL_TOP;
-            }
-            if (mTmpBottomRightCorner.contains(x, y)
-                    && currentPipBounds.bottom != mDisplayBounds.bottom
-                    && currentPipBounds.right != mDisplayBounds.right) {
-                mCtrlType |= CTRL_RIGHT;
-                mCtrlType |= CTRL_BOTTOM;
-            }
-            if (mTmpBottomLeftCorner.contains(x, y)
-                    && currentPipBounds.bottom != mDisplayBounds.bottom
-                    && currentPipBounds.left != mDisplayBounds.left) {
-                mCtrlType |= CTRL_LEFT;
-                mCtrlType |= CTRL_BOTTOM;
-            }
-            return true;
+
+        if (mTmpTopLeftCorner.contains(x, y) && currentPipBounds.top != mDisplayBounds.top
+                && currentPipBounds.left != mDisplayBounds.left) {
+            mCtrlType |= CTRL_LEFT;
+            mCtrlType |= CTRL_TOP;
         }
-        return false;
+        if (mTmpTopRightCorner.contains(x, y) && currentPipBounds.top != mDisplayBounds.top
+                && currentPipBounds.right != mDisplayBounds.right) {
+            mCtrlType |= CTRL_RIGHT;
+            mCtrlType |= CTRL_TOP;
+        }
+        if (mTmpBottomRightCorner.contains(x, y)
+                && currentPipBounds.bottom != mDisplayBounds.bottom
+                && currentPipBounds.right != mDisplayBounds.right) {
+            mCtrlType |= CTRL_RIGHT;
+            mCtrlType |= CTRL_BOTTOM;
+        }
+        if (mTmpBottomLeftCorner.contains(x, y)
+                && currentPipBounds.bottom != mDisplayBounds.bottom
+                && currentPipBounds.left != mDisplayBounds.left) {
+            mCtrlType |= CTRL_LEFT;
+            mCtrlType |= CTRL_BOTTOM;
+        }
     }
 
     private void onMotionEvent(MotionEvent ev) {
@@ -234,6 +251,7 @@ public class PipResizeGestureHandler {
             mLastResizeBounds.setEmpty();
             mAllowGesture = isWithinTouchRegion((int) ev.getX(), (int) ev.getY());
             if (mAllowGesture) {
+                setCtrlType((int) ev.getX(), (int) ev.getY());
                 mDownPoint.set(ev.getX(), ev.getY());
                 mLastDownBounds.set(mMotionHelper.getBounds());
             }
