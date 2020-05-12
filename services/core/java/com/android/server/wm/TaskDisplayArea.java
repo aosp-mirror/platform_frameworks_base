@@ -21,6 +21,7 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
@@ -1332,16 +1333,16 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
     }
 
     /**
-     * Check if the requested windowing-mode is appropriate for the specified task and/or activity
+     * Check that the requested windowing-mode is appropriate for the specified task and/or activity
      * on this display.
      *
      * @param windowingMode The windowing-mode to validate.
      * @param r The {@link ActivityRecord} to check against.
      * @param task The {@link Task} to check against.
      * @param activityType An activity type.
-     * @return {@code true} if windowingMode is valid, {@code false} otherwise.
+     * @return The provided windowingMode or the closest valid mode which is appropriate.
      */
-    boolean isValidWindowingMode(int windowingMode, @Nullable ActivityRecord r, @Nullable Task task,
+    int validateWindowingMode(int windowingMode, @Nullable ActivityRecord r, @Nullable Task task,
             int activityType) {
         // Make sure the windowing mode we are trying to use makes sense for what is supported.
         boolean supportsMultiWindow = mAtmService.mSupportsMultiWindow;
@@ -1361,35 +1362,24 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
             }
         }
 
-        return windowingMode != WINDOWING_MODE_UNDEFINED
-                && isWindowingModeSupported(windowingMode, supportsMultiWindow, supportsSplitScreen,
-                        supportsFreeform, supportsPip, activityType);
-    }
-
-    /**
-     * Check that the requested windowing-mode is appropriate for the specified task and/or activity
-     * on this display.
-     *
-     * @param windowingMode The windowing-mode to validate.
-     * @param r The {@link ActivityRecord} to check against.
-     * @param task The {@link Task} to check against.
-     * @param activityType An activity type.
-     * @return The provided windowingMode or the closest valid mode which is appropriate.
-     */
-    int validateWindowingMode(int windowingMode, @Nullable ActivityRecord r, @Nullable Task task,
-            int activityType) {
         final boolean inSplitScreenMode = isSplitScreenModeActivated();
-        if (!inSplitScreenMode && windowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY) {
+        if (!inSplitScreenMode
+                && windowingMode == WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY) {
             // Switch to the display's windowing mode if we are not in split-screen mode and we are
             // trying to launch in split-screen secondary.
             windowingMode = WINDOWING_MODE_UNDEFINED;
-        } else if (inSplitScreenMode && windowingMode == WINDOWING_MODE_UNDEFINED) {
+        } else if (inSplitScreenMode && (windowingMode == WINDOWING_MODE_FULLSCREEN
+                || windowingMode == WINDOWING_MODE_UNDEFINED)
+                && supportsSplitScreen) {
             windowingMode = WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
         }
-        if (!isValidWindowingMode(windowingMode, r, task, activityType)) {
-            return WINDOWING_MODE_UNDEFINED;
+
+        if (windowingMode != WINDOWING_MODE_UNDEFINED
+                && isWindowingModeSupported(windowingMode, supportsMultiWindow, supportsSplitScreen,
+                supportsFreeform, supportsPip, activityType)) {
+            return windowingMode;
         }
-        return windowingMode;
+        return WINDOWING_MODE_UNDEFINED;
     }
 
     boolean isTopStack(ActivityStack stack) {
