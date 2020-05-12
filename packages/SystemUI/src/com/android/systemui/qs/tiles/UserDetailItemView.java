@@ -106,6 +106,7 @@ public class UserDetailItemView extends LinearLayout {
     }
 
     public void setEnabled(boolean enabled) {
+        super.setEnabled(enabled);
         mName.setEnabled(enabled);
         mAvatar.setEnabled(enabled);
     }
