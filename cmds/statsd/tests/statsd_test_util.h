@@ -230,9 +230,12 @@ std::shared_ptr<LogEvent> makeAttributionLogEvent(int atomId, int64_t eventTimeN
 
 sp<MockUidMap> makeMockUidMapForOneHost(int hostUid, const vector<int>& isolatedUids);
 
+sp<MockUidMap> makeMockUidMapForPackage(const string& pkg, const set<int32_t>& uids);
+
 // Create log event for screen state changed.
-std::unique_ptr<LogEvent> CreateScreenStateChangedEvent(
-        uint64_t timestampNs, const android::view::DisplayStateEnum state);
+std::unique_ptr<LogEvent> CreateScreenStateChangedEvent(uint64_t timestampNs,
+                                                        const android::view::DisplayStateEnum state,
+                                                        int loggerUid = 0);
 
 // Create log event for screen brightness state changed.
 std::unique_ptr<LogEvent> CreateScreenBrightnessChangedEvent(uint64_t timestampNs, int level);

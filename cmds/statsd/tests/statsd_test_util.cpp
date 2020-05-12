@@ -605,8 +605,17 @@ sp<MockUidMap> makeMockUidMapForOneHost(int hostUid, const vector<int>& isolated
     return uidMap;
 }
 
-std::unique_ptr<LogEvent> CreateScreenStateChangedEvent(
-        uint64_t timestampNs, const android::view::DisplayStateEnum state) {
+sp<MockUidMap> makeMockUidMapForPackage(const string& pkg, const set<int32_t>& uids) {
+    sp<MockUidMap> uidMap = new StrictMock<MockUidMap>();
+    EXPECT_CALL(*uidMap, getAppUid(_)).Times(AnyNumber());
+    EXPECT_CALL(*uidMap, getAppUid(pkg)).WillRepeatedly(Return(uids));
+
+    return uidMap;
+}
+
+std::unique_ptr<LogEvent> CreateScreenStateChangedEvent(uint64_t timestampNs,
+                                                        const android::view::DisplayStateEnum state,
+                                                        int loggerUid) {
     AStatsEvent* statsEvent = AStatsEvent_obtain();
     AStatsEvent_setAtomId(statsEvent, util::SCREEN_STATE_CHANGED);
     AStatsEvent_overwriteTimestamp(statsEvent, timestampNs);
@@ -614,7 +623,7 @@ std::unique_ptr<LogEvent> CreateScreenStateChangedEvent(
     AStatsEvent_addBoolAnnotation(statsEvent, util::ANNOTATION_ID_EXCLUSIVE_STATE, true);
     AStatsEvent_addBoolAnnotation(statsEvent, util::ANNOTATION_ID_STATE_NESTED, false);
 
-    std::unique_ptr<LogEvent> logEvent = std::make_unique<LogEvent>(/*uid=*/0, /*pid=*/0);
+    std::unique_ptr<LogEvent> logEvent = std::make_unique<LogEvent>(loggerUid, /*pid=*/0);
     parseStatsEventToLogEvent(statsEvent, logEvent.get());
     return logEvent;
 }
