@@ -307,8 +307,15 @@ public class BtHelper {
                 case BluetoothHeadset.STATE_AUDIO_DISCONNECTED:
                     mDeviceBroker.setBluetoothScoOn(false, "BtHelper.receiveBtEvent");
                     scoAudioState = AudioManager.SCO_AUDIO_STATE_DISCONNECTED;
-                    // startBluetoothSco called after stopBluetoothSco
-                    if (mScoAudioState == SCO_STATE_ACTIVATE_REQ) {
+                    // There are two cases where we want to immediately reconnect audio:
+                    // 1) If a new start request was received while disconnecting: this was
+                    // notified by requestScoState() setting state to SCO_STATE_ACTIVATE_REQ.
+                    // 2) If audio was connected then disconnected via Bluetooth APIs and
+                    // we still have pending activation requests by apps: this is indicated by
+                    // state SCO_STATE_ACTIVE_EXTERNAL and the mScoClients list not empty.
+                    if (mScoAudioState == SCO_STATE_ACTIVATE_REQ
+                            || (mScoAudioState == SCO_STATE_ACTIVE_EXTERNAL
+                                    && !mScoClients.isEmpty())) {
                         if (mBluetoothHeadset != null && mBluetoothHeadsetDevice != null
                                 && connectBluetoothScoAudioHelper(mBluetoothHeadset,
                                 mBluetoothHeadsetDevice, mScoAudioMode)) {
@@ -318,7 +325,9 @@ public class BtHelper {
                         }
                     }
                     // Tear down SCO if disconnected from external
-                    clearAllScoClients(0, mScoAudioState == SCO_STATE_ACTIVE_INTERNAL);
+                    if (mScoAudioState == SCO_STATE_DEACTIVATING) {
+                        clearAllScoClients(0, false);
+                    }
                     mScoAudioState = SCO_STATE_INACTIVE;
                     break;
                 case BluetoothHeadset.STATE_AUDIO_CONNECTING:
