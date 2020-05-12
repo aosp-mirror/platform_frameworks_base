@@ -438,6 +438,7 @@ message Atom {
         AppPermissionGroupsFragmentAutoRevokeAction
             app_permission_groups_fragment_auto_revoke_action =
             273 [(module) = "permissioncontroller"];
+        EvsUsageStatsReported evs_usage_stats_reported = 274 [(module) = "evs"];
         SdkExtensionStatus sdk_extension_status = 354;
 
         // StatsdStats tracks platform atoms with ids upto 500.
@@ -9646,4 +9647,45 @@ message AppUsageEventOccurred {
         MOVE_TO_BACKGROUND = 2;
     }
     optional EventType event_type = 4;
+}
+
+/*
+ * Quality metrics logged when EVS cameras are active.
+ *
+ * Logged from:
+ *  packages/services/Car/evs/manager/1.1/Enumerator.cpp
+ */
+message EvsUsageStatsReported {
+
+    // Camera identifier to distinguish the source camera device.  This is not
+    // globally unique and therefore cannot be used to identify the user and/or
+    // the device.
+    optional int32 device_id = 1;
+
+    // Peak number of clients during the service
+    optional int32 peak_num_clients = 2;
+
+    // Number of erroneous events during the service
+    optional int32 num_errors = 3;
+
+    // Round trip latency of the very first frame
+    optional int64 first_latency_millis = 4;
+
+    // Average frame round trip latency
+    optional float avg_latency_millis = 5;
+
+    // Peak frame round trip latency
+    optional int64 peak_latency_millis = 6;
+
+    // Total number of frames received
+    optional int64 total_frames = 7;
+
+    // Number of frames ignored
+    optional int64 ignored_frames = 8;
+
+    // Number of dropped frames to synchronize camera devices
+    optional int64 dropped_frames_to_sync = 9;
+
+    // The duration of the service
+    optional int64 duration_millis = 10;
 }
