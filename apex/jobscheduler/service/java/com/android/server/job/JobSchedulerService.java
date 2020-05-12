@@ -56,6 +56,7 @@ import android.os.BatteryStats;
 import android.os.BatteryStatsInternal;
 import android.os.Binder;
 import android.os.Handler;
+import android.os.LimitExceededException;
 import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
@@ -1002,7 +1003,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                     }
                     if (isDebuggable) {
                         // Only throw the exception for debuggable apps.
-                        throw new IllegalStateException(
+                        throw new LimitExceededException(
                                 "schedule()/enqueue() called more than "
                                         + mQuotaTracker.getLimit(Category.SINGLE_CATEGORY)
                                         + " times in the past "
