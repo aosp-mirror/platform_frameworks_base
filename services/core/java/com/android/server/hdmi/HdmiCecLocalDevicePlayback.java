@@ -63,6 +63,10 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
     // TODO(amyjojo): adding system constants for input ports to TIF mapping.
     private int mLocalActivePath = 0;
 
+    // Determines what action should be taken upon receiving Routing Control messages.
+    @VisibleForTesting
+    protected String mPlaybackDeviceActionOnRoutingControl;
+
     HdmiCecLocalDevicePlayback(HdmiControlService service) {
         super(service, HdmiDeviceInfo.DEVICE_PLAYBACK);
 
@@ -71,6 +75,10 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
         // The option is false by default. Update settings db as well to have the right
         // initial setting on UI.
         mService.writeBooleanSetting(Global.HDMI_CONTROL_AUTO_DEVICE_OFF_ENABLED, mAutoTvOff);
+
+        mPlaybackDeviceActionOnRoutingControl = SystemProperties.get(
+                Constants.PLAYBACK_DEVICE_ACTION_ON_ROUTING_CONTROL,
+                Constants.PLAYBACK_DEVICE_ACTION_ON_ROUTING_CONTROL_NONE);
     }
 
     @Override
@@ -331,6 +339,47 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
             }
         }
         return true;
+    }
+
+    @Override
+    @ServiceThreadOnly
+    protected boolean handleRoutingChange(HdmiCecMessage message) {
+        assertRunOnServiceThread();
+        int physicalAddress = HdmiUtils.twoBytesToInt(message.getParams(), 2);
+        handleRoutingChangeAndInformation(physicalAddress, message);
+        return true;
+    }
+
+    @Override
+    @ServiceThreadOnly
+    protected boolean handleRoutingInformation(HdmiCecMessage message) {
+        assertRunOnServiceThread();
+        int physicalAddress = HdmiUtils.twoBytesToInt(message.getParams());
+        handleRoutingChangeAndInformation(physicalAddress, message);
+        return true;
+    }
+
+    @Override
+    protected void handleRoutingChangeAndInformation(int physicalAddress, HdmiCecMessage message) {
+        if (physicalAddress != mService.getPhysicalAddress()) {
+            return; // Do nothing.
+        }
+        switch (mPlaybackDeviceActionOnRoutingControl) {
+            case Constants.PLAYBACK_DEVICE_ACTION_ON_ROUTING_CONTROL_WAKE_UP_AND_SEND_ACTIVE_SOURCE:
+                setAndBroadcastActiveSource(message, physicalAddress);
+                break;
+            case Constants.PLAYBACK_DEVICE_ACTION_ON_ROUTING_CONTROL_WAKE_UP_ONLY:
+                mService.wakeUp();
+                break;
+            case Constants.PLAYBACK_DEVICE_ACTION_ON_ROUTING_CONTROL_NONE:
+                break;
+            default:
+                Slog.w(TAG, "Invalid property '"
+                        + Constants.PLAYBACK_DEVICE_ACTION_ON_ROUTING_CONTROL
+                        + "' value: "
+                        + mPlaybackDeviceActionOnRoutingControl);
+                break;
+        }
     }
 
     @Override

@@ -199,7 +199,8 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
         // do nothing
     }
 
-    // Source device with Switch functionality should implement this method.
+    // Only source devices that react to routing control messages should implement
+    // this method (e.g. a TV with built in switch).
     // TODO(): decide which type will handle the routing when multi device type is supported
     protected void handleRoutingChangeAndInformation(int physicalAddress, HdmiCecMessage message) {
         // do nothing
