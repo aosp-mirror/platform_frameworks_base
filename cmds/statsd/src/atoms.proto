@@ -429,6 +429,16 @@ message Atom {
         AccessibilityServiceReported accessibility_service_reported = 267 [(module) = "settings"];
         DocsUIDragAndDropReported docs_ui_drag_and_drop_reported = 268 [(module) = "docsui"];
         AppUsageEventOccurred app_usage_event_occurred = 269 [(module) = "framework"];
+        AutoRevokeNotificationClicked auto_revoke_notification_clicked =
+            270 [(module) = "permissioncontroller"];
+        AutoRevokeFragmentAppViewed auto_revoke_fragment_app_viewed =
+            271 [(module) = "permissioncontroller"];
+        AutoRevokedAppInteraction auto_revoked_app_interaction =
+            272 [(module) = "permissioncontroller", (module) = "settings"];
+        AppPermissionGroupsFragmentAutoRevokeAction
+            app_permission_groups_fragment_auto_revoke_action =
+            273 [(module) = "permissioncontroller"];
+        EvsUsageStatsReported evs_usage_stats_reported = 274 [(module) = "evs"];
         SdkExtensionStatus sdk_extension_status = 354;
 
         // StatsdStats tracks platform atoms with ids upto 500.
@@ -8210,7 +8220,8 @@ message AppPermissionFragmentViewed {
 }
 
 /**
-* Information about a AppPermissionsFragment viewed by user
+* Information about a AppPermissionGroupsFragment viewed by user. Fragment has been renamed, but
+* the log retains the old fragment name.
 */
 message AppPermissionsFragmentViewed {
     // id which identifies single session of user interacting with permission controller
@@ -8238,7 +8249,6 @@ message AppPermissionsFragmentViewed {
     }
     optional Category category = 6;
 }
-
 /**
 * Information about a PermissionAppsFragment viewed by user.
 * Logged from ui/handheld/PermissionAppsFragment.java
@@ -8268,6 +8278,99 @@ message PermissionAppsFragmentViewed {
         DENIED = 3;
     }
     optional Category category = 6;
+}
+
+/**
+* Log that the Auto Revoke notification has been clicked
+* Logged from ui/ManagePermissionsActivity
+*/
+message AutoRevokeNotificationClicked {
+    // id which identifies single session of user interacting with permission controller
+    optional int64 session_id = 1;
+}
+
+/**
+* Log that an app has been displayed on the auto revoke page, and lists one permission that was
+* auto revoked for it.
+* Logged from ui/handheld/AutoRevokeFragment
+*/
+message AutoRevokeFragmentAppViewed {
+    // id which identifies single session of user interacting with permission controller
+    optional int64 session_id = 1;
+
+    // UID of package for which permissions are viewed
+    optional int32 uid = 2 [(is_uid) = true];
+
+    // Name of package for which permissions are viewed
+    optional string package_name = 3;
+
+    // The name of a permission group that has been revoked
+    optional string permission_group_name = 4;
+
+    // The age of the app- more than three months old, or more than six months
+    enum Age {
+        UNDEFINED = 0;
+        NEWER_BUCKET = 1;
+        OLDER_BUCKET = 2;
+    }
+
+    // How long the app has been unused. Currently, newer bucket is 3 months, older is 6 months
+    optional Age age = 5;
+}
+
+/**
+* Log that the user has interacted with an app on the auto revoke fragment
+* Logged from ui/handheld/AutoRevokeFragment
+*/
+message AutoRevokedAppInteraction {
+    // id which identifies single session of user interacting with permission controller
+    optional int64 session_id = 1;
+
+    // UID of package for which permissions are viewed
+    optional int32 uid = 2 [(is_uid) = true];
+
+    // Name of package for which permissions are viewed
+    optional string package_name = 3;
+
+    enum Action {
+        UNDEFINED = 0;
+        REMOVE = 1;
+        OPEN = 2;
+        APP_INFO = 3;
+        PERMISSIONS = 4;
+        REMOVE_IN_SETTINGS = 5;
+        OPEN_IN_SETTINGS = 6;
+    }
+
+    // The action the user took to interact with the app
+    optional Action action = 4;
+}
+
+/**
+* Log that the AppPermissionGroupsFragment has been interacted with for the possible purposes of
+* auto revoke, or that the auto revoke switch has been changed
+* Logged from ui/handheld/AppPermissionGroupsFragment
+ */
+message AppPermissionGroupsFragmentAutoRevokeAction {
+    // id which identifies single session of user interacting with permission controller
+    optional int64 session_id = 1;
+
+    // UID of package for which permissions are viewed
+    optional int32 uid = 2 [(is_uid) = true];
+
+    // Name of package for which permissions are viewed
+    optional string package_name = 3;
+
+    enum Action {
+        UNDEFINED = 0;
+        OPENED_FOR_AUTO_REVOKE = 1;
+        OPENED_FROM_INTENT = 2;
+        SWITCH_ENABLED = 3;
+        SWITCH_DISABLED = 4;
+    }
+
+    // The action the user took to interact with the fragment
+    optional Action action = 4;
 }
 
 /**
@@ -9544,4 +9647,45 @@ message AppUsageEventOccurred {
         MOVE_TO_BACKGROUND = 2;
     }
     optional EventType event_type = 4;
+}
+
+/*
+ * Quality metrics logged when EVS cameras are active.
+ *
+ * Logged from:
+ *  packages/services/Car/evs/manager/1.1/Enumerator.cpp
+ */
+message EvsUsageStatsReported {
+
+    // Camera identifier to distinguish the source camera device.  This is not
+    // globally unique and therefore cannot be used to identify the user and/or
+    // the device.
+    optional int32 device_id = 1;
+
+    // Peak number of clients during the service
+    optional int32 peak_num_clients = 2;
+
+    // Number of erroneous events during the service
+    optional int32 num_errors = 3;
+
+    // Round trip latency of the very first frame
+    optional int64 first_latency_millis = 4;
+
+    // Average frame round trip latency
+    optional float avg_latency_millis = 5;
+
+    // Peak frame round trip latency
+    optional int64 peak_latency_millis = 6;
+
+    // Total number of frames received
+    optional int64 total_frames = 7;
+
+    // Number of frames ignored
+    optional int64 ignored_frames = 8;
+
+    // Number of dropped frames to synchronize camera devices
+    optional int64 dropped_frames_to_sync = 9;
+
+    // The duration of the service
+    optional int64 duration_millis = 10;
 }
