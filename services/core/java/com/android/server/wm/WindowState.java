@@ -743,7 +743,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             if (mControllableInsetProvider != null) {
                 mControllableInsetProvider.startSeamlessRotation();
             }
-            mPendingSeamlessRotate = new SeamlessRotator(oldRotation, rotation, getDisplayInfo());
+            mPendingSeamlessRotate = new SeamlessRotator(oldRotation, rotation, getDisplayInfo(),
+                    false /* applyFixedTransformationHint */);
             mPendingSeamlessRotate.unrotate(transaction, this);
             getDisplayContent().getDisplayRotation().markForSeamlessRotation(this,
                     true /* seamlesslyRotated */);
