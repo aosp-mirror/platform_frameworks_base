@@ -363,8 +363,9 @@ public class ResolverActivity extends Activity implements
         // of the last used choice to highlight it in the list.  We need to always
         // turn this off when running under voice interaction, since it results in
         // a more complicated UI that the current voice interaction flow is not able
-        // to handle.
-        boolean filterLastUsed = mSupportsAlwaysUseOption && !isVoiceInteraction();
+        // to handle. We also turn it off when the work tab is shown to simplify the UX.
+        boolean filterLastUsed = mSupportsAlwaysUseOption && !isVoiceInteraction()
+                && !shouldShowTabs();
         mWorkProfileUserHandle = fetchWorkProfileUserProfile();
         mMultiProfilePagerAdapter = createMultiProfilePagerAdapter(initialIntents, rList, filterLastUsed);
         if (configureContentView()) {

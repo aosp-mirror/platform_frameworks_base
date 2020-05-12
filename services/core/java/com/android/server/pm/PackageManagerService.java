@@ -17919,8 +17919,46 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     @Override
+    public void deleteExistingPackageAsUser(VersionedPackage versionedPackage,
+            final IPackageDeleteObserver2 observer, final int userId) {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.DELETE_PACKAGES, null);
+        Preconditions.checkNotNull(versionedPackage);
+        Preconditions.checkNotNull(observer);
+        final String packageName = versionedPackage.getPackageName();
+        final long versionCode = versionedPackage.getLongVersionCode();
+
+        int installedForUsersCount = 0;
+        synchronized (mLock) {
+            // Normalize package name to handle renamed packages and static libs
+            final String internalPkgName = resolveInternalPackageNameLPr(packageName, versionCode);
+            final PackageSetting ps = mSettings.getPackageLPr(internalPkgName);
+            if (ps != null) {
+                int[] installedUsers = ps.queryInstalledUsers(mUserManager.getUserIds(), true);
+                installedForUsersCount = installedUsers.length;
+            }
+        }
+
+        if (installedForUsersCount > 1) {
+            deletePackageVersionedInternal(versionedPackage, observer, userId, 0, true);
+        } else {
+            try {
+                observer.onPackageDeleted(packageName, PackageManager.DELETE_FAILED_INTERNAL_ERROR,
+                        null);
+            } catch (RemoteException re) {
+            }
+        }
+    }
+
+    @Override
     public void deletePackageVersioned(VersionedPackage versionedPackage,
             final IPackageDeleteObserver2 observer, final int userId, final int deleteFlags) {
+        deletePackageVersionedInternal(versionedPackage, observer, userId, deleteFlags, false);
+    }
+
+    private void deletePackageVersionedInternal(VersionedPackage versionedPackage,
+            final IPackageDeleteObserver2 observer, final int userId, final int deleteFlags,
+            final boolean allowSilentUninstall) {
         final int callingUid = Binder.getCallingUid();
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.DELETE_PACKAGES, null);
@@ -17941,6 +17979,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         final int uid = Binder.getCallingUid();
         if (!isOrphaned(internalPackageName)
+                && !allowSilentUninstall
                 && !isCallerAllowedToSilentlyUninstall(uid, internalPackageName)) {
             mHandler.post(() -> {
                 try {

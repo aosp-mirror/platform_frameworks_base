@@ -2120,12 +2120,20 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     @Override
     boolean fillsParent() {
-        return occludesParent();
+        return occludesParent(true /* includingFinishing */);
     }
 
-    /** Returns true if this activity is opaque and fills the entire space of this task. */
+    /** Returns true if this activity is not finishing, is opaque and fills the entire space of
+     * this task. */
     boolean occludesParent() {
-        return !finishing && mOccludesParent;
+        return occludesParent(false /* includingFinishing */);
+    }
+
+    private boolean occludesParent(boolean includingFinishing) {
+        if (!includingFinishing && finishing) {
+            return false;
+        }
+        return mOccludesParent;
     }
 
     boolean setOccludesParent(boolean occludesParent) {
@@ -7554,7 +7562,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (mThumbnail != null){
             mThumbnail.dumpDebug(proto, THUMBNAIL);
         }
-        proto.write(FILLS_PARENT, mOccludesParent);
+        proto.write(FILLS_PARENT, fillsParent());
         proto.write(APP_STOPPED, mAppStopped);
         proto.write(TRANSLUCENT, !occludesParent());
         proto.write(VISIBLE, mVisible);

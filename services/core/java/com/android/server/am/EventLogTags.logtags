@@ -106,4 +106,4 @@ option java_package com.android.server.am
 30078 uc_finish_user_boot (userId|1|5)
 30079 uc_dispatch_user_switch (oldUserId|1|5) (newUserId|1|5)
 30080 uc_continue_user_switch (oldUserId|1|5) (newUserId|1|5)
-30081 uc_send_user_broadcast (userId|1|5) (IntentAction|3|)
+30081 uc_send_user_broadcast (userId|1|5),(IntentAction|3)

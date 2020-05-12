@@ -147,7 +147,8 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
         addLocalService(PowerManagerInternal.class, mLocalPowerManager);
         addLocalService(TwilightManager.class, mTwilightManager);
         
-        mUiManagerService = new UiModeManagerService(mContext, true);
+        mUiManagerService = new UiModeManagerService(mContext, true,
+                mTwilightManager);
         try {
             mUiManagerService.onBootPhase(SystemService.PHASE_SYSTEM_SERVICES_READY);
         } catch (SecurityException e) {/* ignore for permission denial */}
