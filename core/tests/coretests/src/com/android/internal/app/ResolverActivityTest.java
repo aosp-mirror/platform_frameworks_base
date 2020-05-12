@@ -43,6 +43,7 @@ import static org.testng.Assert.assertFalse;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
+import android.os.RemoteException;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.view.View;
@@ -825,6 +826,34 @@ public class ResolverActivityTest {
         waitForIdle();
 
         assertThat(chosen[0], is(personalResolvedComponentInfos.get(1).getResolveInfoAt(0)));
+    }
+
+    @Test
+    public void testLayoutWithDefault_withWorkTab_neverShown() throws RemoteException {
+        // enable the work tab feature flag
+        ResolverActivity.ENABLE_TABBED_VIEW = true;
+        markWorkProfileUserAvailable();
+
+        // In this case we prefer the other profile and don't display anything about the last
+        // chosen activity.
+        Intent sendIntent = createSendImageIntent();
+        List<ResolvedComponentInfo> resolvedComponentInfos =
+                createResolvedComponentsForTest(2);
+
+        when(sOverrides.resolverListController.getResolversForIntent(Mockito.anyBoolean(),
+                Mockito.anyBoolean(),
+                Mockito.isA(List.class))).thenReturn(resolvedComponentInfos);
+        when(sOverrides.resolverListController.getLastChosen())
+                .thenReturn(resolvedComponentInfos.get(1).getResolveInfoAt(0));
+
+        final ResolverWrapperActivity activity = mActivityRule.launchActivity(sendIntent);
+        Espresso.registerIdlingResources(activity.getAdapter().getLabelIdlingResource());
+        waitForIdle();
+
+        // The other entry is filtered to the last used slot
+        assertThat(activity.getAdapter().hasFilteredItem(), is(false));
+        assertThat(activity.getAdapter().getCount(), is(2));
+        assertThat(activity.getAdapter().getPlaceholderCount(), is(2));
     }
 
     private Intent createSendImageIntent() {
