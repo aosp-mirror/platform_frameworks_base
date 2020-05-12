@@ -18,6 +18,7 @@ package android.net;
 
 import android.app.PendingIntent;
 import android.net.ConnectionInfo;
+import android.net.ConnectivityDiagnosticsManager;
 import android.net.IConnectivityDiagnosticsCallback;
 import android.net.LinkProperties;
 import android.net.Network;
@@ -33,6 +34,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Messenger;
 import android.os.ParcelFileDescriptor;
+import android.os.PersistableBundle;
 import android.os.ResultReceiver;
 
 import com.android.internal.net.LegacyVpnInfo;
@@ -227,4 +229,7 @@ interface IConnectivityManager
     void unregisterConnectivityDiagnosticsCallback(in IConnectivityDiagnosticsCallback callback);
 
     IBinder startOrGetTestNetworkService();
+
+    void simulateDataStall(int detectionMethod, long timestampMillis, in Network network,
+                in PersistableBundle extras);
 }
