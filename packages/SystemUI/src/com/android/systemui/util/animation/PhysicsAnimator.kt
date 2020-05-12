@@ -311,10 +311,25 @@ class PhysicsAnimator<T> private constructor (val target: T) {
         val springConfigCopy = springConfig.copy()
         val toAtLeast = if (startVelocity < 0) flingConfig.min else flingConfig.max
 
-        // If the fling needs to reach min/max, calculate the velocity required to do so and use
-        // that if the provided start velocity is not sufficient.
-        if (flingMustReachMinOrMax &&
-                toAtLeast != -Float.MAX_VALUE && toAtLeast != Float.MAX_VALUE) {
+        if (flingMustReachMinOrMax && isValidValue(toAtLeast)) {
+            val currentValue = property.getValue(target)
+            val flingTravelDistance =
+                    startVelocity / (flingConfig.friction * FLING_FRICTION_SCALAR_MULTIPLIER)
+            val projectedFlingEndValue = currentValue + flingTravelDistance
+            val midpoint = (flingConfig.min + flingConfig.max) / 2
+
+            // If fling velocity is too low to push the target past the midpoint between min and
+            // max, then spring back towards the nearest edge, starting with the current velocity.
+            if ((startVelocity < 0 && projectedFlingEndValue > midpoint) ||
+                    (startVelocity > 0 && projectedFlingEndValue < midpoint)) {
+                val toPosition =
+                        if (projectedFlingEndValue < midpoint) flingConfig.min else flingConfig.max
+                if (isValidValue(toPosition)) {
+                    return spring(property, toPosition, startVelocity, springConfig)
+                }
+            }
+
+            // Projected fling end value is past the midpoint, so fling forward.
             val distanceToDestination = toAtLeast - property.getValue(target)
 
             // The minimum velocity required for the fling to end up at the given destination,
@@ -344,6 +359,8 @@ class PhysicsAnimator<T> private constructor (val target: T) {
         springConfigs[property] = springConfigCopy
         return this
     }
+
+    private fun isValidValue(value: Float) = value < Float.MAX_VALUE && value > -Float.MAX_VALUE
 
     /**
      * Adds a listener that will be called whenever any property on the animated object is updated.
