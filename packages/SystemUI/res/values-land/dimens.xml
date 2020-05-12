@@ -40,4 +40,6 @@
     <!-- Padding between status bar and bubbles when displayed in expanded state, smaller
          value in landscape since we have limited vertical space-->
     <dimen name="bubble_padding_top">4dp</dimen>
+
+    <dimen name="controls_activity_view_top_offset">25dp</dimen>
 </resources>
