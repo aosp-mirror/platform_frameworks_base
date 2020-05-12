@@ -29,10 +29,12 @@ import android.content.Intent;
 import android.provider.Settings;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.keyguard.KeyguardMediaPlayer;
 import com.android.systemui.R;
+import com.android.systemui.media.KeyguardMediaController;
+import com.android.systemui.media.MediaHierarchyManager;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.StatusBarState;
@@ -74,8 +76,8 @@ public class NotificationSectionsManager implements StackScrollAlgorithm.Section
     private final StatusBarStateController mStatusBarStateController;
     private final ConfigurationController mConfigurationController;
     private final PeopleHubViewAdapter mPeopleHubViewAdapter;
-    private final KeyguardMediaPlayer mKeyguardMediaPlayer;
     private final NotificationSectionsFeatureManager mSectionsFeatureManager;
+    private final KeyguardMediaController mKeyguardMediaController;
     private final int mNumberOfSections;
 
     private final PeopleHubViewBoundary mPeopleHubViewBoundary = new PeopleHubViewBoundary() {
@@ -123,15 +125,15 @@ public class NotificationSectionsManager implements StackScrollAlgorithm.Section
             StatusBarStateController statusBarStateController,
             ConfigurationController configurationController,
             PeopleHubViewAdapter peopleHubViewAdapter,
-            KeyguardMediaPlayer keyguardMediaPlayer,
+            KeyguardMediaController keyguardMediaController,
             NotificationSectionsFeatureManager sectionsFeatureManager) {
         mActivityStarter = activityStarter;
         mStatusBarStateController = statusBarStateController;
         mConfigurationController = configurationController;
         mPeopleHubViewAdapter = peopleHubViewAdapter;
-        mKeyguardMediaPlayer = keyguardMediaPlayer;
         mSectionsFeatureManager = sectionsFeatureManager;
         mNumberOfSections = mSectionsFeatureManager.getNumberOfBuckets();
+        mKeyguardMediaController = keyguardMediaController;
     }
 
     NotificationSection[] createSectionsForBuckets() {
@@ -205,12 +207,9 @@ public class NotificationSectionsManager implements StackScrollAlgorithm.Section
         mIncomingHeader.setHeaderText(R.string.notification_section_header_incoming);
         mIncomingHeader.setOnHeaderClickListener(this::onGentleHeaderClick);
 
-        if (mMediaControlsView != null) {
-            mKeyguardMediaPlayer.unbindView();
-        }
         mMediaControlsView = reinflateView(mMediaControlsView, layoutInflater,
                 R.layout.keyguard_media_header);
-        mKeyguardMediaPlayer.bindView(mMediaControlsView);
+        mKeyguardMediaController.attach(mMediaControlsView);
     }
 
     /** Listener for when the "clear all" button is clicked on the gentle notification header. */
@@ -267,7 +266,6 @@ public class NotificationSectionsManager implements StackScrollAlgorithm.Section
 
         final boolean showHeaders = mStatusBarStateController.getState() != StatusBarState.KEYGUARD;
         final boolean usingPeopleFiltering = mSectionsFeatureManager.isFilteringEnabled();
-        final boolean isKeyguard = mStatusBarStateController.getState() == StatusBarState.KEYGUARD;
         final boolean usingMediaControls = mSectionsFeatureManager.isMediaControlsEnabled();
 
         boolean peopleNotifsPresent = false;
@@ -275,7 +273,7 @@ public class NotificationSectionsManager implements StackScrollAlgorithm.Section
         int currentMediaControlsIdx = -1;
         // Currently, just putting media controls in the front and incrementing the position based
         // on the number of heads-up notifs.
-        int mediaControlsTarget = isKeyguard && usingMediaControls ? 0 : -1;
+        int mediaControlsTarget = usingMediaControls ? 0 : -1;
         int currentIncomingHeaderIdx = -1;
         int incomingHeaderTarget = -1;
         int currentPeopleHeaderIdx = -1;
