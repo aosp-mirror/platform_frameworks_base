@@ -56,8 +56,13 @@ class MediaViewManager @Inject constructor(
             }
         }
     private val scrollChangedListener = object : View.OnScrollChangeListener {
-        override fun onScrollChange(v: View?, scrollX: Int, scrollY: Int, oldScrollX: Int,
-                                    oldScrollY: Int) {
+        override fun onScrollChange(
+            v: View?,
+            scrollX: Int,
+            scrollY: Int,
+            oldScrollX: Int,
+            oldScrollY: Int
+        ) {
             if (playerWidthPlusPadding == 0) {
                 return
             }
@@ -79,16 +84,17 @@ class MediaViewManager @Inject constructor(
             override fun onMediaDataRemoved(key: String) {
                 val removed = mediaPlayers.remove(key)
                 removed?.apply {
-                    val beforeActive = mediaContent.indexOfChild(removed.view) <= activeMediaIndex
-                    mediaContent.removeView(removed.view)
+                    val beforeActive = mediaContent.indexOfChild(removed.view?.player) <=
+                            activeMediaIndex
+                    mediaContent.removeView(removed.view?.player)
                     removed.onDestroy()
                     updateMediaPaddings()
                     if (beforeActive) {
                         // also update the index here since the scroll below might not always lead
                         // to a scrolling changed
                         activeMediaIndex = Math.max(0, activeMediaIndex - 1)
-                        mediaCarousel.scrollX = Math.max(mediaCarousel.scrollX
-                                - playerWidthPlusPadding, 0)
+                        mediaCarousel.scrollX = Math.max(mediaCarousel.scrollX -
+                                playerWidthPlusPadding, 0)
                     }
                     updatePlayerVisibilities()
                 }
@@ -103,7 +109,7 @@ class MediaViewManager @Inject constructor(
 
     private fun reorderAllPlayers() {
         for (mediaPlayer in mediaPlayers.values) {
-            val view = mediaPlayer.view
+            val view = mediaPlayer.view?.player
             if (mediaPlayer.isPlaying && mediaContent.indexOfChild(view) != 0) {
                 mediaContent.removeView(view)
                 mediaContent.addView(view, 0)
@@ -142,24 +148,26 @@ class MediaViewManager @Inject constructor(
             val routeManager = LocalMediaManager(context, localBluetoothManager,
                     imm, data.packageName)
 
-            existingPlayer = MediaControlPanel(context, mediaContent, routeManager,
-                    foregroundExecutor, backgroundExecutor, activityStarter)
+            existingPlayer = MediaControlPanel(context, routeManager, foregroundExecutor,
+                    backgroundExecutor, activityStarter)
+            existingPlayer.attach(PlayerViewHolder.create(LayoutInflater.from(context),
+                    mediaContent))
             mediaPlayers[key] = existingPlayer
             val lp = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT)
-            existingPlayer.view.setLayoutParams(lp)
+            existingPlayer.view?.player?.setLayoutParams(lp)
             existingPlayer.setListening(currentlyExpanded)
             if (existingPlayer.isPlaying) {
-                mediaContent.addView(existingPlayer.view, 0)
+                mediaContent.addView(existingPlayer.view?.player, 0)
             } else {
-                mediaContent.addView(existingPlayer.view)
+                mediaContent.addView(existingPlayer.view?.player)
             }
             updatePlayerToCurrentState(existingPlayer)
         } else if (existingPlayer.isPlaying &&
-                    mediaContent.indexOfChild(existingPlayer.view) != 0) {
+                    mediaContent.indexOfChild(existingPlayer.view?.player) != 0) {
             if (visualStabilityManager.isReorderingAllowed) {
-                mediaContent.removeView(existingPlayer.view)
-                mediaContent.addView(existingPlayer.view, 0)
+                mediaContent.removeView(existingPlayer.view?.player)
+                mediaContent.addView(existingPlayer.view?.player, 0)
             } else {
                 visualStabilityManager.addReorderingAllowedCallback(visualStabilityCallback)
             }
@@ -167,7 +175,7 @@ class MediaViewManager @Inject constructor(
         existingPlayer.bind(data)
         // Resetting the progress to make sure it's taken into account for the latest
         // motion model
-        existingPlayer.view.progress = currentState?.expansion ?: 0.0f
+        existingPlayer.view?.player?.progress = currentState?.expansion ?: 0.0f
         updateMediaPaddings()
     }
 
@@ -190,7 +198,6 @@ class MediaViewManager @Inject constructor(
                 mediaView.layoutParams = layoutParams
             }
         }
-
     }
 
     /**
@@ -201,8 +208,8 @@ class MediaViewManager @Inject constructor(
         currentState = state
         currentlyExpanded = state.expansion > 0
         for (mediaPlayer in mediaPlayers.values) {
-            val view = mediaPlayer.view
-            view.progress = state.expansion
+            val view = mediaPlayer.view?.player
+            view?.progress = state.expansion
         }
     }
 
@@ -215,8 +222,12 @@ class MediaViewManager @Inject constructor(
      * @param desiredState the target state we're transitioning to
      * @param animate should this be animated
      */
-    fun onDesiredLocationChanged(desiredState: MediaState?, animate: Boolean, duration: Long,
-                                 startDelay: Long) {
+    fun onDesiredLocationChanged(
+        desiredState: MediaState?,
+        animate: Boolean,
+        duration: Long,
+        startDelay: Long
+    ) {
         if (desiredState is MediaHost.MediaHostState) {
             // This is a hosting view, let's remeasure our players
             this.desiredState = desiredState
@@ -224,7 +235,7 @@ class MediaViewManager @Inject constructor(
             if (playerWidth != width) {
                 setPlayerWidth(width)
                 for (mediaPlayer in mediaPlayers.values) {
-                    if (animate && mediaPlayer.view.visibility == View.VISIBLE) {
+                    if (animate && mediaPlayer.view?.player?.visibility == View.VISIBLE) {
                         mediaPlayer.animatePendingSizeChange(duration, startDelay)
                     }
                 }
@@ -266,24 +277,25 @@ class MediaViewManager @Inject constructor(
      * Get a measurement for the given input state. This measures the first player and returns
      * its bounds as if it were measured with the given measurement dimensions
      */
-    fun obtainMeasurement(input: MediaMeasurementInput) : MeasurementOutput? {
+    fun obtainMeasurement(input: MediaMeasurementInput): MeasurementOutput? {
         val firstPlayer = mediaPlayers.values.firstOrNull() ?: return null
-        // Let's measure the size of the first player and return its height
-        val previousProgress = firstPlayer.view.progress
-        val previousRight = firstPlayer.view.right
-        val previousBottom = firstPlayer.view.bottom
-        firstPlayer.view.progress = input.expansion
-        firstPlayer.measure(input)
-        // Relayouting is necessary in motionlayout to obtain its size properly ....
-        firstPlayer.view.layout(0, 0, firstPlayer.view.measuredWidth,
-                firstPlayer.view.measuredHeight)
-        val result = MeasurementOutput(firstPlayer.view.measuredWidth,
-                firstPlayer.view.measuredHeight)
-        firstPlayer.view.progress = previousProgress
-        if (desiredState != null) {
-            // remeasure it to the old size again!
-            firstPlayer.measure(desiredState!!.measurementInput)
-            firstPlayer.view.layout(0, 0, previousRight, previousBottom)
+        var result: MeasurementOutput? = null
+        firstPlayer.view?.player?.let {
+            // Let's measure the size of the first player and return its height
+            val previousProgress = it.progress
+            val previousRight = it.right
+            val previousBottom = it.bottom
+            it.progress = input.expansion
+            firstPlayer.measure(input)
+            // Relayouting is necessary in motionlayout to obtain its size properly ....
+            it.layout(0, 0, it.measuredWidth, it.measuredHeight)
+            val result = MeasurementOutput(it.measuredWidth, it.measuredHeight)
+            it.progress = previousProgress
+            if (desiredState != null) {
+                // remeasure it to the old size again!
+                firstPlayer.measure(desiredState!!.measurementInput)
+                it.layout(0, 0, previousRight, previousBottom)
+            }
         }
         return result
     }
@@ -295,7 +307,7 @@ class MediaViewManager @Inject constructor(
             val widthSpec = desiredState!!.measurementInput?.widthMeasureSpec ?: 0
             val heightSpec = desiredState!!.measurementInput?.heightMeasureSpec ?: 0
             for (mediaPlayer in mediaPlayers.values) {
-                mediaPlayer.view.measure(widthSpec, heightSpec)
+                mediaPlayer.view?.player?.measure(widthSpec, heightSpec)
             }
         }
     }
