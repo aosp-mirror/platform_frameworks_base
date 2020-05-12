@@ -1159,7 +1159,7 @@
     <string name="aerr_application_repeated" msgid="7804378743218496566">"<xliff:g id="APPLICATION">%1$s</xliff:g> continua a falhar"</string>
     <string name="aerr_process_repeated" msgid="1153152413537954974">"<xliff:g id="PROCESS">%1$s</xliff:g> continua a falhar"</string>
     <string name="aerr_restart" msgid="2789618625210505419">"Abrir app novamente"</string>
-    <string name="aerr_report" msgid="3095644466849299308">"Enviar comentários"</string>
+    <string name="aerr_report" msgid="3095644466849299308">"Enviar feedback"</string>
     <string name="aerr_close" msgid="3398336821267021852">"Fechar"</string>
     <string name="aerr_mute" msgid="2304972923480211376">"Desativar som até o dispositivo reiniciar"</string>
     <string name="aerr_wait" msgid="3198677780474548217">"Aguardar"</string>
