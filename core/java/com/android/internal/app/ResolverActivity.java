@@ -1598,6 +1598,7 @@ public class ResolverActivity extends Activity implements
     }
 
     private void setupProfileTabs() {
+        maybeHideDivider();
         TabHost tabHost = findViewById(R.id.profile_tabhost);
         tabHost.setup();
         ViewPager viewPager = findViewById(R.id.profile_pager);
@@ -1644,6 +1645,17 @@ public class ResolverActivity extends Activity implements
                     resetCheckedItem();
                 });
         findViewById(R.id.resolver_tab_divider).setVisibility(View.VISIBLE);
+    }
+
+    private void maybeHideDivider() {
+        if (!isIntentPicker()) {
+            return;
+        }
+        final View divider = findViewById(R.id.divider);
+        if (divider == null) {
+            return;
+        }
+        divider.setVisibility(View.GONE);
     }
 
     /**
