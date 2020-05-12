@@ -63,6 +63,13 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
     // TODO(amyjojo): adding system constants for input ports to TIF mapping.
     private int mLocalActivePath = 0;
 
+    // Determines what action should be taken upon receiving Routing Control messages.
+    @VisibleForTesting
+    protected HdmiProperties.playback_device_action_on_routing_control_values
+            mPlaybackDeviceActionOnRoutingControl = HdmiProperties
+                    .playback_device_action_on_routing_control()
+                    .orElse(HdmiProperties.playback_device_action_on_routing_control_values.NONE);
+
     HdmiCecLocalDevicePlayback(HdmiControlService service) {
         super(service, HdmiDeviceInfo.DEVICE_PLAYBACK);
 
@@ -320,6 +327,41 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
             }
         }
         return true;
+    }
+
+    @Override
+    @ServiceThreadOnly
+    protected boolean handleRoutingChange(HdmiCecMessage message) {
+        assertRunOnServiceThread();
+        int physicalAddress = HdmiUtils.twoBytesToInt(message.getParams(), 2);
+        handleRoutingChangeAndInformation(physicalAddress, message);
+        return true;
+    }
+
+    @Override
+    @ServiceThreadOnly
+    protected boolean handleRoutingInformation(HdmiCecMessage message) {
+        assertRunOnServiceThread();
+        int physicalAddress = HdmiUtils.twoBytesToInt(message.getParams());
+        handleRoutingChangeAndInformation(physicalAddress, message);
+        return true;
+    }
+
+    @Override
+    protected void handleRoutingChangeAndInformation(int physicalAddress, HdmiCecMessage message) {
+        if (physicalAddress != mService.getPhysicalAddress()) {
+            return; // Do nothing.
+        }
+        switch (mPlaybackDeviceActionOnRoutingControl) {
+            case WAKE_UP_AND_SEND_ACTIVE_SOURCE:
+                setAndBroadcastActiveSource(message, physicalAddress);
+                break;
+            case WAKE_UP_ONLY:
+                mService.wakeUp();
+                break;
+            case NONE:
+                break;
+        }
     }
 
     @Override

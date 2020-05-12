@@ -15,6 +15,7 @@
  */
 package com.android.server.hdmi;
 
+import static com.android.server.hdmi.Constants.ADDR_PLAYBACK_1;
 import static com.android.server.hdmi.Constants.ADDR_TV;
 import static com.android.server.hdmi.HdmiControlService.INITIATED_BY_ENABLE_CEC;
 
@@ -28,6 +29,7 @@ import android.os.Looper;
 import android.os.PowerManager;
 import android.os.test.TestLooper;
 import android.platform.test.annotations.Presubmit;
+import android.sysprop.HdmiProperties;
 import android.view.KeyEvent;
 
 import androidx.test.InstrumentationRegistry;
@@ -119,6 +121,136 @@ public class HdmiCecLocalDevicePlaybackTest {
         mNativeWrapper.setPhysicalAddress(mPlaybackPhysicalAddress);
         mTestLooper.dispatchAll();
         mNativeWrapper.clearResultMessages();
+    }
+
+    @Test
+    public void handleRoutingChange_None() {
+        mHdmiCecLocalDevicePlayback.mPlaybackDeviceActionOnRoutingControl =
+                HdmiProperties.playback_device_action_on_routing_control_values.NONE;
+
+        mWokenUp = false;
+
+        HdmiCecMessage message =
+                HdmiCecMessageBuilder.buildRoutingChange(ADDR_TV, 0x0000,
+                        mPlaybackPhysicalAddress);
+
+        HdmiCecMessage expectedMessage =
+                HdmiCecMessageBuilder.buildActiveSource(ADDR_PLAYBACK_1,
+                        mPlaybackPhysicalAddress);
+
+        assertThat(mHdmiCecLocalDevicePlayback.handleRoutingChange(message)).isTrue();
+        mTestLooper.dispatchAll();
+        assertThat(mWokenUp).isFalse();
+        assertThat(mNativeWrapper.getResultMessages().contains(expectedMessage)).isFalse();
+    }
+
+    @Test
+    public void handleRoutingInformation_None() {
+        mHdmiCecLocalDevicePlayback.mPlaybackDeviceActionOnRoutingControl =
+                HdmiProperties.playback_device_action_on_routing_control_values.NONE;
+
+        mWokenUp = false;
+
+        HdmiCecMessage message =
+                HdmiCecMessageBuilder.buildRoutingInformation(ADDR_TV,
+                        mPlaybackPhysicalAddress);
+
+        HdmiCecMessage expectedMessage =
+                HdmiCecMessageBuilder.buildActiveSource(ADDR_PLAYBACK_1,
+                        mPlaybackPhysicalAddress);
+
+        assertThat(mHdmiCecLocalDevicePlayback.handleRoutingInformation(message)).isTrue();
+        mTestLooper.dispatchAll();
+        assertThat(mWokenUp).isFalse();
+        assertThat(mNativeWrapper.getResultMessages().contains(expectedMessage)).isFalse();
+    }
+
+    @Test
+    public void handleRoutingChange_WakeUpOnly() {
+        mHdmiCecLocalDevicePlayback.mPlaybackDeviceActionOnRoutingControl =
+                HdmiProperties.playback_device_action_on_routing_control_values.WAKE_UP_ONLY;
+
+        mWokenUp = false;
+
+        HdmiCecMessage message =
+                HdmiCecMessageBuilder.buildRoutingChange(ADDR_TV, 0x0000,
+                        mPlaybackPhysicalAddress);
+
+        HdmiCecMessage expectedMessage =
+                HdmiCecMessageBuilder.buildActiveSource(ADDR_PLAYBACK_1,
+                        mPlaybackPhysicalAddress);
+
+        assertThat(mHdmiCecLocalDevicePlayback.handleRoutingChange(message)).isTrue();
+        mTestLooper.dispatchAll();
+        assertThat(mWokenUp).isTrue();
+        assertThat(mNativeWrapper.getResultMessages().contains(expectedMessage)).isFalse();
+    }
+
+    @Test
+    public void handleRoutingInformation_WakeUpOnly() {
+        mHdmiCecLocalDevicePlayback.mPlaybackDeviceActionOnRoutingControl =
+                HdmiProperties.playback_device_action_on_routing_control_values.WAKE_UP_ONLY;
+
+        mWokenUp = false;
+
+        HdmiCecMessage message =
+                HdmiCecMessageBuilder.buildRoutingInformation(ADDR_TV,
+                        mPlaybackPhysicalAddress);
+
+        HdmiCecMessage expectedMessage =
+                HdmiCecMessageBuilder.buildActiveSource(ADDR_PLAYBACK_1,
+                        mPlaybackPhysicalAddress);
+
+        assertThat(mHdmiCecLocalDevicePlayback.handleRoutingInformation(message)).isTrue();
+        mTestLooper.dispatchAll();
+        assertThat(mWokenUp).isTrue();
+        assertThat(mNativeWrapper.getResultMessages().contains(expectedMessage)).isFalse();
+    }
+
+    @Test
+    public void handleRoutingChange_WakeUpAndSendActiveSource() {
+        mHdmiCecLocalDevicePlayback.mPlaybackDeviceActionOnRoutingControl =
+                HdmiProperties
+                    .playback_device_action_on_routing_control_values
+                    .WAKE_UP_AND_SEND_ACTIVE_SOURCE;
+
+        mWokenUp = false;
+
+        HdmiCecMessage message =
+                HdmiCecMessageBuilder.buildRoutingChange(ADDR_TV, 0x0000,
+                        mPlaybackPhysicalAddress);
+
+        HdmiCecMessage expectedMessage =
+                HdmiCecMessageBuilder.buildActiveSource(ADDR_PLAYBACK_1,
+                        mPlaybackPhysicalAddress);
+
+        assertThat(mHdmiCecLocalDevicePlayback.handleRoutingChange(message)).isTrue();
+        mTestLooper.dispatchAll();
+        assertThat(mWokenUp).isTrue();
+        assertThat(mNativeWrapper.getResultMessages()).contains(expectedMessage);
+    }
+
+    @Test
+    public void handleRoutingInformation_WakeUpAndSendActiveSource() {
+        mHdmiCecLocalDevicePlayback.mPlaybackDeviceActionOnRoutingControl =
+                HdmiProperties
+                    .playback_device_action_on_routing_control_values
+                    .WAKE_UP_AND_SEND_ACTIVE_SOURCE;
+
+        mWokenUp = false;
+
+        HdmiCecMessage message =
+                HdmiCecMessageBuilder.buildRoutingInformation(ADDR_TV,
+                        mPlaybackPhysicalAddress);
+
+        HdmiCecMessage expectedMessage =
+                HdmiCecMessageBuilder.buildActiveSource(ADDR_PLAYBACK_1,
+                        mPlaybackPhysicalAddress);
+
+        assertThat(mHdmiCecLocalDevicePlayback.handleRoutingInformation(message)).isTrue();
+        mTestLooper.dispatchAll();
+        assertThat(mWokenUp).isTrue();
+        assertThat(mNativeWrapper.getResultMessages()).contains(expectedMessage);
     }
 
     // Playback device does not handle routing control related feature right now
