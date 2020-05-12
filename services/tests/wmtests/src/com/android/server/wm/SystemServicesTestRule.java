@@ -100,7 +100,6 @@ public class SystemServicesTestRule implements TestRule {
     static int sNextDisplayId = DEFAULT_DISPLAY + 100;
     static int sNextTaskId = 100;
 
-    private final AtomicBoolean mCurrentMessagesProcessed = new AtomicBoolean(false);
     private static final int[] TEST_USER_PROFILE_IDS = {};
 
     private Context mContext;
@@ -419,20 +418,20 @@ public class SystemServicesTestRule implements TestRule {
         if (wm == null) {
             return;
         }
-        synchronized (mCurrentMessagesProcessed) {
-            // Add a message to the handler queue and make sure it is fully processed before we move
-            // on. This makes sure all previous messages in the handler are fully processed vs. just
-            // popping them from the message queue.
-            mCurrentMessagesProcessed.set(false);
-            wm.mAnimator.getChoreographer().postFrameCallback(time -> {
-                synchronized (mCurrentMessagesProcessed) {
-                    mCurrentMessagesProcessed.set(true);
-                    mCurrentMessagesProcessed.notifyAll();
-                }
-            });
-            while (!mCurrentMessagesProcessed.get()) {
+        // Add a message to the handler queue and make sure it is fully processed before we move on.
+        // This makes sure all previous messages in the handler are fully processed vs. just popping
+        // them from the message queue.
+        final AtomicBoolean currentMessagesProcessed = new AtomicBoolean(false);
+        wm.mAnimator.getChoreographer().postFrameCallback(time -> {
+            synchronized (currentMessagesProcessed) {
+                currentMessagesProcessed.set(true);
+                currentMessagesProcessed.notifyAll();
+            }
+        });
+        while (!currentMessagesProcessed.get()) {
+            synchronized (currentMessagesProcessed) {
                 try {
-                    mCurrentMessagesProcessed.wait();
+                    currentMessagesProcessed.wait();
                 } catch (InterruptedException e) {
                 }
             }
