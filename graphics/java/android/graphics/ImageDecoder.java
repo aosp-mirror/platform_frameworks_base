@@ -70,9 +70,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
  *  {@link Bitmap} objects.
  *
  *  <p>To use it, first create a {@link Source Source} using one of the
- *  {@code createSource} overloads. For example, to decode from a {@link File}, call
- *  {@link #createSource(File)} and pass the result to {@link #decodeDrawable(Source)}
- *  or {@link #decodeBitmap(Source)}:
+ *  {@code createSource} overloads. For example, to decode from a {@link Uri}, call
+ *  {@link #createSource(ContentResolver, Uri)} and pass the result to
+ *  {@link #decodeDrawable(Source)} or {@link #decodeBitmap(Source)}:
  *
  *  <pre class="prettyprint">
  *  File file = new File(...);
@@ -1045,7 +1045,11 @@ public final class ImageDecoder implements AutoCloseable {
 
     /**
      * Create a new {@link Source Source} from a {@link java.io.File}.
-     *
+     * <p>
+     * This method should only be used for files that you have direct access to;
+     * if you'd like to work with files hosted outside your app, use an API like
+     * {@link #createSource(Callable)} or
+     * {@link #createSource(ContentResolver, Uri)}.
      * @return a new Source object, which can be passed to
      *      {@link #decodeDrawable decodeDrawable} or
      *      {@link #decodeBitmap decodeBitmap}.
