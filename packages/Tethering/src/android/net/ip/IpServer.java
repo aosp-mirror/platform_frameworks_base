@@ -303,6 +303,8 @@ public class IpServer extends StateMachine {
 
     private final IpNeighborMonitor mIpNeighborMonitor;
 
+    // TODO: Add a dependency object to pass the data members or variables from the tethering
+    // object. It helps to reduce the arguments of the constructor.
     public IpServer(
             String ifaceName, Looper looper, int interfaceType, SharedLog log,
             INetd netd, Callback callback, boolean usingLegacyDhcp, boolean usingBpfOffload,
@@ -325,14 +327,12 @@ public class IpServer extends StateMachine {
         mIpNeighborMonitor = mDeps.getIpNeighborMonitor(getHandler(), mLog,
                 new MyNeighborEventConsumer());
 
-        // IP neighbor monitor monitors the neighbor event for adding/removing offload
+        // IP neighbor monitor monitors the neighbor events for adding/removing offload
         // forwarding rules per client. If BPF offload is not supported, don't start listening
-        // neighbor events. See updateIpv6ForwardingRules, addIpv6ForwardingRule,
+        // for neighbor events. See updateIpv6ForwardingRules, addIpv6ForwardingRule,
         // removeIpv6ForwardingRule.
-        if (mUsingBpfOffload) {
-            if (!mIpNeighborMonitor.start()) {
-                mLog.e("Failed to create IpNeighborMonitor on " + mIfaceName);
-            }
+        if (mUsingBpfOffload && !mIpNeighborMonitor.start()) {
+            mLog.e("Failed to create IpNeighborMonitor on " + mIfaceName);
         }
 
         mInitialState = new InitialState();
