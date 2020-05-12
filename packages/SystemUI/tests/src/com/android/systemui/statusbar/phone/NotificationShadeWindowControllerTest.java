@@ -16,11 +16,15 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
+import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -44,6 +48,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -62,6 +67,7 @@ public class NotificationShadeWindowControllerTest extends SysuiTestCase {
     @Mock private SysuiColorExtractor mColorExtractor;
     @Mock ColorExtractor.GradientColors mGradientColors;
     @Mock private DumpManager mDumpManager;
+    @Captor private ArgumentCaptor<WindowManager.LayoutParams> mLayoutParameters;
 
     private NotificationShadeWindowController mNotificationShadeWindowController;
 
@@ -120,5 +126,47 @@ public class NotificationShadeWindowControllerTest extends SysuiTestCase {
 
         mNotificationShadeWindowController.setBackgroundBlurRadius(0);
         verify(mNotificationShadeWindowView).setVisibility(eq(View.INVISIBLE));
+    }
+
+    @Test
+    public void setBouncerShowing_isFocusable_whenNeedsInput() {
+        mNotificationShadeWindowController.setKeyguardNeedsInput(true);
+        clearInvocations(mWindowManager);
+        mNotificationShadeWindowController.setBouncerShowing(true);
+
+        verify(mWindowManager).updateViewLayout(any(), mLayoutParameters.capture());
+        assertThat((mLayoutParameters.getValue().flags & FLAG_NOT_FOCUSABLE) == 0).isTrue();
+        assertThat((mLayoutParameters.getValue().flags & FLAG_ALT_FOCUSABLE_IM) == 0).isTrue();
+    }
+
+    @Test
+    public void setKeyguardShowing_focusable_notAltFocusable_whenNeedsInput() {
+        mNotificationShadeWindowController.setKeyguardShowing(true);
+        clearInvocations(mWindowManager);
+        mNotificationShadeWindowController.setKeyguardNeedsInput(true);
+
+        verify(mWindowManager).updateViewLayout(any(), mLayoutParameters.capture());
+        assertThat((mLayoutParameters.getValue().flags & FLAG_NOT_FOCUSABLE) == 0).isTrue();
+        assertThat((mLayoutParameters.getValue().flags & FLAG_ALT_FOCUSABLE_IM) == 0).isTrue();
+    }
+
+    @Test
+    public void setPanelExpanded_notFocusable_altFocusable_whenPanelIsOpen() {
+        mNotificationShadeWindowController.setPanelExpanded(true);
+        clearInvocations(mWindowManager);
+        mNotificationShadeWindowController.setNotificationShadeFocusable(true);
+
+        verify(mWindowManager).updateViewLayout(any(), mLayoutParameters.capture());
+        assertThat((mLayoutParameters.getValue().flags & FLAG_NOT_FOCUSABLE) == 0).isTrue();
+        assertThat((mLayoutParameters.getValue().flags & FLAG_ALT_FOCUSABLE_IM) != 0).isTrue();
+    }
+
+    @Test
+    public void setKeyguardShowing_notFocusable_byDefault() {
+        mNotificationShadeWindowController.setKeyguardShowing(false);
+
+        verify(mWindowManager).updateViewLayout(any(), mLayoutParameters.capture());
+        assertThat((mLayoutParameters.getValue().flags & FLAG_NOT_FOCUSABLE) != 0).isTrue();
+        assertThat((mLayoutParameters.getValue().flags & FLAG_ALT_FOCUSABLE_IM) == 0).isTrue();
     }
 }
