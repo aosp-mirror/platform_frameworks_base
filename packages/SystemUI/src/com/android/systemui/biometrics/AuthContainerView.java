@@ -23,6 +23,7 @@ import android.content.Context;
 import android.graphics.PixelFormat;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
+import android.hardware.biometrics.PromptInfo;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -106,7 +107,7 @@ public class AuthContainerView extends LinearLayout
     static class Config {
         Context mContext;
         AuthDialogCallback mCallback;
-        Bundle mBiometricPromptBundle;
+        PromptInfo mPromptInfo;
         boolean mRequireConfirmation;
         int mUserId;
         String mOpPackageName;
@@ -128,8 +129,8 @@ public class AuthContainerView extends LinearLayout
             return this;
         }
 
-        public Builder setBiometricPromptBundle(Bundle bundle) {
-            mConfig.mBiometricPromptBundle = bundle;
+        public Builder setPromptInfo(PromptInfo promptInfo) {
+            mConfig.mPromptInfo = promptInfo;
             return this;
         }
 
@@ -267,7 +268,7 @@ public class AuthContainerView extends LinearLayout
         mPanelController = mInjector.getPanelController(mContext, mPanelView);
 
         // Inflate biometric view only if necessary.
-        if (Utils.isBiometricAllowed(mConfig.mBiometricPromptBundle)) {
+        if (Utils.isBiometricAllowed(mConfig.mPromptInfo)) {
             final @BiometricAuthenticator.Modality int biometricModality =
                     config.mModalityMask & ~BiometricAuthenticator.TYPE_CREDENTIAL;
 
@@ -317,13 +318,13 @@ public class AuthContainerView extends LinearLayout
 
     @Override
     public boolean isAllowDeviceCredentials() {
-        return Utils.isDeviceCredentialAllowed(mConfig.mBiometricPromptBundle);
+        return Utils.isDeviceCredentialAllowed(mConfig.mPromptInfo);
     }
 
     private void addBiometricView() {
         mBiometricView.setRequireConfirmation(mConfig.mRequireConfirmation);
         mBiometricView.setPanelController(mPanelController);
-        mBiometricView.setBiometricPromptBundle(mConfig.mBiometricPromptBundle);
+        mBiometricView.setPromptInfo(mConfig.mPromptInfo);
         mBiometricView.setCallback(mBiometricCallback);
         mBiometricView.setBackgroundView(mBackgroundView);
         mBiometricView.setUserId(mConfig.mUserId);
@@ -369,7 +370,7 @@ public class AuthContainerView extends LinearLayout
         mCredentialView.setEffectiveUserId(mEffectiveUserId);
         mCredentialView.setCredentialType(credentialType);
         mCredentialView.setCallback(mCredentialCallback);
-        mCredentialView.setBiometricPromptBundle(mConfig.mBiometricPromptBundle);
+        mCredentialView.setPromptInfo(mConfig.mPromptInfo);
         mCredentialView.setPanelController(mPanelController, animatePanel);
         mCredentialView.setShouldAnimateContents(animateContents);
         mFrameLayout.addView(mCredentialView);
@@ -391,13 +392,13 @@ public class AuthContainerView extends LinearLayout
     void onAttachedToWindowInternal() {
         mWakefulnessLifecycle.addObserver(this);
 
-        if (Utils.isBiometricAllowed(mConfig.mBiometricPromptBundle)) {
+        if (Utils.isBiometricAllowed(mConfig.mPromptInfo)) {
             addBiometricView();
-        } else if (Utils.isDeviceCredentialAllowed(mConfig.mBiometricPromptBundle)) {
+        } else if (Utils.isDeviceCredentialAllowed(mConfig.mPromptInfo)) {
             addCredentialView(true /* animatePanel */, false /* animateContents */);
         } else {
             throw new IllegalStateException("Unknown configuration: "
-                    + Utils.getAuthenticators(mConfig.mBiometricPromptBundle));
+                    + mConfig.mPromptInfo.getAuthenticators());
         }
 
         if (mConfig.mSkipIntro) {

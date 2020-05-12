@@ -34,8 +34,8 @@ import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.BiometricPrompt;
 import android.hardware.biometrics.BiometricPrompt.AuthenticationResultType;
+import android.hardware.biometrics.PromptInfo;
 import android.os.Build;
-import android.os.Bundle;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Slog;
@@ -59,19 +59,18 @@ public class Utils {
     }
 
     /**
-     * Combines {@link BiometricPrompt#KEY_ALLOW_DEVICE_CREDENTIAL} with
-     * {@link BiometricPrompt#KEY_AUTHENTICATORS_ALLOWED}, as the former is not flexible enough.
+     * Combines {@link PromptInfo#setDeviceCredentialAllowed(boolean)} with
+     * {@link PromptInfo#setAuthenticators(int)}, as the former is not flexible enough.
      */
-    static void combineAuthenticatorBundles(Bundle bundle) {
+    static void combineAuthenticatorBundles(PromptInfo promptInfo) {
         // Cache and remove explicit ALLOW_DEVICE_CREDENTIAL boolean flag from the bundle.
-        final boolean deviceCredentialAllowed =
-                bundle.getBoolean(BiometricPrompt.KEY_ALLOW_DEVICE_CREDENTIAL, false);
-        bundle.remove(BiometricPrompt.KEY_ALLOW_DEVICE_CREDENTIAL);
+        final boolean deviceCredentialAllowed = promptInfo.isDeviceCredentialAllowed();
+        promptInfo.setDeviceCredentialAllowed(false);
 
         final @Authenticators.Types int authenticators;
-        if (bundle.containsKey(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED)) {
+        if (promptInfo.getAuthenticators() != 0) {
             // Ignore ALLOW_DEVICE_CREDENTIAL flag if AUTH_TYPES_ALLOWED is defined.
-            authenticators = bundle.getInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED, 0);
+            authenticators = promptInfo.getAuthenticators();
         } else {
             // Otherwise, use ALLOW_DEVICE_CREDENTIAL flag along with Weak+ biometrics by default.
             authenticators = deviceCredentialAllowed
@@ -79,7 +78,7 @@ public class Utils {
                     : Authenticators.BIOMETRIC_WEAK;
         }
 
-        bundle.putInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED, authenticators);
+        promptInfo.setAuthenticators(authenticators);
     }
 
     /**
@@ -91,11 +90,12 @@ public class Utils {
     }
 
     /**
-     * @param bundle should be first processed by {@link #combineAuthenticatorBundles(Bundle)}
+     * @param promptInfo should be first processed by
+     * {@link #combineAuthenticatorBundles(PromptInfo)}
      * @return true if device credential is allowed.
      */
-    static boolean isCredentialRequested(Bundle bundle) {
-        return isCredentialRequested(bundle.getInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED));
+    static boolean isCredentialRequested(PromptInfo promptInfo) {
+        return isCredentialRequested(promptInfo.getAuthenticators());
     }
 
     /**
@@ -112,22 +112,23 @@ public class Utils {
     /**
      * Checks if any of the publicly defined strengths are set.
      *
-     * @param bundle should be first processed by {@link #combineAuthenticatorBundles(Bundle)}
+     * @param promptInfo should be first processed by
+     * {@link #combineAuthenticatorBundles(PromptInfo)}
      * @return minimal allowed biometric strength or 0 if biometric authentication is not allowed.
      */
-    static int getPublicBiometricStrength(Bundle bundle) {
-        return getPublicBiometricStrength(
-                bundle.getInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED));
+    static int getPublicBiometricStrength(PromptInfo promptInfo) {
+        return getPublicBiometricStrength(promptInfo.getAuthenticators());
     }
 
     /**
      * Checks if any of the publicly defined strengths are set.
      *
-     * @param bundle should be first processed by {@link #combineAuthenticatorBundles(Bundle)}
+     * @param promptInfo should be first processed by
+     * {@link #combineAuthenticatorBundles(PromptInfo)}
      * @return true if biometric authentication is allowed.
      */
-    static boolean isBiometricRequested(Bundle bundle) {
-        return getPublicBiometricStrength(bundle) != 0;
+    static boolean isBiometricRequested(PromptInfo promptInfo) {
+        return getPublicBiometricStrength(promptInfo) != 0;
     }
 
     /**
@@ -158,11 +159,11 @@ public class Utils {
 
     /**
      * Checks if the authenticator configuration is a valid combination of the public APIs
-     * @param bundle
+     * @param promptInfo
      * @return
      */
-    static boolean isValidAuthenticatorConfig(Bundle bundle) {
-        final int authenticators = bundle.getInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED);
+    static boolean isValidAuthenticatorConfig(PromptInfo promptInfo) {
+        final int authenticators = promptInfo.getAuthenticators();
         return isValidAuthenticatorConfig(authenticators);
     }
 
@@ -307,6 +308,6 @@ public class Utils {
     }
 
     static int removeBiometricBits(@Authenticators.Types int authenticators) {
-        return authenticators &= ~Authenticators.BIOMETRIC_MIN_STRENGTH;
+        return authenticators & ~Authenticators.BIOMETRIC_MIN_STRENGTH;
     }
 }

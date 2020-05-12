@@ -43,6 +43,7 @@ import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricPrompt;
 import android.hardware.biometrics.IBiometricSysuiReceiver;
+import android.hardware.biometrics.PromptInfo;
 import android.hardware.face.FaceManager;
 import android.os.Bundle;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -404,8 +405,7 @@ public class AuthControllerTest extends SysuiTestCase {
         ArgumentCaptor<Bundle> captor = ArgumentCaptor.forClass(Bundle.class);
         verify(mDialog2).show(any(), captor.capture());
         assertEquals(Authenticators.DEVICE_CREDENTIAL,
-                mAuthController.mLastBiometricPromptBundle
-                        .getInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED));
+                mAuthController.mLastBiometricPromptInfo.getAuthenticators());
     }
 
     @Test
@@ -464,7 +464,7 @@ public class AuthControllerTest extends SysuiTestCase {
     // Helpers
 
     private void showDialog(int authenticators, int biometricModality) {
-        mAuthController.showAuthenticationDialog(createTestDialogBundle(authenticators),
+        mAuthController.showAuthenticationDialog(createTestPromptInfo(authenticators),
                 mReceiver /* receiver */,
                 biometricModality,
                 true /* requireConfirmation */,
@@ -473,21 +473,21 @@ public class AuthControllerTest extends SysuiTestCase {
                 0 /* operationId */);
     }
 
-    private Bundle createTestDialogBundle(int authenticators) {
-        Bundle bundle = new Bundle();
+    private PromptInfo createTestPromptInfo(int authenticators) {
+        PromptInfo promptInfo = new PromptInfo();
 
-        bundle.putCharSequence(BiometricPrompt.KEY_TITLE, "Title");
-        bundle.putCharSequence(BiometricPrompt.KEY_SUBTITLE, "Subtitle");
-        bundle.putCharSequence(BiometricPrompt.KEY_DESCRIPTION, "Description");
-        bundle.putCharSequence(BiometricPrompt.KEY_NEGATIVE_TEXT, "Negative Button");
+        promptInfo.setTitle("Title");
+        promptInfo.setSubtitle("Subtitle");
+        promptInfo.setDescription("Description");
+        promptInfo.setNegativeButtonText("Negative Button");
 
         // RequireConfirmation is a hint to BiometricService. This can be forced to be required
         // by user settings, and should be tested in BiometricService.
-        bundle.putBoolean(BiometricPrompt.KEY_REQUIRE_CONFIRMATION, true);
+        promptInfo.setConfirmationRequested(true);
 
-        bundle.putInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED, authenticators);
+        promptInfo.setAuthenticators(authenticators);
 
-        return bundle;
+        return promptInfo;
     }
 
     private byte[] generateRandomHAT() {
@@ -499,18 +499,18 @@ public class AuthControllerTest extends SysuiTestCase {
 
     private final class TestableAuthController extends AuthController {
         private int mBuildCount = 0;
-        private Bundle mLastBiometricPromptBundle;
+        private PromptInfo mLastBiometricPromptInfo;
 
         TestableAuthController(Context context, CommandQueue commandQueue, Injector injector) {
             super(context, commandQueue, injector);
         }
 
         @Override
-        protected AuthDialog buildDialog(Bundle biometricPromptBundle,
+        protected AuthDialog buildDialog(PromptInfo promptInfo,
                 boolean requireConfirmation, int userId, int type, String opPackageName,
                 boolean skipIntro, long operationId) {
 
-            mLastBiometricPromptBundle = biometricPromptBundle;
+            mLastBiometricPromptInfo = promptInfo;
 
             AuthDialog dialog;
             if (mBuildCount == 0) {

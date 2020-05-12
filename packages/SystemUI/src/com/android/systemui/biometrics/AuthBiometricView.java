@@ -25,6 +25,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.biometrics.BiometricPrompt;
+import android.hardware.biometrics.PromptInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -159,7 +160,7 @@ public abstract class AuthBiometricView extends LinearLayout {
     private final int mTextColorHint;
 
     private AuthPanelController mPanelController;
-    private Bundle mBiometricPromptBundle;
+    private PromptInfo mPromptInfo;
     private boolean mRequireConfirmation;
     private int mUserId;
     private int mEffectiveUserId;
@@ -265,8 +266,8 @@ public abstract class AuthBiometricView extends LinearLayout {
         mPanelController = panelController;
     }
 
-    public void setBiometricPromptBundle(Bundle bundle) {
-        mBiometricPromptBundle = bundle;
+    public void setPromptInfo(PromptInfo promptInfo) {
+        mPromptInfo = promptInfo;
     }
 
     public void setCallback(Callback callback) {
@@ -540,18 +541,18 @@ public abstract class AuthBiometricView extends LinearLayout {
         mSavedState = savedState;
     }
 
-    private void setTextOrHide(TextView view, String string) {
-        if (TextUtils.isEmpty(string)) {
+    private void setTextOrHide(TextView view, CharSequence charSequence) {
+        if (TextUtils.isEmpty(charSequence)) {
             view.setVisibility(View.GONE);
         } else {
-            view.setText(string);
+            view.setText(charSequence);
         }
 
         Utils.notifyAccessibilityContentChanged(mAccessibilityManager, this);
     }
 
-    private void setText(TextView view, String string) {
-        view.setText(string);
+    private void setText(TextView view, CharSequence charSequence) {
+        view.setText(charSequence);
     }
 
     // Remove all pending icon and text animations
@@ -634,9 +635,9 @@ public abstract class AuthBiometricView extends LinearLayout {
      */
     @VisibleForTesting
     void onAttachedToWindowInternal() {
-        setText(mTitleView, mBiometricPromptBundle.getString(BiometricPrompt.KEY_TITLE));
+        setText(mTitleView, mPromptInfo.getTitle());
 
-        final String negativeText;
+        final CharSequence negativeText;
         if (isDeviceCredentialAllowed()) {
 
             final @Utils.CredentialType int credentialType =
@@ -658,15 +659,13 @@ public abstract class AuthBiometricView extends LinearLayout {
             }
 
         } else {
-            negativeText = mBiometricPromptBundle.getString(BiometricPrompt.KEY_NEGATIVE_TEXT);
+            negativeText = mPromptInfo.getNegativeButtonText();
         }
         setText(mNegativeButton, negativeText);
 
-        setTextOrHide(mSubtitleView,
-                mBiometricPromptBundle.getString(BiometricPrompt.KEY_SUBTITLE));
+        setTextOrHide(mSubtitleView, mPromptInfo.getSubtitle());
 
-        setTextOrHide(mDescriptionView,
-                mBiometricPromptBundle.getString(BiometricPrompt.KEY_DESCRIPTION));
+        setTextOrHide(mDescriptionView, mPromptInfo.getDescription());
 
         if (mSavedState == null) {
             updateState(STATE_AUTHENTICATING_ANIMATING_IN);
@@ -763,6 +762,6 @@ public abstract class AuthBiometricView extends LinearLayout {
     }
 
     private boolean isDeviceCredentialAllowed() {
-        return Utils.isDeviceCredentialAllowed(mBiometricPromptBundle);
+        return Utils.isDeviceCredentialAllowed(mPromptInfo);
     }
 }

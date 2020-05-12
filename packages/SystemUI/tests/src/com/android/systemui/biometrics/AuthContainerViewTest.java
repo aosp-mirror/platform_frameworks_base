@@ -35,8 +35,7 @@ import static org.mockito.Mockito.when;
 import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
-import android.hardware.biometrics.BiometricPrompt;
-import android.os.Bundle;
+import android.hardware.biometrics.PromptInfo;
 import android.os.IBinder;
 import android.os.UserManager;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -216,9 +215,9 @@ public class AuthContainerViewTest extends SysuiTestCase {
         config.mCallback = mCallback;
         config.mModalityMask |= BiometricAuthenticator.TYPE_FINGERPRINT;
 
-        Bundle bundle = new Bundle();
-        bundle.putInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED, authenticators);
-        config.mBiometricPromptBundle = bundle;
+        PromptInfo promptInfo = new PromptInfo();
+        promptInfo.setAuthenticators(authenticators);
+        config.mPromptInfo = promptInfo;
 
         mAuthContainer = new TestableAuthContainer(config);
     }

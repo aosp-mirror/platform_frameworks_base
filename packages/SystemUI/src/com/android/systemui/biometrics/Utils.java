@@ -22,8 +22,7 @@ import static android.view.accessibility.AccessibilityEvent.CONTENT_CHANGE_TYPE_
 import android.annotation.IntDef;
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
-import android.hardware.biometrics.BiometricPrompt;
-import android.os.Bundle;
+import android.hardware.biometrics.PromptInfo;
 import android.os.UserManager;
 import android.util.DisplayMetrics;
 import android.view.ViewGroup;
@@ -67,18 +66,14 @@ public class Utils {
         view.notifySubtreeAccessibilityStateChanged(view, view, CONTENT_CHANGE_TYPE_SUBTREE);
     }
 
-    static boolean isDeviceCredentialAllowed(Bundle biometricPromptBundle) {
-        final int authenticators = getAuthenticators(biometricPromptBundle);
+    static boolean isDeviceCredentialAllowed(PromptInfo promptInfo) {
+        @Authenticators.Types final int authenticators = promptInfo.getAuthenticators();
         return (authenticators & Authenticators.DEVICE_CREDENTIAL) != 0;
     }
 
-    static boolean isBiometricAllowed(Bundle biometricPromptBundle) {
-        final int authenticators = getAuthenticators(biometricPromptBundle);
+    static boolean isBiometricAllowed(PromptInfo promptInfo) {
+        @Authenticators.Types final int authenticators = promptInfo.getAuthenticators();
         return (authenticators & Authenticators.BIOMETRIC_WEAK) != 0;
-    }
-
-    static int getAuthenticators(Bundle biometricPromptBundle) {
-        return biometricPromptBundle.getInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED);
     }
 
     static @CredentialType int getCredentialType(Context context, int userId) {

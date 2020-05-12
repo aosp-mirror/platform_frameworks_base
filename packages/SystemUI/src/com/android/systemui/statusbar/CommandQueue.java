@@ -36,6 +36,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.IBiometricSysuiReceiver;
+import android.hardware.biometrics.PromptInfo;
 import android.hardware.display.DisplayManager;
 import android.inputmethodservice.InputMethodService.BackDispositionMode;
 import android.os.Bundle;
@@ -262,7 +263,7 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
 
         default void onRotationProposal(int rotation, boolean isValid) { }
 
-        default void showAuthenticationDialog(Bundle bundle,
+        default void showAuthenticationDialog(PromptInfo promptInfo,
                 IBiometricSysuiReceiver receiver,
                 @BiometricAuthenticator.Modality int biometricModality,
                 boolean requireConfirmation, int userId, String opPackageName,
@@ -792,12 +793,12 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
     }
 
     @Override
-    public void showAuthenticationDialog(Bundle bundle, IBiometricSysuiReceiver receiver,
+    public void showAuthenticationDialog(PromptInfo promptInfo, IBiometricSysuiReceiver receiver,
             @BiometricAuthenticator.Modality int biometricModality, boolean requireConfirmation,
             int userId, String opPackageName, long operationId) {
         synchronized (mLock) {
             SomeArgs args = SomeArgs.obtain();
-            args.arg1 = bundle;
+            args.arg1 = promptInfo;
             args.arg2 = receiver;
             args.argi1 = biometricModality;
             args.arg3 = requireConfirmation;
@@ -1183,7 +1184,7 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
                     SomeArgs someArgs = (SomeArgs) msg.obj;
                     for (int i = 0; i < mCallbacks.size(); i++) {
                         mCallbacks.get(i).showAuthenticationDialog(
-                                (Bundle) someArgs.arg1,
+                                (PromptInfo) someArgs.arg1,
                                 (IBiometricSysuiReceiver) someArgs.arg2,
                                 someArgs.argi1 /* biometricModality */,
                                 (boolean) someArgs.arg3 /* requireConfirmation */,

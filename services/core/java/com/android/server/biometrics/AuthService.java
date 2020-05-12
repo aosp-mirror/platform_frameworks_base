@@ -30,17 +30,16 @@ import static android.hardware.biometrics.BiometricManager.Authenticators;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.hardware.biometrics.BiometricPrompt;
 import android.hardware.biometrics.IAuthService;
 import android.hardware.biometrics.IBiometricAuthenticator;
 import android.hardware.biometrics.IBiometricEnabledOnKeyguardCallback;
 import android.hardware.biometrics.IBiometricService;
 import android.hardware.biometrics.IBiometricServiceReceiver;
+import android.hardware.biometrics.PromptInfo;
 import android.hardware.face.IFaceService;
 import android.hardware.fingerprint.IFingerprintService;
 import android.hardware.iris.IIrisService;
 import android.os.Binder;
-import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -133,7 +132,7 @@ public class AuthService extends SystemService {
     private final class AuthServiceImpl extends IAuthService.Stub {
         @Override
         public void authenticate(IBinder token, long sessionId, int userId,
-                IBiometricServiceReceiver receiver, String opPackageName, Bundle bundle)
+                IBiometricServiceReceiver receiver, String opPackageName, PromptInfo promptInfo)
                 throws RemoteException {
 
             // Only allow internal clients to authenticate with a different userId.
@@ -146,20 +145,13 @@ public class AuthService extends SystemService {
                 checkInternalPermission();
             }
 
-            if (token == null || receiver == null || opPackageName == null || bundle == null) {
+            if (token == null || receiver == null || opPackageName == null || promptInfo == null) {
                 Slog.e(TAG, "Unable to authenticate, one or more null arguments");
                 return;
             }
 
             // Only allow internal clients to enable non-public options.
-            if (bundle.getBoolean(BiometricPrompt.EXTRA_DISALLOW_BIOMETRICS_IF_POLICY_EXISTS)
-                    || bundle.getBoolean(BiometricPrompt.KEY_USE_DEFAULT_TITLE, false)
-                    || bundle.getCharSequence(BiometricPrompt.KEY_DEVICE_CREDENTIAL_TITLE) != null
-                    || bundle.getCharSequence(
-                            BiometricPrompt.KEY_DEVICE_CREDENTIAL_SUBTITLE) != null
-                    || bundle.getCharSequence(
-                            BiometricPrompt.KEY_DEVICE_CREDENTIAL_DESCRIPTION) != null
-                    || bundle.getBoolean(BiometricPrompt.KEY_RECEIVE_SYSTEM_EVENTS, false)) {
+            if (promptInfo.containsPrivateApiConfigurations()) {
                 checkInternalPermission();
             }
 
@@ -168,7 +160,7 @@ public class AuthService extends SystemService {
             final long identity = Binder.clearCallingIdentity();
             try {
                 mBiometricService.authenticate(
-                        token, sessionId, userId, receiver, opPackageName, bundle, callingUid,
+                        token, sessionId, userId, receiver, opPackageName, promptInfo, callingUid,
                         callingPid, callingUserId);
             } finally {
                 Binder.restoreCallingIdentity(identity);
