@@ -165,9 +165,11 @@ final class UiModeManagerService extends SystemService {
     }
 
     @VisibleForTesting
-    protected UiModeManagerService(Context context, boolean setupWizardComplete) {
+    protected UiModeManagerService(Context context, boolean setupWizardComplete,
+            TwilightManager tm) {
         this(context);
         mSetupWizardComplete = setupWizardComplete;
+        mTwilightManager = tm;
     }
 
     private static Intent buildHomeIntent(String category) {
@@ -337,7 +339,6 @@ final class UiModeManagerService extends SystemService {
                 mAlarmManager = (AlarmManager) getContext().getSystemService(Context.ALARM_SERVICE);
                 mLocalPowerManager =
                         LocalServices.getService(PowerManagerInternal.class);
-                mTwilightManager = getLocalService(TwilightManager.class);
                 initPowerSave();
                 mCarModeEnabled = mDockState == Intent.EXTRA_DOCK_STATE_CAR;
                 registerVrStateListener();
@@ -380,7 +381,7 @@ final class UiModeManagerService extends SystemService {
                 com.android.internal.R.bool.config_enableCarDockHomeLaunch);
         mUiModeLocked = res.getBoolean(com.android.internal.R.bool.config_lockUiMode);
         mNightModeLocked = res.getBoolean(com.android.internal.R.bool.config_lockDayNightMode);
-
+        mTwilightManager = getLocalService(TwilightManager.class);
         final PackageManager pm = context.getPackageManager();
         mTelevision = pm.hasSystemFeature(PackageManager.FEATURE_TELEVISION)
                 || pm.hasSystemFeature(PackageManager.FEATURE_LEANBACK);
