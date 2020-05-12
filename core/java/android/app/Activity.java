@@ -17,6 +17,8 @@
 package android.app;
 
 import static android.Manifest.permission.CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.app.WindowConfiguration.inMultiWindowMode;
 import static android.os.Process.myUid;
 
 import static java.lang.Character.MIN_VALUE;
@@ -947,9 +949,8 @@ public class Activity extends ContextThemeWrapper
     /** @hide */
     boolean mEnterAnimationComplete;
 
-    /** Track last dispatched multi-window and PiP mode to client, internal debug purpose **/
-    private Boolean mLastDispatchedIsInMultiWindowMode;
-    private Boolean mLastDispatchedIsInPictureInPictureMode;
+    private boolean mIsInMultiWindowMode;
+    private boolean mIsInPictureInPictureMode;
 
     private final WindowControllerCallback mWindowControllerCallback =
             new WindowControllerCallback() {
@@ -2749,7 +2750,7 @@ public class Activity extends ContextThemeWrapper
      * @return True if the activity is in multi-window mode.
      */
     public boolean isInMultiWindowMode() {
-        return mLastDispatchedIsInMultiWindowMode == Boolean.TRUE;
+        return mIsInMultiWindowMode;
     }
 
     /**
@@ -2792,7 +2793,7 @@ public class Activity extends ContextThemeWrapper
      * @return True if the activity is in picture-in-picture mode.
      */
     public boolean isInPictureInPictureMode() {
-        return mLastDispatchedIsInPictureInPictureMode == Boolean.TRUE;
+        return mIsInPictureInPictureMode;
     }
 
     /**
@@ -7143,10 +7144,10 @@ public class Activity extends ContextThemeWrapper
                 writer.print(mResumed); writer.print(" mStopped=");
                 writer.print(mStopped); writer.print(" mFinished=");
                 writer.println(mFinished);
-        writer.print(innerPrefix); writer.print("mLastDispatchedIsInMultiWindowMode=");
-                writer.print(mLastDispatchedIsInMultiWindowMode);
-                writer.print(" mLastDispatchedIsInPictureInPictureMode=");
-                writer.println(mLastDispatchedIsInPictureInPictureMode);
+        writer.print(innerPrefix); writer.print("mIsInMultiWindowMode=");
+                writer.print(mIsInMultiWindowMode);
+                writer.print(" mIsInPictureInPictureMode=");
+                writer.println(mIsInPictureInPictureMode);
         writer.print(innerPrefix); writer.print("mChangingConfigurations=");
                 writer.println(mChangingConfigurations);
         writer.print(innerPrefix); writer.print("mCurrentConfig=");
@@ -7978,6 +7979,11 @@ public class Activity extends ContextThemeWrapper
     final void performCreate(Bundle icicle, PersistableBundle persistentState) {
         dispatchActivityPreCreated(icicle);
         mCanEnterPictureInPicture = true;
+        // initialize mIsInMultiWindowMode and mIsInPictureInPictureMode before onCreate
+        final int windowingMode = getResources().getConfiguration().windowConfiguration
+                .getWindowingMode();
+        mIsInMultiWindowMode = inMultiWindowMode(windowingMode);
+        mIsInPictureInPictureMode = windowingMode == WINDOWING_MODE_PINNED;
         restoreHasCurrentPermissionRequest(icicle);
         if (persistentState != null) {
             onCreate(icicle, persistentState);
@@ -8246,7 +8252,7 @@ public class Activity extends ContextThemeWrapper
         if (mWindow != null) {
             mWindow.onMultiWindowModeChanged();
         }
-        mLastDispatchedIsInMultiWindowMode = isInMultiWindowMode;
+        mIsInMultiWindowMode = isInMultiWindowMode;
         onMultiWindowModeChanged(isInMultiWindowMode, newConfig);
     }
 
@@ -8259,7 +8265,7 @@ public class Activity extends ContextThemeWrapper
         if (mWindow != null) {
             mWindow.onPictureInPictureModeChanged(isInPictureInPictureMode);
         }
-        mLastDispatchedIsInPictureInPictureMode = isInPictureInPictureMode;
+        mIsInPictureInPictureMode = isInPictureInPictureMode;
         onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig);
     }
 
