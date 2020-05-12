@@ -2884,8 +2884,8 @@ public class NotificationPanelViewController extends PanelViewController {
         return mNotificationStackScroller.createDelegate();
     }
 
-    public void updateNotificationViews() {
-        mNotificationStackScroller.updateSectionBoundaries();
+    void updateNotificationViews(String reason) {
+        mNotificationStackScroller.updateSectionBoundaries(reason);
         mNotificationStackScroller.updateSpeedBumpIndex();
         mNotificationStackScroller.updateFooter();
         updateShowEmptyShadeView();
