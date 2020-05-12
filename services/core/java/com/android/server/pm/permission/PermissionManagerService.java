@@ -421,7 +421,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        mContext.getSystemService(PermissionControllerManager.class).dump(fd, pw, args);
+        mContext.getSystemService(PermissionControllerManager.class).dump(fd, args);
     }
 
     /**
