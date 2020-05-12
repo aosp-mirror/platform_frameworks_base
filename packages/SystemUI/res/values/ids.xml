@@ -70,6 +70,26 @@
     <item type="id" name="panel_alpha_animator_end_tag"/>
     <item type="id" name="cross_fade_layer_type_changed_tag"/>
 
+    <item type="id" name="absolute_x_animator_tag"/>
+    <item type="id" name="absolute_x_animator_start_tag"/>
+    <item type="id" name="absolute_x_animator_end_tag"/>
+    <item type="id" name="absolute_x_current_value"/>
+
+    <item type="id" name="absolute_y_animator_tag"/>
+    <item type="id" name="absolute_y_animator_start_tag"/>
+    <item type="id" name="absolute_y_animator_end_tag"/>
+    <item type="id" name="absolute_y_current_value"/>
+
+    <item type="id" name="view_height_animator_tag"/>
+    <item type="id" name="view_height_animator_start_tag"/>
+    <item type="id" name="view_height_animator_end_tag"/>
+    <item type="id" name="view_height_current_value"/>
+
+    <item type="id" name="view_width_animator_tag"/>
+    <item type="id" name="view_width_animator_start_tag"/>
+    <item type="id" name="view_width_animator_end_tag"/>
+    <item type="id" name="view_width_current_value"/>
+
     <!-- Whether the icon is from a notification for which targetSdk < L -->
     <item type="id" name="icon_is_pre_L"/>
 
