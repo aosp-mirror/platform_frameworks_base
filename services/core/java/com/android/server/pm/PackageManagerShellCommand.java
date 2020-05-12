@@ -3172,7 +3172,7 @@ class PackageManagerShellCommand extends ShellCommand {
             metadata = (streamingVersion == 0) ? Metadata.forDataOnlyStreaming(fileId)
                     : Metadata.forStreaming(fileId);
             try {
-                if (V4Signature.readFrom(signature) == null) {
+                if ((signature.length > 0) && (V4Signature.readFrom(signature) == null)) {
                     getErrPrintWriter().println("V4 signature is invalid in: " + arg);
                     return 1;
                 }
