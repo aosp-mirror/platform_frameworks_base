@@ -524,19 +524,166 @@ public final class ScanResult implements Parcelable {
      * {@hide}
      */
     public final static int UNSPECIFIED = -1;
+
+    /**
+     * 2.4 GHz band first channel number
+     * @hide
+     */
+    public static final int BAND_24_GHZ_FIRST_CH_NUM = 1;
+    /**
+     * 2.4 GHz band last channel number
+     * @hide
+     */
+    public static final int BAND_24_GHZ_LAST_CH_NUM = 14;
+    /**
+     * 2.4 GHz band frequency of first channel in MHz
+     * @hide
+     */
+    public static final int BAND_24_GHZ_START_FREQ_MHZ = 2412;
+    /**
+     * 2.4 GHz band frequency of last channel in MHz
+     * @hide
+     */
+    public static final int BAND_24_GHZ_END_FREQ_MHZ = 2484;
+
+    /**
+     * 5 GHz band first channel number
+     * @hide
+     */
+    public static final int BAND_5_GHZ_FIRST_CH_NUM = 32;
+    /**
+     * 5 GHz band last channel number
+     * @hide
+     */
+    public static final int BAND_5_GHZ_LAST_CH_NUM = 173;
+    /**
+     * 5 GHz band frequency of first channel in MHz
+     * @hide
+     */
+    public static final int BAND_5_GHZ_START_FREQ_MHZ = 5160;
+    /**
+     * 5 GHz band frequency of last channel in MHz
+     * @hide
+     */
+    public static final int BAND_5_GHZ_END_FREQ_MHZ = 5865;
+
+    /**
+     * 6 GHz band first channel number
+     * @hide
+     */
+    public static final int BAND_6_GHZ_FIRST_CH_NUM = 1;
+    /**
+     * 6 GHz band last channel number
+     * @hide
+     */
+    public static final int BAND_6_GHZ_LAST_CH_NUM = 233;
+    /**
+     * 6 GHz band frequency of first channel in MHz
+     * @hide
+     */
+    public static final int BAND_6_GHZ_START_FREQ_MHZ = 5945;
+    /**
+     * 6 GHz band frequency of last channel in MHz
+     * @hide
+     */
+    public static final int BAND_6_GHZ_END_FREQ_MHZ = 7105;
+
+    /**
+     * Utility function to check if a frequency within 2.4 GHz band
+     * @param freqMhz frequency in MHz
+     * @return true if within 2.4GHz, false otherwise
+     *
+     * @hide
+     */
+    public static boolean is24GHz(int freqMhz) {
+        return freqMhz >= BAND_24_GHZ_START_FREQ_MHZ && freqMhz <= BAND_24_GHZ_END_FREQ_MHZ;
+    }
+
+    /**
+     * Utility function to check if a frequency within 5 GHz band
+     * @param freqMhz frequency in MHz
+     * @return true if within 5GHz, false otherwise
+     *
+     * @hide
+     */
+    public static boolean is5GHz(int freqMhz) {
+        return freqMhz >=  BAND_5_GHZ_START_FREQ_MHZ && freqMhz <= BAND_5_GHZ_END_FREQ_MHZ;
+    }
+
+    /**
+     * Utility function to check if a frequency within 6 GHz band
+     * @param freqMhz
+     * @return true if within 6GHz, false otherwise
+     *
+     * @hide
+     */
+    public static boolean is6GHz(int freqMhz) {
+        return freqMhz >= BAND_6_GHZ_START_FREQ_MHZ && freqMhz <= BAND_6_GHZ_END_FREQ_MHZ;
+    }
+
+    /**
+     * Utility function to convert channel number/band to frequency in MHz
+     * @param channel number to convert
+     * @param band of channel to convert
+     * @return center frequency in Mhz of the channel, {@link UNSPECIFIED} if no match
+     *
+     * @hide
+     */
+    public static int convertChannelToFrequencyMhz(int channel, @WifiScanner.WifiBand int band) {
+        if (band == WifiScanner.WIFI_BAND_24_GHZ) {
+            // Special case
+            if (channel == 14) {
+                return 2484;
+            } else if (channel >= BAND_24_GHZ_FIRST_CH_NUM && channel <= BAND_24_GHZ_LAST_CH_NUM) {
+                return ((channel - BAND_24_GHZ_FIRST_CH_NUM) * 5) + BAND_24_GHZ_START_FREQ_MHZ;
+            } else {
+                return UNSPECIFIED;
+            }
+        }
+        if (band == WifiScanner.WIFI_BAND_5_GHZ) {
+            if (channel >= BAND_5_GHZ_FIRST_CH_NUM && channel <= BAND_5_GHZ_LAST_CH_NUM) {
+                return ((channel - BAND_5_GHZ_FIRST_CH_NUM) * 5) + BAND_5_GHZ_START_FREQ_MHZ;
+            } else {
+                return UNSPECIFIED;
+            }
+        }
+        if (band == WifiScanner.WIFI_BAND_6_GHZ) {
+            if (channel >= BAND_6_GHZ_FIRST_CH_NUM && channel <= BAND_6_GHZ_LAST_CH_NUM) {
+                return ((channel - BAND_6_GHZ_FIRST_CH_NUM) * 5) + BAND_6_GHZ_START_FREQ_MHZ;
+            } else {
+                return UNSPECIFIED;
+            }
+        }
+        return UNSPECIFIED;
+    }
+
+    /**
+     * Utility function to convert frequency in MHz to channel number
+     * @param freqMhz frequency in MHz
+     * @return channel number associated with given frequency, {@link UNSPECIFIED} if no match
+     *
+     * @hide
+     */
+    public static int convertFrequencyMhzToChannel(int freqMhz) {
+        // Special case
+        if (freqMhz == 2484) {
+            return 14;
+        } else if (is24GHz(freqMhz)) {
+            return (freqMhz - BAND_24_GHZ_START_FREQ_MHZ) / 5 + BAND_24_GHZ_FIRST_CH_NUM;
+        } else if (is5GHz(freqMhz)) {
+            return ((freqMhz - BAND_5_GHZ_START_FREQ_MHZ) / 5) + BAND_5_GHZ_FIRST_CH_NUM;
+        } else if (is6GHz(freqMhz)) {
+            return ((freqMhz - BAND_6_GHZ_START_FREQ_MHZ) / 5) + BAND_6_GHZ_FIRST_CH_NUM;
+        }
+
+        return UNSPECIFIED;
+    }
+
     /**
      * @hide
      */
     public boolean is24GHz() {
         return ScanResult.is24GHz(frequency);
-    }
-
-    /**
-     * @hide
-     * TODO: makes real freq boundaries
-     */
-    public static boolean is24GHz(int freq) {
-        return freq > 2400 && freq < 2500;
     }
 
     /**
@@ -551,21 +698,6 @@ public final class ScanResult implements Parcelable {
      */
     public boolean is6GHz() {
         return ScanResult.is6GHz(frequency);
-    }
-
-    /**
-     * @hide
-     * TODO: makes real freq boundaries
-     */
-    public static boolean is5GHz(int freq) {
-        return freq > 4900 && freq < 5900;
-    }
-
-    /**
-     * @hide
-     */
-    public static boolean is6GHz(int freq) {
-        return freq > 5925 && freq < 7125;
     }
 
     /**
