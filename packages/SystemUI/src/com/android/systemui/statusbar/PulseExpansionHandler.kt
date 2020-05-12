@@ -121,14 +121,14 @@ constructor(
     }
 
     override fun onInterceptTouchEvent(event: MotionEvent): Boolean {
-        return canHandleMotionEvent() && startExpansion(event)
+        return maybeStartExpansion(event)
     }
 
-    private fun canHandleMotionEvent(): Boolean {
-        return !wakeUpCoordinator.canShowPulsingHuns || qsExpanded || bouncerShowing
-    }
-
-    private fun startExpansion(event: MotionEvent): Boolean {
+    private fun maybeStartExpansion(event: MotionEvent): Boolean {
+        if (!wakeUpCoordinator.canShowPulsingHuns || qsExpanded ||
+                bouncerShowing) {
+            return false
+        }
         if (velocityTracker == null) {
             velocityTracker = VelocityTracker.obtain()
         }
@@ -177,14 +177,9 @@ constructor(
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
-        if (!canHandleMotionEvent()) {
-            return false
+        if (!isExpanding) {
+            return maybeStartExpansion(event)
         }
-
-        if (!isExpanding || event.actionMasked == MotionEvent.ACTION_DOWN) {
-            return startExpansion(event)
-        }
-
         velocityTracker!!.addMovement(event)
         val y = event.y
 
