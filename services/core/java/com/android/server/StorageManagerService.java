@@ -1941,10 +1941,13 @@ class StorageManagerService extends IStorageManager.Stub
             mDownloadsAuthorityAppId = UserHandle.getAppId(provider.applicationInfo.uid);
         }
 
-        try {
-            mIAppOpsService.startWatchingMode(OP_REQUEST_INSTALL_PACKAGES, null, mAppOpsCallback);
-            mIAppOpsService.startWatchingMode(OP_LEGACY_STORAGE, null, mAppOpsCallback);
-        } catch (RemoteException e) {
+        if (!mIsFuseEnabled) {
+            try {
+                mIAppOpsService.startWatchingMode(OP_REQUEST_INSTALL_PACKAGES, null,
+                        mAppOpsCallback);
+                mIAppOpsService.startWatchingMode(OP_LEGACY_STORAGE, null, mAppOpsCallback);
+            } catch (RemoteException e) {
+            }
         }
     }
 
