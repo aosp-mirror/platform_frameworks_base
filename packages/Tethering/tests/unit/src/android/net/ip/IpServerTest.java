@@ -106,6 +106,7 @@ public class IpServerTest {
     private static final String BLUETOOTH_IFACE_ADDR = "192.168.42.1";
     private static final int BLUETOOTH_DHCP_PREFIX_LENGTH = 24;
     private static final int DHCP_LEASE_TIME_SECS = 3600;
+    private static final boolean DEFAULT_USING_BPF_OFFLOAD = true;
 
     private static final InterfaceParams TEST_IFACE_PARAMS = new InterfaceParams(
             IFACE_NAME, 42 /* index */, MacAddress.ALL_ZEROS_ADDRESS, 1500 /* defaultMtu */);
@@ -130,10 +131,11 @@ public class IpServerTest {
     private NeighborEventConsumer mNeighborEventConsumer;
 
     private void initStateMachine(int interfaceType) throws Exception {
-        initStateMachine(interfaceType, false /* usingLegacyDhcp */);
+        initStateMachine(interfaceType, false /* usingLegacyDhcp */, DEFAULT_USING_BPF_OFFLOAD);
     }
 
-    private void initStateMachine(int interfaceType, boolean usingLegacyDhcp) throws Exception {
+    private void initStateMachine(int interfaceType, boolean usingLegacyDhcp,
+            boolean usingBpfOffload) throws Exception {
         doAnswer(inv -> {
             final IDhcpServerCallbacks cb = inv.getArgument(2);
             new Thread(() -> {
@@ -165,7 +167,7 @@ public class IpServerTest {
 
         mIpServer = new IpServer(
                 IFACE_NAME, mLooper.getLooper(), interfaceType, mSharedLog, mNetd,
-                mCallback, usingLegacyDhcp, mDependencies);
+                mCallback, usingLegacyDhcp, usingBpfOffload, mDependencies);
         mIpServer.start();
         mNeighborEventConsumer = neighborCaptor.getValue();
 
@@ -179,12 +181,13 @@ public class IpServerTest {
 
     private void initTetheredStateMachine(int interfaceType, String upstreamIface)
             throws Exception {
-        initTetheredStateMachine(interfaceType, upstreamIface, false);
+        initTetheredStateMachine(interfaceType, upstreamIface, false,
+                DEFAULT_USING_BPF_OFFLOAD);
     }
 
     private void initTetheredStateMachine(int interfaceType, String upstreamIface,
-            boolean usingLegacyDhcp) throws Exception {
-        initStateMachine(interfaceType, usingLegacyDhcp);
+            boolean usingLegacyDhcp, boolean usingBpfOffload) throws Exception {
+        initStateMachine(interfaceType, usingLegacyDhcp, usingBpfOffload);
         dispatchCommand(IpServer.CMD_TETHER_REQUESTED, STATE_TETHERED);
         if (upstreamIface != null) {
             LinkProperties lp = new LinkProperties();
@@ -204,7 +207,8 @@ public class IpServerTest {
         when(mDependencies.getIpNeighborMonitor(any(), any(), any()))
                 .thenReturn(mIpNeighborMonitor);
         mIpServer = new IpServer(IFACE_NAME, mLooper.getLooper(), TETHERING_BLUETOOTH, mSharedLog,
-                mNetd, mCallback, false /* usingLegacyDhcp */, mDependencies);
+                mNetd, mCallback, false /* usingLegacyDhcp */, DEFAULT_USING_BPF_OFFLOAD,
+                mDependencies);
         mIpServer.start();
         mLooper.dispatchAll();
         verify(mCallback).updateInterfaceState(
@@ -494,7 +498,8 @@ public class IpServerTest {
 
     @Test
     public void doesNotStartDhcpServerIfDisabled() throws Exception {
-        initTetheredStateMachine(TETHERING_WIFI, UPSTREAM_IFACE, true /* usingLegacyDhcp */);
+        initTetheredStateMachine(TETHERING_WIFI, UPSTREAM_IFACE, true /* usingLegacyDhcp */,
+                DEFAULT_USING_BPF_OFFLOAD);
         dispatchTetherConnectionChanged(UPSTREAM_IFACE);
 
         verify(mDependencies, never()).makeDhcpServer(any(), any(), any());
@@ -577,7 +582,8 @@ public class IpServerTest {
 
     @Test
     public void addRemoveipv6ForwardingRules() throws Exception {
-        initTetheredStateMachine(TETHERING_WIFI, UPSTREAM_IFACE, false /* usingLegacyDhcp */);
+        initTetheredStateMachine(TETHERING_WIFI, UPSTREAM_IFACE, false /* usingLegacyDhcp */,
+                DEFAULT_USING_BPF_OFFLOAD);
 
         final int myIfindex = TEST_IFACE_PARAMS.index;
         final int notMyIfindex = myIfindex - 1;
@@ -676,6 +682,53 @@ public class IpServerTest {
         verify(mNetd).tetherOffloadRuleRemove(matches(UPSTREAM_IFINDEX, neighA, macA));
         verify(mNetd).tetherOffloadRuleRemove(matches(UPSTREAM_IFINDEX, neighB, macB));
         reset(mNetd);
+    }
+
+    @Test
+    public void enableDisableUsingBpfOffload() throws Exception {
+        final int myIfindex = TEST_IFACE_PARAMS.index;
+        final InetAddress neigh = InetAddresses.parseNumericAddress("2001:db8::1");
+        final MacAddress macA = MacAddress.fromString("00:00:00:00:00:0a");
+        final MacAddress macNull = MacAddress.fromString("00:00:00:00:00:00");
+
+        reset(mNetd);
+
+        // Expect that rules can be only added/removed when the BPF offload config is enabled.
+        // Note that the usingBpfOffload false case is not a realistic test case. Because IP
+        // neighbor monitor doesn't start if BPF offload is disabled, there should have no
+        // neighbor event listening. This is used for testing the protection check just in case.
+        // TODO: Perhaps remove this test once we don't need this check anymore.
+        for (boolean usingBpfOffload : new boolean[]{true, false}) {
+            initTetheredStateMachine(TETHERING_WIFI, UPSTREAM_IFACE, false /* usingLegacyDhcp */,
+                    usingBpfOffload);
+
+            // A neighbor is added.
+            recvNewNeigh(myIfindex, neigh, NUD_REACHABLE, macA);
+            if (usingBpfOffload) {
+                verify(mNetd).tetherOffloadRuleAdd(matches(UPSTREAM_IFINDEX, neigh, macA));
+            } else {
+                verify(mNetd, never()).tetherOffloadRuleAdd(any());
+            }
+            reset(mNetd);
+
+            // A neighbor is deleted.
+            recvDelNeigh(myIfindex, neigh, NUD_STALE, macA);
+            if (usingBpfOffload) {
+                verify(mNetd).tetherOffloadRuleRemove(matches(UPSTREAM_IFINDEX, neigh, macNull));
+            } else {
+                verify(mNetd, never()).tetherOffloadRuleRemove(any());
+            }
+            reset(mNetd);
+        }
+    }
+
+    @Test
+    public void doesNotStartIpNeighborMonitorIfBpfOffloadDisabled() throws Exception {
+        initTetheredStateMachine(TETHERING_WIFI, UPSTREAM_IFACE, false /* usingLegacyDhcp */,
+                false /* usingBpfOffload */);
+
+        // IP neighbor monitor doesn't start if BPF offload is disabled.
+        verify(mIpNeighborMonitor, never()).start();
     }
 
     private void assertDhcpStarted(IpPrefix expectedPrefix) throws Exception {
