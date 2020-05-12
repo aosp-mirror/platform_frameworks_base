@@ -31,6 +31,7 @@ import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.widget.PopupWindow;
+import android.window.WindowMetricsHelper;
 
 /**
  * Custom {@link PopupWindow} used to isolate its content from the autofilled app - the
@@ -128,7 +129,8 @@ public class AutofillPopupWindow extends PopupWindow {
             // Gravity.BOTTOM because PopupWindow base class does not expose computeGravity().
             final WindowManager windowManager = anchor.getContext()
                     .getSystemService(WindowManager.class);
-            final Rect windowBounds = windowManager.getCurrentWindowMetrics().getBounds();
+            final Rect windowBounds = WindowMetricsHelper.getBoundsExcludingNavigationBarAndCutout(
+                    windowManager.getCurrentWindowMetrics());
             width = windowBounds.width();
             if (height != LayoutParams.MATCH_PARENT) {
                 offsetY = windowBounds.height() - height;

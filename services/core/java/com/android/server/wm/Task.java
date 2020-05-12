@@ -18,7 +18,6 @@ package com.android.server.wm;
 
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.ActivityTaskManager.RESIZE_MODE_FORCED;
-import static android.app.ActivityTaskManager.RESIZE_MODE_SYSTEM;
 import static android.app.ActivityTaskManager.RESIZE_MODE_SYSTEM_SCREEN_ROTATION;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
@@ -29,7 +28,6 @@ import static android.app.WindowConfiguration.PINNED_WINDOWING_MODE_ELEVATION_IN
 import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
-import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
@@ -661,7 +659,7 @@ class Task extends WindowContainer<WindowContainer> {
         updateTaskDescription();
     }
 
-    boolean resize(Rect bounds, int resizeMode, boolean preserveWindow, boolean deferResume) {
+    boolean resize(Rect bounds, int resizeMode, boolean preserveWindow) {
         mAtmService.deferWindowLayout();
 
         try {
@@ -701,7 +699,7 @@ class Task extends WindowContainer<WindowContainer> {
             boolean kept = true;
             if (updatedConfig) {
                 final ActivityRecord r = topRunningActivityLocked();
-                if (r != null && !deferResume) {
+                if (r != null) {
                     kept = r.ensureActivityConfiguration(0 /* globalChanges */,
                             preserveWindow);
                     // Preserve other windows for resizing because if resizing happens when there
@@ -853,30 +851,11 @@ class Task extends WindowContainer<WindowContainer> {
             // TODO: Should this call be moved inside the resize method in WM?
             toStack.prepareFreezingTaskBounds();
 
-            // Make sure the task has the appropriate bounds/size for the stack it is in.
-            final boolean toStackSplitScreenPrimary =
-                    toStackWindowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
-            final Rect configBounds = getRequestedOverrideBounds();
-            if ((toStackWindowingMode == WINDOWING_MODE_FULLSCREEN
-                    || toStackWindowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY)
-                    && !Objects.equals(configBounds, toStack.getRequestedOverrideBounds())) {
-                kept = resize(toStack.getRequestedOverrideBounds(), RESIZE_MODE_SYSTEM,
-                        !mightReplaceWindow, deferResume);
-            } else if (toStackWindowingMode == WINDOWING_MODE_FREEFORM) {
-                Rect bounds = getLaunchBounds();
-                if (bounds == null) {
-                    mStackSupervisor.getLaunchParamsController().layoutTask(this, null);
-                    bounds = configBounds;
-                }
-                kept = resize(bounds, RESIZE_MODE_FORCED, !mightReplaceWindow, deferResume);
-            } else if (toStackSplitScreenPrimary || toStackWindowingMode == WINDOWING_MODE_PINNED) {
-                if (toStackSplitScreenPrimary && moveStackMode == REPARENT_KEEP_STACK_AT_FRONT) {
-                    // Move recents to front so it is not behind home stack when going into docked
-                    // mode
-                    mStackSupervisor.moveRecentsStackToFront(reason);
-                }
-                kept = resize(toStack.getRequestedOverrideBounds(), RESIZE_MODE_SYSTEM,
-                        !mightReplaceWindow, deferResume);
+            if (toStackWindowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY
+                    && moveStackMode == REPARENT_KEEP_STACK_AT_FRONT) {
+                // Move recents to front so it is not behind home stack when going into docked
+                // mode
+                mStackSupervisor.moveRecentsStackToFront(reason);
             }
         } finally {
             mAtmService.continueWindowLayout();

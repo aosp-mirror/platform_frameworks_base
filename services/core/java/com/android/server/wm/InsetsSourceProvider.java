@@ -219,6 +219,8 @@ class InsetsSourceProvider {
             return;
         }
 
+        setServerVisible(mWin.wouldBeVisibleIfPolicyIgnored() && mWin.isVisibleByPolicy()
+                && !mWin.mGivenInsetsPending);
         updateSourceFrame();
         if (mControl != null) {
             final Rect frame = mWin.getWindowFrames().mFrame;
@@ -228,8 +230,6 @@ class InsetsSourceProvider {
                 mStateController.notifyControlChanged(mControlTarget);
             }
         }
-        setServerVisible(mWin.wouldBeVisibleIfPolicyIgnored() && mWin.isVisibleByPolicy()
-                && !mWin.mGivenInsetsPending);
     }
 
     /**

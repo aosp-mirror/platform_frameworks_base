@@ -54,7 +54,6 @@ public class InsetsSourceProviderTest extends WindowTestsBase {
         mSource.setVisible(true);
         mProvider = new InsetsSourceProvider(mSource,
                 mDisplayContent.getInsetsStateController(), mDisplayContent);
-        mProvider.setServerVisible(true);
         mImeProvider = new InsetsSourceProvider(mImeSource,
                 mDisplayContent.getInsetsStateController(), mDisplayContent);
     }
@@ -106,6 +105,7 @@ public class InsetsSourceProviderTest extends WindowTestsBase {
     public void testPostLayout_frameProvider() {
         final WindowState statusBar = createWindow(null, TYPE_APPLICATION, "statusBar");
         statusBar.getFrameLw().set(0, 0, 500, 100);
+        statusBar.mHasSurface = true;
         mProvider.setWindow(statusBar,
                 (displayFrames, windowState, rect) -> {
                     rect.set(10, 10, 20, 20);

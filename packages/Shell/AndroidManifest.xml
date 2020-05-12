@@ -294,6 +294,9 @@
     <!-- Permissions required for CTS test - AutoRevokeTest -->
     <uses-permission android:name="android.permission.WHITELIST_AUTO_REVOKE_PERMISSIONS" />
 
+    <!-- Permissions needed to test shared libraries -->
+    <uses-permission android:name="android.permission.ACCESS_SHARED_LIBRARIES" />
+
     <application android:label="@string/app_label"
                 android:theme="@android:style/Theme.DeviceDefault.DayNight"
                 android:defaultToDeviceProtectedStorage="true"

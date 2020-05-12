@@ -211,7 +211,13 @@ import java.io.PrintWriter;
                 }
                 mForcedUseForComm = AudioSystem.FORCE_SPEAKER;
             } else if (mForcedUseForComm == AudioSystem.FORCE_SPEAKER) {
-                mForcedUseForComm = AudioSystem.FORCE_NONE;
+                if (mBtHelper.isBluetoothScoOn()) {
+                    mForcedUseForComm = AudioSystem.FORCE_BT_SCO;
+                    setForceUse_Async(
+                            AudioSystem.FOR_RECORD, AudioSystem.FORCE_BT_SCO, eventSource);
+                } else {
+                    mForcedUseForComm = AudioSystem.FORCE_NONE;
+                }
             }
 
             mForcedUseForCommExt = mForcedUseForComm;

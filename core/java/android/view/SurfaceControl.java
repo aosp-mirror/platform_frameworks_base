@@ -220,6 +220,8 @@ public final class SurfaceControl implements Parcelable {
 
     private static native long nativeAcquireFrameRateFlexibilityToken();
     private static native void nativeReleaseFrameRateFlexibilityToken(long token);
+    private static native void nativeSetFixedTransformHint(long transactionObj, long nativeObject,
+            int transformHint);
 
     private final CloseGuard mCloseGuard = CloseGuard.get();
     private String mName;
@@ -2303,6 +2305,39 @@ public final class SurfaceControl implements Parcelable {
             checkPreconditions(sc);
             mResizedSurfaces.put(sc, new Point(w, h));
             nativeSetSize(mNativeObject, sc.mNativeObject, w, h);
+            return this;
+        }
+
+        /**
+         * Provide the graphic producer a transform hint if the layer and its children are
+         * in an orientation different from the display's orientation. The caller is responsible
+         * for clearing this transform hint if the layer is no longer in a fixed orientation.
+         *
+         * The transform hint is used to prevent allocating a buffer of different size when a
+         * layer is rotated. The producer can choose to consume the hint and allocate the buffer
+         * with the same size.
+         *
+         * @return This Transaction.
+         * @hide
+         */
+        @NonNull
+        public Transaction setFixedTransformHint(@NonNull SurfaceControl sc,
+                       @Surface.Rotation int transformHint) {
+            checkPreconditions(sc);
+            nativeSetFixedTransformHint(mNativeObject, sc.mNativeObject, transformHint);
+            return this;
+        }
+
+        /**
+         * Clearing any transform hint if set on this layer.
+         *
+         * @return This Transaction.
+         * @hide
+         */
+        @NonNull
+        public Transaction unsetFixedTransformHint(@NonNull SurfaceControl sc) {
+            checkPreconditions(sc);
+            nativeSetFixedTransformHint(mNativeObject, sc.mNativeObject, -1/* INVALID_ROTATION */);
             return this;
         }
 

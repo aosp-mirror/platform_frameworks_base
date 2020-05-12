@@ -704,6 +704,11 @@ public final class ViewRootImpl implements ViewParent,
     // draw returns.
     private SurfaceControl.Transaction mRtBLASTSyncTransaction = new SurfaceControl.Transaction();
 
+    // Keeps track of whether the WM requested us to use BLAST Sync when calling relayout.
+    //  We use this to make sure we don't send the WM transactions from an internal BLAST sync
+    // (e.g. SurfaceView)
+    private boolean mSendNextFrameToWm = false;
+
     private HashSet<ScrollCaptureCallback> mRootScrollCaptureCallbacks;
 
     private String mTag = TAG;
@@ -3053,6 +3058,7 @@ public final class ViewRootImpl implements ViewParent,
         if ((relayoutResult & WindowManagerGlobal.RELAYOUT_RES_BLAST_SYNC) != 0) {
             reportNextDraw();
             setUseBLASTSyncTransaction();
+            mSendNextFrameToWm = true;
         }
 
         boolean cancelDraw = mAttachInfo.mTreeObserver.dispatchOnPreDraw() || !isViewVisible;
@@ -3762,7 +3768,7 @@ public final class ViewRootImpl implements ViewParent,
             if (needFrameCompleteCallback) {
                 final Handler handler = mAttachInfo.mHandler;
                 mAttachInfo.mThreadedRenderer.setFrameCompleteCallback((long frameNr) -> {
-                        finishBLASTSync(!reportNextDraw);
+                        finishBLASTSync(!mSendNextFrameToWm);
                         handler.postAtFrontOfQueue(() -> {
                             if (reportNextDraw) {
                                 // TODO: Use the frame number
@@ -3784,7 +3790,7 @@ public final class ViewRootImpl implements ViewParent,
                 // so if we are BLAST syncing we make sure the previous draw has
                 // totally finished.
                 if (mAttachInfo.mThreadedRenderer != null) {
-                    mAttachInfo.mThreadedRenderer.fence();
+                    mAttachInfo.mThreadedRenderer.pause();
                 }
 
                 mNextReportConsumeBLAST = true;
@@ -4638,13 +4644,16 @@ public final class ViewRootImpl implements ViewParent,
             mInputQueueCallback = null;
             mInputQueue = null;
         }
-        if (mInputEventReceiver != null) {
-            mInputEventReceiver.dispose();
-            mInputEventReceiver = null;
-        }
         try {
             mWindowSession.remove(mWindow);
         } catch (RemoteException e) {
+        }
+        // Dispose receiver would dispose client InputChannel, too. That could send out a socket
+        // broken event, so we need to unregister the server InputChannel when removing window to
+        // prevent server side receive the event and prompt error.
+        if (mInputEventReceiver != null) {
+            mInputEventReceiver.dispose();
+            mInputEventReceiver = null;
         }
 
         mDisplayManager.unregisterDisplayListener(mDisplayListener);
@@ -9754,6 +9763,7 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     private void finishBLASTSync(boolean apply) {
+        mSendNextFrameToWm = false;
         if (mNextReportConsumeBLAST) {
             mNextReportConsumeBLAST = false;
 

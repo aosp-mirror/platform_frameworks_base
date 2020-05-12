@@ -645,6 +645,14 @@ static void nativeReleaseFrameRateFlexibilityToken(JNIEnv* env, jclass clazz, jl
     token->decStrong((void*)nativeAcquireFrameRateFlexibilityToken);
 }
 
+static void nativeSetFixedTransformHint(JNIEnv* env, jclass clazz, jlong transactionObj,
+                                        jlong nativeObject, jint transformHint) {
+    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
+
+    SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl*>(nativeObject);
+    transaction->setFixedTransformHint(ctrl, transformHint);
+}
+
 static jlongArray nativeGetPhysicalDisplayIds(JNIEnv* env, jclass clazz) {
     const auto displayIds = SurfaceComposerClient::getPhysicalDisplayIds();
     jlongArray array = env->NewLongArray(displayIds.size());
@@ -1644,6 +1652,7 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSetGlobalShadowSettings },
     {"nativeGetHandle", "(J)J",
             (void*)nativeGetHandle },
+    {"nativeSetFixedTransformHint", "(JJI)V", (void*)nativeSetFixedTransformHint},
 };
 
 int register_android_view_SurfaceControl(JNIEnv* env)

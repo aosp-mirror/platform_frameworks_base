@@ -133,9 +133,11 @@ public class SystemServerInitThreadPool {
     /**
      * Shuts it down.
      *
-     * <p>Note:</p> should only be called by {@link SystemServer}.
+     * <p>Note:</p> should only be called *after* {@code PHASE_BOOT_COMPLETED} is sent to the
+     * {@link SystemService system services}.
      */
     static void shutdown() {
+        Slog.d(TAG, "Shutdown requested");
         synchronized (LOCK) {
             TimingsTraceAndSlog t = new TimingsTraceAndSlog();
             t.traceBegin("WaitInitThreadPoolShutdown");

@@ -16,7 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.view.Display.DEFAULT_DISPLAY;
@@ -159,7 +158,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         hiddenActivity.setVisible(false);
         mDefaultDisplay.getConfiguration().windowConfiguration.setRotation(
                 mDefaultDisplay.getRotation());
-        mController.initialize(ACTIVITY_TYPE_HOME, new SparseBooleanArray(), homeActivity);
+        initializeRecentsAnimationController(mController, homeActivity);
 
         // Ensure that we are animating the target activity as well
         assertTrue(mController.isAnimatingTask(homeActivity.getTask()));
@@ -182,7 +181,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
 
         mDefaultDisplay.getConfiguration().windowConfiguration.setRotation(
                 mDefaultDisplay.getRotation());
-        mController.initialize(ACTIVITY_TYPE_HOME, new SparseBooleanArray(), homeActivity);
+        initializeRecentsAnimationController(mController, homeActivity);
         mController.startAnimation();
 
         // Ensure that we are animating the app and wallpaper target
@@ -205,7 +204,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
 
         mDefaultDisplay.getConfiguration().windowConfiguration.setRotation(
                 mDefaultDisplay.getRotation());
-        mController.initialize(ACTIVITY_TYPE_HOME, new SparseBooleanArray(), homeActivity);
+        initializeRecentsAnimationController(mController, homeActivity);
         mController.startAnimation();
 
         // Cancel the animation and ensure the controller is still running
@@ -231,7 +230,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         doReturn(true).when(mDefaultDisplay.mWallpaperController).isWallpaperVisible();
 
         // Start and finish the animation
-        mController.initialize(ACTIVITY_TYPE_HOME, new SparseBooleanArray(), homeActivity);
+        initializeRecentsAnimationController(mController, homeActivity);
         mController.startAnimation();
 
         assertTrue(mController.isAnimatingTask(homeActivity.getTask()));
@@ -342,7 +341,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         assertEquals(Configuration.ORIENTATION_LANDSCAPE,
                 mDefaultDisplay.getConfiguration().orientation);
 
-        mController.initialize(ACTIVITY_TYPE_HOME, new SparseBooleanArray(), homeActivity);
+        initializeRecentsAnimationController(mController, homeActivity);
 
         assertEquals(homeActivity, mDefaultDisplay.mFixedRotationLaunchingApp);
 
@@ -354,6 +353,30 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         // top rotated record should be cleared.
         mController.cleanupAnimation(REORDER_MOVE_TO_ORIGINAL_POSITION);
         assertFalse(homeActivity.hasFixedRotationTransform());
+        assertNull(mDefaultDisplay.mFixedRotationLaunchingApp);
+    }
+
+    @Test
+    public void testClearFixedRotationLaunchingAppAfterCleanupAnimation() {
+        final ActivityRecord homeActivity = createHomeActivity();
+        homeActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        final ActivityRecord activity = createActivityRecord(mDefaultDisplay,
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
+        // Assume an activity is launching to different rotation.
+        mDefaultDisplay.setFixedRotationLaunchingApp(activity,
+                (mDefaultDisplay.getRotation() + 1) % 4);
+
+        assertTrue(activity.hasFixedRotationTransform());
+        assertEquals(activity, mDefaultDisplay.mFixedRotationLaunchingApp);
+
+        // Before the transition is done, the recents animation is triggered.
+        initializeRecentsAnimationController(mController, homeActivity);
+        assertFalse(homeActivity.hasFixedRotationTransform());
+
+        // Simulate giving up the swipe up gesture to keep the original activity as top.
+        mController.cleanupAnimation(REORDER_MOVE_TO_ORIGINAL_POSITION);
+        // The rotation transform should be cleared after updating orientation with display.
+        assertFalse(activity.hasFixedRotationTransform());
         assertNull(mDefaultDisplay.mFixedRotationLaunchingApp);
     }
 
@@ -394,7 +417,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         doReturn(true).when(mDefaultDisplay.mWallpaperController).isWallpaperVisible();
 
         // Start the recents animation
-        mController.initialize(ACTIVITY_TYPE_HOME, new SparseBooleanArray(), homeActivity);
+        initializeRecentsAnimationController(mController, homeActivity);
 
         mDefaultDisplay.mWallpaperController.adjustWallpaperWindows();
 
@@ -431,6 +454,11 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         // returning null when calling {@link RecentsAnimationController#createAppAnimations}.
         homeActivity.setVisibility(true);
         return homeActivity;
+    }
+
+    private static void initializeRecentsAnimationController(RecentsAnimationController controller,
+            ActivityRecord activity) {
+        controller.initialize(activity.getActivityType(), new SparseBooleanArray(), activity);
     }
 
     private static void verifyNoMoreInteractionsExceptAsBinder(IInterface binder) {
