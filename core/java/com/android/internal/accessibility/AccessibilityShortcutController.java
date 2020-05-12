@@ -19,6 +19,7 @@ package com.android.internal.accessibility;
 import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG;
 import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_SHORTCUT_KEY;
 
+import static com.android.internal.accessibility.dialog.AccessibilityTargetHelper.getTargets;
 import static com.android.internal.util.ArrayUtils.convertToLongArray;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
@@ -52,6 +53,7 @@ import android.view.accessibility.AccessibilityManager;
 import android.widget.Toast;
 
 import com.android.internal.R;
+import com.android.internal.accessibility.dialog.AccessibilityTarget;
 import com.android.internal.util.function.pooled.PooledLambda;
 
 import java.lang.annotation.Retention;
@@ -267,16 +269,21 @@ public class AccessibilityShortcutController {
     }
 
     private AlertDialog createShortcutWarningDialog(int userId) {
-        final String warningMessage = mContext.getString(
-                R.string.accessibility_shortcut_toogle_warning);
+        List<AccessibilityTarget> targets = getTargets(mContext, ACCESSIBILITY_SHORTCUT_KEY);
+        if (targets.size() == 0) {
+            return null;
+        }
+
+        // Avoid non-a11y users accidentally turning shortcut on without reading this carefully.
+        // Put "don't turn on" as the primary action.
         final AlertDialog alertDialog = mFrameworkObjectProvider.getAlertDialogBuilder(
                 // Use SystemUI context so we pick up any theme set in a vendor overlay
                 mFrameworkObjectProvider.getSystemUiContext())
-                .setTitle(R.string.accessibility_shortcut_warning_dialog_title)
-                .setMessage(warningMessage)
+                .setTitle(getShortcutWarningTitle(targets))
+                .setMessage(getShortcutWarningMessage(targets))
                 .setCancelable(false)
-                .setPositiveButton(R.string.leave_accessibility_shortcut_on, null)
-                .setNegativeButton(R.string.disable_accessibility_shortcut,
+                .setNegativeButton(R.string.accessibility_shortcut_on, null)
+                .setPositiveButton(R.string.accessibility_shortcut_off,
                         (DialogInterface d, int which) -> {
                             Settings.Secure.putStringForUser(mContext.getContentResolver(),
                                     Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE, "",
@@ -295,6 +302,32 @@ public class AccessibilityShortcutController {
                 })
                 .create();
         return alertDialog;
+    }
+
+    private String getShortcutWarningTitle(List<AccessibilityTarget> targets) {
+        if (targets.size() == 1) {
+            return mContext.getString(
+                    R.string.accessibility_shortcut_single_service_warning_title,
+                    targets.get(0).getLabel());
+        }
+        return mContext.getString(
+                R.string.accessibility_shortcut_multiple_service_warning_title);
+    }
+
+    private String getShortcutWarningMessage(List<AccessibilityTarget> targets) {
+        if (targets.size() == 1) {
+            return mContext.getString(
+                    R.string.accessibility_shortcut_single_service_warning,
+                    targets.get(0).getLabel());
+        }
+
+        final StringBuilder sb = new StringBuilder();
+        for (AccessibilityTarget target : targets) {
+            sb.append(mContext.getString(R.string.accessibility_shortcut_multiple_service_list,
+                    target.getLabel()));
+        }
+        return mContext.getString(R.string.accessibility_shortcut_multiple_service_warning,
+                sb.toString());
     }
 
     private AccessibilityServiceInfo getInfoForTargetService() {
