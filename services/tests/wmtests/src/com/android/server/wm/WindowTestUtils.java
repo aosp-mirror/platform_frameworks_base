@@ -34,14 +34,11 @@ class WindowTestUtils {
 
     /** Creates a {@link Task} and adds it to the specified {@link ActivityStack}. */
     static Task createTaskInStack(WindowManagerService service, ActivityStack stack, int userId) {
-        synchronized (service.mGlobalLock) {
-            final Task task = new ActivityTestsBase.TaskBuilder(
-                    stack.mStackSupervisor)
-                    .setUserId(userId)
-                    .setStack(stack)
-                    .build();
-            return task;
-        }
+        final Task task = new ActivityTestsBase.TaskBuilder(stack.mStackSupervisor)
+                .setUserId(userId)
+                .setStack(stack)
+                .build();
+        return task;
     }
 
     /** Creates an {@link ActivityRecord} and adds it to the specified {@link Task}. */
@@ -52,23 +49,18 @@ class WindowTestUtils {
     }
 
     static ActivityRecord createTestActivityRecord(ActivityStack stack) {
-        synchronized (stack.mAtmService.mGlobalLock) {
-            final ActivityRecord activity = new ActivityTestsBase.ActivityBuilder(
-                    stack.mAtmService)
-                    .setStack(stack)
-                    .setCreateTask(true)
-                    .build();
-            postCreateActivitySetup(activity, stack.getDisplayContent());
-            return activity;
-        }
+        final ActivityRecord activity = new ActivityTestsBase.ActivityBuilder(stack.mAtmService)
+                .setStack(stack)
+                .setCreateTask(true)
+                .build();
+        postCreateActivitySetup(activity, stack.getDisplayContent());
+        return activity;
     }
 
     static ActivityRecord createTestActivityRecord(DisplayContent dc) {
-        synchronized (dc.mWmService.mGlobalLock) {
-            final ActivityRecord activity = new ActivityBuilder(dc.mWmService.mAtmService).build();
-            postCreateActivitySetup(activity, dc);
-            return activity;
-        }
+        final ActivityRecord activity = new ActivityBuilder(dc.mWmService.mAtmService).build();
+        postCreateActivitySetup(activity, dc);
+        return activity;
     }
 
     private static void postCreateActivitySetup(ActivityRecord activity, DisplayContent dc) {
@@ -84,9 +76,9 @@ class WindowTestUtils {
 
     static TestWindowToken createTestWindowToken(int type, DisplayContent dc,
             boolean persistOnEmpty) {
-        synchronized (dc.mWmService.mGlobalLock) {
-            return new TestWindowToken(type, dc, persistOnEmpty);
-        }
+        SystemServicesTestRule.checkHoldsLock(dc.mWmService.mGlobalLock);
+
+        return new TestWindowToken(type, dc, persistOnEmpty);
     }
 
     /* Used so we can gain access to some protected members of the {@link WindowToken} class */
