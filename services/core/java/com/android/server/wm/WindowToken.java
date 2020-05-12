@@ -671,6 +671,11 @@ class WindowToken extends WindowContainer<WindowState> {
             pw.print(" waitingToShow=true");
         }
         pw.println();
+        if (hasFixedRotationTransform()) {
+            pw.print(prefix);
+            pw.print("fixedRotationConfig=");
+            pw.println(mFixedRotationTransformState.mRotatedOverrideConfiguration);
+        }
     }
 
     @Override
