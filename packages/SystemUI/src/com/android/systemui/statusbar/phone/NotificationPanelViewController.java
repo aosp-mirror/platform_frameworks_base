@@ -69,6 +69,7 @@ import com.android.systemui.dagger.qualifiers.DisplayId;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.fragments.FragmentHostManager.FragmentListener;
+import com.android.systemui.media.MediaHierarchyManager;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -242,6 +243,7 @@ public class NotificationPanelViewController extends PanelViewController {
     private final KeyguardBypassController mKeyguardBypassController;
     private final KeyguardUpdateMonitor mUpdateMonitor;
     private final ConversationNotificationManager mConversationNotificationManager;
+    private final MediaHierarchyManager mMediaHierarchyManager;
 
     private KeyguardAffordanceHelper mAffordanceHelper;
     private KeyguardUserSwitcher mKeyguardUserSwitcher;
@@ -456,7 +458,8 @@ public class NotificationPanelViewController extends PanelViewController {
             ConfigurationController configurationController,
             FlingAnimationUtils.Builder flingAnimationUtilsBuilder,
             StatusBarTouchableRegionManager statusBarTouchableRegionManager,
-            ConversationNotificationManager conversationNotificationManager) {
+            ConversationNotificationManager conversationNotificationManager,
+            MediaHierarchyManager mediaHierarchyManager) {
         super(view, falsingManager, dozeLog, keyguardStateController,
                 (SysuiStatusBarStateController) statusBarStateController, vibratorHelper,
                 latencyTracker, flingAnimationUtilsBuilder, statusBarTouchableRegionManager);
@@ -466,6 +469,7 @@ public class NotificationPanelViewController extends PanelViewController {
         mZenModeController = zenModeController;
         mConfigurationController = configurationController;
         mFlingAnimationUtilsBuilder = flingAnimationUtilsBuilder;
+        mMediaHierarchyManager = mediaHierarchyManager;
         mView.setWillNotDraw(!DEBUG);
         mInjectionInflationController = injectionInflationController;
         mFalsingManager = falsingManager;
@@ -1609,7 +1613,7 @@ public class NotificationPanelViewController extends PanelViewController {
         if (mQs == null) return;
         float qsExpansionFraction = getQsExpansionFraction();
         mQs.setQsExpansion(qsExpansionFraction, getHeaderTranslation());
-        int heightDiff = mQs.getDesiredHeight() - mQs.getQsMinExpansionHeight();
+        mMediaHierarchyManager.setQsExpansion(qsExpansionFraction);
         mNotificationStackScroller.setQsExpansionFraction(qsExpansionFraction);
     }
 
@@ -3514,7 +3518,11 @@ public class NotificationPanelViewController extends PanelViewController {
             // Calculate quick setting heights.
             int oldMaxHeight = mQsMaxExpansionHeight;
             if (mQs != null) {
+                float previousMin = mQsMinExpansionHeight;
                 mQsMinExpansionHeight = mKeyguardShowing ? 0 : mQs.getQsMinExpansionHeight();
+                if (mQsExpansionHeight == previousMin) {
+                    mQsExpansionHeight = mQsMinExpansionHeight;
+                }
                 mQsMaxExpansionHeight = mQs.getDesiredHeight();
                 mNotificationStackScroller.setMaxTopPadding(
                         mQsMaxExpansionHeight + mQsNotificationTopPadding);
