@@ -337,7 +337,7 @@ public class NotificationEntryManagerInflationTest extends SysuiTestCase {
         assertNotNull(mEntryManager.getActiveNotificationUnfiltered(mSbn.getKey()));
 
         // THEN we update the presenter
-        verify(mPresenter).updateNotificationViews();
+        verify(mPresenter).updateNotificationViews(any());
     }
 
     @Test
@@ -366,7 +366,7 @@ public class NotificationEntryManagerInflationTest extends SysuiTestCase {
         verify(mEntryListener).onEntryReinflated(entry);
 
         // THEN we update the presenter
-        verify(mPresenter).updateNotificationViews();
+        verify(mPresenter).updateNotificationViews(any());
     }
 
     @Test
