@@ -166,11 +166,18 @@ class InsetsSourceProvider {
             return;
         }
 
-        mTmpRect.set(mWin.getFrameLw());
-        if (mFrameProvider != null) {
-            mFrameProvider.accept(mWin.getDisplayContent().mDisplayFrames, mWin, mTmpRect);
+        // Make sure we set the valid source frame only when server visible is true, because the
+        // frame may not yet determined that server side doesn't think the window is ready to
+        // visible. (i.e. No surface, pending insets that were given during layout, etc..)
+        if (mServerVisible) {
+            mTmpRect.set(mWin.getFrameLw());
+            if (mFrameProvider != null) {
+                mFrameProvider.accept(mWin.getDisplayContent().mDisplayFrames, mWin, mTmpRect);
+            } else {
+                mTmpRect.inset(mWin.mGivenContentInsets);
+            }
         } else {
-            mTmpRect.inset(mWin.mGivenContentInsets);
+            mTmpRect.setEmpty();
         }
         mSource.setFrame(mTmpRect);
 
