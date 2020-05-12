@@ -5372,7 +5372,7 @@ public class Activity extends ContextThemeWrapper
         return mActivityTransitionState.isTransitionRunning();
     }
 
-    private Bundle transferSpringboardActivityOptions(Bundle options) {
+    private Bundle transferSpringboardActivityOptions(@Nullable Bundle options) {
         if (options == null && (mWindow != null && !mWindow.isActive())) {
             final ActivityOptions activityOptions = getActivityOptions();
             if (activityOptions != null &&
@@ -5540,7 +5540,7 @@ public class Activity extends ContextThemeWrapper
      */
     public void startIntentSenderForResult(IntentSender intent, int requestCode,
             @Nullable Intent fillInIntent, int flagsMask, int flagsValues, int extraFlags,
-            Bundle options) throws IntentSender.SendIntentException {
+            @Nullable Bundle options) throws IntentSender.SendIntentException {
         if (mParent == null) {
             startIntentSenderForResultInner(intent, mEmbeddedID, requestCode, fillInIntent,
                     flagsMask, flagsValues, options);
@@ -5557,7 +5557,7 @@ public class Activity extends ContextThemeWrapper
 
     private void startIntentSenderForResultInner(IntentSender intent, String who, int requestCode,
             Intent fillInIntent, int flagsMask, int flagsValues,
-            Bundle options)
+            @Nullable Bundle options)
             throws IntentSender.SendIntentException {
         try {
             options = transferSpringboardActivityOptions(options);
@@ -5718,6 +5718,7 @@ public class Activity extends ContextThemeWrapper
      * <var>flagsMask</var>
      * @param extraFlags Always set to 0.
      */
+    @Override
     public void startIntentSender(IntentSender intent,
             @Nullable Intent fillInIntent, int flagsMask, int flagsValues, int extraFlags)
             throws IntentSender.SendIntentException {
@@ -5745,9 +5746,10 @@ public class Activity extends ContextThemeWrapper
      * have also been supplied by the IntentSender, options given here will
      * override any that conflict with those given by the IntentSender.
      */
+    @Override
     public void startIntentSender(IntentSender intent,
             @Nullable Intent fillInIntent, int flagsMask, int flagsValues, int extraFlags,
-            Bundle options) throws IntentSender.SendIntentException {
+            @Nullable Bundle options) throws IntentSender.SendIntentException {
         if (options != null) {
             startIntentSenderForResult(intent, -1, fillInIntent, flagsMask,
                     flagsValues, extraFlags, options);

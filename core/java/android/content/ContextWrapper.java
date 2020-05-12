@@ -449,7 +449,8 @@ public class ContextWrapper extends Context {
 
     @Override
     public void startIntentSender(IntentSender intent,
-            Intent fillInIntent, int flagsMask, int flagsValues, int extraFlags)
+            @Nullable Intent fillInIntent, int flagsMask, int flagsValues,
+            int extraFlags)
             throws IntentSender.SendIntentException {
         mBase.startIntentSender(intent, fillInIntent, flagsMask,
                 flagsValues, extraFlags);
@@ -457,8 +458,9 @@ public class ContextWrapper extends Context {
 
     @Override
     public void startIntentSender(IntentSender intent,
-            Intent fillInIntent, int flagsMask, int flagsValues, int extraFlags,
-            Bundle options) throws IntentSender.SendIntentException {
+            @Nullable Intent fillInIntent, int flagsMask, int flagsValues,
+            int extraFlags, @Nullable Bundle options)
+            throws IntentSender.SendIntentException {
         mBase.startIntentSender(intent, fillInIntent, flagsMask,
                 flagsValues, extraFlags, options);
     }
