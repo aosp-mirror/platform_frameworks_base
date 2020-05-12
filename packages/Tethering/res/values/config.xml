@@ -55,6 +55,12 @@
         <item>"bt-pan"</item>
     </string-array>
 
+    <!-- Use the BPF offload for tethering when the kernel has support. True by default.
+         If the device doesn't want to support tether BPF offload, this should be false.
+         Note that this setting could be override by device config.
+    -->
+    <bool translatable="false" name="config_tether_enable_bpf_offload">true</bool>
+
     <!-- Use the old dnsmasq DHCP server for tethering instead of the framework implementation. -->
     <bool translatable="false" name="config_tether_enable_legacy_dhcp_server">false</bool>
 
