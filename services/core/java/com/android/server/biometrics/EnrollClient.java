@@ -43,11 +43,11 @@ public abstract class EnrollClient extends ClientMonitor {
     public abstract boolean shouldVibrate();
 
     public EnrollClient(Context context, Constants constants,
-            BiometricServiceBase.DaemonWrapper daemon, long halDeviceId, IBinder token,
+            BiometricServiceBase.DaemonWrapper daemon, IBinder token,
             BiometricServiceBase.ServiceListener listener, int userId, int groupId,
             byte[] cryptoToken, boolean restricted, String owner, BiometricUtils utils,
             final int[] disabledFeatures, int timeoutSec, Surface surface) {
-        super(context, constants, daemon, halDeviceId, token, listener, userId, groupId, restricted,
+        super(context, constants, daemon, token, listener, userId, groupId, restricted,
                 owner, 0 /* cookie */);
         mBiometricUtils = utils;
         mCryptoToken = Arrays.copyOf(cryptoToken, cryptoToken.length);
@@ -109,8 +109,7 @@ public abstract class EnrollClient extends ClientMonitor {
             if (result != 0) {
                 Slog.w(getLogTag(), "startEnroll failed, result=" + result);
                 mMetricsLogger.histogram(mConstants.tagEnrollStartError(), result);
-                onError(getHalDeviceId(), BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE,
-                        0 /* vendorCode */);
+                onError(BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE, 0 /* vendorCode */);
                 return result;
             }
         } catch (RemoteException e) {
@@ -166,10 +165,10 @@ public abstract class EnrollClient extends ClientMonitor {
      * @return true if client should be removed
      */
     @Override
-    public boolean onError(long deviceId, int error, int vendorCode) {
+    public boolean onError(int error, int vendorCode) {
         logOnEnrolled(getTargetUserId(), System.currentTimeMillis() - mEnrollmentStartTimeMs,
                 false /* enrollSuccessful */);
-        return super.onError(deviceId, error, vendorCode);
+        return super.onError(error, vendorCode);
     }
 
 }

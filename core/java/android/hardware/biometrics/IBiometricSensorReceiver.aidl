@@ -24,10 +24,10 @@ oneway interface IBiometricSensorReceiver {
     // the auth token must be submitted into KeyStore.
     void onAuthenticationSucceeded(int sensorId, in byte[] token);
     // Notify BiometricService authentication was rejected.
-    void onAuthenticationFailed();
+    void onAuthenticationFailed(int sensorId);
     // Notify BiometricService than an error has occured. Forward to the correct receiver depending
     // on the cookie.
-    void onError(int cookie, int modality, int error, int vendorCode);
+    void onError(int sensorId, int cookie, int error, int vendorCode);
     // Notifies that a biometric has been acquired.
-    void onAcquired(int acquiredInfo, String message);
+    void onAcquired(int sensorId, int acquiredInfo, String message);
 }

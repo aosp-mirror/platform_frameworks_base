@@ -46,7 +46,6 @@ public abstract class ClientMonitor extends LoggableMonitor implements IBinder.D
                     .build();
 
     private final Context mContext;
-    private final long mHalDeviceId;
     private final int mTargetUserId;
     private final int mGroupId;
     // True if client does not have MANAGE_FINGERPRINT permission
@@ -71,7 +70,6 @@ public abstract class ClientMonitor extends LoggableMonitor implements IBinder.D
     /**
      * @param context context of BiometricService
      * @param daemon interface to call back to a specific biometric's daemon
-     * @param halDeviceId the HAL device ID of the associated biometric hardware
      * @param token a unique token for the client
      * @param listener recipient of related events (e.g. authentication)
      * @param userId target user id for operation
@@ -81,13 +79,12 @@ public abstract class ClientMonitor extends LoggableMonitor implements IBinder.D
      * @param owner name of the client that owns this
      */
     public ClientMonitor(Context context, Constants constants,
-            BiometricServiceBase.DaemonWrapper daemon, long halDeviceId, IBinder token,
+            BiometricServiceBase.DaemonWrapper daemon, IBinder token,
             BiometricServiceBase.ServiceListener listener, int userId, int groupId,
             boolean restricted, String owner, int cookie) {
         mContext = context;
         mConstants = constants;
         mDaemon = daemon;
-        mHalDeviceId = halDeviceId;
         mToken = token;
         mListener = listener;
         mTargetUserId = userId;
@@ -178,15 +175,16 @@ public abstract class ClientMonitor extends LoggableMonitor implements IBinder.D
     /**
      * Called when we get notification from the biometric's HAL that an image has been acquired.
      * Common to authenticate and enroll.
+     * @param sensorId as configured by the framework
      * @param acquiredInfo info about the current image acquisition
      * @return true if client should be removed
      */
-    public boolean onAcquired(int acquiredInfo, int vendorCode) {
+    public boolean onAcquired(int sensorId, int acquiredInfo, int vendorCode) {
         super.logOnAcquired(mContext, acquiredInfo, vendorCode, getTargetUserId());
         if (DEBUG) Slog.v(getLogTag(), "Acquired: " + acquiredInfo + " " + vendorCode);
         try {
             if (mListener != null && !blacklistContains(acquiredInfo, vendorCode)) {
-                mListener.onAcquired(getHalDeviceId(), acquiredInfo, vendorCode);
+                mListener.onAcquired(sensorId, acquiredInfo, vendorCode);
             }
             return false; // acquisition continues...
         } catch (RemoteException e) {
@@ -206,11 +204,11 @@ public abstract class ClientMonitor extends LoggableMonitor implements IBinder.D
      * @param error
      * @return true if client should be removed
      */
-    public boolean onError(long deviceId, int error, int vendorCode) {
+    public boolean onError(int error, int vendorCode) {
         super.logOnError(mContext, error, vendorCode, getTargetUserId());
         try {
             if (mListener != null) {
-                mListener.onError(deviceId, error, vendorCode, getCookie());
+                mListener.onError(error, vendorCode, getCookie());
             }
         } catch (RemoteException e) {
             Slog.w(getLogTag(), "Failed to invoke sendError", e);
@@ -245,7 +243,7 @@ public abstract class ClientMonitor extends LoggableMonitor implements IBinder.D
         try {
             if (mToken != null) {
                 if (DEBUG) Slog.w(getLogTag(), "removing leaked reference: " + mToken);
-                onError(getHalDeviceId(), BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE,
+                onError(BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE,
                         0 /* vendorCode */);
             }
         } finally {
@@ -255,10 +253,6 @@ public abstract class ClientMonitor extends LoggableMonitor implements IBinder.D
 
     public final Context getContext() {
         return mContext;
-    }
-
-    public final long getHalDeviceId() {
-        return mHalDeviceId;
     }
 
     public final String getOwnerString() {
