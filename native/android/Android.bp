@@ -37,6 +37,7 @@ cc_library_shared {
 
     srcs: [
         "asset_manager.cpp",
+        "choreographer.cpp",
         "configuration.cpp",
         "hardware_buffer_jni.cpp",
         "input.cpp",
@@ -49,6 +50,7 @@ cc_library_shared {
         "sharedmem.cpp",
         "storage_manager.cpp",
         "surface_control.cpp",
+        "surface_texture.cpp",
         "system_fonts.cpp",
         "trace.cpp",
         "thermal.cpp"
@@ -76,6 +78,7 @@ cc_library_shared {
         "libpowermanager",
         "android.hardware.configstore@1.0",
         "android.hardware.configstore-utils",
+        "libnativedisplay",
     ],
 
     static_libs: [
@@ -83,9 +86,9 @@ cc_library_shared {
         "libarect",
     ],
 
-    header_libs: [ "libhwui_internal_headers" ],
+    header_libs: [ "libhwui_internal_headers",],
 
-    whole_static_libs: ["libnativedisplay", "libnativewindow"],
+    whole_static_libs: ["libnativewindow"],
 
     export_static_lib_headers: ["libarect"],
 

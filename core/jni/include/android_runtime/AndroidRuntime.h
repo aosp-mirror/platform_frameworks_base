@@ -19,15 +19,14 @@
 #ifndef _RUNTIME_ANDROID_RUNTIME_H
 #define _RUNTIME_ANDROID_RUNTIME_H
 
-#include <utils/Errors.h>
 #include <binder/IBinder.h>
-#include <utils/String8.h>
+#include <jni.h>
+#include <pthread.h>
+#include <utils/Errors.h>
 #include <utils/String16.h>
+#include <utils/String8.h>
 #include <utils/Vector.h>
 #include <utils/threads.h>
-#include <pthread.h>
-#include <jni.h>
-
 
 namespace android {
 
@@ -154,6 +153,6 @@ private:
     static int javaThreadShell(void* args);
 };
 
-}
+} // namespace android
 
 #endif
