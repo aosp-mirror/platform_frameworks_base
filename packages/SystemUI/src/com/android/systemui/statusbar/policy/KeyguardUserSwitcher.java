@@ -298,6 +298,7 @@ public class KeyguardUserSwitcher {
             convertView.setAlpha(
                     item.isCurrent || item.isSwitchToEnabled ? USER_SWITCH_ENABLED_ALPHA
                             : USER_SWITCH_DISABLED_ALPHA);
+            convertView.setEnabled(item.isSwitchToEnabled);
             return convertView;
         }
 
