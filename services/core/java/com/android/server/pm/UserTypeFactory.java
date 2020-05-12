@@ -116,6 +116,10 @@ public final class UserTypeFactory {
                         com.android.internal.R.color.profile_badge_1,
                         com.android.internal.R.color.profile_badge_2,
                         com.android.internal.R.color.profile_badge_3)
+                .setDarkThemeBadgeColors(
+                        com.android.internal.R.color.profile_badge_1_dark,
+                        com.android.internal.R.color.profile_badge_2_dark,
+                        com.android.internal.R.color.profile_badge_3_dark)
                 .setDefaultRestrictions(null);
     }
 
@@ -292,6 +296,8 @@ public final class UserTypeFactory {
                         setResAttributeArray(parser, builder::setBadgeLabels);
                     } else if (isProfile && "badge-colors".equals(childName)) {
                         setResAttributeArray(parser, builder::setBadgeColors);
+                    } else if (isProfile && "badge-colors-dark".equals(childName)) {
+                        setResAttributeArray(parser, builder::setDarkThemeBadgeColors);
                     } else {
                         Slog.w(LOG_TAG, "Unrecognized tag " + childName + " in "
                                 + parser.getPositionDescription());
