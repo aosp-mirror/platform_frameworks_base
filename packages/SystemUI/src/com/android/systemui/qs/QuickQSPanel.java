@@ -18,38 +18,34 @@ package com.android.systemui.qs;
 
 import static com.android.systemui.util.InjectionInflationController.VIEW_CONTEXT;
 
-import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
 import com.android.internal.logging.UiEventLogger;
-import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
-import com.android.systemui.dagger.qualifiers.Background;
-import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.media.MediaHierarchyManager;
+import com.android.systemui.media.MediaHost;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTile.SignalState;
 import com.android.systemui.plugins.qs.QSTile.State;
 import com.android.systemui.qs.customize.QSCustomizer;
 import com.android.systemui.qs.logging.QSLogger;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
 import com.android.systemui.util.Utils;
-import com.android.systemui.util.concurrency.DelayableExecutor;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -67,16 +63,17 @@ public class QuickQSPanel extends QSPanel {
     private boolean mDisabledByPolicy;
     private int mMaxTiles;
     protected QSPanel mFullPanel;
-    private QuickQSMediaPlayer mMediaPlayer;
     /** Whether or not the QS media player feature is enabled. */
     private boolean mUsingMediaPlayer;
     /** Whether or not the QuickQSPanel currently contains a media player. */
-    private boolean mHasMediaPlayer;
+    private boolean mShowHorizontalTileLayout;
     private LinearLayout mHorizontalLinearLayout;
 
     // Only used with media
-    private QSTileLayout mMediaTileLayout;
+    private QSTileLayout mHorizontalTileLayout;
     private QSTileLayout mRegularTileLayout;
+    private int mLastOrientation = -1;
+    private int mMediaBottomMargin;
 
     @Inject
     public QuickQSPanel(
@@ -85,16 +82,11 @@ public class QuickQSPanel extends QSPanel {
             DumpManager dumpManager,
             BroadcastDispatcher broadcastDispatcher,
             QSLogger qsLogger,
-            @Main Executor foregroundExecutor,
-            @Background DelayableExecutor backgroundExecutor,
-            @Nullable LocalBluetoothManager localBluetoothManager,
-            ActivityStarter activityStarter,
-            NotificationEntryManager entryManager,
+            MediaHost mediaHost,
             UiEventLogger uiEventLogger
     ) {
-        super(context, attrs, dumpManager, broadcastDispatcher, qsLogger,
-                foregroundExecutor, backgroundExecutor, localBluetoothManager, activityStarter,
-                entryManager, uiEventLogger);
+        super(context, attrs, dumpManager, broadcastDispatcher, qsLogger, mediaHost,
+                uiEventLogger);
         if (mFooter != null) {
             removeView(mFooter.getView());
         }
@@ -104,6 +96,8 @@ public class QuickQSPanel extends QSPanel {
             }
             removeView((View) mTileLayout);
         }
+        mMediaBottomMargin = getResources().getDimensionPixelSize(
+                R.dimen.quick_settings_media_extra_bottom_margin);
 
         mUsingMediaPlayer = Utils.useQsMediaPlayer(context);
         if (mUsingMediaPlayer) {
@@ -112,40 +106,95 @@ public class QuickQSPanel extends QSPanel {
             mHorizontalLinearLayout.setClipChildren(false);
             mHorizontalLinearLayout.setClipToPadding(false);
 
-            int marginSize = (int) mContext.getResources().getDimension(R.dimen.qqs_media_spacing);
-            mMediaPlayer = new QuickQSMediaPlayer(mContext, mHorizontalLinearLayout,
-                    foregroundExecutor, backgroundExecutor, activityStarter);
-            LayoutParams lp2 = new LayoutParams(0, LayoutParams.MATCH_PARENT, 1);
-            lp2.setMarginEnd(marginSize);
-            lp2.setMarginStart(0);
-            mHorizontalLinearLayout.addView(mMediaPlayer.getView(), lp2);
-
-            mTileLayout = new DoubleLineTileLayout(context, mUiEventLogger);
-            mMediaTileLayout = mTileLayout;
+            DoubleLineTileLayout horizontalTileLayout = new DoubleLineTileLayout(context,
+                    mUiEventLogger);
+            horizontalTileLayout.setPaddingRelative(
+                    horizontalTileLayout.getPaddingStart(),
+                    horizontalTileLayout.getPaddingTop(),
+                    horizontalTileLayout.getPaddingEnd(),
+                    mContext.getResources().getDimensionPixelSize(
+                            R.dimen.qqs_horizonal_tile_padding_bottom));
+            mHorizontalTileLayout = horizontalTileLayout;
             mRegularTileLayout = new HeaderTileLayout(context, mUiEventLogger);
-            LayoutParams lp = new LayoutParams(0, LayoutParams.MATCH_PARENT, 1);
-            lp.setMarginEnd(0);
-            lp.setMarginStart(marginSize);
-            mHorizontalLinearLayout.addView((View) mTileLayout, lp);
+            LayoutParams lp = new LayoutParams(0, LayoutParams.WRAP_CONTENT, 1);
+            int marginSize = (int) mContext.getResources().getDimension(R.dimen.qqs_media_spacing);
+            lp.setMarginStart(0);
+            lp.setMarginEnd(marginSize);
+            lp.gravity = Gravity.CENTER_VERTICAL;
+            mHorizontalLinearLayout.addView((View) mHorizontalTileLayout, lp);
 
             sDefaultMaxTiles = getResources().getInteger(R.integer.quick_qs_panel_max_columns);
 
+            boolean useHorizontal = shouldUseHorizontalTileLayout();
+            mTileLayout = useHorizontal ? mHorizontalTileLayout : mRegularTileLayout;
             mTileLayout.setListening(mListening);
             addView(mHorizontalLinearLayout, 0 /* Between brightness and footer */);
-            ((View) mRegularTileLayout).setVisibility(View.GONE);
+            ((View) mRegularTileLayout).setVisibility(!useHorizontal ? View.VISIBLE : View.GONE);
+            mHorizontalLinearLayout.setVisibility(useHorizontal ? View.VISIBLE : View.GONE);
             addView((View) mRegularTileLayout, 0);
             super.setPadding(0, 0, 0, 0);
+            applySideMargins(mHorizontalLinearLayout);
+            applyBottomMargin((View) mRegularTileLayout);
         } else {
             sDefaultMaxTiles = getResources().getInteger(R.integer.quick_qs_panel_max_columns);
             mTileLayout = new HeaderTileLayout(context, mUiEventLogger);
             mTileLayout.setListening(mListening);
             addView((View) mTileLayout, 0 /* Between brightness and footer */);
             super.setPadding(0, 0, 0, 0);
+            applyBottomMargin((View) mTileLayout);
         }
     }
 
-    public QuickQSMediaPlayer getMediaPlayer() {
-        return mMediaPlayer;
+    private void applyBottomMargin(View view) {
+        int margin = getResources().getDimensionPixelSize(R.dimen.qs_header_tile_margin_bottom);
+        MarginLayoutParams layoutParams = (MarginLayoutParams) view.getLayoutParams();
+        layoutParams.bottomMargin = margin;
+        view.setLayoutParams(layoutParams);
+    }
+
+    private void applySideMargins(View view) {
+        int margin = getResources().getDimensionPixelSize(R.dimen.qs_header_tile_margin_horizontal);
+        MarginLayoutParams layoutParams = (MarginLayoutParams) view.getLayoutParams();
+        layoutParams.setMarginStart(margin);
+        layoutParams.setMarginEnd(margin);
+        view.setLayoutParams(layoutParams);
+    }
+
+    private void reAttachMediaHost() {
+        if (mMediaHost == null) {
+            return;
+        }
+        boolean horizontal = shouldUseHorizontalTileLayout();
+        ViewGroup host = mMediaHost.getHostView();
+        ViewGroup newParent = horizontal ? mHorizontalLinearLayout : this;
+        ViewGroup currentParent = (ViewGroup) host.getParent();
+        if (currentParent != newParent) {
+            if (currentParent != null) {
+                currentParent.removeView(host);
+            }
+            newParent.addView(host);
+            LinearLayout.LayoutParams layoutParams = (LayoutParams) host.getLayoutParams();
+            layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT;
+            layoutParams.width = horizontal ? 0 : ViewGroup.LayoutParams.MATCH_PARENT;
+            layoutParams.weight = horizontal ? 1.5f : 0;
+            layoutParams.bottomMargin = mMediaBottomMargin;
+            int marginStart = horizontal
+                    ? getResources().getDimensionPixelSize(R.dimen.qs_header_tile_margin_horizontal)
+                    : 0;
+            layoutParams.setMarginStart(marginStart);
+        }
+    }
+
+    @Override
+    protected void addMediaHostView() {
+        mMediaHost.setVisibleChangedListener((visible) -> {
+            switchTileLayout();
+            return null;
+        });
+        mMediaHost.init(MediaHierarchyManager.LOCATION_QQS);
+        mMediaHost.setExpansion(0.0f);
+        mMediaHost.setShowsOnlyActiveMedia(true);
+        reAttachMediaHost();
     }
 
     @Override
@@ -191,10 +240,19 @@ public class QuickQSPanel extends QSPanel {
         super.drawTile(r, state);
     }
 
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        if (newConfig.orientation != mLastOrientation) {
+            mLastOrientation = newConfig.orientation;
+            switchTileLayout();
+        }
+    }
+
     boolean switchTileLayout() {
         if (!mUsingMediaPlayer) return false;
-        mHasMediaPlayer = mMediaPlayer.hasMediaSession();
-        if (mHasMediaPlayer && mHorizontalLinearLayout.getVisibility() == View.GONE) {
+        mShowHorizontalTileLayout = shouldUseHorizontalTileLayout();
+        if (mShowHorizontalTileLayout && mHorizontalLinearLayout.getVisibility() == View.GONE) {
             mHorizontalLinearLayout.setVisibility(View.VISIBLE);
             ((View) mRegularTileLayout).setVisibility(View.GONE);
             mTileLayout.setListening(false);
@@ -202,11 +260,13 @@ public class QuickQSPanel extends QSPanel {
                 mTileLayout.removeTile(record);
                 record.tile.removeCallback(record.callback);
             }
-            mTileLayout = mMediaTileLayout;
+            mTileLayout = mHorizontalTileLayout;
             if (mHost != null) setTiles(mHost.getTiles());
             mTileLayout.setListening(mListening);
+            reAttachMediaHost();
             return true;
-        } else if (!mHasMediaPlayer && mHorizontalLinearLayout.getVisibility() == View.VISIBLE) {
+        } else if (!mShowHorizontalTileLayout
+                && mHorizontalLinearLayout.getVisibility() == View.VISIBLE) {
             mHorizontalLinearLayout.setVisibility(View.GONE);
             ((View) mRegularTileLayout).setVisibility(View.VISIBLE);
             mTileLayout.setListening(false);
@@ -217,14 +277,21 @@ public class QuickQSPanel extends QSPanel {
             mTileLayout = mRegularTileLayout;
             if (mHost != null) setTiles(mHost.getTiles());
             mTileLayout.setListening(mListening);
+            reAttachMediaHost();
             return true;
         }
         return false;
     }
 
-    /** Returns true if this panel currently contains a media player. */
-    public boolean hasMediaPlayer() {
-        return mHasMediaPlayer;
+    private boolean shouldUseHorizontalTileLayout() {
+        return mMediaHost.getVisible()
+                && getResources().getConfiguration().orientation
+                        == Configuration.ORIENTATION_LANDSCAPE;
+    }
+
+    /** Returns true if this panel currently uses a horizontal tile layout. */
+    public boolean usesHorizontalLayout() {
+        return mShowHorizontalTileLayout;
     }
 
     @Override
@@ -341,7 +408,7 @@ public class QuickQSPanel extends QSPanel {
             setClipChildren(false);
             setClipToPadding(false);
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT,
-                    LayoutParams.MATCH_PARENT);
+                    LayoutParams.WRAP_CONTENT);
             lp.gravity = Gravity.CENTER_HORIZONTAL;
             setLayoutParams(lp);
         }
@@ -354,6 +421,7 @@ public class QuickQSPanel extends QSPanel {
 
         @Override
         public void onFinishInflate(){
+            super.onFinishInflate();
             updateResources();
         }
 
