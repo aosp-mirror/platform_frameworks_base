@@ -53,7 +53,7 @@ public class ModeSwitchesController {
     private final WindowManager.LayoutParams mParams;
     private final int mPadding;
 
-    ModeSwitchesController(Context context) {
+    public ModeSwitchesController(Context context) {
         mContext = context;
         mDisplayManager = mContext.getSystemService(DisplayManager.class);
 
@@ -193,7 +193,7 @@ public class ModeSwitchesController {
                     mMagnificationMode ^ Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_ALL;
             mMagnificationMode = newMode;
             Settings.Secure.putInt(mContext.getContentResolver(),
-                    Settings.Secure.WINDOW_MAGNIFICATION, newMode);
+                    Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE, newMode);
         }
     }
 }
