@@ -23,6 +23,7 @@ import static org.mockito.Mockito.verify;
 
 import android.content.Context;
 import android.os.RemoteException;
+import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
 import android.view.Display;
 import android.view.accessibility.AccessibilityManager;
@@ -57,6 +58,8 @@ public class IWindowMagnificationConnectionTest extends SysuiTestCase {
     private IWindowMagnificationConnectionCallback mConnectionCallback;
     @Mock
     private WindowMagnificationController mWindowMagnificationController;
+    @Mock
+    private ModeSwitchesController mModeSwitchesController;
     private IWindowMagnificationConnection mIWindowMagnificationConnection;
     private WindowMagnification mWindowMagnification;
 
@@ -70,7 +73,7 @@ public class IWindowMagnificationConnectionTest extends SysuiTestCase {
         }).when(mAccessibilityManager).setWindowMagnificationConnection(
                 any(IWindowMagnificationConnection.class));
         mWindowMagnification = new WindowMagnification(getContext(),
-                getContext().getMainThreadHandler(), mCommandQueue);
+                getContext().getMainThreadHandler(), mCommandQueue, mModeSwitchesController);
         mWindowMagnification.mWindowMagnificationController = mWindowMagnificationController;
         mWindowMagnification.requestWindowMagnificationConnection(true);
         assertNotNull(mIWindowMagnificationConnection);
@@ -113,6 +116,24 @@ public class IWindowMagnificationConnectionTest extends SysuiTestCase {
         waitForIdleSync();
 
         verify(mWindowMagnificationController).moveWindowMagnifier(100f, 200f);
+    }
+
+    @Test
+    public void showMagnificationButton() throws RemoteException {
+        mIWindowMagnificationConnection.showMagnificationButton(TEST_DISPLAY,
+                Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
+        waitForIdleSync();
+
+        verify(mModeSwitchesController).showButton(TEST_DISPLAY,
+                Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
+    }
+
+    @Test
+    public void removeMagnificationButton() throws RemoteException {
+        mIWindowMagnificationConnection.removeMagnificationButton(TEST_DISPLAY);
+        waitForIdleSync();
+
+        verify(mModeSwitchesController).removeButton(TEST_DISPLAY);
     }
 }
 

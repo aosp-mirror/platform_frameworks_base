@@ -47,6 +47,8 @@ public class WindowMagnificationTest extends SysuiTestCase {
 
     @Mock
     private AccessibilityManager mAccessibilityManager;
+    @Mock
+    private ModeSwitchesController mModeSwitchesController;
     private CommandQueue mCommandQueue;
     private WindowMagnification mWindowMagnification;
 
@@ -57,7 +59,7 @@ public class WindowMagnificationTest extends SysuiTestCase {
 
         mCommandQueue = new CommandQueue(getContext());
         mWindowMagnification = new WindowMagnification(getContext(),
-                getContext().getMainThreadHandler(), mCommandQueue);
+                getContext().getMainThreadHandler(), mCommandQueue, mModeSwitchesController);
         mWindowMagnification.start();
     }
 
