@@ -76,6 +76,8 @@ import com.android.keyguard.KeyguardUpdateMonitor.BiometricAuthenticated;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.util.RingerModeTracker;
 
@@ -141,6 +143,8 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     private RingerModeTracker mRingerModeTracker;
     @Mock
     private LiveData<Integer> mRingerModeLiveData;
+    @Mock
+    private StatusBarStateController mStatusBarStateController;
     // Direct executor
     private Executor mBackgroundExecutor = Runnable::run;
     private TestableLooper mTestableLooper;
@@ -415,6 +419,16 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         mTestableLooper.processAllMessages();
         mKeyguardUpdateMonitor.onKeyguardVisibilityChanged(true);
         verify(mFaceManager).authenticate(any(), any(), anyInt(), any(), any(), anyInt());
+    }
+
+    @Test
+    public void skipsAuthentication_whenStatusBarShadeLocked() {
+        when(mStatusBarStateController.getState()).thenReturn(StatusBarState.SHADE_LOCKED);
+
+        mKeyguardUpdateMonitor.dispatchStartedWakingUp();
+        mTestableLooper.processAllMessages();
+        mKeyguardUpdateMonitor.onKeyguardVisibilityChanged(true);
+        verify(mFaceManager, never()).authenticate(any(), any(), anyInt(), any(), any(), anyInt());
     }
 
     @Test
@@ -715,7 +729,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
             super(context,
                     TestableLooper.get(KeyguardUpdateMonitorTest.this).getLooper(),
                     mBroadcastDispatcher, mDumpManager,
-                    mRingerModeTracker, mBackgroundExecutor);
+                    mRingerModeTracker, mBackgroundExecutor, mStatusBarStateController);
             mStrongAuthTracker = KeyguardUpdateMonitorTest.this.mStrongAuthTracker;
         }
 
