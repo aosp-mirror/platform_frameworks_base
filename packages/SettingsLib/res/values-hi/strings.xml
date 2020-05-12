@@ -549,12 +549,8 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"मेहमान जोड़ें"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"मेहमान हटाएं"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"मेहमान"</string>
-    <!-- no translation found for cached_apps_freezer_device_default (2616594131750144342) -->
-    <skip />
-    <!-- no translation found for cached_apps_freezer_disabled (4816382260660472042) -->
-    <skip />
-    <!-- no translation found for cached_apps_freezer_enabled (8866703500183051546) -->
-    <skip />
-    <!-- no translation found for cached_apps_freezer_reboot_dialog_text (695330563489230096) -->
-    <skip />
+    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"डिवाइस की डिफ़ॉल्ट सेटिंग"</string>
+    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"बंद है"</string>
+    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"चालू है"</string>
+    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"बदली गई सेटिंग को लागू करने के लिए, अपने डिवाइस को फिर से चालू करें. डिवाइस को फिर से चालू करें या रद्द करें."</string>
 </resources>

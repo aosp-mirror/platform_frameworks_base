@@ -113,6 +113,23 @@ private:
     JavaVM* const mJvm;
 };
 
+class RealLooperWrapper final : public LooperWrapper {
+public:
+    int addFd(int fd, int ident, int events, android::Looper_callbackFunc callback,
+              void* data) final {
+        return mLooper.addFd(fd, ident, events, callback, data);
+    }
+    int removeFd(int fd) final { return mLooper.removeFd(fd); }
+    void wake() final { return mLooper.wake(); }
+    int pollAll(int timeoutMillis) final { return mLooper.pollAll(timeoutMillis); }
+
+private:
+    struct Looper : public android::Looper {
+        Looper() : android::Looper(/*allowNonCallbacks=*/false) {}
+        ~Looper() {}
+    } mLooper;
+};
+
 class RealIncFs : public IncFsWrapper {
 public:
     RealIncFs() = default;
@@ -201,6 +218,10 @@ std::unique_ptr<AppOpsManagerWrapper> RealServiceManager::getAppOpsManager() {
 
 std::unique_ptr<JniWrapper> RealServiceManager::getJni() {
     return std::make_unique<RealJniWrapper>(mJvm);
+}
+
+std::unique_ptr<LooperWrapper> RealServiceManager::getLooper() {
+    return std::make_unique<RealLooperWrapper>();
 }
 
 static JavaVM* getJavaVm(JNIEnv* env) {

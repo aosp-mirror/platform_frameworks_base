@@ -388,7 +388,7 @@
     <string name="loading_injected_setting_summary" msgid="8394446285689070348">"جارٍ التحميل…"</string>
   <string-array name="color_mode_names">
     <item msgid="3836559907767149216">"نابض بالحياة (تلقائي)"</item>
-    <item msgid="9112200311983078311">"طبيعي"</item>
+    <item msgid="9112200311983078311">"طبيعية"</item>
     <item msgid="6564241960833766170">"عادي"</item>
   </string-array>
   <string-array name="color_mode_descriptions">
@@ -428,10 +428,10 @@
     <string name="power_discharging_duration_enhanced" msgid="1800465736237672323">"يتبقى <xliff:g id="TIME_REMAINING">%1$s</xliff:g> تقريبًا، بناءً على استخدامك (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <!-- no translation found for power_remaining_duration_only_short (7438846066602840588) -->
     <skip />
-    <string name="power_discharge_by_enhanced" msgid="563438403581662942">"قد تكفي طاقة البطارية حتى حوالي الساعة <xliff:g id="TIME">%1$s</xliff:g> حسب استخدامك (<xliff:g id="LEVEL">%2$s</xliff:g>)."</string>
-    <string name="power_discharge_by_only_enhanced" msgid="3268796172652988877">"قد تكفي طاقة البطارية حتى حوالي الساعة <xliff:g id="TIME">%1$s</xliff:g> حسب استخدامك."</string>
-    <string name="power_discharge_by" msgid="4113180890060388350">"قد تكفي طاقة البطارية حتى حوالي الساعة <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)."</string>
-    <string name="power_discharge_by_only" msgid="92545648425937000">"قد تكفي طاقة البطارية حتى حوالي الساعة <xliff:g id="TIME">%1$s</xliff:g>."</string>
+    <string name="power_discharge_by_enhanced" msgid="563438403581662942">"يُفترض أن تكفي طاقة البطارية حتى حوالي الساعة <xliff:g id="TIME">%1$s</xliff:g> حسب استخدامك (<xliff:g id="LEVEL">%2$s</xliff:g>)."</string>
+    <string name="power_discharge_by_only_enhanced" msgid="3268796172652988877">"يُفترض أن تكفي طاقة البطارية حتى حوالي الساعة <xliff:g id="TIME">%1$s</xliff:g> حسب استخدامك."</string>
+    <string name="power_discharge_by" msgid="4113180890060388350">"يُفترض أن تكفي طاقة البطارية حتى حوالي الساعة <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)."</string>
+    <string name="power_discharge_by_only" msgid="92545648425937000">"يُفترض أن تكفي طاقة البطارية حتى حوالي الساعة <xliff:g id="TIME">%1$s</xliff:g>."</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"حتى <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"قد ينفد شحن البطارية قبل <xliff:g id="TIME">%1$s</xliff:g>."</string>
     <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"سيبقى شحن البطارية أقل من <xliff:g id="THRESHOLD">%1$s</xliff:g>."</string>
@@ -553,12 +553,8 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"إضافة ضيف"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"إزالة جلسة الضيف"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"ضيف"</string>
-    <!-- no translation found for cached_apps_freezer_device_default (2616594131750144342) -->
-    <skip />
-    <!-- no translation found for cached_apps_freezer_disabled (4816382260660472042) -->
-    <skip />
-    <!-- no translation found for cached_apps_freezer_enabled (8866703500183051546) -->
-    <skip />
-    <!-- no translation found for cached_apps_freezer_reboot_dialog_text (695330563489230096) -->
-    <skip />
+    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"الإعداد التلقائي للجهاز"</string>
+    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"غير مفعّل"</string>
+    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"مفعّل"</string>
+    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"يجب إعادة تشغيل جهازك ليتم تطبيق هذا التغيير. يمكنك إعادة التشغيل الآن أو إلغاء التغيير."</string>
 </resources>

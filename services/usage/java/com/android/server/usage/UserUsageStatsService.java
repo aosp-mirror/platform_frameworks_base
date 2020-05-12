@@ -1166,6 +1166,7 @@ class UserUsageStatsService {
 
     byte[] getBackupPayload(String key){
         checkAndGetTimeLocked();
+        persistActiveStats();
         return mDatabase.getBackupPayload(key);
     }
 

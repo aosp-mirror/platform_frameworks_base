@@ -143,9 +143,9 @@
     <string name="data_usage_uninstalled_apps" msgid="1933665711856171491">"Εφαρμογές που καταργήθηκαν"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="5533981546921913295">"Εφαρμογές και χρήστες που έχουν καταργηθεί"</string>
     <string name="data_usage_ota" msgid="7984667793701597001">"Ενημερώσεις συστήματος"</string>
-    <string name="tether_settings_title_usb" msgid="3728686573430917722">"Πρόσδεση USB"</string>
+    <string name="tether_settings_title_usb" msgid="3728686573430917722">"Σύνδεση με USB"</string>
     <string name="tether_settings_title_wifi" msgid="4803402057533895526">"Φορητό σημείο πρόσβασης"</string>
-    <string name="tether_settings_title_bluetooth" msgid="916519902721399656">"Πρόσδεση Bluetooth"</string>
+    <string name="tether_settings_title_bluetooth" msgid="916519902721399656">"Σύνδεση με Bluetooth"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="1727111807207577322">"Πρόσδεση"</string>
     <string name="tether_settings_title_all" msgid="8910259483383010470">"Πρόσ. και φορητό σημ. πρόσβ."</string>
     <string name="managed_user_title" msgid="449081789742645723">"Όλες οι εφαρμ. εργασίας"</string>
@@ -549,12 +549,8 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"Προσθήκη επισκέπτη"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Κατάργηση επισκέπτη"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Επισκέπτης"</string>
-    <!-- no translation found for cached_apps_freezer_device_default (2616594131750144342) -->
-    <skip />
-    <!-- no translation found for cached_apps_freezer_disabled (4816382260660472042) -->
-    <skip />
-    <!-- no translation found for cached_apps_freezer_enabled (8866703500183051546) -->
-    <skip />
-    <!-- no translation found for cached_apps_freezer_reboot_dialog_text (695330563489230096) -->
-    <skip />
+    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Προεπιλογή συσκευής"</string>
+    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Ανενεργή"</string>
+    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Ενεργή"</string>
+    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Για να εφαρμοστεί αυτή η αλλαγή, θα πρέπει να επανεκκινήσετε τη συσκευή σας. Επανεκκίνηση τώρα ή ακύρωση."</string>
 </resources>

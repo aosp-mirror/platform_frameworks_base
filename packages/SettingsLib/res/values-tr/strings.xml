@@ -428,10 +428,10 @@
     <string name="power_discharging_duration_enhanced" msgid="1800465736237672323">"Kullanımınıza dayalı olarak yaklaşık <xliff:g id="TIME_REMAINING">%1$s</xliff:g> kaldı (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <!-- no translation found for power_remaining_duration_only_short (7438846066602840588) -->
     <skip />
-    <string name="power_discharge_by_enhanced" msgid="563438403581662942">"Kullanımınıza göre saat yaklaşık <xliff:g id="TIME">%1$s</xliff:g> olana kadar kullanılabilmelidir (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_discharge_by_only_enhanced" msgid="3268796172652988877">"Kullanımınıza göre saat yaklaşık <xliff:g id="TIME">%1$s</xliff:g> olana kadar kullanılabilmelidir"</string>
-    <string name="power_discharge_by" msgid="4113180890060388350">"Saat yaklaşık <xliff:g id="TIME">%1$s</xliff:g> olana kadar kullanılabilmelidir (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_discharge_by_only" msgid="92545648425937000">"Saat yaklaşık <xliff:g id="TIME">%1$s</xliff:g> olana kadar kullanılabilmelidir"</string>
+    <string name="power_discharge_by_enhanced" msgid="563438403581662942">"Kullanımınıza göre pilin <xliff:g id="TIME">%1$s</xliff:g> civarına kadar yeteceği tahmin ediliyor (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_discharge_by_only_enhanced" msgid="3268796172652988877">"Kullanımınıza göre pilin <xliff:g id="TIME">%1$s</xliff:g> civarına kadar yeteceği tahmin ediliyor"</string>
+    <string name="power_discharge_by" msgid="4113180890060388350">"Pilin <xliff:g id="TIME">%1$s</xliff:g> civarına kadar yeteceği tahmin ediliyor (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_discharge_by_only" msgid="92545648425937000">"Pilin <xliff:g id="TIME">%1$s</xliff:g> civarına kadar yeteceği tahmin ediliyor"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"Şu saate kadar: <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Pilin tahmini bitiş zamanı: <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"En çok <xliff:g id="THRESHOLD">%1$s</xliff:g> kaldı"</string>
