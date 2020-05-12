@@ -293,6 +293,13 @@ public class AppStandbyController implements AppStandbyInternal {
      * {@link #setAppStandbyBucket(String, int, int, int, int)} will not be propagated.
      */
     boolean mLinkCrossProfileApps;
+    /**
+     * Whether we should allow apps into the
+     * {@link android.app.usage.UsageStatsManager#STANDBY_BUCKET_RESTRICTED} bucket or not.
+     * If false, any attempts to put an app into the bucket will put the app into the
+     * {@link android.app.usage.UsageStatsManager#STANDBY_BUCKET_RARE} bucket instead.
+     */
+    private boolean mAllowRestrictedBucket;
 
     private volatile boolean mAppIdleEnabled;
     private boolean mIsCharging;
@@ -688,6 +695,10 @@ public class AppStandbyController implements AppStandbyInternal {
                     return;
                 }
                 final int oldBucket = app.currentBucket;
+                if (oldBucket == STANDBY_BUCKET_NEVER) {
+                    // None of this should bring an app out of the NEVER bucket.
+                    return;
+                }
                 int newBucket = Math.max(oldBucket, STANDBY_BUCKET_ACTIVE); // Undo EXEMPTED
                 boolean predictionLate = predictionTimedOut(app, elapsedRealtime);
                 // Compute age-based bucket
@@ -743,11 +754,18 @@ public class AppStandbyController implements AppStandbyInternal {
                         Slog.d(TAG, "Bringing down to RESTRICTED due to timeout");
                     }
                 }
+                if (newBucket == STANDBY_BUCKET_RESTRICTED && !mAllowRestrictedBucket) {
+                    newBucket = STANDBY_BUCKET_RARE;
+                    // Leave the reason alone.
+                    if (DEBUG) {
+                        Slog.d(TAG, "Bringing up from RESTRICTED to RARE due to off switch");
+                    }
+                }
                 if (DEBUG) {
                     Slog.d(TAG, "     Old bucket=" + oldBucket
                             + ", newBucket=" + newBucket);
                 }
-                if (oldBucket < newBucket || predictionLate) {
+                if (oldBucket != newBucket || predictionLate) {
                     mAppIdleHistory.setAppStandbyBucket(packageName, userId,
                             elapsedRealtime, newBucket, reason);
                     maybeInformListeners(packageName, userId, elapsedRealtime,
@@ -1197,8 +1215,8 @@ public class AppStandbyController implements AppStandbyInternal {
 
         final int reason = REASON_MAIN_FORCED_BY_SYSTEM | (REASON_SUB_MASK & restrictReason);
         final long nowElapsed = mInjector.elapsedRealtime();
-        setAppStandbyBucket(packageName, userId, STANDBY_BUCKET_RESTRICTED, reason,
-                nowElapsed, false);
+        final int bucket = mAllowRestrictedBucket ? STANDBY_BUCKET_RESTRICTED : STANDBY_BUCKET_RARE;
+        setAppStandbyBucket(packageName, userId, bucket, reason, nowElapsed, false);
     }
 
     @Override
@@ -1267,6 +1285,9 @@ public class AppStandbyController implements AppStandbyInternal {
             if (!mInjector.isPackageInstalled(packageName, 0, userId)) {
                 Slog.e(TAG, "Tried to set bucket of uninstalled app: " + packageName);
                 return;
+            }
+            if (newBucket == STANDBY_BUCKET_RESTRICTED && !mAllowRestrictedBucket) {
+                newBucket = STANDBY_BUCKET_RARE;
             }
             AppIdleHistory.AppUsageHistory app = mAppIdleHistory.getAppUsageHistory(packageName,
                     userId, elapsedRealtime);
@@ -1386,6 +1407,7 @@ public class AppStandbyController implements AppStandbyInternal {
                         Slog.d(TAG, "    Keeping at WORKING_SET due to min timeout");
                     }
                 } else if (newBucket == STANDBY_BUCKET_RARE
+                        && mAllowRestrictedBucket
                         && getBucketForLocked(packageName, userId, elapsedRealtime)
                         == STANDBY_BUCKET_RESTRICTED) {
                     // Prediction doesn't think the app will be used anytime soon and
@@ -1727,6 +1749,8 @@ public class AppStandbyController implements AppStandbyInternal {
 
         pw.println();
         pw.print("mAppIdleEnabled="); pw.print(mAppIdleEnabled);
+        pw.print(" mAllowRestrictedBucket=");
+        pw.print(mAllowRestrictedBucket);
         pw.print(" mIsCharging=");
         pw.print(mIsCharging);
         pw.println();
@@ -1826,6 +1850,12 @@ public class AppStandbyController implements AppStandbyInternal {
 
         boolean isNonIdleWhitelisted(String packageName) throws RemoteException {
             return mPowerWhitelistManager.isWhitelisted(packageName, false);
+        }
+
+        boolean isRestrictedBucketEnabled() {
+            return Global.getInt(mContext.getContentResolver(),
+                    Global.ENABLE_RESTRICTED_BUCKET,
+                    Global.DEFAULT_ENABLE_RESTRICTED_BUCKET) == 1;
         }
 
         File getDataSystemDirectory() {
@@ -2066,6 +2096,8 @@ public class AppStandbyController implements AppStandbyInternal {
             final ContentResolver cr = mContext.getContentResolver();
             cr.registerContentObserver(Global.getUriFor(Global.APP_IDLE_CONSTANTS), false, this);
             cr.registerContentObserver(Global.getUriFor(Global.APP_STANDBY_ENABLED), false, this);
+            cr.registerContentObserver(Global.getUriFor(Global.ENABLE_RESTRICTED_BUCKET),
+                    false, this);
             cr.registerContentObserver(Global.getUriFor(Global.ADAPTIVE_BATTERY_MANAGEMENT_ENABLED),
                     false, this);
         }
@@ -2164,6 +2196,8 @@ public class AppStandbyController implements AppStandbyInternal {
                 mLinkCrossProfileApps = mParser.getBoolean(
                         KEY_CROSS_PROFILE_APPS_SHARE_STANDBY_BUCKETS,
                         DEFAULT_CROSS_PROFILE_APPS_SHARE_STANDBY_BUCKETS);
+
+                mAllowRestrictedBucket = mInjector.isRestrictedBucketEnabled();
             }
 
             // Check if app_idle_enabled has changed. Do this after getting the rest of the settings
