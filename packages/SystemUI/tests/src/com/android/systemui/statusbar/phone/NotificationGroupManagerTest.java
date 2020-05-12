@@ -33,6 +33,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 
 import org.junit.Before;
@@ -63,7 +64,9 @@ public class NotificationGroupManagerTest extends SysuiTestCase {
     }
 
     private void initializeGroupManager() {
-        mGroupManager = new NotificationGroupManager(mock(StatusBarStateController.class));
+        mGroupManager = new NotificationGroupManager(
+                mock(StatusBarStateController.class),
+                () -> mock(PeopleNotificationIdentifier.class));
         mGroupManager.setHeadsUpManager(mHeadsUpManager);
     }
 
