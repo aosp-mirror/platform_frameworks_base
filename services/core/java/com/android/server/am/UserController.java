@@ -675,6 +675,8 @@ class UserController implements Handler.Callback {
         // Spin up app widgets prior to boot-complete, so they can be ready promptly
         mInjector.startUserWidgets(userId);
 
+        mHandler.obtainMessage(USER_UNLOCKED_MSG, userId, 0).sendToTarget();
+
         Slog.i(TAG, "Posting BOOT_COMPLETED user #" + userId);
         // Do not report secondary users, runtime restarts or first boot/upgrade
         if (userId == UserHandle.USER_SYSTEM
@@ -684,9 +686,6 @@ class UserController implements Handler.Callback {
                     FrameworkStatsLog.BOOT_TIME_EVENT_ELAPSED_TIME__EVENT__FRAMEWORK_BOOT_COMPLETED,
                     elapsedTimeMs);
         }
-
-        mHandler.obtainMessage(USER_UNLOCKED_MSG, userId, 0).sendToTarget();
-
         final Intent bootIntent = new Intent(Intent.ACTION_BOOT_COMPLETED, null);
         bootIntent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
         bootIntent.addFlags(Intent.FLAG_RECEIVER_NO_ABORT
@@ -2442,8 +2441,10 @@ class UserController implements Handler.Callback {
                 logUserJourneyInfo(null, getUserInfo(msg.arg1), USER_JOURNEY_USER_START);
                 logUserLifecycleEvent(msg.arg1, USER_JOURNEY_USER_START,
                         USER_LIFECYCLE_EVENT_START_USER, true);
+
                 mInjector.getSystemServiceManager().startUser(TimingsTraceAndSlog.newAsyncLog(),
                         msg.arg1);
+
                 logUserLifecycleEvent(msg.arg1, USER_JOURNEY_USER_START,
                         USER_LIFECYCLE_EVENT_START_USER, false);
                 clearSessionId(msg.arg1, USER_JOURNEY_USER_START);
@@ -2475,6 +2476,7 @@ class UserController implements Handler.Callback {
                 break;
             case REPORT_USER_SWITCH_COMPLETE_MSG:
                 dispatchUserSwitchComplete(msg.arg1);
+
                 final int currentJourney = mUserSwitchUiEnabled ? USER_JOURNEY_USER_SWITCH_UI
                                                                 : USER_JOURNEY_USER_SWITCH_FG;
                 logUserLifecycleEvent(msg.arg1, currentJourney,
@@ -2620,6 +2622,13 @@ class UserController implements Handler.Callback {
                 Bundle resultExtras, String[] requiredPermissions, int appOp, Bundle bOptions,
                 boolean ordered, boolean sticky, int callingPid, int callingUid, int realCallingUid,
                 int realCallingPid, @UserIdInt int userId) {
+
+            int logUserId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL);
+            if (logUserId == UserHandle.USER_NULL) {
+                logUserId = userId;
+            }
+            EventLog.writeEvent(EventLogTags.UC_SEND_USER_BROADCAST, logUserId, intent.getAction());
+
             // TODO b/64165549 Verify that mLock is not held before calling AMS methods
             synchronized (mService) {
                 return mService.broadcastIntentLocked(null, null, null, intent, resolvedType,
@@ -2685,6 +2694,8 @@ class UserController implements Handler.Callback {
         }
 
         void sendPreBootBroadcast(@UserIdInt int userId, boolean quiet, final Runnable onFinish) {
+            EventLog.writeEvent(EventLogTags.UC_SEND_USER_BROADCAST,
+                    userId, Intent.ACTION_PRE_BOOT_COMPLETED);
             new PreBootBroadcaster(mService, userId, null, quiet) {
                 @Override
                 public void onFinished() {

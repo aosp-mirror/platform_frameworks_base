@@ -226,6 +226,14 @@ public class MockSystemServices {
         uh.userType = type;
         uh.profileGroupId = profileGroupId;
         when(userManager.getUserInfo(eq(userId))).thenReturn(uh);
+        // Ensure there are no duplicate UserInfo records.
+        // TODO: fix tests so that this is not needed.
+        for (int i = 0; i < mUserInfos.size(); i++) {
+            if (mUserInfos.get(i).id == userId) {
+                mUserInfos.remove(i);
+                break;
+            }
+        }
         mUserInfos.add(uh);
         when(userManager.getUsers()).thenReturn(mUserInfos);
         when(userManager.getUsers(anyBoolean())).thenReturn(mUserInfos);

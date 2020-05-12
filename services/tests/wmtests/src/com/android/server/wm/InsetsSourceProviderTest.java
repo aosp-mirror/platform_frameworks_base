@@ -16,8 +16,10 @@
 
 package com.android.server.wm;
 
+import static android.view.InsetsState.ITYPE_IME;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
+import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -44,11 +46,15 @@ public class InsetsSourceProviderTest extends WindowTestsBase {
 
     private InsetsSource mSource = new InsetsSource(ITYPE_STATUS_BAR);
     private InsetsSourceProvider mProvider;
+    private InsetsSource mImeSource = new InsetsSource(ITYPE_IME);
+    private InsetsSourceProvider mImeProvider;
 
     @Before
     public void setUp() throws Exception {
         mSource.setVisible(true);
         mProvider = new InsetsSourceProvider(mSource,
+                mDisplayContent.getInsetsStateController(), mDisplayContent);
+        mImeProvider = new InsetsSourceProvider(mImeSource,
                 mDisplayContent.getInsetsStateController(), mDisplayContent);
     }
 
@@ -99,6 +105,7 @@ public class InsetsSourceProviderTest extends WindowTestsBase {
     public void testPostLayout_frameProvider() {
         final WindowState statusBar = createWindow(null, TYPE_APPLICATION, "statusBar");
         statusBar.getFrameLw().set(0, 0, 500, 100);
+        statusBar.mHasSurface = true;
         mProvider.setWindow(statusBar,
                 (displayFrames, windowState, rect) -> {
                     rect.set(10, 10, 20, 20);
@@ -163,6 +170,30 @@ public class InsetsSourceProviderTest extends WindowTestsBase {
         assertNull(mProvider.getControl(target).getLeash());
         mProvider.updateControlForFakeTarget(null);
         assertNull(mProvider.getControl(target));
+    }
+
+    @Test
+    public void testUpdateSourceFrameForIme() {
+        final WindowState inputMethod = createWindow(null, TYPE_INPUT_METHOD, "inputMethod");
+
+        inputMethod.getFrameLw().set(new Rect(0, 400, 500, 500));
+
+        mImeProvider.setWindow(inputMethod, null, null);
+        mImeProvider.setServerVisible(false);
+        mImeSource.setVisible(true);
+        mImeProvider.updateSourceFrame();
+        assertEquals(new Rect(0, 0, 0, 0), mImeSource.getFrame());
+        Insets insets = mImeSource.calculateInsets(new Rect(0, 0, 500, 500),
+                false /* ignoreVisibility */);
+        assertEquals(Insets.of(0, 0, 0, 0), insets);
+
+        mImeProvider.setServerVisible(true);
+        mImeSource.setVisible(true);
+        mImeProvider.updateSourceFrame();
+        assertEquals(inputMethod.getFrameLw(), mImeSource.getFrame());
+        insets = mImeSource.calculateInsets(new Rect(0, 0, 500, 500),
+                false /* ignoreVisibility */);
+        assertEquals(Insets.of(0, 0, 0, 100), insets);
     }
 
     @Test

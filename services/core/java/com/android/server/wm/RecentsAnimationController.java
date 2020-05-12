@@ -734,13 +734,10 @@ public class RecentsAnimationController implements DeathRecipient {
             if (reorderMode == REORDER_MOVE_TO_TOP || reorderMode == REORDER_KEEP_IN_PLACE) {
                 mDisplayContent.mAppTransition.notifyAppTransitionFinishedLocked(
                         mTargetActivityRecord.token);
-            } else {
-                // The target activity will be moved to original position (non-top). Since it won't
-                // affect display orientation, just finish the transform.
-                mTargetActivityRecord.finishFixedRotationTransform();
             }
         }
-        mDisplayContent.mFixedRotationTransitionListener.onFinishRecentsAnimation();
+        mDisplayContent.mFixedRotationTransitionListener.onFinishRecentsAnimation(
+                reorderMode == REORDER_MOVE_TO_ORIGINAL_POSITION /* moveRecentsToBack */);
 
         // Notify that the animation has ended
         if (mStatusBar != null) {

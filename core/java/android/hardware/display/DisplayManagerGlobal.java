@@ -34,7 +34,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
 import android.util.SparseArray;
@@ -74,6 +73,8 @@ public final class DisplayManagerGlobal {
     @UnsupportedAppUsage
     private static DisplayManagerGlobal sInstance;
 
+    // Guarded by mLock
+    private boolean mDispatchNativeCallbacks = false;
     private final Object mLock = new Object();
 
     @UnsupportedAppUsage
@@ -143,27 +144,35 @@ public final class DisplayManagerGlobal {
     @UnsupportedAppUsage
     public DisplayInfo getDisplayInfo(int displayId) {
         synchronized (mLock) {
-            DisplayInfo info = null;
-            if (mDisplayCache != null) {
-                info = mDisplayCache.query(displayId);
-            } else {
-                try {
-                    info = mDm.getDisplayInfo(displayId);
-                } catch (RemoteException ex) {
-                    ex.rethrowFromSystemServer();
-                }
-            }
-            if (info == null) {
-                return null;
-            }
-
-            registerCallbackIfNeededLocked();
-
-            if (DEBUG) {
-                Log.d(TAG, "getDisplayInfo: displayId=" + displayId + ", info=" + info);
-            }
-            return info;
+            return getDisplayInfoLocked(displayId);
         }
+    }
+
+    /**
+     * Gets information about a particular logical display
+     * See {@link getDisplayInfo}, but assumes that {@link mLock} is held
+     */
+    private @Nullable DisplayInfo getDisplayInfoLocked(int displayId) {
+        DisplayInfo info = null;
+        if (mDisplayCache != null) {
+            info = mDisplayCache.query(displayId);
+        } else {
+            try {
+                info = mDm.getDisplayInfo(displayId);
+            } catch (RemoteException ex) {
+                ex.rethrowFromSystemServer();
+            }
+        }
+        if (info == null) {
+            return null;
+        }
+
+        registerCallbackIfNeededLocked();
+
+        if (DEBUG) {
+            Log.d(TAG, "getDisplayInfo: displayId=" + displayId + ", info=" + info);
+        }
+        return info;
     }
 
     /**
@@ -340,6 +349,20 @@ public final class DisplayManagerGlobal {
             final int numListeners = mDisplayListeners.size();
             for (int i = 0; i < numListeners; i++) {
                 mDisplayListeners.get(i).sendDisplayEvent(displayId, event);
+            }
+            if (event == EVENT_DISPLAY_CHANGED && mDispatchNativeCallbacks) {
+                // Choreographer only supports a single display, so only dispatch refresh rate
+                // changes for the default display.
+                if (displayId == Display.DEFAULT_DISPLAY) {
+                    // We can likely save a binder hop if we attach the refresh rate onto the
+                    // listener.
+                    DisplayInfo display = getDisplayInfoLocked(displayId);
+                    if (display != null) {
+                        float refreshRate = display.getMode().getRefreshRate();
+                        // Signal native callbacks if we ever set a refresh rate.
+                        nSignalNativeCallbacks(refreshRate);
+                    }
+                }
             }
         }
     }
@@ -799,5 +822,31 @@ public final class DisplayManagerGlobal {
      */
     public void disableLocalDisplayInfoCaches() {
         mDisplayCache = null;
+    }
+
+    private static native void nSignalNativeCallbacks(float refreshRate);
+
+    // Called from AChoreographer via JNI.
+    // Registers AChoreographer so that refresh rate callbacks can be dispatched from DMS.
+    private void registerNativeChoreographerForRefreshRateCallbacks() {
+        synchronized (mLock) {
+            registerCallbackIfNeededLocked();
+            mDispatchNativeCallbacks = true;
+            DisplayInfo display = getDisplayInfoLocked(Display.DEFAULT_DISPLAY);
+            if (display != null) {
+                // We need to tell AChoreographer instances the current refresh rate so that apps
+                // can get it for free once a callback first registers.
+                float refreshRate = display.getMode().getRefreshRate();
+                nSignalNativeCallbacks(refreshRate);
+            }
+        }
+    }
+
+    // Called from AChoreographer via JNI.
+    // Unregisters AChoreographer from receiving refresh rate callbacks.
+    private void unregisterNativeChoreographerForRefreshRateCallbacks() {
+        synchronized (mLock) {
+            mDispatchNativeCallbacks = false;
+        }
     }
 }

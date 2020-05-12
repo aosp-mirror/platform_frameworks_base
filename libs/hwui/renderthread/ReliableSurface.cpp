@@ -19,6 +19,7 @@
 #include <log/log_main.h>
 #include <private/android/AHardwareBufferHelpers.h>
 // TODO: this should be including apex instead.
+#include <system/window.h>
 #include <vndk/window.h>
 
 namespace android::uirenderer::renderthread {
@@ -44,6 +45,7 @@ ReliableSurface::~ReliableSurface() {
     ANativeWindow_setDequeueBufferInterceptor(mWindow, nullptr, nullptr);
     ANativeWindow_setQueueBufferInterceptor(mWindow, nullptr, nullptr);
     ANativeWindow_setPerformInterceptor(mWindow, nullptr, nullptr);
+    ANativeWindow_setQueryInterceptor(mWindow, nullptr, nullptr);
     ANativeWindow_release(mWindow);
 }
 
@@ -62,6 +64,10 @@ void ReliableSurface::init() {
 
     result = ANativeWindow_setPerformInterceptor(mWindow, hook_perform, this);
     LOG_ALWAYS_FATAL_IF(result != NO_ERROR, "Failed to set perform interceptor: error = %d",
+                        result);
+
+    result = ANativeWindow_setQueryInterceptor(mWindow, hook_query, this);
+    LOG_ALWAYS_FATAL_IF(result != NO_ERROR, "Failed to set query interceptor: error = %d",
                         result);
 }
 
@@ -253,7 +259,27 @@ int ReliableSurface::hook_perform(ANativeWindow* window, ANativeWindow_performFn
             case ANATIVEWINDOW_PERFORM_SET_BUFFERS_FORMAT:
                 rs->mFormat = static_cast<AHardwareBuffer_Format>(va_arg(args, int32_t));
                 break;
+            case NATIVE_WINDOW_SET_BUFFER_COUNT:
+                size_t bufferCount = va_arg(args, size_t);
+                if (bufferCount >= rs->mExpectedBufferCount) {
+                    rs->mDidSetExtraBuffers = true;
+                } else {
+                    ALOGD("HOOK FAILED! Expected %zd got = %zd", rs->mExpectedBufferCount, bufferCount);
+                }
+                break;
         }
+    }
+    return result;
+}
+
+int ReliableSurface::hook_query(const ANativeWindow *window, ANativeWindow_queryFn query,
+        void *data, int what, int *value) {
+    ReliableSurface* rs = reinterpret_cast<ReliableSurface*>(data);
+    int result = query(window, what, value);
+    if (what == ANATIVEWINDOW_QUERY_MIN_UNDEQUEUED_BUFFERS && result == OK) {
+        std::lock_guard _lock{rs->mMutex};
+        *value += rs->mExtraBuffers;
+        rs->mExpectedBufferCount = *value + 2;
     }
     return result;
 }

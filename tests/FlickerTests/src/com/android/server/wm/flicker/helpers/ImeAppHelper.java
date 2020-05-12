@@ -16,14 +16,14 @@
 
 package com.android.server.wm.flicker.helpers;
 
-import static android.os.SystemClock.sleep;
-
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 
 import android.app.Instrumentation;
 import android.support.test.uiautomator.By;
 import android.support.test.uiautomator.UiDevice;
 import android.support.test.uiautomator.UiObject2;
+import android.support.test.uiautomator.Until;
 
 public class ImeAppHelper extends FlickerAppHelper {
 
@@ -35,11 +35,16 @@ public class ImeAppHelper extends FlickerAppHelper {
         this(instr, "ImeApp");
     }
 
-    public void clickEditTextWidget(UiDevice device) {
-        UiObject2 editText = device.findObject(By.res(getPackage(), "plain_text_input"));
+    public void openIME(UiDevice device) {
+        UiObject2 editText = device.wait(
+                Until.findObject(By.res(getPackage(), "plain_text_input")),
+                AutomationUtils.FIND_TIMEOUT);
         assertNotNull("Text field not found, this usually happens when the device was left "
                 + "in an unknown state (e.g. in split screen)", editText);
         editText.click();
-        sleep(500);
+
+        if (!AutomationUtils.waitForIME(device)) {
+            fail("IME did not appear");
+        }
     }
 }

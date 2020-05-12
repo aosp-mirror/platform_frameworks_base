@@ -81,6 +81,7 @@ public class TaskStackChangedListenerTest {
     @Before
     public void setUp() throws Exception {
         mService = ActivityManager.getService();
+        sTaskStackChangedCalled = false;
     }
 
     @After
@@ -110,6 +111,28 @@ public class TaskStackChangedListenerTest {
             assertTrue(sTaskStackChangedCalled);
         }
         assertTrue(sActivityBResumed);
+    }
+
+    @Test
+    @Presubmit
+    public void testTaskStackChanged_resumeWhilePausing() throws Exception {
+        registerTaskStackChangedListener(new TaskStackListener() {
+            @Override
+            public void onTaskStackChanged() throws RemoteException {
+                synchronized (sLock) {
+                    sTaskStackChangedCalled = true;
+                }
+            }
+        });
+
+        final Context context = getInstrumentation().getContext();
+        context.startActivity(new Intent(context, ResumeWhilePausingActivity.class).addFlags(
+                Intent.FLAG_ACTIVITY_NEW_TASK));
+        UiDevice.getInstance(getInstrumentation()).waitForIdle();
+
+        synchronized (sLock) {
+            assertTrue(sTaskStackChangedCalled);
+        }
     }
 
     @Test
@@ -173,7 +196,6 @@ public class TaskStackChangedListenerTest {
      */
     @Test
     @Presubmit
-    @FlakyTest(bugId = 130388819)
     public void testTaskChangeCallBacks() throws Exception {
         final Object[] params = new Object[2];
         final CountDownLatch taskCreatedLaunchLatch = new CountDownLatch(1);
@@ -616,6 +638,8 @@ public class TaskStackChangedListenerTest {
 
     // Activity that has {@link android.R.attr#resizeableActivity} attribute set to {@code true}
     public static class ActivityInActivityView extends TestActivity {}
+
+    public static class ResumeWhilePausingActivity extends TestActivity {}
 
     public static class LandscapeActivity extends TestActivity {}
 }

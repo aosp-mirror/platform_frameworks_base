@@ -6441,6 +6441,16 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         verify(mContext.spiedContext).startActivityAsUser(
                 MockUtils.checkIntentAction(ACTION_CHECK_POLICY_COMPLIANCE),
                 MockUtils.checkUserHandle(CALLER_USER_HANDLE));
+
+        // Verify that correct suspension reason is reported to the DPC.
+        mContext.binder.callingUid = DpmMockContext.CALLER_UID;
+        assertThat(dpm.getPersonalAppsSuspendedReasons(admin1))
+                .isEqualTo(DevicePolicyManager.PERSONAL_APPS_SUSPENDED_PROFILE_TIMEOUT);
+
+        // Verify that rolling time back doesn't change the status.
+        dpms.mMockInjector.setSystemCurrentTimeMillis(PROFILE_OFF_START);
+        assertThat(dpm.getPersonalAppsSuspendedReasons(admin1))
+                .isEqualTo(DevicePolicyManager.PERSONAL_APPS_SUSPENDED_PROFILE_TIMEOUT);
     }
 
     private void sendBroadcastWithUser(String action, int userHandle) throws Exception {

@@ -94,8 +94,10 @@ import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.TaskStackChangeListener;
+import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.util.Assert;
 import com.android.systemui.util.RingerModeTracker;
@@ -219,6 +221,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
 
     private final Context mContext;
     private final boolean mIsPrimaryUser;
+    private final StatusBarStateController mStatusBarStateController;
     HashMap<Integer, SimData> mSimDatas = new HashMap<>();
     HashMap<Integer, ServiceState> mServiceStates = new HashMap<Integer, ServiceState>();
 
@@ -1521,7 +1524,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             BroadcastDispatcher broadcastDispatcher,
             DumpManager dumpManager,
             RingerModeTracker ringerModeTracker,
-            @Background Executor backgroundExecutor) {
+            @Background Executor backgroundExecutor,
+            StatusBarStateController statusBarStateController) {
         mContext = context;
         mSubscriptionManager = SubscriptionManager.from(context);
         mDeviceProvisioned = isDeviceProvisionedInSettingsDb();
@@ -1529,6 +1533,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         mBackgroundExecutor = backgroundExecutor;
         mBroadcastDispatcher = broadcastDispatcher;
         mRingerModeTracker = ringerModeTracker;
+        mStatusBarStateController = statusBarStateController;
         dumpManager.registerDumpable(getClass().getName(), this);
 
         mHandler = new Handler(mainLooper) {
@@ -1664,6 +1669,15 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         filter.addAction(TelephonyManager.ACTION_PHONE_STATE_CHANGED);
         filter.addAction(DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED);
         mBroadcastDispatcher.registerReceiverWithHandler(mBroadcastReceiver, filter, mHandler);
+        // Since ACTION_SERVICE_STATE is being moved to a non-sticky broadcast, trigger the
+        // listener now with the service state from the default sub.
+        mBackgroundExecutor.execute(() -> {
+            int subId = SubscriptionManager.getDefaultSubscriptionId();
+            ServiceState serviceState = mContext.getSystemService(TelephonyManager.class)
+                    .getServiceStateForSubscriber(subId);
+            mHandler.sendMessage(
+                    mHandler.obtainMessage(MSG_SERVICE_STATE_CHANGE, subId, 0, serviceState));
+        });
 
         mHandler.post(this::registerRingerTracker);
 
@@ -1846,8 +1860,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         boolean shouldListenForFace = shouldListenForFace();
         if (mFaceRunningState == BIOMETRIC_STATE_RUNNING && !shouldListenForFace) {
             stopListeningForFace();
-        } else if (mFaceRunningState != BIOMETRIC_STATE_RUNNING
-                && shouldListenForFace) {
+        } else if (mFaceRunningState != BIOMETRIC_STATE_RUNNING && shouldListenForFace) {
             startListeningForFace();
         }
     }
@@ -1885,7 +1898,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
      * If face auth is allows to scan on this exact moment.
      */
     public boolean shouldListenForFace() {
-        final boolean awakeKeyguard = mKeyguardIsVisible && mDeviceInteractive && !mGoingToSleep;
+        final boolean statusBarShadeLocked =
+                mStatusBarStateController.getState() == StatusBarState.SHADE_LOCKED;
+        final boolean awakeKeyguard = mKeyguardIsVisible && mDeviceInteractive && !mGoingToSleep
+                && !statusBarShadeLocked;
         final int user = getCurrentUser();
         final int strongAuth = mStrongAuthTracker.getStrongAuthForUser(user);
         final boolean isLockDown =

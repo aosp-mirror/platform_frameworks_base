@@ -216,7 +216,7 @@ class CommonTransitions {
                 .runBefore(device::pressHome)
                 .runBefore(() -> setRotation(device, beginRotation))
                 .runBefore(testApp::open)
-                .run(() -> testApp.clickEditTextWidget(device))
+                .run(() -> testApp.openIME(device))
                 .runAfterAll(testApp::exit)
                 .repeat(ITERATIONS);
     }
@@ -244,7 +244,8 @@ class CommonTransitions {
                             By.res(device.getLauncherPackageName(), "snapshot"));
                     snapshot.click();
                 })
-                .runBefore(() -> testAppBottom.clickEditTextWidget(device))
+                .runBefore(() -> testAppBottom.openIME(device))
+                .runBefore(device::pressBack)
                 .runBefore(() -> AutomationUtils.resizeSplitScreen(device, startRatio))
                 .run(() -> AutomationUtils.resizeSplitScreen(device, stopRatio))
                 .runAfter(() -> exitSplitScreen(device))
@@ -264,7 +265,7 @@ class CommonTransitions {
                 .runBefore(device::pressHome)
                 .runBefore(() -> setRotation(device, beginRotation))
                 .runBefore(testApp::open)
-                .runBefore(() -> testApp.clickEditTextWidget(device))
+                .runBefore(() -> testApp.openIME(device))
                 .run(device::pressHome)
                 .run(device::waitForIdle)
                 .runAfterAll(testApp::exit)
@@ -281,7 +282,7 @@ class CommonTransitions {
                 .runBefore(device::pressHome)
                 .runBefore(() -> setRotation(device, beginRotation))
                 .runBefore(testApp::open)
-                .runBefore(() -> testApp.clickEditTextWidget(device))
+                .runBefore(() -> testApp.openIME(device))
                 .run(device::pressBack)
                 .run(device::waitForIdle)
                 .runAfterAll(testApp::exit)

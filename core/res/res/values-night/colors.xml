@@ -35,4 +35,6 @@
 
     <color name="resolver_empty_state_text">#FFFFFF</color>
     <color name="resolver_empty_state_icon">#FFFFFF</color>
+
+    <color name="personal_apps_suspension_notification_color">#8AB4F8</color>
 </resources>
