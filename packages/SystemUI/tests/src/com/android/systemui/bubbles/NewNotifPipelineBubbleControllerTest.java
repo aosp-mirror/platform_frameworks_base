@@ -254,7 +254,8 @@ public class NewNotifPipelineBubbleControllerTest extends SysuiTestCase {
                 mFloatingContentCoordinator,
                 mDataRepository,
                 mSysUiState,
-                mock(INotificationManager.class));
+                mock(INotificationManager.class),
+                mWindowManager);
         mBubbleController.addNotifCallback(mNotifCallback);
         mBubbleController.setExpandListener(mBubbleExpandListener);
 
