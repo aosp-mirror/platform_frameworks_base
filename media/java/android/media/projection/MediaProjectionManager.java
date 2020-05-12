@@ -23,8 +23,6 @@ import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.media.projection.IMediaProjection;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -85,6 +83,12 @@ public final class MediaProjectionManager {
      * Retrieve the MediaProjection obtained from a succesful screen
      * capture request. Will be null if the result from the
      * startActivityForResult() is anything other than RESULT_OK.
+     *
+     * Starting from Android {@link android.os.Build.VERSION_CODES#R}, if your application requests
+     * the {@link android.Manifest.permission#SYSTEM_ALERT_WINDOW} permission, and the
+     * user has not explicitly denied it, the permission will be automatically granted until the
+     * projection is stopped. This allows for user controls to be displayed on top of the screen
+     * being captured.
      *
      * @param resultCode The result code from {@link android.app.Activity#onActivityResult(int,
      * int, android.content.Intent)}
