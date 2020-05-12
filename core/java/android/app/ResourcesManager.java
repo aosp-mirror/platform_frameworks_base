@@ -59,6 +59,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.WeakHashMap;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 /** @hide */
@@ -1294,6 +1295,35 @@ public class ResourcesManager {
                 }
             }
         }
+    }
+
+    /**
+     * Overrides the display adjustments of all resources which are associated with the given token.
+     *
+     * @param token The token that owns the resources.
+     * @param override The operation to override the existing display adjustments. If it is null,
+     *                 the override adjustments will be cleared.
+     * @return {@code true} if the override takes effect.
+     */
+    public boolean overrideTokenDisplayAdjustments(IBinder token,
+            @Nullable Consumer<DisplayAdjustments> override) {
+        boolean handled = false;
+        synchronized (this) {
+            final ActivityResources tokenResources = mActivityResourceReferences.get(token);
+            if (tokenResources == null) {
+                return false;
+            }
+            final ArrayList<WeakReference<Resources>> resourcesRefs =
+                    tokenResources.activityResources;
+            for (int i = resourcesRefs.size() - 1; i >= 0; i--) {
+                final Resources res = resourcesRefs.get(i).get();
+                if (res != null) {
+                    res.overrideDisplayAdjustments(override);
+                    handled = true;
+                }
+            }
+        }
+        return handled;
     }
 
     private class UpdateHandler implements Resources.UpdateCallbacks {
