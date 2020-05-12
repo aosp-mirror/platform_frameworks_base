@@ -156,10 +156,17 @@ public class GlobalActionsDialogTest extends SysuiTestCase {
     }
 
     @Test
-    public void testShouldLogVisibility() {
+    public void testShouldLogShow() {
         mGlobalActionsDialog.onShow(null);
         mTestableLooper.processAllMessages();
         verifyLogPosted(GlobalActionsDialog.GlobalActionsEvent.GA_POWER_MENU_OPEN);
+    }
+
+    @Test
+    public void testShouldLogDismiss() {
+        mGlobalActionsDialog.onDismiss(mGlobalActionsDialog.mDialog);
+        mTestableLooper.processAllMessages();
+        verifyLogPosted(GlobalActionsDialog.GlobalActionsEvent.GA_POWER_MENU_CLOSE);
     }
 
     @Test
