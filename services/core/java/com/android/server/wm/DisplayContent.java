@@ -235,7 +235,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         implements WindowManagerPolicy.DisplayContentInfo {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "DisplayContent" : TAG_WM;
     private static final String TAG_STACK = TAG + POSTFIX_STACK;
-    private static final int NO_ROTATION = -1;
 
     /** The default scaling mode that scales content automatically. */
     static final int FORCE_SCALING_MODE_AUTO = 0;
@@ -1409,21 +1408,24 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         return mDisplayRotation.updateOrientation(orientation, forceUpdate);
     }
 
-    /** @return a valid rotation if the activity can use different orientation than the display. */
+    /**
+     * Returns a valid rotation if the activity can use different orientation than the display.
+     * Otherwise {@link #ROTATION_UNDEFINED}.
+     */
     @Surface.Rotation
-    private int rotationForActivityInDifferentOrientation(@NonNull ActivityRecord r) {
+    int rotationForActivityInDifferentOrientation(@NonNull ActivityRecord r) {
         if (!mWmService.mIsFixedRotationTransformEnabled) {
-            return NO_ROTATION;
+            return ROTATION_UNDEFINED;
         }
         if (r.inMultiWindowMode()
                 || r.getRequestedConfigurationOrientation() == getConfiguration().orientation) {
-            return NO_ROTATION;
+            return ROTATION_UNDEFINED;
         }
         final int currentRotation = getRotation();
         final int rotation = mDisplayRotation.rotationForOrientation(r.getRequestedOrientation(),
                 currentRotation);
         if (rotation == currentRotation) {
-            return NO_ROTATION;
+            return ROTATION_UNDEFINED;
         }
         return rotation;
     }
@@ -1458,7 +1460,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             return false;
         }
         final int rotation = rotationForActivityInDifferentOrientation(r);
-        if (rotation == NO_ROTATION) {
+        if (rotation == ROTATION_UNDEFINED) {
             return false;
         }
         if (!r.getParent().matchParentBounds()) {
@@ -1555,7 +1557,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      */
     void rotateInDifferentOrientationIfNeeded(ActivityRecord activityRecord) {
         int rotation = rotationForActivityInDifferentOrientation(activityRecord);
-        if (rotation != NO_ROTATION) {
+        if (rotation != ROTATION_UNDEFINED) {
             startFixedRotationTransform(activityRecord, rotation);
         }
     }

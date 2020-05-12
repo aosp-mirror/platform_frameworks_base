@@ -69,6 +69,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.never;
 
+import android.app.ActivityManager.TaskSnapshot;
 import android.app.ActivityOptions;
 import android.app.WindowConfiguration;
 import android.app.servertransaction.ActivityConfigurationChangeItem;
@@ -1437,6 +1438,32 @@ public class ActivityRecordTests extends ActivityTestsBase {
 
         assertNull(display.mFixedRotationLaunchingApp);
         assertFalse(mActivity.hasFixedRotationTransform());
+    }
+
+    @Test
+    public void testIsSnapshotCompatible() {
+        mService.mWindowManager.mIsFixedRotationTransformEnabled = true;
+        final TaskSnapshot snapshot = new TaskSnapshotPersisterTestBase.TaskSnapshotBuilder()
+                .setRotation(mActivity.getWindowConfiguration().getRotation())
+                .build();
+
+        assertTrue(mActivity.isSnapshotCompatible(snapshot));
+
+        setRotatedScreenOrientationSilently(mActivity);
+
+        assertFalse(mActivity.isSnapshotCompatible(snapshot));
+    }
+
+    /**
+     * Sets orientation without notifying the parent to simulate that the display has not applied
+     * the requested orientation yet.
+     */
+    private static void setRotatedScreenOrientationSilently(ActivityRecord r) {
+        final int rotatedOrentation = r.getConfiguration().orientation == ORIENTATION_PORTRAIT
+                ? SCREEN_ORIENTATION_LANDSCAPE
+                : SCREEN_ORIENTATION_PORTRAIT;
+        doReturn(false).when(r).onDescendantOrientationChanged(any(), any());
+        r.setOrientation(rotatedOrentation);
     }
 
     @Test
