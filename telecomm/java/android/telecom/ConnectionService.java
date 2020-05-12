@@ -2505,6 +2505,11 @@ public abstract class ConnectionService extends Service {
             mAdapter.addConferenceCall(id, parcelableConference);
             mAdapter.setVideoProvider(id, conference.getVideoProvider());
             mAdapter.setVideoState(id, conference.getVideoState());
+            // In some instances a conference can start its life as a standalone call with just a
+            // single participant; ensure we signal to Telecom in this case.
+            if (!conference.isMultiparty()) {
+                mAdapter.setConferenceState(id, conference.isMultiparty());
+            }
 
             // Go through any child calls and set the parent.
             for (Connection connection : conference.getConnections()) {
