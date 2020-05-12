@@ -37,9 +37,7 @@ import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
 import android.service.media.MediaBrowserService;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -90,16 +88,14 @@ public class MediaControlPanel {
     };
 
     private final SeekBarViewModel mSeekBarViewModel;
-    private final SeekBarObserver mSeekBarObserver;
+    private SeekBarObserver mSeekBarObserver;
     private final Executor mForegroundExecutor;
     protected final Executor mBackgroundExecutor;
     private final ActivityStarter mActivityStarter;
-    private final LayoutAnimationHelper mLayoutAnimationHelper;
+    private LayoutAnimationHelper mLayoutAnimationHelper;
 
     private Context mContext;
-    private MotionLayout mMediaNotifView;
-    private final View mBackground;
-    private View mSeamless;
+    private PlayerViewHolder mViewHolder;
     private MediaSession.Token mToken;
     private MediaController mController;
     private int mForegroundColor;
@@ -107,7 +103,7 @@ public class MediaControlPanel {
     private MediaDevice mDevice;
     protected ComponentName mServiceComponent;
     private boolean mIsRegistered = false;
-    private final List<KeyFrames> mKeyFrames;
+    private List<KeyFrames> mKeyFrames;
     private String mKey;
     private int mAlbumArtSize;
     private int mAlbumArtRadius;
@@ -166,37 +162,27 @@ public class MediaControlPanel {
     /**
      * Initialize a new control panel
      * @param context
-     * @param parent
      * @param routeManager Manager used to listen for device change events.
      * @param foregroundExecutor foreground executor
      * @param backgroundExecutor background executor, used for processing artwork
      * @param activityStarter activity starter
      */
-    public MediaControlPanel(Context context, ViewGroup parent,
-            @Nullable LocalMediaManager routeManager, Executor foregroundExecutor,
-            DelayableExecutor backgroundExecutor, ActivityStarter activityStarter) {
+    public MediaControlPanel(Context context, @Nullable LocalMediaManager routeManager,
+            Executor foregroundExecutor, DelayableExecutor backgroundExecutor,
+            ActivityStarter activityStarter) {
         mContext = context;
-        LayoutInflater inflater = LayoutInflater.from(mContext);
-        mMediaNotifView = (MotionLayout) inflater.inflate(R.layout.qs_media_panel, parent, false);
-        mBackground = mMediaNotifView.findViewById(R.id.media_background);
-        mLayoutAnimationHelper = new LayoutAnimationHelper(mMediaNotifView);
-        GoneChildrenHideHelper.clipGoneChildrenOnLayout(mMediaNotifView);
-        mKeyFrames = mMediaNotifView.getDefinedTransitions().get(0).getKeyFrameList();
         mLocalMediaManager = routeManager;
         mForegroundExecutor = foregroundExecutor;
         mBackgroundExecutor = backgroundExecutor;
         mActivityStarter = activityStarter;
         mSeekBarViewModel = new SeekBarViewModel(backgroundExecutor);
-        mSeekBarObserver = new SeekBarObserver(getView());
-        mSeekBarViewModel.getProgress().observeForever(mSeekBarObserver);
-        SeekBar bar = getView().findViewById(R.id.media_progress_bar);
-        bar.setOnSeekBarChangeListener(mSeekBarViewModel.getSeekBarListener());
-        bar.setOnTouchListener(mSeekBarViewModel.getSeekBarTouchListener());
         loadDimens();
     }
 
     public void onDestroy() {
-        mSeekBarViewModel.getProgress().removeObserver(mSeekBarObserver);
+        if (mSeekBarObserver != null) {
+            mSeekBarViewModel.getProgress().removeObserver(mSeekBarObserver);
+        }
         makeInactive();
     }
 
@@ -207,11 +193,12 @@ public class MediaControlPanel {
     }
 
     /**
-     * Get the view used to display media controls
-     * @return the view
+     * Get the view holder used to display media controls
+     * @return the view holder
      */
-    public MotionLayout getView() {
-        return mMediaNotifView;
+    @Nullable
+    public PlayerViewHolder getView() {
+        return mViewHolder;
     }
 
     /**
@@ -234,10 +221,27 @@ public class MediaControlPanel {
         return mContext;
     }
 
+    /** Attaches the player to the view holder. */
+    public void attach(PlayerViewHolder vh) {
+        mViewHolder = vh;
+        MotionLayout motionView = vh.getPlayer();
+        mLayoutAnimationHelper = new LayoutAnimationHelper(motionView);
+        GoneChildrenHideHelper.clipGoneChildrenOnLayout(motionView);
+        mKeyFrames = motionView.getDefinedTransitions().get(0).getKeyFrameList();
+        mSeekBarObserver = new SeekBarObserver(motionView);
+        mSeekBarViewModel.getProgress().observeForever(mSeekBarObserver);
+        SeekBar bar = vh.getSeekBar();
+        bar.setOnSeekBarChangeListener(mSeekBarViewModel.getSeekBarListener());
+        bar.setOnTouchListener(mSeekBarViewModel.getSeekBarTouchListener());
+    }
+
     /**
      * Bind this view based on the data given
      */
     public void bind(@NotNull MediaData data) {
+        if (mViewHolder == null) {
+            return;
+        }
         MediaSession.Token token = data.getToken();
         mForegroundColor = data.getForegroundColor();
         mBackgroundColor = data.getBackgroundColor();
@@ -254,8 +258,8 @@ public class MediaControlPanel {
 
         mController = new MediaController(mContext, mToken);
 
-        ConstraintSet expandedSet = mMediaNotifView.getConstraintSet(R.id.expanded);
-        ConstraintSet collapsedSet = mMediaNotifView.getConstraintSet(R.id.collapsed);
+        ConstraintSet expandedSet = mViewHolder.getPlayer().getConstraintSet(R.id.expanded);
+        ConstraintSet collapsedSet = mViewHolder.getPlayer().getConstraintSet(R.id.collapsed);
 
         // Try to find a browser service component for this app
         // TODO also check for a media button receiver intended for restarting (b/154127084)
@@ -281,64 +285,61 @@ public class MediaControlPanel {
 
         mController.registerCallback(mSessionCallback);
 
-        mMediaNotifView.requireViewById(R.id.media_background).setBackgroundTintList(
+        mViewHolder.getBackground().setBackgroundTintList(
                 ColorStateList.valueOf(mBackgroundColor));
 
         // Click action
         PendingIntent clickIntent = data.getClickIntent();
         if (clickIntent != null) {
-            mMediaNotifView.setOnClickListener(v -> {
+            mViewHolder.getPlayer().setOnClickListener(v -> {
                 mActivityStarter.postStartActivityDismissingKeyguard(clickIntent);
             });
         }
 
-        ImageView albumView = mMediaNotifView.findViewById(R.id.album_art);
+        ImageView albumView = mViewHolder.getAlbumView();
         // TODO: migrate this to a view with rounded corners instead of baking the rounding
         // into the bitmap
         Drawable artwork = createRoundedBitmap(data.getArtwork());
         albumView.setImageDrawable(artwork);
 
         // App icon
-        ImageView appIcon = mMediaNotifView.requireViewById(R.id.icon);
+        ImageView appIcon = mViewHolder.getAppIcon();
         Drawable iconDrawable = data.getAppIcon().mutate();
         iconDrawable.setTint(mForegroundColor);
         appIcon.setImageDrawable(iconDrawable);
 
         // Song name
-        TextView titleText = mMediaNotifView.requireViewById(R.id.header_title);
+        TextView titleText = mViewHolder.getTitleText();
         titleText.setText(data.getSong());
         titleText.setTextColor(data.getForegroundColor());
 
         // App title
-        TextView appName = mMediaNotifView.requireViewById(R.id.app_name);
+        TextView appName = mViewHolder.getAppName();
         appName.setText(data.getApp());
         appName.setTextColor(mForegroundColor);
 
         // Artist name
-        TextView artistText = mMediaNotifView.requireViewById(R.id.header_artist);
+        TextView artistText = mViewHolder.getArtistText();
         artistText.setText(data.getArtist());
         artistText.setTextColor(mForegroundColor);
 
         // Transfer chip
-        mSeamless = mMediaNotifView.findViewById(R.id.media_seamless);
-        if (mSeamless != null) {
-            if (mLocalMediaManager != null) {
-                mSeamless.setVisibility(View.VISIBLE);
-                setVisibleAndAlpha(collapsedSet, R.id.media_seamless, true /*visible */);
-                setVisibleAndAlpha(expandedSet, R.id.media_seamless, true /*visible */);
-                updateDevice(mLocalMediaManager.getCurrentConnectedDevice());
-                mSeamless.setOnClickListener(v -> {
-                    final Intent intent = new Intent()
-                            .setAction(MediaOutputSliceConstants.ACTION_MEDIA_OUTPUT)
-                            .putExtra(MediaOutputSliceConstants.EXTRA_PACKAGE_NAME,
-                                    mController.getPackageName())
-                            .putExtra(MediaOutputSliceConstants.KEY_MEDIA_SESSION_TOKEN, mToken);
-                    mActivityStarter.startActivity(intent, false, true /* dismissShade */,
-                            Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                });
-            } else {
-                Log.d(TAG, "LocalMediaManager is null. Not binding output chip for pkg=" + pkgName);
-            }
+        if (mLocalMediaManager != null) {
+            mViewHolder.getSeamless().setVisibility(View.VISIBLE);
+            setVisibleAndAlpha(collapsedSet, R.id.media_seamless, true /*visible */);
+            setVisibleAndAlpha(expandedSet, R.id.media_seamless, true /*visible */);
+            updateDevice(mLocalMediaManager.getCurrentConnectedDevice());
+            mViewHolder.getSeamless().setOnClickListener(v -> {
+                final Intent intent = new Intent()
+                        .setAction(MediaOutputSliceConstants.ACTION_MEDIA_OUTPUT)
+                        .putExtra(MediaOutputSliceConstants.EXTRA_PACKAGE_NAME,
+                                mController.getPackageName())
+                        .putExtra(MediaOutputSliceConstants.KEY_MEDIA_SESSION_TOKEN, mToken);
+                mActivityStarter.startActivity(intent, false, true /* dismissShade */,
+                        Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            });
+        } else {
+            Log.d(TAG, "LocalMediaManager is null. Not binding output chip for pkg=" + pkgName);
         }
         PlaybackInfo playbackInfo = mController.getPlaybackInfo();
         if (playbackInfo != null) {
@@ -353,16 +354,16 @@ public class MediaControlPanel {
         List<MediaAction> actionIcons = data.getActions();
         for (; i < actionIcons.size() && i < ACTION_IDS.length; i++) {
             int actionId = ACTION_IDS[i];
-            final ImageButton button = mMediaNotifView.findViewById(actionId);
+            final ImageButton button = mViewHolder.getAction(actionId);
             MediaAction mediaAction = actionIcons.get(i);
             button.setImageDrawable(mediaAction.getDrawable());
             button.setContentDescription(mediaAction.getContentDescription());
             button.setImageTintList(ColorStateList.valueOf(mForegroundColor));
             PendingIntent actionIntent = mediaAction.getIntent();
 
-            if (mBackground.getBackground() instanceof IlluminationDrawable) {
-                ((IlluminationDrawable) mBackground.getBackground())
-                        .setupTouch(button, mMediaNotifView);
+            if (mViewHolder.getBackground().getBackground() instanceof IlluminationDrawable) {
+                ((IlluminationDrawable) mViewHolder.getBackground().getBackground())
+                        .setupTouch(button, mViewHolder.getPlayer());
             }
 
             button.setOnClickListener(v -> {
@@ -397,8 +398,8 @@ public class MediaControlPanel {
         makeActive();
 
         // Update both constraint sets to regenerate the animation.
-        mMediaNotifView.updateState(R.id.collapsed, collapsedSet);
-        mMediaNotifView.updateState(R.id.expanded, expandedSet);
+        mViewHolder.getPlayer().updateState(R.id.collapsed, collapsedSet);
+        mViewHolder.getPlayer().updateState(R.id.expanded, expandedSet);
     }
 
     @UiThread
@@ -441,6 +442,9 @@ public class MediaControlPanel {
      * @param visible is the view visible
      */
     private void updateKeyFrameVisibility(int actionId, boolean visible) {
+        if (mKeyFrames == null) {
+            return;
+        }
         for (int i = 0; i < mKeyFrames.size(); i++) {
             KeyFrames keyframe = mKeyFrames.get(i);
             ArrayList<Key> viewKeyFrames = keyframe.getKeyFramesForView(actionId);
@@ -528,38 +532,38 @@ public class MediaControlPanel {
      * @param device device information to display
      */
     private void updateDevice(MediaDevice device) {
-        if (mSeamless == null) {
-            return;
-        }
         mForegroundExecutor.execute(() -> {
             updateChipInternal(device);
         });
     }
 
     private void updateChipInternal(MediaDevice device) {
+        if (mViewHolder == null) {
+            return;
+        }
         ColorStateList fgTintList = ColorStateList.valueOf(mForegroundColor);
 
         // Update the outline color
-        LinearLayout viewLayout = (LinearLayout) mSeamless;
+        LinearLayout viewLayout = (LinearLayout) mViewHolder.getSeamless();
         RippleDrawable bkgDrawable = (RippleDrawable) viewLayout.getBackground();
         GradientDrawable rect = (GradientDrawable) bkgDrawable.getDrawable(0);
         rect.setStroke(2, mForegroundColor);
         rect.setColor(mBackgroundColor);
 
-        ImageView iconView = mSeamless.findViewById(R.id.media_seamless_image);
-        TextView deviceName = mSeamless.findViewById(R.id.media_seamless_text);
+        ImageView iconView = mViewHolder.getSeamlessIcon();
+        TextView deviceName = mViewHolder.getSeamlessText();
         deviceName.setTextColor(fgTintList);
 
         if (mIsRemotePlayback) {
-            mSeamless.setEnabled(false);
-            mSeamless.setAlpha(0.38f);
+            mViewHolder.getSeamless().setEnabled(false);
+            mViewHolder.getSeamless().setAlpha(0.38f);
             iconView.setImageResource(R.drawable.ic_hardware_speaker);
             iconView.setVisibility(View.VISIBLE);
             iconView.setImageTintList(fgTintList);
             deviceName.setText(R.string.media_seamless_remote_device);
         } else if (device != null) {
-            mSeamless.setEnabled(true);
-            mSeamless.setAlpha(1f);
+            mViewHolder.getSeamless().setEnabled(true);
+            mViewHolder.getSeamless().setAlpha(1f);
             Drawable icon = device.getIcon();
             iconView.setVisibility(View.VISIBLE);
             iconView.setImageTintList(fgTintList);
@@ -575,8 +579,8 @@ public class MediaControlPanel {
         } else {
             // Reset to default
             Log.d(TAG, "device is null. Not binding output chip.");
-            mSeamless.setEnabled(true);
-            mSeamless.setAlpha(1f);
+            mViewHolder.getSeamless().setEnabled(true);
+            mViewHolder.getSeamless().setAlpha(1f);
             iconView.setVisibility(View.GONE);
             deviceName.setText(com.android.internal.R.string.ext_media_seamless_action);
         }
@@ -601,17 +605,20 @@ public class MediaControlPanel {
      * Hide the media buttons and show only a restart button
      */
     protected void resetButtons() {
+        if (mViewHolder == null) {
+            return;
+        }
         // Hide all the old buttons
 
-        ConstraintSet expandedSet = mMediaNotifView.getConstraintSet(R.id.expanded);
-        ConstraintSet collapsedSet = mMediaNotifView.getConstraintSet(R.id.collapsed);
+        ConstraintSet expandedSet = mViewHolder.getPlayer().getConstraintSet(R.id.expanded);
+        ConstraintSet collapsedSet = mViewHolder.getPlayer().getConstraintSet(R.id.collapsed);
         for (int i = 1; i < ACTION_IDS.length; i++) {
             setVisibleAndAlpha(expandedSet, ACTION_IDS[i], false /*visible */);
             setVisibleAndAlpha(collapsedSet, ACTION_IDS[i], false /*visible */);
         }
 
         // Add a restart button
-        ImageButton btn = mMediaNotifView.findViewById(ACTION_IDS[0]);
+        ImageButton btn = mViewHolder.getAction0();
         btn.setOnClickListener(v -> {
             Log.d(TAG, "Attempting to restart session");
             if (mQSMediaBrowser != null) {
@@ -639,9 +646,9 @@ public class MediaControlPanel {
         mSeekBarViewModel.clearController();
         // TODO: fix guts
         //        View guts = mMediaNotifView.findViewById(R.id.media_guts);
-        View options = mMediaNotifView.findViewById(R.id.qs_media_controls_options);
+        View options = mViewHolder.getOptions();
 
-        mMediaNotifView.setOnLongClickListener(v -> {
+        mViewHolder.getPlayer().setOnLongClickListener(v -> {
             // Replace player view with close/cancel view
 //            guts.setVisibility(View.GONE);
             options.setVisibility(View.VISIBLE);
@@ -748,20 +755,28 @@ public class MediaControlPanel {
     protected void removePlayer() { }
 
     public void measure(@Nullable MediaMeasurementInput input) {
+        if (mViewHolder == null) {
+            return;
+        }
         if (input != null) {
             int width = input.getWidth();
             setPlayerWidth(width);
-            mMediaNotifView.measure(input.getWidthMeasureSpec(), input.getHeightMeasureSpec());
+            mViewHolder.getPlayer().measure(input.getWidthMeasureSpec(),
+                    input.getHeightMeasureSpec());
         }
     }
 
     public void setPlayerWidth(int width) {
-        ConstraintSet expandedSet = mMediaNotifView.getConstraintSet(R.id.expanded);
-        ConstraintSet collapsedSet = mMediaNotifView.getConstraintSet(R.id.collapsed);
+        if (mViewHolder == null) {
+            return;
+        }
+        MotionLayout view = mViewHolder.getPlayer();
+        ConstraintSet expandedSet = view.getConstraintSet(R.id.expanded);
+        ConstraintSet collapsedSet = view.getConstraintSet(R.id.collapsed);
         collapsedSet.setGuidelineBegin(R.id.view_width, width);
         expandedSet.setGuidelineBegin(R.id.view_width, width);
-        mMediaNotifView.updateState(R.id.collapsed, collapsedSet);
-        mMediaNotifView.updateState(R.id.expanded, expandedSet);
+        view.updateState(R.id.collapsed, collapsedSet);
+        view.updateState(R.id.expanded, expandedSet);
     }
 
     public void animatePendingSizeChange(long duration, long startDelay) {
