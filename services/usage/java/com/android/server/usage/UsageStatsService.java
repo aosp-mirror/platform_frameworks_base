@@ -1847,7 +1847,7 @@ public class UsageStatsService extends SystemService implements
             final DevicePolicyManagerInternal dpmInternal = getDpmInternal();
             if (!hasPermissions(callingPackage,
                     Manifest.permission.SUSPEND_APPS, Manifest.permission.OBSERVE_APP_USAGE)
-                    && (dpmInternal != null && !dpmInternal.isActiveSupervisionApp(callingUid))) {
+                    && (dpmInternal == null || !dpmInternal.isActiveSupervisionApp(callingUid))) {
                 throw new SecurityException("Caller must be the active supervision app or "
                         + "it must have both SUSPEND_APPS and OBSERVE_APP_USAGE permissions");
             }
@@ -1874,7 +1874,7 @@ public class UsageStatsService extends SystemService implements
             final DevicePolicyManagerInternal dpmInternal = getDpmInternal();
             if (!hasPermissions(callingPackage,
                     Manifest.permission.SUSPEND_APPS, Manifest.permission.OBSERVE_APP_USAGE)
-                    && (dpmInternal != null && !dpmInternal.isActiveSupervisionApp(callingUid))) {
+                    && (dpmInternal == null || !dpmInternal.isActiveSupervisionApp(callingUid))) {
                 throw new SecurityException("Caller must be the active supervision app or "
                         + "it must have both SUSPEND_APPS and OBSERVE_APP_USAGE permissions");
             }
