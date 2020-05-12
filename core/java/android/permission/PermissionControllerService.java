@@ -499,6 +499,11 @@ public abstract class PermissionControllerService extends Service {
 
             @Override
             protected void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
+                checkNotNull(fd, "fd");
+                checkNotNull(writer, "writer");
+
+                enforceSomePermissionsGrantedToCaller(Manifest.permission.GET_RUNTIME_PERMISSIONS);
+
                 PermissionControllerService.this.dump(fd, writer, args);
             }
         };
