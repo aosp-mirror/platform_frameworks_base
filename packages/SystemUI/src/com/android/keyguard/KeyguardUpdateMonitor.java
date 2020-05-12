@@ -33,6 +33,7 @@ import static com.android.systemui.DejankUtils.whitelistIpcs;
 
 import android.annotation.AnyThread;
 import android.annotation.MainThread;
+import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.app.AlarmManager;
@@ -247,8 +248,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     // Battery status
     private BatteryStatus mBatteryStatus;
 
-    @VisibleForTesting
-    protected StrongAuthTracker mStrongAuthTracker;
+    private StrongAuthTracker mStrongAuthTracker;
 
     private final ArrayList<WeakReference<KeyguardUpdateMonitorCallback>>
             mCallbacks = Lists.newArrayList();
@@ -1512,6 +1512,16 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         mUserTrustIsUsuallyManaged.delete(userId);
     }
 
+    @VisibleForTesting
+    protected void setStrongAuthTracker(@NonNull StrongAuthTracker tracker) {
+        if (mStrongAuthTracker != null) {
+            mLockPatternUtils.unregisterStrongAuthTracker(mStrongAuthTracker);
+        }
+
+        mStrongAuthTracker = tracker;
+        mLockPatternUtils.registerStrongAuthTracker(mStrongAuthTracker);
+    }
+
     private void registerRingerTracker() {
         mRingerModeTracker.getRingerMode().observeForever(mRingerModeObserver);
     }
@@ -1525,7 +1535,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             DumpManager dumpManager,
             RingerModeTracker ringerModeTracker,
             @Background Executor backgroundExecutor,
-            StatusBarStateController statusBarStateController) {
+            StatusBarStateController statusBarStateController,
+            LockPatternUtils lockPatternUtils) {
         mContext = context;
         mSubscriptionManager = SubscriptionManager.from(context);
         mDeviceProvisioned = isDeviceProvisionedInSettingsDb();
@@ -1534,6 +1545,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         mBroadcastDispatcher = broadcastDispatcher;
         mRingerModeTracker = ringerModeTracker;
         mStatusBarStateController = statusBarStateController;
+        mLockPatternUtils = lockPatternUtils;
         dumpManager.registerDumpable(getClass().getName(), this);
 
         mHandler = new Handler(mainLooper) {
@@ -1702,8 +1714,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
 
         mTrustManager = context.getSystemService(TrustManager.class);
         mTrustManager.registerTrustListener(this);
-        mLockPatternUtils = new LockPatternUtils(context);
-        mLockPatternUtils.registerStrongAuthTracker(mStrongAuthTracker);
+
+        setStrongAuthTracker(mStrongAuthTracker);
 
         mDreamManager = IDreamManager.Stub.asInterface(
                 ServiceManager.getService(DreamService.DREAM_SERVICE));
@@ -2846,6 +2858,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         mBroadcastDispatcher.unregisterReceiver(mBroadcastReceiver);
         mBroadcastDispatcher.unregisterReceiver(mBroadcastAllReceiver);
         mRingerModeTracker.getRingerMode().removeObserver(mRingerModeObserver);
+
+        mLockPatternUtils.unregisterStrongAuthTracker(mStrongAuthTracker);
+        mTrustManager.unregisterTrustListener(this);
 
         mHandler.removeCallbacksAndMessages(null);
     }
