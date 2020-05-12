@@ -16,10 +16,8 @@
 
 package com.android.systemui.media;
 
-import android.annotation.LayoutRes;
 import android.app.PendingIntent;
 import android.content.ComponentName;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -27,35 +25,38 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
-import android.graphics.ImageDecoder;
+import android.graphics.Canvas;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.Icon;
 import android.graphics.drawable.RippleDrawable;
-import android.media.MediaDescription;
-import android.media.MediaMetadata;
-import android.media.ThumbnailUtils;
 import android.media.session.MediaController;
 import android.media.session.MediaController.PlaybackInfo;
 import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
-import android.net.Uri;
 import android.service.media.MediaBrowserService;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnAttachStateChangeListener;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
+import androidx.annotation.UiThread;
+import androidx.constraintlayout.motion.widget.Key;
+import androidx.constraintlayout.motion.widget.KeyAttributes;
+import androidx.constraintlayout.motion.widget.KeyFrames;
+import androidx.constraintlayout.motion.widget.MotionLayout;
+import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.core.graphics.drawable.RoundedBitmapDrawable;
 import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory;
 
+import com.android.settingslib.Utils;
 import com.android.settingslib.media.LocalMediaManager;
 import com.android.settingslib.media.MediaDevice;
 import com.android.settingslib.media.MediaOutputSliceConstants;
@@ -64,23 +65,40 @@ import com.android.systemui.R;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.qs.QSMediaBrowser;
 import com.android.systemui.util.Assert;
+import com.android.systemui.util.concurrency.DelayableExecutor;
 
-import java.io.IOException;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executor;
 
 /**
- * Base media control panel for System UI
+ * A view controller used for Media Playback.
  */
 public class MediaControlPanel {
     private static final String TAG = "MediaControlPanel";
     @Nullable private final LocalMediaManager mLocalMediaManager;
+
+    // Button IDs for QS controls
+    static final int[] ACTION_IDS = {
+            R.id.action0,
+            R.id.action1,
+            R.id.action2,
+            R.id.action3,
+            R.id.action4
+    };
+
+    private final SeekBarViewModel mSeekBarViewModel;
+    private final SeekBarObserver mSeekBarObserver;
     private final Executor mForegroundExecutor;
     protected final Executor mBackgroundExecutor;
     private final ActivityStarter mActivityStarter;
+    private final LayoutAnimationHelper mLayoutAnimationHelper;
 
     private Context mContext;
-    protected LinearLayout mMediaNotifView;
+    private MotionLayout mMediaNotifView;
+    private final View mBackground;
     private View mSeamless;
     private MediaSession.Token mToken;
     private MediaController mController;
@@ -89,9 +107,11 @@ public class MediaControlPanel {
     private MediaDevice mDevice;
     protected ComponentName mServiceComponent;
     private boolean mIsRegistered = false;
+    private final List<KeyFrames> mKeyFrames;
     private String mKey;
-
-    private final int[] mActionIds;
+    private int mAlbumArtSize;
+    private int mAlbumArtRadius;
+    private int mViewWidth;
 
     public static final String MEDIA_PREFERENCES = "media_control_prefs";
     public static final String MEDIA_PREFERENCE_KEY = "browser_components";
@@ -99,22 +119,6 @@ public class MediaControlPanel {
     private boolean mCheckedForResumption = false;
     private boolean mIsRemotePlayback;
     private QSMediaBrowser mQSMediaBrowser;
-
-    // Button IDs used in notifications
-    protected static final int[] NOTIF_ACTION_IDS = {
-            com.android.internal.R.id.action0,
-            com.android.internal.R.id.action1,
-            com.android.internal.R.id.action2,
-            com.android.internal.R.id.action3,
-            com.android.internal.R.id.action4
-    };
-
-    // URI fields to try loading album art from
-    private static final String[] ART_URIS = {
-            MediaMetadata.METADATA_KEY_ALBUM_ART_URI,
-            MediaMetadata.METADATA_KEY_ART_URI,
-            MediaMetadata.METADATA_KEY_DISPLAY_ICON_URI
-    };
 
     private final MediaController.Callback mSessionCallback = new MediaController.Callback() {
         @Override
@@ -132,17 +136,6 @@ public class MediaControlPanel {
                 clearControls();
                 makeInactive();
             }
-        }
-    };
-
-    private final OnAttachStateChangeListener mStateListener = new OnAttachStateChangeListener() {
-        @Override
-        public void onViewAttachedToWindow(View unused) {
-            makeActive();
-        }
-        @Override
-        public void onViewDetachedFromWindow(View unused) {
-            makeInactive();
         }
     };
 
@@ -175,38 +168,62 @@ public class MediaControlPanel {
      * @param context
      * @param parent
      * @param routeManager Manager used to listen for device change events.
-     * @param layoutId layout resource to use for this control panel
-     * @param actionIds resource IDs for action buttons in the layout
      * @param foregroundExecutor foreground executor
      * @param backgroundExecutor background executor, used for processing artwork
      * @param activityStarter activity starter
      */
     public MediaControlPanel(Context context, ViewGroup parent,
-            @Nullable LocalMediaManager routeManager, @LayoutRes int layoutId, int[] actionIds,
-            Executor foregroundExecutor, Executor backgroundExecutor,
-            ActivityStarter activityStarter) {
+            @Nullable LocalMediaManager routeManager, Executor foregroundExecutor,
+            DelayableExecutor backgroundExecutor, ActivityStarter activityStarter) {
         mContext = context;
         LayoutInflater inflater = LayoutInflater.from(mContext);
-        mMediaNotifView = (LinearLayout) inflater.inflate(layoutId, parent, false);
-        // TODO(b/150854549): removeOnAttachStateChangeListener when this doesn't inflate views
-        // mStateListener shouldn't need to be unregistered since this object shares the same
-        // lifecycle with the inflated view. It would be better, however, if this controller used an
-        // attach/detach of views instead of inflating them in the constructor, which would allow
-        // mStateListener to be unregistered in detach.
-        mMediaNotifView.addOnAttachStateChangeListener(mStateListener);
+        mMediaNotifView = (MotionLayout) inflater.inflate(R.layout.qs_media_panel, parent, false);
+        mBackground = mMediaNotifView.findViewById(R.id.media_background);
+        mLayoutAnimationHelper = new LayoutAnimationHelper(mMediaNotifView);
+        GoneChildrenHideHelper.clipGoneChildrenOnLayout(mMediaNotifView);
+        mKeyFrames = mMediaNotifView.getDefinedTransitions().get(0).getKeyFrameList();
         mLocalMediaManager = routeManager;
-        mActionIds = actionIds;
         mForegroundExecutor = foregroundExecutor;
         mBackgroundExecutor = backgroundExecutor;
         mActivityStarter = activityStarter;
+        mSeekBarViewModel = new SeekBarViewModel(backgroundExecutor);
+        mSeekBarObserver = new SeekBarObserver(getView());
+        mSeekBarViewModel.getProgress().observeForever(mSeekBarObserver);
+        SeekBar bar = getView().findViewById(R.id.media_progress_bar);
+        bar.setOnSeekBarChangeListener(mSeekBarViewModel.getSeekBarListener());
+        bar.setOnTouchListener(mSeekBarViewModel.getSeekBarTouchListener());
+        loadDimens();
+    }
+
+    public void onDestroy() {
+        mSeekBarViewModel.getProgress().removeObserver(mSeekBarObserver);
+        makeInactive();
+    }
+
+    private void loadDimens() {
+        mAlbumArtRadius = mContext.getResources().getDimensionPixelSize(
+                Utils.getThemeAttr(mContext, android.R.attr.dialogCornerRadius));
+        mAlbumArtSize = mContext.getResources().getDimensionPixelSize(R.dimen.qs_media_album_size);
     }
 
     /**
      * Get the view used to display media controls
      * @return the view
      */
-    public View getView() {
+    public MotionLayout getView() {
         return mMediaNotifView;
+    }
+
+    /**
+     * Sets the listening state of the player.
+     *
+     * Should be set to true when the QS panel is open. Otherwise, false. This is a signal to avoid
+     * unnecessary work when the QS panel is closed.
+     *
+     * @param listening True when player should be active. Otherwise, false.
+     */
+    public void setListening(boolean listening) {
+        mSeekBarViewModel.setListening(listening);
     }
 
     /**
@@ -218,20 +235,12 @@ public class MediaControlPanel {
     }
 
     /**
-     * Update the media panel view for the given media session
-     * @param token
-     * @param iconDrawable
-     * @param largeIcon
-     * @param iconColor
-     * @param bgColor
-     * @param contentIntent
-     * @param appNameString
-     * @param key
+     * Bind this view based on the data given
      */
-    public void setMediaSession(MediaSession.Token token, Drawable iconDrawable, Icon largeIcon,
-            int iconColor, int bgColor, PendingIntent contentIntent, String appNameString,
-            String key) {
-        // Ensure that component names are updated if token has changed
+    public void bind(@NotNull MediaData data) {
+        MediaSession.Token token = data.getToken();
+        mForegroundColor = data.getForegroundColor();
+        mBackgroundColor = data.getBackgroundColor();
         if (mToken == null || !mToken.equals(token)) {
             if (mQSMediaBrowser != null) {
                 Log.d(TAG, "Disconnecting old media browser");
@@ -243,20 +252,21 @@ public class MediaControlPanel {
             mCheckedForResumption = false;
         }
 
-        mForegroundColor = iconColor;
-        mBackgroundColor = bgColor;
         mController = new MediaController(mContext, mToken);
-        mKey = key;
+
+        ConstraintSet expandedSet = mMediaNotifView.getConstraintSet(R.id.expanded);
+        ConstraintSet collapsedSet = mMediaNotifView.getConstraintSet(R.id.collapsed);
 
         // Try to find a browser service component for this app
         // TODO also check for a media button receiver intended for restarting (b/154127084)
         // Only check if we haven't tried yet or the session token changed
-        final String pkgName = mController.getPackageName();
+        final String pkgName = data.getPackageName();
         if (mServiceComponent == null && !mCheckedForResumption) {
             Log.d(TAG, "Checking for service component");
             PackageManager pm = mContext.getPackageManager();
             Intent resumeIntent = new Intent(MediaBrowserService.SERVICE_INTERFACE);
             List<ResolveInfo> resumeInfo = pm.queryIntentServices(resumeIntent, 0);
+            // TODO: look into this resumption
             if (resumeInfo != null) {
                 for (ResolveInfo inf : resumeInfo) {
                     if (inf.serviceInfo.packageName.equals(mController.getPackageName())) {
@@ -271,25 +281,51 @@ public class MediaControlPanel {
 
         mController.registerCallback(mSessionCallback);
 
-        mMediaNotifView.setBackgroundTintList(ColorStateList.valueOf(mBackgroundColor));
+        mMediaNotifView.requireViewById(R.id.media_background).setBackgroundTintList(
+                ColorStateList.valueOf(mBackgroundColor));
 
         // Click action
-        if (contentIntent != null) {
+        PendingIntent clickIntent = data.getClickIntent();
+        if (clickIntent != null) {
             mMediaNotifView.setOnClickListener(v -> {
-                mActivityStarter.postStartActivityDismissingKeyguard(contentIntent);
+                mActivityStarter.postStartActivityDismissingKeyguard(clickIntent);
             });
         }
 
+        ImageView albumView = mMediaNotifView.findViewById(R.id.album_art);
+        // TODO: migrate this to a view with rounded corners instead of baking the rounding
+        // into the bitmap
+        Drawable artwork = createRoundedBitmap(data.getArtwork());
+        albumView.setImageDrawable(artwork);
+
         // App icon
-        ImageView appIcon = mMediaNotifView.findViewById(R.id.icon);
+        ImageView appIcon = mMediaNotifView.requireViewById(R.id.icon);
+        Drawable iconDrawable = data.getAppIcon().mutate();
         iconDrawable.setTint(mForegroundColor);
         appIcon.setImageDrawable(iconDrawable);
+
+        // Song name
+        TextView titleText = mMediaNotifView.requireViewById(R.id.header_title);
+        titleText.setText(data.getSong());
+        titleText.setTextColor(data.getForegroundColor());
+
+        // App title
+        TextView appName = mMediaNotifView.requireViewById(R.id.app_name);
+        appName.setText(data.getApp());
+        appName.setTextColor(mForegroundColor);
+
+        // Artist name
+        TextView artistText = mMediaNotifView.requireViewById(R.id.header_artist);
+        artistText.setText(data.getArtist());
+        artistText.setTextColor(mForegroundColor);
 
         // Transfer chip
         mSeamless = mMediaNotifView.findViewById(R.id.media_seamless);
         if (mSeamless != null) {
             if (mLocalMediaManager != null) {
                 mSeamless.setVisibility(View.VISIBLE);
+                setVisibleAndAlpha(collapsedSet, R.id.media_seamless, true /*visible */);
+                setVisibleAndAlpha(expandedSet, R.id.media_seamless, true /*visible */);
                 updateDevice(mLocalMediaManager.getCurrentConnectedDevice());
                 mSeamless.setOnClickListener(v -> {
                     final Intent intent = new Intent()
@@ -311,43 +347,110 @@ public class MediaControlPanel {
             Log.d(TAG, "PlaybackInfo was null. Defaulting to local playback.");
             mIsRemotePlayback = false;
         }
+        List<Integer> actionsWhenCollapsed = data.getActionsToShowInCompact();
+        // Media controls
+        int i = 0;
+        List<MediaAction> actionIcons = data.getActions();
+        for (; i < actionIcons.size() && i < ACTION_IDS.length; i++) {
+            int actionId = ACTION_IDS[i];
+            final ImageButton button = mMediaNotifView.findViewById(actionId);
+            MediaAction mediaAction = actionIcons.get(i);
+            button.setImageDrawable(mediaAction.getDrawable());
+            button.setContentDescription(mediaAction.getContentDescription());
+            button.setImageTintList(ColorStateList.valueOf(mForegroundColor));
+            PendingIntent actionIntent = mediaAction.getIntent();
+
+            if (mBackground.getBackground() instanceof IlluminationDrawable) {
+                ((IlluminationDrawable) mBackground.getBackground())
+                        .setupTouch(button, mMediaNotifView);
+            }
+
+            button.setOnClickListener(v -> {
+                if (actionIntent != null) {
+                    try {
+                        actionIntent.send();
+                    } catch (PendingIntent.CanceledException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+            boolean visibleInCompat = actionsWhenCollapsed.contains(i);
+            updateKeyFrameVisibility(actionId, visibleInCompat);
+            setVisibleAndAlpha(collapsedSet, actionId, visibleInCompat);
+            setVisibleAndAlpha(expandedSet, actionId, true /*visible */);
+        }
+
+        // Hide any unused buttons
+        for (; i < ACTION_IDS.length; i++) {
+            setVisibleAndAlpha(expandedSet, ACTION_IDS[i], false /*visible */);
+            setVisibleAndAlpha(collapsedSet, ACTION_IDS[i], false /*visible */);
+        }
+
+        // Seek Bar
+        final MediaController controller = getController();
+        mBackgroundExecutor.execute(
+                () -> mSeekBarViewModel.updateController(controller, data.getForegroundColor()));
+
+        // Set up long press menu
+        // TODO: b/156036025 bring back media guts
 
         makeActive();
 
-        // App title (not in mini player)
-        TextView appName = mMediaNotifView.findViewById(R.id.app_name);
-        if (appName != null) {
-            appName.setText(appNameString);
-            appName.setTextColor(mForegroundColor);
+        // Update both constraint sets to regenerate the animation.
+        mMediaNotifView.updateState(R.id.collapsed, collapsedSet);
+        mMediaNotifView.updateState(R.id.expanded, expandedSet);
+    }
+
+    @UiThread
+    private Drawable createRoundedBitmap(Icon icon) {
+        if (icon == null) {
+            return null;
         }
-
-        // Can be null!
-        MediaMetadata mediaMetadata = mController.getMetadata();
-
-        ImageView albumView = mMediaNotifView.findViewById(R.id.album_art);
-        if (albumView != null) {
-            // Resize art in a background thread
-            mBackgroundExecutor.execute(() -> processAlbumArt(mediaMetadata, largeIcon, albumView));
+        // Let's scale down the View, such that the content always nicely fills the view.
+        // ThumbnailUtils actually scales it down such that it may not be filled for odd aspect
+        // ratios
+        Drawable drawable = icon.loadDrawable(mContext);
+        float aspectRatio = drawable.getIntrinsicHeight() / (float) drawable.getIntrinsicWidth();
+        Rect bounds;
+        if (aspectRatio > 1.0f) {
+            bounds = new Rect(0, 0, mAlbumArtSize, (int) (mAlbumArtSize * aspectRatio));
+        } else {
+            bounds = new Rect(0, 0, (int) (mAlbumArtSize / aspectRatio), mAlbumArtSize);
         }
-
-        // Song name
-        TextView titleText = mMediaNotifView.findViewById(R.id.header_title);
-        String songName = "";
-        if (mediaMetadata != null) {
-            songName = mediaMetadata.getString(MediaMetadata.METADATA_KEY_TITLE);
+        if (bounds.width() > mAlbumArtSize || bounds.height() > mAlbumArtSize) {
+            float offsetX = (bounds.width() - mAlbumArtSize) / 2.0f;
+            float offsetY = (bounds.height() - mAlbumArtSize) / 2.0f;
+            bounds.offset((int) -offsetX,(int) -offsetY);
         }
-        titleText.setText(songName);
-        titleText.setTextColor(mForegroundColor);
+        drawable.setBounds(bounds);
+        Bitmap scaled = Bitmap.createBitmap(mAlbumArtSize, mAlbumArtSize,
+                Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(scaled);
+        drawable.draw(canvas);
+        RoundedBitmapDrawable artwork = RoundedBitmapDrawableFactory.create(
+                mContext.getResources(), scaled);
+        artwork.setCornerRadius(mAlbumArtRadius);
+        return artwork;
+    }
 
-        // Artist name (not in mini player)
-        TextView artistText = mMediaNotifView.findViewById(R.id.header_artist);
-        if (artistText != null) {
-            String artistName = "";
-            if (mediaMetadata != null) {
-                artistName = mediaMetadata.getString(MediaMetadata.METADATA_KEY_ARTIST);
+    /**
+     * Updates the keyframe visibility such that only views that are not visible actually go
+     * through a transition and fade in.
+     *
+     * @param actionId the id to change
+     * @param visible is the view visible
+     */
+    private void updateKeyFrameVisibility(int actionId, boolean visible) {
+        for (int i = 0; i < mKeyFrames.size(); i++) {
+            KeyFrames keyframe = mKeyFrames.get(i);
+            ArrayList<Key> viewKeyFrames = keyframe.getKeyFramesForView(actionId);
+            for (int j = 0; j < viewKeyFrames.size(); j++) {
+                Key key = viewKeyFrames.get(j);
+                if (key instanceof KeyAttributes) {
+                    KeyAttributes attributes = (KeyAttributes) key;
+                    attributes.setValue("alpha", visible ? 1.0f : 0.0f);
+                }
             }
-            artistText.setText(artistName);
-            artistText.setTextColor(mForegroundColor);
         }
     }
 
@@ -418,120 +521,6 @@ public class MediaControlPanel {
         }
 
         return (state.getState() == PlaybackState.STATE_PLAYING);
-    }
-
-    /**
-     * Process album art for layout
-     * @param description media description
-     * @param albumView view to hold the album art
-     */
-    protected void processAlbumArt(MediaDescription description, ImageView albumView) {
-        Bitmap albumArt = null;
-
-        // First try loading from URI
-        albumArt = loadBitmapFromUri(description.getIconUri());
-
-        // Then check bitmap
-        if (albumArt == null) {
-            albumArt = description.getIconBitmap();
-        }
-
-        processAlbumArtInternal(albumArt, albumView);
-    }
-
-    /**
-     * Process album art for layout
-     * @param metadata media metadata
-     * @param largeIcon from notification, checked as a fallback if metadata does not have art
-     * @param albumView view to hold the album art
-     */
-    private void processAlbumArt(MediaMetadata metadata, Icon largeIcon, ImageView albumView) {
-        Bitmap albumArt = null;
-
-        if (metadata != null) {
-            // First look in URI fields
-            for (String field : ART_URIS) {
-                String uriString = metadata.getString(field);
-                if (!TextUtils.isEmpty(uriString)) {
-                    albumArt = loadBitmapFromUri(Uri.parse(uriString));
-                    if (albumArt != null) {
-                        Log.d(TAG, "loaded art from " + field);
-                        break;
-                    }
-                }
-            }
-
-            // Then check bitmap field
-            if (albumArt == null) {
-                albumArt = metadata.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART);
-            }
-        }
-
-        // Finally try the notification's largeIcon
-        if (albumArt == null && largeIcon != null) {
-            albumArt = largeIcon.getBitmap();
-        }
-
-        processAlbumArtInternal(albumArt, albumView);
-    }
-
-    /**
-     * Load a bitmap from a URI
-     * @param uri
-     * @return bitmap, or null if couldn't be loaded
-     */
-    private Bitmap loadBitmapFromUri(Uri uri) {
-        // ImageDecoder requires a scheme of the following types
-        if (uri.getScheme() == null) {
-            return null;
-        }
-
-        if (!uri.getScheme().equals(ContentResolver.SCHEME_CONTENT)
-                && !uri.getScheme().equals(ContentResolver.SCHEME_ANDROID_RESOURCE)
-                && !uri.getScheme().equals(ContentResolver.SCHEME_FILE)) {
-            return null;
-        }
-
-        ImageDecoder.Source source = ImageDecoder.createSource(mContext.getContentResolver(), uri);
-        try {
-            return ImageDecoder.decodeBitmap(source);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    /**
-     * Resize and crop the image if provided and update the control view
-     * @param albumArt Bitmap of art to display, or null to hide view
-     * @param albumView View that will hold the art
-     */
-    private void processAlbumArtInternal(@Nullable Bitmap albumArt, ImageView albumView) {
-        // Resize
-        RoundedBitmapDrawable roundedDrawable = null;
-        if (albumArt != null) {
-            float radius = mContext.getResources().getDimension(R.dimen.qs_media_corner_radius);
-            Bitmap original = albumArt.copy(Bitmap.Config.ARGB_8888, true);
-            int albumSize = (int) mContext.getResources().getDimension(
-                    R.dimen.qs_media_album_size);
-            Bitmap scaled = ThumbnailUtils.extractThumbnail(original, albumSize, albumSize);
-            roundedDrawable = RoundedBitmapDrawableFactory.create(mContext.getResources(), scaled);
-            roundedDrawable.setCornerRadius(radius);
-        } else {
-            Log.e(TAG, "No album art available");
-        }
-
-        // Now that it's resized, update the UI
-        final RoundedBitmapDrawable result = roundedDrawable;
-        mForegroundExecutor.execute(() -> {
-            if (result != null) {
-                albumView.setImageDrawable(result);
-                albumView.setVisibility(View.VISIBLE);
-            } else {
-                albumView.setImageDrawable(null);
-                albumView.setVisibility(View.GONE);
-            }
-        });
     }
 
     /**
@@ -613,15 +602,16 @@ public class MediaControlPanel {
      */
     protected void resetButtons() {
         // Hide all the old buttons
-        for (int i = 0; i < mActionIds.length; i++) {
-            ImageButton thisBtn = mMediaNotifView.findViewById(mActionIds[i]);
-            if (thisBtn != null) {
-                thisBtn.setVisibility(View.GONE);
-            }
+
+        ConstraintSet expandedSet = mMediaNotifView.getConstraintSet(R.id.expanded);
+        ConstraintSet collapsedSet = mMediaNotifView.getConstraintSet(R.id.collapsed);
+        for (int i = 1; i < ACTION_IDS.length; i++) {
+            setVisibleAndAlpha(expandedSet, ACTION_IDS[i], false /*visible */);
+            setVisibleAndAlpha(collapsedSet, ACTION_IDS[i], false /*visible */);
         }
 
         // Add a restart button
-        ImageButton btn = mMediaNotifView.findViewById(mActionIds[0]);
+        ImageButton btn = mMediaNotifView.findViewById(ACTION_IDS[0]);
         btn.setOnClickListener(v -> {
             Log.d(TAG, "Attempting to restart session");
             if (mQSMediaBrowser != null) {
@@ -643,7 +633,25 @@ public class MediaControlPanel {
         });
         btn.setImageDrawable(mContext.getResources().getDrawable(R.drawable.lb_ic_play));
         btn.setImageTintList(ColorStateList.valueOf(mForegroundColor));
-        btn.setVisibility(View.VISIBLE);
+        setVisibleAndAlpha(expandedSet, ACTION_IDS[0], true /*visible */);
+        setVisibleAndAlpha(collapsedSet, ACTION_IDS[0], true /*visible */);
+
+        mSeekBarViewModel.clearController();
+        // TODO: fix guts
+        //        View guts = mMediaNotifView.findViewById(R.id.media_guts);
+        View options = mMediaNotifView.findViewById(R.id.qs_media_controls_options);
+
+        mMediaNotifView.setOnLongClickListener(v -> {
+            // Replace player view with close/cancel view
+//            guts.setVisibility(View.GONE);
+            options.setVisibility(View.VISIBLE);
+            return true; // consumed click
+        });
+    }
+
+    private void setVisibleAndAlpha(ConstraintSet set, int actionId, boolean visible) {
+        set.setVisibility(actionId, visible? ConstraintSet.VISIBLE : ConstraintSet.GONE);
+        set.setAlpha(actionId, visible ? 1.0f : 0.0f);
     }
 
     private void makeActive() {
@@ -667,7 +675,6 @@ public class MediaControlPanel {
             mIsRegistered = false;
         }
     }
-
     /**
      * Verify that we can connect to the given component with a MediaBrowser, and if so, add that
      * component to the list of resumption components
@@ -739,4 +746,25 @@ public class MediaControlPanel {
      * Called when a player can't be resumed to give it an opportunity to hide or remove itself
      */
     protected void removePlayer() { }
+
+    public void measure(@Nullable MediaMeasurementInput input) {
+        if (input != null) {
+            int width = input.getWidth();
+            setPlayerWidth(width);
+            mMediaNotifView.measure(input.getWidthMeasureSpec(), input.getHeightMeasureSpec());
+        }
+    }
+
+    public void setPlayerWidth(int width) {
+        ConstraintSet expandedSet = mMediaNotifView.getConstraintSet(R.id.expanded);
+        ConstraintSet collapsedSet = mMediaNotifView.getConstraintSet(R.id.collapsed);
+        collapsedSet.setGuidelineBegin(R.id.view_width, width);
+        expandedSet.setGuidelineBegin(R.id.view_width, width);
+        mMediaNotifView.updateState(R.id.collapsed, collapsedSet);
+        mMediaNotifView.updateState(R.id.expanded, expandedSet);
+    }
+
+    public void animatePendingSizeChange(long duration, long startDelay) {
+        mLayoutAnimationHelper.animatePendingSizeChange(duration, startDelay);
+    }
 }

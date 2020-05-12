@@ -42,9 +42,9 @@ import android.view.ViewGroup;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.keyguard.KeyguardMediaPlayer;
 import com.android.systemui.ActivityStarterDelegate;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.media.KeyguardMediaController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager;
@@ -74,7 +74,7 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
     @Mock private StatusBarStateController mStatusBarStateController;
     @Mock private ConfigurationController mConfigurationController;
     @Mock private PeopleHubViewAdapter mPeopleHubAdapter;
-    @Mock private KeyguardMediaPlayer mKeyguardMediaPlayer;
+    @Mock private KeyguardMediaController mKeyguardMediaController;
     @Mock private NotificationSectionsFeatureManager mSectionsFeatureManager;
     @Mock private NotificationRowComponent mNotificationRowComponent;
     @Mock private ActivatableNotificationViewController mActivatableNotificationViewController;
@@ -93,7 +93,7 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
                         mStatusBarStateController,
                         mConfigurationController,
                         mPeopleHubAdapter,
-                        mKeyguardMediaPlayer,
+                        mKeyguardMediaController,
                         mSectionsFeatureManager
                 );
         // Required in order for the header inflation to work properly
@@ -365,38 +365,6 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
 
         // Then the media controls are added after HEADS_UP
         verify(mNssl).addView(mSectionsManager.getMediaControlsView(), 1);
-    }
-
-    @Test
-    public void testMediaControls_RemoveWhenExitKeyguard() {
-        enableMediaControls();
-
-        // GIVEN a stack with media controls
-        setStackState(ChildType.MEDIA_CONTROLS, ChildType.ALERTING, ChildType.GENTLE_HEADER,
-                ChildType.GENTLE);
-
-        // WHEN we leave the keyguard
-        when(mStatusBarStateController.getState()).thenReturn(StatusBarState.SHADE);
-        mSectionsManager.updateSectionBoundaries();
-
-        // Then the media controls is removed
-        verify(mNssl).removeView(mSectionsManager.getMediaControlsView());
-    }
-
-    @Test
-    public void testMediaControls_RemoveWhenPullDownShade() {
-        enableMediaControls();
-
-        // GIVEN a stack with media controls
-        setStackState(ChildType.MEDIA_CONTROLS, ChildType.ALERTING, ChildType.GENTLE_HEADER,
-                ChildType.GENTLE);
-
-        // WHEN we pull down the shade on the keyguard
-        when(mStatusBarStateController.getState()).thenReturn(StatusBarState.SHADE_LOCKED);
-        mSectionsManager.updateSectionBoundaries();
-
-        // Then the media controls is removed
-        verify(mNssl).removeView(mSectionsManager.getMediaControlsView());
     }
 
     private void enablePeopleFiltering() {
