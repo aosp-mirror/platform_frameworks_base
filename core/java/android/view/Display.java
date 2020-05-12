@@ -104,6 +104,14 @@ public final class Display {
     private int mCachedAppHeightCompat;
 
     /**
+     * Indicates that the application is started in a different rotation than the real display, so
+     * the display information may be adjusted. That ensures the methods {@link #getRotation},
+     * {@link #getRealSize}, {@link #getRealMetrics}, and {@link #getCutout} are consistent with how
+     * the application window is laid out.
+     */
+    private boolean mMayAdjustByFixedRotation;
+
+    /**
      * The default Display id, which is the id of the primary display assuming there is one.
      */
     public static final int DEFAULT_DISPLAY = 0;
@@ -804,7 +812,9 @@ public final class Display {
     public int getRotation() {
         synchronized (this) {
             updateDisplayInfoLocked();
-            return mDisplayInfo.rotation;
+            return mMayAdjustByFixedRotation
+                    ? getDisplayAdjustments().getRotation(mDisplayInfo.rotation)
+                    : mDisplayInfo.rotation;
         }
     }
 
@@ -828,7 +838,9 @@ public final class Display {
     public DisplayCutout getCutout() {
         synchronized (this) {
             updateDisplayInfoLocked();
-            return mDisplayInfo.displayCutout;
+            return mMayAdjustByFixedRotation
+                    ? getDisplayAdjustments().getDisplayCutout(mDisplayInfo.displayCutout)
+                    : mDisplayInfo.displayCutout;
         }
     }
 
@@ -1140,6 +1152,9 @@ public final class Display {
             updateDisplayInfoLocked();
             outSize.x = mDisplayInfo.logicalWidth;
             outSize.y = mDisplayInfo.logicalHeight;
+            if (mMayAdjustByFixedRotation) {
+                getDisplayAdjustments().adjustSize(outSize, mDisplayInfo.rotation);
+            }
         }
     }
 
@@ -1159,6 +1174,9 @@ public final class Display {
             updateDisplayInfoLocked();
             mDisplayInfo.getLogicalMetrics(outMetrics,
                     CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO, null);
+            if (mMayAdjustByFixedRotation) {
+                getDisplayAdjustments().adjustMetrics(outMetrics, mDisplayInfo.rotation);
+            }
         }
     }
 
@@ -1225,6 +1243,11 @@ public final class Display {
                 }
             }
         }
+
+        // TODO(b/147213487): Replace the condition with per-resources state.
+        mMayAdjustByFixedRotation = mIsValid && mResources != null
+                && mResources.getConfiguration().windowConfiguration.getRotation()
+                != mDisplayInfo.rotation;
     }
 
     private void updateCachedAppSizeIfNeededLocked() {
@@ -1243,9 +1266,12 @@ public final class Display {
     public String toString() {
         synchronized (this) {
             updateDisplayInfoLocked();
-            mDisplayInfo.getAppMetrics(mTempMetrics, getDisplayAdjustments());
+            final DisplayAdjustments adjustments = getDisplayAdjustments();
+            mDisplayInfo.getAppMetrics(mTempMetrics, adjustments);
             return "Display id " + mDisplayId + ": " + mDisplayInfo
-                    + ", " + mTempMetrics + ", isValid=" + mIsValid;
+                    + (mMayAdjustByFixedRotation
+                            ? (", " + adjustments.getFixedRotationAdjustments() + ", ") : ", ")
+                    + mTempMetrics + ", isValid=" + mIsValid;
         }
     }
 
