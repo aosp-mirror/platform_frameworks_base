@@ -66,15 +66,6 @@ using std::vector;
 #define ATTRIBUTION_CHAIN_TYPE 0x09
 #define ERROR_TYPE 0x0F
 
-LogEvent::LogEvent(const LogEvent& event) {
-    mTagId = event.mTagId;
-    mLogUid = event.mLogUid;
-    mLogPid = event.mLogPid;
-    mElapsedTimestampNs = event.mElapsedTimestampNs;
-    mLogdTimestampNs = event.mLogdTimestampNs;
-    mValues = event.mValues;
-}
-
 LogEvent::LogEvent(int32_t uid, int32_t pid)
     : mLogdTimestampNs(time(nullptr)), mLogUid(uid), mLogPid(pid) {
 }
