@@ -19,8 +19,6 @@ package com.android.keyguard;
 import static android.telephony.PhoneStateListener.LISTEN_ACTIVE_DATA_SUBSCRIPTION_ID_CHANGE;
 import static android.telephony.PhoneStateListener.LISTEN_NONE;
 
-import static com.android.systemui.DejankUtils.whitelistIpcs;
-
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -47,6 +45,7 @@ import com.android.systemui.keyguard.WakefulnessLifecycle;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.inject.Inject;
 
@@ -61,9 +60,11 @@ public class CarrierTextController {
 
     private final boolean mIsEmergencyCallCapable;
     private final Handler mMainHandler;
+    private final Handler mBgHandler;
     private boolean mTelephonyCapable;
     private boolean mShowMissingSim;
     private boolean mShowAirplaneMode;
+    private final AtomicBoolean mNetworkSupported = new AtomicBoolean();
     @VisibleForTesting
     protected KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private WifiManager mWifiManager;
@@ -78,12 +79,14 @@ public class CarrierTextController {
             new WakefulnessLifecycle.Observer() {
                 @Override
                 public void onFinishedWakingUp() {
-                    if (mCarrierTextCallback != null) mCarrierTextCallback.finishedWakingUp();
+                    final CarrierTextCallback callback = mCarrierTextCallback;
+                    if (callback != null) callback.finishedWakingUp();
                 }
 
                 @Override
                 public void onStartedGoingToSleep() {
-                    if (mCarrierTextCallback != null) mCarrierTextCallback.startedGoingToSleep();
+                    final CarrierTextCallback callback = mCarrierTextCallback;
+                    if (callback != null) callback.startedGoingToSleep();
                 }
             };
 
@@ -131,7 +134,7 @@ public class CarrierTextController {
         @Override
         public void onActiveDataSubscriptionIdChanged(int subId) {
             mActiveMobileDataSubscription = subId;
-            if (mKeyguardUpdateMonitor != null) {
+            if (mNetworkSupported.get() && mCarrierTextCallback != null) {
                 updateCarrierText();
             }
         }
@@ -173,6 +176,17 @@ public class CarrierTextController {
         mSimSlotsNumber = getTelephonyManager().getSupportedModemCount();
         mSimErrorState = new boolean[mSimSlotsNumber];
         mMainHandler = Dependency.get(Dependency.MAIN_HANDLER);
+        mBgHandler = new Handler(Dependency.get(Dependency.BG_LOOPER));
+        mKeyguardUpdateMonitor = Dependency.get(KeyguardUpdateMonitor.class);
+        mBgHandler.post(() -> {
+            boolean supported = ConnectivityManager.from(mContext).isNetworkSupported(
+                    ConnectivityManager.TYPE_MOBILE);
+            if (supported && mNetworkSupported.compareAndSet(false, supported)) {
+                // This will set/remove the listeners appropriately. Note that it will never double
+                // add the listeners.
+                handleSetListening(mCarrierTextCallback);
+            }
+        });
     }
 
     private TelephonyManager getTelephonyManager() {
@@ -221,46 +235,49 @@ public class CarrierTextController {
     }
 
     /**
-     * Sets the listening status of this controller. If the callback is null, it is set to
-     * not listening
+     * This may be called internally after retrieving the correct value of {@code mNetworkSupported}
+     * (assumed false to start). In that case, the following happens:
+     * <ul>
+     *     <li> If there was a registered callback, and the network is supported, it will register
+     *          listeners.
+     *     <li> If there was not a registered callback, it will try to remove unregistered listeners
+     *          which is a no-op
+     * </ul>
      *
-     * @param callback Callback to provide text updates
+     * This call will always be processed in a background thread.
      */
-    public void setListening(CarrierTextCallback callback) {
+    private void handleSetListening(CarrierTextCallback callback) {
         TelephonyManager telephonyManager = getTelephonyManager();
         if (callback != null) {
             mCarrierTextCallback = callback;
-            // TODO(b/140034799)
-            if (whitelistIpcs(() -> ConnectivityManager.from(mContext).isNetworkSupported(
-                    ConnectivityManager.TYPE_MOBILE))) {
-                mKeyguardUpdateMonitor = Dependency.get(KeyguardUpdateMonitor.class);
+            if (mNetworkSupported.get()) {
                 // Keyguard update monitor expects callbacks from main thread
-                mMainHandler.post(() -> {
-                    if (mKeyguardUpdateMonitor != null) {
-                        mKeyguardUpdateMonitor.registerCallback(mCallback);
-                    }
-                });
+                mMainHandler.post(() -> mKeyguardUpdateMonitor.registerCallback(mCallback));
                 mWakefulnessLifecycle.addObserver(mWakefulnessObserver);
                 telephonyManager.listen(mPhoneStateListener,
                         LISTEN_ACTIVE_DATA_SUBSCRIPTION_ID_CHANGE);
             } else {
                 // Don't listen and clear out the text when the device isn't a phone.
-                mKeyguardUpdateMonitor = null;
-                callback.updateCarrierInfo(new CarrierTextCallbackInfo("", null, false, null));
+                mMainHandler.post(() -> callback.updateCarrierInfo(
+                        new CarrierTextCallbackInfo("", null, false, null)
+                ));
             }
         } else {
             mCarrierTextCallback = null;
-            if (mKeyguardUpdateMonitor != null) {
-                // Keyguard update monitor expects callbacks from main thread
-                mMainHandler.post(() -> {
-                    if (mKeyguardUpdateMonitor != null) {
-                        mKeyguardUpdateMonitor.removeCallback(mCallback);
-                    }
-                });
-                mWakefulnessLifecycle.removeObserver(mWakefulnessObserver);
-            }
+            mMainHandler.post(() -> mKeyguardUpdateMonitor.removeCallback(mCallback));
+            mWakefulnessLifecycle.removeObserver(mWakefulnessObserver);
             telephonyManager.listen(mPhoneStateListener, LISTEN_NONE);
         }
+    }
+
+    /**
+     * Sets the listening status of this controller. If the callback is null, it is set to
+     * not listening.
+     *
+     * @param callback Callback to provide text updates
+     */
+    public void setListening(CarrierTextCallback callback) {
+        mBgHandler.post(() -> handleSetListening(callback));
     }
 
     protected List<SubscriptionInfo> getSubscriptionInfo() {
@@ -500,7 +517,7 @@ public class CarrierTextController {
      */
     private CarrierTextController.StatusMode getStatusForIccState(int simState) {
         final boolean missingAndNotProvisioned =
-                !Dependency.get(KeyguardUpdateMonitor.class).isDeviceProvisioned()
+                !mKeyguardUpdateMonitor.isDeviceProvisioned()
                         && (simState == TelephonyManager.SIM_STATE_ABSENT
                         || simState == TelephonyManager.SIM_STATE_PERM_DISABLED);
 
