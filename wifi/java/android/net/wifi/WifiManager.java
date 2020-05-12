@@ -2106,22 +2106,6 @@ public class WifiManager {
     }
 
     /**
-     * Deauthenticate and set the re-authentication hold off time for the current network
-     * @param holdoff hold off time in milliseconds
-     * @param ess set if the hold off pertains to an ESS rather than a BSS
-     * @hide
-     *
-     * TODO (140167680): This needs to be removed, the implementation is empty!
-     */
-    public void deauthenticateNetwork(long holdoff, boolean ess) {
-        try {
-            mService.deauthenticateNetwork(holdoff, ess);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
      * Remove the specified network from the list of configured networks.
      * This may result in the asynchronous delivery of state change
      * events.
