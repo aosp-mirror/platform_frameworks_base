@@ -2582,8 +2582,8 @@ public class UserManager {
     }
 
     /**
-     * Creates a user with the specified name and options. For non-admin users, default user
-     * restrictions are going to be applied.
+     * Creates a user with the specified name and options.
+     * Default user restrictions will be applied.
      * Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
      *
      * @param name the user's name
@@ -2602,8 +2602,8 @@ public class UserManager {
     }
 
     /**
-     * Creates a user with the specified name and options. For non-admin users, default user
-     * restrictions will be applied.
+     * Creates a user with the specified name and options.
+     * Default user restrictions will be applied.
      *
      * <p>Requires {@link android.Manifest.permission#MANAGE_USERS}.
      * {@link android.Manifest.permission#CREATE_USERS} suffices if flags are in
@@ -2637,8 +2637,7 @@ public class UserManager {
     }
 
     /**
-     * Pre-creates a user of the specified type. For non-admin users, default user
-     * restrictions will be applied.
+     * Pre-creates a user of the specified type. Default user restrictions will be applied.
      *
      * <p>This method can be used by OEMs to "warm" up the user creation by pre-creating some users
      * at the first boot, so they when the "real" user is created (for example,
