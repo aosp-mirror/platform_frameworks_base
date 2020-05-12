@@ -279,7 +279,8 @@ public class BubbleControllerTest extends SysuiTestCase {
                 mFloatingContentCoordinator,
                 mDataRepository,
                 mSysUiState,
-                mock(INotificationManager.class));
+                mock(INotificationManager.class),
+                mWindowManager);
         mBubbleController.setExpandListener(mBubbleExpandListener);
 
         // Get a reference to the BubbleController's entry listener
