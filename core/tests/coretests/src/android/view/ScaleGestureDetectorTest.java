@@ -24,6 +24,7 @@ import static org.junit.Assert.assertTrue;
 
 import android.graphics.Rect;
 import android.widget.TextView;
+import android.window.WindowMetricsHelper;
 
 import androidx.test.filters.LargeTest;
 import androidx.test.rule.ActivityTestRule;
@@ -55,7 +56,8 @@ public class ScaleGestureDetectorTest {
 
         // Specify start and end coordinates with respect to the window size.
         final WindowManager wm = mScaleGestureActivity.getSystemService(WindowManager.class);
-        final Rect windowBounds = wm.getCurrentWindowMetrics().getBounds();
+        final Rect windowBounds = WindowMetricsHelper.getBoundsExcludingNavigationBarAndCutout(
+                wm.getCurrentWindowMetrics());
         final int windowWidth = windowBounds.width();
         final int windowHeight = windowBounds.height();
 
