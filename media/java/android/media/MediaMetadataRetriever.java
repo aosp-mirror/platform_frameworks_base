@@ -1335,13 +1335,13 @@ public class MediaMetadataRetriever implements AutoCloseable {
 
     /**
      * This key retrieves the sample rate in Hz, if available.
-     * In int32_t type in native code, query returns String.
+     * This is a signed 32-bit integer formatted as a string in base 10.
      */
     public static final int METADATA_KEY_SAMPLERATE      = 38;
 
     /**
      * This key retrieves the bits per sample in numbers of bits, if available.
-     * In int32_t type in native code, query returns String.
+     * This is a signed 32-bit integer formatted as a string in base 10.
      */
     public static final int METADATA_KEY_BITS_PER_SAMPLE = 39;
 }
