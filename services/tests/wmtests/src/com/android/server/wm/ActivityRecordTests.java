@@ -35,6 +35,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doCallRealMethod;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.eq;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.reset;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
@@ -83,14 +84,18 @@ import android.content.res.Resources;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.PersistableBundle;
+import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 import android.util.MergedConfiguration;
 import android.util.MutableBoolean;
 import android.view.DisplayInfo;
 import android.view.IRemoteAnimationFinishedCallback;
 import android.view.IRemoteAnimationRunner.Stub;
+import android.view.IWindowSession;
 import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationTarget;
+import android.view.WindowManager;
+import android.view.WindowManagerGlobal;
 
 import androidx.test.filters.MediumTest;
 
@@ -1452,6 +1457,47 @@ public class ActivityRecordTests extends ActivityTestsBase {
         setRotatedScreenOrientationSilently(mActivity);
 
         assertFalse(mActivity.isSnapshotCompatible(snapshot));
+    }
+
+    @Test
+    public void testFixedRotationSnapshotStartingWindow() {
+        mService.mWindowManager.mIsFixedRotationTransformEnabled = true;
+        // TaskSnapshotSurface requires a fullscreen opaque window.
+        final WindowManager.LayoutParams params = new WindowManager.LayoutParams(
+                WindowManager.LayoutParams.TYPE_APPLICATION_STARTING);
+        params.width = params.height = WindowManager.LayoutParams.MATCH_PARENT;
+        final WindowTestUtils.TestWindowState w = new WindowTestUtils.TestWindowState(
+                mService.mWindowManager, mock(Session.class), new TestIWindow(), params, mActivity);
+        mActivity.addWindow(w);
+
+        // Assume the activity is launching in different rotation, and there was an available
+        // snapshot accepted by {@link Activity#isSnapshotCompatible}.
+        final TaskSnapshot snapshot = new TaskSnapshotPersisterTestBase.TaskSnapshotBuilder()
+                .setRotation((mActivity.getWindowConfiguration().getRotation() + 1) % 4)
+                .build();
+        setRotatedScreenOrientationSilently(mActivity);
+
+        final IWindowSession session = WindowManagerGlobal.getWindowSession();
+        spyOn(session);
+        try {
+            // Return error to skip unnecessary operation.
+            doReturn(WindowManagerGlobal.ADD_STARTING_NOT_NEEDED).when(session).addToDisplay(
+                    any() /* window */, anyInt() /* seq */, any() /* attrs */,
+                    anyInt() /* viewVisibility */, anyInt() /* displayId */, any() /* outFrame */,
+                    any() /* outContentInsets */, any() /* outStableInsets */,
+                    any() /* outDisplayCutout */, any() /* outInputChannel */,
+                    any() /* outInsetsState */, any() /* outActiveControls */);
+            TaskSnapshotSurface.create(mService.mWindowManager, mActivity, snapshot);
+        } catch (RemoteException ignored) {
+        } finally {
+            reset(session);
+        }
+
+        // Because the rotation of snapshot and the corresponding top activity are different, fixed
+        // rotation should be applied when creating snapshot surface if the display rotation may be
+        // changed according to the activity orientation.
+        assertTrue(mActivity.hasFixedRotationTransform());
+        assertEquals(mActivity, mActivity.mDisplayContent.mFixedRotationLaunchingApp);
     }
 
     /**
