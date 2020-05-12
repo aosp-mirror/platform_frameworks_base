@@ -2573,7 +2573,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     if (sVerbose) Slog.v(TAG, "Exiting view " + id);
                     mUi.hideFillUi(this);
                     hideAugmentedAutofillLocked(viewState);
-                    mInlineSessionController.hideInlineSuggestionsUiLocked(mCurrentViewId);
                     mCurrentViewId = null;
                 }
                 break;
@@ -2647,6 +2646,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 if (sVerbose) {
                     Slog.v(TAG, "ignoring autofilled change on id " + id);
                 }
+                // TODO(b/156099633): remove this once framework gets out of business of resending
+                // inline suggestions when IME visibility changes.
+                mInlineSessionController.hideInlineSuggestionsUiLocked(viewState.id);
                 viewState.resetState(ViewState.STATE_CHANGED);
                 return;
             } else if ((viewState.id.equals(this.mCurrentViewId))
@@ -3339,7 +3341,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 if (generateEvent) {
                     mService.logDatasetSelected(dataset.getId(), id, mClientState);
                 }
-
+                if (mCurrentViewId != null) {
+                    mInlineSessionController.hideInlineSuggestionsUiLocked(mCurrentViewId);
+                }
                 autoFillApp(dataset);
                 return;
             }
