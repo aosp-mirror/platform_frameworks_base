@@ -677,16 +677,27 @@ public final class NetworkCapabilities implements Parcelable {
      * restrictions.
      * @hide
      */
-    public void restrictCapabilitesForTestNetwork() {
+    public void restrictCapabilitesForTestNetwork(int creatorUid) {
         final long originalCapabilities = mNetworkCapabilities;
         final NetworkSpecifier originalSpecifier = mNetworkSpecifier;
         final int originalSignalStrength = mSignalStrength;
+        final int originalOwnerUid = getOwnerUid();
+        final int[] originalAdministratorUids = getAdministratorUids();
         clearAll();
         // Reset the transports to only contain TRANSPORT_TEST.
         mTransportTypes = (1 << TRANSPORT_TEST);
         mNetworkCapabilities = originalCapabilities & TEST_NETWORKS_ALLOWED_CAPABILITIES;
         mNetworkSpecifier = originalSpecifier;
         mSignalStrength = originalSignalStrength;
+
+        // Only retain the owner and administrator UIDs if they match the app registering the remote
+        // caller that registered the network.
+        if (originalOwnerUid == creatorUid) {
+            setOwnerUid(creatorUid);
+        }
+        if (ArrayUtils.contains(originalAdministratorUids, creatorUid)) {
+            setAdministratorUids(new int[] {creatorUid});
+        }
     }
 
     /**
