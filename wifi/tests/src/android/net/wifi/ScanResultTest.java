@@ -46,6 +46,68 @@ public class ScanResultTest {
             ScanResult.WIFI_STANDARD_11AC;
 
     /**
+     * Frequency to channel map. This include some frequencies used outside the US.
+     * Representing it using a vector (instead of map) for simplification.
+     */
+    private static final int[] FREQUENCY_TO_CHANNEL_MAP = {
+            2412, WifiScanner.WIFI_BAND_24_GHZ, 1,
+            2417, WifiScanner.WIFI_BAND_24_GHZ, 2,
+            2422, WifiScanner.WIFI_BAND_24_GHZ, 3,
+            2427, WifiScanner.WIFI_BAND_24_GHZ, 4,
+            2432, WifiScanner.WIFI_BAND_24_GHZ, 5,
+            2437, WifiScanner.WIFI_BAND_24_GHZ, 6,
+            2442, WifiScanner.WIFI_BAND_24_GHZ, 7,
+            2447, WifiScanner.WIFI_BAND_24_GHZ, 8,
+            2452, WifiScanner.WIFI_BAND_24_GHZ, 9,
+            2457, WifiScanner.WIFI_BAND_24_GHZ, 10,
+            2462, WifiScanner.WIFI_BAND_24_GHZ, 11,
+            /* 12, 13 are only legitimate outside the US. */
+            2467, WifiScanner.WIFI_BAND_24_GHZ, 12,
+            2472, WifiScanner.WIFI_BAND_24_GHZ, 13,
+            /* 14 is for Japan, DSSS and CCK only. */
+            2484, WifiScanner.WIFI_BAND_24_GHZ, 14,
+            /* 34 valid in Japan. */
+            5170, WifiScanner.WIFI_BAND_5_GHZ, 34,
+            5180, WifiScanner.WIFI_BAND_5_GHZ, 36,
+            5190, WifiScanner.WIFI_BAND_5_GHZ, 38,
+            5200, WifiScanner.WIFI_BAND_5_GHZ, 40,
+            5210, WifiScanner.WIFI_BAND_5_GHZ, 42,
+            5220, WifiScanner.WIFI_BAND_5_GHZ, 44,
+            5230, WifiScanner.WIFI_BAND_5_GHZ, 46,
+            5240, WifiScanner.WIFI_BAND_5_GHZ, 48,
+            5260, WifiScanner.WIFI_BAND_5_GHZ, 52,
+            5280, WifiScanner.WIFI_BAND_5_GHZ, 56,
+            5300, WifiScanner.WIFI_BAND_5_GHZ, 60,
+            5320, WifiScanner.WIFI_BAND_5_GHZ, 64,
+            5500, WifiScanner.WIFI_BAND_5_GHZ, 100,
+            5520, WifiScanner.WIFI_BAND_5_GHZ, 104,
+            5540, WifiScanner.WIFI_BAND_5_GHZ, 108,
+            5560, WifiScanner.WIFI_BAND_5_GHZ, 112,
+            5580, WifiScanner.WIFI_BAND_5_GHZ, 116,
+            /* 120, 124, 128 valid in Europe/Japan. */
+            5600, WifiScanner.WIFI_BAND_5_GHZ, 120,
+            5620, WifiScanner.WIFI_BAND_5_GHZ, 124,
+            5640, WifiScanner.WIFI_BAND_5_GHZ, 128,
+            /* 132+ valid in US. */
+            5660, WifiScanner.WIFI_BAND_5_GHZ, 132,
+            5680, WifiScanner.WIFI_BAND_5_GHZ, 136,
+            5700, WifiScanner.WIFI_BAND_5_GHZ, 140,
+            /* 144 is supported by a subset of WiFi chips. */
+            5720, WifiScanner.WIFI_BAND_5_GHZ, 144,
+            5745, WifiScanner.WIFI_BAND_5_GHZ, 149,
+            5765, WifiScanner.WIFI_BAND_5_GHZ, 153,
+            5785, WifiScanner.WIFI_BAND_5_GHZ, 157,
+            5805, WifiScanner.WIFI_BAND_5_GHZ, 161,
+            5825, WifiScanner.WIFI_BAND_5_GHZ, 165,
+            5845, WifiScanner.WIFI_BAND_5_GHZ, 169,
+            5865, WifiScanner.WIFI_BAND_5_GHZ, 173,
+            /* Now some 6GHz channels */
+            5945, WifiScanner.WIFI_BAND_6_GHZ, 1,
+            5960, WifiScanner.WIFI_BAND_6_GHZ, 4,
+            6100, WifiScanner.WIFI_BAND_6_GHZ, 32
+    };
+
+    /**
      * Setup before tests.
      */
     @Before
@@ -181,6 +243,25 @@ public class ScanResultTest {
                 + "80211mcResponder: is not supported, "
                 + "Radio Chain Infos: [RadioChainInfo: id=0, level=-45, "
                 + "RadioChainInfo: id=1, level=-54]", scanResult.toString());
+    }
+
+    /**
+     * verify frequency to channel conversion for all possible frequencies.
+     */
+    @Test
+    public void convertFrequencyToChannel() throws Exception {
+        for (int i = 0; i < FREQUENCY_TO_CHANNEL_MAP.length; i += 3) {
+            assertEquals(FREQUENCY_TO_CHANNEL_MAP[i + 2],
+                    ScanResult.convertFrequencyMhzToChannel(FREQUENCY_TO_CHANNEL_MAP[i]));
+        }
+    }
+
+    /**
+     * Verify frequency to channel conversion failed for an invalid frequency.
+     */
+    @Test
+    public void convertFrequencyToChannelWithInvalidFreq() throws Exception {
+        assertEquals(-1, ScanResult.convertFrequencyMhzToChannel(8000));
     }
 
     /**
