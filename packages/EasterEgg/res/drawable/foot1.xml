@@ -1,5 +1,5 @@
 <!--
-Copyright (C) 2018 The Android Open Source Project
+Copyright (C) 2016 The Android Open Source Project
 
    Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -13,6 +13,10 @@ Copyright (C) 2018 The Android Open Source Project
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-<color xmlns:android="http://schemas.android.com/apk/res/android"
-    android:color="#073042" />
-
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+        android:width="48dp"
+        android:height="48dp"
+        android:viewportWidth="48.0"
+        android:viewportHeight="48.0">
+    <path android:name="foot1" android:fillColor="#FF000000" android:pathData="M11.5,43m-2.5,0a2.5,2.5 0,1 1,5 0a2.5,2.5 0,1 1,-5 0"/>
+</vector>
