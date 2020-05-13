@@ -748,7 +748,7 @@ int IncrementalService::unbind(StorageId storage, std::string_view target) {
         return -EINVAL;
     }
 
-    LOG(INFO) << "Removing bind point " << target;
+    LOG(INFO) << "Removing bind point " << target << " for storage " << storage;
 
     // Here we should only look up by the exact target, not by a subdirectory of any existing mount,
     // otherwise there's a chance to unmount something completely unrelated
@@ -1807,6 +1807,8 @@ bool IncrementalService::DataLoaderStub::fsmStep() {
         targetStatus = mTargetStatus;
     }
 
+    LOG(DEBUG) << "fsmStep: " << mId << ": " << currentStatus << " -> " << targetStatus;
+
     if (currentStatus == targetStatus) {
         return true;
     }
@@ -1868,8 +1870,8 @@ binder::Status IncrementalService::DataLoaderStub::onStatusChanged(MountId mount
         listener = mListener;
 
         if (mCurrentStatus == IDataLoaderStatusListener::DATA_LOADER_UNAVAILABLE) {
-            // For unavailable, reset target status.
-            setTargetStatusLocked(IDataLoaderStatusListener::DATA_LOADER_UNAVAILABLE);
+            // For unavailable, unbind from DataLoader to ensure proper re-commit.
+            setTargetStatusLocked(IDataLoaderStatusListener::DATA_LOADER_DESTROYED);
         }
     }
 
