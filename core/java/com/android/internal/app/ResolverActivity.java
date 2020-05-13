@@ -358,6 +358,7 @@ public class ResolverActivity extends Activity implements
                 : isHttpSchemeAndViewAction(getTargetIntent());
 
         mSupportsAlwaysUseOption = supportsAlwaysUseOption;
+        mWorkProfileUserHandle = fetchWorkProfileUserProfile();
 
         // The last argument of createResolverListAdapter is whether to do special handling
         // of the last used choice to highlight it in the list.  We need to always
@@ -366,7 +367,6 @@ public class ResolverActivity extends Activity implements
         // to handle. We also turn it off when the work tab is shown to simplify the UX.
         boolean filterLastUsed = mSupportsAlwaysUseOption && !isVoiceInteraction()
                 && !shouldShowTabs();
-        mWorkProfileUserHandle = fetchWorkProfileUserProfile();
         mMultiProfilePagerAdapter = createMultiProfilePagerAdapter(initialIntents, rList, filterLastUsed);
         if (configureContentView()) {
             return;
