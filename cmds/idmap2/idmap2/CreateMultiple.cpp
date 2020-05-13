@@ -26,6 +26,7 @@
 #include "android-base/stringprintf.h"
 #include "idmap2/BinaryStreamVisitor.h"
 #include "idmap2/CommandLineOptions.h"
+#include "idmap2/CommandUtils.h"
 #include "idmap2/FileUtils.h"
 #include "idmap2/Idmap.h"
 #include "idmap2/Policies.h"
@@ -103,7 +104,8 @@ Result<Unit> CreateMultiple(const std::vector<std::string>& args) {
       continue;
     }
 
-    if (!Verify(std::vector<std::string>({"--idmap-path", idmap_path}))) {
+    if (!Verify(idmap_path, target_apk_path, overlay_apk_path, fulfilled_policies,
+                !ignore_overlayable)) {
       const std::unique_ptr<const ApkAssets> overlay_apk = ApkAssets::Load(overlay_apk_path);
       if (!overlay_apk) {
         LOG(WARNING) << "failed to load apk " << overlay_apk_path.c_str();

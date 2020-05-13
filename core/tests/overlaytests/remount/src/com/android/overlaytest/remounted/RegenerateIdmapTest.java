@@ -22,7 +22,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(DeviceJUnit4ClassRunner.class)
-public class PackagedUpgradedTest extends OverlayRemountedTestBase {
+public class RegenerateIdmapTest extends OverlayRemountedTestBase {
+    private static final String OVERLAY_SIGNATURE_APK =
+            "OverlayRemountedTest_Overlay_SameCert.apk";
     private static final String TARGET_UPGRADE_APK = "OverlayRemountedTest_TargetUpgrade.apk";
 
     @Test
@@ -65,5 +67,33 @@ public class PackagedUpgradedTest extends OverlayRemountedTestBase {
 
         assertResource(targetReference, "@" + 0x7f0100ff + " -> true");
         assertResource(targetOverlaid, "true");
+    }
+
+    @Test
+    public void testIdmapPoliciesChanged() throws Exception {
+        final String targetResource = resourceName(TARGET_PACKAGE, "bool",
+                "signature_policy_overlaid");
+
+        mPreparer.pushResourceFile(TARGET_APK, "/product/app/OverlayTarget.apk")
+                .pushResourceFile(OVERLAY_APK, "/product/overlay/TestOverlay.apk")
+                .reboot()
+                .setOverlayEnabled(OVERLAY_PACKAGE, false);
+
+        assertResource(targetResource, "false");
+
+        // The overlay is not signed with the same signature as the target.
+        mPreparer.setOverlayEnabled(OVERLAY_PACKAGE, true);
+        assertResource(targetResource, "false");
+
+        // Replace the overlay with a version of the overlay that is signed with the same signature
+        // as the target.
+        mPreparer.pushResourceFile(OVERLAY_SIGNATURE_APK, "/product/overlay/TestOverlay.apk")
+                .reboot();
+
+        // The idmap should have been recreated with the signature policy fulfilled.
+        assertResource(targetResource, "true");
+
+        mPreparer.setOverlayEnabled(OVERLAY_PACKAGE, false);
+        assertResource(targetResource, "false");
     }
 }
