@@ -206,7 +206,8 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     @VisibleForTesting
     protected final ArrayList<Action> mOverflowItems = new ArrayList<>();
 
-    private ActionsDialog mDialog;
+    @VisibleForTesting
+    protected ActionsDialog mDialog;
 
     private Action mSilentModeAction;
     private ToggleAction mAirplaneModeOn;
@@ -245,6 +246,9 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     public enum GlobalActionsEvent implements UiEventLogger.UiEventEnum {
         @UiEvent(doc = "The global actions / power menu surface became visible on the screen.")
         GA_POWER_MENU_OPEN(337),
+
+        @UiEvent(doc = "The global actions / power menu surface was dismissed.")
+        GA_POWER_MENU_CLOSE(471),
 
         @UiEvent(doc = "The global actions bugreport button was pressed.")
         GA_BUGREPORT_PRESS(344),
@@ -1167,6 +1171,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         if (mDialog == dialog) {
             mDialog = null;
         }
+        mUiEventLogger.log(GlobalActionsEvent.GA_POWER_MENU_CLOSE);
         mWindowManagerFuncs.onGlobalActionsHidden();
         mLifecycle.setCurrentState(Lifecycle.State.DESTROYED);
     }
