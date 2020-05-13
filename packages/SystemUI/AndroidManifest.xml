@@ -259,6 +259,9 @@
     <!-- Permission to register process observer -->
     <uses-permission android:name="android.permission.SET_ACTIVITY_WATCHER"/>
 
+    <!-- Restore settings (used by QS) even if they have been modified -->
+    <uses-permission android:name="android.permission.MODIFY_SETTINGS_OVERRIDEABLE_BY_RESTORE" />
+
     <protected-broadcast android:name="com.android.settingslib.action.REGISTER_SLICE_RECEIVER" />
     <protected-broadcast android:name="com.android.settingslib.action.UNREGISTER_SLICE_RECEIVER" />
     <protected-broadcast android:name="com.android.settings.flashlight.action.FLASHLIGHT_CHANGED" />
