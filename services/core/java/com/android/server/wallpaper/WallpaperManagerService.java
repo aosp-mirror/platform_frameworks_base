@@ -2709,7 +2709,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     mContext, 0,
                     Intent.createChooser(new Intent(Intent.ACTION_SET_WALLPAPER),
                             mContext.getText(com.android.internal.R.string.chooser_wallpaper)),
-                    0, null, new UserHandle(serviceUserId)));
+                    PendingIntent.FLAG_IMMUTABLE, null, new UserHandle(serviceUserId)));
             if (!mContext.bindServiceAsUser(intent, newConn,
                     Context.BIND_AUTO_CREATE | Context.BIND_SHOWING_UI
                             | Context.BIND_FOREGROUND_SERVICE_WHILE_AWAKE
