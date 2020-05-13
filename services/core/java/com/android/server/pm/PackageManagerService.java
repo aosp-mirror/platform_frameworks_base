@@ -14638,9 +14638,9 @@ public class PackageManagerService extends IPackageManager.Stub
         int installFlags;
         @NonNull final InstallSource installSource;
         final String volumeUuid;
-        private boolean mVerificationCompleted;
-        private boolean mIntegrityVerificationCompleted;
-        private boolean mEnableRollbackCompleted;
+        private boolean mWaitForVerificationToComplete;
+        private boolean mWaitForIntegrityVerificationToComplete;
+        private boolean mWaitForEnableRollbackToComplete;
         private InstallArgs mArgs;
         int mRet;
         final String packageAbiOverride;
@@ -14805,16 +14805,15 @@ public class PackageManagerService extends IPackageManager.Stub
             return pkgLite.recommendedInstallLocation;
         }
 
-        /*
-         * Invoke remote method to get package information and install
-         * location values. Override install location based on default
-         * policy if needed and then create install arguments based
-         * on the install location.
+        /**
+         * Override install location based on default policy if needed.
+         *
+         * Only {@link #installFlags} and {@link #mRet} are mutated in this method.
+         *
+         * Only {@link PackageManager#INSTALL_INTERNAL} flag is mutated in
+         * {@link #installFlags}
          */
-        public void handleStartCopy() {
-            PackageInfoLite pkgLite = PackageManagerServiceUtils.getMinimalPackageInfo(mContext,
-                    origin.resolvedPath, installFlags, packageAbiOverride);
-
+        private void overrideInstallLocation(PackageInfoLite pkgLite) {
             final boolean ephemeral = (installFlags & PackageManager.INSTALL_INSTANT_APP) != 0;
             if (DEBUG_INSTANT && ephemeral) {
                 Slog.v(TAG, "pkgLite for install: " + pkgLite);
@@ -14898,81 +14897,96 @@ public class PackageManagerService extends IPackageManager.Stub
                     }
                 }
             }
+            mRet = ret;
+        }
 
-            mVerificationCompleted = true;
-            mIntegrityVerificationCompleted = true;
-            mEnableRollbackCompleted = true;
+        /*
+         * Invoke remote method to get package information and install
+         * location values. Override install location based on default
+         * policy if needed and then create install arguments based
+         * on the install location.
+         */
+        public void handleStartCopy() {
+            PackageInfoLite pkgLite = PackageManagerServiceUtils.getMinimalPackageInfo(mContext,
+                    origin.resolvedPath, installFlags, packageAbiOverride);
+
+            overrideInstallLocation(pkgLite);
 
             // Now that installFlags is finalized, we can create an immutable InstallArgs
             mArgs = createInstallArgs(this);
 
             // Perform package verification and enable rollback (unless we are simply moving the
             // package).
-            if (ret == PackageManager.INSTALL_SUCCEEDED && !origin.existing) {
-                final int verificationId = mPendingVerificationToken++;
-
-                PackageVerificationState verificationState =
-                        new PackageVerificationState(this);
-                mPendingVerification.append(verificationId, verificationState);
-
-                sendIntegrityVerificationRequest(verificationId, pkgLite, verificationState);
-                ret = sendPackageVerificationRequest(
-                        verificationId, pkgLite, verificationState);
-
-                // If both verifications are skipped, we should remove the state.
-                if (verificationState.areAllVerificationsComplete()) {
-                    mPendingVerification.remove(verificationId);
-                }
-
+            if (mRet == PackageManager.INSTALL_SUCCEEDED && !origin.existing) {
+                sendApkVerificationRequest(pkgLite);
                 if ((installFlags & PackageManager.INSTALL_ENABLE_ROLLBACK) != 0) {
-                    final int enableRollbackToken = mPendingEnableRollbackToken++;
-                    Trace.asyncTraceBegin(
-                            TRACE_TAG_PACKAGE_MANAGER, "enable_rollback", enableRollbackToken);
-                    mPendingEnableRollback.append(enableRollbackToken, this);
-
-                    Intent enableRollbackIntent = new Intent(Intent.ACTION_PACKAGE_ENABLE_ROLLBACK);
-                    enableRollbackIntent.putExtra(
-                            PackageManagerInternal.EXTRA_ENABLE_ROLLBACK_TOKEN,
-                            enableRollbackToken);
-                    enableRollbackIntent.putExtra(
-                            PackageManagerInternal.EXTRA_ENABLE_ROLLBACK_SESSION_ID,
-                            mSessionId);
-                    enableRollbackIntent.setType(PACKAGE_MIME_TYPE);
-                    enableRollbackIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-
-                    // Allow the broadcast to be sent before boot complete.
-                    // This is needed when committing the apk part of a staged
-                    // session in early boot. The rollback manager registers
-                    // its receiver early enough during the boot process that
-                    // it will not miss the broadcast.
-                    enableRollbackIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
-
-                    mContext.sendOrderedBroadcastAsUser(enableRollbackIntent, UserHandle.SYSTEM,
-                            android.Manifest.permission.PACKAGE_ROLLBACK_AGENT,
-                            new BroadcastReceiver() {
-                                @Override
-                                public void onReceive(Context context, Intent intent) {
-                                    // the duration to wait for rollback to be enabled, in millis
-                                    long rollbackTimeout = DeviceConfig.getLong(
-                                            DeviceConfig.NAMESPACE_ROLLBACK,
-                                            PROPERTY_ENABLE_ROLLBACK_TIMEOUT_MILLIS,
-                                            DEFAULT_ENABLE_ROLLBACK_TIMEOUT_MILLIS);
-                                    if (rollbackTimeout < 0) {
-                                        rollbackTimeout = DEFAULT_ENABLE_ROLLBACK_TIMEOUT_MILLIS;
-                                    }
-                                    final Message msg = mHandler.obtainMessage(
-                                            ENABLE_ROLLBACK_TIMEOUT);
-                                    msg.arg1 = enableRollbackToken;
-                                    msg.arg2 = mSessionId;
-                                    mHandler.sendMessageDelayed(msg, rollbackTimeout);
-                                }
-                            }, null, 0, null, null);
-
-                    mEnableRollbackCompleted = false;
+                    sendEnableRollbackRequest();
                 }
             }
+        }
 
-            mRet = ret;
+        void sendApkVerificationRequest(PackageInfoLite pkgLite) {
+            final int verificationId = mPendingVerificationToken++;
+
+            PackageVerificationState verificationState =
+                    new PackageVerificationState(this);
+            mPendingVerification.append(verificationId, verificationState);
+
+            sendIntegrityVerificationRequest(verificationId, pkgLite, verificationState);
+            mRet = sendPackageVerificationRequest(
+                    verificationId, pkgLite, verificationState);
+
+            // If both verifications are skipped, we should remove the state.
+            if (verificationState.areAllVerificationsComplete()) {
+                mPendingVerification.remove(verificationId);
+            }
+        }
+
+        void sendEnableRollbackRequest() {
+            final int enableRollbackToken = mPendingEnableRollbackToken++;
+            Trace.asyncTraceBegin(
+                    TRACE_TAG_PACKAGE_MANAGER, "enable_rollback", enableRollbackToken);
+            mPendingEnableRollback.append(enableRollbackToken, this);
+
+            Intent enableRollbackIntent = new Intent(Intent.ACTION_PACKAGE_ENABLE_ROLLBACK);
+            enableRollbackIntent.putExtra(
+                    PackageManagerInternal.EXTRA_ENABLE_ROLLBACK_TOKEN,
+                    enableRollbackToken);
+            enableRollbackIntent.putExtra(
+                    PackageManagerInternal.EXTRA_ENABLE_ROLLBACK_SESSION_ID,
+                    mSessionId);
+            enableRollbackIntent.setType(PACKAGE_MIME_TYPE);
+            enableRollbackIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+            // Allow the broadcast to be sent before boot complete.
+            // This is needed when committing the apk part of a staged
+            // session in early boot. The rollback manager registers
+            // its receiver early enough during the boot process that
+            // it will not miss the broadcast.
+            enableRollbackIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+
+            mContext.sendOrderedBroadcastAsUser(enableRollbackIntent, UserHandle.SYSTEM,
+                    android.Manifest.permission.PACKAGE_ROLLBACK_AGENT,
+                    new BroadcastReceiver() {
+                        @Override
+                        public void onReceive(Context context, Intent intent) {
+                            // the duration to wait for rollback to be enabled, in millis
+                            long rollbackTimeout = DeviceConfig.getLong(
+                                    DeviceConfig.NAMESPACE_ROLLBACK,
+                                    PROPERTY_ENABLE_ROLLBACK_TIMEOUT_MILLIS,
+                                    DEFAULT_ENABLE_ROLLBACK_TIMEOUT_MILLIS);
+                            if (rollbackTimeout < 0) {
+                                rollbackTimeout = DEFAULT_ENABLE_ROLLBACK_TIMEOUT_MILLIS;
+                            }
+                            final Message msg = mHandler.obtainMessage(
+                                    ENABLE_ROLLBACK_TIMEOUT);
+                            msg.arg1 = enableRollbackToken;
+                            msg.arg2 = mSessionId;
+                            mHandler.sendMessageDelayed(msg, rollbackTimeout);
+                        }
+                    }, null, 0, null, null);
+
+            mWaitForEnableRollbackToComplete = true;
         }
 
         /**
@@ -15036,7 +15050,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     TRACE_TAG_PACKAGE_MANAGER, "integrity_verification", verificationId);
 
             // stop the copy until verification succeeds.
-            mIntegrityVerificationCompleted = false;
+            mWaitForIntegrityVerificationToComplete = true;
         }
 
         /**
@@ -15173,7 +15187,7 @@ public class PackageManagerService extends IPackageManager.Stub
                      * We don't want the copy to proceed until verification
                      * succeeds.
                      */
-                    mVerificationCompleted = false;
+                    mWaitForVerificationToComplete = true;
                 }
             } else {
                 verificationState.setVerifierResponse(
@@ -15215,67 +15229,59 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         void handleVerificationFinished() {
-            if (!mVerificationCompleted) {
-                mVerificationCompleted = true;
-                if (mIntegrityVerificationCompleted) {
-                    handleReturnCode();
-                }
-                // integrity verification still pending.
-            }
+            mWaitForVerificationToComplete = false;
+            handleReturnCode();
         }
 
         void handleIntegrityVerificationFinished() {
-            if (!mIntegrityVerificationCompleted) {
-                mIntegrityVerificationCompleted = true;
-                if (mVerificationCompleted) {
-                    handleReturnCode();
-                }
-                // verifier still pending
-            }
+            mWaitForIntegrityVerificationToComplete = false;
+            handleReturnCode();
         }
 
 
         void handleRollbackEnabled() {
             // TODO(ruhler) b/112431924: Consider halting the install if we
             // couldn't enable rollback.
-            mEnableRollbackCompleted = true;
+            mWaitForEnableRollbackToComplete = false;
             handleReturnCode();
         }
 
         @Override
         void handleReturnCode() {
-            if (mVerificationCompleted
-                    && mIntegrityVerificationCompleted && mEnableRollbackCompleted) {
-                if ((installFlags & PackageManager.INSTALL_DRY_RUN) != 0) {
-                    String packageName = "";
-                    ParseResult<PackageLite> result = ApkLiteParseUtils.parsePackageLite(
-                            new ParseTypeImpl(
-                                    (changeId, packageName1, targetSdkVersion) -> {
-                                        ApplicationInfo appInfo = new ApplicationInfo();
-                                        appInfo.packageName = packageName1;
-                                        appInfo.targetSdkVersion = targetSdkVersion;
-                                        return mPackageParserCallback.isChangeEnabled(changeId,
-                                                appInfo);
-                                    }).reset(),
-                            origin.file, 0);
-                    if (result.isError()) {
-                        Slog.e(TAG, "Can't parse package at " + origin.file.getAbsolutePath(),
-                                result.getException());
-                    } else {
-                        packageName = result.getResult().packageName;
-                    }
-                    try {
-                        observer.onPackageInstalled(packageName, mRet, "Dry run", new Bundle());
-                    } catch (RemoteException e) {
-                        Slog.i(TAG, "Observer no longer exists.");
-                    }
-                    return;
-                }
-                if (mRet == PackageManager.INSTALL_SUCCEEDED) {
-                    mRet = mArgs.copyApk();
-                }
-                processPendingInstall(mArgs, mRet);
+            if (mWaitForVerificationToComplete || mWaitForIntegrityVerificationToComplete
+                    || mWaitForEnableRollbackToComplete) {
+                return;
             }
+
+            if ((installFlags & PackageManager.INSTALL_DRY_RUN) != 0) {
+                String packageName = "";
+                ParseResult<PackageLite> result = ApkLiteParseUtils.parsePackageLite(
+                        new ParseTypeImpl(
+                                (changeId, packageName1, targetSdkVersion) -> {
+                                    ApplicationInfo appInfo = new ApplicationInfo();
+                                    appInfo.packageName = packageName1;
+                                    appInfo.targetSdkVersion = targetSdkVersion;
+                                    return mPackageParserCallback.isChangeEnabled(changeId,
+                                            appInfo);
+                                }).reset(),
+                        origin.file, 0);
+                if (result.isError()) {
+                    Slog.e(TAG, "Can't parse package at " + origin.file.getAbsolutePath(),
+                            result.getException());
+                } else {
+                    packageName = result.getResult().packageName;
+                }
+                try {
+                    observer.onPackageInstalled(packageName, mRet, "Dry run", new Bundle());
+                } catch (RemoteException e) {
+                    Slog.i(TAG, "Observer no longer exists.");
+                }
+                return;
+            }
+            if (mRet == PackageManager.INSTALL_SUCCEEDED) {
+                mRet = mArgs.copyApk();
+            }
+            processPendingInstall(mArgs, mRet);
         }
     }
 
