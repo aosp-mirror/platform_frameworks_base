@@ -95,7 +95,8 @@ private:
     int32_t mWidth = 1080;
     int32_t mHeight = 1920;
     int64_t mVsyncPeriod = 16666666;
-    int64_t mPresentationDeadlineNanos = 0;
+    // Magically corresponds with an sf offset of 0 for a sane default.
+    int64_t mPresentationDeadlineNanos = 17666666;
     int64_t mAppVsyncOffsetNanos = 0;
 
     // Density is not retrieved from the ADisplay apis, so this may potentially
