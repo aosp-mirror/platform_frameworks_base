@@ -608,6 +608,12 @@ public class PackageManagerService extends IPackageManager.Stub
     private static final long DEFAULT_VERIFICATION_TIMEOUT = 10 * 1000;
 
     /**
+     * The default maximum time to wait for the integrity verification to return in
+     * milliseconds.
+     */
+    private static final long DEFAULT_INTEGRITY_VERIFICATION_TIMEOUT = 30 * 1000;
+
+    /**
      * Timeout duration in milliseconds for enabling package rollback. If we fail to enable
      * rollback within that period, the install will proceed without rollback enabled.
      *
@@ -13845,6 +13851,19 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     /**
+     * Get the integrity verification timeout.
+     *
+     * @return verification timeout in milliseconds
+     */
+    private long getIntegrityVerificationTimeout() {
+        long timeout = Global.getLong(mContext.getContentResolver(),
+                Global.APP_INTEGRITY_VERIFICATION_TIMEOUT, DEFAULT_INTEGRITY_VERIFICATION_TIMEOUT);
+        // The setting can be used to increase the timeout but not decrease it, since that is
+        // equivalent to disabling the integrity component.
+        return Math.max(timeout, DEFAULT_INTEGRITY_VERIFICATION_TIMEOUT);
+    }
+
+    /**
      * Get the default verification agent response code.
      *
      * @return default verification response code
@@ -15039,8 +15058,7 @@ public class PackageManagerService extends IPackageManager.Stub
                             final Message msg =
                                     mHandler.obtainMessage(CHECK_PENDING_INTEGRITY_VERIFICATION);
                             msg.arg1 = verificationId;
-                            // TODO: do we want to use the same timeout?
-                            mHandler.sendMessageDelayed(msg, getVerificationTimeout());
+                            mHandler.sendMessageDelayed(msg, getIntegrityVerificationTimeout());
                         }
                     }, /* scheduler= */ null,
                     /* initialCode= */ 0,
