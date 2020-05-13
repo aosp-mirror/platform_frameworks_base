@@ -1808,24 +1808,23 @@ public class PackageManagerService extends IPackageManager.Stub
                     if ((state != null) && !state.isVerificationComplete()
                             && !state.timeoutExtended()) {
                         final InstallParams params = state.getInstallParams();
-                        final InstallArgs args = params.mArgs;
-                        final Uri originUri = Uri.fromFile(args.origin.resolvedFile);
+                        final Uri originUri = Uri.fromFile(params.origin.resolvedFile);
 
                         Slog.i(TAG, "Verification timed out for " + originUri);
 
-                        final UserHandle user = args.getUser();
+                        final UserHandle user = params.getUser();
                         if (getDefaultVerificationResponse(user)
                                 == PackageManager.VERIFICATION_ALLOW) {
                             Slog.i(TAG, "Continuing with installation of " + originUri);
                             state.setVerifierResponse(Binder.getCallingUid(),
                                     PackageManager.VERIFICATION_ALLOW_WITHOUT_SUFFICIENT);
                             broadcastPackageVerified(verificationId, originUri,
-                                    PackageManager.VERIFICATION_ALLOW, null, args.mDataLoaderType,
+                                    PackageManager.VERIFICATION_ALLOW, null, params.mDataLoaderType,
                                     user);
                         } else {
                             broadcastPackageVerified(verificationId, originUri,
-                                    PackageManager.VERIFICATION_REJECT, null, args.mDataLoaderType,
-                                    user);
+                                    PackageManager.VERIFICATION_REJECT, null,
+                                    params.mDataLoaderType, user);
                             params.setReturnCode(
                                     PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE);
                             state.setVerifierResponse(Binder.getCallingUid(),
@@ -1850,8 +1849,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
                     if (state != null && !state.isIntegrityVerificationComplete()) {
                         final InstallParams params = state.getInstallParams();
-                        final InstallArgs args = params.mArgs;
-                        final Uri originUri = Uri.fromFile(args.origin.resolvedFile);
+                        final Uri originUri = Uri.fromFile(params.origin.resolvedFile);
 
                         Slog.i(TAG, "Integrity verification timed out for " + originUri);
 
@@ -1896,12 +1894,11 @@ public class PackageManagerService extends IPackageManager.Stub
 
                     if (state.isVerificationComplete()) {
                         final InstallParams params = state.getInstallParams();
-                        final InstallArgs args = params.mArgs;
-                        final Uri originUri = Uri.fromFile(args.origin.resolvedFile);
+                        final Uri originUri = Uri.fromFile(params.origin.resolvedFile);
 
                         if (state.isInstallAllowed()) {
                             broadcastPackageVerified(verificationId, originUri,
-                                    response.code, null, args.mDataLoaderType, args.getUser());
+                                    response.code, null, params.mDataLoaderType, params.getUser());
                         } else {
                             params.setReturnCode(
                                     PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE);
@@ -1930,10 +1927,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     }
 
                     final int response = (Integer) msg.obj;
-
                     final InstallParams params = state.getInstallParams();
-                    final InstallArgs args = params.mArgs;
-                    final Uri originUri = Uri.fromFile(args.origin.resolvedFile);
+                    final Uri originUri = Uri.fromFile(params.origin.resolvedFile);
 
                     state.setIntegrityVerificationResult(response);
 
@@ -2026,8 +2021,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     mPendingEnableRollback.remove(enableRollbackToken);
 
                     if (enableRollbackCode != PackageManagerInternal.ENABLE_ROLLBACK_SUCCEEDED) {
-                        final InstallArgs args = params.mArgs;
-                        final Uri originUri = Uri.fromFile(args.origin.resolvedFile);
+                        final Uri originUri = Uri.fromFile(params.origin.resolvedFile);
                         Slog.w(TAG, "Failed to enable rollback for " + originUri);
                         Slog.w(TAG, "Continuing with installation of " + originUri);
                     }
@@ -2043,8 +2037,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     final int sessionId = msg.arg2;
                     final InstallParams params = mPendingEnableRollback.get(enableRollbackToken);
                     if (params != null) {
-                        final InstallArgs args = params.mArgs;
-                        final Uri originUri = Uri.fromFile(args.origin.resolvedFile);
+                        final Uri originUri = Uri.fromFile(params.origin.resolvedFile);
 
                         Slog.w(TAG, "Enable rollback timed out for " + originUri);
                         mPendingEnableRollback.remove(enableRollbackToken);
@@ -14641,7 +14634,6 @@ public class PackageManagerService extends IPackageManager.Stub
         private boolean mWaitForVerificationToComplete;
         private boolean mWaitForIntegrityVerificationToComplete;
         private boolean mWaitForEnableRollbackToComplete;
-        private InstallArgs mArgs;
         int mRet;
         final String packageAbiOverride;
         final String[] grantedRuntimePermissions;
@@ -14872,9 +14864,6 @@ public class PackageManagerService extends IPackageManager.Stub
                 mRet = overrideInstallLocation(pkgLite);
             }
 
-            // Now that installFlags is finalized, we can create an immutable InstallArgs
-            mArgs = createInstallArgs(this);
-
             // Perform package verification and enable rollback (unless we are simply moving the
             // package).
             if (mRet == INSTALL_SUCCEEDED && !origin.existing) {
@@ -15091,9 +15080,9 @@ public class PackageManagerService extends IPackageManager.Stub
             final boolean isVerificationEnabled = isVerificationEnabled(
                     pkgLite, verifierUser.getIdentifier(), installFlags, installerUid);
             final boolean isV4Signed =
-                    (mArgs.signingDetails.signatureSchemeVersion == SIGNING_BLOCK_V4);
+                    (signingDetails.signatureSchemeVersion == SIGNING_BLOCK_V4);
             final boolean isIncrementalInstall =
-                    (mArgs.mDataLoaderType == DataLoaderType.INCREMENTAL);
+                    (mDataLoaderType == DataLoaderType.INCREMENTAL);
             // NOTE: We purposefully skip verification for only incremental installs when there's
             // a v4 signature block. Otherwise, proceed with verification as usual.
             if (!origin.existing
@@ -15286,10 +15275,11 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
                 return;
             }
+            InstallArgs args = createInstallArgs(this);
             if (mRet == PackageManager.INSTALL_SUCCEEDED) {
-                mRet = mArgs.copyApk();
+                mRet = args.copyApk();
             }
-            processPendingInstall(mArgs, mRet);
+            processPendingInstall(args, mRet);
         }
     }
 
