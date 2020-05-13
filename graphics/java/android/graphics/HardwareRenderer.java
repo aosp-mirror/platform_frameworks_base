@@ -165,6 +165,7 @@ public class HardwareRenderer {
      * to opaque with no light source configured.
      */
     public HardwareRenderer() {
+        ProcessInitializer.sInstance.initDisplayInfo();
         mRootNode = RenderNode.adopt(nCreateRootRenderNode());
         mRootNode.setClipToBounds(false);
         mNativeProxy = nCreateProxy(!mOpaque, mIsWideGamut, mRootNode.mNativeRenderNode);
@@ -1051,6 +1052,7 @@ public class HardwareRenderer {
         }
 
         private boolean mInitialized = false;
+        private boolean mDisplayInitialized = false;
 
         private boolean mIsolated = false;
         private Context mContext;
@@ -1087,7 +1089,6 @@ public class HardwareRenderer {
 
             initSched(renderProxy);
             initGraphicsStats();
-            initDisplayInfo();
         }
 
         private void initSched(long renderProxy) {
@@ -1112,7 +1113,8 @@ public class HardwareRenderer {
             }
         }
 
-        private void initDisplayInfo() {
+        synchronized void initDisplayInfo() {
+            if (mDisplayInitialized) return;
             if (mContext == null) return;
 
             // If we're in an isolated sandbox mode then we shouldn't try to communicate with DMS
@@ -1120,6 +1122,7 @@ public class HardwareRenderer {
                 // Defensively clear out the context in case we were passed a context that can leak
                 // if we live longer than it, e.g. an activity context.
                 mContext = null;
+                mDisplayInitialized = true;
                 return;
             }
 
@@ -1162,6 +1165,7 @@ public class HardwareRenderer {
 
             // Defensively clear out the context
             mContext = null;
+            mDisplayInitialized = true;
         }
 
         private void rotateBuffer() {
