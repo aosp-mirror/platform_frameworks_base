@@ -35,7 +35,7 @@ private const val ATTR_SHORTCUT_ID = "sid"
  * Writes the bubbles in xml format into given output stream.
  */
 @Throws(IOException::class)
-fun writeXml(stream: OutputStream, bubbles: List<BubbleXmlEntity>) {
+fun writeXml(stream: OutputStream, bubbles: List<BubbleEntity>) {
     val serializer: XmlSerializer = FastXmlSerializer()
     serializer.setOutput(stream, StandardCharsets.UTF_8.name())
     serializer.startDocument(null, true)
@@ -51,7 +51,7 @@ fun writeXml(stream: OutputStream, bubbles: List<BubbleXmlEntity>) {
  * <bb uid="0" pkg="com.example.messenger" sid="my-shortcut" />
  * ```
  */
-private fun writeXmlEntry(serializer: XmlSerializer, bubble: BubbleXmlEntity) {
+private fun writeXmlEntry(serializer: XmlSerializer, bubble: BubbleEntity) {
     try {
         serializer.startTag(null, TAG_BUBBLE)
         serializer.attribute(null, ATTR_USER_ID, bubble.userId.toString())
@@ -66,8 +66,8 @@ private fun writeXmlEntry(serializer: XmlSerializer, bubble: BubbleXmlEntity) {
 /**
  * Reads the bubbles from xml file.
  */
-fun readXml(stream: InputStream): List<BubbleXmlEntity> {
-    val bubbles = mutableListOf<BubbleXmlEntity>()
+fun readXml(stream: InputStream): List<BubbleEntity> {
+    val bubbles = mutableListOf<BubbleEntity>()
     val parser: XmlPullParser = Xml.newPullParser()
     parser.setInput(stream, StandardCharsets.UTF_8.name())
     XmlUtils.beginDocument(parser, TAG_BUBBLES)
@@ -78,9 +78,9 @@ fun readXml(stream: InputStream): List<BubbleXmlEntity> {
     return bubbles
 }
 
-private fun readXmlEntry(parser: XmlPullParser): BubbleXmlEntity? {
+private fun readXmlEntry(parser: XmlPullParser): BubbleEntity? {
     while (parser.eventType != XmlPullParser.START_TAG) { parser.next() }
-    return BubbleXmlEntity(
+    return BubbleEntity(
             parser.getAttributeWithName(ATTR_USER_ID)?.toInt() ?: return null,
             parser.getAttributeWithName(ATTR_PACKAGE) ?: return null,
             parser.getAttributeWithName(ATTR_SHORTCUT_ID) ?: return null
