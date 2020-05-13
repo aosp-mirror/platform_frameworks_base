@@ -9936,6 +9936,11 @@ public final class Settings {
         * @hide */
        public static final String PACKAGE_VERIFIER_TIMEOUT = "verifier_timeout";
 
+        /** Timeout for app integrity verification.
+         * @hide */
+        public static final String APP_INTEGRITY_VERIFICATION_TIMEOUT =
+                "app_integrity_verification_timeout";
+
        /** Default response code for package verification.
         * @hide */
        public static final String PACKAGE_VERIFIER_DEFAULT_RESPONSE = "verifier_default_response";
