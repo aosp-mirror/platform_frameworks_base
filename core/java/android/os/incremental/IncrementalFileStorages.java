@@ -92,10 +92,7 @@ public final class IncrementalFileStorages {
             }
         }
 
-        if (!result.mDefaultStorage.startLoading()) {
-            // TODO(b/146080380): add incremental-specific error code
-            throw new IOException("Failed to start loading data for Incremental installation.");
-        }
+        result.startLoading();
 
         return result;
     }
@@ -140,6 +137,15 @@ public final class IncrementalFileStorages {
         final File targetFile = new File(mStageDir, apkName);
         if (!targetFile.exists()) {
             mDefaultStorage.makeFile(apkName, apk.size, null, apk.metadata, apk.signature);
+        }
+    }
+
+    /**
+     * Starts or re-starts loading of data.
+     */
+    public void startLoading() throws IOException {
+        if (!mDefaultStorage.startLoading()) {
+            throw new IOException("Failed to start loading data for Incremental installation.");
         }
     }
 
