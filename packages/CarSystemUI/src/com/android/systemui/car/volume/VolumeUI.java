@@ -52,6 +52,15 @@ public class VolumeUI extends SystemUI {
             new CarAudioManager.CarVolumeCallback() {
                 @Override
                 public void onGroupVolumeChanged(int zoneId, int groupId, int flags) {
+                    initVolumeDialogComponent();
+                }
+
+                @Override
+                public void onMasterMuteChanged(int zoneId, int flags) {
+                    initVolumeDialogComponent();
+                }
+
+                private void initVolumeDialogComponent() {
                     if (mVolumeDialogComponent == null) {
                         mMainHandler.post(() -> {
                             mVolumeDialogComponent = mVolumeDialogComponentLazy.get();
@@ -59,11 +68,6 @@ public class VolumeUI extends SystemUI {
                         });
                         mCarAudioManager.unregisterCarVolumeCallback(mVolumeChangeCallback);
                     }
-                }
-
-                @Override
-                public void onMasterMuteChanged(int zoneId, int flags) {
-                    // ignored
                 }
             };
 
