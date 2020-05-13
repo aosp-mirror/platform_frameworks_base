@@ -30,7 +30,6 @@ import com.android.systemui.statusbar.notification.people.PeopleNotificationIden
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier.Companion.TYPE_NON_PERSON
 import com.android.systemui.statusbar.notification.stack.BUCKET_ALERTING
 import com.android.systemui.statusbar.notification.stack.BUCKET_FOREGROUND_SERVICE
-import com.android.systemui.statusbar.notification.stack.BUCKET_HEADS_UP
 import com.android.systemui.statusbar.notification.stack.BUCKET_PEOPLE
 import com.android.systemui.statusbar.notification.stack.BUCKET_SILENT
 import com.android.systemui.statusbar.notification.stack.PriorityBucket
@@ -138,23 +137,8 @@ open class NotificationRankingManager @Inject constructor(
                 .filterNot(notifFilter::shouldFilterOut)
                 .sortedWith(rankingComparator)
                 .toList()
-        assignBuckets(filtered)
-        return filtered
-    }
-
-    private fun assignBuckets(entries: List<NotificationEntry>) {
         entries.forEach { it.bucket = getBucketForEntry(it) }
-        if (!usePeopleFiltering) {
-            // If we don't have a Conversation section, just assign buckets normally based on the
-            // content.
-            return
-        }
-        // If HUNs are not continuous with the top section, break out into a new Incoming section.
-        entries.asReversed().asSequence().zipWithNext().forEach { (next, entry) ->
-            if (entry.isRowHeadsUp && entry.bucket > next.bucket) {
-                entry.bucket = BUCKET_HEADS_UP
-            }
-        }
+        return filtered
     }
 
     @PriorityBucket

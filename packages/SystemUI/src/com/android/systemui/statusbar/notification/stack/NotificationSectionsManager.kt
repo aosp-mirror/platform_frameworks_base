@@ -206,11 +206,14 @@ class NotificationSectionsManager @Inject internal constructor(
             child === alertingHeaderView -> logger.logAlertingHeader(i)
             child === silentHeaderView -> logger.logSilentHeader(i)
             child !is ExpandableNotificationRow -> logger.logOther(i, child.javaClass)
-            else -> when (child.entry.bucket) {
-                BUCKET_HEADS_UP -> logger.logHeadsUp(i)
-                BUCKET_PEOPLE -> logger.logConversation(i)
-                BUCKET_ALERTING -> logger.logAlerting(i)
-                BUCKET_SILENT -> logger.logSilent(i)
+            else -> {
+                val isHeadsUp = child.isHeadsUp
+                when (child.entry.bucket) {
+                    BUCKET_HEADS_UP -> logger.logHeadsUp(i, isHeadsUp)
+                    BUCKET_PEOPLE -> logger.logConversation(i, isHeadsUp)
+                    BUCKET_ALERTING -> logger.logAlerting(i, isHeadsUp)
+                    BUCKET_SILENT -> logger.logSilent(i, isHeadsUp)
+                }
             }
         }
     }
@@ -242,7 +245,7 @@ class NotificationSectionsManager @Inject internal constructor(
 
         var peopleNotifsPresent = false
         var currentMediaControlsIdx = -1
-        var mediaControlsTarget = if (usingMediaControls) 0 else -1
+        val mediaControlsTarget = if (usingMediaControls) 0 else -1
         var currentIncomingHeaderIdx = -1
         var incomingHeaderTarget = -1
         var currentPeopleHeaderIdx = -1
@@ -253,10 +256,12 @@ class NotificationSectionsManager @Inject internal constructor(
         var gentleHeaderTarget = -1
 
         var lastNotifIndex = 0
+        var lastIncomingIndex = -1
+        var prev: ExpandableNotificationRow? = null
 
-        parent.children.forEachIndexed { i, child ->
-            // Track the existing positions of the headers
+        for ((i, child) in parent.children.withIndex()) {
             when {
+                // Track the existing positions of the headers
                 child === incomingHeaderView -> {
                     logger.logIncomingHeader(i)
                     currentIncomingHeaderIdx = i
@@ -280,41 +285,40 @@ class NotificationSectionsManager @Inject internal constructor(
                 child !is ExpandableNotificationRow -> logger.logOther(i, child.javaClass)
                 else -> {
                     lastNotifIndex = i
+                    // Is there a section discontinuity? This usually occurs due to HUNs
+                    if (prev?.entry?.bucket?.let { it > child.entry.bucket } == true) {
+                        // Remove existing headers, and move the Incoming header if necessary
+                        if (alertingHeaderTarget != -1) {
+                            if (showHeaders && incomingHeaderTarget != -1) {
+                                incomingHeaderTarget = alertingHeaderTarget
+                            }
+                            alertingHeaderTarget = -1
+                        }
+                        if (peopleHeaderTarget != -1) {
+                            if (showHeaders && incomingHeaderTarget != -1) {
+                                incomingHeaderTarget = peopleHeaderTarget
+                            }
+                            peopleHeaderTarget = -1
+                        }
+                        if (showHeaders && incomingHeaderTarget == -1) {
+                            incomingHeaderTarget = 0
+                        }
+                        // Walk backwards changing all previous notifications to the Incoming
+                        // section
+                        for (j in i - 1 downTo lastIncomingIndex + 1) {
+                            val prevChild = parent.getChildAt(j)
+                            if (prevChild is ExpandableNotificationRow) {
+                                prevChild.entry.bucket = BUCKET_HEADS_UP
+                            }
+                        }
+                        // Track the new bottom of the Incoming section
+                        lastIncomingIndex = i - 1
+                    }
+                    val isHeadsUp = child.isHeadsUp
                     when (child.entry.bucket) {
-                        BUCKET_HEADS_UP -> {
-                            logger.logHeadsUp(i)
-                            if (showHeaders && incomingHeaderTarget == -1) {
-                                incomingHeaderTarget = i
-                                // Offset the target if there are other headers before this that
-                                // will be moved.
-                                if (currentIncomingHeaderIdx != -1) {
-                                    incomingHeaderTarget--
-                                }
-                                if (currentMediaControlsIdx != -1) {
-                                    incomingHeaderTarget--
-                                }
-                                if (currentPeopleHeaderIdx != -1) {
-                                    incomingHeaderTarget--
-                                }
-                                if (currentAlertingHeaderIdx != -1) {
-                                    incomingHeaderTarget--
-                                }
-                                if (currentGentleHeaderIdx != -1) {
-                                    incomingHeaderTarget--
-                                }
-                            }
-                            if (mediaControlsTarget != -1) {
-                                mediaControlsTarget++
-                            }
-                        }
-                        BUCKET_FOREGROUND_SERVICE -> {
-                            logger.logForegroundService(i)
-                            if (mediaControlsTarget != -1) {
-                                mediaControlsTarget++
-                            }
-                        }
+                        BUCKET_FOREGROUND_SERVICE -> logger.logForegroundService(i, isHeadsUp)
                         BUCKET_PEOPLE -> {
-                            logger.logConversation(i)
+                            logger.logConversation(i, isHeadsUp)
                             peopleNotifsPresent = true
                             if (showHeaders && peopleHeaderTarget == -1) {
                                 peopleHeaderTarget = i
@@ -332,7 +336,7 @@ class NotificationSectionsManager @Inject internal constructor(
                             }
                         }
                         BUCKET_ALERTING -> {
-                            logger.logAlerting(i)
+                            logger.logAlerting(i, isHeadsUp)
                             if (showHeaders && usingPeopleFiltering && alertingHeaderTarget == -1) {
                                 alertingHeaderTarget = i
                                 // Offset the target if there are other headers before this that
@@ -346,7 +350,7 @@ class NotificationSectionsManager @Inject internal constructor(
                             }
                         }
                         BUCKET_SILENT -> {
-                            logger.logSilent(i)
+                            logger.logSilent(i, isHeadsUp)
                             if (showHeaders && gentleHeaderTarget == -1) {
                                 gentleHeaderTarget = i
                                 // Offset the target if there are other headers before this that
@@ -358,6 +362,8 @@ class NotificationSectionsManager @Inject internal constructor(
                         }
                         else -> throw IllegalStateException("Cannot find section bucket for view")
                     }
+
+                    prev = child
                 }
             }
         }
@@ -393,11 +399,11 @@ class NotificationSectionsManager @Inject internal constructor(
         peopleHeaderView?.let {
             adjustHeaderVisibilityAndPosition(peopleHeaderTarget, it, currentPeopleHeaderIdx)
         }
-        mediaControlsView?.let {
-            adjustViewPosition(mediaControlsTarget, it, currentMediaControlsIdx)
-        }
         incomingHeaderView?.let {
             adjustHeaderVisibilityAndPosition(incomingHeaderTarget, it, currentIncomingHeaderIdx)
+        }
+        mediaControlsView?.let {
+            adjustViewPosition(mediaControlsTarget, it, currentMediaControlsIdx)
         }
 
         logger.logStr("Final order:")
@@ -575,14 +581,16 @@ class NotificationSectionsManager @Inject internal constructor(
 @IntDef(
         prefix = ["BUCKET_"],
         value = [
-            BUCKET_HEADS_UP, BUCKET_FOREGROUND_SERVICE, BUCKET_MEDIA_CONTROLS, BUCKET_PEOPLE,
-            BUCKET_ALERTING, BUCKET_SILENT
+            BUCKET_UNKNOWN, BUCKET_MEDIA_CONTROLS, BUCKET_HEADS_UP, BUCKET_FOREGROUND_SERVICE,
+            BUCKET_PEOPLE, BUCKET_ALERTING, BUCKET_SILENT
         ]
 )
 annotation class PriorityBucket
-const val BUCKET_HEADS_UP = 0
-const val BUCKET_FOREGROUND_SERVICE = 1
-const val BUCKET_MEDIA_CONTROLS = 2
-const val BUCKET_PEOPLE = 3
-const val BUCKET_ALERTING = 4
-const val BUCKET_SILENT = 5
+
+const val BUCKET_UNKNOWN = 0
+const val BUCKET_MEDIA_CONTROLS = 1
+const val BUCKET_HEADS_UP = 2
+const val BUCKET_FOREGROUND_SERVICE = 3
+const val BUCKET_PEOPLE = 4
+const val BUCKET_ALERTING = 5
+const val BUCKET_SILENT = 6

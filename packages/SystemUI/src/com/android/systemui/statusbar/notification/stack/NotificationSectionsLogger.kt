@@ -52,13 +52,34 @@ class NotificationSectionsLogger @Inject constructor(
             { "$int1: other ($str1)" }
     )
 
-    fun logHeadsUp(position: Int) = logPosition(position, "Heads Up")
-    fun logConversation(position: Int) = logPosition(position, "Conversation")
-    fun logAlerting(position: Int) = logPosition(position, "Alerting")
-    fun logSilent(position: Int) = logPosition(position, "Silent")
-    fun logForegroundService(position: Int) = logPosition(position, "Foreground Service")
+    fun logHeadsUp(position: Int, isHeadsUp: Boolean) =
+            logPosition(position, "Heads Up", isHeadsUp)
+    fun logConversation(position: Int, isHeadsUp: Boolean) =
+            logPosition(position, "Conversation", isHeadsUp)
+    fun logAlerting(position: Int, isHeadsUp: Boolean) =
+            logPosition(position, "Alerting", isHeadsUp)
+    fun logSilent(position: Int, isHeadsUp: Boolean) =
+            logPosition(position, "Silent", isHeadsUp)
+    fun logForegroundService(position: Int, isHeadsUp: Boolean) =
+            logPosition(position, "Foreground Service", isHeadsUp)
 
     fun logStr(str: String) = logBuffer.log(TAG, LogLevel.DEBUG, { str1 = str }, { "$str1" })
+
+    private fun logPosition(position: Int, label: String, isHeadsUp: Boolean) {
+        val headsUpTag = if (isHeadsUp) " (HUN)" else ""
+        logBuffer.log(
+                TAG,
+                LogLevel.DEBUG,
+                {
+                    int1 = position
+                    str1 = label
+                    str2 = headsUpTag
+                },
+                {
+                    "$int1: $str1$str2"
+                }
+        )
+    }
 
     private fun logPosition(position: Int, label: String) = logBuffer.log(
             TAG,
