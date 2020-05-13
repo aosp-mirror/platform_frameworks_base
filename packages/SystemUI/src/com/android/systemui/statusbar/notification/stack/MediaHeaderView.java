@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.notification.stack;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.ViewGroup;
 
 import com.android.systemui.R;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
@@ -37,7 +38,6 @@ public class MediaHeaderView extends ActivatableNotificationView {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mContentView = findViewById(R.id.keyguard_media_view);
     }
 
     @Override
@@ -51,5 +51,18 @@ public class MediaHeaderView extends ActivatableNotificationView {
      */
     public void setBackgroundColor(int color) {
         setTintColor(color);
+    }
+
+    public void setContentView(ViewGroup contentView) {
+        mContentView = contentView;
+        addView(contentView);
+        ViewGroup.LayoutParams layoutParams = contentView.getLayoutParams();
+        layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT;
+        layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT;
+    }
+
+    @Override
+    public boolean wantsAddAndRemoveAnimations() {
+        return false;
     }
 }

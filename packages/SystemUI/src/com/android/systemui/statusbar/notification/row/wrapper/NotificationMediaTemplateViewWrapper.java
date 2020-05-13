@@ -178,38 +178,6 @@ public class NotificationMediaTemplateViewWrapper extends NotificationTemplateVi
         final MediaSession.Token token = mRow.getEntry().getSbn().getNotification().extras
                 .getParcelable(Notification.EXTRA_MEDIA_SESSION);
 
-        if (Utils.useQsMediaPlayer(mContext) && token != null) {
-            final int[] compactActions = mRow.getEntry().getSbn().getNotification().extras
-                    .getIntArray(Notification.EXTRA_COMPACT_ACTIONS);
-            int tintColor = getNotificationHeader().getOriginalIconColor();
-            NotificationShadeWindowController ctrl = Dependency.get(
-                    NotificationShadeWindowController.class);
-            QuickQSPanel panel = ctrl.getNotificationShadeView().findViewById(
-                    com.android.systemui.R.id.quick_qs_panel);
-            StatusBarNotification sbn = mRow.getEntry().getSbn();
-            Notification notif = sbn.getNotification();
-            Drawable iconDrawable = notif.getSmallIcon().loadDrawable(mContext);
-            panel.getMediaPlayer().setMediaSession(token,
-                    iconDrawable,
-                    notif.getLargeIcon(),
-                    tintColor,
-                    mBackgroundColor,
-                    mActions,
-                    compactActions,
-                    notif.contentIntent,
-                    sbn.getKey());
-            QSPanel bigPanel = ctrl.getNotificationShadeView().findViewById(
-                    com.android.systemui.R.id.quick_settings_panel);
-            bigPanel.addMediaSession(token,
-                    iconDrawable,
-                    notif.getLargeIcon(),
-                    tintColor,
-                    mBackgroundColor,
-                    mActions,
-                    sbn,
-                    sbn.getKey());
-        }
-
         boolean showCompactSeekbar = mMediaManager.getShowCompactMediaSeekbar();
         if (token == null || (COMPACT_MEDIA_TAG.equals(mView.getTag()) && !showCompactSeekbar)) {
             if (mSeekBarView != null) {

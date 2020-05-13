@@ -1,0 +1,4 @@
+# Input
+per-file *MotionEventTest.* = michaelwr@google.com, svv@google.com
+per-file *KeyEventTest.* = michaelwr@google.com, svv@google.com
+per-file VelocityTest.java = michaelwr@google.com, svv@google.com

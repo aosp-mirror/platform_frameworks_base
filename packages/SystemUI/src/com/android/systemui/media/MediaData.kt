@@ -11,23 +11,36 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License.
+ * limitations under the License
  */
 
-package com.android.keyguard
+package com.android.systemui.media
 
+import android.app.PendingIntent
 import android.graphics.drawable.Drawable
+import android.graphics.drawable.Icon
+import android.media.session.MediaSession
 
-import java.util.List
-
-/** State for lock screen media controls. */
-data class KeyguardMedia(
+/** State of a media view. */
+data class MediaData(
+    val initialized: Boolean = false,
     val foregroundColor: Int,
     val backgroundColor: Int,
     val app: String?,
     val appIcon: Drawable?,
-    val artist: String?,
-    val song: String?,
-    val artwork: Drawable?,
-    val actionIcons: List<Drawable>
+    val artist: CharSequence?,
+    val song: CharSequence?,
+    val artwork: Icon?,
+    val actions: List<MediaAction>,
+    val actionsToShowInCompact: List<Int>,
+    val packageName: String?,
+    val token: MediaSession.Token?,
+    val clickIntent: PendingIntent?
+)
+
+/** State of a media action. */
+data class MediaAction(
+    val drawable: Drawable?,
+    val intent: PendingIntent?,
+    val contentDescription: CharSequence?
 )

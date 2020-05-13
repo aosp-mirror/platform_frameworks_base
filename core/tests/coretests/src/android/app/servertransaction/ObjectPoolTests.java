@@ -144,11 +144,12 @@ public class ObjectPoolTests {
         IBinder assistToken = new Binder();
 
         LaunchActivityItem emptyItem = LaunchActivityItem.obtain(null, 0, null, null, null, null,
-                null, null, 0, null, null, null, null, false, null, null);
+                null, null, 0, null, null, null, null, false, null, null, null);
         LaunchActivityItem item = LaunchActivityItem.obtain(intent, ident, activityInfo,
                 config(), overrideConfig, compat, referrer, null /* voiceInteractor */,
                 procState, bundle, persistableBundle, resultInfoList(), referrerIntentList(),
-                true /* isForward */, null /* profilerInfo */, assistToken);
+                true /* isForward */, null /* profilerInfo */, assistToken,
+                null /* fixedRotationAdjustments */);
         assertNotSame(item, emptyItem);
         assertFalse(item.equals(emptyItem));
 
@@ -158,7 +159,8 @@ public class ObjectPoolTests {
         LaunchActivityItem item2 = LaunchActivityItem.obtain(intent, ident, activityInfo,
                 config(), overrideConfig, compat, referrer, null /* voiceInteractor */,
                 procState, bundle, persistableBundle, resultInfoList(), referrerIntentList(),
-                true /* isForward */, null /* profilerInfo */, assistToken);
+                true /* isForward */, null /* profilerInfo */, assistToken,
+                null /* fixedRotationAdjustments */);
         assertSame(item, item2);
         assertFalse(item2.equals(emptyItem));
     }

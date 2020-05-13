@@ -842,7 +842,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                         r.launchedFromPackage, task.voiceInteractor, proc.getReportedProcState(),
                         r.getSavedState(), r.getPersistentSavedState(), results, newIntents,
                         dc.isNextTransitionForward(), proc.createProfilerInfoIfNeeded(),
-                                r.assistToken));
+                        r.assistToken, r.createFixedRotationAdjustmentsIfNeeded()));
 
                 // Set desired final state.
                 final ActivityLifecycleItem lifecycleItem;
@@ -1440,6 +1440,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         mService.deferWindowLayout();
         try {
             stack.setWindowingMode(WINDOWING_MODE_UNDEFINED);
+            stack.setBounds(null);
             if (toDisplay.getDisplayId() != stack.getDisplayId()) {
                 stack.reparent(toDisplay.getDefaultTaskDisplayArea(), false /* onTop */);
             } else {

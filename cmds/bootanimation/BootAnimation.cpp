@@ -1306,7 +1306,7 @@ status_t BootAnimation::TimeCheckThread::readyToRun() {
     if (mSystemWd < 0) {
         close(mInotifyFd);
         mInotifyFd = -1;
-        SLOGE("Could not add watch for %s", SYSTEM_DATA_DIR_PATH);
+        SLOGE("Could not add watch for %s: %s", SYSTEM_DATA_DIR_PATH, strerror(errno));
         return NO_INIT;
     }
 
