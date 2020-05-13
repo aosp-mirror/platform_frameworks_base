@@ -68,6 +68,8 @@ class Bubble implements BubbleViewProvider {
 
     /** Whether flyout text should be suppressed, regardless of any other flags or state. */
     private boolean mSuppressFlyout;
+    /** Whether this bubble should auto expand regardless of the normal flag, used for overflow. */
+    private boolean mShouldAutoExpand;
 
     // Items that are typically loaded later
     private String mAppName;
@@ -470,7 +472,11 @@ class Bubble implements BubbleViewProvider {
 
     boolean shouldAutoExpand() {
         Notification.BubbleMetadata metadata = mEntry.getBubbleMetadata();
-        return metadata != null && metadata.getAutoExpandBubble();
+        return (metadata != null && metadata.getAutoExpandBubble()) ||  mShouldAutoExpand;
+    }
+
+    void setShouldAutoExpand(boolean shouldAutoExpand) {
+        mShouldAutoExpand = shouldAutoExpand;
     }
 
     @Override
