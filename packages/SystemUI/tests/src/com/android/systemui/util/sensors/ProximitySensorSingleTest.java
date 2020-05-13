@@ -210,6 +210,25 @@ public class ProximitySensorSingleTest extends SysuiTestCase {
         mProximitySensor.unregister(listenerB);
     }
 
+    @Test
+    public void testPreventRecursiveAlert() {
+        TestableListener listenerA = new TestableListener() {
+            @Override
+            public void onThresholdCrossed(ProximitySensor.ThresholdSensorEvent proximityEvent) {
+                super.onThresholdCrossed(proximityEvent);
+                if (mCallCount < 2) {
+                    mProximitySensor.alertListeners();
+                }
+            }
+        };
+
+        mProximitySensor.register(listenerA);
+
+        mThresholdSensor.triggerEvent(true, 0);
+
+        assertEquals(1, listenerA.mCallCount);
+    }
+
     private static class TestableListener implements ThresholdSensor.Listener {
         ThresholdSensor.ThresholdSensorEvent mLastEvent;
         int mCallCount = 0;

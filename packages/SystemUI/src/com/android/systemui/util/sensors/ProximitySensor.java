@@ -17,7 +17,6 @@
 package com.android.systemui.util.sensors;
 
 import android.hardware.SensorManager;
-import android.os.Handler;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -27,6 +26,7 @@ import com.android.systemui.util.concurrency.DelayableExecutor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 import javax.inject.Inject;
@@ -64,11 +64,12 @@ public class ProximitySensor implements ThresholdSensor {
     private final DelayableExecutor mDelayableExecutor;
     private final List<ThresholdSensor.Listener> mListeners = new ArrayList<>();
     private String mTag = null;
+    @VisibleForTesting protected boolean mPaused;
     private ThresholdSensorEvent mLastPrimaryEvent;
     @VisibleForTesting
     ThresholdSensorEvent mLastEvent;
-    private boolean mPaused;
     private boolean mRegistered;
+    private final AtomicBoolean mAlerting = new AtomicBoolean();
     private Runnable mCancelSecondaryRunnable;
     private boolean mInitializedListeners = false;
 
@@ -235,13 +236,16 @@ public class ProximitySensor implements ThresholdSensor {
     /** Update all listeners with the last value this class received from the sensor. */
     public void alertListeners() {
         Assert.isMainThread();
-        if (mLastEvent == null) {
+        if (mAlerting.getAndSet(true)) {
             return;
         }
+        if (mLastEvent != null) {
+            List<ThresholdSensor.Listener> listeners = new ArrayList<>(mListeners);
+            listeners.forEach(proximitySensorListener ->
+                    proximitySensorListener.onThresholdCrossed(mLastEvent));
+        }
 
-        List<ThresholdSensor.Listener> listeners = new ArrayList<>(mListeners);
-        listeners.forEach(proximitySensorListener ->
-                proximitySensorListener.onThresholdCrossed(mLastEvent));
+        mAlerting.set(false);
     }
 
     private void onPrimarySensorEvent(ThresholdSensorEvent event) {
@@ -291,14 +295,14 @@ public class ProximitySensor implements ThresholdSensor {
     public static class ProximityCheck implements Runnable {
 
         private final ProximitySensor mSensor;
-        private final Handler mHandler;
+        private final DelayableExecutor mDelayableExecutor;
         private List<Consumer<Boolean>> mCallbacks = new ArrayList<>();
 
         @Inject
-        public ProximityCheck(ProximitySensor sensor, Handler handler) {
+        public ProximityCheck(ProximitySensor sensor, DelayableExecutor delayableExecutor) {
             mSensor = sensor;
             mSensor.setTag("prox_check");
-            mHandler = handler;
+            mDelayableExecutor = delayableExecutor;
             mSensor.pause();
             ThresholdSensor.Listener listener = proximityEvent -> {
                 mCallbacks.forEach(
@@ -332,7 +336,7 @@ public class ProximitySensor implements ThresholdSensor {
             mCallbacks.add(callback);
             if (!mSensor.isRegistered()) {
                 mSensor.resume();
-                mHandler.postDelayed(this, timeoutMs);
+                mDelayableExecutor.executeDelayed(this, timeoutMs);
             }
         }
     }
