@@ -49,10 +49,10 @@ TEST(StorageManagerTest, TrainInfoReadWriteTest) {
     EXPECT_TRUE(result);
 
     EXPECT_EQ(trainInfo.trainVersionCode, trainInfoResult.trainVersionCode);
-    EXPECT_EQ(trainInfo.trainName.size(), trainInfoResult.trainName.size());
+    ASSERT_EQ(trainInfo.trainName.size(), trainInfoResult.trainName.size());
     EXPECT_EQ(trainInfo.trainName, trainInfoResult.trainName);
     EXPECT_EQ(trainInfo.status, trainInfoResult.status);
-    EXPECT_EQ(trainInfo.experimentIds.size(), trainInfoResult.experimentIds.size());
+    ASSERT_EQ(trainInfo.experimentIds.size(), trainInfoResult.experimentIds.size());
     EXPECT_EQ(trainInfo.experimentIds, trainInfoResult.experimentIds);
 }
 
@@ -75,10 +75,10 @@ TEST(StorageManagerTest, TrainInfoReadWriteTrainNameSizeOneTest) {
     EXPECT_TRUE(result);
 
     EXPECT_EQ(trainInfo.trainVersionCode, trainInfoResult.trainVersionCode);
-    EXPECT_EQ(trainInfo.trainName.size(), trainInfoResult.trainName.size());
+    ASSERT_EQ(trainInfo.trainName.size(), trainInfoResult.trainName.size());
     EXPECT_EQ(trainInfo.trainName, trainInfoResult.trainName);
     EXPECT_EQ(trainInfo.status, trainInfoResult.status);
-    EXPECT_EQ(trainInfo.experimentIds.size(), trainInfoResult.experimentIds.size());
+    ASSERT_EQ(trainInfo.experimentIds.size(), trainInfoResult.experimentIds.size());
     EXPECT_EQ(trainInfo.experimentIds, trainInfoResult.experimentIds);
 }
 
