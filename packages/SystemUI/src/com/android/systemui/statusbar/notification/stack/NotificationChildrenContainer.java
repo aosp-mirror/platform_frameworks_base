@@ -463,7 +463,8 @@ public class NotificationChildrenContainer extends ViewGroup {
                     mAttachedChildren.add(i, desiredChild);
                     result = true;
                 } else {
-                    visualStabilityManager.addReorderingAllowedCallback(callback);
+                    visualStabilityManager.addReorderingAllowedCallback(callback,
+                            false /* persistent */);
                 }
             }
         }
