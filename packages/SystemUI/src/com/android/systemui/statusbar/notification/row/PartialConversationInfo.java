@@ -135,9 +135,12 @@ public class PartialConversationInfo extends LinearLayout implements
     }
 
     private void bindActions() {
+        final OnClickListener settingsOnClickListener = getSettingsOnClickListener();
         final View settingsButton = findViewById(R.id.info);
-        settingsButton.setOnClickListener(getSettingsOnClickListener());
+        settingsButton.setOnClickListener(settingsOnClickListener);
         settingsButton.setVisibility(settingsButton.hasOnClickListeners() ? VISIBLE : GONE);
+
+        findViewById(R.id.settings_link).setOnClickListener(settingsOnClickListener);
 
         TextView msg = findViewById(R.id.non_configurable_text);
         msg.setText(getResources().getString(R.string.no_shortcut, mAppName));
