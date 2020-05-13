@@ -17,6 +17,7 @@ package android.multiuser;
 
 import static org.junit.Assume.assumeTrue;
 
+import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.app.AppGlobals;
@@ -767,13 +768,14 @@ public class UserLifecycleTests {
         }
     }
 
-    private void attestTrue(String message, boolean assertion) {
+    private void attestTrue(@NonNull String message, boolean assertion) {
         if (!assertion) {
-            Log.w(TAG, message);
+            Log.e(TAG, "Test failed on iteration #" + mRunner.getIteration() + ": " + message);
+            mRunner.markAsFailed(new AssertionError(message));
         }
     }
 
-    private void attestFalse(String message, boolean assertion) {
+    private void attestFalse(@NonNull String message, boolean assertion) {
         attestTrue(message, !assertion);
     }
 }
