@@ -1749,7 +1749,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                         failure.error, failure.getLocalizedMessage(), null);
                 return;
             }
-            mPm.installStage(installingChildSessions);
+            mPm.installStage(installingSession, installingChildSessions);
         } else {
             mPm.installStage(installingSession);
         }
@@ -1868,6 +1868,34 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
         };
 
+        // An observer through which PMS returns the result of verification
+        // TODO(samiul): We are temporarily assigning two observer to ActiveInstallSession. One for
+        // installation and one for verification. This will be fixed within next few CLs.
+        final IPackageInstallObserver2 sessionVerificationObserver;
+        if (!hasParentSessionId()) {
+            // Avoid attaching this observer to child session since they won't use it.
+            sessionVerificationObserver = new IPackageInstallObserver2.Stub() {
+                @Override
+                public void onUserActionRequired(Intent intent) {
+                    throw new IllegalStateException();
+                }
+
+                @Override
+                public void onPackageInstalled(String basePackageName, int returnCode, String msg,
+                        Bundle extras) {
+                    if (returnCode == PackageManager.INSTALL_SUCCEEDED) {
+                        // TODO(samiul): In future, packages will not be installed immediately after
+                        // verification. Package verification will return control back to here,
+                        // and we will have call into PMS again to install package.
+                        //
+                        // For now, this is a no op.
+                    }
+                }
+            };
+        } else {
+            sessionVerificationObserver = null;
+        }
+
         final UserHandle user;
         if ((params.installFlags & PackageManager.INSTALL_ALL_USERS) != 0) {
             user = UserHandle.ALL;
@@ -1877,7 +1905,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
         mRelinquished = true;
         return new PackageManagerService.ActiveInstallSession(mPackageName, stageDir, localObserver,
-                sessionId, params, mInstallerUid, mInstallSource, user, mSigningDetails);
+                sessionVerificationObserver, sessionId, params, mInstallerUid, mInstallSource, user,
+                mSigningDetails);
     }
 
     private static void maybeRenameFile(File from, File to) throws PackageManagerException {

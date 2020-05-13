@@ -12801,11 +12801,11 @@ public class PackageManagerService extends IPackageManager.Stub
         mHandler.sendMessage(msg);
     }
 
-    void installStage(List<ActiveInstallSession> children)
+    void installStage(ActiveInstallSession parent, List<ActiveInstallSession> children)
             throws PackageManagerException {
         final Message msg = mHandler.obtainMessage(INIT_COPY);
         final MultiPackageInstallParams params =
-                new MultiPackageInstallParams(UserHandle.ALL, children);
+                new MultiPackageInstallParams(UserHandle.ALL, parent, children);
         params.setTraceMethod("installStageMultiPackage")
                 .setTraceCookie(System.identityHashCode(params));
         msg.obj = params;
@@ -14693,13 +14693,17 @@ public class PackageManagerService extends IPackageManager.Stub
      * committed together.
      */
     class MultiPackageInstallParams extends HandlerParams {
+        private final IPackageInstallObserver2 mVerificationObserver;
         @NonNull
         private final ArrayList<InstallParams> mChildParams;
+        // TODO(samiul): mCurrentState will relocated to a install-specific class in future
         @NonNull
         private final Map<InstallArgs, Integer> mCurrentState;
+        private final Map<InstallParams, Integer> mVerificationState;
 
         MultiPackageInstallParams(
                 @NonNull UserHandle user,
+                @NonNull ActiveInstallSession parent,
                 @NonNull List<ActiveInstallSession> activeInstallSessions)
                 throws PackageManagerException {
             super(user);
@@ -14713,6 +14717,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 this.mChildParams.add(childParams);
             }
             this.mCurrentState = new ArrayMap<>(mChildParams.size());
+            this.mVerificationState = new ArrayMap<>(mChildParams.size());
+            mVerificationObserver = parent.getVerificationObserver();
         }
 
         @Override
@@ -14729,6 +14735,7 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         }
 
+        // TODO(samiul): this method will relocated to a install-specific class in future
         void tryProcessInstallRequest(InstallArgs args, int currentStatus) {
             mCurrentState.put(args, currentStatus);
             if (mCurrentState.size() != mChildParams.size()) {
@@ -14752,6 +14759,28 @@ public class PackageManagerService extends IPackageManager.Stub
                     completeStatus == PackageManager.INSTALL_SUCCEEDED,
                     installRequests);
         }
+
+        void trySendVerificationCompleteNotification(InstallParams child, int currentStatus) {
+            mVerificationState.put(child, currentStatus);
+            if (mVerificationState.size() != mChildParams.size()) {
+                return;
+            }
+            int completeStatus = PackageManager.INSTALL_SUCCEEDED;
+            for (Integer status : mVerificationState.values()) {
+                if (status == PackageManager.INSTALL_UNKNOWN) {
+                    return;
+                } else if (status != PackageManager.INSTALL_SUCCEEDED) {
+                    completeStatus = status;
+                    break;
+                }
+            }
+            try {
+                mVerificationObserver.onPackageInstalled(null, completeStatus,
+                        "Package Verification Result", new Bundle());
+            } catch (RemoteException e) {
+                Slog.i(TAG, "Observer no longer exists.");
+            }
+        }
     }
 
     class InstallParams extends HandlerParams {
@@ -14759,7 +14788,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
         final OriginInfo origin;
         final MoveInfo move;
-        final IPackageInstallObserver2 observer;
+        final IPackageInstallObserver2 mInstallObserver;
+        private final IPackageInstallObserver2 mVerificationObserver;
         int installFlags;
         @NonNull final InstallSource installSource;
         final String volumeUuid;
@@ -14781,7 +14811,7 @@ public class PackageManagerService extends IPackageManager.Stub
         final int mDataLoaderType;
         final int mSessionId;
 
-        InstallParams(OriginInfo origin, MoveInfo move, IPackageInstallObserver2 observer,
+        InstallParams(OriginInfo origin, MoveInfo move, IPackageInstallObserver2 installObserver,
                 int installFlags, InstallSource installSource, String volumeUuid,
                 VerificationInfo verificationInfo, UserHandle user, String packageAbiOverride,
                 String[] grantedPermissions, List<String> whitelistedRestrictedPermissions,
@@ -14791,7 +14821,8 @@ public class PackageManagerService extends IPackageManager.Stub
             super(user);
             this.origin = origin;
             this.move = move;
-            this.observer = observer;
+            this.mInstallObserver = installObserver;
+            this.mVerificationObserver = null;
             this.installFlags = installFlags;
             this.installSource = Preconditions.checkNotNull(installSource);
             this.volumeUuid = volumeUuid;
@@ -14829,7 +14860,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     activeInstallSession.getInstallSource().installerPackageName,
                     activeInstallSession.getInstallerUid(),
                     sessionParams.installReason);
-            observer = activeInstallSession.getObserver();
+            mInstallObserver = activeInstallSession.getInstallObserver();
+            mVerificationObserver = activeInstallSession.getVerificationObserver();
             installFlags = sessionParams.installFlags;
             installSource = activeInstallSession.getInstallSource();
             volumeUuid = sessionParams.volumeUuid;
@@ -15383,17 +15415,33 @@ public class PackageManagerService extends IPackageManager.Stub
 
             if ((installFlags & PackageManager.INSTALL_DRY_RUN) != 0) {
                 try {
-                    observer.onPackageInstalled(null, mRet, "Dry run", new Bundle());
+                    mInstallObserver.onPackageInstalled(null, mRet, "Dry run", new Bundle());
                 } catch (RemoteException e) {
                     Slog.i(TAG, "Observer no longer exists.");
                 }
                 return;
             }
+            sendVerificationCompleteNotification();
+
+            // TODO(samiul): In future return once verification is complete
             InstallArgs args = createInstallArgs(this);
             if (mRet == PackageManager.INSTALL_SUCCEEDED) {
                 mRet = args.copyApk();
             }
             processPendingInstall(args, mRet);
+        }
+
+        private void sendVerificationCompleteNotification() {
+            if (mParentInstallParams != null) {
+                mParentInstallParams.trySendVerificationCompleteNotification(this, mRet);
+            } else {
+                try {
+                    mVerificationObserver.onPackageInstalled(null, mRet,
+                            "Package Verification Result", new Bundle());
+                } catch (RemoteException e) {
+                    Slog.i(TAG, "Observer no longer exists.");
+                }
+            }
         }
     }
 
@@ -15476,7 +15524,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         /** New install */
         InstallArgs(InstallParams params) {
-            this(params.origin, params.move, params.observer, params.installFlags,
+            this(params.origin, params.move, params.mInstallObserver, params.installFlags,
                     params.installSource, params.volumeUuid,
                     params.getUser(), null /*instructionSets*/, params.packageAbiOverride,
                     params.grantedRuntimePermissions, params.whitelistedRestrictedPermissions,
@@ -25497,7 +25545,10 @@ public class PackageManagerService extends IPackageManager.Stub
     static class ActiveInstallSession {
         private final String mPackageName;
         private final File mStagedDir;
-        private final IPackageInstallObserver2 mObserver;
+        private final IPackageInstallObserver2 mInstallObserver;
+        // TODO(samiul): We are temporarily assigning two observer to ActiveInstallSession. One for
+        // installation and one for verification. This will be fixed within next few CLs.
+        private final IPackageInstallObserver2 mVerificationObserver;
         private final int mSessionId;
         private final PackageInstaller.SessionParams mSessionParams;
         private final int mInstallerUid;
@@ -25505,12 +25556,15 @@ public class PackageManagerService extends IPackageManager.Stub
         private final UserHandle mUser;
         private final SigningDetails mSigningDetails;
 
-        ActiveInstallSession(String packageName, File stagedDir, IPackageInstallObserver2 observer,
+        ActiveInstallSession(String packageName, File stagedDir,
+                IPackageInstallObserver2 installObserver,
+                IPackageInstallObserver2 verificationObserver,
                 int sessionId, PackageInstaller.SessionParams sessionParams, int installerUid,
                 InstallSource installSource, UserHandle user, SigningDetails signingDetails) {
             mPackageName = packageName;
             mStagedDir = stagedDir;
-            mObserver = observer;
+            mInstallObserver = installObserver;
+            mVerificationObserver = verificationObserver;
             mSessionId = sessionId;
             mSessionParams = sessionParams;
             mInstallerUid = installerUid;
@@ -25527,8 +25581,12 @@ public class PackageManagerService extends IPackageManager.Stub
             return mStagedDir;
         }
 
-        public IPackageInstallObserver2 getObserver() {
-            return mObserver;
+        public IPackageInstallObserver2 getInstallObserver() {
+            return mInstallObserver;
+        }
+
+        public IPackageInstallObserver2 getVerificationObserver() {
+            return mVerificationObserver;
         }
 
         public int getSessionId() {
