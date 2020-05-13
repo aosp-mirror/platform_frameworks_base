@@ -30,6 +30,9 @@ interface Behavior {
 
     /**
      * Will be invoked on every update provided to the Control
+     *
+     * @param cws ControlWithState, as loaded from favorites and/or the application
+     * @param colorOffset An additional flag to control rendering color. See [RenderInfo]
      */
-    fun bind(cws: ControlWithState)
+    fun bind(cws: ControlWithState, colorOffset: Int = 0)
 }
