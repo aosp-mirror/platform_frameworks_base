@@ -489,6 +489,8 @@ message StatsdConfig {
 
   repeated PullAtomPackages pull_atom_packages = 23;
 
+  repeated int32 whitelisted_atom_ids = 24;
+
   // Field number 1000 is reserved for later use.
   reserved 1000;
 }
