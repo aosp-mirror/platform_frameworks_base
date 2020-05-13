@@ -144,25 +144,36 @@
         android:clipToPadding="false"
         android:orientation="vertical">
 
-        <LinearLayout
+        <com.android.systemui.statusbar.notification.row.ButtonLinearLayout
+            android:id="@+id/settings_link"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:clipChildren="false"
-            android:clipToPadding="false"
-            android:orientation="horizontal">
-            <ImageView
-                android:layout_height="wrap_content"
-                android:layout_width="wrap_content"
-                android:contentDescription="@null"
-                android:src="@drawable/ic_info"
-                android:tint="?android:attr/textColorPrimary"
-                android:layout_marginEnd="8dp"/>
-            <TextView
-                android:id="@+id/non_configurable_text"
+            android:padding="@dimen/notification_importance_button_padding"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="@drawable/notification_guts_priority_button_bg"
+            android:orientation="vertical">
+
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                style="@style/TextAppearance.NotificationImportanceChannelGroup" />
-        </LinearLayout>
+                android:clipChildren="false"
+                android:clipToPadding="false"
+                android:orientation="horizontal">
+                <ImageView
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_info"
+                    android:tint="?android:attr/textColorPrimary"
+                    android:layout_marginEnd="8dp"/>
+                <TextView
+                    android:id="@+id/non_configurable_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    style="@style/TextAppearance.NotificationImportanceChannelGroup" />
+            </LinearLayout>
+        </com.android.systemui.statusbar.notification.row.ButtonLinearLayout>
 
         <RelativeLayout
             android:id="@+id/bottom_buttons"
