@@ -396,7 +396,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     private boolean mDataLoaderFinished = false;
 
-    // TODO(b/146080380): merge file list with Callback installation.
     private IncrementalFileStorages mIncrementalFileStorages;
 
     private static final FileFilter sAddedApkFilter = new FileFilter() {
@@ -2704,6 +2703,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     /**
      * Makes sure files are present in staging location.
+     * @return if the image is ready for installation
      */
     @GuardedBy("mLock")
     private boolean prepareDataLoaderLocked()
@@ -2713,6 +2713,17 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
         if (mDataLoaderFinished) {
             return true;
+        }
+
+        // Retrying commit.
+        if (mIncrementalFileStorages != null) {
+            try {
+                mIncrementalFileStorages.startLoading();
+            } catch (IOException e) {
+                throw new PackageManagerException(INSTALL_FAILED_MEDIA_UNAVAILABLE, e.getMessage(),
+                        e.getCause());
+            }
+            return false;
         }
 
         final List<InstallationFileParcel> addedFiles = new ArrayList<>();
