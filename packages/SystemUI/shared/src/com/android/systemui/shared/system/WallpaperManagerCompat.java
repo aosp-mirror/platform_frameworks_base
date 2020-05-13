@@ -18,6 +18,7 @@ package com.android.systemui.shared.system;
 
 import android.app.WallpaperManager;
 import android.content.Context;
+import android.content.res.Resources;
 import android.os.IBinder;
 
 /**
@@ -42,6 +43,9 @@ public class WallpaperManagerCompat {
      */
     public static float getWallpaperZoomOutMaxScale(Context context) {
         return context.getResources()
-                .getFloat(com.android.internal.R.dimen.config_wallpaperMaxScale);
+                .getFloat(Resources.getSystem().getIdentifier(
+                        /* name= */ "config_wallpaperMaxScale",
+                        /* defType= */ "dimen",
+                        /* defPackage= */ "android"));
     }
 }
