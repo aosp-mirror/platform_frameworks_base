@@ -35,31 +35,30 @@ void StateTracker::onLogEvent(const LogEvent& event) {
     HashableDimensionKey primaryKey;
     filterPrimaryKey(event.getValues(), &primaryKey);
 
-    FieldValue stateValue;
-    if (!getStateFieldValueFromLogEvent(event, &stateValue)) {
+    FieldValue newState;
+    if (!getStateFieldValueFromLogEvent(event, &newState)) {
         ALOGE("StateTracker error extracting state from log event. Missing exclusive state field.");
         clearStateForPrimaryKey(eventTimeNs, primaryKey);
         return;
     }
 
-    mField.setField(stateValue.mField.getField());
+    mField.setField(newState.mField.getField());
 
-    if (stateValue.mValue.getType() != INT) {
+    if (newState.mValue.getType() != INT) {
         ALOGE("StateTracker error extracting state from log event. Type: %d",
-              stateValue.mValue.getType());
+              newState.mValue.getType());
         clearStateForPrimaryKey(eventTimeNs, primaryKey);
         return;
     }
 
-    const int32_t resetState = event.getResetState();
-    if (resetState != -1) {
+    if (int resetState = event.getResetState(); resetState != -1) {
         VLOG("StateTracker new reset state: %d", resetState);
-        handleReset(eventTimeNs, resetState);
+        const FieldValue resetStateFieldValue(mField, Value(resetState));
+        handleReset(eventTimeNs, resetStateFieldValue);
         return;
     }
 
-    const int32_t newState = stateValue.mValue.int_value;
-    const bool nested = stateValue.mAnnotations.isNested();
+    const bool nested = newState.mAnnotations.isNested();
     StateValueInfo* stateValueInfo = &mStateMap[primaryKey];
     updateStateForPrimaryKey(eventTimeNs, primaryKey, newState, nested, stateValueInfo);
 }
@@ -85,7 +84,7 @@ bool StateTracker::getStateValue(const HashableDimensionKey& queryKey, FieldValu
     return false;
 }
 
-void StateTracker::handleReset(const int64_t eventTimeNs, const int32_t newState) {
+void StateTracker::handleReset(const int64_t eventTimeNs, const FieldValue& newState) {
     VLOG("StateTracker handle reset");
     for (auto& [primaryKey, stateValueInfo] : mStateMap) {
         updateStateForPrimaryKey(eventTimeNs, primaryKey, newState,
@@ -102,8 +101,9 @@ void StateTracker::clearStateForPrimaryKey(const int64_t eventTimeNs,
 
     // If there is no entry for the primaryKey in mStateMap, then the state is already
     // kStateUnknown.
+    const FieldValue state(mField, Value(kStateUnknown));
     if (it != mStateMap.end()) {
-        updateStateForPrimaryKey(eventTimeNs, primaryKey, kStateUnknown,
+        updateStateForPrimaryKey(eventTimeNs, primaryKey, state,
                                  false /* nested; treat this state change as not nested */,
                                  &it->second);
     }
@@ -111,22 +111,26 @@ void StateTracker::clearStateForPrimaryKey(const int64_t eventTimeNs,
 
 void StateTracker::updateStateForPrimaryKey(const int64_t eventTimeNs,
                                             const HashableDimensionKey& primaryKey,
-                                            const int32_t newState, const bool nested,
+                                            const FieldValue& newState, const bool nested,
                                             StateValueInfo* stateValueInfo) {
-    const int32_t oldState = stateValueInfo->state;
+    FieldValue oldState;
+    oldState.mField = mField;
+    oldState.mValue.setInt(stateValueInfo->state);
+    const int32_t oldStateValue = stateValueInfo->state;
+    const int32_t newStateValue = newState.mValue.int_value;
 
-    if (kStateUnknown == newState) {
+    if (kStateUnknown == newStateValue) {
         mStateMap.erase(primaryKey);
     }
 
     // Update state map for non-nested counting case.
     // Every state event triggers a state overwrite.
     if (!nested) {
-        stateValueInfo->state = newState;
+        stateValueInfo->state = newStateValue;
         stateValueInfo->count = 1;
 
         // Notify listeners if state has changed.
-        if (oldState != newState) {
+        if (oldStateValue != newStateValue) {
             notifyListeners(eventTimeNs, primaryKey, oldState, newState);
         }
         return;
@@ -142,26 +146,26 @@ void StateTracker::updateStateForPrimaryKey(const int64_t eventTimeNs,
     // In atoms.proto, a state atom with nested counting enabled
     // must only have 2 states. There is no enforcemnt here of this requirement.
     // The atom must be logged correctly.
-    if (kStateUnknown == newState) {
-        if (kStateUnknown != oldState) {
+    if (kStateUnknown == newStateValue) {
+        if (kStateUnknown != oldStateValue) {
             notifyListeners(eventTimeNs, primaryKey, oldState, newState);
         }
-    } else if (oldState == kStateUnknown) {
-        stateValueInfo->state = newState;
+    } else if (oldStateValue == kStateUnknown) {
+        stateValueInfo->state = newStateValue;
         stateValueInfo->count = 1;
         notifyListeners(eventTimeNs, primaryKey, oldState, newState);
-    } else if (oldState == newState) {
+    } else if (oldStateValue == newStateValue) {
         stateValueInfo->count++;
     } else if (--stateValueInfo->count == 0) {
-        stateValueInfo->state = newState;
+        stateValueInfo->state = newStateValue;
         stateValueInfo->count = 1;
         notifyListeners(eventTimeNs, primaryKey, oldState, newState);
     }
 }
 
 void StateTracker::notifyListeners(const int64_t eventTimeNs,
-                                   const HashableDimensionKey& primaryKey, const int32_t oldState,
-                                   const int32_t newState) {
+                                   const HashableDimensionKey& primaryKey,
+                                   const FieldValue& oldState, const FieldValue& newState) {
     for (auto l : mListeners) {
         auto sl = l.promote();
         if (sl != nullptr) {

@@ -55,8 +55,8 @@ public:
                                          const sp<AlarmMonitor>& anomalyAlarmMonitor) override;
 
     void onStateChanged(const int64_t eventTimeNs, const int32_t atomId,
-                        const HashableDimensionKey& primaryKey, const int32_t oldState,
-                        const int32_t newState) override;
+                        const HashableDimensionKey& primaryKey, const FieldValue& oldState,
+                        const FieldValue& newState) override;
 
 protected:
     void onMatchedLogEventLocked(const size_t matcherIndex, const LogEvent& event) override;
