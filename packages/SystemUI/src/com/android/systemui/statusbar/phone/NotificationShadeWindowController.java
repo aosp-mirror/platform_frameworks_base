@@ -321,8 +321,7 @@ public class NotificationShadeWindowController implements Callback, Dumpable,
                 || state.mPanelVisible || state.mKeyguardFadingAway || state.mBouncerShowing
                 || state.mHeadsUpShowing
                 || state.mScrimsVisibility != ScrimController.TRANSPARENT)
-                || state.mBackgroundBlurRadius > 0
-                || state.mLaunchingActivity;
+                || state.mBackgroundBlurRadius > 0;
     }
 
     private void applyFitsSystemWindows(State state) {
@@ -486,11 +485,6 @@ public class NotificationShadeWindowController implements Callback, Dumpable,
         apply(mCurrentState);
     }
 
-    void setLaunchingActivity(boolean launching) {
-        mCurrentState.mLaunchingActivity = launching;
-        apply(mCurrentState);
-    }
-
     public void setScrimsVisibility(int scrimsVisibility) {
         mCurrentState.mScrimsVisibility = scrimsVisibility;
         apply(mCurrentState);
@@ -651,7 +645,6 @@ public class NotificationShadeWindowController implements Callback, Dumpable,
         boolean mForceCollapsed;
         boolean mForceDozeBrightness;
         boolean mForceUserActivity;
-        boolean mLaunchingActivity;
         boolean mBackdropShowing;
         boolean mWallpaperSupportsAmbientMode;
         boolean mNotTouchable;
