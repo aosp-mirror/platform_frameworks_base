@@ -128,9 +128,8 @@ class AppPredictionServiceResolverComparator extends AbstractResolverComparator 
                         mResolverRankerService.compute(targets);
                     } else {
                         Log.i(TAG, "AppPredictionService response received");
-                        Message msg =
-                            Message.obtain(mHandler, RANKER_SERVICE_RESULT, sortedAppTargets);
-                        msg.sendToTarget();
+                        // Skip sending to Handler which takes extra time to dispatch messages.
+                        handleResult(sortedAppTargets);
                     }
                 }
         );
@@ -141,20 +140,32 @@ class AppPredictionServiceResolverComparator extends AbstractResolverComparator 
         // Null value is okay if we have defaulted to the ResolverRankerService.
         if (msg.what == RANKER_SERVICE_RESULT && msg.obj != null) {
             final List<AppTarget> sortedAppTargets = (List<AppTarget>) msg.obj;
-            if (checkAppTargetRankValid(sortedAppTargets)) {
-                sortedAppTargets.forEach(target -> mTargetScores.put(
-                        new ComponentName(target.getPackageName(), target.getClassName()),
-                        target.getRank()));
-            }
-            for (int i = 0; i < sortedAppTargets.size(); i++) {
-                ComponentName componentName = new ComponentName(
-                        sortedAppTargets.get(i).getPackageName(),
-                        sortedAppTargets.get(i).getClassName());
-                mTargetRanks.put(componentName, i);
-                Log.i(TAG, "handleResultMessage, sortedAppTargets #" + i + ": " + componentName);
-            }
+            handleSortedAppTargets(sortedAppTargets);
         } else if (msg.obj == null && mResolverRankerService == null) {
             Log.e(TAG, "Unexpected null result");
+        }
+    }
+
+    private void handleResult(List<AppTarget> sortedAppTargets) {
+        if (mHandler.hasMessages(RANKER_RESULT_TIMEOUT)) {
+            handleSortedAppTargets(sortedAppTargets);
+            mHandler.removeMessages(RANKER_RESULT_TIMEOUT);
+            afterCompute();
+        }
+    }
+
+    private void handleSortedAppTargets(List<AppTarget> sortedAppTargets) {
+        if (checkAppTargetRankValid(sortedAppTargets)) {
+            sortedAppTargets.forEach(target -> mTargetScores.put(
+                    new ComponentName(target.getPackageName(), target.getClassName()),
+                    target.getRank()));
+        }
+        for (int i = 0; i < sortedAppTargets.size(); i++) {
+            ComponentName componentName = new ComponentName(
+                    sortedAppTargets.get(i).getPackageName(),
+                    sortedAppTargets.get(i).getClassName());
+            mTargetRanks.put(componentName, i);
+            Log.i(TAG, "handleSortedAppTargets, sortedAppTargets #" + i + ": " + componentName);
         }
     }
 
