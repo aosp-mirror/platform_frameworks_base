@@ -18,6 +18,7 @@ package com.android.systemui.bubbles.dagger;
 
 import android.app.INotificationManager;
 import android.content.Context;
+import android.view.WindowManager;
 
 import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.bubbles.BubbleData;
@@ -68,7 +69,8 @@ public interface BubbleModule {
             FloatingContentCoordinator floatingContentCoordinator,
             BubbleDataRepository bubbleDataRepository,
             SysUiState sysUiState,
-            INotificationManager notifManager) {
+            INotificationManager notifManager,
+            WindowManager windowManager) {
         return new BubbleController(
                 context,
                 notificationShadeWindowController,
@@ -88,6 +90,7 @@ public interface BubbleModule {
                 floatingContentCoordinator,
                 bubbleDataRepository,
                 sysUiState,
-                notifManager);
+                notifManager,
+                windowManager);
     }
 }

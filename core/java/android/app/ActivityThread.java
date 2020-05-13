@@ -155,6 +155,8 @@ import android.util.proto.ProtoOutputStream;
 import android.view.Choreographer;
 import android.view.ContextThemeWrapper;
 import android.view.Display;
+import android.view.DisplayAdjustments;
+import android.view.DisplayAdjustments.FixedRotationAdjustments;
 import android.view.ThreadedRenderer;
 import android.view.View;
 import android.view.ViewDebug;
@@ -214,6 +216,7 @@ import java.util.Objects;
 import java.util.TimeZone;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 
 final class RemoteServiceException extends AndroidRuntimeException {
     public RemoteServiceException(String msg) {
@@ -404,6 +407,9 @@ public final class ActivityThread extends ClientTransactionHandler {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private final ResourcesManager mResourcesManager;
 
+    /** The active adjustments that override the {@link DisplayAdjustments} in resources. */
+    private ArrayList<Pair<IBinder, Consumer<DisplayAdjustments>>> mActiveRotationAdjustments;
+
     // Registry of remote cancellation transports pending a reply with reply handles.
     @GuardedBy("this")
     private @Nullable Map<SafeCancellationTransport, CancellationSignal> mRemoteCancellations;
@@ -540,6 +546,12 @@ public final class ActivityThread extends ClientTransactionHandler {
         @UnsupportedAppUsage
         boolean mPreserveWindow;
 
+        /**
+         * If non-null, the activity is launching with a specified rotation, the adjustments should
+         * be consumed before activity creation.
+         */
+        FixedRotationAdjustments mPendingFixedRotationAdjustments;
+
         @LifecycleState
         private int mLifecycleState = PRE_ON_CREATE;
 
@@ -556,7 +568,7 @@ public final class ActivityThread extends ClientTransactionHandler {
                 PersistableBundle persistentState, List<ResultInfo> pendingResults,
                 List<ReferrerIntent> pendingNewIntents, boolean isForward,
                 ProfilerInfo profilerInfo, ClientTransactionHandler client,
-                IBinder assistToken) {
+                IBinder assistToken, FixedRotationAdjustments fixedRotationAdjustments) {
             this.token = token;
             this.assistToken = assistToken;
             this.ident = ident;
@@ -574,6 +586,7 @@ public final class ActivityThread extends ClientTransactionHandler {
             this.overrideConfig = overrideConfig;
             this.packageInfo = client.getPackageInfoNoCheck(activityInfo.applicationInfo,
                     compatInfo);
+            mPendingFixedRotationAdjustments = fixedRotationAdjustments;
             init();
         }
 
@@ -3232,6 +3245,44 @@ public final class ActivityThread extends ClientTransactionHandler {
         sendMessage(H.CLEAN_UP_CONTEXT, cci);
     }
 
+    @Override
+    public void handleFixedRotationAdjustments(@NonNull IBinder token,
+            @Nullable FixedRotationAdjustments fixedRotationAdjustments) {
+        final Consumer<DisplayAdjustments> override = fixedRotationAdjustments != null
+                ? displayAdjustments -> displayAdjustments.setFixedRotationAdjustments(
+                        fixedRotationAdjustments)
+                : null;
+        if (!mResourcesManager.overrideTokenDisplayAdjustments(token, override)) {
+            // No resources are associated with the token.
+            return;
+        }
+        if (mActivities.get(token) == null) {
+            // Only apply the override to application for activity token because the appearance of
+            // activity is usually more sensitive to the application resources.
+            return;
+        }
+
+        // Apply the last override to application resources for compatibility. Because the Resources
+        // of Display can be from application, e.g.
+        //    applicationContext.getSystemService(DisplayManager.class).getDisplay(displayId)
+        // and the deprecated usage:
+        //    applicationContext.getSystemService(WindowManager.class).getDefaultDisplay();
+        final Consumer<DisplayAdjustments> appOverride;
+        if (mActiveRotationAdjustments == null) {
+            mActiveRotationAdjustments = new ArrayList<>(2);
+        }
+        if (override != null) {
+            mActiveRotationAdjustments.add(Pair.create(token, override));
+            appOverride = override;
+        } else {
+            mActiveRotationAdjustments.removeIf(adjustmentsPair -> adjustmentsPair.first == token);
+            appOverride = mActiveRotationAdjustments.isEmpty()
+                    ? null
+                    : mActiveRotationAdjustments.get(mActiveRotationAdjustments.size() - 1).second;
+        }
+        mInitialApplication.getResources().overrideDisplayAdjustments(appOverride);
+    }
+
     /**  Core implementation of activity launch. */
     private Activity performLaunchActivity(ActivityClientRecord r, Intent customIntent) {
         ActivityInfo aInfo = r.activityInfo;
@@ -3444,6 +3495,13 @@ public final class ActivityThread extends ClientTransactionHandler {
 
         ContextImpl appContext = ContextImpl.createActivityContext(
                 this, r.packageInfo, r.activityInfo, r.token, displayId, r.overrideConfig);
+
+        // The rotation adjustments must be applied before creating the activity, so the activity
+        // can get the adjusted display info during creation.
+        if (r.mPendingFixedRotationAdjustments != null) {
+            handleFixedRotationAdjustments(r.token, r.mPendingFixedRotationAdjustments);
+            r.mPendingFixedRotationAdjustments = null;
+        }
 
         final DisplayManagerGlobal dm = DisplayManagerGlobal.getInstance();
         // For debugging purposes, if the activity's package name contains the value of
@@ -7461,7 +7519,15 @@ public final class ActivityThread extends ClientTransactionHandler {
             try {
                 super.rename(oldPath, newPath);
             } catch (ErrnoException e) {
-                if (e.errno == OsConstants.EXDEV && oldPath.startsWith("/storage/")) {
+                // On emulated volumes, we have bind mounts for /Android/data and
+                // /Android/obb, which prevents move from working across those directories
+                // and other directories on the filesystem. To work around that, try to
+                // recover by doing a copy instead.
+                // Note that we only do this for "/storage/emulated", because public volumes
+                // don't have these bind mounts, neither do private volumes that are not
+                // the primary storage.
+                if (e.errno == OsConstants.EXDEV && oldPath.startsWith("/storage/emulated")
+                        && newPath.startsWith("/storage/emulated")) {
                     Log.v(TAG, "Recovering failed rename " + oldPath + " to " + newPath);
                     try {
                         Files.move(new File(oldPath).toPath(), new File(newPath).toPath(),

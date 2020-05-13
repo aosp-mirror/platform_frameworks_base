@@ -6,11 +6,17 @@ java_library {
 
     srcs: [
         "java/**/*.java",
+        ":framework-jobscheduler-shared-srcs",
+        ":statslog-framework-java-gen", // FrameworkStatsLog.java
     ],
 
     libs: [
         "app-compat-annotations",
         "framework",
         "services.core",
+        "unsupportedappusage",
     ],
+
+    // Rename classes shared with the framework
+    jarjar_rules: "jarjar-rules.txt",
 }

@@ -52,6 +52,7 @@ public class WindowMagnification extends SystemUI implements WindowMagnifierCall
 
     @VisibleForTesting
     protected WindowMagnificationController mWindowMagnificationController;
+    protected final ModeSwitchesController mModeSwitchesController;
     private final Handler mHandler;
     private final AccessibilityManager mAccessibilityManager;
     private final CommandQueue mCommandQueue;
@@ -61,13 +62,14 @@ public class WindowMagnification extends SystemUI implements WindowMagnifierCall
 
     @Inject
     public WindowMagnification(Context context, @Main Handler mainHandler,
-            CommandQueue commandQueue) {
+            CommandQueue commandQueue, ModeSwitchesController modeSwitchesController) {
         super(context);
         mHandler = mainHandler;
         mLastConfiguration = new Configuration(context.getResources().getConfiguration());
         mAccessibilityManager = (AccessibilityManager) mContext.getSystemService(
                 Context.ACCESSIBILITY_SERVICE);
         mCommandQueue = commandQueue;
+        mModeSwitchesController = modeSwitchesController;
     }
 
     @Override
@@ -142,7 +144,7 @@ public class WindowMagnification extends SystemUI implements WindowMagnifierCall
     private void setWindowMagnificationConnection() {
         if (mWindowMagnificationConnectionImpl == null) {
             mWindowMagnificationConnectionImpl = new WindowMagnificationConnectionImpl(this,
-                    mHandler);
+                    mHandler, mModeSwitchesController);
         }
         mAccessibilityManager.setWindowMagnificationConnection(
                 mWindowMagnificationConnectionImpl);
@@ -161,11 +163,13 @@ public class WindowMagnification extends SystemUI implements WindowMagnifierCall
         private IWindowMagnificationConnectionCallback mConnectionCallback;
         private final WindowMagnification mWindowMagnification;
         private final Handler mHandler;
+        private final ModeSwitchesController mModeSwitchesController;
 
         WindowMagnificationConnectionImpl(@NonNull WindowMagnification windowMagnification,
-                @Main Handler mainHandler) {
+                @Main Handler mainHandler, ModeSwitchesController modeSwitchesController) {
             mWindowMagnification = windowMagnification;
             mHandler = mainHandler;
+            mModeSwitchesController = modeSwitchesController;
         }
 
         @Override
@@ -194,14 +198,14 @@ public class WindowMagnification extends SystemUI implements WindowMagnifierCall
 
         @Override
         public void showMagnificationButton(int displayId, int magnificationMode) {
-            // TODO(b/145780606): show magnification button UI when the magnification capability
-            //  or scale changed.
+            mHandler.post(
+                    () -> mModeSwitchesController.showButton(displayId, magnificationMode));
         }
 
         @Override
         public void removeMagnificationButton(int displayId) {
-            // TODO(b/145780606): remove magnification button UI when the magnification
-            //  capability changed.
+            mHandler.post(
+                    () -> mModeSwitchesController.removeButton(displayId));
         }
 
         @Override

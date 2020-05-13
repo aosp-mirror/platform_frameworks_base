@@ -54,20 +54,32 @@
         android:layout_marginTop="@*android:dimen/quick_qs_offset_height"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/qs_footer_height"
         android:elevation="4dp"
         android:background="@android:color/transparent"
         android:focusable="true"
-        android:accessibilityTraversalBefore="@android:id/edit"
-    />
+        android:accessibilityTraversalBefore="@android:id/edit">
+        <include layout="@layout/qs_footer_impl" />
+    </com.android.systemui.qs.QSPanel>
 
     <include layout="@layout/quick_status_bar_expanded_header" />
-
-    <include layout="@layout/qs_footer_impl" />
 
     <include android:id="@+id/qs_detail" layout="@layout/qs_detail" />
 
     <include android:id="@+id/qs_customize" layout="@layout/qs_customize_panel"
         android:visibility="gone" />
+
+    <FrameLayout
+        android:id="@+id/qs_drag_handle_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:elevation="4dp"
+        android:paddingBottom="5dp">
+        <View
+            android:layout_width="46dp"
+            android:layout_height="3dp"
+            android:background="@drawable/qs_footer_drag_handle" />
+    </FrameLayout>
+
 
 </com.android.systemui.qs.QSContainerImpl>

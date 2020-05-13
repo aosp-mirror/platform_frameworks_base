@@ -30,4 +30,5 @@ message WindowConfigurationProto {
     optional int32 windowing_mode = 2;
     optional int32 activity_type = 3;
     optional .android.graphics.RectProto bounds = 4;
+    optional .android.graphics.RectProto max_bounds = 5;
 }
