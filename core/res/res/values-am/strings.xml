@@ -537,8 +537,7 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"መተግበሪያው የፎቶ ስብስብዎን እንዲቀይረው ያስችለዋል።"</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"አካባቢዎችን ከሚዲያ ስብስብዎ ማንበብ"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"መተግበሪያው አካባቢዎችን ከሚዲያ ስብስብዎ እንዲያነብብ ያስችለዋል።"</string>
-    <!-- no translation found for biometric_dialog_default_title (55026799173208210) -->
-    <skip />
+    <string name="biometric_dialog_default_title" msgid="55026799173208210">"እርስዎን መሆንዎን ያረጋግጡ"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"ባዮሜትራዊ ሃርድዌር አይገኝም"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"ማረጋገጥ ተሰርዟል"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"አልታወቀም"</string>
@@ -1409,7 +1408,7 @@
     <string name="grant_credentials_permission_message_header" msgid="5365733888842570481">"የሚከተለው ወይም ተጨማሪ መተግበሪያዎች ወደ መለያህ ለመድረስ አሁን እና ወደፊት ፈቃድ ትጠይቃለህ።"</string>
     <string name="grant_credentials_permission_message_footer" msgid="1886710210516246461">"ይህን ጥየቃ መፍቀድ ይፈልጋሉ?"</string>
     <string name="grant_permissions_header_text" msgid="3420736827804657201">"የመድረሻ ጥያቄ"</string>
-    <string name="allow" msgid="6195617008611933762">"ይፍቀዱ"</string>
+    <string name="allow" msgid="6195617008611933762">"ፍቀድ"</string>
     <string name="deny" msgid="6632259981847676572">"ያስተባብሉ"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"ፈቃድ ተጠይቋል"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">\n" ለ<xliff:g id="ACCOUNT">%s</xliff:g> መለያ ፈቃድ ተጠይቋል"</string>

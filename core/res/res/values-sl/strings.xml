@@ -543,8 +543,7 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"Aplikaciji omogoča spreminjanje zbirke fotografij."</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"branje lokacij v predstavnostni zbirki"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"Aplikaciji omogoča branje lokacij v predstavnostni zbirki."</string>
-    <!-- no translation found for biometric_dialog_default_title (55026799173208210) -->
-    <skip />
+    <string name="biometric_dialog_default_title" msgid="55026799173208210">"Preverite, da ste res vi"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Strojna oprema za biometrične podatke ni na voljo"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Preverjanje pristnosti je preklicano"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Ni prepoznano"</string>

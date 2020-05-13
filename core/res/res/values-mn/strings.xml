@@ -269,7 +269,7 @@
     <string name="status_bar_notification_info_overflow" msgid="3330152558746563475">"999+"</string>
     <string name="notification_hidden_text" msgid="2835519769868187223">"Шинэ мэдэгдэл"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6465975799223304567">"Виртуал гар"</string>
-    <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"Бодит гар"</string>
+    <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"Биет гар"</string>
     <string name="notification_channel_security" msgid="8516754650348238057">"Аюулгүй байдал"</string>
     <string name="notification_channel_car_mode" msgid="2123919247040988436">"Машины горим"</string>
     <string name="notification_channel_account" msgid="6436294521740148173">"Бүртгэлийн төлөв"</string>
@@ -537,8 +537,7 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"Таны зургийн цуглуулгыг тохируулах зөвшөөрлийг аппад олгодог."</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"медиа цуглуулгаасаа байршлыг унших"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"Таны медиа цуглуулгаас байршлыг унших зөвшөөрлийг аппад олгодог."</string>
-    <!-- no translation found for biometric_dialog_default_title (55026799173208210) -->
-    <skip />
+    <string name="biometric_dialog_default_title" msgid="55026799173208210">"Өөрийгөө мөн гэдгийг баталгаажуулаарай"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Биометрийн техник хангамж боломжгүй байна"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Нотолгоог цуцаллаа"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Таниагүй"</string>
@@ -1330,7 +1329,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"ХУВААЛЦАХ"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"ТАТГАЛЗАХ"</string>
     <string name="select_input_method" msgid="3971267998568587025">"Оруулах аргыг сонгоно уу"</string>
-    <string name="show_ime" msgid="6406112007347443383">"Бодит гар идэвхтэй үед үүнийг дэлгэцэнд харуулна уу"</string>
+    <string name="show_ime" msgid="6406112007347443383">"Биет гар идэвхтэй үед үүнийг дэлгэцэд харуулна уу"</string>
     <string name="hardware" msgid="1800597768237606953">"Хийсвэр гарыг харуулах"</string>
     <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"Биет гарыг хэлбэрт оруулах"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Хэл болон бүдүүвчийг сонгохын тулд дарна уу"</string>
