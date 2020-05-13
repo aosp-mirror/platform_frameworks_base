@@ -18,6 +18,7 @@
 #define LOG_TAG "PackageManagerShellCommandDataLoader-jni"
 #include <android-base/file.h>
 #include <android-base/logging.h>
+#include <android-base/no_destructor.h>
 #include <android-base/stringprintf.h>
 #include <android-base/unique_fd.h>
 #include <core_jni_helpers.h>
@@ -65,6 +66,7 @@ static constexpr std::string_view OKAY = "OKAY"sv;
 static constexpr MagicType INCR = 0x52434e49; // BE INCR
 
 static constexpr auto PollTimeoutMs = 5000;
+static constexpr auto TraceTagCheckInterval = 1s;
 
 struct JniIds {
     jclass packageManagerShellCommandDataLoader;
@@ -337,9 +339,47 @@ static inline JNIEnv* GetOrAttachJNIEnvironment(JavaVM* jvm) {
     return env;
 }
 
-class PackageManagerShellCommandDataLoaderDataLoader : public android::dataloader::DataLoader {
+class PMSCDataLoader;
+
+struct OnTraceChanged {
+    OnTraceChanged();
+    ~OnTraceChanged() {
+        mRunning = false;
+        mChecker.join();
+    }
+
+    void registerCallback(PMSCDataLoader* callback) {
+        std::unique_lock lock(mMutex);
+        mCallbacks.insert(callback);
+    }
+
+    void unregisterCallback(PMSCDataLoader* callback) {
+        std::unique_lock lock(mMutex);
+        mCallbacks.erase(callback);
+    }
+
+private:
+    std::mutex mMutex;
+    std::unordered_set<PMSCDataLoader*> mCallbacks;
+    std::atomic<bool> mRunning{true};
+    std::thread mChecker;
+};
+
+static OnTraceChanged& onTraceChanged() {
+    static android::base::NoDestructor<OnTraceChanged> instance;
+    return *instance;
+}
+
+class PMSCDataLoader : public android::dataloader::DataLoader {
 public:
-    PackageManagerShellCommandDataLoaderDataLoader(JavaVM* jvm) : mJvm(jvm) { CHECK(mJvm); }
+    PMSCDataLoader(JavaVM* jvm) : mJvm(jvm) { CHECK(mJvm); }
+    ~PMSCDataLoader() { onTraceChanged().unregisterCallback(this); }
+
+    void updateReadLogsState(const bool enabled) {
+        if (enabled != mReadLogsEnabled.exchange(enabled)) {
+            mIfs->setParams({.readLogsEnabled = enabled});
+        }
+    }
 
 private:
     // Lifecycle.
@@ -353,7 +393,8 @@ private:
         mArgs = params.arguments();
         mIfs = ifs;
         mStatusListener = statusListener;
-        mIfs->setParams({.readLogsEnabled = true});
+        updateReadLogsState(atrace_is_tag_enabled(ATRACE_TAG));
+        onTraceChanged().registerCallback(this);
         return true;
     }
     bool onStart() final { return true; }
@@ -365,6 +406,7 @@ private:
         }
     }
     void onDestroy() final {
+        onTraceChanged().unregisterCallback(this);
         // Make sure the receiver thread stopped.
         CHECK(!mReceiverThread.joinable());
     }
@@ -757,9 +799,27 @@ private:
     android::base::unique_fd mEventFd;
     std::thread mReceiverThread;
     std::atomic<bool> mStopReceiving = false;
+    std::atomic<bool> mReadLogsEnabled = false;
     /** Tracks which files have been requested */
     std::unordered_set<FileIdx> mRequestedFiles;
 };
+
+OnTraceChanged::OnTraceChanged() {
+    mChecker = std::thread([this]() {
+        bool oldTrace = atrace_is_tag_enabled(ATRACE_TAG);
+        while (mRunning) {
+            bool newTrace = atrace_is_tag_enabled(ATRACE_TAG);
+            if (oldTrace != newTrace) {
+                std::unique_lock lock(mMutex);
+                for (auto&& callback : mCallbacks) {
+                    callback->updateReadLogsState(newTrace);
+                }
+            }
+            oldTrace = newTrace;
+            std::this_thread::sleep_for(TraceTagCheckInterval);
+        }
+    });
+}
 
 BlockHeader readHeader(std::span<uint8_t>& data) {
     BlockHeader header;
@@ -794,7 +854,7 @@ int register_android_server_com_android_server_pm_PackageManagerShellCommandData
             [](auto jvm, const auto& params) -> android::dataloader::DataLoaderPtr {
                 if (params.type() == DATA_LOADER_TYPE_INCREMENTAL) {
                     // This DataLoader only supports incremental installations.
-                    return std::make_unique<PackageManagerShellCommandDataLoaderDataLoader>(jvm);
+                    return std::make_unique<PMSCDataLoader>(jvm);
                 }
                 return {};
             });
