@@ -80,8 +80,6 @@ interface IWifiManager
 
     int matchProviderWithCurrentNetwork(String fqdn);
 
-    void deauthenticateNetwork(long holdoff, boolean ess);
-
     boolean removeNetwork(int netId, String packageName);
 
     boolean enableNetwork(int netId, boolean disableOthers, String packageName);
