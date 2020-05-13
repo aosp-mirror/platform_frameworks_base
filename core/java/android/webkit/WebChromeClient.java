@@ -189,14 +189,29 @@ public class WebChromeClient {
     public void onCloseWindow(WebView window) {}
 
     /**
-     * Tell the client to display a javascript alert dialog.  If the client
-     * returns {@code true}, WebView will assume that the client will handle the
-     * dialog.  If the client returns {@code false}, it will continue execution.
+     * Notify the host application that the web page wants to display a
+     * JavaScript {@code alert()} dialog.
+     * <p>The default behavior if this method returns {@code false} or is not
+     * overridden is to show a dialog containing the alert message and suspend
+     * JavaScript execution until the dialog is dismissed.
+     * <p>To show a custom dialog, the app should return {@code true} from this
+     * method, in which case the default dialog will not be shown and JavaScript
+     * execution will be suspended. The app should call
+     * {@code JsResult.confirm()} when the custom dialog is dismissed such that
+     * JavaScript execution can be resumed.
+     * <p>To suppress the dialog and allow JavaScript execution to
+     * continue, call {@code JsResult.confirm()} immediately and then return
+     * {@code true}.
+     * <p>Note that if the {@link WebChromeClient} is {@code null}, the default
+     * dialog will be suppressed and Javascript execution will continue
+     * immediately.
+     *
      * @param view The WebView that initiated the callback.
      * @param url The url of the page requesting the dialog.
      * @param message Message to be displayed in the window.
-     * @param result A JsResult to confirm that the user hit enter.
-     * @return boolean Whether the client will handle the alert dialog.
+     * @param result A JsResult to confirm that the user closed the window.
+     * @return boolean {@code true} if the request is handled or ignored.
+     * {@code false} if WebView needs to show the default dialog.
      */
     public boolean onJsAlert(WebView view, String url, String message,
             JsResult result) {
