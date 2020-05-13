@@ -43,7 +43,9 @@ public class VisualStabilityManager implements OnHeadsUpChangedListener, Dumpabl
     private static final long TEMPORARY_REORDERING_ALLOWED_DURATION = 1000;
 
     private final ArrayList<Callback> mReorderingAllowedCallbacks = new ArrayList<>();
+    private final ArraySet<Callback> mPersistentReorderingCallbacks = new ArraySet<>();
     private final ArrayList<Callback> mGroupChangesAllowedCallbacks = new ArrayList<>();
+    private final ArraySet<Callback> mPersistentGroupCallbacks = new ArraySet<>();
     private final Handler mHandler;
 
     private boolean mPanelExpanded;
@@ -85,8 +87,15 @@ public class VisualStabilityManager implements OnHeadsUpChangedListener, Dumpabl
 
     /**
      * Add a callback to invoke when reordering is allowed again.
+     *
+     * @param callback the callback to add
+     * @param persistent {@code true} if this callback should this callback be persisted, otherwise
+     *                               it will be removed after a single invocation
      */
-    public void addReorderingAllowedCallback(Callback callback) {
+    public void addReorderingAllowedCallback(Callback callback, boolean persistent) {
+        if (persistent) {
+            mPersistentReorderingCallbacks.add(callback);
+        }
         if (mReorderingAllowedCallbacks.contains(callback)) {
             return;
         }
@@ -95,8 +104,15 @@ public class VisualStabilityManager implements OnHeadsUpChangedListener, Dumpabl
 
     /**
      * Add a callback to invoke when group changes are allowed again.
+     *
+     * @param callback the callback to add
+     * @param persistent {@code true} if this callback should this callback be persisted, otherwise
+     *                               it will be removed after a single invocation
      */
-    public void addGroupChangesAllowedCallback(Callback callback) {
+    public void addGroupChangesAllowedCallback(Callback callback, boolean persistent) {
+        if (persistent) {
+            mPersistentGroupCallbacks.add(callback);
+        }
         if (mGroupChangesAllowedCallbacks.contains(callback)) {
             return;
         }
@@ -136,21 +152,26 @@ public class VisualStabilityManager implements OnHeadsUpChangedListener, Dumpabl
         boolean changedToTrue = reorderingAllowed && !mReorderingAllowed;
         mReorderingAllowed = reorderingAllowed;
         if (changedToTrue) {
-            notifyChangeAllowed(mReorderingAllowedCallbacks);
+            notifyChangeAllowed(mReorderingAllowedCallbacks, mPersistentReorderingCallbacks);
         }
         boolean groupChangesAllowed = (!mScreenOn || !mPanelExpanded) && !mPulsing;
         changedToTrue = groupChangesAllowed && !mGroupChangedAllowed;
         mGroupChangedAllowed = groupChangesAllowed;
         if (changedToTrue) {
-            notifyChangeAllowed(mGroupChangesAllowedCallbacks);
+            notifyChangeAllowed(mGroupChangesAllowedCallbacks, mPersistentGroupCallbacks);
         }
     }
 
-    private void notifyChangeAllowed(ArrayList<Callback> callbacks) {
+    private void notifyChangeAllowed(ArrayList<Callback> callbacks,
+            ArraySet<Callback> persistentCallbacks) {
         for (int i = 0; i < callbacks.size(); i++) {
-            callbacks.get(i).onChangeAllowed();
+            Callback callback = callbacks.get(i);
+            callback.onChangeAllowed();
+            if (!persistentCallbacks.contains(callback)) {
+                callbacks.remove(callback);
+                i--;
+            }
         }
-        callbacks.clear();
     }
 
     /**
