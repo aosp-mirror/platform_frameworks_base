@@ -44,7 +44,7 @@ class TouchBehavior : Behavior {
         })
     }
 
-    override fun bind(cws: ControlWithState) {
+    override fun bind(cws: ControlWithState, colorOffset: Int) {
         this.control = cws.control!!
         cvh.status.setText(control.getStatusText())
         template = control.getControlTemplate()
@@ -53,6 +53,6 @@ class TouchBehavior : Behavior {
         clipLayer = ld.findDrawableByLayerId(R.id.clip_layer)
         clipLayer.setLevel(MIN_LEVEL)
 
-        cvh.applyRenderInfo(false)
+        cvh.applyRenderInfo(false, colorOffset)
     }
 }
