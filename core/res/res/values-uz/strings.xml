@@ -182,7 +182,7 @@
       <item quantity="one">Sertifikat markazi sertifikati o‘rnatildi</item>
     </plurals>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4961102218216815242">"Noma‘lum uchinchi shaxslar tomonidan"</string>
-    <string name="ssl_ca_cert_noti_by_administrator" msgid="4564941950768783879">"Ishchi profil administratori"</string>
+    <string name="ssl_ca_cert_noti_by_administrator" msgid="4564941950768783879">"Ish profili administratori"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="217337232273211674">"<xliff:g id="MANAGING_DOMAIN">%s</xliff:g> tomonidan"</string>
     <string name="work_profile_deleted" msgid="5891181538182009328">"Ichshi profil o‘chirildi"</string>
     <string name="work_profile_deleted_details" msgid="3773706828364418016">"Ishchi profilning administrator ilovasi yo‘q yoki buzilgan. Shuning uchun, ishchi profilingiz va unga aloqador ma’lumotlar o‘chirib tashlandi. Yordam olish uchun administratoringizga murojaat qiling."</string>
@@ -464,7 +464,7 @@
     <string name="permdesc_transmitIr" product="tablet" msgid="5884738958581810253">"Dasturga planshetdagi infraqizil antenadan foydalanish ruxsatini beradi."</string>
     <string name="permdesc_transmitIr" product="tv" msgid="4453220932790148184">"Ilovaga televizorning infraqizil uzatkichidan foydalanish huquqini beradi."</string>
     <string name="permdesc_transmitIr" product="default" msgid="8484193849295581808">"Dasturga telefondagi infraqizil antenadan foydalanish ruxsatini beradi."</string>
-    <string name="permlab_setWallpaper" msgid="6959514622698794511">"fonga rasm o‘rnatish"</string>
+    <string name="permlab_setWallpaper" msgid="6959514622698794511">"fonga rasm tanlash"</string>
     <string name="permdesc_setWallpaper" msgid="2973996714129021397">"Ilova tizim uchun orqa fon rasmlarini o‘rnatishi mumkin."</string>
     <string name="permlab_setWallpaperHints" msgid="1153485176642032714">"fon rasmi o‘lchamini moslash"</string>
     <string name="permdesc_setWallpaperHints" msgid="6257053376990044668">"Ilova tizimning orqa fon rasmlari uchun o‘lchamlarini ko‘rsatishi mumkin."</string>
@@ -1117,8 +1117,8 @@
     <string name="translate_desc" msgid="4096225388385338322">"Belgilangan matnni tarjima qilish"</string>
     <string name="define" msgid="5214255850068764195">"Izohini olish"</string>
     <string name="define_desc" msgid="6916651934713282645">"Belgilangan matnning izohini aniqlash"</string>
-    <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Xotirada bo‘sh joy tugamoqda"</string>
-    <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Ba‘zi tizim funksiyalari ishlamasligi mumkin"</string>
+    <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Xotirada joy yetarli emas"</string>
+    <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Ayrim funksiyalar ishlamasligi mumkin"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Tizim uchun xotirada joy yetarli emas. Avval 250 megabayt joy bo‘shatib, keyin qurilmani o‘chirib yoqing."</string>
     <string name="app_running_notification_title" msgid="8985999749231486569">"<xliff:g id="APP_NAME">%1$s</xliff:g> ishlamoqda"</string>
     <string name="app_running_notification_text" msgid="5120815883400228566">"Ilovani to‘xtatish yoki qo‘shimcha ma’lumot olish uchun bosing."</string>
@@ -1229,7 +1229,7 @@
     <string name="volume_music_hint_silent_ringtone_selected" msgid="1514829655029062233">"Ovozsiz rejim tanlandi"</string>
     <string name="volume_call" msgid="7625321655265747433">"Suhbat vaqtidagi tovush balandligi"</string>
     <string name="volume_bluetooth_call" msgid="2930204618610115061">"Kiruvchi bluetooth tovushi"</string>
-    <string name="volume_alarm" msgid="4486241060751798448">"Signal tovushi"</string>
+    <string name="volume_alarm" msgid="4486241060751798448">"Signal balandligi"</string>
     <string name="volume_notification" msgid="6864412249031660057">"Eslatma tovushi"</string>
     <string name="volume_unknown" msgid="4041914008166576293">"Tovush balandligi"</string>
     <string name="volume_icon_description_bluetooth" msgid="7540388479345558400">"Bluetooth tovushi"</string>
@@ -1289,7 +1289,7 @@
     <string name="wifi_softap_config_change" msgid="9101613252632264297">"Hotspot sozlamalari o‘zgartirildi"</string>
     <string name="wifi_softap_config_change_summary" msgid="3818290044234944123">"Hotspot chastotasi o‘zgartirildi."</string>
     <string name="wifi_softap_config_change_detailed" msgid="2531736378103873579">"Qurilma faqat 5 GGs chastotada ishlay olmaydi. Bu chastotadan imkoniyatga qarab foydalaniladi."</string>
-    <string name="network_switch_metered" msgid="1531869544142283384">"<xliff:g id="NETWORK_TYPE">%1$s</xliff:g> tarmog‘iga ulanildi"</string>
+    <string name="network_switch_metered" msgid="1531869544142283384">"Yangi ulanish: <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="1358296010128405906">"Agar <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> tarmoqda internet uzilsa, qurilma <xliff:g id="NEW_NETWORK">%1$s</xliff:g>ga ulanadi. Sarflangan trafik uchun haq olinishi mumkin."</string>
     <string name="network_switch_metered_toast" msgid="501662047275723743">"<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> tarmog‘idan <xliff:g id="NEW_NETWORK">%2$s</xliff:g> tarmog‘iga o‘tildi"</string>
   <string-array name="network_switch_type_name">
@@ -1521,7 +1521,7 @@
     <string name="sync_do_nothing" msgid="4528734662446469646">"Hozir hech nima qilinmasin"</string>
     <string name="choose_account_label" msgid="5557833752759831548">"Hisobni tanlang"</string>
     <string name="add_account_label" msgid="4067610644298737417">"Hisob kiritish"</string>
-    <string name="add_account_button_label" msgid="322390749416414097">"Hisob qo‘shish"</string>
+    <string name="add_account_button_label" msgid="322390749416414097">"Hisob kiritish"</string>
     <string name="number_picker_increment_button" msgid="7621013714795186298">"Ko‘paytirish"</string>
     <string name="number_picker_decrement_button" msgid="5116948444762708204">"Kamaytirish"</string>
     <string name="number_picker_increment_scroll_mode" msgid="8403893549806805985">"<xliff:g id="VALUE">%s</xliff:g> raqamini bosib turing."</string>
@@ -1686,8 +1686,8 @@
     <string name="accessibility_gesture_prompt_text" msgid="3271927619707898924">"Maxsus imkoniyatlar ishorasi bilan ishga tushadigan xizmatni tanlang (2 barmoq bilan ekranning pastidan tepaga surib tortilganda):"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="218295923313037542">"Maxsus imkoniyatlar ishorasi bilan ishga tushadigan xizmatni tanlang (3 barmoq bilan ekranning pastidan tepaga surib tortilganda):"</string>
     <string name="accessibility_button_instructional_text" msgid="8523635009916665153">"Xizmatlar orasida almashish uchun maxsus imkoniyatlar tugmasini bosib turing."</string>
-    <string name="accessibility_gesture_instructional_text" msgid="927882482331885974">"Xizmatlarni almashtirish uchun 2 barmoq bilan tepaga suring va bosib turing."</string>
-    <string name="accessibility_gesture_3finger_instructional_text" msgid="7527523742771203377">"Xizmatlarni almashtirish uchun 3 barmoq bilan tepaga suring va bosib turing."</string>
+    <string name="accessibility_gesture_instructional_text" msgid="927882482331885974">"Xizmatlarni almashtirish uchun 2 barmoq bilan tepaga suring va ushlab turing."</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="7527523742771203377">"Xizmatlarni almashtirish uchun 3 barmoq bilan tepaga suring va ushlab turing."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Kattalashtirish"</string>
     <string name="user_switched" msgid="7249833311585228097">"Joriy foydalanuvchi <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"Quyidagi foydalanuvchiga o‘tilmoqda: <xliff:g id="NAME">%1$s</xliff:g>…"</string>
@@ -1822,7 +1822,7 @@
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Administrator tomonidan o‘chirilgan"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
     <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Batareya quvvatini uzaytirish uchun Quvvat tejash funksiyasi:\n·Tungi mavzuni yoqadi\n·Fondagi harakatlar, vizual effektlar va “Hey Google” kabi boshqa funksiyalarni faolsizlantiradi\n\n"<annotation id="url">"Batafsil"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"Batareya quvvatini uzaytirish uchun Quvvat tejash funksiyasi:\n·Tungi mavzuni yoqadi\n·Fondagi harakatlar, vizual effektlar va “Hey Google” kabi boshqa funksiyalarni faolsizlantiradi"</string>
+    <string name="battery_saver_description" msgid="7618492104632328184">"Batareya quvvati yetadigan vaqni uzaytirish uchun Quvvat tejash rejimida:\n·Tungi mavzu yoqiladi\n·Fondagi harakatlar, vizual effektlar va “Ok Google” kabi boshqa funksiyalar faolsizlantiriladi"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Trafik tejash rejimida ayrim ilovalar uchun orqa fonda internetdan foydalanish imkoniyati cheklanadi. Siz ishlatayotgan ilova zaruratga qarab internet-trafik sarflashi mumkin, biroq cheklangan miqdorda. Masalan, rasmlar ustiga bosmaguningizcha ular yuklanmaydi."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Trafik tejash yoqilsinmi?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Yoqish"</string>
@@ -1881,7 +1881,7 @@
     <string name="stk_cc_ss_to_dial_video" msgid="1324194624384312664">"SS talabi video chaqiruvga almashtirildi"</string>
     <string name="stk_cc_ss_to_ussd" msgid="8417905193112944760">"SS talabi USSD talabiga almashtirildi"</string>
     <string name="stk_cc_ss_to_ss" msgid="132040645206514450">"Yangi SS talabiga almashtirildi"</string>
-    <string name="notification_work_profile_content_description" msgid="5296477955677725799">"Ishchi profil"</string>
+    <string name="notification_work_profile_content_description" msgid="5296477955677725799">"Ish profili"</string>
     <string name="notification_alerted_content_description" msgid="6139691253611265992">"Ogohlantirildi"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"Yoyish"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"Yig‘ish"</string>
@@ -1913,15 +1913,15 @@
     <string name="app_suspended_title" msgid="888873445010322650">"Ilova ishlamayapti"</string>
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> ishlamayapti. Uning ishlashini <xliff:g id="APP_NAME_1">%2$s</xliff:g> cheklamoqda."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Batafsil"</string>
-    <string name="work_mode_off_title" msgid="5503291976647976560">"Ishchi profil yoqilsinmi?"</string>
-    <string name="work_mode_off_message" msgid="8417484421098563803">"Ishchi ilovalar, bildirishnomalar, ma’lumotlar va boshqa ishchi profil imkoniyatlari yoqiladi"</string>
+    <string name="work_mode_off_title" msgid="5503291976647976560">"Ish profili yoqilsinmi?"</string>
+    <string name="work_mode_off_message" msgid="8417484421098563803">"Ishga oid ilovalar, bildirishnomalar, ma’lumotlar va boshqa ish profili imkoniyatlari yoqiladi"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Yoqish"</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Bu ilova eskiroq Android versiyalariga chiqarilgan va xato ishlashi mumkin. Yangilanishlarini tekshiring yoki dasturchi bilan bog‘laning."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Yangilanish borligini tekshirish"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Sizga yangi SMS keldi"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Ko‘rish uchun SMS ilovasini oching"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"Ayrim funksiyalar ishlamasligi mumkin"</string>
-    <string name="profile_encrypted_detail" msgid="5279730442756849055">"Ishchi profil yopiq"</string>
+    <string name="profile_encrypted_detail" msgid="5279730442756849055">"Ish profili yopiq"</string>
     <string name="profile_encrypted_message" msgid="1128512616293157802">"Qulfini ochish uchun bosing"</string>
     <string name="usb_mtp_launch_notification_title" msgid="774319638256707227">"<xliff:g id="PRODUCT_NAME">%1$s</xliff:g> qurilmasiga ulandi"</string>
     <string name="usb_mtp_launch_notification_description" msgid="6942535713629852684">"Fayllarni ko‘rish uchun bosing"</string>

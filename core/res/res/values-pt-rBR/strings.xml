@@ -227,7 +227,7 @@
     <string name="global_action_lock" msgid="6949357274257655383">"Bloquear tela"</string>
     <string name="global_action_power_off" msgid="4404936470711393203">"Desligar"</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"Emergência"</string>
-    <string name="global_action_bug_report" msgid="5127867163044170003">"Relatório de bugs"</string>
+    <string name="global_action_bug_report" msgid="5127867163044170003">"Relatório de bug"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"Finalizar sessão"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"Captura de tela"</string>
     <string name="bugreport_title" msgid="8549990811777373050">"Relatório de bug"</string>
@@ -285,7 +285,7 @@
     <string name="permgrouprequest_location" msgid="5261379525646615507">"Permitir que o app &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; acesse o local deste dispositivo?"</string>
     <string name="permgrouprequestdetail_location" msgid="8223089637855613805">"O app só terá acesso ao local enquanto estiver sendo usado"</string>
     <string name="permgroupbackgroundrequest_location" msgid="534202103935528927">"Permitir que o &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; acesse o local do dispositivo &lt;b&gt;o tempo todo&lt;/b&gt;?"</string>
-    <string name="permgroupbackgroundrequestdetail_location" msgid="5230541171285233536">"No momento, o app só pode acessar o local enquanto estiver sendo usado"</string>
+    <string name="permgroupbackgroundrequestdetail_location" msgid="5230541171285233536">"No momento, o app só pode acessar o local enquanto está sendo usado"</string>
     <string name="permgrouplab_calendar" msgid="6426860926123033230">"Agenda"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"acesse sua agenda"</string>
     <string name="permgrouprequest_calendar" msgid="2680538977344557840">"Permitir que &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; acesse sua agenda?"</string>
@@ -1822,9 +1822,9 @@
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Excluído pelo seu administrador"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
     <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Para aumentar a duração da bateria, a \"Economia de bateria: \n ativa o tema escuro;\n·desativa ou restringe atividades em segundo plano, alguns efeitos visuais e outros recursos, como o \"Ok Google\".\n\n"<annotation id="url">"Saiba mais"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"Para aumentar a duração da bateria, a \"Economia de bateria\": \n ativa o tema escuro;\n desativa ou restringe atividades em segundo plano, alguns efeitos visuais e outros recursos, como o \"Ok Google\"."</string>
+    <string name="battery_saver_description" msgid="7618492104632328184">"Para aumentar a duração da carga, a \"Economia de bateria\": \n·ativa o tema escuro;\n·desativa ou restringe atividades em segundo plano, alguns efeitos visuais e outros recursos, como o \"Ok Google\"."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Para ajudar a reduzir o uso de dados, a Economia de dados impede que alguns apps enviem ou recebam dados em segundo plano. Um app que você esteja usando no momento pode acessar dados, mas com menos frequência. Isso pode fazer com que imagens não sejam exibidas até que você toque nelas."</string>
-    <string name="data_saver_enable_title" msgid="7080620065745260137">"Ativar Economia de dados?"</string>
+    <string name="data_saver_enable_title" msgid="7080620065745260137">"Ativar \"Economia de dados\"?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Ativar"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
       <item quantity="one">Por %1$d minutos (até às <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>

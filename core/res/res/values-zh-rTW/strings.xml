@@ -786,7 +786,7 @@
     <string name="relationTypeAssistant" msgid="4057605157116589315">"助理"</string>
     <string name="relationTypeBrother" msgid="7141662427379247820">"兄弟"</string>
     <string name="relationTypeChild" msgid="9076258911292693601">"子女"</string>
-    <string name="relationTypeDomesticPartner" msgid="7825306887697559238">"同居人"</string>
+    <string name="relationTypeDomesticPartner" msgid="7825306887697559238">"同居伴侶"</string>
     <string name="relationTypeFather" msgid="3856225062864790596">"父親"</string>
     <string name="relationTypeFriend" msgid="3192092625893980574">"好友"</string>
     <string name="relationTypeManager" msgid="2272860813153171857">"經理"</string>
@@ -1150,7 +1150,7 @@
     <string name="whichSendToApplication" msgid="77101541959464018">"透過以下應用程式傳送："</string>
     <string name="whichSendToApplicationNamed" msgid="3385686512014670003">"透過「%1$s」傳送"</string>
     <string name="whichSendToApplicationLabel" msgid="3543240188816513303">"傳送"</string>
-    <string name="whichHomeApplication" msgid="8276350727038396616">"選取主螢幕應用程式"</string>
+    <string name="whichHomeApplication" msgid="8276350727038396616">"選取主畫面應用程式"</string>
     <string name="whichHomeApplicationNamed" msgid="5855990024847433794">"使用「%1$s」做為主螢幕"</string>
     <string name="whichHomeApplicationLabel" msgid="8907334282202933959">"擷取圖片"</string>
     <string name="whichImageCaptureApplication" msgid="2737413019463215284">"使用以下應用程式擷取圖片："</string>
@@ -1360,7 +1360,7 @@
     <string name="usb_supplying_notification_title" msgid="5378546632408101811">"正在透過 USB 為連接的裝置充電"</string>
     <string name="usb_mtp_notification_title" msgid="1065989144124499810">"已開啟 USB 檔案傳輸模式"</string>
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"已開啟 USB PTP 模式"</string>
-    <string name="usb_tether_notification_title" msgid="8828527870612663771">"已開啟 USB 數據連線模式"</string>
+    <string name="usb_tether_notification_title" msgid="8828527870612663771">"已開啟 USB 網路共用模式"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"已開啟 USB MIDI 模式"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"已連接 USB 配件"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"輕觸即可查看更多選項。"</string>
@@ -1491,7 +1491,7 @@
     <string name="car_mode_disable_notification_message" msgid="8954550232288567515">"輕觸即可結束行車應用程式。"</string>
     <string name="tethered_notification_title" msgid="2700523927485687353">"網路共用或無線基地台已啟用"</string>
     <string name="tethered_notification_message" msgid="6228080755828019453">"輕觸即可進行設定。"</string>
-    <string name="disable_tether_notification_title" msgid="7158047514545848391">"數據連線已停用"</string>
+    <string name="disable_tether_notification_title" msgid="7158047514545848391">"網路共用已停用"</string>
     <string name="disable_tether_notification_message" msgid="98281313984014775">"詳情請洽你的管理員"</string>
     <string name="back_button_label" msgid="4078224038025043387">"返回"</string>
     <string name="next_button_label" msgid="6040209156399907780">"繼續"</string>
@@ -1821,9 +1821,9 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"已由你的管理員更新"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"已由你的管理員刪除"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"確定"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"為了延長電池續航力，節約耗電量功能會執行以下動作：\n開啟深色主題\n關閉或限制背景活動、部分視覺效果和其他功能，例如「Hey Google」\n\n"<annotation id="url">"瞭解詳情"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"為了延長電池續航力，節約耗電量功能會執行以下動作：\n開啟深色主題\n關閉或限制背景活動、部分視覺效果和其他功能，例如「Hey Google」"</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"「數據節省模式」可防止部分應用程式在背景收發資料，以節省數據用量。你目前使用的某個應用程式可以存取資料，但存取頻率可能不如平時高。舉例來說，圖片可能不會自動顯示，在你輕觸後才會顯示。"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"為了延長電池續航力，節約耗電量功能會執行以下動作：\n開啟深色主題\n關閉或限制背景活動、部分視覺效果和其他功能，例如「Hey Google」啟動字詞\n\n"<annotation id="url">"瞭解詳情"</annotation></string>
+    <string name="battery_saver_description" msgid="7618492104632328184">"為了延長電池續航力，節約耗電量功能會執行以下動作：\n· 開啟深色主題\n· 關閉或限制背景活動、部分視覺效果和其他功能，例如「Hey Google」啟動字詞"</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"「數據節省模式」可防止部分應用程式在背景收發資料，以節省數據用量。你目前使用的應用程式可以存取資料，但存取頻率可能不如平時高。舉例來說，圖片可能不會自動顯示，在你輕觸後才會顯示。"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"要開啟數據節省模式嗎？"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"開啟"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
@@ -1914,7 +1914,7 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"目前無法使用「<xliff:g id="APP_NAME_0">%1$s</xliff:g>」。這項設定是由「<xliff:g id="APP_NAME_1">%2$s</xliff:g>」管理。"</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"瞭解詳情"</string>
     <string name="work_mode_off_title" msgid="5503291976647976560">"要開啟工作資料夾嗎？"</string>
-    <string name="work_mode_off_message" msgid="8417484421098563803">"系統將開啟你的辦公應用程式、通知、資料和其他工作資料夾功能"</string>
+    <string name="work_mode_off_message" msgid="8417484421098563803">"系統將開啟你的工作應用程式、通知、資料和其他工作資料夾功能"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"開啟"</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"這個應用程式是專為舊版 Android 所打造，因此可能無法正常運作。請嘗試檢查更新，或是與開發人員聯絡。"</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"檢查更新"</string>

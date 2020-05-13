@@ -1456,8 +1456,8 @@
     <string name="ime_action_default" msgid="8265027027659800121">"Կատարել"</string>
     <string name="dial_number_using" msgid="6060769078933953531">"Հավաքել հեռախոսահամարը`\nօգտագործելով <xliff:g id="NUMBER">%s</xliff:g>-ը"</string>
     <string name="create_contact_using" msgid="6200708808003692594">"Ստեղծել կոնտակտ`\nօգտագործելով <xliff:g id="NUMBER">%s</xliff:g>-ը"</string>
-    <string name="grant_credentials_permission_message_header" msgid="5365733888842570481">"Հետևյալ մեկ կամ ավել հավելվածներ մուտքի թույլտվության հարցում են անում` այժմ և հետագայում ձեր հաշվին մուտք ունենալու համար:"</string>
-    <string name="grant_credentials_permission_message_footer" msgid="1886710210516246461">"Ցանկանու՞մ եք թույլատրել այս հարցումը:"</string>
+    <string name="grant_credentials_permission_message_header" msgid="5365733888842570481">"Հետևյալ մեկ կամ մի քանի հավելվածներին թույլտվություն է անհրաժեշտ՝ այժմ և հետագայում ձեր հաշվի տվյալներն օգտագործելու համար։"</string>
+    <string name="grant_credentials_permission_message_footer" msgid="1886710210516246461">"Թույլատրե՞լ"</string>
     <string name="grant_permissions_header_text" msgid="3420736827804657201">"Մուտքի հարցում"</string>
     <string name="allow" msgid="6195617008611933762">"Թույլատրել"</string>
     <string name="deny" msgid="6632259981847676572">"Մերժել"</string>
@@ -1615,7 +1615,7 @@
     <string name="wireless_display_route_description" msgid="8297563323032966831">"Անլար էկրան"</string>
     <string name="media_route_button_content_description" msgid="2299223698196869956">"Հեռարձակում"</string>
     <string name="media_route_chooser_title" msgid="6646594924991269208">"Միանալ սարքին"</string>
-    <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"Հեռարձակել էկրանը սարքի վրա"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"Էկրանը հեռարձակել սարքին"</string>
     <string name="media_route_chooser_searching" msgid="6119673534251329535">"Որոնվում են սարքեր..."</string>
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"Կարգավորումներ"</string>
     <string name="media_route_controller_disconnect" msgid="7362617572732576959">"Անջատել"</string>
@@ -1821,10 +1821,10 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Թարմացվել է ձեր ադմինիստրատորի կողմից"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Ջնջվել է ձեր ադմինիստրատորի կողմից"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Եղավ"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Մարտկոցի աշխատաժամանակը երկարացնելու համար «Մարտկոցի տնտեսում» գործառույթը՝\n·միացնում է մուգ թեման,\n·անջատում կամ սահմանափակում է աշխատանքը ֆոնային ռեժիմում, որոշ տեսողական էֆեկտներ և այլ գործառույթներ, օրինակ «OK Google» հրահանգը:\n\n"<annotation id="url">"Իմանալ ավելին"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"Մարտկոցի աշխատաժամանակը երկարացնելու համար «Մարտկոցի տնտեսում» գործառույթը՝\n·միացնում է մուգ թեման,\n·անջատում կամ սահմանափակում է աշխատանքը ֆոնային ռեժիմում, որոշ տեսողական էֆեկտներ և այլ գործառույթներ, օրինակ «OK Google» հրահանգը:"</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"Թրաֆիկի տնտեսման ռեժիմում որոշ հավելվածների համար ֆոնային փոխանցումն անջատված է։ Հավելվածը, որն օգտագործում եք, կարող է տվյալներ փոխանցել և ստանալ, սակայն ոչ այնքան հաճախ: Օրինակ՝ պատկերները կցուցադրվեն միայն դրանց վրա սեղմելուց հետո։"</string>
-    <string name="data_saver_enable_title" msgid="7080620065745260137">"Միացնե՞լ թրաֆիկի խնայումը:"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Մարտկոցի աշխատաժամանակը երկարացնելու համար «Մարտկոցի տնտեսում» գործառույթը\n·միացնում է մուգ թեման,\n·անջատում կամ սահմանափակում է աշխատանքը ֆոնային ռեժիմում, որոշ վիզուալ էֆեկտներ և այլ գործառույթներ, օրինակ «Ok Google» հրահանգը:\n\n"<annotation id="url">"Իմանալ ավելին"</annotation></string>
+    <string name="battery_saver_description" msgid="7618492104632328184">"Մարտկոցի աշխատաժամանակը երկարացնելու համար «Մարտկոցի տնտեսում» գործառույթը\n·միացնում է մուգ թեման,\n·անջատում կամ սահմանափակում է աշխատանքը ֆոնային ռեժիմում, որոշ վիզուալ էֆեկտներ և այլ գործառույթներ, օրինակ «Ok Google» հրահանգը:"</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"Թրաֆիկի տնտեսման ռեժիմում որոշ հավելվածների համար տվյալների ֆոնային փոխանցումն անջատված է։ Հավելվածը, որն օգտագործում եք, կարող է տվյալներ փոխանցել և ստանալ, սակայն ոչ այնքան հաճախ: Օրինակ՝ պատկերները կցուցադրվեն միայն դրանց վրա սեղմելուց հետո։"</string>
+    <string name="data_saver_enable_title" msgid="7080620065745260137">"Միացնե՞լ թրաֆիկի տնտեսումը"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Միացնել"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
       <item quantity="one">%1$d րոպե (մինչև <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
@@ -1914,7 +1914,7 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> հավելվածը հասանելի չէ։ Դրա աշխատանքը սահմանափակում է <xliff:g id="APP_NAME_1">%2$s</xliff:g> հավելվածը։"</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Մանրամասն"</string>
     <string name="work_mode_off_title" msgid="5503291976647976560">"Միացնե՞լ աշխատանքային պրոֆիլը"</string>
-    <string name="work_mode_off_message" msgid="8417484421098563803">"Ձեր աշխատանքային հավելվածները, ծանուցումները, տվյալները և աշխատանքային պրոֆիլի մյուս գործառույթները կմիանան"</string>
+    <string name="work_mode_off_message" msgid="8417484421098563803">"Ձեր աշխատանքային հավելվածները, ծանուցումները, տվյալները և աշխատանքային պրոֆիլի մյուս գործառույթները կմիացվեն։"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Միացնել"</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Այս հավելվածը ստեղծվել է Android-ի ավելի հին տարբերակի համար և կարող է պատշաճ չաշխատել: Ստուգեք թարմացումների առկայությունը կամ դիմեք մշակողին:"</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Ստուգել նոր տարբերակի առկայությունը"</string>
@@ -2015,7 +2015,7 @@
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"Խոսափող"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"ցուցադրվում է մյուս հավելվածների վրայից"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Ծանուցում լիցքավորման մասին"</string>
-    <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Մարտկոցի լիցքը կարող է սովորականից շուտ սպառվել"</string>
+    <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Մարտկոցը կարող է սովորականից շուտ սպառվել"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Մարտկոցի կյանքը երկարացնելու համար ակտիվացվել է մարտկոցի տնտեսման ռեժիմը"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Մարտկոցի տնտեսում"</string>
     <string name="battery_saver_sticky_disabled_notification_title" msgid="616803848887159814">"Մարտկոցի տնտեսումը նորից կմիանա, երբ մարտկոցի լիցքը ցածր լինի"</string>

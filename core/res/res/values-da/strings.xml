@@ -1824,8 +1824,8 @@
     <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Batterisparefunktionen gør følgende for at spare på batteriet:\n·Aktiverer Mørkt tema\n·Deaktiverer eller begrænser aktivitet i baggrunden, visse visuelle effekter og andre funktioner som f.eks. \"Hey Google\"\n\n"<annotation id="url">"Få flere oplysninger"</annotation></string>
     <string name="battery_saver_description" msgid="7618492104632328184">"Batterisparefunktionen gør følgende for at spare på batteriet:\n·Aktiverer Mørkt tema\n·Deaktiverer eller begrænser aktivitet i baggrunden, visse visuelle effekter og andre funktioner som f.eks. \"Hey Google\""</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Datasparefunktionen forhindrer nogle apps i at sende eller modtage data i baggrunden for at reducere dataforbruget. En app, der er i brug, kan få adgang til data, men gør det måske ikke så ofte. Dette kan f.eks. betyde, at billeder ikke vises, før du trykker på dem."</string>
-    <string name="data_saver_enable_title" msgid="7080620065745260137">"Vil du slå Datasparefunktion til?"</string>
-    <string name="data_saver_enable_button" msgid="4399405762586419726">"Slå til"</string>
+    <string name="data_saver_enable_title" msgid="7080620065745260137">"Vil du aktivere Datasparefunktion?"</string>
+    <string name="data_saver_enable_button" msgid="4399405762586419726">"Aktivér"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
       <item quantity="one">I %1$d minutter (indtil <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="other">I %1$d minutter (indtil <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>

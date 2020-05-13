@@ -219,7 +219,7 @@
     <string name="shutdown_confirm_question" msgid="796151167261608447">"¿Deseas apagarlo?"</string>
     <string name="reboot_safemode_title" msgid="5853949122655346734">"Reiniciar en modo seguro"</string>
     <string name="reboot_safemode_confirm" msgid="1658357874737219624">"¿Deseas reiniciar el dispositivo en modo seguro? Las aplicaciones de terceros que instalaste se desactivarán y se restablecerán cuando vuelvas a reiniciar el dispositivo."</string>
-    <string name="recent_tasks_title" msgid="8183172372995396653">"Reciente"</string>
+    <string name="recent_tasks_title" msgid="8183172372995396653">"Recientes"</string>
     <string name="no_recent_tasks" msgid="9063946524312275906">"No hay aplicaciones recientes."</string>
     <string name="global_actions" product="tablet" msgid="4412132498517933867">"Opciones de tablet"</string>
     <string name="global_actions" product="tv" msgid="2020669784083287370">"Opciones de TV"</string>
@@ -556,10 +556,10 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Ícono de huella digital"</string>
-    <string name="permlab_manageFace" msgid="4569549381889283282">"administrar el hardware de Desbloqueo facial"</string>
+    <string name="permlab_manageFace" msgid="4569549381889283282">"administrar el hardware de desbloqueo facial"</string>
     <string name="permdesc_manageFace" msgid="6204569688492710471">"Permite que la app emplee métodos para agregar y borrar plantillas de rostros para su uso."</string>
-    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"usar el hardware de Desbloqueo facial"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Permite que la app use el hardware de Desbloqueo facial con fines de autenticación"</string>
+    <string name="permlab_useFaceAuthentication" msgid="1011430526454859030">"usar el hardware de desbloqueo facial"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="3115697017684668012">"Permite que la app use el hardware de desbloqueo facial con fines de autenticación"</string>
     <string name="face_recalibrate_notification_name" msgid="6006095897989257026">"Desbloqueo facial"</string>
     <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Vuelve a registrar tu rostro"</string>
     <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Para mejorar el reconocimiento, vuelve a registrar tu rostro"</string>
@@ -575,8 +575,8 @@
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Mira directamente al dispositivo."</string>
     <string name="face_acquired_not_detected" msgid="2945945257956443257">"Ubica el rostro directamente frente al teléfono."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Te estás moviendo demasiado. No muevas el teléfono"</string>
-    <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Vuelve a registrar tu cara."</string>
-    <string name="face_acquired_too_different" msgid="4699657338753282542">"Ya no se reconoce la cara. Vuelve a intentarlo."</string>
+    <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Vuelve a registrar tu rostro."</string>
+    <string name="face_acquired_too_different" msgid="4699657338753282542">"Ya no se reconoce el rostro. Vuelve a intentarlo."</string>
     <string name="face_acquired_too_similar" msgid="7684650785108399370">"Es muy similar a la anterior. Haz otra pose."</string>
     <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"Gira la cabeza un poco menos."</string>
     <string name="face_acquired_tilt_too_extreme" msgid="8119978324129248059">"Gira la cabeza un poco menos."</string>
@@ -586,15 +586,15 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"No se verificó el rostro. Hardware no disponible."</string>
-    <string name="face_error_timeout" msgid="522924647742024699">"Vuelve a probar el Desbloqueo facial."</string>
+    <string name="face_error_timeout" msgid="522924647742024699">"Vuelve a probar el desbloqueo facial."</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"No hay espacio para datos faciales nuevos. Borra uno viejo."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"Se canceló el reconocimiento facial."</string>
-    <string name="face_error_user_canceled" msgid="8553045452825849843">"El usuario canceló el Desbloqueo facial."</string>
+    <string name="face_error_user_canceled" msgid="8553045452825849843">"El usuario canceló el desbloqueo facial."</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Demasiados intentos. Inténtalo de nuevo más tarde."</string>
-    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"Demasiados intentos. Se inhabilitó el Desbloqueo facial."</string>
-    <string name="face_error_unable_to_process" msgid="5723292697366130070">"No se pudo verificar la cara. Vuelve a intentarlo."</string>
-    <string name="face_error_not_enrolled" msgid="7369928733504691611">"No configuraste el Desbloqueo facial."</string>
-    <string name="face_error_hw_not_present" msgid="1070600921591729944">"No se admite el Desbloqueo facial en este dispositivo."</string>
+    <string name="face_error_lockout_permanent" msgid="8277853602168960343">"Demasiados intentos. Se inhabilitó el desbloqueo facial."</string>
+    <string name="face_error_unable_to_process" msgid="5723292697366130070">"No se pudo verificar el rostro. Vuelve a intentarlo."</string>
+    <string name="face_error_not_enrolled" msgid="7369928733504691611">"No configuraste el desbloqueo facial."</string>
+    <string name="face_error_hw_not_present" msgid="1070600921591729944">"No se admite el desbloqueo facial en este dispositivo."</string>
     <string name="face_name_template" msgid="3877037340223318119">"Rostro <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1822,9 +1822,9 @@
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Tu administrador borró este paquete"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Aceptar"</string>
     <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Para extender la duración de batería, el Ahorro de batería hace lo siguiente:\n·Activa el Tema oscuro.\n·Desactiva o restringe la actividad en segundo plano, algunos efectos visuales y otras funciones, como \"Ok Google\".\n\n"<annotation id="url">"Más información"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"Para extender la duración de batería, el Ahorro de batería hace lo siguiente:\n·Activa el Tema oscuro.\n·Desactiva o restringe la actividad en segundo plano, algunos efectos visuales y otras funciones, como \"Ok Google\"."</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"Para reducir el uso de datos, Ahorro de datos evita que algunas apps envíen y reciban datos en segundo plano. La app que estés usando podrá acceder a los datos, pero con menor frecuencia. De esta forma, por ejemplo, las imágenes no se mostrarán hasta que las presiones."</string>
-    <string name="data_saver_enable_title" msgid="7080620065745260137">"¿Activar Ahorro de datos?"</string>
+    <string name="battery_saver_description" msgid="7618492104632328184">"Para extender la duración de batería, el modo Ahorro de batería hace lo siguiente:\n·Activa el Tema oscuro.\n·Desactiva o restringe la actividad en segundo plano, algunos efectos visuales y otras funciones como \"Ok Google\"."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"Para reducir el uso de datos, el modo Ahorro de datos evita que algunas apps envíen y reciban datos en segundo plano. La app que estés usando podrá acceder a los datos, pero con menor frecuencia. De esta forma, por ejemplo, las imágenes no se mostrarán hasta que las presiones."</string>
+    <string name="data_saver_enable_title" msgid="7080620065745260137">"¿Deseas activar Ahorro de datos?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Activar"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
       <item quantity="other">Durante %1$d minutos hasta la(s) <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g></item>
@@ -1914,7 +1914,7 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> no está disponible en este momento. Esta opción se administra en <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Más información"</string>
     <string name="work_mode_off_title" msgid="5503291976647976560">"¿Activar el perfil de trabajo?"</string>
-    <string name="work_mode_off_message" msgid="8417484421098563803">"Se activaran las apps de trabajo, los datos, las notificaciones y otras funciones del perfil de trabajo"</string>
+    <string name="work_mode_off_message" msgid="8417484421098563803">"Se activarán las apps de trabajo, los datos, las notificaciones y otras funciones del perfil de trabajo"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Activar"</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Esta app se creó para una versión anterior de Android y es posible que no funcione correctamente. Busca actualizaciones o comunícate con el programador."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Buscar actualización"</string>

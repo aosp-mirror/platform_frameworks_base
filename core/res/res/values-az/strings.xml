@@ -1822,8 +1822,8 @@
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Admin tərəfindən silindi"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
     <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Batareyanın ömrünü artırmaq üçün Enerjiyə Qənaət xüsusiyyəti:\n·Qaranlıq temanı aktiv edir\n·Arxa fondakı fəaliyyəti, bəzi vizual effektləri və “Hey Google” kimi digər xüsusiyyətləri deaktiv edir və ya məhdudlaşdırır\n\n"<annotation id="url">"Ətraflı məlumat"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"Batareyanın ömrünü artırmaq üçün Enerjiyə Qənaət xüsusiyyəti:\n·Qaranlıq temanı aktiv edir\n·Arxa fondakı fəaliyyəti, bəzi vizual effektləri və “Hey Google” kimi digər xüsusiyyətləri deaktiv edir və ya məhdudlaşdırır"</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"Data istifadəsini azalatmaq üçün, Data Qanaəti bəzi tətbiqlərin arxafonda data göndərməsini və qəbulunun qarşısını alır. Hazırda istifadə etdiyiniz tətbiq dataya daxil ola bilər, lakin bunu tez-tez edə bilməz. Bu o deməkdir ki, məsələn, Siz üzərinə tıklamadıqca o şəkillər göstərilməyəcək."</string>
+    <string name="battery_saver_description" msgid="7618492104632328184">"Batareyanın ömrünü artırmaq üçün Enerjiyə Qənaət bunları edir:\n·Qaranlıq temanı aktiv edir\n·Arxa fondakı fəaliyyəti, bəzi vizual effektləri və “Hey Google” kimi digər xüsusiyyətləri söndürür və ya məhdudlaşdırır"</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"Data istifadəsini azalatmaq üçün, Data Qanaəti bəzi tətbiqlərin arxafonda data göndərməsinin və qəbulunun qarşısını alır. Hazırda işlətdiyiniz tətbiq dataya daxil ola bilər, ancaq bunu tez-tez edə bilməz. Bu o deməkdir ki, məsələn, Siz üzərinə tıklamadıqca o şəkillər göstərilməyəcək."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Data Qənaəti aktiv edilsin?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Aktivləşdirin"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
@@ -1927,7 +1927,7 @@
     <string name="usb_mtp_launch_notification_description" msgid="6942535713629852684">"Faylları görmək üçün basın"</string>
     <string name="pin_target" msgid="8036028973110156895">"Pin kod"</string>
     <string name="unpin_target" msgid="3963318576590204447">"Çıxarın"</string>
-    <string name="app_info" msgid="6113278084877079851">"Tətbiq məlumatı"</string>
+    <string name="app_info" msgid="6113278084877079851">"Tətbiq infosu"</string>
     <string name="negative_duration" msgid="1938335096972945232">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="6577581216125805905">"Demo başlayır…"</string>
     <string name="demo_restarting_message" msgid="1160053183701746766">"Cihaz sıfırlanır…"</string>

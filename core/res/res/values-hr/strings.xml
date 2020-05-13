@@ -1847,9 +1847,9 @@
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Izbrisao administrator"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"U redu"</string>
     <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Da bi se produljilo trajanje baterije, Štednja baterije:\n·Uključuje Tamnu temu.\n·Isključuje ili ograničava aktivnosti u pozadini, neke vizualne efekte i druge značajke kao što je \"Hey Google\".\n\n"<annotation id="url">"Saznajte više"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"Da bi se produljilo trajanje baterije, Štednja baterije:\n·Uključuje Tamnu temu.\n·Isključuje ili ograničava aktivnosti u pozadini, neke vizualne efekte i druge značajke kao što je \"Hey Google\"."</string>
+    <string name="battery_saver_description" msgid="7618492104632328184">"Da bi se produljilo trajanje baterije, Štednja baterije:\n·uključuje Tamnu temu\n·isključuje ili ograničava aktivnosti u pozadini, neke vizualne efekte i druge značajke kao što je \"Hey Google\"."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Da bi se smanjio podatkovni promet, značajka Štednja podatkovnog prometa onemogućuje nekim aplikacijama slanje ili primanje podataka u pozadini. Aplikacija koju trenutačno upotrebljavate može pristupiti podacima, no možda će to činiti rjeđe. To može značiti da se, na primjer, slike neće prikazivati dok ih ne dodirnete."</string>
-    <string name="data_saver_enable_title" msgid="7080620065745260137">"Uključiti Uštedu podataka?"</string>
+    <string name="data_saver_enable_title" msgid="7080620065745260137">"Uključiti Štednju podatkovnog prometa?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Uključi"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
       <item quantity="one">%1$d minutu (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
@@ -1947,8 +1947,8 @@
     <string name="app_suspended_title" msgid="888873445010322650">"Aplikacija nije dostupna"</string>
     <string name="app_suspended_default_message" msgid="6451215678552004172">"Aplikacija <xliff:g id="APP_NAME_0">%1$s</xliff:g> trenutačno nije dostupna. Ovime upravlja aplikacija <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Saznajte više"</string>
-    <string name="work_mode_off_title" msgid="5503291976647976560">"Želite uključiti radni profil?"</string>
-    <string name="work_mode_off_message" msgid="8417484421098563803">"Uključit će se vaše radne aplikacije, obavijesti, podaci i druge značajke radnog profila"</string>
+    <string name="work_mode_off_title" msgid="5503291976647976560">"Želite li uključiti poslovni profil?"</string>
+    <string name="work_mode_off_message" msgid="8417484421098563803">"Uključit će se vaše poslovne aplikacije, obavijesti, podaci i druge značajke poslovnog profila"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Uključi"</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Ova je aplikacija razvijena za stariju verziju Androida i možda neće funkcionirati pravilno. Potražite ažuriranja ili se obratite razvojnom programeru."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Provjeri ažuriranja"</string>

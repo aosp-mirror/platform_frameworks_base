@@ -1677,8 +1677,8 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"Si la drecera està activada, prem els dos botons de volum durant 3 segons, per iniciar una funció d\'accessibilitat.\n\n Funció d\'accessibilitat actual:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Pots canviar la funció a Configuració &gt; Accessibilitat."</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Desactiva la drecera"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Utilitza la drecera"</string>
-    <string name="color_inversion_feature_name" msgid="326050048927789012">"Inversió dels colors"</string>
-    <string name="color_correction_feature_name" msgid="3655077237805422597">"Correcció del color"</string>
+    <string name="color_inversion_feature_name" msgid="326050048927789012">"Inversió de colors"</string>
+    <string name="color_correction_feature_name" msgid="3655077237805422597">"Correcció de color"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="6141620395915529473">"La drecera d\'accessibilitat ha activat <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="1287340429965172651">"La drecera d\'accessibilitat ha desactivat <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Mantén premudes les dues tecles de volum durant 3 segons per fer servir <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
@@ -1821,10 +1821,10 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Actualitzat per l\'administrador"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Suprimit per l\'administrador"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"D\'acord"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Per allargar la durada de la bateria, el mode Estalvi de bateria fa el següent:\n Activa el tema fosc\n Desactiva o restringeix l\'activitat en segon pla, alguns efectes visuals i altres funcions com \"Ok Google\"\n\n"<annotation id="url">"Més informació"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"Per allargar la durada de la bateria, el mode Estalvi de bateria fa el següent:\n Activa el tema fosc\n Desactiva o restringeix l\'activitat en segon pla, alguns efectes visuals i altres funcions com \"Ok Google\""</string>
+    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Per allargar la durada de la bateria, el mode Estalvi de bateria:\n Activa el tema fosc\n Desactiva o restringeix l\'activitat en segon pla, alguns efectes visuals i altres funcions com \"Ok Google\"\n\n"<annotation id="url">"Més informació"</annotation></string>
+    <string name="battery_saver_description" msgid="7618492104632328184">"Per allargar la durada de la bateria, el mode Estalvi de bateria:\n Activa el tema fosc\n Desactiva o restringeix l\'activitat en segon pla, alguns efectes visuals i altres funcions com \"Ok Google\""</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Per reduir l\'ús de dades, la funció Economitzador de dades evita que determinades aplicacions enviïn o rebin dades en segon pla. L\'aplicació que estiguis fent servir podrà accedir a les dades, però menys sovint. Això vol dir, per exemple, que les imatges no es mostraran fins que no les toquis."</string>
-    <string name="data_saver_enable_title" msgid="7080620065745260137">"Activar Economitzador de dades?"</string>
+    <string name="data_saver_enable_title" msgid="7080620065745260137">"Activar l\'Economitzador de dades?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Activa"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
       <item quantity="other">Durant %1$d minuts (fins a les <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
@@ -1860,7 +1860,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="2250286190237669079">"Fins a les <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"Fins a les <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (propera alarma)"</string>
-    <string name="zen_mode_forever" msgid="740585666364912448">"Fins que no ho desactivi"</string>
+    <string name="zen_mode_forever" msgid="740585666364912448">"Fins que no el desactivis"</string>
     <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"Fins que desactivis el mode No molestis"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"Replega"</string>

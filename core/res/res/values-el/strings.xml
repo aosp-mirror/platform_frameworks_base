@@ -253,7 +253,7 @@
     <string name="status_bar_notification_info_overflow" msgid="3330152558746563475">"999+"</string>
     <string name="notification_hidden_text" msgid="2835519769868187223">"Νέα ειδοποίηση"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6465975799223304567">"Εικονικό πληκτρολόγιο"</string>
-    <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"Φυσικό πληκτρολόγιο"</string>
+    <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"Κανονικό πληκτρολόγιο"</string>
     <string name="notification_channel_security" msgid="8516754650348238057">"Ασφάλεια"</string>
     <string name="notification_channel_car_mode" msgid="2123919247040988436">"Λειτουργία αυτοκινήτου"</string>
     <string name="notification_channel_account" msgid="6436294521740148173">"Κατάσταση λογαριασμού"</string>
@@ -1383,7 +1383,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"ΚΟΙΝΟΠΟΙΗΣΗ"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"ΑΠΟΡΡΙΨΗ"</string>
     <string name="select_input_method" msgid="3971267998568587025">"Επιλογή μεθόδου εισόδου"</string>
-    <string name="show_ime" msgid="6406112007347443383">"Να παραμένει στην οθόνη όταν είναι ενεργό το φυσικό πληκτρολόγιο"</string>
+    <string name="show_ime" msgid="6406112007347443383">"Να παραμένει στην οθόνη όταν είναι ενεργό το κανονικό πληκτρολόγιο"</string>
     <string name="hardware" msgid="1800597768237606953">"Εμφάνιση εικονικού πληκτρολ."</string>
     <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"Διαμόρφωση φυσικού πληκτρολογίου"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Πατήστε για να επιλέξετε γλώσσα και διάταξη"</string>

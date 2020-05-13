@@ -284,7 +284,7 @@
     <string name="permgroupdesc_location" msgid="1995955142118450685">"auf den Standort deines Geräts zugreifen"</string>
     <string name="permgrouprequest_location" msgid="5261379525646615507">"Zulassen, dass die App &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; den Gerätestandort abruft?"</string>
     <string name="permgrouprequestdetail_location" msgid="8223089637855613805">"Die App hat nur Zugriff auf den Gerätestandort, solange du sie verwendest"</string>
-    <string name="permgroupbackgroundrequest_location" msgid="534202103935528927">"Zulassen, dass &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; &lt;b&gt;ständig&lt;/b&gt; auf deinen Standort zugreift?"</string>
+    <string name="permgroupbackgroundrequest_location" msgid="534202103935528927">"Zulassen, dass &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; &lt;b&gt;immer&lt;/b&gt; auf deinen Standort zugreift?"</string>
     <string name="permgroupbackgroundrequestdetail_location" msgid="5230541171285233536">"Die App hat gegenwärtig nur dann Zugriff auf den Gerätestandort, wenn du sie verwendest"</string>
     <string name="permgrouplab_calendar" msgid="6426860926123033230">"Kalender"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"auf deinen Kalender zugreifen"</string>
@@ -1003,8 +1003,8 @@
     <string name="years" msgid="5797714729103773425">"Jahre"</string>
     <string name="now_string_shortest" msgid="3684914126941650330">"Jetzt"</string>
     <plurals name="duration_minutes_shortest" formatted="false" msgid="7519574894537185135">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> min</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> min</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> Min.</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> Min.</item>
     </plurals>
     <plurals name="duration_hours_shortest" formatted="false" msgid="2838655994500499651">
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> h</item>
@@ -1019,8 +1019,8 @@
       <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> J.</item>
     </plurals>
     <plurals name="duration_minutes_shortest_future" formatted="false" msgid="849196137176399440">
-      <item quantity="other">in <xliff:g id="COUNT_1">%d</xliff:g> min</item>
-      <item quantity="one">in <xliff:g id="COUNT_0">%d</xliff:g> min</item>
+      <item quantity="other">in <xliff:g id="COUNT_1">%d</xliff:g> Min.</item>
+      <item quantity="one">in <xliff:g id="COUNT_0">%d</xliff:g> Min.</item>
     </plurals>
     <plurals name="duration_hours_shortest_future" formatted="false" msgid="5386373597343170388">
       <item quantity="other">in <xliff:g id="COUNT_1">%d</xliff:g> h</item>
@@ -1122,7 +1122,7 @@
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Der Speicherplatz reicht nicht für das System aus. Stelle sicher, dass 250 MB freier Speicherplatz vorhanden sind, und starte das Gerät dann neu."</string>
     <string name="app_running_notification_title" msgid="8985999749231486569">"<xliff:g id="APP_NAME">%1$s</xliff:g> wird ausgeführt"</string>
     <string name="app_running_notification_text" msgid="5120815883400228566">"Für weitere Informationen oder zum Beenden der App tippen."</string>
-    <string name="ok" msgid="2646370155170753815">"Ok"</string>
+    <string name="ok" msgid="2646370155170753815">"OK"</string>
     <string name="cancel" msgid="6908697720451760115">"Abbrechen"</string>
     <string name="yes" msgid="9069828999585032361">"Ok"</string>
     <string name="no" msgid="5122037903299899715">"Abbrechen"</string>
@@ -1820,10 +1820,10 @@
     <string name="package_installed_device_owner" msgid="7035926868974878525">"Von deinem Administrator installiert"</string>
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Von deinem Administrator aktualisiert"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Von deinem Administrator gelöscht"</string>
-    <string name="confirm_battery_saver" msgid="5247976246208245754">"Ok"</string>
+    <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
     <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Der Energiesparmodus sorgt für eine längere Akkulaufzeit:\n·Das dunkle Design wird aktiviert\n·Hintergrundaktivitäten, einige optische Effekte und weitere Funktionen wie \"Ok Google\" werden abgeschaltet oder eingeschränkt\n\n"<annotation id="url">"Weitere Informationen"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"Der Energiesparmodus sorgt für eine längere Akkulaufzeit:\n Das dunkle Design wird aktiviert\n·Hintergrundaktivitäten, einige optische Effekte und weitere Funktionen wie \"Ok Google\" werden abgeschaltet oder eingeschränkt"</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"Der Datensparmodus verhindert zum einen, dass Apps im Hintergrund Daten senden oder empfangen, sodass weniger Daten verbraucht werden. Zum anderen werden die Datenzugriffe der gerade aktiven App eingeschränkt, was z. B. dazu führen kann, dass Bilder erst angetippt werden müssen, bevor sie sichtbar werden."</string>
+    <string name="battery_saver_description" msgid="7618492104632328184">"Der Energiesparmodus sorgt für eine längere Akkulaufzeit:\n·Das dunkle Design wird aktiviert\n·Hintergrundaktivitäten, einige optische Effekte und weitere Funktionen wie \"Ok Google\" werden abgeschaltet oder eingeschränkt"</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"Der Datensparmodus verhindert zum einen, dass manche Apps im Hintergrund Daten senden oder empfangen, sodass weniger Daten verbraucht werden. Zum anderen werden die Datenzugriffe der gerade aktiven App eingeschränkt, was z. B. dazu führen kann, dass Bilder erst angetippt werden müssen, bevor sie sichtbar werden."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Datensparmodus aktivieren?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Aktivieren"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
@@ -1831,8 +1831,8 @@
       <item quantity="one">1 Minute (bis <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
     </plurals>
     <plurals name="zen_mode_duration_minutes_summary_short" formatted="false" msgid="4230730310318858312">
-      <item quantity="other">Für %1$d min (bis <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="one">Für 1 min (bis <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
+      <item quantity="other">Für %1$d Min. (bis <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="one">Für 1 Min. (bis <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
     </plurals>
     <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="7725354244196466758">
       <item quantity="other">%1$d Stunden (bis <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
@@ -1847,8 +1847,8 @@
       <item quantity="one">Für 1 Minute</item>
     </plurals>
     <plurals name="zen_mode_duration_minutes_short" formatted="false" msgid="2742377799995454859">
-      <item quantity="other">Für %d min</item>
-      <item quantity="one">Für 1 min</item>
+      <item quantity="other">Für %d Min.</item>
+      <item quantity="one">Für 1 Min.</item>
     </plurals>
     <plurals name="zen_mode_duration_hours" formatted="false" msgid="525401855645490022">
       <item quantity="other">%d Stunden</item>

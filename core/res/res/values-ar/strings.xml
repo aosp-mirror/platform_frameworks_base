@@ -228,7 +228,7 @@
     <string name="reboot_safemode_title" msgid="5853949122655346734">"إعادة تشغيل في الوضع الآمن"</string>
     <string name="reboot_safemode_confirm" msgid="1658357874737219624">"هل تريد إعادة تشغيل الكمبيوتر في الوضع الآمن؟ سيؤدي ذلك إلى إيقاف جميع تطبيقات الجهات الخارجية التي تم تثبيتها. ستتم استعادتها عند إعادة التشغيل مرة أخرى."</string>
     <string name="recent_tasks_title" msgid="8183172372995396653">"حديثة"</string>
-    <string name="no_recent_tasks" msgid="9063946524312275906">"ليست هناك تطبيقات حديثة."</string>
+    <string name="no_recent_tasks" msgid="9063946524312275906">"لم يتمّ استخدام تطبيقات مؤخرًا."</string>
     <string name="global_actions" product="tablet" msgid="4412132498517933867">"خيارات الجهاز اللوحي"</string>
     <string name="global_actions" product="tv" msgid="2020669784083287370">"خيارات التلفزيون"</string>
     <string name="global_actions" product="default" msgid="6410072189971495460">"خيارات الهاتف"</string>
@@ -712,7 +712,7 @@
   </string-array>
   <string-array name="emailAddressTypes">
     <item msgid="7786349763648997741">"المنزل"</item>
-    <item msgid="435564470865989199">"عمل"</item>
+    <item msgid="435564470865989199">"العمل"</item>
     <item msgid="4199433197875490373">"آخر"</item>
     <item msgid="3233938986670468328">"مخصص"</item>
   </string-array>
@@ -766,7 +766,7 @@
     <string name="phoneTypeMms" msgid="1799747455131365989">"رسالة وسائط متعددة"</string>
     <string name="eventTypeCustom" msgid="3257367158986466481">"مخصص"</string>
     <string name="eventTypeBirthday" msgid="7770026752793912283">"عيد ميلاد"</string>
-    <string name="eventTypeAnniversary" msgid="4684702412407916888">"الذكرى السنوية"</string>
+    <string name="eventTypeAnniversary" msgid="4684702412407916888">"ذكرى سنوية"</string>
     <string name="eventTypeOther" msgid="530671238533887997">"غير ذلك"</string>
     <string name="emailTypeCustom" msgid="1809435350482181786">"مخصص"</string>
     <string name="emailTypeHome" msgid="1597116303154775999">"المنزل"</string>
@@ -803,9 +803,9 @@
     <string name="relationTypeFriend" msgid="3192092625893980574">"صديق"</string>
     <string name="relationTypeManager" msgid="2272860813153171857">"مدير"</string>
     <string name="relationTypeMother" msgid="2331762740982699460">"أم"</string>
-    <string name="relationTypeParent" msgid="4177920938333039882">"الوالدان"</string>
+    <string name="relationTypeParent" msgid="4177920938333039882">"ولي أمر"</string>
     <string name="relationTypePartner" msgid="4018017075116766194">"شريك"</string>
-    <string name="relationTypeReferredBy" msgid="5285082289602849400">"جهة الإحالة"</string>
+    <string name="relationTypeReferredBy" msgid="5285082289602849400">"جهة إحالة"</string>
     <string name="relationTypeRelative" msgid="3396498519818009134">"قريب"</string>
     <string name="relationTypeSister" msgid="3721676005094140671">"أخت"</string>
     <string name="relationTypeSpouse" msgid="6916682664436031703">"زوج/زوجة"</string>
@@ -1230,7 +1230,7 @@
     <string name="whichSendToApplication" msgid="77101541959464018">"إرسال باستخدام"</string>
     <string name="whichSendToApplicationNamed" msgid="3385686512014670003">"‏إرسال باستخدام %1$s"</string>
     <string name="whichSendToApplicationLabel" msgid="3543240188816513303">"إرسال"</string>
-    <string name="whichHomeApplication" msgid="8276350727038396616">"تحديد تطبيق شاشة رئيسية"</string>
+    <string name="whichHomeApplication" msgid="8276350727038396616">"اختيار تطبيق شاشة رئيسية"</string>
     <string name="whichHomeApplicationNamed" msgid="5855990024847433794">"‏استخدام %1$s كصفحة رئيسية"</string>
     <string name="whichHomeApplicationLabel" msgid="8907334282202933959">"التقاط صورة"</string>
     <string name="whichImageCaptureApplication" msgid="2737413019463215284">"التقاط صورة باستخدام"</string>
@@ -1773,7 +1773,7 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"عند تشغيل الاختصار، يؤدي الضغط على زرّي مستوى الصوت لمدة 3 ثوانٍ إلى تفعيل ميزة \"سهولة الاستخدام\".\n\n ميزة \"سهولة الاستخدام\" الحالية:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n يمكنك تغيير الميزة من \"الإعدادات\" &gt; \"سهولة الاستخدام\"."</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"إيقاف الاختصار"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"استخدام الاختصار"</string>
-    <string name="color_inversion_feature_name" msgid="326050048927789012">"عكس الألوان"</string>
+    <string name="color_inversion_feature_name" msgid="326050048927789012">"قلب الألوان"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"تصحيح الألوان"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="6141620395915529473">"شغَّل اختصار إمكانية الوصول خدمة <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="1287340429965172651">"أوقف اختصار إمكانية الوصول خدمة <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
@@ -1921,9 +1921,9 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"تم التحديث بواسطة المشرف"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"تم الحذف بواسطة المشرف"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"حسنًا"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"‏لإطالة عمر البطارية، \"توفير شحن البطارية\":\n·تفعيل \"التصميم الداكن\"\n إيقاف النشاط في الخلفية أو تقييده وأيضًا بعض التأثيرات المرئية والميزات الأخرى، مثلاً \"Ok Google\"\n\n"<annotation id="url">"مزيد من المعلومات"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"‏لإطالة عمر البطارية، \"توفير شحن البطارية\":\n·تفعيل \"التصميم الداكن\"\n إيقاف النشاط في الخلفية أو تقييده وأيضًا بعض التأثيرات المرئية والميزات الأخرى، مثلاً \"Ok Google\"."</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"للمساعدة في خفض استخدام البيانات، تمنع ميزة \"توفير البيانات\" بعض التطبيقات من إرسال البيانات وتلقّيها في الخلفية. يمكن للتطبيق الذي تستخدمه الآن الوصول إلى البيانات، ولكن لا يمكنه تنفيذ ذلك كثيرًا. وهذا يعني أن الصور مثلاً لا تظهر حتى تنقر عليها."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"‏لإطالة عمر البطارية، تعمل ميزة \"توفير شحن البطارية\" على:\n·تفعيل \"المظهر الداكن\"\n إيقاف أو حظر النشاط في الخلفية وبعض التأثيرات المرئية والميزات الأخرى، مثل \"Ok Google\"\n\n"<annotation id="url">"مزيد من المعلومات"</annotation></string>
+    <string name="battery_saver_description" msgid="7618492104632328184">"‏لإطالة عمر البطارية، تعمل ميزة \"توفير شحن البطارية\" على:\n تفعيل \"المظهر الداكن\"\n إيقاف أو حظر النشاط في الخلفية وبعض التأثيرات المرئية والميزات الأخرى، مثل \"Ok Google\"."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"للمساعدة في خفض استخدام البيانات، تمنع ميزة \"توفير البيانات\" بعض التطبيقات من إرسال البيانات وتلقّيها في الخلفية. يمكن للتطبيقات المتاحة لديك الآن استخدام البيانات، ولكن لا يمكنها الإكثار من ذلك. وهذا يعني أن الصور مثلاً لا تظهر حتى تنقر عليها."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"هل تريد تفعيل توفير البيانات؟"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"تفعيل"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
@@ -1992,7 +1992,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="2250286190237669079">"حتى <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"حتى <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (التنبيه التالي)"</string>
-    <string name="zen_mode_forever" msgid="740585666364912448">"لحين الإيقاف"</string>
+    <string name="zen_mode_forever" msgid="740585666364912448">"إلى أن يتم إيقاف الوضع"</string>
     <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"حتى يتم إيقاف \"عدم الإزعاج\""</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"تصغير"</string>
@@ -2027,12 +2027,12 @@
     <string name="close_button_text" msgid="10603510034455258">"إغلاق"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <plurals name="selected_count" formatted="false" msgid="3946212171128200491">
-      <item quantity="zero">تم تحديد <xliff:g id="COUNT_1">%1$d</xliff:g> من العناصر</item>
-      <item quantity="two">تم تحديد عنصرين (<xliff:g id="COUNT_1">%1$d</xliff:g>)</item>
-      <item quantity="few">تم تحديد <xliff:g id="COUNT_1">%1$d</xliff:g> عناصر</item>
-      <item quantity="many">تم تحديد <xliff:g id="COUNT_1">%1$d</xliff:g> عنصرًا</item>
-      <item quantity="other">تم تحديد <xliff:g id="COUNT_1">%1$d</xliff:g> من العناصر</item>
-      <item quantity="one">تم تحديد عنصر واحد (<xliff:g id="COUNT_0">%1$d</xliff:g>)</item>
+      <item quantity="zero">تم اختيار <xliff:g id="COUNT_1">%1$d</xliff:g> عنصر</item>
+      <item quantity="two">تم اختيار عنصرين (<xliff:g id="COUNT_1">%1$d</xliff:g>)</item>
+      <item quantity="few">تم اختيار <xliff:g id="COUNT_1">%1$d</xliff:g> عناصر</item>
+      <item quantity="many">تم اختيار <xliff:g id="COUNT_1">%1$d</xliff:g> عنصرًا</item>
+      <item quantity="other">تم اختيار <xliff:g id="COUNT_1">%1$d</xliff:g> عنصر</item>
+      <item quantity="one">تم اختيار عنصر واحد (<xliff:g id="COUNT_0">%1$d</xliff:g>)</item>
     </plurals>
     <string name="default_notification_channel_label" msgid="3697928973567217330">"غير مصنفة"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"لقد عيَّنت أهمية هذه الإشعارات."</string>
@@ -2049,7 +2049,7 @@
     <string name="app_suspended_title" msgid="888873445010322650">"التطبيق غير متاح"</string>
     <string name="app_suspended_default_message" msgid="6451215678552004172">"التطبيق <xliff:g id="APP_NAME_0">%1$s</xliff:g> غير متاح الآن، وهو مُدار بواسطة <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"مزيد من المعلومات"</string>
-    <string name="work_mode_off_title" msgid="5503291976647976560">"تفعيل الملف الشخصي للعمل؟"</string>
+    <string name="work_mode_off_title" msgid="5503291976647976560">"هل تريد تفعيل الملف الشخصي للعمل؟"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"سيتم تفعيل تطبيقات العمل التي تستخدمها والإشعارات والبيانات وغيرها من ميزات الملف الشخصي للعمل"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"تفعيل"</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"‏تمّ إنشاء هذا التطبيق لإصدار قديم من Android وقد لا يعمل بشكل صحيح. جرِّب البحث عن تحديثات أو الاتصال بمطوّر البرامج."</string>

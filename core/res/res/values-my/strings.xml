@@ -243,7 +243,7 @@
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"အသံတိတ်စနစ်"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"အသံပိတ်ထားသည်"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"အသံဖွင့်ထားသည်"</string>
-    <string name="global_actions_toggle_airplane_mode" msgid="6911684460146916206">"လေယာဥ်ပျံပေါ်အသုံးပြုသောစနစ်"</string>
+    <string name="global_actions_toggle_airplane_mode" msgid="6911684460146916206">"လေယာဉ်ပျံမုဒ်"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="5508025516695361936">"လေယဥ်ပျံပေါ်၌အသုံးပြုသောစနစ်ဖွင့်ထားသည်"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="8522219771500505475">"လေယဥ်ပျံပေါ်၌အသုံးပြုသောစနစ်ပိတ်ထားသည်"</string>
     <string name="global_action_settings" msgid="4671878836947494217">"ဆက်တင်များ"</string>
@@ -292,7 +292,7 @@
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS စာတိုစနစ်"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS စာများကို ပို့ကာ ကြည့်မည်"</string>
     <string name="permgrouprequest_sms" msgid="3985338150822482831">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; အား SMS မက်ဆေ့ဂျ်များ ကြည့်ရှုခွင့်နှင့် ပို့ခွင့်ပေးလိုပါသလား။"</string>
-    <string name="permgrouplab_storage" msgid="1121695277384787841">"သိုလှောင်မှုများ"</string>
+    <string name="permgrouplab_storage" msgid="1121695277384787841">"သိုလှောင်ခန်း"</string>
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"သင့်ဖုန်းရှိ ဓာတ်ပုံများ၊ မီဒီယာနှင့် ဖိုင်များအား ဝင်သုံးပါ"</string>
     <string name="permgrouprequest_storage" msgid="1594774620878445266">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; အား သင့်ဖုန်းရှိ ဓာတ်ပုံများ၊ မီဒီယာနှင့် ဖိုင်များ ဝင်သုံးခွင့်ပေးလိုပါသလား။"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"မိုက်ခရိုဖုန်း"</string>
@@ -1504,7 +1504,7 @@
     </plurals>
     <string name="action_mode_done" msgid="2536182504764803222">"ပြီးပါပြီ"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"မျှဝေထားသည့် သိုလှောင်ခန်းကို ဖျက်နေသည်…"</string>
-    <string name="share" msgid="4157615043345227321">"မျှဝေခြင်း"</string>
+    <string name="share" msgid="4157615043345227321">"မျှဝေရန်"</string>
     <string name="find" msgid="5015737188624767706">"ရှာဖွေရန်"</string>
     <string name="websearch" msgid="5624340204512793290">"ဝဘ်တွင် ရှာရန်"</string>
     <string name="find_next" msgid="5341217051549648153">"နောက်တစ်ခု ရှာဖွေရန်"</string>
@@ -1615,10 +1615,10 @@
     <string name="wireless_display_route_description" msgid="8297563323032966831">"ကြိုးမဲ့ပြသခြင်း"</string>
     <string name="media_route_button_content_description" msgid="2299223698196869956">"သရုပ်ဆောင်​များ"</string>
     <string name="media_route_chooser_title" msgid="6646594924991269208">"စက်တစ်ခုကို ချိတ်ဆက်ရန်"</string>
-    <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"ဖန်သားပြင်ကို စက်ဆီ ပို့လွှတ်ပါ"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"ဖန်သားပြင်ကို စက်ထံသို့ ပို့ပါ"</string>
     <string name="media_route_chooser_searching" msgid="6119673534251329535">"စက်များကို ရှာဖွေနေပါသည် ..."</string>
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"ဆက်တင်များ"</string>
-    <string name="media_route_controller_disconnect" msgid="7362617572732576959">"ချိတ်ဆက်ခြင်းရပ်ဆိုင်းရန်"</string>
+    <string name="media_route_controller_disconnect" msgid="7362617572732576959">"ချိတ်ဆက်မှုဖြုတ်ရန်"</string>
     <string name="media_route_status_scanning" msgid="8045156315309594482">"စကင်ပြုလုပ်နေစဉ်..."</string>
     <string name="media_route_status_connecting" msgid="5845597961412010540">"ဆက်သွယ်နေစဉ်..."</string>
     <string name="media_route_status_available" msgid="1477537663492007608">"ရနိုင်သော"</string>
@@ -1822,9 +1822,9 @@
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"သင်၏ စီမံခန့်ခွဲသူက ဖျက်လိုက်ပါပြီ"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
     <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"ဘက်ထရီသက်တမ်း ပိုရှည်စေရန် \'ဘက်ထရီအားထိန်း\' က \n·မှောင်သည့် အပြင်အဆင်ကို ဖွင့်သည် \n·နောက်ခံလုပ်ဆောင်ချက် အချို့ အမြင်အာရုံဆိုင်ရာ အထူးပြုလုပ်ချက်များနှင့် “Hey Google” ကဲ့သို့ အခြား ဝန်ဆောင်မှုများကို ပိတ်ခြင်း သို့မဟုတ် ကန့်သတ်ခြင်းတို့ ပြုလုပ်သည်။\n\n"<annotation id="url">"ပိုမိုလေ့လာရန်"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"ဘက်ထရီသက်တမ်း ပိုရှည်စေရန် \'ဘက်ထရီအားထိန်း\' က \n·မှောင်သည့် အပြင်အဆင်ကို ဖွင့်သည် \n·နောက်ခံလုပ်ဆောင်ချက် အချို့ အမြင်အာရုံဆိုင်ရာ အထူးပြုလုပ်ချက်များနှင့် “Hey Google” ကဲ့သို့ အခြား ဝန်ဆောင်မှုများကို ပိတ်ခြင်း သို့မဟုတ် ကန့်သတ်ခြင်းတို့ ပြုလုပ်သည်။"</string>
+    <string name="battery_saver_description" msgid="7618492104632328184">"ဘက်ထရီသက်တမ်း ပိုရှည်စေရန် \'ဘက်ထရီအားထိန်း\' က- \n·မှောင်သည့် အပြင်အဆင်ကို ဖွင့်သည်\n·နောက်ခံလုပ်ဆောင်ချက်၊ ပြသမှုဆိုင်ရာ အထူးပြုလုပ်ချက်အချို့နှင့် “Hey Google” ကဲ့သို့ အခြား ဝန်ဆောင်မှုများကို ပိတ်သည် သို့မဟုတ် ကန့်သတ်သည်။"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"ဒေတာအသုံးလျှော့ချနိုင်ရန်အတွက် အက်ပ်များကို နောက်ခံတွင် ဒေတာပို့ခြင်းနှင့် လက်ခံခြင်းမပြုရန် \'ဒေတာချွေတာမှု\' စနစ်က တားဆီးထားပါသည်။ ယခုအက်ပ်ဖြင့် ဒေတာအသုံးပြုနိုင်သော်လည်း အကြိမ်လျှော့၍သုံးရပါမည်။ ဥပမာ၊ သင်က မတို့မချင်း ပုံများပေါ်လာမည် မဟုတ်ပါ။"</string>
-    <string name="data_saver_enable_title" msgid="7080620065745260137">"ဒေတာအသုံးပြုမှု ချွေတာမှုစနစ်ကို ဖွင့်မလား။"</string>
+    <string name="data_saver_enable_title" msgid="7080620065745260137">"ဒေတာချွေတာမှုစနစ် ဖွင့်မလား။"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"ဖွင့်ပါ"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
       <item quantity="other">%1$d မိနစ်တွင် (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>အထိ)</item>

@@ -1035,8 +1035,8 @@
       <item quantity="one">en <xliff:g id="COUNT_0">%d</xliff:g> a</item>
     </plurals>
     <plurals name="duration_minutes_relative" formatted="false" msgid="6569851308583028344">
-      <item quantity="other">hai <xliff:g id="COUNT_1">%d</xliff:g> minutos</item>
-      <item quantity="one">hai <xliff:g id="COUNT_0">%d</xliff:g> minuto</item>
+      <item quantity="other">Hai <xliff:g id="COUNT_1">%d</xliff:g> minutos</item>
+      <item quantity="one">Hai <xliff:g id="COUNT_0">%d</xliff:g> minuto</item>
     </plurals>
     <plurals name="duration_hours_relative" formatted="false" msgid="420434788589102019">
       <item quantity="other">hai <xliff:g id="COUNT_1">%d</xliff:g> horas</item>

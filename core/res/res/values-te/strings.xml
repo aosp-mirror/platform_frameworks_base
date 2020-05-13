@@ -280,7 +280,7 @@
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"కాంటాక్ట్‌లు"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"మీ పరిచయాలను యాక్సెస్ చేయడానికి"</string>
     <string name="permgrouprequest_contacts" msgid="7755354139254094668">"మీ పరిచయాలను యాక్సెస్ చేయడానికి &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ని అనుమతించాలా?"</string>
-    <string name="permgrouplab_location" msgid="1858277002233964394">"స్థానం"</string>
+    <string name="permgrouplab_location" msgid="1858277002233964394">"లొకేషన్"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"ఈ పరికర స్థానాన్ని యాక్సెస్ చేయడానికి"</string>
     <string name="permgrouprequest_location" msgid="5261379525646615507">"ఈ పరికరం యొక్క లొకేషన్‌ను యాక్సెస్ చేయడానికి &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ను అనుమతించాలా?"</string>
     <string name="permgrouprequestdetail_location" msgid="8223089637855613805">"మీరు యాప్‌ను ఉపయోగిస్తున్నప్పుడు మాత్రమే స్థానానికి యాప్ యాక్సెస్ కలిగి ఉంటుంది"</string>
@@ -1238,7 +1238,7 @@
     <string name="volume_icon_description_media" msgid="4997633254078171233">"మీడియా వాల్యూమ్"</string>
     <string name="volume_icon_description_notification" msgid="579091344110747279">"నోటిఫికేషన్ వాల్యూమ్"</string>
     <string name="ringtone_default" msgid="9118299121288174597">"డిఫాల్ట్ రింగ్‌టోన్"</string>
-    <string name="ringtone_default_with_actual" msgid="2709686194556159773">"డిఫాల్ట్ (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
+    <string name="ringtone_default_with_actual" msgid="2709686194556159773">"ఆటోమేటిక్ (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="397111123930141876">"ఏదీ వద్దు"</string>
     <string name="ringtone_picker_title" msgid="667342618626068253">"రింగ్‌టోన్‌లు"</string>
     <string name="ringtone_picker_title_alarm" msgid="7438934548339024767">"అలారం ధ్వనులు"</string>
@@ -1616,7 +1616,7 @@
     <string name="media_route_button_content_description" msgid="2299223698196869956">"ప్రసారం చేయండి"</string>
     <string name="media_route_chooser_title" msgid="6646594924991269208">"పరికరానికి కనెక్ట్ చేయండి"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"స్క్రీన్‌ను పరికరానికి ప్రసారం చేయండి"</string>
-    <string name="media_route_chooser_searching" msgid="6119673534251329535">"పరికరాల కోసం వెతుకుతోంది…"</string>
+    <string name="media_route_chooser_searching" msgid="6119673534251329535">"డివైజ్‌ల కోసం వెతుకుతోంది…"</string>
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"సెట్టింగ్‌లు"</string>
     <string name="media_route_controller_disconnect" msgid="7362617572732576959">"డిస్‌కనెక్ట్ చేయి"</string>
     <string name="media_route_status_scanning" msgid="8045156315309594482">"స్కాన్ చేస్తోంది..."</string>
@@ -1677,7 +1677,7 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"షార్ట్‌కట్ ఆన్‌లో ఉన్నప్పుడు, రెండు వాల్యూమ్ బటన్‌లను 3 సెకన్ల పాటు నొక్కితే యాక్సెస్ సామర్థ్య ఫీచర్ ప్రారంభం అవుతుంది.\n\n ప్రస్తుత యాక్సెస్ సామర్థ్య ఫీచర్:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n సెట్టింగ్‌లు &gt; యాక్సెస్ సామర్థ్యంలో మీరు ఫీచర్‌ను మార్చవచ్చు."</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"సత్వరమార్గాన్ని ఆఫ్ చేయి"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"సత్వరమార్గాన్ని ఉపయోగించు"</string>
-    <string name="color_inversion_feature_name" msgid="326050048927789012">"రంగుల మార్పిడి"</string>
+    <string name="color_inversion_feature_name" msgid="326050048927789012">"కలర్ మార్పిడి"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"రంగు సవరణ"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="6141620395915529473">"యాక్సెస్ సామర్థ్య షార్ట్‌కట్ ద్వారా <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ఆన్ చేయబడింది"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="1287340429965172651">"యాక్సెస్ సామర్థ్య షార్ట్‌కట్ ద్వారా <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ఆఫ్ చేయబడింది"</string>
@@ -1821,9 +1821,9 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"మీ నిర్వాహకులు నవీకరించారు"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"మీ నిర్వాహకులు తొలగించారు"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"సరే"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"బ్యాటరీ జీవితకాలాన్ని పెంచడానికి, బ్యాటరీ సేవర్:\n ముదురు రంగు·థీమ్‌ను ఆన్ చేస్తుంది\n·నేపథ్య కార్యకలాపం, కొన్ని విజువల్ ఎఫెక్ట్స్ మరియు “Hey Google” వంటి ఇతర ఫీచర్‌లను ఆపివేస్తుంది లేదా పరిమితం చేస్తుంది\n\n"<annotation id="url">"మరింత తెలుసుకోండి"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"బ్యాటరీ జీవితకాలాన్ని పెంచడానికి, బ్యాటరీ సేవర్:\n ముదురు రంగు·థీమ్‌ను ఆన్ చేస్తుంది\n·నేపథ్య కార్యకలాపం, కొన్ని విజువల్ ఎఫెక్ట్స్ మరియు “Hey Google” వంటి ఇతర ఫీచర్‌లను ఆపివేస్తుంది లేదా పరిమితం చేస్తుంది"</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"డేటా వినియోగాన్ని తగ్గించడంలో డేటా సేవర్ సహాయకరంగా ఉంటుంది. బ్యాక్‌గ్రౌండ్‌లో కొన్ని యాప్‌లు డేటాను పంపకుండా లేదా స్వీకరించకుండా నిరోధిస్తుంది. మీరు ప్రస్తుతం ఉపయోగిస్తోన్న యాప్‌ డేటాను యాక్సెస్ చేయగలదు. కానీ అలా అరుదుగా చేయవచ్చు. ఉదాహరణకు, మీరు చిత్రాలను నొక్కే వరకు అవి ప్రదర్శించబడవు."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"బ్యాటరీ జీవితకాలాన్ని పెంచడానికి, బ్యాటరీ సేవర్ వీటిని చేస్తుంది:\n·ముదురు రంగు థీమ్‌ను ఆన్ చేస్తుంది\n·బ్యాక్‌గ్రౌండ్ కార్యకలాపం, కొన్ని విజువల్ ఎఫెక్ట్స్‌లతో పాటు “Ok Google” వంటి ఇతర ఫీచర్‌లను ఆపివేస్తుంది లేదా పరిమితం చేస్తుంది\n\n"<annotation id="url">"మరింత తెలుసుకోండి"</annotation></string>
+    <string name="battery_saver_description" msgid="7618492104632328184">"బ్యాటరీ జీవితకాలాన్ని పెంచడానికి, బ్యాటరీ సేవర్ వీటిని చేస్తుంది:\n·ముదురు రంగు థీమ్‌ను ఆన్ చేస్తుంది\n·బ్యాక్‌గ్రౌండ్ కార్యకలాపం, కొన్ని విజువల్ ఎఫెక్ట్స్‌లతో పాటు “Ok Google” వంటి ఇతర ఫీచర్‌లను ఆపివేస్తుంది లేదా పరిమితం చేస్తుంది"</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"డేటా వినియోగాన్ని తగ్గించడంలో డేటా సేవర్ సహాయకరంగా ఉంటుంది. బ్యాక్‌గ్రౌండ్‌లో కొన్ని యాప్‌లు డేటాను పంపకుండా లేదా స్వీకరించకుండా నిరోధిస్తుంది. మీరు ప్రస్తుతం ఉపయోగిస్తోన్న యాప్‌, డేటాను యాక్సెస్ చేయగలదు. కానీ త‌క్కువ సార్లు మాత్ర‌మే అలా చేయవచ్చు. ఉదాహరణకు, మీరు నొక్కే వరకు ఫోటోలు ప్రదర్శించబడవు."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"డేటా సేవర్‌ను ఆన్ చేయాలా?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"ఆన్ చేయి"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">

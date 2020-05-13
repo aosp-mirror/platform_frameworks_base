@@ -1822,7 +1822,7 @@
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"আপনার প্রশাসক মুছে দিয়েছেন"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ঠিক আছে"</string>
     <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"ব্যাটারি আরও বেশিক্ষণ চালাতে, ব্যাটারি সেভার:\n·গাঢ় থিম চালু করে\n·ব্যাকগ্রাউন্ড অ্যাক্টিভিটি, কিছু ভিজ্যুয়াল এফেক্ট, এবং “হ্যালো Google”-এর মতো অন্যান্য ফিচার বন্ধ বা সীমাবদ্ধ করে\n\n"<annotation id="url">"আরও জানুন"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"ব্যাটারি আরও বেশিক্ষণ চালাতে, ব্যাটারি সেভার:\n·গাঢ় থিম চালু করে\n·ব্যাকগ্রাউন্ড অ্যাক্টিভিটি, কিছু ভিজ্যুয়াল এফেক্ট, এবং “হ্যালো Google”-এর মতো অন্যান্য ফিচার বন্ধ বা সীমাবদ্ধ করে"</string>
+    <string name="battery_saver_description" msgid="7618492104632328184">"ব্যাটারি আরও বেশিক্ষণ চালাতে, ব্যাটারি সেভার:\n·গাঢ় থিম চালু করে\n·ব্যাকগ্রাউন্ড অ্যাক্টিভিটি, কিছু ভিজ্যুয়াল এফেক্ট এবং “হ্যালো Google”-এর মতো অন্যান্য ফিচার বন্ধ বা সীমাবদ্ধ করে"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"ডেটার ব্যবহার কমাতে সহায়তা করার জন্য, ডেটা সেভার ব্যাকগ্রাউন্ডে কিছু অ্যাপ্লিকেশনকে ডেটা পাঠাতে বা গ্রহণ করতে বাধা দেয়৷ আপনি বর্তমানে এমন একটি অ্যাপ্লিকেশন ব্যবহার করছেন যেটি ডেটা অ্যাক্সেস করতে পারে, তবে সেটি কমই করে৷ এর ফলে যা হতে পারে, উদাহরণস্বরূপ, আপনি ছবির উপর ট্যাপ না করা পর্যন্ত সেগুলি দেখানো হবে না৷"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"ডেটা সেভার চালু করবেন?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"চালু করুন"</string>
@@ -1913,8 +1913,8 @@
     <string name="app_suspended_title" msgid="888873445010322650">"অ্যাপটি উপলভ্য নয়"</string>
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> এখন উপলভ্য নয়। এই অ্যাপটিকে <xliff:g id="APP_NAME_1">%2$s</xliff:g> অ্যাপ ম্যানেজ করে।"</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"আরও জানুন"</string>
-    <string name="work_mode_off_title" msgid="5503291976647976560">"কাজের প্রোফাইল চালু করবেন?"</string>
-    <string name="work_mode_off_message" msgid="8417484421098563803">"আপনার কাজের অ্যাপ, বিজ্ঞপ্তি, ডেটা এবং কাজের প্রোফাইলের অন্যান্য বৈশিষ্ট্য চালু করা হবে"</string>
+    <string name="work_mode_off_title" msgid="5503291976647976560">"অফিস প্রোফাইল চালু করবেন?"</string>
+    <string name="work_mode_off_message" msgid="8417484421098563803">"আপনার অফিস অ্যাপ, বিজ্ঞপ্তি, ডেটা এবং অফিস প্রোফাইলের অন্যান্য বৈশিষ্ট্য চালু করা হবে"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"চালু করুন"</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"এই অ্যাপটি Android এর একটি পুরনো ভার্সনের জন্য তৈরি করা হয়েছিল, তাই এখানে সেটি ঠিকমতো কাজ নাও করতে পারে। আপডেট পাওয়া যাচ্ছে কিনা দেখুন বা ডেভেলপারের সাথে যোগাযোগ করুন।"</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"আপডেট পাওয়া যাচ্ছে কিনা দেখুন"</string>

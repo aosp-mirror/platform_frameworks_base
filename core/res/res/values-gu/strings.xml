@@ -691,7 +691,7 @@
   <string-array name="phoneTypes">
     <item msgid="8996339953292723951">"ઘર"</item>
     <item msgid="7740243458912727194">"મોબાઇલ"</item>
-    <item msgid="8526146065496663766">"કાર્યાલય"</item>
+    <item msgid="8526146065496663766">"ઑફિસ"</item>
     <item msgid="8150904584178569699">"કાર્ય ફૅક્સ"</item>
     <item msgid="4537253139152229577">"ઘરનો ફૅક્સ"</item>
     <item msgid="6751245029698664340">"પેજર"</item>
@@ -700,24 +700,24 @@
   </string-array>
   <string-array name="emailAddressTypes">
     <item msgid="7786349763648997741">"હોમ"</item>
-    <item msgid="435564470865989199">"કાર્યાલય"</item>
+    <item msgid="435564470865989199">"ઑફિસ"</item>
     <item msgid="4199433197875490373">"અન્ય"</item>
     <item msgid="3233938986670468328">"કસ્ટમ"</item>
   </string-array>
   <string-array name="postalAddressTypes">
     <item msgid="3861463339764243038">"ઘર"</item>
-    <item msgid="5472578890164979109">"કાર્યાલય"</item>
+    <item msgid="5472578890164979109">"ઑફિસ"</item>
     <item msgid="5718921296646594739">"અન્ય"</item>
     <item msgid="5523122236731783179">"કસ્ટમ"</item>
   </string-array>
   <string-array name="imAddressTypes">
     <item msgid="588088543406993772">"હોમ"</item>
-    <item msgid="5503060422020476757">"કાર્યાલય"</item>
+    <item msgid="5503060422020476757">"ઑફિસ"</item>
     <item msgid="2530391194653760297">"અન્ય"</item>
     <item msgid="7640927178025203330">"કસ્ટમ"</item>
   </string-array>
   <string-array name="organizationTypes">
-    <item msgid="6144047813304847762">"કાર્યાલય"</item>
+    <item msgid="6144047813304847762">"ઑફિસ"</item>
     <item msgid="7402720230065674193">"અન્ય"</item>
     <item msgid="808230403067569648">"કસ્ટમ"</item>
   </string-array>
@@ -734,7 +734,7 @@
     <string name="phoneTypeCustom" msgid="5120365721260686814">"કસ્ટમ"</string>
     <string name="phoneTypeHome" msgid="3880132427643623588">"હોમ"</string>
     <string name="phoneTypeMobile" msgid="1178852541462086735">"મોબાઇલ"</string>
-    <string name="phoneTypeWork" msgid="6604967163358864607">"કાર્યાલય"</string>
+    <string name="phoneTypeWork" msgid="6604967163358864607">"ઑફિસ"</string>
     <string name="phoneTypeFaxWork" msgid="6757519896109439123">"કાર્ય ફૅક્સ"</string>
     <string name="phoneTypeFaxHome" msgid="6678559953115904345">"ઘરનો ફૅક્સ"</string>
     <string name="phoneTypePager" msgid="576402072263522767">"પેજર"</string>
@@ -758,16 +758,16 @@
     <string name="eventTypeOther" msgid="530671238533887997">"અન્ય"</string>
     <string name="emailTypeCustom" msgid="1809435350482181786">"કસ્ટમ"</string>
     <string name="emailTypeHome" msgid="1597116303154775999">"ઘર"</string>
-    <string name="emailTypeWork" msgid="2020095414401882111">"કાર્યાલય"</string>
+    <string name="emailTypeWork" msgid="2020095414401882111">"ઑફિસ"</string>
     <string name="emailTypeOther" msgid="5131130857030897465">"અન્ય"</string>
     <string name="emailTypeMobile" msgid="787155077375364230">"મોબાઇલ"</string>
     <string name="postalTypeCustom" msgid="5645590470242939129">"કસ્ટમ"</string>
     <string name="postalTypeHome" msgid="7562272480949727912">"ઘર"</string>
-    <string name="postalTypeWork" msgid="8553425424652012826">"કાર્યાલય"</string>
+    <string name="postalTypeWork" msgid="8553425424652012826">"ઑફિસ"</string>
     <string name="postalTypeOther" msgid="7094245413678857420">"અન્ય"</string>
     <string name="imTypeCustom" msgid="5653384545085765570">"કસ્ટમ"</string>
     <string name="imTypeHome" msgid="6996507981044278216">"હોમ"</string>
-    <string name="imTypeWork" msgid="2099668940169903123">"કાર્યાલય"</string>
+    <string name="imTypeWork" msgid="2099668940169903123">"ઑફિસ"</string>
     <string name="imTypeOther" msgid="8068447383276219810">"અન્ય"</string>
     <string name="imProtocolCustom" msgid="4437878287653764692">"કસ્ટમ"</string>
     <string name="imProtocolAim" msgid="4050198236506604378">"AIM"</string>
@@ -779,7 +779,7 @@
     <string name="imProtocolIcq" msgid="2410325380427389521">"ICQ"</string>
     <string name="imProtocolJabber" msgid="7919269388889582015">"Jabber"</string>
     <string name="imProtocolNetMeeting" msgid="4985002408136148256">"NetMeeting"</string>
-    <string name="orgTypeWork" msgid="8684458700669564172">"કાર્યાલય"</string>
+    <string name="orgTypeWork" msgid="8684458700669564172">"ઑફિસ"</string>
     <string name="orgTypeOther" msgid="5450675258408005553">"અન્ય"</string>
     <string name="orgTypeCustom" msgid="1126322047677329218">"કસ્ટમ"</string>
     <string name="relationTypeCustom" msgid="282938315217441351">"કસ્ટમ"</string>
@@ -799,7 +799,7 @@
     <string name="relationTypeSpouse" msgid="6916682664436031703">"જીવનસાથી"</string>
     <string name="sipAddressTypeCustom" msgid="6283889809842649336">"કસ્ટમ"</string>
     <string name="sipAddressTypeHome" msgid="5918441930656878367">"ઘર"</string>
-    <string name="sipAddressTypeWork" msgid="7873967986701216770">"કાર્યાલય"</string>
+    <string name="sipAddressTypeWork" msgid="7873967986701216770">"ઑફિસ"</string>
     <string name="sipAddressTypeOther" msgid="6317012577345187275">"અન્ય"</string>
     <string name="quick_contacts_not_available" msgid="1262709196045052223">"આ સંપર્ક જોવા માટે કોઈ ઍપ્લિકેશન મળી નથી."</string>
     <string name="keyguard_password_enter_pin_code" msgid="6401406801060956153">"પિન કોડ લખો"</string>
@@ -1615,8 +1615,8 @@
     <string name="wireless_display_route_description" msgid="8297563323032966831">"વાયરલેસ ડિસ્પ્લે"</string>
     <string name="media_route_button_content_description" msgid="2299223698196869956">"કાસ્ટ કરો"</string>
     <string name="media_route_chooser_title" msgid="6646594924991269208">"ઉપકરણ સાથે કનેક્ટ કરો"</string>
-    <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"ઉપકરણ પર સ્ક્રીન કાસ્ટ કરો"</string>
-    <string name="media_route_chooser_searching" msgid="6119673534251329535">"ઉપકરણો માટે શોધી રહ્યું છે…"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"ડિવાઇસ પર સ્ક્રીન કાસ્ટ કરો"</string>
+    <string name="media_route_chooser_searching" msgid="6119673534251329535">"ડિવાઇસ શોધી રહ્યું છે…"</string>
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"સેટિંગ"</string>
     <string name="media_route_controller_disconnect" msgid="7362617572732576959">"ડિસ્કનેક્ટ કરો"</string>
     <string name="media_route_status_scanning" msgid="8045156315309594482">"સ્કેન કરી રહ્યું છે..."</string>
@@ -1677,7 +1677,7 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"જ્યારે શૉર્ટકટ ચાલુ હોય, ત્યારે બન્ને વૉલ્યૂમ બટનને 3 સેકન્ડ સુધી દબાવી રાખવાથી ઍક્સેસિબિલિટી સુવિધા શરૂ થઈ જશે.\n\n વર્તમાન ઍક્સેસિબિલિટી સુવિધા:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n તમે સેટિંગ્સ &gt; ઍક્સેસિબિલિટીમાં જઈને આ સુવિધા બદલી શકો છો."</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"શૉર્ટકટ બંધ કરો"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"શૉર્ટકટનો ઉપયોગ કરો"</string>
-    <string name="color_inversion_feature_name" msgid="326050048927789012">"રંગનો વ્યુત્ક્રમ"</string>
+    <string name="color_inversion_feature_name" msgid="326050048927789012">"વિપરીત રંગમાં બદલવું"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"રંગ સુધારણા"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="6141620395915529473">"ઍક્સેસિબિલિટી શૉર્ટકટે <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ચાલુ કરી"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="1287340429965172651">"ઍક્સેસિબિલિટી શૉર્ટકટે <xliff:g id="SERVICE_NAME">%1$s</xliff:g> બંધ કરી"</string>
@@ -1811,7 +1811,7 @@
     <string name="select_day" msgid="2060371240117403147">"મહિનો અને દિવસ પસંદ કરો"</string>
     <string name="select_year" msgid="1868350712095595393">"વર્ષ પસંદ કરો"</string>
     <string name="deleted_key" msgid="9130083334943364001">"<xliff:g id="KEY">%1$s</xliff:g> કાઢી નાખી"</string>
-    <string name="managed_profile_label_badge" msgid="6762559569999499495">"કાર્યાલય <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="managed_profile_label_badge" msgid="6762559569999499495">"ઑફિસ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"2જું કાર્ય <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"3જું કાર્ય <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"અનપિન કરતા પહેલાં પિન માટે પૂછો"</string>
@@ -1823,7 +1823,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ઓકે"</string>
     <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"બૅટરીની આવરદા વધારવા માટે, બૅટરી સેવર:\n·ઘેરી થીમ ચાલુ કરે છે\n·બૅકગ્રાઉન્ડ પ્રવૃત્તિ, અમુક વિઝ્યુઅલ ઇફેક્ટ અને “હેય Google” જેવી અન્ય સુવિધાઓ બંધ અથવા પ્રતિબંધિત કરે છે\n\n"<annotation id="url">"વધુ જાણો"</annotation></string>
     <string name="battery_saver_description" msgid="7618492104632328184">"બૅટરીની આવરદા વધારવા માટે, બૅટરી સેવર:\n·ઘેરી થીમ ચાલુ કરે છે\n·બૅકગ્રાઉન્ડ પ્રવૃત્તિ, અમુક વિઝ્યુઅલ ઇફેક્ટ અને “હેય Google” જેવી અન્ય સુવિધાઓ બંધ અથવા પ્રતિબંધિત કરે છે"</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"ડેટા વપરાશને ઘટાડવામાં સહાય માટે, ડેટા સેવર કેટલીક ઍપ્લિકેશનોને પૃષ્ઠભૂમિમાં ડેટા મોકલવા અથવા પ્રાપ્ત કરવાથી અટકાવે છે. તમે હાલમાં ઉપયોગ કરી રહ્યાં છો તે ઍપ્લિકેશન ડેટાને ઍક્સેસ કરી શકે છે, પરંતુ તે આ ક્યારેક જ કરી શકે છે. આનો અર્થ એ હોઈ શકે છે, ઉદાહરણ તરીકે, છબીઓ ત્યાં સુધી પ્રદર્શિત થશે નહીં જ્યાં સુધી તમે તેને ટૅપ નહીં કરો."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"ડેટા વપરાશને ઘટાડવામાં સહાય માટે, ડેટા સેવર કેટલીક ઍપને બૅકગ્રાઉન્ડમાં ડેટા મોકલવા અથવા પ્રાપ્ત કરવાથી અટકાવે છે. તમે હાલમાં ઉપયોગ કરી રહ્યાં છો તે ઍપ ડેટાને ઍક્સેસ કરી શકે છે, પરંતુ તે આ ક્યારેક જ કરી શકે છે. આનો અર્થ એ હોઈ શકે છે, ઉદાહરણ તરીકે, છબીઓ ત્યાં સુધી પ્રદર્શિત થશે નહીં જ્યાં સુધી તમે તેને ટૅપ નહીં કરો."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"ડેટા સેવર ચાલુ કરીએ?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"ચાલુ કરો"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
@@ -1881,7 +1881,7 @@
     <string name="stk_cc_ss_to_dial_video" msgid="1324194624384312664">"SS વિનંતીને વીડિઓ કૉલમાં બદલવામાં આવી છે"</string>
     <string name="stk_cc_ss_to_ussd" msgid="8417905193112944760">"SS વિનંતીને USSD વિનંતીમાં બદલવામાં આવી છે"</string>
     <string name="stk_cc_ss_to_ss" msgid="132040645206514450">"નવી SS વિનંતીમાં બદલવામાં આવી છે"</string>
-    <string name="notification_work_profile_content_description" msgid="5296477955677725799">"કાર્યાલયની પ્રોફાઇલ"</string>
+    <string name="notification_work_profile_content_description" msgid="5296477955677725799">"ઑફિસની પ્રોફાઇલ"</string>
     <string name="notification_alerted_content_description" msgid="6139691253611265992">"અલર્ટ કરેલ"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"વિસ્તૃત કરો"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"સંકુચિત કરો"</string>
@@ -1913,8 +1913,8 @@
     <string name="app_suspended_title" msgid="888873445010322650">"ઍપ ઉપલબ્ધ નથી"</string>
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> હમણાં ઉપલબ્ધ નથી. આને <xliff:g id="APP_NAME_1">%2$s</xliff:g> દ્વારા મેનેજ કરવામાં આવે છે."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"વધુ જાણો"</string>
-    <string name="work_mode_off_title" msgid="5503291976647976560">"કાર્યાલયની પ્રોફાઇલ ચાલુ કરીએ?"</string>
-    <string name="work_mode_off_message" msgid="8417484421098563803">"તમારી કાર્યાલયની ઍપ, નોટિફિકેશન, ડેટા અને અન્ય કાર્યાલયની પ્રોફાઇલ સુવિધાઓ ચાલુ કરવામાં આવશે"</string>
+    <string name="work_mode_off_title" msgid="5503291976647976560">"ઑફિસની પ્રોફાઇલ ચાલુ કરીએ?"</string>
+    <string name="work_mode_off_message" msgid="8417484421098563803">"તમારી ઑફિસ માટેની ઍપ, નોટિફિકેશન, ડેટા અને અન્ય ઑફિસની પ્રોફાઇલ સુવિધાઓ ચાલુ કરવામાં આવશે"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"ચાલુ કરો"</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"આ ઍપ Androidના જૂના વર્ઝન માટે બનાવવામાં આવ્યું હતું અને તે કદાચ તે યોગ્ય રીતે કાર્ય કરી શકશે નહીં. અપડેટ માટે તપાસવાનો પ્રયાસ કરો અથવા ડેવલપરનો સંપર્ક કરો."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"અપડેટ માટે તપાસો"</string>
@@ -1935,7 +1935,7 @@
     <string name="conference_call" msgid="5731633152336490471">"કોન્ફરન્સ કૉલ"</string>
     <string name="tooltip_popup_title" msgid="7863719020269945722">"ટૂલટિપ"</string>
     <string name="app_category_game" msgid="4534216074910244790">"રમતો"</string>
-    <string name="app_category_audio" msgid="8296029904794676222">"સંગીત અને ઑડિઓ"</string>
+    <string name="app_category_audio" msgid="8296029904794676222">"સંગીત અને ઑડિયો"</string>
     <string name="app_category_video" msgid="2590183854839565814">"મૂવી અને વીડિઓ"</string>
     <string name="app_category_image" msgid="7307840291864213007">"ફોટો અને છબીઓ"</string>
     <string name="app_category_social" msgid="2278269325488344054">"સામાજિક અને સંચાર"</string>

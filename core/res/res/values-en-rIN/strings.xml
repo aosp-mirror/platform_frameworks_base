@@ -307,7 +307,7 @@
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"Call logs"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"read and write phone call logs"</string>
     <string name="permgrouprequest_calllog" msgid="7565344038959817408">"Allow &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; to access your phone call logs?"</string>
-    <string name="permgrouplab_phone" msgid="570318944091926620">"Telephone"</string>
+    <string name="permgrouplab_phone" msgid="570318944091926620">"Phone"</string>
     <string name="permgroupdesc_phone" msgid="270048070781478204">"make and manage phone calls"</string>
     <string name="permgrouprequest_phone" msgid="6430085454721364373">"Allow &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; to make and manage phone calls?"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Body sensors"</string>

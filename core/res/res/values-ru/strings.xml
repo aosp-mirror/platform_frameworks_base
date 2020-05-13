@@ -291,7 +291,7 @@
     <string name="permgrouprequest_location" msgid="5261379525646615507">"Разрешить приложению &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; доступ к данным о местоположении устройства?"</string>
     <string name="permgrouprequestdetail_location" msgid="8223089637855613805">"Доступ к местоположению будет открыт, только пока вы пользуетесь приложением."</string>
     <string name="permgroupbackgroundrequest_location" msgid="534202103935528927">"Разрешить приложению \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" постоянный доступ к местоположению устройства?"</string>
-    <string name="permgroupbackgroundrequestdetail_location" msgid="5230541171285233536">"Сейчас у приложения есть доступ к местоположению только во время его использования."</string>
+    <string name="permgroupbackgroundrequestdetail_location" msgid="5230541171285233536">"Сейчас у приложения есть доступ к местоположению только во время использования этого приложения."</string>
     <string name="permgrouplab_calendar" msgid="6426860926123033230">"Календарь"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"доступ к календарю"</string>
     <string name="permgrouprequest_calendar" msgid="2680538977344557840">"Разрешить приложению &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; доступ к календарю?"</string>
@@ -1873,7 +1873,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ОК"</string>
     <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Чтобы продлить время работы от батареи, в режиме энергосбережения:\nвключается тёмная тема;\nотключаются или ограничиваются фоновые процессы, некоторые визуальные эффекты и другие функции (например, распознавание команды \"Окей, Google\").\n\n"<annotation id="url">"Подробнее…"</annotation></string>
     <string name="battery_saver_description" msgid="7618492104632328184">"Чтобы продлить время работы от батареи, в режиме энергосбережения:\nвключается тёмная тема;\nотключаются или ограничиваются фоновые процессы, некоторые визуальные эффекты и другие функции (например, распознавание команды \"Окей, Google\")."</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"В режиме экономии трафика фоновая передача для некоторых приложений отключена. Приложение, которым вы пользуетесь, может получать и отправлять данные, но реже, чем обычно. Например, изображения могут не загружаться, пока вы не нажмете на них."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"В режиме экономии трафика фоновая передача данных для некоторых приложений отключена. Приложение, которым вы пользуетесь, может получать и отправлять данные, но реже, чем обычно. Например, изображения могут не загружаться, пока вы не нажмете на них."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Включить экономию трафика?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Включить"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">

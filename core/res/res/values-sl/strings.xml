@@ -274,10 +274,10 @@
     <string name="notification_channel_retail_mode" msgid="3732239154256431213">"Predstavitev za maloprodajo"</string>
     <string name="notification_channel_usb" msgid="1528280969406244896">"Povezava USB"</string>
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"Aplikacija se izvaja"</string>
-    <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Aplikacije, ki porabljajo energijo akumulatorja"</string>
-    <string name="foreground_service_app_in_background" msgid="1439289699671273555">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> porablja energijo akumulatorja"</string>
-    <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"Toliko aplikacij porablja energijo akumulatorja: <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
-    <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Dotaknite se za prikaz podrobnosti porabe akumulatorja in prenosa podatkov"</string>
+    <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Aplikacije, ki porabljajo energijo baterije"</string>
+    <string name="foreground_service_app_in_background" msgid="1439289699671273555">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> porablja energijo baterije"</string>
+    <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"Toliko aplikacij porablja energijo baterije: <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
+    <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Dotaknite se za prikaz podrobnosti porabe baterije in prenosa podatkov"</string>
     <string name="foreground_service_multiple_separator" msgid="5002287361849863168">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="8974401416068943888">"Varni način"</string>
     <string name="android_system_label" msgid="5974767339591067210">"Sistem Android"</string>
@@ -374,7 +374,7 @@
     <string name="permlab_systemAlertWindow" msgid="5757218350944719065">"Prikaz aplikacije s prekrivanjem drugih aplikacij"</string>
     <string name="permdesc_systemAlertWindow" msgid="1145660714855738308">"Ta aplikacija lahko prekrije druge aplikacije ali druge dele zaslona. To lahko vpliva na normalno delovanje aplikacije in na način prikaza drugih aplikacij."</string>
     <string name="permlab_runInBackground" msgid="541863968571682785">"izvajanje v ozadju"</string>
-    <string name="permdesc_runInBackground" msgid="4344539472115495141">"Ta aplikacija se lahko izvaja tudi v ozadju, kar lahko privede do hitrejšega praznjenja akumulatorja."</string>
+    <string name="permdesc_runInBackground" msgid="4344539472115495141">"Ta aplikacija se lahko izvaja tudi v ozadju, kar lahko privede do hitrejšega praznjenja baterije."</string>
     <string name="permlab_useDataInBackground" msgid="783415807623038947">"prenos podatkov v ozadju"</string>
     <string name="permdesc_useDataInBackground" msgid="1230753883865891987">"Ta aplikacija lahko prenaša podatke tudi v ozadju, kar lahko privede do večje porabe prenosa podatkov."</string>
     <string name="permlab_persistentActivity" msgid="464970041740567970">"neprekinjeno izvajanje aplikacij"</string>
@@ -422,7 +422,7 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"dostopanje do ukazov ponudnika dodatnih lokacij"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"Aplikaciji omogoča dostop do dodatnih ukazov ponudnika lokacij. S tem lahko aplikacija moti delovanje sistema GPS ali drugih virov lokacije."</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"dostop do točne lokacije samo, ko deluje v ospredju"</string>
-    <string name="permdesc_accessFineLocation" msgid="3056141052532120237">"Ta aplikacija lahko pridobi vašo točno lokacijo samo, ko deluje v ospredju. Če želite aplikaciji omogočiti uporabo teh lokacijskih storitev, morajo biti te vklopljene in na voljo v telefonu. Poraba energije akumulatorja bo morda večja."</string>
+    <string name="permdesc_accessFineLocation" msgid="3056141052532120237">"Ta aplikacija lahko pridobi vašo točno lokacijo samo, ko deluje v ospredju. Če želite aplikaciji omogočiti uporabo teh lokacijskih storitev, morajo biti te vklopljene in na voljo v telefonu. Poraba energije baterije bo morda večja."</string>
     <string name="permlab_accessCoarseLocation" msgid="8215351553392299056">"dostop do približne lokacije (na podlagi omrežja) samo med delovanjem v ospredju"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="7479449026750078899">"Ta aplikacija lahko pridobi vašo lokacijo na podlagi omrežnih virov, kot so bazne postaje in omrežja Wi-Fi, vendar samo, ko deluje v ospredju. Če želite aplikaciji omogočiti uporabo teh lokacijskih storitev, morajo biti te vklopljene in na voljo v tabličnem računalniku."</string>
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="1912601926375190585">"Ta aplikacija lahko pridobi vašo lokacijo na podlagi omrežnih virov, kot so bazne postaje in omrežja Wi-Fi, vendar samo, ko deluje v ospredju. Če želite aplikaciji omogočiti uporabo teh lokacijskih storitev, morajo biti te vklopljene in na voljo v televizorju."</string>
@@ -1487,8 +1487,8 @@
     <string name="permdesc_requestInstallPackages" msgid="3969369278325313067">"Aplikaciji omogoča zahtevanje namestitve paketov."</string>
     <string name="permlab_requestDeletePackages" msgid="2541172829260106795">"Zahteva za brisanje paketov"</string>
     <string name="permdesc_requestDeletePackages" msgid="6133633516423860381">"Omogoča aplikaciji, da zahteva brisanje paketov."</string>
-    <string name="permlab_requestIgnoreBatteryOptimizations" msgid="7646611326036631439">"Dovoljenje za prezrtje optimizacij akumulatorja"</string>
-    <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"Aplikaciji dovoljuje, da vpraša za dovoljenje, ali naj prezre optimizacije akumulatorja."</string>
+    <string name="permlab_requestIgnoreBatteryOptimizations" msgid="7646611326036631439">"Dovoljenje za prezrtje optimizacij baterije"</string>
+    <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"Aplikaciji dovoljuje, da vpraša za dovoljenje, ali naj prezre optimizacije baterije."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"Tapnite dvakrat za nadzor povečave/pomanjšave"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"Pripomočka ni bilo mogoče dodati."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"Pojdi"</string>
@@ -1661,7 +1661,7 @@
     <string name="wireless_display_route_description" msgid="8297563323032966831">"Brezžični prikaz"</string>
     <string name="media_route_button_content_description" msgid="2299223698196869956">"Predvajanje"</string>
     <string name="media_route_chooser_title" msgid="6646594924991269208">"Povezovanje z napravo"</string>
-    <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"Predvajanje zaslona v napravi"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"Predvajanje zaslona v napravo"</string>
     <string name="media_route_chooser_searching" msgid="6119673534251329535">"Iskanje naprav …"</string>
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"Nastavitve"</string>
     <string name="media_route_controller_disconnect" msgid="7362617572732576959">"Prekinitev povezave"</string>
@@ -1872,7 +1872,7 @@
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Izbrisal skrbnik"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"V redu"</string>
     <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Funkcija varčevanja z energijo baterije tako podaljša čas delovanja baterije:\n·Vklopi temno temo,\n·izklopi ali omeji izvajanje dejavnosti v ozadju, nekaterih vizualnih učinkov in drugih funkcij, kot je »Hey Google«.\n\n"<annotation id="url">"Več o tem"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"Funkcija varčevanja z energijo baterije tako podaljša čas delovanja baterije:\n·Vklopi temno temo,\n·izklopi ali omeji izvajanje dejavnosti v ozadju, nekaterih vizualnih učinkov in drugih funkcij, kot je »Hey Google«."</string>
+    <string name="battery_saver_description" msgid="7618492104632328184">"Funkcija varčevanja z energijo baterije podaljša čas delovanja baterije tako:\n·vklopi temno temo,\n·izklopi ali omeji izvajanje dejavnosti v ozadju, nekaterih vizualnih učinkov in drugih funkcij, kot je »Hey Google«."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Zaradi zmanjševanja prenesene količine podatkov funkcija varčevanja s podatki nekaterim aplikacijam preprečuje, da bi v ozadju pošiljale ali prejemale podatke. Aplikacija, ki jo trenutno uporabljate, lahko prenaša podatke, vendar to morda počne manj pogosto. To na primer pomeni, da se slike ne prikažejo, dokler se jih ne dotaknete."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Vklop varčevanja s podatki?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Vklop"</string>
@@ -2085,16 +2085,16 @@
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"Mikrofon"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"prekriva druge aplikacije na zaslonu"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Rutinsko informativno obvestilo o načinu delovanja"</string>
-    <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Akumulator se bo morda izpraznil, preden ga običajno priključite na polnjenje"</string>
-    <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Vklopilo se je varčevanje z energijo akumulatorja za podaljšanje časa delovanja akumulatorja"</string>
+    <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Baterija se bo morda izpraznila, preden jo običajno priključite na polnjenje"</string>
+    <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Vklopilo se je varčevanje z energijo baterije za podaljšanje časa delovanja baterije"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Varčevanje z energijo baterije"</string>
-    <string name="battery_saver_sticky_disabled_notification_title" msgid="616803848887159814">"Varčevanje z energijo akumulatorja se ne bo znova aktiviralo, dokler akumulator ne bo znova skoraj prazen"</string>
-    <string name="battery_saver_sticky_disabled_notification_summary" msgid="9091127514013090563">"Akumulator je dovolj napolnjen. Varčevanje z energijo akumulatorja se ne bo znova aktiviralo, dokler akumulator ne bo znova skoraj prazen."</string>
+    <string name="battery_saver_sticky_disabled_notification_title" msgid="616803848887159814">"Varčevanje z energijo baterije se ne bo znova aktiviralo, dokler baterija ne bo znova skoraj prazna"</string>
+    <string name="battery_saver_sticky_disabled_notification_summary" msgid="9091127514013090563">"Baterija je dovolj napolnjena. Varčevanje z energijo baterije se ne bo znova aktiviralo, dokler baterija ne bo znova skoraj prazna."</string>
     <string name="battery_saver_charged_notification_title" product="default" msgid="3323003634503470433">"Napolnjenost telefona: <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
     <string name="battery_saver_charged_notification_title" product="tablet" msgid="7917739170436791596">"Napolnjenost tabličnega računalnika: <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
     <string name="battery_saver_charged_notification_title" product="device" msgid="6316898726189914805">"Napolnjenost naprave: <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
-    <string name="battery_saver_off_notification_summary" msgid="8489738830261291526">"Varčevanje z energijo akumulatorja je izklopljeno. Funkcije niso več omejene."</string>
-    <string name="battery_saver_off_alternative_notification_summary" msgid="8875240624827898671">"Varčevanje z energijo akumulatorja je izklopljeno. Funkcije niso več omejene."</string>
+    <string name="battery_saver_off_notification_summary" msgid="8489738830261291526">"Varčevanje z energijo baterije je izklopljeno. Funkcije niso več omejene."</string>
+    <string name="battery_saver_off_alternative_notification_summary" msgid="8875240624827898671">"Varčevanje z energijo baterije je izklopljeno. Funkcije niso več omejene."</string>
     <string name="mime_type_folder" msgid="2203536499348787650">"Mapa"</string>
     <string name="mime_type_apk" msgid="3168784749499623902">"Aplikacija za Android"</string>
     <string name="mime_type_generic" msgid="4606589110116560228">"Datoteka"</string>

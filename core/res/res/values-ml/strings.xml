@@ -226,7 +226,7 @@
     <string name="global_actions" product="default" msgid="6410072189971495460">"ഫോൺ ഓപ്‌ഷനുകൾ"</string>
     <string name="global_action_lock" msgid="6949357274257655383">"സ്‌ക്രീൻ ലോക്ക്"</string>
     <string name="global_action_power_off" msgid="4404936470711393203">"പവർ ഓഫാക്കുക"</string>
-    <string name="global_action_emergency" msgid="1387617624177105088">"അടിയന്തിരാവശ്യം"</string>
+    <string name="global_action_emergency" msgid="1387617624177105088">"അടിയന്തരാവശ്യം"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"ബഗ് റിപ്പോർട്ട്"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"സെഷൻ അവസാനിപ്പിക്കുക"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"സ്‌ക്രീൻഷോട്ട്"</string>
@@ -1678,7 +1678,7 @@
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"കുറുക്കുവഴി ‌ഓഫാക്കുക"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"കുറുക്കുവഴി ഉപയോഗിക്കുക"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"വർണ്ണ വിപര്യയം"</string>
-    <string name="color_correction_feature_name" msgid="3655077237805422597">"വർണ്ണം ക്രമീകരിക്കൽ"</string>
+    <string name="color_correction_feature_name" msgid="3655077237805422597">"നിറം ക്രമീകരിക്കൽ"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="6141620395915529473">"ഉപയോഗസഹായിക്കുള്ള കുറുക്കുവഴി <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ഓൺ ചെയ്തിരിക്കുന്നു"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="1287340429965172651">"ഉപയോഗസഹായിക്കുള്ള കുറുക്കുവഴി <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ഓഫ് ചെയ്തിരിക്കുന്നു"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> ഉപയോഗിക്കാൻ, രണ്ട് വോളിയം കീകളും മൂന്ന് സെക്കൻഡ് അമർത്തിപ്പിടിക്കുക"</string>

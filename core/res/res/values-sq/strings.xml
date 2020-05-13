@@ -1920,7 +1920,7 @@
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Kontrollo për përditësim"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Ke mesazhe të reja"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Hap aplikacionin SMS për ta parë"</string>
-    <string name="profile_encrypted_title" msgid="9001208667521266472">"Disa funksione mund të jenë të kufizuara"</string>
+    <string name="profile_encrypted_title" msgid="9001208667521266472">"Disa veçori mund të jenë të kufizuara"</string>
     <string name="profile_encrypted_detail" msgid="5279730442756849055">"Profili i punës është i kyçur"</string>
     <string name="profile_encrypted_message" msgid="1128512616293157802">"Trokit për ta shkyçur profilin e punës"</string>
     <string name="usb_mtp_launch_notification_title" msgid="774319638256707227">"U lidh me <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>

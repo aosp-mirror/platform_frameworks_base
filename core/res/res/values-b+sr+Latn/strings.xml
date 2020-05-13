@@ -184,11 +184,11 @@
       <item quantity="other">Instalirani su autoriteti za izdavanje sertifikata</item>
     </plurals>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4961102218216815242">"Od strane nepoznate treće strane"</string>
-    <string name="ssl_ca_cert_noti_by_administrator" msgid="4564941950768783879">"Od strane administratora profila za Work"</string>
+    <string name="ssl_ca_cert_noti_by_administrator" msgid="4564941950768783879">"Od strane administratora poslovnog profila"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="217337232273211674">"Od strane <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
     <string name="work_profile_deleted" msgid="5891181538182009328">"Poslovni profil je izbrisan"</string>
-    <string name="work_profile_deleted_details" msgid="3773706828364418016">"Aplikacija za administratore na profilu za Work nedostaje ili je oštećena. Zbog toga su profil za Work i povezani podaci izbrisani. Obratite se administratoru za pomoć."</string>
-    <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"Profil za Work više nije dostupan na ovom uređaju"</string>
+    <string name="work_profile_deleted_details" msgid="3773706828364418016">"Aplikacija za administratore na poslovnom profilu nedostaje ili je oštećena. Zbog toga su poslovni profil i povezani podaci izbrisani. Obratite se administratoru za pomoć."</string>
+    <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"Poslovni profil više nije dostupan na ovom uređaju"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"Previše pokušaja unosa lozinke"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"Uređajem se upravlja"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Organizacija upravlja ovim uređajem i može da nadgleda mrežni saobraćaj. Dodirnite za detalje."</string>
@@ -282,25 +282,25 @@
     <string name="managed_profile_label" msgid="7316778766973512382">"Pređi na poslovni profil"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Kontakti"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"pristupi kontaktima"</string>
-    <string name="permgrouprequest_contacts" msgid="7755354139254094668">"Želite li da omogućite da &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; pristupa kontaktima?"</string>
+    <string name="permgrouprequest_contacts" msgid="7755354139254094668">"Želite da omogućite da &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; pristupa kontaktima?"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Lokacija"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"pristupi lokaciji ovog uređaja"</string>
-    <string name="permgrouprequest_location" msgid="5261379525646615507">"Želite li da omogućite da &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; pristupa lokaciji ovog uređaja?"</string>
+    <string name="permgrouprequest_location" msgid="5261379525646615507">"Želite da omogućite da &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; pristupa lokaciji ovog uređaja?"</string>
     <string name="permgrouprequestdetail_location" msgid="8223089637855613805">"Aplikacija će imati pristup lokaciji samo dok koristite aplikaciju"</string>
     <string name="permgroupbackgroundrequest_location" msgid="534202103935528927">"Želite li da dozvolite da &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; pristupa lokaciji uređaja &lt;b&gt;u bilo kom trenutku&lt;/b&gt;?"</string>
     <string name="permgroupbackgroundrequestdetail_location" msgid="5230541171285233536">"Aplikacija trenutno može da pristupa lokaciji samo kada koristite aplikaciju"</string>
     <string name="permgrouplab_calendar" msgid="6426860926123033230">"Kalendar"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"pristupi kalendaru"</string>
-    <string name="permgrouprequest_calendar" msgid="2680538977344557840">"Želite li da omogućite da &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; pristupa kalendaru?"</string>
+    <string name="permgrouprequest_calendar" msgid="2680538977344557840">"Želite da omogućite da &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; pristupa kalendaru?"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"šalje i pregleda SMS poruke"</string>
-    <string name="permgrouprequest_sms" msgid="3985338150822482831">"Želite li da omogućite da &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; šalje i pregleda SMS-ove?"</string>
+    <string name="permgrouprequest_sms" msgid="3985338150822482831">"Želite da omogućite da &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; šalje i pregleda SMS-ove?"</string>
     <string name="permgrouplab_storage" msgid="1121695277384787841">"Memorijski prostor"</string>
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"pristupa slikama, medijima i datotekama na uređaju"</string>
-    <string name="permgrouprequest_storage" msgid="1594774620878445266">"Želite li da omogućite da &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; pristupa slikama, medijskim i drugim datotekama na uređaju?"</string>
+    <string name="permgrouprequest_storage" msgid="1594774620878445266">"Želite da omogućite da &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; pristupa slikama, medijskim i drugim datotekama na uređaju?"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"snima zvuk"</string>
-    <string name="permgrouprequest_microphone" msgid="4942966684471718126">"Želite li da omogućite da &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; snima zvuk?"</string>
+    <string name="permgrouprequest_microphone" msgid="4942966684471718126">"Želite da omogućite da &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; snima zvuk?"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Fizičke aktivnosti"</string>
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"pristup fizičkim aktivnostima"</string>
     <string name="permgrouprequest_activityRecognition" msgid="693328554262727556">"Želite li da dozvolite da &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; pristupa fizičkim aktivnostima?"</string>
@@ -309,13 +309,13 @@
     <string name="permgrouprequest_camera" msgid="2697305443703328372">"Želite da omogućite da &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; snima slike i video snimke?"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"Evidencije poziva"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"čitanje i pisanje evidencije poziva na telefonu"</string>
-    <string name="permgrouprequest_calllog" msgid="7565344038959817408">"Želite li da omogućite da &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; pristupa evidencijama poziva na telefonu?"</string>
+    <string name="permgrouprequest_calllog" msgid="7565344038959817408">"Želite da omogućite da &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; pristupa evidencijama poziva na telefonu?"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"Telefon"</string>
     <string name="permgroupdesc_phone" msgid="270048070781478204">"upućuje telefonske pozive i upravlja njima"</string>
-    <string name="permgrouprequest_phone" msgid="6430085454721364373">"Želite li da omogućite da &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; upućuje pozive i upravlja njima?"</string>
+    <string name="permgrouprequest_phone" msgid="6430085454721364373">"Želite da omogućite da &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; upućuje pozive i upravlja njima?"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Senzori za telo"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"pristupa podacima senzora o vitalnim funkcijama"</string>
-    <string name="permgrouprequest_sensors" msgid="2431000833343586816">"Želite li da omogućite da &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;pristupa podacima senzora o vitalnim funkcijama?"</string>
+    <string name="permgrouprequest_sensors" msgid="2431000833343586816">"Želite da omogućite da &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;pristupa podacima senzora o vitalnim funkcijama?"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"da preuzima sadržaj prozora"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Proverava sadržaj prozora sa kojim ostvarujete interakciju."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"da uključi Istraživanja dodirom"</string>
@@ -1511,7 +1511,7 @@
     <string name="submit" msgid="862795280643405865">"Pošalji"</string>
     <string name="car_mode_disable_notification_title" msgid="8450693275833142896">"Aplikacija za vožnju je pokrenuta"</string>
     <string name="car_mode_disable_notification_message" msgid="8954550232288567515">"Dodirnite da biste izašli iz aplikacije za vožnju."</string>
-    <string name="tethered_notification_title" msgid="2700523927485687353">"Aktivno povezivanje sa internetom preko mobilnog uređaja ili hotspot"</string>
+    <string name="tethered_notification_title" msgid="2700523927485687353">"Aktivno je privezivanje ili hotspot"</string>
     <string name="tethered_notification_message" msgid="6228080755828019453">"Dodirnite da biste podesili."</string>
     <string name="disable_tether_notification_title" msgid="7158047514545848391">"Privezivanje je onemogućeno"</string>
     <string name="disable_tether_notification_message" msgid="98281313984014775">"Potražite detalje od administratora"</string>
@@ -1849,7 +1849,7 @@
     <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Radi dužeg trajanja baterije, ušteda baterije:\n·uključuje tamnu temu\n·isključuje ili ograničava aktivnosti u pozadini, neke vizuelne efekte i druge funkcije, na primer, „Ok Google“\n\n"<annotation id="url">"Saznajte više"</annotation></string>
     <string name="battery_saver_description" msgid="7618492104632328184">"Radi dužeg trajanja baterije, ušteda baterije:\n·uključuje tamnu temu\n·isključuje ili ograničava aktivnosti u pozadini, neke vizuelne efekte i druge funkcije, na primer, „Ok Google“"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Da bi se smanjila potrošnja podataka, Ušteda podataka sprečava neke aplikacije da šalju ili primaju podatke u pozadini. Aplikacija koju trenutno koristite može da pristupa podacima, ali će to činiti ređe. Na primer, slike se neće prikazivati dok ih ne dodirnete."</string>
-    <string name="data_saver_enable_title" msgid="7080620065745260137">"Uključiti Uštedu podataka?"</string>
+    <string name="data_saver_enable_title" msgid="7080620065745260137">"Želite da uključite Uštedu podataka?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Uključi"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
       <item quantity="one">%1$d minut (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
@@ -1914,7 +1914,7 @@
     <string name="stk_cc_ss_to_dial_video" msgid="1324194624384312664">"SS zahtev je promenjen u video poziv"</string>
     <string name="stk_cc_ss_to_ussd" msgid="8417905193112944760">"SS zahtev je promenjen u USSD zahtev"</string>
     <string name="stk_cc_ss_to_ss" msgid="132040645206514450">"Promenjeno je u novi SS zahtev"</string>
-    <string name="notification_work_profile_content_description" msgid="5296477955677725799">"Profil za Work"</string>
+    <string name="notification_work_profile_content_description" msgid="5296477955677725799">"Poslovni profil"</string>
     <string name="notification_alerted_content_description" msgid="6139691253611265992">"Obavešteno"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"Proširi"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"Skupi"</string>
@@ -1947,16 +1947,16 @@
     <string name="app_suspended_title" msgid="888873445010322650">"Aplikacija nije dostupna"</string>
     <string name="app_suspended_default_message" msgid="6451215678552004172">"Aplikacija <xliff:g id="APP_NAME_0">%1$s</xliff:g> trenutno nije dostupna. <xliff:g id="APP_NAME_1">%2$s</xliff:g> upravlja dostupnošću."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Saznajte više"</string>
-    <string name="work_mode_off_title" msgid="5503291976647976560">"Da uključimo profil za Work?"</string>
-    <string name="work_mode_off_message" msgid="8417484421098563803">"Uključiće se poslovne aplikacije, obaveštenja, podaci i druge funkcije profila za Work"</string>
+    <string name="work_mode_off_title" msgid="5503291976647976560">"Da uključimo poslovni profil?"</string>
+    <string name="work_mode_off_message" msgid="8417484421098563803">"Uključiće se poslovne aplikacije, obaveštenja, podaci i druge funkcije poslovnog profila"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Uključi"</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Ova aplikacija je napravljena za stariju verziju Android-a, pa možda neće raditi ispravno. Potražite ažuriranja ili kontaktirajte programera."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Potraži ažuriranje"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Imate nove poruke"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Otvorite aplikaciju za SMS da biste pregledali"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"Neke funkcije su možda ograničene"</string>
-    <string name="profile_encrypted_detail" msgid="5279730442756849055">"Profil za Work je zaključan"</string>
-    <string name="profile_encrypted_message" msgid="1128512616293157802">"Dodirom otklj. profil za Work"</string>
+    <string name="profile_encrypted_detail" msgid="5279730442756849055">"Poslovni profil je zaključan"</string>
+    <string name="profile_encrypted_message" msgid="1128512616293157802">"Dodirom otklj. poslovni profil"</string>
     <string name="usb_mtp_launch_notification_title" msgid="774319638256707227">"Povezano je sa proizvodom <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
     <string name="usb_mtp_launch_notification_description" msgid="6942535713629852684">"Dodirnite za pregled datoteka"</string>
     <string name="pin_target" msgid="8036028973110156895">"Zakači"</string>
