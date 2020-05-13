@@ -24,7 +24,6 @@ import android.location.IGeocodeProvider;
 import android.os.IBinder;
 import android.os.RemoteException;
 
-import com.android.internal.os.BackgroundThread;
 import com.android.server.ServiceWatcher;
 
 import java.util.Collections;
@@ -55,8 +54,7 @@ public class GeocoderProxy {
     private final ServiceWatcher mServiceWatcher;
 
     private GeocoderProxy(Context context) {
-        mServiceWatcher = new ServiceWatcher(context, BackgroundThread.getHandler(), SERVICE_ACTION,
-                null, null,
+        mServiceWatcher = new ServiceWatcher(context, SERVICE_ACTION, null, null,
                 com.android.internal.R.bool.config_enableGeocoderOverlay,
                 com.android.internal.R.string.config_geocoderProviderPackageName);
     }
