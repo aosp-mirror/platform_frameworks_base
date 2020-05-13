@@ -65,14 +65,14 @@ TEST(CountMetricE2eTest, TestSlicedState) {
     auto processor = CreateStatsLogProcessor(bucketStartTimeNs, bucketStartTimeNs, config, cfgKey);
 
     // Check that CountMetricProducer was initialized correctly.
-    EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
+    ASSERT_EQ(processor->mMetricsManagers.size(), 1u);
     sp<MetricsManager> metricsManager = processor->mMetricsManagers.begin()->second;
     EXPECT_TRUE(metricsManager->isConfigValid());
-    EXPECT_EQ(metricsManager->mAllMetricProducers.size(), 1);
+    ASSERT_EQ(metricsManager->mAllMetricProducers.size(), 1);
     sp<MetricProducer> metricProducer = metricsManager->mAllMetricProducers[0];
-    EXPECT_EQ(metricProducer->mSlicedStateAtoms.size(), 1);
+    ASSERT_EQ(metricProducer->mSlicedStateAtoms.size(), 1);
     EXPECT_EQ(metricProducer->mSlicedStateAtoms.at(0), SCREEN_STATE_ATOM_ID);
-    EXPECT_EQ(metricProducer->mStateGroupMap.size(), 0);
+    ASSERT_EQ(metricProducer->mStateGroupMap.size(), 0);
 
     // Check that StateTrackers were initialized correctly.
     EXPECT_EQ(1, StateManager::getInstance().getStateTrackersCount());
@@ -132,23 +132,23 @@ TEST(CountMetricE2eTest, TestSlicedState) {
     ConfigMetricsReportList reports;
     processor->onDumpReport(cfgKey, bucketStartTimeNs + bucketSizeNs * 2 + 1, false, true, ADB_DUMP,
                             FAST, &buffer);
-    EXPECT_GT(buffer.size(), 0);
+    ASSERT_GT(buffer.size(), 0);
     EXPECT_TRUE(reports.ParseFromArray(&buffer[0], buffer.size()));
     backfillDimensionPath(&reports);
     backfillStringInReport(&reports);
     backfillStartEndTimestamp(&reports);
 
-    EXPECT_EQ(1, reports.reports_size());
-    EXPECT_EQ(1, reports.reports(0).metrics_size());
+    ASSERT_EQ(1, reports.reports_size());
+    ASSERT_EQ(1, reports.reports(0).metrics_size());
     EXPECT_TRUE(reports.reports(0).metrics(0).has_count_metrics());
     StatsLogReport::CountMetricDataWrapper countMetrics;
     sortMetricDataByDimensionsValue(reports.reports(0).metrics(0).count_metrics(), &countMetrics);
-    EXPECT_EQ(3, countMetrics.data_size());
+    ASSERT_EQ(3, countMetrics.data_size());
 
     // For each CountMetricData, check StateValue info is correct and buckets
     // have correct counts.
     auto data = countMetrics.data(0);
-    EXPECT_EQ(1, data.slice_by_state_size());
+    ASSERT_EQ(1, data.slice_by_state_size());
     EXPECT_EQ(SCREEN_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
     EXPECT_TRUE(data.slice_by_state(0).has_value());
     EXPECT_EQ(android::view::DisplayStateEnum::DISPLAY_STATE_UNKNOWN,
@@ -157,7 +157,7 @@ TEST(CountMetricE2eTest, TestSlicedState) {
     EXPECT_EQ(1, data.bucket_info(0).count());
 
     data = countMetrics.data(1);
-    EXPECT_EQ(1, data.slice_by_state_size());
+    ASSERT_EQ(1, data.slice_by_state_size());
     EXPECT_EQ(SCREEN_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
     EXPECT_TRUE(data.slice_by_state(0).has_value());
     EXPECT_EQ(android::view::DisplayStateEnum::DISPLAY_STATE_OFF, data.slice_by_state(0).value());
@@ -166,7 +166,7 @@ TEST(CountMetricE2eTest, TestSlicedState) {
     EXPECT_EQ(2, data.bucket_info(1).count());
 
     data = countMetrics.data(2);
-    EXPECT_EQ(1, data.slice_by_state_size());
+    ASSERT_EQ(1, data.slice_by_state_size());
     EXPECT_EQ(SCREEN_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
     EXPECT_TRUE(data.slice_by_state(0).has_value());
     EXPECT_EQ(android::view::DisplayStateEnum::DISPLAY_STATE_ON, data.slice_by_state(0).value());
@@ -220,14 +220,14 @@ TEST(CountMetricE2eTest, TestSlicedStateWithMap) {
     EXPECT_EQ(1, StateManager::getInstance().getListenersCount(SCREEN_STATE_ATOM_ID));
 
     // Check that CountMetricProducer was initialized correctly.
-    EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
+    ASSERT_EQ(processor->mMetricsManagers.size(), 1u);
     sp<MetricsManager> metricsManager = processor->mMetricsManagers.begin()->second;
     EXPECT_TRUE(metricsManager->isConfigValid());
-    EXPECT_EQ(metricsManager->mAllMetricProducers.size(), 1);
+    ASSERT_EQ(metricsManager->mAllMetricProducers.size(), 1);
     sp<MetricProducer> metricProducer = metricsManager->mAllMetricProducers[0];
-    EXPECT_EQ(metricProducer->mSlicedStateAtoms.size(), 1);
+    ASSERT_EQ(metricProducer->mSlicedStateAtoms.size(), 1);
     EXPECT_EQ(metricProducer->mSlicedStateAtoms.at(0), SCREEN_STATE_ATOM_ID);
-    EXPECT_EQ(metricProducer->mStateGroupMap.size(), 1);
+    ASSERT_EQ(metricProducer->mStateGroupMap.size(), 1);
 
     StateMap map = state.map();
     for (auto group : map.group()) {
@@ -316,44 +316,44 @@ TEST(CountMetricE2eTest, TestSlicedStateWithMap) {
     ConfigMetricsReportList reports;
     processor->onDumpReport(cfgKey, bucketStartTimeNs + bucketSizeNs * 2 + 1, false, true, ADB_DUMP,
                             FAST, &buffer);
-    EXPECT_GT(buffer.size(), 0);
+    ASSERT_GT(buffer.size(), 0);
     EXPECT_TRUE(reports.ParseFromArray(&buffer[0], buffer.size()));
     backfillDimensionPath(&reports);
     backfillStringInReport(&reports);
     backfillStartEndTimestamp(&reports);
 
-    EXPECT_EQ(1, reports.reports_size());
-    EXPECT_EQ(1, reports.reports(0).metrics_size());
+    ASSERT_EQ(1, reports.reports_size());
+    ASSERT_EQ(1, reports.reports(0).metrics_size());
     EXPECT_TRUE(reports.reports(0).metrics(0).has_count_metrics());
     StatsLogReport::CountMetricDataWrapper countMetrics;
     sortMetricDataByDimensionsValue(reports.reports(0).metrics(0).count_metrics(), &countMetrics);
-    EXPECT_EQ(3, countMetrics.data_size());
+    ASSERT_EQ(3, countMetrics.data_size());
 
     // For each CountMetricData, check StateValue info is correct and buckets
     // have correct counts.
     auto data = countMetrics.data(0);
-    EXPECT_EQ(1, data.slice_by_state_size());
+    ASSERT_EQ(1, data.slice_by_state_size());
     EXPECT_EQ(SCREEN_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
     EXPECT_TRUE(data.slice_by_state(0).has_value());
     EXPECT_EQ(-1 /* StateTracker::kStateUnknown */, data.slice_by_state(0).value());
-    EXPECT_EQ(1, data.bucket_info_size());
+    ASSERT_EQ(1, data.bucket_info_size());
     EXPECT_EQ(1, data.bucket_info(0).count());
 
     data = countMetrics.data(1);
-    EXPECT_EQ(1, data.slice_by_state_size());
+    ASSERT_EQ(1, data.slice_by_state_size());
     EXPECT_EQ(SCREEN_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
     EXPECT_TRUE(data.slice_by_state(0).has_group_id());
     EXPECT_EQ(screenOnId, data.slice_by_state(0).group_id());
-    EXPECT_EQ(2, data.bucket_info_size());
+    ASSERT_EQ(2, data.bucket_info_size());
     EXPECT_EQ(1, data.bucket_info(0).count());
     EXPECT_EQ(1, data.bucket_info(1).count());
 
     data = countMetrics.data(2);
-    EXPECT_EQ(1, data.slice_by_state_size());
+    ASSERT_EQ(1, data.slice_by_state_size());
     EXPECT_EQ(SCREEN_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
     EXPECT_TRUE(data.slice_by_state(0).has_group_id());
     EXPECT_EQ(screenOffId, data.slice_by_state(0).group_id());
-    EXPECT_EQ(2, data.bucket_info_size());
+    ASSERT_EQ(2, data.bucket_info_size());
     EXPECT_EQ(4, data.bucket_info(0).count());
     EXPECT_EQ(2, data.bucket_info(1).count());
 }
@@ -405,15 +405,15 @@ TEST(CountMetricE2eTest, TestSlicedStateWithPrimaryFields) {
     EXPECT_EQ(1, StateManager::getInstance().getListenersCount(UID_PROCESS_STATE_ATOM_ID));
 
     // Check that CountMetricProducer was initialized correctly.
-    EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
+    ASSERT_EQ(processor->mMetricsManagers.size(), 1u);
     sp<MetricsManager> metricsManager = processor->mMetricsManagers.begin()->second;
     EXPECT_TRUE(metricsManager->isConfigValid());
-    EXPECT_EQ(metricsManager->mAllMetricProducers.size(), 1);
+    ASSERT_EQ(metricsManager->mAllMetricProducers.size(), 1);
     sp<MetricProducer> metricProducer = metricsManager->mAllMetricProducers[0];
-    EXPECT_EQ(metricProducer->mSlicedStateAtoms.size(), 1);
+    ASSERT_EQ(metricProducer->mSlicedStateAtoms.size(), 1);
     EXPECT_EQ(metricProducer->mSlicedStateAtoms.at(0), UID_PROCESS_STATE_ATOM_ID);
-    EXPECT_EQ(metricProducer->mStateGroupMap.size(), 0);
-    EXPECT_EQ(metricProducer->mMetric2StateLinks.size(), 1);
+    ASSERT_EQ(metricProducer->mStateGroupMap.size(), 0);
+    ASSERT_EQ(metricProducer->mMetric2StateLinks.size(), 1);
 
     /*
     NOTE: "1" or "2" represents the uid associated with the state/app crash event
@@ -496,23 +496,23 @@ TEST(CountMetricE2eTest, TestSlicedStateWithPrimaryFields) {
     ConfigMetricsReportList reports;
     processor->onDumpReport(cfgKey, bucketStartTimeNs + bucketSizeNs * 2 + 1, false, true, ADB_DUMP,
                             FAST, &buffer);
-    EXPECT_GT(buffer.size(), 0);
+    ASSERT_GT(buffer.size(), 0);
     EXPECT_TRUE(reports.ParseFromArray(&buffer[0], buffer.size()));
     backfillDimensionPath(&reports);
     backfillStringInReport(&reports);
     backfillStartEndTimestamp(&reports);
 
-    EXPECT_EQ(1, reports.reports_size());
-    EXPECT_EQ(1, reports.reports(0).metrics_size());
+    ASSERT_EQ(1, reports.reports_size());
+    ASSERT_EQ(1, reports.reports(0).metrics_size());
     EXPECT_TRUE(reports.reports(0).metrics(0).has_count_metrics());
     StatsLogReport::CountMetricDataWrapper countMetrics;
     sortMetricDataByDimensionsValue(reports.reports(0).metrics(0).count_metrics(), &countMetrics);
-    EXPECT_EQ(5, countMetrics.data_size());
+    ASSERT_EQ(5, countMetrics.data_size());
 
     // For each CountMetricData, check StateValue info is correct and buckets
     // have correct counts.
     auto data = countMetrics.data(0);
-    EXPECT_EQ(1, data.slice_by_state_size());
+    ASSERT_EQ(1, data.slice_by_state_size());
     EXPECT_EQ(UID_PROCESS_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
     EXPECT_TRUE(data.slice_by_state(0).has_value());
     EXPECT_EQ(-1 /* StateTracker::kStateUnknown */, data.slice_by_state(0).value());
@@ -520,7 +520,7 @@ TEST(CountMetricE2eTest, TestSlicedStateWithPrimaryFields) {
     EXPECT_EQ(1, data.bucket_info(0).count());
 
     data = countMetrics.data(1);
-    EXPECT_EQ(1, data.slice_by_state_size());
+    ASSERT_EQ(1, data.slice_by_state_size());
     EXPECT_EQ(UID_PROCESS_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
     EXPECT_TRUE(data.slice_by_state(0).has_value());
     EXPECT_EQ(android::app::PROCESS_STATE_TOP, data.slice_by_state(0).value());
@@ -528,7 +528,7 @@ TEST(CountMetricE2eTest, TestSlicedStateWithPrimaryFields) {
     EXPECT_EQ(2, data.bucket_info(0).count());
 
     data = countMetrics.data(2);
-    EXPECT_EQ(1, data.slice_by_state_size());
+    ASSERT_EQ(1, data.slice_by_state_size());
     EXPECT_EQ(UID_PROCESS_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
     EXPECT_TRUE(data.slice_by_state(0).has_value());
     EXPECT_EQ(android::app::PROCESS_STATE_FOREGROUND_SERVICE, data.slice_by_state(0).value());
@@ -537,7 +537,7 @@ TEST(CountMetricE2eTest, TestSlicedStateWithPrimaryFields) {
     EXPECT_EQ(2, data.bucket_info(1).count());
 
     data = countMetrics.data(3);
-    EXPECT_EQ(1, data.slice_by_state_size());
+    ASSERT_EQ(1, data.slice_by_state_size());
     EXPECT_EQ(UID_PROCESS_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
     EXPECT_TRUE(data.slice_by_state(0).has_value());
     EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_FOREGROUND, data.slice_by_state(0).value());
@@ -545,7 +545,7 @@ TEST(CountMetricE2eTest, TestSlicedStateWithPrimaryFields) {
     EXPECT_EQ(2, data.bucket_info(0).count());
 
     data = countMetrics.data(4);
-    EXPECT_EQ(1, data.slice_by_state_size());
+    ASSERT_EQ(1, data.slice_by_state_size());
     EXPECT_EQ(UID_PROCESS_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
     EXPECT_TRUE(data.slice_by_state(0).has_value());
     EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_BACKGROUND, data.slice_by_state(0).value());
@@ -600,16 +600,16 @@ TEST(CountMetricE2eTest, TestMultipleSlicedStates) {
     EXPECT_EQ(1, StateManager::getInstance().getListenersCount(UID_PROCESS_STATE_ATOM_ID));
 
     // Check that CountMetricProducer was initialized correctly.
-    EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
+    ASSERT_EQ(processor->mMetricsManagers.size(), 1u);
     sp<MetricsManager> metricsManager = processor->mMetricsManagers.begin()->second;
     EXPECT_TRUE(metricsManager->isConfigValid());
-    EXPECT_EQ(metricsManager->mAllMetricProducers.size(), 1);
+    ASSERT_EQ(metricsManager->mAllMetricProducers.size(), 1);
     sp<MetricProducer> metricProducer = metricsManager->mAllMetricProducers[0];
-    EXPECT_EQ(metricProducer->mSlicedStateAtoms.size(), 2);
+    ASSERT_EQ(metricProducer->mSlicedStateAtoms.size(), 2);
     EXPECT_EQ(metricProducer->mSlicedStateAtoms.at(0), SCREEN_STATE_ATOM_ID);
     EXPECT_EQ(metricProducer->mSlicedStateAtoms.at(1), UID_PROCESS_STATE_ATOM_ID);
-    EXPECT_EQ(metricProducer->mStateGroupMap.size(), 1);
-    EXPECT_EQ(metricProducer->mMetric2StateLinks.size(), 1);
+    ASSERT_EQ(metricProducer->mStateGroupMap.size(), 1);
+    ASSERT_EQ(metricProducer->mMetric2StateLinks.size(), 1);
 
     StateMap map = state1.map();
     for (auto group : map.group()) {
@@ -726,23 +726,23 @@ TEST(CountMetricE2eTest, TestMultipleSlicedStates) {
     ConfigMetricsReportList reports;
     processor->onDumpReport(cfgKey, bucketStartTimeNs + bucketSizeNs * 2 + 1, false, true, ADB_DUMP,
                             FAST, &buffer);
-    EXPECT_GT(buffer.size(), 0);
+    ASSERT_GT(buffer.size(), 0);
     EXPECT_TRUE(reports.ParseFromArray(&buffer[0], buffer.size()));
     backfillDimensionPath(&reports);
     backfillStringInReport(&reports);
     backfillStartEndTimestamp(&reports);
 
-    EXPECT_EQ(1, reports.reports_size());
-    EXPECT_EQ(1, reports.reports(0).metrics_size());
+    ASSERT_EQ(1, reports.reports_size());
+    ASSERT_EQ(1, reports.reports(0).metrics_size());
     EXPECT_TRUE(reports.reports(0).metrics(0).has_count_metrics());
     StatsLogReport::CountMetricDataWrapper countMetrics;
     sortMetricDataByDimensionsValue(reports.reports(0).metrics(0).count_metrics(), &countMetrics);
-    EXPECT_EQ(6, countMetrics.data_size());
+    ASSERT_EQ(6, countMetrics.data_size());
 
     // For each CountMetricData, check StateValue info is correct and buckets
     // have correct counts.
     auto data = countMetrics.data(0);
-    EXPECT_EQ(2, data.slice_by_state_size());
+    ASSERT_EQ(2, data.slice_by_state_size());
     EXPECT_EQ(SCREEN_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
     EXPECT_TRUE(data.slice_by_state(0).has_value());
     EXPECT_EQ(-1, data.slice_by_state(0).value());
@@ -753,7 +753,7 @@ TEST(CountMetricE2eTest, TestMultipleSlicedStates) {
     EXPECT_EQ(1, data.bucket_info(0).count());
 
     data = countMetrics.data(1);
-    EXPECT_EQ(2, data.slice_by_state_size());
+    ASSERT_EQ(2, data.slice_by_state_size());
     EXPECT_EQ(SCREEN_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
     EXPECT_TRUE(data.slice_by_state(0).has_group_id());
     EXPECT_EQ(screenOnId, data.slice_by_state(0).group_id());
@@ -764,7 +764,7 @@ TEST(CountMetricE2eTest, TestMultipleSlicedStates) {
     EXPECT_EQ(1, data.bucket_info(0).count());
 
     data = countMetrics.data(2);
-    EXPECT_EQ(2, data.slice_by_state_size());
+    ASSERT_EQ(2, data.slice_by_state_size());
     EXPECT_EQ(SCREEN_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
     EXPECT_TRUE(data.slice_by_state(0).has_group_id());
     EXPECT_EQ(screenOnId, data.slice_by_state(0).group_id());
@@ -775,7 +775,7 @@ TEST(CountMetricE2eTest, TestMultipleSlicedStates) {
     EXPECT_EQ(1, data.bucket_info(0).count());
 
     data = countMetrics.data(3);
-    EXPECT_EQ(2, data.slice_by_state_size());
+    ASSERT_EQ(2, data.slice_by_state_size());
     EXPECT_EQ(SCREEN_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
     EXPECT_TRUE(data.slice_by_state(0).has_group_id());
     EXPECT_EQ(screenOffId, data.slice_by_state(0).group_id());
@@ -786,7 +786,7 @@ TEST(CountMetricE2eTest, TestMultipleSlicedStates) {
     EXPECT_EQ(2, data.bucket_info(0).count());
 
     data = countMetrics.data(4);
-    EXPECT_EQ(2, data.slice_by_state_size());
+    ASSERT_EQ(2, data.slice_by_state_size());
     EXPECT_EQ(SCREEN_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
     EXPECT_TRUE(data.slice_by_state(0).has_group_id());
     EXPECT_EQ(screenOffId, data.slice_by_state(0).group_id());
@@ -797,7 +797,7 @@ TEST(CountMetricE2eTest, TestMultipleSlicedStates) {
     EXPECT_EQ(1, data.bucket_info(0).count());
 
     data = countMetrics.data(5);
-    EXPECT_EQ(2, data.slice_by_state_size());
+    ASSERT_EQ(2, data.slice_by_state_size());
     EXPECT_EQ(SCREEN_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
     EXPECT_TRUE(data.slice_by_state(0).has_group_id());
     EXPECT_EQ(screenOffId, data.slice_by_state(0).group_id());

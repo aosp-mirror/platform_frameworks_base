@@ -44,23 +44,23 @@ TEST(indexed_priority_queue, empty_and_size) {
     sp<const AATest> aa4 = new AATest{4, emptyMetricId, emptyDimensionId};
     sp<const AATest> aa8 = new AATest{8, emptyMetricId, emptyDimensionId};
 
-    EXPECT_EQ(0u, ipq.size());
+    ASSERT_EQ(0u, ipq.size());
     EXPECT_TRUE(ipq.empty());
 
     ipq.push(aa4);
-    EXPECT_EQ(1u, ipq.size());
+    ASSERT_EQ(1u, ipq.size());
     EXPECT_FALSE(ipq.empty());
 
     ipq.push(aa8);
-    EXPECT_EQ(2u, ipq.size());
+    ASSERT_EQ(2u, ipq.size());
     EXPECT_FALSE(ipq.empty());
 
     ipq.remove(aa4);
-    EXPECT_EQ(1u, ipq.size());
+    ASSERT_EQ(1u, ipq.size());
     EXPECT_FALSE(ipq.empty());
 
     ipq.remove(aa8);
-    EXPECT_EQ(0u, ipq.size());
+    ASSERT_EQ(0u, ipq.size());
     EXPECT_TRUE(ipq.empty());
 }
 
@@ -126,17 +126,17 @@ TEST(indexed_priority_queue, push_same_aa) {
     sp<const AATest> aa4_b = new AATest{4, emptyMetricId, emptyDimensionId};
 
     ipq.push(aa4_a);
-    EXPECT_EQ(1u, ipq.size());
+    ASSERT_EQ(1u, ipq.size());
     EXPECT_TRUE(ipq.contains(aa4_a));
     EXPECT_FALSE(ipq.contains(aa4_b));
 
     ipq.push(aa4_a);
-    EXPECT_EQ(1u, ipq.size());
+    ASSERT_EQ(1u, ipq.size());
     EXPECT_TRUE(ipq.contains(aa4_a));
     EXPECT_FALSE(ipq.contains(aa4_b));
 
     ipq.push(aa4_b);
-    EXPECT_EQ(2u, ipq.size());
+    ASSERT_EQ(2u, ipq.size());
     EXPECT_TRUE(ipq.contains(aa4_a));
     EXPECT_TRUE(ipq.contains(aa4_b));
 }
@@ -150,7 +150,7 @@ TEST(indexed_priority_queue, remove_nonexistant) {
 
     ipq.push(aa4);
     ipq.remove(aa5);
-    EXPECT_EQ(1u, ipq.size());
+    ASSERT_EQ(1u, ipq.size());
     EXPECT_TRUE(ipq.contains(aa4));
     EXPECT_FALSE(ipq.contains(aa5));
 }
@@ -164,17 +164,17 @@ TEST(indexed_priority_queue, remove_same_aa) {
 
     ipq.push(aa4_a);
     ipq.push(aa4_b);
-    EXPECT_EQ(2u, ipq.size());
+    ASSERT_EQ(2u, ipq.size());
     EXPECT_TRUE(ipq.contains(aa4_a));
     EXPECT_TRUE(ipq.contains(aa4_b));
 
     ipq.remove(aa4_b);
-    EXPECT_EQ(1u, ipq.size());
+    ASSERT_EQ(1u, ipq.size());
     EXPECT_TRUE(ipq.contains(aa4_a));
     EXPECT_FALSE(ipq.contains(aa4_b));
 
     ipq.remove(aa4_a);
-    EXPECT_EQ(0u, ipq.size());
+    ASSERT_EQ(0u, ipq.size());
     EXPECT_FALSE(ipq.contains(aa4_a));
     EXPECT_FALSE(ipq.contains(aa4_b));
 }
@@ -205,22 +205,22 @@ TEST(indexed_priority_queue, pop) {
     ipq.push(c);
     ipq.push(b);
     ipq.push(a);
-    EXPECT_EQ(3u, ipq.size());
+    ASSERT_EQ(3u, ipq.size());
 
     ipq.pop();
-    EXPECT_EQ(2u, ipq.size());
+    ASSERT_EQ(2u, ipq.size());
     EXPECT_FALSE(ipq.contains(a));
     EXPECT_TRUE(ipq.contains(b));
     EXPECT_TRUE(ipq.contains(c));
 
     ipq.pop();
-    EXPECT_EQ(1u, ipq.size());
+    ASSERT_EQ(1u, ipq.size());
     EXPECT_FALSE(ipq.contains(a));
     EXPECT_FALSE(ipq.contains(b));
     EXPECT_TRUE(ipq.contains(c));
 
     ipq.pop();
-    EXPECT_EQ(0u, ipq.size());
+    ASSERT_EQ(0u, ipq.size());
     EXPECT_FALSE(ipq.contains(a));
     EXPECT_FALSE(ipq.contains(b));
     EXPECT_FALSE(ipq.contains(c));
