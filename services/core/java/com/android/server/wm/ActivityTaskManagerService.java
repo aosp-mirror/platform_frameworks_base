@@ -3340,7 +3340,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
                 // After reparenting (which only resizes the task to the stack bounds), resize the
                 // task to the actual bounds provided
-                task.resize(bounds, resizeMode, preserveWindow, !DEFER_RESUME);
+                task.resize(bounds, resizeMode, preserveWindow);
             }
         } finally {
             Binder.restoreCallingIdentity(ident);

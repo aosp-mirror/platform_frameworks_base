@@ -1,0 +1,143 @@
+// Baseline format: 1.0
+ArrayReturn: android.test.mock.MockContentProvider#bulkInsert(android.net.Uri, android.content.ContentValues[]) parameter #1:
+    Method parameter should be Collection<ContentValues> (or subclass) instead of raw array; was `android.content.ContentValues[]`
+ArrayReturn: android.test.mock.MockResources#getTextArray(int):
+    Method should return Collection<CharSequence> (or subclass) instead of raw array; was `java.lang.CharSequence[]`
+
+
+MissingNullability: android.test.mock.MockApplication#onConfigurationChanged(android.content.res.Configuration) parameter #0:
+    Missing nullability on parameter `newConfig` in method `onConfigurationChanged`
+MissingNullability: android.test.mock.MockContentProvider#attachInfo(android.content.Context, android.content.pm.ProviderInfo) parameter #0:
+    Missing nullability on parameter `context` in method `attachInfo`
+MissingNullability: android.test.mock.MockContentProvider#attachInfo(android.content.Context, android.content.pm.ProviderInfo) parameter #1:
+    Missing nullability on parameter `info` in method `attachInfo`
+MissingNullability: android.test.mock.MockContentProvider#bulkInsert(android.net.Uri, android.content.ContentValues[]) parameter #0:
+    Missing nullability on parameter `uri` in method `bulkInsert`
+MissingNullability: android.test.mock.MockContentProvider#bulkInsert(android.net.Uri, android.content.ContentValues[]) parameter #1:
+    Missing nullability on parameter `values` in method `bulkInsert`
+MissingNullability: android.test.mock.MockContentProvider#getStreamTypes(android.net.Uri, String):
+    Missing nullability on method `getStreamTypes` return
+MissingNullability: android.test.mock.MockContentProvider#getStreamTypes(android.net.Uri, String) parameter #0:
+    Missing nullability on parameter `url` in method `getStreamTypes`
+MissingNullability: android.test.mock.MockContentProvider#getStreamTypes(android.net.Uri, String) parameter #1:
+    Missing nullability on parameter `mimeTypeFilter` in method `getStreamTypes`
+MissingNullability: android.test.mock.MockContext#bindIsolatedService(android.content.Intent, int, String, java.util.concurrent.Executor, android.content.ServiceConnection) parameter #0:
+    Missing nullability on parameter `service` in method `bindIsolatedService`
+MissingNullability: android.test.mock.MockContext#bindIsolatedService(android.content.Intent, int, String, java.util.concurrent.Executor, android.content.ServiceConnection) parameter #2:
+    Missing nullability on parameter `instanceName` in method `bindIsolatedService`
+MissingNullability: android.test.mock.MockContext#bindIsolatedService(android.content.Intent, int, String, java.util.concurrent.Executor, android.content.ServiceConnection) parameter #3:
+    Missing nullability on parameter `executor` in method `bindIsolatedService`
+MissingNullability: android.test.mock.MockContext#bindIsolatedService(android.content.Intent, int, String, java.util.concurrent.Executor, android.content.ServiceConnection) parameter #4:
+    Missing nullability on parameter `conn` in method `bindIsolatedService`
+MissingNullability: android.test.mock.MockContext#bindService(android.content.Intent, int, java.util.concurrent.Executor, android.content.ServiceConnection) parameter #0:
+    Missing nullability on parameter `service` in method `bindService`
+MissingNullability: android.test.mock.MockContext#bindService(android.content.Intent, int, java.util.concurrent.Executor, android.content.ServiceConnection) parameter #2:
+    Missing nullability on parameter `executor` in method `bindService`
+MissingNullability: android.test.mock.MockContext#bindService(android.content.Intent, int, java.util.concurrent.Executor, android.content.ServiceConnection) parameter #3:
+    Missing nullability on parameter `conn` in method `bindService`
+MissingNullability: android.test.mock.MockContext#createWindowContext(int, android.os.Bundle) parameter #1:
+    Missing nullability on parameter `options` in method `createWindowContext`
+MissingNullability: android.test.mock.MockContext#getDisplay():
+    Missing nullability on method `getDisplay` return
+MissingNullability: android.test.mock.MockContext#getMainExecutor():
+    Missing nullability on method `getMainExecutor` return
+MissingNullability: android.test.mock.MockContext#sendOrderedBroadcast(android.content.Intent, String, String, android.content.BroadcastReceiver, android.os.Handler, int, String, android.os.Bundle) parameter #0:
+    Missing nullability on parameter `intent` in method `sendOrderedBroadcast`
+MissingNullability: android.test.mock.MockContext#sendOrderedBroadcast(android.content.Intent, String, String, android.content.BroadcastReceiver, android.os.Handler, int, String, android.os.Bundle) parameter #1:
+    Missing nullability on parameter `receiverPermission` in method `sendOrderedBroadcast`
+MissingNullability: android.test.mock.MockContext#sendOrderedBroadcast(android.content.Intent, String, String, android.content.BroadcastReceiver, android.os.Handler, int, String, android.os.Bundle) parameter #2:
+    Missing nullability on parameter `receiverAppOp` in method `sendOrderedBroadcast`
+MissingNullability: android.test.mock.MockContext#sendOrderedBroadcast(android.content.Intent, String, String, android.content.BroadcastReceiver, android.os.Handler, int, String, android.os.Bundle) parameter #3:
+    Missing nullability on parameter `resultReceiver` in method `sendOrderedBroadcast`
+MissingNullability: android.test.mock.MockContext#sendOrderedBroadcast(android.content.Intent, String, String, android.content.BroadcastReceiver, android.os.Handler, int, String, android.os.Bundle) parameter #4:
+    Missing nullability on parameter `scheduler` in method `sendOrderedBroadcast`
+MissingNullability: android.test.mock.MockContext#sendOrderedBroadcast(android.content.Intent, String, String, android.content.BroadcastReceiver, android.os.Handler, int, String, android.os.Bundle) parameter #6:
+    Missing nullability on parameter `initialData` in method `sendOrderedBroadcast`
+MissingNullability: android.test.mock.MockContext#sendOrderedBroadcast(android.content.Intent, String, String, android.content.BroadcastReceiver, android.os.Handler, int, String, android.os.Bundle) parameter #7:
+    Missing nullability on parameter `initialExtras` in method `sendOrderedBroadcast`
+MissingNullability: android.test.mock.MockContext#updateServiceGroup(android.content.ServiceConnection, int, int) parameter #0:
+    Missing nullability on parameter `conn` in method `updateServiceGroup`
+MissingNullability: android.test.mock.MockCursor#getNotificationUris():
+    Missing nullability on method `getNotificationUris` return
+MissingNullability: android.test.mock.MockCursor#setNotificationUris(android.content.ContentResolver, java.util.List<android.net.Uri>) parameter #0:
+    Missing nullability on parameter `cr` in method `setNotificationUris`
+MissingNullability: android.test.mock.MockCursor#setNotificationUris(android.content.ContentResolver, java.util.List<android.net.Uri>) parameter #1:
+    Missing nullability on parameter `uris` in method `setNotificationUris`
+MissingNullability: android.test.mock.MockPackageManager#getPackageArchiveInfo(String, int):
+    Missing nullability on method `getPackageArchiveInfo` return
+MissingNullability: android.test.mock.MockPackageManager#getPackageArchiveInfo(String, int) parameter #0:
+    Missing nullability on parameter `archiveFilePath` in method `getPackageArchiveInfo`
+MissingNullability: android.test.mock.MockPackageManager#hasSigningCertificate(String, byte[], int) parameter #0:
+    Missing nullability on parameter `packageName` in method `hasSigningCertificate`
+MissingNullability: android.test.mock.MockPackageManager#hasSigningCertificate(String, byte[], int) parameter #1:
+    Missing nullability on parameter `certificate` in method `hasSigningCertificate`
+MissingNullability: android.test.mock.MockPackageManager#hasSigningCertificate(int, byte[], int) parameter #1:
+    Missing nullability on parameter `certificate` in method `hasSigningCertificate`
+MissingNullability: android.test.mock.MockResources#getAnimation(int):
+    Missing nullability on method `getAnimation` return
+MissingNullability: android.test.mock.MockResources#getConfiguration():
+    Missing nullability on method `getConfiguration` return
+MissingNullability: android.test.mock.MockResources#getDisplayMetrics():
+    Missing nullability on method `getDisplayMetrics` return
+MissingNullability: android.test.mock.MockResources#getIdentifier(String, String, String) parameter #0:
+    Missing nullability on parameter `name` in method `getIdentifier`
+MissingNullability: android.test.mock.MockResources#getIdentifier(String, String, String) parameter #1:
+    Missing nullability on parameter `defType` in method `getIdentifier`
+MissingNullability: android.test.mock.MockResources#getIdentifier(String, String, String) parameter #2:
+    Missing nullability on parameter `defPackage` in method `getIdentifier`
+MissingNullability: android.test.mock.MockResources#getIntArray(int):
+    Missing nullability on method `getIntArray` return
+MissingNullability: android.test.mock.MockResources#getLayout(int):
+    Missing nullability on method `getLayout` return
+MissingNullability: android.test.mock.MockResources#getQuantityString(int, int):
+    Missing nullability on method `getQuantityString` return
+MissingNullability: android.test.mock.MockResources#getQuantityString(int, int, java.lang.Object...):
+    Missing nullability on method `getQuantityString` return
+MissingNullability: android.test.mock.MockResources#getQuantityString(int, int, java.lang.Object...) parameter #2:
+    Missing nullability on parameter `formatArgs` in method `getQuantityString`
+MissingNullability: android.test.mock.MockResources#getQuantityText(int, int):
+    Missing nullability on method `getQuantityText` return
+MissingNullability: android.test.mock.MockResources#getResourceEntryName(int):
+    Missing nullability on method `getResourceEntryName` return
+MissingNullability: android.test.mock.MockResources#getResourceName(int):
+    Missing nullability on method `getResourceName` return
+MissingNullability: android.test.mock.MockResources#getResourcePackageName(int):
+    Missing nullability on method `getResourcePackageName` return
+MissingNullability: android.test.mock.MockResources#getResourceTypeName(int):
+    Missing nullability on method `getResourceTypeName` return
+MissingNullability: android.test.mock.MockResources#getString(int):
+    Missing nullability on method `getString` return
+MissingNullability: android.test.mock.MockResources#getString(int, java.lang.Object...):
+    Missing nullability on method `getString` return
+MissingNullability: android.test.mock.MockResources#getString(int, java.lang.Object...) parameter #1:
+    Missing nullability on parameter `formatArgs` in method `getString`
+MissingNullability: android.test.mock.MockResources#getStringArray(int):
+    Missing nullability on method `getStringArray` return
+MissingNullability: android.test.mock.MockResources#getText(int):
+    Missing nullability on method `getText` return
+MissingNullability: android.test.mock.MockResources#getText(int, CharSequence):
+    Missing nullability on method `getText` return
+MissingNullability: android.test.mock.MockResources#getText(int, CharSequence) parameter #1:
+    Missing nullability on parameter `def` in method `getText`
+MissingNullability: android.test.mock.MockResources#getTextArray(int):
+    Missing nullability on method `getTextArray` return
+MissingNullability: android.test.mock.MockResources#getValue(String, android.util.TypedValue, boolean) parameter #0:
+    Missing nullability on parameter `name` in method `getValue`
+MissingNullability: android.test.mock.MockResources#getValue(String, android.util.TypedValue, boolean) parameter #1:
+    Missing nullability on parameter `outValue` in method `getValue`
+MissingNullability: android.test.mock.MockResources#getValue(int, android.util.TypedValue, boolean) parameter #1:
+    Missing nullability on parameter `outValue` in method `getValue`
+MissingNullability: android.test.mock.MockResources#getXml(int):
+    Missing nullability on method `getXml` return
+MissingNullability: android.test.mock.MockResources#obtainAttributes(android.util.AttributeSet, int[]):
+    Missing nullability on method `obtainAttributes` return
+MissingNullability: android.test.mock.MockResources#obtainAttributes(android.util.AttributeSet, int[]) parameter #0:
+    Missing nullability on parameter `set` in method `obtainAttributes`
+MissingNullability: android.test.mock.MockResources#obtainAttributes(android.util.AttributeSet, int[]) parameter #1:
+    Missing nullability on parameter `attrs` in method `obtainAttributes`
+MissingNullability: android.test.mock.MockResources#obtainTypedArray(int):
+    Missing nullability on method `obtainTypedArray` return
+MissingNullability: android.test.mock.MockResources#openRawResource(int):
+    Missing nullability on method `openRawResource` return
+MissingNullability: android.test.mock.MockResources#openRawResourceFd(int):
+    Missing nullability on method `openRawResourceFd` return

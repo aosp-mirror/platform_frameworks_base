@@ -225,7 +225,8 @@ public class ActivityThreadClientTest {
                     CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO, null /* referrer */,
                     null /* voiceInteractor */, null /* state */, null /* persistentState */,
                     null /* pendingResults */, null /* pendingNewIntents */, true /* isForward */,
-                    null /* profilerInfo */,  mThread /* client */, null /* asssitToken */);
+                    null /* profilerInfo */,  mThread /* client */, null /* asssitToken */,
+                    null /* fixedRotationAdjustments */);
         }
 
         @Override

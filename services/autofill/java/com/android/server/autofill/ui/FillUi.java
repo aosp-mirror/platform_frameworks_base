@@ -130,9 +130,9 @@ final class FillUi {
     }
 
     FillUi(@NonNull Context context, @NonNull FillResponse response,
-           @NonNull AutofillId focusedViewId, @NonNull @Nullable String filterText,
-           @NonNull OverlayControl overlayControl, @NonNull CharSequence serviceLabel,
-           @NonNull Drawable serviceIcon, boolean nightMode, @NonNull Callback callback) {
+            @NonNull AutofillId focusedViewId, @Nullable String filterText,
+            @NonNull OverlayControl overlayControl, @NonNull CharSequence serviceLabel,
+            @NonNull Drawable serviceIcon, boolean nightMode, @NonNull Callback callback) {
         if (sVerbose) Slog.v(TAG, "nightMode: " + nightMode);
         mThemeId = nightMode ? THEME_ID_DARK : THEME_ID_LIGHT;
         mCallback = callback;

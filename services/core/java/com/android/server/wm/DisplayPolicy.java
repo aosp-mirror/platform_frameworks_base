@@ -95,6 +95,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
 import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_ERROR;
 import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
+import static android.view.WindowManager.LayoutParams.TYPE_TRUSTED_APPLICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_VOICE_INTERACTION;
 import static android.view.WindowManager.LayoutParams.TYPE_VOICE_INTERACTION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY;
@@ -994,6 +995,11 @@ public class DisplayPolicy {
             case TYPE_VOICE_INTERACTION_STARTING:
                 mContext.enforcePermission(
                         android.Manifest.permission.STATUS_BAR_SERVICE, callingPid, callingUid,
+                        "DisplayPolicy");
+                break;
+            case TYPE_TRUSTED_APPLICATION_OVERLAY:
+                mContext.enforcePermission(
+                        android.Manifest.permission.INTERNAL_SYSTEM_WINDOW, callingPid, callingUid,
                         "DisplayPolicy");
                 break;
             case TYPE_STATUS_BAR_PANEL:

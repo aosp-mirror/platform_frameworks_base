@@ -361,6 +361,8 @@
   <java-symbol type="bool" name="config_disableUsbPermissionDialogs"/>
   <java-symbol type="dimen" name="config_highResTaskSnapshotScale" />
   <java-symbol type="dimen" name="config_lowResTaskSnapshotScale" />
+  <java-symbol type="dimen" name="config_qsTileStrokeWidthInactive" />
+  <java-symbol type="dimen" name="config_qsTileStrokeWidthActive" />
   <java-symbol type="bool" name="config_use16BitTaskSnapshotPixelFormat" />
   <java-symbol type="bool" name="config_hasRecents" />
   <java-symbol type="string" name="config_recentsComponentName" />
@@ -1201,6 +1203,7 @@
   <java-symbol type="string" name="personal_apps_suspension_tomorrow_text" />
   <java-symbol type="string" name="personal_apps_suspension_text" />
   <java-symbol type="string" name="personal_apps_suspended_turn_profile_on" />
+  <java-symbol type="string" name="notification_work_profile_content_description" />
   <java-symbol type="string" name="factory_reset_warning" />
   <java-symbol type="string" name="factory_reset_message" />
   <java-symbol type="string" name="lockscreen_transport_play_description" />
@@ -1446,6 +1449,9 @@
   <java-symbol type="color" name="profile_badge_1" />
   <java-symbol type="color" name="profile_badge_2" />
   <java-symbol type="color" name="profile_badge_3" />
+  <java-symbol type="color" name="profile_badge_1_dark" />
+  <java-symbol type="color" name="profile_badge_2_dark" />
+  <java-symbol type="color" name="profile_badge_3_dark" />
   <java-symbol type="color" name="instant_app_badge" />
 
   <java-symbol type="layout" name="action_bar_home" />
@@ -3215,12 +3221,15 @@
   <java-symbol type="integer" name="config_debugSystemServerPssThresholdBytes" />
 
   <!-- Accessibility Shortcut -->
-  <java-symbol type="string" name="accessibility_shortcut_warning_dialog_title" />
-  <java-symbol type="string" name="accessibility_shortcut_toogle_warning" />
+  <java-symbol type="string" name="accessibility_shortcut_single_service_warning_title" />
+  <java-symbol type="string" name="accessibility_shortcut_single_service_warning" />
+  <java-symbol type="string" name="accessibility_shortcut_multiple_service_warning_title" />
+  <java-symbol type="string" name="accessibility_shortcut_multiple_service_warning" />
+  <java-symbol type="string" name="accessibility_shortcut_multiple_service_list" />
+  <java-symbol type="string" name="accessibility_shortcut_on" />
+  <java-symbol type="string" name="accessibility_shortcut_off" />
   <java-symbol type="string" name="accessibility_shortcut_enabling_service" />
   <java-symbol type="string" name="accessibility_shortcut_disabling_service" />
-  <java-symbol type="string" name="disable_accessibility_shortcut" />
-  <java-symbol type="string" name="leave_accessibility_shortcut_on" />
   <java-symbol type="string" name="color_inversion_feature_name" />
   <java-symbol type="string" name="color_correction_feature_name" />
   <java-symbol type="string" name="config_defaultAccessibilityService" />
@@ -4000,6 +4009,8 @@
   <java-symbol type="string" name="notification_channel_network_status" />
   <java-symbol type="string" name="notification_channel_network_alerts" />
   <java-symbol type="string" name="notification_channel_network_available" />
+
+  <java-symbol type="color" name="personal_apps_suspension_notification_color" />
 
   <!-- For Pdn throttle feature -->
   <java-symbol type="bool" name="config_pdp_reject_enable_retry" />

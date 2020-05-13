@@ -3899,7 +3899,7 @@
     <string name="config_managed_provisioning_package" translatable="false">com.android.managedprovisioning</string>
 
     <!-- Whether or not swipe up gesture's opt-in setting is available on this device -->
-    <bool name="config_swipe_up_gesture_setting_available">false</bool>
+    <bool name="config_swipe_up_gesture_setting_available">true</bool>
 
     <!-- Applications which are disabled unless matching a particular sku -->
     <string-array name="config_disableApksUnlessMatchedSku_apk_list" translatable="false" />

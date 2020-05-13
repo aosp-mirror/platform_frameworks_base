@@ -17,6 +17,7 @@
 package com.android.server.autofill.ui;
 
 import static com.android.server.autofill.Helper.sDebug;
+import static com.android.server.autofill.Helper.sVerbose;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -42,13 +43,8 @@ import com.android.internal.view.inline.IInlineContentCallback;
  * {@link InlineContentProviderImpl}s, each of which wraps a callback from the IME. But at any
  * given time, there is only one active IME callback which this class will callback into.
  *
- * <p>This class is thread safe, because all the outside calls are piped into the same single
- * thread handler to be processed.
- *
- * TODO(b/154683107): implement the reference counting in case there are multiple active
- * SurfacePackages at the same time. This will not happen for now since all the InlineSuggestions
- * sharing the same UI will be sent to the same IME window, so the previous view will be detached
- * before the new view are attached to the window.
+ * <p>This class is thread safe, because all the outside calls are piped into a single handler
+ * thread to be processed.
  */
 final class RemoteInlineSuggestionUi {
 
@@ -83,6 +79,7 @@ final class RemoteInlineSuggestionUi {
      */
     @Nullable
     private IInlineSuggestionUi mInlineSuggestionUi;
+    private int mRefCount = 0;
     private boolean mWaitingForUiCreation = false;
     private int mActualWidth;
     private int mActualHeight;
@@ -124,7 +121,7 @@ final class RemoteInlineSuggestionUi {
      * released.
      */
     void surfacePackageReleased() {
-        mHandler.post(this::handleSurfacePackageReleased);
+        mHandler.post(() -> handleUpdateRefCount(-1));
     }
 
     /**
@@ -132,24 +129,6 @@ final class RemoteInlineSuggestionUi {
      */
     boolean match(int width, int height) {
         return mWidth == width && mHeight == height;
-    }
-
-    private void handleSurfacePackageReleased() {
-        cancelPendingReleaseViewRequest();
-
-        // Schedule a delayed release view request
-        mDelayedReleaseViewRunnable = () -> {
-            if (mInlineSuggestionUi != null) {
-                try {
-                    mInlineSuggestionUi.releaseSurfaceControlViewHost();
-                    mInlineSuggestionUi = null;
-                } catch (RemoteException e) {
-                    Slog.w(TAG, "RemoteException calling releaseSurfaceControlViewHost");
-                }
-            }
-            mDelayedReleaseViewRunnable = null;
-        };
-        mHandler.postDelayed(mDelayedReleaseViewRunnable, RELEASE_REMOTE_VIEW_HOST_DELAY_MS);
     }
 
     private void handleRequestSurfacePackage() {
@@ -174,15 +153,42 @@ final class RemoteInlineSuggestionUi {
             try {
                 mInlineSuggestionUi.getSurfacePackage(new ISurfacePackageResultCallback.Stub() {
                     @Override
-                    public void onResult(SurfaceControlViewHost.SurfacePackage result)
-                            throws RemoteException {
-                        if (sDebug) Slog.d(TAG, "Sending new SurfacePackage to IME");
-                        mInlineContentCallback.onContent(result, mActualWidth, mActualHeight);
+                    public void onResult(SurfaceControlViewHost.SurfacePackage result) {
+                        mHandler.post(() -> {
+                            if (sVerbose) Slog.v(TAG, "Sending refreshed SurfacePackage to IME");
+                            try {
+                                mInlineContentCallback.onContent(result, mActualWidth,
+                                        mActualHeight);
+                                handleUpdateRefCount(1);
+                            } catch (RemoteException e) {
+                                Slog.w(TAG, "RemoteException calling onContent");
+                            }
+                        });
                     }
                 });
             } catch (RemoteException e) {
                 Slog.w(TAG, "RemoteException calling getSurfacePackage.");
             }
+        }
+    }
+
+    private void handleUpdateRefCount(int delta) {
+        cancelPendingReleaseViewRequest();
+        mRefCount += delta;
+        if (mRefCount <= 0) {
+            mDelayedReleaseViewRunnable = () -> {
+                if (mInlineSuggestionUi != null) {
+                    try {
+                        if (sVerbose) Slog.v(TAG, "releasing the host");
+                        mInlineSuggestionUi.releaseSurfaceControlViewHost();
+                        mInlineSuggestionUi = null;
+                    } catch (RemoteException e) {
+                        Slog.w(TAG, "RemoteException calling releaseSurfaceControlViewHost");
+                    }
+                }
+                mDelayedReleaseViewRunnable = null;
+            };
+            mHandler.postDelayed(mDelayedReleaseViewRunnable, RELEASE_REMOTE_VIEW_HOST_DELAY_MS);
         }
     }
 
@@ -199,11 +205,14 @@ final class RemoteInlineSuggestionUi {
     private void handleInlineSuggestionUiReady(IInlineSuggestionUi content,
             SurfaceControlViewHost.SurfacePackage surfacePackage, int width, int height) {
         mInlineSuggestionUi = content;
+        mRefCount = 0;
         mWaitingForUiCreation = false;
         mActualWidth = width;
         mActualHeight = height;
         if (mInlineContentCallback != null) {
             try {
+                if (sVerbose) Slog.v(TAG, "Sending new UI content to IME");
+                handleUpdateRefCount(1);
                 mInlineContentCallback.onContent(surfacePackage, mActualWidth, mActualHeight);
             } catch (RemoteException e) {
                 Slog.w(TAG, "RemoteException calling onContent");

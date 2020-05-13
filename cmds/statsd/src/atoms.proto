@@ -428,6 +428,18 @@ message Atom {
             266 [(module) = "framework"];
         AccessibilityServiceReported accessibility_service_reported = 267 [(module) = "settings"];
         DocsUIDragAndDropReported docs_ui_drag_and_drop_reported = 268 [(module) = "docsui"];
+        AppUsageEventOccurred app_usage_event_occurred = 269 [(module) = "framework"];
+        AutoRevokeNotificationClicked auto_revoke_notification_clicked =
+            270 [(module) = "permissioncontroller"];
+        AutoRevokeFragmentAppViewed auto_revoke_fragment_app_viewed =
+            271 [(module) = "permissioncontroller"];
+        AutoRevokedAppInteraction auto_revoked_app_interaction =
+            272 [(module) = "permissioncontroller", (module) = "settings"];
+        AppPermissionGroupsFragmentAutoRevokeAction
+            app_permission_groups_fragment_auto_revoke_action =
+            273 [(module) = "permissioncontroller"];
+        EvsUsageStatsReported evs_usage_stats_reported = 274 [(module) = "evs"];
+        AudioPowerUsageDataReported audio_power_usage_data_reported = 275;
         SdkExtensionStatus sdk_extension_status = 354;
 
         // StatsdStats tracks platform atoms with ids upto 500.
@@ -8209,7 +8221,8 @@ message AppPermissionFragmentViewed {
 }
 
 /**
-* Information about a AppPermissionsFragment viewed by user
+* Information about a AppPermissionGroupsFragment viewed by user. Fragment has been renamed, but
+* the log retains the old fragment name.
 */
 message AppPermissionsFragmentViewed {
     // id which identifies single session of user interacting with permission controller
@@ -8237,7 +8250,6 @@ message AppPermissionsFragmentViewed {
     }
     optional Category category = 6;
 }
-
 /**
 * Information about a PermissionAppsFragment viewed by user.
 * Logged from ui/handheld/PermissionAppsFragment.java
@@ -8267,6 +8279,99 @@ message PermissionAppsFragmentViewed {
         DENIED = 3;
     }
     optional Category category = 6;
+}
+
+/**
+* Log that the Auto Revoke notification has been clicked
+* Logged from ui/ManagePermissionsActivity
+*/
+message AutoRevokeNotificationClicked {
+    // id which identifies single session of user interacting with permission controller
+    optional int64 session_id = 1;
+}
+
+/**
+* Log that an app has been displayed on the auto revoke page, and lists one permission that was
+* auto revoked for it.
+* Logged from ui/handheld/AutoRevokeFragment
+*/
+message AutoRevokeFragmentAppViewed {
+    // id which identifies single session of user interacting with permission controller
+    optional int64 session_id = 1;
+
+    // UID of package for which permissions are viewed
+    optional int32 uid = 2 [(is_uid) = true];
+
+    // Name of package for which permissions are viewed
+    optional string package_name = 3;
+
+    // The name of a permission group that has been revoked
+    optional string permission_group_name = 4;
+
+    // The age of the app- more than three months old, or more than six months
+    enum Age {
+        UNDEFINED = 0;
+        NEWER_BUCKET = 1;
+        OLDER_BUCKET = 2;
+    }
+
+    // How long the app has been unused. Currently, newer bucket is 3 months, older is 6 months
+    optional Age age = 5;
+}
+
+/**
+* Log that the user has interacted with an app on the auto revoke fragment
+* Logged from ui/handheld/AutoRevokeFragment
+*/
+message AutoRevokedAppInteraction {
+    // id which identifies single session of user interacting with permission controller
+    optional int64 session_id = 1;
+
+    // UID of package for which permissions are viewed
+    optional int32 uid = 2 [(is_uid) = true];
+
+    // Name of package for which permissions are viewed
+    optional string package_name = 3;
+
+    enum Action {
+        UNDEFINED = 0;
+        REMOVE = 1;
+        OPEN = 2;
+        APP_INFO = 3;
+        PERMISSIONS = 4;
+        REMOVE_IN_SETTINGS = 5;
+        OPEN_IN_SETTINGS = 6;
+    }
+
+    // The action the user took to interact with the app
+    optional Action action = 4;
+}
+
+/**
+* Log that the AppPermissionGroupsFragment has been interacted with for the possible purposes of
+* auto revoke, or that the auto revoke switch has been changed
+* Logged from ui/handheld/AppPermissionGroupsFragment
+ */
+message AppPermissionGroupsFragmentAutoRevokeAction {
+    // id which identifies single session of user interacting with permission controller
+    optional int64 session_id = 1;
+
+    // UID of package for which permissions are viewed
+    optional int32 uid = 2 [(is_uid) = true];
+
+    // Name of package for which permissions are viewed
+    optional string package_name = 3;
+
+    enum Action {
+        UNDEFINED = 0;
+        OPENED_FOR_AUTO_REVOKE = 1;
+        OPENED_FROM_INTENT = 2;
+        SWITCH_ENABLED = 3;
+        SWITCH_DISABLED = 4;
+    }
+
+    // The action the user took to interact with the fragment
+    optional Action action = 4;
 }
 
 /**
@@ -9527,4 +9632,117 @@ message AccessibilityServiceReported {
     // The definition of the service status.
     // From frameworks/base/core/proto/android/stats/accessibility/accessibility_enums.proto.
     optional android.stats.accessibility.ServiceStatus service_status = 2;
+}
+
+/**
+ * Logs app usage events.
+ */
+message AppUsageEventOccurred {
+    optional int32 uid = 1 [(is_uid) = true];
+    optional string package_name = 2;
+    optional string class_name = 3;
+
+    enum EventType {
+        NONE = 0;
+        MOVE_TO_FOREGROUND = 1;
+        MOVE_TO_BACKGROUND = 2;
+    }
+    optional EventType event_type = 4;
+}
+
+/*
+ * Quality metrics logged when EVS cameras are active.
+ *
+ * Logged from:
+ *  packages/services/Car/evs/manager/1.1/Enumerator.cpp
+ */
+message EvsUsageStatsReported {
+
+    // Camera identifier to distinguish the source camera device.  This is not
+    // globally unique and therefore cannot be used to identify the user and/or
+    // the device.
+    optional int32 device_id = 1;
+
+    // Peak number of clients during the service
+    optional int32 peak_num_clients = 2;
+
+    // Number of erroneous events during the service
+    optional int32 num_errors = 3;
+
+    // Round trip latency of the very first frame
+    optional int64 first_latency_millis = 4;
+
+    // Average frame round trip latency
+    optional float avg_latency_millis = 5;
+
+    // Peak frame round trip latency
+    optional int64 peak_latency_millis = 6;
+
+    // Total number of frames received
+    optional int64 total_frames = 7;
+
+    // Number of frames ignored
+    optional int64 ignored_frames = 8;
+
+    // Number of dropped frames to synchronize camera devices
+    optional int64 dropped_frames_to_sync = 9;
+
+    // The duration of the service
+    optional int64 duration_millis = 10;
+}
+
+/**
+ * Logs audio power usage stats.
+ *
+ * Pushed from:
+ *  frameworks/av/services/mediametrics/AudioPowerUsage.cpp
+ */
+message AudioPowerUsageDataReported {
+    /**
+     * Device used for input/output
+     *
+     * All audio devices please refer to below file:
+     * system/media/audio/include/system/audio-base.h
+     *
+     * Define our own enum values because we don't report all audio devices.
+     * Currently, we only report built-in audio devices such as handset, speaker,
+     * built-in mics, common audio devices such as wired headset, usb headset
+     * and bluetooth devices.
+     */
+    enum AudioDevice {
+        OUTPUT_EARPIECE         = 0x1; // handset
+        OUTPUT_SPEAKER          = 0x2; // dual speaker
+        OUTPUT_WIRED_HEADSET    = 0x4; // 3.5mm headset
+        OUTPUT_USB_HEADSET      = 0x8; // usb headset
+        OUTPUT_BLUETOOTH_SCO    = 0x10; // bluetooth sco
+        OUTPUT_BLUETOOTH_A2DP   = 0x20; // a2dp
+        OUTPUT_SPEAKER_SAFE     = 0x40; // bottom speaker
+
+        INPUT_DEVICE_BIT        = 0x40000000; // non-negative positive int32.
+        INPUT_BUILTIN_MIC       = 0x40000001; // buildin mic
+        INPUT_BUILTIN_BACK_MIC  = 0x40000002; // buildin back mic
+        INPUT_WIRED_HEADSET_MIC = 0x40000004; // 3.5mm headset mic
+        INPUT_USB_HEADSET_MIC   = 0x40000008; // usb headset mic
+        INPUT_BLUETOOTH_SCO     = 0x40000010; // bluetooth sco mic
+    }
+    optional AudioDevice audio_device = 1;
+
+    // Duration of the audio in seconds
+    optional int32 duration_secs = 2;
+
+    // Average volume (0 ... 1.0)
+    optional float average_volume = 3;
+
+    enum AudioType {
+        UNKNOWN_TYPE = 0;
+        VOICE_CALL_TYPE = 1; // voice call
+        VOIP_CALL_TYPE = 2; // voip call, including uplink and downlink
+        MEDIA_TYPE = 3; // music and system sound
+        RINGTONE_NOTIFICATION_TYPE = 4; // ringtone and notification
+        ALARM_TYPE = 5; // alarm type
+        // record type
+        CAMCORDER_TYPE = 6; // camcorder
+        RECORD_TYPE = 7;  // other recording
+    }
+    optional AudioType type = 4;
 }

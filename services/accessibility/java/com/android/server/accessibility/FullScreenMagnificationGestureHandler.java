@@ -24,6 +24,7 @@ import static android.view.MotionEvent.ACTION_POINTER_DOWN;
 import static android.view.MotionEvent.ACTION_POINTER_UP;
 import static android.view.MotionEvent.ACTION_UP;
 
+import static com.android.internal.accessibility.util.AccessibilityStatsLogUtils.logMagnificationTripleTap;
 import static com.android.server.accessibility.gestures.GestureUtils.distance;
 
 import static java.lang.Math.abs;
@@ -759,10 +760,17 @@ class FullScreenMagnificationGestureHandler extends MagnificationGestureHandler 
             // Shortcut acts as the 2 initial taps
             if (mShortcutTriggered) return tapCount() + 2 >= numTaps;
 
-            return mDetectTripleTap
+            final boolean multitapTriggered = mDetectTripleTap
                     && tapCount() >= numTaps
                     && isMultiTap(mPreLastDown, mLastDown)
                     && isMultiTap(mPreLastUp, mLastUp);
+
+            // Only log the triple tap event, use numTaps to filter.
+            if (multitapTriggered && numTaps > 2) {
+                final boolean enabled = mMagnificationController.isMagnifying(mDisplayId);
+                logMagnificationTripleTap(enabled);
+            }
+            return multitapTriggered;
         }
 
         private boolean isMultiTap(MotionEvent first, MotionEvent second) {
@@ -885,7 +893,6 @@ class FullScreenMagnificationGestureHandler extends MagnificationGestureHandler 
         }
 
         private void onTripleTap(MotionEvent up) {
-
             if (DEBUG_DETECTING) {
                 Slog.i(LOG_TAG, "onTripleTap(); delayed: "
                         + MotionEventInfo.toString(mDelayedEventQueue));
@@ -907,6 +914,10 @@ class FullScreenMagnificationGestureHandler extends MagnificationGestureHandler 
 
             mViewportDraggingState.mZoomedInBeforeDrag =
                     mMagnificationController.isMagnifying(mDisplayId);
+
+            // Triple tap and hold also belongs to triple tap event.
+            final boolean enabled = !mViewportDraggingState.mZoomedInBeforeDrag;
+            logMagnificationTripleTap(enabled);
 
             zoomOn(down.getX(), down.getY());
 

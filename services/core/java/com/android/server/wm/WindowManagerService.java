@@ -196,6 +196,7 @@ import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.service.vr.IVrManager;
 import android.service.vr.IVrStateCallbacks;
+import android.sysprop.SurfaceFlingerProperties;
 import android.text.format.DateUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -305,7 +306,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -2256,7 +2259,7 @@ public class WindowManagerService extends IWindowManager.Stub
             win.mRelayoutCalled = true;
             win.mInRelayout = true;
 
-            win.mViewVisibility = viewVisibility;
+            win.setViewVisibility(viewVisibility);
             ProtoLog.i(WM_DEBUG_SCREEN_ON,
                     "Relayout %s: oldVis=%d newVis=%d. %s", win, oldVisibility,
                             viewVisibility, new RuntimeException().fillInStackTrace());
@@ -4692,6 +4695,11 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     private static boolean queryWideColorGamutSupport() {
+        boolean defaultValue = false;
+        Optional<Boolean> hasWideColorProp = SurfaceFlingerProperties.has_wide_color_display();
+        if (hasWideColorProp.isPresent()) {
+            return hasWideColorProp.get();
+        }
         try {
             ISurfaceFlingerConfigs surfaceFlinger = ISurfaceFlingerConfigs.getService();
             OptionalBool hasWideColor = surfaceFlinger.hasWideColorDisplay();
@@ -4700,11 +4708,18 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         } catch (RemoteException e) {
             // Ignore, we're in big trouble if we can't talk to SurfaceFlinger's config store
+        } catch (NoSuchElementException e) {
+            return defaultValue;
         }
         return false;
     }
 
     private static boolean queryHdrSupport() {
+        boolean defaultValue = false;
+        Optional<Boolean> hasHdrProp = SurfaceFlingerProperties.has_HDR_display();
+        if (hasHdrProp.isPresent()) {
+            return hasHdrProp.get();
+        }
         try {
             ISurfaceFlingerConfigs surfaceFlinger = ISurfaceFlingerConfigs.getService();
             OptionalBool hasHdr = surfaceFlinger.hasHDRDisplay();
@@ -4713,6 +4728,8 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         } catch (RemoteException e) {
             // Ignore, we're in big trouble if we can't talk to SurfaceFlinger's config store
+        } catch (NoSuchElementException e) {
+            return defaultValue;
         }
         return false;
     }
@@ -8013,26 +8030,15 @@ public class WindowManagerService extends IWindowManager.Stub
             IWindow window, IBinder hostInputToken, int flags, InputChannel outInputChannel) {
         final InputApplicationHandle applicationHandle;
         final String name;
-        final InputChannel[] inputChannels;
         final InputChannel clientChannel;
-        final InputChannel serverChannel;
         synchronized (mGlobalLock) {
             EmbeddedWindowController.EmbeddedWindow win =
-                    new EmbeddedWindowController.EmbeddedWindow(window,
+                    new EmbeddedWindowController.EmbeddedWindow(this, window,
                             mInputToWindowMap.get(hostInputToken), callingUid, callingPid);
-            name = win.getName();
-
-            inputChannels = InputChannel.openInputChannelPair(name);
-            serverChannel = inputChannels[0];
-            clientChannel = inputChannels[1];
-            mInputManager.registerInputChannel(serverChannel);
+            clientChannel = win.openInputChannel();
             mEmbeddedWindowController.add(clientChannel.getToken(), win);
-            if (serverChannel.getToken() != clientChannel.getToken()) {
-                throw new IllegalStateException("Client and Server channel are expected to"
-                        + "be the same");
-            }
-
             applicationHandle = win.getApplicationHandle();
+            name = win.getName();
         }
 
         updateInputChannel(clientChannel.getToken(), callingUid, callingPid, displayId, surface,
@@ -8040,10 +8046,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
         clientChannel.transferTo(outInputChannel);
         clientChannel.dispose();
-        // Prevent the java finalizer from breaking the input channel. But we won't
-        // do any further management so we just release the java ref and let the
-        // InputDispatcher hold the last ref.
-        serverChannel.release();
     }
 
     private void updateInputChannel(IBinder channelToken, int callingUid, int callingPid,

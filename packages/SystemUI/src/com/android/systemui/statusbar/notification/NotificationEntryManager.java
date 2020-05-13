@@ -440,6 +440,10 @@ public class NotificationEntryManager implements
                         mLogger.logLifetimeExtended(key, extender.getClass().getName(), "pending");
                     }
                 }
+                if (!lifetimeExtended) {
+                    // At this point, we are guaranteed the notification will be removed
+                    mAllNotifications.remove(pendingEntry);
+                }
             }
         }
 
@@ -670,7 +674,7 @@ public class NotificationEntryManager implements
     public void updateNotifications(String reason) {
         reapplyFilterAndSort(reason);
         if (mPresenter != null && !mFeatureFlags.isNewNotifPipelineRenderingEnabled()) {
-            mPresenter.updateNotificationViews();
+            mPresenter.updateNotificationViews(reason);
         }
     }
 

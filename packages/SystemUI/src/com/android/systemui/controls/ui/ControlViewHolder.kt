@@ -86,6 +86,7 @@ class ControlViewHolder(
     var behavior: Behavior? = null
     var lastAction: ControlAction? = null
     private var lastChallengeDialog: Dialog? = null
+    private val onDialogCancel: () -> Unit = { lastChallengeDialog = null }
 
     val deviceType: Int
         get() = cws.control?.let { it.getDeviceType() } ?: cws.ci.deviceType
@@ -154,15 +155,18 @@ class ControlViewHolder(
                 setTransientStatus(context.resources.getString(R.string.controls_error_failed))
             }
             ControlAction.RESPONSE_CHALLENGE_PIN -> {
-                lastChallengeDialog = ChallengeDialogs.createPinDialog(this, false, failedAttempt)
+                lastChallengeDialog = ChallengeDialogs.createPinDialog(
+                    this, false, failedAttempt, onDialogCancel)
                 lastChallengeDialog?.show()
             }
             ControlAction.RESPONSE_CHALLENGE_PASSPHRASE -> {
-                lastChallengeDialog = ChallengeDialogs.createPinDialog(this, true, failedAttempt)
+                lastChallengeDialog = ChallengeDialogs.createPinDialog(
+                    this, false, failedAttempt, onDialogCancel)
                 lastChallengeDialog?.show()
             }
             ControlAction.RESPONSE_CHALLENGE_ACK -> {
-                lastChallengeDialog = ChallengeDialogs.createConfirmationDialog(this)
+                lastChallengeDialog = ChallengeDialogs.createConfirmationDialog(
+                    this, onDialogCancel)
                 lastChallengeDialog?.show()
             }
         }

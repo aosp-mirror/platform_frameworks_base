@@ -2582,8 +2582,8 @@ public class UserManager {
     }
 
     /**
-     * Creates a user with the specified name and options. For non-admin users, default user
-     * restrictions are going to be applied.
+     * Creates a user with the specified name and options.
+     * Default user restrictions will be applied.
      * Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
      *
      * @param name the user's name
@@ -2602,8 +2602,8 @@ public class UserManager {
     }
 
     /**
-     * Creates a user with the specified name and options. For non-admin users, default user
-     * restrictions will be applied.
+     * Creates a user with the specified name and options.
+     * Default user restrictions will be applied.
      *
      * <p>Requires {@link android.Manifest.permission#MANAGE_USERS}.
      * {@link android.Manifest.permission#CREATE_USERS} suffices if flags are in
@@ -2637,8 +2637,7 @@ public class UserManager {
     }
 
     /**
-     * Pre-creates a user of the specified type. For non-admin users, default user
-     * restrictions will be applied.
+     * Pre-creates a user of the specified type. Default user restrictions will be applied.
      *
      * <p>This method can be used by OEMs to "warm" up the user creation by pre-creating some users
      * at the first boot, so they when the "real" user is created (for example,
@@ -3663,7 +3662,8 @@ public class UserManager {
     }
 
     /**
-     * Returns the badge color for the given user (generally to color a profile's icon's badge).
+     * Returns the light theme badge color for the given user (generally to color a profile's
+     * icon's badge).
      *
      * <p>To check whether a badge color is expected for the user, first call {@link #hasBadge}.
      *
@@ -3676,6 +3676,27 @@ public class UserManager {
     public @ColorInt int getUserBadgeColor(@UserIdInt int userId) {
         try {
             final int resourceId = mService.getUserBadgeColorResId(userId);
+            return Resources.getSystem().getColor(resourceId, null);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the dark theme badge color for the given user (generally to color a profile's icon's
+     * badge).
+     *
+     * <p>To check whether a badge color is expected for the user, first call {@link #hasBadge}.
+     *
+     * @return the color (not the resource ID) to be used for the user's badge
+     * @throws Resources.NotFoundException if no valid badge color exists for this user
+     *
+     * @see #getBadgedIconForUser more information about badging in general
+     * @hide
+     */
+    public @ColorInt int getUserBadgeDarkColor(@UserIdInt int userId) {
+        try {
+            final int resourceId = mService.getUserBadgeDarkColorResId(userId);
             return Resources.getSystem().getColor(resourceId, null);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
