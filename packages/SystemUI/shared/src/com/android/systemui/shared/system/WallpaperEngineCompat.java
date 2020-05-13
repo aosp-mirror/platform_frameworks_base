@@ -16,7 +16,6 @@
 package com.android.systemui.shared.system;
 
 import android.graphics.Rect;
-import android.os.RemoteException;
 import android.service.wallpaper.IWallpaperEngine;
 import android.util.Log;
 
@@ -39,7 +38,7 @@ public class WallpaperEngineCompat {
     public void scalePreview(Rect scaleToRect) {
         try {
             mWrappedEngine.scalePreview(scaleToRect);
-        } catch (RemoteException e) {
+        } catch (Exception e) {
             Log.i(TAG, "Couldn't call scalePreview method on WallpaperEngine", e);
         }
     }
