@@ -161,7 +161,6 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
@@ -610,7 +609,8 @@ class ActivityStack extends Task {
         // Update bounds if applicable
         boolean hasNewOverrideBounds = false;
         // Use override windowing mode to prevent extra bounds changes if inheriting the mode.
-        if ((overrideWindowingMode != WINDOWING_MODE_PINNED) && !matchParentBounds()) {
+        if ((overrideWindowingMode != WINDOWING_MODE_PINNED)
+                && !getRequestedOverrideBounds().isEmpty()) {
             // If the parent (display) has rotated, rotate our bounds to best-fit where their
             // bounds were on the pre-rotated display.
             final int newRotation = getWindowConfiguration().getRotation();
@@ -762,41 +762,12 @@ class ActivityStack extends Task {
                         + " while there is already one isn't currently supported");
                 //return;
             }
-
-            mTmpRect2.setEmpty();
-            if (windowingMode != WINDOWING_MODE_FULLSCREEN) {
-                if (matchParentBounds()) {
-                    mTmpRect2.setEmpty();
-                } else {
-                    getRawBounds(mTmpRect2);
-                }
-            }
-
-            if (!Objects.equals(getRequestedOverrideBounds(), mTmpRect2)) {
-                resize(mTmpRect2, false /*preserveWindows*/, true /*deferResume*/);
-            }
         } finally {
             mAtmService.continueWindowLayout();
         }
 
         mRootWindowContainer.ensureActivitiesVisible(null, 0, PRESERVE_WINDOWS);
         mRootWindowContainer.resumeFocusedStacksTopActivities();
-
-        final boolean pinnedToFullscreen = currentMode == WINDOWING_MODE_PINNED
-                && windowingMode == WINDOWING_MODE_FULLSCREEN;
-        if (pinnedToFullscreen && topActivity != null && !isForceHidden()) {
-            mDisplayContent.getPinnedStackController().setPipWindowingModeChanging(true);
-            try {
-                // Report orientation as soon as possible so that the display can freeze earlier if
-                // the display orientation will be changed. Because the surface bounds of activity
-                // may have been set to fullscreen but the activity hasn't redrawn its content yet,
-                // the rotation animation needs to capture snapshot earlier to avoid animating from
-                // an intermediate state.
-                topActivity.reportDescendantOrientationChangeIfNeeded();
-            } finally {
-                mDisplayContent.getPinnedStackController().setPipWindowingModeChanging(false);
-            }
-        }
     }
 
     @Override
@@ -2900,7 +2871,8 @@ class ActivityStack extends Task {
                 .isKeyguardOrAodShowing(displayId);
         if (!mStackSupervisor.getLaunchParamsController()
                 .layoutTask(task, info.windowLayout, activity, source, options)
-                && !matchParentBounds() && task.isResizeable() && !isLockscreenShown) {
+                && !getRequestedOverrideBounds().isEmpty()
+                && task.isResizeable() && !isLockscreenShown) {
             task.setBounds(getRequestedOverrideBounds());
         }
 
