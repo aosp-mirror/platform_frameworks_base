@@ -29,12 +29,10 @@ import android.content.Intent;
 import android.provider.Settings;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.R;
 import com.android.systemui.media.KeyguardMediaController;
-import com.android.systemui.media.MediaHierarchyManager;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.StatusBarState;
@@ -329,8 +327,6 @@ public class NotificationSectionsManager implements StackScrollAlgorithm.Section
         boolean peopleNotifsPresent = false;
 
         int currentMediaControlsIdx = -1;
-        // Currently, just putting media controls in the front and incrementing the position based
-        // on the number of heads-up notifs.
         int mediaControlsTarget = usingMediaControls ? 0 : -1;
         int currentIncomingHeaderIdx = -1;
         int incomingHeaderTarget = -1;
@@ -404,6 +400,11 @@ public class NotificationSectionsManager implements StackScrollAlgorithm.Section
                             incomingHeaderTarget--;
                         }
                     }
+                    if (mediaControlsTarget != -1) {
+                        mediaControlsTarget++;
+                    }
+                    break;
+                case BUCKET_FOREGROUND_SERVICE:
                     if (mediaControlsTarget != -1) {
                         mediaControlsTarget++;
                     }
@@ -488,7 +489,8 @@ public class NotificationSectionsManager implements StackScrollAlgorithm.Section
         adjustHeaderVisibilityAndPosition(
                 peopleHeaderTarget, mPeopleHubView, currentPeopleHeaderIdx);
         adjustViewPosition(mediaControlsTarget, mMediaControlsView, currentMediaControlsIdx);
-        adjustViewPosition(incomingHeaderTarget, mIncomingHeader, currentIncomingHeaderIdx);
+        adjustHeaderVisibilityAndPosition(incomingHeaderTarget, mIncomingHeader,
+                currentIncomingHeaderIdx);
 
 
         mLogger.logStr("Final order:");
@@ -508,45 +510,29 @@ public class NotificationSectionsManager implements StackScrollAlgorithm.Section
 
     private void adjustHeaderVisibilityAndPosition(
             int targetPosition, StackScrollerDecorView header, int currentPosition) {
-        if (targetPosition == -1) {
-            if (currentPosition != -1) {
-                mParent.removeView(header);
-            }
-        } else {
-            if (currentPosition == -1) {
-                // If the header is animating away, it will still have a parent, so detach it first
-                // TODO: We should really cancel the active animations here. This will happen
-                // automatically when the view's intro animation starts, but it's a fragile link.
-                if (header.getTransientContainer() != null) {
-                    header.getTransientContainer().removeTransientView(header);
-                    header.setTransientContainer(null);
-                }
-                header.setContentVisible(true);
-                mParent.addView(header, targetPosition);
-            } else {
-                mParent.changeViewPosition(header, targetPosition);
-            }
+        adjustViewPosition(targetPosition, header, currentPosition);
+        if (targetPosition != -1 && currentPosition == -1) {
+            header.setContentVisible(true);
         }
     }
 
-    private void adjustViewPosition(int targetPosition, ExpandableView header,
-            int currentPosition) {
+    private void adjustViewPosition(int targetPosition, ExpandableView view, int currentPosition) {
         if (targetPosition == -1) {
             if (currentPosition != -1) {
-                mParent.removeView(header);
+                mParent.removeView(view);
             }
         } else {
             if (currentPosition == -1) {
                 // If the header is animating away, it will still have a parent, so detach it first
                 // TODO: We should really cancel the active animations here. This will happen
                 // automatically when the view's intro animation starts, but it's a fragile link.
-                if (header.getTransientContainer() != null) {
-                    header.getTransientContainer().removeTransientView(header);
-                    header.setTransientContainer(null);
+                if (view.getTransientContainer() != null) {
+                    view.getTransientContainer().removeTransientView(view);
+                    view.setTransientContainer(null);
                 }
-                mParent.addView(header, targetPosition);
+                mParent.addView(view, targetPosition);
             } else {
-                mParent.changeViewPosition(header, targetPosition);
+                mParent.changeViewPosition(view, targetPosition);
             }
         }
     }
@@ -641,6 +627,11 @@ public class NotificationSectionsManager implements StackScrollAlgorithm.Section
     }
 
     @VisibleForTesting
+    ExpandableView getIncomingHeaderView() {
+        return mIncomingHeader;
+    }
+
+    @VisibleForTesting
     void setPeopleHubVisible(boolean visible) {
         mPeopleHubVisible = visible;
     }
@@ -685,6 +676,7 @@ public class NotificationSectionsManager implements StackScrollAlgorithm.Section
     @Retention(SOURCE)
     @IntDef(prefix = { "BUCKET_" }, value = {
             BUCKET_HEADS_UP,
+            BUCKET_FOREGROUND_SERVICE,
             BUCKET_MEDIA_CONTROLS,
             BUCKET_PEOPLE,
             BUCKET_ALERTING,
@@ -692,8 +684,9 @@ public class NotificationSectionsManager implements StackScrollAlgorithm.Section
     })
     public @interface PriorityBucket {}
     public static final int BUCKET_HEADS_UP = 0;
-    public static final int BUCKET_MEDIA_CONTROLS = 1;
-    public static final int BUCKET_PEOPLE = 2;
-    public static final int BUCKET_ALERTING = 3;
-    public static final int BUCKET_SILENT = 4;
+    public static final int BUCKET_FOREGROUND_SERVICE = 1;
+    public static final int BUCKET_MEDIA_CONTROLS = 2;
+    public static final int BUCKET_PEOPLE = 3;
+    public static final int BUCKET_ALERTING = 4;
+    public static final int BUCKET_SILENT = 5;
 }
