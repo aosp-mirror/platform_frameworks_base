@@ -12857,7 +12857,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                         pw.print(" unmapped + ");
                         pw.print(stringifyKBSize(ionPool));
                         pw.println(" pools)");
-                kernelUsed += ionUnmapped;
+                // Note: mapped ION memory is not accounted in PSS due to VM_PFNMAP flag being
+                // set on ION VMAs, therefore consider the entire ION heap as used kernel memory
+                kernelUsed += ionHeap;
             }
             final long lostRAM = memInfo.getTotalSizeKb() - (totalPss - totalSwapPss)
                     - memInfo.getFreeSizeKb() - memInfo.getCachedSizeKb()
@@ -13594,7 +13596,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             memInfoBuilder.append("       ION: ");
             memInfoBuilder.append(stringifyKBSize(ionHeap + ionPool));
             memInfoBuilder.append("\n");
-            kernelUsed += ionUnmapped;
+            // Note: mapped ION memory is not accounted in PSS due to VM_PFNMAP flag being
+            // set on ION VMAs, therefore consider the entire ION heap as used kernel memory
+            kernelUsed += ionHeap;
         }
         memInfoBuilder.append("  Used RAM: ");
         memInfoBuilder.append(stringifyKBSize(
