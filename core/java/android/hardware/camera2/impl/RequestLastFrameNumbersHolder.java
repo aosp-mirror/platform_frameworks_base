@@ -38,6 +38,10 @@ public class RequestLastFrameNumbersHolder {
     // The last ZSL still capture frame number for this request ID. It's
     // CaptureCallback.NO_FRAMES_CAPTURED if the request ID has no zsl request.
     private final long mLastZslStillFrameNumber;
+    // Whether the sequence is completed. (only consider capture result)
+    private boolean mSequenceCompleted;
+    // Whether the inflight request is completed. (consider result, buffers, and notifies)
+    private boolean mInflightCompleted;
 
     /**
      * Create a request-last-frame-numbers holder with a list of requests, request ID, and
@@ -89,6 +93,8 @@ public class RequestLastFrameNumbersHolder {
         mLastReprocessFrameNumber = lastReprocessFrameNumber;
         mLastZslStillFrameNumber = lastZslStillFrameNumber;
         mRequestId = requestInfo.getRequestId();
+        mSequenceCompleted = false;
+        mInflightCompleted = false;
     }
 
     /**
@@ -137,6 +143,8 @@ public class RequestLastFrameNumbersHolder {
         mLastZslStillFrameNumber = lastZslStillFrameNumber;
         mLastReprocessFrameNumber = CameraCaptureSession.CaptureCallback.NO_FRAMES_CAPTURED;
         mRequestId = requestId;
+        mSequenceCompleted = false;
+        mInflightCompleted = false;
     }
 
     /**
@@ -177,5 +185,34 @@ public class RequestLastFrameNumbersHolder {
     public int getRequestId() {
         return mRequestId;
     }
+
+    /**
+     * Return whether the capture sequence is completed.
+     */
+    public boolean isSequenceCompleted() {
+        return mSequenceCompleted;
+    }
+
+    /**
+     * Mark the capture sequence as completed.
+     */
+    public void markSequenceCompleted() {
+        mSequenceCompleted = true;
+    }
+
+    /**
+     * Return whether the inflight capture is completed.
+     */
+    public boolean isInflightCompleted() {
+        return mInflightCompleted;
+    }
+
+    /**
+     * Mark the inflight capture as completed.
+     */
+    public void markInflightCompleted() {
+        mInflightCompleted = true;
+    }
+
 }
 
