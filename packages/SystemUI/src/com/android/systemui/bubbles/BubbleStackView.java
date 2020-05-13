@@ -445,6 +445,10 @@ public class BubbleStackView extends FrameLayout
             final boolean clickedBubbleIsCurrentlyExpandedBubble =
                     clickedBubble.getKey().equals(mExpandedBubble.getKey());
 
+            if (isExpanded()) {
+                mExpandedAnimationController.onGestureFinished();
+            }
+
             if (isExpanded() && !clickedBubbleIsCurrentlyExpandedBubble) {
                 if (clickedBubble != mBubbleData.getSelectedBubble()) {
                     // Select the clicked bubble.
@@ -464,7 +468,6 @@ public class BubbleStackView extends FrameLayout
                     mBubbleData.setExpanded(!mBubbleData.isExpanded());
                 }
             }
-            mExpandedAnimationController.onGestureFinished();
         }
     };
 
