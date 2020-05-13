@@ -1669,6 +1669,16 @@ class Linker {
       context_->SetCompilationPackage(app_info.package);
     }
 
+    // Determine the package name under which to merge resources.
+    if (options_.rename_resources_package) {
+      if (!options_.custom_java_package) {
+        // Generate the R.java under the original package name instead of the package name specified
+        // through --rename-resources-package.
+        options_.custom_java_package = context_->GetCompilationPackage();
+      }
+      context_->SetCompilationPackage(options_.rename_resources_package.value());
+    }
+
     // Now that the compilation package is set, load the dependencies. This will also extract
     // the Android framework's versionCode and versionName, if they exist.
     if (!LoadSymbolsFromIncludePaths()) {
