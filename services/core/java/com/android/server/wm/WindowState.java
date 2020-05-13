@@ -741,7 +741,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             if (mControllableInsetProvider != null) {
                 mControllableInsetProvider.startSeamlessRotation();
             }
-            mPendingSeamlessRotate = new SeamlessRotator(oldRotation, rotation, getDisplayInfo());
+            mPendingSeamlessRotate = new SeamlessRotator(oldRotation, rotation, getDisplayInfo(),
+                    false /* applyFixedTransformationHint */);
             mPendingSeamlessRotate.unrotate(transaction, this);
             getDisplayContent().getDisplayRotation().markForSeamlessRotation(this,
                     true /* seamlesslyRotated */);
@@ -5686,6 +5687,17 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     boolean isNonToastWindowVisibleForPid(int pid) {
         return mSession.mPid == pid && isNonToastOrStarting() && isVisibleNow();
+    }
+
+    void setViewVisibility(int viewVisibility) {
+        mViewVisibility = viewVisibility;
+        // The viewVisibility is set to GONE with a client request to relayout. If this occurs and
+        // there's a blast sync transaction waiting, finishDrawing will never be called since the
+        // client will not render when visibility is GONE. Therefore, call finishDrawing here to
+        // prevent system server from blocking on a window that will not draw.
+        if (viewVisibility == View.GONE && mUsingBLASTSyncTransaction) {
+            finishDrawing(null);
+        }
     }
 
     SurfaceControl getClientViewRootSurface() {

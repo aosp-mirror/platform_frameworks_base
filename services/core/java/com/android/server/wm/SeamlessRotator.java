@@ -45,11 +45,22 @@ public class SeamlessRotator {
     private final float[] mFloat9 = new float[9];
     private final int mOldRotation;
     private final int mNewRotation;
+    /* If the seamless rotator is used to rotate part of the hierarchy, then provide a transform
+     * hint based on the display orientation if the entire display was rotated. When the display
+     * orientation matches the hierarchy orientation, the fixed transform hint will be removed.
+     * This will prevent allocating different buffer sizes by the graphic producers when the
+     * orientation of a layer changes.
+     */
+    private final boolean mApplyFixedTransformHint;
+    private final int mFixedTransformHint;
 
-    public SeamlessRotator(@Rotation int oldRotation, @Rotation int newRotation, DisplayInfo info) {
+
+    public SeamlessRotator(@Rotation int oldRotation, @Rotation int newRotation, DisplayInfo info,
+            boolean applyFixedTransformationHint) {
         mOldRotation = oldRotation;
         mNewRotation = newRotation;
-
+        mApplyFixedTransformHint = applyFixedTransformationHint;
+        mFixedTransformHint = oldRotation;
         final boolean flipped = info.rotation == ROTATION_90 || info.rotation == ROTATION_270;
         final int pH = flipped ? info.logicalWidth : info.logicalHeight;
         final int pW = flipped ? info.logicalHeight : info.logicalWidth;
@@ -70,6 +81,9 @@ public class SeamlessRotator {
         final float[] winSurfacePos = {win.mLastSurfacePosition.x, win.mLastSurfacePosition.y};
         mTransform.mapPoints(winSurfacePos);
         transaction.setPosition(win.getSurfaceControl(), winSurfacePos[0], winSurfacePos[1]);
+        if (mApplyFixedTransformHint) {
+            transaction.setFixedTransformHint(win.mSurfaceControl, mFixedTransformHint);
+        }
     }
 
     /**
@@ -109,6 +123,9 @@ public class SeamlessRotator {
         mTransform.reset();
         t.setMatrix(win.mSurfaceControl, mTransform, mFloat9);
         t.setPosition(win.mSurfaceControl, win.mLastSurfacePosition.x, win.mLastSurfacePosition.y);
+        if (mApplyFixedTransformHint) {
+            t.unsetFixedTransformHint(win.mSurfaceControl);
+        }
     }
 
     public void dump(PrintWriter pw) {

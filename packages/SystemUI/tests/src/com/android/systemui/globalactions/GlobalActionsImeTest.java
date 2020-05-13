@@ -34,6 +34,8 @@ import androidx.test.filters.LargeTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.rule.ActivityTestRule;
 
+import com.android.systemui.SysuiTestCase;
+
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -41,7 +43,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.BooleanSupplier;
 
 @LargeTest
-public class GlobalActionsImeTest {
+public class GlobalActionsImeTest extends SysuiTestCase {
 
     @Rule
     public ActivityTestRule<TestActivity> mActivityTestRule = new ActivityTestRule<>(
