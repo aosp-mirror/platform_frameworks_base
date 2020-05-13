@@ -7393,10 +7393,32 @@ public class AudioService extends IAudioService.Stub
                 return false;
             }
             boolean suppress = false;
-            if (resolvedStream != AudioSystem.STREAM_MUSIC && mController != null) {
+            // Intended behavior:
+            // 1/ if the stream is not the default UI stream, do not suppress (as it is not involved
+            //    in bringing up the UI)
+            // 2/ if the resolved and default stream is MUSIC, and media is playing, do not suppress
+            // 3/ otherwise suppress the first adjustments that occur during the "long press
+            //    timeout" interval. Note this is true regardless of whether this is a "real long
+            //    press" (where the user keeps pressing on the volume button), or repeated single
+            //    presses (here we don't know if we are in a real long press, or repeated fast
+            //    button presses).
+            //    Once the long press timeout occurs (mNextLongPress reset to 0), do not suppress.
+            // Example: for a default and resolved stream of MUSIC, this allows modifying rapidly
+            // the volume when media is playing (whether by long press or repeated individual
+            // presses), or to bring up the volume UI when media is not playing, in order to make
+            // another change (e.g. switch ringer modes) without changing media volume.
+            if (resolvedStream == DEFAULT_VOL_STREAM_NO_PLAYBACK && mController != null) {
+                // never suppress media vol adjustement during media playback
+                if (resolvedStream == AudioSystem.STREAM_MUSIC
+                        && AudioSystem.isStreamActive(AudioSystem.STREAM_MUSIC, mLongPressTimeout))
+                {
+                    // media is playing, adjust the volume right away
+                    return false;
+                }
+
                 final long now = SystemClock.uptimeMillis();
                 if ((flags & AudioManager.FLAG_SHOW_UI) != 0 && !mVisible) {
-                    // ui will become visible
+                    // UI is not visible yet, adjustment is ignored
                     if (mNextLongPress < now) {
                         mNextLongPress = now + mLongPressTimeout;
                     }
