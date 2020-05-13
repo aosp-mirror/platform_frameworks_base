@@ -101,7 +101,7 @@ TEST(AttributionE2eTest, TestAttributionMatchAndSliceByFirstUid) {
 
     ConfigKey cfgKey;
     auto processor = CreateStatsLogProcessor(bucketStartTimeNs, bucketStartTimeNs, config, cfgKey);
-    EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
+    ASSERT_EQ(processor->mMetricsManagers.size(), 1u);
     EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
 
     // Here it assumes that GMS core has two uids.
@@ -155,17 +155,17 @@ TEST(AttributionE2eTest, TestAttributionMatchAndSliceByFirstUid) {
     backfillDimensionPath(&reports);
     backfillStringInReport(&reports);
     backfillStartEndTimestamp(&reports);
-    EXPECT_EQ(reports.reports_size(), 1);
-    EXPECT_EQ(reports.reports(0).metrics_size(), 1);
+    ASSERT_EQ(reports.reports_size(), 1);
+    ASSERT_EQ(reports.reports(0).metrics_size(), 1);
 
     StatsLogReport::CountMetricDataWrapper countMetrics;
     sortMetricDataByDimensionsValue(reports.reports(0).metrics(0).count_metrics(), &countMetrics);
-    EXPECT_EQ(countMetrics.data_size(), 4);
+    ASSERT_EQ(countMetrics.data_size(), 4);
 
     auto data = countMetrics.data(0);
     ValidateAttributionUidAndTagDimension(data.dimensions_in_what(),
                                           util::WAKELOCK_STATE_CHANGED, 111, "App1");
-    EXPECT_EQ(data.bucket_info_size(), 2);
+    ASSERT_EQ(data.bucket_info_size(), 2);
     EXPECT_EQ(data.bucket_info(0).count(), 2);
     EXPECT_EQ(data.bucket_info(0).start_bucket_elapsed_nanos(), bucketStartTimeNs);
     EXPECT_EQ(data.bucket_info(0).end_bucket_elapsed_nanos(), bucketStartTimeNs + bucketSizeNs);
@@ -178,7 +178,7 @@ TEST(AttributionE2eTest, TestAttributionMatchAndSliceByFirstUid) {
     ValidateAttributionUidAndTagDimension(data.dimensions_in_what(),
                                           util::WAKELOCK_STATE_CHANGED, 222,
                                           "GMSCoreModule1");
-    EXPECT_EQ(data.bucket_info_size(), 2);
+    ASSERT_EQ(data.bucket_info_size(), 2);
     EXPECT_EQ(data.bucket_info(0).count(), 1);
     EXPECT_EQ(data.bucket_info(0).start_bucket_elapsed_nanos(), bucketStartTimeNs);
     EXPECT_EQ(data.bucket_info(0).end_bucket_elapsed_nanos(), bucketStartTimeNs + bucketSizeNs);
@@ -190,7 +190,7 @@ TEST(AttributionE2eTest, TestAttributionMatchAndSliceByFirstUid) {
     ValidateAttributionUidAndTagDimension(data.dimensions_in_what(),
                                           util::WAKELOCK_STATE_CHANGED, 222,
                                           "GMSCoreModule3");
-    EXPECT_EQ(data.bucket_info_size(), 1);
+    ASSERT_EQ(data.bucket_info_size(), 1);
     EXPECT_EQ(data.bucket_info(0).count(), 1);
     EXPECT_EQ(data.bucket_info(0).start_bucket_elapsed_nanos(),
               bucketStartTimeNs + 3 * bucketSizeNs);
@@ -200,7 +200,7 @@ TEST(AttributionE2eTest, TestAttributionMatchAndSliceByFirstUid) {
     ValidateAttributionUidAndTagDimension(data.dimensions_in_what(),
                                           util::WAKELOCK_STATE_CHANGED, 444,
                                           "GMSCoreModule2");
-    EXPECT_EQ(data.bucket_info_size(), 1);
+    ASSERT_EQ(data.bucket_info_size(), 1);
     EXPECT_EQ(data.bucket_info(0).count(), 1);
     EXPECT_EQ(data.bucket_info(0).start_bucket_elapsed_nanos(),
               bucketStartTimeNs + 2 * bucketSizeNs);
@@ -214,7 +214,7 @@ TEST(AttributionE2eTest, TestAttributionMatchAndSliceByChain) {
 
     ConfigKey cfgKey;
     auto processor = CreateStatsLogProcessor(bucketStartTimeNs, bucketStartTimeNs, config, cfgKey);
-    EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
+    ASSERT_EQ(processor->mMetricsManagers.size(), 1u);
     EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
 
     // Here it assumes that GMS core has two uids.
@@ -268,18 +268,18 @@ TEST(AttributionE2eTest, TestAttributionMatchAndSliceByChain) {
     backfillDimensionPath(&reports);
     backfillStringInReport(&reports);
     backfillStartEndTimestamp(&reports);
-    EXPECT_EQ(reports.reports_size(), 1);
-    EXPECT_EQ(reports.reports(0).metrics_size(), 1);
+    ASSERT_EQ(reports.reports_size(), 1);
+    ASSERT_EQ(reports.reports(0).metrics_size(), 1);
 
     StatsLogReport::CountMetricDataWrapper countMetrics;
     sortMetricDataByDimensionsValue(reports.reports(0).metrics(0).count_metrics(), &countMetrics);
-    EXPECT_EQ(countMetrics.data_size(), 6);
+    ASSERT_EQ(countMetrics.data_size(), 6);
 
     auto data = countMetrics.data(0);
     ValidateAttributionUidAndTagDimension(data.dimensions_in_what(),
                                           util::WAKELOCK_STATE_CHANGED, 222,
                                           "GMSCoreModule1");
-    EXPECT_EQ(2, data.bucket_info_size());
+    ASSERT_EQ(2, data.bucket_info_size());
     EXPECT_EQ(1, data.bucket_info(0).count());
     EXPECT_EQ(bucketStartTimeNs + bucketSizeNs, data.bucket_info(0).start_bucket_elapsed_nanos());
     EXPECT_EQ(bucketStartTimeNs + 2 * bucketSizeNs, data.bucket_info(0).end_bucket_elapsed_nanos());
@@ -296,7 +296,7 @@ TEST(AttributionE2eTest, TestAttributionMatchAndSliceByChain) {
     ValidateUidDimension(data.dimensions_in_what(), 1, util::WAKELOCK_STATE_CHANGED, 333);
     ValidateAttributionUidAndTagDimension(data.dimensions_in_what(), 1,
                                           util::WAKELOCK_STATE_CHANGED, 333, "App3");
-    EXPECT_EQ(data.bucket_info_size(), 1);
+    ASSERT_EQ(data.bucket_info_size(), 1);
     EXPECT_EQ(data.bucket_info(0).count(), 1);
     EXPECT_EQ(data.bucket_info(0).start_bucket_elapsed_nanos(), bucketStartTimeNs);
     EXPECT_EQ(data.bucket_info(0).end_bucket_elapsed_nanos(), bucketStartTimeNs + bucketSizeNs);
@@ -310,7 +310,7 @@ TEST(AttributionE2eTest, TestAttributionMatchAndSliceByChain) {
     ValidateAttributionUidAndTagDimension(data.dimensions_in_what(), 1,
                                           util::WAKELOCK_STATE_CHANGED, 222,
                                           "GMSCoreModule1");
-    EXPECT_EQ(data.bucket_info_size(), 1);
+    ASSERT_EQ(data.bucket_info_size(), 1);
     EXPECT_EQ(data.bucket_info(0).count(), 1);
     EXPECT_EQ(bucketStartTimeNs + 2 * bucketSizeNs,
               data.bucket_info(0).start_bucket_elapsed_nanos());
@@ -327,7 +327,7 @@ TEST(AttributionE2eTest, TestAttributionMatchAndSliceByChain) {
     ValidateUidDimension(data.dimensions_in_what(), 2, util::WAKELOCK_STATE_CHANGED, 333);
     ValidateAttributionUidAndTagDimension(data.dimensions_in_what(), 2,
                                           util::WAKELOCK_STATE_CHANGED, 333, "App3");
-    EXPECT_EQ(data.bucket_info_size(), 1);
+    ASSERT_EQ(data.bucket_info_size(), 1);
     EXPECT_EQ(data.bucket_info(0).count(), 1);
     EXPECT_EQ(bucketStartTimeNs, data.bucket_info(0).start_bucket_elapsed_nanos());
     EXPECT_EQ(bucketStartTimeNs + bucketSizeNs, data.bucket_info(0).end_bucket_elapsed_nanos());
@@ -343,7 +343,7 @@ TEST(AttributionE2eTest, TestAttributionMatchAndSliceByChain) {
     ValidateAttributionUidAndTagDimension(data.dimensions_in_what(), 2,
                                           util::WAKELOCK_STATE_CHANGED, 222,
                                           "GMSCoreModule1");
-    EXPECT_EQ(data.bucket_info_size(), 1);
+    ASSERT_EQ(data.bucket_info_size(), 1);
     EXPECT_EQ(data.bucket_info(0).count(), 1);
     EXPECT_EQ(bucketStartTimeNs, data.bucket_info(0).start_bucket_elapsed_nanos());
     EXPECT_EQ(bucketStartTimeNs + bucketSizeNs, data.bucket_info(0).end_bucket_elapsed_nanos());
@@ -359,7 +359,7 @@ TEST(AttributionE2eTest, TestAttributionMatchAndSliceByChain) {
     ValidateUidDimension(data.dimensions_in_what(), 2, util::WAKELOCK_STATE_CHANGED, 333);
     ValidateAttributionUidAndTagDimension(data.dimensions_in_what(), 2,
                                           util::WAKELOCK_STATE_CHANGED, 333, "App3");
-    EXPECT_EQ(data.bucket_info_size(), 1);
+    ASSERT_EQ(data.bucket_info_size(), 1);
     EXPECT_EQ(data.bucket_info(0).count(), 1);
     EXPECT_EQ(bucketStartTimeNs + 2 * bucketSizeNs,
               data.bucket_info(0).start_bucket_elapsed_nanos());

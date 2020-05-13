@@ -121,7 +121,7 @@ TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensionsForSumDuration1) 
     uint64_t bucketSizeNs =
             TimeUnitToBucketSizeInMillis(config.duration_metric(0).bucket()) * 1000000LL;
     auto processor = CreateStatsLogProcessor(bucketStartTimeNs, bucketStartTimeNs, config, cfgKey);
-    EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
+    ASSERT_EQ(processor->mMetricsManagers.size(), 1u);
     EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
     FeedEvents(config, processor);
     vector<uint8_t> buffer;
@@ -134,17 +134,17 @@ TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensionsForSumDuration1) 
     backfillStringInReport(&reports);
     backfillStartEndTimestamp(&reports);
 
-    EXPECT_EQ(reports.reports_size(), 1);
-    EXPECT_EQ(reports.reports(0).metrics_size(), 1);
+    ASSERT_EQ(reports.reports_size(), 1);
+    ASSERT_EQ(reports.reports(0).metrics_size(), 1);
     // Only 1 dimension output. The tag dimension in the predicate has been aggregated.
-    EXPECT_EQ(reports.reports(0).metrics(0).duration_metrics().data_size(), 1);
+    ASSERT_EQ(reports.reports(0).metrics(0).duration_metrics().data_size(), 1);
 
     auto data = reports.reports(0).metrics(0).duration_metrics().data(0);
     // Validate dimension value.
     ValidateAttributionUidDimension(data.dimensions_in_what(),
                                     util::WAKELOCK_STATE_CHANGED, 111);
     // Validate bucket info.
-    EXPECT_EQ(reports.reports(0).metrics(0).duration_metrics().data(0).bucket_info_size(), 1);
+    ASSERT_EQ(reports.reports(0).metrics(0).duration_metrics().data(0).bucket_info_size(), 1);
     data = reports.reports(0).metrics(0).duration_metrics().data(0);
     // The wakelock holding interval starts from the screen off event and to the end of the 1st
     // bucket.
@@ -158,7 +158,7 @@ TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensionsForSumDuration2) 
     uint64_t bucketSizeNs =
             TimeUnitToBucketSizeInMillis(config.duration_metric(0).bucket()) * 1000000LL;
     auto processor = CreateStatsLogProcessor(bucketStartTimeNs, bucketStartTimeNs, config, cfgKey);
-    EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
+    ASSERT_EQ(processor->mMetricsManagers.size(), 1u);
     EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
     FeedEvents(config, processor);
     vector<uint8_t> buffer;
@@ -170,11 +170,11 @@ TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensionsForSumDuration2) 
     backfillDimensionPath(&reports);
     backfillStringInReport(&reports);
     backfillStartEndTimestamp(&reports);
-    EXPECT_EQ(reports.reports_size(), 1);
-    EXPECT_EQ(reports.reports(0).metrics_size(), 1);
-    EXPECT_EQ(reports.reports(0).metrics(0).duration_metrics().data_size(), 1);
+    ASSERT_EQ(reports.reports_size(), 1);
+    ASSERT_EQ(reports.reports(0).metrics_size(), 1);
+    ASSERT_EQ(reports.reports(0).metrics(0).duration_metrics().data_size(), 1);
     // Dump the report after the end of 2nd bucket.
-    EXPECT_EQ(reports.reports(0).metrics(0).duration_metrics().data(0).bucket_info_size(), 2);
+    ASSERT_EQ(reports.reports(0).metrics(0).duration_metrics().data(0).bucket_info_size(), 2);
     auto data = reports.reports(0).metrics(0).duration_metrics().data(0);
     // Validate dimension value.
     ValidateAttributionUidDimension(data.dimensions_in_what(),
@@ -196,7 +196,7 @@ TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensionsForSumDuration3) 
     uint64_t bucketSizeNs =
             TimeUnitToBucketSizeInMillis(config.duration_metric(0).bucket()) * 1000000LL;
     auto processor = CreateStatsLogProcessor(bucketStartTimeNs, bucketStartTimeNs, config, cfgKey);
-    EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
+    ASSERT_EQ(processor->mMetricsManagers.size(), 1u);
     EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
     FeedEvents(config, processor);
     vector<uint8_t> buffer;
@@ -222,10 +222,10 @@ TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensionsForSumDuration3) 
     backfillDimensionPath(&reports);
     backfillStringInReport(&reports);
     backfillStartEndTimestamp(&reports);
-    EXPECT_EQ(reports.reports_size(), 1);
-    EXPECT_EQ(reports.reports(0).metrics_size(), 1);
-    EXPECT_EQ(reports.reports(0).metrics(0).duration_metrics().data_size(), 1);
-    EXPECT_EQ(reports.reports(0).metrics(0).duration_metrics().data(0).bucket_info_size(), 6);
+    ASSERT_EQ(reports.reports_size(), 1);
+    ASSERT_EQ(reports.reports(0).metrics_size(), 1);
+    ASSERT_EQ(reports.reports(0).metrics(0).duration_metrics().data_size(), 1);
+    ASSERT_EQ(reports.reports(0).metrics(0).duration_metrics().data(0).bucket_info_size(), 6);
     auto data = reports.reports(0).metrics(0).duration_metrics().data(0);
     ValidateAttributionUidDimension(data.dimensions_in_what(),
                                     util::WAKELOCK_STATE_CHANGED, 111);
@@ -243,7 +243,7 @@ TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensionsForMaxDuration1) 
     uint64_t bucketSizeNs =
             TimeUnitToBucketSizeInMillis(config.duration_metric(0).bucket()) * 1000000LL;
     auto processor = CreateStatsLogProcessor(bucketStartTimeNs, bucketStartTimeNs, config, cfgKey);
-    EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
+    ASSERT_EQ(processor->mMetricsManagers.size(), 1u);
     EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
     FeedEvents(config, processor);
     ConfigMetricsReportList reports;
@@ -257,13 +257,13 @@ TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensionsForMaxDuration1) 
     backfillStringInReport(&reports);
     backfillStartEndTimestamp(&reports);
 
-    EXPECT_EQ(reports.reports_size(), 1);
+    ASSERT_EQ(reports.reports_size(), 1);
 
     // When using ProtoOutputStream, if nothing written to a sub msg, it won't be treated as
     // one. It was previsouly 1 because we had a fake onDumpReport which calls add_metric() by
     // itself.
-    EXPECT_EQ(1, reports.reports(0).metrics_size());
-    EXPECT_EQ(0, reports.reports(0).metrics(0).duration_metrics().data_size());
+    ASSERT_EQ(1, reports.reports(0).metrics_size());
+    ASSERT_EQ(0, reports.reports(0).metrics(0).duration_metrics().data_size());
 }
 
 TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensionsForMaxDuration2) {
@@ -273,7 +273,7 @@ TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensionsForMaxDuration2) 
     uint64_t bucketSizeNs =
             TimeUnitToBucketSizeInMillis(config.duration_metric(0).bucket()) * 1000000LL;
     auto processor = CreateStatsLogProcessor(bucketStartTimeNs, bucketStartTimeNs, config, cfgKey);
-    EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
+    ASSERT_EQ(processor->mMetricsManagers.size(), 1u);
     EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
     FeedEvents(config, processor);
     ConfigMetricsReportList reports;
@@ -285,11 +285,11 @@ TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensionsForMaxDuration2) 
     backfillDimensionPath(&reports);
     backfillStringInReport(&reports);
     backfillStartEndTimestamp(&reports);
-    EXPECT_EQ(reports.reports_size(), 1);
-    EXPECT_EQ(reports.reports(0).metrics_size(), 1);
-    EXPECT_EQ(reports.reports(0).metrics(0).duration_metrics().data_size(), 1);
+    ASSERT_EQ(reports.reports_size(), 1);
+    ASSERT_EQ(reports.reports(0).metrics_size(), 1);
+    ASSERT_EQ(reports.reports(0).metrics(0).duration_metrics().data_size(), 1);
     // Dump the report after the end of 2nd bucket. One dimension with one bucket.
-    EXPECT_EQ(reports.reports(0).metrics(0).duration_metrics().data(0).bucket_info_size(), 1);
+    ASSERT_EQ(reports.reports(0).metrics(0).duration_metrics().data(0).bucket_info_size(), 1);
     auto data = reports.reports(0).metrics(0).duration_metrics().data(0);
     // Validate dimension value.
     ValidateAttributionUidDimension(data.dimensions_in_what(),
@@ -305,7 +305,7 @@ TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensionsForMaxDuration3) 
     uint64_t bucketSizeNs =
             TimeUnitToBucketSizeInMillis(config.duration_metric(0).bucket()) * 1000000LL;
     auto processor = CreateStatsLogProcessor(bucketStartTimeNs, bucketStartTimeNs, config, cfgKey);
-    EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
+    ASSERT_EQ(processor->mMetricsManagers.size(), 1u);
     EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
     FeedEvents(config, processor);
     ConfigMetricsReportList reports;
@@ -331,10 +331,10 @@ TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensionsForMaxDuration3) 
     backfillDimensionPath(&reports);
     backfillStringInReport(&reports);
     backfillStartEndTimestamp(&reports);
-    EXPECT_EQ(reports.reports_size(), 1);
-    EXPECT_EQ(reports.reports(0).metrics_size(), 1);
-    EXPECT_EQ(reports.reports(0).metrics(0).duration_metrics().data_size(), 1);
-    EXPECT_EQ(reports.reports(0).metrics(0).duration_metrics().data(0).bucket_info_size(), 2);
+    ASSERT_EQ(reports.reports_size(), 1);
+    ASSERT_EQ(reports.reports(0).metrics_size(), 1);
+    ASSERT_EQ(reports.reports(0).metrics(0).duration_metrics().data_size(), 1);
+    ASSERT_EQ(reports.reports(0).metrics(0).duration_metrics().data(0).bucket_info_size(), 2);
     auto data = reports.reports(0).metrics(0).duration_metrics().data(0);
     ValidateAttributionUidDimension(data.dimensions_in_what(),
                                     util::WAKELOCK_STATE_CHANGED, 111);
