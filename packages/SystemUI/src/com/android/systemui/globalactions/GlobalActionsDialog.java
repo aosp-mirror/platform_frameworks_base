@@ -360,10 +360,9 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             @Override
             public void onUnlockedChanged() {
                 if (mDialog != null) {
-                    boolean unlocked = keyguardStateController.isUnlocked()
-                            || keyguardStateController.canDismissLockScreen();
                     if (mDialog.mPanelController != null) {
-                        mDialog.mPanelController.onDeviceLockStateChanged(unlocked);
+                        mDialog.mPanelController.onDeviceLockStateChanged(
+                                !mKeyguardStateController.isUnlocked());
                     }
                     if (!mDialog.isShowingControls() && shouldShowControls()) {
                         mDialog.showControls(mControlsUiController);
@@ -2378,9 +2377,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
     @VisibleForTesting
     protected boolean shouldShowControls() {
-        boolean isUnlocked = mKeyguardStateController.isUnlocked()
-                || mKeyguardStateController.canDismissLockScreen();
-        return (isUnlocked || mShowLockScreenCardsAndControls)
+        return (mKeyguardStateController.isUnlocked() || mShowLockScreenCardsAndControls)
                 && mControlsUiController.getAvailable()
                 && !mControlsServiceInfos.isEmpty()
                 && mDeviceProvisioned;
