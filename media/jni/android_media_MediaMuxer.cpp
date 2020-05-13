@@ -26,14 +26,10 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-#include <android/api-level.h>
 #include <media/stagefright/foundation/ABuffer.h>
 #include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/foundation/AMessage.h>
-#include <media/stagefright/MediaErrors.h>
 #include <media/stagefright/MediaMuxer.h>
-
-extern "C" int android_get_application_target_sdk_version();
 
 namespace android {
 
@@ -233,31 +229,11 @@ static void android_media_MediaMuxer_stop(JNIEnv *env, jclass /* clazz */,
 
     status_t err = muxer->stop();
 
-    if (android_get_application_target_sdk_version() >= __ANDROID_API_R__) {
-        switch (err) {
-            case OK:
-                break;
-            case ERROR_IO: {
-                jniThrowException(env, "java/lang/UncheckedIOException",
-                                  "Muxer stopped unexpectedly");
-                return;
-            }
-            case ERROR_MALFORMED: {
-                jniThrowException(env, "java/io/IOError",
-                                  "Failure of reading or writing operation");
-                return;
-            }
-            default: {
-                jniThrowException(env, "java/lang/IllegalStateException",
-                                  "Failed to stop the muxer");
-                return;
-            }
-        }
-    } else {
-        if (err != OK) {
-            jniThrowException(env, "java/lang/IllegalStateException", "Failed to stop the muxer");
-            return;
-        }
+    if (err != OK) {
+        ALOGE("Error during stop:%d", err);
+        jniThrowException(env, "java/lang/IllegalStateException",
+                    "Error during stop(), muxer would have stopped already");
+        return;
     }
 }
 
