@@ -152,15 +152,33 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
     }
 
     @Override
+    public void fakeDragBy(float xOffset) {
+        try {
+            super.fakeDragBy(xOffset);
+            // Keep on drawing until the animation has finished.
+            postInvalidateOnAnimation();
+        } catch (NullPointerException e) {
+            Log.e(TAG, "FakeDragBy called before begin", e);
+            // If we were trying to fake drag, it means we just added a new tile to the last
+            // page, so animate there.
+            final int lastPageNumber = mPages.size() - 1;
+            post(() -> {
+                setCurrentItem(lastPageNumber, true);
+                if (mBounceAnimatorSet != null) {
+                    mBounceAnimatorSet.start();
+                }
+                setOffscreenPageLimit(1);
+            });
+        }
+    }
+
+    @Override
     public void computeScroll() {
         if (!mScroller.isFinished() && mScroller.computeScrollOffset()) {
             if (!isFakeDragging()) {
                 beginFakeDrag();
             }
             fakeDragBy(getScrollX() - mScroller.getCurrX());
-            // Keep on drawing until the animation has finished.
-            postInvalidateOnAnimation();
-            return;
         } else if (isFakeDragging()) {
             endFakeDrag();
             mBounceAnimatorSet.start();
