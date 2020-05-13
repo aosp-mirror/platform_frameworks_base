@@ -124,7 +124,6 @@ public abstract class BiometricServiceBase extends SystemService
     private PerformanceStats mPerformanceStats;
     private int mSensorId;
     protected int mCurrentUserId = UserHandle.USER_NULL;
-    protected long mHalDeviceId;
     // Tracks if the current authentication makes use of CryptoObjects.
     protected boolean mIsCrypto;
     // Normal authentications are tracked by mPerformanceMap.
@@ -187,11 +186,6 @@ public abstract class BiometricServiceBase extends SystemService
     protected abstract String getLockoutBroadcastPermission();
 
     /**
-     * @return The HAL ID.
-     */
-    protected abstract long getHalDeviceId();
-
-    /**
      * @param userId
      * @return Returns true if the user has any enrolled biometrics.
      */
@@ -239,11 +233,11 @@ public abstract class BiometricServiceBase extends SystemService
             return false;
         }
 
-        public AuthenticationClientImpl(Context context, DaemonWrapper daemon, long halDeviceId,
+        public AuthenticationClientImpl(Context context, DaemonWrapper daemon,
                 IBinder token, ServiceListener listener, int targetUserId, int groupId, long opId,
                 boolean restricted, String owner, int cookie, boolean requireConfirmation,
                 Surface surface) {
-            super(context, getConstants(), daemon, halDeviceId, token, listener, targetUserId,
+            super(context, getConstants(), daemon, token, listener, targetUserId,
                     groupId, opId, restricted, owner, cookie, requireConfirmation, surface);
         }
 
@@ -302,11 +296,11 @@ public abstract class BiometricServiceBase extends SystemService
 
     protected abstract class EnrollClientImpl extends EnrollClient {
 
-        public EnrollClientImpl(Context context, DaemonWrapper daemon, long halDeviceId,
+        public EnrollClientImpl(Context context, DaemonWrapper daemon,
                 IBinder token, ServiceListener listener, int userId, int groupId,
                 byte[] cryptoToken, boolean restricted, String owner,
                 final int[] disabledFeatures, int timeoutSec, Surface surface) {
-            super(context, getConstants(), daemon, halDeviceId, token, listener,
+            super(context, getConstants(), daemon, token, listener,
                     userId, groupId, cryptoToken, restricted, owner, getBiometricUtils(),
                     disabledFeatures, timeoutSec, surface);
         }
@@ -322,10 +316,10 @@ public abstract class BiometricServiceBase extends SystemService
      */
     private final class InternalRemovalClient extends RemovalClient {
         InternalRemovalClient(Context context,
-                DaemonWrapper daemon, long halDeviceId, IBinder token,
+                DaemonWrapper daemon, IBinder token,
                 ServiceListener listener, int templateId, int groupId, int userId,
                 boolean restricted, String owner) {
-            super(context, getConstants(), daemon, halDeviceId, token, listener, templateId, groupId,
+            super(context, getConstants(), daemon, token, listener, templateId, groupId,
                     userId, restricted, owner, getBiometricUtils());
         }
 
@@ -348,11 +342,11 @@ public abstract class BiometricServiceBase extends SystemService
         private List<BiometricAuthenticator.Identifier> mUnknownHALTemplates = new ArrayList<>();
 
         InternalEnumerateClient(Context context,
-                DaemonWrapper daemon, long halDeviceId, IBinder token,
+                DaemonWrapper daemon, IBinder token,
                 ServiceListener listener, int groupId, int userId, boolean restricted,
                 String owner, List<? extends BiometricAuthenticator.Identifier> enrolledList,
                 BiometricUtils utils) {
-            super(context, getConstants(), daemon, halDeviceId, token, listener, groupId, userId,
+            super(context, getConstants(), daemon, token, listener, groupId, userId,
                     restricted, owner);
             mEnrolledList = enrolledList;
             mUtils = utils;
@@ -427,10 +421,10 @@ public abstract class BiometricServiceBase extends SystemService
         default void onEnrollResult(BiometricAuthenticator.Identifier identifier,
                 int remaining) throws RemoteException {};
 
-        void onAcquired(long deviceId, int acquiredInfo, int vendorCode) throws RemoteException;
+        void onAcquired(int sensorId, int acquiredInfo, int vendorCode) throws RemoteException;
 
-        default void onAuthenticationSucceeded(long deviceId,
-                BiometricAuthenticator.Identifier biometric, int userId) throws RemoteException {
+        default void onAuthenticationSucceeded(BiometricAuthenticator.Identifier biometric,
+                int userId) throws RemoteException {
             throw new UnsupportedOperationException("Stub!");
         }
 
@@ -439,16 +433,16 @@ public abstract class BiometricServiceBase extends SystemService
             throw new UnsupportedOperationException("Stub!");
         }
 
-        default void onAuthenticationFailed(long deviceId) throws RemoteException {
+        default void onAuthenticationFailed() throws RemoteException {
             throw new UnsupportedOperationException("Stub!");
         }
 
-        default void onAuthenticationFailedInternal()
+        default void onAuthenticationFailedInternal(int sensorId)
                 throws RemoteException {
             throw new UnsupportedOperationException("Stub!");
         }
 
-        void onError(long deviceId, int error, int vendorCode, int cookie) throws RemoteException;
+        void onError(int error, int vendorCode, int cookie) throws RemoteException;
 
         default void onRemoved(BiometricAuthenticator.Identifier identifier,
                 int remaining) throws RemoteException {};
@@ -480,10 +474,10 @@ public abstract class BiometricServiceBase extends SystemService
         }
 
         @Override
-        public void onAuthenticationFailedInternal()
+        public void onAuthenticationFailedInternal(int sensorId)
                 throws RemoteException {
             if (getWrapperReceiver() != null) {
-                getWrapperReceiver().onAuthenticationFailed();
+                getWrapperReceiver().onAuthenticationFailed(sensorId);
             }
         }
     }
@@ -589,7 +583,7 @@ public abstract class BiometricServiceBase extends SystemService
             if (mCallback != null) {
                 try {
                     mWakeLock.acquire(WAKELOCK_TIMEOUT_MS);
-                    mCallback.onLockoutReset(getHalDeviceId(), new IRemoteCallback.Stub() {
+                    mCallback.onLockoutReset(new IRemoteCallback.Stub() {
                         @Override
                         public void sendResult(Bundle data) throws RemoteException {
                             releaseWakelock();
@@ -679,7 +673,7 @@ public abstract class BiometricServiceBase extends SystemService
         // All client lifecycle must be managed on the handler.
         mHandler.post(() -> {
             Slog.e(getTag(), "Sending BIOMETRIC_ERROR_HW_UNAVAILABLE after HAL crash");
-            handleError(getHalDeviceId(), BIOMETRIC_ERROR_HW_UNAVAILABLE, 0 /* vendorCode */);
+            handleError(BIOMETRIC_ERROR_HW_UNAVAILABLE, 0 /* vendorCode */);
         });
 
         FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_SYSTEM_HEALTH_ISSUE_DETECTED,
@@ -721,9 +715,9 @@ public abstract class BiometricServiceBase extends SystemService
      * Callback handlers from the daemon. The caller must put this on a handler.
      */
 
-    protected void handleAcquired(long deviceId, int acquiredInfo, int vendorCode) {
+    protected void handleAcquired(int sensorId, int acquiredInfo, int vendorCode) {
         ClientMonitor client = mCurrentClient;
-        if (client != null && client.onAcquired(acquiredInfo, vendorCode)) {
+        if (client != null && client.onAcquired(sensorId, acquiredInfo, vendorCode)) {
             removeClient(client);
         }
         if (mPerformanceStats != null && getLockoutMode() == AuthenticationClient.LOCKOUT_NONE
@@ -761,7 +755,7 @@ public abstract class BiometricServiceBase extends SystemService
         }
     }
 
-    protected void handleError(long deviceId, int error, int vendorCode) {
+    protected void handleError(int error, int vendorCode) {
         final ClientMonitor client = mCurrentClient;
 
         if (DEBUG) Slog.v(getTag(), "handleError(client="
@@ -772,7 +766,7 @@ public abstract class BiometricServiceBase extends SystemService
             clearEnumerateState();
         }
 
-        if (client != null && client.onError(deviceId, error, vendorCode)) {
+        if (client != null && client.onError(error, vendorCode)) {
             removeClient(client);
         }
 
@@ -980,7 +974,7 @@ public abstract class BiometricServiceBase extends SystemService
             int errorCode = lockoutMode == AuthenticationClient.LOCKOUT_TIMED ?
                     BiometricConstants.BIOMETRIC_ERROR_LOCKOUT :
                     BiometricConstants.BIOMETRIC_ERROR_LOCKOUT_PERMANENT;
-            if (!client.onError(getHalDeviceId(), errorCode, 0 /* vendorCode */)) {
+            if (!client.onError(errorCode, 0 /* vendorCode */)) {
                 Slog.w(getTag(), "Cannot send permanent lockout message to client");
             }
             return;
@@ -1160,8 +1154,7 @@ public abstract class BiometricServiceBase extends SystemService
         if (status == 0) {
             notifyClientActiveCallbacks(true);
         } else {
-            mCurrentClient.onError(getHalDeviceId(), BIOMETRIC_ERROR_HW_UNAVAILABLE,
-                    0 /* vendorCode */);
+            mCurrentClient.onError(BIOMETRIC_ERROR_HW_UNAVAILABLE, 0 /* vendorCode */);
             removeClient(mCurrentClient);
         }
     }
@@ -1286,7 +1279,7 @@ public abstract class BiometricServiceBase extends SystemService
             mUnknownHALTemplates.remove(template);
             boolean restricted = !hasPermission(getManageBiometricPermission());
             InternalRemovalClient client = new InternalRemovalClient(getContext(),
-                    getDaemonWrapper(), mHalDeviceId, mToken, null /* listener */,
+                    getDaemonWrapper(), mToken, null /* listener */,
                     template.mIdentifier.getBiometricId(), 0 /* groupId */, template.mUserId,
                     restricted, getContext().getPackageName());
             removeInternal(client);
@@ -1311,7 +1304,7 @@ public abstract class BiometricServiceBase extends SystemService
                 getEnrolledTemplates(userId);
 
         InternalEnumerateClient client = new InternalEnumerateClient(getContext(),
-                getDaemonWrapper(), mHalDeviceId, mToken, null /* serviceListener */, userId,
+                getDaemonWrapper(), mToken, null /* serviceListener */, userId,
                 userId, restricted, getContext().getOpPackageName(), enrolledList,
                 getBiometricUtils());
         enumerateInternal(client);

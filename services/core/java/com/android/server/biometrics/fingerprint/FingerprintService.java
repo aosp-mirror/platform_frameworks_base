@@ -70,7 +70,6 @@ import com.android.server.SystemServerInitThreadPool;
 import com.android.server.biometrics.AuthenticationClient;
 import com.android.server.biometrics.BiometricServiceBase;
 import com.android.server.biometrics.BiometricUtils;
-import com.android.server.biometrics.ClientMonitor;
 import com.android.server.biometrics.Constants;
 import com.android.server.biometrics.EnumerateClient;
 import com.android.server.biometrics.RemovalClient;
@@ -132,11 +131,11 @@ public class FingerprintService extends BiometricServiceBase {
         }
 
         public FingerprintAuthClient(Context context,
-                DaemonWrapper daemon, long halDeviceId, IBinder token,
+                DaemonWrapper daemon, IBinder token,
                 ServiceListener listener, int targetUserId, int groupId, long opId,
                 boolean restricted, String owner, int cookie,
                 boolean requireConfirmation, Surface surface) {
-            super(context, daemon, halDeviceId, token, listener, targetUserId, groupId, opId,
+            super(context, daemon, token, listener, targetUserId, groupId, opId,
                     restricted, owner, cookie, requireConfirmation, surface);
         }
 
@@ -217,7 +216,7 @@ public class FingerprintService extends BiometricServiceBase {
             final boolean restricted = isRestricted();
             final int groupId = userId; // default group for fingerprint enrollment
             final EnrollClientImpl client = new EnrollClientImpl(getContext(), mDaemonWrapper,
-                    mHalDeviceId, token, new ServiceListenerImpl(receiver), mCurrentUserId, groupId,
+                    token, new ServiceListenerImpl(receiver), mCurrentUserId, groupId,
                     cryptoToken, restricted, opPackageName, new int[0] /* disabledFeatures */,
                     ENROLL_TIMEOUT_SEC, surface) {
                 @Override
@@ -247,7 +246,7 @@ public class FingerprintService extends BiometricServiceBase {
             updateActiveGroup(groupId, opPackageName);
             final boolean restricted = isRestricted();
             final AuthenticationClientImpl client = new FingerprintAuthClient(getContext(),
-                    mDaemonWrapper, mHalDeviceId, token, new ServiceListenerImpl(receiver),
+                    mDaemonWrapper, token, new ServiceListenerImpl(receiver),
                     mCurrentUserId, groupId, opId, restricted, opPackageName,
                     0 /* cookie */, false /* requireConfirmation */,
                     surface);
@@ -263,7 +262,7 @@ public class FingerprintService extends BiometricServiceBase {
             updateActiveGroup(groupId, opPackageName);
             final boolean restricted = true; // BiometricPrompt is always restricted
             final AuthenticationClientImpl client = new FingerprintAuthClient(getContext(),
-                    mDaemonWrapper, mHalDeviceId, token,
+                    mDaemonWrapper, token,
                     new BiometricPromptServiceListenerImpl(sensorReceiver),
                     mCurrentUserId, groupId, opId, restricted, opPackageName, cookie,
                     false /* requireConfirmation */,
@@ -311,7 +310,7 @@ public class FingerprintService extends BiometricServiceBase {
 
             final boolean restricted = isRestricted();
             final RemovalClient client = new RemovalClient(getContext(), getConstants(),
-                    mDaemonWrapper, mHalDeviceId, token, new ServiceListenerImpl(receiver),
+                    mDaemonWrapper, token, new ServiceListenerImpl(receiver),
                     fingerId, groupId, userId, restricted, token.toString(), getBiometricUtils()) {
                 @Override
                 protected int statsModality() {
@@ -328,7 +327,7 @@ public class FingerprintService extends BiometricServiceBase {
 
             final boolean restricted = isRestricted();
             final EnumerateClient client = new EnumerateClient(getContext(), getConstants(),
-                    mDaemonWrapper, mHalDeviceId, token, new ServiceListenerImpl(receiver), userId,
+                    mDaemonWrapper, token, new ServiceListenerImpl(receiver), userId,
                     userId, restricted, getContext().getOpPackageName()) {
                 @Override
                 protected int statsModality() {
@@ -378,7 +377,7 @@ public class FingerprintService extends BiometricServiceBase {
             final long token = Binder.clearCallingIdentity();
             try {
                 IBiometricsFingerprint daemon = getFingerprintDaemon();
-                return daemon != null && mHalDeviceId != 0;
+                return daemon != null;
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -477,16 +476,17 @@ public class FingerprintService extends BiometricServiceBase {
         }
 
         @Override
-        public void onAcquired(long deviceId, int acquiredInfo, int vendorCode)
+        public void onAcquired(int sensorId, int acquiredInfo, int vendorCode)
                 throws RemoteException {
             if (getWrapperReceiver() != null) {
-                getWrapperReceiver().onAcquired(acquiredInfo, FingerprintManager.getAcquiredString(
-                            getContext(), acquiredInfo, vendorCode));
+                getWrapperReceiver().onAcquired(sensorId, acquiredInfo,
+                        FingerprintManager.getAcquiredString(getContext(), acquiredInfo,
+                                vendorCode));
             }
         }
 
         @Override
-        public void onError(long deviceId, int error, int vendorCode, int cookie)
+        public void onError(int error, int vendorCode, int cookie)
                 throws RemoteException {
             if (getWrapperReceiver() != null) {
                 getWrapperReceiver().onError(cookie, TYPE_FINGERPRINT, error, vendorCode);
@@ -510,26 +510,24 @@ public class FingerprintService extends BiometricServiceBase {
                 throws RemoteException {
             if (mFingerprintServiceReceiver != null) {
                 final Fingerprint fp = (Fingerprint) identifier;
-                mFingerprintServiceReceiver.onEnrollResult(fp.getDeviceId(), fp.getBiometricId(),
-                        fp.getGroupId(), remaining);
+                mFingerprintServiceReceiver.onEnrollResult(fp, remaining);
             }
         }
 
         @Override
-        public void onAcquired(long deviceId, int acquiredInfo, int vendorCode)
+        public void onAcquired(int sensorId, int acquiredInfo, int vendorCode)
                 throws RemoteException {
             if (mFingerprintServiceReceiver != null) {
-                mFingerprintServiceReceiver.onAcquired(deviceId, acquiredInfo, vendorCode);
+                mFingerprintServiceReceiver.onAcquired(acquiredInfo, vendorCode);
             }
         }
 
         @Override
-        public void onAuthenticationSucceeded(long deviceId,
-                BiometricAuthenticator.Identifier biometric, int userId)
-                throws RemoteException {
+        public void onAuthenticationSucceeded(BiometricAuthenticator.Identifier biometric,
+                int userId) throws RemoteException {
             if (mFingerprintServiceReceiver != null) {
                 if (biometric == null || biometric instanceof Fingerprint) {
-                    mFingerprintServiceReceiver.onAuthenticationSucceeded(deviceId,
+                    mFingerprintServiceReceiver.onAuthenticationSucceeded(
                             (Fingerprint) biometric, userId, isStrongBiometric());
                 } else {
                     Slog.e(TAG, "onAuthenticationSucceeded received non-fingerprint biometric");
@@ -538,17 +536,17 @@ public class FingerprintService extends BiometricServiceBase {
         }
 
         @Override
-        public void onAuthenticationFailed(long deviceId) throws RemoteException {
+        public void onAuthenticationFailed() throws RemoteException {
             if (mFingerprintServiceReceiver != null) {
-                mFingerprintServiceReceiver.onAuthenticationFailed(deviceId);
+                mFingerprintServiceReceiver.onAuthenticationFailed();
             }
         }
 
         @Override
-        public void onError(long deviceId, int error, int vendorCode, int cookie)
+        public void onError(int error, int vendorCode, int cookie)
                 throws RemoteException {
             if (mFingerprintServiceReceiver != null) {
-                mFingerprintServiceReceiver.onError(deviceId, error, vendorCode);
+                mFingerprintServiceReceiver.onError(error, vendorCode);
             }
         }
 
@@ -557,18 +555,7 @@ public class FingerprintService extends BiometricServiceBase {
                 throws RemoteException {
             if (mFingerprintServiceReceiver != null) {
                 final Fingerprint fp = (Fingerprint) identifier;
-                mFingerprintServiceReceiver.onRemoved(fp.getDeviceId(), fp.getBiometricId(),
-                        fp.getGroupId(), remaining);
-            }
-        }
-
-        @Override
-        public void onEnumerated(BiometricAuthenticator.Identifier identifier, int remaining)
-                throws RemoteException {
-            if (mFingerprintServiceReceiver != null) {
-                final Fingerprint fp = (Fingerprint) identifier;
-                mFingerprintServiceReceiver.onEnumerated(fp.getDeviceId(), fp.getBiometricId(),
-                        fp.getGroupId(), remaining);
+                mFingerprintServiceReceiver.onRemoved(fp, remaining);
             }
         }
     }
@@ -610,7 +597,7 @@ public class FingerprintService extends BiometricServiceBase {
         @Override
         public void onAcquired_2_2(long deviceId, int acquiredInfo, int vendorCode) {
             mHandler.post(() -> {
-                FingerprintService.super.handleAcquired(deviceId, acquiredInfo, vendorCode);
+                FingerprintService.super.handleAcquired(getSensorId(), acquiredInfo, vendorCode);
             });
         }
 
@@ -626,14 +613,13 @@ public class FingerprintService extends BiometricServiceBase {
         @Override
         public void onError(final long deviceId, final int error, final int vendorCode) {
             mHandler.post(() -> {
-                FingerprintService.super.handleError(deviceId, error, vendorCode);
+                FingerprintService.super.handleError(error, vendorCode);
                 // TODO: this chunk of code should be common to all biometric services
                 if (error == BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE) {
                     // If we get HW_UNAVAILABLE, try to connect again later...
                     Slog.w(TAG, "Got ERROR_HW_UNAVAILABLE; try reconnecting next client.");
                     synchronized (this) {
                         mDaemon = null;
-                        mHalDeviceId = 0;
                         mCurrentUserId = UserHandle.USER_NULL;
                     }
                 }
@@ -644,7 +630,6 @@ public class FingerprintService extends BiometricServiceBase {
         public void onRemoved(final long deviceId, final int fingerId, final int groupId,
                 final int remaining) {
             mHandler.post(() -> {
-                ClientMonitor client = getCurrentClient();
                 final Fingerprint fp = new Fingerprint("", groupId, fingerId, deviceId);
                 FingerprintService.super.handleRemoved(fp, remaining);
             });
@@ -837,11 +822,6 @@ public class FingerprintService extends BiometricServiceBase {
     }
 
     @Override
-    protected long getHalDeviceId() {
-        return mHalDeviceId;
-    }
-
-    @Override
     protected boolean hasEnrolledBiometrics(int userId) {
         if (userId != UserHandle.getCallingUserId()) {
             checkPermission(INTERACT_ACROSS_USERS);
@@ -933,15 +913,16 @@ public class FingerprintService extends BiometricServiceBase {
 
             mDaemon.asBinder().linkToDeath(this, 0);
 
+            long halId = 0;
             try {
-                mHalDeviceId = mDaemon.setNotify(mDaemonCallback);
+                halId = mDaemon.setNotify(mDaemonCallback);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Failed to open fingerprint HAL", e);
                 mDaemon = null; // try again later!
             }
 
-            if (DEBUG) Slog.v(TAG, "Fingerprint HAL id: " + mHalDeviceId);
-            if (mHalDeviceId != 0) {
+            if (DEBUG) Slog.v(TAG, "Fingerprint HAL id: " + halId);
+            if (halId != 0) {
                 loadAuthenticatorIds();
                 updateActiveGroup(ActivityManager.getCurrentUser(), null);
                 doTemplateCleanupForUser(ActivityManager.getCurrentUser());

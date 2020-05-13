@@ -117,7 +117,7 @@ class DoubleLineTileLayout(
             it.tileView.measure(exactly(smallTileSize), exactly(smallTileSize))
         }
 
-        val height = twoLineHeight
+        val height = twoLineHeight + paddingBottom + paddingTop
         setMeasuredDimension(MeasureSpec.getSize(widthMeasureSpec), height)
     }
 

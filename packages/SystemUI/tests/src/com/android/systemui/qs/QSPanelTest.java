@@ -43,6 +43,7 @@ import com.android.systemui.Dependency;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.media.MediaHost;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.QSTileView;
 import com.android.systemui.qs.customize.QSCustomizer;
@@ -50,7 +51,6 @@ import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.policy.SecurityController;
-import com.android.systemui.util.concurrency.DelayableExecutor;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -62,7 +62,6 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Collections;
-import java.util.concurrent.Executor;
 
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
@@ -90,9 +89,7 @@ public class QSPanelTest extends SysuiTestCase {
     @Mock
     private QSTileView mQSTileView;
     @Mock
-    private Executor mForegroundExecutor;
-    @Mock
-    private DelayableExecutor mBackgroundExecutor;
+    private MediaHost mMediaHost;
     @Mock
     private LocalBluetoothManager mLocalBluetoothManager;
     @Mock
@@ -116,8 +113,7 @@ public class QSPanelTest extends SysuiTestCase {
         mTestableLooper.runWithLooper(() -> {
             mMetricsLogger = mDependency.injectMockDependency(MetricsLogger.class);
             mQsPanel = new QSPanel(mContext, null, mDumpManager, mBroadcastDispatcher,
-                    mQSLogger, mForegroundExecutor, mBackgroundExecutor,
-                    mLocalBluetoothManager, mActivityStarter, mEntryManager, mUiEventLogger);
+                    mQSLogger, mMediaHost, mUiEventLogger);
             // Provides a parent with non-zero size for QSPanel
             mParentView = new FrameLayout(mContext);
             mParentView.addView(mQsPanel);

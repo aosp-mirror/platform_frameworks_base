@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.notification.collection.notifcollection;
 
+import android.annotation.NonNull;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 
@@ -43,13 +44,13 @@ public interface NotifCollectionListener {
      * there is no guarantee of order and they may not have had a chance to initialize yet. Instead,
      * use {@link #onEntryAdded} which is called after all initialization.
      */
-    default void onEntryInit(NotificationEntry entry) {
+    default void onEntryInit(@NonNull NotificationEntry entry) {
     }
 
     /**
      * Called whenever a notification with a new key is posted.
      */
-    default void onEntryAdded(NotificationEntry entry) {
+    default void onEntryAdded(@NonNull NotificationEntry entry) {
     }
 
     /**
@@ -64,7 +65,7 @@ public interface NotifCollectionListener {
      * immediately after a user dismisses a notification: we wait until we receive confirmation from
      * system server before considering the notification removed.
      */
-    default void onEntryRemoved(NotificationEntry entry, @CancellationReason int reason) {
+    default void onEntryRemoved(@NonNull NotificationEntry entry, @CancellationReason int reason) {
     }
 
     /**

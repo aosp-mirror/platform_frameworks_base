@@ -28,10 +28,12 @@ import static com.google.common.truth.Truth.assertThat;
 import android.graphics.Rect;
 import android.support.test.uiautomator.UiDevice;
 import android.util.Rational;
+import android.view.Surface;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.FlakyTest;
 import androidx.test.filters.LargeTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.wm.flicker.helpers.ImeAppHelper;
 
@@ -41,25 +43,22 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
-import org.junit.runners.Parameterized;
 
 /**
  * Test split screen resizing window transitions.
  * To run this test: {@code atest FlickerTests:ResizeSplitScreenTest}
+ *
+ * Currently it runs only in 0 degrees because of b/156100803
  */
 @LargeTest
-@RunWith(Parameterized.class)
+@RunWith(AndroidJUnit4.class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@FlakyTest(bugId = 140854698)
-@Ignore("Waiting bug feedback")
-public class ResizeSplitScreenTest extends NonRotationTestBase {
+public class ResizeSplitScreenTest extends FlickerTestBase {
 
     private static String sSimpleActivity = "SimpleActivity";
     private static String sImeActivity = "ImeActivity";
 
-    public ResizeSplitScreenTest(String beginRotationName, int beginRotation) {
-        super(beginRotationName, beginRotation);
-
+    public ResizeSplitScreenTest() {
         this.mTestApp = new StandardAppHelper(InstrumentationRegistry.getInstrumentation(),
                 "com.android.server.wm.flicker.testapp", "SimpleApp");
     }
@@ -67,7 +66,7 @@ public class ResizeSplitScreenTest extends NonRotationTestBase {
     @Override
     TransitionRunner getTransitionToRun() {
         ImeAppHelper bottomApp = new ImeAppHelper(InstrumentationRegistry.getInstrumentation());
-        return resizeSplitScreen(mTestApp, bottomApp, mUiDevice, mBeginRotation,
+        return resizeSplitScreen(mTestApp, bottomApp, mUiDevice, Surface.ROTATION_0,
                 new Rational(1, 3), new Rational(2, 3))
                 .includeJankyRuns().build();
     }
@@ -94,6 +93,7 @@ public class ResizeSplitScreenTest extends NonRotationTestBase {
     }
 
     @Test
+    @Ignore("Waiting feedback")
     public void checkPosition_appsStartingBounds() {
         Rect displayBounds = getDisplayBounds();
         checkResults(result -> {
@@ -123,6 +123,7 @@ public class ResizeSplitScreenTest extends NonRotationTestBase {
     }
 
     @Test
+    @Ignore("Waiting feedback")
     public void checkPosition_appsEndingBounds() {
         Rect displayBounds = getDisplayBounds();
         checkResults(result -> {
@@ -167,6 +168,8 @@ public class ResizeSplitScreenTest extends NonRotationTestBase {
     }
 
     @Test
+    @FlakyTest(bugId = 156223549)
+    @Ignore("Waiting bug feedback")
     public void checkVisibility_topAppWindowIsAlwaysVisible() {
         checkResults(result -> WmTraceSubject.assertThat(result)
                 .showsAppWindow(sSimpleActivity)
@@ -174,16 +177,11 @@ public class ResizeSplitScreenTest extends NonRotationTestBase {
     }
 
     @Test
+    @FlakyTest(bugId = 156223549)
+    @Ignore("Waiting bug feedback")
     public void checkVisibility_bottomAppWindowIsAlwaysVisible() {
         checkResults(result -> WmTraceSubject.assertThat(result)
                 .showsAppWindow(sImeActivity)
-                .forAllEntries());
-    }
-
-    @Test
-    public void checkVisibility_dividerWindowIsAlwaysVisible() {
-        checkResults(result -> WmTraceSubject.assertThat(result)
-                .showsAboveAppWindow(DOCKED_STACK_DIVIDER)
                 .forAllEntries());
     }
 

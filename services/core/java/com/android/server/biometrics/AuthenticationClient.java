@@ -76,11 +76,11 @@ public abstract class AuthenticationClient extends ClientMonitor {
     public abstract int getSensorId();
 
     public AuthenticationClient(Context context, Constants constants,
-            BiometricServiceBase.DaemonWrapper daemon, long halDeviceId, IBinder token,
+            BiometricServiceBase.DaemonWrapper daemon, IBinder token,
             BiometricServiceBase.ServiceListener listener, int targetUserId, int groupId, long opId,
             boolean restricted, String owner, int cookie, boolean requireConfirmation,
             Surface surface) {
-        super(context, constants, daemon, halDeviceId, token, listener, targetUserId, groupId,
+        super(context, constants, daemon, token, listener, targetUserId, groupId,
                 restricted, owner, cookie);
         mOpId = opId;
         mRequireConfirmation = requireConfirmation;
@@ -115,7 +115,7 @@ public abstract class AuthenticationClient extends ClientMonitor {
     }
 
     @Override
-    public boolean onError(long deviceId, int error, int vendorCode) {
+    public boolean onError(int error, int vendorCode) {
         if (!shouldFrameworkHandleLockout()) {
             switch (error) {
                 case BiometricConstants.BIOMETRIC_ERROR_TIMEOUT:
@@ -133,7 +133,7 @@ public abstract class AuthenticationClient extends ClientMonitor {
                     break;
             }
         }
-        return super.onError(deviceId, error, vendorCode);
+        return super.onError(error, vendorCode);
     }
 
     @Override
@@ -186,11 +186,9 @@ public abstract class AuthenticationClient extends ClientMonitor {
                         // Explicitly have if/else here to make it super obvious in case the code is
                         // touched in the future.
                         if (!getIsRestricted()) {
-                            listener.onAuthenticationSucceeded(
-                                    getHalDeviceId(), identifier, getTargetUserId());
+                            listener.onAuthenticationSucceeded(identifier, getTargetUserId());
                         } else {
-                            listener.onAuthenticationSucceeded(
-                                    getHalDeviceId(), null, getTargetUserId());
+                            listener.onAuthenticationSucceeded(null, getTargetUserId());
                         }
                     } catch (RemoteException e) {
                         Slog.e(getLogTag(), "Remote exception", e);
@@ -214,16 +212,16 @@ public abstract class AuthenticationClient extends ClientMonitor {
                     final int errorCode = lockoutMode == LOCKOUT_TIMED
                             ? BiometricConstants.BIOMETRIC_ERROR_LOCKOUT
                             : BiometricConstants.BIOMETRIC_ERROR_LOCKOUT_PERMANENT;
-                    onError(getHalDeviceId(), errorCode, 0 /* vendorCode */);
+                    onError(errorCode, 0 /* vendorCode */);
                 } else {
                     // Don't send onAuthenticationFailed if we're in lockout, it causes a
                     // janky UI on Keyguard/BiometricPrompt since "authentication failed"
                     // will show briefly and be replaced by "device locked out" message.
                     if (listener != null) {
                         if (isBiometricPrompt()) {
-                            listener.onAuthenticationFailedInternal();
+                            listener.onAuthenticationFailedInternal(getSensorId());
                         } else {
-                            listener.onAuthenticationFailed(getHalDeviceId());
+                            listener.onAuthenticationFailed();
                         }
                     }
                 }
@@ -249,8 +247,7 @@ public abstract class AuthenticationClient extends ClientMonitor {
             if (result != 0) {
                 Slog.w(getLogTag(), "startAuthentication failed, result=" + result);
                 mMetricsLogger.histogram(mConstants.tagAuthStartError(), result);
-                onError(getHalDeviceId(), BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE,
-                        0 /* vendorCode */);
+                onError(BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE, 0 /* vendorCode */);
                 return result;
             }
             if (DEBUG) Slog.w(getLogTag(), "client " + getOwnerString() + " is authenticating...");

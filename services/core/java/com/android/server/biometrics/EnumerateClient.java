@@ -31,10 +31,10 @@ import java.util.ArrayList;
  */
 public abstract class EnumerateClient extends ClientMonitor {
     public EnumerateClient(Context context, Constants constants,
-            BiometricServiceBase.DaemonWrapper daemon, long halDeviceId, IBinder token,
+            BiometricServiceBase.DaemonWrapper daemon, IBinder token,
             BiometricServiceBase.ServiceListener listener, int groupId, int userId,
             boolean restricted, String owner) {
-        super(context, constants, daemon, halDeviceId, token, listener, userId, groupId, restricted,
+        super(context, constants, daemon, token, listener, userId, groupId, restricted,
                 owner, 0 /* cookie */);
     }
 
@@ -56,8 +56,7 @@ public abstract class EnumerateClient extends ClientMonitor {
                 Slog.w(getLogTag(), "start enumerate for user " + getTargetUserId()
                     + " failed, result=" + result);
                 mMetricsLogger.histogram(mConstants.tagEnumerateStartError(), result);
-                onError(getHalDeviceId(), BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE,
-                        0 /* vendorCode */);
+                onError(BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE, 0 /* vendorCode */);
                 return result;
             }
         } catch (RemoteException e) {
@@ -87,8 +86,7 @@ public abstract class EnumerateClient extends ClientMonitor {
         // We don't actually stop enumerate, but inform the client that the cancel operation
         // succeeded so we can start the next operation.
         if (initiatedByClient) {
-            onError(getHalDeviceId(), BiometricConstants.BIOMETRIC_ERROR_CANCELED,
-                    0 /* vendorCode */);
+            onError(BiometricConstants.BIOMETRIC_ERROR_CANCELED, 0 /* vendorCode */);
         }
         mAlreadyCancelled = true;
         return 0; // success

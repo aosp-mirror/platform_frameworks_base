@@ -115,11 +115,6 @@ public class IrisService extends BiometricServiceBase {
     }
 
     @Override
-    protected long getHalDeviceId() {
-        return 0;
-    }
-
-    @Override
     protected boolean hasEnrolledBiometrics(int userId) {
         return false;
     }
