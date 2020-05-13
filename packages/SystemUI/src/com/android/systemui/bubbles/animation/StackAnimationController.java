@@ -809,7 +809,7 @@ public class StackAnimationController extends
      * Update effective screen width based on current orientation.
      * @param orientation Landscape or portrait.
      */
-    public void updateOrientation(int orientation) {
+    public void updateResources(int orientation) {
         if (mLayout != null) {
             Resources res = mLayout.getContext().getResources();
             mBubblePaddingTop = res.getDimensionPixelSize(R.dimen.bubble_padding_top);
