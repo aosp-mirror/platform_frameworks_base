@@ -635,7 +635,7 @@ class GnssVisibilityControl {
         final String firstLineText = context.getString(R.string.gpsNotifTitle);
         final String secondLineText = context.getString(R.string.global_action_emergency);
         final String accessibilityServicesText = firstLineText + " (" + secondLineText + ")";
-        return new Notification.Builder(context, SystemNotificationChannels.NETWORK_ALERTS)
+        return new Notification.Builder(context, SystemNotificationChannels.NETWORK_STATUS)
                 .setSmallIcon(com.android.internal.R.drawable.stat_sys_gps_on)
                 .setWhen(0)
                 .setOngoing(false)
