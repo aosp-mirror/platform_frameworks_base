@@ -131,10 +131,10 @@ public class WifiScanner {
     public @interface WifiBand {}
 
     /**
-     * Max band value
+     * All bands
      * @hide
      */
-    public static final int WIFI_BAND_MAX = 0x10;
+    public static final int WIFI_BAND_ALL = (1 << WIFI_BAND_COUNT) - 1;
 
     /** Minimum supported scanning period */
     public static final int MIN_SCAN_PERIOD_MS = 1000;
@@ -165,6 +165,22 @@ public class WifiScanner {
     public static interface ActionListener {
         public void onSuccess();
         public void onFailure(int reason, String description);
+    }
+
+    /**
+     * Test if scan is a full scan. i.e. scanning all available bands.
+     * For backward compatibility, since some apps don't include 6GHz in their requests yet,
+     * lacking 6GHz band does not cause the result to be false.
+     *
+     * @param bandScanned bands that are fully scanned
+     * @param excludeDfs when true, DFS band is excluded from the check
+     * @return true if all bands are scanned, false otherwise
+     *
+     * @hide
+     */
+    public static boolean isFullBandScan(@WifiBand int bandScanned, boolean excludeDfs) {
+        return (bandScanned | WIFI_BAND_6_GHZ | (excludeDfs ? WIFI_BAND_5_GHZ_DFS_ONLY : 0))
+                == WIFI_BAND_ALL;
     }
 
     /**
