@@ -24,11 +24,10 @@
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:orientation="vertical"
-      android:paddingTop="40dp"
-      android:paddingBottom="40dp"
-      android:layout_marginLeft="10dp"
-      android:layout_marginRight="10dp"
-      android:layout_marginTop="@dimen/controls_top_margin"
+      android:paddingVertical="@dimen/controls_setup_vertical_padding"
+      android:layout_marginLeft="@dimen/global_actions_side_margin"
+      android:layout_marginRight="@dimen/global_actions_side_margin"
+      android:layout_marginTop="@dimen/controls_setup_top_margin"
       android:background="@drawable/control_no_favorites_background">
 
     <LinearLayout
@@ -37,7 +36,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:orientation="horizontal"
-        android:paddingBottom="8dp" />
+        android:layout_marginBottom="16dp" />
 
     <TextView
         style="@style/TextAppearance.ControlSetup.Title"
