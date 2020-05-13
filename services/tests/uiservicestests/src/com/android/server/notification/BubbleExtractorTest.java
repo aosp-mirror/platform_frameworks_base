@@ -26,6 +26,8 @@ import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
 
 import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -166,6 +168,8 @@ public class BubbleExtractorTest extends UiServiceTestCase {
         setUpBubblesEnabled(true /* feature */,
                 BUBBLE_PREFERENCE_ALL /* app */,
                 ALLOW_BUBBLE_OFF /* channel */);
+        when(mActivityManager.isLowRamDevice()).thenReturn(false);
+        setUpShortcutBubble(true /* isValid */);
         NotificationRecord r = getNotificationRecord(true /* bubble */);
         mBubbleExtractor.process(r);
 
@@ -178,6 +182,8 @@ public class BubbleExtractorTest extends UiServiceTestCase {
         setUpBubblesEnabled(true /* feature */,
                 BUBBLE_PREFERENCE_ALL /* app */,
                 DEFAULT_ALLOW_BUBBLE /* channel */);
+        when(mActivityManager.isLowRamDevice()).thenReturn(false);
+        setUpShortcutBubble(true /* isValid */);
         NotificationRecord r = getNotificationRecord(true /* bubble */);
 
         mBubbleExtractor.process(r);
@@ -190,6 +196,8 @@ public class BubbleExtractorTest extends UiServiceTestCase {
         setUpBubblesEnabled(true /* feature */,
                 BUBBLE_PREFERENCE_ALL /* app */,
                 ALLOW_BUBBLE_ON /* channel */);
+        when(mActivityManager.isLowRamDevice()).thenReturn(false);
+        setUpShortcutBubble(true /* isValid */);
         NotificationRecord r = getNotificationRecord(true /* bubble */);
 
         mBubbleExtractor.process(r);
@@ -202,6 +210,8 @@ public class BubbleExtractorTest extends UiServiceTestCase {
         setUpBubblesEnabled(false /* feature */,
                 BUBBLE_PREFERENCE_ALL /* app */,
                 ALLOW_BUBBLE_ON /* channel */);
+        when(mActivityManager.isLowRamDevice()).thenReturn(false);
+        setUpShortcutBubble(true /* isValid */);
         NotificationRecord r = getNotificationRecord(true /* bubble */);
 
         mBubbleExtractor.process(r);
@@ -215,6 +225,8 @@ public class BubbleExtractorTest extends UiServiceTestCase {
         setUpBubblesEnabled(true /* feature */,
                 BUBBLE_PREFERENCE_NONE /* app */,
                 ALLOW_BUBBLE_ON /* channel */);
+        when(mActivityManager.isLowRamDevice()).thenReturn(false);
+        setUpShortcutBubble(true /* isValid */);
         NotificationRecord r = getNotificationRecord(true /* bubble */);
 
         mBubbleExtractor.process(r);
@@ -228,6 +240,8 @@ public class BubbleExtractorTest extends UiServiceTestCase {
         setUpBubblesEnabled(true /* feature */,
                 BUBBLE_PREFERENCE_NONE /* app */,
                 DEFAULT_ALLOW_BUBBLE /* channel */);
+        when(mActivityManager.isLowRamDevice()).thenReturn(false);
+        setUpShortcutBubble(true /* isValid */);
         NotificationRecord r = getNotificationRecord(true /* bubble */);
 
         mBubbleExtractor.process(r);
@@ -241,6 +255,8 @@ public class BubbleExtractorTest extends UiServiceTestCase {
         setUpBubblesEnabled(true /* feature */,
                 BUBBLE_PREFERENCE_SELECTED /* app */,
                 DEFAULT_ALLOW_BUBBLE /* channel */);
+        when(mActivityManager.isLowRamDevice()).thenReturn(false);
+        setUpShortcutBubble(true /* isValid */);
         NotificationRecord r = getNotificationRecord(true /* bubble */);
 
         mBubbleExtractor.process(r);
@@ -254,6 +270,8 @@ public class BubbleExtractorTest extends UiServiceTestCase {
         setUpBubblesEnabled(true /* feature */,
                 BUBBLE_PREFERENCE_SELECTED /* app */,
                 ALLOW_BUBBLE_OFF /* channel */);
+        when(mActivityManager.isLowRamDevice()).thenReturn(false);
+        setUpShortcutBubble(true /* isValid */);
         NotificationRecord r = getNotificationRecord(true /* bubble */);
 
         mBubbleExtractor.process(r);
@@ -267,6 +285,9 @@ public class BubbleExtractorTest extends UiServiceTestCase {
         setUpBubblesEnabled(true /* feature */,
                 BUBBLE_PREFERENCE_SELECTED /* app */,
                 ALLOW_BUBBLE_ON /* channel */);
+        when(mActivityManager.isLowRamDevice()).thenReturn(false);
+        setUpShortcutBubble(true /* isValid */);
+
         NotificationRecord r = getNotificationRecord(true /* bubble */);
 
         mBubbleExtractor.process(r);
@@ -279,6 +300,9 @@ public class BubbleExtractorTest extends UiServiceTestCase {
         setUpBubblesEnabled(false /* feature */,
                 BUBBLE_PREFERENCE_SELECTED /* app */,
                 ALLOW_BUBBLE_ON /* channel */);
+        when(mActivityManager.isLowRamDevice()).thenReturn(false);
+        setUpShortcutBubble(true /* isValid */);
+
         NotificationRecord r = getNotificationRecord(true /* bubble */);
 
         mBubbleExtractor.process(r);
@@ -305,6 +329,7 @@ public class BubbleExtractorTest extends UiServiceTestCase {
         mBubbleExtractor.process(r);
 
         assertTrue(r.canBubble());
+        assertNotNull(r.getNotification().getBubbleMetadata());
         assertFalse(r.getNotification().isBubbleNotification());
     }
 
@@ -320,6 +345,7 @@ public class BubbleExtractorTest extends UiServiceTestCase {
         mBubbleExtractor.process(r);
 
         assertTrue(r.canBubble());
+        assertNotNull(r.getNotification().getBubbleMetadata());
         assertTrue(r.getNotification().isBubbleNotification());
     }
 
@@ -335,6 +361,7 @@ public class BubbleExtractorTest extends UiServiceTestCase {
         mBubbleExtractor.process(r);
 
         assertTrue(r.canBubble());
+        assertNotNull(r.getNotification().getBubbleMetadata());
         assertTrue(r.getNotification().isBubbleNotification());
     }
 
@@ -350,7 +377,8 @@ public class BubbleExtractorTest extends UiServiceTestCase {
         r.setShortcutInfo(null);
         mBubbleExtractor.process(r);
 
-        assertTrue(r.canBubble());
+        assertFalse(r.canBubble());
+        assertNull(r.getNotification().getBubbleMetadata());
         assertFalse(r.getNotification().isBubbleNotification());
     }
 
@@ -366,7 +394,8 @@ public class BubbleExtractorTest extends UiServiceTestCase {
         r.setShortcutInfo(null);
         mBubbleExtractor.process(r);
 
-        assertTrue(r.canBubble());
+        assertFalse(r.canBubble());
+        assertNull(r.getNotification().getBubbleMetadata());
         assertFalse(r.getNotification().isBubbleNotification());
     }
 
@@ -381,7 +410,8 @@ public class BubbleExtractorTest extends UiServiceTestCase {
         NotificationRecord r = getNotificationRecord(true /* bubble */);
         mBubbleExtractor.process(r);
 
-        assertTrue(r.canBubble());
+        assertFalse(r.canBubble());
+        assertNull(r.getNotification().getBubbleMetadata());
         assertFalse(r.getNotification().isBubbleNotification());
     }
 
@@ -395,7 +425,8 @@ public class BubbleExtractorTest extends UiServiceTestCase {
         NotificationRecord r = getNotificationRecord(false /* bubble */);
         mBubbleExtractor.process(r);
 
-        assertTrue(r.canBubble());
+        assertFalse(r.canBubble());
+        assertNull(r.getNotification().getBubbleMetadata());
         assertFalse(r.getNotification().isBubbleNotification());
     }
 
@@ -414,7 +445,8 @@ public class BubbleExtractorTest extends UiServiceTestCase {
 
         mBubbleExtractor.process(r);
 
-        assertTrue(r.canBubble());
+        assertFalse(r.canBubble());
+        assertNull(r.getNotification().getBubbleMetadata());
         assertFalse(r.getNotification().isBubbleNotification());
     }
 
@@ -429,7 +461,8 @@ public class BubbleExtractorTest extends UiServiceTestCase {
         NotificationRecord r = getNotificationRecord(true /* bubble */);
         mBubbleExtractor.process(r);
 
-        assertTrue(r.canBubble());
+        assertFalse(r.canBubble());
+        assertNull(r.getNotification().getBubbleMetadata());
         assertFalse(r.getNotification().isBubbleNotification());
     }
 
@@ -445,7 +478,8 @@ public class BubbleExtractorTest extends UiServiceTestCase {
         NotificationRecord r = getNotificationRecord(true /* bubble */);
         mBubbleExtractor.process(r);
 
-        assertTrue(r.canBubble());
+        assertFalse(r.canBubble());
+        assertNull(r.getNotification().getBubbleMetadata());
         assertFalse(r.getNotification().isBubbleNotification());
     }
 
@@ -462,7 +496,8 @@ public class BubbleExtractorTest extends UiServiceTestCase {
         NotificationRecord r = getNotificationRecord(true /* bubble */);
         mBubbleExtractor.process(r);
 
-        assertTrue(r.canBubble());
+        assertFalse(r.canBubble());
+        assertNull(r.getNotification().getBubbleMetadata());
         assertFalse(r.getNotification().isBubbleNotification());
     }
 }
