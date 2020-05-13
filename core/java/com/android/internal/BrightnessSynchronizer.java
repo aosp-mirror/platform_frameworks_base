@@ -84,17 +84,17 @@ public class BrightnessSynchronizer{
      * Converts between the int brightness system and the float brightness system.
      */
     public static float brightnessIntToFloat(Context context, int brightnessInt) {
-        PowerManager pm = context.getSystemService(PowerManager.class);
-        float pmMinBrightness = pm.getBrightnessConstraint(
+        final PowerManager pm = context.getSystemService(PowerManager.class);
+        final float pmMinBrightness = pm.getBrightnessConstraint(
                 PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_MINIMUM);
-        float pmMaxBrightness = pm.getBrightnessConstraint(
+        final float pmMaxBrightness = pm.getBrightnessConstraint(
                 PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_MAXIMUM);
-        int minBrightnessInt = brightnessFloatToInt(pmMinBrightness, PowerManager.BRIGHTNESS_MIN,
-                PowerManager.BRIGHTNESS_MAX, PowerManager.BRIGHTNESS_OFF + 1,
-                PowerManager.BRIGHTNESS_ON);
-        int maxBrightnessInt = brightnessFloatToInt(pmMaxBrightness, PowerManager.BRIGHTNESS_MIN,
-                PowerManager.BRIGHTNESS_MAX, PowerManager.BRIGHTNESS_OFF + 1,
-                PowerManager.BRIGHTNESS_ON);
+        final int minBrightnessInt = Math.round(brightnessFloatToIntRange(pmMinBrightness,
+                PowerManager.BRIGHTNESS_MIN, PowerManager.BRIGHTNESS_MAX,
+                PowerManager.BRIGHTNESS_OFF + 1, PowerManager.BRIGHTNESS_ON));
+        final int maxBrightnessInt = Math.round(brightnessFloatToIntRange(pmMaxBrightness,
+                PowerManager.BRIGHTNESS_MIN, PowerManager.BRIGHTNESS_MAX,
+                PowerManager.BRIGHTNESS_OFF + 1, PowerManager.BRIGHTNESS_ON));
 
         return brightnessIntToFloat(brightnessInt, minBrightnessInt, maxBrightnessInt,
                 pmMinBrightness, pmMaxBrightness);
@@ -119,34 +119,43 @@ public class BrightnessSynchronizer{
      * Converts between the float brightness system and the int brightness system.
      */
     public static int brightnessFloatToInt(Context context, float brightnessFloat) {
-        PowerManager pm = context.getSystemService(PowerManager.class);
-        float pmMinBrightness = pm.getBrightnessConstraint(
-                PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_MINIMUM);
-        float pmMaxBrightness = pm.getBrightnessConstraint(
-                PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_MAXIMUM);
-        int minBrightnessInt = brightnessFloatToInt(pmMinBrightness, PowerManager.BRIGHTNESS_MIN,
-                PowerManager.BRIGHTNESS_MAX, PowerManager.BRIGHTNESS_OFF + 1,
-                PowerManager.BRIGHTNESS_ON);
-        int maxBrightnessInt = brightnessFloatToInt(pmMaxBrightness, PowerManager.BRIGHTNESS_MIN,
-                PowerManager.BRIGHTNESS_MAX, PowerManager.BRIGHTNESS_OFF + 1,
-                PowerManager.BRIGHTNESS_ON);
-
-        return brightnessFloatToInt(brightnessFloat, pmMinBrightness, pmMaxBrightness,
-                minBrightnessInt, maxBrightnessInt);
+        return Math.round(brightnessFloatToIntRange(context, brightnessFloat));
     }
 
     /**
-     * Converts between the float brightness system and the int brightness system.
+     * Converts between the float brightness system and the int brightness system, but returns
+     * the converted value as a float within the int-system's range. This method helps with
+     * conversions from one system to the other without losing the floating-point precision.
      */
-    public static int brightnessFloatToInt(float brightnessFloat, float minFloat, float maxFloat,
-            int minInt, int maxInt) {
+    public static float brightnessFloatToIntRange(Context context, float brightnessFloat) {
+        final PowerManager pm = context.getSystemService(PowerManager.class);
+        final float minFloat = pm.getBrightnessConstraint(
+                PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_MINIMUM);
+        final float maxFloat = pm.getBrightnessConstraint(
+                PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_MAXIMUM);
+        final float minInt = brightnessFloatToIntRange(minFloat,
+                PowerManager.BRIGHTNESS_MIN, PowerManager.BRIGHTNESS_MAX,
+                PowerManager.BRIGHTNESS_OFF + 1, PowerManager.BRIGHTNESS_ON);
+        final float maxInt = brightnessFloatToIntRange(maxFloat,
+                PowerManager.BRIGHTNESS_MIN, PowerManager.BRIGHTNESS_MAX,
+                PowerManager.BRIGHTNESS_OFF + 1, PowerManager.BRIGHTNESS_ON);
+        return brightnessFloatToIntRange(brightnessFloat, minFloat, maxFloat, minInt, maxInt);
+    }
+
+    /**
+     * Translates specified value from the float brightness system to the int brightness system,
+     * given the min/max of each range.  Accounts for special values such as OFF and invalid values.
+     * Value returned as a float privimite (to preserve precision), but is a value within the
+     * int-system range.
+     */
+    private static float brightnessFloatToIntRange(float brightnessFloat, float minFloat,
+            float maxFloat, float minInt, float maxInt) {
         if (floatEquals(brightnessFloat, PowerManager.BRIGHTNESS_OFF_FLOAT)) {
             return PowerManager.BRIGHTNESS_OFF;
         } else if (Float.isNaN(brightnessFloat)) {
             return PowerManager.BRIGHTNESS_INVALID;
         } else {
-            return Math.round(MathUtils.constrainedMap((float) minInt, (float) maxInt, minFloat,
-                    maxFloat, brightnessFloat));
+            return MathUtils.constrainedMap(minInt, maxInt, minFloat, maxFloat, brightnessFloat);
         }
     }
 
