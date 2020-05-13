@@ -21,6 +21,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -108,7 +109,7 @@ public class VisualStabilityManagerTest extends SysuiTestCase {
     public void testCallBackCalledScreenOn() {
         mVisualStabilityManager.setPanelExpanded(true);
         mVisualStabilityManager.setScreenOn(true);
-        mVisualStabilityManager.addReorderingAllowedCallback(mCallback);
+        mVisualStabilityManager.addReorderingAllowedCallback(mCallback, false  /* persistent */);
         mVisualStabilityManager.setScreenOn(false);
         verify(mCallback).onChangeAllowed();
     }
@@ -117,7 +118,7 @@ public class VisualStabilityManagerTest extends SysuiTestCase {
     public void testCallBackCalledPanelExpanded() {
         mVisualStabilityManager.setPanelExpanded(true);
         mVisualStabilityManager.setScreenOn(true);
-        mVisualStabilityManager.addReorderingAllowedCallback(mCallback);
+        mVisualStabilityManager.addReorderingAllowedCallback(mCallback, false  /* persistent */);
         mVisualStabilityManager.setPanelExpanded(false);
         verify(mCallback).onChangeAllowed();
     }
@@ -126,11 +127,22 @@ public class VisualStabilityManagerTest extends SysuiTestCase {
     public void testCallBackExactlyOnce() {
         mVisualStabilityManager.setPanelExpanded(true);
         mVisualStabilityManager.setScreenOn(true);
-        mVisualStabilityManager.addReorderingAllowedCallback(mCallback);
+        mVisualStabilityManager.addReorderingAllowedCallback(mCallback, false  /* persistent */);
         mVisualStabilityManager.setScreenOn(false);
         mVisualStabilityManager.setScreenOn(true);
         mVisualStabilityManager.setScreenOn(false);
         verify(mCallback).onChangeAllowed();
+    }
+
+    @Test
+    public void testCallBackCalledContinuouslyWhenRequested() {
+        mVisualStabilityManager.setPanelExpanded(true);
+        mVisualStabilityManager.setScreenOn(true);
+        mVisualStabilityManager.addReorderingAllowedCallback(mCallback, true  /* persistent */);
+        mVisualStabilityManager.setScreenOn(false);
+        mVisualStabilityManager.setScreenOn(true);
+        mVisualStabilityManager.setScreenOn(false);
+        verify(mCallback, times(2)).onChangeAllowed();
     }
 
     @Test
@@ -188,7 +200,7 @@ public class VisualStabilityManagerTest extends SysuiTestCase {
     @Test
     public void testCallBackCalled_Pulsing() {
         mVisualStabilityManager.setPulsing(true);
-        mVisualStabilityManager.addReorderingAllowedCallback(mCallback);
+        mVisualStabilityManager.addReorderingAllowedCallback(mCallback, false  /* persistent */);
         mVisualStabilityManager.setPulsing(false);
         verify(mCallback).onChangeAllowed();
     }
@@ -198,7 +210,7 @@ public class VisualStabilityManagerTest extends SysuiTestCase {
         // GIVEN having the panel open (which would block reordering)
         mVisualStabilityManager.setScreenOn(true);
         mVisualStabilityManager.setPanelExpanded(true);
-        mVisualStabilityManager.addReorderingAllowedCallback(mCallback);
+        mVisualStabilityManager.addReorderingAllowedCallback(mCallback, false  /* persistent */);
 
         // WHEN we temprarily allow reordering
         mVisualStabilityManager.temporarilyAllowReordering();
@@ -212,7 +224,7 @@ public class VisualStabilityManagerTest extends SysuiTestCase {
     public void testTemporarilyAllowReorderingDoesntOverridePulsing() {
         // GIVEN we are in a pulsing state
         mVisualStabilityManager.setPulsing(true);
-        mVisualStabilityManager.addReorderingAllowedCallback(mCallback);
+        mVisualStabilityManager.addReorderingAllowedCallback(mCallback, false  /* persistent */);
 
         // WHEN we temprarily allow reordering
         mVisualStabilityManager.temporarilyAllowReordering();
@@ -227,7 +239,7 @@ public class VisualStabilityManagerTest extends SysuiTestCase {
         // GIVEN having the panel open (which would block reordering)
         mVisualStabilityManager.setScreenOn(true);
         mVisualStabilityManager.setPanelExpanded(true);
-        mVisualStabilityManager.addReorderingAllowedCallback(mCallback);
+        mVisualStabilityManager.addReorderingAllowedCallback(mCallback, false  /* persistent */);
 
         // WHEN we temprarily allow reordering and then wait until the window expires
         mVisualStabilityManager.temporarilyAllowReordering();
