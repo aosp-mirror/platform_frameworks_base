@@ -67,6 +67,10 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
     @VisibleForTesting
     protected String mPlaybackDeviceActionOnRoutingControl;
 
+    // Behaviour of the device when <Active Source> is lost in favor of another device.
+    @VisibleForTesting
+    protected String mPowerStateChangeOnActiveSourceLost;
+
     HdmiCecLocalDevicePlayback(HdmiControlService service) {
         super(service, HdmiDeviceInfo.DEVICE_PLAYBACK);
 
@@ -79,6 +83,10 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
         mPlaybackDeviceActionOnRoutingControl = SystemProperties.get(
                 Constants.PLAYBACK_DEVICE_ACTION_ON_ROUTING_CONTROL,
                 Constants.PLAYBACK_DEVICE_ACTION_ON_ROUTING_CONTROL_NONE);
+
+        mPowerStateChangeOnActiveSourceLost = SystemProperties.get(
+                Constants.POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST,
+                Constants.POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST_NONE);
     }
 
     @Override
@@ -238,6 +246,28 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
     @Override
     protected boolean canGoToStandby() {
         return !getWakeLock().isHeld();
+    }
+
+    @Override
+    @ServiceThreadOnly
+    protected boolean handleActiveSource(HdmiCecMessage message) {
+        super.handleActiveSource(message);
+        if (mIsActiveSource) {
+            return true;
+        }
+        switch (mPowerStateChangeOnActiveSourceLost) {
+            case Constants.POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST_STANDBY_NOW:
+                mService.standby();
+                return true;
+            case Constants.POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST_NONE:
+                return true;
+            default:
+                Slog.w(TAG, "Invalid property '"
+                        + Constants.POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST
+                        + "' value: "
+                        + mPowerStateChangeOnActiveSourceLost);
+                return true;
+        }
     }
 
     @ServiceThreadOnly
