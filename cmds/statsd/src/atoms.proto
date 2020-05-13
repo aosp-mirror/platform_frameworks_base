@@ -1257,7 +1257,8 @@ message BatteryLevelChanged {
  */
 message ChargingStateChanged {
     // State of the battery, from frameworks/base/core/proto/android/os/enums.proto.
-    optional android.os.BatteryStatusEnum state = 1;
+    optional android.os.BatteryStatusEnum state = 1
+            [(state_field_option).exclusive_state = true, (state_field_option).nested = false];
 }
 
 /**
