@@ -324,6 +324,7 @@ applications that come with the platform
         <permission name="android.permission.MANAGE_ROLLBACKS"/>
         <permission name="android.permission.MANAGE_USB"/>
         <permission name="android.permission.MODIFY_APPWIDGET_BIND_PERMISSIONS"/>
+        <permission name="android.permission.MODIFY_DAY_NIGHT_MODE"/>
         <permission name="android.permission.MODIFY_PHONE_STATE"/>
         <permission name="android.permission.MOUNT_FORMAT_FILESYSTEMS"/>
         <permission name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS"/>
