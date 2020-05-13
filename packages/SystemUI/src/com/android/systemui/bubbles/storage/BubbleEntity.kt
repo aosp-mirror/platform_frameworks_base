@@ -17,7 +17,7 @@ package com.android.systemui.bubbles.storage
 
 import android.annotation.UserIdInt
 
-data class BubbleXmlEntity(
+data class BubbleEntity(
     @UserIdInt val userId: Int,
     val packageName: String,
     val shortcutId: String
