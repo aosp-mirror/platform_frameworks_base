@@ -42,10 +42,10 @@ class MediaViewManager @Inject constructor(
     val mediaCarousel: HorizontalScrollView
     private val mediaContent: ViewGroup
     private val mediaPlayers: MutableMap<String, MediaControlPanel> = mutableMapOf()
-    private val visualStabilityCallback = ::reorderAllPlayers
+    private val visualStabilityCallback : VisualStabilityManager.Callback
     private var activeMediaIndex: Int = 0
+    private var needsReordering: Boolean = false
     private var scrollIntoCurrentMedia: Int = 0
-
     private var currentlyExpanded = true
         set(value) {
             if (field != value) {
@@ -75,6 +75,16 @@ class MediaViewManager @Inject constructor(
         mediaCarousel = inflateMediaCarousel()
         mediaCarousel.setOnScrollChangeListener(scrollChangedListener)
         mediaContent = mediaCarousel.requireViewById(R.id.media_carousel)
+        visualStabilityCallback = VisualStabilityManager.Callback {
+            if (needsReordering) {
+                needsReordering = false
+                reorderAllPlayers()
+            }
+            // Let's reset our scroll position
+            mediaCarousel.scrollX = 0
+        }
+        visualStabilityManager.addReorderingAllowedCallback(visualStabilityCallback,
+                true /* persistent */)
         mediaManager.addListener(object : MediaDataManager.Listener {
             override fun onMediaDataLoaded(key: String, data: MediaData) {
                 updateView(key, data)
@@ -169,7 +179,7 @@ class MediaViewManager @Inject constructor(
                 mediaContent.removeView(existingPlayer.view?.player)
                 mediaContent.addView(existingPlayer.view?.player, 0)
             } else {
-                visualStabilityManager.addReorderingAllowedCallback(visualStabilityCallback)
+                needsReordering = true
             }
         }
         existingPlayer.bind(data)
