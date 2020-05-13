@@ -42,7 +42,7 @@ public class QSContainerImpl extends FrameLayout {
     private QuickStatusBarHeader mHeader;
     private float mQsExpansion;
     private QSCustomizer mQSCustomizer;
-    private View mQSFooter;
+    private View mDragHandle;
 
     private View mBackground;
     private View mBackgroundGradient;
@@ -62,7 +62,7 @@ public class QSContainerImpl extends FrameLayout {
         mQSDetail = findViewById(R.id.qs_detail);
         mHeader = findViewById(R.id.header);
         mQSCustomizer = findViewById(R.id.qs_customize);
-        mQSFooter = findViewById(R.id.qs_footer);
+        mDragHandle = findViewById(R.id.qs_drag_handle_view);
         mBackground = findViewById(R.id.quick_settings_background);
         mStatusBarBackground = findViewById(R.id.quick_settings_status_bar_background);
         mBackgroundGradient = findViewById(R.id.quick_settings_gradient_view);
@@ -167,8 +167,8 @@ public class QSContainerImpl extends FrameLayout {
         int height = calculateContainerHeight();
         setBottom(getTop() + height);
         mQSDetail.setBottom(getTop() + height);
-        // Pin QS Footer to the bottom of the panel.
-        mQSFooter.setTranslationY(height - mQSFooter.getHeight());
+        // Pin the drag handle to the bottom of the panel.
+        mDragHandle.setTranslationY(height - mDragHandle.getHeight());
         mBackground.setTop(mQSPanel.getTop());
         mBackground.setBottom(height);
     }
@@ -192,13 +192,13 @@ public class QSContainerImpl extends FrameLayout {
 
     public void setExpansion(float expansion) {
         mQsExpansion = expansion;
+        mDragHandle.setAlpha(1.0f - expansion);
         updateExpansion();
     }
 
     private void setMargins() {
         setMargins(mQSDetail);
         setMargins(mBackground);
-        setMargins(mQSFooter);
         mQSPanel.setMargins(mSideMargins);
         mHeader.setMargins(mSideMargins);
     }

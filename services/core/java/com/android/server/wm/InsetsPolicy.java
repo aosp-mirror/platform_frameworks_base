@@ -60,7 +60,37 @@ class InsetsPolicy {
     private final IntArray mShowingTransientTypes = new IntArray();
 
     /** For resetting visibilities of insets sources. */
-    private final InsetsControlTarget mDummyControlTarget = new InsetsControlTarget() { };
+    private final InsetsControlTarget mDummyControlTarget = new InsetsControlTarget() {
+
+        @Override
+        public void notifyInsetsControlChanged() {
+            boolean hasLeash = false;
+            final InsetsSourceControl[] controls =
+                    mStateController.getControlsForDispatch(this);
+            if (controls == null) {
+                return;
+            }
+            for (InsetsSourceControl control : controls) {
+                final @InternalInsetsType int type = control.getType();
+                if (mShowingTransientTypes.indexOf(type) != -1) {
+                    // The visibilities of transient bars will be handled with animations.
+                    continue;
+                }
+                final SurfaceControl leash = control.getLeash();
+                if (leash != null) {
+                    hasLeash = true;
+
+                    // We use alpha to control the visibility here which aligns the logic at
+                    // SurfaceAnimator.createAnimationLeash
+                    mDisplayContent.getPendingTransaction().setAlpha(
+                            leash, InsetsState.getDefaultVisibility(type) ? 1f : 0f);
+                }
+            }
+            if (hasLeash) {
+                mDisplayContent.scheduleAnimation();
+            }
+        }
+    };
 
     private WindowState mFocusedWin;
     private BarWindow mStatusBar = new BarWindow(StatusBarManager.WINDOW_STATUS_BAR);

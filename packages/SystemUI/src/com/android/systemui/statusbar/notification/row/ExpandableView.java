@@ -767,6 +767,10 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable {
         return mContentTranslation;
     }
 
+    public boolean wantsAddAndRemoveAnimations() {
+        return true;
+    }
+
     /**
      * A listener notifying when {@link #getActualHeight} changes.
      */

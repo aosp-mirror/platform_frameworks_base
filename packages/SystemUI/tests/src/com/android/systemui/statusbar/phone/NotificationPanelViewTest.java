@@ -55,6 +55,7 @@ import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.doze.DozeLog;
+import com.android.systemui.media.MediaHierarchyManager;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.FlingAnimationUtils;
@@ -172,6 +173,8 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     @Mock
     private ConfigurationController mConfigurationController;
     @Mock
+    private MediaHierarchyManager mMediaHiearchyManager;
+    @Mock
     private ConversationNotificationManager mConversationNotificationManager;
     private FlingAnimationUtils.Builder mFlingAnimationUtilsBuilder;
 
@@ -228,7 +231,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                 mLatencyTracker, mPowerManager, mAccessibilityManager, 0, mUpdateMonitor,
                 mMetricsLogger, mActivityManager, mZenModeController, mConfigurationController,
                 mFlingAnimationUtilsBuilder, mStatusBarTouchableRegionManager,
-                mConversationNotificationManager);
+                mConversationNotificationManager, mMediaHiearchyManager);
         mNotificationPanelViewController.initDependencies(mStatusBar, mGroupManager,
                 mNotificationShelf, mNotificationAreaController, mScrimController);
         mNotificationPanelViewController.setHeadsUpManager(mHeadsUpManager);

@@ -4390,12 +4390,6 @@
     <!-- Used in multiple service warning to list current features. [CHAR LIMIT=none] -->
     <string name="accessibility_shortcut_multiple_service_list">\t• <xliff:g id="service" example="TalkBack">%1$s</xliff:g>\n</string>
 
-    <!-- Dialog title for dialog shown when the TalkBack shortcut is activated, and we want to confirm that the user understands what's going to happen. [CHAR LIMIT=none] -->
-    <string name="accessibility_shortcut_talkback_warning_title">Turn on TalkBack?</string>
-
-    <!-- Message shown in dialog when user is in the process of enabling the TalkBack via the volume buttons shortcut for the first time. [CHAR LIMIT=none] -->
-    <string name="accessibility_shortcut_talkback_warning">Holding down both volume keys for a few seconds turns on TalkBack, a screen reader that is helpful for people who are blind or have low vision. TalkBack completely changes how your device works.\n\nYou can change this shortcut to another feature in Settings > Accessibility.</string>
-
     <!-- Dialog title for dialog shown when this accessibility shortcut is activated, and we want to confirm that the user understands what's going to happen. [CHAR LIMIT=none] -->
     <string name="accessibility_shortcut_single_service_warning_title">Turn on <xliff:g id="service" example="TalkBack">%1$s</xliff:g>?</string>
 

@@ -29,7 +29,6 @@ import static com.android.systemui.util.InjectionInflationController.VIEW_CONTEX
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
-import android.app.TaskStackBuilder;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.TimeAnimator;
@@ -51,7 +50,6 @@ import android.graphics.PointF;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.ServiceManager;
 import android.os.UserHandle;
@@ -3074,6 +3072,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
      */
     @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     private boolean generateRemoveAnimation(ExpandableView child) {
+        if (!child.wantsAddAndRemoveAnimations()) {
+            return false;
+        }
         if (removeRemovedChildFromHeadsUpChangeAnimations(child)) {
             mAddedHeadsUpChildren.remove(child);
             return false;
@@ -3428,7 +3429,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     @Override
     @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     public void generateAddAnimation(ExpandableView child, boolean fromMoreCard) {
-        if (mIsExpanded && mAnimationsEnabled && !mChangePositionInProgress && !isFullyHidden()) {
+        if (mIsExpanded && mAnimationsEnabled && !mChangePositionInProgress && !isFullyHidden()
+                && child.wantsAddAndRemoveAnimations()) {
             // Generate Animations
             mChildrenToAddAnimated.add(child);
             if (fromMoreCard) {
@@ -5841,7 +5843,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         // Let's update the footer once the notifications have been updated (in the next frame)
         post(() -> {
             updateFooter();
-            updateSectionBoundaries();
+            updateSectionBoundaries("dynamic privacy changed");
         });
     }
 
@@ -5922,8 +5924,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
 
     /** Updates the indices of the boundaries between sections. */
     @ShadeViewRefactor(RefactorComponent.INPUT)
-    public void updateSectionBoundaries() {
-        mSectionsManager.updateSectionBoundaries();
+    public void updateSectionBoundaries(String reason) {
+        mSectionsManager.updateSectionBoundaries(reason);
     }
 
     private void updateContinuousBackgroundDrawing() {

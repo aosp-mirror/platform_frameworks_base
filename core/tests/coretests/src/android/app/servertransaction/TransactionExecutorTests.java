@@ -267,7 +267,7 @@ public class TransactionExecutorTests {
                 null /* voiceInteractor */, 0 /* procState */, null /* state */,
                 null /* persistentState */, null /* pendingResults */,
                 null /* pendingNewIntents */, false /* isForward */, null /* profilerInfo */,
-                null /* assistToken*/));
+                null /* assistToken */, null /* fixedRotationAdjustments */));
         launchTransaction.addCallback(launchItem);
         mExecutor.execute(launchTransaction);
 

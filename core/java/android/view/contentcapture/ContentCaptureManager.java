@@ -346,7 +346,7 @@ public final class ContentCaptureManager {
 
 
     /** @hide */
-    public static final int DEFAULT_MAX_BUFFER_SIZE = 100;
+    public static final int DEFAULT_MAX_BUFFER_SIZE = 500; // Enough for typical busy screen.
     /** @hide */
     public static final int DEFAULT_IDLE_FLUSHING_FREQUENCY_MS = 5_000;
     /** @hide */

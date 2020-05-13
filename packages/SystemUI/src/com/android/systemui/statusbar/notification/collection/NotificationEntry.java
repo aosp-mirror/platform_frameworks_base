@@ -209,7 +209,7 @@ public final class NotificationEntry extends ListEntry {
     }
 
     /** The key for this notification. Guaranteed to be immutable and unique */
-    public String getKey() {
+    @NonNull public String getKey() {
         return mKey;
     }
 
@@ -217,7 +217,7 @@ public final class NotificationEntry extends ListEntry {
      * The StatusBarNotification that represents one half of a NotificationEntry (the other half
      * being the Ranking). This object is swapped out whenever a notification is updated.
      */
-    public StatusBarNotification getSbn() {
+    @NonNull public StatusBarNotification getSbn() {
         return mSbn;
     }
 

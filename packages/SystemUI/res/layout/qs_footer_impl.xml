@@ -23,7 +23,6 @@
     android:layout_height="@dimen/qs_footer_height"
     android:layout_marginStart="@dimen/qs_footer_margin"
     android:layout_marginEnd="@dimen/qs_footer_margin"
-    android:elevation="4dp"
     android:background="@android:color/transparent"
     android:baselineAligned="false"
     android:clickable="false"
@@ -128,13 +127,4 @@
             </com.android.systemui.statusbar.AlphaOptimizedFrameLayout>
         </com.android.keyguard.AlphaOptimizedLinearLayout>
     </LinearLayout>
-    <View
-        android:id="@+id/qs_drag_handle_view"
-        android:layout_width="48dp"
-        android:layout_height="4dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp"
-        android:layout_gravity="center_horizontal|bottom"
-        android:background="@drawable/qs_footer_drag_handle" />
-
 </com.android.systemui.qs.QSFooterImpl>

@@ -39,10 +39,13 @@ import java.io.IOException;
  */
 public class ScreenRecordDrawable extends DrawableWrapper {
     private Drawable mFillDrawable;
+    private Drawable mIconDrawable;
     private int mHorizontalPadding;
     private int mLevel;
     private float mTextSize;
-    private float mIconRadius;
+    private int mIconRadius;
+    private int mWidthPx;
+    private int mHeightPx;
     private Paint mPaint;
 
     /** No-arg constructor used by drawable inflation. */
@@ -57,6 +60,7 @@ public class ScreenRecordDrawable extends DrawableWrapper {
         super.inflate(r, parser, attrs, theme);
         setDrawable(r.getDrawable(R.drawable.ic_screen_record_background, theme).mutate());
         mFillDrawable = r.getDrawable(R.drawable.ic_screen_record_background, theme).mutate();
+        mIconDrawable = r.getDrawable(R.drawable.ic_screenrecord, theme).mutate();
         mHorizontalPadding = r.getDimensionPixelSize(R.dimen.status_bar_horizontal_padding);
 
         mTextSize = r.getDimensionPixelSize(R.dimen.screenrecord_status_text_size);
@@ -68,6 +72,19 @@ public class ScreenRecordDrawable extends DrawableWrapper {
         mPaint.setColor(Color.WHITE);
         mPaint.setTextSize(mTextSize);
         mPaint.setFakeBoldText(true);
+
+        mWidthPx = r.getDimensionPixelSize(R.dimen.screenrecord_status_icon_width);
+        mHeightPx = r.getDimensionPixelSize(R.dimen.screenrecord_status_icon_height);
+    }
+
+    @Override
+    public int getIntrinsicWidth() {
+        return mWidthPx;
+    }
+
+    @Override
+    public int getIntrinsicHeight() {
+        return mHeightPx;
     }
 
     @Override
@@ -103,10 +120,14 @@ public class ScreenRecordDrawable extends DrawableWrapper {
             String val = String.valueOf(mLevel);
             Rect textBounds = new Rect();
             mPaint.getTextBounds(val, 0, val.length(), textBounds);
-            float yOffset = textBounds.height() / 4; // half, and half again since it's centered
-            canvas.drawText(val, b.centerX(), b.centerY() + yOffset, mPaint);
+            canvas.drawText(val, b.centerX(), b.centerY() + textBounds.height() / 2, mPaint);
         } else {
-            canvas.drawCircle(b.centerX(), b.centerY() - mIconRadius / 2, mIconRadius, mPaint);
+            Rect iconBounds = new Rect(b.centerX() - mIconRadius,
+                    b.centerY() - mIconRadius,
+                    b.centerX() + mIconRadius,
+                    b.centerY() + mIconRadius);
+            mIconDrawable.setBounds(iconBounds);
+            mIconDrawable.draw(canvas);
         }
     }
 
@@ -114,9 +135,6 @@ public class ScreenRecordDrawable extends DrawableWrapper {
     public boolean getPadding(Rect padding) {
         padding.left += mHorizontalPadding;
         padding.right += mHorizontalPadding;
-        padding.top = 0;
-        padding.bottom = 0;
-        android.util.Log.d("ScreenRecordDrawable", "set zero top/bottom pad");
         return true;
     }
 

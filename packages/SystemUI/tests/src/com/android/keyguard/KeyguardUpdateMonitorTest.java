@@ -38,6 +38,7 @@ import static org.mockito.Mockito.when;
 
 import android.app.Activity;
 import android.app.admin.DevicePolicyManager;
+import android.app.trust.IStrongAuthTracker;
 import android.app.trust.TrustManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -72,6 +73,8 @@ import androidx.lifecycle.Observer;
 
 import com.android.dx.mockito.inline.extended.ExtendedMockito;
 import com.android.internal.telephony.TelephonyIntents;
+import com.android.internal.widget.ILockSettings;
+import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor.BiometricAuthenticated;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
@@ -119,6 +122,10 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     private KeyguardUpdateMonitor.StrongAuthTracker mStrongAuthTracker;
     @Mock
     private TrustManager mTrustManager;
+    @Mock
+    private LockPatternUtils mLockPatternUtils;
+    @Mock
+    private ILockSettings mLockSettings;
     @Mock
     private FingerprintManager mFingerprintManager;
     @Mock
@@ -169,12 +176,13 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         when(mFaceManager.hasEnrolledTemplates(anyInt())).thenReturn(true);
         when(mUserManager.isUserUnlocked(anyInt())).thenReturn(true);
         when(mUserManager.isPrimaryUser()).thenReturn(true);
+        when(mStrongAuthTracker.getStub()).thenReturn(mock(IStrongAuthTracker.Stub.class));
         when(mStrongAuthTracker
                 .isUnlockingWithBiometricAllowed(anyBoolean() /* isStrongBiometric */))
                 .thenReturn(true);
-
         when(mTelephonyManager.getServiceStateForSubscriber(anyInt()))
                 .thenReturn(new ServiceState());
+        when(mLockPatternUtils.getLockSettings()).thenReturn(mLockSettings);
         mSpiedContext.addMockSystemService(TrustManager.class, mTrustManager);
         mSpiedContext.addMockSystemService(FingerprintManager.class, mFingerprintManager);
         mSpiedContext.addMockSystemService(BiometricManager.class, mBiometricManager);
@@ -729,8 +737,9 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
             super(context,
                     TestableLooper.get(KeyguardUpdateMonitorTest.this).getLooper(),
                     mBroadcastDispatcher, mDumpManager,
-                    mRingerModeTracker, mBackgroundExecutor, mStatusBarStateController);
-            mStrongAuthTracker = KeyguardUpdateMonitorTest.this.mStrongAuthTracker;
+                    mRingerModeTracker, mBackgroundExecutor,
+                    mStatusBarStateController, mLockPatternUtils);
+            setStrongAuthTracker(KeyguardUpdateMonitorTest.this.mStrongAuthTracker);
         }
 
         public boolean hasSimStateJustChanged() {

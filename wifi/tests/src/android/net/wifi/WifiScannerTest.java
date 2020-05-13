@@ -613,4 +613,22 @@ public class WifiScannerTest {
         verify(mExecutor, never()).execute(any());
         verify(mScanListener, never()).onResults(mScanData);
     }
+
+    /**
+     * Tests isFullBandScan() method with and without DFS check
+     */
+    @Test
+    public void testIsFullBandScan() throws Exception {
+        assertFalse(WifiScanner.isFullBandScan(WifiScanner.WIFI_BAND_24_GHZ, true));
+        assertFalse(WifiScanner.isFullBandScan(WifiScanner.WIFI_BAND_5_GHZ, true));
+        assertFalse(WifiScanner.isFullBandScan(WifiScanner.WIFI_BAND_6_GHZ, true));
+        assertFalse(WifiScanner.isFullBandScan(
+                WifiScanner.WIFI_BAND_6_GHZ | WifiScanner.WIFI_BAND_5_GHZ, true));
+        assertTrue(WifiScanner.isFullBandScan(
+                WifiScanner.WIFI_BAND_24_GHZ | WifiScanner.WIFI_BAND_5_GHZ, true));
+        assertFalse(WifiScanner.isFullBandScan(
+                WifiScanner.WIFI_BAND_24_GHZ | WifiScanner.WIFI_BAND_5_GHZ, false));
+        assertTrue(WifiScanner.isFullBandScan(WifiScanner.WIFI_BAND_BOTH_WITH_DFS, true));
+        assertTrue(WifiScanner.isFullBandScan(WifiScanner.WIFI_BAND_BOTH_WITH_DFS, false));
+    }
 }

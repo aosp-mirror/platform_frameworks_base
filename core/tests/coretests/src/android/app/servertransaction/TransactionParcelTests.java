@@ -52,6 +52,9 @@ import android.os.PersistableBundle;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
+import android.view.DisplayAdjustments.FixedRotationAdjustments;
+import android.view.DisplayCutout;
+import android.view.Surface;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -187,11 +190,14 @@ public class TransactionParcelTests {
         bundle.putParcelable("data", new ParcelableData(1));
         PersistableBundle persistableBundle = new PersistableBundle();
         persistableBundle.putInt("k", 4);
+        FixedRotationAdjustments fixedRotationAdjustments = new FixedRotationAdjustments(
+                Surface.ROTATION_90, DisplayCutout.NO_CUTOUT);
 
         LaunchActivityItem item = LaunchActivityItem.obtain(intent, ident, activityInfo,
                 config(), overrideConfig, compat, referrer, null /* voiceInteractor */,
                 procState, bundle, persistableBundle, resultInfoList(), referrerIntentList(),
-                true /* isForward */, null /* profilerInfo */, new Binder());
+                true /* isForward */, null /* profilerInfo */, new Binder(),
+                fixedRotationAdjustments);
         writeAndPrepareForReading(item);
 
         // Read from parcel and assert
@@ -330,6 +336,22 @@ public class TransactionParcelTests {
 
         ClientTransaction transaction = ClientTransaction.obtain(appThread, activityToken);
         transaction.setLifecycleStateRequest(lifecycleRequest);
+
+        writeAndPrepareForReading(transaction);
+
+        // Read from parcel and assert
+        ClientTransaction result = ClientTransaction.CREATOR.createFromParcel(mParcel);
+
+        assertEquals(transaction.hashCode(), result.hashCode());
+        assertTrue(transaction.equals(result));
+    }
+
+    @Test
+    public void testFixedRotationAdjustments() {
+        ClientTransaction transaction = ClientTransaction.obtain(new StubAppThread(),
+                null /* activityToken */);
+        transaction.addCallback(FixedRotationAdjustmentsItem.obtain(new Binder(),
+                new FixedRotationAdjustments(Surface.ROTATION_270, DisplayCutout.NO_CUTOUT)));
 
         writeAndPrepareForReading(transaction);
 

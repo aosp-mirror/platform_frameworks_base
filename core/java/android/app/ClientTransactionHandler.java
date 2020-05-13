@@ -25,6 +25,7 @@ import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.os.IBinder;
 import android.util.MergedConfiguration;
+import android.view.DisplayAdjustments.FixedRotationAdjustments;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.ReferrerIntent;
@@ -166,6 +167,10 @@ public abstract class ClientTransactionHandler {
 
     /** Deliver app configuration change notification. */
     public abstract void handleConfigurationChanged(Configuration config);
+
+    /** Apply addition adjustments to override display information. */
+    public abstract void handleFixedRotationAdjustments(IBinder token,
+            FixedRotationAdjustments fixedRotationAdjustments);
 
     /**
      * Get {@link android.app.ActivityThread.ActivityClientRecord} instance that corresponds to the

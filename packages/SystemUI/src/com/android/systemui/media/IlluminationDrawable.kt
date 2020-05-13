@@ -6,6 +6,7 @@ import android.animation.AnimatorSet
 import android.animation.ValueAnimator
 import android.content.res.ColorStateList
 import android.content.res.Resources
+import android.content.res.TypedArray
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.ColorFilter
@@ -49,6 +50,7 @@ private data class RippleData(
 @Keep
 class IlluminationDrawable : Drawable() {
 
+    private var themeAttrs: IntArray? = null
     private var cornerRadius = 0f
     private var highlightColor = Color.TRANSPARENT
     private val rippleData = RippleData(0f, 0f, 0f, 0f, 0f, 0f, 0f)
@@ -139,11 +141,39 @@ class IlluminationDrawable : Drawable() {
         theme: Resources.Theme?
     ) {
         val a = obtainAttributes(r, theme, attrs, R.styleable.IlluminationDrawable)
-        cornerRadius = a.getDimension(R.styleable.IlluminationDrawable_cornerRadius, cornerRadius)
-        rippleData.minSize = a.getDimension(R.styleable.IlluminationDrawable_rippleMinSize, 0f)
-        rippleData.maxSize = a.getDimension(R.styleable.IlluminationDrawable_rippleMaxSize, 0f)
-        rippleData.highlight = a.getInteger(R.styleable.IlluminationDrawable_highlight, 0) / 100f
+        themeAttrs = a.extractThemeAttrs()
+        updateStateFromTypedArray(a)
         a.recycle()
+    }
+
+    private fun updateStateFromTypedArray(a: TypedArray) {
+        if (a.hasValue(R.styleable.IlluminationDrawable_cornerRadius)) {
+            cornerRadius = a.getDimension(R.styleable.IlluminationDrawable_cornerRadius,
+                    cornerRadius)
+        }
+        if (a.hasValue(R.styleable.IlluminationDrawable_rippleMinSize)) {
+            rippleData.minSize = a.getDimension(R.styleable.IlluminationDrawable_rippleMinSize, 0f)
+        }
+        if (a.hasValue(R.styleable.IlluminationDrawable_rippleMaxSize)) {
+            rippleData.maxSize = a.getDimension(R.styleable.IlluminationDrawable_rippleMaxSize, 0f)
+        }
+        if (a.hasValue(R.styleable.IlluminationDrawable_highlight)) {
+            rippleData.highlight = a.getInteger(R.styleable.IlluminationDrawable_highlight, 0) /
+                    100f
+        }
+    }
+
+    override fun canApplyTheme(): Boolean {
+        return themeAttrs != null && themeAttrs!!.size > 0 || super.canApplyTheme()
+    }
+
+    override fun applyTheme(t: Resources.Theme) {
+        super.applyTheme(t)
+        themeAttrs?.let {
+            val a = t.resolveAttributes(it, R.styleable.IlluminationDrawable)
+            updateStateFromTypedArray(a)
+            a.recycle()
+        }
     }
 
     override fun setColorFilter(p0: ColorFilter?) {

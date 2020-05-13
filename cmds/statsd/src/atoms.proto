@@ -439,6 +439,7 @@ message Atom {
             app_permission_groups_fragment_auto_revoke_action =
             273 [(module) = "permissioncontroller"];
         EvsUsageStatsReported evs_usage_stats_reported = 274 [(module) = "evs"];
+        AudioPowerUsageDataReported audio_power_usage_data_reported = 275;
         SdkExtensionStatus sdk_extension_status = 354;
 
         // StatsdStats tracks platform atoms with ids upto 500.
@@ -9688,4 +9689,60 @@ message EvsUsageStatsReported {
 
     // The duration of the service
     optional int64 duration_millis = 10;
+}
+
+/**
+ * Logs audio power usage stats.
+ *
+ * Pushed from:
+ *  frameworks/av/services/mediametrics/AudioPowerUsage.cpp
+ */
+message AudioPowerUsageDataReported {
+    /**
+     * Device used for input/output
+     *
+     * All audio devices please refer to below file:
+     * system/media/audio/include/system/audio-base.h
+     *
+     * Define our own enum values because we don't report all audio devices.
+     * Currently, we only report built-in audio devices such as handset, speaker,
+     * built-in mics, common audio devices such as wired headset, usb headset
+     * and bluetooth devices.
+     */
+    enum AudioDevice {
+        OUTPUT_EARPIECE         = 0x1; // handset
+        OUTPUT_SPEAKER          = 0x2; // dual speaker
+        OUTPUT_WIRED_HEADSET    = 0x4; // 3.5mm headset
+        OUTPUT_USB_HEADSET      = 0x8; // usb headset
+        OUTPUT_BLUETOOTH_SCO    = 0x10; // bluetooth sco
+        OUTPUT_BLUETOOTH_A2DP   = 0x20; // a2dp
+        OUTPUT_SPEAKER_SAFE     = 0x40; // bottom speaker
+
+        INPUT_DEVICE_BIT        = 0x40000000; // non-negative positive int32.
+        INPUT_BUILTIN_MIC       = 0x40000001; // buildin mic
+        INPUT_BUILTIN_BACK_MIC  = 0x40000002; // buildin back mic
+        INPUT_WIRED_HEADSET_MIC = 0x40000004; // 3.5mm headset mic
+        INPUT_USB_HEADSET_MIC   = 0x40000008; // usb headset mic
+        INPUT_BLUETOOTH_SCO     = 0x40000010; // bluetooth sco mic
+    }
+    optional AudioDevice audio_device = 1;
+
+    // Duration of the audio in seconds
+    optional int32 duration_secs = 2;
+
+    // Average volume (0 ... 1.0)
+    optional float average_volume = 3;
+
+    enum AudioType {
+        UNKNOWN_TYPE = 0;
+        VOICE_CALL_TYPE = 1; // voice call
+        VOIP_CALL_TYPE = 2; // voip call, including uplink and downlink
+        MEDIA_TYPE = 3; // music and system sound
+        RINGTONE_NOTIFICATION_TYPE = 4; // ringtone and notification
+        ALARM_TYPE = 5; // alarm type
+        // record type
+        CAMCORDER_TYPE = 6; // camcorder
+        RECORD_TYPE = 7;  // other recording
+    }
+    optional AudioType type = 4;
 }

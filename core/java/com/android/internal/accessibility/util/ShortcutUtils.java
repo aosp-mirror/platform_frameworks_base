@@ -137,7 +137,8 @@ public final class ShortcutUtils {
      */
     public static boolean isShortcutContained(Context context, @ShortcutType int shortcutType,
             @NonNull String componentId) {
-        final AccessibilityManager am = context.getSystemService(AccessibilityManager.class);
+        final AccessibilityManager am = (AccessibilityManager) context.getSystemService(
+                Context.ACCESSIBILITY_SERVICE);
         final List<String> requiredTargets = am.getAccessibilityShortcutTargets(shortcutType);
         return requiredTargets.contains(componentId);
     }

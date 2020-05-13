@@ -100,6 +100,7 @@ public final class MediaRouter2Manager {
                 .getSystemService(Context.MEDIA_SESSION_SERVICE);
         mPackageName = mContext.getPackageName();
         mHandler = new Handler(context.getMainLooper());
+        mHandler.post(this::getOrCreateClient);
     }
 
     /**
@@ -118,18 +119,6 @@ public final class MediaRouter2Manager {
             Log.w(TAG, "Ignoring to add the same callback twice.");
             return;
         }
-
-        synchronized (sLock) {
-            if (mClient == null) {
-                Client client = new Client();
-                try {
-                    mMediaRouterService.registerManager(client, mPackageName);
-                    mClient = client;
-                } catch (RemoteException ex) {
-                    Log.e(TAG, "Unable to register media router manager.", ex);
-                }
-            }
-        }
     }
 
     /**
@@ -143,21 +132,6 @@ public final class MediaRouter2Manager {
         if (!mCallbackRecords.remove(new CallbackRecord(null, callback))) {
             Log.w(TAG, "unregisterCallback: Ignore unknown callback. " + callback);
             return;
-        }
-
-        synchronized (sLock) {
-            if (mCallbackRecords.size() == 0) {
-                if (mClient != null) {
-                    try {
-                        mMediaRouterService.unregisterManager(mClient);
-                    } catch (RemoteException ex) {
-                        Log.e(TAG, "Unable to unregister media router manager", ex);
-                    }
-                    mClient = null;
-                }
-                mRoutes.clear();
-                mPreferredFeaturesMap.clear();
-            }
         }
     }
 
@@ -314,10 +288,7 @@ public final class MediaRouter2Manager {
      */
     @NonNull
     public List<RoutingSessionInfo> getActiveSessions() {
-        Client client;
-        synchronized (sLock) {
-            client = mClient;
-        }
+        Client client = getOrCreateClient();
         if (client != null) {
             try {
                 return mMediaRouterService.getActiveSessions(client);
@@ -380,10 +351,7 @@ public final class MediaRouter2Manager {
             return;
         }
 
-        Client client;
-        synchronized (sLock) {
-            client = mClient;
-        }
+        Client client = getOrCreateClient();
         if (client != null) {
             try {
                 int requestId = mNextRequestId.getAndIncrement();
@@ -419,10 +387,7 @@ public final class MediaRouter2Manager {
             return;
         }
 
-        Client client;
-        synchronized (sLock) {
-            client = mClient;
-        }
+        Client client = getOrCreateClient();
         if (client != null) {
             try {
                 int requestId = mNextRequestId.getAndIncrement();
@@ -451,10 +416,7 @@ public final class MediaRouter2Manager {
             return;
         }
 
-        Client client;
-        synchronized (sLock) {
-            client = mClient;
-        }
+        Client client = getOrCreateClient();
         if (client != null) {
             try {
                 int requestId = mNextRequestId.getAndIncrement();
@@ -710,15 +672,12 @@ public final class MediaRouter2Manager {
             return;
         }
 
-        Client client;
-        synchronized (sLock) {
-            client = mClient;
-        }
+        Client client = getOrCreateClient();
         if (client != null) {
             try {
                 int requestId = mNextRequestId.getAndIncrement();
                 mMediaRouterService.selectRouteWithManager(
-                        mClient, requestId, sessionInfo.getId(), route);
+                        client, requestId, sessionInfo.getId(), route);
             } catch (RemoteException ex) {
                 Log.e(TAG, "selectRoute: Failed to send a request.", ex);
             }
@@ -755,15 +714,12 @@ public final class MediaRouter2Manager {
             return;
         }
 
-        Client client;
-        synchronized (sLock) {
-            client = mClient;
-        }
+        Client client = getOrCreateClient();
         if (client != null) {
             try {
                 int requestId = mNextRequestId.getAndIncrement();
                 mMediaRouterService.deselectRouteWithManager(
-                        mClient, requestId, sessionInfo.getId(), route);
+                        client, requestId, sessionInfo.getId(), route);
             } catch (RemoteException ex) {
                 Log.e(TAG, "deselectRoute: Failed to send a request.", ex);
             }
@@ -794,14 +750,11 @@ public final class MediaRouter2Manager {
         int requestId = mNextRequestId.getAndIncrement();
         mTransferRequests.add(new TransferRequest(requestId, sessionInfo, route));
 
-        Client client;
-        synchronized (sLock) {
-            client = mClient;
-        }
+        Client client = getOrCreateClient();
         if (client != null) {
             try {
                 mMediaRouterService.transferToRouteWithManager(
-                        mClient, requestId, sessionInfo.getId(), route);
+                        client, requestId, sessionInfo.getId(), route);
             } catch (RemoteException ex) {
                 Log.e(TAG, "transferToRoute: Failed to send a request.", ex);
             }
@@ -821,15 +774,12 @@ public final class MediaRouter2Manager {
     public void releaseSession(@NonNull RoutingSessionInfo sessionInfo) {
         Objects.requireNonNull(sessionInfo, "sessionInfo must not be null");
 
-        Client client;
-        synchronized (sLock) {
-            client = mClient;
-        }
+        Client client = getOrCreateClient();
         if (client != null) {
             try {
                 int requestId = mNextRequestId.getAndIncrement();
                 mMediaRouterService.releaseSessionWithManager(
-                        mClient, requestId, sessionInfo.getId());
+                        client, requestId, sessionInfo.getId());
             } catch (RemoteException ex) {
                 Log.e(TAG, "releaseSession: Failed to send a request", ex);
             }
@@ -855,6 +805,23 @@ public final class MediaRouter2Manager {
         return TextUtils.equals(volumeControlId, sessionInfo.getOriginalId())
                 && TextUtils.equals(mediaController.getPackageName(),
                 sessionInfo.getOwnerPackageName());
+    }
+
+    private Client getOrCreateClient() {
+        synchronized (sLock) {
+            if (mClient != null) {
+                return mClient;
+            }
+            Client client = new Client();
+            try {
+                mMediaRouterService.registerManager(client, mPackageName);
+                mClient = client;
+                return client;
+            } catch (RemoteException ex) {
+                Log.e(TAG, "Unable to register media router manager.", ex);
+            }
+        }
+        return null;
     }
 
     /**

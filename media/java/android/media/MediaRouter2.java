@@ -98,7 +98,7 @@ public final class MediaRouter2 {
 
     final Handler mHandler;
     @GuardedBy("sRouterLock")
-    private boolean mShouldUpdateRoutes;
+    private boolean mShouldUpdateRoutes = true;
     private volatile List<MediaRoute2Info> mFilteredRoutes = Collections.emptyList();
     private volatile OnGetControllerHintsListener mOnGetControllerHintsListener;
 

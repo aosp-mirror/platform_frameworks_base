@@ -30,6 +30,7 @@ import android.content.pm.ResolveInfo;
 import android.os.IBinder;
 import android.os.ServiceManager;
 import android.provider.Settings;
+import android.provider.Telephony;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Slog;
@@ -84,6 +85,7 @@ public class PersonalAppsSuspensionHelper {
         result.removeAll(getSystemLauncherPackages());
         result.removeAll(getAccessibilityServices());
         result.removeAll(getInputMethodPackages());
+        result.remove(Telephony.Sms.getDefaultSmsPackage(mContext));
         result.remove(getSettingsPackageName());
 
         final String[] unsuspendablePackages =

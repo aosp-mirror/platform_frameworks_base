@@ -216,7 +216,7 @@ private:
     /**
      * Only use this if copy is absolutely needed.
      */
-    LogEvent(const LogEvent&);
+    LogEvent(const LogEvent&) = default;
 
     void parseInt32(int32_t* pos, int32_t depth, bool* last, uint8_t numAnnotations);
     void parseInt64(int32_t* pos, int32_t depth, bool* last, uint8_t numAnnotations);

@@ -20,5 +20,7 @@
         <permission name="android.permission.ACTIVITY_EMBEDDING"/>
         <!-- Required to send notification to current user-->
         <permission name="android.permission.MANAGE_USERS"/>
+        <!-- Required for CarNotificationLib -->
+        <permission name="android.permission.INTERACT_ACROSS_USERS"/>
     </privapp-permissions>
 </permissions>

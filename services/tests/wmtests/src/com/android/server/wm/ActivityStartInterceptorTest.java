@@ -53,6 +53,7 @@ import com.android.server.LocalServices;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.pm.PackageManagerService;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -159,6 +160,12 @@ public class ActivityStartInterceptorTest {
         // Initialise activity info
         mAInfo.applicationInfo = new ApplicationInfo();
         mAInfo.packageName = mAInfo.applicationInfo.packageName = TEST_PACKAGE_NAME;
+    }
+
+    @After
+    public void tearDown() {
+        LocalServices.removeServiceForTest(ActivityManagerInternal.class);
+        LocalServices.removeServiceForTest(DevicePolicyManagerInternal.class);
     }
 
     @Test

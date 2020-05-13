@@ -16,236 +16,173 @@
   -->
 
 <!-- Layout for media controls inside QSPanel carousel -->
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.motion.widget.MotionLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/qs_media_controls"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
+    android:layout_height="wrap_content"
+    android:clipChildren="false"
+    android:clipToPadding="false"
     android:gravity="center_horizontal|fill_vertical"
-    android:paddingTop="@dimen/qs_media_panel_outer_padding"
-    android:paddingBottom="@dimen/qs_media_panel_outer_padding"
-    android:background="@drawable/qs_media_background"
-    >
+    app:layoutDescription="@xml/media_scene">
+
+    <View
+        android:id="@+id/media_background"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@drawable/qs_media_background"
+        app:layout_constraintEnd_toEndOf="@id/view_width"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        />
+
+    <FrameLayout
+        android:id="@+id/notification_media_progress_time"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:forceHasOverlappingRendering="false">
+        <!-- width is set to "match_parent" to avoid extra layout calls -->
+        <TextView
+            android:id="@+id/media_elapsed_time"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:fontFamily="@*android:string/config_bodyFontFamily"
+            android:gravity="left"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/media_total_time"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:fontFamily="@*android:string/config_bodyFontFamily"
+            android:gravity="right"
+            android:textSize="14sp" />
+    </FrameLayout>
+
+    <ImageButton
+        android:id="@+id/action0"
+        style="@style/MediaPlayer.Button"
+        android:layout_width="48dp"
+        android:layout_height="48dp" />
+
+    <ImageButton
+        android:id="@+id/action1"
+        style="@style/MediaPlayer.Button"
+        android:layout_width="48dp"
+        android:layout_height="48dp" />
+
+    <ImageButton
+        android:id="@+id/action2"
+        style="@style/MediaPlayer.Button"
+        android:layout_width="52dp"
+        android:layout_height="52dp" />
+
+    <ImageButton
+        android:id="@+id/action3"
+        style="@style/MediaPlayer.Button"
+        android:layout_width="48dp"
+        android:layout_height="48dp" />
+
+    <ImageButton
+        android:id="@+id/action4"
+        style="@style/MediaPlayer.Button"
+        android:layout_width="48dp"
+        android:layout_height="48dp" />
+
+    <!-- Album Art -->
+    <ImageView
+        android:id="@+id/album_art"
+        android:layout_width="@dimen/qs_media_album_size"
+        android:layout_height="@dimen/qs_media_album_size" />
+
+    <!-- Seamless Output Switcher -->
+    <LinearLayout
+        android:id="@+id/media_seamless"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@*android:drawable/media_seamless_background"
+        android:orientation="horizontal"
+        android:forceHasOverlappingRendering="false"
+        android:paddingLeft="12dp"
+        android:paddingTop="6dp"
+        android:paddingRight="12dp"
+        android:paddingBottom="6dp">
+
+        <ImageView
+            android:id="@+id/media_seamless_image"
+            android:layout_width="@dimen/qs_seamless_icon_size"
+            android:layout_height="@dimen/qs_seamless_icon_size"
+            android:layout_marginRight="8dp"
+            android:src="@*android:drawable/ic_media_seamless" />
+
+        <TextView
+            android:id="@+id/media_seamless_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@*android:string/config_bodyFontFamily"
+            android:singleLine="true"
+            android:text="@*android:string/ext_media_seamless_action"
+            android:textSize="14sp" />
+    </LinearLayout>
+
+    <!-- Seek Bar -->
+    <SeekBar
+        android:id="@+id/media_progress_bar"
+        style="@android:style/Widget.ProgressBar.Horizontal"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:maxHeight="3dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="16dp"
+        android:splitTrack="false" />
+
+    <!-- App name -->
+    <TextView
+        android:id="@+id/app_name"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:singleLine="true"
+        android:textSize="14sp" />
+
+    <!-- Song name -->
+    <TextView
+        android:id="@+id/header_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@*android:string/config_headlineFontFamilyMedium"
+        android:singleLine="true"
+        android:textSize="18sp" />
+
+    <!-- Artist name -->
+    <TextView
+        android:id="@+id/header_artist"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@*android:string/config_bodyFontFamily"
+        android:singleLine="true"
+        android:textSize="14sp" />
+
+    <com.android.internal.widget.CachingIconView
+        android:id="@+id/icon"
+        android:layout_width="16dp"
+        android:layout_height="16dp" />
 
     <!-- Buttons to remove this view when no longer needed -->
     <include
         layout="@layout/qs_media_panel_options"
-        android:visibility="gone"/>
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="@id/view_width"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-    <LinearLayout
-        android:id="@+id/media_guts"
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/view_width"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-        <!-- Header section -->
-        <LinearLayout
-            android:orientation="horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/qs_media_panel_outer_padding"
-            android:paddingStart="@dimen/qs_media_panel_outer_padding"
-            android:paddingEnd="16dp"
-        >
-
-            <ImageView
-                android:id="@+id/album_art"
-                android:layout_width="@dimen/qs_media_album_size"
-                android:layout_height="@dimen/qs_media_album_size"
-                android:layout_marginRight="16dp"
-                android:layout_weight="0"
-            />
-
-            <LinearLayout
-                android:orientation="vertical"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-            >
-                <LinearLayout
-                    android:orientation="horizontal"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                >
-                    <com.android.internal.widget.CachingIconView
-                        android:id="@+id/icon"
-                        android:layout_width="16dp"
-                        android:layout_height="16dp"
-                        android:layout_marginEnd="5dp"
-                    />
-                    <TextView
-                        android:id="@+id/app_name"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textSize="14sp"
-                        android:singleLine="true"
-                    />
-                </LinearLayout>
-
-                <!-- Song name -->
-                <TextView
-                    android:id="@+id/header_title"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:singleLine="true"
-                    android:fontFamily="@*android:string/config_headlineFontFamilyMedium"
-                    android:textSize="18sp"
-                    android:paddingBottom="6dp"
-                    android:gravity="center"/>
-
-                <!-- Artist name -->
-                <TextView
-                    android:id="@+id/header_artist"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@*android:string/config_bodyFontFamily"
-                    android:textSize="14sp"
-                    android:singleLine="true"
-                />
-            </LinearLayout>
-
-            <!-- Output chip -->
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:visibility="gone"
-                android:paddingTop="6dp"
-                android:paddingBottom="6dp"
-                android:paddingLeft="12dp"
-                android:paddingRight="12dp"
-                android:gravity="center"
-                android:id="@+id/media_seamless"
-                android:background="@*android:drawable/media_seamless_background"
-                android:layout_weight="1"
-                android:forceHasOverlappingRendering="false"
-            >
-                <ImageView
-                    android:layout_width="@dimen/qs_seamless_icon_size"
-                    android:layout_height="@dimen/qs_seamless_icon_size"
-                    android:src="@*android:drawable/ic_media_seamless"
-                    android:layout_marginRight="8dp"
-                    android:id="@+id/media_seamless_image"
-                />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@*android:string/config_bodyFontFamily"
-                    android:text="@*android:string/ext_media_seamless_action"
-                    android:textSize="14sp"
-                    android:id="@+id/media_seamless_text"
-                    android:singleLine="true"
-                />
-            </LinearLayout>
-        </LinearLayout>
-
-        <!-- Seek Bar -->
-        <SeekBar
-            android:id="@+id/media_progress_bar"
-            style="@android:style/Widget.ProgressBar.Horizontal"
-            android:clickable="true"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:maxHeight="3dp"
-            android:paddingTop="24dp"
-            android:paddingBottom="24dp"
-            android:layout_marginBottom="-24dp"
-            android:layout_marginTop="-24dp"
-            android:splitTrack="false"
-        />
-
-        <FrameLayout
-            android:id="@+id/notification_media_progress_time"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingStart="@dimen/qs_media_panel_outer_padding"
-            android:paddingEnd="@dimen/qs_media_panel_outer_padding"
-            android:layout_marginBottom="10dp"
-            android:layout_gravity="center"
-            >
-            <!-- width is set to "match_parent" to avoid extra layout calls -->
-            <TextView
-                android:id="@+id/media_elapsed_time"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
-                android:fontFamily="@*android:string/config_bodyFontFamily"
-                android:textSize="14sp"
-                android:gravity="left"
-            />
-            <TextView
-                android:id="@+id/media_total_time"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:fontFamily="@*android:string/config_bodyFontFamily"
-                android:layout_alignParentRight="true"
-                android:textSize="14sp"
-                android:gravity="right"
-            />
-        </FrameLayout>
-
-        <!-- Controls -->
-        <LinearLayout
-            android:id="@+id/media_actions"
-            android:orientation="horizontal"
-            android:layoutDirection="ltr"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingStart="@dimen/qs_media_panel_outer_padding"
-            android:paddingEnd="@dimen/qs_media_panel_outer_padding"
-            android:gravity="center"
-            >
-            <ImageButton
-                style="@style/MediaPlayer.Button"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginEnd="8dp"
-                android:gravity="center"
-                android:visibility="gone"
-                android:id="@+id/action0"
-            />
-            <ImageButton
-                style="@style/MediaPlayer.Button"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginEnd="8dp"
-                android:gravity="center"
-                android:visibility="gone"
-                android:id="@+id/action1"
-            />
-            <ImageButton
-                style="@style/MediaPlayer.Button"
-                android:layout_width="52dp"
-                android:layout_height="52dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginEnd="8dp"
-                android:gravity="center"
-                android:visibility="gone"
-                android:id="@+id/action2"
-            />
-            <ImageButton
-                style="@style/MediaPlayer.Button"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginEnd="8dp"
-                android:gravity="center"
-                android:visibility="gone"
-                android:id="@+id/action3"
-            />
-            <ImageButton
-                style="@style/MediaPlayer.Button"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginEnd="8dp"
-                android:gravity="center"
-                android:visibility="gone"
-                android:id="@+id/action4"
-            />
-        </LinearLayout>
-    </LinearLayout>
-</LinearLayout>
+        app:layout_constraintGuide_begin="300dp" />
+</androidx.constraintlayout.motion.widget.MotionLayout>

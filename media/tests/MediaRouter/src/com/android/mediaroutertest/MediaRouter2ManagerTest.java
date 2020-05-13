@@ -603,6 +603,11 @@ public class MediaRouter2ManagerTest {
         assertTrue(onSessionCreatedLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
     }
 
+    @Test
+    public void testGetActiveSessions_returnsNonEmptyList() {
+        assertFalse(mManager.getActiveSessions().isEmpty());
+    }
+
     Map<String, MediaRoute2Info> waitAndGetRoutesWithManager(List<String> routeFeatures)
             throws Exception {
         CountDownLatch addedLatch = new CountDownLatch(1);

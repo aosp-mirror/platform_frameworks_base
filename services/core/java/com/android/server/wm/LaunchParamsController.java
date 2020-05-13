@@ -146,7 +146,10 @@ class LaunchParamsController {
 
             if (mTmpParams.hasWindowingMode()
                     && mTmpParams.mWindowingMode != task.getStack().getWindowingMode()) {
-                task.getStack().setWindowingMode(mTmpParams.mWindowingMode);
+                final int activityType = activity != null
+                        ? activity.getActivityType() : task.getActivityType();
+                task.getStack().setWindowingMode(task.getDisplayArea().validateWindowingMode(
+                        mTmpParams.mWindowingMode, activity, task, activityType));
             }
 
             if (mTmpParams.mBounds.isEmpty()) {

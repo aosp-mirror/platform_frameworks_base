@@ -32,7 +32,7 @@ class BubblePersistentRepository @Inject constructor(
     private val bubbleFile: AtomicFile = AtomicFile(File(context.filesDir,
             "overflow_bubbles.xml"), "overflow-bubbles")
 
-    fun persistsToDisk(bubbles: List<BubbleXmlEntity>): Boolean {
+    fun persistsToDisk(bubbles: List<BubbleEntity>): Boolean {
         if (DEBUG) Log.d(TAG, "persisting ${bubbles.size} bubbles")
         synchronized(bubbleFile) {
             val stream: FileOutputStream = try { bubbleFile.startWrite() } catch (e: IOException) {
@@ -52,7 +52,7 @@ class BubblePersistentRepository @Inject constructor(
         return false
     }
 
-    fun readFromDisk(): List<BubbleXmlEntity> {
+    fun readFromDisk(): List<BubbleEntity> {
         synchronized(bubbleFile) {
             try { return bubbleFile.openRead().use(::readXml) } catch (e: Throwable) {
                 Log.e(TAG, "Failed to open bubble file", e)

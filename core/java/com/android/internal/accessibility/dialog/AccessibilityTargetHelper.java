@@ -53,19 +53,61 @@ import java.util.Locale;
 /**
  * Collection of utilities for accessibility target.
  */
-final class AccessibilityTargetHelper {
+public final class AccessibilityTargetHelper {
     private AccessibilityTargetHelper() {}
 
-    static List<AccessibilityTarget> getTargets(Context context,
+    /**
+     * Returns list of {@link AccessibilityTarget} of assigned accessibility shortcuts from
+     * {@link AccessibilityManager#getAccessibilityShortcutTargets} including accessibility
+     * feature's package name, component id, etc.
+     *
+     * @param context The context of the application.
+     * @param shortcutType The shortcut type.
+     * @return The list of {@link AccessibilityTarget}.
+     * @hide
+     */
+    public static List<AccessibilityTarget> getTargets(Context context,
             @ShortcutType int shortcutType) {
-        final List<AccessibilityTarget> targets = getInstalledTargets(context, shortcutType);
-        final AccessibilityManager ams = context.getSystemService(AccessibilityManager.class);
-        final List<String> requiredTargets = ams.getAccessibilityShortcutTargets(shortcutType);
-        targets.removeIf(target -> !requiredTargets.contains(target.getId()));
+        // List all accessibility target
+        final List<AccessibilityTarget> installedTargets = getInstalledTargets(context,
+                shortcutType);
 
-        return targets;
+        // List accessibility shortcut target
+        final AccessibilityManager am = (AccessibilityManager) context.getSystemService(
+                Context.ACCESSIBILITY_SERVICE);
+        final List<String> assignedTargets = am.getAccessibilityShortcutTargets(shortcutType);
+
+        // Get the list of accessibility shortcut target in all accessibility target
+        final List<AccessibilityTarget> results = new ArrayList<>();
+        for (String assignedTarget : assignedTargets) {
+            for (AccessibilityTarget installedTarget : installedTargets) {
+                if (!MAGNIFICATION_CONTROLLER_NAME.contentEquals(assignedTarget)) {
+                    final ComponentName assignedTargetComponentName =
+                            ComponentName.unflattenFromString(assignedTarget);
+                    final ComponentName targetComponentName = ComponentName.unflattenFromString(
+                            installedTarget.getId());
+                    if (assignedTargetComponentName.equals(targetComponentName)) {
+                        results.add(installedTarget);
+                        continue;
+                    }
+                }
+                if (assignedTarget.contentEquals(installedTarget.getId())) {
+                    results.add(installedTarget);
+                }
+            }
+        }
+        return results;
     }
 
+    /**
+     * Returns list of {@link AccessibilityTarget} of the installed accessibility service,
+     * accessibility activity, and white listing feature including accessibility feature's package
+     * name, component id, etc.
+     *
+     * @param context The context of the application.
+     * @param shortcutType The shortcut type.
+     * @return The list of {@link AccessibilityTarget}.
+     */
     static List<AccessibilityTarget> getInstalledTargets(Context context,
             @ShortcutType int shortcutType) {
         final List<AccessibilityTarget> targets = new ArrayList<>();
@@ -110,9 +152,10 @@ final class AccessibilityTargetHelper {
 
     private static List<AccessibilityTarget> getAccessibilityServiceTargets(Context context,
             @ShortcutType int shortcutType) {
-        final AccessibilityManager ams = context.getSystemService(AccessibilityManager.class);
+        final AccessibilityManager am = (AccessibilityManager) context.getSystemService(
+                Context.ACCESSIBILITY_SERVICE);
         final List<AccessibilityServiceInfo> installedServices =
-                ams.getInstalledAccessibilityServiceList();
+                am.getInstalledAccessibilityServiceList();
         if (installedServices == null) {
             return Collections.emptyList();
         }
@@ -136,9 +179,10 @@ final class AccessibilityTargetHelper {
 
     private static List<AccessibilityTarget> getAccessibilityActivityTargets(Context context,
             @ShortcutType int shortcutType) {
-        final AccessibilityManager ams = context.getSystemService(AccessibilityManager.class);
+        final AccessibilityManager am = (AccessibilityManager) context.getSystemService(
+                Context.ACCESSIBILITY_SERVICE);
         final List<AccessibilityShortcutInfo> installedServices =
-                ams.getInstalledAccessibilityShortcutListAsUser(context,
+                am.getInstalledAccessibilityShortcutListAsUser(context,
                         ActivityManager.getCurrentUser());
         if (installedServices == null) {
             return Collections.emptyList();

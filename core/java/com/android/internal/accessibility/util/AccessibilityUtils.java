@@ -142,7 +142,8 @@ public final class AccessibilityUtils {
      */
     public static boolean isAccessibilityServiceEnabled(Context context,
             @NonNull String componentId) {
-        final AccessibilityManager am = context.getSystemService(AccessibilityManager.class);
+        final AccessibilityManager am = (AccessibilityManager) context.getSystemService(
+                Context.ACCESSIBILITY_SERVICE);
         final List<AccessibilityServiceInfo> enabledServices =
                 am.getEnabledAccessibilityServiceList(AccessibilityServiceInfo.FEEDBACK_ALL_MASK);
 

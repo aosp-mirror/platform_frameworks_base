@@ -115,7 +115,9 @@ public class NotificationTestHelper {
         dependency.injectMockDependency(BubbleController.class);
         dependency.injectMockDependency(NotificationShadeWindowController.class);
         mStatusBarStateController = mock(StatusBarStateController.class);
-        mGroupManager = new NotificationGroupManager(mStatusBarStateController);
+        mGroupManager = new NotificationGroupManager(
+                mStatusBarStateController,
+                () -> mock(PeopleNotificationIdentifier.class));
         mHeadsUpManager = new HeadsUpManagerPhone(mContext, mStatusBarStateController,
                 mock(KeyguardBypassController.class), mock(NotificationGroupManager.class),
                 mock(ConfigurationControllerImpl.class));

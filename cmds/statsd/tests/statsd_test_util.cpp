@@ -956,11 +956,11 @@ int64_t StringToId(const string& str) {
 void ValidateWakelockAttributionUidAndTagDimension(const DimensionsValue& value, const int atomId,
                                                    const int uid, const string& tag) {
     EXPECT_EQ(value.field(), atomId);
-    EXPECT_EQ(value.value_tuple().dimensions_value_size(), 2);
+    ASSERT_EQ(value.value_tuple().dimensions_value_size(), 2);
     // Attribution field.
     EXPECT_EQ(value.value_tuple().dimensions_value(0).field(), 1);
     // Uid field.
-    EXPECT_EQ(value.value_tuple().dimensions_value(0).value_tuple().dimensions_value_size(), 1);
+    ASSERT_EQ(value.value_tuple().dimensions_value(0).value_tuple().dimensions_value_size(), 1);
     EXPECT_EQ(value.value_tuple().dimensions_value(0).value_tuple().dimensions_value(0).field(), 1);
     EXPECT_EQ(value.value_tuple().dimensions_value(0).value_tuple().dimensions_value(0).value_int(),
               uid);
@@ -971,7 +971,7 @@ void ValidateWakelockAttributionUidAndTagDimension(const DimensionsValue& value,
 
 void ValidateAttributionUidDimension(const DimensionsValue& value, int atomId, int uid) {
     EXPECT_EQ(value.field(), atomId);
-    EXPECT_EQ(value.value_tuple().dimensions_value_size(), 1);
+    ASSERT_EQ(value.value_tuple().dimensions_value_size(), 1);
     // Attribution field.
     EXPECT_EQ(value.value_tuple().dimensions_value(0).field(), 1);
     // Uid only.
@@ -985,7 +985,7 @@ void ValidateAttributionUidDimension(const DimensionsValue& value, int atomId, i
 
 void ValidateUidDimension(const DimensionsValue& value, int node_idx, int atomId, int uid) {
     EXPECT_EQ(value.field(), atomId);
-    EXPECT_GT(value.value_tuple().dimensions_value_size(), node_idx);
+    ASSERT_GT(value.value_tuple().dimensions_value_size(), node_idx);
     // Attribution field.
     EXPECT_EQ(value.value_tuple().dimensions_value(node_idx).field(), 1);
     EXPECT_EQ(value.value_tuple().dimensions_value(node_idx)
@@ -997,7 +997,7 @@ void ValidateUidDimension(const DimensionsValue& value, int node_idx, int atomId
 void ValidateAttributionUidAndTagDimension(
     const DimensionsValue& value, int node_idx, int atomId, int uid, const std::string& tag) {
     EXPECT_EQ(value.field(), atomId);
-    EXPECT_GT(value.value_tuple().dimensions_value_size(), node_idx);
+    ASSERT_GT(value.value_tuple().dimensions_value_size(), node_idx);
     // Attribution field.
     EXPECT_EQ(1, value.value_tuple().dimensions_value(node_idx).field());
     // Uid only.
@@ -1016,7 +1016,7 @@ void ValidateAttributionUidAndTagDimension(
 void ValidateAttributionUidAndTagDimension(
     const DimensionsValue& value, int atomId, int uid, const std::string& tag) {
     EXPECT_EQ(value.field(), atomId);
-    EXPECT_EQ(1, value.value_tuple().dimensions_value_size());
+    ASSERT_EQ(1, value.value_tuple().dimensions_value_size());
     // Attribution field.
     EXPECT_EQ(1, value.value_tuple().dimensions_value(0).field());
     // Uid only.

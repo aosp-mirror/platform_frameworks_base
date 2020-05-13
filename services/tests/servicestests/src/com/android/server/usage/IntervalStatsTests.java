@@ -19,6 +19,7 @@ import static android.app.usage.UsageEvents.Event.MAX_EVENT_TYPE;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
+import static junit.framework.Assert.fail;
 
 import android.app.usage.UsageEvents;
 import android.content.res.Configuration;
@@ -26,9 +27,12 @@ import android.test.suitebuilder.annotation.SmallTest;
 
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.internal.util.ArrayUtils;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.lang.reflect.Field;
 import java.util.Locale;
 
 @RunWith(AndroidJUnit4.class)
@@ -190,5 +194,28 @@ public class IntervalStatsTests {
         // that some events were removed because of how shortcut and notification events are handled
         assertTrue(intervalStats.events.size() > NUMBER_OF_EVENTS - NUMBER_OF_EVENTS_PER_PACKAGE);
         assertEquals(intervalStats.packageStats.size(), NUMBER_OF_PACKAGES);
+    }
+
+    // All fields in this list are defined in IntervalStats and persisted - please ensure they're
+    // defined correctly in both usagestatsservice.proto and usagestatsservice_v2.proto
+    private static final String[] INTERVALSTATS_PERSISTED_FIELDS = {"beginTime", "endTime",
+            "mStringCache", "majorVersion", "minorVersion", "interactiveTracker",
+            "nonInteractiveTracker", "keyguardShownTracker", "keyguardHiddenTracker",
+            "packageStats", "configurations", "activeConfiguration", "events"};
+    // All fields in this list are defined in IntervalStats but not persisted
+    private static final String[] INTERVALSTATS_IGNORED_FIELDS = {"lastTimeSaved",
+            "packageStatsObfuscated", "CURRENT_MAJOR_VERSION", "CURRENT_MINOR_VERSION", "TAG"};
+
+    @Test
+    public void testIntervalStatsFieldsAreKnown() {
+        final IntervalStats stats = new IntervalStats();
+        final Field[] fields = stats.getClass().getDeclaredFields();
+        for (Field field : fields) {
+            if (!(ArrayUtils.contains(INTERVALSTATS_PERSISTED_FIELDS, field.getName())
+                    || ArrayUtils.contains(INTERVALSTATS_IGNORED_FIELDS, field.getName()))) {
+                fail("Found an unknown field: " + field.getName() + ". Please correctly update "
+                        + "either INTERVALSTATS_PERSISTED_FIELDS or INTERVALSTATS_IGNORED_FIELDS.");
+            }
+        }
     }
 }

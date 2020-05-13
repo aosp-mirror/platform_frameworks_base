@@ -68,6 +68,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 /**
@@ -381,17 +382,51 @@ public abstract class FileSystemProvider extends DocumentsProvider {
         return result;
     }
 
+    /**
+     * This method is similar to
+     * {@link DocumentsProvider#queryChildDocuments(String, String[], String)}. This method returns
+     * all children documents including hidden directories/files.
+     *
+     * <p>
+     * In a scoped storage world, access to "Android/data" style directories are hidden for privacy
+     * reasons. This method may show privacy sensitive data, so its usage should only be in
+     * restricted modes.
+     *
+     * @param parentDocumentId the directory to return children for.
+     * @param projection list of {@link Document} columns to put into the
+     *            cursor. If {@code null} all supported columns should be
+     *            included.
+     * @param sortOrder how to order the rows, formatted as an SQL
+     *            {@code ORDER BY} clause (excluding the ORDER BY itself).
+     *            Passing {@code null} will use the default sort order, which
+     *            may be unordered. This ordering is a hint that can be used to
+     *            prioritize how data is fetched from the network, but UI may
+     *            always enforce a specific ordering
+     * @throws FileNotFoundException when parent document doesn't exist or query fails
+     */
+    protected Cursor queryChildDocumentsShowAll(
+            String parentDocumentId, String[] projection, String sortOrder)
+            throws FileNotFoundException {
+        return queryChildDocuments(parentDocumentId, projection, sortOrder, File -> true);
+    }
+
     @Override
     public Cursor queryChildDocuments(
             String parentDocumentId, String[] projection, String sortOrder)
             throws FileNotFoundException {
+        // Access to some directories is hidden for privacy reasons.
+        return queryChildDocuments(parentDocumentId, projection, sortOrder, this::shouldShow);
+    }
 
+    private Cursor queryChildDocuments(
+            String parentDocumentId, String[] projection, String sortOrder,
+            @NonNull Predicate<File> filter) throws FileNotFoundException {
         final File parent = getFileForDocId(parentDocumentId);
         final MatrixCursor result = new DirectoryCursor(
                 resolveProjection(projection), parentDocumentId, parent);
         if (parent.isDirectory()) {
             for (File file : FileUtils.listFilesOrEmpty(parent)) {
-                if (!shouldHide(file)) {
+                if (filter.test(file)) {
                     includeFile(result, null, file);
                 }
             }
@@ -615,6 +650,10 @@ public abstract class FileSystemProvider extends DocumentsProvider {
      */
     protected boolean shouldHide(@NonNull File file) {
         return (PATTERN_HIDDEN_PATH.matcher(file.getAbsolutePath()).matches());
+    }
+
+    private boolean shouldShow(@NonNull File file) {
+        return !shouldHide(file);
     }
 
     protected boolean shouldBlockFromTree(@NonNull String docId) {

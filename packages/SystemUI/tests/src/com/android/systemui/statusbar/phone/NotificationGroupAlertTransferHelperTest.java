@@ -42,6 +42,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier;
 import com.android.systemui.statusbar.notification.row.NotifBindPipeline.BindCallback;
 import com.android.systemui.statusbar.notification.row.RowContentBindParams;
 import com.android.systemui.statusbar.notification.row.RowContentBindStage;
@@ -87,7 +88,9 @@ public class NotificationGroupAlertTransferHelperTest extends SysuiTestCase {
         when(mNotificationEntryManager.getPendingNotificationsIterator())
                 .thenReturn(mPendingEntries.values());
 
-        mGroupManager = new NotificationGroupManager(mock(StatusBarStateController.class));
+        mGroupManager = new NotificationGroupManager(
+                mock(StatusBarStateController.class),
+                () -> mock(PeopleNotificationIdentifier.class));
         mDependency.injectTestDependency(NotificationGroupManager.class, mGroupManager);
         mGroupManager.setHeadsUpManager(mHeadsUpManager);
 

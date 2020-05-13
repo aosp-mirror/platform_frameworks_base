@@ -13,21 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.android.systemui.bubbles.storage
 
-package com.android.keyguard
+import android.annotation.UserIdInt
 
-import android.graphics.drawable.Drawable
-
-import java.util.List
-
-/** State for lock screen media controls. */
-data class KeyguardMedia(
-    val foregroundColor: Int,
-    val backgroundColor: Int,
-    val app: String?,
-    val appIcon: Drawable?,
-    val artist: String?,
-    val song: String?,
-    val artwork: Drawable?,
-    val actionIcons: List<Drawable>
+data class BubbleEntity(
+    @UserIdInt val userId: Int,
+    val packageName: String,
+    val shortcutId: String
 )

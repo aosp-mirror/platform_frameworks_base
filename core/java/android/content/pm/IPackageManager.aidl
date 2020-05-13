@@ -235,6 +235,16 @@ interface IPackageManager {
     void deletePackageVersioned(in VersionedPackage versionedPackage,
             IPackageDeleteObserver2 observer, int userId, int flags);
 
+    /**
+     * Delete a package for a specific user.
+     *
+     * @param versionedPackage The package to delete.
+     * @param observer a callback to use to notify when the package deletion in finished.
+     * @param userId the id of the user for whom to delete the package
+     */
+    void deleteExistingPackageAsUser(in VersionedPackage versionedPackage,
+            IPackageDeleteObserver2 observer, int userId);
+
     @UnsupportedAppUsage
     String getInstallerPackageName(in String packageName);
 

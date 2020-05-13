@@ -19,6 +19,7 @@ package com.android.systemui.car.navigationbar;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.view.InsetsState.containsType;
+import static android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
 
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_SEMI_TRANSPARENT;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSPARENT;
@@ -34,26 +35,31 @@ import android.view.Display;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowInsetsController;
 import android.view.WindowManager;
 
 import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.RegisterStatusBarResult;
+import com.android.internal.view.AppearanceRegion;
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
 import com.android.systemui.car.CarDeviceProvisionedController;
 import com.android.systemui.car.CarDeviceProvisionedListener;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.UiBackground;
+import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.statusbar.AutoHideUiElement;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.AutoHideController;
 import com.android.systemui.statusbar.phone.BarTransitions;
+import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.phone.PhoneStatusBarPolicy;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy;
+import com.android.systemui.statusbar.phone.SysuiDarkIconDispatcher;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import java.io.FileDescriptor;
@@ -69,6 +75,7 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
 
     private final Resources mResources;
     private final CarNavigationBarController mCarNavigationBarController;
+    private final SysuiDarkIconDispatcher mStatusBarIconController;
     private final WindowManager mWindowManager;
     private final CarDeviceProvisionedController mCarDeviceProvisionedController;
     private final CommandQueue mCommandQueue;
@@ -106,6 +113,7 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
     private boolean mDeviceIsSetUpForUser = true;
     private boolean mIsUserSetupInProgress = false;
 
+    private AppearanceRegion[] mAppearanceRegions = new AppearanceRegion[0];
     @BarTransitions.TransitionMode
     private int mStatusBarMode;
     @BarTransitions.TransitionMode
@@ -117,6 +125,9 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
     public CarNavigationBar(Context context,
             @Main Resources resources,
             CarNavigationBarController carNavigationBarController,
+            // TODO(b/156052638): Should not need to inject LightBarController
+            LightBarController lightBarController,
+            DarkIconDispatcher darkIconDispatcher,
             WindowManager windowManager,
             CarDeviceProvisionedController deviceProvisionedController,
             CommandQueue commandQueue,
@@ -133,6 +144,7 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
         super(context);
         mResources = resources;
         mCarNavigationBarController = carNavigationBarController;
+        mStatusBarIconController = (SysuiDarkIconDispatcher) darkIconDispatcher;
         mWindowManager = windowManager;
         mCarDeviceProvisionedController = deviceProvisionedController;
         mCommandQueue = commandQueue;
@@ -165,6 +177,9 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
         } catch (RemoteException ex) {
             ex.rethrowFromSystemServer();
         }
+
+        onSystemBarAppearanceChanged(mDisplayId, result.mAppearance, result.mAppearanceRegions,
+                result.mNavbarColorManagedByIme);
 
         // StatusBarManagerService has a back up of IME token and it's restored here.
         setImeWindowStatus(mDisplayId, result.mImeToken, result.mImeWindowVis,
@@ -444,6 +459,64 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
         boolean isKeyboardVisible = (vis & InputMethodService.IME_VISIBLE) != 0;
         mCarNavigationBarController.setBottomWindowVisibility(
                 isKeyboardVisible ? View.GONE : View.VISIBLE);
+    }
+
+    @Override
+    public void onSystemBarAppearanceChanged(
+            int displayId,
+            @WindowInsetsController.Appearance int appearance,
+            AppearanceRegion[] appearanceRegions,
+            boolean navbarColorManagedByIme) {
+        if (displayId != mDisplayId) {
+            return;
+        }
+        boolean barModeChanged = updateStatusBarMode(
+                mStatusBarTransientShown ? MODE_SEMI_TRANSPARENT : MODE_TRANSPARENT);
+        int numStacks = appearanceRegions.length;
+        boolean stackAppearancesChanged = mAppearanceRegions.length != numStacks;
+        for (int i = 0; i < numStacks && !stackAppearancesChanged; i++) {
+            stackAppearancesChanged |= !appearanceRegions[i].equals(mAppearanceRegions[i]);
+        }
+        if (stackAppearancesChanged || barModeChanged) {
+            mAppearanceRegions = appearanceRegions;
+            updateStatusBarAppearance();
+        }
+    }
+
+    private void updateStatusBarAppearance() {
+        int numStacks = mAppearanceRegions.length;
+        int numLightStacks = 0;
+
+        // We can only have maximum one light stack.
+        int indexLightStack = -1;
+
+        for (int i = 0; i < numStacks; i++) {
+            if (isLight(mAppearanceRegions[i].getAppearance())) {
+                numLightStacks++;
+                indexLightStack = i;
+            }
+        }
+
+        // If all stacks are light, all icons become dark.
+        if (numLightStacks == numStacks) {
+            mStatusBarIconController.setIconsDarkArea(null);
+            mStatusBarIconController.getTransitionsController().setIconsDark(
+                    /* dark= */ true, /* animate= */ false);
+        } else if (numLightStacks == 0) {
+            // If no one is light, all icons become white.
+            mStatusBarIconController.getTransitionsController().setIconsDark(
+                    /* dark= */ false, /* animate= */ false);
+        } else {
+            // Not the same for every stack, update icons in area only.
+            mStatusBarIconController.setIconsDarkArea(
+                    mAppearanceRegions[indexLightStack].getBounds());
+            mStatusBarIconController.getTransitionsController().setIconsDark(
+                    /* dark= */ true, /* animate= */ false);
+        }
+    }
+
+    private static boolean isLight(int appearance) {
+        return (appearance & APPEARANCE_LIGHT_STATUS_BARS) != 0;
     }
 
     @Override

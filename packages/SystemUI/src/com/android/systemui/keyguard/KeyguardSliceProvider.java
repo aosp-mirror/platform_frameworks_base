@@ -451,7 +451,8 @@ public class KeyguardSliceProvider extends SliceProvider implements
      * @param metadata New metadata.
      */
     @Override
-    public void onMetadataOrStateChanged(MediaMetadata metadata, @PlaybackState.State int state) {
+    public void onPrimaryMetadataOrStateChanged(MediaMetadata metadata,
+            @PlaybackState.State int state) {
         synchronized (this) {
             boolean nextVisible = NotificationMediaManager.isPlayingState(state);
             mMediaHandler.removeCallbacksAndMessages(null);

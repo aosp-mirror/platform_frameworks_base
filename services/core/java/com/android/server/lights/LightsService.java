@@ -41,9 +41,12 @@ import android.view.SurfaceControl;
 import com.android.internal.BrightnessSynchronizer;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.DumpUtils;
 import com.android.internal.util.Preconditions;
 import com.android.server.SystemService;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -172,6 +175,36 @@ public class LightsService extends SystemService {
                     "closeSession requires CONTROL_DEVICE_LIGHTS permission");
             Preconditions.checkNotNull(token);
             closeSessionInternal(token);
+        }
+
+        @Override
+        protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+            if (!DumpUtils.checkDumpPermission(getContext(), TAG, pw)) return;
+
+            synchronized (LightsService.this) {
+                if (mVintfLights != null) {
+                    pw.println("Service: aidl (" + mVintfLights.get() + ")");
+                } else {
+                    pw.println("Service: hidl");
+                }
+
+                pw.println("Lights:");
+                for (int i = 0; i < mLightsById.size(); i++) {
+                    final LightImpl light = mLightsById.valueAt(i);
+                    pw.println(String.format("  Light id=%d ordinal=%d color=%08x",
+                            light.mHwLight.id, light.mHwLight.ordinal, light.getColor()));
+                }
+
+                pw.println("Session clients:");
+                for (Session session : mSessions) {
+                    pw.println("  Session token=" + session.mToken);
+                    for (int i = 0; i < session.mRequests.size(); i++) {
+                        pw.println(String.format("    Request id=%d color=%08x",
+                                session.mRequests.keyAt(i),
+                                session.mRequests.valueAt(i).getColor()));
+                    }
+                }
+            }
         }
 
         private void closeSessionInternal(IBinder token) {

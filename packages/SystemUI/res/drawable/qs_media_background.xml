@@ -19,4 +19,4 @@
     systemui:rippleMinSize="30dp"
     systemui:rippleMaxSize="135dp"
     systemui:highlight="15"
-    systemui:cornerRadius="@dimen/qs_media_corner_radius" />
+    systemui:cornerRadius="?android:attr/dialogCornerRadius" />

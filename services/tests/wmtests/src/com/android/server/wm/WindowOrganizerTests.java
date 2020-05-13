@@ -836,7 +836,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
         spyOn(record);
         doReturn(true).when(record).checkEnterPictureInPictureState(any(), anyBoolean());
 
-        record.getRootTask().setHasBeenVisible(true);
+        record.getTask().setHasBeenVisible(true);
         return record;
     }
 

@@ -102,6 +102,13 @@ class Bubble implements BubbleViewProvider {
         return user.getIdentifier() + "|" + entry.getSbn().getPackageName();
     }
 
+    // TODO: Decouple Bubble from NotificationEntry and transform ShortcutInfo into Bubble
+    Bubble(ShortcutInfo shortcutInfo) {
+        mShortcutInfo = shortcutInfo;
+        mKey = shortcutInfo.getId();
+        mGroupId = shortcutInfo.getId();
+    }
+
     /** Used in tests when no UI is required. */
     @VisibleForTesting(visibility = PRIVATE)
     Bubble(NotificationEntry e,

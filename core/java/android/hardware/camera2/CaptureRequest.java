@@ -2182,11 +2182,13 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * <p>By using this control, the application gains a simpler way to control zoom, which can
      * be a combination of optical and digital zoom. For example, a multi-camera system may
      * contain more than one lens with different focal lengths, and the user can use optical
-     * zoom by switching between lenses. Using zoomRatio has benefits in the scenarios below:
-     * <em> Zooming in from a wide-angle lens to a telephoto lens: A floating-point ratio provides
-     *   better precision compared to an integer value of {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion}.
-     * </em> Zooming out from a wide lens to an ultrawide lens: zoomRatio supports zoom-out whereas
-     *   {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion} doesn't.</p>
+     * zoom by switching between lenses. Using zoomRatio has benefits in the scenarios below:</p>
+     * <ul>
+     * <li>Zooming in from a wide-angle lens to a telephoto lens: A floating-point ratio provides
+     *   better precision compared to an integer value of {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion}.</li>
+     * <li>Zooming out from a wide lens to an ultrawide lens: zoomRatio supports zoom-out whereas
+     *   {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion} doesn't.</li>
+     * </ul>
      * <p>To illustrate, here are several scenarios of different zoom ratios, crop regions,
      * and output streams, for a hypothetical camera device with an active array of size
      * <code>(2000,1500)</code>.</p>

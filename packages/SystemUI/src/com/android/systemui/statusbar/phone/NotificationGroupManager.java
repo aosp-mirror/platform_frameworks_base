@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar.phone;
 
 import android.annotation.Nullable;
-import android.app.NotificationChannel;
 import android.service.notification.StatusBarNotification;
 import android.util.ArraySet;
 import android.util.Log;
@@ -28,6 +27,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
@@ -42,6 +42,8 @@ import java.util.Objects;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import dagger.Lazy;
+
 /**
  * A class to handle notifications and their corresponding groups.
  */
@@ -51,6 +53,7 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener, State
     private static final String TAG = "NotificationGroupManager";
     private final HashMap<String, NotificationGroup> mGroupMap = new HashMap<>();
     private final ArraySet<OnGroupChangeListener> mListeners = new ArraySet<>();
+    private final Lazy<PeopleNotificationIdentifier> mPeopleNotificationIdentifier;
     private int mBarState = -1;
     private HashMap<String, StatusBarNotification> mIsolatedEntries = new HashMap<>();
     private HeadsUpManager mHeadsUpManager;
@@ -58,8 +61,11 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener, State
     @Nullable private BubbleController mBubbleController = null;
 
     @Inject
-    public NotificationGroupManager(StatusBarStateController statusBarStateController) {
+    public NotificationGroupManager(
+            StatusBarStateController statusBarStateController,
+            Lazy<PeopleNotificationIdentifier> peopleNotificationIdentifier) {
         statusBarStateController.addCallback(this);
+        mPeopleNotificationIdentifier = peopleNotificationIdentifier;
     }
 
     private BubbleController getBubbleController() {
@@ -536,8 +542,9 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener, State
         if (!sbn.isGroup() || sbn.getNotification().isGroupSummary()) {
             return false;
         }
-        NotificationChannel channel = entry.getChannel();
-        if (channel != null && channel.isImportantConversation()) {
+        int peopleNotificationType = mPeopleNotificationIdentifier.get().getPeopleNotificationType(
+                entry.getSbn(), entry.getRanking());
+        if (peopleNotificationType == PeopleNotificationIdentifier.TYPE_IMPORTANT_PERSON) {
             return true;
         }
         if (mHeadsUpManager != null && !mHeadsUpManager.isAlerting(entry.getKey())) {

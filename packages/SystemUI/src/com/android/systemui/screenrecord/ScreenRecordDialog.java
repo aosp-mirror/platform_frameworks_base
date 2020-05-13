@@ -72,6 +72,7 @@ public class ScreenRecordDialog extends Activity {
         window.getDecorView();
         window.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         window.setGravity(Gravity.TOP);
+        setTitle(R.string.screenrecord_name);
 
         setContentView(R.layout.screen_record_dialog);
 

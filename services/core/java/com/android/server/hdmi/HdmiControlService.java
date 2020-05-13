@@ -2207,13 +2207,7 @@ public class HdmiControlService extends SystemService {
         @Override
         public void setHdmiCecVolumeControlEnabled(final boolean isHdmiCecVolumeControlEnabled) {
             enforceAccessPermission();
-            runOnServiceThread(new Runnable() {
-                @Override
-                public void run() {
-                    HdmiControlService.this.setHdmiCecVolumeControlEnabled(
-                            isHdmiCecVolumeControlEnabled);
-                }
-            });
+            HdmiControlService.this.setHdmiCecVolumeControlEnabled(isHdmiCecVolumeControlEnabled);
         }
 
         @Override
@@ -3014,7 +3008,6 @@ public class HdmiControlService extends SystemService {
     }
 
     void setHdmiCecVolumeControlEnabled(boolean isHdmiCecVolumeControlEnabled) {
-        assertRunOnServiceThread();
         synchronized (mLock) {
             mHdmiCecVolumeControlEnabled = isHdmiCecVolumeControlEnabled;
 
@@ -3030,7 +3023,6 @@ public class HdmiControlService extends SystemService {
     }
 
     boolean isHdmiCecVolumeControlEnabled() {
-        assertRunOnServiceThread();
         synchronized (mLock) {
             return mHdmiCecVolumeControlEnabled;
         }

@@ -1055,6 +1055,7 @@ public class BubbleStackView extends FrameLayout
     public void onComputeInternalInsets(ViewTreeObserver.InternalInsetsInfo inoutInfo) {
         inoutInfo.setTouchableInsets(ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION);
 
+        mTempRect.setEmpty();
         getTouchableRegion(mTempRect);
         inoutInfo.touchableRegion.set(mTempRect);
     }

@@ -13,12 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.systemui.bubbles.storage
 
-import android.annotation.UserIdInt
+package com.android.systemui.log.dagger;
 
-data class BubbleXmlEntity(
-    @UserIdInt val userId: Int,
-    val packageName: String,
-    val shortcutId: String
-)
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
+import com.android.systemui.log.LogBuffer;
+
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
+
+import javax.inject.Qualifier;
+
+/** A {@link LogBuffer} for notification sections-related messages. */
+@Qualifier
+@Documented
+@Retention(RUNTIME)
+public @interface NotificationSectionLog {
+}

@@ -449,12 +449,21 @@ public class PipTaskOrganizer extends TaskOrganizer {
      * {@link #scheduleResizePip}.
      */
     public void scheduleFinishResizePip(Rect destinationBounds) {
+        scheduleFinishResizePip(destinationBounds, null);
+    }
+
+    /**
+     * Same as {@link #scheduleFinishResizePip} but with a callback.
+     */
+    public void scheduleFinishResizePip(Rect destinationBounds,
+            Consumer<Rect> updateBoundsCallback) {
         final SurfaceControl.Transaction tx = mSurfaceControlTransactionFactory.getTransaction();
         mSurfaceTransactionHelper
                 .crop(tx, mLeash, destinationBounds)
                 .resetScale(tx, mLeash, destinationBounds)
                 .round(tx, mLeash, mInPip);
-        scheduleFinishResizePip(tx, destinationBounds, TRANSITION_DIRECTION_NONE, null);
+        scheduleFinishResizePip(tx, destinationBounds, TRANSITION_DIRECTION_NONE,
+                updateBoundsCallback);
     }
 
     private void scheduleFinishResizePip(SurfaceControl.Transaction tx,
@@ -552,6 +561,9 @@ public class PipTaskOrganizer extends TaskOrganizer {
                     ? null : destinationBounds;
             // As for the final windowing mode, simply reset it to undefined.
             wct.setWindowingMode(mToken, WINDOWING_MODE_UNDEFINED);
+            if (mSplitDivider != null && direction == TRANSITION_DIRECTION_TO_SPLIT_SCREEN) {
+                wct.reparent(mToken, mSplitDivider.getSecondaryRoot(), true /* onTop */);
+            }
         } else {
             taskBounds = destinationBounds;
         }

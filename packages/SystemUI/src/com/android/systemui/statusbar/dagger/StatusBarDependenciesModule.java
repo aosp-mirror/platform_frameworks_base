@@ -21,9 +21,9 @@ import android.content.Context;
 import android.os.Handler;
 
 import com.android.internal.statusbar.IStatusBarService;
-import com.android.keyguard.KeyguardMediaPlayer;
 import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.media.MediaDataManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.MediaArtworkProcessor;
@@ -95,9 +95,9 @@ public interface StatusBarDependenciesModule {
             NotificationEntryManager notificationEntryManager,
             MediaArtworkProcessor mediaArtworkProcessor,
             KeyguardBypassController keyguardBypassController,
-            KeyguardMediaPlayer keyguardMediaPlayer,
             @Main Executor mainExecutor,
-            DeviceConfigProxy deviceConfigProxy) {
+            DeviceConfigProxy deviceConfigProxy,
+            MediaDataManager mediaDataManager) {
         return new NotificationMediaManager(
                 context,
                 statusBarLazy,
@@ -105,9 +105,9 @@ public interface StatusBarDependenciesModule {
                 notificationEntryManager,
                 mediaArtworkProcessor,
                 keyguardBypassController,
-                keyguardMediaPlayer,
                 mainExecutor,
-                deviceConfigProxy);
+                deviceConfigProxy,
+                mediaDataManager);
     }
 
     /** */

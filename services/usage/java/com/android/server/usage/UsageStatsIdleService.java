@@ -27,6 +27,8 @@ import android.os.PersistableBundle;
 
 import com.android.server.LocalServices;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * JobService used to do any work for UsageStats while the device is idle.
  */
@@ -36,6 +38,11 @@ public class UsageStatsIdleService extends JobService {
      * Base job ID for the pruning job - must be unique within the system server uid.
      */
     private static final int PRUNE_JOB_ID = 546357475;
+    /**
+     * Job ID for the update mappings job - must be unique within the system server uid.
+     * Incrementing PRUNE_JOB_ID by 21475 (MAX_USER_ID) to ensure there is no overlap in job ids.
+     */
+    private static final int UPDATE_MAPPINGS_JOB_ID = 546378950;
 
     private static final String USER_ID_KEY = "user_id";
 
@@ -51,35 +58,65 @@ public class UsageStatsIdleService extends JobService {
                 .setPersisted(true)
                 .build();
 
+        scheduleJobInternal(context, pruneJob, userJobId);
+    }
+
+    static void scheduleUpdateMappingsJob(Context context) {
+        final ComponentName component = new ComponentName(context.getPackageName(),
+                UsageStatsIdleService.class.getName());
+        final JobInfo updateMappingsJob = new JobInfo.Builder(UPDATE_MAPPINGS_JOB_ID, component)
+                .setPersisted(true)
+                .setMinimumLatency(TimeUnit.DAYS.toMillis(1))
+                .setOverrideDeadline(TimeUnit.DAYS.toMillis(2))
+                .build();
+
+        scheduleJobInternal(context, updateMappingsJob, UPDATE_MAPPINGS_JOB_ID);
+    }
+
+    private static void scheduleJobInternal(Context context, JobInfo pruneJob, int jobId) {
         final JobScheduler jobScheduler = context.getSystemService(JobScheduler.class);
-        final JobInfo pendingPruneJob = jobScheduler.getPendingJob(userJobId);
+        final JobInfo pendingPruneJob = jobScheduler.getPendingJob(jobId);
         // only schedule a new prune job if one doesn't exist already for this user
         if (!pruneJob.equals(pendingPruneJob)) {
-            jobScheduler.cancel(userJobId); // cancel any previously scheduled prune job
+            jobScheduler.cancel(jobId); // cancel any previously scheduled prune job
             jobScheduler.schedule(pruneJob);
         }
-
     }
 
     static void cancelJob(Context context, int userId) {
-        final int userJobId = PRUNE_JOB_ID + userId; // unique job id per user
+        cancelJobInternal(context, PRUNE_JOB_ID + userId);
+    }
+
+    static void cancelUpdateMappingsJob(Context context) {
+        cancelJobInternal(context, UPDATE_MAPPINGS_JOB_ID);
+    }
+
+    private static void cancelJobInternal(Context context, int jobId) {
         final JobScheduler jobScheduler = context.getSystemService(JobScheduler.class);
-        jobScheduler.cancel(userJobId);
+        if (jobScheduler != null) {
+            jobScheduler.cancel(jobId);
+        }
     }
 
     @Override
     public boolean onStartJob(JobParameters params) {
         final PersistableBundle bundle = params.getExtras();
         final int userId = bundle.getInt(USER_ID_KEY, -1);
-        if (userId == -1) {
+        if (userId == -1 && params.getJobId() != UPDATE_MAPPINGS_JOB_ID) {
             return false;
         }
 
         AsyncTask.execute(() -> {
             final UsageStatsManagerInternal usageStatsManagerInternal = LocalServices.getService(
                     UsageStatsManagerInternal.class);
-            final boolean pruned = usageStatsManagerInternal.pruneUninstalledPackagesData(userId);
-            jobFinished(params, !pruned); // reschedule if data was not pruned
+            if (params.getJobId() == UPDATE_MAPPINGS_JOB_ID) {
+                final boolean jobFinished = usageStatsManagerInternal.updatePackageMappingsData();
+                jobFinished(params, !jobFinished); // reschedule if data was not updated
+            } else {
+                final boolean jobFinished =
+                        usageStatsManagerInternal.pruneUninstalledPackagesData(userId);
+                jobFinished(params, !jobFinished); // reschedule if data was not pruned
+            }
         });
         return true;
     }

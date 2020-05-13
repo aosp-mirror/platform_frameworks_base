@@ -296,20 +296,20 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
     }
 
     @Override
-    public void updateNotificationViews() {
+    public void updateNotificationViews(final String reason) {
         // The function updateRowStates depends on both of these being non-null, so check them here.
         // We may be called before they are set from DeviceProvisionedController's callback.
         if (mScrimController == null) return;
 
         // Do not modify the notifications during collapse.
         if (isCollapsing()) {
-            mShadeController.addPostCollapseAction(this::updateNotificationViews);
+            mShadeController.addPostCollapseAction(() -> updateNotificationViews(reason));
             return;
         }
 
         mViewHierarchyManager.updateNotificationViews();
 
-        mNotificationPanel.updateNotificationViews();
+        mNotificationPanel.updateNotificationViews(reason);
     }
 
     public void onNotificationRemoved(String key, StatusBarNotification old) {
@@ -347,7 +347,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
             updateNotificationOnUiModeChanged();
             mDispatchUiModeChangeOnUserSwitched = false;
         }
-        updateNotificationViews();
+        updateNotificationViews("user switched");
         mMediaManager.clearCurrentMediaNotification();
         mStatusBar.setLockscreenUser(newUserId);
         updateMediaMetaData(true, false);

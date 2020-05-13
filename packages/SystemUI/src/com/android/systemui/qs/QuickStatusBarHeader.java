@@ -220,6 +220,10 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         mNextAlarmTextView.setSelected(true);
     }
 
+    public QuickQSPanel getHeaderQsPanel() {
+        return mHeaderQsPanel;
+    }
+
     private List<String> getIgnoredIconSlots() {
         ArrayList<String> ignored = new ArrayList<>();
         ignored.add(mContext.getResources().getString(
@@ -335,23 +339,6 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         mSystemIconsView.getLayoutParams().height = resources.getDimensionPixelSize(
                 com.android.internal.R.dimen.quick_qs_offset_height);
         mSystemIconsView.setLayoutParams(mSystemIconsView.getLayoutParams());
-
-        FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) getLayoutParams();
-
-        if (mQsDisabled) {
-            lp.height = resources.getDimensionPixelSize(
-                    com.android.internal.R.dimen.quick_qs_offset_height);
-        } else if (useQsMediaPlayer(mContext) && mHeaderQsPanel.hasMediaPlayer()) {
-            lp.height = Math.max(getMinimumHeight(),
-                    resources.getDimensionPixelSize(
-                            com.android.internal.R.dimen.quick_qs_total_height_with_media));
-        } else {
-            lp.height = Math.max(getMinimumHeight(),
-                    resources.getDimensionPixelSize(
-                            com.android.internal.R.dimen.quick_qs_total_height));
-        }
-
-        setLayoutParams(lp);
 
         updateStatusIconAlphaAnimator();
         updateHeaderTextContainerAlphaAnimator();

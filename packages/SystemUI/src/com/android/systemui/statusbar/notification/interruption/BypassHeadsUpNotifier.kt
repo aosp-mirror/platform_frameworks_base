@@ -75,7 +75,7 @@ class BypassHeadsUpNotifier @Inject constructor(
         mediaManager.addCallback(this)
     }
 
-    override fun onMetadataOrStateChanged(metadata: MediaMetadata?, state: Int) {
+    override fun onPrimaryMetadataOrStateChanged(metadata: MediaMetadata?, state: Int) {
         val previous = currentMediaEntry
         var newEntry = entryManager
                 .getActiveNotificationUnfiltered(mediaManager.mediaNotificationKey)

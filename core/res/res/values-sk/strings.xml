@@ -1705,7 +1705,7 @@
     <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"Funkcie prepnete pridržaním tlačidla dostupnosti."</string>
     <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"Funkcie prepnete potiahnutím dvoma prstami nahor a pridržaním."</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"Funkcie prepnete potiahnutím troma prstami nahor a pridržaním."</string>
-    <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Priblíženie"</string>
+    <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Zväčšenie"</string>
     <string name="user_switched" msgid="7249833311585228097">"Aktuálny používateľ je <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"Prepína sa na účet <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"Prebieha odhlásenie používateľa <xliff:g id="NAME">%1$s</xliff:g>…"</string>

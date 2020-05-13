@@ -243,7 +243,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         // Ensure that update callbacks happen in correct order
         InOrder order = inOrder(mEntryListener, mPresenter, mEntryListener);
         order.verify(mEntryListener).onPreEntryUpdated(mEntry);
-        order.verify(mPresenter).updateNotificationViews();
+        order.verify(mPresenter).updateNotificationViews(any());
         order.verify(mEntryListener).onPostEntryUpdated(mEntry);
     }
 
@@ -254,7 +254,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
 
         mEntryManager.removeNotification(mSbn.getKey(), mRankingMap, UNDEFINED_DISMISS_REASON);
 
-        verify(mPresenter).updateNotificationViews();
+        verify(mPresenter).updateNotificationViews(any());
         verify(mEntryListener).onEntryRemoved(
                 eq(mEntry), any(), eq(false) /* removedByUser */, eq(UNDEFINED_DISMISS_REASON));
         verify(mRow).setRemoved();

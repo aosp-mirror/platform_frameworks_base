@@ -109,7 +109,7 @@ public class HybridGroupManager {
     }
 
     @Nullable
-    private CharSequence resolveText(Notification notification) {
+    public static CharSequence resolveText(Notification notification) {
         CharSequence contentText = notification.extras.getCharSequence(Notification.EXTRA_TEXT);
         if (contentText == null) {
             contentText = notification.extras.getCharSequence(Notification.EXTRA_BIG_TEXT);
@@ -118,7 +118,7 @@ public class HybridGroupManager {
     }
 
     @Nullable
-    private CharSequence resolveTitle(Notification notification) {
+    public static CharSequence resolveTitle(Notification notification) {
         CharSequence titleText = notification.extras.getCharSequence(Notification.EXTRA_TITLE);
         if (titleText == null) {
             titleText = notification.extras.getCharSequence(Notification.EXTRA_TITLE_BIG);

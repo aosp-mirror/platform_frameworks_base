@@ -275,6 +275,13 @@ public class ExternalStorageProvider extends FileSystemProvider {
         return projection != null ? projection : DEFAULT_ROOT_PROJECTION;
     }
 
+    @Override
+    public Cursor queryChildDocumentsForManage(
+            String parentDocId, String[] projection, String sortOrder)
+            throws FileNotFoundException {
+        return queryChildDocumentsShowAll(parentDocId, projection, sortOrder);
+    }
+
     /**
      * Check that the directory is the root of storage or blocked file from tree.
      *

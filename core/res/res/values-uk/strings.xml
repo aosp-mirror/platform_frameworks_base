@@ -857,7 +857,7 @@
     <string name="lockscreen_transport_stop_description" msgid="1449552232598355348">"Зупинити"</string>
     <string name="lockscreen_transport_rew_description" msgid="7680106856221622779">"Перемотати назад"</string>
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"Перемотати вперед"</string>
-    <string name="emergency_calls_only" msgid="3057351206678279851">"Лише аварійні виклики"</string>
+    <string name="emergency_calls_only" msgid="3057351206678279851">"Лише екстрені виклики"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"Мережу заблок."</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"SIM-карту заблоковано PUK."</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"Перегляньте посібник користувача чи зверніться до служби підтримки."</string>
