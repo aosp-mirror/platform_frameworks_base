@@ -7033,6 +7033,10 @@ package android.os {
     field public static final String EXTRA_VERSION = "android.os.extra.VERSION";
   }
 
+  public class DeviceIdleManager {
+    method @RequiresPermission(android.Manifest.permission.DEVICE_POWER) public void endIdle(@NonNull String);
+  }
+
   public class Environment {
     method @NonNull public static java.util.Collection<java.io.File> getInternalMediaDirectories();
     method @NonNull public static java.io.File getOdmDirectory();
@@ -11324,7 +11328,7 @@ package android.telephony.mbms.vendor {
   public class MbmsDownloadServiceBase extends android.os.Binder implements android.os.IInterface {
     ctor public MbmsDownloadServiceBase();
     method public int addProgressListener(android.telephony.mbms.DownloadRequest, android.telephony.mbms.DownloadProgressListener) throws android.os.RemoteException;
-    method public int addServiceAnnouncementFile(int, @NonNull byte[]);
+    method public int addServiceAnnouncement(int, @NonNull byte[]);
     method public int addStatusListener(android.telephony.mbms.DownloadRequest, android.telephony.mbms.DownloadStatusListener) throws android.os.RemoteException;
     method public android.os.IBinder asBinder();
     method public int cancelDownload(android.telephony.mbms.DownloadRequest) throws android.os.RemoteException;

@@ -144,11 +144,11 @@ public class MbmsErrors {
         public static final int ERROR_UNKNOWN_FILE_INFO = 403;
 
         /**
-         * Indicates that the service announcement file passed via
-         * {@link android.telephony.MbmsDownloadSession#addServiceAnnouncementFile(byte[])}
+         * Indicates that the service announcement descriptor passed via
+         * {@link android.telephony.MbmsDownloadSession#addServiceAnnouncement(byte[])}
          * is malformed.
          */
-        public static final int ERROR_MALFORMED_SERVICE_ANNOUNCEMENT_FILE = 404;
+        public static final int ERROR_MALFORMED_SERVICE_ANNOUNCEMENT = 404;
     }
 
     /**
@@ -189,7 +189,7 @@ public class MbmsErrors {
             DownloadErrors.ERROR_CANNOT_CHANGE_TEMP_FILE_ROOT,
             DownloadErrors.ERROR_UNKNOWN_DOWNLOAD_REQUEST,
             DownloadErrors.ERROR_UNKNOWN_FILE_INFO,
-            DownloadErrors.ERROR_MALFORMED_SERVICE_ANNOUNCEMENT_FILE,
+            DownloadErrors.ERROR_MALFORMED_SERVICE_ANNOUNCEMENT,
             GroupCallErrors.ERROR_UNABLE_TO_START_SERVICE,
             GroupCallErrors.ERROR_DUPLICATE_START_GROUP_CALL,
     })
