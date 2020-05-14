@@ -40,15 +40,12 @@ import android.net.TetheringRequestParcel;
 import android.net.dhcp.DhcpServerCallbacks;
 import android.net.dhcp.DhcpServingParamsParcel;
 import android.net.ip.IpServer;
-import android.net.util.SharedLog;
 import android.os.Binder;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
-import android.os.SystemProperties;
-import android.os.UserManager;
 import android.provider.Settings;
 import android.util.Log;
 
@@ -68,21 +65,14 @@ import java.io.PrintWriter;
 public class TetheringService extends Service {
     private static final String TAG = TetheringService.class.getSimpleName();
 
-    private final SharedLog mLog = new SharedLog(TAG);
     private TetheringConnector mConnector;
-    private Context mContext;
-    private TetheringDependencies mDeps;
-    private Tethering mTethering;
-    private UserManager mUserManager;
 
     @Override
     public void onCreate() {
-        mLog.mark("onCreate");
-        mDeps = getTetheringDependencies();
-        mContext = mDeps.getContext();
-        mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
-        mTethering = makeTethering(mDeps);
-        mTethering.startStateMachineUpdaters();
+        final TetheringDependencies deps = makeTetheringDependencies();
+        // The Tethering object needs a fully functional context to start, so this can't be done
+        // in the constructor.
+        mConnector = new TetheringConnector(makeTethering(deps), TetheringService.this);
     }
 
     /**
@@ -94,21 +84,10 @@ public class TetheringService extends Service {
         return new Tethering(deps);
     }
 
-    /**
-     * Create a binder connector for the system server to communicate with the tethering.
-     */
-    private synchronized IBinder makeConnector() {
-        if (mConnector == null) {
-            mConnector = new TetheringConnector(mTethering, TetheringService.this);
-        }
-        return mConnector;
-    }
-
     @NonNull
     @Override
     public IBinder onBind(Intent intent) {
-        mLog.mark("onBind");
-        return makeConnector();
+        return mConnector;
     }
 
     private static class TetheringConnector extends ITetheringConnector.Stub {
@@ -237,7 +216,7 @@ public class TetheringService extends Service {
                     listener.onResult(TETHER_ERROR_NO_CHANGE_TETHERING_PERMISSION);
                     return true;
                 }
-                if (!mService.isTetheringSupported()) {
+                if (!mTethering.isTetheringSupported()) {
                     listener.onResult(TETHER_ERROR_UNSUPPORTED);
                     return true;
                 }
@@ -253,7 +232,7 @@ public class TetheringService extends Service {
                 receiver.send(TETHER_ERROR_NO_CHANGE_TETHERING_PERMISSION, null);
                 return true;
             }
-            if (!mService.isTetheringSupported()) {
+            if (!mTethering.isTetheringSupported()) {
                 receiver.send(TETHER_ERROR_UNSUPPORTED, null);
                 return true;
             }
@@ -287,105 +266,83 @@ public class TetheringService extends Service {
         }
     }
 
-    // if ro.tether.denied = true we default to no tethering
-    // gservices could set the secure setting to 1 though to enable it on a build where it
-    // had previously been turned off.
-    private boolean isTetheringSupported() {
-        final int defaultVal =
-                SystemProperties.get("ro.tether.denied").equals("true") ? 0 : 1;
-        final boolean tetherSupported = Settings.Global.getInt(mContext.getContentResolver(),
-                Settings.Global.TETHER_SUPPORTED, defaultVal) != 0;
-        final boolean tetherEnabledInSettings = tetherSupported
-                && !mUserManager.hasUserRestriction(UserManager.DISALLOW_CONFIG_TETHERING);
-
-        return tetherEnabledInSettings && mTethering.hasTetherableConfiguration();
-    }
-
     /**
      * An injection method for testing.
      */
     @VisibleForTesting
-    public TetheringDependencies getTetheringDependencies() {
-        if (mDeps == null) {
-            mDeps = new TetheringDependencies() {
-                @Override
-                public NetworkRequest getDefaultNetworkRequest() {
-                    // TODO: b/147280869, add a proper system API to replace this.
-                    final NetworkRequest trackDefaultRequest = new NetworkRequest.Builder()
-                            .clearCapabilities()
-                            .addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED)
-                            .addCapability(NetworkCapabilities.NET_CAPABILITY_TRUSTED)
-                            .addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VPN)
-                            .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-                            .build();
-                    return trackDefaultRequest;
-                }
+    public TetheringDependencies makeTetheringDependencies() {
+        return new TetheringDependencies() {
+            @Override
+            public NetworkRequest getDefaultNetworkRequest() {
+                // TODO: b/147280869, add a proper system API to replace this.
+                final NetworkRequest trackDefaultRequest = new NetworkRequest.Builder()
+                        .clearCapabilities()
+                        .addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED)
+                        .addCapability(NetworkCapabilities.NET_CAPABILITY_TRUSTED)
+                        .addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VPN)
+                        .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+                        .build();
+                return trackDefaultRequest;
+            }
 
-                @Override
-                public Looper getTetheringLooper() {
-                    final HandlerThread tetherThread = new HandlerThread("android.tethering");
-                    tetherThread.start();
-                    return tetherThread.getLooper();
-                }
+            @Override
+            public Looper getTetheringLooper() {
+                final HandlerThread tetherThread = new HandlerThread("android.tethering");
+                tetherThread.start();
+                return tetherThread.getLooper();
+            }
 
-                @Override
-                public boolean isTetheringSupported() {
-                    return TetheringService.this.isTetheringSupported();
-                }
+            @Override
+            public Context getContext() {
+                return TetheringService.this;
+            }
 
-                @Override
-                public Context getContext() {
-                    return TetheringService.this;
-                }
+            @Override
+            public IpServer.Dependencies getIpServerDependencies() {
+                return new IpServer.Dependencies() {
+                    @Override
+                    public void makeDhcpServer(String ifName, DhcpServingParamsParcel params,
+                            DhcpServerCallbacks cb) {
+                        try {
+                            final INetworkStackConnector service = getNetworkStackConnector();
+                            if (service == null) return;
 
-                @Override
-                public IpServer.Dependencies getIpServerDependencies() {
-                    return new IpServer.Dependencies() {
-                        @Override
-                        public void makeDhcpServer(String ifName, DhcpServingParamsParcel params,
-                                DhcpServerCallbacks cb) {
+                            service.makeDhcpServer(ifName, params, cb);
+                        } catch (RemoteException e) {
+                            Log.e(TAG, "Fail to make dhcp server");
                             try {
-                                final INetworkStackConnector service = getNetworkStackConnector();
-                                if (service == null) return;
-
-                                service.makeDhcpServer(ifName, params, cb);
-                            } catch (RemoteException e) {
-                                Log.e(TAG, "Fail to make dhcp server");
-                                try {
-                                    cb.onDhcpServerCreated(STATUS_UNKNOWN_ERROR, null);
-                                } catch (RemoteException re) { }
-                            }
+                                cb.onDhcpServerCreated(STATUS_UNKNOWN_ERROR, null);
+                            } catch (RemoteException re) { }
                         }
-                    };
-                }
-
-                // TODO: replace this by NetworkStackClient#getRemoteConnector after refactoring
-                // networkStackClient.
-                static final int NETWORKSTACK_TIMEOUT_MS = 60_000;
-                private INetworkStackConnector getNetworkStackConnector() {
-                    IBinder connector;
-                    try {
-                        final long before = System.currentTimeMillis();
-                        while ((connector = NetworkStack.getService()) == null) {
-                            if (System.currentTimeMillis() - before > NETWORKSTACK_TIMEOUT_MS) {
-                                Log.wtf(TAG, "Timeout, fail to get INetworkStackConnector");
-                                return null;
-                            }
-                            Thread.sleep(200);
-                        }
-                    } catch (InterruptedException e) {
-                        Log.wtf(TAG, "Interrupted, fail to get INetworkStackConnector");
-                        return null;
                     }
-                    return INetworkStackConnector.Stub.asInterface(connector);
-                }
+                };
+            }
 
-                @Override
-                public BluetoothAdapter getBluetoothAdapter() {
-                    return BluetoothAdapter.getDefaultAdapter();
+            // TODO: replace this by NetworkStackClient#getRemoteConnector after refactoring
+            // networkStackClient.
+            static final int NETWORKSTACK_TIMEOUT_MS = 60_000;
+            private INetworkStackConnector getNetworkStackConnector() {
+                IBinder connector;
+                try {
+                    final long before = System.currentTimeMillis();
+                    while ((connector = NetworkStack.getService()) == null) {
+                        if (System.currentTimeMillis() - before > NETWORKSTACK_TIMEOUT_MS) {
+                            Log.wtf(TAG, "Timeout, fail to get INetworkStackConnector");
+                            return null;
+                        }
+                        Thread.sleep(200);
+                    }
+                } catch (InterruptedException e) {
+                    Log.wtf(TAG, "Interrupted, fail to get INetworkStackConnector");
+                    return null;
                 }
-            };
-        }
-        return mDeps;
+                return INetworkStackConnector.Stub.asInterface(connector);
+            }
+
+            @Override
+            public BluetoothAdapter getBluetoothAdapter() {
+                return BluetoothAdapter.getDefaultAdapter();
+            }
+        };
     }
 }
