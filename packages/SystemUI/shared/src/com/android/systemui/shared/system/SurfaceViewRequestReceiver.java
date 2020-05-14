@@ -58,7 +58,7 @@ public class SurfaceViewRequestReceiver {
      */
     public void onReceive(Context context, Bundle bundle, View view, Size viewSize) {
         if (mSurfaceControlViewHost != null) {
-            mSurfaceControlViewHost.die();
+            mSurfaceControlViewHost.release();
         }
 
         SurfaceControl surfaceControl = SurfaceViewRequestUtils.getSurfaceControl(bundle);
