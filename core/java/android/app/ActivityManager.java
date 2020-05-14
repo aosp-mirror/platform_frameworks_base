@@ -2231,7 +2231,8 @@ public class ActivityManager {
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeLong(mId);
             ComponentName.writeToParcel(mTopActivityComponent, dest);
-            dest.writeParcelable(mSnapshot, 0);
+            dest.writeParcelable(mSnapshot != null && !mSnapshot.isDestroyed() ? mSnapshot : null,
+                    0);
             dest.writeInt(mColorSpace.getId());
             dest.writeInt(mOrientation);
             dest.writeInt(mRotation);
