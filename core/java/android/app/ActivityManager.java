@@ -601,6 +601,20 @@ public class ActivityManager {
     @TestApi
     public static final int PROCESS_CAPABILITY_FOREGROUND_MICROPHONE = 1 << 2;
 
+    // TODO: remove this when development is done.
+    // These are debug flags used between OomAdjuster and AppOpsService to detect and report absence
+    // of the real flags.
+    /** @hide */
+    public static final int DEBUG_PROCESS_CAPABILITY_FOREGROUND_MICROPHONE_Q = 1 << 27;
+    /** @hide */
+    public static final int DEBUG_PROCESS_CAPABILITY_FOREGROUND_CAMERA_Q = 1 << 28;
+    /** @hide */
+    public static final int DEBUG_PROCESS_CAPABILITY_FOREGROUND_MICROPHONE = 1 << 29;
+    /** @hide */
+    public static final int DEBUG_PROCESS_CAPABILITY_FOREGROUND_CAMERA = 1 << 30;
+    /** @hide */
+    public static final int DEBUG_PROCESS_CAPABILITY_FOREGROUND_LOCATION = 1 << 31;
+
     /** @hide all capabilities, the ORing of all flags in {@link ProcessCapability}*/
     @TestApi
     public static final int PROCESS_CAPABILITY_ALL = PROCESS_CAPABILITY_FOREGROUND_LOCATION
@@ -622,6 +636,51 @@ public class ActivityManager {
     @TestApi
     public static final int PROCESS_CAPABILITY_ALL_IMPLICIT = PROCESS_CAPABILITY_FOREGROUND_CAMERA
             | PROCESS_CAPABILITY_FOREGROUND_MICROPHONE;
+
+    /**
+     * Print capability bits in human-readable form.
+     * @hide
+     */
+    public static void printCapabilitiesSummary(PrintWriter pw, @ProcessCapability int caps) {
+        pw.print((caps & PROCESS_CAPABILITY_FOREGROUND_LOCATION) != 0 ? 'L' : '-');
+        pw.print((caps & PROCESS_CAPABILITY_FOREGROUND_CAMERA) != 0 ? 'C' : '-');
+        pw.print((caps & PROCESS_CAPABILITY_FOREGROUND_MICROPHONE) != 0 ? 'M' : '-');
+    }
+
+    /**
+     * Print capability bits in human-readable form.
+     * @hide
+     */
+    public static void printCapabilitiesFull(PrintWriter pw, @ProcessCapability int caps) {
+        printCapabilitiesSummary(pw, caps);
+        if ((caps & DEBUG_PROCESS_CAPABILITY_FOREGROUND_LOCATION) != 0) {
+            pw.print(" !L");
+        }
+        if ((caps & DEBUG_PROCESS_CAPABILITY_FOREGROUND_CAMERA) != 0) {
+            pw.print(" !C");
+        }
+        if ((caps & DEBUG_PROCESS_CAPABILITY_FOREGROUND_CAMERA_Q) != 0) {
+            pw.print(" !Cq");
+        }
+        if ((caps & DEBUG_PROCESS_CAPABILITY_FOREGROUND_MICROPHONE) != 0) {
+            pw.print(" !M");
+        }
+        if ((caps & DEBUG_PROCESS_CAPABILITY_FOREGROUND_MICROPHONE_Q) != 0) {
+            pw.print(" !Mq");
+        }
+        final int remain = caps & ~(PROCESS_CAPABILITY_FOREGROUND_LOCATION
+                | PROCESS_CAPABILITY_FOREGROUND_CAMERA
+                | PROCESS_CAPABILITY_FOREGROUND_MICROPHONE
+                | DEBUG_PROCESS_CAPABILITY_FOREGROUND_LOCATION
+                | DEBUG_PROCESS_CAPABILITY_FOREGROUND_CAMERA
+                | DEBUG_PROCESS_CAPABILITY_FOREGROUND_CAMERA_Q
+                | DEBUG_PROCESS_CAPABILITY_FOREGROUND_MICROPHONE
+                | DEBUG_PROCESS_CAPABILITY_FOREGROUND_MICROPHONE_Q);
+        if (remain != 0) {
+            pw.print('+');
+            pw.print(remain);
+        }
+    }
 
     // NOTE: If PROCESS_STATEs are added, then new fields must be added
     // to frameworks/base/core/proto/android/app/enums.proto and the following method must
