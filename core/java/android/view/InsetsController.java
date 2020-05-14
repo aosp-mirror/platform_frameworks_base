@@ -35,6 +35,7 @@ import android.graphics.Insets;
 import android.graphics.Rect;
 import android.os.CancellationSignal;
 import android.os.Handler;
+import android.os.Trace;
 import android.util.ArraySet;
 import android.util.Pair;
 import android.util.SparseArray;
@@ -1139,6 +1140,8 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             if (controller.isCancelled()) {
                 return;
             }
+            Trace.asyncTraceBegin(Trace.TRACE_TAG_VIEW,
+                    "InsetsAnimation: " + WindowInsets.Type.toString(types), types);
             for (int i = mRunningAnimations.size() - 1; i >= 0; i--) {
                 RunningAnimation runningAnimation = mRunningAnimations.get(i);
                 if (runningAnimation.runner == controller) {
@@ -1155,6 +1158,9 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
     @VisibleForTesting
     public void dispatchAnimationEnd(WindowInsetsAnimation animation) {
+        Trace.asyncTraceEnd(Trace.TRACE_TAG_VIEW,
+                "InsetsAnimation: " + WindowInsets.Type.toString(animation.getTypeMask()),
+                animation.getTypeMask());
         mHost.dispatchWindowInsetsAnimationEnd(animation);
     }
 
