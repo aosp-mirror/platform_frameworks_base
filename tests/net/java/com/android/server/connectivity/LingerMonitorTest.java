@@ -38,6 +38,7 @@ import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.net.NetworkProvider;
+import android.os.Binder;
 import android.os.INetworkManagementService;
 import android.text.format.DateUtils;
 
@@ -354,7 +355,7 @@ public class LingerMonitorTest {
         caps.addTransportType(transport);
         NetworkAgentInfo nai = new NetworkAgentInfo(null, null, new Network(netId), info, null,
                 caps, 50, mCtx, null, null /* config */, mConnService, mNetd, mDnsResolver, mNMS,
-                NetworkProvider.ID_NONE);
+                NetworkProvider.ID_NONE, Binder.getCallingUid());
         nai.everValidated = true;
         return nai;
     }
