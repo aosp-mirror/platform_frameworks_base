@@ -251,6 +251,7 @@
     <allow-in-data-usage-save package="com.android.providers.downloads" />
 
     <!-- This is a core platform component that needs to freely run in the background -->
+    <allow-in-power-save package="com.android.cellbroadcastreceiver.module" />
     <allow-in-power-save package="com.android.cellbroadcastreceiver" />
     <allow-in-power-save package="com.android.shell" />
 
