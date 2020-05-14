@@ -183,8 +183,17 @@ package android.os {
 
 package android.util {
 
+  public class AtomicFile {
+    ctor public AtomicFile(@NonNull java.io.File, @Nullable android.util.SystemConfigFileCommitEventLogger);
+  }
+
   public final class Log {
     method public static int logToRadioBuffer(int, @Nullable String, @Nullable String);
+  }
+
+  public class SystemConfigFileCommitEventLogger {
+    ctor public SystemConfigFileCommitEventLogger(@NonNull String);
+    method public void setStartTime(long);
   }
 
 }
