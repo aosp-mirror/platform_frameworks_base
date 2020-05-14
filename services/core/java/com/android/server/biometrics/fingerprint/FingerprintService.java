@@ -330,6 +330,7 @@ public class FingerprintService extends BiometricServiceBase {
         @Override
         public void addLockoutResetCallback(final IBiometricServiceLockoutResetCallback callback)
                 throws RemoteException {
+            checkPermission(USE_BIOMETRIC_INTERNAL);
             FingerprintService.super.addLockoutResetCallback(callback);
         }
 
