@@ -3213,7 +3213,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             if (TextUtils.equals(pae.intent.getAction(),
                     android.service.voice.VoiceInteractionService.SERVICE_INTERFACE)) {
                 // Start voice interaction through VoiceInteractionManagerService.
-                mAssistUtils.showSessionForActiveService(sendBundle, SHOW_SOURCE_APPLICATION,
+                mAssistUtils.showSessionForActiveService(pae.extras, SHOW_SOURCE_APPLICATION,
                         null, null);
             } else {
                 pae.intent.replaceExtras(pae.extras);
