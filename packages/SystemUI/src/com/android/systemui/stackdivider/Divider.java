@@ -592,13 +592,11 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
         removeDivider();
         addDivider(configuration);
 
-        if (mView != null) {
-            if (mMinimized) {
-                mView.setMinimizedDockStack(true, mHomeStackResizable);
-                updateTouchable();
-            }
-            mView.setHidden(isDividerHidden);
+        if (mMinimized) {
+            mView.setMinimizedDockStack(true, mHomeStackResizable);
+            updateTouchable();
         }
+        mView.setHidden(isDividerHidden);
     }
 
     void onTaskVanished() {
@@ -610,7 +608,7 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
                 mContext.getDisplayId()).getResources().getConfiguration()));
     }
 
-    void updateVisibility(final boolean visible) {
+    private void updateVisibility(final boolean visible) {
         if (DEBUG) Slog.d(TAG, "Updating visibility " + mVisible + "->" + visible);
         if (mVisible != visible) {
             mVisible = visible;
@@ -639,6 +637,7 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
     void onSplitDismissed() {
         mMinimized = false;
         updateVisibility(false /* visible */);
+        removeDivider();
     }
 
     /** Switch to minimized state if appropriate */
@@ -788,6 +787,8 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
     }
 
     void startEnterSplit() {
+        update(mDisplayController.getDisplayContext(
+                mContext.getDisplayId()).getResources().getConfiguration());
         // Set resizable directly here because applyEnterSplit already resizes home stack.
         mHomeStackResizable = WindowManagerProxy.applyEnterSplit(mSplits, mSplitLayout);
     }
