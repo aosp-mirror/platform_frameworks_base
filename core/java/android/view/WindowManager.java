@@ -1162,7 +1162,7 @@ public interface WindowManager extends ViewManager {
 
         /**
          * Window type: shows directly above the keyguard. The layer is
-         * reserved for screenshot region selection. These windows must not take input focus.
+         * reserved for screenshot animation, region selection and UI.
          * In multiuser systems shows only on the owning user's window.
          * @hide
          */
