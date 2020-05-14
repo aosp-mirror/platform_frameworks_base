@@ -208,26 +208,6 @@ public final class ImeFocusController {
     }
 
     /**
-     * Called by {@link ViewRootImpl} to feedback the state of the screen for this view.
-     * @param newScreenState The new state of the screen. Can be either
-     *                       {@link View#SCREEN_STATE_ON} or {@link View#SCREEN_STATE_OFF}
-     */
-    @UiThread
-    void onScreenStateChanged(int newScreenState) {
-        if (!getImmDelegate().isCurrentRootView(mViewRootImpl)) {
-            return;
-        }
-        // Close input connection and IME when the screen is turn off for security concern.
-        if (newScreenState == View.SCREEN_STATE_OFF && mServedView != null) {
-            if (DEBUG) {
-                Log.d(TAG, "onScreenStateChanged, disconnect input when screen turned off");
-            }
-            mNextServedView = null;
-            mViewRootImpl.dispatchCheckFocus();
-        }
-    }
-
-    /**
      * @param windowAttribute {@link WindowManager.LayoutParams} to be checked.
      * @return Whether the window is in local focus mode or not.
      */
