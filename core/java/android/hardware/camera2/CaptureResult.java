@@ -3949,14 +3949,24 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
             new Key<Integer>("android.sensor.testPatternMode", int.class);
 
     /**
-     * <p>Duration between the start of first row exposure
-     * and the start of last row exposure.</p>
-     * <p>This is the exposure time skew between the first and last
-     * row exposure start times. The first row and the last row are
-     * the first and last rows inside of the
+     * <p>Duration between the start of exposure for the first row of the image sensor,
+     * and the start of exposure for one past the last row of the image sensor.</p>
+     * <p>This is the exposure time skew between the first and <code>(last+1)</code> row exposure start times. The
+     * first row and the last row are the first and last rows inside of the
      * {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize}.</p>
-     * <p>For typical camera sensors that use rolling shutters, this is also equivalent
-     * to the frame readout time.</p>
+     * <p>For typical camera sensors that use rolling shutters, this is also equivalent to the frame
+     * readout time.</p>
+     * <p>If the image sensor is operating in a binned or cropped mode due to the current output
+     * target resolutions, it's possible this skew is reported to be larger than the exposure
+     * time, for example, since it is based on the full array even if a partial array is read
+     * out. Be sure to scale the number to cover the section of the sensor actually being used
+     * for the outputs you care about. So if your output covers N rows of the active array of
+     * height H, scale this value by N/H to get the total skew for that viewport.</p>
+     * <p><em>Note:</em> Prior to Android 11, this field was described as measuring duration from
+     * first to last row of the image sensor, which is not equal to the frame readout time for a
+     * rolling shutter sensor. Implementations generally reported the latter value, so to resolve
+     * the inconsistency, the description has been updated to range from (first, last+1) row
+     * exposure start, instead.</p>
      * <p><b>Units</b>: Nanoseconds</p>
      * <p><b>Range of valid values:</b><br>
      * &gt;= 0 and &lt;
