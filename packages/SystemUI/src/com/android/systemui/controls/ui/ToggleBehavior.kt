@@ -19,7 +19,9 @@ package com.android.systemui.controls.ui
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.LayerDrawable
 import android.service.controls.Control
+import android.service.controls.templates.TemperatureControlTemplate
 import android.service.controls.templates.ToggleTemplate
+import android.util.Log
 import android.view.View
 import com.android.systemui.R
 import com.android.systemui.controls.ui.ControlViewHolder.Companion.MAX_LEVEL
@@ -39,17 +41,25 @@ class ToggleBehavior : Behavior {
         })
     }
 
-    override fun bind(cws: ControlWithState) {
+    override fun bind(cws: ControlWithState, colorOffset: Int) {
         this.control = cws.control!!
 
         cvh.status.setText(control.getStatusText())
-        template = control.getControlTemplate() as ToggleTemplate
+        val controlTemplate = control.getControlTemplate()
+        template = when (controlTemplate) {
+            is ToggleTemplate -> controlTemplate
+            is TemperatureControlTemplate -> controlTemplate.getTemplate() as ToggleTemplate
+            else -> {
+                Log.e(ControlsUiController.TAG, "Unsupported template type: $controlTemplate")
+                return
+            }
+        }
 
         val ld = cvh.layout.getBackground() as LayerDrawable
         clipLayer = ld.findDrawableByLayerId(R.id.clip_layer)
         clipLayer.level = MAX_LEVEL
 
         val checked = template.isChecked()
-        cvh.applyRenderInfo(checked)
+        cvh.applyRenderInfo(checked, colorOffset)
     }
 }

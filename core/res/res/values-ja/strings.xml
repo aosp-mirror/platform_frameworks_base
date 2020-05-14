@@ -1631,8 +1631,8 @@
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"音量大と音量小の両方のボタンを数秒ほど長押しすると、ユーザー補助機能の <xliff:g id="SERVICE">%1$s</xliff:g> が ON になります。この機能が ON になると、デバイスの動作が変わることがあります。\n\nこのショートカットは [設定] &gt; [ユーザー補助] で別の機能に変更できます。"</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"ON にする"</string>
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"ON にしない"</string>
-    <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"オン"</string>
-    <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"オフ"</string>
+    <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"ON"</string>
+    <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"OFF"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g> にデバイスのフル コントロールを許可しますか？"</string>
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"<xliff:g id="SERVICE">%1$s</xliff:g> をオンにすると、デバイスデータの暗号化の強化に画面ロックは使用されなくなります。"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"フル コントロールは、ユーザー補助機能を必要とするユーザーをサポートするアプリには適していますが、ほとんどのアプリには適していません。"</string>

@@ -19,6 +19,7 @@ package com.android.systemui.controls.ui
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.LayerDrawable
 import android.service.controls.Control
+import android.service.controls.templates.ControlTemplate
 import android.service.controls.templates.TemperatureControlTemplate
 
 import com.android.systemui.R
@@ -29,17 +30,13 @@ class TemperatureControlBehavior : Behavior {
     lateinit var clipLayer: Drawable
     lateinit var control: Control
     lateinit var cvh: ControlViewHolder
-    lateinit var template: TemperatureControlTemplate
+    var subBehavior: Behavior? = null
 
     override fun initialize(cvh: ControlViewHolder) {
         this.cvh = cvh
-
-        cvh.layout.setOnClickListener { _ ->
-            cvh.controlActionCoordinator.touch(cvh, template.getTemplateId(), control)
-        }
     }
 
-    override fun bind(cws: ControlWithState) {
+    override fun bind(cws: ControlWithState, colorOffset: Int) {
         this.control = cws.control!!
 
         cvh.status.setText(control.getStatusText())
@@ -47,11 +44,32 @@ class TemperatureControlBehavior : Behavior {
         val ld = cvh.layout.getBackground() as LayerDrawable
         clipLayer = ld.findDrawableByLayerId(R.id.clip_layer)
 
-        template = control.getControlTemplate() as TemperatureControlTemplate
-
+        val template = control.getControlTemplate() as TemperatureControlTemplate
         val activeMode = template.getCurrentActiveMode()
-        val enabled = activeMode != 0 && activeMode != TemperatureControlTemplate.MODE_OFF
-        clipLayer.setLevel(if (enabled) MAX_LEVEL else MIN_LEVEL)
-        cvh.applyRenderInfo(enabled, activeMode)
+        val subTemplate = template.getTemplate()
+        if (subTemplate == ControlTemplate.getNoTemplateObject() ||
+            subTemplate == ControlTemplate.getErrorTemplate()) {
+            // No sub template is specified, apply a default look with basic touch interaction.
+            // Treat an error as no template.
+            val enabled = activeMode != 0 && activeMode != TemperatureControlTemplate.MODE_OFF
+            clipLayer.setLevel(if (enabled) MAX_LEVEL else MIN_LEVEL)
+            cvh.applyRenderInfo(enabled, activeMode)
+
+            cvh.layout.setOnClickListener { _ ->
+                cvh.controlActionCoordinator.touch(cvh, template.getTemplateId(), control)
+            }
+        } else {
+            // A sub template has been specified, use this as the default behavior for user
+            // interactions (touch, range)
+            subBehavior = cvh.bindBehavior(
+                subBehavior,
+                ControlViewHolder.findBehaviorClass(
+                    control.status,
+                    subTemplate,
+                    control.deviceType
+                ),
+                activeMode
+            )
+        }
     }
 }

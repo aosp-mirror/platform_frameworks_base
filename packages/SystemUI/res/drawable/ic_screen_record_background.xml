@@ -13,13 +13,11 @@ Copyright (C) 2020 The Android Open Source Project
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-<vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="24dp"
-    android:height="24dp"
-    android:tint="?android:attr/colorError"
-    android:viewportWidth="24.0"
-    android:viewportHeight="24.0">
-    <path
-        android:pathData="M10,0L14,0A10,10 0,0 1,24 10L24,10A10,10 0,0 1,14 20L10,20A10,10 0,0 1,0 10L0,10A10,10 0,0 1,10 0z"
-        android:fillColor="@android:color/white"/>
-</vector>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+        android:shape="rectangle">
+    <solid
+        android:color="@color/screenrecord_status_color"
+        android:width="@dimen/screenrecord_status_icon_width"
+        android:height="@dimen/screenrecord_status_icon_height" />
+    <corners android:radius="@dimen/screenrecord_status_icon_bg_radius" />
+</shape>

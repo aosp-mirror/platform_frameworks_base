@@ -1230,7 +1230,7 @@
     <string name="volume_icon_description_media" msgid="4997633254078171233">"మీడియా వాల్యూమ్"</string>
     <string name="volume_icon_description_notification" msgid="579091344110747279">"నోటిఫికేషన్ వాల్యూమ్"</string>
     <string name="ringtone_default" msgid="9118299121288174597">"డిఫాల్ట్ రింగ్‌టోన్"</string>
-    <string name="ringtone_default_with_actual" msgid="2709686194556159773">"డిఫాల్ట్ (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
+    <string name="ringtone_default_with_actual" msgid="2709686194556159773">"ఆటోమేటిక్ (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="397111123930141876">"ఏదీ వద్దు"</string>
     <string name="ringtone_picker_title" msgid="667342618626068253">"రింగ్‌టోన్‌లు"</string>
     <string name="ringtone_picker_title_alarm" msgid="7438934548339024767">"అలారం ధ్వనులు"</string>

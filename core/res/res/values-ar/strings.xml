@@ -239,7 +239,7 @@
     <string name="reboot_safemode_title" msgid="5853949122655346734">"إعادة تشغيل في الوضع الآمن"</string>
     <string name="reboot_safemode_confirm" msgid="1658357874737219624">"هل تريد إعادة تشغيل الكمبيوتر في الوضع الآمن؟ سيؤدي ذلك إلى إيقاف جميع تطبيقات الجهات الخارجية التي تم تثبيتها. ستتم استعادتها عند إعادة التشغيل مرة أخرى."</string>
     <string name="recent_tasks_title" msgid="8183172372995396653">"حديثة"</string>
-    <string name="no_recent_tasks" msgid="9063946524312275906">"ليست هناك تطبيقات حديثة."</string>
+    <string name="no_recent_tasks" msgid="9063946524312275906">"لم يتمّ استخدام تطبيقات مؤخرًا."</string>
     <string name="global_actions" product="tablet" msgid="4412132498517933867">"خيارات الجهاز اللوحي"</string>
     <string name="global_actions" product="tv" msgid="3871763739487450369">"‏خيارات Android TV"</string>
     <string name="global_actions" product="default" msgid="6410072189971495460">"خيارات الهاتف"</string>
@@ -1222,7 +1222,7 @@
     <string name="whichSendToApplication" msgid="77101541959464018">"إرسال باستخدام"</string>
     <string name="whichSendToApplicationNamed" msgid="3385686512014670003">"‏إرسال باستخدام %1$s"</string>
     <string name="whichSendToApplicationLabel" msgid="3543240188816513303">"إرسال"</string>
-    <string name="whichHomeApplication" msgid="8276350727038396616">"تحديد تطبيق شاشة رئيسية"</string>
+    <string name="whichHomeApplication" msgid="8276350727038396616">"اختيار تطبيق شاشة رئيسية"</string>
     <string name="whichHomeApplicationNamed" msgid="5855990024847433794">"‏استخدام %1$s كصفحة رئيسية"</string>
     <string name="whichHomeApplicationLabel" msgid="8907334282202933959">"التقاط صورة"</string>
     <string name="whichImageCaptureApplication" msgid="2737413019463215284">"التقاط صورة باستخدام"</string>
@@ -1886,8 +1886,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"تم التحديث بواسطة المشرف"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"تم الحذف بواسطة المشرف"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"حسنًا"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"‏لإطالة عمر البطارية، تعمل \"توفير شحن البطارية\" على:\n\n• تفعيل \"المظهر الداكن\"\n• إيقاف أو تقييد النشاط في الخلفية وبعض التأثيرات المرئية والميزات الأخرى، مثل \"Ok Google\".\n\n"<annotation id="url">"مزيد من المعلومات"</annotation></string>
-    <string name="battery_saver_description" msgid="8587408568232177204">"‏لإطالة عمر البطارية، تعمل ميزة \"توفير شحن البطارية\" على:\n\n• تفعيل \"المظهر الداكن\"\n• إيقاف أو تقييد النشاط في الخلفية وبعض التأثيرات المرئية والميزات الأخرى، مثل \"Ok Google\"."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"‏لإطالة عمر البطارية، تعمل ميزة \"توفير شحن البطارية\" على:\n\n• تفعيل \"المظهر الداكن\"\n• إيقاف أو حظر النشاط في الخلفية وبعض التأثيرات المرئية والميزات الأخرى، مثل \"Ok Google\".\n\n"<annotation id="url">"مزيد من المعلومات"</annotation></string>
+    <string name="battery_saver_description" msgid="8587408568232177204">"‏لإطالة عمر البطارية، تعمل ميزة \"توفير شحن البطارية\" على:\n\n• تفعيل \"المظهر الداكن\"\n• إيقاف أو حظر النشاط في الخلفية وبعض التأثيرات المرئية والميزات الأخرى، مثل \"Ok Google\"."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"للمساعدة في خفض استخدام البيانات، تمنع ميزة \"توفير البيانات\" بعض التطبيقات من إرسال البيانات وتلقّيها في الخلفية. يمكن للتطبيقات المتاحة لديك الآن استخدام البيانات، ولكن لا يمكنها الإكثار من ذلك. وهذا يعني أن الصور مثلاً لا تظهر حتى تنقر عليها."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"هل تريد تفعيل توفير البيانات؟"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"تفعيل"</string>

@@ -142,7 +142,7 @@
     <string name="wfcSpnFormat_wifi" msgid="1376356951297043426">"ୱାଇ-ଫାଇ"</string>
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="7178561009225028264">"ୱାଇଫାଇ କଲିଂ"</string>
     <string name="wfcSpnFormat_vowifi" msgid="8371335230890725606">"VoWifi"</string>
-    <string name="wifi_calling_off_summary" msgid="5626710010766902560">"ଅଫ୍"</string>
+    <string name="wifi_calling_off_summary" msgid="5626710010766902560">"ବନ୍ଦ"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1035175836270943089">"ୱାଇ-ଫାଇ ମାଧ୍ୟମରେ କଲ୍ କରନ୍ତୁ"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="4958965609212575619">"ମୋବାଇଲ ନେଟ୍‌ୱର୍କ ମାଧ୍ୟମରେ କଲ୍ କରନ୍ତୁ"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="104951993894678665">"କେବଳ ୱାଇ-ଫାଇ"</string>
@@ -1119,7 +1119,7 @@
     <string name="dialog_alert_title" msgid="651856561974090712">"ଧ୍ୟାନଦିଅନ୍ତୁ"</string>
     <string name="loading" msgid="3138021523725055037">"ଲୋଡ୍ କରାଯାଉଛି…"</string>
     <string name="capital_on" msgid="2770685323900821829">"ଚାଲୁ"</string>
-    <string name="capital_off" msgid="7443704171014626777">"ଅଫ୍"</string>
+    <string name="capital_off" msgid="7443704171014626777">"ବନ୍ଦ"</string>
     <string name="checked" msgid="9179896827054513119">"ଯାଞ୍ଚ ହୋଇଛି"</string>
     <string name="not_checked" msgid="7972320087569023342">"ଯାଞ୍ଚ ହୋଇନାହିଁ"</string>
     <string name="whichApplication" msgid="5432266899591255759">"ବ୍ୟବହାର କରି କାର୍ଯ୍ୟ ସମ୍ପୂର୍ଣ୍ଣ କରନ୍ତୁ"</string>
@@ -1231,7 +1231,7 @@
     <string name="volume_icon_description_notification" msgid="579091344110747279">"ବିଜ୍ଞପ୍ତି ଭଲ୍ୟୁମ୍‍"</string>
     <string name="ringtone_default" msgid="9118299121288174597">"ଡିଫଲ୍ଟ ରିଙ୍ଗଟୋନ୍‌"</string>
     <string name="ringtone_default_with_actual" msgid="2709686194556159773">"ଡିଫଲ୍ଟ (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
-    <string name="ringtone_silent" msgid="397111123930141876">"କିଛିନୁହେଁ"</string>
+    <string name="ringtone_silent" msgid="397111123930141876">"କିଛି ନାହିଁ"</string>
     <string name="ringtone_picker_title" msgid="667342618626068253">"ରିଙ୍ଗଟୋନ୍‌"</string>
     <string name="ringtone_picker_title_alarm" msgid="7438934548339024767">"ଆଲାରାମ୍ ଶବ୍ଦ"</string>
     <string name="ringtone_picker_title_notification" msgid="6387191794719608122">"ବିଜ୍ଞପ୍ତି ଶବ୍ଦ"</string>
