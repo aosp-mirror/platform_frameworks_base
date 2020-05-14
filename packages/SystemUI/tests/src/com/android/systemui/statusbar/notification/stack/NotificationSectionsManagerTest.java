@@ -18,11 +18,11 @@ package com.android.systemui.statusbar.notification.stack;
 
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
-import static com.android.systemui.statusbar.notification.stack.NotificationSectionsManager.BUCKET_ALERTING;
-import static com.android.systemui.statusbar.notification.stack.NotificationSectionsManager.BUCKET_FOREGROUND_SERVICE;
-import static com.android.systemui.statusbar.notification.stack.NotificationSectionsManager.BUCKET_HEADS_UP;
-import static com.android.systemui.statusbar.notification.stack.NotificationSectionsManager.BUCKET_PEOPLE;
-import static com.android.systemui.statusbar.notification.stack.NotificationSectionsManager.BUCKET_SILENT;
+import static com.android.systemui.statusbar.notification.stack.NotificationSectionsManagerKt.BUCKET_ALERTING;
+import static com.android.systemui.statusbar.notification.stack.NotificationSectionsManagerKt.BUCKET_FOREGROUND_SERVICE;
+import static com.android.systemui.statusbar.notification.stack.NotificationSectionsManagerKt.BUCKET_HEADS_UP;
+import static com.android.systemui.statusbar.notification.stack.NotificationSectionsManagerKt.BUCKET_PEOPLE;
+import static com.android.systemui.statusbar.notification.stack.NotificationSectionsManagerKt.BUCKET_SILENT;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -141,7 +141,7 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
         mSectionsManager.updateSectionBoundaries();
 
         // THEN a LO section header is added
-        verify(mNssl).addView(mSectionsManager.getGentleHeaderView(), 3);
+        verify(mNssl).addView(mSectionsManager.getSilentHeaderView(), 3);
     }
 
     @Test
@@ -160,7 +160,7 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
         mSectionsManager.updateSectionBoundaries();
 
         // THEN the LO section header is removed
-        verify(mNssl).removeView(mSectionsManager.getGentleHeaderView());
+        verify(mNssl).removeView(mSectionsManager.getSilentHeaderView());
     }
 
     @Test
@@ -172,7 +172,7 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
         mSectionsManager.updateSectionBoundaries();
 
         // THEN we don't add any section headers
-        verify(mNssl, never()).addView(eq(mSectionsManager.getGentleHeaderView()), anyInt());
+        verify(mNssl, never()).addView(eq(mSectionsManager.getSilentHeaderView()), anyInt());
     }
 
     @Test
@@ -195,7 +195,7 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
         mSectionsManager.updateSectionBoundaries();
 
         // THEN the LO section header is also moved forward
-        verify(mNssl).changeViewPosition(mSectionsManager.getGentleHeaderView(), 2);
+        verify(mNssl).changeViewPosition(mSectionsManager.getSilentHeaderView(), 2);
     }
 
     @Test
@@ -218,7 +218,7 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
         mSectionsManager.updateSectionBoundaries();
 
         // THEN the LO section header is also moved backward (with appropriate index shifting)
-        verify(mNssl).changeViewPosition(mSectionsManager.getGentleHeaderView(), 3);
+        verify(mNssl).changeViewPosition(mSectionsManager.getSilentHeaderView(), 3);
     }
 
     @Test
@@ -237,7 +237,7 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
         clearInvocations(mNssl);
 
         ViewGroup transientParent = mock(ViewGroup.class);
-        mSectionsManager.getGentleHeaderView().setTransientContainer(transientParent);
+        mSectionsManager.getSilentHeaderView().setTransientContainer(transientParent);
 
         // WHEN the LO section reappears
         setStackState(
@@ -247,8 +247,8 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
 
         // THEN the header is first removed from the transient parent before being added to the
         // NSSL.
-        verify(transientParent).removeTransientView(mSectionsManager.getGentleHeaderView());
-        verify(mNssl).addView(mSectionsManager.getGentleHeaderView(), 1);
+        verify(transientParent).removeTransientView(mSectionsManager.getSilentHeaderView());
+        verify(mNssl).addView(mSectionsManager.getSilentHeaderView(), 1);
     }
 
     @Test
@@ -261,7 +261,7 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
         mSectionsManager.updateSectionBoundaries();
 
         // Then the section header is not added
-        verify(mNssl, never()).addView(eq(mSectionsManager.getGentleHeaderView()), anyInt());
+        verify(mNssl, never()).addView(eq(mSectionsManager.getSilentHeaderView()), anyInt());
     }
 
     @Test
@@ -276,7 +276,7 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
         mSectionsManager.updateSectionBoundaries();
 
         // Then the section header is added
-        verify(mNssl).addView(mSectionsManager.getGentleHeaderView(), 3);
+        verify(mNssl).addView(mSectionsManager.getSilentHeaderView(), 3);
     }
 
     @Test
@@ -289,7 +289,7 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
         mSectionsManager.updateSectionBoundaries();
 
         // Then the section header is removed
-        verify(mNssl).removeView(mSectionsManager.getGentleHeaderView());
+        verify(mNssl).removeView(mSectionsManager.getSilentHeaderView());
     }
 
     @Test
@@ -303,7 +303,7 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
                 ChildType.GENTLE);
         mSectionsManager.updateSectionBoundaries();
 
-        verify(mNssl).changeViewPosition(mSectionsManager.getGentleHeaderView(), 2);
+        verify(mNssl).changeViewPosition(mSectionsManager.getSilentHeaderView(), 2);
         verify(mNssl).addView(mSectionsManager.getAlertingHeaderView(), 1);
         verify(mNssl).addView(mSectionsManager.getPeopleHeaderView(), 0);
     }
@@ -318,7 +318,7 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
                 ChildType.GENTLE);
         mSectionsManager.updateSectionBoundaries();
 
-        verify(mNssl).addView(mSectionsManager.getGentleHeaderView(), 2);
+        verify(mNssl).addView(mSectionsManager.getSilentHeaderView(), 2);
         verify(mNssl).addView(mSectionsManager.getAlertingHeaderView(), 1);
         verify(mNssl).addView(mSectionsManager.getPeopleHeaderView(), 0);
     }
@@ -336,7 +336,7 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
                 ChildType.GENTLE);
         mSectionsManager.updateSectionBoundaries();
 
-        verify(mNssl).changeViewPosition(mSectionsManager.getGentleHeaderView(), 4);
+        verify(mNssl).changeViewPosition(mSectionsManager.getSilentHeaderView(), 4);
         verify(mNssl).changeViewPosition(mSectionsManager.getAlertingHeaderView(), 2);
         verify(mNssl).changeViewPosition(mSectionsManager.getPeopleHeaderView(), 0);
     }
@@ -473,7 +473,7 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
                     child = mSectionsManager.getAlertingHeaderView();
                     break;
                 case GENTLE_HEADER:
-                    child = mSectionsManager.getGentleHeaderView();
+                    child = mSectionsManager.getSilentHeaderView();
                     break;
                 case HEADS_UP:
                     child = mockNotification(BUCKET_HEADS_UP);
@@ -533,7 +533,7 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
                 actual.add(ChildType.ALERTING_HEADER);
                 continue;
             }
-            if (child == mSectionsManager.getGentleHeaderView()) {
+            if (child == mSectionsManager.getSilentHeaderView()) {
                 actual.add(ChildType.GENTLE_HEADER);
                 continue;
             }
@@ -606,7 +606,7 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
                     child = mSectionsManager.getAlertingHeaderView();
                     break;
                 case GENTLE_HEADER:
-                    child = mSectionsManager.getGentleHeaderView();
+                    child = mSectionsManager.getSilentHeaderView();
                     break;
                 case HEADS_UP:
                     child = mockNotification(BUCKET_HEADS_UP);
