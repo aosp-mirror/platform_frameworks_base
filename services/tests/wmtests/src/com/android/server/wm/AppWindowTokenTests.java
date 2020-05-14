@@ -307,7 +307,7 @@ public class AppWindowTokenTests extends WindowTestsBase {
     public void testCreateRemoveStartingWindow() {
         mActivity.addStartingWindow(mPackageName,
                 android.R.style.Theme, null, "Test", 0, 0, 0, 0, null, true, true, false, true,
-                false, false);
+                false);
         waitUntilHandlersIdle();
         assertHasStartingWindow(mActivity);
         mActivity.removeStartingWindow();
@@ -322,7 +322,7 @@ public class AppWindowTokenTests extends WindowTestsBase {
         for (int i = 0; i < 1000; i++) {
             appToken.addStartingWindow(mPackageName,
                     android.R.style.Theme, null, "Test", 0, 0, 0, 0, null, true, true, false, true,
-                    false, false);
+                    false);
             appToken.removeStartingWindow();
             waitUntilHandlersIdle();
             assertNoStartingWindow(appToken);
@@ -335,11 +335,11 @@ public class AppWindowTokenTests extends WindowTestsBase {
         final ActivityRecord activity2 = createIsolatedTestActivityRecord();
         activity1.addStartingWindow(mPackageName,
                 android.R.style.Theme, null, "Test", 0, 0, 0, 0, null, true, true, false, true,
-                false, false);
+                false);
         waitUntilHandlersIdle();
         activity2.addStartingWindow(mPackageName,
                 android.R.style.Theme, null, "Test", 0, 0, 0, 0, activity1.appToken.asBinder(),
-                true, true, false, true, false, false);
+                true, true, false, true, false);
         waitUntilHandlersIdle();
         assertNoStartingWindow(activity1);
         assertHasStartingWindow(activity2);
@@ -355,11 +355,11 @@ public class AppWindowTokenTests extends WindowTestsBase {
                     activity2.addStartingWindow(mPackageName,
                             android.R.style.Theme, null, "Test", 0, 0, 0, 0,
                             activity1.appToken.asBinder(), true, true, false,
-                            true, false, false);
+                            true, false);
                 });
         activity1.addStartingWindow(mPackageName,
                 android.R.style.Theme, null, "Test", 0, 0, 0, 0, null, true, true, false, true,
-                false, false);
+                false);
         waitUntilHandlersIdle();
         assertNoStartingWindow(activity1);
         assertHasStartingWindow(activity2);
@@ -371,11 +371,11 @@ public class AppWindowTokenTests extends WindowTestsBase {
         final ActivityRecord activity2 = createIsolatedTestActivityRecord();
         activity1.addStartingWindow(mPackageName,
                 android.R.style.Theme, null, "Test", 0, 0, 0, 0, null, true, true, false, true,
-                false, false);
+                false);
         waitUntilHandlersIdle();
         activity2.addStartingWindow(mPackageName,
                 android.R.style.Theme, null, "Test", 0, 0, 0, 0, activity1.appToken.asBinder(),
-                true, true, false, true, false, false);
+                true, true, false, true, false);
         waitUntilHandlersIdle();
         assertNoStartingWindow(activity1);
         assertHasStartingWindow(activity2);
@@ -413,7 +413,7 @@ public class AppWindowTokenTests extends WindowTestsBase {
         // Add a starting window.
         activityTop.addStartingWindow(mPackageName,
                 android.R.style.Theme, null, "Test", 0, 0, 0, 0, null, true, true, false, true,
-                false, false);
+                false);
         waitUntilHandlersIdle();
 
         // Make the top one invisible, and try transferring the starting window from the top to the
