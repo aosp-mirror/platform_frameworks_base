@@ -31,7 +31,6 @@ import com.android.internal.location.ILocationProvider;
 import com.android.internal.location.ILocationProviderManager;
 import com.android.internal.location.ProviderProperties;
 import com.android.internal.location.ProviderRequest;
-import com.android.server.FgThread;
 import com.android.server.ServiceWatcher;
 
 import java.io.FileDescriptor;
@@ -75,7 +74,7 @@ public class LocationProviderProxy extends AbstractLocationProvider {
         super(DIRECT_EXECUTOR);
 
         mContext = context;
-        mServiceWatcher = new ServiceWatcher(context, FgThread.getHandler(), action, this::onBind,
+        mServiceWatcher = new ServiceWatcher(context, action, this::onBind,
                 this::onUnbind, enableOverlayResId, nonOverlayPackageResId);
 
         mProxy = null;

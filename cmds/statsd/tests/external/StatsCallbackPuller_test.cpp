@@ -131,11 +131,11 @@ TEST_F(StatsCallbackPullerTest, PullSuccess) {
     EXPECT_TRUE(puller.PullInternal(&dataHolder));
     int64_t endTimeNs = getElapsedRealtimeNs();
 
-    EXPECT_EQ(1, dataHolder.size());
+    ASSERT_EQ(1, dataHolder.size());
     EXPECT_EQ(pullTagId, dataHolder[0]->GetTagId());
     EXPECT_LT(startTimeNs, dataHolder[0]->GetElapsedTimestampNs());
     EXPECT_GT(endTimeNs, dataHolder[0]->GetElapsedTimestampNs());
-    EXPECT_EQ(1, dataHolder[0]->size());
+    ASSERT_EQ(1, dataHolder[0]->size());
     EXPECT_EQ(value, dataHolder[0]->getValues()[0].mValue.int_value);
 }
 
@@ -149,7 +149,7 @@ TEST_F(StatsCallbackPullerTest, PullFail) {
 
     vector<shared_ptr<LogEvent>> dataHolder;
     EXPECT_FALSE(puller.PullInternal(&dataHolder));
-    EXPECT_EQ(0, dataHolder.size());
+    ASSERT_EQ(0, dataHolder.size());
 }
 
 TEST_F(StatsCallbackPullerTest, PullTimeout) {
@@ -173,11 +173,11 @@ TEST_F(StatsCallbackPullerTest, PullTimeout) {
     // is bigger.
     EXPECT_LT(pullTimeoutNs, actualPullDurationNs);
     EXPECT_GT(pullDelayNs, actualPullDurationNs);
-    EXPECT_EQ(0, dataHolder.size());
+    ASSERT_EQ(0, dataHolder.size());
 
     // Let the pull return and make sure that the dataHolder is not modified.
     pullThread.join();
-    EXPECT_EQ(0, dataHolder.size());
+    ASSERT_EQ(0, dataHolder.size());
 }
 
 // Register a puller and ensure that the timeout logic works.
@@ -204,11 +204,11 @@ TEST_F(StatsCallbackPullerTest, RegisterAndTimeout) {
     // is bigger.
     EXPECT_LT(pullTimeoutNs, actualPullDurationNs);
     EXPECT_GT(pullDelayNs, actualPullDurationNs);
-    EXPECT_EQ(0, dataHolder.size());
+    ASSERT_EQ(0, dataHolder.size());
 
     // Let the pull return and make sure that the dataHolder is not modified.
     pullThread.join();
-    EXPECT_EQ(0, dataHolder.size());
+    ASSERT_EQ(0, dataHolder.size());
 }
 
 }  // namespace statsd

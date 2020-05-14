@@ -79,19 +79,15 @@ public class ScreenRecordTile extends QSTileImpl<QSTile.BooleanState>
         state.value = isRecording || isStarting;
         state.state = (isRecording || isStarting) ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
         state.label = mContext.getString(R.string.quick_settings_screen_record_label);
+        state.icon = ResourceIcon.get(R.drawable.ic_screenrecord);
 
         if (isRecording) {
-            state.icon = ResourceIcon.get(R.drawable.ic_qs_screenrecord);
             state.secondaryLabel = mContext.getString(R.string.quick_settings_screen_record_stop);
         } else if (isStarting) {
             // round, since the timer isn't exact
             int countdown = (int) Math.floorDiv(mMillisUntilFinished + 500, 1000);
-            // TODO update icon
-            state.icon = ResourceIcon.get(R.drawable.ic_qs_screenrecord);
             state.secondaryLabel = String.format("%d...", countdown);
         } else {
-            // TODO update icon
-            state.icon = ResourceIcon.get(R.drawable.ic_qs_screenrecord);
             state.secondaryLabel = mContext.getString(R.string.quick_settings_screen_record_start);
         }
         state.contentDescription = TextUtils.isEmpty(state.secondaryLabel)

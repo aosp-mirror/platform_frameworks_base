@@ -52,9 +52,9 @@ TEST(AlarmE2eTest, TestMultipleAlarms) {
 
     ConfigKey cfgKey;
     auto processor = CreateStatsLogProcessor(bucketStartTimeNs, bucketStartTimeNs, config, cfgKey);
-    EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
+    ASSERT_EQ(processor->mMetricsManagers.size(), 1u);
     EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
-    EXPECT_EQ(2u, processor->mMetricsManagers.begin()->second->mAllPeriodicAlarmTrackers.size());
+    ASSERT_EQ(2u, processor->mMetricsManagers.begin()->second->mAllPeriodicAlarmTrackers.size());
 
     auto alarmTracker1 = processor->mMetricsManagers.begin()->second->mAllPeriodicAlarmTrackers[0];
     auto alarmTracker2 = processor->mMetricsManagers.begin()->second->mAllPeriodicAlarmTrackers[1];
@@ -68,7 +68,7 @@ TEST(AlarmE2eTest, TestMultipleAlarms) {
     const int64_t alarmFiredTimestampSec0 = alarmTimestampSec1 + 5;
     auto alarmSet = processor->getPeriodicAlarmMonitor()->popSoonerThan(
             static_cast<uint32_t>(alarmFiredTimestampSec0));
-    EXPECT_EQ(1u, alarmSet.size());
+    ASSERT_EQ(1u, alarmSet.size());
     processor->onPeriodicAlarmFired(alarmFiredTimestampSec0 * NS_PER_SEC, alarmSet);
     EXPECT_EQ(alarmTimestampSec0, alarmTracker1->getAlarmTimestampSec());
     EXPECT_EQ(alarmTimestampSec1 + 30 * 60, alarmTracker2->getAlarmTimestampSec());
@@ -77,7 +77,7 @@ TEST(AlarmE2eTest, TestMultipleAlarms) {
     const int64_t alarmFiredTimestampSec1 = alarmTimestampSec0 + 2 * 60 * 60 + 125;
     alarmSet = processor->getPeriodicAlarmMonitor()->popSoonerThan(
             static_cast<uint32_t>(alarmFiredTimestampSec1));
-    EXPECT_EQ(2u, alarmSet.size());
+    ASSERT_EQ(2u, alarmSet.size());
     processor->onPeriodicAlarmFired(alarmFiredTimestampSec1 * NS_PER_SEC, alarmSet);
     EXPECT_EQ(alarmTimestampSec0 + 60 * 60 * 3, alarmTracker1->getAlarmTimestampSec());
     EXPECT_EQ(alarmTimestampSec1 + 30 * 60 * 5, alarmTracker2->getAlarmTimestampSec());

@@ -107,7 +107,7 @@ TEST(MetricConditionLinkE2eTest, TestMultiplePredicatesAndLinks1) {
 
     ConfigKey cfgKey;
     auto processor = CreateStatsLogProcessor(bucketStartTimeNs, bucketStartTimeNs, config, cfgKey);
-    EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
+    ASSERT_EQ(processor->mMetricsManagers.size(), 1u);
     EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
 
     int appUid = 123;
@@ -204,15 +204,15 @@ TEST(MetricConditionLinkE2eTest, TestMultiplePredicatesAndLinks1) {
     backfillDimensionPath(&reports);
     backfillStringInReport(&reports);
     backfillStartEndTimestamp(&reports);
-    EXPECT_EQ(reports.reports_size(), 1);
-    EXPECT_EQ(reports.reports(0).metrics_size(), 1);
-    EXPECT_EQ(reports.reports(0).metrics(0).count_metrics().data_size(), 1);
-    EXPECT_EQ(reports.reports(0).metrics(0).count_metrics().data(0).bucket_info_size(), 1);
+    ASSERT_EQ(reports.reports_size(), 1);
+    ASSERT_EQ(reports.reports(0).metrics_size(), 1);
+    ASSERT_EQ(reports.reports(0).metrics(0).count_metrics().data_size(), 1);
+    ASSERT_EQ(reports.reports(0).metrics(0).count_metrics().data(0).bucket_info_size(), 1);
     EXPECT_EQ(reports.reports(0).metrics(0).count_metrics().data(0).bucket_info(0).count(), 1);
     auto data = reports.reports(0).metrics(0).count_metrics().data(0);
     // Validate dimension value.
     EXPECT_EQ(data.dimensions_in_what().field(), util::PROCESS_LIFE_CYCLE_STATE_CHANGED);
-    EXPECT_EQ(data.dimensions_in_what().value_tuple().dimensions_value_size(), 1);
+    ASSERT_EQ(data.dimensions_in_what().value_tuple().dimensions_value_size(), 1);
     // Uid field.
     EXPECT_EQ(data.dimensions_in_what().value_tuple().dimensions_value(0).field(), 1);
     EXPECT_EQ(data.dimensions_in_what().value_tuple().dimensions_value(0).value_int(), appUid);
@@ -226,7 +226,7 @@ TEST(MetricConditionLinkE2eTest, TestMultiplePredicatesAndLinks2) {
 
     ConfigKey cfgKey;
     auto processor = CreateStatsLogProcessor(bucketStartTimeNs, bucketStartTimeNs, config, cfgKey);
-    EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
+    ASSERT_EQ(processor->mMetricsManagers.size(), 1u);
     EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
 
     int appUid = 123;
@@ -324,16 +324,16 @@ TEST(MetricConditionLinkE2eTest, TestMultiplePredicatesAndLinks2) {
     backfillDimensionPath(&reports);
     backfillStringInReport(&reports);
     backfillStartEndTimestamp(&reports);
-    EXPECT_EQ(reports.reports_size(), 1);
-    EXPECT_EQ(reports.reports(0).metrics_size(), 1);
-    EXPECT_EQ(reports.reports(0).metrics(0).count_metrics().data_size(), 1);
-    EXPECT_EQ(reports.reports(0).metrics(0).count_metrics().data(0).bucket_info_size(), 2);
+    ASSERT_EQ(reports.reports_size(), 1);
+    ASSERT_EQ(reports.reports(0).metrics_size(), 1);
+    ASSERT_EQ(reports.reports(0).metrics(0).count_metrics().data_size(), 1);
+    ASSERT_EQ(reports.reports(0).metrics(0).count_metrics().data(0).bucket_info_size(), 2);
     EXPECT_EQ(reports.reports(0).metrics(0).count_metrics().data(0).bucket_info(0).count(), 1);
     EXPECT_EQ(reports.reports(0).metrics(0).count_metrics().data(0).bucket_info(1).count(), 3);
     auto data = reports.reports(0).metrics(0).count_metrics().data(0);
     // Validate dimension value.
     EXPECT_EQ(data.dimensions_in_what().field(), util::PROCESS_LIFE_CYCLE_STATE_CHANGED);
-    EXPECT_EQ(data.dimensions_in_what().value_tuple().dimensions_value_size(), 1);
+    ASSERT_EQ(data.dimensions_in_what().value_tuple().dimensions_value_size(), 1);
     // Uid field.
     EXPECT_EQ(data.dimensions_in_what().value_tuple().dimensions_value(0).field(), 1);
     EXPECT_EQ(data.dimensions_in_what().value_tuple().dimensions_value(0).value_int(), appUid);

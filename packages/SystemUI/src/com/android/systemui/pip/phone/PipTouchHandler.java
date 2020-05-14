@@ -232,7 +232,8 @@ public class PipTouchHandler {
                 mMenuController, mSnapAlgorithm, mFlingAnimationUtils, floatingContentCoordinator);
         mPipResizeGestureHandler =
                 new PipResizeGestureHandler(context, pipBoundsHandler, mMotionHelper,
-                        deviceConfig, pipTaskOrganizer);
+                        deviceConfig, pipTaskOrganizer, this::getMovementBounds,
+                        this::updateMovementBounds);
         mTouchState = new PipTouchState(ViewConfiguration.get(context), mHandler,
                 () -> mMenuController.showMenuWithDelay(MENU_STATE_FULL, mMotionHelper.getBounds(),
                         true /* allowMenuTimeout */, willResizeMenu()));
@@ -571,6 +572,11 @@ public class PipTouchHandler {
         }
 
         MotionEvent ev = (MotionEvent) inputEvent;
+
+
+        if (mPipResizeGestureHandler.isWithinTouchRegion((int) ev.getX(), (int) ev.getY())) {
+            return true;
+        }
 
         if (mMagnetizedPip.maybeConsumeMotionEvent(ev)) {
             // If the first touch event occurs within the magnetic field, pass the ACTION_DOWN event
@@ -935,6 +941,10 @@ public class PipTouchHandler {
         boolean isMenuExpanded = mMenuState == MENU_STATE_FULL;
         mPipBoundsHandler.setMinEdgeSize(
                 isMenuExpanded  && willResizeMenu() ? mExpandedShortestEdgeSize : 0);
+    }
+
+    private Rect getMovementBounds() {
+        return mMovementBounds;
     }
 
     /**

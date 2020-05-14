@@ -77,7 +77,7 @@ TEST(MaxDurationTrackerTest, TestSimpleMaxDuration) {
 
     tracker.flushIfNeeded(bucketStartTimeNs + bucketSizeNs + 1, &buckets);
     EXPECT_TRUE(buckets.find(eventKey) != buckets.end());
-    EXPECT_EQ(1u, buckets[eventKey].size());
+    ASSERT_EQ(1u, buckets[eventKey].size());
     EXPECT_EQ(20LL, buckets[eventKey][0].mDuration);
 }
 
@@ -110,7 +110,7 @@ TEST(MaxDurationTrackerTest, TestStopAll) {
 
     tracker.flushIfNeeded(bucketStartTimeNs + 3 * bucketSizeNs + 40, &buckets);
     EXPECT_TRUE(buckets.find(eventKey) != buckets.end());
-    EXPECT_EQ(1u, buckets[eventKey].size());
+    ASSERT_EQ(1u, buckets[eventKey].size());
     EXPECT_EQ(bucketSizeNs + 40 - 1, buckets[eventKey][0].mDuration);
     EXPECT_EQ(bucketStartTimeNs + bucketSizeNs, buckets[eventKey][0].mBucketStartNs);
     EXPECT_EQ(bucketStartTimeNs + 2 * bucketSizeNs, buckets[eventKey][0].mBucketEndNs);
@@ -149,7 +149,7 @@ TEST(MaxDurationTrackerTest, TestCrossBucketBoundary) {
     EXPECT_TRUE(buckets.find(eventKey) == buckets.end());
 
     tracker.flushIfNeeded(bucketStartTimeNs + 4 * bucketSizeNs, &buckets);
-    EXPECT_EQ(1u, buckets[eventKey].size());
+    ASSERT_EQ(1u, buckets[eventKey].size());
     EXPECT_EQ((3 * bucketSizeNs) + 20 - 1, buckets[eventKey][0].mDuration);
     EXPECT_EQ(bucketStartTimeNs + 3 * bucketSizeNs, buckets[eventKey][0].mBucketStartNs);
     EXPECT_EQ(bucketStartTimeNs + 4 * bucketSizeNs, buckets[eventKey][0].mBucketEndNs);
@@ -187,7 +187,7 @@ TEST(MaxDurationTrackerTest, TestCrossBucketBoundary_nested) {
                      bucketStartTimeNs + (2 * bucketSizeNs) + 5, false);
     tracker.flushIfNeeded(bucketStartTimeNs + (3 * bucketSizeNs) + 1, &buckets);
 
-    EXPECT_EQ(1u, buckets[eventKey].size());
+    ASSERT_EQ(1u, buckets[eventKey].size());
     EXPECT_EQ(2 * bucketSizeNs + 5 - 1, buckets[eventKey][0].mDuration);
 }
 
@@ -223,15 +223,15 @@ TEST(MaxDurationTrackerTest, TestMaxDurationWithCondition) {
     tracker.noteConditionChanged(key1, false, conditionStops1);
     unordered_map<MetricDimensionKey, vector<DurationBucket>> buckets;
     tracker.flushIfNeeded(bucketStartTimeNs + bucketSizeNs + 1, &buckets);
-    EXPECT_EQ(0U, buckets.size());
+    ASSERT_EQ(0U, buckets.size());
 
     tracker.noteConditionChanged(key1, true, conditionStarts2);
     tracker.noteConditionChanged(key1, false, conditionStops2);
     tracker.noteStop(key1, eventStopTimeNs, false);
     tracker.flushIfNeeded(bucketStartTimeNs + 2 * bucketSizeNs + 1, &buckets);
-    EXPECT_EQ(1U, buckets.size());
+    ASSERT_EQ(1U, buckets.size());
     vector<DurationBucket> item = buckets.begin()->second;
-    EXPECT_EQ(1UL, item.size());
+    ASSERT_EQ(1UL, item.size());
     EXPECT_EQ((int64_t)(13LL * NS_PER_SEC), item[0].mDuration);
 }
 
@@ -272,11 +272,11 @@ TEST(MaxDurationTrackerTest, TestAnomalyDetection) {
 
     // Remove the anomaly alarm when the duration is no longer fully met.
     tracker.noteConditionChanged(key1, false, eventStartTimeNs + 15 * NS_PER_SEC);
-    EXPECT_EQ(0U, anomalyTracker->mAlarms.size());
+    ASSERT_EQ(0U, anomalyTracker->mAlarms.size());
 
     // Since the condition was off for 10 seconds, the anomaly should trigger 10 sec later.
     tracker.noteConditionChanged(key1, true, eventStartTimeNs + 25 * NS_PER_SEC);
-    EXPECT_EQ(1U, anomalyTracker->mAlarms.size());
+    ASSERT_EQ(1U, anomalyTracker->mAlarms.size());
     alarm = anomalyTracker->mAlarms.begin()->second;
     EXPECT_EQ((long long)(63ULL * NS_PER_SEC), (long long)(alarm->timestampSec * NS_PER_SEC));
 }
@@ -330,7 +330,7 @@ TEST(MaxDurationTrackerTest, TestAnomalyPredictedTimestamp) {
     tracker.noteConditionChanged(key1, false, conditionStops1);
     tracker.noteStart(key2, true, eventStartTimeNs2, conditionKey2);  // Condition is on already.
     tracker.noteConditionChanged(key1, true, conditionStarts2);
-    EXPECT_EQ(1U, anomalyTracker->mAlarms.size());
+    ASSERT_EQ(1U, anomalyTracker->mAlarms.size());
     auto alarm = anomalyTracker->mAlarms.begin()->second;
     int64_t anomalyFireTimeSec = alarm->timestampSec;
     EXPECT_EQ(conditionStarts2 + 36 * NS_PER_SEC,
@@ -341,7 +341,7 @@ TEST(MaxDurationTrackerTest, TestAnomalyPredictedTimestamp) {
     // gets correctly taken into account in future predictAnomalyTimestampNs calculations.
     std::unordered_set<sp<const InternalAlarm>, SpHash<InternalAlarm>> firedAlarms({alarm});
     anomalyTracker->informAlarmsFired(anomalyFireTimeSec * NS_PER_SEC, firedAlarms);
-    EXPECT_EQ(0u, anomalyTracker->mAlarms.size());
+    ASSERT_EQ(0u, anomalyTracker->mAlarms.size());
     int64_t refractoryPeriodEndsSec = anomalyFireTimeSec + refPeriodSec;
     EXPECT_EQ(anomalyTracker->getRefractoryPeriodEndsSec(eventKey), refractoryPeriodEndsSec);
 
@@ -352,7 +352,7 @@ TEST(MaxDurationTrackerTest, TestAnomalyPredictedTimestamp) {
     tracker.noteStop(key2, eventStopTimeNs, false);
     tracker.noteStart(key1, true, eventStopTimeNs + 1000000, conditionKey1);
     // Anomaly is ongoing, but we're still in the refractory period.
-    EXPECT_EQ(1U, anomalyTracker->mAlarms.size());
+    ASSERT_EQ(1U, anomalyTracker->mAlarms.size());
     alarm = anomalyTracker->mAlarms.begin()->second;
     EXPECT_EQ(refractoryPeriodEndsSec, (long long)(alarm->timestampSec));
 
@@ -410,7 +410,7 @@ TEST(MaxDurationTrackerTest, TestAnomalyPredictedTimestamp_UpdatedOnStop) {
     tracker.noteStart(key1, true, eventStartTimeNs1, conditionKey1);
     tracker.noteStart(key2, true, eventStartTimeNs2, conditionKey2);
     tracker.noteStop(key1, eventStopTimeNs1, false);
-    EXPECT_EQ(1U, anomalyTracker->mAlarms.size());
+    ASSERT_EQ(1U, anomalyTracker->mAlarms.size());
     auto alarm = anomalyTracker->mAlarms.begin()->second;
     EXPECT_EQ(eventStopTimeNs1 + 35 * NS_PER_SEC,
               (unsigned long long)(alarm->timestampSec * NS_PER_SEC));

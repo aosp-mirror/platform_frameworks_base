@@ -312,7 +312,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
 
         void register(LockSettingsStrongAuth strongAuth) {
-            strongAuth.registerStrongAuthTracker(this.mStub);
+            strongAuth.registerStrongAuthTracker(getStub());
         }
     }
 

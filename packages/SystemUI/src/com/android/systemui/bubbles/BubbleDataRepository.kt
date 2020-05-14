@@ -15,24 +15,32 @@
  */
 package com.android.systemui.bubbles
 
+import android.annotation.SuppressLint
 import android.annotation.UserIdInt
+import android.content.pm.LauncherApps
+import android.content.pm.LauncherApps.ShortcutQuery.FLAG_MATCH_DYNAMIC
+import android.content.pm.LauncherApps.ShortcutQuery.FLAG_MATCH_PINNED_BY_ANY_LAUNCHER
+import android.content.pm.LauncherApps.ShortcutQuery.FLAG_MATCH_CACHED
+import android.os.UserHandle
 import android.util.Log
+import com.android.systemui.bubbles.storage.BubbleEntity
 import com.android.systemui.bubbles.storage.BubblePersistentRepository
 import com.android.systemui.bubbles.storage.BubbleVolatileRepository
-import com.android.systemui.bubbles.storage.BubbleXmlEntity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.yield
+
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 internal class BubbleDataRepository @Inject constructor(
     private val volatileRepository: BubbleVolatileRepository,
-    private val persistentRepository: BubblePersistentRepository
+    private val persistentRepository: BubblePersistentRepository,
+    private val launcherApps: LauncherApps
 ) {
 
     private val ioScope = CoroutineScope(Dispatchers.IO)
@@ -64,10 +72,10 @@ internal class BubbleDataRepository @Inject constructor(
         if (entities.isNotEmpty()) persistToDisk()
     }
 
-    private fun transform(userId: Int, bubbles: List<Bubble>): List<BubbleXmlEntity> {
+    private fun transform(userId: Int, bubbles: List<Bubble>): List<BubbleEntity> {
         return bubbles.mapNotNull { b ->
             val shortcutId = b.shortcutInfo?.id ?: return@mapNotNull null
-            BubbleXmlEntity(userId, b.packageName, shortcutId)
+            BubbleEntity(userId, b.packageName, shortcutId)
         }
     }
 
@@ -100,15 +108,60 @@ internal class BubbleDataRepository @Inject constructor(
     /**
      * Load bubbles from disk.
      */
+    // TODO: call this method from BubbleController and update UI
+    @SuppressLint("WrongConstant")
     fun loadBubbles(cb: (List<Bubble>) -> Unit) = ioScope.launch {
-        val bubbleXmlEntities = persistentRepository.readFromDisk()
-        volatileRepository.addBubbles(bubbleXmlEntities)
-        uiScope.launch {
-            // TODO: transform bubbleXmlEntities into bubbles
-            // cb(bubbles)
-        }
+        /**
+         * Load BubbleEntity from disk.
+         * e.g.
+         * [
+         *     BubbleEntity(0, "com.example.messenger", "id-2"),
+         *     BubbleEntity(10, "com.example.chat", "my-id1")
+         *     BubbleEntity(0, "com.example.messenger", "id-1")
+         * ]
+         */
+        val entities = persistentRepository.readFromDisk()
+        volatileRepository.addBubbles(entities)
+        /**
+         * Extract userId/packageName from these entities.
+         * e.g.
+         * [
+         *     ShortcutKey(0, "com.example.messenger"), ShortcutKey(0, "com.example.chat")
+         * ]
+         */
+        val shortcutKeys = entities.map { ShortcutKey(it.userId, it.packageName) }.toSet()
+        /**
+         * Retrieve shortcuts with given userId/packageName combination, then construct a mapping
+         * between BubbleEntity and ShortcutInfo.
+         * e.g.
+         * {
+         *     BubbleEntity(0, "com.example.messenger", "id-0") ->
+         *         ShortcutInfo(userId=0, pkg="com.example.messenger", id="id-0"),
+         *     BubbleEntity(0, "com.example.messenger", "id-2") ->
+         *         ShortcutInfo(userId=0, pkg="com.example.messenger", id="id-2"),
+         *     BubbleEntity(10, "com.example.chat", "id-1") ->
+         *         ShortcutInfo(userId=10, pkg="com.example.chat", id="id-1"),
+         *     BubbleEntity(10, "com.example.chat", "id-3") ->
+         *         ShortcutInfo(userId=10, pkg="com.example.chat", id="id-3")
+         * }
+         */
+        val shortcutMap = shortcutKeys.flatMap { key ->
+            launcherApps.getShortcuts(
+                    LauncherApps.ShortcutQuery()
+                            .setPackage(key.pkg)
+                            .setQueryFlags(SHORTCUT_QUERY_FLAG), UserHandle.of(key.userId))
+                    ?.map { BubbleEntity(key.userId, key.pkg, it.id) to it } ?: emptyList()
+        }.toMap()
+        // For each entity loaded from xml, find the corresponding ShortcutInfo then convert them
+        // into Bubble.
+        val bubbles = entities.mapNotNull { entity -> shortcutMap[entity]?.let { Bubble(it) } }
+        uiScope.launch { cb(bubbles) }
     }
+
+    private data class ShortcutKey(val userId: Int, val pkg: String)
 }
 
 private const val TAG = "BubbleDataRepository"
 private const val DEBUG = false
+private const val SHORTCUT_QUERY_FLAG =
+        FLAG_MATCH_DYNAMIC or FLAG_MATCH_PINNED_BY_ANY_LAUNCHER or FLAG_MATCH_CACHED

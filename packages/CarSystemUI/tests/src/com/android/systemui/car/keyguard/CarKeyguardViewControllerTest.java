@@ -32,6 +32,8 @@ import android.testing.TestableLooper;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
+import androidx.test.filters.SmallTest;
+
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.ViewMediatorCallback;
@@ -58,6 +60,7 @@ import dagger.Lazy;
 
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
+@SmallTest
 public class CarKeyguardViewControllerTest extends SysuiTestCase {
 
     private TestableCarKeyguardViewController mCarKeyguardViewController;

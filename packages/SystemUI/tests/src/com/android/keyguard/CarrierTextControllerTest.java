@@ -134,6 +134,7 @@ public class CarrierTextControllerTest extends SysuiTestCase {
         mDependency.injectMockDependency(WakefulnessLifecycle.class);
         mDependency.injectTestDependency(Dependency.MAIN_HANDLER,
                 new Handler(mTestableLooper.getLooper()));
+        mDependency.injectTestDependency(Dependency.BG_LOOPER, mTestableLooper.getLooper());
         mDependency.injectTestDependency(KeyguardUpdateMonitor.class, mKeyguardUpdateMonitor);
 
         doAnswer(this::checkMainThread).when(mKeyguardUpdateMonitor)
@@ -150,6 +151,7 @@ public class CarrierTextControllerTest extends SysuiTestCase {
         // This should not start listening on any of the real dependencies but will test that
         // callbacks in mKeyguardUpdateMonitor are done in the mTestableLooper thread
         mCarrierTextController.setListening(mCarrierTextCallback);
+        mTestableLooper.processAllMessages();
     }
 
     @Test

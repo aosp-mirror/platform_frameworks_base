@@ -267,10 +267,10 @@ TEST(MetricActivationE2eTest, TestCountMetric) {
 
     processor.OnConfigUpdated(bucketStartTimeNs, cfgKey, config);
 
-    EXPECT_EQ(processor.mMetricsManagers.size(), 1u);
+    ASSERT_EQ(processor.mMetricsManagers.size(), 1u);
     sp<MetricsManager> metricsManager = processor.mMetricsManagers.begin()->second;
     EXPECT_TRUE(metricsManager->isConfigValid());
-    EXPECT_EQ(metricsManager->mAllMetricProducers.size(), 1);
+    ASSERT_EQ(metricsManager->mAllMetricProducers.size(), 1);
     sp<MetricProducer> metricProducer = metricsManager->mAllMetricProducers[0];
     auto& eventActivationMap = metricProducer->mEventActivationMap;
 
@@ -278,7 +278,7 @@ TEST(MetricActivationE2eTest, TestCountMetric) {
     EXPECT_FALSE(metricProducer->mIsActive);
     // Two activations: one is triggered by battery saver mode (tracker index 0), the other is
     // triggered by screen on event (tracker index 2).
-    EXPECT_EQ(eventActivationMap.size(), 2u);
+    ASSERT_EQ(eventActivationMap.size(), 2u);
     EXPECT_TRUE(eventActivationMap.find(0) != eventActivationMap.end());
     EXPECT_TRUE(eventActivationMap.find(2) != eventActivationMap.end());
     EXPECT_EQ(eventActivationMap[0]->state, ActivationState::kNotActive);
@@ -302,7 +302,7 @@ TEST(MetricActivationE2eTest, TestCountMetric) {
     EXPECT_TRUE(metricsManager->isActive());
     EXPECT_TRUE(metricProducer->mIsActive);
     EXPECT_EQ(broadcastCount, 1);
-    EXPECT_EQ(activeConfigsBroadcast.size(), 1);
+    ASSERT_EQ(activeConfigsBroadcast.size(), 1);
     EXPECT_EQ(activeConfigsBroadcast[0], cfgId);
     EXPECT_EQ(eventActivationMap[0]->state, ActivationState::kActive);
     EXPECT_EQ(eventActivationMap[0]->start_ns, bucketStartTimeNs + 10);
@@ -353,7 +353,7 @@ TEST(MetricActivationE2eTest, TestCountMetric) {
     EXPECT_FALSE(metricProducer->mIsActive);
     // New broadcast since the config is no longer active.
     EXPECT_EQ(broadcastCount, 2);
-    EXPECT_EQ(activeConfigsBroadcast.size(), 0);
+    ASSERT_EQ(activeConfigsBroadcast.size(), 0);
     EXPECT_EQ(eventActivationMap[0]->state, ActivationState::kNotActive);
     EXPECT_EQ(eventActivationMap[0]->start_ns, bucketStartTimeNs + 10);
     EXPECT_EQ(eventActivationMap[0]->ttl_ns, 60 * 6 * NS_PER_SEC);
@@ -368,7 +368,7 @@ TEST(MetricActivationE2eTest, TestCountMetric) {
     EXPECT_TRUE(metricsManager->isActive());
     EXPECT_TRUE(metricProducer->mIsActive);
     EXPECT_EQ(broadcastCount, 3);
-    EXPECT_EQ(activeConfigsBroadcast.size(), 1);
+    ASSERT_EQ(activeConfigsBroadcast.size(), 1);
     EXPECT_EQ(activeConfigsBroadcast[0], cfgId);
     EXPECT_EQ(eventActivationMap[0]->state, ActivationState::kNotActive);
     EXPECT_EQ(eventActivationMap[0]->start_ns, bucketStartTimeNs + 10);
@@ -389,42 +389,42 @@ TEST(MetricActivationE2eTest, TestCountMetric) {
     EXPECT_TRUE(reports.ParseFromArray(&buffer[0], buffer.size()));
     backfillDimensionPath(&reports);
     backfillStartEndTimestamp(&reports);
-    EXPECT_EQ(1, reports.reports_size());
-    EXPECT_EQ(1, reports.reports(0).metrics_size());
+    ASSERT_EQ(1, reports.reports_size());
+    ASSERT_EQ(1, reports.reports(0).metrics_size());
 
     StatsLogReport::CountMetricDataWrapper countMetrics;
     sortMetricDataByDimensionsValue(reports.reports(0).metrics(0).count_metrics(), &countMetrics);
-    EXPECT_EQ(4, countMetrics.data_size());
+    ASSERT_EQ(4, countMetrics.data_size());
 
     auto data = countMetrics.data(0);
     EXPECT_EQ(util::PROCESS_LIFE_CYCLE_STATE_CHANGED, data.dimensions_in_what().field());
-    EXPECT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
+    ASSERT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
     EXPECT_EQ(1 /* uid field */,
               data.dimensions_in_what().value_tuple().dimensions_value(0).field());
     EXPECT_EQ(222, data.dimensions_in_what().value_tuple().dimensions_value(0).value_int());
-    EXPECT_EQ(1, data.bucket_info_size());
+    ASSERT_EQ(1, data.bucket_info_size());
     EXPECT_EQ(1, data.bucket_info(0).count());
     EXPECT_EQ(bucketStartTimeNs, data.bucket_info(0).start_bucket_elapsed_nanos());
     EXPECT_EQ(bucketStartTimeNs + bucketSizeNs, data.bucket_info(0).end_bucket_elapsed_nanos());
 
     data = countMetrics.data(1);
     EXPECT_EQ(util::PROCESS_LIFE_CYCLE_STATE_CHANGED, data.dimensions_in_what().field());
-    EXPECT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
+    ASSERT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
     EXPECT_EQ(1 /* uid field */,
               data.dimensions_in_what().value_tuple().dimensions_value(0).field());
     EXPECT_EQ(333, data.dimensions_in_what().value_tuple().dimensions_value(0).value_int());
-    EXPECT_EQ(1, data.bucket_info_size());
+    ASSERT_EQ(1, data.bucket_info_size());
     EXPECT_EQ(1, data.bucket_info(0).count());
     EXPECT_EQ(bucketStartTimeNs, data.bucket_info(0).start_bucket_elapsed_nanos());
     EXPECT_EQ(bucketStartTimeNs + bucketSizeNs, data.bucket_info(0).end_bucket_elapsed_nanos());
 
     data = countMetrics.data(2);
     EXPECT_EQ(util::PROCESS_LIFE_CYCLE_STATE_CHANGED, data.dimensions_in_what().field());
-    EXPECT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
+    ASSERT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
     EXPECT_EQ(1 /* uid field */,
               data.dimensions_in_what().value_tuple().dimensions_value(0).field());
     EXPECT_EQ(444, data.dimensions_in_what().value_tuple().dimensions_value(0).value_int());
-    EXPECT_EQ(1, data.bucket_info_size());
+    ASSERT_EQ(1, data.bucket_info_size());
     EXPECT_EQ(1, data.bucket_info(0).count());
     // Partial bucket as metric is deactivated.
     EXPECT_EQ(bucketStartTimeNs + bucketSizeNs, data.bucket_info(0).start_bucket_elapsed_nanos());
@@ -433,11 +433,11 @@ TEST(MetricActivationE2eTest, TestCountMetric) {
 
     data = countMetrics.data(3);
     EXPECT_EQ(util::PROCESS_LIFE_CYCLE_STATE_CHANGED, data.dimensions_in_what().field());
-    EXPECT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
+    ASSERT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
     EXPECT_EQ(1 /* uid field */,
               data.dimensions_in_what().value_tuple().dimensions_value(0).field());
     EXPECT_EQ(666, data.dimensions_in_what().value_tuple().dimensions_value(0).value_int());
-    EXPECT_EQ(1, data.bucket_info_size());
+    ASSERT_EQ(1, data.bucket_info_size());
     EXPECT_EQ(1, data.bucket_info(0).count());
     EXPECT_EQ(bucketStartTimeNs + 2 * bucketSizeNs,
               data.bucket_info(0).start_bucket_elapsed_nanos());
@@ -478,10 +478,10 @@ TEST(MetricActivationE2eTest, TestCountMetricWithOneDeactivation) {
 
     processor.OnConfigUpdated(bucketStartTimeNs, cfgKey, config);
 
-    EXPECT_EQ(processor.mMetricsManagers.size(), 1u);
+    ASSERT_EQ(processor.mMetricsManagers.size(), 1u);
     sp<MetricsManager> metricsManager = processor.mMetricsManagers.begin()->second;
     EXPECT_TRUE(metricsManager->isConfigValid());
-    EXPECT_EQ(metricsManager->mAllMetricProducers.size(), 1);
+    ASSERT_EQ(metricsManager->mAllMetricProducers.size(), 1);
     sp<MetricProducer> metricProducer = metricsManager->mAllMetricProducers[0];
     auto& eventActivationMap = metricProducer->mEventActivationMap;
     auto& eventDeactivationMap = metricProducer->mEventDeactivationMap;
@@ -490,7 +490,7 @@ TEST(MetricActivationE2eTest, TestCountMetricWithOneDeactivation) {
     EXPECT_FALSE(metricProducer->mIsActive);
     // Two activations: one is triggered by battery saver mode (tracker index 0), the other is
     // triggered by screen on event (tracker index 2).
-    EXPECT_EQ(eventActivationMap.size(), 2u);
+    ASSERT_EQ(eventActivationMap.size(), 2u);
     EXPECT_TRUE(eventActivationMap.find(0) != eventActivationMap.end());
     EXPECT_TRUE(eventActivationMap.find(2) != eventActivationMap.end());
     EXPECT_EQ(eventActivationMap[0]->state, ActivationState::kNotActive);
@@ -499,9 +499,9 @@ TEST(MetricActivationE2eTest, TestCountMetricWithOneDeactivation) {
     EXPECT_EQ(eventActivationMap[2]->state, ActivationState::kNotActive);
     EXPECT_EQ(eventActivationMap[2]->start_ns, 0);
     EXPECT_EQ(eventActivationMap[2]->ttl_ns, 60 * 2 * NS_PER_SEC);
-    EXPECT_EQ(eventDeactivationMap.size(), 1u);
+    ASSERT_EQ(eventDeactivationMap.size(), 1u);
     EXPECT_TRUE(eventDeactivationMap.find(3) != eventDeactivationMap.end());
-    EXPECT_EQ(eventDeactivationMap[3].size(), 1u);
+    ASSERT_EQ(eventDeactivationMap[3].size(), 1u);
     EXPECT_EQ(eventDeactivationMap[3][0], eventActivationMap[0]);
 
     std::unique_ptr<LogEvent> event;
@@ -518,7 +518,7 @@ TEST(MetricActivationE2eTest, TestCountMetricWithOneDeactivation) {
     EXPECT_TRUE(metricsManager->isActive());
     EXPECT_TRUE(metricProducer->mIsActive);
     EXPECT_EQ(broadcastCount, 1);
-    EXPECT_EQ(activeConfigsBroadcast.size(), 1);
+    ASSERT_EQ(activeConfigsBroadcast.size(), 1);
     EXPECT_EQ(activeConfigsBroadcast[0], cfgId);
     EXPECT_EQ(eventActivationMap[0]->state, ActivationState::kActive);
     EXPECT_EQ(eventActivationMap[0]->start_ns, bucketStartTimeNs + 10);
@@ -572,7 +572,7 @@ TEST(MetricActivationE2eTest, TestCountMetricWithOneDeactivation) {
     EXPECT_FALSE(metricProducer->mIsActive);
     // New broadcast since the config is no longer active.
     EXPECT_EQ(broadcastCount, 2);
-    EXPECT_EQ(activeConfigsBroadcast.size(), 0);
+    ASSERT_EQ(activeConfigsBroadcast.size(), 0);
     EXPECT_EQ(eventActivationMap[0]->state, ActivationState::kNotActive);
     EXPECT_EQ(eventActivationMap[0]->start_ns, bucketStartTimeNs + 10);
     EXPECT_EQ(eventActivationMap[0]->ttl_ns, 60 * 6 * NS_PER_SEC);
@@ -588,7 +588,7 @@ TEST(MetricActivationE2eTest, TestCountMetricWithOneDeactivation) {
     EXPECT_TRUE(metricsManager->isActive());
     EXPECT_TRUE(metricProducer->mIsActive);
     EXPECT_EQ(broadcastCount, 3);
-    EXPECT_EQ(activeConfigsBroadcast.size(), 1);
+    ASSERT_EQ(activeConfigsBroadcast.size(), 1);
     EXPECT_EQ(activeConfigsBroadcast[0], cfgId);
     EXPECT_EQ(eventActivationMap[0]->state, ActivationState::kNotActive);
     EXPECT_EQ(eventActivationMap[0]->start_ns, bucketStartTimeNs + 10);
@@ -608,7 +608,7 @@ TEST(MetricActivationE2eTest, TestCountMetricWithOneDeactivation) {
     EXPECT_TRUE(metricsManager->isActive());
     EXPECT_TRUE(metricProducer->mIsActive);
     EXPECT_EQ(broadcastCount, 3);
-    EXPECT_EQ(activeConfigsBroadcast.size(), 1);
+    ASSERT_EQ(activeConfigsBroadcast.size(), 1);
     EXPECT_EQ(activeConfigsBroadcast[0], cfgId);
     EXPECT_EQ(eventActivationMap[0]->state, ActivationState::kActive);
     EXPECT_EQ(eventActivationMap[0]->start_ns, bucketStartTimeNs + NS_PER_SEC * 60 * 11 + 15);
@@ -628,7 +628,7 @@ TEST(MetricActivationE2eTest, TestCountMetricWithOneDeactivation) {
     EXPECT_TRUE(metricsManager->isActive());
     EXPECT_TRUE(metricProducer->mIsActive);
     EXPECT_EQ(broadcastCount, 3);
-    EXPECT_EQ(activeConfigsBroadcast.size(), 1);
+    ASSERT_EQ(activeConfigsBroadcast.size(), 1);
     EXPECT_EQ(activeConfigsBroadcast[0], cfgId);
     EXPECT_EQ(eventActivationMap[0]->state, ActivationState::kNotActive);
     EXPECT_EQ(eventActivationMap[0]->start_ns, bucketStartTimeNs + NS_PER_SEC * 60 * 11 + 15);
@@ -645,7 +645,7 @@ TEST(MetricActivationE2eTest, TestCountMetricWithOneDeactivation) {
     EXPECT_FALSE(metricProducer->mIsActive);
     // New broadcast since the config is no longer active.
     EXPECT_EQ(broadcastCount, 4);
-    EXPECT_EQ(activeConfigsBroadcast.size(), 0);
+    ASSERT_EQ(activeConfigsBroadcast.size(), 0);
     EXPECT_EQ(eventActivationMap[0]->state, ActivationState::kNotActive);
     EXPECT_EQ(eventActivationMap[0]->start_ns, bucketStartTimeNs + NS_PER_SEC * 60 * 11 + 15);
     EXPECT_EQ(eventActivationMap[0]->ttl_ns, 60 * 6 * NS_PER_SEC);
@@ -663,7 +663,7 @@ TEST(MetricActivationE2eTest, TestCountMetricWithOneDeactivation) {
     EXPECT_TRUE(metricsManager->isActive());
     EXPECT_TRUE(metricProducer->mIsActive);
     EXPECT_EQ(broadcastCount, 5);
-    EXPECT_EQ(activeConfigsBroadcast.size(), 1);
+    ASSERT_EQ(activeConfigsBroadcast.size(), 1);
     EXPECT_EQ(activeConfigsBroadcast[0], cfgId);
     EXPECT_EQ(eventActivationMap[0]->state, ActivationState::kActive);
     EXPECT_EQ(eventActivationMap[0]->start_ns, bucketStartTimeNs + NS_PER_SEC * 60 * 15 + 15);
@@ -679,7 +679,7 @@ TEST(MetricActivationE2eTest, TestCountMetricWithOneDeactivation) {
     EXPECT_FALSE(metricsManager->isActive());
     EXPECT_FALSE(metricProducer->mIsActive);
     EXPECT_EQ(broadcastCount, 6);
-    EXPECT_EQ(activeConfigsBroadcast.size(), 0);
+    ASSERT_EQ(activeConfigsBroadcast.size(), 0);
     EXPECT_EQ(eventActivationMap[0]->state, ActivationState::kNotActive);
     EXPECT_EQ(eventActivationMap[0]->start_ns, bucketStartTimeNs + NS_PER_SEC * 60 * 15 + 15);
     EXPECT_EQ(eventActivationMap[0]->ttl_ns, 60 * 6 * NS_PER_SEC);
@@ -696,42 +696,42 @@ TEST(MetricActivationE2eTest, TestCountMetricWithOneDeactivation) {
     EXPECT_TRUE(reports.ParseFromArray(&buffer[0], buffer.size()));
     backfillDimensionPath(&reports);
     backfillStartEndTimestamp(&reports);
-    EXPECT_EQ(1, reports.reports_size());
-    EXPECT_EQ(1, reports.reports(0).metrics_size());
+    ASSERT_EQ(1, reports.reports_size());
+    ASSERT_EQ(1, reports.reports(0).metrics_size());
 
     StatsLogReport::CountMetricDataWrapper countMetrics;
     sortMetricDataByDimensionsValue(reports.reports(0).metrics(0).count_metrics(), &countMetrics);
-    EXPECT_EQ(5, countMetrics.data_size());
+    ASSERT_EQ(5, countMetrics.data_size());
 
     auto data = countMetrics.data(0);
     EXPECT_EQ(util::PROCESS_LIFE_CYCLE_STATE_CHANGED, data.dimensions_in_what().field());
-    EXPECT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
+    ASSERT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
     EXPECT_EQ(1 /* uid field */,
               data.dimensions_in_what().value_tuple().dimensions_value(0).field());
     EXPECT_EQ(222, data.dimensions_in_what().value_tuple().dimensions_value(0).value_int());
-    EXPECT_EQ(1, data.bucket_info_size());
+    ASSERT_EQ(1, data.bucket_info_size());
     EXPECT_EQ(1, data.bucket_info(0).count());
     EXPECT_EQ(bucketStartTimeNs, data.bucket_info(0).start_bucket_elapsed_nanos());
     EXPECT_EQ(bucketStartTimeNs + bucketSizeNs, data.bucket_info(0).end_bucket_elapsed_nanos());
 
     data = countMetrics.data(1);
     EXPECT_EQ(util::PROCESS_LIFE_CYCLE_STATE_CHANGED, data.dimensions_in_what().field());
-    EXPECT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
+    ASSERT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
     EXPECT_EQ(1 /* uid field */,
               data.dimensions_in_what().value_tuple().dimensions_value(0).field());
     EXPECT_EQ(333, data.dimensions_in_what().value_tuple().dimensions_value(0).value_int());
-    EXPECT_EQ(1, data.bucket_info_size());
+    ASSERT_EQ(1, data.bucket_info_size());
     EXPECT_EQ(1, data.bucket_info(0).count());
     EXPECT_EQ(bucketStartTimeNs, data.bucket_info(0).start_bucket_elapsed_nanos());
     EXPECT_EQ(bucketStartTimeNs + bucketSizeNs, data.bucket_info(0).end_bucket_elapsed_nanos());
 
     data = countMetrics.data(2);
     EXPECT_EQ(util::PROCESS_LIFE_CYCLE_STATE_CHANGED, data.dimensions_in_what().field());
-    EXPECT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
+    ASSERT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
     EXPECT_EQ(1 /* uid field */,
               data.dimensions_in_what().value_tuple().dimensions_value(0).field());
     EXPECT_EQ(444, data.dimensions_in_what().value_tuple().dimensions_value(0).value_int());
-    EXPECT_EQ(1, data.bucket_info_size());
+    ASSERT_EQ(1, data.bucket_info_size());
     EXPECT_EQ(1, data.bucket_info(0).count());
     // Partial bucket as metric is deactivated.
     EXPECT_EQ(bucketStartTimeNs + bucketSizeNs, data.bucket_info(0).start_bucket_elapsed_nanos());
@@ -740,11 +740,11 @@ TEST(MetricActivationE2eTest, TestCountMetricWithOneDeactivation) {
 
     data = countMetrics.data(3);
     EXPECT_EQ(util::PROCESS_LIFE_CYCLE_STATE_CHANGED, data.dimensions_in_what().field());
-    EXPECT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
+    ASSERT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
     EXPECT_EQ(1 /* uid field */,
               data.dimensions_in_what().value_tuple().dimensions_value(0).field());
     EXPECT_EQ(666, data.dimensions_in_what().value_tuple().dimensions_value(0).value_int());
-    EXPECT_EQ(1, data.bucket_info_size());
+    ASSERT_EQ(1, data.bucket_info_size());
     EXPECT_EQ(1, data.bucket_info(0).count());
     EXPECT_EQ(bucketStartTimeNs + 2 * bucketSizeNs,
               data.bucket_info(0).start_bucket_elapsed_nanos());
@@ -753,11 +753,11 @@ TEST(MetricActivationE2eTest, TestCountMetricWithOneDeactivation) {
 
     data = countMetrics.data(4);
     EXPECT_EQ(util::PROCESS_LIFE_CYCLE_STATE_CHANGED, data.dimensions_in_what().field());
-    EXPECT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
+    ASSERT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
     EXPECT_EQ(1 /* uid field */,
               data.dimensions_in_what().value_tuple().dimensions_value(0).field());
     EXPECT_EQ(777, data.dimensions_in_what().value_tuple().dimensions_value(0).value_int());
-    EXPECT_EQ(1, data.bucket_info_size());
+    ASSERT_EQ(1, data.bucket_info_size());
     EXPECT_EQ(1, data.bucket_info(0).count());
     EXPECT_EQ(bucketStartTimeNs + 2 * bucketSizeNs,
               data.bucket_info(0).start_bucket_elapsed_nanos());
@@ -799,10 +799,10 @@ TEST(MetricActivationE2eTest, TestCountMetricWithTwoDeactivations) {
 
     processor.OnConfigUpdated(bucketStartTimeNs, cfgKey, config);
 
-    EXPECT_EQ(processor.mMetricsManagers.size(), 1u);
+    ASSERT_EQ(processor.mMetricsManagers.size(), 1u);
     sp<MetricsManager> metricsManager = processor.mMetricsManagers.begin()->second;
     EXPECT_TRUE(metricsManager->isConfigValid());
-    EXPECT_EQ(metricsManager->mAllMetricProducers.size(), 1);
+    ASSERT_EQ(metricsManager->mAllMetricProducers.size(), 1);
     sp<MetricProducer> metricProducer = metricsManager->mAllMetricProducers[0];
     auto& eventActivationMap = metricProducer->mEventActivationMap;
     auto& eventDeactivationMap = metricProducer->mEventDeactivationMap;
@@ -811,7 +811,7 @@ TEST(MetricActivationE2eTest, TestCountMetricWithTwoDeactivations) {
     EXPECT_FALSE(metricProducer->mIsActive);
     // Two activations: one is triggered by battery saver mode (tracker index 0), the other is
     // triggered by screen on event (tracker index 2).
-    EXPECT_EQ(eventActivationMap.size(), 2u);
+    ASSERT_EQ(eventActivationMap.size(), 2u);
     EXPECT_TRUE(eventActivationMap.find(0) != eventActivationMap.end());
     EXPECT_TRUE(eventActivationMap.find(2) != eventActivationMap.end());
     EXPECT_EQ(eventActivationMap[0]->state, ActivationState::kNotActive);
@@ -820,11 +820,11 @@ TEST(MetricActivationE2eTest, TestCountMetricWithTwoDeactivations) {
     EXPECT_EQ(eventActivationMap[2]->state, ActivationState::kNotActive);
     EXPECT_EQ(eventActivationMap[2]->start_ns, 0);
     EXPECT_EQ(eventActivationMap[2]->ttl_ns, 60 * 2 * NS_PER_SEC);
-    EXPECT_EQ(eventDeactivationMap.size(), 2u);
+    ASSERT_EQ(eventDeactivationMap.size(), 2u);
     EXPECT_TRUE(eventDeactivationMap.find(3) != eventDeactivationMap.end());
     EXPECT_TRUE(eventDeactivationMap.find(4) != eventDeactivationMap.end());
-    EXPECT_EQ(eventDeactivationMap[3].size(), 1u);
-    EXPECT_EQ(eventDeactivationMap[4].size(), 1u);
+    ASSERT_EQ(eventDeactivationMap[3].size(), 1u);
+    ASSERT_EQ(eventDeactivationMap[4].size(), 1u);
     EXPECT_EQ(eventDeactivationMap[3][0], eventActivationMap[0]);
     EXPECT_EQ(eventDeactivationMap[4][0], eventActivationMap[2]);
 
@@ -842,7 +842,7 @@ TEST(MetricActivationE2eTest, TestCountMetricWithTwoDeactivations) {
     EXPECT_TRUE(metricsManager->isActive());
     EXPECT_TRUE(metricProducer->mIsActive);
     EXPECT_EQ(broadcastCount, 1);
-    EXPECT_EQ(activeConfigsBroadcast.size(), 1);
+    ASSERT_EQ(activeConfigsBroadcast.size(), 1);
     EXPECT_EQ(activeConfigsBroadcast[0], cfgId);
     EXPECT_EQ(eventActivationMap[0]->state, ActivationState::kActive);
     EXPECT_EQ(eventActivationMap[0]->start_ns, bucketStartTimeNs + 10);
@@ -899,7 +899,7 @@ TEST(MetricActivationE2eTest, TestCountMetricWithTwoDeactivations) {
     EXPECT_FALSE(metricProducer->mIsActive);
     // New broadcast since the config is no longer active.
     EXPECT_EQ(broadcastCount, 2);
-    EXPECT_EQ(activeConfigsBroadcast.size(), 0);
+    ASSERT_EQ(activeConfigsBroadcast.size(), 0);
     EXPECT_EQ(eventActivationMap[0]->state, ActivationState::kNotActive);
     EXPECT_EQ(eventActivationMap[0]->start_ns, bucketStartTimeNs + 10);
     EXPECT_EQ(eventActivationMap[0]->ttl_ns, 60 * 6 * NS_PER_SEC);
@@ -916,7 +916,7 @@ TEST(MetricActivationE2eTest, TestCountMetricWithTwoDeactivations) {
     EXPECT_TRUE(metricsManager->isActive());
     EXPECT_TRUE(metricProducer->mIsActive);
     EXPECT_EQ(broadcastCount, 3);
-    EXPECT_EQ(activeConfigsBroadcast.size(), 1);
+    ASSERT_EQ(activeConfigsBroadcast.size(), 1);
     EXPECT_EQ(activeConfigsBroadcast[0], cfgId);
     EXPECT_EQ(eventActivationMap[0]->state, ActivationState::kNotActive);
     EXPECT_EQ(eventActivationMap[0]->start_ns, bucketStartTimeNs + 10);
@@ -937,7 +937,7 @@ TEST(MetricActivationE2eTest, TestCountMetricWithTwoDeactivations) {
     EXPECT_TRUE(metricsManager->isActive());
     EXPECT_TRUE(metricProducer->mIsActive);
     EXPECT_EQ(broadcastCount, 3);
-    EXPECT_EQ(activeConfigsBroadcast.size(), 1);
+    ASSERT_EQ(activeConfigsBroadcast.size(), 1);
     EXPECT_EQ(activeConfigsBroadcast[0], cfgId);
     EXPECT_EQ(eventActivationMap[0]->state, ActivationState::kActive);
     EXPECT_EQ(eventActivationMap[0]->start_ns, bucketStartTimeNs + NS_PER_SEC * 60 * 11 + 15);
@@ -959,7 +959,7 @@ TEST(MetricActivationE2eTest, TestCountMetricWithTwoDeactivations) {
     EXPECT_FALSE(metricProducer->mIsActive);
     // New broadcast since the config is no longer active.
     EXPECT_EQ(broadcastCount, 4);
-    EXPECT_EQ(activeConfigsBroadcast.size(), 0);
+    ASSERT_EQ(activeConfigsBroadcast.size(), 0);
     EXPECT_EQ(eventActivationMap[0]->state, ActivationState::kNotActive);
     EXPECT_EQ(eventActivationMap[0]->start_ns, bucketStartTimeNs + NS_PER_SEC * 60 * 11 + 15);
     EXPECT_EQ(eventActivationMap[0]->ttl_ns, 60 * 6 * NS_PER_SEC);
@@ -975,7 +975,7 @@ TEST(MetricActivationE2eTest, TestCountMetricWithTwoDeactivations) {
     EXPECT_FALSE(metricsManager->isActive());
     EXPECT_FALSE(metricProducer->mIsActive);
     EXPECT_EQ(broadcastCount, 4);
-    EXPECT_EQ(activeConfigsBroadcast.size(), 0);
+    ASSERT_EQ(activeConfigsBroadcast.size(), 0);
     EXPECT_EQ(eventActivationMap[0]->state, ActivationState::kNotActive);
     EXPECT_EQ(eventActivationMap[0]->start_ns, bucketStartTimeNs + NS_PER_SEC * 60 * 11 + 15);
     EXPECT_EQ(eventActivationMap[0]->ttl_ns, 60 * 6 * NS_PER_SEC);
@@ -994,7 +994,7 @@ TEST(MetricActivationE2eTest, TestCountMetricWithTwoDeactivations) {
     EXPECT_TRUE(metricsManager->isActive());
     EXPECT_TRUE(metricProducer->mIsActive);
     EXPECT_EQ(broadcastCount, 5);
-    EXPECT_EQ(activeConfigsBroadcast.size(), 1);
+    ASSERT_EQ(activeConfigsBroadcast.size(), 1);
     EXPECT_EQ(activeConfigsBroadcast[0], cfgId);
     EXPECT_EQ(eventActivationMap[0]->state, ActivationState::kActive);
     EXPECT_EQ(eventActivationMap[0]->start_ns, bucketStartTimeNs + NS_PER_SEC * 60 * 15 + 15);
@@ -1011,7 +1011,7 @@ TEST(MetricActivationE2eTest, TestCountMetricWithTwoDeactivations) {
     EXPECT_FALSE(metricsManager->isActive());
     EXPECT_FALSE(metricProducer->mIsActive);
     EXPECT_EQ(broadcastCount, 6);
-    EXPECT_EQ(activeConfigsBroadcast.size(), 0);
+    ASSERT_EQ(activeConfigsBroadcast.size(), 0);
     EXPECT_EQ(eventActivationMap[0]->state, ActivationState::kNotActive);
     EXPECT_EQ(eventActivationMap[0]->start_ns, bucketStartTimeNs + NS_PER_SEC * 60 * 15 + 15);
     EXPECT_EQ(eventActivationMap[0]->ttl_ns, 60 * 6 * NS_PER_SEC);
@@ -1029,42 +1029,42 @@ TEST(MetricActivationE2eTest, TestCountMetricWithTwoDeactivations) {
     EXPECT_TRUE(reports.ParseFromArray(&buffer[0], buffer.size()));
     backfillDimensionPath(&reports);
     backfillStartEndTimestamp(&reports);
-    EXPECT_EQ(1, reports.reports_size());
-    EXPECT_EQ(1, reports.reports(0).metrics_size());
+    ASSERT_EQ(1, reports.reports_size());
+    ASSERT_EQ(1, reports.reports(0).metrics_size());
 
     StatsLogReport::CountMetricDataWrapper countMetrics;
     sortMetricDataByDimensionsValue(reports.reports(0).metrics(0).count_metrics(), &countMetrics);
-    EXPECT_EQ(5, countMetrics.data_size());
+    ASSERT_EQ(5, countMetrics.data_size());
 
     auto data = countMetrics.data(0);
     EXPECT_EQ(util::PROCESS_LIFE_CYCLE_STATE_CHANGED, data.dimensions_in_what().field());
-    EXPECT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
+    ASSERT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
     EXPECT_EQ(1 /* uid field */,
               data.dimensions_in_what().value_tuple().dimensions_value(0).field());
     EXPECT_EQ(222, data.dimensions_in_what().value_tuple().dimensions_value(0).value_int());
-    EXPECT_EQ(1, data.bucket_info_size());
+    ASSERT_EQ(1, data.bucket_info_size());
     EXPECT_EQ(1, data.bucket_info(0).count());
     EXPECT_EQ(bucketStartTimeNs, data.bucket_info(0).start_bucket_elapsed_nanos());
     EXPECT_EQ(bucketStartTimeNs + bucketSizeNs, data.bucket_info(0).end_bucket_elapsed_nanos());
 
     data = countMetrics.data(1);
     EXPECT_EQ(util::PROCESS_LIFE_CYCLE_STATE_CHANGED, data.dimensions_in_what().field());
-    EXPECT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
+    ASSERT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
     EXPECT_EQ(1 /* uid field */,
               data.dimensions_in_what().value_tuple().dimensions_value(0).field());
     EXPECT_EQ(333, data.dimensions_in_what().value_tuple().dimensions_value(0).value_int());
-    EXPECT_EQ(1, data.bucket_info_size());
+    ASSERT_EQ(1, data.bucket_info_size());
     EXPECT_EQ(1, data.bucket_info(0).count());
     EXPECT_EQ(bucketStartTimeNs, data.bucket_info(0).start_bucket_elapsed_nanos());
     EXPECT_EQ(bucketStartTimeNs + bucketSizeNs, data.bucket_info(0).end_bucket_elapsed_nanos());
 
     data = countMetrics.data(2);
     EXPECT_EQ(util::PROCESS_LIFE_CYCLE_STATE_CHANGED, data.dimensions_in_what().field());
-    EXPECT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
+    ASSERT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
     EXPECT_EQ(1 /* uid field */,
               data.dimensions_in_what().value_tuple().dimensions_value(0).field());
     EXPECT_EQ(444, data.dimensions_in_what().value_tuple().dimensions_value(0).value_int());
-    EXPECT_EQ(1, data.bucket_info_size());
+    ASSERT_EQ(1, data.bucket_info_size());
     EXPECT_EQ(1, data.bucket_info(0).count());
     // Partial bucket as metric is deactivated.
     EXPECT_EQ(bucketStartTimeNs + bucketSizeNs, data.bucket_info(0).start_bucket_elapsed_nanos());
@@ -1073,11 +1073,11 @@ TEST(MetricActivationE2eTest, TestCountMetricWithTwoDeactivations) {
 
     data = countMetrics.data(3);
     EXPECT_EQ(util::PROCESS_LIFE_CYCLE_STATE_CHANGED, data.dimensions_in_what().field());
-    EXPECT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
+    ASSERT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
     EXPECT_EQ(1 /* uid field */,
               data.dimensions_in_what().value_tuple().dimensions_value(0).field());
     EXPECT_EQ(666, data.dimensions_in_what().value_tuple().dimensions_value(0).value_int());
-    EXPECT_EQ(1, data.bucket_info_size());
+    ASSERT_EQ(1, data.bucket_info_size());
     EXPECT_EQ(1, data.bucket_info(0).count());
     EXPECT_EQ(bucketStartTimeNs + 2 * bucketSizeNs,
               data.bucket_info(0).start_bucket_elapsed_nanos());
@@ -1086,11 +1086,11 @@ TEST(MetricActivationE2eTest, TestCountMetricWithTwoDeactivations) {
 
     data = countMetrics.data(4);
     EXPECT_EQ(util::PROCESS_LIFE_CYCLE_STATE_CHANGED, data.dimensions_in_what().field());
-    EXPECT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
+    ASSERT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
     EXPECT_EQ(1 /* uid field */,
               data.dimensions_in_what().value_tuple().dimensions_value(0).field());
     EXPECT_EQ(777, data.dimensions_in_what().value_tuple().dimensions_value(0).value_int());
-    EXPECT_EQ(1, data.bucket_info_size());
+    ASSERT_EQ(1, data.bucket_info_size());
     EXPECT_EQ(1, data.bucket_info(0).count());
     EXPECT_EQ(bucketStartTimeNs + 2 * bucketSizeNs,
               data.bucket_info(0).start_bucket_elapsed_nanos());
@@ -1132,10 +1132,10 @@ TEST(MetricActivationE2eTest, TestCountMetricWithSameDeactivation) {
 
     processor.OnConfigUpdated(bucketStartTimeNs, cfgKey, config);
 
-    EXPECT_EQ(processor.mMetricsManagers.size(), 1u);
+    ASSERT_EQ(processor.mMetricsManagers.size(), 1u);
     sp<MetricsManager> metricsManager = processor.mMetricsManagers.begin()->second;
     EXPECT_TRUE(metricsManager->isConfigValid());
-    EXPECT_EQ(metricsManager->mAllMetricProducers.size(), 1);
+    ASSERT_EQ(metricsManager->mAllMetricProducers.size(), 1);
     sp<MetricProducer> metricProducer = metricsManager->mAllMetricProducers[0];
     auto& eventActivationMap = metricProducer->mEventActivationMap;
     auto& eventDeactivationMap = metricProducer->mEventDeactivationMap;
@@ -1144,7 +1144,7 @@ TEST(MetricActivationE2eTest, TestCountMetricWithSameDeactivation) {
     EXPECT_FALSE(metricProducer->mIsActive);
     // Two activations: one is triggered by battery saver mode (tracker index 0), the other is
     // triggered by screen on event (tracker index 2).
-    EXPECT_EQ(eventActivationMap.size(), 2u);
+    ASSERT_EQ(eventActivationMap.size(), 2u);
     EXPECT_TRUE(eventActivationMap.find(0) != eventActivationMap.end());
     EXPECT_TRUE(eventActivationMap.find(2) != eventActivationMap.end());
     EXPECT_EQ(eventActivationMap[0]->state, ActivationState::kNotActive);
@@ -1153,9 +1153,9 @@ TEST(MetricActivationE2eTest, TestCountMetricWithSameDeactivation) {
     EXPECT_EQ(eventActivationMap[2]->state, ActivationState::kNotActive);
     EXPECT_EQ(eventActivationMap[2]->start_ns, 0);
     EXPECT_EQ(eventActivationMap[2]->ttl_ns, 60 * 2 * NS_PER_SEC);
-    EXPECT_EQ(eventDeactivationMap.size(), 1u);
+    ASSERT_EQ(eventDeactivationMap.size(), 1u);
     EXPECT_TRUE(eventDeactivationMap.find(3) != eventDeactivationMap.end());
-    EXPECT_EQ(eventDeactivationMap[3].size(), 2u);
+    ASSERT_EQ(eventDeactivationMap[3].size(), 2u);
     EXPECT_EQ(eventDeactivationMap[3][0], eventActivationMap[0]);
     EXPECT_EQ(eventDeactivationMap[3][1], eventActivationMap[2]);
     EXPECT_EQ(broadcastCount, 0);
@@ -1172,7 +1172,7 @@ TEST(MetricActivationE2eTest, TestCountMetricWithSameDeactivation) {
     EXPECT_TRUE(metricsManager->isActive());
     EXPECT_TRUE(metricProducer->mIsActive);
     EXPECT_EQ(broadcastCount, 1);
-    EXPECT_EQ(activeConfigsBroadcast.size(), 1);
+    ASSERT_EQ(activeConfigsBroadcast.size(), 1);
     EXPECT_EQ(activeConfigsBroadcast[0], cfgId);
     EXPECT_EQ(eventActivationMap[0]->state, ActivationState::kNotActive);
     EXPECT_EQ(eventActivationMap[2]->state, ActivationState::kActive);
@@ -1205,7 +1205,7 @@ TEST(MetricActivationE2eTest, TestCountMetricWithSameDeactivation) {
     EXPECT_FALSE(metricProducer->mIsActive);
     // New broadcast since the config is no longer active.
     EXPECT_EQ(broadcastCount, 2);
-    EXPECT_EQ(activeConfigsBroadcast.size(), 0);
+    ASSERT_EQ(activeConfigsBroadcast.size(), 0);
     EXPECT_EQ(eventActivationMap[0]->state, ActivationState::kNotActive);
     EXPECT_EQ(eventActivationMap[2]->state, ActivationState::kNotActive);
 
@@ -1219,7 +1219,7 @@ TEST(MetricActivationE2eTest, TestCountMetricWithSameDeactivation) {
     EXPECT_TRUE(metricsManager->isActive());
     EXPECT_TRUE(metricProducer->mIsActive);
     EXPECT_EQ(broadcastCount, 3);
-    EXPECT_EQ(activeConfigsBroadcast.size(), 1);
+    ASSERT_EQ(activeConfigsBroadcast.size(), 1);
     EXPECT_EQ(activeConfigsBroadcast[0], cfgId);
     EXPECT_EQ(eventActivationMap[0]->state, ActivationState::kActive);
     EXPECT_EQ(eventActivationMap[0]->start_ns, bucketStartTimeNs + NS_PER_SEC * 60 * 10 + 15);
@@ -1236,7 +1236,7 @@ TEST(MetricActivationE2eTest, TestCountMetricWithSameDeactivation) {
     EXPECT_FALSE(metricsManager->isActive());
     EXPECT_FALSE(metricProducer->mIsActive);
     EXPECT_EQ(broadcastCount, 4);
-    EXPECT_EQ(activeConfigsBroadcast.size(), 0);
+    ASSERT_EQ(activeConfigsBroadcast.size(), 0);
     EXPECT_EQ(eventActivationMap[0]->state, ActivationState::kNotActive);
     EXPECT_EQ(eventActivationMap[2]->state, ActivationState::kNotActive);
 
@@ -1252,42 +1252,42 @@ TEST(MetricActivationE2eTest, TestCountMetricWithSameDeactivation) {
     EXPECT_TRUE(reports.ParseFromArray(&buffer[0], buffer.size()));
     backfillDimensionPath(&reports);
     backfillStartEndTimestamp(&reports);
-    EXPECT_EQ(1, reports.reports_size());
-    EXPECT_EQ(1, reports.reports(0).metrics_size());
+    ASSERT_EQ(1, reports.reports_size());
+    ASSERT_EQ(1, reports.reports(0).metrics_size());
 
     StatsLogReport::CountMetricDataWrapper countMetrics;
     sortMetricDataByDimensionsValue(reports.reports(0).metrics(0).count_metrics(), &countMetrics);
-    EXPECT_EQ(3, countMetrics.data_size());
+    ASSERT_EQ(3, countMetrics.data_size());
 
     auto data = countMetrics.data(0);
     EXPECT_EQ(util::PROCESS_LIFE_CYCLE_STATE_CHANGED, data.dimensions_in_what().field());
-    EXPECT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
+    ASSERT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
     EXPECT_EQ(1 /* uid field */,
               data.dimensions_in_what().value_tuple().dimensions_value(0).field());
     EXPECT_EQ(222, data.dimensions_in_what().value_tuple().dimensions_value(0).value_int());
-    EXPECT_EQ(1, data.bucket_info_size());
+    ASSERT_EQ(1, data.bucket_info_size());
     EXPECT_EQ(1, data.bucket_info(0).count());
     EXPECT_EQ(bucketStartTimeNs, data.bucket_info(0).start_bucket_elapsed_nanos());
     EXPECT_EQ(firstDeactivation, data.bucket_info(0).end_bucket_elapsed_nanos());
 
     data = countMetrics.data(1);
     EXPECT_EQ(util::PROCESS_LIFE_CYCLE_STATE_CHANGED, data.dimensions_in_what().field());
-    EXPECT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
+    ASSERT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
     EXPECT_EQ(1 /* uid field */,
               data.dimensions_in_what().value_tuple().dimensions_value(0).field());
     EXPECT_EQ(333, data.dimensions_in_what().value_tuple().dimensions_value(0).value_int());
-    EXPECT_EQ(1, data.bucket_info_size());
+    ASSERT_EQ(1, data.bucket_info_size());
     EXPECT_EQ(1, data.bucket_info(0).count());
     EXPECT_EQ(bucketStartTimeNs, data.bucket_info(0).start_bucket_elapsed_nanos());
     EXPECT_EQ(firstDeactivation, data.bucket_info(0).end_bucket_elapsed_nanos());
 
     data = countMetrics.data(2);
     EXPECT_EQ(util::PROCESS_LIFE_CYCLE_STATE_CHANGED, data.dimensions_in_what().field());
-    EXPECT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
+    ASSERT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
     EXPECT_EQ(1 /* uid field */,
               data.dimensions_in_what().value_tuple().dimensions_value(0).field());
     EXPECT_EQ(555, data.dimensions_in_what().value_tuple().dimensions_value(0).value_int());
-    EXPECT_EQ(1, data.bucket_info_size());
+    ASSERT_EQ(1, data.bucket_info_size());
     EXPECT_EQ(1, data.bucket_info(0).count());
     // Partial bucket as metric is deactivated.
     EXPECT_EQ(bucketStartTimeNs + 2 * bucketSizeNs,
@@ -1329,10 +1329,10 @@ TEST(MetricActivationE2eTest, TestCountMetricWithTwoMetricsTwoDeactivations) {
 
     processor.OnConfigUpdated(bucketStartTimeNs, cfgKey, config);
 
-    EXPECT_EQ(processor.mMetricsManagers.size(), 1u);
+    ASSERT_EQ(processor.mMetricsManagers.size(), 1u);
     sp<MetricsManager> metricsManager = processor.mMetricsManagers.begin()->second;
     EXPECT_TRUE(metricsManager->isConfigValid());
-    EXPECT_EQ(metricsManager->mAllMetricProducers.size(), 2);
+    ASSERT_EQ(metricsManager->mAllMetricProducers.size(), 2);
     sp<MetricProducer> metricProducer = metricsManager->mAllMetricProducers[0];
     auto& eventActivationMap = metricProducer->mEventActivationMap;
     auto& eventDeactivationMap = metricProducer->mEventDeactivationMap;
@@ -1345,7 +1345,7 @@ TEST(MetricActivationE2eTest, TestCountMetricWithTwoMetricsTwoDeactivations) {
     EXPECT_FALSE(metricProducer2->mIsActive);
     // Two activations: one is triggered by battery saver mode (tracker index 0), the other is
     // triggered by screen on event (tracker index 2).
-    EXPECT_EQ(eventActivationMap.size(), 2u);
+    ASSERT_EQ(eventActivationMap.size(), 2u);
     EXPECT_TRUE(eventActivationMap.find(0) != eventActivationMap.end());
     EXPECT_TRUE(eventActivationMap.find(2) != eventActivationMap.end());
     EXPECT_EQ(eventActivationMap[0]->state, ActivationState::kNotActive);
@@ -1354,15 +1354,15 @@ TEST(MetricActivationE2eTest, TestCountMetricWithTwoMetricsTwoDeactivations) {
     EXPECT_EQ(eventActivationMap[2]->state, ActivationState::kNotActive);
     EXPECT_EQ(eventActivationMap[2]->start_ns, 0);
     EXPECT_EQ(eventActivationMap[2]->ttl_ns, 60 * 2 * NS_PER_SEC);
-    EXPECT_EQ(eventDeactivationMap.size(), 2u);
+    ASSERT_EQ(eventDeactivationMap.size(), 2u);
     EXPECT_TRUE(eventDeactivationMap.find(3) != eventDeactivationMap.end());
     EXPECT_TRUE(eventDeactivationMap.find(4) != eventDeactivationMap.end());
-    EXPECT_EQ(eventDeactivationMap[3].size(), 1u);
-    EXPECT_EQ(eventDeactivationMap[4].size(), 1u);
+    ASSERT_EQ(eventDeactivationMap[3].size(), 1u);
+    ASSERT_EQ(eventDeactivationMap[4].size(), 1u);
     EXPECT_EQ(eventDeactivationMap[3][0], eventActivationMap[0]);
     EXPECT_EQ(eventDeactivationMap[4][0], eventActivationMap[2]);
 
-    EXPECT_EQ(eventActivationMap2.size(), 2u);
+    ASSERT_EQ(eventActivationMap2.size(), 2u);
     EXPECT_TRUE(eventActivationMap2.find(0) != eventActivationMap2.end());
     EXPECT_TRUE(eventActivationMap2.find(2) != eventActivationMap2.end());
     EXPECT_EQ(eventActivationMap2[0]->state, ActivationState::kNotActive);
@@ -1371,11 +1371,11 @@ TEST(MetricActivationE2eTest, TestCountMetricWithTwoMetricsTwoDeactivations) {
     EXPECT_EQ(eventActivationMap2[2]->state, ActivationState::kNotActive);
     EXPECT_EQ(eventActivationMap2[2]->start_ns, 0);
     EXPECT_EQ(eventActivationMap2[2]->ttl_ns, 60 * 2 * NS_PER_SEC);
-    EXPECT_EQ(eventDeactivationMap2.size(), 2u);
+    ASSERT_EQ(eventDeactivationMap2.size(), 2u);
     EXPECT_TRUE(eventDeactivationMap2.find(3) != eventDeactivationMap2.end());
     EXPECT_TRUE(eventDeactivationMap2.find(4) != eventDeactivationMap2.end());
-    EXPECT_EQ(eventDeactivationMap[3].size(), 1u);
-    EXPECT_EQ(eventDeactivationMap[4].size(), 1u);
+    ASSERT_EQ(eventDeactivationMap[3].size(), 1u);
+    ASSERT_EQ(eventDeactivationMap[4].size(), 1u);
     EXPECT_EQ(eventDeactivationMap2[3][0], eventActivationMap2[0]);
     EXPECT_EQ(eventDeactivationMap2[4][0], eventActivationMap2[2]);
 
@@ -1395,7 +1395,7 @@ TEST(MetricActivationE2eTest, TestCountMetricWithTwoMetricsTwoDeactivations) {
     processor.OnLogEvent(event.get(), bucketStartTimeNs + 10);
     EXPECT_TRUE(metricsManager->isActive());
     EXPECT_EQ(broadcastCount, 1);
-    EXPECT_EQ(activeConfigsBroadcast.size(), 1);
+    ASSERT_EQ(activeConfigsBroadcast.size(), 1);
     EXPECT_EQ(activeConfigsBroadcast[0], cfgId);
     EXPECT_TRUE(metricProducer->mIsActive);
     EXPECT_EQ(eventActivationMap[0]->state, ActivationState::kActive);
@@ -1487,7 +1487,7 @@ TEST(MetricActivationE2eTest, TestCountMetricWithTwoMetricsTwoDeactivations) {
     EXPECT_FALSE(metricsManager->isActive());
     // New broadcast since the config is no longer active.
     EXPECT_EQ(broadcastCount, 2);
-    EXPECT_EQ(activeConfigsBroadcast.size(), 0);
+    ASSERT_EQ(activeConfigsBroadcast.size(), 0);
     EXPECT_FALSE(metricProducer->mIsActive);
     EXPECT_EQ(eventActivationMap[0]->state, ActivationState::kNotActive);
     EXPECT_EQ(eventActivationMap[0]->start_ns, bucketStartTimeNs + 10);
@@ -1513,7 +1513,7 @@ TEST(MetricActivationE2eTest, TestCountMetricWithTwoMetricsTwoDeactivations) {
     processor.OnLogEvent(event.get(), bucketStartTimeNs + NS_PER_SEC * 60 * 10 + 10);
     EXPECT_TRUE(metricsManager->isActive());
     EXPECT_EQ(broadcastCount, 3);
-    EXPECT_EQ(activeConfigsBroadcast.size(), 1);
+    ASSERT_EQ(activeConfigsBroadcast.size(), 1);
     EXPECT_EQ(activeConfigsBroadcast[0], cfgId);
     EXPECT_TRUE(metricProducer->mIsActive);
     EXPECT_EQ(eventActivationMap[0]->state, ActivationState::kNotActive);
@@ -1545,7 +1545,7 @@ TEST(MetricActivationE2eTest, TestCountMetricWithTwoMetricsTwoDeactivations) {
     processor.OnLogEvent(event.get(), bucketStartTimeNs + NS_PER_SEC * 60 * 11 + 15);
     EXPECT_TRUE(metricsManager->isActive());
     EXPECT_EQ(broadcastCount, 3);
-    EXPECT_EQ(activeConfigsBroadcast.size(), 1);
+    ASSERT_EQ(activeConfigsBroadcast.size(), 1);
     EXPECT_EQ(activeConfigsBroadcast[0], cfgId);
     EXPECT_TRUE(metricProducer->mIsActive);
     EXPECT_EQ(eventActivationMap[0]->state, ActivationState::kActive);
@@ -1578,7 +1578,7 @@ TEST(MetricActivationE2eTest, TestCountMetricWithTwoMetricsTwoDeactivations) {
     EXPECT_FALSE(metricsManager->isActive());
     // New broadcast since the config is no longer active.
     EXPECT_EQ(broadcastCount, 4);
-    EXPECT_EQ(activeConfigsBroadcast.size(), 0);
+    ASSERT_EQ(activeConfigsBroadcast.size(), 0);
     EXPECT_FALSE(metricProducer->mIsActive);
     EXPECT_EQ(eventActivationMap[0]->state, ActivationState::kNotActive);
     EXPECT_EQ(eventActivationMap[0]->start_ns, bucketStartTimeNs + NS_PER_SEC * 60 * 11 + 15);
@@ -1605,7 +1605,7 @@ TEST(MetricActivationE2eTest, TestCountMetricWithTwoMetricsTwoDeactivations) {
     processor.OnLogEvent(event.get(), bucketStartTimeNs + NS_PER_SEC * 60 * 13);
     EXPECT_FALSE(metricsManager->isActive());
     EXPECT_EQ(broadcastCount, 4);
-    EXPECT_EQ(activeConfigsBroadcast.size(), 0);
+    ASSERT_EQ(activeConfigsBroadcast.size(), 0);
     EXPECT_FALSE(metricProducer->mIsActive);
     EXPECT_EQ(eventActivationMap[0]->state, ActivationState::kNotActive);
     EXPECT_EQ(eventActivationMap[0]->start_ns, bucketStartTimeNs + NS_PER_SEC * 60 * 11 + 15);
@@ -1635,7 +1635,7 @@ TEST(MetricActivationE2eTest, TestCountMetricWithTwoMetricsTwoDeactivations) {
     processor.OnLogEvent(event.get(), bucketStartTimeNs + NS_PER_SEC * 60 * 15 + 15);
     EXPECT_TRUE(metricsManager->isActive());
     EXPECT_EQ(broadcastCount, 5);
-    EXPECT_EQ(activeConfigsBroadcast.size(), 1);
+    ASSERT_EQ(activeConfigsBroadcast.size(), 1);
     EXPECT_EQ(activeConfigsBroadcast[0], cfgId);
     EXPECT_TRUE(metricProducer->mIsActive);
     EXPECT_EQ(eventActivationMap[0]->state, ActivationState::kActive);
@@ -1661,7 +1661,7 @@ TEST(MetricActivationE2eTest, TestCountMetricWithTwoMetricsTwoDeactivations) {
     processor.OnLogEvent(event.get(), bucketStartTimeNs + NS_PER_SEC * 60 * 16);
     EXPECT_FALSE(metricsManager->isActive());
     EXPECT_EQ(broadcastCount, 6);
-    EXPECT_EQ(activeConfigsBroadcast.size(), 0);
+    ASSERT_EQ(activeConfigsBroadcast.size(), 0);
     EXPECT_FALSE(metricProducer->mIsActive);
     EXPECT_EQ(eventActivationMap[0]->state, ActivationState::kNotActive);
     EXPECT_EQ(eventActivationMap[0]->start_ns, bucketStartTimeNs + NS_PER_SEC * 60 * 15 + 15);
@@ -1689,43 +1689,43 @@ TEST(MetricActivationE2eTest, TestCountMetricWithTwoMetricsTwoDeactivations) {
     EXPECT_TRUE(reports.ParseFromArray(&buffer[0], buffer.size()));
     backfillDimensionPath(&reports);
     backfillStartEndTimestamp(&reports);
-    EXPECT_EQ(1, reports.reports_size());
-    EXPECT_EQ(2, reports.reports(0).metrics_size());
+    ASSERT_EQ(1, reports.reports_size());
+    ASSERT_EQ(2, reports.reports(0).metrics_size());
 
     StatsLogReport::CountMetricDataWrapper countMetrics;
 
     sortMetricDataByDimensionsValue(reports.reports(0).metrics(0).count_metrics(), &countMetrics);
-    EXPECT_EQ(5, countMetrics.data_size());
+    ASSERT_EQ(5, countMetrics.data_size());
 
     auto data = countMetrics.data(0);
     EXPECT_EQ(util::PROCESS_LIFE_CYCLE_STATE_CHANGED, data.dimensions_in_what().field());
-    EXPECT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
+    ASSERT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
     EXPECT_EQ(1 /* uid field */,
               data.dimensions_in_what().value_tuple().dimensions_value(0).field());
     EXPECT_EQ(222, data.dimensions_in_what().value_tuple().dimensions_value(0).value_int());
-    EXPECT_EQ(1, data.bucket_info_size());
+    ASSERT_EQ(1, data.bucket_info_size());
     EXPECT_EQ(1, data.bucket_info(0).count());
     EXPECT_EQ(bucketStartTimeNs, data.bucket_info(0).start_bucket_elapsed_nanos());
     EXPECT_EQ(bucketStartTimeNs + bucketSizeNs, data.bucket_info(0).end_bucket_elapsed_nanos());
 
     data = countMetrics.data(1);
     EXPECT_EQ(util::PROCESS_LIFE_CYCLE_STATE_CHANGED, data.dimensions_in_what().field());
-    EXPECT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
+    ASSERT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
     EXPECT_EQ(1 /* uid field */,
               data.dimensions_in_what().value_tuple().dimensions_value(0).field());
     EXPECT_EQ(333, data.dimensions_in_what().value_tuple().dimensions_value(0).value_int());
-    EXPECT_EQ(1, data.bucket_info_size());
+    ASSERT_EQ(1, data.bucket_info_size());
     EXPECT_EQ(1, data.bucket_info(0).count());
     EXPECT_EQ(bucketStartTimeNs, data.bucket_info(0).start_bucket_elapsed_nanos());
     EXPECT_EQ(bucketStartTimeNs + bucketSizeNs, data.bucket_info(0).end_bucket_elapsed_nanos());
 
     data = countMetrics.data(2);
     EXPECT_EQ(util::PROCESS_LIFE_CYCLE_STATE_CHANGED, data.dimensions_in_what().field());
-    EXPECT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
+    ASSERT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
     EXPECT_EQ(1 /* uid field */,
               data.dimensions_in_what().value_tuple().dimensions_value(0).field());
     EXPECT_EQ(444, data.dimensions_in_what().value_tuple().dimensions_value(0).value_int());
-    EXPECT_EQ(1, data.bucket_info_size());
+    ASSERT_EQ(1, data.bucket_info_size());
     EXPECT_EQ(1, data.bucket_info(0).count());
     // Partial bucket as metric is deactivated.
     EXPECT_EQ(bucketStartTimeNs + bucketSizeNs, data.bucket_info(0).start_bucket_elapsed_nanos());
@@ -1734,11 +1734,11 @@ TEST(MetricActivationE2eTest, TestCountMetricWithTwoMetricsTwoDeactivations) {
 
     data = countMetrics.data(3);
     EXPECT_EQ(util::PROCESS_LIFE_CYCLE_STATE_CHANGED, data.dimensions_in_what().field());
-    EXPECT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
+    ASSERT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
     EXPECT_EQ(1 /* uid field */,
               data.dimensions_in_what().value_tuple().dimensions_value(0).field());
     EXPECT_EQ(666, data.dimensions_in_what().value_tuple().dimensions_value(0).value_int());
-    EXPECT_EQ(1, data.bucket_info_size());
+    ASSERT_EQ(1, data.bucket_info_size());
     EXPECT_EQ(1, data.bucket_info(0).count());
     EXPECT_EQ(bucketStartTimeNs + 2 * bucketSizeNs,
               data.bucket_info(0).start_bucket_elapsed_nanos());
@@ -1747,11 +1747,11 @@ TEST(MetricActivationE2eTest, TestCountMetricWithTwoMetricsTwoDeactivations) {
 
     data = countMetrics.data(4);
     EXPECT_EQ(util::PROCESS_LIFE_CYCLE_STATE_CHANGED, data.dimensions_in_what().field());
-    EXPECT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
+    ASSERT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
     EXPECT_EQ(1 /* uid field */,
               data.dimensions_in_what().value_tuple().dimensions_value(0).field());
     EXPECT_EQ(777, data.dimensions_in_what().value_tuple().dimensions_value(0).value_int());
-    EXPECT_EQ(1, data.bucket_info_size());
+    ASSERT_EQ(1, data.bucket_info_size());
     EXPECT_EQ(1, data.bucket_info(0).count());
     EXPECT_EQ(bucketStartTimeNs + 2 * bucketSizeNs,
               data.bucket_info(0).start_bucket_elapsed_nanos());
@@ -1760,37 +1760,37 @@ TEST(MetricActivationE2eTest, TestCountMetricWithTwoMetricsTwoDeactivations) {
 
     countMetrics.clear_data();
     sortMetricDataByDimensionsValue(reports.reports(0).metrics(1).count_metrics(), &countMetrics);
-    EXPECT_EQ(5, countMetrics.data_size());
+    ASSERT_EQ(5, countMetrics.data_size());
 
     data = countMetrics.data(0);
     EXPECT_EQ(util::ACTIVITY_FOREGROUND_STATE_CHANGED, data.dimensions_in_what().field());
-    EXPECT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
+    ASSERT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
     EXPECT_EQ(1 /* uid field */,
               data.dimensions_in_what().value_tuple().dimensions_value(0).field());
     EXPECT_EQ(2222, data.dimensions_in_what().value_tuple().dimensions_value(0).value_int());
-    EXPECT_EQ(1, data.bucket_info_size());
+    ASSERT_EQ(1, data.bucket_info_size());
     EXPECT_EQ(1, data.bucket_info(0).count());
     EXPECT_EQ(bucketStartTimeNs, data.bucket_info(0).start_bucket_elapsed_nanos());
     EXPECT_EQ(bucketStartTimeNs + bucketSizeNs, data.bucket_info(0).end_bucket_elapsed_nanos());
 
     data = countMetrics.data(1);
     EXPECT_EQ(util::ACTIVITY_FOREGROUND_STATE_CHANGED, data.dimensions_in_what().field());
-    EXPECT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
+    ASSERT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
     EXPECT_EQ(1 /* uid field */,
               data.dimensions_in_what().value_tuple().dimensions_value(0).field());
     EXPECT_EQ(3333, data.dimensions_in_what().value_tuple().dimensions_value(0).value_int());
-    EXPECT_EQ(1, data.bucket_info_size());
+    ASSERT_EQ(1, data.bucket_info_size());
     EXPECT_EQ(1, data.bucket_info(0).count());
     EXPECT_EQ(bucketStartTimeNs, data.bucket_info(0).start_bucket_elapsed_nanos());
     EXPECT_EQ(bucketStartTimeNs + bucketSizeNs, data.bucket_info(0).end_bucket_elapsed_nanos());
 
     data = countMetrics.data(2);
     EXPECT_EQ(util::ACTIVITY_FOREGROUND_STATE_CHANGED, data.dimensions_in_what().field());
-    EXPECT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
+    ASSERT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
     EXPECT_EQ(1 /* uid field */,
               data.dimensions_in_what().value_tuple().dimensions_value(0).field());
     EXPECT_EQ(4444, data.dimensions_in_what().value_tuple().dimensions_value(0).value_int());
-    EXPECT_EQ(1, data.bucket_info_size());
+    ASSERT_EQ(1, data.bucket_info_size());
     EXPECT_EQ(1, data.bucket_info(0).count());
     // Partial bucket as metric is deactivated.
     EXPECT_EQ(bucketStartTimeNs + bucketSizeNs, data.bucket_info(0).start_bucket_elapsed_nanos());
@@ -1799,11 +1799,11 @@ TEST(MetricActivationE2eTest, TestCountMetricWithTwoMetricsTwoDeactivations) {
 
     data = countMetrics.data(3);
     EXPECT_EQ(util::ACTIVITY_FOREGROUND_STATE_CHANGED, data.dimensions_in_what().field());
-    EXPECT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
+    ASSERT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
     EXPECT_EQ(1 /* uid field */,
               data.dimensions_in_what().value_tuple().dimensions_value(0).field());
     EXPECT_EQ(6666, data.dimensions_in_what().value_tuple().dimensions_value(0).value_int());
-    EXPECT_EQ(1, data.bucket_info_size());
+    ASSERT_EQ(1, data.bucket_info_size());
     EXPECT_EQ(1, data.bucket_info(0).count());
     EXPECT_EQ(bucketStartTimeNs + 2 * bucketSizeNs,
               data.bucket_info(0).start_bucket_elapsed_nanos());
@@ -1812,11 +1812,11 @@ TEST(MetricActivationE2eTest, TestCountMetricWithTwoMetricsTwoDeactivations) {
 
     data = countMetrics.data(4);
     EXPECT_EQ(util::ACTIVITY_FOREGROUND_STATE_CHANGED, data.dimensions_in_what().field());
-    EXPECT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
+    ASSERT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
     EXPECT_EQ(1 /* uid field */,
               data.dimensions_in_what().value_tuple().dimensions_value(0).field());
     EXPECT_EQ(7777, data.dimensions_in_what().value_tuple().dimensions_value(0).value_int());
-    EXPECT_EQ(1, data.bucket_info_size());
+    ASSERT_EQ(1, data.bucket_info_size());
     EXPECT_EQ(1, data.bucket_info(0).count());
     EXPECT_EQ(bucketStartTimeNs + 2 * bucketSizeNs,
               data.bucket_info(0).start_bucket_elapsed_nanos());

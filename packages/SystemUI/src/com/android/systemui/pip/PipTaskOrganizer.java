@@ -449,12 +449,21 @@ public class PipTaskOrganizer extends TaskOrganizer {
      * {@link #scheduleResizePip}.
      */
     public void scheduleFinishResizePip(Rect destinationBounds) {
+        scheduleFinishResizePip(destinationBounds, null);
+    }
+
+    /**
+     * Same as {@link #scheduleFinishResizePip} but with a callback.
+     */
+    public void scheduleFinishResizePip(Rect destinationBounds,
+            Consumer<Rect> updateBoundsCallback) {
         final SurfaceControl.Transaction tx = mSurfaceControlTransactionFactory.getTransaction();
         mSurfaceTransactionHelper
                 .crop(tx, mLeash, destinationBounds)
                 .resetScale(tx, mLeash, destinationBounds)
                 .round(tx, mLeash, mInPip);
-        scheduleFinishResizePip(tx, destinationBounds, TRANSITION_DIRECTION_NONE, null);
+        scheduleFinishResizePip(tx, destinationBounds, TRANSITION_DIRECTION_NONE,
+                updateBoundsCallback);
     }
 
     private void scheduleFinishResizePip(SurfaceControl.Transaction tx,
