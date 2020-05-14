@@ -286,6 +286,13 @@ import java.io.PrintWriter;
         final BtDeviceConnectionInfo info = new BtDeviceConnectionInfo(device, state, profile,
                 suppressNoisyIntent, a2dpVolume);
 
+        new MediaMetrics.Item(MediaMetrics.Name.AUDIO_DEVICE + MediaMetrics.SEPARATOR
+                + "postBluetoothA2dpDeviceConnectionStateSuppressNoisyIntent")
+                .set(MediaMetrics.Property.STATE, state == BluetoothProfile.STATE_CONNECTED
+                        ? MediaMetrics.Value.CONNECTED : MediaMetrics.Value.DISCONNECTED)
+                .set(MediaMetrics.Property.INDEX, a2dpVolume)
+                .record();
+
         // operations of removing and posting messages related to A2DP device state change must be
         // mutually exclusive
         synchronized (mDeviceStateLock) {
