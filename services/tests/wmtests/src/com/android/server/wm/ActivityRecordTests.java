@@ -488,6 +488,16 @@ public class ActivityRecordTests extends ActivityTestsBase {
     }
 
     @Test
+    public void testShouldMakeActive_nonTopVisible() {
+        ActivityRecord finishingActivity = new ActivityBuilder(mService).setTask(mTask).build();
+        finishingActivity.finishing = true;
+        ActivityRecord topActivity = new ActivityBuilder(mService).setTask(mTask).build();
+        mActivity.setState(ActivityStack.ActivityState.STOPPED, "Testing");
+
+        assertEquals(false, mActivity.shouldMakeActive(null /* activeActivity */));
+    }
+
+    @Test
     public void testShouldResume_stackVisibility() {
         mActivity.setState(ActivityStack.ActivityState.STOPPED, "Testing");
         spyOn(mStack);
