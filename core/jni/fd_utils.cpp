@@ -57,6 +57,8 @@ static const char* kPathWhitelist[] = {
         "/dev/urandom",
         "/dev/ion",
         "/dev/dri/renderD129", // Fixes b/31172436
+        "/dev/stune/foreground/tasks",
+        "/dev/blkio/tasks",
 };
 
 static const char kFdPath[] = "/proc/self/fd";
