@@ -64,7 +64,8 @@ final class InlineSuggestionFactory {
         final Consumer<IntentSender> intentSenderConsumer = (intentSender) ->
                 client.startIntentSender(intentSender, new Intent());
         InlinePresentation inlineAuthentication = response.getInlinePresentation();
-        return createInlineAuthSuggestion(inlineAuthentication,
+        return createInlineAuthSuggestion(
+                mergedInlinePresentation(request, 0, inlineAuthentication),
                 remoteRenderService, onClickFactory, onErrorCallback, intentSenderConsumer,
                 request.getHostInputToken(), request.getHostDisplayId());
     }
