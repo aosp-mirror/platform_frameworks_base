@@ -29,31 +29,32 @@ import java.io.IOException;
 import java.util.function.Consumer;
 
 /**
- * Helper class for performing atomic operations on a file by creating a
- * backup file until a write has successfully completed.  If you need this
- * on older versions of the platform you can use
- * {@link android.support.v4.util.AtomicFile} in the v4 support library.
+ * Helper class for performing atomic operations on a file by writing to a new file and renaming it
+ * into the place of the original file after the write has successfully completed. If you need this
+ * on older versions of the platform you can use {@link androidx.core.util.AtomicFile} in AndroidX.
  * <p>
- * Atomic file guarantees file integrity by ensuring that a file has
- * been completely written and sync'd to disk before removing its backup.
- * As long as the backup file exists, the original file is considered
- * to be invalid (left over from a previous attempt to write the file).
- * </p><p>
- * Atomic file does not confer any file locking semantics.
- * Do not use this class when the file may be accessed or modified concurrently
- * by multiple threads or processes.  The caller is responsible for ensuring
- * appropriate mutual exclusion invariants whenever it accesses the file.
- * </p>
+ * Atomic file guarantees file integrity by ensuring that a file has been completely written and
+ * sync'd to disk before renaming it to the original file. Previously this is done by renaming the
+ * original file to a backup file beforehand, but this approach couldn't handle the case where the
+ * file is created for the first time. This class will also handle the backup file created by the
+ * old implementation properly.
+ * <p>
+ * Atomic file does not confer any file locking semantics. Do not use this class when the file may
+ * be accessed or modified concurrently by multiple threads or processes. The caller is responsible
+ * for ensuring appropriate mutual exclusion invariants whenever it accesses the file.
  */
 public class AtomicFile {
+    private static final String LOG_TAG = "AtomicFile";
+
     private final File mBaseName;
-    private final File mBackupName;
+    private final File mNewName;
+    private final File mLegacyBackupName;
     private final String mCommitTag;
     private long mStartTime;
 
     /**
      * Create a new AtomicFile for a file located at the given File path.
-     * The secondary backup file will be the same file path with ".bak" appended.
+     * The new file created when writing will be the same file path with ".new" appended.
      */
     public AtomicFile(File baseName) {
         this(baseName, null);
@@ -65,7 +66,8 @@ public class AtomicFile {
      */
     public AtomicFile(File baseName, String commitTag) {
         mBaseName = baseName;
-        mBackupName = new File(baseName.getPath() + ".bak");
+        mNewName = new File(baseName.getPath() + ".new");
+        mLegacyBackupName = new File(baseName.getPath() + ".bak");
         mCommitTag = commitTag;
     }
 
@@ -78,11 +80,12 @@ public class AtomicFile {
     }
 
     /**
-     * Delete the atomic file.  This deletes both the base and backup files.
+     * Delete the atomic file.  This deletes both the base and new files.
      */
     public void delete() {
         mBaseName.delete();
-        mBackupName.delete();
+        mNewName.delete();
+        mLegacyBackupName.delete();
     }
 
     /**
@@ -112,36 +115,28 @@ public class AtomicFile {
     public FileOutputStream startWrite(long startTime) throws IOException {
         mStartTime = startTime;
 
-        // Rename the current file so it may be used as a backup during the next read
-        if (mBaseName.exists()) {
-            if (!mBackupName.exists()) {
-                if (!mBaseName.renameTo(mBackupName)) {
-                    Log.w("AtomicFile", "Couldn't rename file " + mBaseName
-                            + " to backup file " + mBackupName);
-                }
-            } else {
-                mBaseName.delete();
+        if (mLegacyBackupName.exists()) {
+            if (!mLegacyBackupName.renameTo(mBaseName)) {
+                Log.e(LOG_TAG, "Failed to rename legacy backup file " + mLegacyBackupName
+                        + " to base file " + mBaseName);
             }
         }
-        FileOutputStream str = null;
+
         try {
-            str = new FileOutputStream(mBaseName);
+            return new FileOutputStream(mNewName);
         } catch (FileNotFoundException e) {
-            File parent = mBaseName.getParentFile();
+            File parent = mNewName.getParentFile();
             if (!parent.mkdirs()) {
-                throw new IOException("Couldn't create directory " + mBaseName);
+                throw new IOException("Failed to create directory for " + mNewName);
             }
-            FileUtils.setPermissions(
-                parent.getPath(),
-                FileUtils.S_IRWXU|FileUtils.S_IRWXG|FileUtils.S_IXOTH,
-                -1, -1);
+            FileUtils.setPermissions(parent.getPath(), FileUtils.S_IRWXU | FileUtils.S_IRWXG
+                    | FileUtils.S_IXOTH, -1, -1);
             try {
-                str = new FileOutputStream(mBaseName);
+                return new FileOutputStream(mNewName);
             } catch (FileNotFoundException e2) {
-                throw new IOException("Couldn't create " + mBaseName);
+                throw new IOException("Failed to create new file " + mNewName, e2);
             }
         }
-        return str;
     }
 
     /**
@@ -151,36 +146,45 @@ public class AtomicFile {
      * will return the new file stream.
      */
     public void finishWrite(FileOutputStream str) {
-        if (str != null) {
-            FileUtils.sync(str);
-            try {
-                str.close();
-                mBackupName.delete();
-            } catch (IOException e) {
-                Log.w("AtomicFile", "finishWrite: Got exception:", e);
-            }
-            if (mCommitTag != null) {
-                com.android.internal.logging.EventLogTags.writeCommitSysConfigFile(
-                        mCommitTag, SystemClock.uptimeMillis() - mStartTime);
-            }
+        if (str == null) {
+            return;
+        }
+        if (!FileUtils.sync(str)) {
+            Log.e(LOG_TAG, "Failed to sync file output stream");
+        }
+        try {
+            str.close();
+        } catch (IOException e) {
+            Log.e(LOG_TAG, "Failed to close file output stream", e);
+        }
+        if (!mNewName.renameTo(mBaseName)) {
+            Log.e(LOG_TAG, "Failed to rename new file " + mNewName + " to base file " + mBaseName);
+        }
+        if (mCommitTag != null) {
+            com.android.internal.logging.EventLogTags.writeCommitSysConfigFile(
+                    mCommitTag, SystemClock.uptimeMillis() - mStartTime);
         }
     }
 
     /**
      * Call when you have failed for some reason at writing to the stream
      * returned by {@link #startWrite()}.  This will close the current
-     * write stream, and roll back to the previous state of the file.
+     * write stream, and delete the new file.
      */
     public void failWrite(FileOutputStream str) {
-        if (str != null) {
-            FileUtils.sync(str);
-            try {
-                str.close();
-                mBaseName.delete();
-                mBackupName.renameTo(mBaseName);
-            } catch (IOException e) {
-                Log.w("AtomicFile", "failWrite: Got exception:", e);
-            }
+        if (str == null) {
+            return;
+        }
+        if (!FileUtils.sync(str)) {
+            Log.e(LOG_TAG, "Failed to sync file output stream");
+        }
+        try {
+            str.close();
+        } catch (IOException e) {
+            Log.e(LOG_TAG, "Failed to close file output stream", e);
+        }
+        if (!mNewName.delete()) {
+            Log.e(LOG_TAG, "Failed to delete new file " + mNewName);
         }
     }
 
@@ -210,32 +214,34 @@ public class AtomicFile {
     }
 
     /**
-     * Open the atomic file for reading.  If there previously was an
-     * incomplete write, this will roll back to the last good data before
-     * opening for read.  You should call close() on the FileInputStream when
-     * you are done reading from it.
-     *
-     * <p>Note that if another thread is currently performing
-     * a write, this will incorrectly consider it to be in the state of a bad
-     * write and roll back, causing the new data currently being written to
-     * be dropped.  You must do your own threading protection for access to
-     * AtomicFile.
+     * Open the atomic file for reading. You should call close() on the FileInputStream when you are
+     * done reading from it.
+     * <p>
+     * You must do your own threading protection for access to AtomicFile.
      */
     public FileInputStream openRead() throws FileNotFoundException {
-        if (mBackupName.exists()) {
-            mBaseName.delete();
-            mBackupName.renameTo(mBaseName);
+        if (mLegacyBackupName.exists()) {
+            if (!mLegacyBackupName.renameTo(mBaseName)) {
+                Log.e(LOG_TAG, "Failed to rename legacy backup file " + mLegacyBackupName
+                        + " to base file " + mBaseName);
+            }
+        }
+
+        if (mNewName.exists()) {
+            if (!mNewName.delete()) {
+                Log.e(LOG_TAG, "Failed to delete outdated new file " + mNewName);
+            }
         }
         return new FileInputStream(mBaseName);
     }
 
     /**
      * @hide
-     * Checks if the original or backup file exists.
-     * @return whether the original or backup file exists.
+     * Checks if the original or legacy backup file exists.
+     * @return whether the original or legacy backup file exists.
      */
     public boolean exists() {
-        return mBaseName.exists() || mBackupName.exists();
+        return mBaseName.exists() || mLegacyBackupName.exists();
     }
 
     /**
@@ -246,8 +252,8 @@ public class AtomicFile {
      *     the file does not exist or an I/O error is encountered.
      */
     public long getLastModifiedTime() {
-        if (mBackupName.exists()) {
-            return mBackupName.lastModified();
+        if (mLegacyBackupName.exists()) {
+            return mLegacyBackupName.lastModified();
         }
         return mBaseName.lastModified();
     }
