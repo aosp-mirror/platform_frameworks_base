@@ -2146,7 +2146,7 @@
     <permission android:name="android.permission.READ_PRECISE_PHONE_STATE"
         android:protectionLevel="signature|privileged" />
 
-    <!-- @SystemApi Allows read access to privileged phone state.
+    <!-- @SystemApi @TestApi Allows read access to privileged phone state.
          @hide Used internally. -->
     <permission android:name="android.permission.READ_PRIVILEGED_PHONE_STATE"
         android:protectionLevel="signature|privileged" />
