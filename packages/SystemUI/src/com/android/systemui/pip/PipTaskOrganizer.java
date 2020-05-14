@@ -621,7 +621,7 @@ public class PipTaskOrganizer extends TaskOrganizer {
      * @return {@code true} if destinationBounds is altered for split screen
      */
     private boolean syncWithSplitScreenBounds(Rect destinationBoundsOut) {
-        if (mSplitDivider == null || !mSplitDivider.inSplitMode()) {
+        if (mSplitDivider == null || !mSplitDivider.isDividerVisible()) {
             // bail early if system is not in split screen mode
             return false;
         }
