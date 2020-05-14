@@ -630,7 +630,7 @@ class GnssVisibilityControl {
         }
 
         Notification.Builder builder = new Notification.Builder(mContext,
-                SystemNotificationChannels.NETWORK_ALERTS)
+                SystemNotificationChannels.NETWORK_STATUS)
                 .setSmallIcon(R.drawable.stat_sys_gps_on)
                 .setCategory(Notification.CATEGORY_SYSTEM)
                 .setVisibility(Notification.VISIBILITY_SECRET)
