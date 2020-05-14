@@ -42,6 +42,7 @@ import com.android.systemui.statusbar.notification.row.StackScrollerDecorView
 import com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm.SectionProvider
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.children
+import com.android.systemui.util.foldToSparseArray
 import javax.inject.Inject
 
 /**
@@ -447,6 +448,38 @@ class NotificationSectionsManager @Inject internal constructor(
         }
     }
 
+    private sealed class SectionBounds {
+
+        data class Many(
+            val first: ActivatableNotificationView,
+            val last: ActivatableNotificationView
+        ) : SectionBounds()
+
+        data class One(val lone: ActivatableNotificationView) : SectionBounds()
+        object None : SectionBounds()
+
+        fun addNotif(notif: ActivatableNotificationView): SectionBounds = when (this) {
+            is None -> One(notif)
+            is One -> Many(lone, notif)
+            is Many -> copy(last = notif)
+        }
+
+        fun updateSection(section: NotificationSection): Boolean = when (this) {
+            is None -> section.setFirstAndLastVisibleChildren(null, null)
+            is One -> section.setFirstAndLastVisibleChildren(lone, lone)
+            is Many -> section.setFirstAndLastVisibleChildren(first, last)
+        }
+
+        private fun NotificationSection.setFirstAndLastVisibleChildren(
+            first: ActivatableNotificationView?,
+            last: ActivatableNotificationView?
+        ): Boolean {
+            val firstChanged = setFirstVisibleChild(first)
+            val lastChanged = setLastVisibleChild(last)
+            return firstChanged || lastChanged
+        }
+    }
+
     /**
      * Updates the boundaries (as tracked by their first and last views) of the priority sections.
      *
@@ -456,35 +489,23 @@ class NotificationSectionsManager @Inject internal constructor(
         sections: Array<NotificationSection>,
         children: List<ActivatableNotificationView>
     ): Boolean {
-        if (sections.isEmpty() || children.isEmpty()) {
-            for (s in sections) {
-                s.firstVisibleChild = null
-                s.lastVisibleChild = null
-            }
-            return false
-        }
-        var changed = false
-        val viewsInBucket = mutableListOf<ActivatableNotificationView>()
-        for (s in sections) {
-            val filter = s.bucket
-            viewsInBucket.clear()
-
-            // TODO: do this in a single pass, and more better
-            for (v in children) {
-                val bucket = getBucket(v)
-                        ?: throw IllegalArgumentException("Cannot find section bucket for view")
-                if (bucket == filter) {
-                    viewsInBucket.add(v)
+        // Create mapping of bucket to section
+        val sectionBounds = children.asSequence()
+                // Group children by bucket
+                .groupingBy {
+                    getBucket(it)
+                            ?: throw IllegalArgumentException("Cannot find section bucket for view")
                 }
-                if (viewsInBucket.size >= 1) {
-                    changed = changed or s.setFirstVisibleChild(viewsInBucket[0])
-                    changed = changed or
-                            s.setLastVisibleChild(viewsInBucket[viewsInBucket.size - 1])
-                } else {
-                    changed = changed or s.setFirstVisibleChild(null)
-                    changed = changed or s.setLastVisibleChild(null)
-                }
-            }
+                // Combine each bucket into a SectionBoundary
+                .foldToSparseArray(
+                        SectionBounds.None,
+                        size = sections.size,
+                        operation = SectionBounds::addNotif
+                )
+        // Update each section with the associated boundary, tracking if there was a change
+        val changed = sections.fold(false) { changed, section ->
+            val bounds = sectionBounds[section.bucket] ?: SectionBounds.None
+            bounds.updateSection(section) || changed
         }
         if (DEBUG) {
             logSections(sections)
