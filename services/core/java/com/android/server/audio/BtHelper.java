@@ -358,14 +358,11 @@ public class BtHelper {
      * @return false if SCO isn't connected
      */
     /*package*/ synchronized boolean isBluetoothScoOn() {
-        if ((mBluetoothHeadset != null)
-                && (mBluetoothHeadset.getAudioState(mBluetoothHeadsetDevice)
-                != BluetoothHeadset.STATE_AUDIO_CONNECTED)) {
-            Log.w(TAG, "isBluetoothScoOn(true) returning false because "
-                    + mBluetoothHeadsetDevice + " is not in audio connected mode");
+        if (mBluetoothHeadset == null) {
             return false;
         }
-        return true;
+        return mBluetoothHeadset.getAudioState(mBluetoothHeadsetDevice)
+                == BluetoothHeadset.STATE_AUDIO_CONNECTED;
     }
 
     /**
