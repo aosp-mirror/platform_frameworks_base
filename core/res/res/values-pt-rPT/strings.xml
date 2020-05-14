@@ -537,8 +537,7 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"Permite que a app modifique a sua coleção de fotos."</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"ler as localizações a partir da sua coleção de multimédia"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"Permite que a app leia as localizações a partir da sua coleção de multimédia."</string>
-    <!-- no translation found for biometric_dialog_default_title (55026799173208210) -->
-    <skip />
+    <string name="biometric_dialog_default_title" msgid="55026799173208210">"Confirme a sua identidade"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Hardware biométrico indisponível."</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Autenticação cancelada"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Não reconhecido."</string>
@@ -1162,7 +1161,7 @@
     <string name="aerr_application_repeated" msgid="7804378743218496566">"<xliff:g id="APPLICATION">%1$s</xliff:g> continua a falhar"</string>
     <string name="aerr_process_repeated" msgid="1153152413537954974">"<xliff:g id="PROCESS">%1$s</xliff:g> continua a falhar"</string>
     <string name="aerr_restart" msgid="2789618625210505419">"Abrir app novamente"</string>
-    <string name="aerr_report" msgid="3095644466849299308">"Enviar comentários"</string>
+    <string name="aerr_report" msgid="3095644466849299308">"Enviar feedback"</string>
     <string name="aerr_close" msgid="3398336821267021852">"Fechar"</string>
     <string name="aerr_mute" msgid="2304972923480211376">"Desativar som até o dispositivo reiniciar"</string>
     <string name="aerr_wait" msgid="3198677780474548217">"Aguardar"</string>

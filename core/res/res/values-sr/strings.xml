@@ -540,8 +540,7 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"Дозвољава апликацији да мења колекцију слика."</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"читање локација из медијске колекције"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"Дозвољава апликацији да чита локације из медијске колекције."</string>
-    <!-- no translation found for biometric_dialog_default_title (55026799173208210) -->
-    <skip />
+    <string name="biometric_dialog_default_title" msgid="55026799173208210">"Потврдите свој идентитет"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Биометријски хардвер није доступан"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Потврда идентитета је отказана"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Није препознато"</string>
@@ -2087,7 +2086,7 @@
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"Групна конверзација"</string>
     <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"Лично"</string>
-    <string name="resolver_work_tab" msgid="2690019516263167035">"Пословни"</string>
+    <string name="resolver_work_tab" msgid="2690019516263167035">"Пословно"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Лични приказ"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Приказ за посао"</string>
     <string name="resolver_cant_share_with_work_apps" msgid="637686613606502219">"Не можете да делите овај садржај помоћу апликација за посао"</string>

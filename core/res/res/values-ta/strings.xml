@@ -537,8 +537,7 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"உங்களின் படத் தொகுப்பை மாற்ற ஆப்ஸை அனுமதிக்கும்."</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"மீடியா தொகுப்பிலிருந்து இடங்களை அறிதல்"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"உங்களின் மீடியா தொகுப்பிலிருந்து இடங்களை அறிந்துகொள்ள ஆப்ஸை அனுமதிக்கும்."</string>
-    <!-- no translation found for biometric_dialog_default_title (55026799173208210) -->
-    <skip />
+    <string name="biometric_dialog_default_title" msgid="55026799173208210">"நீங்கள்தான் என உறுதிசெய்க"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"பயோமெட்ரிக் வன்பொருள் இல்லை"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"அங்கீகரிப்பு ரத்தானது"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"அடையாளங்காணபடவில்லை"</string>

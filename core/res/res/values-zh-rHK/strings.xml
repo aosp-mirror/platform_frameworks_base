@@ -537,8 +537,7 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"允許應用程式修改您的相片集。"</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"讀取媒體集的位置"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"允許應用程式讀取媒體集的位置。"</string>
-    <!-- no translation found for biometric_dialog_default_title (55026799173208210) -->
-    <skip />
+    <string name="biometric_dialog_default_title" msgid="55026799173208210">"驗證是你本人"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"無法使用生物識別硬件"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"已取消驗證"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"未能識別"</string>
@@ -1310,7 +1309,7 @@
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"偵測到模擬音頻配件"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"連接的裝置與這部手機不兼容。輕按即可瞭解詳情。"</string>
     <string name="adb_active_notification_title" msgid="408390247354560331">"已連接 USB 偵錯工具"</string>
-    <string name="adb_active_notification_message" msgid="5617264033476778211">"輕按即可關閉 USB 偵錯功能"</string>
+    <string name="adb_active_notification_message" msgid="5617264033476778211">"輕按即可將 USB 偵錯工具關閉"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"選取即可停用 USB 偵錯。"</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"已連接無線偵錯"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"輕按即可關閉無線偵錯功能"</string>
@@ -2031,7 +2030,7 @@
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> 個檔案</item>
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g> 個檔案</item>
     </plurals>
-    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"沒有任何建議的使用者可分享"</string>
+    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"沒有推薦的分享對象"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"應用程式清單"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"此應用程式尚未獲授予錄音權限，但可透過此 USB 裝置記錄音訊。"</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"主頁"</string>

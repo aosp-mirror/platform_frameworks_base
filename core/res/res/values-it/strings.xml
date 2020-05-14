@@ -537,8 +537,7 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"Consente all\'app di modificare la tua raccolta di foto."</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"lettura delle posizioni dalla tua raccolta multimediale"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"Consente all\'app di leggere le posizioni dalla tua raccolta multimediale."</string>
-    <!-- no translation found for biometric_dialog_default_title (55026799173208210) -->
-    <skip />
+    <string name="biometric_dialog_default_title" msgid="55026799173208210">"Verifica la tua identità"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Hardware biometrico non disponibile"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Autenticazione annullata"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Non riconosciuto"</string>
@@ -1650,7 +1649,7 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Fine"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Disattiva scorciatoia"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Usa scorciatoia"</string>
-    <string name="color_inversion_feature_name" msgid="326050048927789012">"Inversione colori"</string>
+    <string name="color_inversion_feature_name" msgid="326050048927789012">"Inversione dei colori"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Correzione del colore"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Tieni premuti i tasti del volume. Servizio <xliff:g id="SERVICE_NAME">%1$s</xliff:g> attivato."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Tieni premuti i tasti del volume. Servizio <xliff:g id="SERVICE_NAME">%1$s</xliff:g> disattivato."</string>

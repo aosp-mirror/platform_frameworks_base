@@ -537,8 +537,7 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"ອະນຸຍາດໃຫ້ແອັບແກ້ໄຂຄໍເລັກຊັນຮູບຂອງທ່ານ."</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"ອ່ານສະຖານທີ່ຈາກຄໍເລັກຊັນມີເດຍຂອງທ່ານ"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"ອະນຸຍາດໃຫ້ແອັບອ່ານສະຖານທີ່ຈາກຄໍເລັກຊັນມີເດຍຂອງທ່ານ."</string>
-    <!-- no translation found for biometric_dialog_default_title (55026799173208210) -->
-    <skip />
+    <string name="biometric_dialog_default_title" msgid="55026799173208210">"ຢັ້ງຢືນວ່າແມ່ນທ່ານ"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"ຮາດແວຊີວະມິຕິບໍ່ສາມາດໃຊ້ໄດ້"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"ຍົກເລີກການຮັບຮອງຄວາມຖືກຕ້ອງແລ້ວ"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"ບໍ່ຮັບຮູ້"</string>
@@ -1233,7 +1232,7 @@
     <string name="volume_icon_description_media" msgid="4997633254078171233">"ລະດັບສຽງຂອງສື່"</string>
     <string name="volume_icon_description_notification" msgid="579091344110747279">"ລະດັບສຽງການແຈ້ງເຕືອນ"</string>
     <string name="ringtone_default" msgid="9118299121288174597">"ຣິງໂທນເລີ່ມຕົ້ນ"</string>
-    <string name="ringtone_default_with_actual" msgid="2709686194556159773">"Default (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
+    <string name="ringtone_default_with_actual" msgid="2709686194556159773">"ຄ່າເລີ່ມຕົ້ນ (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="397111123930141876">"ບໍ່ມີ"</string>
     <string name="ringtone_picker_title" msgid="667342618626068253">"ຣິງໂທນ"</string>
     <string name="ringtone_picker_title_alarm" msgid="7438934548339024767">"Alarm sounds"</string>
