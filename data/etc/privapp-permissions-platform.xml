@@ -40,7 +40,7 @@ applications that come with the platform
         <permission name="android.permission.CRYPT_KEEPER"/>
     </privapp-permissions>
 
-    <privapp-permissions package="com.android.cellbroadcastreceiver">
+    <privapp-permissions package="com.android.cellbroadcastreceiver.module">
         <permission name="android.permission.INTERACT_ACROSS_USERS"/>
         <permission name="android.permission.MANAGE_USERS"/>
         <permission name="android.permission.MODIFY_PHONE_STATE"/>
