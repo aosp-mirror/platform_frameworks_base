@@ -103,7 +103,7 @@ TEST(GaugeMetricE2eTest, TestMultipleFieldsForPushedEvent) {
         ConfigKey cfgKey;
         auto processor =
                 CreateStatsLogProcessor(bucketStartTimeNs, bucketStartTimeNs, config, cfgKey);
-        EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
+        ASSERT_EQ(processor->mMetricsManagers.size(), 1u);
         EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
 
         int appUid1 = 123;
@@ -160,24 +160,24 @@ TEST(GaugeMetricE2eTest, TestMultipleFieldsForPushedEvent) {
         backfillDimensionPath(&reports);
         backfillStringInReport(&reports);
         backfillStartEndTimestamp(&reports);
-        EXPECT_EQ(1, reports.reports_size());
-        EXPECT_EQ(1, reports.reports(0).metrics_size());
+        ASSERT_EQ(1, reports.reports_size());
+        ASSERT_EQ(1, reports.reports(0).metrics_size());
         StatsLogReport::GaugeMetricDataWrapper gaugeMetrics;
         sortMetricDataByDimensionsValue(reports.reports(0).metrics(0).gauge_metrics(),
                                         &gaugeMetrics);
-        EXPECT_EQ(2, gaugeMetrics.data_size());
+        ASSERT_EQ(2, gaugeMetrics.data_size());
 
         auto data = gaugeMetrics.data(0);
         EXPECT_EQ(util::APP_START_OCCURRED, data.dimensions_in_what().field());
-        EXPECT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
+        ASSERT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
         EXPECT_EQ(1 /* uid field */,
                   data.dimensions_in_what().value_tuple().dimensions_value(0).field());
         EXPECT_EQ(appUid1, data.dimensions_in_what().value_tuple().dimensions_value(0).value_int());
-        EXPECT_EQ(3, data.bucket_info_size());
+        ASSERT_EQ(3, data.bucket_info_size());
         if (sampling_type == GaugeMetric::FIRST_N_SAMPLES) {
-            EXPECT_EQ(2, data.bucket_info(0).atom_size());
-            EXPECT_EQ(2, data.bucket_info(0).elapsed_timestamp_nanos_size());
-            EXPECT_EQ(0, data.bucket_info(0).wall_clock_timestamp_nanos_size());
+            ASSERT_EQ(2, data.bucket_info(0).atom_size());
+            ASSERT_EQ(2, data.bucket_info(0).elapsed_timestamp_nanos_size());
+            ASSERT_EQ(0, data.bucket_info(0).wall_clock_timestamp_nanos_size());
             EXPECT_EQ(bucketStartTimeNs, data.bucket_info(0).start_bucket_elapsed_nanos());
             EXPECT_EQ(bucketStartTimeNs + bucketSizeNs,
                       data.bucket_info(0).end_bucket_elapsed_nanos());
@@ -194,8 +194,8 @@ TEST(GaugeMetricE2eTest, TestMultipleFieldsForPushedEvent) {
             EXPECT_EQ(103L,
                       data.bucket_info(0).atom(1).app_start_occurred().activity_start_millis());
 
-            EXPECT_EQ(1, data.bucket_info(1).atom_size());
-            EXPECT_EQ(1, data.bucket_info(1).elapsed_timestamp_nanos_size());
+            ASSERT_EQ(1, data.bucket_info(1).atom_size());
+            ASSERT_EQ(1, data.bucket_info(1).elapsed_timestamp_nanos_size());
             EXPECT_EQ(bucketStartTimeNs + bucketSizeNs,
                       data.bucket_info(1).start_bucket_elapsed_nanos());
             EXPECT_EQ(bucketStartTimeNs + 2 * bucketSizeNs,
@@ -207,8 +207,8 @@ TEST(GaugeMetricE2eTest, TestMultipleFieldsForPushedEvent) {
             EXPECT_EQ(104L,
                       data.bucket_info(1).atom(0).app_start_occurred().activity_start_millis());
 
-            EXPECT_EQ(2, data.bucket_info(2).atom_size());
-            EXPECT_EQ(2, data.bucket_info(2).elapsed_timestamp_nanos_size());
+            ASSERT_EQ(2, data.bucket_info(2).atom_size());
+            ASSERT_EQ(2, data.bucket_info(2).elapsed_timestamp_nanos_size());
             EXPECT_EQ(bucketStartTimeNs + 2 * bucketSizeNs,
                       data.bucket_info(2).start_bucket_elapsed_nanos());
             EXPECT_EQ(bucketStartTimeNs + 3 * bucketSizeNs,
@@ -226,8 +226,8 @@ TEST(GaugeMetricE2eTest, TestMultipleFieldsForPushedEvent) {
             EXPECT_EQ(106L,
                       data.bucket_info(2).atom(1).app_start_occurred().activity_start_millis());
         } else {
-            EXPECT_EQ(1, data.bucket_info(0).atom_size());
-            EXPECT_EQ(1, data.bucket_info(0).elapsed_timestamp_nanos_size());
+            ASSERT_EQ(1, data.bucket_info(0).atom_size());
+            ASSERT_EQ(1, data.bucket_info(0).elapsed_timestamp_nanos_size());
             EXPECT_EQ(bucketStartTimeNs, data.bucket_info(0).start_bucket_elapsed_nanos());
             EXPECT_EQ(bucketStartTimeNs + bucketSizeNs,
                       data.bucket_info(0).end_bucket_elapsed_nanos());
@@ -238,8 +238,8 @@ TEST(GaugeMetricE2eTest, TestMultipleFieldsForPushedEvent) {
             EXPECT_EQ(102L,
                       data.bucket_info(0).atom(0).app_start_occurred().activity_start_millis());
 
-            EXPECT_EQ(1, data.bucket_info(1).atom_size());
-            EXPECT_EQ(1, data.bucket_info(1).elapsed_timestamp_nanos_size());
+            ASSERT_EQ(1, data.bucket_info(1).atom_size());
+            ASSERT_EQ(1, data.bucket_info(1).elapsed_timestamp_nanos_size());
             EXPECT_EQ(bucketStartTimeNs + bucketSizeNs,
                       data.bucket_info(1).start_bucket_elapsed_nanos());
             EXPECT_EQ(bucketStartTimeNs + 2 * bucketSizeNs,
@@ -251,8 +251,8 @@ TEST(GaugeMetricE2eTest, TestMultipleFieldsForPushedEvent) {
             EXPECT_EQ(104L,
                       data.bucket_info(1).atom(0).app_start_occurred().activity_start_millis());
 
-            EXPECT_EQ(1, data.bucket_info(2).atom_size());
-            EXPECT_EQ(1, data.bucket_info(2).elapsed_timestamp_nanos_size());
+            ASSERT_EQ(1, data.bucket_info(2).atom_size());
+            ASSERT_EQ(1, data.bucket_info(2).elapsed_timestamp_nanos_size());
             EXPECT_EQ(bucketStartTimeNs + 2 * bucketSizeNs,
                       data.bucket_info(2).start_bucket_elapsed_nanos());
             EXPECT_EQ(bucketStartTimeNs + 3 * bucketSizeNs,
@@ -268,13 +268,13 @@ TEST(GaugeMetricE2eTest, TestMultipleFieldsForPushedEvent) {
         data = gaugeMetrics.data(1);
 
         EXPECT_EQ(data.dimensions_in_what().field(), util::APP_START_OCCURRED);
-        EXPECT_EQ(data.dimensions_in_what().value_tuple().dimensions_value_size(), 1);
+        ASSERT_EQ(data.dimensions_in_what().value_tuple().dimensions_value_size(), 1);
         EXPECT_EQ(1 /* uid field */,
                   data.dimensions_in_what().value_tuple().dimensions_value(0).field());
         EXPECT_EQ(appUid2, data.dimensions_in_what().value_tuple().dimensions_value(0).value_int());
-        EXPECT_EQ(1, data.bucket_info_size());
-        EXPECT_EQ(1, data.bucket_info(0).atom_size());
-        EXPECT_EQ(1, data.bucket_info(0).elapsed_timestamp_nanos_size());
+        ASSERT_EQ(1, data.bucket_info_size());
+        ASSERT_EQ(1, data.bucket_info(0).atom_size());
+        ASSERT_EQ(1, data.bucket_info(0).elapsed_timestamp_nanos_size());
         EXPECT_EQ(bucketStartTimeNs + 2 * bucketSizeNs,
                   data.bucket_info(0).start_bucket_elapsed_nanos());
         EXPECT_EQ(bucketStartTimeNs + 3 * bucketSizeNs,

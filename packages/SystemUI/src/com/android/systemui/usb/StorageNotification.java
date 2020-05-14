@@ -369,16 +369,24 @@ public class StorageNotification extends SystemUI {
                     R.string.ext_media_new_notification_message, disk.getDescription());
 
             final PendingIntent initIntent = buildInitPendingIntent(vol);
-            return buildNotificationBuilder(vol, title, text)
-                    .addAction(new Action(R.drawable.ic_settings_24dp,
-                            mContext.getString(R.string.ext_media_init_action), initIntent))
-                    .addAction(new Action(R.drawable.ic_eject_24dp,
-                            mContext.getString(R.string.ext_media_unmount_action),
-                            buildUnmountPendingIntent(vol)))
-                    .setContentIntent(initIntent)
-                    .setDeleteIntent(buildSnoozeIntent(vol.getFsUuid()))
-                    .build();
+            final PendingIntent unmountIntent = buildUnmountPendingIntent(vol);
 
+            if (isAutomotive()) {
+                return buildNotificationBuilder(vol, title, text)
+                        .setContentIntent(unmountIntent)
+                        .setDeleteIntent(buildSnoozeIntent(vol.getFsUuid()))
+                        .build();
+            } else {
+                return buildNotificationBuilder(vol, title, text)
+                        .addAction(new Action(R.drawable.ic_settings_24dp,
+                                mContext.getString(R.string.ext_media_init_action), initIntent))
+                        .addAction(new Action(R.drawable.ic_eject_24dp,
+                                mContext.getString(R.string.ext_media_unmount_action),
+                                unmountIntent))
+                        .setContentIntent(initIntent)
+                        .setDeleteIntent(buildSnoozeIntent(vol.getFsUuid()))
+                        .build();
+            }
         } else {
             final CharSequence title = disk.getDescription();
             final CharSequence text = mContext.getString(
@@ -427,9 +435,15 @@ public class StorageNotification extends SystemUI {
                 R.string.ext_media_unmountable_notification_title, disk.getDescription());
         final CharSequence text = mContext.getString(
                 R.string.ext_media_unmountable_notification_message, disk.getDescription());
+        PendingIntent action;
+        if (isAutomotive()) {
+            action = buildUnmountPendingIntent(vol);
+        } else {
+            action = buildInitPendingIntent(vol);
+        }
 
         return buildNotificationBuilder(vol, title, text)
-                .setContentIntent(buildInitPendingIntent(vol))
+                .setContentIntent(action)
                 .setCategory(Notification.CATEGORY_ERROR)
                 .build();
     }

@@ -309,10 +309,10 @@ TEST(MetricsManagerTest, TestGoodConfig) {
                                  activationAtomTrackerToMetricMap, deactivationAtomTrackerToMetricMap,
                                  alertTrackerMap, metricsWithActivation,
                                  noReportMetricIds));
-    EXPECT_EQ(1u, allMetricProducers.size());
-    EXPECT_EQ(1u, allAnomalyTrackers.size());
-    EXPECT_EQ(1u, noReportMetricIds.size());
-    EXPECT_EQ(1u, alertTrackerMap.size());
+    ASSERT_EQ(1u, allMetricProducers.size());
+    ASSERT_EQ(1u, allAnomalyTrackers.size());
+    ASSERT_EQ(1u, noReportMetricIds.size());
+    ASSERT_EQ(1u, alertTrackerMap.size());
     EXPECT_NE(alertTrackerMap.find(kAlertId), alertTrackerMap.end());
     EXPECT_EQ(alertTrackerMap.find(kAlertId)->second, 0);
 }

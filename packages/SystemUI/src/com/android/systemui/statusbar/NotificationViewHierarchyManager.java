@@ -195,13 +195,15 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
                 boolean wasChildInGroup = ent.isChildInGroup();
                 if (isChildInGroup && !wasChildInGroup) {
                     isChildInGroup = wasChildInGroup;
-                    mVisualStabilityManager.addGroupChangesAllowedCallback(mEntryManager);
+                    mVisualStabilityManager.addGroupChangesAllowedCallback(mEntryManager,
+                            false /* persistent */);
                 } else if (!isChildInGroup && wasChildInGroup) {
                     // We allow grouping changes if the group was collapsed
                     if (mGroupManager.isLogicalGroupExpanded(ent.getSbn())) {
                         isChildInGroup = wasChildInGroup;
                         parent = ent.getRow().getNotificationParent().getEntry();
-                        mVisualStabilityManager.addGroupChangesAllowedCallback(mEntryManager);
+                        mVisualStabilityManager.addGroupChangesAllowedCallback(mEntryManager,
+                                false /* persistent */);
                     }
                 }
             }
@@ -286,7 +288,8 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
                 if (mVisualStabilityManager.canReorderNotification(targetChild)) {
                     mListContainer.changeViewPosition(targetChild, i);
                 } else {
-                    mVisualStabilityManager.addReorderingAllowedCallback(mEntryManager);
+                    mVisualStabilityManager.addReorderingAllowedCallback(mEntryManager,
+                            false  /* persistent */);
                 }
             }
             j++;

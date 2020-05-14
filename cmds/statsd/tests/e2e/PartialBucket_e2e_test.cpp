@@ -127,8 +127,8 @@ TEST(PartialBucketE2eTest, TestCountMetricWithoutSplit) {
 
     ConfigMetricsReport report = GetReports(service->mProcessor, start + 3);
     // Expect no metrics since the bucket has not finished yet.
-    EXPECT_EQ(1, report.metrics_size());
-    EXPECT_EQ(0, report.metrics(0).count_metrics().data_size());
+    ASSERT_EQ(1, report.metrics_size());
+    ASSERT_EQ(0, report.metrics(0).count_metrics().data_size());
 }
 
 TEST(PartialBucketE2eTest, TestCountMetricNoSplitOnNewApp) {
@@ -147,8 +147,8 @@ TEST(PartialBucketE2eTest, TestCountMetricNoSplitOnNewApp) {
     service->mProcessor->OnLogEvent(CreateAppCrashEvent(start + 3, 100).get());
 
     ConfigMetricsReport report = GetReports(service->mProcessor, start + 4);
-    EXPECT_EQ(1, report.metrics_size());
-    EXPECT_EQ(0, report.metrics(0).count_metrics().data_size());
+    ASSERT_EQ(1, report.metrics_size());
+    ASSERT_EQ(0, report.metrics(0).count_metrics().data_size());
 }
 
 TEST(PartialBucketE2eTest, TestCountMetricSplitOnUpgrade) {
@@ -267,8 +267,8 @@ TEST(PartialBucketE2eTest, TestValueMetricWithoutMinPartialBucket) {
             GetReports(service->mProcessor, 5 * 60 * NS_PER_SEC + start + 100 * NS_PER_SEC);
     backfillStartEndTimestamp(&report);
 
-    EXPECT_EQ(1, report.metrics_size());
-    EXPECT_EQ(0, report.metrics(0).value_metrics().skipped_size());
+    ASSERT_EQ(1, report.metrics_size());
+    ASSERT_EQ(0, report.metrics(0).value_metrics().skipped_size());
 
     // The fake subsystem state sleep puller returns two atoms.
     ASSERT_EQ(2, report.metrics(0).value_metrics().data_size());
@@ -305,7 +305,7 @@ TEST(PartialBucketE2eTest, TestValueMetricWithMinPartialBucket) {
               report.metrics(0).value_metrics().skipped(0).end_bucket_elapsed_nanos());
 
     ASSERT_EQ(2, report.metrics(0).value_metrics().data_size());
-    EXPECT_EQ(1, report.metrics(0).value_metrics().data(0).bucket_info_size());
+    ASSERT_EQ(1, report.metrics(0).value_metrics().data(0).bucket_info_size());
 }
 
 TEST(PartialBucketE2eTest, TestValueMetricOnBootWithoutMinPartialBucket) {
@@ -329,7 +329,7 @@ TEST(PartialBucketE2eTest, TestValueMetricOnBootWithoutMinPartialBucket) {
 
     // First bucket is dropped due to the initial pull failing
     ASSERT_EQ(1, report.metrics_size());
-    EXPECT_EQ(1, report.metrics(0).value_metrics().skipped_size());
+    ASSERT_EQ(1, report.metrics(0).value_metrics().skipped_size());
     EXPECT_EQ(MillisToNano(NanoToMillis(bootCompleteTimeNs)),
               report.metrics(0).value_metrics().skipped(0).end_bucket_elapsed_nanos());
 
@@ -359,10 +359,10 @@ TEST(PartialBucketE2eTest, TestGaugeMetricWithoutMinPartialBucket) {
     ConfigMetricsReport report = GetReports(service->mProcessor, 5 * 60 * NS_PER_SEC + start + 100);
     backfillStartEndTimestamp(&report);
     ASSERT_EQ(1, report.metrics_size());
-    EXPECT_EQ(0, report.metrics(0).gauge_metrics().skipped_size());
+    ASSERT_EQ(0, report.metrics(0).gauge_metrics().skipped_size());
     // The fake subsystem state sleep puller returns two atoms.
     ASSERT_EQ(2, report.metrics(0).gauge_metrics().data_size());
-    EXPECT_EQ(2, report.metrics(0).gauge_metrics().data(0).bucket_info_size());
+    ASSERT_EQ(2, report.metrics(0).gauge_metrics().data(0).bucket_info_size());
 }
 
 TEST(PartialBucketE2eTest, TestGaugeMetricWithMinPartialBucket) {
@@ -391,7 +391,7 @@ TEST(PartialBucketE2eTest, TestGaugeMetricWithMinPartialBucket) {
     EXPECT_EQ(MillisToNano(NanoToMillis(endSkipped)),
               report.metrics(0).gauge_metrics().skipped(0).end_bucket_elapsed_nanos());
     ASSERT_EQ(2, report.metrics(0).gauge_metrics().data_size());
-    EXPECT_EQ(1, report.metrics(0).gauge_metrics().data(0).bucket_info_size());
+    ASSERT_EQ(1, report.metrics(0).gauge_metrics().data(0).bucket_info_size());
 }
 
 TEST(PartialBucketE2eTest, TestGaugeMetricOnBootWithoutMinPartialBucket) {
@@ -414,7 +414,7 @@ TEST(PartialBucketE2eTest, TestGaugeMetricOnBootWithoutMinPartialBucket) {
     backfillStartEndTimestamp(&report);
 
     ASSERT_EQ(1, report.metrics_size());
-    EXPECT_EQ(0, report.metrics(0).gauge_metrics().skipped_size());
+    ASSERT_EQ(0, report.metrics(0).gauge_metrics().skipped_size());
     // The fake subsystem state sleep puller returns two atoms.
     ASSERT_EQ(2, report.metrics(0).gauge_metrics().data_size());
     // No data in the first bucket, so nothing is reported

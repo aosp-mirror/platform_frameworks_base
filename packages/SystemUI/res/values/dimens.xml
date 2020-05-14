@@ -1281,6 +1281,10 @@
     <dimen name="control_status_padding">3dp</dimen>
     <fraction name="controls_toggle_bg_intensity">5%</fraction>
     <fraction name="controls_dimmed_alpha">40%</fraction>
+    <dimen name="controls_setup_top_margin">16dp</dimen>
+    <dimen name="controls_setup_title">22sp</dimen>
+    <dimen name="controls_setup_subtitle">14sp</dimen>
+    <dimen name="controls_setup_vertical_padding">52dp</dimen>
 
     <!-- Home Controls activity view detail panel-->
     <dimen name="controls_activity_view_top_offset">100dp</dimen>
@@ -1323,7 +1327,10 @@
     <dimen name="screenrecord_dialog_padding">18dp</dimen>
     <dimen name="screenrecord_logo_size">24dp</dimen>
     <dimen name="screenrecord_status_text_size">14sp</dimen>
-    <dimen name="screenrecord_status_icon_radius">5dp</dimen>
+    <dimen name="screenrecord_status_icon_radius">7dp</dimen>
+    <dimen name="screenrecord_status_icon_width">21dp</dimen>
+    <dimen name="screenrecord_status_icon_height">17.5dp</dimen>
+    <dimen name="screenrecord_status_icon_bg_radius">8dp</dimen>
 
     <dimen name="kg_user_switcher_text_size">16sp</dimen>
 

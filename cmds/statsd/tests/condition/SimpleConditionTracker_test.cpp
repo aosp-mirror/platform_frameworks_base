@@ -306,13 +306,13 @@ TEST(SimpleConditionTrackerTest, TestSlicedCondition) {
                                            changedCache);
 
         if (position == Position::FIRST || position == Position::LAST) {
-            EXPECT_EQ(1UL, conditionTracker.mSlicedConditionState.size());
+            ASSERT_EQ(1UL, conditionTracker.mSlicedConditionState.size());
         } else {
-            EXPECT_EQ(uids.size(), conditionTracker.mSlicedConditionState.size());
+            ASSERT_EQ(uids.size(), conditionTracker.mSlicedConditionState.size());
         }
         EXPECT_TRUE(changedCache[0]);
         if (position == Position::FIRST || position == Position::LAST) {
-            EXPECT_EQ(conditionTracker.getChangedToTrueDimensions(allConditions)->size(), 1u);
+            ASSERT_EQ(conditionTracker.getChangedToTrueDimensions(allConditions)->size(), 1u);
             EXPECT_TRUE(conditionTracker.getChangedToFalseDimensions(allConditions)->empty());
         } else {
             EXPECT_EQ(conditionTracker.getChangedToTrueDimensions(allConditions)->size(),
@@ -338,9 +338,9 @@ TEST(SimpleConditionTrackerTest, TestSlicedCondition) {
                                            changedCache);
         EXPECT_FALSE(changedCache[0]);
         if (position == Position::FIRST || position == Position::LAST) {
-            EXPECT_EQ(1UL, conditionTracker.mSlicedConditionState.size());
+            ASSERT_EQ(1UL, conditionTracker.mSlicedConditionState.size());
         } else {
-            EXPECT_EQ(uids.size(), conditionTracker.mSlicedConditionState.size());
+            ASSERT_EQ(uids.size(), conditionTracker.mSlicedConditionState.size());
         }
         EXPECT_TRUE(conditionTracker.getChangedToTrueDimensions(allConditions)->empty());
         EXPECT_TRUE(conditionTracker.getChangedToFalseDimensions(allConditions)->empty());
@@ -359,9 +359,9 @@ TEST(SimpleConditionTrackerTest, TestSlicedCondition) {
         // nothing changes, because wake lock 2 is still held for this uid
         EXPECT_FALSE(changedCache[0]);
         if (position == Position::FIRST || position == Position::LAST) {
-            EXPECT_EQ(1UL, conditionTracker.mSlicedConditionState.size());
+            ASSERT_EQ(1UL, conditionTracker.mSlicedConditionState.size());
         } else {
-            EXPECT_EQ(uids.size(), conditionTracker.mSlicedConditionState.size());
+            ASSERT_EQ(uids.size(), conditionTracker.mSlicedConditionState.size());
         }
         EXPECT_TRUE(conditionTracker.getChangedToTrueDimensions(allConditions)->empty());
         EXPECT_TRUE(conditionTracker.getChangedToFalseDimensions(allConditions)->empty());
@@ -375,10 +375,10 @@ TEST(SimpleConditionTrackerTest, TestSlicedCondition) {
         changedCache[0] = false;
         conditionTracker.evaluateCondition(event4, matcherState, allPredicates, conditionCache,
                                            changedCache);
-        EXPECT_EQ(0UL, conditionTracker.mSlicedConditionState.size());
+        ASSERT_EQ(0UL, conditionTracker.mSlicedConditionState.size());
         EXPECT_TRUE(changedCache[0]);
         if (position == Position::FIRST || position == Position::LAST) {
-            EXPECT_EQ(conditionTracker.getChangedToFalseDimensions(allConditions)->size(), 1u);
+            ASSERT_EQ(conditionTracker.getChangedToFalseDimensions(allConditions)->size(), 1u);
             EXPECT_TRUE(conditionTracker.getChangedToTrueDimensions(allConditions)->empty());
         } else {
             EXPECT_EQ(conditionTracker.getChangedToFalseDimensions(allConditions)->size(),
@@ -432,7 +432,7 @@ TEST(SimpleConditionTrackerTest, TestSlicedWithNoOutputDim) {
     conditionTracker.evaluateCondition(event1, matcherState, allPredicates, conditionCache,
                                        changedCache);
 
-    EXPECT_EQ(1UL, conditionTracker.mSlicedConditionState.size());
+    ASSERT_EQ(1UL, conditionTracker.mSlicedConditionState.size());
     EXPECT_TRUE(changedCache[0]);
 
     // Now test query
@@ -480,7 +480,7 @@ TEST(SimpleConditionTrackerTest, TestSlicedWithNoOutputDim) {
     changedCache[0] = false;
     conditionTracker.evaluateCondition(event4, matcherState, allPredicates, conditionCache,
                                        changedCache);
-    EXPECT_EQ(0UL, conditionTracker.mSlicedConditionState.size());
+    ASSERT_EQ(0UL, conditionTracker.mSlicedConditionState.size());
     EXPECT_TRUE(changedCache[0]);
 
     // query again
@@ -524,14 +524,14 @@ TEST(SimpleConditionTrackerTest, TestStopAll) {
         conditionTracker.evaluateCondition(event1, matcherState, allPredicates, conditionCache,
                                            changedCache);
         if (position == Position::FIRST || position == Position::LAST) {
-            EXPECT_EQ(1UL, conditionTracker.mSlicedConditionState.size());
+            ASSERT_EQ(1UL, conditionTracker.mSlicedConditionState.size());
         } else {
-            EXPECT_EQ(uids1.size(), conditionTracker.mSlicedConditionState.size());
+            ASSERT_EQ(uids1.size(), conditionTracker.mSlicedConditionState.size());
         }
         EXPECT_TRUE(changedCache[0]);
         {
             if (position == Position::FIRST || position == Position::LAST) {
-                EXPECT_EQ(1UL, conditionTracker.getChangedToTrueDimensions(allConditions)->size());
+                ASSERT_EQ(1UL, conditionTracker.getChangedToTrueDimensions(allConditions)->size());
                 EXPECT_TRUE(conditionTracker.getChangedToFalseDimensions(allConditions)->empty());
             } else {
                 EXPECT_EQ(uids1.size(),
@@ -560,14 +560,14 @@ TEST(SimpleConditionTrackerTest, TestStopAll) {
         conditionTracker.evaluateCondition(event2, matcherState, allPredicates, conditionCache,
                                            changedCache);
         if (position == Position::FIRST || position == Position::LAST) {
-            EXPECT_EQ(2UL, conditionTracker.mSlicedConditionState.size());
+            ASSERT_EQ(2UL, conditionTracker.mSlicedConditionState.size());
         } else {
-            EXPECT_EQ(uids1.size() + uids2.size(), conditionTracker.mSlicedConditionState.size());
+            ASSERT_EQ(uids1.size() + uids2.size(), conditionTracker.mSlicedConditionState.size());
         }
         EXPECT_TRUE(changedCache[0]);
         {
             if (position == Position::FIRST || position == Position::LAST) {
-                EXPECT_EQ(1UL, conditionTracker.getChangedToTrueDimensions(allConditions)->size());
+                ASSERT_EQ(1UL, conditionTracker.getChangedToTrueDimensions(allConditions)->size());
                 EXPECT_TRUE(conditionTracker.getChangedToFalseDimensions(allConditions)->empty());
             } else {
                 EXPECT_EQ(uids2.size(),
@@ -597,10 +597,10 @@ TEST(SimpleConditionTrackerTest, TestStopAll) {
         conditionTracker.evaluateCondition(event3, matcherState, allPredicates, conditionCache,
                                            changedCache);
         EXPECT_TRUE(changedCache[0]);
-        EXPECT_EQ(0UL, conditionTracker.mSlicedConditionState.size());
+        ASSERT_EQ(0UL, conditionTracker.mSlicedConditionState.size());
         {
             if (position == Position::FIRST || position == Position::LAST) {
-                EXPECT_EQ(2UL, conditionTracker.getChangedToFalseDimensions(allConditions)->size());
+                ASSERT_EQ(2UL, conditionTracker.getChangedToFalseDimensions(allConditions)->size());
                 EXPECT_TRUE(conditionTracker.getChangedToTrueDimensions(allConditions)->empty());
             } else {
                 EXPECT_EQ(uids1.size() + uids2.size(),

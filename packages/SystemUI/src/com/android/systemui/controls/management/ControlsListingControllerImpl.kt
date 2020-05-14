@@ -106,9 +106,15 @@ class ControlsListingControllerImpl @VisibleForTesting constructor(
 
     override fun changeUser(newUser: UserHandle) {
         backgroundExecutor.execute {
-            callbacks.clear()
-            availableServices = emptyList()
             serviceListing.setListening(false)
+
+            // Notify all callbacks in order to clear their existing state prior to attaching
+            // a new listener
+            availableServices = emptyList()
+            callbacks.forEach {
+                it.onServicesUpdated(emptyList())
+            }
+
             currentUserId = newUser.identifier
             val contextForUser = context.createContextAsUser(newUser, 0)
             serviceListing = serviceListingBuilder(contextForUser)

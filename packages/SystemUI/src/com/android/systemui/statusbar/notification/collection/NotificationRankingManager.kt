@@ -29,6 +29,7 @@ import com.android.systemui.statusbar.notification.collection.provider.HighPrior
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier.Companion.TYPE_NON_PERSON
 import com.android.systemui.statusbar.notification.stack.NotificationSectionsManager.BUCKET_ALERTING
+import com.android.systemui.statusbar.notification.stack.NotificationSectionsManager.BUCKET_FOREGROUND_SERVICE
 import com.android.systemui.statusbar.notification.stack.NotificationSectionsManager.BUCKET_HEADS_UP
 import com.android.systemui.statusbar.notification.stack.NotificationSectionsManager.BUCKET_PEOPLE
 import com.android.systemui.statusbar.notification.stack.NotificationSectionsManager.BUCKET_SILENT
@@ -162,6 +163,8 @@ open class NotificationRankingManager @Inject constructor(
         val isMedia = isImportantMedia(entry)
         val isSystemMax = entry.isSystemMax()
         return when {
+            entry.sbn.notification.isForegroundService && entry.sbn.notification.isColorized ->
+                BUCKET_FOREGROUND_SERVICE
             usePeopleFiltering && entry.getPeopleNotificationType() != TYPE_NON_PERSON ->
                 BUCKET_PEOPLE
             isHeadsUp || isMedia || isSystemMax || entry.isHighPriority() ->

@@ -27,7 +27,7 @@ class StatusBehavior : Behavior {
         this.cvh = cvh
     }
 
-    override fun bind(cws: ControlWithState) {
+    override fun bind(cws: ControlWithState, colorOffset: Int) {
         val status = cws.control?.status ?: Control.STATUS_UNKNOWN
         val msg = when (status) {
             Control.STATUS_ERROR -> R.string.controls_error_generic
@@ -35,6 +35,6 @@ class StatusBehavior : Behavior {
             else -> com.android.internal.R.string.loading
         }
         cvh.status.setText(cvh.context.getString(msg))
-        cvh.applyRenderInfo(false)
+        cvh.applyRenderInfo(false, colorOffset)
     }
 }

@@ -177,4 +177,31 @@ class ControlsListingControllerImplTest : SysuiTestCase() {
         inOrder.verify(mockSL).setListening(true)
         inOrder.verify(mockSL).reload()
     }
+
+    @Test
+    fun testChangeUserResetsExistingCallbackServices() {
+        val list = listOf(serviceInfo)
+        controller.addCallback(mockCallback)
+
+        @Suppress("unchecked_cast")
+        val captor: ArgumentCaptor<List<ControlsServiceInfo>> =
+                ArgumentCaptor.forClass(List::class.java)
+                        as ArgumentCaptor<List<ControlsServiceInfo>>
+        executor.runAllReady()
+        reset(mockCallback)
+
+        serviceListingCallbackCaptor.value.onServicesReloaded(list)
+
+        executor.runAllReady()
+        verify(mockCallback).onServicesUpdated(capture(captor))
+        assertEquals(1, captor.value.size)
+
+        reset(mockCallback)
+        controller.changeUser(UserHandle.of(otherUser))
+        executor.runAllReady()
+        assertEquals(otherUser, controller.currentUserId)
+
+        verify(mockCallback).onServicesUpdated(capture(captor))
+        assertEquals(0, captor.value.size)
+    }
 }
