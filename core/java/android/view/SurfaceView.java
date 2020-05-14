@@ -134,6 +134,23 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
     // we need to preserve the old one until the new one has drawn.
     SurfaceControl mDeferredDestroySurfaceControl;
     SurfaceControl mBackgroundControl;
+
+    /**
+     * We use this lock in SOME cases when reading or writing SurfaceControl,
+     * but use the following model so that the RenderThread can run locklessly
+     * in the position up-date case.
+     *
+     * 1. UI Thread can read from mSurfaceControl (use in Transactions) without
+     * holding the lock.
+     * 2. UI Thread will hold the lock when writing to mSurfaceControl (calling release
+     * or remove).
+     * 3. Render thread will also hold the lock when writing to mSurfaceControl (e.g.
+     * calling release from positionLost).
+     * 3. RenderNode.PositionUpdateListener::positionChanged will only be called
+     * when the UI thread is paused (blocked on the Render thread).
+     * 4. positionChanged thus will not be required to hold the lock as the
+     * UI thread is blocked, and the other writer is the RT itself.
+     */
     final Object mSurfaceControlLock = new Object();
     final Rect mTmpRect = new Rect();
 
@@ -1297,15 +1314,19 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                 (viewRoot != null ? viewRoot.getBLASTSyncTransaction() : mRtTransaction) :
                 mRtTransaction;
 
-            if (frameNumber > 0 && viewRoot !=  null && !useBLAST) {
-                if (viewRoot.mSurface.isValid()) {
-                    mRtTransaction.deferTransactionUntil(mSurfaceControl,
-                            viewRoot.getRenderSurfaceControl(), frameNumber);
-                }
-            }
-            t.hide(mSurfaceControl);
-
+            /**
+             * positionLost can be called while UI thread is un-paused so we
+             * need to hold the lock here.
+             */
             synchronized (mSurfaceControlLock) {
+                if (frameNumber > 0 && viewRoot !=  null && !useBLAST) {
+                    if (viewRoot.mSurface.isValid()) {
+                        mRtTransaction.deferTransactionUntil(mSurfaceControl,
+                                viewRoot.getRenderSurfaceControl(), frameNumber);
+                    }
+                }
+                t.hide(mSurfaceControl);
+
                 if (mRtReleaseSurfaces) {
                     mRtReleaseSurfaces = false;
                     mRtTransaction.remove(mSurfaceControl);

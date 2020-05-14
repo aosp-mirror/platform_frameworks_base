@@ -439,7 +439,8 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
                         // time out anyway
                         && !entry.showingPulsing()) {
                     mEntriesToRemoveWhenReorderingAllowed.add(entry);
-                    mVisualStabilityManager.addReorderingAllowedCallback(HeadsUpManagerPhone.this);
+                    mVisualStabilityManager.addReorderingAllowedCallback(HeadsUpManagerPhone.this,
+                            false  /* persistent */);
                 } else if (mTrackingHeadsUp) {
                     mEntriesToRemoveAfterExpand.add(entry);
                 } else if (mIsAutoHeadsUp && mStatusBarState == StatusBarState.KEYGUARD) {
