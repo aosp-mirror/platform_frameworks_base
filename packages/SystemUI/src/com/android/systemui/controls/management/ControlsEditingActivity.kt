@@ -191,7 +191,18 @@ class ControlsEditingActivity @Inject constructor(
 
         recyclerView.apply {
             this.adapter = adapter
-            layoutManager = GridLayoutManager(recyclerView.context, 2).apply {
+            layoutManager = object : GridLayoutManager(recyclerView.context, 2) {
+
+                // This will remove from the announcement the row corresponding to the divider,
+                // as it's not something that should be announced.
+                override fun getRowCountForAccessibility(
+                    recycler: RecyclerView.Recycler,
+                    state: RecyclerView.State
+                ): Int {
+                    val initial = super.getRowCountForAccessibility(recycler, state)
+                    return if (initial > 0) initial - 1 else initial
+                }
+            }.apply {
                 spanSizeLookup = adapter.spanSizeLookup
             }
             addItemDecoration(itemDecorator)

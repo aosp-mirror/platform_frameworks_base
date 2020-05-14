@@ -22,13 +22,11 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.ImageDecoder
-import android.graphics.Rect
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.Icon
 import android.media.MediaMetadata
 import android.media.session.MediaSession
 import android.net.Uri
-import android.provider.Settings
 import android.service.notification.StatusBarNotification
 import android.text.TextUtils
 import android.util.Log
@@ -37,8 +35,8 @@ import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.statusbar.notification.MediaNotificationProcessor
 import com.android.systemui.statusbar.notification.row.HybridGroupManager
+import com.android.systemui.util.Utils
 import java.io.IOException
-import java.util.*
 import java.util.concurrent.Executor
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -126,8 +124,8 @@ class MediaDataManager @Inject constructor(
         if (artWorkIcon != null) {
             // If we have art, get colors from that
             if (artworkBitmap == null) {
-                if (artWorkIcon.type == Icon.TYPE_BITMAP
-                        || artWorkIcon.type == Icon.TYPE_ADAPTIVE_BITMAP) {
+                if (artWorkIcon.type == Icon.TYPE_BITMAP ||
+                        artWorkIcon.type == Icon.TYPE_ADAPTIVE_BITMAP) {
                     artworkBitmap = artWorkIcon.bitmap
                 } else {
                     val drawable: Drawable = artWorkIcon.loadDrawable(context)
@@ -195,7 +193,6 @@ class MediaDataManager @Inject constructor(
                     song, artWorkIcon, actionIcons, actionsToShowCollapsed, sbn.packageName, token,
                     notif.contentIntent))
         }
-
     }
 
     /**
@@ -222,14 +219,14 @@ class MediaDataManager @Inject constructor(
      */
     private fun loadBitmapFromUri(uri: Uri): Bitmap? {
         // ImageDecoder requires a scheme of the following types
-        if (uri.getScheme() == null) {
-            return null;
+        if (uri.scheme == null) {
+            return null
         }
 
-        if (!uri.getScheme().equals(ContentResolver.SCHEME_CONTENT)
-                && !uri.getScheme().equals(ContentResolver.SCHEME_ANDROID_RESOURCE)
-                && !uri.getScheme().equals(ContentResolver.SCHEME_FILE)) {
-            return null;
+        if (!uri.scheme.equals(ContentResolver.SCHEME_CONTENT) &&
+                !uri.scheme.equals(ContentResolver.SCHEME_ANDROID_RESOURCE) &&
+                !uri.scheme.equals(ContentResolver.SCHEME_FILE)) {
+            return null
         }
 
         val source = ImageDecoder.createSource(context.getContentResolver(), uri)
@@ -260,26 +257,20 @@ class MediaDataManager @Inject constructor(
         }
     }
 
-    private fun isMediaNotification(sbn: StatusBarNotification) : Boolean {
-        if (!useUniversalMediaPlayer()) {
+    private fun isMediaNotification(sbn: StatusBarNotification): Boolean {
+        if (!Utils.useQsMediaPlayer(context)) {
             return false
         }
         if (!sbn.notification.hasMediaSession()) {
             return false
         }
         val notificationStyle = sbn.notification.notificationStyle
-        if (Notification.DecoratedMediaCustomViewStyle::class.java.equals(notificationStyle)
-                || Notification.MediaStyle::class.java.equals(notificationStyle)) {
+        if (Notification.DecoratedMediaCustomViewStyle::class.java.equals(notificationStyle) ||
+                Notification.MediaStyle::class.java.equals(notificationStyle)) {
             return true
         }
         return false
     }
-
-    /**
-     * are we using the universal media player
-     */
-    private fun useUniversalMediaPlayer()
-            = Settings.System.getInt(context.contentResolver, "qs_media_player", 1) > 0
 
     /**
      * Are there any media notifications active?

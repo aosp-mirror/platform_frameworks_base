@@ -332,6 +332,11 @@ public class UsageStatsService extends SystemService implements
     private void onUserUnlocked(int userId) {
         // fetch the installed packages outside the lock so it doesn't block package manager.
         final HashMap<String, Long> installedPackages = getInstalledPackages(userId);
+        // delay updating of package mappings for user 0 since their data is not likely to be stale.
+        // this also makes it less likely for restored data to be erased on unexpected reboots.
+        if (userId == UserHandle.USER_SYSTEM) {
+            UsageStatsIdleService.scheduleUpdateMappingsJob(getContext());
+        }
         synchronized (mLock) {
             // Create a user unlocked event to report
             final Event unlockEvent = new Event(USER_UNLOCKED, SystemClock.elapsedRealtime());
@@ -543,8 +548,8 @@ public class UsageStatsService extends SystemService implements
      * Initializes the given user's usage stats service - this should ideally only be called once,
      * when the user is initially unlocked.
      */
-    private void initializeUserUsageStatsServiceLocked(int userId,
-            long currentTimeMillis, HashMap<String, Long> installedPackages) {
+    private void initializeUserUsageStatsServiceLocked(int userId, long currentTimeMillis,
+            HashMap<String, Long> installedPackages) {
         final File usageStatsDir = new File(Environment.getDataSystemCeDirectory(userId),
                 "usagestats");
         final UserUsageStatsService service = new UserUsageStatsService(getContext(), userId,
@@ -931,6 +936,7 @@ public class UsageStatsService extends SystemService implements
         }
         // Cancel any scheduled jobs for this user since the user is being removed.
         UsageStatsIdleService.cancelJob(getContext(), userId);
+        UsageStatsIdleService.cancelUpdateMappingsJob(getContext());
     }
 
     /**
@@ -974,6 +980,26 @@ public class UsageStatsService extends SystemService implements
             }
 
             return userService.pruneUninstalledPackagesData();
+        }
+    }
+
+    /**
+     * Called by the Binder stub.
+     */
+    private boolean updatePackageMappingsData() {
+        // fetch the installed packages outside the lock so it doesn't block package manager.
+        final HashMap<String, Long> installedPkgs = getInstalledPackages(UserHandle.USER_SYSTEM);
+        synchronized (mLock) {
+            if (!mUserUnlockedStates.get(UserHandle.USER_SYSTEM)) {
+                return false; // user is no longer unlocked
+            }
+
+            final UserUsageStatsService userService = mUserState.get(UserHandle.USER_SYSTEM);
+            if (userService == null) {
+                return false; // user was stopped or removed
+            }
+
+            return userService.updatePackageMappingsLocked(installedPkgs);
         }
     }
 
@@ -2137,6 +2163,9 @@ public class UsageStatsService extends SystemService implements
                 }
 
                 // Check to ensure that only user 0's data is b/r for now
+                // Note: if backup and restore is enabled for users other than the system user, the
+                // #onUserUnlocked logic, specifically when the update mappings job is scheduled via
+                // UsageStatsIdleService.scheduleUpdateMappingsJob, will have to be updated.
                 if (user == UserHandle.USER_SYSTEM) {
                     final UserUsageStatsService userStats = getUserUsageStatsServiceLocked(user);
                     if (userStats == null) {
@@ -2228,6 +2257,11 @@ public class UsageStatsService extends SystemService implements
         @Override
         public boolean pruneUninstalledPackagesData(int userId) {
             return UsageStatsService.this.pruneUninstalledPackagesData(userId);
+        }
+
+        @Override
+        public boolean updatePackageMappingsData() {
+            return UsageStatsService.this.updatePackageMappingsData();
         }
     }
 

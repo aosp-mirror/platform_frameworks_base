@@ -29,7 +29,6 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Log;
 
-import com.android.server.FgThread;
 import com.android.server.ServiceWatcher;
 
 import java.util.Objects;
@@ -59,7 +58,7 @@ public final class GeofenceProxy {
 
     private GeofenceProxy(Context context, IGpsGeofenceHardware gpsGeofence) {
         mGpsGeofenceHardware = Objects.requireNonNull(gpsGeofence);
-        mServiceWatcher = new ServiceWatcher(context, FgThread.getHandler(), SERVICE_ACTION,
+        mServiceWatcher = new ServiceWatcher(context, SERVICE_ACTION,
                 this::updateGeofenceHardware, null,
                 com.android.internal.R.bool.config_enableGeofenceOverlay,
                 com.android.internal.R.string.config_geofenceProviderPackageName);

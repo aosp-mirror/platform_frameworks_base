@@ -242,8 +242,8 @@
     <color name="magnification_switch_button_color">#7F000000</color>
 
     <!-- controls -->
-    <color name="control_primary_text">@color/GM2_grey_100</color>
-    <color name="control_secondary_text">@color/GM2_grey_500</color>
+    <color name="control_primary_text">#E6FFFFFF</color>
+    <color name="control_secondary_text">#99FFFFFF</color>
     <color name="control_default_foreground">@color/GM2_grey_500</color>
     <color name="control_default_background">@color/GM2_grey_900</color>
     <color name="control_list_popup_background">@*android:color/background_floating_material_dark</color>
@@ -259,4 +259,6 @@
 
     <!-- Docked misalignment message -->
     <color name="misalignment_text_color">#F28B82</color>
+
+    <color name="screenrecord_status_color">#E94235</color>
 </resources>

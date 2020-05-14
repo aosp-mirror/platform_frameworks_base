@@ -1,0 +1,9 @@
+# Display
+per-file BrightnessLimit.java = michaelwr@google.com, santoscordon@google.com
+
+# Haptics
+per-file ExternalVibrationTest.java = michaelwr@google.com
+per-file VibrationEffectTest.java = michaelwr@google.com
+
+# Power
+per-file PowerManager*.java = michaelwr@google.com, santoscordon@google.com

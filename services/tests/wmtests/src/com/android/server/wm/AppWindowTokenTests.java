@@ -316,20 +316,16 @@ public class AppWindowTokenTests extends WindowTestsBase {
     }
 
     @Test
-    @FlakyTest(bugId = 130392471)
     public void testAddRemoveRace() {
         // There was once a race condition between adding and removing starting windows
+        final ActivityRecord appToken = mAppWindow.mActivityRecord;
         for (int i = 0; i < 1000; i++) {
-            final ActivityRecord appToken = createIsolatedTestActivityRecord();
-
             appToken.addStartingWindow(mPackageName,
                     android.R.style.Theme, null, "Test", 0, 0, 0, 0, null, true, true, false, true,
                     false, false);
             appToken.removeStartingWindow();
             waitUntilHandlersIdle();
             assertNoStartingWindow(appToken);
-
-            appToken.getParent().getParent().removeImmediately();
         }
     }
 

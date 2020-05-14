@@ -339,13 +339,18 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
         changeTileSpecs(tileSpecs-> !tileSpecs.contains(spec) && tileSpecs.add(spec));
     }
 
+    private void saveTilesToSettings(List<String> tileSpecs) {
+        Settings.Secure.putStringForUser(mContext.getContentResolver(), TILES_SETTING,
+                TextUtils.join(",", tileSpecs), null /* tag */,
+                false /* default */, mCurrentUser, true /* overrideable by restore */);
+    }
+
     private void changeTileSpecs(Predicate<List<String>> changeFunction) {
         final String setting = Settings.Secure.getStringForUser(mContext.getContentResolver(),
-            TILES_SETTING, ActivityManager.getCurrentUser());
+                TILES_SETTING, mCurrentUser);
         final List<String> tileSpecs = loadTileSpecs(mContext, setting);
         if (changeFunction.test(tileSpecs)) {
-            Settings.Secure.putStringForUser(mContext.getContentResolver(), TILES_SETTING,
-                TextUtils.join(",", tileSpecs), ActivityManager.getCurrentUser());
+            saveTilesToSettings(tileSpecs);
         }
     }
 
@@ -375,7 +380,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
                 Intent intent = new Intent().setComponent(component);
                 TileLifecycleManager lifecycleManager = new TileLifecycleManager(new Handler(),
                         mContext, mServices, new Tile(), intent,
-                        new UserHandle(ActivityManager.getCurrentUser()),
+                        new UserHandle(mCurrentUser),
                         mBroadcastDispatcher);
                 lifecycleManager.onStopListening();
                 lifecycleManager.onTileRemoved();
@@ -384,8 +389,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
             }
         }
         if (DEBUG) Log.d(TAG, "saveCurrentTiles " + newTiles);
-        Secure.putStringForUser(getContext().getContentResolver(), QSTileHost.TILES_SETTING,
-                TextUtils.join(",", newTiles), ActivityManager.getCurrentUser());
+        saveTilesToSettings(newTiles);
     }
 
     public QSTile createTile(String tileSpec) {

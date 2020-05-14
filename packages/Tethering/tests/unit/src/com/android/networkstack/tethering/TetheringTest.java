@@ -485,18 +485,6 @@ public class TetheringTest {
         MockitoAnnotations.initMocks(this);
         when(mResources.getStringArray(R.array.config_tether_dhcp_range))
                 .thenReturn(new String[0]);
-        when(mResources.getStringArray(R.array.config_tether_usb_regexs))
-                .thenReturn(new String[] { "test_rndis\\d" });
-        when(mResources.getStringArray(R.array.config_tether_wifi_regexs))
-                .thenReturn(new String[]{ "test_wlan\\d" });
-        when(mResources.getStringArray(R.array.config_tether_wifi_p2p_regexs))
-                .thenReturn(new String[]{ "test_p2p-p2p\\d-.*" });
-        when(mResources.getStringArray(R.array.config_tether_bluetooth_regexs))
-                .thenReturn(new String[0]);
-        when(mResources.getStringArray(R.array.config_tether_ncm_regexs))
-                .thenReturn(new String[] { "test_ncm\\d" });
-        when(mResources.getIntArray(R.array.config_tether_upstream_types)).thenReturn(new int[0]);
-        when(mResources.getBoolean(R.bool.config_tether_upstream_automatic)).thenReturn(false);
         when(mResources.getBoolean(R.bool.config_tether_enable_legacy_dhcp_server)).thenReturn(
                 false);
         when(mNetd.interfaceGetList())
@@ -515,6 +503,7 @@ public class TetheringTest {
         mServiceContext = new TestContext(mContext);
         mContentResolver = new MockContentResolver(mServiceContext);
         mContentResolver.addProvider(Settings.AUTHORITY, new FakeSettingsProvider());
+        setTetheringSupported(true /* supported */);
         mIntents = new Vector<>();
         mBroadcastReceiver = new BroadcastReceiver() {
             @Override
@@ -525,7 +514,6 @@ public class TetheringTest {
         mServiceContext.registerReceiver(mBroadcastReceiver,
                 new IntentFilter(ACTION_TETHER_STATE_CHANGED));
         mTethering = makeTethering();
-        mTethering.startStateMachineUpdaters();
         verify(mStatsManager, times(1)).registerNetworkStatsProvider(anyString(), any());
         verify(mNetd).registerUnsolicitedEventListener(any());
         final ArgumentCaptor<PhoneStateListener> phoneListenerCaptor =
@@ -534,6 +522,31 @@ public class TetheringTest {
                 eq(PhoneStateListener.LISTEN_ACTIVE_DATA_SUBSCRIPTION_ID_CHANGE));
         verify(mWifiManager).registerSoftApCallback(any(), any());
         mPhoneStateListener = phoneListenerCaptor.getValue();
+    }
+
+    private void setTetheringSupported(final boolean supported) {
+        Settings.Global.putInt(mContentResolver, Settings.Global.TETHER_SUPPORTED,
+                supported ? 1 : 0);
+        when(mUserManager.hasUserRestriction(
+                UserManager.DISALLOW_CONFIG_TETHERING)).thenReturn(!supported);
+        // Setup tetherable configuration.
+        when(mResources.getStringArray(R.array.config_tether_usb_regexs))
+                .thenReturn(new String[] { "test_rndis\\d" });
+        when(mResources.getStringArray(R.array.config_tether_wifi_regexs))
+                .thenReturn(new String[]{ "test_wlan\\d" });
+        when(mResources.getStringArray(R.array.config_tether_wifi_p2p_regexs))
+                .thenReturn(new String[]{ "test_p2p-p2p\\d-.*" });
+        when(mResources.getStringArray(R.array.config_tether_bluetooth_regexs))
+                .thenReturn(new String[0]);
+        when(mResources.getStringArray(R.array.config_tether_ncm_regexs))
+                .thenReturn(new String[] { "test_ncm\\d" });
+        when(mResources.getIntArray(R.array.config_tether_upstream_types)).thenReturn(new int[0]);
+        when(mResources.getBoolean(R.bool.config_tether_upstream_automatic)).thenReturn(true);
+    }
+
+    private void initTetheringUpstream(UpstreamNetworkState upstreamState) {
+        when(mUpstreamNetworkMonitor.getCurrentPreferredUpstream()).thenReturn(upstreamState);
+        when(mUpstreamNetworkMonitor.selectPreferredUpstreamType(any())).thenReturn(upstreamState);
     }
 
     private Tethering makeTethering() {
@@ -672,9 +685,7 @@ public class TetheringTest {
     }
 
     private void prepareUsbTethering(UpstreamNetworkState upstreamState) {
-        when(mUpstreamNetworkMonitor.getCurrentPreferredUpstream()).thenReturn(upstreamState);
-        when(mUpstreamNetworkMonitor.selectPreferredUpstreamType(any()))
-                .thenReturn(upstreamState);
+        initTetheringUpstream(upstreamState);
 
         // Emulate pressing the USB tethering button in Settings UI.
         mTethering.startTethering(createTetheringRequestParcel(TETHERING_USB), null);
@@ -700,7 +711,7 @@ public class TetheringTest {
         verify(mNetd, times(1)).interfaceGetList();
 
         // UpstreamNetworkMonitor should receive selected upstream
-        verify(mUpstreamNetworkMonitor, times(1)).selectPreferredUpstreamType(any());
+        verify(mUpstreamNetworkMonitor, times(1)).getCurrentPreferredUpstream();
         verify(mUpstreamNetworkMonitor, times(1)).setCurrentUpstream(upstreamState.network);
     }
 
@@ -872,8 +883,7 @@ public class TetheringTest {
 
         // Then 464xlat comes up
         upstreamState = buildMobile464xlatUpstreamState();
-        when(mUpstreamNetworkMonitor.selectPreferredUpstreamType(any()))
-                .thenReturn(upstreamState);
+        initTetheringUpstream(upstreamState);
 
         // Upstream LinkProperties changed: UpstreamNetworkMonitor sends EVENT_ON_LINKPROPERTIES.
         mTetheringDependencies.mUpstreamNetworkMonitorMasterSM.sendMessage(
@@ -1344,9 +1354,7 @@ public class TetheringTest {
         callback.expectOffloadStatusChanged(TETHER_HARDWARE_OFFLOAD_STOPPED);
         // 2. Enable wifi tethering.
         UpstreamNetworkState upstreamState = buildMobileDualStackUpstreamState();
-        when(mUpstreamNetworkMonitor.getCurrentPreferredUpstream()).thenReturn(upstreamState);
-        when(mUpstreamNetworkMonitor.selectPreferredUpstreamType(any()))
-                .thenReturn(upstreamState);
+        initTetheringUpstream(upstreamState);
         when(mWifiManager.startTetheredHotspot(any(SoftApConfiguration.class))).thenReturn(true);
         mTethering.interfaceStatusChanged(TEST_WLAN_IFNAME, true);
         mLooper.dispatchAll();
@@ -1723,7 +1731,7 @@ public class TetheringTest {
         final Tethering.TetherMasterSM stateMachine = (Tethering.TetherMasterSM)
                 mTetheringDependencies.mUpstreamNetworkMonitorMasterSM;
         final UpstreamNetworkState upstreamState = buildMobileIPv4UpstreamState();
-        when(mUpstreamNetworkMonitor.selectPreferredUpstreamType(any())).thenReturn(upstreamState);
+        initTetheringUpstream(upstreamState);
         stateMachine.chooseUpstreamType(true);
 
         verify(mUpstreamNetworkMonitor, times(1)).setCurrentUpstream(eq(upstreamState.network));
@@ -1735,7 +1743,7 @@ public class TetheringTest {
         final Tethering.TetherMasterSM stateMachine = (Tethering.TetherMasterSM)
                 mTetheringDependencies.mUpstreamNetworkMonitorMasterSM;
         final UpstreamNetworkState upstreamState = buildMobileIPv4UpstreamState();
-        when(mUpstreamNetworkMonitor.selectPreferredUpstreamType(any())).thenReturn(upstreamState);
+        initTetheringUpstream(upstreamState);
         stateMachine.chooseUpstreamType(true);
 
         stateMachine.handleUpstreamNetworkMonitorCallback(EVENT_ON_CAPABILITIES, upstreamState);

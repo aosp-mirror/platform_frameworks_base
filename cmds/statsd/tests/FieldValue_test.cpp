@@ -74,7 +74,7 @@ TEST(AtomMatcherTest, TestFieldTranslation) {
     vector<Matcher> output;
     translateFieldMatcher(matcher1, &output);
 
-    EXPECT_EQ((size_t)1, output.size());
+    ASSERT_EQ((size_t)1, output.size());
 
     const auto& matcher12 = output[0];
     EXPECT_EQ((int32_t)10, matcher12.mMatcher.getTag());
@@ -95,7 +95,7 @@ TEST(AtomMatcherTest, TestFieldTranslation_ALL) {
     vector<Matcher> output;
     translateFieldMatcher(matcher1, &output);
 
-    EXPECT_EQ((size_t)1, output.size());
+    ASSERT_EQ((size_t)1, output.size());
 
     const auto& matcher12 = output[0];
     EXPECT_EQ((int32_t)10, matcher12.mMatcher.getTag());
@@ -128,7 +128,7 @@ TEST(AtomMatcherTest, TestFilter_ALL) {
 
     filterValues(matchers, event.getValues(), &output);
 
-    EXPECT_EQ((size_t)7, output.getValues().size());
+    ASSERT_EQ((size_t)7, output.getValues().size());
     EXPECT_EQ((int32_t)0x02010101, output.getValues()[0].mField.getField());
     EXPECT_EQ((int32_t)1111, output.getValues()[0].mValue.int_value);
     EXPECT_EQ((int32_t)0x02010102, output.getValues()[1].mField.getField());
@@ -218,12 +218,12 @@ TEST(AtomMatcherTest, TestMetric2ConditionLink) {
     translateFieldMatcher(whatMatcher, &link.metricFields);
     translateFieldMatcher(conditionMatcher, &link.conditionFields);
 
-    EXPECT_EQ((size_t)1, link.metricFields.size());
+    ASSERT_EQ((size_t)1, link.metricFields.size());
     EXPECT_EQ((int32_t)0x02010001, link.metricFields[0].mMatcher.getField());
     EXPECT_EQ((int32_t)0xff7f007f, link.metricFields[0].mMask);
     EXPECT_EQ((int32_t)10, link.metricFields[0].mMatcher.getTag());
 
-    EXPECT_EQ((size_t)1, link.conditionFields.size());
+    ASSERT_EQ((size_t)1, link.conditionFields.size());
     EXPECT_EQ((int32_t)0x02028002, link.conditionFields[0].mMatcher.getField());
     EXPECT_EQ((int32_t)0xff7f807f, link.conditionFields[0].mMask);
     EXPECT_EQ((int32_t)27, link.conditionFields[0].mMatcher.getTag());
@@ -264,15 +264,15 @@ TEST(AtomMatcherTest, TestWriteDimensionPath) {
         }
 
         DimensionsValue result;
-        EXPECT_EQ(true, result.ParseFromArray(&outData[0], outData.size()));
+        ASSERT_EQ(true, result.ParseFromArray(&outData[0], outData.size()));
 
         EXPECT_EQ(10, result.field());
         EXPECT_EQ(DimensionsValue::ValueCase::kValueTuple, result.value_case());
-        EXPECT_EQ(3, result.value_tuple().dimensions_value_size());
+        ASSERT_EQ(3, result.value_tuple().dimensions_value_size());
 
         const auto& dim1 = result.value_tuple().dimensions_value(0);
         EXPECT_EQ(2, dim1.field());
-        EXPECT_EQ(2, dim1.value_tuple().dimensions_value_size());
+        ASSERT_EQ(2, dim1.value_tuple().dimensions_value_size());
 
         const auto& dim11 = dim1.value_tuple().dimensions_value(0);
         EXPECT_EQ(1, dim11.field());
@@ -285,7 +285,7 @@ TEST(AtomMatcherTest, TestWriteDimensionPath) {
 
         const auto& dim3 = result.value_tuple().dimensions_value(2);
         EXPECT_EQ(6, dim3.field());
-        EXPECT_EQ(1, dim3.value_tuple().dimensions_value_size());
+        ASSERT_EQ(1, dim3.value_tuple().dimensions_value_size());
         const auto& dim31 = dim3.value_tuple().dimensions_value(0);
         EXPECT_EQ(2, dim31.field());
     }
@@ -356,14 +356,14 @@ TEST(AtomMatcherTest, TestWriteDimensionToProto) {
     }
 
     DimensionsValue result;
-    EXPECT_EQ(true, result.ParseFromArray(&outData[0], outData.size()));
+    ASSERT_EQ(true, result.ParseFromArray(&outData[0], outData.size()));
     EXPECT_EQ(10, result.field());
     EXPECT_EQ(DimensionsValue::ValueCase::kValueTuple, result.value_case());
-    EXPECT_EQ(2, result.value_tuple().dimensions_value_size());
+    ASSERT_EQ(2, result.value_tuple().dimensions_value_size());
 
     const auto& dim1 = result.value_tuple().dimensions_value(0);
     EXPECT_EQ(DimensionsValue::ValueCase::kValueTuple, dim1.value_case());
-    EXPECT_EQ(3, dim1.value_tuple().dimensions_value_size());
+    ASSERT_EQ(3, dim1.value_tuple().dimensions_value_size());
 
     const auto& dim11 = dim1.value_tuple().dimensions_value(0);
     EXPECT_EQ(DimensionsValue::ValueCase::kValueInt, dim11.value_case());
@@ -418,8 +418,8 @@ TEST(AtomMatcherTest, TestWriteDimensionLeafNodesToProto) {
     }
 
     DimensionsValueTuple result;
-    EXPECT_EQ(true, result.ParseFromArray(&outData[0], outData.size()));
-    EXPECT_EQ(4, result.dimensions_value_size());
+    ASSERT_EQ(true, result.ParseFromArray(&outData[0], outData.size()));
+    ASSERT_EQ(4, result.dimensions_value_size());
 
     const auto& dim1 = result.dimensions_value(0);
     EXPECT_EQ(DimensionsValue::ValueCase::kValueInt, dim1.value_case());
@@ -460,10 +460,10 @@ TEST(AtomMatcherTest, TestWriteAtomToProto) {
     }
 
     Atom result;
-    EXPECT_EQ(true, result.ParseFromArray(&outData[0], outData.size()));
+    ASSERT_EQ(true, result.ParseFromArray(&outData[0], outData.size()));
     EXPECT_EQ(Atom::PushedCase::kBleScanResultReceived, result.pushed_case());
     const auto& atom = result.ble_scan_result_received();
-    EXPECT_EQ(2, atom.attribution_node_size());
+    ASSERT_EQ(2, atom.attribution_node_size());
     EXPECT_EQ(1111, atom.attribution_node(0).uid());
     EXPECT_EQ("location1", atom.attribution_node(0).tag());
     EXPECT_EQ(2222, atom.attribution_node(1).uid());
@@ -488,7 +488,7 @@ TEST(AtomMatcherTest, TestSubsetDimensions1) {
 
     vector<Matcher> matchers1;
     translateFieldMatcher(matcher1, &matchers1);
-    EXPECT_EQ(2, matchers1.size());
+    ASSERT_EQ(2, matchers1.size());
 
     // Initialize second set of matchers
     FieldMatcher matcher2;
@@ -501,7 +501,7 @@ TEST(AtomMatcherTest, TestSubsetDimensions1) {
 
     vector<Matcher> matchers2;
     translateFieldMatcher(matcher2, &matchers2);
-    EXPECT_EQ(1, matchers2.size());
+    ASSERT_EQ(1, matchers2.size());
 
     EXPECT_FALSE(subsetDimensions(matchers1, matchers2));
     EXPECT_TRUE(subsetDimensions(matchers2, matchers1));

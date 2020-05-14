@@ -19,15 +19,19 @@ package com.android.systemui.statusbar.notification.stack;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
 import static com.android.systemui.statusbar.notification.stack.NotificationSectionsManager.BUCKET_ALERTING;
+import static com.android.systemui.statusbar.notification.stack.NotificationSectionsManager.BUCKET_FOREGROUND_SERVICE;
 import static com.android.systemui.statusbar.notification.stack.NotificationSectionsManager.BUCKET_HEADS_UP;
 import static com.android.systemui.statusbar.notification.stack.NotificationSectionsManager.BUCKET_PEOPLE;
 import static com.android.systemui.statusbar.notification.stack.NotificationSectionsManager.BUCKET_SILENT;
+
+import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -62,6 +66,9 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
@@ -84,10 +91,23 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
 
     @Before
     public void setUp() {
-        when(mSectionsFeatureManager.getNumberOfBuckets()).thenReturn(2);
-        when(mNotificationRowComponent.getActivatableNotificationViewController()).thenReturn(
-                mActivatableNotificationViewController
-        );
+        when(mSectionsFeatureManager.getNumberOfBuckets()).thenAnswer(
+                invocation -> {
+                    int count = 2;
+                    if (mSectionsFeatureManager.isFilteringEnabled()) {
+                        count = 5;
+                    }
+                    if (mSectionsFeatureManager.isMediaControlsEnabled()) {
+                        if (!mSectionsFeatureManager.isFilteringEnabled()) {
+                            count = 5;
+                        } else {
+                            count += 1;
+                        }
+                    }
+                    return count;
+                });
+        when(mNotificationRowComponent.getActivatableNotificationViewController())
+                .thenReturn(mActivatableNotificationViewController);
         mSectionsManager =
                 new NotificationSectionsManager(
                         mActivityStarterDelegate,
@@ -104,6 +124,7 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
         mSectionsManager.initialize(mNssl, LayoutInflater.from(mContext));
         when(mNssl.indexOfChild(any(View.class))).thenReturn(-1);
         when(mStatusBarStateController.getState()).thenReturn(StatusBarState.SHADE);
+
     }
 
     @Test(expected =  IllegalStateException.class)
@@ -339,6 +360,58 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
     }
 
     @Test
+    public void testPeopleFiltering_HunWhilePeopleVisible() {
+        enablePeopleFiltering();
+
+        setupMockStack(
+                ChildType.PEOPLE_HEADER,
+                ChildType.HEADS_UP,
+                ChildType.PERSON,
+                ChildType.ALERTING_HEADER,
+                ChildType.GENTLE_HEADER,
+                ChildType.GENTLE
+        );
+        mSectionsManager.updateSectionBoundaries();
+
+        verifyMockStack(
+                ChildType.INCOMING_HEADER,
+                ChildType.HEADS_UP,
+                ChildType.PEOPLE_HEADER,
+                ChildType.PERSON,
+                ChildType.GENTLE_HEADER,
+                ChildType.GENTLE
+        );
+    }
+
+    @Test
+    public void testPeopleFiltering_Fsn() {
+        enablePeopleFiltering();
+
+        setupMockStack(
+                ChildType.INCOMING_HEADER,
+                ChildType.HEADS_UP,
+                ChildType.PEOPLE_HEADER,
+                ChildType.FSN,
+                ChildType.PERSON,
+                ChildType.ALERTING,
+                ChildType.GENTLE
+        );
+        mSectionsManager.updateSectionBoundaries();
+
+        verifyMockStack(
+                ChildType.INCOMING_HEADER,
+                ChildType.HEADS_UP,
+                ChildType.FSN,
+                ChildType.PEOPLE_HEADER,
+                ChildType.PERSON,
+                ChildType.ALERTING_HEADER,
+                ChildType.ALERTING,
+                ChildType.GENTLE_HEADER,
+                ChildType.GENTLE
+        );
+    }
+
+    @Test
     public void testMediaControls_AddWhenEnterKeyguard() {
         enableMediaControls();
 
@@ -358,30 +431,28 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
         enableMediaControls();
 
         // GIVEN a stack that doesn't include media controls but includes HEADS_UP
-        setStackState(ChildType.HEADS_UP, ChildType.ALERTING, ChildType.GENTLE_HEADER,
+        setupMockStack(ChildType.HEADS_UP, ChildType.ALERTING, ChildType.GENTLE_HEADER,
                 ChildType.GENTLE);
 
         // WHEN we go back to the keyguard
         when(mStatusBarStateController.getState()).thenReturn(StatusBarState.KEYGUARD);
         mSectionsManager.updateSectionBoundaries();
 
-        // Then the media controls are added after HEADS_UP
-        verify(mNssl).addView(mSectionsManager.getMediaControlsView(), 1);
+        verifyMockStack(ChildType.HEADS_UP, ChildType.MEDIA_CONTROLS, ChildType.ALERTING,
+                ChildType.GENTLE);
     }
 
     private void enablePeopleFiltering() {
         when(mSectionsFeatureManager.isFilteringEnabled()).thenReturn(true);
-        when(mSectionsFeatureManager.getNumberOfBuckets()).thenReturn(4);
     }
 
     private void enableMediaControls() {
         when(mSectionsFeatureManager.isMediaControlsEnabled()).thenReturn(true);
-        when(mSectionsFeatureManager.getNumberOfBuckets()).thenReturn(4);
     }
 
     private enum ChildType {
-        MEDIA_CONTROLS, PEOPLE_HEADER, ALERTING_HEADER, GENTLE_HEADER, HEADS_UP, PERSON, ALERTING,
-            GENTLE, OTHER
+        INCOMING_HEADER, MEDIA_CONTROLS, PEOPLE_HEADER, ALERTING_HEADER, GENTLE_HEADER, HEADS_UP,
+        FSN, PERSON, ALERTING, GENTLE, OTHER
     }
 
     private void setStackState(ChildType... children) {
@@ -389,6 +460,9 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
         for (int i = 0; i < children.length; i++) {
             View child;
             switch (children[i]) {
+                case INCOMING_HEADER:
+                    child = mSectionsManager.getIncomingHeaderView();
+                    break;
                 case MEDIA_CONTROLS:
                     child = mSectionsManager.getMediaControlsView();
                     break;
@@ -403,6 +477,9 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
                     break;
                 case HEADS_UP:
                     child = mockNotification(BUCKET_HEADS_UP);
+                    break;
+                case FSN:
+                    child = mockNotification(BUCKET_FOREGROUND_SERVICE);
                     break;
                 case PERSON:
                     child = mockNotification(BUCKET_PEOPLE);
@@ -433,5 +510,128 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
         when(notifRow.getEntry().getBucket()).thenReturn(bucket);
         when(notifRow.getParent()).thenReturn(mNssl);
         return notifRow;
+    }
+
+    private void verifyMockStack(ChildType... expected) {
+        final List<ChildType> actual = new ArrayList<>();
+        int childCount = mNssl.getChildCount();
+        for (int i = 0; i < childCount; i++) {
+            View child = mNssl.getChildAt(i);
+            if (child == mSectionsManager.getIncomingHeaderView()) {
+                actual.add(ChildType.INCOMING_HEADER);
+                continue;
+            }
+            if (child == mSectionsManager.getMediaControlsView()) {
+                actual.add(ChildType.MEDIA_CONTROLS);
+                continue;
+            }
+            if (child == mSectionsManager.getPeopleHeaderView()) {
+                actual.add(ChildType.PEOPLE_HEADER);
+                continue;
+            }
+            if (child == mSectionsManager.getAlertingHeaderView()) {
+                actual.add(ChildType.ALERTING_HEADER);
+                continue;
+            }
+            if (child == mSectionsManager.getGentleHeaderView()) {
+                actual.add(ChildType.GENTLE_HEADER);
+                continue;
+            }
+            if (child instanceof ExpandableNotificationRow) {
+                switch (((ExpandableNotificationRow) child).getEntry().getBucket()) {
+                    case BUCKET_HEADS_UP:
+                        actual.add(ChildType.HEADS_UP);
+                        break;
+                    case BUCKET_FOREGROUND_SERVICE:
+                        actual.add(ChildType.FSN);
+                        break;
+                    case BUCKET_PEOPLE:
+                        actual.add(ChildType.PERSON);
+                        break;
+                    case BUCKET_ALERTING:
+                        actual.add(ChildType.ALERTING);
+                        break;
+                    case BUCKET_SILENT:
+                        actual.add(ChildType.GENTLE);
+                        break;
+                    default:
+                        actual.add(ChildType.OTHER);
+                        break;
+                }
+                continue;
+            }
+            actual.add(ChildType.OTHER);
+        }
+        assertThat(actual).containsExactly((Object[]) expected).inOrder();
+    }
+
+    private void setupMockStack(ChildType... childTypes) {
+        final List<View> children = new ArrayList<>();
+        when(mNssl.getChildCount()).thenAnswer(invocation -> children.size());
+        when(mNssl.getChildAt(anyInt()))
+                .thenAnswer(invocation -> children.get(invocation.getArgument(0)));
+        when(mNssl.indexOfChild(any()))
+                .thenAnswer(invocation -> children.indexOf(invocation.getArgument(0)));
+        doAnswer(invocation -> {
+            View child = invocation.getArgument(0);
+            int index = invocation.getArgument(1);
+            children.add(index, child);
+            return null;
+        }).when(mNssl).addView(any(), anyInt());
+        doAnswer(invocation -> {
+            View child = invocation.getArgument(0);
+            children.remove(child);
+            return null;
+        }).when(mNssl).removeView(any());
+        doAnswer(invocation -> {
+            View child = invocation.getArgument(0);
+            int newIndex = invocation.getArgument(1);
+            children.remove(child);
+            children.add(newIndex, child);
+            return null;
+        }).when(mNssl).changeViewPosition(any(), anyInt());
+        for (ChildType childType : childTypes) {
+            View child;
+            switch (childType) {
+                case INCOMING_HEADER:
+                    child = mSectionsManager.getIncomingHeaderView();
+                    break;
+                case MEDIA_CONTROLS:
+                    child = mSectionsManager.getMediaControlsView();
+                    break;
+                case PEOPLE_HEADER:
+                    child = mSectionsManager.getPeopleHeaderView();
+                    break;
+                case ALERTING_HEADER:
+                    child = mSectionsManager.getAlertingHeaderView();
+                    break;
+                case GENTLE_HEADER:
+                    child = mSectionsManager.getGentleHeaderView();
+                    break;
+                case HEADS_UP:
+                    child = mockNotification(BUCKET_HEADS_UP);
+                    break;
+                case FSN:
+                    child = mockNotification(BUCKET_FOREGROUND_SERVICE);
+                    break;
+                case PERSON:
+                    child = mockNotification(BUCKET_PEOPLE);
+                    break;
+                case ALERTING:
+                    child = mockNotification(BUCKET_ALERTING);
+                    break;
+                case GENTLE:
+                    child = mockNotification(BUCKET_SILENT);
+                    break;
+                case OTHER:
+                    child = mock(View.class);
+                    when(child.getVisibility()).thenReturn(View.VISIBLE);
+                    when(child.getParent()).thenReturn(mNssl);
+                    break;
+                default:
+                    throw new RuntimeException("Unknown ChildType: " + childType);
+            }
+            children.add(child);
+        }
     }
 }

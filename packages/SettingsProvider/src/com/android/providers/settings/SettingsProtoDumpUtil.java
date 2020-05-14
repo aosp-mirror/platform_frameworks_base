@@ -1409,9 +1409,6 @@ class SettingsProtoDumpUtil {
                 Settings.Global.SYS_STORAGE_CACHE_MAX_BYTES,
                 GlobalSettingsProto.Sys.STORAGE_CACHE_MAX_BYTES);
         dumpSetting(s, p,
-                Settings.Global.SYS_VDSO,
-                GlobalSettingsProto.Sys.VDSO);
-        dumpSetting(s, p,
                 Settings.Global.SYS_UIDCPUPOWER,
                 GlobalSettingsProto.Sys.UIDCPUPOWER);
         p.end(sysToken);

@@ -128,6 +128,8 @@ public class SystemActions extends SystemUI {
     public static final int SYSTEM_ACTION_ID_ACCESSIBILITY_SHORTCUT =
             AccessibilityService.GLOBAL_ACTION_ACCESSIBILITY_SHORTCUT; // 13
 
+    private static final String PERMISSION_SELF = "com.android.systemui.permission.SELF";
+
     private Recents mRecents;
     private StatusBar mStatusBar;
     private SystemActionsBroadcastReceiver mReceiver;
@@ -147,7 +149,11 @@ public class SystemActions extends SystemUI {
 
     @Override
     public void start() {
-        mContext.registerReceiverForAllUsers(mReceiver, mReceiver.createIntentFilter(), null, null);
+        mContext.registerReceiverForAllUsers(
+                mReceiver,
+                mReceiver.createIntentFilter(),
+                PERMISSION_SELF,
+                null);
         registerActions();
     }
 
@@ -397,6 +403,7 @@ public class SystemActions extends SystemUI {
                 case INTENT_ACTION_ACCESSIBILITY_BUTTON_CHOOSER:
                 case INTENT_ACTION_ACCESSIBILITY_SHORTCUT: {
                     Intent intent = new Intent(intentAction);
+                    intent.setPackage(context.getPackageName());
                     return PendingIntent.getBroadcast(context, 0, intent, 0);
                 }
                 default:

@@ -9978,6 +9978,11 @@ public final class Settings {
         * @hide */
        public static final String PACKAGE_VERIFIER_TIMEOUT = "verifier_timeout";
 
+        /** Timeout for app integrity verification.
+         * @hide */
+        public static final String APP_INTEGRITY_VERIFICATION_TIMEOUT =
+                "app_integrity_verification_timeout";
+
        /** Default response code for package verification.
         * @hide */
        public static final String PACKAGE_VERIFIER_DEFAULT_RESPONSE = "verifier_default_response";
@@ -11618,17 +11623,6 @@ public final class Settings {
          * @hide
          */
         public static final String ALWAYS_ON_DISPLAY_CONSTANTS = "always_on_display_constants";
-
-        /**
-        * System VDSO global setting. This links to the "sys.vdso" system property.
-        * The following values are supported:
-        * false  -> both 32 and 64 bit vdso disabled
-        * 32     -> 32 bit vdso enabled
-        * 64     -> 64 bit vdso enabled
-        * Any other value defaults to both 32 bit and 64 bit true.
-        * @hide
-        */
-        public static final String SYS_VDSO = "sys_vdso";
 
         /**
         * UidCpuPower global setting. This links the sys.uidcpupower system property.

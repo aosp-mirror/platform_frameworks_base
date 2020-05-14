@@ -104,9 +104,9 @@ TEST(AnomalyDetectionE2eTest, TestDurationMetric_SUM_single_bucket) {
 
     ConfigKey cfgKey;
     auto processor = CreateStatsLogProcessor(bucketStartTimeNs, bucketStartTimeNs, config, cfgKey);
-    EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
+    ASSERT_EQ(processor->mMetricsManagers.size(), 1u);
     EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
-    EXPECT_EQ(1u, processor->mMetricsManagers.begin()->second->mAllAnomalyTrackers.size());
+    ASSERT_EQ(1u, processor->mMetricsManagers.begin()->second->mAllAnomalyTrackers.size());
 
     sp<AnomalyTracker> anomalyTracker =
             processor->mMetricsManagers.begin()->second->mAllAnomalyTrackers[0];
@@ -162,7 +162,7 @@ TEST(AnomalyDetectionE2eTest, TestDurationMetric_SUM_single_bucket) {
     // Anomaly alarm fired.
     auto alarmSet = processor->getAnomalyAlarmMonitor()->popSoonerThan(
             static_cast<uint32_t>(alarmFiredTimestampSec0));
-    EXPECT_EQ(1u, alarmSet.size());
+    ASSERT_EQ(1u, alarmSet.size());
     processor->onAnomalyAlarmFired(alarmFiredTimestampSec0 * NS_PER_SEC, alarmSet);
     EXPECT_EQ(0u, anomalyTracker->getAlarmTimestampSec(dimensionKey1));
     EXPECT_EQ(refractory_period_sec + alarmFiredTimestampSec0,
@@ -199,7 +199,7 @@ TEST(AnomalyDetectionE2eTest, TestDurationMetric_SUM_single_bucket) {
 
     alarmSet = processor->getAnomalyAlarmMonitor()->popSoonerThan(
             static_cast<uint32_t>(alarmFiredTimestampSec1));
-    EXPECT_EQ(0u, alarmSet.size());
+    ASSERT_EQ(0u, alarmSet.size());
 
     // Acquire wakelock wl1 near the end of bucket #0.
     acquire_event = CreateAcquireWakelockEvent(bucketStartTimeNs + bucketSizeNs - 2,
@@ -285,9 +285,9 @@ TEST(AnomalyDetectionE2eTest, TestDurationMetric_SUM_multiple_buckets) {
 
     ConfigKey cfgKey;
     auto processor = CreateStatsLogProcessor(bucketStartTimeNs, bucketStartTimeNs, config, cfgKey);
-    EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
+    ASSERT_EQ(processor->mMetricsManagers.size(), 1u);
     EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
-    EXPECT_EQ(1u, processor->mMetricsManagers.begin()->second->mAllAnomalyTrackers.size());
+    ASSERT_EQ(1u, processor->mMetricsManagers.begin()->second->mAllAnomalyTrackers.size());
 
     sp<AnomalyTracker> anomalyTracker =
             processor->mMetricsManagers.begin()->second->mAllAnomalyTrackers[0];
@@ -406,9 +406,9 @@ TEST(AnomalyDetectionE2eTest, TestDurationMetric_SUM_long_refractory_period) {
 
     ConfigKey cfgKey;
     auto processor = CreateStatsLogProcessor(bucketStartTimeNs, bucketStartTimeNs, config, cfgKey);
-    EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
+    ASSERT_EQ(processor->mMetricsManagers.size(), 1u);
     EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
-    EXPECT_EQ(1u, processor->mMetricsManagers.begin()->second->mAllAnomalyTrackers.size());
+    ASSERT_EQ(1u, processor->mMetricsManagers.begin()->second->mAllAnomalyTrackers.size());
 
     sp<AnomalyTracker> anomalyTracker =
             processor->mMetricsManagers.begin()->second->mAllAnomalyTrackers[0];
@@ -439,7 +439,7 @@ TEST(AnomalyDetectionE2eTest, TestDurationMetric_SUM_long_refractory_period) {
     const int64_t firedAlarmTimestampNs = bucketStartTimeNs + 2 * bucketSizeNs - NS_PER_SEC;
     auto alarmSet = processor->getAnomalyAlarmMonitor()->popSoonerThan(
             static_cast<uint32_t>(firedAlarmTimestampNs / NS_PER_SEC));
-    EXPECT_EQ(1u, alarmSet.size());
+    ASSERT_EQ(1u, alarmSet.size());
     processor->onAnomalyAlarmFired(firedAlarmTimestampNs, alarmSet);
     EXPECT_EQ(0u, anomalyTracker->getAlarmTimestampSec(dimensionKey1));
     EXPECT_EQ(refractory_period_sec + firedAlarmTimestampNs / NS_PER_SEC,

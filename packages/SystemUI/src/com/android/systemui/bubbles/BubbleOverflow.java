@@ -58,12 +58,13 @@ public class BubbleOverflow implements BubbleViewProvider {
     public BubbleOverflow(Context context) {
         mContext = context;
         mInflater = LayoutInflater.from(context);
-        mBitmapSize = mContext.getResources().getDimensionPixelSize(R.dimen.bubble_bitmap_size);
-        mIconBitmapSize = mContext.getResources().getDimensionPixelSize(
-                R.dimen.bubble_overflow_icon_bitmap_size);
     }
 
     void setUpOverflow(ViewGroup parentViewGroup, BubbleStackView stackView) {
+        mBitmapSize = mContext.getResources().getDimensionPixelSize(R.dimen.bubble_bitmap_size);
+        mIconBitmapSize = mContext.getResources().getDimensionPixelSize(
+                R.dimen.bubble_overflow_icon_bitmap_size);
+
         mExpandedView = (BubbleExpandedView) mInflater.inflate(
                 R.layout.bubble_expanded_view, parentViewGroup /* root */,
                 false /* attachToRoot */);
@@ -74,6 +75,7 @@ public class BubbleOverflow implements BubbleViewProvider {
     }
 
     void updateIcon(Context context, ViewGroup parentViewGroup) {
+        mContext = context;
         mInflater = LayoutInflater.from(context);
         mOverflowBtn = (BadgedImageView) mInflater.inflate(R.layout.bubble_overflow_button,
                 parentViewGroup /* root */,
@@ -87,7 +89,7 @@ public class BubbleOverflow implements BubbleViewProvider {
         ta.recycle();
 
         TypedValue typedValue = new TypedValue();
-        context.getTheme().resolveAttribute(android.R.attr.colorAccent, typedValue, true);
+        mContext.getTheme().resolveAttribute(android.R.attr.colorAccent, typedValue, true);
         int colorAccent = mContext.getColor(typedValue.resourceId);
         mOverflowBtn.getDrawable().setTint(colorAccent);
         mDotColor = colorAccent;
@@ -97,7 +99,7 @@ public class BubbleOverflow implements BubbleViewProvider {
                 mBitmapSize - mIconBitmapSize /* inset */);
         AdaptiveIconDrawable adaptiveIconDrawable = new AdaptiveIconDrawable(bg, fg);
 
-        BubbleIconFactory iconFactory = new BubbleIconFactory(context);
+        BubbleIconFactory iconFactory = new BubbleIconFactory(mContext);
         mIcon = iconFactory.createBadgedIconBitmap(adaptiveIconDrawable,
                 null /* user */,
                 true /* shrinkNonAdaptiveIcons */).icon;
@@ -106,7 +108,7 @@ public class BubbleOverflow implements BubbleViewProvider {
                 null /* outBounds */, null /* path */, null /* outMaskShape */);
         float radius = DEFAULT_PATH_SIZE / 2f;
         mPath = PathParser.createPathFromPathData(
-                context.getResources().getString(com.android.internal.R.string.config_icon_mask));
+                mContext.getResources().getString(com.android.internal.R.string.config_icon_mask));
         Matrix matrix = new Matrix();
         matrix.setScale(scale /* x scale */, scale /* y scale */, radius /* pivot x */,
                 radius /* pivot y */);

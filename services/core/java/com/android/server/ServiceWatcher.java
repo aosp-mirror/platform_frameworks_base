@@ -183,7 +183,7 @@ public class ServiceWatcher implements ServiceConnection {
     private volatile ServiceInfo mServiceInfo;
     private volatile IBinder mBinder;
 
-    public ServiceWatcher(Context context, Handler handler, String action,
+    public ServiceWatcher(Context context, String action,
             @Nullable BinderRunner onBind, @Nullable Runnable onUnbind,
             @BoolRes int enableOverlayResId, @StringRes int nonOverlayPackageResId) {
         mContext = context;
