@@ -255,44 +255,44 @@ public class NotificationSectionsManager implements StackScrollAlgorithm.Section
         for (int i = 0; i < childCount; i++) {
             View child = mParent.getChildAt(i);
             if (child == mIncomingHeader) {
-                mLogger.logPosition(i, "INCOMING HEADER");
+                mLogger.logIncomingHeader(i);
                 continue;
             }
             if (child == mMediaControlsView) {
-                mLogger.logPosition(i, "MEDIA CONTROLS");
+                mLogger.logMediaControls(i);
                 continue;
             }
             if (child == mPeopleHubView) {
-                mLogger.logPosition(i, "CONVERSATIONS HEADER");
+                mLogger.logConversationsHeader(i);
                 continue;
             }
             if (child == mAlertingHeader) {
-                mLogger.logPosition(i, "ALERTING HEADER");
+                mLogger.logAlertingHeader(i);
                 continue;
             }
             if (child == mGentleHeader) {
-                mLogger.logPosition(i, "SILENT HEADER");
+                mLogger.logSilentHeader(i);
                 continue;
             }
 
             if (!(child instanceof ExpandableNotificationRow)) {
-                mLogger.logPosition(i, "other:" + child.getClass().getName());
+                mLogger.logOther(i, child.getClass());
                 continue;
             }
             ExpandableNotificationRow row = (ExpandableNotificationRow) child;
             // Once we enter a new section, calculate the target position for the header.
             switch (row.getEntry().getBucket()) {
                 case BUCKET_HEADS_UP:
-                    mLogger.logPosition(i, "Heads Up");
+                    mLogger.logHeadsUp(i);
                     break;
                 case BUCKET_PEOPLE:
-                    mLogger.logPosition(i, "Conversation");
+                    mLogger.logConversation(i);
                     break;
                 case BUCKET_ALERTING:
-                    mLogger.logPosition(i, "Alerting");
+                    mLogger.logAlerting(i);
                     break;
                 case BUCKET_SILENT:
-                    mLogger.logPosition(i, "Silent");
+                    mLogger.logSilent(i);
                     break;
             }
         }
@@ -345,33 +345,33 @@ public class NotificationSectionsManager implements StackScrollAlgorithm.Section
 
             // Track the existing positions of the headers
             if (child == mIncomingHeader) {
-                mLogger.logPosition(i, "INCOMING HEADER");
+                mLogger.logIncomingHeader(i);
                 currentIncomingHeaderIdx = i;
                 continue;
             }
             if (child == mMediaControlsView) {
-                mLogger.logPosition(i, "MEDIA CONTROLS");
+                mLogger.logMediaControls(i);
                 currentMediaControlsIdx = i;
                 continue;
             }
             if (child == mPeopleHubView) {
-                mLogger.logPosition(i, "CONVERSATIONS HEADER");
+                mLogger.logConversationsHeader(i);
                 currentPeopleHeaderIdx = i;
                 continue;
             }
             if (child == mAlertingHeader) {
-                mLogger.logPosition(i, "ALERTING HEADER");
+                mLogger.logAlertingHeader(i);
                 currentAlertingHeaderIdx = i;
                 continue;
             }
             if (child == mGentleHeader) {
-                mLogger.logPosition(i, "SILENT HEADER");
+                mLogger.logSilentHeader(i);
                 currentGentleHeaderIdx = i;
                 continue;
             }
 
             if (!(child instanceof ExpandableNotificationRow)) {
-                mLogger.logPosition(i, "other");
+                mLogger.logOther(i, child.getClass());
                 continue;
             }
             lastNotifIndex = i;
@@ -379,7 +379,7 @@ public class NotificationSectionsManager implements StackScrollAlgorithm.Section
             // Once we enter a new section, calculate the target position for the header.
             switch (row.getEntry().getBucket()) {
                 case BUCKET_HEADS_UP:
-                    mLogger.logPosition(i, "Heads Up");
+                    mLogger.logHeadsUp(i);
                     if (showHeaders && incomingHeaderTarget == -1) {
                         incomingHeaderTarget = i;
                         // Offset the target if there are other headers before this that will be
@@ -405,12 +405,13 @@ public class NotificationSectionsManager implements StackScrollAlgorithm.Section
                     }
                     break;
                 case BUCKET_FOREGROUND_SERVICE:
+                    mLogger.logForegroundService(i);
                     if (mediaControlsTarget != -1) {
                         mediaControlsTarget++;
                     }
                     break;
                 case BUCKET_PEOPLE:
-                    mLogger.logPosition(i, "Conversation");
+                    mLogger.logConversation(i);
                     peopleNotifsPresent = true;
                     if (showHeaders && peopleHeaderTarget == -1) {
                         peopleHeaderTarget = i;
@@ -428,7 +429,7 @@ public class NotificationSectionsManager implements StackScrollAlgorithm.Section
                     }
                     break;
                 case BUCKET_ALERTING:
-                    mLogger.logPosition(i, "Alerting");
+                    mLogger.logAlerting(i);
                     if (showHeaders && usingPeopleFiltering && alertingHeaderTarget == -1) {
                         alertingHeaderTarget = i;
                         // Offset the target if there are other headers before this that will be
@@ -442,7 +443,7 @@ public class NotificationSectionsManager implements StackScrollAlgorithm.Section
                     }
                     break;
                 case BUCKET_SILENT:
-                    mLogger.logPosition(i, "Silent");
+                    mLogger.logSilent(i);
                     if (showHeaders && gentleHeaderTarget == -1) {
                         gentleHeaderTarget = i;
                         // Offset the target if there are other headers before this that will be
@@ -474,12 +475,11 @@ public class NotificationSectionsManager implements StackScrollAlgorithm.Section
         }
 
         mLogger.logStr("New header target positions:");
-
-        mLogger.logPosition(incomingHeaderTarget, "INCOMING HEADER");
-        mLogger.logPosition(mediaControlsTarget, "MEDIA CONTROLS");
-        mLogger.logPosition(peopleHeaderTarget, "CONVERSATIONS HEADER");
-        mLogger.logPosition(alertingHeaderTarget, "ALERTING HEADER");
-        mLogger.logPosition(gentleHeaderTarget, "SILENT HEADER");
+        mLogger.logIncomingHeader(incomingHeaderTarget);
+        mLogger.logMediaControls(mediaControlsTarget);
+        mLogger.logConversationsHeader(peopleHeaderTarget);
+        mLogger.logAlertingHeader(alertingHeaderTarget);
+        mLogger.logSilentHeader(gentleHeaderTarget);
 
         // Add headers in reverse order to preserve indices
         adjustHeaderVisibilityAndPosition(
@@ -492,11 +492,8 @@ public class NotificationSectionsManager implements StackScrollAlgorithm.Section
         adjustHeaderVisibilityAndPosition(incomingHeaderTarget, mIncomingHeader,
                 currentIncomingHeaderIdx);
 
-
         mLogger.logStr("Final order:");
-
         logShadeContents();
-
         mLogger.logStr("Section boundary update complete");
 
         // Update headers to reflect state of section contents
