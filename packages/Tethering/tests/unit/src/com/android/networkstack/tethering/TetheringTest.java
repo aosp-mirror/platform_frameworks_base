@@ -312,8 +312,8 @@ public class TetheringTest {
         }
 
         @Override
-        protected boolean getDeviceConfigBoolean(final String name) {
-            return false;
+        protected String getDeviceConfigProperty(final String name) {
+            return null;
         }
 
         @Override
