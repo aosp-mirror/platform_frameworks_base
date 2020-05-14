@@ -30,9 +30,8 @@
 
     <TextView
         android:id="@+id/bubble_view_name"
-        android:fontFamily="@*android:string/config_bodyFontFamily"
-        android:textAppearance="@*android:style/TextAppearance.DeviceDefault.Body2"
-        android:textColor="?android:attr/textColorSecondary"
+        android:textAppearance="@*android:style/TextAppearance.DeviceDefault.ListItem"
+        android:textSize="13sp"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:maxLines="1"
