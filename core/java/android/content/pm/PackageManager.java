@@ -2016,8 +2016,16 @@ public abstract class PackageManager {
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device's main front and back cameras can stream
-     * concurrently as described in  {@link
-     * android.hardware.camera2.CameraManager#getConcurrentCameraIds()}
+     * concurrently as described in {@link
+     * android.hardware.camera2.CameraManager#getConcurrentCameraIds()}.
+     * </p>
+     * <p>While {@link android.hardware.camera2.CameraManager#getConcurrentCameraIds()} and
+     * associated APIs are only available on API level 30 or newer, this feature flag may be
+     * advertised by devices on API levels below 30. If present on such a device, the same
+     * guarantees hold: The main front and main back camera can be used at the same time, with
+     * guaranteed stream configurations as defined in the table for concurrent streaming at
+     * {@link android.hardware.camera2.CameraDevice#createCaptureSession(android.hardware.camera2.params.SessionConfiguration)}.
+     * </p>
      */
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_CAMERA_CONCURRENT = "android.hardware.camera.concurrent";
