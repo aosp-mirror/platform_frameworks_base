@@ -235,7 +235,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         implements WindowManagerPolicy.DisplayContentInfo {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "DisplayContent" : TAG_WM;
     private static final String TAG_STACK = TAG + POSTFIX_STACK;
-    private static final int NO_ROTATION = -1;
 
     /** The default scaling mode that scales content automatically. */
     static final int FORCE_SCALING_MODE_AUTO = 0;
@@ -1394,36 +1393,40 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         final WindowContainer orientationSource = getLastOrientationSource();
         final ActivityRecord r =
                 orientationSource != null ? orientationSource.asActivityRecord() : null;
-        if (r != null && r.getTask() != null
-                && orientation != r.getTask().mLastReportedRequestedOrientation) {
+        if (r != null) {
             final Task task = r.getTask();
-            task.mLastReportedRequestedOrientation = orientation;
-            mAtmService.getTaskChangeNotificationController()
-                    .notifyTaskRequestedOrientationChanged(task.mTaskId, orientation);
-        }
-        // Currently there is no use case from non-activity.
-        if (r != null && handleTopActivityLaunchingInDifferentOrientation(r)) {
-            // Display orientation should be deferred until the top fixed rotation is finished.
-            return false;
+            if (task != null && orientation != task.mLastReportedRequestedOrientation) {
+                task.mLastReportedRequestedOrientation = orientation;
+                mAtmService.getTaskChangeNotificationController()
+                        .notifyTaskRequestedOrientationChanged(task.mTaskId, orientation);
+            }
+            // Currently there is no use case from non-activity.
+            if (handleTopActivityLaunchingInDifferentOrientation(r, true /* checkOpening */)) {
+                // Display orientation should be deferred until the top fixed rotation is finished.
+                return false;
+            }
         }
         return mDisplayRotation.updateOrientation(orientation, forceUpdate);
     }
 
-    /** @return a valid rotation if the activity can use different orientation than the display. */
+    /**
+     * Returns a valid rotation if the activity can use different orientation than the display.
+     * Otherwise {@link #ROTATION_UNDEFINED}.
+     */
     @Surface.Rotation
-    private int rotationForActivityInDifferentOrientation(@NonNull ActivityRecord r) {
+    int rotationForActivityInDifferentOrientation(@NonNull ActivityRecord r) {
         if (!mWmService.mIsFixedRotationTransformEnabled) {
-            return NO_ROTATION;
+            return ROTATION_UNDEFINED;
         }
         if (r.inMultiWindowMode()
                 || r.getRequestedConfigurationOrientation() == getConfiguration().orientation) {
-            return NO_ROTATION;
+            return ROTATION_UNDEFINED;
         }
         final int currentRotation = getRotation();
         final int rotation = mDisplayRotation.rotationForOrientation(r.getRequestedOrientation(),
                 currentRotation);
         if (rotation == currentRotation) {
-            return NO_ROTATION;
+            return ROTATION_UNDEFINED;
         }
         return rotation;
     }
@@ -1433,9 +1436,13 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * is launching until the launch animation is done to avoid showing the previous activity
      * inadvertently in a wrong orientation.
      *
+     * @param r The launching activity which may change display orientation.
+     * @param checkOpening Whether to check if the activity is animating by transition. Set to
+     *                     {@code true} if the caller is not sure whether the activity is launching.
      * @return {@code true} if the fixed rotation is started.
      */
-    private boolean handleTopActivityLaunchingInDifferentOrientation(@NonNull ActivityRecord r) {
+    boolean handleTopActivityLaunchingInDifferentOrientation(@NonNull ActivityRecord r,
+            boolean checkOpening) {
         if (!mWmService.mIsFixedRotationTransformEnabled) {
             return false;
         }
@@ -1446,19 +1453,18 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             // It has been set and not yet finished.
             return true;
         }
-        if (!mAppTransition.isTransitionSet()) {
-            // Apply normal rotation animation in case of the activity set different requested
-            // orientation without activity switch.
-            return false;
-        }
-        if (!mOpeningApps.contains(r)
-                // Without screen rotation, the rotation behavior of non-top visible activities is
-                // undefined. So the fixed rotated activity needs to cover the screen.
-                && r.findMainWindow() != mDisplayPolicy.getTopFullscreenOpaqueWindow()) {
+        if (checkOpening) {
+            if (!mAppTransition.isTransitionSet() && !mOpeningApps.contains(r)) {
+                // Apply normal rotation animation in case of the activity set different requested
+                // orientation without activity switch.
+                return false;
+            }
+        } else if (r != topRunningActivity()) {
+            // If the transition has not started yet, the activity must be the top.
             return false;
         }
         final int rotation = rotationForActivityInDifferentOrientation(r);
-        if (rotation == NO_ROTATION) {
+        if (rotation == ROTATION_UNDEFINED) {
             return false;
         }
         if (!r.getParent().matchParentBounds()) {
@@ -1511,6 +1517,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             sendNewConfiguration();
             return;
         }
+        if (mDisplayRotation.isWaitingForRemoteRotation()) {
+            // There is pending rotation change to apply.
+            return;
+        }
         // The orientation of display is not changed.
         clearFixedRotationLaunchingApp();
     }
@@ -1551,7 +1561,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      */
     void rotateInDifferentOrientationIfNeeded(ActivityRecord activityRecord) {
         int rotation = rotationForActivityInDifferentOrientation(activityRecord);
-        if (rotation != NO_ROTATION) {
+        if (rotation != ROTATION_UNDEFINED) {
             startFixedRotationTransform(activityRecord, rotation);
         }
     }
