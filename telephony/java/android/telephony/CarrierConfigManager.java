@@ -1634,6 +1634,12 @@ public class CarrierConfigManager {
             "show_precise_failed_cause_bool";
 
     /**
+     * Boolean to decide whether NR is enabled.
+     * @hide
+     */
+    public static final String KEY_NR_ENABLED_BOOL = "nr_enabled_bool";
+
+    /**
      * Boolean to decide whether LTE is enabled.
      */
     public static final String KEY_LTE_ENABLED_BOOL = "lte_enabled_bool";
@@ -4117,6 +4123,7 @@ public class CarrierConfigManager {
         sDefaults.putString(KEY_OPERATOR_NAME_FILTER_PATTERN_STRING, "");
         sDefaults.putString(KEY_SHOW_CARRIER_DATA_ICON_PATTERN_STRING, "");
         sDefaults.putBoolean(KEY_HIDE_LTE_PLUS_DATA_ICON_BOOL, true);
+        sDefaults.putBoolean(KEY_NR_ENABLED_BOOL, true);
         sDefaults.putBoolean(KEY_LTE_ENABLED_BOOL, true);
         sDefaults.putBoolean(KEY_SUPPORT_TDSCDMA_BOOL, false);
         sDefaults.putStringArray(KEY_SUPPORT_TDSCDMA_ROAMING_NETWORKS_STRING_ARRAY, null);
