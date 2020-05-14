@@ -1646,7 +1646,7 @@ class ActivityStarter {
 
         mTargetStack.mLastPausedActivity = null;
 
-        mRootWindowContainer.sendPowerHintForLaunchStartIfNeeded(
+        mRootWindowContainer.startPowerModeLaunchIfNeeded(
                 false /* forceSend */, mStartActivity);
 
         mTargetStack.startActivityLocked(mStartActivity, topStack.getTopNonFinishingActivity(),
@@ -1829,7 +1829,7 @@ class ActivityStarter {
             }
         }
 
-        mRootWindowContainer.sendPowerHintForLaunchStartIfNeeded(false /* forceSend */,
+        mRootWindowContainer.startPowerModeLaunchIfNeeded(false /* forceSend */,
                 targetTaskTop);
 
         setTargetStackIfNeeded(targetTaskTop);

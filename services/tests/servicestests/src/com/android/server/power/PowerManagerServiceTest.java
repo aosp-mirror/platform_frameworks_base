@@ -34,6 +34,7 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
@@ -53,6 +54,8 @@ import android.hardware.SensorManager;
 import android.hardware.display.AmbientDisplayConfiguration;
 import android.hardware.display.DisplayManagerInternal;
 import android.hardware.display.DisplayManagerInternal.DisplayPowerRequest;
+import android.hardware.power.Boost;
+import android.hardware.power.Mode;
 import android.os.BatteryManager;
 import android.os.BatteryManagerInternal;
 import android.os.Binder;
@@ -98,7 +101,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Tests for {@link com.android.server.power.PowerManagerService}
+ * Tests for {@link com.android.server.power.PowerManagerService}.
+ *
+ * Build/Install/Run:
+ *  atest FrameworksServicesTests:PowerManagerServiceTest
  */
 public class PowerManagerServiceTest {
     private static final String SYSTEM_PROPERTY_QUIESCENT = "ro.boot.quiescent";
@@ -360,6 +366,14 @@ public class PowerManagerServiceTest {
     private void advanceTime(long timeMs) {
         mClock.fastForward(timeMs);
         mTestLooper.dispatchAll();
+    }
+
+    @Test
+    public void testCreateService_initializesNativeServiceAndSetsPowerModes() {
+        PowerManagerService service = createService();
+        verify(mNativeWrapperMock).nativeInit(same(service));
+        verify(mNativeWrapperMock).nativeSetPowerMode(eq(Mode.INTERACTIVE), eq(true));
+        verify(mNativeWrapperMock).nativeSetPowerMode(eq(Mode.DOUBLE_TAP_TO_WAKE), eq(false));
     }
 
     @Test
@@ -966,5 +980,68 @@ public class PowerManagerServiceTest {
             .isTrue();
         assertThat(mService.getBinderServiceInstance().isAmbientDisplaySuppressedForToken("test2"))
             .isFalse();
+    }
+
+    @Test
+    public void testSetPowerBoost_redirectsCallToNativeWrapper() {
+        createService();
+        mService.systemReady(null);
+
+        mService.getBinderServiceInstance().setPowerBoost(Boost.INTERACTION, 1234);
+
+        verify(mNativeWrapperMock).nativeSetPowerBoost(eq(Boost.INTERACTION), eq(1234));
+    }
+
+    @Test
+    public void testSetPowerMode_redirectsCallToNativeWrapper() {
+        createService();
+        mService.systemReady(null);
+
+        // Enabled launch boost in BatterySaverController to allow setting launch mode.
+        when(mBatterySaverControllerMock.isLaunchBoostDisabled()).thenReturn(false);
+        when(mNativeWrapperMock.nativeSetPowerMode(anyInt(), anyBoolean())).thenReturn(true);
+
+        mService.getBinderServiceInstance().setPowerMode(Mode.LAUNCH, true);
+        mService.getBinderServiceInstance().setPowerMode(Mode.VR, false);
+
+        verify(mNativeWrapperMock).nativeSetPowerMode(eq(Mode.LAUNCH), eq(true));
+        verify(mNativeWrapperMock).nativeSetPowerMode(eq(Mode.VR), eq(false));
+    }
+
+    @Test
+    public void testSetPowerMode_withLaunchBoostDisabledAndModeLaunch_ignoresCallToEnable() {
+        createService();
+        mService.systemReady(null);
+
+        // Disables launch boost in BatterySaverController.
+        when(mBatterySaverControllerMock.isLaunchBoostDisabled()).thenReturn(true);
+        when(mNativeWrapperMock.nativeSetPowerMode(anyInt(), anyBoolean())).thenReturn(true);
+
+        mService.getBinderServiceInstance().setPowerMode(Mode.LAUNCH, true);
+        mService.getBinderServiceInstance().setPowerMode(Mode.LAUNCH, false);
+
+        verify(mNativeWrapperMock, never()).nativeSetPowerMode(eq(Mode.LAUNCH), eq(true));
+        verify(mNativeWrapperMock).nativeSetPowerMode(eq(Mode.LAUNCH), eq(false));
+    }
+
+    @Test
+    public void testSetPowerModeChecked_returnsNativeCallResult() {
+        createService();
+        mService.systemReady(null);
+
+        // Disables launch boost in BatterySaverController.
+        when(mBatterySaverControllerMock.isLaunchBoostDisabled()).thenReturn(true);
+        when(mNativeWrapperMock.nativeSetPowerMode(anyInt(), anyBoolean())).thenReturn(true);
+        when(mNativeWrapperMock.nativeSetPowerMode(eq(Mode.INTERACTIVE), anyBoolean()))
+            .thenReturn(false);
+
+        // Ignored because isLaunchBoostDisabled is true. Should return false.
+        assertFalse(mService.getBinderServiceInstance().setPowerModeChecked(Mode.LAUNCH, true));
+        // Native calls return true.
+        assertTrue(mService.getBinderServiceInstance().setPowerModeChecked(Mode.LAUNCH, false));
+        assertTrue(mService.getBinderServiceInstance().setPowerModeChecked(Mode.LOW_POWER, true));
+        // Native call for interactive returns false.
+        assertFalse(
+                mService.getBinderServiceInstance().setPowerModeChecked(Mode.INTERACTIVE, false));
     }
 }
