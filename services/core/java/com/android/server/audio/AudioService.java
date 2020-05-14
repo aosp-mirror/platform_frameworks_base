@@ -3594,11 +3594,9 @@ public class AudioService extends IAudioService.Stub
         }
 
         public void binderDied() {
-            int oldModeOwnerPid;
             int newModeOwnerPid = 0;
             synchronized (mDeviceBroker.mSetModeLock) {
                 Log.w(TAG, "setMode() client died");
-                oldModeOwnerPid = getModeOwnerPid();
                 int index = mSetModeDeathHandlers.indexOf(this);
                 if (index < 0) {
                     Log.w(TAG, "unregistered setMode() client died");
@@ -3608,9 +3606,7 @@ public class AudioService extends IAudioService.Stub
             }
             // when entering RINGTONE, IN_CALL or IN_COMMUNICATION mode, clear all
             // SCO connections not started by the application changing the mode when pid changes
-            if ((newModeOwnerPid != oldModeOwnerPid) && (newModeOwnerPid != 0)) {
-                mDeviceBroker.postDisconnectBluetoothSco(newModeOwnerPid);
-            }
+            mDeviceBroker.postSetModeOwnerPid(newModeOwnerPid);
         }
 
         public int getPid() {
@@ -3662,17 +3658,20 @@ public class AudioService extends IAudioService.Stub
             return;
         }
 
-        int oldModeOwnerPid;
         int newModeOwnerPid;
         synchronized (mDeviceBroker.mSetModeLock) {
             if (mode == AudioSystem.MODE_CURRENT) {
                 mode = mMode;
             }
-            oldModeOwnerPid = getModeOwnerPid();
+            int oldModeOwnerPid = getModeOwnerPid();
             // Do not allow changing mode if a call is active and the requester
-            // does not have permission to modify phone state or is not the mode owner.
-            if (((mMode == AudioSystem.MODE_IN_CALL)
-                    || (mMode == AudioSystem.MODE_IN_COMMUNICATION))
+            // does not have permission to modify phone state or is not the mode owner,
+            // unless returning to NORMAL mode (will not change current mode owner) or
+            // not changing mode in which case the mode owner will reflect the last
+            // requester of current mode
+            if (!((mode == mMode) || (mode == AudioSystem.MODE_NORMAL))
+                    && ((mMode == AudioSystem.MODE_IN_CALL)
+                        || (mMode == AudioSystem.MODE_IN_COMMUNICATION))
                     && !(hasModifyPhoneStatePermission || (oldModeOwnerPid == callingPid))) {
                 Log.w(TAG, "setMode(" + mode + ") from pid=" + callingPid
                         + ", uid=" + Binder.getCallingUid()
@@ -3685,9 +3684,7 @@ public class AudioService extends IAudioService.Stub
         }
         // when entering RINGTONE, IN_CALL or IN_COMMUNICATION mode, clear all
         // SCO connections not started by the application changing the mode when pid changes
-        if ((newModeOwnerPid != oldModeOwnerPid) && (newModeOwnerPid != 0)) {
-            mDeviceBroker.postDisconnectBluetoothSco(newModeOwnerPid);
-        }
+        mDeviceBroker.postSetModeOwnerPid(newModeOwnerPid);
     }
 
     // setModeInt() returns a valid PID if the audio mode was successfully set to
@@ -3964,23 +3961,9 @@ public class AudioService extends IAudioService.Stub
     }
 
     /** @see AudioManager#setSpeakerphoneOn(boolean) */
-    public void setSpeakerphoneOn(boolean on){
+    public void setSpeakerphoneOn(IBinder cb, boolean on) {
         if (!checkAudioSettingsPermission("setSpeakerphoneOn()")) {
             return;
-        }
-
-        if (mContext.checkCallingOrSelfPermission(
-                android.Manifest.permission.MODIFY_PHONE_STATE)
-                != PackageManager.PERMISSION_GRANTED) {
-            synchronized (mSetModeDeathHandlers) {
-                for (SetModeDeathHandler h : mSetModeDeathHandlers) {
-                    if (h.getMode() == AudioSystem.MODE_IN_CALL) {
-                        Log.w(TAG, "getMode is call, Permission Denial: setSpeakerphoneOn from pid="
-                                + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid());
-                        return;
-                    }
-                }
-            }
         }
 
         // for logging only
@@ -3989,7 +3972,7 @@ public class AudioService extends IAudioService.Stub
         final String eventSource = new StringBuilder("setSpeakerphoneOn(").append(on)
                 .append(") from u/pid:").append(uid).append("/")
                 .append(pid).toString();
-        final boolean stateChanged = mDeviceBroker.setSpeakerphoneOn(on, eventSource);
+        final boolean stateChanged = mDeviceBroker.setSpeakerphoneOn(cb, pid, on, eventSource);
         new MediaMetrics.Item(MediaMetrics.Name.AUDIO_DEVICE
                 + MediaMetrics.SEPARATOR + "setSpeakerphoneOn")
                 .setUid(uid)
