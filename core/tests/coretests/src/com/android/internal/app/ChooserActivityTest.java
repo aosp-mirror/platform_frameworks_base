@@ -294,6 +294,60 @@ public class ChooserActivityTest {
     }
 
     @Test
+    public void fourOptionsStackedIntoOneTarget() throws InterruptedException {
+        Intent sendIntent = createSendTextIntent();
+
+        // create 12 unique app targets to ensure the app ranking row can be filled, otherwise
+        // targets will not stack
+        List<ResolvedComponentInfo> resolvedComponentInfos = createResolvedComponentsForTest(12);
+
+        // next create 4 targets in a single app that should be stacked into a single target
+        String packageName = "xxx.yyy";
+        String appName = "aaa";
+        ComponentName cn = new ComponentName(packageName, appName);
+        Intent intent = new Intent("fakeIntent");
+        List<ResolvedComponentInfo> infosToStack = new ArrayList<>();
+        for (int i = 0; i < 4; i++) {
+            ResolveInfo resolveInfo = ResolverDataProvider.createResolveInfo(i,
+                    UserHandle.USER_CURRENT);
+            resolveInfo.activityInfo.applicationInfo.name = appName;
+            resolveInfo.activityInfo.applicationInfo.packageName = packageName;
+            resolveInfo.activityInfo.packageName = packageName;
+            resolveInfo.activityInfo.name = "ccc" + i;
+            infosToStack.add(new ResolvedComponentInfo(cn, intent, resolveInfo));
+        }
+        resolvedComponentInfos.addAll(infosToStack);
+
+        when(sOverrides.resolverListController.getResolversForIntent(Mockito.anyBoolean(),
+                Mockito.anyBoolean(),
+                Mockito.isA(List.class))).thenReturn(resolvedComponentInfos);
+
+        final ChooserWrapperActivity activity = mActivityRule
+                .launchActivity(Intent.createChooser(sendIntent, null));
+        waitForIdle();
+
+        // expect 12 unique targets + 1 group + 4 ranked app targets
+        assertThat(activity.getAdapter().getCount(), is(17));
+
+        ResolveInfo[] chosen = new ResolveInfo[1];
+        sOverrides.onSafelyStartCallback = targetInfo -> {
+            chosen[0] = targetInfo.getResolveInfo();
+            return true;
+        };
+
+        onView(withText(appName)).perform(click());
+        waitForIdle();
+
+        // clicking will launch a dialog to choose the activity within the app
+        onView(withText(appName)).check(matches(isDisplayed()));
+        int i = 0;
+        for (ResolvedComponentInfo rci: infosToStack) {
+            onView(withText("ccc" + i)).check(matches(isDisplayed()));
+            ++i;
+        }
+    }
+
+    @Test
     public void updateChooserCountsAndModelAfterUserSelection() throws InterruptedException {
         Intent sendIntent = createSendTextIntent();
         List<ResolvedComponentInfo> resolvedComponentInfos = createResolvedComponentsForTest(2);
