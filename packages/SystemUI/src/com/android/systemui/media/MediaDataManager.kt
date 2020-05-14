@@ -21,6 +21,7 @@ import android.content.ContentResolver
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.ImageDecoder
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.Icon
@@ -30,7 +31,7 @@ import android.net.Uri
 import android.service.notification.StatusBarNotification
 import android.text.TextUtils
 import android.util.Log
-import com.android.internal.util.ContrastColorUtil
+import com.android.internal.graphics.ColorUtils
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.statusbar.notification.MediaNotificationProcessor
@@ -40,7 +41,6 @@ import java.io.IOException
 import java.util.concurrent.Executor
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlin.collections.LinkedHashMap
 
 // URI fields to try loading album art from
 private val ART_URIS = arrayOf(
@@ -50,6 +50,9 @@ private val ART_URIS = arrayOf(
 )
 
 private const val TAG = "MediaDataManager"
+private const val DEFAULT_LUMINOSITY = 0.25f
+private const val LUMINOSITY_THRESHOLD = 0.05f
+private const val SATURATION_MULTIPLIER = 0.8f
 
 private val LOADING = MediaData(false, 0, 0, null, null, null, null, null,
         emptyList(), emptyList(), null, null, null)
@@ -107,8 +110,8 @@ class MediaDataManager @Inject constructor(
 
         // Foreground and Background colors computed from album art
         val notif: Notification = sbn.notification
-        var fgColor = notif.color
-        var bgColor = -1
+        val fgColor = Color.WHITE
+        var bgColor = Color.WHITE
         var artworkBitmap = metadata.getBitmap(MediaMetadata.METADATA_KEY_ART)
         if (artworkBitmap == null) {
             artworkBitmap = metadata.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART)
@@ -142,13 +145,22 @@ class MediaDataManager @Inject constructor(
                     .generate()
             val swatch = MediaNotificationProcessor.findBackgroundSwatch(p)
             bgColor = swatch.rgb
-            fgColor = MediaNotificationProcessor.selectForegroundColor(bgColor, p)
         }
-        // Make sure colors will be legible
-        val isDark = !ContrastColorUtil.isColorLight(bgColor)
-        fgColor = ContrastColorUtil.resolveContrastColor(context, fgColor, bgColor,
-                isDark)
-        fgColor = ContrastColorUtil.ensureTextContrast(fgColor, bgColor, isDark)
+        // Adapt background color, so it's always subdued and text is legible
+        val tmpHsl = floatArrayOf(0f, 0f, 0f)
+        ColorUtils.colorToHSL(bgColor, tmpHsl)
+
+        val l = tmpHsl[2]
+        // Colors with very low luminosity can have any saturation. This means that changing the
+        // luminosity can make a black become red. Let's remove the saturation of very light or
+        // very dark colors to avoid this issue.
+        if (l < LUMINOSITY_THRESHOLD || l > 1f - LUMINOSITY_THRESHOLD) {
+            tmpHsl[1] = 0f
+        }
+        tmpHsl[1] *= SATURATION_MULTIPLIER
+        tmpHsl[2] = DEFAULT_LUMINOSITY
+
+        bgColor = ColorUtils.HSLToColor(tmpHsl)
 
         // App name
         val builder = Notification.Builder.recoverBuilder(context, notif)
