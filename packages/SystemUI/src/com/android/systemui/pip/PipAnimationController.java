@@ -65,6 +65,10 @@ public class PipAnimationController {
     @Retention(RetentionPolicy.SOURCE)
     public @interface TransitionDirection {}
 
+    public static boolean isInPipDirection(@TransitionDirection int direction) {
+        return direction == TRANSITION_DIRECTION_TO_PIP;
+    }
+
     public static boolean isOutPipDirection(@TransitionDirection int direction) {
         return direction == TRANSITION_DIRECTION_TO_FULLSCREEN
                 || direction == TRANSITION_DIRECTION_TO_SPLIT_SCREEN;
@@ -104,6 +108,12 @@ public class PipAnimationController {
         if (mCurrentAnimator == null) {
             mCurrentAnimator = setupPipTransitionAnimator(
                     PipTransitionAnimator.ofBounds(leash, startBounds, endBounds));
+        } else if (mCurrentAnimator.getAnimationType() == ANIM_TYPE_ALPHA
+                && mCurrentAnimator.isRunning()) {
+            // If we are still animating the fade into pip, then just move the surface and ensure
+            // we update with the new destination bounds, but don't interrupt the existing animation
+            // with a new bounds
+            mCurrentAnimator.setDestinationBounds(endBounds);
         } else if (mCurrentAnimator.getAnimationType() == ANIM_TYPE_BOUNDS
                 && mCurrentAnimator.isRunning()) {
             mCurrentAnimator.setDestinationBounds(endBounds);
@@ -265,8 +275,7 @@ public class PipAnimationController {
 
         boolean inScaleTransition() {
             if (mAnimationType != ANIM_TYPE_BOUNDS) return false;
-            final int direction = getTransitionDirection();
-            return !isOutPipDirection(direction) && direction != TRANSITION_DIRECTION_TO_PIP;
+            return !isInPipDirection(getTransitionDirection());
         }
 
         /**
@@ -354,7 +363,11 @@ public class PipAnimationController {
                             getCastedFractionValue(start.bottom, end.bottom, fraction));
                     setCurrentValue(mTmpRect);
                     if (inScaleTransition()) {
-                        getSurfaceTransactionHelper().scale(tx, leash, start, mTmpRect);
+                        if (isOutPipDirection(getTransitionDirection())) {
+                            getSurfaceTransactionHelper().scale(tx, leash, end, mTmpRect);
+                        } else {
+                            getSurfaceTransactionHelper().scale(tx, leash, start, mTmpRect);
+                        }
                     } else {
                         getSurfaceTransactionHelper().crop(tx, leash, mTmpRect);
                     }
