@@ -1940,7 +1940,6 @@ class Task extends WindowContainer<WindowContainer> {
                 setLastNonFullscreenBounds(currentBounds);
             }
         }
-        // TODO: Should also take care of Pip mode changes here.
 
         saveLaunchingStateIfNeeded();
         final boolean taskOrgChanged = updateTaskOrganizerState(false /* forceUpdate */);

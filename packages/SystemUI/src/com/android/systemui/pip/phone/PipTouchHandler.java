@@ -23,7 +23,6 @@ import static com.android.systemui.pip.phone.PipMenuActivityController.MENU_STAT
 
 import android.annotation.SuppressLint;
 import android.app.IActivityManager;
-import android.app.IActivityTaskManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.res.Resources;
@@ -188,7 +187,7 @@ public class PipTouchHandler {
 
         @Override
         public void onPipExpand() {
-            mMotionHelper.expandPip();
+            mMotionHelper.expandPipToFullscreen();
         }
 
         @Override
@@ -210,7 +209,7 @@ public class PipTouchHandler {
 
     @SuppressLint("InflateParams")
     public PipTouchHandler(Context context, IActivityManager activityManager,
-            IActivityTaskManager activityTaskManager, PipMenuActivityController menuController,
+            PipMenuActivityController menuController,
             InputConsumerController inputConsumerController,
             PipBoundsHandler pipBoundsHandler,
             PipTaskOrganizer pipTaskOrganizer,
@@ -228,8 +227,8 @@ public class PipTouchHandler {
         mFlingAnimationUtils = new FlingAnimationUtils(context.getResources().getDisplayMetrics(),
                 2.5f);
         mGesture = new DefaultPipTouchGesture();
-        mMotionHelper = new PipMotionHelper(mContext, activityTaskManager, pipTaskOrganizer,
-                mMenuController, mSnapAlgorithm, mFlingAnimationUtils, floatingContentCoordinator);
+        mMotionHelper = new PipMotionHelper(mContext, pipTaskOrganizer, mMenuController,
+                mSnapAlgorithm, floatingContentCoordinator);
         mPipResizeGestureHandler =
                 new PipResizeGestureHandler(context, pipBoundsHandler, mMotionHelper,
                         deviceConfig, pipTaskOrganizer, this::getMovementBounds,
@@ -908,7 +907,7 @@ public class PipTouchHandler {
                 // Expand to fullscreen if this is a double tap
                 // the PiP should be frozen until the transition ends
                 setTouchEnabled(false);
-                mMotionHelper.expandPip();
+                mMotionHelper.expandPipToFullscreen();
             } else if (mMenuState != MENU_STATE_FULL) {
                 if (!mTouchState.isWaitingForDoubleTap()) {
                     // User has stalled long enough for this not to be a drag or a double tap, just
