@@ -132,7 +132,7 @@ public class TetheringConfiguration {
         isDunRequired = checkDunRequired(ctx);
 
         chooseUpstreamAutomatically = getResourceBoolean(
-                res, R.bool.config_tether_upstream_automatic, false /** default value */);
+                res, R.bool.config_tether_upstream_automatic, false /** defaultValue */);
         preferredUpstreamIfaceTypes = getUpstreamIfaceTypes(res, isDunRequired);
 
         legacyDhcpRanges = getLegacyDhcpRanges(res);
@@ -375,30 +375,31 @@ public class TetheringConfiguration {
         // Priority 1: Device config
         // Priority 2: Resource config
         // Priority 3: Default value
-        final boolean resourceValue = getResourceBoolean(
+        final boolean defaultValue = getResourceBoolean(
                 res, R.bool.config_tether_enable_bpf_offload, true /** default value */);
 
-        // Due to the limitation of static mock for testing, using #getProperty directly instead
-        // of getDeviceConfigBoolean. getDeviceConfigBoolean is not invoked because it uses
-        // #getBoolean to get the boolean device config. The test can't know that the returned
-        // boolean value comes from device config or default value (because of null property
-        // string). Because the test would like to verify null property boolean string case,
-        // use DeviceConfig.getProperty here. See also the test case testBpfOffload{*} in
-        // TetheringConfigurationTest.java.
-        final String value = DeviceConfig.getProperty(
-                NAMESPACE_CONNECTIVITY, OVERRIDE_TETHER_ENABLE_BPF_OFFLOAD);
-        return (value != null) ? Boolean.parseBoolean(value) : resourceValue;
+        return getDeviceConfigBoolean(OVERRIDE_TETHER_ENABLE_BPF_OFFLOAD, defaultValue);
     }
 
     private boolean getEnableLegacyDhcpServer(final Resources res) {
         return getResourceBoolean(
-                res, R.bool.config_tether_enable_legacy_dhcp_server, false /** default value */)
-                || getDeviceConfigBoolean(TETHER_ENABLE_LEGACY_DHCP_SERVER);
+                res, R.bool.config_tether_enable_legacy_dhcp_server, false /** defaultValue */)
+                || getDeviceConfigBoolean(
+                TETHER_ENABLE_LEGACY_DHCP_SERVER, false /** defaultValue */);
+    }
+
+    private boolean getDeviceConfigBoolean(final String name, final boolean defaultValue) {
+        // Due to the limitation of static mock for testing, using #getDeviceConfigProperty instead
+        // of DeviceConfig#getBoolean. If using #getBoolean here, the test can't know that the
+        // returned boolean value comes from device config or default value (because of null
+        // property string). See the test case testBpfOffload{*} in TetheringConfigurationTest.java.
+        final String value = getDeviceConfigProperty(name);
+        return value != null ? Boolean.parseBoolean(value) : defaultValue;
     }
 
     @VisibleForTesting
-    protected boolean getDeviceConfigBoolean(final String name) {
-        return DeviceConfig.getBoolean(NAMESPACE_CONNECTIVITY, name, false /** defaultValue */);
+    protected String getDeviceConfigProperty(String name) {
+        return DeviceConfig.getProperty(NAMESPACE_CONNECTIVITY, name);
     }
 
     private Resources getResources(Context ctx, int subId) {
