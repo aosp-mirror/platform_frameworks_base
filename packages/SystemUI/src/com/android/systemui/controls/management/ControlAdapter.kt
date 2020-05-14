@@ -23,9 +23,14 @@ import android.service.controls.DeviceTypes
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.CheckBox
 import android.widget.ImageView
+import android.widget.Switch
 import android.widget.TextView
+import androidx.core.view.AccessibilityDelegateCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.android.systemui.R
@@ -72,7 +77,8 @@ class ControlAdapter(
                         elevation = this@ControlAdapter.elevation
                         background = parent.context.getDrawable(
                                 R.drawable.control_background_ripple)
-                    }
+                    },
+                    model is FavoritesModel // Indicates that position information is needed
                 ) { id, favorite ->
                     model?.changeFavoriteStatus(id, favorite)
                 }
@@ -175,8 +181,14 @@ private class ZoneHolder(view: View) : Holder(view) {
  */
 internal class ControlHolder(
     view: View,
+    val withPosition: Boolean,
     val favoriteCallback: ModelFavoriteChanger
 ) : Holder(view) {
+    private val favoriteStateDescription =
+        itemView.context.getString(R.string.accessibility_control_favorite)
+    private val notFavoriteStateDescription =
+        itemView.context.getString(R.string.accessibility_control_not_favorite)
+
     private val icon: ImageView = itemView.requireViewById(R.id.icon)
     private val title: TextView = itemView.requireViewById(R.id.title)
     private val subtitle: TextView = itemView.requireViewById(R.id.subtitle)
@@ -185,15 +197,38 @@ internal class ControlHolder(
         visibility = View.VISIBLE
     }
 
+    private val accessibilityDelegate = ControlHolderAccessibilityDelegate(this::stateDescription)
+
+    init {
+        ViewCompat.setAccessibilityDelegate(itemView, accessibilityDelegate)
+    }
+
+    // Determine the stateDescription based on favorite state and maybe position
+    private fun stateDescription(favorite: Boolean): CharSequence? {
+        if (!favorite) {
+            return notFavoriteStateDescription
+        } else if (!withPosition) {
+            return favoriteStateDescription
+        } else {
+            val position = layoutPosition + 1
+            return itemView.context.getString(
+                R.string.accessibility_control_favorite_position, position)
+        }
+    }
+
     override fun bindData(wrapper: ElementWrapper) {
         wrapper as ControlInterface
         val renderInfo = getRenderInfo(wrapper.component, wrapper.deviceType)
         title.text = wrapper.title
         subtitle.text = wrapper.subtitle
-        favorite.isChecked = wrapper.favorite
-        removed.text = if (wrapper.removed) "Removed" else ""
+        updateFavorite(wrapper.favorite)
+        removed.text = if (wrapper.removed) {
+            itemView.context.getText(R.string.controls_removed)
+        } else {
+            ""
+        }
         itemView.setOnClickListener {
-            favorite.isChecked = !favorite.isChecked
+            updateFavorite(!favorite.isChecked)
             favoriteCallback(wrapper.controlId, favorite.isChecked)
         }
         applyRenderInfo(renderInfo)
@@ -201,6 +236,8 @@ internal class ControlHolder(
 
     override fun updateFavorite(favorite: Boolean) {
         this.favorite.isChecked = favorite
+        accessibilityDelegate.isFavorite = favorite
+        itemView.stateDescription = stateDescription(favorite)
     }
 
     private fun getRenderInfo(
@@ -216,6 +253,36 @@ internal class ControlHolder(
 
         icon.setImageDrawable(ri.icon)
         icon.setImageTintList(fg)
+    }
+}
+
+private class ControlHolderAccessibilityDelegate(
+    val stateRetriever: (Boolean) -> CharSequence?
+) : AccessibilityDelegateCompat() {
+
+    var isFavorite = false
+
+    override fun onInitializeAccessibilityNodeInfo(host: View, info: AccessibilityNodeInfoCompat) {
+        super.onInitializeAccessibilityNodeInfo(host, info)
+
+        // Change the text for the double-tap action
+        val clickActionString = if (isFavorite) {
+            host.context.getString(R.string.accessibility_control_change_unfavorite)
+        } else {
+            host.context.getString(R.string.accessibility_control_change_favorite)
+        }
+        val click = AccessibilityNodeInfoCompat.AccessibilityActionCompat(
+            AccessibilityNodeInfo.ACTION_CLICK,
+            // “favorite/unfavorite”
+            clickActionString)
+        info.addAction(click)
+
+        // Determine the stateDescription based on the holder information
+        info.stateDescription = stateRetriever(isFavorite)
+        // Remove the information at the end indicating row and column.
+        info.setCollectionItemInfo(null)
+
+        info.className = Switch::class.java.name
     }
 }
 

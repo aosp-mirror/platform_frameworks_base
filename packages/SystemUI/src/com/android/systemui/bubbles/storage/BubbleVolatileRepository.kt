@@ -29,12 +29,12 @@ class BubbleVolatileRepository @Inject constructor() {
     /**
      * An ordered set of bubbles based on their natural ordering.
      */
-    private val entities = mutableSetOf<BubbleXmlEntity>()
+    private val entities = mutableSetOf<BubbleEntity>()
 
     /**
      * Returns a snapshot of all the bubbles.
      */
-    val bubbles: List<BubbleXmlEntity>
+    val bubbles: List<BubbleEntity>
         @Synchronized
         get() = entities.toList()
 
@@ -43,7 +43,7 @@ class BubbleVolatileRepository @Inject constructor() {
      * it will be moved to the last.
      */
     @Synchronized
-    fun addBubbles(bubbles: List<BubbleXmlEntity>) {
+    fun addBubbles(bubbles: List<BubbleEntity>) {
         if (bubbles.isEmpty()) return
         bubbles.forEach { entities.remove(it) }
         if (entities.size + bubbles.size >= CAPACITY) {
@@ -53,7 +53,7 @@ class BubbleVolatileRepository @Inject constructor() {
     }
 
     @Synchronized
-    fun removeBubbles(bubbles: List<BubbleXmlEntity>) {
+    fun removeBubbles(bubbles: List<BubbleEntity>) {
         bubbles.forEach { entities.remove(it) }
     }
 }

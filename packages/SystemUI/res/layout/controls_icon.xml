@@ -19,8 +19,8 @@
 
 <ImageView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="28dp"
-    android:layout_height="28dp"
+    android:layout_width="24dp"
+    android:layout_height="24dp"
     android:scaleType="fitCenter"
-    android:layout_marginLeft="2dp"
-    android:layout_marginRight="2dp" />
+    android:layout_marginLeft="5dp"
+    android:layout_marginRight="5dp" />

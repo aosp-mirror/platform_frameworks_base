@@ -57,10 +57,10 @@ TEST(DurationMetricE2eTest, TestOneBucket) {
 
     auto processor = CreateStatsLogProcessor(baseTimeNs, configAddedTimeNs, config, cfgKey);
 
-    EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
+    ASSERT_EQ(processor->mMetricsManagers.size(), 1u);
     sp<MetricsManager> metricsManager = processor->mMetricsManagers.begin()->second;
     EXPECT_TRUE(metricsManager->isConfigValid());
-    EXPECT_EQ(metricsManager->mAllMetricProducers.size(), 1);
+    ASSERT_EQ(metricsManager->mAllMetricProducers.size(), 1);
     sp<MetricProducer> metricProducer = metricsManager->mAllMetricProducers[0];
     EXPECT_TRUE(metricsManager->isActive());
     EXPECT_TRUE(metricProducer->mIsActive);
@@ -93,18 +93,18 @@ TEST(DurationMetricE2eTest, TestOneBucket) {
     EXPECT_TRUE(reports.ParseFromArray(&buffer[0], buffer.size()));
     backfillDimensionPath(&reports);
     backfillStartEndTimestamp(&reports);
-    EXPECT_EQ(1, reports.reports_size());
-    EXPECT_EQ(1, reports.reports(0).metrics_size());
+    ASSERT_EQ(1, reports.reports_size());
+    ASSERT_EQ(1, reports.reports(0).metrics_size());
     EXPECT_EQ(metricId, reports.reports(0).metrics(0).metric_id());
     EXPECT_TRUE(reports.reports(0).metrics(0).has_duration_metrics());
 
     StatsLogReport::DurationMetricDataWrapper durationMetrics;
     sortMetricDataByDimensionsValue(reports.reports(0).metrics(0).duration_metrics(),
                                     &durationMetrics);
-    EXPECT_EQ(1, durationMetrics.data_size());
+    ASSERT_EQ(1, durationMetrics.data_size());
 
     DurationMetricData data = durationMetrics.data(0);
-    EXPECT_EQ(1, data.bucket_info_size());
+    ASSERT_EQ(1, data.bucket_info_size());
     EXPECT_EQ(durationEndNs - durationStartNs, data.bucket_info(0).duration_nanos());
     EXPECT_EQ(configAddedTimeNs, data.bucket_info(0).start_bucket_elapsed_nanos());
     EXPECT_EQ(baseTimeNs + bucketSizeNs, data.bucket_info(0).end_bucket_elapsed_nanos());
@@ -140,10 +140,10 @@ TEST(DurationMetricE2eTest, TestTwoBuckets) {
 
     auto processor = CreateStatsLogProcessor(baseTimeNs, configAddedTimeNs, config, cfgKey);
 
-    EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
+    ASSERT_EQ(processor->mMetricsManagers.size(), 1u);
     sp<MetricsManager> metricsManager = processor->mMetricsManagers.begin()->second;
     EXPECT_TRUE(metricsManager->isConfigValid());
-    EXPECT_EQ(metricsManager->mAllMetricProducers.size(), 1);
+    ASSERT_EQ(metricsManager->mAllMetricProducers.size(), 1);
     sp<MetricProducer> metricProducer = metricsManager->mAllMetricProducers[0];
     EXPECT_TRUE(metricsManager->isActive());
     EXPECT_TRUE(metricProducer->mIsActive);
@@ -176,18 +176,18 @@ TEST(DurationMetricE2eTest, TestTwoBuckets) {
     EXPECT_TRUE(reports.ParseFromArray(&buffer[0], buffer.size()));
     backfillDimensionPath(&reports);
     backfillStartEndTimestamp(&reports);
-    EXPECT_EQ(1, reports.reports_size());
-    EXPECT_EQ(1, reports.reports(0).metrics_size());
+    ASSERT_EQ(1, reports.reports_size());
+    ASSERT_EQ(1, reports.reports(0).metrics_size());
     EXPECT_EQ(metricId, reports.reports(0).metrics(0).metric_id());
     EXPECT_TRUE(reports.reports(0).metrics(0).has_duration_metrics());
 
     StatsLogReport::DurationMetricDataWrapper durationMetrics;
     sortMetricDataByDimensionsValue(reports.reports(0).metrics(0).duration_metrics(),
                                     &durationMetrics);
-    EXPECT_EQ(1, durationMetrics.data_size());
+    ASSERT_EQ(1, durationMetrics.data_size());
 
     DurationMetricData data = durationMetrics.data(0);
-    EXPECT_EQ(1, data.bucket_info_size());
+    ASSERT_EQ(1, data.bucket_info_size());
 
     auto bucketInfo = data.bucket_info(0);
     EXPECT_EQ(0, bucketInfo.bucket_num());
@@ -253,16 +253,16 @@ TEST(DurationMetricE2eTest, TestWithActivation) {
 
     processor.OnConfigUpdated(bucketStartTimeNs, cfgKey, config);  // 0:00
 
-    EXPECT_EQ(processor.mMetricsManagers.size(), 1u);
+    ASSERT_EQ(processor.mMetricsManagers.size(), 1u);
     sp<MetricsManager> metricsManager = processor.mMetricsManagers.begin()->second;
     EXPECT_TRUE(metricsManager->isConfigValid());
-    EXPECT_EQ(metricsManager->mAllMetricProducers.size(), 1);
+    ASSERT_EQ(metricsManager->mAllMetricProducers.size(), 1);
     sp<MetricProducer> metricProducer = metricsManager->mAllMetricProducers[0];
     auto& eventActivationMap = metricProducer->mEventActivationMap;
 
     EXPECT_FALSE(metricsManager->isActive());
     EXPECT_FALSE(metricProducer->mIsActive);
-    EXPECT_EQ(eventActivationMap.size(), 1u);
+    ASSERT_EQ(eventActivationMap.size(), 1u);
     EXPECT_TRUE(eventActivationMap.find(2) != eventActivationMap.end());
     EXPECT_EQ(eventActivationMap[2]->state, ActivationState::kNotActive);
     EXPECT_EQ(eventActivationMap[2]->start_ns, 0);
@@ -289,7 +289,7 @@ TEST(DurationMetricE2eTest, TestWithActivation) {
     EXPECT_TRUE(metricsManager->isActive());
     EXPECT_TRUE(metricProducer->mIsActive);
     EXPECT_EQ(broadcastCount, 1);
-    EXPECT_EQ(activeConfigsBroadcast.size(), 1);
+    ASSERT_EQ(activeConfigsBroadcast.size(), 1);
     EXPECT_EQ(activeConfigsBroadcast[0], cfgId);
     EXPECT_EQ(eventActivationMap[2]->state, ActivationState::kActive);
     EXPECT_EQ(eventActivationMap[2]->start_ns, activationStartNs);
@@ -302,8 +302,8 @@ TEST(DurationMetricE2eTest, TestWithActivation) {
     EXPECT_FALSE(metricsManager->isActive());
     EXPECT_FALSE(metricProducer->mIsActive);
     EXPECT_EQ(broadcastCount, 2);
-    EXPECT_EQ(activeConfigsBroadcast.size(), 0);
-    EXPECT_EQ(eventActivationMap.size(), 1u);
+    ASSERT_EQ(activeConfigsBroadcast.size(), 0);
+    ASSERT_EQ(eventActivationMap.size(), 1u);
     EXPECT_TRUE(eventActivationMap.find(2) != eventActivationMap.end());
     EXPECT_EQ(eventActivationMap[2]->state, ActivationState::kNotActive);
     EXPECT_EQ(eventActivationMap[2]->start_ns, activationStartNs);
@@ -333,7 +333,7 @@ TEST(DurationMetricE2eTest, TestWithActivation) {
     EXPECT_TRUE(metricsManager->isActive());
     EXPECT_TRUE(metricProducer->mIsActive);
     EXPECT_EQ(broadcastCount, 3);
-    EXPECT_EQ(activeConfigsBroadcast.size(), 1);
+    ASSERT_EQ(activeConfigsBroadcast.size(), 1);
     EXPECT_EQ(activeConfigsBroadcast[0], cfgId);
     EXPECT_EQ(eventActivationMap[2]->state, ActivationState::kActive);
     EXPECT_EQ(eventActivationMap[2]->start_ns, activation2StartNs);
@@ -347,18 +347,18 @@ TEST(DurationMetricE2eTest, TestWithActivation) {
     EXPECT_TRUE(reports.ParseFromArray(&buffer[0], buffer.size()));
     backfillDimensionPath(&reports);
     backfillStartEndTimestamp(&reports);
-    EXPECT_EQ(1, reports.reports_size());
-    EXPECT_EQ(1, reports.reports(0).metrics_size());
+    ASSERT_EQ(1, reports.reports_size());
+    ASSERT_EQ(1, reports.reports(0).metrics_size());
     EXPECT_EQ(metricId, reports.reports(0).metrics(0).metric_id());
     EXPECT_TRUE(reports.reports(0).metrics(0).has_duration_metrics());
 
     StatsLogReport::DurationMetricDataWrapper durationMetrics;
     sortMetricDataByDimensionsValue(reports.reports(0).metrics(0).duration_metrics(),
                                     &durationMetrics);
-    EXPECT_EQ(1, durationMetrics.data_size());
+    ASSERT_EQ(1, durationMetrics.data_size());
 
     DurationMetricData data = durationMetrics.data(0);
-    EXPECT_EQ(1, data.bucket_info_size());
+    ASSERT_EQ(1, data.bucket_info_size());
 
     auto bucketInfo = data.bucket_info(0);
     EXPECT_EQ(0, bucketInfo.bucket_num());
@@ -393,10 +393,10 @@ TEST(DurationMetricE2eTest, TestWithCondition) {
     uint64_t bucketSizeNs =
             TimeUnitToBucketSizeInMillis(config.duration_metric(0).bucket()) * 1000000LL;
     auto processor = CreateStatsLogProcessor(bucketStartTimeNs, bucketStartTimeNs, config, cfgKey);
-    EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
+    ASSERT_EQ(processor->mMetricsManagers.size(), 1u);
     sp<MetricsManager> metricsManager = processor->mMetricsManagers.begin()->second;
     EXPECT_TRUE(metricsManager->isConfigValid());
-    EXPECT_EQ(metricsManager->mAllMetricProducers.size(), 1);
+    ASSERT_EQ(metricsManager->mAllMetricProducers.size(), 1);
     sp<MetricProducer> metricProducer = metricsManager->mAllMetricProducers[0];
     auto& eventActivationMap = metricProducer->mEventActivationMap;
     EXPECT_TRUE(metricsManager->isActive());
@@ -428,23 +428,23 @@ TEST(DurationMetricE2eTest, TestWithCondition) {
     ConfigMetricsReportList reports;
     processor->onDumpReport(cfgKey, bucketStartTimeNs + bucketSizeNs + 1, false, true, ADB_DUMP,
                             FAST, &buffer);
-    EXPECT_GT(buffer.size(), 0);
+    ASSERT_GT(buffer.size(), 0);
     EXPECT_TRUE(reports.ParseFromArray(&buffer[0], buffer.size()));
     backfillDimensionPath(&reports);
     backfillStringInReport(&reports);
     backfillStartEndTimestamp(&reports);
 
-    EXPECT_EQ(1, reports.reports_size());
-    EXPECT_EQ(1, reports.reports(0).metrics_size());
+    ASSERT_EQ(1, reports.reports_size());
+    ASSERT_EQ(1, reports.reports(0).metrics_size());
     StatsLogReport::DurationMetricDataWrapper durationMetrics;
     sortMetricDataByDimensionsValue(reports.reports(0).metrics(0).duration_metrics(),
                                     &durationMetrics);
-    EXPECT_EQ(1, durationMetrics.data_size());
+    ASSERT_EQ(1, durationMetrics.data_size());
 
     DurationMetricData data = durationMetrics.data(0);
 
     // Validate bucket info.
-    EXPECT_EQ(1, data.bucket_info_size());
+    ASSERT_EQ(1, data.bucket_info_size());
 
     auto bucketInfo = data.bucket_info(0);
     EXPECT_EQ(bucketStartTimeNs, bucketInfo.start_bucket_elapsed_nanos());
@@ -497,10 +497,10 @@ TEST(DurationMetricE2eTest, TestWithSlicedCondition) {
     uint64_t bucketSizeNs =
             TimeUnitToBucketSizeInMillis(config.duration_metric(0).bucket()) * 1000000LL;
     auto processor = CreateStatsLogProcessor(bucketStartTimeNs, bucketStartTimeNs, config, cfgKey);
-    EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
+    ASSERT_EQ(processor->mMetricsManagers.size(), 1u);
     sp<MetricsManager> metricsManager = processor->mMetricsManagers.begin()->second;
     EXPECT_TRUE(metricsManager->isConfigValid());
-    EXPECT_EQ(metricsManager->mAllMetricProducers.size(), 1);
+    ASSERT_EQ(metricsManager->mAllMetricProducers.size(), 1);
     sp<MetricProducer> metricProducer = metricsManager->mAllMetricProducers[0];
     auto& eventActivationMap = metricProducer->mEventActivationMap;
     EXPECT_TRUE(metricsManager->isActive());
@@ -530,25 +530,25 @@ TEST(DurationMetricE2eTest, TestWithSlicedCondition) {
     ConfigMetricsReportList reports;
     processor->onDumpReport(cfgKey, bucketStartTimeNs + bucketSizeNs + 1, false, true, ADB_DUMP,
                             FAST, &buffer);
-    EXPECT_GT(buffer.size(), 0);
+    ASSERT_GT(buffer.size(), 0);
     EXPECT_TRUE(reports.ParseFromArray(&buffer[0], buffer.size()));
     backfillDimensionPath(&reports);
     backfillStringInReport(&reports);
     backfillStartEndTimestamp(&reports);
 
-    EXPECT_EQ(1, reports.reports_size());
-    EXPECT_EQ(1, reports.reports(0).metrics_size());
+    ASSERT_EQ(1, reports.reports_size());
+    ASSERT_EQ(1, reports.reports(0).metrics_size());
     StatsLogReport::DurationMetricDataWrapper durationMetrics;
     sortMetricDataByDimensionsValue(reports.reports(0).metrics(0).duration_metrics(),
                                     &durationMetrics);
-    EXPECT_EQ(1, durationMetrics.data_size());
+    ASSERT_EQ(1, durationMetrics.data_size());
 
     DurationMetricData data = durationMetrics.data(0);
     // Validate dimension value.
     ValidateAttributionUidDimension(data.dimensions_in_what(),
                                     util::WAKELOCK_STATE_CHANGED, appUid);
     // Validate bucket info.
-    EXPECT_EQ(1, data.bucket_info_size());
+    ASSERT_EQ(1, data.bucket_info_size());
 
     auto bucketInfo = data.bucket_info(0);
     EXPECT_EQ(bucketStartTimeNs, bucketInfo.start_bucket_elapsed_nanos());
@@ -608,15 +608,15 @@ TEST(DurationMetricE2eTest, TestWithActivationAndSlicedCondition) {
     uint64_t bucketSizeNs =
             TimeUnitToBucketSizeInMillis(config.duration_metric(0).bucket()) * 1000000LL;
     auto processor = CreateStatsLogProcessor(bucketStartTimeNs, bucketStartTimeNs, config, cfgKey);
-    EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
+    ASSERT_EQ(processor->mMetricsManagers.size(), 1u);
     sp<MetricsManager> metricsManager = processor->mMetricsManagers.begin()->second;
     EXPECT_TRUE(metricsManager->isConfigValid());
-    EXPECT_EQ(metricsManager->mAllMetricProducers.size(), 1);
+    ASSERT_EQ(metricsManager->mAllMetricProducers.size(), 1);
     sp<MetricProducer> metricProducer = metricsManager->mAllMetricProducers[0];
     auto& eventActivationMap = metricProducer->mEventActivationMap;
     EXPECT_FALSE(metricsManager->isActive());
     EXPECT_FALSE(metricProducer->mIsActive);
-    EXPECT_EQ(eventActivationMap.size(), 1u);
+    ASSERT_EQ(eventActivationMap.size(), 1u);
     EXPECT_TRUE(eventActivationMap.find(4) != eventActivationMap.end());
     EXPECT_EQ(eventActivationMap[4]->state, ActivationState::kNotActive);
     EXPECT_EQ(eventActivationMap[4]->start_ns, 0);
@@ -691,25 +691,25 @@ TEST(DurationMetricE2eTest, TestWithActivationAndSlicedCondition) {
     ConfigMetricsReportList reports;
     processor->onDumpReport(cfgKey, bucketStartTimeNs + bucketSizeNs + 1, false, true, ADB_DUMP,
                             FAST, &buffer);
-    EXPECT_GT(buffer.size(), 0);
+    ASSERT_GT(buffer.size(), 0);
     EXPECT_TRUE(reports.ParseFromArray(&buffer[0], buffer.size()));
     backfillDimensionPath(&reports);
     backfillStringInReport(&reports);
     backfillStartEndTimestamp(&reports);
 
-    EXPECT_EQ(1, reports.reports_size());
-    EXPECT_EQ(1, reports.reports(0).metrics_size());
+    ASSERT_EQ(1, reports.reports_size());
+    ASSERT_EQ(1, reports.reports(0).metrics_size());
     StatsLogReport::DurationMetricDataWrapper durationMetrics;
     sortMetricDataByDimensionsValue(reports.reports(0).metrics(0).duration_metrics(),
                                     &durationMetrics);
-    EXPECT_EQ(1, durationMetrics.data_size());
+    ASSERT_EQ(1, durationMetrics.data_size());
 
     DurationMetricData data = durationMetrics.data(0);
     // Validate dimension value.
     ValidateAttributionUidDimension(data.dimensions_in_what(),
                                     util::WAKELOCK_STATE_CHANGED, appUid);
     // Validate bucket info.
-    EXPECT_EQ(2, data.bucket_info_size());
+    ASSERT_EQ(2, data.bucket_info_size());
 
     auto bucketInfo = data.bucket_info(0);
     EXPECT_EQ(bucketStartTimeNs, bucketInfo.start_bucket_elapsed_nanos());
@@ -753,16 +753,16 @@ TEST(DurationMetricE2eTest, TestWithSlicedState) {
             TimeUnitToBucketSizeInMillis(config.duration_metric(0).bucket()) * 1000000LL;
     auto processor = CreateStatsLogProcessor(bucketStartTimeNs, bucketStartTimeNs, config, cfgKey);
 
-    EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
+    ASSERT_EQ(processor->mMetricsManagers.size(), 1u);
     sp<MetricsManager> metricsManager = processor->mMetricsManagers.begin()->second;
     EXPECT_TRUE(metricsManager->isConfigValid());
-    EXPECT_EQ(metricsManager->mAllMetricProducers.size(), 1);
+    ASSERT_EQ(metricsManager->mAllMetricProducers.size(), 1);
     EXPECT_TRUE(metricsManager->isActive());
     sp<MetricProducer> metricProducer = metricsManager->mAllMetricProducers[0];
     EXPECT_TRUE(metricProducer->mIsActive);
-    EXPECT_EQ(metricProducer->mSlicedStateAtoms.size(), 1);
+    ASSERT_EQ(metricProducer->mSlicedStateAtoms.size(), 1);
     EXPECT_EQ(metricProducer->mSlicedStateAtoms.at(0), SCREEN_STATE_ATOM_ID);
-    EXPECT_EQ(metricProducer->mStateGroupMap.size(), 0);
+    ASSERT_EQ(metricProducer->mStateGroupMap.size(), 0);
 
     // Check that StateTrackers were initialized correctly.
     EXPECT_EQ(1, StateManager::getInstance().getStateTrackersCount());
@@ -814,26 +814,26 @@ TEST(DurationMetricE2eTest, TestWithSlicedState) {
     processor->onDumpReport(cfgKey, bucketStartTimeNs + 360 * NS_PER_SEC,
                             true /* include current partial bucket */, true, ADB_DUMP, FAST,
                             &buffer);  // 6:10
-    EXPECT_GT(buffer.size(), 0);
+    ASSERT_GT(buffer.size(), 0);
     EXPECT_TRUE(reports.ParseFromArray(&buffer[0], buffer.size()));
     backfillDimensionPath(&reports);
     backfillStringInReport(&reports);
     backfillStartEndTimestamp(&reports);
 
-    EXPECT_EQ(1, reports.reports_size());
-    EXPECT_EQ(1, reports.reports(0).metrics_size());
+    ASSERT_EQ(1, reports.reports_size());
+    ASSERT_EQ(1, reports.reports(0).metrics_size());
     EXPECT_TRUE(reports.reports(0).metrics(0).has_duration_metrics());
     StatsLogReport::DurationMetricDataWrapper durationMetrics;
     sortMetricDataByDimensionsValue(reports.reports(0).metrics(0).duration_metrics(),
                                     &durationMetrics);
-    EXPECT_EQ(3, durationMetrics.data_size());
+    ASSERT_EQ(3, durationMetrics.data_size());
 
     DurationMetricData data = durationMetrics.data(0);
-    EXPECT_EQ(1, data.slice_by_state_size());
+    ASSERT_EQ(1, data.slice_by_state_size());
     EXPECT_EQ(SCREEN_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
     EXPECT_TRUE(data.slice_by_state(0).has_value());
     EXPECT_EQ(android::view::DisplayStateEnum::DISPLAY_STATE_OFF, data.slice_by_state(0).value());
-    EXPECT_EQ(2, data.bucket_info_size());
+    ASSERT_EQ(2, data.bucket_info_size());
     EXPECT_EQ(50 * NS_PER_SEC, data.bucket_info(0).duration_nanos());
     EXPECT_EQ(10 * NS_PER_SEC, data.bucket_info(0).start_bucket_elapsed_nanos());
     EXPECT_EQ(310 * NS_PER_SEC, data.bucket_info(0).end_bucket_elapsed_nanos());
@@ -842,11 +842,11 @@ TEST(DurationMetricE2eTest, TestWithSlicedState) {
     EXPECT_EQ(370 * NS_PER_SEC, data.bucket_info(1).end_bucket_elapsed_nanos());
 
     data = durationMetrics.data(1);
-    EXPECT_EQ(1, data.slice_by_state_size());
+    ASSERT_EQ(1, data.slice_by_state_size());
     EXPECT_EQ(SCREEN_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
     EXPECT_TRUE(data.slice_by_state(0).has_value());
     EXPECT_EQ(android::view::DisplayStateEnum::DISPLAY_STATE_ON, data.slice_by_state(0).value());
-    EXPECT_EQ(2, data.bucket_info_size());
+    ASSERT_EQ(2, data.bucket_info_size());
     EXPECT_EQ(110 * NS_PER_SEC, data.bucket_info(0).duration_nanos());
     EXPECT_EQ(10 * NS_PER_SEC, data.bucket_info(0).start_bucket_elapsed_nanos());
     EXPECT_EQ(310 * NS_PER_SEC, data.bucket_info(0).end_bucket_elapsed_nanos());
@@ -855,11 +855,11 @@ TEST(DurationMetricE2eTest, TestWithSlicedState) {
     EXPECT_EQ(370 * NS_PER_SEC, data.bucket_info(1).end_bucket_elapsed_nanos());
 
     data = durationMetrics.data(2);
-    EXPECT_EQ(1, data.slice_by_state_size());
+    ASSERT_EQ(1, data.slice_by_state_size());
     EXPECT_EQ(SCREEN_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
     EXPECT_TRUE(data.slice_by_state(0).has_value());
     EXPECT_EQ(android::view::DisplayStateEnum::DISPLAY_STATE_DOZE, data.slice_by_state(0).value());
-    EXPECT_EQ(1, data.bucket_info_size());
+    ASSERT_EQ(1, data.bucket_info_size());
     EXPECT_EQ(40 * NS_PER_SEC, data.bucket_info(0).duration_nanos());
     EXPECT_EQ(10 * NS_PER_SEC, data.bucket_info(0).start_bucket_elapsed_nanos());
     EXPECT_EQ(310 * NS_PER_SEC, data.bucket_info(0).end_bucket_elapsed_nanos());
@@ -902,16 +902,16 @@ TEST(DurationMetricE2eTest, TestWithConditionAndSlicedState) {
             TimeUnitToBucketSizeInMillis(config.duration_metric(0).bucket()) * 1000000LL;
     auto processor = CreateStatsLogProcessor(bucketStartTimeNs, bucketStartTimeNs, config, cfgKey);
 
-    EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
+    ASSERT_EQ(processor->mMetricsManagers.size(), 1u);
     sp<MetricsManager> metricsManager = processor->mMetricsManagers.begin()->second;
     EXPECT_TRUE(metricsManager->isConfigValid());
-    EXPECT_EQ(metricsManager->mAllMetricProducers.size(), 1);
+    ASSERT_EQ(metricsManager->mAllMetricProducers.size(), 1);
     EXPECT_TRUE(metricsManager->isActive());
     sp<MetricProducer> metricProducer = metricsManager->mAllMetricProducers[0];
     EXPECT_TRUE(metricProducer->mIsActive);
-    EXPECT_EQ(metricProducer->mSlicedStateAtoms.size(), 1);
+    ASSERT_EQ(metricProducer->mSlicedStateAtoms.size(), 1);
     EXPECT_EQ(metricProducer->mSlicedStateAtoms.at(0), SCREEN_STATE_ATOM_ID);
-    EXPECT_EQ(metricProducer->mStateGroupMap.size(), 0);
+    ASSERT_EQ(metricProducer->mStateGroupMap.size(), 0);
 
     // Check that StateTrackers were initialized correctly.
     EXPECT_EQ(1, StateManager::getInstance().getStateTrackersCount());
@@ -976,26 +976,26 @@ TEST(DurationMetricE2eTest, TestWithConditionAndSlicedState) {
     processor->onDumpReport(cfgKey, bucketStartTimeNs + 410 * NS_PER_SEC,
                             true /* include current partial bucket */, true, ADB_DUMP, FAST,
                             &buffer);
-    EXPECT_GT(buffer.size(), 0);
+    ASSERT_GT(buffer.size(), 0);
     EXPECT_TRUE(reports.ParseFromArray(&buffer[0], buffer.size()));
     backfillDimensionPath(&reports);
     backfillStringInReport(&reports);
     backfillStartEndTimestamp(&reports);
 
-    EXPECT_EQ(1, reports.reports_size());
-    EXPECT_EQ(1, reports.reports(0).metrics_size());
+    ASSERT_EQ(1, reports.reports_size());
+    ASSERT_EQ(1, reports.reports(0).metrics_size());
     EXPECT_TRUE(reports.reports(0).metrics(0).has_duration_metrics());
     StatsLogReport::DurationMetricDataWrapper durationMetrics;
     sortMetricDataByDimensionsValue(reports.reports(0).metrics(0).duration_metrics(),
                                     &durationMetrics);
-    EXPECT_EQ(3, durationMetrics.data_size());
+    ASSERT_EQ(3, durationMetrics.data_size());
 
     DurationMetricData data = durationMetrics.data(0);
-    EXPECT_EQ(1, data.slice_by_state_size());
+    ASSERT_EQ(1, data.slice_by_state_size());
     EXPECT_EQ(SCREEN_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
     EXPECT_TRUE(data.slice_by_state(0).has_value());
     EXPECT_EQ(android::view::DisplayStateEnum::DISPLAY_STATE_OFF, data.slice_by_state(0).value());
-    EXPECT_EQ(2, data.bucket_info_size());
+    ASSERT_EQ(2, data.bucket_info_size());
     EXPECT_EQ(45 * NS_PER_SEC, data.bucket_info(0).duration_nanos());
     EXPECT_EQ(10 * NS_PER_SEC, data.bucket_info(0).start_bucket_elapsed_nanos());
     EXPECT_EQ(310 * NS_PER_SEC, data.bucket_info(0).end_bucket_elapsed_nanos());
@@ -1004,11 +1004,11 @@ TEST(DurationMetricE2eTest, TestWithConditionAndSlicedState) {
     EXPECT_EQ(420 * NS_PER_SEC, data.bucket_info(1).end_bucket_elapsed_nanos());
 
     data = durationMetrics.data(1);
-    EXPECT_EQ(1, data.slice_by_state_size());
+    ASSERT_EQ(1, data.slice_by_state_size());
     EXPECT_EQ(SCREEN_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
     EXPECT_TRUE(data.slice_by_state(0).has_value());
     EXPECT_EQ(android::view::DisplayStateEnum::DISPLAY_STATE_ON, data.slice_by_state(0).value());
-    EXPECT_EQ(2, data.bucket_info_size());
+    ASSERT_EQ(2, data.bucket_info_size());
     EXPECT_EQ(45 * NS_PER_SEC, data.bucket_info(0).duration_nanos());
     EXPECT_EQ(10 * NS_PER_SEC, data.bucket_info(0).start_bucket_elapsed_nanos());
     EXPECT_EQ(310 * NS_PER_SEC, data.bucket_info(0).end_bucket_elapsed_nanos());
@@ -1017,11 +1017,11 @@ TEST(DurationMetricE2eTest, TestWithConditionAndSlicedState) {
     EXPECT_EQ(420 * NS_PER_SEC, data.bucket_info(1).end_bucket_elapsed_nanos());
 
     data = durationMetrics.data(2);
-    EXPECT_EQ(1, data.slice_by_state_size());
+    ASSERT_EQ(1, data.slice_by_state_size());
     EXPECT_EQ(SCREEN_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
     EXPECT_TRUE(data.slice_by_state(0).has_value());
     EXPECT_EQ(android::view::DisplayStateEnum::DISPLAY_STATE_DOZE, data.slice_by_state(0).value());
-    EXPECT_EQ(1, data.bucket_info_size());
+    ASSERT_EQ(1, data.bucket_info_size());
     EXPECT_EQ(30 * NS_PER_SEC, data.bucket_info(0).duration_nanos());
     EXPECT_EQ(10 * NS_PER_SEC, data.bucket_info(0).start_bucket_elapsed_nanos());
     EXPECT_EQ(310 * NS_PER_SEC, data.bucket_info(0).end_bucket_elapsed_nanos());
@@ -1060,16 +1060,16 @@ TEST(DurationMetricE2eTest, TestWithSlicedStateMapped) {
             TimeUnitToBucketSizeInMillis(config.duration_metric(0).bucket()) * 1000000LL;
     auto processor = CreateStatsLogProcessor(bucketStartTimeNs, bucketStartTimeNs, config, cfgKey);
 
-    EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
+    ASSERT_EQ(processor->mMetricsManagers.size(), 1u);
     sp<MetricsManager> metricsManager = processor->mMetricsManagers.begin()->second;
     EXPECT_TRUE(metricsManager->isConfigValid());
-    EXPECT_EQ(metricsManager->mAllMetricProducers.size(), 1);
+    ASSERT_EQ(metricsManager->mAllMetricProducers.size(), 1);
     EXPECT_TRUE(metricsManager->isActive());
     sp<MetricProducer> metricProducer = metricsManager->mAllMetricProducers[0];
     EXPECT_TRUE(metricProducer->mIsActive);
-    EXPECT_EQ(metricProducer->mSlicedStateAtoms.size(), 1);
+    ASSERT_EQ(metricProducer->mSlicedStateAtoms.size(), 1);
     EXPECT_EQ(metricProducer->mSlicedStateAtoms.at(0), SCREEN_STATE_ATOM_ID);
-    EXPECT_EQ(metricProducer->mStateGroupMap.size(), 1);
+    ASSERT_EQ(metricProducer->mStateGroupMap.size(), 1);
 
     // Check that StateTrackers were initialized correctly.
     EXPECT_EQ(1, StateManager::getInstance().getStateTrackersCount());
@@ -1134,26 +1134,26 @@ TEST(DurationMetricE2eTest, TestWithSlicedStateMapped) {
     processor->onDumpReport(cfgKey, bucketStartTimeNs + 490 * NS_PER_SEC,
                             true /* include current partial bucket */, true, ADB_DUMP, FAST,
                             &buffer);
-    EXPECT_GT(buffer.size(), 0);
+    ASSERT_GT(buffer.size(), 0);
     EXPECT_TRUE(reports.ParseFromArray(&buffer[0], buffer.size()));
     backfillDimensionPath(&reports);
     backfillStringInReport(&reports);
     backfillStartEndTimestamp(&reports);
 
-    EXPECT_EQ(1, reports.reports_size());
-    EXPECT_EQ(1, reports.reports(0).metrics_size());
+    ASSERT_EQ(1, reports.reports_size());
+    ASSERT_EQ(1, reports.reports(0).metrics_size());
     EXPECT_TRUE(reports.reports(0).metrics(0).has_duration_metrics());
     StatsLogReport::DurationMetricDataWrapper durationMetrics;
     sortMetricDataByDimensionsValue(reports.reports(0).metrics(0).duration_metrics(),
                                     &durationMetrics);
-    EXPECT_EQ(2, durationMetrics.data_size());
+    ASSERT_EQ(2, durationMetrics.data_size());
 
     DurationMetricData data = durationMetrics.data(0);
-    EXPECT_EQ(1, data.slice_by_state_size());
+    ASSERT_EQ(1, data.slice_by_state_size());
     EXPECT_EQ(SCREEN_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
     EXPECT_TRUE(data.slice_by_state(0).has_group_id());
     EXPECT_EQ(screenOnId, data.slice_by_state(0).group_id());
-    EXPECT_EQ(2, data.bucket_info_size());
+    ASSERT_EQ(2, data.bucket_info_size());
     EXPECT_EQ(130 * NS_PER_SEC, data.bucket_info(0).duration_nanos());
     EXPECT_EQ(10 * NS_PER_SEC, data.bucket_info(0).start_bucket_elapsed_nanos());
     EXPECT_EQ(310 * NS_PER_SEC, data.bucket_info(0).end_bucket_elapsed_nanos());
@@ -1162,11 +1162,11 @@ TEST(DurationMetricE2eTest, TestWithSlicedStateMapped) {
     EXPECT_EQ(500 * NS_PER_SEC, data.bucket_info(1).end_bucket_elapsed_nanos());
 
     data = durationMetrics.data(1);
-    EXPECT_EQ(1, data.slice_by_state_size());
+    ASSERT_EQ(1, data.slice_by_state_size());
     EXPECT_EQ(SCREEN_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
     EXPECT_TRUE(data.slice_by_state(0).has_group_id());
     EXPECT_EQ(screenOffId, data.slice_by_state(0).group_id());
-    EXPECT_EQ(2, data.bucket_info_size());
+    ASSERT_EQ(2, data.bucket_info_size());
     EXPECT_EQ(70 * NS_PER_SEC, data.bucket_info(0).duration_nanos());
     EXPECT_EQ(10 * NS_PER_SEC, data.bucket_info(0).start_bucket_elapsed_nanos());
     EXPECT_EQ(310 * NS_PER_SEC, data.bucket_info(0).end_bucket_elapsed_nanos());
@@ -1216,7 +1216,7 @@ TEST(DurationMetricE2eTest, TestSlicedStatePrimaryFieldsNotSubsetDimInWhat) {
 
     // This config is rejected because the dimension in what fields are not a superset of the sliced
     // state primary fields.
-    EXPECT_EQ(processor->mMetricsManagers.size(), 0);
+    ASSERT_EQ(processor->mMetricsManagers.size(), 0);
 }
 
 TEST(DurationMetricE2eTest, TestWithSlicedStatePrimaryFieldsSubset) {
@@ -1261,16 +1261,16 @@ TEST(DurationMetricE2eTest, TestWithSlicedStatePrimaryFieldsSubset) {
             TimeUnitToBucketSizeInMillis(config.duration_metric(0).bucket()) * 1000000LL;
     auto processor = CreateStatsLogProcessor(bucketStartTimeNs, bucketStartTimeNs, config, cfgKey);
 
-    EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
+    ASSERT_EQ(processor->mMetricsManagers.size(), 1u);
     sp<MetricsManager> metricsManager = processor->mMetricsManagers.begin()->second;
     EXPECT_TRUE(metricsManager->isConfigValid());
-    EXPECT_EQ(metricsManager->mAllMetricProducers.size(), 1);
+    ASSERT_EQ(metricsManager->mAllMetricProducers.size(), 1);
     EXPECT_TRUE(metricsManager->isActive());
     sp<MetricProducer> metricProducer = metricsManager->mAllMetricProducers[0];
     EXPECT_TRUE(metricProducer->mIsActive);
-    EXPECT_EQ(metricProducer->mSlicedStateAtoms.size(), 1);
+    ASSERT_EQ(metricProducer->mSlicedStateAtoms.size(), 1);
     EXPECT_EQ(metricProducer->mSlicedStateAtoms.at(0), UID_PROCESS_STATE_ATOM_ID);
-    EXPECT_EQ(metricProducer->mStateGroupMap.size(), 0);
+    ASSERT_EQ(metricProducer->mStateGroupMap.size(), 0);
 
     // Check that StateTrackers were initialized correctly.
     EXPECT_EQ(1, StateManager::getInstance().getStateTrackersCount());
@@ -1328,24 +1328,24 @@ TEST(DurationMetricE2eTest, TestWithSlicedStatePrimaryFieldsSubset) {
     processor->onDumpReport(cfgKey, bucketStartTimeNs + 320 * NS_PER_SEC,
                             true /* include current partial bucket */, true, ADB_DUMP, FAST,
                             &buffer);
-    EXPECT_GT(buffer.size(), 0);
+    ASSERT_GT(buffer.size(), 0);
     EXPECT_TRUE(reports.ParseFromArray(&buffer[0], buffer.size()));
     backfillDimensionPath(&reports);
     backfillStringInReport(&reports);
     backfillStartEndTimestamp(&reports);
 
-    EXPECT_EQ(1, reports.reports_size());
-    EXPECT_EQ(1, reports.reports(0).metrics_size());
+    ASSERT_EQ(1, reports.reports_size());
+    ASSERT_EQ(1, reports.reports(0).metrics_size());
     EXPECT_TRUE(reports.reports(0).metrics(0).has_duration_metrics());
     StatsLogReport::DurationMetricDataWrapper durationMetrics;
     sortMetricDataByDimensionsValue(reports.reports(0).metrics(0).duration_metrics(),
                                     &durationMetrics);
-    EXPECT_EQ(9, durationMetrics.data_size());
+    ASSERT_EQ(9, durationMetrics.data_size());
 
     DurationMetricData data = durationMetrics.data(0);
     ValidateWakelockAttributionUidAndTagDimension(data.dimensions_in_what(), 10, appUid1,
                                                   "wakelock1");
-    EXPECT_EQ(1, data.slice_by_state_size());
+    ASSERT_EQ(1, data.slice_by_state_size());
     EXPECT_EQ(UID_PROCESS_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
     EXPECT_TRUE(data.slice_by_state(0).has_value());
     EXPECT_EQ(android::app::ProcessStateEnum::PROCESS_STATE_IMPORTANT_FOREGROUND,
@@ -1358,7 +1358,7 @@ TEST(DurationMetricE2eTest, TestWithSlicedStatePrimaryFieldsSubset) {
     data = durationMetrics.data(1);
     ValidateWakelockAttributionUidAndTagDimension(data.dimensions_in_what(), 10, appUid1,
                                                   "wakelock1");
-    EXPECT_EQ(1, data.slice_by_state_size());
+    ASSERT_EQ(1, data.slice_by_state_size());
     EXPECT_EQ(UID_PROCESS_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
     EXPECT_TRUE(data.slice_by_state(0).has_value());
     EXPECT_EQ(android::app::ProcessStateEnum::PROCESS_STATE_IMPORTANT_BACKGROUND,
@@ -1374,7 +1374,7 @@ TEST(DurationMetricE2eTest, TestWithSlicedStatePrimaryFieldsSubset) {
     data = durationMetrics.data(2);
     ValidateWakelockAttributionUidAndTagDimension(data.dimensions_in_what(), 10, appUid1,
                                                   "wakelock2");
-    EXPECT_EQ(1, data.slice_by_state_size());
+    ASSERT_EQ(1, data.slice_by_state_size());
     EXPECT_EQ(UID_PROCESS_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
     EXPECT_TRUE(data.slice_by_state(0).has_value());
     EXPECT_EQ(android::app::ProcessStateEnum::PROCESS_STATE_IMPORTANT_FOREGROUND,
@@ -1387,7 +1387,7 @@ TEST(DurationMetricE2eTest, TestWithSlicedStatePrimaryFieldsSubset) {
     data = durationMetrics.data(3);
     ValidateWakelockAttributionUidAndTagDimension(data.dimensions_in_what(), 10, appUid1,
                                                   "wakelock2");
-    EXPECT_EQ(1, data.slice_by_state_size());
+    ASSERT_EQ(1, data.slice_by_state_size());
     EXPECT_EQ(UID_PROCESS_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
     EXPECT_TRUE(data.slice_by_state(0).has_value());
     EXPECT_EQ(android::app::ProcessStateEnum::PROCESS_STATE_IMPORTANT_BACKGROUND,
@@ -1400,7 +1400,7 @@ TEST(DurationMetricE2eTest, TestWithSlicedStatePrimaryFieldsSubset) {
     data = durationMetrics.data(4);
     ValidateWakelockAttributionUidAndTagDimension(data.dimensions_in_what(), 10, appUid2,
                                                   "wakelock1");
-    EXPECT_EQ(1, data.slice_by_state_size());
+    ASSERT_EQ(1, data.slice_by_state_size());
     EXPECT_EQ(UID_PROCESS_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
     EXPECT_TRUE(data.slice_by_state(0).has_value());
     EXPECT_EQ(-1 /* StateTracker:: kStateUnknown */, data.slice_by_state(0).value());
@@ -1412,7 +1412,7 @@ TEST(DurationMetricE2eTest, TestWithSlicedStatePrimaryFieldsSubset) {
     data = durationMetrics.data(5);
     ValidateWakelockAttributionUidAndTagDimension(data.dimensions_in_what(), 10, appUid2,
                                                   "wakelock1");
-    EXPECT_EQ(1, data.slice_by_state_size());
+    ASSERT_EQ(1, data.slice_by_state_size());
     EXPECT_EQ(UID_PROCESS_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
     EXPECT_TRUE(data.slice_by_state(0).has_value());
     EXPECT_EQ(android::app::ProcessStateEnum::PROCESS_STATE_IMPORTANT_BACKGROUND,
@@ -1425,7 +1425,7 @@ TEST(DurationMetricE2eTest, TestWithSlicedStatePrimaryFieldsSubset) {
     data = durationMetrics.data(6);
     ValidateWakelockAttributionUidAndTagDimension(data.dimensions_in_what(), 10, appUid2,
                                                   "wakelock2");
-    EXPECT_EQ(1, data.slice_by_state_size());
+    ASSERT_EQ(1, data.slice_by_state_size());
     EXPECT_EQ(UID_PROCESS_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
     EXPECT_TRUE(data.slice_by_state(0).has_value());
     EXPECT_EQ(-1 /* StateTracker:: kStateUnknown */, data.slice_by_state(0).value());
@@ -1437,7 +1437,7 @@ TEST(DurationMetricE2eTest, TestWithSlicedStatePrimaryFieldsSubset) {
     data = durationMetrics.data(7);
     ValidateWakelockAttributionUidAndTagDimension(data.dimensions_in_what(), 10, appUid2,
                                                   "wakelock2");
-    EXPECT_EQ(1, data.slice_by_state_size());
+    ASSERT_EQ(1, data.slice_by_state_size());
     EXPECT_EQ(UID_PROCESS_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
     EXPECT_TRUE(data.slice_by_state(0).has_value());
     EXPECT_EQ(android::app::ProcessStateEnum::PROCESS_STATE_FOREGROUND_SERVICE,
@@ -1453,7 +1453,7 @@ TEST(DurationMetricE2eTest, TestWithSlicedStatePrimaryFieldsSubset) {
     data = durationMetrics.data(8);
     ValidateWakelockAttributionUidAndTagDimension(data.dimensions_in_what(), 10, appUid2,
                                                   "wakelock2");
-    EXPECT_EQ(1, data.slice_by_state_size());
+    ASSERT_EQ(1, data.slice_by_state_size());
     EXPECT_EQ(UID_PROCESS_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
     EXPECT_TRUE(data.slice_by_state(0).has_value());
     EXPECT_EQ(android::app::ProcessStateEnum::PROCESS_STATE_IMPORTANT_BACKGROUND,

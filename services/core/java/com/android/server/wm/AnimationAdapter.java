@@ -85,4 +85,25 @@ interface AnimationAdapter {
     }
 
     void dumpDebug(ProtoOutputStream proto);
+
+    /**
+     * Gets called when the animation is about to finish and gives the client the opportunity to
+     * defer finishing the animation, i.e. it keeps the leash around until the client calls
+     * endDeferFinishCallback.
+     * <p>
+     * This has the same effect as
+     * {@link com.android.server.wm.SurfaceAnimator.Animatable#shouldDeferAnimationFinish(Runnable)}
+     * . The later will be evaluated first and has precedence over this method if it returns true,
+     * which means that if the {@link com.android.server.wm.SurfaceAnimator.Animatable} requests to
+     * defer its finish, this method won't be called so this adapter will never have access to the
+     * finish callback. On the other hand, if the
+     * {@link com.android.server.wm.SurfaceAnimator.Animatable}, doesn't request to defer, this
+     * {@link AnimationAdapter} is responsible for ending the animation.
+     *
+     * @param endDeferFinishCallback The callback to call when defer finishing should be ended.
+     * @return Whether the client would like to defer the animation finish.
+     */
+    default boolean shouldDeferAnimationFinish(Runnable endDeferFinishCallback) {
+        return false;
+    }
 }

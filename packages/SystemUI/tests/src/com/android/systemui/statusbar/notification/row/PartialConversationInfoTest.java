@@ -356,6 +356,30 @@ public class PartialConversationInfoTest extends SysuiTestCase {
     }
 
     @Test
+    public void testBindNotification_SetsOnClickListenerForSettings_mainText() {
+        final CountDownLatch latch = new CountDownLatch(1);
+        mInfo.bindNotification(
+                mMockPackageManager,
+                mMockINotificationManager,
+                mChannelEditorDialogController,
+                TEST_PACKAGE_NAME,
+                mNotificationChannel,
+                mNotificationChannelSet,
+                mEntry,
+                (View v, NotificationChannel c, int appUid) -> {
+                    assertEquals(mNotificationChannel, c);
+                    latch.countDown();
+                },
+                true,
+                false);
+
+        final View settingsButton = mInfo.findViewById(R.id.settings_link);
+        settingsButton.performClick();
+        // Verify that listener was triggered.
+        assertEquals(0, latch.getCount());
+    }
+
+    @Test
     public void testBindNotification_SettingsButtonInvisibleWhenNoClickListener() {
         mInfo.bindNotification(
                 mMockPackageManager,

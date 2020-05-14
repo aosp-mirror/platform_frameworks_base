@@ -584,7 +584,8 @@ class MediaRouter2ServiceImpl {
         mAllRouterRecords.put(binder, routerRecord);
 
         userRecord.mHandler.sendMessage(
-                obtainMessage(UserHandler::notifyRoutesToRouter, userRecord.mHandler, router));
+                obtainMessage(UserHandler::notifyRoutesToRouter,
+                        userRecord.mHandler, routerRecord));
     }
 
     private void unregisterRouter2Locked(@NonNull IMediaRouter2 router, boolean died) {
@@ -1775,16 +1776,36 @@ class MediaRouter2ServiceImpl {
             }
         }
 
-        private void notifyRoutesToRouter(@NonNull IMediaRouter2 router) {
+        private void notifyRoutesToRouter(@NonNull RouterRecord routerRecord) {
             List<MediaRoute2Info> routes = new ArrayList<>();
+
+            MediaRoute2ProviderInfo systemProviderInfo = null;
             for (MediaRoute2ProviderInfo providerInfo : mLastProviderInfos) {
+                // TODO: Create MediaRoute2ProviderInfo#isSystemProvider()
+                if (TextUtils.equals(providerInfo.getUniqueId(), mSystemProvider.getUniqueId())) {
+                    // Adding routes from system provider will be handled below, so skip it here.
+                    systemProviderInfo = providerInfo;
+                    continue;
+                }
                 routes.addAll(providerInfo.getRoutes());
             }
+
+            if (routerRecord.mHasModifyAudioRoutingPermission) {
+                if (systemProviderInfo != null) {
+                    routes.addAll(systemProviderInfo.getRoutes());
+                } else {
+                    // This shouldn't happen.
+                    Slog.w(TAG, "notifyRoutesToRouter: System route provider not found.");
+                }
+            } else {
+                routes.add(mSystemProvider.getDefaultRoute());
+            }
+
             if (routes.size() == 0) {
                 return;
             }
             try {
-                router.notifyRoutesAdded(routes);
+                routerRecord.mRouter.notifyRoutesAdded(routes);
             } catch (RemoteException ex) {
                 Slog.w(TAG, "Failed to notify all routes. Router probably died.", ex);
             }

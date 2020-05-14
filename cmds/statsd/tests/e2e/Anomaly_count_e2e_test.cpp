@@ -66,9 +66,9 @@ TEST(AnomalyDetectionE2eTest, TestSlicedCountMetric_single_bucket) {
 
     ConfigKey cfgKey;
     auto processor = CreateStatsLogProcessor(bucketStartTimeNs, bucketStartTimeNs, config, cfgKey);
-    EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
+    ASSERT_EQ(processor->mMetricsManagers.size(), 1u);
     EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
-    EXPECT_EQ(1u, processor->mMetricsManagers.begin()->second->mAllAnomalyTrackers.size());
+    ASSERT_EQ(1u, processor->mMetricsManagers.begin()->second->mAllAnomalyTrackers.size());
 
     sp<AnomalyTracker> anomalyTracker =
             processor->mMetricsManagers.begin()->second->mAllAnomalyTrackers[0];
@@ -183,9 +183,9 @@ TEST(AnomalyDetectionE2eTest, TestSlicedCountMetric_multiple_buckets) {
 
     ConfigKey cfgKey;
     auto processor = CreateStatsLogProcessor(bucketStartTimeNs, bucketStartTimeNs, config, cfgKey);
-    EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
+    ASSERT_EQ(processor->mMetricsManagers.size(), 1u);
     EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
-    EXPECT_EQ(1u, processor->mMetricsManagers.begin()->second->mAllAnomalyTrackers.size());
+    ASSERT_EQ(1u, processor->mMetricsManagers.begin()->second->mAllAnomalyTrackers.size());
 
     sp<AnomalyTracker> anomalyTracker =
             processor->mMetricsManagers.begin()->second->mAllAnomalyTrackers[0];
@@ -254,16 +254,16 @@ TEST(AnomalyDetectionE2eTest, TestCountMetric_save_refractory_to_disk_no_data_wr
     int64_t configId = 1000;
     ConfigKey cfgKey(configUid, configId);
     auto processor = CreateStatsLogProcessor(bucketStartTimeNs, bucketStartTimeNs, config, cfgKey);
-    EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
+    ASSERT_EQ(processor->mMetricsManagers.size(), 1u);
     EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
-    EXPECT_EQ(1u, processor->mMetricsManagers.begin()->second->mAllAnomalyTrackers.size());
+    ASSERT_EQ(1u, processor->mMetricsManagers.begin()->second->mAllAnomalyTrackers.size());
 
     metadata::StatsMetadataList result;
     int64_t mockWallClockNs = 1584991200 * NS_PER_SEC;
     int64_t mockElapsedTimeNs = bucketStartTimeNs + 5000 * NS_PER_SEC;
     processor->WriteMetadataToProto(mockWallClockNs, mockElapsedTimeNs, &result);
 
-    EXPECT_EQ(result.stats_metadata_size(), 0);
+    ASSERT_EQ(result.stats_metadata_size(), 0);
 }
 
 TEST(AnomalyDetectionE2eTest, TestCountMetric_save_refractory_to_disk) {
@@ -279,9 +279,9 @@ TEST(AnomalyDetectionE2eTest, TestCountMetric_save_refractory_to_disk) {
     int64_t configId = 1000;
     ConfigKey cfgKey(configUid, configId);
     auto processor = CreateStatsLogProcessor(bucketStartTimeNs, bucketStartTimeNs, config, cfgKey);
-    EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
+    ASSERT_EQ(processor->mMetricsManagers.size(), 1u);
     EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
-    EXPECT_EQ(1u, processor->mMetricsManagers.begin()->second->mAllAnomalyTrackers.size());
+    ASSERT_EQ(1u, processor->mMetricsManagers.begin()->second->mAllAnomalyTrackers.size());
 
     sp<AnomalyTracker> anomalyTracker =
             processor->mMetricsManagers.begin()->second->mAllAnomalyTrackers[0];
@@ -308,15 +308,15 @@ TEST(AnomalyDetectionE2eTest, TestCountMetric_save_refractory_to_disk) {
     processor->WriteMetadataToProto(mockWallClockNs, mockElapsedTimeNs, &result);
 
     metadata::StatsMetadata statsMetadata = result.stats_metadata(0);
-    EXPECT_EQ(result.stats_metadata_size(), 1);
+    ASSERT_EQ(result.stats_metadata_size(), 1);
     EXPECT_EQ(statsMetadata.config_key().config_id(), configId);
     EXPECT_EQ(statsMetadata.config_key().uid(), configUid);
 
     metadata::AlertMetadata alertMetadata = statsMetadata.alert_metadata(0);
-    EXPECT_EQ(statsMetadata.alert_metadata_size(), 1);
+    ASSERT_EQ(statsMetadata.alert_metadata_size(), 1);
     EXPECT_EQ(alertMetadata.alert_id(), alert_id);
     metadata::AlertDimensionKeyedData keyedData = alertMetadata.alert_dim_keyed_data(0);
-    EXPECT_EQ(alertMetadata.alert_dim_keyed_data_size(), 1);
+    ASSERT_EQ(alertMetadata.alert_dim_keyed_data_size(), 1);
     EXPECT_EQ(keyedData.last_refractory_ends_sec(),
               anomalyTracker->getRefractoryPeriodEndsSec(dimensionKey1) -
               mockElapsedTimeNs / NS_PER_SEC +
@@ -342,9 +342,9 @@ TEST(AnomalyDetectionE2eTest, TestCountMetric_load_refractory_from_disk) {
     int64_t configId = 1000;
     ConfigKey cfgKey(configUid, configId);
     auto processor = CreateStatsLogProcessor(bucketStartTimeNs, bucketStartTimeNs, config, cfgKey);
-    EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
+    ASSERT_EQ(processor->mMetricsManagers.size(), 1u);
     EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
-    EXPECT_EQ(1u, processor->mMetricsManagers.begin()->second->mAllAnomalyTrackers.size());
+    ASSERT_EQ(1u, processor->mMetricsManagers.begin()->second->mAllAnomalyTrackers.size());
 
     sp<AnomalyTracker> anomalyTracker =
             processor->mMetricsManagers.begin()->second->mAllAnomalyTrackers[0];

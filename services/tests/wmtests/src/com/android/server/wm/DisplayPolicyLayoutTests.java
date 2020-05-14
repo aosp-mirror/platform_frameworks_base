@@ -27,9 +27,7 @@ import static android.view.Surface.ROTATION_0;
 import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
 import static android.view.View.SYSTEM_UI_FLAG_FULLSCREEN;
-import static android.view.View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
 import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
-import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
@@ -40,7 +38,6 @@ import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_M
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IS_SCREEN_DECOR;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING;
-import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
@@ -50,7 +47,6 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assume.assumeTrue;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.spy;
 import static org.testng.Assert.expectThrows;
@@ -64,18 +60,15 @@ import android.util.Pair;
 import android.view.DisplayCutout;
 import android.view.DisplayInfo;
 import android.view.InsetsState;
-import android.view.ViewRootImpl;
 import android.view.WindowInsets.Side;
 import android.view.WindowInsets.Type;
 import android.view.WindowManager;
 
-import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.wm.utils.WmDisplayCutout;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -114,12 +107,6 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         attrs.format = PixelFormat.TRANSLUCENT;
 
         updateDisplayFrames();
-    }
-
-    @After
-    public void tearDown() {
-        PolicyControl.setFilters("");
-        mWindow.getDisplayContent().mInputMethodTarget = null;
     }
 
     public void setRotation(int rotation) {
@@ -210,8 +197,6 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
 
     @Test
     public void layoutWindowLw_fitStatusBars() {
-        assumeTrue(ViewRootImpl.sNewInsetsMode == ViewRootImpl.NEW_INSETS_MODE_FULL);
-
         mWindow.mAttrs.setFitInsetsTypes(Type.statusBars());
         addWindow(mWindow);
 
@@ -228,8 +213,6 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
 
     @Test
     public void layoutWindowLw_fitNavigationBars() {
-        assumeTrue(ViewRootImpl.sNewInsetsMode == ViewRootImpl.NEW_INSETS_MODE_FULL);
-
         mWindow.mAttrs.setFitInsetsTypes(Type.navigationBars());
         addWindow(mWindow);
 
@@ -246,8 +229,6 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
 
     @Test
     public void layoutWindowLw_fitAllSides() {
-        assumeTrue(ViewRootImpl.sNewInsetsMode == ViewRootImpl.NEW_INSETS_MODE_FULL);
-
         mWindow.mAttrs.setFitInsetsSides(Side.all());
         addWindow(mWindow);
 
@@ -264,8 +245,6 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
 
     @Test
     public void layoutWindowLw_fitTopOnly() {
-        assumeTrue(ViewRootImpl.sNewInsetsMode == ViewRootImpl.NEW_INSETS_MODE_FULL);
-
         mWindow.mAttrs.setFitInsetsSides(Side.TOP);
         addWindow(mWindow);
 
@@ -282,8 +261,6 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
 
     @Test
     public void layoutWindowLw_fitInsetsIgnoringVisibility() {
-        assumeTrue(ViewRootImpl.sNewInsetsMode == ViewRootImpl.NEW_INSETS_MODE_FULL);
-
         final InsetsState state =
                 mDisplayContent.getInsetsPolicy().getInsetsForDispatch(mWindow);
         state.getSource(InsetsState.ITYPE_STATUS_BAR).setVisible(false);
@@ -304,8 +281,6 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
 
     @Test
     public void layoutWindowLw_fitInsetsNotIgnoringVisibility() {
-        assumeTrue(ViewRootImpl.sNewInsetsMode == ViewRootImpl.NEW_INSETS_MODE_FULL);
-
         final InsetsState state =
                 mDisplayContent.getInsetsPolicy().getInsetsForDispatch(mWindow);
         state.getSource(InsetsState.ITYPE_STATUS_BAR).setVisible(false);
@@ -326,7 +301,6 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
 
     @Test
     public void layoutWindowLw_fitDisplayCutout() {
-        assumeTrue(ViewRootImpl.sNewInsetsMode == ViewRootImpl.NEW_INSETS_MODE_FULL);
         addDisplayCutout();
 
         mWindow.mAttrs.setFitInsetsTypes(Type.displayCutout());
@@ -683,31 +657,6 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
     }
 
     @Test
-    public void layoutWindowLw_withForwardInset_SoftInputAdjustResize() {
-        assumeTrue(ViewRootImpl.sNewInsetsMode == ViewRootImpl.NEW_INSETS_MODE_NONE);
-
-        mWindow.mAttrs.flags =
-                FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR | FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
-        mWindow.mAttrs.setFitInsetsTypes(0 /* types */);
-        mWindow.mAttrs.softInputMode = SOFT_INPUT_ADJUST_RESIZE;
-        addWindow(mWindow);
-
-        final int forwardedInsetBottom = 50;
-        mDisplayPolicy.setForwardedInsets(Insets.of(0, 0, 0, forwardedInsetBottom));
-        mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
-        mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
-
-        assertInsetBy(mWindow.getParentFrame(), 0, 0, 0, 0);
-        assertInsetByTopBottom(mWindow.getStableFrameLw(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
-        assertInsetByTopBottom(mWindow.getContentFrameLw(),
-                STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT + forwardedInsetBottom);
-        assertInsetByTopBottom(mWindow.getVisibleFrameLw(),
-                STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT + forwardedInsetBottom);
-        assertInsetBy(mWindow.getDecorFrame(), 0, 0, 0, 0);
-        assertInsetBy(mWindow.getDisplayFrameLw(), 0, 0, 0, 0);
-    }
-
-    @Test
     public void layoutWindowLw_withForwardInset_SoftInputAdjustNothing() {
         mWindow.mAttrs.flags =
                 FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR | FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
@@ -726,117 +675,6 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         assertInsetByTopBottom(mWindow.getVisibleFrameLw(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
         assertInsetBy(mWindow.getDecorFrame(), 0, 0, 0, 0);
         assertInsetBy(mWindow.getDisplayFrameLw(), 0, 0, 0, 0);
-    }
-
-    // TODO(b/118118435): remove after removing PolicyControl
-    @FlakyTest(bugId = 129711077)
-    @Test
-    public void layoutWindowLw_withImmersive_SoftInputAdjustResize() {
-        assumeTrue(ViewRootImpl.sNewInsetsMode != ViewRootImpl.NEW_INSETS_MODE_FULL);
-
-        synchronized (mWm.mGlobalLock) {
-            mWindow.mAttrs.softInputMode = SOFT_INPUT_ADJUST_RESIZE;
-            mWindow.mAttrs.flags = 0;
-            mWindow.mAttrs.systemUiVisibility =
-                    SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                            | SYSTEM_UI_FLAG_FULLSCREEN | SYSTEM_UI_FLAG_HIDE_NAVIGATION;
-
-            addWindow(mWindow);
-
-            mWindow.getDisplayContent().mInputMethodTarget = mWindow;
-            mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
-            mFrames.mContent.bottom = mFrames.mVoiceContent.bottom = INPUT_METHOD_WINDOW_TOP;
-            mFrames.mCurrent.bottom = INPUT_METHOD_WINDOW_TOP;
-            mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
-
-            int bottomInset = mFrames.mDisplayHeight - INPUT_METHOD_WINDOW_TOP;
-            assertInsetByTopBottom(mWindow.getParentFrame(), 0, 0);
-            assertInsetByTopBottom(mWindow.getContentFrameLw(), 0, 0);
-            assertInsetByTopBottom(mWindow.getVisibleFrameLw(), STATUS_BAR_HEIGHT, bottomInset);
-        }
-    }
-
-    // TODO(b/118118435): remove after removing PolicyControl
-    @FlakyTest(bugId = 129711077)
-    @Test
-    public void layoutWindowLw_withImmersive_SoftInputAdjustNothing() {
-        assumeTrue(ViewRootImpl.sNewInsetsMode != ViewRootImpl.NEW_INSETS_MODE_FULL);
-
-        synchronized (mWm.mGlobalLock) {
-            mWindow.mAttrs.softInputMode = SOFT_INPUT_ADJUST_NOTHING;
-            mWindow.mAttrs.flags = 0;
-            mWindow.mAttrs.systemUiVisibility =
-                    SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                            | SYSTEM_UI_FLAG_FULLSCREEN | SYSTEM_UI_FLAG_HIDE_NAVIGATION;
-
-            addWindow(mWindow);
-
-            mWindow.getDisplayContent().mInputMethodTarget = mWindow;
-            mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
-            mFrames.mContent.bottom = mFrames.mVoiceContent.bottom = INPUT_METHOD_WINDOW_TOP;
-            mFrames.mCurrent.bottom = INPUT_METHOD_WINDOW_TOP;
-            mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
-
-            assertInsetByTopBottom(mWindow.getParentFrame(), 0, 0);
-            assertInsetByTopBottom(mWindow.getContentFrameLw(), 0, 0);
-            assertInsetByTopBottom(mWindow.getVisibleFrameLw(), 0, 0);
-        }
-    }
-
-    // TODO(b/118118435): remove after removing PolicyControl
-    @FlakyTest(bugId = 129711077)
-    @Test
-    public void layoutWindowLw_withForceImmersive_fullscreen() {
-        assumeTrue(ViewRootImpl.sNewInsetsMode != ViewRootImpl.NEW_INSETS_MODE_FULL);
-
-        synchronized (mWm.mGlobalLock) {
-            mWindow.mAttrs.softInputMode = SOFT_INPUT_ADJUST_RESIZE;
-            mWindow.mAttrs.flags = 0;
-            mWindow.mAttrs.systemUiVisibility = 0;
-            PolicyControl.setFilters(PolicyControl.NAME_IMMERSIVE_FULL + "=*");
-
-            addWindow(mWindow);
-
-            mWindow.getDisplayContent().mInputMethodTarget = mWindow;
-            mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
-            mFrames.mContent.bottom = mFrames.mVoiceContent.bottom = INPUT_METHOD_WINDOW_TOP;
-            mFrames.mCurrent.bottom = INPUT_METHOD_WINDOW_TOP;
-            mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
-
-            int bottomInset = mFrames.mDisplayHeight - INPUT_METHOD_WINDOW_TOP;
-            assertInsetByTopBottom(mWindow.getParentFrame(), 0, 0);
-            assertInsetByTopBottom(mWindow.getContentFrameLw(), 0, 0);
-            assertInsetByTopBottom(mWindow.getVisibleFrameLw(), STATUS_BAR_HEIGHT, bottomInset);
-        }
-    }
-
-    // TODO(b/118118435): remove after removing PolicyControl
-    @FlakyTest(bugId = 129711077)
-    @Test
-    public void layoutWindowLw_withForceImmersive_nonFullscreen() {
-        assumeTrue(ViewRootImpl.sNewInsetsMode != ViewRootImpl.NEW_INSETS_MODE_FULL);
-
-        synchronized (mWm.mGlobalLock) {
-            mWindow.mAttrs.softInputMode = SOFT_INPUT_ADJUST_RESIZE;
-            mWindow.mAttrs.flags = 0;
-            mWindow.mAttrs.systemUiVisibility = 0;
-            mWindow.mAttrs.width = DISPLAY_WIDTH / 2;
-            mWindow.mAttrs.height = DISPLAY_HEIGHT / 2;
-            PolicyControl.setFilters(PolicyControl.NAME_IMMERSIVE_FULL + "=*");
-
-            addWindow(mWindow);
-
-            mWindow.getDisplayContent().mInputMethodTarget = mWindow;
-            mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
-            mFrames.mContent.bottom = mFrames.mVoiceContent.bottom = INPUT_METHOD_WINDOW_TOP;
-            mFrames.mCurrent.bottom = INPUT_METHOD_WINDOW_TOP;
-            mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
-
-            int bottomInset = mFrames.mDisplayHeight - INPUT_METHOD_WINDOW_TOP;
-            assertInsetByTopBottom(mWindow.getParentFrame(), STATUS_BAR_HEIGHT, bottomInset);
-            assertInsetByTopBottom(mWindow.getContentFrameLw(), STATUS_BAR_HEIGHT, bottomInset);
-            assertInsetByTopBottom(mWindow.getVisibleFrameLw(), STATUS_BAR_HEIGHT, bottomInset);
-        }
     }
 
     @Test

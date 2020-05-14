@@ -358,6 +358,7 @@ public class ResolverActivity extends Activity implements
                 : isHttpSchemeAndViewAction(getTargetIntent());
 
         mSupportsAlwaysUseOption = supportsAlwaysUseOption;
+        mWorkProfileUserHandle = fetchWorkProfileUserProfile();
 
         // The last argument of createResolverListAdapter is whether to do special handling
         // of the last used choice to highlight it in the list.  We need to always
@@ -366,7 +367,6 @@ public class ResolverActivity extends Activity implements
         // to handle. We also turn it off when the work tab is shown to simplify the UX.
         boolean filterLastUsed = mSupportsAlwaysUseOption && !isVoiceInteraction()
                 && !shouldShowTabs();
-        mWorkProfileUserHandle = fetchWorkProfileUserProfile();
         mMultiProfilePagerAdapter = createMultiProfilePagerAdapter(initialIntents, rList, filterLastUsed);
         if (configureContentView()) {
             return;
@@ -1612,6 +1612,7 @@ public class ResolverActivity extends Activity implements
     }
 
     private void setupProfileTabs() {
+        maybeHideDivider();
         TabHost tabHost = findViewById(R.id.profile_tabhost);
         tabHost.setup();
         ViewPager viewPager = findViewById(R.id.profile_pager);
@@ -1658,6 +1659,17 @@ public class ResolverActivity extends Activity implements
                     resetCheckedItem();
                 });
         findViewById(R.id.resolver_tab_divider).setVisibility(View.VISIBLE);
+    }
+
+    private void maybeHideDivider() {
+        if (!isIntentPicker()) {
+            return;
+        }
+        final View divider = findViewById(R.id.divider);
+        if (divider == null) {
+            return;
+        }
+        divider.setVisibility(View.GONE);
     }
 
     /**

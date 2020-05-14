@@ -79,7 +79,7 @@ TEST(EventMetricProducerTest, TestNoCondition) {
 
     StatsLogReport report = outputStreamToProto(&output);
     EXPECT_TRUE(report.has_event_metrics());
-    EXPECT_EQ(2, report.event_metrics().data_size());
+    ASSERT_EQ(2, report.event_metrics().data_size());
     EXPECT_EQ(bucketStartTimeNs + 1, report.event_metrics().data(0).elapsed_timestamp_nanos());
     EXPECT_EQ(bucketStartTimeNs + 2, report.event_metrics().data(1).elapsed_timestamp_nanos());
 }
@@ -118,7 +118,7 @@ TEST(EventMetricProducerTest, TestEventsWithNonSlicedCondition) {
 
     StatsLogReport report = outputStreamToProto(&output);
     EXPECT_TRUE(report.has_event_metrics());
-    EXPECT_EQ(1, report.event_metrics().data_size());
+    ASSERT_EQ(1, report.event_metrics().data_size());
     EXPECT_EQ(bucketStartTimeNs + 1, report.event_metrics().data(0).elapsed_timestamp_nanos());
 }
 
@@ -168,7 +168,7 @@ TEST(EventMetricProducerTest, TestEventsWithSlicedCondition) {
 
     StatsLogReport report = outputStreamToProto(&output);
     EXPECT_TRUE(report.has_event_metrics());
-    EXPECT_EQ(1, report.event_metrics().data_size());
+    ASSERT_EQ(1, report.event_metrics().data_size());
     EXPECT_EQ(bucketStartTimeNs + 10, report.event_metrics().data(0).elapsed_timestamp_nanos());
 }
 
