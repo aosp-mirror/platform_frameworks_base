@@ -229,7 +229,16 @@ interface IActivityTaskManager {
     void unregisterTaskStackListener(in ITaskStackListener listener);
     void setTaskResizeable(int taskId, int resizeableMode);
     void toggleFreeformWindowingMode(in IBinder token);
-    void resizeTask(int taskId, in Rect bounds, int resizeMode);
+
+    /**
+     * Resize the task with given bounds
+     *
+     * @param taskId The id of the task to set the bounds for.
+     * @param bounds The new bounds.
+     * @param resizeMode Resize mode defined as {@code ActivityTaskManager#RESIZE_MODE_*} constants.
+     * @return Return true on success. Otherwise false.
+     */
+    boolean resizeTask(int taskId, in Rect bounds, int resizeMode);
     void moveStackToDisplay(int stackId, int displayId);
     void removeStack(int stackId);
 
