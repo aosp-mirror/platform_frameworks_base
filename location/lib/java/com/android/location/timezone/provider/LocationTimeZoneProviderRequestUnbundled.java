@@ -17,7 +17,6 @@
 package com.android.location.timezone.provider;
 
 import android.annotation.NonNull;
-import android.os.WorkSource;
 
 import com.android.internal.location.timezone.LocationTimeZoneProviderRequest;
 
@@ -42,11 +41,6 @@ public final class LocationTimeZoneProviderRequestUnbundled {
 
     public boolean getReportLocationTimeZone() {
         return mRequest.getReportLocationTimeZone();
-    }
-
-    @NonNull
-    public WorkSource getWorkSource() {
-        return mRequest.getWorkSource();
     }
 
     @Override
