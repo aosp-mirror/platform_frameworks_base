@@ -3087,10 +3087,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         @Override
         public void notifyDataStallSuspected(DataStallReportParcelable p) {
-            final Message msg = mConnectivityDiagnosticsHandler.obtainMessage(
-                    ConnectivityDiagnosticsHandler.EVENT_DATA_STALL_SUSPECTED,
-                    p.detectionMethod, mNetId, p.timestampMillis);
-
             final PersistableBundle extras = new PersistableBundle();
             switch (p.detectionMethod) {
                 case DETECTION_METHOD_DNS_EVENTS:
@@ -3105,12 +3101,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     log("Unknown data stall detection method, ignoring: " + p.detectionMethod);
                     return;
             }
-            msg.setData(new Bundle(extras));
 
-            // NetworkStateTrackerHandler currently doesn't take any actions based on data
-            // stalls so send the message directly to ConnectivityDiagnosticsHandler and avoid
-            // the cost of going through two handlers.
-            mConnectivityDiagnosticsHandler.sendMessage(msg);
+            proxyDataStallToConnectivityDiagnosticsHandler(
+                    p.detectionMethod, mNetId, p.timestampMillis, extras);
         }
 
         @Override
@@ -3122,6 +3115,19 @@ public class ConnectivityService extends IConnectivityManager.Stub
         public String getInterfaceHash() {
             return this.HASH;
         }
+    }
+
+    private void proxyDataStallToConnectivityDiagnosticsHandler(int detectionMethod, int netId,
+            long timestampMillis, @NonNull PersistableBundle extras) {
+        final Message msg = mConnectivityDiagnosticsHandler.obtainMessage(
+                    ConnectivityDiagnosticsHandler.EVENT_DATA_STALL_SUSPECTED,
+                    detectionMethod, netId, timestampMillis);
+        msg.setData(new Bundle(extras));
+
+        // NetworkStateTrackerHandler currently doesn't take any actions based on data
+        // stalls so send the message directly to ConnectivityDiagnosticsHandler and avoid
+        // the cost of going through two handlers.
+        mConnectivityDiagnosticsHandler.sendMessage(msg);
     }
 
     private boolean networkRequiresPrivateDnsValidation(NetworkAgentInfo nai) {
@@ -8153,5 +8159,25 @@ public class ConnectivityService extends IConnectivityManager.Stub
                         Binder.getCallingUid(),
                         0,
                         callback));
+    }
+
+    @Override
+    public void simulateDataStall(int detectionMethod, long timestampMillis,
+            @NonNull Network network, @NonNull PersistableBundle extras) {
+        enforceAnyPermissionOf(android.Manifest.permission.MANAGE_TEST_NETWORKS,
+                android.Manifest.permission.NETWORK_STACK);
+        final NetworkCapabilities nc = getNetworkCapabilitiesInternal(network);
+        if (!nc.hasTransport(TRANSPORT_TEST)) {
+            throw new SecurityException("Data Stall simluation is only possible for test networks");
+        }
+
+        final NetworkAgentInfo nai = getNetworkAgentInfoForNetwork(network);
+        if (nai == null || nai.creatorUid != Binder.getCallingUid()) {
+            throw new SecurityException("Data Stall simulation is only possible for network "
+                + "creators");
+        }
+
+        proxyDataStallToConnectivityDiagnosticsHandler(
+                detectionMethod, network.netId, timestampMillis, extras);
     }
 }

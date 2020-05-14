@@ -1811,6 +1811,7 @@ package android.net {
   }
 
   public class ConnectivityManager {
+    method @RequiresPermission(anyOf={"android.permission.MANAGE_TEST_NETWORKS", android.Manifest.permission.NETWORK_STACK}) public void simulateDataStall(int, long, @NonNull android.net.Network, @NonNull android.os.PersistableBundle);
     method @RequiresPermission(android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK) public void startCaptivePortalApp(@NonNull android.net.Network, @NonNull android.os.Bundle);
     field public static final String EXTRA_CAPTIVE_PORTAL_PROBE_SPEC = "android.net.extra.CAPTIVE_PORTAL_PROBE_SPEC";
     field public static final String EXTRA_CAPTIVE_PORTAL_USER_AGENT = "android.net.extra.CAPTIVE_PORTAL_USER_AGENT";
