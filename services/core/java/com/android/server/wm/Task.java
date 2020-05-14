@@ -942,7 +942,7 @@ class Task extends WindowContainer<WindowContainer> {
             return;
         }
 
-        affinity = info.taskAffinity;
+        affinity = isLeafTask() ? info.taskAffinity : null;
         if (intent == null) {
             // If this task already has an intent associated with it, don't set the root
             // affinity -- we don't want it changing after initially set, but the initially
@@ -3397,6 +3397,24 @@ class Task extends WindowContainer<WindowContainer> {
     boolean forAllTasks(Function<Task, Boolean> callback) {
         if (super.forAllTasks(callback)) return true;
         return callback.apply(this);
+    }
+
+    @Override
+    boolean forAllLeafTasks(Function<Task, Boolean> callback) {
+        boolean isLeafTask = true;
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            final Task child = mChildren.get(i).asTask();
+            if (child != null) {
+                isLeafTask = false;
+                if (child.forAllLeafTasks(callback)) {
+                    return true;
+                }
+            }
+        }
+        if (isLeafTask) {
+            return callback.apply(this);
+        }
+        return false;
     }
 
     @Override
