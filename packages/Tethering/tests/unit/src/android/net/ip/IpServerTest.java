@@ -18,6 +18,7 @@ package android.net.ip;
 
 import static android.net.INetd.IF_STATE_UP;
 import static android.net.TetheringManager.TETHERING_BLUETOOTH;
+import static android.net.TetheringManager.TETHERING_NCM;
 import static android.net.TetheringManager.TETHERING_USB;
 import static android.net.TetheringManager.TETHERING_WIFI;
 import static android.net.TetheringManager.TETHERING_WIFI_P2P;
@@ -38,6 +39,7 @@ import static android.net.shared.Inet4AddressUtils.intToInet4AddressHTH;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -67,6 +69,7 @@ import android.net.MacAddress;
 import android.net.RouteInfo;
 import android.net.TetherOffloadRuleParcel;
 import android.net.dhcp.DhcpServingParamsParcel;
+import android.net.dhcp.IDhcpEventCallbacks;
 import android.net.dhcp.IDhcpServer;
 import android.net.dhcp.IDhcpServerCallbacks;
 import android.net.ip.IpNeighborMonitor.NeighborEvent;
@@ -94,6 +97,7 @@ import org.mockito.MockitoAnnotations;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.util.Arrays;
+import java.util.List;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
@@ -497,6 +501,59 @@ public class IpServerTest {
     }
 
     @Test
+    public void startsDhcpServerOnNcm() throws Exception {
+        initStateMachine(TETHERING_NCM);
+        dispatchCommand(IpServer.CMD_TETHER_REQUESTED, STATE_LOCAL_ONLY);
+        dispatchTetherConnectionChanged(UPSTREAM_IFACE);
+
+        assertDhcpStarted(new IpPrefix("192.168.42.0/24"));
+    }
+
+    @Test
+    public void testOnNewPrefixRequest() throws Exception {
+        initStateMachine(TETHERING_NCM);
+        dispatchCommand(IpServer.CMD_TETHER_REQUESTED, STATE_LOCAL_ONLY);
+
+        final IDhcpEventCallbacks eventCallbacks;
+        final ArgumentCaptor<IDhcpEventCallbacks> dhcpEventCbsCaptor =
+                 ArgumentCaptor.forClass(IDhcpEventCallbacks.class);
+        verify(mDhcpServer, timeout(MAKE_DHCPSERVER_TIMEOUT_MS).times(1)).startWithCallbacks(
+                any(), dhcpEventCbsCaptor.capture());
+        eventCallbacks = dhcpEventCbsCaptor.getValue();
+        assertDhcpStarted(new IpPrefix("192.168.42.0/24"));
+
+        // Simulate the DHCP server receives DHCPDECLINE on MirrorLink and then signals
+        // onNewPrefixRequest callback.
+        eventCallbacks.onNewPrefixRequest(new IpPrefix("192.168.42.0/24"));
+        mLooper.dispatchAll();
+
+        final ArgumentCaptor<LinkProperties> lpCaptor =
+                ArgumentCaptor.forClass(LinkProperties.class);
+        InOrder inOrder = inOrder(mNetd, mCallback);
+        inOrder.verify(mCallback).updateInterfaceState(
+                mIpServer, STATE_LOCAL_ONLY, TETHER_ERROR_NO_ERROR);
+        inOrder.verify(mCallback).updateLinkProperties(eq(mIpServer), lpCaptor.capture());
+        inOrder.verify(mNetd).networkAddInterface(INetd.LOCAL_NET_ID, IFACE_NAME);
+        // One for ipv4 route, one for ipv6 link local route.
+        inOrder.verify(mNetd, times(2)).networkAddRoute(eq(INetd.LOCAL_NET_ID), eq(IFACE_NAME),
+                any(), any());
+        inOrder.verify(mNetd).tetherApplyDnsInterfaces();
+        inOrder.verify(mCallback).updateLinkProperties(eq(mIpServer), lpCaptor.capture());
+        verifyNoMoreInteractions(mCallback);
+
+        final LinkProperties linkProperties = lpCaptor.getValue();
+        final List<LinkAddress> linkAddresses = linkProperties.getLinkAddresses();
+        assertEquals(1, linkProperties.getLinkAddresses().size());
+        assertEquals(1, linkProperties.getRoutes().size());
+        final IpPrefix prefix = new IpPrefix(linkAddresses.get(0).getAddress(),
+                linkAddresses.get(0).getPrefixLength());
+        assertNotEquals(prefix, new IpPrefix("192.168.42.0/24"));
+
+        verify(mDhcpServer).updateParams(mDhcpParamsCaptor.capture(), any());
+        assertDhcpServingParams(mDhcpParamsCaptor.getValue(), prefix);
+    }
+
+    @Test
     public void doesNotStartDhcpServerIfDisabled() throws Exception {
         initTetheredStateMachine(TETHERING_WIFI, UPSTREAM_IFACE, true /* usingLegacyDhcp */,
                 DEFAULT_USING_BPF_OFFLOAD);
@@ -731,19 +788,26 @@ public class IpServerTest {
         verify(mIpNeighborMonitor, never()).start();
     }
 
-    private void assertDhcpStarted(IpPrefix expectedPrefix) throws Exception {
-        verify(mDependencies, times(1)).makeDhcpServer(eq(IFACE_NAME), any(), any());
-        verify(mDhcpServer, timeout(MAKE_DHCPSERVER_TIMEOUT_MS).times(1)).startWithCallbacks(
-                any(), any());
-        final DhcpServingParamsParcel params = mDhcpParamsCaptor.getValue();
+    private void assertDhcpServingParams(final DhcpServingParamsParcel params,
+            final IpPrefix prefix) {
         // Last address byte is random
-        assertTrue(expectedPrefix.contains(intToInet4AddressHTH(params.serverAddr)));
-        assertEquals(expectedPrefix.getPrefixLength(), params.serverAddrPrefixLength);
+        assertTrue(prefix.contains(intToInet4AddressHTH(params.serverAddr)));
+        assertEquals(prefix.getPrefixLength(), params.serverAddrPrefixLength);
         assertEquals(1, params.defaultRouters.length);
         assertEquals(params.serverAddr, params.defaultRouters[0]);
         assertEquals(1, params.dnsServers.length);
         assertEquals(params.serverAddr, params.dnsServers[0]);
         assertEquals(DHCP_LEASE_TIME_SECS, params.dhcpLeaseTimeSecs);
+        if (mIpServer.interfaceType() == TETHERING_NCM) {
+            assertTrue(params.changePrefixOnDecline);
+        }
+    }
+
+    private void assertDhcpStarted(IpPrefix expectedPrefix) throws Exception {
+        verify(mDependencies, times(1)).makeDhcpServer(eq(IFACE_NAME), any(), any());
+        verify(mDhcpServer, timeout(MAKE_DHCPSERVER_TIMEOUT_MS).times(1)).startWithCallbacks(
+                any(), any());
+        assertDhcpServingParams(mDhcpParamsCaptor.getValue(), expectedPrefix);
     }
 
     /**
