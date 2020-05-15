@@ -1328,30 +1328,36 @@ public final class WindowInsets {
             }
         }
 
-        static String toString(@InsetsType int type) {
-            switch (type) {
-                case STATUS_BARS:
-                    return "statusBars";
-                case NAVIGATION_BARS:
-                    return "navigationBars";
-                case CAPTION_BAR:
-                    return "captionBar";
-                case IME:
-                    return "ime";
-                case SYSTEM_GESTURES:
-                    return "systemGestures";
-                case MANDATORY_SYSTEM_GESTURES:
-                    return "mandatorySystemGestures";
-                case TAPPABLE_ELEMENT:
-                    return "tappableElement";
-                case DISPLAY_CUTOUT:
-                    return "displayCutout";
-                case WINDOW_DECOR:
-                    return "windowDecor";
-                default:
-                    throw new IllegalArgumentException("type needs to be >= FIRST and <= LAST,"
-                            + " type=" + type);
+        static String toString(@InsetsType int types) {
+            StringBuilder result = new StringBuilder();
+            if ((types & STATUS_BARS) != 0) {
+                result.append("statusBars |");
             }
+            if ((types & NAVIGATION_BARS) != 0) {
+                result.append("navigationBars |");
+            }
+            if ((types & IME) != 0) {
+                result.append("ime |");
+            }
+            if ((types & SYSTEM_GESTURES) != 0) {
+                result.append("systemGestures |");
+            }
+            if ((types & MANDATORY_SYSTEM_GESTURES) != 0) {
+                result.append("mandatorySystemGestures |");
+            }
+            if ((types & TAPPABLE_ELEMENT) != 0) {
+                result.append("tappableElement |");
+            }
+            if ((types & DISPLAY_CUTOUT) != 0) {
+                result.append("displayCutout |");
+            }
+            if ((types & WINDOW_DECOR) != 0) {
+                result.append("windowDecor |");
+            }
+            if (result.length() > 0) {
+                result.delete(result.length() - 2, result.length());
+            }
+            return result.toString();
         }
 
         private Type() {

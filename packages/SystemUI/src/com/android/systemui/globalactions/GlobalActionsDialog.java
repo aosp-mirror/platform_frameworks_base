@@ -69,6 +69,9 @@ import android.telecom.TelecomManager;
 import android.telephony.PhoneStateListener;
 import android.telephony.ServiceState;
 import android.telephony.TelephonyManager;
+import android.transition.AutoTransition;
+import android.transition.TransitionManager;
+import android.transition.TransitionSet;
 import android.util.ArraySet;
 import android.util.FeatureFlagUtils;
 import android.util.Log;
@@ -2026,7 +2029,22 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                         new FrameLayout.LayoutParams(
                                 FrameLayout.LayoutParams.MATCH_PARENT,
                                 FrameLayout.LayoutParams.MATCH_PARENT);
-                panelContainer.addView(mPanelController.getPanelContent(), panelParams);
+                View walletView = mPanelController.getPanelContent();
+                panelContainer.addView(walletView, panelParams);
+                // Smooth transitions when wallet is resized, which can happen when a card is added
+                ViewGroup root = findViewById(com.android.systemui.R.id.global_actions_grid_root);
+                if (root != null) {
+                    walletView.addOnLayoutChangeListener((v, l, t, r, b, ol, ot, or, ob) -> {
+                        int oldHeight = ob - ot;
+                        int newHeight = b - t;
+                        if (oldHeight > 0 && oldHeight != newHeight) {
+                            TransitionSet transition = new AutoTransition()
+                                    .setDuration(250)
+                                    .setOrdering(TransitionSet.ORDERING_TOGETHER);
+                            TransitionManager.beginDelayedTransition(root, transition);
+                        }
+                    });
+                }
             }
         }
 

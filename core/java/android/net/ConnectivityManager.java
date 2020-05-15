@@ -48,6 +48,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.ParcelFileDescriptor;
+import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
@@ -4691,6 +4692,30 @@ public class ConnectivityManager {
                 sb.append(" [").append(stackTrace).append("]");
             }
             Log.d(TAG, "StackLog:" + sb.toString());
+        }
+    }
+
+    /**
+     * Simulates a Data Stall for the specified Network.
+     *
+     * <p>The caller must be the owner of the specified Network.
+     *
+     * @param detectionMethod The detection method used to identify the Data Stall.
+     * @param timestampMillis The timestamp at which the stall 'occurred', in milliseconds.
+     * @param network The Network for which a Data Stall is being simluated.
+     * @param extras The PersistableBundle of extras included in the Data Stall notification.
+     * @throws SecurityException if the caller is not the owner of the given network.
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(anyOf = {android.Manifest.permission.MANAGE_TEST_NETWORKS,
+            android.Manifest.permission.NETWORK_STACK})
+    public void simulateDataStall(int detectionMethod, long timestampMillis,
+            @NonNull Network network, @NonNull PersistableBundle extras) {
+        try {
+            mService.simulateDataStall(detectionMethod, timestampMillis, network, extras);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
         }
     }
 }

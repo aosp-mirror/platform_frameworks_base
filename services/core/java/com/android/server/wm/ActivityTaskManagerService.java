@@ -2476,13 +2476,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         if (DEBUG_STACK) Slog.d(TAG_STACK, "moveTaskToFront: moving taskId=" + taskId);
         synchronized (mGlobalLock) {
             moveTaskToFrontLocked(appThread, callingPackage, taskId, flags,
-                    SafeActivityOptions.fromBundle(bOptions), false /* fromRecents */);
+                    SafeActivityOptions.fromBundle(bOptions));
         }
     }
 
     void moveTaskToFrontLocked(@Nullable IApplicationThread appThread,
-            @Nullable String callingPackage, int taskId, int flags, SafeActivityOptions options,
-            boolean fromRecents) {
+            @Nullable String callingPackage, int taskId, int flags, SafeActivityOptions options) {
         final int callingPid = Binder.getCallingPid();
         final int callingUid = Binder.getCallingUid();
         assertPackageMatchesCallingUid(callingPackage);
@@ -2527,7 +2526,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 // We are reshowing a task, use a starting window to hide the initial draw delay
                 // so the transition can start earlier.
                 topActivity.showStartingWindow(null /* prev */, false /* newTask */,
-                        true /* taskSwitch */, fromRecents);
+                        true /* taskSwitch */);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -3213,7 +3212,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             if (TextUtils.equals(pae.intent.getAction(),
                     android.service.voice.VoiceInteractionService.SERVICE_INTERFACE)) {
                 // Start voice interaction through VoiceInteractionManagerService.
-                mAssistUtils.showSessionForActiveService(sendBundle, SHOW_SOURCE_APPLICATION,
+                mAssistUtils.showSessionForActiveService(pae.extras, SHOW_SOURCE_APPLICATION,
                         null, null);
             } else {
                 pae.intent.replaceExtras(pae.extras);

@@ -171,6 +171,11 @@ public final class MultiClientInputMethodManagerService {
             LocalServices.addService(InputMethodManagerInternal.class,
                     new InputMethodManagerInternal() {
                         @Override
+                        public void setInteractive(boolean interactive) {
+                            reportNotSupported();
+                        }
+
+                        @Override
                         public void hideCurrentInputMethod(@SoftInputShowHideReason int reason) {
                             reportNotSupported();
                         }
