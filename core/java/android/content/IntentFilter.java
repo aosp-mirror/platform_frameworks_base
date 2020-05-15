@@ -1183,7 +1183,8 @@ public class IntentFilter implements Parcelable {
                     return NO_MATCH_DATA;
                 }
             }
-            if (mPort >= 0) {
+            // if we're dealing with wildcard support, we ignore ports
+            if (!wildcardSupported && mPort >= 0) {
                 if (mPort != data.getPort()) {
                     return NO_MATCH_DATA;
                 }
