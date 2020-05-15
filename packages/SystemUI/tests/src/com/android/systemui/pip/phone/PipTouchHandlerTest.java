@@ -65,9 +65,6 @@ public class PipTouchHandlerTest extends SysuiTestCase {
     private IActivityManager mActivityManager;
 
     @Mock
-    private IActivityTaskManager mIActivityTaskManager;
-
-    @Mock
     private PipMenuActivityController mPipMenuActivityController;
 
     @Mock
@@ -101,7 +98,7 @@ public class PipTouchHandlerTest extends SysuiTestCase {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         mPipSnapAlgorithm = new PipSnapAlgorithm(mContext);
-        mPipTouchHandler = new PipTouchHandler(mContext, mActivityManager, mIActivityTaskManager,
+        mPipTouchHandler = new PipTouchHandler(mContext, mActivityManager,
                 mPipMenuActivityController, mInputConsumerController, mPipBoundsHandler,
                 mPipTaskOrganizer, mFloatingContentCoordinator, mDeviceConfigProxy,
                 mPipSnapAlgorithm);
