@@ -26,7 +26,6 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.anyInt;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 
@@ -34,6 +33,7 @@ import android.animation.AnimationHandler.AnimationFrameCallbackProvider;
 import android.animation.ValueAnimator;
 import android.graphics.Matrix;
 import android.graphics.Point;
+import android.hardware.power.Boost;
 import android.os.PowerManagerInternal;
 import android.platform.test.annotations.Presubmit;
 import android.view.Choreographer;
@@ -187,16 +187,14 @@ public class SurfaceAnimationRunnerTest extends WindowTestsBase {
     }
 
     @Test
-    public void testPowerHint() throws Exception {
+    public void testPowerBoost() throws Exception {
         mSurfaceAnimationRunner = new SurfaceAnimationRunner(new NoOpFrameCallbackProvider(), null,
                 mMockTransaction, mMockPowerManager);
         mSurfaceAnimationRunner.startAnimation(createTranslateAnimation(), mMockSurface,
                 mMockTransaction, this::finishedCallback);
         waitUntilNextFrame();
 
-        // TODO: For some reason we don't have access to PowerHint definition from the tests. For
-        // now let's just verify that we got some kind of hint.
-        verify(mMockPowerManager).powerHint(anyInt(), anyInt());
+        verify(mMockPowerManager).setPowerBoost(eq(Boost.INTERACTION), eq(0));
     }
 
     private void waitUntilNextFrame() throws Exception {

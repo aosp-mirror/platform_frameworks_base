@@ -110,7 +110,7 @@ import android.content.res.Resources;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManagerInternal;
-import android.hardware.power.V1_0.PowerHint;
+import android.hardware.power.Mode;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Debug;
@@ -259,8 +259,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
      */
     final ArrayList<ActivityTaskManagerInternal.SleepToken> mSleepTokens = new ArrayList<>();
 
-    /** Set when a power hint has started, but not ended. */
-    private boolean mPowerHintSent;
+    /** Set when a power mode launch has started, but not ended. */
+    private boolean mPowerModeLaunchStarted;
 
     // The default minimal size that will be used if the activity doesn't specify its minimal size.
     // It will be calculated when the default display gets added.
@@ -949,9 +949,9 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
         if (mSustainedPerformanceModeCurrent != mSustainedPerformanceModeEnabled) {
             mSustainedPerformanceModeEnabled = mSustainedPerformanceModeCurrent;
-            mWmService.mPowerManagerInternal.powerHint(
-                    PowerHint.SUSTAINED_PERFORMANCE,
-                    (mSustainedPerformanceModeEnabled ? 1 : 0));
+            mWmService.mPowerManagerInternal.setPowerMode(
+                    Mode.SUSTAINED_PERFORMANCE,
+                    mSustainedPerformanceModeEnabled);
         }
 
         if (mUpdateRotation) {
@@ -3276,8 +3276,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 return false;
             }
         }
-        // Send launch end powerhint when idle
-        sendPowerHintForLaunchEndIfNeeded();
+        // End power mode launch when idle.
+        endPowerModeLaunchIfNeeded();
         return true;
     }
 
@@ -3472,16 +3472,16 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 callingUid, allowed, crossUser, profileIds);
     }
 
-    void sendPowerHintForLaunchStartIfNeeded(boolean forceSend, ActivityRecord targetActivity) {
-        boolean sendHint = forceSend;
+    void startPowerModeLaunchIfNeeded(boolean forceSend, ActivityRecord targetActivity) {
+        final boolean sendPowerModeLaunch;
 
-        if (!sendHint) {
-            // Send power hint if we don't know what we're launching yet
-            sendHint = targetActivity == null || targetActivity.app == null;
-        }
-
-        if (!sendHint) { // targetActivity != null
-            // Send power hint when the activity's process is different than the current top resumed
+        if (forceSend) {
+            sendPowerModeLaunch = true;
+        } else if (targetActivity == null || targetActivity.app == null) {
+            // Set power mode if we don't know what we're launching yet.
+            sendPowerModeLaunch = true;
+        } else {
+            // Set power mode when the activity's process is different than the current top resumed
             // activity on all display areas, or if there are no resumed activities in the system.
             boolean noResumedActivities = true;
             boolean allFocusedProcessesDiffer = true;
@@ -3500,20 +3500,20 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                     }
                 }
             }
-            sendHint = noResumedActivities || allFocusedProcessesDiffer;
+            sendPowerModeLaunch = noResumedActivities || allFocusedProcessesDiffer;
         }
 
-        if (sendHint && mService.mPowerManagerInternal != null) {
-            mService.mPowerManagerInternal.powerHint(PowerHint.LAUNCH, 1);
-            mPowerHintSent = true;
+        if (sendPowerModeLaunch && mService.mPowerManagerInternal != null) {
+            mService.mPowerManagerInternal.setPowerMode(Mode.LAUNCH, true);
+            mPowerModeLaunchStarted = true;
         }
     }
 
-    void sendPowerHintForLaunchEndIfNeeded() {
-        // Trigger launch power hint if activity is launched
-        if (mPowerHintSent && mService.mPowerManagerInternal != null) {
-            mService.mPowerManagerInternal.powerHint(PowerHint.LAUNCH, 0);
-            mPowerHintSent = false;
+    void endPowerModeLaunchIfNeeded() {
+        // Trigger launch power mode off if activity is launched
+        if (mPowerModeLaunchStarted && mService.mPowerManagerInternal != null) {
+            mService.mPowerManagerInternal.setPowerMode(Mode.LAUNCH, false);
+            mPowerModeLaunchStarted = false;
         }
     }
 

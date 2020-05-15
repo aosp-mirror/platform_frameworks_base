@@ -57,8 +57,9 @@ android_test {
     },
 
     libs: [
-        "android.hidl.manager-V1.0-java",
+        "android.hardware.power-java",
         "android.hardware.tv.cec-V1.0-java",
+        "android.hidl.manager-V1.0-java",
         "android.test.mock",
         "android.test.base",
         "android.test.runner",
