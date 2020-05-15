@@ -475,5 +475,10 @@ public class InfoMediaManager extends MediaManager {
         public void onRequestFailed(int reason) {
             dispatchOnRequestFailed(reason);
         }
+
+        @Override
+        public void onSessionUpdated(RoutingSessionInfo sessionInfo) {
+            dispatchDataChanged();
+        }
     }
 }
