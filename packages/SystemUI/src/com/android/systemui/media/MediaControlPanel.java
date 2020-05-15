@@ -323,6 +323,10 @@ public class MediaControlPanel {
             setVisibleAndAlpha(collapsedSet, R.id.media_seamless, true /*visible */);
             setVisibleAndAlpha(expandedSet, R.id.media_seamless, true /*visible */);
             updateDevice(mLocalMediaManager.getCurrentConnectedDevice());
+            if (mViewHolder.getBackground().getBackground() instanceof IlluminationDrawable) {
+                    ((IlluminationDrawable) mViewHolder.getBackground().getBackground())
+                            .setupTouch(mViewHolder.getSeamless(), mViewHolder.getPlayer());
+            }
             mViewHolder.getSeamless().setOnClickListener(v -> {
                 final Intent intent = new Intent()
                         .setAction(MediaOutputSliceConstants.ACTION_MEDIA_OUTPUT)
@@ -541,7 +545,7 @@ public class MediaControlPanel {
         RippleDrawable bkgDrawable = (RippleDrawable) viewLayout.getBackground();
         GradientDrawable rect = (GradientDrawable) bkgDrawable.getDrawable(0);
         rect.setStroke(2, deviceName.getCurrentTextColor());
-        rect.setColor(mBackgroundColor);
+        rect.setColor(Color.TRANSPARENT);
 
         if (mIsRemotePlayback) {
             mViewHolder.getSeamless().setEnabled(false);
