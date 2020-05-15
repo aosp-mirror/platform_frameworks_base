@@ -188,6 +188,8 @@ public final class NotificationRecord {
     private boolean mHasSeenSmartReplies;
     private boolean mFlagBubbleRemoved;
     private boolean mPostSilently;
+    private boolean mHasSentValidMsg;
+    private boolean mAppDemotedFromConvo;
     /**
      * Whether this notification (and its channels) should be considered user locked. Used in
      * conjunction with user sentiment calculation.
@@ -1377,6 +1379,14 @@ public final class NotificationRecord {
         return mShortcutInfo;
     }
 
+    public void setHasSentValidMsg(boolean hasSentValidMsg) {
+        mHasSentValidMsg = hasSentValidMsg;
+    }
+
+    public void userDemotedAppFromConvoSpace(boolean userDemoted) {
+        mAppDemotedFromConvo = userDemoted;
+    }
+
     /**
      * Whether this notification is a conversation notification.
      */
@@ -1395,6 +1405,12 @@ public final class NotificationRecord {
         if (mTargetSdkVersion >= Build.VERSION_CODES.R
             && Notification.MessagingStyle.class.equals(notification.getNotificationStyle())
             && mShortcutInfo == null) {
+            return false;
+        }
+        if (mHasSentValidMsg && mShortcutInfo == null) {
+            return false;
+        }
+        if (mAppDemotedFromConvo) {
             return false;
         }
         return true;
