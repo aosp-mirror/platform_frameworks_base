@@ -239,6 +239,11 @@
 
     <color name="magnification_border_color">#FF9900</color>
 
+    <!-- media -->
+    <color name="media_primary_text">@android:color/white</color>
+    <color name="media_seekbar_progress">#c0ffffff</color>
+    <color name="media_disabled">#80ffffff</color>
+
     <!-- controls -->
     <color name="control_primary_text">#E6FFFFFF</color>
     <color name="control_secondary_text">#99FFFFFF</color>
