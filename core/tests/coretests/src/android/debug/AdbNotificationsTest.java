@@ -56,8 +56,11 @@ public final class AdbNotificationsTest {
         // Verify that the adb notification for usb connections has the correct text.
         assertEquals(title, notification.extras.getCharSequence(Notification.EXTRA_TITLE, ""));
         assertEquals(message, notification.extras.getCharSequence(Notification.EXTRA_TEXT, ""));
-        // Verify the PendingIntent has an explicit intent (b/153356209).
-        assertFalse(TextUtils.isEmpty(notification.contentIntent.getIntent().getPackage()));
+        // Verify the PendingIntent has an explicit intent (b/153356209), if there is a
+        // PendingIntent attached.
+        if (notification.contentIntent != null) {
+            assertFalse(TextUtils.isEmpty(notification.contentIntent.getIntent().getPackage()));
+        }
     }
 
     @Test
@@ -73,7 +76,10 @@ public final class AdbNotificationsTest {
         // Verify that the adb notification for usb connections has the correct text.
         assertEquals(title, notification.extras.getCharSequence(Notification.EXTRA_TITLE, ""));
         assertEquals(message, notification.extras.getCharSequence(Notification.EXTRA_TEXT, ""));
-        // Verify the PendingIntent has an explicit intent (b/153356209).
-        assertFalse(TextUtils.isEmpty(notification.contentIntent.getIntent().getPackage()));
+        // Verify the PendingIntent has an explicit intent (b/153356209), if there is a
+        // PendingIntent attached.
+        if (notification.contentIntent != null) {
+            assertFalse(TextUtils.isEmpty(notification.contentIntent.getIntent().getPackage()));
+        }
     }
 }
