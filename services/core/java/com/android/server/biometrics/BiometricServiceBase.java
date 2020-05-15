@@ -983,6 +983,10 @@ public abstract class BiometricServiceBase extends SystemService
     }
 
     protected void addLockoutResetCallback(IBiometricServiceLockoutResetCallback callback) {
+        if (callback == null) {
+            Slog.w(getTag(), "Null LockoutResetCallback");
+            return;
+        }
         mHandler.post(() -> {
            final LockoutResetMonitor monitor = new LockoutResetMonitor(callback);
            if (!mLockoutMonitors.contains(monitor)) {
