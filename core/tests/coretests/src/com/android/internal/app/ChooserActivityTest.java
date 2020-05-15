@@ -1926,6 +1926,33 @@ public class ChooserActivityTest {
                 .check(matches(isDisplayed()));
     }
 
+    @Test
+    public void testDeduplicateCallerTargetRankedTarget() {
+        // Create 4 ranked app targets.
+        List<ResolvedComponentInfo> personalResolvedComponentInfos =
+                createResolvedComponentsForTest(4);
+        when(sOverrides.resolverListController.getResolversForIntent(Mockito.anyBoolean(),
+                Mockito.anyBoolean(),
+                Mockito.isA(List.class)))
+                .thenReturn(new ArrayList<>(personalResolvedComponentInfos));
+        // Create caller target which is duplicate with one of app targets
+        Intent chooserIntent = createChooserIntent(createSendTextIntent(),
+                new Intent[] {new Intent("action.fake")});
+        sOverrides.packageManager = mock(PackageManager.class);
+        ResolveInfo ri = ResolverDataProvider.createResolveInfo(0,
+                UserHandle.USER_CURRENT);
+        when(sOverrides.packageManager.resolveActivity(any(Intent.class), anyInt())).thenReturn(ri);
+        waitForIdle();
+
+        ChooserWrapperActivity activity = mActivityRule.launchActivity(chooserIntent);
+        waitForIdle();
+
+        // Total 4 targets (1 caller target, 3 ranked targets)
+        assertThat(activity.getAdapter().getCount(), is(4));
+        assertThat(activity.getAdapter().getCallerTargetCount(), is(1));
+        assertThat(activity.getAdapter().getRankedTargetCount(), is(3));
+    }
+
     private Intent createChooserIntent(Intent intent, Intent[] initialIntents) {
         Intent chooserIntent = new Intent();
         chooserIntent.setAction(Intent.ACTION_CHOOSER);
