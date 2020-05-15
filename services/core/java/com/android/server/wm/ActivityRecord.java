@@ -1940,6 +1940,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             mStartingData = null;
             startingSurface = null;
             startingWindow = null;
+            startingDisplayed = false;
             if (surface == null) {
                 ProtoLog.v(WM_DEBUG_STARTING_WINDOW,
                         "startingWindow was set but startingSurface==null, couldn't "
@@ -5462,6 +5463,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (mLastTransactionSequence != mWmService.mTransactionSequence) {
             mLastTransactionSequence = mWmService.mTransactionSequence;
             mNumDrawnWindows = 0;
+            startingDisplayed = false;
 
             // There is the main base application window, even if it is exiting, wait for it
             mNumInterestingWindows = findMainWindow(false /* includeStartingApp */) != null ? 1 : 0;
