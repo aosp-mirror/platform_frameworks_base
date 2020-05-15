@@ -161,6 +161,9 @@ public class QSPanelTest extends SysuiTestCase {
 
         mQsPanel.setListening(true);
         verify(mQSLogger).logAllTilesChangeListening(true, mQsPanel.getDumpableTag(), "dnd");
+
+        mQsPanel.setListening(false);
+        verify(mQSLogger).logAllTilesChangeListening(false, mQsPanel.getDumpableTag(), "dnd");
     }
 
 /*    @Test
