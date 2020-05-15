@@ -43,6 +43,10 @@ import java.util.Set;
  * through the {@link CameraManager CameraManager}
  * interface with {@link CameraManager#getCameraCharacteristics}.</p>
  *
+ * <p>When obtained by a client that does not hold the CAMERA permission, some metadata values are
+ * not included. The list of keys that require the permission is given by
+ * {@link #getKeysNeedingPermission}.</p>
+ *
  * <p>{@link CameraCharacteristics} objects are immutable.</p>
  *
  * @see CameraDevice
