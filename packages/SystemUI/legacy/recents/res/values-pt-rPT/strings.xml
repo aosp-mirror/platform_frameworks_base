@@ -23,15 +23,15 @@
     <string name="accessibility_recents_item_will_be_dismissed" msgid="1987979391731836442">"Ignorar <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="accessibility_recents_item_dismissed" msgid="99149432850273747">"Aplicação <xliff:g id="APP">%s</xliff:g> ignorada."</string>
     <string name="accessibility_recents_all_items_dismissed" msgid="2584965907377043255">"Todas as aplicações recentes foram ignoradas."</string>
-    <string name="accessibility_recents_item_open_app_info" msgid="5843409407745673280">"Abrir as informações da aplicação <xliff:g id="APP">%s</xliff:g>."</string>
-    <string name="accessibility_recents_item_launched" msgid="2439069760172103351">"A iniciar a aplicação <xliff:g id="APP">%s</xliff:g>…"</string>
+    <string name="accessibility_recents_item_open_app_info" msgid="5843409407745673280">"Abrir as informações da app <xliff:g id="APP">%s</xliff:g>."</string>
+    <string name="accessibility_recents_item_launched" msgid="2439069760172103351">"A iniciar a app <xliff:g id="APP">%s</xliff:g>…"</string>
     <string name="recents_empty_message" msgid="4718114148356836203">"Nenhum item recente"</string>
     <string name="recents_empty_message_dismissed_all" msgid="2873215505812268822">"Limpou tudo"</string>
-    <string name="recents_app_info_button_label" msgid="5371319329151716224">"Informações da aplicação"</string>
+    <string name="recents_app_info_button_label" msgid="5371319329151716224">"Informações da app"</string>
     <string name="recents_lock_to_app_button_label" msgid="3282305316722066169">"afixação no ecrã"</string>
     <string name="recents_search_bar_label" msgid="1910412649656301014">"pesquisar"</string>
-    <string name="recents_launch_error_message" msgid="8622817255751191462">"Não foi possível iniciar a aplicação <xliff:g id="APP">%s</xliff:g>."</string>
-    <string name="recents_launch_disabled_message" msgid="1055364973720665718">"A aplicação <xliff:g id="APP">%s</xliff:g> está desativada no modo de segurança."</string>
+    <string name="recents_launch_error_message" msgid="8622817255751191462">"Não foi possível iniciar a app <xliff:g id="APP">%s</xliff:g>."</string>
+    <string name="recents_launch_disabled_message" msgid="1055364973720665718">"A app <xliff:g id="APP">%s</xliff:g> está desativada no modo de segurança."</string>
     <string name="recents_stack_action_button_label" msgid="7396636872618564201">"Limpar tudo"</string>
     <string name="recents_drag_hint_message" msgid="3309424039418402577">"Arraste aqui para utilizar o ecrã dividido"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="3361339364058788960">"Divisão horizontal"</string>

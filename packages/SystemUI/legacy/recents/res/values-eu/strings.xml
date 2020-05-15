@@ -28,7 +28,7 @@
     <string name="recents_empty_message" msgid="4718114148356836203">"Ez dago azkenaldi honetako ezer"</string>
     <string name="recents_empty_message_dismissed_all" msgid="2873215505812268822">"Dena garbitu duzu"</string>
     <string name="recents_app_info_button_label" msgid="5371319329151716224">"Aplikazioaren informazioa"</string>
-    <string name="recents_lock_to_app_button_label" msgid="3282305316722066169">"pantaila-ainguratzea"</string>
+    <string name="recents_lock_to_app_button_label" msgid="3282305316722066169">"pantaila ainguratzeko aukera"</string>
     <string name="recents_search_bar_label" msgid="1910412649656301014">"bilatu"</string>
     <string name="recents_launch_error_message" msgid="8622817255751191462">"Ezin izan da abiarazi <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="recents_launch_disabled_message" msgid="1055364973720665718">"<xliff:g id="APP">%s</xliff:g> desgaituta dago modu seguruan."</string>

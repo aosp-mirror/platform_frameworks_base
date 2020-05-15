@@ -28,7 +28,7 @@
     <string name="recents_empty_message" msgid="4718114148356836203">"କୌଣସି ସାମ୍ପ୍ରତିକ ଆଇଟମ୍ ନାହିଁ"</string>
     <string name="recents_empty_message_dismissed_all" msgid="2873215505812268822">"ଆପଣ ସୁବୁକିଛି ଖାଲି କରିଦେଇଛନ୍ତି"</string>
     <string name="recents_app_info_button_label" msgid="5371319329151716224">"ଆପ୍ଲିକେସନ୍‍ ସୂଚନା"</string>
-    <string name="recents_lock_to_app_button_label" msgid="3282305316722066169">"ସ୍କ୍ରିନ୍‌ ଲକ୍‌"</string>
+    <string name="recents_lock_to_app_button_label" msgid="3282305316722066169">"ସ୍କ୍ରିନ୍‌ ପିନିଂ"</string>
     <string name="recents_search_bar_label" msgid="1910412649656301014">"ଖୋଜନ୍ତୁ"</string>
     <string name="recents_launch_error_message" msgid="8622817255751191462">"<xliff:g id="APP">%s</xliff:g> କୁ ଆରମ୍ଭ କରାଯାଇପାରିଲା ନାହିଁ।"</string>
     <string name="recents_launch_disabled_message" msgid="1055364973720665718">"<xliff:g id="APP">%s</xliff:g> ସୁରକ୍ଷିତ-ମୋଡ୍‌ରେ ଅକ୍ଷମ ଅଟେ।"</string>
