@@ -2532,6 +2532,7 @@
   <java-symbol type="style" name="TextAppearance.Material.TimePicker.TimeLabel" />
   <java-symbol type="attr" name="seekBarPreferenceStyle" />
   <java-symbol type="style" name="Theme.DeviceDefault.Resolver" />
+  <java-symbol type="style" name="Theme.DeviceDefault.Chooser" />
   <java-symbol type="style" name="Theme.DeviceDefault.System" />
   <java-symbol type="attr" name="preferenceActivityStyle" />
   <java-symbol type="attr" name="preferenceFragmentStyle" />
@@ -3783,8 +3784,11 @@
   <!-- For Auto-Brightness -->
   <java-symbol type="string" name="config_displayLightSensorType" />
 
-  <java-symbol type="drawable" name="iconfactory_adaptive_icon_drawable_wrapper"/>
   <java-symbol type="dimen" name="notification_min_height" />
+
+  <java-symbol type="drawable" name="iconfactory_adaptive_icon_drawable_wrapper"/>
+  <java-symbol type="attr" name="iconfactoryIconSize"/>
+  <java-symbol type="attr" name="iconfactoryBadgeSize"/>
   <java-symbol type="dimen" name="resolver_icon_size"/>
   <java-symbol type="dimen" name="resolver_badge_size"/>
   <java-symbol type="dimen" name="resolver_button_bar_spacing"/>
@@ -3793,6 +3797,7 @@
   <java-symbol type="dimen" name="resolver_edge_margin"/>
   <java-symbol type="dimen" name="resolver_elevation"/>
   <java-symbol type="dimen" name="chooser_icon_size"/>
+  <java-symbol type="dimen" name="chooser_badge_size"/>
 
   <!-- For DropBox -->
   <java-symbol type="integer" name="config_dropboxLowPriorityBroadcastRateLimitPeriod" />
@@ -4018,4 +4023,5 @@
   <java-symbol type="string" name="config_pdp_reject_user_authentication_failed" />
   <java-symbol type="string" name="config_pdp_reject_service_not_subscribed" />
   <java-symbol type="string" name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" />
+
 </resources>

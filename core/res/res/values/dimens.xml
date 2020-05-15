@@ -812,7 +812,8 @@
     <dimen name="chooser_header_scroll_elevation">4dp</dimen>
     <dimen name="chooser_max_collapsed_height">288dp</dimen>
     <dimen name="chooser_direct_share_label_placeholder_max_width">72dp</dimen>
-    <dimen name="chooser_icon_size">42dp</dimen>
+    <dimen name="chooser_icon_size">56dp</dimen>
+    <dimen name="chooser_badge_size">22dp</dimen>
     <dimen name="resolver_icon_size">32dp</dimen>
     <dimen name="resolver_button_bar_spacing">8dp</dimen>
     <dimen name="resolver_badge_size">18dp</dimen>

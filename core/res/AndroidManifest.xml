@@ -5054,7 +5054,7 @@
                  android:forceQueryable="true"
                  android:directBootAware="true">
         <activity android:name="com.android.internal.app.ChooserActivity"
-                android:theme="@style/Theme.DeviceDefault.Resolver"
+                android:theme="@style/Theme.DeviceDefault.Chooser"
                 android:finishOnCloseSystemDialogs="true"
                 android:excludeFromRecents="true"
                 android:documentLaunchMode="never"
