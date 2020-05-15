@@ -23,6 +23,7 @@ import android.annotation.TestApi;
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Intent;
+import android.content.pm.ServiceInfo;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.IBinder;
@@ -281,9 +282,20 @@ public abstract class CallScreeningService extends Service {
              * Sets whether to request background audio processing so that the in-call service can
              * screen the call further. If set to {@code true}, {@link #setDisallowCall} should be
              * called with {@code false}, and all other parameters in this builder will be ignored.
-             *
+             * <p>
              * This request will only be honored if the {@link CallScreeningService} shares the same
              * uid as the default dialer app. Otherwise, the call will go through as usual.
+             * <p>
+             * Apps built with SDK version {@link android.os.Build.VERSION_CODES#R} or later which
+             * are using the microphone as part of audio processing should specify the
+             * foreground service type using the attribute
+             * {@link android.R.attr#foregroundServiceType} in the {@link CallScreeningService}
+             * service element of the app's manifest file.
+             * The {@link ServiceInfo#FOREGROUND_SERVICE_TYPE_MICROPHONE} attribute should be
+             * specified.
+             * @see
+             * <a href="https://developer.android.com/preview/privacy/foreground-service-types">
+             *     the Android Developer Site</a> for more information.
              *
              * @param shouldScreenCallViaAudioProcessing Whether to request further call screening.
              * @hide
