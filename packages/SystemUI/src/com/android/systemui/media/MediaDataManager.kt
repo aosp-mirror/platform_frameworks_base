@@ -54,7 +54,7 @@ private const val DEFAULT_LUMINOSITY = 0.25f
 private const val LUMINOSITY_THRESHOLD = 0.05f
 private const val SATURATION_MULTIPLIER = 0.8f
 
-private val LOADING = MediaData(false, 0, 0, null, null, null, null, null,
+private val LOADING = MediaData(false,  0, null, null, null, null, null,
         emptyList(), emptyList(), null, null, null)
 
 /**
@@ -110,7 +110,6 @@ class MediaDataManager @Inject constructor(
 
         // Foreground and Background colors computed from album art
         val notif: Notification = sbn.notification
-        val fgColor = Color.WHITE
         var bgColor = Color.WHITE
         var artworkBitmap = metadata.getBitmap(MediaMetadata.METADATA_KEY_ART)
         if (artworkBitmap == null) {
@@ -201,8 +200,8 @@ class MediaDataManager @Inject constructor(
         }
 
         foregroundExcecutor.execute {
-            onMediaDataLoaded(key, MediaData(true, fgColor, bgColor, app, smallIconDrawable, artist,
-                    song, artWorkIcon, actionIcons, actionsToShowCollapsed, sbn.packageName, token,
+            onMediaDataLoaded(key, MediaData(true, bgColor, app, smallIconDrawable, artist, song,
+                    artWorkIcon, actionIcons, actionsToShowCollapsed, sbn.packageName, token,
                     notif.contentIntent))
         }
     }
