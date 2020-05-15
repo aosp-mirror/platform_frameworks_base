@@ -1106,6 +1106,24 @@ public class DisplayPolicy {
         }
     }
 
+    TriConsumer<DisplayFrames, WindowState, Rect> getImeSourceFrameProvider() {
+        return (displayFrames, windowState, inOutFrame) -> {
+            if (mNavigationBar != null && navigationBarPosition(displayFrames.mDisplayWidth,
+                    displayFrames.mDisplayHeight,
+                    displayFrames.mRotation) == NAV_BAR_BOTTOM) {
+                // In gesture navigation, nav bar frame is larger than frame to calculate insets.
+                // IME should not provide frame which is smaller than the nav bar frame. Otherwise,
+                // nav bar might be overlapped with the content of the client when IME is shown.
+                sTmpRect.set(inOutFrame);
+                sTmpRect.intersectUnchecked(mNavigationBar.getFrameLw());
+                inOutFrame.inset(windowState.getGivenContentInsetsLw());
+                inOutFrame.union(sTmpRect);
+            } else {
+                inOutFrame.inset(windowState.getGivenContentInsetsLw());
+            }
+        };
+    }
+
     private static void enforceSingleInsetsTypeCorrespondingToWindowType(int[] insetsTypes) {
         int count = 0;
         for (int insetsType : insetsTypes) {
