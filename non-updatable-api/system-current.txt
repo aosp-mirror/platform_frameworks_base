@@ -7854,6 +7854,7 @@ package android.provider {
     field public static final String NAMESPACE_AUTOFILL = "autofill";
     field public static final String NAMESPACE_BIOMETRICS = "biometrics";
     field public static final String NAMESPACE_BLOBSTORE = "blobstore";
+    field public static final String NAMESPACE_BLUETOOTH = "bluetooth";
     field public static final String NAMESPACE_CONNECTIVITY = "connectivity";
     field public static final String NAMESPACE_CONTENT_CAPTURE = "content_capture";
     field @Deprecated public static final String NAMESPACE_DEX_BOOT = "dex_boot";
