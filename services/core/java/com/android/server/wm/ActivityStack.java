@@ -382,6 +382,7 @@ class ActivityStack extends Task {
             return mBehindFullscreenActivity;
         }
 
+        /** Returns {@code true} to stop the outer loop and indicate the result is computed. */
         private boolean processActivity(ActivityRecord r, ActivityRecord topActivity) {
             if (mAboveTop) {
                 if (r == topActivity) {
@@ -397,7 +398,10 @@ class ActivityStack extends Task {
             }
 
             if (mHandlingOccluded) {
-                mHandleBehindFullscreenActivity.accept(r);
+                // Iterating through all occluded activities.
+                if (mBehindFullscreenActivity) {
+                    mHandleBehindFullscreenActivity.accept(r);
+                }
             } else if (r == mToCheck) {
                 return true;
             } else if (mBehindFullscreenActivity) {

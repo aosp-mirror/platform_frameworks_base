@@ -76,6 +76,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.ArrayList;
+import java.util.function.Consumer;
+
 /**
  * Tests for the {@link ActivityStack} class.
  *
@@ -1327,6 +1330,8 @@ public class ActivityStackTests extends ActivityTestsBase {
 
     @Test
     public void testCheckBehindFullscreenActivity() {
+        final ArrayList<ActivityRecord> occludedActivities = new ArrayList<>();
+        final Consumer<ActivityRecord> handleBehindFullscreenActivity = occludedActivities::add;
         final ActivityRecord bottomActivity =
                 new ActivityBuilder(mService).setStack(mStack).setTask(mTask).build();
         final ActivityRecord topActivity =
@@ -1337,11 +1342,20 @@ public class ActivityStackTests extends ActivityTestsBase {
         assertFalse(mStack.checkBehindFullscreenActivity(topActivity,
                 null /* handleBehindFullscreenActivity */));
 
+        // Top activity occludes bottom activity.
+        mStack.checkBehindFullscreenActivity(null /* toCheck */, handleBehindFullscreenActivity);
+        assertThat(occludedActivities).containsExactly(bottomActivity);
+
         doReturn(false).when(topActivity).occludesParent();
         assertFalse(mStack.checkBehindFullscreenActivity(bottomActivity,
                 null /* handleBehindFullscreenActivity */));
         assertFalse(mStack.checkBehindFullscreenActivity(topActivity,
                 null /* handleBehindFullscreenActivity */));
+
+        occludedActivities.clear();
+        // Top activity doesn't occlude parent, so the bottom activity is not occluded.
+        mStack.checkBehindFullscreenActivity(null /* toCheck */, handleBehindFullscreenActivity);
+        assertThat(occludedActivities).isEmpty();
 
         final ActivityRecord finishingActivity =
                 new ActivityBuilder(mService).setStack(mStack).setTask(mTask).build();
