@@ -49,6 +49,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:fontFamily="@*android:string/config_bodyFontFamily"
+            android:textColor="@color/media_primary_text"
             android:gravity="left"
             android:textSize="14sp" />
 
@@ -58,6 +59,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:fontFamily="@*android:string/config_bodyFontFamily"
+            android:textColor="@color/media_primary_text"
             android:gravity="right"
             android:textSize="14sp" />
     </FrameLayout>
@@ -116,6 +118,7 @@
             android:layout_width="@dimen/qs_seamless_icon_size"
             android:layout_height="@dimen/qs_seamless_icon_size"
             android:layout_marginRight="8dp"
+            android:tint="@color/media_primary_text"
             android:src="@*android:drawable/ic_media_seamless" />
 
         <TextView
@@ -125,6 +128,7 @@
             android:fontFamily="@*android:string/config_bodyFontFamily"
             android:singleLine="true"
             android:text="@*android:string/ext_media_seamless_action"
+            android:textColor="@color/media_primary_text"
             android:textSize="14sp" />
     </LinearLayout>
 
@@ -138,11 +142,15 @@
         android:maxHeight="3dp"
         android:paddingTop="16dp"
         android:paddingBottom="16dp"
+        android:thumbTint="@color/media_primary_text"
+        android:progressTint="@color/media_seekbar_progress"
+        android:progressBackgroundTint="@color/media_disabled"
         android:splitTrack="false" />
 
     <!-- App name -->
     <TextView
         android:id="@+id/app_name"
+        android:textColor="@color/media_primary_text"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:singleLine="true"
@@ -155,6 +163,7 @@
         android:layout_height="wrap_content"
         android:fontFamily="@*android:string/config_headlineFontFamilyMedium"
         android:singleLine="true"
+        android:textColor="@color/media_primary_text"
         android:textSize="18sp" />
 
     <!-- Artist name -->
@@ -164,10 +173,12 @@
         android:layout_height="wrap_content"
         android:fontFamily="@*android:string/config_bodyFontFamily"
         android:singleLine="true"
+        android:textColor="@color/media_primary_text"
         android:textSize="14sp" />
 
     <com.android.internal.widget.CachingIconView
         android:id="@+id/icon"
+        android:tint="@color/media_primary_text"
         android:layout_width="16dp"
         android:layout_height="16dp" />
 
