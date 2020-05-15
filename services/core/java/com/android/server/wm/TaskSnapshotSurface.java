@@ -195,6 +195,16 @@ class TaskSnapshotSurface implements StartingSurface {
                         + activity);
                 return null;
             }
+            if (topFullscreenActivity.getWindowConfiguration().getRotation()
+                    != snapshot.getRotation()) {
+                // The snapshot should have been checked by ActivityRecord#isSnapshotCompatible
+                // that the activity will be updated to the same rotation as the snapshot. Since
+                // the transition is not started yet, fixed rotation transform needs to be applied
+                // earlier to make the snapshot show in a rotated container.
+                activity.mDisplayContent.handleTopActivityLaunchingInDifferentOrientation(
+                        topFullscreenActivity, false /* checkOpening */);
+            }
+
             sysUiVis = topFullscreenOpaqueWindow.getSystemUiVisibility();
             WindowManager.LayoutParams attrs = topFullscreenOpaqueWindow.mAttrs;
             windowFlags = attrs.flags;
