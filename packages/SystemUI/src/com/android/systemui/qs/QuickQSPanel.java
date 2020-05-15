@@ -32,7 +32,6 @@ import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.media.MediaHierarchyManager;
 import com.android.systemui.media.MediaHost;
 import com.android.systemui.plugins.qs.QSTile;
@@ -225,6 +224,11 @@ public class QuickQSPanel extends QSPanel {
 
     public void setQSPanelAndHeader(QSPanel fullPanel, View header) {
         mFullPanel = fullPanel;
+    }
+
+    @Override
+    protected boolean shouldShowDetail() {
+        return !mExpanded;
     }
 
     @Override
