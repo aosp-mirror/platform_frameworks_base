@@ -16,8 +16,10 @@
 
 package com.android.systemui.car.navigationbar;
 
+import static android.view.InsetsState.ITYPE_BOTTOM_GESTURES;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
+import static android.view.InsetsState.ITYPE_TOP_GESTURES;
 import static android.view.InsetsState.containsType;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
 
@@ -377,7 +379,7 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
                             | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH,
                     PixelFormat.TRANSLUCENT);
             lp.setTitle("TopCarNavigationBar");
-            lp.providesInsetsTypes = new int[]{ITYPE_STATUS_BAR};
+            lp.providesInsetsTypes = new int[]{ITYPE_STATUS_BAR, ITYPE_TOP_GESTURES};
             lp.setFitInsetsTypes(0);
             lp.windowAnimations = 0;
             lp.gravity = Gravity.TOP;
@@ -399,7 +401,7 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
                             | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH,
                     PixelFormat.TRANSLUCENT);
             lp.setTitle("BottomCarNavigationBar");
-            lp.providesInsetsTypes = new int[]{ITYPE_NAVIGATION_BAR};
+            lp.providesInsetsTypes = new int[]{ITYPE_NAVIGATION_BAR, ITYPE_BOTTOM_GESTURES};
             lp.windowAnimations = 0;
             lp.gravity = Gravity.BOTTOM;
             mWindowManager.addView(mBottomNavigationBarWindow, lp);
