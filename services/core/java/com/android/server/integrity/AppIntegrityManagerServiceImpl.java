@@ -190,6 +190,9 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
     public void updateRuleSet(
             String version, ParceledListSlice<Rule> rules, IntentSender statusReceiver) {
         String ruleProvider = getCallerPackageNameOrThrow(Binder.getCallingUid());
+        if (DEBUG_INTEGRITY_COMPONENT) {
+            Slog.i(TAG, String.format("Calling rule provider name is: %s.", ruleProvider));
+        }
 
         mHandler.post(
                 () -> {
@@ -201,6 +204,9 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
                         success = false;
                     }
 
+                    if (DEBUG_INTEGRITY_COMPONENT) {
+                        Slog.i(TAG, String.format("Successfully pushed rule set: %s", version));
+                    }
                     FrameworkStatsLog.write(
                             FrameworkStatsLog.INTEGRITY_RULES_PUSHED,
                             success,
@@ -673,9 +679,6 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
 
         // Identify the package names in the caller list.
         List<String> callingPackageNames = getPackageListForUid(callingUid);
-        if (DEBUG_INTEGRITY_COMPONENT) {
-            Slog.i(TAG, String.format("Calling packages are: ", callingPackageNames));
-        }
 
         // Find the intersection between the allowed and calling packages. Ideally, we will have
         // at most one package name here. But if we have more, it is fine.
@@ -685,10 +688,7 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
                 allowedCallingPackages.add(packageName);
             }
         }
-        if (DEBUG_INTEGRITY_COMPONENT) {
-            Slog.i(TAG,
-                    String.format("Calling rule pusher packages are: ", allowedCallingPackages));
-        }
+
         return allowedCallingPackages.isEmpty() ? null : allowedCallingPackages.get(0);
     }
 
@@ -706,9 +706,6 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
                 Arrays.asList(
                         mContext.getResources()
                                 .getStringArray(R.array.config_integrityRuleProviderPackages));
-        if (DEBUG_INTEGRITY_COMPONENT) {
-            Slog.i(TAG, String.format("Rule provider list contains: %s", integrityRuleProviders));
-        }
 
         // Filter out the rule provider packages that are not system apps.
         List<String> systemAppRuleProviders = new ArrayList<>();
