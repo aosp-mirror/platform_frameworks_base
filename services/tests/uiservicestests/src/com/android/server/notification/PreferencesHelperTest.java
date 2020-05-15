@@ -454,7 +454,9 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         mHelper.createNotificationChannel(PKG_O, UID_O, getChannel(), true, false);
 
         mHelper.setShowBadge(PKG_N_MR1, UID_N_MR1, true);
-        mHelper.setMessageSent(PKG_P, UID_P);
+        mHelper.setInvalidMessageSent(PKG_P, UID_P);
+        mHelper.setValidMessageSent(PKG_P, UID_P);
+        mHelper.setInvalidMsgAppDemoted(PKG_P, UID_P, true);
 
         mHelper.setImportance(PKG_O, UID_O, IMPORTANCE_NONE);
 
@@ -470,8 +472,10 @@ public class PreferencesHelperTest extends UiServiceTestCase {
 
         assertEquals(IMPORTANCE_NONE, mHelper.getImportance(PKG_O, UID_O));
         assertTrue(mHelper.canShowBadge(PKG_N_MR1, UID_N_MR1));
-        assertTrue(mHelper.hasSentMessage(PKG_P, UID_P));
-        assertFalse(mHelper.hasSentMessage(PKG_N_MR1, UID_N_MR1));
+        assertTrue(mHelper.hasSentInvalidMsg(PKG_P, UID_P));
+        assertFalse(mHelper.hasSentInvalidMsg(PKG_N_MR1, UID_N_MR1));
+        assertTrue(mHelper.hasSentValidMsg(PKG_P, UID_P));
+        assertTrue(mHelper.didUserEverDemoteInvalidMsgApp(PKG_P, UID_P));
         assertEquals(channel1,
                 mHelper.getNotificationChannel(PKG_N_MR1, UID_N_MR1, channel1.getId(), false));
         compareChannels(channel2,
@@ -3380,15 +3384,49 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testMessageSent() {
+    public void testInvalidMessageSent() {
         // create package preferences
         mHelper.canShowBadge(PKG_P, UID_P);
 
         // check default value
-        assertFalse(mHelper.hasSentMessage(PKG_P, UID_P));
+        assertFalse(mHelper.isInInvalidMsgState(PKG_P, UID_P));
 
         // change it
-        mHelper.setMessageSent(PKG_P, UID_P);
-        assertTrue(mHelper.hasSentMessage(PKG_P, UID_P));
+        mHelper.setInvalidMessageSent(PKG_P, UID_P);
+        assertTrue(mHelper.isInInvalidMsgState(PKG_P, UID_P));
+        assertTrue(mHelper.hasSentInvalidMsg(PKG_P, UID_P));
+    }
+
+    @Test
+    public void testValidMessageSent() {
+        // create package preferences
+        mHelper.canShowBadge(PKG_P, UID_P);
+
+        // get into the bad state
+        mHelper.setInvalidMessageSent(PKG_P, UID_P);
+
+        // and then fix it
+        mHelper.setValidMessageSent(PKG_P, UID_P);
+
+        assertTrue(mHelper.hasSentValidMsg(PKG_P, UID_P));
+        assertFalse(mHelper.isInInvalidMsgState(PKG_P, UID_P));
+    }
+
+    @Test
+    public void testUserDemotedInvalidMsgApp() {
+        // create package preferences
+        mHelper.canShowBadge(PKG_P, UID_P);
+
+        // demotion means nothing before msg notif sent
+        mHelper.setInvalidMsgAppDemoted(PKG_P, UID_P, true);
+        assertFalse(mHelper.hasUserDemotedInvalidMsgApp(PKG_P, UID_P));
+
+        // it's valid when incomplete msgs have been sent
+        mHelper.setInvalidMessageSent(PKG_P, UID_P);
+        assertTrue(mHelper.hasUserDemotedInvalidMsgApp(PKG_P, UID_P));
+
+        // and is invalid once complete msgs are sent
+        mHelper.setValidMessageSent(PKG_P, UID_P);
+        assertFalse(mHelper.hasUserDemotedInvalidMsgApp(PKG_P, UID_P));
     }
 }
