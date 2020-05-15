@@ -135,6 +135,7 @@ class EmbeddedWindowController {
         final int mOwnerPid;
         final WindowManagerService mWmService;
         InputChannel mInputChannel;
+        final int mWindowType;
 
         /**
          * @param clientToken client token used to clean up the map if the embedding process dies
@@ -146,7 +147,7 @@ class EmbeddedWindowController {
          * @param ownerPid  calling pid used for anr blaming
          */
         EmbeddedWindow(WindowManagerService service, IWindow clientToken,
-                WindowState hostWindowState, int ownerUid, int ownerPid) {
+                WindowState hostWindowState, int ownerUid, int ownerPid, int windowType) {
             mWmService = service;
             mClient = clientToken;
             mHostWindowState = hostWindowState;
@@ -154,6 +155,7 @@ class EmbeddedWindowController {
                     : null;
             mOwnerUid = ownerUid;
             mOwnerPid = ownerPid;
+            mWindowType = windowType;
         }
 
         String getName() {
