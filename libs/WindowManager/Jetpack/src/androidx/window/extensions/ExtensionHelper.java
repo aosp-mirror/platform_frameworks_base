@@ -30,6 +30,8 @@ import android.os.IBinder;
 import android.view.DisplayInfo;
 import android.view.Surface;
 
+import androidx.annotation.Nullable;
+
 /**
  * Toolkit class for calculation of the display feature bounds within the window.
  * NOTE: This sample implementation only works for Activity windows, because there is no public APIs
@@ -84,7 +86,7 @@ class ExtensionHelper {
 
     /** Transform rectangle from absolute coordinate space to the window coordinate space. */
     static void transformToWindowSpaceRect(Rect inOutRect, IBinder windowToken) {
-        Rect windowRect = getWindowRect(windowToken);
+        Rect windowRect = getWindowBounds(windowToken);
         if (windowRect == null) {
             inOutRect.setEmpty();
             return;
@@ -101,13 +103,12 @@ class ExtensionHelper {
      * Get the current window bounds in absolute coordinates.
      * NOTE: Only works with Activity windows.
      */
-    private static Rect getWindowRect(IBinder windowToken) {
+    @Nullable
+    private static Rect getWindowBounds(IBinder windowToken) {
         Activity activity = ActivityThread.currentActivityThread().getActivity(windowToken);
-        final Rect windowRect = new Rect();
-        if (activity != null) {
-            activity.getWindow().getDecorView().getWindowDisplayFrame(windowRect);
-        }
-        return windowRect;
+        return activity != null
+                ? activity.getWindowManager().getCurrentWindowMetrics().getBounds()
+                : null;
     }
 
     /**
