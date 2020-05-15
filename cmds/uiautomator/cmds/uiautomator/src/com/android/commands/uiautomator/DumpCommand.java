@@ -16,6 +16,7 @@
 
 package com.android.commands.uiautomator;
 
+import android.accessibilityservice.AccessibilityServiceInfo;
 import android.app.UiAutomation;
 import android.graphics.Point;
 import android.hardware.display.DisplayManagerGlobal;
@@ -61,11 +62,14 @@ public class DumpCommand extends Command {
     public void run(String[] args) {
         File dumpFile = DEFAULT_DUMP_FILE;
         boolean verboseMode = true;
+        boolean allWindows = false;
 
         for (String arg : args) {
             if (arg.equals("--compressed"))
                 verboseMode = false;
-            else if (!arg.startsWith("-")) {
+            else if (arg.equals("--windows")) {
+                allWindows = true;
+            } else if (!arg.startsWith("-")) {
                 dumpFile = new File(arg);
             }
         }
@@ -85,18 +89,28 @@ public class DumpCommand extends Command {
         try {
             UiAutomation uiAutomation = automationWrapper.getUiAutomation();
             uiAutomation.waitForIdle(1000, 1000 * 10);
-            AccessibilityNodeInfo info = uiAutomation.getRootInActiveWindow();
-            if (info == null) {
-                System.err.println("ERROR: null root node returned by UiTestAutomationBridge.");
-                return;
-            }
+            if (allWindows) {
+                AccessibilityServiceInfo info = uiAutomation.getServiceInfo();
+                info.flags |= AccessibilityServiceInfo.FLAG_RETRIEVE_INTERACTIVE_WINDOWS;
+                uiAutomation.setServiceInfo(info);
+                AccessibilityNodeInfoDumper.dumpWindowsToFile(
+                        uiAutomation.getWindowsOnAllDisplays(), dumpFile,
+                        DisplayManagerGlobal.getInstance());
+            } else {
+                AccessibilityNodeInfo info = uiAutomation.getRootInActiveWindow();
+                if (info == null) {
+                    System.err.println("ERROR: null root node returned by UiTestAutomationBridge.");
+                    return;
+                }
 
-            Display display =
-                    DisplayManagerGlobal.getInstance().getRealDisplay(Display.DEFAULT_DISPLAY);
-            int rotation = display.getRotation();
-            Point size = new Point();
-            display.getSize(size);
-            AccessibilityNodeInfoDumper.dumpWindowToFile(info, dumpFile, rotation, size.x, size.y);
+                Display display =
+                        DisplayManagerGlobal.getInstance().getRealDisplay(Display.DEFAULT_DISPLAY);
+                int rotation = display.getRotation();
+                Point size = new Point();
+                display.getSize(size);
+                AccessibilityNodeInfoDumper.dumpWindowToFile(info, dumpFile, rotation, size.x,
+                        size.y);
+            }
         } catch (TimeoutException re) {
             System.err.println("ERROR: could not get idle state.");
             return;
