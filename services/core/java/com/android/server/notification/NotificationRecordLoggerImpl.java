@@ -62,7 +62,7 @@ public class NotificationRecordLoggerImpl implements NotificationRecordLogger {
                 /* android.stats.sysui.NotificationImportance importance_asst = 19 */
                 r.getAssistantImportance(),
                 /* int32 assistant_hash = 20 */ p.getAssistantHash(),
-                /* float assistant_ranking_score = 21 */ 0 // TODO connect up ranking score
+                /* float assistant_ranking_score = 21 */ r.getRankingScore()
         );
     }
 
