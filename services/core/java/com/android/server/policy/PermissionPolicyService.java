@@ -25,6 +25,8 @@ import static android.content.pm.PackageManager.FLAG_PERMISSION_APPLY_RESTRICTIO
 import static android.content.pm.PackageManager.FLAG_PERMISSION_AUTO_REVOKED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_REVOKED_COMPAT;
+import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_SENSITIVE_WHEN_DENIED;
+import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_SENSITIVE_WHEN_GRANTED;
 import static android.content.pm.PackageManager.GET_PERMISSIONS;
 import static android.content.pm.PackageManager.MATCH_ALL;
 
@@ -45,7 +47,6 @@ import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageManagerInternal.PackageListObserver;
 import android.content.pm.PermissionInfo;
 import android.os.Build;
-import android.os.Handler;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -57,7 +58,6 @@ import android.provider.Telephony;
 import android.telecom.TelecomManager;
 import android.util.ArrayMap;
 import android.util.ArraySet;
-import android.util.Log;
 import android.util.LongSparseLongArray;
 import android.util.Pair;
 import android.util.Slog;
@@ -93,6 +93,7 @@ import java.util.concurrent.ExecutionException;
 public final class PermissionPolicyService extends SystemService {
     private static final String LOG_TAG = PermissionPolicyService.class.getSimpleName();
     private static final boolean DEBUG = false;
+    private static final long USER_SENSITIVE_UPDATE_DELAY_MS = 10000;
 
     private final Object mLock = new Object();
 
@@ -378,8 +379,6 @@ public final class PermissionPolicyService extends SystemService {
      * TODO ntmyren: Remove once propagated, and state is repaired
      */
     private void restoreReadPhoneStatePermissions(int userId) {
-        PermissionControllerManager manager = new PermissionControllerManager(this.getContext(),
-                Handler.getMain());
         PackageManager pm = getContext().getPackageManager();
         List<PackageInfo> packageInfos = pm.getInstalledPackagesAsUser(
                 MATCH_ALL | GET_PERMISSIONS, userId);
@@ -389,25 +388,20 @@ public final class PermissionPolicyService extends SystemService {
                 continue;
             }
 
-            boolean hasReadPhoneState = false;
+            UserHandle user = UserHandle.getUserHandleForUid(pI.applicationInfo.uid);
             for (int j = pI.requestedPermissions.length - 1; j >= 0; j--) {
                 if (pI.requestedPermissions[j].equals(READ_PHONE_STATE)) {
-                    hasReadPhoneState = true;
+                    int flags = pm.getPermissionFlags(READ_PHONE_STATE, pI.packageName, user);
+                    // If the app is auto revoked for read phone state, and is only user sensitive
+                    // when granted, clear auto revoked flag.
+                    if ((flags & FLAG_PERMISSION_AUTO_REVOKED) != 0
+                            && (flags & FLAG_PERMISSION_USER_SENSITIVE_WHEN_GRANTED) != 0
+                            && (flags & FLAG_PERMISSION_USER_SENSITIVE_WHEN_DENIED) == 0) {
+                        pm.updatePermissionFlags(READ_PHONE_STATE, pI.packageName,
+                                FLAG_PERMISSION_AUTO_REVOKED, 0, user);
+                    }
+                    break;
                 }
-            }
-            if (!hasReadPhoneState) {
-                continue;
-            }
-
-            Log.i(LOG_TAG, "Updating read phone state for " + pI.packageName + " "
-                    + pI.applicationInfo.uid);
-            manager.updateUserSensitiveForApp(pI.applicationInfo.uid);
-
-            UserHandle user = UserHandle.getUserHandleForUid(pI.applicationInfo.uid);
-            int permFlags = pm.getPermissionFlags(READ_PHONE_STATE, pI.packageName, user);
-            if ((permFlags & FLAG_PERMISSION_AUTO_REVOKED) != 0) {
-                pm.updatePermissionFlags(READ_PHONE_STATE, pI.packageName,
-                        FLAG_PERMISSION_AUTO_REVOKED, 0, user);
             }
         }
     }
@@ -460,7 +454,8 @@ public final class PermissionPolicyService extends SystemService {
                 throw new IllegalStateException(e);
             }
 
-            permissionControllerManager.updateUserSensitive();
+            FgThread.getHandler().postDelayed(permissionControllerManager::updateUserSensitive,
+                    USER_SENSITIVE_UPDATE_DELAY_MS);
 
             packageManagerInternal.updateRuntimePermissionsFingerprint(userId);
         }
