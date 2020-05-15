@@ -15,6 +15,32 @@
   ~ limitations under the License
   -->
 <resources>
+    <!-- Text size for car -->
+    <dimen name="car_title_size">32sp</dimen>
+    <dimen name="car_title2_size">32sp</dimen>
+    <dimen name="car_headline1_size">45sp</dimen>
+    <dimen name="car_headline2_size">32sp</dimen>
+    <dimen name="car_headline3_size">24sp</dimen>
+    <dimen name="car_headline4_size">20sp</dimen>
+    <dimen name="car_body1_size">32sp</dimen>
+    <dimen name="car_body2_size">28sp</dimen>
+    <dimen name="car_body3_size">26sp</dimen>
+    <dimen name="car_body4_size">24sp</dimen>
+    <!-- car_body5_size is deprecated -->
+    <dimen name="car_body5_size">18sp</dimen>
+    <dimen name="car_label1_size">26sp</dimen>
+    <dimen name="car_label2_size">64sp</dimen>
+    <dimen name="car_action1_size">26sp</dimen>
+    <dimen name="car_action2_size">26sp</dimen>
+    <!-- Paddings -->
+    <dimen name="car_padding_0">4dp</dimen>
+    <dimen name="car_padding_1">8dp</dimen>
+    <dimen name="car_padding_2">16dp</dimen>
+    <dimen name="car_padding_3">24dp</dimen>
+    <dimen name="car_padding_4">32dp</dimen>
+    <dimen name="car_padding_5">64dp</dimen>
+    <dimen name="car_padding_6">96dp</dimen>
+
     <!--
        Note: status bar height and navigation bar heights are defined
        in frameworks/base/core package and thus will have no effect if
@@ -156,4 +182,10 @@
     <dimen name="car_user_switcher_container_height">420dp</dimen>
     <!-- This must be the negative of car_user_switcher_container_height for the animation. -->
     <dimen name="car_user_switcher_container_anim_height">-420dp</dimen>
+
+    <!-- dimensions for car user switching dialog -->
+    <dimen name="car_fullscreen_user_pod_image_avatar_width">96dp</dimen>
+    <dimen name="car_fullscreen_user_pod_image_avatar_height">96dp</dimen>
+    <dimen name="car_user_switching_dialog_loading_text_margin_top">@*android:dimen/car_padding_4</dimen>
+    <dimen name="car_user_switching_dialog_loading_text_font_size">@*android:dimen/car_body1_size</dimen>
 </resources>
