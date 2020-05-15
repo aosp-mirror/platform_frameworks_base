@@ -431,16 +431,46 @@ class ProcessRecord implements WindowProcessListener {
                 pw.print(" nextPssTime=");
                 TimeUtils.formatDuration(nextPssTime, nowUptime, pw);
                 pw.println();
-        pw.print(prefix); pw.print("adjSeq="); pw.print(adjSeq);
-                pw.print(" lruSeq="); pw.print(lruSeq);
-                pw.print(" lastPss="); DebugUtils.printSizeValue(pw, lastPss*1024);
-                pw.print(" lastSwapPss="); DebugUtils.printSizeValue(pw, lastSwapPss*1024);
-                pw.print(" lastCachedPss="); DebugUtils.printSizeValue(pw, lastCachedPss*1024);
-                pw.print(" lastCachedSwapPss="); DebugUtils.printSizeValue(pw, lastCachedSwapPss*1024);
-        pw.print(" lastRss="); DebugUtils.printSizeValue(pw, mLastRss * 1024);
+        pw.print(prefix); pw.print("lastPss="); DebugUtils.printSizeValue(pw, lastPss * 1024);
+                pw.print(" lastSwapPss="); DebugUtils.printSizeValue(pw, lastSwapPss * 1024);
+                pw.print(" lastCachedPss="); DebugUtils.printSizeValue(pw, lastCachedPss * 1024);
+                pw.print(" lastCachedSwapPss="); DebugUtils.printSizeValue(pw,
+                        lastCachedSwapPss * 1024);
+                pw.print(" lastRss="); DebugUtils.printSizeValue(pw, mLastRss * 1024);
                 pw.println();
         pw.print(prefix); pw.print("procStateMemTracker: ");
         procStateMemTracker.dumpLine(pw);
+        pw.print(prefix); pw.print("adjSeq="); pw.print(adjSeq);
+                pw.print(" lruSeq="); pw.println(lruSeq);
+        pw.print(prefix); pw.print("oom adj: max="); pw.print(maxAdj);
+                pw.print(" curRaw="); pw.print(mCurRawAdj);
+                pw.print(" setRaw="); pw.print(setRawAdj);
+                pw.print(" cur="); pw.print(curAdj);
+                pw.print(" set="); pw.println(setAdj);
+        pw.print(prefix); pw.print("lastCompactTime="); pw.print(lastCompactTime);
+                pw.print(" lastCompactAction="); pw.println(lastCompactAction);
+        pw.print(prefix); pw.print("mCurSchedGroup="); pw.print(mCurSchedGroup);
+                pw.print(" setSchedGroup="); pw.print(setSchedGroup);
+                pw.print(" systemNoUi="); pw.print(systemNoUi);
+                pw.print(" trimMemoryLevel="); pw.println(trimMemoryLevel);
+        pw.print(prefix); pw.print("curProcState="); pw.print(getCurProcState());
+                pw.print(" mRepProcState="); pw.print(mRepProcState);
+                pw.print(" pssProcState="); pw.print(pssProcState);
+                pw.print(" setProcState="); pw.print(setProcState);
+                pw.print(" lastStateTime=");
+                TimeUtils.formatDuration(lastStateTime, nowUptime, pw);
+                pw.println();
+        pw.print(prefix); pw.print("curCapability=");
+                ActivityManager.printCapabilitiesFull(pw, curCapability);
+                pw.print(" setCapability=");
+                ActivityManager.printCapabilitiesFull(pw, setCapability);
+                pw.println();
+        if (hasShownUi || mPendingUiClean || hasAboveClient || treatLikeActivity) {
+            pw.print(prefix); pw.print("hasShownUi="); pw.print(hasShownUi);
+                    pw.print(" pendingUiClean="); pw.print(mPendingUiClean);
+                    pw.print(" hasAboveClient="); pw.print(hasAboveClient);
+                    pw.print(" treatLikeActivity="); pw.println(treatLikeActivity);
+        }
         pw.print(prefix); pw.print("cached="); pw.print(mCached);
                 pw.print(" empty="); pw.println(empty);
         if (serviceb) {
@@ -450,32 +480,6 @@ class ProcessRecord implements WindowProcessListener {
         if (notCachedSinceIdle) {
             pw.print(prefix); pw.print("notCachedSinceIdle="); pw.print(notCachedSinceIdle);
                     pw.print(" initialIdlePss="); pw.println(initialIdlePss);
-        }
-        pw.print(prefix); pw.print("oom: max="); pw.print(maxAdj);
-                pw.print(" curRaw="); pw.print(mCurRawAdj);
-                pw.print(" setRaw="); pw.print(setRawAdj);
-                pw.print(" cur="); pw.print(curAdj);
-                pw.print(" set="); pw.println(setAdj);
-        pw.print(prefix); pw.print("lastCompactTime="); pw.print(lastCompactTime);
-                pw.print(" lastCompactAction="); pw.print(lastCompactAction);
-        pw.print(prefix); pw.print("mCurSchedGroup="); pw.print(mCurSchedGroup);
-                pw.print(" setSchedGroup="); pw.print(setSchedGroup);
-                pw.print(" systemNoUi="); pw.print(systemNoUi);
-                pw.print(" trimMemoryLevel="); pw.println(trimMemoryLevel);
-        pw.print(prefix); pw.print("curProcState="); pw.print(getCurProcState());
-                pw.print(" mRepProcState="); pw.print(mRepProcState);
-                pw.print(" pssProcState="); pw.print(pssProcState);
-                pw.print(" setProcState="); pw.print(setProcState);
-                pw.print(" curCapability="); pw.print(curCapability);
-                pw.print(" setCapability="); pw.print(setCapability);
-                pw.print(" lastStateTime=");
-                TimeUtils.formatDuration(lastStateTime, nowUptime, pw);
-                pw.println();
-        if (hasShownUi || mPendingUiClean || hasAboveClient || treatLikeActivity) {
-            pw.print(prefix); pw.print("hasShownUi="); pw.print(hasShownUi);
-                    pw.print(" pendingUiClean="); pw.print(mPendingUiClean);
-                    pw.print(" hasAboveClient="); pw.print(hasAboveClient);
-                    pw.print(" treatLikeActivity="); pw.println(treatLikeActivity);
         }
         if (connectionService != null || connectionGroup != 0) {
             pw.print(prefix); pw.print("connectionGroup="); pw.print(connectionGroup);
