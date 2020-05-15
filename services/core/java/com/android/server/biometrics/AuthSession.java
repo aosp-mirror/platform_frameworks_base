@@ -48,7 +48,7 @@ import java.util.Random;
  * {@link android.hardware.biometrics.BiometricPrompt}, as well as all of the necessary
  * state information for such a session.
  */
-final class AuthSession {
+final class AuthSession implements IBinder.DeathRecipient {
     private static final String TAG = "BiometricService/AuthSession";
 
     /**
@@ -93,6 +93,12 @@ final class AuthSession {
      * Device credential in AuthController is showing
      */
     static final int STATE_SHOWING_DEVICE_CREDENTIAL = 8;
+    /**
+     * The client binder died, and sensors were authenticating at the time. Cancel has been
+     * requested and we're waiting for the HAL(s) to send ERROR_CANCELED.
+     */
+    static final int STATE_CLIENT_DIED_CANCELLING = 9;
+
     @IntDef({
             STATE_AUTH_IDLE,
             STATE_AUTH_CALLED,
@@ -106,10 +112,20 @@ final class AuthSession {
     @Retention(RetentionPolicy.SOURCE)
     @interface SessionState {}
 
+    /**
+     * Notify the holder of the AuthSession that the caller/client's binder has died. The
+     * holder (BiometricService) should schedule {@link AuthSession#onClientDied()} to be run
+     * on its handler (instead of whatever thread invokes the death recipient callback).
+     */
+    interface ClientDeathReceiver {
+        void onClientDied();
+    }
+
     private final IStatusBarService mStatusBarService;
     private final IBiometricSysuiReceiver mSysuiReceiver;
     private final KeyStore mKeyStore;
     private final Random mRandom;
+    private final ClientDeathReceiver mClientDeathReceiver;
     final PreAuthInfo mPreAuthInfo;
 
     // The following variables are passed to authenticateInternal, which initiates the
@@ -143,14 +159,16 @@ final class AuthSession {
     private long mAuthenticatedTimeMs;
 
     AuthSession(IStatusBarService statusBarService, IBiometricSysuiReceiver sysuiReceiver,
-            KeyStore keystore, Random random, PreAuthInfo preAuthInfo,
-            IBinder token, long operationId, int userId, IBiometricSensorReceiver sensorReceiver,
-            IBiometricServiceReceiver clientReceiver, String opPackageName, PromptInfo promptInfo,
+            KeyStore keystore, Random random, ClientDeathReceiver clientDeathReceiver,
+            PreAuthInfo preAuthInfo, IBinder token, long operationId, int userId,
+            IBiometricSensorReceiver sensorReceiver, IBiometricServiceReceiver clientReceiver,
+            String opPackageName, PromptInfo promptInfo,
             int callingUid, int callingPid, int callingUserId, boolean debugEnabled) {
         mStatusBarService = statusBarService;
         mSysuiReceiver = sysuiReceiver;
         mKeyStore = keystore;
         mRandom = random;
+        mClientDeathReceiver = clientDeathReceiver;
         mPreAuthInfo = preAuthInfo;
         mToken = token;
         mOperationId = operationId;
@@ -164,7 +182,19 @@ final class AuthSession {
         mCallingUserId = callingUserId;
         mDebugEnabled = debugEnabled;
 
+        try {
+            mClientReceiver.asBinder().linkToDeath(this, 0 /* flags */);
+        } catch (RemoteException e) {
+            Slog.w(TAG, "Unable to link to death");
+        }
+
         setSensorsToStateUnknown();
+    }
+
+    @Override
+    public void binderDied() {
+        Slog.e(TAG, "Binder died, session: " + this);
+        mClientDeathReceiver.onClientDied();
     }
 
     /**
@@ -379,6 +409,10 @@ final class AuthSession {
                 Slog.d(TAG, "Biometric canceled, ignoring from state: " + mState);
                 break;
 
+            case STATE_CLIENT_DIED_CANCELLING:
+                mStatusBarService.hideAuthenticationDialog();
+                return true;
+
             default:
                 Slog.e(TAG, "Unhandled error state, mState: " + mState);
                 break;
@@ -484,6 +518,25 @@ final class AuthSession {
         // from system server. The interface is permission protected so this is fine.
         cancelBiometricOnly();
         mState = STATE_SHOWING_DEVICE_CREDENTIAL;
+    }
+
+    /**
+     * @return true if this session is finished and should be set to null.
+     */
+    boolean onClientDied() {
+        try {
+            if (mState == STATE_AUTH_STARTED) {
+                mState = STATE_CLIENT_DIED_CANCELLING;
+                cancelAllSensors();
+                return false;
+            } else {
+                mStatusBarService.hideAuthenticationDialog();
+                return true;
+            }
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Remote Exception: " + e);
+            return true;
+        }
     }
 
     private void logOnDialogDismissed(@BiometricPrompt.DismissedReason int reason) {
