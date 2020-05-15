@@ -2188,6 +2188,10 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 // display area, so reparent.
                 stack.reparent(taskDisplayArea, true /* onTop */);
             }
+            // Defer the windowing mode change until after the transition to prevent the activity
+            // from doing work and changing the activity visuals while animating
+            // TODO(task-org): Figure-out more structured way to do this long term.
+            r.setWindowingMode(stack.getWindowingMode());
             stack.setWindowingMode(WINDOWING_MODE_PINNED);
 
             // Reset the state that indicates it can enter PiP while pausing after we've moved it
