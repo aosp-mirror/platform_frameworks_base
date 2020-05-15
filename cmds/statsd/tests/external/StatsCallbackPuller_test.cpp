@@ -155,7 +155,7 @@ TEST_F(StatsCallbackPullerTest, PullFail) {
 TEST_F(StatsCallbackPullerTest, PullTimeout) {
     shared_ptr<FakePullAtomCallback> cb = SharedRefBase::make<FakePullAtomCallback>();
     pullSuccess = true;
-    pullDelayNs = 500000000;  // 500ms.
+    pullDelayNs = MillisToNano(5);  // 5ms.
     pullTimeoutNs = 10000;    // 10 microseconds.
     int64_t value = 4321;
     values.push_back(value);
@@ -184,7 +184,7 @@ TEST_F(StatsCallbackPullerTest, PullTimeout) {
 TEST_F(StatsCallbackPullerTest, RegisterAndTimeout) {
     shared_ptr<FakePullAtomCallback> cb = SharedRefBase::make<FakePullAtomCallback>();
     pullSuccess = true;
-    pullDelayNs = 500000000;  // 500 ms.
+    pullDelayNs = MillisToNano(5);  // 5 ms.
     pullTimeoutNs = 10000;    // 10 microsseconds.
     int64_t value = 4321;
     int32_t uid = 123;
@@ -196,7 +196,7 @@ TEST_F(StatsCallbackPullerTest, RegisterAndTimeout) {
     vector<shared_ptr<LogEvent>> dataHolder;
     int64_t startTimeNs = getElapsedRealtimeNs();
     // Returns false, since StatsPuller code will evaluate the timeout.
-    EXPECT_FALSE(pullerManager->Pull(pullTagId, {uid}, &dataHolder));
+    EXPECT_FALSE(pullerManager->Pull(pullTagId, {uid}, startTimeNs, &dataHolder));
     int64_t endTimeNs = getElapsedRealtimeNs();
     int64_t actualPullDurationNs = endTimeNs - startTimeNs;
 

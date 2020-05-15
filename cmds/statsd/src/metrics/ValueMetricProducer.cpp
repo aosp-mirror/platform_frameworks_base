@@ -508,7 +508,7 @@ void ValueMetricProducer::prepareFirstBucketLocked() {
 
 void ValueMetricProducer::pullAndMatchEventsLocked(const int64_t timestampNs) {
     vector<std::shared_ptr<LogEvent>> allData;
-    if (!mPullerManager->Pull(mPullTagId, mConfigKey, &allData)) {
+    if (!mPullerManager->Pull(mPullTagId, mConfigKey, timestampNs, &allData)) {
         ALOGE("Stats puller failed for tag: %d at %lld", mPullTagId, (long long)timestampNs);
         invalidateCurrentBucket(timestampNs, BucketDropReason::PULL_FAILED);
         return;

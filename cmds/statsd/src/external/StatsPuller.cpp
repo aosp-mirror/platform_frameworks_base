@@ -38,14 +38,16 @@ StatsPuller::StatsPuller(const int tagId, const int64_t coolDownNs, const int64_
       mPullTimeoutNs(pullTimeoutNs),
       mCoolDownNs(coolDownNs),
       mAdditiveFields(additiveFields),
-      mLastPullTimeNs(0) {
+      mLastPullTimeNs(0),
+      mLastEventTimeNs(0) {
 }
 
-bool StatsPuller::Pull(std::vector<std::shared_ptr<LogEvent>>* data) {
+bool StatsPuller::Pull(const int64_t eventTimeNs, std::vector<std::shared_ptr<LogEvent>>* data) {
     lock_guard<std::mutex> lock(mLock);
     int64_t elapsedTimeNs = getElapsedRealtimeNs();
     StatsdStats::getInstance().notePull(mTagId);
-    const bool shouldUseCache = elapsedTimeNs - mLastPullTimeNs < mCoolDownNs;
+    const bool shouldUseCache =
+            (mLastEventTimeNs == eventTimeNs) || (elapsedTimeNs - mLastPullTimeNs < mCoolDownNs);
     if (shouldUseCache) {
         if (mHasGoodData) {
             (*data) = mCachedData;
@@ -54,13 +56,13 @@ bool StatsPuller::Pull(std::vector<std::shared_ptr<LogEvent>>* data) {
         }
         return mHasGoodData;
     }
-
     if (mLastPullTimeNs > 0) {
         StatsdStats::getInstance().updateMinPullIntervalSec(
                 mTagId, (elapsedTimeNs - mLastPullTimeNs) / NS_PER_SEC);
     }
     mCachedData.clear();
     mLastPullTimeNs = elapsedTimeNs;
+    mLastEventTimeNs = eventTimeNs;
     mHasGoodData = PullInternal(&mCachedData);
     if (!mHasGoodData) {
         return mHasGoodData;
@@ -70,7 +72,7 @@ bool StatsPuller::Pull(std::vector<std::shared_ptr<LogEvent>>* data) {
     const bool pullTimeOut = pullDurationNs > mPullTimeoutNs;
     if (pullTimeOut) {
         // Something went wrong. Discard the data.
-        clearCacheLocked();
+        mCachedData.clear();
         mHasGoodData = false;
         StatsdStats::getInstance().notePullTimeout(mTagId);
         ALOGW("Pull for atom %d exceeds timeout %lld nano seconds.", mTagId,
@@ -104,6 +106,7 @@ int StatsPuller::clearCacheLocked() {
     int ret = mCachedData.size();
     mCachedData.clear();
     mLastPullTimeNs = 0;
+    mLastEventTimeNs = 0;
     return ret;
 }
 
