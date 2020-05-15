@@ -16,19 +16,15 @@
 
 package com.android.systemui.media
 
-import android.graphics.Color
-import android.content.res.ColorStateList
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.View
 import android.widget.SeekBar
 import android.widget.TextView
 import androidx.test.filters.SmallTest
-
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.google.common.truth.Truth.assertThat
-
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -65,7 +61,7 @@ public class SeekBarObserverTest : SysuiTestCase() {
     fun seekBarGone() {
         // WHEN seek bar is disabled
         val isEnabled = false
-        val data = SeekBarViewModel.Progress(isEnabled, false, null, null, null)
+        val data = SeekBarViewModel.Progress(isEnabled, false, null, null)
         observer.onChanged(data)
         // THEN seek bar shows just a line with no text
         assertThat(seekBarView.isEnabled()).isFalse()
@@ -78,7 +74,7 @@ public class SeekBarObserverTest : SysuiTestCase() {
     fun seekBarVisible() {
         // WHEN seek bar is enabled
         val isEnabled = true
-        val data = SeekBarViewModel.Progress(isEnabled, true, 3000, 12000, -1)
+        val data = SeekBarViewModel.Progress(isEnabled, true, 3000, 12000)
         observer.onChanged(data)
         // THEN seek bar is visible
         assertThat(seekBarView.getVisibility()).isEqualTo(View.VISIBLE)
@@ -89,7 +85,7 @@ public class SeekBarObserverTest : SysuiTestCase() {
     @Test
     fun seekBarProgress() {
         // WHEN seek bar progress is about half
-        val data = SeekBarViewModel.Progress(true, true, 3000, 120000, -1)
+        val data = SeekBarViewModel.Progress(true, true, 3000, 120000)
         observer.onChanged(data)
         // THEN seek bar is visible
         assertThat(seekBarView.progress).isEqualTo(100)
@@ -102,7 +98,7 @@ public class SeekBarObserverTest : SysuiTestCase() {
     fun seekBarDisabledWhenSeekNotAvailable() {
         // WHEN seek is not available
         val isSeekAvailable = false
-        val data = SeekBarViewModel.Progress(true, isSeekAvailable, 3000, 120000, -1)
+        val data = SeekBarViewModel.Progress(true, isSeekAvailable, 3000, 120000)
         observer.onChanged(data)
         // THEN seek bar is not enabled
         assertThat(seekBarView.isEnabled()).isFalse()
@@ -112,20 +108,9 @@ public class SeekBarObserverTest : SysuiTestCase() {
     fun seekBarEnabledWhenSeekNotAvailable() {
         // WHEN seek is available
         val isSeekAvailable = true
-        val data = SeekBarViewModel.Progress(true, isSeekAvailable, 3000, 120000, -1)
+        val data = SeekBarViewModel.Progress(true, isSeekAvailable, 3000, 120000)
         observer.onChanged(data)
         // THEN seek bar is not enabled
         assertThat(seekBarView.isEnabled()).isTrue()
-    }
-
-    @Test
-    fun seekBarColor() {
-        // WHEN data included color
-        val data = SeekBarViewModel.Progress(true, true, 3000, 120000, Color.RED)
-        observer.onChanged(data)
-        // THEN seek bar is colored
-        val red = ColorStateList.valueOf(Color.RED)
-        assertThat(elapsedTimeView.getTextColors()).isEqualTo(red)
-        assertThat(totalTimeView.getTextColors()).isEqualTo(red)
     }
 }
