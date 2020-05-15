@@ -25,6 +25,7 @@ import static java.util.Arrays.copyOfRange;
 
 import android.annotation.Nullable;
 import android.content.Context;
+import android.provider.Settings;
 import android.util.Log;
 import android.util.MathUtils;
 import android.util.Slog;
@@ -160,6 +161,11 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
         } else {
             enableWindowMagnifier(Float.NaN, Float.NaN);
         }
+    }
+
+    @Override
+    public int getMode() {
+        return Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW;
     }
 
     private void enableWindowMagnifier(float centerX, float centerY) {
