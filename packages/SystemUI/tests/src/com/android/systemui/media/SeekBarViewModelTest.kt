@@ -16,7 +16,6 @@
 
 package com.android.systemui.media
 
-import android.graphics.Color
 import android.media.MediaMetadata
 import android.media.session.MediaController
 import android.media.session.PlaybackState
@@ -352,25 +351,6 @@ public class SeekBarViewModelTest : SysuiTestCase() {
         }
         // THEN another task is queued
         assertThat(fakeExecutor.numPending()).isEqualTo(1)
-    }
-
-    @Test
-    fun taskUpdatesProgress() {
-        // GIVEN that the PlaybackState contins the initial position
-        val initialPosition = 0L
-        val state = PlaybackState.Builder().run {
-            setState(PlaybackState.STATE_PLAYING, initialPosition, 1f)
-            build()
-        }
-        whenever(mockController.getPlaybackState()).thenReturn(state)
-        viewModel.updateController(mockController)
-        // WHEN the task runs
-        with(fakeExecutor) {
-            advanceClockToNext()
-            runAllReady()
-        }
-        // THEN elapsed time has increased
-        assertThat(viewModel.progress.value!!.elapsedTime).isGreaterThan(initialPosition.toInt())
     }
 
     @Test
