@@ -1581,12 +1581,13 @@ public class IntentFilter implements Parcelable {
      * @param wildcardSupported if true, will allow parameters to use wildcards
      */
     private int matchData(String type, String scheme, Uri data, boolean wildcardSupported) {
-        final ArrayList<String> types = mDataTypes;
+        final boolean wildcardWithMimegroups = wildcardSupported && countMimeGroups() != 0;
+        final List<String> types = mDataTypes;
         final ArrayList<String> schemes = mDataSchemes;
 
         int match = MATCH_CATEGORY_EMPTY;
 
-        if (types == null && schemes == null) {
+        if (!wildcardWithMimegroups && types == null && schemes == null) {
             return ((type == null && data == null)
                 ? (MATCH_CATEGORY_EMPTY+MATCH_ADJUSTMENT_NORMAL) : NO_MATCH_DATA);
         }
@@ -1641,7 +1642,9 @@ public class IntentFilter implements Parcelable {
             }
         }
 
-        if (types != null) {
+        if (wildcardWithMimegroups) {
+            return MATCH_CATEGORY_TYPE;
+        } else if (types != null) {
             if (findMimeType(type)) {
                 match = MATCH_CATEGORY_TYPE;
             } else {
