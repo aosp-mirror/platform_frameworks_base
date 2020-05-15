@@ -15,7 +15,7 @@
   ~ limitations under the License.
   -->
 
-<resources>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <!-- String to represent lowest setting of an HVAC system [CHAR LIMIT=10]-->
     <string name="hvac_min_text">Min</string>
     <!-- String to represent largest setting of an HVAC system [CHAR LIMIT=10]-->
@@ -34,4 +34,8 @@
     <string name="user_add_user_message_setup">When you add a new user, that person needs to set up their space.</string>
     <!-- Message to inform user that the newly created user will have permissions to update apps for all other users. [CHAR LIMIT=100] -->
     <string name="user_add_user_message_update">Any user can update apps for all other users.</string>
+    <!-- Message to inform user that the new user profile is loading. [CHAR LIMIT=20] -->
+    <string name="car_loading_profile">Loading</string>
+    <!-- Message to inform user that the new user profile is loading with additional information on the previous and the next user. [CHAR LIMIT=100] -->
+    <string name="car_loading_profile_developer_message">Loading user (from <xliff:g id="from_user" example="10">%1$d</xliff:g> to <xliff:g id="to_user" example="12">%2$d</xliff:g>)</string>
 </resources>
