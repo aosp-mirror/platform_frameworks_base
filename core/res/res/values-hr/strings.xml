@@ -540,8 +540,7 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"Omogućuje aplikaciji izmjenu vaše zbirke fotografija."</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"čitanje lokacija iz vaše medijske zbirke"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"Omogućuje aplikaciji čitanje lokacija iz vaše medijske zbirke."</string>
-    <!-- no translation found for biometric_dialog_default_title (55026799173208210) -->
-    <skip />
+    <string name="biometric_dialog_default_title" msgid="55026799173208210">"Potvrdite da ste to vi"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Biometrijski hardver nije dostupan"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Autentifikacija otkazana"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Nije prepoznato"</string>

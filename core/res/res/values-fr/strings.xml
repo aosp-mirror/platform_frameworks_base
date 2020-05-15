@@ -537,8 +537,7 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"Autorise l\'application à modifier votre bibliothèque photo."</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"consulter des positions issues de votre bibliothèque multimédia"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"Autorise l\'application à consulter des positions issues de votre bibliothèque multimédia."</string>
-    <!-- no translation found for biometric_dialog_default_title (55026799173208210) -->
-    <skip />
+    <string name="biometric_dialog_default_title" msgid="55026799173208210">"Confirmez votre identité"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Matériel biométrique indisponible"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Authentification annulée"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Non reconnu"</string>
@@ -854,7 +853,7 @@
     <string name="lockscreen_transport_stop_description" msgid="1449552232598355348">"Arrêter"</string>
     <string name="lockscreen_transport_rew_description" msgid="7680106856221622779">"Retour arrière"</string>
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"Avance rapide"</string>
-    <string name="emergency_calls_only" msgid="3057351206678279851">"Urgences seulement"</string>
+    <string name="emergency_calls_only" msgid="3057351206678279851">"Appels d\'urgence uniquement"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"Réseau verrouillé"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"La carte SIM est verrouillée par clé PUK."</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"Veuillez consulter le guide de l\'utilisateur ou contacter le service client."</string>

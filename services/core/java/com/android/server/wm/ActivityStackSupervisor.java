@@ -1741,8 +1741,8 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
             return;
         }
 
-        // Send launch end powerhint before going sleep
-        mRootWindowContainer.sendPowerHintForLaunchEndIfNeeded();
+        // End power mode launch before going sleep
+        mRootWindowContainer.endPowerModeLaunchIfNeeded();
 
         removeSleepTimeouts();
 
@@ -2492,7 +2492,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                     && task.getRootActivity() != null) {
                 final ActivityRecord targetActivity = task.getTopNonFinishingActivity();
 
-                mRootWindowContainer.sendPowerHintForLaunchStartIfNeeded(
+                mRootWindowContainer.startPowerModeLaunchIfNeeded(
                         true /* forceSend */, targetActivity);
                 final LaunchingState launchingState =
                         mActivityMetricsLogger.notifyActivityLaunching(task.intent);

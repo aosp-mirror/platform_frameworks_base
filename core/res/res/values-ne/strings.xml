@@ -94,7 +94,7 @@
     <string name="notification_channel_sms" msgid="1243384981025535724">"SMS सन्देशहरू"</string>
     <string name="notification_channel_voice_mail" msgid="8457433203106654172">"भ्वाइस मेल सन्देशहरू"</string>
     <string name="notification_channel_wfc" msgid="9048240466765169038">"Wi-Fi कल"</string>
-    <string name="notification_channel_sim" msgid="5098802350325677490">"SIM को स्थिति"</string>
+    <string name="notification_channel_sim" msgid="5098802350325677490">"SIM को अवस्था"</string>
     <string name="notification_channel_sim_high_prio" msgid="642361929452850928">"उच्च प्राथमिकता रहेको SIM को स्थिति"</string>
     <string name="peerTtyModeFull" msgid="337553730440832160">"सहकर्मी अनुरोध गरियो। TTY मोड पूर्ण"</string>
     <string name="peerTtyModeHco" msgid="5626377160840915617">"सहकर्मी अनुरोध गरियो। TTY मोड HCO"</string>
@@ -381,7 +381,7 @@
     <string name="permlab_persistentActivity" msgid="464970041740567970">"एपहरू जहिले पनि चल्ने बनाउनुहोस्"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="6055271149187369916">"यसको आफ्नै मेमोरीमा दृढ भएकोको अंश बनाउनको लागि एपलाई अनुमति दिन्छ। ट्याब्लेटलाई ढिलो गराउँदै गरेका अन्य अनुप्रयोगहरूलाई सीमित मात्रामा यसले मेमोरी उपलब्ध गराउन सक्छ।"</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="6800526387664131321">"एपलाई आफ्ना केही अंशहरू मेमोरीमा स्थायी रूपमा राख्ने अनुमति दिन्छ। यसले गर्दा अन्य अनुप्रयोगहरूका लागि मेमोरीको अभाव हुन सक्ने भएकाले तपाईंको Android TV यन्त्र सुस्त हुन सक्छ।"</string>
-    <string name="permdesc_persistentActivity" product="default" msgid="1914841924366562051">"एपलाई मेमोरीमा आफैंको निरन्तरको अंश बनाउन अनुमति दिन्छ। यसले फोनलाई ढिला बनाएर अन्य अनुप्रयोगहरूमा मेमोरी SIMित गर्न सक्दछन्।"</string>
+    <string name="permdesc_persistentActivity" product="default" msgid="1914841924366562051">"एपलाई मेमोरीमा आफैंको निरन्तरको अंश बनाउन अनुमति दिन्छ। यसले फोनलाई ढिला बनाएर अन्य एपहरूमा मेमोरी SIMित गर्न सक्दछन्।"</string>
     <string name="permlab_foregroundService" msgid="1768855976818467491">"अग्रभूमिको सेवा सञ्चालन गर्नुहोस्"</string>
     <string name="permdesc_foregroundService" msgid="8720071450020922795">"एपलाई अग्रभूमिका सेवाहरू प्रयोग गर्ने अनुमति दिन्छ।"</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"एप भण्डारण ठाउँको मापन गर्नुहोस्"</string>
@@ -617,7 +617,7 @@
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"समीकरण सेटिङहरू पढ्नुहोस्"</string>
     <string name="permdesc_readSyncSettings" msgid="1325658466358779298">"एपलाई खाताको लागि सिंक सेटिङहरू पढ्न अनुमति दिन्छ। उदाहरणको लागि यसले व्यक्तिहरको एप खातासँग सिंक भएको नभएको निर्धारण गर्न सक्दछ।"</string>
     <string name="permlab_writeSyncSettings" msgid="6583154300780427399">"टगल सिंक खुला र बन्द"</string>
-    <string name="permdesc_writeSyncSettings" msgid="6029151549667182687">"अनुप्रयोगहरूलाई खाताको लागि सिंक सेटिङहरू परिमार्जन गर्न अनुमति दिन्छ। उदाहरणको लागि, यो खातासँग व्यक्ति अनुप्रयोगको सिंक सक्षम गर्न प्रयोग गर्न सकिन्छ।"</string>
+    <string name="permdesc_writeSyncSettings" msgid="6029151549667182687">"अनुप्रयोगहरूलाई खाताको लागि सिंक सेटिङहरू परिमार्जन गर्न अनुमति दिन्छ। उदाहरणको लागि, यो खातासँग व्यक्ति एपको सिंक सक्षम गर्न प्रयोग गर्न सकिन्छ।"</string>
     <string name="permlab_readSyncStats" msgid="3747407238320105332">"सिंक तथ्याङ्कहरू पढ्नुहोस्"</string>
     <string name="permdesc_readSyncStats" msgid="3867809926567379434">"एपलाई खाताको लागि समीकरणको आँकडा समीकरण घटनाहरूको  इतिहास र समीकरण गरिएको डेटाको मापन समेत, पढ्न अनुमति दिन्छ।"</string>
     <string name="permlab_sdcardRead" msgid="5791467020950064920">"आफ्नो आदान प्रदान गरिएको भण्डारणको सामग्रीहरूहरू पढ्नुहोस्"</string>
@@ -1190,7 +1190,7 @@
     <string name="screen_compat_mode_hint" msgid="4032272159093750908">"प्रणाली सेटिङहरूमा यसलाई पुनःसक्षम गराउनुहोस् &gt; एपहरू &gt; डाउनलोड गरेको।"</string>
     <string name="unsupported_display_size_message" msgid="7265211375269394699">"<xliff:g id="APP_NAME">%1$s</xliff:g> ले हालको प्रदर्शनको आकार सम्बन्धी सेटिङलाई समर्थन गर्दैन र अप्रत्याशित तरिकाले व्यवहार गर्न सक्छ।"</string>
     <string name="unsupported_display_size_show" msgid="980129850974919375">"सधैँ देखाउनुहोस्"</string>
-    <string name="unsupported_compile_sdk_message" msgid="7326293500707890537">"<xliff:g id="APP_NAME">%1$s</xliff:g> लाई Android OS को कुनै नमिल्दो संस्करणका लागि निर्माण गरिएको थियो र यसले अप्रत्याशित ढंगले कार्य गर्नसक्छ। उक्त अनुप्रयोगको कुनै अद्यावधिक संस्करण उपलब्ध हुनसक्छ।"</string>
+    <string name="unsupported_compile_sdk_message" msgid="7326293500707890537">"<xliff:g id="APP_NAME">%1$s</xliff:g> लाई Android OS को कुनै नमिल्दो संस्करणका लागि निर्माण गरिएको थियो र यसले अप्रत्याशित ढंगले कार्य गर्नसक्छ। उक्त एपको कुनै अद्यावधिक संस्करण उपलब्ध हुनसक्छ।"</string>
     <string name="unsupported_compile_sdk_show" msgid="1601210057960312248">"जुनसुकै बेला देखाउनुहोस्"</string>
     <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"अद्यावधिकका लागि जाँच गर्नुहोस्"</string>
     <string name="smv_application" msgid="3775183542777792638">"एप <xliff:g id="APPLICATION">%1$s</xliff:g> (प्रक्रिया <xliff:g id="PROCESS">%2$s</xliff:g>) ले यसको स्वयं-लागु गरिएको स्ट्रिटमोड नीति उलङ्घन गरेको छ।"</string>
@@ -1220,7 +1220,7 @@
     <string name="dump_heap_ready_notification" msgid="2302452262927390268">"<xliff:g id="PROC">%1$s</xliff:g> हिप डम्प तयार छ"</string>
     <string name="dump_heap_notification_detail" msgid="8431586843001054050">"हिप डम्प सङ्‍कलन गरियो, ट्याप गरेर सेयर गर्नुहोस्।"</string>
     <string name="dump_heap_title" msgid="4367128917229233901">"हिप डम्प साझेदारी गर्नुहुन्छ?"</string>
-    <string name="dump_heap_text" msgid="1692649033835719336">"<xliff:g id="PROC">%1$s</xliff:g>प्रक्रियाले यसको मेमोरीको सीमा <xliff:g id="SIZE">%2$s</xliff:g> नाघेको छ। तपाईंका लागि विकासकर्तासँग साझेदारी गर्न एउटा हिप डम्प उपलब्ध छ। सावधान हुनुहोला: यो हिप डम्पमा अनुप्रयोगको पहुँच भएको तपाईंको जुनसुकै व्यक्तिगत जानकारी हुन सक्छ।"</string>
+    <string name="dump_heap_text" msgid="1692649033835719336">"<xliff:g id="PROC">%1$s</xliff:g>प्रक्रियाले यसको मेमोरीको सीमा <xliff:g id="SIZE">%2$s</xliff:g> नाघेको छ। तपाईंका लागि विकासकर्तासँग साझेदारी गर्न एउटा हिप डम्प उपलब्ध छ। सावधान हुनुहोला: यो हिप डम्पमा एपको पहुँच भएको तपाईंको जुनसुकै व्यक्तिगत जानकारी हुन सक्छ।"</string>
     <string name="dump_heap_system_text" msgid="6805155514925350849">"<xliff:g id="PROC">%1$s</xliff:g> प्रक्रियाले यसको मेमोरीको सीमा <xliff:g id="SIZE">%2$s</xliff:g> नाँघेको छ। आदान प्रदान गर्नका लागि तपाईंलाई एउटा हिप डम्प उपलब्ध छ। सावधान हुनुहोस्: यस हिप डम्पमा उक्त प्रक्रियाको पहुँच भएको जुनसुकै संवेदनशील व्यक्तिगत जानकारी समावेश हुन सक्छ जसमा तपाईंले टाइप गर्नुभएका कुराहरू पर्न सक्छन्।"</string>
     <string name="dump_heap_ready_text" msgid="5849618132123045516">"तपाईंसँग आदान प्रदान गर्नका लागि <xliff:g id="PROC">%1$s</xliff:g> को प्रक्रियासम्बन्धी हिप डम्प उपलब्ध छ। सावधान हुनुहोस्: यस हिप डम्पमा उक्त प्रक्रियाको पहुँच भएको जुनसुकै संवेदनशील व्यक्तिगत जानकारी समावेश हुन सक्छ जसमा तपाईंले टाइप गर्नुभएका कुराहरू पर्न सक्छन्।"</string>
     <string name="sendText" msgid="493003724401350724">"पाठको लागि एउटा प्रकार्य छान्नुहोस्"</string>
@@ -1343,8 +1343,8 @@
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="alert_windows_notification_channel_group_name" msgid="6063891141815714246">"अन्य अनुप्रयोगमा देखाउनुहोस्"</string>
-    <string name="alert_windows_notification_channel_name" msgid="3437528564303192620">"<xliff:g id="NAME">%s</xliff:g> अन्य अनुप्रयोगहरूमा देखिँदैछ"</string>
-    <string name="alert_windows_notification_title" msgid="6331662751095228536">"<xliff:g id="NAME">%s</xliff:g> अन्य अनुप्रयोगहरूमा देखिँदैछ"</string>
+    <string name="alert_windows_notification_channel_name" msgid="3437528564303192620">"<xliff:g id="NAME">%s</xliff:g> अन्य एपहरूमा देखिँदैछ"</string>
+    <string name="alert_windows_notification_title" msgid="6331662751095228536">"<xliff:g id="NAME">%s</xliff:g> अन्य एपहरूमा देखिँदैछ"</string>
     <string name="alert_windows_notification_message" msgid="6538171456970725333">"तपाईं <xliff:g id="NAME">%s</xliff:g> ले यो विशेषता प्रयोग नगरेको चाहनुहुन्न भने सेटिङहरू खोली यसलाई निष्क्रिय पार्न ट्याप गर्नुहोस्।"</string>
     <string name="alert_windows_notification_turn_off_action" msgid="7805857234839123780">"निष्क्रिय पार्नुहोस्"</string>
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"जाँच गर्दै <xliff:g id="NAME">%s</xliff:g>…"</string>
@@ -1643,7 +1643,7 @@
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"तपाईंले <xliff:g id="SERVICE">%1$s</xliff:g> सक्रिय गर्नुभयो भने तपाईंको यन्त्रले डेटा इन्क्रिप्ट गर्ने सुविधाको स्तरोन्नति गर्न तपाईंको स्क्रिन लक सुविधाको प्रयोग गर्ने छैन।"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"तपाईंलाई पहुँच राख्न आवश्यक पर्ने कुरामा सहयोग गर्ने अनुप्रयोगहरूमाथि पूर्ण नियन्त्रण गर्नु उपयुक्त हुन्छ तर अधिकांश अनुप्रयोगहरूका हकमा यस्तो नियन्त्रण उपयुक्त हुँदैन।"</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"स्क्रिन हेर्नुहोस् र नियन्त्रण गर्नुहोस्"</string>
-    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"यसले स्क्रिनमा देखिने सबै सामग्री पढ्न सक्छ र अन्य अनुप्रयोगहरूमा उक्त सामग्री देखाउन सक्छ।"</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"यसले स्क्रिनमा देखिने सबै सामग्री पढ्न सक्छ र अन्य एपहरूमा उक्त सामग्री देखाउन सक्छ।"</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"कारबाहीहरू हेर्नुहोस् र तिनमा कार्य गर्नुहोस्"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"यसले कुनै एप वा हार्डवेयर सेन्सरसँग तपाईंले गर्ने अन्तर्क्रियाको ट्र्याक गर्न सक्छ र तपाईंका तर्फबाट एपहरूसँग अन्तर्क्रिया गर्न सक्छ।"</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"अनुमति दिनुहोस्"</string>
@@ -1982,7 +1982,7 @@
     <string name="mmcc_illegal_me_msim_template" msgid="4802735138861422802">"SIM <xliff:g id="SIMNUMBER">%d</xliff:g> लाई अनुमति छैन"</string>
     <string name="popup_window_default_title" msgid="6907717596694826919">"पपअप विन्डो"</string>
     <string name="slice_more_content" msgid="3377367737876888459">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
-    <string name="shortcut_restored_on_lower_version" msgid="9206301954024286063">"या त अनुप्रयोगको संस्करण स्तरह्रास गरियो वा यो यस सर्टकटसँग मिल्दो छैन"</string>
+    <string name="shortcut_restored_on_lower_version" msgid="9206301954024286063">"या त एपको संस्करण स्तरह्रास गरियो वा यो यस सर्टकटसँग मिल्दो छैन"</string>
     <string name="shortcut_restore_not_supported" msgid="4763198938588468400">"अनुप्रयोगले ब्याकअप तथा पुनर्स्थापनालाई समर्थन नगर्ने हुँदा सर्टकट पुनर्स्थापित गर्न सकिएन"</string>
     <string name="shortcut_restore_signature_mismatch" msgid="579345304221605479">"अनुप्रयोगमा प्रयोग गरिने हस्ताक्षर नमिल्ने हुँदा सर्टकट पुनर्स्थापित गर्न सकिएन"</string>
     <string name="shortcut_restore_unknown_issue" msgid="2478146134395982154">"सर्टकट पुनर्स्थापित गर्न सकिएन"</string>
@@ -2004,7 +2004,7 @@
     <string name="notification_app_name_settings" msgid="9088548800899952531">"सेटिङहरू"</string>
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"क्यामेरा"</string>
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"माइक्रोफोन"</string>
-    <string name="notification_appops_overlay_active" msgid="5571732753262836481">"तपाईंको स्क्रिनका अन्य अनुप्रयोगहरूमा प्रदर्शन गरिँदै छ"</string>
+    <string name="notification_appops_overlay_active" msgid="5571732753262836481">"तपाईंको स्क्रिनका अन्य एपहरूमा प्रदर्शन गरिँदै छ"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"दिनचर्या मोडको जानकारीमूलक सूचना"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"प्रायः चार्ज गर्ने समय हुनुभन्दा पहिले नै ब्याट्री सकिन सक्छ"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"ब्याट्रीको आयु बढाउन ब्याट्री सेभर सक्रिय गरियो"</string>

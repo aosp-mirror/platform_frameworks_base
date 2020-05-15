@@ -386,7 +386,7 @@
     <string name="permdesc_foregroundService" msgid="8720071450020922795">"ઍપને ફૉરગ્રાઉન્ડ સેવાઓનો ઉપયોગ કરવાની મંજૂરી આપે છે."</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"ઍપ્લિકેશન સંગ્રહ સ્થાન માપો"</string>
     <string name="permdesc_getPackageSize" msgid="742743530909966782">"એપ્લિકેશનને તેનો કોડ, ડેટા અને કેશ કદ પુનઃપ્રાપ્ત કરવાની મંજૂરી આપે છે."</string>
-    <string name="permlab_writeSettings" msgid="8057285063719277394">"સિસ્ટમ સેટિંગ્સ સંશોધિત કરો"</string>
+    <string name="permlab_writeSettings" msgid="8057285063719277394">"સિસ્ટમ સેટિંગમાં ફેરફાર કરો"</string>
     <string name="permdesc_writeSettings" msgid="8293047411196067188">"એપ્લિકેશનને તમારા સિસ્ટમના સેટિંગ્સ ડેટાને સંશોધિત કરવાની મંજૂરી આપે છે. દુર્ભાવનાપૂર્ણ ઍપ્લિકેશનો તમારા સિસ્ટમની ગોઠવણીને દૂષિત કરી શકે છે."</string>
     <string name="permlab_receiveBootCompleted" msgid="6643339400247325379">"સ્ટાર્ટઅપ પર શરૂ કરો"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="5565659082718177484">"એપ્લિકેશનને સિસ્ટમ બૂટ થવાનું સમાપ્ત કરી લે કે તરત જ પોતાની જાતે પ્રારંભ થવાની મંજૂરી આપે છે. આનાથી ટેબ્લેટને પ્રારંભ થવામાં વધુ લાંબો સમય લાગી શકે છે અને એપ્લિકેશનને હંમેશા ચાલુ રહીને ટેબ્લેટને એકંદર ધીમું કરવાની મંજૂરી આપી શકે છે."</string>

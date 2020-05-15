@@ -537,8 +537,7 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"អនុញ្ញាតឱ្យ​កម្មវិធី​កែប្រែ​បណ្ដុំ​រូបថត​របស់​អ្នក។"</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"អាន​ទីតាំង​ពី​បណ្ដុំ​មេឌៀ​របស់​អ្នក"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"អនុញ្ញាតឱ្យ​កម្មវិធី​អាន​ទីតាំង​ពីបណ្ដុំ​មេឌៀ​របស់​អ្នក។"</string>
-    <!-- no translation found for biometric_dialog_default_title (55026799173208210) -->
-    <skip />
+    <string name="biometric_dialog_default_title" msgid="55026799173208210">"ផ្ទៀងផ្ទាត់ថាជាអ្នក"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"មិនអាច​ប្រើឧបករណ៍​ស្កេន​ស្នាមម្រាមដៃ​បានទេ"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"បាន​បោះបង់​ការ​ផ្ទៀងផ្ទាត់"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"មិនអាចសម្គាល់បានទេ"</string>
@@ -854,7 +853,7 @@
     <string name="lockscreen_transport_stop_description" msgid="1449552232598355348">"បញ្ឈប់"</string>
     <string name="lockscreen_transport_rew_description" msgid="7680106856221622779">"ខា​ថយក្រោយ"</string>
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"ទៅ​មុខ​​​រហ័ស"</string>
-    <string name="emergency_calls_only" msgid="3057351206678279851">"សម្រាប់​តែ​ហៅ​ពេល​អាសន្ន​ប៉ុណ្ណោះ"</string>
+    <string name="emergency_calls_only" msgid="3057351206678279851">"ការហៅទៅលេខសង្គ្រោះបន្ទាន់​តែប៉ុណ្ណោះ"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"បណ្ដាញ​ជាប់​សោ"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"ស៊ីម​កាត​ជាប់​សោ PUK។"</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"មើល​មគ្គុទ្ទេសក៍​អ្នក​ប្រើ ឬ​ទាក់ទង​សេវា​អតិថិជន។"</string>

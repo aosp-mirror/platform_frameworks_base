@@ -537,8 +537,7 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"允許應用程式修改你的相片收藏。"</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"讀取你的媒體收藏的位置資訊"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"允許應用程式讀取你的媒體收藏的位置資訊。"</string>
-    <!-- no translation found for biometric_dialog_default_title (55026799173208210) -->
-    <skip />
+    <string name="biometric_dialog_default_title" msgid="55026799173208210">"驗證你的身分"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"無法使用生物特徵辨識硬體"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"已取消驗證"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"無法辨識"</string>

@@ -142,7 +142,7 @@
     <string name="wfcSpnFormat_wifi" msgid="1376356951297043426">"Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="7178561009225028264">"Wi-Fi-puhelut"</string>
     <string name="wfcSpnFormat_vowifi" msgid="8371335230890725606">"VoWifi"</string>
-    <string name="wifi_calling_off_summary" msgid="5626710010766902560">"Ei käytössä"</string>
+    <string name="wifi_calling_off_summary" msgid="5626710010766902560">"Ei päällä"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1035175836270943089">"Soita Wi-Fin kautta"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="4958965609212575619">"Soita mobiiliverkon kautta"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="104951993894678665">"Vain Wi-Fi"</string>
@@ -537,8 +537,7 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"Antaa sovelluksen muokata kuvakokoelmaasi."</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"lukea mediakokoelmasi sijainteja"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"Antaa sovelluksen lukea mediakokoelmasi sijainteja."</string>
-    <!-- no translation found for biometric_dialog_default_title (55026799173208210) -->
-    <skip />
+    <string name="biometric_dialog_default_title" msgid="55026799173208210">"Vahvista henkilöllisyytesi"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Biometrinen laitteisto ei käytettävissä"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Todennus peruutettu"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Ei tunnistettu"</string>
@@ -2031,7 +2030,7 @@
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> tiedostoa</item>
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g> tiedosto</item>
     </plurals>
-    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Ei suosituksia ihmisistä, joille tämän voisi jakaa"</string>
+    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Ei suosituksia kenelle jakaa"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"Sovellusluettelo"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Sovellus ei ole saanut tallennuslupaa mutta voi tallentaa ääntä tämän USB-laitteen avulla."</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"Aloitusnäyttö"</string>

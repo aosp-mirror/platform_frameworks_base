@@ -854,7 +854,7 @@
     <string name="lockscreen_transport_stop_description" msgid="1449552232598355348">"ਰੋਕੋ"</string>
     <string name="lockscreen_transport_rew_description" msgid="7680106856221622779">"ਰੀਵਾਈਂਡ ਕਰੋ"</string>
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"ਤੇਜ਼ੀ ਨਾਲ ਅੱਗੇ ਭੇਜੋ"</string>
-    <string name="emergency_calls_only" msgid="3057351206678279851">"ਕੇਵਲ ਐਮਰਜੈਂਸੀ ਕਾਲਾਂ"</string>
+    <string name="emergency_calls_only" msgid="3057351206678279851">"ਸਿਰਫ਼ ਸੰਕਟਕਾਲੀਨ ਕਾਲਾਂ"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"ਨੈੱਟਵਰਕ  ਲਾਕ  ਕੀਤਾ"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"SIM ਕਾਰਡ PUK-ਲੌਕਡ ਹੈ।"</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"ਵਰਤੋਂਕਾਰ ਗਾਈਡ ਦੇਖੋ ਜਾਂ ਗਾਹਕ ਸੇਵਾ ਨੂੰ ਫ਼ੋਨ ਕਰੋ।"</string>
@@ -1650,7 +1650,7 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"ਹੋ ਗਿਆ"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"ਸ਼ਾਰਟਕੱਟ ਬੰਦ ਕਰੋ"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"ਸ਼ਾਰਟਕੱਟ ਦੀ ਵਰਤੋਂ ਕਰੋ"</string>
-    <string name="color_inversion_feature_name" msgid="326050048927789012">"ਰੰਗ ਦੀ ਉਲਟੀ ਤਰਤੀਬ"</string>
+    <string name="color_inversion_feature_name" msgid="326050048927789012">"ਰੰਗ ਪਲਟਨਾ"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"ਰੰਗ ਸੁਧਾਈ"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"ਅਵਾਜ਼ੀ ਕੁੰਜੀਆਂ ਦਬਾ ਕੇ ਰੱਖੀਆਂ ਗਈਆਂ। <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ਨੂੰ ਚਾਲੂ ਕੀਤਾ ਗਿਆ।"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"ਅਵਾਜ਼ੀ ਕੁੰਜੀਆਂ ਦਬਾ ਕੇ ਰੱਖੀਆਂ ਗਈਆਂ। <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ਨੂੰ ਬੰਦ ਕੀਤਾ ਗਿਆ।"</string>

@@ -50,8 +50,6 @@
 
 using android::hardware::power::Boost;
 using android::hardware::power::Mode;
-using android::hardware::power::V1_0::PowerHint;
-using android::hardware::power::V1_0::Feature;
 using android::String8;
 using android::system::suspend::V1_0::ISystemSuspend;
 using android::system::suspend::V1_0::IWakeLock;
@@ -96,31 +94,13 @@ static void setPowerBoost(Boost boost, int32_t durationMs) {
 }
 
 static bool setPowerMode(Mode mode, bool enabled) {
+    android::base::Timer t;
     auto result = gPowerHalController.setMode(mode, enabled);
-    return result == PowerHalResult::SUCCESSFUL;
-}
-
-static void sendPowerHint(PowerHint hintId, uint32_t data) {
-    switch (hintId) {
-        case PowerHint::INTERACTION:
-            gPowerHalController.setBoost(Boost::INTERACTION, data);
-            SurfaceComposerClient::notifyPowerBoost(static_cast<int32_t>(Boost::INTERACTION));
-            break;
-        case PowerHint::LAUNCH:
-            gPowerHalController.setMode(Mode::LAUNCH, static_cast<bool>(data));
-            break;
-        case PowerHint::LOW_POWER:
-            gPowerHalController.setMode(Mode::LOW_POWER, static_cast<bool>(data));
-            break;
-        case PowerHint::SUSTAINED_PERFORMANCE:
-            gPowerHalController.setMode(Mode::SUSTAINED_PERFORMANCE, static_cast<bool>(data));
-            break;
-        case PowerHint::VR_MODE:
-            gPowerHalController.setMode(Mode::VR, static_cast<bool>(data));
-            break;
-        default:
-            ALOGE("Unsupported power hint: %s.", toString(hintId).c_str());
+    if (mode == Mode::INTERACTIVE && t.duration() > 20ms) {
+        ALOGD("Excessive delay in setting interactive mode to %s while turning screen %s",
+              enabled ? "true" : "false", enabled ? "on" : "off");
     }
+    return result == PowerHalResult::SUCCESSFUL;
 }
 
 void android_server_PowerManagerService_userActivity(nsecs_t eventTime, int32_t eventType) {
@@ -140,7 +120,7 @@ void android_server_PowerManagerService_userActivity(nsecs_t eventTime, int32_t 
             gLastEventTime[eventType] = eventTime;
 
             // Tell the power HAL when user activity occurs.
-            sendPowerHint(PowerHint::INTERACTION, 0);
+            setPowerBoost(Boost::INTERACTION, 0);
         }
 
         JNIEnv* env = AndroidRuntime::getJNIEnv();
@@ -220,15 +200,6 @@ static void nativeReleaseSuspendBlocker(JNIEnv *env, jclass /* clazz */, jstring
     release_wake_lock(name.c_str());
 }
 
-static void nativeSetInteractive(JNIEnv* /* env */, jclass /* clazz */, jboolean enable) {
-    android::base::Timer t;
-    gPowerHalController.setMode(Mode::INTERACTIVE, enable);
-    if (t.duration() > 20ms) {
-        ALOGD("Excessive delay in setInteractive(%s) while turning screen %s",
-              enable ? "true" : "false", enable ? "on" : "off");
-    }
-}
-
 static void nativeSetAutoSuspend(JNIEnv* /* env */, jclass /* clazz */, jboolean enable) {
     if (enable) {
         android::base::Timer t;
@@ -245,10 +216,6 @@ static void nativeSetAutoSuspend(JNIEnv* /* env */, jclass /* clazz */, jboolean
     }
 }
 
-static void nativeSendPowerHint(JNIEnv* /* env */, jclass /* clazz */, jint hintId, jint data) {
-    sendPowerHint(static_cast<PowerHint>(hintId), data);
-}
-
 static void nativeSetPowerBoost(JNIEnv* /* env */, jclass /* clazz */, jint boost,
                                 jint durationMs) {
     setPowerBoost(static_cast<Boost>(boost), durationMs);
@@ -257,17 +224,6 @@ static void nativeSetPowerBoost(JNIEnv* /* env */, jclass /* clazz */, jint boos
 static jboolean nativeSetPowerMode(JNIEnv* /* env */, jclass /* clazz */, jint mode,
                                    jboolean enabled) {
     return setPowerMode(static_cast<Mode>(mode), enabled);
-}
-
-static void nativeSetFeature(JNIEnv* /* env */, jclass /* clazz */, jint featureId, jint data) {
-    Feature feature = static_cast<Feature>(featureId);
-    switch (feature) {
-        case Feature::POWER_FEATURE_DOUBLE_TAP_TO_WAKE:
-            gPowerHalController.setMode(Mode::DOUBLE_TAP_TO_WAKE, static_cast<bool>(data));
-            break;
-        default:
-            ALOGE("Unsupported feature: %s.", toString(feature).c_str());
-    }
 }
 
 static bool nativeForceSuspend(JNIEnv* /* env */, jclass /* clazz */) {
@@ -286,12 +242,9 @@ static const JNINativeMethod gPowerManagerServiceMethods[] = {
         {"nativeForceSuspend", "()Z", (void*)nativeForceSuspend},
         {"nativeReleaseSuspendBlocker", "(Ljava/lang/String;)V",
          (void*)nativeReleaseSuspendBlocker},
-        {"nativeSetInteractive", "(Z)V", (void*)nativeSetInteractive},
         {"nativeSetAutoSuspend", "(Z)V", (void*)nativeSetAutoSuspend},
-        {"nativeSendPowerHint", "(II)V", (void*)nativeSendPowerHint},
         {"nativeSetPowerBoost", "(II)V", (void*)nativeSetPowerBoost},
         {"nativeSetPowerMode", "(IZ)Z", (void*)nativeSetPowerMode},
-        {"nativeSetFeature", "(II)V", (void*)nativeSetFeature},
 };
 
 #define FIND_CLASS(var, className) \

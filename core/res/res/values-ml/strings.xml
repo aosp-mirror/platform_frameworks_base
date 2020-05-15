@@ -537,8 +537,7 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"നിങ്ങളുടെ ഫോട്ടോ ശേഖരം പരിഷ്‌ക്കരിക്കുന്നതിന് ആപ്പിനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"നിങ്ങളുടെ മീഡിയ ശേഖരത്തിൽ നിന്നും ലൊക്കേഷനുകൾ റീഡ് ചെയ്യുക"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"നിങ്ങളുടെ മീഡിയ ശേഖരത്തിൽ നിന്നും ലൊക്കേഷനുകൾ റീഡ് ചെയ്യുന്നതിന് ആപ്പിനെ അനുവദിക്കുന്നു."</string>
-    <!-- no translation found for biometric_dialog_default_title (55026799173208210) -->
-    <skip />
+    <string name="biometric_dialog_default_title" msgid="55026799173208210">"ഇത് നിങ്ങളാണെന്ന് പരിശോധിച്ചുറപ്പിക്കുക"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"ബയോമെട്രിക് ഹാർ‌ഡ്‌വെയർ ലഭ്യമല്ല"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"പരിശോധിച്ചുറപ്പിക്കൽ റദ്ദാക്കി"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"തിരിച്ചറിഞ്ഞില്ല"</string>
@@ -2052,8 +2051,8 @@
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"സംഭാഷണം"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"ഗ്രൂപ്പ് സംഭാഷണം"</string>
     <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>
-    <string name="resolver_personal_tab" msgid="2051260504014442073">"വ്യക്തിപരമായത്"</string>
-    <string name="resolver_work_tab" msgid="2690019516263167035">"ജോലിസ്ഥലം"</string>
+    <string name="resolver_personal_tab" msgid="2051260504014442073">"വ്യക്തിപരം"</string>
+    <string name="resolver_work_tab" msgid="2690019516263167035">"ഔദ്യോഗികം"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"വ്യക്തിപര കാഴ്‌ച"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"ഔദ്യോഗിക കാഴ്‌ച"</string>
     <string name="resolver_cant_share_with_work_apps" msgid="637686613606502219">"ഔദ്യോഗിക ആപ്പുകൾ ഉപയോഗിച്ച് ഇത് പങ്കിടാനാവില്ല"</string>

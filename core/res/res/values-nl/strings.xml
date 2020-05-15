@@ -537,8 +537,7 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"Hiermee sta je de app toe je fotocollectie aan te passen."</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"locaties van je mediacollecties bekijken"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"Hiermee sta je de app toe locaties van je mediacollectie te bekijken."</string>
-    <!-- no translation found for biometric_dialog_default_title (55026799173208210) -->
-    <skip />
+    <string name="biometric_dialog_default_title" msgid="55026799173208210">"Je identiteit verifiëren"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Biometrische hardware niet beschikbaar"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Verificatie geannuleerd"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Niet herkend"</string>
