@@ -49,11 +49,10 @@ class Swipe extends GestureMatcher {
     // Buffer for storing points for gesture detection.
     private final ArrayList<PointF> mStrokeBuffer = new ArrayList<>(100);
 
-    // The minimal delta between moves to add a gesture point.
-    private static final int TOUCH_TOLERANCE_PIX = 3;
-
-    // The minimal score for accepting a predicted gesture.
-    private static final float MIN_PREDICTION_SCORE = 2.0f;
+    // Constants for sampling motion event points.
+    // We sample based on a minimum distance between points, primarily to improve accuracy by
+    // reducing noisy minor changes in direction.
+    private static final float MIN_CM_BETWEEN_SAMPLES = 0.25f;
 
     // Distance a finger must travel before we decide if it is a gesture or not.
     public static final int GESTURE_CONFIRM_CM = 1;
@@ -67,22 +66,19 @@ class Swipe extends GestureMatcher {
     // all gestures started with the initial movement taking less than 100ms.
     // When touch exploring, the first movement almost always takes longer than
     // 200ms.
-    public static final long CANCEL_ON_PAUSE_THRESHOLD_NOT_STARTED_MS = 150;
+    public static final long MAX_TIME_TO_START_SWIPE_MS = 150 * GESTURE_CONFIRM_CM;
 
     // Time threshold used to determine if a gesture should be cancelled.  If
-    // the finger takes more than this time to move 1cm, the ongoing gesture is
-    // cancelled.
-    public static final long CANCEL_ON_PAUSE_THRESHOLD_STARTED_MS = 300;
+    // the finger takes more than this time to move  to the next sample point, the ongoing gesture
+    // is cancelled.
+    public static final long MAX_TIME_TO_CONTINUE_SWIPE_MS = 350 * GESTURE_CONFIRM_CM;
 
     private int[] mDirections;
     private float mBaseX;
     private float mBaseY;
+    private long mBaseTime;
     private float mPreviousGestureX;
     private float mPreviousGestureY;
-    // Constants for sampling motion event points.
-    // We sample based on a minimum distance between points, primarily to improve accuracy by
-    // reducing noisy minor changes in direction.
-    private static final float MIN_CM_BETWEEN_SAMPLES = 0.25f;
     private final float mMinPixelsBetweenSamplesX;
     private final float mMinPixelsBetweenSamplesY;
     // The minmimum distance the finger must travel before we evaluate the initial direction of the
@@ -134,16 +130,19 @@ class Swipe extends GestureMatcher {
     protected void clear() {
         mBaseX = Float.NaN;
         mBaseY = Float.NaN;
+        mBaseTime = 0;
+        mPreviousGestureX = Float.NaN;
+        mPreviousGestureY = Float.NaN;
         mStrokeBuffer.clear();
         super.clear();
     }
 
     @Override
     protected void onDown(MotionEvent event, MotionEvent rawEvent, int policyFlags) {
-        cancelAfterPauseThreshold(event, rawEvent, policyFlags);
         if (Float.isNaN(mBaseX) && Float.isNaN(mBaseY)) {
             mBaseX = rawEvent.getX();
             mBaseY = rawEvent.getY();
+            mBaseTime = rawEvent.getEventTime();
             mPreviousGestureX = mBaseX;
             mPreviousGestureY = mBaseY;
         }
@@ -154,9 +153,11 @@ class Swipe extends GestureMatcher {
     protected void onMove(MotionEvent event, MotionEvent rawEvent, int policyFlags) {
         final float x = rawEvent.getX();
         final float y = rawEvent.getY();
+        final long time = rawEvent.getEventTime();
         final float dX = Math.abs(x - mPreviousGestureX);
         final float dY = Math.abs(y - mPreviousGestureY);
         final double moveDelta = Math.hypot(Math.abs(x - mBaseX), Math.abs(y - mBaseY));
+        final long timeDelta = time - mBaseTime;
         if (DEBUG) {
             Slog.d(
                     getGestureName(),
@@ -171,34 +172,38 @@ class Swipe extends GestureMatcher {
                 return;
             } else if (mStrokeBuffer.size() == 0) {
                 // First, make sure the pointer is going in the right direction.
-                cancelAfterPauseThreshold(event, rawEvent, policyFlags);
                 int direction = toDirection(x - mBaseX, y - mBaseY);
                 if (direction != mDirections[0]) {
                     cancelGesture(event, rawEvent, policyFlags);
                     return;
-                } else {
-                    // This is confirmed to be some kind of swipe so start tracking points.
-                    mStrokeBuffer.add(new PointF(mBaseX, mBaseY));
                 }
-            }
-            if (moveDelta > mGestureDetectionThresholdPixels) {
-                // If the pointer has moved more than the threshold,
-                // update the stored values.
-                mBaseX = x;
-                mBaseY = y;
-                if (getState() == STATE_CLEAR) {
-                    startGesture(event, rawEvent, policyFlags);
-                    cancelAfterPauseThreshold(event, rawEvent, policyFlags);
-                }
+                // This is confirmed to be some kind of swipe so start tracking points.
+                mStrokeBuffer.add(new PointF(mBaseX, mBaseY));
             }
         }
-        if (getState() == STATE_GESTURE_STARTED) {
-            if (dX >= mMinPixelsBetweenSamplesX || dY >= mMinPixelsBetweenSamplesY) {
-                mPreviousGestureX = x;
-                mPreviousGestureY = y;
-                mStrokeBuffer.add(new PointF(x, y));
-                cancelAfterPauseThreshold(event, rawEvent, policyFlags);
+        if (moveDelta > mGestureDetectionThresholdPixels) {
+            // This is a gesture, not touch exploration.
+            mBaseX = x;
+            mBaseY = y;
+            mBaseTime = time;
+            startGesture(event, rawEvent, policyFlags);
+        } else if (getState() == STATE_CLEAR) {
+            if (timeDelta > MAX_TIME_TO_START_SWIPE_MS) {
+                // The user isn't moving fast enough.
+                cancelGesture(event, rawEvent, policyFlags);
+                return;
             }
+        } else if (getState() == STATE_GESTURE_STARTED) {
+            if (timeDelta > MAX_TIME_TO_CONTINUE_SWIPE_MS) {
+                cancelGesture(event, rawEvent, policyFlags);
+                return;
+            }
+        }
+        if (dX >= mMinPixelsBetweenSamplesX || dY >= mMinPixelsBetweenSamplesY) {
+            // At this point gesture detection has started and we are sampling points.
+            mPreviousGestureX = x;
+            mPreviousGestureY = y;
+            mStrokeBuffer.add(new PointF(x, y));
         }
     }
 
@@ -227,25 +232,6 @@ class Swipe extends GestureMatcher {
     @Override
     protected void onPointerUp(MotionEvent event, MotionEvent rawEvent, int policyFlags) {
         cancelGesture(event, rawEvent, policyFlags);
-    }
-
-    /**
-     * queues a transition to STATE_GESTURE_CANCEL based on the current state. If we have
-     * transitioned to STATE_GESTURE_STARTED the delay is longer.
-     */
-    private void cancelAfterPauseThreshold(
-            MotionEvent event, MotionEvent rawEvent, int policyFlags) {
-        cancelPendingTransitions();
-        switch (getState()) {
-            case STATE_CLEAR:
-                cancelAfter(CANCEL_ON_PAUSE_THRESHOLD_NOT_STARTED_MS, event, rawEvent, policyFlags);
-                break;
-            case STATE_GESTURE_STARTED:
-                cancelAfter(CANCEL_ON_PAUSE_THRESHOLD_STARTED_MS, event, rawEvent, policyFlags);
-                break;
-            default:
-                break;
-        }
     }
 
     /**
