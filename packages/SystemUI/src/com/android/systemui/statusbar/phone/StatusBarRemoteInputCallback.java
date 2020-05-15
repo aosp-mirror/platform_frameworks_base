@@ -37,6 +37,7 @@ import android.view.ViewParent;
 import com.android.systemui.ActivityIntentHelper;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.ActionClickLogger;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.CommandQueue.Callbacks;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
@@ -73,6 +74,7 @@ public class StatusBarRemoteInputCallback implements Callback, Callbacks,
     private View mPendingRemoteInputView;
     private KeyguardManager mKeyguardManager;
     private final CommandQueue mCommandQueue;
+    private final ActionClickLogger mActionClickLogger;
     private int mDisabled2;
     protected BroadcastReceiver mChallengeReceiver = new ChallengeReceiver();
     private Handler mMainHandler = new Handler();
@@ -87,7 +89,8 @@ public class StatusBarRemoteInputCallback implements Callback, Callbacks,
             StatusBarStateController statusBarStateController,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             ActivityStarter activityStarter, ShadeController shadeController,
-            CommandQueue commandQueue) {
+            CommandQueue commandQueue,
+            ActionClickLogger clickLogger) {
         mContext = context;
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
         mShadeController = shadeController;
@@ -101,6 +104,7 @@ public class StatusBarRemoteInputCallback implements Callback, Callbacks,
         mKeyguardManager = context.getSystemService(KeyguardManager.class);
         mCommandQueue = commandQueue;
         mCommandQueue.addCallback(this);
+        mActionClickLogger = clickLogger;
         mActivityIntentHelper = new ActivityIntentHelper(mContext);
         mGroupManager = groupManager;
         // Listen to onKeyguardShowingChanged in case a managed profile needs to be unlocked
@@ -304,9 +308,12 @@ public class StatusBarRemoteInputCallback implements Callback, Callbacks,
             NotificationRemoteInputManager.ClickHandler defaultHandler) {
         final boolean isActivity = pendingIntent.isActivity();
         if (isActivity) {
+            mActionClickLogger.logWaitingToCloseKeyguard(pendingIntent);
             final boolean afterKeyguardGone = mActivityIntentHelper.wouldLaunchResolverActivity(
                     pendingIntent.getIntent(), mLockscreenUserManager.getCurrentUserId());
             mActivityStarter.dismissKeyguardThenExecute(() -> {
+                mActionClickLogger.logKeyguardGone(pendingIntent);
+
                 try {
                     ActivityManager.getService().resumeAppSwitches();
                 } catch (RemoteException e) {
