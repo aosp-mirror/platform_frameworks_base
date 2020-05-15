@@ -351,9 +351,9 @@ Status IncidentService::reportIncidentToDumpstate(unique_fd stream,
 
 Status IncidentService::registerSection(const int id, const String16& name16,
         const sp<IIncidentDumpCallback>& callback) {
-    const char* name = String8(name16).c_str();
+    const String8 name = String8(name16);
     const uid_t callingUid = IPCThreadState::self()->getCallingUid();
-    ALOGI("Uid %d registers section %d '%s'", callingUid, id, name);
+    ALOGI("Uid %d registers section %d '%s'", callingUid, id, name.c_str());
     if (callback == nullptr) {
         return Status::fromExceptionCode(Status::EX_NULL_POINTER);
     }
@@ -363,11 +363,11 @@ Status IncidentService::registerSection(const int id, const String16& name16,
                 ALOGW("Error registering section %d: calling uid does not match", id);
                 return Status::fromExceptionCode(Status::EX_SECURITY);
             }
-            mRegisteredSections.at(i) = new BringYourOwnSection(id, name, callingUid, callback);
+            mRegisteredSections.at(i) = new BringYourOwnSection(id, name.c_str(), callingUid, callback);
             return Status::ok();
         }
     }
-    mRegisteredSections.push_back(new BringYourOwnSection(id, name, callingUid, callback));
+    mRegisteredSections.push_back(new BringYourOwnSection(id, name.c_str(), callingUid, callback));
     return Status::ok();
 }
 
