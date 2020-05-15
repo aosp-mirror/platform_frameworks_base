@@ -8082,6 +8082,7 @@ public class WindowManagerService extends IWindowManager.Stub
         t.setInputWindowInfo(surface, h);
         t.apply();
         t.close();
+        surface.release();
     }
 
     /**
