@@ -267,6 +267,9 @@ public class AppPredictionPerUserService extends
         mRemoteService.destroy();
         mRemoteService = null;
 
+        synchronized (mLock) {
+            mZombie = true;
+        }
         mRemoteService = getRemoteServiceLocked();
         if (mRemoteService != null) {
             if (isDebug()) {
