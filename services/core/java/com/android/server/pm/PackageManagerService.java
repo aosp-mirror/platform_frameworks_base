@@ -1566,13 +1566,17 @@ public class PackageManagerService extends IPackageManager.Stub
     // Recordkeeping of restore-after-install operations that are currently in flight
     // between the Package Manager and the Backup Manager
     static class PostInstallData {
+        @Nullable
         public final InstallArgs args;
+        @NonNull
         public final PackageInstalledInfo res;
+        @Nullable
         public final Runnable mPostInstallRunnable;
 
-        PostInstallData(InstallArgs _a, PackageInstalledInfo _r, Runnable postInstallRunnable) {
-            args = _a;
-            res = _r;
+        PostInstallData(@Nullable InstallArgs args, @NonNull PackageInstalledInfo res,
+                @Nullable Runnable postInstallRunnable) {
+            this.args = args;
+            this.res = res;
             mPostInstallRunnable = postInstallRunnable;
         }
     }
@@ -1714,7 +1718,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
                     if (data != null && data.mPostInstallRunnable != null) {
                         data.mPostInstallRunnable.run();
-                    } else if (data != null) {
+                    } else if (data != null && data.args != null) {
                         InstallArgs args = data.args;
                         PackageInstalledInfo parentRes = data.res;
 
@@ -2306,27 +2310,8 @@ public class PackageManagerService extends IPackageManager.Stub
             // Work that needs to happen on first install within each user
             if (firstUserIds != null && firstUserIds.length > 0) {
                 for (int userId : firstUserIds) {
-                    // If this app is a browser and it's newly-installed for some
-                    // users, clear any default-browser state in those users. The
-                    // app's nature doesn't depend on the user, so we can just check
-                    // its browser nature in any user and generalize.
-                    if (packageIsBrowser(packageName, userId)) {
-                        // If this browser is restored from user's backup, do not clear
-                        // default-browser state for this user
-                        if (pkgSetting.getInstallReason(userId)
-                                != PackageManager.INSTALL_REASON_DEVICE_RESTORE) {
-                            mPermissionManager.setDefaultBrowser(null, true, true, userId);
-                        }
-                    }
-
-                    // We may also need to apply pending (restored) runtime permission grants
-                    // within these users.
-                    mPermissionManager.restoreDelayedRuntimePermissions(packageName,
-                            UserHandle.of(userId));
-
-                    // Persistent preferred activity might have came into effect due to this
-                    // install.
-                    updateDefaultHomeNotLocked(userId);
+                    clearRolesAndRestorePermissionsForNewUserInstall(packageName,
+                            pkgSetting.getInstallReason(userId), userId);
                 }
             }
 
@@ -13122,9 +13107,15 @@ public class PackageManagerService extends IPackageManager.Stub
                         createPackageInstalledInfo(PackageManager.INSTALL_SUCCEEDED);
                 res.pkg = pkgSetting.pkg;
                 res.newUsers = new int[]{ userId };
-                PostInstallData postInstallData = intentSender == null ? null :
-                        new PostInstallData(null, res, () -> onRestoreComplete(res.returnCode,
-                              mContext, intentSender));
+
+                PostInstallData postInstallData =
+                        new PostInstallData(null, res, () -> {
+                            clearRolesAndRestorePermissionsForNewUserInstall(packageName,
+                                    pkgSetting.getInstallReason(userId), userId);
+                            if (intentSender != null) {
+                                onRestoreComplete(res.returnCode, mContext, intentSender);
+                            }
+                        });
                 restoreAndPostInstall(userId, res, postInstallData);
             }
         } finally {
@@ -19747,6 +19738,30 @@ public class PackageManagerService extends IPackageManager.Stub
                 mPermissionManager.setDefaultBrowser(null, true, true, userId);
             }
         }
+    }
+
+    private void clearRolesAndRestorePermissionsForNewUserInstall(String packageName,
+            int installReason, @UserIdInt int userId) {
+        // If this app is a browser and it's newly-installed for some
+        // users, clear any default-browser state in those users. The
+        // app's nature doesn't depend on the user, so we can just check
+        // its browser nature in any user and generalize.
+        if (packageIsBrowser(packageName, userId)) {
+            // If this browser is restored from user's backup, do not clear
+            // default-browser state for this user
+            if (installReason != PackageManager.INSTALL_REASON_DEVICE_RESTORE) {
+                mPermissionManager.setDefaultBrowser(null, true, true, userId);
+            }
+        }
+
+        // We may also need to apply pending (restored) runtime permission grants
+        // within these users.
+        mPermissionManager.restoreDelayedRuntimePermissions(packageName,
+                UserHandle.of(userId));
+
+        // Persistent preferred activity might have came into effect due to this
+        // install.
+        updateDefaultHomeNotLocked(userId);
     }
 
     @Override
