@@ -69,6 +69,8 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.content.PackageHelper;
 import com.android.internal.os.BackgroundThread;
 import com.android.server.LocalServices;
+import com.android.server.SystemService;
+import com.android.server.SystemServiceManager;
 import com.android.server.pm.parsing.PackageParser2;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
@@ -110,6 +112,9 @@ public class StagingManager {
     private final List<String> mFailedPackageNames = new ArrayList<>();
     private String mNativeFailureReason;
 
+    @GuardedBy("mSuccessfulStagedSessionIds")
+    private final List<Integer> mSuccessfulStagedSessionIds = new ArrayList<>();
+
     StagingManager(PackageInstallerService pi, Context context,
             Supplier<PackageParser2> packageParserSupplier) {
         mPi = pi;
@@ -120,6 +125,34 @@ public class StagingManager {
         mPowerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         mPreRebootVerificationHandler = new PreRebootVerificationHandler(
                 BackgroundThread.get().getLooper());
+    }
+
+    /**
+     This class manages lifecycle events for StagingManager.
+     */
+    public static final class Lifecycle extends SystemService {
+        private static StagingManager sStagingManager;
+
+        public Lifecycle(Context context) {
+            super(context);
+        }
+
+        void startService(StagingManager stagingManager) {
+            sStagingManager = stagingManager;
+            LocalServices.getService(SystemServiceManager.class).startService(this);
+        }
+
+        @Override
+        public void onStart() {
+            // no-op
+        }
+
+        @Override
+        public void onBootPhase(int phase) {
+            if (phase == SystemService.PHASE_BOOT_COMPLETED && sStagingManager != null) {
+                sStagingManager.markStagedSessionsAsSuccessful();
+            }
+        }
     }
 
     private void updateStoredSession(@NonNull PackageInstallerSession sessionInfo) {
@@ -652,7 +685,22 @@ public class StagingManager {
         Slog.d(TAG, "Marking session " + session.sessionId + " as applied");
         session.setStagedSessionApplied();
         if (hasApex) {
-            mApexManager.markStagedSessionSuccessful(session.sessionId);
+            try {
+                if (supportsCheckpoint()) {
+                    // Store the session ID, which will be marked as successful by ApexManager
+                    // upon boot completion.
+                    synchronized (mSuccessfulStagedSessionIds) {
+                        mSuccessfulStagedSessionIds.add(session.sessionId);
+                    }
+                } else {
+                    // Mark sessions as successful immediately on non-checkpointing devices.
+                    mApexManager.markStagedSessionSuccessful(session.sessionId);
+                }
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Checkpoint support unknown, marking session as successful "
+                        + "immediately.");
+                mApexManager.markStagedSessionSuccessful(session.sessionId);
+            }
         }
     }
 
@@ -1121,7 +1169,16 @@ public class StagingManager {
         }
     }
 
+    void markStagedSessionsAsSuccessful() {
+        synchronized (mSuccessfulStagedSessionIds) {
+            for (int i = 0; i < mSuccessfulStagedSessionIds.size(); i++) {
+                mApexManager.markStagedSessionSuccessful(mSuccessfulStagedSessionIds.get(i));
+            }
+        }
+    }
+
     void systemReady() {
+        new Lifecycle(mContext).startService(this);
         // Register the receiver of boot completed intent for staging manager.
         mContext.registerReceiver(new BroadcastReceiver() {
             @Override
