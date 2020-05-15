@@ -51,7 +51,7 @@ public:
     //   2) pull takes longer than mPullTimeoutNs (intrinsic to puller)
     // If a metric wants to make any change to the data, like timestamps, it
     // should make a copy as this data may be shared with multiple metrics.
-    bool Pull(std::vector<std::shared_ptr<LogEvent>>* data);
+    bool Pull(const int64_t eventTimeNs, std::vector<std::shared_ptr<LogEvent>>* data);
 
     // Clear cache immediately
     int ForceClearCache();
@@ -93,6 +93,11 @@ private:
     const std::vector<int> mAdditiveFields;
 
     int64_t mLastPullTimeNs;
+
+    // All pulls happen due to an event (app upgrade, bucket boundary, condition change, etc).
+    // If multiple pulls need to be done at the same event time, we will always use the cache after
+    // the first pull.
+    int64_t mLastEventTimeNs;
 
     // Cache of data from last pull. If next request comes before cool down finishes,
     // cached data will be returned.
