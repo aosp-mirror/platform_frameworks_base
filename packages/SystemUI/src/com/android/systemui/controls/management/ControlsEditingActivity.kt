@@ -130,6 +130,7 @@ class ControlsEditingActivity @Inject constructor(
             inflate()
         }
         requireViewById<TextView>(R.id.title).text = structure
+        setTitle(structure)
         subtitle = requireViewById<TextView>(R.id.subtitle).apply {
             setText(SUBTITLE_ID)
         }
