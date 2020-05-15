@@ -20,6 +20,7 @@ import static android.content.Context.ACTIVITY_SERVICE;
 import static android.graphics.Paint.DITHER_FLAG;
 import static android.graphics.Paint.FILTER_BITMAP_FLAG;
 
+import android.annotation.AttrRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
@@ -46,6 +47,7 @@ import android.graphics.drawable.DrawableWrapper;
 import android.os.UserHandle;
 import android.util.AttributeSet;
 import android.util.Pools.SynchronizedPool;
+import android.util.TypedValue;
 
 import com.android.internal.R;
 
@@ -92,15 +94,34 @@ public class SimpleIconFactory {
             final ActivityManager am = (ActivityManager) ctx.getSystemService(ACTIVITY_SERVICE);
             final int iconDpi = (am == null) ? 0 : am.getLauncherLargeIconDensity();
 
-            final Resources r = ctx.getResources();
-            final int iconSize = r.getDimensionPixelSize(R.dimen.resolver_icon_size);
-            final int badgeSize = r.getDimensionPixelSize(R.dimen.resolver_badge_size);
-
+            final int iconSize = getIconSizeFromContext(ctx);
+            final int badgeSize = getBadgeSizeFromContext(ctx);
             instance = new SimpleIconFactory(ctx, iconDpi, iconSize, badgeSize);
             instance.setWrapperBackgroundColor(Color.WHITE);
         }
 
         return instance;
+    }
+
+    private static int getAttrDimFromContext(Context ctx, @AttrRes int attrId, String errorMsg) {
+        final Resources res = ctx.getResources();
+        TypedValue outVal = new TypedValue();
+        if (!ctx.getTheme().resolveAttribute(attrId, outVal, true)) {
+            throw new IllegalStateException(errorMsg);
+        }
+        return res.getDimensionPixelSize(outVal.resourceId);
+    }
+
+    private static int getIconSizeFromContext(Context ctx) {
+        return getAttrDimFromContext(ctx,
+                com.android.internal.R.attr.iconfactoryIconSize,
+                "Expected theme to define iconfactoryIconSize.");
+    }
+
+    private static int getBadgeSizeFromContext(Context ctx) {
+        return getAttrDimFromContext(ctx,
+                com.android.internal.R.attr.iconfactoryBadgeSize,
+                "Expected theme to define iconfactoryBadgeSize.");
     }
 
     /**

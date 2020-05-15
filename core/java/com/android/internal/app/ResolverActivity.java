@@ -324,7 +324,7 @@ public class ResolverActivity extends Activity implements
     protected void onCreate(Bundle savedInstanceState, Intent intent,
             CharSequence title, int defaultTitleRes, Intent[] initialIntents,
             List<ResolveInfo> rList, boolean supportsAlwaysUseOption) {
-        setTheme(R.style.Theme_DeviceDefault_Resolver);
+        setTheme(appliedThemeResId());
         super.onCreate(savedInstanceState);
 
         // Determine whether we should show that intent is forwarded
@@ -505,6 +505,10 @@ public class ResolverActivity extends Activity implements
                 getPersonalProfileUserHandle(),
                 getWorkProfileUserHandle(),
                 /* shouldShowNoCrossProfileIntentsEmptyState= */ getUser().equals(intentUser));
+    }
+
+    protected int appliedThemeResId() {
+        return R.style.Theme_DeviceDefault_Resolver;
     }
 
     /**
