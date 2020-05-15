@@ -39,4 +39,9 @@
               android:layout_height="match_parent"
               android:layout="@layout/car_fullscreen_user_switcher"/>
 
+    <ViewStub android:id="@+id/user_switching_dialog_stub"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:layout="@layout/car_user_switching_dialog"/>
+
 </FrameLayout>
