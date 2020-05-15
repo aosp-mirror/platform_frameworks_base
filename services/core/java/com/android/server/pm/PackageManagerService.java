@@ -14297,17 +14297,6 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    private void processPendingInstall(final InstallArgs args, final int currentStatus) {
-        if (args.mMultiPackageInstallParams != null) {
-            args.mMultiPackageInstallParams.tryProcessInstallRequest(args, currentStatus);
-        } else {
-            PackageInstalledInfo res = createPackageInstalledInfo(currentStatus);
-            processInstallRequestsAsync(
-                    res.returnCode == PackageManager.INSTALL_SUCCEEDED,
-                    Collections.singletonList(new InstallRequest(args, res)));
-        }
-    }
-
     // Queue up an async operation since the package installation may take a little while.
     private void processInstallRequestsAsync(boolean success,
             List<InstallRequest> installRequests) {
@@ -15424,11 +15413,23 @@ public class PackageManagerService extends IPackageManager.Stub
             sendVerificationCompleteNotification();
 
             // TODO(samiul): In future return once verification is complete
+            processPendingInstall();
+        }
+
+        private void processPendingInstall() {
             InstallArgs args = createInstallArgs(this);
             if (mRet == PackageManager.INSTALL_SUCCEEDED) {
                 mRet = args.copyApk();
             }
-            processPendingInstall(args, mRet);
+            if (mParentInstallParams != null) {
+                mParentInstallParams.tryProcessInstallRequest(args, mRet);
+            } else {
+                PackageInstalledInfo res = createPackageInstalledInfo(mRet);
+                processInstallRequestsAsync(
+                        res.returnCode == PackageManager.INSTALL_SUCCEEDED,
+                        Collections.singletonList(new InstallRequest(args, res)));
+
+            }
         }
 
         private void sendVerificationCompleteNotification() {
@@ -15484,7 +15485,6 @@ public class PackageManagerService extends IPackageManager.Stub
         final PackageParser.SigningDetails signingDetails;
         final int installReason;
         final boolean forceQueryableOverride;
-        @Nullable final MultiPackageInstallParams mMultiPackageInstallParams;
         final int mDataLoaderType;
 
         // The list of instruction sets supported by this app. This is currently
@@ -15499,8 +15499,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 List<String> whitelistedRestrictedPermissions,
                 int autoRevokePermissionsMode,
                 String traceMethod, int traceCookie, SigningDetails signingDetails,
-                int installReason, boolean forceQueryableOverride,
-                MultiPackageInstallParams multiPackageInstallParams, int dataLoaderType) {
+                int installReason, boolean forceQueryableOverride, int dataLoaderType) {
             this.origin = origin;
             this.move = move;
             this.installFlags = installFlags;
@@ -15518,7 +15517,6 @@ public class PackageManagerService extends IPackageManager.Stub
             this.signingDetails = signingDetails;
             this.installReason = installReason;
             this.forceQueryableOverride = forceQueryableOverride;
-            this.mMultiPackageInstallParams = multiPackageInstallParams;
             this.mDataLoaderType = dataLoaderType;
         }
 
@@ -15530,8 +15528,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     params.grantedRuntimePermissions, params.whitelistedRestrictedPermissions,
                     params.autoRevokePermissionsMode,
                     params.traceMethod, params.traceCookie, params.signingDetails,
-                    params.installReason, params.forceQueryableOverride,
-                    params.mParentInstallParams, params.mDataLoaderType);
+                    params.installReason, params.forceQueryableOverride, params.mDataLoaderType);
         }
 
         abstract int copyApk();
@@ -15622,7 +15619,7 @@ public class PackageManagerService extends IPackageManager.Stub
             super(OriginInfo.fromNothing(), null, null, 0, InstallSource.EMPTY,
                     null, null, instructionSets, null, null, null, MODE_DEFAULT, null, 0,
                     PackageParser.SigningDetails.UNKNOWN,
-                    PackageManager.INSTALL_REASON_UNKNOWN, false, null /* parent */,
+                    PackageManager.INSTALL_REASON_UNKNOWN, false,
                     DataLoaderType.NONE);
             this.codeFile = (codePath != null) ? new File(codePath) : null;
             this.resourceFile = (resourcePath != null) ? new File(resourcePath) : null;
