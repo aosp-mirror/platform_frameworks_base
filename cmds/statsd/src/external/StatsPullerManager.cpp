@@ -91,20 +91,21 @@ StatsPullerManager::StatsPullerManager()
       mPullAtomCallbackDeathRecipient(AIBinder_DeathRecipient_new(pullAtomCallbackDied)) {
 }
 
-bool StatsPullerManager::Pull(int tagId, const ConfigKey& configKey,
+bool StatsPullerManager::Pull(int tagId, const ConfigKey& configKey, const int64_t eventTimeNs,
                               vector<shared_ptr<LogEvent>>* data, bool useUids) {
     std::lock_guard<std::mutex> _l(mLock);
-    return PullLocked(tagId, configKey, data, useUids);
+    return PullLocked(tagId, configKey, eventTimeNs, data, useUids);
 }
 
-bool StatsPullerManager::Pull(int tagId, const vector<int32_t>& uids,
+bool StatsPullerManager::Pull(int tagId, const vector<int32_t>& uids, const int64_t eventTimeNs,
                               vector<std::shared_ptr<LogEvent>>* data, bool useUids) {
     std::lock_guard<std::mutex> _l(mLock);
-    return PullLocked(tagId, uids, data, useUids);
+    return PullLocked(tagId, uids, eventTimeNs, data, useUids);
 }
 
 bool StatsPullerManager::PullLocked(int tagId, const ConfigKey& configKey,
-                                    vector<shared_ptr<LogEvent>>* data, bool useUids) {
+                                    const int64_t eventTimeNs, vector<shared_ptr<LogEvent>>* data,
+                                    bool useUids) {
     vector<int32_t> uids;
     if (useUids) {
         auto uidProviderIt = mPullUidProviders.find(configKey);
@@ -123,18 +124,19 @@ bool StatsPullerManager::PullLocked(int tagId, const ConfigKey& configKey,
         }
         uids = pullUidProvider->getPullAtomUids(tagId);
     }
-    return PullLocked(tagId, uids, data, useUids);
+    return PullLocked(tagId, uids, eventTimeNs, data, useUids);
 }
 
 bool StatsPullerManager::PullLocked(int tagId, const vector<int32_t>& uids,
-                                    vector<shared_ptr<LogEvent>>* data, bool useUids) {
+                                    const int64_t eventTimeNs, vector<shared_ptr<LogEvent>>* data,
+                                    bool useUids) {
     VLOG("Initiating pulling %d", tagId);
     if (useUids) {
         for (int32_t uid : uids) {
             PullerKey key = {.atomTag = tagId, .uid = uid};
             auto pullerIt = kAllPullAtomInfo.find(key);
             if (pullerIt != kAllPullAtomInfo.end()) {
-                bool ret = pullerIt->second->Pull(data);
+                bool ret = pullerIt->second->Pull(eventTimeNs, data);
                 VLOG("pulled %zu items", data->size());
                 if (!ret) {
                     StatsdStats::getInstance().notePullFailed(tagId);
@@ -149,7 +151,7 @@ bool StatsPullerManager::PullLocked(int tagId, const vector<int32_t>& uids,
         PullerKey key = {.atomTag = tagId, .uid = -1};
         auto pullerIt = kAllPullAtomInfo.find(key);
         if (pullerIt != kAllPullAtomInfo.end()) {
-            bool ret = pullerIt->second->Pull(data);
+            bool ret = pullerIt->second->Pull(eventTimeNs, data);
             VLOG("pulled %zu items", data->size());
             if (!ret) {
                 StatsdStats::getInstance().notePullFailed(tagId);
@@ -290,7 +292,8 @@ void StatsPullerManager::OnAlarmFired(int64_t elapsedTimeNs) {
     }
     for (const auto& pullInfo : needToPull) {
         vector<shared_ptr<LogEvent>> data;
-        bool pullSuccess = PullLocked(pullInfo.first->atomTag, pullInfo.first->configKey, &data);
+        bool pullSuccess = PullLocked(pullInfo.first->atomTag, pullInfo.first->configKey,
+                                      elapsedTimeNs, &data);
         if (!pullSuccess) {
             VLOG("pull failed at %lld, will try again later", (long long)elapsedTimeNs);
         }
