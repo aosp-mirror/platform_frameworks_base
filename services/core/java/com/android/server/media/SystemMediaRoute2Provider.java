@@ -81,6 +81,7 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
     MediaRoute2Info mDeviceRoute;
     RoutingSessionInfo mDefaultSessionInfo;
     final AudioRoutesInfo mCurAudioRoutesInfo = new AudioRoutesInfo();
+    int mDeviceVolume;
 
     private final Object mRequestLock = new Object();
     @GuardedBy("mRequestLock")
@@ -127,8 +128,9 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
         });
         updateSessionInfosIfNeeded();
 
-        mContext.registerReceiver(new VolumeChangeReceiver(),
-                new IntentFilter(AudioManager.VOLUME_CHANGED_ACTION));
+        IntentFilter intentFilter = new IntentFilter(AudioManager.VOLUME_CHANGED_ACTION);
+        intentFilter.addAction(AudioManager.STREAM_DEVICES_CHANGED_ACTION);
+        mContext.registerReceiver(new AudioManagerBroadcastReceiver(), intentFilter);
 
         if (mBtRouteProvider != null) {
             mHandler.post(() -> {
@@ -136,6 +138,7 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
                 notifyProviderState();
             });
         }
+        updateVolume();
     }
 
     @Override
@@ -248,8 +251,8 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
                 .setVolumeHandling(mAudioManager.isVolumeFixed()
                         ? MediaRoute2Info.PLAYBACK_VOLUME_FIXED
                         : MediaRoute2Info.PLAYBACK_VOLUME_VARIABLE)
+                .setVolume(mDeviceVolume)
                 .setVolumeMax(mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC))
-                .setVolume(mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC))
                 .setType(type)
                 .addFeature(FEATURE_LIVE_AUDIO)
                 .addFeature(FEATURE_LIVE_VIDEO)
@@ -361,36 +364,43 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
         }
     }
 
-    private class VolumeChangeReceiver extends BroadcastReceiver {
+    void updateVolume() {
+        int devices = mAudioManager.getDevicesForStream(AudioManager.STREAM_MUSIC);
+        int volume = mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+
+        if (mDefaultRoute.getVolume() != volume) {
+            mDefaultRoute = new MediaRoute2Info.Builder(mDefaultRoute)
+                    .setVolume(volume)
+                    .build();
+        }
+
+        if (mBtRouteProvider != null && mBtRouteProvider.updateVolumeForDevices(devices, volume)) {
+            return;
+        }
+        if (mDeviceVolume != volume) {
+            mDeviceVolume = volume;
+            mDeviceRoute = new MediaRoute2Info.Builder(mDeviceRoute)
+                    .setVolume(volume)
+                    .build();
+        }
+        publishProviderState();
+    }
+
+    private class AudioManagerBroadcastReceiver extends BroadcastReceiver {
         // This will be called in the main thread.
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (!intent.getAction().equals(AudioManager.VOLUME_CHANGED_ACTION)) {
+            if (!intent.getAction().equals(AudioManager.VOLUME_CHANGED_ACTION)
+                    && !intent.getAction().equals(AudioManager.STREAM_DEVICES_CHANGED_ACTION)) {
                 return;
             }
 
-            final int streamType = intent.getIntExtra(AudioManager.EXTRA_VOLUME_STREAM_TYPE, -1);
+            int streamType = intent.getIntExtra(AudioManager.EXTRA_VOLUME_STREAM_TYPE, -1);
             if (streamType != AudioManager.STREAM_MUSIC) {
                 return;
             }
 
-            final int newVolume = intent.getIntExtra(AudioManager.EXTRA_VOLUME_STREAM_VALUE, 0);
-            final int oldVolume = intent.getIntExtra(
-                    AudioManager.EXTRA_PREV_VOLUME_STREAM_VALUE, 0);
-
-            if (newVolume != oldVolume) {
-                if (TextUtils.equals(mDeviceRoute.getId(), mSelectedRouteId)) {
-                    mDeviceRoute = new MediaRoute2Info.Builder(mDeviceRoute)
-                            .setVolume(newVolume)
-                            .build();
-                } else if (mBtRouteProvider != null) {
-                    mBtRouteProvider.setSelectedRouteVolume(newVolume);
-                }
-                mDefaultRoute = new MediaRoute2Info.Builder(mDefaultRoute)
-                        .setVolume(newVolume)
-                        .build();
-                publishProviderState();
-            }
+            updateVolume();
         }
     }
 }
