@@ -9475,9 +9475,6 @@ message TvSettingsUIInteracted {
 
     /** The ID of the entry that the users actioned on */
     optional android.app.tvsettings.ItemId item_id = 2;
-
-    /** Additional information (e.g., navigation direction on page focused) */
-    optional string additional_info = 3;
 }
 
 /**
