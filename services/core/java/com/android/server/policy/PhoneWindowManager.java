@@ -129,10 +129,10 @@ import android.media.IAudioService;
 import android.media.session.MediaSessionLegacyHelper;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.DeviceIdleManager;
 import android.os.FactoryTest;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.IDeviceIdleController;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeReason;
@@ -4321,13 +4321,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (!keyguardOn()) {
             voiceIntent = new Intent(RecognizerIntent.ACTION_WEB_SEARCH);
         } else {
-            IDeviceIdleController dic = IDeviceIdleController.Stub.asInterface(
-                    ServiceManager.getService(Context.DEVICE_IDLE_CONTROLLER));
-            if (dic != null) {
-                try {
-                    dic.exitIdle("voice-search");
-                } catch (RemoteException e) {
-                }
+            DeviceIdleManager dim = mContext.getSystemService(DeviceIdleManager.class);
+            if (dim != null) {
+                dim.endIdle("voice-search");
             }
             voiceIntent = new Intent(RecognizerIntent.ACTION_VOICE_SEARCH_HANDS_FREE);
             voiceIntent.putExtra(RecognizerIntent.EXTRA_SECURE, true);

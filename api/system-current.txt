@@ -8121,6 +8121,10 @@ package android.os {
     field public static final String EXTRA_VERSION = "android.os.extra.VERSION";
   }
 
+  public class DeviceIdleManager {
+    method @RequiresPermission(android.Manifest.permission.DEVICE_POWER) public void endIdle(@NonNull String);
+  }
+
   public class Environment {
     method @NonNull public static java.util.Collection<java.io.File> getInternalMediaDirectories();
     method @NonNull public static java.io.File getOdmDirectory();
