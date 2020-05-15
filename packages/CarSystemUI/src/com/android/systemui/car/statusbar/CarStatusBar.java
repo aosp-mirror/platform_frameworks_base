@@ -425,6 +425,11 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
     }
 
     @Override
+    public void notifyBiometricAuthModeChanged() {
+        // No op.
+    }
+
+    @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         //When executing dump() function simultaneously, we need to serialize them
         //to get mStackScroller's position correctly.
