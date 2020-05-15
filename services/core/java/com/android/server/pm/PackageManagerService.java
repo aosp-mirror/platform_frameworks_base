@@ -7217,11 +7217,14 @@ public class PackageManagerService extends IPackageManager.Stub
                     sortResult = true;
                 }
             } else {
-                final AndroidPackage pkg = mPackages.get(pkgName);
+                final PackageSetting setting =
+                        getPackageSettingInternal(pkgName, Process.SYSTEM_UID);
                 result = null;
-                if (pkg != null) {
+                if (setting != null && setting.pkg != null
+                        && !shouldFilterApplicationLocked(setting, filterCallingUid, userId)) {
                     result = filterIfNotSystemUser(mComponentResolver.queryActivities(
-                            intent, resolvedType, flags, pkg.getActivities(), userId), userId);
+                            intent, resolvedType, flags, setting.pkg.getActivities(), userId),
+                            userId);
                 }
                 if (result == null || result.size() == 0) {
                     // the caller wants to resolve for a particular package; however, there
