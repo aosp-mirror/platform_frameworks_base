@@ -4262,7 +4262,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             }
 
             // ---------------------------------------------------------------
-            case MSG_INLINE_SUGGESTIONS_REQUEST:
+            case MSG_INLINE_SUGGESTIONS_REQUEST: {
                 args = (SomeArgs) msg.obj;
                 final InlineSuggestionsRequestInfo requestInfo =
                         (InlineSuggestionsRequestInfo) args.arg2;
@@ -4274,7 +4274,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 } catch (RemoteException e) {
                     Slog.w(TAG, "RemoteException calling onCreateInlineSuggestionsRequest(): " + e);
                 }
+                args.recycle();
                 return true;
+            }
         }
         return false;
     }
