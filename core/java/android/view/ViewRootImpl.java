@@ -1496,7 +1496,6 @@ public final class ViewRootImpl implements ViewParent,
                         final int newScreenState = toViewScreenState(newDisplayState);
                         if (oldScreenState != newScreenState) {
                             mView.dispatchScreenStateChanged(newScreenState);
-                            mImeFocusController.onScreenStateChanged(newScreenState);
                         }
                         if (oldDisplayState == Display.STATE_OFF) {
                             // Draw was suppressed so we need to for it to happen here.
