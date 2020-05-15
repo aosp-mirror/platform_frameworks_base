@@ -24,7 +24,6 @@ import android.media.session.MediaSession
 /** State of a media view. */
 data class MediaData(
     val initialized: Boolean = false,
-    val foregroundColor: Int,
     val backgroundColor: Int,
     val app: String?,
     val appIcon: Drawable?,
