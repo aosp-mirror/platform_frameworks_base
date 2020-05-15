@@ -28,15 +28,15 @@
     <string name="battery_low_percent_format" msgid="4276661262843170964">"<xliff:g id="PERCENTAGE">%s</xliff:g> restants"</string>
     <string name="battery_low_percent_format_hybrid" msgid="3985614339605686167">"Il reste <xliff:g id="PERCENTAGE">%1$s</xliff:g>, environ <xliff:g id="TIME">%2$s</xliff:g> en fonction de votre usage"</string>
     <string name="battery_low_percent_format_hybrid_short" msgid="5917433188456218857">"Il reste <xliff:g id="PERCENTAGE">%1$s</xliff:g>, environ <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="battery_low_percent_format_saver_started" msgid="4968468824040940688">"<xliff:g id="PERCENTAGE">%s</xliff:g> restants. La fonction Économie d\'énergie est activée."</string>
+    <string name="battery_low_percent_format_saver_started" msgid="4968468824040940688">"<xliff:g id="PERCENTAGE">%s</xliff:g> restants. La fonction Économiseur de pile est activée."</string>
     <string name="invalid_charger" msgid="4370074072117767416">"Impossible de charger l\'appareil par USB. Servez-vous du chargeur fourni avec celui-ci."</string>
     <string name="invalid_charger_title" msgid="938685362320735167">"Impossible de charger l\'appareil par USB"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"Servez-vous du chargeur fourni avec votre appareil"</string>
     <string name="battery_low_why" msgid="2056750982959359863">"Paramètres"</string>
-    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Activer la fonction Économie d\'énergie?"</string>
+    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Activer l\'économiseur de pile?"</string>
     <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"À propos du mode Économiseur de pile"</string>
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"Activer"</string>
-    <string name="battery_saver_start_action" msgid="4553256017945469937">"Activer la fonction Économie d\'énergie"</string>
+    <string name="battery_saver_start_action" msgid="4553256017945469937">"Activer l\'économiseur de pile"</string>
     <string name="status_bar_settings_settings_button" msgid="534331565185171556">"Paramètres"</string>
     <string name="status_bar_settings_wifi_button" msgid="7243072479837270946">"Wi-Fi"</string>
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Rotation auto de l\'écran"</string>
@@ -405,7 +405,7 @@
     <string name="keyguard_unlock" msgid="8031975796351361601">"Balayez l\'écran vers le haut pour ouvrir"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Balayez l\'écran vers le haut pour réessayer"</string>
     <string name="dock_alignment_slow_charging" product="default" msgid="5148122851798085807">"Réalignez le téléphone pour le recharger plus rapidement"</string>
-    <string name="dock_alignment_not_charging" product="default" msgid="1002617659995575624">"Réalignez le téléphone pour effectuer la recharge sans fil"</string>
+    <string name="dock_alignment_not_charging" product="default" msgid="1002617659995575624">"Réalignez le téléphone pour le recharger sans fil"</string>
     <string name="do_disclosure_generic" msgid="2388094207542706440">"Cet appareil est géré par votre organisation"</string>
     <string name="do_disclosure_with_name" msgid="9113122674419739611">"Cet appareil est géré par <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="phone_hint" msgid="6682125338461375925">"Balayez à partir de l\'icône pour accéder au téléphone"</string>
@@ -454,9 +454,9 @@
     <string name="user_remove_user_title" msgid="9124124694835811874">"Supprimer l\'utilisateur?"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"Toutes les applications et les données de cet utilisateur seront supprimées."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"Supprimer"</string>
-    <string name="battery_saver_notification_title" msgid="8419266546034372562">"La fonction Économie d\'énergie est activée"</string>
+    <string name="battery_saver_notification_title" msgid="8419266546034372562">"Économiseur de pile activé"</string>
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"Réduire les performances et de fond"</string>
-    <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"Désactiver la fonction Économie d\'énergie"</string>
+    <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"Désactiver la fonction Économiseur de pile"</string>
     <string name="media_projection_dialog_text" msgid="5509958417853154019">"Durant l\'enregistrement ou la diffusion, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> peut capturer de l\'information confidentielle qui s\'affiche sur votre écran ou qui joue sur votre appareil, comme de l\'audio, des mots de passe, des données de paiement, des photos et des messages."</string>
     <string name="media_projection_dialog_service_text" msgid="1046871290896249896">"Durant l\'enregistrement ou la diffusion, le service offrant cette fonction peut capturer de l\'information confidentielle qui s\'affiche sur votre écran ou qui joue sur votre appareil, comme de l\'audio, des mots de passe, des données de paiement, des photos et des messages."</string>
     <string name="media_projection_dialog_title" msgid="6379655487632663290">"Exposer des renseignements sensibles durant la diffusion ou l\'enregistrement"</string>
@@ -695,8 +695,8 @@
       <item quantity="other">%d minutes</item>
     </plurals>
     <string name="battery_panel_title" msgid="5931157246673665963">"Utilisation de la pile"</string>
-    <string name="battery_detail_charging_summary" msgid="8821202155297559706">"Le mode Économie d\'énergie n\'est pas accessible pendant la charge"</string>
-    <string name="battery_detail_switch_title" msgid="6940976502957380405">"Économie d\'énergie"</string>
+    <string name="battery_detail_charging_summary" msgid="8821202155297559706">"Le mode Économiseur de pile n\'est pas accessible pendant la charge"</string>
+    <string name="battery_detail_switch_title" msgid="6940976502957380405">"Économiseur de pile"</string>
     <string name="battery_detail_switch_summary" msgid="3668748557848025990">"Réduit les performances et les données en arrière-plan"</string>
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"Bouton <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="3734400625170020657">"Accueil"</string>
@@ -906,11 +906,11 @@
     <string name="slice_permission_checkbox" msgid="4242888137592298523">"Autoriser <xliff:g id="APP">%1$s</xliff:g> à afficher des tranches de n\'importe quelle application"</string>
     <string name="slice_permission_allow" msgid="6340449521277951123">"Autoriser"</string>
     <string name="slice_permission_deny" msgid="6870256451658176895">"Refuser"</string>
-    <string name="auto_saver_title" msgid="6873691178754086596">"Toucher pour activer la fonction Économie d\'énergie"</string>
+    <string name="auto_saver_title" msgid="6873691178754086596">"Toucher pour activer la fonction Économiseur de pile"</string>
     <string name="auto_saver_text" msgid="3214960308353838764">"Activer si la pile est susceptible de s\'épuiser totalement"</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"Non merci"</string>
-    <string name="auto_saver_enabled_title" msgid="4294726198280286333">"La fonction Économie d\'énergie est activée"</string>
-    <string name="auto_saver_enabled_text" msgid="7889491183116752719">"La fonction Économie d\'énergie s\'activera automatiquement une fois que la pile sera en dessous de <xliff:g id="PERCENTAGE">%d</xliff:g> %%."</string>
+    <string name="auto_saver_enabled_title" msgid="4294726198280286333">"La fonction Économiseur de pile est activée"</string>
+    <string name="auto_saver_enabled_text" msgid="7889491183116752719">"La fonction Économiseur de pile s\'activera automatiquement une fois que la pile sera en dessous de <xliff:g id="PERCENTAGE">%d</xliff:g> %%."</string>
     <string name="open_saver_setting_action" msgid="2111461909782935190">"Paramètres"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"OK"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Copier mémoire SysUI"</string>

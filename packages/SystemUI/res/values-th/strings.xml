@@ -38,7 +38,7 @@
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"เปิด"</string>
     <string name="battery_saver_start_action" msgid="4553256017945469937">"เปิดโหมดประหยัดแบตเตอรี่"</string>
     <string name="status_bar_settings_settings_button" msgid="534331565185171556">"การตั้งค่า"</string>
-    <string name="status_bar_settings_wifi_button" msgid="7243072479837270946">"WiFi"</string>
+    <string name="status_bar_settings_wifi_button" msgid="7243072479837270946">"Wi-Fi"</string>
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"หมุนหน้าจออัตโนมัติ"</string>
     <string name="status_bar_settings_mute_label" msgid="914392730086057522">"ปิดเสียง"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="2151934479226017725">"อัตโนมัติ"</string>
@@ -311,7 +311,7 @@
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"เสียง"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"ชุดหูฟัง"</string>
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="3887552721233148132">"อินพุต"</string>
-    <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="3003338571871392293">"เครื่องช่วยการได้ยิน"</string>
+    <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="3003338571871392293">"เครื่องช่วยฟัง"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"กำลังเปิด..."</string>
     <string name="quick_settings_brightness_label" msgid="680259653088849563">"ความสว่าง"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"หมุนอัตโนมัติ"</string>
@@ -331,7 +331,7 @@
     <string name="quick_settings_user_label" msgid="1253515509432672496">"ฉัน"</string>
     <string name="quick_settings_user_title" msgid="8673045967216204537">"ผู้ใช้"</string>
     <string name="quick_settings_user_new_user" msgid="3347905871336069666">"ผู้ใช้ใหม่"</string>
-    <string name="quick_settings_wifi_label" msgid="2879507532983487244">"WiFi"</string>
+    <string name="quick_settings_wifi_label" msgid="2879507532983487244">"Wi-Fi"</string>
     <string name="quick_settings_wifi_not_connected" msgid="4071097522427039160">"ไม่ได้เชื่อมต่อ"</string>
     <string name="quick_settings_wifi_no_network" msgid="6003178398713839313">"ไม่มีเครือข่าย"</string>
     <string name="quick_settings_wifi_off_label" msgid="4003379736176547594">"ปิด WiFi"</string>
@@ -346,7 +346,7 @@
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"ไม่ได้เชื่อมต่อ Wi-Fi"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"ความสว่าง"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="2325362583903258677">"อัตโนมัติ"</string>
-    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"สลับสี"</string>
+    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"กลับสี"</string>
     <string name="quick_settings_color_space_label" msgid="537528291083575559">"โหมดการแก้ไขสี"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"การตั้งค่าเพิ่มเติม"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"เสร็จสิ้น"</string>
@@ -356,7 +356,7 @@
     <string name="quick_settings_tethering_label" msgid="5257299852322475780">"การปล่อยสัญญาณ"</string>
     <string name="quick_settings_hotspot_label" msgid="1199196300038363424">"ฮอตสปอต"</string>
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"กำลังเปิด..."</string>
-    <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"เปิดประหยัดเน็ตอยู่"</string>
+    <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"เปิดการประหยัดเน็ตอยู่"</string>
     <plurals name="quick_settings_hotspot_secondary_label_num_devices" formatted="false" msgid="3142308865165871976">
       <item quantity="other">อุปกรณ์ %d เครื่อง</item>
       <item quantity="one">อุปกรณ์ %d เครื่อง</item>
@@ -428,7 +428,7 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"แสดงโปรไฟล์"</string>
     <string name="user_add_user" msgid="4336657383006913022">"เพิ่มผู้ใช้"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"ผู้ใช้ใหม่"</string>
-    <string name="guest_nickname" msgid="1863770639799615889">"ผู้เข้าร่วม"</string>
+    <string name="guest_nickname" msgid="1863770639799615889">"ผู้ใช้ชั่วคราว"</string>
     <string name="guest_new_guest" msgid="962155336259570156">"เพิ่มผู้เข้าร่วม"</string>
     <string name="guest_exit_guest" msgid="4030840507598850886">"นำผู้เข้าร่วมออก"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"ต้องการนำผู้เข้าร่วมออกไหม"</string>
@@ -782,8 +782,8 @@
     <string name="right_keycode" msgid="2480715509844798438">"Keycode ทางขวา"</string>
     <string name="left_icon" msgid="5036278531966897006">"ไอคอนทางซ้าย"</string>
     <string name="right_icon" msgid="1103955040645237425">"ไอคอนทางขวา"</string>
-    <string name="drag_to_add_tiles" msgid="8933270127508303672">"กดค้างแล้วลากเพื่อเพิ่มชิ้นส่วน"</string>
-    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"กดไทล์ค้างไว้แล้วลากเพื่อจัดเรียงใหม่"</string>
+    <string name="drag_to_add_tiles" msgid="8933270127508303672">"กดค้างแล้วลากเพื่อเพิ่มการ์ด"</string>
+    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"กดการ์ดค้างไว้แล้วลากเพื่อจัดเรียงใหม่"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"ลากมาที่นี่เพื่อนำออก"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"คุณต้องมีการ์ดอย่างน้อย <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> รายการ"</string>
     <string name="qs_edit" msgid="5583565172803472437">"แก้ไข"</string>
@@ -896,8 +896,8 @@
     <string name="qs_dnd_replace" msgid="7712119051407052689">"แทนที่"</string>
     <string name="running_foreground_services_title" msgid="5137313173431186685">"แอปที่กำลังทำงานในเบื้องหลัง"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"แตะเพื่อดูรายละเอียดเกี่ยวกับแบตเตอรี่และปริมาณการใช้อินเทอร์เน็ต"</string>
-    <string name="mobile_data_disable_title" msgid="5366476131671617790">"ปิดเน็ตมือถือไหม"</string>
-    <string name="mobile_data_disable_message" msgid="8604966027899770415">"คุณจะใช้เน็ตมือถือหรืออินเทอร์เน็ตผ่าน <xliff:g id="CARRIER">%s</xliff:g> ไม่ได้ แต่จะใช้ผ่าน Wi-Fi ได้เท่านั้น"</string>
+    <string name="mobile_data_disable_title" msgid="5366476131671617790">"ปิดอินเทอร์เน็ตมือถือไหม"</string>
+    <string name="mobile_data_disable_message" msgid="8604966027899770415">"คุณจะใช้เน็ตมือถือหรืออินเทอร์เน็ตผ่าน \"<xliff:g id="CARRIER">%s</xliff:g>\" ไม่ได้ แต่จะใช้ผ่าน Wi-Fi ได้เท่านั้น"</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"ผู้ให้บริการของคุณ"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"เนื่องจากแอปหนึ่งได้บดบังคำขอสิทธิ์ ระบบจึงไม่สามารถยืนยันคำตอบของคุณสำหรับการตั้งค่าได้"</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"อนุญาตให้ <xliff:g id="APP_0">%1$s</xliff:g> แสดงส่วนต่างๆ ของ <xliff:g id="APP_2">%2$s</xliff:g>"</string>
@@ -926,8 +926,8 @@
     <string name="music_controls_no_title" msgid="4166497066552290938">"ไม่มีชื่อ"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"แตะเพื่อรีสตาร์ทแอปนี้และแสดงแบบเต็มหน้าจอ"</string>
     <string name="bubbles_deep_link_button_description" msgid="3532375322003698792">"เปิด <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="bubbles_settings_button_description" msgid="7324245408859877545">"การตั้งค่าลูกโป่ง <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="bubbles_prompt" msgid="8172381116778530318">"อนุญาตลูกโป่งจาก <xliff:g id="APP_NAME">%1$s</xliff:g> ไหม"</string>
+    <string name="bubbles_settings_button_description" msgid="7324245408859877545">"การตั้งค่าบับเบิล <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="bubbles_prompt" msgid="8172381116778530318">"อนุญาตบับเบิลจาก <xliff:g id="APP_NAME">%1$s</xliff:g> ไหม"</string>
     <string name="manage_bubbles_text" msgid="6856830436329494850">"จัดการ"</string>
     <string name="no_bubbles" msgid="1187859094003006292">"ปฏิเสธ"</string>
     <string name="yes_bubbles" msgid="3014008797151197346">"อนุญาต"</string>

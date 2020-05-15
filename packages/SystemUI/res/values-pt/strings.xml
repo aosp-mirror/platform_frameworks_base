@@ -33,7 +33,7 @@
     <string name="invalid_charger_title" msgid="938685362320735167">"Não é possível carregar via USB"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"Usar o carregador que acompanha o dispositivo"</string>
     <string name="battery_low_why" msgid="2056750982959359863">"Configurações"</string>
-    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Ativar Economia de bateria?"</string>
+    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Ativar \"Economia de bateria\"?"</string>
     <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"Sobre a Economia de bateria"</string>
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"Ativar"</string>
     <string name="battery_saver_start_action" msgid="4553256017945469937">"Ativar a Economia de bateria"</string>
@@ -386,7 +386,7 @@
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Deslize para cima para alternar entre os apps"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Arraste para a direita para alternar rapidamente entre os apps"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Alternar Visão geral"</string>
-    <string name="expanded_header_battery_charged" msgid="5307907517976548448">"Carregada"</string>
+    <string name="expanded_header_battery_charged" msgid="5307907517976548448">"Carregado"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"Carregando"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="757991461445765011">"<xliff:g id="CHARGING_TIME">%s</xliff:g> até concluir"</string>
     <string name="expanded_header_battery_not_charging" msgid="809409140358955848">"Não está carregando"</string>
@@ -632,7 +632,7 @@
     <string name="do_not_silence" msgid="4982217934250511227">"Não silenciar"</string>
     <string name="do_not_silence_block" msgid="4361847809775811849">"Não silenciar ou bloquear"</string>
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Controles de ativação/desativação de notificações"</string>
-    <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"Ativado"</string>
+    <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"Ativada"</string>
     <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"Desativado"</string>
     <string name="power_notification_controls_description" msgid="1334963837572708952">"Com controles de ativação de notificações, é possível definir o nível de importância de 0 a 5 para as notificações de um app. \n\n"<b>"Nível 5"</b>" \n- Exibir na parte superior da lista de notificações \n- Permitir interrupção em tela cheia \n- Sempre exibir \n\n"<b>"Nível 4"</b>" \n- Impedir interrupções em tela cheia \n- Sempre exibir \n\n"<b>"Nível 3"</b>" \n- Impedir interrupções em tela cheia \n- Nunca exibir \n\n"<b>"Nível 2"</b>" \n- Impedir interrupções em tela cheia \n- Nunca exibir \n- Nunca emitir som ou vibrar \n\n"<b>"Nível 1"</b>" \n- Impedir interrupções em tela cheia \n- Nunca exibir \n- Nunca emitir som ou vibrar \n- Ocultar da tela de bloqueio e barra de status \n- Exibir na parte inferior da lista de notificações \n\n"<b>"Nível 0"</b>" \n- Bloquear todas as notificações do app"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"Notificações"</string>
@@ -897,7 +897,7 @@
     <string name="running_foreground_services_title" msgid="5137313173431186685">"Apps sendo executados em segundo plano"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"Tocar para ver detalhes sobre a bateria e o uso de dados"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"Desativar os dados móveis?"</string>
-    <string name="mobile_data_disable_message" msgid="8604966027899770415">"Você não terá acesso a dados ou à Internet por meio da operadora <xliff:g id="CARRIER">%s</xliff:g>. A Internet só estará disponível via Wi-Fi."</string>
+    <string name="mobile_data_disable_message" msgid="8604966027899770415">"Você não terá acesso a dados ou à Internet pela operadora <xliff:g id="CARRIER">%s</xliff:g>. A Internet só estará disponível via Wi-Fi."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"sua operadora"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"Como um app está ocultando uma solicitação de permissão, as configurações não podem verificar sua resposta."</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"Permitir que <xliff:g id="APP_0">%1$s</xliff:g> mostre partes do app <xliff:g id="APP_2">%2$s</xliff:g>?"</string>

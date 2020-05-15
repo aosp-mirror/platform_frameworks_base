@@ -182,7 +182,7 @@
     <string name="data_connection_5g" msgid="6268379449490425462">"5G"</string>
     <string name="data_connection_5g_plus" msgid="2926653195193324466">"5G+"</string>
     <string name="data_connection_cdma" msgid="7678457855627313518">"1X"</string>
-    <string name="data_connection_roaming" msgid="375650836665414797">"Barangolás"</string>
+    <string name="data_connection_roaming" msgid="375650836665414797">"Roaming"</string>
     <string name="data_connection_edge" msgid="6316755666481405762">"EDGE"</string>
     <string name="accessibility_data_connection_wifi" msgid="4422160347472742434">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="1140839832913084973">"Nincs SIM."</string>
@@ -897,7 +897,7 @@
     <string name="running_foreground_services_title" msgid="5137313173431186685">"A háttérben még futnak alkalmazások"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"Koppintson az akkumulátor- és adathasználat részleteinek megtekintéséhez"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"Kikapcsolja a mobiladatokat?"</string>
-    <string name="mobile_data_disable_message" msgid="8604966027899770415">"Nem lesz adat-, illetve internet-hozzáférése <xliff:g id="CARRIER">%s</xliff:g> szolgáltatón keresztül. Az internethez csak Wi-Fi-n keresztül csatlakozhat."</string>
+    <string name="mobile_data_disable_message" msgid="8604966027899770415">"Nem lesz adat-, illetve internet-hozzáférése a <xliff:g id="CARRIER">%s</xliff:g> szolgáltatón keresztül. Az internethez csak Wi-Fi-n keresztül csatlakozhat."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"saját mobilszolgáltató"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"Mivel az egyik alkalmazás eltakarja az engedélykérést, a Beállítások alkalmazás nem tudja ellenőrizni az Ön válaszát."</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"Engedélyezi a(z) <xliff:g id="APP_0">%1$s</xliff:g> alkalmazásnak, hogy részleteket mutasson a(z) <xliff:g id="APP_2">%2$s</xliff:g> alkalmazásból?"</string>

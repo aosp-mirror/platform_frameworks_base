@@ -33,7 +33,7 @@
     <string name="invalid_charger_title" msgid="938685362320735167">"USB ဖြင့် အားသွင်း၍မရပါ"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"သင့်စက်ပစ္စည်းနှင့် အတူပါလာသည့် အားသွင်းကိရိယာကို အသုံးပြုပါ"</string>
     <string name="battery_low_why" msgid="2056750982959359863">"ဆက်တင်များ"</string>
-    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"ဘက်ထရီ အားထိန်းကို ဖွင့်ခြင်း"</string>
+    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"ဘက်ထရီအားထိန်းကို ဖွင့်မလား။"</string>
     <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"\'ဘက်ထရီအားထိန်း\' အကြောင်း"</string>
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"ဖွင့်ရန်"</string>
     <string name="battery_saver_start_action" msgid="4553256017945469937">"ဘက်ထရီ အားထိန်းကို ဖွင့်ရန်"</string>
@@ -192,7 +192,7 @@
     <string name="not_default_data_content_description" msgid="6757881730711522517">"ဒေတာအသုံးပြုရန် သတ်မှတ်မထားပါ"</string>
     <string name="cell_data_off" msgid="4886198950247099526">"ပိတ်ရန်"</string>
     <string name="accessibility_bluetooth_tether" msgid="6327291292208790599">"ဘလူးတုသ်သုံး၍ ချိတ်ဆက်ခြင်း"</string>
-    <string name="accessibility_airplane_mode" msgid="1899529214045998505">"လေယာဥ်ပျံပေါ်အသုံးပြုသောစနစ်။"</string>
+    <string name="accessibility_airplane_mode" msgid="1899529214045998505">"လေယာဉ်ပျံမုဒ်"</string>
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"VPN ကို ဖွင့်ထားသည်။"</string>
     <string name="accessibility_no_sims" msgid="5711270400476534667">"SIM ကတ် မရှိပါ"</string>
     <string name="carrier_network_change_mode" msgid="5174141476991149918">"ဝန်ဆောင်မှုပေးသူ ကွန်ရက် ပြောင်းလဲနေသည်။"</string>
@@ -601,7 +601,7 @@
     <string name="status_bar_ethernet" msgid="5690979758988647484">"အီသာနက်"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"နှိုးစက်"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"အလုပ် ပရိုဖိုင်"</string>
-    <string name="status_bar_airplane" msgid="4848702508684541009">"လေယာဉ်ပေါ်သုံးစနစ်"</string>
+    <string name="status_bar_airplane" msgid="4848702508684541009">"လေယာဉ်ပျံမုဒ်"</string>
     <string name="add_tile" msgid="6239678623873086686">"လေးထောင့်ကွက် ထည့်ရန်"</string>
     <string name="broadcast_tile" msgid="5224010633596487481">"လေးထောင့်ကွက် ထုတ်လွှင့်ရန်"</string>
     <string name="zen_alarm_warning_indef" msgid="5252866591716504287">"သင့်ရဲ့ နောက်ထပ်နှိုးစက် <xliff:g id="WHEN">%1$s</xliff:g> ကိုသင်ကြားမည်မဟုတ်ပါ အကယ်၍ သင်၎င်းအချိန်မတိုင်"</string>
@@ -874,7 +874,7 @@
     <string name="notification_channel_battery" msgid="9219995638046695106">"ဘက်ထရီ"</string>
     <string name="notification_channel_screenshot" msgid="7665814998932211997">"မျက်နှာပြင်ဓာတ်ပုံများ"</string>
     <string name="notification_channel_general" msgid="4384774889645929705">"အထွေထွေ မက်ဆေ့ဂျ်များ"</string>
-    <string name="notification_channel_storage" msgid="2720725707628094977">"သိုလှောင်မှုများ"</string>
+    <string name="notification_channel_storage" msgid="2720725707628094977">"သိုလှောင်ခန်း"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"အရိပ်အမြွက်များ"</string>
     <string name="instant_apps" msgid="8337185853050247304">"Instant Apps"</string>
     <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> လုပ်ဆောင်နေသည်"</string>
@@ -896,8 +896,8 @@
     <string name="qs_dnd_replace" msgid="7712119051407052689">"အစားထိုးရန်"</string>
     <string name="running_foreground_services_title" msgid="5137313173431186685">"နောက်ခံတွင် ပွင့်နေသော အက်ပ်များ"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"ဘက်ထရီနှင့် ဒေတာအသုံးပြုမှု အသေးစိတ်ကို ကြည့်ရန် တို့ပါ"</string>
-    <string name="mobile_data_disable_title" msgid="5366476131671617790">"မိုဘိုင်းဒေတာ ပိတ်လိုပါသလား။"</string>
-    <string name="mobile_data_disable_message" msgid="8604966027899770415">"<xliff:g id="CARRIER">%s</xliff:g> မှတစ်ဆင့် ဒေတာ သို့မဟုတ် အင်တာနက်ကို သုံးစွဲ၍ မရနိုင်ပါ။ Wi-Fi အသုံးပြု၍သာ အင်တာနက် သုံးစွဲနိုင်ပါသည်။"</string>
+    <string name="mobile_data_disable_title" msgid="5366476131671617790">"မိုဘိုင်းဒေတာ ပိတ်မလား။"</string>
+    <string name="mobile_data_disable_message" msgid="8604966027899770415">"<xliff:g id="CARRIER">%s</xliff:g> မှတစ်ဆင့် ဒေတာ သို့မဟုတ် အင်တာနက်ကို မသုံးနိုင်ပါ။ Wi-Fi ဖြင့်သာ အင်တာနက် သုံးနိုင်သည်။"</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"သင်၏ ဝန်ဆောင်မှုပေးသူ"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"အပလီကေးရှင်းတစ်ခုက ခွင့်ပြုချက်တောင်းခံမှုကို ပိတ်ထားသောကြောင့် ဆက်တင်များသည် သင်၏ လုပ်ဆောင်ကို တုံ့ပြန်နိုင်ခြင်းမရှိပါ။"</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"<xliff:g id="APP_0">%1$s</xliff:g> အား <xliff:g id="APP_2">%2$s</xliff:g> ၏အချပ်များ ပြသခွင့်ပြုပါသလား။"</string>
@@ -926,7 +926,7 @@
     <string name="music_controls_no_title" msgid="4166497066552290938">"ခေါင်းစဉ် မရှိပါ"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"ဤအက်ပ်ကို ပြန်စတင်ပြီး မျက်နှာပြင်အပြည့်လုပ်ရန် တို့ပါ။"</string>
     <string name="bubbles_deep_link_button_description" msgid="3532375322003698792">"<xliff:g id="APP_NAME">%1$s</xliff:g> ကိုဖွင့်ရန်"</string>
-    <string name="bubbles_settings_button_description" msgid="7324245408859877545">"<xliff:g id="APP_NAME">%1$s</xliff:g> ပူဖောင်းကွက်များအတွက် ဆက်တင်များ"</string>
+    <string name="bubbles_settings_button_description" msgid="7324245408859877545">"<xliff:g id="APP_NAME">%1$s</xliff:g> ပူဖောင်းကွက်အတွက် ဆက်တင်များ"</string>
     <string name="bubbles_prompt" msgid="8172381116778530318">"<xliff:g id="APP_NAME">%1$s</xliff:g> မှ ပူဖောင်းကွက်များကို ခွင့်ပြုလိုပါသလား။"</string>
     <string name="manage_bubbles_text" msgid="6856830436329494850">"စီမံရန်"</string>
     <string name="no_bubbles" msgid="1187859094003006292">"ငြင်းပယ်ရန်"</string>

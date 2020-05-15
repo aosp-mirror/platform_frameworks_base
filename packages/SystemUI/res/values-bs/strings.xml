@@ -538,7 +538,7 @@
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"Postavke zvuka"</string>
     <string name="accessibility_volume_expand" msgid="7653070939304433603">"Proširi"</string>
     <string name="accessibility_volume_collapse" msgid="2746845391013829996">"Suzi"</string>
-    <string name="volume_odi_captions_tip" msgid="8825655463280990941">"Automatski titluj medije"</string>
+    <string name="volume_odi_captions_tip" msgid="8825655463280990941">"Automatski titlovi za medije"</string>
     <string name="accessibility_volume_close_odi_captions_tip" msgid="8924753283621160480">"Savjet u titlu"</string>
     <string name="volume_odi_captions_content_description" msgid="4172765742046013630">"Preklapanje titlova"</string>
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"omogući"</string>
@@ -656,14 +656,14 @@
     <string name="inline_minimize_button" msgid="1474436209299333445">"Minimiziraj"</string>
     <string name="inline_silent_button_silent" msgid="525243786649275816">"Nečujno"</string>
     <string name="inline_silent_button_stay_silent" msgid="2129254868305468743">"Ostani u nečujnom načinu rada"</string>
-    <string name="inline_silent_button_alert" msgid="5705343216858250354">"Upozorenja"</string>
+    <string name="inline_silent_button_alert" msgid="5705343216858250354">"Zvučni"</string>
     <string name="inline_silent_button_keep_alerting" msgid="6577845442184724992">"Nastavi upozoravati"</string>
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"Isključi obavještenja"</string>
     <string name="inline_keep_showing_app" msgid="4393429060390649757">"Nastaviti prikazivanje obavještenja iz ove aplikacije?"</string>
     <string name="notification_silence_title" msgid="8608090968400832335">"Nečujno"</string>
-    <string name="notification_alert_title" msgid="7629202599338071971">"Upozorenja"</string>
+    <string name="notification_alert_title" msgid="7629202599338071971">"Zvučni"</string>
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"Pomaže vam da se koncentrirate bez zvuka ili vibracije."</string>
-    <string name="notification_channel_summary_default" msgid="3539949463907902037">"Privlači vašu pažnju pomoću zvuka ili vibracije."</string>
+    <string name="notification_channel_summary_default" msgid="3539949463907902037">"Privlači vam pažnju pomoću zvuka ili vibracije."</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Ta obavještenja se ne mogu izmijeniti."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Ovdje nije moguće konfigurirati ovu grupu obavještenja"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Obavještenje preko proksi servera"</string>
@@ -904,7 +904,7 @@
     <string name="running_foreground_services_title" msgid="5137313173431186685">"Aplikacije koje rade u pozadini"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"Dodirnite za detalje o potrošnji baterije i prijenosa podataka"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"Isključiti prijenos podataka na mobilnoj mreži?"</string>
-    <string name="mobile_data_disable_message" msgid="8604966027899770415">"Nećete imati pristup podacima ili internetu putem mobilnog operatera <xliff:g id="CARRIER">%s</xliff:g>. Internet će biti dostupan samo putem WiFi mreže."</string>
+    <string name="mobile_data_disable_message" msgid="8604966027899770415">"Nećete imati pristup podacima ni internetu putem mobilnog operatera <xliff:g id="CARRIER">%s</xliff:g>. Internet će biti dostupan samo putem WiFi mreže."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"vaš operater"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"Postavke ne mogu potvrditi vaš odgovor jer aplikacija zaklanja zahtjev za odobrenje."</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"Dozvoliti aplikaciji <xliff:g id="APP_0">%1$s</xliff:g> prikazivanje isječaka aplikacije <xliff:g id="APP_2">%2$s</xliff:g>?"</string>

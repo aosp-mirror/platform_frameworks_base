@@ -313,7 +313,7 @@
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"ऑडियो"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"हेडसेट"</string>
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="3887552721233148132">"इनपुट"</string>
-    <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="3003338571871392293">"सुनने में मददगार डिवाइस"</string>
+    <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="3003338571871392293">"कान की मशीन"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"ब्लूटूथ चालू हो रहा है…"</string>
     <string name="quick_settings_brightness_label" msgid="680259653088849563">"स्क्रीन की रोशनी"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"अपने-आप घूमना"</string>
@@ -406,8 +406,8 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"खोलने के लिए फिर से टैप करें"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"खोलने के लिए ऊपर स्वाइप करें"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"फिर से कोशिश करने के लिए ऊपर की ओर स्वाइप करें"</string>
-    <string name="dock_alignment_slow_charging" product="default" msgid="5148122851798085807">"फ़ोन को फ़ास्ट चार्ज करने के लिए डॉक पर ठीक तरह से रखें"</string>
-    <string name="dock_alignment_not_charging" product="default" msgid="1002617659995575624">"फ़ोन को वायरलेस चार्जिंग के लिए डॉक पर ठीक तरह से रखें"</string>
+    <string name="dock_alignment_slow_charging" product="default" msgid="5148122851798085807">"फ़ोन को फ़ास्ट चार्ज करने के लिए, डॉक पर ठीक तरह से रखें"</string>
+    <string name="dock_alignment_not_charging" product="default" msgid="1002617659995575624">"वायरलेस चार्जिंग के लिए, फ़ोन को डॉक पर ठीक तरह से रखें"</string>
     <string name="do_disclosure_generic" msgid="2388094207542706440">"इस डिवाइस का प्रबंधन आपका संगठन करता है"</string>
     <string name="do_disclosure_with_name" msgid="9113122674419739611">"इस डिवाइस के प्रबंधक <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> हैं"</string>
     <string name="phone_hint" msgid="6682125338461375925">"फ़ोन के लिए आइकॉन से स्वाइप करें"</string>
@@ -468,7 +468,7 @@
     <string name="notification_section_header_gentle" msgid="3044910806569985386">"बिना आवाज़ या वाइब्रेशन वाली सूचनाएं"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"बिना आवाज़ की सभी सूचनाएं हटाएं"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"\'परेशान न करें\' सुविधा के ज़रिए कुछ समय के लिए सूचनाएं दिखाना रोक दिया गया है"</string>
-    <string name="media_projection_action_text" msgid="3634906766918186440">"अब शुरू करें"</string>
+    <string name="media_projection_action_text" msgid="3634906766918186440">"अभी शुरू करें"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"कोई सूचना नहीं मिली"</string>
     <string name="profile_owned_footer" msgid="2756770645766113964">"प्रोफ़ाइल को मॉनीटर किया जा सकता है"</string>
     <string name="vpn_footer" msgid="3457155078010607471">"नेटवर्क को मॉनीटर किया जा सकता है"</string>
@@ -537,7 +537,7 @@
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"साउंड सेटिंग"</string>
     <string name="accessibility_volume_expand" msgid="7653070939304433603">"विस्तार करें"</string>
     <string name="accessibility_volume_collapse" msgid="2746845391013829996">"छोटा करें"</string>
-    <string name="volume_odi_captions_tip" msgid="8825655463280990941">"मीडिया में अपने आप कैप्शन जोड़ें"</string>
+    <string name="volume_odi_captions_tip" msgid="8825655463280990941">"ऑडियो-वीडियो से अपने-आप कैप्शन बनना"</string>
     <string name="accessibility_volume_close_odi_captions_tip" msgid="8924753283621160480">"कैप्शन सलाह बंद करें"</string>
     <string name="volume_odi_captions_content_description" msgid="4172765742046013630">"कैप्शन ऊपर लगाएं"</string>
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"चालू करें"</string>
@@ -899,7 +899,7 @@
     <string name="running_foreground_services_title" msgid="5137313173431186685">"बैकग्राउंड में चल रहे ऐप्लिकेशन"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"बैटरी और डेटा खर्च की जानकारी के लिए छूएं"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"मोबाइल डेटा बंद करना चाहते हैं?"</string>
-    <string name="mobile_data_disable_message" msgid="8604966027899770415">"आप <xliff:g id="CARRIER">%s</xliff:g> के ज़रिए डेटा या इंटरनेट इस्तेमाल नहीं कर पाएंगे. इंटरनेट सिर्फ़ वाई-फ़ाई का इस्तेमाल करके चलेगा."</string>
+    <string name="mobile_data_disable_message" msgid="8604966027899770415">"आप <xliff:g id="CARRIER">%s</xliff:g> से डेटा या इंटरनेट का इस्तेमाल नहीं कर पाएंगे. इंटरनेट सिर्फ़ वाई-फ़ाई से चलेगा."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"आपको मोबाइल और इंटरनेट सेवा देने वाली कंपनी"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"ऐप की वजह से मंज़ूरी के अनुरोध को समझने में दिक्कत हो रही है, इसलिए सेटिंग से आपके जवाब की पुष्टि नहीं हो पा रही है."</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"<xliff:g id="APP_0">%1$s</xliff:g> को <xliff:g id="APP_2">%2$s</xliff:g> के हिस्से (स्लाइस) दिखाने की मंज़ूरी दें?"</string>
@@ -928,8 +928,8 @@
     <string name="music_controls_no_title" msgid="4166497066552290938">"कोई शीर्षक नहीं"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"इस ऐप्लिकेशन को रीस्टार्ट करने और फ़ुल स्क्रीन चालू करने के लिए टैप करें."</string>
     <string name="bubbles_deep_link_button_description" msgid="3532375322003698792">"<xliff:g id="APP_NAME">%1$s</xliff:g> खोलें"</string>
-    <string name="bubbles_settings_button_description" msgid="7324245408859877545">"<xliff:g id="APP_NAME">%1$s</xliff:g> बबल की सेटिंग"</string>
-    <string name="bubbles_prompt" msgid="8172381116778530318">"<xliff:g id="APP_NAME">%1$s</xliff:g> से बबल की अनुमति दें?"</string>
+    <string name="bubbles_settings_button_description" msgid="7324245408859877545">"<xliff:g id="APP_NAME">%1$s</xliff:g> बबल्स की सेटिंग"</string>
+    <string name="bubbles_prompt" msgid="8172381116778530318">"<xliff:g id="APP_NAME">%1$s</xliff:g> से बबल्स की अनुमति दें?"</string>
     <string name="manage_bubbles_text" msgid="6856830436329494850">"प्रबंधित करें"</string>
     <string name="no_bubbles" msgid="1187859094003006292">"अनुमति न दें"</string>
     <string name="yes_bubbles" msgid="3014008797151197346">"अनुमति दें"</string>

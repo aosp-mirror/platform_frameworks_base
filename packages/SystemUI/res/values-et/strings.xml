@@ -374,7 +374,7 @@
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Öövalgus"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Sissel. päikeselooj."</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"Kuni päikesetõusuni"</string>
-    <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"Sisselülitam. kell <xliff:g id="TIME">%s</xliff:g>"</string>
+    <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"Sisse kell <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"Kuni <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_ui_mode_night_label" msgid="1398928270610780470">"Tume teema"</string>
     <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"Akusäästja"</string>
@@ -880,7 +880,7 @@
     <string name="instant_apps_title" msgid="8942706782103036910">"Rakendus <xliff:g id="APP">%1$s</xliff:g> töötab"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"Rakendus avati installimata."</string>
     <string name="instant_apps_message_with_help" msgid="1816952263531203932">"Rakendus avati installimata. Lisateabe saamiseks puudutage."</string>
-    <string name="app_info" msgid="5153758994129963243">"Rakenduse teave"</string>
+    <string name="app_info" msgid="5153758994129963243">"Rakenduste teave"</string>
     <string name="go_to_web" msgid="636673528981366511">"Ava brauser"</string>
     <string name="mobile_data" msgid="4564407557775397216">"Mobiilne andmeside"</string>
     <string name="mobile_data_text_format" msgid="6806501540022589786">"<xliff:g id="ID_1">%1$s</xliff:g> – <xliff:g id="ID_2">%2$s</xliff:g>"</string>
@@ -897,7 +897,7 @@
     <string name="running_foreground_services_title" msgid="5137313173431186685">"Rakendusi käitatakse taustal"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"Aku ja andmekasutuse üksikasjade nägemiseks puudutage"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"Kas lülitada mobiilne andmeside välja?"</string>
-    <string name="mobile_data_disable_message" msgid="8604966027899770415">"Teil ei ole operaatori <xliff:g id="CARRIER">%s</xliff:g> kaudu juurdepääsu andmesidele ega Internetile. Internet on saadaval ainult WiFi kaudu."</string>
+    <string name="mobile_data_disable_message" msgid="8604966027899770415">"Pärast seda pole teil operaatori <xliff:g id="CARRIER">%s</xliff:g> kaudu juurdepääsu andmesidele ega internetile. Internet on saadaval ainult WiFi kaudu."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"teie operaator"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"Seaded ei saa teie vastust kinnitada, sest rakendus varjab loataotlust."</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"Kas lubada rakendusel <xliff:g id="APP_0">%1$s</xliff:g> näidata rakenduse <xliff:g id="APP_2">%2$s</xliff:g> lõike?"</string>

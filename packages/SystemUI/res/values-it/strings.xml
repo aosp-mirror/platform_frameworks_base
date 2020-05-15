@@ -166,7 +166,7 @@
     <string name="accessibility_three_bars" msgid="819417766606501295">"Tre barre."</string>
     <string name="accessibility_signal_full" msgid="5920148525598637311">"Massimo segnale."</string>
     <string name="accessibility_desc_on" msgid="2899626845061427845">"ON"</string>
-    <string name="accessibility_desc_off" msgid="8055389500285421408">"OFF"</string>
+    <string name="accessibility_desc_off" msgid="8055389500285421408">"Off"</string>
     <string name="accessibility_desc_connected" msgid="3082590384032624233">"Connesso."</string>
     <string name="accessibility_desc_connecting" msgid="8011433412112903614">"Connessione in corso."</string>
     <string name="data_connection_gprs" msgid="2752584037409568435">"GPRS"</string>
@@ -190,7 +190,7 @@
     <string name="accessibility_cell_data_on" msgid="691666434519443162">"Dati mobili attivati"</string>
     <string name="cell_data_off_content_description" msgid="9165555931499878044">"Dati mobili disattivati"</string>
     <string name="not_default_data_content_description" msgid="6757881730711522517">"Non impostato per l\'utilizzo dei dati"</string>
-    <string name="cell_data_off" msgid="4886198950247099526">"OFF"</string>
+    <string name="cell_data_off" msgid="4886198950247099526">"Off"</string>
     <string name="accessibility_bluetooth_tether" msgid="6327291292208790599">"Tethering Bluetooth."</string>
     <string name="accessibility_airplane_mode" msgid="1899529214045998505">"Modalità aereo."</string>
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"VPN attiva."</string>
@@ -255,8 +255,8 @@
     <string name="accessibility_quick_settings_flashlight_on" msgid="3785616827729850766">"Torcia accesa."</string>
     <string name="accessibility_quick_settings_flashlight_changed_off" msgid="3782375441381402599">"Torcia disattivata."</string>
     <string name="accessibility_quick_settings_flashlight_changed_on" msgid="4747870681508334200">"Torcia attivata."</string>
-    <string name="accessibility_quick_settings_color_inversion_changed_off" msgid="7548045840282925393">"Inversione colori disattivata."</string>
-    <string name="accessibility_quick_settings_color_inversion_changed_on" msgid="4711141858364404084">"Inversione colori attivata."</string>
+    <string name="accessibility_quick_settings_color_inversion_changed_off" msgid="7548045840282925393">"Inversione dei colori disattivata."</string>
+    <string name="accessibility_quick_settings_color_inversion_changed_on" msgid="4711141858364404084">"Inversione dei colori attivata."</string>
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"Hotspot mobile disattivato."</string>
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"Hotspot mobile attivato."</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"Trasmissione dello schermo interrotta."</string>
@@ -321,7 +321,7 @@
     <string name="quick_settings_rotation_locked_portrait_label" msgid="1194988975270484482">"Verticale"</string>
     <string name="quick_settings_rotation_locked_landscape_label" msgid="2000295772687238645">"Orizzontale"</string>
     <string name="quick_settings_ime_label" msgid="3351174938144332051">"Metodo di immissione"</string>
-    <string name="quick_settings_location_label" msgid="2621868789013389163">"Geolocalizz."</string>
+    <string name="quick_settings_location_label" msgid="2621868789013389163">"Geolocalizzazione"</string>
     <string name="quick_settings_location_off_label" msgid="7923929131443915919">"Geolocalizz. non attiva"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"Dispositivo multimediale"</string>
     <string name="quick_settings_rssi_label" msgid="3397615415140356701">"RSSI"</string>
@@ -332,7 +332,7 @@
     <string name="quick_settings_user_title" msgid="8673045967216204537">"Utente"</string>
     <string name="quick_settings_user_new_user" msgid="3347905871336069666">"Nuovo utente"</string>
     <string name="quick_settings_wifi_label" msgid="2879507532983487244">"Wi-Fi"</string>
-    <string name="quick_settings_wifi_not_connected" msgid="4071097522427039160">"Non connesso"</string>
+    <string name="quick_settings_wifi_not_connected" msgid="4071097522427039160">"Non connessa"</string>
     <string name="quick_settings_wifi_no_network" msgid="6003178398713839313">"Nessuna rete"</string>
     <string name="quick_settings_wifi_off_label" msgid="4003379736176547594">"Wi-Fi disattivato"</string>
     <string name="quick_settings_wifi_on_label" msgid="2489928193654318511">"Wi-Fi attivo"</string>
@@ -633,7 +633,7 @@
     <string name="do_not_silence_block" msgid="4361847809775811849">"Non silenziare e non bloccare"</string>
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Controlli di gestione delle notifiche"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"On"</string>
-    <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"OFF"</string>
+    <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"Off"</string>
     <string name="power_notification_controls_description" msgid="1334963837572708952">"I controlli di gestione delle notifiche ti consentono di impostare un livello di importanza compreso tra 0 e 5 per le notifiche di un\'app. \n\n"<b>"Livello 5"</b>" \n- Mostra in cima all\'elenco di notifiche \n- Consenti l\'interruzione a schermo intero \n- Visualizza sempre \n\n"<b>"Livello 4"</b>" \n- Impedisci l\'interruzione a schermo intero \n- Visualizza sempre \n\n"<b>"Livello 3"</b>" \n- Impedisci l\'interruzione a schermo intero \n- Non visualizzare mai \n\n"<b>"Livello 2"</b>" \n- Impedisci l\'interruzione a schermo intero \n- Non visualizzare mai \n- Non emettere mai suoni e vibrazioni \n\n"<b>"Livello 1"</b>" \n- Impedisci l\'interruzione a schermo intero \n- Non visualizzare mai \n- Non emettere mai suoni e vibrazioni \n- Nascondi da schermata di blocco e barra di stato \n- Mostra in fondo all\'elenco di notifiche \n\n"<b>"Livello 0"</b>" \n- Blocca tutte le notifiche dell\'app"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"Notifiche"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"Non vedrai più queste notifiche"</string>
@@ -754,7 +754,7 @@
     <string name="accessibility_data_saver_on" msgid="5394743820189757731">"Risparmio dati attivo"</string>
     <string name="accessibility_data_saver_off" msgid="58339669022107171">"Risparmio dati disattivato"</string>
     <string name="switch_bar_on" msgid="1770868129120096114">"On"</string>
-    <string name="switch_bar_off" msgid="5669805115416379556">"OFF"</string>
+    <string name="switch_bar_off" msgid="5669805115416379556">"Off"</string>
     <string name="nav_bar" msgid="4642708685386136807">"Barra di navigazione"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"Layout"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"Tipo di pulsante extra sinistra"</string>
@@ -782,8 +782,8 @@
     <string name="right_keycode" msgid="2480715509844798438">"Keycode destra"</string>
     <string name="left_icon" msgid="5036278531966897006">"Icona sinistra"</string>
     <string name="right_icon" msgid="1103955040645237425">"Icona destra"</string>
-    <string name="drag_to_add_tiles" msgid="8933270127508303672">"Tieni premuto e trascina per aggiungere riquadri"</string>
-    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Tieni premuto e trascina per riordinare i riquadri"</string>
+    <string name="drag_to_add_tiles" msgid="8933270127508303672">"Tieni premuto e trascina per aggiungere icone"</string>
+    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Tieni premuto e trascina per riordinare le icone"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"Trascina qui per rimuovere"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"Occorrono almeno <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> schede"</string>
     <string name="qs_edit" msgid="5583565172803472437">"Modifica"</string>
@@ -926,8 +926,8 @@
     <string name="music_controls_no_title" msgid="4166497066552290938">"Senza titolo"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"Tocca per riavviare l\'app e passare a schermo intero."</string>
     <string name="bubbles_deep_link_button_description" msgid="3532375322003698792">"Apri <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="bubbles_settings_button_description" msgid="7324245408859877545">"Impostazioni per fumetti <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="bubbles_prompt" msgid="8172381116778530318">"Consentire fumetti da <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="bubbles_settings_button_description" msgid="7324245408859877545">"Impostazioni per bolle <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="bubbles_prompt" msgid="8172381116778530318">"Consentire bolle da <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="manage_bubbles_text" msgid="6856830436329494850">"Gestisci"</string>
     <string name="no_bubbles" msgid="1187859094003006292">"Rifiuta"</string>
     <string name="yes_bubbles" msgid="3014008797151197346">"Consenti"</string>

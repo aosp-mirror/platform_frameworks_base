@@ -28,7 +28,7 @@
     <string name="battery_low_percent_format" msgid="4276661262843170964">"Queda un <xliff:g id="PERCENTAGE">%s</xliff:g> de batería"</string>
     <string name="battery_low_percent_format_hybrid" msgid="3985614339605686167">"Queda un <xliff:g id="PERCENTAGE">%1$s</xliff:g> (tiempo restante aproximado según tu uso: <xliff:g id="TIME">%2$s</xliff:g>)"</string>
     <string name="battery_low_percent_format_hybrid_short" msgid="5917433188456218857">"Queda un <xliff:g id="PERCENTAGE">%1$s</xliff:g> (tiempo restante aproximado: <xliff:g id="TIME">%2$s</xliff:g>)"</string>
-    <string name="battery_low_percent_format_saver_started" msgid="4968468824040940688">"Queda un <xliff:g id="PERCENTAGE">%s</xliff:g> de batería. Se ha activado la función Ahorro de energía."</string>
+    <string name="battery_low_percent_format_saver_started" msgid="4968468824040940688">"Queda un <xliff:g id="PERCENTAGE">%s</xliff:g> de batería. Se ha activado el modo Ahorro de batería."</string>
     <string name="invalid_charger" msgid="4370074072117767416">"No se puede cargar por USB. Utiliza el cargador original incluido con el dispositivo."</string>
     <string name="invalid_charger_title" msgid="938685362320735167">"No se puede cargar por USB"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"Utiliza el cargador original incluido con el dispositivo"</string>
@@ -46,8 +46,8 @@
     <string name="bluetooth_tethered" msgid="4171071193052799041">"Bluetooth anclado"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="2972273031043777851">"Configurar métodos de entrada"</string>
     <string name="status_bar_use_physical_keyboard" msgid="4849251850931213371">"Teclado físico"</string>
-    <string name="usb_device_permission_prompt" msgid="4414719028369181772">"¿Quieres permitir que <xliff:g id="APPLICATION">%1$s</xliff:g> acceda a <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
-    <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"¿Quieres permitir que <xliff:g id="APPLICATION">%1$s</xliff:g> acceda a <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
+    <string name="usb_device_permission_prompt" msgid="4414719028369181772">"¿Permitir que <xliff:g id="APPLICATION">%1$s</xliff:g> acceda a <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"¿Permitir que <xliff:g id="APPLICATION">%1$s</xliff:g> acceda a <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"¿Quieres abrir <xliff:g id="APPLICATION">%1$s</xliff:g> para utilizar <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_accessory_confirm_prompt" msgid="5728408382798643421">"¿Quieres abrir <xliff:g id="APPLICATION">%1$s</xliff:g> para utilizar <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
     <string name="usb_accessory_uri_prompt" msgid="6756649383432542382">"Ninguna aplicación instalada funciona con este accesorio USB. Más información: <xliff:g id="URL">%1$s</xliff:g>"</string>
@@ -343,7 +343,7 @@
     <string name="quick_settings_cast_device_default_name" msgid="6988469571141331700">"Dispositivo sin nombre"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2580520859212250265">"Listo para enviar"</string>
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"No hay dispositivos disponibles"</string>
-    <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Wi‑Fi sin conexión"</string>
+    <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Wi‑Fi no conectado"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Brillo"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="2325362583903258677">"AUTO"</string>
     <string name="quick_settings_inversion_label" msgid="5078769633069667698">"Invertir colores"</string>
@@ -356,7 +356,7 @@
     <string name="quick_settings_tethering_label" msgid="5257299852322475780">"Compartir conexión"</string>
     <string name="quick_settings_hotspot_label" msgid="1199196300038363424">"Zona Wi-Fi"</string>
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"Activando…"</string>
-    <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"Ahorro de datos: sí"</string>
+    <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"Ahorro de datos activado"</string>
     <plurals name="quick_settings_hotspot_secondary_label_num_devices" formatted="false" msgid="3142308865165871976">
       <item quantity="other">%d dispositivos</item>
       <item quantity="one">%d dispositivo</item>
@@ -466,7 +466,7 @@
     <string name="notification_section_header_gentle" msgid="3044910806569985386">"Notificaciones silenciadas"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Borrar todas las notificaciones silenciadas"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Notificaciones pausadas por el modo No molestar"</string>
-    <string name="media_projection_action_text" msgid="3634906766918186440">"Iniciar ahora"</string>
+    <string name="media_projection_action_text" msgid="3634906766918186440">"Empezar ahora"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"No hay notificaciones"</string>
     <string name="profile_owned_footer" msgid="2756770645766113964">"Es posible que se supervise el perfil"</string>
     <string name="vpn_footer" msgid="3457155078010607471">"Puede que la red esté supervisada"</string>
@@ -538,8 +538,8 @@
     <string name="volume_odi_captions_tip" msgid="8825655463280990941">"Transcripción instantánea"</string>
     <string name="accessibility_volume_close_odi_captions_tip" msgid="8924753283621160480">"Cerrar las recomendaciones de subtítulos"</string>
     <string name="volume_odi_captions_content_description" msgid="4172765742046013630">"Superposición de subtítulos"</string>
-    <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"habilitar"</string>
-    <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"inhabilitar"</string>
+    <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"activar"</string>
+    <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"desactivar"</string>
     <string name="accessibility_output_chooser" msgid="7807898688967194183">"Cambiar dispositivo de salida"</string>
     <string name="screen_pinning_title" msgid="7357611095909618178">"Pantalla fijada"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"La pantalla se mantiene visible hasta que dejas de fijarla. Para ello, mantén pulsados los botones Atrás y Aplicaciones recientes."</string>
@@ -591,7 +591,7 @@
     <string name="output_service_bt_wifi" msgid="7186882540475524124">"Bluetooth y Wi‑Fi"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"Configurador de UI del sistema"</string>
     <string name="show_battery_percentage" msgid="6235377891802910455">"Mostrar porcentaje de batería insertado"</string>
-    <string name="show_battery_percentage_summary" msgid="9053024758304102915">"Mostrar el porcentaje del nivel de batería en el icono de la barra de estado cuando no se esté cargando"</string>
+    <string name="show_battery_percentage_summary" msgid="9053024758304102915">"Muestra el porcentaje del nivel de batería en el icono de la barra de estado cuando no se esté cargando"</string>
     <string name="quick_settings" msgid="6211774484997470203">"Ajustes rápidos"</string>
     <string name="status_bar" msgid="4357390266055077437">"Barra de estado"</string>
     <string name="overview" msgid="3522318590458536816">"Aplicaciones recientes"</string>
@@ -896,11 +896,11 @@
     <string name="qs_dnd_replace" msgid="7712119051407052689">"Reemplazar"</string>
     <string name="running_foreground_services_title" msgid="5137313173431186685">"Aplicaciones que se están ejecutando en segundo plano"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"Toca para ver información detallada sobre el uso de datos y de la batería"</string>
-    <string name="mobile_data_disable_title" msgid="5366476131671617790">"¿Quieres desactivar los datos móviles?"</string>
-    <string name="mobile_data_disable_message" msgid="8604966027899770415">"No tendrás conexión a Internet ni de datos móviles a través de <xliff:g id="CARRIER">%s</xliff:g>. Solo podrás conectarte a Internet mediante una red Wi‑Fi."</string>
+    <string name="mobile_data_disable_title" msgid="5366476131671617790">"¿Desactivar datos móviles?"</string>
+    <string name="mobile_data_disable_message" msgid="8604966027899770415">"No tendrás acceso a datos móviles ni a Internet a través de <xliff:g id="CARRIER">%s</xliff:g>. Solo podrás conectarte a Internet mediante Wi‑Fi."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"tu operador"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"Una aplicación impide ver una solicitud de permiso, por lo que Ajustes no puede verificar tu respuesta."</string>
-    <string name="slice_permission_title" msgid="3262615140094151017">"¿Quieres permitir que <xliff:g id="APP_0">%1$s</xliff:g> muestre fragmentos de <xliff:g id="APP_2">%2$s</xliff:g>?"</string>
+    <string name="slice_permission_title" msgid="3262615140094151017">"¿Permitir que <xliff:g id="APP_0">%1$s</xliff:g> muestre fragmentos de <xliff:g id="APP_2">%2$s</xliff:g>?"</string>
     <string name="slice_permission_text_1" msgid="6675965177075443714">"- Puede leer información de <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="slice_permission_text_2" msgid="6758906940360746983">"- Puede realizar acciones en <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="slice_permission_checkbox" msgid="4242888137592298523">"Permitir que <xliff:g id="APP">%1$s</xliff:g> muestre fragmentos de cualquier aplicación"</string>

@@ -33,7 +33,7 @@
     <string name="invalid_charger_title" msgid="938685362320735167">"Пуњење преко USB-а није успело"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"Користите пуњач који сте добили уз уређај"</string>
     <string name="battery_low_why" msgid="2056750982959359863">"Подешавања"</string>
-    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Желите ли да укључите Уштеду батерије?"</string>
+    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Желите да укључите Уштеду батерије?"</string>
     <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"О Уштеди батерије"</string>
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"Укључи"</string>
     <string name="battery_saver_start_action" msgid="4553256017945469937">"Укључи Уштеду батерије"</string>
@@ -354,7 +354,7 @@
     <string name="quick_settings_connected" msgid="3873605509184830379">"Повезан"</string>
     <string name="quick_settings_connected_battery_level" msgid="1322075669498906959">"Повезано, ниво батерије је <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="quick_settings_connecting" msgid="2381969772953268809">"Повезује се..."</string>
-    <string name="quick_settings_tethering_label" msgid="5257299852322475780">"Повезивање"</string>
+    <string name="quick_settings_tethering_label" msgid="5257299852322475780">"Привезивање"</string>
     <string name="quick_settings_hotspot_label" msgid="1199196300038363424">"Хотспот"</string>
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"Укључује се..."</string>
     <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"Уштеда података је укључена"</string>
@@ -372,7 +372,7 @@
     <string name="quick_settings_cellular_detail_data_used" msgid="6798849610647988987">"Искористили сте <xliff:g id="DATA_USED">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"Ограничење од <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"Упозорење за <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
-    <string name="quick_settings_work_mode_label" msgid="2754212289804324685">"Профил за Work"</string>
+    <string name="quick_settings_work_mode_label" msgid="2754212289804324685">"Пословни профил"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Ноћно светло"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Укључује се по заласку сунца"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"До изласка сунца"</string>
@@ -482,11 +482,11 @@
     <string name="quick_settings_disclosure_named_management" msgid="586473803771171610">"Овим уређајем управља <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management_vpns" msgid="3447553497516286109">"Уређајем управља организација и повезан је са VPN-овима"</string>
     <string name="quick_settings_disclosure_named_management_vpns" msgid="4066586579688193212">"Уређајем управља <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> и повезан је са VPN-овима"</string>
-    <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"Организација може да прати мрежни саобраћај на профилу за Work"</string>
-    <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> може да надгледа мрежни саобраћај на профилу за Work"</string>
+    <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"Организација може да прати мрежни саобраћај на пословном профилу"</string>
+    <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> може да надгледа мрежни саобраћај на пословном профилу"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"Мрежа се можда надгледа"</string>
     <string name="quick_settings_disclosure_vpns" msgid="2890510056934492407">"Уређај је повезан са VPN-овима"</string>
-    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="5149334449426566152">"Профил за Work је повезан са апликацијом <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="5149334449426566152">"Пословни профил је повезан са апликацијом <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="4201831495800021670">"Лични профил је повезан са апликацијом <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_named_vpn" msgid="5069088739435424666">"Уређај је повезан са апликацијом <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"Управљање уређајима"</string>
@@ -501,12 +501,12 @@
     <string name="monitoring_description_named_management" msgid="7424612629468754552">"Уређајем управља <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>.\n\nАдминистратор може да надгледа подешавања, корпоративни приступ, апликације, податке повезане са уређајем и информације о локацији уређаја, као и да управља њима.\n\nВише информација потражите од администратора."</string>
     <string name="monitoring_description_management" msgid="8081910434889677718">"Уређајем управља организација.\n\nАдминистратор може да надгледа подешавања, корпоративни приступ, апликације, податке повезане са уређајем и информације о локацији уређаја, као и да управља њима.\n\nВише информација потражите од администратора."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"Организација је на овом уређају инсталирала ауторитет за издавање сертификата. Безбедни мрежни саобраћај може да се прати или мења."</string>
-    <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Организација је на профилу за Work инсталирала ауторитет за издавање сертификата. Безбедни мрежни саобраћај може да се прати или мења."</string>
+    <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Организација је на пословном профилу инсталирала ауторитет за издавање сертификата. Безбедни мрежни саобраћај може да се прати или мења."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"На овом уређају је инсталиран ауторитет за издавање сертификата. Безбедни мрежни саобраћај може да се прати или мења."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Администратор је укључио евидентирање мреже, које прати саобраћај на уређају."</string>
     <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"Повезани сте са апликацијом <xliff:g id="VPN_APP">%1$s</xliff:g>, која може да надгледа активности на мрежи, укључујући имејлове, апликације и веб-сајтове."</string>
     <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"Повезани сте са апликацијама <xliff:g id="VPN_APP_0">%1$s</xliff:g> и <xliff:g id="VPN_APP_1">%2$s</xliff:g>, које могу да надгледају активности на мрежи, укључујући имејлове, апликације и веб-сајтове."</string>
-    <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"Профил за Work је повезан са апликацијом <xliff:g id="VPN_APP">%1$s</xliff:g>, која може да надгледа активности на мрежи, укључујући имејлове, апликације и веб-сајтове."</string>
+    <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"Пословни профил је повезан са апликацијом <xliff:g id="VPN_APP">%1$s</xliff:g>, која може да надгледа активности на мрежи, укључујући имејлове, апликације и веб-сајтове."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="8179722332380953673">"Лични профил је повезан са апликацијом <xliff:g id="VPN_APP">%1$s</xliff:g>, која може да надгледа активности на мрежи, укључујући имејлове, апликације и веб-сајтове."</string>
     <string name="monitoring_description_do_header_generic" msgid="6130190408164834986">"Уређајем управља <xliff:g id="DEVICE_OWNER_APP">%1$s</xliff:g>."</string>
     <string name="monitoring_description_do_header_with_name" msgid="2696255132542779511">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> користи <xliff:g id="DEVICE_OWNER_APP">%2$s</xliff:g> за управљање уређајем."</string>
@@ -520,13 +520,13 @@
     <string name="monitoring_description_ca_cert_settings" msgid="8329781950135541003">"Отворите поуздане акредитиве"</string>
     <string name="monitoring_description_network_logging" msgid="577305979174002252">"Администратор је укључио евидентирање мреже, које прати саобраћај на уређају.\n\nКонтактирајте администратора за више информација."</string>
     <string name="monitoring_description_vpn" msgid="1685428000684586870">"Дали сте дозволу апликацији да подешава VPN везу.\n\nТа апликација може да надгледа активности на уређају и мрежи, укључујући имејлове, апликације и веб-сајтове."</string>
-    <string name="monitoring_description_vpn_profile_owned" msgid="4964237035412372751">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> управља профилом за Work.\n\nАдминистратор може да прати активности на мрежи, укључујући имејлове, апликације и веб-сајтове.\n\nКонтактирајте администратора за више информација.\n\nПовезани сте и са VPN-ом, који може да прати активности на мрежи."</string>
+    <string name="monitoring_description_vpn_profile_owned" msgid="4964237035412372751">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> управља пословним профилом.\n\nАдминистратор може да прати активности на мрежи, укључујући имејлове, апликације и веб-сајтове.\n\nКонтактирајте администратора за више информација.\n\nПовезани сте и са VPN-ом, који може да прати активности на мрежи."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
     <string name="monitoring_description_app" msgid="376868879287922929">"Повезани сте са апликацијом <xliff:g id="APPLICATION">%1$s</xliff:g>, која може да надгледа активности на мрежи, укључујући имејлове, апликације и веб-сајтове."</string>
     <string name="monitoring_description_app_personal" msgid="1970094872688265987">"Повезани сте са апликацијом <xliff:g id="APPLICATION">%1$s</xliff:g>, која може да надгледа активности на личној мрежи, укључујући имејлове, апликације и веб-сајтове."</string>
     <string name="branded_monitoring_description_app_personal" msgid="1703511985892688885">"Повезани сте са апликацијом <xliff:g id="APPLICATION">%1$s</xliff:g>, која може да надгледа активности на личној мрежи, укључујући имејлове, апликације и веб-сајтове."</string>
-    <string name="monitoring_description_app_work" msgid="3713084153786663662">"Профилом за Work управља <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Повезан је са апликацијом <xliff:g id="APPLICATION">%2$s</xliff:g>, која може да надгледа активности на пословној мрежи, укључујући имејлове, апликације и веб-сајтове.\n\nВише информација потражите од администратора."</string>
-    <string name="monitoring_description_app_personal_work" msgid="6175816356939166101">"Профилом за Work управља <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Повезан је са апликацијом <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, која може да надгледа активности на пословној мрежи, укључујући имејлове, апликације и веб-сајтове.\n\nПовезани сте и са апликацијом <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, која може да надгледа активности на личној мрежи."</string>
+    <string name="monitoring_description_app_work" msgid="3713084153786663662">"Пословним профилом управља <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Повезан је са апликацијом <xliff:g id="APPLICATION">%2$s</xliff:g>, која може да надгледа активности на пословној мрежи, укључујући имејлове, апликације и веб-сајтове.\n\nВише информација потражите од администратора."</string>
+    <string name="monitoring_description_app_personal_work" msgid="6175816356939166101">"Пословним профилом управља <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Повезан је са апликацијом <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, која може да надгледа активности на пословној мрежи, укључујући имејлове, апликације и веб-сајтове.\n\nПовезани сте и са апликацијом <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, која може да надгледа активности на личној мрежи."</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"Поуздани агент спречава закључавање"</string>
     <string name="keyguard_indication_trust_disabled" msgid="6820793704816727918">"Уређај ће остати закључан док га не откључате ручно"</string>
     <string name="hidden_notifications_title" msgid="1782412844777612795">"Брже добијајте обавештења"</string>
@@ -603,7 +603,7 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"Прикажи режим демонстрације"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Етернет"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Аларм"</string>
-    <string name="status_bar_work" msgid="5238641949837091056">"Профил за Work"</string>
+    <string name="status_bar_work" msgid="5238641949837091056">"Пословни профил"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Режим рада у авиону"</string>
     <string name="add_tile" msgid="6239678623873086686">"Додај плочицу"</string>
     <string name="broadcast_tile" msgid="5224010633596487481">"Плочица за емитовање"</string>
@@ -613,7 +613,7 @@
     <string name="alarm_template_far" msgid="3561752195856839456">"у <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_detail" msgid="544463655956179791">"Брза подешавања, <xliff:g id="TITLE">%s</xliff:g>."</string>
     <string name="accessibility_status_bar_hotspot" msgid="2888479317489131669">"Хотспот"</string>
-    <string name="accessibility_managed_profile" msgid="4703836746209377356">"Профил за Work"</string>
+    <string name="accessibility_managed_profile" msgid="4703836746209377356">"Пословни профил"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Забава за неке, али не за све"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"Тјунер за кориснички интерфејс система вам пружа додатне начине за подешавање и прилагођавање Android корисничког интерфејса. Ове експерименталне функције могу да се промене, откажу или нестану у будућим издањима. Будите опрезни."</string>
     <string name="tuner_persistent_warning" msgid="230466285569307806">"Ове експерименталне функције могу да се промене, откажу или нестану у будућим издањима. Будите опрезни."</string>
@@ -901,7 +901,7 @@
     <string name="qs_dnd_replace" msgid="7712119051407052689">"Замени"</string>
     <string name="running_foreground_services_title" msgid="5137313173431186685">"Апликације покренуте у позадини"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"Додирните за детаље о батерији и потрошњи података"</string>
-    <string name="mobile_data_disable_title" msgid="5366476131671617790">"Желите ли да искључите мобилне податке?"</string>
+    <string name="mobile_data_disable_title" msgid="5366476131671617790">"Желите да искључите мобилне податке?"</string>
     <string name="mobile_data_disable_message" msgid="8604966027899770415">"Нећете имати приступ подацима или интернету преко мобилног оператера <xliff:g id="CARRIER">%s</xliff:g>. Интернет ће бити доступан само преко Wi-Fi везе."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"мобилни оператер"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"Подешавања не могу да верификују ваш одговор јер апликација скрива захтев за дозволу."</string>

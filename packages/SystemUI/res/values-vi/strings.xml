@@ -191,7 +191,7 @@
     <string name="cell_data_off_content_description" msgid="9165555931499878044">"Đã tắt dữ liệu di động"</string>
     <string name="not_default_data_content_description" msgid="6757881730711522517">"Chưa được đặt để sử dụng dữ liệu"</string>
     <string name="cell_data_off" msgid="4886198950247099526">"Tắt"</string>
-    <string name="accessibility_bluetooth_tether" msgid="6327291292208790599">"Chia sẻ kết nối Internet qua Bluetooth"</string>
+    <string name="accessibility_bluetooth_tether" msgid="6327291292208790599">"Chia sẻ Internet qua Bluetooth"</string>
     <string name="accessibility_airplane_mode" msgid="1899529214045998505">"Chế độ trên máy bay."</string>
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"VPN đang bật."</string>
     <string name="accessibility_no_sims" msgid="5711270400476534667">"Không có thẻ SIM nào."</string>
@@ -347,13 +347,13 @@
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Độ sáng"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="2325362583903258677">"TỰ ĐỘNG"</string>
     <string name="quick_settings_inversion_label" msgid="5078769633069667698">"Đảo ngược màu"</string>
-    <string name="quick_settings_color_space_label" msgid="537528291083575559">"Chế độ hiệu chỉnh màu sắc"</string>
+    <string name="quick_settings_color_space_label" msgid="537528291083575559">"Chế độ chỉnh màu"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"Cài đặt khác"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Xong"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"Đã kết nối"</string>
     <string name="quick_settings_connected_battery_level" msgid="1322075669498906959">"Đã kết nối, mức pin <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="quick_settings_connecting" msgid="2381969772953268809">"Đang kết nối..."</string>
-    <string name="quick_settings_tethering_label" msgid="5257299852322475780">"Đang dùng làm điểm truy cập Internet"</string>
+    <string name="quick_settings_tethering_label" msgid="5257299852322475780">"Chia sẻ Internet"</string>
     <string name="quick_settings_hotspot_label" msgid="1199196300038363424">"Điểm phát sóng"</string>
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"Đang bật…"</string>
     <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"Trình tiết kiệm dữ liệu đang bật"</string>
@@ -897,7 +897,7 @@
     <string name="running_foreground_services_title" msgid="5137313173431186685">"Ứng dụng đang chạy trong nền"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"Nhấn để biết chi tiết về mức sử dụng dữ liệu và pin"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"Tắt dữ liệu di động?"</string>
-    <string name="mobile_data_disable_message" msgid="8604966027899770415">"Bạn sẽ không có quyền sử dụng dữ liệu hoặc truy cập Internet thông qua <xliff:g id="CARRIER">%s</xliff:g>. Bạn chỉ có thể truy cập Internet thông qua Wi-Fi."</string>
+    <string name="mobile_data_disable_message" msgid="8604966027899770415">"Bạn sẽ không có quyền sử dụng dữ liệu hoặc truy cập Internet thông qua chế độ <xliff:g id="CARRIER">%s</xliff:g>. Bạn chỉ có thể truy cập Internet thông qua Wi-Fi."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"nhà mạng của bạn"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"Vì ứng dụng đang che khuất yêu cầu cấp quyền nên Cài đặt không thể xác minh câu trả lời của bạn."</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"Cho phép <xliff:g id="APP_0">%1$s</xliff:g> hiển thị các lát của <xliff:g id="APP_2">%2$s</xliff:g>?"</string>

@@ -20,7 +20,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4811759950673118541">"ਸਿਸਟਮ UI"</string>
-    <string name="status_bar_clear_all_button" msgid="2491321682873657397">"ਹਟਾਓ"</string>
+    <string name="status_bar_clear_all_button" msgid="2491321682873657397">"ਕਲੀਅਰ ਕਰੋ"</string>
     <string name="status_bar_no_notifications_title" msgid="7812479124981107507">"ਕੋਈ ਸੂਚਨਾਵਾਂ ਨਹੀਂ"</string>
     <string name="status_bar_ongoing_events_title" msgid="3986169317496615446">"ਜਾਰੀ"</string>
     <string name="status_bar_latest_events_title" msgid="202755896454005436">"ਸੂਚਨਾਵਾਂ"</string>
@@ -39,7 +39,7 @@
     <string name="battery_saver_start_action" msgid="4553256017945469937">"ਬੈਟਰੀ ਸੇਵਰ ਚਾਲੂ ਕਰੋ"</string>
     <string name="status_bar_settings_settings_button" msgid="534331565185171556">"ਸੈਟਿੰਗਾਂ"</string>
     <string name="status_bar_settings_wifi_button" msgid="7243072479837270946">"ਵਾਈ-ਫਾਈ"</string>
-    <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"ਸਕ੍ਰੀਨ ਆਪਣੇ-ਆਪ ਘੁੰਮਾਓ"</string>
+    <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"ਸਕ੍ਰੀਨ ਸਵੈ-ਘੁਮਾਓ"</string>
     <string name="status_bar_settings_mute_label" msgid="914392730086057522">"ਮਿਊਟ ਕਰੋ"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="2151934479226017725">"ਆਟੋ"</string>
     <string name="status_bar_settings_notifications" msgid="5285316949980621438">"ਸੂਚਨਾਵਾਂ"</string>
@@ -314,7 +314,7 @@
     <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="3003338571871392293">"ਸੁਣਨ ਦੇ ਸਾਧਨ"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"ਚਾਲੂ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ…"</string>
     <string name="quick_settings_brightness_label" msgid="680259653088849563">"ਚਮਕ"</string>
-    <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"ਸਵੈ-ਘੁੰਮਾਓ"</string>
+    <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"ਸਵੈ-ਘੁਮਾਓ"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"ਸਕ੍ਰੀਨ ਨੂੰ ਆਪਣੇ ਆਪ ਘੁੰਮਾਓ"</string>
     <string name="accessibility_quick_settings_rotation_value" msgid="2916484894750819251">"<xliff:g id="ID_1">%s</xliff:g> ਮੋਡ"</string>
     <string name="quick_settings_rotation_locked_label" msgid="4420863550666310319">"ਰੋਟੇਸ਼ਨ  ਲਾਕ  ਕੀਤੀ"</string>
@@ -325,7 +325,7 @@
     <string name="quick_settings_location_off_label" msgid="7923929131443915919">"ਨਿਰਧਾਰਿਤ ਸਥਾਨ ਬੰਦ"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"ਮੀਡੀਆ ਡੀਵਾਈਸ"</string>
     <string name="quick_settings_rssi_label" msgid="3397615415140356701">"RSSI"</string>
-    <string name="quick_settings_rssi_emergency_only" msgid="7499207215265078598">"ਕੇਵਲ ਐਮਰਜੈਂਸੀ ਕਾਲਾਂ"</string>
+    <string name="quick_settings_rssi_emergency_only" msgid="7499207215265078598">"ਸਿਰਫ਼ ਸੰਕਟਕਾਲੀਨ ਕਾਲਾਂ"</string>
     <string name="quick_settings_settings_label" msgid="2214639529565474534">"ਸੈਟਿੰਗਾਂ"</string>
     <string name="quick_settings_time_label" msgid="3352680970557509303">"ਸਮਾਂ"</string>
     <string name="quick_settings_user_label" msgid="1253515509432672496">"ਮੈਂ"</string>
@@ -346,7 +346,7 @@
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"ਵਾਈ-ਫਾਈ ਕਨੈਕਟ ਨਹੀਂ ਕੀਤਾ ਗਿਆ"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"ਚਮਕ"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="2325362583903258677">"ਆਟੋ"</string>
-    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"ਰੰਗ ਉਲਟੋ"</string>
+    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"ਰੰਗ ਪਲਟਾਓ"</string>
     <string name="quick_settings_color_space_label" msgid="537528291083575559">"ਰੰਗ ਸੰਸ਼ੋਧਨ ਮੋਡ"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"ਹੋਰ ਸੈਟਿੰਗਾਂ"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"ਹੋ ਗਿਆ"</string>
@@ -601,7 +601,7 @@
     <string name="status_bar_ethernet" msgid="5690979758988647484">"ਈਥਰਨੈਟ"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"ਅਲਾਰਮ"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ"</string>
-    <string name="status_bar_airplane" msgid="4848702508684541009">"ਜਹਾਜ਼ ਮੋਡ"</string>
+    <string name="status_bar_airplane" msgid="4848702508684541009">"ਹਵਾਈ-ਜਹਾਜ਼ ਮੋਡ"</string>
     <string name="add_tile" msgid="6239678623873086686">"ਟਾਇਲ ਸ਼ਾਮਲ ਕਰੋ"</string>
     <string name="broadcast_tile" msgid="5224010633596487481">"ਪ੍ਰਸਾਰਨ ਟਾਇਲ"</string>
     <string name="zen_alarm_warning_indef" msgid="5252866591716504287">"ਤੁਸੀਂ <xliff:g id="WHEN">%1$s</xliff:g> ਵਜੇ ਆਪਣਾ ਅਗਲਾ ਅਲਾਰਮ ਨਹੀਂ ਸੁਣੋਗੇ ਜਦੋਂ ਤੱਕ ਉਸਤੋਂ ਪਹਿਲਾਂ ਤੁਸੀਂ ਇਸਨੂੰ ਬੰਦ ਨਹੀਂ ਕਰਦੇ"</string>
@@ -782,7 +782,7 @@
     <string name="right_keycode" msgid="2480715509844798438">"ਸੱਜਾ ਕੀ-ਕੋਡ"</string>
     <string name="left_icon" msgid="5036278531966897006">"ਖੱਬਾ ਪ੍ਰਤੀਕ"</string>
     <string name="right_icon" msgid="1103955040645237425">"ਸੱਜਾ ਪ੍ਰਤੀਕ"</string>
-    <string name="drag_to_add_tiles" msgid="8933270127508303672">"ਟਾਇਲਾਂ ਸ਼ਾਮਲ ਕਰਨ ਲਈ ਫੜ੍ਹ ਕੇ ਰੱਖੋ ਅਤੇ ਘਸੀਟੋ"</string>
+    <string name="drag_to_add_tiles" msgid="8933270127508303672">"ਟਾਇਲਾਂ ਸ਼ਾਮਲ ਕਰਨ ਲਈ ਫੜ੍ਹ ਕੇ ਘਸੀਟੋ"</string>
     <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"ਟਾਇਲਾਂ ਨੂੰ ਮੁੜ-ਵਿਵਸਥਿਤ ਕਰਨ ਲਈ ਫੜ੍ਹ ਕੇ ਘਸੀਟੋ"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"ਹਟਾਉਣ ਲਈ ਇੱਥੇ ਘਸੀਟੋ"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"ਤੁਹਾਨੂੰ ਘੱਟੋ-ਘੱਟ <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> ਟਾਇਲਾਂ ਦੀ ਲੋੜ ਪਵੇਗੀ"</string>
@@ -892,7 +892,7 @@
     <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"ਐਪ (<xliff:g id="ID_1">%s</xliff:g>) ਵੱਲੋਂ \'ਪਰੇਸ਼ਾਨ ਨਾ ਕਰੋ\' ਚਾਲੂ ਕੀਤਾ ਗਿਆ ਸੀ।"</string>
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"ਇੱਕ ਸਵੈਚਲਿਤ ਨਿਯਮ ਜਾਂ ਐਪ ਵੱਲੋਂ \'ਪਰੇਸ਼ਾਨ ਨਾ ਕਰੋ\' ਚਾਲੂ ਕੀਤਾ ਗਿਆ ਸੀ।"</string>
     <string name="qs_dnd_until" msgid="7844269319043747955">"<xliff:g id="ID_1">%s</xliff:g> ਤੱਕ"</string>
-    <string name="qs_dnd_keep" msgid="3829697305432866434">"ਰੱਖੋ"</string>
+    <string name="qs_dnd_keep" msgid="3829697305432866434">"Keep"</string>
     <string name="qs_dnd_replace" msgid="7712119051407052689">"ਬਦਲੋ"</string>
     <string name="running_foreground_services_title" msgid="5137313173431186685">"ਬੈਕਗ੍ਰਾਊਂਡ ਵਿੱਚ ਚੱਲ ਰਹੀਆਂ ਐਪਾਂ"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"ਬੈਟਰੀ ਅਤੇ ਡਾਟਾ ਵਰਤੋਂ ਸਬੰਧੀ ਵੇਰਵਿਆਂ ਲਈ ਟੈਪ ਕਰੋ"</string>
@@ -926,8 +926,8 @@
     <string name="music_controls_no_title" msgid="4166497066552290938">"ਕੋਈ ਸਿਰਲੇਖ ਨਹੀਂ"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"ਇਸ ਐਪ ਨੂੰ ਮੁੜ-ਸ਼ੁਰੂ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ ਅਤੇ ਪੂਰੀ-ਸਕ੍ਰੀਨ ਮੋਡ \'ਤੇ ਜਾਓ।"</string>
     <string name="bubbles_deep_link_button_description" msgid="3532375322003698792">"<xliff:g id="APP_NAME">%1$s</xliff:g> ਖੋਲ੍ਹੋ"</string>
-    <string name="bubbles_settings_button_description" msgid="7324245408859877545">"<xliff:g id="APP_NAME">%1$s</xliff:g> ਬੁਲਬੁਲਿਆਂ ਲਈ ਸੈਟਿੰਗਾਂ"</string>
-    <string name="bubbles_prompt" msgid="8172381116778530318">"<xliff:g id="APP_NAME">%1$s</xliff:g> ਤੋਂ ਬੁਲਬੁਲੇ ਆਉਣ ਦਿਓ?"</string>
+    <string name="bubbles_settings_button_description" msgid="7324245408859877545">"<xliff:g id="APP_NAME">%1$s</xliff:g> ਬਬਲ ਲਈ ਸੈਟਿੰਗਾਂ"</string>
+    <string name="bubbles_prompt" msgid="8172381116778530318">"<xliff:g id="APP_NAME">%1$s</xliff:g> ਤੋਂ ਬਬਲ ਦੀ ਇਜਾਜ਼ਤ ਦੇਣੀ ਹੈ?"</string>
     <string name="manage_bubbles_text" msgid="6856830436329494850">"ਪ੍ਰਬੰਧਨ ਕਰੋ"</string>
     <string name="no_bubbles" msgid="1187859094003006292">"ਮਨ੍ਹਾ ਕਰੋ"</string>
     <string name="yes_bubbles" msgid="3014008797151197346">"ਕਰਨ ਦਿਓ"</string>

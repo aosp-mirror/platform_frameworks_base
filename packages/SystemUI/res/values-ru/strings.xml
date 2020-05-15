@@ -541,7 +541,7 @@
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"Настройки звука"</string>
     <string name="accessibility_volume_expand" msgid="7653070939304433603">"Развернуть"</string>
     <string name="accessibility_volume_collapse" msgid="2746845391013829996">"Свернуть"</string>
-    <string name="volume_odi_captions_tip" msgid="8825655463280990941">"Автоматические субтитры"</string>
+    <string name="volume_odi_captions_tip" msgid="8825655463280990941">"Автоматически добавлять субтитры"</string>
     <string name="accessibility_volume_close_odi_captions_tip" msgid="8924753283621160480">"Подсказка \"Закрыть субтитры\""</string>
     <string name="volume_odi_captions_content_description" msgid="4172765742046013630">"Наложение субтитров"</string>
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"включить"</string>
@@ -907,7 +907,7 @@
     <string name="running_foreground_services_title" msgid="5137313173431186685">"Приложения, работающие в фоновом режиме"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"Нажмите, чтобы проверить энергопотребление и трафик"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"Отключить мобильный Интернет?"</string>
-    <string name="mobile_data_disable_message" msgid="8604966027899770415">"У вас не будет доступа к данным и Интернету через оператора \"<xliff:g id="CARRIER">%s</xliff:g>\". Вы сможете установить интернет-соединение только по сети Wi-Fi."</string>
+    <string name="mobile_data_disable_message" msgid="8604966027899770415">"Вы не сможете передавать данные или выходить в Интернет через оператора \"<xliff:g id="CARRIER">%s</xliff:g>\". Интернет будет доступен только по сети Wi-Fi."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"ваш оператор"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"Невозможно принять ваше согласие, поскольку запрос скрыт другим приложением."</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"Разрешить приложению \"<xliff:g id="APP_0">%1$s</xliff:g>\" показывать фрагменты приложения \"<xliff:g id="APP_2">%2$s</xliff:g>\"?"</string>
@@ -936,8 +936,8 @@
     <string name="music_controls_no_title" msgid="4166497066552290938">"Без названия"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"Нажмите, чтобы перезапустить приложение и перейти в полноэкранный режим."</string>
     <string name="bubbles_deep_link_button_description" msgid="3532375322003698792">"Открыть приложение \"<xliff:g id="APP_NAME">%1$s</xliff:g>\"."</string>
-    <string name="bubbles_settings_button_description" msgid="7324245408859877545">"Настройки всплывающих уведомлений от приложения \"<xliff:g id="APP_NAME">%1$s</xliff:g>\"."</string>
-    <string name="bubbles_prompt" msgid="8172381116778530318">"Разрешить всплывающие уведомления от приложения \"<xliff:g id="APP_NAME">%1$s</xliff:g>\"?"</string>
+    <string name="bubbles_settings_button_description" msgid="7324245408859877545">"Настройки всплывающих чатов от приложения \"<xliff:g id="APP_NAME">%1$s</xliff:g>\"."</string>
+    <string name="bubbles_prompt" msgid="8172381116778530318">"Разрешить всплывающие чаты от приложения \"<xliff:g id="APP_NAME">%1$s</xliff:g>\"?"</string>
     <string name="manage_bubbles_text" msgid="6856830436329494850">"Настроить"</string>
     <string name="no_bubbles" msgid="1187859094003006292">"Запретить"</string>
     <string name="yes_bubbles" msgid="3014008797151197346">"Разрешить"</string>

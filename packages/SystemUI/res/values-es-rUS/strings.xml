@@ -33,7 +33,7 @@
     <string name="invalid_charger_title" msgid="938685362320735167">"No se puede cargar mediante USB"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"Usa el cargador que se incluyó con el dispositivo"</string>
     <string name="battery_low_why" msgid="2056750982959359863">"Configuración"</string>
-    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"¿Activar el Ahorro de batería?"</string>
+    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"¿Deseas activar Ahorro de batería?"</string>
     <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"Acerca del Ahorro de batería"</string>
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"Activar"</string>
     <string name="battery_saver_start_action" msgid="4553256017945469937">"Activar el Ahorro de batería"</string>
@@ -343,7 +343,7 @@
     <string name="quick_settings_cast_device_default_name" msgid="6988469571141331700">"Dispositivo sin nombre"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2580520859212250265">"Listo para transmitir"</string>
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"No hay dispositivos disponibles"</string>
-    <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"La red Wi-Fi no está conectada"</string>
+    <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Red Wi-Fi no conectada"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Brillo"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="2325362583903258677">"AUTOMÁTICO"</string>
     <string name="quick_settings_inversion_label" msgid="5078769633069667698">"Invertir colores"</string>
@@ -356,7 +356,7 @@
     <string name="quick_settings_tethering_label" msgid="5257299852322475780">"Compartir conexión"</string>
     <string name="quick_settings_hotspot_label" msgid="1199196300038363424">"Hotspot"</string>
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"Activando…"</string>
-    <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"Ahorro de datos sí"</string>
+    <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"Ahorro de datos act."</string>
     <plurals name="quick_settings_hotspot_secondary_label_num_devices" formatted="false" msgid="3142308865165871976">
       <item quantity="other">%d dispositivos</item>
       <item quantity="one">%d dispositivo</item>
@@ -897,7 +897,7 @@
     <string name="running_foreground_services_title" msgid="5137313173431186685">"Apps que se ejecutan en segundo plano"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"Presiona para obtener información sobre el uso de datos y de la batería"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"¿Deseas desactivar los datos móviles?"</string>
-    <string name="mobile_data_disable_message" msgid="8604966027899770415">"No tendrás acceso a datos ni Internet de <xliff:g id="CARRIER">%s</xliff:g>. Internet solo estará disponible mediante Wi-Fi."</string>
+    <string name="mobile_data_disable_message" msgid="8604966027899770415">"No tendrás acceso a datos móviles ni a Internet a través de <xliff:g id="CARRIER">%s</xliff:g>. Solo podrás conectarte a Internet mediante Wi‑Fi."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"tu proveedor"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"Como una app está bloqueando una solicitud de permiso, Configuración no puede verificar tu respuesta."</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"¿Permitir que <xliff:g id="APP_0">%1$s</xliff:g> muestre fragmentos de <xliff:g id="APP_2">%2$s</xliff:g>?"</string>
@@ -926,8 +926,8 @@
     <string name="music_controls_no_title" msgid="4166497066552290938">"Sin título"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"Presiona para reiniciar esta app y acceder al modo de pantalla completa."</string>
     <string name="bubbles_deep_link_button_description" msgid="3532375322003698792">"Abrir <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="bubbles_settings_button_description" msgid="7324245408859877545">"Configuración para cuadros de <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="bubbles_prompt" msgid="8172381116778530318">"¿Quieres permitir cuadros de <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="bubbles_settings_button_description" msgid="7324245408859877545">"Configuración para burbujas de <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="bubbles_prompt" msgid="8172381116778530318">"¿Quieres permitir burbujas de <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="manage_bubbles_text" msgid="6856830436329494850">"Administrar"</string>
     <string name="no_bubbles" msgid="1187859094003006292">"Denegar"</string>
     <string name="yes_bubbles" msgid="3014008797151197346">"Permitir"</string>

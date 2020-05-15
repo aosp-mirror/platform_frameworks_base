@@ -333,7 +333,7 @@
     <string name="quick_settings_user_title" msgid="8673045967216204537">"Utilizator"</string>
     <string name="quick_settings_user_new_user" msgid="3347905871336069666">"Utilizator nou"</string>
     <string name="quick_settings_wifi_label" msgid="2879507532983487244">"Wi-Fi"</string>
-    <string name="quick_settings_wifi_not_connected" msgid="4071097522427039160">"Neconectat"</string>
+    <string name="quick_settings_wifi_not_connected" msgid="4071097522427039160">"Neconectată"</string>
     <string name="quick_settings_wifi_no_network" msgid="6003178398713839313">"Nicio rețea"</string>
     <string name="quick_settings_wifi_off_label" msgid="4003379736176547594">"Wi-Fi deconectat"</string>
     <string name="quick_settings_wifi_on_label" msgid="2489928193654318511">"Wi-Fi activat"</string>

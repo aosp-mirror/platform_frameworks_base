@@ -550,7 +550,7 @@
     <string name="screen_pinning_toast" msgid="2083944237147005811">"Hold knapperne Tilbage og Oversigt nede for at frigøre skærmen"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="6343770487795352573">"Hold knapperne Tilbage og Hjem nede for at frigøre skærmen"</string>
     <string name="screen_pinning_toast_gesture_nav" msgid="2884536903398445645">"Stryg opad, og hold fingeren nede for at frigøre denne skærm"</string>
-    <string name="screen_pinning_positive" msgid="3285785989665266984">"OK, det er forstået"</string>
+    <string name="screen_pinning_positive" msgid="3285785989665266984">"OK"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"Nej tak"</string>
     <string name="screen_pinning_start" msgid="5695091877402422575">"Skærmen blev fastgjort"</string>
     <string name="screen_pinning_exit" msgid="5114993350662745840">"Skærmen blev frigjort"</string>
@@ -897,7 +897,7 @@
     <string name="running_foreground_services_title" msgid="5137313173431186685">"Apps, der kører i baggrunden"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"Tryk for at se info om batteri- og dataforbrug"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"Vil du deaktivere mobildata?"</string>
-    <string name="mobile_data_disable_message" msgid="8604966027899770415">"Du vil ikke have data- eller internetadgang via <xliff:g id="CARRIER">%s</xliff:g>. Der vil kunne være adgang til internettet via Wi-Fi."</string>
+    <string name="mobile_data_disable_message" msgid="8604966027899770415">"Du vil ikke have data- eller internetadgang via <xliff:g id="CARRIER">%s</xliff:g>. Der vil kun være adgang til internettet via Wi-Fi."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"dit mobilselskab"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"Indstillinger kan ikke bekræfte dit svar, da en app dækker for en anmodning om tilladelse."</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"Vil du give <xliff:g id="APP_0">%1$s</xliff:g> tilladelse til at vise eksempler fra <xliff:g id="APP_2">%2$s</xliff:g>?"</string>

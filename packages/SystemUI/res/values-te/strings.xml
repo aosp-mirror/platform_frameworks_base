@@ -321,11 +321,11 @@
     <string name="quick_settings_rotation_locked_portrait_label" msgid="1194988975270484482">"పోర్ట్రెయిట్"</string>
     <string name="quick_settings_rotation_locked_landscape_label" msgid="2000295772687238645">"ల్యాండ్‌స్కేప్"</string>
     <string name="quick_settings_ime_label" msgid="3351174938144332051">"ఇన్‌పుట్ పద్ధతి"</string>
-    <string name="quick_settings_location_label" msgid="2621868789013389163">"స్థానం"</string>
-    <string name="quick_settings_location_off_label" msgid="7923929131443915919">"స్థానం ఆఫ్‌లో ఉంది"</string>
+    <string name="quick_settings_location_label" msgid="2621868789013389163">"లొకేషన్"</string>
+    <string name="quick_settings_location_off_label" msgid="7923929131443915919">"లొకేష‌న్ ఆఫ్‌లో ఉంది"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"ప్రసార మాధ్యమ పరికరం"</string>
     <string name="quick_settings_rssi_label" msgid="3397615415140356701">"RSSI"</string>
-    <string name="quick_settings_rssi_emergency_only" msgid="7499207215265078598">"అత్యవసర కాల్‌లు మాత్రమే"</string>
+    <string name="quick_settings_rssi_emergency_only" msgid="7499207215265078598">"ఎమర్జెన్సీ కాల్స్ మాత్రమే"</string>
     <string name="quick_settings_settings_label" msgid="2214639529565474534">"సెట్టింగ్‌లు"</string>
     <string name="quick_settings_time_label" msgid="3352680970557509303">"సమయం"</string>
     <string name="quick_settings_user_label" msgid="1253515509432672496">"నేను"</string>
@@ -346,7 +346,7 @@
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Wi‑Fi కనెక్ట్ కాలేదు"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"ప్రకాశం"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="2325362583903258677">"ఆటోమేటిక్"</string>
-    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"రంగుల‌ను అటుఇటు మార్చు"</string>
+    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"కలర్ మార్పిడి"</string>
     <string name="quick_settings_color_space_label" msgid="537528291083575559">"రంగు సవరణ మోడ్"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"మరిన్ని సెట్టింగ్‌లు"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"పూర్తయింది"</string>
@@ -376,7 +376,7 @@
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"సూర్యోదయం వరకు"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"<xliff:g id="TIME">%s</xliff:g>కి"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"<xliff:g id="TIME">%s</xliff:g> వరకు"</string>
-    <string name="quick_settings_ui_mode_night_label" msgid="1398928270610780470">"ముదురు రంగు థీమ్"</string>
+    <string name="quick_settings_ui_mode_night_label" msgid="1398928270610780470">"ముదురు రంగు రూపం"</string>
     <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"బ్యాటరీ సేవర్"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at_sunset" msgid="6017379738102015710">"సూర్యాస్తమయానికి"</string>
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"సూర్యోదయం వరకు"</string>
@@ -734,7 +734,7 @@
     <string name="keyboard_shortcut_group_applications" msgid="7386239431100651266">"అప్లికేషన్‌లు"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="771606231466098742">"సహాయకం"</string>
     <string name="keyboard_shortcut_group_applications_browser" msgid="2776211137869809251">"బ్రౌజర్"</string>
-    <string name="keyboard_shortcut_group_applications_contacts" msgid="2807268086386201060">"పరిచయాలు"</string>
+    <string name="keyboard_shortcut_group_applications_contacts" msgid="2807268086386201060">"కాంటాక్ట్‌లు"</string>
     <string name="keyboard_shortcut_group_applications_email" msgid="7852376788894975192">"ఇమెయిల్"</string>
     <string name="keyboard_shortcut_group_applications_sms" msgid="6912633831752843566">"SMS"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"సంగీతం"</string>
@@ -786,7 +786,7 @@
     <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"టైల్‌ల క్రమం మార్చడానికి వాటిని పట్టుకుని, లాగండి"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"తీసివేయడానికి ఇక్కడికి లాగండి"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"మీ వద్ద కనీసం <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> టైల్‌లు ఉండాలి"</string>
-    <string name="qs_edit" msgid="5583565172803472437">"సవరించు"</string>
+    <string name="qs_edit" msgid="5583565172803472437">"ఎడిట్ చేయండి"</string>
     <string name="tuner_time" msgid="2450785840990529997">"సమయం"</string>
   <string-array name="clock_options">
     <item msgid="3986445361435142273">"గంటలు, నిమిషాలు మరియు సెకన్లను చూపు"</item>
@@ -892,12 +892,12 @@
     <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"యాప్ (<xliff:g id="ID_1">%s</xliff:g>) ద్వారా అంతరాయం కలిగించవద్దు ఆన్ చేయబడింది."</string>
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"స్వయంచాలక నియమం లేదా యాప్ ద్వారా అంతరాయం కలిగించవద్దు ఆన్ చేయబడింది."</string>
     <string name="qs_dnd_until" msgid="7844269319043747955">"<xliff:g id="ID_1">%s</xliff:g> వరకు"</string>
-    <string name="qs_dnd_keep" msgid="3829697305432866434">"ఉంచు"</string>
+    <string name="qs_dnd_keep" msgid="3829697305432866434">"Keep"</string>
     <string name="qs_dnd_replace" msgid="7712119051407052689">"భర్తీ చేయి"</string>
     <string name="running_foreground_services_title" msgid="5137313173431186685">"నేపథ్యంలో అమలు అవుతున్న ఆప్‌లు"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"బ్యాటరీ మరియు డేటా వినియోగ వివరాల కోసం నొక్కండి"</string>
-    <string name="mobile_data_disable_title" msgid="5366476131671617790">"మొబైల్ డేటాని ఆఫ్ చేయాలా?"</string>
-    <string name="mobile_data_disable_message" msgid="8604966027899770415">"మీకు <xliff:g id="CARRIER">%s</xliff:g> ద్వారా డేటా లేదా ఇంటర్నెట్‌కు యాక్సెస్ ఉండదు. Wi-Fi ద్వారా మాత్రమే ఇంటర్నెట్ అందుబాటులో ఉంటుంది."</string>
+    <string name="mobile_data_disable_title" msgid="5366476131671617790">"మొబైల్ డేటాను ఆఫ్ చేయాలా?"</string>
+    <string name="mobile_data_disable_message" msgid="8604966027899770415">"\"<xliff:g id="CARRIER">%s</xliff:g>\" ద్వారా మీకు డేటా లేదా ఇంటర్నెట్‌కు యాక్సెస్ ఉండదు. Wi-Fi ద్వారా మాత్రమే ఇంటర్నెట్ అందుబాటులో ఉంటుంది."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"మీ క్యారియర్"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"అనుమతి అభ్యర్థనకు ఒక యాప్ అడ్డు తగులుతున్నందున సెట్టింగ్‌లు మీ ప్రతిస్పందనను ధృవీకరించలేకపోయాయి."</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"<xliff:g id="APP_2">%2$s</xliff:g> స్లైస్‌లను చూపించడానికి <xliff:g id="APP_0">%1$s</xliff:g>ని అనుమతించండి?"</string>
@@ -919,14 +919,14 @@
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" మరియు "</string>
     <string name="privacy_type_camera" msgid="7974051382167078332">"కెమెరా"</string>
-    <string name="privacy_type_location" msgid="7991481648444066703">"స్థానం"</string>
+    <string name="privacy_type_location" msgid="7991481648444066703">"లొకేషన్"</string>
     <string name="privacy_type_microphone" msgid="9136763906797732428">"మైక్రోఫోన్"</string>
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"సెన్సార్‌లు ఆఫ్"</string>
     <string name="device_services" msgid="1549944177856658705">"పరికర సేవలు"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"శీర్షిక లేదు"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"ఈ యాప్‌ను పునఃప్రారంభించేలా నొక్కి, ఆపై పూర్తి స్క్రీన్‌‍లోకి వెళ్లండి."</string>
     <string name="bubbles_deep_link_button_description" msgid="3532375322003698792">"<xliff:g id="APP_NAME">%1$s</xliff:g>ని తెరువు"</string>
-    <string name="bubbles_settings_button_description" msgid="7324245408859877545">"<xliff:g id="APP_NAME">%1$s</xliff:g> బబుల్‌ల సెట్టింగ్‌లు"</string>
+    <string name="bubbles_settings_button_description" msgid="7324245408859877545">"<xliff:g id="APP_NAME">%1$s</xliff:g> బబుల్స్ సెట్టింగ్‌లు"</string>
     <string name="bubbles_prompt" msgid="8172381116778530318">"<xliff:g id="APP_NAME">%1$s</xliff:g> నుండి బబుల్‌లను అనుమతించాలా?"</string>
     <string name="manage_bubbles_text" msgid="6856830436329494850">"నిర్వహించండి"</string>
     <string name="no_bubbles" msgid="1187859094003006292">"తిరస్కరించు"</string>

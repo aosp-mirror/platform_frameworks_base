@@ -68,7 +68,7 @@
     <string name="learn_more" msgid="4690632085667273811">"Ətraflı məlumat"</string>
     <string name="compat_mode_on" msgid="4963711187149440884">"Ekranı doldurmaq üçün yaxınlaşdır"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"Ekranı doldurmaq üçün uzat"</string>
-    <string name="global_action_screenshot" msgid="2760267567509131654">"Ekran şəkli"</string>
+    <string name="global_action_screenshot" msgid="2760267567509131654">"Skrinşot"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"Skrinşot yadda saxlanılır..."</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Skrinşot yadda saxlanır..."</string>
     <string name="screenshot_saved_title" msgid="8893267638659083153">"Skrinşot yadda saxlandı"</string>
@@ -386,7 +386,7 @@
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Tətbiqi dəyişmək üçün yuxarı sürüşdürün"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Tətbiqləri cəld dəyişmək üçün sağa çəkin"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"İcmala Keçin"</string>
-    <string name="expanded_header_battery_charged" msgid="5307907517976548448">"Dolub"</string>
+    <string name="expanded_header_battery_charged" msgid="5307907517976548448">"Enerji yığılıb"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"Enerji doldurulur"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="757991461445765011">"<xliff:g id="CHARGING_TIME">%s</xliff:g> dolana kimi"</string>
     <string name="expanded_header_battery_not_charging" msgid="809409140358955848">"Doldurulmur"</string>
@@ -783,7 +783,7 @@
     <string name="left_icon" msgid="5036278531966897006">"Sol ikona"</string>
     <string name="right_icon" msgid="1103955040645237425">"Sağ ikona"</string>
     <string name="drag_to_add_tiles" msgid="8933270127508303672">"Mozaika əlavə etmək üçün basıb saxlayaraq çəkin"</string>
-    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Mozaikaları yenidən təşkil etmək üçün basıb saxlayın və çəkin"</string>
+    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"İkonları yenidən düzənləmək üçün saxlayaraq dartın"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"Silmək üçün bura sürüşdürün"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"Minimum <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> mozaika lazımdır"</string>
     <string name="qs_edit" msgid="5583565172803472437">"Redaktə edin"</string>
@@ -880,7 +880,7 @@
     <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> işləyir"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"Quraşdırılmadan açılan tətbiq."</string>
     <string name="instant_apps_message_with_help" msgid="1816952263531203932">"Quraşdırılmadan açılan tətbiq. Ətraflı məlumat üçün klikləyin."</string>
-    <string name="app_info" msgid="5153758994129963243">"Tətbiq haqqında"</string>
+    <string name="app_info" msgid="5153758994129963243">"Tətbiq infosu"</string>
     <string name="go_to_web" msgid="636673528981366511">"Brauzerə daxil edin"</string>
     <string name="mobile_data" msgid="4564407557775397216">"Mobil data"</string>
     <string name="mobile_data_text_format" msgid="6806501540022589786">"<xliff:g id="ID_1">%1$s</xliff:g> — <xliff:g id="ID_2">%2$s</xliff:g>"</string>
@@ -926,8 +926,8 @@
     <string name="music_controls_no_title" msgid="4166497066552290938">"Başlıq yoxdur"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"Bu tətbiqi sıfırlayaraq tam ekrana keçmək üçün klikləyin."</string>
     <string name="bubbles_deep_link_button_description" msgid="3532375322003698792">"<xliff:g id="APP_NAME">%1$s</xliff:g> tətbiqini açın"</string>
-    <string name="bubbles_settings_button_description" msgid="7324245408859877545">"<xliff:g id="APP_NAME">%1$s</xliff:g> qabarcıqları üçün ayarlar"</string>
-    <string name="bubbles_prompt" msgid="8172381116778530318">"<xliff:g id="APP_NAME">%1$s</xliff:g> qabarcıqlarına icazə verilsin?"</string>
+    <string name="bubbles_settings_button_description" msgid="7324245408859877545">"<xliff:g id="APP_NAME">%1$s</xliff:g> yumrucuqları üçün ayarlar"</string>
+    <string name="bubbles_prompt" msgid="8172381116778530318">"<xliff:g id="APP_NAME">%1$s</xliff:g> yumrucuqlarına icazə verilsin?"</string>
     <string name="manage_bubbles_text" msgid="6856830436329494850">"İdarə edin"</string>
     <string name="no_bubbles" msgid="1187859094003006292">"İmtina edin"</string>
     <string name="yes_bubbles" msgid="3014008797151197346">"İcazə verin"</string>

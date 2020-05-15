@@ -906,7 +906,7 @@
     <string name="qs_dnd_replace" msgid="7712119051407052689">"Замінити"</string>
     <string name="running_foreground_services_title" msgid="5137313173431186685">"Додатки, які працюють у фоновому режимі"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"Торкніться, щоб перевірити використання акумулятора й трафік"</string>
-    <string name="mobile_data_disable_title" msgid="5366476131671617790">"Вимкнути мобільне передавання даних?"</string>
+    <string name="mobile_data_disable_title" msgid="5366476131671617790">"Вимкнути мобільний Інтернет?"</string>
     <string name="mobile_data_disable_message" msgid="8604966027899770415">"Ви не матимете доступу до даних чи Інтернету через оператора <xliff:g id="CARRIER">%s</xliff:g>. Інтернет буде доступний лише через Wi-Fi."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"ваш оператор"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"Не вдається підтвердити вашу відповідь у налаштуваннях, оскільки інший додаток заступає запит на дозвіл."</string>
@@ -936,9 +936,9 @@
     <string name="music_controls_no_title" msgid="4166497066552290938">"Без назви"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"Натисніть, щоб перезапустити додаток і перейти в повноекранний режим."</string>
     <string name="bubbles_deep_link_button_description" msgid="3532375322003698792">"Відкрити додаток <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="bubbles_settings_button_description" msgid="7324245408859877545">"Налаштування спливаючих підказок від додатка <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="bubbles_prompt" msgid="8172381116778530318">"Дозволити спливаючі підказки від додатка <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <string name="manage_bubbles_text" msgid="6856830436329494850">"Керувати"</string>
+    <string name="bubbles_settings_button_description" msgid="7324245408859877545">"Налаштування спливаючих чатів від додатка <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="bubbles_prompt" msgid="8172381116778530318">"Дозволити спливаючі чати від додатка <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="manage_bubbles_text" msgid="6856830436329494850">"Налаштувати"</string>
     <string name="no_bubbles" msgid="1187859094003006292">"Заборонити"</string>
     <string name="yes_bubbles" msgid="3014008797151197346">"Дозволити"</string>
     <string name="ask_me_later_bubbles" msgid="2666199914636253557">"Запитати пізніше"</string>

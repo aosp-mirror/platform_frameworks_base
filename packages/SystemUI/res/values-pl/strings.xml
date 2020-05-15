@@ -77,9 +77,9 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Spróbuj jeszcze raz wykonać zrzut ekranu"</string>
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"Nie można zapisać zrzutu ekranu, bo brakuje miejsca w pamięci"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Nie możesz wykonać zrzutu ekranu, bo nie zezwala na to aplikacja lub Twoja organizacja."</string>
-    <string name="screenrecord_name" msgid="6286499308042305686">"Rejestrowanie zawartości ekranu"</string>
+    <string name="screenrecord_name" msgid="6286499308042305686">"Nagrywam zawartość ekranu"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Stałe powiadomienie o sesji rejestrowania zawartości ekranu"</string>
-    <string name="screenrecord_start_label" msgid="1539048263178882562">"Rozpocznij rejestrowanie"</string>
+    <string name="screenrecord_start_label" msgid="1539048263178882562">"Zacznij nagrywać"</string>
     <string name="screenrecord_mic_label" msgid="6134198080740031632">"Nagraj tekst lektora"</string>
     <string name="screenrecord_taps_label" msgid="2518244240225925076">"Pokaż dotknięcia"</string>
     <string name="screenrecord_stop_label" msgid="72699670052087989">"Zatrzymaj"</string>
@@ -88,7 +88,7 @@
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"Anuluj"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Udostępnij"</string>
     <string name="screenrecord_delete_label" msgid="1376347010553987058">"Usuń"</string>
-    <string name="screenrecord_cancel_success" msgid="1775448688137393901">"Anulowano rejestrowanie zawartości ekranu"</string>
+    <string name="screenrecord_cancel_success" msgid="1775448688137393901">"Anulowano nagrywanie zawartości ekranu"</string>
     <string name="screenrecord_save_message" msgid="490522052388998226">"Zapisano nagranie zawartości ekranu – kliknij, by je obejrzeć"</string>
     <string name="screenrecord_delete_description" msgid="1604522770162810570">"Usunięto nagranie zawartości ekranu"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"Błąd podczas usuwania nagrania zawartości ekranu"</string>
@@ -374,7 +374,7 @@
     <string name="quick_settings_cellular_detail_data_used" msgid="6798849610647988987">"Wykorzyst.: <xliff:g id="DATA_USED">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"Limit <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"Ostrzeżenie: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
-    <string name="quick_settings_work_mode_label" msgid="2754212289804324685">"Profil do pracy"</string>
+    <string name="quick_settings_work_mode_label" msgid="2754212289804324685">"Profil służbowy"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Podświetlenie nocne"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Włącz o zachodzie"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"Do wschodu słońca"</string>
@@ -520,7 +520,7 @@
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">"  "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"Otwórz ustawienia VPN"</string>
     <string name="monitoring_description_ca_cert_settings_separator" msgid="7107390013344435439">" "</string>
-    <string name="monitoring_description_ca_cert_settings" msgid="8329781950135541003">"Otwórz zaufane dane logowania"</string>
+    <string name="monitoring_description_ca_cert_settings" msgid="8329781950135541003">"Otwórz zaufane certyfikaty"</string>
     <string name="monitoring_description_network_logging" msgid="577305979174002252">"Administrator włączył rejestrowanie sieciowe, które pozwala monitorować ruch na Twoim urządzeniu.\n\nAby dowiedzieć się więcej, skontaktuj się z administratorem."</string>
     <string name="monitoring_description_vpn" msgid="1685428000684586870">"Aplikacja otrzymała od Ciebie uprawnienia do konfigurowania połączenia VPN.\n\nMoże ona monitorować Twoją aktywność na urządzeniu i w sieci, w tym e-maile, aplikacje i strony internetowe."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="4964237035412372751">"Twoim profilem do pracy zarządza <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nAdministrator może monitorować Twoją aktywność w sieci, w tym e-maile, aplikacje i strony internetowe.\n\nAby dowiedzieć się więcej, skontaktuj się z administratorem.\n\nŁączysz się też z siecią VPN, która może monitorować Twoją aktywność w sieci."</string>
@@ -907,7 +907,7 @@
     <string name="running_foreground_services_title" msgid="5137313173431186685">"Aplikacje działające w tle"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"Kliknij, by wyświetlić szczegóły wykorzystania baterii i użycia danych"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"Wyłączyć mobilną transmisję danych?"</string>
-    <string name="mobile_data_disable_message" msgid="8604966027899770415">"Nie będziesz mieć dostępu do transmisji danych ani internetu przez operatora <xliff:g id="CARRIER">%s</xliff:g>. Internet będzie dostępny tylko przez Wi-Fi."</string>
+    <string name="mobile_data_disable_message" msgid="8604966027899770415">"Nie będziesz mieć dostępu do transmisji danych ani internetu w <xliff:g id="CARRIER">%s</xliff:g>. Internet będzie dostępny tylko przez Wi‑Fi."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"Twój operator"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"Aplikacja Ustawienia nie może zweryfikować Twojej odpowiedzi, ponieważ inna aplikacja zasłania prośbę o udzielenie uprawnień."</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"Zezwolić aplikacji <xliff:g id="APP_0">%1$s</xliff:g> na pokazywanie wycinków z aplikacji <xliff:g id="APP_2">%2$s</xliff:g>?"</string>

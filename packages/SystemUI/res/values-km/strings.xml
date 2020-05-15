@@ -325,7 +325,7 @@
     <string name="quick_settings_location_off_label" msgid="7923929131443915919">"ទីតាំង​បាន​បិទ"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"ឧបករណ៍​មេឌៀ"</string>
     <string name="quick_settings_rssi_label" msgid="3397615415140356701">"RSSI"</string>
-    <string name="quick_settings_rssi_emergency_only" msgid="7499207215265078598">"សម្រាប់​តែ​ការ​ហៅ​ពេល​អាសន្ន"</string>
+    <string name="quick_settings_rssi_emergency_only" msgid="7499207215265078598">"ការហៅទៅលេខសង្គ្រោះបន្ទាន់​តែប៉ុណ្ណោះ"</string>
     <string name="quick_settings_settings_label" msgid="2214639529565474534">"ការ​កំណត់"</string>
     <string name="quick_settings_time_label" msgid="3352680970557509303">"ពេលវេលា"</string>
     <string name="quick_settings_user_label" msgid="1253515509432672496">"ខ្ញុំ"</string>
@@ -338,7 +338,7 @@
     <string name="quick_settings_wifi_on_label" msgid="2489928193654318511">"Wi-Fi បានបើក"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="483130889414601732">"គ្មានបណ្តាញ Wi-Fi ទេ"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7501659015509357887">"កំពុង​បើក..."</string>
-    <string name="quick_settings_cast_title" msgid="2279220930629235211">"ការថតវីដេអូ​នៅលើអេក្រង់"</string>
+    <string name="quick_settings_cast_title" msgid="2279220930629235211">"ការបញ្ចាំងអេក្រង់"</string>
     <string name="quick_settings_casting" msgid="1435880708719268055">"ការ​ចាត់​ថ្នាក់"</string>
     <string name="quick_settings_cast_device_default_name" msgid="6988469571141331700">"ឧបករណ៍​​ដែល​មិន​មាន​ឈ្មោះ"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2580520859212250265">"ត្រៀម​រួចរាល់​ដើម្បី​ចាត់​ថ្នាក់"</string>
@@ -926,8 +926,8 @@
     <string name="music_controls_no_title" msgid="4166497066552290938">"គ្មាន​ចំណងជើង"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"ចុចដើម្បី​ចាប់ផ្ដើម​កម្មវិធី​នេះឡើងវិញ រួចចូលប្រើ​ពេញអេក្រង់។"</string>
     <string name="bubbles_deep_link_button_description" msgid="3532375322003698792">"បើក <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="bubbles_settings_button_description" msgid="7324245408859877545">"ការកំណត់​សម្រាប់សារលេចឡើង <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="bubbles_prompt" msgid="8172381116778530318">"អនុញ្ញាត​សារលេចឡើង​ពី <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="bubbles_settings_button_description" msgid="7324245408859877545">"ការកំណត់​សម្រាប់​ពពុះ <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="bubbles_prompt" msgid="8172381116778530318">"អនុញ្ញាត​ពពុះពី <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="manage_bubbles_text" msgid="6856830436329494850">"គ្រប់គ្រង"</string>
     <string name="no_bubbles" msgid="1187859094003006292">"បដិសេធ"</string>
     <string name="yes_bubbles" msgid="3014008797151197346">"អនុញ្ញាត"</string>

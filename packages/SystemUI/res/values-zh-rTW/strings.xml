@@ -405,7 +405,7 @@
     <string name="keyguard_unlock" msgid="8031975796351361601">"向上滑動即可開啟"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"向上滑動即可重試"</string>
     <string name="dock_alignment_slow_charging" product="default" msgid="5148122851798085807">"請調整手機的位置，以便提高充電效率"</string>
-    <string name="dock_alignment_not_charging" product="default" msgid="1002617659995575624">"必須調整手機的位置，才能進行無線充電"</string>
+    <string name="dock_alignment_not_charging" product="default" msgid="1002617659995575624">"請調整手機位置，即可無線充電"</string>
     <string name="do_disclosure_generic" msgid="2388094207542706440">"這個裝置是由貴機構所管理"</string>
     <string name="do_disclosure_with_name" msgid="9113122674419739611">"這個裝置是由 <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> 所管理"</string>
     <string name="phone_hint" msgid="6682125338461375925">"滑動手機圖示即可啟用"</string>
@@ -444,7 +444,7 @@
     <string name="user_logout_notification_title" msgid="3644848998053832589">"登出使用者"</string>
     <string name="user_logout_notification_text" msgid="7441286737342997991">"登出目前使用者"</string>
     <string name="user_logout_notification_action" msgid="7974458760719361881">"登出使用者"</string>
-    <string name="user_add_user_title" msgid="4172327541504825032">"新增使用者？"</string>
+    <string name="user_add_user_title" msgid="4172327541504825032">"要新增使用者嗎？"</string>
     <string name="user_add_user_message_short" msgid="2599370307878014791">"新增的使用者需要自行設定個人空間。\n\n任何使用者皆可為其他所有使用者更新應用程式。"</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"已達使用者數量上限"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
@@ -926,8 +926,8 @@
     <string name="music_controls_no_title" msgid="4166497066552290938">"無標題"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"輕觸即可重新啟動這個應用程式並進入全螢幕模式。"</string>
     <string name="bubbles_deep_link_button_description" msgid="3532375322003698792">"開啟「<xliff:g id="APP_NAME">%1$s</xliff:g>」"</string>
-    <string name="bubbles_settings_button_description" msgid="7324245408859877545">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」泡泡的設定"</string>
-    <string name="bubbles_prompt" msgid="8172381116778530318">"要允許「<xliff:g id="APP_NAME">%1$s</xliff:g>」顯示泡泡嗎？"</string>
+    <string name="bubbles_settings_button_description" msgid="7324245408859877545">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」對話框的設定"</string>
+    <string name="bubbles_prompt" msgid="8172381116778530318">"要允許「<xliff:g id="APP_NAME">%1$s</xliff:g>」顯示對話框嗎？"</string>
     <string name="manage_bubbles_text" msgid="6856830436329494850">"管理"</string>
     <string name="no_bubbles" msgid="1187859094003006292">"拒絕"</string>
     <string name="yes_bubbles" msgid="3014008797151197346">"允許"</string>

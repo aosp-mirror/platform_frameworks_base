@@ -33,7 +33,7 @@
     <string name="invalid_charger_title" msgid="938685362320735167">"USB арқылы зарядтау мүмкін емес"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"Құрылғымен бірге берілген зарядтау құралын пайдаланыңыз"</string>
     <string name="battery_low_why" msgid="2056750982959359863">"Параметрлер"</string>
-    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Battery Saver функциясы қосылсын ба?"</string>
+    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Battery Saver функциясын қосу керек пе?"</string>
     <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"Battery Saver туралы ақпарат"</string>
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"Қосу"</string>
     <string name="battery_saver_start_action" msgid="4553256017945469937">"Battery saver функциясын қосу"</string>
@@ -55,12 +55,12 @@
     <string name="label_view" msgid="6815442985276363364">"Көрініс"</string>
     <string name="always_use_device" msgid="210535878779644679">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> қосылған кезде, <xliff:g id="APPLICATION">%1$s</xliff:g> қолданбасын ашу"</string>
     <string name="always_use_accessory" msgid="1977225429341838444">"<xliff:g id="USB_ACCESSORY">%2$s</xliff:g> қосылған кезде, <xliff:g id="APPLICATION">%1$s</xliff:g> қолданбасын ашу"</string>
-    <string name="usb_debugging_title" msgid="8274884945238642726">"USB жөндеуге рұқсат берілсін бе?"</string>
+    <string name="usb_debugging_title" msgid="8274884945238642726">"USB арқылы түзетуге рұқсат берілсін бе?"</string>
     <string name="usb_debugging_message" msgid="5794616114463921773">"Бұл компьютердің  RSA перне саусақ таңбасы:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="4003121804294739548">"Осы компьютерден әрқашан рұқсат беру"</string>
     <string name="usb_debugging_allow" msgid="1722643858015321328">"Рұқсат беру"</string>
-    <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"USB жөндеу рұқсат етілмеген"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"Бұл құрылғыға жаңа кірген пайдаланушы USB түзетуін іске қосылмайды. Бұл мүмкіндікті пайдалану үшін негізгі пайдаланушыға ауысыңыз."</string>
+    <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"USB арқылы түзетуге рұқсат етілмеген"</string>
+    <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"Бұл құрылғыға қазір кірген пайдаланушы USB арқылы түзетуді іске қосылмайды. Бұл мүмкіндікті пайдалану үшін негізгі пайдаланушыға ауысыңыз."</string>
     <string name="usb_contaminant_title" msgid="894052515034594113">"USB порты өшірілді"</string>
     <string name="usb_contaminant_message" msgid="7730476585174719805">"Құрылғыңызға сұйықтық немесе қоқыс кіріп кетпеуі үшін, USB порты өшірілген және ешқандай керек-жарақты анықтамайды.\n\nUSB портын қайта пайдалануға болатын кезде хабарландыру аласыз."</string>
     <string name="usb_port_enabled" msgid="531823867664717018">"Зарядтағыштар мен аксессуарларды анықтау үшін USB порты қосылды."</string>
@@ -535,7 +535,7 @@
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"Дыбыс параметрлері"</string>
     <string name="accessibility_volume_expand" msgid="7653070939304433603">"Жаю"</string>
     <string name="accessibility_volume_collapse" msgid="2746845391013829996">"Жию"</string>
-    <string name="volume_odi_captions_tip" msgid="8825655463280990941">"Автоматты субтитр медиасы"</string>
+    <string name="volume_odi_captions_tip" msgid="8825655463280990941">"Автоматты субтитр қосу"</string>
     <string name="accessibility_volume_close_odi_captions_tip" msgid="8924753283621160480">"Субтитрлер кеңесі"</string>
     <string name="volume_odi_captions_content_description" msgid="4172765742046013630">"Субтитр қою"</string>
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"қосу"</string>
@@ -685,7 +685,7 @@
     <string name="notification_menu_snooze_description" msgid="4740133348901973244">"хабарландыруды кідірту опциялары"</string>
     <string name="notification_menu_snooze_action" msgid="8411152711279433989">"Кідірту"</string>
     <string name="snooze_undo" msgid="60890935148417175">"КЕРІ ҚАЙТАРУ"</string>
-    <string name="snoozed_for_time" msgid="7586689374860469469">"<xliff:g id="TIME_AMOUNT">%1$s</xliff:g> кідіртілді"</string>
+    <string name="snoozed_for_time" msgid="7586689374860469469">"<xliff:g id="TIME_AMOUNT">%1$s</xliff:g> кейінге қалдырылды"</string>
     <plurals name="snoozeHourOptions" formatted="false" msgid="2066838694120718170">
       <item quantity="other">%d сағат</item>
       <item quantity="one">%d сағат</item>
@@ -838,7 +838,7 @@
     <string name="pip_phone_expand" msgid="1424988917240616212">"Жаю"</string>
     <string name="pip_phone_minimize" msgid="9057117033655996059">"Кішірейту"</string>
     <string name="pip_phone_close" msgid="8801864042095341824">"Жабу"</string>
-    <string name="pip_phone_settings" msgid="5687538631925004341">"Реттеулер"</string>
+    <string name="pip_phone_settings" msgid="5687538631925004341">"Параметрлер"</string>
     <string name="pip_phone_dismiss_hint" msgid="5825740708095316710">"Жабу үшін төмен қарай сүйреңіз"</string>
     <string name="pip_menu_title" msgid="6365909306215631910">"Mәзір"</string>
     <string name="pip_notification_title" msgid="8661573026059630525">"<xliff:g id="NAME">%s</xliff:g> \"суреттегі сурет\" режимінде"</string>
@@ -926,8 +926,8 @@
     <string name="music_controls_no_title" msgid="4166497066552290938">"Атауы жоқ"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"Бұл қолданбаны қайта қосып, толық экранға өту үшін түртіңіз."</string>
     <string name="bubbles_deep_link_button_description" msgid="3532375322003698792">"<xliff:g id="APP_NAME">%1$s</xliff:g> қолданбасын ашу"</string>
-    <string name="bubbles_settings_button_description" msgid="7324245408859877545">"<xliff:g id="APP_NAME">%1$s</xliff:g> қалқымалы анықтамаларының параметрлері"</string>
-    <string name="bubbles_prompt" msgid="8172381116778530318">"<xliff:g id="APP_NAME">%1$s</xliff:g> қолданбасының қалқымалы анықтамаларына рұқсат етілсін бе?"</string>
+    <string name="bubbles_settings_button_description" msgid="7324245408859877545">"<xliff:g id="APP_NAME">%1$s</xliff:g> қалқыма хабарларының параметрлері"</string>
+    <string name="bubbles_prompt" msgid="8172381116778530318">"<xliff:g id="APP_NAME">%1$s</xliff:g> қолданбасының қалқыма хабарларына рұқсат етілсін бе?"</string>
     <string name="manage_bubbles_text" msgid="6856830436329494850">"Басқару"</string>
     <string name="no_bubbles" msgid="1187859094003006292">"Тыйым салу"</string>
     <string name="yes_bubbles" msgid="3014008797151197346">"Рұқсат беру"</string>

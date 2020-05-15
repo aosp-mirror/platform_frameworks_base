@@ -535,7 +535,7 @@
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"صوتی ترتیبات"</string>
     <string name="accessibility_volume_expand" msgid="7653070939304433603">"پھیلائیں"</string>
     <string name="accessibility_volume_collapse" msgid="2746845391013829996">"سکیڑیں"</string>
-    <string name="volume_odi_captions_tip" msgid="8825655463280990941">"خودکار طور پر کیپشن میڈیا"</string>
+    <string name="volume_odi_captions_tip" msgid="8825655463280990941">"خودکار طور پر میڈیا پر کیپشن لگائیں"</string>
     <string name="accessibility_volume_close_odi_captions_tip" msgid="8924753283621160480">"کیپشنز کی تجویز بند کریں"</string>
     <string name="volume_odi_captions_content_description" msgid="4172765742046013630">"کیپشنز کا اوورلے"</string>
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"فعال کریں"</string>

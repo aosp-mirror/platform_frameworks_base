@@ -535,7 +535,7 @@
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"Lydinnstillinger"</string>
     <string name="accessibility_volume_expand" msgid="7653070939304433603">"Utvid"</string>
     <string name="accessibility_volume_collapse" msgid="2746845391013829996">"Skjul"</string>
-    <string name="volume_odi_captions_tip" msgid="8825655463280990941">"Automatisk teksting av media"</string>
+    <string name="volume_odi_captions_tip" msgid="8825655463280990941">"Automatisk medieteksting"</string>
     <string name="accessibility_volume_close_odi_captions_tip" msgid="8924753283621160480">"Verktøytips for teksting"</string>
     <string name="volume_odi_captions_content_description" msgid="4172765742046013630">"Overlegg med teksting"</string>
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"slå på"</string>
@@ -897,7 +897,7 @@
     <string name="running_foreground_services_title" msgid="5137313173431186685">"Apper kjører i bakgrunnen"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"Trykk for detaljer om batteri- og databruk"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"Vil du slå av mobildata?"</string>
-    <string name="mobile_data_disable_message" msgid="8604966027899770415">"Du får ikke tilgang til data eller Internett via <xliff:g id="CARRIER">%s</xliff:g>. Internett blir bare tilgjengelig via Wi-Fi."</string>
+    <string name="mobile_data_disable_message" msgid="8604966027899770415">"Du får ikke tilgang til data eller internett via <xliff:g id="CARRIER">%s</xliff:g>. Internett er bare tilgjengelig via Wi-Fi."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"operatøren din"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"Fordi en app skjuler tillatelsesforespørselen, kan ikke Innstillinger bekrefte svaret ditt."</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"Vil du tillate at <xliff:g id="APP_0">%1$s</xliff:g> viser <xliff:g id="APP_2">%2$s</xliff:g>-utsnitt?"</string>

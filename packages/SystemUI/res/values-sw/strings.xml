@@ -568,7 +568,7 @@
     <string name="stream_accessibility" msgid="3873610336741987152">"Zana za walio na matatizo ya kuona au kusikia"</string>
     <string name="ring_toggle_title" msgid="5973120187287633224">"Simu"</string>
     <string name="volume_ringer_status_normal" msgid="1339039682222461143">"Piga"</string>
-    <string name="volume_ringer_status_vibrate" msgid="6970078708957857825">"Tetema"</string>
+    <string name="volume_ringer_status_vibrate" msgid="6970078708957857825">"Kutetema"</string>
     <string name="volume_ringer_status_silent" msgid="3691324657849880883">"Zima sauti"</string>
     <string name="qs_status_phone_vibrate" msgid="7055409506885541979">"Umeweka mipangilio ya simu kutetema"</string>
     <string name="qs_status_phone_muted" msgid="3763664791309544103">"Umezima sauti ya simu"</string>
@@ -658,7 +658,7 @@
     <string name="notification_silence_title" msgid="8608090968400832335">"Kimya"</string>
     <string name="notification_alert_title" msgid="7629202599338071971">"Kutoa arifa"</string>
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"Hukusaidia kuwa makini bila sauti au mtetemo."</string>
-    <string name="notification_channel_summary_default" msgid="3539949463907902037">"Hupata umakinifu wako kwa sauti na mtetemo."</string>
+    <string name="notification_channel_summary_default" msgid="3539949463907902037">"Hupata umakinifu wako kwa sauti au mtetemo."</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Arifa hizi haziwezi kubadilishwa."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Kikundi hiki cha arifa hakiwezi kuwekewa mipangilio hapa"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Arifa wakilishi"</string>

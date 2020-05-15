@@ -68,15 +68,15 @@
     <string name="learn_more" msgid="4690632085667273811">"بیشتر بدانید"</string>
     <string name="compat_mode_on" msgid="4963711187149440884">"بزرگ‌نمایی برای پر کردن صفحه"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"گسترده کردن برای پر کردن صفحه"</string>
-    <string name="global_action_screenshot" msgid="2760267567509131654">"عکس صفحه‌نمایش"</string>
-    <string name="screenshot_saving_ticker" msgid="6519186952674544916">"در حال ذخیره عکس صفحه‌نمایش..."</string>
-    <string name="screenshot_saving_title" msgid="2298349784913287333">"درحال ذخیره عکس صفحه‌نمایش…"</string>
-    <string name="screenshot_saved_title" msgid="8893267638659083153">"عکس صفحه‌نمایش ذخیره شد"</string>
+    <string name="global_action_screenshot" msgid="2760267567509131654">"نماگرفت"</string>
+    <string name="screenshot_saving_ticker" msgid="6519186952674544916">"در حال ذخیره نماگرفت..."</string>
+    <string name="screenshot_saving_title" msgid="2298349784913287333">"درحال ذخیره نماگرفت…"</string>
+    <string name="screenshot_saved_title" msgid="8893267638659083153">"نماگرفت ذخیره شد"</string>
     <string name="screenshot_saved_text" msgid="7778833104901642442">"برای مشاهده عکس صفحه‌نمایشتان ضربه بزنید"</string>
-    <string name="screenshot_failed_title" msgid="3259148215671936891">"عکس صفحه‌نمایش ذخیره نشد"</string>
-    <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"دوباره عکس صفحه‌نمایش بگیرید"</string>
-    <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"به دلیل محدود بودن فضای ذخیره‌سازی نمی‌توان عکس صفحه‌نمایش را ذخیره کرد"</string>
-    <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"برنامه یا سازمان شما اجازه نمی‌دهند عکس صفحه‌نمایش بگیرید."</string>
+    <string name="screenshot_failed_title" msgid="3259148215671936891">"نماگرفت ذخیره نشد"</string>
+    <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"دوباره نماگرفت بگیرید"</string>
+    <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"به دلیل محدود بودن فضای ذخیره‌سازی نمی‌توان نماگرفت را ذخیره کرد"</string>
+    <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"برنامه یا سازمان شما اجازه نمی‌دهند نماگرفت بگیرید."</string>
     <string name="screenrecord_name" msgid="6286499308042305686">"ضبط صفحه‌نمایش"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"اعلان درحال انجام برای جلسه ضبط صفحه‌نمایش"</string>
     <string name="screenrecord_start_label" msgid="1539048263178882562">"شروع ضبط"</string>
@@ -150,7 +150,7 @@
     <string name="accessibility_data_signal_full" msgid="283507058258113551">"قدرت سیگنال داده کامل است."</string>
     <string name="accessibility_wifi_name" msgid="4863440268606851734">"به <xliff:g id="WIFI">%s</xliff:g> متصل شد."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"به <xliff:g id="BLUETOOTH">%s</xliff:g> متصل شد."</string>
-    <string name="accessibility_cast_name" msgid="7344437925388773685">"متصل به <xliff:g id="CAST">%s</xliff:g>."</string>
+    <string name="accessibility_cast_name" msgid="7344437925388773685">"به <xliff:g id="CAST">%s</xliff:g> متصل شد."</string>
     <string name="accessibility_no_wimax" msgid="2014864207473859228">"‏WiMAX وجود ندارد."</string>
     <string name="accessibility_wimax_one_bar" msgid="2996915709342221412">"‏WiMAX یک نوار دارد."</string>
     <string name="accessibility_wimax_two_bars" msgid="7335485192390018939">"‏WiMAX دو نوار دارد."</string>
@@ -338,10 +338,10 @@
     <string name="quick_settings_wifi_on_label" msgid="2489928193654318511">"‏Wi-Fi روشن"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="483130889414601732">"‏هیچ شبکه Wi-Fi موجود نیست"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7501659015509357887">"روشن کردن…"</string>
-    <string name="quick_settings_cast_title" msgid="2279220930629235211">"فرستادن صفحه نمایش"</string>
+    <string name="quick_settings_cast_title" msgid="2279220930629235211">"فرستادن محتوای صفحه"</string>
     <string name="quick_settings_casting" msgid="1435880708719268055">"در حال فرستادن"</string>
     <string name="quick_settings_cast_device_default_name" msgid="6988469571141331700">"دستگاه بدون نام"</string>
-    <string name="quick_settings_cast_device_default_description" msgid="2580520859212250265">"آماده برای فرستادن"</string>
+    <string name="quick_settings_cast_device_default_description" msgid="2580520859212250265">"آماده برای ارسال محتوا"</string>
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"دستگاهی موجود نیست"</string>
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"‏Wi-Fi وصل نیست"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"روشنایی"</string>
@@ -897,7 +897,7 @@
     <string name="running_foreground_services_title" msgid="5137313173431186685">"برنامه‌هایی که در پس‌زمینه اجرا می‌شوند"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"برای جزئیات مربوط به مصرف باتری و داده، ضربه بزنید"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"داده تلفن همراه خاموش شود؟"</string>
-    <string name="mobile_data_disable_message" msgid="8604966027899770415">"‏نمی‌توانید ازطریق <xliff:g id="CARRIER">%s</xliff:g> به داده یا اینترنت دسترسی داشته باشید. اینترنت فقط ازطریق Wi-Fi دردسترس خواهد بود."</string>
+    <string name="mobile_data_disable_message" msgid="8604966027899770415">"‏نمی‌توانید ازطریق <xliff:g id="CARRIER">%s</xliff:g> به داده یا اینترنت دسترسی داشته باشید. اینترنت فقط ازطریق Wi-Fi در دسترس خواهد بود."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"شرکت مخابراتی شما"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"چون برنامه‌ای درحال ایجاد تداخل در درخواست مجوز است، «تنظیمات» نمی‌تواند پاسخ شما را تأیید کند."</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"به <xliff:g id="APP_0">%1$s</xliff:g> اجازه داده شود تکه‌های <xliff:g id="APP_2">%2$s</xliff:g> را نشان دهد؟"</string>
