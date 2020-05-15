@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,15 @@
  * limitations under the License.
  */
 
-package com.android.internal.util;
+package android.util;
 
-import junit.framework.TestCase;
+import static junit.framework.Assert.assertEquals;
+
+import androidx.test.runner.AndroidJUnit4;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
@@ -24,19 +30,19 @@ import java.io.PrintWriter;
 /**
  * Tests for {@link IndentingPrintWriter}.
  */
-public class IndentingPrintWriterTest extends TestCase {
+@RunWith(AndroidJUnit4.class)
+public class IndentingPrintWriterTest {
 
     private ByteArrayOutputStream mStream;
     private PrintWriter mWriter;
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-
+    @Before
+    public void setUp() throws Exception {
         mStream = new ByteArrayOutputStream();
         mWriter = new PrintWriter(mStream);
     }
 
+    @Test
     public void testMultipleIndents() throws Exception {
         final IndentingPrintWriter pw = new IndentingPrintWriter(mWriter, "  ");
 
@@ -59,6 +65,7 @@ public class IndentingPrintWriterTest extends TestCase {
         assertEquals("Hello\n  World\n    And\n  Goodbye\nWorld\n", mStream.toString());
     }
 
+    @Test
     public void testAdjustIndentAfterNewline() throws Exception {
         final IndentingPrintWriter pw = new IndentingPrintWriter(mWriter, "  ");
 
@@ -70,6 +77,7 @@ public class IndentingPrintWriterTest extends TestCase {
         assertEquals("Hello\n  World\n", mStream.toString());
     }
 
+    @Test
     public void testWrapping() throws Exception {
         final IndentingPrintWriter pw = new IndentingPrintWriter(mWriter, "", 10);
 
@@ -82,6 +90,7 @@ public class IndentingPrintWriterTest extends TestCase {
         assertEquals("dog cat \ncow meow ", mStream.toString());
     }
 
+    @Test
     public void testWrappingIndented() throws Exception {
         final IndentingPrintWriter pw = new IndentingPrintWriter(mWriter, "    ", 10);
 
@@ -96,6 +105,7 @@ public class IndentingPrintWriterTest extends TestCase {
         assertEquals("    dog \n    meow \n    a b \n    cow ", mStream.toString());
     }
 
+    @Test
     public void testWrappingEmbeddedNewlines() throws Exception {
         final IndentingPrintWriter pw = new IndentingPrintWriter(mWriter, "  ", 10);
 
@@ -107,6 +117,7 @@ public class IndentingPrintWriterTest extends TestCase {
                 + "  nsectetu\n  r \n  adipisci\n  ng elit.\n", mStream.toString());
     }
 
+    @Test
     public void testWrappingSingleGiant() throws Exception {
         final IndentingPrintWriter pw = new IndentingPrintWriter(mWriter, "  ", 10);
 
@@ -118,6 +129,7 @@ public class IndentingPrintWriterTest extends TestCase {
                 + "  ectetur \n  adipisci\n  ng elit.\n", mStream.toString());
     }
 
+    @Test
     public void testWrappingPrefixedGiant() throws Exception {
         final IndentingPrintWriter pw = new IndentingPrintWriter(mWriter, "  ", 10);
 
@@ -128,5 +140,16 @@ public class IndentingPrintWriterTest extends TestCase {
         pw.flush();
         assertEquals("  foo\n  Lorem ip\n  sum dolo\n  r sit am\n  et, cons\n"
                 + "  ectetur \n  adipisci\n  ng elit.\n", mStream.toString());
+    }
+
+    @Test
+    public void testArrayValue() {
+        final IndentingPrintWriter pw = new IndentingPrintWriter(mWriter, "  ");
+        pw.increaseIndent();
+        pw.print("strings", new String[]{"a", "b", "c"});
+        pw.print("ints", new int[]{1, 2});
+        pw.flush();
+
+        assertEquals("  strings=[a, b, c] ints=[1, 2] ", mStream.toString());
     }
 }
