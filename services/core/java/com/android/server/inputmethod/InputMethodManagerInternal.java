@@ -45,6 +45,12 @@ public abstract class InputMethodManagerInternal {
     }
 
     /**
+     * Called by the power manager to tell the input method manager whether it
+     * should start watching for wake events.
+     */
+    public abstract void setInteractive(boolean interactive);
+
+    /**
      * Hides the current input method, if visible.
      */
     public abstract void hideCurrentInputMethod(@SoftInputShowHideReason int reason);
@@ -107,6 +113,10 @@ public abstract class InputMethodManagerInternal {
      */
     private static final InputMethodManagerInternal NOP =
             new InputMethodManagerInternal() {
+                @Override
+                public void setInteractive(boolean interactive) {
+                }
+
                 @Override
                 public void hideCurrentInputMethod(@SoftInputShowHideReason int reason) {
                 }

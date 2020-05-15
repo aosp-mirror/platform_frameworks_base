@@ -74,7 +74,10 @@ internal class BubbleDataRepository @Inject constructor(
 
     private fun transform(userId: Int, bubbles: List<Bubble>): List<BubbleEntity> {
         return bubbles.mapNotNull { b ->
-            val shortcutId = b.shortcutInfo?.id ?: return@mapNotNull null
+            var shortcutId = b.shortcutInfo?.id
+            if (shortcutId == null) shortcutId = b.entry?.bubbleMetadata?.shortcutId
+            if (shortcutId == null) shortcutId = b.entry?.ranking?.shortcutInfo?.id
+            if (shortcutId == null) return@mapNotNull null
             BubbleEntity(userId, b.packageName, shortcutId)
         }
     }
@@ -108,7 +111,6 @@ internal class BubbleDataRepository @Inject constructor(
     /**
      * Load bubbles from disk.
      */
-    // TODO: call this method from BubbleController and update UI
     @SuppressLint("WrongConstant")
     fun loadBubbles(cb: (List<Bubble>) -> Unit) = ioScope.launch {
         /**

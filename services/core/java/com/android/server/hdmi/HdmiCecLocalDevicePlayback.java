@@ -44,9 +44,6 @@ import java.util.Locale;
 public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
     private static final String TAG = "HdmiCecLocalDevicePlayback";
 
-    private static final boolean WAKE_ON_HOTPLUG =
-            SystemProperties.getBoolean(Constants.PROPERTY_WAKE_ON_HOTPLUG, false);
-
     private static final boolean SET_MENU_LANGUAGE =
             HdmiProperties.set_menu_language().orElse(false);
 
@@ -152,9 +149,6 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
         assertRunOnServiceThread();
         mCecMessageCache.flushAll();
         // We'll not clear mIsActiveSource on the hotplug event to pass CETC 11.2.2-2 ~ 3.
-        if (WAKE_ON_HOTPLUG && connected && mService.isPowerStandbyOrTransient()) {
-            mService.wakeUp();
-        }
         if (!connected) {
             getWakeLock().release();
         }

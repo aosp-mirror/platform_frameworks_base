@@ -138,6 +138,13 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                             Slog.e(TAG, "Attempt to operate on detached container: " + wc);
                             continue;
                         }
+                        // Make sure we add to the syncSet before performing
+                        // operations so we don't end up splitting effects between the WM
+                        // pending transaction and the BLASTSync transaction.
+                        if (syncId >= 0) {
+                            mBLASTSyncEngine.addToSyncSet(syncId, wc);
+                        }
+
                         int containerEffect = applyWindowContainerChange(wc, entry.getValue());
                         effects |= containerEffect;
 
@@ -145,9 +152,6 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                         if ((effects & TRANSACT_EFFECTS_LIFECYCLE) == 0
                                 && (containerEffect & TRANSACT_EFFECTS_CLIENT_CONFIG) != 0) {
                             haveConfigChanges.add(wc);
-                        }
-                        if (syncId >= 0) {
-                            mBLASTSyncEngine.addToSyncSet(syncId, wc);
                         }
                     }
                     // Hierarchy changes

@@ -59,7 +59,7 @@
         <Button
             android:id="@+id/resolver_empty_state_button"
             android:layout_below="@+id/resolver_empty_state_subtitle"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="8dp"
             android:text="@string/resolver_switch_on_work"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
