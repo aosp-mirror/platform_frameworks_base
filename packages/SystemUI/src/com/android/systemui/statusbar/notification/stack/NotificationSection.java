@@ -32,8 +32,8 @@ import com.android.systemui.statusbar.notification.row.ActivatableNotificationVi
  * Represents the bounds of a section of the notification shade and handles animation when the
  * bounds change.
  */
-class NotificationSection {
-    private @NotificationSectionsManager.PriorityBucket int mBucket;
+public class NotificationSection {
+    private @PriorityBucket int mBucket;
     private View mOwningView;
     private Rect mBounds = new Rect();
     private Rect mCurrentBounds = new Rect(-1, -1, -1, -1);
@@ -44,7 +44,7 @@ class NotificationSection {
     private ActivatableNotificationView mFirstVisibleChild;
     private ActivatableNotificationView mLastVisibleChild;
 
-    NotificationSection(View owningView, @NotificationSectionsManager.PriorityBucket int bucket) {
+    NotificationSection(View owningView, @PriorityBucket int bucket) {
         mOwningView = owningView;
         mBucket = bucket;
     }
@@ -74,7 +74,7 @@ class NotificationSection {
         return mBottomAnimator != null || mTopAnimator != null;
     }
 
-    @NotificationSectionsManager.PriorityBucket
+    @PriorityBucket
     public int getBucket() {
         return mBucket;
     }

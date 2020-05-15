@@ -21,7 +21,7 @@ import static android.service.notification.NotificationStats.DISMISS_SENTIMENT_N
 
 import static com.android.systemui.Dependency.ALLOW_NOTIFICATION_LONG_PRESS_NAME;
 import static com.android.systemui.statusbar.notification.ActivityLaunchAnimator.ExpandAnimationParameters;
-import static com.android.systemui.statusbar.notification.stack.NotificationSectionsManager.BUCKET_SILENT;
+import static com.android.systemui.statusbar.notification.stack.NotificationSectionsManagerKt.BUCKET_SILENT;
 import static com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm.ANCHOR_SCROLLING;
 import static com.android.systemui.statusbar.notification.stack.StackStateAnimator.ANIMATION_DURATION_SWIPE;
 import static com.android.systemui.statusbar.phone.NotificationIconAreaController.HIGH_PRIORITY;
@@ -577,7 +577,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
 
         mSectionsManager = notificationSectionsManager;
         mSectionsManager.initialize(this, LayoutInflater.from(context));
-        mSectionsManager.setOnClearGentleNotifsClickListener(v -> {
+        mSectionsManager.setOnClearSilentNotifsClickListener(v -> {
             // Leave the shade open if there will be other notifs left over to clear
             final boolean closeShade = !hasActiveClearableNotifications(ROWS_HIGH_PRIORITY);
             clearNotifications(ROWS_GENTLE, closeShade);
