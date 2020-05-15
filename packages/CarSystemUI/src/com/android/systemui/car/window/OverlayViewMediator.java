@@ -23,6 +23,9 @@ public interface OverlayViewMediator {
 
     /**
      * Register listeners that could use ContentVisibilityAdjuster to show/hide content.
+     *
+     * Note that we do not unregister listeners because SystemUI components are expected to live
+     * for the lifecycle of the device.
      */
     void registerListeners();
 
