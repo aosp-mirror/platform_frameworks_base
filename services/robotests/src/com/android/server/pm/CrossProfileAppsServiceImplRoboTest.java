@@ -46,6 +46,7 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
+import android.content.pm.PermissionInfo;
 import android.content.pm.ResolveInfo;
 import android.os.Process;
 import android.os.UserHandle;
@@ -106,6 +107,7 @@ public class CrossProfileAppsServiceImplRoboTest {
             new CrossProfileAppsServiceImpl(mContext, mInjector);
     private final Map<UserHandle, Set<Intent>> mSentUserBroadcasts = new HashMap<>();
     private final Map<Integer, List<ApplicationInfo>> installedApplications = new HashMap<>();
+    private final Set<Integer> mKilledUids = new HashSet<>();
 
     @Mock private PackageManagerInternal mPackageManagerInternal;
     @Mock private IPackageManager mIPackageManager;
@@ -386,6 +388,33 @@ public class CrossProfileAppsServiceImplRoboTest {
         mCrossProfileAppsServiceImpl.setInteractAcrossProfilesAppOp(
                 CROSS_PROFILE_APP_PACKAGE_NAME, MODE_ALLOWED);
         assertThat(receivedManifestCanInteractAcrossProfilesChangedBroadcast()).isTrue();
+    }
+
+    @Test
+    public void setInteractAcrossProfilesAppOp_toAllowed_doesNotKillApp() {
+        mCrossProfileAppsServiceImpl.setInteractAcrossProfilesAppOp(
+                CROSS_PROFILE_APP_PACKAGE_NAME, MODE_ALLOWED);
+        assertThat(mKilledUids).isEmpty();
+    }
+
+    @Test
+    public void setInteractAcrossProfilesAppOp_toDisallowed_killsAppsInBothProfiles() {
+        shadowOf(mPackageManager).addPermissionInfo(createCrossProfilesPermissionInfo());
+        mCrossProfileAppsServiceImpl.setInteractAcrossProfilesAppOp(
+                CROSS_PROFILE_APP_PACKAGE_NAME, MODE_ALLOWED);
+
+        mCrossProfileAppsServiceImpl.setInteractAcrossProfilesAppOp(
+                CROSS_PROFILE_APP_PACKAGE_NAME, MODE_DEFAULT);
+
+        assertThat(mKilledUids).contains(WORK_PROFILE_UID);
+        assertThat(mKilledUids).contains(PERSONAL_PROFILE_UID);
+    }
+
+    private PermissionInfo createCrossProfilesPermissionInfo() {
+        PermissionInfo permissionInfo = new PermissionInfo();
+        permissionInfo.name = Manifest.permission.INTERACT_ACROSS_PROFILES;
+        permissionInfo.protectionLevel = PermissionInfo.PROTECTION_FLAG_APPOP;
+        return permissionInfo;
     }
 
     @Test
@@ -677,6 +706,11 @@ public class CrossProfileAppsServiceImplRoboTest {
             // AppGlobals.getPackageManager()#checkUidPermission, which calls through to
             // ShadowActivityThread with Robolectric. This method is currently not supported there.
             return mContext.checkPermission(permission, Process.myPid(), uid);
+        }
+
+        @Override
+        public void killUid(String packageName, int uid) {
+            mKilledUids.add(uid);
         }
     }
 }
