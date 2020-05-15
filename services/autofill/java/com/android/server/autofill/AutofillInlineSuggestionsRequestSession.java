@@ -55,16 +55,6 @@ final class AutofillInlineSuggestionsRequestSession {
 
     private static final String TAG = AutofillInlineSuggestionsRequestSession.class.getSimpleName();
 
-    // This timeout controls how long Autofill should wait for the IME to respond either
-    // unsupported or an {@link InlineSuggestionsRequest}. The timeout is needed to take into
-    // account the latency between the two events after a field is focused, 1) an Autofill
-    // request is triggered on framework; 2) the InputMethodService#onStartInput() event is
-    // triggered on the IME side. When 1) happens, Autofill may call the IME to return an {@link
-    // InlineSuggestionsRequest}, but the IME will only return it after 2) happens (or return
-    // immediately if the IME doesn't support inline suggestions). Also there is IPC latency
-    // between the framework and the IME but that should be small compare to that.
-    private static final int CREATE_INLINE_SUGGESTIONS_REQUEST_TIMEOUT_MS = 1000;
-
     @NonNull
     private final InputMethodManagerInternal mInputMethodManagerInternal;
     private final int mUserId;
@@ -92,9 +82,6 @@ final class AutofillInlineSuggestionsRequestSession {
     @GuardedBy("mLock")
     @Nullable
     private IInlineSuggestionsResponseCallback mResponseCallback;
-    @GuardedBy("mLock")
-    @Nullable
-    private Runnable mTimeoutCallback;
 
     @GuardedBy("mLock")
     @Nullable
@@ -174,12 +161,17 @@ final class AutofillInlineSuggestionsRequestSession {
     }
 
     /**
-     * This method must be called when the session is destroyed, to avoid further callbacks from/to
-     * the IME.
+     * Prevents further interaction with the IME. Must be called before starting a new request
+     * session to avoid unwanted behavior from two overlapping requests.
      */
     @GuardedBy("mLock")
     void destroySessionLocked() {
         mDestroyed = true;
+
+        if (!mImeRequestReceived) {
+            Slog.w(TAG,
+                    "Never received an InlineSuggestionsRequest from the IME for " + mAutofillId);
+        }
     }
 
     /**
@@ -196,11 +188,6 @@ final class AutofillInlineSuggestionsRequestSession {
         mInputMethodManagerInternal.onCreateInlineSuggestionsRequest(mUserId,
                 new InlineSuggestionsRequestInfo(mComponentName, mAutofillId, mUiExtras),
                 new InlineSuggestionsRequestCallbackImpl(this));
-        mTimeoutCallback = () -> {
-            Slog.w(TAG, "Timed out waiting for IME callback InlineSuggestionsRequest.");
-            handleOnReceiveImeRequest(null, null);
-        };
-        mHandler.postDelayed(mTimeoutCallback, CREATE_INLINE_SUGGESTIONS_REQUEST_TIMEOUT_MS);
     }
 
     /**
@@ -264,11 +251,6 @@ final class AutofillInlineSuggestionsRequestSession {
             }
             mImeRequestReceived = true;
 
-            if (mTimeoutCallback != null) {
-                if (sVerbose) Slog.v(TAG, "removing timeout callback");
-                mHandler.removeCallbacks(mTimeoutCallback);
-                mTimeoutCallback = null;
-            }
             if (request != null && callback != null) {
                 mImeRequest = request;
                 mResponseCallback = callback;
