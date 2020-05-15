@@ -6650,18 +6650,14 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 nr.getSbn().getId(), nr.getSbn().getNotification(), nr.getSbn().getUserId());
         waitForIdle();
 
-        assertTrue(mBinderService.hasSentMessage(PKG, mUid));
+        assertTrue(mBinderService.isInInvalidMsgState(PKG, mUid));
     }
 
     @Test
     public void testRecordMessages_validMsg() throws RemoteException {
-        // Messaging notification with shortcut info
-        Notification.BubbleMetadata metadata =
-                new Notification.BubbleMetadata.Builder("id").build();
         Notification.Builder nb = getMessageStyleNotifBuilder(false /* addDefaultMetadata */,
                 null /* groupKey */, false /* isSummary */);
-        nb.setShortcutId("id");
-        nb.setBubbleMetadata(metadata);
+        nb.setShortcutId(null);
         StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, 1,
                 "testRecordMessages_validMsg", mUid, 0, nb.build(), new UserHandle(mUid), null, 0);
         NotificationRecord nr = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
@@ -6670,7 +6666,43 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 nr.getSbn().getId(), nr.getSbn().getNotification(), nr.getSbn().getUserId());
         waitForIdle();
 
-        assertFalse(mBinderService.hasSentMessage(PKG, mUid));
+        assertTrue(mBinderService.isInInvalidMsgState(PKG, mUid));
+
+        nr = generateMessageBubbleNotifRecord(mTestNotificationChannel,
+                "testRecordMessages_validMsg");
+
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, nr.getSbn().getTag(),
+                nr.getSbn().getId(), nr.getSbn().getNotification(), nr.getSbn().getUserId());
+        waitForIdle();
+
+        assertFalse(mBinderService.isInInvalidMsgState(PKG, mUid));
+    }
+
+    @Test
+    public void testRecordMessages_invalidMsg_afterValidMsg() throws RemoteException {
+        NotificationRecord nr = generateMessageBubbleNotifRecord(mTestNotificationChannel,
+                "testRecordMessages_invalidMsg_afterValidMsg_1");
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, nr.getSbn().getTag(),
+                nr.getSbn().getId(), nr.getSbn().getNotification(), nr.getSbn().getUserId());
+        waitForIdle();
+        assertTrue(mService.getNotificationRecord(nr.getKey()).isConversation());
+
+        mBinderService.cancelAllNotifications(PKG, mUid);
+        waitForIdle();
+
+        Notification.Builder nb = getMessageStyleNotifBuilder(false /* addDefaultMetadata */,
+                null /* groupKey */, false /* isSummary */);
+        nb.setShortcutId(null);
+        StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, 1,
+                "testRecordMessages_invalidMsg_afterValidMsg_2", mUid, 0, nb.build(),
+                new UserHandle(mUid), null, 0);
+         nr = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
+
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, nr.getSbn().getTag(),
+                nr.getSbn().getId(), nr.getSbn().getNotification(), nr.getSbn().getUserId());
+        waitForIdle();
+
+        assertFalse(mService.getNotificationRecord(nr.getKey()).isConversation());
     }
 
     @Test

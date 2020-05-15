@@ -1137,6 +1137,26 @@ public class NotificationRecordTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testIsConversation_noShortcut_appHasPreviousSentFullConversation() {
+        StatusBarNotification sbn = getMessagingStyleNotification();
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
+        record.setShortcutInfo(null);
+        record.setHasSentValidMsg(true);
+
+        assertFalse(record.isConversation());
+    }
+
+    @Test
+    public void testIsConversation_noShortcut_userDemotedApp() {
+        StatusBarNotification sbn = getMessagingStyleNotification();
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
+        record.setShortcutInfo(null);
+        record.userDemotedAppFromConvoSpace(true);
+
+        assertFalse(record.isConversation());
+    }
+
+    @Test
     public void testIsConversation_noShortcut_targetsR() {
         StatusBarNotification sbn = getMessagingStyleNotification(PKG_R);
         NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
