@@ -2176,6 +2176,10 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 // move the PIP activity into the task.
                 stack = taskDisplayArea.createStack(WINDOWING_MODE_UNDEFINED, r.getActivityType(),
                         ON_TOP, r.info, r.intent, false /* createdByOrganizer */);
+                // It's possible the task entering PIP is in freeform, so save the last
+                // non-fullscreen bounds. Then when this new PIP task exits PIP, it can restore
+                // to its previous freeform bounds.
+                stack.setLastNonFullscreenBounds(task.mLastNonFullscreenBounds);
 
                 // There are multiple activities in the task and moving the top activity should
                 // reveal/leave the other activities in their original task.
