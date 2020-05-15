@@ -309,7 +309,7 @@ class ScreenRotationAnimation {
         pw.print(prefix); pw.print("mEnterTransformation=");
         mEnterTransformation.printShortString(pw); pw.println();
         pw.print(prefix); pw.print("mSnapshotInitialMatrix=");
-        mSnapshotInitialMatrix.printShortString(pw);pw.println();
+        mSnapshotInitialMatrix.dump(pw); pw.println();
         pw.print(prefix); pw.print("mForceDefaultOrientation="); pw.print(mForceDefaultOrientation);
         if (mForceDefaultOrientation) {
             pw.print(" mOriginalDisplayRect="); pw.print(mOriginalDisplayRect.toShortString());

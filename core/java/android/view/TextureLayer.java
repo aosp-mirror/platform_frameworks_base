@@ -115,7 +115,7 @@ public final class TextureLayer {
      * @param matrix The transform to apply to the layer.
      */
     public void setTransform(Matrix matrix) {
-        nSetTransform(mFinalizer.get(), matrix.native_instance);
+        nSetTransform(mFinalizer.get(), matrix.ni());
         mRenderer.pushLayerUpdate(this);
     }
 
