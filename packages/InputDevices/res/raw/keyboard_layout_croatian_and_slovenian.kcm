@@ -258,9 +258,9 @@ key L {
 }
 
 key SEMICOLON {
-    label:                              '\u010d'
-    base:                               '\u010c'
-    shift, capslock:                    '\u010d'
+    label:                              '\u010c'
+    base:                               '\u010d'
+    shift, capslock:                    '\u010c'
 }
 
 key APOSTROPHE {
