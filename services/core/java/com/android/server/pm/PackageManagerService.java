@@ -2711,13 +2711,13 @@ public class PackageManagerService extends IPackageManager.Stub
                     return SCAN_AS_SYSTEM_EXT;
                 default:
                     throw new IllegalStateException("Unable to determine scan flag for "
-                            + partition.folder);
+                            + partition.getFolder());
             }
         }
 
         @Override
         public String toString() {
-            return folder.getAbsolutePath() + ":" + scanFlag;
+            return getFolder().getAbsolutePath() + ":" + scanFlag;
         }
     }
 
@@ -3283,7 +3283,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
                         @ParseFlags int reparseFlags = 0;
                         @ScanFlags int rescanFlags = 0;
-                        for (int i1 = 0, size = mDirsToScanAsSystem.size(); i1 < size; i1++) {
+                        for (int i1 = mDirsToScanAsSystem.size() - 1; i1 >= 0; i1--) {
                             final ScanPartition partition = mDirsToScanAsSystem.get(i1);
                             if (partition.containsPrivApp(scanFile)) {
                                 reparseFlags = systemParseFlags;
@@ -18681,7 +18681,7 @@ public class PackageManagerService extends IPackageManager.Stub
         for (int i = 0, size = SYSTEM_PARTITIONS.size(); i < size; i++) {
             ScanPartition sp = SYSTEM_PARTITIONS.get(i);
             if (apexInfo.preInstalledApexPath.getAbsolutePath().startsWith(
-                    sp.folder.getAbsolutePath())) {
+                    sp.getFolder().getAbsolutePath())) {
                 return new ScanPartition(apexInfo.apexDirectory, sp, SCAN_AS_APK_IN_APEX);
             }
         }
@@ -18777,23 +18777,23 @@ public class PackageManagerService extends IPackageManager.Stub
             @Nullable int[] allUserHandles, @Nullable int[] origUserHandles,
             @Nullable PermissionsState origPermissionState, boolean writeSettings)
                     throws PackageManagerException {
+        final File codePath = new File(codePathString);
         @ParseFlags int parseFlags =
                 mDefParseFlags
                 | PackageParser.PARSE_MUST_BE_APK
                 | PackageParser.PARSE_IS_SYSTEM_DIR;
         @ScanFlags int scanFlags = SCAN_AS_SYSTEM;
-        for (int i = 0, size = mDirsToScanAsSystem.size(); i < size; i++) {
+        for (int i = mDirsToScanAsSystem.size() - 1; i >= 0; i--) {
             ScanPartition partition = mDirsToScanAsSystem.get(i);
-            if (partition.containsPath(codePathString)) {
+            if (partition.containsFile(codePath)) {
                 scanFlags |= partition.scanFlag;
-                if (partition.containsPrivPath(codePathString)) {
+                if (partition.containsPrivApp(codePath)) {
                     scanFlags |= SCAN_AS_PRIVILEGED;
                 }
                 break;
             }
         }
 
-        final File codePath = new File(codePathString);
         final AndroidPackage pkg =
                 scanPackageTracedLI(codePath, parseFlags, scanFlags, 0 /*currentTime*/, null);
 
