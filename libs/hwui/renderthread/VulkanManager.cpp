@@ -459,7 +459,7 @@ Frame VulkanManager::dequeueNextBuffer(VulkanSurface* surface) {
                 // The following flush blocks the GPU immediately instead of waiting for other
                 // drawing ops. It seems dequeue_fence is not respected otherwise.
                 // TODO: remove the flush after finding why backendSemaphore is not working.
-                bufferInfo->skSurface->flush();
+                bufferInfo->skSurface->flushAndSubmit();
             }
         }
     }
@@ -525,9 +525,15 @@ void VulkanManager::swapBuffers(VulkanSurface* surface, const SkRect& dirtyRect)
     int fenceFd = -1;
     DestroySemaphoreInfo* destroyInfo =
             new DestroySemaphoreInfo(mDestroySemaphore, mDevice, semaphore);
+    GrFlushInfo flushInfo;
+    flushInfo.fNumSemaphores = 1;
+    flushInfo.fSignalSemaphores = &backendSemaphore;
+    flushInfo.fFinishedProc = destroy_semaphore;
+    flushInfo.fFinishedContext = destroyInfo;
     GrSemaphoresSubmitted submitted = bufferInfo->skSurface->flush(
-            SkSurface::BackendSurfaceAccess::kPresent, kNone_GrFlushFlags, 1, &backendSemaphore,
-            destroy_semaphore, destroyInfo);
+            SkSurface::BackendSurfaceAccess::kPresent, flushInfo);
+    ALOGE_IF(!bufferInfo->skSurface->getContext(), "Surface is not backed by gpu");
+    bufferInfo->skSurface->getContext()->submit();
     if (submitted == GrSemaphoresSubmitted::kYes) {
         VkSemaphoreGetFdInfoKHR getFdInfo;
         getFdInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_GET_FD_INFO_KHR;
@@ -612,7 +618,7 @@ status_t VulkanManager::fenceWait(int fence, GrContext* grContext) {
 
     // Skia takes ownership of the semaphore and will delete it once the wait has finished.
     grContext->wait(1, &beSemaphore);
-    grContext->flush();
+    grContext->flushAndSubmit();
 
     return OK;
 }
@@ -648,8 +654,13 @@ status_t VulkanManager::createReleaseFence(int* nativeFence, GrContext* grContex
     // Even if Skia fails to submit the semaphore, it will still call the destroy_semaphore callback
     // which will remove its ref to the semaphore. The VulkanManager must still release its ref,
     // when it is done with the semaphore.
-    GrSemaphoresSubmitted submitted = grContext->flush(kNone_GrFlushFlags, 1, &backendSemaphore,
-                                                       destroy_semaphore, destroyInfo);
+    GrFlushInfo flushInfo;
+    flushInfo.fNumSemaphores = 1;
+    flushInfo.fSignalSemaphores = &backendSemaphore;
+    flushInfo.fFinishedProc = destroy_semaphore;
+    flushInfo.fFinishedContext = destroyInfo;
+    GrSemaphoresSubmitted submitted = grContext->flush(flushInfo);
+    grContext->submit();
 
     if (submitted == GrSemaphoresSubmitted::kNo) {
         ALOGE("VulkanManager::createReleaseFence: Failed to submit semaphore");

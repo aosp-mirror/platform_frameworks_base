@@ -145,7 +145,7 @@ void SkiaPipeline::renderLayersImpl(const LayerUpdateQueue& layers, bool opaque)
         if (cachedContext.get() != currentContext) {
             if (cachedContext.get()) {
                 ATRACE_NAME("flush layers (context changed)");
-                cachedContext->flush();
+                cachedContext->flushAndSubmit();
             }
             cachedContext.reset(SkSafeRef(currentContext));
         }
@@ -153,7 +153,7 @@ void SkiaPipeline::renderLayersImpl(const LayerUpdateQueue& layers, bool opaque)
 
     if (cachedContext.get()) {
         ATRACE_NAME("flush layers");
-        cachedContext->flush();
+        cachedContext->flushAndSubmit();
     }
 }
 
@@ -450,7 +450,7 @@ void SkiaPipeline::renderFrame(const LayerUpdateQueue& layers, const SkRect& cli
     }
 
     ATRACE_NAME("flush commands");
-    surface->getCanvas()->flush();
+    surface->flushAndSubmit();
 
     Properties::skpCaptureEnabled = previousSkpEnabled;
 }
