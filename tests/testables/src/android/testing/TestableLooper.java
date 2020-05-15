@@ -222,6 +222,10 @@ public class TestableLooper {
         return sLoopers.get(test);
     }
 
+    public static void remove(Object test) {
+        sLoopers.remove(test);
+    }
+
     static class LooperFrameworkMethod extends FrameworkMethod {
         private HandlerThread mHandlerThread;
 
