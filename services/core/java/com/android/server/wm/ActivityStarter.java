@@ -1539,10 +1539,7 @@ class ActivityStarter {
      *
      * Note: This method should only be called from {@link #startActivityUnchecked}.
      */
-
-    // TODO(b/152429287): Make it easier to exercise code paths through startActivityInner
-    @VisibleForTesting
-    int startActivityInner(final ActivityRecord r, ActivityRecord sourceRecord,
+    private int startActivityInner(final ActivityRecord r, ActivityRecord sourceRecord,
             IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor,
             int startFlags, boolean doResume, ActivityOptions options, Task inTask,
             boolean restrictedBgActivity) {
@@ -1663,10 +1660,7 @@ class ActivityStarter {
                 // Also, we don't want to resume activities in a task that currently has an overlay
                 // as the starting activity just needs to be in the visible paused state until the
                 // over is removed.
-                // Passing {@code null} as the start parameter ensures all activities are made
-                // visible.
-                mTargetStack.ensureActivitiesVisible(null /* starting */,
-                        0 /* configChanges */, !PRESERVE_WINDOWS);
+                mTargetStack.ensureActivitiesVisible(mStartActivity, 0, !PRESERVE_WINDOWS);
                 // Go ahead and tell window manager to execute app transition for this activity
                 // since the app transition will not be triggered through the resume channel.
                 mTargetStack.getDisplay().mDisplayContent.executeAppTransition();
