@@ -89,8 +89,7 @@
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"ቅጽበታዊ ገጽ እይታን አሰናብት"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"የቅጽበታዊ ገጽ ዕይታ ቅድመ-ዕይታ"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"የማያ መቅጃ"</string>
-    <!-- no translation found for screenrecord_background_processing_label (7244617554884238898) -->
-    <skip />
+    <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"የማያ ገጽ ቀረጻን በማሰናዳት ላይ"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"ለአንድ የማያ ገጽ ቀረጻ ክፍለ-ጊዜ በመካሄድ ያለ ማሳወቂያ"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"መቅረጽ ይጀመር?"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"እየቀረጹ ሳለ የAndroid ስርዓት በማያ ገጽዎ ላይ የሚታይ ወይም በመሣሪያዎ ላይ የሚጫወት ማንኛውም ሚስጥራዊነት ያለው መረጃን መያዝ ይችላል። ይህ የይለፍ ቃላትን፣ የክፍያ መረጃን፣ ፎቶዎችን፣ መልዕክቶችን እና ኦዲዮን ያካትታል።"</string>
@@ -511,8 +510,7 @@
     <string name="clear_all_notifications_text" msgid="348312370303046130">"ሁሉንም አጽዳ"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"ያቀናብሩ"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"ታሪክ"</string>
-    <!-- no translation found for notification_section_header_incoming (5295312809341711367) -->
-    <skip />
+    <string name="notification_section_header_incoming" msgid="5295312809341711367">"ገቢ"</string>
     <string name="notification_section_header_gentle" msgid="3044910806569985386">"ጸጥ ያሉ ማሳወቂያዎች"</string>
     <string name="notification_section_header_alerting" msgid="3168140660646863240">"የማንቂያ ማሳወቂያዎች"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"ውይይቶች"</string>
@@ -991,10 +989,8 @@
     <string name="music_controls_no_title" msgid="4166497066552290938">"ርዕስ የለም"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"ይህን መተግበሪያ እንደገና ለማስጀመር መታ ያድርጉ እና ወደ ሙሉ ማያ ገጽ ይሂዱ።"</string>
     <string name="bubbles_settings_button_description" msgid="7324245408859877545">"ቅንብሮች ለ <xliff:g id="APP_NAME">%1$s</xliff:g> አረፋዎች"</string>
-    <!-- no translation found for bubble_overflow_button_content_description (5523744621434300510) -->
-    <skip />
-    <!-- no translation found for bubble_accessibility_action_add_back (6217995665917123890) -->
-    <skip />
+    <string name="bubble_overflow_button_content_description" msgid="5523744621434300510">"ትርፍ ፍሰት"</string>
+    <string name="bubble_accessibility_action_add_back" msgid="6217995665917123890">"ወደ ቁልል መልሰው ያክሉ"</string>
     <string name="manage_bubbles_text" msgid="6856830436329494850">"ያቀናብሩ"</string>
     <string name="bubble_content_description_single" msgid="5175160674436546329">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> ከ<xliff:g id="APP_NAME">%2$s</xliff:g>"</string>
     <string name="bubble_content_description_stack" msgid="7907610717462651870">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> ከ <xliff:g id="APP_NAME">%2$s</xliff:g> እና <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g> ተጨማሪ"</string>

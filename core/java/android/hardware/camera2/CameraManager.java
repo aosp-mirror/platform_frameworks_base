@@ -362,6 +362,11 @@ public final class CameraManager {
      * cameras that can only be used as part of logical multi-camera. These cameras cannot be
      * opened directly via {@link #openCamera}</p>
      *
+     * <p>Also starting with API level 29, while most basic camera information is still available
+     * even without the CAMERA permission, some values are not available to apps that do not hold
+     * that permission. The keys not available are listed by
+     * {@link CameraCharacteristics#getKeysNeedingPermission}.</p>
+     *
      * @param cameraId The id of the camera device to query. This could be either a standalone
      * camera ID which can be directly opened by {@link #openCamera}, or a physical camera ID that
      * can only used as part of a logical multi-camera.
