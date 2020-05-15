@@ -31,6 +31,7 @@ import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.dock.DockManagerImpl;
+import com.android.systemui.doze.DozeHost;
 import com.android.systemui.plugins.qs.QSFactory;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.power.EnhancedEstimates;
@@ -43,6 +44,7 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationLockscreenUserManagerImpl;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.phone.DozeServiceHost;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.KeyguardEnvironmentImpl;
@@ -148,4 +150,7 @@ public abstract class SystemUIDefaultModule {
     @Binds
     abstract KeyguardViewController bindKeyguardViewController(
             StatusBarKeyguardViewManager statusBarKeyguardViewManager);
+
+    @Binds
+    abstract DozeHost provideDozeHost(DozeServiceHost dozeServiceHost);
 }
