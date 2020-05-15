@@ -23,7 +23,6 @@ import static com.android.systemui.pip.phone.PipMenuActivityController.MENU_STAT
 
 import android.annotation.SuppressLint;
 import android.app.IActivityManager;
-import android.app.IActivityTaskManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.res.Resources;
@@ -188,7 +187,7 @@ public class PipTouchHandler {
 
         @Override
         public void onPipExpand() {
-            mMotionHelper.expandPip();
+            mMotionHelper.expandPipToFullscreen();
         }
 
         @Override
@@ -210,7 +209,7 @@ public class PipTouchHandler {
 
     @SuppressLint("InflateParams")
     public PipTouchHandler(Context context, IActivityManager activityManager,
-            IActivityTaskManager activityTaskManager, PipMenuActivityController menuController,
+            PipMenuActivityController menuController,
             InputConsumerController inputConsumerController,
             PipBoundsHandler pipBoundsHandler,
             PipTaskOrganizer pipTaskOrganizer,
@@ -228,8 +227,8 @@ public class PipTouchHandler {
         mFlingAnimationUtils = new FlingAnimationUtils(context.getResources().getDisplayMetrics(),
                 2.5f);
         mGesture = new DefaultPipTouchGesture();
-        mMotionHelper = new PipMotionHelper(mContext, activityTaskManager, pipTaskOrganizer,
-                mMenuController, mSnapAlgorithm, mFlingAnimationUtils, floatingContentCoordinator);
+        mMotionHelper = new PipMotionHelper(mContext, pipTaskOrganizer, mMenuController,
+                mSnapAlgorithm, floatingContentCoordinator);
         mPipResizeGestureHandler =
                 new PipResizeGestureHandler(context, pipBoundsHandler, mMotionHelper,
                         deviceConfig, pipTaskOrganizer, this::getMovementBounds,
@@ -815,6 +814,7 @@ public class PipTouchHandler {
     private class DefaultPipTouchGesture extends PipTouchGesture {
         private final Point mStartPosition = new Point();
         private final PointF mDelta = new PointF();
+        private boolean mShouldHideMenuAfterFling;
 
         @Override
         public void onDown(PipTouchState touchState) {
@@ -892,26 +892,22 @@ public class PipTouchHandler {
             final float velocity = PointF.length(vel.x, vel.y);
 
             if (touchState.isDragging()) {
-                Runnable endAction = null;
                 if (mMenuState != MENU_STATE_NONE) {
                     // If the menu is still visible, then just poke the menu so that
                     // it will timeout after the user stops touching it
                     mMenuController.showMenu(mMenuState, mMotionHelper.getBounds(),
                             true /* allowMenuTimeout */, willResizeMenu());
-                } else {
-                    // If the menu is not visible, then we can still be showing the activity for the
-                    // dismiss overlay, so just finish it after the animation completes
-                    endAction = mMenuController::hideMenu;
                 }
+                mShouldHideMenuAfterFling = mMenuState == MENU_STATE_NONE;
 
                 mMotionHelper.flingToSnapTarget(vel.x, vel.y,
                         PipTouchHandler.this::updateDismissFraction /* updateAction */,
-                        endAction /* endAction */);
+                        this::flingEndAction /* endAction */);
             } else if (mTouchState.isDoubleTap()) {
                 // Expand to fullscreen if this is a double tap
                 // the PiP should be frozen until the transition ends
                 setTouchEnabled(false);
-                mMotionHelper.expandPip();
+                mMotionHelper.expandPipToFullscreen();
             } else if (mMenuState != MENU_STATE_FULL) {
                 if (!mTouchState.isWaitingForDoubleTap()) {
                     // User has stalled long enough for this not to be a drag or a double tap, just
@@ -926,6 +922,15 @@ public class PipTouchHandler {
                 }
             }
             return true;
+        }
+
+        private void flingEndAction() {
+            mTouchState.setAllowTouches(true);
+            if (mShouldHideMenuAfterFling) {
+                // If the menu is not visible, then we can still be showing the activity for the
+                // dismiss overlay, so just finish it after the animation completes
+                mMenuController.hideMenu();
+            }
         }
     };
 

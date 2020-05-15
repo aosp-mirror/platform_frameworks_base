@@ -39,7 +39,7 @@ apex_defaults {
 
 sdk {
     name: "sdkextensions-sdk",
-    java_header_libs: [ "framework-sdkextensions-stubs-systemapi" ],
+    java_sdk_libs: [ "framework-sdkextensions" ],
 }
 
 apex_key {

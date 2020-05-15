@@ -67,8 +67,8 @@ final class AutofillInlineSessionController {
      * Requests the IME to create an {@link InlineSuggestionsRequest} for {@code autofillId}.
      *
      * @param autofillId      the Id of the field for which the request is for.
-     * @param requestConsumer the callback which will be invoked when IME responded or if it times
-     *                        out waiting for IME response.
+     * @param requestConsumer the callback to be invoked when the IME responds. Note that this is
+     *                        never invoked if the IME doesn't respond.
      */
     @GuardedBy("mLock")
     void onCreateInlineSuggestionsRequestLocked(@NonNull AutofillId autofillId,

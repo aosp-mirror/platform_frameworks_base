@@ -874,10 +874,6 @@ public class DisplayPolicy {
                 }
                 break;
 
-            case TYPE_SCREENSHOT:
-                attrs.flags |= WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
-                break;
-
             case TYPE_TOAST:
                 // While apps should use the dedicated toast APIs to add such windows
                 // it possible legacy apps to add the window directly. Therefore, we
@@ -2036,9 +2032,13 @@ public class DisplayPolicy {
             final Rect dfu = displayFrames.mUnrestricted;
             Insets insets = Insets.of(0, 0, 0, 0);
             for (int i = types.size() - 1; i >= 0; i--) {
-                insets = Insets.max(insets, mDisplayContent.getInsetsPolicy()
-                        .getInsetsForDispatch(win).getSource(types.valueAt(i))
-                        .calculateInsets(dfu, attrs.isFitInsetsIgnoringVisibility()));
+                final InsetsSource source = mDisplayContent.getInsetsPolicy()
+                        .getInsetsForDispatch(win).peekSource(types.valueAt(i));
+                if (source == null) {
+                    continue;
+                }
+                insets = Insets.max(insets, source.calculateInsets(
+                        dfu, attrs.isFitInsetsIgnoringVisibility()));
             }
             final int left = (sidesToFit & Side.LEFT) != 0 ? insets.left : 0;
             final int top = (sidesToFit & Side.TOP) != 0 ? insets.top : 0;

@@ -52,7 +52,7 @@ class TestNetworkStackService : Service() {
         doReturn(mock(IBinder::class.java)).`when`(it).getSystemService(Context.NETD_SERVICE)
     }
 
-    private class TestPermissionChecker : NetworkStackConnector.PermissionChecker() {
+    private class TestPermissionChecker : NetworkStackService.PermissionChecker() {
         override fun enforceNetworkStackCallingPermission() = Unit
     }
 
@@ -62,8 +62,8 @@ class TestNetworkStackService : Service() {
         override fun sendNetworkConditionsBroadcast(context: Context, broadcast: Intent) = Unit
     }
 
-    private inner class TestNetworkStackConnector(context: Context) :
-            NetworkStackConnector(context, TestPermissionChecker()) {
+    private inner class TestNetworkStackConnector(context: Context) : NetworkStackConnector(
+            context, TestPermissionChecker(), NetworkStackService.Dependencies()) {
 
         private val network = Network(TEST_NETID)
         private val privateDnsBypassNetwork = TestNetwork(TEST_NETID)

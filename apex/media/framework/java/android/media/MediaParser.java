@@ -21,6 +21,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StringDef;
 import android.media.MediaCodec.CryptoInfo;
+import android.os.Build;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
@@ -467,7 +468,24 @@ public final class MediaParser {
     public @interface SampleFlags {}
     /** Indicates that the sample holds a synchronization sample. */
     public static final int SAMPLE_FLAG_KEY_FRAME = MediaCodec.BUFFER_FLAG_KEY_FRAME;
-    /** Indicates that the sample has supplemental data. */
+    /**
+     * Indicates that the sample has supplemental data.
+     *
+     * <p>Samples will not have this flag set unless the {@code
+     * "android.media.mediaparser.includeSupplementalData"} parameter is set to {@code true} via
+     * {@link #setParameter}.
+     *
+     * <p>Samples with supplemental data have the following sample data format:
+     *
+     * <ul>
+     *   <li>If the {@code "android.media.mediaparser.inBandCryptoInfo"} parameter is set, all
+     *       encryption information.
+     *   <li>(4 bytes) {@code sample_data_size}: The size of the actual sample data, not including
+     *       supplemental data or encryption information.
+     *   <li>({@code sample_data_size} bytes): The media sample data.
+     *   <li>(remaining bytes) The supplemental data.
+     * </ul>
+     */
     public static final int SAMPLE_FLAG_HAS_SUPPLEMENTAL_DATA = 1 << 28;
     /** Indicates that the sample is known to contain the last media sample of the stream. */
     public static final int SAMPLE_FLAG_LAST_SAMPLE = 1 << 29;
@@ -578,7 +596,9 @@ public final class MediaParser {
                 PARAMETER_TS_IGNORE_AVC_STREAM,
                 PARAMETER_TS_IGNORE_SPLICE_INFO_STREAM,
                 PARAMETER_TS_DETECT_ACCESS_UNITS,
-                PARAMETER_TS_ENABLE_HDMV_DTS_AUDIO_STREAMS
+                PARAMETER_TS_ENABLE_HDMV_DTS_AUDIO_STREAMS,
+                PARAMETER_IN_BAND_CRYPTO_INFO,
+                PARAMETER_INCLUDE_SUPPLEMENTAL_DATA
             })
     public @interface ParameterName {}
 
@@ -740,6 +760,16 @@ public final class MediaParser {
     public static final String PARAMETER_IN_BAND_CRYPTO_INFO =
             "android.media.mediaparser.inBandCryptoInfo";
 
+    /**
+     * Sets whether supplemental data should be included as part of the sample data. {@code boolean}
+     * expected. Default value is {@code false}. See {@link #SAMPLE_FLAG_HAS_SUPPLEMENTAL_DATA} for
+     * information about the sample data format.
+     *
+     * @hide
+     */
+    public static final String PARAMETER_INCLUDE_SUPPLEMENTAL_DATA =
+            "android.media.mediaparser.includeSupplementalData";
+
     // Private constants.
 
     private static final String TAG = "MediaParser";
@@ -899,6 +929,7 @@ public final class MediaParser {
     private final ParsableByteArrayAdapter mScratchParsableByteArrayAdapter;
     @Nullable private final Constructor<DrmInitData.SchemeInitData> mSchemeInitDataConstructor;
     private boolean mInBandCryptoInfo;
+    private boolean mIncludeSupplementalData;
     private String mParserName;
     private Extractor mExtractor;
     private ExtractorInput mExtractorInput;
@@ -948,6 +979,9 @@ public final class MediaParser {
         }
         if (PARAMETER_IN_BAND_CRYPTO_INFO.equals(parameterName)) {
             mInBandCryptoInfo = (boolean) value;
+        }
+        if (PARAMETER_INCLUDE_SUPPLEMENTAL_DATA.equals(parameterName)) {
+            mIncludeSupplementalData = (boolean) value;
         }
         mParserParameters.put(parameterName, value);
         return this;
@@ -1099,6 +1133,9 @@ public final class MediaParser {
     // Private methods.
 
     private MediaParser(OutputConsumer outputConsumer, boolean sniff, String... parserNamesPool) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+            throw new UnsupportedOperationException("Android version must be R or greater.");
+        }
         mParserParameters = new HashMap<>();
         mOutputConsumer = outputConsumer;
         mParserNamesPool = parserNamesPool;
@@ -1330,6 +1367,7 @@ public final class MediaParser {
         private int mEncryptionVectorSize;
         private boolean mHasSubsampleEncryptionData;
         private CryptoInfo.Pattern mEncryptionPattern;
+        private int mSkippedSupplementalDataBytes;
 
         private TrackOutputAdapter(int trackIndex) {
             mTrackIndex = trackIndex;
@@ -1419,6 +1457,10 @@ public final class MediaParser {
                             throw new IllegalStateException();
                     }
                 }
+            } else if (sampleDataPart == SAMPLE_DATA_PART_SUPPLEMENTAL
+                    && !mIncludeSupplementalData) {
+                mSkippedSupplementalDataBytes += length;
+                data.skipBytes(length);
             } else {
                 outputSampleData(data, length);
             }
@@ -1427,6 +1469,8 @@ public final class MediaParser {
         @Override
         public void sampleMetadata(
                 long timeUs, int flags, int size, int offset, @Nullable CryptoData cryptoData) {
+            size -= mSkippedSupplementalDataBytes;
+            mSkippedSupplementalDataBytes = 0;
             mOutputConsumer.onSampleCompleted(
                     mTrackIndex,
                     timeUs,
@@ -1686,13 +1730,13 @@ public final class MediaParser {
         }
     }
 
-    private static int getMediaParserFlags(int flags) {
+    private int getMediaParserFlags(int flags) {
         @SampleFlags int result = 0;
         result |= (flags & C.BUFFER_FLAG_ENCRYPTED) != 0 ? SAMPLE_FLAG_ENCRYPTED : 0;
         result |= (flags & C.BUFFER_FLAG_KEY_FRAME) != 0 ? SAMPLE_FLAG_KEY_FRAME : 0;
         result |= (flags & C.BUFFER_FLAG_DECODE_ONLY) != 0 ? SAMPLE_FLAG_DECODE_ONLY : 0;
         result |=
-                (flags & C.BUFFER_FLAG_HAS_SUPPLEMENTAL_DATA) != 0
+                (flags & C.BUFFER_FLAG_HAS_SUPPLEMENTAL_DATA) != 0 && mIncludeSupplementalData
                         ? SAMPLE_FLAG_HAS_SUPPLEMENTAL_DATA
                         : 0;
         result |= (flags & C.BUFFER_FLAG_LAST_SAMPLE) != 0 ? SAMPLE_FLAG_LAST_SAMPLE : 0;
@@ -1755,6 +1799,7 @@ public final class MediaParser {
         expectedTypeByParameterName.put(PARAMETER_TS_DETECT_ACCESS_UNITS, Boolean.class);
         expectedTypeByParameterName.put(PARAMETER_TS_ENABLE_HDMV_DTS_AUDIO_STREAMS, Boolean.class);
         expectedTypeByParameterName.put(PARAMETER_IN_BAND_CRYPTO_INFO, Boolean.class);
+        expectedTypeByParameterName.put(PARAMETER_INCLUDE_SUPPLEMENTAL_DATA, Boolean.class);
         EXPECTED_TYPE_BY_PARAMETER_NAME = Collections.unmodifiableMap(expectedTypeByParameterName);
     }
 }

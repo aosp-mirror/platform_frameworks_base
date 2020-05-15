@@ -1705,7 +1705,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     boolean addStartingWindow(String pkg, int theme, CompatibilityInfo compatInfo,
             CharSequence nonLocalizedLabel, int labelRes, int icon, int logo, int windowFlags,
             IBinder transferFrom, boolean newTask, boolean taskSwitch, boolean processRunning,
-            boolean allowTaskSnapshot, boolean activityCreated, boolean fromRecents) {
+            boolean allowTaskSnapshot, boolean activityCreated) {
         // If the display is frozen, we won't do anything until the actual window is
         // displayed so there is no reason to put in the starting window.
         if (!okToDisplay()) {
@@ -1726,7 +1726,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 mWmService.mTaskSnapshotController.getSnapshot(task.mTaskId, task.mUserId,
                         false /* restoreFromDisk */, false /* isLowResolution */);
         final int type = getStartingWindowType(newTask, taskSwitch, processRunning,
-                allowTaskSnapshot, activityCreated, fromRecents, snapshot);
+                allowTaskSnapshot, activityCreated, snapshot);
 
         if (type == STARTING_WINDOW_TYPE_SNAPSHOT) {
             if (isActivityTypeHome()) {
@@ -1888,12 +1888,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     private final AddStartingWindow mAddStartingWindow = new AddStartingWindow();
 
     private int getStartingWindowType(boolean newTask, boolean taskSwitch, boolean processRunning,
-            boolean allowTaskSnapshot, boolean activityCreated, boolean fromRecents,
+            boolean allowTaskSnapshot, boolean activityCreated,
             ActivityManager.TaskSnapshot snapshot) {
         if (newTask || !processRunning || (taskSwitch && !activityCreated)) {
             return STARTING_WINDOW_TYPE_SPLASH_SCREEN;
         } else if (taskSwitch && allowTaskSnapshot) {
-            if (snapshotOrientationSameAsTask(snapshot) || (snapshot != null && fromRecents)) {
+            if (isSnapshotCompatible(snapshot)) {
                 return STARTING_WINDOW_TYPE_SNAPSHOT;
             }
             if (!isActivityTypeHome()) {
@@ -1905,11 +1905,22 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
     }
 
-    private boolean snapshotOrientationSameAsTask(ActivityManager.TaskSnapshot snapshot) {
+    /**
+     * Returns {@code true} if the task snapshot is compatible with this activity (at least the
+     * rotation must be the same).
+     */
+    @VisibleForTesting
+    boolean isSnapshotCompatible(ActivityManager.TaskSnapshot snapshot) {
         if (snapshot == null) {
             return false;
         }
-        return task.getConfiguration().orientation == snapshot.getOrientation();
+        final int rotation = mDisplayContent.rotationForActivityInDifferentOrientation(this);
+        final int targetRotation = rotation != ROTATION_UNDEFINED
+                // The display may rotate according to the orientation of this activity.
+                ? rotation
+                // The activity won't change display orientation.
+                : task.getWindowConfiguration().getRotation();
+        return snapshot.getRotation() == targetRotation;
     }
 
     void removeStartingWindow() {
@@ -1929,7 +1940,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             mStartingData = null;
             startingSurface = null;
             startingWindow = null;
-            startingDisplayed = false;
             if (surface == null) {
                 ProtoLog.v(WM_DEBUG_STARTING_WINDOW,
                         "startingWindow was set but startingSurface==null, couldn't "
@@ -2184,8 +2194,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     @Override
     boolean isFocusable() {
-        return super.isFocusable()
-                && (getWindowConfiguration().canReceiveKeys() || isAlwaysFocusable());
+        // TODO(156521483): Propagate the state down the hierarchy instead of checking the parent
+        boolean canReceiveKeys = getWindowConfiguration().canReceiveKeys()
+                && getTask().getWindowConfiguration().canReceiveKeys();
+        return super.isFocusable() && (canReceiveKeys || isAlwaysFocusable());
     }
 
     boolean isResizeable() {
@@ -4785,16 +4797,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (!task.hasChild(this)) {
             throw new IllegalStateException("Activity not found in its task");
         }
-        final ActivityRecord activityAbove = task.getActivityAbove(this);
-        if (activityAbove == null) {
-            // It's the topmost activity in the task - should become resumed now
-            return true;
-        }
-        // Check if activity above is finishing now and this one becomes the topmost in task.
-        if (activityAbove.finishing) {
-            return true;
-        }
-        return false;
+        return task.topRunningActivity() == this;
     }
 
     void handleAlreadyVisible() {
@@ -5453,7 +5456,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (mLastTransactionSequence != mWmService.mTransactionSequence) {
             mLastTransactionSequence = mWmService.mTransactionSequence;
             mNumDrawnWindows = 0;
-            startingDisplayed = false;
 
             // There is the main base application window, even if it is exiting, wait for it
             mNumInterestingWindows = findMainWindow(false /* includeStartingApp */) != null ? 1 : 0;
@@ -5673,11 +5675,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     void showStartingWindow(ActivityRecord prev, boolean newTask, boolean taskSwitch) {
-        showStartingWindow(prev, newTask, taskSwitch, false /* fromRecents */);
-    }
-
-    void showStartingWindow(ActivityRecord prev, boolean newTask, boolean taskSwitch,
-            boolean fromRecents) {
         if (mTaskOverlay) {
             // We don't show starting window for overlay activities.
             return;
@@ -5694,8 +5691,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 compatInfo, nonLocalizedLabel, labelRes, icon, logo, windowFlags,
                 prev != null ? prev.appToken : null, newTask, taskSwitch, isProcessRunning(),
                 allowTaskSnapshot(),
-                mState.ordinal() >= STARTED.ordinal() && mState.ordinal() <= STOPPED.ordinal(),
-                fromRecents);
+                mState.ordinal() >= STARTED.ordinal() && mState.ordinal() <= STOPPED.ordinal());
         if (shown) {
             mStartingWindowState = STARTING_WINDOW_SHOWN;
         }
