@@ -752,7 +752,10 @@ public final class AccessibilityWindowInfo implements Parcelable {
         }
     }
 
-    private static String typeToString(int type) {
+    /**
+     * @hide
+     */
+    public static String typeToString(int type) {
         switch (type) {
             case TYPE_APPLICATION: {
                 return "TYPE_APPLICATION";
@@ -770,7 +773,7 @@ public final class AccessibilityWindowInfo implements Parcelable {
                 return "TYPE_SPLIT_SCREEN_DIVIDER";
             }
             default:
-                return "<UNKNOWN>";
+                return "<UNKNOWN:" + type + ">";
         }
     }
 
