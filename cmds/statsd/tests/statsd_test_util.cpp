@@ -1339,7 +1339,7 @@ Status FakeSubsystemSleepCallback::onPullAtom(int atomTag,
         // stats_event.h/c uses a vector as opposed to a buffer.
         p.buffer.assign(buffer, buffer + size);
         parcels.push_back(std::move(p));
-        AStatsEvent_write(event);
+        AStatsEvent_release(event);
     }
     resultReceiver->pullFinished(atomTag, /*success=*/true, parcels);
     return Status::ok();
