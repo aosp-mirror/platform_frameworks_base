@@ -200,20 +200,12 @@ public class InsetsSourceConsumer {
     }
 
     boolean applyLocalVisibilityOverride() {
-        InsetsSource source = mState.peekSource(mType);
-        final boolean isVisible = source != null && source.isVisible();
-        final boolean hasControl = mSourceControl != null;
-
-        // We still need to let the legacy app know the visibility change even if we don't have the
-        // control.
-        mController.updateCompatSysUiVisibility(
-                mType, hasControl ? mRequestedVisible : isVisible, hasControl);
 
         // If we don't have control, we are not able to change the visibility.
-        if (!hasControl) {
+        if (mSourceControl == null) {
             return false;
         }
-        if (isVisible == mRequestedVisible) {
+        if (mState.getSource(mType).isVisible() == mRequestedVisible) {
             return false;
         }
         mState.getSource(mType).setVisible(mRequestedVisible);

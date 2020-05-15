@@ -143,7 +143,7 @@ public class WindowlessWindowManager implements IWindowSession {
                 WindowManager.LayoutParams.INPUT_FEATURE_NO_INPUT_CHANNEL) == 0)) {
             try {
                 mRealWm.grantInputChannel(displayId, sc, window, mHostInputToken, attrs.flags,
-                        outInputChannel);
+                        attrs.type, outInputChannel);
             } catch (RemoteException e) {
                 Log.e(TAG, "Failed to grant input to surface: ", e);
             }
@@ -432,7 +432,7 @@ public class WindowlessWindowManager implements IWindowSession {
 
     @Override
     public void grantInputChannel(int displayId, SurfaceControl surface, IWindow window,
-            IBinder hostInputToken, int flags, InputChannel outInputChannel) {
+            IBinder hostInputToken, int flags, int type, InputChannel outInputChannel) {
     }
 
     @Override

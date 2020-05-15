@@ -1387,6 +1387,7 @@ public class WindowManagerService extends IWindowManager.Stub
             DisplayCutout.ParcelableWrapper outDisplayCutout, InputChannel outInputChannel,
             InsetsState outInsetsState, InsetsSourceControl[] outActiveControls,
             int requestUserId) {
+        Arrays.fill(outActiveControls, null);
         int[] appOp = new int[1];
         final boolean isRoundedCornerOverlay = (attrs.privateFlags
                 & PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY) != 0;
@@ -2133,6 +2134,7 @@ public class WindowManagerService extends IWindowManager.Stub
             SurfaceControl outSurfaceControl, InsetsState outInsetsState,
             InsetsSourceControl[] outActiveControls, Point outSurfaceSize,
             SurfaceControl outBLASTSurfaceControl) {
+        Arrays.fill(outActiveControls, null);
         int result = 0;
         boolean configChanged;
         final int pid = Binder.getCallingPid();
@@ -2470,23 +2472,20 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     private void getInsetsSourceControls(WindowState win, InsetsSourceControl[] outControls) {
-        if (outControls != null) {
-            final InsetsSourceControl[] controls =
-                    win.getDisplayContent().getInsetsStateController().getControlsForDispatch(win);
-            Arrays.fill(outControls, null);
-            if (controls != null) {
-                final int length = Math.min(controls.length, outControls.length);
-                for (int i = 0; i < length; i++) {
-                    // We will leave the critical section before returning the leash to the client,
-                    // so we need to copy the leash to prevent others release the one that we are
-                    // about to return.
-                    // TODO: We will have an extra copy if the client is not local.
-                    //       For now, we rely on GC to release it.
-                    //       Maybe we can modify InsetsSourceControl.writeToParcel so it can release
-                    //       the extra leash as soon as possible.
-                    outControls[i] = controls[i] != null
-                            ? new InsetsSourceControl(controls[i]) : null;
-                }
+        final InsetsSourceControl[] controls =
+                win.getDisplayContent().getInsetsStateController().getControlsForDispatch(win);
+        if (controls != null) {
+            final int length = Math.min(controls.length, outControls.length);
+            for (int i = 0; i < length; i++) {
+                // We will leave the critical section before returning the leash to the client,
+                // so we need to copy the leash to prevent others release the one that we are
+                // about to return.
+                // TODO: We will have an extra copy if the client is not local.
+                //       For now, we rely on GC to release it.
+                //       Maybe we can modify InsetsSourceControl.writeToParcel so it can release
+                //       the extra leash as soon as possible.
+                outControls[i] = controls[i] != null
+                        ? new InsetsSourceControl(controls[i]) : null;
             }
         }
     }
@@ -8027,14 +8026,15 @@ public class WindowManagerService extends IWindowManager.Stub
      * views.
      */
     void grantInputChannel(int callingUid, int callingPid, int displayId, SurfaceControl surface,
-            IWindow window, IBinder hostInputToken, int flags, InputChannel outInputChannel) {
+            IWindow window, IBinder hostInputToken, int flags, int type,
+            InputChannel outInputChannel) {
         final InputApplicationHandle applicationHandle;
         final String name;
         final InputChannel clientChannel;
         synchronized (mGlobalLock) {
             EmbeddedWindowController.EmbeddedWindow win =
                     new EmbeddedWindowController.EmbeddedWindow(this, window,
-                            mInputToWindowMap.get(hostInputToken), callingUid, callingPid);
+                            mInputToWindowMap.get(hostInputToken), callingUid, callingPid, type);
             clientChannel = win.openInputChannel();
             mEmbeddedWindowController.add(clientChannel.getToken(), win);
             applicationHandle = win.getApplicationHandle();
@@ -8042,7 +8042,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         updateInputChannel(clientChannel.getToken(), callingUid, callingPid, displayId, surface,
-                name, applicationHandle, flags, null /* region */);
+                name, applicationHandle, flags, type, null /* region */);
 
         clientChannel.transferTo(outInputChannel);
         clientChannel.dispose();
@@ -8050,7 +8050,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     private void updateInputChannel(IBinder channelToken, int callingUid, int callingPid,
             int displayId, SurfaceControl surface, String name,
-            InputApplicationHandle applicationHandle, int flags, Region region) {
+            InputApplicationHandle applicationHandle, int flags, int type, Region region) {
         InputWindowHandle h = new InputWindowHandle(applicationHandle, displayId);
         h.token = channelToken;
         h.name = name;
@@ -8058,7 +8058,7 @@ public class WindowManagerService extends IWindowManager.Stub
         final int sanitizedFlags = flags & (LayoutParams.FLAG_NOT_TOUCHABLE
                 | LayoutParams.FLAG_SLIPPERY);
         h.layoutParamsFlags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | sanitizedFlags;
-        h.layoutParamsType = 0;
+        h.layoutParamsType = type;
         h.dispatchingTimeoutNanos = DEFAULT_INPUT_DISPATCHING_TIMEOUT_NANOS;
         h.canReceiveKeys = false;
         h.hasFocus = false;
@@ -8082,6 +8082,7 @@ public class WindowManagerService extends IWindowManager.Stub
         t.setInputWindowInfo(surface, h);
         t.apply();
         t.close();
+        surface.release();
     }
 
     /**
@@ -8105,7 +8106,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         updateInputChannel(channelToken, win.mOwnerUid, win.mOwnerPid, displayId, surface, name,
-                applicationHandle, flags, region);
+                applicationHandle, flags, win.mWindowType, region);
     }
 
     /** Return whether layer tracing is enabled */

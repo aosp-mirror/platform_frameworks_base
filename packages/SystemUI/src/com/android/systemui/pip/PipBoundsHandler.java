@@ -209,6 +209,10 @@ public class PipBoundsHandler {
         return new Rect(0, 0, mDisplayInfo.logicalWidth, mDisplayInfo.logicalHeight);
     }
 
+    public int getDisplayRotation() {
+        return mDisplayInfo.rotation;
+    }
+
     /**
      * Responds to IPinnedStackListener on {@link DisplayInfo} change.
      * It will normally follow up with a
