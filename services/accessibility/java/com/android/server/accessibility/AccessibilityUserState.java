@@ -688,6 +688,25 @@ class AccessibilityUserState {
     }
 
     /**
+     * Removes given shortcut target in the list.
+     *
+     * @param shortcutType The shortcut type.
+     * @param target The component name of the shortcut target.
+     * @return true if the shortcut target is removed.
+     */
+    public boolean removeShortcutTargetLocked(@ShortcutType int shortcutType,
+            ComponentName target) {
+        return getShortcutTargetsLocked(shortcutType).removeIf(name -> {
+            ComponentName componentName;
+            if (name == null
+                    || (componentName = ComponentName.unflattenFromString(name)) == null) {
+                return false;
+            }
+            return componentName.equals(target);
+        });
+    }
+
+    /**
      * Returns installed accessibility service info by the given service component name.
      */
     public AccessibilityServiceInfo getInstalledServiceInfoLocked(ComponentName componentName) {
