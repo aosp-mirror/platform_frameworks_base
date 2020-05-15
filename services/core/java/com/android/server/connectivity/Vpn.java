@@ -2867,6 +2867,23 @@ public class Vpn {
         return Credentials.PLATFORM_VPN + mUserHandle + "_" + packageName;
     }
 
+    @VisibleForTesting
+    void validateRequiredFeatures(VpnProfile profile) {
+        switch (profile.type) {
+            case VpnProfile.TYPE_IKEV2_IPSEC_USER_PASS:
+            case VpnProfile.TYPE_IKEV2_IPSEC_PSK:
+            case VpnProfile.TYPE_IKEV2_IPSEC_RSA:
+                if (!mContext.getPackageManager().hasSystemFeature(
+                        PackageManager.FEATURE_IPSEC_TUNNELS)) {
+                    throw new UnsupportedOperationException(
+                            "Ikev2VpnProfile(s) requires PackageManager.FEATURE_IPSEC_TUNNELS");
+                }
+                break;
+            default:
+                return;
+        }
+    }
+
     /**
      * Stores an app-provisioned VPN profile and returns whether the app is already prepared.
      *
@@ -2883,6 +2900,7 @@ public class Vpn {
 
         verifyCallingUidAndPackage(packageName);
         enforceNotRestrictedUser();
+        validateRequiredFeatures(profile);
 
         if (profile.isRestrictedToTestNetworks) {
             mContext.enforceCallingPermission(Manifest.permission.MANAGE_TEST_NETWORKS,
