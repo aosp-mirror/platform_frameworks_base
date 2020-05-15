@@ -25,7 +25,8 @@ import android.os.ParcelFileDescriptor;
  */
 oneway interface IIncidentDumpCallback {
     /**
-     * Dumps section data to the given ParcelFileDescriptor.
+     * Dumps section data to the given ParcelFileDescriptor, which needs to be
+     * closed properly after writing the data.
      */
     void onDumpSection(in ParcelFileDescriptor fd);
 }
