@@ -344,7 +344,7 @@ class UserSystemPackageInstaller {
      */
     @NonNull
     private List<String> getPackagesWhitelistErrors(@PackageWhitelistMode int mode) {
-        if ((!isEnforceMode(mode) || isImplicitWhitelistMode(mode)) && !isLogMode(mode)) {
+        if ((!isEnforceMode(mode) || isImplicitWhitelistMode(mode))) {
             return Collections.emptyList();
         }
 
@@ -751,6 +751,10 @@ class UserSystemPackageInstaller {
             mode = getWhitelistMode();
         } else if (mode == USER_TYPE_PACKAGE_WHITELIST_MODE_DEVICE_DEFAULT) {
             mode = getDeviceDefaultWhitelistMode();
+        }
+        if (criticalOnly) {
+            // Flip-out log mode
+            mode &= ~USER_TYPE_PACKAGE_WHITELIST_MODE_LOG;
         }
         Slog.v(TAG, "dumpPackageWhitelistProblems(): using mode " + modeToString(mode));
 
