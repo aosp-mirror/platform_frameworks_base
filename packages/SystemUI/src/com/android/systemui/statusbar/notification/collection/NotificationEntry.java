@@ -31,7 +31,7 @@ import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_PEEK;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_STATUS_BAR;
 
 import static com.android.systemui.statusbar.notification.collection.NotifCollection.REASON_NOT_CANCELED;
-import static com.android.systemui.statusbar.notification.stack.NotificationSectionsManager.BUCKET_ALERTING;
+import static com.android.systemui.statusbar.notification.stack.NotificationSectionsManagerKt.BUCKET_ALERTING;
 
 import static java.util.Objects.requireNonNull;
 
@@ -68,7 +68,7 @@ import com.android.systemui.statusbar.notification.icon.IconPack;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRowController;
 import com.android.systemui.statusbar.notification.row.NotificationGuts;
-import com.android.systemui.statusbar.notification.stack.NotificationSectionsManager;
+import com.android.systemui.statusbar.notification.stack.PriorityBucket;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -409,12 +409,12 @@ public final class NotificationEntry extends ListEntry {
         return wasBubble != isBubble();
     }
 
-    @NotificationSectionsManager.PriorityBucket
+    @PriorityBucket
     public int getBucket() {
         return mBucket;
     }
 
-    public void setBucket(@NotificationSectionsManager.PriorityBucket int bucket) {
+    public void setBucket(@PriorityBucket int bucket) {
         mBucket = bucket;
     }
 
