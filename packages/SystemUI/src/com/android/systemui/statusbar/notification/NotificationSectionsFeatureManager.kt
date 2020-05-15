@@ -21,12 +21,12 @@ import android.provider.DeviceConfig
 
 import com.android.internal.annotations.VisibleForTesting
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags.NOTIFICATIONS_USE_PEOPLE_FILTERING
-import com.android.systemui.statusbar.notification.stack.NotificationSectionsManager.BUCKET_ALERTING
-import com.android.systemui.statusbar.notification.stack.NotificationSectionsManager.BUCKET_FOREGROUND_SERVICE
-import com.android.systemui.statusbar.notification.stack.NotificationSectionsManager.BUCKET_HEADS_UP
-import com.android.systemui.statusbar.notification.stack.NotificationSectionsManager.BUCKET_MEDIA_CONTROLS
-import com.android.systemui.statusbar.notification.stack.NotificationSectionsManager.BUCKET_PEOPLE
-import com.android.systemui.statusbar.notification.stack.NotificationSectionsManager.BUCKET_SILENT
+import com.android.systemui.statusbar.notification.stack.BUCKET_ALERTING
+import com.android.systemui.statusbar.notification.stack.BUCKET_FOREGROUND_SERVICE
+import com.android.systemui.statusbar.notification.stack.BUCKET_HEADS_UP
+import com.android.systemui.statusbar.notification.stack.BUCKET_MEDIA_CONTROLS
+import com.android.systemui.statusbar.notification.stack.BUCKET_PEOPLE
+import com.android.systemui.statusbar.notification.stack.BUCKET_SILENT
 import com.android.systemui.util.DeviceConfigProxy
 import com.android.systemui.util.Utils
 
