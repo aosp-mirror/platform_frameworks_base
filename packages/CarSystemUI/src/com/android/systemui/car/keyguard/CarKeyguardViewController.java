@@ -188,7 +188,7 @@ public class CarKeyguardViewController extends OverlayViewController implements
         stop();
         getOverlayViewGlobalStateController().setWindowFocusable(/* focusable= */ false);
         mKeyguardStateController.notifyKeyguardDoneFading();
-        mViewMediatorCallback.keyguardGone();
+        mHandler.post(mViewMediatorCallback::keyguardGone);
         notifyKeyguardUpdateMonitor();
     }
 
