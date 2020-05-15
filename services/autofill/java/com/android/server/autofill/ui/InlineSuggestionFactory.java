@@ -57,7 +57,6 @@ final class InlineSuggestionFactory {
             @NonNull AutoFillUI.AutoFillUiCallback client, @NonNull Runnable onErrorCallback,
             @Nullable RemoteInlineSuggestionRenderService remoteRenderService) {
         final BiConsumer<Dataset, Integer> onClickFactory = (dataset, datasetIndex) -> {
-            client.requestHideFillUi(autofillId);
             client.authenticate(response.getRequestId(),
                     datasetIndex, response.getAuthentication(), response.getClientState(),
                     /* authenticateInline= */ true);
@@ -85,7 +84,6 @@ final class InlineSuggestionFactory {
         final Consumer<IntentSender> intentSenderConsumer = (intentSender) ->
                 client.startIntentSender(intentSender, new Intent());
         final BiConsumer<Dataset, Integer> onClickFactory = (dataset, datasetIndex) -> {
-            client.requestHideFillUi(autofillId);
             client.fill(requestId, datasetIndex, dataset);
         };
 
