@@ -62,6 +62,7 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
     private final Context mContext;
     private int mCurrentPage;
     private OnProfileSelectedListener mOnProfileSelectedListener;
+    private OnSwitchOnWorkSelectedListener mOnSwitchOnWorkSelectedListener;
     private Set<Integer> mLoadedPages;
     private final UserHandle mPersonalProfileUserHandle;
     private final UserHandle mWorkProfileUserHandle;
@@ -122,6 +123,10 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
 
     void setOnProfileSelectedListener(OnProfileSelectedListener listener) {
         mOnProfileSelectedListener = listener;
+    }
+
+    void setOnSwitchOnWorkSelectedListener(OnSwitchOnWorkSelectedListener listener) {
+        mOnSwitchOnWorkSelectedListener = listener;
     }
 
     Context getContext() {
@@ -397,6 +402,9 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
                     ProfileDescriptor descriptor = getItem(
                             userHandleToPageIndex(listAdapter.getUserHandle()));
                     showSpinner(descriptor.getEmptyStateView());
+                    if (mOnSwitchOnWorkSelectedListener != null) {
+                        mOnSwitchOnWorkSelectedListener.onSwitchOnWorkSelected();
+                    }
                     mInjector.requestQuietModeEnabled(false, mWorkProfileUserHandle);
                 });
         return true;
@@ -573,6 +581,16 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
          * {@link #PROFILE_WORK} if the work profile was selected.
          */
         void onProfileSelected(int profileIndex);
+    }
+
+    /**
+     * Listener for when the user switches on the work profile from the work tab.
+     */
+    interface OnSwitchOnWorkSelectedListener {
+        /**
+         * Callback for when the user switches on the work profile from the work tab.
+         */
+        void onSwitchOnWorkSelected();
     }
 
     /**
