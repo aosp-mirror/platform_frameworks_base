@@ -55,4 +55,7 @@
     <color name="list_divider_color">@*android:color/car_list_divider_light</color>
     <color name="car_volume_item_divider_color">@*android:color/car_list_divider</color>
     <color name="car_volume_item_background_color">@*android:color/car_card_dark</color>
+
+    <color name="car_user_switching_dialog_background_color">@android:color/black</color>
+    <color name="car_user_switching_dialog_loading_text_color">@*android:color/car_body1</color>
 </resources>
