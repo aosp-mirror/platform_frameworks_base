@@ -56,7 +56,6 @@ import javax.inject.Inject;
 /** Quick settings tile: Wifi **/
 public class WifiTile extends QSTileImpl<SignalState> {
     private static final Intent WIFI_SETTINGS = new Intent(Settings.ACTION_WIFI_SETTINGS);
-    private static final Intent WIFI_PANEL = new Intent(Settings.Panel.ACTION_WIFI);
 
     protected final NetworkController mController;
     private final AccessPointController mWifiController;
@@ -109,21 +108,11 @@ public class WifiTile extends QSTileImpl<SignalState> {
 
     @Override
     public Intent getLongClickIntent() {
-        if (mQSSettingsPanelOption == QSSettingsPanel.OPEN_LONG_PRESS) return WIFI_PANEL;
-        else return WIFI_SETTINGS;
-    }
-
-    @Override
-    public boolean supportsDetailView() {
-        return getDetailAdapter() != null && mQSSettingsPanelOption == QSSettingsPanel.OPEN_CLICK;
+        return WIFI_SETTINGS;
     }
 
     @Override
     protected void handleClick() {
-        if (mQSSettingsPanelOption == QSSettingsPanel.OPEN_CLICK) {
-            mActivityStarter.postStartActivityDismissingKeyguard(WIFI_PANEL, 0);
-            return;
-        }
         // Secondary clicks are header clicks, just toggle.
         mState.copyTo(mStateBeforeClick);
         boolean wifiEnabled = mState.value;
