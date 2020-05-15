@@ -212,12 +212,12 @@ final class AutofillInlineSuggestionsRequestSession {
         if (mDestroyed || mResponseCallback == null) {
             return;
         }
-        if (!mImeInputViewStarted && mPreviousResponseIsNotEmpty) {
-            // 1. if previous response is not empty, and IME just become invisible, then send
-            // empty response to make sure existing responses don't stick around on the IME.
+        if (!mImeInputStarted && mPreviousResponseIsNotEmpty) {
+            // 1. if previous response is not empty, and IME is just disconnected from the view,
+            // then send empty response to make sure existing responses don't stick around.
             // Although the inline suggestions should disappear when IME hides which removes them
-            // from the view hierarchy, but we still send an empty response to be extra safe.
-
+            // from the view hierarchy, but we still send an empty response to indicate that the
+            // previous suggestions are invalid now.
             if (sVerbose) Slog.v(TAG, "Send empty inline response");
             updateResponseToImeUncheckLocked(new InlineSuggestionsResponse(Collections.EMPTY_LIST));
             mPreviousResponseIsNotEmpty = false;
