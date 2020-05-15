@@ -1552,6 +1552,15 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         return false;
     }
 
+    boolean forAllLeafTasks(Function<Task, Boolean> callback) {
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            if (mChildren.get(i).forAllLeafTasks(callback)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * For all tasks at or below this container call the callback.
      *
