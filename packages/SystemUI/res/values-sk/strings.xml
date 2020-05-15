@@ -89,6 +89,7 @@
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"Zavrieť snímku obrazovky"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Ukážka snímky obrazovky"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Rekordér obrazovky"</string>
+    <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Spracúva sa záznam obrazovky"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Zobrazuje sa upozornenie týkajúce sa relácie záznamu obrazovky"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Chcete spustiť nahrávanie?"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"Počas nahrávania zaznamená systém Android všetky citlivé údaje, ktoré sa zobrazia na obrazovke alebo prehrajú v zariadení. Zahrnuje to heslá, platobné údaje, fotky, správy a zvuky."</string>
@@ -515,8 +516,7 @@
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Vymazať všetko"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Spravovať"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"História"</string>
-    <!-- no translation found for notification_section_header_incoming (5295312809341711367) -->
-    <skip />
+    <string name="notification_section_header_incoming" msgid="5295312809341711367">"Prichádzajúce"</string>
     <string name="notification_section_header_gentle" msgid="3044910806569985386">"Tiché upozornenia"</string>
     <string name="notification_section_header_alerting" msgid="3168140660646863240">"Varovné upozornenia"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Konverzácie"</string>
@@ -999,10 +999,8 @@
     <string name="music_controls_no_title" msgid="4166497066552290938">"Bez názvu"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"Klepnutím reštartujete túto aplikáciu a prejdete do režimu celej obrazovky."</string>
     <string name="bubbles_settings_button_description" msgid="7324245408859877545">"Nastavenia bublín aplikácie <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for bubble_overflow_button_content_description (5523744621434300510) -->
-    <skip />
-    <!-- no translation found for bubble_accessibility_action_add_back (6217995665917123890) -->
-    <skip />
+    <string name="bubble_overflow_button_content_description" msgid="5523744621434300510">"Rozšírená ponuka"</string>
+    <string name="bubble_accessibility_action_add_back" msgid="6217995665917123890">"Pridať späť do zásobníka"</string>
     <string name="manage_bubbles_text" msgid="6856830436329494850">"Spravovať"</string>
     <string name="bubble_content_description_single" msgid="5175160674436546329">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> z aplikácie <xliff:g id="APP_NAME">%2$s</xliff:g>"</string>
     <string name="bubble_content_description_stack" msgid="7907610717462651870">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> z aplikácie <xliff:g id="APP_NAME">%2$s</xliff:g> a ďalšie (<xliff:g id="BUBBLE_COUNT">%3$d</xliff:g>)"</string>
@@ -1030,9 +1028,9 @@
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Okno prekrytia priblíženia"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Okno priblíženia"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Ovládacie prvky okna priblíženia"</string>
-    <string name="quick_controls_title" msgid="6839108006171302273">"Ovládanie zariadenia"</string>
+    <string name="quick_controls_title" msgid="6839108006171302273">"Ovládanie zariadení"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Pridajte ovládacie prvky pre svoje pripojené zariadenia"</string>
-    <string name="quick_controls_setup_title" msgid="8901436655997849822">"Nastavenie ovládania zariadenia"</string>
+    <string name="quick_controls_setup_title" msgid="8901436655997849822">"Nastavenie ovládania zariadení"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Pridržaním vypínača získate prístup k ovládacím prvkom"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Výberom aplikácie pridajte ovládacie prvky"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
@@ -1048,7 +1046,7 @@
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Zmeny neboli uložené"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Zoznam všetkých ovl. prvkov sa nepodarilo načítať."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Iné"</string>
-    <string name="controls_dialog_title" msgid="2343565267424406202">"Pridanie do ovládania zariadenia"</string>
+    <string name="controls_dialog_title" msgid="2343565267424406202">"Pridanie do ovládania zariadení"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Pridať"</string>
     <string name="controls_dialog_message" msgid="342066938390663844">"Navrhuje <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"Ovládanie bolo aktualizované"</string>

@@ -89,6 +89,7 @@
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"I-dismiss ang screenshot"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Preview ng screenshot"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Recorder ng Screen"</string>
+    <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Pinoproseso screen recording"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Kasalukuyang notification para sa session ng pag-record ng screen"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Simulang Mag-record?"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"Habang nagre-record, puwedeng ma-capture ng Android System ang anumang sensitibong impormasyong nakikita sa iyong screen o nagpe-play sa device mo. Kasama dito ang mga password, impormasyon sa pagbabayad, mga larawan, mensahe, at audio."</string>
@@ -509,8 +510,7 @@
     <string name="clear_all_notifications_text" msgid="348312370303046130">"I-clear lahat"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Pamahalaan"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"History"</string>
-    <!-- no translation found for notification_section_header_incoming (5295312809341711367) -->
-    <skip />
+    <string name="notification_section_header_incoming" msgid="5295312809341711367">"Papasok"</string>
     <string name="notification_section_header_gentle" msgid="3044910806569985386">"Mga silent na notification"</string>
     <string name="notification_section_header_alerting" msgid="3168140660646863240">"Mga nag-aalertong notification"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Mga Pag-uusap"</string>
@@ -989,10 +989,8 @@
     <string name="music_controls_no_title" msgid="4166497066552290938">"Walang pamagat"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"I-tap para i-restart ang app na ito at mag-full screen."</string>
     <string name="bubbles_settings_button_description" msgid="7324245408859877545">"Mga setting para sa mga bubble ng <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for bubble_overflow_button_content_description (5523744621434300510) -->
-    <skip />
-    <!-- no translation found for bubble_accessibility_action_add_back (6217995665917123890) -->
-    <skip />
+    <string name="bubble_overflow_button_content_description" msgid="5523744621434300510">"Overflow"</string>
+    <string name="bubble_accessibility_action_add_back" msgid="6217995665917123890">"Idagdag ulit sa stack"</string>
     <string name="manage_bubbles_text" msgid="6856830436329494850">"Pamahalaan"</string>
     <string name="bubble_content_description_single" msgid="5175160674436546329">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> mula sa <xliff:g id="APP_NAME">%2$s</xliff:g>"</string>
     <string name="bubble_content_description_stack" msgid="7907610717462651870">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> mula sa <xliff:g id="APP_NAME">%2$s</xliff:g> at <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g> pa"</string>

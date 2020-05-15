@@ -89,6 +89,7 @@
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"Ignora screenshot"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Anteprima screenshot"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Registrazione dello schermo"</string>
+    <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Elaboraz. registraz. schermo"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Notifica costante per una sessione di registrazione dello schermo"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Avviare la registrazione?"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"Durante la registrazione, il sistema Android può acquisire dati sensibili visibili sullo schermo o riprodotti sul tuo dispositivo, tra cui password, dati di pagamento, foto, messaggi e audio."</string>
@@ -297,8 +298,8 @@
     <string name="accessibility_quick_settings_flashlight_on" msgid="3785616827729850766">"Torcia accesa."</string>
     <string name="accessibility_quick_settings_flashlight_changed_off" msgid="3782375441381402599">"Torcia disattivata."</string>
     <string name="accessibility_quick_settings_flashlight_changed_on" msgid="4747870681508334200">"Torcia attivata."</string>
-    <string name="accessibility_quick_settings_color_inversion_changed_off" msgid="7548045840282925393">"Inversione colori disattivata."</string>
-    <string name="accessibility_quick_settings_color_inversion_changed_on" msgid="4711141858364404084">"Inversione colori attivata."</string>
+    <string name="accessibility_quick_settings_color_inversion_changed_off" msgid="7548045840282925393">"Inversione dei colori disattivata."</string>
+    <string name="accessibility_quick_settings_color_inversion_changed_on" msgid="4711141858364404084">"Inversione dei colori attivata."</string>
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="7002061268910095176">"Hotspot mobile disattivato."</string>
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2576895346762408840">"Hotspot mobile attivato."</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"Trasmissione dello schermo interrotta."</string>
@@ -509,8 +510,7 @@
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Cancella tutto"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Gestisci"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Cronologia"</string>
-    <!-- no translation found for notification_section_header_incoming (5295312809341711367) -->
-    <skip />
+    <string name="notification_section_header_incoming" msgid="5295312809341711367">"In arrivo"</string>
     <string name="notification_section_header_gentle" msgid="3044910806569985386">"Notifiche silenziose"</string>
     <string name="notification_section_header_alerting" msgid="3168140660646863240">"Notifiche di avviso"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Conversazioni"</string>
@@ -989,10 +989,8 @@
     <string name="music_controls_no_title" msgid="4166497066552290938">"Senza titolo"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"Tocca per riavviare l\'app e passare a schermo intero."</string>
     <string name="bubbles_settings_button_description" msgid="7324245408859877545">"Impostazioni per bolle <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for bubble_overflow_button_content_description (5523744621434300510) -->
-    <skip />
-    <!-- no translation found for bubble_accessibility_action_add_back (6217995665917123890) -->
-    <skip />
+    <string name="bubble_overflow_button_content_description" msgid="5523744621434300510">"Altre"</string>
+    <string name="bubble_accessibility_action_add_back" msgid="6217995665917123890">"Aggiungi di nuovo all\'elenco"</string>
     <string name="manage_bubbles_text" msgid="6856830436329494850">"Gestisci"</string>
     <string name="bubble_content_description_single" msgid="5175160674436546329">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> da <xliff:g id="APP_NAME">%2$s</xliff:g>"</string>
     <string name="bubble_content_description_stack" msgid="7907610717462651870">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> da <xliff:g id="APP_NAME">%2$s</xliff:g> e altre <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g>"</string>
