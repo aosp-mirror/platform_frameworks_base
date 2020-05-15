@@ -89,6 +89,7 @@
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"Ignorar captura de ecrã"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Pré-visualização da captura de ecrã"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Gravador de ecrã"</string>
+    <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"A processar a gravação de ecrã"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Notificação persistente de uma sessão de gravação de ecrã"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Pretende iniciar a gravação?"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"Enquanto estiver a gravar, o sistema Android pode capturar quaisquer informações confidenciais que estejam visíveis no ecrã ou que sejam reproduzidas no dispositivo. Isto inclui palavras-passe, informações de pagamento, fotos, mensagens e áudio."</string>

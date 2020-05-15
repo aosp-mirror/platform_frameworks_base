@@ -63,7 +63,7 @@
     <string name="usb_debugging_allow" msgid="1722643858015321328">"Dopusti"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"Otklanjanje pogrešaka putem USB-a nije dopušteno"</string>
     <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"Korisnik koji je trenutačno prijavljen na ovaj uređaj ne može uključiti otklanjanje pogrešaka putem USB-a. Da biste upotrebljavali tu značajku, prijeđite na primarnog korisnika."</string>
-    <string name="wifi_debugging_title" msgid="7300007687492186076">"Želite li dopustiti bežično otklanjanje pogrešaka na ovoj mreži?"</string>
+    <string name="wifi_debugging_title" msgid="7300007687492186076">"Dopuštate li bežično otklanjanje pogrešaka na ovoj mreži?"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"Naziv mreže (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nAdresa Wi‑Fija (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
     <string name="wifi_debugging_always" msgid="2968383799517975155">"Uvijek dopusti na ovoj mreži"</string>
     <string name="wifi_debugging_allow" msgid="4573224609684957886">"Dopusti"</string>
@@ -89,6 +89,7 @@
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"Odbacivanje snimke zaslona"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Pregled snimke zaslona"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Snimač zaslona"</string>
+    <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Obrada snimanja zaslona"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Tekuća obavijest za sesiju snimanja zaslona"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Želite li započeti snimanje?"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"Za vrijeme snimanja sustav Android može snimiti osjetljive podatke koji su vidljivi na vašem zaslonu ili se reproduciraju na vašem uređaju. To uključuje zaporke, podatke o plaćanju, fotografije, poruke i zvuk."</string>
@@ -415,7 +416,7 @@
     <string name="quick_settings_cellular_detail_data_used" msgid="6798849610647988987">"<xliff:g id="DATA_USED">%s</xliff:g> iskorišteno"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"Ograničenje od <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"Upozorenje <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
-    <string name="quick_settings_work_mode_label" msgid="2754212289804324685">"Radni profil"</string>
+    <string name="quick_settings_work_mode_label" msgid="2754212289804324685">"Poslovni profil"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Noćno svjetlo"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Uključuje se u suton"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"Do izlaska sunca"</string>
@@ -653,7 +654,7 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"Prikaži demo način"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Alarm"</string>
-    <string name="status_bar_work" msgid="5238641949837091056">"Radni profil"</string>
+    <string name="status_bar_work" msgid="5238641949837091056">"Poslovni profil"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Način rada u zrakoplovu"</string>
     <string name="add_tile" msgid="6239678623873086686">"Dodavanje pločice"</string>
     <string name="broadcast_tile" msgid="5224010633596487481">"Emitiranje pločice"</string>
@@ -663,7 +664,7 @@
     <string name="alarm_template_far" msgid="3561752195856839456">"u <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_detail" msgid="544463655956179791">"Brze postavke, <xliff:g id="TITLE">%s</xliff:g>."</string>
     <string name="accessibility_status_bar_hotspot" msgid="2888479317489131669">"Žarišna točka"</string>
-    <string name="accessibility_managed_profile" msgid="4703836746209377356">"Radni profil"</string>
+    <string name="accessibility_managed_profile" msgid="4703836746209377356">"Poslovni profil"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Zabava za neke, ali ne za sve"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"Ugađanje korisničkog sučelja sustava pruža vam dodatne načine za prilagodbu korisničkog sučelja Androida. Te se eksperimentalne značajke mogu promijeniti, prekinuti ili nestati u budućim izdanjima. Nastavite uz oprez."</string>
     <string name="tuner_persistent_warning" msgid="230466285569307806">"Te se eksperimentalne značajke mogu promijeniti, prekinuti ili nestati u budućim izdanjima. Nastavite uz oprez."</string>
