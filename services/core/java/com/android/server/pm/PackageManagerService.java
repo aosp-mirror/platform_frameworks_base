@@ -1736,25 +1736,11 @@ public class PackageManagerService extends IPackageManager.Stub
                                 : args.whitelistedRestrictedPermissions;
                         int autoRevokePermissionsMode = args.autoRevokePermissionsMode;
 
-                        // Handle the parent package
                         handlePackagePostInstall(parentRes, grantPermissions,
                                 killApp, virtualPreload, grantedPermissions,
                                 whitelistedRestrictedPermissions, autoRevokePermissionsMode,
                                 didRestore, args.installSource.installerPackageName, args.observer,
                                 args.mDataLoaderType);
-
-                        // Handle the child packages
-                        final int childCount = (parentRes.addedChildPackages != null)
-                                ? parentRes.addedChildPackages.size() : 0;
-                        for (int i = 0; i < childCount; i++) {
-                            PackageInstalledInfo childRes = parentRes.addedChildPackages.valueAt(i);
-                            handlePackagePostInstall(childRes, grantPermissions,
-                                    killApp, virtualPreload, grantedPermissions,
-                                    whitelistedRestrictedPermissions, autoRevokePermissionsMode,
-                                    false /*didRestore*/,
-                                    args.installSource.installerPackageName, args.observer,
-                                    args.mDataLoaderType);
-                        }
 
                         // Log tracing if needed
                         if (args.traceMethod != null) {
@@ -15792,7 +15778,6 @@ public class PackageManagerService extends IPackageManager.Stub
         String returnMsg;
         String installerPackageName;
         PackageRemovedInfo removedInfo;
-        ArrayMap<String, PackageInstalledInfo> addedChildPackages;
         // The set of packages consuming this shared library or null if no consumers exist.
         ArrayList<AndroidPackage> libraryConsumers;
         PackageFreezer freezer;
@@ -15806,37 +15791,21 @@ public class PackageManagerService extends IPackageManager.Stub
         public void setError(String msg, PackageParserException e) {
             setReturnCode(e.error);
             setReturnMessage(ExceptionUtils.getCompleteMessage(msg, e));
-            final int childCount = (addedChildPackages != null) ? addedChildPackages.size() : 0;
-            for (int i = 0; i < childCount; i++) {
-                addedChildPackages.valueAt(i).setError(msg, e);
-            }
             Slog.w(TAG, msg, e);
         }
 
         public void setError(String msg, PackageManagerException e) {
             returnCode = e.error;
             setReturnMessage(ExceptionUtils.getCompleteMessage(msg, e));
-            final int childCount = (addedChildPackages != null) ? addedChildPackages.size() : 0;
-            for (int i = 0; i < childCount; i++) {
-                addedChildPackages.valueAt(i).setError(msg, e);
-            }
             Slog.w(TAG, msg, e);
         }
 
         public void setReturnCode(int returnCode) {
             this.returnCode = returnCode;
-            final int childCount = (addedChildPackages != null) ? addedChildPackages.size() : 0;
-            for (int i = 0; i < childCount; i++) {
-                addedChildPackages.valueAt(i).returnCode = returnCode;
-            }
         }
 
         private void setReturnMessage(String returnMsg) {
             this.returnMsg = returnMsg;
-            final int childCount = (addedChildPackages != null) ? addedChildPackages.size() : 0;
-            for (int i = 0; i < childCount; i++) {
-                addedChildPackages.valueAt(i).returnMsg = returnMsg;
-            }
         }
 
         // In some error cases we want to convey more info back to the observer
@@ -17386,7 +17355,6 @@ public class PackageManagerService extends IPackageManager.Stub
             int targetParseFlags = parseFlags;
             final PackageSetting ps;
             final PackageSetting disabledPs;
-            final PackageSetting[] childPackages;
             if (replace) {
                 if (parsedPackage.isStaticSharedLibrary()) {
                     // Static libs have a synthetic package name containing the version
@@ -18388,7 +18356,6 @@ public class PackageManagerService extends IPackageManager.Stub
             final boolean killApp = (deleteFlags & PackageManager.DELETE_DONT_KILL_APP) == 0;
             info.sendPackageRemovedBroadcasts(killApp);
             info.sendSystemPackageUpdatedBroadcasts();
-            info.sendSystemPackageAppearedBroadcasts();
         }
         // Force a gc here.
         Runtime.getRuntime().gc();
@@ -18446,7 +18413,6 @@ public class PackageManagerService extends IPackageManager.Stub
         SparseArray<int[]> broadcastWhitelist;
         // Clean up resources deleted packages.
         InstallArgs args = null;
-        ArrayMap<String, PackageInstalledInfo> appearedChildPackages;
 
         PackageRemovedInfo(PackageSender packageSender) {
             this.packageSender = packageSender;
@@ -18459,18 +18425,6 @@ public class PackageManagerService extends IPackageManager.Stub
         void sendSystemPackageUpdatedBroadcasts() {
             if (isRemovedPackageSystemUpdate) {
                 sendSystemPackageUpdatedBroadcastsInternal();
-            }
-        }
-
-        void sendSystemPackageAppearedBroadcasts() {
-            final int packageCount = (appearedChildPackages != null)
-                    ? appearedChildPackages.size() : 0;
-            for (int i = 0; i < packageCount; i++) {
-                PackageInstalledInfo installedInfo = appearedChildPackages.valueAt(i);
-                packageSender.sendPackageAddedForNewUsers(installedInfo.name,
-                    true /*sendBootCompleted*/, false /*startReceiver*/,
-                        UserHandle.getAppId(installedInfo.uid), installedInfo.newUsers, null,
-                        DataLoaderType.NONE);
             }
         }
 
