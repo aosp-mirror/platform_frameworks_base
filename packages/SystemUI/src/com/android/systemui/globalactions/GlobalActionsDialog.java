@@ -23,6 +23,7 @@ import static android.view.WindowManager.TAKE_SCREENSHOT_FULLSCREEN;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_USER_REQUEST;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_NOT_REQUIRED;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_GLOBAL_ACTIONS_SHOWING;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -121,9 +122,11 @@ import com.android.systemui.controls.management.ControlsListingController;
 import com.android.systemui.controls.ui.ControlsUiController;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.model.SysUiState;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.GlobalActions.GlobalActionsManager;
 import com.android.systemui.plugins.GlobalActionsPanelPlugin;
+import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.BlurUtils;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowController;
@@ -197,6 +200,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     private final UiEventLogger mUiEventLogger;
     private final NotificationShadeDepthController mDepthController;
     private final BlurUtils mBlurUtils;
+    private final SysUiState mSysUiState;
 
     // Used for RingerModeTracker
     private final LifecycleRegistry mLifecycle = new LifecycleRegistry(this);
@@ -298,7 +302,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             @Background Executor backgroundExecutor,
             ControlsListingController controlsListingController,
             ControlsController controlsController, UiEventLogger uiEventLogger,
-            RingerModeTracker ringerModeTracker, @Main Handler handler) {
+            RingerModeTracker ringerModeTracker, SysUiState sysUiState, @Main Handler handler) {
         mContext = new ContextThemeWrapper(context, com.android.systemui.R.style.qs_theme);
         mWindowManagerFuncs = windowManagerFuncs;
         mAudioManager = audioManager;
@@ -327,6 +331,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         mBlurUtils = blurUtils;
         mRingerModeTracker = ringerModeTracker;
         mControlsController = controlsController;
+        mSysUiState = sysUiState;
         mMainHandler = handler;
 
         // receive broadcasts
@@ -635,7 +640,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         ActionsDialog dialog = new ActionsDialog(mContext, mAdapter, mOverflowAdapter,
                 getWalletPanelViewController(), mDepthController, mSysuiColorExtractor,
                 mStatusBarService, mNotificationShadeWindowController,
-                shouldShowControls() ? mControlsUiController : null, mBlurUtils,
+                shouldShowControls() ? mControlsUiController : null, mBlurUtils, mSysUiState,
                 shouldUseControlsLayout(), this::onRotate, mKeyguardShowing);
         dialog.setCanceledOnTouchOutside(false); // Handled by the custom class.
         dialog.setOnDismissListener(this);
@@ -1917,6 +1922,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         private final NotificationShadeWindowController mNotificationShadeWindowController;
         private final NotificationShadeDepthController mDepthController;
         private final BlurUtils mBlurUtils;
+        private final SysUiState mSysUiState;
         private final boolean mUseControlsLayout;
         private ListPopupWindow mOverflowPopup;
         private final Runnable mOnRotateCallback;
@@ -1931,7 +1937,8 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                 SysuiColorExtractor sysuiColorExtractor, IStatusBarService statusBarService,
                 NotificationShadeWindowController notificationShadeWindowController,
                 ControlsUiController controlsUiController, BlurUtils blurUtils,
-                boolean useControlsLayout, Runnable onRotateCallback, boolean keyguardShowing) {
+                SysUiState sysuiState, boolean useControlsLayout, Runnable onRotateCallback,
+                boolean keyguardShowing) {
             super(context, com.android.systemui.R.style.Theme_SystemUI_Dialog_GlobalActions);
             mContext = context;
             mAdapter = adapter;
@@ -1942,6 +1949,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             mNotificationShadeWindowController = notificationShadeWindowController;
             mControlsUiController = controlsUiController;
             mBlurUtils = blurUtils;
+            mSysUiState = sysuiState;
             mUseControlsLayout = useControlsLayout;
             mOnRotateCallback = onRotateCallback;
             mKeyguardShowing = keyguardShowing;
@@ -2185,6 +2193,8 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             mShowing = true;
             mHadTopUi = mNotificationShadeWindowController.getForceHasTopUi();
             mNotificationShadeWindowController.setForceHasTopUi(true);
+            mSysUiState.setFlag(SYSUI_STATE_GLOBAL_ACTIONS_SHOWING, true)
+                    .commitUpdate(mContext.getDisplayId());
 
             ViewGroup root = (ViewGroup) mGlobalActionsLayout.getRootView();
             root.setOnApplyWindowInsetsListener((v, windowInsets) -> {
@@ -2285,6 +2295,8 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             if (mControlsUiController != null) mControlsUiController.hide();
             mNotificationShadeWindowController.setForceHasTopUi(mHadTopUi);
             mDepthController.updateGlobalDialogVisibility(0, null /* view */);
+            mSysUiState.setFlag(SYSUI_STATE_GLOBAL_ACTIONS_SHOWING, false)
+                    .commitUpdate(mContext.getDisplayId());
             super.dismiss();
         }
 
