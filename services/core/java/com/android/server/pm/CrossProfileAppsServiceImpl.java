@@ -50,6 +50,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.permission.PermissionManager;
 import android.stats.devicepolicy.DevicePolicyEnums;
 import android.text.TextUtils;
 import android.util.Slog;
@@ -458,6 +459,10 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
                     + packageName + " on user ID " + userId);
             return;
         }
+
+        final boolean hadPermission = hasInteractAcrossProfilesPermission(
+                packageName, uid, PermissionChecker.PID_UNKNOWN);
+
         final int callingUid = mInjector.getCallingUid();
         if (isPermissionGranted(
                 Manifest.permission.CONFIGURE_INTERACT_ACROSS_PROFILES, callingUid)) {
@@ -472,6 +477,22 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
         }
         sendCanInteractAcrossProfilesChangedBroadcast(packageName, uid, UserHandle.of(userId));
         maybeLogSetInteractAcrossProfilesAppOp(packageName, newMode, userId, logMetrics, uid);
+        maybeKillUid(packageName, uid, hadPermission);
+    }
+
+    /**
+     * Kills the process represented by the given UID if it has lost the permission to
+     * interact across profiles.
+     */
+    private void maybeKillUid(
+            String packageName, int uid, boolean hadPermission) {
+        if (!hadPermission) {
+            return;
+        }
+        if (hasInteractAcrossProfilesPermission(packageName, uid, PermissionChecker.PID_UNKNOWN)) {
+            return;
+        }
+        mInjector.killUid(packageName, uid);
     }
 
     private void maybeLogSetInteractAcrossProfilesAppOp(
@@ -774,6 +795,18 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
                 String permission, int uid, int owningUid, boolean exported) {
             return ActivityManager.checkComponentPermission(permission, uid, owningUid, exported);
         }
+
+        @Override
+        public void killUid(String packageName, int uid) {
+            try {
+                ActivityManager.getService().killApplication(
+                        packageName,
+                        UserHandle.getAppId(uid),
+                        UserHandle.getUserId(uid),
+                        PermissionManager.KILL_APP_REASON_PERMISSIONS_REVOKED);
+            } catch (RemoteException ignored) {
+            }
+        }
     }
 
     @VisibleForTesting
@@ -813,6 +846,8 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
         void sendBroadcastAsUser(Intent intent, UserHandle user);
 
         int checkComponentPermission(String permission, int uid, int owningUid, boolean exported);
+
+        void killUid(String packageName, int uid);
     }
 
     class LocalService extends CrossProfileAppsInternal {
