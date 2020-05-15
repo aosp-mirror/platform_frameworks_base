@@ -89,8 +89,7 @@
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"ច្រានចោល​រូបថត​អេក្រង់"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"ការមើល​រូបថត​អេក្រង់​សាកល្បង"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"មុខងារថត​អេក្រង់"</string>
-    <!-- no translation found for screenrecord_background_processing_label (7244617554884238898) -->
-    <skip />
+    <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"កំពុង​ដំណើរការ​ការថតអេក្រង់"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"ការជូនដំណឹង​ដែល​កំពុង​ដំណើរការ​សម្រាប់​រយៈពេលប្រើ​ការថត​សកម្មភាព​អេក្រង់"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"ចាប់ផ្តើម​ថត​ឬ?"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"នៅពេល​កំពុងថត ប្រព័ន្ធ Android អាច​ថត​ព័ត៌មាន​រសើប​ដែលអាច​មើលឃើញ​នៅលើ​អេក្រង់​របស់អ្នក ឬដែល​បានចាក់​នៅលើ​ឧបករណ៍​របស់អ្នក។ ព័ត៌មាននេះ​រួមមាន​ពាក្យសម្ងាត់ ព័ត៌មាន​អំពី​ការបង់ប្រាក់ រូបថត សារ និងសំឡេង។"</string>
@@ -369,7 +368,7 @@
     <string name="quick_settings_location_off_label" msgid="7923929131443915919">"ទីតាំង​បាន​បិទ"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"ឧបករណ៍​មេឌៀ"</string>
     <string name="quick_settings_rssi_label" msgid="3397615415140356701">"RSSI"</string>
-    <string name="quick_settings_rssi_emergency_only" msgid="7499207215265078598">"សម្រាប់​តែ​ការ​ហៅ​ពេល​អាសន្ន"</string>
+    <string name="quick_settings_rssi_emergency_only" msgid="7499207215265078598">"ការហៅទៅលេខសង្គ្រោះបន្ទាន់​តែប៉ុណ្ណោះ"</string>
     <string name="quick_settings_settings_label" msgid="2214639529565474534">"ការ​កំណត់"</string>
     <string name="quick_settings_time_label" msgid="3352680970557509303">"ពេលវេលា"</string>
     <string name="quick_settings_user_label" msgid="1253515509432672496">"ខ្ញុំ"</string>
@@ -382,7 +381,7 @@
     <string name="quick_settings_wifi_on_label" msgid="2489928193654318511">"Wi-Fi បានបើក"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="483130889414601732">"គ្មានបណ្តាញ Wi-Fi ទេ"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7501659015509357887">"កំពុង​បើក..."</string>
-    <string name="quick_settings_cast_title" msgid="2279220930629235211">"ការថតវីដេអូ​នៅលើអេក្រង់"</string>
+    <string name="quick_settings_cast_title" msgid="2279220930629235211">"ការបញ្ចាំងអេក្រង់"</string>
     <string name="quick_settings_casting" msgid="1435880708719268055">"ការ​ចាត់​ថ្នាក់"</string>
     <string name="quick_settings_cast_device_default_name" msgid="6988469571141331700">"ឧបករណ៍​​ដែល​មិន​មាន​ឈ្មោះ"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2580520859212250265">"ត្រៀម​រួចរាល់​ដើម្បី​ចាត់​ថ្នាក់"</string>
@@ -511,8 +510,7 @@
     <string name="clear_all_notifications_text" msgid="348312370303046130">"សម្អាត​ទាំងអស់"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"គ្រប់គ្រង"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"ប្រវត្តិ"</string>
-    <!-- no translation found for notification_section_header_incoming (5295312809341711367) -->
-    <skip />
+    <string name="notification_section_header_incoming" msgid="5295312809341711367">"មក​ដល់"</string>
     <string name="notification_section_header_gentle" msgid="3044910806569985386">"ការជូនដំណឹង​ស្ងាត់"</string>
     <string name="notification_section_header_alerting" msgid="3168140660646863240">"ការជូនដំណឹង​ញ័រ ឬរោទ៍"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"ការសន្ទនា"</string>
@@ -991,10 +989,8 @@
     <string name="music_controls_no_title" msgid="4166497066552290938">"គ្មាន​ចំណងជើង"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"ចុចដើម្បី​ចាប់ផ្ដើម​កម្មវិធី​នេះឡើងវិញ រួចចូលប្រើ​ពេញអេក្រង់។"</string>
     <string name="bubbles_settings_button_description" msgid="7324245408859877545">"ការកំណត់​សម្រាប់​ពពុះ <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for bubble_overflow_button_content_description (5523744621434300510) -->
-    <skip />
-    <!-- no translation found for bubble_accessibility_action_add_back (6217995665917123890) -->
-    <skip />
+    <string name="bubble_overflow_button_content_description" msgid="5523744621434300510">"ម៉ឺនុយបន្ថែម"</string>
+    <string name="bubble_accessibility_action_add_back" msgid="6217995665917123890">"បញ្ចូល​ទៅក្នុង​គំនរវិញ"</string>
     <string name="manage_bubbles_text" msgid="6856830436329494850">"គ្រប់គ្រង"</string>
     <string name="bubble_content_description_single" msgid="5175160674436546329">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> ពី <xliff:g id="APP_NAME">%2$s</xliff:g>"</string>
     <string name="bubble_content_description_stack" msgid="7907610717462651870">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> ពី <xliff:g id="APP_NAME">%2$s</xliff:g> និង <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g> ទៀត"</string>
