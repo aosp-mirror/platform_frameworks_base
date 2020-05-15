@@ -36,14 +36,31 @@ class NotificationSectionsLogger @Inject constructor(
             { "Updating section boundaries: $reason" }
     )
 
-    fun logStr(str: String) = logBuffer.log(
+    fun logIncomingHeader(position: Int) = logPosition(position, "INCOMING HEADER")
+    fun logMediaControls(position: Int) = logPosition(position, "MEDIA CONTROLS")
+    fun logConversationsHeader(position: Int) = logPosition(position, "CONVERSATIONS HEADER")
+    fun logAlertingHeader(position: Int) = logPosition(position, "ALERTING HEADER")
+    fun logSilentHeader(position: Int) = logPosition(position, "SILENT HEADER")
+
+    fun logOther(position: Int, clazz: Class<*>) = logBuffer.log(
             TAG,
             LogLevel.DEBUG,
-            { str1 = str },
-            { str1 ?: "" }
+            {
+                int1 = position
+                str1 = clazz.name
+            },
+            { "$int1: other ($str1)" }
     )
 
-    fun logPosition(position: Int, label: String) = logBuffer.log(
+    fun logHeadsUp(position: Int) = logPosition(position, "Heads Up")
+    fun logConversation(position: Int) = logPosition(position, "Conversation")
+    fun logAlerting(position: Int) = logPosition(position, "Alerting")
+    fun logSilent(position: Int) = logPosition(position, "Silent")
+    fun logForegroundService(position: Int) = logPosition(position, "Foreground Service")
+
+    fun logStr(str: String) = logBuffer.log(TAG, LogLevel.DEBUG, { str1 = str }, { "$str1" })
+
+    private fun logPosition(position: Int, label: String) = logBuffer.log(
             TAG,
             LogLevel.DEBUG,
             {
