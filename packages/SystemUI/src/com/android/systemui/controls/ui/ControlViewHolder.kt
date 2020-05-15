@@ -145,8 +145,7 @@ class ControlViewHolder(
         }
 
         behavior = bindBehavior(behavior, findBehaviorClass(controlStatus, template, deviceType))
-
-        layout.setContentDescription("${title.text} ${subtitle.text} ${status.text}")
+        updateContentDescription()
     }
 
     fun actionResponse(@ControlAction.ResponseResult response: Int) {
@@ -191,10 +190,15 @@ class ControlViewHolder(
 
         cancelUpdate = uiExecutor.executeDelayed({
                 status.setText(previousText)
+                updateContentDescription()
             }, UPDATE_DELAY_IN_MILLIS)
 
         status.setText(tempStatus)
+        updateContentDescription()
     }
+
+    private fun updateContentDescription() =
+        layout.setContentDescription("${title.text} ${subtitle.text} ${status.text}")
 
     fun action(action: ControlAction) {
         lastAction = action
