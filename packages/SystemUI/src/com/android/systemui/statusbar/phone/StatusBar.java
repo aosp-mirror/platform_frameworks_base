@@ -1488,7 +1488,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         if (mDividerOptional.isPresent()) {
             divider = mDividerOptional.get();
         }
-        if (divider == null || !divider.inSplitMode()) {
+        if (divider == null || !divider.isDividerVisible()) {
             final int navbarPos = WindowManagerWrapper.getInstance().getNavBarPosition(mDisplayId);
             if (navbarPos == NAV_BAR_POS_INVALID) {
                 return false;
