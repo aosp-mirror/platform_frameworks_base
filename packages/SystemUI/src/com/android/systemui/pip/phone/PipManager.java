@@ -295,7 +295,7 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
             final boolean changed = mPipBoundsHandler.setShelfHeight(visible, height);
             if (changed) {
                 mTouchHandler.onShelfVisibilityChanged(visible, height);
-                updateMovementBounds(mPipBoundsHandler.getLastDestinationBounds(),
+                updateMovementBounds(mPipTaskOrganizer.getLastReportedBounds(),
                         false /* fromRotation */, false /* fromImeAdjustment */,
                         true /* fromShelfAdjustment */);
             }
