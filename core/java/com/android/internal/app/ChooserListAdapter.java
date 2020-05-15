@@ -104,7 +104,7 @@ public class ChooserListAdapter extends ResolverListAdapter {
     private Set<ComponentName> mPendingChooserTargetService = new HashSet<>();
     private Set<ComponentName> mShortcutComponents = new HashSet<>();
     private final List<ChooserTargetInfo> mServiceTargets = new ArrayList<>();
-    private final List<TargetInfo> mCallerTargets = new ArrayList<>();
+    private final List<DisplayResolveInfo> mCallerTargets = new ArrayList<>();
 
     private final ChooserActivity.BaseChooserTargetComparator mBaseTargetComparator =
             new ChooserActivity.BaseChooserTargetComparator();
@@ -268,10 +268,13 @@ public class ChooserListAdapter extends ResolverListAdapter {
 
     void updateAlphabeticalList() {
         mSortedList.clear();
+        List<DisplayResolveInfo> tempList = new ArrayList<>();
+        tempList.addAll(mDisplayList);
+        tempList.addAll(mCallerTargets);
         if (mEnableStackedApps) {
             // Consolidate multiple targets from same app.
             Map<String, DisplayResolveInfo> consolidated = new HashMap<>();
-            for (DisplayResolveInfo info : mDisplayList) {
+            for (DisplayResolveInfo info : tempList) {
                 String packageName = info.getResolvedComponentName().getPackageName();
                 DisplayResolveInfo multiDri = consolidated.get(packageName);
                 if (multiDri == null) {
@@ -288,7 +291,7 @@ public class ChooserListAdapter extends ResolverListAdapter {
             }
             mSortedList.addAll(consolidated.values());
         } else {
-            mSortedList.addAll(mDisplayList);
+            mSortedList.addAll(tempList);
         }
         Collections.sort(mSortedList, new ChooserActivity.AzInfoComparator(mContext));
     }
@@ -340,7 +343,10 @@ public class ChooserListAdapter extends ResolverListAdapter {
         return standardCount > mChooserListCommunicator.getMaxRankedTargets() ? standardCount : 0;
     }
 
-    int getRankedTargetCount() {
+    /**
+     * Fetch ranked app target count
+     */
+    public int getRankedTargetCount() {
         int spacesAvailable =
                 mChooserListCommunicator.getMaxRankedTargets() - getCallerTargetCount();
         return Math.min(spacesAvailable, super.getCount());
@@ -423,6 +429,19 @@ public class ChooserListAdapter extends ResolverListAdapter {
         }
 
         return null;
+    }
+
+    // Check whether {@code dri} should be added into mDisplayList.
+    @Override
+    protected boolean shouldAddResolveInfo(DisplayResolveInfo dri) {
+        // Checks if this info is already listed in callerTargets.
+        for (TargetInfo existingInfo : mCallerTargets) {
+            if (mResolverListCommunicator
+                    .resolveInfoMatch(dri.getResolveInfo(), existingInfo.getResolveInfo())) {
+                return false;
+            }
+        }
+        return super.shouldAddResolveInfo(dri);
     }
 
     /**
