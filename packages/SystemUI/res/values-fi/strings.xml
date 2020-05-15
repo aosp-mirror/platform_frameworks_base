@@ -89,8 +89,7 @@
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"Hylkää kuvakaappaus"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Kuvakaappauksen esikatselu"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Näytön tallentaja"</string>
-    <!-- no translation found for screenrecord_background_processing_label (7244617554884238898) -->
-    <skip />
+    <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Näytön tallennusta käsitellään"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Pysyvä ilmoitus näytön tallentamisesta"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Aloitetaanko tallennus?"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"Tallennuksen aikana Android-järjestelmä voi tallentaa mitä tahansa näytöllä näkyvää tai laitteen toistamaa arkaluontoista tietoa. Näitä tietoja ovat esimerkiksi salasanat, maksutiedot, kuvat, viestit ja äänisisältö."</string>
@@ -430,7 +429,7 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC on poistettu käytöstä"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC on käytössä"</string>
-    <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"Näytön tallentaminen"</string>
+    <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"Tallennus"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Aloita"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Lopeta"</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"Laite"</string>
@@ -511,8 +510,7 @@
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Poista kaikki"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Muuta asetuksia"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Historia"</string>
-    <!-- no translation found for notification_section_header_incoming (5295312809341711367) -->
-    <skip />
+    <string name="notification_section_header_incoming" msgid="5295312809341711367">"Saapuvat"</string>
     <string name="notification_section_header_gentle" msgid="3044910806569985386">"Hiljaiset ilmoitukset"</string>
     <string name="notification_section_header_alerting" msgid="3168140660646863240">"Ääni-ilmoitukset"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Keskustelut"</string>
@@ -855,7 +853,7 @@
     <string name="left_icon" msgid="5036278531966897006">"Vasen kuvake"</string>
     <string name="right_icon" msgid="1103955040645237425">"Oikea kuvake"</string>
     <string name="drag_to_add_tiles" msgid="8933270127508303672">"Lisää osioita koskettamalla pitkään ja vetämällä"</string>
-    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Järjestele osioita koskettamalla pitkään ja vetämällä"</string>
+    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Järjestele koskettamalla pitkään ja vetämällä"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"Poista vetämällä tähän."</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"<xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> kiekkoa on vähimmäismäärä"</string>
     <string name="qs_edit" msgid="5583565172803472437">"Muokkaa"</string>
@@ -968,8 +966,8 @@
     <string name="qs_dnd_replace" msgid="7712119051407052689">"Korvaa"</string>
     <string name="running_foreground_services_title" msgid="5137313173431186685">"Sovelluksia käynnissä taustalla"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"Katso lisätietoja akun ja datan käytöstä napauttamalla"</string>
-    <string name="mobile_data_disable_title" msgid="5366476131671617790">"Poistetaanko mobiilidata käytöstä?"</string>
-    <string name="mobile_data_disable_message" msgid="8604966027899770415">"<xliff:g id="CARRIER">%s</xliff:g> ei voi enää tarjota sinulle internetyhteyttä. Internetyhteys voidaan muodostaa vain Wi-Fi-verkossa."</string>
+    <string name="mobile_data_disable_title" msgid="5366476131671617790">"Laitetaanko mobiilidata pois päältä?"</string>
+    <string name="mobile_data_disable_message" msgid="8604966027899770415">"<xliff:g id="CARRIER">%s</xliff:g> ei enää tarjoa pääsyä dataan eikä internetyhteyttä, joka on saatavilla vain Wi-Fin kautta."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"operaattorisi"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"Sovellus peittää käyttöoikeuspyynnön, joten Asetukset ei voi vahvistaa valintaasi."</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"Saako <xliff:g id="APP_0">%1$s</xliff:g> näyttää osia sovelluksesta <xliff:g id="APP_2">%2$s</xliff:g>?"</string>
@@ -991,10 +989,8 @@
     <string name="music_controls_no_title" msgid="4166497066552290938">"Ei nimeä"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"Napauta, niin sovellus käynnistyy uudelleen ja siirtyy koko näytön tilaan."</string>
     <string name="bubbles_settings_button_description" msgid="7324245408859877545">"Kuplien asetukset: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for bubble_overflow_button_content_description (5523744621434300510) -->
-    <skip />
-    <!-- no translation found for bubble_accessibility_action_add_back (6217995665917123890) -->
-    <skip />
+    <string name="bubble_overflow_button_content_description" msgid="5523744621434300510">"Ylivuoto"</string>
+    <string name="bubble_accessibility_action_add_back" msgid="6217995665917123890">"Lisää takaisin pinoon"</string>
     <string name="manage_bubbles_text" msgid="6856830436329494850">"Ylläpidä"</string>
     <string name="bubble_content_description_single" msgid="5175160674436546329">"<xliff:g id="APP_NAME">%2$s</xliff:g>: <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_content_description_stack" msgid="7907610717462651870">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> (<xliff:g id="APP_NAME">%2$s</xliff:g>) ja <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g> muuta"</string>
