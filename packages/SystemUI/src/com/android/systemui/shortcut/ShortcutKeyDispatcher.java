@@ -92,7 +92,7 @@ public class ShortcutKeyDispatcher extends SystemUI
     }
 
     private void handleDockKey(long shortcutCode) {
-        if (mDivider == null || !mDivider.inSplitMode()) {
+        if (mDivider == null || !mDivider.isDividerVisible()) {
             // Split the screen
             mRecents.splitPrimaryTask((shortcutCode == SC_DOCK_LEFT)
                     ? SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT
