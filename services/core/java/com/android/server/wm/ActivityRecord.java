@@ -2194,8 +2194,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     @Override
     boolean isFocusable() {
-        return super.isFocusable()
-                && (getWindowConfiguration().canReceiveKeys() || isAlwaysFocusable());
+        // TODO(156521483): Propagate the state down the hierarchy instead of checking the parent
+        boolean canReceiveKeys = getWindowConfiguration().canReceiveKeys()
+                && getTask().getWindowConfiguration().canReceiveKeys();
+        return super.isFocusable() && (canReceiveKeys || isAlwaysFocusable());
     }
 
     boolean isResizeable() {
