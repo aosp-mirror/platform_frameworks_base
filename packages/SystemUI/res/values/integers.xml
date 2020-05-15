@@ -33,11 +33,6 @@
     <!-- Maximum number of bubbles we allow in overflow before we dismiss the oldest one. -->
     <integer name="bubbles_max_overflow">16</integer>
 
-    <!-- Ratio of "left" end of status bar that will swipe to QQS. -->
-    <integer name="qqs_split_fraction">3</integer>
-    <!-- Ratio of "right" end of status bar that will swipe to QS. -->
-    <integer name="qs_split_fraction">2</integer>
-
     <integer name="magnification_default_scale">2</integer>
 
     <!-- The position of the volume dialog on the screen.
