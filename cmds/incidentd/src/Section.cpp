@@ -875,7 +875,9 @@ BringYourOwnSection::~BringYourOwnSection() {}
 
 status_t BringYourOwnSection::BlockingCall(unique_fd& pipeWriteFd) const {
     android::os::ParcelFileDescriptor pfd(std::move(pipeWriteFd));
-    mCallback->onDumpSection(pfd);
+    if(mCallback != nullptr) {
+        mCallback->onDumpSection(pfd);
+    }
     return NO_ERROR;
 }
 
