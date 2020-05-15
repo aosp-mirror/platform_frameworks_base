@@ -71,21 +71,7 @@
         android:elevation="@dimen/screenshot_preview_elevation"
         android:background="@drawable/screenshot_rounded_corners"
         android:adjustViewBounds="true"/>
-    <ImageView
-        android:id="@+id/global_screenshot_preview"
-        android:layout_width="@dimen/global_screenshot_x_scale"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginStart="@dimen/screenshot_offset_x"
-        android:layout_marginBottom="@dimen/screenshot_offset_y"
-        android:scaleType="fitEnd"
-        android:elevation="@dimen/screenshot_preview_elevation"
-        android:visibility="gone"
-        android:background="@drawable/screenshot_rounded_corners"
-        android:adjustViewBounds="true"
-        android:contentDescription="@string/screenshot_preview_description"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"/>
+    <include layout="@layout/global_screenshot_preview"/>
     <FrameLayout
         android:id="@+id/global_screenshot_dismiss_button"
         android:layout_width="@dimen/screenshot_dismiss_button_tappable_size"
