@@ -207,7 +207,7 @@ public:
     virtual status_t BlockingCall(unique_fd& pipeWriteFd) const;
 
 private:
-    const sp<IIncidentDumpCallback>& mCallback;
+    const sp<IIncidentDumpCallback> mCallback;
 };
 
 
