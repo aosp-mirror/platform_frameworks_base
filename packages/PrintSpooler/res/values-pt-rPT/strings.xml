@@ -33,7 +33,7 @@
     <string name="pages_range_example" msgid="8558694453556945172">"p. ex. 1-5, 8, 11-13"</string>
     <string name="print_preview" msgid="8010217796057763343">"Pré-visualização de impressão"</string>
     <string name="install_for_print_preview" msgid="6366303997385509332">"Instalar o leitor de PDF para pré-visualização"</string>
-    <string name="printing_app_crashed" msgid="854477616686566398">"A aplicação de impressão bloqueou"</string>
+    <string name="printing_app_crashed" msgid="854477616686566398">"A app de impressão bloqueou"</string>
     <string name="generating_print_job" msgid="3119608742651698916">"A gerar tarefa de impressão"</string>
     <string name="save_as_pdf" msgid="5718454119847596853">"Guardar como PDF"</string>
     <string name="all_printers" msgid="5018829726861876202">"Todas as impressoras..."</string>
