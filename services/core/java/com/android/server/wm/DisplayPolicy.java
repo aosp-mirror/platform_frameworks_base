@@ -874,10 +874,6 @@ public class DisplayPolicy {
                 }
                 break;
 
-            case TYPE_SCREENSHOT:
-                attrs.flags |= WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
-                break;
-
             case TYPE_TOAST:
                 // While apps should use the dedicated toast APIs to add such windows
                 // it possible legacy apps to add the window directly. Therefore, we
