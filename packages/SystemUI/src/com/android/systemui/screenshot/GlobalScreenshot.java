@@ -54,6 +54,7 @@ import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.DeviceConfig;
+import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.MathUtils;
@@ -154,6 +155,9 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
     static final String SCREENSHOT_URI_ID = "android:screenshot_uri_id";
     static final String EXTRA_CANCEL_NOTIFICATION = "android:screenshot_cancel_notification";
     static final String EXTRA_DISALLOW_ENTER_PIP = "android:screenshot_disallow_enter_pip";
+
+    // From WizardManagerHelper.java
+    private static final String SETTINGS_SECURE_USER_SETUP_COMPLETE = "user_setup_complete";
 
     private static final String TAG = "GlobalScreenshot";
 
@@ -378,6 +382,13 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
             return;
         }
 
+        if (!isUserSetupComplete()) {
+            // User setup isn't complete, so we don't want to show any UI beyond a toast, as editing
+            // and sharing shouldn't be exposed to the user.
+            saveScreenshotAndToast(finisher);
+            return;
+        }
+
         // Optimizations
         mScreenBitmap.setHasAlpha(false);
         mScreenBitmap.prepareToDraw();
@@ -465,6 +476,41 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
             mWindowManager.removeView(mScreenshotLayout);
             mScreenshotSelectorView.stopSelection();
         }
+    }
+
+    /**
+     * Save the bitmap but don't show the normal screenshot UI.. just a toast (or notification on
+     * failure).
+     */
+    private void saveScreenshotAndToast(Consumer<Uri> finisher) {
+        // Play the shutter sound to notify that we've taken a screenshot
+        mScreenshotHandler.post(() -> {
+            mCameraSound.play(MediaActionSound.SHUTTER_CLICK);
+        });
+
+        saveScreenshotInWorkerThread(finisher, new ActionsReadyListener() {
+            @Override
+            void onActionsReady(SavedImageData imageData) {
+                finisher.accept(imageData.uri);
+                if (imageData.uri == null) {
+                    mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_NOT_SAVED);
+                    mNotificationsController.notifyScreenshotError(
+                            R.string.screenshot_failed_to_capture_text);
+                } else {
+                    mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_SAVED);
+
+                    mScreenshotHandler.post(() -> {
+                        Toast.makeText(mContext, R.string.screenshot_saved_title,
+                                Toast.LENGTH_SHORT).show();
+                    });
+                }
+            }
+        });
+    }
+
+    private boolean isUserSetupComplete() {
+        return Settings.Secure.getInt(mContext.getContentResolver(),
+                SETTINGS_SECURE_USER_SETUP_COMPLETE, 0) == 1;
     }
 
     /**
