@@ -28,10 +28,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.AudioManager;
+import android.media.AudioSystem;
 import android.media.MediaRoute2Info;
 import android.text.TextUtils;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
+import android.util.SparseIntArray;
 
 import com.android.internal.R;
 
@@ -54,6 +56,9 @@ class BluetoothRouteProvider {
     BluetoothA2dp mA2dpProfile;
     @SuppressWarnings("WeakerAccess") /* synthetic access */
     BluetoothHearingAid mHearingAidProfile;
+
+    // Route type -> volume map
+    private final SparseIntArray mVolumeMap = new SparseIntArray();
 
     private final Context mContext;
     private final BluetoothAdapter mBluetoothAdapter;
@@ -192,11 +197,30 @@ class BluetoothRouteProvider {
         return routes;
     }
 
-    boolean setSelectedRouteVolume(int volume) {
-        if (mSelectedRoute == null) return false;
+    /**
+     * Updates the volume for {@link AudioManager#getDevicesForStream(int) devices}.
+     *
+     * @return true if devices can be handled by the provider.
+     */
+    public boolean updateVolumeForDevices(int devices, int volume) {
+        int routeType;
+        if ((devices & (AudioSystem.DEVICE_OUT_HEARING_AID)) != 0) {
+            routeType = MediaRoute2Info.TYPE_HEARING_AID;
+        } else if ((devices & (AudioManager.DEVICE_OUT_BLUETOOTH_A2DP
+                | AudioManager.DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES
+                | AudioManager.DEVICE_OUT_BLUETOOTH_A2DP_SPEAKER)) != 0) {
+            routeType = MediaRoute2Info.TYPE_BLUETOOTH_A2DP;
+        } else {
+            return false;
+        }
+        mVolumeMap.put(routeType, volume);
+        if (mSelectedRoute == null || mSelectedRoute.route.getType() != routeType) {
+            return true;
+        }
         mSelectedRoute.route = new MediaRoute2Info.Builder(mSelectedRoute.route)
                 .setVolume(volume)
                 .build();
+        notifyBluetoothRoutesUpdated();
         return true;
     }
 
@@ -222,6 +246,7 @@ class BluetoothRouteProvider {
                         R.string.bluetooth_a2dp_audio_route_name).toString())
                 .setType(MediaRoute2Info.TYPE_BLUETOOTH_A2DP)
                 .setVolumeHandling(MediaRoute2Info.PLAYBACK_VOLUME_VARIABLE)
+                .setVolumeMax(mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC))
                 .build();
         newBtRoute.connectedProfiles = new SparseBooleanArray();
         return newBtRoute;
@@ -240,13 +265,10 @@ class BluetoothRouteProvider {
         // Update volume when the connection state is changed.
         MediaRoute2Info.Builder builder = new MediaRoute2Info.Builder(btRoute.route)
                 .setConnectionState(state);
-        builder.setType(btRoute.connectedProfiles.get(BluetoothProfile.HEARING_AID, false)
-                ? MediaRoute2Info.TYPE_HEARING_AID : MediaRoute2Info.TYPE_BLUETOOTH_A2DP);
+        builder.setType(btRoute.getRouteType());
 
         if (state == MediaRoute2Info.CONNECTION_STATE_CONNECTED) {
-            int maxVolume = mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
-            int currentVolume = mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
-            builder.setVolumeMax(maxVolume).setVolume(currentVolume);
+            builder.setVolume(mVolumeMap.get(btRoute.getRouteType(), 0));
         }
         btRoute.route = builder.build();
     }
@@ -259,6 +281,15 @@ class BluetoothRouteProvider {
         public BluetoothDevice btDevice;
         public MediaRoute2Info route;
         public SparseBooleanArray connectedProfiles;
+
+        @MediaRoute2Info.Type
+        int getRouteType() {
+            // Let hearing aid profile have a priority.
+            if (connectedProfiles.get(BluetoothProfile.HEARING_AID, false)) {
+                return MediaRoute2Info.TYPE_HEARING_AID;
+            }
+            return MediaRoute2Info.TYPE_BLUETOOTH_A2DP;
+        }
     }
 
     // These callbacks run on the main thread.
@@ -285,13 +316,12 @@ class BluetoothRouteProvider {
                     btRoute = createBluetoothRoute(device);
                     mBluetoothRoutes.put(device.getAddress(), btRoute);
                 }
+                btRoute.connectedProfiles.put(profile, true);
                 if (activeDevices.contains(device)) {
                     mSelectedRoute = btRoute;
                     setRouteConnectionState(mSelectedRoute,
                             MediaRoute2Info.CONNECTION_STATE_CONNECTED);
                 }
-
-                btRoute.connectedProfiles.put(profile, true);
             }
             notifyBluetoothRoutesUpdated();
         }
@@ -348,6 +378,8 @@ class BluetoothRouteProvider {
                     BluetoothDevice.ERROR);
             BluetoothRouteInfo btRoute = mBluetoothRoutes.get(device.getAddress());
             if (bondState == BluetoothDevice.BOND_BONDED && btRoute == null) {
+                //TODO: The type of the new route is A2DP even when it's HEARING_AID.
+                // We may determine the type of route when create the route.
                 btRoute = createBluetoothRoute(device);
                 if (mA2dpProfile != null && mA2dpProfile.getConnectedDevices().contains(device)) {
                     btRoute.connectedProfiles.put(BluetoothProfile.A2DP, true);
