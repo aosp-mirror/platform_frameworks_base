@@ -21,7 +21,6 @@ import static com.android.systemui.util.InjectionInflationController.VIEW_CONTEX
 import static com.android.systemui.util.Utils.useQsMediaPlayer;
 
 import android.annotation.Nullable;
-import android.app.Notification;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -30,8 +29,6 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.graphics.Color;
-import android.graphics.drawable.Drawable;
 import android.media.MediaDescription;
 import android.metrics.LogMaker;
 import android.os.Bundle;
@@ -50,7 +47,6 @@ import android.widget.LinearLayout;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.internal.statusbar.NotificationVisibility;
 import com.android.settingslib.Utils;
 import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
@@ -60,7 +56,6 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.media.MediaControlPanel;
 import com.android.systemui.media.MediaHierarchyManager;
 import com.android.systemui.media.MediaHost;
-import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.DetailAdapter;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTileView;
@@ -70,7 +65,6 @@ import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.settings.BrightnessController;
 import com.android.systemui.settings.ToggleSliderView;
-import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController.BrightnessMirrorListener;
 import com.android.systemui.tuner.TunerService;
@@ -545,6 +539,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
 
     public void setListening(boolean listening) {
         if (mListening == listening) return;
+        mListening = listening;
         if (mTileLayout != null) {
             mQSLogger.logAllTilesChangeListening(listening, getDumpableTag(), mCachedSpecs);
             mTileLayout.setListening(listening);
