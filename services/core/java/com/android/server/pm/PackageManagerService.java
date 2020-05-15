@@ -1566,13 +1566,17 @@ public class PackageManagerService extends IPackageManager.Stub
     // Recordkeeping of restore-after-install operations that are currently in flight
     // between the Package Manager and the Backup Manager
     static class PostInstallData {
+        @Nullable
         public final InstallArgs args;
+        @NonNull
         public final PackageInstalledInfo res;
+        @Nullable
         public final Runnable mPostInstallRunnable;
 
-        PostInstallData(InstallArgs _a, PackageInstalledInfo _r, Runnable postInstallRunnable) {
-            args = _a;
-            res = _r;
+        PostInstallData(@Nullable InstallArgs args, @NonNull PackageInstalledInfo res,
+                @Nullable Runnable postInstallRunnable) {
+            this.args = args;
+            this.res = res;
             mPostInstallRunnable = postInstallRunnable;
         }
     }
@@ -1714,7 +1718,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
                     if (data != null && data.mPostInstallRunnable != null) {
                         data.mPostInstallRunnable.run();
-                    } else if (data != null) {
+                    } else if (data != null && data.args != null) {
                         InstallArgs args = data.args;
                         PackageInstalledInfo parentRes = data.res;
 
@@ -1732,25 +1736,11 @@ public class PackageManagerService extends IPackageManager.Stub
                                 : args.whitelistedRestrictedPermissions;
                         int autoRevokePermissionsMode = args.autoRevokePermissionsMode;
 
-                        // Handle the parent package
                         handlePackagePostInstall(parentRes, grantPermissions,
                                 killApp, virtualPreload, grantedPermissions,
                                 whitelistedRestrictedPermissions, autoRevokePermissionsMode,
                                 didRestore, args.installSource.installerPackageName, args.observer,
                                 args.mDataLoaderType);
-
-                        // Handle the child packages
-                        final int childCount = (parentRes.addedChildPackages != null)
-                                ? parentRes.addedChildPackages.size() : 0;
-                        for (int i = 0; i < childCount; i++) {
-                            PackageInstalledInfo childRes = parentRes.addedChildPackages.valueAt(i);
-                            handlePackagePostInstall(childRes, grantPermissions,
-                                    killApp, virtualPreload, grantedPermissions,
-                                    whitelistedRestrictedPermissions, autoRevokePermissionsMode,
-                                    false /*didRestore*/,
-                                    args.installSource.installerPackageName, args.observer,
-                                    args.mDataLoaderType);
-                        }
 
                         // Log tracing if needed
                         if (args.traceMethod != null) {
@@ -2306,27 +2296,8 @@ public class PackageManagerService extends IPackageManager.Stub
             // Work that needs to happen on first install within each user
             if (firstUserIds != null && firstUserIds.length > 0) {
                 for (int userId : firstUserIds) {
-                    // If this app is a browser and it's newly-installed for some
-                    // users, clear any default-browser state in those users. The
-                    // app's nature doesn't depend on the user, so we can just check
-                    // its browser nature in any user and generalize.
-                    if (packageIsBrowser(packageName, userId)) {
-                        // If this browser is restored from user's backup, do not clear
-                        // default-browser state for this user
-                        if (pkgSetting.getInstallReason(userId)
-                                != PackageManager.INSTALL_REASON_DEVICE_RESTORE) {
-                            mPermissionManager.setDefaultBrowser(null, true, true, userId);
-                        }
-                    }
-
-                    // We may also need to apply pending (restored) runtime permission grants
-                    // within these users.
-                    mPermissionManager.restoreDelayedRuntimePermissions(packageName,
-                            UserHandle.of(userId));
-
-                    // Persistent preferred activity might have came into effect due to this
-                    // install.
-                    updateDefaultHomeNotLocked(userId);
+                    clearRolesAndRestorePermissionsForNewUserInstall(packageName,
+                            pkgSetting.getInstallReason(userId), userId);
                 }
             }
 
@@ -13132,9 +13103,15 @@ public class PackageManagerService extends IPackageManager.Stub
                         createPackageInstalledInfo(PackageManager.INSTALL_SUCCEEDED);
                 res.pkg = pkgSetting.pkg;
                 res.newUsers = new int[]{ userId };
-                PostInstallData postInstallData = intentSender == null ? null :
-                        new PostInstallData(null, res, () -> onRestoreComplete(res.returnCode,
-                              mContext, intentSender));
+
+                PostInstallData postInstallData =
+                        new PostInstallData(null, res, () -> {
+                            clearRolesAndRestorePermissionsForNewUserInstall(packageName,
+                                    pkgSetting.getInstallReason(userId), userId);
+                            if (intentSender != null) {
+                                onRestoreComplete(res.returnCode, mContext, intentSender);
+                            }
+                        });
                 restoreAndPostInstall(userId, res, postInstallData);
             }
         } finally {
@@ -15811,7 +15788,6 @@ public class PackageManagerService extends IPackageManager.Stub
         String returnMsg;
         String installerPackageName;
         PackageRemovedInfo removedInfo;
-        ArrayMap<String, PackageInstalledInfo> addedChildPackages;
         // The set of packages consuming this shared library or null if no consumers exist.
         ArrayList<AndroidPackage> libraryConsumers;
         PackageFreezer freezer;
@@ -15825,37 +15801,21 @@ public class PackageManagerService extends IPackageManager.Stub
         public void setError(String msg, PackageParserException e) {
             setReturnCode(e.error);
             setReturnMessage(ExceptionUtils.getCompleteMessage(msg, e));
-            final int childCount = (addedChildPackages != null) ? addedChildPackages.size() : 0;
-            for (int i = 0; i < childCount; i++) {
-                addedChildPackages.valueAt(i).setError(msg, e);
-            }
             Slog.w(TAG, msg, e);
         }
 
         public void setError(String msg, PackageManagerException e) {
             returnCode = e.error;
             setReturnMessage(ExceptionUtils.getCompleteMessage(msg, e));
-            final int childCount = (addedChildPackages != null) ? addedChildPackages.size() : 0;
-            for (int i = 0; i < childCount; i++) {
-                addedChildPackages.valueAt(i).setError(msg, e);
-            }
             Slog.w(TAG, msg, e);
         }
 
         public void setReturnCode(int returnCode) {
             this.returnCode = returnCode;
-            final int childCount = (addedChildPackages != null) ? addedChildPackages.size() : 0;
-            for (int i = 0; i < childCount; i++) {
-                addedChildPackages.valueAt(i).returnCode = returnCode;
-            }
         }
 
         private void setReturnMessage(String returnMsg) {
             this.returnMsg = returnMsg;
-            final int childCount = (addedChildPackages != null) ? addedChildPackages.size() : 0;
-            for (int i = 0; i < childCount; i++) {
-                addedChildPackages.valueAt(i).returnMsg = returnMsg;
-            }
         }
 
         // In some error cases we want to convey more info back to the observer
@@ -17406,7 +17366,6 @@ public class PackageManagerService extends IPackageManager.Stub
             int targetParseFlags = parseFlags;
             final PackageSetting ps;
             final PackageSetting disabledPs;
-            final PackageSetting[] childPackages;
             if (replace) {
                 if (parsedPackage.isStaticSharedLibrary()) {
                     // Static libs have a synthetic package name containing the version
@@ -18409,7 +18368,6 @@ public class PackageManagerService extends IPackageManager.Stub
             final boolean killApp = (deleteFlags & PackageManager.DELETE_DONT_KILL_APP) == 0;
             info.sendPackageRemovedBroadcasts(killApp);
             info.sendSystemPackageUpdatedBroadcasts();
-            info.sendSystemPackageAppearedBroadcasts();
         }
         // Force a gc here.
         Runtime.getRuntime().gc();
@@ -18467,7 +18425,6 @@ public class PackageManagerService extends IPackageManager.Stub
         SparseArray<int[]> broadcastWhitelist;
         // Clean up resources deleted packages.
         InstallArgs args = null;
-        ArrayMap<String, PackageInstalledInfo> appearedChildPackages;
 
         PackageRemovedInfo(PackageSender packageSender) {
             this.packageSender = packageSender;
@@ -18480,18 +18437,6 @@ public class PackageManagerService extends IPackageManager.Stub
         void sendSystemPackageUpdatedBroadcasts() {
             if (isRemovedPackageSystemUpdate) {
                 sendSystemPackageUpdatedBroadcastsInternal();
-            }
-        }
-
-        void sendSystemPackageAppearedBroadcasts() {
-            final int packageCount = (appearedChildPackages != null)
-                    ? appearedChildPackages.size() : 0;
-            for (int i = 0; i < packageCount; i++) {
-                PackageInstalledInfo installedInfo = appearedChildPackages.valueAt(i);
-                packageSender.sendPackageAddedForNewUsers(installedInfo.name,
-                    true /*sendBootCompleted*/, false /*startReceiver*/,
-                        UserHandle.getAppId(installedInfo.uid), installedInfo.newUsers, null,
-                        DataLoaderType.NONE);
             }
         }
 
@@ -19759,6 +19704,30 @@ public class PackageManagerService extends IPackageManager.Stub
                 mPermissionManager.setDefaultBrowser(null, true, true, userId);
             }
         }
+    }
+
+    private void clearRolesAndRestorePermissionsForNewUserInstall(String packageName,
+            int installReason, @UserIdInt int userId) {
+        // If this app is a browser and it's newly-installed for some
+        // users, clear any default-browser state in those users. The
+        // app's nature doesn't depend on the user, so we can just check
+        // its browser nature in any user and generalize.
+        if (packageIsBrowser(packageName, userId)) {
+            // If this browser is restored from user's backup, do not clear
+            // default-browser state for this user
+            if (installReason != PackageManager.INSTALL_REASON_DEVICE_RESTORE) {
+                mPermissionManager.setDefaultBrowser(null, true, true, userId);
+            }
+        }
+
+        // We may also need to apply pending (restored) runtime permission grants
+        // within these users.
+        mPermissionManager.restoreDelayedRuntimePermissions(packageName,
+                UserHandle.of(userId));
+
+        // Persistent preferred activity might have came into effect due to this
+        // install.
+        updateDefaultHomeNotLocked(userId);
     }
 
     @Override
