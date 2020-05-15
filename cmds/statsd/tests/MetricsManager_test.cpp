@@ -591,6 +591,30 @@ TEST(MetricsManagerTest, TestLogSources) {
     EXPECT_TRUE(isSubset(defaultPullUids, set<int32_t>(atom3Uids.begin(), atom3Uids.end())));
 }
 
+TEST(MetricsManagerTest, TestCheckLogCredentialsWhitelistedAtom) {
+    sp<UidMap> uidMap;
+    sp<StatsPullerManager> pullerManager = new StatsPullerManager();
+    sp<AlarmMonitor> anomalyAlarmMonitor;
+    sp<AlarmMonitor> periodicAlarmMonitor;
+
+    StatsdConfig config = buildGoodConfig();
+    config.add_whitelisted_atom_ids(3);
+    config.add_whitelisted_atom_ids(4);
+
+    MetricsManager metricsManager(kConfigKey, config, timeBaseSec, timeBaseSec, uidMap,
+                                  pullerManager, anomalyAlarmMonitor, periodicAlarmMonitor);
+
+    LogEvent event(0 /* uid */, 0 /* pid */);
+    CreateNoValuesLogEvent(&event, 10 /* atom id */, 0 /* timestamp */);
+    EXPECT_FALSE(metricsManager.checkLogCredentials(event));
+
+    CreateNoValuesLogEvent(&event, 3 /* atom id */, 0 /* timestamp */);
+    EXPECT_TRUE(metricsManager.checkLogCredentials(event));
+
+    CreateNoValuesLogEvent(&event, 4 /* atom id */, 0 /* timestamp */);
+    EXPECT_TRUE(metricsManager.checkLogCredentials(event));
+}
+
 }  // namespace statsd
 }  // namespace os
 }  // namespace android
