@@ -189,6 +189,8 @@ private:
     // To guard access to mAllowedLogSources
     mutable std::mutex mAllowedLogSourcesMutex;
 
+    const std::set<int32_t> mWhitelistedAtomIds;
+
     // We can pull any atom from these uids.
     std::set<int32_t> mDefaultPullUids;
 
