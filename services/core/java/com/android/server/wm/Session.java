@@ -91,6 +91,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     private float mLastReportedAnimatorScale;
     private String mPackageName;
     private String mRelayoutTag;
+    private final InsetsSourceControl[] mDummyControls =  new InsetsSourceControl[0];
 
     public Session(WindowManagerService service, IWindowSessionCallback callback) {
         mService = service;
@@ -184,7 +185,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
         return mService.addWindow(this, window, seq, attrs, viewVisibility, displayId,
                 new Rect() /* outFrame */, outContentInsets, outStableInsets,
                 new DisplayCutout.ParcelableWrapper() /* cutout */, null /* outInputChannel */,
-                outInsetsState, null, UserHandle.getUserId(mUid));
+                outInsetsState, mDummyControls, UserHandle.getUserId(mUid));
     }
 
     @Override
