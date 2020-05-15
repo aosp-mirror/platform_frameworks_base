@@ -66,14 +66,6 @@ public interface QSTile {
 
     void destroy();
 
-    /**
-      * return true if the tile supports detail views, and not
-      * only boolean states
-      */
-    default boolean supportsDetailView() {
-        return false;
-    }
-
     CharSequence getTileLabel();
 
     State getState();
