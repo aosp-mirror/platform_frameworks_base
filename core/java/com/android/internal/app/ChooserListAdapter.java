@@ -262,14 +262,17 @@ public class ChooserListAdapter extends ResolverListAdapter {
             Map<String, DisplayResolveInfo> consolidated = new HashMap<>();
             for (DisplayResolveInfo info : mDisplayList) {
                 String packageName = info.getResolvedComponentName().getPackageName();
-                if (consolidated.get(packageName) != null) {
-                    // create consolidated target
-                    MultiDisplayResolveInfo multiDisplayResolveInfo =
-                            new MultiDisplayResolveInfo(packageName, info);
-                    multiDisplayResolveInfo.addTarget(consolidated.get(packageName));
-                    consolidated.put(packageName, multiDisplayResolveInfo);
-                } else {
+                DisplayResolveInfo multiDri = consolidated.get(packageName);
+                if (multiDri == null) {
                     consolidated.put(packageName, info);
+                } else if (multiDri instanceof MultiDisplayResolveInfo) {
+                    ((MultiDisplayResolveInfo) multiDri).addTarget(info);
+                } else {
+                    // create consolidated target from the single DisplayResolveInfo
+                    MultiDisplayResolveInfo multiDisplayResolveInfo =
+                            new MultiDisplayResolveInfo(packageName, multiDri);
+                    multiDisplayResolveInfo.addTarget(info);
+                    consolidated.put(packageName, multiDisplayResolveInfo);
                 }
             }
             mSortedList.addAll(consolidated.values());
