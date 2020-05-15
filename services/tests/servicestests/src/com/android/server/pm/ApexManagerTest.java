@@ -21,8 +21,10 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -68,7 +70,9 @@ public class ApexManagerTest {
     @Before
     public void setUp() throws RemoteException {
         mContext = InstrumentationRegistry.getInstrumentation().getContext();
-        mApexManager = new ApexManager.ApexManagerImpl(mContext, mApexService);
+        ApexManager.ApexManagerImpl managerImpl = spy(new ApexManager.ApexManagerImpl(mContext));
+        doReturn(mApexService).when(managerImpl).waitForApexService();
+        mApexManager = managerImpl;
     }
 
     @Test
