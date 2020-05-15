@@ -2191,9 +2191,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
                 if (wasVisible) {
                     final int transit = (!startingWindow) ? TRANSIT_EXIT : TRANSIT_PREVIEW_DONE;
-                    final int flags = startingWindow ? 0 /* self */ : PARENTS;
+
                     // Try starting an animation.
-                    if (mWinAnimator.applyAnimationLocked(transit, false, flags)) {
+                    if (mWinAnimator.applyAnimationLocked(transit, false)) {
                         mAnimatingExit = true;
 
                         // mAnimatingExit affects canAffectSystemUiFlags(). Run layout such that
@@ -2205,9 +2205,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                         mWmService.mAccessibilityController.onWindowTransitionLocked(this, transit);
                     }
                 }
-                final boolean isAnimating = startingWindow
-                        ? isAnimating(0)
-                        : isAnimating(TRANSITION | PARENTS)
+                final boolean isAnimating = isAnimating(TRANSITION | PARENTS)
                         && (mActivityRecord == null || !mActivityRecord.isWaitingForTransitionStart());
                 final boolean lastWindowIsStartingWindow = startingWindow && mActivityRecord != null
                         && mActivityRecord.isLastWindow(this);
@@ -2229,9 +2227,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 }
             }
 
-            if (startingWindow && mActivityRecord != null) {
-                mActivityRecord.startingDisplayed = false;
-            }
             removeImmediately();
             // Removing a visible window will effect the computed orientation
             // So just update orientation if needed.
