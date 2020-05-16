@@ -52,7 +52,6 @@ import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
 import android.content.res.Configuration;
@@ -570,6 +569,10 @@ public class AudioService extends IAudioService.Stub
     private int[] mAccessibilityServiceUids;
     private final Object mAccessibilityServiceUidsLock = new Object();
 
+    // Uid of the active input method service to check if caller is the one or not.
+    private int mInputMethodServiceUid = android.os.Process.INVALID_UID;
+    private final Object mInputMethodServiceUidLock = new Object();
+
     private int mEncodedSurroundMode;
     private String mEnabledSurroundFormats;
     private boolean mSurroundModeChanged;
@@ -1078,11 +1081,13 @@ public class AudioService extends IAudioService.Stub
             sendEncodedSurroundMode(mContentResolver, "onAudioServerDied");
             sendEnabledSurroundFormats(mContentResolver, true);
             updateAssistantUId(true);
-            updateCurrentImeUid(true);
             AudioSystem.setRttEnabled(mRttEnabled);
         }
         synchronized (mAccessibilityServiceUidsLock) {
             AudioSystem.setA11yServicesUids(mAccessibilityServiceUids);
+        }
+        synchronized (mInputMethodServiceUidLock) {
+            mAudioSystem.setCurrentImeUid(mInputMethodServiceUid);
         }
         synchronized (mHdmiClientLock) {
             if (mHdmiManager != null && mHdmiTvClient != null) {
@@ -1629,37 +1634,6 @@ public class AudioService extends IAudioService.Stub
         }
     }
 
-    @GuardedBy("mSettingsLock")
-    private void updateCurrentImeUid(boolean forceUpdate) {
-        String imeId = Settings.Secure.getStringForUser(
-                mContentResolver,
-                Settings.Secure.DEFAULT_INPUT_METHOD, UserHandle.USER_CURRENT);
-        if (TextUtils.isEmpty(imeId)) {
-            Log.e(TAG, "updateCurrentImeUid() could not find current IME");
-            return;
-        }
-        ComponentName componentName = ComponentName.unflattenFromString(imeId);
-        if (componentName == null) {
-            Log.e(TAG, "updateCurrentImeUid() got invalid service name for "
-                    + Settings.Secure.DEFAULT_INPUT_METHOD + ": " + imeId);
-            return;
-        }
-        String packageName = componentName.getPackageName();
-        int currentUserId = LocalServices.getService(ActivityManagerInternal.class)
-                .getCurrentUserId();
-        int currentImeUid = LocalServices.getService(PackageManagerInternal.class)
-                .getPackageUidInternal(packageName, 0 /* flags */, currentUserId);
-        if (currentImeUid < 0) {
-            Log.e(TAG, "updateCurrentImeUid() could not find UID for package: " + packageName);
-            return;
-        }
-
-        if (currentImeUid != mCurrentImeUid || forceUpdate) {
-            mAudioSystem.setCurrentImeUid(currentImeUid);
-            mCurrentImeUid = currentImeUid;
-        }
-    }
-
     private void readPersistedSettings() {
         if (!mSystemServer.isPrivileged()) {
             return;
@@ -1707,7 +1681,6 @@ public class AudioService extends IAudioService.Stub
             sendEncodedSurroundMode(cr, "readPersistedSettings");
             sendEnabledSurroundFormats(cr, true);
             updateAssistantUId(true);
-            updateCurrentImeUid(true);
             AudioSystem.setRttEnabled(mRttEnabled);
         }
 
@@ -6217,8 +6190,6 @@ public class AudioService extends IAudioService.Stub
 
             mContentResolver.registerContentObserver(Settings.Secure.getUriFor(
                     Settings.Secure.VOICE_INTERACTION_SERVICE), false, this);
-            mContentResolver.registerContentObserver(Settings.Secure.getUriFor(
-                    Settings.Secure.DEFAULT_INPUT_METHOD), false, this);
         }
 
         @Override
@@ -6242,7 +6213,6 @@ public class AudioService extends IAudioService.Stub
                 updateEncodedSurroundOutput();
                 sendEnabledSurroundFormats(mContentResolver, mSurroundModeChanged);
                 updateAssistantUId(false);
-                updateCurrentImeUid(false);
             }
         }
 
@@ -7582,6 +7552,19 @@ public class AudioService extends IAudioService.Stub
                     }
                 }
                 AudioSystem.setA11yServicesUids(mAccessibilityServiceUids);
+            }
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public void setInputMethodServiceUid(int uid) {
+            synchronized (mInputMethodServiceUidLock) {
+                if (mInputMethodServiceUid != uid) {
+                    mAudioSystem.setCurrentImeUid(uid);
+                    mInputMethodServiceUid = uid;
+                }
             }
         }
     }
