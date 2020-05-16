@@ -3501,13 +3501,11 @@ public class ChooserActivity extends ResolverActivity implements
         }
 
         /**
-         * Only expand direct share area if there is a minimum number of shortcuts,
-         * which will help reduce the amount of visible shuffling due to older-style
-         * direct share targets.
+         * Only expand direct share area if there is a minimum number of targets.
          */
         private boolean canExpandDirectShare() {
             int orientation = getResources().getConfiguration().orientation;
-            return mChooserListAdapter.getNumShortcutResults() > getMaxTargetsPerRow()
+            return mChooserListAdapter.getNumServiceTargetsForExpand() > getMaxTargetsPerRow()
                     && orientation == Configuration.ORIENTATION_PORTRAIT
                     && !isInMultiWindowMode();
         }
@@ -3716,8 +3714,12 @@ public class ChooserActivity extends ResolverActivity implements
 
                 // only expand if we have more than maxTargetsPerRow, and delay that decision
                 // until they start to scroll
-                if (mChooserMultiProfilePagerAdapter.getActiveListAdapter()
-                        .getSelectableServiceTargetCount() <= maxTargetsPerRow) {
+                ChooserListAdapter adapter =
+                        mChooserMultiProfilePagerAdapter.getActiveListAdapter();
+                int validTargets =
+                        mAppendDirectShareEnabled ? adapter.getNumServiceTargetsForExpand()
+                                : adapter.getSelectableServiceTargetCount();
+                if (validTargets <= maxTargetsPerRow) {
                     mHideDirectShareExpansion = true;
                     return;
                 }
