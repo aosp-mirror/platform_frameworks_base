@@ -1729,9 +1729,15 @@ public class UserManager {
      * <p>As of {@link android.os.Build.VERSION_CODES#LOLLIPOP}, this method can
      * now automatically identify goats using advanced goat recognition technology.</p>
      *
-     * @return Returns true if the user making this call is a goat.
+     * <p>As of {@link android.os.Build.VERSION_CODES#R}, this method always returns
+     * {@code false} in order to protect goat privacy.</p>
+     *
+     * @return Returns whether the user making this call is a goat.
      */
     public boolean isUserAGoat() {
+        if (mContext.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.R) {
+            return false;
+        }
         return mContext.getPackageManager()
                 .isPackageAvailable("com.coffeestainstudios.goatsimulator");
     }
