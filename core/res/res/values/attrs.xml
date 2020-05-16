@@ -9230,4 +9230,7 @@
     </declare-styleable>
 
     <attr name="autoSizePresetSizes" />
+
+    <attr name="iconfactoryIconSize" format="dimension"/>
+    <attr name="iconfactoryBadgeSize" format="dimension"/>
 </resources>
