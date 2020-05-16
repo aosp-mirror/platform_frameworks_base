@@ -972,7 +972,7 @@ public final class ProcessList {
             return buildOomTag("vis", "vis", "   ", setAdj,
                     ProcessList.VISIBLE_APP_ADJ, compact);
         } else if (setAdj >= ProcessList.FOREGROUND_APP_ADJ) {
-            return buildOomTag("fore  ", "fore", null, setAdj,
+            return buildOomTag("fg ", "fg ", "   ", setAdj,
                     ProcessList.FOREGROUND_APP_ADJ, compact);
         } else if (setAdj >= ProcessList.PERSISTENT_SERVICE_ADJ) {
             return buildOomTag("psvc  ", "psvc", null, setAdj,

@@ -2362,6 +2362,14 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         }
 
         public void refreshDialog() {
+            // ensure dropdown menus are dismissed before re-initializing the dialog
+            dismissPanel();
+            dismissOverflow(true);
+            if (mControlsUiController != null) {
+                mControlsUiController.hide();
+            }
+
+            // re-create dialog
             initializeLayout();
             mGlobalActionsLayout.updateList();
             if (mControlsUiController != null) {

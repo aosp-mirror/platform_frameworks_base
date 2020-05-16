@@ -89,8 +89,7 @@
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"Sule ekraanipilt"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Ekraanipildi eelvaade"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Ekraanisalvesti"</string>
-    <!-- no translation found for screenrecord_background_processing_label (7244617554884238898) -->
-    <skip />
+    <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Ekraanisalvestuse töötlemine"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Pooleli märguanne ekraanikuva salvestamise seansi puhul"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Kas alustada salvestamist?"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"Heli salvestamise ajal võib Androidi süsteem jäädvustada tundlikku teavet, mis on ekraanikuval nähtav või mida seadmes esitatakse. See hõlmab paroole, makseteavet, fotosid, sõnumeid ja heli."</string>
@@ -511,8 +510,7 @@
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Tühjenda kõik"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Haldamine"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Ajalugu"</string>
-    <!-- no translation found for notification_section_header_incoming (5295312809341711367) -->
-    <skip />
+    <string name="notification_section_header_incoming" msgid="5295312809341711367">"Sissetulevad"</string>
     <string name="notification_section_header_gentle" msgid="3044910806569985386">"Hääletud märguanded"</string>
     <string name="notification_section_header_alerting" msgid="3168140660646863240">"Hoiatusmärguanded"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Vestlused"</string>
@@ -717,7 +715,7 @@
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Hoiab teie tähelepanu hõljuva otseteega selle sisu juurde."</string>
     <string name="notification_channel_summary_priority" msgid="7415770044553264622">"Kuvatakse vestluste jaotise ülaosas mullina."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Seaded"</string>
-    <string name="notification_priority_title" msgid="2079708866333537093">"Prioriteet"</string>
+    <string name="notification_priority_title" msgid="2079708866333537093">"Prioriteetne"</string>
     <string name="no_shortcut" msgid="7176375126961212514">"<xliff:g id="APP_NAME">%1$s</xliff:g> ei toeta vestluspõhiseid seadeid"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Hiljutisi mulle pole"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Siin kuvatakse hiljutised ja suletud mullid."</string>
@@ -991,10 +989,8 @@
     <string name="music_controls_no_title" msgid="4166497066552290938">"Pealkiri puudub"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"Puudutage rakenduse taaskäivitamiseks ja täisekraanrežiimi aktiveerimiseks."</string>
     <string name="bubbles_settings_button_description" msgid="7324245408859877545">"Rakenduse <xliff:g id="APP_NAME">%1$s</xliff:g> mullide seaded"</string>
-    <!-- no translation found for bubble_overflow_button_content_description (5523744621434300510) -->
-    <skip />
-    <!-- no translation found for bubble_accessibility_action_add_back (6217995665917123890) -->
-    <skip />
+    <string name="bubble_overflow_button_content_description" msgid="5523744621434300510">"Ületäide"</string>
+    <string name="bubble_accessibility_action_add_back" msgid="6217995665917123890">"Lisa tagasi virna"</string>
     <string name="manage_bubbles_text" msgid="6856830436329494850">"Halda"</string>
     <string name="bubble_content_description_single" msgid="5175160674436546329">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> rakendusest <xliff:g id="APP_NAME">%2$s</xliff:g>"</string>
     <string name="bubble_content_description_stack" msgid="7907610717462651870">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> rakenduselt <xliff:g id="APP_NAME">%2$s</xliff:g> ja veel <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g>"</string>
@@ -1017,7 +1013,7 @@
     <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Kuvatakse vestluste jaotise kohal"</string>
     <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Lukustuskuval kuvatakse profiilipilt"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Kuvatakse rakenduste kohal hõljuva mullina"</string>
-    <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Funktsiooni Mitte segada katkestamine"</string>
+    <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Funktsioon Mitte segada katkestatakse"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"Selge"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Suurendamisakna ülekate"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Suurendamisaken"</string>

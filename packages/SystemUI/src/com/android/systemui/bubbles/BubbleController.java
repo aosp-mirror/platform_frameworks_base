@@ -911,6 +911,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         // Update the state in NotificationManagerService
         try {
             int flags = Notification.BubbleMetadata.FLAG_SUPPRESS_NOTIFICATION;
+            flags |= Notification.BubbleMetadata.FLAG_AUTO_EXPAND_BUBBLE;
             mBarService.onNotificationBubbleChanged(entry.getKey(), shouldBubble, flags);
         } catch (RemoteException e) {
         }

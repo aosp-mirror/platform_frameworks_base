@@ -391,7 +391,7 @@
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Povezava Wi-Fi ni vzpostavljena"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Svetlost"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="2325362583903258677">"SAMODEJNO"</string>
-    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"Obrni barve"</string>
+    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"Inverzija barv"</string>
     <string name="quick_settings_color_space_label" msgid="537528291083575559">"Način popravljanja barv"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"Več nastavitev"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Končano"</string>
@@ -977,7 +977,7 @@
     <string name="running_foreground_services_title" msgid="5137313173431186685">"Aplikacije, ki se izvajajo v ozadju"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"Dotaknite se za prikaz podrobnosti porabe baterije in prenosa podatkov"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"Želite izklopiti prenos podatkov v mobilnih omrežjih?"</string>
-    <string name="mobile_data_disable_message" msgid="8604966027899770415">"Prek operaterja <xliff:g id="CARRIER">%s</xliff:g> ne boste imeli dostopa do podatkovne povezave ali interneta. Internet bo na voljo samo prek povezave Wi-Fi."</string>
+    <string name="mobile_data_disable_message" msgid="8604966027899770415">"Prek operaterja »<xliff:g id="CARRIER">%s</xliff:g>« ne boste imeli dostopa do podatkovne povezave ali interneta. Internet bo na voljo samo prek povezave Wi-Fi."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"svojega operaterja"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"Ker aplikacija zakriva zahtevo za dovoljenje, z nastavitvami ni mogoče preveriti vašega odziva."</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"Želite dovoliti, da aplikacija <xliff:g id="APP_0">%1$s</xliff:g> prikaže izreze aplikacije <xliff:g id="APP_2">%2$s</xliff:g>?"</string>

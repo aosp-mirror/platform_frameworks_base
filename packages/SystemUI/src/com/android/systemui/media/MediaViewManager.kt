@@ -299,7 +299,7 @@ class MediaViewManager @Inject constructor(
             firstPlayer.measure(input)
             // Relayouting is necessary in motionlayout to obtain its size properly ....
             it.layout(0, 0, it.measuredWidth, it.measuredHeight)
-            val result = MeasurementOutput(it.measuredWidth, it.measuredHeight)
+            result = MeasurementOutput(it.measuredWidth, it.measuredHeight)
             it.progress = previousProgress
             if (desiredState != null) {
                 // remeasure it to the old size again!

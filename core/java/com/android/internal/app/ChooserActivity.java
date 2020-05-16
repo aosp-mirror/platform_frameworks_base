@@ -778,6 +778,11 @@ public class ChooserActivity extends ResolverActivity implements
         mDirectShareShortcutInfoCache = new HashMap<>();
     }
 
+    @Override
+    protected int appliedThemeResId() {
+        return R.style.Theme_DeviceDefault_Chooser;
+    }
+
     private AppPredictor setupAppPredictorForUser(UserHandle userHandle,
             AppPredictor.Callback appPredictorCallback) {
         AppPredictor appPredictor = getAppPredictorForDirectShareIfEnabled(userHandle);

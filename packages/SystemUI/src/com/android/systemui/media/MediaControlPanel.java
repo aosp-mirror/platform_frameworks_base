@@ -26,6 +26,7 @@ import android.content.pm.ResolveInfo;
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
@@ -98,7 +99,6 @@ public class MediaControlPanel {
     private PlayerViewHolder mViewHolder;
     private MediaSession.Token mToken;
     private MediaController mController;
-    private int mForegroundColor;
     private int mBackgroundColor;
     private MediaDevice mDevice;
     protected ComponentName mServiceComponent;
@@ -243,7 +243,6 @@ public class MediaControlPanel {
             return;
         }
         MediaSession.Token token = data.getToken();
-        mForegroundColor = data.getForegroundColor();
         mBackgroundColor = data.getBackgroundColor();
         if (mToken == null || !mToken.equals(token)) {
             if (mQSMediaBrowser != null) {
@@ -304,24 +303,19 @@ public class MediaControlPanel {
 
         // App icon
         ImageView appIcon = mViewHolder.getAppIcon();
-        Drawable iconDrawable = data.getAppIcon().mutate();
-        iconDrawable.setTint(mForegroundColor);
-        appIcon.setImageDrawable(iconDrawable);
+        appIcon.setImageDrawable(data.getAppIcon());
 
         // Song name
         TextView titleText = mViewHolder.getTitleText();
         titleText.setText(data.getSong());
-        titleText.setTextColor(data.getForegroundColor());
 
         // App title
         TextView appName = mViewHolder.getAppName();
         appName.setText(data.getApp());
-        appName.setTextColor(mForegroundColor);
 
         // Artist name
         TextView artistText = mViewHolder.getArtistText();
         artistText.setText(data.getArtist());
-        artistText.setTextColor(mForegroundColor);
 
         // Transfer chip
         if (mLocalMediaManager != null) {
@@ -329,6 +323,10 @@ public class MediaControlPanel {
             setVisibleAndAlpha(collapsedSet, R.id.media_seamless, true /*visible */);
             setVisibleAndAlpha(expandedSet, R.id.media_seamless, true /*visible */);
             updateDevice(mLocalMediaManager.getCurrentConnectedDevice());
+            if (mViewHolder.getBackground().getBackground() instanceof IlluminationDrawable) {
+                    ((IlluminationDrawable) mViewHolder.getBackground().getBackground())
+                            .setupTouch(mViewHolder.getSeamless(), mViewHolder.getPlayer());
+            }
             mViewHolder.getSeamless().setOnClickListener(v -> {
                 final Intent intent = new Intent()
                         .setAction(MediaOutputSliceConstants.ACTION_MEDIA_OUTPUT)
@@ -358,7 +356,6 @@ public class MediaControlPanel {
             MediaAction mediaAction = actionIcons.get(i);
             button.setImageDrawable(mediaAction.getDrawable());
             button.setContentDescription(mediaAction.getContentDescription());
-            button.setImageTintList(ColorStateList.valueOf(mForegroundColor));
             PendingIntent actionIntent = mediaAction.getIntent();
 
             if (mViewHolder.getBackground().getBackground() instanceof IlluminationDrawable) {
@@ -389,8 +386,7 @@ public class MediaControlPanel {
 
         // Seek Bar
         final MediaController controller = getController();
-        mBackgroundExecutor.execute(
-                () -> mSeekBarViewModel.updateController(controller, data.getForegroundColor()));
+        mBackgroundExecutor.execute(() -> mSeekBarViewModel.updateController(controller));
 
         // Set up long press menu
         // TODO: b/156036025 bring back media guts
@@ -541,32 +537,27 @@ public class MediaControlPanel {
         if (mViewHolder == null) {
             return;
         }
-        ColorStateList fgTintList = ColorStateList.valueOf(mForegroundColor);
+        ImageView iconView = mViewHolder.getSeamlessIcon();
+        TextView deviceName = mViewHolder.getSeamlessText();
 
         // Update the outline color
         LinearLayout viewLayout = (LinearLayout) mViewHolder.getSeamless();
         RippleDrawable bkgDrawable = (RippleDrawable) viewLayout.getBackground();
         GradientDrawable rect = (GradientDrawable) bkgDrawable.getDrawable(0);
-        rect.setStroke(2, mForegroundColor);
-        rect.setColor(mBackgroundColor);
-
-        ImageView iconView = mViewHolder.getSeamlessIcon();
-        TextView deviceName = mViewHolder.getSeamlessText();
-        deviceName.setTextColor(fgTintList);
+        rect.setStroke(2, deviceName.getCurrentTextColor());
+        rect.setColor(Color.TRANSPARENT);
 
         if (mIsRemotePlayback) {
             mViewHolder.getSeamless().setEnabled(false);
             mViewHolder.getSeamless().setAlpha(0.38f);
             iconView.setImageResource(R.drawable.ic_hardware_speaker);
             iconView.setVisibility(View.VISIBLE);
-            iconView.setImageTintList(fgTintList);
             deviceName.setText(R.string.media_seamless_remote_device);
         } else if (device != null) {
             mViewHolder.getSeamless().setEnabled(true);
             mViewHolder.getSeamless().setAlpha(1f);
             Drawable icon = device.getIcon();
             iconView.setVisibility(View.VISIBLE);
-            iconView.setImageTintList(fgTintList);
 
             if (icon instanceof AdaptiveIcon) {
                 AdaptiveIcon aIcon = (AdaptiveIcon) icon;
@@ -639,7 +630,6 @@ public class MediaControlPanel {
             mQSMediaBrowser.restart();
         });
         btn.setImageDrawable(mContext.getResources().getDrawable(R.drawable.lb_ic_play));
-        btn.setImageTintList(ColorStateList.valueOf(mForegroundColor));
         setVisibleAndAlpha(expandedSet, ACTION_IDS[0], true /*visible */);
         setVisibleAndAlpha(collapsedSet, ACTION_IDS[0], true /*visible */);
 
