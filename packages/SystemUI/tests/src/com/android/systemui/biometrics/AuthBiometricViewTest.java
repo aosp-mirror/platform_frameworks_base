@@ -26,7 +26,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import android.content.Context;
-import android.hardware.biometrics.BiometricPrompt;
+import android.hardware.biometrics.PromptInfo;
 import android.os.Bundle;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
@@ -290,24 +290,24 @@ public class AuthBiometricViewTest extends SysuiTestCase {
         verify(mCallback).onAction(AuthBiometricView.Callback.ACTION_USE_DEVICE_CREDENTIAL);
     }
 
-    private Bundle buildBiometricPromptBundle(boolean allowDeviceCredential) {
-        Bundle bundle = new Bundle();
-        bundle.putCharSequence(BiometricPrompt.KEY_TITLE, "Title");
+    private PromptInfo buildPromptInfo(boolean allowDeviceCredential) {
+        PromptInfo promptInfo = new PromptInfo();
+        promptInfo.setTitle("Title");
         int authenticators = Authenticators.BIOMETRIC_WEAK;
         if (allowDeviceCredential) {
             authenticators |= Authenticators.DEVICE_CREDENTIAL;
         } else {
-            bundle.putCharSequence(BiometricPrompt.KEY_NEGATIVE_TEXT, "Negative");
+            promptInfo.setNegativeButtonText("Negative");
         }
-        bundle.putInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED, authenticators);
-        return bundle;
+        promptInfo.setAuthenticators(authenticators);
+        return promptInfo;
     }
 
     private void initDialog(Context context, boolean allowDeviceCredential,
             AuthBiometricView.Callback callback,
             Bundle savedState, MockInjector injector) {
         mBiometricView = new TestableBiometricView(context, null, injector);
-        mBiometricView.setBiometricPromptBundle(buildBiometricPromptBundle(allowDeviceCredential));
+        mBiometricView.setPromptInfo(buildPromptInfo(allowDeviceCredential));
         mBiometricView.setCallback(callback);
         mBiometricView.restoreState(savedState);
         mBiometricView.onFinishInflateInternal();

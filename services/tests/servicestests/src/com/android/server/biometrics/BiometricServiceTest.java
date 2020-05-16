@@ -19,6 +19,7 @@ package com.android.server.biometrics;
 import static android.hardware.biometrics.BiometricManager.Authenticators;
 
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.TestCase.assertNotNull;
 
@@ -50,9 +51,9 @@ import android.hardware.biometrics.IBiometricSensorReceiver;
 import android.hardware.biometrics.IBiometricService;
 import android.hardware.biometrics.IBiometricServiceReceiver;
 import android.hardware.biometrics.IBiometricSysuiReceiver;
+import android.hardware.biometrics.PromptInfo;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.Binder;
-import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
@@ -189,7 +190,7 @@ public class BiometricServiceTest {
                 mBiometricService.mCurrentAuthSession.getState());
         // StatusBar showBiometricDialog invoked
         verify(mBiometricService.mStatusBarService).showAuthenticationDialog(
-                eq(mBiometricService.mCurrentAuthSession.mBundle),
+                eq(mBiometricService.mCurrentAuthSession.mPromptInfo),
                 any(IBiometricSysuiReceiver.class),
                 eq(0),
                 anyBoolean() /* requireConfirmation */,
@@ -272,7 +273,7 @@ public class BiometricServiceTest {
 
         // StatusBar showBiometricDialog invoked with face, which was set up to be STRONG
         verify(mBiometricService.mStatusBarService).showAuthenticationDialog(
-                eq(mBiometricService.mCurrentAuthSession.mBundle),
+                eq(mBiometricService.mCurrentAuthSession.mPromptInfo),
                 any(IBiometricSysuiReceiver.class),
                 eq(BiometricAuthenticator.TYPE_FACE),
                 eq(false) /* requireConfirmation */,
@@ -404,7 +405,7 @@ public class BiometricServiceTest {
 
         // StatusBar showBiometricDialog invoked
         verify(mBiometricService.mStatusBarService).showAuthenticationDialog(
-                eq(mBiometricService.mCurrentAuthSession.mBundle),
+                eq(mBiometricService.mCurrentAuthSession.mPromptInfo),
                 any(IBiometricSysuiReceiver.class),
                 eq(BiometricAuthenticator.TYPE_FINGERPRINT),
                 anyBoolean() /* requireConfirmation */,
@@ -455,10 +456,9 @@ public class BiometricServiceTest {
         assertEquals(AuthSession.STATE_SHOWING_DEVICE_CREDENTIAL,
                 mBiometricService.mCurrentAuthSession.getState());
         assertEquals(Authenticators.DEVICE_CREDENTIAL,
-                mBiometricService.mCurrentAuthSession.mBundle
-                        .getInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED));
+                mBiometricService.mCurrentAuthSession.mPromptInfo.getAuthenticators());
         verify(mBiometricService.mStatusBarService).showAuthenticationDialog(
-                eq(mBiometricService.mCurrentAuthSession.mBundle),
+                eq(mBiometricService.mCurrentAuthSession.mPromptInfo),
                 any(IBiometricSysuiReceiver.class),
                 eq(0 /* biometricModality */),
                 anyBoolean() /* requireConfirmation */,
@@ -624,7 +624,7 @@ public class BiometricServiceTest {
         startPendingAuthSession(mBiometricService);
         waitForIdle();
         verify(mBiometricService.mStatusBarService, never()).showAuthenticationDialog(
-                any(Bundle.class),
+                any(PromptInfo.class),
                 any(IBiometricSysuiReceiver.class),
                 anyInt(),
                 anyBoolean() /* requireConfirmation */,
@@ -722,10 +722,9 @@ public class BiometricServiceTest {
         assertEquals(AuthSession.STATE_SHOWING_DEVICE_CREDENTIAL,
                 mBiometricService.mCurrentAuthSession.getState());
         assertEquals(Authenticators.DEVICE_CREDENTIAL,
-                mBiometricService.mCurrentAuthSession.mBundle.getInt(
-                        BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED));
+                mBiometricService.mCurrentAuthSession.mPromptInfo.getAuthenticators());
         verify(mBiometricService.mStatusBarService).showAuthenticationDialog(
-                eq(mBiometricService.mCurrentAuthSession.mBundle),
+                eq(mBiometricService.mCurrentAuthSession.mPromptInfo),
                 any(IBiometricSysuiReceiver.class),
                 eq(0 /* biometricModality */),
                 anyBoolean() /* requireConfirmation */,
@@ -761,51 +760,50 @@ public class BiometricServiceTest {
         final boolean allowDeviceCredential = false;
         final @Authenticators.Types int authenticators =
                 Authenticators.DEVICE_CREDENTIAL | Authenticators.BIOMETRIC_WEAK;
-        final Bundle bundle = new Bundle();
+        final PromptInfo promptInfo = new PromptInfo();
 
-        bundle.putBoolean(BiometricPrompt.KEY_ALLOW_DEVICE_CREDENTIAL, allowDeviceCredential);
-        bundle.putInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED, authenticators);
-        Utils.combineAuthenticatorBundles(bundle);
+        promptInfo.setDeviceCredentialAllowed(allowDeviceCredential);
+        promptInfo.setAuthenticators(authenticators);
+        Utils.combineAuthenticatorBundles(promptInfo);
 
-        assertNull(bundle.get(BiometricPrompt.KEY_ALLOW_DEVICE_CREDENTIAL));
-        assertEquals(bundle.getInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED), authenticators);
+        assertFalse(promptInfo.isDeviceCredentialAllowed());
+        assertEquals(authenticators, promptInfo.getAuthenticators());
     }
 
     @Test
     public void testCombineAuthenticatorBundles_withNoKeyDeviceCredential_andKeyAuthenticators() {
         final @Authenticators.Types int authenticators =
                 Authenticators.DEVICE_CREDENTIAL | Authenticators.BIOMETRIC_WEAK;
-        final Bundle bundle = new Bundle();
+        final PromptInfo promptInfo = new PromptInfo();
 
-        bundle.putInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED, authenticators);
-        Utils.combineAuthenticatorBundles(bundle);
+        promptInfo.setAuthenticators(authenticators);
+        Utils.combineAuthenticatorBundles(promptInfo);
 
-        assertNull(bundle.get(BiometricPrompt.KEY_ALLOW_DEVICE_CREDENTIAL));
-        assertEquals(bundle.getInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED), authenticators);
+        assertFalse(promptInfo.isDeviceCredentialAllowed());
+        assertEquals(authenticators, promptInfo.getAuthenticators());
     }
 
     @Test
     public void testCombineAuthenticatorBundles_withKeyDeviceCredential_andNoKeyAuthenticators() {
         final boolean allowDeviceCredential = true;
-        final Bundle bundle = new Bundle();
+        final PromptInfo promptInfo = new PromptInfo();
 
-        bundle.putBoolean(BiometricPrompt.KEY_ALLOW_DEVICE_CREDENTIAL, allowDeviceCredential);
-        Utils.combineAuthenticatorBundles(bundle);
+        promptInfo.setDeviceCredentialAllowed(allowDeviceCredential);
+        Utils.combineAuthenticatorBundles(promptInfo);
 
-        assertNull(bundle.get(BiometricPrompt.KEY_ALLOW_DEVICE_CREDENTIAL));
-        assertEquals(bundle.getInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED),
-                Authenticators.DEVICE_CREDENTIAL | Authenticators.BIOMETRIC_WEAK);
+        assertFalse(promptInfo.isDeviceCredentialAllowed());
+        assertEquals(Authenticators.DEVICE_CREDENTIAL | Authenticators.BIOMETRIC_WEAK,
+                promptInfo.getAuthenticators());
     }
 
     @Test
     public void testCombineAuthenticatorBundles_withNoKeyDeviceCredential_andNoKeyAuthenticators() {
-        final Bundle bundle = new Bundle();
+        final PromptInfo promptInfo = new PromptInfo();
 
-        Utils.combineAuthenticatorBundles(bundle);
+        Utils.combineAuthenticatorBundles(promptInfo);
 
-        assertNull(bundle.get(BiometricPrompt.KEY_ALLOW_DEVICE_CREDENTIAL));
-        assertEquals(bundle.getInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED),
-                Authenticators.BIOMETRIC_WEAK);
+        assertFalse(promptInfo.isDeviceCredentialAllowed());
+        assertEquals(Authenticators.BIOMETRIC_WEAK, promptInfo.getAuthenticators());
     }
 
     @Test
@@ -1231,7 +1229,7 @@ public class BiometricServiceTest {
                 authenticators);
         waitForIdle();
         verify(mBiometricService.mStatusBarService).showAuthenticationDialog(
-                eq(mBiometricService.mCurrentAuthSession.mBundle),
+                eq(mBiometricService.mCurrentAuthSession.mPromptInfo),
                 any(IBiometricSysuiReceiver.class),
                 eq(BiometricAuthenticator.TYPE_FINGERPRINT /* biometricModality */),
                 anyBoolean() /* requireConfirmation */,
@@ -1249,9 +1247,9 @@ public class BiometricServiceTest {
                 false /* requireConfirmation */,
                 authenticators);
         waitForIdle();
-        assertTrue(Utils.isCredentialRequested(mBiometricService.mCurrentAuthSession.mBundle));
+        assertTrue(Utils.isCredentialRequested(mBiometricService.mCurrentAuthSession.mPromptInfo));
         verify(mBiometricService.mStatusBarService).showAuthenticationDialog(
-                eq(mBiometricService.mCurrentAuthSession.mBundle),
+                eq(mBiometricService.mCurrentAuthSession.mPromptInfo),
                 any(IBiometricSysuiReceiver.class),
                 eq(BiometricAuthenticator.TYPE_NONE /* biometricModality */),
                 anyBoolean() /* requireConfirmation */,
@@ -1274,7 +1272,7 @@ public class BiometricServiceTest {
                 false /* requireConfirmation */, authenticators);
         waitForIdle();
         verify(mBiometricService.mStatusBarService).showAuthenticationDialog(
-                eq(mBiometricService.mCurrentAuthSession.mBundle),
+                eq(mBiometricService.mCurrentAuthSession.mPromptInfo),
                 any(IBiometricSysuiReceiver.class),
                 eq(BiometricAuthenticator.TYPE_FINGERPRINT /* biometricModality */),
                 anyBoolean() /* requireConfirmation */,
@@ -1516,7 +1514,7 @@ public class BiometricServiceTest {
                 0 /* userId */,
                 receiver,
                 TEST_PACKAGE_NAME /* packageName */,
-                createTestBiometricPromptBundle(requireConfirmation, authenticators,
+                createTestPromptInfo(requireConfirmation, authenticators,
                         false /* checkDevicePolicy */),
                 0 /* callingUid */,
                 0 /* callingPid */,
@@ -1531,27 +1529,27 @@ public class BiometricServiceTest {
                 0 /* userId */,
                 receiver,
                 TEST_PACKAGE_NAME /* packageName */,
-                createTestBiometricPromptBundle(false /* requireConfirmation */, authenticators,
+                createTestPromptInfo(false /* requireConfirmation */, authenticators,
                         true /* checkDevicePolicy */),
                 0 /* callingUid */,
                 0 /* callingPid */,
                 0 /* callingUserId */);
     }
 
-    private static Bundle createTestBiometricPromptBundle(
+    private static PromptInfo createTestPromptInfo(
             boolean requireConfirmation,
             Integer authenticators,
             boolean checkDevicePolicy) {
-        final Bundle bundle = new Bundle();
-        bundle.putBoolean(BiometricPrompt.KEY_REQUIRE_CONFIRMATION, requireConfirmation);
+        final PromptInfo promptInfo = new PromptInfo();
+        promptInfo.setConfirmationRequested(requireConfirmation);
 
         if (authenticators != null) {
-            bundle.putInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED, authenticators);
+            promptInfo.setAuthenticators(authenticators);
         }
         if (checkDevicePolicy) {
-            bundle.putBoolean(BiometricPrompt.EXTRA_DISALLOW_BIOMETRICS_IF_POLICY_EXISTS, true);
+            promptInfo.setDisallowBiometricsIfPolicyExists(checkDevicePolicy);
         }
-        return bundle;
+        return promptInfo;
     }
 
     private static int getCookieForCurrentSession(AuthSession session) {
