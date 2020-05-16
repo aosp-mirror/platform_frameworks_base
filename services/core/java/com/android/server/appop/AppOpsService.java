@@ -66,11 +66,11 @@ import static android.content.Intent.EXTRA_REPLACING;
 import static android.content.pm.PermissionInfo.PROTECTION_DANGEROUS;
 import static android.content.pm.PermissionInfo.PROTECTION_FLAG_APPOP;
 
-import static com.android.server.am.OomAdjuster.DEBUG_PROCESS_CAPABILITY_FOREGROUND_CAMERA;
-import static com.android.server.am.OomAdjuster.DEBUG_PROCESS_CAPABILITY_FOREGROUND_CAMERA_Q;
-import static com.android.server.am.OomAdjuster.DEBUG_PROCESS_CAPABILITY_FOREGROUND_LOCATION;
-import static com.android.server.am.OomAdjuster.DEBUG_PROCESS_CAPABILITY_FOREGROUND_MICROPHONE;
-import static com.android.server.am.OomAdjuster.DEBUG_PROCESS_CAPABILITY_FOREGROUND_MICROPHONE_Q;
+import static android.app.ActivityManager.DEBUG_PROCESS_CAPABILITY_FOREGROUND_CAMERA;
+import static android.app.ActivityManager.DEBUG_PROCESS_CAPABILITY_FOREGROUND_CAMERA_Q;
+import static android.app.ActivityManager.DEBUG_PROCESS_CAPABILITY_FOREGROUND_LOCATION;
+import static android.app.ActivityManager.DEBUG_PROCESS_CAPABILITY_FOREGROUND_MICROPHONE;
+import static android.app.ActivityManager.DEBUG_PROCESS_CAPABILITY_FOREGROUND_MICROPHONE_Q;
 import static com.android.server.appop.AppOpsService.ModeCallback.ALL_OPS;
 
 import static java.lang.Long.max;

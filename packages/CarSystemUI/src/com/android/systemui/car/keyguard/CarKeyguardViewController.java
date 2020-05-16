@@ -203,6 +203,11 @@ public class CarKeyguardViewController extends OverlayViewController implements
             }
             mKeyguardUpdateMonitor.sendKeyguardReset();
             notifyKeyguardUpdateMonitor();
+        } else {
+            // This is necessary in order to address an inconsistency between the keyguard service
+            // and the keyguard views.
+            // TODO: Investigate the source of the inconsistency.
+            show(/* options= */ null);
         }
     }
 

@@ -336,7 +336,7 @@ interface IWindowSession {
     * an input channel where the client can receive input.
     */
     void grantInputChannel(int displayId, in SurfaceControl surface, in IWindow window,
-            in IBinder hostInputToken, int flags, out InputChannel outInputChannel);
+            in IBinder hostInputToken, int flags, int type, out InputChannel outInputChannel);
 
     /**
      * Update the flags on an input channel associated with a particular surface.

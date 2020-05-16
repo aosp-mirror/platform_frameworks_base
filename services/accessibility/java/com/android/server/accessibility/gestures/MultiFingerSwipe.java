@@ -20,9 +20,9 @@ import static android.view.MotionEvent.INVALID_POINTER_ID;
 
 import static com.android.server.accessibility.gestures.GestureUtils.MM_PER_CM;
 import static com.android.server.accessibility.gestures.GestureUtils.getActionIndex;
-import static com.android.server.accessibility.gestures.Swipe.CANCEL_ON_PAUSE_THRESHOLD_NOT_STARTED_MS;
-import static com.android.server.accessibility.gestures.Swipe.CANCEL_ON_PAUSE_THRESHOLD_STARTED_MS;
 import static com.android.server.accessibility.gestures.Swipe.GESTURE_CONFIRM_CM;
+import static com.android.server.accessibility.gestures.Swipe.MAX_TIME_TO_CONTINUE_SWIPE_MS;
+import static com.android.server.accessibility.gestures.Swipe.MAX_TIME_TO_START_SWIPE_MS;
 import static com.android.server.accessibility.gestures.TouchExplorer.DEBUG;
 
 import android.content.Context;
@@ -387,10 +387,10 @@ class MultiFingerSwipe extends GestureMatcher {
         cancelPendingTransitions();
         switch (getState()) {
             case STATE_CLEAR:
-                cancelAfter(CANCEL_ON_PAUSE_THRESHOLD_NOT_STARTED_MS, event, rawEvent, policyFlags);
+                cancelAfter(MAX_TIME_TO_START_SWIPE_MS, event, rawEvent, policyFlags);
                 break;
             case STATE_GESTURE_STARTED:
-                cancelAfter(CANCEL_ON_PAUSE_THRESHOLD_STARTED_MS, event, rawEvent, policyFlags);
+                cancelAfter(MAX_TIME_TO_CONTINUE_SWIPE_MS, event, rawEvent, policyFlags);
                 break;
             default:
                 break;

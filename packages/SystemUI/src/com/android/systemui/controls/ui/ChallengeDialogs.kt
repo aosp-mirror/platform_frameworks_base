@@ -124,7 +124,7 @@ object ChallengeDialogs {
         }
         val builder = AlertDialog.Builder(cvh.context, STYLE).apply {
             val res = cvh.context.resources
-            setMessage(res.getString(
+            setTitle(res.getString(
                 R.string.controls_confirmation_message, cvh.title.getText()))
             setPositiveButton(
                 android.R.string.ok,

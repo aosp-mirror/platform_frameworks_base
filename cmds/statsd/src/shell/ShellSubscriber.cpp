@@ -152,6 +152,7 @@ void ShellSubscriber::startPull(int myToken) {
             }
 
             int64_t nowMillis = getElapsedRealtimeMillis();
+            int64_t nowNanos = getElapsedRealtimeNs();
             for (PullInfo& pullInfo : mSubscriptionInfo->mPulledInfo) {
                 if (pullInfo.mPrevPullElapsedRealtimeMs + pullInfo.mInterval >= nowMillis) {
                     continue;
@@ -161,7 +162,7 @@ void ShellSubscriber::startPull(int myToken) {
                 getUidsForPullAtom(&uids, pullInfo);
 
                 vector<std::shared_ptr<LogEvent>> data;
-                mPullerMgr->Pull(pullInfo.mPullerMatcher.atom_id(), uids, &data);
+                mPullerMgr->Pull(pullInfo.mPullerMatcher.atom_id(), uids, nowNanos, &data);
                 VLOG("Pulled %zu atoms with id %d", data.size(), pullInfo.mPullerMatcher.atom_id());
                 writePulledAtomsLocked(data, pullInfo.mPullerMatcher);
 

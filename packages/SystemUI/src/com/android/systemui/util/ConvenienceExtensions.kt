@@ -13,17 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef ANDROID_ATRACE_HEADERS_H
-#define ANDROID_ATRACE_HEADERS_H
 
-#include <cutils/trace.h>
+package com.android.systemui.util
 
-inline void ATrace_beginSection(const char* sectionName) {
-    atrace_begin(ATRACE_TAG_APP, sectionName);
-}
+import android.view.ViewGroup
 
-inline void ATrace_endSection() {
-    atrace_end(ATRACE_TAG_APP);
-}
-
-#endif // ANDROID_ATRACE_HEADERS_H
+/** [Sequence] that yields all of the direct children of this [ViewGroup] */
+val ViewGroup.children
+    get() = sequence {
+        for (i in 0 until childCount) yield(getChildAt(i))
+    }

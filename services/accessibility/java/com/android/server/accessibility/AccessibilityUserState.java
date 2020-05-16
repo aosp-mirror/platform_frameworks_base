@@ -116,11 +116,17 @@ class AccessibilityUserState {
     private int mLastSentClientState = -1;
     // The magnification mode of default display.
     private int mMagnificationMode = ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
+    // The magnification capabilities used to know magnification mode could be switched.
+    private int mMagnificationCapabilities = ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
 
     private Context mContext;
 
     @SoftKeyboardShowMode
     private int mSoftKeyboardShowMode = SHOW_MODE_AUTO;
+
+    boolean isValidMagnificationModeLocked() {
+        return (mMagnificationCapabilities & mMagnificationMode) != 0;
+    }
 
     interface ServiceInfoChangeListener {
         void onServiceInfoChangedLocked(AccessibilityUserState userState);
@@ -455,6 +461,9 @@ class AccessibilityUserState {
         pw.append(", nonInteractiveUiTimeout=").append(String.valueOf(mNonInteractiveUiTimeout));
         pw.append(", interactiveUiTimeout=").append(String.valueOf(mInteractiveUiTimeout));
         pw.append(", installedServiceCount=").append(String.valueOf(mInstalledServices.size()));
+        pw.append(", magnificationMode=").append(String.valueOf(mMagnificationMode));
+        pw.append(", magnificationCapabilities=")
+                .append(String.valueOf(mMagnificationCapabilities));
         pw.append("}");
         pw.println();
         pw.append("     shortcut key:{");
@@ -588,6 +597,31 @@ class AccessibilityUserState {
         return mMagnificationMode;
     }
 
+
+    /**
+     * Gets the magnification capabilities setting of current user.
+     *
+     * @return magnification capabilities
+     *
+     * @see Settings.Secure#ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN
+     * @see Settings.Secure#ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW
+     * @see Settings.Secure#ACCESSIBILITY_MAGNIFICATION_MODE_ALL
+     */
+    int getMagnificationCapabilitiesLocked() {
+        return mMagnificationCapabilities;
+    }
+
+    /**
+     * Sets the magnification capabilities from Settings value.
+     *
+     * @see Settings.Secure#ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN
+     * @see Settings.Secure#ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW
+     * @see Settings.Secure#ACCESSIBILITY_MAGNIFICATION_MODE_ALL
+     */
+    public void setMagnificationCapabilitiesLocked(int capabilities) {
+        mMagnificationCapabilities = capabilities;
+    }
+
     /**
      * Sets the magnification mode of default display.
      * @param mode The magnification mode.
@@ -651,6 +685,25 @@ class AccessibilityUserState {
             }
         }
         return false;
+    }
+
+    /**
+     * Removes given shortcut target in the list.
+     *
+     * @param shortcutType The shortcut type.
+     * @param target The component name of the shortcut target.
+     * @return true if the shortcut target is removed.
+     */
+    public boolean removeShortcutTargetLocked(@ShortcutType int shortcutType,
+            ComponentName target) {
+        return getShortcutTargetsLocked(shortcutType).removeIf(name -> {
+            ComponentName componentName;
+            if (name == null
+                    || (componentName = ComponentName.unflattenFromString(name)) == null) {
+                return false;
+            }
+            return componentName.equals(target);
+        });
     }
 
     /**

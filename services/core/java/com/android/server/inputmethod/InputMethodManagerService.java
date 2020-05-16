@@ -4202,6 +4202,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                             + ((ClientState)msg.obj).uid);
                 }
                 return true;
+            case MSG_SET_INTERACTIVE:
+                handleSetInteractive(msg.arg1 != 0);
+                return true;
             case MSG_REPORT_FULLSCREEN_MODE: {
                 final boolean fullscreen = msg.arg1 != 0;
                 final ClientState clientState = (ClientState)msg.obj;
@@ -4259,7 +4262,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             }
 
             // ---------------------------------------------------------------
-            case MSG_INLINE_SUGGESTIONS_REQUEST:
+            case MSG_INLINE_SUGGESTIONS_REQUEST: {
                 args = (SomeArgs) msg.obj;
                 final InlineSuggestionsRequestInfo requestInfo =
                         (InlineSuggestionsRequestInfo) args.arg2;
@@ -4271,9 +4274,25 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 } catch (RemoteException e) {
                     Slog.w(TAG, "RemoteException calling onCreateInlineSuggestionsRequest(): " + e);
                 }
+                args.recycle();
                 return true;
+            }
         }
         return false;
+    }
+
+    private void handleSetInteractive(final boolean interactive) {
+        synchronized (mMethodMap) {
+            mIsInteractive = interactive;
+            updateSystemUiLocked(interactive ? mImeWindowVis : 0, mBackDisposition);
+
+            // Inform the current client of the change in active status
+            if (mCurClient != null && mCurClient.client != null) {
+                executeOrSendMessage(mCurClient.client, mCaller.obtainMessageIIO(
+                        MSG_SET_ACTIVE, mIsInteractive ? 1 : 0, mInFullscreenMode ? 1 : 0,
+                        mCurClient));
+            }
+        }
     }
 
     private boolean chooseNewDefaultIMELocked() {
@@ -4882,6 +4901,13 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
         LocalServiceImpl(@NonNull InputMethodManagerService service) {
             mService = service;
+        }
+
+        @Override
+        public void setInteractive(boolean interactive) {
+            // Do everything in handler so as not to block the caller.
+            mService.mHandler.obtainMessage(MSG_SET_INTERACTIVE, interactive ? 1 : 0, 0)
+                    .sendToTarget();
         }
 
         @Override

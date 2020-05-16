@@ -30,6 +30,7 @@ import android.content.pm.LabeledIntent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ShortcutInfo;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -253,6 +254,16 @@ public class ChooserListAdapter extends ResolverListAdapter {
             holder.text.setBackground(null);
             holder.itemView.setBackground(holder.defaultItemViewBackground);
         }
+
+        // If the target is grouped show an indicator
+        if (info instanceof MultiDisplayResolveInfo) {
+            Drawable bkg = mContext.getDrawable(R.drawable.chooser_group_background);
+            holder.text.setPaddingRelative(0, 0, bkg.getIntrinsicWidth() /* end */, 0);
+            holder.text.setBackground(bkg);
+        } else {
+            holder.text.setBackground(null);
+            holder.text.setPaddingRelative(0, 0, 0, 0);
+        }
     }
 
     void updateAlphabeticalList() {
@@ -262,14 +273,17 @@ public class ChooserListAdapter extends ResolverListAdapter {
             Map<String, DisplayResolveInfo> consolidated = new HashMap<>();
             for (DisplayResolveInfo info : mDisplayList) {
                 String packageName = info.getResolvedComponentName().getPackageName();
-                if (consolidated.get(packageName) != null) {
-                    // create consolidated target
-                    MultiDisplayResolveInfo multiDisplayResolveInfo =
-                            new MultiDisplayResolveInfo(packageName, info);
-                    multiDisplayResolveInfo.addTarget(consolidated.get(packageName));
-                    consolidated.put(packageName, multiDisplayResolveInfo);
-                } else {
+                DisplayResolveInfo multiDri = consolidated.get(packageName);
+                if (multiDri == null) {
                     consolidated.put(packageName, info);
+                } else if (multiDri instanceof MultiDisplayResolveInfo) {
+                    ((MultiDisplayResolveInfo) multiDri).addTarget(info);
+                } else {
+                    // create consolidated target from the single DisplayResolveInfo
+                    MultiDisplayResolveInfo multiDisplayResolveInfo =
+                            new MultiDisplayResolveInfo(packageName, multiDri);
+                    multiDisplayResolveInfo.addTarget(info);
+                    consolidated.put(packageName, multiDisplayResolveInfo);
                 }
             }
             mSortedList.addAll(consolidated.values());
