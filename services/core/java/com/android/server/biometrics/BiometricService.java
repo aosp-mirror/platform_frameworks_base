@@ -38,9 +38,9 @@ import android.hardware.biometrics.IBiometricSensorReceiver;
 import android.hardware.biometrics.IBiometricService;
 import android.hardware.biometrics.IBiometricServiceReceiver;
 import android.hardware.biometrics.IBiometricSysuiReceiver;
+import android.hardware.biometrics.PromptInfo;
 import android.net.Uri;
 import android.os.Binder;
-import android.os.Bundle;
 import android.os.DeadObjectException;
 import android.os.Handler;
 import android.os.IBinder;
@@ -181,7 +181,7 @@ public class BiometricService extends SystemService {
                             args.argi1 /* userid */,
                             (IBiometricServiceReceiver) args.arg3 /* receiver */,
                             (String) args.arg4 /* opPackageName */,
-                            (Bundle) args.arg5 /* bundle */,
+                            (PromptInfo) args.arg5 /* promptInfo */,
                             args.argi2 /* callingUid */,
                             args.argi3 /* callingPid */,
                             args.argi4 /* callingUserId */);
@@ -465,26 +465,26 @@ public class BiometricService extends SystemService {
 
         @Override // Binder call
         public void authenticate(IBinder token, long operationId, int userId,
-                IBiometricServiceReceiver receiver, String opPackageName, Bundle bundle,
+                IBiometricServiceReceiver receiver, String opPackageName, PromptInfo promptInfo,
                 int callingUid, int callingPid, int callingUserId) {
             checkInternalPermission();
 
-            if (token == null || receiver == null || opPackageName == null || bundle == null) {
+            if (token == null || receiver == null || opPackageName == null || promptInfo == null) {
                 Slog.e(TAG, "Unable to authenticate, one or more null arguments");
                 return;
             }
 
-            if (!Utils.isValidAuthenticatorConfig(bundle)) {
+            if (!Utils.isValidAuthenticatorConfig(promptInfo)) {
                 throw new SecurityException("Invalid authenticator configuration");
             }
 
-            Utils.combineAuthenticatorBundles(bundle);
+            Utils.combineAuthenticatorBundles(promptInfo);
 
             // Set the default title if necessary.
-            if (bundle.getBoolean(BiometricPrompt.KEY_USE_DEFAULT_TITLE, false)) {
-                if (TextUtils.isEmpty(bundle.getCharSequence(BiometricPrompt.KEY_TITLE))) {
-                    bundle.putCharSequence(BiometricPrompt.KEY_TITLE,
-                            getContext().getString(R.string.biometric_dialog_default_title));
+            if (promptInfo.isUseDefaultTitle()) {
+                if (TextUtils.isEmpty(promptInfo.getTitle())) {
+                    promptInfo.setTitle(getContext()
+                            .getString(R.string.biometric_dialog_default_title));
                 }
             }
 
@@ -494,7 +494,7 @@ public class BiometricService extends SystemService {
             args.argi1 = userId;
             args.arg3 = receiver;
             args.arg4 = opPackageName;
-            args.arg5 = bundle;
+            args.arg5 = promptInfo;
             args.argi2 = callingUid;
             args.argi3 = callingPid;
             args.argi4 = callingUserId;
@@ -523,12 +523,12 @@ public class BiometricService extends SystemService {
                 throw new SecurityException("Invalid authenticator configuration");
             }
 
-            final Bundle bundle = new Bundle();
-            bundle.putInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED, authenticators);
+            final PromptInfo promptInfo = new PromptInfo();
+            promptInfo.setAuthenticators(authenticators);
 
             try {
                 PreAuthInfo preAuthInfo = PreAuthInfo.create(mTrustManager,
-                        mDevicePolicyManager, mSettingObserver, mSensors, userId, bundle,
+                        mDevicePolicyManager, mSettingObserver, mSensors, userId, promptInfo,
                         opPackageName,
                         false /* checkDevicePolicyManager */);
                 return preAuthInfo.getCanAuthenticateResult();
@@ -979,16 +979,14 @@ public class BiometricService extends SystemService {
     }
 
     private void handleAuthenticate(IBinder token, long operationId, int userId,
-            IBiometricServiceReceiver receiver, String opPackageName, Bundle bundle,
+            IBiometricServiceReceiver receiver, String opPackageName, PromptInfo promptInfo,
             int callingUid, int callingPid, int callingUserId) {
 
         mHandler.post(() -> {
             try {
-                final boolean checkDevicePolicyManager = bundle.getBoolean(
-                        BiometricPrompt.EXTRA_DISALLOW_BIOMETRICS_IF_POLICY_EXISTS, false);
                 final PreAuthInfo preAuthInfo = PreAuthInfo.create(mTrustManager,
-                        mDevicePolicyManager, mSettingObserver, mSensors, userId, bundle,
-                        opPackageName, checkDevicePolicyManager);
+                        mDevicePolicyManager, mSettingObserver, mSensors, userId, promptInfo,
+                        opPackageName, promptInfo.isDisallowBiometricsIfPolicyExists());
 
                 final Pair<Integer, Integer> preAuthStatus = preAuthInfo.getPreAuthenticateStatus();
 
@@ -1002,13 +1000,11 @@ public class BiometricService extends SystemService {
                     // TODO: We should clean this up, as well as the interface with SystemUI
                     if (preAuthInfo.credentialRequested && preAuthInfo.credentialAvailable
                             && preAuthInfo.eligibleSensors.isEmpty()) {
-                        bundle.putInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED,
-                                Authenticators.DEVICE_CREDENTIAL);
+                        promptInfo.setAuthenticators(Authenticators.DEVICE_CREDENTIAL);
                     }
 
-                    authenticateInternal(token, operationId, userId,
-                            receiver, opPackageName, bundle, callingUid, callingPid, callingUserId,
-                            preAuthInfo);
+                    authenticateInternal(token, operationId, userId, receiver, opPackageName,
+                            promptInfo, callingUid, callingPid, callingUserId, preAuthInfo);
                 } else {
                     receiver.onError(preAuthStatus.first /* modality */,
                             preAuthStatus.second /* errorCode */,
@@ -1029,8 +1025,8 @@ public class BiometricService extends SystemService {
      * 2) Preparing <Biometric>Services for authentication when BiometricPrompt is already shown
      * and the user has pressed "try again"
      */
-    private void authenticateInternal(IBinder token, long operationId,
-            int userId, IBiometricServiceReceiver receiver, String opPackageName, Bundle bundle,
+    private void authenticateInternal(IBinder token, long operationId, int userId,
+            IBiometricServiceReceiver receiver, String opPackageName, PromptInfo promptInfo,
             int callingUid, int callingPid, int callingUserId, PreAuthInfo preAuthInfo) {
         Slog.d(TAG, "Creating authSession with authRequest: " + preAuthInfo);
 
@@ -1048,7 +1044,7 @@ public class BiometricService extends SystemService {
         final boolean debugEnabled = mInjector.isDebugEnabled(getContext(), userId);
         mCurrentAuthSession = new AuthSession(mStatusBarService, mSysuiReceiver, mKeyStore, mRandom,
                 preAuthInfo, token, operationId, userId, mBiometricSensorReceiver, receiver,
-                opPackageName, bundle, callingUid, callingPid, callingUserId, debugEnabled);
+                opPackageName, promptInfo, callingUid, callingPid, callingUserId, debugEnabled);
         try {
             mCurrentAuthSession.goToInitialState();
         } catch (RemoteException e) {
