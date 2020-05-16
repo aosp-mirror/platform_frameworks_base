@@ -54,7 +54,7 @@ private const val DEFAULT_LUMINOSITY = 0.25f
 private const val LUMINOSITY_THRESHOLD = 0.05f
 private const val SATURATION_MULTIPLIER = 0.8f
 
-private val LOADING = MediaData(false,  0, null, null, null, null, null,
+private val LOADING = MediaData(false, 0, null, null, null, null, null,
         emptyList(), emptyList(), null, null, null)
 
 /**
@@ -191,12 +191,14 @@ class MediaDataManager @Inject constructor(
         // TODO: b/153736623 look into creating actions when this isn't a media style notification
 
         val packageContext: Context = sbn.getPackageContext(context)
-        for (action in actions) {
-            val mediaAction = MediaAction(
-                    action.getIcon().loadDrawable(packageContext),
-                    action.actionIntent,
-                    action.title)
-            actionIcons.add(mediaAction)
+        if (actions != null) {
+            for (action in actions) {
+                val mediaAction = MediaAction(
+                        action.getIcon().loadDrawable(packageContext),
+                        action.actionIntent,
+                        action.title)
+                actionIcons.add(mediaAction)
+            }
         }
 
         foregroundExcecutor.execute {
