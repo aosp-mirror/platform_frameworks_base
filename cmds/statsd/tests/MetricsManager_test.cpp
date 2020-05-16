@@ -29,6 +29,7 @@
 #include "src/metrics/MetricProducer.h"
 #include "src/metrics/ValueMetricProducer.h"
 #include "src/metrics/metrics_manager_util.h"
+#include "src/state/StateManager.h"
 #include "statsd_test_util.h"
 
 using namespace testing;
@@ -613,6 +614,34 @@ TEST(MetricsManagerTest, TestCheckLogCredentialsWhitelistedAtom) {
 
     CreateNoValuesLogEvent(&event, 4 /* atom id */, 0 /* timestamp */);
     EXPECT_TRUE(metricsManager.checkLogCredentials(event));
+}
+
+TEST(MetricsManagerTest, TestWhitelistedAtomStateTracker) {
+    sp<UidMap> uidMap;
+    sp<StatsPullerManager> pullerManager = new StatsPullerManager();
+    sp<AlarmMonitor> anomalyAlarmMonitor;
+    sp<AlarmMonitor> periodicAlarmMonitor;
+
+    StatsdConfig config = buildGoodConfig();
+    config.add_allowed_log_source("AID_SYSTEM");
+    config.add_whitelisted_atom_ids(3);
+    config.add_whitelisted_atom_ids(4);
+
+    State state;
+    state.set_id(1);
+    state.set_atom_id(3);
+
+    *config.add_state() = state;
+
+    config.mutable_count_metric(0)->add_slice_by_state(state.id());
+
+    StateManager::getInstance().clear();
+
+    MetricsManager metricsManager(kConfigKey, config, timeBaseSec, timeBaseSec, uidMap,
+                                  pullerManager, anomalyAlarmMonitor, periodicAlarmMonitor);
+
+    EXPECT_EQ(0, StateManager::getInstance().getStateTrackersCount());
+    EXPECT_FALSE(metricsManager.isConfigValid());
 }
 
 }  // namespace statsd

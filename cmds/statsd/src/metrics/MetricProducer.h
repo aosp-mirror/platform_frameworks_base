@@ -442,7 +442,7 @@ protected:
     bool mIsActive;
 
     // The slice_by_state atom ids defined in statsd_config.
-    std::vector<int32_t> mSlicedStateAtoms;
+    const std::vector<int32_t> mSlicedStateAtoms;
 
     // Maps atom ids and state values to group_ids (<atom_id, <value, group_id>>).
     const std::unordered_map<int32_t, std::unordered_map<int, int64_t>> mStateGroupMap;
