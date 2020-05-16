@@ -16265,10 +16265,16 @@ public class PackageManagerService extends IPackageManager.Stub
                     // signing certificate than the existing one, and if so, copy over the new
                     // details
                     if (signatureCheckPs.sharedUser != null) {
-                        if (parsedPackage.getSigningDetails().hasAncestor(
-                                signatureCheckPs.sharedUser.signatures.mSigningDetails)) {
-                            signatureCheckPs.sharedUser.signatures.mSigningDetails =
-                                    parsedPackage.getSigningDetails();
+                        // Attempt to merge the existing lineage for the shared SigningDetails with
+                        // the lineage of the new package; if the shared SigningDetails are not
+                        // returned this indicates the new package added new signers to the lineage
+                        // and/or changed the capabilities of existing signers in the lineage.
+                        SigningDetails sharedSigningDetails =
+                                signatureCheckPs.sharedUser.signatures.mSigningDetails;
+                        SigningDetails mergedDetails = sharedSigningDetails.mergeLineageWith(
+                                signingDetails);
+                        if (mergedDetails != sharedSigningDetails) {
+                            signatureCheckPs.sharedUser.signatures.mSigningDetails = mergedDetails;
                         }
                         if (signatureCheckPs.sharedUser.signaturesChanged == null) {
                             signatureCheckPs.sharedUser.signaturesChanged = Boolean.FALSE;
