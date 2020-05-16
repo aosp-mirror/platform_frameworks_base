@@ -131,14 +131,23 @@ public class ParsingPackageUtils {
     public static final String TAG = ParsingUtils.TAG;
 
     /**
-     * For cases outside of PackageManagerService when an APK needs to be parsed as a one-off
-     * request, without caching the input object and without querying the internal system state
-     * for feature support.
+     * @see #parseDefault(ParseInput, File, int, boolean)
      */
     @NonNull
     public static ParseResult<ParsingPackage> parseDefaultOneTime(File file,
             @PackageParser.ParseFlags int parseFlags, boolean collectCertificates) {
         ParseInput input = ParseTypeImpl.forDefaultParsing().reset();
+        return parseDefault(input, file, parseFlags, collectCertificates);
+    }
+
+    /**
+     * For cases outside of PackageManagerService when an APK needs to be parsed as a one-off
+     * request, without caching the input object and without querying the internal system state
+     * for feature support.
+     */
+    @NonNull
+    public static ParseResult<ParsingPackage> parseDefault(ParseInput input, File file,
+            @PackageParser.ParseFlags int parseFlags, boolean collectCertificates) {
         ParseResult<ParsingPackage> result;
 
         ParsingPackageUtils parser = new ParsingPackageUtils(false, null, null, new Callback() {
