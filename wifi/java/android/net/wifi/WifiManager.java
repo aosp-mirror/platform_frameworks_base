@@ -817,6 +817,9 @@ public class WifiManager {
     /**
      * Broadcast intent action indicating that the wifi network settings
      * had been reset.
+     *
+     * Note: This intent is sent as a directed broadcast to each manifest registered receiver.
+     * Intent will not be received by dynamically registered receivers.
      * @hide
      */
     @SystemApi
