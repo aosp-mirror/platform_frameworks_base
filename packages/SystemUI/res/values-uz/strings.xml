@@ -370,7 +370,7 @@
     <string name="quick_settings_cellular_detail_data_used" msgid="6798849610647988987">"<xliff:g id="DATA_USED">%s</xliff:g> sarflandi"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"Cheklov: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"Ogohlantirish: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
-    <string name="quick_settings_work_mode_label" msgid="2754212289804324685">"Ishchi profil"</string>
+    <string name="quick_settings_work_mode_label" msgid="2754212289804324685">"Ish profili"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Tungi rejim"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Kunbotarda yoqish"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"Quyosh chiqqunicha"</string>
@@ -535,7 +535,7 @@
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"Tovush sozlamalari"</string>
     <string name="accessibility_volume_expand" msgid="7653070939304433603">"Yoyish"</string>
     <string name="accessibility_volume_collapse" msgid="2746845391013829996">"Yig‘ish"</string>
-    <string name="volume_odi_captions_tip" msgid="8825655463280990941">"Avtomatik taglavha mediasi"</string>
+    <string name="volume_odi_captions_tip" msgid="8825655463280990941">"Avtomatik taglavha yaratish"</string>
     <string name="accessibility_volume_close_odi_captions_tip" msgid="8924753283621160480">"Taglavhalar maslahatini yopish"</string>
     <string name="volume_odi_captions_content_description" msgid="4172765742046013630">"Taglavhalarni chiqarish"</string>
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"faollashtirish"</string>
@@ -600,7 +600,7 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"Demo rejimni ko‘rsatish"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Signal"</string>
-    <string name="status_bar_work" msgid="5238641949837091056">"Ishchi profil"</string>
+    <string name="status_bar_work" msgid="5238641949837091056">"Ish profili"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Parvoz rejimi"</string>
     <string name="add_tile" msgid="6239678623873086686">"Tezkor sozlamalar tugmasini qo‘shish"</string>
     <string name="broadcast_tile" msgid="5224010633596487481">"Translatsiya tugmasi"</string>
@@ -610,7 +610,7 @@
     <string name="alarm_template_far" msgid="3561752195856839456">"<xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_detail" msgid="544463655956179791">"Tezkor sozlamalar, <xliff:g id="TITLE">%s</xliff:g>."</string>
     <string name="accessibility_status_bar_hotspot" msgid="2888479317489131669">"Hotspot"</string>
-    <string name="accessibility_managed_profile" msgid="4703836746209377356">"Ishchi profil"</string>
+    <string name="accessibility_managed_profile" msgid="4703836746209377356">"Ish profili"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Diqqat!"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"System UI Tuner yordamida siz Android foydalanuvchi interfeysini tuzatish va o‘zingizga moslashtirishingiz mumkin. Ushbu tajribaviy funksiyalar o‘zgarishi, buzilishi yoki keyingi versiyalarda olib tashlanishi mumkin. Ehtiyot bo‘lib davom eting."</string>
     <string name="tuner_persistent_warning" msgid="230466285569307806">"Ushbu tajribaviy funksiyalar o‘zgarishi, buzilishi yoki keyingi versiyalarda olib tashlanishi mumkin. Ehtiyot bo‘lib davom eting."</string>
@@ -926,8 +926,8 @@
     <string name="music_controls_no_title" msgid="4166497066552290938">"Nomsiz"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"Bu ilovani qaytadan ishga tushirish va butun ekranga ochish uchun bosing."</string>
     <string name="bubbles_deep_link_button_description" msgid="3532375322003698792">"Ochish: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="bubbles_settings_button_description" msgid="7324245408859877545">"<xliff:g id="APP_NAME">%1$s</xliff:g> pufakchalari uchun sozlamalar"</string>
-    <string name="bubbles_prompt" msgid="8172381116778530318">"<xliff:g id="APP_NAME">%1$s</xliff:g> pufakchalariga ruxsat berilsinmi?"</string>
+    <string name="bubbles_settings_button_description" msgid="7324245408859877545">"<xliff:g id="APP_NAME">%1$s</xliff:g> bulutchalari uchun sozlamalar"</string>
+    <string name="bubbles_prompt" msgid="8172381116778530318">"<xliff:g id="APP_NAME">%1$s</xliff:g> bulutchalariga ruxsat berilsinmi?"</string>
     <string name="manage_bubbles_text" msgid="6856830436329494850">"Boshqarish"</string>
     <string name="no_bubbles" msgid="1187859094003006292">"Rad etish"</string>
     <string name="yes_bubbles" msgid="3014008797151197346">"Ruxsat"</string>

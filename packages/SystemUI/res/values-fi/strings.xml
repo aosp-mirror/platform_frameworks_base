@@ -28,7 +28,7 @@
     <string name="battery_low_percent_format" msgid="4276661262843170964">"<xliff:g id="PERCENTAGE">%s</xliff:g> jäljellä"</string>
     <string name="battery_low_percent_format_hybrid" msgid="3985614339605686167">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> käytettävissä, noin <xliff:g id="TIME">%2$s</xliff:g> jäljellä käytön perusteella"</string>
     <string name="battery_low_percent_format_hybrid_short" msgid="5917433188456218857">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> käytettävissä, noin <xliff:g id="TIME">%2$s</xliff:g> jäljellä"</string>
-    <string name="battery_low_percent_format_saver_started" msgid="4968468824040940688">"<xliff:g id="PERCENTAGE">%s</xliff:g> jäljellä. Virransäästö on käytössä."</string>
+    <string name="battery_low_percent_format_saver_started" msgid="4968468824040940688">"<xliff:g id="PERCENTAGE">%s</xliff:g> jäljellä. Virransäästö on päällä."</string>
     <string name="invalid_charger" msgid="4370074072117767416">"Lataaminen USB:llä ei onnistu. Käytä laitteesi mukana tullutta laturia."</string>
     <string name="invalid_charger_title" msgid="938685362320735167">"Lataaminen USB:llä ei onnistu"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"Käytä laitteesi mukana tullutta laturia"</string>
@@ -454,7 +454,7 @@
     <string name="user_remove_user_title" msgid="9124124694835811874">"Poistetaanko käyttäjä?"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"Kaikki käyttäjän tiedot ja sovellukset poistetaan."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"Poista"</string>
-    <string name="battery_saver_notification_title" msgid="8419266546034372562">"Virransäästö on käytössä"</string>
+    <string name="battery_saver_notification_title" msgid="8419266546034372562">"Virransäästö on päällä"</string>
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"Rajoittaa suorituskykyä ja taustatiedonsiirtoa"</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"Poista virransäästö käytöstä"</string>
     <string name="media_projection_dialog_text" msgid="5509958417853154019">"Tallennuksen tai striimauksen aikana <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> voi tallentaa mitä tahansa näytöllä näkyvää tai laitteen toistamaa arkaluontoista tietoa, kuten ääniä, salasanoja, maksutietoja, kuvia ja viestejä."</string>
@@ -783,7 +783,7 @@
     <string name="left_icon" msgid="5036278531966897006">"Vasen kuvake"</string>
     <string name="right_icon" msgid="1103955040645237425">"Oikea kuvake"</string>
     <string name="drag_to_add_tiles" msgid="8933270127508303672">"Lisää osioita koskettamalla pitkään ja vetämällä"</string>
-    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Järjestele osioita koskettamalla pitkään ja vetämällä"</string>
+    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Järjestele koskettamalla pitkään ja vetämällä"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"Poista vetämällä tähän."</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"<xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> kiekkoa on vähimmäismäärä"</string>
     <string name="qs_edit" msgid="5583565172803472437">"Muokkaa"</string>
@@ -896,8 +896,8 @@
     <string name="qs_dnd_replace" msgid="7712119051407052689">"Korvaa"</string>
     <string name="running_foreground_services_title" msgid="5137313173431186685">"Sovelluksia käynnissä taustalla"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"Katso lisätietoja akun ja datan käytöstä napauttamalla"</string>
-    <string name="mobile_data_disable_title" msgid="5366476131671617790">"Poistetaanko mobiilidata käytöstä?"</string>
-    <string name="mobile_data_disable_message" msgid="8604966027899770415">"<xliff:g id="CARRIER">%s</xliff:g> ei voi enää tarjota sinulle internetyhteyttä. Internetyhteys voidaan muodostaa vain Wi-Fi-verkossa."</string>
+    <string name="mobile_data_disable_title" msgid="5366476131671617790">"Laitetaanko mobiilidata pois päältä?"</string>
+    <string name="mobile_data_disable_message" msgid="8604966027899770415">"<xliff:g id="CARRIER">%s</xliff:g> ei enää tarjoa pääsyä dataan eikä internetyhteyttä, joka on saatavilla vain Wi-Fin kautta."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"operaattorisi"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"Sovellus peittää käyttöoikeuspyynnön, joten Asetukset ei voi vahvistaa valintaasi."</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"Saako <xliff:g id="APP_0">%1$s</xliff:g> näyttää osia sovelluksesta <xliff:g id="APP_2">%2$s</xliff:g>?"</string>

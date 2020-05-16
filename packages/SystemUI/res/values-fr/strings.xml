@@ -36,7 +36,7 @@
     <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Activer l\'économiseur de batterie ?"</string>
     <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"À propos de l\'économiseur de batterie"</string>
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"Activer"</string>
-    <string name="battery_saver_start_action" msgid="4553256017945469937">"Activer l\'économiseur de batterie ?"</string>
+    <string name="battery_saver_start_action" msgid="4553256017945469937">"Activer l\'économiseur de batterie"</string>
     <string name="status_bar_settings_settings_button" msgid="534331565185171556">"Paramètres"</string>
     <string name="status_bar_settings_wifi_button" msgid="7243072479837270946">"Wi-Fi"</string>
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Rotation automatique de l\'écran"</string>
@@ -356,7 +356,7 @@
     <string name="quick_settings_tethering_label" msgid="5257299852322475780">"Partage de connexion"</string>
     <string name="quick_settings_hotspot_label" msgid="1199196300038363424">"Point d\'accès"</string>
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"Activation…"</string>
-    <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"Économ. données activé"</string>
+    <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"Écon. données activé"</string>
     <plurals name="quick_settings_hotspot_secondary_label_num_devices" formatted="false" msgid="3142308865165871976">
       <item quantity="one">%d appareil</item>
       <item quantity="other">%d appareils</item>
@@ -404,7 +404,7 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"Appuyer à nouveau pour ouvrir"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Balayer vers le haut pour ouvrir"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Balayez l\'écran vers le haut pour réessayer"</string>
-    <string name="dock_alignment_slow_charging" product="default" msgid="5148122851798085807">"Réalignez le téléphone pour le recharger plus rapidement"</string>
+    <string name="dock_alignment_slow_charging" product="default" msgid="5148122851798085807">"Réalignez le téléphone pour une recharge plus rapide"</string>
     <string name="dock_alignment_not_charging" product="default" msgid="1002617659995575624">"Réalignez le téléphone pour le recharger sans fil"</string>
     <string name="do_disclosure_generic" msgid="2388094207542706440">"Cet appareil est géré par votre entreprise"</string>
     <string name="do_disclosure_with_name" msgid="9113122674419739611">"Cet appareil est géré par <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
@@ -649,7 +649,7 @@
     <string name="inline_block_button" msgid="479892866568378793">"Bloquer"</string>
     <string name="inline_keep_button" msgid="299631874103662170">"Continuer d\'afficher les notifications"</string>
     <string name="inline_minimize_button" msgid="1474436209299333445">"Réduire"</string>
-    <string name="inline_silent_button_silent" msgid="525243786649275816">"Mode silencieux"</string>
+    <string name="inline_silent_button_silent" msgid="525243786649275816">"Silencieux"</string>
     <string name="inline_silent_button_stay_silent" msgid="2129254868305468743">"Notifications silencieuses"</string>
     <string name="inline_silent_button_alert" msgid="5705343216858250354">"Alertes"</string>
     <string name="inline_silent_button_keep_alerting" msgid="6577845442184724992">"Continuer de m\'avertir"</string>
@@ -913,7 +913,7 @@
     <string name="auto_saver_enabled_text" msgid="7889491183116752719">"L\'économiseur de batterie s\'active automatiquement lorsque l\'autonomie de la batterie est inférieure à <xliff:g id="PERCENTAGE">%d</xliff:g> %%."</string>
     <string name="open_saver_setting_action" msgid="2111461909782935190">"Paramètres"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"OK"</string>
-    <string name="heap_dump_tile_name" msgid="2464189856478823046">"Copier le tas SysUI"</string>
+    <string name="heap_dump_tile_name" msgid="2464189856478823046">"Copier mémoire SysUI"</string>
     <string name="ongoing_privacy_chip_content_single_app" msgid="2969750601815230385">"<xliff:g id="APP">%1$s</xliff:g> utilise votre <xliff:g id="TYPES_LIST">%2$s</xliff:g>."</string>
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Des applications utilisent votre <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
@@ -927,7 +927,7 @@
     <string name="restart_button_description" msgid="6916116576177456480">"Appuyez pour redémarrer cette application et activer le mode plein écran."</string>
     <string name="bubbles_deep_link_button_description" msgid="3532375322003698792">"Ouvrir <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubbles_settings_button_description" msgid="7324245408859877545">"Paramètres des bulles de <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="bubbles_prompt" msgid="8172381116778530318">"Autoriser les bulles pour <xliff:g id="APP_NAME">%1$s</xliff:g> ?"</string>
+    <string name="bubbles_prompt" msgid="8172381116778530318">"Autoriser les bulles de <xliff:g id="APP_NAME">%1$s</xliff:g> ?"</string>
     <string name="manage_bubbles_text" msgid="6856830436329494850">"Gérer"</string>
     <string name="no_bubbles" msgid="1187859094003006292">"Refuser"</string>
     <string name="yes_bubbles" msgid="3014008797151197346">"Autoriser"</string>

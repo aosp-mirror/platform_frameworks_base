@@ -148,7 +148,7 @@
     <string name="accessibility_data_two_bars" msgid="4576231688545173059">"Data dua batang."</string>
     <string name="accessibility_data_three_bars" msgid="3036562180893930325">"Data tiga batang."</string>
     <string name="accessibility_data_signal_full" msgid="283507058258113551">"Sinyal data penuh."</string>
-    <string name="accessibility_wifi_name" msgid="4863440268606851734">"Tersambung ke <xliff:g id="WIFI">%s</xliff:g>."</string>
+    <string name="accessibility_wifi_name" msgid="4863440268606851734">"Terhubung ke <xliff:g id="WIFI">%s</xliff:g>."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"Tersambung ke <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"Terhubung ke <xliff:g id="CAST">%s</xliff:g>."</string>
     <string name="accessibility_no_wimax" msgid="2014864207473859228">"Tidak ada WiMAX."</string>
@@ -159,7 +159,7 @@
     <string name="accessibility_ethernet_disconnected" msgid="2097190491174968655">"Ethernet terputus."</string>
     <string name="accessibility_ethernet_connected" msgid="3988347636883115213">"Ethernet tersambung."</string>
     <string name="accessibility_no_signal" msgid="1115622734914921920">"Tidak ada sinyal."</string>
-    <string name="accessibility_not_connected" msgid="4061305616351042142">"Tidak tersambung."</string>
+    <string name="accessibility_not_connected" msgid="4061305616351042142">"Tidak terhubung."</string>
     <string name="accessibility_zero_bars" msgid="1364823964848784827">"0 baris."</string>
     <string name="accessibility_one_bar" msgid="6312250030039240665">"Satu garis."</string>
     <string name="accessibility_two_bars" msgid="1335676987274417121">"Dua baris."</string>
@@ -264,8 +264,8 @@
     <string name="accessibility_quick_settings_work_mode_on" msgid="2779253456042059110">"Mode kerja aktif."</string>
     <string name="accessibility_quick_settings_work_mode_changed_off" msgid="6256690740556798683">"Mode kerja dinonaktifkan."</string>
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="1105258550138313384">"Mode kerja diaktifkan."</string>
-    <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"Penghemat Kuota nonaktif."</string>
-    <string name="accessibility_quick_settings_data_saver_changed_on" msgid="6370606590802623078">"Penghemat Kuota diaktifkan."</string>
+    <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"Penghemat Data nonaktif."</string>
+    <string name="accessibility_quick_settings_data_saver_changed_on" msgid="6370606590802623078">"Penghemat Data diaktifkan."</string>
     <string name="accessibility_quick_settings_sensor_privacy_changed_off" msgid="7608378211873807353">"Privasi Sensor dinonaktifkan."</string>
     <string name="accessibility_quick_settings_sensor_privacy_changed_on" msgid="4267393685085328801">"Privasi Sensor diaktifkan."</string>
     <string name="accessibility_brightness" msgid="5391187016177823721">"Kecerahan tampilan"</string>
@@ -332,7 +332,7 @@
     <string name="quick_settings_user_title" msgid="8673045967216204537">"Pengguna"</string>
     <string name="quick_settings_user_new_user" msgid="3347905871336069666">"Pengguna baru"</string>
     <string name="quick_settings_wifi_label" msgid="2879507532983487244">"Wi-Fi"</string>
-    <string name="quick_settings_wifi_not_connected" msgid="4071097522427039160">"Tidak Tersambung"</string>
+    <string name="quick_settings_wifi_not_connected" msgid="4071097522427039160">"Tidak Terhubung"</string>
     <string name="quick_settings_wifi_no_network" msgid="6003178398713839313">"Tidak Ada Jaringan"</string>
     <string name="quick_settings_wifi_off_label" msgid="4003379736176547594">"Wi-Fi Mati"</string>
     <string name="quick_settings_wifi_on_label" msgid="2489928193654318511">"Wi-Fi Aktif"</string>
@@ -356,7 +356,7 @@
     <string name="quick_settings_tethering_label" msgid="5257299852322475780">"Menambatkan"</string>
     <string name="quick_settings_hotspot_label" msgid="1199196300038363424">"Hotspot"</string>
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"Mengaktifkan…"</string>
-    <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"Penghemat Kuota aktif"</string>
+    <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"Penghemat Data aktif"</string>
     <plurals name="quick_settings_hotspot_secondary_label_num_devices" formatted="false" msgid="3142308865165871976">
       <item quantity="other">%d perangkat</item>
       <item quantity="one">%d perangkat</item>
@@ -364,7 +364,7 @@
     <string name="quick_settings_notifications_label" msgid="3379631363952582758">"Notifikasi"</string>
     <string name="quick_settings_flashlight_label" msgid="4904634272006284185">"Lampu Senter"</string>
     <string name="quick_settings_cellular_detail_title" msgid="792977203299358893">"Data seluler"</string>
-    <string name="quick_settings_cellular_detail_data_usage" msgid="6105969068871138427">"Penggunaan kuota"</string>
+    <string name="quick_settings_cellular_detail_data_usage" msgid="6105969068871138427">"Penggunaan data"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="1136599216568805644">"Data tersisa"</string>
     <string name="quick_settings_cellular_detail_over_limit" msgid="4561921367680636235">"Melebihi batas"</string>
     <string name="quick_settings_cellular_detail_data_used" msgid="6798849610647988987">"<xliff:g id="DATA_USED">%s</xliff:g> digunakan"</string>
@@ -386,7 +386,7 @@
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Geser ke atas untuk beralih aplikasi"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Tarik ke kanan untuk beralih aplikasi dengan cepat"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Aktifkan Ringkasan"</string>
-    <string name="expanded_header_battery_charged" msgid="5307907517976548448">"Terisi"</string>
+    <string name="expanded_header_battery_charged" msgid="5307907517976548448">"Terisi penuh"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"Mengisi daya"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="757991461445765011">"<xliff:g id="CHARGING_TIME">%s</xliff:g> sampai penuh"</string>
     <string name="expanded_header_battery_not_charging" msgid="809409140358955848">"Tidak mengisi daya"</string>
@@ -750,9 +750,9 @@
     <string name="accessibility_long_click_tile" msgid="210472753156768705">"Buka setelan"</string>
     <string name="accessibility_status_bar_headphones" msgid="1304082414912647414">"Headphone terhubung"</string>
     <string name="accessibility_status_bar_headset" msgid="2699275863720926104">"Headset terhubung"</string>
-    <string name="data_saver" msgid="3484013368530820763">"Penghemat Kuota"</string>
-    <string name="accessibility_data_saver_on" msgid="5394743820189757731">"Penghemat Kuota aktif"</string>
-    <string name="accessibility_data_saver_off" msgid="58339669022107171">"Penghemat Kuota nonaktif"</string>
+    <string name="data_saver" msgid="3484013368530820763">"Penghemat Data"</string>
+    <string name="accessibility_data_saver_on" msgid="5394743820189757731">"Penghemat Data aktif"</string>
+    <string name="accessibility_data_saver_off" msgid="58339669022107171">"Penghemat Data nonaktif"</string>
     <string name="switch_bar_on" msgid="1770868129120096114">"Aktif"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"Nonaktif"</string>
     <string name="nav_bar" msgid="4642708685386136807">"Bilah navigasi"</string>
@@ -896,7 +896,7 @@
     <string name="qs_dnd_replace" msgid="7712119051407052689">"Ganti"</string>
     <string name="running_foreground_services_title" msgid="5137313173431186685">"Aplikasi yang sedang berjalan di latar belakang"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"Ketuk untuk melihat detail penggunaan baterai dan data"</string>
-    <string name="mobile_data_disable_title" msgid="5366476131671617790">"Nonaktifkan kuota?"</string>
+    <string name="mobile_data_disable_title" msgid="5366476131671617790">"Nonaktifkan data seluler?"</string>
     <string name="mobile_data_disable_message" msgid="8604966027899770415">"Anda tidak akan dapat mengakses data atau internet melalui <xliff:g id="CARRIER">%s</xliff:g>. Internet hanya akan tersedia melalui Wi-Fi."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"Operator Seluler Anda"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"Karena sebuah aplikasi menghalangi permintaan izin, Setelan tidak dapat memverifikasi respons Anda."</string>

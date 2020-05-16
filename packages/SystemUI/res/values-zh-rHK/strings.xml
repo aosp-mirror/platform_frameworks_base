@@ -426,7 +426,7 @@
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="5759855008166759399">"切換使用者，目前使用者是<xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="383168614528618402">"目前的使用者是 <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"顯示個人檔案"</string>
-    <string name="user_add_user" msgid="4336657383006913022">"新增使用者"</string>
+    <string name="user_add_user" msgid="4336657383006913022">"加入使用者"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"新使用者"</string>
     <string name="guest_nickname" msgid="1863770639799615889">"訪客"</string>
     <string name="guest_new_guest" msgid="962155336259570156">"新增訪客"</string>
@@ -897,7 +897,7 @@
     <string name="running_foreground_services_title" msgid="5137313173431186685">"正在背景中執行的應用程式"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"輕按即可查看電池和數據用量詳情"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"要關閉流動數據嗎？"</string>
-    <string name="mobile_data_disable_message" msgid="8604966027899770415">"您將無法透過「<xliff:g id="CARRIER">%s</xliff:g>」存取流動數據或互聯網。必須連接 Wi-Fi 才能使用互聯網。"</string>
+    <string name="mobile_data_disable_message" msgid="8604966027899770415">"您無法透過「<xliff:g id="CARRIER">%s</xliff:g>」使用流動數據或互聯網。如要使用互聯網，您必須連接 Wi-Fi。"</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"您的流動網絡供應商"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"由於某個應用程式已阻擋權限要求畫面，因此「設定」應用程式無法驗證您的回應。"</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"要允許「<xliff:g id="APP_0">%1$s</xliff:g>」顯示「<xliff:g id="APP_2">%2$s</xliff:g>」的快訊嗎？"</string>

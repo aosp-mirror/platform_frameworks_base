@@ -190,7 +190,7 @@
     <string name="accessibility_cell_data_on" msgid="691666434519443162">"Мабільная перадача даных уключана"</string>
     <string name="cell_data_off_content_description" msgid="9165555931499878044">"Мабільная перадача даных выключана"</string>
     <string name="not_default_data_content_description" msgid="6757881730711522517">"Не зададзена для выкарыстання даных"</string>
-    <string name="cell_data_off" msgid="4886198950247099526">"Выключаны"</string>
+    <string name="cell_data_off" msgid="4886198950247099526">"Выключана"</string>
     <string name="accessibility_bluetooth_tether" msgid="6327291292208790599">"Сувязь па Bluetooth."</string>
     <string name="accessibility_airplane_mode" msgid="1899529214045998505">"Рэжым палёту."</string>
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"VPN уключана."</string>
@@ -264,8 +264,8 @@
     <string name="accessibility_quick_settings_work_mode_on" msgid="2779253456042059110">"Рэжым працы ўкл."</string>
     <string name="accessibility_quick_settings_work_mode_changed_off" msgid="6256690740556798683">"Рэжым працы выключаны."</string>
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="1105258550138313384">"Рэжым працы ўключаны."</string>
-    <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"Эканомія трафіку адключана."</string>
-    <string name="accessibility_quick_settings_data_saver_changed_on" msgid="6370606590802623078">"Эканомія трафіку ўключана."</string>
+    <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"Эканомія трафіка адключана."</string>
+    <string name="accessibility_quick_settings_data_saver_changed_on" msgid="6370606590802623078">"Эканомія трафіка ўключана."</string>
     <string name="accessibility_quick_settings_sensor_privacy_changed_off" msgid="7608378211873807353">"Прыватнасць датчыкаў выключана."</string>
     <string name="accessibility_quick_settings_sensor_privacy_changed_on" msgid="4267393685085328801">"Прыватнасць датчыкаў уключана."</string>
     <string name="accessibility_brightness" msgid="5391187016177823721">"Яркасць дысплэя"</string>
@@ -760,9 +760,9 @@
     <string name="accessibility_long_click_tile" msgid="210472753156768705">"Адкрыць налады"</string>
     <string name="accessibility_status_bar_headphones" msgid="1304082414912647414">"Навушнікі падключаны"</string>
     <string name="accessibility_status_bar_headset" msgid="2699275863720926104">"Гарнітура падлучана"</string>
-    <string name="data_saver" msgid="3484013368530820763">"Эканомія трафіку"</string>
-    <string name="accessibility_data_saver_on" msgid="5394743820189757731">"Эканомія трафіку ўключана"</string>
-    <string name="accessibility_data_saver_off" msgid="58339669022107171">"Эканомія трафіку адключана"</string>
+    <string name="data_saver" msgid="3484013368530820763">"Эканомія трафіка"</string>
+    <string name="accessibility_data_saver_on" msgid="5394743820189757731">"Эканомія трафіка ўключана"</string>
+    <string name="accessibility_data_saver_off" msgid="58339669022107171">"Эканомія трафіка адключана"</string>
     <string name="switch_bar_on" msgid="1770868129120096114">"Уключана"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"Выключана"</string>
     <string name="nav_bar" msgid="4642708685386136807">"Панэль навігацыі"</string>
@@ -936,8 +936,8 @@
     <string name="music_controls_no_title" msgid="4166497066552290938">"Без назвы"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"Націсніце, каб перазапусціць гэту праграму і перайсці ў поўнаэкранны рэжым."</string>
     <string name="bubbles_deep_link_button_description" msgid="3532375322003698792">"Адкрыць праграму \"<xliff:g id="APP_NAME">%1$s</xliff:g>\""</string>
-    <string name="bubbles_settings_button_description" msgid="7324245408859877545">"Налады дыялогаў у праграме \"<xliff:g id="APP_NAME">%1$s</xliff:g>\""</string>
-    <string name="bubbles_prompt" msgid="8172381116778530318">"Дазволіць дыялогі з праграмы \"<xliff:g id="APP_NAME">%1$s</xliff:g>\"?"</string>
+    <string name="bubbles_settings_button_description" msgid="7324245408859877545">"Налады ўсплывальных апавяшчэнняў у праграме \"<xliff:g id="APP_NAME">%1$s</xliff:g>\""</string>
+    <string name="bubbles_prompt" msgid="8172381116778530318">"Дазволіць усплывальныя апавяшчэнні з праграмы \"<xliff:g id="APP_NAME">%1$s</xliff:g>\"?"</string>
     <string name="manage_bubbles_text" msgid="6856830436329494850">"Кіраваць"</string>
     <string name="no_bubbles" msgid="1187859094003006292">"Адмовіць"</string>
     <string name="yes_bubbles" msgid="3014008797151197346">"Дазволіць"</string>

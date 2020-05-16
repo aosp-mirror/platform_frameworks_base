@@ -750,7 +750,7 @@
     <string name="accessibility_long_click_tile" msgid="210472753156768705">"Einstellungen öffnen"</string>
     <string name="accessibility_status_bar_headphones" msgid="1304082414912647414">"Mit Kopfhörer verbunden"</string>
     <string name="accessibility_status_bar_headset" msgid="2699275863720926104">"Mit Headset verbunden"</string>
-    <string name="data_saver" msgid="3484013368530820763">"Datenverbrauch reduzieren"</string>
+    <string name="data_saver" msgid="3484013368530820763">"Datensparmodus"</string>
     <string name="accessibility_data_saver_on" msgid="5394743820189757731">"Datensparmodus aktiviert"</string>
     <string name="accessibility_data_saver_off" msgid="58339669022107171">"Datensparmodus deaktiviert"</string>
     <string name="switch_bar_on" msgid="1770868129120096114">"An"</string>
@@ -782,8 +782,8 @@
     <string name="right_keycode" msgid="2480715509844798438">"Rechter Keycode"</string>
     <string name="left_icon" msgid="5036278531966897006">"Linkes Symbol"</string>
     <string name="right_icon" msgid="1103955040645237425">"Rechtes Symbol"</string>
-    <string name="drag_to_add_tiles" msgid="8933270127508303672">"Zum Hinzufügen von Kacheln Kachel halten und ziehen"</string>
-    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Zum Verschieben der Kacheln Kachel halten und ziehen"</string>
+    <string name="drag_to_add_tiles" msgid="8933270127508303672">"Zum Hinzufügen Kachel halten und ziehen"</string>
+    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Zum Verschieben Kachel halten und ziehen"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"Zum Entfernen hierher ziehen"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"Du brauchst mindestens <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> Kacheln"</string>
     <string name="qs_edit" msgid="5583565172803472437">"Bearbeiten"</string>

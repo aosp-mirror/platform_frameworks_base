@@ -358,7 +358,7 @@
     <string name="quick_settings_tethering_label" msgid="5257299852322475780">"Sdílené připojení"</string>
     <string name="quick_settings_hotspot_label" msgid="1199196300038363424">"Hotspot"</string>
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"Zapínání…"</string>
-    <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"Spořič dat je zapnutý"</string>
+    <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"Spořič dat zapnut"</string>
     <plurals name="quick_settings_hotspot_secondary_label_num_devices" formatted="false" msgid="3142308865165871976">
       <item quantity="few">%d zařízení</item>
       <item quantity="many">%d zařízení</item>
