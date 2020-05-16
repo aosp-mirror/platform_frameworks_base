@@ -2725,9 +2725,18 @@ public class NotificationManagerService extends SystemService {
         Context appContext = r.getSbn().getPackageContext(getContext());
         Notification.Builder nb =
                 Notification.Builder.recoverBuilder(appContext, r.getNotification());
-        if (nb.getStyle() instanceof Notification.MessagingStyle && r.getShortcutInfo() == null) {
-            mPreferencesHelper.setMessageSent(r.getSbn().getPackageName(), r.getUid());
-            handleSavePolicyFile();
+        if (nb.getStyle() instanceof Notification.MessagingStyle) {
+            if (r.getShortcutInfo() != null) {
+                if (mPreferencesHelper.setValidMessageSent(
+                        r.getSbn().getPackageName(), r.getUid())) {
+                    handleSavePolicyFile();
+                }
+            } else {
+                if (mPreferencesHelper.setInvalidMessageSent(
+                        r.getSbn().getPackageName(), r.getUid())) {
+                    handleSavePolicyFile();
+                }
+            }
         }
     }
 
@@ -3158,9 +3167,22 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
-        public boolean hasSentMessage(String pkg, int uid) {
+        public boolean isInInvalidMsgState(String pkg, int uid) {
             checkCallerIsSystem();
-            return mPreferencesHelper.hasSentMessage(pkg, uid);
+            return mPreferencesHelper.isInInvalidMsgState(pkg, uid);
+        }
+
+        @Override
+        public boolean hasUserDemotedInvalidMsgApp(String pkg, int uid) {
+            checkCallerIsSystem();
+            return mPreferencesHelper.hasUserDemotedInvalidMsgApp(pkg, uid);
+        }
+
+        @Override
+        public void setInvalidMsgAppDemoted(String pkg, int uid, boolean isDemoted) {
+            checkCallerIsSystem();
+            mPreferencesHelper.setInvalidMsgAppDemoted(pkg, uid, isDemoted);
+            handleSavePolicyFile();
         }
 
         @Override
@@ -5698,6 +5720,9 @@ public class NotificationManagerService extends SystemService {
             Slog.w(TAG, "notification " + r.getKey() + " added an invalid shortcut");
         }
         r.setShortcutInfo(info);
+        r.setHasSentValidMsg(mPreferencesHelper.hasSentValidMsg(pkg, notificationUid));
+        r.userDemotedAppFromConvoSpace(
+                mPreferencesHelper.hasUserDemotedInvalidMsgApp(pkg, notificationUid));
 
         if (!checkDisqualifyingFeatures(userId, notificationUid, id, tag, r,
                 r.getSbn().getOverrideGroupKey() != null)) {
