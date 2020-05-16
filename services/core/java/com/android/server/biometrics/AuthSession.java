@@ -29,7 +29,7 @@ import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.IBiometricSensorReceiver;
 import android.hardware.biometrics.IBiometricServiceReceiver;
 import android.hardware.biometrics.IBiometricSysuiReceiver;
-import android.os.Bundle;
+import android.hardware.biometrics.PromptInfo;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.security.KeyStore;
@@ -116,7 +116,7 @@ final class AuthSession {
     // appropriate <Biometric>Services.
     @VisibleForTesting final IBinder mToken;
     // Info to be shown on BiometricDialog when all cookies are returned.
-    @VisibleForTesting final Bundle mBundle;
+    @VisibleForTesting final PromptInfo mPromptInfo;
     private final long mOperationId;
     private final int mUserId;
     private final IBiometricSensorReceiver mSensorReceiver;
@@ -145,7 +145,7 @@ final class AuthSession {
     AuthSession(IStatusBarService statusBarService, IBiometricSysuiReceiver sysuiReceiver,
             KeyStore keystore, Random random, PreAuthInfo preAuthInfo,
             IBinder token, long operationId, int userId, IBiometricSensorReceiver sensorReceiver,
-            IBiometricServiceReceiver clientReceiver, String opPackageName, Bundle bundle,
+            IBiometricServiceReceiver clientReceiver, String opPackageName, PromptInfo promptInfo,
             int callingUid, int callingPid, int callingUserId, boolean debugEnabled) {
         mStatusBarService = statusBarService;
         mSysuiReceiver = sysuiReceiver;
@@ -158,7 +158,7 @@ final class AuthSession {
         mSensorReceiver = sensorReceiver;
         mClientReceiver = clientReceiver;
         mOpPackageName = opPackageName;
-        mBundle = bundle;
+        mPromptInfo = promptInfo;
         mCallingUid = callingUid;
         mCallingPid = callingPid;
         mCallingUserId = callingUserId;
@@ -203,7 +203,7 @@ final class AuthSession {
             mState = AuthSession.STATE_SHOWING_DEVICE_CREDENTIAL;
 
             mStatusBarService.showAuthenticationDialog(
-                    mBundle,
+                    mPromptInfo,
                     mSysuiReceiver,
                     0 /* biometricModality */,
                     false /* requireConfirmation */,
@@ -237,7 +237,7 @@ final class AuthSession {
                     final boolean requireConfirmation = isConfirmationRequiredByAnyEligibleSensor();
                     final @BiometricAuthenticator.Modality int modality =
                             getEligibleModalities();
-                    mStatusBarService.showAuthenticationDialog(mBundle,
+                    mStatusBarService.showAuthenticationDialog(mPromptInfo,
                             mSysuiReceiver,
                             modality,
                             requireConfirmation,
@@ -322,17 +322,16 @@ final class AuthSession {
                 // If any error is received while preparing the auth session (lockout, etc),
                 // and if device credential is allowed, just show the credential UI.
                 if (isAllowDeviceCredential()) {
-                    @BiometricManager.Authenticators.Types int authenticators = mBundle.getInt(
-                            BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED, 0);
+                    @BiometricManager.Authenticators.Types int authenticators =
+                            mPromptInfo.getAuthenticators();
                     // Disallow biometric and notify SystemUI to show the authentication prompt.
                     authenticators = Utils.removeBiometricBits(authenticators);
-                    mBundle.putInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED,
-                            authenticators);
+                    mPromptInfo.setAuthenticators(authenticators);
 
                     mState = AuthSession.STATE_SHOWING_DEVICE_CREDENTIAL;
 
                     mStatusBarService.showAuthenticationDialog(
-                            mBundle,
+                            mPromptInfo,
                             mSysuiReceiver,
                             0 /* biometricModality */,
                             false /* requireConfirmation */,
@@ -401,9 +400,7 @@ final class AuthSession {
     }
 
     void onSystemEvent(int event) {
-        final boolean shouldReceive = mBundle
-                .getBoolean(BiometricPrompt.KEY_RECEIVE_SYSTEM_EVENTS, false);
-        if (!shouldReceive) {
+        if (!mPromptInfo.isReceiveSystemEvents()) {
             return;
         }
 
@@ -656,7 +653,7 @@ final class AuthSession {
     }
 
     private boolean isAllowDeviceCredential() {
-        return Utils.isCredentialRequested(mBundle);
+        return Utils.isCredentialRequested(mPromptInfo);
     }
 
     boolean allCookiesReceived() {

@@ -33,11 +33,11 @@ import android.content.pm.PackageManager;
 import android.hardware.biometrics.IBiometricEnabledOnKeyguardCallback;
 import android.hardware.biometrics.IBiometricService;
 import android.hardware.biometrics.IBiometricServiceReceiver;
+import android.hardware.biometrics.PromptInfo;
 import android.hardware.face.IFaceService;
 import android.hardware.fingerprint.IFingerprintService;
 import android.hardware.iris.IIrisService;
 import android.os.Binder;
-import android.os.Bundle;
 import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
 
@@ -144,7 +144,7 @@ public class AuthServiceTest {
         mAuthService.onStart();
 
         final Binder token = new Binder();
-        final Bundle bundle = new Bundle();
+        final PromptInfo promptInfo = new PromptInfo();
         final long sessionId = 0;
         final int userId = 0;
 
@@ -154,7 +154,7 @@ public class AuthServiceTest {
                 userId,
                 mReceiver,
                 TEST_OP_PACKAGE_NAME,
-                bundle);
+                promptInfo);
         waitForIdle();
         verify(mBiometricService).authenticate(
                 eq(token),
@@ -162,7 +162,7 @@ public class AuthServiceTest {
                 eq(userId),
                 eq(mReceiver),
                 eq(TEST_OP_PACKAGE_NAME),
-                eq(bundle),
+                eq(promptInfo),
                 eq(Binder.getCallingUid()),
                 eq(Binder.getCallingPid()),
                 eq(UserHandle.getCallingUserId()));

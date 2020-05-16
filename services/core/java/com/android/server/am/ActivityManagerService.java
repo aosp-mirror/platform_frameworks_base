@@ -8765,6 +8765,53 @@ public class ActivityManagerService extends IActivityManager.Stub
         return uidRecord != null && !uidRecord.setIdle;
     }
 
+    /**
+     * Change the sched policy cgroup of a thread.
+     *
+     * <p>It is intended to be used in jni call of {@link Process#setThreadPriority(int, int)}.
+     * When a process is changing the priority of its threads, the sched policy of that
+     * thread may need to be changed accordingly - if the priority is changed to below
+     * or equal to {@link android.os.Process#THREAD_PRIORITY_BACKGROUND} or raising from it.
+     * However, because of the limitation of sepolicy, the thread priority change will
+     * fail for some processes. To solve it, we add this binder call in Activity Manager,
+     * so that the jni call of {@link Process#setThreadPriority(int, int)} could use it.
+     *
+     * @param tid tid of the thread to be changed.
+     * @param group The sched policy group to be changed to.
+     *
+     * @throws IllegalArgumentException if group is invalid.
+     * @throws SecurityException if no permission.
+     *
+     * @return Returns {@code true} if the sched policy is changed successfully;
+     *         {@code false} otherwise.
+     */
+    @Override
+    public boolean setSchedPolicyCgroup(final int tid, final int group) {
+        final int pid = Binder.getCallingPid();
+        final int tgid = Process.getThreadGroupLeader(tid);
+        final int pgroup = Process.getProcessGroup(pid);
+
+        // tid is not in the thread group of caller
+        if (pid != tgid) {
+            return false;
+        }
+
+        // sched group is higher than its main process
+        if (group > pgroup) {
+            return false;
+        }
+
+        try {
+            Process.setThreadGroup(tid, group);
+            return true;
+        } catch (IllegalArgumentException e) {
+            Slog.w(TAG, "Failed to set thread group, argument invalid:\n" + e);
+        } catch (SecurityException e) {
+            Slog.w(TAG, "Failed to set thread group, no permission:\n" + e);
+        }
+        return false;
+    }
+
     @Override
     public void setPersistentVrThread(int tid) {
         mActivityTaskManager.setPersistentVrThread(tid);

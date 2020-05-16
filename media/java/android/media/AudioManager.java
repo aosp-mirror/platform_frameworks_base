@@ -1505,7 +1505,7 @@ public class AudioManager {
     public void setSpeakerphoneOn(boolean on){
         final IAudioService service = getService();
         try {
-            service.setSpeakerphoneOn(on);
+            service.setSpeakerphoneOn(mICallBack, on);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
