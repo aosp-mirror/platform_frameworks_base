@@ -63,8 +63,8 @@
     <string name="usb_debugging_allow" msgid="1722643858015321328">"అనుమతించు"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"USB డీబగ్గింగ్‌కి అనుమతి లేదు"</string>
     <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"ఈ పరికరానికి ప్రస్తుతం సైన్ ఇన్ చేసిన వినియోగదారు USB డీబగ్గింగ్ ఆన్ చేయలేరు. ఈ ఫీచర్ ఉపయోగించడానికి, ప్రాథమిక వినియోగదారుకి మారాలి."</string>
-    <string name="wifi_debugging_title" msgid="7300007687492186076">"ఈ నెట్‌వర్క్ పై వైర్‌లెస్ డీబగ్గింగ్‌ను అనుమతిస్తారా?"</string>
-    <string name="wifi_debugging_message" msgid="5461204211731802995">"నెట్‌వర్క్ పేరు (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nWi‑Fi చిరునామా (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
+    <string name="wifi_debugging_title" msgid="7300007687492186076">"ఈ నెట్‌వర్క్ ద్వారా వైర్‌లెస్ డీబగ్గింగ్‌ను అనుమతించాలా?"</string>
+    <string name="wifi_debugging_message" msgid="5461204211731802995">"నెట్‌వర్క్ పేరు (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nWi‑Fi అడ్రస్ (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
     <string name="wifi_debugging_always" msgid="2968383799517975155">"ఈ నెట్‌వర్క్ నుండి ఎల్లప్పుడూ అనుమతించు"</string>
     <string name="wifi_debugging_allow" msgid="4573224609684957886">"అనుమతించు"</string>
     <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"వైర్‌లెస్ డీబగ్గింగ్‌కి అనుమతి లేదు"</string>
@@ -89,6 +89,7 @@
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"స్క్రీన్‌షాట్‌ను మూసివేస్తుంది"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"స్క్రీన్‌షాట్ ప్రివ్యూ"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"స్క్రీన్ రికార్డర్"</string>
+    <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"స్క్రీన్ రికార్డింగ్ అవుతోంది"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"స్క్రీన్ రికార్డ్ సెషన్ కోసం ఆన్‌గోయింగ్ నోటిఫికేషన్"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"రికార్డింగ్‌ను ప్రారంభించాలా?"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"రికార్డ్ చేస్తున్నప్పుడు, Android సిస్టమ్ మీ స్క్రీన్‌పై ప్రదర్శించబడిన లేదా మీ పరికరం నుండి ప్లే చేయబడిన ఏ సున్నితమైన సమాచారాన్నైనా క్యాప్చర్ చేయగలదు. ఈ సమాచారంలో, పాస్‌వర్డ్‌లు, చెల్లింపు వివరాలు, ఫోటోలు, మెసేజ్‌లు, ఆడియో ఉంటాయి."</string>
@@ -97,7 +98,7 @@
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"మీ పరికరం నుండి వచ్చే సంగీతం, కాల్‌లు, రింగ్‌టోన్‌ల వంటి ధ్వనులు"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"మైక్రోఫోన్"</string>
     <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"పరికరం ఆడియో, మైక్రోఫోన్"</string>
-    <string name="screenrecord_start" msgid="330991441575775004">"ప్రారంభం"</string>
+    <string name="screenrecord_start" msgid="330991441575775004">"ప్రారంభించు"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"స్క్రీన్ రికార్డింగ్ చేయబడుతోంది"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"స్క్రీన్, ఆడియో రికార్డింగ్ చేయబడుతున్నాయి"</string>
     <string name="screenrecord_taps_label" msgid="1595690528298857649">"స్క్రీన్‌పై తాకే స్థానాలను చూపు"</string>
@@ -367,7 +368,7 @@
     <string name="quick_settings_location_off_label" msgid="7923929131443915919">"స్థానం ఆఫ్‌లో ఉంది"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"ప్రసార మాధ్యమ పరికరం"</string>
     <string name="quick_settings_rssi_label" msgid="3397615415140356701">"RSSI"</string>
-    <string name="quick_settings_rssi_emergency_only" msgid="7499207215265078598">"అత్యవసర కాల్‌లు మాత్రమే"</string>
+    <string name="quick_settings_rssi_emergency_only" msgid="7499207215265078598">"ఎమర్జెన్సీ కాల్స్ మాత్రమే"</string>
     <string name="quick_settings_settings_label" msgid="2214639529565474534">"సెట్టింగ్‌లు"</string>
     <string name="quick_settings_time_label" msgid="3352680970557509303">"సమయం"</string>
     <string name="quick_settings_user_label" msgid="1253515509432672496">"నేను"</string>
@@ -388,7 +389,7 @@
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Wi‑Fi కనెక్ట్ కాలేదు"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"ప్రకాశం"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="2325362583903258677">"ఆటోమేటిక్"</string>
-    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"రంగుల‌ను అటుఇటు మార్చు"</string>
+    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"కలర్ మార్పిడి"</string>
     <string name="quick_settings_color_space_label" msgid="537528291083575559">"రంగు సవరణ మోడ్"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"మరిన్ని సెట్టింగ్‌లు"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"పూర్తయింది"</string>
@@ -419,7 +420,7 @@
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"సూర్యోదయం వరకు"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"<xliff:g id="TIME">%s</xliff:g>కి"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"<xliff:g id="TIME">%s</xliff:g> వరకు"</string>
-    <string name="quick_settings_ui_mode_night_label" msgid="1398928270610780470">"ముదురు రంగు థీమ్"</string>
+    <string name="quick_settings_ui_mode_night_label" msgid="1398928270610780470">"ముదురు రంగు రూపం"</string>
     <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"బ్యాటరీ సేవర్"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at_sunset" msgid="6017379738102015710">"సూర్యాస్తమయానికి"</string>
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"సూర్యోదయం వరకు"</string>
@@ -509,8 +510,7 @@
     <string name="clear_all_notifications_text" msgid="348312370303046130">"అన్నీ క్లియర్ చేయండి"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"నిర్వహించండి"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"చరిత్ర"</string>
-    <!-- no translation found for notification_section_header_incoming (5295312809341711367) -->
-    <skip />
+    <string name="notification_section_header_incoming" msgid="5295312809341711367">"ఇన్‌కమింగ్"</string>
     <string name="notification_section_header_gentle" msgid="3044910806569985386">"నిశ్శబ్ద నోటిఫికేషన్‌లు"</string>
     <string name="notification_section_header_alerting" msgid="3168140660646863240">"అలర్ట్ చేసే నోటిఫికేషన్‌లు"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"సంభాషణలు"</string>
@@ -856,7 +856,7 @@
     <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"టైల్‌ల క్రమం మార్చడానికి వాటిని పట్టుకుని, లాగండి"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"తీసివేయడానికి ఇక్కడికి లాగండి"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"మీ వద్ద కనీసం <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> టైల్‌లు ఉండాలి"</string>
-    <string name="qs_edit" msgid="5583565172803472437">"సవరించు"</string>
+    <string name="qs_edit" msgid="5583565172803472437">"ఎడిట్ చేయండి"</string>
     <string name="tuner_time" msgid="2450785840990529997">"సమయం"</string>
   <string-array name="clock_options">
     <item msgid="3986445361435142273">"గంటలు, నిమిషాలు మరియు సెకన్లను చూపు"</item>
@@ -967,7 +967,7 @@
     <string name="running_foreground_services_title" msgid="5137313173431186685">"నేపథ్యంలో అమలు అవుతున్న ఆప్‌లు"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"బ్యాటరీ మరియు డేటా వినియోగ వివరాల కోసం నొక్కండి"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"మొబైల్ డేటాను ఆఫ్ చేయాలా?"</string>
-    <string name="mobile_data_disable_message" msgid="8604966027899770415">"మీకు <xliff:g id="CARRIER">%s</xliff:g> ద్వారా డేటా లేదా ఇంటర్నెట్‌కు యాక్సెస్ ఉండదు. Wi-Fi ద్వారా మాత్రమే ఇంటర్నెట్ అందుబాటులో ఉంటుంది."</string>
+    <string name="mobile_data_disable_message" msgid="8604966027899770415">"\"<xliff:g id="CARRIER">%s</xliff:g>\" ద్వారా మీకు డేటా లేదా ఇంటర్నెట్‌కు యాక్సెస్ ఉండదు. Wi-Fi ద్వారా మాత్రమే ఇంటర్నెట్ అందుబాటులో ఉంటుంది."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"మీ క్యారియర్"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"అనుమతి అభ్యర్థనకు ఒక యాప్ అడ్డు తగులుతున్నందున సెట్టింగ్‌లు మీ ప్రతిస్పందనను ధృవీకరించలేకపోయాయి."</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"<xliff:g id="APP_2">%2$s</xliff:g> స్లైస్‌లను చూపించడానికి <xliff:g id="APP_0">%1$s</xliff:g>ని అనుమతించండి?"</string>
@@ -989,10 +989,8 @@
     <string name="music_controls_no_title" msgid="4166497066552290938">"శీర్షిక లేదు"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"ఈ యాప్‌ను పునఃప్రారంభించేలా నొక్కి, ఆపై పూర్తి స్క్రీన్‌‍లోకి వెళ్లండి."</string>
     <string name="bubbles_settings_button_description" msgid="7324245408859877545">"<xliff:g id="APP_NAME">%1$s</xliff:g> బబుల్స్ సెట్టింగ్‌లు"</string>
-    <!-- no translation found for bubble_overflow_button_content_description (5523744621434300510) -->
-    <skip />
-    <!-- no translation found for bubble_accessibility_action_add_back (6217995665917123890) -->
-    <skip />
+    <string name="bubble_overflow_button_content_description" msgid="5523744621434300510">"ఓవర్‌ఫ్లో"</string>
+    <string name="bubble_accessibility_action_add_back" msgid="6217995665917123890">"స్ట్యాక్‌కు తిరిగి జోడించండి"</string>
     <string name="manage_bubbles_text" msgid="6856830436329494850">"నిర్వహించండి"</string>
     <string name="bubble_content_description_single" msgid="5175160674436546329">"<xliff:g id="APP_NAME">%2$s</xliff:g> నుండి <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_content_description_stack" msgid="7907610717462651870">"<xliff:g id="APP_NAME">%2$s</xliff:g> నుండి <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> మరియు మరో <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g>"</string>

@@ -89,6 +89,7 @@
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"Zamknij zrzut ekranu"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Podgląd zrzutu ekranu"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Nagrywanie ekranu"</string>
+    <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Przetwarzam nagrywanie ekranu"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Stałe powiadomienie o sesji rejestrowania zawartości ekranu"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Rozpocząć nagrywanie?"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"Podczas nagrywania system Android może rejestrować wszelkie informacje poufne wyświetlane na ekranie lub odtwarzane na urządzeniu. Dotyczy to m.in. haseł, szczegółów płatności, zdjęć, wiadomości i odtwarzanych dźwięków."</string>
@@ -417,7 +418,7 @@
     <string name="quick_settings_cellular_detail_data_used" msgid="6798849610647988987">"Wykorzyst.: <xliff:g id="DATA_USED">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"Limit <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"Ostrzeżenie: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
-    <string name="quick_settings_work_mode_label" msgid="2754212289804324685">"Profil do pracy"</string>
+    <string name="quick_settings_work_mode_label" msgid="2754212289804324685">"Profil służbowy"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Podświetlenie nocne"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Włącz o zachodzie"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"Do wschodu słońca"</string>
@@ -515,8 +516,7 @@
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Usuń wszystkie"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Zarządzaj"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Historia"</string>
-    <!-- no translation found for notification_section_header_incoming (5295312809341711367) -->
-    <skip />
+    <string name="notification_section_header_incoming" msgid="5295312809341711367">"Przychodzące"</string>
     <string name="notification_section_header_gentle" msgid="3044910806569985386">"Ciche powiadomienia"</string>
     <string name="notification_section_header_alerting" msgid="3168140660646863240">"Alerty"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Rozmowy"</string>
@@ -657,7 +657,7 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"Pokaż tryb demonstracyjny"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Alarm"</string>
-    <string name="status_bar_work" msgid="5238641949837091056">"Profil do pracy"</string>
+    <string name="status_bar_work" msgid="5238641949837091056">"Profil służbowy"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Tryb samolotowy"</string>
     <string name="add_tile" msgid="6239678623873086686">"Dodaj nazwę"</string>
     <string name="broadcast_tile" msgid="5224010633596487481">"Rozgłaszana nazwa"</string>
@@ -667,7 +667,7 @@
     <string name="alarm_template_far" msgid="3561752195856839456">"w: <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_detail" msgid="544463655956179791">"Szybkie ustawienia, <xliff:g id="TITLE">%s</xliff:g>."</string>
     <string name="accessibility_status_bar_hotspot" msgid="2888479317489131669">"Hotspot"</string>
-    <string name="accessibility_managed_profile" msgid="4703836746209377356">"Profil do pracy"</string>
+    <string name="accessibility_managed_profile" msgid="4703836746209377356">"Profil służbowy"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Dobra zabawa, ale nie dla każdego"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"Kalibrator System UI udostępnia dodatkowe sposoby dostrajania i dostosowywania interfejsu Androida. Te eksperymentalne funkcje mogą się zmienić, popsuć lub zniknąć w przyszłych wersjach. Zachowaj ostrożność."</string>
     <string name="tuner_persistent_warning" msgid="230466285569307806">"Te eksperymentalne funkcje mogą się zmienić, popsuć lub zniknąć w przyszłych wersjach. Zachowaj ostrożność."</string>
@@ -999,10 +999,8 @@
     <string name="music_controls_no_title" msgid="4166497066552290938">"Bez tytułu"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"Kliknij, by uruchomić tę aplikację ponownie i przejść w tryb pełnoekranowy."</string>
     <string name="bubbles_settings_button_description" msgid="7324245408859877545">"Ustawienia dymków aplikacji <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for bubble_overflow_button_content_description (5523744621434300510) -->
-    <skip />
-    <!-- no translation found for bubble_accessibility_action_add_back (6217995665917123890) -->
-    <skip />
+    <string name="bubble_overflow_button_content_description" msgid="5523744621434300510">"Przepełnienie"</string>
+    <string name="bubble_accessibility_action_add_back" msgid="6217995665917123890">"Dodaj ponownie do stosu"</string>
     <string name="manage_bubbles_text" msgid="6856830436329494850">"Zarządzaj"</string>
     <string name="bubble_content_description_single" msgid="5175160674436546329">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> z aplikacji <xliff:g id="APP_NAME">%2$s</xliff:g>"</string>
     <string name="bubble_content_description_stack" msgid="7907610717462651870">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> z aplikacji <xliff:g id="APP_NAME">%2$s</xliff:g> i jeszcze <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g>"</string>

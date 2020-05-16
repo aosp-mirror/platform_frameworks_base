@@ -17,6 +17,7 @@
 package com.android.systemui.media
 
 import android.content.res.ColorStateList
+import android.graphics.Color
 import android.text.format.DateUtils
 import android.view.View
 import android.widget.SeekBar
@@ -46,18 +47,6 @@ class SeekBarObserver(view: View) : Observer<SeekBarViewModel.Progress> {
     /** Updates seek bar views when the data model changes. */
     @UiThread
     override fun onChanged(data: SeekBarViewModel.Progress) {
-
-        data.color?.let {
-            var tintList = ColorStateList.valueOf(it)
-            seekBarView.setThumbTintList(tintList)
-            tintList = tintList.withAlpha(192) // 75%
-            seekBarView.setProgressTintList(tintList)
-            tintList = tintList.withAlpha(128) // 50%
-            seekBarView.setProgressBackgroundTintList(tintList)
-            elapsedTimeView.setTextColor(it)
-            totalTimeView.setTextColor(it)
-        }
-
         if (!data.enabled) {
             seekBarView.setEnabled(false)
             seekBarView.getThumb().setAlpha(0)

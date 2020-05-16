@@ -89,6 +89,7 @@
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"Отфрлете ја сликата од екранот"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Преглед на слика од екранот"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Снимач на екран"</string>
+    <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Се обработува снимка од екран"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Тековно известување за сесија за снимање на екранот"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Да се започне со снимање?"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"При снимањето, системот Android може да ги сними сите чувствителни податоци што се видливи на вашиот екран или пуштени на уредот. Ова вклучува лозинки, податоци за плаќање, фотографии, пораки и аудио."</string>
@@ -509,8 +510,7 @@
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Избриши сѐ"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Управувајте"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Историја"</string>
-    <!-- no translation found for notification_section_header_incoming (5295312809341711367) -->
-    <skip />
+    <string name="notification_section_header_incoming" msgid="5295312809341711367">"Дојдовни"</string>
     <string name="notification_section_header_gentle" msgid="3044910806569985386">"Тивки известувања"</string>
     <string name="notification_section_header_alerting" msgid="3168140660646863240">"Известувања за предупредување"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Разговори"</string>
@@ -989,10 +989,8 @@
     <string name="music_controls_no_title" msgid="4166497066552290938">"Без наслов"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"Допрете за да ја рестартирате апликацијава и да ја отворите на цел екран."</string>
     <string name="bubbles_settings_button_description" msgid="7324245408859877545">"Поставки за балончињата за <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for bubble_overflow_button_content_description (5523744621434300510) -->
-    <skip />
-    <!-- no translation found for bubble_accessibility_action_add_back (6217995665917123890) -->
-    <skip />
+    <string name="bubble_overflow_button_content_description" msgid="5523744621434300510">"Прелевање"</string>
+    <string name="bubble_accessibility_action_add_back" msgid="6217995665917123890">"Додајте назад во stack"</string>
     <string name="manage_bubbles_text" msgid="6856830436329494850">"Управување"</string>
     <string name="bubble_content_description_single" msgid="5175160674436546329">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> од <xliff:g id="APP_NAME">%2$s</xliff:g>"</string>
     <string name="bubble_content_description_stack" msgid="7907610717462651870">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> од <xliff:g id="APP_NAME">%2$s</xliff:g> и уште <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g>"</string>

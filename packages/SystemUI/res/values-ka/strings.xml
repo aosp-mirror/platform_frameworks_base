@@ -89,6 +89,7 @@
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"ეკრანის ანაბეჭდის დახურვა"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"ეკრანის ანაბეჭდის გადახედვა"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"ეკრანის ჩამწერი"</string>
+    <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"ეკრანის ჩანაწერი მუშავდება"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"უწყვეტი შეტყობინება ეკრანის ჩაწერის სესიისთვის"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"დაიწყოს ჩაწერა?"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"ჩაწერის განმავლობაში Android სისტემას შეუძლია აღბეჭდოს ნებისმიერი სენსიტიური ინფორმაცია, რომელიც თქვენს ეკრანზე გამოჩნდება ან თქვენს მოწყობილობაზე დაიკვრება. აღნიშნული მოიცავს პაროლებს, გადახდის დეტალებს, ფოტოებს, შეტყობინებებსა და აუდიოს."</string>

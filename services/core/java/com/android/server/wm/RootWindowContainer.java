@@ -327,7 +327,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             documentData = isDocument ? intent.getData() : null;
 
             if (DEBUG_TASKS) Slog.d(TAG_TASKS, "Looking for task of " + target + " in " + parent);
-            parent.forAllTasks(this);
+            parent.forAllLeafTasks(this);
         }
 
         void clear() {

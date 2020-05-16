@@ -89,9 +89,10 @@
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"Odbacite snimak ekrana"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Pregled snimka ekrana"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Snimač ekrana"</string>
+    <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Obrađivanje snimka ekrana"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Obavještenje za sesiju snimanja ekrana je u toku"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Započeti snimanje?"</string>
-    <string name="screenrecord_description" msgid="1123231719680353736">"Prilikom snimanja, Android sistem može snimiti sve osjetljive informacije koje su vidljive na vašem ekranu ili koje reproducirate na uređaju. To uključuje lozinke, informacije za plaćanje, fotografije, poruke i zvuk."</string>
+    <string name="screenrecord_description" msgid="1123231719680353736">"Prilikom snimanja, sistem Android može snimiti sve osjetljive informacije koje su vidljive na vašem ekranu ili koje reproducirate na uređaju. To uključuje lozinke, informacije za plaćanje, fotografije, poruke i zvuk."</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Snimi zvučni zapis"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Zvuk uređaja"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Zvuk s vašeg uređaja, naprimjer muzika, pozivi i melodije zvona"</string>
@@ -973,7 +974,7 @@
     <string name="running_foreground_services_title" msgid="5137313173431186685">"Aplikacije koje rade u pozadini"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"Dodirnite za detalje o potrošnji baterije i prijenosa podataka"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"Isključiti prijenos podataka na mobilnoj mreži?"</string>
-    <string name="mobile_data_disable_message" msgid="8604966027899770415">"Nećete imati pristup podacima ili internetu putem mobilnog operatera <xliff:g id="CARRIER">%s</xliff:g>. Internet će biti dostupan samo putem WiFi mreže."</string>
+    <string name="mobile_data_disable_message" msgid="8604966027899770415">"Nećete imati pristup podacima ni internetu putem mobilnog operatera <xliff:g id="CARRIER">%s</xliff:g>. Internet će biti dostupan samo putem WiFi mreže."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"vaš operater"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"Postavke ne mogu potvrditi vaš odgovor jer aplikacija zaklanja zahtjev za odobrenje."</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"Dozvoliti aplikaciji <xliff:g id="APP_0">%1$s</xliff:g> prikazivanje isječaka aplikacije <xliff:g id="APP_2">%2$s</xliff:g>?"</string>
@@ -995,8 +996,8 @@
     <string name="music_controls_no_title" msgid="4166497066552290938">"Bez naslova"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"Dodirnite da ponovo pokrenete ovu aplikaciju i aktivirate prikaz preko cijelog ekrana."</string>
     <string name="bubbles_settings_button_description" msgid="7324245408859877545">"Postavke za oblačiće aplikacije <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="bubble_overflow_button_content_description" msgid="5523744621434300510">"Dodatno"</string>
-    <string name="bubble_accessibility_action_add_back" msgid="6217995665917123890">"Dodajte natrag u nizove"</string>
+    <string name="bubble_overflow_button_content_description" msgid="5523744621434300510">"Preklapanje"</string>
+    <string name="bubble_accessibility_action_add_back" msgid="6217995665917123890">"Dodaj nazad u grupu"</string>
     <string name="manage_bubbles_text" msgid="6856830436329494850">"Upravljaj"</string>
     <string name="bubble_content_description_single" msgid="5175160674436546329">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> od aplikacije <xliff:g id="APP_NAME">%2$s</xliff:g>"</string>
     <string name="bubble_content_description_stack" msgid="7907610717462651870">"Obavještenje <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> aplikacije <xliff:g id="APP_NAME">%2$s</xliff:g> i još <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g>"</string>

@@ -89,6 +89,7 @@
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"Zavřít snímek obrazovky"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Náhled snímku obrazovky"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Rekordér obrazovky"</string>
+    <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Záznam obrazovky se zpracovává"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Trvalé oznámení o relaci nahrávání"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Spustit nahrávání?"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"Při nahrávání může systém Android zaznamenávat citlivé údaje, které jsou viditelné na obrazovce nebo které jsou přehrávány na zařízení. Týká se to hesel, údajů o platbě, fotek, zpráv a zvuků."</string>
@@ -400,7 +401,7 @@
     <string name="quick_settings_tethering_label" msgid="5257299852322475780">"Sdílené připojení"</string>
     <string name="quick_settings_hotspot_label" msgid="1199196300038363424">"Hotspot"</string>
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"Zapínání…"</string>
-    <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"Spořič dat je zapnutý"</string>
+    <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"Spořič dat zapnut"</string>
     <plurals name="quick_settings_hotspot_secondary_label_num_devices" formatted="false" msgid="3142308865165871976">
       <item quantity="few">%d zařízení</item>
       <item quantity="many">%d zařízení</item>
@@ -515,8 +516,7 @@
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Smazat vše"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Spravovat"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Historie"</string>
-    <!-- no translation found for notification_section_header_incoming (5295312809341711367) -->
-    <skip />
+    <string name="notification_section_header_incoming" msgid="5295312809341711367">"Příchozí"</string>
     <string name="notification_section_header_gentle" msgid="3044910806569985386">"Tichá oznámení"</string>
     <string name="notification_section_header_alerting" msgid="3168140660646863240">"Oznámení s upozorněním"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Konverzace"</string>
@@ -999,10 +999,8 @@
     <string name="music_controls_no_title" msgid="4166497066552290938">"Bez názvu"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"Klepnutím aplikaci restartujete a přejdete na režim celé obrazovky"</string>
     <string name="bubbles_settings_button_description" msgid="7324245408859877545">"Nastavení bublin aplikace <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for bubble_overflow_button_content_description (5523744621434300510) -->
-    <skip />
-    <!-- no translation found for bubble_accessibility_action_add_back (6217995665917123890) -->
-    <skip />
+    <string name="bubble_overflow_button_content_description" msgid="5523744621434300510">"Rozbalovací nabídka"</string>
+    <string name="bubble_accessibility_action_add_back" msgid="6217995665917123890">"Přidat zpět do sady"</string>
     <string name="manage_bubbles_text" msgid="6856830436329494850">"Spravovat"</string>
     <string name="bubble_content_description_single" msgid="5175160674436546329">"Oznámení <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> z aplikace <xliff:g id="APP_NAME">%2$s</xliff:g>"</string>
     <string name="bubble_content_description_stack" msgid="7907610717462651870">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> z aplikace <xliff:g id="APP_NAME">%2$s</xliff:g> a dalších (<xliff:g id="BUBBLE_COUNT">%3$d</xliff:g>)"</string>

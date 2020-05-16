@@ -89,6 +89,7 @@
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"Dispensar captura de tela"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Visualização de captura de tela"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Gravador de tela"</string>
+    <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Processando gravação de tela"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Notificação contínua para uma sessão de gravação de tela"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Iniciar gravação?"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"Durante a gravação, o sistema Android pode capturar informações confidenciais visíveis na tela ou tocadas no dispositivo. Isso inclui senhas, informações de pagamento, fotos, mensagens e áudio."</string>

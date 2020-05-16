@@ -89,6 +89,7 @@
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"スクリーンショットを閉じます"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"スクリーンショットのプレビュー"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"スクリーン レコーダー"</string>
+    <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"画面の録画を処理しています"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"画面の録画セッション中の通知"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"録画を開始しますか？"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"録画中に機密情報が画面に表示されたりデバイスで再生されたりした場合、Android システムでキャプチャされることがあります。これには、パスワード、お支払い情報、写真、メッセージ、音声などが含まれます。"</string>
@@ -509,8 +510,7 @@
     <string name="clear_all_notifications_text" msgid="348312370303046130">"すべて消去"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"管理"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"履歴"</string>
-    <!-- no translation found for notification_section_header_incoming (5295312809341711367) -->
-    <skip />
+    <string name="notification_section_header_incoming" msgid="5295312809341711367">"新着"</string>
     <string name="notification_section_header_gentle" msgid="3044910806569985386">"サイレント通知"</string>
     <string name="notification_section_header_alerting" msgid="3168140660646863240">"バイブレーションまたは音を伴う通知"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"会話"</string>
@@ -967,7 +967,7 @@
     <string name="running_foreground_services_title" msgid="5137313173431186685">"バックグラウンドで実行中のアプリ"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"タップして電池やデータの使用量を確認"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"モバイルデータを OFF にしますか？"</string>
-    <string name="mobile_data_disable_message" msgid="8604966027899770415">"<xliff:g id="CARRIER">%s</xliff:g> でデータやインターネットにアクセスできなくなります。インターネットには Wi-Fi からのみ接続できます。"</string>
+    <string name="mobile_data_disable_message" msgid="8604966027899770415">"<xliff:g id="CARRIER">%s</xliff:g>でデータやインターネットにアクセスできなくなります。インターネットには Wi-Fi からのみ接続できます。"</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"携帯通信会社"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"アプリが許可リクエストを隠しているため、設定側でユーザーの応答を確認できません。"</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"「<xliff:g id="APP_2">%2$s</xliff:g>」のスライスの表示を「<xliff:g id="APP_0">%1$s</xliff:g>」に許可しますか？"</string>
@@ -989,10 +989,8 @@
     <string name="music_controls_no_title" msgid="4166497066552290938">"タイトルなし"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"タップしてこのアプリを再起動すると、全画面表示になります。"</string>
     <string name="bubbles_settings_button_description" msgid="7324245408859877545">"<xliff:g id="APP_NAME">%1$s</xliff:g> のバブルの設定"</string>
-    <!-- no translation found for bubble_overflow_button_content_description (5523744621434300510) -->
-    <skip />
-    <!-- no translation found for bubble_accessibility_action_add_back (6217995665917123890) -->
-    <skip />
+    <string name="bubble_overflow_button_content_description" msgid="5523744621434300510">"オーバーフロー"</string>
+    <string name="bubble_accessibility_action_add_back" msgid="6217995665917123890">"スタックに戻す"</string>
     <string name="manage_bubbles_text" msgid="6856830436329494850">"管理"</string>
     <string name="bubble_content_description_single" msgid="5175160674436546329">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>（<xliff:g id="APP_NAME">%2$s</xliff:g>）"</string>
     <string name="bubble_content_description_stack" msgid="7907610717462651870">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>（<xliff:g id="APP_NAME">%2$s</xliff:g>）、他 <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g> 件"</string>
@@ -1030,7 +1028,7 @@
       <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> 件のコントロールを追加しました。</item>
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"コントロール"</string>
-    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"電源メニューからアクセスするコントロールを選択する"</string>
+    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"電源ボタン メニューからアクセスするコントロールを選択する"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"コントロールを並べ替えるには長押ししてドラッグします"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"すべてのコントロールを削除しました"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"変更が保存されていません"</string>

@@ -89,6 +89,7 @@
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"Одбаците снимак екрана"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Преглед снимка екрана"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Снимач екрана"</string>
+    <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Обрађујемо видео снимка екрана"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Обавештење о сесији снимања екрана је активно"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Желите да започнете снимање?"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"Током снимања Android систем може да сними осетљиве информације које су видљиве на екрану или које се пуштају на уређају. То обухвата лозинке, информације о плаћању, слике, поруке и звук."</string>
@@ -512,8 +513,7 @@
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Обриши све"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Управљајте"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Историја"</string>
-    <!-- no translation found for notification_section_header_incoming (5295312809341711367) -->
-    <skip />
+    <string name="notification_section_header_incoming" msgid="5295312809341711367">"Долазно"</string>
     <string name="notification_section_header_gentle" msgid="3044910806569985386">"Нечујна обавештења"</string>
     <string name="notification_section_header_alerting" msgid="3168140660646863240">"Обавештења која привлаче пажњу"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Конверзације"</string>
@@ -994,10 +994,8 @@
     <string name="music_controls_no_title" msgid="4166497066552290938">"Без наслова"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"Додирните да бисте рестартовали апликацију и прешли у режим целог екрана."</string>
     <string name="bubbles_settings_button_description" msgid="7324245408859877545">"Подешавања за <xliff:g id="APP_NAME">%1$s</xliff:g> облачиће"</string>
-    <!-- no translation found for bubble_overflow_button_content_description (5523744621434300510) -->
-    <skip />
-    <!-- no translation found for bubble_accessibility_action_add_back (6217995665917123890) -->
-    <skip />
+    <string name="bubble_overflow_button_content_description" msgid="5523744621434300510">"Преклапање"</string>
+    <string name="bubble_accessibility_action_add_back" msgid="6217995665917123890">"Додај поново у групу"</string>
     <string name="manage_bubbles_text" msgid="6856830436329494850">"Управљајте"</string>
     <string name="bubble_content_description_single" msgid="5175160674436546329">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> из апликације <xliff:g id="APP_NAME">%2$s</xliff:g>"</string>
     <string name="bubble_content_description_stack" msgid="7907610717462651870">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> из апликације <xliff:g id="APP_NAME">%2$s</xliff:g> и још <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g>"</string>
@@ -1017,10 +1015,10 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Навигација система је ажурирана. Да бисте унели измене, идите у Подешавања."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Идите у Подешавања да бисте ажурирали навигацију система"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Стање приправности"</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Приказују се у врху одељка за конверзације"</string>
-    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Приказују слику профила на закључаном екрану"</string>
+    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Приказује се у врху одељка за конверзације"</string>
+    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Приказује слику профила на закључаном екрану"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Приказују се плутајући облачићи преко апликација"</string>
-    <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Ометају подешавање Не узнемиравај"</string>
+    <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Омета подешавање Не узнемиравај"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"Важи"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Преклопни прозор за увећање"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Прозор за увећање"</string>

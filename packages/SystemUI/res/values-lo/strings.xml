@@ -19,7 +19,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_label" msgid="4811759950673118541">"ສ່ວນຕິດຕໍ່ຜູ່ໃຊ້ຂອງລະບົບ"</string>
+    <string name="app_label" msgid="4811759950673118541">"ສ່ວນຕິດຕໍ່ຜູ້ໃຊ້ຂອງລະບົບ"</string>
     <string name="status_bar_clear_all_button" msgid="2491321682873657397">"ລຶບ"</string>
     <string name="status_bar_no_notifications_title" msgid="7812479124981107507">"ບໍ່ມີການແຈ້ງເຕືອນ"</string>
     <string name="status_bar_ongoing_events_title" msgid="3986169317496615446">"ດຳເນີນຢູ່"</string>
@@ -89,6 +89,7 @@
     <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"ປິດຮູບໜ້າຈໍ"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"ຕົວຢ່າງຮູບໜ້າຈໍ"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"ໂປຣແກຣມບັນທຶກໜ້າຈໍ"</string>
+    <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"ກຳລັງປະມວນຜົນການບັນທຶກໜ້າຈໍ"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"ການແຈ້ງເຕືອນສຳລັບເຊດຊັນການບັນທຶກໜ້າຈໍໃດໜຶ່ງ"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"ເລີ່ມການບັນທຶກບໍ?"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"ໃນລະຫວ່າງການບັນທຶກ, ລະບົບ Android ຈະສາມາດບັນທຶກຂໍ້ມູນທີ່ລະອຽດອ່ອນໃດກໍຕາມທີ່ສະແດງຢູ່ໜ້າຈໍຂອງທ່ານ ຫຼື ຫຼິ້ນຢູ່ອຸປະກອນທ່ານ. ນີ້ຮວມເຖິງລະຫັດຜ່ານ, ຂໍ້ມູນການຈ່າຍເງິນ, ຮູບ, ຂໍ້ຄວາມ ແລະ ສຽງນຳ."</string>
