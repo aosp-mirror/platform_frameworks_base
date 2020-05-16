@@ -469,8 +469,12 @@ final class InputMonitor {
         public void accept(WindowState w) {
             final InputChannel inputChannel = w.mInputChannel;
             final InputWindowHandle inputWindowHandle = w.mInputWindowHandle;
+            final RecentsAnimationController recentsAnimationController =
+                    mService.getRecentsAnimationController();
+            final boolean shouldApplyRecentsInputConsumer = recentsAnimationController != null
+                    && recentsAnimationController.shouldApplyInputConsumer(w.mActivityRecord);
             if (inputChannel == null || inputWindowHandle == null || w.mRemoved
-                    || w.cantReceiveTouchInput()) {
+                    || (w.cantReceiveTouchInput() && !shouldApplyRecentsInputConsumer)) {
                 if (w.mWinAnimator.hasSurface()) {
                     mInputTransaction.setInputWindowInfo(
                         w.mWinAnimator.mSurfaceController.getClientViewRootSurface(),
@@ -486,22 +490,16 @@ final class InputMonitor {
             final boolean hasFocus = w.isFocused();
             final boolean isVisible = w.isVisibleLw();
 
-            if (mAddRecentsAnimationInputConsumerHandle) {
-                final RecentsAnimationController recentsAnimationController =
-                        mService.getRecentsAnimationController();
-                if (recentsAnimationController != null
-                        && recentsAnimationController.shouldApplyInputConsumer(w.mActivityRecord)) {
-                    if (recentsAnimationController.updateInputConsumerForApp(
-                            mRecentsAnimationInputConsumer.mWindowHandle, hasFocus)) {
-                        mRecentsAnimationInputConsumer.show(mInputTransaction, w);
-                        mAddRecentsAnimationInputConsumerHandle = false;
-                    }
+            if (mAddRecentsAnimationInputConsumerHandle && shouldApplyRecentsInputConsumer) {
+                if (recentsAnimationController.updateInputConsumerForApp(
+                        mRecentsAnimationInputConsumer.mWindowHandle, hasFocus)) {
+                    mRecentsAnimationInputConsumer.show(mInputTransaction, w);
+                    mAddRecentsAnimationInputConsumerHandle = false;
                 }
             }
 
             if (w.inPinnedWindowingMode()) {
                 if (mAddPipInputConsumerHandle) {
-
                     final Task rootTask = w.getTask().getRootTask();
                     mPipInputConsumer.mWindowHandle.replaceTouchableRegionWithCrop(
                             rootTask.getSurfaceControl());
