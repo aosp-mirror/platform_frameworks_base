@@ -58,7 +58,9 @@ interface INotificationManager
 
     void setShowBadge(String pkg, int uid, boolean showBadge);
     boolean canShowBadge(String pkg, int uid);
-    boolean hasSentMessage(String pkg, int uid);
+    boolean isInInvalidMsgState(String pkg, int uid);
+    boolean hasUserDemotedInvalidMsgApp(String pkg, int uid);
+    void setInvalidMsgAppDemoted(String pkg, int uid, boolean isDemoted);
     void setNotificationsEnabledForPackage(String pkg, int uid, boolean enabled);
     /**
      * Updates the notification's enabled state. Additionally locks importance for all of the
