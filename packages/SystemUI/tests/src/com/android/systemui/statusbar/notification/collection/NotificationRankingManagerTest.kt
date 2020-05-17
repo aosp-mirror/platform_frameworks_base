@@ -21,6 +21,7 @@ import android.app.NotificationChannel
 import android.app.NotificationManager.IMPORTANCE_DEFAULT
 import android.app.NotificationManager.IMPORTANCE_HIGH
 import android.app.NotificationManager.IMPORTANCE_LOW
+import android.os.SystemClock
 import android.service.notification.NotificationListenerService.RankingMap
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
@@ -58,17 +59,19 @@ class NotificationRankingManagerTest : SysuiTestCase() {
     private lateinit var personNotificationIdentifier: PeopleNotificationIdentifier
     private lateinit var rankingManager: TestableNotificationRankingManager
     private lateinit var sectionsManager: NotificationSectionsFeatureManager
+    private lateinit var notificationFilter: NotificationFilter
 
     @Before
     fun setup() {
         personNotificationIdentifier =
                 mock(PeopleNotificationIdentifier::class.java)
         sectionsManager = mock(NotificationSectionsFeatureManager::class.java)
+        notificationFilter = mock(NotificationFilter::class.java)
         rankingManager = TestableNotificationRankingManager(
                 lazyMedia,
                 mock(NotificationGroupManager::class.java),
                 mock(HeadsUpManager::class.java),
-                mock(NotificationFilter::class.java),
+                notificationFilter,
                 mock(NotificationEntryManagerLogger::class.java),
                 sectionsManager,
                 personNotificationIdentifier,
@@ -322,6 +325,32 @@ class NotificationRankingManagerTest : SysuiTestCase() {
 
         rankingManager.updateRanking(RankingMap(arrayOf(e.ranking)), listOf(e), "test")
         assertEquals(e.bucket, BUCKET_SILENT)
+    }
+
+    @Test
+    fun testFilter_resetsInitalizationTime() {
+        // GIVEN an entry that was initialized 1 second ago
+        val notif = Notification.Builder(mContext, "test") .build()
+
+        val e = NotificationEntryBuilder()
+            .setPkg("pkg")
+            .setOpPkg("pkg")
+            .setTag("tag")
+            .setNotification(notif)
+            .setUser(mContext.user)
+            .setChannel(NotificationChannel("test", "", IMPORTANCE_DEFAULT))
+            .setOverrideGroupKey("")
+            .build()
+
+        e.setInitializationTime(SystemClock.elapsedRealtime() - 1000)
+        assertEquals(true, e.hasFinishedInitialization())
+
+        // WHEN we update ranking and filter out the notification entry
+        whenever(notificationFilter.shouldFilterOut(e)).thenReturn(true)
+        rankingManager.updateRanking(RankingMap(arrayOf(e.ranking)), listOf(e), "test")
+
+        // THEN the initialization time for the entry is reset
+        assertEquals(false, e.hasFinishedInitialization())
     }
 
     internal class TestableNotificationRankingManager(
