@@ -20,6 +20,7 @@ import android.app.ITransientNotificationCallback;
 import android.content.ComponentName;
 import android.graphics.Rect;
 import android.hardware.biometrics.IBiometricSysuiReceiver;
+import android.hardware.biometrics.PromptInfo;
 import android.os.Bundle;
 import android.service.notification.StatusBarNotification;
 
@@ -135,7 +136,7 @@ oneway interface IStatusBar
     void showShutdownUi(boolean isReboot, String reason);
 
     // Used to show the authentication dialog (Biometrics, Device Credential)
-    void showAuthenticationDialog(in Bundle bundle, IBiometricSysuiReceiver sysuiReceiver,
+    void showAuthenticationDialog(in PromptInfo promptInfo, IBiometricSysuiReceiver sysuiReceiver,
             int biometricModality, boolean requireConfirmation, int userId, String opPackageName,
             long operationId);
     // Used to notify the authentication dialog that a biometric has been authenticated

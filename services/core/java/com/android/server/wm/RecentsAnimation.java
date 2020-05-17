@@ -183,7 +183,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
         // Send launch hint if we are actually launching the target. If it's already visible
         // (shouldn't happen in general) we don't need to send it.
         if (targetActivity == null || !targetActivity.mVisibleRequested) {
-            mService.mRootWindowContainer.sendPowerHintForLaunchStartIfNeeded(
+            mService.mRootWindowContainer.startPowerModeLaunchIfNeeded(
                     true /* forceSend */, targetActivity);
         }
 
@@ -278,7 +278,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
             // Just to be sure end the launch hint in case the target activity was never launched.
             // However, if we're keeping the activity and making it visible, we can leave it on.
             if (reorderMode != REORDER_KEEP_IN_PLACE) {
-                mService.mRootWindowContainer.sendPowerHintForLaunchEndIfNeeded();
+                mService.mRootWindowContainer.endPowerModeLaunchIfNeeded();
             }
 
             // Once the target is shown, prevent spurious background app switches

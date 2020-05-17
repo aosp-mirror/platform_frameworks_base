@@ -44,6 +44,24 @@ enum Action {
     /** Denotes that a toggle is clicked by a user. */
     TOGGLE_INTERACTED = 3;
 
+    /**
+     * Denotes that a TvSettings page is being focused in the forward direction
+     * into the settings tree.
+     */
+    PAGE_FOCUSED_FORWARD = 4;
+
+    /**
+     * Denotes that a TvSettings page is being focused in the backward direction
+     * up the settings tree.
+     */
+    PAGE_FOCUSED_BACKWARD = 5;
+
+    /** Denotes that a toggle is turned on by a user. */
+    TOGGLED_ON = 6;
+
+    /** Denotes that a toggle is turned off by a user. */
+    TOGGLED_OFF = 7;
+
 }
 
 /**

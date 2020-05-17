@@ -79,6 +79,12 @@ public class AppIdleHistory {
 
     private static final int STANDBY_BUCKET_UNKNOWN = -1;
 
+    /**
+     * The bucket beyond which apps are considered idle. Any apps in this bucket or lower are
+     * considered idle while those in higher buckets are not considered idle.
+     */
+    static final int IDLE_BUCKET_CUTOFF = STANDBY_BUCKET_RARE;
+
     @VisibleForTesting
     static final String APP_IDLE_FILENAME = "app_idle_stats.xml";
     private static final String TAG_PACKAGES = "packages";
@@ -350,7 +356,7 @@ public class AppIdleHistory {
         ArrayMap<String, AppUsageHistory> userHistory = getUserHistory(userId);
         AppUsageHistory appUsageHistory =
                 getPackageHistory(userHistory, packageName, elapsedRealtime, true);
-        return appUsageHistory.currentBucket >= STANDBY_BUCKET_RARE;
+        return appUsageHistory.currentBucket >= IDLE_BUCKET_CUTOFF;
     }
 
     public AppUsageHistory getAppUsageHistory(String packageName, int userId,
@@ -487,7 +493,7 @@ public class AppIdleHistory {
         final int newBucket;
         final int reason;
         if (idle) {
-            newBucket = STANDBY_BUCKET_RARE;
+            newBucket = IDLE_BUCKET_CUTOFF;
             reason = REASON_MAIN_FORCED_BY_USER;
         } else {
             newBucket = STANDBY_BUCKET_ACTIVE;

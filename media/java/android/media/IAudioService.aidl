@@ -150,7 +150,7 @@ interface IAudioService {
 
     oneway void avrcpSupportsAbsoluteVolume(String address, boolean support);
 
-    void setSpeakerphoneOn(boolean on);
+    void setSpeakerphoneOn(IBinder cb, boolean on);
 
     boolean isSpeakerphoneOn();
 

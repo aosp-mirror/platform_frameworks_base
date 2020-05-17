@@ -67,7 +67,7 @@ private fun PlaybackState.computePosition(duration: Long): Long {
 /** ViewModel for seek bar in QS media player. */
 class SeekBarViewModel(val bgExecutor: DelayableExecutor) {
 
-    private var _data = Progress(false, false, null, null, null)
+    private var _data = Progress(false, false, null, null)
         set(value) {
             field = value
             _progress.postValue(value)
@@ -100,10 +100,9 @@ class SeekBarViewModel(val bgExecutor: DelayableExecutor) {
     /**
      * Updates media information.
      * @param mediaController controller for media session
-     * @param color foreground color for UI elements
      */
     @WorkerThread
-    fun updateController(mediaController: MediaController?, color: Int) {
+    fun updateController(mediaController: MediaController?) {
         controller = mediaController
         playbackState = controller?.playbackState
         val mediaMetadata = controller?.metadata
@@ -113,7 +112,7 @@ class SeekBarViewModel(val bgExecutor: DelayableExecutor) {
         val enabled = if (playbackState == null ||
                 playbackState?.getState() == PlaybackState.STATE_NONE ||
                 (duration != null && duration <= 0)) false else true
-        _data = Progress(enabled, seekAvailable, position, duration, color)
+        _data = Progress(enabled, seekAvailable, position, duration)
         if (shouldPollPlaybackPosition()) {
             checkPlaybackPosition()
         }
@@ -191,7 +190,6 @@ class SeekBarViewModel(val bgExecutor: DelayableExecutor) {
         val enabled: Boolean,
         val seekAvailable: Boolean,
         val elapsedTime: Int?,
-        val duration: Int?,
-        val color: Int?
+        val duration: Int?
     )
 }

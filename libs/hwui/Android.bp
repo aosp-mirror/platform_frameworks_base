@@ -247,7 +247,7 @@ droidstubs {
 java_library {
     name: "framework-graphics-stubs-module_libs_api",
     srcs: [":framework-graphics-stubs-srcs-module_libs_api"],
-    sdk_version: "system_current",
+    defaults: ["framework-module-stubs-lib-defaults-module_libs_api"],
     visibility: [
         "//frameworks/base", // Framework
         "//frameworks/base/libs/hwui", // UI-rendering module
@@ -257,7 +257,7 @@ java_library {
 java_library {
     name: "framework-graphics-stubs-publicapi",
     srcs: [":framework-graphics-stubs-srcs-publicapi"],
-    sdk_version: "current",
+    defaults: ["framework-module-stubs-lib-defaults-publicapi"],
     visibility: [
         "//frameworks/base", // Framework
         "//frameworks/base/libs/hwui", // UI-rendering module
@@ -267,7 +267,7 @@ java_library {
 java_library {
     name: "framework-graphics-stubs-systemapi",
     srcs: [":framework-graphics-stubs-srcs-systemapi"],
-    sdk_version: "system_current",
+    defaults: ["framework-module-stubs-lib-defaults-systemapi"],
     visibility: [
         "//frameworks/base", // Framework
         "//frameworks/base/libs/hwui", // UI-rendering module

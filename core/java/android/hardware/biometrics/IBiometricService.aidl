@@ -16,10 +16,10 @@
 
 package android.hardware.biometrics;
 
-import android.os.Bundle;
 import android.hardware.biometrics.IBiometricEnabledOnKeyguardCallback;
 import android.hardware.biometrics.IBiometricServiceReceiver;
 import android.hardware.biometrics.IBiometricAuthenticator;
+import android.hardware.biometrics.PromptInfo;
 
 /**
  * Communication channel from AuthService to BiometricService.
@@ -29,7 +29,7 @@ interface IBiometricService {
     // Requests authentication. The service choose the appropriate biometric to use, and show
     // the corresponding BiometricDialog.
     void authenticate(IBinder token, long operationId, int userId,
-            IBiometricServiceReceiver receiver, String opPackageName, in Bundle bundle,
+            IBiometricServiceReceiver receiver, String opPackageName, in PromptInfo promptInfo,
             int callingUid, int callingPid, int callingUserId);
 
     // Cancel authentication for the given session.

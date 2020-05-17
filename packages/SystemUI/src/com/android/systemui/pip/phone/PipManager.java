@@ -25,7 +25,6 @@ import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.app.IActivityManager;
-import android.app.IActivityTaskManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ParceledListSlice;
@@ -140,7 +139,7 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
                     != WINDOWING_MODE_PINNED) {
                 return;
             }
-            mTouchHandler.getMotionHelper().expandPip(clearedTask /* skipAnimation */);
+            mTouchHandler.getMotionHelper().expandPipToFullscreen(clearedTask /* skipAnimation */);
         }
     };
 
@@ -214,7 +213,6 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
         }
         ActivityManagerWrapper.getInstance().registerTaskStackListener(mTaskStackListener);
 
-        final IActivityTaskManager activityTaskManager = ActivityTaskManager.getService();
         mPipBoundsHandler = pipBoundsHandler;
         mPipTaskOrganizer = pipTaskOrganizer;
         mPipTaskOrganizer.registerPipTransitionCallback(this);
@@ -222,7 +220,7 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
         mMediaController = new PipMediaController(context, mActivityManager, broadcastDispatcher);
         mMenuController = new PipMenuActivityController(context, mMediaController,
                 mInputConsumerController);
-        mTouchHandler = new PipTouchHandler(context, mActivityManager, activityTaskManager,
+        mTouchHandler = new PipTouchHandler(context, mActivityManager,
                 mMenuController, mInputConsumerController, mPipBoundsHandler, mPipTaskOrganizer,
                 floatingContentCoordinator, deviceConfig, pipSnapAlgorithm);
         mAppOpsListener = new PipAppOpsListener(context, mActivityManager,
@@ -237,7 +235,7 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
 
         try {
             mPipTaskOrganizer.registerOrganizer(WINDOWING_MODE_PINNED);
-            ActivityManager.StackInfo stackInfo = activityTaskManager.getStackInfo(
+            ActivityManager.StackInfo stackInfo = ActivityTaskManager.getService().getStackInfo(
                     WINDOWING_MODE_PINNED, ACTIVITY_TYPE_UNDEFINED);
             if (stackInfo != null) {
                 // If SystemUI restart, and it already existed a pinned stack,
@@ -261,7 +259,7 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
      */
     @Override
     public void expandPip() {
-        mTouchHandler.getMotionHelper().expandPip(false /* skipAnimation */);
+        mTouchHandler.getMotionHelper().expandPipToFullscreen(false /* skipAnimation */);
     }
 
     /**
@@ -378,5 +376,6 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
         mMenuController.dump(pw, innerPrefix);
         mTouchHandler.dump(pw, innerPrefix);
         mPipBoundsHandler.dump(pw, innerPrefix);
+        mPipTaskOrganizer.dump(pw, innerPrefix);
     }
 }

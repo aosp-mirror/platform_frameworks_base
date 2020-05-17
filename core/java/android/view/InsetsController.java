@@ -35,6 +35,7 @@ import android.graphics.Insets;
 import android.graphics.Rect;
 import android.os.CancellationSignal;
 import android.os.Handler;
+import android.os.Trace;
 import android.util.ArraySet;
 import android.util.Pair;
 import android.util.SparseArray;
@@ -567,11 +568,15 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     private void updateState(InsetsState newState) {
         mState.setDisplayFrame(newState.getDisplayFrame());
         for (int i = newState.getSourcesCount() - 1; i >= 0; i--) {
-            InsetsSource source = newState.sourceAt(i);
-            getSourceConsumer(source.getType()).updateSource(source);
+            final InsetsSource source = newState.sourceAt(i);
+            final int type = source.getType();
+            final InsetsSourceConsumer consumer = getSourceConsumer(type);
+            consumer.updateSource(source);
+            mHost.updateCompatSysUiVisibility(type, source.isVisible(),
+                    consumer.getControl() != null);
         }
         for (int i = mState.getSourcesCount() - 1; i >= 0; i--) {
-            InsetsSource source = mState.sourceAt(i);
+            final InsetsSource source = mState.sourceAt(i);
             if (newState.peekSource(source.getType()) == null) {
                 mState.removeSource(source.getType());
             }
@@ -1006,14 +1011,6 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     }
 
     /**
-     * @see ViewRootImpl#updateCompatSysUiVisibility(int, boolean, boolean)
-     */
-    public void updateCompatSysUiVisibility(@InternalInsetsType int type, boolean visible,
-            boolean hasControl) {
-        mHost.updateCompatSysUiVisibility(type, visible, hasControl);
-    }
-
-    /**
      * Called when current window gains focus.
      */
     public void onWindowFocusGained() {
@@ -1143,6 +1140,8 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             if (controller.isCancelled()) {
                 return;
             }
+            Trace.asyncTraceBegin(Trace.TRACE_TAG_VIEW,
+                    "InsetsAnimation: " + WindowInsets.Type.toString(types), types);
             for (int i = mRunningAnimations.size() - 1; i >= 0; i--) {
                 RunningAnimation runningAnimation = mRunningAnimations.get(i);
                 if (runningAnimation.runner == controller) {
@@ -1159,6 +1158,9 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
     @VisibleForTesting
     public void dispatchAnimationEnd(WindowInsetsAnimation animation) {
+        Trace.asyncTraceEnd(Trace.TRACE_TAG_VIEW,
+                "InsetsAnimation: " + WindowInsets.Type.toString(animation.getTypeMask()),
+                animation.getTypeMask());
         mHost.dispatchWindowInsetsAnimationEnd(animation);
     }
 

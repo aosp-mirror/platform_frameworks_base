@@ -2755,19 +2755,13 @@ class UserController implements Handler.Callback {
 
         void showUserSwitchingDialog(UserInfo fromUser, UserInfo toUser,
                 String switchingFromSystemUserMessage, String switchingToSystemUserMessage) {
-            Dialog d;
             if (!mService.mContext.getPackageManager()
                     .hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE)) {
-                d = new UserSwitchingDialog(mService, mService.mContext, fromUser, toUser,
-                    true /* above system */, switchingFromSystemUserMessage,
-                    switchingToSystemUserMessage);
-            } else {
-                d = new CarUserSwitchingDialog(mService, mService.mContext, fromUser, toUser,
-                    true /* above system */, switchingFromSystemUserMessage,
-                    switchingToSystemUserMessage);
+                final Dialog d = new UserSwitchingDialog(mService, mService.mContext, fromUser,
+                        toUser, true /* above system */, switchingFromSystemUserMessage,
+                        switchingToSystemUserMessage);
+                d.show();
             }
-
-            d.show();
         }
 
         void reportGlobalUsageEventLocked(int event) {

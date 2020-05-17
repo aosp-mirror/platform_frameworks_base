@@ -1680,6 +1680,8 @@ easier.
         <item name="listPreferredItemPaddingEnd">?attr/dialogPreferredPadding</item>
         <item name="navigationBarColor">@android:color/transparent</item>
         <item name="tabWidgetStyle">@style/Widget.DeviceDefault.Resolver.TabWidget</item>
+        <item name="iconfactoryIconSize">@dimen/resolver_icon_size</item>
+        <item name="iconfactoryBadgeSize">@dimen/resolver_badge_size</item>
     </style>
 
     <style name="Widget.DeviceDefault.Resolver.TabWidget" parent="Widget.DeviceDefault.TabWidget">
@@ -1692,6 +1694,11 @@ easier.
 
     <style name="Theme.DeviceDefault.Resolver" parent="Theme.DeviceDefault.ResolverCommon">
         <item name="windowLightNavigationBar">true</item>
+    </style>
+
+    <style name="Theme.DeviceDefault.Chooser" parent="Theme.DeviceDefault.Resolver">
+        <item name="iconfactoryIconSize">@dimen/chooser_icon_size</item>
+        <item name="iconfactoryBadgeSize">@dimen/chooser_badge_size</item>
     </style>
 
     <style name="Animation.DeviceDefault.Activity.Resolver" parent="Animation.DeviceDefault.Activity">

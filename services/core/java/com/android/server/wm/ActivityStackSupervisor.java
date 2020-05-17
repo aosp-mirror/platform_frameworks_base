@@ -1741,8 +1741,8 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
             return;
         }
 
-        // Send launch end powerhint before going sleep
-        mRootWindowContainer.sendPowerHintForLaunchEndIfNeeded();
+        // End power mode launch before going sleep
+        mRootWindowContainer.endPowerModeLaunchIfNeeded();
 
         removeSleepTimeouts();
 
@@ -2492,13 +2492,13 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                     && task.getRootActivity() != null) {
                 final ActivityRecord targetActivity = task.getTopNonFinishingActivity();
 
-                mRootWindowContainer.sendPowerHintForLaunchStartIfNeeded(
+                mRootWindowContainer.startPowerModeLaunchIfNeeded(
                         true /* forceSend */, targetActivity);
                 final LaunchingState launchingState =
                         mActivityMetricsLogger.notifyActivityLaunching(task.intent);
                 try {
                     mService.moveTaskToFrontLocked(null /* appThread */, null /* callingPackage */,
-                            task.mTaskId, 0, options, true /* fromRecents */);
+                            task.mTaskId, 0, options);
                     // Apply options to prevent pendingOptions be taken by client to make sure
                     // the override pending app transition will be applied immediately.
                     targetActivity.applyOptionsLocked();

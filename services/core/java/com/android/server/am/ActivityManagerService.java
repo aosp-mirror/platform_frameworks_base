@@ -8765,6 +8765,53 @@ public class ActivityManagerService extends IActivityManager.Stub
         return uidRecord != null && !uidRecord.setIdle;
     }
 
+    /**
+     * Change the sched policy cgroup of a thread.
+     *
+     * <p>It is intended to be used in jni call of {@link Process#setThreadPriority(int, int)}.
+     * When a process is changing the priority of its threads, the sched policy of that
+     * thread may need to be changed accordingly - if the priority is changed to below
+     * or equal to {@link android.os.Process#THREAD_PRIORITY_BACKGROUND} or raising from it.
+     * However, because of the limitation of sepolicy, the thread priority change will
+     * fail for some processes. To solve it, we add this binder call in Activity Manager,
+     * so that the jni call of {@link Process#setThreadPriority(int, int)} could use it.
+     *
+     * @param tid tid of the thread to be changed.
+     * @param group The sched policy group to be changed to.
+     *
+     * @throws IllegalArgumentException if group is invalid.
+     * @throws SecurityException if no permission.
+     *
+     * @return Returns {@code true} if the sched policy is changed successfully;
+     *         {@code false} otherwise.
+     */
+    @Override
+    public boolean setSchedPolicyCgroup(final int tid, final int group) {
+        final int pid = Binder.getCallingPid();
+        final int tgid = Process.getThreadGroupLeader(tid);
+        final int pgroup = Process.getProcessGroup(pid);
+
+        // tid is not in the thread group of caller
+        if (pid != tgid) {
+            return false;
+        }
+
+        // sched group is higher than its main process
+        if (group > pgroup) {
+            return false;
+        }
+
+        try {
+            Process.setThreadGroup(tid, group);
+            return true;
+        } catch (IllegalArgumentException e) {
+            Slog.w(TAG, "Failed to set thread group, argument invalid:\n" + e);
+        } catch (SecurityException e) {
+            Slog.w(TAG, "Failed to set thread group, no permission:\n" + e);
+        }
+        return false;
+    }
+
     @Override
     public void setPersistentVrThread(int tid) {
         mActivityTaskManager.setPersistentVrThread(tid);
@@ -11083,18 +11130,22 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     void dumpLruEntryLocked(PrintWriter pw, int index, ProcessRecord proc, String prefix) {
         pw.print(prefix);
-        pw.print("#");
+        pw.print('#');
+        if (index < 10) {
+            pw.print(' ');
+        }
         pw.print(index);
         pw.print(": ");
         pw.print(ProcessList.makeOomAdjString(proc.setAdj, false));
-        pw.print(" ");
+        pw.print(' ');
         pw.print(ProcessList.makeProcStateString(proc.getCurProcState()));
-        pw.print(" ");
+        pw.print(' ');
+        ActivityManager.printCapabilitiesSummary(pw, proc.curCapability);
+        pw.print(' ');
         pw.print(proc.toShortString());
-        pw.print(" ");
         if (proc.hasActivitiesOrRecentTasks() || proc.hasClientActivities()
                 || proc.treatLikeActivity) {
-            pw.print(" activity=");
+            pw.print(" act:");
             boolean printed = false;
             if (proc.hasActivities()) {
                 pw.print("activities");
@@ -12559,7 +12610,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             char schedGroup;
             switch (r.setSchedGroup) {
                 case ProcessList.SCHED_GROUP_BACKGROUND:
-                    schedGroup = 'B';
+                    schedGroup = 'b';
                     break;
                 case ProcessList.SCHED_GROUP_DEFAULT:
                     schedGroup = 'F';
@@ -12569,6 +12620,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                     break;
                 case ProcessList.SCHED_GROUP_RESTRICTED:
                     schedGroup = 'R';
+                    break;
+                case ProcessList.SCHED_GROUP_TOP_APP_BOUND:
+                    schedGroup = 'B';
                     break;
                 default:
                     schedGroup = '?';
@@ -12597,7 +12651,10 @@ public class ActivityManagerService extends IActivityManager.Stub
             pw.print(foreground);
             pw.print('/');
             pw.print(procState);
-            pw.print(" trm:");
+            pw.print(' ');
+            ActivityManager.printCapabilitiesSummary(pw, r.curCapability);
+            pw.print(' ');
+            pw.print(" t:");
             if (r.trimMemoryLevel < 10) pw.print(' ');
             pw.print(r.trimMemoryLevel);
             pw.print(' ');

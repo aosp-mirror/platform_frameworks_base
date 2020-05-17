@@ -47,7 +47,7 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(CacheManager, trimMemory) {
         sk_sp<SkSurface> surface = SkSurface::MakeRenderTarget(grContext, SkBudgeted::kYes, info);
         surface->getCanvas()->drawColor(SK_AlphaTRANSPARENT);
 
-        grContext->flush();
+        grContext->flushAndSubmit();
 
         surfaces.push_back(surface);
     }

@@ -33,13 +33,12 @@ import static org.mockito.Mockito.when;
 import android.app.admin.DevicePolicyManager;
 import android.app.trust.ITrustManager;
 import android.hardware.biometrics.BiometricManager.Authenticators;
-import android.hardware.biometrics.BiometricPrompt;
 import android.hardware.biometrics.IBiometricAuthenticator;
 import android.hardware.biometrics.IBiometricSensorReceiver;
 import android.hardware.biometrics.IBiometricServiceReceiver;
 import android.hardware.biometrics.IBiometricSysuiReceiver;
+import android.hardware.biometrics.PromptInfo;
 import android.os.Binder;
-import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
@@ -172,14 +171,14 @@ public class AuthSessionTest {
         }
     }
 
-    private PreAuthInfo createPreAuthInfo(List<BiometricSensor> sensors, int userId, Bundle bundle,
-            boolean checkDevicePolicyManager) throws RemoteException {
+    private PreAuthInfo createPreAuthInfo(List<BiometricSensor> sensors, int userId,
+            PromptInfo promptInfo, boolean checkDevicePolicyManager) throws RemoteException {
         return PreAuthInfo.create(mTrustManager,
                 mDevicePolicyManager,
                 mSettingObserver,
                 sensors,
                 userId,
-                bundle,
+                promptInfo,
                 TEST_PACKAGE,
                 checkDevicePolicyManager);
     }
@@ -190,21 +189,21 @@ public class AuthSessionTest {
             int callingUid, int callingPid, int callingUserId)
             throws RemoteException {
 
-        final Bundle bundle = createBiometricPromptBundle(authenticators);
+        final PromptInfo promptInfo = createPromptInfo(authenticators);
 
-        final PreAuthInfo preAuthInfo = createPreAuthInfo(sensors, userId, bundle,
+        final PreAuthInfo preAuthInfo = createPreAuthInfo(sensors, userId, promptInfo,
                 checkDevicePolicyManager);
 
         return new AuthSession(mStatusBarService, mSysuiReceiver, mKeyStore,
                 mRandom, preAuthInfo, mToken, operationId, userId, mSensorReceiver,
-                mClientReceiver, TEST_PACKAGE, bundle, callingUid,
+                mClientReceiver, TEST_PACKAGE, promptInfo, callingUid,
                 callingPid, callingUserId, false /* debugEnabled */);
     }
 
-    private Bundle createBiometricPromptBundle(@Authenticators.Types int authenticators) {
-        Bundle bundle = new Bundle();
-        bundle.putInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED, authenticators);
-        return bundle;
+    private PromptInfo createPromptInfo(@Authenticators.Types int authenticators) {
+        PromptInfo promptInfo = new PromptInfo();
+        promptInfo.setAuthenticators(authenticators);
+        return promptInfo;
     }
 
 

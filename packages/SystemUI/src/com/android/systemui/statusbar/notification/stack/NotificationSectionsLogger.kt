@@ -36,14 +36,52 @@ class NotificationSectionsLogger @Inject constructor(
             { "Updating section boundaries: $reason" }
     )
 
-    fun logStr(str: String) = logBuffer.log(
+    fun logIncomingHeader(position: Int) = logPosition(position, "INCOMING HEADER")
+    fun logMediaControls(position: Int) = logPosition(position, "MEDIA CONTROLS")
+    fun logConversationsHeader(position: Int) = logPosition(position, "CONVERSATIONS HEADER")
+    fun logAlertingHeader(position: Int) = logPosition(position, "ALERTING HEADER")
+    fun logSilentHeader(position: Int) = logPosition(position, "SILENT HEADER")
+
+    fun logOther(position: Int, clazz: Class<*>) = logBuffer.log(
             TAG,
             LogLevel.DEBUG,
-            { str1 = str },
-            { str1 ?: "" }
+            {
+                int1 = position
+                str1 = clazz.name
+            },
+            { "$int1: other ($str1)" }
     )
 
-    fun logPosition(position: Int, label: String) = logBuffer.log(
+    fun logHeadsUp(position: Int, isHeadsUp: Boolean) =
+            logPosition(position, "Heads Up", isHeadsUp)
+    fun logConversation(position: Int, isHeadsUp: Boolean) =
+            logPosition(position, "Conversation", isHeadsUp)
+    fun logAlerting(position: Int, isHeadsUp: Boolean) =
+            logPosition(position, "Alerting", isHeadsUp)
+    fun logSilent(position: Int, isHeadsUp: Boolean) =
+            logPosition(position, "Silent", isHeadsUp)
+    fun logForegroundService(position: Int, isHeadsUp: Boolean) =
+            logPosition(position, "Foreground Service", isHeadsUp)
+
+    fun logStr(str: String) = logBuffer.log(TAG, LogLevel.DEBUG, { str1 = str }, { "$str1" })
+
+    private fun logPosition(position: Int, label: String, isHeadsUp: Boolean) {
+        val headsUpTag = if (isHeadsUp) " (HUN)" else ""
+        logBuffer.log(
+                TAG,
+                LogLevel.DEBUG,
+                {
+                    int1 = position
+                    str1 = label
+                    str2 = headsUpTag
+                },
+                {
+                    "$int1: $str1$str2"
+                }
+        )
+    }
+
+    private fun logPosition(position: Int, label: String) = logBuffer.log(
             TAG,
             LogLevel.DEBUG,
             {

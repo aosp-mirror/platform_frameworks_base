@@ -139,7 +139,7 @@ import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.hardware.input.InputManager;
-import android.hardware.power.V1_0.PowerHint;
+import android.hardware.power.Boost;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -547,8 +547,8 @@ public class DisplayPolicy {
                     @Override
                     public void onFling(int duration) {
                         if (mService.mPowerManagerInternal != null) {
-                            mService.mPowerManagerInternal.powerHint(
-                                    PowerHint.INTERACTION, duration);
+                            mService.mPowerManagerInternal.setPowerBoost(
+                                    Boost.INTERACTION, duration);
                         }
                     }
 
@@ -874,10 +874,6 @@ public class DisplayPolicy {
                 }
                 break;
 
-            case TYPE_SCREENSHOT:
-                attrs.flags |= WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
-                break;
-
             case TYPE_TOAST:
                 // While apps should use the dedicated toast APIs to add such windows
                 // it possible legacy apps to add the window directly. Therefore, we
@@ -1108,6 +1104,24 @@ public class DisplayPolicy {
                 }
                 break;
         }
+    }
+
+    TriConsumer<DisplayFrames, WindowState, Rect> getImeSourceFrameProvider() {
+        return (displayFrames, windowState, inOutFrame) -> {
+            if (mNavigationBar != null && navigationBarPosition(displayFrames.mDisplayWidth,
+                    displayFrames.mDisplayHeight,
+                    displayFrames.mRotation) == NAV_BAR_BOTTOM) {
+                // In gesture navigation, nav bar frame is larger than frame to calculate insets.
+                // IME should not provide frame which is smaller than the nav bar frame. Otherwise,
+                // nav bar might be overlapped with the content of the client when IME is shown.
+                sTmpRect.set(inOutFrame);
+                sTmpRect.intersectUnchecked(mNavigationBar.getFrameLw());
+                inOutFrame.inset(windowState.getGivenContentInsetsLw());
+                inOutFrame.union(sTmpRect);
+            } else {
+                inOutFrame.inset(windowState.getGivenContentInsetsLw());
+            }
+        };
     }
 
     private static void enforceSingleInsetsTypeCorrespondingToWindowType(int[] insetsTypes) {
@@ -2036,9 +2050,13 @@ public class DisplayPolicy {
             final Rect dfu = displayFrames.mUnrestricted;
             Insets insets = Insets.of(0, 0, 0, 0);
             for (int i = types.size() - 1; i >= 0; i--) {
-                insets = Insets.max(insets, mDisplayContent.getInsetsPolicy()
-                        .getInsetsForDispatch(win).getSource(types.valueAt(i))
-                        .calculateInsets(dfu, attrs.isFitInsetsIgnoringVisibility()));
+                final InsetsSource source = mDisplayContent.getInsetsPolicy()
+                        .getInsetsForDispatch(win).peekSource(types.valueAt(i));
+                if (source == null) {
+                    continue;
+                }
+                insets = Insets.max(insets, source.calculateInsets(
+                        dfu, attrs.isFitInsetsIgnoringVisibility()));
             }
             final int left = (sidesToFit & Side.LEFT) != 0 ? insets.left : 0;
             final int top = (sidesToFit & Side.TOP) != 0 ? insets.top : 0;

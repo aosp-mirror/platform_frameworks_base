@@ -13,17 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef ANDROID_ATRACE_HEADERS_H
-#define ANDROID_ATRACE_HEADERS_H
+package android.hardware.biometrics;
 
-#include <cutils/trace.h>
-
-inline void ATrace_beginSection(const char* sectionName) {
-    atrace_begin(ATRACE_TAG_APP, sectionName);
-}
-
-inline void ATrace_endSection() {
-    atrace_end(ATRACE_TAG_APP);
-}
-
-#endif // ANDROID_ATRACE_HEADERS_H
+parcelable PromptInfo;

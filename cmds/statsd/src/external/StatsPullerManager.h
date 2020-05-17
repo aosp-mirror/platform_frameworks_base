@@ -101,11 +101,11 @@ public:
     //      registered for any of the uids for this atom.
     // If the metric wants to make any change to the data, like timestamps, they
     // should make a copy as this data may be shared with multiple metrics.
-    virtual bool Pull(int tagId, const ConfigKey& configKey,
+    virtual bool Pull(int tagId, const ConfigKey& configKey, const int64_t eventTimeNs,
                       vector<std::shared_ptr<LogEvent>>* data, bool useUids = true);
 
     // Same as above, but directly specify the allowed uids to pull from.
-    virtual bool Pull(int tagId, const vector<int32_t>& uids,
+    virtual bool Pull(int tagId, const vector<int32_t>& uids, const int64_t eventTimeNs,
                       vector<std::shared_ptr<LogEvent>>* data, bool useUids = true);
 
     // Clear pull data cache immediately.
@@ -152,11 +152,11 @@ private:
     // mapping from Config Key to the PullUidProvider for that config
     std::map<ConfigKey, wp<PullUidProvider>> mPullUidProviders;
 
-    bool PullLocked(int tagId, const ConfigKey& configKey, vector<std::shared_ptr<LogEvent>>* data,
-                    bool useUids = true);
+    bool PullLocked(int tagId, const ConfigKey& configKey, const int64_t eventTimeNs,
+                    vector<std::shared_ptr<LogEvent>>* data, bool useUids = true);
 
-    bool PullLocked(int tagId, const vector<int32_t>& uids, vector<std::shared_ptr<LogEvent>>* data,
-                    bool useUids);
+    bool PullLocked(int tagId, const vector<int32_t>& uids, const int64_t eventTimeNs,
+                    vector<std::shared_ptr<LogEvent>>* data, bool useUids);
 
     // locks for data receiver and StatsCompanionService changes
     std::mutex mLock;

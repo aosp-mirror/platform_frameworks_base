@@ -34,6 +34,7 @@ import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricPrompt;
 import android.hardware.biometrics.IBiometricSysuiReceiver;
+import android.hardware.biometrics.PromptInfo;
 import android.hardware.face.FaceManager;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.Bundle;
@@ -275,10 +276,10 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
     }
 
     @Override
-    public void showAuthenticationDialog(Bundle bundle, IBiometricSysuiReceiver receiver,
+    public void showAuthenticationDialog(PromptInfo promptInfo, IBiometricSysuiReceiver receiver,
             @BiometricAuthenticator.Modality int biometricModality, boolean requireConfirmation,
             int userId, String opPackageName, long operationId) {
-        final int authenticators = Utils.getAuthenticators(bundle);
+        @Authenticators.Types final int authenticators = promptInfo.getAuthenticators();
 
         if (DEBUG) {
             Log.d(TAG, "showAuthenticationDialog, authenticators: " + authenticators
@@ -287,7 +288,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
                     + ", operationId: " + operationId);
         }
         SomeArgs args = SomeArgs.obtain();
-        args.arg1 = bundle;
+        args.arg1 = promptInfo;
         args.arg2 = receiver;
         args.argi1 = biometricModality;
         args.arg3 = requireConfirmation;
@@ -378,7 +379,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
     private void showDialog(SomeArgs args, boolean skipAnimation, Bundle savedState) {
         mCurrentDialogArgs = args;
         final @BiometricAuthenticator.Modality int type = args.argi1;
-        final Bundle biometricPromptBundle = (Bundle) args.arg1;
+        final PromptInfo promptInfo = (PromptInfo) args.arg1;
         final boolean requireConfirmation = (boolean) args.arg3;
         final int userId = args.argi2;
         final String opPackageName = (String) args.arg4;
@@ -386,7 +387,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
 
         // Create a new dialog but do not replace the current one yet.
         final AuthDialog newDialog = buildDialog(
-                biometricPromptBundle,
+                promptInfo,
                 requireConfirmation,
                 userId,
                 type,
@@ -447,10 +448,11 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
                 final boolean credentialShowing =
                         savedState.getBoolean(AuthDialog.KEY_CREDENTIAL_SHOWING);
                 if (credentialShowing) {
-                    // TODO: Clean this up
-                    Bundle bundle = (Bundle) mCurrentDialogArgs.arg1;
-                    bundle.putInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED,
-                            Authenticators.DEVICE_CREDENTIAL);
+                    // There may be a cleaner way to do this, rather than altering the current
+                    // authentication's parameters. This gets the job done and should be clear
+                    // enough for now.
+                    PromptInfo promptInfo = (PromptInfo) mCurrentDialogArgs.arg1;
+                    promptInfo.setAuthenticators(Authenticators.DEVICE_CREDENTIAL);
                 }
 
                 showDialog(mCurrentDialogArgs, true /* skipAnimation */, savedState);
@@ -458,12 +460,12 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
         }
     }
 
-    protected AuthDialog buildDialog(Bundle biometricPromptBundle, boolean requireConfirmation,
+    protected AuthDialog buildDialog(PromptInfo promptInfo, boolean requireConfirmation,
             int userId, @BiometricAuthenticator.Modality int type, String opPackageName,
             boolean skipIntro, long operationId) {
         return new AuthContainerView.Builder(mContext)
                 .setCallback(this)
-                .setBiometricPromptBundle(biometricPromptBundle)
+                .setPromptInfo(promptInfo)
                 .setRequireConfirmation(requireConfirmation)
                 .setUserId(userId)
                 .setOpPackageName(opPackageName)

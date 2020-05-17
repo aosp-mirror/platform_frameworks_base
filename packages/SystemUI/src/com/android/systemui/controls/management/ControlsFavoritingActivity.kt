@@ -208,7 +208,7 @@ class ControlsFavoritingActivity @Inject constructor(
                     val name = listOfStructures[position].structureName
                     val title = if (!TextUtils.isEmpty(name)) name else appName
                     titleView.text = title
-                    setTitle(title)
+                    titleView.requestFocus()
                 }
 
                 override fun onPageScrolled(

@@ -114,9 +114,10 @@ public final class WindowMagnificationManager implements
      *
      * @return {@code true} if {@link IWindowMagnificationConnection} is available
      */
-    @GuardedBy("mLock")
-    private boolean isConnected() {
-        return mConnectionWrapper != null;
+    public boolean isConnected() {
+        synchronized (mLock) {
+            return mConnectionWrapper != null;
+        }
     }
 
     /**
@@ -385,8 +386,8 @@ public final class WindowMagnificationManager implements
         @Override
         public void binderDied() {
             synchronized (mLock) {
+                Slog.w(TAG, "binderDied DeathRecipient :" + mExpiredDeathRecipient);
                 if (mExpiredDeathRecipient) {
-                    Slog.w(TAG, "binderDied DeathRecipient is expired");
                     return;
                 }
                 mConnectionWrapper.unlinkToDeath(this);

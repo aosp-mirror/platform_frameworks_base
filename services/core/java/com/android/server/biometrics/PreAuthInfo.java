@@ -27,8 +27,7 @@ import android.app.admin.DevicePolicyManager;
 import android.app.trust.ITrustManager;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricManager;
-import android.hardware.biometrics.BiometricPrompt;
-import android.os.Bundle;
+import android.hardware.biometrics.PromptInfo;
 import android.os.RemoteException;
 import android.util.Pair;
 import android.util.Slog;
@@ -82,13 +81,13 @@ class PreAuthInfo {
             DevicePolicyManager devicePolicyManager,
             BiometricService.SettingObserver settingObserver,
             List<BiometricSensor> sensors,
-            int userId, Bundle bundle, String opPackageName, boolean checkDevicePolicyManager)
+            int userId, PromptInfo promptInfo, String opPackageName,
+            boolean checkDevicePolicyManager)
             throws RemoteException {
-        final boolean confirmationRequested = bundle.getBoolean(
-                BiometricPrompt.KEY_REQUIRE_CONFIRMATION, true /* default */);
-        final boolean biometricRequested = Utils.isBiometricRequested(bundle);
-        final int requestedStrength = Utils.getPublicBiometricStrength(bundle);
-        final boolean credentialRequested = Utils.isCredentialRequested(bundle);
+        final boolean confirmationRequested = promptInfo.isConfirmationRequested();
+        final boolean biometricRequested = Utils.isBiometricRequested(promptInfo);
+        final int requestedStrength = Utils.getPublicBiometricStrength(promptInfo);
+        final boolean credentialRequested = Utils.isCredentialRequested(promptInfo);
 
         final boolean credentialAvailable = trustManager.isDeviceSecure(userId);
 

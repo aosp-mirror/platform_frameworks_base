@@ -121,6 +121,7 @@ import android.os.storage.StorageVolume;
 import android.os.storage.VolumeInfo;
 import android.os.storage.VolumeRecord;
 import android.provider.DeviceConfig;
+import android.provider.DocumentsContract;
 import android.provider.Downloads;
 import android.provider.MediaStore;
 import android.provider.Settings;
@@ -431,6 +432,8 @@ class StorageManagerService extends IStorageManager.Stub
     private volatile int mMediaStoreAuthorityAppId = -1;
 
     private volatile int mDownloadsAuthorityAppId = -1;
+
+    private volatile int mExternalStorageAuthorityAppId = -1;
 
     private volatile int mCurrentUserId = UserHandle.USER_SYSTEM;
 
@@ -1924,22 +1927,20 @@ class StorageManagerService extends IStorageManager.Stub
         mIAppOpsService = IAppOpsService.Stub.asInterface(
                 ServiceManager.getService(Context.APP_OPS_SERVICE));
 
-        ProviderInfo provider = mPmInternal.resolveContentProvider(
-                MediaStore.AUTHORITY, PackageManager.MATCH_DIRECT_BOOT_AWARE
-                | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
-                UserHandle.getUserId(UserHandle.USER_SYSTEM));
+        ProviderInfo provider = getProviderInfo(MediaStore.AUTHORITY);
         if (provider != null) {
             mMediaStoreAuthorityAppId = UserHandle.getAppId(provider.applicationInfo.uid);
             sMediaStoreAuthorityProcessName = provider.applicationInfo.processName;
         }
 
-        provider = mPmInternal.resolveContentProvider(
-                Downloads.Impl.AUTHORITY, PackageManager.MATCH_DIRECT_BOOT_AWARE
-                        | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
-                UserHandle.getUserId(UserHandle.USER_SYSTEM));
-
+        provider = getProviderInfo(Downloads.Impl.AUTHORITY);
         if (provider != null) {
             mDownloadsAuthorityAppId = UserHandle.getAppId(provider.applicationInfo.uid);
+        }
+
+        provider = getProviderInfo(DocumentsContract.EXTERNAL_STORAGE_PROVIDER_AUTHORITY);
+        if (provider != null) {
+            mExternalStorageAuthorityAppId = UserHandle.getAppId(provider.applicationInfo.uid);
         }
 
         if (!mIsFuseEnabled) {
@@ -1950,6 +1951,13 @@ class StorageManagerService extends IStorageManager.Stub
             } catch (RemoteException e) {
             }
         }
+    }
+
+    private ProviderInfo getProviderInfo(String authority) {
+        return mPmInternal.resolveContentProvider(
+                authority, PackageManager.MATCH_DIRECT_BOOT_AWARE
+                        | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
+                UserHandle.getUserId(UserHandle.USER_SYSTEM));
     }
 
     private void updateLegacyStorageApps(String packageName, int uid, boolean hasLegacy) {
@@ -4192,9 +4200,11 @@ class StorageManagerService extends IStorageManager.Stub
                 return Zygote.MOUNT_EXTERNAL_PASS_THROUGH;
             }
 
-            if (mIsFuseEnabled && mDownloadsAuthorityAppId == UserHandle.getAppId(uid)) {
+            if (mIsFuseEnabled && (mDownloadsAuthorityAppId == UserHandle.getAppId(uid)
+                    || mExternalStorageAuthorityAppId == UserHandle.getAppId(uid))) {
                 // DownloadManager can write in app-private directories on behalf of apps;
                 // give it write access to Android/
+                // ExternalStorageProvider can access Android/{data,obb} dirs in managed mode
                 return Zygote.MOUNT_EXTERNAL_ANDROID_WRITABLE;
             }
 
