@@ -713,6 +713,10 @@ public class ShadeListBuilder implements Dumpable {
     private boolean applyFilters(NotificationEntry entry, long now, List<NotifFilter> filters) {
         final NotifFilter filter = findRejectingFilter(entry, now, filters);
         entry.getAttachState().setExcludingFilter(filter);
+        if (filter != null) {
+            // notification is removed from the list, so we reset its initialization time
+            entry.resetInitializationTime();
+        }
         return filter != null;
     }
 
