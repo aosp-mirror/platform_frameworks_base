@@ -16,6 +16,7 @@
 
 package com.android.systemui.stackdivider;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.SCREEN_HEIGHT_DP_UNDEFINED;
 import static android.content.res.Configuration.SCREEN_WIDTH_DP_UNDEFINED;
@@ -123,14 +124,17 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
                 SplitDisplayLayout sdl = new SplitDisplayLayout(mContext, displayLayout, mSplits);
                 sdl.rotateTo(toRotation);
                 mRotateSplitLayout = sdl;
-                int position = mMinimized ? mView.mSnapTargetBeforeMinimized.position
-                        : mView.getCurrentPosition();
+                final int position = isDividerVisible()
+                        ? (mMinimized ? mView.mSnapTargetBeforeMinimized.position
+                                : mView.getCurrentPosition())
+                        // snap resets to middle target when not in split-mode
+                        : sdl.getSnapAlgorithm().getMiddleTarget().position;
                 DividerSnapAlgorithm snap = sdl.getSnapAlgorithm();
                 final DividerSnapAlgorithm.SnapTarget target =
                         snap.calculateNonDismissingSnapTarget(position);
                 sdl.resizeSplits(target.position, t);
 
-                if (inSplitMode()) {
+                if (isSplitActive()) {
                     WindowManagerProxy.applyHomeTasksMinimized(sdl, mSplits.mSecondary.token, t);
                 }
             };
@@ -199,7 +203,7 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
         @Override
         public void onImeStartPositioning(int displayId, int hiddenTop, int shownTop,
                 boolean imeShouldShow, SurfaceControl.Transaction t) {
-            if (!inSplitMode()) {
+            if (!isDividerVisible()) {
                 return;
             }
             final boolean splitIsVisible = !mView.isHidden();
@@ -298,7 +302,7 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
         @Override
         public void onImePositionChanged(int displayId, int imeTop,
                 SurfaceControl.Transaction t) {
-            if (mAnimation != null || !inSplitMode() || mPaused) {
+            if (mAnimation != null || !isDividerVisible() || mPaused) {
                 // Not synchronized with IME anymore, so return.
                 return;
             }
@@ -310,7 +314,7 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
         @Override
         public void onImeEndPositioning(int displayId, boolean cancelled,
                 SurfaceControl.Transaction t) {
-            if (mAnimation != null || !inSplitMode() || mPaused) {
+            if (mAnimation != null || !isDividerVisible() || mPaused) {
                 // Not synchronized with IME anymore, so return.
                 return;
             }
@@ -479,7 +483,7 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
 
             @Override
             public void onKeyguardShowingChanged() {
-                if (!inSplitMode() || mView == null) {
+                if (!isDividerVisible() || mView == null) {
                     return;
                 }
                 mView.setHidden(mKeyguardStateController.isShowing());
@@ -559,8 +563,18 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
     }
 
     /** {@code true} if this is visible */
-    public boolean inSplitMode() {
+    public boolean isDividerVisible() {
         return mView != null && mView.getVisibility() == View.VISIBLE;
+    }
+
+    /**
+     * This indicates that at-least one of the splits has content. This differs from
+     * isDividerVisible because the divider is only visible once *everything* is in split mode
+     * while this only cares if some things are (eg. while entering/exiting as well).
+     */
+    private boolean isSplitActive() {
+        return mSplits.mPrimary.topActivityType != ACTIVITY_TYPE_UNDEFINED
+                || mSplits.mSecondary.topActivityType != ACTIVITY_TYPE_UNDEFINED;
     }
 
     private void addDivider(Configuration configuration) {
@@ -635,8 +649,8 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
     }
 
     void onSplitDismissed() {
-        mMinimized = false;
         updateVisibility(false /* visible */);
+        mMinimized = false;
         removeDivider();
     }
 
@@ -655,7 +669,8 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
     private void setHomeMinimized(final boolean minimized, boolean homeStackResizable) {
         if (DEBUG) {
             Slog.d(TAG, "setHomeMinimized  min:" + mMinimized + "->" + minimized + " hrsz:"
-                    + mHomeStackResizable + "->" + homeStackResizable + " split:" + inSplitMode());
+                    + mHomeStackResizable + "->" + homeStackResizable
+                    + " split:" + isDividerVisible());
         }
         WindowContainerTransaction wct = new WindowContainerTransaction();
         final boolean minimizedChanged = mMinimized != minimized;
@@ -670,7 +685,7 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
         final boolean homeResizableChanged = mHomeStackResizable != homeStackResizable;
         if (homeResizableChanged) {
             mHomeStackResizable = homeStackResizable;
-            if (inSplitMode()) {
+            if (isDividerVisible()) {
                 WindowManagerProxy.applyHomeTasksMinimized(
                         mSplitLayout, mSplits.mSecondary.token, wct);
             }
@@ -780,7 +795,7 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
 
     /** Register a listener that gets called whenever the existence of the divider changes */
     public void registerInSplitScreenListener(Consumer<Boolean> listener) {
-        listener.accept(inSplitMode());
+        listener.accept(isDividerVisible());
         synchronized (mDockedStackExistsListeners) {
             mDockedStackExistsListeners.add(new WeakReference<>(listener));
         }
@@ -795,7 +810,7 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
 
     void ensureMinimizedSplit() {
         setHomeMinimized(true /* minimized */, mSplits.mSecondary.isResizable());
-        if (!inSplitMode()) {
+        if (!isDividerVisible()) {
             // Wasn't in split-mode yet, so enter now.
             if (DEBUG) {
                 Slog.d(TAG, " entering split mode with minimized=true");
@@ -806,7 +821,7 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
 
     void ensureNormalSplit() {
         setHomeMinimized(false /* minimized */, mHomeStackResizable);
-        if (!inSplitMode()) {
+        if (!isDividerVisible()) {
             // Wasn't in split-mode, so enter now.
             if (DEBUG) {
                 Slog.d(TAG, " enter split mode unminimized ");

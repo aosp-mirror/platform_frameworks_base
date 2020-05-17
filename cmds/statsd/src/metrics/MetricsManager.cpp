@@ -71,6 +71,8 @@ MetricsManager::MetricsManager(const ConfigKey& key, const StatsdConfig& config,
       mLastReportTimeNs(currentTimeNs),
       mLastReportWallClockNs(getWallClockNs()),
       mPullerManager(pullerManager),
+      mWhitelistedAtomIds(config.whitelisted_atom_ids().begin(),
+                          config.whitelisted_atom_ids().end()),
       mShouldPersistHistory(config.persist_locally()) {
     // Init the ttl end timestamp.
     refreshTtl(timeBaseNs);
@@ -366,9 +368,14 @@ void MetricsManager::onDumpReport(const int64_t dumpTimeStampNs,
 
 
 bool MetricsManager::checkLogCredentials(const LogEvent& event) {
+    // TODO(b/154856835): Remove this check once we get whitelist from the config.
     if (android::util::AtomsInfo::kWhitelistedAtoms.find(event.GetTagId()) !=
       android::util::AtomsInfo::kWhitelistedAtoms.end())
     {
+        return true;
+    }
+
+    if (mWhitelistedAtomIds.find(event.GetTagId()) != mWhitelistedAtomIds.end()) {
         return true;
     }
     std::lock_guard<std::mutex> lock(mAllowedLogSourcesMutex);

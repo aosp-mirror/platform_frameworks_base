@@ -85,7 +85,7 @@ public class ResolverListAdapter extends BaseAdapter {
 
     private int mLastChosenPosition = -1;
     private boolean mFilterLastUsed;
-    private final ResolverListCommunicator mResolverListCommunicator;
+    final ResolverListCommunicator mResolverListCommunicator;
     private Runnable mPostListReadyRunnable;
     private final boolean mIsAudioCaptureDevice;
     private boolean mIsTabLoaded;
@@ -443,15 +443,22 @@ public class ResolverListAdapter extends BaseAdapter {
         // TODO(arangelov): Is that UserHandle.USER_CURRENT check okay?
         if (dri != null && dri.getResolveInfo() != null
                 && dri.getResolveInfo().targetUserId == UserHandle.USER_CURRENT) {
-            // Checks if this info is already listed in display.
-            for (DisplayResolveInfo existingInfo : mDisplayList) {
-                if (mResolverListCommunicator
-                        .resolveInfoMatch(dri.getResolveInfo(), existingInfo.getResolveInfo())) {
-                    return;
-                }
+            if (shouldAddResolveInfo(dri)) {
+                mDisplayList.add(dri);
             }
-            mDisplayList.add(dri);
         }
+    }
+
+    // Check whether {@code dri} should be added into mDisplayList.
+    protected boolean shouldAddResolveInfo(DisplayResolveInfo dri) {
+        // Checks if this info is already listed in display.
+        for (DisplayResolveInfo existingInfo : mDisplayList) {
+            if (mResolverListCommunicator
+                    .resolveInfoMatch(dri.getResolveInfo(), existingInfo.getResolveInfo())) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Nullable

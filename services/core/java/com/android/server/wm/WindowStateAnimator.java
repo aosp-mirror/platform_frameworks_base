@@ -1400,25 +1400,9 @@ class WindowStateAnimator {
      *      the switch statement below.
      * @param isEntrance The animation type the last time this was called. Used to keep from
      *      loading the same animation twice.
-     * @return {@code true} if an animation has been loaded, includes the parents.
-     *
+     * @return true if an animation has been loaded.
      */
     boolean applyAnimationLocked(int transit, boolean isEntrance) {
-        return applyAnimationLocked(transit, isEntrance, PARENTS);
-    }
-
-    /**
-     * Choose the correct animation and set it to the passed WindowState.
-     * @param transit If AppTransition.TRANSIT_PREVIEW_DONE and the app window has been drawn
-     *      then the animation will be app_starting_exit. Any other value loads the animation from
-     *      the switch statement below.
-     * @param isEntrance The animation type the last time this was called. Used to keep from
-     *      loading the same animation twice.
-     * @param flags The combination of bitmask flags to specify targets and condition for
-     *      checking animating status. See {@link WindowContainer.AnimationFlags}.
-     * @return {@code true} if an animation has been loaded.
-     */
-    boolean applyAnimationLocked(int transit, boolean isEntrance, int flags) {
         if (mWin.isAnimating() && mAnimationIsEntrance == isEntrance) {
             // If we are trying to apply an animation, but already running
             // an animation of the same type, then just leave that one alone.
@@ -1488,7 +1472,7 @@ class WindowStateAnimator {
             mWin.getDisplayContent().adjustForImeIfNeeded();
         }
 
-        return mWin.isAnimating(flags);
+        return mWin.isAnimating(PARENTS);
     }
 
     void dumpDebug(ProtoOutputStream proto, long fieldId) {

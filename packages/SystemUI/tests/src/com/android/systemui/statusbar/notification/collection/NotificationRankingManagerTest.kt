@@ -36,8 +36,8 @@ import com.android.systemui.statusbar.notification.people.PeopleNotificationIden
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier.Companion.TYPE_IMPORTANT_PERSON
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier.Companion.TYPE_PERSON
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
-import com.android.systemui.statusbar.notification.stack.NotificationSectionsManager.BUCKET_ALERTING
-import com.android.systemui.statusbar.notification.stack.NotificationSectionsManager.BUCKET_SILENT
+import com.android.systemui.statusbar.notification.stack.BUCKET_ALERTING
+import com.android.systemui.statusbar.notification.stack.BUCKET_SILENT
 import com.android.systemui.statusbar.phone.NotificationGroupManager
 import com.android.systemui.statusbar.policy.HeadsUpManager
 import dagger.Lazy

@@ -34,16 +34,19 @@ public class FullscreenUserSwitcherViewMediator implements OverlayViewMediator {
     private final StatusBarStateController mStatusBarStateController;
     private final FullScreenUserSwitcherViewController mFullScreenUserSwitcherViewController;
     private final CarKeyguardViewController mCarKeyguardViewController;
+    private final UserSwitchTransitionViewController mUserSwitchTransitionViewController;
 
     @Inject
     public FullscreenUserSwitcherViewMediator(
             StatusBarStateController statusBarStateController,
             CarKeyguardViewController carKeyguardViewController,
+            UserSwitchTransitionViewController userSwitchTransitionViewController,
             FullScreenUserSwitcherViewController fullScreenUserSwitcherViewController) {
 
         mStatusBarStateController = statusBarStateController;
-        mFullScreenUserSwitcherViewController = fullScreenUserSwitcherViewController;
         mCarKeyguardViewController = carKeyguardViewController;
+        mUserSwitchTransitionViewController = userSwitchTransitionViewController;
+        mFullScreenUserSwitcherViewController = fullScreenUserSwitcherViewController;
     }
 
     @Override
@@ -74,6 +77,11 @@ public class FullscreenUserSwitcherViewMediator implements OverlayViewMediator {
     private void onUserSelected(UserGridRecyclerView.UserRecord record) {
         if (record.mType != UserGridRecyclerView.UserRecord.FOREGROUND_USER) {
             mCarKeyguardViewController.hideKeyguardToPrepareBouncer();
+            // If guest user, we cannot use record.mInfo.id and should listen to the User lifecycle
+            // event instead.
+            if (record.mType != UserGridRecyclerView.UserRecord.START_GUEST) {
+                mUserSwitchTransitionViewController.handleShow(record.mInfo.id);
+            }
         }
 
         hide();
