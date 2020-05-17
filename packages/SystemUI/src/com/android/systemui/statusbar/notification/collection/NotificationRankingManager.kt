@@ -134,10 +134,19 @@ open class NotificationRankingManager @Inject constructor(
     ): List<NotificationEntry> {
         logger.logFilterAndSort(reason)
         val filtered = entries.asSequence()
-                .filterNot(notifFilter::shouldFilterOut)
+                .filterNot(this::filter)
                 .sortedWith(rankingComparator)
                 .toList()
         entries.forEach { it.bucket = getBucketForEntry(it) }
+        return filtered
+    }
+
+    private fun filter(entry: NotificationEntry): Boolean {
+        val filtered = notifFilter.shouldFilterOut(entry)
+        if (filtered) {
+            // notification is removed from the list, so we reset its initialization time
+            entry.resetInitializationTime()
+        }
         return filtered
     }
 
