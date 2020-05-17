@@ -17,6 +17,7 @@
 package com.android.server.display;
 
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.verify;
 
 import android.content.Context;
 import android.os.Handler;
@@ -28,6 +29,7 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.server.display.DisplayModeDirector.BrightnessObserver;
 import com.android.server.display.DisplayModeDirector.DesiredDisplayModeSpecs;
 import com.android.server.display.DisplayModeDirector.Vote;
 
@@ -36,6 +38,7 @@ import com.google.common.truth.Truth;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 @SmallTest
@@ -52,16 +55,15 @@ public class DisplayModeDirectorTest {
         mContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
     }
 
-    private DisplayModeDirector createDisplayModeDirectorWithDisplayFpsRange(
-            int minFps, int maxFps) {
+    private DisplayModeDirector createDirectorFromRefreshRateArray(
+            float[] refreshRates, int baseModeId) {
         DisplayModeDirector director =
                 new DisplayModeDirector(mContext, new Handler(Looper.getMainLooper()));
         int displayId = 0;
-        int numModes = maxFps - minFps + 1;
-        Display.Mode[] modes = new Display.Mode[numModes];
-        for (int i = minFps; i <= maxFps; i++) {
-            modes[i - minFps] = new Display.Mode(
-                    /*modeId=*/i, /*width=*/1000, /*height=*/1000, /*refreshRate=*/i);
+        Display.Mode[] modes = new Display.Mode[refreshRates.length];
+        for (int i = 0; i < refreshRates.length; i++) {
+            modes[i] = new Display.Mode(
+                    /*modeId=*/baseModeId + i, /*width=*/1000, /*height=*/1000, refreshRates[i]);
         }
         SparseArray<Display.Mode[]> supportedModesByDisplay = new SparseArray<>();
         supportedModesByDisplay.put(displayId, modes);
@@ -72,14 +74,22 @@ public class DisplayModeDirectorTest {
         return director;
     }
 
+    private DisplayModeDirector createDirectorFromFpsRange(int minFps, int maxFps) {
+        int numRefreshRates = maxFps - minFps + 1;
+        float[] refreshRates = new float[numRefreshRates];
+        for (int i = 0; i < numRefreshRates; i++) {
+            refreshRates[i] = minFps + i;
+        }
+        return createDirectorFromRefreshRateArray(refreshRates, /*baseModeId=*/minFps);
+    }
+
     @Test
     public void testDisplayModeVoting() {
         int displayId = 0;
 
         // With no votes present, DisplayModeDirector should allow any refresh rate.
         DesiredDisplayModeSpecs modeSpecs =
-                createDisplayModeDirectorWithDisplayFpsRange(60, 90).getDesiredDisplayModeSpecs(
-                        displayId);
+                createDirectorFromFpsRange(60, 90).getDesiredDisplayModeSpecs(displayId);
         Truth.assertThat(modeSpecs.baseModeId).isEqualTo(60);
         Truth.assertThat(modeSpecs.primaryRefreshRateRange.min).isEqualTo(0f);
         Truth.assertThat(modeSpecs.primaryRefreshRateRange.max).isEqualTo(Float.POSITIVE_INFINITY);
@@ -92,7 +102,7 @@ public class DisplayModeDirectorTest {
         {
             int minFps = 60;
             int maxFps = 90;
-            DisplayModeDirector director = createDisplayModeDirectorWithDisplayFpsRange(60, 90);
+            DisplayModeDirector director = createDirectorFromFpsRange(60, 90);
             assertTrue(2 * numPriorities < maxFps - minFps + 1);
             SparseArray<Vote> votes = new SparseArray<>();
             SparseArray<SparseArray<Vote>> votesByDisplay = new SparseArray<>();
@@ -114,7 +124,7 @@ public class DisplayModeDirectorTest {
         // presence of higher priority votes.
         {
             assertTrue(numPriorities >= 2);
-            DisplayModeDirector director = createDisplayModeDirectorWithDisplayFpsRange(60, 90);
+            DisplayModeDirector director = createDirectorFromFpsRange(60, 90);
             SparseArray<Vote> votes = new SparseArray<>();
             SparseArray<SparseArray<Vote>> votesByDisplay = new SparseArray<>();
             votesByDisplay.put(displayId, votes);
@@ -131,7 +141,7 @@ public class DisplayModeDirectorTest {
     @Test
     public void testVotingWithFloatingPointErrors() {
         int displayId = 0;
-        DisplayModeDirector director = createDisplayModeDirectorWithDisplayFpsRange(50, 90);
+        DisplayModeDirector director = createDirectorFromFpsRange(50, 90);
         SparseArray<Vote> votes = new SparseArray<>();
         SparseArray<SparseArray<Vote>> votesByDisplay = new SparseArray<>();
         votesByDisplay.put(displayId, votes);
@@ -154,7 +164,7 @@ public class DisplayModeDirectorTest {
         assertTrue(Vote.PRIORITY_LOW_BRIGHTNESS < Vote.PRIORITY_APP_REQUEST_SIZE);
 
         int displayId = 0;
-        DisplayModeDirector director = createDisplayModeDirectorWithDisplayFpsRange(60, 90);
+        DisplayModeDirector director = createDirectorFromFpsRange(60, 90);
         SparseArray<Vote> votes = new SparseArray<>();
         SparseArray<SparseArray<Vote>> votesByDisplay = new SparseArray<>();
         votesByDisplay.put(displayId, votes);
@@ -202,7 +212,7 @@ public class DisplayModeDirectorTest {
                 >= Vote.APP_REQUEST_REFRESH_RATE_RANGE_PRIORITY_CUTOFF);
 
         int displayId = 0;
-        DisplayModeDirector director = createDisplayModeDirectorWithDisplayFpsRange(60, 90);
+        DisplayModeDirector director = createDirectorFromFpsRange(60, 90);
         SparseArray<Vote> votes = new SparseArray<>();
         SparseArray<SparseArray<Vote>> votesByDisplay = new SparseArray<>();
         votesByDisplay.put(displayId, votes);
@@ -234,5 +244,62 @@ public class DisplayModeDirectorTest {
         Truth.assertThat(desiredSpecs.appRequestRefreshRateRange.max)
                 .isWithin(FLOAT_TOLERANCE)
                 .of(75);
+    }
+
+    void verifySpecsWithRefreshRateSettings(DisplayModeDirector director, float minFps,
+            float peakFps, float defaultFps, float primaryMin, float primaryMax,
+            float appRequestMin, float appRequestMax) {
+        DesiredDisplayModeSpecs specs = director.getDesiredDisplayModeSpecsWithInjectedFpsSettings(
+                minFps, peakFps, defaultFps);
+        Truth.assertThat(specs.primaryRefreshRateRange.min).isEqualTo(primaryMin);
+        Truth.assertThat(specs.primaryRefreshRateRange.max).isEqualTo(primaryMax);
+        Truth.assertThat(specs.appRequestRefreshRateRange.min).isEqualTo(appRequestMin);
+        Truth.assertThat(specs.appRequestRefreshRateRange.max).isEqualTo(appRequestMax);
+    }
+
+    @Test
+    public void testSpecsFromRefreshRateSettings() {
+        // Confirm that, with varying settings for min, peak, and default refresh rate,
+        // DesiredDisplayModeSpecs is calculated correctly.
+        float[] refreshRates = {30.f, 60.f, 90.f, 120.f, 150.f};
+        DisplayModeDirector director =
+                createDirectorFromRefreshRateArray(refreshRates, /*baseModeId=*/0);
+
+        float inf = Float.POSITIVE_INFINITY;
+        verifySpecsWithRefreshRateSettings(director, 0, 0, 0, 0, inf, 0, inf);
+        verifySpecsWithRefreshRateSettings(director, 0, 0, 90, 0, 90, 0, inf);
+        verifySpecsWithRefreshRateSettings(director, 0, 90, 0, 0, 90, 0, 90);
+        verifySpecsWithRefreshRateSettings(director, 0, 90, 60, 0, 60, 0, 90);
+        verifySpecsWithRefreshRateSettings(director, 0, 90, 120, 0, 90, 0, 90);
+        verifySpecsWithRefreshRateSettings(director, 90, 0, 0, 90, inf, 0, inf);
+        verifySpecsWithRefreshRateSettings(director, 90, 0, 120, 90, 120, 0, inf);
+        verifySpecsWithRefreshRateSettings(director, 90, 0, 60, 90, inf, 0, inf);
+        verifySpecsWithRefreshRateSettings(director, 90, 120, 0, 90, 120, 0, 120);
+        verifySpecsWithRefreshRateSettings(director, 90, 60, 0, 90, 90, 0, 90);
+        verifySpecsWithRefreshRateSettings(director, 60, 120, 90, 60, 90, 0, 120);
+    }
+
+    void verifyBrightnessObserverCall(DisplayModeDirector director, float minFps, float peakFps,
+            float defaultFps, float brightnessObserverMin, float brightnessObserverMax) {
+        BrightnessObserver brightnessObserver = Mockito.mock(BrightnessObserver.class);
+        director.injectBrightnessObserver(brightnessObserver);
+        director.getDesiredDisplayModeSpecsWithInjectedFpsSettings(minFps, peakFps, defaultFps);
+        verify(brightnessObserver)
+                .onRefreshRateSettingChangedLocked(brightnessObserverMin, brightnessObserverMax);
+    }
+
+    @Test
+    public void testBrightnessObserverCallWithRefreshRateSettings() {
+        // Confirm that, with varying settings for min, peak, and default refresh rate, we make the
+        // correct call to the brightness observer.
+        float[] refreshRates = {60.f, 90.f, 120.f};
+        DisplayModeDirector director =
+                createDirectorFromRefreshRateArray(refreshRates, /*baseModeId=*/0);
+        verifyBrightnessObserverCall(director, 0, 0, 0, 0, 0);
+        verifyBrightnessObserverCall(director, 0, 0, 90, 0, 90);
+        verifyBrightnessObserverCall(director, 0, 90, 0, 0, 90);
+        verifyBrightnessObserverCall(director, 0, 90, 60, 0, 60);
+        verifyBrightnessObserverCall(director, 90, 90, 0, 90, 90);
+        verifyBrightnessObserverCall(director, 120, 90, 0, 120, 90);
     }
 }
