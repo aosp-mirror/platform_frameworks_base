@@ -186,8 +186,7 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
 
             boolean groupChangesAllowed =
                     mVisualStabilityManager.areGroupChangesAllowed() // user isn't looking at notifs
-                    || !ent.hasFinishedInitialization() // notif recently added
-                    || !mListContainer.containsView(ent.getRow()); // notif recently unfiltered
+                    || !ent.hasFinishedInitialization(); // notif recently added
 
             NotificationEntry parent = mGroupManager.getGroupSummary(ent.getSbn());
             if (!groupChangesAllowed) {
