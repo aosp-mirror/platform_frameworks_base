@@ -151,6 +151,8 @@ public final class NotificationEntry extends ListEntry {
     public CharSequence headsUpStatusBarText;
     public CharSequence headsUpStatusBarTextPublic;
 
+    // indicates when this entry's view was first attached to a window
+    // this value will reset when the view is completely removed from the shade (ie: filtered out)
     private long initializationTime = -1;
 
     /**
@@ -473,8 +475,8 @@ public final class NotificationEntry extends ListEntry {
     }
 
     public boolean hasFinishedInitialization() {
-        return initializationTime == -1
-                || SystemClock.elapsedRealtime() > initializationTime + INITIALIZATION_DELAY;
+        return initializationTime != -1
+                && SystemClock.elapsedRealtime() > initializationTime + INITIALIZATION_DELAY;
     }
 
     public int getContrastedColor(Context context, boolean isLowPriority,
@@ -563,6 +565,10 @@ public final class NotificationEntry extends ListEntry {
             }
         }
         return false;
+    }
+
+    public void resetInitializationTime() {
+        initializationTime = -1;
     }
 
     public void setInitializationTime(long time) {
