@@ -312,6 +312,17 @@ class DisplayAreaPolicyBuilder {
             return mFeatures;
         }
 
+        @Override
+        public List<DisplayArea<? extends WindowContainer>> getDisplayAreas(int featureId) {
+            for (int i = 0; i < mFeatures.size(); i++) {
+                Feature feature = mFeatures.get(i);
+                if (feature.getId() == featureId) {
+                    return getDisplayAreas(feature);
+                }
+            }
+            return new ArrayList<>();
+        }
+
         public List<DisplayArea<? extends WindowContainer>> getDisplayAreas(Feature feature) {
             return mAreas.get(feature);
         }
@@ -377,8 +388,8 @@ class DisplayAreaPolicyBuilder {
                 final PendingArea child = mChildren.get(i);
                 final DisplayArea area = child.createArea(parent, areaForLayer);
                 parent.addChild(area, WindowContainer.POSITION_TOP);
-                if (mFeature != null) {
-                    areas.get(mFeature).add(area);
+                if (child.mFeature != null) {
+                    areas.get(child.mFeature).add(area);
                 }
                 child.instantiateChildren(area, areaForLayer, level + 1, areas);
             }

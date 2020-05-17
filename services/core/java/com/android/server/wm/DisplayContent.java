@@ -57,7 +57,6 @@ import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.FLAG_SPLIT_TOUCH;
 import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
-import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_BOOT_PROGRESS;
@@ -72,6 +71,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static android.view.WindowManager.TRANSIT_ACTIVITY_OPEN;
 import static android.view.WindowManager.TRANSIT_TASK_OPEN;
 import static android.view.WindowManager.TRANSIT_TASK_TO_FRONT;
+import static android.window.DisplayAreaOrganizer.FEATURE_WINDOWED_MAGNIFICATION;
 
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_CONFIG;
@@ -89,7 +89,6 @@ import static com.android.server.wm.DisplayContentProto.FOCUSED_APP;
 import static com.android.server.wm.DisplayContentProto.FOCUSED_ROOT_TASK_ID;
 import static com.android.server.wm.DisplayContentProto.ID;
 import static com.android.server.wm.DisplayContentProto.OPENING_APPS;
-import static com.android.server.wm.DisplayContentProto.OVERLAY_WINDOWS;
 import static com.android.server.wm.DisplayContentProto.RESUMED_ACTIVITY;
 import static com.android.server.wm.DisplayContentProto.ROOT_DISPLAY_AREA;
 import static com.android.server.wm.DisplayContentProto.ROTATION;
@@ -259,6 +258,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * strict mode flash or the magnification overlay itself. Those layers will be children of
      * {@link #mOverlayContainers} where mWindowContainers contains everything else.
      */
+     // TODO(b/156425461) we don't need this extra layer between DisplayContent and DisplayArea.Root
     private final WindowContainers mWindowContainers =
             new WindowContainers("mWindowContainers", mWmService);
 
@@ -266,8 +266,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     // Screen-Magnification, for example the WindowMagnification windows.
     private final NonAppWindowContainers mOverlayContainers =
             new NonAppWindowContainers("mOverlayContainers", mWmService);
-
-    /** The containers below are the only child containers {@link #mWindowContainers} can have. */
 
     // Contains all IME window containers. Note that the z-ordering of the IME windows will depend
     // on the IME target. We mainly have this container grouping so we can keep track of all the IME
@@ -1060,10 +1058,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 case TYPE_INPUT_METHOD:
                 case TYPE_INPUT_METHOD_DIALOG:
                     mImeWindowsContainers.addChild(token);
-                    break;
-                case TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY:
-                    // TODO(display-area): Migrate to DisplayArea
-                    mOverlayContainers.addChild(token);
                     break;
                 default:
                     mDisplayAreaPolicy.addWindow(token);
@@ -2813,10 +2807,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         proto.write(ID, mDisplayId);
         mRootDisplayArea.dumpDebug(proto, ROOT_DISPLAY_AREA, logLevel);
-        for (int i = mOverlayContainers.getChildCount() - 1; i >= 0; --i) {
-            final WindowToken windowToken = mOverlayContainers.getChildAt(i);
-            windowToken.dumpDebug(proto, OVERLAY_WINDOWS, logLevel);
-        }
         proto.write(DPI, mBaseDisplayDensity);
         mDisplayInfo.dumpDebug(proto, DISPLAY_INFO);
         proto.write(ROTATION, getRotation());
@@ -4320,16 +4310,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * Apps. E.g. status bar.
      */
     private class NonAppWindowContainers extends DisplayChildWindowContainer<WindowToken> {
-        /**
-         * Compares two child window tokens returns -1 if the first is lesser than the second in
-         * terms of z-order and 1 otherwise.
-         */
-        private final Comparator<WindowToken> mWindowComparator = (token1, token2) ->
-                // Tokens with higher base layer are z-ordered on-top.
-                mWmService.mPolicy.getWindowLayerFromTypeLw(token1.windowType,
-                        token1.mOwnerCanManageAppTokens)
-                        < mWmService.mPolicy.getWindowLayerFromTypeLw(token2.windowType,
-                        token2.mOwnerCanManageAppTokens) ? -1 : 1;
 
         private final String mName;
         private final Dimmer mDimmer = new Dimmer(this);
@@ -4344,10 +4324,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         boolean hasActivity() {
             // I am a non-app-window-container :P
             return false;
-        }
-
-        void addChild(WindowToken token) {
-            addChild(token, mWindowComparator);
         }
 
         @Override
@@ -4478,15 +4454,14 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * and other potpourii.
      */
     SurfaceControl.Builder makeOverlay() {
-        return mWmService.makeSurfaceBuilder(mSession)
-                .setParent(mOverlayContainers.getSurfaceControl());
+        return mWmService.makeSurfaceBuilder(mSession).setParent(getOverlayLayer());
     }
 
     /**
      * Reparents the given surface to {@link #mOverlayContainers}' SurfaceControl.
      */
     void reparentToOverlay(Transaction transaction, SurfaceControl surface) {
-        transaction.reparent(surface, mOverlayContainers.getSurfaceControl());
+        transaction.reparent(surface, getOverlayLayer());
     }
 
     void applyMagnificationSpec(MagnificationSpec spec) {
@@ -4544,7 +4519,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         mOverlayContainers.assignLayer(t, 1);
 
         mWindowContainers.assignChildLayers(t);
-        mOverlayContainers.assignChildLayers(t);
     }
 
     /**
@@ -4793,9 +4767,25 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }, false /* traverseTopToBottom */);
     }
 
+    // TODO(b/156425461) Make DisplayContent the DisplayArea.Root
+    @Override
+    public SurfaceControl getSurfaceControl() {
+        return mRootDisplayArea.getSurfaceControl();
+    }
+
+    private DisplayArea getWindowContainers() {
+        List<DisplayArea<? extends WindowContainer>> windowContainers =
+                mDisplayAreaPolicy.getDisplayAreas(FEATURE_WINDOWED_MAGNIFICATION);
+        if (windowContainers.size() != 1) {
+            throw new IllegalStateException("There should be only one DisplayArea for "
+                    + "FEATURE_WINDOWED_MAGNIFICATION");
+        }
+        return windowContainers.get(0);
+    }
+
     @VisibleForTesting
     SurfaceControl getWindowingLayer() {
-        return mWindowContainers.getSurfaceControl();
+        return getWindowContainers().getSurfaceControl();
     }
 
     @VisibleForTesting
