@@ -623,6 +623,7 @@
     <style name="MediaPlayer.Button" parent="@android:style/Widget.Material.Button.Borderless.Small">
         <item name="android:background">@null</item>
         <item name="android:tint">@android:color/white</item>
+        <item name="android:stateListAnimator">@anim/media_button_state_list_animator</item>
     </style>
 
     <!-- Used to style charging animation AVD animation -->
