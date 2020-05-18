@@ -19,8 +19,6 @@ package com.android.systemui.statusbar.notification.collection.coordinator;
 import static android.service.notification.NotificationStats.DISMISSAL_OTHER;
 import static android.service.notification.NotificationStats.DISMISS_SENTIMENT_NEUTRAL;
 
-import android.annotation.NonNull;
-
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
@@ -123,7 +121,7 @@ public class BubbleCoordinator implements Coordinator {
     private final BubbleController.NotifCallback mNotifCallback =
             new BubbleController.NotifCallback() {
         @Override
-        public void removeNotification(@NonNull final NotificationEntry entry, int reason) {
+        public void removeNotification(NotificationEntry entry, int reason) {
             if (isInterceptingDismissal(entry)) {
                 mInterceptedDismissalEntries.remove(entry.getKey());
                 mOnEndDismissInterception.onEndDismissInterception(mDismissInterceptor, entry,
@@ -143,7 +141,7 @@ public class BubbleCoordinator implements Coordinator {
         }
 
         @Override
-        public void maybeCancelSummary(@NonNull final NotificationEntry entry) {
+        public void maybeCancelSummary(NotificationEntry entry) {
             // no-op
         }
     };
