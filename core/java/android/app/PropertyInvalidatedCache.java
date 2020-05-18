@@ -26,13 +26,19 @@ import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.FastPrintWriter;
 
+import java.io.FileDescriptor;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
+import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -235,6 +241,11 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
     private boolean mDisabled = false;
 
     /**
+     * Maximum number of entries the cache will maintain.
+     */
+    private final int mMaxEntries;
+
+    /**
      * Make a new property invalidated cache.
      *
      * @param maxEntries Maximum number of entries to cache; LRU discard
@@ -242,6 +253,7 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
      */
     public PropertyInvalidatedCache(int maxEntries, @NonNull String propertyName) {
         mPropertyName = propertyName;
+        mMaxEntries = maxEntries;
         mCache = new LinkedHashMap<Query, Result>(
             2 /* start small */,
             0.75f /* default load factor */,
@@ -736,11 +748,85 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
     }
 
     /**
-     * Return a list of caches alive at the current time.
+     * Returns a list of caches alive at the current time.
      */
     public static ArrayList<PropertyInvalidatedCache> getActiveCaches() {
         synchronized (sCorkLock) {
             return new ArrayList<PropertyInvalidatedCache>(sCaches.keySet());
+        }
+    }
+
+    /**
+     * Returns a list of the active corks in a process.
+     */
+    public static ArrayList<Map.Entry<String, Integer>> getActiveCorks() {
+        synchronized (sCorkLock) {
+            return new ArrayList<Map.Entry<String, Integer>>(sCorks.entrySet());
+        }
+    }
+
+    private void dumpContents(PrintWriter pw, String[] args) {
+        synchronized (mLock) {
+            pw.println(String.format("  Cache Property Name: %s", cacheName()));
+            pw.println(String.format("    Last Observed Nonce: %d", mLastSeenNonce));
+            pw.println(String.format("    Current Size: %d, Max Size: %d",
+                    mCache.entrySet().size(), mMaxEntries));
+            pw.println(String.format("    Enabled: %s", mDisabled ? "false" : "true"));
+
+            Set<Map.Entry<Query, Result>> cacheEntries = mCache.entrySet();
+            if (cacheEntries.size() == 0) {
+                pw.println("");
+                return;
+            }
+
+            pw.println("");
+            pw.println("    Contents:");
+            for (Map.Entry<Query, Result> entry : cacheEntries) {
+                String key = Objects.toString(entry.getKey());
+                String value = Objects.toString(entry.getValue());
+
+                pw.println(String.format("      Key: %s\n      Value: %s\n", key, value));
+            }
+        }
+    }
+
+    /**
+     * Dumps contents of every cache in the process to the provided FileDescriptor.
+     */
+    public static void dumpCacheInfo(FileDescriptor fd, String[] args) {
+        ArrayList<PropertyInvalidatedCache> activeCaches;
+        ArrayList<Map.Entry<String, Integer>> activeCorks;
+
+        try  (
+            FileOutputStream fout = new FileOutputStream(fd);
+            PrintWriter pw = new FastPrintWriter(fout);
+        ) {
+            if (!sEnabled) {
+                pw.println("  Caching is disabled in this process.");
+                return;
+            }
+
+            synchronized (sCorkLock) {
+                activeCaches = getActiveCaches();
+                activeCorks = getActiveCorks();
+
+                if (activeCorks.size() > 0) {
+                    pw.println("  Corking Status:");
+                    for (int i = 0; i < activeCorks.size(); i++) {
+                        Map.Entry<String, Integer> entry = activeCorks.get(i);
+                        pw.println(String.format("    Property Name: %s Count: %d",
+                                entry.getKey(), entry.getValue()));
+                    }
+                }
+            }
+
+            for (int i = 0; i < activeCaches.size(); i++) {
+                PropertyInvalidatedCache currentCache = activeCaches.get(i);
+                currentCache.dumpContents(pw, args);
+                pw.flush();
+            }
+        } catch (IOException e) {
+            Log.e(TAG, "Failed to dump PropertyInvalidatedCache instances");
         }
     }
 }

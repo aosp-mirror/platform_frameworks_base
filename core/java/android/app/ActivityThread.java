@@ -1537,6 +1537,12 @@ public final class ActivityThread extends ClientTransactionHandler {
             IoUtils.closeQuietly(pfd);
         }
 
+        @Override
+        public void dumpCacheInfo(ParcelFileDescriptor pfd, String[] args) {
+            PropertyInvalidatedCache.dumpCacheInfo(pfd.getFileDescriptor(), args);
+            IoUtils.closeQuietly(pfd);
+        }
+
         private File getDatabasesDir(Context context) {
             // There's no simple way to get the databases/ path, so do it this way.
             return context.getDatabasePath("a").getParentFile();

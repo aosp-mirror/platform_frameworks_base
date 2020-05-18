@@ -2098,6 +2098,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             ServiceManager.addService("permission", new PermissionController(this));
             ServiceManager.addService("processinfo", new ProcessInfoService(this));
+            ServiceManager.addService("cacheinfo", new CacheBinder(this));
 
             ApplicationInfo info = mContext.getPackageManager().getApplicationInfo(
                     "android", STOCK_PM_FLAGS | MATCH_SYSTEM_ONLY);
@@ -2191,16 +2192,18 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         @Override
         protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-            if (mActivityManagerService.mOomAdjuster.mCachedAppOptimizer.useFreezer()) {
-                Process.enableFreezer(false);
-            }
+            try {
+                if (mActivityManagerService.mOomAdjuster.mCachedAppOptimizer.useFreezer()) {
+                    Process.enableFreezer(false);
+                }
 
-            if (!DumpUtils.checkDumpAndUsageStatsPermission(mActivityManagerService.mContext,
-                    "meminfo", pw)) return;
-            PriorityDump.dump(mPriorityDumper, fd, pw, args);
-
-            if (mActivityManagerService.mOomAdjuster.mCachedAppOptimizer.useFreezer()) {
-                Process.enableFreezer(true);
+                if (!DumpUtils.checkDumpAndUsageStatsPermission(mActivityManagerService.mContext,
+                        "meminfo", pw)) return;
+                PriorityDump.dump(mPriorityDumper, fd, pw, args);
+            } finally {
+                if (mActivityManagerService.mOomAdjuster.mCachedAppOptimizer.useFreezer()) {
+                    Process.enableFreezer(true);
+                }
             }
         }
     }
@@ -2213,16 +2216,18 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         @Override
         protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-            if (mActivityManagerService.mOomAdjuster.mCachedAppOptimizer.useFreezer()) {
-                Process.enableFreezer(false);
-            }
+            try {
+                if (mActivityManagerService.mOomAdjuster.mCachedAppOptimizer.useFreezer()) {
+                    Process.enableFreezer(false);
+                }
 
-            if (!DumpUtils.checkDumpAndUsageStatsPermission(mActivityManagerService.mContext,
-                    "gfxinfo", pw)) return;
-            mActivityManagerService.dumpGraphicsHardwareUsage(fd, pw, args);
-
-            if (mActivityManagerService.mOomAdjuster.mCachedAppOptimizer.useFreezer()) {
-                Process.enableFreezer(true);
+                if (!DumpUtils.checkDumpAndUsageStatsPermission(mActivityManagerService.mContext,
+                        "gfxinfo", pw)) return;
+                mActivityManagerService.dumpGraphicsHardwareUsage(fd, pw, args);
+            } finally {
+                if (mActivityManagerService.mOomAdjuster.mCachedAppOptimizer.useFreezer()) {
+                    Process.enableFreezer(true);
+                }
             }
         }
     }
@@ -2235,16 +2240,18 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         @Override
         protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-            if (mActivityManagerService.mOomAdjuster.mCachedAppOptimizer.useFreezer()) {
-                Process.enableFreezer(false);
-            }
+            try {
+                if (mActivityManagerService.mOomAdjuster.mCachedAppOptimizer.useFreezer()) {
+                    Process.enableFreezer(false);
+                }
 
-            if (!DumpUtils.checkDumpAndUsageStatsPermission(mActivityManagerService.mContext,
-                    "dbinfo", pw)) return;
-            mActivityManagerService.dumpDbInfo(fd, pw, args);
-
-            if (mActivityManagerService.mOomAdjuster.mCachedAppOptimizer.useFreezer()) {
-                Process.enableFreezer(true);
+                if (!DumpUtils.checkDumpAndUsageStatsPermission(mActivityManagerService.mContext,
+                        "dbinfo", pw)) return;
+                mActivityManagerService.dumpDbInfo(fd, pw, args);
+            } finally {
+                if (mActivityManagerService.mOomAdjuster.mCachedAppOptimizer.useFreezer()) {
+                    Process.enableFreezer(true);
+                }
             }
         }
     }
@@ -2277,6 +2284,34 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
             PriorityDump.dump(mPriorityDumper, fd, pw, args);
+        }
+    }
+
+    static class CacheBinder extends Binder {
+        ActivityManagerService mActivityManagerService;
+
+        CacheBinder(ActivityManagerService activityManagerService) {
+            mActivityManagerService = activityManagerService;
+        }
+
+        @Override
+        protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+            try {
+                if (mActivityManagerService.mOomAdjuster.mCachedAppOptimizer.useFreezer()) {
+                    Process.enableFreezer(false);
+                }
+
+                if (!DumpUtils.checkDumpAndUsageStatsPermission(mActivityManagerService.mContext,
+                        "cacheinfo", pw)) {
+                    return;
+                }
+
+                mActivityManagerService.dumpBinderCacheContents(fd, pw, args);
+            } finally {
+                if (mActivityManagerService.mOomAdjuster.mCachedAppOptimizer.useFreezer()) {
+                    Process.enableFreezer(true);
+                }
+            }
         }
     }
 
@@ -12760,6 +12795,39 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
                 } catch (IOException e) {
                     pw.println("Failure while dumping the app: " + r);
+                    pw.flush();
+                } catch (RemoteException e) {
+                    pw.println("Got a RemoteException while dumping the app " + r);
+                    pw.flush();
+                }
+            }
+        }
+    }
+
+    final void dumpBinderCacheContents(FileDescriptor fd, PrintWriter pw, String[] args) {
+        ArrayList<ProcessRecord> procs = collectProcesses(pw, 0, false, args);
+        if (procs == null) {
+            pw.println("No process found for: " + args[0]);
+            return;
+        }
+
+        pw.println("Per-process Binder Cache Contents");
+
+        for (int i = procs.size() - 1; i >= 0; i--) {
+            ProcessRecord r = procs.get(i);
+            if (r.thread != null) {
+                pw.println("\n\n** Cache info for pid " + r.pid + " [" + r.processName + "] **");
+                pw.flush();
+                try {
+                    TransferPipe tp = new TransferPipe();
+                    try {
+                        r.thread.dumpCacheInfo(tp.getWriteFd(), args);
+                        tp.go(fd);
+                    } finally {
+                        tp.kill();
+                    }
+                } catch (IOException e) {
+                    pw.println("Failure while dumping the app " + r);
                     pw.flush();
                 } catch (RemoteException e) {
                     pw.println("Got a RemoteException while dumping the app " + r);
