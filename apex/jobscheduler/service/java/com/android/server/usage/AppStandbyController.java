@@ -1129,8 +1129,7 @@ public class AppStandbyController implements AppStandbyInternal {
 
             if (mAppWidgetManager != null
                     && mInjector.isBoundWidgetPackage(mAppWidgetManager, packageName, userId)) {
-                // TODO: consider lowering to ACTIVE
-                return STANDBY_BUCKET_EXEMPTED;
+                return STANDBY_BUCKET_ACTIVE;
             }
 
             if (isDeviceProvisioningPackage(packageName)) {
