@@ -65,6 +65,7 @@ import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.recents.TriangleShape;
 import com.android.systemui.statusbar.AlphaOptimizedButton;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
 /**
  * Container for the expanded bubble view, handles rendering the caret and settings icon.
@@ -160,7 +161,7 @@ public class BubbleExpandedView extends LinearLayout {
                             // the bubble again so we'll just remove it.
                             Log.w(TAG, "Exception while displaying bubble: " + getBubbleKey()
                                     + ", " + e.getMessage() + "; removing bubble");
-                            mBubbleController.removeBubble(getBubbleKey(),
+                            mBubbleController.removeBubble(getBubbleEntry(),
                                     BubbleController.DISMISS_INVALID_INTENT);
                         }
                     });
@@ -204,7 +205,7 @@ public class BubbleExpandedView extends LinearLayout {
             }
             if (mBubble != null) {
                 // Must post because this is called from a binder thread.
-                post(() -> mBubbleController.removeBubble(mBubble.getKey(),
+                post(() -> mBubbleController.removeBubble(mBubble.getEntry(),
                         BubbleController.DISMISS_TASK_FINISHED));
             }
         }
@@ -289,6 +290,10 @@ public class BubbleExpandedView extends LinearLayout {
 
     private String getBubbleKey() {
         return mBubble != null ? mBubble.getKey() : "null";
+    }
+
+    private NotificationEntry getBubbleEntry() {
+        return mBubble != null ? mBubble.getEntry() : null;
     }
 
     void setManageClickListener(OnClickListener manageClickListener) {

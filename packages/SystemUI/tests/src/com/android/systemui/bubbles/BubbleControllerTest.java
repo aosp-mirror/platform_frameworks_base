@@ -317,7 +317,7 @@ public class BubbleControllerTest extends SysuiTestCase {
         verify(mNotificationEntryManager).updateNotifications(any());
 
         mBubbleController.removeBubble(
-                mRow.getEntry().getKey(), BubbleController.DISMISS_USER_GESTURE);
+                mRow.getEntry(), BubbleController.DISMISS_USER_GESTURE);
         assertNull(mBubbleData.getBubbleInStackWithKey(mRow.getEntry().getKey()));
         verify(mNotificationEntryManager, times(2)).updateNotifications(anyString());
 
@@ -329,7 +329,7 @@ public class BubbleControllerTest extends SysuiTestCase {
         mBubbleController.updateBubble(mRow2.getEntry());
         mBubbleController.updateBubble(mRow.getEntry());
         mBubbleController.removeBubble(
-                mRow.getEntry().getKey(), BubbleController.DISMISS_USER_GESTURE);
+                mRow.getEntry(), BubbleController.DISMISS_USER_GESTURE);
 
         Bubble b = mBubbleData.getOverflowBubbleWithKey(mRow.getEntry().getKey());
         assertThat(mBubbleData.getOverflowBubbles()).isEqualTo(ImmutableList.of(b));
@@ -350,10 +350,9 @@ public class BubbleControllerTest extends SysuiTestCase {
         mBubbleController.updateBubble(mRow.getEntry(), /* suppressFlyout */
                 false, /* showInShade */ true);
         mBubbleController.removeBubble(
-                mRow.getEntry().getKey(), BubbleController.DISMISS_USER_GESTURE);
+                mRow.getEntry(), BubbleController.DISMISS_USER_GESTURE);
 
-        mBubbleController.removeBubble(
-                mRow.getEntry().getKey(), BubbleController.DISMISS_NOTIF_CANCEL);
+        mBubbleController.removeBubble(mRow.getEntry(), BubbleController.DISMISS_NOTIF_CANCEL);
         verify(mNotificationEntryManager, times(1)).performRemoveNotification(
                 eq(mRow.getEntry().getSbn()), anyInt());
         assertThat(mBubbleData.getOverflowBubbles()).isEmpty();
@@ -366,7 +365,7 @@ public class BubbleControllerTest extends SysuiTestCase {
         assertTrue(mBubbleController.hasBubbles());
 
         mBubbleController.removeBubble(
-                mRow.getEntry().getKey(), BubbleController.DISMISS_USER_CHANGED);
+                mRow.getEntry(), BubbleController.DISMISS_USER_CHANGED);
         verify(mNotificationEntryManager, never()).performRemoveNotification(
                 eq(mRow.getEntry().getSbn()), anyInt());
         assertFalse(mBubbleController.hasBubbles());
@@ -564,8 +563,7 @@ public class BubbleControllerTest extends SysuiTestCase {
 
         // Dismiss currently expanded
         mBubbleController.removeBubble(
-                mBubbleData.getBubbleInStackWithKey(stackView.getExpandedBubble().getKey())
-                        .getEntry().getKey(),
+                mBubbleData.getBubbleInStackWithKey(stackView.getExpandedBubble().getKey()).getEntry(),
                 BubbleController.DISMISS_USER_GESTURE);
         verify(mBubbleExpandListener).onBubbleExpandChanged(false, mRow2.getEntry().getKey());
 
@@ -576,8 +574,7 @@ public class BubbleControllerTest extends SysuiTestCase {
 
         // Dismiss that one
         mBubbleController.removeBubble(
-                mBubbleData.getBubbleInStackWithKey(stackView.getExpandedBubble().getKey())
-                        .getEntry().getKey(),
+                mBubbleData.getBubbleInStackWithKey(stackView.getExpandedBubble().getKey()).getEntry(),
                 BubbleController.DISMISS_USER_GESTURE);
 
         // Make sure state changes and collapse happens
@@ -703,7 +700,7 @@ public class BubbleControllerTest extends SysuiTestCase {
     @Test
     public void testDeleteIntent_removeBubble_aged() throws PendingIntent.CanceledException {
         mBubbleController.updateBubble(mRow.getEntry());
-        mBubbleController.removeBubble(mRow.getEntry().getKey(), BubbleController.DISMISS_AGED);
+        mBubbleController.removeBubble(mRow.getEntry(), BubbleController.DISMISS_AGED);
         verify(mDeleteIntent, never()).send();
     }
 
@@ -711,7 +708,7 @@ public class BubbleControllerTest extends SysuiTestCase {
     public void testDeleteIntent_removeBubble_user() throws PendingIntent.CanceledException {
         mBubbleController.updateBubble(mRow.getEntry());
         mBubbleController.removeBubble(
-                mRow.getEntry().getKey(), BubbleController.DISMISS_USER_GESTURE);
+                mRow.getEntry(), BubbleController.DISMISS_USER_GESTURE);
         verify(mDeleteIntent, times(1)).send();
     }
 
@@ -811,7 +808,7 @@ public class BubbleControllerTest extends SysuiTestCase {
 
         // Dismiss the bubble into overflow.
         mBubbleController.removeBubble(
-                mRow.getEntry().getKey(), BubbleController.DISMISS_USER_GESTURE);
+                mRow.getEntry(), BubbleController.DISMISS_USER_GESTURE);
         assertFalse(mBubbleController.hasBubbles());
 
         boolean intercepted = mRemoveInterceptor.onNotificationRemoveRequested(
@@ -832,7 +829,7 @@ public class BubbleControllerTest extends SysuiTestCase {
                 mRow.getEntry()));
 
         mBubbleController.removeBubble(
-                mRow.getEntry().getKey(), BubbleController.DISMISS_NO_LONGER_BUBBLE);
+                mRow.getEntry(), BubbleController.DISMISS_NO_LONGER_BUBBLE);
         assertFalse(mBubbleController.hasBubbles());
 
         boolean intercepted = mRemoveInterceptor.onNotificationRemoveRequested(
@@ -854,12 +851,12 @@ public class BubbleControllerTest extends SysuiTestCase {
 
         mBubbleData.setMaxOverflowBubbles(1);
         mBubbleController.removeBubble(
-                mRow.getEntry().getKey(), BubbleController.DISMISS_USER_GESTURE);
+                mRow.getEntry(), BubbleController.DISMISS_USER_GESTURE);
         assertEquals(mBubbleData.getBubbles().size(), 2);
         assertEquals(mBubbleData.getOverflowBubbles().size(), 1);
 
         mBubbleController.removeBubble(
-                mRow2.getEntry().getKey(), BubbleController.DISMISS_USER_GESTURE);
+                mRow2.getEntry(), BubbleController.DISMISS_USER_GESTURE);
         // Overflow max of 1 is reached; mRow is oldest, so it gets removed
         verify(mNotificationEntryManager, times(1)).performRemoveNotification(
                 mRow.getEntry().getSbn(), REASON_CANCEL);
