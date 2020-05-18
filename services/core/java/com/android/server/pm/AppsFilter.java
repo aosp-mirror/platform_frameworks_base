@@ -417,7 +417,7 @@ public class AppsFilter {
     public void grantImplicitAccess(int recipientUid, int visibleUid) {
         if (recipientUid != visibleUid
                 && mImplicitlyQueryable.add(recipientUid, visibleUid) && DEBUG_LOGGING) {
-            Slog.wtf(TAG, "implicit access granted: " + recipientUid + " -> " + visibleUid);
+            Slog.i(TAG, "implicit access granted: " + recipientUid + " -> " + visibleUid);
         }
     }
 
@@ -720,7 +720,7 @@ public class AppsFilter {
                 return false;
             }
             if (callingSetting == null) {
-                Slog.wtf(TAG, "No setting found for non system uid " + callingUid);
+                Slog.w(TAG, "No setting found for non system uid " + callingUid);
                 return true;
             }
             final PackageSetting callingPkgSetting;
@@ -760,7 +760,7 @@ public class AppsFilter {
             final AndroidPackage targetPkg = targetPkgSetting.pkg;
             if (targetPkg == null) {
                 if (DEBUG_LOGGING) {
-                    Slog.wtf(TAG, "shouldFilterApplication: " + "targetPkg is null");
+                    Slog.w(TAG, "shouldFilterApplication: " + "targetPkg is null");
                 }
                 return true;
             }
