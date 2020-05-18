@@ -6224,6 +6224,12 @@ public final class ActivityThread extends ClientTransactionHandler {
         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "trimMemory");
         if (DEBUG_MEMORY_TRIM) Slog.v(TAG, "Trimming memory to level: " + level);
 
+        if (level >= ComponentCallbacks2.TRIM_MEMORY_COMPLETE) {
+            for (PropertyInvalidatedCache pic : PropertyInvalidatedCache.getActiveCaches()) {
+                pic.clear();
+            }
+        }
+
         ArrayList<ComponentCallbacks2> callbacks = collectComponentCallbacks(true, null);
 
         final int N = callbacks.size();
