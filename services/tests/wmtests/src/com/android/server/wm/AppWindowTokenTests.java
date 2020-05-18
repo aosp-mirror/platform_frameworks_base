@@ -52,6 +52,7 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 
 import android.content.res.Configuration;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 import android.view.IWindowManager;
@@ -432,20 +433,35 @@ public class AppWindowTokenTests extends WindowTestsBase {
         removeGlobalMinSizeRestriction();
         final Rect stackBounds = new Rect(0, 0, 1000, 600);
         final Rect taskBounds = new Rect(100, 400, 600, 800);
-        mStack.setBounds(stackBounds);
-        mTask.setBounds(taskBounds);
+        // Set the bounds and windowing mode to window configuration directly, otherwise the
+        // testing setups may be discarded by configuration resolving.
+        mStack.getWindowConfiguration().setBounds(stackBounds);
+        mTask.getWindowConfiguration().setBounds(taskBounds);
+        mActivity.getWindowConfiguration().setBounds(taskBounds);
 
         // Check that anim bounds for freeform window match task bounds
-        mTask.setWindowingMode(WINDOWING_MODE_FREEFORM);
+        mTask.getWindowConfiguration().setWindowingMode(WINDOWING_MODE_FREEFORM);
         assertEquals(mTask.getBounds(), mActivity.getAnimationBounds(STACK_CLIP_NONE));
 
         // STACK_CLIP_AFTER_ANIM should use task bounds since they will be clipped by
         // bounds animation layer.
-        mTask.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+        mTask.getWindowConfiguration().setWindowingMode(WINDOWING_MODE_FULLSCREEN);
         assertEquals(mTask.getBounds(), mActivity.getAnimationBounds(STACK_CLIP_AFTER_ANIM));
 
+        // Even the activity is smaller than task and it is not aligned to the top-left corner of
+        // task, the animation bounds the same as task and position should be zero because in real
+        // case the letterbox will fill the remaining area in task.
+        final Rect halfBounds = new Rect(taskBounds);
+        halfBounds.scale(0.5f);
+        mActivity.getWindowConfiguration().setBounds(halfBounds);
+        final Point animationPosition = new Point();
+        mActivity.getAnimationPosition(animationPosition);
+
+        assertEquals(taskBounds, mActivity.getAnimationBounds(STACK_CLIP_AFTER_ANIM));
+        assertEquals(new Point(0, 0), animationPosition);
+
         // STACK_CLIP_BEFORE_ANIM should use stack bounds since it won't be clipped later.
-        mTask.setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
+        mTask.getWindowConfiguration().setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
         assertEquals(mStack.getBounds(), mActivity.getAnimationBounds(STACK_CLIP_BEFORE_ANIM));
     }
 
