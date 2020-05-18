@@ -46,8 +46,6 @@
   <com.android.systemui.globalactions.MinHeightScrollView
       android:layout_width="match_parent"
       android:layout_height="match_parent"
-      android:paddingBottom="@dimen/global_actions_grid_container_shadow_offset"
-      android:layout_marginBottom="@dimen/global_actions_grid_container_negative_shadow_offset"
       android:orientation="vertical"
       android:scrollbars="none"
   >
