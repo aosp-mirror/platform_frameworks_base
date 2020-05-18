@@ -182,15 +182,26 @@ ValueMetricProducer::~ValueMetricProducer() {
 }
 
 void ValueMetricProducer::onStateChanged(int64_t eventTimeNs, int32_t atomId,
-                                         const HashableDimensionKey& primaryKey, int oldState,
-                                         int newState) {
+                                         const HashableDimensionKey& primaryKey,
+                                         const FieldValue& oldState, const FieldValue& newState) {
     VLOG("ValueMetric %lld onStateChanged time %lld, State %d, key %s, %d -> %d",
          (long long)mMetricId, (long long)eventTimeNs, atomId, primaryKey.toString().c_str(),
-         oldState, newState);
+         oldState.mValue.int_value, newState.mValue.int_value);
     // If condition is not true, we do not need to pull for this state change.
     if (mCondition != ConditionState::kTrue) {
         return;
     }
+
+    // If old and new states are in the same StateGroup, then we do not need to
+    // pull for this state change.
+    FieldValue oldStateCopy = oldState;
+    FieldValue newStateCopy = newState;
+    mapStateValue(atomId, &oldStateCopy);
+    mapStateValue(atomId, &newStateCopy);
+    if (oldStateCopy == newStateCopy) {
+        return;
+    }
+
     bool isEventLate = eventTimeNs < mCurrentBucketStartTimeNs;
     if (isEventLate) {
         VLOG("Skip event due to late arrival: %lld vs %lld", (long long)eventTimeNs,
