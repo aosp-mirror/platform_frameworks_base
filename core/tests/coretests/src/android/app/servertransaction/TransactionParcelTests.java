@@ -563,6 +563,11 @@ public class TransactionParcelTests {
         }
 
         @Override
+        public void dumpCacheInfo(ParcelFileDescriptor parcelFileDescriptor, String[] strings)
+                throws RemoteException {
+        }
+
+        @Override
         public void dumpProvider(ParcelFileDescriptor parcelFileDescriptor, IBinder iBinder,
                 String[] strings) throws RemoteException {
         }
