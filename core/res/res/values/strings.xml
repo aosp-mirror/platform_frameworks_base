@@ -451,10 +451,14 @@
     <string name="personal_apps_suspension_text">
         Your personal apps are blocked until you turn on your work profile</string>
     <!-- Notification text. This notification lets a user know that their apps will be blocked
-        tomorrow due to a work policy from their IT admin, and that they need to turn on their work
-        profile to prevent the apps from being blocked. [CHAR LIMIT=NONE] -->
-    <string name="personal_apps_suspension_tomorrow_text">
-        Your personal apps will be blocked tomorrow</string>
+        at a particular time due to a work policy from their IT admin, and that they need to turn on
+        their work profile to prevent the apps from being blocked. It also explains for how many
+        days the profile is allowed to be off and this number is at least 3. [CHAR LIMIT=NONE] -->
+    <string name="personal_apps_suspension_soon_text">
+        Personal apps will be blocked on <xliff:g id="date" example="May 29">%1$s</xliff:g> at
+        <xliff:g id="time" example="5:20 PM">%2$s</xliff:g>. Your work profile can\u2019t stay off
+        for more than <xliff:g id="number" example="3">%3$d</xliff:g> days.
+    </string>
     <!-- Title for the button that turns work profile on. To be used in a notification
         [CHAR LIMIT=NONE] -->
     <string name="personal_apps_suspended_turn_profile_on">Turn on work profile</string>
