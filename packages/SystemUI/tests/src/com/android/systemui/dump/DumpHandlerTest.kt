@@ -37,6 +37,9 @@ class DumpHandlerTest : SysuiTestCase() {
     private lateinit var dumpHandler: DumpHandler
 
     @Mock
+    private lateinit var logBufferEulogizer: LogBufferEulogizer
+
+    @Mock
     private lateinit var fd: FileDescriptor
     @Mock
     private lateinit var pw: PrintWriter
@@ -59,7 +62,7 @@ class DumpHandlerTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
-        dumpHandler = DumpHandler(mContext, dumpManager)
+        dumpHandler = DumpHandler(mContext, dumpManager, logBufferEulogizer)
     }
 
     @Test

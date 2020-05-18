@@ -79,7 +79,8 @@ import javax.inject.Inject
  */
 class DumpHandler @Inject constructor(
     private val context: Context,
-    private val dumpManager: DumpManager
+    private val dumpManager: DumpManager,
+    private val logBufferEulogizer: LogBufferEulogizer
 ) {
     /**
      * Dump the diagnostics! Behavior can be controlled via [args].
@@ -125,6 +126,7 @@ class DumpHandler @Inject constructor(
 
     private fun dumpNormal(pw: PrintWriter, args: ParsedArgs) {
         dumpManager.dumpBuffers(pw, args.tailLength)
+        logBufferEulogizer.readEulogyIfPresent(pw)
     }
 
     private fun dumpDumpables(fw: FileDescriptor, pw: PrintWriter, args: ParsedArgs) {
