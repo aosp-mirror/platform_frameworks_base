@@ -387,7 +387,7 @@ public class AppStandbyControllerTests {
     @Test
     public void testBoundWidgetPackageExempt() throws Exception {
         assumeTrue(mInjector.getContext().getSystemService(AppWidgetManager.class) != null);
-        assertEquals(STANDBY_BUCKET_EXEMPTED,
+        assertEquals(STANDBY_BUCKET_ACTIVE,
                 mController.getAppStandbyBucket(PACKAGE_EXEMPTED_1, USER_ID,
                         mInjector.mElapsedRealtime, false));
     }
