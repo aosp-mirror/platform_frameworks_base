@@ -600,6 +600,7 @@ public class PipTaskOrganizer extends TaskOrganizer {
             Log.w(TAG, "Abort animation, invalid leash");
             return;
         }
+        mLastReportedBounds.set(destinationBounds);
         final SurfaceControl.Transaction tx = mSurfaceControlTransactionFactory.getTransaction();
         mSurfaceTransactionHelper
                 .crop(tx, mLeash, destinationBounds)

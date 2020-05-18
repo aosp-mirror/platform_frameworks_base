@@ -61,12 +61,6 @@ public class PipBoundsHandler {
     private final DisplayInfo mDisplayInfo = new DisplayInfo();
     private final Rect mTmpInsets = new Rect();
 
-    /**
-     * Tracks the destination bounds, used for any following
-     * {@link #onMovementBoundsChanged(Rect, Rect, Rect, DisplayInfo)} calculations.
-     */
-    private final Rect mLastDestinationBounds = new Rect();
-
     private ComponentName mLastPipComponentName;
     private float mReentrySnapFraction = INVALID_SNAP_FRACTION;
     private Size mReentrySize;
@@ -198,11 +192,6 @@ public class PipBoundsHandler {
         mReentrySnapFraction = INVALID_SNAP_FRACTION;
         mReentrySize = null;
         mLastPipComponentName = null;
-        mLastDestinationBounds.setEmpty();
-    }
-
-    public Rect getLastDestinationBounds() {
-        return mLastDestinationBounds;
     }
 
     public Rect getDisplayBounds() {
@@ -262,7 +251,6 @@ public class PipBoundsHandler {
                     false /* useCurrentMinEdgeSize */);
         }
         mAspectRatio = aspectRatio;
-        mLastDestinationBounds.set(destinationBounds);
         return destinationBounds;
     }
 
@@ -276,8 +264,8 @@ public class PipBoundsHandler {
      *
      * @return {@code true} if internal {@link DisplayInfo} is rotated, {@code false} otherwise.
      */
-    public boolean onDisplayRotationChanged(Rect outBounds, int displayId, int fromRotation,
-            int toRotation, WindowContainerTransaction t) {
+    public boolean onDisplayRotationChanged(Rect outBounds, Rect oldBounds, int displayId,
+            int fromRotation, int toRotation, WindowContainerTransaction t) {
         // Bail early if the event is not sent to current {@link #mDisplayInfo}
         if ((displayId != mDisplayInfo.displayId) || (fromRotation == toRotation)) {
             return false;
@@ -295,7 +283,7 @@ public class PipBoundsHandler {
         }
 
         // Calculate the snap fraction of the current stack along the old movement bounds
-        final Rect postChangeStackBounds = new Rect(mLastDestinationBounds);
+        final Rect postChangeStackBounds = new Rect(oldBounds);
         final float snapFraction = getSnapFraction(postChangeStackBounds);
 
         // Populate the new {@link #mDisplayInfo}.
@@ -313,7 +301,6 @@ public class PipBoundsHandler {
                 snapFraction);
 
         outBounds.set(postChangeStackBounds);
-        mLastDestinationBounds.set(outBounds);
         t.setBounds(pinnedStackInfo.stackToken, outBounds);
         return true;
     }
