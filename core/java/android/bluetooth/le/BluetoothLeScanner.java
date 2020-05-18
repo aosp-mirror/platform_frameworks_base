@@ -110,8 +110,9 @@ public final class BluetoothLeScanner {
      * off to save power. Scanning is resumed when screen is turned on again. To avoid this, use
      * {@link #startScan(List, ScanSettings, ScanCallback)} with desired {@link ScanFilter}.
      * <p>
-     * An app must hold
-     * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION ACCESS_COARSE_LOCATION} or
+     * An app must have
+     * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION ACCESS_COARSE_LOCATION} permission
+     * in order to get results. An App targeting Android Q or later must have
      * {@link android.Manifest.permission#ACCESS_FINE_LOCATION ACCESS_FINE_LOCATION} permission
      * in order to get results.
      *
@@ -129,8 +130,9 @@ public final class BluetoothLeScanner {
      * resumed when screen is turned on again. To avoid this, do filetered scanning by
      * using proper {@link ScanFilter}.
      * <p>
-     * An app must hold
-     * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION ACCESS_COARSE_LOCATION} or
+     * An app must have
+     * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION ACCESS_COARSE_LOCATION} permission
+     * in order to get results. An App targeting Android Q or later must have
      * {@link android.Manifest.permission#ACCESS_FINE_LOCATION ACCESS_FINE_LOCATION} permission
      * in order to get results.
      *
@@ -150,8 +152,9 @@ public final class BluetoothLeScanner {
      * the PendingIntent. Use this method of scanning if your process is not always running and it
      * should be started when scan results are available.
      * <p>
-     * An app must hold
-     * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION ACCESS_COARSE_LOCATION} or
+     * An app must have
+     * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION ACCESS_COARSE_LOCATION} permission
+     * in order to get results. An App targeting Android Q or later must have
      * {@link android.Manifest.permission#ACCESS_FINE_LOCATION ACCESS_FINE_LOCATION} permission
      * in order to get results.
      * <p>
