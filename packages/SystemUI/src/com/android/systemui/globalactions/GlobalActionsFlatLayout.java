@@ -23,6 +23,7 @@ import static com.android.systemui.util.leak.RotationUtils.ROTATION_SEASCAPE;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.ViewGroup;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.HardwareBgDrawable;
@@ -75,6 +76,31 @@ public class GlobalActionsFlatLayout extends GlobalActionsLayout {
         // if there's an overflow button, add it back after clearing the list views
         if (overflowButton != null) {
             super.addToListView(overflowButton, false);
+        }
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
+        boolean anyTruncated = false;
+        ViewGroup listView = getListView();
+        // Check to see if any of the GlobalActionsItems have had their messages truncated
+        for (int i = 0; i < listView.getChildCount(); i++) {
+            View child = listView.getChildAt(i);
+            if (child instanceof GlobalActionsItem) {
+                GlobalActionsItem item = (GlobalActionsItem) child;
+                anyTruncated = anyTruncated || item.isTruncated();
+            }
+        }
+        // If any of the items have been truncated, set the all to single-line marquee
+        if (anyTruncated) {
+            for (int i = 0; i < listView.getChildCount(); i++) {
+                View child = listView.getChildAt(i);
+                if (child instanceof GlobalActionsItem) {
+                    GlobalActionsItem item = (GlobalActionsItem) child;
+                    item.setMarquee(true);
+                }
+            }
         }
     }
 

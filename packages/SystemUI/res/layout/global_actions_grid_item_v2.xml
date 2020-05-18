@@ -14,9 +14,7 @@
      limitations under the License.
 -->
 
-<!-- RelativeLayouts have an issue enforcing minimum heights, so just
-     work around this for now with LinearLayouts. -->
-<LinearLayout
+<com.android.systemui.globalactions.GlobalActionsItem
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="0dp"
     android:layout_weight="1"
@@ -42,7 +40,7 @@
             android:id="@*android:id/message"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:ellipsize="marquee"
+            android:ellipsize="end"
             android:marqueeRepeatLimit="marquee_forever"
             android:maxLines="2"
             android:textSize="12sp"
@@ -51,4 +49,4 @@
             android:breakStrategy="high_quality"
             android:hyphenationFrequency="full"
             android:textAppearance="?android:attr/textAppearanceSmall" />
-</LinearLayout>
+</com.android.systemui.globalactions.GlobalActionsItem>
