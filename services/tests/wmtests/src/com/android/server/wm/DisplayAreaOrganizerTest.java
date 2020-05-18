@@ -23,6 +23,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Binder;
 import android.os.RemoteException;
@@ -90,6 +91,12 @@ public class DisplayAreaOrganizerTest extends WindowTestsBase {
                 .onDisplayAreaAppeared(any(DisplayAreaInfo.class), any(SurfaceControl.class));
 
         mDisplayContent.setBounds(new Rect(0, 0, 1000, 1000));
+        verify(organizer).onDisplayAreaInfoChanged(any());
+
+        Configuration tmpConfiguration = new Configuration();
+        tmpConfiguration.setTo(mDisplayContent.getRequestedOverrideConfiguration());
+        mDisplayContent.onRequestedOverrideConfigurationChanged(tmpConfiguration);
+        // Ensure it was still only called once if the bounds didn't change
         verify(organizer).onDisplayAreaInfoChanged(any());
     }
 }
