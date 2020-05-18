@@ -2711,6 +2711,8 @@
     <string name="accessibility_control_change_favorite">favorite</string>
     <!-- a11y action to unfavorite a control. It will read as "Double-tap to unfavorite" in screen readers [CHAR LIMIT=NONE] -->
     <string name="accessibility_control_change_unfavorite">unfavorite</string>
+    <!-- a11y action to move a control to the position specified by the parameter [CHAR LIMIT=NONE] -->
+    <string name="accessibility_control_move">Move to position <xliff:g id="number" example="1">%d</xliff:g></string>
 
     <!-- Controls management controls screen default title [CHAR LIMIT=30] -->
     <string name="controls_favorite_default_title">Controls</string>

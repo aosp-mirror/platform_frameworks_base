@@ -17,6 +17,7 @@
 package com.android.systemui.controls.management
 
 import android.content.ComponentName
+import android.util.Log
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.android.systemui.controls.ControlInterface
@@ -39,8 +40,38 @@ class FavoritesModel(
     private val favoritesModelCallback: FavoritesModelCallback
 ) : ControlsModel {
 
+    companion object {
+        private const val TAG = "FavoritesModel"
+    }
+
     private var adapter: RecyclerView.Adapter<*>? = null
     private var modified = false
+
+    override val moveHelper = object : ControlsModel.MoveHelper {
+        override fun canMoveBefore(position: Int): Boolean {
+            return position > 0 && position < dividerPosition
+        }
+
+        override fun canMoveAfter(position: Int): Boolean {
+            return position >= 0 && position < dividerPosition - 1
+        }
+
+        override fun moveBefore(position: Int) {
+            if (!canMoveBefore(position)) {
+                Log.w(TAG, "Cannot move position $position before")
+            } else {
+                onMoveItem(position, position - 1)
+            }
+        }
+
+        override fun moveAfter(position: Int) {
+            if (!canMoveAfter(position)) {
+                Log.w(TAG, "Cannot move position $position after")
+            } else {
+                onMoveItem(position, position + 1)
+            }
+        }
+    }
 
     override fun attachAdapter(adapter: RecyclerView.Adapter<*>) {
         this.adapter = adapter
