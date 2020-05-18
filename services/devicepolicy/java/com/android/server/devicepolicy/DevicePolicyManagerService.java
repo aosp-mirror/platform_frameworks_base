@@ -11965,10 +11965,21 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     private void showLocationSettingsChangedNotification(UserHandle user) {
+        Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        // Fill the component explicitly to prevent the PendingIntent from being intercepted
+        // and fired with crafted target. b/155183624
+        ActivityInfo targetInfo = intent.resolveActivityInfo(
+                mInjector.getPackageManager(user.getIdentifier()),
+                PackageManager.MATCH_SYSTEM_ONLY);
+        if (targetInfo != null) {
+            intent.setComponent(targetInfo.getComponentName());
+        } else {
+            Slog.wtf(LOG_TAG, "Failed to resolve intent for location settings");
+        }
+
         PendingIntent locationSettingsIntent = mInjector.pendingIntentGetActivityAsUser(mContext, 0,
-                new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
-                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK), PendingIntent.FLAG_UPDATE_CURRENT,
-                null, user);
+                intent, PendingIntent.FLAG_UPDATE_CURRENT, null, user);
         Notification notification = new Notification.Builder(mContext,
                 SystemNotificationChannels.DEVICE_ADMIN)
                 .setSmallIcon(R.drawable.ic_info_outline)
