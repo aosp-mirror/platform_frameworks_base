@@ -83,7 +83,16 @@ import java.util.concurrent.atomic.AtomicInteger;
  * <p>An AccessPoint, which would be more fittingly named "WifiNetwork", is an aggregation of
  * {@link ScanResult ScanResults} along with pertinent metadata (e.g. current connection info,
  * network scores) required to successfully render the network to the user.
+ *
+ * @deprecated WifiTracker/AccessPoint is no longer supported, and will be removed in a future
+ * release. Clients that need a dynamic list of available wifi networks should migrate to one of the
+ * newer tracker classes,
+ * {@link com.android.wifitrackerlib.WifiPickerTracker},
+ * {@link com.android.wifitrackerlib.SavedNetworkTracker},
+ * {@link com.android.wifitrackerlib.NetworkDetailsTracker},
+ * in conjunction with {@link com.android.wifitrackerlib.WifiEntry} to represent each wifi network.
  */
+@Deprecated
 public class AccessPoint implements Comparable<AccessPoint> {
     static final String TAG = "SettingsLib.AccessPoint";
 
