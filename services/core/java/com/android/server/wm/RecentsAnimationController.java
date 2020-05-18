@@ -799,7 +799,8 @@ public class RecentsAnimationController implements DeathRecipient {
         // Only apply the input consumer if it is enabled, it is not the target (home/recents)
         // being revealed with the transition, and we are actively animating the app as a part of
         // the animation
-        return mInputConsumerEnabled && !isTargetApp(activity) && isAnimatingApp(activity);
+        return mInputConsumerEnabled && activity != null
+                && !isTargetApp(activity) && isAnimatingApp(activity);
     }
 
     boolean updateInputConsumerForApp(InputWindowHandle inputWindowHandle,
