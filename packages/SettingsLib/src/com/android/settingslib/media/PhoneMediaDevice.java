@@ -61,11 +61,11 @@ public class PhoneMediaDevice extends MediaDevice {
         switch (mRouteInfo.getType()) {
             case TYPE_WIRED_HEADSET:
             case TYPE_WIRED_HEADPHONES:
-                name = mContext.getString(R.string.media_transfer_wired_device_name);
-                break;
             case TYPE_USB_DEVICE:
             case TYPE_USB_HEADSET:
             case TYPE_USB_ACCESSORY:
+                name = mContext.getString(R.string.media_transfer_wired_usb_device_name);
+                break;
             case TYPE_DOCK:
             case TYPE_HDMI:
                 name = mRouteInfo.getName();
