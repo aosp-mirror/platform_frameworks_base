@@ -22,6 +22,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.os.Handler;
 import android.os.SystemClock;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.accessibility.AccessibilityManager;
 
@@ -61,6 +62,7 @@ public final class AssistHandleBehaviorController implements AssistHandleCallbac
 
     private static final long DEFAULT_SHOWN_FREQUENCY_THRESHOLD_MS = 0;
     private static final long DEFAULT_SHOW_AND_GO_DURATION_MS = TimeUnit.SECONDS.toMillis(3);
+    private static final String SETTINGS_SECURE_USER_SETUP_COMPLETE = "user_setup_complete";
 
     /**
      * This is the default behavior that will be used once the system is up. It will be set once the
@@ -203,6 +205,10 @@ public final class AssistHandleBehaviorController implements AssistHandleCallbac
     }
 
     private boolean handlesUnblocked(boolean ignoreThreshold) {
+        if (!isUserSetupComplete()) {
+            return false;
+        }
+
         long timeSinceHidden = SystemClock.elapsedRealtime() - mHandlesLastHiddenAt;
         boolean notThrottled = ignoreThreshold || timeSinceHidden >= getShownFrequencyThreshold();
         ComponentName assistantComponent =
@@ -282,6 +288,11 @@ public final class AssistHandleBehaviorController implements AssistHandleCallbac
         mHandler.removeCallbacks(mHideHandles);
         mHandler.removeCallbacks(mShowAndGo);
         mShowAndGoEndsAt = 0;
+    }
+
+    private boolean isUserSetupComplete() {
+        return Settings.Secure.getInt(
+                mContext.getContentResolver(), SETTINGS_SECURE_USER_SETUP_COMPLETE, 0) == 1;
     }
 
     @VisibleForTesting
