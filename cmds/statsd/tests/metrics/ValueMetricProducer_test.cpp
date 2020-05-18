@@ -3898,14 +3898,12 @@ TEST(ValueMetricProducerTest, TestSlicedStateWithMap) {
                 data->push_back(CreateRepeatedValueLogEvent(tagId, bucketStartTimeNs + 5, 5));
                 return true;
             }))
-            // Screen state change to VR.
-            .WillOnce(Invoke([](int tagId, const ConfigKey&, const int64_t eventTimeNs,
-                                vector<std::shared_ptr<LogEvent>>* data, bool) {
-                EXPECT_EQ(eventTimeNs, bucketStartTimeNs + 10);
-                data->clear();
-                data->push_back(CreateRepeatedValueLogEvent(tagId, bucketStartTimeNs + 10, 9));
-                return true;
-            }))
+            // Screen state change to VR has no pull because it is in the same
+            // state group as ON.
+
+            // Screen state change to ON has no pull because it is in the same
+            // state group as VR.
+
             // Screen state change to OFF.
             .WillOnce(Invoke([](int tagId, const ConfigKey&, const int64_t eventTimeNs,
                                 vector<std::shared_ptr<LogEvent>>* data, bool) {
@@ -3969,23 +3967,33 @@ TEST(ValueMetricProducerTest, TestSlicedStateWithMap) {
     EXPECT_EQ(true, it->second[0].hasValue);
     EXPECT_EQ(2, it->second[0].value.long_value);
 
-    // Bucket status after screen state change ON->VR (also ON).
+    // Bucket status after screen state change ON->VR.
+    // Both ON and VR are in the same state group, so the base should not change.
     screenEvent = CreateScreenStateChangedEvent(bucketStartTimeNs + 10,
                                                 android::view::DisplayStateEnum::DISPLAY_STATE_VR);
     StateManager::getInstance().onLogEvent(*screenEvent);
-    ASSERT_EQ(2UL, valueProducer->mCurrentSlicedBucket.size());
+    ASSERT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
     // Base for dimension key {}
     it = valueProducer->mCurrentSlicedBucket.begin();
     itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
     EXPECT_EQ(true, itBase->second[0].hasBase);
-    EXPECT_EQ(9, itBase->second[0].base.long_value);
-    // Value for dimension, state key {{}, ON GROUP}
-    EXPECT_EQ(screenOnGroup.group_id(),
-              it->first.getStateValuesKey().getValues()[0].mValue.long_value);
-    EXPECT_EQ(true, it->second[0].hasValue);
-    EXPECT_EQ(4, it->second[0].value.long_value);
+    EXPECT_EQ(5, itBase->second[0].base.long_value);
     // Value for dimension, state key {{}, kStateUnknown}
-    it++;
+    EXPECT_EQ(true, it->second[0].hasValue);
+    EXPECT_EQ(2, it->second[0].value.long_value);
+
+    // Bucket status after screen state change VR->ON.
+    // Both ON and VR are in the same state group, so the base should not change.
+    screenEvent = CreateScreenStateChangedEvent(bucketStartTimeNs + 12,
+                                                android::view::DisplayStateEnum::DISPLAY_STATE_ON);
+    StateManager::getInstance().onLogEvent(*screenEvent);
+    EXPECT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
+    // Base for dimension key {}
+    it = valueProducer->mCurrentSlicedBucket.begin();
+    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
+    EXPECT_EQ(true, itBase->second[0].hasBase);
+    EXPECT_EQ(5, itBase->second[0].base.long_value);
+    // Value for dimension, state key {{}, kStateUnknown}
     EXPECT_EQ(true, it->second[0].hasValue);
     EXPECT_EQ(2, it->second[0].value.long_value);
 
