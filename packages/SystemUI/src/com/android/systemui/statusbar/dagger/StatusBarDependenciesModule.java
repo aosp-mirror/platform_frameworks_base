@@ -25,6 +25,7 @@ import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.media.MediaDataManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.ActionClickLogger;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.MediaArtworkProcessor;
 import com.android.systemui.statusbar.NotificationListener;
@@ -73,7 +74,8 @@ public interface StatusBarDependenciesModule {
             Lazy<StatusBar> statusBarLazy,
             StatusBarStateController statusBarStateController,
             Handler mainHandler,
-            RemoteInputUriController remoteInputUriController) {
+            RemoteInputUriController remoteInputUriController,
+            ActionClickLogger actionClickLogger) {
         return new NotificationRemoteInputManager(
                 context,
                 lockscreenUserManager,
@@ -82,7 +84,8 @@ public interface StatusBarDependenciesModule {
                 statusBarLazy,
                 statusBarStateController,
                 mainHandler,
-                remoteInputUriController);
+                remoteInputUriController,
+                actionClickLogger);
     }
 
     /** */
