@@ -31,8 +31,10 @@ struct JMediaCodecLinearBlock {
     std::shared_ptr<C2LinearBlock> mBlock;
     std::shared_ptr<C2WriteView> mReadWriteMapping;
 
-    sp<IMemoryHeap> mHeap;
-    sp<hardware::HidlMemory> mMemory;
+    sp<IMemory> mMemory;
+    sp<hardware::HidlMemory> mHidlMemory;
+    ssize_t mHidlMemoryOffset;
+    size_t mHidlMemorySize;
 
     sp<MediaCodecBuffer> mLegacyBuffer;
 
@@ -56,8 +58,8 @@ struct JMediaCodecLinearBlock {
     }
 
     sp<hardware::HidlMemory> toHidlMemory() {
-        if (mMemory) {
-            return mMemory;
+        if (mHidlMemory) {
+            return mHidlMemory;
         }
         return nullptr;
     }
