@@ -447,7 +447,7 @@ message Atom {
     }
 
     // Pulled events will start at field 10000.
-    // Next: 10082
+    // Next: 10083
     oneof pulled {
         WifiBytesTransfer wifi_bytes_transfer = 10000 [(module) = "framework"];
         WifiBytesTransferByFgBg wifi_bytes_transfer_by_fg_bg = 10001 [(module) = "framework"];
@@ -539,6 +539,7 @@ message Atom {
         SupportedRadioAccessFamily supported_radio_access_family = 10079 [(module) = "telephony"];
         SettingSnapshot setting_snapshot = 10080 [(module) = "framework"];
         DisplayWakeReason display_wake_reason = 10081 [(module) = "framework"];
+        DataUsageBytesTransfer data_usage_bytes_transfer = 10082 [(module) = "framework"];
     }
 
     // DO NOT USE field numbers above 100,000 in AOSP.
@@ -4937,6 +4938,52 @@ message MobileBytesTransferByFgBg {
     optional int64 tx_bytes = 5;
 
     optional int64 tx_packets = 6;
+}
+
+/**
+ * Used for pull network statistics via mobile|wifi networks, and sliced by interesting dimensions.
+ * Note that data is expected to be sliced into more dimensions in future. In other words,
+ * the caller must not assume the data is unique when filtering with a set of matching conditions.
+ * Thus, as the dimension grows, the caller will not be affected.
+ *
+ * Pulled from:
+ *   StatsPullAtomService (using NetworkStatsService to get NetworkStats)
+ */
+message DataUsageBytesTransfer {
+    // State of this record. Should be NetworkStats#SET_DEFAULT or NetworkStats#SET_FOREGROUND to
+    // indicate the foreground state, or NetworkStats#SET_ALL to indicate the record is for all
+    // states combined, not including debug states. See NetworkStats#SET_*.
+    optional int32 state = 1;
+
+    optional int64 rx_bytes = 2;
+
+    optional int64 rx_packets = 3;
+
+    optional int64 tx_bytes = 4;
+
+    optional int64 tx_packets = 5;
+
+    // Radio Access Technology (RAT) type of this record, should be one of
+    // TelephonyManager#NETWORK_TYPE_* constants, or NetworkTemplate#NETWORK_TYPE_ALL to indicate
+    // the record is for all rat types combined.
+    optional int32 rat_type = 6;
+
+    // Mcc/Mnc read from sim if the record is for a specific subscription, null indicates the
+    // record is combined regardless of subscription.
+    optional string sim_mcc = 7;
+    optional string sim_mnc = 8;
+
+    // Enumeration of opportunistic states with an additional ALL state indicates the record is
+    // combined regardless of the boolean value in its field.
+    enum DataSubscriptionState {
+        ALL = 1;
+        OPPORTUNISTIC = 2;
+        NOT_OPPORTUNISTIC = 3;
+    }
+    // Mark whether the subscription is an opportunistic data subscription, and ALL indicates the
+    // record is combined regardless of opportunistic data subscription.
+    // See {@link SubscriptionManager#setOpportunistic}.
+    optional DataSubscriptionState opportunistic_data_sub = 9;
 }
 
 /**
