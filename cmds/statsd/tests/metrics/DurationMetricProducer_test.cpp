@@ -70,9 +70,11 @@ TEST(DurationMetricTrackerTest, TestFirstBucket) {
     metric.set_aggregation_type(DurationMetric_AggregationType_SUM);
 
     FieldMatcher dimensions;
-    DurationMetricProducer durationProducer(
-            kConfigKey, metric, -1 /*no condition*/, 1 /* start index */, 2 /* stop index */,
-            3 /* stop_all index */, false /*nesting*/, wizard, dimensions, 5, 600 * NS_PER_SEC + NS_PER_SEC/2);
+
+    DurationMetricProducer durationProducer(kConfigKey, metric, -1 /*no condition*/, {},
+                                            1 /* start index */, 2 /* stop index */,
+                                            3 /* stop_all index */, false /*nesting*/, wizard,
+                                            dimensions, 5, 600 * NS_PER_SEC + NS_PER_SEC / 2);
 
     EXPECT_EQ(600500000000, durationProducer.mCurrentBucketStartTimeNs);
     EXPECT_EQ(10, durationProducer.mCurrentBucketNum);
@@ -96,7 +98,8 @@ TEST(DurationMetricTrackerTest, TestNoCondition) {
     makeLogEvent(&event2, bucketStartTimeNs + bucketSizeNs + 2, tagId);
 
     FieldMatcher dimensions;
-    DurationMetricProducer durationProducer(kConfigKey, metric, -1 /*no condition*/,
+
+    DurationMetricProducer durationProducer(kConfigKey, metric, -1 /*no condition*/, {},
                                             1 /* start index */, 2 /* stop index */,
                                             3 /* stop_all index */, false /*nesting*/, wizard,
                                             dimensions, bucketStartTimeNs, bucketStartTimeNs);
@@ -138,10 +141,11 @@ TEST(DurationMetricTrackerTest, TestNonSlicedCondition) {
     makeLogEvent(&event4, bucketStartTimeNs + bucketSizeNs + 3, tagId);
 
     FieldMatcher dimensions;
-    DurationMetricProducer durationProducer(kConfigKey, metric, 0 /* condition index */,
-                                            1 /* start index */, 2 /* stop index */,
-                                            3 /* stop_all index */, false /*nesting*/, wizard,
-                                            dimensions, bucketStartTimeNs, bucketStartTimeNs);
+
+    DurationMetricProducer durationProducer(
+            kConfigKey, metric, 0 /* condition index */, {ConditionState::kUnknown},
+            1 /* start index */, 2 /* stop index */, 3 /* stop_all index */, false /*nesting*/,
+            wizard, dimensions, bucketStartTimeNs, bucketStartTimeNs);
     durationProducer.mCondition = ConditionState::kFalse;
 
     EXPECT_FALSE(durationProducer.mCondition);
@@ -187,10 +191,11 @@ TEST(DurationMetricTrackerTest, TestNonSlicedConditionUnknownState) {
     makeLogEvent(&event4, bucketStartTimeNs + bucketSizeNs + 3, tagId);
 
     FieldMatcher dimensions;
-    DurationMetricProducer durationProducer(kConfigKey, metric, 0 /* condition index */,
-                                            1 /* start index */, 2 /* stop index */,
-                                            3 /* stop_all index */, false /*nesting*/, wizard,
-                                            dimensions, bucketStartTimeNs, bucketStartTimeNs);
+
+    DurationMetricProducer durationProducer(
+            kConfigKey, metric, 0 /* condition index */, {ConditionState::kUnknown},
+            1 /* start index */, 2 /* stop index */, 3 /* stop_all index */, false /*nesting*/,
+            wizard, dimensions, bucketStartTimeNs, bucketStartTimeNs);
 
     EXPECT_EQ(ConditionState::kUnknown, durationProducer.mCondition);
     EXPECT_FALSE(durationProducer.isConditionSliced());
@@ -232,7 +237,8 @@ TEST_P(DurationMetricProducerTest_PartialBucket, TestSumDuration) {
     metric.set_aggregation_type(DurationMetric_AggregationType_SUM);
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
     FieldMatcher dimensions;
-    DurationMetricProducer durationProducer(kConfigKey, metric, -1 /* no condition */,
+
+    DurationMetricProducer durationProducer(kConfigKey, metric, -1 /* no condition */, {},
                                             1 /* start index */, 2 /* stop index */,
                                             3 /* stop_all index */, false /*nesting*/, wizard,
                                             dimensions, bucketStartTimeNs, bucketStartTimeNs);
@@ -294,7 +300,8 @@ TEST_P(DurationMetricProducerTest_PartialBucket, TestSumDurationWithSplitInFollo
     metric.set_aggregation_type(DurationMetric_AggregationType_SUM);
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
     FieldMatcher dimensions;
-    DurationMetricProducer durationProducer(kConfigKey, metric, -1 /* no condition */,
+
+    DurationMetricProducer durationProducer(kConfigKey, metric, -1 /* no condition */, {},
                                             1 /* start index */, 2 /* stop index */,
                                             3 /* stop_all index */, false /*nesting*/, wizard,
                                             dimensions, bucketStartTimeNs, bucketStartTimeNs);
@@ -357,7 +364,8 @@ TEST_P(DurationMetricProducerTest_PartialBucket, TestSumDurationAnomaly) {
 
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
     FieldMatcher dimensions;
-    DurationMetricProducer durationProducer(kConfigKey, metric, -1 /* no condition */,
+
+    DurationMetricProducer durationProducer(kConfigKey, metric, -1 /* no condition */, {},
                                             1 /* start index */, 2 /* stop index */,
                                             3 /* stop_all index */, false /*nesting*/, wizard,
                                             dimensions, bucketStartTimeNs, bucketStartTimeNs);
@@ -402,7 +410,8 @@ TEST_P(DurationMetricProducerTest_PartialBucket, TestMaxDuration) {
 
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
     FieldMatcher dimensions;
-    DurationMetricProducer durationProducer(kConfigKey, metric, -1 /* no condition */,
+
+    DurationMetricProducer durationProducer(kConfigKey, metric, -1 /* no condition */, {},
                                             1 /* start index */, 2 /* stop index */,
                                             3 /* stop_all index */, false /*nesting*/, wizard,
                                             dimensions, bucketStartTimeNs, bucketStartTimeNs);
@@ -455,7 +464,8 @@ TEST_P(DurationMetricProducerTest_PartialBucket, TestMaxDurationWithSplitInNextB
 
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
     FieldMatcher dimensions;
-    DurationMetricProducer durationProducer(kConfigKey, metric, -1 /* no condition */,
+
+    DurationMetricProducer durationProducer(kConfigKey, metric, -1 /* no condition */, {},
                                             1 /* start index */, 2 /* stop index */,
                                             3 /* stop_all index */, false /*nesting*/, wizard,
                                             dimensions, bucketStartTimeNs, bucketStartTimeNs);

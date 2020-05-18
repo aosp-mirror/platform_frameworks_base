@@ -60,12 +60,14 @@ bool initLogTrackers(const StatsdConfig& config,
 // [allConditionTrackers]: stores the sp to all the ConditionTrackers
 // [trackerToConditionMap]: contain the mapping from index of
 //                        log tracker to condition trackers that use the log tracker
+// [initialConditionCache]: stores the initial conditions for each ConditionTracker
 bool initConditions(const ConfigKey& key, const StatsdConfig& config,
                     const std::unordered_map<int64_t, int>& logTrackerMap,
                     std::unordered_map<int64_t, int>& conditionTrackerMap,
                     std::vector<sp<ConditionTracker>>& allConditionTrackers,
                     std::unordered_map<int, std::vector<int>>& trackerToConditionMap,
-                    std::unordered_map<int, std::vector<MetricConditionLink>>& eventConditionLinks);
+                    std::unordered_map<int, std::vector<MetricConditionLink>>& eventConditionLinks,
+                    std::vector<ConditionState>& initialConditionCache);
 
 // Initialize State maps using State protos in the config. These maps will
 // eventually be passed to MetricProducers to initialize their state info.
@@ -103,6 +105,7 @@ bool initMetrics(
         const unordered_map<int64_t, int>& stateAtomIdMap,
         const unordered_map<int64_t, unordered_map<int, int64_t>>& allStateGroupMaps,
         vector<sp<ConditionTracker>>& allConditionTrackers,
+        const std::vector<ConditionState>& initialConditionCache,
         std::vector<sp<MetricProducer>>& allMetricProducers,
         std::unordered_map<int, std::vector<int>>& conditionToMetricMap,
         std::unordered_map<int, std::vector<int>>& trackerToMetricMap,
