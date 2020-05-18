@@ -32,9 +32,12 @@ class StatusBehavior : Behavior {
         val msg = when (status) {
             Control.STATUS_ERROR -> R.string.controls_error_generic
             Control.STATUS_NOT_FOUND -> R.string.controls_error_removed
-            else -> com.android.internal.R.string.loading
+            else -> {
+                cvh.isLoading = true
+                com.android.internal.R.string.loading
+            }
         }
-        cvh.status.setText(cvh.context.getString(msg))
+        cvh.setStatusText(cvh.context.getString(msg))
         cvh.applyRenderInfo(false, colorOffset)
     }
 }
