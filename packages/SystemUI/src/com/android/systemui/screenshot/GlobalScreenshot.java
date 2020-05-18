@@ -703,9 +703,7 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
                 mScreenshotPreview.buildLayer();
                 mScreenshotAnimation.start();
             });
-
         });
-
     }
 
     private AnimatorSet createScreenshotDropInAnimation(int width, int height, Rect bounds) {

@@ -314,13 +314,14 @@
     <dimen name="screenshot_dismiss_button_margin">8dp</dimen>
     <dimen name="screenshot_action_container_offset_y">32dp</dimen>
     <dimen name="screenshot_action_container_corner_radius">10dp</dimen>
-    <dimen name="screenshot_action_container_padding_vertical">16dp</dimen>
+    <dimen name="screenshot_action_container_padding_vertical">6dp</dimen>
     <dimen name="screenshot_action_container_margin_horizontal">8dp</dimen>
     <dimen name="screenshot_action_container_padding_left">96dp</dimen>
     <dimen name="screenshot_action_container_padding_right">8dp</dimen>
     <!-- Radius of the chip background on global screenshot actions -->
     <dimen name="screenshot_button_corner_radius">20dp</dimen>
     <dimen name="screenshot_action_chip_margin_right">8dp</dimen>
+    <dimen name="screenshot_action_chip_margin_vertical">10dp</dimen>
     <dimen name="screenshot_action_chip_padding_vertical">7dp</dimen>
     <dimen name="screenshot_action_chip_icon_size">18dp</dimen>
     <dimen name="screenshot_action_chip_padding_start">8dp</dimen>

@@ -22,8 +22,8 @@ import android.content.Context;
 import android.graphics.drawable.Icon;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.android.systemui.R;
@@ -31,7 +31,7 @@ import com.android.systemui.R;
 /**
  * View for a chip with an icon and text.
  */
-public class ScreenshotActionChip extends LinearLayout {
+public class ScreenshotActionChip extends FrameLayout {
 
     private static final String TAG = "ScreenshotActionChip";
 
