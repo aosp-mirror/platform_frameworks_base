@@ -1134,8 +1134,19 @@ public class MediaSessionService extends SystemService implements Monitor {
                 if (cb == null) {
                     throw new IllegalArgumentException("Controller callback cannot be null");
                 }
-                return createSessionInternal(pid, uid, resolvedUserId, packageName, cb, tag,
-                        sessionInfo).getSessionBinder();
+                MediaSessionRecord session = createSessionInternal(
+                        pid, uid, resolvedUserId, packageName, cb, tag, sessionInfo);
+                if (session == null) {
+                    throw new IllegalStateException("Failed to create a new session record");
+                }
+                ISession sessionBinder = session.getSessionBinder();
+                if (sessionBinder == null) {
+                    throw new IllegalStateException("Invalid session record");
+                }
+                return sessionBinder;
+            } catch (Exception e) {
+                Slog.w(TAG, "Exception in creating a new session", e);
+                throw e;
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
