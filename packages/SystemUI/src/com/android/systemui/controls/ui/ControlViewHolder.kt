@@ -18,10 +18,15 @@ package com.android.systemui.controls.ui
 
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
+import android.animation.AnimatorSet
+import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
+import android.annotation.ColorRes
 import android.app.Dialog
 import android.content.Context
+import android.content.res.ColorStateList
 import android.graphics.drawable.ClipDrawable
+import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.LayerDrawable
 import android.service.controls.Control
@@ -34,6 +39,7 @@ import android.service.controls.templates.TemperatureControlTemplate
 import android.service.controls.templates.ToggleRangeTemplate
 import android.service.controls.templates.ToggleTemplate
 import android.util.MathUtils
+import android.util.TypedValue
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
@@ -63,6 +69,8 @@ class ControlViewHolder(
         private const val UPDATE_DELAY_IN_MILLIS = 3000L
         private const val ALPHA_ENABLED = 255
         private const val ALPHA_DISABLED = 0
+        private const val STATUS_ALPHA_ENABLED = 1f
+        private const val STATUS_ALPHA_DIMMED = 0.45f
         private val FORCE_PANEL_DEVICES = setOf(
             DeviceTypes.TYPE_THERMOSTAT,
             DeviceTypes.TYPE_CAMERA
@@ -94,9 +102,11 @@ class ControlViewHolder(
     private val toggleBackgroundIntensity: Float = layout.context.resources
             .getFraction(R.fraction.controls_toggle_bg_intensity, 1, 1)
     private var stateAnimator: ValueAnimator? = null
+    private var statusAnimator: Animator? = null
     private val baseLayer: GradientDrawable
     val icon: ImageView = layout.requireViewById(R.id.icon)
-    val status: TextView = layout.requireViewById(R.id.status)
+    private val status: TextView = layout.requireViewById(R.id.status)
+    private var nextStatusText: CharSequence = ""
     val title: TextView = layout.requireViewById(R.id.title)
     val subtitle: TextView = layout.requireViewById(R.id.subtitle)
     val context: Context = layout.getContext()
@@ -105,6 +115,7 @@ class ControlViewHolder(
     var cancelUpdate: Runnable? = null
     var behavior: Behavior? = null
     var lastAction: ControlAction? = null
+    var isLoading = false
     private var lastChallengeDialog: Dialog? = null
     private val onDialogCancel: () -> Unit = { lastChallengeDialog = null }
 
@@ -144,6 +155,7 @@ class ControlViewHolder(
             })
         }
 
+        isLoading = false
         behavior = bindBehavior(behavior, findBehaviorClass(controlStatus, template, deviceType))
         updateContentDescription()
     }
@@ -189,11 +201,11 @@ class ControlViewHolder(
         val previousText = status.getText()
 
         cancelUpdate = uiExecutor.executeDelayed({
-                status.setText(previousText)
-                updateContentDescription()
-            }, UPDATE_DELAY_IN_MILLIS)
+            setStatusText(previousText)
+            updateContentDescription()
+        }, UPDATE_DELAY_IN_MILLIS)
 
-        status.setText(tempStatus)
+        setStatusText(tempStatus)
         updateContentDescription()
     }
 
@@ -231,39 +243,56 @@ class ControlViewHolder(
     }
 
     internal fun applyRenderInfo(enabled: Boolean, offset: Int, animated: Boolean = true) {
-        setEnabled(enabled)
-
         val ri = RenderInfo.lookup(context, cws.componentName, deviceType, enabled, offset)
-
         val fg = context.resources.getColorStateList(ri.foreground, context.theme)
+        val newText = nextStatusText
+        nextStatusText = ""
+        val control = cws.control
+
+        var shouldAnimate = animated
+        if (newText == status.text) {
+            shouldAnimate = false
+        }
+        animateStatusChange(shouldAnimate) {
+            updateStatusRow(enabled, newText, ri.icon, fg, control)
+        }
+
+        animateBackgroundChange(shouldAnimate, enabled, ri.enabledBackground)
+    }
+
+    fun getStatusText() = status.text
+
+    fun setStatusTextSize(textSize: Float) =
+        status.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize)
+
+    fun setStatusText(text: CharSequence, immediately: Boolean = false) {
+        if (immediately) {
+            status.alpha = STATUS_ALPHA_ENABLED
+            status.text = text
+            nextStatusText = ""
+        } else {
+            nextStatusText = text
+        }
+    }
+
+    private fun animateBackgroundChange(
+        animated: Boolean,
+        enabled: Boolean,
+        @ColorRes bgColor: Int
+    ) {
         val bg = context.resources.getColor(R.color.control_default_background, context.theme)
         var (newClipColor, newAlpha) = if (enabled) {
             // allow color overrides for the enabled state only
             val color = cws.control?.getCustomColor()?.let {
                 val state = intArrayOf(android.R.attr.state_enabled)
                 it.getColorForState(state, it.getDefaultColor())
-            } ?: context.resources.getColor(ri.enabledBackground, context.theme)
+            } ?: context.resources.getColor(bgColor, context.theme)
             listOf(color, ALPHA_ENABLED)
         } else {
             listOf(
                 context.resources.getColor(R.color.control_default_background, context.theme),
                 ALPHA_DISABLED
             )
-        }
-
-        status.setTextColor(fg)
-
-        cws.control?.getCustomIcon()?.let {
-            // do not tint custom icons, assume the intended icon color is correct
-            icon.imageTintList = null
-            icon.setImageIcon(it)
-        } ?: run {
-            icon.setImageDrawable(ri.icon)
-
-            // do not color app icons
-            if (deviceType != DeviceTypes.TYPE_ROUTINE) {
-                icon.imageTintList = fg
-            }
         }
 
         (clipLayer.getDrawable() as GradientDrawable).apply {
@@ -299,6 +328,77 @@ class ControlViewHolder(
                 setColor(newClipColor)
                 baseLayer.setColor(newBaseColor)
                 layout.alpha = 1f
+            }
+        }
+    }
+
+    private fun animateStatusChange(animated: Boolean, statusRowUpdater: () -> Unit) {
+        statusAnimator?.cancel()
+
+        if (!animated) {
+            statusRowUpdater.invoke()
+            return
+        }
+
+        if (isLoading) {
+            statusRowUpdater.invoke()
+            statusAnimator = ObjectAnimator.ofFloat(status, "alpha", STATUS_ALPHA_DIMMED).apply {
+                repeatMode = ValueAnimator.REVERSE
+                repeatCount = ValueAnimator.INFINITE
+                duration = 500L
+                interpolator = Interpolators.LINEAR
+                startDelay = 900L
+                start()
+            }
+        } else {
+            val fadeOut = ObjectAnimator.ofFloat(status, "alpha", 0f).apply {
+                duration = 200L
+                interpolator = Interpolators.LINEAR
+                addListener(object : AnimatorListenerAdapter() {
+                    override fun onAnimationEnd(animation: Animator?) {
+                        statusRowUpdater.invoke()
+                    }
+                })
+            }
+            val fadeIn = ObjectAnimator.ofFloat(status, "alpha", STATUS_ALPHA_ENABLED).apply {
+                duration = 200L
+                interpolator = Interpolators.LINEAR
+            }
+            statusAnimator = AnimatorSet().apply {
+                playSequentially(fadeOut, fadeIn)
+                addListener(object : AnimatorListenerAdapter() {
+                    override fun onAnimationEnd(animation: Animator?) {
+                        status.alpha = STATUS_ALPHA_ENABLED
+                        statusAnimator = null
+                    }
+                })
+                start()
+            }
+        }
+    }
+
+    private fun updateStatusRow(
+        enabled: Boolean,
+        text: CharSequence,
+        drawable: Drawable,
+        color: ColorStateList,
+        control: Control?
+    ) {
+        setEnabled(enabled)
+
+        status.text = text
+        status.setTextColor(color)
+
+        control?.getCustomIcon()?.let {
+            // do not tint custom icons, assume the intended icon color is correct
+            icon.imageTintList = null
+            icon.setImageIcon(it)
+        } ?: run {
+            icon.setImageDrawable(drawable)
+
+            // do not color app icons
+            if (deviceType != DeviceTypes.TYPE_ROUTINE) {
+                icon.imageTintList = color
             }
         }
     }
