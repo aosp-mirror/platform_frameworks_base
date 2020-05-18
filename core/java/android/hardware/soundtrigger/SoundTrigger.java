@@ -314,6 +314,92 @@ public class SoundTrigger {
         }
 
         @Override
+        public boolean equals(@Nullable Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (!(obj instanceof ModuleProperties)) {
+                return false;
+            }
+            ModuleProperties other = (ModuleProperties) obj;
+            if (mId != other.mId) {
+                return false;
+            }
+            if (!mImplementor.equals(other.mImplementor)) {
+                return false;
+            }
+            if (!mDescription.equals(other.mDescription)) {
+                return false;
+            }
+            if (!mUuid.equals(other.mUuid)) {
+                return false;
+            }
+            if (mVersion != other.mVersion) {
+                return false;
+            }
+            if (!mSupportedModelArch.equals(other.mSupportedModelArch)) {
+                return false;
+            }
+            if (mMaxSoundModels != other.mMaxSoundModels) {
+                return false;
+            }
+            if (mMaxKeyphrases != other.mMaxKeyphrases) {
+                return false;
+            }
+            if (mMaxUsers != other.mMaxUsers) {
+                return false;
+            }
+            if (mRecognitionModes != other.mRecognitionModes) {
+                return false;
+            }
+            if (mSupportsCaptureTransition != other.mSupportsCaptureTransition) {
+                return false;
+            }
+            if (mMaxBufferMillis != other.mMaxBufferMillis) {
+                return false;
+            }
+            if (mSupportsConcurrentCapture != other.mSupportsConcurrentCapture) {
+                return false;
+            }
+            if (mPowerConsumptionMw != other.mPowerConsumptionMw) {
+                return false;
+            }
+            if (mReturnsTriggerInEvent != other.mReturnsTriggerInEvent) {
+                return false;
+            }
+            if (mAudioCapabilities != other.mAudioCapabilities) {
+                return false;
+            }
+            return true;
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + mId;
+            result = prime * result + mImplementor.hashCode();
+            result = prime * result + mDescription.hashCode();
+            result = prime * result + mUuid.hashCode();
+            result = prime * result + mVersion;
+            result = prime * result + mSupportedModelArch.hashCode();
+            result = prime * result + mMaxSoundModels;
+            result = prime * result + mMaxKeyphrases;
+            result = prime * result + mMaxUsers;
+            result = prime * result + mRecognitionModes;
+            result = prime * result + (mSupportsCaptureTransition ? 1 : 0);
+            result = prime * result + mMaxBufferMillis;
+            result = prime * result + (mSupportsConcurrentCapture ? 1 : 0);
+            result = prime * result + mPowerConsumptionMw;
+            result = prime * result + (mReturnsTriggerInEvent ? 1 : 0);
+            result = prime * result + mAudioCapabilities;
+            return result;
+        }
+
+        @Override
         public String toString() {
             return "ModuleProperties [id=" + getId() + ", implementor=" + getImplementor()
                     + ", description=" + getDescription() + ", uuid=" + getUuid()
