@@ -74,8 +74,9 @@ public class RuntimeShader extends Shader {
         discardNativeInstance();
     }
 
+    /** @hide */
     @Override
-    long createNativeInstance(long nativeMatrix) {
+    protected long createNativeInstance(long nativeMatrix) {
         return nativeCreate(mNativeInstanceRuntimeShaderFactory, nativeMatrix, mUniforms,
                 colorSpace().getNativeInstance(), mIsOpaque);
     }

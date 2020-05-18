@@ -147,8 +147,9 @@ public class RadialGradient extends Shader {
         this(centerX, centerY, radius, new long[] {centerColor, edgeColor}, null, tileMode);
     }
 
+    /** @hide */
     @Override
-    long createNativeInstance(long nativeMatrix) {
+    protected long createNativeInstance(long nativeMatrix) {
         return nativeCreate(nativeMatrix, mX, mY, mRadius,
                 mColorLongs, mPositions, mTileMode.nativeInt,
                 colorSpace().getNativeInstance());
