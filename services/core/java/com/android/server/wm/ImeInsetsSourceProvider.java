@@ -18,9 +18,11 @@ package com.android.server.wm;
 
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_IME;
 
+import android.graphics.PixelFormat;
 import android.view.InsetsSource;
 import android.view.WindowInsets;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.protolog.common.ProtoLog;
 
 /**
@@ -100,7 +102,8 @@ class ImeInsetsSourceProvider extends InsetsSourceProvider {
         mShowImeRunner = null;
     }
 
-    private boolean isImeTargetFromDisplayContentAndImeSame() {
+    @VisibleForTesting
+    boolean isImeTargetFromDisplayContentAndImeSame() {
         // IMMS#mLastImeTargetWindow always considers focused window as
         // IME target, however DisplayContent#computeImeTarget() can compute
         // a different IME target.
@@ -111,6 +114,7 @@ class ImeInsetsSourceProvider extends InsetsSourceProvider {
         // TODO(b/139861270): Remove the child & sublayer check once IMMS is aware of
         //  actual IME target.
         final WindowState dcTarget = mDisplayContent.mInputMethodTarget;
+        final InsetsControlTarget controlTarget = mDisplayContent.mInputMethodControlTarget;
         if (dcTarget == null || mImeTargetFromIme == null) {
             return false;
         }
@@ -120,6 +124,9 @@ class ImeInsetsSourceProvider extends InsetsSourceProvider {
         return (!dcTarget.isClosing() && mImeTargetFromIme == dcTarget)
                 || (mImeTargetFromIme != null && dcTarget.getParentWindow() == mImeTargetFromIme
                         && dcTarget.mSubLayer > mImeTargetFromIme.mSubLayer)
-                || mImeTargetFromIme == mDisplayContent.getImeFallback();
+                || mImeTargetFromIme == mDisplayContent.getImeFallback()
+                // If IME target is transparent but control target matches requesting window.
+                || (controlTarget == mImeTargetFromIme
+                        && PixelFormat.formatHasAlpha(dcTarget.mAttrs.format));
     }
 }
