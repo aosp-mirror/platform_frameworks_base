@@ -50,8 +50,9 @@ public:
     std::vector<Update> updates;
 
     void onStateChanged(const int64_t eventTimeNs, const int32_t atomId,
-                        const HashableDimensionKey& primaryKey, int oldState, int newState) {
-        updates.emplace_back(primaryKey, newState);
+                        const HashableDimensionKey& primaryKey, const FieldValue& oldState,
+                        const FieldValue& newState) {
+        updates.emplace_back(primaryKey, newState.mValue.int_value);
     }
 };
 
