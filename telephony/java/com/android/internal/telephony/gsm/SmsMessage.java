@@ -92,14 +92,15 @@ public class SmsMessage extends SmsMessageBase {
 
     private int mVoiceMailCount = 0;
 
+    /** TP-Validity-Period-Format (TP-VPF). See TS 23.040, 9.2.3.3 */
     private static final int VALIDITY_PERIOD_FORMAT_NONE = 0x00;
     private static final int VALIDITY_PERIOD_FORMAT_ENHANCED = 0x01;
     private static final int VALIDITY_PERIOD_FORMAT_RELATIVE = 0x02;
     private static final int VALIDITY_PERIOD_FORMAT_ABSOLUTE = 0x03;
 
-    //Validity Period min - 5 mins
+    // Validity Period min - 5 mins
     private static final int VALIDITY_PERIOD_MIN = 5;
-    //Validity Period max - 63 weeks
+    // Validity Period max - 63 weeks
     private static final int VALIDITY_PERIOD_MAX = 635040;
 
     private static final int INVALID_VALIDITY_PERIOD = -1;
@@ -194,20 +195,20 @@ public class SmsMessage extends SmsMessageBase {
     }
 
     /**
-     * Get Encoded Relative Validty Period Value from Validity period in mins.
+     * Gets Encoded Relative Validity Period Value from Validity period in mins.
      *
      * @param validityPeriod Validity period in mins.
      *
      * Refer specification 3GPP TS 23.040 V6.8.1 section 9.2.3.12.1.
-     * ||relValidityPeriod (TP-VP)  ||                 ||  validityPeriod   ||
-     *
-     *      0 to 143                            --->       (TP-VP + 1) x 5 minutes
-     *
-     *      144 to 167                         --->        12 hours + ((TP-VP -143) x 30 minutes)
-     *
-     *      168 to 196                         --->        (TP-VP - 166) x 1 day
-     *
-     *      197 to 255                         --->        (TP-VP - 192) x 1 week
+     * ------------------------------------------------------------
+     *        TP-VP       |            Validity period
+     *  (Relative format) |                 value
+     * ------------------------------------------------------------
+     *  0 to 143          | (TP-VP + 1) x 5 minutes
+     *  144 to 167        | 12 hours + ((TP-VP -143) x 30 minutes)
+     *  168 to 196        | (TP-VP - 166) x 1 day
+     *  197 to 255        | (TP-VP - 192) x 1 week
+     * ------------------------------------------------------------
      *
      * @return relValidityPeriod Encoded Relative Validity Period Value.
      * @hide
@@ -215,19 +216,16 @@ public class SmsMessage extends SmsMessageBase {
     public static int getRelativeValidityPeriod(int validityPeriod) {
         int relValidityPeriod = INVALID_VALIDITY_PERIOD;
 
-        if (validityPeriod < VALIDITY_PERIOD_MIN  || validityPeriod > VALIDITY_PERIOD_MAX) {
-            Rlog.e(LOG_TAG,"Invalid Validity Period" + validityPeriod);
-            return relValidityPeriod;
-        }
-
-        if (validityPeriod <= 720) {
-            relValidityPeriod = (validityPeriod  / 5) - 1;
-        } else if (validityPeriod <= 1440) {
-            relValidityPeriod = ((validityPeriod - 720) / 30) + 143;
-        } else if (validityPeriod <= 43200) {
-            relValidityPeriod = (validityPeriod  / 1440) + 166;
-        } else if (validityPeriod <= 635040) {
-            relValidityPeriod = (validityPeriod  / 10080) + 192;
+        if (validityPeriod >= VALIDITY_PERIOD_MIN) {
+            if (validityPeriod <= 720) {
+                relValidityPeriod = (validityPeriod / 5) - 1;
+            } else if (validityPeriod <= 1440) {
+                relValidityPeriod = ((validityPeriod - 720) / 30) + 143;
+            } else if (validityPeriod <= 43200) {
+                relValidityPeriod = (validityPeriod / 1440) + 166;
+            } else if (validityPeriod <= VALIDITY_PERIOD_MAX) {
+                relValidityPeriod = (validityPeriod / 10080) + 192;
+            }
         }
         return relValidityPeriod;
     }
@@ -337,17 +335,19 @@ public class SmsMessage extends SmsMessageBase {
 
         SubmitPdu ret = new SubmitPdu();
 
-        int validityPeriodFormat = VALIDITY_PERIOD_FORMAT_NONE;
-        int relativeValidityPeriod = INVALID_VALIDITY_PERIOD;
+        int relativeValidityPeriod = getRelativeValidityPeriod(validityPeriod);
 
-        // TP-Validity-Period-Format (TP-VPF) in 3GPP TS 23.040 V6.8.1 section 9.2.3.3
-        //bit 4:3 = 10 - TP-VP field present - relative format
-        if((relativeValidityPeriod = getRelativeValidityPeriod(validityPeriod)) >= 0) {
-            validityPeriodFormat = VALIDITY_PERIOD_FORMAT_RELATIVE;
+        byte mtiByte = 0x01; // SMS-SUBMIT
+
+        if (header != null) {
+            // Set TP-UDHI
+            mtiByte |= 0x40;
         }
 
-        byte mtiByte = (byte)(0x01 | (validityPeriodFormat << 0x03) |
-                (header != null ? 0x40 : 0x00));
+        if (relativeValidityPeriod != INVALID_VALIDITY_PERIOD) {
+            // Set TP-Validity-Period-Format (TP-VPF)
+            mtiByte |= VALIDITY_PERIOD_FORMAT_RELATIVE << 3;
+        }
 
         ByteArrayOutputStream bo = getSubmitPduHead(
                 scAddress, destinationAddress, mtiByte,
@@ -419,8 +419,8 @@ public class SmsMessage extends SmsMessageBase {
             bo.write(0x08);
         }
 
-        if (validityPeriodFormat == VALIDITY_PERIOD_FORMAT_RELATIVE) {
-            // ( TP-Validity-Period - relative format)
+        // TP-Validity-Period (TP-VP)
+        if (relativeValidityPeriod != INVALID_VALIDITY_PERIOD) {
             bo.write(relativeValidityPeriod);
         }
 
@@ -1353,23 +1353,17 @@ public class SmsMessage extends SmsMessageBase {
 
         // TP-Validity-Period-Format
         int validityPeriodLength = 0;
-        int validityPeriodFormat = ((firstByte>>3) & 0x3);
-        if (0x0 == validityPeriodFormat) /* 00, TP-VP field not present*/
-        {
+        int validityPeriodFormat = ((firstByte >> 3) & 0x3);
+        if (validityPeriodFormat == VALIDITY_PERIOD_FORMAT_NONE) {
             validityPeriodLength = 0;
-        }
-        else if (0x2 == validityPeriodFormat) /* 10, TP-VP: relative format*/
-        {
+        } else if (validityPeriodFormat == VALIDITY_PERIOD_FORMAT_RELATIVE) {
             validityPeriodLength = 1;
-        }
-        else /* other case, 11 or 01, TP-VP: absolute or enhanced format*/
-        {
+        } else { // VALIDITY_PERIOD_FORMAT_ENHANCED or VALIDITY_PERIOD_FORMAT_ABSOLUTE
             validityPeriodLength = 7;
         }
 
         // TP-Validity-Period is not used on phone, so just ignore it for now.
-        while (validityPeriodLength-- > 0)
-        {
+        while (validityPeriodLength-- > 0) {
             p.getByte();
         }
 
