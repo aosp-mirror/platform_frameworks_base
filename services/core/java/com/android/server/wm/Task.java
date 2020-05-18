@@ -192,7 +192,6 @@ class Task extends WindowContainer<WindowContainer> {
     private static final String ATTR_TASK_AFFILIATION = "task_affiliation";
     private static final String ATTR_PREV_AFFILIATION = "prev_affiliation";
     private static final String ATTR_NEXT_AFFILIATION = "next_affiliation";
-    private static final String ATTR_TASK_AFFILIATION_COLOR = "task_affiliation_color";
     private static final String ATTR_CALLING_UID = "calling_uid";
     private static final String ATTR_CALLING_PACKAGE = "calling_package";
     private static final String ATTR_CALLING_FEATURE_ID = "calling_feature_id";
@@ -297,7 +296,6 @@ class Task extends WindowContainer<WindowContainer> {
     CharSequence lastDescription; // Last description captured for this item.
 
     int mAffiliatedTaskId; // taskId of parent affiliation or self if no parent.
-    int mAffiliatedTaskColor; // color of the parent task affiliation.
     Task mPrevAffiliate; // previous task in affiliated chain.
     int mPrevAffiliateTaskId = INVALID_TASK_ID; // previous id for persistence.
     Task mNextAffiliate; // next task in affiliated chain.
@@ -511,7 +509,7 @@ class Task extends WindowContainer<WindowContainer> {
                 null /*_lastDescription*/, System.currentTimeMillis(),
                 true /*neverRelinquishIdentity*/,
                 _taskDescription != null ? _taskDescription : new TaskDescription(),
-                _taskId, INVALID_TASK_ID, INVALID_TASK_ID, 0 /*taskAffiliationColor*/,
+                _taskId, INVALID_TASK_ID, INVALID_TASK_ID,
                 info.applicationInfo.uid, info.packageName, null /* default featureId */,
                 info.resizeMode, info.supportsPictureInPicture(), false /*_realActivitySuspended*/,
                 false /*userSetupComplete*/, INVALID_MIN_SIZE, INVALID_MIN_SIZE, info,
@@ -525,7 +523,7 @@ class Task extends WindowContainer<WindowContainer> {
             boolean _askedCompatMode, int _userId, int _effectiveUid, String _lastDescription,
             long lastTimeMoved, boolean neverRelinquishIdentity,
             TaskDescription _lastTaskDescription, int taskAffiliation, int prevTaskId,
-            int nextTaskId, int taskAffiliationColor, int callingUid, String callingPackage,
+            int nextTaskId, int callingUid, String callingPackage,
             @Nullable String callingFeatureId, int resizeMode, boolean supportsPictureInPicture,
             boolean _realActivitySuspended, boolean userSetupComplete, int minWidth, int minHeight,
             ActivityInfo info, IVoiceInteractionSession _voiceSession,
@@ -563,7 +561,6 @@ class Task extends WindowContainer<WindowContainer> {
         mLastTimeMoved = lastTimeMoved;
         mNeverRelinquishIdentity = neverRelinquishIdentity;
         mAffiliatedTaskId = taskAffiliation;
-        mAffiliatedTaskColor = taskAffiliationColor;
         mPrevAffiliateTaskId = prevTaskId;
         mNextAffiliateTaskId = nextTaskId;
         mCallingUid = callingUid;
@@ -1240,7 +1237,6 @@ class Task extends WindowContainer<WindowContainer> {
     void setTaskToAffiliateWith(Task taskToAffiliateWith) {
         closeRecentsChain();
         mAffiliatedTaskId = taskToAffiliateWith.mAffiliatedTaskId;
-        mAffiliatedTaskColor = taskToAffiliateWith.mAffiliatedTaskColor;
         // Find the end
         while (taskToAffiliateWith.mNextAffiliate != null) {
             final Task nextRecents = taskToAffiliateWith.mNextAffiliate;
@@ -1729,10 +1725,6 @@ class Task extends WindowContainer<WindowContainer> {
         taskDescription.setMinWidth(mMinWidth);
         taskDescription.setMinHeight(mMinHeight);
         setTaskDescription(taskDescription);
-        // Update the task affiliation color if we are the parent of the group
-        if (mTaskId == mAffiliatedTaskId) {
-            mAffiliatedTaskColor = taskDescription.getPrimaryColor();
-        }
         mAtmService.getTaskChangeNotificationController().notifyTaskDescriptionChanged(
                 getTaskInfo());
 
@@ -3993,7 +3985,6 @@ class Task extends WindowContainer<WindowContainer> {
         if (getTaskDescription() != null) {
             getTaskDescription().saveToXml(out);
         }
-        out.attribute(null, ATTR_TASK_AFFILIATION_COLOR, String.valueOf(mAffiliatedTaskColor));
         out.attribute(null, ATTR_TASK_AFFILIATION, String.valueOf(mAffiliatedTaskId));
         out.attribute(null, ATTR_PREV_AFFILIATION, String.valueOf(mPrevAffiliateTaskId));
         out.attribute(null, ATTR_NEXT_AFFILIATION, String.valueOf(mNextAffiliateTaskId));
@@ -4080,7 +4071,6 @@ class Task extends WindowContainer<WindowContainer> {
         final int outerDepth = in.getDepth();
         TaskDescription taskDescription = new TaskDescription();
         int taskAffiliation = INVALID_TASK_ID;
-        int taskAffiliationColor = 0;
         int prevTaskId = INVALID_TASK_ID;
         int nextTaskId = INVALID_TASK_ID;
         int callingUid = -1;
@@ -4161,9 +4151,6 @@ class Task extends WindowContainer<WindowContainer> {
                     break;
                 case ATTR_NEXT_AFFILIATION:
                     nextTaskId = Integer.parseInt(attrValue);
-                    break;
-                case ATTR_TASK_AFFILIATION_COLOR:
-                    taskAffiliationColor = Integer.parseInt(attrValue);
                     break;
                 case ATTR_CALLING_UID:
                     callingUid = Integer.parseInt(attrValue);
@@ -4273,7 +4260,7 @@ class Task extends WindowContainer<WindowContainer> {
                 affinityIntent, affinity, rootAffinity, realActivity, origActivity, rootHasReset,
                 autoRemoveRecents, askedCompatMode, userId, effectiveUid, lastDescription,
                 lastTimeOnTop, neverRelinquishIdentity, taskDescription, taskAffiliation,
-                prevTaskId, nextTaskId, taskAffiliationColor, callingUid, callingPackage,
+                prevTaskId, nextTaskId, callingUid, callingPackage,
                 callingFeatureId, resizeMode, supportsPictureInPicture, realActivitySuspended,
                 userSetupComplete, minWidth, minHeight, null /*ActivityInfo*/,
                 null /*_voiceSession*/, null /*_voiceInteractor*/, null /* stack */);
