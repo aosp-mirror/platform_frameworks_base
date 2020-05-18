@@ -77,7 +77,16 @@ import java.util.stream.Collectors;
 
 /**
  * Tracks saved or available wifi networks and their state.
+ *
+ * @deprecated WifiTracker/AccessPoint is no longer supported, and will be removed in a future
+ * release. Clients that need a dynamic list of available wifi networks should migrate to one of the
+ * newer tracker classes,
+ * {@link com.android.wifitrackerlib.WifiPickerTracker},
+ * {@link com.android.wifitrackerlib.SavedNetworkTracker},
+ * {@link com.android.wifitrackerlib.NetworkDetailsTracker},
+ * in conjunction with {@link com.android.wifitrackerlib.WifiEntry} to represent each wifi network.
  */
+@Deprecated
 public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestroy {
     /**
      * Default maximum age in millis of cached scored networks in
