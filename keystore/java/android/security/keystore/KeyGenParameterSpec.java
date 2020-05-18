@@ -25,6 +25,7 @@ import android.app.KeyguardManager;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.BiometricPrompt;
+import android.os.Build;
 import android.security.GateKeeper;
 import android.security.KeyStore;
 import android.text.TextUtils;
@@ -266,6 +267,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
     private final @KeyProperties.AuthEnum int mUserAuthenticationType;
     private final boolean mUserPresenceRequired;
     private final byte[] mAttestationChallenge;
+    private final boolean mDevicePropertiesAttestationIncluded;
     private final boolean mUniqueIdIncluded;
     private final boolean mUserAuthenticationValidWhileOnBody;
     private final boolean mInvalidatedByBiometricEnrollment;
@@ -305,6 +307,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
             @KeyProperties.AuthEnum int userAuthenticationType,
             boolean userPresenceRequired,
             byte[] attestationChallenge,
+            boolean devicePropertiesAttestationIncluded,
             boolean uniqueIdIncluded,
             boolean userAuthenticationValidWhileOnBody,
             boolean invalidatedByBiometricEnrollment,
@@ -356,6 +359,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
         mUserAuthenticationValidityDurationSeconds = userAuthenticationValidityDurationSeconds;
         mUserAuthenticationType = userAuthenticationType;
         mAttestationChallenge = Utils.cloneIfNotNull(attestationChallenge);
+        mDevicePropertiesAttestationIncluded = devicePropertiesAttestationIncluded;
         mUniqueIdIncluded = uniqueIdIncluded;
         mUserAuthenticationValidWhileOnBody = userAuthenticationValidWhileOnBody;
         mInvalidatedByBiometricEnrollment = invalidatedByBiometricEnrollment;
@@ -667,6 +671,21 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
     }
 
     /**
+     * Returns {@code true} if attestation for the base device properties ({@link Build#BRAND},
+     * {@link Build#DEVICE}, {@link Build#MANUFACTURER}, {@link Build#MODEL}, {@link Build#PRODUCT})
+     * was requested to be added in the attestation certificate for the generated key.
+     *
+     * {@link javax.crypto.KeyGenerator#generateKey()} will throw
+     * {@link java.security.ProviderException} if device properties attestation fails or is not
+     * supported.
+     *
+     * @see Builder#setDevicePropertiesAttestationIncluded(boolean)
+     */
+    public boolean isDevicePropertiesAttestationIncluded() {
+        return mDevicePropertiesAttestationIncluded;
+    }
+
+    /**
      * @hide This is a system-only API
      *
      * Returns {@code true} if the attestation certificate will contain a unique ID field.
@@ -769,6 +788,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
                 KeyProperties.AUTH_BIOMETRIC_STRONG;
         private boolean mUserPresenceRequired = false;
         private byte[] mAttestationChallenge = null;
+        private boolean mDevicePropertiesAttestationIncluded = false;
         private boolean mUniqueIdIncluded = false;
         private boolean mUserAuthenticationValidWhileOnBody;
         private boolean mInvalidatedByBiometricEnrollment = true;
@@ -834,6 +854,8 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
             mUserAuthenticationType = sourceSpec.getUserAuthenticationType();
             mUserPresenceRequired = sourceSpec.isUserPresenceRequired();
             mAttestationChallenge = sourceSpec.getAttestationChallenge();
+            mDevicePropertiesAttestationIncluded =
+                    sourceSpec.isDevicePropertiesAttestationIncluded();
             mUniqueIdIncluded = sourceSpec.isUniqueIdIncluded();
             mUserAuthenticationValidWhileOnBody = sourceSpec.isUserAuthenticationValidWhileOnBody();
             mInvalidatedByBiometricEnrollment = sourceSpec.isInvalidatedByBiometricEnrollment();
@@ -1340,6 +1362,31 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
         }
 
         /**
+         * Sets whether to include the base device properties in the attestation certificate.
+         *
+         * <p>If {@code attestationChallenge} is not {@code null}, the public key certificate for
+         * this key pair will contain an extension that describes the details of the key's
+         * configuration and authorizations, including the device properties values (brand, device,
+         * manufacturer, model, product). These should be the same as in ({@link Build#BRAND},
+         * {@link Build#DEVICE}, {@link Build#MANUFACTURER}, {@link Build#MODEL},
+         * {@link Build#PRODUCT}). The attestation certificate chain can
+         * be retrieved with {@link java.security.KeyStore#getCertificateChain(String)}.
+         *
+         * <p> If {@code attestationChallenge} is {@code null}, the public key certificate for
+         * this key pair will not contain the extension with the requested attested values.
+         *
+         * <p> {@link javax.crypto.KeyGenerator#generateKey()} will throw
+         * {@link java.security.ProviderException} if device properties attestation fails or is not
+         * supported.
+         */
+        @NonNull
+        public Builder setDevicePropertiesAttestationIncluded(
+                boolean devicePropertiesAttestationIncluded) {
+            mDevicePropertiesAttestationIncluded = devicePropertiesAttestationIncluded;
+            return this;
+        }
+
+        /**
          * @hide Only system apps can use this method.
          *
          * Sets whether to include a temporary unique ID field in the attestation certificate.
@@ -1463,6 +1510,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
                     mUserAuthenticationType,
                     mUserPresenceRequired,
                     mAttestationChallenge,
+                    mDevicePropertiesAttestationIncluded,
                     mUniqueIdIncluded,
                     mUserAuthenticationValidWhileOnBody,
                     mInvalidatedByBiometricEnrollment,
