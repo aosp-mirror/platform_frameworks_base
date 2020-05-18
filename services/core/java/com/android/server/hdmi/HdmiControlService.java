@@ -2195,8 +2195,12 @@ public class HdmiControlService extends SystemService {
         public void setHdmiCecVolumeControlEnabled(final boolean isHdmiCecVolumeControlEnabled) {
             enforceAccessPermission();
             long token = Binder.clearCallingIdentity();
-            HdmiControlService.this.setHdmiCecVolumeControlEnabled(isHdmiCecVolumeControlEnabled);
-            Binder.restoreCallingIdentity(token);
+            try {
+                HdmiControlService.this.setHdmiCecVolumeControlEnabled(
+                        isHdmiCecVolumeControlEnabled);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
         }
 
         @Override
