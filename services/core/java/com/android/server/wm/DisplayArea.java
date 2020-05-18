@@ -66,6 +66,7 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
     final int mFeatureId;
     private final DisplayAreaOrganizerController mOrganizerController;
     IDisplayAreaOrganizer mOrganizer;
+    private final Configuration mTmpConfiguration = new Configuration();
 
     DisplayArea(WindowManagerService wms, Type type, String name) {
         this(wms, type, name, FEATURE_UNDEFINED);
@@ -162,8 +163,10 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
 
     @Override
     public void onConfigurationChanged(Configuration newParentConfig) {
+        mTmpConfiguration.setTo(getConfiguration());
         super.onConfigurationChanged(newParentConfig);
-        if (mOrganizer != null) {
+
+        if (mOrganizer != null && getConfiguration().diff(mTmpConfiguration) != 0) {
             mOrganizerController.onDisplayAreaInfoChanged(mOrganizer, this);
         }
     }
