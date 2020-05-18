@@ -86,6 +86,8 @@ public class QuickStepContract {
     // enabled (since it's used to navigate back within the bubbled app, or to collapse the bubble
     // stack.
     public static final int SYSUI_STATE_BUBBLES_EXPANDED = 1 << 14;
+    // The global actions dialog is showing
+    public static final int SYSUI_STATE_GLOBAL_ACTIONS_SHOWING = 1 << 15;
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({SYSUI_STATE_SCREEN_PINNING,
@@ -102,7 +104,8 @@ public class QuickStepContract {
             SYSUI_STATE_SEARCH_DISABLED,
             SYSUI_STATE_TRACING_ENABLED,
             SYSUI_STATE_ASSIST_GESTURE_CONSTRAINED,
-            SYSUI_STATE_BUBBLES_EXPANDED
+            SYSUI_STATE_BUBBLES_EXPANDED,
+            SYSUI_STATE_GLOBAL_ACTIONS_SHOWING
     })
     public @interface SystemUiStateFlags {}
 
@@ -119,6 +122,7 @@ public class QuickStepContract {
         str.add((flags & SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING_OCCLUDED) != 0
                 ? "keygrd_occluded" : "");
         str.add((flags & SYSUI_STATE_BOUNCER_SHOWING) != 0 ? "bouncer_visible" : "");
+        str.add((flags & SYSUI_STATE_GLOBAL_ACTIONS_SHOWING) != 0 ? "global_actions" : "");
         str.add((flags & SYSUI_STATE_A11Y_BUTTON_CLICKABLE) != 0 ? "a11y_click" : "");
         str.add((flags & SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE) != 0 ? "a11y_long_click" : "");
         str.add((flags & SYSUI_STATE_TRACING_ENABLED) != 0 ? "tracing" : "");
@@ -192,8 +196,9 @@ public class QuickStepContract {
      * disabled.
      */
     public static boolean isBackGestureDisabled(int sysuiStateFlags) {
-        // Always allow when the bouncer is showing (even on top of the keyguard)
-        if ((sysuiStateFlags & SYSUI_STATE_BOUNCER_SHOWING) != 0) {
+        // Always allow when the bouncer/global actions is showing (even on top of the keyguard)
+        if ((sysuiStateFlags & SYSUI_STATE_BOUNCER_SHOWING) != 0
+                || (sysuiStateFlags & SYSUI_STATE_GLOBAL_ACTIONS_SHOWING) != 0) {
             return false;
         }
         // Disable when in immersive, or the notifications are interactive
