@@ -1121,6 +1121,7 @@ public abstract class WebSettings {
      * @deprecated The Application Cache API is deprecated and this method will
      *             become a no-op on all Android versions once support is
      *             removed in Chromium. Consider using Service Workers instead.
+     *             See https://web.dev/appcache-removal/ for more information.
      */
     public abstract void setAppCacheEnabled(boolean flag);
 
@@ -1136,6 +1137,7 @@ public abstract class WebSettings {
      * @deprecated The Application Cache API is deprecated and this method will
      *             become a no-op on all Android versions once support is
      *             removed in Chromium. Consider using Service Workers instead.
+     *             See https://web.dev/appcache-removal/ for more information.
      */
     public abstract void setAppCachePath(String appCachePath);
 
