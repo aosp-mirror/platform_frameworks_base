@@ -30,6 +30,7 @@ import org.junit.Before;
  */
 public abstract class OneHandedTestCase extends SysuiTestCase {
     static boolean sOrigEnabled;
+    static boolean sOrigTapsAppToExitEnabled;
     static int sOrigTimeout;
 
     @Before
@@ -38,10 +39,14 @@ public abstract class OneHandedTestCase extends SysuiTestCase {
                 getContext().getContentResolver());
         sOrigTimeout = OneHandedSettingsUtil.getSettingsOneHandedModeTimeout(
                 getContext().getContentResolver());
+        sOrigTapsAppToExitEnabled = OneHandedSettingsUtil.getSettingsTapsAppToExit(
+                getContext().getContentResolver());
         Settings.Secure.putInt(getContext().getContentResolver(),
                 Settings.Secure.ONE_HANDED_MODE_ENABLED, 1);
         Settings.Secure.putInt(getContext().getContentResolver(),
                 Settings.Secure.ONE_HANDED_MODE_TIMEOUT, ONE_HANDED_TIMEOUT_MEDIUM_IN_SECONDS);
+        Settings.Secure.putInt(getContext().getContentResolver(),
+                Settings.Secure.TAPS_APP_TO_EXIT, 1);
     }
 
     @After
@@ -50,6 +55,8 @@ public abstract class OneHandedTestCase extends SysuiTestCase {
                 Settings.Secure.ONE_HANDED_MODE_ENABLED, sOrigEnabled ? 1 : 0);
         Settings.Secure.putInt(mContext.getContentResolver(),
                 Settings.Secure.ONE_HANDED_MODE_TIMEOUT, sOrigTimeout);
+        Settings.Secure.putInt(mContext.getContentResolver(),
+                Settings.Secure.TAPS_APP_TO_EXIT, sOrigTapsAppToExitEnabled ? 1 : 0);
     }
 }
 
