@@ -20,8 +20,11 @@ import static com.android.systemui.statusbar.NotificationEntryHelper.modifyRanki
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
@@ -177,8 +180,7 @@ public class BubbleDataTest extends SysuiTestCase {
         mBubbleData.setListener(mListener);
 
         // Test
-        mBubbleData.notificationEntryRemoved(
-                mEntryA1.getKey(), BubbleController.DISMISS_USER_GESTURE);
+        mBubbleData.notificationEntryRemoved(mEntryA1, BubbleController.DISMISS_USER_GESTURE);
 
         // Verify
         verifyUpdateReceived();
@@ -295,14 +297,12 @@ public class BubbleDataTest extends SysuiTestCase {
         mBubbleData.setListener(mListener);
 
         mBubbleData.setMaxOverflowBubbles(1);
-        mBubbleData.notificationEntryRemoved(
-                mEntryA1.getKey(), BubbleController.DISMISS_USER_GESTURE);
+        mBubbleData.notificationEntryRemoved(mEntryA1, BubbleController.DISMISS_USER_GESTURE);
         verifyUpdateReceived();
         assertOverflowChangedTo(ImmutableList.of(mBubbleA1));
 
         // Overflow max of 1 is reached; A1 is oldest, so it gets removed
-        mBubbleData.notificationEntryRemoved(
-                mEntryA2.getKey(), BubbleController.DISMISS_USER_GESTURE);
+        mBubbleData.notificationEntryRemoved(mEntryA2, BubbleController.DISMISS_USER_GESTURE);
         verifyUpdateReceived();
         assertOverflowChangedTo(ImmutableList.of(mBubbleA2));
     }
@@ -449,8 +449,7 @@ public class BubbleDataTest extends SysuiTestCase {
         mBubbleData.setListener(mListener);
 
         // Test
-        mBubbleData.notificationEntryRemoved(
-                mEntryA2.getKey(), BubbleController.DISMISS_USER_GESTURE);
+        mBubbleData.notificationEntryRemoved(mEntryA2, BubbleController.DISMISS_USER_GESTURE);
         verifyUpdateReceived();
         assertOrderChangedTo(mBubbleB2, mBubbleB1, mBubbleA1);
     }
@@ -470,8 +469,7 @@ public class BubbleDataTest extends SysuiTestCase {
         mBubbleData.setListener(mListener);
 
         // Test
-        mBubbleData.notificationEntryRemoved(
-                mEntryB1.getKey(), BubbleController.DISMISS_USER_GESTURE);
+        mBubbleData.notificationEntryRemoved(mEntryB1, BubbleController.DISMISS_USER_GESTURE);
         verifyUpdateReceived();
         assertOrderNotChanged();
     }
@@ -491,8 +489,7 @@ public class BubbleDataTest extends SysuiTestCase {
         mBubbleData.setListener(mListener);
 
         // Test
-        mBubbleData.notificationEntryRemoved(
-                mEntryA1.getKey(), BubbleController.DISMISS_NOTIF_CANCEL);
+        mBubbleData.notificationEntryRemoved(mEntryA1, BubbleController.DISMISS_NOTIF_CANCEL);
         verifyUpdateReceived();
         assertOrderChangedTo(mBubbleB2, mBubbleB1, mBubbleA2);
     }
@@ -513,14 +510,12 @@ public class BubbleDataTest extends SysuiTestCase {
         mBubbleData.setListener(mListener);
 
         // Test
-        mBubbleData.notificationEntryRemoved(
-                mEntryA1.getKey(), BubbleController.DISMISS_NOTIF_CANCEL);
+        mBubbleData.notificationEntryRemoved(mEntryA1, BubbleController.DISMISS_NOTIF_CANCEL);
         verifyUpdateReceived();
         assertOverflowChangedTo(ImmutableList.of(mBubbleA2));
 
         // Test
-        mBubbleData.notificationEntryRemoved(
-                mEntryA2.getKey(), BubbleController.DISMISS_GROUP_CANCELLED);
+        mBubbleData.notificationEntryRemoved(mEntryA2, BubbleController.DISMISS_GROUP_CANCELLED);
         verifyUpdateReceived();
         assertOverflowChangedTo(ImmutableList.of());
     }
@@ -539,8 +534,7 @@ public class BubbleDataTest extends SysuiTestCase {
         mBubbleData.setListener(mListener);
 
         // Test
-        mBubbleData.notificationEntryRemoved(
-                mEntryA2.getKey(), BubbleController.DISMISS_NOTIF_CANCEL);
+        mBubbleData.notificationEntryRemoved(mEntryA2, BubbleController.DISMISS_NOTIF_CANCEL);
         verifyUpdateReceived();
         assertSelectionChangedTo(mBubbleB2);
     }
@@ -631,8 +625,7 @@ public class BubbleDataTest extends SysuiTestCase {
         mBubbleData.setListener(mListener);
 
         // Test
-        mBubbleData.notificationEntryRemoved(
-                mEntryA1.getKey(), BubbleController.DISMISS_USER_GESTURE);
+        mBubbleData.notificationEntryRemoved(mEntryA1, BubbleController.DISMISS_USER_GESTURE);
 
         // Verify the selection was cleared.
         verifyUpdateReceived();
@@ -786,8 +779,7 @@ public class BubbleDataTest extends SysuiTestCase {
         mBubbleData.setListener(mListener);
 
         // Test
-        mBubbleData.notificationEntryRemoved(
-                mEntryB2.getKey(), BubbleController.DISMISS_USER_GESTURE);
+        mBubbleData.notificationEntryRemoved(mEntryB2, BubbleController.DISMISS_USER_GESTURE);
         verifyUpdateReceived();
         assertOrderChangedTo(mBubbleB1, mBubbleA2, mBubbleA1);
     }
@@ -812,13 +804,11 @@ public class BubbleDataTest extends SysuiTestCase {
         mBubbleData.setListener(mListener);
 
         // Test
-        mBubbleData.notificationEntryRemoved(
-                mEntryA2.getKey(), BubbleController.DISMISS_USER_GESTURE);
+        mBubbleData.notificationEntryRemoved(mEntryA2, BubbleController.DISMISS_USER_GESTURE);
         verifyUpdateReceived();
         assertSelectionChangedTo(mBubbleA1);
 
-        mBubbleData.notificationEntryRemoved(
-                mEntryA1.getKey(), BubbleController.DISMISS_USER_GESTURE);
+        mBubbleData.notificationEntryRemoved(mEntryA1, BubbleController.DISMISS_USER_GESTURE);
         verifyUpdateReceived();
         assertSelectionChangedTo(mBubbleB1);
     }
@@ -933,8 +923,7 @@ public class BubbleDataTest extends SysuiTestCase {
         mBubbleData.setListener(mListener);
 
         // Test
-        mBubbleData.notificationEntryRemoved(
-                mEntryA1.getKey(), BubbleController.DISMISS_USER_GESTURE);
+        mBubbleData.notificationEntryRemoved(mEntryA1, BubbleController.DISMISS_USER_GESTURE);
         verifyUpdateReceived();
         assertExpandedChangedTo(false);
     }
