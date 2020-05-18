@@ -130,8 +130,9 @@ public class SweepGradient extends Shader {
         this(cx, cy, new long[] {color0, color1}, null);
     }
 
+    /** @hide */
     @Override
-    long createNativeInstance(long nativeMatrix) {
+    protected long createNativeInstance(long nativeMatrix) {
         return nativeCreate(nativeMatrix, mCx, mCy, mColorLongs, mPositions,
                 colorSpace().getNativeInstance());
     }

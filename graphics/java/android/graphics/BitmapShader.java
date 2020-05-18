@@ -17,7 +17,6 @@
 package android.graphics;
 
 import android.annotation.NonNull;
-import android.compat.annotation.UnsupportedAppUsage;
 
 /**
  * Shader used to draw a bitmap as a texture. The bitmap can be repeated or
@@ -26,15 +25,10 @@ import android.compat.annotation.UnsupportedAppUsage;
 public class BitmapShader extends Shader {
     /**
      * Prevent garbage collection.
-     * @hide
      */
-    @SuppressWarnings({"FieldCanBeLocal", "UnusedDeclaration"})
-    @UnsupportedAppUsage
-    public Bitmap mBitmap;
+    /*package*/ Bitmap mBitmap;
 
-    @UnsupportedAppUsage
     private int mTileX;
-    @UnsupportedAppUsage
     private int mTileY;
 
     /**
@@ -52,16 +46,14 @@ public class BitmapShader extends Shader {
         if (bitmap == null) {
             throw new IllegalArgumentException("Bitmap must be non-null");
         }
-        if (bitmap == mBitmap && tileX == mTileX && tileY == mTileY) {
-            return;
-        }
         mBitmap = bitmap;
         mTileX = tileX;
         mTileY = tileY;
     }
 
+    /** @hide */
     @Override
-    long createNativeInstance(long nativeMatrix) {
+    protected long createNativeInstance(long nativeMatrix) {
         return nativeCreate(nativeMatrix, mBitmap.getNativeInstance(), mTileX, mTileY);
     }
 
