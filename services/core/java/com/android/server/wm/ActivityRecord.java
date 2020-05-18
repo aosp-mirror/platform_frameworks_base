@@ -6684,6 +6684,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     @Override
+    void getAnimationPosition(Point outPosition) {
+        // Always animate from zero because if the activity doesn't fill the task, the letterbox
+        // will fill the remaining area that should be included in the animation.
+        outPosition.set(0, 0);
+    }
+
+    @Override
     public void onConfigurationChanged(Configuration newParentConfig) {
         if (mCompatDisplayInsets != null) {
             Configuration overrideConfig = getRequestedOverrideConfiguration();
