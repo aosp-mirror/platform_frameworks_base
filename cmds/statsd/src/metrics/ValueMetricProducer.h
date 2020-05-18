@@ -90,7 +90,7 @@ public:
     };
 
     void onStateChanged(int64_t eventTimeNs, int32_t atomId, const HashableDimensionKey& primaryKey,
-                        int oldState, int newState) override;
+                        const FieldValue& oldState, const FieldValue& newState) override;
 
 protected:
     void onMatchedLogEventInternalLocked(
