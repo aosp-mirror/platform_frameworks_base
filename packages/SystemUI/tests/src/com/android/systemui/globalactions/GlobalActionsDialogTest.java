@@ -53,6 +53,7 @@ import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.controls.controller.ControlsController;
 import com.android.systemui.controls.management.ControlsListingController;
 import com.android.systemui.controls.ui.ControlsUiController;
+import com.android.systemui.model.SysUiState;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.GlobalActions;
 import com.android.systemui.statusbar.BlurUtils;
@@ -107,6 +108,7 @@ public class GlobalActionsDialogTest extends SysuiTestCase {
     @Mock private UiEventLogger mUiEventLogger;
     @Mock private RingerModeTracker mRingerModeTracker;
     @Mock private RingerModeLiveData mRingerModeLiveData;
+    @Mock private SysUiState mSysUiState;
     @Mock private Handler mHandler;
 
     private TestableLooper mTestableLooper;
@@ -150,6 +152,7 @@ public class GlobalActionsDialogTest extends SysuiTestCase {
                 mControlsController,
                 mUiEventLogger,
                 mRingerModeTracker,
+                mSysUiState,
                 mHandler
         );
         mGlobalActionsDialog.setZeroDialogPressDelayForTesting();
