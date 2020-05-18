@@ -79,6 +79,7 @@ public class ChooserListAdapter extends ResolverListAdapter {
 
     private static final int MAX_SUGGESTED_APP_TARGETS = 4;
     private static final int MAX_CHOOSER_TARGETS_PER_APP = 2;
+    private static final int MAX_SERVICE_TARGET_APP = 8;
 
     static final int MAX_SERVICE_TARGETS = 8;
 
@@ -98,6 +99,7 @@ public class ChooserListAdapter extends ResolverListAdapter {
     private ChooserTargetInfo
             mPlaceHolderTargetInfo = new ChooserActivity.PlaceHolderTargetInfo();
     private int mValidServiceTargetsNum = 0;
+    private int mAvailableServiceTargetsNum = 0;
     private final Map<ComponentName, Pair<List<ChooserTargetInfo>, Integer>>
             mParkingDirectShareTargets = new HashMap<>();
     private final Map<ComponentName, Map<String, Integer>> mChooserTargetScores = new HashMap<>();
@@ -603,7 +605,13 @@ public class ChooserListAdapter extends ResolverListAdapter {
             Pair<List<ChooserTargetInfo>, Integer> parkingTargetInfoPair =
                     mParkingDirectShareTargets.getOrDefault(origComponentName,
                             new Pair<>(new ArrayList<>(), 0));
-            parkingTargetInfoPair.first.addAll(parkingTargetInfos);
+            for (ChooserTargetInfo target : parkingTargetInfos) {
+                if (!checkDuplicateTarget(target, parkingTargetInfoPair.first)
+                        && !checkDuplicateTarget(target, mServiceTargets)) {
+                    parkingTargetInfoPair.first.add(target);
+                    mAvailableServiceTargetsNum++;
+                }
+            }
             mParkingDirectShareTargets.put(origComponentName, parkingTargetInfoPair);
             rankTargetsWithinComponent(origComponentName);
             if (isShortcutResult) {
@@ -648,7 +656,7 @@ public class ChooserListAdapter extends ResolverListAdapter {
             List<ChooserTargetInfo> parkingTargets = parkingTargetsItem.first;
             int insertedNum = parkingTargetsItem.second;
             while (insertedNum < quota && !parkingTargets.isEmpty()) {
-                if (!checkDuplicateTarget(parkingTargets.get(0))) {
+                if (!checkDuplicateTarget(parkingTargets.get(0), mServiceTargets)) {
                     mServiceTargets.add(mValidServiceTargetsNum, parkingTargets.get(0));
                     mValidServiceTargetsNum++;
                     insertedNum++;
@@ -662,9 +670,6 @@ public class ChooserListAdapter extends ResolverListAdapter {
                         + " score=" + score
                         + " totalScore=" + totalScore
                         + " quota=" + quota);
-            }
-            if (mShortcutComponents.contains(component)) {
-                mNumShortcutResults += insertedNum - parkingTargetsItem.second;
             }
             mParkingDirectShareTargets.put(component, new Pair<>(parkingTargets, insertedNum));
         }
@@ -681,19 +686,15 @@ public class ChooserListAdapter extends ResolverListAdapter {
             return;
         }
         Log.i(TAG, " fillAllServiceTargets");
-        int maxRankedTargets = mChooserListCommunicator.getMaxRankedTargets();
-        List<ComponentName> topComponentNames = getTopComponentNames(maxRankedTargets);
+        List<ComponentName> topComponentNames = getTopComponentNames(MAX_SERVICE_TARGET_APP);
         // Append all remaining targets of top recommended components into direct share row.
         for (ComponentName component : topComponentNames) {
             if (!mParkingDirectShareTargets.containsKey(component)) {
                 continue;
             }
             mParkingDirectShareTargets.get(component).first.stream()
-                    .filter(target -> !checkDuplicateTarget(target))
+                    .filter(target -> !checkDuplicateTarget(target, mServiceTargets))
                     .forEach(target -> {
-                        if (mShortcutComponents.contains(component)) {
-                            mNumShortcutResults++;
-                        }
                         mServiceTargets.add(mValidServiceTargetsNum, target);
                         mValidServiceTargetsNum++;
                     });
@@ -706,28 +707,34 @@ public class ChooserListAdapter extends ResolverListAdapter {
                 .map(pair -> pair.first)
                 .forEach(targets -> {
                     for (ChooserTargetInfo target : targets) {
-                        if (!checkDuplicateTarget(target)) {
+                        if (!checkDuplicateTarget(target, mServiceTargets)) {
                             mServiceTargets.add(mValidServiceTargetsNum, target);
                             mValidServiceTargetsNum++;
-                            mNumShortcutResults++;
                         }
                     }
                 });
         mParkingDirectShareTargets.clear();
     }
 
-    private boolean checkDuplicateTarget(ChooserTargetInfo chooserTargetInfo) {
+    private boolean checkDuplicateTarget(ChooserTargetInfo target,
+            List<ChooserTargetInfo> destination) {
         // Check for duplicates and abort if found
-        for (ChooserTargetInfo otherTargetInfo : mServiceTargets) {
-            if (chooserTargetInfo.isSimilar(otherTargetInfo)) {
+        for (ChooserTargetInfo otherTargetInfo : destination) {
+            if (target.isSimilar(otherTargetInfo)) {
                 return true;
             }
         }
         return false;
     }
 
-    int getNumShortcutResults() {
-        return mNumShortcutResults;
+    /**
+     * The return number have to exceed a minimum limit to make direct share area expandable. When
+     * append direct share targets is enabled, return count of all available targets parking in the
+     * memory; otherwise, it is shortcuts count which will help reduce the amount of visible
+     * shuffling due to older-style direct share targets.
+     */
+    int getNumServiceTargetsForExpand() {
+        return mAppendDirectShareEnabled ? mAvailableServiceTargetsNum : mNumShortcutResults;
     }
 
     /**
