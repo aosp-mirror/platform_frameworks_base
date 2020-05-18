@@ -429,7 +429,9 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
             }
             int launchResult = intent.sendAndReturnResult(mContext, 0, fillInIntent, null,
                     null, null, getActivityOptions(adapter));
-            mActivityLaunchAnimator.setLaunchResult(launchResult, isActivityIntent);
+            mMainThreadHandler.post(() -> {
+                mActivityLaunchAnimator.setLaunchResult(launchResult, isActivityIntent);
+            });
         } catch (RemoteException | PendingIntent.CanceledException e) {
             // the stack trace isn't very helpful here.
             // Just log the exception message.
@@ -449,10 +451,11 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
                                 mActivityLaunchAnimator.getLaunchAnimation(
                                         row, mStatusBar.isOccluded())),
                                 new UserHandle(UserHandle.getUserId(appUid)));
-                mActivityLaunchAnimator.setLaunchResult(launchResult, true /* isActivityIntent */);
 
                 // Putting it back on the main thread, since we're touching views
                 mMainThreadHandler.post(() -> {
+                    mActivityLaunchAnimator.setLaunchResult(launchResult,
+                            true /* isActivityIntent */);
                     removeHUN(row);
                 });
                 if (shouldCollapse()) {

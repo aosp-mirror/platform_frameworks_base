@@ -93,6 +93,7 @@ public class NotificationShadeWindowViewController {
     private PhoneStatusBarView mStatusBarView;
     private PhoneStatusBarTransitions mBarTransitions;
     private StatusBar mService;
+    private NotificationShadeWindowController mNotificationShadeWindowController;
     private DragDownHelper mDragDownHelper;
     private boolean mDoubleTapEnabled;
     private boolean mSingleTapEnabled;
@@ -429,11 +430,19 @@ public class NotificationShadeWindowViewController {
     }
 
     public void setExpandAnimationPending(boolean pending) {
-        mExpandAnimationPending = pending;
+        if (mExpandAnimationPending != pending) {
+            mExpandAnimationPending = pending;
+            mNotificationShadeWindowController
+                    .setLaunchingActivity(mExpandAnimationPending | mExpandAnimationRunning);
+        }
     }
 
     public void setExpandAnimationRunning(boolean running) {
-        mExpandAnimationRunning = running;
+        if (mExpandAnimationRunning != running) {
+            mExpandAnimationRunning = running;
+            mNotificationShadeWindowController
+                    .setLaunchingActivity(mExpandAnimationPending | mExpandAnimationRunning);
+        }
     }
 
     public void cancelExpandHelper() {
@@ -456,8 +465,9 @@ public class NotificationShadeWindowViewController {
         }
     }
 
-    public void setService(StatusBar statusBar) {
+    public void setService(StatusBar statusBar, NotificationShadeWindowController controller) {
         mService = statusBar;
+        mNotificationShadeWindowController = controller;
     }
 
     @VisibleForTesting
