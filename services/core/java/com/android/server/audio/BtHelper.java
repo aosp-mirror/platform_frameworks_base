@@ -38,6 +38,7 @@ import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -128,6 +129,26 @@ public class BtHelper {
                 return "SCO_MODE_VR";
             default:
                 return "SCO_MODE_(" + scoAudioMode + ")";
+        }
+    }
+
+    /**
+     * Returns a string representation of the scoAudioState.
+     */
+    public static String scoAudioStateToString(int scoAudioState) {
+        switch (scoAudioState) {
+            case SCO_STATE_INACTIVE:
+                return "SCO_STATE_INACTIVE";
+            case SCO_STATE_ACTIVATE_REQ:
+                return "SCO_STATE_ACTIVATE_REQ";
+            case SCO_STATE_ACTIVE_EXTERNAL:
+                return "SCO_STATE_ACTIVE_EXTERNAL";
+            case SCO_STATE_ACTIVE_INTERNAL:
+                return "SCO_STATE_ACTIVE_INTERNAL";
+            case SCO_STATE_DEACTIVATING:
+                return "SCO_STATE_DEACTIVATING";
+            default:
+                return "SCO_STATE_(" + scoAudioState + ")";
         }
     }
 
@@ -1007,4 +1028,20 @@ public class BtHelper {
                 return "ENCODING_BT_CODEC_TYPE(" + btCodecType + ")";
         }
     }
+
+    //------------------------------------------------------------
+    /*package*/ void dump(PrintWriter pw, String prefix) {
+        pw.println("\n" + prefix + "mBluetoothHeadset: " + mBluetoothHeadset);
+        pw.println(prefix + "mBluetoothHeadsetDevice: " + mBluetoothHeadsetDevice);
+        pw.println(prefix + "mScoAudioState: " + scoAudioStateToString(mScoAudioState));
+        pw.println(prefix + "mScoAudioMode: " + scoAudioModeToString(mScoAudioMode));
+        pw.println(prefix + "Sco clients:");
+        mScoClients.forEach((cl) -> {
+            pw.println("  " + prefix + "pid: " + cl.getPid() + " cb: " + cl.getBinder()); });
+
+        pw.println("\n" + prefix + "mHearingAid: " + mHearingAid);
+        pw.println(prefix + "mA2dp: " + mA2dp);
+        pw.println(prefix + "mAvrcpAbsVolSupported: " + mAvrcpAbsVolSupported);
+    }
+
 }
