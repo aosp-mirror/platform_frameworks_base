@@ -20,11 +20,18 @@ import static org.testng.Assert.assertThrows;
 
 import android.content.ContentResolver;
 import android.content.Context;
+import android.media.IMediaTranscodingService;
+import android.media.ITranscodingClient;
+import android.media.ITranscodingClientCallback;
 import android.media.MediaFormat;
 import android.media.MediaTranscodeManager;
 import android.media.MediaTranscodeManager.TranscodingJob;
 import android.media.MediaTranscodeManager.TranscodingRequest;
+import android.media.TranscodingJobParcel;
+import android.media.TranscodingRequestParcel;
+import android.media.TranscodingResultParcel;
 import android.net.Uri;
+import android.os.RemoteException;
 import android.test.ActivityInstrumentationTestCase2;
 import android.util.Log;
 
@@ -34,10 +41,16 @@ import com.android.mediaframeworktest.R;
 import org.junit.Test;
 
 import java.io.File;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /*
  * Functional tests for MediaTranscodeManager in the media framework.
@@ -63,11 +76,123 @@ public class MediaTranscodeManagerTest
     private Uri mSourceHEVCVideoUri = null;
     private Uri mDestinationUri = null;
 
+    // Use mock transcoding service for testing the api.
+    private MockTranscodingService mTranscodingService = null;
+
     // Setting for transcoding to H.264.
     private static final String MIME_TYPE = MediaFormat.MIMETYPE_VIDEO_AVC;
     private static final int BIT_RATE = 2000000;            // 2Mbps
     private static final int WIDTH = 1920;
     private static final int HEIGHT = 1080;
+
+    // A mock transcoding service that will take constant 300ms to process each transcoding job.
+    // Instead of doing real transcoding, it will return the dst uri directly.
+    class MockTranscodingService extends IMediaTranscodingService.Stub {
+        private final ScheduledExecutorService mJobScheduler = Executors.newScheduledThreadPool(1);
+        private int mNumOfClients = 0;
+        private AtomicInteger mJobId = new AtomicInteger();
+
+        // A runnable that will process the job.
+        private class ProcessingJobRunnable implements Runnable {
+            private TranscodingJobParcel mJob;
+            private ITranscodingClientCallback mCallback;
+            private ConcurrentMap<Integer, ScheduledFuture<?>> mJobMap;
+
+            ProcessingJobRunnable(ITranscodingClientCallback callback,
+                    TranscodingJobParcel job,
+                    ConcurrentMap<Integer, ScheduledFuture<?>> jobMap) {
+                mJob = job;
+                mCallback = callback;
+                mJobMap = jobMap;
+            }
+
+            @Override
+            public void run() {
+                Log.d(TAG, "Start to process job " + mJob.jobId);
+                TranscodingResultParcel result = new TranscodingResultParcel();
+                try {
+                    mCallback.onTranscodingFinished(mJob.jobId, result);
+                    // Removes the job from job map.
+                    mJobMap.remove(mJob.jobId);
+                } catch (RemoteException re) {
+                    Log.e(TAG, "Failed to callback to client");
+                }
+            }
+        }
+
+        @Override
+        public ITranscodingClient registerClient(ITranscodingClientCallback callback,
+                String clientName, String opPackageName, int clientUid, int clientPid)
+                throws RemoteException {
+            Log.d(TAG, "MockTranscodingService creates one client");
+
+            ITranscodingClient client = new ITranscodingClient.Stub() {
+                private final ConcurrentMap<Integer, ScheduledFuture<?>> mPendingTranscodingJobs =
+                        new ConcurrentHashMap<Integer, ScheduledFuture<?>>();
+
+                @Override
+                public boolean submitRequest(TranscodingRequestParcel inRequest,
+                        TranscodingJobParcel outjob) {
+                    Log.d(TAG, "Mock client gets submitRequest");
+                    try {
+                        outjob.request = inRequest;
+                        outjob.jobId = mJobId.getAndIncrement();
+                        Log.d(TAG, "Generate new job " + outjob.jobId);
+
+                        // Schedules the job to run after inRequest.processingDelayMs.
+                        ScheduledFuture<?> transcodingFuture = mJobScheduler.schedule(
+                                new ProcessingJobRunnable(callback, outjob,
+                                        mPendingTranscodingJobs),
+                                inRequest.testConfig == null ? 0
+                                        : inRequest.testConfig.processingDelayMs,
+                                TimeUnit.MILLISECONDS);
+                        mPendingTranscodingJobs.put(outjob.jobId, transcodingFuture);
+                    } catch (RejectedExecutionException e) {
+                        Log.e(TAG, "Failed to schedule transcoding job: " + e);
+                        return false;
+                    }
+
+                    return true;
+                }
+
+                @Override
+                public boolean cancelJob(int jobId) throws RemoteException {
+                    Log.d(TAG, "Mock client gets cancelJob " + jobId);
+                    // Cancels the job is still in the mPendingTranscodingJobs.
+                    if (mPendingTranscodingJobs.containsKey(jobId)) {
+                        // Cancel the future task for transcoding.
+                        mPendingTranscodingJobs.get(jobId).cancel(true);
+
+                        // Remove the job from the mPendingTranscodingJobs.
+                        mPendingTranscodingJobs.remove(jobId);
+                        return true;
+                    }
+                    return false;
+                }
+
+                @Override
+                public boolean getJobWithId(int jobId, TranscodingJobParcel job)
+                        throws RemoteException {
+                    // This will be implemented this if needed in the test.
+                    return true;
+                }
+
+                @Override
+                public void unregister() throws RemoteException {
+                    Log.d(TAG, "Mock client gets unregister");
+                    // This will be implemented this if needed in the test.
+                    mNumOfClients--;
+                }
+            };
+            mNumOfClients++;
+            return client;
+        }
+
+        @Override
+        public int getNumOfClients() throws RemoteException {
+            return mNumOfClients;
+        }
+    }
 
     public MediaTranscodeManagerTest() {
         super("com.android.MediaTranscodeManagerTest", MediaFrameworkTest.class);
@@ -89,6 +214,12 @@ public class MediaTranscodeManagerTest
         return Uri.fromFile(outFile);
     }
 
+    // Generates a invalid uri which will let the mock service return transcoding failure.
+    private static Uri generateInvalidTranscodingUri(Context context) {
+        File outFile = new File(context.getExternalCacheDir(), "InvalidUri.mp4");
+        return Uri.fromFile(outFile);
+    }
+
     /**
      * Creates a MediaFormat with the basic set of values.
      */
@@ -102,8 +233,9 @@ public class MediaTranscodeManagerTest
     public void setUp() throws Exception {
         Log.d(TAG, "setUp");
         super.setUp();
+        mTranscodingService = new MockTranscodingService();
         mContext = getInstrumentation().getContext();
-        mMediaTranscodeManager = MediaTranscodeManager.getInstance(mContext);
+        mMediaTranscodeManager = MediaTranscodeManager.getInstance(mContext, mTranscodingService);
         assertNotNull(mMediaTranscodeManager);
 
         // Setup source HEVC file uri.
@@ -217,7 +349,7 @@ public class MediaTranscodeManagerTest
     }
 
     @Test
-    public void testNormalTranscoding() throws InterruptedException {
+    public void testTranscodingOneVideo() throws Exception {
         Log.d(TAG, "Starting: testMediaTranscodeManager");
 
         Semaphore transcodeCompleteSemaphore = new Semaphore(0);
@@ -228,19 +360,16 @@ public class MediaTranscodeManagerTest
                         .setType(MediaTranscodeManager.TRANSCODING_TYPE_VIDEO)
                         .setPriority(MediaTranscodeManager.PRIORITY_REALTIME)
                         .setVideoTrackFormat(createMediaFormat())
+                        .setProcessingDelayMs(300 /* delayMs */)
                         .build();
         Executor listenerExecutor = Executors.newSingleThreadExecutor();
 
-        TranscodingJob job;
-        job = mMediaTranscodeManager.enqueueTranscodingRequest(request, listenerExecutor,
+        TranscodingJob job = mMediaTranscodeManager.enqueueRequest(request, listenerExecutor,
                 transcodingJob -> {
-                    Log.d(TAG, "Transcoding completed with result: " + transcodingJob.getResult());
+                    Log.d(TAG, "Transcoding completed with result: ");
                     transcodeCompleteSemaphore.release();
                 });
         assertNotNull(job);
-
-        job.setOnProgressChangedListener(
-                listenerExecutor, progress -> Log.d(TAG, "Progress: " + progress));
 
         if (job != null) {
             Log.d(TAG, "testMediaTranscodeManager - Waiting for transcode to complete.");
@@ -249,4 +378,5 @@ public class MediaTranscodeManagerTest
             assertTrue("Transcode failed to complete in time.", finishedOnTime);
         }
     }
+
 }
