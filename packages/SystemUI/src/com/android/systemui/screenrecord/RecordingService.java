@@ -156,7 +156,7 @@ public class RecordingService extends Service implements MediaRecorder.OnInfoLis
                 sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
 
                 // Remove notification
-                notificationManager.cancel(NOTIFICATION_RECORDING_ID);
+                notificationManager.cancel(NOTIFICATION_VIEW_ID);
 
                 startActivity(Intent.createChooser(shareIntent, shareLabel)
                         .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
@@ -175,7 +175,7 @@ public class RecordingService extends Service implements MediaRecorder.OnInfoLis
                         Toast.LENGTH_LONG).show();
 
                 // Remove notification
-                notificationManager.cancel(NOTIFICATION_RECORDING_ID);
+                notificationManager.cancel(NOTIFICATION_VIEW_ID);
                 Log.d(TAG, "Deleted recording " + uri);
                 break;
         }
