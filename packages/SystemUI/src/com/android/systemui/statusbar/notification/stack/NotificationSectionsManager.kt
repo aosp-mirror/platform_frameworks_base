@@ -360,7 +360,6 @@ class NotificationSectionsManager @Inject internal constructor(
                                 }
                             }
                         }
-                        else -> throw IllegalStateException("Cannot find section bucket for view")
                     }
 
                     prev = child
