@@ -2182,7 +2182,8 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         final int appStackClipMode = getDisplayContent().mAppTransition.getAppStackClipMode();
 
         // Separate position and size for use in animators.
-        mTmpRect.set(getAnimationBounds(appStackClipMode));
+        final Rect screenBounds = getAnimationBounds(appStackClipMode);
+        mTmpRect.set(screenBounds);
         getAnimationPosition(mTmpPoint);
         if (!sHierarchicalAnimations) {
             // Non-hierarchical animation uses position in global coordinates.
@@ -2201,7 +2202,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             localBounds.offsetTo(mTmpPoint.x, mTmpPoint.y);
             final RemoteAnimationController.RemoteAnimationRecord adapters =
                     controller.createRemoteAnimationRecord(this, mTmpPoint, localBounds,
-                            mTmpRect, (isChanging ? mSurfaceFreezer.mFreezeBounds : null));
+                            screenBounds, (isChanging ? mSurfaceFreezer.mFreezeBounds : null));
             resultAdapters = new Pair<>(adapters.mAdapter, adapters.mThumbnailAdapter);
         } else if (isChanging) {
             final float durationScale = mWmService.getTransitionAnimationScaleLocked();
