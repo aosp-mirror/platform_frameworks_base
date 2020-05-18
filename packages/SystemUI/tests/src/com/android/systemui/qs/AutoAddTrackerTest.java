@@ -21,6 +21,7 @@ import static com.android.systemui.statusbar.phone.AutoTileManager.WORK;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import android.os.UserHandle;
 import android.provider.Settings.Secure;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
@@ -40,6 +41,8 @@ import org.junit.runner.RunWith;
 @SmallTest
 public class AutoAddTrackerTest extends SysuiTestCase {
 
+    private static final int USER = 0;
+
     private AutoAddTracker mAutoTracker;
 
     @Before
@@ -51,7 +54,8 @@ public class AutoAddTrackerTest extends SysuiTestCase {
     public void testMigration() {
         Prefs.putBoolean(mContext, Key.QS_DATA_SAVER_ADDED, true);
         Prefs.putBoolean(mContext, Key.QS_WORK_ADDED, true);
-        mAutoTracker = new AutoAddTracker(mContext);
+        mAutoTracker = new AutoAddTracker(mContext, USER);
+        mAutoTracker.initialize();
 
         assertTrue(mAutoTracker.isAdded(SAVER));
         assertTrue(mAutoTracker.isAdded(WORK));
@@ -68,7 +72,8 @@ public class AutoAddTrackerTest extends SysuiTestCase {
 
     @Test
     public void testChangeFromBackup() {
-        mAutoTracker = new AutoAddTracker(mContext);
+        mAutoTracker = new AutoAddTracker(mContext, USER);
+        mAutoTracker.initialize();
 
         assertFalse(mAutoTracker.isAdded(SAVER));
 
@@ -82,7 +87,8 @@ public class AutoAddTrackerTest extends SysuiTestCase {
 
     @Test
     public void testSetAdded() {
-        mAutoTracker = new AutoAddTracker(mContext);
+        mAutoTracker = new AutoAddTracker(mContext, USER);
+        mAutoTracker.initialize();
 
         assertFalse(mAutoTracker.isAdded(SAVER));
         mAutoTracker.setTileAdded(SAVER);
@@ -94,16 +100,38 @@ public class AutoAddTrackerTest extends SysuiTestCase {
 
     @Test
     public void testPersist() {
-        mAutoTracker = new AutoAddTracker(mContext);
+        mAutoTracker = new AutoAddTracker(mContext, USER);
+        mAutoTracker.initialize();
 
         assertFalse(mAutoTracker.isAdded(SAVER));
         mAutoTracker.setTileAdded(SAVER);
 
         mAutoTracker.destroy();
-        mAutoTracker = new AutoAddTracker(mContext);
+        mAutoTracker = new AutoAddTracker(mContext, USER);
 
         assertTrue(mAutoTracker.isAdded(SAVER));
 
         mAutoTracker.destroy();
+    }
+
+    @Test
+    public void testIndependentUsers() {
+        mAutoTracker = new AutoAddTracker(mContext, USER);
+        mAutoTracker.initialize();
+        mAutoTracker.setTileAdded(SAVER);
+
+        mAutoTracker = new AutoAddTracker(mContext, USER + 1);
+        assertFalse(mAutoTracker.isAdded(SAVER));
+    }
+
+    @Test
+    public void testChangeUser() {
+        mAutoTracker = new AutoAddTracker(mContext, USER);
+        mAutoTracker.initialize();
+        mAutoTracker.setTileAdded(SAVER);
+
+        mAutoTracker = new AutoAddTracker(mContext, USER + 1);
+        mAutoTracker.changeUser(UserHandle.of(USER));
+        assertTrue(mAutoTracker.isAdded(SAVER));
     }
 }
