@@ -1,0 +1,67 @@
+// Signature format: 2.0
+package android.annotation {
+
+  @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) @java.lang.annotation.Target({java.lang.annotation.ElementType.METHOD, java.lang.annotation.ElementType.PARAMETER, java.lang.annotation.ElementType.FIELD}) public @interface NonNull {
+  }
+
+  @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) @java.lang.annotation.Target({java.lang.annotation.ElementType.METHOD, java.lang.annotation.ElementType.PARAMETER, java.lang.annotation.ElementType.FIELD}) public @interface Nullable {
+  }
+
+}
+
+package android.content.rollback {
+
+  public class RollbackManagerFrameworkInitializer {
+    method public static void initialize();
+  }
+
+}
+
+package android.graphics {
+
+  public final class Compatibility {
+    method public static void setTargetSdkVersion(int);
+  }
+
+  public final class ImageDecoder implements java.lang.AutoCloseable {
+    method @AnyThread @NonNull public static android.graphics.ImageDecoder.Source createSource(@NonNull android.content.ContentResolver, @NonNull android.net.Uri, @Nullable android.content.res.Resources);
+  }
+
+}
+
+package android.os {
+
+  public class StatsServiceManager {
+    method @NonNull public android.os.StatsServiceManager.ServiceRegisterer getStatsCompanionServiceRegisterer();
+    method @NonNull public android.os.StatsServiceManager.ServiceRegisterer getStatsManagerServiceRegisterer();
+    method @NonNull public android.os.StatsServiceManager.ServiceRegisterer getStatsdServiceRegisterer();
+  }
+
+  public static class StatsServiceManager.ServiceNotFoundException extends java.lang.Exception {
+    ctor public StatsServiceManager.ServiceNotFoundException(@NonNull String);
+  }
+
+  public static final class StatsServiceManager.ServiceRegisterer {
+    method @Nullable public android.os.IBinder get();
+    method @Nullable public android.os.IBinder getOrThrow() throws android.os.StatsServiceManager.ServiceNotFoundException;
+  }
+
+}
+
+package android.util {
+
+  public class AtomicFile {
+    ctor public AtomicFile(@NonNull java.io.File, @Nullable android.util.SystemConfigFileCommitEventLogger);
+  }
+
+  public final class Log {
+    method public static int logToRadioBuffer(int, @Nullable String, @Nullable String);
+  }
+
+  public class SystemConfigFileCommitEventLogger {
+    ctor public SystemConfigFileCommitEventLogger(@NonNull String);
+    method public void setStartTime(long);
+  }
+
+}
+
