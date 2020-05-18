@@ -323,10 +323,6 @@ public class MediaControlPanel {
             setVisibleAndAlpha(collapsedSet, R.id.media_seamless, true /*visible */);
             setVisibleAndAlpha(expandedSet, R.id.media_seamless, true /*visible */);
             updateDevice(mLocalMediaManager.getCurrentConnectedDevice());
-            if (mViewHolder.getBackground().getBackground() instanceof IlluminationDrawable) {
-                    ((IlluminationDrawable) mViewHolder.getBackground().getBackground())
-                            .setupTouch(mViewHolder.getSeamless(), mViewHolder.getPlayer());
-            }
             mViewHolder.getSeamless().setOnClickListener(v -> {
                 final Intent intent = new Intent()
                         .setAction(MediaOutputSliceConstants.ACTION_MEDIA_OUTPUT)
@@ -357,11 +353,6 @@ public class MediaControlPanel {
             button.setImageDrawable(mediaAction.getDrawable());
             button.setContentDescription(mediaAction.getContentDescription());
             PendingIntent actionIntent = mediaAction.getIntent();
-
-            if (mViewHolder.getBackground().getBackground() instanceof IlluminationDrawable) {
-                ((IlluminationDrawable) mViewHolder.getBackground().getBackground())
-                        .setupTouch(button, mViewHolder.getPlayer());
-            }
 
             button.setOnClickListener(v -> {
                 if (actionIntent != null) {
