@@ -34,7 +34,6 @@ class ToggleBehavior : Behavior {
 
     override fun initialize(cvh: ControlViewHolder) {
         this.cvh = cvh
-        cvh.applyRenderInfo(false /* enabled */, 0 /* offset */, false /* animated */)
 
         cvh.layout.setOnClickListener(View.OnClickListener() {
             cvh.controlActionCoordinator.toggle(cvh, template.getTemplateId(), template.isChecked())
@@ -44,7 +43,7 @@ class ToggleBehavior : Behavior {
     override fun bind(cws: ControlWithState, colorOffset: Int) {
         this.control = cws.control!!
 
-        cvh.status.setText(control.getStatusText())
+        cvh.setStatusText(control.getStatusText())
         val controlTemplate = control.getControlTemplate()
         template = when (controlTemplate) {
             is ToggleTemplate -> controlTemplate
