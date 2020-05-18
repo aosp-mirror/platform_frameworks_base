@@ -54,7 +54,7 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.statusbar.dagger.StatusBarModule;
+import com.android.systemui.statusbar.dagger.StatusBarDependenciesModule;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -114,6 +114,7 @@ public class NotificationRemoteInputManager implements Dumpable {
     private final SmartReplyController mSmartReplyController;
     private final NotificationEntryManager mEntryManager;
     private final Handler mMainHandler;
+    private final ActionClickLogger mLogger;
 
     private final Lazy<StatusBar> mStatusBarLazy;
 
@@ -138,14 +139,18 @@ public class NotificationRemoteInputManager implements Dumpable {
             mStatusBarLazy.get().wakeUpIfDozing(SystemClock.uptimeMillis(), view,
                     "NOTIFICATION_CLICK");
 
+            final NotificationEntry entry = getNotificationForParent(view.getParent());
+            mLogger.logInitialClick(entry, pendingIntent);
+
             if (handleRemoteInput(view, pendingIntent)) {
+                mLogger.logRemoteInputWasHandled(entry);
                 return true;
             }
 
             if (DEBUG) {
                 Log.v(TAG, "Notification click handler invoked for intent: " + pendingIntent);
             }
-            logActionClick(view, pendingIntent);
+            logActionClick(view, entry, pendingIntent);
             // The intent we are sending is for the application, which
             // won't have permission to immediately start an activity after
             // the user switches to home.  We know it is safe to do at this
@@ -158,11 +163,15 @@ public class NotificationRemoteInputManager implements Dumpable {
                 Pair<Intent, ActivityOptions> options = response.getLaunchOptions(view);
                 options.second.setLaunchWindowingMode(
                         WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY);
+                mLogger.logStartingIntentWithDefaultHandler(entry, pendingIntent);
                 return RemoteViews.startPendingIntent(view, pendingIntent, options);
             });
         }
 
-        private void logActionClick(View view, PendingIntent actionIntent) {
+        private void logActionClick(
+                View view,
+                NotificationEntry entry,
+                PendingIntent actionIntent) {
             Integer actionIndex = (Integer)
                     view.getTag(com.android.internal.R.id.notification_action_index_tag);
             if (actionIndex == null) {
@@ -170,7 +179,7 @@ public class NotificationRemoteInputManager implements Dumpable {
                 return;
             }
             ViewParent parent = view.getParent();
-            StatusBarNotification statusBarNotification = getNotificationForParent(parent);
+            StatusBarNotification statusBarNotification = entry.getSbn();
             if (statusBarNotification == null) {
                 Log.w(TAG, "Couldn't determine notification for click.");
                 return;
@@ -212,10 +221,10 @@ public class NotificationRemoteInputManager implements Dumpable {
             }
         }
 
-        private StatusBarNotification getNotificationForParent(ViewParent parent) {
+        private NotificationEntry getNotificationForParent(ViewParent parent) {
             while (parent != null) {
                 if (parent instanceof ExpandableNotificationRow) {
-                    return ((ExpandableNotificationRow) parent).getEntry().getSbn();
+                    return ((ExpandableNotificationRow) parent).getEntry();
                 }
                 parent = parent.getParent();
             }
@@ -255,7 +264,7 @@ public class NotificationRemoteInputManager implements Dumpable {
     };
 
     /**
-     * Injected constructor. See {@link StatusBarModule}.
+     * Injected constructor. See {@link StatusBarDependenciesModule}.
      */
     public NotificationRemoteInputManager(
             Context context,
@@ -265,13 +274,15 @@ public class NotificationRemoteInputManager implements Dumpable {
             Lazy<StatusBar> statusBarLazy,
             StatusBarStateController statusBarStateController,
             @Main Handler mainHandler,
-            RemoteInputUriController remoteInputUriController) {
+            RemoteInputUriController remoteInputUriController,
+            ActionClickLogger logger) {
         mContext = context;
         mLockscreenUserManager = lockscreenUserManager;
         mSmartReplyController = smartReplyController;
         mEntryManager = notificationEntryManager;
         mStatusBarLazy = statusBarLazy;
         mMainHandler = mainHandler;
+        mLogger = logger;
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
         mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
