@@ -162,6 +162,8 @@ struct JMediaCodec : public AHandler {
 
     void selectAudioPresentation(const int32_t presentationId, const int32_t programId);
 
+    bool hasCryptoOrDescrambler() { return mHasCryptoOrDescrambler; }
+
 protected:
     virtual ~JMediaCodec();
 
@@ -181,6 +183,7 @@ private:
     sp<MediaCodec> mCodec;
     AString mNameAtCreation;
     bool mGraphicOutput{false};
+    bool mHasCryptoOrDescrambler{false};
     std::once_flag mReleaseFlag;
 
     sp<AMessage> mCallbackNotification;
