@@ -24,6 +24,7 @@ import static android.graphics.GraphicBuffer.USAGE_SW_READ_RARELY;
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
@@ -39,10 +40,15 @@ import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.UserManager;
+import android.os.UserManagerInternal;
 import android.view.Surface;
 
+import com.android.server.LocalServices;
+
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 
 import java.io.File;
 import java.util.function.Predicate;
@@ -70,10 +76,25 @@ class TaskSnapshotPersisterTestBase extends WindowTestsBase {
         mLowResScale = lowResScale;
     }
 
+    @BeforeClass
+    public static void setUpOnce() {
+        final UserManagerInternal userManager = mock(UserManagerInternal.class);
+        LocalServices.addService(UserManagerInternal.class, userManager);
+    }
+
+    @AfterClass
+    public static void tearDownOnce() {
+        LocalServices.removeServiceForTest(UserManagerInternal.class);
+    }
+
     @Before
     public void setUp() {
         final UserManager um = UserManager.get(getInstrumentation().getTargetContext());
         mTestUserId = um.getUserHandle();
+
+        final UserManagerInternal userManagerInternal =
+                LocalServices.getService(UserManagerInternal.class);
+        when(userManagerInternal.isUserUnlocked(mTestUserId)).thenReturn(true);
 
         mContextSpy = spy(new ContextWrapper(mWm.mContext));
         mResourcesSpy = spy(mContextSpy.getResources());
