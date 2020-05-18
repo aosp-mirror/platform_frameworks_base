@@ -161,13 +161,12 @@ sp<AnomalyTracker> DurationMetricProducer::addAnomalyTracker(
 
 void DurationMetricProducer::onStateChanged(const int64_t eventTimeNs, const int32_t atomId,
                                             const HashableDimensionKey& primaryKey,
-                                            const int32_t oldState, const int32_t newState) {
-    // Create a FieldValue object to hold the new state.
-    FieldValue value;
-    value.mValue.setInt(newState);
+                                            const FieldValue& oldState,
+                                            const FieldValue& newState) {
     // Check if this metric has a StateMap. If so, map the new state value to
     // the correct state group id.
-    mapStateValue(atomId, &value);
+    FieldValue newStateCopy = newState;
+    mapStateValue(atomId, &newStateCopy);
 
     flushIfNeededLocked(eventTimeNs);
 
@@ -185,7 +184,7 @@ void DurationMetricProducer::onStateChanged(const int64_t eventTimeNs, const int
         if (!containsLinkedStateValues(whatIt.first, primaryKey, mMetric2StateLinks, atomId)) {
             continue;
         }
-        whatIt.second->onStateChanged(eventTimeNs, atomId, value);
+        whatIt.second->onStateChanged(eventTimeNs, atomId, newStateCopy);
     }
 }
 
