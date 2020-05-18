@@ -45,8 +45,8 @@ public:
      * [newState]: Current state value after state change
      */
     virtual void onStateChanged(const int64_t eventTimeNs, const int32_t atomId,
-                                const HashableDimensionKey& primaryKey, int oldState,
-                                int newState) = 0;
+                                const HashableDimensionKey& primaryKey, const FieldValue& oldState,
+                                const FieldValue& newState) = 0;
 };
 
 }  // namespace statsd
