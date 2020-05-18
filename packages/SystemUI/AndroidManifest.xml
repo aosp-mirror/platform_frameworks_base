@@ -688,6 +688,7 @@
         </activity>
 
         <activity android:name=".controls.management.ControlsEditingActivity"
+                  android:label="@string/controls_menu_edit"
                   android:theme="@style/Theme.ControlsManagement"
                   android:excludeFromRecents="true"
                   android:noHistory="true"

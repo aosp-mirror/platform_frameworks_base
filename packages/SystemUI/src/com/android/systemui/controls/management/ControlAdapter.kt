@@ -18,6 +18,7 @@ package com.android.systemui.controls.management
 
 import android.content.ComponentName
 import android.graphics.Rect
+import android.os.Bundle
 import android.service.controls.Control
 import android.service.controls.DeviceTypes
 import android.view.LayoutInflater
@@ -78,7 +79,7 @@ class ControlAdapter(
                         background = parent.context.getDrawable(
                                 R.drawable.control_background_ripple)
                     },
-                    model is FavoritesModel // Indicates that position information is needed
+                    model?.moveHelper // Indicates that position information is needed
                 ) { id, favorite ->
                     model?.changeFavoriteStatus(id, favorite)
                 }
@@ -176,12 +177,14 @@ private class ZoneHolder(view: View) : Holder(view) {
 
 /**
  * Holder for using with [ControlStatusWrapper] to display names of zones.
+ * @param moveHelper a helper interface to facilitate a11y rearranging. Null indicates no
+ *                   rearranging
  * @param favoriteCallback this callback will be called whenever the favorite state of the
  *                         [Control] this view represents changes.
  */
 internal class ControlHolder(
     view: View,
-    val withPosition: Boolean,
+    val moveHelper: ControlsModel.MoveHelper?,
     val favoriteCallback: ModelFavoriteChanger
 ) : Holder(view) {
     private val favoriteStateDescription =
@@ -197,7 +200,11 @@ internal class ControlHolder(
         visibility = View.VISIBLE
     }
 
-    private val accessibilityDelegate = ControlHolderAccessibilityDelegate(this::stateDescription)
+    private val accessibilityDelegate = ControlHolderAccessibilityDelegate(
+        this::stateDescription,
+        this::getLayoutPosition,
+        moveHelper
+    )
 
     init {
         ViewCompat.setAccessibilityDelegate(itemView, accessibilityDelegate)
@@ -207,7 +214,7 @@ internal class ControlHolder(
     private fun stateDescription(favorite: Boolean): CharSequence? {
         if (!favorite) {
             return notFavoriteStateDescription
-        } else if (!withPosition) {
+        } else if (moveHelper == null) {
             return favoriteStateDescription
         } else {
             val position = layoutPosition + 1
@@ -256,15 +263,67 @@ internal class ControlHolder(
     }
 }
 
+/**
+ * Accessibility delegate for [ControlHolder].
+ *
+ * Provides the following functionality:
+ * * Sets the state description indicating whether the controls is Favorited or Unfavorited
+ * * Adds the position to the state description if necessary.
+ * * Adds context action for moving (rearranging) a control.
+ *
+ * @param stateRetriever function to determine the state description based on the favorite state
+ * @param positionRetriever function to obtain the position of this control. It only has to be
+ *                          correct in controls that are currently favorites (and therefore can
+ *                          be moved).
+ * @param moveHelper helper interface to determine if a control can be moved and actually move it.
+ */
 private class ControlHolderAccessibilityDelegate(
-    val stateRetriever: (Boolean) -> CharSequence?
+    val stateRetriever: (Boolean) -> CharSequence?,
+    val positionRetriever: () -> Int,
+    val moveHelper: ControlsModel.MoveHelper?
 ) : AccessibilityDelegateCompat() {
 
     var isFavorite = false
 
+    companion object {
+        private val MOVE_BEFORE_ID = R.id.accessibility_action_controls_move_before
+        private val MOVE_AFTER_ID = R.id.accessibility_action_controls_move_after
+    }
+
     override fun onInitializeAccessibilityNodeInfo(host: View, info: AccessibilityNodeInfoCompat) {
         super.onInitializeAccessibilityNodeInfo(host, info)
 
+        info.isContextClickable = false
+        addClickAction(host, info)
+        maybeAddMoveBeforeAction(host, info)
+        maybeAddMoveAfterAction(host, info)
+
+        // Determine the stateDescription based on the holder information
+        info.stateDescription = stateRetriever(isFavorite)
+        // Remove the information at the end indicating row and column.
+        info.setCollectionItemInfo(null)
+
+        info.className = Switch::class.java.name
+    }
+
+    override fun performAccessibilityAction(host: View?, action: Int, args: Bundle?): Boolean {
+        if (super.performAccessibilityAction(host, action, args)) {
+            return true
+        }
+        return when (action) {
+            MOVE_BEFORE_ID -> {
+                moveHelper?.moveBefore(positionRetriever())
+                true
+            }
+            MOVE_AFTER_ID -> {
+                moveHelper?.moveAfter(positionRetriever())
+                true
+            }
+            else -> false
+        }
+    }
+
+    private fun addClickAction(host: View, info: AccessibilityNodeInfoCompat) {
         // Change the text for the double-tap action
         val clickActionString = if (isFavorite) {
             host.context.getString(R.string.accessibility_control_change_unfavorite)
@@ -276,13 +335,30 @@ private class ControlHolderAccessibilityDelegate(
             // “favorite/unfavorite”
             clickActionString)
         info.addAction(click)
+    }
 
-        // Determine the stateDescription based on the holder information
-        info.stateDescription = stateRetriever(isFavorite)
-        // Remove the information at the end indicating row and column.
-        info.setCollectionItemInfo(null)
+    private fun maybeAddMoveBeforeAction(host: View, info: AccessibilityNodeInfoCompat) {
+        if (moveHelper?.canMoveBefore(positionRetriever()) ?: false) {
+            val newPosition = positionRetriever() + 1 - 1
+            val moveBefore = AccessibilityNodeInfoCompat.AccessibilityActionCompat(
+                MOVE_BEFORE_ID,
+                host.context.getString(R.string.accessibility_control_move, newPosition)
+            )
+            info.addAction(moveBefore)
+            info.isContextClickable = true
+        }
+    }
 
-        info.className = Switch::class.java.name
+    private fun maybeAddMoveAfterAction(host: View, info: AccessibilityNodeInfoCompat) {
+        if (moveHelper?.canMoveAfter(positionRetriever()) ?: false) {
+            val newPosition = positionRetriever() + 1 + 1
+            val moveAfter = AccessibilityNodeInfoCompat.AccessibilityActionCompat(
+                MOVE_AFTER_ID,
+                host.context.getString(R.string.accessibility_control_move, newPosition)
+            )
+            info.addAction(moveAfter)
+            info.isContextClickable = true
+        }
     }
 }
 
