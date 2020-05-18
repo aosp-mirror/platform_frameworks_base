@@ -289,6 +289,7 @@ public class StatsPullAtomService extends SystemService {
     private StatsPullAtomCallbackImpl mStatsCallbackImpl;
 
     private int mAppOpsSamplingRate = 0;
+    private final ArraySet<Integer> mDangerousAppOpsList = new ArraySet<>();
 
     // Baselines that stores list of NetworkStats right after initializing, with associated
     // information. This is used to calculate difference when pulling
@@ -525,6 +526,25 @@ public class StatsPullAtomService extends SystemService {
             mHealthService.init();
         } catch (RemoteException e) {
             Slog.e(TAG, "failed to initialize healthHalWrapper");
+        }
+
+        // Initialize list of AppOps related to DangerousPermissions
+        PackageManager pm = mContext.getPackageManager();
+        for (int op = 0; op < AppOpsManager._NUM_OP; op++) {
+            String perm = AppOpsManager.opToPermission(op);
+            if (perm == null) {
+                continue;
+            } else {
+                PermissionInfo permInfo;
+                try {
+                    permInfo = pm.getPermissionInfo(perm, 0);
+                    if (permInfo.getProtection() == PROTECTION_DANGEROUS) {
+                        mDangerousAppOpsList.add(op);
+                    }
+                } catch (PackageManager.NameNotFoundException exception) {
+                    continue;
+                }
+            }
         }
     }
 
@@ -3113,22 +3133,8 @@ public class StatsPullAtomService extends SystemService {
         e.writeLong(op.getBackgroundRejectCount(OP_FLAGS_PULLED));
         e.writeLong(op.getForegroundAccessDuration(OP_FLAGS_PULLED));
         e.writeLong(op.getBackgroundAccessDuration(OP_FLAGS_PULLED));
+        e.writeBoolean(mDangerousAppOpsList.contains(op.getOpCode()));
 
-        String perm = AppOpsManager.opToPermission(op.getOpCode());
-        if (perm == null) {
-            e.writeBoolean(false);
-        } else {
-            PermissionInfo permInfo;
-            try {
-                permInfo = mContext.getPackageManager().getPermissionInfo(
-                        perm,
-                        0);
-                e.writeBoolean(
-                        permInfo.getProtection() == PROTECTION_DANGEROUS);
-            } catch (PackageManager.NameNotFoundException exception) {
-                e.writeBoolean(false);
-            }
-        }
         if (atomTag == FrameworkStatsLog.ATTRIBUTED_APP_OPS) {
             e.writeInt(mAppOpsSamplingRate);
         }
