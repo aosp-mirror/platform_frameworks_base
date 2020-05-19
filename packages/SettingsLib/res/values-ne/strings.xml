@@ -399,7 +399,7 @@
     <string name="inactive_apps_title" msgid="5372523625297212320">"स्ट्यान्डबाई एपहरू"</string>
     <string name="inactive_app_inactive_summary" msgid="3161222402614236260">"निष्क्रिय। टगल गर्न ट्याप गर्नुहोस्।"</string>
     <string name="inactive_app_active_summary" msgid="8047630990208722344">"सक्रिय। टगल गर्न ट्याप गर्नुहोस्।"</string>
-    <string name="standby_bucket_summary" msgid="5128193447550429600">"अनुप्रयोगको स्ट्यान्डबाई अवस्था:<xliff:g id="BUCKET"> %s</xliff:g>"</string>
+    <string name="standby_bucket_summary" msgid="5128193447550429600">"एपको स्ट्यान्डबाई अवस्था:<xliff:g id="BUCKET"> %s</xliff:g>"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"चलिरहेका सेवाहरू"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"हाल चालु भइरहेका सेवाहरू हेर्नुहोस् र नियन्त्रण गर्नुहोस्"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView कार्यान्वयन"</string>
@@ -549,14 +549,11 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"अतिथि थप्नुहोस्"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"अतिथि हटाउनुहोस्"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"अतिथि"</string>
-    <!-- no translation found for cached_apps_freezer_device_default (2616594131750144342) -->
-    <skip />
-    <!-- no translation found for cached_apps_freezer_disabled (4816382260660472042) -->
-    <skip />
-    <!-- no translation found for cached_apps_freezer_enabled (8866703500183051546) -->
-    <skip />
-    <!-- no translation found for cached_apps_freezer_reboot_dialog_text (695330563489230096) -->
-    <skip />
-    <!-- no translation found for accessibility_work_profile_app_description (5470883112342119165) -->
+    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"पूर्वनिर्धारित यन्त्र"</string>
+    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"असक्षम पारिएको छ"</string>
+    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"सक्षम पारिएको छ"</string>
+    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"यो परिवर्तन लागू गर्न तपाईंको यन्त्र अनिवार्य रूपमा रिबुट गर्नु पर्छ। अहिले रिबुट गर्नुहोस् वा रद्द गर्नुहोस्।"</string>
+    <string name="accessibility_work_profile_app_description" msgid="5470883112342119165">"कार्यालयको प्रोफाइल <xliff:g id="APP_NAME">%s</xliff:g>"</string>
+    <!-- no translation found for media_transfer_wired_usb_device_name (7699141088423210903) -->
     <skip />
 </resources>

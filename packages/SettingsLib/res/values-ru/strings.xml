@@ -210,7 +210,7 @@
     <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Режим отладки при подключении к сети Wi‑Fi"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"Ошибка"</string>
     <string name="adb_wireless_settings" msgid="2295017847215680229">"Отладка по Wi-Fi"</string>
-    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Чтобы посмотреть и использовать доступные устройства, включите отладку по Wi-Fi"</string>
+    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Чтобы увидеть и использовать доступные устройства, включите отладку по Wi-Fi."</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Подключить устройство с помощью QR-кода"</string>
     <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"Подключение новых устройств с помощью сканера QR-кодов"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Подключить устройство с помощью кода подключения"</string>
@@ -223,7 +223,7 @@
     <string name="adb_wireless_connection_failed_title" msgid="664211177427438438">"Не удалось установить подключение"</string>
     <string name="adb_wireless_connection_failed_message" msgid="9213896700171602073">"Убедитесь, что устройство \"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>\" подключено к нужной сети."</string>
     <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"Подключение к устройству"</string>
-    <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"Код подключения к сети Wi‑Fi"</string>
+    <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"Код подключения по сети Wi‑Fi"</string>
     <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"Не удалось подключить устройство"</string>
     <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"Устройство должно быть подключено к той же самой сети."</string>
     <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"Подключение устройства через Wi‑Fi с использованием QR-кода"</string>
@@ -555,6 +555,7 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Отключено"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Включено"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Чтобы изменение вступило в силу, необходимо перезапустить устройство. Вы можете сделать это сейчас или позже."</string>
-    <!-- no translation found for accessibility_work_profile_app_description (5470883112342119165) -->
+    <string name="accessibility_work_profile_app_description" msgid="5470883112342119165">"Рабочее приложение \"<xliff:g id="APP_NAME">%s</xliff:g>\""</string>
+    <!-- no translation found for media_transfer_wired_usb_device_name (7699141088423210903) -->
     <skip />
 </resources>

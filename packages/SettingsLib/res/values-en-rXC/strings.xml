@@ -554,4 +554,6 @@
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‏‎‏‏‏‏‏‏‏‏‏‏‎‏‏‎‎‎‎‏‏‎‎‏‏‎‏‏‎‏‏‏‏‎‏‏‎‏‏‎‎‎‎‏‎‎‏‎‎‎‏‏‏‏‏‏‎‎‏‏‏‎‏‎‎‎‏‏‎‏‎‎Enabled‎‏‎‎‏‎"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‏‎‏‏‏‏‎‎‏‎‎‏‏‎‏‎‎‏‏‎‎‏‎‎‏‏‏‏‎‏‏‏‎‏‏‎‏‎‏‎‎‏‏‎‎‎‏‏‏‏‏‏‎‏‏‎‏‏‎‏‎‎‎‏‎‎‎‎‎Your device must be rebooted for this change to apply. Reboot now or cancel.‎‏‎‎‏‎"</string>
     <string name="accessibility_work_profile_app_description" msgid="5470883112342119165">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‏‎‏‏‏‏‏‏‏‎‎‏‎‏‏‏‏‏‎‏‏‎‎‎‏‏‏‏‎‏‏‎‎‏‏‎‏‎‎‎‏‏‎‎‏‏‎‏‏‎‏‎‏‎‏‏‏‏‎‎‎‏‎‏‏‏‏‏‏‎‏‎Work ‎‏‎‎‏‏‎<xliff:g id="APP_NAME">%s</xliff:g>‎‏‎‎‏‏‏‎‎‏‎‎‏‎"</string>
+    <!-- no translation found for media_transfer_wired_usb_device_name (7699141088423210903) -->
+    <skip />
 </resources>

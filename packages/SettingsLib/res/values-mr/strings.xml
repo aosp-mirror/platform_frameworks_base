@@ -243,7 +243,7 @@
     <string name="oem_unlock_enable" msgid="5334869171871566731">"OEM अनलॉक करणे"</string>
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"बूटलोडर अनलॉक करण्यासाठी अनुमती द्या"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"OEM अनलॉक करण्यास अनुमती द्यायची?"</string>
-    <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"चेतावणी: हे सेटिंग चालू असताना या डिव्हाइस वर डिव्हाइस संरक्षण वैशिष्ट्ये काम करणार नाहीत."</string>
+    <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"चेतावणी: हे सेटिंग सुरू असताना या डिव्हाइस वर डिव्हाइस संरक्षण वैशिष्ट्ये काम करणार नाहीत."</string>
     <string name="mock_location_app" msgid="6269380172542248304">"बनावट स्थान अ‍ॅप निवडा"</string>
     <string name="mock_location_app_not_set" msgid="6972032787262831155">"कोणताही बनावट स्थान अ‍ॅप सेट केला नाही"</string>
     <string name="mock_location_app_set" msgid="4706722469342913843">"बनावट स्थान अ‍ॅप: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
@@ -298,7 +298,7 @@
     <string name="allow_mock_location" msgid="2102650981552527884">"बनावट स्थानांना अनुमती द्या"</string>
     <string name="allow_mock_location_summary" msgid="179780881081354579">"बनावट स्थानांना अनुमती द्या"</string>
     <string name="debug_view_attributes" msgid="3539609843984208216">"दृश्‍य विशेषता तपासणी सुरू करा"</string>
-    <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"वाय-फाय चालू असतानाही मोबाइल डेटा नेहमी सुरू ठेवा (नेटवर्क जलदरीत्या स्विच करण्यासाठी)."</string>
+    <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"वाय-फाय सुरू असतानाही मोबाइल डेटा नेहमी सुरू ठेवा (नेटवर्क जलदरीत्या स्विच करण्यासाठी)."</string>
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"उपलब्ध असल्यास टेदरिंग हार्डवेअर ॲक्सिलरेशन वापरा"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"USB डीबग करण्यास अनुमती द्यायची?"</string>
     <string name="adb_warning_message" msgid="8145270656419669221">"USB डीबग करण्याचा हेतू फक्त विकास उद्देशांसाठी आहे. याचा वापर तुमचा कॉंप्युटर आणि तुमचे डिव्हाइस यांच्या दरम्यान डेटा कॉपी करण्यासाठी करा, सूचनेशिवाय तुमच्या डिव्हाइस वर अ‍ॅप्स इंस्टॉल करा आणि लॉग डेटा वाचा."</string>
@@ -409,7 +409,7 @@
     <string name="convert_to_file_encryption_enabled" msgid="840757431284311754">"रूपांतरित करा..."</string>
     <string name="convert_to_file_encryption_done" msgid="8965831011811180627">"फाईल आधीपासून एंक्रिप्ट होती"</string>
     <string name="title_convert_fbe" msgid="5780013350366495149">"फाईल आधारित कूटबद्धीकरणावर रूपांतरित करणे"</string>
-    <string name="convert_to_fbe_warning" msgid="34294381569282109">"फाईल आधारित कूटबद्धीकरणावर डेटा विभाजक रूपांतरित करा.\n !!चेतावणी!! हे आपल्‍या सर्व डेटास मिटवेल.\n हे वैशिष्ट्य अल्‍फा आहे आणि कदाचित योग्यरित्या कार्य करू शकत नाही.\n सुरु ठेवण्‍यासाठी \'पुसा आणि रूपांतरित करा...\' दाबा."</string>
+    <string name="convert_to_fbe_warning" msgid="34294381569282109">"फाईल आधारित कूटबद्धीकरणावर डेटा विभाजक रूपांतरित करा.\n !!चेतावणी!! हे आपल्‍या सर्व डेटास मिटवेल.\n हे वैशिष्ट्य अल्‍फा आहे आणि कदाचित योग्यरित्या कार्य करू शकत नाही.\n सुरू ठेवण्‍यासाठी \'पुसा आणि रूपांतरित करा...\' दाबा."</string>
     <string name="button_convert_fbe" msgid="1159861795137727671">"पुसा आणि रुपांतरित करा..."</string>
     <string name="picture_color_mode" msgid="1013807330552931903">"चित्र रंग मोड"</string>
     <string name="picture_color_mode_desc" msgid="151780973768136200">"sRGB वापरा"</string>
@@ -495,8 +495,8 @@
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"कमी वेळ."</string>
     <string name="cancel" msgid="5665114069455378395">"रद्द करा"</string>
     <string name="okay" msgid="949938843324579502">"ठीक आहे"</string>
-    <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"चालू करा"</string>
-    <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"व्यत्यय आणू नका चालू करा"</string>
+    <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"सुरू करा"</string>
+    <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"व्यत्यय आणू नका सुरू करा"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"कधीही नाही"</string>
     <string name="zen_interruption_level_priority" msgid="5392140786447823299">"केवळ प्राधान्य"</string>
     <string name="zen_mode_and_condition" msgid="8877086090066332516">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
@@ -549,14 +549,11 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"अतिथी जोडा"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"अतिथी काढून टाका"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"अतिथी"</string>
-    <!-- no translation found for cached_apps_freezer_device_default (2616594131750144342) -->
-    <skip />
-    <!-- no translation found for cached_apps_freezer_disabled (4816382260660472042) -->
-    <skip />
-    <!-- no translation found for cached_apps_freezer_enabled (8866703500183051546) -->
-    <skip />
-    <!-- no translation found for cached_apps_freezer_reboot_dialog_text (695330563489230096) -->
-    <skip />
-    <!-- no translation found for accessibility_work_profile_app_description (5470883112342119165) -->
+    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"डिव्हाइस डीफॉल्ट"</string>
+    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"बंद केले आहे"</string>
+    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"सुरू केले आहे"</string>
+    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"हा बदल लागू करण्यासाठी तुमचे डिव्हाइस रीबूट करणे आवश्यक आहे. आता रीबूट करा किंवा रद्द करा."</string>
+    <string name="accessibility_work_profile_app_description" msgid="5470883112342119165">"कार्य <xliff:g id="APP_NAME">%s</xliff:g>"</string>
+    <!-- no translation found for media_transfer_wired_usb_device_name (7699141088423210903) -->
     <skip />
 </resources>
