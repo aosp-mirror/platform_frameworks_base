@@ -62,13 +62,11 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer implemen
     private static final String TAG = "OneHandedDisplayAreaOrganizer";
 
     @VisibleForTesting
-    static final int MSG_OFFSET_IMMEDIATE = 1;
+    static final int MSG_RESET_IMMEDIATE = 1;
     @VisibleForTesting
     static final int MSG_OFFSET_ANIMATE = 2;
     @VisibleForTesting
     static final int MSG_OFFSET_FINISH = 3;
-    @VisibleForTesting
-    static final int MSG_RESIZE_IMMEDIATE = 4;
 
     private final Handler mUpdateHandler;
 
@@ -118,9 +116,12 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer implemen
         final int yOffset = args.argi2;
         final int direction = args.argi3;
 
+        if (mLeash == null || !mLeash.isValid()) {
+            Log.w(TAG, "mLeash is null, abort transition");
+            return false;
+        }
         switch (msg.what) {
-            case MSG_RESIZE_IMMEDIATE:
-            case MSG_OFFSET_IMMEDIATE:
+            case MSG_RESET_IMMEDIATE:
                 final OneHandedAnimationController.OneHandedTransitionAnimator animator =
                         mAnimationController.getAnimator(mLeash, currentBounds,
                                 mDefaultDisplayBounds);
@@ -129,9 +130,9 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer implemen
                 }
                 final SurfaceControl.Transaction tx =
                         mSurfaceControlTransactionFactory.getTransaction();
-                mSurfaceTransactionHelper.translate(tx, mLeash, yOffset)
-                        .crop(tx, mLeash, currentBounds);
-                tx.apply();
+                tx.setPosition(mLeash, 0, 0)
+                        .setWindowCrop(mLeash, -1/* reset */, -1/* reset */)
+                        .apply();
                 finishOffset(currentBounds, yOffset, direction);
                 break;
             case MSG_OFFSET_ANIMATE:
@@ -177,6 +178,12 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer implemen
     @Override
     public void onDisplayAreaInfoChanged(@NonNull DisplayAreaInfo displayAreaInfo) {
         Objects.requireNonNull(displayAreaInfo, "displayArea must not be null");
+        // Stop one handed without animation and reset cropped size immediately
+        if (displayAreaInfo.configuration.orientation
+                != mDisplayAreaInfo.configuration.orientation) {
+            final Rect newBounds = displayAreaInfo.configuration.windowConfiguration.getBounds();
+            resetImmediately(newBounds);
+        }
         mDisplayAreaInfo = displayAreaInfo;
     }
 
@@ -192,12 +199,8 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer implemen
 
         // Stop one handed immediately
         if (isInOneHanded()) {
-            SomeArgs args = SomeArgs.obtain();
-            args.arg1 = getLastVisualDisplayBounds();
-            args.argi1 = 0 /* xOffset */;
-            args.argi2 = 0 /* yOffset */;
-            args.argi3 = TRANSITION_DIRECTION_EXIT;
-            mUpdateHandler.sendMessage(mUpdateHandler.obtainMessage(MSG_OFFSET_IMMEDIATE, args));
+            final Rect newBounds = mDisplayAreaInfo.configuration.windowConfiguration.getBounds();
+            resetImmediately(newBounds);
         }
     }
 
@@ -215,23 +218,10 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer implemen
     }
 
     /**
-     * Offset DisplayArea immediately calling from OneHandedManager when screen going to rotate
+     * Immediately resize/reset leash from previous cropped boundary to default.
+     * (i.e Screen rotation need to reset crop and position before applying new bounds)
      */
-    public void offsetImmediately(int xOffset, int yOffset) {
-        if (mDisplayAreaInfo != null && mLeash != null) {
-            SomeArgs args = SomeArgs.obtain();
-            args.arg1 = getLastVisualDisplayBounds();
-            args.argi1 = xOffset;
-            args.argi2 = yOffset;
-            args.argi3 = yOffset > 0 ? TRANSITION_DIRECTION_TRIGGER : TRANSITION_DIRECTION_EXIT;
-            mUpdateHandler.sendMessage(mUpdateHandler.obtainMessage(MSG_OFFSET_ANIMATE, args));
-        }
-    }
-
-    /**
-     * Resize DisplayArea immediately calling from OneHandedManager when screen going to rotate
-     */
-    public void resizeImmediately(Rect newDisplayBounds) {
+    public void resetImmediately(Rect newDisplayBounds) {
         updateDisplayBounds(newDisplayBounds);
         if (mDisplayAreaInfo != null && mLeash != null) {
             SomeArgs args = SomeArgs.obtain();
@@ -239,7 +229,7 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer implemen
             args.argi1 = 0 /* xOffset */;
             args.argi2 = 0 /* yOffset */;
             args.argi3 = TRANSITION_DIRECTION_EXIT;
-            mUpdateHandler.sendMessage(mUpdateHandler.obtainMessage(MSG_RESIZE_IMMEDIATE, args));
+            mUpdateHandler.sendMessage(mUpdateHandler.obtainMessage(MSG_RESET_IMMEDIATE, args));
         }
     }
 
