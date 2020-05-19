@@ -58,7 +58,7 @@ class ControlActionCoordinatorImpl @Inject constructor(
 
     override fun toggle(cvh: ControlViewHolder, templateId: String, isChecked: Boolean) {
         bouncerOrRun {
-            val effect = if (isChecked) Vibrations.toggleOnEffect else Vibrations.toggleOffEffect
+            val effect = if (!isChecked) Vibrations.toggleOnEffect else Vibrations.toggleOffEffect
             vibrate(effect)
             cvh.action(BooleanAction(templateId, !isChecked))
         }
